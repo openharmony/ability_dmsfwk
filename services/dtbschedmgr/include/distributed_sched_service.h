@@ -31,7 +31,6 @@
 #include "nocopyable.h"
 #endif
 #include "single_instance.h"
-#include "system_ability.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -58,15 +57,13 @@ struct ProcessDiedNotifyInfo {
     TargetComponent targetComponent;
 };
 
-class DistributedSchedService : public SystemAbility, public DistributedSchedStub {
-DECLARE_SYSTEM_ABILITY(DistributedSchedService);
+class DistributedSchedService : public DistributedSchedStub {
 
 DECLARE_SINGLE_INSTANCE_BASE(DistributedSchedService);
 
 public:
     ~DistributedSchedService() = default;
-    void OnStart() override;
-    void OnStop() override;
+    void OnStart();
     int32_t StartRemoteAbility(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t requestCode,
         uint32_t accessToken) override;
     int32_t StartAbilityFromRemote(const OHOS::AAFwk::Want& want,
@@ -172,6 +169,7 @@ private:
     int32_t TryStartRemoteAbilityByCall(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
         const CallerInfo& callerInfo);
     int32_t StartLocalAbility(const FreeInstallInfo& info, int64_t taskId, int32_t resultCode);
+    int32_t StartAbility(const OHOS::AAFwk::Want& want, int32_t requestCode);
     int32_t HandleRemoteNotify(const FreeInstallInfo& info, int64_t taskId, int32_t resultCode);
     bool HandleDistributedComponentChange(const std::string& componentInfo);
     void ReportDistributedComponentChange(const CallerInfo& callerInfo, int32_t changeType,
