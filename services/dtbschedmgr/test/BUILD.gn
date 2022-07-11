@@ -45,11 +45,11 @@ dsched_external_deps = [
   "hitrace_native:hitrace_meter",
   "hitrace_native:libhitrace",
   "hiviewdfx_hilog_native:libhilog",
+  "init:libbegetutil",
   "ipc:ipc_core",
   "os_account:os_account_innerkits",
   "safwk:system_ability_fwk",
   "samgr_standard:samgr_proxy",
-  "startup_l2:syspara",
   "utils_base:utils",
 ]
 
