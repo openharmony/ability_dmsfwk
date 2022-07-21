@@ -48,7 +48,7 @@ dsched_external_deps = [
   "ipc:ipc_core",
   "os_account:os_account_innerkits",
   "safwk:system_ability_fwk",
-  "samgr_standard:samgr_proxy",
+  "samgr:samgr_proxy",
   "startup_l2:syspara",
   "utils_base:utils",
 ]
