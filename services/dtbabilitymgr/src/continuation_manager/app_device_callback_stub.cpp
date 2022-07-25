@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "continuationManager/app_device_callback_stub.h"
+#include "continuation_manager/app_device_callback_stub.h"
 
 #include <string>
 
@@ -38,7 +38,7 @@ int32_t AppDeviceCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
     MessageParcel& reply, MessageOption& option)
 {
     HILOGD("code = %{public}u", code);
-    std::u16string descriptor = IAppDeviceCallback::GetDescriptor();
+    std::u16string descriptor = AppDeviceCallbackInterface::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
         HILOGE("descriptor check failed");
@@ -46,7 +46,7 @@ int32_t AppDeviceCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
     }
     int32_t token = -1;
     switch (code) {
-        case IAppDeviceCallback::EVENT_DEVICE_CONNECT: {
+        case AppDeviceCallbackInterface::EVENT_DEVICE_CONNECT: {
             PARCEL_READ_HELPER(data, Int32, token);
             std::vector<ContinuationResult> continuationResults;
             if (!ContinuationResult::ReadContinuationResultsFromParcel(data, continuationResults)) {
@@ -55,14 +55,14 @@ int32_t AppDeviceCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
             int32_t result = OnDeviceConnect(token, continuationResults);
             return result;
         }
-        case IAppDeviceCallback::EVENT_DEVICE_DISCONNECT: {
+        case AppDeviceCallbackInterface::EVENT_DEVICE_DISCONNECT: {
             PARCEL_READ_HELPER(data, Int32, token);
             std::vector<std::u16string> deviceIds;
             PARCEL_READ_HELPER(data, String16Vector, &deviceIds); // use u16string, because from app.
             int32_t result = OnDeviceDisconnect(token, ContinationManagerUtils::Str16VecToStr8Vec(deviceIds));
             return result;
         }
-        case IAppDeviceCallback::EVENT_DEVICE_CANCEL: {
+        case AppDeviceCallbackInterface::EVENT_DEVICE_CANCEL: {
             int32_t result = OnDeviceCancel();
             return result;
         }

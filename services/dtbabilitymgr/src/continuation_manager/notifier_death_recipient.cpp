@@ -13,32 +13,32 @@
  * limitations under the License.
  */
 
-#include "continuationManager/connect_status_info.h"
+#include "continuation_manager/notifier_death_recipient.h"
+
+#include <iosfwd>
+#include <string>
+
+#include "dtbschedmgr_log.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-const std::string TAG = "ConnectStatusInfo";
+const std::string TAG = "NotifierDeathRecipient";
 }
 
-std::string ConnectStatusInfo::GetDeviceId() const
+NotifierDeathRecipient::NotifierDeathRecipient(const sptr<DmsNotifier>& dmsNotifier)
 {
-    return deviceId_;
+    dmsNotifier_ = dmsNotifier;
 }
 
-void ConnectStatusInfo::SetDeviceId(const std::string& deviceId)
+void NotifierDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    deviceId_ = deviceId;
-}
-
-DeviceConnectStatus ConnectStatusInfo::GetDeviceConnectStatus() const
-{
-    return deviceConnectStatus_;
-}
-
-void ConnectStatusInfo::SetDeviceConnectStatus(const DeviceConnectStatus& deviceConnectStatus)
-{
-    deviceConnectStatus_ = deviceConnectStatus;
+    HILOGD("called");
+    if (dmsNotifier_ == nullptr) {
+        HILOGE("dmsNotifier_ is nullptr");
+        return;
+    }
+    dmsNotifier_->ProcessNotifierDied(remote.promote());
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

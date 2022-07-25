@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "continuationManager/device_selection_notifier_proxy.h"
+#include "continuation_manager/device_selection_notifier_proxy.h"
 
 #include <string>
 

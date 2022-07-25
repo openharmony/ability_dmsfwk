@@ -23,12 +23,12 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
-class IAppDeviceCallback : public IRemoteBroker {
+class AppDeviceCallbackInterface : public IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.DistributedSchedule.IAppDeviceCallback");
 
-    IAppDeviceCallback() = default;
-    virtual ~IAppDeviceCallback() = default;
+    AppDeviceCallbackInterface() = default;
+    virtual ~AppDeviceCallbackInterface() = default;
 
     virtual int32_t OnDeviceConnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) = 0;
     virtual int32_t OnDeviceDisconnect(int32_t token, const std::vector<std::string>& deviceIds) = 0;

@@ -64,7 +64,7 @@ bool DtbschedmgrDeviceInfoStorage::Init()
     return true;
 }
 
-bool DtbschedmgrDeviceInfoStorage::Init(sptr<DmsNotifier> listener)
+bool DtbschedmgrDeviceInfoStorage::Init(const sptr<DmsNotifier>& listener)
 {
     listener_ = listener;
     return Init();

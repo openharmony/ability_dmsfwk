@@ -16,7 +16,7 @@
 #ifndef OHOS_DISTRIBUTED_ABILITY_MANAGER_SERVICE_H
 #define OHOS_DISTRIBUTED_ABILITY_MANAGER_SERVICE_H
 
-#include "continuationManager/notifier_info.h"
+#include "continuation_manager/notifier_info.h"
 #include "distributed_ability_manager_stub.h"
 #include "dms_notifier.h"
 #include "event_handler.h"
