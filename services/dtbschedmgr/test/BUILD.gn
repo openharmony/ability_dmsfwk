@@ -28,6 +28,7 @@ config("test_config") {
   include_dirs = [
     "//foundation/ability/dmsfwk/utils/native/include",
     "//foundation/ability/dmsfwk/services/base/include",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/unittest",
   ]
 }
 
@@ -58,6 +59,8 @@ if (dmsfwk_mission_manager) {
 }
 
 dsched_public_deps = [
+  "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
+  "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
   "//foundation/ability/dmsfwk/services/base:dmsbaseinner",
   "//third_party/googletest:gmock_main",
   "//third_party/googletest:gtest_main",
@@ -83,6 +86,7 @@ dtbschedmgr_sources = [
   "${distributed_service}/dtbschedmgr/src/dms_free_install_callback_proxy.cpp",
   "${distributed_service}/dtbschedmgr/src/dms_free_install_callback_stub.cpp",
   "${distributed_service}/dtbschedmgr/src/dms_token_callback.cpp",
+  "unittest/distributed_sched_util.cpp",
 ]
 
 if (dmsfwk_mission_manager) {

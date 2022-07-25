@@ -14,6 +14,7 @@
  */
 
 #include "distributed_sched_continuation_test.h"
+#include "distributed_sched_util.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "mock_distributed_sched.h"
 
@@ -42,6 +43,7 @@ void DSchedContinuationTest::TearDownTestCase()
 
 void DSchedContinuationTest::SetUp()
 {
+    DistributedSchedUtil::MockPermission();
     dschedContinuation_ = std::make_shared<DSchedContinuation>();
 }
 

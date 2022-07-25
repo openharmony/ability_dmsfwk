@@ -17,6 +17,7 @@
 
 #include "distributed_sched_proxy.h"
 #include "distributed_sched_service.h"
+#include "distributed_sched_util.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
@@ -53,6 +54,7 @@ void DMSMissionManagerTest::TearDownTestCase()
 
 void DMSMissionManagerTest::SetUp()
 {
+    DistributedSchedUtil::MockPermission();
     string localDeviceId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
         DTEST_LOG << "getLocalDevicesId failed!" << std::endl;
