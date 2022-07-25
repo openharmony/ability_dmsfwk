@@ -56,7 +56,6 @@ void BundleManagerInternalTest::SetUp()
  * @tc.name: BundleManagerInternalTest_001
  * @tc.desc: input invalid params
  * @tc.type: FUNC
- * @tc.require: AR000H3FD0
  */
 HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_001, TestSize.Level0)
 {
@@ -74,7 +73,6 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_001, TestSize.Leve
  * @tc.name: BundleManagerInternalTest_002
  * @tc.desc: test ability info convert
  * @tc.type: FUNC
- * @tc.require: AR000H3FD0
  */
 HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_002, TestSize.Level0)
 {
