@@ -28,9 +28,9 @@ config("continuation_manager_public_config") {
 
 ohos_shared_library("continuation_manager") {
   sources = [
-    "//foundation/ability/dmsfwk/services/dtbabilitymgr/src/continuationManager/continuation_extra_params.cpp",
-    "//foundation/ability/dmsfwk/services/dtbabilitymgr/src/continuationManager/continuation_result.cpp",
-    "//foundation/ability/dmsfwk/services/dtbabilitymgr/src/continuationManager/device_selection_notifier_stub.cpp",
+    "//foundation/ability/dmsfwk/services/dtbabilitymgr/src/continuation_manager/continuation_extra_params.cpp",
+    "//foundation/ability/dmsfwk/services/dtbabilitymgr/src/continuation_manager/continuation_result.cpp",
+    "//foundation/ability/dmsfwk/services/dtbabilitymgr/src/continuation_manager/device_selection_notifier_stub.cpp",
   ]
 
   public_configs = [ ":continuation_manager_public_config" ]

@@ -19,9 +19,9 @@
 #include <thread>
 
 #include "adapter/dnetwork_adapter.h"
-#include "continuationManager/app_device_callback_stub.h"
-#include "continuationManager/device_selection_notifier_proxy.h"
-#include "continuationManager/notifier_death_recipient.h"
+#include "continuation_manager/app_device_callback_stub.h"
+#include "continuation_manager/device_selection_notifier_proxy.h"
+#include "continuation_manager/notifier_death_recipient.h"
 #include "dlfcn.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
@@ -67,7 +67,7 @@ void DistributedAbilityManagerService::OnStart()
     }
     notifierDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new NotifierDeathRecipient(this));
     if (continuationHandler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create("continuationManager");
+        auto runner = AppExecFwk::EventRunner::Create("continuation_manager");
         continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
     Publish(this);

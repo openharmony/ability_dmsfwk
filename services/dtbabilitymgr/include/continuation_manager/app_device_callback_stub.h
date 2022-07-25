@@ -21,7 +21,7 @@
 
 #include "continuation_result.h"
 #include "dms_notifier.h"
-#include "iapp_device_callback_interface.h"
+#include "app_device_callback_interface.h"
 #include "iremote_stub.h"
 #include "message_option.h"
 #include "message_parcel.h"
@@ -30,7 +30,7 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
-class AppDeviceCallbackStub : public IRemoteStub<IAppDeviceCallback> {
+class AppDeviceCallbackStub : public IRemoteStub<AppDeviceCallbackInterface> {
 public:
     explicit AppDeviceCallbackStub(const sptr<DmsNotifier>& dmsNotifier);
     virtual ~AppDeviceCallbackStub() = default;

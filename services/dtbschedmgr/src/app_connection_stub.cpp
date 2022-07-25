@@ -81,7 +81,6 @@ void AppConnectionStub::OnAbilityConnectDone(const AppExecFwk::ElementName& elem
         return;
     }
     dmsNotifier_->ScheduleStartDeviceManager(remoteObject, token_, continuationExtraParams_);
-    return;
 }
 
 void AppConnectionStub::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element,
@@ -93,7 +92,6 @@ void AppConnectionStub::OnAbilityDisconnectDone(const AppExecFwk::ElementName& e
         return;
     }
     dmsNotifier_->ScheduleStartDeviceManager(nullptr, token_, continuationExtraParams_);
-    return;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "continuationManager/notifier_info.h"
+#include "continuation_manager/notifier_info.h"
 
 namespace OHOS {
 namespace DistributedSchedule {

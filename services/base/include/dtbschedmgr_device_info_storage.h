@@ -40,7 +40,7 @@ class DtbschedmgrDeviceInfoStorage {
 
 public:
     bool Init();
-    bool Init(sptr<DmsNotifier> listener);
+    bool Init(const sptr<DmsNotifier>& listener);
     void Stop();
     bool GetLocalDeviceId(std::string& deviceId);
     void DeviceOnlineNotify(const std::shared_ptr<DmsDeviceInfo> devInfo);
