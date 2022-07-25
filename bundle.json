@@ -1,9 +1,9 @@
 {
-    "name": "@ohos/distributedschedule_dms_fwk",
+    "name": "@ohos/dmsfwk",
     "description": "distributed ability manager service",
     "version": "3.1",
     "license": "Apache License 2.0",
-    "repository": "https://gitee.com/openharmony/distributedschedule_dms_fwk",
+    "repository": "https://gitee.com/openharmony/ability_dmsfwk",
     "publishAs": "code-segment",
     "segment": {
       "destPath": "foundation/ability/dmsfwk"
