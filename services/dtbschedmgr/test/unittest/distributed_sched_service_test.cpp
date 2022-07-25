@@ -15,11 +15,13 @@
 
 #define private public
 #define protected public
+#include "gtest/gtest.h"
+
 #include "distributed_sched_proxy.h"
 #include "distributed_sched_service.h"
+#include "distributed_sched_util.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
-#include "gtest/gtest.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -71,7 +73,9 @@ void DistributedSchedServiceTest::TearDownTestCase()
 {}
 
 void DistributedSchedServiceTest::SetUp()
-{}
+{
+    DistributedSchedUtil::MockPermission();
+}
 
 void DistributedSchedServiceTest::TearDown()
 {}
