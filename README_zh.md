@@ -28,13 +28,13 @@
 ```
 /foundation/ability
 ├── dmsfwk                      # 分布式组件管理部件模块
-├── dms_fwk_lite                # 轻量分布式组件管理部件模块
+├── dmsfwk_lite                # 轻量分布式组件管理部件模块
 ```
 
 ## 相关仓<a name="section1371113476307"></a>
 
 **分布式组件管理部件**
 
-ability\_dms\_fwk
+ability\_dmsfwk
 
-ability\_dms\_fwk\_lite
+ability\_dmsfwk\_lite

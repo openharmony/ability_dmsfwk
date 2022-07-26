@@ -20,13 +20,13 @@ Distributed Scheduler is used for cross-device component management. It allows t
 ```
 /foundation/ability
 ├── dmsfwk                      # DMS framework (DMS is short for Distributed Manager Service, also called the Distributed Scheduler Service)
-├── dms_fwk_lite                # Lightweight DMS framework
+├── dmsfwk_lite                # Lightweight DMS framework
 ```
 
 ## Repositories Involved<a name="section1371113476307"></a>
 
 **Distributed Scheduler**
 
-ability\_dms\_fwk
+ability\_dmsfwk
 
-ability\_dms\_fwk\_lite
+ability\_dmsfwk\_lite
