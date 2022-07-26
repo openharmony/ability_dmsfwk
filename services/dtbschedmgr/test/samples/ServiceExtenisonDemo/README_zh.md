@@ -9,7 +9,7 @@
 
 3、发起端调用 context.connectAbility() 接口，传入 deviceId，bundleName，abilityName 绑定远端 ServiceExtensionAbility
 
-4、绑定成功获取远端 ServiceExtensionAbility 句柄，发起段使用句柄的 sendRequest() 接口调用远端定义的方法
+4、绑定成功获取远端 ServiceExtensionAbility 句柄，发起端使用句柄的 sendRequest() 接口调用远端定义的方法
 
 
 ### 测试步骤
@@ -17,13 +17,15 @@
 
 2、在设置里给予此应用分布式权限
 
-3、设备 A 打开应用，选择待绑定设备 B 的 deviceId，点击 connect 按钮发起绑定
+3、发起端设备 A 打开应用，选择待绑定远端设备 B 的 deviceId，点击 connect 按钮发起绑定
 
-4、设备 A 日志区显示 “get proxy”，代表绑定成功
+4、发起端设备 A 日志区显示 “get proxy”，代表绑定成功
 
-5、设备 A 在输入栏输入任意字符串，点击 send 按钮，信息被发送到远端设备 B
+5、发起端设备 A 在输入栏输入任意字符串，点击 send 按钮，信息被发送到远端设备 B
 
-6、设备 A 收到设备 B 的回复消息 “MyServiceExtensionAbility receive your message”
+6、发起端设备 A 收到远端设备 B 的回复消息 “MyServiceExtensionAbility receive your message”
 
 ### 约束与限制
-1、本示例仅支持标准系统上运行。 2、本示例为Stage模型，仅支持API version 9，IDE版本3.0.1.900以上，系统版本OpenHarmony3.1 release。
+1、本示例仅支持标准系统上运行
+
+2、本示例为Stage模型，仅支持API version 9，IDE版本3.0.1.900以上，系统版本OpenHarmony3.1 release
