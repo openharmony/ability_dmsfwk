@@ -14,6 +14,7 @@
  */
 
 #include "distributed_sched_continuation_test.h"
+#include "distributed_sched_util.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "mock_distributed_sched.h"
 
@@ -42,6 +43,7 @@ void DSchedContinuationTest::TearDownTestCase()
 
 void DSchedContinuationTest::SetUp()
 {
+    DistributedSchedUtil::MockPermission();
     dschedContinuation_ = std::make_shared<DSchedContinuation>();
 }
 
@@ -494,7 +496,6 @@ HWTEST_F(DSchedContinuationTest, PopAbilityToken_003, TestSize.Level1)
  * @tc.name: ContinueMission_001
  * @tc.desc: test ContinueMission when srcDeviceId is empty.
  * @tc.type: FUNC
- * @tc.require: SR000GKT4A
  */
 HWTEST_F(DSchedContinuationTest, ContinueMission_001, TestSize.Level1)
 {
@@ -510,7 +511,6 @@ HWTEST_F(DSchedContinuationTest, ContinueMission_001, TestSize.Level1)
  * @tc.name: ContinueMission_002
  * @tc.desc: test ContinueMission when dstDeviceId is empty.
  * @tc.type: FUNC
- * @tc.require: SR000GKT4A
  */
 HWTEST_F(DSchedContinuationTest, ContinueMission_002, TestSize.Level1)
 {
@@ -526,7 +526,6 @@ HWTEST_F(DSchedContinuationTest, ContinueMission_002, TestSize.Level1)
  * @tc.name: ContinueMission_003
  * @tc.desc: test ContinueMission when callback is nullptr.
  * @tc.type: FUNC
- * @tc.require: SR000GKT4A
  */
 HWTEST_F(DSchedContinuationTest, ContinueMission_003, TestSize.Level1)
 {
@@ -541,7 +540,6 @@ HWTEST_F(DSchedContinuationTest, ContinueMission_003, TestSize.Level1)
  * @tc.name: ContinueMission_004
  * @tc.desc: test ContinueMission when srcDeviceId == localDevId.
  * @tc.type: FUNC
- * @tc.require: SR000GKT4A
  */
 HWTEST_F(DSchedContinuationTest, ContinueMission_004, TestSize.Level1)
 {
@@ -748,7 +746,6 @@ HWTEST_F(DSchedContinuationTest, StartFreeInstallFromRemote_004, TestSize.Level0
  * @tc.name: StartFreeInstallFromRemote_005
  * @tc.desc: call StartFreeInstallFromRemote with dms
  * @tc.type: FUNC
- * @tc.require: SR000GKT4A
  */
 HWTEST_F(DSchedContinuationTest, StartFreeInstallFromRemote_005, TestSize.Level1)
 {

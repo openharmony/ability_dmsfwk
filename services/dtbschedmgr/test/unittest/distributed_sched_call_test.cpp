@@ -133,7 +133,6 @@ void DistributedSchedCallTest::TearDown()
  * @tc.name: CallAbility_001
  * @tc.desc: Call StartRemoteAbilityByCall with illegal want
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_001, TestSize.Level1)
 {
@@ -159,7 +158,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_001, TestSize.Level1)
  * @tc.name: CallAbility_002
  * @tc.desc: Call TryStartRemoteAbilityByCall with illegal parameter
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_002, TestSize.Level1)
 {
@@ -187,7 +185,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_002, TestSize.Level1)
  * @tc.name: CallAbility_003
  * @tc.desc: Call StartAbilityByCallFromRemote with illegal parameter
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_003, TestSize.Level1)
 {
@@ -217,7 +214,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_003, TestSize.Level1)
  * @tc.name: CallAbility_004
  * @tc.desc: Call StartAbilityByCall with illegal parameter
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_004, TestSize.Level1)
 {
@@ -242,7 +238,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_004, TestSize.Level1)
  * @tc.name: CallAbility_005
  * @tc.desc: Call ReleaseRemoteAbility with illegal parameter
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_005, TestSize.Level1)
 {
@@ -263,7 +258,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_005, TestSize.Level1)
  * @tc.name: CallAbility_006
  * @tc.desc: Call ReleaseAbilityFromRemote with illegal parameter
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_006, TestSize.Level1)
 {
@@ -299,7 +293,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_006, TestSize.Level1)
  * @tc.name: CallAbility_007
  * @tc.desc: Call ReleaseAbilityFromRemote with illegal callerInfo
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_007, TestSize.Level1)
 {
@@ -356,7 +349,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_007, TestSize.Level1)
  * @tc.name: CallAbility_008
  * @tc.desc: Call StartAbilityByCall with illegal parameter
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_008, TestSize.Level1)
 {
@@ -397,7 +389,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_008, TestSize.Level1)
  * @tc.name: CallAbility_011
  * @tc.desc: Call StartRemoteAbilityByCall with illegal callback
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_011, TestSize.Level1)
 {
@@ -422,7 +413,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_011, TestSize.Level1)
  * @tc.name: CallAbility_012
  * @tc.desc: Call StartRemoteAbilityByCall with illegal uid
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_012, TestSize.Level1)
 {
@@ -446,7 +436,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_012, TestSize.Level1)
  * @tc.name: CallAbility_013
  * @tc.desc: Call TryStartRemoteAbilityByCall with illegal callback
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_013, TestSize.Level1)
 {
@@ -472,7 +461,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_013, TestSize.Level1)
  * @tc.name: CallAbility_014
  * @tc.desc: Call TryStartRemoteAbilityByCall with illegal callerInfo
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_014, TestSize.Level1)
 {
@@ -516,7 +504,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_014, TestSize.Level1)
  * @tc.name: CallAbility_015
  * @tc.desc: Call StartAbilityByCallFromRemote with illegal callback
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_015, TestSize.Level1)
 {
@@ -551,7 +538,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_015, TestSize.Level1)
  * @tc.name: CallAbility_016
  * @tc.desc: Call StartAbilityByCall with illegal callback
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_016, TestSize.Level1)
 {
@@ -581,7 +567,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_016, TestSize.Level1)
  * @tc.name: CallAbility_017
  * @tc.desc: Call StartAbilityByCall with illegal token
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_017, TestSize.Level1)
 {
@@ -605,7 +590,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_017, TestSize.Level1)
  * @tc.name: CallAbility_018
  * @tc.desc: Call ReleaseRemoteAbility with illegal callback
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_018, TestSize.Level1)
 {
@@ -626,7 +610,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_018, TestSize.Level1)
  * @tc.name: CallAbility_019
  * @tc.desc: Call ReleaseRemoteAbility with illegal remote deviceId
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_019, TestSize.Level1)
 {
@@ -646,7 +629,6 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_019, TestSize.Level1)
  * @tc.name: CallAbility_020
  * @tc.desc: Call ReleaseAbilityFromRemote with illegal callback
  * @tc.type: FUNC
- * @tc.require: AR000GK59A
  */
 HWTEST_F(DistributedSchedCallTest, CallAbility_020, TestSize.Level1)
 {

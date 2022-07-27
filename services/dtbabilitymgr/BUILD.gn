@@ -32,14 +32,14 @@ config("distributed_ability_manager_config") {
 ohos_shared_library("distributed_ability_manager_svr") {
   install_enable = true
   sources = [
-    "src/continuationManager/app_device_callback_stub.cpp",
-    "src/continuationManager/connect_status_info.cpp",
-    "src/continuationManager/continuation_extra_params.cpp",
-    "src/continuationManager/continuation_result.cpp",
-    "src/continuationManager/device_selection_notifier_proxy.cpp",
-    "src/continuationManager/device_selection_notifier_stub.cpp",
-    "src/continuationManager/notifier_death_recipient.cpp",
-    "src/continuationManager/notifier_info.cpp",
+    "src/continuation_manager/app_device_callback_stub.cpp",
+    "src/continuation_manager/connect_status_info.cpp",
+    "src/continuation_manager/continuation_extra_params.cpp",
+    "src/continuation_manager/continuation_result.cpp",
+    "src/continuation_manager/device_selection_notifier_proxy.cpp",
+    "src/continuation_manager/device_selection_notifier_stub.cpp",
+    "src/continuation_manager/notifier_death_recipient.cpp",
+    "src/continuation_manager/notifier_info.cpp",
     "src/distributed_ability_manager_service.cpp",
     "src/distributed_ability_manager_stub.cpp",
   ]
@@ -52,10 +52,10 @@ ohos_shared_library("distributed_ability_manager_svr") {
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "startup_l2:syspara",
     "utils_base:utils",
   ]
 

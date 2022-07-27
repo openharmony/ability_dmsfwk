@@ -36,10 +36,10 @@ dtbabilitymgr_external_deps = [
   "dsoftbus:softbus_client",
   "eventhandler:libeventhandler",
   "hiviewdfx_hilog_native:libhilog",
+  "init:libbegetutil",
   "ipc:ipc_core",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
-  "startup_l2:syspara",
   "utils_base:utils",
 ]
 
@@ -51,13 +51,13 @@ dtbabilitymgr_public_deps = [
 ]
 
 dtbabilitymgr_sources = [
-  "${distributed_service}/dtbabilitymgr/src/continuationManager/connect_status_info.cpp",
-  "${distributed_service}/dtbabilitymgr/src/continuationManager/continuation_extra_params.cpp",
-  "${distributed_service}/dtbabilitymgr/src/continuationManager/continuation_result.cpp",
-  "${distributed_service}/dtbabilitymgr/src/continuationManager/device_selection_notifier_proxy.cpp",
-  "${distributed_service}/dtbabilitymgr/src/continuationManager/device_selection_notifier_stub.cpp",
-  "${distributed_service}/dtbabilitymgr/src/continuationManager/notifier_death_recipient.cpp",
-  "${distributed_service}/dtbabilitymgr/src/continuationManager/notifier_info.cpp",
+  "${distributed_service}/dtbabilitymgr/src/continuation_manager/connect_status_info.cpp",
+  "${distributed_service}/dtbabilitymgr/src/continuation_manager/continuation_extra_params.cpp",
+  "${distributed_service}/dtbabilitymgr/src/continuation_manager/continuation_result.cpp",
+  "${distributed_service}/dtbabilitymgr/src/continuation_manager/device_selection_notifier_proxy.cpp",
+  "${distributed_service}/dtbabilitymgr/src/continuation_manager/device_selection_notifier_stub.cpp",
+  "${distributed_service}/dtbabilitymgr/src/continuation_manager/notifier_death_recipient.cpp",
+  "${distributed_service}/dtbabilitymgr/src/continuation_manager/notifier_info.cpp",
   "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_client.cpp",
   "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_proxy.cpp",
   "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_service.cpp",
@@ -66,7 +66,7 @@ dtbabilitymgr_sources = [
 
 ohos_unittest("continuationmanagertest") {
   module_out_path = module_output_path
-  sources = [ "unittest/continuationManager/continuation_manager_test.cpp" ]
+  sources = [ "unittest/continuation_manager/continuation_manager_test.cpp" ]
   sources += dtbabilitymgr_sources
   configs = [ ":test_config" ]
   configs += dtbabilitymgr_configs

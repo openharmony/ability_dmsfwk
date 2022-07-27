@@ -17,6 +17,7 @@
 
 #include "distributed_sched_proxy.h"
 #include "distributed_sched_service.h"
+#include "distributed_sched_util.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
@@ -53,6 +54,7 @@ void DMSMissionManagerTest::TearDownTestCase()
 
 void DMSMissionManagerTest::SetUp()
 {
+    DistributedSchedUtil::MockPermission();
     string localDeviceId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
         DTEST_LOG << "getLocalDevicesId failed!" << std::endl;
@@ -107,7 +109,6 @@ void RemoteMissionListenerTest::NotifyNetDisconnect(const std::string& deviceId,
  * @tc.name: testGetRemoteMissionInfo001
  * @tc.desc: get remote mission info
  * @tc.type: FUNC
- * @tc.require:AR000GK66R
  */
 HWTEST_F(DMSMissionManagerTest, testGetRemoteMissionInfo001, TestSize.Level1)
 {
@@ -132,7 +133,6 @@ HWTEST_F(DMSMissionManagerTest, testGetRemoteMissionInfo001, TestSize.Level1)
  * @tc.name: testGetRemoteMissionInfo002
  * @tc.desc: get remote mission info
  * @tc.type: FUNC
- * @tc.require:AR000GK66R
  */
 HWTEST_F(DMSMissionManagerTest, testGetRemoteMissionInfo002, TestSize.Level1)
 {
@@ -161,7 +161,6 @@ HWTEST_F(DMSMissionManagerTest, testGetRemoteMissionInfo002, TestSize.Level1)
  * @tc.name: testStartSyncRemoteMissions001
  * @tc.desc: prepare and sync missions from remote
  * @tc.type: FUNC
- * @tc.require:AR000GK67A
  */
 HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions001, TestSize.Level1)
 {
@@ -177,7 +176,6 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions001, TestSize.Level1)
  * @tc.name: testStartSyncRemoteMissions002
  * @tc.desc: prepare and sync missions from remote
  * @tc.type: FUNC
- * @tc.require:SR000GK679
  */
 HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions002, TestSize.Level1)
 {
@@ -193,7 +191,6 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions002, TestSize.Level1)
  * @tc.name: testStartSyncRemoteMissions003
  * @tc.desc: prepare and sync missions from remote
  * @tc.type: FUNC
- * @tc.require:AR000GK67A
  */
 HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions003, TestSize.Level1)
 {
@@ -326,7 +323,6 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions012, TestSize.Level2)
  * @tc.name: testStopSyncRemoteMissions001
  * @tc.desc: stop sync missions from remote with fake deviceId
  * @tc.type: FUNC
- * @tc.require:AR000GK672
  */
 HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions001, TestSize.Level1)
 {
@@ -342,7 +338,6 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions001, TestSize.Level1)
  * @tc.name: testStopSyncRemoteMissions002
  * @tc.desc: stop sync missions from remote with local deviceId
  * @tc.type: FUNC
- * @tc.require:SR000GK671
  */
 HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions002, TestSize.Level1)
 {
@@ -358,7 +353,6 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions002, TestSize.Level1)
  * @tc.name: testStopSyncRemoteMissions003
  * @tc.desc: stop sync missions from remote with empty deviceId
  * @tc.type: FUNC
- * @tc.require:SR000GK671
  */
 HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions003, TestSize.Level1)
 {
@@ -491,7 +485,6 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions012, TestSize.Level2)
  * @tc.name: testRegisterMissionListener001
  * @tc.desc: register mission listener
  * @tc.type: FUNC
- * @tc.require:AR000GK5N7
  */
 HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener001, TestSize.Level1)
 {
@@ -513,7 +506,6 @@ HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener001, TestSize.Level1)
  * @tc.name: testRegisterMissionListener002
  * @tc.desc: register mission listener
  * @tc.type: FUNC
- * @tc.require:SR000GK5N6
  */
 HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener002, TestSize.Level1)
 {
@@ -545,7 +537,6 @@ HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener002, TestSize.Level1)
  * @tc.name: testUnRegisterMissionListener001
  * @tc.desc: register mission listener
  * @tc.type: FUNC
- * @tc.require:AR000GK5N7
  */
 HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener001, TestSize.Level1)
 {
@@ -567,7 +558,6 @@ HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener001, TestSize.Level
  * @tc.name: testIsDeviceIdValidated001
  * @tc.desc: judging whether the deviceId is valid
  * @tc.type: FUNC
- * @tc.require:AR000GK66R
  */
 HWTEST_F(DMSMissionManagerTest, testIsDeviceIdValidated001, TestSize.Level1)
 {
@@ -586,7 +576,6 @@ HWTEST_F(DMSMissionManagerTest, testIsDeviceIdValidated001, TestSize.Level1)
  * @tc.name: testGetMissionInfos001
  * @tc.desc: get missions
  * @tc.type: FUNC
- * @tc.require:AR000GK67M
  */
 HWTEST_F(DMSMissionManagerTest, testGetMissionInfos001, TestSize.Level1)
 {
@@ -684,7 +673,6 @@ HWTEST_F(DMSMissionManagerTest, testGetMissionInfos006, TestSize.Level2)
  * @tc.name: testFetchCachedRemoteMissions001
  * @tc.desc: test stop fake device, return error code
  * @tc.type: FUNC
- * @tc.require:AR000GK67M
  */
 HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions001, TestSize.Level1)
 {
@@ -768,7 +756,6 @@ HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions006, TestSize.Level
  * @tc.name: testFetchCachedRemoteMissions007
  * @tc.desc: test stop fake device, return error code
  * @tc.type: FUNC
- * @tc.require:AR000GK67M
  */
 HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions007, TestSize.Level2)
 {
