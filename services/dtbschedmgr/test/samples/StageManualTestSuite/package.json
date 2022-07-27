@@ -1,17 +1,18 @@
 {
-	"name": "stagemanualtestsuite",
-	"version": "1.0.0",
-	"ohos": {
-	  "org": "ohos",
-	  "buildTool": "hvigor",
-	  "directoryLevel": "project"
-	},
-	"description": "example description",
-	"repository": {},
-	"license": "ISC",
-	"dependencies": {
-	  "@ohos/hypium": "1.0.1",
-	  "@ohos/hvigor": "1.1.6",
-	  "@ohos/hvigor-ohos-plugin": "1.1.6"
-	}
-  }
+    "license": "ISC",
+    "devDependencies": {},
+    "name": "stagemanualtestsuite",
+    "ohos": {
+        "org": "ohos",
+        "directoryLevel": "project",
+        "buildTool": "hvigor"
+    },
+    "description": "example description",
+    "repository": {},
+    "version": "1.0.0",
+    "dependencies": {
+        "@ohos/hypium": "1.0.1",
+        "@ohos/hvigor-ohos-plugin": "1.1.6",
+        "@ohos/hvigor": "1.1.6"
+    }
+}

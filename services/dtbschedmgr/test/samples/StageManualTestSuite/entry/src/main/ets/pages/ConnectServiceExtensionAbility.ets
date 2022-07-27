@@ -12,7 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// @ts-nocheck
+
+import router from '@system.router'
+
 var printLog = '[ServiceExtensionDemo]'
 AppStorage.Link("message")
 AppStorage.Link("receiveMessage")
@@ -38,6 +40,13 @@ struct Index {
 
       Row() {
         Column() {
+          Button('back')
+            .width(100)
+            .height(50)
+            .onClick(() => {
+              router.back();
+            })
+
           Button('connect')
             .width(100)
             .height(50)
@@ -65,7 +74,7 @@ struct Index {
                   })
               }.editable(this.editFlag)
             }, (item : string) => item.toString())
-          }.height('100%').width('100%').borderWidth(1).align(ItemAlign.Start)
+          }.height('75%').width('100%').borderWidth(1).align(ItemAlign.Start)
         }.width('30%').height('100%').padding(5)
 
         Column() {

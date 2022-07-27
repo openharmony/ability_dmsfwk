@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// @ts-nocheck
+
 import router from '@system.router'
 
 @Entry
@@ -33,10 +33,11 @@ struct Index {
           router.push({uri : 'pages/ConnectServiceExtensionAbility'})
         })
 
-      Button('other')
+      Button('StartAbility+StartAbilityForResult')
         .width("90%")
         .height(50)
         .onClick(() => {
+          router.push({uri : 'pages/StartAbility'})
         })
     }.width('100%').height('100%')
   }
