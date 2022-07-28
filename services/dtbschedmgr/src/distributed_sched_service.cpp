@@ -22,6 +22,7 @@
 #include "ability_manager_client.h"
 #include "ability_manager_errors.h"
 #include "adapter/dnetwork_adapter.h"
+#include "app_connection_stub.h"
 #include "bundle/bundle_manager_internal.h"
 #include "connect_death_recipient.h"
 #include "datetime_ex.h"
@@ -42,6 +43,7 @@
 #include "mission/distributed_sched_mission_manager.h"
 #endif
 #include "os_account_manager.h"
+#include "parameters.h"
 #include "parcel_helper.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
@@ -67,6 +69,9 @@ const std::string UID_KEY = "uid";
 const std::string COMPONENT_TYPE_KEY = "componentType";
 const std::string DEVICE_TYPE_KEY = "deviceType";
 const std::string CHANGE_TYPE_KEY = "changeType";
+const std::string PANEL_NAME_KEY = "const.distributedsched.panelname";
+const std::string DEFAULT_PANEL_NAME_VALUE = "";
+constexpr int32_t MAX_SPLIT_VARS = 2;
 constexpr int32_t BIND_CONNECT_RETRY_TIMES = 3;
 constexpr int32_t BIND_CONNECT_TIMEOUT = 500; // 500ms
 constexpr int32_t MAX_DISTRIBUTED_CONNECT_NUM = 600;
@@ -75,6 +80,9 @@ constexpr int32_t IASS_CALLBACK_ON_REMOTE_FREE_INSTALL_DONE = 1;
 constexpr int32_t DISTRIBUTED_COMPONENT_ADD = 1;
 constexpr int32_t DISTRIBUTED_COMPONENT_REMOVE = 2;
 constexpr int32_t REPORT_DISTRIBUTED_COMPONENT_CHANGE_CODE = 1;
+constexpr int64_t CONTINUATION_TIMEOUT = 20000; // 20s
+// BundleDistributedManager set timeout to 3s, so we set 1s longer
+constexpr int64_t CHECK_REMOTE_INSTALL_ABILITY = 40000;
 }
 
 extern "C" {
@@ -103,6 +111,17 @@ void DeviceOfflineNotify(const std::string& deviceId)
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(deviceId);
 #endif
+}
+
+int32_t ConnectAbility(const sptr<DmsNotifier>& dmsNotifier, int32_t token,
+    const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams)
+{
+    return DistributedSchedService::GetInstance().ConnectAbility(dmsNotifier, token, continuationExtraParams);
+}
+
+int32_t DisconnectAbility()
+{
+    return DistributedSchedService::GetInstance().DisconnectAbility();
 }
 }
 
@@ -248,6 +267,33 @@ int32_t DistributedSchedService::SendResultFromRemote(OHOS::AAFwk::Want& want, i
     return err;
 }
 
+void DistributedSchedService::RemoveContinuationTimeout(int32_t missionId)
+{
+    if (dschedContinuation_ == nullptr) {
+        HILOGE("continuation object null!");
+        return;
+    }
+    dschedContinuation_->RemoveTimeOut(missionId);
+}
+
+void DistributedSchedService::SetContinuationTimeout(int32_t missionId, int32_t timeout)
+{
+    if (dschedContinuation_ == nullptr) {
+        HILOGE("continuation object null!");
+        return;
+    }
+    dschedContinuation_->SetTimeOut(missionId, timeout);
+}
+
+std::string DistributedSchedService::GetContinuaitonDevice(int32_t missionId)
+{
+    if (dschedContinuation_ == nullptr) {
+        HILOGE("continuation object null!");
+        return "";
+    }
+    return dschedContinuation_->GetTargetDevice(missionId);
+}
+
 int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDeviceId, int32_t missionId,
     const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
@@ -272,20 +318,36 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
     DistributedBundleInfo remoteBundleInfo;
     result = BundleManagerInternal::CheckRemoteBundleInfoForContinuation(dstDeviceId,
         bundleName, remoteBundleInfo);
-    if (result != ERR_OK) {
-        isFreeInstall = missionInfo.want.GetBoolParam("isFreeInstall", false);
-        if (!isFreeInstall) {
-            HILOGE("ContinueLocalMission result: %{public}d!", result);
-            return result;
-        }
-        dschedContinuation_->PopCallback(missionId);
+    if (result == ERR_OK) {
+        dschedContinuation_->PushCallback(missionId, callback, dstDeviceId, false);
+        SetContinuationTimeout(missionId, CONTINUATION_TIMEOUT);
+        uint32_t remoteBundleVersion = remoteBundleInfo.versionCode;
+        result = AbilityManagerClient::GetInstance()->ContinueAbility(dstDeviceId, missionId, remoteBundleVersion);
+        HILOGI("result: %{public}d!", result);
+        return result;
     }
-    dschedContinuation_->PushCallback(missionId, callback, isFreeInstall);
-    uint32_t remoteBundleVersion = remoteBundleInfo.versionCode;
+    if (result == CONTINUE_REMOTE_UNINSTALLED_UNSUPPORT_FREEINSTALL) {
+        HILOGE("remote not installed and app not support free install");
+        return result;
+    }
+    // if remote not installed
+    isFreeInstall = missionInfo.want.GetBoolParam("isFreeInstall", false);
+    if (!isFreeInstall) {
+        HILOGE("remote not installed but support freeInstall, try again with freeInstall flag");
+        return CONTINUE_REMOTE_UNINSTALLED_SUPPORT_FREEINSTALL;
+    }
 
-    result = AbilityManagerClient::GetInstance()->ContinueAbility(dstDeviceId, missionId, remoteBundleVersion);
-    HILOGI("ContinueLocalMission result: %{public}d!", result);
-    return result;
+    dschedContinuation_->PushCallback(missionId, callback, dstDeviceId, true);
+    SetContinuationTimeout(missionId, CHECK_REMOTE_INSTALL_ABILITY);
+
+    missionInfo.want.SetDeviceId(dstDeviceId);
+    if (!BundleManagerInternal::CheckIfRemoteCanInstall(missionInfo.want, missionId)) {
+        HILOGE("call CheckIfRemoteCanInstall failed");
+        RemoveContinuationTimeout(missionId);
+        dschedContinuation_->PopCallback(missionId);
+        return INVALID_PARAMETERS_ERR;
+    }
+    return ERR_OK;
 }
 
 int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
@@ -367,7 +429,7 @@ int32_t DistributedSchedService::StartContinuation(const OHOS::AAFwk::Want& want
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
     if (!dschedContinuation_->IsInContinuationProgress(missionId)) {
-        dschedContinuation_->SetTimeOut(missionId);
+        dschedContinuation_->SetTimeOut(missionId, CONTINUATION_TIMEOUT);
     }
 
     AAFwk::Want newWant = want;
@@ -378,13 +440,13 @@ int32_t DistributedSchedService::StartContinuation(const OHOS::AAFwk::Want& want
     }
     bool flag = dschedContinuation_->IsFreeInstall(missionId);
     if (flag) {
-        result = StartRemoteFreeInstall(newWant, callerUid, 0, accessToken, nullptr);
+        result = StartRemoteFreeInstall(newWant, callerUid, DEFAULT_REQUEST_CODE, accessToken, nullptr);
         if (result != ERR_OK) {
             HILOGE("continue free install failed, result = %{public}d", result);
             return result;
         }
     } else {
-        result = StartRemoteAbility(newWant, callerUid, 0, accessToken);
+        result = StartRemoteAbility(newWant, callerUid, DEFAULT_REQUEST_CODE, accessToken);
         if (result != ERR_OK) {
             HILOGE("continue ability failed, errorCode = %{public}d", result);
             return result;
@@ -1581,45 +1643,11 @@ int32_t DistributedSchedService::NotifyMissionsChangedFromRemote(const std::vect
         .NotifyMissionsChangedFromRemote(callerInfo, missionInfos);
 }
 
-std::unique_ptr<Snapshot> DistributedSchedService::GetRemoteSnapshotInfo(const std::u16string& deviceId,
-    int32_t missionId)
-{
-    std::string strDeviceId = Str16ToStr8(deviceId);
-    HILOGI("GetRemoteSnapShot missionId:%{public}d", missionId);
-    return DistributedSchedMissionManager::GetInstance().GetRemoteSnapshotInfo(strDeviceId, missionId);
-}
-
 int32_t DistributedSchedService::GetRemoteMissionSnapshotInfo(const std::string& networkId, int32_t missionId,
     std::unique_ptr<MissionSnapshot>& missionSnapshot)
 {
     return DistributedSchedMissionManager::GetInstance()
         .GetRemoteMissionSnapshotInfo(networkId, missionId, missionSnapshot);
-}
-
-int32_t DistributedSchedService::CheckSupportOsd(const std::string& deviceId)
-{
-    return DistributedSchedMissionManager::GetInstance().CheckSupportOsd(deviceId);
-}
-
-void DistributedSchedService::GetCachedOsdSwitch(std::vector<std::u16string>& deviceIds, std::vector<int32_t>& values)
-{
-    return DistributedSchedMissionManager::GetInstance().GetCachedOsdSwitch(deviceIds, values);
-}
-
-int32_t DistributedSchedService::GetOsdSwitchValueFromRemote()
-{
-    return DistributedSchedMissionManager::GetInstance().GetOsdSwitchValueFromRemote();
-}
-
-int32_t DistributedSchedService::StoreSnapshotInfo(const std::string& deviceId, int32_t missionId,
-    const uint8_t* byteStream, size_t len)
-{
-    return DistributedSchedMissionManager::GetInstance().StoreSnapshotInfo(deviceId, missionId, byteStream, len);
-}
-
-int32_t DistributedSchedService::RemoveSnapshotInfo(const std::string& deviceId, int32_t missionId)
-{
-    return DistributedSchedMissionManager::GetInstance().RemoveSnapshotInfo(deviceId, missionId);
 }
 
 int32_t DistributedSchedService::RegisterMissionListener(const std::u16string& devId,
@@ -1654,13 +1682,6 @@ int32_t DistributedSchedService::StopSyncMissionsFromRemote(const CallerInfo& ca
 {
     DistributedSchedMissionManager::GetInstance().StopSyncMissionsFromRemote(callerInfo.sourceDeviceId);
     return ERR_NONE;
-}
-
-int32_t DistributedSchedService::UpdateOsdSwitchValueFromRemote(int32_t switchVal,
-    const std::string& sourceDeviceId)
-{
-    return DistributedSchedMissionManager::GetInstance()
-        .UpdateOsdSwitchValueFromRemote(switchVal, sourceDeviceId);
 }
 #endif
 
@@ -1823,7 +1844,7 @@ int32_t DistributedSchedService::StartAbility(const OHOS::AAFwk::Want& want, int
     if (ret != ERR_OK || ids.empty()) {
         return INVALID_PARAMETERS_ERR;
     }
-    if (requestCode != DEFAULT_REQUEST_CODE) {
+    if (want.GetBoolParam(Want::PARAM_RESV_FOR_RESULT, false)) {
         HILOGI("StartAbilityForResult start");
         sptr<IRemoteObject> dmsTokenCallback = new DmsTokenCallback();
         err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, dmsTokenCallback, requestCode, ids[0]);
@@ -1910,6 +1931,49 @@ int32_t DistributedSchedService::NotifyFreeInstallResult(const CallbackTaskItem 
     MessageParcel reply;
     MessageOption option;
     return item.callback->SendRequest(IASS_CALLBACK_ON_REMOTE_FREE_INSTALL_DONE, data, reply, option);
+}
+
+int32_t DistributedSchedService::ConnectAbility(const sptr<DmsNotifier>& dmsNotifier, int32_t token,
+    const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams)
+{
+    Want want;
+    // get bundleName and abilityName from parameter
+    std::string panelName = system::GetParameter(PANEL_NAME_KEY, DEFAULT_PANEL_NAME_VALUE);
+    if (panelName.empty()) {
+        HILOGE("get panelName from parameter failed");
+        return PANEL_NAME_NOT_CONFIGURED;
+    }
+    std::vector<std::string> nameVector;
+    SplitStr(panelName, "_", nameVector);
+    if (nameVector.size() != MAX_SPLIT_VARS) {
+        HILOGE("parse panelName failed");
+        return PANEL_NAME_NOT_CONFIGURED;
+    }
+    want.SetElementName(nameVector[0], nameVector[1]);
+    if (connect_ == nullptr) {
+        connect_ = new AppConnectionStub(dmsNotifier, token, continuationExtraParams);
+    }
+    int32_t errCode = DistributedSchedAdapter::GetInstance().ConnectAbility(want, connect_, this);
+    if (errCode != ERR_OK) {
+        HILOGE("ConnectAbility failed");
+        connect_ = nullptr;
+        return CONNECT_ABILITY_FAILED;
+    }
+    return ERR_OK;
+}
+
+int32_t DistributedSchedService::DisconnectAbility()
+{
+    if (connect_ == nullptr) {
+        return ERR_NULL_OBJECT;
+    }
+    int32_t errCode = DistributedSchedAdapter::GetInstance().DisconnectAbility(connect_);
+    connect_ = nullptr;
+    if (errCode != ERR_OK) {
+        HILOGE("DisconnectAbility failed");
+        return DISCONNECT_ABILITY_FAILED;
+    }
+    return ERR_OK;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -15,8 +15,8 @@
 
 #include "distributed_sched_proxy.h"
 
+#include "dfx/dms_hitrace_constants.h"
 #include "dtbschedmgr_log.h"
-
 #include "ipc_types.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission/mission_info_converter.h"
@@ -35,6 +35,7 @@ const std::string TAG = "DistributedSchedProxy";
 const std::u16string DMS_PROXY_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
 const std::string EXTRO_INFO_JSON_KEY_ACCESS_TOKEN = "accessTokenID";
 const std::string EXTRO_INFO_JSON_KEY_REQUEST_CODE = "requestCode";
+const std::string FREE_INSTLL_CALLING_BUNDLENAMES = "freeInstallCallingBundleNames";
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 constexpr int32_t WAIT_TIME = 15;
 #endif
@@ -87,6 +88,7 @@ int32_t DistributedSchedProxy::StartAbilityFromRemote(const OHOS::AAFwk::Want& w
     std::string extraInfo = extraInfoJson.dump();
     PARCEL_WRITE_HELPER(data, String, extraInfo);
     MessageParcel reply;
+    HITRACE_METER_NAME(TraceTag::DSCHED, TraceValue::REMOTE_PROCEDURE_CALL);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, START_ABILITY_FROM_REMOTE, data, reply);
 }
 
@@ -281,6 +283,7 @@ int32_t DistributedSchedProxy::ConnectAbilityFromRemote(const OHOS::AAFwk::Want&
     std::string extraInfo = extraInfoJson.dump();
     PARCEL_WRITE_HELPER(data, String, extraInfo);
     MessageParcel reply;
+    HITRACE_METER_NAME(TraceTag::DSCHED, TraceValue::REMOTE_PROCEDURE_CALL);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, CONNECT_ABILITY_FROM_REMOTE, data, reply);
 }
 
@@ -305,6 +308,7 @@ int32_t DistributedSchedProxy::DisconnectAbilityFromRemote(const sptr<IRemoteObj
     PARCEL_WRITE_HELPER(data, Int32, uid);
     PARCEL_WRITE_HELPER(data, String, sourceDeviceId);
     MessageParcel reply;
+    HITRACE_METER_NAME(TraceTag::DSCHED, TraceValue::REMOTE_PROCEDURE_CALL);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, DISCONNECT_ABILITY_FROM_REMOTE, data, reply);
 }
 
@@ -516,84 +520,6 @@ int32_t DistributedSchedProxy::NotifyMissionsChangedFromRemote(const std::vector
     return result;
 }
 
-int32_t DistributedSchedProxy::CheckSupportOsd(const std::string& deviceId)
-{
-    HILOGI("CheckSupportOsd is called");
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        HILOGE("CheckSupportOsd remote service is null");
-        return ERR_NULL_OBJECT;
-    }
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    PARCEL_WRITE_HELPER(data, String, deviceId);
-    return remote->SendRequest(CHECK_SUPPORTED_OSD, data, reply, option);
-}
-
-void DistributedSchedProxy::GetCachedOsdSwitch(std::vector<std::u16string>& deviceIds, std::vector<int32_t>& values)
-{
-    HILOGI("GetCachedOsdSwitch is called");
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        HILOGE("GetCachedOsdSwitch remote service is null");
-        return;
-    }
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
-        return;
-    }
-    int32_t error = remote->SendRequest(GET_CACHED_SUPPORTED_OSD, data, reply, option);
-    if (error != ERR_NONE) {
-        HILOGE("%{public}s transact failed, error: %{public}d", __func__, error);
-        return;
-    }
-    PARCEL_READ_HELPER_NORET(reply, String16Vector, &deviceIds);
-    PARCEL_READ_HELPER_NORET(reply, Int32Vector, &values);
-    return;
-}
-
-int32_t DistributedSchedProxy::GetOsdSwitchValueFromRemote()
-{
-    HILOGI("GetOsdSwitchValueFromRemote is called");
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        HILOGE("GetOsdSwitchValueFromRemote remote service is null");
-        return ERR_NULL_OBJECT;
-    }
-
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    MessageParcel reply;
-    MessageOption option { MessageOption::TF_SYNC, WAIT_TIME };
-    int32_t error = remote->SendRequest(CHECK_SUPPORT_OSD_FROM_REMOTE, data, reply, option);
-    if (error != ERR_NONE) {
-        HILOGE("%{public}s transact failed, error: %{public}d", __func__, error);
-        return error;
-    }
-    int32_t result = reply.ReadInt32();
-    HILOGD("%{public}s get result from server data = %{public}d", __func__, result);
-    return result;
-}
-
-int32_t DistributedSchedProxy::StoreSnapshotInfo(const std::string& deviceId, int32_t missionId,
-    const uint8_t* byteStream, size_t len)
-{
-    return ERR_NONE;
-}
-
-int32_t DistributedSchedProxy::RemoveSnapshotInfo(const std::string& deviceId, int32_t missionId)
-{
-    return ERR_NONE;
-}
-
 int32_t DistributedSchedProxy::GetRemoteMissionSnapshotInfo(const std::string& networkId, int32_t missionId,
     std::unique_ptr<MissionSnapshot>& missionSnapshot)
 {
@@ -626,33 +552,6 @@ int32_t DistributedSchedProxy::GetRemoteMissionSnapshotInfo(const std::string& n
     std::unique_ptr<MissionSnapshot> missionSnapshotPtr(reply.ReadParcelable<MissionSnapshot>());
     missionSnapshot = std::move(missionSnapshotPtr);
     return ERR_NONE;
-}
-
-int32_t DistributedSchedProxy::UpdateOsdSwitchValueFromRemote(int32_t switchVal,
-    const std::string& sourceDeviceId)
-{
-    HILOGD("called");
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        HILOGE("remote service is null");
-        return ERR_NULL_OBJECT;
-    }
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    PARCEL_WRITE_HELPER(data, Int32, switchVal);
-    PARCEL_WRITE_HELPER(data, String, sourceDeviceId);
-    MessageParcel reply;
-    MessageOption option { MessageOption::TF_SYNC, WAIT_TIME };
-    int32_t error = remote->SendRequest(NOTIFY_SWITCH_CHANGED_FROM_REMOTE, data, reply, option);
-    if (error != ERR_NONE) {
-        HILOGE("%{public}s transact failed, error: %{public}d", __func__, error);
-        return error;
-    }
-    int32_t result = reply.ReadInt32();
-    HILOGD("%{public}s get result from server data = %{public}d", __func__, result);
-    return result;
 }
 #endif
 
@@ -750,6 +649,7 @@ int32_t DistributedSchedProxy::StartAbilityByCallFromRemote(const OHOS::AAFwk::W
     PARCEL_WRITE_HELPER(data, String, extraInfo);
     PARCEL_WRITE_HELPER(data, Parcelable, &want);
     MessageParcel reply;
+    HITRACE_METER_NAME(TraceTag::DSCHED, TraceValue::REMOTE_PROCEDURE_CALL);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, START_ABILITY_BY_CALL_FROM_REMOTE, data, reply);
 }
 
@@ -779,6 +679,7 @@ int32_t DistributedSchedProxy::ReleaseAbilityFromRemote(const sptr<IRemoteObject
     std::string extraInfo = "";
     PARCEL_WRITE_HELPER(data, String, extraInfo);
     MessageParcel reply;
+    HITRACE_METER_NAME(TraceTag::DSCHED, TraceValue::REMOTE_PROCEDURE_CALL);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, RELEASE_ABILITY_FROM_REMOTE, data, reply);
 }
 
@@ -835,6 +736,7 @@ int32_t DistributedSchedProxy::StartFreeInstallFromRemote(const FreeInstallInfo&
     PARCEL_WRITE_HELPER(data, String, info.callerInfo.callerAppId);
     PARCEL_WRITE_HELPER(data, Int64, taskId);
     OHOS::AAFwk::Want cmpWant;
+    cmpWant.SetParam(FREE_INSTLL_CALLING_BUNDLENAMES, info.callerInfo.bundleNames);
     PARCEL_WRITE_HELPER(data, Parcelable, &cmpWant);
     nlohmann::json extraInfoJson;
     extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN] = info.callerInfo.accessToken;
@@ -842,6 +744,7 @@ int32_t DistributedSchedProxy::StartFreeInstallFromRemote(const FreeInstallInfo&
     std::string extraInfo = extraInfoJson.dump();
     PARCEL_WRITE_HELPER(data, String, extraInfo);
     MessageParcel reply;
+    HITRACE_METER_NAME(TraceTag::DSCHED, TraceValue::REMOTE_PROCEDURE_CALL);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, START_FREE_INSTALL_FROM_REMOTE, data, reply);
 }
 

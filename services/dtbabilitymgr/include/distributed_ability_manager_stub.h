@@ -16,19 +16,42 @@
 #ifndef OHOS_DISTRIBUTED_ABILITY_MANAGER_STUB_H
 #define OHOS_DISTRIBUTED_ABILITY_MANAGER_STUB_H
 
+#include <functional>
+#include <map>
+
 #include "distributed_ability_manager_interface.h"
-#include "ipc_skeleton.h"
+#include "ipc_types.h"
 #include "iremote_stub.h"
+#include "message_option.h"
 #include "message_parcel.h"
+#include "refbase.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 class DistributedAbilityManagerStub : public IRemoteStub<IDistributedAbilityManager> {
 public:
-    DistributedAbilityManagerStub() = default;
-    ~DistributedAbilityManagerStub() = default;
+    DistributedAbilityManagerStub();
+    ~DistributedAbilityManagerStub();
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data,
         MessageParcel& reply, MessageOption& option) override;
+    virtual int32_t SendRequestToImpl(uint32_t code, MessageParcel& data, MessageParcel& reply,
+        MessageOption& option)
+    {
+        return ERR_NONE;
+    }
+
+private:
+    bool EnforceInterfaceToken(MessageParcel& data);
+
+    int32_t RegisterInner(MessageParcel& data, MessageParcel& reply);
+    int32_t UnregisterInner(MessageParcel& data, MessageParcel& reply);
+    int32_t RegisterDeviceSelectionCallbackInner(MessageParcel& data, MessageParcel& reply);
+    int32_t UnregisterDeviceSelectionCallbackInner(MessageParcel& data, MessageParcel& reply);
+    int32_t UpdateConnectStatusInner(MessageParcel& data, MessageParcel& reply);
+    int32_t StartDeviceManagerInner(MessageParcel& data, MessageParcel& reply);
+
+    using Func = int32_t(DistributedAbilityManagerStub::*)(MessageParcel& data, MessageParcel& reply);
+    std::map<uint32_t, Func> funcsMap_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

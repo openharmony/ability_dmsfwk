@@ -1,22 +1,25 @@
 {
-    "name": "@ohos/distributedschedule_dms_fwk",
+    "name": "@ohos/dmsfwk",
     "description": "distributed ability manager service",
     "version": "3.1",
     "license": "Apache License 2.0",
-    "repository": "https://gitee.com/openharmony/distributedschedule_dms_fwk",
+    "repository": "https://gitee.com/openharmony/ability_dmsfwk",
     "publishAs": "code-segment",
     "segment": {
-      "destPath": "foundation/distributedschedule/dmsfwk"
+      "destPath": "foundation/ability/dmsfwk"
     },
     "dirs": {},
     "scripts": {},
     "license": "Apache License 2.0",
     "component": {
-      "name": "dmsfwk_standard",
-      "subsystem": "distributedschedule",
+      "name": "dmsfwk",
+      "subsystem": "ability",
       "adapted_system_type": [ "standard" ],
       "features" : [
-        "dmsfwk_standard_mission_manager"
+        "dmsfwk_mission_manager"
+      ],
+      "hisysevent_config": [
+        "//foundation/ability/dmsfwk/hisysevent.yaml"
       ],
       "rom": "",
       "ram": "",
@@ -24,46 +27,73 @@
         "components": [
           "ability_base",
           "ability_runtime",
-          "appexecfwk_standard",
+          "access_token",
+          "bundle_framework",
+          "device_auth",
           "distributeddatamgr",
           "dsoftbus",
           "eventhandler",
+          "hisysevent_native",
+          "hitrace_native",
           "hiviewdfx_hilog_native",
           "ipc",
           "multimedia_image_standard",
+          "napi",
+          "os_account",
           "safwk",
           "samgr_standard",
+          "startup_l2",
           "utils_base"
         ],
         "third_party": []
       },
       "build": {
-        "sub_component": [
-          "//foundation/distributedschedule/dmsfwk/etc/init:etc",
-          "//foundation/distributedschedule/dmsfwk/etc/profile:distributedsched_trust",
-          "//foundation/distributedschedule/dmsfwk/sa_profile:dms_sa_profile",
-          "//foundation/distributedschedule/dmsfwk/services/dtbabilitymgr:distributed_ability_manager_svr",
-          "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr:distributedschedsvr"
-        ],
+        "group_type": {
+          "base_group": [],
+          "fwk_group": [
+            "//foundation/ability/dmsfwk/interfaces/innerkits/common:common_sdk",
+            "//foundation/ability/dmsfwk/interfaces/innerkits/continuation_manager:continuation_manager",
+            "//foundation/ability/dmsfwk/interfaces/kits/napi:napi_packages"
+          ],
+          "service_group": [
+            "//foundation/ability/dmsfwk/etc/init:etc",
+            "//foundation/ability/dmsfwk/etc/param:param_files",
+            "//foundation/ability/dmsfwk/etc/profile:distributedsched_trust",
+            "//foundation/ability/dmsfwk/sa_profile:dms_sa_profile",
+            "//foundation/ability/dmsfwk/services/base:dmsbaseinner",
+            "//foundation/ability/dmsfwk/services/dtbabilitymgr:distributed_ability_manager_svr",
+            "//foundation/ability/dmsfwk/services/dtbschedmgr:distributedschedsvr"
+          ]
+        },
         "inner_kits": [
-            {
-                "header": {
-                    "header_base": "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/dmsbase/include",
-                    "header_files": [
-                        "adapter/dnetwork_adapter.h",
-                        "deviceManager/dms_device_info.h",
-                        "deviceManager/dms_device_listener.h",
-                        "distributed_device_node_listener.h",
-                        "dtbschedmgr_device_info_storage.h",
-		        "dtbschedmgr_log.h",
-                        "parcel_helper.h"
-                    ]
-                },
-                "name": "//foundation/distributedschedule/dmsfwk/interfaces/innerkits/dmsbase:dmsbaseinner"
-            }
+          {
+            "header": {
+              "header_base": "//foundation/ability/dmsfwk/interfaces/innerkits/continuation_manager/include",
+              "header_files": [
+                "continuation_extra_params.h",
+                "continuation_mode.h",
+                "continuation_result.h",
+                "device_connect_status.h",
+                "device_selection_notifier_stub.h",
+                "idevice_selection_notifier.h"
+              ]
+            },
+            "name": "//foundation/ability/dmsfwk/interfaces/innerkits/continuation_manager:continuation_manager"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/dmsfwk/interfaces/innerkits/common/include",
+              "header_files": [
+                "distributed_ability_manager_client.h",
+                "distributed_ability_manager_proxy.h"
+              ]
+            },
+            "name": "//foundation/ability/dmsfwk/interfaces/innerkits/common:common_sdk"
+          }
         ],
         "test": [
-          "//foundation/distributedschedule/dmsfwk/services/dtbschedmgr:unittest"
+          "//foundation/ability/dmsfwk/services/dtbschedmgr:unittest",
+          "//foundation/ability/dmsfwk/services/dtbabilitymgr:unittest"
         ]
       }
     }

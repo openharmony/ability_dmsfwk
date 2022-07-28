@@ -14,6 +14,7 @@
  */
 
 #include "distributed_sched_continuation_test.h"
+#include "distributed_sched_util.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "mock_distributed_sched.h"
 
@@ -42,6 +43,7 @@ void DSchedContinuationTest::TearDownTestCase()
 
 void DSchedContinuationTest::SetUp()
 {
+    DistributedSchedUtil::MockPermission();
     dschedContinuation_ = std::make_shared<DSchedContinuation>();
 }
 
@@ -221,6 +223,144 @@ HWTEST_F(DSchedContinuationTest, NotifyContinuationResultFromRemote_002, TestSiz
 }
 
 /**
+ * @tc.name: SetWantForContinuation_001
+ * @tc.desc: input invalid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinuationTest, SetWantForContinuation_001, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest SetWantForContinuation_001 start" << std::endl;
+    /**
+     * @tc.steps: step1. input invalid bundleName.
+     * @tc.expected: step1. return err.
+     */
+    string bundleName = "bundleName";
+    string abilityName = "abilityName";
+    std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
+    int32_t missionId = 0;
+    int32_t ret = DistributedSchedService::GetInstance().SetWantForContinuation(*spWant, missionId);
+    EXPECT_TRUE(INVALID_PARAMETERS_ERR == ret);
+    DTEST_LOG << "DSchedContinuationTest SetWantForContinuation_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetWantForContinuation_002
+ * @tc.desc: input valid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinuationTest, SetWantForContinuation_002, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest SetWantForContinuation_002 start" << std::endl;
+    /**
+     * @tc.steps: step1. input valid bundleName.
+     * @tc.expected: step1. return OK.
+     */
+    string bundleName = "ohos.samples.distributedcalc";
+    string abilityName = "MainAbility";
+    std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
+    int32_t missionId = 0;
+    int32_t ret = DistributedSchedService::GetInstance().SetWantForContinuation(*spWant, missionId);
+    EXPECT_TRUE(ERR_OK == ret);
+    DTEST_LOG << "DSchedContinuationTest SetWantForContinuation_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinueLocalMission_001
+ * @tc.desc: input invalid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinuationTest, ContinueLocalMission_001, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest ContinueLocalMission_001 start" << std::endl;
+    /**
+     * @tc.steps: step1. input invalid missionId.
+     * @tc.expected: step1. return err.
+     */
+    string deviceId = "123456";
+    int32_t missionId = 0;
+    auto callback = GetDSchedService();
+    WantParams wantParams;
+    int32_t ret = DistributedSchedService::GetInstance().ContinueLocalMission(deviceId,
+        missionId, callback, wantParams);
+    EXPECT_TRUE(INVALID_PARAMETERS_ERR == ret);
+    DTEST_LOG << "DSchedContinuationTest ContinueLocalMission_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinueLocalMission_002
+ * @tc.desc: input invalid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinuationTest, ContinueLocalMission_002, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest ContinueLocalMission_002 start" << std::endl;
+    /**
+     * @tc.steps: step1. input invalid mission.
+     * @tc.expected: step1. return err.
+     */
+    string deviceId = "123456";
+    int32_t missionId = 0;
+    auto callback = GetDSchedService();
+    WantParams wantParams;
+    DistributedSchedService::GetInstance().OnStart();
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        return;
+    }
+    DistributedSchedService::GetInstance().dschedContinuation_->PushCallback(missionId, callback, deviceId, false);
+    int32_t ret = DistributedSchedService::GetInstance().ContinueLocalMission(
+        deviceId, missionId, callback, wantParams);
+    EXPECT_TRUE(INVALID_PARAMETERS_ERR == ret);
+    DTEST_LOG << "DSchedContinuationTest ContinueLocalMission_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinueRemoteMission_001
+ * @tc.desc: input invalid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinuationTest, ContinueRemoteMission_001, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest ContinueRemoteMission_001 start" << std::endl;
+    /**
+     * @tc.steps: step1. input invalid deviceId.
+     * @tc.expected: step1. return err.
+     */
+    string srcDeviceId = "123456";
+    string dstDeviceid = "123456";
+    int32_t missionId = 0;
+    auto callback = GetDSchedService();
+    WantParams wantParams;
+    int32_t ret = DistributedSchedService::GetInstance().ContinueRemoteMission(
+        srcDeviceId, dstDeviceid, missionId, callback, wantParams);
+    EXPECT_TRUE(INVALID_REMOTE_PARAMETERS_ERR == ret);
+    DTEST_LOG << "DSchedContinuationTest ContinueRemoteMission_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinueRemoteMission_002
+ * @tc.desc: input invalid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinuationTest, ContinueRemoteMission_002, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest ContinueRemoteMission_002 start" << std::endl;
+    /**
+     * @tc.steps: step1. input invalid param.
+     * @tc.expected: step1. return err.
+     */
+    string srcDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId);
+    string dstDeviceid = "123456";
+    int32_t missionId = 0;
+    auto callback = GetDSchedService();
+    WantParams wantParams;
+    int32_t ret = DistributedSchedService::GetInstance().ContinueRemoteMission(
+        srcDeviceId, dstDeviceid, missionId, callback, wantParams);
+    EXPECT_TRUE(ERR_OK != ret);
+    DTEST_LOG << "DSchedContinuationTest ContinueRemoteMission_002 end" << std::endl;
+}
+
+/**
  * @tc.name: PushAbilityToken_001
  * @tc.desc: input invalid params.
  * @tc.type: FUNC
@@ -356,7 +496,6 @@ HWTEST_F(DSchedContinuationTest, PopAbilityToken_003, TestSize.Level1)
  * @tc.name: ContinueMission_001
  * @tc.desc: test ContinueMission when srcDeviceId is empty.
  * @tc.type: FUNC
- * @tc.require: SR000GKT4A
  */
 HWTEST_F(DSchedContinuationTest, ContinueMission_001, TestSize.Level1)
 {
@@ -372,7 +511,6 @@ HWTEST_F(DSchedContinuationTest, ContinueMission_001, TestSize.Level1)
  * @tc.name: ContinueMission_002
  * @tc.desc: test ContinueMission when dstDeviceId is empty.
  * @tc.type: FUNC
- * @tc.require: SR000GKT4A
  */
 HWTEST_F(DSchedContinuationTest, ContinueMission_002, TestSize.Level1)
 {
@@ -388,7 +526,6 @@ HWTEST_F(DSchedContinuationTest, ContinueMission_002, TestSize.Level1)
  * @tc.name: ContinueMission_003
  * @tc.desc: test ContinueMission when callback is nullptr.
  * @tc.type: FUNC
- * @tc.require: SR000GKT4A
  */
 HWTEST_F(DSchedContinuationTest, ContinueMission_003, TestSize.Level1)
 {
@@ -403,7 +540,6 @@ HWTEST_F(DSchedContinuationTest, ContinueMission_003, TestSize.Level1)
  * @tc.name: ContinueMission_004
  * @tc.desc: test ContinueMission when srcDeviceId == localDevId.
  * @tc.type: FUNC
- * @tc.require: SR000GKT4A
  */
 HWTEST_F(DSchedContinuationTest, ContinueMission_004, TestSize.Level1)
 {
@@ -610,7 +746,6 @@ HWTEST_F(DSchedContinuationTest, StartFreeInstallFromRemote_004, TestSize.Level0
  * @tc.name: StartFreeInstallFromRemote_005
  * @tc.desc: call StartFreeInstallFromRemote with dms
  * @tc.type: FUNC
- * @tc.require: SR000GKT4A
  */
 HWTEST_F(DSchedContinuationTest, StartFreeInstallFromRemote_005, TestSize.Level1)
 {

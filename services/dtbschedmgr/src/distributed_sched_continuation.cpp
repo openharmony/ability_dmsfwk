@@ -23,7 +23,6 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 constexpr int64_t CONTINUATION_DELAY_TIME = 20000;
-constexpr int64_t FREE_INSTALL_TIMEOUT = 30000;
 const std::string TAG = "DSchedContinuation";
 const std::u16string NAPI_MISSION_CENTER_INTERFACE_TOKEN = u"ohos.DistributedSchedule.IMissionCallback";
 constexpr int32_t NOTIFY_MISSION_CENTER_RESULT = 4;
@@ -100,13 +99,13 @@ int32_t DSchedContinuation::GenerateSessionId()
     return currValue;
 }
 
-void DSchedContinuation::SetTimeOut(int32_t missionId)
+void DSchedContinuation::SetTimeOut(int32_t missionId, int32_t timeout)
 {
     if (continuationHandler_ == nullptr) {
         HILOGE("continuationHandler not initialized!");
         return;
     }
-    continuationHandler_->SendEvent(missionId, 0, CONTINUATION_DELAY_TIME);
+    continuationHandler_->SendEvent(missionId, 0, timeout);
 }
 
 void DSchedContinuation::RemoveTimeOut(int32_t missionId)
@@ -140,39 +139,39 @@ bool DSchedContinuation::IsInContinuationProgress(int32_t missionId)
     return false;
 }
 
-bool DSchedContinuation::PushCallback(int32_t missionId, const sptr<IRemoteObject>& callback, bool isFreeInstall)
+std::string DSchedContinuation::GetTargetDevice(int32_t missionId)
+{
+    std::lock_guard<std::mutex> autoLock(continuationLock_);
+    auto iter = continuationDevices_.find(missionId);
+    if (iter != continuationDevices_.end()) {
+        HILOGD("missionId:%{public}d exist!", missionId);
+        return iter->second;
+    }
+    return "";
+}
+
+bool DSchedContinuation::PushCallback(int32_t missionId, const sptr<IRemoteObject>& callback,
+    std::string deviceId, bool isFreeInstall)
 {
     HILOGI("DSchedContinuation PushCallback start!");
     if (callback == nullptr) {
-        HILOGE("PushCallback callback null!");
+        HILOGE("callback null!");
         return false;
     }
 
     if (continuationHandler_ == nullptr) {
-        HILOGE("PushCallback not initialized!");
-        return false;
-    }
-
-    bool ret = true;
-    if (isFreeInstall) {
-        HILOGI("get freeInstall true!");
-        ret = continuationHandler_->SendEvent(missionId, 0, CONTINUATION_DELAY_TIME + FREE_INSTALL_TIMEOUT);
-    } else {
-        HILOGI("get freeInstall false!");
-        ret = continuationHandler_->SendEvent(missionId, 0, CONTINUATION_DELAY_TIME);
-    }
-    if (!ret) {
-        HILOGE("PushCallback SendEvent failed!");
+        HILOGE("not initialized!");
         return false;
     }
 
     std::lock_guard<std::mutex> autoLock(continuationLock_);
     auto iterSession = callbackMap_.find(missionId);
     if (iterSession != callbackMap_.end()) {
-        HILOGE("PushCallback missionId:%{public}d exist!", missionId);
+        HILOGE("missionId:%{public}d exist!", missionId);
         return false;
     }
     (void)callbackMap_.emplace(missionId, callback);
+    (void)continuationDevices_.emplace(missionId, deviceId);
     if (isFreeInstall) {
         freeInstall_[missionId] = isFreeInstall;
     }
@@ -188,21 +187,26 @@ sptr<IRemoteObject> DSchedContinuation::PopCallback(int32_t missionId)
         return nullptr;
     }
     sptr<IRemoteObject> callback = iter->second;
+
+    auto iteration = continuationDevices_.find(missionId);
+    if (iteration != continuationDevices_.end()) {
+        HILOGD("%{public}d need pop from continuationDevices_", missionId);
+        (void)continuationDevices_.erase(iteration);
+    }
+
     auto it = freeInstall_.find(missionId);
     if (it != freeInstall_.end()) {
         HILOGD("%{public}d need pop from freeInstall_", missionId);
         (void)freeInstall_.erase(it);
     }
     (void)callbackMap_.erase(iter);
-    if (continuationHandler_ != nullptr) {
-        continuationHandler_->RemoveEvent(missionId);
-    }
     return callback;
 }
 
 int32_t DSchedContinuation::NotifyMissionCenterResult(int32_t missionId, int32_t isSuccess)
 {
     sptr<IRemoteObject> callback = PopCallback(missionId);
+    RemoveTimeOut(missionId);
     if (callback == nullptr) {
         HILOGE("NotifyMissionCenterResult callback is null");
         return INVALID_PARAMETERS_ERR;

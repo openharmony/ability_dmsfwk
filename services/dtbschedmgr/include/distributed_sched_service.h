@@ -21,9 +21,11 @@
 #include <set>
 #include <unordered_map>
 
+#include "continuation_extra_params.h"
 #include "distributed_sched_stub.h"
 #include "distributed_sched_continuation.h"
 #include "dms_callback_task.h"
+#include "dms_notifier.h"
 #include "iremote_object.h"
 #include "iremote_proxy.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
@@ -77,6 +79,7 @@ public:
         int32_t status, uint32_t accessToken) override;
     void NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId, bool isSuccess) override;
     int32_t NotifyContinuationResultFromRemote(int32_t sessionId, bool isSuccess) override;
+    void NotifyContinuationCallbackResult(int32_t missionId, int32_t isSuccess);
     int32_t NotifyFreeInstallResult(const CallbackTaskItem item, int32_t resultCode);
     int32_t ConnectRemoteAbility(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
         int32_t callerUid, int32_t callerPid, uint32_t accessToken) override;
@@ -90,9 +93,6 @@ public:
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     int32_t GetMissionInfos(const std::string& deviceId, int32_t numMissions,
         std::vector<AAFwk::MissionInfo>& missionInfos) override;
-    int32_t StoreSnapshotInfo(const std::string& deviceId, int32_t missionId,
-        const uint8_t* byteStream, size_t len) override;
-    int32_t RemoveSnapshotInfo(const std::string& deviceId, int32_t missionId) override;
     int32_t NotifyMissionsChangedFromRemote(const std::vector<DstbMissionInfo>& missionInfos,
         const CallerInfo& callerInfo) override;
 #endif
@@ -103,11 +103,6 @@ public:
     void DumpSessionsLocked(const std::list<ConnectAbilitySession>& sessionsList, std::string& info);
     void DumpElementLocked(const std::list<AppExecFwk::ElementName>& elementsList, std::string& info);
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    int32_t CheckSupportOsd(const std::string& deviceId) override;
-    void GetCachedOsdSwitch(std::vector<std::u16string>& deviceIds, std::vector<int32_t>& values) override;
-    int32_t GetOsdSwitchValueFromRemote() override;
-    int32_t UpdateOsdSwitchValueFromRemote(int32_t switchVal, const std::string& sourceDeviceId) override;
-    std::unique_ptr<Snapshot> GetRemoteSnapshotInfo(const std::u16string& deviceId, int32_t missionId) override;
     int32_t GetRemoteMissionSnapshotInfo(const std::string& networkId, int32_t missionId,
         std::unique_ptr<AAFwk::MissionSnapshot>& missionSnapshot) override;
     int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;
@@ -135,10 +130,16 @@ public:
     int32_t NotifyCompleteFreeInstall(const FreeInstallInfo& info, int64_t taskId, int32_t resultCode);
     int32_t RegisterDistributedComponentListener(const sptr<IRemoteObject>& callback) override;
     int32_t GetDistributedComponentList(std::vector<std::string>& distributedComponents) override;
+    void SetContinuationTimeout(int32_t missionId, int32_t timeout);
+    void RemoveContinuationTimeout(int32_t missionId);
+    std::string GetContinuaitonDevice(int32_t missionId);
+
+    int32_t ConnectAbility(const sptr<DmsNotifier>& dmsNotifier, int32_t token,
+        const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams);
+    int32_t DisconnectAbility();
 private:
     DistributedSchedService();
     bool Init();
-    void NotifyContinuationCallbackResult(int32_t missionId, int32_t isSuccess);
     void RemoteConnectAbilityMappingLocked(const sptr<IRemoteObject>& connect, const std::string& localDeviceId,
         const std::string& remoteDeviceId, const AppExecFwk::ElementName& element, const CallerInfo& callerInfo,
         TargetComponent targetComponent);
@@ -201,6 +202,7 @@ private:
     std::mutex callerLock_;
     std::map<sptr<IRemoteObject>, std::list<ConnectAbilitySession>> callerMap_;
     sptr<IRemoteObject::DeathRecipient> callerDeathRecipientForLocalDevice_;
+    sptr<IRemoteObject> connect_;
 };
 
 class ConnectAbilitySession {

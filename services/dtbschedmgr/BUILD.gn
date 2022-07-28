@@ -13,7 +13,7 @@
 
 import("//build/ohos.gni")
 import("//build/ohos_var.gni")
-import("//foundation/distributedschedule/dmsfwk/dmsfwk.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
 group("unittest") {
   testonly = true
@@ -22,8 +22,11 @@ group("unittest") {
 
 config("distributed_sched_config") {
   visibility = [ ":*" ]
-  include_dirs = [ "include" ]
-  if (dmsfwk_standard_mission_manager) {
+  include_dirs = [
+    "include",
+    "../base/include/",
+  ]
+  if (dmsfwk_mission_manager) {
     defines = [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
   }
 }
@@ -33,6 +36,8 @@ ohos_shared_library("distributedschedsvr") {
   sources = [
     "src/ability_connection_wrapper_proxy.cpp",
     "src/ability_connection_wrapper_stub.cpp",
+    "src/app_connection_stub.cpp",
+    "src/bundle/bundle_manager_callback_stub.cpp",
     "src/bundle/bundle_manager_internal.cpp",
     "src/connect_death_recipient.cpp",
     "src/distributed_sched_adapter.cpp",
@@ -60,10 +65,13 @@ ohos_shared_library("distributedschedsvr") {
     "bundle_framework:appexecfwk_core",
     "device_auth:deviceauth_sdk",
     "distributeddatamgr:distributeddata_inner",
-    "dmsfwk_standard:dmsbaseinner",
+    "dmsfwk:continuation_manager",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
+    "hitrace_native:hitrace_meter",
+    "hitrace_native:libhitrace",
     "hiviewdfx_hilog_native:libhilog",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "os_account:os_account_innerkits",
     "safwk:system_ability_fwk",
@@ -71,7 +79,9 @@ ohos_shared_library("distributedschedsvr") {
     "utils_base:utils",
   ]
 
-  if (dmsfwk_standard_mission_manager) {
+  deps = [ "//foundation/ability/dmsfwk/services/base:dmsbaseinner" ]
+
+  if (dmsfwk_mission_manager) {
     defines = [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
     sources += [
       "src/mission/distributed_data_change_listener.cpp",
@@ -90,6 +100,6 @@ ohos_shared_library("distributedschedsvr") {
 
   install_images = [ system_base_dir ]
   relative_install_dir = "platformsdk"
-  part_name = "dmsfwk_standard"
-  subsystem_name = "distributedschedule"
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
 }

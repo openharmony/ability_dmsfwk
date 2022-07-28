@@ -112,17 +112,6 @@ int32_t MockDistributedSched::UnRegisterMissionListener(const std::u16string& de
     return ERR_NONE;
 }
 
-int32_t MockDistributedSched::StoreSnapshotInfo(const std::string& deviceId, int32_t missionId,
-    const uint8_t* byteStream, size_t len)
-{
-    return ERR_NONE;
-}
-
-int32_t MockDistributedSched::RemoveSnapshotInfo(const std::string& deviceId, int32_t missionId)
-{
-    return ERR_NONE;
-}
-
 int32_t MockDistributedSched::GetRemoteMissionSnapshotInfo(const std::string& networkId, int32_t missionId,
     std::unique_ptr<MissionSnapshot>& missionSnapshot)
 {
@@ -133,22 +122,6 @@ int32_t MockDistributedSched::NotifyMissionsChangedFromRemote(const std::vector<
     const CallerInfo& callerInfo)
 {
     expectedTrue_ = false;
-    return ERR_NONE;
-}
-
-int32_t MockDistributedSched::CheckSupportOsd(const std::string& deviceId)
-{
-    return ERR_NONE;
-}
-
-void MockDistributedSched::GetCachedOsdSwitch(std::vector<std::u16string>& deviceIds,
-    std::vector<int32_t>& values)
-{
-    return;
-}
-
-int32_t MockDistributedSched::GetOsdSwitchValueFromRemote()
-{
     return ERR_NONE;
 }
 
@@ -170,12 +143,6 @@ int32_t MockDistributedSched::StopSyncMissionsFromRemote(const CallerInfo& calle
 }
 
 int32_t MockDistributedSched::StopSyncRemoteMissions(const std::string& devId)
-{
-    return ERR_NONE;
-}
-
-int32_t MockDistributedSched::UpdateOsdSwitchValueFromRemote(int32_t switchVal,
-    const std::string& sourceDeviceId)
 {
     return ERR_NONE;
 }
