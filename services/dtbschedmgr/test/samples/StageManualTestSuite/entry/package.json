@@ -1,14 +1,31 @@
 {
-	"name": "entry",
-	"version": "1.0.0",
-	"ohos": {
-	  "org": "ohos",
-	  "buildTool": "hvigor",
-	  "directoryLevel": "module"
-	},
-	"description": "example description",
-	"repository": {},
-	"license": "ISC",
-	"dependencies": {}
-  }
-  
+    "license":"ISC",
+    "devDependencies":{},
+    "name":"entry",
+    "ohos":{
+        "org":"ohos",
+        "directoryLevel":"module",
+        "buildTool":"hvigor"
+    },
+    "description":"example description",
+    "repository":{},
+    "version":"1.0.0",
+    "reqPermissions":[
+        {
+            "reason":"need use ohos.permission.GET_BUNDLE_INFO_PRIVILEGED",
+            "name":"ohos.permission.GET_BUNDLE_INFO_PRIVILEGED"
+        },
+        {
+            "reason":"need use ohos.permission.GET_BUNDLE_INFO",
+            "name":"ohos.permission.GET_BUNDLE_INFO"
+        },
+        {
+            "reason":"need use ohos.permission.CHANGE_ABILITY_ENABLED_STATE",
+            "name":"ohos.permission.CHANGE_ABILITY_ENABLED_STATE"
+        },
+        {
+            "name":"ohos.permission.DISTRIBUTED_DATASYNC"
+        }
+    ],
+    "dependencies":{}
+}
