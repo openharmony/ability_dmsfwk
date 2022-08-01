@@ -98,6 +98,8 @@ ohos_shared_library("distributedschedsvr") {
     external_deps += [ "multimedia_image_standard:image_native" ]
   }
 
+  install_images = [ system_base_dir ]
+  relative_install_dir = "platformsdk"
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
