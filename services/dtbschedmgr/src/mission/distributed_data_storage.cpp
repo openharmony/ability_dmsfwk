@@ -35,6 +35,7 @@ namespace {
 const string TAG = "DistributedDataStorage";
 const string APP_ID = "DistributedSchedule";
 const string STORE_ID = "SnapshotInfoDataStorage";
+const string KVDB_PATH = "/data/service/el1/public/database/DistributedSchedule";
 constexpr int32_t RETRY_TIMES_WAIT_KV_DATA = 30;
 constexpr int32_t RETRY_TIMES_GET_KVSTORE = 5;
 }
@@ -143,6 +144,8 @@ Status DistributedDataStorage::GetKvStore()
         .encrypt = false,
         .autoSync = true,
         .kvStoreType = KvStoreType::SINGLE_VERSION,
+        .area = 1,
+        .baseDir = KVDB_PATH
     };
     Status status = dataManager_.GetSingleKvStore(options, appId_, storeId_, kvStorePtr_);
     if (status != Status::SUCCESS) {
@@ -160,7 +163,7 @@ void DistributedDataStorage::SubscribeDistributedDataStorage()
         HILOGW("kvStorePtr is null!");
         return;
     }
-    SubscribeType subscribeType = SubscribeType::DEFAULT;
+    SubscribeType subscribeType = SubscribeType::SUBSCRIBE_TYPE_REMOTE;
     if (distributedDataChangeListener_ != nullptr) {
         HILOGD("SubscribeKvStore start.");
         Status status = kvStorePtr_->SubscribeKvStore(subscribeType, move(distributedDataChangeListener_));
@@ -211,7 +214,7 @@ bool DistributedDataStorage::UninitDistributedDataStorage()
     int64_t begin = GetTickCount();
     Status status;
     if (distributedDataChangeListener_ != nullptr && kvStorePtr_ != nullptr) {
-        SubscribeType subscribeType = SubscribeType::DEFAULT;
+        SubscribeType subscribeType = SubscribeType::SUBSCRIBE_TYPE_REMOTE;
         status = kvStorePtr_->UnSubscribeKvStore(subscribeType, move(distributedDataChangeListener_));
         HILOGI("[PerformanceTest] UnSubscribeKvStore spend %{public}" PRId64 " ms", GetTickCount() - begin);
         if (status != Status::SUCCESS) {
@@ -228,7 +231,7 @@ bool DistributedDataStorage::UninitDistributedDataStorage()
         }
         kvStorePtr_ = nullptr;
     }
-    status = dataManager_.DeleteKvStore(appId_, storeId_);
+    status = dataManager_.DeleteKvStore(appId_, storeId_, KVDB_PATH);
     if (status != Status::SUCCESS) {
         HILOGE("DeleteKvStore failed! status = %{public}d.", status);
         return false;
