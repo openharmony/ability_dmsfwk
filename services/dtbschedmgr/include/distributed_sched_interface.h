@@ -20,6 +20,9 @@
 #include "ability_info.h"
 #include "ability_manager_interface.h"
 #include "caller_info.h"
+#ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
+#include "form_share_info.h"
+#endif
 #include "iremote_broker.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission_info.h"
@@ -115,6 +118,12 @@ public:
     {
         return 0;
     }
+#ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
+    virtual int32_t StartRemoteShareForm(const std::string &remoteDeviceId,
+        const OHOS::AppExecFwk::FormShareInfo &formShareInfo) = 0;
+    virtual int32_t StartShareFormFromRemote(
+        const std::string &remoteDeviceId, const OHOS::AppExecFwk::FormShareInfo &formShareInfo) = 0;
+#endif
     virtual int32_t RegisterDistributedComponentListener(const sptr<IRemoteObject>& callback) = 0;
     virtual int32_t GetDistributedComponentList(std::vector<std::string>& distributedComponents) = 0;
     enum {
@@ -170,6 +179,10 @@ public:
         // request code for upload distributed component info
         REGISTER_DISTRIBUTED_COMPONENT_LISTENER = 160,
         GET_DISTRIBUTED_COMPONENT_LIST = 161,
+        
+        // form share
+        START_REMOTE_SHARE_FORM = 220,
+        START_SHARE_FORM_FROM_REMOTE = 221,
     };
 };
 } // namespace DistributedSchedule

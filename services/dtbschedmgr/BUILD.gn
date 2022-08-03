@@ -29,6 +29,9 @@ config("distributed_sched_config") {
   if (dmsfwk_mission_manager) {
     defines = [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
   }
+  if (dmsfwk_standard_form_share) {
+    defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
+  }
 }
 
 ohos_shared_library("distributedschedsvr") {
@@ -80,6 +83,10 @@ ohos_shared_library("distributedschedsvr") {
   ]
 
   deps = [ "//foundation/ability/dmsfwk/services/base:dmsbaseinner" ]
+
+  if (dmsfwk_standard_form_share) {
+     external_deps += [ "form_fwk:form_manager" ]
+  }
 
   if (dmsfwk_mission_manager) {
     defines = [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]

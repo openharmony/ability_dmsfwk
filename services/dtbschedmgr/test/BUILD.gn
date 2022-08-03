@@ -54,6 +54,10 @@ dsched_external_deps = [
   "utils_base:utils",
 ]
 
+if (dmsfwk_standard_form_share) {
+  dsched_external_deps += [ "form_fwk:form_manager" ]
+}
+
 if (dmsfwk_mission_manager) {
   dsched_external_deps += [ "multimedia_image_standard:image_native" ]
 }
@@ -151,6 +155,10 @@ ohos_unittest("dschedcontinuetest") {
 
   if (dmsfwk_mission_manager) {
     defines = [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
+  }
+
+  if (dmsfwk_standard_form_share) {
+    defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
   }
 
   part_name = "dmsfwk"
