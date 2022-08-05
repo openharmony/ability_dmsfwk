@@ -867,6 +867,10 @@ int32_t DistributedSchedStub::ReleaseAbilityFromRemoteInner(MessageParcel& data,
 int32_t DistributedSchedStub::StartRemoteShareFormInner(MessageParcel& data, MessageParcel& reply)
 {
     HILOGD("SHAREFORM:: func call");
+    if (!DistributedSchedPermission::GetInstance().IsFoundationCall()) {
+        return DMS_PERMISSION_DENIED;
+    }
+
     std::string deviceId = "";
     PARCEL_READ_HELPER(data, String, deviceId);
     shared_ptr<AppExecFwk::FormShareInfo> formShareInfo(data.ReadParcelable<AppExecFwk::FormShareInfo>());
