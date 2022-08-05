@@ -209,7 +209,7 @@ int32_t DistributedSchedAdapter::ReleaseAbility(const sptr<IRemoteObject>& conne
         return errCode;
     }
     AppExecFwk::ElementName elementWithoutDeviceId("", element.GetBundleName(), element.GetAbilityName());
-    ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->ReleaseAbility(
+    ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->ReleaseCall(
         iface_cast<AAFwk::IAbilityConnection>(connect), elementWithoutDeviceId);
     return ret;
 }
