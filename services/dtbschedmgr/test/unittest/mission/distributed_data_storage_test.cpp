@@ -143,43 +143,6 @@ HWTEST_F(DistributedDataStorageTest, DeleteTest_002, TestSize.Level1)
 }
 
 /**
- * @tc.name: FuzzyDeleteTest_001
- * @tc.desc: test fuzzy delete DistributedDataStorage
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedDataStorageTest, FuzzyDeleteTest_001, TestSize.Level0)
-{
-    DTEST_LOG << "DistributedDataStorageTest FuzzyDeleteTest_001 start" << std::endl;
-    distributedDataStorage_->Init();
-    this_thread::sleep_for(1s);
-    std::string deviceId = GetLocalDeviceId();
-    bool ret = distributedDataStorage_->FuzzyDelete(deviceId);
-    EXPECT_EQ(true, ret);
-    distributedDataStorage_->Stop();
-    DTEST_LOG << "DistributedDataStorageTest FuzzyDeleteTest_001 end" << std::endl;
-}
-
-/**
- * @tc.name: FuzzyDeleteTest_002
- * @tc.desc: test fuzzy delete DistributedDataStorage
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedDataStorageTest, FuzzyDeleteTest_002, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedDataStorageTest FuzzyDeleteTest_002 start" << std::endl;
-    distributedDataStorage_->Init();
-    this_thread::sleep_for(1s);
-    std::string deviceId = GetLocalDeviceId();
-    uint8_t* byteStream = InitByteStream();
-    distributedDataStorage_->Insert(deviceId, TASK_ID_1, byteStream, BYTESTREAM_LENGTH);
-    distributedDataStorage_->Insert(deviceId, TASK_ID_2, byteStream, BYTESTREAM_LENGTH);
-    bool ret = distributedDataStorage_->FuzzyDelete(deviceId);
-    EXPECT_EQ(true, ret);
-    distributedDataStorage_->Stop();
-    DTEST_LOG << "DistributedDataStorageTest FuzzyDeleteTest_002 end" << std::endl;
-}
-
-/**
  * @tc.name: QueryTest_001
  * @tc.desc: test query DistributedDataStorage
  * @tc.type: FUNC
