@@ -119,10 +119,10 @@ public:
         return 0;
     }
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
-    virtual int32_t StartRemoteShareForm(const std::string &remoteDeviceId,
-        const OHOS::AppExecFwk::FormShareInfo &formShareInfo) = 0;
+    virtual int32_t StartRemoteShareForm(const std::string& remoteDeviceId,
+        const OHOS::AppExecFwk::FormShareInfo& formShareInfo) = 0;
     virtual int32_t StartShareFormFromRemote(
-        const std::string &remoteDeviceId, const OHOS::AppExecFwk::FormShareInfo &formShareInfo) = 0;
+        const std::string& remoteDeviceId, const OHOS::AppExecFwk::FormShareInfo& formShareInfo) = 0;
 #endif
     virtual int32_t RegisterDistributedComponentListener(const sptr<IRemoteObject>& callback) = 0;
     virtual int32_t GetDistributedComponentList(std::vector<std::string>& distributedComponents) = 0;

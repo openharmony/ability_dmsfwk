@@ -37,7 +37,7 @@
 #include "element_name.h"
 #include "file_ex.h"
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
-#include "form_mgr_interface.h"
+#include "form_mgr_death_recipient.h"
 #endif
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -492,25 +492,54 @@ int32_t DistributedSchedService::NotifyContinuationResultFromRemote(int32_t sess
 }
 
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
-sptr<IRemoteObject> DistributedSchedService::GetFormMgrProxy()
+sptr<IFormMgr> DistributedSchedService::GetFormMgrProxy()
 {
     HILOGD("%{public}s begin.", __func__);
+    std::lock_guard<std::mutex> lock(formMgrLock_);
     if (formMgrProxy_ != nullptr) {
-        HILOGD("%{public}s fms proxy get success.", __func__);
+        HILOGD("get fms proxy success.");
         return formMgrProxy_;
     }
-    auto sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (sm == nullptr) {
-        HILOGE("GetAbilityManagerProxy sm is nullptr");
+
+    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityMgr == nullptr) {
+        HILOGE("system ability manager is nullptr.");
         return nullptr;
     }
 
-    formMgrProxy_ = sm->GetSystemAbility(FORM_MGR_SERVICE_ID);
-    if (formMgrProxy_ == nullptr) {
-        HILOGE("failed to get ability manager service");
+    auto remoteObj = systemAbilityMgr->GetSystemAbility(FORM_MGR_SERVICE_ID);
+    if (remoteObj == nullptr) {
+        HILOGE("failed to get form manager service");
         return nullptr;
     }
+
+    formMgrDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new FormMgrDeathRecipient());
+    if (formMgrDeathRecipient_ == nullptr) {
+        HILOGE("failed to create FormMgrDeathRecipient!");
+        return nullptr;
+    }
+
+    if ((remoteObj->IsProxyObject()) && (!remoteObj->AddDeathRecipient(formMgrDeathRecipient_))) {
+        HILOGE("add death recipient to FormMgrService failed.");
+        return nullptr;
+    }
+
+    formMgrProxy_ = iface_cast<IFormMgr>(remoteObj);
     return formMgrProxy_;
+}
+
+void DistributedSchedService::ProcessFormMgrDied(const wptr<IRemoteObject>& remote)
+{
+    std::lock_guard<std::mutex> lock(formMgrLock_);
+    if (formMgrProxy_ == nullptr) {
+        return;
+    }
+
+    auto serviceRemote = formMgrProxy_->AsObject();
+    if ((serviceRemote != nullptr) && (serviceRemote == remote.promote())) {
+        serviceRemote->RemoveDeathRecipient(formMgrDeathRecipient_);
+        formMgrProxy_ = nullptr;
+    }
 }
 #endif
 
@@ -994,8 +1023,8 @@ int32_t DistributedSchedService::ReleaseAbilityFromRemote(const sptr<IRemoteObje
 }
 
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
-int32_t DistributedSchedService::StartRemoteShareForm(const std::string &remoteDeviceId,
-    const OHOS::AppExecFwk::FormShareInfo &formShareInfo)
+int32_t DistributedSchedService::StartRemoteShareForm(const std::string& remoteDeviceId,
+    const OHOS::AppExecFwk::FormShareInfo& formShareInfo)
 {
     HILOGD("SHAREFORM:: func call");
 
@@ -1020,7 +1049,7 @@ int32_t DistributedSchedService::StartRemoteShareForm(const std::string &remoteD
 }
 
 int32_t DistributedSchedService::StartShareFormFromRemote(
-    const std::string &remoteDeviceId, const OHOS::AppExecFwk::FormShareInfo &formShareInfo)
+    const std::string& remoteDeviceId, const OHOS::AppExecFwk::FormShareInfo& formShareInfo)
 {
     HILOGD("SHAREFORM:: func call begin");
     std::string localDeviceId = "";
@@ -1032,15 +1061,9 @@ int32_t DistributedSchedService::StartShareFormFromRemote(
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
 
-    auto remote = GetFormMgrProxy();
-    if (remote == nullptr) {
-        HILOGE("Get remote proxy failed");
-        return NOT_FIND_SERVICE_PROXY;
-    }
-
-    auto formMgr = iface_cast<IFormMgr>(remote);
+    auto formMgr = GetFormMgrProxy();
     if (formMgr == nullptr) {
-        HILOGE("FormMgr type conversion failed");
+        HILOGE("get form mgr proxy failed.");
         return NOT_FIND_SERVICE_PROXY;
     }
 

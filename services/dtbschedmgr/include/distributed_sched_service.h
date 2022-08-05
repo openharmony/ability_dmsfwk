@@ -26,6 +26,9 @@
 #include "distributed_sched_continuation.h"
 #include "dms_callback_task.h"
 #include "dms_notifier.h"
+#ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
+#include "form_mgr_interface.h"
+#endif
 #include "iremote_object.h"
 #include "iremote_proxy.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
@@ -122,10 +125,11 @@ public:
     int32_t ReleaseAbilityFromRemote(const sptr<IRemoteObject>& connect, const AppExecFwk::ElementName &element,
         const CallerInfo& callerInfo) override;
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
-    int32_t StartRemoteShareForm(const std::string &remoteDeviceId,
-        const AppExecFwk::FormShareInfo &formShareInfo) override;
+    int32_t StartRemoteShareForm(const std::string& remoteDeviceId,
+        const AppExecFwk::FormShareInfo& formShareInfo) override;
     int32_t StartShareFormFromRemote(
-        const std::string &remoteDeviceId, const AppExecFwk::FormShareInfo &formShareInfo) override;
+        const std::string& remoteDeviceId, const AppExecFwk::FormShareInfo& formShareInfo) override;
+    void ProcessFormMgrDied(const wptr<IRemoteObject>& remote);
 #endif
     void ProcessCallerDied(const sptr<IRemoteObject>& connect, int32_t deviceType);
     void ProcessCalleeDied(const sptr<IRemoteObject>& connect);
@@ -167,7 +171,7 @@ private:
     int32_t TryConnectRemoteAbility(const OHOS::AAFwk::Want& want,
         const sptr<IRemoteObject>& connect, const CallerInfo& callerInfo);
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
-    sptr<IRemoteObject> GetFormMgrProxy();
+    sptr<AppExecFwk::IFormMgr> GetFormMgrProxy();
 #endif
     int32_t CleanMission(int32_t missionId);
     int32_t SetCallerInfo(int32_t callerUid, std::string localDeviceId, uint32_t accessToken, CallerInfo& callerInfo);
@@ -203,7 +207,9 @@ private:
     std::mutex connectLock_;
     sptr<IRemoteObject::DeathRecipient> connectDeathRecipient_;
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
-    sptr<IRemoteObject> formMgrProxy_;
+    sptr<IRemoteObject::DeathRecipient> formMgrDeathRecipient_;
+    sptr<AppExecFwk::IFormMgr> formMgrProxy_;
+    std::mutex formMgrLock_;
 #endif
     std::mutex calleeLock_;
     std::map<sptr<IRemoteObject>, ConnectInfo> calleeMap_;

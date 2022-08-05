@@ -85,7 +85,8 @@ ohos_shared_library("distributedschedsvr") {
   deps = [ "//foundation/ability/dmsfwk/services/base:dmsbaseinner" ]
 
   if (dmsfwk_standard_form_share) {
-     external_deps += [ "form_fwk:form_manager" ]
+    external_deps += [ "form_fwk:form_manager" ]
+    sources += [ "src/form_mgr_death_recipient.cpp" ]
   }
 
   if (dmsfwk_mission_manager) {

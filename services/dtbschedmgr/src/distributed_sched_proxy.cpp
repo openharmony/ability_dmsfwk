@@ -771,7 +771,7 @@ int32_t DistributedSchedProxy::NotifyCompleteFreeInstallFromRemote(int64_t taskI
 
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
 int32_t DistributedSchedProxy::StartRemoteShareForm(
-    const std::string &remoteDeviceId, const AppExecFwk::FormShareInfo &formShareInfo)
+    const std::string& remoteDeviceId, const AppExecFwk::FormShareInfo& formShareInfo)
 {
     HILOGD("SHAREFORM:: func call");
     if (remoteDeviceId.empty()) {
@@ -799,7 +799,7 @@ int32_t DistributedSchedProxy::StartRemoteShareForm(
 }
 
 int32_t DistributedSchedProxy::StartShareFormFromRemote(
-    const std::string &remoteDeviceId, const AppExecFwk::FormShareInfo &formShareInfo)
+    const std::string& remoteDeviceId, const AppExecFwk::FormShareInfo& formShareInfo)
 {
     HILOGD("SHAREFORM:: func call");
     if (remoteDeviceId.empty()) {

@@ -864,7 +864,7 @@ int32_t DistributedSchedStub::ReleaseAbilityFromRemoteInner(MessageParcel& data,
 }
 
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
-int32_t DistributedSchedStub::StartRemoteShareFormInner(MessageParcel &data, MessageParcel &reply)
+int32_t DistributedSchedStub::StartRemoteShareFormInner(MessageParcel& data, MessageParcel& reply)
 {
     HILOGD("SHAREFORM:: func call");
     std::string deviceId = "";
@@ -881,7 +881,7 @@ int32_t DistributedSchedStub::StartRemoteShareFormInner(MessageParcel &data, Mes
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 
-int32_t DistributedSchedStub::StartShareFormFromRemoteInner(MessageParcel &data, MessageParcel &reply)
+int32_t DistributedSchedStub::StartShareFormFromRemoteInner(MessageParcel& data, MessageParcel& reply)
 {
     HILOGD("SHAREFORM:: func call");
     if (!CheckCallingUid()) {
