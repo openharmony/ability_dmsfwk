@@ -108,6 +108,11 @@ if (dmsfwk_mission_manager) {
   ]
 }
 
+if (dmsfwk_standard_form_share) {
+  dtbschedmgr_sources +=
+      [ "${distributed_service}/dtbschedmgr/src/form_mgr_death_recipient.cpp" ]
+}
+
 ohos_unittest("distributedschedsvrtest") {
   module_out_path = module_output_path
 
