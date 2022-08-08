@@ -769,6 +769,64 @@ int32_t DistributedSchedProxy::NotifyCompleteFreeInstallFromRemote(int64_t taskI
     PARCEL_TRANSACT_SYNC_RET_INT(remote, NOTIFY_COMPLETE_FREE_INSTALL_FROM_REMOTE, data, reply);
 }
 
+#ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
+int32_t DistributedSchedProxy::StartRemoteShareForm(
+    const std::string& remoteDeviceId, const AppExecFwk::FormShareInfo& formShareInfo)
+{
+    HILOGD("SHAREFORM:: func call");
+    if (remoteDeviceId.empty()) {
+        HILOGE("input params deviceId is nullptr.");
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    auto remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("fail to get dms remote.");
+        return DMSPROXY_SERVICE_ERR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        HILOGE("WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    PARCEL_WRITE_HELPER(data, String, remoteDeviceId);
+    PARCEL_WRITE_HELPER(data, Parcelable, &formShareInfo);
+
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, START_REMOTE_SHARE_FORM, data, reply);
+}
+
+int32_t DistributedSchedProxy::StartShareFormFromRemote(
+    const std::string& remoteDeviceId, const AppExecFwk::FormShareInfo& formShareInfo)
+{
+    HILOGD("SHAREFORM:: func call");
+    if (remoteDeviceId.empty()) {
+        HILOGE("input params deviceId is nullptr.");
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    auto remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("fail to get dms remote.");
+        return DMSPROXY_SERVICE_ERR;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        HILOGE("WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    PARCEL_WRITE_HELPER(data, String, remoteDeviceId);
+    PARCEL_WRITE_HELPER(data, Parcelable, &formShareInfo);
+
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, START_SHARE_FORM_FROM_REMOTE, data, reply);
+}
+#endif
+
 int32_t DistributedSchedProxy::RegisterDistributedComponentListener(const sptr<IRemoteObject>& callback)
 {
     if (callback == nullptr) {
