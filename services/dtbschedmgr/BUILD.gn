@@ -64,7 +64,7 @@ ohos_shared_library("distributedschedsvr") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "device_auth:deviceauth_sdk",
-    "distributeddatamgr:distributeddata_inner",
+    "kv_store:distributeddata_inner",
     "dmsfwk:continuation_manager",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
