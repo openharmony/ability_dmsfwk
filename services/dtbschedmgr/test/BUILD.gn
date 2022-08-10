@@ -38,6 +38,7 @@ dsched_external_deps = [
   "access_token:libaccesstoken_sdk",
   "bundle_framework:appexecfwk_base",
   "bundle_framework:appexecfwk_core",
+  "c_utils:utils",
   "device_auth:deviceauth_sdk",
   "distributeddatamgr:distributeddata_inner",
   "dmsfwk:continuation_manager",
@@ -51,7 +52,6 @@ dsched_external_deps = [
   "os_account:os_account_innerkits",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
-  "utils_base:utils",
 ]
 
 if (dmsfwk_standard_form_share) {
