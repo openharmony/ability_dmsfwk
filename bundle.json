@@ -14,6 +14,9 @@
     "component": {
       "name": "dmsfwk",
       "subsystem": "ability",
+      "syscap": [
+        "SystemCapability.Ability.DistributedAbilityManager"
+      ],
       "adapted_system_type": [ "standard" ],
       "features" : [
         "dmsfwk_standard_form_share",
