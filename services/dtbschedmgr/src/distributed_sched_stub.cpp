@@ -49,8 +49,9 @@ const std::u16string DMS_STUB_INTERFACE_TOKEN = u"ohos.distributedschedule.acces
 const std::string EXTRO_INFO_JSON_KEY_ACCESS_TOKEN = "accessTokenID";
 const std::string EXTRO_INFO_JSON_KEY_REQUEST_CODE = "requestCode";
 const std::string PERMISSION_DISTRIBUTED_DATASYNC = "ohos.permission.DISTRIBUTED_DATASYNC";
-const std::string FREE_INSTLL_CALLING_APP_ID = "freeInstallCallingAppId";
-const std::string FREE_INSTLL_CALLING_BUNDLENAMES = "freeInstallCallingBundleNames";
+const std::string PARAM_FREEINSTALL_APPID = "ohos.freeinstall.params.callingAppId";
+const std::string PARAM_FREEINSTALL_BUNDLENAMES = "ohos.freeinstall.params.callingBundleNames";
+const std::string CMPT_PARAM_FREEINSTALL_BUNDLENAMES = "ohos.extra.param.key.allowedBundles";
 const int DEFAULT_REQUEST_CODE = -1;
 }
 
@@ -1010,9 +1011,9 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
 
     FreeInstallInfo info = {
         .want = *want, .callerInfo = callerInfo, .accountInfo = accountInfo, .requestCode = requestCode};
-    info.want.SetParam(FREE_INSTLL_CALLING_APP_ID, callerInfo.callerAppId);
+    info.want.SetParam(PARAM_FREEINSTALL_APPID, callerInfo.callerAppId);
     info.want.SetParam(
-        FREE_INSTLL_CALLING_BUNDLENAMES, (*cmpWant).GetStringArrayParam(FREE_INSTLL_CALLING_BUNDLENAMES));
+        PARAM_FREEINSTALL_BUNDLENAMES, (*cmpWant).GetStringArrayParam(CMPT_PARAM_FREEINSTALL_BUNDLENAMES));
     int32_t result = StartFreeInstallFromRemote(info, taskId);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_HELPER(reply, Int32, result);
