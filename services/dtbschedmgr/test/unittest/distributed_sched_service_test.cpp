@@ -792,7 +792,6 @@ HWTEST_F(DistributedSchedServiceTest, StartShareFormFromRemote_001, TestSize.Lev
     DTEST_LOG << "result:" << result << std::endl;
     EXPECT_EQ(static_cast<int>(ERR_OK), result);
 
-
     DTEST_LOG << "DistributedSchedServiceTest StartShareFormFromRemote_001 end" << std::endl;
 }
 
@@ -811,6 +810,5 @@ HWTEST_F(DistributedSchedServiceTest, StartShareFormFromRemote_002, TestSize.Lev
     EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), result);
     DTEST_LOG << "DistributedSchedServiceTest StartShareFormFromRemote_002 end" << std::endl;
 }
-
 } // namespace DistributedSchedule
 } // namespace OHOS

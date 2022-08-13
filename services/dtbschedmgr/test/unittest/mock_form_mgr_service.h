@@ -66,16 +66,16 @@ public:
     };
     ErrCode AddFormInfo(FormInfo &formInfo) override
     {
-        return ERR_OK; 
+        return ERR_OK;
     };
     ErrCode RemoveFormInfo(const std::string &moduleName, const std::string &formName) override
     {
-        return ERR_OK; 
+        return ERR_OK;
     };
     ErrCode RequestPublishForm(Want &want, bool withFormBindingData,
         std::unique_ptr<FormProviderData> &formBindingData, int64_t &formId) override
     {
-        return ERR_OK; 
+        return ERR_OK;
     };
     int32_t RequestForm(const int64_t formId, const sptr<IRemoteObject> &callerToken, const Want &want) override
     {
