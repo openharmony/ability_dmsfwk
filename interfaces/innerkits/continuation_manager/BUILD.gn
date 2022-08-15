@@ -36,9 +36,9 @@ ohos_shared_library("continuation_manager") {
   public_configs = [ ":continuation_manager_public_config" ]
 
   external_deps = [
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "utils_base:utils",
   ]
 
   subsystem_name = "ability"

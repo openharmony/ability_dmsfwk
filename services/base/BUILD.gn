@@ -37,6 +37,7 @@ ohos_shared_library("dmsbaseinner") {
   public_configs = [ ":distributed_sched_config" ]
 
   external_deps = [
+    "c_utils:utils",
     "device_auth:deviceauth_sdk",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
@@ -47,7 +48,6 @@ ohos_shared_library("dmsbaseinner") {
     "ipc:ipc_core",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "utils_base:utils",
   ]
   part_name = "dmsfwk"
   subsystem_name = "ability"

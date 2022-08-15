@@ -33,6 +33,7 @@
           "ability_runtime",
           "access_token",
           "bundle_framework",
+          "c_utils",
           "device_auth",
           "distributeddatamgr",
           "dsoftbus",
@@ -47,8 +48,7 @@
           "os_account",
           "safwk",
           "samgr",
-          "startup_l2",
-          "utils_base"
+          "startup_l2"
         ],
         "third_party": []
       },
