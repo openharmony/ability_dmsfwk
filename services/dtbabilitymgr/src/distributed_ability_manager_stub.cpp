@@ -31,6 +31,7 @@ namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DistributedAbilityManagerStub";
 const std::u16string DMS_STUB_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
+constexpr int32_t GET_DISTRIBUTED_COMPONENT_LIST_REQUEST_CODE = 161;
 }
 
 DistributedAbilityManagerStub::DistributedAbilityManagerStub()
@@ -43,11 +44,15 @@ DistributedAbilityManagerStub::DistributedAbilityManagerStub()
         &DistributedAbilityManagerStub::UnregisterDeviceSelectionCallbackInner;
     funcsMap_[UPDATE_CONNECT_STATUS] = &DistributedAbilityManagerStub::UpdateConnectStatusInner;
     funcsMap_[START_DEVICE_MANAGER] = &DistributedAbilityManagerStub::StartDeviceManagerInner;
+
+    distributedFuncMap_[GET_DISTRIBUTED_COMPONENT_LIST_REQUEST_CODE] =
+        &DistributedAbilityManagerStub::GetDistributedComponentListInner;
 }
 
 DistributedAbilityManagerStub::~DistributedAbilityManagerStub()
 {
     funcsMap_.clear();
+    distributedFuncMap_.clear();
 }
 
 int32_t DistributedAbilityManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
@@ -63,6 +68,16 @@ int32_t DistributedAbilityManagerStub::OnRemoteRequest(uint32_t code, MessagePar
         }
         if (func != nullptr) {
             return (this->*func)(data, reply);
+        } else {
+            HILOGE("func is nullptr");
+            return ERR_NULL_OBJECT;
+        }
+    }
+    auto distributedFuncIter = distributedFuncMap_.find(code);
+    if (distributedFuncIter != distributedFuncMap_.end()) {
+        auto func = distributedFuncIter->second;
+        if (func != nullptr) {
+            return (this->*func)(data, reply, option);
         } else {
             HILOGE("func is nullptr");
             return ERR_NULL_OBJECT;
@@ -177,6 +192,23 @@ int32_t DistributedAbilityManagerStub::StartDeviceManagerInner(MessageParcel& da
     int32_t result = StartDeviceManager(token, continuationExtraParamsPtr);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_HELPER(reply, Int32, result);
+    return ERR_NONE;
+}
+
+int32_t DistributedAbilityManagerStub::GetDistributedComponentListInner(MessageParcel& data,
+    MessageParcel& reply, MessageOption& option)
+{
+    if (IsDistributedSchedLoaded()) {
+        return SendRequestToImpl(GET_DISTRIBUTED_COMPONENT_LIST_REQUEST_CODE, data, reply, option);
+    }
+    if (!EnforceInterfaceToken(data)) {
+        HILOGE("interface token check failed!");
+        return DMS_PERMISSION_DENIED;
+    }
+    HILOGI("DistributedSched is not loaded, return empty");
+    PARCEL_WRITE_HELPER(reply, Int32, ERR_NONE);
+    std::vector<std::string> distributedComponents;
+    PARCEL_WRITE_HELPER(reply, StringVector, distributedComponents);
     return ERR_NONE;
 }
 } // namespace DistributedSchedule

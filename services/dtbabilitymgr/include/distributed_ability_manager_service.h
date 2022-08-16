@@ -36,6 +36,7 @@ public:
     void OnStop() override;
     int32_t SendRequestToImpl(uint32_t code, MessageParcel& data, MessageParcel& reply,
         MessageOption& option) override;
+    bool IsDistributedSchedLoaded() override;
     void DeviceOnlineNotify(const std::string& deviceId) override;
     void DeviceOfflineNotify(const std::string& deviceId) override;
     void ProcessNotifierDied(const sptr<IRemoteObject>& notifier) override;
