@@ -40,6 +40,7 @@ const std::string CALLBACK_TYPE2 = "deviceDisconnect";
 const std::string INVALID_CALLBACK_TYPE = "deviceCancel";
 const std::string SELECTED_DEVICE_ID1 = "selected deviceId1";
 const std::string SELECTED_DEVICE_ID2 = "selected deviceId2";
+const std::string SELECTED_DEVICE_ID3 = "selected deviceId3";
 const std::string SELECTED_DEVICE_TYPE1 = "selected deviceType1";
 const std::string SELECTED_DEVICE_TYPE2 = "selected deviceType2";
 const std::string SELECTED_DEVICE_NAME1 = "selected deviceName1";
@@ -47,6 +48,16 @@ const std::string SELECTED_DEVICE_NAME2 = "selected deviceName2";
 const std::string UNSELECTED_DEVICE_ID1 = "unselected deviceId1";
 const std::string UNSELECTED_DEVICE_ID2 = "unselected deviceId2";
 const std::string UNSELECTED_DEVICE_ID3 = "unselected deviceId3";
+const std::string TEST_DEVICE_TYPE = "test deviceType";
+const std::string TEST_TARGETBUNDLE = "test targetBundle";
+const std::string TEST_DESCRIPTION = "test description";
+const std::string TEST_FILTER = "test filter";
+const std::string TEST_AUTHINFO = "test authInfo";
+const std::u16string TEST_INPUT1 = u"test input1";
+const std::u16string TEST_INPUT2 = u"test input2";
+const std::string TEST_INPUT3 = "test input1";
+const std::string TEST_INPUT4 = "test input2";
+const std::uint32_t INVALID_EVENT_DEVICE_CODE = 0;
 }
 
 void DeviceSelectionNotifierTest::OnDeviceConnect(const std::vector<ContinuationResult>& continuationResults)
@@ -1085,6 +1096,466 @@ HWTEST_F(ContinuationManagerTest, QueryTokenByNotifier_002, TestSize.Level1)
     EXPECT_EQ(true, result);
     EXPECT_EQ(TEST_TOKEN, token);
     DTEST_LOG << "ContinuationManagerTest QueryTokenByNotifier_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetSetDeviceInfo_001
+ * @tc.desc: test  SetDeviceId SetDeviceType SetDeviceName GetDeviceId GetDeviceType GetDeviceName function.
+ * @tc.type: FUNC
+ * @tc.require: I5M4CD
+ */
+HWTEST_F(ContinuationManagerTest, GetSetDeviceInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest GetSetDeviceInfo_001 start" << std::endl;
+
+    ContinuationResult continuationResult;
+    continuationResult.SetDeviceId(SELECTED_DEVICE_ID1);
+    continuationResult.SetDeviceType(SELECTED_DEVICE_TYPE1);
+    continuationResult.SetDeviceName(SELECTED_DEVICE_NAME1);
+
+    string deviceId1 = continuationResult.GetDeviceId();
+    string deviceType1 = continuationResult.GetDeviceType();
+    string deviceName1 = continuationResult.GetDeviceName();
+
+    EXPECT_EQ(SELECTED_DEVICE_ID1, deviceId1);
+    EXPECT_EQ(SELECTED_DEVICE_TYPE1, deviceType1);
+    EXPECT_EQ(SELECTED_DEVICE_NAME1, deviceName1);
+
+    DTEST_LOG << "ContinuationManagerTest GetSetDeviceInfo_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: MarshallingUnmarshalling_001
+ * @tc.desc: test Marshalling and Unmarshalling function.
+ * @tc.type: FUNC
+ * @tc.require: I5M4CD
+ */
+HWTEST_F(ContinuationManagerTest, MarshallingUnmarshalling_001, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest MarshallingUnmarshalling_001 start" << std::endl;
+    
+    ContinuationResult continuationResult1;
+    continuationResult1.SetDeviceId(SELECTED_DEVICE_ID1);
+    continuationResult1.SetDeviceType(SELECTED_DEVICE_TYPE1);
+    continuationResult1.SetDeviceName(SELECTED_DEVICE_NAME1);
+    
+    Parcel parcel;
+    bool result1 = continuationResult1.Marshalling(parcel);
+    if (!result1) {
+        DTEST_LOG << " Marshalling failed" << std::endl;
+        return;
+    }
+    DTEST_LOG << "result1:" << result1 << endl;
+
+    sptr<ContinuationResult> continuationResult2 = continuationResult1.Unmarshalling(parcel);
+    if (continuationResult2 == nullptr) {
+        DTEST_LOG << "continuationResult is nullptr" << endl;
+        return;
+    }
+
+    string deviceId1 = continuationResult2->GetDeviceId();
+    string deviceType1 = continuationResult2->GetDeviceType();
+    string deviceName1 = continuationResult2->GetDeviceName();
+    EXPECT_EQ(true, result1);
+    EXPECT_EQ(SELECTED_DEVICE_ID1, deviceId1);
+    EXPECT_EQ(SELECTED_DEVICE_TYPE1, deviceType1);
+    EXPECT_EQ(SELECTED_DEVICE_NAME1, deviceName1);
+
+    DTEST_LOG << "ContinuationManagerTest MarshallingUnmarshalling_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReadFromParcel_001
+ * @tc.desc: test ReadFromParcel function.
+ * @tc.type: FUNC
+ * @tc.require: I5M4CD
+ */
+HWTEST_F(ContinuationManagerTest, ReadFromParcel_001, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest ReadFromParcel_001 start" << std::endl;
+    ContinuationResult continuationResult;
+    continuationResult.SetDeviceId(SELECTED_DEVICE_ID1);
+    continuationResult.SetDeviceType(SELECTED_DEVICE_TYPE1);
+    continuationResult.SetDeviceName(SELECTED_DEVICE_NAME1);
+    
+    Parcel parcel;
+    bool result1 = continuationResult.Marshalling(parcel);
+    if (!result1) {
+        DTEST_LOG << "Marshalling failed" << std::endl;
+        return;
+    }
+    bool result2 = continuationResult.ReadFromParcel(parcel);
+    if (!result2) {
+        DTEST_LOG << "ReadFromParcel failed" << std::endl;
+        return;
+    }
+
+    string deviceId1 = continuationResult.GetDeviceId();
+    string deviceType1 = continuationResult.GetDeviceType();
+    string deviceName1 = continuationResult.GetDeviceName();
+    EXPECT_EQ(true, result1);
+    EXPECT_EQ(true, result2);
+    EXPECT_EQ(SELECTED_DEVICE_ID1, deviceId1);
+    EXPECT_EQ(SELECTED_DEVICE_TYPE1, deviceType1);
+    EXPECT_EQ(SELECTED_DEVICE_NAME1, deviceName1);
+
+    DTEST_LOG << "ContinuationManagerTest ReadFromParcel_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: Write_Read_ContinuationResultsFromParcel_001
+ * @tc.desc: test WriteContinuationResultsToParcel and ReadContinuationResultsFromParcel function.
+ * @tc.type: FUNC
+ * @tc.require: I5M4CD
+ */
+HWTEST_F(ContinuationManagerTest, Write_Read_ContinuationResultsFromParcel_001, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest WriteContinuationResultsFromParcel_001 start" << std::endl;
+
+    std::vector<ContinuationResult> continuationResults1;
+    ContinuationResult continuationResult1;
+    continuationResult1.SetDeviceId(SELECTED_DEVICE_ID1);
+    continuationResult1.SetDeviceType(SELECTED_DEVICE_TYPE1);
+    continuationResult1.SetDeviceName(SELECTED_DEVICE_NAME1);
+    ContinuationResult continuationResult2;
+    continuationResult2.SetDeviceId(SELECTED_DEVICE_ID2);
+    continuationResult2.SetDeviceType(SELECTED_DEVICE_TYPE2);
+    continuationResult2.SetDeviceName(SELECTED_DEVICE_NAME2);
+    continuationResults1.emplace_back(continuationResult1);
+    continuationResults1.emplace_back(continuationResult2);
+
+    Parcel parcel;
+    std::vector<ContinuationResult> continuationResults2;
+    bool result1 = ContinuationResult::WriteContinuationResultsToParcel(parcel, continuationResults1);
+    if (!result1) {
+        DTEST_LOG << "WriteContinuationResultsToParcel failed" << std::endl;
+        return;
+    }
+    bool result2 = ContinuationResult::ReadContinuationResultsFromParcel(parcel, continuationResults2);
+    if (!result2) {
+        DTEST_LOG << "ReadContinuationResultsFromParcel failed" << std::endl;
+        return;
+    }
+
+    size_t size1 = continuationResults1.size();
+    size_t size2 = continuationResults2.size();
+    if (size1 != size2) {
+        DTEST_LOG << "continuationResults1.size != continuationResults2.size" << std::endl;
+        return;
+    }
+
+    EXPECT_EQ(true, result1);
+    EXPECT_EQ(true, result2);
+    for (size_t i = 0; i < size1; ++i) {
+        EXPECT_EQ(continuationResults1[i].GetDeviceId(), continuationResults2[i].GetDeviceId());
+        EXPECT_EQ(continuationResults1[i].GetDeviceType(), continuationResults2[i].GetDeviceType());
+        EXPECT_EQ(continuationResults1[i].GetDeviceName(), continuationResults2[i].GetDeviceName());
+    }
+
+    DTEST_LOG << "ContinuationManagerTest WriteContinuationResultsFromParcel_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: Str16VecToStr8Vec_001
+ * @tc.desc: test Str16VecToStr8Vec function.
+ * @tc.type: FUNC
+ * @tc.require: I5M4CD
+ */
+HWTEST_F(ContinuationManagerTest, Str16VecToStr8Vec_001, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest Str16VecToStr8Vec_001 start" << std::endl;
+    
+    std::vector<std::u16string> input1;
+    input1.emplace_back(TEST_INPUT1);
+    input1.emplace_back(TEST_INPUT2);
+    std::vector<std::string> input2;
+    input2.emplace_back(TEST_INPUT3);
+    input2.emplace_back(TEST_INPUT4);
+
+    std::vector<std::string> input3 = ContinationManagerUtils::Str16VecToStr8Vec(input1);
+    
+    size_t size1 = input2.size();
+    size_t size2 = input3.size();
+    if (size1 != size2) {
+        DTEST_LOG << "input2.size != input3.size" << std::endl;
+        return;
+    }
+    for (size_t i = 0; i < size1; ++i) {
+        EXPECT_EQ(input2[i], input3[i]);
+    }
+
+    DTEST_LOG << "ContinuationManagerTest Str16VecToStr8Vec_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetFunction_001
+ * @tc.desc: test SetFunction function.
+ * @tc.type: FUNC
+ * @tc.require: I5M4CD
+ */
+HWTEST_F(ContinuationManagerTest, SetFunction_001, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest SetFunction_001 start" << std::endl;
+    ContinuationExtraParams continuationExtraParams;
+    
+    std::vector<std::string> deviceTypeVec1;
+    deviceTypeVec1.emplace_back(SELECTED_DEVICE_TYPE1);
+    deviceTypeVec1.emplace_back(SELECTED_DEVICE_TYPE2);
+    ContinuationMode continuationMode = ContinuationMode::COLLABORATION_MUTIPLE;
+
+    continuationExtraParams.SetDeviceType(deviceTypeVec1);
+    continuationExtraParams.SetTargetBundle(TEST_TARGETBUNDLE);
+    continuationExtraParams.SetDescription(TEST_DESCRIPTION);
+    continuationExtraParams.SetFilter(TEST_FILTER);
+    continuationExtraParams.SetContinuationMode(continuationMode);
+    continuationExtraParams.SetAuthInfo(TEST_AUTHINFO);
+
+    std::vector<std::string> deviceTypeVec2 = continuationExtraParams.GetDeviceType();
+    size_t size1 = deviceTypeVec1.size();
+    size_t size2 = deviceTypeVec2.size();
+    if (size1 != size2) {
+        DTEST_LOG << "deviceTypeVec1.size != deviceTypeVec2.size" << std::endl;
+        return;
+    }
+    for (size_t i = 0; i < size1; ++i) {
+        EXPECT_EQ(deviceTypeVec1[i], deviceTypeVec2[i]);
+    }
+    EXPECT_EQ(TEST_TARGETBUNDLE, continuationExtraParams.GetTargetBundle());
+    EXPECT_EQ(TEST_DESCRIPTION, continuationExtraParams.GetDescription());
+    EXPECT_EQ(TEST_FILTER, continuationExtraParams.GetFilter());
+    EXPECT_EQ(continuationMode, continuationExtraParams.GetContinuationMode());
+    EXPECT_EQ(TEST_AUTHINFO, continuationExtraParams.GetAuthInfo());
+
+    DTEST_LOG << "ContinuationManagerTest SetFunction_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReadFromParcel_002
+ * @tc.desc: test ContinuationExtraParams::ReadFromParcel function.
+ * @tc.type: FUNC
+ * @tc.require: I5M4CD
+ */
+HWTEST_F(ContinuationManagerTest, ReadFromParcel_002, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest ReadFromParcel_002 start" << std::endl;
+    ContinuationExtraParams continuationExtraParams;
+
+    std::vector<std::string> deviceTypeVec1;
+    deviceTypeVec1.emplace_back(SELECTED_DEVICE_TYPE1);
+    deviceTypeVec1.emplace_back(SELECTED_DEVICE_TYPE2);
+    ContinuationMode continuationMode = ContinuationMode::COLLABORATION_MUTIPLE;
+
+    continuationExtraParams.SetDeviceType(deviceTypeVec1);
+    continuationExtraParams.SetTargetBundle(TEST_TARGETBUNDLE);
+    continuationExtraParams.SetDescription(TEST_DESCRIPTION);
+    continuationExtraParams.SetFilter(TEST_FILTER);
+    continuationExtraParams.SetContinuationMode(continuationMode);
+    continuationExtraParams.SetAuthInfo(TEST_AUTHINFO);
+    
+    Parcel parcel;
+    bool result1 = continuationExtraParams.Marshalling(parcel);
+    if (!result1) {
+        DTEST_LOG << "Marshalling failed" << std::endl;
+        return;
+    }
+    bool result2 = continuationExtraParams.ReadFromParcel(parcel);
+    if (!result2) {
+        DTEST_LOG << "ReadFromParcel failed" << std::endl;
+        return;
+    }
+
+    EXPECT_EQ(true, result1);
+    EXPECT_EQ(true, result2);
+    std::vector<std::string> deviceTypeVec2 = continuationExtraParams.GetDeviceType();
+    size_t size1 = deviceTypeVec1.size();
+    size_t size2 = deviceTypeVec2.size();
+    if (size1 != size2) {
+        DTEST_LOG << "deviceTypeVec1.size != deviceTypeVec2.size" << std::endl;
+        return;
+    }
+    for (size_t i = 0; i < size1; ++i) {
+        EXPECT_EQ(deviceTypeVec1[i], deviceTypeVec2[i]);
+    }
+    EXPECT_EQ(TEST_TARGETBUNDLE, continuationExtraParams.GetTargetBundle());
+    EXPECT_EQ(TEST_DESCRIPTION, continuationExtraParams.GetDescription());
+    EXPECT_EQ(TEST_FILTER, continuationExtraParams.GetFilter());
+    EXPECT_EQ(continuationMode, continuationExtraParams.GetContinuationMode());
+    EXPECT_EQ(TEST_AUTHINFO, continuationExtraParams.GetAuthInfo());
+
+    DTEST_LOG << "ContinuationManagerTest ReadFromParcel_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: Unmarshalling_001
+ * @tc.desc: test Unmarshalling_001 function.
+ * @tc.type: FUNC
+ * @tc.require: I5M4CD
+ */
+HWTEST_F(ContinuationManagerTest, Unmarshalling_001, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest Unmarshalling_001 start" << std::endl;
+    ContinuationExtraParams continuationExtraParams1;
+
+    std::vector<std::string> deviceTypeVec1;
+    deviceTypeVec1.emplace_back(SELECTED_DEVICE_TYPE1);
+    deviceTypeVec1.emplace_back(SELECTED_DEVICE_TYPE2);
+    ContinuationMode continuationMode = ContinuationMode::COLLABORATION_MUTIPLE;
+
+    continuationExtraParams1.SetDeviceType(deviceTypeVec1);
+    continuationExtraParams1.SetTargetBundle(TEST_TARGETBUNDLE);
+    continuationExtraParams1.SetDescription(TEST_DESCRIPTION);
+    continuationExtraParams1.SetFilter(TEST_FILTER);
+    continuationExtraParams1.SetContinuationMode(continuationMode);
+    continuationExtraParams1.SetAuthInfo(TEST_AUTHINFO);
+
+    Parcel parcel;
+
+    bool result1 = continuationExtraParams1.Marshalling(parcel);
+    if (!result1) {
+        DTEST_LOG << "Marshalling failed" << std::endl;
+        return;
+    }
+    sptr<ContinuationExtraParams> continuationExtraParams2 = continuationExtraParams1.Unmarshalling(parcel);
+    if (continuationExtraParams2 == nullptr) {
+        DTEST_LOG << "continuationExtraParams is nullptr" << std::endl;
+        return;
+    }
+
+    std::vector<std::string> deviceTypeVec2 = continuationExtraParams2->GetDeviceType();
+
+    EXPECT_EQ(true, result1);
+    size_t size1 = deviceTypeVec1.size();
+    size_t size2 = deviceTypeVec2.size();
+    if (size1 != size2) {
+        DTEST_LOG << "deviceTypeVec1.size != deviceTypeVec2.size" << std::endl;
+        return;
+    }
+    for (size_t i = 0; i < size1; ++i) {
+        EXPECT_EQ(deviceTypeVec1[i], deviceTypeVec2[i]);
+    }
+    EXPECT_EQ(TEST_TARGETBUNDLE, continuationExtraParams2->GetTargetBundle());
+    EXPECT_EQ(TEST_DESCRIPTION, continuationExtraParams2->GetDescription());
+    EXPECT_EQ(TEST_FILTER, continuationExtraParams2->GetFilter());
+    EXPECT_EQ(continuationMode, continuationExtraParams2->GetContinuationMode());
+    EXPECT_EQ(TEST_AUTHINFO, continuationExtraParams2->GetAuthInfo());
+
+    DTEST_LOG << "ContinuationManagerTest Unmarshalling_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnRemoteRequest_001
+ * @tc.desc: test OnRemoteRequest, invalid interface token.
+ * @tc.type: FUNC
+ * @tc.require: I5M4CD
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_001, TestSize.Level3)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    DeviceSelectionNotifierTest deviceSelectionNotifierTest;
+    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_CONNECT,
+        data, reply, option);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+}
+
+/**
+ * @tc.name: OnRemoteRequest_002
+ * @tc.desc: test OnRemoteRequest, invalid code.
+ * @tc.type: FUNC
+ * @tc.require: I5M4CD
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_002, TestSize.Level3)
+{
+    MessageParcel data;
+    data.WriteInterfaceToken(IDeviceSelectionNotifier::GetDescriptor());
+    MessageParcel reply;
+    MessageOption option;
+    DeviceSelectionNotifierTest deviceSelectionNotifierTest;
+    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(INVALID_EVENT_DEVICE_CODE,
+        data, reply, option);
+    EXPECT_NE(ERR_OK, result);
+}
+
+/**
+ * @tc.name: OnRemoteRequest_003
+ * @tc.desc: test OnRemoteRequest, code = EVENT_DEVICE_CONNECT
+ * @tc.type: FUNC
+ * @tc.require: I5M4CD
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_003, TestSize.Level3)
+{
+    MessageParcel data;
+    data.WriteInterfaceToken(IDeviceSelectionNotifier::GetDescriptor());
+    std::vector<ContinuationResult> continuationResults;
+    ContinuationResult continuationResult1;
+    continuationResult1.SetDeviceId(SELECTED_DEVICE_ID1);
+    continuationResult1.SetDeviceType(SELECTED_DEVICE_TYPE1);
+    continuationResult1.SetDeviceName(SELECTED_DEVICE_NAME1);
+    ContinuationResult continuationResult2;
+    continuationResult2.SetDeviceId(SELECTED_DEVICE_ID2);
+    continuationResult2.SetDeviceType(SELECTED_DEVICE_TYPE2);
+    continuationResult2.SetDeviceName(SELECTED_DEVICE_NAME2);
+    continuationResults.emplace_back(continuationResult1);
+    continuationResults.emplace_back(continuationResult2);
+
+    bool result1 = ContinuationResult::WriteContinuationResultsToParcel(data, continuationResults);
+    if (!result1) {
+        DTEST_LOG << "WriteContinuationResultsToParcel failed" << std::endl;
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    DeviceSelectionNotifierTest deviceSelectionNotifierTest;
+    int32_t result2 = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_CONNECT,
+        data, reply, option);
+
+    EXPECT_EQ(true, result1);
+    EXPECT_EQ(ERR_OK, result2);
+}
+
+/**
+ * @tc.name: OnRemoteRequest_004
+ * @tc.desc: test OnRemoteRequest, invalid interface token.
+ * @tc.type: FUNC
+ * @tc.require: I5M4CD
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_004, TestSize.Level3)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    DeviceSelectionNotifierTest deviceSelectionNotifierTest;
+    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_DISCONNECT,
+        data, reply, option);
+
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+}
+
+/**
+ * @tc.name: OnRemoteRequest_005
+ * @tc.desc: test OnRemoteRequest, code = EVENT_DEVICE_DISCONNECT
+ * @tc.type: FUNC
+ * @tc.require: I5M4CD
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_005, TestSize.Level3)
+{
+    MessageParcel data;
+    data.WriteInterfaceToken(IDeviceSelectionNotifier::GetDescriptor());
+    std::vector<std::string> deviceIds;
+    deviceIds.emplace_back(SELECTED_DEVICE_ID1);
+    deviceIds.emplace_back(SELECTED_DEVICE_ID2);
+    deviceIds.emplace_back(SELECTED_DEVICE_ID3);
+    data.WriteStringVector(deviceIds);
+
+    MessageParcel reply;
+    MessageOption option;
+    DeviceSelectionNotifierTest deviceSelectionNotifierTest;
+    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_DISCONNECT,
+        data, reply, option);
+
+    EXPECT_EQ(ERR_OK, result);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
