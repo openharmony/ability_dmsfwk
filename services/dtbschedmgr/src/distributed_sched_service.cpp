@@ -1168,7 +1168,7 @@ bool DistributedSchedService::HandleDistributedComponentChange(const std::string
         BackgroundTaskMgr::BackgroundTaskMgrHelper::ReportStateChangeEvent(
             BackgroundTaskMgr::EventType::DIS_COMP_CHANGE, componentInfo);
     };
-    if (!componentChangeHandler_->PostTask(func)) {
+    if (componentChangeHandler_ == nullptr || !componentChangeHandler_->PostTask(func)) {
         HILOGE("HandleDistributedComponentChange handler postTask failed");
         return false;
     }
