@@ -1165,7 +1165,7 @@ bool DistributedSchedService::HandleDistributedComponentChange(const std::string
 {
     HILOGI("DistributedSchedService::HandleDistributedComponentChange begin");
     auto func = [this, componentInfo]() {
-        BackgroundTaskMgr::BackgroundTaskMgrHelper::ReportStateChangeEvent  (
+        BackgroundTaskMgr::BackgroundTaskMgrHelper::ReportStateChangeEvent(
             BackgroundTaskMgr::EventType::DIS_COMP_CHANGE, componentInfo);
     };
     if (componentChangeHandler_ == nullptr || !componentChangeHandler_->PostTask(func)) {
