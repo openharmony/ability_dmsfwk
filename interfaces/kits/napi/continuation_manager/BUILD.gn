@@ -33,7 +33,10 @@ ohos_shared_library("continuationmanager_napi") {
     "js_device_selection_listener.cpp",
   ]
 
-  public_configs = [ ":continuationmanager_napi_public_config" ]
+  public_configs = [
+    ":continuationmanager_napi_public_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
 
   deps = [ "//foundation/ability/ability_runtime/frameworks/js/napi/inner/napi_common:napi_common" ]
 

@@ -22,10 +22,7 @@ group("unittest") {
 
 config("distributed_sched_config") {
   visibility = [ ":*" ]
-  include_dirs = [
-    "include",
-    "../base/include/",
-  ]
+  include_dirs = [ "include" ]
   if (dmsfwk_mission_manager) {
     defines = [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
   }
@@ -57,7 +54,10 @@ ohos_shared_library("distributedschedsvr") {
     "src/dms_token_callback.cpp",
   ]
 
-  configs = [ ":distributed_sched_config" ]
+  configs = [
+    ":distributed_sched_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
 
   external_deps = [
     "ability_base:want",

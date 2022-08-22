@@ -27,7 +27,6 @@ config("test_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "//foundation/ability/dmsfwk/utils/native/include",
-    "//foundation/ability/dmsfwk/services/base/include",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/unittest",
   ]
 }
@@ -120,7 +119,10 @@ ohos_unittest("distributedschedsvrtest") {
 
   sources = [ "unittest/distributed_sched_service_test.cpp" ]
   sources += dtbschedmgr_sources
-  configs = [ ":test_config" ]
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
   configs += dsched_configs
   if (is_standard_system) {
     external_deps = dsched_external_deps
@@ -135,7 +137,10 @@ ohos_unittest("distributedcalltest") {
 
   sources = [ "unittest/distributed_sched_call_test.cpp" ]
   sources += dtbschedmgr_sources
-  configs = [ ":test_config" ]
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
   configs += dsched_configs
   if (is_standard_system) {
     external_deps = dsched_external_deps
@@ -153,7 +158,10 @@ ohos_unittest("dschedcontinuetest") {
     "unittest/mock_distributed_sched.cpp",
   ]
   sources += dtbschedmgr_sources
-  configs = [ ":test_config" ]
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
   configs += dsched_configs
   if (is_standard_system) {
     external_deps = dsched_external_deps
@@ -177,7 +185,10 @@ ohos_unittest("dschedconnecttest") {
 
   sources = [ "unittest/distributed_sched_connect_test.cpp" ]
   sources += dtbschedmgr_sources
-  configs = [ ":test_config" ]
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
   configs += dsched_configs
   if (is_standard_system) {
     external_deps = dsched_external_deps
@@ -192,7 +203,10 @@ ohos_unittest("dschedpermissiontest") {
 
   sources = [ "unittest/distributed_sched_permission_test.cpp" ]
   sources += dtbschedmgr_sources
-  configs = [ ":test_config" ]
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
   configs += dsched_configs
   if (is_standard_system) {
     external_deps = dsched_external_deps
@@ -206,7 +220,10 @@ ohos_unittest("dschedmissionmanagertest") {
   module_out_path = module_output_path
   sources = [ "unittest/mission/dms_mission_manager_test.cpp" ]
   sources += dtbschedmgr_sources
-  configs = [ ":test_config" ]
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
   configs += dsched_configs
   deps = [ "${distributed_service}/dtbschedmgr:distributedschedsvr" ]
   if (is_standard_system) {
@@ -221,7 +238,10 @@ ohos_unittest("dscheddatastoragetest") {
   module_out_path = module_output_path
   sources = [ "unittest/mission/distributed_data_storage_test.cpp" ]
   sources += dtbschedmgr_sources
-  configs = [ ":test_config" ]
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
   configs += dsched_configs
   deps = [ "${distributed_service}/dtbschedmgr:distributedschedsvr" ]
   if (is_standard_system) {
@@ -235,7 +255,10 @@ ohos_unittest("bundlemanagerinternaltest") {
   module_out_path = module_output_path
   sources = [ "unittest/bundle_manager_internal_test.cpp" ]
   sources += dtbschedmgr_sources
-  configs = [ ":test_config" ]
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
   configs += dsched_configs
   deps = [ "${distributed_service}/dtbschedmgr:distributedschedsvr" ]
   if (is_standard_system) {
@@ -249,7 +272,10 @@ ohos_unittest("hisyseventreporttest") {
   module_out_path = module_output_path
   sources = [ "unittest/dms_hisysevent_report_test.cpp" ]
   sources += dtbschedmgr_sources
-  configs = [ ":test_config" ]
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
   configs += dsched_configs
   deps = [ "${distributed_service}/dtbschedmgr:distributedschedsvr" ]
   if (is_standard_system) {
