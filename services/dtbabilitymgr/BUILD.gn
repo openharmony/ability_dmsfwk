@@ -23,7 +23,6 @@ config("distributed_ability_manager_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "include/",
-    "../base/include/",
     "//foundation/ability/dmsfwk/interfaces/innerkits/common/include/",
     "//foundation/ability/dmsfwk/interfaces/innerkits/continuation_manager/include/",
   ]
@@ -44,7 +43,10 @@ ohos_shared_library("distributed_ability_manager_svr") {
     "src/distributed_ability_manager_stub.cpp",
   ]
 
-  configs = [ ":distributed_ability_manager_config" ]
+  configs = [
+    ":distributed_ability_manager_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
 
   ldflags = [ "-rdynamic" ]
 

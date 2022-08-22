@@ -19,6 +19,7 @@
       ],
       "adapted_system_type": [ "standard" ],
       "features" : [
+        "dmsfwk_feature_coverage = false",
         "dmsfwk_standard_form_share",
         "dmsfwk_mission_manager"
       ],

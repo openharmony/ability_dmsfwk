@@ -34,7 +34,10 @@ ohos_shared_library("common_sdk") {
     "//foundation/ability/dmsfwk/services/dtbabilitymgr/src/distributed_ability_manager_proxy.cpp",
   ]
 
-  public_configs = [ ":common_public_config" ]
+  public_configs = [
+    ":common_public_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
 
   external_deps = [
     "ability_base:want",
