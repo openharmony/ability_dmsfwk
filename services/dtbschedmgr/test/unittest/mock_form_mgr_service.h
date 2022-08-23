@@ -184,7 +184,11 @@ public:
     {
         return true;
     };
-    int32_t StartAbility(const Want &want, const sptr<IRemoteObject> &callerToken)override
+    int32_t StartAbility(const Want &want, const sptr<IRemoteObject> &callerToken) override
+    {
+        return ERR_OK;
+    };
+    int32_t GetFormsInfo(const FormInfoFilter &filter, std::vector<FormInfo> &formInfos) override
     {
         return ERR_OK;
     };
