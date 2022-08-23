@@ -163,10 +163,6 @@ public:
     {
         return ERR_OK;
     };
-    int32_t GetFormsInfo(const std::string &moduleName, std::vector<FormInfo> &formInfos) override
-    {
-        return ERR_OK;
-    };
     int32_t UpdateRouterAction(const int64_t formId, std::string &action) override
     {
         return ERR_OK;
