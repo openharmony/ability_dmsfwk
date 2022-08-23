@@ -22,14 +22,14 @@
 #include "distributed_sched_util.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "form_mgr_errors.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "mock_form_mgr_service.h"
 #include "system_ability_definition.h"
 #include "test_log.h"
 #include "thread_pool.h"
-#include "form_mgr_errors.h"
-#include "mock_form_mgr_service.h"
 #undef private
 #undef protected
 
@@ -745,7 +745,8 @@ HWTEST_F(DistributedSchedServiceTest, StartLocalAbility_004, TestSize.Level1)
 /**
  * @tc.name: StartRemoteShareForm_001
  * @tc.desc: call StartRemoteShareForm with dms
- * @tc.type: FUNC
+ * @tc.type: StartRemoteShareForm
+ * @tc.require: Issue I5M62D
  */
 HWTEST_F(DistributedSchedServiceTest, StartRemoteShareForm_001, TestSize.Level1)
 {
@@ -762,7 +763,8 @@ HWTEST_F(DistributedSchedServiceTest, StartRemoteShareForm_001, TestSize.Level1)
 /**
  * @tc.name: StartRemoteShareForm_002
  * @tc.desc: call StartAbilityFromRemote with dms
- * @tc.type: FUNC
+ * @tc.type: StartRemoteShareForm
+ * @tc.require: Issue I5M62D
  */
 HWTEST_F(DistributedSchedServiceTest, StartRemoteShareForm_002, TestSize.Level1)
 {
@@ -779,7 +781,8 @@ HWTEST_F(DistributedSchedServiceTest, StartRemoteShareForm_002, TestSize.Level1)
 /**
  * @tc.name: StartShareFormFromRemote_001
  * @tc.desc: call StartAbilityFromRemote with dms
- * @tc.type: FUNC
+ * @tc.type: StartShareFormFromRemote
+ * @tc.require: Issue I5M62D
  */
 HWTEST_F(DistributedSchedServiceTest, StartShareFormFromRemote_001, TestSize.Level1)
 {
@@ -798,7 +801,8 @@ HWTEST_F(DistributedSchedServiceTest, StartShareFormFromRemote_001, TestSize.Lev
 /**
  * @tc.name: StartShareFormFromRemote_002
  * @tc.desc: call StartAbilityFromRemote with dms
- * @tc.type: FUNC
+ * @tc.type: StartShareFormFromRemote
+ * @tc.require: Issue I5M62D
  */
 HWTEST_F(DistributedSchedServiceTest, StartShareFormFromRemote_002, TestSize.Level1)
 {
