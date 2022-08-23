@@ -545,12 +545,13 @@ NativeValue* JsContinuationManagerInit(NativeEngine* engine, NativeValue* export
     JsContinuationManager* jsContinuationManager = new JsContinuationManager();
     object->SetNativePointer(jsContinuationManager, JsContinuationManager::Finalizer, nullptr);
 
-    BindNativeFunction(*engine, *object, "register", JsContinuationManager::Register);
-    BindNativeFunction(*engine, *object, "unregister", JsContinuationManager::Unregister);
-    BindNativeFunction(*engine, *object, "on", JsContinuationManager::RegisterDeviceSelectionCallback);
-    BindNativeFunction(*engine, *object, "off", JsContinuationManager::UnregisterDeviceSelectionCallback);
-    BindNativeFunction(*engine, *object, "updateConnectStatus", JsContinuationManager::UpdateConnectStatus);
-    BindNativeFunction(*engine, *object, "startDeviceManager", JsContinuationManager::StartDeviceManager);
+    const char *moduleName = "JsContinuationManager";
+    BindNativeFunction(*engine, *object, "register", moduleName, JsContinuationManager::Register);
+    BindNativeFunction(*engine, *object, "unregister", moduleName, JsContinuationManager::Unregister);
+    BindNativeFunction(*engine, *object, "on", moduleName, JsContinuationManager::RegisterDeviceSelectionCallback);
+    BindNativeFunction(*engine, *object, "off", moduleName, JsContinuationManager::UnregisterDeviceSelectionCallback);
+    BindNativeFunction(*engine, *object, "updateConnectStatus", moduleName, JsContinuationManager::UpdateConnectStatus);
+    BindNativeFunction(*engine, *object, "startDeviceManager", moduleName, JsContinuationManager::StartDeviceManager);
     BindNativeProperty(*object, "DeviceConnectState", JsContinuationManager::InitDeviceConnectStateObject);
     BindNativeProperty(*object, "ContinuationMode", JsContinuationManager::InitContinuationModeObject);
 

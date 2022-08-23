@@ -22,10 +22,7 @@ group("unittest") {
 
 config("distributed_sched_config") {
   visibility = [ ":*" ]
-  include_dirs = [
-    "include",
-    "../base/include/",
-  ]
+  include_dirs = [ "include" ]
   if (dmsfwk_mission_manager) {
     defines = [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
   }
@@ -57,15 +54,20 @@ ohos_shared_library("distributedschedsvr") {
     "src/dms_token_callback.cpp",
   ]
 
-  configs = [ ":distributed_sched_config" ]
+  configs = [
+    ":distributed_sched_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
 
   external_deps = [
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ability_manager",
     "access_token:libaccesstoken_sdk",
+    "background_task_mgr:bgtaskmgr_innerkits",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
     "device_auth:deviceauth_sdk",
     "distributeddatamgr:distributeddata_inner",
     "dmsfwk:continuation_manager",
@@ -77,9 +79,9 @@ ohos_shared_library("distributedschedsvr") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "os_account:os_account_innerkits",
+    "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
-    "utils_base:utils",
   ]
 
   deps = [ "//foundation/ability/dmsfwk/services/base:dmsbaseinner" ]

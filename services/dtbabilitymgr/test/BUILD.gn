@@ -26,13 +26,11 @@ dtbabilitymgr_configs = [
 
 config("test_config") {
   visibility = [ ":*" ]
-  include_dirs = [
-    "//foundation/ability/dmsfwk/utils/native/include",
-    "//foundation/ability/dmsfwk/services/base/include",
-  ]
+  include_dirs = [ "//foundation/ability/dmsfwk/utils/native/include" ]
 }
 
 dtbabilitymgr_external_deps = [
+  "c_utils:utils",
   "dsoftbus:softbus_client",
   "eventhandler:libeventhandler",
   "hiviewdfx_hilog_native:libhilog",
@@ -40,7 +38,6 @@ dtbabilitymgr_external_deps = [
   "ipc:ipc_core",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
-  "utils_base:utils",
 ]
 
 dtbabilitymgr_public_deps = [
@@ -68,7 +65,10 @@ ohos_unittest("continuationmanagertest") {
   module_out_path = module_output_path
   sources = [ "unittest/continuation_manager/continuation_manager_test.cpp" ]
   sources += dtbabilitymgr_sources
-  configs = [ ":test_config" ]
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
   configs += dtbabilitymgr_configs
   deps =
       [ "${distributed_service}/dtbabilitymgr:distributed_ability_manager_svr" ]

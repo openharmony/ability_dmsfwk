@@ -19,6 +19,7 @@
       ],
       "adapted_system_type": [ "standard" ],
       "features" : [
+        "dmsfwk_feature_coverage = false",
         "dmsfwk_standard_form_share",
         "dmsfwk_mission_manager"
       ],
@@ -33,6 +34,7 @@
           "ability_runtime",
           "access_token",
           "bundle_framework",
+          "c_utils",
           "device_auth",
           "distributeddatamgr",
           "dsoftbus",
@@ -47,8 +49,7 @@
           "os_account",
           "safwk",
           "samgr",
-          "startup_l2",
-          "utils_base"
+          "startup_l2"
         ],
         "third_party": []
       },

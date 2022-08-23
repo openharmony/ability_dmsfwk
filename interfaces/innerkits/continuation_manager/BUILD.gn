@@ -33,12 +33,15 @@ ohos_shared_library("continuation_manager") {
     "//foundation/ability/dmsfwk/services/dtbabilitymgr/src/continuation_manager/device_selection_notifier_stub.cpp",
   ]
 
-  public_configs = [ ":continuation_manager_public_config" ]
+  public_configs = [
+    ":continuation_manager_public_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
 
   external_deps = [
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
-    "utils_base:utils",
   ]
 
   subsystem_name = "ability"

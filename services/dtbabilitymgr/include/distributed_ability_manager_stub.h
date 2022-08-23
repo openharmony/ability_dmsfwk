@@ -39,6 +39,10 @@ public:
     {
         return ERR_NONE;
     }
+    virtual bool IsDistributedSchedLoaded()
+    {
+        return false;
+    }
 
 private:
     bool EnforceInterfaceToken(MessageParcel& data);
@@ -49,9 +53,13 @@ private:
     int32_t UnregisterDeviceSelectionCallbackInner(MessageParcel& data, MessageParcel& reply);
     int32_t UpdateConnectStatusInner(MessageParcel& data, MessageParcel& reply);
     int32_t StartDeviceManagerInner(MessageParcel& data, MessageParcel& reply);
+    int32_t GetDistributedComponentListInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
 
     using Func = int32_t(DistributedAbilityManagerStub::*)(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, Func> funcsMap_;
+    using distributedFunc = int32_t(DistributedAbilityManagerStub::*)(MessageParcel& data,
+        MessageParcel& reply, MessageOption& option);
+    std::map<uint32_t, distributedFunc> distributedFuncMap_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

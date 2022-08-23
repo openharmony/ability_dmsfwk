@@ -23,6 +23,7 @@
 #include "ability_manager_errors.h"
 #include "adapter/dnetwork_adapter.h"
 #include "app_connection_stub.h"
+#include "background_task_mgr_helper.h"
 #include "bundle/bundle_manager_internal.h"
 #include "connect_death_recipient.h"
 #include "datetime_ex.h"
@@ -35,6 +36,7 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "element_name.h"
+#include "event_type.h"
 #include "file_ex.h"
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
 #include "form_mgr_death_recipient.h"
@@ -82,7 +84,6 @@ constexpr int32_t INVALID_CALLER_UID = -1;
 constexpr int32_t IASS_CALLBACK_ON_REMOTE_FREE_INSTALL_DONE = 1;
 constexpr int32_t DISTRIBUTED_COMPONENT_ADD = 1;
 constexpr int32_t DISTRIBUTED_COMPONENT_REMOVE = 2;
-constexpr int32_t REPORT_DISTRIBUTED_COMPONENT_CHANGE_CODE = 1;
 constexpr int64_t CONTINUATION_TIMEOUT = 20000; // 20s
 // BundleDistributedManager set timeout to 3s, so we set 1s longer
 constexpr int64_t CHECK_REMOTE_INSTALL_ABILITY = 40000;
@@ -1162,29 +1163,12 @@ void DistributedSchedService::GetCallComponentList(std::vector<std::string>& dis
 
 bool DistributedSchedService::HandleDistributedComponentChange(const std::string& componentInfo)
 {
-    if (componentChangeHandler_ == nullptr) {
-        HILOGE("HandleDistributedComponentChange componentChangeHandler_ is null");
-        return false;
-    }
+    HILOGI("DistributedSchedService::HandleDistributedComponentChange begin");
     auto func = [this, componentInfo]() {
-        HILOGI("HandleDistributedComponentChange call callback");
-        if (distributedComponentListener_ == nullptr) {
-            HILOGW("HandleDistributedComponentChange distributedComponentListener_ is null");
-            return;
-        }
-        MessageParcel data;
-        if (!data.WriteInterfaceToken(COMPONENT_CHANGE_INTERFACE_TOKEN)) {
-            HILOGE("HandleDistributedComponentChange WriteInterfaceToken error");
-            return;
-        }
-        PARCEL_WRITE_HELPER_NORET(data, String, componentInfo);
-        MessageParcel reply;
-        MessageOption option;
-        int32_t result = distributedComponentListener_->SendRequest(REPORT_DISTRIBUTED_COMPONENT_CHANGE_CODE,
-            data, reply, option);
-        HILOGD("HandleDistributedComponentChange result is %{public}d", result);
+        BackgroundTaskMgr::BackgroundTaskMgrHelper::ReportStateChangeEvent(
+            BackgroundTaskMgr::EventType::DIS_COMP_CHANGE, componentInfo);
     };
-    if (!componentChangeHandler_->PostTask(func)) {
+    if (componentChangeHandler_ == nullptr || !componentChangeHandler_->PostTask(func)) {
         HILOGE("HandleDistributedComponentChange handler postTask failed");
         return false;
     }
@@ -1194,10 +1178,6 @@ bool DistributedSchedService::HandleDistributedComponentChange(const std::string
 void DistributedSchedService::ReportDistributedComponentChange(const CallerInfo& callerInfo, int32_t changeType,
     int32_t componentType, int32_t deviceType)
 {
-    if (distributedComponentListener_ == nullptr) {
-        HILOGI("distributedComponentListener_ nullptr");
-        return;
-    }
     HILOGI("caller report");
     nlohmann::json componentInfoJson;
     componentInfoJson[PID_KEY] = callerInfo.pid;
@@ -1216,10 +1196,6 @@ void DistributedSchedService::ReportDistributedComponentChange(const CallerInfo&
 void DistributedSchedService::ReportDistributedComponentChange(const ConnectInfo& connectInfo, int32_t changeType,
     int32_t componentType, int32_t deviceType)
 {
-    if (distributedComponentListener_ == nullptr) {
-        HILOGI("distributedComponentListener_ nullptr");
-        return;
-    }
     HILOGI("callee report");
     nlohmann::json componentInfoJson;
     componentInfoJson[UID_KEY] = BundleManagerInternal::GetUidFromBms(connectInfo.element.GetBundleName());
