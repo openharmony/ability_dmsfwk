@@ -746,7 +746,7 @@ HWTEST_F(DistributedSchedServiceTest, StartLocalAbility_004, TestSize.Level1)
  * @tc.name: StartRemoteShareForm_001
  * @tc.desc: call StartRemoteShareForm with dms
  * @tc.type: StartRemoteShareForm
- * @tc.require: Issue I5M62D
+ * @tc.require: issueI5M62D
  */
 HWTEST_F(DistributedSchedServiceTest, StartRemoteShareForm_001, TestSize.Level1)
 {
@@ -764,7 +764,7 @@ HWTEST_F(DistributedSchedServiceTest, StartRemoteShareForm_001, TestSize.Level1)
  * @tc.name: StartRemoteShareForm_002
  * @tc.desc: call StartAbilityFromRemote with dms
  * @tc.type: StartRemoteShareForm
- * @tc.require: Issue I5M62D
+ * @tc.require: issueI5M62D
  */
 HWTEST_F(DistributedSchedServiceTest, StartRemoteShareForm_002, TestSize.Level1)
 {
@@ -782,7 +782,7 @@ HWTEST_F(DistributedSchedServiceTest, StartRemoteShareForm_002, TestSize.Level1)
  * @tc.name: StartShareFormFromRemote_001
  * @tc.desc: call StartAbilityFromRemote with dms
  * @tc.type: StartShareFormFromRemote
- * @tc.require: Issue I5M62D
+ * @tc.require: issueI5M62D
  */
 HWTEST_F(DistributedSchedServiceTest, StartShareFormFromRemote_001, TestSize.Level1)
 {
@@ -802,7 +802,7 @@ HWTEST_F(DistributedSchedServiceTest, StartShareFormFromRemote_001, TestSize.Lev
  * @tc.name: StartShareFormFromRemote_002
  * @tc.desc: call StartAbilityFromRemote with dms
  * @tc.type: StartShareFormFromRemote
- * @tc.require: Issue I5M62D
+ * @tc.require: issueI5M62D
  */
 HWTEST_F(DistributedSchedServiceTest, StartShareFormFromRemote_002, TestSize.Level1)
 {
