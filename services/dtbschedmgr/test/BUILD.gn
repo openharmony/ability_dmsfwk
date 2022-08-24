@@ -63,7 +63,7 @@ if (dmsfwk_mission_manager) {
   dsched_external_deps += [ "multimedia_image_standard:image_native" ]
 }
 
-if (efficiency_manager_enable) {
+if (efficiency_manager_service_enable) {
   dsched_external_deps += [ "efficiency_manager:suspend_manager_client" ]
 }
 
