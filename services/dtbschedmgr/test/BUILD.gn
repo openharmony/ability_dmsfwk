@@ -37,7 +37,6 @@ dsched_external_deps = [
   "access_token:libaccesstoken_sdk",
   "access_token:libnativetoken",
   "access_token:libtoken_setproc",
-  "background_task_mgr:bgtaskmgr_innerkits",
   "bundle_framework:appexecfwk_base",
   "bundle_framework:appexecfwk_core",
   "c_utils:utils",
@@ -52,7 +51,6 @@ dsched_external_deps = [
   "init:libbegetutil",
   "ipc:ipc_core",
   "os_account:os_account_innerkits",
-  "resource_management:global_resmgr",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
 ]
@@ -63,6 +61,10 @@ if (dmsfwk_standard_form_share) {
 
 if (dmsfwk_mission_manager) {
   dsched_external_deps += [ "multimedia_image_standard:image_native" ]
+}
+
+if (efficiency_manager_enable) {
+  dsched_external_deps += [ "efficiency_manager:suspend_manager_client" ]
 }
 
 dsched_public_deps = [
