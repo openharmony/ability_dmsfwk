@@ -22,9 +22,11 @@
 #include "distributed_sched_util.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "form_mgr_errors.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "mock_form_mgr_service.h"
 #include "system_ability_definition.h"
 #include "test_log.h"
 #include "thread_pool.h"
@@ -739,6 +741,78 @@ HWTEST_F(DistributedSchedServiceTest, StartLocalAbility_004, TestSize.Level1)
     int result2 = DistributedSchedService::GetInstance().StartLocalAbility(info2, 0, 0);
     DTEST_LOG << "result2:" << result2 << std::endl;
     DTEST_LOG << "DistributedSchedServiceTest StartLocalAbility_004 end" << std::endl;
+}
+/**
+ * @tc.name: StartRemoteShareForm_001
+ * @tc.desc: call StartRemoteShareForm with dms
+ * @tc.type: StartRemoteShareForm
+ * @tc.require: issueI5M62D
+ */
+HWTEST_F(DistributedSchedServiceTest, StartRemoteShareForm_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StartRemoteShareForm_001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    const std::string remoteDeviceId = "";
+    const OHOS::AppExecFwk::FormShareInfo formShareInfo {};
+    auto result = proxy->StartRemoteShareForm(remoteDeviceId, formShareInfo);
+    DTEST_LOG << "result:" << result << std::endl;
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), result);
+    DTEST_LOG << "DistributedSchedServiceTest StartRemoteShareForm_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartRemoteShareForm_002
+ * @tc.desc: call StartAbilityFromRemote with dms
+ * @tc.type: StartRemoteShareForm
+ * @tc.require: issueI5M62D
+ */
+HWTEST_F(DistributedSchedServiceTest, StartRemoteShareForm_002, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StartRemoteShareForm_002 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    const std::string remoteDeviceId = "123456";
+    const OHOS::AppExecFwk::FormShareInfo formShareInfo {};
+    auto result = proxy->StartRemoteShareForm(remoteDeviceId, formShareInfo);
+    DTEST_LOG << "result:" << result << std::endl;
+    EXPECT_EQ(static_cast<int>(DMS_PERMISSION_DENIED), result);
+    DTEST_LOG << "DistributedSchedServiceTest StartRemoteShareForm_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartShareFormFromRemote_001
+ * @tc.desc: call StartAbilityFromRemote with dms
+ * @tc.type: StartShareFormFromRemote
+ * @tc.require: issueI5M62D
+ */
+HWTEST_F(DistributedSchedServiceTest, StartShareFormFromRemote_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StartShareFormFromRemote_001 start" << std::endl;
+    std::string remoteDeviceId = "";
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(remoteDeviceId);
+    const OHOS::AppExecFwk::FormShareInfo formShareInfo {};
+    DistributedSchedService::GetInstance().formMgrProxy_ = new MockFormMgrService();
+    auto result = DistributedSchedService::GetInstance().StartShareFormFromRemote(remoteDeviceId, formShareInfo);
+    DTEST_LOG << "result:" << result << std::endl;
+    EXPECT_EQ(static_cast<int>(ERR_OK), result);
+
+    DTEST_LOG << "DistributedSchedServiceTest StartShareFormFromRemote_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartShareFormFromRemote_002
+ * @tc.desc: call StartAbilityFromRemote with dms
+ * @tc.type: StartShareFormFromRemote
+ * @tc.require: issueI5M62D
+ */
+HWTEST_F(DistributedSchedServiceTest, StartShareFormFromRemote_002, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StartShareFormFromRemote_002 start" << std::endl;
+    std::string remoteDeviceId = "123456";
+    const OHOS::AppExecFwk::FormShareInfo formShareInfo {};
+    auto result = DistributedSchedService::GetInstance().StartShareFormFromRemote(remoteDeviceId, formShareInfo);
+    DTEST_LOG << "result:" << result << std::endl;
+    EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), result);
+    DTEST_LOG << "DistributedSchedServiceTest StartShareFormFromRemote_002 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
