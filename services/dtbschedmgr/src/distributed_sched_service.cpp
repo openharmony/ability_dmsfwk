@@ -1165,17 +1165,17 @@ void DistributedSchedService::GetCallComponentList(std::vector<std::string>& dis
 
 bool DistributedSchedService::HandleDistributedComponentChange(const std::string& componentInfo)
 {
-#ifdef EFFICIENCY_MANAGER_ENABLE
     HILOGI("DistributedSchedService::HandleDistributedComponentChange begin");
     auto func = [this, componentInfo]() {
+#ifdef EFFICIENCY_MANAGER_ENABLE
         SuspendManager::SuspendManagerClient::GetInstance().ReportStateChangeEvent(
             SuspendManager::ReportEventType::DIS_COMP_CHANGE, componentInfo);
+#endif
     };
     if (componentChangeHandler_ == nullptr || !componentChangeHandler_->PostTask(func)) {
         HILOGE("HandleDistributedComponentChange handler postTask failed");
         return false;
     }
-#endif
     return true;
 }
 
