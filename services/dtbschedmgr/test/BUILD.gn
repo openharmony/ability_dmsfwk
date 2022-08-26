@@ -253,6 +253,40 @@ ohos_unittest("dscheddatastoragetest") {
   part_name = "dmsfwk"
 }
 
+ohos_unittest("snapshottest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/mission/snapshot_test.cpp" ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = [ "${distributed_service}/dtbschedmgr:distributedschedsvr" ]
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+}
+
+ohos_unittest("distributedmissioninfotest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/mission/distributed_mission_info_test.cpp" ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = [ "${distributed_service}/dtbschedmgr:distributedschedsvr" ]
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+}
+
 ohos_unittest("bundlemanagerinternaltest") {
   module_out_path = module_output_path
   sources = [ "unittest/bundle_manager_internal_test.cpp" ]
@@ -298,9 +332,11 @@ group("unittest") {
   ]
   if (dmsfwk_mission_manager) {
     deps += [
+      ":distributedmissioninfotest",
       ":dscheddatastoragetest",
       ":dschedmissionmanagertest",
       ":dschedpermissiontest",
+      ":snapshottest",
     ]
   }
 }
