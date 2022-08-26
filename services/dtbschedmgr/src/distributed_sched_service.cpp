@@ -23,7 +23,6 @@
 #include "ability_manager_errors.h"
 #include "adapter/dnetwork_adapter.h"
 #include "app_connection_stub.h"
-#include "background_task_mgr_helper.h"
 #include "bundle/bundle_manager_internal.h"
 #include "connect_death_recipient.h"
 #include "datetime_ex.h"
@@ -36,7 +35,6 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "element_name.h"
-#include "event_type.h"
 #include "file_ex.h"
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
 #include "form_mgr_death_recipient.h"
@@ -50,6 +48,10 @@
 #include "os_account_manager.h"
 #include "parameters.h"
 #include "parcel_helper.h"
+#ifdef EFFICIENCY_MANAGER_ENABLE
+#include "report_event_type.h"
+#include "suspend_manager_client.h"
+#endif
 #include "string_ex.h"
 #include "system_ability_definition.h"
 
@@ -1165,8 +1167,10 @@ bool DistributedSchedService::HandleDistributedComponentChange(const std::string
 {
     HILOGI("DistributedSchedService::HandleDistributedComponentChange begin");
     auto func = [this, componentInfo]() {
-        BackgroundTaskMgr::BackgroundTaskMgrHelper::ReportStateChangeEvent(
-            BackgroundTaskMgr::EventType::DIS_COMP_CHANGE, componentInfo);
+#ifdef EFFICIENCY_MANAGER_ENABLE
+        SuspendManager::SuspendManagerClient::GetInstance().ReportStateChangeEvent(
+            SuspendManager::ReportEventType::DIS_COMP_CHANGE, componentInfo);
+#endif
     };
     if (componentChangeHandler_ == nullptr || !componentChangeHandler_->PostTask(func)) {
         HILOGE("HandleDistributedComponentChange handler postTask failed");

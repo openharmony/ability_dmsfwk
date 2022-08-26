@@ -29,6 +29,9 @@ config("distributed_sched_config") {
   if (dmsfwk_standard_form_share) {
     defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
   }
+  if (efficiency_manager_service_enable) {
+    defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
+  }
 }
 
 ohos_shared_library("distributedschedsvr") {
@@ -64,7 +67,6 @@ ohos_shared_library("distributedschedsvr") {
     "ability_base:zuri",
     "ability_runtime:ability_manager",
     "access_token:libaccesstoken_sdk",
-    "background_task_mgr:bgtaskmgr_innerkits",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
@@ -79,10 +81,13 @@ ohos_shared_library("distributedschedsvr") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (efficiency_manager_service_enable) {
+    external_deps += [ "efficiency_manager:suspend_manager_client" ]
+  }
 
   deps = [ "//foundation/ability/dmsfwk/services/base:dmsbaseinner" ]
 
