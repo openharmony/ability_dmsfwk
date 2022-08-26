@@ -30,6 +30,7 @@ using namespace std;
 namespace OHOS {
 namespace DistributedSchedule {
 using namespace std::chrono_literals;
+using namespace DistributedHardware;
 
 namespace {
 constexpr int32_t RETRY_TIMES = 30;
@@ -125,7 +126,7 @@ bool DtbschedmgrDeviceInfoStorage::WaitForDnetworkReady()
     }
     int32_t retryTimeout = RETRY_TIMES;
     do {
-        auto dnetwork = samgr->CheckSystemAbility(SOFTBUS_SERVER_SA_ID);
+        auto dnetwork = samgr->CheckSystemAbility(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
         if (dnetwork != nullptr) {
             IPCObjectProxy* proxy = reinterpret_cast<IPCObjectProxy*>(dnetwork.GetRefPtr());
             // make sure the proxy is not dead
@@ -182,15 +183,15 @@ bool DtbschedmgrDeviceInfoStorage::GetLocalDeviceFromDnet(std::string& deviceId)
         HILOGE("GetLocalDeviceFromDnet dnetworkAdapter null");
         return false;
     }
-    std::shared_ptr<NodeBasicInfo> localNode = dnetworkAdapter->GetLocalBasicInfo();
-    if (localNode != nullptr) {
-        deviceId = localNode->networkId;
-        HILOGI("get local deviceId from DnetworkAdapter, deviceId = %{public}s",
-            DnetworkAdapter::AnonymizeDeviceId(deviceId).c_str());
-        return true;
+    DmDeviceInfo dmDeviceInfo;
+    if (!dnetworkAdapter->GetLocalBasicInfo(dmDeviceInfo)) {
+        HILOGE("GetLocalBasicInfo error");
+        return false;
     }
-    HILOGE("GetLocalDeviceFromDnet localNode null");
-    return false;
+    deviceId = dmDeviceInfo.networkId;
+    HILOGI("get local deviceId from DnetworkAdapter, deviceId = %{public}s",
+        DnetworkAdapter::AnonymizeDeviceId(deviceId).c_str());
+    return true;
 }
 
 void DtbschedmgrDeviceInfoStorage::ClearAllDevices()
@@ -307,7 +308,7 @@ void DtbschedmgrDeviceInfoStorage::DeviceOfflineNotify(const std::string& device
     }
 }
 
-void DtbschedmgrDeviceInfoStorage::OnDeviceInfoChanged(const std::string& deviceId, DeviceInfoType type)
+void DtbschedmgrDeviceInfoStorage::OnDeviceInfoChanged(const std::string& deviceId)
 {
     HILOGI("OnDeviceInfoChanged called");
 }

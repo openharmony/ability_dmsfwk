@@ -45,7 +45,7 @@ public:
     bool GetLocalDeviceId(std::string& deviceId);
     void DeviceOnlineNotify(const std::shared_ptr<DmsDeviceInfo> devInfo);
     void DeviceOfflineNotify(const std::string& deviceId);
-    void OnDeviceInfoChanged(const std::string& deviceId, DeviceInfoType type);
+    void OnDeviceInfoChanged(const std::string& deviceId);
 
     /**
      * get device info by device id

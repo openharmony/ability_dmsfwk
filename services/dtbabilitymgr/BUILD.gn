@@ -52,6 +52,7 @@ ohos_shared_library("distributed_ability_manager_svr") {
 
   external_deps = [
     "c_utils:utils",
+    "device_manager:devicemanagersdk",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",

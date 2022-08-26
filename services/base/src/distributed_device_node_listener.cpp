@@ -27,29 +27,21 @@ namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DistributedDeviceNodeListener";
 }
-void DistributedDeviceNodeListener::OnDeviceOnline(const NodeBasicInfo* nodeBasicInfo)
+void DistributedDeviceNodeListener::OnDeviceOnline(const DistributedHardware::DmDeviceInfo& deviceInfo)
 {
-    if (nodeBasicInfo == nullptr) {
-        HILOGE("OnDeviceOnline null nodeBasicInfo");
-        return;
-    }
     auto dmsDeviceInfo = std::make_shared<DmsDeviceInfo>(
-        nodeBasicInfo->deviceName, nodeBasicInfo->deviceTypeId, nodeBasicInfo->networkId);
+        deviceInfo.deviceName, deviceInfo.deviceTypeId, deviceInfo.deviceId);
     DtbschedmgrDeviceInfoStorage::GetInstance().DeviceOnlineNotify(dmsDeviceInfo);
 }
 
-void DistributedDeviceNodeListener::OnDeviceOffline(const NodeBasicInfo* nodeBasicInfo)
+void DistributedDeviceNodeListener::OnDeviceOffline(const DistributedHardware::DmDeviceInfo& deviceInfo)
 {
-    if (nodeBasicInfo == nullptr) {
-        HILOGE("OnDeviceOffline null nodeBasicInfo");
-        return;
-    }
-    DtbschedmgrDeviceInfoStorage::GetInstance().DeviceOfflineNotify(nodeBasicInfo->networkId);
+    DtbschedmgrDeviceInfoStorage::GetInstance().DeviceOfflineNotify(deviceInfo.deviceId);
 }
 
-void DistributedDeviceNodeListener::OnDeviceInfoChanged(const std::string& deviceId, DeviceInfoType type)
+void DistributedDeviceNodeListener::OnDeviceInfoChanged(const DistributedHardware::DmDeviceInfo& deviceInfo)
 {
-    DtbschedmgrDeviceInfoStorage::GetInstance().OnDeviceInfoChanged(deviceId, type);
+    DtbschedmgrDeviceInfoStorage::GetInstance().OnDeviceInfoChanged(deviceInfo.deviceId);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

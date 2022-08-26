@@ -19,7 +19,6 @@
 #include <iosfwd>
 
 #include "adapter/dnetwork_adapter.h"
-#include "softbus_bus_center.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -28,9 +27,9 @@ public:
     DistributedDeviceNodeListener() = default;
     ~DistributedDeviceNodeListener() = default;
 
-    void OnDeviceOnline(const NodeBasicInfo* nodeBasicInfo) override;
-    void OnDeviceOffline(const NodeBasicInfo* nodeBasicInfo) override;
-    void OnDeviceInfoChanged(const std::string& deviceId, DeviceInfoType type) override;
+    void OnDeviceOnline(const DistributedHardware::DmDeviceInfo& deviceInfo) override;
+    void OnDeviceOffline(const DistributedHardware::DmDeviceInfo& deviceInfo) override;
+    void OnDeviceInfoChanged(const DistributedHardware::DmDeviceInfo& deviceInfo) override;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
