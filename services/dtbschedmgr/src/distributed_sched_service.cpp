@@ -41,6 +41,9 @@
 #endif
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#ifdef SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR
+#include "mem_mgr_client.h"
+#endif
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission/distributed_mission_info.h"
 #include "mission/distributed_sched_mission_manager.h"
@@ -840,8 +843,8 @@ void DistributedSchedService::RemoveCallerComponent(const sptr<IRemoteObject>& c
     std::lock_guard<std::mutex> autoLock(callerLock_);
     auto it = callerMap_.find(connect);
     if (it != callerMap_.end()) {
-        std::list<ConnectAbilitySession> sessionsList = it->second;
         connect->RemoveDeathRecipient(callerDeathRecipientForLocalDevice_);
+        std::list<ConnectAbilitySession> sessionsList = it->second;
         if (!sessionsList.empty()) {
             ReportDistributedComponentChange(sessionsList.front().GetCallerInfo(), DISTRIBUTED_COMPONENT_REMOVE,
                 IDistributedSched::CALL, IDistributedSched::CALLER);
@@ -1076,16 +1079,6 @@ int32_t DistributedSchedService::StartShareFormFromRemote(
 }
 #endif
 
-int32_t DistributedSchedService::RegisterDistributedComponentListener(const sptr<IRemoteObject>& callback)
-{
-    if (callback == nullptr) {
-        HILOGE("RegisterDistributedComponentListener callback is null");
-        return INVALID_PARAMETERS_ERR;
-    }
-    distributedComponentListener_ = callback;
-    return ERR_OK;
-}
-
 int32_t DistributedSchedService::GetDistributedComponentList(std::vector<std::string>& distributedComponents)
 {
     GetConnectComponentList(distributedComponents);
@@ -1163,54 +1156,57 @@ void DistributedSchedService::GetCallComponentList(std::vector<std::string>& dis
     }
 }
 
-bool DistributedSchedService::HandleDistributedComponentChange(const std::string& componentInfo)
+void DistributedSchedService::ReportDistributedComponentChange(const CallerInfo& callerInfo, int32_t changeType,
+    int32_t componentType, int32_t deviceType)
 {
-    HILOGI("DistributedSchedService::HandleDistributedComponentChange begin");
-    auto func = [this, componentInfo]() {
+#if defined(EFFICIENCY_MANAGER_ENABLE) || defined(SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR)
+    HILOGI("caller report");
+    auto func = [this, callerInfo, changeType, componentType, deviceType]() {
 #ifdef EFFICIENCY_MANAGER_ENABLE
+        nlohmann::json componentInfoJson;
+        componentInfoJson[PID_KEY] = callerInfo.pid;
+        componentInfoJson[UID_KEY] = callerInfo.uid;
+        componentInfoJson[BUNDLE_NAME_KEY] =
+            callerInfo.bundleNames.empty() ? std::string() : callerInfo.bundleNames.front();
+        componentInfoJson[COMPONENT_TYPE_KEY] = componentType;
+        componentInfoJson[DEVICE_TYPE_KEY] = deviceType;
+        componentInfoJson[CHANGE_TYPE_KEY] = changeType;
+        std::string componentInfo = componentInfoJson.dump();
         SuspendManager::SuspendManagerClient::GetInstance().ReportStateChangeEvent(
             SuspendManager::ReportEventType::DIS_COMP_CHANGE, componentInfo);
+#endif
+#ifdef SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR
+        Memory::MemMgrClient::GetInstance().NotifyDistDevStatus(callerInfo.pid, callerInfo.uid,
+            callerInfo.bundleNames.empty() ? std::string() : callerInfo.bundleNames.front(),
+            changeType == DISTRIBUTED_COMPONENT_ADD);
 #endif
     };
     if (componentChangeHandler_ == nullptr || !componentChangeHandler_->PostTask(func)) {
         HILOGE("HandleDistributedComponentChange handler postTask failed");
-        return false;
     }
-    return true;
-}
-
-void DistributedSchedService::ReportDistributedComponentChange(const CallerInfo& callerInfo, int32_t changeType,
-    int32_t componentType, int32_t deviceType)
-{
-    HILOGI("caller report");
-    nlohmann::json componentInfoJson;
-    componentInfoJson[PID_KEY] = callerInfo.pid;
-    componentInfoJson[UID_KEY] = callerInfo.uid;
-    componentInfoJson[BUNDLE_NAME_KEY] =
-        callerInfo.bundleNames.empty() ? std::string() : callerInfo.bundleNames.front();
-    componentInfoJson[COMPONENT_TYPE_KEY] = componentType;
-    componentInfoJson[DEVICE_TYPE_KEY] = deviceType;
-    componentInfoJson[CHANGE_TYPE_KEY] = changeType;
-    std::string componentInfo = componentInfoJson.dump();
-    if (!HandleDistributedComponentChange(componentInfo)) {
-        HILOGW("ReportDistributedComponentChange notify rms failed");
-    }
+#endif
 }
 
 void DistributedSchedService::ReportDistributedComponentChange(const ConnectInfo& connectInfo, int32_t changeType,
     int32_t componentType, int32_t deviceType)
 {
+#ifdef EFFICIENCY_MANAGER_ENABLE
     HILOGI("callee report");
-    nlohmann::json componentInfoJson;
-    componentInfoJson[UID_KEY] = BundleManagerInternal::GetUidFromBms(connectInfo.element.GetBundleName());
-    componentInfoJson[BUNDLE_NAME_KEY] = connectInfo.element.GetBundleName();
-    componentInfoJson[COMPONENT_TYPE_KEY] = componentType;
-    componentInfoJson[DEVICE_TYPE_KEY] = deviceType;
-    componentInfoJson[CHANGE_TYPE_KEY] = changeType;
-    std::string componentInfo = componentInfoJson.dump();
-    if (!HandleDistributedComponentChange(componentInfo)) {
-        HILOGW("ReportDistributedComponentChange notify rms failed");
+    auto func = [this, connectInfo, changeType, componentType, deviceType]() {
+        nlohmann::json componentInfoJson;
+        componentInfoJson[UID_KEY] = BundleManagerInternal::GetUidFromBms(connectInfo.element.GetBundleName());
+        componentInfoJson[BUNDLE_NAME_KEY] = connectInfo.element.GetBundleName();
+        componentInfoJson[COMPONENT_TYPE_KEY] = componentType;
+        componentInfoJson[DEVICE_TYPE_KEY] = deviceType;
+        componentInfoJson[CHANGE_TYPE_KEY] = changeType;
+        std::string componentInfo = componentInfoJson.dump();
+        SuspendManager::SuspendManagerClient::GetInstance().ReportStateChangeEvent(s
+            SuspendManager::ReportEventType::DIS_COMP_CHANGE, componentInfo);
+    };
+    if (componentChangeHandler_ == nullptr || !componentChangeHandler_->PostTask(func)) {
+        HILOGE("HandleDistributedComponentChange handler postTask failed");
     }
+#endif
 }
 
 sptr<IDistributedSched> DistributedSchedService::GetRemoteDms(const std::string& remoteDeviceId)
