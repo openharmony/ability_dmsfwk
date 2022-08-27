@@ -21,7 +21,8 @@
       "features" : [
         "dmsfwk_feature_coverage = false",
         "dmsfwk_standard_form_share",
-        "dmsfwk_mission_manager"
+        "dmsfwk_mission_manager",
+        "dmsfwk_report_distributedcomponent_memmgr"
       ],
       "hisysevent_config": [
         "//foundation/ability/dmsfwk/hisysevent.yaml"

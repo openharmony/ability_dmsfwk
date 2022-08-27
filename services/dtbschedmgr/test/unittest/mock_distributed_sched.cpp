@@ -172,11 +172,6 @@ int32_t MockDistributedSched::ReleaseAbilityFromRemote(const sptr<IRemoteObject>
     return ERR_NONE;
 }
 
-int32_t MockDistributedSched::RegisterDistributedComponentListener(const sptr<IRemoteObject>& callback)
-{
-    return ERR_NONE;
-}
-
 int32_t MockDistributedSched::GetDistributedComponentList(std::vector<std::string>& distributedComponents)
 {
     return ERR_NONE;

@@ -55,6 +55,10 @@ dsched_external_deps = [
   "samgr:samgr_proxy",
 ]
 
+if (dmsfwk_report_distributedcomponent_memmgr) {
+  dsched_external_deps += [ "memmgr:memmgrclient" ]
+}
+
 if (dmsfwk_standard_form_share) {
   dsched_external_deps += [ "form_fwk:form_manager" ]
 }
@@ -133,6 +137,11 @@ ohos_unittest("distributedschedsvrtest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
+
+  if (dmsfwk_report_distributedcomponent_memmgr) {
+    defines = [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
+  }
+
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
