@@ -55,8 +55,13 @@ dsched_external_deps = [
   "samgr:samgr_proxy",
 ]
 
-if (dmsfwk_report_distributedcomponent_memmgr) {
-  dsched_external_deps += [ "memmgr:memmgrclient" ]
+if (dmsfwk_report_distributedcomponent_memmgr && defined(global_parts_info)) {
+  if (defined(global_parts_info.resourceschedule_memmgr)) {
+    dsched_external_deps += [ "memmgr:memmgrclient" ]
+  }
+  if (defined(global_parts_info.resourceschedule_plugins_memmgr)) {
+    dsched_external_deps += [ "plugins/memmgr:memmgrclient" ]
+  }
 }
 
 if (dmsfwk_standard_form_share) {

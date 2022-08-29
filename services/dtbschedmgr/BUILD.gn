@@ -115,8 +115,13 @@ ohos_shared_library("distributedschedsvr") {
     external_deps += [ "multimedia_image_standard:image_native" ]
   }
 
-  if (dmsfwk_report_distributedcomponent_memmgr) {
-    external_deps += [ "memmgr:memmgrclient" ]
+  if (dmsfwk_report_distributedcomponent_memmgr && defined(global_parts_info)) {
+    if (defined(global_parts_info.resourceschedule_memmgr)) {
+      external_deps += [ "memmgr:memmgrclient" ]
+    }
+    if (defined(global_parts_info.resourceschedule_plugins_memmgr)) {
+      external_deps += [ "plugins/memmgr:memmgrclient" ]
+    }
   }
 
   install_images = [ system_base_dir ]

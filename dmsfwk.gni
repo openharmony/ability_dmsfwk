@@ -26,7 +26,8 @@ declare_args() {
     efficiency_manager_service_enable = false
   }
   if (defined(global_parts_info) &&
-      !defined(global_parts_info.resourceschedule_memmgr)) {
+      !defined(global_parts_info.resourceschedule_memmgr) &&
+      !defined(global_parts_info.resourceschedule_plugins_memmgr)) {
     dmsfwk_report_distributedcomponent_memmgr = false
   }
 }
