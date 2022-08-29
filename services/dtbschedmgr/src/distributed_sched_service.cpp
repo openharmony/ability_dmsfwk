@@ -1200,7 +1200,7 @@ void DistributedSchedService::ReportDistributedComponentChange(const ConnectInfo
         componentInfoJson[DEVICE_TYPE_KEY] = deviceType;
         componentInfoJson[CHANGE_TYPE_KEY] = changeType;
         std::string componentInfo = componentInfoJson.dump();
-        SuspendManager::SuspendManagerClient::GetInstance().ReportStateChangeEvent(s
+        SuspendManager::SuspendManagerClient::GetInstance().ReportStateChangeEvent(
             SuspendManager::ReportEventType::DIS_COMP_CHANGE, componentInfo);
     };
     if (componentChangeHandler_ == nullptr || !componentChangeHandler_->PostTask(func)) {
