@@ -19,6 +19,7 @@
 #include "ability_connect_callback_stub.h"
 #include "distributed_sched_service.h"
 #include "distributed_sched_util.h"
+#include "dtbschedmgr_device_info_storage.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -631,6 +632,393 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectRemoteAbility002, TestSize.Level
     }
 
     RemoveConnectInfo(connect);
+}
+
+/**
+ * @tc.name: DisconnectRemoteAbility003
+ * @tc.desc: disconnect remote ability whith error callback
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, DisconnectRemoteAbility003, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedServiceTest DisconnectRemoteAbility003 start" << std::endl;
+    int32_t ret = DistributedSchedService::GetInstance().DisconnectRemoteAbility(nullptr, 0, 0);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest DisconnectRemoteAbility003 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectRemoteAbility
+ * @tc.desc: connect remote ability whith error uid and pid
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ConnectRemoteAbility001, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ConnectRemoteAbility001 start" << std::endl;
+    OHOS::AAFwk::Want want;
+    want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbility(want, connect, -1, -1, -1);
+    EXPECT_EQ(ret, BIND_ABILITY_UID_INVALID_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest ConnectRemoteAbility001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectRemoteAbility
+ * @tc.desc: connect remote ability whith empty deviceId.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ConnectRemoteAbility002, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ConnectRemoteAbility002 start" << std::endl;
+    OHOS::AAFwk::Want want;
+    want.SetElementName("", "ohos.demo.bundleName", "abilityName");
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbility(want, connect, -1, -1, -1);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest ConnectRemoteAbility002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectAbilityFromRemote
+ * @tc.desc: connect remote ability whith fake deviceId.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ConnectAbilityFromRemote001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedConnectTest ConnectAbilityFromRemote001 start" << std::endl;
+    OHOS::AAFwk::Want want;
+    want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
+    AppExecFwk::AbilityInfo abilityInfo;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    CallerInfo callerInfo;
+    IDistributedSched::AccountInfo accountInfo;
+    int32_t ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
+        abilityInfo, connect, callerInfo, accountInfo);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedConnectTest ConnectAbilityFromRemote001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectAbilityFromRemote
+ * @tc.desc: connect remote ability whith error callback.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ConnectAbilityFromRemote002, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedConnectTest ConnectAbilityFromRemote002 start" << std::endl;
+    OHOS::AAFwk::Want want;
+    want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
+    AppExecFwk::AbilityInfo abilityInfo;
+    CallerInfo callerInfo;
+    IDistributedSched::AccountInfo accountInfo;
+    int32_t ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
+        abilityInfo, nullptr, callerInfo, accountInfo);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedConnectTest ConnectAbilityFromRemote002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectAbilityFromRemote
+ * @tc.desc: connect remote ability whith error param
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ConnectAbilityFromRemote003, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedConnectTest ConnectAbilityFromRemote003 start" << std::endl;
+    OHOS::AAFwk::Want want;
+    want.SetElementName("", "ohos.demo.bundleName", "abilityName");
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    AppExecFwk::AbilityInfo abilityInfo;
+    CallerInfo callerInfo;
+    IDistributedSched::AccountInfo accountInfo;
+    int32_t ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
+        abilityInfo, connect, callerInfo, accountInfo);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedConnectTest ConnectAbilityFromRemote003 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectAbilityFromRemote
+ * @tc.desc: connect remote ability whith null callback
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ConnectAbilityFromRemote004, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedConnectTest ConnectAbilityFromRemote004 start" << std::endl;
+    OHOS::AAFwk::Want want;
+    want.SetElementName("", "ohos.demo.bundleName", "abilityName");
+    AppExecFwk::AbilityInfo abilityInfo;
+    CallerInfo callerInfo;
+    IDistributedSched::AccountInfo accountInfo;
+    int32_t ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
+        abilityInfo, nullptr, callerInfo, accountInfo);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedConnectTest ConnectAbilityFromRemote004 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectEachRemoteAbilityLocked
+ * @tc.desc: disconnect remote ability.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, DisconnectEachRemoteAbilityLocked001, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectEachRemoteAbilityLocked001 start" << std::endl;
+    int32_t ret = DistributedSchedService::GetInstance().DisconnectEachRemoteAbilityLocked("", "", nullptr);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectEachRemoteAbilityLocked001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectEachRemoteAbilityLocked
+ * @tc.desc: disconnect remote ability.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, DisconnectEachRemoteAbilityLocked002, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectEachRemoteAbilityLocked002 start" << std::endl;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    int32_t ret = DistributedSchedService::GetInstance().DisconnectEachRemoteAbilityLocked("", "", connect);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectEachRemoteAbilityLocked002 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectEachRemoteAbilityLocked
+ * @tc.desc: disconnect remote ability.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, DisconnectEachRemoteAbilityLocked003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectEachRemoteAbilityLocked003 start" << std::endl;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    int32_t ret = DistributedSchedService::GetInstance().DisconnectEachRemoteAbilityLocked(
+        "123_remote_device_id", "123_remote_device_id", connect);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectEachRemoteAbilityLocked003 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectEachRemoteAbilityLocked
+ * @tc.desc: disconnect remote ability.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, DisconnectEachRemoteAbilityLocked004, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectEachRemoteAbilityLocked004 start" << std::endl;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    std::string deviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(deviceId);
+    int32_t ret = DistributedSchedService::GetInstance().DisconnectEachRemoteAbilityLocked(
+        deviceId, deviceId, connect);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectEachRemoteAbilityLocked004 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectRemoteAbility
+ * @tc.desc: disconnect remote ability.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, DisconnectRemoteAbility004, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectRemoteAbility004 start" << std::endl;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    int32_t ret = DistributedSchedService::GetInstance().DisconnectRemoteAbility(connect, 0, 0);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectRemoteAbility004 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectRemoteAbility
+ * @tc.desc: disconnect remote ability.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, DisconnectRemoteAbility005, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectRemoteAbility005 start" << std::endl;
+    int32_t ret = DistributedSchedService::GetInstance().DisconnectRemoteAbility(nullptr, 0, 0);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectRemoteAbility005 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectAbilityFromRemote
+ * @tc.desc: disconnect ability from remote.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, DisconnectAbilityFromRemote001, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectAbilityFromRemote001 start" << std::endl;
+    int32_t ret = DistributedSchedService::GetInstance().DisconnectAbilityFromRemote(nullptr, 0, "");
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectAbilityFromRemote001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectAbilityFromRemote
+ * @tc.desc: disconnect ability from remote.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, DisconnectAbilityFromRemote002, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectAbilityFromRemote002 start" << std::endl;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    int32_t ret = DistributedSchedService::GetInstance().DisconnectAbilityFromRemote(connect, 0, "");
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectAbilityFromRemote002 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectAbilityFromRemote
+ * @tc.desc: disconnect ability from remote.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, DisconnectAbilityFromRemote003, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectAbilityFromRemote003 start" << std::endl;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    std::string deviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(deviceId);
+    int32_t ret = DistributedSchedService::GetInstance().DisconnectAbilityFromRemote(connect, 0, deviceId);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectAbilityFromRemote003 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectAbilityFromRemote
+ * @tc.desc: disconnect ability from remote.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, DisconnectAbilityFromRemote004, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectAbilityFromRemote004 start" << std::endl;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    int32_t ret = DistributedSchedService::GetInstance().DisconnectAbilityFromRemote(
+        connect, 0, "123_remote_device_id");
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedConnectTest DisconnectAbilityFromRemote004 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProcessDeviceOffline
+ * @tc.desc: device offline, clear the connect info using fake deviceId.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ProcessDeviceOffline006, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedConnectTest ProcessDeviceOffline006 start" << std::endl;
+    DistributedSchedService::GetInstance().ProcessDeviceOffline("123_remote_device_id");
+    DTEST_LOG << "DistributedSchedConnectTest ProcessDeviceOffline006 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProcessDeviceOffline
+ * @tc.desc: device offline, clear connect info using empty deviceId.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ProcessDeviceOffline007, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedConnectTest ProcessDeviceOffline007 start" << std::endl;
+    DistributedSchedService::GetInstance().ProcessDeviceOffline("");
+    DTEST_LOG << "DistributedSchedConnectTest ProcessDeviceOffline007 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProcessDeviceOffline
+ * @tc.desc: device offline, clear connect info using local deviceId.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ProcessDeviceOffline008, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedConnectTest ProcessDeviceOffline008 start" << std::endl;
+    std::string deviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(deviceId);
+    DistributedSchedService::GetInstance().ProcessDeviceOffline(deviceId);
+    DTEST_LOG << "DistributedSchedConnectTest ProcessDeviceOffline008 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyApp
+ * @tc.desc: notify app to dealwith the offline message.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, NotifyApp001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedConnectTest NotifyApp001 start" << std::endl;
+    AppExecFwk::ElementName element;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    int32_t ret = DistributedSchedService::GetInstance().NotifyApp(connect, element, 0);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedConnectTest NotifyApp001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyApp
+ * @tc.desc: notify app to dealwith the offline message.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, NotifyApp002, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedConnectTest NotifyApp002 start" << std::endl;
+    AppExecFwk::ElementName element;
+    int32_t ret = DistributedSchedService::GetInstance().NotifyApp(nullptr, element, 0);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedConnectTest NotifyApp002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProcessConnectDied
+ * @tc.desc: dealwith the app died message.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ProcessConnectDied005, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedConnectTest ProcessConnectDied005 start" << std::endl;
+    DistributedSchedService::GetInstance().ProcessConnectDied(nullptr);
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    DistributedSchedService::GetInstance().ProcessConnectDied(connect);
+    DTEST_LOG << "DistributedSchedConnectTest ProcessConnectDied005 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyProcessDied001
+ * @tc.desc: notify process died message to remote.
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, NotifyProcessDied001, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedConnectTest NotifyProcessDied001 start" << std::endl;
+    TargetComponent targetComponent {TargetComponent::HARMONY_COMPONENT};
+    CallerInfo callerInfo;
+    DistributedSchedService::GetInstance().NotifyProcessDied("", callerInfo, targetComponent);
+    DistributedSchedService::GetInstance().NotifyProcessDied("123_remote_device_id", callerInfo, targetComponent);
+    DTEST_LOG << "DistributedSchedConnectTest NotifyProcessDied001 end" << std::endl;
 }
 }
 }
