@@ -120,6 +120,24 @@ if (dmsfwk_standard_form_share) {
       [ "${distributed_service}/dtbschedmgr/src/form_mgr_death_recipient.cpp" ]
 }
 
+ohos_unittest("appconnectstubtest") {
+  module_out_path = module_output_path
+
+  sources = [ "unittest/app_connection_stub_test.cpp" ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 ohos_unittest("distributedschedsvrtest") {
   module_out_path = module_output_path
 
@@ -150,6 +168,24 @@ ohos_unittest("distributedcalltest") {
   module_out_path = module_output_path
 
   sources = [ "unittest/distributed_sched_call_test.cpp" ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("dmsfreeinstallcbstubtest") {
+  module_out_path = module_output_path
+
+  sources = [ "unittest/dms_free_install_callback_stub_test.cpp" ]
   sources += dtbschedmgr_sources
   configs = [
     ":test_config",
@@ -336,9 +372,11 @@ ohos_unittest("hisyseventreporttest") {
 group("unittest") {
   testonly = true
   deps = [
+    ":appconnectstubtest",
     ":bundlemanagerinternaltest",
     ":distributedcalltest",
     ":distributedschedsvrtest",
+    ":dmsfreeinstallcbstubtest",
     ":dschedconnecttest",
     ":dschedcontinuetest",
   ]
