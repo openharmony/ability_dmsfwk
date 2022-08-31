@@ -55,5 +55,9 @@ void DistributedMissionChangeListener::OnMissionIconUpdated(int32_t missionId,
 {
 }
 #endif
+
+void DistributedMissionChangeListener::OnMissionClosed(int32_t missionId)
+{
+}
 }
 }
