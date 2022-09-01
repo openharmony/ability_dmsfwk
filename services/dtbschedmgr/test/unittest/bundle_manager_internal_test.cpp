@@ -224,6 +224,80 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_008, TestSize.Leve
 }
 
 /**
+ * @tc.name: BundleManagerInternalTest_009
+ * @tc.desc: test get callerappId from bms with invalid param
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_009, TestSize.Level4)
+{
+    DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_009 begin" << std::endl;
+    int32_t callingUid = -1;
+    string appId;
+    bool ret = BundleManagerInternal::GetCallerAppIdFromBms(callingUid, appId);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_009 end "<< std::endl;
+}
+
+/**
+ * @tc.name: BundleManagerInternalTest_010
+ * @tc.desc: test get callerappId from bms with invalid param
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_010, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_010 begin" << std::endl;
+    int32_t callingUid = 5522;
+    string appId;
+    bool ret = BundleManagerInternal::GetCallerAppIdFromBms(callingUid, appId);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_010 end "<< std::endl;
+}
+
+/**
+ * @tc.name: BundleManagerInternalTest_011
+ * @tc.desc: test IsSameAppId with invalid param
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_011, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_011 begin" << std::endl;
+    string appId;
+    string targetBundleName;
+    bool ret = BundleManagerInternal::IsSameAppId(appId, targetBundleName);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_011 end "<< std::endl;
+}
+
+/**
+ * @tc.name: BundleManagerInternalTest_012
+ * @tc.desc: test IsSameAppId with invalid param
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_012, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_012 begin" << std::endl;
+    string appId = "1001";
+    string targetBundleName = "ohos.samples.testApp";
+    bool ret = BundleManagerInternal::IsSameAppId(appId, targetBundleName);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_012 end "<< std::endl;
+}
+
+/**
+ * @tc.name: BundleManagerInternalTest_013
+ * @tc.desc: test IsSameAppId with invalid param
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_013, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_013 begin" << std::endl;
+    string bundleName = "ohos.samples.testApp";
+    int32_t uid = BundleManagerInternal::GetUidFromBms(bundleName);
+    EXPECT_EQ(uid, -1);
+    DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_013 end "<< std::endl;
+}
+
+/**
  * @tc.name: BundleManagerCallBackTest_001
  * @tc.desc: test OnQueryInstallationFinished with failed result
  * @tc.type: FUNC

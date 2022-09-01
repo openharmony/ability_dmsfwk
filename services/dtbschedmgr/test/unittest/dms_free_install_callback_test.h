@@ -13,25 +13,27 @@
  * limitations under the License.
  */
 
-#ifndef APP_CONNECTION_STUB_TEST_H
-#define APP_CONNECTION_STUB_TEST_H
+#ifndef DMS_FREE_INSTALL_CB_TEST_H
+#define DMS_FREE_INSTALL_CB_TEST_H
 
 #include "gtest/gtest.h"
+#include "dms_free_install_callback_proxy.h"
 
 #define private public
-#include "app_connection_stub.h"
+#include "dms_free_install_callback.h"
 #undef private
 
 namespace OHOS {
 namespace DistributedSchedule {
-class AppConnectionStubTest : public testing::Test {
+class DmsFreeInstallCallbackTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    sptr<AppConnectionStub> appConnectionStub_;
+    sptr<DmsFreeInstallCallbackStub> dmsFreeInstallCallbackStub_;
+    sptr<DmsFreeInstallCallbackProxy> dmsFreeInstallCallbackProxy_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
-#endif // APP_CONNECTION_STUB_TEST_H
+#endif // DMS_FREE_INSTALL_CB_TEST_H

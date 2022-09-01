@@ -24,11 +24,10 @@ using namespace testing::ext;
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-    const string GROUP_ID = "TEST_GROUP_ID";
-    const string bundleName = "ohos.hisysevent.test";
-    const string abilityName = "testAbility";
-    const int32_t eventResult = 0;
-    const int32_t callingAppUid = 0;
+const string bundleName = "ohos.hisysevent.test";
+const string abilityName = "testAbility";
+const int32_t eventResult = 0;
+const int32_t callingAppUid = 0;
 }
 
 void DmsHiSysEventReportTest::SetUpTestCase()
@@ -56,7 +55,7 @@ void DmsHiSysEventReportTest::SetUp()
  * @tc.desc: report start remote ability
  * @tc.type: FUNC
  */
-HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_001, TestSize.Level1)
+HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsHiSysEventReportTest DmsHiSysEventReportTest_001 begin" << std::endl;
 
@@ -73,7 +72,7 @@ HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_001, TestSize.Level1)
  * @tc.desc: report connect remote ability
  * @tc.type: FUNC
  */
-HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_002, TestSize.Level1)
+HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_002, TestSize.Level3)
 {
     DTEST_LOG << "DmsHiSysEventReportTest DmsHiSysEventReportTest_002 begin" << std::endl;
 
@@ -90,7 +89,7 @@ HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_002, TestSize.Level1)
  * @tc.desc: report continue remote ability
  * @tc.type: FUNC
  */
-HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_003, TestSize.Level1)
+HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_003, TestSize.Level3)
 {
     DTEST_LOG << "DmsHiSysEventReportTest DmsHiSysEventReportTest_003 begin" << std::endl;
 
@@ -107,7 +106,7 @@ HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_003, TestSize.Level1)
  * @tc.desc: report start remote ability by call
  * @tc.type: FUNC
  */
-HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_004, TestSize.Level1)
+HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_004, TestSize.Level3)
 {
     DTEST_LOG << "DmsHiSysEventReportTest DmsHiSysEventReportTest_004 begin" << std::endl;
 
@@ -124,7 +123,7 @@ HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_004, TestSize.Level1)
  * @tc.desc: report disconnect remote ability
  * @tc.type: FUNC
  */
-HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_005, TestSize.Level1)
+HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_005, TestSize.Level3)
 {
     DTEST_LOG << "DmsHiSysEventReportTest DmsHiSysEventReportTest_005 begin" << std::endl;
 
@@ -141,7 +140,7 @@ HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_005, TestSize.Level1)
  * @tc.desc: report release remote ability
  * @tc.type: FUNC
  */
-HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_006, TestSize.Level1)
+HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_006, TestSize.Level3)
 {
     DTEST_LOG << "DmsHiSysEventReportTest DmsHiSysEventReportTest_006 begin" << std::endl;
 
@@ -158,7 +157,7 @@ HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_006, TestSize.Level1)
  * @tc.desc: report start remote ability
  * @tc.type: FUNC
  */
-HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_007, TestSize.Level1)
+HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_007, TestSize.Level3)
 {
     DTEST_LOG << "DmsHiSysEventReportTest DmsHiSysEventReportTest_007 begin" << std::endl;
 
@@ -174,7 +173,7 @@ HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_007, TestSize.Level1)
  * @tc.desc: report connect remote ability
  * @tc.type: FUNC
  */
-HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_008, TestSize.Level1)
+HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_008, TestSize.Level3)
 {
     DTEST_LOG << "DmsHiSysEventReportTest DmsHiSysEventReportTest_008 begin" << std::endl;
 
@@ -190,7 +189,7 @@ HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_008, TestSize.Level1)
  * @tc.desc: report continue remote ability
  * @tc.type: FUNC
  */
-HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_009, TestSize.Level1)
+HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_009, TestSize.Level3)
 {
     DTEST_LOG << "DmsHiSysEventReportTest DmsHiSysEventReportTest_009 begin" << std::endl;
 
@@ -206,7 +205,7 @@ HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_009, TestSize.Level1)
  * @tc.desc: report start remote ability by call
  * @tc.type: FUNC
  */
-HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_010, TestSize.Level1)
+HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_010, TestSize.Level3)
 {
     DTEST_LOG << "DmsHiSysEventReportTest DmsHiSysEventReportTest_010 begin" << std::endl;
 
@@ -222,7 +221,7 @@ HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_010, TestSize.Level1)
  * @tc.desc: report disconnect remote ability
  * @tc.type: FUNC
  */
-HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_011, TestSize.Level1)
+HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_011, TestSize.Level3)
 {
     DTEST_LOG << "DmsHiSysEventReportTest DmsHiSysEventReportTest_011 begin" << std::endl;
 
@@ -238,7 +237,7 @@ HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_011, TestSize.Level1)
  * @tc.desc: report release remote ability
  * @tc.type: FUNC
  */
-HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_012, TestSize.Level1)
+HWTEST_F(DmsHiSysEventReportTest, DmsHiSysEventReportTest_012, TestSize.Level3)
 {
     DTEST_LOG << "DmsHiSysEventReportTest DmsHiSysEventReportTest_012 begin" << std::endl;
 
