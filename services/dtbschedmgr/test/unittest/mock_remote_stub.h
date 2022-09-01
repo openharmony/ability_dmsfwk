@@ -13,20 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef DMS_FREE_INSTALL_CB_STUB_TEST_H
-#define DMS_FREE_INSTALL_CB_STUB_TEST_H
+#ifndef MOCK_REMOTE_STUB_H
+#define MOCK_REMOTE_STUB_H
 
-#include "gtest/gtest.h"
+#include "iremote_broker.h"
+#include "iremote_stub.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
-class DmsFreeInstallCallbackStubTest : public testing::Test {
+class MockRemoteInterface : public OHOS::IRemoteBroker {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.test.mock");
 };
-} // namespace DistributedSchedule
-} // namespace OHOS
-#endif // DMS_FREE_INSTALL_CB_STUB_TEST_H
+
+class MockRemoteStub : public IRemoteStub<MockRemoteInterface> {
+public:
+    ~MockRemoteStub() = default;
+    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+        MessageOption& option) override
+    {
+        return 0;
+    }
+};
+}
+}
+#endif
