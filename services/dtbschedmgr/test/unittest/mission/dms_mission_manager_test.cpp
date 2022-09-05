@@ -207,7 +207,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions003, TestSize.Level1)
  * @tc.desc: prepare and sync missions from remote
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions004, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions004, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions004 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(DEVICE_ID, false, 0);
@@ -220,7 +220,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions004, TestSize.Level2)
  * @tc.desc: prepare and sync missions from remote
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions005, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions005, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions005 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions("", false, 0);
@@ -233,7 +233,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions005, TestSize.Level2)
  * @tc.desc: prepare and sync missions from remote
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions006, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions006, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions006 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(localDeviceId_, false, 0);
@@ -246,7 +246,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions006, TestSize.Level2)
  * @tc.desc: prepare and sync missions from remote
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions007, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions007, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions007 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(DEVICE_ID, true, 0);
@@ -259,7 +259,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions007, TestSize.Level2)
  * @tc.desc: prepare and sync missions from remote
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions008, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions008, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions008 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions("", true, 0);
@@ -272,7 +272,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions008, TestSize.Level2)
  * @tc.desc: prepare and sync missions from remote
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions009, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions009, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions009 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(localDeviceId_, true, 0);
@@ -285,7 +285,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions009, TestSize.Level2)
  * @tc.desc: prepare and sync missions from remote
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions010, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions010, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions010 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(DEVICE_ID, true, 1);
@@ -298,7 +298,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions010, TestSize.Level2)
  * @tc.desc: prepare and sync missions from remote
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions011, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions011, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions011 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions("", true, 1);
@@ -311,7 +311,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions011, TestSize.Level2)
  * @tc.desc: prepare and sync missions from remote
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions012, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions012, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions012 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(localDeviceId_, true, 1);
@@ -324,7 +324,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions012, TestSize.Level2)
  * @tc.desc: prepare and sync missions from remote
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions013, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions013, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions013 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(DEVICE_ID, localDeviceId_);
@@ -337,7 +337,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions013, TestSize.Level2)
  * @tc.desc: prepare and sync missions from remote
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions014, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions014, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions014 begin" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
@@ -354,7 +354,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions014, TestSize.Level2)
  * @tc.desc: need sync device
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testNeedSyncDevice001, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testNeedSyncDevice001, TestSize.Level3)
 {
     DTEST_LOG << "testCleanMissionResources001 begin" << std::endl;
     bool ret = DistributedSchedMissionManager::GetInstance().needSyncDevice(DEVICE_ID);
@@ -363,25 +363,38 @@ HWTEST_F(DMSMissionManagerTest, testNeedSyncDevice001, TestSize.Level2)
 }
 
 /**
+ * @tc.name: testNeedSyncDevice002
+ * @tc.desc: need sync device
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNeedSyncDevice002, TestSize.Level3)
+{
+    DTEST_LOG << "testNeedSyncDevice002 begin" << std::endl;
+    remoteSyncDeviceSet_.emplace(DEVICE_ID);
+    bool ret = DistributedSchedMissionManager::GetInstance().needSyncDevice(DEVICE_ID);
+    EXPECT_EQ(false, ret);
+    DTEST_LOG << "testNeedSyncDevice002 end" << std::endl;
+}
+
+/**
  * @tc.name: testHasSyncListener001
  * @tc.desc: need sync device
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testHasSyncListener001, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testHasSyncListener001, TestSize.Level3)
 {
-    DTEST_LOG << "testCleanMissionResources001 begin" << std::endl;
+    DTEST_LOG << "testHasSyncListener001 begin" << std::endl;
     bool ret = DistributedSchedMissionManager::GetInstance().HasSyncListener(DEVICE_ID);
     EXPECT_EQ(false, ret);
     DTEST_LOG << "testHasSyncListener001 end" << std::endl;
 }
-
 
 /**
  * @tc.name: testCleanMissionResources001
  * @tc.desc: prepare and sync missions from remote
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testCleanMissionResources001, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testCleanMissionResources001, TestSize.Level3)
 {
     DTEST_LOG << "testCleanMissionResources001 begin" << std::endl;
     DistributedSchedMissionManager::GetInstance().CleanMissionResources(DEVICE_ID);
@@ -438,7 +451,7 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions003, TestSize.Level1)
  * @tc.desc: stop sync missions from remote with empty deviceId
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions004, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions004, TestSize.Level3)
 {
     DTEST_LOG << "testStopSyncRemoteMissions004 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StopSyncRemoteMissions("", false, true);
@@ -451,7 +464,7 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions004, TestSize.Level2)
  * @tc.desc: stop sync missions from remote with local deviceId
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions005, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions005, TestSize.Level3)
 {
     DTEST_LOG << "testStopSyncRemoteMissions005 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StopSyncRemoteMissions(localDeviceId_, false, true);
@@ -464,7 +477,7 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions005, TestSize.Level2)
  * @tc.desc: stop sync missions from remote with deviceId
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions006, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions006, TestSize.Level3)
 {
     DTEST_LOG << "testStopSyncRemoteMissions006 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StopSyncRemoteMissions(DEVICE_ID, false, true);
@@ -477,7 +490,7 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions006, TestSize.Level2)
  * @tc.desc: stop sync missions from remote with empty deviceId
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions007, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions007, TestSize.Level3)
 {
     DTEST_LOG << "testStopSyncRemoteMissions007 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StopSyncRemoteMissions("", true, true);
@@ -490,7 +503,7 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions007, TestSize.Level2)
  * @tc.desc: stop sync missions from remote with local deviceId
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions008, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions008, TestSize.Level3)
 {
     DTEST_LOG << "testStopSyncRemoteMissions008 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StopSyncRemoteMissions(localDeviceId_, true, true);
@@ -503,7 +516,7 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions008, TestSize.Level2)
  * @tc.desc: stop sync missions from remote with deviceId
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions009, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions009, TestSize.Level3)
 {
     DTEST_LOG << "testStopSyncRemoteMissions009 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StopSyncRemoteMissions(DEVICE_ID, true, true);
@@ -516,7 +529,7 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions009, TestSize.Level2)
  * @tc.desc: stop sync missions from remote with empty deviceId
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions010, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions010, TestSize.Level3)
 {
     DTEST_LOG << "testStopSyncRemoteMissions010 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StopSyncRemoteMissions("", true, false);
@@ -529,7 +542,7 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions010, TestSize.Level2)
  * @tc.desc: stop sync missions from remote with local deviceId
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions011, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions011, TestSize.Level3)
 {
     DTEST_LOG << "testStopSyncRemoteMissions011 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StopSyncRemoteMissions(localDeviceId_, true, false);
@@ -542,7 +555,7 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions011, TestSize.Level2)
  * @tc.desc: stop sync missions from remote with deviceId
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions012, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions012, TestSize.Level3)
 {
     DTEST_LOG << "testStopSyncRemoteMissions012 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StopSyncRemoteMissions(DEVICE_ID, true, false);
@@ -607,7 +620,7 @@ HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener002, TestSize.Level1)
  * @tc.desc: test register mission listener
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener003, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener003, TestSize.Level3)
 {
     DTEST_LOG << "testRegisterMissionListener003 begin" << std::endl;
     sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
@@ -621,13 +634,71 @@ HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener003, TestSize.Level2)
  * @tc.desc: test register mission listener
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener004, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener004, TestSize.Level3)
 {
     DTEST_LOG << "testRegisterMissionListener004 begin" << std::endl;
     sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
     auto ret = DistributedSchedMissionManager::GetInstance().RegisterMissionListener(U16DEVICE_ID, listener);
     EXPECT_TRUE(ret == ERR_NONE);
     DTEST_LOG << "testRegisterMissionListener004 end" << std::endl;
+}
+
+/**
+ * @tc.name: testRegisterMissionListener005
+ * @tc.desc: test register mission listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener005, TestSize.Level3)
+{
+    DTEST_LOG << "testRegisterMissionListener005 begin" << std::endl;
+    sptr<IRemoteObject> listener = nullptr;
+    auto ret = DistributedSchedMissionManager::GetInstance().RegisterMissionListener(u"", listener);
+    EXPECT_TRUE(ret == INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "testRegisterMissionListener005 end" << std::endl;
+}
+
+/**
+ * @tc.name: testRegisterMissionListener006
+ * @tc.desc: test register mission listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener006, TestSize.Level3)
+{
+    DTEST_LOG << "testRegisterMissionListener006 begin" << std::endl;
+    sptr<IRemoteObject> listener = nullptr;
+    auto ret = DistributedSchedMissionManager::GetInstance().RegisterMissionListener(U16DEVICE_ID, listener);
+    EXPECT_TRUE(ret == INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "testRegisterMissionListener006 end" << std::endl;
+}
+
+/**
+ * @tc.name: testRegisterMissionListener007
+ * @tc.desc: test register mission listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener007, TestSize.Level3)
+{
+    DTEST_LOG << "testRegisterMissionListener007 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(localDeviceId_);
+    sptr<IRemoteObject> listener = nullptr;
+    auto ret = DistributedSchedMissionManager::GetInstance().RegisterMissionListener(deviceId, listener);
+    EXPECT_TRUE(ret == INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "testRegisterMissionListener007 end" << std::endl;
+}
+
+/**
+ * @tc.name: testRegisterMissionListener008
+ * @tc.desc: test register mission listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener008, TestSize.Level3)
+{
+    DTEST_LOG << "testRegisterMissionListener008 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(localDeviceId_);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    auto ret = DistributedSchedMissionManager::GetInstance().RegisterMissionListener(deviceId, listener);
+    EXPECT_TRUE(ret == INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "testRegisterMissionListener008 end" << std::endl;
 }
 
 /**
@@ -656,7 +727,7 @@ HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener001, TestSize.Level
  * @tc.desc: register mission listener
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener002, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener002, TestSize.Level3)
 {
     DTEST_LOG << "testUnRegisterMissionListener002 begin" << std::endl;
     sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
@@ -670,12 +741,41 @@ HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener002, TestSize.Level
  * @tc.desc: register mission listener
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener003, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener003, TestSize.Level3)
 {
     DTEST_LOG << "testUnRegisterMissionListener003 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().UnRegisterMissionListener(U16DEVICE_ID, nullptr);
     EXPECT_TRUE(ret == INVALID_PARAMETERS_ERR);
     DTEST_LOG << "testUnRegisterMissionListener003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testUnRegisterMissionListener004
+ * @tc.desc: register mission listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener004, TestSize.Level3)
+{
+    DTEST_LOG << "testUnRegisterMissionListener004 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(localDeviceId_);
+    auto ret = DistributedSchedMissionManager::GetInstance().UnRegisterMissionListener(deviceId, nullptr);
+    EXPECT_TRUE(ret == INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "testUnRegisterMissionListener004 end" << std::endl;
+}
+
+/**
+ * @tc.name: testUnRegisterMissionListener005
+ * @tc.desc: register mission listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener005, TestSize.Level3)
+{
+    DTEST_LOG << "testUnRegisterMissionListener005 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(localDeviceId_);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    auto ret = DistributedSchedMissionManager::GetInstance().UnRegisterMissionListener(deviceId, listener);
+    EXPECT_TRUE(ret == INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "testUnRegisterMissionListener005 end" << std::endl;
 }
 
 /**
@@ -716,7 +816,7 @@ HWTEST_F(DMSMissionManagerTest, testGetMissionInfos001, TestSize.Level1)
  * @tc.desc: get missions
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testGetMissionInfos002, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testGetMissionInfos002, TestSize.Level3)
 {
     DTEST_LOG << "testGetMissionInfos002 begin" << std::endl;
     std::string deviceid = localDeviceId_;
@@ -733,7 +833,7 @@ HWTEST_F(DMSMissionManagerTest, testGetMissionInfos002, TestSize.Level2)
  * @tc.desc: get missions
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testGetMissionInfos003, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testGetMissionInfos003, TestSize.Level3)
 {
     DTEST_LOG << "testGetMissionInfos003 begin" << std::endl;
     std::string deviceid = "";
@@ -750,7 +850,7 @@ HWTEST_F(DMSMissionManagerTest, testGetMissionInfos003, TestSize.Level2)
  * @tc.desc: get missions
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testGetMissionInfos004, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testGetMissionInfos004, TestSize.Level3)
 {
     DTEST_LOG << "testGetMissionInfos004 begin" << std::endl;
     std::string deviceid = DEVICE_ID;
@@ -766,7 +866,7 @@ HWTEST_F(DMSMissionManagerTest, testGetMissionInfos004, TestSize.Level2)
  * @tc.desc: get missions
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testGetMissionInfos005, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testGetMissionInfos005, TestSize.Level3)
 {
     DTEST_LOG << "testGetMissionInfos005 begin" << std::endl;
     std::string deviceid = "";
@@ -782,7 +882,7 @@ HWTEST_F(DMSMissionManagerTest, testGetMissionInfos005, TestSize.Level2)
  * @tc.desc: get missions
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testGetMissionInfos006, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testGetMissionInfos006, TestSize.Level3)
 {
     DTEST_LOG << "testGetMissionInfos006 begin" << std::endl;
     std::string deviceid = "";
@@ -810,7 +910,7 @@ HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions001, TestSize.Level
  * @tc.desc: test empty deviceId, return error code
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions002, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions002, TestSize.Level3)
 {
     DTEST_LOG << "testFetchCachedRemoteMissions002 begin" << std::endl;
     std::vector<DstbMissionInfo> infos;
@@ -824,7 +924,7 @@ HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions002, TestSize.Level
  * @tc.desc: test local deviceId, return error code
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions003, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions003, TestSize.Level3)
 {
     DTEST_LOG << "testFetchCachedRemoteMissions003 begin" << std::endl;
     std::vector<DstbMissionInfo> infos;
@@ -838,7 +938,7 @@ HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions003, TestSize.Level
  * @tc.desc: test stop fake device, return error code
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions004, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions004, TestSize.Level3)
 {
     DTEST_LOG << "testFetchCachedRemoteMissions004 begin" << std::endl;
     std::vector<DstbMissionInfo> infos;
@@ -852,7 +952,7 @@ HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions004, TestSize.Level
  * @tc.desc: test empty deviceId, return error code
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions005, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions005, TestSize.Level3)
 {
     DTEST_LOG << "testFetchCachedRemoteMissions005 begin" << std::endl;
     std::vector<DstbMissionInfo> infos;
@@ -866,7 +966,7 @@ HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions005, TestSize.Level
  * @tc.desc: test local deviceId, return error code
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions006, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions006, TestSize.Level3)
 {
     DTEST_LOG << "testFetchCachedRemoteMissions006 begin" << std::endl;
     std::vector<DstbMissionInfo> infos;
@@ -881,7 +981,7 @@ HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions006, TestSize.Level
  * @tc.desc: test stop fake device, return error code
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions007, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions007, TestSize.Level3)
 {
     DTEST_LOG << "testFetchCachedRemoteMissions007 begin" << std::endl;
     std::vector<DstbMissionInfo> infos;
@@ -896,7 +996,7 @@ HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions007, TestSize.Level
  * @tc.desc: test empty deviceId, return error code
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions008, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions008, TestSize.Level3)
 {
     DTEST_LOG << "testFetchCachedRemoteMissions008 begin" << std::endl;
     std::vector<DstbMissionInfo> infos;
@@ -910,7 +1010,7 @@ HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions008, TestSize.Level
  * @tc.desc: test local deviceId, return error code
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions009, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions009, TestSize.Level3)
 {
     DTEST_LOG << "testFetchCachedRemoteMissions009 begin" << std::endl;
     std::vector<DstbMissionInfo> infos;
@@ -925,7 +1025,7 @@ HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions009, TestSize.Level
  * @tc.desc: test notify remote died
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testNotifyRemoteDied001, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testNotifyRemoteDied001, TestSize.Level3)
 {
     DTEST_LOG << "testNotifyRemoteDied001 begin" << std::endl;
     wptr<IRemoteObject> remote = nullptr;
@@ -934,28 +1034,15 @@ HWTEST_F(DMSMissionManagerTest, testNotifyRemoteDied001, TestSize.Level2)
 }
 
 /**
- * @tc.name: testInitDataStorage001
- * @tc.desc: test init data storage
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testInitDataStorage001, TestSize.Level2)
-{
-    DTEST_LOG << "testInitDataStorage001 begin" << std::endl;
-    auto ret = DistributedSchedMissionManager::GetInstance().InitDataStorage();
-    EXPECT_TRUE(ret == ERR_NONE);
-    DTEST_LOG << "testInitDataStorage001 end" << std::endl;
-}
-
-/**
  * @tc.name: testStopDataStorage001
  * @tc.desc: test stop data storage
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStopDataStorage001, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStopDataStorage001, TestSize.Level3)
 {
     DTEST_LOG << "testStopDataStorage001 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StopDataStorage();
-    EXPECT_TRUE(ret == ERR_NONE);
+    EXPECT_TRUE(ret == ERR_NULL_OBJECT);
     DTEST_LOG << "testStopDataStorage001 end" << std::endl;
 }
 
@@ -964,11 +1051,11 @@ HWTEST_F(DMSMissionManagerTest, testStopDataStorage001, TestSize.Level2)
  * @tc.desc: test store snapshot info
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testStoreSnapshotInfo001, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testStoreSnapshotInfo001, TestSize.Level3)
 {
     DTEST_LOG << "testStoreSnapshotInfo001 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StoreSnapshotInfo(DEVICE_ID, 0, 0, 0);
-    EXPECT_TRUE(ret == INVALID_PARAMETERS_ERR);
+    EXPECT_TRUE(ret == ERR_NULL_OBJECT);
     DTEST_LOG << "testStoreSnapshotInfo001 end" << std::endl;
 }
 
@@ -977,12 +1064,77 @@ HWTEST_F(DMSMissionManagerTest, testStoreSnapshotInfo001, TestSize.Level2)
  * @tc.desc: test remove snapshot info
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testRemoveSnapshotInfo001, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testRemoveSnapshotInfo001, TestSize.Level3)
 {
     DTEST_LOG << "testRemoveSnapshotInfo001 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().RemoveSnapshotInfo(DEVICE_ID, 0);
-    EXPECT_TRUE(ret == INVALID_PARAMETERS_ERR);
+    EXPECT_TRUE(ret == ERR_NULL_OBJECT);
     DTEST_LOG << "testRemoveSnapshotInfo001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testInitDataStorage001
+ * @tc.desc: test init data storage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testInitDataStorage001, TestSize.Level3)
+{
+    DTEST_LOG << "testInitDataStorage001 begin" << std::endl;
+    auto ret = DistributedSchedMissionManager::GetInstance().InitDataStorage();
+    EXPECT_TRUE(ret == ERR_NONE);
+    DTEST_LOG << "testInitDataStorage001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testInitDataStorage002
+ * @tc.desc: test init data storage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testInitDataStorage002, TestSize.Level3)
+{
+    DTEST_LOG << "testInitDataStorage002 begin" << std::endl;
+    auto ret = DistributedSchedMissionManager::GetInstance().InitDataStorage();
+    EXPECT_TRUE(ret == ERR_NONE);
+    DTEST_LOG << "testInitDataStorage002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testStopDataStorage002
+ * @tc.desc: test stop data storage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testStopDataStorage002, TestSize.Level3)
+{
+    DTEST_LOG << "testStopDataStorage002 begin" << std::endl;
+    auto ret = DistributedSchedMissionManager::GetInstance().StopDataStorage();
+    EXPECT_TRUE(ret == ERR_NONE);
+    DTEST_LOG << "testStopDataStorage002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testStoreSnapshotInfo002
+ * @tc.desc: test store snapshot info
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testStoreSnapshotInfo002, TestSize.Level3)
+{
+    DTEST_LOG << "testStoreSnapshotInfo002 begin" << std::endl;
+    auto ret = DistributedSchedMissionManager::GetInstance().StoreSnapshotInfo(DEVICE_ID, 0, 0, 0);
+    EXPECT_TRUE(ret == INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "testStoreSnapshotInfo002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testRemoveSnapshotInfo002
+ * @tc.desc: test remove snapshot info
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testRemoveSnapshotInfo002, TestSize.Level3)
+{
+    DTEST_LOG << "testRemoveSnapshotInfo002 begin" << std::endl;
+    auto ret = DistributedSchedMissionManager::GetInstance().RemoveSnapshotInfo(DEVICE_ID, 0);
+    EXPECT_TRUE(ret == INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "testRemoveSnapshotInfo002 end" << std::endl;
 }
 
 /**
@@ -990,7 +1142,7 @@ HWTEST_F(DMSMissionManagerTest, testRemoveSnapshotInfo001, TestSize.Level2)
  * @tc.desc: test get remote mission snapshot info
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testGetRemoteMissionSnapshotInfo001, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testGetRemoteMissionSnapshotInfo001, TestSize.Level3)
 {
     DTEST_LOG << "testGetRemoteMissionSnapshotInfo001 begin" << std::endl;
     unique_ptr<AAFwk::MissionSnapshot> missionSnapshot = nullptr;
@@ -1004,7 +1156,7 @@ HWTEST_F(DMSMissionManagerTest, testGetRemoteMissionSnapshotInfo001, TestSize.Le
  * @tc.desc: test device online notify
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testDeviceOnlineNotify001, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testDeviceOnlineNotify001, TestSize.Level3)
 {
     DTEST_LOG << "testDeviceOnlineNotify001 begin" << std::endl;
     DistributedSchedMissionManager::GetInstance().DeviceOnlineNotify("");
@@ -1016,7 +1168,7 @@ HWTEST_F(DMSMissionManagerTest, testDeviceOnlineNotify001, TestSize.Level2)
  * @tc.desc: test device online notify
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testDeviceOnlineNotify002, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testDeviceOnlineNotify002, TestSize.Level3)
 {
     DTEST_LOG << "testDeviceOnlineNotify002 begin" << std::endl;
     DistributedSchedMissionManager::GetInstance().DeviceOnlineNotify(DEVICE_ID);
@@ -1024,11 +1176,24 @@ HWTEST_F(DMSMissionManagerTest, testDeviceOnlineNotify002, TestSize.Level2)
 }
 
 /**
+ * @tc.name: testDeviceOnlineNotify003
+ * @tc.desc: test device online notify
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testDeviceOnlineNotify003, TestSize.Level3)
+{
+    DTEST_LOG << "testDeviceOnlineNotify003 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().DeviceOnlineNotify(DEVICE_ID);
+    DTEST_LOG << "testDeviceOnlineNotify003 end" << std::endl;
+}
+
+/**
  * @tc.name: testDeviceOfflineNotify001
  * @tc.desc: test device offline notify
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testDeviceOfflineNotify001, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testDeviceOfflineNotify001, TestSize.Level3)
 {
     DTEST_LOG << "testDeviceOfflineNotify001 begin" << std::endl;
     DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify("");
@@ -1036,11 +1201,24 @@ HWTEST_F(DMSMissionManagerTest, testDeviceOfflineNotify001, TestSize.Level2)
 }
 
 /**
+ * @tc.name: testDeviceOfflineNotify002
+ * @tc.desc: test device offline notify
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testDeviceOfflineNotify002, TestSize.Level3)
+{
+    DTEST_LOG << "testDeviceOfflineNotify002 begin" << std::endl;
+    std::set<std::string> remoteSyncDeviceSet_ = set<std::string>();
+    DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(DEVICE_ID);
+    DTEST_LOG << "testDeviceOfflineNotify002 end" << std::endl;
+}
+
+/**
  * @tc.name: testDeleteDataStorage001
  * @tc.desc: test delete data storage
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testDeleteDataStorage001, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testDeleteDataStorage001, TestSize.Level3)
 {
     DTEST_LOG << "testDeleteDataStorage001 begin" << std::endl;
     DistributedSchedMissionManager::GetInstance().DeleteDataStorage("", false);
@@ -1052,7 +1230,7 @@ HWTEST_F(DMSMissionManagerTest, testDeleteDataStorage001, TestSize.Level2)
  * @tc.desc: test delete data storage
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testDeleteDataStorage002, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testDeleteDataStorage002, TestSize.Level3)
 {
     DTEST_LOG << "testDeleteDataStorage002 begin" << std::endl;
     DistributedSchedMissionManager::GetInstance().DeleteDataStorage(DEVICE_ID, false);
@@ -1060,11 +1238,35 @@ HWTEST_F(DMSMissionManagerTest, testDeleteDataStorage002, TestSize.Level2)
 }
 
 /**
+ * @tc.name: testDeleteDataStorage003
+ * @tc.desc: test delete data storage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testDeleteDataStorage003, TestSize.Level3)
+{
+    DTEST_LOG << "testDeleteDataStorage003 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().DeleteDataStorage("", true);
+    DTEST_LOG << "testDeleteDataStorage003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testDeleteDataStorage004
+ * @tc.desc: test delete data storage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testDeleteDataStorage004, TestSize.Level3)
+{
+    DTEST_LOG << "testDeleteDataStorage004 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().DeleteDataStorage(DEVICE_ID, true);
+    DTEST_LOG << "testDeleteDataStorage004 end" << std::endl;
+}
+
+/**
  * @tc.name: testNotifySnapshotChanged001
  * @tc.desc: test notify snapshot changed
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testNotifySnapshotChanged001, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testNotifySnapshotChanged001, TestSize.Level3)
 {
     DTEST_LOG << "testNotifySnapshotChanged001 begin" << std::endl;
     DistributedSchedMissionManager::GetInstance().NotifySnapshotChanged(DEVICE_ID, 0);
@@ -1076,7 +1278,7 @@ HWTEST_F(DMSMissionManagerTest, testNotifySnapshotChanged001, TestSize.Level2)
  * @tc.desc: test on remote died
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testOnRemoteDied001, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testOnRemoteDied001, TestSize.Level3)
 {
     DTEST_LOG << "testOnRemoteDied001 begin" << std::endl;
     wptr<IRemoteObject> remote = nullptr;
@@ -1089,12 +1291,486 @@ HWTEST_F(DMSMissionManagerTest, testOnRemoteDied001, TestSize.Level2)
  * @tc.desc: test on remote died
  * @tc.type: FUNC
  */
-HWTEST_F(DMSMissionManagerTest, testOnRemoteDied002, TestSize.Level2)
+HWTEST_F(DMSMissionManagerTest, testOnRemoteDied002, TestSize.Level3)
 {
     DTEST_LOG << "testOnRemoteDied002 begin" << std::endl;
     wptr<IRemoteObject> remote = new RemoteMissionListenerTest();
     DistributedSchedMissionManager::GetInstance().OnRemoteDied(remote);
     DTEST_LOG << "testOnRemoteDied002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testStartSyncMissionsFromRemote001
+ * @tc.desc: prepare and sync missions from remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testStartSyncMissionsFromRemote001, TestSize.Level3)
+{
+    DTEST_LOG << "testStartSyncMissionsFromRemote001 begin" << std::endl;
+    std::vector<DstbMissionInfo> missionInfos;
+    CallerInfo callerInfo;
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().GenerateCallerInfo(callerInfo);
+    auto ret = DistributedSchedMissionManager::GetInstance().StartSyncMissionsFromRemote(callerInfo, missionInfos);
+    EXPECT_TRUE(ret == ERR_NONE);
+    DTEST_LOG << "testStartSyncMissionsFromRemote001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testStopSyncMissionsFromRemote001
+ * @tc.desc: stop sync missions from remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testStopSyncMissionsFromRemote001, TestSize.Level3)
+{
+    DTEST_LOG << "testStopSyncMissionsFromRemote001 begin" << std::endl;
+    std::vector<DstbMissionInfo> missionInfos;
+    CallerInfo callerInfo;
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().StopSyncMissionsFromRemote("");
+    DTEST_LOG << "testStopSyncMissionsFromRemote001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testStopSyncMissionsFromRemote002
+ * @tc.desc: stop sync missions from remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testStopSyncMissionsFromRemote002, TestSize.Level3)
+{
+    DTEST_LOG << "testStopSyncMissionsFromRemote002 begin" << std::endl;
+    std::vector<DstbMissionInfo> missionInfos;
+    CallerInfo callerInfo;
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().StopSyncMissionsFromRemote(DEVICE_ID);
+    DTEST_LOG << "testStopSyncMissionsFromRemote002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testEnqueueCachedSnapshotInfo001
+ * @tc.desc: enqueue cached snapshot info
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testEnqueueCachedSnapshotInfo001, TestSize.Level3)
+{
+    DTEST_LOG << "testEnqueueCachedSnapshotInfo001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().EnqueueCachedSnapshotInfo("", 1, nullptr);
+    DTEST_LOG << "testEnqueueCachedSnapshotInfo001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testEnqueueCachedSnapshotInfo002
+ * @tc.desc: enqueue cached snapshot info
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testEnqueueCachedSnapshotInfo002, TestSize.Level3)
+{
+    DTEST_LOG << "testEnqueueCachedSnapshotInfo002 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().EnqueueCachedSnapshotInfo(DEVICE_ID, 1, nullptr);
+    DTEST_LOG << "testEnqueueCachedSnapshotInfo002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testEnqueueCachedSnapshotInfo003
+ * @tc.desc: enqueue cached snapshot info
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testEnqueueCachedSnapshotInfo003, TestSize.Level3)
+{
+    DTEST_LOG << "testEnqueueCachedSnapshotInfo003 begin" << std::endl;
+    unique_ptr<Snapshot> snapshot = make_unique<Snapshot>();
+    DistributedSchedMissionManager::GetInstance().EnqueueCachedSnapshotInfo("", 1, std::move(snapshot));
+    DTEST_LOG << "testEnqueueCachedSnapshotInfo003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testDequeueCachedSnapshotInfo001
+ * @tc.desc: enqueue cached snapshot info
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testDequeueCachedSnapshotInfo001, TestSize.Level3)
+{
+    DTEST_LOG << "testDequeueCachedSnapshotInfo001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().DequeueCachedSnapshotInfo("", 1);
+    DTEST_LOG << "testDequeueCachedSnapshotInfo001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testDequeueCachedSnapshotInfo002
+ * @tc.desc: enqueue cached snapshot info
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testDequeueCachedSnapshotInfo002, TestSize.Level3)
+{
+    DTEST_LOG << "testDequeueCachedSnapshotInfo002 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().DequeueCachedSnapshotInfo(DEVICE_ID, 1);
+    DTEST_LOG << "testDequeueCachedSnapshotInfo002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testRebornMissionCache001
+ * @tc.desc: reborn mission cache
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testRebornMissionCache001, TestSize.Level3)
+{
+    DTEST_LOG << "testRebornMissionCache001 begin" << std::endl;
+    std::vector<DstbMissionInfo> missionInfos;
+    DistributedSchedMissionManager::GetInstance().RebornMissionCache("", missionInfos);
+    DTEST_LOG << "testRebornMissionCache001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testRebornMissionCache002
+ * @tc.desc: reborn mission cache
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testRebornMissionCache002, TestSize.Level3)
+{
+    DTEST_LOG << "testRebornMissionCache002 begin" << std::endl;
+    std::vector<DstbMissionInfo> missionInfos;
+    DistributedSchedMissionManager::GetInstance().RebornMissionCache(DEVICE_ID, missionInfos);
+    DTEST_LOG << "testRebornMissionCache002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyMissionsChangedFromRemote001
+ * @tc.desc: notify missions changed from remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedFromRemote001, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyMissionsChangedFromRemote001 begin" << std::endl;
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = "";
+    callerInfo.uid = 0;
+    callerInfo.pid = 0;
+    callerInfo.dmsVersion = 0;
+    std::vector<DstbMissionInfo> missionInfos;
+    DistributedSchedMissionManager::GetInstance().Init();
+    auto ret = DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedFromRemote(callerInfo, missionInfos);
+    EXPECT_TRUE(ret == ERR_NONE);
+    DTEST_LOG << "testNotifyMissionsChangedFromRemote001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyMissionsChangedFromRemote002
+ * @tc.desc: notify missions changed from remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedFromRemote002, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyMissionsChangedFromRemote002 begin" << std::endl;
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = DEVICE_ID;
+    callerInfo.uid = 0;
+    callerInfo.pid = 0;
+    callerInfo.dmsVersion = 0;
+    std::vector<DstbMissionInfo> missionInfos;
+    DistributedSchedMissionManager::GetInstance().Init();
+    auto ret = DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedFromRemote(callerInfo, missionInfos);
+    EXPECT_TRUE(ret == INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "testNotifyMissionsChangedFromRemote002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyLocalMissionsChanged001
+ * @tc.desc: notify local missions changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyLocalMissionsChanged001, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyLocalMissionsChanged001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().NotifyLocalMissionsChanged();
+    DTEST_LOG << "testNotifyLocalMissionsChanged001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyMissionSnapshotCreated001
+ * @tc.desc: notify mission snapshot created
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyMissionSnapshotCreated001, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyMissionSnapshotCreated001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().NotifyMissionSnapshotCreated(1);
+    DTEST_LOG << "testNotifyMissionSnapshotCreated001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyMissionSnapshotChanged001
+ * @tc.desc: notify mission snapshot changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyMissionSnapshotChanged001, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyMissionSnapshotChanged001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().NotifyMissionSnapshotChanged(1);
+    DTEST_LOG << "testNotifyMissionSnapshotChanged001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyMissionSnapshotDestroyed001
+ * @tc.desc: notify mission snapshot destroyed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyMissionSnapshotDestroyed001, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyMissionSnapshotDestroyed001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().NotifyMissionSnapshotDestroyed(1);
+    DTEST_LOG << "testNotifyMissionSnapshotDestroyed001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyMissionsChangedToRemote001
+ * @tc.desc: notify missions changed to remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedToRemote001, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyMissionsChangedToRemote001 begin" << std::endl;
+    std::vector<DstbMissionInfo> missionInfos;
+    auto ret = DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedToRemote(missionInfos);
+    EXPECT_TRUE(ret == ERR_NONE);
+    DTEST_LOG << "testNotifyMissionsChangedToRemote001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyMissionsChangedToRemoteInner001
+ * @tc.desc: notify missions changed to remote inner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedToRemoteInner001, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyMissionsChangedToRemoteInner001 begin" << std::endl;
+    CallerInfo callerInfo;
+    std::vector<DstbMissionInfo> missionInfos;
+    DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedToRemoteInner("", missionInfos, callerInfo);
+    DTEST_LOG << "testNotifyMissionsChangedToRemoteInner001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyMissionsChangedToRemoteInner002
+ * @tc.desc: notify missions changed to remote inner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedToRemoteInner002, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyMissionsChangedToRemoteInner002 begin" << std::endl;
+    CallerInfo callerInfo;
+    std::vector<DstbMissionInfo> missionInfos;
+    DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedToRemoteInner(
+        DEVICE_ID, missionInfos, callerInfo);
+    DTEST_LOG << "testNotifyMissionsChangedToRemoteInner002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testFetchDeviceHandler001
+ * @tc.desc: fetch device handler
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testFetchDeviceHandler001, TestSize.Level3)
+{
+    DTEST_LOG << "testFetchDeviceHandler001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().FetchDeviceHandler("");
+    DTEST_LOG << "testFetchDeviceHandler001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testFetchDeviceHandler002
+ * @tc.desc: fetch device handler
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testFetchDeviceHandler002, TestSize.Level3)
+{
+    DTEST_LOG << "testFetchDeviceHandler002 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().FetchDeviceHandler(DEVICE_ID);
+    DTEST_LOG << "testFetchDeviceHandler002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnRemoteDmsDied001
+ * @tc.desc: on remote dms died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied001, TestSize.Level3)
+{
+    DTEST_LOG << "testOnRemoteDmsDied001 begin" << std::endl;
+    wptr<IRemoteObject> remote = nullptr;
+    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
+    DTEST_LOG << "testOnRemoteDmsDied001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnRemoteDmsDied002
+ * @tc.desc: on remote dms died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied002, TestSize.Level3)
+{
+    DTEST_LOG << "testOnRemoteDmsDied002 begin" << std::endl;
+    wptr<IRemoteObject> remote = wptr<IRemoteObject>();
+    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
+    DTEST_LOG << "testOnRemoteDmsDied002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testRetryStartSyncRemoteMissions001
+ * @tc.desc: retry start sync remote missions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testRetryStartSyncRemoteMissions001, TestSize.Level3)
+{
+    DTEST_LOG << "testRetryStartSyncRemoteMissions001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().RetryStartSyncRemoteMissions("", localDeviceId_, 1);
+    DTEST_LOG << "testRetryStartSyncRemoteMissions001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testRetryStartSyncRemoteMissions002
+ * @tc.desc: retry start sync remote missions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testRetryStartSyncRemoteMissions002, TestSize.Level3)
+{
+    DTEST_LOG << "testRetryStartSyncRemoteMissions002 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().RetryStartSyncRemoteMissions(DEVICE_ID, localDeviceId_, 1);
+    DTEST_LOG << "testRetryStartSyncRemoteMissions002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnMissionListenerDied001
+ * @tc.desc: on mission listener died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnMissionListenerDied001, TestSize.Level3)
+{
+    DTEST_LOG << "testOnMissionListenerDied001 begin" << std::endl;
+    sptr<IRemoteObject> remote = nullptr;
+    DistributedSchedMissionManager::GetInstance().OnMissionListenerDied(remote);
+    DTEST_LOG << "testOnMissionListenerDied001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnMissionListenerDied002
+ * @tc.desc: on mission listener died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnMissionListenerDied002, TestSize.Level3)
+{
+    DTEST_LOG << "testOnMissionListenerDied002 begin" << std::endl;
+    sptr<IRemoteObject> remote = sptr<IRemoteObject>();
+    DistributedSchedMissionManager::GetInstance().OnMissionListenerDied(remote);
+    DTEST_LOG << "testOnMissionListenerDied002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnRemoteDmsDied003
+ * @tc.desc: on remote dms died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied003, TestSize.Level3)
+{
+    DTEST_LOG << "testOnRemoteDmsDied003 begin" << std::endl;
+    sptr<IRemoteObject> remote = nullptr;
+    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
+    DTEST_LOG << "testOnRemoteDmsDied003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnRemoteDmsDied004
+ * @tc.desc: on remote dms died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied004, TestSize.Level3)
+{
+    DTEST_LOG << "testOnRemoteDmsDied004 begin" << std::endl;
+    sptr<IRemoteObject> remote = sptr<IRemoteObject>();
+    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
+    DTEST_LOG << "testOnRemoteDmsDied004 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyDmsProxyProcessDied001
+ * @tc.desc: notify dms proxy process died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyDmsProxyProcessDied001, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyDmsProxyProcessDied001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().NotifyDmsProxyProcessDied();
+    DTEST_LOG << "testNotifyDmsProxyProcessDied001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testRetryRegisterMissionChange001
+ * @tc.desc: retry register mission change
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testRetryRegisterMissionChange001, TestSize.Level3)
+{
+    DTEST_LOG << "testRetryRegisterMissionChange001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().RetryRegisterMissionChange(1);
+    DTEST_LOG << "testRetryRegisterMissionChange001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testInitAllSnapshots001
+ * @tc.desc: init all snapshots
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testInitAllSnapshots001, TestSize.Level3)
+{
+    DTEST_LOG << "testInitAllSnapshots001 begin" << std::endl;
+    std::vector<DstbMissionInfo> missionInfos;
+    DistributedSchedMissionManager::GetInstance().InitAllSnapshots(missionInfos);
+    DTEST_LOG << "testInitAllSnapshots001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testMissionSnapshotChanged001
+ * @tc.desc: mission snapshot changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testMissionSnapshotChanged001, TestSize.Level3)
+{
+    DTEST_LOG << "testMissionSnapshotChanged001 begin" << std::endl;
+    auto ret = DistributedSchedMissionManager::GetInstance().MissionSnapshotChanged(1);
+    EXPECT_TRUE(ret != ERR_NONE);
+    DTEST_LOG << "testMissionSnapshotChanged001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testMissionSnapshotDestroyed001
+ * @tc.desc: mission snapshot destroyed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testMissionSnapshotDestroyed001, TestSize.Level3)
+{
+    DTEST_LOG << "testMissionSnapshotDestroyed001 begin" << std::endl;
+    auto ret = DistributedSchedMissionManager::GetInstance().MissionSnapshotDestroyed(1);
+    EXPECT_TRUE(ret != ERR_NONE);
+    DTEST_LOG << "testMissionSnapshotDestroyed001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnDnetDied001
+ * @tc.desc: on dnet died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnDnetDied001, TestSize.Level3)
+{
+    DTEST_LOG << "testOnDnetDied001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().OnDnetDied();
+    DTEST_LOG << "testOnDnetDied001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
