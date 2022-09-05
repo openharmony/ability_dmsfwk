@@ -22,9 +22,9 @@
 #include <set>
 #include <string>
 
+#include "device_manager.h"
 #include "event_handler.h"
 #include "nocopyable.h"
-#include "softbus_bus_center.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -35,14 +35,19 @@ enum DeviceInfoType {
     TRUST_INFO = 3,
 };
 
+enum NodeDeviceInfoKey {
+    NODE_KEY_UDID = 0,
+    NODE_KEY_UUID = 1,
+};
+
 class DeviceListener {
 public:
     DeviceListener() = default;
     virtual ~DeviceListener() = default;
 
-    virtual void OnDeviceOnline(const NodeBasicInfo* nodeBasicInfo) = 0;
-    virtual void OnDeviceOffline(const NodeBasicInfo* nodeBasicInfo) = 0;
-    virtual void OnDeviceInfoChanged(const std::string& networkId, DeviceInfoType type) = 0;
+    virtual void OnDeviceOnline(const DistributedHardware::DmDeviceInfo& deviceInfo) = 0;
+    virtual void OnDeviceOffline(const DistributedHardware::DmDeviceInfo& deviceInfo) = 0;
+    virtual void OnDeviceInfoChanged(const DistributedHardware::DmDeviceInfo& deviceInfo) = 0;
 };
 
 class DnetworkAdapter {
@@ -55,7 +60,7 @@ public:
     void RemoveDeviceChangeListener(const std::shared_ptr<DeviceListener>& listener);
     std::string GetUdidByNetworkId(const std::string& networkId);
     std::string GetUuidByNetworkId(const std::string& networkId);
-    std::shared_ptr<NodeBasicInfo> GetLocalBasicInfo();
+    bool GetLocalBasicInfo(DistributedHardware::DmDeviceInfo& dmDeviceInfo);
 
     static std::string AnonymizeDeviceId(const std::string& deviceId);
     static std::shared_ptr<DnetworkAdapter> GetInstance();
@@ -63,15 +68,22 @@ public:
 private:
     DISALLOW_COPY_AND_MOVE(DnetworkAdapter);
 
-    std::string GetUuidOrUdidByNetworkId(const std::string& networkId, NodeDeviceInfoKey keyType);
-    static void OnNodeOnline(NodeBasicInfo* info);
-    static void OnNodeOffline(NodeBasicInfo* info);
-    static void OnNodeBasicInfoChanged(NodeBasicInfoType type, NodeBasicInfo* info);
-
-    INodeStateCb nodeStateCb_;
     static std::shared_ptr<AppExecFwk::EventHandler> dnetworkHandler_;
     static std::mutex listenerSetMutex_;
     static std::set<std::shared_ptr<DeviceListener>> listenerSet_;
+
+    std::shared_ptr<DistributedHardware::DeviceStateCallback> stateCallback_;
+    std::shared_ptr<DistributedHardware::DmInitCallback> initCallback_;
+class DeviceInitCallBack : public DistributedHardware::DmInitCallback {
+    void OnRemoteDied() override;
+};
+
+class DmsDeviceStateCallback : public DistributedHardware::DeviceStateCallback {
+    void OnDeviceOnline(const DistributedHardware::DmDeviceInfo& deviceInfo) override;
+    void OnDeviceOffline(const DistributedHardware::DmDeviceInfo& deviceInfo) override;
+    void OnDeviceChanged(const DistributedHardware::DmDeviceInfo& deviceInfo) override;
+    void OnDeviceReady(const DistributedHardware::DmDeviceInfo& deviceInfo) override;
+};
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

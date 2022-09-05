@@ -39,6 +39,7 @@ ohos_shared_library("dmsbaseinner") {
 
   external_deps = [
     "c_utils:utils",
+    "device_manager:devicemanagersdk",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "hisysevent_native:libhisysevent",

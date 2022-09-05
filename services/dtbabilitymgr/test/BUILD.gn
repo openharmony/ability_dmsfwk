@@ -31,7 +31,7 @@ config("test_config") {
 
 dtbabilitymgr_external_deps = [
   "c_utils:utils",
-  "dsoftbus:softbus_client",
+  "device_manager:devicemanagersdk",
   "eventhandler:libeventhandler",
   "hiviewdfx_hilog_native:libhilog",
   "init:libbegetutil",
