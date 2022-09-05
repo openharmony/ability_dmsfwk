@@ -26,8 +26,14 @@ config("distributed_sched_config") {
   if (dmsfwk_mission_manager) {
     defines = [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
   }
+  if (dmsfwk_report_distributedcomponent_memmgr) {
+    defines += [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
+  }
   if (dmsfwk_standard_form_share) {
     defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
+  }
+  if (efficiency_manager_service_enable) {
+    defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
   }
 }
 
@@ -61,17 +67,13 @@ ohos_shared_library("distributedschedsvr") {
 
   external_deps = [
     "ability_base:want",
-    "ability_base:zuri",
     "ability_runtime:ability_manager",
     "access_token:libaccesstoken_sdk",
-    "background_task_mgr:bgtaskmgr_innerkits",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
     "device_manager:devicemanagersdk",
-    "dmsfwk:continuation_manager",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "hitrace_native:hitrace_meter",
     "hitrace_native:libhitrace",
@@ -80,10 +82,13 @@ ohos_shared_library("distributedschedsvr") {
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "os_account:os_account_innerkits",
-    "resource_management:global_resmgr",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+
+  if (efficiency_manager_service_enable) {
+    external_deps += [ "efficiency_manager:suspend_manager_client" ]
+  }
 
   deps = [ "//foundation/ability/dmsfwk/services/base:dmsbaseinner" ]
 
@@ -93,7 +98,6 @@ ohos_shared_library("distributedschedsvr") {
   }
 
   if (dmsfwk_mission_manager) {
-    defines = [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
     sources += [
       "src/mission/distributed_data_change_listener.cpp",
       "src/mission/distributed_data_storage.cpp",
@@ -107,6 +111,15 @@ ohos_shared_library("distributedschedsvr") {
       "src/mission/snapshot_converter.cpp",
     ]
     external_deps += [ "multimedia_image_standard:image_native" ]
+  }
+
+  if (dmsfwk_report_distributedcomponent_memmgr && defined(global_parts_info)) {
+    if (defined(global_parts_info.resourceschedule_memmgr)) {
+      external_deps += [ "memmgr:memmgrclient" ]
+    }
+    if (defined(global_parts_info.resourceschedule_plugins_memmgr)) {
+      external_deps += [ "plugins/memmgr:memmgrclient" ]
+    }
   }
 
   install_images = [ system_base_dir ]

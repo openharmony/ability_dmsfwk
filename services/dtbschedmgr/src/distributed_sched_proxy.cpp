@@ -827,31 +827,11 @@ int32_t DistributedSchedProxy::StartShareFormFromRemote(
 }
 #endif
 
-int32_t DistributedSchedProxy::RegisterDistributedComponentListener(const sptr<IRemoteObject>& callback)
-{
-    if (callback == nullptr) {
-        HILOGE("RegisterDistributedComponentListener callback is null");
-        return ERR_NULL_OBJECT;
-    }
-    sptr<IRemoteObject> remote = Remote();
-    if (remote == nullptr) {
-        HILOGE("RegisterDistributedComponentListener remote is null");
-        return ERR_NULL_OBJECT;
-    }
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
-        return ERR_FLATTEN_OBJECT;
-    }
-    PARCEL_WRITE_HELPER(data, RemoteObject, callback);
-    MessageParcel reply;
-    PARCEL_TRANSACT_SYNC_RET_INT(remote, REGISTER_DISTRIBUTED_COMPONENT_LISTENER, data, reply);
-}
-
 int32_t DistributedSchedProxy::GetDistributedComponentList(std::vector<std::string>& distributedComponents)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
-        HILOGE("RegisterDistributedComponentListener remote is null");
+        HILOGE("GetDistributedComponentList remote is null");
         return ERR_NULL_OBJECT;
     }
     MessageParcel data;
