@@ -14,6 +14,9 @@
  */
 
 #include "distributed_sched_continuation_test.h"
+
+#include <thread>
+
 #include "distributed_sched_util.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "mock_distributed_sched.h"
@@ -30,11 +33,15 @@ namespace {
 const std::u16string MOCK_DEVICE_ID = u"MOCK_DEVICE_ID";
 constexpr int32_t MOCK_SESSION_ID = 123;
 constexpr int32_t MOCK_TASK_ID = 456;
+constexpr int32_t SLEEP_TIME = 1000;
 const string LOCAL_DEVICE_ID = "192.168.43.100";
 }
 
 void DSchedContinuationTest::SetUpTestCase()
 {
+    DnetworkAdapter::GetInstance()->Init();
+    DtbschedmgrDeviceInfoStorage::GetInstance().Init();
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
 }
 
 void DSchedContinuationTest::TearDownTestCase()

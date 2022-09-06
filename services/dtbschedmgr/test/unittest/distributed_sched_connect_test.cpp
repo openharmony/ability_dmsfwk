@@ -16,6 +16,8 @@
 
 #define private public
 #define protected public
+#include <thread>
+
 #include "ability_connect_callback_stub.h"
 #include "distributed_sched_service.h"
 #include "distributed_sched_util.h"
@@ -35,6 +37,7 @@ using namespace testing::ext;
 
 namespace {
 constexpr int32_t STDOUT_FD = 1;
+constexpr int32_t SLEEP_TIME = 1000;
 }
 
 class AbilityConnectCallbackTest : public AAFwk::AbilityConnectionStub {
@@ -103,6 +106,9 @@ void AbilityConnectionWrapperStubTest::OnAbilityDisconnectDone(const AppExecFwk:
 
 void DistributedSchedConnectTest::SetUpTestCase()
 {
+    DnetworkAdapter::GetInstance()->Init();
+    DtbschedmgrDeviceInfoStorage::GetInstance().Init();
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
 }
 
 void DistributedSchedConnectTest::TearDownTestCase()

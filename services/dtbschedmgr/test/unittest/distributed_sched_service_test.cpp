@@ -48,6 +48,7 @@ namespace {
     const string REMOTE_DEVICEID = "255.255.255.255";
     const std::u16string DEVICE_ID = u"192.168.43.100";
     constexpr int32_t SESSION_ID = 123;
+    constexpr int32_t SLEEP_TIME = 1000;
     const std::string DMS_MISSION_ID = "dmsMissionId";
     constexpr int32_t MISSION_ID = 1;
     const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
@@ -75,7 +76,11 @@ protected:
 };
 
 void DistributedSchedServiceTest::SetUpTestCase()
-{}
+{
+    DnetworkAdapter::GetInstance()->Init();
+    DtbschedmgrDeviceInfoStorage::GetInstance().Init();
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+}
 
 void DistributedSchedServiceTest::TearDownTestCase()
 {}
