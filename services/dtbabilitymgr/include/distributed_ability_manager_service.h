@@ -18,6 +18,7 @@
 
 #include "continuation_manager/notifier_info.h"
 #include "distributed_ability_manager_stub.h"
+#include "dms_dumper.h"
 #include "dms_notifier.h"
 #include "event_handler.h"
 #include "single_instance.h"
@@ -26,7 +27,7 @@
 namespace OHOS {
 namespace DistributedSchedule {
 class DistributedAbilityManagerService : public SystemAbility, public DistributedAbilityManagerStub,
-    public DmsNotifier {
+    public DmsNotifier, public DmsDumper {
     DECLARE_SYSTEM_ABILITY(DistributedAbilityManagerService);
 
 public:
@@ -56,7 +57,8 @@ public:
         const DeviceConnectStatus& deviceConnectStatus) override;
     int32_t StartDeviceManager(
         int32_t token, const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams = nullptr) override;
-
+    int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
+    bool ProcessDistributedSchedDump(const std::vector<std::string>& args, std::string& result) override;
 private:
     bool IsExceededRegisterMaxNum(uint32_t accessToken);
     bool IsContinuationModeValid(ContinuationMode continuationMode);
@@ -91,11 +93,13 @@ private:
     using ConnectAbilityFunc = int32_t(*)(const sptr<DmsNotifier>& dmsNotifier, int32_t token,
         const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams);
     using DisconnectAbilityFunc = int32_t(*)();
+    using DistributedSchedDumpFunc = bool(*)(const std::vector<std::string>& args, std::string& result);
     OnRemoteRequestFunc onRemoteRequestFunc_ = nullptr;
     DeviceOnlineNotifyFunc deviceOnlineNotifyFunc_ = nullptr;
     DeviceOfflineNotifyFunc deviceOfflineNotifyFunc_ = nullptr;
     ConnectAbilityFunc connectAbilityFunc_ = nullptr;
     DisconnectAbilityFunc disconnectAbilityFunc_ = nullptr;
+    DistributedSchedDumpFunc distributedSchedDumpFunc_ = nullptr;
 
     std::atomic_bool isLoaded_ = false;
     std::mutex libLoadLock_;

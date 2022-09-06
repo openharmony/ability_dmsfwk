@@ -101,7 +101,6 @@ public:
 #endif
     void ProcessConnectDied(const sptr<IRemoteObject>& connect);
     void ProcessDeviceOffline(const std::string& deviceId);
-    int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
     void DumpConnectInfo(std::string& info);
     void DumpSessionsLocked(const std::list<ConnectAbilitySession>& sessionsList, std::string& info);
     void DumpElementLocked(const std::list<AppExecFwk::ElementName>& elementsList, std::string& info);

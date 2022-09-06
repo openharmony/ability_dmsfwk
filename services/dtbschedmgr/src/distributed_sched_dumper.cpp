@@ -23,10 +23,8 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 constexpr size_t MIN_ARGS_SIZE = 1;
-const std::string ARGS_HELP = "-h";
 const std::string ARGS_CONNECT_REMOTE_ABILITY = "-connect";
 const std::string TAG = "DistributedSchedDumper";
-constexpr int32_t UID_ROOT = 0;
 }
 
 bool DistributedSchedDumper::DumpDefault(std::string& result)
@@ -40,57 +38,24 @@ bool DistributedSchedDumper::DumpDefault(std::string& result)
 bool DistributedSchedDumper::Dump(const std::vector<std::string>& args, std::string& result)
 {
     result.clear();
-    if (!CanDump()) {
-        result.append("Dump failed, not allowed");
-        return false;
-    }
-
     if (args.size() < MIN_ARGS_SIZE) {
         return DumpDefault(result);
     }
 
     if (args.size() == MIN_ARGS_SIZE) {
-        // -h
-        if (args[0] == ARGS_HELP) {
-            ShowHelp(result);
-            return true;
-        }
         // -connect
         if (args[0] == ARGS_CONNECT_REMOTE_ABILITY) {
             ShowConnectRemoteAbility(result);
             return true;
         }
     }
-    IllegalInput(result);
     return false;
 }
 
-void DistributedSchedDumper::ShowHelp(std::string& result)
-{
-    result.append("DistributedSched Dump options:\n")
-        .append("  [-h] [cmd]...\n")
-        .append("cmd maybe one of:\n")
-        .append("  -connect: show all connected remote abilities.\n");
-}
-
-void DistributedSchedDumper::IllegalInput(std::string& result)
-{
-    result.append("The arguments are illegal and you can enter '-h' for help.\n");
-}
 
 void DistributedSchedDumper::ShowConnectRemoteAbility(std::string& result)
 {
     DistributedSchedService::GetInstance().DumpConnectInfo(result);
-}
-
-bool DistributedSchedDumper::CanDump()
-{
-    auto callingUid = IPCSkeleton::GetCallingUid();
-    HILOGI("calling uid = %u", callingUid);
-    if (callingUid != UID_ROOT) {
-        return false;
-    }
-    return true;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

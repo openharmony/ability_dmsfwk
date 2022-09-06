@@ -23,8 +23,10 @@
 #include "continuation_manager/device_selection_notifier_proxy.h"
 #include "continuation_manager/notifier_death_recipient.h"
 #include "dlfcn.h"
+#include "distributed_ability_manager_dumper.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "file_ex.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "parameters.h"
@@ -131,6 +133,11 @@ bool DistributedAbilityManagerService::InitFunc()
     disconnectAbilityFunc_ = reinterpret_cast<DisconnectAbilityFunc>(dlsym(dmsImplHandle_, "DisconnectAbility"));
     if (disconnectAbilityFunc_ == nullptr) {
         HILOGE("get DisconnectAbility function error");
+        return false;
+    }
+    distributedSchedDumpFunc_ = reinterpret_cast<DistributedSchedDumpFunc>(dlsym(dmsImplHandle_, "DistributedSchedDump"));
+    if (distributedSchedDumpFunc_ == nullptr) {
+        HILOGE("get Dump function error");
         return false;
     }
     return true;
@@ -723,6 +730,37 @@ void DistributedAbilityManagerService::HandleNotifierDied(const sptr<IRemoteObje
 bool DistributedAbilityManagerService::IsDistributedSchedLoaded()
 {
     return isLoaded_;
+}
+
+int32_t DistributedAbilityManagerService::Dump(int32_t fd, const std::vector<std::u16string>& args)
+{
+    std::vector<std::string> argsInStr8;
+    for (const auto& arg : args) {
+        argsInStr8.emplace_back(Str16ToStr8(arg));
+    }
+    std::string result;
+    DistributedAbilityManagerDumper::Dump(this, argsInStr8, result);
+
+    if (!SaveStringToFd(fd, result)) {
+        HILOGE("save to fd failed");
+        return DMS_WRITE_FILE_FAILED_ERR;
+    }
+    return ERR_OK;
+}
+
+bool DistributedAbilityManagerService::ProcessDistributedSchedDump(const std::vector<std::string>& args, std::string& result)
+{
+    std::lock_guard<std::mutex> lock(libLoadLock_);
+    if (!IsDistributedSchedLoaded() || distributedSchedDumpFunc_ == nullptr) {
+        result.append("<none info>\n");
+        return false;
+    }
+
+    if (!distributedSchedDumpFunc_(args, result)) {
+        HILOGE("distributedSched dump failed");
+        return false;
+    }
+    return true;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

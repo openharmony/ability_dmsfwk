@@ -132,6 +132,11 @@ int32_t DisconnectAbility()
 {
     return DistributedSchedService::GetInstance().DisconnectAbility();
 }
+
+bool DistributedSchedDump(const std::vector<std::string>& args, std::string& result)
+{
+    return DistributedSchedDumper::Dump(args, result);
+}
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedService);
@@ -1641,23 +1646,6 @@ bool ConnectAbilitySession::IsSameCaller(const CallerInfo& callerInfo)
             callerInfo.pid == callerInfo_.pid &&
             callerInfo.sourceDeviceId == callerInfo_.sourceDeviceId &&
             callerInfo.callerType == callerInfo_.callerType);
-}
-
-int32_t DistributedSchedService::Dump(int32_t fd, const std::vector<std::u16string>& args)
-{
-    std::vector<std::string> argsInStr8;
-    for (const auto& arg : args) {
-        argsInStr8.emplace_back(Str16ToStr8(arg));
-    }
-
-    std::string result;
-    DistributedSchedDumper::Dump(argsInStr8, result);
-
-    if (!SaveStringToFd(fd, result)) {
-        HILOGE("save to fd failed");
-        return DMS_WRITE_FILE_FAILED_ERR;
-    }
-    return ERR_OK;
 }
 
 void DistributedSchedService::DumpConnectInfo(std::string& info)
