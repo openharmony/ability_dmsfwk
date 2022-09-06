@@ -39,6 +39,7 @@ ohos_shared_library("distributed_ability_manager_svr") {
     "src/continuation_manager/device_selection_notifier_stub.cpp",
     "src/continuation_manager/notifier_death_recipient.cpp",
     "src/continuation_manager/notifier_info.cpp",
+    "src/distributed_ability_manager_dumper.cpp",
     "src/distributed_ability_manager_service.cpp",
     "src/distributed_ability_manager_stub.cpp",
   ]
