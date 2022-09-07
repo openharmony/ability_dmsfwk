@@ -17,6 +17,7 @@
 #define protected public
 #include "gtest/gtest.h"
 
+#include "device_manager.h"
 #include "distributed_sched_proxy.h"
 #include "distributed_sched_service.h"
 #include "distributed_sched_util.h"
@@ -43,12 +44,12 @@ namespace OHOS {
 namespace DistributedSchedule {
 using namespace AAFwk;
 using namespace AppExecFwk;
+using namespace DistributedHardware;
 namespace {
     const string LOCAL_DEVICEID = "192.168.43.100";
     const string REMOTE_DEVICEID = "255.255.255.255";
     const std::u16string DEVICE_ID = u"192.168.43.100";
     constexpr int32_t SESSION_ID = 123;
-    constexpr int32_t SLEEP_TIME = 1000;
     const std::string DMS_MISSION_ID = "dmsMissionId";
     constexpr int32_t MISSION_ID = 1;
     const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
@@ -73,13 +74,17 @@ protected:
     void GetAbilityInfo(const std::string& package, const std::string& name,
         const std::string& bundleName, const std::string& deviceId,
         OHOS::AppExecFwk::AbilityInfo& abilityInfo);
+
+    class DeviceInitCallBack : public DmInitCallback {
+        void OnRemoteDied() override;
+    };
 };
 
 void DistributedSchedServiceTest::SetUpTestCase()
 {
-    DnetworkAdapter::GetInstance()->Init();
-    DtbschedmgrDeviceInfoStorage::GetInstance().Init();
-    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+    const std::string pkgName = "DBinderBus_" + std::to_string(getpid());
+    std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
+    DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
 }
 
 void DistributedSchedServiceTest::TearDownTestCase()
@@ -91,6 +96,9 @@ void DistributedSchedServiceTest::SetUp()
 }
 
 void DistributedSchedServiceTest::TearDown()
+{}
+
+void DistributedSchedServiceTest::DeviceInitCallBack::OnRemoteDied()
 {}
 
 sptr<IDistributedSched> DistributedSchedServiceTest::GetDms()

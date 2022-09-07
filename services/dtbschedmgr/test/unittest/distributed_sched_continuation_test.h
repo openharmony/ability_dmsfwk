@@ -22,6 +22,7 @@
 #include "distributed_sched_service.h"
 #undef private
 #include "gtest/gtest.h"
+#include "device_manager.h"
 #include "dtbschedmgr_log.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -57,6 +58,10 @@ protected:
     std::shared_ptr<DmsCallbackTask> dmsCallbackTask_;
     bool timeoutFlag_ = false;
     bool freeInstallTimeoutFlag_ = false;
+
+    class DeviceInitCallBack : public OHOS::DistributedHardware::DmInitCallback {
+        void OnRemoteDied() override;
+    };
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
