@@ -33,6 +33,7 @@
 using namespace std;
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::DistributedHardware;
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -46,6 +47,9 @@ const int32_t NORMAL_NUM_MISSIONS = 10;
 }
 void DMSMissionManagerTest::SetUpTestCase()
 {
+    const std::string pkgName = "DBinderBus_" + std::to_string(getpid());
+    std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
+    DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
 }
 
 void DMSMissionManagerTest::TearDownTestCase()
@@ -65,6 +69,10 @@ void DMSMissionManagerTest::SetUp()
 }
 
 void DMSMissionManagerTest::TearDown()
+{
+}
+
+void DMSMissionManagerTest::DeviceInitCallBack::OnRemoteDied()
 {
 }
 

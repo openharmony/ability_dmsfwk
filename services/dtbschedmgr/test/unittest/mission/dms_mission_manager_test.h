@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 
+#include "device_manager.h"
 #include "distributed_sched_interface.h"
 #include "remote_mission_listener_stub.h"
 
@@ -34,6 +35,10 @@ protected:
     std::u16string u16localDeviceId_;
     sptr<IDistributedSched> proxy_;
     sptr<IDistributedSched> GetDms();
+
+    class DeviceInitCallBack : public OHOS::DistributedHardware::DmInitCallback {
+        void OnRemoteDied() override;
+    };
 };
 
 class RemoteMissionListenerTest : public AAFwk::RemoteMissionListenerStub {

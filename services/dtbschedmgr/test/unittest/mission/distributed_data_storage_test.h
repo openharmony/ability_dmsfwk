@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 
+#include "device_manager.h"
 #include "mission/distributed_data_storage.h"
 
 namespace OHOS {
@@ -34,6 +35,10 @@ protected:
     std::string GetLocalDeviceId() const;
 
     std::shared_ptr<DistributedDataStorage> distributedDataStorage_;
+
+    class DeviceInitCallBack : public OHOS::DistributedHardware::DmInitCallback {
+        void OnRemoteDied() override;
+    };
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
