@@ -70,6 +70,13 @@ public:
      * @param missionId, mission Id.
      */
     virtual void OnMissionClosed(int32_t missionId) override;
+
+    /**
+     * @brief When a mission's label changed, AbilityMs notifies the listener of the mission id
+     *
+     * @param missionId, mission Id.
+     */
+    virtual void OnMissionLabelUpdated(int32_t missionId) override;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
