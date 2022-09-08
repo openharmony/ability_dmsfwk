@@ -26,6 +26,7 @@ using namespace std;
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::DistributedKv;
+using namespace OHOS::DistributedHardware;
 namespace {
 constexpr int32_t TASK_ID_1 = 11;
 constexpr int32_t TASK_ID_2 = 12;
@@ -36,6 +37,9 @@ constexpr uint8_t ONE_BYTE = '6';
 void DistributedDataStorageTest::SetUpTestCase()
 {
     DTEST_LOG << "DistributedDataStorageTest::SetUpTestCase" << std::endl;
+    const std::string pkgName = "DBinderBus_" + std::to_string(getpid());
+    std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
+    DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
 }
 
 void DistributedDataStorageTest::TearDownTestCase()
@@ -53,6 +57,10 @@ void DistributedDataStorageTest::SetUp()
 void DistributedDataStorageTest::TearDown()
 {
     DTEST_LOG << "DistributedDataStorageTest::TearDown" << std::endl;
+}
+
+void DistributedDataStorageTest::DeviceInitCallBack::OnRemoteDied()
+{
 }
 
 uint8_t* DistributedDataStorageTest::InitByteStream()
