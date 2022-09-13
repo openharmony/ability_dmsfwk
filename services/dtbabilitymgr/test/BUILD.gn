@@ -81,10 +81,7 @@ ohos_unittest("continuationmanagertest") {
 
 ohos_unittest("distributedabilitymanagerservicetest") {
   module_out_path = module_output_path
-  sources = [
-    "unittest/distributed_ability_manager_service_test.cpp",
-    "//foundation/ability/dmsfwk/services/dtbabilitymgr/src/distributed_ability_manager_service.cpp",
-  ]
+  sources = [ "unittest/distributed_ability_manager_service_test.cpp" ]
   configs = [
     ":test_config",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
