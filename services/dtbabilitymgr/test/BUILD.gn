@@ -79,7 +79,27 @@ ohos_unittest("continuationmanagertest") {
   part_name = "dmsfwk"
 }
 
+ohos_unittest("distributedabilitymanagerservicetest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/distributed_ability_manager_service_test.cpp" ]
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dtbabilitymgr_configs
+  deps =
+      [ "${distributed_service}/dtbabilitymgr:distributed_ability_manager_svr" ]
+  if (is_standard_system) {
+    external_deps = dtbabilitymgr_external_deps
+    public_deps = dtbabilitymgr_public_deps
+  }
+  part_name = "dmsfwk"
+}
+
 group("unittest") {
   testonly = true
-  deps = [ ":continuationmanagertest" ]
+  deps = [
+    ":continuationmanagertest",
+    ":distributedabilitymanagerservicetest",
+  ]
 }
