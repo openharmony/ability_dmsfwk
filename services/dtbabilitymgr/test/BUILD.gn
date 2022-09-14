@@ -82,7 +82,6 @@ ohos_unittest("continuationmanagertest") {
 ohos_unittest("distributedabilitymanagerservicetest") {
   module_out_path = module_output_path
   sources = [
-    "unittest/distributed_ability_manager_service_test.cpp",
     "${distributed_service}/dtbabilitymgr/src/continuation_manager/app_device_callback_stub.cpp",
     "${distributed_service}/dtbabilitymgr/src/continuation_manager/connect_status_info.cpp",
     "${distributed_service}/dtbabilitymgr/src/continuation_manager/continuation_extra_params.cpp",
@@ -93,37 +92,11 @@ ohos_unittest("distributedabilitymanagerservicetest") {
     "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_dumper.cpp",
     "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_service.cpp",
     "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_stub.cpp",
+    "unittest/distributed_ability_manager_service_test.cpp",
   ]
   configs = [
     ":test_config",
     "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
-  ]
-  configs += dtbabilitymgr_configs
-  if (is_standard_system) {
-    external_deps = dtbabilitymgr_external_deps
-    public_deps = dtbabilitymgr_public_deps
-  }
-  part_name = "dmsfwk"
-}
-
-ohos_unittest("distributedabilitymanagerstubtest") {
-  module_out_path = module_output_path
-  sources = [
-    "unittest/distributed_ability_manager_stub_test.cpp",
-    "${distributed_service}/dtbabilitymgr/src/continuation_manager/app_device_callback_stub.cpp",
-    "${distributed_service}/dtbabilitymgr/src/continuation_manager/connect_status_info.cpp",
-    "${distributed_service}/dtbabilitymgr/src/continuation_manager/continuation_extra_params.cpp",
-    "${distributed_service}/dtbabilitymgr/src/continuation_manager/continuation_result.cpp",
-    "${distributed_service}/dtbabilitymgr/src/continuation_manager/device_selection_notifier_proxy.cpp",
-    "${distributed_service}/dtbabilitymgr/src/continuation_manager/notifier_death_recipient.cpp",
-    "${distributed_service}/dtbabilitymgr/src/continuation_manager/notifier_info.cpp",
-    "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_dumper.cpp",
-    "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_service.cpp",
-    "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_stub.cpp",
-  ]
-  configs = [
-    ":test_config",
-    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
   ]
   configs += dtbabilitymgr_configs
   if (is_standard_system) {
@@ -138,6 +111,5 @@ group("unittest") {
   deps = [
     ":continuationmanagertest",
     ":distributedabilitymanagerservicetest",
-    ":distributedabilitymanagerstubtest",
   ]
 }
