@@ -1186,12 +1186,11 @@ void DistributedSchedService::ReportDistributedComponentChange(const CallerInfo&
             changeType == DISTRIBUTED_COMPONENT_ADD);
 #endif
     };
-    if (componentChangeHandler_ == nullptr) {
-        HILOGE("HandleDistributedComponentChange handler postTask failed");
-    }
-    else {
+    if (componentChangeHandler_ != nullptr) {
         componentChangeHandler_->PostTask(func);
+        return;
     }
+    HILOGE("HandleDistributedComponentChange handler postTask failed");
 #endif
 }
 
@@ -1211,12 +1210,11 @@ void DistributedSchedService::ReportDistributedComponentChange(const ConnectInfo
         SuspendManager::SuspendManagerClient::GetInstance().ReportStateChangeEvent(
             SuspendManager::ReportEventType::DIS_COMP_CHANGE, componentInfo);
     };
-    if (componentChangeHandler_ == nullptr) {
-        HILOGE("HandleDistributedComponentChange handler postTask failed");
-    }
-    else {
+    if (componentChangeHandler_ != nullptr) {
         componentChangeHandler_->PostTask(func);
+        return;
     }
+    HILOGE("HandleDistributedComponentChange handler postTask failed");
 #endif
 }
 
