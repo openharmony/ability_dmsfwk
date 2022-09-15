@@ -989,6 +989,7 @@ HWTEST_F(DistributedSchedServiceTest, ContinueMission_002, TestSize.Level1)
  * @tc.name: StartContinuation_001
  * @tc.desc: call StartContinuation
  * @tc.type: FUNC
+ * @tc.require: I5NOA1
  */
 HWTEST_F(DistributedSchedServiceTest, StartContinuation_001, TestSize.Level1)
 {
@@ -1004,6 +1005,27 @@ HWTEST_F(DistributedSchedServiceTest, StartContinuation_001, TestSize.Level1)
     int32_t ret = DistributedSchedService::GetInstance().StartContinuation(
         want, missionId, callerUid, status, accessToken);
     EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), ret);
+    CallerInfo callerInfo;
+    /**
+     * @tc.steps: step1. ReportDistributedComponentChange when componentChangeHandler_ is nullptr
+     */
+    DistributedSchedService::GetInstance().componentChangeHandler_ = nullptr;
+    DistributedSchedService::GetInstance().ReportDistributedComponentChange(callerInfo,
+        1, IDistributedSched::CALL, IDistributedSched::CALLER);
+
+    /**
+     * @tc.steps: step2. ReportDistributedComponentChange when componentChangeHandler_ is not nullptr
+     */
+    auto runner = AppExecFwk::EventRunner::Create("DmsComponentChange");
+    DistributedSchedService::GetInstance().componentChangeHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    DistributedSchedService::GetInstance().ReportDistributedComponentChange(callerInfo,
+        1, IDistributedSched::CALL, IDistributedSched::CALLER);
+    /**
+     * @tc.steps: step3. ReportDistributedComponentChange when callerInfo.bundleNames is not empty
+     */
+    callerInfo.bundleNames.emplace_back("bundleName");
+    DistributedSchedService::GetInstance().ReportDistributedComponentChange(callerInfo,
+        1, IDistributedSched::CALL, IDistributedSched::CALLER);
     DTEST_LOG << "DSchedContinuationTest StartContinuation_001 end" << std::endl;
 }
 
