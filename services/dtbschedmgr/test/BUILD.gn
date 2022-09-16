@@ -55,13 +55,12 @@ dsched_external_deps = [
   "samgr:samgr_proxy",
 ]
 
-if (dmsfwk_report_distributedcomponent_memmgr && defined(global_parts_info)) {
-  if (defined(global_parts_info.resourceschedule_memmgr)) {
-    dsched_external_deps += [ "memmgr:memmgrclient" ]
-  }
-  if (defined(global_parts_info.resourceschedule_plugins_memmgr)) {
-    dsched_external_deps += [ "plugins/memmgr:memmgrclient" ]
-  }
+if (dmsfwk_report_memmgr) {
+  dsched_external_deps += [ "memmgr:memmgrclient" ]
+}
+
+if (dmsfwk_report_memmgr_plugins) {
+  dsched_external_deps += [ "plugins/memmgr:memmgrclient" ]
 }
 
 if (dmsfwk_standard_form_share) {
@@ -143,7 +142,7 @@ ohos_unittest("distributedschedsvrtest") {
     public_deps = dsched_public_deps
   }
 
-  if (dmsfwk_report_distributedcomponent_memmgr) {
+  if (dmsfwk_report_memmgr || dmsfwk_report_memmgr_plugins) {
     defines = [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
   }
 
