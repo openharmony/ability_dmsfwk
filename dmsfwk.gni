@@ -17,7 +17,7 @@ declare_args() {
   efficiency_manager_service_enable = false
   dmsfwk_report_memmgr = false
   dmsfwk_report_memmgr_plugins = false
-  if (defined(global_parts_info) ) {
+  if (defined(global_parts_info)) {
     if (defined(global_parts_info.multimedia_multimedia_image_standard)) {
       dmsfwk_mission_manager = true
     }
