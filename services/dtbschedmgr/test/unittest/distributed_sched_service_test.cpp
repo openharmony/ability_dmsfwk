@@ -1036,6 +1036,7 @@ HWTEST_F(DistributedSchedServiceTest, StartContinuation_001, TestSize.Level1)
      */
     DistributedSchedService::GetInstance().ReportDistributedComponentChange(connectInfo,
         1, IDistributedSched::CALL, IDistributedSched::CALLEE);
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_001 end" << std::endl;
 }
 
 /**
