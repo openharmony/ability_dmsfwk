@@ -13,20 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef DISTRIBUTED_SCHED_UTIL_H
-#define DISTRIBUTED_SCHED_UTIL_H
+#ifndef DMS_TOKEN_CB_TEST_H
+#define DMS_TOKEN_CB_TEST_H
 
-#include <stdint.h>
+#include "gtest/gtest.h"
+
+#define private public
+#include "dms_token_callback.h"
+#undef private
 
 namespace OHOS {
 namespace DistributedSchedule {
-class DistributedSchedUtil {
+class DmsTokenCallbackTest : public testing::Test {
 public:
-    static void MockPermission();
-    static void MockProcess(const char* processName);
-    static void MockProcessAndPermission(const char* processName,
-        const char *perms[] = nullptr, int32_t permsNum = 0);
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+
+    sptr<DmsTokenCallback> dmsTokenCallback_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
-#endif // DISTRIBUTED_SCHED_UTIL_H
+#endif // DMS_TOKEN_CB_TEST_H

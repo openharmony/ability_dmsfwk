@@ -20,20 +20,33 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+const char* DISTSCHED_PROCESS_NAME = "distributedsched";
+}
 void DistributedSchedUtil::MockPermission()
 {
     static const char *PERMS[] = {
         "ohos.permission.DISTRIBUTED_DATASYNC"
     };
+    MockProcessAndPermission(DISTSCHED_PROCESS_NAME, PERMS, 1);
+}
+
+void DistributedSchedUtil::MockProcess(const char* processName)
+{
+    MockProcessAndPermission(processName);
+}
+
+void DistributedSchedUtil::MockProcessAndPermission(const char* processName, const char *perms[], int32_t permsNum)
+{
     uint64_t tokenId;
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
-        .permsNum = 1,
+        .permsNum = permsNum,
         .aclsNum = 0,
         .dcaps = nullptr,
-        .perms = PERMS,
+        .perms = perms,
         .acls = nullptr,
-        .processName = "distributedsched",
+        .processName = processName,
         .aplStr = "system_core",
     };
     tokenId = GetAccessTokenId(&infoInstance);
