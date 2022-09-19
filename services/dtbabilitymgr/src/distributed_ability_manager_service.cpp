@@ -135,7 +135,8 @@ bool DistributedAbilityManagerService::InitFunc()
         HILOGE("get DisconnectAbility function error");
         return false;
     }
-    distributedSchedDumpFunc_ = reinterpret_cast<DistributedSchedDumpFunc>(dlsym(dmsImplHandle_, "DistributedSchedDump"));
+    distributedSchedDumpFunc_ = reinterpret_cast<DistributedSchedDumpFunc>(dlsym(dmsImplHandle_,
+        "DistributedSchedDump"));
     if (distributedSchedDumpFunc_ == nullptr) {
         HILOGE("get Dump function error");
         return false;
@@ -748,7 +749,8 @@ int32_t DistributedAbilityManagerService::Dump(int32_t fd, const std::vector<std
     return ERR_OK;
 }
 
-bool DistributedAbilityManagerService::ProcessDistributedSchedDump(const std::vector<std::string>& args, std::string& result)
+bool DistributedAbilityManagerService::ProcessDistributedSchedDump(const std::vector<std::string>& args,
+    std::string& result)
 {
     std::lock_guard<std::mutex> lock(libLoadLock_);
     if (!IsDistributedSchedLoaded() || distributedSchedDumpFunc_ == nullptr) {
