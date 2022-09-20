@@ -33,7 +33,7 @@ constexpr int32_t ERR_NOT_OK = -1;
 constexpr int32_t ARG_COUNT_ONE = 1;
 constexpr int32_t ARG_COUNT_TWO = 2;
 constexpr int32_t ARG_COUNT_THREE = 3;
-constexpr int32_t MAX_JSPROCOUNT = 1000000;
+constexpr uint32_t MAX_JSPROCOUNT = 1000000;
 }
 
 void JsContinuationManager::Finalizer(NativeEngine* engine, void* data, void* hint)
