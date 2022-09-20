@@ -33,7 +33,7 @@ constexpr int32_t ERR_NOT_OK = -1;
 constexpr int32_t ARG_COUNT_ONE = 1;
 constexpr int32_t ARG_COUNT_TWO = 2;
 constexpr int32_t ARG_COUNT_THREE = 3;
-constexpr int32_t Max_jsProCount_Count = 100000000;
+constexpr int32_t MAX_JSPROCOUNT = 1000000;
 }
 
 void JsContinuationManager::Finalizer(NativeEngine* engine, void* data, void* hint)
@@ -491,8 +491,8 @@ bool JsContinuationManager::PraseJson(const napi_env& env, const napi_value& jso
     napi_value jsProName = nullptr;
     napi_value jsProValue = nullptr;
     napi_valuetype jsValueType = napi_undefined;
-    if (jsProCount > Max_jsProCount_Count) {
-        HILOGE("value of jsProCount is larger than Max_jsProCount_Count");
+    if (jsProCount > MAX_JSPROCOUNT) {
+        HILOGE("value of jsProCount is larger than MAX_JSPROCOUNT");
         return false;
     }
     for (uint32_t index = 0; index < jsProCount; index++) {
