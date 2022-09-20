@@ -160,7 +160,7 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_006, TestSize.Leve
     want.SetElementName(deviceId, bundleName, abilityName, moduleName);
     int32_t missionId = 0;
     bool ret = BundleManagerInternal::CheckIfRemoteCanInstall(want, missionId);
-    EXPECT_TRUE(true == ret);
+    EXPECT_EQ(ret, true);
     DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_006 end "<< std::endl;
 }
 
@@ -180,25 +180,25 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_007, TestSize.Leve
     want.SetElementName(deviceId, bundleName, abilityName, moduleName);
     int32_t missionId = 0;
     bool ret = BundleManagerInternal::CheckIfRemoteCanInstall(want, missionId);
-    EXPECT_TRUE(false == ret);
+    EXPECT_EQ(ret, false);
 
     deviceId = "123456";
     bundleName = "";
     want.SetElementName(deviceId, bundleName, abilityName, moduleName);
     ret = BundleManagerInternal::CheckIfRemoteCanInstall(want, missionId);
-    EXPECT_TRUE(false == ret);
+    EXPECT_EQ(ret, false);
 
     bundleName = "ohos.samples.testApp";
     moduleName = "";
     want.SetElementName(deviceId, bundleName, abilityName, moduleName);
     ret = BundleManagerInternal::CheckIfRemoteCanInstall(want, missionId);
-    EXPECT_TRUE(false == ret);
+    EXPECT_EQ(ret, false);
 
     moduleName = "entry";
     abilityName = "";
     want.SetElementName(deviceId, bundleName, abilityName, moduleName);
     ret = BundleManagerInternal::CheckIfRemoteCanInstall(want, missionId);
-    EXPECT_TRUE(false == ret);
+    EXPECT_EQ(ret, false);
 
     DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_007 end "<< std::endl;
 }
@@ -219,7 +219,7 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_008, TestSize.Leve
     want.SetElementName(deviceId, bundleName, abilityName, moduleName);
     int32_t missionId = 0;
     bool ret = BundleManagerInternal::CheckIfRemoteCanInstall(want, missionId);
-    EXPECT_TRUE(false == ret);
+    EXPECT_EQ(ret, false);
     DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_008 end "<< std::endl;
 }
 
