@@ -110,7 +110,7 @@ ohos_shared_library("distributedschedsvr") {
       "src/mission/snapshot.cpp",
       "src/mission/snapshot_converter.cpp",
     ]
-    external_deps += [ "multimedia_image_standard:image_native" ]
+    external_deps += [ "multimedia_image_framework:image_native" ]
   }
 
   if (dmsfwk_report_memmgr) {

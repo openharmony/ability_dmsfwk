@@ -68,7 +68,7 @@ if (dmsfwk_standard_form_share) {
 }
 
 if (dmsfwk_mission_manager) {
-  dsched_external_deps += [ "multimedia_image_standard:image_native" ]
+  dsched_external_deps += [ "multimedia_image_framework:image_native" ]
 }
 
 if (efficiency_manager_service_enable) {
