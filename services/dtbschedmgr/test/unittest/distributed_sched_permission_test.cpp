@@ -19,6 +19,7 @@
 #define private public
 #include "distributed_sched_permission.h"
 #undef private
+#include "distributed_sched_util.h"
 #include "dtbschedmgr_log.h"
 #include "test_log.h"
 
@@ -40,6 +41,18 @@ const string DEVICE_ID = "255.255.255.255";
 const string INVALID_DEVICE_ID = "";
 const string PERMISSION_NAME = "ohos.permission.DISTRIBUTED_DATASYNC";
 const string INVALID_PERMISSION_NAME = "ohos.permission.TEST";
+
+const string MOCK_FIELD_GROUP_NAME = "MockName";
+const string MOCK_FIELD_GROUP_ID = "MockId";
+const string MOCK_FIELD_GROUP_OWNER = "MockOwner";
+const int32_t MOCK_FIELD_GROUP_TYPE = 0;
+const int32_t MOCK_FIELD_GROUP_VISIBILITY = 0;
+const string FIELD_GROUP_NAME = "groupName";
+const string FIELD_GROUP_ID = "groupId";
+const string FIELD_GROUP_OWNER = "groupOwner";
+const string FIELD_GROUP_TYPE = "groupType";
+const string FIELD_GROUP_VISIBILITY = "groupVisibility";
+const char* FOUNDATION_PROCESS_NAME = "foundation";
 }
 
 void DistributedSchedPermissionTest::SetUpTestCase()
@@ -262,6 +275,159 @@ HWTEST_F(DistributedSchedPermissionTest, CheckDPermission_010, TestSize.Level1)
         callerInfo, accountInfo, localDeviceId);
     EXPECT_TRUE(ret != ERR_OK);
     DTEST_LOG << "DistributedSchedPermissionTest CheckDPermission_010 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: GetAccountInfo_001
+ * @tc.desc: call GetAccountInfo with empty networkId
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, GetAccountInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest GetAccountInfo_001 begin" << std::endl;
+    std::string remoteNetworkId;
+    CallerInfo callerInfo;
+    IDistributedSched::AccountInfo accountInfo;
+    int32_t ret = DistributedSchedPermission::GetInstance().GetAccountInfo(
+        remoteNetworkId, callerInfo, accountInfo);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    DTEST_LOG << "DistributedSchedPermissionTest GetAccountInfo_001 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: GetAccountInfo_002
+ * @tc.desc: call GetAccountInfo with invalid networkId
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, GetAccountInfo_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest GetAccountInfo_002 begin" << std::endl;
+    std::string remoteNetworkId = "0";
+    CallerInfo callerInfo;
+    IDistributedSched::AccountInfo accountInfo;
+    int32_t ret = DistributedSchedPermission::GetInstance().GetAccountInfo(
+        remoteNetworkId, callerInfo, accountInfo);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    DTEST_LOG << "DistributedSchedPermissionTest GetAccountInfo_002 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: GetRelatedGroups_001
+ * @tc.desc: call GetRelatedGroups with empty bundleNames
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, GetRelatedGroups_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest GetRelatedGroups_001 begin" << std::endl;
+    std::string udid;
+    std::vector<std::string> bundleNames;
+    IDistributedSched::AccountInfo accountInfo;
+    bool ret = DistributedSchedPermission::GetInstance().GetRelatedGroups(
+        udid, bundleNames, accountInfo);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest GetRelatedGroups_001 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: GetRelatedGroups_002
+ * @tc.desc: call GetRelatedGroups with invalid bundleNames
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, GetRelatedGroups_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest GetRelatedGroups_002 begin" << std::endl;
+    std::string udid = "0";
+    std::vector<std::string> bundleNames = {"mock.bundle1", "mock.bundle2"};
+    IDistributedSched::AccountInfo accountInfo;
+    bool ret = DistributedSchedPermission::GetInstance().GetRelatedGroups(
+        udid, bundleNames, accountInfo);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest GetRelatedGroups_002 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: ParseGroupInfos_001
+ * @tc.desc: call ParseGroupInfos with empty returnGroupStr
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, ParseGroupInfos_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest ParseGroupInfos_001 begin" << std::endl;
+    std::string returnGroupStr;
+    std::vector<GroupInfo> groupInfos;
+    bool ret = DistributedSchedPermission::GetInstance().ParseGroupInfos(
+        returnGroupStr, groupInfos);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest GetRelatedGroups_001 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: ParseGroupInfos_002
+ * @tc.desc: call ParseGroupInfos with invalid returnGroupStr
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, ParseGroupInfos_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest ParseGroupInfos_002 begin" << std::endl;
+    std::string returnGroupStr = "mockInvalidGroup";
+    std::vector<GroupInfo> groupInfos;
+    bool ret = DistributedSchedPermission::GetInstance().ParseGroupInfos(
+        returnGroupStr, groupInfos);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest GetRelatedGroups_002 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: ParseGroupInfos_003
+ * @tc.desc: call ParseGroupInfos
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, ParseGroupInfos_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest ParseGroupInfos_003 begin" << std::endl;
+    std::string returnGroupStr = "[{\"groupName\":\"mockGroupName\",\"groupId\":\"mockGroupId\",";
+    returnGroupStr += "\"groupOwner\":\"mockGroupOwner\",\"groupType\":0,\"groupVisibility\":0}]";
+    std::vector<GroupInfo> groupInfos;
+    bool ret = DistributedSchedPermission::GetInstance().ParseGroupInfos(
+        returnGroupStr, groupInfos);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "DistributedSchedPermissionTest GetRelatedGroups_003 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: IsFoundationCall_001
+ * @tc.desc: call IsFoundationCall not from foundation
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, IsFoundationCall_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest IsFoundationCall_001 begin" << std::endl;
+    bool ret = DistributedSchedPermission::GetInstance().IsFoundationCall();
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest IsFoundationCall_001 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: IsFoundationCall_002
+ * @tc.desc: call IsFoundationCall from foundation
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, IsFoundationCall_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest IsFoundationCall_002 begin" << std::endl;
+    DistributedSchedUtil::MockProcess(FOUNDATION_PROCESS_NAME);
+    bool ret = DistributedSchedPermission::GetInstance().IsFoundationCall();
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "DistributedSchedPermissionTest IsFoundationCall_002 end result:" << ret << std::endl;
 }
 
 /**
@@ -915,6 +1081,48 @@ HWTEST_F(DistributedSchedPermissionTest, CheckPermission_003, TestSize.Level1)
     int32_t ret = DistributedSchedPermission::GetInstance().CheckPermission(accessToken, permissionName);
     EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedPermissionTest CheckPermission_003 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: from_json_001
+ * @tc.desc: parse groupInfo from json
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedPermissionTest, FromJson_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest FromJson_001 begin" << std::endl;
+    GroupInfo groupInfo;
+    nlohmann::json jsonObject = nlohmann::json{ 
+        {FIELD_GROUP_NAME, MOCK_FIELD_GROUP_NAME},
+        {FIELD_GROUP_ID, MOCK_FIELD_GROUP_ID},
+        {FIELD_GROUP_OWNER, MOCK_FIELD_GROUP_OWNER},
+        {FIELD_GROUP_TYPE, MOCK_FIELD_GROUP_TYPE},
+        {FIELD_GROUP_VISIBILITY, MOCK_FIELD_GROUP_VISIBILITY}
+    };
+    if (jsonObject.is_discarded()) {
+        return;
+    }
+    from_json(jsonObject, groupInfo);
+    EXPECT_EQ(groupInfo.groupName, MOCK_FIELD_GROUP_NAME);
+    DTEST_LOG << "DistributedSchedPermissionTest FromJson_001 end" <<  std::endl;
+}
+
+/**
+ * @tc.name: from_json_002
+ * @tc.desc: parse groupInfo from json with invalid params
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedPermissionTest, FromJson_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest FromJson_002 begin" << std::endl;
+    GroupInfo groupInfo;
+    nlohmann::json jsonObject;
+    if (jsonObject.is_discarded()) {
+        return;
+    }
+    from_json(jsonObject, groupInfo);
+    EXPECT_EQ(groupInfo.groupName, "");
+    DTEST_LOG << "DistributedSchedPermissionTest FromJson_002 end " <<  std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
