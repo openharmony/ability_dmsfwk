@@ -52,6 +52,7 @@ ohos_shared_library("distributed_ability_manager_svr") {
   ldflags = [ "-rdynamic" ]
 
   external_deps = [
+    "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
