@@ -100,7 +100,6 @@ private:
     bool DeleteInnerLocked(const std::string& uuid, int32_t missionId);
     bool FuzzyDeleteInnerLocked(const std::string& networkId);
     bool QueryInnerLocked(const std::string& uuid, int32_t missionId, DistributedKv::Value& value) const;
-    bool InitHandler();
     static void GenerateKey(const std::string& uuid, int32_t missionId, DistributedKv::Key& key);
     static void GenerateValue(const uint8_t* byteStream, size_t len, DistributedKv::Value& value);
 

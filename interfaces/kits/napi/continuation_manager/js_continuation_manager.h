@@ -52,15 +52,15 @@ private:
     NativeValue* OnStartDeviceManager(NativeEngine &engine, NativeCallbackInfo &info);
     NativeValue* OnInitDeviceConnectStateObject(NativeEngine &engine, NativeCallbackInfo &info);
     NativeValue* OnInitContinuationModeObject(NativeEngine &engine, NativeCallbackInfo &info);
-    napi_status SetEnumItem(const napi_env& env, napi_value object, const char* name, int32_t value);
+    static napi_status SetEnumItem(const napi_env& env, napi_value object, const char* name, int32_t value);
 
-    bool IsCallbackValid(NativeValue* listenerObj);
+    static bool IsCallbackValid(NativeValue* listenerObj);
     bool IsCallbackRegistered(int32_t token, const std::string& cbType);
     bool UnWrapContinuationExtraParams(const napi_env& env, const napi_value& options,
         std::shared_ptr<ContinuationExtraParams>& continuationExtraParams);
     bool UnwrapJsonByPropertyName(const napi_env& env, const napi_value& param,
-        const std::string& fieldStr, nlohmann::json& jsonObj);
-    bool PraseJson(const napi_env& env, const napi_value& jsonField, const napi_value& jsProNameList,
+        const std::string& field, nlohmann::json& jsonObj);
+    static bool PraseJson(const napi_env& env, const napi_value& jsonField, const napi_value& jsProNameList,
         uint32_t jsProCount, nlohmann::json& jsonObj);
 
     std::mutex jsCbMapMutex_;
