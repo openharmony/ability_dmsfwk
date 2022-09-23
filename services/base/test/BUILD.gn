@@ -47,7 +47,7 @@ base_public_deps = [
   "//third_party/libxml2:libxml2",
 ]
 
-ohos_unittest("dnetworkadaptertest") {
+ohos_unittest("dmsbasetest") {
   module_out_path = module_output_path
   sources = [ "unittest/dms_network_adapter_test.cpp" ]
   configs = [
@@ -65,5 +65,5 @@ ohos_unittest("dnetworkadaptertest") {
 
 group("unittest") {
   testonly = true
-  deps = [ ":dnetworkadaptertest" ]
+  deps = [ ":dmsbasetest" ]
 }
