@@ -64,14 +64,6 @@ public:
     {
         return ERR_OK;
     };
-    ErrCode AddFormInfo(FormInfo &formInfo) override
-    {
-        return ERR_OK;
-    };
-    ErrCode RemoveFormInfo(const std::string &moduleName, const std::string &formName) override
-    {
-        return ERR_OK;
-    };
     ErrCode RequestPublishForm(Want &want, bool withFormBindingData,
         std::unique_ptr<FormProviderData> &formBindingData, int64_t &formId) override
     {
@@ -114,22 +106,6 @@ public:
     {
         return ERR_OK;
     };
-    int32_t BatchAddFormRecords(const Want &want) override
-    {
-        return ERR_OK;
-    };
-    int32_t ClearFormRecords() override
-    {
-        return ERR_OK;
-    };
-    int32_t DistributedDataAddForm(const Want &want) override
-    {
-        return ERR_OK;
-    };
-    int32_t DistributedDataDeleteForm(const std::string &formId) override
-    {
-        return ERR_OK;
-    };
     int32_t DeleteInvalidForms(const std::vector<int64_t> &formIds, const sptr<IRemoteObject> &callerToken,
                                    int32_t &numFormsDeleted) override
     {
@@ -160,10 +136,6 @@ public:
     };
     int32_t GetFormsInfoByModule(std::string &bundleName, std::string &moduleName,
                              std::vector<FormInfo> &formInfos) override
-    {
-        return ERR_OK;
-    };
-    int32_t UpdateRouterAction(const int64_t formId, std::string &action) override
     {
         return ERR_OK;
     };
