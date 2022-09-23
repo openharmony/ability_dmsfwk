@@ -365,7 +365,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions014, TestSize.Level3)
 HWTEST_F(DMSMissionManagerTest, testNeedSyncDevice001, TestSize.Level3)
 {
     DTEST_LOG << "testCleanMissionResources001 begin" << std::endl;
-    bool ret = DistributedSchedMissionManager::GetInstance().needSyncDevice(DEVICE_ID);
+    bool ret = DistributedSchedMissionManager::GetInstance().NeedSyncDevice(DEVICE_ID);
     EXPECT_EQ(false, ret);
     DTEST_LOG << "testNeedSyncDevice001 end" << std::endl;
 }
