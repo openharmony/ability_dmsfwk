@@ -14,6 +14,11 @@
 import("//build/ohos.gni")
 import("//build/ohos_var.gni")
 
+group("unittest") {
+  testonly = true
+  deps = [ "test:unittest" ]
+}
+
 config("distributed_sched_config") {
   visibility = [ ":*" ]
   include_dirs = [
