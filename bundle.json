@@ -38,6 +38,7 @@
           "bundle_framework",
           "c_utils",
           "device_auth",
+          "device_info_manager",
           "distributeddatamgr",
           "dsoftbus",
           "eventhandler",
