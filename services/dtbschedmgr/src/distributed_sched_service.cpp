@@ -32,6 +32,7 @@
 #include "dms_callback_task.h"
 #include "dms_free_install_callback.h"
 #include "dms_token_callback.h"
+#include "dms_version_manager.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "element_name.h"
@@ -319,6 +320,11 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
         HILOGE("ContinueLocalMission already in progress!");
         return INVALID_PARAMETERS_ERR;
     }
+    DmsVersion thresholdDmsVersion = {3, 2, 0};
+    if (DmsVersionManager::IsRemoteDmsVersionLower(dstDeviceId, thresholdDmsVersion)) {
+        HILOGI("remote dms is low version");
+        return ContinueAbilityWithTimeout(dstDeviceId, missionId, callback);
+    }
 
     MissionInfo missionInfo;
     int32_t result = AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, missionInfo);
@@ -333,12 +339,7 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
     result = BundleManagerInternal::CheckRemoteBundleInfoForContinuation(dstDeviceId,
         bundleName, remoteBundleInfo);
     if (result == ERR_OK) {
-        dschedContinuation_->PushCallback(missionId, callback, dstDeviceId, false);
-        SetContinuationTimeout(missionId, CONTINUATION_TIMEOUT);
-        uint32_t remoteBundleVersion = remoteBundleInfo.versionCode;
-        result = AbilityManagerClient::GetInstance()->ContinueAbility(dstDeviceId, missionId, remoteBundleVersion);
-        HILOGI("result: %{public}d!", result);
-        return result;
+        return ContinueAbilityWithTimeout(dstDeviceId, missionId, callback, remoteBundleInfo.versionCode);
     }
     if (result == CONTINUE_REMOTE_UNINSTALLED_UNSUPPORT_FREEINSTALL) {
         HILOGE("remote not installed and app not support free install");
@@ -362,6 +363,16 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
         return INVALID_PARAMETERS_ERR;
     }
     return ERR_OK;
+}
+
+int32_t DistributedSchedService::ContinueAbilityWithTimeout(const std::string& dstDeviceId, int32_t missionId,
+    const sptr<IRemoteObject>& callback, uint32_t remoteBundleVersion)
+{
+    dschedContinuation_->PushCallback(missionId, callback, dstDeviceId, false);
+    SetContinuationTimeout(missionId, CONTINUATION_TIMEOUT);
+    int32_t result = AbilityManagerClient::GetInstance()->ContinueAbility(dstDeviceId, missionId, remoteBundleVersion);
+    HILOGI("result: %{public}d!", result);
+    return result;
 }
 
 int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDeviceId, const std::string& dstDeviceId,

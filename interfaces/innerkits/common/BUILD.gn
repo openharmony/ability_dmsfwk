@@ -17,6 +17,7 @@ config("common_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "include/",
+    "//foundation/ability/dmsfwk/interfaces/innerkits/continuation_manager/include/",
     "//foundation/ability/dmsfwk/services/base/include",
     "//foundation/ability/dmsfwk/services/dtbabilitymgr/include/",
     "//foundation/ability/dmsfwk/utils/native/include/",
