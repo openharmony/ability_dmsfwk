@@ -90,7 +90,7 @@ public:
     int32_t StartSyncMissionsFromRemote(const CallerInfo& callerInfo, std::vector<DstbMissionInfo>& missionInfos);
     int32_t StopSyncRemoteMissions(const std::string& dstDevId, bool offline, bool exit = false);
     void StopSyncMissionsFromRemote(const std::string& deviceId);
-    bool needSyncDevice(const std::string& deviceId);
+    bool NeedSyncDevice(const std::string& deviceId);
 
     void NotifySnapshotChanged(const std::string& networkId, int32_t missionId);
     void OnRemoteDied(const wptr<IRemoteObject>& remote);

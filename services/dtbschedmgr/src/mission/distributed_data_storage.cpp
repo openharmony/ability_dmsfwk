@@ -52,12 +52,11 @@ bool DistributedDataStorage::Init()
     if (kvStoreDeathRecipient_ == nullptr) {
         kvStoreDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new KvStoreDeathRecipient());
     }
-    bool ret = InitHandler();
-    if (!ret) {
-        HILOGE("InitHandler failed!");
-        return false;
+    if (dmsDataStorageHandler_ == nullptr) {
+        shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("dmsDataStorageHandler");
+        dmsDataStorageHandler_ = make_shared<AppExecFwk::EventHandler>(runner);
     }
-    ret = InitKvDataService();
+    int32_t ret = InitKvDataService();
     if (!ret) {
         HILOGE("InitKvDataService failed!");
         return false;
@@ -173,19 +172,6 @@ void DistributedDataStorage::SubscribeDistributedDataStorage()
             return;
         }
     }
-}
-
-bool DistributedDataStorage::InitHandler()
-{
-    if (dmsDataStorageHandler_ == nullptr) {
-        shared_ptr<AppExecFwk::EventRunner> runner = AppExecFwk::EventRunner::Create("dmsDataStorageHandler");
-        dmsDataStorageHandler_ = make_shared<AppExecFwk::EventHandler>(runner);
-    }
-    if (dmsDataStorageHandler_ == nullptr) {
-        HILOGW("dmsDataStorageHandler_ is null!");
-        return false;
-    }
-    return true;
 }
 
 void DistributedDataStorage::NotifyRemoteDied(const wptr<IRemoteObject>& remote)

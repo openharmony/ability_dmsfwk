@@ -240,11 +240,10 @@ NativeValue* JsContinuationManager::OnUnregisterDeviceSelectionCallback(NativeEn
         if (!IsCallbackRegistered(token, cbType)) {
             return engine.CreateUndefined();
         }
-        CallbackPair& callbackPair = jsCbMap_[token][cbType];
-        auto& listener = callbackPair.second;
         int32_t ret = DistributedAbilityManagerClient::GetInstance().UnregisterDeviceSelectionCallback(token, cbType);
         if (ret == ERR_OK) {
-            listener->RemoveCallback(cbType);
+            CallbackPair& callbackPair = jsCbMap_[token][cbType];
+            callbackPair.second->RemoveCallback(cbType);
             jsCbMap_[token].erase(cbType);
             if (jsCbMap_[token].empty()) {
                 jsCbMap_.erase(token);
@@ -459,7 +458,7 @@ bool JsContinuationManager::UnWrapContinuationExtraParams(const napi_env& env, c
 }
 
 bool JsContinuationManager::UnwrapJsonByPropertyName(const napi_env& env, const napi_value& param,
-    const std::string& field, nlohmann::json& jsonObject)
+    const std::string& field, nlohmann::json& jsonObj)
 {
     HILOGD("called.");
     if (!IsTypeForNapiValue(env, param, napi_object)) {
@@ -478,7 +477,7 @@ bool JsContinuationManager::UnwrapJsonByPropertyName(const napi_env& env, const 
     uint32_t jsProCount = 0;
     napi_get_property_names(env, jsonField, &jsProNameList);
     napi_get_array_length(env, jsProNameList, &jsProCount);
-    if (!PraseJson(env, jsonField, jsProNameList, jsProCount, jsonObject)) {
+    if (!PraseJson(env, jsonField, jsProNameList, jsProCount, jsonObj)) {
         HILOGE("PraseJson failed.");
         return false;
     }
@@ -486,7 +485,7 @@ bool JsContinuationManager::UnwrapJsonByPropertyName(const napi_env& env, const 
 }
 
 bool JsContinuationManager::PraseJson(const napi_env& env, const napi_value& jsonField,
-    const napi_value& jsProNameList, uint32_t jsProCount, nlohmann::json& jsonObject)
+    const napi_value& jsProNameList, uint32_t jsProCount, nlohmann::json& jsonObj)
 {
     napi_value jsProName = nullptr;
     napi_value jsProValue = nullptr;
@@ -504,14 +503,14 @@ bool JsContinuationManager::PraseJson(const napi_env& env, const napi_value& jso
             case napi_string: {
                 std::string elementValue = UnwrapStringFromJS(env, jsProValue);
                 HILOGI("Property name=%{public}s, string, value=%{public}s", strProName.c_str(), elementValue.c_str());
-                jsonObject[strProName] = elementValue;
+                jsonObj[strProName] = elementValue;
                 break;
             }
             case napi_boolean: {
                 bool elementValue = false;
                 napi_get_value_bool(env, jsProValue, &elementValue);
                 HILOGI("Property name=%{public}s, boolean, value=%{public}d.", strProName.c_str(), elementValue);
-                jsonObject[strProName] = elementValue;
+                jsonObj[strProName] = elementValue;
                 break;
             }
             case napi_number: {
@@ -520,7 +519,7 @@ bool JsContinuationManager::PraseJson(const napi_env& env, const napi_value& jso
                     HILOGE("Property name=%{public}s, Property int32_t parse error", strProName.c_str());
                 } else {
                     HILOGI("Property name=%{public}s, number, value=%{public}d.", strProName.c_str(), elementValue);
-                    jsonObject[strProName] = elementValue;
+                    jsonObj[strProName] = elementValue;
                 }
                 break;
             }
