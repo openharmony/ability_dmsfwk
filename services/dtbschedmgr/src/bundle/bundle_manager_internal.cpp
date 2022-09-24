@@ -127,7 +127,7 @@ bool BundleManagerInternal::QueryExtensionAbilityInfo(const AAFwk::Want& want,
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
     bundleMgr->QueryExtensionAbilityInfos(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT
         | AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION, ids[0], extensionInfos);
-    if (extensionInfos.size() <= 0) {
+    if (extensionInfos.empty()) {
         HILOGE("QueryExtensionAbilityInfo failed.");
         return false;
     }
