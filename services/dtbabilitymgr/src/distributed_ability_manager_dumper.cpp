@@ -15,6 +15,7 @@
 
 #include "distributed_ability_manager_dumper.h"
 
+#include "accesstoken_kit.h"
 #include "distributed_ability_manager_service.h"
 #include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
@@ -23,7 +24,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DistributedAbilityManagerDumper";
-constexpr int32_t UID_HIDUMPER = 1212;
+const char* HIDUMPER_PROCESS_NAME = "hidumper_service";
 constexpr size_t MIN_ARGS_SIZE = 1;
 const std::string ARGS_HELP = "-h";
 const std::string ARGS_CONNECT_REMOTE_ABILITY = "-connect";
@@ -82,12 +83,13 @@ void DistributedAbilityManagerDumper::IllegalInput(std::string& result)
 
 bool DistributedAbilityManagerDumper::CanDump()
 {
-    auto callingUid = IPCSkeleton::GetCallingUid();
-    HILOGI("calling uid = %{public}u", callingUid);
-    if (callingUid != UID_HIDUMPER) {
-        return false;
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    if (result == ERR_OK && nativeTokenInfo.processName == HIDUMPER_PROCESS_NAME) {
+        return true;
     }
-    return true;
+    return false;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
