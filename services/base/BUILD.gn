@@ -30,6 +30,7 @@ ohos_shared_library("dmsbaseinner") {
     "src/dfx/dms_hisysevent_report.cpp",
     "src/dfx/dms_hitrace_chain.cpp",
     "src/distributed_device_node_listener.cpp",
+    "src/dms_version_manager.cpp",
     "src/dtbschedmgr_device_info_storage.cpp",
   ]
   public_configs = [
@@ -39,6 +40,7 @@ ohos_shared_library("dmsbaseinner") {
 
   external_deps = [
     "c_utils:utils",
+    "device_info_manager:distributed_device_profile_client",
     "device_manager:devicemanagersdk",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
