@@ -322,6 +322,46 @@ HWTEST_F(DSchedContinuationTest, ContinueLocalMission_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ContinueLocalMission_003
+ * @tc.desc: input invalid params.
+ * @tc.type: FUNC
+ * @tc.require: I5RWKZ
+ */
+HWTEST_F(DSchedContinuationTest, ContinueLocalMission_003, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest ContinueLocalMission_003 start" << std::endl;
+    string deviceId = "123456";
+    int32_t missionId = -1;
+    auto callback = GetDSchedService();
+    WantParams wantParams;
+    DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    int32_t ret = DistributedSchedService::GetInstance().ContinueLocalMission(
+        deviceId, missionId, callback, wantParams);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DSchedContinuationTest ContinueLocalMission_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinueLocalMission_004
+ * @tc.desc: input invalid params.
+ * @tc.type: FUNC
+ * @tc.require: I5RWKZ
+ */
+HWTEST_F(DSchedContinuationTest, ContinueLocalMission_004, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest ContinueLocalMission_004 start" << std::endl;
+    string deviceId;
+    int32_t missionId = -1;
+    auto callback = GetDSchedService();
+    WantParams wantParams;
+    DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    int32_t ret = DistributedSchedService::GetInstance().ContinueLocalMission(
+        deviceId, missionId, callback, wantParams);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DSchedContinuationTest ContinueLocalMission_004 end" << std::endl;
+}
+
+/**
  * @tc.name: ContinueRemoteMission_001
  * @tc.desc: input invalid params.
  * @tc.type: FUNC
