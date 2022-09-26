@@ -347,7 +347,7 @@ NativeValue* JsContinuationManager::OnRegisterDeviceSelectionCallback(NativeEngi
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
         napi_throw_error(reinterpret_cast<napi_env>(&engine),
-            std::to_string(PARAMETER_CHECK_FAILED).c_str(), errInfo.c_str());
+            std::to_string(errCode).c_str(), errInfo.c_str());
     }
     return engine.CreateUndefined();
 }
