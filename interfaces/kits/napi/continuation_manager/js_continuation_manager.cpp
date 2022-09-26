@@ -190,7 +190,7 @@ NativeValue* JsContinuationManager::OnRegisterContinuation(NativeEngine &engine,
             }
             unwrapArgc++;
         }
-        return "";
+        return std::string();
     } ();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
@@ -262,7 +262,7 @@ NativeValue* JsContinuationManager::OnUnregisterContinuation(NativeEngine &engin
         if (!ConvertFromJsValue(engine, info.argv[0], token)) {
             return "Parameter error. The type of \"token\" must be number";
         }
-        return "";
+        return std::string();
     } ();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
@@ -304,7 +304,7 @@ std::string JsContinuationManager::OnRegisterDeviceSelectionCallbackParameterChe
     if (!IsCallbackValid(*jsListenerObj)) {
         return "Parameter error. The type of \"callback\" must be Callback<Array<ContinuationResult>>";
     }
-    return "";
+    return std::string();
 }
 
 NativeValue* JsContinuationManager::OnRegisterDeviceSelectionCallback(NativeEngine &engine, NativeCallbackInfo &info)
@@ -341,7 +341,7 @@ NativeValue* JsContinuationManager::OnRegisterDeviceSelectionCallback(NativeEngi
                 errCode = SYSTEM_WORK_ABNORMALLY;
                 return "RegisterDeviceSelectionListener failed";
             }
-            return "";
+            return std::string();
         }();
     }
     if (!errInfo.empty()) {
@@ -391,7 +391,7 @@ NativeValue* JsContinuationManager::OnUnregisterDeviceSelectionCallback(NativeEn
                 return "UnregisterDeviceSelectionCallback failed";
             }
         }
-        return "";
+        return std::string();
     } ();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
@@ -465,7 +465,7 @@ NativeValue* JsContinuationManager::OnUpdateContinuationState(NativeEngine &engi
         if (!ConvertFromJsValue(engine, info.argv[ARG_COUNT_TWO], deviceConnectStatus)) {
             return "Parameter error. The type of \"status\" must be DeviceConnectState";
         }
-        return "";
+        return std::string();
     } ();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
@@ -560,7 +560,7 @@ NativeValue* JsContinuationManager::OnStartContinuationDeviceManager(NativeEngin
             }
             unwrapArgc++;
         }
-        return "";
+        return std::string();
     } ();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
