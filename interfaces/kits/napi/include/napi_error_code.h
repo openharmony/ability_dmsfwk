@@ -44,6 +44,6 @@ enum {
      */
     REPEATED_REGISTRATION = 16600005,
 };
-}// namespace DistributedSchedule
+} // namespace DistributedSchedule
 } // namespace OHOS
 #endif // SERVICES_DTBSCHEDMGR_NAPI_ERROR_CODE_H_

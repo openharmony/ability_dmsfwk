@@ -177,23 +177,20 @@ NativeValue* JsContinuationManager::OnRegisterContinuation(NativeEngine &engine,
     HILOGD("called.");
     decltype(info.argc) unwrapArgc = 0;
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams;
-    std::string errInfo;
-    [this, &engine, &info, &continuationExtraParams, &unwrapArgc, &errInfo] {
+    std::string errInfo = [this, &engine, &info, &continuationExtraParams, &unwrapArgc]() -> std::string {
         if (info.argc > ARG_COUNT_TWO) {
-            errInfo = "Parameter error. The type of \"number of parameters\" must be less than 3";
-            return;
+            return "Parameter error. The type of \"number of parameters\" must be less than 3";
         }
         if (info.argc > 0 && info.argv[0]->TypeOf() == NATIVE_OBJECT) {
             HILOGI("register options is used.");
             continuationExtraParams = std::make_shared<ContinuationExtraParams>();
             if (!UnWrapContinuationExtraParams(reinterpret_cast<napi_env>(&engine),
                 reinterpret_cast<napi_value>(info.argv[0]), continuationExtraParams)) {
-                errInfo = "Parameter error. The type of \"options\" must be ContinuationExtraParams";
-                return;
+                return "Parameter error. The type of \"options\" must be ContinuationExtraParams";
             }
             unwrapArgc++;
         }
-        return;
+        return "";
     } ();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
@@ -258,16 +255,14 @@ NativeValue* JsContinuationManager::OnUnregisterContinuation(NativeEngine &engin
 {
     HILOGD("called.");
     int32_t token = -1;
-    std::string errInfo;
-    [this, &engine, &info, &token, &errInfo]() {
+    std::string errInfo = [this, &engine, &info, &token]() -> std::string {
         if (info.argc == 0 || info.argc > ARG_COUNT_TWO) {
-            errInfo = "Parameter error. The type of \"number of parameters\" must be greater than 0 and less than 3";
-            return;
+            return "Parameter error. The type of \"number of parameters\" must be greater than 0 and less than 3";
         }
         if (!ConvertFromJsValue(engine, info.argv[0], token)) {
-            errInfo = "Parameter error. The type of \"token\" must be number";
-            return;
+            return "Parameter error. The type of \"token\" must be number";
         }
+        return "";
     } ();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
@@ -292,62 +287,66 @@ NativeValue* JsContinuationManager::OnUnregisterContinuation(NativeEngine &engin
     return result;
 }
 
+std::string JsContinuationManager::OnRegisterDeviceSelectionCallbackParameterCheck(NativeEngine &engine,
+    NativeCallbackInfo &info, std::string &cbType, int32_t &token, NativeValue *jsListenerObj) {
+    if (info.argc != ARG_COUNT_THREE) {
+        return "Parameter error. The type of \"number of parameters\" must be 3";
+    }
+    if (!ConvertFromJsValue(engine, info.argv[0], cbType)) {
+        return "Parameter error. The type of \"type\" must be " +
+            std::string(EVENT_CONNECT) + " or " + std::string(EVENT_DISCONNECT);;
+    }
+    if (!ConvertFromJsValue(engine, info.argv[ARG_COUNT_ONE], token)) {
+        return "Parameter error. The type of \"token\" must be number";
+    }
+    jsListenerObj = info.argv[ARG_COUNT_TWO];
+    if (!IsCallbackValid(jsListenerObj)) {
+        return "Parameter error. The type of \"callback\" must be Callback<Array<ContinuationResult>>";
+    }
+    return "";
+}
+
 NativeValue* JsContinuationManager::OnRegisterDeviceSelectionCallback(NativeEngine &engine, NativeCallbackInfo &info)
 {
     HILOGD("called.");
     std::string cbType;
     int32_t token = -1;
-    NativeValue* jsListenerObj;
-    string errInfo;
-    [this, &engine, &info, &cbType, &token, &jsListenerObj, &errInfo]() {
-        if (info.argc != ARG_COUNT_THREE) {
-            errInfo = "Parameter error. The type of \"number of parameters\" must be 3";
-            return;
-        }
-        if (!ConvertFromJsValue(engine, info.argv[0], cbType)) {
-            errInfo = "Parameter error. The type of \"type\" must be " +
-                std::string(EVENT_CONNECT) + " or " + std::string(EVENT_DISCONNECT);
-            return;
-        }
-        if (!ConvertFromJsValue(engine, info.argv[ARG_COUNT_ONE], token)) {
-            errInfo = "Parameter error. The type of \"token\" must be number";
-            return;
-        }
-        jsListenerObj = info.argv[ARG_COUNT_TWO];
-        if (!IsCallbackValid(jsListenerObj)) {
-            errInfo = "Parameter error. The type of \"callback\" must be Callback<Array<ContinuationResult>>";
-            return;
-        }
-    }();
+    int32_t errCode = PARAMETER_CHECK_FAILED;
+    NativeValue* jsListenerObj = nullptr;
+    std::string errInfo = OnRegisterDeviceSelectionCallbackParameterCheck(engine, info, cbType, token, jsListenerObj);
+    if(errInfo.empty()) {
+        errInfo = [this, &engine, &info, &cbType, &token, &jsListenerObj, &errCode]() -> std::string {
+            std::lock_guard<std::mutex> jsCbMapLock(jsCbMapMutex_);
+            if (IsCallbackRegistered(token, cbType)) {
+                errCode = CALLBACK_TOKEN_UNREGISTERED;
+                return "UnregisterDeviceSelectionCallback Callback is not registered";
+            }
+            std::unique_ptr<NativeReference> callbackRef;
+            callbackRef.reset(engine.CreateReference(jsListenerObj, 1));
+            sptr<JsDeviceSelectionListener> deviceSelectionListener = new JsDeviceSelectionListener(&engine);
+            if (deviceSelectionListener == nullptr) {
+                errCode = SYSTEM_WORK_ABNORMALLY;
+                return "deviceSelectionListener is nullptr";
+            }
+            int32_t ret = DistributedAbilityManagerClient::GetInstance().RegisterDeviceSelectionCallback(
+                token, cbType, deviceSelectionListener);
+            if (ret == ERR_OK) {
+                deviceSelectionListener->AddCallback(cbType, jsListenerObj);
+                CallbackPair callbackPair = std::make_pair(std::move(callbackRef), deviceSelectionListener);
+                jsCbMap_[token][cbType] = std::move(callbackPair); // move assignment
+                HILOGI("RegisterDeviceSelectionListener success");
+            } else {
+                deviceSelectionListener = nullptr;
+                errCode = SYSTEM_WORK_ABNORMALLY;
+                return "RegisterDeviceSelectionListener failed";
+            }
+            return "";
+        }();
+    }
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
         napi_throw_error(reinterpret_cast<napi_env>(&engine),
             std::to_string(PARAMETER_CHECK_FAILED).c_str(), errInfo.c_str());
-        return engine.CreateUndefined();
-    }
-    {
-        std::lock_guard<std::mutex> jsCbMapLock(jsCbMapMutex_);
-        if (IsCallbackRegistered(token, cbType)) {
-            return engine.CreateUndefined();
-        }
-        std::unique_ptr<NativeReference> callbackRef;
-        callbackRef.reset(engine.CreateReference(jsListenerObj, 1));
-        sptr<JsDeviceSelectionListener> deviceSelectionListener = new JsDeviceSelectionListener(&engine);
-        if (deviceSelectionListener == nullptr) {
-            HILOGE("deviceSelectionListener is nullptr");
-            return engine.CreateUndefined();
-        }
-        int32_t ret = DistributedAbilityManagerClient::GetInstance().RegisterDeviceSelectionCallback(
-            token, cbType, deviceSelectionListener);
-        if (ret == ERR_OK) {
-            deviceSelectionListener->AddCallback(cbType, jsListenerObj);
-            CallbackPair callbackPair = std::make_pair(std::move(callbackRef), deviceSelectionListener);
-            jsCbMap_[token][cbType] = std::move(callbackPair); // move assignment
-            HILOGI("RegisterDeviceSelectionListener success");
-        } else {
-            deviceSelectionListener = nullptr;
-            HILOGE("RegisterDeviceSelectionListener failed");
-        }
     }
     return engine.CreateUndefined();
 }
@@ -357,49 +356,47 @@ NativeValue* JsContinuationManager::OnUnregisterDeviceSelectionCallback(NativeEn
     HILOGD("called.");
     std::string cbType;
     int32_t token = -1;
-    std::string errInfo;
-    [this, &engine, &info, &cbType, &token, &errInfo] {
+    int32_t errCode = PARAMETER_CHECK_FAILED;
+    std::string errInfo = [this, &engine, &info, &cbType, &token, &errCode]() -> std::string {
         if (info.argc != ARG_COUNT_TWO) {
-            errInfo = "Parameter error. The type of \"number of parameters\" must be 2";
-            return;
+            return "Parameter error. The type of \"number of parameters\" must be 2";
         }
         if (!ConvertFromJsValue(engine, info.argv[0], cbType)) {
-            errInfo = "Parameter error. The type of \"type\" must be string";
-            return;
+            return "Parameter error. The type of \"type\" must be string";
         }
         if (cbType != EVENT_CONNECT && cbType != EVENT_DISCONNECT) {
-            errInfo = "Parameter error. The type of \"type\" must be " +
+            return "Parameter error. The type of \"type\" must be " +
                 std::string(EVENT_CONNECT) + " or " + std::string(EVENT_DISCONNECT);
-            return;
         }
         if (!ConvertFromJsValue(engine, info.argv[ARG_COUNT_ONE], token)) {
-            errInfo = "Parameter error. The type of \"token\" must be string";
-            return;
+            return "Parameter error. The type of \"token\" must be string";
         }
+        {
+            std::lock_guard<std::mutex> jsCbMapLock(jsCbMapMutex_);
+            if (!IsCallbackRegistered(token, cbType)) {
+                errCode = REPEATED_REGISTRATION;
+                return "UnregisterDeviceSelectionCallback Callback is registered";
+            }
+            errCode = DistributedAbilityManagerClient::GetInstance().UnregisterDeviceSelectionCallback(token, cbType);
+            if (errCode == ERR_OK) {
+                CallbackPair& callbackPair = jsCbMap_[token][cbType];
+                callbackPair.second->RemoveCallback(cbType);
+                jsCbMap_[token].erase(cbType);
+                if (jsCbMap_[token].empty()) {
+                    jsCbMap_.erase(token);
+                }
+                HILOGI("UnregisterDeviceSelectionCallback success");
+            } else {
+                errCode = SYSTEM_WORK_ABNORMALLY;
+                return "UnregisterDeviceSelectionCallback failed";
+            }
+        }
+        return "";
     }();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
         napi_throw_error(reinterpret_cast<napi_env>(&engine),
-            std::to_string(PARAMETER_CHECK_FAILED).c_str(), errInfo.c_str());
-        return engine.CreateUndefined();
-    }
-    {
-        std::lock_guard<std::mutex> jsCbMapLock(jsCbMapMutex_);
-        if (!IsCallbackRegistered(token, cbType)) {
-            return engine.CreateUndefined();
-        }
-        int32_t ret = DistributedAbilityManagerClient::GetInstance().UnregisterDeviceSelectionCallback(token, cbType);
-        if (ret == ERR_OK) {
-            CallbackPair& callbackPair = jsCbMap_[token][cbType];
-            callbackPair.second->RemoveCallback(cbType);
-            jsCbMap_[token].erase(cbType);
-            if (jsCbMap_[token].empty()) {
-                jsCbMap_.erase(token);
-            }
-            HILOGI("UnregisterDeviceSelectionCallback success");
-        } else {
-            HILOGE("UnregisterDeviceSelectionCallback failed");
-        }
+            std::to_string(errCode).c_str(), errInfo.c_str());
     }
     return engine.CreateUndefined();
 }
@@ -455,25 +452,21 @@ NativeValue* JsContinuationManager::OnUpdateContinuationState(NativeEngine &engi
     int32_t token = -1;
     std::string deviceId;
     DeviceConnectStatus deviceConnectStatus;
-    std::string errInfo;
-    [this, &engine, &info, &token, &deviceId, &deviceConnectStatus, &errInfo]() {
+    std::string errInfo = [this, &engine, &info, &token, &deviceId, &deviceConnectStatus, &errInfo]() -> std::string {
         if (info.argc != ARG_COUNT_THREE && info.argc != ARG_COUNT_FOUR) {
-            errInfo = "Parameter error. The type of \"number of parameters\" must be 3 or 4";
-            return;
+            return "Parameter error. The type of \"number of parameters\" must be 3 or 4";
         }
         if (!ConvertFromJsValue(engine, info.argv[0], token)) {
-            errInfo = "Parameter error. The type of \"token\" must be number";
-            return;
+            return "Parameter error. The type of \"token\" must be number";
         }
         if (!ConvertFromJsValue(engine, info.argv[ARG_COUNT_ONE], deviceId)) {
-            errInfo = "Parameter error. The type of \"deviceId\" must be string";
-            return;
+            return "Parameter error. The type of \"deviceId\" must be string";
         }
         deviceConnectStatus = DeviceConnectStatus::IDLE;
         if (!ConvertFromJsValue(engine, info.argv[ARG_COUNT_TWO], deviceConnectStatus)) {
-            errInfo = "Parameter error. The type of \"status\" must be DeviceConnectState";
-            return;
+            return "Parameter error. The type of \"status\" must be DeviceConnectState";
         }
+        return "";
     } ();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
@@ -552,26 +545,23 @@ NativeValue* JsContinuationManager::OnStartContinuationDeviceManager(NativeEngin
     int32_t token = -1;
     decltype(info.argc) unwrapArgc = ARG_COUNT_ONE;
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams;
-    std::string errInfo;
-    [this, &engine, &info, &token, & unwrapArgc, &continuationExtraParams, &errInfo] {
+    std::string errInfo = [this, &engine, &info, &token, & unwrapArgc, &continuationExtraParams]() -> std::string {
         if (info.argc < ARG_COUNT_ONE || info.argc > ARG_COUNT_THREE) {
-            errInfo = "Parameter error. The type of \"number of parameters\" must be greater than 1 and less than 4";
-            return;
+            return "Parameter error. The type of \"number of parameters\" must be greater than 1 and less than 4";
         }
         if (!ConvertFromJsValue(engine, info.argv[0], token)) {
-            errInfo = "Parameter error. The type of \"token\" must be number";
-            return;
+            return "Parameter error. The type of \"token\" must be number";
         }
         continuationExtraParams = std::make_shared<ContinuationExtraParams>();
         if (info.argc > ARG_COUNT_ONE && info.argv[ARG_COUNT_ONE]->TypeOf() == NATIVE_OBJECT) {
             HILOGI("StartContinuationDeviceManager options is used.");
             if (!UnWrapContinuationExtraParams(reinterpret_cast<napi_env>(&engine),
                 reinterpret_cast<napi_value>(info.argv[ARG_COUNT_ONE]), continuationExtraParams)) {
-                errInfo = "Parameter error. The type of \"options\" must be ContinuationExtraParams";
-                return;
+                return "Parameter error. The type of \"options\" must be ContinuationExtraParams";;
             }
             unwrapArgc++;
         }
+        return "";
     } ();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
@@ -814,10 +804,14 @@ NativeValue* JsContinuationManagerInit(NativeEngine* engine, NativeValue* export
     BindNativeFunction(*engine, *object, "startDeviceManager", moduleName, JsContinuationManager::StartDeviceManager);
     BindNativeProperty(*object, "DeviceConnectState", JsContinuationManager::InitDeviceConnectStateObject);
     BindNativeProperty(*object, "ContinuationMode", JsContinuationManager::InitContinuationModeObject);
-    BindNativeFunction(*engine, *object, "registerContinuation", moduleName, JsContinuationManager::RegisterContinuation);
-    BindNativeFunction(*engine, *object, "unregisterContinuation", moduleName, JsContinuationManager::UnregisterContinuation);
-    BindNativeFunction(*engine, *object, "updateContinuationState", moduleName, JsContinuationManager::UpdateContinuationState);
-    BindNativeFunction(*engine, *object, "startContinuationDeviceManager", moduleName, JsContinuationManager::StartContinuationDeviceManager);
+    BindNativeFunction(*engine, *object, "registerContinuation", moduleName,
+        JsContinuationManager::RegisterContinuation);
+    BindNativeFunction(*engine, *object, "unregisterContinuation", moduleName,
+        JsContinuationManager::UnregisterContinuation);
+    BindNativeFunction(*engine, *object, "updateContinuationState", moduleName,
+        JsContinuationManager::UpdateContinuationState);
+    BindNativeFunction(*engine, *object, "startContinuationDeviceManager", moduleName,
+        JsContinuationManager::StartContinuationDeviceManager);
 
     return engine->CreateUndefined();
 }
