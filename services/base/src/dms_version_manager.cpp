@@ -47,11 +47,17 @@ bool DmsVersionManager::IsRemoteDmsVersionLower(const std::string& remoteDeviceI
 
 int32_t DmsVersionManager::GetRemoteDmsVersion(const std::string& deviceId, DmsVersion& dmsVersion)
 {
-    std::string packageNamesData;
-    std::string versionsData;
-    int32_t result = GetAppInfoFromDP(deviceId, packageNamesData, versionsData);
+    std::string appInfoJsonData;
+    int32_t result = GetAppInfoFromDP(deviceId, appInfoJsonData);
     if (result != ERR_OK) {
         HILOGI("get app info failed, result: %{public}d!", result);
+        return result;
+    }
+    std::string packageNamesData;
+    std::string versionsData;
+    result = ParseAppInfo(appInfoJsonData, packageNamesData, versionsData);
+    if (result != ERR_OK) {
+        HILOGI("parse app info failed");
         return result;
     }
 
@@ -68,8 +74,7 @@ int32_t DmsVersionManager::GetRemoteDmsVersion(const std::string& deviceId, DmsV
     return ERR_OK;
 }
 
-int32_t DmsVersionManager::GetAppInfoFromDP(const std::string& deviceId, std::string& packageNamesData,
-    std::string& versionsData)
+int32_t DmsVersionManager::GetAppInfoFromDP(const std::string& deviceId, std::string& appInfoJsonData)
 {
     DeviceProfile::ServiceCharacteristicProfile profile;
     int32_t result = IN_PROCESS_CALL(
@@ -79,17 +84,27 @@ int32_t DmsVersionManager::GetAppInfoFromDP(const std::string& deviceId, std::st
     if (result != ERR_OK) {
         return result;
     }
-    std::string jsonData = profile.GetCharacteristicProfileJson();
-    if (jsonData.empty()) {
+    appInfoJsonData = profile.GetCharacteristicProfileJson();
+    return ERR_OK;
+}
+
+int32_t DmsVersionManager::ParseAppInfo(const std::string& appInfoJsonData, std::string& packageNamesData,
+    std::string& versionsData)
+{
+    if (appInfoJsonData.empty()) {
         return DMS_VERSION_EMPTY;
     }
-    nlohmann::json dpJson = nlohmann::json::parse(jsonData.c_str(), nullptr, false);
-    if (dpJson.find(PACKAGE_NAMES) != dpJson.end() && dpJson.at(PACKAGE_NAMES).is_string()) {
-        dpJson.at(PACKAGE_NAMES).get_to(packageNamesData);
+    nlohmann::json appInfoJson = nlohmann::json::parse(appInfoJsonData.c_str(), nullptr, false);
+    if (appInfoJson.find(PACKAGE_NAMES) == appInfoJson.end() || !appInfoJson.at(PACKAGE_NAMES).is_string()) {
+        return DMS_VERSION_EMPTY;
     }
-    if (dpJson.find(VERSIONS) != dpJson.end() && dpJson.at(VERSIONS).is_string()) {
-        dpJson.at(VERSIONS).get_to(versionsData);
+    appInfoJson.at(PACKAGE_NAMES).get_to(packageNamesData);
+    
+    if (appInfoJson.find(VERSIONS) == appInfoJson.end() || !appInfoJson.at(VERSIONS).is_string()) {
+        return DMS_VERSION_EMPTY;
     }
+    appInfoJson.at(VERSIONS).get_to(versionsData);
+
     return ERR_OK;
 }
 
@@ -126,19 +141,19 @@ bool DmsVersionManager::ParseDmsVersion(const std::string& dmsVersionData, DmsVe
     if (!OHOS::StrToInt(versionNumList[DMS_MAJOR_VERSION_INDEX], majorVersionNum) || majorVersionNum < 0) {
         return false;
     }
-    dmsVersion.majorVersionNum = majorVersionNum;
+    dmsVersion.majorVersionNum = static_cast<uint32_t>(majorVersionNum);
 
     int32_t minorVersionNum = -1;
     if (!OHOS::StrToInt(versionNumList[DMS_MINOR_VERSION_INDEX], minorVersionNum) || minorVersionNum < 0) {
         return false;
     }
-    dmsVersion.minorVersionNum = minorVersionNum;
+    dmsVersion.minorVersionNum = static_cast<uint32_t>(minorVersionNum);
 
     int32_t featureVersionNum = -1;
     if (!OHOS::StrToInt(versionNumList[DMS_FEATURE_VERSION_INDEX], featureVersionNum) || featureVersionNum < 0) {
         return false;
     }
-    dmsVersion.featureVersionNum = featureVersionNum;
+    dmsVersion.featureVersionNum = static_cast<uint32_t>(featureVersionNum);
     return true;
 }
 

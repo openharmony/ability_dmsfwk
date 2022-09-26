@@ -35,12 +35,12 @@ struct DmsVersion {
 };
 
 class DmsVersionManager {
-
 public:
     static bool IsRemoteDmsVersionLower(const std::string& remoteDeviceId, const DmsVersion& thresholdDmsVersion);
 private:
     static int32_t GetRemoteDmsVersion(const std::string& deviceId, DmsVersion& dmsVersion);
-    static int32_t GetAppInfoFromDP(const std::string& deviceId, std::string& packageNamesData,
+    static int32_t GetAppInfoFromDP(const std::string& deviceId, std::string& appInfoJsonData);
+    static int32_t ParseAppInfo(const std::string& appInfoJsonData, std::string& packageNamesData,
         std::string& versionsData);
     static int32_t GetDmsVersionDataFromAppInfo(const std::string& packageNamesData, const std::string& versionsData,
         std::string& dmsVersionData);
