@@ -315,7 +315,7 @@ NativeValue* JsContinuationManager::OnRegisterDeviceSelectionCallback(NativeEngi
     int32_t errCode = PARAMETER_CHECK_FAILED;
     NativeValue* jsListenerObj = nullptr;
     std::string errInfo = OnRegisterDeviceSelectionCallbackParameterCheck(engine, info, cbType, token, jsListenerObj);
-    if( errInfo.empty()) {
+    if (errInfo.empty()) {
         errInfo = [this, &engine, &info, &cbType, &token, &jsListenerObj, &errCode]() -> std::string {
             std::lock_guard<std::mutex> jsCbMapLock(jsCbMapMutex_);
             if (IsCallbackRegistered(token, cbType)) {
