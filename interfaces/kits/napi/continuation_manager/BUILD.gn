@@ -16,7 +16,7 @@ import("//build/ohos.gni")
 config("continuationmanager_napi_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
-    "include/",
+    "//foundation/ability/dmsfwk/interfaces/kits/napi/include",
     "//foundation/ability/dmsfwk/services/base/include",
   ]
 
