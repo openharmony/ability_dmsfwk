@@ -288,7 +288,8 @@ NativeValue* JsContinuationManager::OnUnregisterContinuation(NativeEngine &engin
 }
 
 std::string JsContinuationManager::OnRegisterDeviceSelectionCallbackParameterCheck(NativeEngine &engine,
-    NativeCallbackInfo &info, std::string &cbType, int32_t &token, NativeValue *jsListenerObj) {
+    NativeCallbackInfo &info, std::string &cbType, int32_t &token, NativeValue *jsListenerObj)
+{
     if (info.argc != ARG_COUNT_THREE) {
         return "Parameter error. The type of \"number of parameters\" must be 3";
     }
@@ -314,7 +315,7 @@ NativeValue* JsContinuationManager::OnRegisterDeviceSelectionCallback(NativeEngi
     int32_t errCode = PARAMETER_CHECK_FAILED;
     NativeValue* jsListenerObj = nullptr;
     std::string errInfo = OnRegisterDeviceSelectionCallbackParameterCheck(engine, info, cbType, token, jsListenerObj);
-    if(errInfo.empty()) {
+    if( errInfo.empty()) {
         errInfo = [this, &engine, &info, &cbType, &token, &jsListenerObj, &errCode]() -> std::string {
             std::lock_guard<std::mutex> jsCbMapLock(jsCbMapMutex_);
             if (IsCallbackRegistered(token, cbType)) {
@@ -557,7 +558,7 @@ NativeValue* JsContinuationManager::OnStartContinuationDeviceManager(NativeEngin
             HILOGI("StartContinuationDeviceManager options is used.");
             if (!UnWrapContinuationExtraParams(reinterpret_cast<napi_env>(&engine),
                 reinterpret_cast<napi_value>(info.argv[ARG_COUNT_ONE]), continuationExtraParams)) {
-                return "Parameter error. The type of \"options\" must be ContinuationExtraParams";;
+                return "Parameter error. The type of \"options\" must be ContinuationExtraParams";
             }
             unwrapArgc++;
         }
