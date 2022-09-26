@@ -288,7 +288,7 @@ NativeValue* JsContinuationManager::OnUnregisterContinuation(NativeEngine &engin
 }
 
 std::string JsContinuationManager::OnRegisterDeviceSelectionCallbackParameterCheck(NativeEngine &engine,
-    NativeCallbackInfo &info, std::string &cbType, int32_t &token, NativeValue *jsListenerObj)
+    NativeCallbackInfo &info, std::string &cbType, int32_t &token, NativeValue** jsListenerObj)
 {
     if (info.argc != ARG_COUNT_THREE) {
         return "Parameter error. The type of \"number of parameters\" must be 3";
@@ -300,8 +300,8 @@ std::string JsContinuationManager::OnRegisterDeviceSelectionCallbackParameterChe
     if (!ConvertFromJsValue(engine, info.argv[ARG_COUNT_ONE], token)) {
         return "Parameter error. The type of \"token\" must be number";
     }
-    jsListenerObj = info.argv[ARG_COUNT_TWO];
-    if (!IsCallbackValid(jsListenerObj)) {
+    *jsListenerObj = info.argv[ARG_COUNT_TWO];
+    if (!IsCallbackValid(*jsListenerObj)) {
         return "Parameter error. The type of \"callback\" must be Callback<Array<ContinuationResult>>";
     }
     return "";
@@ -314,7 +314,7 @@ NativeValue* JsContinuationManager::OnRegisterDeviceSelectionCallback(NativeEngi
     int32_t token = -1;
     int32_t errCode = PARAMETER_CHECK_FAILED;
     NativeValue* jsListenerObj = nullptr;
-    std::string errInfo = OnRegisterDeviceSelectionCallbackParameterCheck(engine, info, cbType, token, jsListenerObj);
+    std::string errInfo = OnRegisterDeviceSelectionCallbackParameterCheck(engine, info, cbType, token, &jsListenerObj);
     if (errInfo.empty()) {
         errInfo = [this, &engine, &info, &cbType, &token, &jsListenerObj, &errCode]() -> std::string {
             std::lock_guard<std::mutex> jsCbMapLock(jsCbMapMutex_);
@@ -346,8 +346,7 @@ NativeValue* JsContinuationManager::OnRegisterDeviceSelectionCallback(NativeEngi
     }
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
-        napi_throw_error(reinterpret_cast<napi_env>(&engine),
-            std::to_string(errCode).c_str(), errInfo.c_str());
+        napi_throw_error(reinterpret_cast<napi_env>(&engine), std::to_string(errCode).c_str(), errInfo.c_str());
     }
     return engine.CreateUndefined();
 }
@@ -376,7 +375,7 @@ NativeValue* JsContinuationManager::OnUnregisterDeviceSelectionCallback(NativeEn
             std::lock_guard<std::mutex> jsCbMapLock(jsCbMapMutex_);
             if (!IsCallbackRegistered(token, cbType)) {
                 errCode = REPEATED_REGISTRATION;
-                return "UnregisterDeviceSelectionCallback Callback is registered";
+                return "UnregisterDeviceSelectionCallback Callback is not registered";
             }
             errCode = DistributedAbilityManagerClient::GetInstance().UnregisterDeviceSelectionCallback(token, cbType);
             if (errCode == ERR_OK) {
@@ -393,11 +392,10 @@ NativeValue* JsContinuationManager::OnUnregisterDeviceSelectionCallback(NativeEn
             }
         }
         return "";
-    }();
+    } ();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
-        napi_throw_error(reinterpret_cast<napi_env>(&engine),
-            std::to_string(errCode).c_str(), errInfo.c_str());
+        napi_throw_error(reinterpret_cast<napi_env>(&engine), std::to_string(errCode).c_str(), errInfo.c_str());
     }
     return engine.CreateUndefined();
 }

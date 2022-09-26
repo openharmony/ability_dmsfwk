@@ -72,7 +72,7 @@ private:
         uint32_t jsProCount, nlohmann::json& jsonObj);
     int32_t ErrorCodeReturn(int32_t code);
     std::string OnRegisterDeviceSelectionCallbackParameterCheck(NativeEngine &engine,
-        NativeCallbackInfo &info, std::string &cbType, int32_t &token, NativeValue *jsListenerObj);
+        NativeCallbackInfo &info, std::string &cbType, int32_t &token, NativeValue** jsListenerObj);
     std::mutex jsCbMapMutex_;
     std::map<int32_t, std::map<std::string, CallbackPair>> jsCbMap_;
 };
