@@ -192,6 +192,7 @@ ohos_unittest("dschedcontinuetest") {
 
   sources = [
     "unittest/distributed_sched_continuation_test.cpp",
+    "unittest/dms_version_manager_test.cpp",
     "unittest/mock_distributed_sched.cpp",
   ]
   sources += dtbschedmgr_sources
