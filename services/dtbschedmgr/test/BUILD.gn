@@ -60,7 +60,7 @@ if (dmsfwk_report_memmgr) {
 }
 
 if (dmsfwk_report_memmgr_plugins) {
-  dsched_external_deps += [ "plugins/memmgr:memmgrclient" ]
+  dsched_external_deps += [ "memmgr_plugin:memmgrclient" ]
 }
 
 if (dmsfwk_standard_form_share) {
