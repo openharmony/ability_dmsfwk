@@ -41,6 +41,10 @@ public:
     static NativeValue* StartDeviceManager(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* InitDeviceConnectStateObject(NativeEngine* engine, NativeCallbackInfo* info);
     static NativeValue* InitContinuationModeObject(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* RegisterContinuation(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* UnregisterContinuation(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* UpdateContinuationState(NativeEngine* engine, NativeCallbackInfo* info);
+    static NativeValue* StartContinuationDeviceManager(NativeEngine* engine, NativeCallbackInfo* info);
 
 private:
     using CallbackPair = std::pair<std::unique_ptr<NativeReference>, sptr<JsDeviceSelectionListener>>;
@@ -53,6 +57,10 @@ private:
     NativeValue* OnInitDeviceConnectStateObject(NativeEngine &engine, NativeCallbackInfo &info);
     NativeValue* OnInitContinuationModeObject(NativeEngine &engine, NativeCallbackInfo &info);
     static napi_status SetEnumItem(const napi_env& env, napi_value object, const char* name, int32_t value);
+    NativeValue* OnRegisterContinuation(NativeEngine &engine, NativeCallbackInfo &info);
+    NativeValue* OnUnregisterContinuation(NativeEngine &engine, NativeCallbackInfo &info);
+    NativeValue* OnUpdateContinuationState(NativeEngine &engine, NativeCallbackInfo &info);
+    NativeValue* OnStartContinuationDeviceManager(NativeEngine &engine, NativeCallbackInfo &info);
 
     static bool IsCallbackValid(NativeValue* listenerObj);
     bool IsCallbackRegistered(int32_t token, const std::string& cbType);
@@ -62,7 +70,9 @@ private:
         const std::string& field, nlohmann::json& jsonObj);
     static bool PraseJson(const napi_env& env, const napi_value& jsonField, const napi_value& jsProNameList,
         uint32_t jsProCount, nlohmann::json& jsonObj);
-
+    int32_t ErrorCodeReturn(int32_t code);
+    std::string OnRegisterDeviceSelectionCallbackParameterCheck(NativeEngine &engine,
+        NativeCallbackInfo &info, std::string &cbType, int32_t &token, NativeValue** jsListenerObj);
     std::mutex jsCbMapMutex_;
     std::map<int32_t, std::map<std::string, CallbackPair>> jsCbMap_;
 };
