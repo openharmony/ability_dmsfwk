@@ -47,7 +47,7 @@
           "hitrace_native",
           "hiviewdfx_hilog_native",
           "ipc",
-          "multimedia_image_standard",
+          "multimedia_image_framework",
           "napi",
           "os_account",
           "safwk",

@@ -18,7 +18,7 @@ declare_args() {
   dmsfwk_report_memmgr = false
   dmsfwk_report_memmgr_plugins = false
   if (defined(global_parts_info)) {
-    if (defined(global_parts_info.multimedia_multimedia_image_standard)) {
+    if (defined(global_parts_info.multimedia_multimedia_image_framework)) {
       dmsfwk_mission_manager = true
     }
     if (defined(global_parts_info.resourceschedule_efficiency_manager)) {
