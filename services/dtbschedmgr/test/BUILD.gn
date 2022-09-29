@@ -60,7 +60,7 @@ if (dmsfwk_report_memmgr) {
 }
 
 if (dmsfwk_report_memmgr_plugins) {
-  dsched_external_deps += [ "plugins/memmgr:memmgrclient" ]
+  dsched_external_deps += [ "memmgr_plugin:memmgrclient" ]
 }
 
 if (dmsfwk_standard_form_share) {
@@ -192,6 +192,7 @@ ohos_unittest("dschedcontinuetest") {
 
   sources = [
     "unittest/distributed_sched_continuation_test.cpp",
+    "unittest/dms_version_manager_test.cpp",
     "unittest/mock_distributed_sched.cpp",
   ]
   sources += dtbschedmgr_sources

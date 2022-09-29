@@ -38,6 +38,7 @@
           "bundle_framework",
           "c_utils",
           "device_auth",
+          "device_info_manager",
           "distributeddatamgr",
           "dsoftbus",
           "eventhandler",
@@ -100,8 +101,10 @@
           }
         ],
         "test": [
+          "//foundation/ability/dmsfwk/services/base:unittest",
           "//foundation/ability/dmsfwk/services/dtbschedmgr:unittest",
-          "//foundation/ability/dmsfwk/services/dtbabilitymgr:unittest"
+          "//foundation/ability/dmsfwk/services/dtbabilitymgr:unittest",
+          "//foundation/ability/dmsfwk/test/fuzztest/continuationmanager_fuzzer:fuzztest"
         ]
       }
     }

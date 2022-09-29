@@ -540,7 +540,7 @@ void DistributedSchedMissionManager::StopSyncMissionsFromRemote(const std::strin
     }
 }
 
-bool DistributedSchedMissionManager::needSyncDevice(const std::string& deviceId)
+bool DistributedSchedMissionManager::NeedSyncDevice(const std::string& deviceId)
 {
     std::lock_guard<std::mutex> autoLock(remoteSyncDeviceLock_);
     if (remoteSyncDeviceSet_.count(deviceId) == 0) {

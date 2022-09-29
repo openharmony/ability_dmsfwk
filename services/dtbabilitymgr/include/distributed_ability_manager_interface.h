@@ -26,6 +26,9 @@ namespace DistributedSchedule {
 namespace {
 constexpr int32_t VALUE_NULL = -1; // no object in parcel
 constexpr int32_t VALUE_OBJECT = 1; // object exist in parcel
+
+constexpr const char* DMS_NAME = "dmsfwk";
+constexpr const char* DMS_VERSION = "3.2.0";
 }
 class IDistributedAbilityManager : public OHOS::IRemoteBroker {
 public:

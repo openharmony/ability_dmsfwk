@@ -176,6 +176,8 @@ private:
     int32_t SetWantForContinuation(AAFwk::Want& newWant, int32_t missionId);
     int32_t ContinueLocalMission(const std::string& dstDeviceId, int32_t missionId,
         const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams);
+    int32_t ContinueAbilityWithTimeout(const std::string& dstDeviceId, int32_t missionId,
+        const sptr<IRemoteObject>& callback, uint32_t remoteBundleVersion = 0);
     int32_t ContinueRemoteMission(const std::string& srcDeviceId, const std::string& dstDeviceId, int32_t missionId,
         const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams);
     int32_t TryStartRemoteAbilityByCall(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
