@@ -25,14 +25,19 @@
 
 ```
 /foundation/ability
-├── dmsfwk                      # 分布式组件管理部件模块
-├── dmsfwk_lite                # 轻量分布式组件管理部件模块
+├── dmsfwk              # 分布式组件管理部件模块
+│  ├── bundle.json      # 组件描述及编译脚本 
+│  ├── etc              # 配置文件
+│  ├── interfaces       # 对外接口目录
+│  ├── services         # 组件服务实现
+│  ├── sa_profile       # sa相关配置文件
+│  ├── utils            # 工具类目录
 ```
 
 ## 相关仓<a name="section1371113476307"></a>
 
-**分布式组件管理部件**
+分布式组件管理部件
 
-ability\_dmsfwk
+[**ability\_dmsfwk**](https://gitee.com/openharmony/ability_dmsfwk)
 
-ability\_dmsfwk\_lite
+[ability\_dmsfwk\_lite](https://gitee.com/openharmony/ability_dmsfwk_lite)
