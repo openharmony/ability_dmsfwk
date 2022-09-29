@@ -342,7 +342,7 @@ enum {
      */
     CONTINUE_GET_CONTENT_FAILED = 29360200,
     /*
-     * Result(29360201) for continue get content failed.
+     * Result(29360201) for call permission check failed.
      */
     CALL_PERMISSION_DENIED = 29360201,
     /*
@@ -413,6 +413,14 @@ enum {
      * Result(29360218) for DistributedSched Service parse dms version error.
      */
     DMS_VERSION_PARSE_EXCEPTION = 29360218,
+    /*
+     * Result(29360219) for background permission check failed.
+     */
+    DMS_BACKGROUND_PERMISSION_DENIED = 29360219,
+    /*
+     * Result(29360220) for start control permission check failed.
+     */
+    DMS_START_CONTROL_PERMISSION_DENIED = 29360220,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
