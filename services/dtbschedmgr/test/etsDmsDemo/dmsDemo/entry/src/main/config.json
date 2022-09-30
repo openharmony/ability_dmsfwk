@@ -13,6 +13,7 @@
     "name": ".MyApplication",
     "mainAbility": ".RemoteAbility",
     "deviceType": [
+      "default",
       "phone"
     ],
     "distro": {
