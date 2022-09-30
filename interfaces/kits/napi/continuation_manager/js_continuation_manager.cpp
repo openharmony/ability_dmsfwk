@@ -30,6 +30,7 @@ using namespace OHOS::AbilityRuntime;
 using namespace OHOS::AppExecFwk;
 namespace {
 const std::string TAG = "JsContinuationManager";
+const std::string CODE_KEY_NAME = "code";
 constexpr int32_t ERR_NOT_OK = -1;
 constexpr int32_t ARG_COUNT_ONE = 1;
 constexpr int32_t ARG_COUNT_TWO = 2;
@@ -194,8 +195,8 @@ NativeValue* JsContinuationManager::OnRegisterContinuation(NativeEngine &engine,
     } ();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
-        napi_throw_error(reinterpret_cast<napi_env>(&engine),
-            std::to_string(PARAMETER_CHECK_FAILED).c_str(), errInfo.c_str());
+        napi_throw(reinterpret_cast<napi_env>(&engine),
+            GenerateBusinessError(reinterpret_cast<napi_env>(&engine), PARAMETER_CHECK_FAILED, errInfo));
         return engine.CreateUndefined();
     }
     AsyncTask::CompleteCallback complete =
@@ -266,8 +267,8 @@ NativeValue* JsContinuationManager::OnUnregisterContinuation(NativeEngine &engin
     } ();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
-        napi_throw_error(reinterpret_cast<napi_env>(&engine),
-            std::to_string(PARAMETER_CHECK_FAILED).c_str(), errInfo.c_str());
+        napi_throw(reinterpret_cast<napi_env>(&engine),
+            GenerateBusinessError(reinterpret_cast<napi_env>(&engine), PARAMETER_CHECK_FAILED, errInfo));
         return engine.CreateUndefined();
     }
     AsyncTask::CompleteCallback complete =
@@ -346,7 +347,8 @@ NativeValue* JsContinuationManager::OnRegisterDeviceSelectionCallback(NativeEngi
     }
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
-        napi_throw_error(reinterpret_cast<napi_env>(&engine), std::to_string(errCode).c_str(), errInfo.c_str());
+        napi_throw(reinterpret_cast<napi_env>(&engine),
+            GenerateBusinessError(reinterpret_cast<napi_env>(&engine), errCode, errInfo));
     }
     return engine.CreateUndefined();
 }
@@ -395,7 +397,8 @@ NativeValue* JsContinuationManager::OnUnregisterDeviceSelectionCallback(NativeEn
     } ();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
-        napi_throw_error(reinterpret_cast<napi_env>(&engine), std::to_string(errCode).c_str(), errInfo.c_str());
+        napi_throw(reinterpret_cast<napi_env>(&engine),
+            GenerateBusinessError(reinterpret_cast<napi_env>(&engine), errCode, errInfo));
     }
     return engine.CreateUndefined();
 }
@@ -469,8 +472,8 @@ NativeValue* JsContinuationManager::OnUpdateContinuationState(NativeEngine &engi
     } ();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
-        napi_throw_error(reinterpret_cast<napi_env>(&engine),
-            std::to_string(PARAMETER_CHECK_FAILED).c_str(), errInfo.c_str());
+        napi_throw(reinterpret_cast<napi_env>(&engine),
+            GenerateBusinessError(reinterpret_cast<napi_env>(&engine), PARAMETER_CHECK_FAILED, errInfo));
         return engine.CreateUndefined();
     }
     AsyncTask::CompleteCallback complete =
@@ -564,8 +567,8 @@ NativeValue* JsContinuationManager::OnStartContinuationDeviceManager(NativeEngin
     } ();
     if (!errInfo.empty()) {
         HILOGE("%{public}s", errInfo.c_str());
-        napi_throw_error(reinterpret_cast<napi_env>(&engine),
-            std::to_string(PARAMETER_CHECK_FAILED).c_str(), errInfo.c_str());
+        napi_throw(reinterpret_cast<napi_env>(&engine),
+            GenerateBusinessError(reinterpret_cast<napi_env>(&engine), PARAMETER_CHECK_FAILED, errInfo));
         return engine.CreateUndefined();
     }
     AsyncTask::CompleteCallback complete =
@@ -775,6 +778,18 @@ int32_t JsContinuationManager::ErrorCodeReturn(int32_t code)
 {
     return DMS_ERROR_CODE_MAP.find(code) !=
         DMS_ERROR_CODE_MAP.end() ? DMS_ERROR_CODE_MAP.at(code) : SYSTEM_WORK_ABNORMALLY;
+}
+
+napi_value JsContinuationManager::GenerateBusinessError(const napi_env &env, int32_t errCode, const string &errMsg)
+{
+    napi_value code = nullptr;
+    napi_create_int32(env, errCode, &code);
+    napi_value msg = nullptr;
+    napi_create_string_utf8(env, errMsg.c_str(), NAPI_AUTO_LENGTH, &msg);
+    napi_value businessError = nullptr;
+    napi_create_error(env, nullptr, msg, &businessError);
+    napi_set_named_property(env, businessError, std::string(CODE_KEY_NAME).c_str(), code);
+    return businessError;
 }
 
 NativeValue* JsContinuationManagerInit(NativeEngine* engine, NativeValue* exportObj)
