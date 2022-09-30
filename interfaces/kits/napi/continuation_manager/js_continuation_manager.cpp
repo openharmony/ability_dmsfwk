@@ -780,7 +780,7 @@ int32_t JsContinuationManager::ErrorCodeReturn(int32_t code)
         DMS_ERROR_CODE_MAP.end() ? DMS_ERROR_CODE_MAP.at(code) : SYSTEM_WORK_ABNORMALLY;
 }
 
-napi_value JsContinuationManager::GenerateBusinessError(const napi_env &env, int32_t errCode, const string &errMsg)
+napi_value JsContinuationManager::GenerateBusinessError(const napi_env &env, int32_t errCode, const std::string &errMsg)
 {
     napi_value code = nullptr;
     napi_create_int32(env, errCode, &code);
