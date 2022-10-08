@@ -788,7 +788,7 @@ napi_value JsContinuationManager::GenerateBusinessError(const napi_env &env, int
     napi_create_string_utf8(env, errMsg.c_str(), NAPI_AUTO_LENGTH, &msg);
     napi_value businessError = nullptr;
     napi_create_error(env, nullptr, msg, &businessError);
-    napi_set_named_property(env, businessError, std::string(CODE_KEY_NAME).c_str(), code);
+    napi_set_named_property(env, businessError, CODE_KEY_NAME.c_str(), code);
     return businessError;
 }
 
