@@ -45,7 +45,7 @@ dsched_external_deps = [
   "dmsfwk:continuation_manager",
   "eventhandler:libeventhandler",
   "hitrace_native:hitrace_meter",
-  "hitrace_native:libhitrace",
+  "hitrace_native:libhitracechain",
   "hiviewdfx_hilog_native:libhilog",
   "init:libbegetutil",
   "ipc:ipc_core",
