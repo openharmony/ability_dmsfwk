@@ -14,20 +14,20 @@
  */
 
 #include "dfx/dms_hitrace_chain.h"
-#include "hitrace/hitrace.h"
-#include "hitrace/hitracec.h"
+
+#include "hitrace/trace.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 using namespace OHOS::HiviewDFX;
 DmsHiTraceChain::DmsHiTraceChain(const std::string &name)
 {
-    hiTraceId = HiTrace::Begin(name, HITRACE_FLAG_INCLUDE_ASYNC);
+    hiTraceId = HiTraceChain::Begin(name, HITRACE_FLAG_INCLUDE_ASYNC);
 }
 
 DmsHiTraceChain:: ~DmsHiTraceChain()
 {
-    HiTrace::End(hiTraceId);
+    HiTraceChain::End(hiTraceId);
 }
 }
 }
