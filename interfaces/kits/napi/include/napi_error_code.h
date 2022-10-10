@@ -20,29 +20,25 @@ namespace OHOS {
 namespace DistributedSchedule {
 enum {
     /**
-     * Result(16300503) for failed to get the missioninfo of the specified missionId.
+     * Result(401) for parameter check failed.
      */
-    NO_MISSION_INFO_FOR_MISSION_ID = 16300503,
+    PARAMETER_CHECK_FAILED = 401,
     /**
      * Result(16600001) for the system ability work abnormally.
      */
     SYSTEM_WORK_ABNORMALLY = 16600001,
     /**
-     * Result(16600002) for invalid input parameter.
-     */
-    INVALID_INPUT_PARAMETER = 16600002,
-    /**
      * Result(16600003) for token or callback not registered.
      */
-    CALLBACK_TOKEN_UNREGISTERED = 16600003,
+    CALLBACK_TOKEN_UNREGISTERED = 16600002,
     /**
      * Result(16600004) for token register max times.
      */
-    OVER_MAX_REGISTERED_TIMES = 16600004,
+    OVER_MAX_REGISTERED_TIMES = 16600003,
     /**
      * Result(16600005) for token has been registered.
      */
-    REPEATED_REGISTRATION = 16600005,
+    REPEATED_REGISTRATION = 16600004,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
