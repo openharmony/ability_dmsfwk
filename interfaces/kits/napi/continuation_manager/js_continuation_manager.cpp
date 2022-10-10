@@ -37,16 +37,15 @@ constexpr int32_t ARG_COUNT_TWO = 2;
 constexpr int32_t ARG_COUNT_THREE = 3;
 constexpr uint32_t MAX_JSPROCOUNT = 1000000;
 constexpr int32_t ARG_COUNT_FOUR = 4;
-constexpr int32_t PARAMETER_CHECK_FAILED = 401;
 }
 static const std::map<int32_t, int32_t> DMS_ERROR_CODE_MAP = {
     { ERR_OK, ERR_OK },
     { ERR_NULL_OBJECT, SYSTEM_WORK_ABNORMALLY },
     { ERR_FLATTEN_OBJECT, SYSTEM_WORK_ABNORMALLY },
     { CONNECT_ABILITY_FAILED, SYSTEM_WORK_ABNORMALLY },
-    { INVALID_CONTINUATION_MODE, INVALID_INPUT_PARAMETER },
-    { UNKNOWN_CALLBACK_TYPE, INVALID_INPUT_PARAMETER },
-    { INVALID_CONNECT_STATUS, INVALID_INPUT_PARAMETER },
+    { INVALID_CONTINUATION_MODE, PARAMETER_CHECK_FAILED },
+    { UNKNOWN_CALLBACK_TYPE, PARAMETER_CHECK_FAILED },
+    { INVALID_CONNECT_STATUS, PARAMETER_CHECK_FAILED },
     { CALLBACK_HAS_NOT_REGISTERED, CALLBACK_TOKEN_UNREGISTERED },
     { TOKEN_HAS_NOT_REGISTERED, CALLBACK_TOKEN_UNREGISTERED },
     { REGISTER_EXCEED_MAX_TIMES, REGISTER_EXCEED_MAX_TIMES },
@@ -320,8 +319,8 @@ NativeValue* JsContinuationManager::OnRegisterDeviceSelectionCallback(NativeEngi
         errInfo = [this, &engine, &info, &cbType, &token, &jsListenerObj, &errCode]() -> std::string {
             std::lock_guard<std::mutex> jsCbMapLock(jsCbMapMutex_);
             if (IsCallbackRegistered(token, cbType)) {
-                errCode = CALLBACK_TOKEN_UNREGISTERED;
-                return "UnregisterDeviceSelectionCallback Callback is not registered";
+                errCode = REPEATED_REGISTRATION;
+                return "UnregisterDeviceSelectionCallback Callback has registered";
             }
             std::unique_ptr<NativeReference> callbackRef;
             callbackRef.reset(engine.CreateReference(jsListenerObj, 1));
