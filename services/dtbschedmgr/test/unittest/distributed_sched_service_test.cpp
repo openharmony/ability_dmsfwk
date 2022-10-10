@@ -981,7 +981,7 @@ HWTEST_F(DistributedSchedServiceTest, ContinueMission_002, TestSize.Level1)
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
     int32_t result = DistributedSchedService::GetInstance().ContinueMission(
         "string", "string", missionId, callback, wantParams);
-    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), result);
+    EXPECT_EQ(static_cast<int>(OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET), result);
     DTEST_LOG << "DSchedContinuationTest ContinueMission_002 end" << std::endl;
 }
 

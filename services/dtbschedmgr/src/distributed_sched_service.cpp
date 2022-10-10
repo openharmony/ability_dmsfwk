@@ -318,7 +318,7 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
     }
     if (dschedContinuation_->IsInContinuationProgress(missionId)) {
         HILOGE("ContinueLocalMission already in progress!");
-        return INVALID_PARAMETERS_ERR;
+        return CONTINUE_ALREADY_IN_PROGRESS;
     }
     DmsVersion thresholdDmsVersion = {3, 2, 0};
     if (DmsVersionManager::IsRemoteDmsVersionLower(dstDeviceId, thresholdDmsVersion)) {
@@ -330,7 +330,7 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
     int32_t result = AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, missionInfo);
     if (result != ERR_OK) {
         HILOGE("get missionInfo failed");
-        return INVALID_PARAMETERS_ERR;
+        return NO_MISSION_INFO_FOR_MISSION_ID;
     }
     std::string bundleName = missionInfo.want.GetBundle();
     missionInfo.want.SetParams(wantParams);
@@ -407,7 +407,7 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
         return ContinueRemoteMission(srcDeviceId, dstDeviceId, missionId, callback, wantParams);
     } else {
         HILOGE("source or target device must be local!");
-        return INVALID_PARAMETERS_ERR;
+        return OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET;
     }
 }
 
