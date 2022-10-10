@@ -338,7 +338,7 @@ NativeValue* JsContinuationManager::OnRegisterDeviceSelectionCallback(NativeEngi
                 HILOGI("RegisterDeviceSelectionListener success");
             } else {
                 deviceSelectionListener = nullptr;
-                errCode = SYSTEM_WORK_ABNORMALLY;
+                errCode = ErrorCodeReturn(ret);
                 return "RegisterDeviceSelectionListener failed";
             }
             return std::string();
@@ -388,7 +388,7 @@ NativeValue* JsContinuationManager::OnUnregisterDeviceSelectionCallback(NativeEn
                 }
                 HILOGI("UnregisterDeviceSelectionCallback success");
             } else {
-                errCode = SYSTEM_WORK_ABNORMALLY;
+                errCode = ErrorCodeReturn(errCode);
                 return "UnregisterDeviceSelectionCallback failed";
             }
         }
