@@ -121,6 +121,11 @@ public:
     {
         return ERR_OK;
     };
+    int32_t NotifyFormsPrivacyProtected(const std::vector<int64_t> &formIds, bool isProtected,
+                                        const sptr<IRemoteObject> &callerToken) override
+    {
+        return ERR_OK;
+    };
     int32_t NotifyFormsEnableUpdate(const std::vector<int64_t> &formIds, bool isEnableUpdate,
                                         const sptr<IRemoteObject> &callerToken) override
     {
