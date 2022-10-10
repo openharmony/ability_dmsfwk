@@ -375,7 +375,7 @@ NativeValue* JsContinuationManager::OnUnregisterDeviceSelectionCallback(NativeEn
         {
             std::lock_guard<std::mutex> jsCbMapLock(jsCbMapMutex_);
             if (!IsCallbackRegistered(token, cbType)) {
-                errCode = REPEATED_REGISTRATION;
+                errCode = CALLBACK_TOKEN_UNREGISTERED;
                 return "UnregisterDeviceSelectionCallback Callback is not registered";
             }
             errCode = DistributedAbilityManagerClient::GetInstance().UnregisterDeviceSelectionCallback(token, cbType);
