@@ -338,7 +338,7 @@ NativeValue* JsContinuationManager::OnRegisterDeviceSelectionCallback(NativeEngi
                 HILOGI("RegisterDeviceSelectionListener success");
             } else {
                 deviceSelectionListener = nullptr;
-                errCode = SYSTEM_WORK_ABNORMALLY;
+                errCode = ErrorCodeReturn(ret);
                 return "RegisterDeviceSelectionListener failed";
             }
             return std::string();
@@ -375,7 +375,7 @@ NativeValue* JsContinuationManager::OnUnregisterDeviceSelectionCallback(NativeEn
         {
             std::lock_guard<std::mutex> jsCbMapLock(jsCbMapMutex_);
             if (!IsCallbackRegistered(token, cbType)) {
-                errCode = REPEATED_REGISTRATION;
+                errCode = CALLBACK_TOKEN_UNREGISTERED;
                 return "UnregisterDeviceSelectionCallback Callback is not registered";
             }
             errCode = DistributedAbilityManagerClient::GetInstance().UnregisterDeviceSelectionCallback(token, cbType);
@@ -388,7 +388,7 @@ NativeValue* JsContinuationManager::OnUnregisterDeviceSelectionCallback(NativeEn
                 }
                 HILOGI("UnregisterDeviceSelectionCallback success");
             } else {
-                errCode = SYSTEM_WORK_ABNORMALLY;
+                errCode = ErrorCodeReturn(errCode);
                 return "UnregisterDeviceSelectionCallback failed";
             }
         }
