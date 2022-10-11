@@ -655,8 +655,8 @@ HWTEST_F(DistributedSchedServiceTest, StartLocalAbility_001, TestSize.Level1)
         .accountInfo = accountInfo};
     int result2 = DistributedSchedService::GetInstance().StartLocalAbility(info2, 0, 0);
     DTEST_LOG << "result2:" << result2 << std::endl;
-    EXPECT_EQ(static_cast<int>(DMS_PERMISSION_DENIED), result1);
-    EXPECT_EQ(static_cast<int>(DMS_PERMISSION_DENIED), result2);
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), result1);
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), result2);
     DTEST_LOG << "DistributedSchedServiceTest StartLocalAbility_001 end" << std::endl;
 }
 
@@ -690,8 +690,8 @@ HWTEST_F(DistributedSchedServiceTest, StartLocalAbility_002, TestSize.Level1)
         .callerInfo = callerInfo, .accountInfo = accountInfo};
     int result2 = DistributedSchedService::GetInstance().StartLocalAbility(info2, 0, 0);
     DTEST_LOG << "result2:" << result2 << std::endl;
-    EXPECT_EQ(static_cast<int>(DMS_PERMISSION_DENIED), result1);
-    EXPECT_EQ(static_cast<int>(DMS_PERMISSION_DENIED), result2);
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), result1);
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), result2);
     DTEST_LOG << "DistributedSchedServiceTest StartLocalAbility_002 end" << std::endl;
 }
 
@@ -869,7 +869,7 @@ HWTEST_F(DistributedSchedServiceTest, StartAbilityFromRemote_006, TestSize.Level
     int result = DistributedSchedService::GetInstance().StartAbilityFromRemote(want,
         abilityInfo, 0, callerInfo, accountInfo);
     DTEST_LOG << "result:" << result << std::endl;
-    EXPECT_EQ(static_cast<int>(DMS_PERMISSION_DENIED), result);
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), result);
     DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_006 end" << std::endl;
 }
 
@@ -894,7 +894,7 @@ HWTEST_F(DistributedSchedServiceTest, SendResultFromRemote_006, TestSize.Level1)
     IDistributedSched::AccountInfo accountInfo;
     int result = DistributedSchedService::GetInstance().SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
     DTEST_LOG << "result:" << result << std::endl;
-    EXPECT_EQ(static_cast<int>(DMS_PERMISSION_DENIED), result);
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), result);
     DTEST_LOG << "DistributedSchedServiceTest SendResultFromRemote_006 end" << std::endl;
 }
 
