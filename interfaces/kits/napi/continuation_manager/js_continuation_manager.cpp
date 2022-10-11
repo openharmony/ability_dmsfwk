@@ -460,8 +460,8 @@ NativeValue* JsContinuationManager::OnUpdateContinuationState(NativeEngine &engi
         if (!ConvertFromJsValue(engine, info.argv[0], token)) {
             return "Parameter error. The type of \"token\" must be number";
         }
-        if (!ConvertFromJsValue(engine, info.argv[ARG_COUNT_ONE], deviceId)) {
-            return "Parameter error. The type of \"deviceId\" must be string";
+        if (!ConvertFromJsValue(engine, info.argv[ARG_COUNT_ONE], deviceId) || deviceId.empty()) {
+            return "Parameter error. The type of \"deviceId\" must be string and not empty";
         }
         deviceConnectStatus = DeviceConnectStatus::IDLE;
         if (!ConvertFromJsValue(engine, info.argv[ARG_COUNT_TWO], deviceConnectStatus)) {
