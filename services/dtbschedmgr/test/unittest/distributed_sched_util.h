@@ -16,7 +16,7 @@
 #ifndef DISTRIBUTED_SCHED_UTIL_H
 #define DISTRIBUTED_SCHED_UTIL_H
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace OHOS {
 namespace DistributedSchedule {

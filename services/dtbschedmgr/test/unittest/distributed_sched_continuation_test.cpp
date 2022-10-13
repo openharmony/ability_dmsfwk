@@ -527,7 +527,7 @@ HWTEST_F(DSchedContinuationTest, PopAbilityToken_003, TestSize.Level1)
      * @tc.steps: step1. pop exist sessionId.
      * @tc.expected: step1. return true.
      */
-    int32_t sessionId =PushAbilityToken();
+    int32_t sessionId = PushAbilityToken();
     sptr<IRemoteObject> abilityToken = dschedContinuation_->PopAbilityToken(sessionId);
     EXPECT_TRUE(abilityToken != nullptr);
 
