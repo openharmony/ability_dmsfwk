@@ -99,7 +99,7 @@ int32_t DmsVersionManager::ParseAppInfo(const std::string& appInfoJsonData, std:
         return DMS_VERSION_EMPTY;
     }
     appInfoJson.at(PACKAGE_NAMES).get_to(packageNamesData);
-    
+
     if (appInfoJson.find(VERSIONS) == appInfoJson.end() || !appInfoJson.at(VERSIONS).is_string()) {
         return DMS_VERSION_EMPTY;
     }

@@ -1080,7 +1080,7 @@ HWTEST_F(DistributedSchedPermissionTest, FromJson_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedPermissionTest FromJson_001 begin" << std::endl;
     GroupInfo groupInfo;
-    nlohmann::json jsonObject = nlohmann::json{ 
+    nlohmann::json jsonObject = nlohmann::json { 
         {FIELD_GROUP_NAME, MOCK_FIELD_GROUP_NAME},
         {FIELD_GROUP_ID, MOCK_FIELD_GROUP_ID},
         {FIELD_GROUP_OWNER, MOCK_FIELD_GROUP_OWNER},
