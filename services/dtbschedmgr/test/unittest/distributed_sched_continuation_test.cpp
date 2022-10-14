@@ -597,7 +597,7 @@ HWTEST_F(DSchedContinuationTest, ContinueMission_004, TestSize.Level1)
     std::string srcDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId);
     int32_t ret = DistributedSchedService::GetInstance().ContinueMission(srcDeviceId,
-        "string", 1, GetDSchedService(), wantParams);
+        "string", -1, GetDSchedService(), wantParams);
     EXPECT_TRUE(ret != ERR_OK);
     DTEST_LOG << "DSchedContinuationTest ContinueMission_004 end" << std::endl;
 }
