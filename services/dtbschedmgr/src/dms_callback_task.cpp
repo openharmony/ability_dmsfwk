@@ -38,7 +38,7 @@ int64_t DmsCallbackTask::GenerateTaskId()
 {
     std::lock_guard<std::mutex> autoLock(taskMutex_);
     int64_t currValue = currTaskId_.load(std::memory_order_relaxed);
-    if (++currTaskId_ <= 0) {
+    if (currTaskId_++ == INT64_MAX) {
         currTaskId_ = 1;
     }
     return currValue;
