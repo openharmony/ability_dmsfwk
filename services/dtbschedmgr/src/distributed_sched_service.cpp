@@ -247,9 +247,10 @@ int32_t DistributedSchedService::StartAbilityFromRemote(const OHOS::AAFwk::Want&
         HILOGE("check deviceId failed");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
-    if (!CheckTargetPermission(want, callerInfo, accountInfo, START_PERMISSION, true)) {
-        HILOGE("CheckTargetPermission denied!!");
-        return DMS_PERMISSION_DENIED;
+    int32_t result = CheckTargetPermission(want, callerInfo, accountInfo, START_PERMISSION, true);
+    if (result != ERR_OK) {
+        HILOGE("CheckTargetPermission failed!!");
+        return result;
     }
     return StartAbility(want, requestCode);
 }
@@ -265,9 +266,10 @@ int32_t DistributedSchedService::SendResultFromRemote(OHOS::AAFwk::Want& want, i
         HILOGE("check deviceId failed");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
-    if (!CheckTargetPermission(want, callerInfo, accountInfo, SEND_RESULT_PERMISSION, false)) {
-        HILOGE("CheckTargetPermission denied!!");
-        return DMS_PERMISSION_DENIED;
+    int32_t result = CheckTargetPermission(want, callerInfo, accountInfo, SEND_RESULT_PERMISSION, false);
+    if (result != ERR_OK) {
+        HILOGE("CheckTargetPermission failed!!");
+        return result;
     }
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->Connect();
     if (err != ERR_OK) {
@@ -973,11 +975,12 @@ int32_t DistributedSchedService::StartAbilityByCallFromRemote(const OHOS::AAFwk:
         HILOGE("StartAbilityByCallFromRemote check deviceId failed");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
-
-    if (!CheckTargetPermission(want, callerInfo, accountInfo, CALL_PERMISSION, false)) {
-        HILOGE("CheckTargetPermission denied!!");
-        return DMS_PERMISSION_DENIED;
+    int32_t result = CheckTargetPermission(want, callerInfo, accountInfo, CALL_PERMISSION, false);
+    if (result != ERR_OK) {
+        HILOGE("CheckTargetPermission failed!!");
+        return result;
     }
+
     sptr<IRemoteObject> callbackWrapper;
     {
         std::lock_guard<std::mutex> autoLock(calleeLock_);
@@ -1308,10 +1311,10 @@ int32_t DistributedSchedService::ConnectAbilityFromRemote(const OHOS::AAFwk::Wan
         HILOGE("ConnectAbilityFromRemote check deviceId failed");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
-
-    if (!CheckTargetPermission(want, callerInfo, accountInfo, START_PERMISSION, true)) {
-        HILOGE("CheckTargetPermission denied!!");
-        return DMS_PERMISSION_DENIED;
+    int32_t result = CheckTargetPermission(want, callerInfo, accountInfo, START_PERMISSION, true);
+    if (result != ERR_OK) {
+        HILOGE("CheckTargetPermission failed!!");
+        return result;
     }
 
     HILOGD("ConnectAbilityFromRemote callerType is %{public}d", callerInfo.callerType);
@@ -1900,10 +1903,12 @@ int32_t DistributedSchedService::StartLocalAbility(const FreeInstallInfo& info, 
         HILOGE("get local deviceId failed");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
-    if (!CheckTargetPermission(info.want, info.callerInfo, info.accountInfo, START_PERMISSION, true)) {
-        HILOGE("CheckTargetPermission denied!!");
-        return DMS_PERMISSION_DENIED;
+    int32_t result = CheckTargetPermission(info.want, info.callerInfo, info.accountInfo, START_PERMISSION, true);
+    if (result != ERR_OK) {
+        HILOGE("CheckTargetPermission failed!!");
+        return result;
     }
+
     AAFwk::Want* want = const_cast<Want*>(&info.want);
     want->RemoveFlags(OHOS::AAFwk::Want::FLAG_INSTALL_ON_DEMAND);
     return StartAbility(*want, info.requestCode);
@@ -2053,7 +2058,7 @@ int32_t DistributedSchedService::DisconnectAbility()
     return ERR_OK;
 }
 
-bool DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& want,
+int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& want,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension)
 {
     DistributedSchedPermission& permissionInstance = DistributedSchedPermission::GetInstance();
@@ -2061,29 +2066,24 @@ bool DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& wan
     bool result = permissionInstance.GetTargetAbility(want, targetAbility, needQueryExtension);
     if (!result) {
         HILOGE("GetTargetAbility can not find the target ability");
-        return false;
+        return INVALID_PARAMETERS_ERR;
     }
-    HILOGD("target ability info bundleName:%{public}s abilityName:%{public}s uri:%{private}s visible:%{public}d",
-        targetAbility.bundleName.c_str(), targetAbility.name.c_str(), targetAbility.uri.c_str(),
-        targetAbility.visible);
+    HILOGD("target ability info bundleName:%{public}s abilityName:%{public}s visible:%{public}d",
+        targetAbility.bundleName.c_str(), targetAbility.name.c_str(), targetAbility.visible);
     HILOGD("callerType:%{public}d accountType:%{public}d callerUid:%{public}d AccessTokenID:%{public}u",
         callerInfo.callerType, accountInfo.accountType, callerInfo.uid, callerInfo.accessToken);
-    ErrCode err;
     if (flag == START_PERMISSION) {
-        err = permissionInstance.CheckStartPermission(want, callerInfo, accountInfo, targetAbility);
+        HILOGD("start CheckStartPermission");
+        return permissionInstance.CheckStartPermission(want, callerInfo, accountInfo, targetAbility);
     } else if (flag == CALL_PERMISSION) {
-        err = permissionInstance.CheckGetCallerPermission(want, callerInfo, accountInfo, targetAbility);
+        HILOGD("start CheckGetCallerPermission");
+        return permissionInstance.CheckGetCallerPermission(want, callerInfo, accountInfo, targetAbility);
     } else if (flag == SEND_RESULT_PERMISSION) {
-        err = permissionInstance.CheckSendResultPermission(want, callerInfo, accountInfo, targetAbility);
-    } else {
-        HILOGE("CheckTargetPermission denied!!");
-        return false;
+        HILOGD("start CheckSendResultPermission");
+        return permissionInstance.CheckSendResultPermission(want, callerInfo, accountInfo, targetAbility);
     }
-    if (err != ERR_OK) {
-        HILOGE("CheckTargetPermission denied!!");
-        return false;
-    }
-    return true;
+    HILOGE("CheckTargetPermission denied!!");
+    return DMS_PERMISSION_DENIED;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -197,7 +197,7 @@ private:
     void GetConnectComponentList(std::vector<std::string>& distributedComponents);
     void GetCallComponentList(std::vector<std::string>& distributedComponents);
     void ProcessFreeInstallOffline(const std::string& deviceId);
-    bool CheckTargetPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
+    int32_t CheckTargetPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
 
     std::shared_ptr<DSchedContinuation> dschedContinuation_;

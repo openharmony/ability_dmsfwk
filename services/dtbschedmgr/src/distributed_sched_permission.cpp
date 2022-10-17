@@ -424,13 +424,17 @@ bool DistributedSchedPermission::CheckMinApiVersion(const AppExecFwk::AbilityInf
 bool DistributedSchedPermission::CheckTargetAbilityVisible(const AppExecFwk::AbilityInfo& targetAbility,
     const CallerInfo& callerInfo) const
 {
+    if (targetAbility.visible) {
+        HILOGD("Target ability is visible.");
+        return true;
+    }
     uint32_t dAccessToken = AccessToken::AccessTokenKit::AllocLocalTokenID(callerInfo.sourceDeviceId,
         callerInfo.accessToken);
     if (dAccessToken == 0) {
         HILOGE("dAccessTokenID is invalid!");
         return false;
     }
-    if (!targetAbility.visible && CheckPermission(dAccessToken, PERMISSION_START_INVISIBLE_ABILITY) != ERR_OK) {
+    if (CheckPermission(dAccessToken, PERMISSION_START_INVISIBLE_ABILITY) != ERR_OK) {
         HILOGE("CheckTargetAbilityVisible failed.");
         return false;
     }
