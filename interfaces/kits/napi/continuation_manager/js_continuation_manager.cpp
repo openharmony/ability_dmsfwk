@@ -320,7 +320,7 @@ NativeValue* JsContinuationManager::OnRegisterDeviceSelectionCallback(NativeEngi
             std::lock_guard<std::mutex> jsCbMapLock(jsCbMapMutex_);
             if (IsCallbackRegistered(token, cbType)) {
                 errCode = REPEATED_REGISTRATION;
-                return "UnregisterDeviceSelectionCallback Callback has registered";
+                return "registerDeviceSelectionCallback Callback has registered";
             }
             std::unique_ptr<NativeReference> callbackRef;
             callbackRef.reset(engine.CreateReference(jsListenerObj, 1));

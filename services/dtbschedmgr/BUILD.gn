@@ -23,8 +23,9 @@ group("unittest") {
 config("distributed_sched_config") {
   visibility = [ ":*" ]
   include_dirs = [ "include" ]
+  defines = []
   if (dmsfwk_mission_manager) {
-    defines = [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
+    defines += [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
   }
   if (dmsfwk_report_memmgr || dmsfwk_report_memmgr_plugins) {
     defines += [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
