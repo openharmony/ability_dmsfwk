@@ -51,9 +51,11 @@ int32_t DeviceSelectionNotifierStub::OnRemoteRequest(uint32_t code, MessageParce
             return result;
         }
         case IDeviceSelectionNotifier::EVENT_DEVICE_DISCONNECT: {
-            std::vector<std::string> deviceIds;
-            PARCEL_READ_HELPER(data, StringVector, &deviceIds);
-            int32_t result = OnDeviceDisconnectInner(deviceIds);
+            std::vector<ContinuationResult> continuationResults;
+            if (!ContinuationResult::ReadContinuationResultsFromParcel(data, continuationResults)) {
+                return ERR_FLATTEN_OBJECT;
+            }
+            int32_t result = OnDeviceDisconnectInner(continuationResults);
             return result;
         }
         default: {
@@ -70,10 +72,10 @@ int32_t DeviceSelectionNotifierStub::OnDeviceConnectInner(const std::vector<Cont
     return ERR_OK;
 }
 
-int32_t DeviceSelectionNotifierStub::OnDeviceDisconnectInner(const std::vector<std::string>& deviceIds)
+int32_t DeviceSelectionNotifierStub::OnDeviceDisconnectInner(const std::vector<ContinuationResult>& continuationResults)
 {
     HILOGD("called");
-    OnDeviceDisconnect(deviceIds);
+    OnDeviceDisconnect(continuationResults);
     return ERR_OK;
 }
 } // namespace DistributedSchedule

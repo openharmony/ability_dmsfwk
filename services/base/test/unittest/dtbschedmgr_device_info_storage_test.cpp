@@ -36,7 +36,7 @@ public:
     void ScheduleStartDeviceManager(const sptr<IRemoteObject>& appProxy, int32_t token,
         const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams = nullptr) override;
     int32_t OnDeviceConnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
-    int32_t OnDeviceDisconnect(int32_t token, const std::vector<std::string>& deviceIds) override;
+    int32_t OnDeviceDisconnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
     int32_t OnDeviceCancel() override;
 };
 
@@ -62,7 +62,7 @@ int32_t MockDmsNotifier::OnDeviceConnect(int32_t token, const std::vector<Contin
     return 0;
 }
 
-int32_t MockDmsNotifier::OnDeviceDisconnect(int32_t token, const std::vector<std::string>& deviceIds)
+int32_t MockDmsNotifier::OnDeviceDisconnect(int32_t token, const std::vector<ContinuationResult>& continuationResults)
 {
     return 0;
 }

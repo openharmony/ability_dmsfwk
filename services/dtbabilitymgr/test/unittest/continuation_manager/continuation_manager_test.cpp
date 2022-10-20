@@ -32,11 +32,11 @@ constexpr int32_t TEST_ACCESS_TOKEN = 10000000;
 constexpr int32_t ERROR_CONNECT_STATUS = 10;
 constexpr int32_t ERROR_CONTINUATION_MODE = 10;
 constexpr uint32_t SELECTED_DEVICE_SIZE = 2;
-constexpr uint32_t UNSELECTED_DEVICE_SIZE = 3;
+constexpr uint32_t UNSELECTED_DEVICE_SIZE = 2;
 const std::string TEST_DEVICE_ID = "test deviceId";
 const std::string EMPTY_DEVICE_ID = "";
-const std::string CALLBACK_TYPE1 = "deviceConnect";
-const std::string CALLBACK_TYPE2 = "deviceDisconnect";
+const std::string CALLBACK_TYPE1 = "deviceSelected";
+const std::string CALLBACK_TYPE2 = "deviceUnselected";
 const std::string INVALID_CALLBACK_TYPE = "deviceCancel";
 const std::string SELECTED_DEVICE_ID1 = "selected deviceId1";
 const std::string SELECTED_DEVICE_ID2 = "selected deviceId2";
@@ -73,12 +73,16 @@ void DeviceSelectionNotifierTest::OnDeviceConnect(const std::vector<Continuation
     }
 }
 
-void DeviceSelectionNotifierTest::OnDeviceDisconnect(const std::vector<std::string>& deviceIds)
+void DeviceSelectionNotifierTest::OnDeviceDisconnect(const std::vector<ContinuationResult>& continuationResults)
 {
-    EXPECT_EQ(UNSELECTED_DEVICE_SIZE, deviceIds.size());
-    for (size_t i = 0; i < deviceIds.size(); ++i) {
-        DTEST_LOG << "DeviceSelectionNotifierTest::OnDeviceDisconnect unselected deviceId:"<<
-            deviceIds[i] << std::endl;
+    EXPECT_EQ(UNSELECTED_DEVICE_SIZE, continuationResults.size());
+    for (size_t i = 0; i < continuationResults.size(); ++i) {
+        DTEST_LOG << "DeviceSelectionNotifierTest::OnDeviceDisconnect selected deviceId:"<<
+            continuationResults[i].GetDeviceId() << std::endl;
+        DTEST_LOG << "DeviceSelectionNotifierTest::OnDeviceDisconnect selected deviceType:" <<
+            continuationResults[i].GetDeviceType() << std::endl;
+        DTEST_LOG << "DeviceSelectionNotifierTest::OnDeviceDisconnect selected deviceNane:" <<
+            continuationResults[i].GetDeviceName() << std::endl;
     }
 }
 
@@ -243,7 +247,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_003, TestS
 
 /**
  * @tc.name: RegisterDeviceSelectionCallbackTest_004
- * @tc.desc: test dms deviceConnect callback called when device selection callback has registered.
+ * @tc.desc: test dms deviceSelected callback called when device selection callback has registered.
  * @tc.type: FUNC
  */
 HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_004, TestSize.Level1)
@@ -281,7 +285,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_004, TestS
 
 /**
  * @tc.name: RegisterDeviceSelectionCallbackTest_005
- * @tc.desc: test dms deviceConnect callback called when device selection callback has not registered.
+ * @tc.desc: test dms deviceSelected callback called when device selection callback has not registered.
  * @tc.type: FUNC
  */
 HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_005, TestSize.Level1)
@@ -319,7 +323,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_005, TestS
 
 /**
  * @tc.name: RegisterDeviceSelectionCallbackTest_006
- * @tc.desc: test dms deviceDisconnect callback called when device selection callback has registered.
+ * @tc.desc: test dms deviceUnselected callback called when device selection callback has registered.
  * @tc.type: FUNC
  */
 HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_006, TestSize.Level1)
@@ -336,11 +340,18 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_006, TestS
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
         token, CALLBACK_TYPE2, notifier);
     DTEST_LOG << "result2:" << result2 << std::endl;
-    std::vector<std::string> deviceIds;
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID1);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID2);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID3);
-    int32_t result3 = dtbabilitymgrService_->OnDeviceDisconnect(token, deviceIds);
+    std::vector<ContinuationResult> continuationResults;
+    ContinuationResult continuationResult1;
+    continuationResult1.SetDeviceId(SELECTED_DEVICE_ID1);
+    continuationResult1.SetDeviceType(SELECTED_DEVICE_TYPE1);
+    continuationResult1.SetDeviceName(SELECTED_DEVICE_NAME1);
+    ContinuationResult continuationResult2;
+    continuationResult2.SetDeviceId(SELECTED_DEVICE_ID2);
+    continuationResult2.SetDeviceType(SELECTED_DEVICE_TYPE2);
+    continuationResult2.SetDeviceName(SELECTED_DEVICE_NAME2);
+    continuationResults.emplace_back(continuationResult1);
+    continuationResults.emplace_back(continuationResult2);
+    int32_t result3 = dtbabilitymgrService_->OnDeviceDisconnect(token, continuationResults);
     DTEST_LOG << "result3:" << result3 << std::endl;
     EXPECT_EQ(ERR_OK, result1);
     EXPECT_EQ(ERR_OK, result2);
@@ -350,7 +361,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_006, TestS
 
 /**
  * @tc.name: RegisterDeviceSelectionCallbackTest_007
- * @tc.desc: test dms deviceDisconnect callback called when device selection callback has not registered.
+ * @tc.desc: test dms deviceUnselected callback called when device selection callback has not registered.
  * @tc.type: FUNC
  */
 HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_007, TestSize.Level1)
@@ -367,11 +378,18 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_007, TestS
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
         token, CALLBACK_TYPE1, notifier);
     DTEST_LOG << "result2:" << result2 << std::endl;
-    std::vector<std::string> deviceIds;
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID1);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID2);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID3);
-    int32_t result3 = dtbabilitymgrService_->OnDeviceDisconnect(token, deviceIds);
+    std::vector<ContinuationResult> continuationResults;
+    ContinuationResult continuationResult1;
+    continuationResult1.SetDeviceId(SELECTED_DEVICE_ID1);
+    continuationResult1.SetDeviceType(SELECTED_DEVICE_TYPE1);
+    continuationResult1.SetDeviceName(SELECTED_DEVICE_NAME1);
+    ContinuationResult continuationResult2;
+    continuationResult2.SetDeviceId(SELECTED_DEVICE_ID2);
+    continuationResult2.SetDeviceType(SELECTED_DEVICE_TYPE2);
+    continuationResult2.SetDeviceName(SELECTED_DEVICE_NAME2);
+    continuationResults.emplace_back(continuationResult1);
+    continuationResults.emplace_back(continuationResult2);
+    int32_t result3 = dtbabilitymgrService_->OnDeviceDisconnect(token, continuationResults);
     DTEST_LOG << "result3:" << result3 << std::endl;
     EXPECT_EQ(ERR_OK, result1);
     EXPECT_EQ(ERR_OK, result2);
@@ -407,11 +425,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_008, TestS
     continuationResults.emplace_back(continuationResult2);
     int32_t result2 = dtbabilitymgrService_->OnDeviceConnect(token, continuationResults);
     DTEST_LOG << "result2:" << result2 << std::endl;
-    std::vector<std::string> deviceIds;
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID1);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID2);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID3);
-    int32_t result3 = dtbabilitymgrService_->OnDeviceDisconnect(token, deviceIds);
+    int32_t result3 = dtbabilitymgrService_->OnDeviceDisconnect(token, continuationResults);
     DTEST_LOG << "result3:" << result3 << std::endl;
     EXPECT_EQ(ERR_OK, result1);
     EXPECT_EQ(DISCONNECT_ABILITY_FAILED, result2);
@@ -452,11 +466,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_009, TestS
     int32_t result3 = dtbabilitymgrService_->OnDeviceConnect(
         UNREGISTER_TOKEN, continuationResults);
     DTEST_LOG << "result3:" << result3 << std::endl;
-    std::vector<std::string> deviceIds;
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID1);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID2);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID3);
-    int32_t result4 = dtbabilitymgrService_->OnDeviceDisconnect(UNREGISTER_TOKEN, deviceIds);
+    int32_t result4 = dtbabilitymgrService_->OnDeviceDisconnect(UNREGISTER_TOKEN, continuationResults);
     DTEST_LOG << "result4:" << result4 << std::endl;
     EXPECT_EQ(TOKEN_HAS_NOT_REGISTERED, result1);
     EXPECT_EQ(TOKEN_HAS_NOT_REGISTERED, result2);
@@ -491,11 +501,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_010, TestS
     int32_t result1 = dtbabilitymgrService_->OnDeviceConnect(
         UNREGISTER_TOKEN, continuationResults);
     DTEST_LOG << "result1:" << result1 << std::endl;
-    std::vector<std::string> deviceIds;
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID1);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID2);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID3);
-    int32_t result2 = dtbabilitymgrService_->OnDeviceDisconnect(UNREGISTER_TOKEN, deviceIds);
+    int32_t result2 = dtbabilitymgrService_->OnDeviceDisconnect(UNREGISTER_TOKEN, continuationResults);
     DTEST_LOG << "result2:" << result2 << std::endl;
     EXPECT_EQ(DISCONNECT_ABILITY_FAILED, result1);
     EXPECT_EQ(DISCONNECT_ABILITY_FAILED, result2);
@@ -1543,11 +1549,23 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_005, TestSize.Level3)
 {
     MessageParcel data;
     data.WriteInterfaceToken(IDeviceSelectionNotifier::GetDescriptor());
-    std::vector<std::string> deviceIds;
-    deviceIds.emplace_back(SELECTED_DEVICE_ID1);
-    deviceIds.emplace_back(SELECTED_DEVICE_ID2);
-    deviceIds.emplace_back(SELECTED_DEVICE_ID3);
-    data.WriteStringVector(deviceIds);
+    std::vector<ContinuationResult> continuationResults;
+    ContinuationResult continuationResult1;
+    continuationResult1.SetDeviceId(SELECTED_DEVICE_ID1);
+    continuationResult1.SetDeviceType(SELECTED_DEVICE_TYPE1);
+    continuationResult1.SetDeviceName(SELECTED_DEVICE_NAME1);
+    ContinuationResult continuationResult2;
+    continuationResult2.SetDeviceId(SELECTED_DEVICE_ID2);
+    continuationResult2.SetDeviceType(SELECTED_DEVICE_TYPE2);
+    continuationResult2.SetDeviceName(SELECTED_DEVICE_NAME2);
+    continuationResults.emplace_back(continuationResult1);
+    continuationResults.emplace_back(continuationResult2);
+
+    bool result1 = ContinuationResult::WriteContinuationResultsToParcel(data, continuationResults);
+    if (!result1) {
+        DTEST_LOG << "WriteContinuationResultsToParcel failed" << std::endl;
+        return;
+    }
 
     MessageParcel reply;
     MessageOption option;

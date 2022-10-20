@@ -57,9 +57,11 @@ int32_t AppDeviceCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
         }
         case AppDeviceCallbackInterface::EVENT_DEVICE_DISCONNECT: {
             PARCEL_READ_HELPER(data, Int32, token);
-            std::vector<std::u16string> deviceIds;
-            PARCEL_READ_HELPER(data, String16Vector, &deviceIds); // use u16string, because from app.
-            int32_t result = OnDeviceDisconnect(token, ContinationManagerUtils::Str16VecToStr8Vec(deviceIds));
+            std::vector<ContinuationResult> continuationResults;
+            if (!ContinuationResult::ReadContinuationResultsFromParcel(data, continuationResults)) {
+                return ERR_FLATTEN_OBJECT;
+            }
+            int32_t result = OnDeviceDisconnect(token, continuationResults);
             return result;
         }
         case AppDeviceCallbackInterface::EVENT_DEVICE_CANCEL: {
@@ -85,14 +87,15 @@ int32_t AppDeviceCallbackStub::OnDeviceConnect(int32_t token,
     return result;
 }
 
-int32_t AppDeviceCallbackStub::OnDeviceDisconnect(int32_t token, const std::vector<std::string>& deviceIds)
+int32_t AppDeviceCallbackStub::OnDeviceDisconnect(int32_t token,
+    const std::vector<ContinuationResult>& continuationResults)
 {
     HILOGD("called.");
     if (dmsNotifier_ == nullptr) {
         HILOGE("dmsNotifier_ is nullptr");
         return ERR_NULL_OBJECT;
     }
-    int32_t result = dmsNotifier_->OnDeviceDisconnect(token, deviceIds);
+    int32_t result = dmsNotifier_->OnDeviceDisconnect(token, continuationResults);
     return result;
 }
 

@@ -44,7 +44,7 @@ public:
     void ScheduleStartDeviceManager(const sptr<IRemoteObject>& appProxy, int32_t token,
         const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams = nullptr) override;
     int32_t OnDeviceConnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
-    int32_t OnDeviceDisconnect(int32_t token, const std::vector<std::string>& deviceIds) override;
+    int32_t OnDeviceDisconnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
     int32_t OnDeviceCancel() override;
 
     int32_t Register(
@@ -69,7 +69,8 @@ private:
     bool QueryTokenByNotifier(const sptr<IRemoteObject>& notifier, int32_t& token);
     bool HandleDeviceConnect(const sptr<IRemoteObject>& notifier,
         const std::vector<ContinuationResult>& continuationResults);
-    bool HandleDeviceDisconnect(const sptr<IRemoteObject>& notifier, const std::vector<std::string>& deviceIds);
+    bool HandleDeviceDisconnect(const sptr<IRemoteObject>& notifier,
+        const std::vector<ContinuationResult>& continuationResults);
     int32_t ConnectAbility(const sptr<DmsNotifier>& dmsNotifier, int32_t token,
         const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams);
     int32_t DisconnectAbility();
