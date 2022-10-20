@@ -40,7 +40,7 @@ public:
     bool PushCallback(int32_t missionId, const sptr<IRemoteObject>& callback,
         std::string deviceId, bool isFreeInstall);
     sptr<IRemoteObject> PopCallback(int32_t missionId);
-    int32_t NotifyMissionCenterResult(int32_t missionId, int32_t isSuccess);
+    int32_t NotifyMissionCenterResult(int32_t missionId, int32_t resultCode);
     bool IsFreeInstall(int32_t missionId);
     std::string GetTargetDevice(int32_t missionId);
 

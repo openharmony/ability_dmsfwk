@@ -203,7 +203,7 @@ sptr<IRemoteObject> DSchedContinuation::PopCallback(int32_t missionId)
     return callback;
 }
 
-int32_t DSchedContinuation::NotifyMissionCenterResult(int32_t missionId, int32_t isSuccess)
+int32_t DSchedContinuation::NotifyMissionCenterResult(int32_t missionId, int32_t resultCode)
 {
     sptr<IRemoteObject> callback = PopCallback(missionId);
     RemoveTimeOut(missionId);
@@ -217,7 +217,7 @@ int32_t DSchedContinuation::NotifyMissionCenterResult(int32_t missionId, int32_t
         HILOGE("NotifyMissionCenterResult write token failed");
         return INVALID_PARAMETERS_ERR;
     }
-    PARCEL_WRITE_HELPER_RET(data, Int32, isSuccess, INVALID_PARAMETERS_ERR);
+    PARCEL_WRITE_HELPER_RET(data, Int32, resultCode, INVALID_PARAMETERS_ERR);
     MessageParcel reply;
     MessageOption option;
     int32_t error = callback->SendRequest(NOTIFY_MISSION_CENTER_RESULT, data, reply, option);
