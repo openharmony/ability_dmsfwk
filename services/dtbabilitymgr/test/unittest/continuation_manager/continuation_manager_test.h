@@ -41,7 +41,7 @@ public:
     ~DeviceSelectionNotifierTest() = default;
 
     void OnDeviceConnect(const std::vector<ContinuationResult>& continuationResults) override;
-    void OnDeviceDisconnect(const std::vector<std::string>& deviceIds) override;
+    void OnDeviceDisconnect(const std::vector<ContinuationResult>& continuationResults) override;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

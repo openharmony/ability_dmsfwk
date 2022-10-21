@@ -47,7 +47,7 @@ void DeviceSelectionNotifierProxy::OnDeviceConnect(const std::vector<Continuatio
     HILOGD("result = %{public}d", errCode);
 }
 
-void DeviceSelectionNotifierProxy::OnDeviceDisconnect(const std::vector<std::string>& deviceIds)
+void DeviceSelectionNotifierProxy::OnDeviceDisconnect(const std::vector<ContinuationResult>& continuationResults)
 {
     HILOGD("called");
     MessageParcel data;
@@ -56,7 +56,9 @@ void DeviceSelectionNotifierProxy::OnDeviceDisconnect(const std::vector<std::str
     }
     MessageParcel reply;
     MessageOption option;
-    PARCEL_WRITE_HELPER_NORET(data, StringVector, deviceIds);
+    if (!ContinuationResult::WriteContinuationResultsToParcel(data, continuationResults)) {
+        return;
+    }
     int32_t errCode = Remote()->SendRequest(IDeviceSelectionNotifier::EVENT_DEVICE_DISCONNECT, data, reply, option);
     HILOGD("result = %{public}d", errCode);
 }

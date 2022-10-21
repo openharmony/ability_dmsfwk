@@ -41,7 +41,7 @@ public:
 private:
     DISALLOW_COPY_AND_MOVE(AppDeviceCallbackStub);
     int32_t OnDeviceConnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
-    int32_t OnDeviceDisconnect(int32_t token, const std::vector<std::string>& deviceIds) override;
+    int32_t OnDeviceDisconnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
     int32_t OnDeviceCancel() override;
 
     sptr<DmsNotifier> dmsNotifier_;

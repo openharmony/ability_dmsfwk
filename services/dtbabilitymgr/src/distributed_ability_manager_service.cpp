@@ -403,7 +403,8 @@ int32_t DistributedAbilityManagerService::OnDeviceConnect(int32_t token,
     return ERR_OK;
 }
 
-int32_t DistributedAbilityManagerService::OnDeviceDisconnect(int32_t token, const std::vector<std::string>& deviceIds)
+int32_t DistributedAbilityManagerService::OnDeviceDisconnect(int32_t token,
+    const std::vector<ContinuationResult>& continuationResults)
 {
     // device disconnect callback to napi
     if (!HandleDisconnectAbility()) {
@@ -415,7 +416,7 @@ int32_t DistributedAbilityManagerService::OnDeviceDisconnect(int32_t token, cons
     {
         std::lock_guard<std::mutex> callbackMapLock(callbackMapMutex_);
         auto notifier = callbackMap_[token]->GetNotifier(EVENT_DISCONNECT);
-        if (!HandleDeviceDisconnect(notifier, deviceIds)) {
+        if (!HandleDeviceDisconnect(notifier, continuationResults)) {
             return INVALID_PARAMETERS_ERR;
         }
     }
@@ -548,16 +549,16 @@ bool DistributedAbilityManagerService::HandleDeviceConnect(const sptr<IRemoteObj
 }
 
 bool DistributedAbilityManagerService::HandleDeviceDisconnect(const sptr<IRemoteObject>& notifier,
-    const std::vector<std::string>& deviceIds)
+    const std::vector<ContinuationResult>& continuationResults)
 {
     if (continuationHandler_ == nullptr) {
         HILOGE("continuationHandler_ is nullptr");
         return false;
     }
-    auto func = [notifier, deviceIds]() {
+    auto func = [notifier, continuationResults]() {
         HILOGD("HandleDeviceDisconnect called.");
         auto proxy = std::make_unique<DeviceSelectionNotifierProxy>(notifier);
-        proxy->OnDeviceDisconnect(deviceIds);
+        proxy->OnDeviceDisconnect(continuationResults);
     };
     if (!continuationHandler_->PostTask(func)) {
         HILOGE("continuationHandler_ postTask failed");
