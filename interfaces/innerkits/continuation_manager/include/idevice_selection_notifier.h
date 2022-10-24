@@ -24,8 +24,8 @@
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-constexpr const char* EVENT_CONNECT = "deviceConnect";
-constexpr const char* EVENT_DISCONNECT = "deviceDisconnect";
+constexpr const char* EVENT_CONNECT = "deviceSelected";
+constexpr const char* EVENT_DISCONNECT = "deviceUnselected";
 }
 
 class IDeviceSelectionNotifier : public IRemoteBroker {
@@ -36,7 +36,7 @@ public:
     virtual ~IDeviceSelectionNotifier() = default;
 
     virtual void OnDeviceConnect(const std::vector<ContinuationResult>& continuationResults) = 0;
-    virtual void OnDeviceDisconnect(const std::vector<std::string>& deviceIds) = 0;
+    virtual void OnDeviceDisconnect(const std::vector<ContinuationResult>& continuationResults) = 0;
 
     enum RequestCode {
         EVENT_DEVICE_CONNECT = 1,

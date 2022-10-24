@@ -147,6 +147,10 @@ bool DtbschedmgrDeviceInfoStorage::WaitForDnetworkReady()
 void DtbschedmgrDeviceInfoStorage::RegisterUuidNetworkIdMap(const std::string& networkId)
 {
     std::string uuid = DnetworkAdapter::GetInstance()->GetUuidByNetworkId(networkId);
+    if (uuid.empty()) {
+        HILOGE("GetUuidByNetworkId return an empty uuid!");
+        return;
+    }
     {
         std::lock_guard<std::mutex> autoLock(uuidNetworkIdLock_);
         uuidNetworkIdMap_[uuid] = networkId;
@@ -156,6 +160,10 @@ void DtbschedmgrDeviceInfoStorage::RegisterUuidNetworkIdMap(const std::string& n
 void DtbschedmgrDeviceInfoStorage::UnregisterUuidNetworkIdMap(const std::string& networkId)
 {
     std::string uuid = DnetworkAdapter::GetInstance()->GetUuidByNetworkId(networkId);
+    if (uuid.empty()) {
+        HILOGE("GetUuidByNetworkId return an empty uuid");
+        return;
+    }
     {
         std::lock_guard<std::mutex> autoLock(uuidNetworkIdLock_);
         uuidNetworkIdMap_.erase(uuid);

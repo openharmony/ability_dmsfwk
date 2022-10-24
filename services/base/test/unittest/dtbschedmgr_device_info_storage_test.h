@@ -13,36 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_DISTRIBUTED_ABILITY_MANAGER_CONTINUATION_MANAGER_TEST_H
-#define OHOS_DISTRIBUTED_ABILITY_MANAGER_CONTINUATION_MANAGER_TEST_H
+#ifndef OHOS_DMSFWK_BASE_DTBSCHEDMGR_DEVICE_INFO_STORAGE_TEST_H
+#define OHOS_DMSFWK_BASE_DTBSCHEDMGR_DEVICE_INFO_STORAGE_TEST_H
 
 #include "gtest/gtest.h"
 
-#include "device_selection_notifier_stub.h"
 #define private public
-#include "distributed_ability_manager_service.h"
+#include "dtbschedmgr_device_info_storage.h"
 #undef private
 
 namespace OHOS {
 namespace DistributedSchedule {
-class ContinuationManagerTest : public testing::Test {
+class DtbschedmgrDeviceInfoStorageTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
-    void SetUp() override;
-    void TearDown() override;
-
-    sptr<DistributedAbilityManagerService> dtbabilitymgrService_;
-};
-
-class DeviceSelectionNotifierTest : public DeviceSelectionNotifierStub {
-public:
-    DeviceSelectionNotifierTest() = default;
-    ~DeviceSelectionNotifierTest() = default;
-
-    void OnDeviceConnect(const std::vector<ContinuationResult>& continuationResults) override;
-    void OnDeviceDisconnect(const std::vector<ContinuationResult>& continuationResults) override;
+    void SetUp();
+    void TearDown();
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
-#endif // OHOS_DISTRIBUTED_ABILITY_MANAGER_CONTINUATION_MANAGER_TEST_H
+#endif // OHOS_DMSFWK_BASE_DTBSCHEDMGR_DEVICE_INFO_STORAGE_TEST_H

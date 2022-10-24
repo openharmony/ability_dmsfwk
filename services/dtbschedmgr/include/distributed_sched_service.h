@@ -82,7 +82,7 @@ public:
         int32_t status, uint32_t accessToken) override;
     void NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId, bool isSuccess) override;
     int32_t NotifyContinuationResultFromRemote(int32_t sessionId, bool isSuccess) override;
-    void NotifyContinuationCallbackResult(int32_t missionId, int32_t isSuccess);
+    void NotifyContinuationCallbackResult(int32_t missionId, int32_t resultCode);
     int32_t NotifyFreeInstallResult(const CallbackTaskItem item, int32_t resultCode);
     int32_t ConnectRemoteAbility(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
         int32_t callerUid, int32_t callerPid, uint32_t accessToken) override;
@@ -197,7 +197,7 @@ private:
     void GetConnectComponentList(std::vector<std::string>& distributedComponents);
     void GetCallComponentList(std::vector<std::string>& distributedComponents);
     void ProcessFreeInstallOffline(const std::string& deviceId);
-    bool CheckTargetPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
+    int32_t CheckTargetPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
 
     std::shared_ptr<DSchedContinuation> dschedContinuation_;

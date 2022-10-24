@@ -26,6 +26,8 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+    std::string deviceId_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

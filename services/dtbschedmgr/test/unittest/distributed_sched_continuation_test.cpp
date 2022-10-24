@@ -32,6 +32,7 @@ const std::u16string MOCK_DEVICE_ID = u"MOCK_DEVICE_ID";
 constexpr int32_t MOCK_SESSION_ID = 123;
 constexpr int32_t MOCK_TASK_ID = 456;
 const string LOCAL_DEVICE_ID = "192.168.43.100";
+constexpr int32_t REQUEST_CODE_ERR = 305;
 }
 
 void DSchedContinuationTest::SetUpTestCase()
@@ -597,7 +598,7 @@ HWTEST_F(DSchedContinuationTest, ContinueMission_004, TestSize.Level1)
     std::string srcDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId);
     int32_t ret = DistributedSchedService::GetInstance().ContinueMission(srcDeviceId,
-        "string", 1, GetDSchedService(), wantParams);
+        "string", -1, GetDSchedService(), wantParams);
     EXPECT_TRUE(ret != ERR_OK);
     DTEST_LOG << "DSchedContinuationTest ContinueMission_004 end" << std::endl;
 }
@@ -1045,6 +1046,89 @@ HWTEST_F(DSchedContinuationTest, NotifyMissionCenterResult_002, TestSize.Level1)
     dschedContinuation_->NotifyMissionCenterResult(missionId, resultCode);
     EXPECT_EQ(dschedContinuation_->callbackMap_.size(), 0);
     DTEST_LOG << "DSchedContinuationTest NotifyMissionCenterResult_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallContinueMission001
+ * @tc.desc: call dms proxy ContinueMission
+ * @tc.type: FUNC
+ * @tc.require: I5X9O4
+ */
+HWTEST_F(DSchedContinuationTest, ProxyCallContinueMission001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallContinueMission001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    std::string srcDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId);
+    WantParams wantParams;
+    int32_t ret = proxy->ContinueMission(srcDeviceId, "MockdevId", 0, GetDSchedService(), wantParams);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallContinueMission001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallContinueMission002
+ * @tc.desc: call dms proxy ContinueMission
+ * @tc.type: FUNC
+ * @tc.require: I5X9O4
+ */
+HWTEST_F(DSchedContinuationTest, ProxyCallContinueMission002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallContinueMission002 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    std::string srcDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId);
+    WantParams wantParams;
+    int32_t ret = proxy->ContinueMission(srcDeviceId, "MockdevId", 0, nullptr, wantParams);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallContinueMission002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallStartContinuation001
+ * @tc.desc: call dms proxy StartContinuation
+ * @tc.type: FUNC
+ * @tc.require: I5X9O4
+ */
+HWTEST_F(DSchedContinuationTest, ProxyCallStartContinuation001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallStartContinuation001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    OHOS::AAFwk::Want want;
+    want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
+    int32_t ret = proxy->StartContinuation(want, 0, 0, 0, 0);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallStartContinuation001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallNotifyContinuationResultFromRemote001
+ * @tc.desc: call dms proxy NotifyContinuationResultFromRemote
+ * @tc.type: FUNC
+ * @tc.require: I5X9O4
+ */
+HWTEST_F(DSchedContinuationTest, ProxyCallNotifyContinuationResultFromRemote001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallNotifyContinuationResultFromRemote001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    std::string srcDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId);
+    proxy->NotifyCompleteContinuation(Str8ToStr16(srcDeviceId), 0, true);
+    int32_t ret = proxy->NotifyContinuationResultFromRemote(0, true);
+    EXPECT_EQ(ret, REQUEST_CODE_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallNotifyContinuationResultFromRemote001 end" << std::endl;
 }
 } // DistributedSchedule
 } // namespace OHOS

@@ -34,7 +34,7 @@ public:
     virtual void ScheduleStartDeviceManager(const sptr<IRemoteObject>& appProxy, int32_t token,
         const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams = nullptr) = 0;
     virtual int32_t OnDeviceConnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) = 0;
-    virtual int32_t OnDeviceDisconnect(int32_t token, const std::vector<std::string>& deviceIds) = 0;
+    virtual int32_t OnDeviceDisconnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) = 0;
     virtual int32_t OnDeviceCancel() = 0;
 };
 } // namespace DistributedSchedule
