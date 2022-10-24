@@ -16,7 +16,9 @@
 #include "gtest/gtest.h"
 
 #include <thread>
-
+#define private public
+#include "adapter/dnetwork_adapter.h"
+#undef private
 #include "dtbschedmgr_device_info_storage.h"
 
 using namespace std;
@@ -131,6 +133,166 @@ HWTEST_F(DMSNetworkAdapterTest, testGetUuidByNetworkId003, TestSize.Level3)
 {
     std::string res = DnetworkAdapter::GetInstance()->GetUuidByNetworkId(NETWORKID);
     EXPECT_EQ(res, "");
+}
+
+/**
+ * @tc.name: OnDeviceOnline_001
+ * @tc.desc: listenerSet_ is empty
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DMSNetworkAdapterTest, OnDeviceOnline_001, TestSize.Level3)
+{
+    DnetworkAdapter::GetInstance()->Init();
+    DistributedHardware::DmDeviceInfo deviceInfo;
+    DnetworkAdapter::listenerSet_.clear();
+    DnetworkAdapter::GetInstance()->stateCallback_->OnDeviceOnline(deviceInfo);
+    EXPECT_EQ(DnetworkAdapter::listenerSet_.size(), 0);
+}
+
+/**
+ * @tc.name: OnDeviceOnline_002
+ * @tc.desc: listenerSet_ is not empty
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DMSNetworkAdapterTest, OnDeviceOnline_002, TestSize.Level3)
+{
+    DnetworkAdapter::GetInstance()->Init();
+    DistributedHardware::DmDeviceInfo deviceInfo;
+    DnetworkAdapter::listenerSet_.clear();
+    std::shared_ptr<DeviceListener> deviceNodeListener = std::make_shared<DistributedDeviceNodeListener>();
+    DnetworkAdapter::listenerSet_.insert(deviceNodeListener);
+    DnetworkAdapter::GetInstance()->stateCallback_->OnDeviceOnline(deviceInfo);
+    EXPECT_EQ(DnetworkAdapter::listenerSet_.size(), 1);
+}
+
+/**
+ * @tc.name: OnDeviceOffline_001
+ * @tc.desc: listenerSet_ is empty
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DMSNetworkAdapterTest, OnDeviceOffline_001, TestSize.Level3)
+{
+    DnetworkAdapter::GetInstance()->Init();
+    DistributedHardware::DmDeviceInfo deviceInfo;
+    DnetworkAdapter::listenerSet_.clear();
+    DnetworkAdapter::GetInstance()->stateCallback_->OnDeviceOffline(deviceInfo);
+    EXPECT_EQ(DnetworkAdapter::listenerSet_.size(), 0);
+}
+
+/**
+ * @tc.name: OnDeviceOffline_002
+ * @tc.desc: listenerSet_ is not empty
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DMSNetworkAdapterTest, OnDeviceOffline_002, TestSize.Level3)
+{
+    DnetworkAdapter::GetInstance()->Init();
+    DistributedHardware::DmDeviceInfo deviceInfo;
+    DnetworkAdapter::listenerSet_.clear();
+    std::shared_ptr<DeviceListener> deviceNodeListener = std::make_shared<DistributedDeviceNodeListener>();
+    DnetworkAdapter::listenerSet_.insert(deviceNodeListener);
+    DnetworkAdapter::GetInstance()->stateCallback_->OnDeviceOffline(deviceInfo);
+    EXPECT_EQ(DnetworkAdapter::listenerSet_.size(), 1);
+}
+
+/**
+ * @tc.name: AddDeviceChangeListener_001
+ * @tc.desc: dnetworkHandler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DMSNetworkAdapterTest, AddDeviceChangeListener_001, TestSize.Level3)
+{
+    DnetworkAdapter::GetInstance()->Init();
+    DnetworkAdapter::listenerSet_.clear();
+    DnetworkAdapter::GetInstance()->dnetworkHandler_ = nullptr;
+    std::shared_ptr<DeviceListener> deviceNodeListener = std::make_shared<DistributedDeviceNodeListener>();
+    bool res = DnetworkAdapter::GetInstance()->AddDeviceChangeListener(deviceNodeListener);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: AddDeviceChangeListener_002
+ * @tc.desc: deviceNodeListener is not exist
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DMSNetworkAdapterTest, AddDeviceChangeListener_002, TestSize.Level3)
+{
+    DnetworkAdapter::GetInstance()->Init();
+    DnetworkAdapter::listenerSet_.clear();
+    std::shared_ptr<DeviceListener> oldDeviceNodeListener = std::make_shared<DistributedDeviceNodeListener>();
+    DnetworkAdapter::listenerSet_.insert(oldDeviceNodeListener);
+    std::shared_ptr<DeviceListener> deviceNodeListener = std::make_shared<DistributedDeviceNodeListener>();
+    bool res = DnetworkAdapter::GetInstance()->AddDeviceChangeListener(deviceNodeListener);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: AddDeviceChangeListener_003
+ * @tc.desc: deviceNodeListener is not exist
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DMSNetworkAdapterTest, AddDeviceChangeListener_003, TestSize.Level3)
+{
+    DnetworkAdapter::GetInstance()->Init();
+    DnetworkAdapter::listenerSet_.clear();
+    std::shared_ptr<DeviceListener> deviceNodeListener = std::make_shared<DistributedDeviceNodeListener>();
+    bool res = DnetworkAdapter::GetInstance()->AddDeviceChangeListener(deviceNodeListener);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: AddDeviceChangeListener_004
+ * @tc.desc: deviceNodeListener is exist
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DMSNetworkAdapterTest, AddDeviceChangeListener_004, TestSize.Level3)
+{
+    DnetworkAdapter::GetInstance()->Init();
+    DnetworkAdapter::listenerSet_.clear();
+    std::shared_ptr<DeviceListener> deviceNodeListener = std::make_shared<DistributedDeviceNodeListener>();
+    DnetworkAdapter::listenerSet_.insert(deviceNodeListener);
+    bool res = DnetworkAdapter::GetInstance()->AddDeviceChangeListener(deviceNodeListener);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: RemoveDeviceChangeListener_001
+ * @tc.desc: listenerSet_ size is 0
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DMSNetworkAdapterTest, RemoveDeviceChangeListener_001, TestSize.Level3)
+{
+    DnetworkAdapter::GetInstance()->Init();
+    DnetworkAdapter::listenerSet_.clear();
+    std::shared_ptr<DeviceListener> deviceNodeListener = std::make_shared<DistributedDeviceNodeListener>();
+    DnetworkAdapter::GetInstance()->RemoveDeviceChangeListener(deviceNodeListener);
+    EXPECT_EQ(DnetworkAdapter::listenerSet_.size(), 0);
+}
+
+/**
+ * @tc.name: RemoveDeviceChangeListener_002
+ * @tc.desc: listenerSet_ size is 1
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DMSNetworkAdapterTest, RemoveDeviceChangeListener_002, TestSize.Level3)
+{
+    DnetworkAdapter::GetInstance()->Init();
+    DnetworkAdapter::listenerSet_.clear();
+    std::shared_ptr<DeviceListener> oldDeviceNodeListener = std::make_shared<DistributedDeviceNodeListener>();
+    DnetworkAdapter::listenerSet_.insert(oldDeviceNodeListener);
+    std::shared_ptr<DeviceListener> deviceNodeListener = std::make_shared<DistributedDeviceNodeListener>();
+    DnetworkAdapter::GetInstance()->RemoveDeviceChangeListener(deviceNodeListener);
+    EXPECT_EQ(DnetworkAdapter::listenerSet_.size(), 1);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

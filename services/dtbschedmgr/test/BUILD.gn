@@ -128,6 +128,7 @@ ohos_unittest("distributedschedsvrtest") {
   module_out_path = module_output_path
 
   sources = [
+    "unittest/distributed_sched_adapter_test.cpp",
     "unittest/distributed_sched_service_test.cpp",
     "unittest/dms_callback_task_test.cpp",
     "unittest/dms_token_callback_test.cpp",
