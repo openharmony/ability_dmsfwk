@@ -44,6 +44,7 @@ const std::u16string U16DEVICE_ID = u"123456789ABCD";
 const std::string BUNDLE_NAME = "ohos.test.test";
 const int32_t NUM_MISSIONS = 100;
 const int32_t NORMAL_NUM_MISSIONS = 10;
+constexpr int32_t REQUEST_CODE_ERR = 305;
 }
 void DMSMissionManagerTest::SetUpTestCase()
 {
@@ -1766,6 +1767,102 @@ HWTEST_F(DMSMissionManagerTest, testOnDnetDied001, TestSize.Level3)
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().OnDnetDied();
     DTEST_LOG << "testOnDnetDied001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallStopSyncMissionsFromRemote001
+ * @tc.desc: call dms proxy StopSyncMissionsFromRemote
+ * @tc.type: FUNC
+ * @tc.require: I5XDDS
+ */
+HWTEST_F(DMSMissionManagerTest, ProxyCallStopSyncMissionsFromRemote001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallStopSyncMissionsFromRemote001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    CallerInfo callerInfo;
+    int32_t ret = proxy->StopSyncMissionsFromRemote(callerInfo);
+    EXPECT_EQ(ret, REQUEST_CODE_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallStopSyncMissionsFromRemote001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallNotifyMissionsChangedFromRemote001
+ * @tc.desc: call dms proxy NotifyMissionsChangedFromRemote
+ * @tc.type: FUNC
+ * @tc.require: I5XDDS
+ */
+HWTEST_F(DMSMissionManagerTest, ProxyCallNotifyMissionsChangedFromRemote001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallNotifyMissionsChangedFromRemote001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    CallerInfo callerInfo;
+    std::vector<DstbMissionInfo> missionInfos;
+    int32_t ret = proxy->NotifyMissionsChangedFromRemote(missionInfos, callerInfo);
+    EXPECT_EQ(ret, REQUEST_CODE_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallNotifyMissionsChangedFromRemote001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallGetRemoteMissionSnapshotInfo001
+ * @tc.desc: call dms proxy GetRemoteMissionSnapshotInfo
+ * @tc.type: FUNC
+ * @tc.require: I5XDDS
+ */
+HWTEST_F(DMSMissionManagerTest, ProxyCallGetRemoteMissionSnapshotInfo001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallGetRemoteMissionSnapshotInfo001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    unique_ptr<AAFwk::MissionSnapshot> missionSnapshot = nullptr;
+    int32_t ret = proxy->GetRemoteMissionSnapshotInfo("MockDevId", 1, missionSnapshot);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallGetRemoteMissionSnapshotInfo001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallGetRemoteMissionSnapshotInfo002
+ * @tc.desc: call dms proxy GetRemoteMissionSnapshotInfo
+ * @tc.type: FUNC
+ * @tc.require: I5XDDS
+ */
+HWTEST_F(DMSMissionManagerTest, ProxyCallGetRemoteMissionSnapshotInfo002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallGetRemoteMissionSnapshotInfo002 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    unique_ptr<AAFwk::MissionSnapshot> missionSnapshot = nullptr;
+    int32_t ret = proxy->GetRemoteMissionSnapshotInfo("", 1, missionSnapshot);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallGetRemoteMissionSnapshotInfo002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallGetRemoteMissionSnapshotInfo003
+ * @tc.desc: call dms proxy GetRemoteMissionSnapshotInfo
+ * @tc.type: FUNC
+ * @tc.require: I5XDDS
+ */
+HWTEST_F(DMSMissionManagerTest, ProxyCallGetRemoteMissionSnapshotInfo003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallGetRemoteMissionSnapshotInfo003 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    unique_ptr<AAFwk::MissionSnapshot> missionSnapshot = nullptr;
+    int32_t ret = proxy->GetRemoteMissionSnapshotInfo("MockDevId", -1, missionSnapshot);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallGetRemoteMissionSnapshotInfo003 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
