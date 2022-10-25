@@ -17,6 +17,7 @@
 #define protected public
 #include "gtest/gtest.h"
 
+#include "bundle/bundle_manager_internal.h"
 #include "device_manager.h"
 #include "distributed_sched_proxy.h"
 #include "distributed_sched_service.h"
@@ -54,6 +55,9 @@ namespace {
     constexpr int32_t MISSION_ID = 1;
     const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
     const int DEFAULT_REQUEST_CODE = -1;
+    const string ABILITY_NAME = "com.ohos.launcher.MainAbility";
+    const string BUNDLE_NAME = "com.ohos.launcher";
+    const string DMS_IS_CALLER_BACKGROUND = "dmsIsCallerBackGround";
 }
 
 class DistributedSchedServiceTest : public testing::Test {
@@ -1067,6 +1071,216 @@ HWTEST_F(DistributedSchedServiceTest, NotifyContinuationCallbackResult_001, Test
     bool isSuccess = false;
     DistributedSchedService::GetInstance().NotifyContinuationCallbackResult(missionId, isSuccess);
     DTEST_LOG << "DSchedContinuationTest NotifyContinuationCallbackResult_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartAbilityFromRemote_007
+ * @tc.desc: test StartAbilityFromRemote
+ * @tc.type: FUNC
+ * @tc.require: issueI5T6GJ
+ */
+HWTEST_F(DistributedSchedServiceTest, StartAbilityFromRemote_007, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_007 start" << std::endl;
+    AAFwk::Want want;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME,
+        ABILITY_NAME);
+    want.SetElement(element);
+    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.permissions.clear();
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = LOCAL_DEVICEID;
+    bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
+    EXPECT_TRUE(result);
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
+    int ret = DistributedSchedService::GetInstance().StartAbilityFromRemote(want,
+        abilityInfo, 0, callerInfo, accountInfo);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_007 end" << std::endl;
+}
+
+/**
+ * @tc.name: SendResultFromRemote_007
+ * @tc.desc: test SendResultFromRemote
+ * @tc.type: FUNC
+ * @tc.require: issueI5T6GJ
+ */
+HWTEST_F(DistributedSchedServiceTest, SendResultFromRemote_007, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest SendResultFromRemote_007 start" << std::endl;
+    AAFwk::Want want;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    want.SetParam(DMS_SRC_NETWORK_ID, localDeviceId);
+    AppExecFwk::ElementName element(localDeviceId, "ohos.samples.distributedcalc",
+        "ohos.samples.distributedcalc.MainAbility");
+    want.SetElement(element);
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = LOCAL_DEVICEID;
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
+    int ret = DistributedSchedService::GetInstance().SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceTest SendResultFromRemote_007 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartAbilityByCallFromRemote_001
+ * @tc.desc: input invalid params
+ * @tc.type: FUNC
+ * @tc.require: issueI5T6GJ
+ */
+HWTEST_F(DistributedSchedServiceTest, StartAbilityByCallFromRemote_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StartAbilityByCallFromRemote_001 start" << std::endl;
+    AAFwk::Want want;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    AppExecFwk::ElementName element(localDeviceId, "ohos.samples.distributedcalc",
+        "ohos.samples.distributedcalc.MainAbility");
+    want.SetElement(element);
+    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = LOCAL_DEVICEID;
+    bool result = BundleManagerInternal::GetCallerAppIdFromBms("ohos.samples.distributedcalc",
+        callerInfo.callerAppId);
+    EXPECT_EQ(result, true);
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
+    int ret = DistributedSchedService::GetInstance().StartAbilityByCallFromRemote(want, connect,
+        callerInfo, accountInfo);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceTest StartAbilityByCallFromRemote_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartAbilityByCallFromRemote_002
+ * @tc.desc: input invalid params
+ * @tc.type: FUNC
+ * @tc.require: issueI5T6GJ
+ */
+HWTEST_F(DistributedSchedServiceTest, StartAbilityByCallFromRemote_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StartAbilityByCallFromRemote_002 start" << std::endl;
+    AAFwk::Want want;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    AppExecFwk::ElementName element(localDeviceId, "ohos.samples.distributedcalc",
+        "ohos.samples.distributedcalc.MainAbility");
+    want.SetElement(element);
+    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = LOCAL_DEVICEID;
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
+    int ret = DistributedSchedService::GetInstance().StartAbilityByCallFromRemote(want, connect,
+        callerInfo, accountInfo);
+    EXPECT_EQ(ret, CALL_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedServiceTest StartAbilityByCallFromRemote_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectAbilityFromRemote_001
+ * @tc.desc: test ConnectAbilityFromRemote
+ * @tc.type: FUNC
+ * @tc.require: issueI5T6GJ
+ */
+HWTEST_F(DistributedSchedServiceTest, ConnectAbilityFromRemote_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ConnectAbilityFromRemote_001 start" << std::endl;
+    AAFwk::Want want;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME,
+        ABILITY_NAME);
+    want.SetElement(element);
+    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.permissions.clear();
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = LOCAL_DEVICEID;
+    bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
+    EXPECT_TRUE(result);
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
+    int ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
+        abilityInfo, connect, callerInfo, accountInfo);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceTest ConnectAbilityFromRemote_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectAbilityFromRemote_002
+ * @tc.desc: input invalid params
+ * @tc.type: FUNC
+ * @tc.require: issueI5T6GJ
+ */
+HWTEST_F(DistributedSchedServiceTest, ConnectAbilityFromRemote_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ConnectAbilityFromRemote_002 start" << std::endl;
+    AAFwk::Want want;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME,
+        ABILITY_NAME);
+    want.SetElement(element);
+    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.permissions.clear();
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = LOCAL_DEVICEID;
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
+    int ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
+        abilityInfo, connect, callerInfo, accountInfo);
+    EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedServiceTest ConnectAbilityFromRemote_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartLocalAbility_005
+ * @tc.desc: test StartLocalAbility
+ * @tc.type: FUNC
+ * @tc.require: issueI5T6GJ
+ */
+HWTEST_F(DistributedSchedServiceTest, StartLocalAbility_005, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StartLocalAbility_005 start" << std::endl;
+    AAFwk::Want want;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME,
+        ABILITY_NAME);
+    want.SetElement(element);
+    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.permissions.clear();
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = LOCAL_DEVICEID;
+    bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
+    EXPECT_TRUE(result);
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
+    DistributedSchedProxy::FreeInstallInfo info = {.want = want, .requestCode = 0,
+        .callerInfo = callerInfo, .accountInfo = accountInfo};
+    int ret = DistributedSchedService::GetInstance().StartLocalAbility(info, 0, 0);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceTest StartLocalAbility_005 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
