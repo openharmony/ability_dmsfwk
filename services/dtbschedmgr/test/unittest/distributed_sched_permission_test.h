@@ -16,6 +16,7 @@
 #ifndef DISTRIBUTED_SCHED_PERMISSION_TEST_H
 #define DISTRIBUTED_SCHED_PERMISSION_TEST_H
 
+#include "device_manager.h"
 #include "gtest/gtest.h"
 
 namespace OHOS {
@@ -28,6 +29,11 @@ public:
     void TearDown();
 
     std::string deviceId_;
+
+protected:
+    class DeviceInitCallBack : public OHOS::DistributedHardware::DmInitCallback {
+        void OnRemoteDied() override;
+    };
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
