@@ -51,7 +51,6 @@ Uri::Uri(const string& uriString)
     port_ = NOT_CALCULATED;
 
     if (uriString.empty()) {
-        HiLog::Error(LABEL, "Input empty!");
         return;
     }
 
