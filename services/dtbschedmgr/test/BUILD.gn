@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/access_token/access_token.gni")
 import("//build/ohos.gni")
 import("//build/ohos_var.gni")
 import("//build/test.gni")
@@ -254,6 +255,9 @@ ohos_unittest("dschedpermissiontest") {
   if (is_standard_system) {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
+  }
+  if (token_sync_enable) {
+    cflags_cc = [ "-DTOKEN_SYNC_ENABLE" ]
   }
   part_name = "dmsfwk"
   subsystem_name = "ability"
