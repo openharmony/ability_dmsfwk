@@ -15,6 +15,8 @@
 
 #include "distributed_sched_permission_test.h"
 
+#include "accesstoken_kit.h"
+#include "adapter/dnetwork_adapter.h"
 #include "bundle/bundle_manager_internal.h"
 #include "distributed_sched_interface.h"
 #define private public
@@ -30,6 +32,8 @@
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::AppExecFwk;
+using namespace OHOS::DistributedHardware;
+using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -64,11 +68,21 @@ const string FIELD_GROUP_OWNER = "groupOwner";
 const string FIELD_GROUP_TYPE = "groupType";
 const string FIELD_GROUP_VISIBILITY = "groupVisibility";
 const char* FOUNDATION_PROCESS_NAME = "foundation";
+
+void NativeTokenGet()
+{
+    uint32_t tokenId = AccessTokenKit::GetNativeTokenId("token_sync_service");
+    ASSERT_NE(tokenId, 0);
+    SetSelfTokenID(tokenId);
+}
 }
 
 void DistributedSchedPermissionTest::SetUpTestCase()
 {
     DTEST_LOG << "DistributedSchedPermissionTest::SetUpTestCase" << std::endl;
+    const std::string pkgName = "DBinderBus_PermissionTest" + std::to_string(getpid());
+    std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
+    DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
 }
 
 void DistributedSchedPermissionTest::TearDownTestCase()
@@ -86,6 +100,12 @@ void DistributedSchedPermissionTest::SetUp()
     DTEST_LOG << "DistributedSchedPermissionTest::SetUp" << std::endl;
     DistributedSchedUtil::MockPermission();
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(deviceId_);
+
+    NativeTokenGet();
+}
+
+void DistributedSchedPermissionTest::DeviceInitCallBack::OnRemoteDied()
+{
 }
 
 /**
@@ -1051,12 +1071,122 @@ HWTEST_F(DistributedSchedPermissionTest, CheckTargetAbilityVisible_003, TestSize
     DTEST_LOG << "DistributedSchedPermissionTest CheckTargetAbilityVisible_003 begin" << std::endl;
     AppExecFwk::AbilityInfo targetAbility;
     CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = deviceId_;
+    callerInfo.sourceDeviceId = "deviceId_";
     callerInfo.accessToken = GetSelfTokenID();
     bool ret = DistributedSchedPermission::GetInstance().CheckTargetAbilityVisible(targetAbility, callerInfo);
     EXPECT_FALSE(ret);
     DTEST_LOG << "DistributedSchedPermissionTest CheckTargetAbilityVisible_003 end ret:" << ret << std::endl;
 }
+
+#ifdef TOKEN_SYNC_ENABLE
+/**
+ * @tc.name: CheckTargetAbilityVisible_004
+ * @tc.desc: check CheckTargetAbilityVisible
+ * @tc.type: FUNC
+ * @tc.require: issueI5T6GJ
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckTargetAbilityVisible_004, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckTargetAbilityVisible_004 begin" << std::endl;
+    std::string udid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(deviceId_);
+    std::string deviceId = udid;
+    AccessTokenKit::DeleteRemoteToken(deviceId, 0x20100000);
+    HapTokenInfo baseInfo = {
+        .apl = APL_NORMAL,
+        .ver = 1,
+        .userID = 1,
+        .bundleName = "com.ohos.dms_test",
+        .instIndex = 1,
+        .appID = "dmstest",
+        .deviceID = udid,
+        .tokenID = 0x20100000,
+        .tokenAttr = 0
+    };
+
+    PermissionStateFull infoManagerTestState = {
+        .permissionName = "ohos.permission.START_INVISIBLE_ABILITY",
+        .isGeneral = true,
+        .resDeviceID = {"local"},
+        .grantStatus = {PermissionState::PERMISSION_GRANTED}, // first grant
+        .grantFlags = {PermissionFlag::PERMISSION_SYSTEM_FIXED}};
+    std::vector<PermissionStateFull> permStateList;
+    permStateList.emplace_back(infoManagerTestState);
+
+    HapTokenInfoForSync remoteTokenInfo = {
+        .baseInfo = baseInfo,
+        .permStateList = permStateList
+    };
+
+    int result = AccessTokenKit::SetRemoteHapTokenInfo(deviceId, remoteTokenInfo);
+    ASSERT_EQ(result, RET_SUCCESS);
+
+    // Get local map token ID
+    AccessTokenID mapID = AccessTokenKit::AllocLocalTokenID(deviceId_, 0x20100000);
+    ASSERT_NE(mapID, 0);
+
+    AppExecFwk::AbilityInfo targetAbility;
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = deviceId_;
+    callerInfo.accessToken = 0x20100000;
+    bool ret = DistributedSchedPermission::GetInstance().CheckTargetAbilityVisible(targetAbility, callerInfo);
+    EXPECT_TRUE(ret);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckTargetAbilityVisible_004 end ret:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: CheckTargetAbilityVisible_005
+ * @tc.desc: check CheckTargetAbilityVisible
+ * @tc.type: FUNC
+ * @tc.require: issueI5T6GJ
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckTargetAbilityVisible_005, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckTargetAbilityVisible_005 begin" << std::endl;
+    std::string udid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(deviceId_);
+    std::string deviceId = udid;
+    AccessTokenKit::DeleteRemoteToken(deviceId, 0x20100000);
+    HapTokenInfo baseInfo = {
+        .apl = APL_NORMAL,
+        .ver = 1,
+        .userID = 1,
+        .bundleName = "com.ohos.dms_test",
+        .instIndex = 1,
+        .appID = "dmstest",
+        .deviceID = udid,
+        .tokenID = 0x20100000,
+        .tokenAttr = 0
+    };
+
+    PermissionStateFull infoManagerTestState = {
+        .permissionName = "ohos.permission.START_INVISIBLE_ABILITY",
+        .isGeneral = true,
+        .resDeviceID = {"local"},
+        .grantStatus = {PermissionState::PERMISSION_DENIED},
+        .grantFlags = {PermissionFlag::PERMISSION_SYSTEM_FIXED}};
+    std::vector<PermissionStateFull> permStateList;
+    permStateList.emplace_back(infoManagerTestState);
+
+    HapTokenInfoForSync remoteTokenInfo = {
+        .baseInfo = baseInfo,
+        .permStateList = permStateList
+    };
+
+    int result = AccessTokenKit::SetRemoteHapTokenInfo(deviceId, remoteTokenInfo);
+    ASSERT_EQ(result, RET_SUCCESS);
+
+    // Get local map token ID
+    AccessTokenID mapID = AccessTokenKit::AllocLocalTokenID(deviceId_, 0x20100000);
+    ASSERT_NE(mapID, 0);
+
+    AppExecFwk::AbilityInfo targetAbility;
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = deviceId_;
+    callerInfo.accessToken = 0x20100000;
+    bool ret = DistributedSchedPermission::GetInstance().CheckTargetAbilityVisible(targetAbility, callerInfo);
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckTargetAbilityVisible_005 end ret:" << ret << std::endl;
+}
+#endif
 
 /**
  * @tc.name: GetAccountInfo_001
