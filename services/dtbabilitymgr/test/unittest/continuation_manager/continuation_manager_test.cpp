@@ -1262,6 +1262,108 @@ HWTEST_F(ContinuationManagerTest, Write_Read_ContinuationResultsFromParcel_001, 
 }
 
 /**
+ * @tc.name: ReadContinuationResultsFromParcel_001
+ * @tc.desc: test ReadContinuationResultsFromParcel when len is less than 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContinuationManagerTest, ReadContinuationResultsFromParcel_001, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest ReadContinuationResultsFromParcel_001 start" << std::endl;
+    Parcel parcel;
+    std::vector<ContinuationResult> continuationResults;
+    parcel.WriteInt32(VALUE_OBJECT);
+    parcel.WriteInt32(-1);
+    bool result = ContinuationResult::ReadContinuationResultsFromParcel(parcel, continuationResults);
+    EXPECT_FALSE(result);
+    DTEST_LOG << "ContinuationManagerTest ReadContinuationResultsFromParcel_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReadContinuationResultsFromParcel_002
+ * @tc.desc: test ReadContinuationResultsFromParcel when size > parcel.GetReadableBytes().
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContinuationManagerTest, ReadContinuationResultsFromParcel_002, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest ReadContinuationResultsFromParcel_002 start" << std::endl;
+    Parcel parcel;
+    std::vector<ContinuationResult> continuationResults;
+    parcel.WriteInt32(VALUE_OBJECT);
+    parcel.WriteInt32(parcel.GetReadableBytes() + 1);
+    bool result = ContinuationResult::ReadContinuationResultsFromParcel(parcel, continuationResults);
+    EXPECT_FALSE(result);
+    DTEST_LOG << "ContinuationManagerTest ReadContinuationResultsFromParcel_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReadContinuationResultsFromParcel_003
+ * @tc.desc: test ReadContinuationResultsFromParcel when continuationResults.max_size() < size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContinuationManagerTest, ReadContinuationResultsFromParcel_003, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest ReadContinuationResultsFromParcel_003 start" << std::endl;
+    Parcel parcel;
+    std::vector<ContinuationResult> continuationResults;
+    parcel.WriteInt32(VALUE_OBJECT);
+    parcel.WriteInt32(continuationResults.max_size() + 1);
+    bool result = ContinuationResult::ReadContinuationResultsFromParcel(parcel, continuationResults);
+    EXPECT_FALSE(result);
+    DTEST_LOG << "ContinuationManagerTest ReadContinuationResultsFromParcel_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReadContinuationResultsFromParcel_004
+ * @tc.desc: test ReadContinuationResultsFromParcel when continuationResults.max_size() > size.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContinuationManagerTest, ReadContinuationResultsFromParcel_004, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest ReadContinuationResultsFromParcel_004 start" << std::endl;
+    Parcel parcel;
+    std::vector<ContinuationResult> continuationResults;
+    parcel.WriteInt32(VALUE_OBJECT);
+    parcel.WriteInt32(continuationResults.max_size() - 1);
+    bool result = ContinuationResult::ReadContinuationResultsFromParcel(parcel, continuationResults);
+    EXPECT_FALSE(result);
+    DTEST_LOG << "ContinuationManagerTest ReadContinuationResultsFromParcel_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReadContinuationResultsFromParcel_005
+ * @tc.desc: test ReadContinuationResultsFromParcel when continuationResult is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContinuationManagerTest, ReadContinuationResultsFromParcel_005, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest ReadContinuationResultsFromParcel_005 start" << std::endl;
+    Parcel parcel;
+    ContinuationResult *continuationResult = nullptr;
+    std::vector<ContinuationResult> continuationResults;
+    parcel.WriteInt32(VALUE_OBJECT);
+    parcel.WriteInt32(1);
+    parcel.WriteParcelable(continuationResult);
+    bool result = ContinuationResult::ReadContinuationResultsFromParcel(parcel, continuationResults);
+    EXPECT_FALSE(result);
+    DTEST_LOG << "ContinuationManagerTest ReadContinuationResultsFromParcel_005 end" << std::endl;
+}
+
+/**
+ * @tc.name: WriteContinuationResultsToParcel_001
+ * @tc.desc: test WriteContinuationResultsToParcel when size == 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContinuationManagerTest, WriteContinuationResultsToParcel_001, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest WriteContinuationResultsToParcel_001 start" << std::endl;
+    Parcel parcel;
+    std::vector<ContinuationResult> continuationResults;
+    bool result = ContinuationResult::WriteContinuationResultsToParcel(parcel, continuationResults);
+    EXPECT_TRUE(result);
+    DTEST_LOG << "ContinuationManagerTest WriteContinuationResultsToParcel_001 end" << std::endl;
+}
+
+/**
  * @tc.name: Str16VecToStr8Vec_001
  * @tc.desc: test Str16VecToStr8Vec function.
  * @tc.type: FUNC
