@@ -363,7 +363,7 @@ NativeValue* JsContinuationManager::OnUnregisterDeviceSelectionCallback(NativeEn
                 std::string(EVENT_CONNECT) + " or " + std::string(EVENT_DISCONNECT);
         }
         if (!ConvertFromJsValue(engine, info.argv[ARG_COUNT_ONE], token)) {
-            return "Parameter error. The type of \"token\" must be string";
+            return "Parameter error. The type of \"token\" must be number";
         }
         {
             std::lock_guard<std::mutex> jsCbMapLock(jsCbMapMutex_);
@@ -776,6 +776,8 @@ bool JsContinuationManager::PraseJson(const napi_env& env, const napi_value& jso
 int32_t JsContinuationManager::ErrorCodeReturn(int32_t code)
 {
     switch (code) {
+        case DMS_PERMISSION_DENIED:
+            return PERMISSION_DENIED;
         case ERR_NULL_OBJECT:
             return SYSTEM_WORK_ABNORMALLY;
         case ERR_FLATTEN_OBJECT:

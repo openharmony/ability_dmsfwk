@@ -54,6 +54,7 @@ private:
     int32_t UpdateConnectStatusInner(MessageParcel& data, MessageParcel& reply);
     int32_t StartDeviceManagerInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetDistributedComponentListInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    bool VerifyPermission(uint32_t accessToken, const std::string& permissionName) const;
 
     using Func = int32_t(DistributedAbilityManagerStub::*)(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, Func> funcsMap_;
