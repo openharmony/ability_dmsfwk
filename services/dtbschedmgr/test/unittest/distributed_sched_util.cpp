@@ -15,6 +15,7 @@
 
 #include "distributed_sched_util.h"
 
+#include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 
@@ -51,6 +52,7 @@ void DistributedSchedUtil::MockProcessAndPermission(const char* processName, con
     };
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
+    OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
 }
 }
 }
