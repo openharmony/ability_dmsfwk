@@ -954,19 +954,6 @@ HWTEST_F(DMSMissionManagerTest, testInitDataStorage001, TestSize.Level3)
 }
 
 /**
- * @tc.name: testStopDataStorage002
- * @tc.desc: test stop data storage
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testStopDataStorage002, TestSize.Level3)
-{
-    DTEST_LOG << "testStopDataStorage002 begin" << std::endl;
-    auto ret = DistributedSchedMissionManager::GetInstance().StopDataStorage();
-    EXPECT_TRUE(ret == ERR_NONE);
-    DTEST_LOG << "testStopDataStorage002 end" << std::endl;
-}
-
-/**
  * @tc.name: testStoreSnapshotInfo002
  * @tc.desc: test store snapshot info
  * @tc.type: FUNC
