@@ -16,6 +16,7 @@
 #include "continuation_manager_test.h"
 
 #include "distributed_ability_manager_client.h"
+#include "distributed_sched_util.h"
 #include "dtbschedmgr_log.h"
 #include "test_log.h"
 
@@ -115,6 +116,7 @@ void ContinuationManagerTest::TearDown()
 HWTEST_F(ContinuationManagerTest, RegisterTest_001, TestSize.Level1)
 {
     DTEST_LOG << "ContinuationManagerTest RegisterTest_001 start" << std::endl;
+    DistributedSchedUtil::MockPermission();
     int32_t token1 = -1;
     int32_t result1 = DistributedAbilityManagerClient::GetInstance().Register(nullptr, token1);
     DTEST_LOG << "result1:" << result1 << std::endl;

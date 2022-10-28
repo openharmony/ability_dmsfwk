@@ -66,7 +66,6 @@
           ],
           "service_group": [
             "//foundation/ability/dmsfwk/etc/init:etc",
-            "//foundation/ability/dmsfwk/etc/param:param_files",
             "//foundation/ability/dmsfwk/etc/profile:distributedsched_trust",
             "//foundation/ability/dmsfwk/sa_profile:dms_sa_profile",
             "//foundation/ability/dmsfwk/services/base:dmsbaseinner",

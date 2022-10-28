@@ -26,7 +26,10 @@ dtbabilitymgr_configs = [
 
 config("test_config") {
   visibility = [ ":*" ]
-  include_dirs = [ "//foundation/ability/dmsfwk/utils/native/include" ]
+  include_dirs = [
+    "//foundation/ability/dmsfwk/utils/native/include",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/unittest",
+  ]
 }
 
 dtbabilitymgr_external_deps = [
@@ -67,6 +70,7 @@ dtbabilitymgr_sources = [
 ohos_unittest("continuationmanagertest") {
   module_out_path = module_output_path
   sources = [
+    "${distributed_service}/dtbschedmgr/test/unittest/distributed_sched_util.cpp",
     "unittest/continuation_manager/continuation_manager_test.cpp",
     "unittest/distributed_ability_manager_dumper_test.cpp",
   ]
@@ -98,6 +102,7 @@ ohos_unittest("distributedabilitymanagerservicetest") {
     "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_dumper.cpp",
     "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_service.cpp",
     "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_stub.cpp",
+    "${distributed_service}/dtbschedmgr/test/unittest/distributed_sched_util.cpp",
     "unittest/distributed_ability_manager_service_test.cpp",
   ]
   configs = [

@@ -17,6 +17,7 @@
 #define private public
 #include "distributed_ability_manager_service.h"
 #undef private
+#include "distributed_sched_util.h"
 #include "dtbschedmgr_log.h"
 #include "test_log.h"
 
@@ -162,7 +163,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_001, TestSize.Lev
 
 /**
  * @tc.name: OnRemoteRequest_002
- * @tc.desc: test OnRemoteRequest to start funcsMap_
+ * @tc.desc: test OnRemoteRequest with invalid code
  * @tc.type: FUNC
  * @tc.require: I5NOA1
  */
@@ -175,14 +176,14 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_002, TestSize.Lev
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    int32_t result = dtbabilitymgrService->OnRemoteRequest(UPDATE_CONNECT_STATUS, data, reply, option);
+    int32_t result = dtbabilitymgrService->OnRemoteRequest(INVALID_CODE, data, reply, option);
     EXPECT_NE(ERR_NONE, result);
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_002 end" << std::endl;
 }
 
 /**
  * @tc.name: OnRemoteRequest_003
- * @tc.desc: test OnRemoteRequest to start funcsMap_ with invalid token
+ * @tc.desc: test OnRemoteRequest to start funcsMap_ without token
  * @tc.type: FUNC
  * @tc.require: I5NOA1
  */
@@ -201,7 +202,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_003, TestSize.Lev
 
 /**
  * @tc.name: OnRemoteRequest_004
- * @tc.desc: test OnRemoteRequest with invalid code
+ * @tc.desc: test OnRemoteRequest to start funcsMap_ without DATASYNC permission
  * @tc.type: FUNC
  * @tc.require: I5NOA1
  */
@@ -214,9 +215,29 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_004, TestSize.Lev
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    int32_t result = dtbabilitymgrService->OnRemoteRequest(INVALID_CODE, data, reply, option);
-    EXPECT_NE(ERR_NONE, result);
+    int32_t result = dtbabilitymgrService->OnRemoteRequest(UPDATE_CONNECT_STATUS, data, reply, option);
+    EXPECT_EQ(DMS_PERMISSION_DENIED, result);
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnRemoteRequest_005
+ * @tc.desc: test OnRemoteRequest to start funcsMap_ with DATASYNC permission
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_005, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_005 start" << std::endl;
+    DistributedSchedUtil::MockPermission();
+    sptr<DistributedAbilityManagerService>  dtbabilitymgrService =
+        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    int32_t result = dtbabilitymgrService->OnRemoteRequest(UPDATE_CONNECT_STATUS, data, reply, option);
+    EXPECT_NE(ERR_NONE, result);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_005 end" << std::endl;
 }
 }
 }
