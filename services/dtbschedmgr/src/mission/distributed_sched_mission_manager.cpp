@@ -889,9 +889,7 @@ std::shared_ptr<AppExecFwk::EventHandler> DistributedSchedMissionManager::FetchD
     auto anonyUuid = DnetworkAdapter::AnonymizeDeviceId(uuid);
     auto runner = AppExecFwk::EventRunner::Create(anonyUuid + "_MissionN");
     auto handler = std::make_shared<AppExecFwk::EventHandler>(runner);
-    if (handler != nullptr) {
-        deviceHandle_.emplace(uuid, handler);
-    }
+    deviceHandle_.emplace(uuid, handler);
     return handler;
 }
 
