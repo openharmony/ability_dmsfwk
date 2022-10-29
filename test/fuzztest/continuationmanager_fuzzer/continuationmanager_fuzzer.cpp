@@ -21,6 +21,7 @@
 #include "distributed_ability_manager_interface.h"
 #include "distributed_ability_manager_stub.h"
 #include "distributed_ability_manager_service.h"
+#include "mock_permission.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -42,6 +43,7 @@ uint32_t Convert2Uint32(const uint8_t* ptr)
 
 void FuzzUnregister(const uint8_t* rawData, size_t size)
 {
+    DmsMockPermission::MockPermission();
     uint32_t code = Convert2Uint32(rawData);
     rawData = rawData + OFFSET;
     size = size - OFFSET;
