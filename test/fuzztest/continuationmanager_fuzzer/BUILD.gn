@@ -42,6 +42,8 @@ dtbabilitymgr_sources = [
 
 dtbabilitymgr_external_deps = [
   "access_token:libaccesstoken_sdk",
+  "access_token:libnativetoken",
+  "access_token:libtoken_setproc",
   "c_utils:utils",
   "device_manager:devicemanagersdk",
   "eventhandler:libeventhandler",
@@ -71,7 +73,11 @@ ohos_fuzztest("ContinuationManagerFuzzTest") {
     "-fno-omit-frame-pointer",
   ]
 
-  sources = [ "continuationmanager_fuzzer.cpp" ]
+  sources = [
+    "continuationmanager_fuzzer.cpp",
+    "mock_permission.cpp",
+  ]
+
   sources += dtbabilitymgr_sources
 
   deps = [ "//foundation/ability/dmsfwk/services/base:dmsbaseinner" ]
