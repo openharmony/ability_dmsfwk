@@ -57,6 +57,7 @@ const std::string TEST_FILTER = "test filter";
 const std::string TEST_AUTHINFO = "test authInfo";
 const std::u16string TEST_INPUT1 = u"test input1";
 const std::u16string TEST_INPUT2 = u"test input2";
+const std::u16string TEST_INVALID_REMOTEDESCRIPTOR = u"invalid remoteDescriptor";
 const std::string TEST_INPUT3 = "test input1";
 const std::string TEST_INPUT4 = "test input2";
 const std::uint32_t INVALID_EVENT_DEVICE_CODE = 0;
@@ -1624,7 +1625,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_006, TestSize.Level3)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    data.WriteInterfaceToken(u"invalid remoteDescriptor");
+    data.WriteInterfaceToken(TEST_INVALID_REMOTEDESCRIPTOR);
     /**
      * @tc.steps: step1. AppDeviceCallbackStub::OnRemoteRequest
      */
@@ -1653,11 +1654,11 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_006, TestSize.Level3)
     continuationResults.emplace_back(continuationResult1);
     continuationResults.emplace_back(continuationResult2);
     /**
-     * @tc.steps: step3. DeviceSelectionNotifierProxy::OnDeviceConnect.
+     * @tc.steps: step4. DeviceSelectionNotifierProxy::OnDeviceConnect.
      */
     deviceSelectionNotifierProxy.OnDeviceConnect(continuationResults);
     /**
-     * @tc.steps: step3. DeviceSelectionNotifierProxy::OnDeviceDisconnect.
+     * @tc.steps: step5. DeviceSelectionNotifierProxy::OnDeviceDisconnect.
      */
     deviceSelectionNotifierProxy.OnDeviceDisconnect(continuationResults);
 }

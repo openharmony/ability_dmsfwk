@@ -15,11 +15,12 @@
 
 #include "snapshot_test.h"
 
-#include "parcel_helper.h"
-#include "test_log.h" 
-#include <exception> 
+#include <exception>
 #define private public
 #include "mission/snapshot.h"
+#undef private
+#include "parcel_helper.h"
+#include "test_log.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -28,6 +29,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string TAG = "Snapshot";
+constexpr size_t TEST_PARCEL_WRITE_VALUE = 1;
 }
 void SnapshotTest::SetUpTestCase()
 {
@@ -107,8 +109,8 @@ HWTEST_F(SnapshotTest, testWriteToParcel004, TestSize.Level3)
     MessageParcel data;
     snapshot.rect_ = std::make_unique<Rect>(0, 0, 0, 0);
     snapshot.windowBounds_ = std::make_unique<Rect>(0, 0, 0, 0);
-    uint8_t buffer = (uint8_t)1;
-    snapshot.pixelMap_ = snapshot.CreatePixelMap(&buffer, 1);
+    uint8_t buffer = (uint8_t)TEST_PARCEL_WRITE_VALUE;
+    snapshot.pixelMap_ = snapshot.CreatePixelMap(&buffer, TEST_PARCEL_WRITE_VALUE);
     /**
      * @tc.steps: step1. WriteToParcel when pixelMap_ is not nullptr
      */
@@ -214,8 +216,8 @@ HWTEST_F(SnapshotTest, testUpdateLastAccessTime001, TestSize.Level3)
 {
     DTEST_LOG << "SnapshotTest testUpdateLastAccessTime001 start" << std::endl;
     Snapshot snapshot;
-    snapshot.UpdateLastAccessTime(1);
-    EXPECT_EQ((int64_t)1, snapshot.lastAccessTime_);
+    snapshot.UpdateLastAccessTime(TEST_PARCEL_WRITE_VALUE);
+    EXPECT_EQ((int64_t)TEST_PARCEL_WRITE_VALUE, snapshot.lastAccessTime_);
     DTEST_LOG << "SnapshotTest testUpdateLastAccessTime001 end" << std::endl;
 }
 } // DistributedSchedule

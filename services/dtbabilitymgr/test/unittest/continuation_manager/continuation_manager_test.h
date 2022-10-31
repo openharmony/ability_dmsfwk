@@ -20,9 +20,9 @@
 
 #include "device_selection_notifier_stub.h"
 #define private public
-#include "distributed_ability_manager_service.h"
 #include "continuation_manager/app_device_callback_stub.h"
 #include "continuation_manager/device_selection_notifier_proxy.h"
+#include "distributed_ability_manager_service.h"
 #undef private
 
 namespace OHOS {

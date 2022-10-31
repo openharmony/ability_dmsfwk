@@ -14,17 +14,23 @@
  */
 
 #include "distributed_mission_info_test.h"
-#include "parcel_helper.h"
-#include "test_log.h"
 #include <memory>
 #define private public
 #include "mission/distributed_mission_info.h"
+#undef private
+#include "parcel_helper.h"
+#include "test_log.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+constexpr int32_t TEST_INVALID_VALUE = -1;
+constexpr int32_t TEST_PARCEL_WRITE_VALUE = 1;
+constexpr size_t TEST_PARCEL_WRITE_LEN = 5;
+}
 void DistributedMissionInfoTest::SetUpTestCase()
 {
 }
@@ -47,7 +53,7 @@ void DistributedMissionInfoTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testReadFromParcel001, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testReadFromParcel001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testReadFromParcel001 start" << std::endl;
     DstbMissionInfo dstbMissionInfo;
@@ -65,16 +71,14 @@ HWTEST_F(DistributedMissionInfoTest, testReadFromParcel001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testReadFromParcel002, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testReadFromParcel002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testReadFromParcel002 start" << std::endl;
     DstbMissionInfo dstbMissionInfo;
     Parcel parcel;
-    parcel.WriteInt32(1);
-    parcel.WriteInt32(2);
-    parcel.WriteInt32(3);
-    parcel.WriteInt32(4);
-    parcel.WriteInt32(5);
+    for (size_t i = 0; i < TEST_PARCEL_WRITE_LEN; i++) {
+        parcel.WriteInt32(TEST_PARCEL_WRITE_VALUE);
+    }
     bool ret = dstbMissionInfo.ReadFromParcel(parcel);
     EXPECT_FALSE(ret);
     DTEST_LOG << "DistributedMissionInfoTest testReadFromParcel002 end" << std::endl;
@@ -86,7 +90,7 @@ HWTEST_F(DistributedMissionInfoTest, testReadFromParcel002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testUnmarshalling001, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testUnmarshalling001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testUnmarshalling001 start" << std::endl;
     DstbMissionInfo dstbMissionInfo;
@@ -104,16 +108,14 @@ HWTEST_F(DistributedMissionInfoTest, testUnmarshalling001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testUnmarshalling002, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testUnmarshalling002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testUnmarshalling002 start" << std::endl;
     DstbMissionInfo dstbMissionInfo;
     Parcel parcel;
-    parcel.WriteInt32(1);
-    parcel.WriteInt32(2);
-    parcel.WriteInt32(3);
-    parcel.WriteInt32(4);
-    parcel.WriteInt32(5);
+    for (size_t i = 0; i < TEST_PARCEL_WRITE_LEN; i++) {
+        parcel.WriteInt32(TEST_PARCEL_WRITE_VALUE);
+    }
     DstbMissionInfo*  dstbMissionInfoReturn = dstbMissionInfo.Unmarshalling(parcel);
     EXPECT_EQ(nullptr, dstbMissionInfoReturn);
     DTEST_LOG << "DistributedMissionInfoTest testUnmarshalling002 end" << std::endl;
@@ -125,7 +127,7 @@ HWTEST_F(DistributedMissionInfoTest, testUnmarshalling002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testMarshalling001, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testMarshalling001, TestSize.Level3)
 {
     DstbMissionInfo dstbMissionInfo;
     Parcel data;
@@ -139,7 +141,7 @@ HWTEST_F(DistributedMissionInfoTest, testMarshalling001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel001, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testReadDstbMissionInfosFromParcel001 start" << std::endl;
     DstbMissionInfo dstbMissionInfo;
@@ -157,14 +159,14 @@ HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel001, Test
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel002, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testReadDstbMissionInfosFromParcel002 start" << std::endl;
     DstbMissionInfo dstbMissionInfo;
     Parcel parcel;
     std::vector<DstbMissionInfo> missionInfos;
-    parcel.WriteInt32(1);
-    parcel.WriteInt32(-1);
+    parcel.WriteInt32(TEST_PARCEL_WRITE_VALUE);
+    parcel.WriteInt32(TEST_INVALID_VALUE);
     bool ret = dstbMissionInfo.ReadDstbMissionInfosFromParcel(parcel, missionInfos);
     EXPECT_FALSE(ret);
     DTEST_LOG << "DistributedMissionInfoTest testReadDstbMissionInfosFromParcel002 end" << std::endl;
@@ -176,13 +178,13 @@ HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel002, Test
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel003, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testReadDstbMissionInfosFromParcel003 start" << std::endl;
     DstbMissionInfo dstbMissionInfo;
     Parcel parcel;
     std::vector<DstbMissionInfo> missionInfos;
-    parcel.WriteInt32(1);
+    parcel.WriteInt32(TEST_PARCEL_WRITE_VALUE);
     parcel.WriteInt32(parcel.GetReadableBytes() + 1);
     bool ret = dstbMissionInfo.ReadDstbMissionInfosFromParcel(parcel, missionInfos);
     EXPECT_FALSE(ret);
@@ -195,13 +197,13 @@ HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel003, Test
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel004, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel004, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testReadDstbMissionInfosFromParcel004 start" << std::endl;
     DstbMissionInfo dstbMissionInfo;
     Parcel parcel;
     std::vector<DstbMissionInfo> missionInfos;
-    parcel.WriteInt32(1);
+    parcel.WriteInt32(TEST_PARCEL_WRITE_VALUE);
     parcel.WriteInt32(missionInfos.max_size() + 1);
     bool ret = dstbMissionInfo.ReadDstbMissionInfosFromParcel(parcel, missionInfos);
     EXPECT_FALSE(ret);
@@ -214,13 +216,13 @@ HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel004, Test
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel005, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel005, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testReadDstbMissionInfosFromParcel005 start" << std::endl;
     DstbMissionInfo dstbMissionInfo;
     Parcel parcel;
     std::vector<DstbMissionInfo> missionInfos;
-    parcel.WriteInt32(1);
+    parcel.WriteInt32(TEST_PARCEL_WRITE_VALUE);
     parcel.WriteInt32(missionInfos.max_size() - 1);
     bool ret = dstbMissionInfo.ReadDstbMissionInfosFromParcel(parcel, missionInfos);
     EXPECT_FALSE(ret);
@@ -233,14 +235,14 @@ HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel005, Test
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel006, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel006, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testReadDstbMissionInfosFromParcel006 start" << std::endl;
     DstbMissionInfo dstbMissionInfo;
     Parcel parcel;
     std::vector<DstbMissionInfo> missionInfos;
-    parcel.WriteInt32(1);
-    parcel.WriteInt32(1);
+    parcel.WriteInt32(TEST_PARCEL_WRITE_VALUE);
+    parcel.WriteInt32(TEST_PARCEL_WRITE_VALUE);
     parcel.WriteParcelable(nullptr);
     bool ret = dstbMissionInfo.ReadDstbMissionInfosFromParcel(parcel, missionInfos);
     EXPECT_FALSE(ret);
@@ -253,14 +255,14 @@ HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel006, Test
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel007, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel007, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testReadDstbMissionInfosFromParcel007 start" << std::endl;
     DstbMissionInfo dstbMissionInfo;
     Parcel parcel;
     std::vector<DstbMissionInfo> missionInfos;
-    parcel.WriteInt32(1);
-    parcel.WriteInt32(1);
+    parcel.WriteInt32(TEST_PARCEL_WRITE_VALUE);
+    parcel.WriteInt32(TEST_PARCEL_WRITE_VALUE);
     parcel.WriteParcelable(&dstbMissionInfo);
     bool ret = dstbMissionInfo.ReadDstbMissionInfosFromParcel(parcel, missionInfos);
     EXPECT_TRUE(ret);
@@ -274,7 +276,7 @@ HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel007, Test
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testWriteDstbMissionInfosToParcel001, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testWriteDstbMissionInfosToParcel001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testWriteDstbMissionInfosToParcel001 start" << std::endl;
     DstbMissionInfo dstbMissionInfo;
@@ -291,7 +293,7 @@ HWTEST_F(DistributedMissionInfoTest, testWriteDstbMissionInfosToParcel001, TestS
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testWriteDstbMissionInfosToParcel002, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testWriteDstbMissionInfosToParcel002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testWriteDstbMissionInfosToParcel002 start" << std::endl;
     DstbMissionInfo dstbMissionInfo;
@@ -309,7 +311,7 @@ HWTEST_F(DistributedMissionInfoTest, testWriteDstbMissionInfosToParcel002, TestS
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testToString001, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testToString001, TestSize.Level3)
 {
     DstbMissionInfo dstbMissionInfo;
     auto ret = dstbMissionInfo.ToString();
@@ -322,7 +324,7 @@ HWTEST_F(DistributedMissionInfoTest, testToString001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
-HWTEST_F(DistributedMissionInfoTest, testToString002, TestSize.Level1)
+HWTEST_F(DistributedMissionInfoTest, testToString002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testToString002 start" << std::endl;
     DstbMissionInfo dstbMissionInfo;
