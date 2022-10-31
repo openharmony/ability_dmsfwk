@@ -18,6 +18,7 @@
 #include "distributed_ability_manager_client.h"
 #include "distributed_sched_util.h"
 #include "dtbschedmgr_log.h"
+#include "mock_remote_stub.h"
 #include "test_log.h"
 
 namespace OHOS {
@@ -56,6 +57,7 @@ const std::string TEST_FILTER = "test filter";
 const std::string TEST_AUTHINFO = "test authInfo";
 const std::u16string TEST_INPUT1 = u"test input1";
 const std::u16string TEST_INPUT2 = u"test input2";
+const std::u16string TEST_INVALID_REMOTEDESCRIPTOR = u"invalid remoteDescriptor";
 const std::string TEST_INPUT3 = "test input1";
 const std::string TEST_INPUT4 = "test input2";
 const std::uint32_t INVALID_EVENT_DEVICE_CODE = 0;
@@ -85,6 +87,38 @@ void DeviceSelectionNotifierTest::OnDeviceDisconnect(const std::vector<Continuat
         DTEST_LOG << "DeviceSelectionNotifierTest::OnDeviceDisconnect selected deviceNane:" <<
             continuationResults[i].GetDeviceName() << std::endl;
     }
+}
+
+void MockDmsNotifier::DeviceOnlineNotify(const std::string& deviceId)
+{
+}
+
+void MockDmsNotifier::DeviceOfflineNotify(const std::string& deviceId)
+{
+}
+
+void MockDmsNotifier::ProcessNotifierDied(const sptr<IRemoteObject>& notifier)
+{
+}
+
+void MockDmsNotifier::ScheduleStartDeviceManager(const sptr<IRemoteObject>& appProxy, int32_t token,
+    const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams)
+{
+}
+
+int32_t MockDmsNotifier::OnDeviceConnect(int32_t token, const std::vector<ContinuationResult>& continuationResults)
+{
+    return 0;
+}
+
+int32_t MockDmsNotifier::OnDeviceDisconnect(int32_t token, const std::vector<ContinuationResult>& continuationResults)
+{
+    return 0;
+}
+
+int32_t MockDmsNotifier::OnDeviceCancel()
+{
+    return 0;
 }
 
 void ContinuationManagerTest::SetUpTestCase()
@@ -1678,6 +1712,57 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_005, TestSize.Level3)
         data, reply, option);
 
     EXPECT_EQ(ERR_OK, result);
+}
+
+/**
+ * @tc.name: OnRemoteRequest_006
+ * @tc.desc: test OnRemoteRequest when descriptor != remoteDescriptor.
+ * @tc.type: FUNC
+ * @tc.require: I5M4CD
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_006, TestSize.Level3)
+{
+    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
+    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(TEST_INVALID_REMOTEDESCRIPTOR);
+    /**
+     * @tc.steps: step1. AppDeviceCallbackStub::OnRemoteRequest
+     */
+    int32_t ret = appDeviceCallbackStub.OnRemoteRequest(1, data, reply, option);
+    EXPECT_EQ(ERR_INVALID_STATE, ret);
+    /**
+     * @tc.steps: step2. DeviceSelectionNotifierProxy::OnDeviceConnect when continuationResults is nullptr.
+     */
+    sptr<IRemoteObject> impl = new MockRemoteStub();
+    DeviceSelectionNotifierProxy deviceSelectionNotifierProxy(impl);
+    std::vector<ContinuationResult> continuationResults;
+    deviceSelectionNotifierProxy.OnDeviceConnect(continuationResults);
+    /**
+     * @tc.steps: step3. DeviceSelectionNotifierProxy::OnDeviceDisconnect when continuationResults is nullptr.
+     */
+    deviceSelectionNotifierProxy.OnDeviceDisconnect(continuationResults);
+
+    ContinuationResult continuationResult1;
+    continuationResult1.SetDeviceId(SELECTED_DEVICE_ID1);
+    continuationResult1.SetDeviceType(SELECTED_DEVICE_TYPE1);
+    continuationResult1.SetDeviceName(SELECTED_DEVICE_NAME1);
+    ContinuationResult continuationResult2;
+    continuationResult2.SetDeviceId(SELECTED_DEVICE_ID2);
+    continuationResult2.SetDeviceType(SELECTED_DEVICE_TYPE2);
+    continuationResult2.SetDeviceName(SELECTED_DEVICE_NAME2);
+    continuationResults.emplace_back(continuationResult1);
+    continuationResults.emplace_back(continuationResult2);
+    /**
+     * @tc.steps: step4. DeviceSelectionNotifierProxy::OnDeviceConnect.
+     */
+    deviceSelectionNotifierProxy.OnDeviceConnect(continuationResults);
+    /**
+     * @tc.steps: step5. DeviceSelectionNotifierProxy::OnDeviceDisconnect.
+     */
+    deviceSelectionNotifierProxy.OnDeviceDisconnect(continuationResults);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

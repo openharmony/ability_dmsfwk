@@ -20,6 +20,8 @@
 
 #include "device_selection_notifier_stub.h"
 #define private public
+#include "continuation_manager/app_device_callback_stub.h"
+#include "continuation_manager/device_selection_notifier_proxy.h"
 #include "distributed_ability_manager_service.h"
 #undef private
 
@@ -43,6 +45,22 @@ public:
     void OnDeviceConnect(const std::vector<ContinuationResult>& continuationResults) override;
     void OnDeviceDisconnect(const std::vector<ContinuationResult>& continuationResults) override;
 };
+
+class MockDmsNotifier : public DmsNotifier {
+public:
+    MockDmsNotifier() = default;
+    ~MockDmsNotifier() = default;
+
+    void DeviceOnlineNotify(const std::string& deviceId) override;
+    void DeviceOfflineNotify(const std::string& deviceId) override;
+    void ProcessNotifierDied(const sptr<IRemoteObject>& notifier) override;
+    void ScheduleStartDeviceManager(const sptr<IRemoteObject>& appProxy, int32_t token,
+        const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams = nullptr) override;
+    int32_t OnDeviceConnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
+    int32_t OnDeviceDisconnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
+    int32_t OnDeviceCancel() override;
+};
+
 } // namespace DistributedSchedule
 } // namespace OHOS
 #endif // OHOS_DISTRIBUTED_ABILITY_MANAGER_CONTINUATION_MANAGER_TEST_H

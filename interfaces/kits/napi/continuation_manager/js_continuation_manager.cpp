@@ -809,15 +809,15 @@ std::string JsContinuationManager::ErrorMessageReturn(int32_t code)
         case PARAMETER_CHECK_FAILED:
             return "The parameter check failed.";
         case SYSTEM_WORK_ABNORMALLY:
-            return "The system ability work abnormally.";
+            return "The system ability works abnormally.";
         case CALLBACK_TOKEN_UNREGISTERED:
-            return "The specified token or callback has not registered.";
+            return "The specified token or callback is not registered.";
         case OVER_MAX_REGISTERED_TIMES:
             return "The number of token registration times has reached the upper limit.";
         case REPEATED_REGISTRATION:
             return "The specified callback has been registered.";
         default:
-            return "The system ability work abnormally.";
+            return "The system ability works abnormally.";
     };
 }
 
