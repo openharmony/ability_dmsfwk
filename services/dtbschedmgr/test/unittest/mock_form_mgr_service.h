@@ -102,7 +102,7 @@ public:
     {
         return ERR_OK;
     };
-    int32_t RouterEvent(const int64_t formId, Want &want) override
+    int32_t RouterEvent(const int64_t formId, Want &want, const sptr<IRemoteObject> &callerToken) override
     {
         return ERR_OK;
     };
