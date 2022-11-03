@@ -14,7 +14,7 @@
  */
 // @ts-nocheck
 
-import Ability from '@ohos.application.Ability'
+import Ability from '@ohos.app.ability.UIAbility'
 import RemoteDeviceModel from '../Model/RemoteDeviceModel'
 import rpc from '@ohos.rpc'
 

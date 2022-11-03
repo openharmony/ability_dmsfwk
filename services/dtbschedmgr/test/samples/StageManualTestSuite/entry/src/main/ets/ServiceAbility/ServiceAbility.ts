@@ -14,7 +14,7 @@
  */
 // @ts-nocheck
 
-import ServiceExtensionAbility from '@ohos.application.ServiceExtensionAbility';
+import ServiceExtensionAbility from '@ohos.app.ability.ServiceExtensionAbility';
 import wantConstant from '@ohos.ability.wantConstant'
 
 export default class ServiceAbility extends ServiceExtensionAbility {

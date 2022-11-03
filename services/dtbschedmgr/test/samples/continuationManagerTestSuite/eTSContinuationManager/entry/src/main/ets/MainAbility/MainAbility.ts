@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import Ability from '@ohos.application.Ability'
+import Ability from '@ohos.app.ability.UIAbility'
 import abilityAccessCtrl from "@ohos.abilityAccessCtrl";
 import bundle from '@ohos.bundle';
 import continuationManager from '@ohos.continuation.continuationManager';
