@@ -371,6 +371,9 @@ int32_t DistributedSchedService::ContinueAbilityWithTimeout(const std::string& d
     SetContinuationTimeout(missionId, CONTINUATION_TIMEOUT);
     int32_t result = AbilityManagerClient::GetInstance()->ContinueAbility(dstDeviceId, missionId, remoteBundleVersion);
     HILOGI("result: %{public}d!", result);
+    if (result == ERR_INVALID_VALUE) {
+        return MISSION_FOR_CONTINUING_IS_NOT_ALIVE;
+    }
     return result;
 }
 

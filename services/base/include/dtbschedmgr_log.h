@@ -79,6 +79,10 @@ enum {
      */
     CONTINUE_ALREADY_IN_PROGRESS = 16300506,
     /**
+     * Result(29360220) for the mission for continuing is not alive, try again after restart mission.
+     */
+    MISSION_FOR_CONTINUING_IS_NOT_ALIVE = 16300507,
+    /**
      * Result(29360128) for invalid parameters.
      */
     INVALID_PARAMETERS_ERR = DMS_SERVICE_ERR_OFFSET,
