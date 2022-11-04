@@ -28,7 +28,7 @@ namespace DistributedSchedule {
 namespace {
     constexpr int32_t DISTRIBUTED_SCHED_SA_ID = 1401;
     constexpr size_t THRESHOLD = 10;
-    constexpr uint8_t MAX_CALL_TRANSACTION = 64;
+    constexpr uint16_t MAX_CALL_TRANSACTION = 510;
     constexpr int32_t OFFSET = 4;
     const std::u16string DMS_INTERFACE_TOKEN = u"OHOS.DistributedSchedule.IDistributedAbilityManager";
 }
