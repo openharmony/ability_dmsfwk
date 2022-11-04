@@ -80,9 +80,7 @@ const std::string UID_KEY = "uid";
 const std::string COMPONENT_TYPE_KEY = "componentType";
 const std::string DEVICE_TYPE_KEY = "deviceType";
 const std::string CHANGE_TYPE_KEY = "changeType";
-const std::string PANEL_NAME_KEY = "const.distributedsched.panelname";
-const std::string DEFAULT_PANEL_NAME_VALUE = "";
-constexpr int32_t MAX_SPLIT_VARS = 2;
+const std::string DMS_HIPLAY_ACTION = "ohos.ability.action.deviceSelect";
 constexpr int32_t BIND_CONNECT_RETRY_TIMES = 3;
 constexpr int32_t BIND_CONNECT_TIMEOUT = 500; // 500ms
 constexpr int32_t MAX_DISTRIBUTED_CONNECT_NUM = 600;
@@ -2019,19 +2017,12 @@ int32_t DistributedSchedService::ConnectAbility(const sptr<DmsNotifier>& dmsNoti
     const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams)
 {
     Want want;
-    // get bundleName and abilityName from parameter
-    std::string panelName = system::GetParameter(PANEL_NAME_KEY, DEFAULT_PANEL_NAME_VALUE);
-    if (panelName.empty()) {
-        HILOGE("get panelName from parameter failed");
-        return PANEL_NAME_NOT_CONFIGURED;
+    want.SetAction(DMS_HIPLAY_ACTION);
+    AppExecFwk::ExtensionAbilityInfo extensionAbility;
+    if (!BundleManagerInternal::QueryExtensionAbilityInfo(want, extensionAbility)) {
+        HILOGE("QueryExtensionAbilityInfo failed");
+        return CONNECT_ABILITY_FAILED;
     }
-    std::vector<std::string> nameVector;
-    SplitStr(panelName, "_", nameVector);
-    if (nameVector.size() != MAX_SPLIT_VARS) {
-        HILOGE("parse panelName failed");
-        return PANEL_NAME_NOT_CONFIGURED;
-    }
-    want.SetElementName(nameVector[0], nameVector[1]);
     if (connect_ == nullptr) {
         connect_ = new AppConnectionStub(dmsNotifier, token, continuationExtraParams);
     }
