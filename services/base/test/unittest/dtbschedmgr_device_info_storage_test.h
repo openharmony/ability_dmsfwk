@@ -16,6 +16,8 @@
 #ifndef OHOS_DMSFWK_BASE_DTBSCHEDMGR_DEVICE_INFO_STORAGE_TEST_H
 #define OHOS_DMSFWK_BASE_DTBSCHEDMGR_DEVICE_INFO_STORAGE_TEST_H
 
+#include <condition_variable>
+#include <shared_mutex>
 #include "gtest/gtest.h"
 
 #define private public
@@ -30,6 +32,9 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    static bool isCaseDone_;
+    static std::mutex caseDoneLock_;
+    static std::condition_variable caseDoneCondition_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

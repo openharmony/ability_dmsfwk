@@ -14,11 +14,12 @@
  */
 #include "distributed_ability_manager_service_test.h"
 
-#define private public
-#include "distributed_ability_manager_service.h"
-#undef private
+#include <thread>
 #include "distributed_sched_util.h"
 #include "dtbschedmgr_log.h"
+#define private public
+#include "mission/distributed_sched_mission_manager.h"
+#undef private
 #include "test_log.h"
 
 using namespace testing;
@@ -27,20 +28,43 @@ using namespace testing::ext;
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-    constexpr int32_t DISTRIBUTED_SCHED_SA_ID = 1401;
-    constexpr int32_t GET_DISTRIBUTED_COMPONENT_LIST_REQUEST_CODE = 161;
-    constexpr int32_t UPDATE_CONNECT_STATUS = 504;
-    constexpr int32_t INVALID_CODE = -1;
-    const std::u16string DMS_STUB_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
+constexpr int32_t DISTRIBUTED_SCHED_SA_ID = 1401;
+constexpr int32_t GET_DISTRIBUTED_COMPONENT_LIST_REQUEST_CODE = 161;
+constexpr int32_t UPDATE_CONNECT_STATUS = 504;
+constexpr int32_t INVALID_CODE = -1;
+constexpr int32_t MAX_WAIT_TIME = 10000;
+const std::u16string DMS_STUB_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
 }
+
+sptr<DistributedAbilityManagerService>  DistributedAbilityManagerServiceTest::dtbabilitymgrService_;
+bool DistributedAbilityManagerServiceTest::isCaseDone_ = false;
+std::mutex DistributedAbilityManagerServiceTest::caseDoneLock_;
+std::condition_variable DistributedAbilityManagerServiceTest::caseDoneCondition_;
 
 void DistributedAbilityManagerServiceTest::SetUpTestCase()
 {
+    dtbabilitymgrService_ = new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
     DTEST_LOG << "DistributedAbilityManagerServiceTest::SetUpTestCase" << std::endl;
 }
 
 void DistributedAbilityManagerServiceTest::TearDownTestCase()
 {
+    //Wait until all asyn tasks are completed before exiting the test suite
+    auto caseDoneNotifyTask = [&]() {
+        std::lock_guard<std::mutex> autoLock(caseDoneLock_);
+        isCaseDone_ = true;
+        caseDoneCondition_.notify_all();
+    };
+    if (DistributedSchedMissionManager::GetInstance().distributedDataStorage_ != nullptr) {
+        std::shared_ptr<AppExecFwk::EventHandler> dmsDataStorageHandler = 
+        DistributedSchedMissionManager::GetInstance().distributedDataStorage_->dmsDataStorageHandler_;
+        if (dmsDataStorageHandler != nullptr) {
+            dmsDataStorageHandler->PostTask(caseDoneNotifyTask);
+        }
+    }
+    std::unique_lock<std::mutex> lock(caseDoneLock_);
+    caseDoneCondition_.wait_for(lock, std::chrono::milliseconds(MAX_WAIT_TIME),
+        [&] () { return isCaseDone_; });
     DTEST_LOG << "DistributedAbilityManagerServiceTest::TearDownTestCase" << std::endl;
 }
 
@@ -63,9 +87,11 @@ void DistributedAbilityManagerServiceTest::TearDown()
 HWTEST_F(DistributedAbilityManagerServiceTest, IsDistributedSchedLoaded_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest IsDistributedSchedLoaded_001 start" << std::endl;
-    sptr<DistributedAbilityManagerService>  dtbabilitymgrService =
-        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
-    int32_t result = dtbabilitymgrService->IsDistributedSchedLoaded();
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    int32_t result = dtbabilitymgrService_->IsDistributedSchedLoaded();
     EXPECT_EQ(false, result);
     DTEST_LOG << "DistributedAbilityManagerServiceTest IsDistributedSchedLoaded_001 end" << std::endl;
 }
@@ -78,13 +104,15 @@ HWTEST_F(DistributedAbilityManagerServiceTest, IsDistributedSchedLoaded_001, Tes
 HWTEST_F(DistributedAbilityManagerServiceTest, GetDistributedComponentListInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest GetDistributedComponentListInner_001 start" << std::endl;
-    sptr<DistributedAbilityManagerService>  dtbabilitymgrService =
-        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    int32_t result = dtbabilitymgrService->GetDistributedComponentListInner(data, reply, option);
+    int32_t result = dtbabilitymgrService_->GetDistributedComponentListInner(data, reply, option);
     EXPECT_EQ(ERR_NONE, result);
     result = reply.ReadInt32();
     EXPECT_EQ(ERR_NONE, result);
@@ -103,15 +131,17 @@ HWTEST_F(DistributedAbilityManagerServiceTest, GetDistributedComponentListInner_
 HWTEST_F(DistributedAbilityManagerServiceTest, GetDistributedComponentListInner_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest GetDistributedComponentListInner_002 start" << std::endl;
-    sptr<DistributedAbilityManagerService>  dtbabilitymgrService =
-        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    bool result1 = dtbabilitymgrService->InitDmsImplFunc();
+    bool result1 = dtbabilitymgrService_->InitDmsImplFunc();
     EXPECT_EQ(true, result1);
-    int32_t result2 = dtbabilitymgrService->GetDistributedComponentListInner(data, reply, option);
+    int32_t result2 = dtbabilitymgrService_->GetDistributedComponentListInner(data, reply, option);
     EXPECT_EQ(ERR_NONE, result2);
     result2 = reply.ReadInt32();
     EXPECT_EQ(ERR_NONE, result2);
@@ -130,12 +160,14 @@ HWTEST_F(DistributedAbilityManagerServiceTest, GetDistributedComponentListInner_
 HWTEST_F(DistributedAbilityManagerServiceTest, GetDistributedComponentListInner_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest GetDistributedComponentListInner_003 start" << std::endl;
-    sptr<DistributedAbilityManagerService>  dtbabilitymgrService =
-        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    int32_t result = dtbabilitymgrService->GetDistributedComponentListInner(data, reply, option);
+    int32_t result = dtbabilitymgrService_->GetDistributedComponentListInner(data, reply, option);
     EXPECT_EQ(DMS_PERMISSION_DENIED, result);
     DTEST_LOG << "DistributedAbilityManagerServiceTest GetDistributedComponentListInner_003 end" << std::endl;
 }
@@ -149,13 +181,15 @@ HWTEST_F(DistributedAbilityManagerServiceTest, GetDistributedComponentListInner_
 HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_001 start" << std::endl;
-    sptr<DistributedAbilityManagerService>  dtbabilitymgrService =
-        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    int32_t result = dtbabilitymgrService->OnRemoteRequest(
+    int32_t result = dtbabilitymgrService_->OnRemoteRequest(
         GET_DISTRIBUTED_COMPONENT_LIST_REQUEST_CODE, data, reply, option);
     EXPECT_EQ(ERR_NONE, result);
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_001 end" << std::endl;
@@ -170,13 +204,15 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_001, TestSize.Lev
 HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_002 start" << std::endl;
-    sptr<DistributedAbilityManagerService>  dtbabilitymgrService =
-        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    int32_t result = dtbabilitymgrService->OnRemoteRequest(INVALID_CODE, data, reply, option);
+    int32_t result = dtbabilitymgrService_->OnRemoteRequest(INVALID_CODE, data, reply, option);
     EXPECT_NE(ERR_NONE, result);
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_002 end" << std::endl;
 }
@@ -190,12 +226,14 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_002, TestSize.Lev
 HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_003 start" << std::endl;
-    sptr<DistributedAbilityManagerService>  dtbabilitymgrService =
-        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    int32_t result = dtbabilitymgrService->OnRemoteRequest(UPDATE_CONNECT_STATUS, data, reply, option);
+    int32_t result = dtbabilitymgrService_->OnRemoteRequest(UPDATE_CONNECT_STATUS, data, reply, option);
     EXPECT_EQ(DMS_PERMISSION_DENIED, result);
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_003 end" << std::endl;
 }
@@ -209,13 +247,15 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_003, TestSize.Lev
 HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_004, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_004 start" << std::endl;
-    sptr<DistributedAbilityManagerService>  dtbabilitymgrService =
-        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    int32_t result = dtbabilitymgrService->OnRemoteRequest(UPDATE_CONNECT_STATUS, data, reply, option);
+    int32_t result = dtbabilitymgrService_->OnRemoteRequest(UPDATE_CONNECT_STATUS, data, reply, option);
     EXPECT_EQ(DMS_PERMISSION_DENIED, result);
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_004 end" << std::endl;
 }
@@ -228,14 +268,16 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_004, TestSize.Lev
 HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_005, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_005 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
     DistributedSchedUtil::MockPermission();
-    sptr<DistributedAbilityManagerService>  dtbabilitymgrService =
-        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    int32_t result = dtbabilitymgrService->OnRemoteRequest(UPDATE_CONNECT_STATUS, data, reply, option);
+    int32_t result = dtbabilitymgrService_->OnRemoteRequest(UPDATE_CONNECT_STATUS, data, reply, option);
     EXPECT_NE(ERR_NONE, result);
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_005 end" << std::endl;
 }

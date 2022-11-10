@@ -24,6 +24,9 @@ namespace DistributedSchedule {
 using namespace std;
 using namespace testing;
 using namespace testing::ext;
+namespace {
+constexpr int32_t MAX_WAIT_TIME = 10000;
+}
 
 class MockDmsNotifier : public DmsNotifier {
 public:
@@ -77,8 +80,25 @@ void DtbschedmgrDeviceInfoStorageTest::SetUpTestCase()
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest::SetUpTestCase" << std::endl;
 }
 
+bool DtbschedmgrDeviceInfoStorageTest::isCaseDone_ = false;
+std::mutex DtbschedmgrDeviceInfoStorageTest::caseDoneLock_;
+std::condition_variable DtbschedmgrDeviceInfoStorageTest::caseDoneCondition_;
+
 void DtbschedmgrDeviceInfoStorageTest::TearDownTestCase()
 {
+    //Wait until all asyn tasks are completed before exiting the test suite
+    auto caseDoneNotifyTask = [&]() {
+        std::lock_guard<std::mutex> autoLock(caseDoneLock_);
+        isCaseDone_ = true;
+        caseDoneCondition_.notify_all();
+    };
+    if (DtbschedmgrDeviceInfoStorage::GetInstance().networkIdMgrHandler_ != nullptr) {
+        DtbschedmgrDeviceInfoStorage::GetInstance().networkIdMgrHandler_->PostTask(caseDoneNotifyTask);
+    }
+
+    std::unique_lock<std::mutex> lock(caseDoneLock_);
+    caseDoneCondition_.wait_for(lock, std::chrono::milliseconds(MAX_WAIT_TIME),
+        [&] () { return isCaseDone_; });
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest::TearDownTestCase" << std::endl;
 }
 
