@@ -27,10 +27,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace DistributedSchedule {
-namespace {
-
-}
-
 void DmsVersionManagerTest::SetUpTestCase()
 {
     DTEST_LOG << "DmsVersionManagerTest::SetUpTestCase" << std::endl;
@@ -133,14 +129,14 @@ HWTEST_F(DmsVersionManagerTest, ParseDmsVersionTest_001, TestSize.Level3)
 
 /**
  * @tc.name: ParseDmsVersionTest_002
- * @tc.desc: test call ParseDmsVersion with invaild dmsVersionData
+ * @tc.desc: test call ParseDmsVersion with invalid dmsVersionData
  * @tc.type: FUNC
  * @tc.require: I5RWKZ
  */
 HWTEST_F(DmsVersionManagerTest, ParseDmsVersionTest_002, TestSize.Level3)
 {
     DTEST_LOG << "DmsVersionManagerTest ParseDmsVersionTest_002 begin" << std::endl;
-    std::string dmsVersionData = "invaild.2.1";
+    std::string dmsVersionData = "invalid.2.1";
     DmsVersion dmsVersion;
     bool result = DmsVersionManager::ParseDmsVersion(dmsVersionData, dmsVersion);
     EXPECT_EQ(result, false);
@@ -149,7 +145,7 @@ HWTEST_F(DmsVersionManagerTest, ParseDmsVersionTest_002, TestSize.Level3)
 
 /**
  * @tc.name: ParseDmsVersionTest_003
- * @tc.desc: test call ParseDmsVersion with invaild dmsVersionData
+ * @tc.desc: test call ParseDmsVersion with invalid dmsVersionData
  * @tc.type: FUNC
  * @tc.require: I5RWKZ
  */
@@ -165,14 +161,14 @@ HWTEST_F(DmsVersionManagerTest, ParseDmsVersionTest_003, TestSize.Level3)
 
 /**
  * @tc.name: ParseDmsVersionTest_004
- * @tc.desc: test call ParseDmsVersion with invaild dmsVersionData
+ * @tc.desc: test call ParseDmsVersion with invalid dmsVersionData
  * @tc.type: FUNC
  * @tc.require: I5RWKZ
  */
 HWTEST_F(DmsVersionManagerTest, ParseDmsVersionTest_004, TestSize.Level3)
 {
     DTEST_LOG << "DmsVersionManagerTest ParseDmsVersionTest_004 begin" << std::endl;
-    std::string dmsVersionData = "3.invaild.1";
+    std::string dmsVersionData = "3.invalid.1";
     DmsVersion dmsVersion;
     bool result = DmsVersionManager::ParseDmsVersion(dmsVersionData, dmsVersion);
     EXPECT_EQ(result, false);
@@ -181,7 +177,7 @@ HWTEST_F(DmsVersionManagerTest, ParseDmsVersionTest_004, TestSize.Level3)
 
 /**
  * @tc.name: ParseDmsVersionTest_005
- * @tc.desc: test call ParseDmsVersion with invaild dmsVersionData
+ * @tc.desc: test call ParseDmsVersion with invalid dmsVersionData
  * @tc.type: FUNC
  * @tc.require: I5RWKZ
  */
@@ -197,14 +193,14 @@ HWTEST_F(DmsVersionManagerTest, ParseDmsVersionTest_005, TestSize.Level3)
 
 /**
  * @tc.name: ParseDmsVersionTest_006
- * @tc.desc: test call ParseDmsVersion with invaild dmsVersionData
+ * @tc.desc: test call ParseDmsVersion with invalid dmsVersionData
  * @tc.type: FUNC
  * @tc.require: I5RWKZ
  */
 HWTEST_F(DmsVersionManagerTest, ParseDmsVersionTest_006, TestSize.Level3)
 {
     DTEST_LOG << "DmsVersionManagerTest ParseDmsVersionTest_006 begin" << std::endl;
-    std::string dmsVersionData = "3.2.invaild";
+    std::string dmsVersionData = "3.2.invalid";
     DmsVersion dmsVersion;
     bool result = DmsVersionManager::ParseDmsVersion(dmsVersionData, dmsVersion);
     EXPECT_EQ(result, false);
@@ -213,7 +209,7 @@ HWTEST_F(DmsVersionManagerTest, ParseDmsVersionTest_006, TestSize.Level3)
 
 /**
  * @tc.name: ParseDmsVersionTest_007
- * @tc.desc: test call ParseDmsVersion with invaild dmsVersionData
+ * @tc.desc: test call ParseDmsVersion with invalid dmsVersionData
  * @tc.type: FUNC
  * @tc.require: I5RWKZ
  */
@@ -281,7 +277,7 @@ HWTEST_F(DmsVersionManagerTest, GetDmsVersionDataFromAppInfo_002, TestSize.Level
 
 /**
  * @tc.name: GetDmsVersionDataFromAppInfo_003
- * @tc.desc: test call GetDmsVersionDataFromAppInfo with invaild data
+ * @tc.desc: test call GetDmsVersionDataFromAppInfo with invalid data
  * @tc.type: FUNC
  * @tc.require: I5RWKZ
  */
@@ -299,7 +295,7 @@ HWTEST_F(DmsVersionManagerTest, GetDmsVersionDataFromAppInfo_003, TestSize.Level
 
 /**
  * @tc.name: GetDmsVersionDataFromAppInfo_004
- * @tc.desc: test call GetDmsVersionDataFromAppInfo with invaild data
+ * @tc.desc: test call GetDmsVersionDataFromAppInfo with invalid data
  * @tc.type: FUNC
  * @tc.require: I5RWKZ
  */
@@ -335,7 +331,7 @@ HWTEST_F(DmsVersionManagerTest, GetDmsVersionDataFromAppInfo_005, TestSize.Level
 
 /**
  * @tc.name: GetAppInfoFromDP_001
- * @tc.desc: test call GetAppInfoFromDP with invaild device id
+ * @tc.desc: test call GetAppInfoFromDP with invalid device id
  * @tc.type: FUNC
  * @tc.require: I5RWKZ
  */
@@ -403,7 +399,7 @@ HWTEST_F(DmsVersionManagerTest, ParseAppInfo_002, TestSize.Level3)
 
 /**
  * @tc.name: ParseAppInfo_003
- * @tc.desc: test call ParseAppInfo with invaild packageNamesData
+ * @tc.desc: test call ParseAppInfo with invalid packageNamesData
  * @tc.type: FUNC
  * @tc.require: I5RWKZ
  */
@@ -439,7 +435,7 @@ HWTEST_F(DmsVersionManagerTest, ParseAppInfo_004, TestSize.Level3)
 
 /**
  * @tc.name: ParseAppInfo_005
- * @tc.desc: test call ParseAppInfo with invaild versionsData
+ * @tc.desc: test call ParseAppInfo with invalid versionsData
  * @tc.type: FUNC
  * @tc.require: I5RWKZ
  */
@@ -475,7 +471,7 @@ HWTEST_F(DmsVersionManagerTest, ParseAppInfo_006, TestSize.Level3)
 
 /**
  * @tc.name: GetRemoteDmsVersion_001
- * @tc.desc: test call GetRemoteDmsVersion with invaild deviceId
+ * @tc.desc: test call GetRemoteDmsVersion with invalid deviceId
  * @tc.type: FUNC
  * @tc.require: I5RWKZ
  */
@@ -507,7 +503,7 @@ HWTEST_F(DmsVersionManagerTest, GetRemoteDmsVersion_002, TestSize.Level3)
 
 /**
  * @tc.name: IsRemoteDmsVersionLower_001
- * @tc.desc: test call IsRemoteDmsVersionLower with invaild deviceId
+ * @tc.desc: test call IsRemoteDmsVersionLower with invalid deviceId
  * @tc.type: FUNC
  * @tc.require: I5RWKZ
  */

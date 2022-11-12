@@ -15,6 +15,7 @@
 
 #include "distributed_sched_adapter_test.h"
 #include "dtbschedmgr_log.h"
+#include "mock_remote_stub.h"
 #include "snapshot.h"
 #include "test_log.h"
 
@@ -43,6 +44,20 @@ void DistributedSchedAdapterTest::SetUp()
     distributedSchedAdapter_ = std::make_shared<DistributedSchedAdapter>();
     distributedSchedAdapter_->Init();
     DTEST_LOG << "DistributedSchedAdapterTest::SetUp" << std::endl;
+}
+
+/**
+ * @tc.name: Init_001
+ * @tc.desc: dmsAdapterHandler_ is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DistributedSchedAdapterTest, Init_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedAdapterTest Init_001 begin" << std::endl;
+    distributedSchedAdapter_->Init();
+    EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
+    DTEST_LOG << "DistributedSchedAdapterTest Init_001 end" << std::endl;
 }
 
 /**
@@ -201,6 +216,21 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessConnectDied_002, TestSize.Level3)
 }
 
 /**
+ * @tc.name: ProcessConnectDied_003
+ * @tc.desc: process connect died
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DistributedSchedAdapterTest, ProcessConnectDied_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedAdapterTest ProcessConnectDied_003 begin" << std::endl;
+    const sptr<IRemoteObject> connect = new MockRemoteStub();
+    distributedSchedAdapter_->ProcessConnectDied(connect);
+    EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
+    DTEST_LOG << "DistributedSchedAdapterTest ProcessConnectDied_003 end" << std::endl;
+}
+
+/**
  * @tc.name: ProcessCalleeDied_001
  * @tc.desc: dmsAdapterHandler_ is nullptr
  * @tc.type: FUNC
@@ -229,6 +259,21 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessCalleeDied_002, TestSize.Level3)
     distributedSchedAdapter_->ProcessCalleeDied(connect);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCalleeDied_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProcessCalleeDied_003
+ * @tc.desc: processs callee died
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DistributedSchedAdapterTest, ProcessCalleeDied_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedAdapterTest ProcessCalleeDied_003 begin" << std::endl;
+    const sptr<IRemoteObject> connect = new MockRemoteStub();
+    distributedSchedAdapter_->ProcessCalleeDied(connect);
+    EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
+    DTEST_LOG << "DistributedSchedAdapterTest ProcessCalleeDied_003 end" << std::endl;
 }
 
 /**
@@ -262,6 +307,22 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessCallerDied_002, TestSize.Level3)
     distributedSchedAdapter_->ProcessCallerDied(connect, deviceType);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCallerDied_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProcessCallerDied_003
+ * @tc.desc: process caller died
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DistributedSchedAdapterTest, ProcessCallerDied_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedAdapterTest ProcessCallerDied_003 begin" << std::endl;
+    const sptr<IRemoteObject> connect = new MockRemoteStub();
+    int32_t deviceType = 0;
+    distributedSchedAdapter_->ProcessCallerDied(connect, deviceType);
+    EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
+    DTEST_LOG << "DistributedSchedAdapterTest ProcessCallerDied_003 end" << std::endl;
 }
 
 /**
