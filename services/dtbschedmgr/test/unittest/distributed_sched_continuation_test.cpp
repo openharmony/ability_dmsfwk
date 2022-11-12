@@ -17,6 +17,7 @@
 #include "distributed_sched_util.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "mock_distributed_sched.h"
+#include "mock_remote_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -482,6 +483,23 @@ HWTEST_F(DSchedContinuationTest, PushAbilityToken_004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PushAbilityToken_005
+ * @tc.desc: AbilityToken is exist.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, PushAbilityToken_005, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest PushAbilityToken_005 start" << std::endl;
+    dschedContinuation_->Init(nullptr);
+    auto sessionId = 1;
+    bool ret = dschedContinuation_->PushAbilityToken(sessionId, GetDSchedService());
+    ret = dschedContinuation_->PushAbilityToken(sessionId, GetDSchedService());
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DSchedContinuationTest PushAbilityToken_005 end" << std::endl;
+}
+
+/**
  * @tc.name: PopAbilityToken_001
  * @tc.desc: input invalid params.
  * @tc.type: FUNC
@@ -539,6 +557,157 @@ HWTEST_F(DSchedContinuationTest, PopAbilityToken_003, TestSize.Level1)
     abilityToken = dschedContinuation_->PopAbilityToken(sessionId);
     EXPECT_TRUE(abilityToken == nullptr);
     DTEST_LOG << "DSchedContinuationTest PopAbilityToken_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: PopAbilityToken_004
+ * @tc.desc: pop abilityToken success.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, PopAbilityToken_004, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest PopAbilityToken_004 start" << std::endl;
+    dschedContinuation_->continuationHandler_ = nullptr;
+
+    int32_t sessionId = PushAbilityToken();
+    sptr<IRemoteObject> abilityToken = dschedContinuation_->PopAbilityToken(sessionId);
+    EXPECT_TRUE(abilityToken != nullptr);
+    DTEST_LOG << "DSchedContinuationTest PopAbilityToken_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: GenerateSessionId_001
+ * @tc.desc: test GenerateSessionId when currSessionId is less than zero.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, GenerateSessionId_001, TestSize.Level4)
+{
+    DTEST_LOG << "DSchedContinuationTest GenerateSessionId_001 start" << std::endl;
+    int32_t sessionId =  dschedContinuation_->currSessionId_;
+    dschedContinuation_->currSessionId_ = -100;
+    dschedContinuation_->GenerateSessionId();
+    EXPECT_EQ(dschedContinuation_->currSessionId_, 1);
+    dschedContinuation_->currSessionId_ = sessionId;
+    DTEST_LOG << "DSchedContinuationTest GenerateSessionId_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetTimeOut_001
+ * @tc.desc: test SetTimeOut.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, SetTimeOut_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest SetTimeOut_001 start" << std::endl;
+    dschedContinuation_->Init(nullptr);
+
+    int32_t missionId = 0;
+    int32_t timeout = 1000;
+    dschedContinuation_->SetTimeOut(missionId, timeout);
+    EXPECT_NE(dschedContinuation_->continuationHandler_, nullptr);
+    DTEST_LOG << "DSchedContinuationTest SetTimeOut_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: RemoveTimeOut_001
+ * @tc.desc: test RemoveTimeOut.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, RemoveTimeOut_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest RemoveTimeOut_001 start" << std::endl;
+    dschedContinuation_->Init(nullptr);
+
+    int32_t missionId = 0;
+    int32_t timeout = 1000;
+    dschedContinuation_->SetTimeOut(missionId, timeout);
+    EXPECT_NE(dschedContinuation_->continuationHandler_, nullptr);
+    DTEST_LOG << "DSchedContinuationTest RemoveTimeOut_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetTargetDevice_001
+ * @tc.desc: test GetTargetDevice.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, GetTargetDevice_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest GetTargetDevice_001 start" << std::endl;
+    dschedContinuation_->Init(nullptr);
+
+    int32_t missionId = 0;
+    std::string mockDevice = "mockDevice";
+    dschedContinuation_->continuationDevices_[missionId] = mockDevice;
+    std::string result = dschedContinuation_->GetTargetDevice(missionId);
+    EXPECT_EQ(result, mockDevice);
+    DTEST_LOG << "DSchedContinuationTest GetTargetDevice_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PushCallback_001
+ * @tc.desc: test PushCallback when callback is nullptr.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, PushCallback_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest PushCallback_001 start" << std::endl;
+    dschedContinuation_->Init(nullptr);
+
+    int32_t missionId = 0;
+    const sptr<IRemoteObject> callback = nullptr;
+    std::string deviceId = "";
+    bool isFreeInstall = true;
+    bool result = dschedContinuation_->PushCallback(missionId, callback, deviceId, isFreeInstall);
+    EXPECT_EQ(result, false);
+    DTEST_LOG << "DSchedContinuationTest PushCallback_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PushCallback_002
+ * @tc.desc: test PushCallback when callback is exist.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, PushCallback_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest PushCallback_002 start" << std::endl;
+    dschedContinuation_->Init(nullptr);
+
+    int32_t missionId = 0;
+    const sptr<IRemoteObject> callback = new MockRemoteStub();
+    std::string deviceId = "";
+    bool isFreeInstall = true;
+    dschedContinuation_->callbackMap_[missionId] = callback;
+    bool result = dschedContinuation_->PushCallback(missionId, callback, deviceId, isFreeInstall);
+    EXPECT_EQ(result, false);
+    DTEST_LOG << "DSchedContinuationTest PushCallback_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: PushCallback_003
+ * @tc.desc: test PushCallback when isFreeInstall is true.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, PushCallback_003, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest PushCallback_003 start" << std::endl;
+    dschedContinuation_->Init(nullptr);
+
+    int32_t missionId = 0;
+    const sptr<IRemoteObject> callback = new MockRemoteStub();
+    std::string deviceId = "";
+    bool isFreeInstall = true;
+    dschedContinuation_->callbackMap_.clear();
+    bool result = dschedContinuation_->PushCallback(missionId, callback, deviceId, isFreeInstall);
+    EXPECT_EQ(result, true);
+    DTEST_LOG << "DSchedContinuationTest PushCallback_003 end" << std::endl;
 }
 
 /**

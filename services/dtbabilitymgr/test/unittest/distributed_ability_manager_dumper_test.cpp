@@ -29,7 +29,7 @@ namespace {
 constexpr int32_t DISTRIBUTED_SCHED_SA_ID = 1401;
 const char* HIDUMPER_PROCESS_NAME = "hidumper_service";
 const char* DISTSCHED_PROCESS_NAME = "distributedsched";
-const char* INVAILD_PROCESS_NAME = "invaild_process";
+const char* INVALID_PROCESS_NAME = "invalid_process";
 bool g_mockResult = false;
 }
 
@@ -78,7 +78,7 @@ void DistributedAbilityManagerDumperTest::TearDown()
 
 /**
  * @tc.name: Dump_001
- * @tc.desc: call dump with invaild fd.
+ * @tc.desc: call dump with invalid fd.
  * @tc.type: FUNC
  * @tc.require: I5PUBK
  */
@@ -298,7 +298,7 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_004, TestSize.Level3)
 
 /**
  * @tc.name: Dumper_Dump_005
- * @tc.desc: call DistributedAbilityManagerDumper::Dump with invaild args.
+ * @tc.desc: call DistributedAbilityManagerDumper::Dump with invalid args.
  * @tc.type: FUNC
  * @tc.require: I5PUBK
  */
@@ -341,7 +341,7 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_006, TestSize.Level4)
 
 /**
  * @tc.name: Dumper_Dump_007
- * @tc.desc: call DistributedAbilityManagerDumper::Dump from invaild process.
+ * @tc.desc: call DistributedAbilityManagerDumper::Dump from invalid process.
  * @tc.type: FUNC
  * @tc.require: I5PUBK
  */
@@ -352,7 +352,7 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_007, TestSize.Level4)
         DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
         return;
     }
-    MockProcess(INVAILD_PROCESS_NAME);
+    MockProcess(INVALID_PROCESS_NAME);
     const std::vector<std::string> args;
     std::string dumpResult;
     bool result = DistributedAbilityManagerDumper::Dump(dtbabilitymgrService_, args, dumpResult);
