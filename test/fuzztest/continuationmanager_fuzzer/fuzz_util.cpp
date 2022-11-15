@@ -13,29 +13,42 @@
  * limitations under the License.
  */
 
-#include "mock_permission.h"
+#include "fuzz_util.h"
 
+#include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 
 namespace OHOS {
-void DmsMockPermission::MockPermission()
+namespace DistributedSchedule {
+namespace {
+const char* DISTSCHED_PROCESS_NAME = "foundation";
+}
+
+void FuzzUtil::MockPermission()
 {
     static const char *PERMS[] = {
         "ohos.permission.DISTRIBUTED_DATASYNC"
     };
+    MockProcessAndPermission(DISTSCHED_PROCESS_NAME, PERMS, 1);
+}
+
+void FuzzUtil::MockProcessAndPermission(const char* processName, const char *perms[], int32_t permsNum)
+{
     uint64_t tokenId;
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
-        .permsNum = 1,
+        .permsNum = permsNum,
         .aclsNum = 0,
         .dcaps = nullptr,
-        .perms = PERMS,
+        .perms = perms,
         .acls = nullptr,
-        .processName = "foundation",
+        .processName = processName,
         .aplStr = "system_core",
     };
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
+    OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
+}
 }
 }

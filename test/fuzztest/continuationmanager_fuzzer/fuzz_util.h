@@ -16,10 +16,16 @@
 #ifndef MOCK_PERMISSION_H
 #define MOCK_PERMISSION_H
 
+#include "iservice_registry.h"
+
 namespace OHOS {
-class DmsMockPermission {
+namespace DistributedSchedule {
+class FuzzUtil {
 public:
     static void MockPermission();
+    static void MockProcessAndPermission(const char* processName,
+        const char *perms[], int32_t permsNum);
 };
+}
 } // namespace OHOS
 #endif // SAMGR_SERVICES_SAMGR_MOCK_PERMISSION_H
