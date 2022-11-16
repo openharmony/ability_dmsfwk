@@ -1,32 +1,38 @@
-# Distributed Scheduler<a name="EN-US_TOPIC_0000001115719369"></a>
+# dmsfwk
 
-## Introduction<a name="section11660541593"></a>
+## Introduction
 
-Distributed Scheduler is used for cross-device component management. It allows the local device to access or control remote components, and enables app collaboration in distributed scenarios. Its main functions are as follows:
+The Distributed Ability Manager Service Framework (dmsfwk) component is used for cross-device component management. It allows the local device to access and control remote components, and enables application collaboration in distributed scenarios. Major functions are as follows:
 
--   Remote ability startup: Starts an ability on a remote device.
--   Remote ability migration: Migrates an ability to a remote device.
--   Remote ability binding: Binds an ability on a remote device.
+-   Remote ability startup: starts an ability on a remote device. Data can be returned when the Page ability ends.
+-   Ability continuation: continues an ability on a remote device.
+-   Remote ability binding: binds an ability on a remote device.
+-   Remote call: obtains the caller interface of a remote ability to call the ability across devices.
 
-## System Architecture<a name="section13587185873516"></a>
+## System Architecture
 
-**Figure 1**  Distributed Scheduler architecture<a name="fig4460722185514"></a>
+Figure 1 Architecture of dmsfwk
 
 
 ![](figures/dms-architecture.png)
 
-## Directory Structure<a name="section161941989596"></a>
+## Directory Structure
 
 ```
 /foundation/ability
-├── dmsfwk                      # DMS framework (DMS is short for Distributed Manager Service, also called the Distributed Scheduler Service)
-├── dmsfwk_lite                # Lightweight DMS framework
+├── dmsfwk              # dmsfwk
+│  ├── bundle.json      # Description and build script of dmsfwk
+│  ├── etc              # Configuration files
+│  ├── interfaces       # APIs exposed externally
+│  ├── services         # Service implementation
+│  ├── sa_profile       # SA-related configuration files
+│  ├── utils            # Utils
 ```
 
-## Repositories Involved<a name="section1371113476307"></a>
+## Repositories Involved
 
-**Distributed Scheduler**
+dmsfwk
 
-ability\_dmsfwk
+[**ability\_dmsfwk**](https://gitee.com/openharmony/ability_dmsfwk)
 
-ability\_dmsfwk\_lite
+[ability\_dmsfwk\_lite](https://gitee.com/openharmony/ability_dmsfwk_lite)
