@@ -16,6 +16,7 @@
 #include "mission_info_converter_test.h"
 
 #include "mission/distributed_mission_info.h"
+#include "mission/mission_constant.h"
 #include "mission/mission_info_converter.h"
 #include "parcel_helper.h"
 #include "test_log.h"
@@ -26,7 +27,7 @@ using namespace testing::ext;
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-const std::string TAG = "DistributedAbilityManagerService";
+const std::string TAG = "MissionInfoConverter";
 }
 
 void MissionInfoConverterTest::SetUpTestCase()
@@ -124,18 +125,18 @@ HWTEST_F(MissionInfoConverterTest, ReadMissionInfosFromParcel_001, TestSize.Leve
     EXPECT_FALSE(result);
     EXPECT_TRUE(missionInfos.empty());
     /**
-     * @tc.steps: step3. test ReadMissionInfosFromParcel when len = missionInfos.max_size() + 1;
+     * @tc.steps: step3. test ReadMissionInfosFromParcel when len = GET_MAX_MISSIONS + 1;
      */
     PARCEL_WRITE_HELPER_NORET(parcel, Int32, 1);
-    PARCEL_WRITE_HELPER_NORET(parcel, Int32, missionInfos.max_size() + 1);
+    PARCEL_WRITE_HELPER_NORET(parcel, Int32, Constants::Mission::GET_MAX_MISSIONS + 1);
     result = MissionInfoConverter::ReadMissionInfosFromParcel(parcel, missionInfos);
     EXPECT_FALSE(result);
     EXPECT_TRUE(missionInfos.empty());
     /**
-     * @tc.steps: step4. test ReadMissionInfosFromParcel when len = missionInfos.max_size() - 1;
+     * @tc.steps: step4. test ReadMissionInfosFromParcel when len = GET_MAX_MISSIONS - 1;
      */
     PARCEL_WRITE_HELPER_NORET(parcel, Int32, 1);
-    PARCEL_WRITE_HELPER_NORET(parcel, Int32, missionInfos.max_size() - 1);
+    PARCEL_WRITE_HELPER_NORET(parcel, Int32, Constants::Mission::GET_MAX_MISSIONS - 1);
     result = MissionInfoConverter::ReadMissionInfosFromParcel(parcel, missionInfos);
     EXPECT_FALSE(result);
     EXPECT_TRUE(missionInfos.empty());

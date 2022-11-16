@@ -16,6 +16,7 @@
 #include "mission/mission_info_converter.h"
 
 #include "adapter/adapter_constant.h"
+#include "mission/mission_constant.h"
 #include "dtbschedmgr_log.h"
 #include "parcel_helper.h"
 
@@ -78,7 +79,7 @@ bool MissionInfoConverter::ReadMissionInfosFromParcel(Parcel& parcel,
             return false;
         }
         size_t size = static_cast<size_t>(len);
-        if ((size > parcel.GetReadableBytes()) || (missionInfos.max_size() < size)) {
+        if ((size > parcel.GetReadableBytes()) || (size > Constants::Mission::GET_MAX_MISSIONS)) {
             HILOGE("Failed to read MissionInfo vector, size = %{public}zu", size);
             return false;
         }
