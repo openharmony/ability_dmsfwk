@@ -18,10 +18,11 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "dtbschedmgr_log.h"
 #include "distributed_ability_manager_interface.h"
 #include "distributed_ability_manager_stub.h"
 #include "distributed_ability_manager_service.h"
-#include "mock_permission.h"
+#include "fuzz_util.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -31,6 +32,8 @@ namespace {
     constexpr uint16_t MAX_CALL_TRANSACTION = 510;
     constexpr int32_t OFFSET = 4;
     const std::u16string DMS_INTERFACE_TOKEN = u"OHOS.DistributedSchedule.IDistributedAbilityManager";
+    const std::u16string DMS_STUB_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
+    const std::string TAG = "ContinuationFuzz";
 }
 
 uint32_t Convert2Uint32(const uint8_t* ptr)
@@ -43,19 +46,27 @@ uint32_t Convert2Uint32(const uint8_t* ptr)
 
 void FuzzUnregister(const uint8_t* rawData, size_t size)
 {
-    DmsMockPermission::MockPermission();
+    FuzzUtil::MockPermission();
     uint32_t code = Convert2Uint32(rawData);
     rawData = rawData + OFFSET;
     size = size - OFFSET;
     MessageParcel data;
-    data.WriteInterfaceToken(DMS_INTERFACE_TOKEN);
+    data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     data.WriteBuffer(rawData, size);
     data.RewindRead(0);
     MessageParcel reply;
     MessageOption option;
-    std::shared_ptr<DistributedAbilityManagerService> dtbAbilityMgr(
-        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true));
-    dtbAbilityMgr->OnRemoteRequest(code % MAX_CALL_TRANSACTION, data, reply, option);
+    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (systemAbilityMgr == nullptr) {
+        HILOGE("system ability manager is nullptr.");
+        return;
+    }
+    auto remoteObj = systemAbilityMgr->GetSystemAbility(DISTRIBUTED_SCHED_SA_ID);
+    if (remoteObj == nullptr) {
+        HILOGE("failed to get form manager service");
+        return;
+    }
+    remoteObj->SendRequest(code % MAX_CALL_TRANSACTION, data, reply, option);
 }
 }
 }
