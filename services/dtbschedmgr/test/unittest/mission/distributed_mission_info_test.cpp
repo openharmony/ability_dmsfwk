@@ -18,6 +18,7 @@
 #define private public
 #include "mission/distributed_mission_info.h"
 #undef private
+#include "mission/mission_constant.h"
 #include "parcel_helper.h"
 #include "test_log.h"
 
@@ -193,7 +194,7 @@ HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel003, Test
 
 /**
  * @tc.name: testReadDstbMissionInfosFromParcel004
- * @tc.desc: test ReadDstbMissionInfosFromParcel when missionInfos.max_size() < size
+ * @tc.desc: test ReadDstbMissionInfosFromParcel when size > GET_MAX_MISSIONS
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
@@ -204,7 +205,7 @@ HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel004, Test
     Parcel parcel;
     std::vector<DstbMissionInfo> missionInfos;
     parcel.WriteInt32(TEST_PARCEL_WRITE_VALUE);
-    parcel.WriteInt32(missionInfos.max_size() + 1);
+    parcel.WriteInt32(Constants::Mission::GET_MAX_MISSIONS + 1);
     bool ret = dstbMissionInfo.ReadDstbMissionInfosFromParcel(parcel, missionInfos);
     EXPECT_FALSE(ret);
     DTEST_LOG << "DistributedMissionInfoTest testReadDstbMissionInfosFromParcel004 end" << std::endl;
@@ -212,7 +213,7 @@ HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel004, Test
 
 /**
  * @tc.name: testReadDstbMissionInfosFromParcel005
- * @tc.desc: test ReadDstbMissionInfosFromParcel when size = missionInfos.max_size() - 1
+ * @tc.desc: test ReadDstbMissionInfosFromParcel when size = GET_MAX_MISSIONS - 1
  * @tc.type: FUNC
  * @tc.require: I5O2P9
  */
@@ -223,7 +224,7 @@ HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel005, Test
     Parcel parcel;
     std::vector<DstbMissionInfo> missionInfos;
     parcel.WriteInt32(TEST_PARCEL_WRITE_VALUE);
-    parcel.WriteInt32(missionInfos.max_size() - 1);
+    parcel.WriteInt32(Constants::Mission::GET_MAX_MISSIONS - 1);
     bool ret = dstbMissionInfo.ReadDstbMissionInfosFromParcel(parcel, missionInfos);
     EXPECT_FALSE(ret);
     DTEST_LOG << "DistributedMissionInfoTest testReadDstbMissionInfosFromParcel005 end" << std::endl;
