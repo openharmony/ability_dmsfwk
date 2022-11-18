@@ -13,13 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_PERMISSION_H
-#define MOCK_PERMISSION_H
+#ifndef DMS_DEVICE_INFO_TEST_H
+#define DMS_DEVICE_INFO_TEST_H
+
+#include "gtest/gtest.h"
 
 namespace OHOS {
-class DmsMockPermission {
+namespace DistributedSchedule {
+class DmsDeviceInfoTest : public testing::Test {
 public:
-    static void MockPermission();
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
 };
-} // namespace OHOS
-#endif // SAMGR_SERVICES_SAMGR_MOCK_PERMISSION_H
+}
+}
+#endif /* DMS_DEVICE_INFO_TEST_H */
+

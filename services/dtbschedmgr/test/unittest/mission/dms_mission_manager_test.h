@@ -34,6 +34,7 @@ protected:
     std::string localDeviceId_;
     std::u16string u16localDeviceId_;
     sptr<IDistributedSched> proxy_;
+    std::set<std::string> remoteSyncDeviceSet_;
     sptr<IDistributedSched> GetDms();
 
     class DeviceInitCallBack : public OHOS::DistributedHardware::DmInitCallback {

@@ -17,6 +17,7 @@
 #include "distributed_sched_util.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "mock_distributed_sched.h"
+#include "mock_remote_stub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -32,6 +33,7 @@ const std::u16string MOCK_DEVICE_ID = u"MOCK_DEVICE_ID";
 constexpr int32_t MOCK_SESSION_ID = 123;
 constexpr int32_t MOCK_TASK_ID = 456;
 const string LOCAL_DEVICE_ID = "192.168.43.100";
+constexpr int32_t REQUEST_CODE_ERR = 305;
 }
 
 void DSchedContinuationTest::SetUpTestCase()
@@ -481,6 +483,23 @@ HWTEST_F(DSchedContinuationTest, PushAbilityToken_004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PushAbilityToken_005
+ * @tc.desc: AbilityToken is exist.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, PushAbilityToken_005, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest PushAbilityToken_005 start" << std::endl;
+    dschedContinuation_->Init(nullptr);
+    auto sessionId = 1;
+    bool ret = dschedContinuation_->PushAbilityToken(sessionId, GetDSchedService());
+    ret = dschedContinuation_->PushAbilityToken(sessionId, GetDSchedService());
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DSchedContinuationTest PushAbilityToken_005 end" << std::endl;
+}
+
+/**
  * @tc.name: PopAbilityToken_001
  * @tc.desc: input invalid params.
  * @tc.type: FUNC
@@ -538,6 +557,157 @@ HWTEST_F(DSchedContinuationTest, PopAbilityToken_003, TestSize.Level1)
     abilityToken = dschedContinuation_->PopAbilityToken(sessionId);
     EXPECT_TRUE(abilityToken == nullptr);
     DTEST_LOG << "DSchedContinuationTest PopAbilityToken_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: PopAbilityToken_004
+ * @tc.desc: pop abilityToken success.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, PopAbilityToken_004, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest PopAbilityToken_004 start" << std::endl;
+    dschedContinuation_->continuationHandler_ = nullptr;
+
+    int32_t sessionId = PushAbilityToken();
+    sptr<IRemoteObject> abilityToken = dschedContinuation_->PopAbilityToken(sessionId);
+    EXPECT_TRUE(abilityToken != nullptr);
+    DTEST_LOG << "DSchedContinuationTest PopAbilityToken_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: GenerateSessionId_001
+ * @tc.desc: test GenerateSessionId when currSessionId is less than zero.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, GenerateSessionId_001, TestSize.Level4)
+{
+    DTEST_LOG << "DSchedContinuationTest GenerateSessionId_001 start" << std::endl;
+    int32_t sessionId =  dschedContinuation_->currSessionId_;
+    dschedContinuation_->currSessionId_ = -100;
+    dschedContinuation_->GenerateSessionId();
+    EXPECT_EQ(dschedContinuation_->currSessionId_, 1);
+    dschedContinuation_->currSessionId_ = sessionId;
+    DTEST_LOG << "DSchedContinuationTest GenerateSessionId_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetTimeOut_001
+ * @tc.desc: test SetTimeOut.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, SetTimeOut_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest SetTimeOut_001 start" << std::endl;
+    dschedContinuation_->Init(nullptr);
+
+    int32_t missionId = 0;
+    int32_t timeout = 1000;
+    dschedContinuation_->SetTimeOut(missionId, timeout);
+    EXPECT_NE(dschedContinuation_->continuationHandler_, nullptr);
+    DTEST_LOG << "DSchedContinuationTest SetTimeOut_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: RemoveTimeOut_001
+ * @tc.desc: test RemoveTimeOut.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, RemoveTimeOut_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest RemoveTimeOut_001 start" << std::endl;
+    dschedContinuation_->Init(nullptr);
+
+    int32_t missionId = 0;
+    int32_t timeout = 1000;
+    dschedContinuation_->SetTimeOut(missionId, timeout);
+    EXPECT_NE(dschedContinuation_->continuationHandler_, nullptr);
+    DTEST_LOG << "DSchedContinuationTest RemoveTimeOut_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetTargetDevice_001
+ * @tc.desc: test GetTargetDevice.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, GetTargetDevice_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest GetTargetDevice_001 start" << std::endl;
+    dschedContinuation_->Init(nullptr);
+
+    int32_t missionId = 0;
+    std::string mockDevice = "mockDevice";
+    dschedContinuation_->continuationDevices_[missionId] = mockDevice;
+    std::string result = dschedContinuation_->GetTargetDevice(missionId);
+    EXPECT_EQ(result, mockDevice);
+    DTEST_LOG << "DSchedContinuationTest GetTargetDevice_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PushCallback_001
+ * @tc.desc: test PushCallback when callback is nullptr.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, PushCallback_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest PushCallback_001 start" << std::endl;
+    dschedContinuation_->Init(nullptr);
+
+    int32_t missionId = 0;
+    const sptr<IRemoteObject> callback = nullptr;
+    std::string deviceId = "";
+    bool isFreeInstall = true;
+    bool result = dschedContinuation_->PushCallback(missionId, callback, deviceId, isFreeInstall);
+    EXPECT_EQ(result, false);
+    DTEST_LOG << "DSchedContinuationTest PushCallback_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PushCallback_002
+ * @tc.desc: test PushCallback when callback is exist.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, PushCallback_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest PushCallback_002 start" << std::endl;
+    dschedContinuation_->Init(nullptr);
+
+    int32_t missionId = 0;
+    const sptr<IRemoteObject> callback = new MockRemoteStub();
+    std::string deviceId = "";
+    bool isFreeInstall = true;
+    dschedContinuation_->callbackMap_[missionId] = callback;
+    bool result = dschedContinuation_->PushCallback(missionId, callback, deviceId, isFreeInstall);
+    EXPECT_EQ(result, false);
+    DTEST_LOG << "DSchedContinuationTest PushCallback_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: PushCallback_003
+ * @tc.desc: test PushCallback when isFreeInstall is true.
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, PushCallback_003, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest PushCallback_003 start" << std::endl;
+    dschedContinuation_->Init(nullptr);
+
+    int32_t missionId = 0;
+    const sptr<IRemoteObject> callback = new MockRemoteStub();
+    std::string deviceId = "";
+    bool isFreeInstall = true;
+    dschedContinuation_->callbackMap_.clear();
+    bool result = dschedContinuation_->PushCallback(missionId, callback, deviceId, isFreeInstall);
+    EXPECT_EQ(result, true);
+    DTEST_LOG << "DSchedContinuationTest PushCallback_003 end" << std::endl;
 }
 
 /**
@@ -895,6 +1065,239 @@ HWTEST_F(DSchedContinuationTest, NotifyCompleteFreeInstallFromRemote_002, TestSi
     DistributedSchedService::GetInstance().NotifyCompleteFreeInstallFromRemote(MOCK_TASK_ID, 0);
     EXPECT_TRUE(!freeInstallTimeoutFlag_);
     DTEST_LOG << "DSchedContinuationTest NotifyCompleteFreeInstallFromRemote_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: IsFreeInstall_001
+ * @tc.desc: missionId is not exist.
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DSchedContinuationTest, IsFreeInstall_001, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest IsFreeInstall_001 start" << std::endl;
+    int32_t missionId = -1;
+    bool result = dschedContinuation_->IsFreeInstall(missionId);
+    EXPECT_EQ(result, false);
+    DTEST_LOG << "DSchedContinuationTest IsFreeInstall_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: IsFreeInstall_002
+ * @tc.desc: missionId is exist.
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DSchedContinuationTest, IsFreeInstall_002, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest IsFreeInstall_002 start" << std::endl;
+    int32_t missionId = 1;
+    dschedContinuation_->freeInstall_[missionId] = true;
+    bool result = dschedContinuation_->IsFreeInstall(missionId);
+    EXPECT_EQ(result, true);
+    DTEST_LOG << "DSchedContinuationTest IsFreeInstall_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: IsFreeInstall_003
+ * @tc.desc: missionId is exist.
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DSchedContinuationTest, IsFreeInstall_003, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest IsFreeInstall_003 start" << std::endl;
+    int32_t missionId = 1;
+    dschedContinuation_->freeInstall_[missionId] = false;
+    bool result = dschedContinuation_->IsFreeInstall(missionId);
+    EXPECT_EQ(result, false);
+    DTEST_LOG << "DSchedContinuationTest IsFreeInstall_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: PopCallback_001
+ * @tc.desc: missionId is not exist in callbackMap_.
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DSchedContinuationTest, PopCallback_001, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest PopCallback_001 start" << std::endl;
+    int32_t missionId = -1;
+    dschedContinuation_->callbackMap_.erase(missionId);
+    sptr<IRemoteObject> result = dschedContinuation_->PopCallback(missionId);
+    EXPECT_EQ(result, nullptr);
+    DTEST_LOG << "DSchedContinuationTest PopCallback_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PopCallback_002
+ * @tc.desc: missionId is not exist in continuationDevices_.
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DSchedContinuationTest, PopCallback_002, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest PopCallback_002 start" << std::endl;
+    int32_t missionId = -1;
+    dschedContinuation_->callbackMap_[missionId] = GetDSchedService();
+    dschedContinuation_->continuationDevices_.erase(missionId);
+    sptr<IRemoteObject> result = dschedContinuation_->PopCallback(missionId);
+    EXPECT_NE(result, nullptr);
+    DTEST_LOG << "DSchedContinuationTest PopCallback_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: PopCallback_003
+ * @tc.desc: missionId is not exist in freeInstall_.
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DSchedContinuationTest, PopCallback_003, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest PopCallback_003 start" << std::endl;
+    int32_t missionId = -1;
+    dschedContinuation_->callbackMap_[missionId] = GetDSchedService();
+    dschedContinuation_->continuationDevices_[missionId] = "mockDevices";
+    dschedContinuation_->freeInstall_.erase(missionId);
+    sptr<IRemoteObject> result = dschedContinuation_->PopCallback(missionId);
+    EXPECT_NE(result, nullptr);
+    DTEST_LOG << "DSchedContinuationTest PopCallback_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: PopCallback_004
+ * @tc.desc: missionId is exist.
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DSchedContinuationTest, PopCallback_004, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest PopCallback_004 start" << std::endl;
+    int32_t missionId = -1;
+    dschedContinuation_->callbackMap_[missionId] = GetDSchedService();
+    dschedContinuation_->continuationDevices_[missionId] = "mockDevices";
+    dschedContinuation_->freeInstall_[missionId] = true;
+    sptr<IRemoteObject> result = dschedContinuation_->PopCallback(missionId);
+    EXPECT_NE(result, nullptr);
+    DTEST_LOG << "DSchedContinuationTest PopCallback_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyMissionCenterResult_001
+ * @tc.desc: missionId is not exist in callbackMap_.
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DSchedContinuationTest, NotifyMissionCenterResult_001, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest NotifyMissionCenterResult_001 start" << std::endl;
+    int32_t missionId = -1;
+    int32_t resultCode = 0;
+    dschedContinuation_->callbackMap_[missionId] = nullptr;
+    int32_t result = dschedContinuation_->NotifyMissionCenterResult(missionId, resultCode);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedContinuationTest NotifyMissionCenterResult_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyMissionCenterResult_002
+ * @tc.desc: missionId is exist.
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DSchedContinuationTest, NotifyMissionCenterResult_002, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest NotifyMissionCenterResult_002 start" << std::endl;
+    int32_t missionId = -1;
+    int32_t resultCode = 0;
+    dschedContinuation_->callbackMap_[missionId] = GetDSchedService();
+    dschedContinuation_->NotifyMissionCenterResult(missionId, resultCode);
+    EXPECT_EQ(dschedContinuation_->callbackMap_.size(), 0);
+    DTEST_LOG << "DSchedContinuationTest NotifyMissionCenterResult_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallContinueMission001
+ * @tc.desc: call dms proxy ContinueMission
+ * @tc.type: FUNC
+ * @tc.require: I5X9O4
+ */
+HWTEST_F(DSchedContinuationTest, ProxyCallContinueMission001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallContinueMission001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    std::string srcDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId);
+    WantParams wantParams;
+    int32_t ret = proxy->ContinueMission(srcDeviceId, "MockdevId", 0, GetDSchedService(), wantParams);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallContinueMission001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallContinueMission002
+ * @tc.desc: call dms proxy ContinueMission
+ * @tc.type: FUNC
+ * @tc.require: I5X9O4
+ */
+HWTEST_F(DSchedContinuationTest, ProxyCallContinueMission002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallContinueMission002 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    std::string srcDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId);
+    WantParams wantParams;
+    int32_t ret = proxy->ContinueMission(srcDeviceId, "MockdevId", 0, nullptr, wantParams);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallContinueMission002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallStartContinuation001
+ * @tc.desc: call dms proxy StartContinuation
+ * @tc.type: FUNC
+ * @tc.require: I5X9O4
+ */
+HWTEST_F(DSchedContinuationTest, ProxyCallStartContinuation001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallStartContinuation001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    OHOS::AAFwk::Want want;
+    want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
+    int32_t ret = proxy->StartContinuation(want, 0, 0, 0, 0);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallStartContinuation001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallNotifyContinuationResultFromRemote001
+ * @tc.desc: call dms proxy NotifyContinuationResultFromRemote
+ * @tc.type: FUNC
+ * @tc.require: I5X9O4
+ */
+HWTEST_F(DSchedContinuationTest, ProxyCallNotifyContinuationResultFromRemote001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallNotifyContinuationResultFromRemote001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    std::string srcDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId);
+    proxy->NotifyCompleteContinuation(Str8ToStr16(srcDeviceId), 0, true);
+    int32_t ret = proxy->NotifyContinuationResultFromRemote(0, true);
+    EXPECT_EQ(ret, REQUEST_CODE_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallNotifyContinuationResultFromRemote001 end" << std::endl;
 }
 } // DistributedSchedule
 } // namespace OHOS

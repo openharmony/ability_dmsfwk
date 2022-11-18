@@ -129,7 +129,10 @@ ohos_unittest("distributedschedsvrtest") {
   module_out_path = module_output_path
 
   sources = [
+    "unittest/distributed_sched_adapter_test.cpp",
+    "unittest/distributed_sched_dumper_test.cpp",
     "unittest/distributed_sched_service_test.cpp",
+    "unittest/distributed_sched_stub_test.cpp",
     "unittest/dms_callback_task_test.cpp",
     "unittest/dms_token_callback_test.cpp",
     "unittest/mock_distributed_sched.cpp",
@@ -268,6 +271,7 @@ ohos_unittest("dschedmissionmanagertest") {
     "unittest/mission/distributed_data_storage_test.cpp",
     "unittest/mission/distributed_mission_info_test.cpp",
     "unittest/mission/dms_mission_manager_test.cpp",
+    "unittest/mission/mission_info_converter_test.cpp",
     "unittest/mission/snapshot_test.cpp",
   ]
   sources += dtbschedmgr_sources

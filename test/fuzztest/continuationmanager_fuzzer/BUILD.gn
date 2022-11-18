@@ -75,7 +75,7 @@ ohos_fuzztest("ContinuationManagerFuzzTest") {
 
   sources = [
     "continuationmanager_fuzzer.cpp",
-    "mock_permission.cpp",
+    "fuzz_util.cpp",
   ]
 
   sources += dtbabilitymgr_sources

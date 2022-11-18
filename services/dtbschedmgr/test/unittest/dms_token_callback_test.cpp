@@ -90,6 +90,29 @@ HWTEST_F(DmsTokenCallbackTest, SendResultTest_002, TestSize.Level3)
 }
 
 /**
+ * @tc.name: SendResultTest_003
+ * @tc.desc: call SendResult with local device id
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DmsTokenCallbackTest, SendResultTest_003, TestSize.Level3)
+{
+    DTEST_LOG << "DmsTokenCallbackTest SendResultTest_003 begin" << std::endl;
+    AAFwk::Want want;
+    string localDeviceId;
+    dmsTokenCallback_->GetLocalDeviceId(localDeviceId);
+    want.SetParam("dmsSrcNetworkId", localDeviceId);
+    int32_t callerUid = 0;
+    int32_t requestCode = 0;
+    uint32_t accessToken = 0;
+    int32_t resultCode = 0;
+    DistributedSchedUtil::MockProcess(FOUNDATION_PROCESS_NAME);
+    int32_t result = dmsTokenCallback_->SendResult(want, callerUid, requestCode, accessToken, resultCode);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DmsTokenCallbackTest SendResultTest_003 end" << std::endl;
+}
+
+/**
  * @tc.name: CheckDeviceIdTest_001
  * @tc.desc: call CheckDeviceId with empty deviceId
  * @tc.type: FUNC

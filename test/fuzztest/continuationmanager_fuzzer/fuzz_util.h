@@ -13,29 +13,19 @@
  * limitations under the License.
  */
 
-#include "mock_permission.h"
+#ifndef MOCK_PERMISSION_H
+#define MOCK_PERMISSION_H
 
-#include "nativetoken_kit.h"
-#include "token_setproc.h"
+#include "iservice_registry.h"
 
 namespace OHOS {
-void DmsMockPermission::MockPermission()
-{
-    static const char *PERMS[] = {
-        "ohos.permission.DISTRIBUTED_DATASYNC"
-    };
-    uint64_t tokenId;
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = 1,
-        .aclsNum = 0,
-        .dcaps = nullptr,
-        .perms = PERMS,
-        .acls = nullptr,
-        .processName = "foundation",
-        .aplStr = "system_core",
-    };
-    tokenId = GetAccessTokenId(&infoInstance);
-    SetSelfTokenID(tokenId);
+namespace DistributedSchedule {
+class FuzzUtil {
+public:
+    static void MockPermission();
+    static void MockProcessAndPermission(const char* processName,
+        const char *perms[], int32_t permsNum);
+};
 }
-}
+} // namespace OHOS
+#endif // SAMGR_SERVICES_SAMGR_MOCK_PERMISSION_H
