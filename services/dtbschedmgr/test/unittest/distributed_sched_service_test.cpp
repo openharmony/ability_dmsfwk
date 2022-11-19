@@ -1044,6 +1044,33 @@ HWTEST_F(DistributedSchedServiceTest, StartContinuation_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StartContinuation_002
+ * @tc.desc: call StartContinuation
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceTest, StartContinuation_002, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_002 start" << std::endl;
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    int32_t flags = Want::FLAG_ABILITY_CONTINUATION;
+    want.SetElement(element);
+    want.SetFlags(flags);
+    int32_t missionId = MISSION_ID;
+    int32_t callerUid = 0;
+    int32_t status = 1;
+    uint32_t accessToken = 0;
+    int32_t ret = DistributedSchedService::GetInstance().StartContinuation(
+        want, missionId, callerUid, status, accessToken);
+    EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), ret);
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_002 end" << std::endl;
+}
+
+/**
  * @tc.name: NotifyCompleteContinuation_001
  * @tc.desc: call NotifyCompleteContinuation
  * @tc.type: FUNC
@@ -1072,6 +1099,37 @@ HWTEST_F(DistributedSchedServiceTest, NotifyContinuationCallbackResult_001, Test
     DistributedSchedService::GetInstance().NotifyContinuationCallbackResult(missionId, isSuccess);
     DTEST_LOG << "DSchedContinuationTest NotifyContinuationCallbackResult_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: NotifyContinuationCallbackResult_002
+ * @tc.desc: call NotifyContinuationCallbackResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceTest, NotifyContinuationCallbackResult_002, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest NotifyContinuationCallbackResult_002 start" << std::endl;
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    int32_t missionId = MISSION_ID;
+    bool resultCode = ERR_OK;
+    DistributedSchedService::GetInstance().NotifyContinuationCallbackResult(missionId, resultCode);
+    DTEST_LOG << "DSchedContinuationTest NotifyContinuationCallbackResult_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetFormMgrProxy_001
+ * @tc.desc: call GetFormMgrProxy
+ * @tc.type: FUNC
+ */
+#ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
+HWTEST_F(DistributedSchedServiceTest, GetFormMgrProxy_001, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest GetFormMgrProxy_001 start" << std::endl;
+    DistributedSchedService::GetInstance().GetFormMgrProxy();
+    DTEST_LOG << "DSchedContinuationTest GetFormMgrProxy_001 end" << std::endl;
+}
+#endif
 
 /**
  * @tc.name: StartAbilityFromRemote_007
