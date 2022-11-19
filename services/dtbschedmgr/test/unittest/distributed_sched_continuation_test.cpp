@@ -16,6 +16,7 @@
 #include "distributed_sched_continuation_test.h"
 #include "distributed_sched_util.h"
 #include "dtbschedmgr_device_info_storage.h"
+#include "ipc_skeleton.h"
 #include "mock_distributed_sched.h"
 #include "mock_remote_stub.h"
 
@@ -162,6 +163,62 @@ HWTEST_F(DSchedContinuationTest, StartContinuation_002, TestSize.Level1)
     int32_t ret = StartContinuation(0, Want::FLAG_ABILITY_CONTINUATION);
     EXPECT_TRUE(ret != ERR_OK);
     DTEST_LOG << "DSchedContinuationTest StartContinuation003 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartContinuation_003
+ * @tc.desc: call StartContinuation
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinuationTest, StartContinuation_003, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_003 start" << std::endl;
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    int32_t flags = Want::FLAG_ABILITY_CONTINUATION;
+    std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, flags);
+    int32_t missionId = 0;
+    auto callback = GetDSchedService();
+    std::string deviceId = "123456";
+    DistributedSchedService::GetInstance().dschedContinuation_->PushCallback(missionId, callback, deviceId, false);
+    int32_t status = ERR_OK;
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    int32_t ret = DistributedSchedService::GetInstance().StartContinuation(*spWant,
+        missionId, uid, status, accessToken);
+    EXPECT_TRUE(ret != ERR_OK);
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartContinuation_004
+ * @tc.desc: call StartContinuation
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinuationTest, StartContinuation_004, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_004 start" << std::endl;
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    int32_t flags = Want::FLAG_ABILITY_CONTINUATION;
+    std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, flags);
+    int32_t missionId = 0;
+    auto callback = GetDSchedService();
+    std::string deviceId = "123456";
+    DistributedSchedService::GetInstance().dschedContinuation_->PushCallback(missionId, callback, deviceId, true);
+    int32_t status = ERR_OK;
+    int32_t uid = IPCSkeleton::GetCallingUid();
+    int32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    int32_t ret = DistributedSchedService::GetInstance().StartContinuation(*spWant,
+        missionId, uid, status, accessToken);
+    EXPECT_TRUE(ret != ERR_OK);
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_004 end" << std::endl;
 }
 
 /**
