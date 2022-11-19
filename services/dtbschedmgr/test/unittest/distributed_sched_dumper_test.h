@@ -13,29 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_DISTRIBUTED_ABILITY_MANAGER_SERVICE_TEST_H
-#define OHOS_DISTRIBUTED_ABILITY_MANAGER_SERVICE_TEST_H
+#ifndef DISTRIBUTED_SCHED_DUMPER_TEST_H
+#define DISTRIBUTED_SCHED_DUMPER_TEST_H
 
-#include <condition_variable>
-#include <shared_mutex>
-#define private public
-#include "distributed_ability_manager_service.h"
-#undef private
 #include "gtest/gtest.h"
+
+#define private public
+#include "distributed_sched_dumper.h"
+#undef private
 
 namespace OHOS {
 namespace DistributedSchedule {
-class DistributedAbilityManagerServiceTest : public testing::Test {
+class DistributedSchedDumperTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    static bool isCaseDone_;
-    static std::mutex caseDoneLock_;
-    static std::condition_variable caseDoneCondition_;
-    static sptr<DistributedAbilityManagerService>  dtbabilitymgrService_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
-#endif // OHOS_DISTRIBUTED_ABILITY_MANAGER_SERVICE_TEST_H
+#endif // DISTRIBUTED_SCHED_DUMPER_TEST_H

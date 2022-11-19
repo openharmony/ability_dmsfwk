@@ -567,9 +567,9 @@ void DistributedSchedService::ProcessFormMgrDied(const wptr<IRemoteObject>& remo
 }
 #endif
 
-void DistributedSchedService::NotifyContinuationCallbackResult(int32_t missionId, int32_t isSuccess)
+void DistributedSchedService::NotifyContinuationCallbackResult(int32_t missionId, int32_t resultCode)
 {
-    HILOGD("Continuation result is: %{public}d", isSuccess);
+    HILOGD("Continuation result is: %{public}d", resultCode);
 
     if (dschedContinuation_ == nullptr) {
         HILOGE("continuation object null!");
@@ -578,13 +578,13 @@ void DistributedSchedService::NotifyContinuationCallbackResult(int32_t missionId
 
     int32_t result = 0;
     if (dschedContinuation_->IsInContinuationProgress(missionId)) {
-        if (!isSuccess) {
+        if (resultCode == ERR_OK) {
             result = AbilityManagerClient::GetInstance()->CleanMission(missionId);
             HILOGD("clean mission result:%{public}d", result);
         }
-        result = dschedContinuation_->NotifyMissionCenterResult(missionId, isSuccess);
+        result = dschedContinuation_->NotifyMissionCenterResult(missionId, resultCode);
     } else {
-        result = AbilityManagerClient::GetInstance()->NotifyContinuationResult(missionId, isSuccess);
+        result = AbilityManagerClient::GetInstance()->NotifyContinuationResult(missionId, resultCode);
         dschedContinuation_->RemoveTimeOut(missionId);
     }
     HILOGD("NotifyContinuationCallbackResult result:%{public}d", result);

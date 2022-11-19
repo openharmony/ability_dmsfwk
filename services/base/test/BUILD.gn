@@ -20,9 +20,7 @@ module_output_path = "dmsfwk/distributed_base_svr_test"
 
 distributed_service = "//foundation/ability/dmsfwk/services"
 
-base_configs = [
-  "${distributed_service}/dtbabilitymgr:distributed_ability_manager_config",
-]
+base_configs = [ "${distributed_service}/base:distributed_sched_config" ]
 
 config("test_config") {
   visibility = [ ":*" ]
@@ -49,14 +47,20 @@ base_public_deps = [
 
 ohos_unittest("dmsbasetest") {
   module_out_path = module_output_path
-  sources = [ "unittest/dms_network_adapter_test.cpp" ]
+  sources = [
+    "${distributed_service}/base/src/adapter/dnetwork_adapter.cpp",
+    "${distributed_service}/base/src/deviceManager/dms_device_info.cpp",
+    "${distributed_service}/base/src/distributed_device_node_listener.cpp",
+    "${distributed_service}/base/src/dtbschedmgr_device_info_storage.cpp",
+    "unittest/deviceManager/dms_device_info_test.cpp",
+    "unittest/dms_network_adapter_test.cpp",
+    "unittest/dtbschedmgr_device_info_storage_test.cpp",
+  ]
   configs = [
     ":test_config",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
   ]
   configs += base_configs
-  deps =
-      [ "${distributed_service}/dtbabilitymgr:distributed_ability_manager_svr" ]
   external_deps = base_external_deps
   public_deps = base_public_deps
   part_name = "dmsfwk"

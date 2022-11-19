@@ -16,9 +16,9 @@
 #ifndef DISTRIBUTED_SCHED_CONTINUATION_TEST_H
 #define DISTRIBUTED_SCHED_CONTINUATION_TEST_H
 
-#include "distributed_sched_continuation.h"
 #include "distributed_sched_proxy.h"
 #define private public
+#include "distributed_sched_continuation.h"
 #include "distributed_sched_service.h"
 #undef private
 #include "gtest/gtest.h"

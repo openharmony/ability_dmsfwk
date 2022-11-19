@@ -21,6 +21,7 @@
 #include "distributed_sched_service.h"
 #include "distributed_sched_util.h"
 #include "dtbschedmgr_device_info_storage.h"
+#include "dtbschedmgr_log.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -37,6 +38,7 @@ using namespace OHOS::DistributedHardware;
 
 namespace {
 constexpr int32_t STDOUT_FD = 1;
+constexpr int32_t REQUEST_CODE_ERR = 305;
 }
 
 class AbilityConnectCallbackTest : public AAFwk::AbilityConnectionStub {
@@ -81,6 +83,7 @@ public:
 
     void AddConnectCount(int32_t uid) const;
     void DecreaseConnectCount(int32_t uid) const;
+    sptr<IDistributedSched> GetDms();
 
     class DeviceInitCallBack : public DmInitCallback {
         void OnRemoteDied() override;
@@ -204,6 +207,22 @@ void DistributedSchedConnectTest::DecreaseConnectCount(int32_t uid) const
     }
 
     DistributedSchedService::GetInstance().DecreaseConnectLocked(uid);
+}
+
+sptr<IDistributedSched> DistributedSchedConnectTest::GetDms()
+{
+    auto sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        DTEST_LOG << "DistributedSchedConnectTest sm is nullptr" << std::endl;
+        return nullptr;
+    }
+    auto distributedObject = sm->GetSystemAbility(DISTRIBUTED_SCHED_SA_ID);
+    if (distributedObject == nullptr) {
+        DTEST_LOG << "distributedObject sm is nullptr" << std::endl;
+        return nullptr;
+    }
+    EXPECT_TRUE(distributedObject != nullptr);
+    return iface_cast<IDistributedSched>(distributedObject);
 }
 
 /**
@@ -1032,6 +1051,170 @@ HWTEST_F(DistributedSchedConnectTest, NotifyProcessDied001, TestSize.Level4)
     DistributedSchedService::GetInstance().NotifyProcessDied("", callerInfo, targetComponent);
     DistributedSchedService::GetInstance().NotifyProcessDied("123_remote_device_id", callerInfo, targetComponent);
     DTEST_LOG << "DistributedSchedConnectTest NotifyProcessDied001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallDisconnectRemoteAbility001
+ * @tc.desc: call dms proxy DisconnectRemoteAbility
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ProxyCallDisconnectRemoteAbility001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallDisconnectRemoteAbility001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    int32_t ret = proxy->DisconnectRemoteAbility(nullptr, 0, 0);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallDisconnectRemoteAbility001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallDisconnectRemoteAbility002
+ * @tc.desc: call dms proxy DisconnectRemoteAbility
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ProxyCallDisconnectRemoteAbility002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallDisconnectRemoteAbility002 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    int32_t ret = proxy->DisconnectRemoteAbility(connect, 0, 0);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallDisconnectRemoteAbility002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallConnectRemoteAbility001
+ * @tc.desc: call dms proxy ConnectRemoteAbility
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ProxyCallConnectRemoteAbility001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectRemoteAbility001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    OHOS::AAFwk::Want want;
+    want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    int32_t ret = proxy->ConnectRemoteAbility(want, connect, 0, 0, 0);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectRemoteAbility001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallConnectRemoteAbility002
+ * @tc.desc: call dms proxy ConnectRemoteAbility
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ProxyCallConnectRemoteAbility002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectRemoteAbility002 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    OHOS::AAFwk::Want want;
+    want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
+    int32_t ret = proxy->ConnectRemoteAbility(want, nullptr, 0, 0, 0);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectRemoteAbility002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallConnectAbilityFromRemote001
+ * @tc.desc: call dms proxy ConnectAbilityFromRemote
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ProxyCallConnectAbilityFromRemote001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectAbilityFromRemote001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    OHOS::AAFwk::Want want;
+    want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
+    AppExecFwk::AbilityInfo abilityInfo;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    CallerInfo callerInfo;
+    IDistributedSched::AccountInfo accountInfo;
+    int32_t ret = proxy->ConnectAbilityFromRemote(want, abilityInfo,
+        connect, callerInfo, accountInfo);
+    EXPECT_EQ(ret, REQUEST_CODE_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectAbilityFromRemote001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallConnectAbilityFromRemote002
+ * @tc.desc: call dms proxy ConnectAbilityFromRemote
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ProxyCallConnectAbilityFromRemote002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectAbilityFromRemote002 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    OHOS::AAFwk::Want want;
+    want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
+    AppExecFwk::AbilityInfo abilityInfo;
+    CallerInfo callerInfo;
+    IDistributedSched::AccountInfo accountInfo;
+    int32_t ret = proxy->ConnectAbilityFromRemote(want, abilityInfo,
+        nullptr, callerInfo, accountInfo);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectAbilityFromRemote002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallDisconnectAbilityFromRemote001
+ * @tc.desc: call dms proxy DisconnectAbilityFromRemote
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ProxyCallDisconnectAbilityFromRemote001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallDisconnectAbilityFromRemote001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    int32_t ret = proxy->DisconnectAbilityFromRemote(connect, 0, "");
+    EXPECT_EQ(ret, REQUEST_CODE_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallDisconnectAbilityFromRemote001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProxyCallDisconnectAbilityFromRemote002
+ * @tc.desc: call dms proxy DisconnectAbilityFromRemote
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ProxyCallDisconnectAbilityFromRemote002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallDisconnectAbilityFromRemote002 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    int32_t ret = proxy->DisconnectAbilityFromRemote(nullptr, 0, "");
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    DTEST_LOG << "DistributedSchedServiceTest ProxyCallDisconnectAbilityFromRemote002 end" << std::endl;
 }
 }
 }
