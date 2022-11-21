@@ -16,7 +16,9 @@
 
 #define private public
 #define protected public
+#include "ability_connect_callback_interface.h"
 #include "ability_connect_callback_stub.h"
+#include "ability_connection_wrapper_stub.h"
 #include "device_manager.h"
 #include "distributed_sched_service.h"
 #include "distributed_sched_util.h"
@@ -25,6 +27,7 @@
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "parcel_helper.h"
 #include "system_ability_definition.h"
 #include "test_log.h"
 #undef private
@@ -32,13 +35,17 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
+using namespace AAFwk;
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::DistributedHardware;
 
 namespace {
+const std::string TAG = "DistributedSchedConnectTest";
+const std::u16string CONNECTION_CALLBACK_INTERFACE_TOKEN = u"ohos.abilityshell.DistributedConnection";
 constexpr int32_t STDOUT_FD = 1;
 constexpr int32_t REQUEST_CODE_ERR = 305;
+constexpr int32_t ERROR_CONNECT_CODE = 1000;
 }
 
 class AbilityConnectCallbackTest : public AAFwk::AbilityConnectionStub {
@@ -1525,6 +1532,198 @@ HWTEST_F(DistributedSchedConnectTest, RemoveCallerComponent001, TestSize.Level4)
     DistributedSchedService::GetInstance().SaveCallerComponent(want, connect, callerInfo);
     DistributedSchedService::GetInstance().RemoveCallerComponent(connect);
     DTEST_LOG << "DistributedSchedServiceTest RemoveCallerComponent001 end" << std::endl;
+}
+
+/**
+ * @tc.name: AbilityConnectionWrapperStub001
+ * @tc.desc: receive connect message
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub001 start" << std::endl;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect);
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    AppExecFwk::ElementName element;
+    PARCEL_WRITE_HELPER_NORET(data, Parcelable, &element);
+    PARCEL_WRITE_HELPER_NORET(data, RemoteObject, connect);
+    PARCEL_WRITE_HELPER_NORET(data, Int32, 1);
+    int32_t result = connectStub->OnRemoteRequest(IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub001 end" << std::endl;
+}
+
+/**
+ * @tc.name: AbilityConnectionWrapperStub002
+ * @tc.desc: receive oncall message
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub002 start" << std::endl;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    AppExecFwk::ElementName element;
+    PARCEL_WRITE_HELPER_NORET(data, Parcelable, &element);
+    PARCEL_WRITE_HELPER_NORET(data, RemoteObject, connect);
+    PARCEL_WRITE_HELPER_NORET(data, Int32, 1);
+    int32_t result = connectStub->OnRemoteRequest(IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub002 end" << std::endl;
+}
+
+/**
+ * @tc.name: AbilityConnectionWrapperStub003
+ * @tc.desc: receive disconnect message
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub003 start" << std::endl;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect);
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    AppExecFwk::ElementName element;
+    PARCEL_WRITE_HELPER_NORET(data, Parcelable, &element);
+    PARCEL_WRITE_HELPER_NORET(data, Int32, 1);
+    int32_t result = connectStub->OnRemoteRequest(IAbilityConnection::ON_ABILITY_DISCONNECT_DONE, data, reply, option);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub003 end" << std::endl;
+}
+
+/**
+ * @tc.name: AbilityConnectionWrapperStub004
+ * @tc.desc: receive oncall disconnect message
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub004, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub004 start" << std::endl;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    AppExecFwk::ElementName element;
+    PARCEL_WRITE_HELPER_NORET(data, Parcelable, &element);
+    PARCEL_WRITE_HELPER_NORET(data, Int32, 1);
+    int32_t result = connectStub->OnRemoteRequest(IAbilityConnection::ON_ABILITY_DISCONNECT_DONE, data, reply, option);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub004 end" << std::endl;
+}
+
+/**
+ * @tc.name: AbilityConnectionWrapperStub005
+ * @tc.desc: receive error connect message
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub005, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub005 start" << std::endl;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    // no interface token
+    AppExecFwk::ElementName element;
+    PARCEL_WRITE_HELPER_NORET(data, Parcelable, &element);
+    PARCEL_WRITE_HELPER_NORET(data, Int32, 1);
+    int32_t result = connectStub->OnRemoteRequest(IAbilityConnection::ON_ABILITY_DISCONNECT_DONE, data, reply, option);
+    EXPECT_EQ(result, ERR_INVALID_STATE);
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub005 end" << std::endl;
+}
+
+/**
+ * @tc.name: AbilityConnectionWrapperStub006
+ * @tc.desc: receive error connect message
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub006, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub006 start" << std::endl;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
+        return;
+    }
+    // no element
+    int32_t result = connectStub->OnRemoteRequest(IAbilityConnection::ON_ABILITY_DISCONNECT_DONE, data, reply, option);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub006 end" << std::endl;
+}
+
+/**
+ * @tc.name: AbilityConnectionWrapperStub007
+ * @tc.desc: receive disconnect message
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub007, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub007 start" << std::endl;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    AppExecFwk::ElementName element;
+    PARCEL_WRITE_HELPER_NORET(data, Parcelable, &element);
+    PARCEL_WRITE_HELPER_NORET(data, Int32, 1);
+    // using error code
+    int32_t result = connectStub->OnRemoteRequest(ERROR_CONNECT_CODE, data, reply, option);
+    EXPECT_NE(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub007 end" << std::endl;
+}
+
+/**
+ * @tc.name: AbilityConnectionWrapperStub008
+ * @tc.desc: receive error connect message
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub008, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub008 start" << std::endl;
+    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
+        return;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    // no remoteObject
+    AppExecFwk::ElementName element;
+    PARCEL_WRITE_HELPER_NORET(data, Parcelable, &element);
+    PARCEL_WRITE_HELPER_NORET(data, Int32, 1);
+    int32_t result = connectStub->OnRemoteRequest(IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
+    EXPECT_NE(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub008 end" << std::endl;
 }
 }
 }
