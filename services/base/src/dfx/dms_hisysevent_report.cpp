@@ -42,7 +42,7 @@ namespace {
 
 int DmsHiSysEventReport::ReportBehaviorEvent(const BehaviorEventParam& param)
 {
-    int result = HiSysEvent::Write(DOMAIN_NAME, param.eventName, HiSysEvent::EventType::BEHAVIOR,
+    int result = HiSysEventWrite(DOMAIN_NAME, param.eventName, HiSysEvent::EventType::BEHAVIOR,
         KEY_CALLING_TYPE, param.callingType,
         KEY_CALLING_UID, IPCSkeleton::GetCallingUid(),
         KEY_CALLING_PID, IPCSkeleton::GetCallingPid(),
@@ -58,7 +58,7 @@ int DmsHiSysEventReport::ReportBehaviorEvent(const BehaviorEventParam& param)
 
 int DmsHiSysEventReport::ReportFaultEvent(const std::string& eventName, const std::string& errorType)
 {
-    int result = HiSysEvent::Write(DOMAIN_NAME, eventName, HiSysEvent::EventType::FAULT,
+    int result = HiSysEventWrite(DOMAIN_NAME, eventName, HiSysEvent::EventType::FAULT,
         KEY_ERROR_TYPE, errorType);
     if (result != 0) {
         HILOGE("hisysevent report failed! ret %{public}d.", result);
