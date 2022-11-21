@@ -36,6 +36,9 @@ protected:
     sptr<IDistributedSched> proxy_;
     std::set<std::string> remoteSyncDeviceSet_;
     sptr<IDistributedSched> GetDms();
+    static bool isCaseDone_;
+    static std::mutex caseDoneLock_;
+    static std::condition_variable caseDoneCondition_;
 
     class DeviceInitCallBack : public OHOS::DistributedHardware::DmInitCallback {
         void OnRemoteDied() override;
