@@ -29,7 +29,7 @@ public:
 class MockRemoteStub : public IRemoteStub<MockRemoteInterface> {
 public:
     ~MockRemoteStub() = default;
-    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
         MessageOption& option) override
     {
         return 0;
