@@ -15,10 +15,14 @@
 
 #include "distributed_mission_info_test.h"
 #include <memory>
+#include "change_notification.h"
 #define private public
+#include "mission/distributed_data_change_listener.h"
 #include "mission/distributed_mission_info.h"
+#include "mission/mission_changed_notify.h"
 #undef private
 #include "mission/mission_constant.h"
+#include "mock_remote_stub.h"
 #include "parcel_helper.h"
 #include "test_log.h"
 
@@ -31,6 +35,9 @@ namespace {
 constexpr int32_t TEST_INVALID_VALUE = -1;
 constexpr int32_t TEST_PARCEL_WRITE_VALUE = 1;
 constexpr size_t TEST_PARCEL_WRITE_LEN = 5;
+const std::string TEST_DEVICE_ID = "test deviceId";
+const std::u16string TEST_DEVICEID = u"invalid deviceId";
+const std::u16string TEST_DEVICEID_TO_RETURN_FALSE = u"deviceId to return false";
 }
 void DistributedMissionInfoTest::SetUpTestCase()
 {
@@ -280,6 +287,23 @@ HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel007, Test
 HWTEST_F(DistributedMissionInfoTest, testWriteDstbMissionInfosToParcel001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testWriteDstbMissionInfosToParcel001 start" << std::endl;
+    /**
+     * @tc.steps: step1. test NotifyMissionsChanged when remoteObject is nullptr
+     */
+    sptr<IRemoteObject> remoteObject = nullptr;
+    MissionChangedNotify::NotifyMissionsChanged(remoteObject, TEST_DEVICEID);
+    /**
+     * @tc.steps: step2. test NotifyMissionsChanged when remoteObject is not nullptr
+     */
+    remoteObject = new MockRemoteStub();
+    MissionChangedNotify::NotifyMissionsChanged(remoteObject, TEST_DEVICEID);
+    /**
+     * @tc.steps: step3. test NotifyMissionsChanged when remoteObject return false
+     */
+    MissionChangedNotify::NotifyMissionsChanged(remoteObject, TEST_DEVICEID_TO_RETURN_FALSE);
+    /**
+     * @tc.steps: step4. test WriteDstbMissionInfosToParcel when missionInfos is empty
+     */
     DstbMissionInfo dstbMissionInfo;
     Parcel parcel;
     std::vector<DstbMissionInfo> missionInfos;
@@ -297,6 +321,24 @@ HWTEST_F(DistributedMissionInfoTest, testWriteDstbMissionInfosToParcel001, TestS
 HWTEST_F(DistributedMissionInfoTest, testWriteDstbMissionInfosToParcel002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testWriteDstbMissionInfosToParcel002 start" << std::endl;
+    int32_t missionId = 0;
+    /**
+     * @tc.steps: step1. test NotifySnapshot when remoteObject is nullptr
+     */
+    sptr<IRemoteObject> remoteObject = nullptr;
+    MissionChangedNotify::NotifySnapshot(remoteObject, TEST_DEVICEID, missionId);
+    /**
+     * @tc.steps: step2. test NotifySnapshot when remoteObject is not nullptr
+     */
+    remoteObject = new MockRemoteStub();
+    MissionChangedNotify::NotifySnapshot(remoteObject, TEST_DEVICEID, missionId);
+    /**
+     * @tc.steps: step3. test NotifySnapshot when remoteObject return false
+     */
+    MissionChangedNotify::NotifySnapshot(remoteObject, TEST_DEVICEID_TO_RETURN_FALSE, missionId);
+    /**
+     * @tc.steps: step4. test WriteDstbMissionInfosToParcel
+     */
     DstbMissionInfo dstbMissionInfo;
     Parcel parcel;
     std::vector<DstbMissionInfo> missionInfos;
@@ -314,6 +356,24 @@ HWTEST_F(DistributedMissionInfoTest, testWriteDstbMissionInfosToParcel002, TestS
  */
 HWTEST_F(DistributedMissionInfoTest, testToString001, TestSize.Level3)
 {
+    int32_t state = 0;
+    /**
+     * @tc.steps: step1. test NotifyNetDisconnect when remoteObject is nullptr
+     */
+    sptr<IRemoteObject> remoteObject = nullptr;
+    MissionChangedNotify::NotifyNetDisconnect(remoteObject, TEST_DEVICEID, state);
+    /**
+     * @tc.steps: step2. test NotifyNetDisconnect when remoteObject is not nullptr
+     */
+    remoteObject = new MockRemoteStub();
+    MissionChangedNotify::NotifyNetDisconnect(remoteObject, TEST_DEVICEID, state);
+    /**
+     * @tc.steps: step3. test NotifyNetDisconnect when remoteObject return false
+     */
+    MissionChangedNotify::NotifyNetDisconnect(remoteObject, TEST_DEVICEID_TO_RETURN_FALSE, state);
+    /**
+     * @tc.steps: step4. test ToString print a missionInfo.
+     */
     DstbMissionInfo dstbMissionInfo;
     auto ret = dstbMissionInfo.ToString();
     EXPECT_NE(ret, "");
@@ -328,6 +388,9 @@ HWTEST_F(DistributedMissionInfoTest, testToString001, TestSize.Level3)
 HWTEST_F(DistributedMissionInfoTest, testToString002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testToString002 start" << std::endl;
+    /**
+     * @tc.steps: step1. test ToString.
+     */
     DstbMissionInfo dstbMissionInfo;
     dstbMissionInfo.baseWant = std::make_shared<AAFwk::Want>();
     dstbMissionInfo.topAbility = std::make_shared<AppExecFwk::ElementName>();
@@ -335,6 +398,16 @@ HWTEST_F(DistributedMissionInfoTest, testToString002, TestSize.Level3)
     dstbMissionInfo.reservedAbility = std::make_shared<AppExecFwk::ElementName>();
     std::string ret = dstbMissionInfo.ToString();
     EXPECT_FALSE(ret.empty());
+    /**
+     * @tc.steps: step2. test OnChange when insertEntries is empty.
+     */
+    DistributedDataChangeListener distributedDataChangeListener;
+    std::vector<DistributedKv::Entry> insertEntries;
+    std::vector<DistributedKv::Entry> updateEntries;
+    std::vector<DistributedKv::Entry> deleteEntries;
+    DistributedKv::ChangeNotification changeNotification(std::move(insertEntries),
+        std::move(updateEntries), std::move(deleteEntries), TEST_DEVICE_ID, false);
+    distributedDataChangeListener.OnChange(changeNotification);
     DTEST_LOG << "DistributedMissionInfoTest testToString002 end" << std::endl;
 }
 } // DistributedSchedule
