@@ -1802,7 +1802,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_007, TestSize.Level3)
 }
 
 /**
- * @tc.name: OnRemoteRequest_006
+ * @tc.name: OnRemoteRequest_008
  * @tc.desc: test OnRemoteRequest when descriptor != remoteDescriptor.
  * @tc.type: FUNC
  * @tc.require: I5M4CD
@@ -1873,12 +1873,12 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_009, TestSize.Level3)
 }
 
 /**
- * @tc.name: OnRemoteRequest_0010
+ * @tc.name: OnRemoteRequest_010
  * @tc.desc: test OnRemoteRequest when ContinuationResult read from parcel failed.
  * @tc.type: FUNC
  * @tc.require: I621C1
  */
-HWTEST_F(ContinuationManagerTest, OnRemoteRequest_0010, TestSize.Level3)
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_010, TestSize.Level3)
 {
     sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
     AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
@@ -1896,7 +1896,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_0010, TestSize.Level3)
 
 /**
  * @tc.name: OnRemoteRequest_011
- * @tc.desc: test OnRemoteRequest when code = AppDeviceCallbackInterface::EVENT_DEVICE_CONNECT.
+ * @tc.desc: test OnRemoteRequest when code = AppDeviceCallbackInterface::EVENT_DEVICE_DISCONNECT.
  * @tc.type: FUNC
  * @tc.require: I621C1
  */
@@ -1915,12 +1915,12 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_011, TestSize.Level3)
 }
 
 /**
- * @tc.name: OnRemoteRequest_0012
+ * @tc.name: OnRemoteRequest_012
  * @tc.desc: test OnRemoteRequest when ContinuationResult read from parcel failed.
  * @tc.type: FUNC
  * @tc.require: I621C1
  */
-HWTEST_F(ContinuationManagerTest, OnRemoteRequest_0012, TestSize.Level3)
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_012, TestSize.Level3)
 {
     sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
     AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
