@@ -18,6 +18,9 @@
 #undef private
 #include "distributed_sched_stub_test.h"
 #include "distributed_sched_util.h"
+#define private public
+#include "mission/distributed_sched_mission_manager.h"
+#undef private
 #include "mock_distributed_sched.h"
 #include "mock_remote_stub.h"
 #include "parcel_helper.h"
@@ -38,6 +41,7 @@ const std::string EXTRO_INFO_JSON_KEY_ACCESS_TOKEN = "accessTokenID";
 const std::string EXTRO_INFO_JSON_KEY_REQUEST_CODE = "requestCode";
 const std::string CMPT_PARAM_FREEINSTALL_BUNDLENAMES = "ohos.extra.param.key.allowedBundles";
 constexpr const char* FOUNDATION_PROCESS_NAME = "foundation";
+constexpr int32_t MAX_WAIT_TIME = 5000;
 const char *PERMS[] = {
     "ohos.permission.DISTRIBUTED_DATASYNC"
 };
@@ -64,6 +68,46 @@ void DistributedSchedStubTest::SetUp()
     DTEST_LOG << "DistributedSchedStubTest::SetUp" << std::endl;
     distributedSchedStub_ = new DistributedSchedService();
     DistributedSchedUtil::MockProcessAndPermission(FOUNDATION_PROCESS_NAME, PERMS, 1);
+}
+
+void DistributedSchedStubTest::WaitHandlerTaskDone(const std::shared_ptr<AppExecFwk::EventHandler> &handler)
+{
+    DTEST_LOG << "DistributedSchedStubTest::WaitHandlerTaskDone" << std::endl;
+    // Wait until all asyn tasks are completed before exiting the test suite
+    isTaskDone_ = false;
+    auto taskDoneNotifyTask = [this]() {
+        std::lock_guard<std::mutex> autoLock(taskDoneLock_);
+        isTaskDone_ = true;
+        taskDoneCondition_.notify_all();
+    };
+    if (handler != nullptr) {
+        handler->PostTask(taskDoneNotifyTask);
+    }
+    std::unique_lock<std::mutex> lock(taskDoneLock_);
+    taskDoneCondition_.wait_for(lock, std::chrono::milliseconds(MAX_WAIT_TIME),
+        [&] () { return isTaskDone_; });
+}
+
+void DistributedSchedStubTest::CallerInfoMarshalling(const CallerInfo& callerInfo, MessageParcel& data)
+{
+    data.WriteInt32(callerInfo.uid);
+    data.WriteInt32(callerInfo.pid);
+    data.WriteInt32(callerInfo.callerType);
+    data.WriteString(callerInfo.sourceDeviceId);
+    data.WriteInt32(callerInfo.duid);
+    data.WriteString(callerInfo.callerAppId);
+    data.WriteInt32(callerInfo.dmsVersion);
+}
+
+void DistributedSchedStubTest::FreeInstallInfoMarshalling(const CallerInfo& callerInfo,
+    const DistributedSchedService::AccountInfo accountInfo, const int64_t taskId, MessageParcel& data)
+{
+    data.WriteInt32(callerInfo.uid);
+    data.WriteString(callerInfo.sourceDeviceId);
+    data.WriteInt32(accountInfo.accountType);
+    data.WriteStringVector(accountInfo.groupIdList);
+    data.WriteString(callerInfo.callerAppId);
+    data.WriteInt64(taskId);
 }
 
 /**
@@ -1078,7 +1122,7 @@ HWTEST_F(DistributedSchedStubTest, RegisterMissionListenerInner_002, TestSize.Le
 HWTEST_F(DistributedSchedStubTest, UnRegisterMissionListenerInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedStubTest UnRegisterMissionListenerInner_001 begin" << std::endl;
-    int32_t code = DistributedSchedStub::REGISTER_MISSION_LISTENER;
+    int32_t code = DistributedSchedStub::UNREGISTER_MISSION_LISTENER;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1098,7 +1142,7 @@ HWTEST_F(DistributedSchedStubTest, UnRegisterMissionListenerInner_001, TestSize.
 HWTEST_F(DistributedSchedStubTest, UnRegisterMissionListenerInner_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedStubTest UnRegisterMissionListenerInner_002 begin" << std::endl;
-    int32_t code = DistributedSchedStub::REGISTER_MISSION_LISTENER;
+    int32_t code = DistributedSchedStub::UNREGISTER_MISSION_LISTENER;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1136,6 +1180,26 @@ HWTEST_F(DistributedSchedStubTest, StartSyncMissionsFromRemoteInner_001, TestSiz
     int32_t result = distributedSchedStub_->StartSyncMissionsFromRemoteInner(data, reply);
     EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
     DTEST_LOG << "DistributedSchedStubTest StartSyncMissionsFromRemoteInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartSyncMissionsFromRemoteInner_002
+ * @tc.desc: check StartSyncMissionsFromRemoteInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, StartSyncMissionsFromRemoteInner_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedStubTest StartSyncMissionsFromRemoteInner_002 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    CallerInfo callerInfo;
+    CallerInfoMarshalling(callerInfo, data);
+
+    DistributedSchedMissionManager::GetInstance().Init();
+    int32_t result = distributedSchedStub_->StartSyncMissionsFromRemoteInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    WaitHandlerTaskDone(DistributedSchedMissionManager::GetInstance().missionHandler_);
+    DTEST_LOG << "DistributedSchedStubTest StartSyncMissionsFromRemoteInner_002 end" << std::endl;
 }
 
 /**
@@ -1181,6 +1245,42 @@ HWTEST_F(DistributedSchedStubTest, StopSyncRemoteMissionsInner_002, TestSize.Lev
     result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest StopSyncRemoteMissionsInner_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: StopSyncMissionsFromRemoteInner_001
+ * @tc.desc: check StopSyncMissionsFromRemoteInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, StopSyncMissionsFromRemoteInner_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedStubTest StopSyncMissionsFromRemoteInner_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t result = distributedSchedStub_->StopSyncMissionsFromRemoteInner(data, reply);
+    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+    DTEST_LOG << "DistributedSchedStubTest StopSyncMissionsFromRemoteInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StopSyncMissionsFromRemoteInner_002
+ * @tc.desc: check StopSyncMissionsFromRemoteInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, StopSyncMissionsFromRemoteInner_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedStubTest StopSyncMissionsFromRemoteInner_002 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    CallerInfo callerInfo;
+    CallerInfoMarshalling(callerInfo, data);
+
+    DistributedSchedMissionManager::GetInstance().Init();
+    int32_t result = distributedSchedStub_->StopSyncMissionsFromRemoteInner(data, reply);
+    EXPECT_NE(result, ERR_FLATTEN_OBJECT);
+    WaitHandlerTaskDone(DistributedSchedMissionManager::GetInstance().missionHandler_);
+    DTEST_LOG << "DistributedSchedStubTest StopSyncMissionsFromRemoteInner_002 end" << std::endl;
 }
 
 /**
@@ -1701,6 +1801,102 @@ HWTEST_F(DistributedSchedStubTest, StartFreeInstallFromRemoteInner_001, TestSize
     int32_t result = distributedSchedStub_->StartFreeInstallFromRemoteInner(data, reply);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedSchedStubTest StartFreeInstallFromRemoteInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartFreeInstallFromRemoteInner_002
+ * @tc.desc: check StartFreeInstallFromRemoteInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, StartFreeInstallFromRemoteInner_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedStubTest StartFreeInstallFromRemoteInner_002 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    Want want;
+    data.WriteParcelable(&want);
+
+    int32_t result = distributedSchedStub_->StartFreeInstallFromRemoteInner(data, reply);
+    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+    DTEST_LOG << "DistributedSchedStubTest StartFreeInstallFromRemoteInner_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartFreeInstallFromRemoteInner_003
+ * @tc.desc: check StartFreeInstallFromRemoteInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, StartFreeInstallFromRemoteInner_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedStubTest StartFreeInstallFromRemoteInner_003 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    Want want;
+    CallerInfo callerInfo;
+    DistributedSchedService::AccountInfo accountInfo;
+    int64_t taskId = 0;
+    Want cmpWant;
+    std::string extraInfo = "extraInfo";
+    data.WriteParcelable(&want);
+    FreeInstallInfoMarshalling(callerInfo, accountInfo, taskId, data);
+    data.WriteParcelable(&cmpWant);
+    data.WriteString(extraInfo);
+
+    int32_t result = distributedSchedStub_->StartFreeInstallFromRemoteInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedStubTest StartFreeInstallFromRemoteInner_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartFreeInstallFromRemoteInner_004
+ * @tc.desc: check StartFreeInstallFromRemoteInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, StartFreeInstallFromRemoteInner_004, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedStubTest StartFreeInstallFromRemoteInner_004 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    Want want;
+    CallerInfo callerInfo;
+    DistributedSchedService::AccountInfo accountInfo;
+    int64_t taskId = 0;
+    Want cmpWant;
+    std::string extraInfo = "{\"accessTokenID\": 0}";
+    data.WriteParcelable(&want);
+    FreeInstallInfoMarshalling(callerInfo, accountInfo, taskId, data);
+    data.WriteParcelable(&cmpWant);
+    data.WriteString(extraInfo);
+
+    int32_t result = distributedSchedStub_->StartFreeInstallFromRemoteInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedStubTest StartFreeInstallFromRemoteInner_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartFreeInstallFromRemoteInner_005
+ * @tc.desc: check StartFreeInstallFromRemoteInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, StartFreeInstallFromRemoteInner_005, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedStubTest StartFreeInstallFromRemoteInner_005 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    Want want;
+    CallerInfo callerInfo;
+    DistributedSchedService::AccountInfo accountInfo;
+    int64_t taskId = 0;
+    Want cmpWant;
+    std::string extraInfo = "{\"requestCode\": 0, \"accessTokenID\": 0}";
+    data.WriteParcelable(&want);
+    FreeInstallInfoMarshalling(callerInfo, accountInfo, taskId, data);
+    data.WriteParcelable(&cmpWant);
+    data.WriteString(extraInfo);
+
+    int32_t result = distributedSchedStub_->StartFreeInstallFromRemoteInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedStubTest StartFreeInstallFromRemoteInner_005 end" << std::endl;
 }
 
 /**
