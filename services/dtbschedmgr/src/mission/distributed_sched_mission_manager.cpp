@@ -963,9 +963,6 @@ void DistributedSchedMissionManager::OnMissionListenerDied(const sptr<IRemoteObj
             }
         }
     }
-    if (deviceSet.empty()) {
-        return;
-    }
     for (auto& devId : deviceSet) {
         StopSyncRemoteMissions(devId, false);
     }

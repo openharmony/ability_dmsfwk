@@ -2399,5 +2399,1105 @@ HWTEST_F(DMSMissionManagerTest, testGetRemoteMissionSnapshotInfo005, TestSize.Le
     DistributedSchedMissionManager::GetInstance().distributedDataStorage_->Stop();
     DTEST_LOG << "testGetRemoteMissionSnapshotInfo005 end" << std::endl;
 }
+
+/**
+ * @tc.name: testDeviceOfflineNotify003
+ * @tc.desc: test device offline notify
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testDeviceOfflineNotify003, TestSize.Level3)
+{
+    DTEST_LOG << "testDeviceOfflineNotify003 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().DeviceOnlineNotify(DEVICE_ID);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    sptr<IDistributedSched> remoteDmsObj = iface_cast<IDistributedSched>(listener);
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_[DEVICE_ID] = remoteDmsObj;
+    }
+    DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(DEVICE_ID);
+    DTEST_LOG << "testDeviceOfflineNotify003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testStartSyncRemoteMissions015
+ * @tc.desc: prepare and sync missions from remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions015, TestSize.Level3)
+{
+    DTEST_LOG << "testStartSyncRemoteMissions015 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        ListenerInfo listenerInfo;
+        listenerInfo.Emplace(listener);
+        listenerInfo.called = true;
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
+    }
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_[DEVICE_ID] = proxy;
+    }
+    auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(DEVICE_ID, localDeviceId_);
+    EXPECT_EQ(ret, ERR_NONE);
+    DTEST_LOG << "testStartSyncRemoteMissions015 end" << std::endl;
+}
+
+/**
+ * @tc.name: testStartSyncRemoteMissions016
+ * @tc.desc: prepare and sync missions from remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions016, TestSize.Level3)
+{
+    DTEST_LOG << "testStartSyncRemoteMissions016 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        ListenerInfo listenerInfo;
+        listenerInfo.Emplace(listener);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
+    }
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_[DEVICE_ID] = proxy;
+    }
+    auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(DEVICE_ID, localDeviceId_);
+    EXPECT_NE(ret, ERR_NONE);
+    DTEST_LOG << "testStartSyncRemoteMissions016 end" << std::endl;
+}
+
+/**
+ * @tc.name: testUnRegisterMissionListener006
+ * @tc.desc: register mission listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener006, TestSize.Level3)
+{
+    DTEST_LOG << "testUnRegisterMissionListener006 begin" << std::endl;
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    auto ret = DistributedSchedMissionManager::GetInstance().UnRegisterMissionListener(U16DEVICE_ID, listener);
+    EXPECT_EQ(ret, ERR_NONE);
+    DTEST_LOG << "testUnRegisterMissionListener006 end" << std::endl;
+}
+
+/**
+ * @tc.name: testUnRegisterMissionListener007
+ * @tc.desc: register mission listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener007, TestSize.Level3)
+{
+    DTEST_LOG << "testUnRegisterMissionListener007 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    auto ret = DistributedSchedMissionManager::GetInstance().UnRegisterMissionListener(deviceId, listener);
+    EXPECT_EQ(ret, ERR_NONE);
+    DTEST_LOG << "testUnRegisterMissionListener007 end" << std::endl;
+}
+
+/**
+ * @tc.name: testUnRegisterMissionListener008
+ * @tc.desc: register mission listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener008, TestSize.Level3)
+{
+    DTEST_LOG << "testUnRegisterMissionListener008 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        ListenerInfo listenerInfo;
+        listenerInfo.Emplace(listener);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
+    }
+    auto ret = DistributedSchedMissionManager::GetInstance().UnRegisterMissionListener(deviceId, listener);
+    EXPECT_EQ(ret, ERR_NONE);
+    DTEST_LOG << "testUnRegisterMissionListener008 end" << std::endl;
+}
+
+/**
+ * @tc.name: testUnRegisterMissionListener009
+ * @tc.desc: register mission listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener009, TestSize.Level3)
+{
+    DTEST_LOG << "testUnRegisterMissionListener009 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    sptr<IRemoteObject> nullListener = nullptr;
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        ListenerInfo listenerInfo;
+        listenerInfo.Emplace(listener);
+        listenerInfo.Emplace(nullListener);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
+    }
+    auto ret = DistributedSchedMissionManager::GetInstance().UnRegisterMissionListener(deviceId, listener);
+    EXPECT_EQ(ret, ERR_NONE);
+    DTEST_LOG << "testUnRegisterMissionListener009 end" << std::endl;
+}
+
+/**
+ * @tc.name: testCleanMissionResources002
+ * @tc.desc: prepare and sync missions from remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testCleanMissionResources002, TestSize.Level3)
+{
+    DTEST_LOG << "testCleanMissionResources002 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    sptr<IRemoteObject> nullListener = nullptr;
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        ListenerInfo listenerInfo;
+        listenerInfo.Emplace(nullListener);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
+    }
+    DistributedSchedMissionManager::GetInstance().CleanMissionResources(DEVICE_ID);
+    DTEST_LOG << "testCleanMissionResources002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testStopSyncRemoteMissions013
+ * @tc.desc: stop sync missions from remote with deviceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions013, TestSize.Level3)
+{
+    DTEST_LOG << "testStopSyncRemoteMissions013 begin" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_[DEVICE_ID] = proxy;
+    }
+    auto ret = DistributedSchedMissionManager::GetInstance().StopSyncRemoteMissions(DEVICE_ID, false, false);
+    EXPECT_NE(ret, ERR_NONE);
+    DTEST_LOG << "testStopSyncRemoteMissions013 end" << std::endl;
+}
+
+/**
+ * @tc.name: testStartSyncMissionsFromRemote002
+ * @tc.desc: prepare and sync missions from remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testStartSyncMissionsFromRemote002, TestSize.Level3)
+{
+    DTEST_LOG << "testStartSyncMissionsFromRemote002 begin" << std::endl;
+    std::vector<DstbMissionInfo> missionInfos;
+    CallerInfo callerInfo;
+    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    DistributedSchedMissionManager::GetInstance().missonChangeListener_ = new DistributedMissionChangeListener();
+    DistributedSchedMissionManager::GetInstance().GenerateCallerInfo(callerInfo);
+    DistributedSchedMissionManager::GetInstance().isRegMissionChange_ = true;
+    auto ret = DistributedSchedMissionManager::GetInstance().StartSyncMissionsFromRemote(callerInfo, missionInfos);
+    EXPECT_EQ(ret, ERR_NONE);
+    DTEST_LOG << "testStartSyncMissionsFromRemote002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testStartSyncMissionsFromRemote003
+ * @tc.desc: prepare and sync missions from remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testStartSyncMissionsFromRemote003, TestSize.Level3)
+{
+    DTEST_LOG << "testStartSyncMissionsFromRemote003 begin" << std::endl;
+    std::vector<DstbMissionInfo> missionInfos;
+    CallerInfo callerInfo;
+    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    DistributedSchedMissionManager::GetInstance().missonChangeListener_ = nullptr;
+    DistributedSchedMissionManager::GetInstance().GenerateCallerInfo(callerInfo);
+    DistributedSchedMissionManager::GetInstance().isRegMissionChange_ = false;
+    auto ret = DistributedSchedMissionManager::GetInstance().StartSyncMissionsFromRemote(callerInfo, missionInfos);
+    EXPECT_EQ(ret, ERR_NONE);
+    DTEST_LOG << "testStartSyncMissionsFromRemote003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testStopSyncMissionsFromRemote003
+ * @tc.desc: stop sync missions from remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testStopSyncMissionsFromRemote003, TestSize.Level3)
+{
+    DTEST_LOG << "testStopSyncMissionsFromRemote003 begin" << std::endl;
+    std::vector<DstbMissionInfo> missionInfos;
+    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    DistributedSchedMissionManager::GetInstance().missonChangeListener_ = nullptr;
+    DistributedSchedMissionManager::GetInstance().StopSyncMissionsFromRemote(DEVICE_ID);
+    DTEST_LOG << "testStopSyncMissionsFromRemote003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNeedSyncDevice003
+ * @tc.desc: need sync device
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNeedSyncDevice003, TestSize.Level3)
+{
+    DTEST_LOG << "testNeedSyncDevice003 begin" << std::endl;
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteSyncDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().remoteSyncDeviceSet_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteSyncDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().remoteSyncDeviceSet_.emplace(DEVICE_ID);
+    }
+    bool ret = DistributedSchedMissionManager::GetInstance().NeedSyncDevice(DEVICE_ID);
+    EXPECT_TRUE(ret);
+    DTEST_LOG << "testNeedSyncDevice003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testHasSyncListener002
+ * @tc.desc: need sync device
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testHasSyncListener002, TestSize.Level3)
+{
+    DTEST_LOG << "testHasSyncListener002 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        ListenerInfo listenerInfo;
+        listenerInfo.Emplace(listener);
+        listenerInfo.called = true;
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
+    }
+    bool ret = DistributedSchedMissionManager::GetInstance().HasSyncListener(DEVICE_ID);
+    EXPECT_TRUE(ret);
+    DTEST_LOG << "testHasSyncListener002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifySnapshotChanged002
+ * @tc.desc: test notify snapshot changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifySnapshotChanged002, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifySnapshotChanged002 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        ListenerInfo listenerInfo;
+        listenerInfo.called = false;
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
+    }
+    DistributedSchedMissionManager::GetInstance().NotifySnapshotChanged(DEVICE_ID, 0);
+    DTEST_LOG << "testNotifySnapshotChanged002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifySnapshotChanged003
+ * @tc.desc: test notify snapshot changed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifySnapshotChanged003, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifySnapshotChanged003 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        ListenerInfo listenerInfo;
+        listenerInfo.Emplace(listener);
+        listenerInfo.called = true;
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
+    }
+    DistributedSchedMissionManager::GetInstance().NotifySnapshotChanged(DEVICE_ID, 0);
+    DTEST_LOG << "testNotifySnapshotChanged003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnRemoteDied003
+ * @tc.desc: test on remote died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnRemoteDied003, TestSize.Level3)
+{
+    DTEST_LOG << "testOnRemoteDied003 begin" << std::endl;
+    wptr<IRemoteObject> remote = new RemoteMissionListenerTest();
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = nullptr;
+    DistributedSchedMissionManager::GetInstance().OnRemoteDied(remote);
+    DTEST_LOG << "testOnRemoteDied003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testDequeueCachedSnapshotInfo003
+ * @tc.desc: enqueue cached snapshot info
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testDequeueCachedSnapshotInfo003, TestSize.Level3)
+{
+    DTEST_LOG << "testDequeueCachedSnapshotInfo003 begin" << std::endl;
+    std::unique_ptr<Snapshot> snapshot = make_unique<Snapshot>();
+    std::string key = DistributedSchedMissionManager::GetInstance().GenerateKeyInfo(DEVICE_ID, 1);
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().cachedSnapshotInfos_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().cachedSnapshotInfos_[key] = std::move(snapshot);
+    }
+    auto ret = DistributedSchedMissionManager::GetInstance().DequeueCachedSnapshotInfo(DEVICE_ID, 1);
+    EXPECT_NE(ret, nullptr);
+    DTEST_LOG << "testDequeueCachedSnapshotInfo003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testDeleteCachedSnapshotInfo001
+ * @tc.desc: delete cached snapshot info
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testDeleteCachedSnapshotInfo001, TestSize.Level3)
+{
+    DTEST_LOG << "testDeleteCachedSnapshotInfo001 begin" << std::endl;
+    std::string uuid = "uuid for GetUuidByNetworkId";
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_.clear();
+    }
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_[uuid] = DEVICE_ID;
+    }
+    std::unique_ptr<Snapshot> snapshot = make_unique<Snapshot>();
+    std::string key = DistributedSchedMissionManager::GetInstance().GenerateKeyInfo(DEVICE_ID, 1);
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().cachedSnapshotInfos_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().cachedSnapshotInfos_[key] = std::move(snapshot);
+    }
+    DistributedSchedMissionManager::GetInstance().DeleteCachedSnapshotInfo(DEVICE_ID);
+    DTEST_LOG << "testDeleteCachedSnapshotInfo001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testDeleteCachedSnapshotInfo002
+ * @tc.desc: delete cached snapshot info
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testDeleteCachedSnapshotInfo002, TestSize.Level3)
+{
+    DTEST_LOG << "testDeleteCachedSnapshotInfo002 begin" << std::endl;
+    std::string uuid = "uuid for GetUuidByNetworkId";
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_.clear();
+    }
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_[uuid] = DEVICE_ID;
+    }
+    std::unique_ptr<Snapshot> snapshot = make_unique<Snapshot>();
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().cachedSnapshotInfos_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().cachedSnapshotInfos_[uuid] = std::move(snapshot);
+    }
+    DistributedSchedMissionManager::GetInstance().DeleteCachedSnapshotInfo(DEVICE_ID);
+    DTEST_LOG << "testDeleteCachedSnapshotInfo002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testFetchCachedRemoteMissions010
+ * @tc.desc: test FetchCachedRemoteMissions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testFetchCachedRemoteMissions010, TestSize.Level3)
+{
+    DTEST_LOG << "testFetchCachedRemoteMissions010 begin" << std::endl;
+    std::string uuid = "uuid for GetUuidByNetworkId";
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_.clear();
+    }
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_[uuid] = DEVICE_ID;
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteMissionInfosLock_);
+        DistributedSchedMissionManager::GetInstance().deviceMissionInfos_.clear();
+    }
+    std::vector<DstbMissionInfo> dstbMissionInfos;
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteMissionInfosLock_);
+        DistributedSchedMissionManager::GetInstance().deviceMissionInfos_[uuid] = dstbMissionInfos;
+    }
+    auto ret = DistributedSchedMissionManager::GetInstance().FetchCachedRemoteMissions(DEVICE_ID,
+        0, dstbMissionInfos);
+    EXPECT_EQ(ret, ERR_NONE);
+    DTEST_LOG << "testFetchCachedRemoteMissions010 end" << std::endl;
+}
+
+/**
+ * @tc.name: testRebornMissionCache003
+ * @tc.desc: reborn mission cache
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testRebornMissionCache003, TestSize.Level3)
+{
+    DTEST_LOG << "testRebornMissionCache003 begin" << std::endl;
+    std::string uuid = "uuid for GetUuidByNetworkId";
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_.clear();
+    }
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_[uuid] = DEVICE_ID;
+    }
+    std::vector<DstbMissionInfo> missionInfos;
+    DistributedSchedMissionManager::GetInstance().RebornMissionCache(DEVICE_ID, missionInfos);
+    DTEST_LOG << "testRebornMissionCache003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyMissionsChangedFromRemote003
+ * @tc.desc: notify missions changed from remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedFromRemote003, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyMissionsChangedFromRemote003 begin" << std::endl;
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = DEVICE_ID;
+    callerInfo.uid = 0;
+    callerInfo.pid = 0;
+    callerInfo.dmsVersion = 0;
+    std::vector<DstbMissionInfo> missionInfos;
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        ListenerInfo listenerInfo;
+        listenerInfo.Emplace(listener);
+        listenerInfo.called = true;
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
+    }
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = nullptr;
+    auto ret = DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedFromRemote(callerInfo, missionInfos);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "testNotifyMissionsChangedFromRemote003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyMissionSnapshotCreated002
+ * @tc.desc: notify mission snapshot created
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyMissionSnapshotCreated002, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyMissionSnapshotCreated002 begin" << std::endl;
+    auto missionChangeRunner = AppExecFwk::EventRunner::Create("DistributedMissionChange");
+    DistributedSchedMissionManager::GetInstance().missionChangeHandler_ =
+        std::make_shared<AppExecFwk::EventHandler>(missionChangeRunner);
+    DistributedSchedMissionManager::GetInstance().NotifyMissionSnapshotCreated(1);
+    DTEST_LOG << "testNotifyMissionSnapshotCreated002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyMissionSnapshotCreated003
+ * @tc.desc: notify mission snapshot created
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyMissionSnapshotCreated003, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyMissionSnapshotCreated003 begin" << std::endl;
+    auto missionChangeRunner = AppExecFwk::EventRunner::Create("DistributedMissionChange");
+    DistributedSchedMissionManager::GetInstance().missionChangeHandler_ =
+        std::make_shared<AppExecFwk::EventHandler>(missionChangeRunner);
+    DistributedSchedMissionManager::GetInstance().distributedDataStorage_ = nullptr;
+    DistributedSchedMissionManager::GetInstance().NotifyMissionSnapshotCreated(1);
+    DTEST_LOG << "testNotifyMissionSnapshotCreated003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyMissionsChangedToRemote002
+ * @tc.desc: notify missions changed to remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedToRemote002, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyMissionsChangedToRemote002 begin" << std::endl;
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteSyncDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().remoteSyncDeviceSet_.clear();
+    }
+    std::vector<DstbMissionInfo> missionInfos;
+    auto ret = DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedToRemote(missionInfos);
+    EXPECT_EQ(ret, ERR_NONE);
+    DTEST_LOG << "testNotifyMissionsChangedToRemote002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyMissionsChangedToRemote003
+ * @tc.desc: notify missions changed to remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedToRemote003, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyMissionsChangedToRemote003 begin" << std::endl;
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteSyncDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().remoteSyncDeviceSet_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteSyncDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().remoteSyncDeviceSet_.emplace(localDeviceId_);
+    }
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_.clear();
+    }
+    int32_t deviceType = 0;
+    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo = make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, localDeviceId_);
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[localDeviceId_] = dmsDeviceInfo;
+    }
+    std::string uuid = "uuid for GetUuidByNetworkId";
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_.clear();
+    }
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_[uuid] = localDeviceId_;
+    }
+    std::vector<DstbMissionInfo> missionInfos;
+    auto ret = DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedToRemote(missionInfos);
+    EXPECT_EQ(ret, ERR_NONE);
+    DTEST_LOG << "testNotifyMissionsChangedToRemote003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyMissionsChangedToRemoteInner003
+ * @tc.desc: notify missions changed to remote inner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedToRemoteInner003, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyMissionsChangedToRemoteInner003 begin" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_[DEVICE_ID] = proxy;
+    }
+    CallerInfo callerInfo;
+    std::vector<DstbMissionInfo> missionInfos;
+    DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedToRemoteInner(
+        DEVICE_ID, missionInfos, callerInfo);
+    DTEST_LOG << "testNotifyMissionsChangedToRemoteInner003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testFetchDeviceHandler003
+ * @tc.desc: fetch device handler
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testFetchDeviceHandler003, TestSize.Level3)
+{
+    DTEST_LOG << "testFetchDeviceHandler003 begin" << std::endl;
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_.clear();
+    }
+
+    int32_t deviceType = 0;
+    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo = make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[DEVICE_ID] = dmsDeviceInfo;
+    }
+    auto ret = DistributedSchedMissionManager::GetInstance().FetchDeviceHandler(DEVICE_ID);
+    EXPECT_EQ(ret, nullptr);
+    DTEST_LOG << "testFetchDeviceHandler003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testFetchDeviceHandler004
+ * @tc.desc: fetch device handler
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testFetchDeviceHandler004, TestSize.Level3)
+{
+    DTEST_LOG << "testFetchDeviceHandler004 begin" << std::endl;
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_.clear();
+    }
+    int32_t deviceType = 0;
+    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo = make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[DEVICE_ID] = dmsDeviceInfo;
+    }
+
+    std::string uuid = "uuid for GetUuidByNetworkId";
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_.clear();
+    }
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_[uuid] = DEVICE_ID;
+    }
+    auto ret = DistributedSchedMissionManager::GetInstance().FetchDeviceHandler(DEVICE_ID);
+    EXPECT_NE(ret, nullptr);
+    DTEST_LOG << "testFetchDeviceHandler004 end" << std::endl;
+}
+
+/**
+ * @tc.name: testFetchDeviceHandler005
+ * @tc.desc: fetch device handler
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testFetchDeviceHandler005, TestSize.Level3)
+{
+    DTEST_LOG << "testFetchDeviceHandler005 begin" << std::endl;
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_.clear();
+    }
+    int32_t deviceType = 0;
+    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo = make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[DEVICE_ID] = dmsDeviceInfo;
+    }
+
+    std::string uuid = "uuid for GetUuidByNetworkId";
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_.clear();
+    }
+    {
+        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
+        DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_[uuid] = DEVICE_ID;
+    }
+    auto anonyUuid = DnetworkAdapter::AnonymizeDeviceId(uuid);
+    auto runner = AppExecFwk::EventRunner::Create(anonyUuid + "_MissionN");
+    auto handler = std::make_shared<AppExecFwk::EventHandler>(runner);
+    DistributedSchedMissionManager::GetInstance().deviceHandle_.emplace(uuid, handler);
+    auto ret = DistributedSchedMissionManager::GetInstance().FetchDeviceHandler(DEVICE_ID);
+    EXPECT_NE(ret, nullptr);
+    DTEST_LOG << "testFetchDeviceHandler005 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnRemoteDmsDied009
+ * @tc.desc: on remote dms died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied009, TestSize.Level3)
+{
+    DTEST_LOG << "testOnRemoteDmsDied009 begin" << std::endl;
+    wptr<IRemoteObject> remote = new RemoteMissionListenerTest();
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = nullptr;
+    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
+    DTEST_LOG << "testOnRemoteDmsDied009 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnRemoteDmsDied005
+ * @tc.desc: on remote dms died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied005, TestSize.Level3)
+{
+    DTEST_LOG << "testOnRemoteDmsDied005 begin" << std::endl;
+    wptr<IRemoteObject> remote = new RemoteMissionListenerTest();
+    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
+    DTEST_LOG << "testOnRemoteDmsDied005 end" << std::endl;
+}
+
+/**
+ * @tc.name: testRetryStartSyncRemoteMissions003
+ * @tc.desc: retry start sync remote missions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testRetryStartSyncRemoteMissions003, TestSize.Level3)
+{
+    DTEST_LOG << "testRetryStartSyncRemoteMissions003 begin" << std::endl;
+    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    DistributedSchedMissionManager::GetInstance().RetryStartSyncRemoteMissions(DEVICE_ID, localDeviceId_, 1);
+    DTEST_LOG << "testRetryStartSyncRemoteMissions003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testRetryStartSyncRemoteMissions004
+ * @tc.desc: retry start sync remote missions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testRetryStartSyncRemoteMissions004, TestSize.Level3)
+{
+    DTEST_LOG << "testRetryStartSyncRemoteMissions004 begin" << std::endl;
+    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        ListenerInfo listenerInfo;
+        listenerInfo.Emplace(listener);
+        listenerInfo.called = true;
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
+    }
+    DistributedSchedMissionManager::GetInstance().RetryStartSyncRemoteMissions(DEVICE_ID, localDeviceId_, 1);
+    DTEST_LOG << "testRetryStartSyncRemoteMissions004 end" << std::endl;
+}
+
+/**
+ * @tc.name: testRetryStartSyncRemoteMissions005
+ * @tc.desc: retry start sync remote missions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testRetryStartSyncRemoteMissions005, TestSize.Level3)
+{
+    DTEST_LOG << "testRetryStartSyncRemoteMissions005 begin" << std::endl;
+    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        ListenerInfo listenerInfo;
+        listenerInfo.Emplace(listener);
+        listenerInfo.called = true;
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
+    }
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_[DEVICE_ID] = proxy;
+    }
+    DistributedSchedMissionManager::GetInstance().RetryStartSyncRemoteMissions(DEVICE_ID, localDeviceId_, 1);
+    DTEST_LOG << "testRetryStartSyncRemoteMissions005 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnMissionListenerDied003
+ * @tc.desc: on mission listener died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnMissionListenerDied003, TestSize.Level3)
+{
+    DTEST_LOG << "testOnMissionListenerDied003 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        ListenerInfo listenerInfo;
+        listenerInfo.Emplace(listener);
+        listenerInfo.called = true;
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
+    }
+    DistributedSchedMissionManager::GetInstance().OnMissionListenerDied(listener);
+    DTEST_LOG << "testOnMissionListenerDied003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnMissionListenerDied004
+ * @tc.desc: on mission listener died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnMissionListenerDied004, TestSize.Level3)
+{
+    DTEST_LOG << "testOnMissionListenerDied004 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    sptr<IRemoteObject> remote = sptr<IRemoteObject>();
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        ListenerInfo listenerInfo;
+        listenerInfo.Emplace(listener);
+        listenerInfo.called = true;
+        listenerInfo.Emplace(remote);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
+    }
+    DistributedSchedMissionManager::GetInstance().OnMissionListenerDied(listener);
+    DTEST_LOG << "testOnMissionListenerDied004 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnMissionListenerDied005
+ * @tc.desc: on mission listener died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnMissionListenerDied005, TestSize.Level3)
+{
+    DTEST_LOG << "testOnMissionListenerDied005 begin" << std::endl;
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        ListenerInfo listenerInfo;
+        listenerInfo.Emplace(listener);
+        listenerInfo.called = false;
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
+    }
+    DistributedSchedMissionManager::GetInstance().OnMissionListenerDied(listener);
+    DTEST_LOG << "testOnMissionListenerDied005 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnRemoteDmsDied006
+ * @tc.desc: on remote dms died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied006, TestSize.Level3)
+{
+    DTEST_LOG << "testOnRemoteDmsDied006 begin" << std::endl;
+    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    sptr<IRemoteObject> remote = new RemoteMissionListenerTest();
+    sptr<IDistributedSched> remoteDmsObj = iface_cast<IDistributedSched>(remote);
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_[DEVICE_ID] = remoteDmsObj;
+    }
+    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
+    DTEST_LOG << "testOnRemoteDmsDied006 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnRemoteDmsDied007
+ * @tc.desc: on remote dms died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied007, TestSize.Level3)
+{
+    DTEST_LOG << "testOnRemoteDmsDied007 begin" << std::endl;
+    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    sptr<IRemoteObject> remote = new RemoteMissionListenerTest();
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_[DEVICE_ID] = proxy;
+    }
+    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
+    DTEST_LOG << "testOnRemoteDmsDied007 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnRemoteDmsDied008
+ * @tc.desc: on remote dms died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied008, TestSize.Level3)
+{
+    DTEST_LOG << "testOnRemoteDmsDied008 begin" << std::endl;
+    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    sptr<IRemoteObject> remote = new RemoteMissionListenerTest();
+    sptr<IDistributedSched> remoteDmsObj = iface_cast<IDistributedSched>(remote);
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
+        DistributedSchedMissionManager::GetInstance().remoteDmsMap_[DEVICE_ID] = remoteDmsObj;
+    }
+    u16string deviceId = Str8ToStr16(DEVICE_ID);
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        ListenerInfo listenerInfo;
+        listenerInfo.Emplace(remote);
+        listenerInfo.called = true;
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
+    }
+    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
+    DTEST_LOG << "testOnRemoteDmsDied008 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyDmsProxyProcessDied002
+ * @tc.desc: notify dms proxy process died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNotifyDmsProxyProcessDied002, TestSize.Level3)
+{
+    DTEST_LOG << "testNotifyDmsProxyProcessDied002 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().isRegMissionChange_ = false;
+    DistributedSchedMissionManager::GetInstance().NotifyDmsProxyProcessDied();
+    DTEST_LOG << "testNotifyDmsProxyProcessDied002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testRetryRegisterMissionChange002
+ * @tc.desc: retry register mission change
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testRetryRegisterMissionChange002, TestSize.Level3)
+{
+    DTEST_LOG << "testRetryRegisterMissionChange002 begin" << std::endl;
+    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    DistributedSchedMissionManager::GetInstance().RetryRegisterMissionChange(1);
+    DTEST_LOG << "testRetryRegisterMissionChange002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnDnetDied002
+ * @tc.desc: on dnet died
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testOnDnetDied002, TestSize.Level3)
+{
+    DTEST_LOG << "testOnDnetDied002 begin" << std::endl;
+    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    DistributedSchedMissionManager::GetInstance().isRegMissionChange_ = false;
+    DistributedSchedMissionManager::GetInstance().OnDnetDied();
+    DTEST_LOG << "testOnDnetDied002 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
