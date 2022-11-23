@@ -1721,7 +1721,6 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_004, TestSize.Level3)
     notifierDeathRecipient.dmsNotifier_ = nullptr;
     wptr<IRemoteObject> remote = nullptr;
     notifierDeathRecipient.OnRemoteDied(remote);
-
 }
 
 /**

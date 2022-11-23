@@ -333,7 +333,7 @@ HWTEST_F(DMSNetworkAdapterTest, AddDeviceChangeListener_006, TestSize.Level3)
     DnetworkAdapter::GetInstance()->stateCallback_ = nullptr;
     bool res = DnetworkAdapter::GetInstance()->AddDeviceChangeListener(deviceNodeListener);
     EXPECT_EQ(res, true);
-    DnetworkAdapter::GetInstance()->stateCallback_ = 
+    DnetworkAdapter::GetInstance()->stateCallback_ =
         std::make_shared<DnetworkAdapter::DmsDeviceStateCallback>();
 }
 

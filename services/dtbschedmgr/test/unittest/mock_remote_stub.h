@@ -21,12 +21,6 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
-namespace {
-constexpr int32_t CODE_NOTIFY_MISSION = 0;
-constexpr int32_t NOTIFY_SNAP_SHOT = 1;
-constexpr int32_t NOTIFY_NET_DISCONNECT = 2;
-const std::string MOCK_DEVICEID_TO_RETURN_FALSE = "deviceId to return false";
-}
 class MockRemoteInterface : public OHOS::IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.test.mock");
@@ -36,17 +30,7 @@ class MockRemoteStub : public IRemoteStub<MockRemoteInterface> {
 public:
     ~MockRemoteStub() = default;
     virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
-        MessageOption& option) override
-    {
-        if (code == CODE_NOTIFY_MISSION || code == NOTIFY_SNAP_SHOT || code == NOTIFY_NET_DISCONNECT) {
-            data.ReadInterfaceToken();
-            std::string deviceId = data.ReadString();
-            if (deviceId == MOCK_DEVICEID_TO_RETURN_FALSE) {
-                return -1;
-            }
-        }
-        return 0;
-    }
+        MessageOption& option) override;
 };
 }
 }
