@@ -1736,7 +1736,6 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_005, TestSize.Level3)
     DeviceSelectionNotifierTest deviceSelectionNotifierTest;
     int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_DISCONNECT,
         data, reply, option);
-
     EXPECT_EQ(ERR_OK, result);
 }
 
