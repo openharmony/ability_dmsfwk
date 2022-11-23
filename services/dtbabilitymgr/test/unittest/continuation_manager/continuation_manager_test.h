@@ -22,6 +22,8 @@
 #define private public
 #include "continuation_manager/app_device_callback_stub.h"
 #include "continuation_manager/device_selection_notifier_proxy.h"
+#include "continuation_manager/notifier_death_recipient.h"
+#include "continuation_manager/notifier_info.h"
 #include "distributed_ability_manager_service.h"
 #undef private
 

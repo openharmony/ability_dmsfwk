@@ -13,25 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef MOCK_REMOTE_STUB_H
-#define MOCK_REMOTE_STUB_H
+#ifndef OHOS_DMSFWK_BASE_DMS_HISYSEVENT_REPORT_TEST_H
+#define OHOS_DMSFWK_BASE_DMS_HISYSEVENT_REPORT_TEST_H
 
-#include "iremote_broker.h"
-#include "iremote_stub.h"
+#include "gtest/gtest.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
-class MockRemoteInterface : public OHOS::IRemoteBroker {
+class DmsHiSysEventReportTest : public testing::Test {
 public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.test.mock");
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
 };
-
-class MockRemoteStub : public IRemoteStub<MockRemoteInterface> {
-public:
-    ~MockRemoteStub() = default;
-    virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
-        MessageOption& option) override;
-};
-}
-}
-#endif
+} // namespace DistributedSchedule
+} // namespace OHOS
+#endif // OHOS_DMSFWK_BASE_DMS_HISYSEVENT_REPORT_TEST_H

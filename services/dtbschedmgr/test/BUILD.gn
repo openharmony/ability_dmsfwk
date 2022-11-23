@@ -136,6 +136,7 @@ ohos_unittest("distributedschedsvrtest") {
     "unittest/dms_callback_task_test.cpp",
     "unittest/dms_token_callback_test.cpp",
     "unittest/mock_distributed_sched.cpp",
+    "unittest/mock_remote_stub.cpp",
   ]
   sources += dtbschedmgr_sources
   configs = [
@@ -177,7 +178,10 @@ ohos_unittest("distributedcalltest") {
 ohos_unittest("dmsfreeinstallcbtest") {
   module_out_path = module_output_path
 
-  sources = [ "unittest/dms_free_install_callback_test.cpp" ]
+  sources = [
+    "unittest/dms_free_install_callback_test.cpp",
+    "unittest/mock_remote_stub.cpp",
+  ]
   sources += dtbschedmgr_sources
   configs = [
     ":test_config",
@@ -199,6 +203,7 @@ ohos_unittest("dschedcontinuetest") {
     "unittest/distributed_sched_continuation_test.cpp",
     "unittest/dms_version_manager_test.cpp",
     "unittest/mock_distributed_sched.cpp",
+    "unittest/mock_remote_stub.cpp",
   ]
   sources += dtbschedmgr_sources
   configs = [
@@ -229,6 +234,7 @@ ohos_unittest("dschedconnecttest") {
   sources = [
     "unittest/app_connection_stub_test.cpp",
     "unittest/distributed_sched_connect_test.cpp",
+    "unittest/mock_remote_stub.cpp",
   ]
   sources += dtbschedmgr_sources
   configs = [
@@ -273,6 +279,7 @@ ohos_unittest("dschedmissionmanagertest") {
     "unittest/mission/dms_mission_manager_test.cpp",
     "unittest/mission/mission_info_converter_test.cpp",
     "unittest/mission/snapshot_test.cpp",
+    "unittest/mock_remote_stub.cpp",
   ]
   sources += dtbschedmgr_sources
   configs = [
