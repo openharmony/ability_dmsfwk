@@ -66,8 +66,8 @@ void DMSNetworkAdapterTest::SetUpTestCase()
 
 void DMSNetworkAdapterTest::TearDownTestCase()
 {
-    //Wait until all asyn tasks are completed before exiting the test suite
-    auto caseDoneNotifyTask = [&]() {
+    // Wait until all asyn tasks are completed before exiting the test suite
+    auto caseDoneNotifyTask = []() {
         std::lock_guard<std::mutex> autoLock(caseDoneLock_);
         isCaseDone_ = true;
         caseDoneCondition_.notify_all();
