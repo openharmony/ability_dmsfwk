@@ -28,6 +28,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace {
 constexpr int32_t DISTRIBUTED_SCHED_SA_ID = 1401;
+constexpr int32_t INVALID_LEN = -1;
 constexpr int32_t UNREGISTER_TOKEN = 10000;
 constexpr int32_t TEST_TOKEN = 1000;
 constexpr int32_t TEST_ACCESS_TOKEN = 10000000;
@@ -1385,6 +1386,24 @@ HWTEST_F(ContinuationManagerTest, ReadContinuationResultsFromParcel_005, TestSiz
 }
 
 /**
+ * @tc.name: ReadContinuationResultsFromParcel_006
+ * @tc.desc: test ReadContinuationResultsFromParcel when size <= parcel.GetReadableBytes().
+ * @tc.type: FUNC
+ * @tc.require: I621C1
+ */
+HWTEST_F(ContinuationManagerTest, ReadContinuationResultsFromParcel_006, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest ReadContinuationResultsFromParcel_006 start" << std::endl;
+    Parcel parcel;
+    std::vector<ContinuationResult> continuationResults;
+    parcel.WriteInt32(VALUE_OBJECT);
+    parcel.WriteInt32(parcel.GetReadableBytes());
+    bool result = ContinuationResult::ReadContinuationResultsFromParcel(parcel, continuationResults);
+    EXPECT_FALSE(result);
+    DTEST_LOG << "ContinuationManagerTest ReadContinuationResultsFromParcel_006 end" << std::endl;
+}
+
+/**
  * @tc.name: WriteContinuationResultsToParcel_001
  * @tc.desc: test WriteContinuationResultsToParcel when size == 0.
  * @tc.type: FUNC
@@ -1587,6 +1606,23 @@ HWTEST_F(ContinuationManagerTest, Unmarshalling_001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: Unmarshalling_002
+ * @tc.desc: test Unmarshalling_002 when ontinuationExtraParams->ReadFromParcel failed;
+ * @tc.type: FUNC
+ * @tc.require: I621C1
+ */
+HWTEST_F(ContinuationManagerTest, Unmarshalling_002, TestSize.Level3)
+{
+    DTEST_LOG << "ContinuationManagerTest Unmarshalling_002 start" << std::endl;
+    ContinuationExtraParams continuationExtraParams;
+    Parcel parcel;
+    parcel.WriteInt32(INVALID_LEN);
+    ContinuationExtraParams* result = continuationExtraParams.Unmarshalling(parcel);
+    EXPECT_EQ(nullptr, result);
+    DTEST_LOG << "ContinuationManagerTest Unmarshalling_002 end" << std::endl;
+}
+
+/**
  * @tc.name: OnRemoteRequest_001
  * @tc.desc: test OnRemoteRequest, invalid interface token.
  * @tc.type: FUNC
@@ -1667,14 +1703,24 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_003, TestSize.Level3)
  */
 HWTEST_F(ContinuationManagerTest, OnRemoteRequest_004, TestSize.Level3)
 {
+    /**
+     * @tc.steps: step1. test OnRemoteRequest with invalid interface token.
+     */
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     DeviceSelectionNotifierTest deviceSelectionNotifierTest;
     int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_DISCONNECT,
         data, reply, option);
-
     EXPECT_EQ(ERR_INVALID_VALUE, result);
+    /**
+     * @tc.steps: step2. test OnRemoteDied when dmsNotifier_ == nullptr.
+     */
+    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
+    NotifierDeathRecipient notifierDeathRecipient(dmsNotifier);
+    notifierDeathRecipient.dmsNotifier_ = nullptr;
+    wptr<IRemoteObject> remote = nullptr;
+    notifierDeathRecipient.OnRemoteDied(remote);
 }
 
 /**
@@ -1716,11 +1762,51 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_005, TestSize.Level3)
 
 /**
  * @tc.name: OnRemoteRequest_006
+ * @tc.desc: test OnRemoteRequest, code = EVENT_DEVICE_CONNECT but read from parcel failed
+ * @tc.type: FUNC
+ * @tc.require: I621C1
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_006, TestSize.Level3)
+{
+    MessageParcel data;
+    data.WriteInterfaceToken(IDeviceSelectionNotifier::GetDescriptor());
+    data.WriteInt32(VALUE_OBJECT);
+    data.WriteInt32(INVALID_LEN);
+    MessageParcel reply;
+    MessageOption option;
+    DeviceSelectionNotifierTest deviceSelectionNotifierTest;
+    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_CONNECT,
+        data, reply, option);
+    EXPECT_EQ(ERR_FLATTEN_OBJECT, result);
+}
+
+/**
+ * @tc.name: OnRemoteRequest_007
+ * @tc.desc: test OnRemoteRequest, code = EVENT_DEVICE_DISCONNECT but read from parcel failed
+ * @tc.type: FUNC
+ * @tc.require: I621C1
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_007, TestSize.Level3)
+{
+    MessageParcel data;
+    data.WriteInterfaceToken(IDeviceSelectionNotifier::GetDescriptor());
+    data.WriteInt32(VALUE_OBJECT);
+    data.WriteInt32(INVALID_LEN);
+    MessageParcel reply;
+    MessageOption option;
+    DeviceSelectionNotifierTest deviceSelectionNotifierTest;
+    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_DISCONNECT,
+        data, reply, option);
+    EXPECT_EQ(ERR_FLATTEN_OBJECT, result);
+}
+
+/**
+ * @tc.name: OnRemoteRequest_008
  * @tc.desc: test OnRemoteRequest when descriptor != remoteDescriptor.
  * @tc.type: FUNC
  * @tc.require: I5M4CD
  */
-HWTEST_F(ContinuationManagerTest, OnRemoteRequest_006, TestSize.Level3)
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_008, TestSize.Level3)
 {
     sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
     AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
@@ -1763,6 +1849,182 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_006, TestSize.Level3)
      * @tc.steps: step5. DeviceSelectionNotifierProxy::OnDeviceDisconnect.
      */
     deviceSelectionNotifierProxy.OnDeviceDisconnect(continuationResults);
+}
+
+/**
+ * @tc.name: OnRemoteRequest_009
+ * @tc.desc: test OnRemoteRequest when code = AppDeviceCallbackInterface::EVENT_DEVICE_CONNECT.
+ * @tc.type: FUNC
+ * @tc.require: I621C1
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_009, TestSize.Level3)
+{
+    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
+    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(AppDeviceCallbackInterface::GetDescriptor());
+    data.WriteInt32(TEST_TOKEN);
+    int32_t ret = appDeviceCallbackStub.OnRemoteRequest(
+        AppDeviceCallbackInterface::EVENT_DEVICE_CONNECT, data, reply, option);
+    EXPECT_EQ(ERR_NONE, ret);
+}
+
+/**
+ * @tc.name: OnRemoteRequest_010
+ * @tc.desc: test OnRemoteRequest when ContinuationResult read from parcel failed.
+ * @tc.type: FUNC
+ * @tc.require: I621C1
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_010, TestSize.Level3)
+{
+    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
+    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(AppDeviceCallbackInterface::GetDescriptor());
+    data.WriteInt32(TEST_TOKEN);
+    data.WriteInt32(VALUE_OBJECT);
+    data.WriteInt32(INVALID_LEN);
+    int32_t ret = appDeviceCallbackStub.OnRemoteRequest(
+        AppDeviceCallbackInterface::EVENT_DEVICE_CONNECT, data, reply, option);
+    EXPECT_EQ(ERR_FLATTEN_OBJECT, ret);
+}
+
+/**
+ * @tc.name: OnRemoteRequest_011
+ * @tc.desc: test OnRemoteRequest when code = AppDeviceCallbackInterface::EVENT_DEVICE_DISCONNECT.
+ * @tc.type: FUNC
+ * @tc.require: I621C1
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_011, TestSize.Level3)
+{
+    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
+    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(AppDeviceCallbackInterface::GetDescriptor());
+    data.WriteInt32(TEST_TOKEN);
+    int32_t ret = appDeviceCallbackStub.OnRemoteRequest(
+        AppDeviceCallbackInterface::EVENT_DEVICE_DISCONNECT, data, reply, option);
+    EXPECT_EQ(ERR_NONE, ret);
+}
+
+/**
+ * @tc.name: OnRemoteRequest_012
+ * @tc.desc: test OnRemoteRequest when ContinuationResult read from parcel failed.
+ * @tc.type: FUNC
+ * @tc.require: I621C1
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_012, TestSize.Level3)
+{
+    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
+    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(AppDeviceCallbackInterface::GetDescriptor());
+    data.WriteInt32(TEST_TOKEN);
+    data.WriteInt32(VALUE_OBJECT);
+    data.WriteInt32(INVALID_LEN);
+    int32_t ret = appDeviceCallbackStub.OnRemoteRequest(
+        AppDeviceCallbackInterface::EVENT_DEVICE_DISCONNECT, data, reply, option);
+    EXPECT_EQ(ERR_FLATTEN_OBJECT, ret);
+}
+
+/**
+ * @tc.name: OnRemoteRequest_013
+ * @tc.desc: test OnRemoteRequest when code = AppDeviceCallbackInterface::EVENT_DEVICE_CANCEL.
+ * @tc.type: FUNC
+ * @tc.require: I621C1
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_013, TestSize.Level3)
+{
+    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
+    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(AppDeviceCallbackInterface::GetDescriptor());
+    int32_t ret = appDeviceCallbackStub.OnRemoteRequest(
+        AppDeviceCallbackInterface::EVENT_DEVICE_CANCEL, data, reply, option);
+    EXPECT_EQ(ERR_NONE, ret);
+}
+
+/**
+ * @tc.name: OnRemoteRequest_014
+ * @tc.desc: test OnRemoteRequest when code = INVALID_EVENT_DEVICE_CODE.
+ * @tc.type: FUNC
+ * @tc.require: I621C1
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_014, TestSize.Level3)
+{
+    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
+    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(AppDeviceCallbackInterface::GetDescriptor());
+    int32_t ret = appDeviceCallbackStub.OnRemoteRequest(INVALID_EVENT_DEVICE_CODE, data, reply, option);
+    EXPECT_NE(ERR_NONE, ret);
+}
+
+/**
+ * @tc.name: OnDeviceEvent_001
+ * @tc.desc: test OnDeviceConnect, OnDeviceDisconnect and OnDeviceCancel.
+ * @tc.type: FUNC
+ * @tc.require: I621C1
+ */
+HWTEST_F(ContinuationManagerTest, OnDeviceEvent_001, TestSize.Level3)
+{
+    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
+    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    std::vector<ContinuationResult> continuationResults;
+    /**
+     * @tc.steps: step1. test OnDeviceConnect
+     */
+    int32_t ret = appDeviceCallbackStub.OnDeviceConnect(TEST_TOKEN, continuationResults);
+    EXPECT_EQ(ERR_NONE, ret);
+    /**
+     * @tc.steps: step2. test OnDeviceDisconnect
+     */
+    ret = appDeviceCallbackStub.OnDeviceDisconnect(TEST_TOKEN, continuationResults);
+    EXPECT_EQ(ERR_NONE, ret);
+    /**
+     * @tc.steps: step3. test OnDeviceCancel
+     */
+    ret = appDeviceCallbackStub.OnDeviceCancel();
+    EXPECT_EQ(ERR_NONE, ret);
+}
+
+/**
+ * @tc.name: GetConnectStatusInfo_001
+ * @tc.desc: test GetConnectStatusInfo
+ * @tc.type: FUNC
+ * @tc.require: I621C1
+ */
+HWTEST_F(ContinuationManagerTest, GetConnectStatusInfo_001, TestSize.Level3)
+{
+    NotifierInfo notifierInfo;
+    /**
+     * @tc.steps: step1. test DeleteNotifier when cbType is not in notifierMap_
+     */
+    notifierInfo.notifierMap_.clear();
+    notifierInfo.DeleteNotifier(INVALID_CALLBACK_TYPE);
+    /**
+     * @tc.steps: step2. test RemoveDeathRecipient when cbType is not in notifierMap_
+     */
+    sptr<IRemoteObject::DeathRecipient> deathRecipient = nullptr;
+    notifierInfo.RemoveDeathRecipient(deathRecipient, INVALID_CALLBACK_TYPE);
+    /**
+     * @tc.steps: step3. test GetConnectStatusInfo
+     */
+    notifierInfo.connectStatusInfo_ = nullptr;
+    std::shared_ptr<ConnectStatusInfo> result = notifierInfo.GetConnectStatusInfo();
+    EXPECT_EQ(nullptr, result);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

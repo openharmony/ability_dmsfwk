@@ -53,6 +53,7 @@ ohos_unittest("dmsbasetest") {
     "${distributed_service}/base/src/distributed_device_node_listener.cpp",
     "${distributed_service}/base/src/dtbschedmgr_device_info_storage.cpp",
     "unittest/deviceManager/dms_device_info_test.cpp",
+    "unittest/dfx/dms_hisysevent_report_test.cpp",
     "unittest/dms_network_adapter_test.cpp",
     "unittest/dtbschedmgr_device_info_storage_test.cpp",
   ]
