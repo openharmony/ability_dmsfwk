@@ -349,7 +349,7 @@ HWTEST_F(DSchedContinuationTest, ContinueLocalMission_001, TestSize.Level1)
     WantParams wantParams;
     int32_t ret = DistributedSchedService::GetInstance().ContinueLocalMission(deviceId,
         missionId, callback, wantParams);
-    EXPECT_TRUE(INVALID_PARAMETERS_ERR == ret);
+    EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedContinuationTest ContinueLocalMission_001 end" << std::endl;
 }
 

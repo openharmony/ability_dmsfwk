@@ -49,14 +49,14 @@ void DistributedAbilityManagerServiceTest::SetUpTestCase()
 
 void DistributedAbilityManagerServiceTest::TearDownTestCase()
 {
-    //Wait until all asyn tasks are completed before exiting the test suite
-    auto caseDoneNotifyTask = [&]() {
+    // Wait until all asyn tasks are completed before exiting the test suite
+    auto caseDoneNotifyTask = []() {
         std::lock_guard<std::mutex> autoLock(caseDoneLock_);
         isCaseDone_ = true;
         caseDoneCondition_.notify_all();
     };
     if (DistributedSchedMissionManager::GetInstance().distributedDataStorage_ != nullptr) {
-        std::shared_ptr<AppExecFwk::EventHandler> dmsDataStorageHandler = 
+        std::shared_ptr<AppExecFwk::EventHandler> dmsDataStorageHandler =
         DistributedSchedMissionManager::GetInstance().distributedDataStorage_->dmsDataStorageHandler_;
         if (dmsDataStorageHandler != nullptr) {
             dmsDataStorageHandler->PostTask(caseDoneNotifyTask);
