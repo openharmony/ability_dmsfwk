@@ -15,7 +15,7 @@
 
 import deviceManager from '@ohos.distributedHardware.deviceManager';
 
-var SUBSCRIBE_ID = 100;
+let SUBSCRIBE_ID = 100;
 
 export default class RemoteDeviceModel {
     deviceList = [];
@@ -49,14 +49,14 @@ export default class RemoteDeviceModel {
     registerDeviceListCallback_(callback) {
         console.info('[dmsDemo] registerDeviceListCallback');
         this.callback = callback;
-        if (this.#deviceManager == undefined) {
+        if (this.#deviceManager === undefined) {
             console.error('[dmsDemo] deviceManager has not initialized');
             this.callback();
             return;
         }
 
         console.info('[dmsDemo] getTrustedDeviceListSync begin');
-        var list = this.#deviceManager.getTrustedDeviceListSync();
+        const list = this.#deviceManager.getTrustedDeviceListSync();
         console.info('[dmsDemo] getTrustedDeviceListSync end, deviceList=' + JSON.stringify(list));
         if (typeof (list) != 'undefined' && typeof (list.length) != 'undefined') {
             this.deviceList = list;
@@ -70,7 +70,7 @@ export default class RemoteDeviceModel {
         registerServiceDieCallback();
 
         SUBSCRIBE_ID = Math.floor(65536 * Math.random());
-        var info = {
+        const info = {
             subscribeId: SUBSCRIBE_ID,
             mode: 0xAA,
             medium: 2,
@@ -99,7 +99,7 @@ export default class RemoteDeviceModel {
                     break;
                 case 2:
                     if (self.deviceList.length > 0) {
-                        for (var i = 0; i < self.deviceList.length; i++) {
+                        for (let i = 0; i < self.deviceList.length; i++) {
                             if (self.deviceList[i].deviceId === data.device.deviceId) {
                                 self.deviceList[i] = data.device;
                                 break;
@@ -111,9 +111,9 @@ export default class RemoteDeviceModel {
                     break;
                 case 1:
                     if (self.deviceList.length > 0) {
-                        var list = [];
-                        for (var i = 0; i < self.deviceList.length; i++) {
-                            if (self.deviceList[i].deviceId != data.device.deviceId) {
+                        const list = [];
+                        for (let i = 0; i < self.deviceList.length; i++) {
+                            if (self.deviceList[i].deviceId !== data.device.deviceId) {
                                 list[i] = data.device;
                             }
                         }
@@ -133,7 +133,7 @@ export default class RemoteDeviceModel {
             console.info('[dmsDemo] deviceFound data=' + JSON.stringify(data));
             console.info('[dmsDemo] deviceFound self.deviceList=' + self.deviceList);
             console.info('[dmsDemo] deviceFound self.deviceList.length=' + self.deviceList.length);
-            for (var i = 0; i < self.discoverList.length; i++) {
+            for (let i = 0; i < self.discoverList.length; i++) {
                 if (self.discoverList[i].deviceId === data.device.deviceId) {
                     console.info('[dmsDemo] device founded, ignored');
                     return;
@@ -158,7 +158,7 @@ export default class RemoteDeviceModel {
 
     authDevice(deviceId, callback) {
         console.info('[dmsDemo] authDevice ' + deviceId);
-        for (var i = 0; i < this.discoverList.length; i++) {
+        for (let i = 0; i < this.discoverList.length; i++) {
             if (this.discoverList[i].deviceId === deviceId) {
                 console.info('[dmsDemo] device founded, ignored');
                 let extraInfo = {

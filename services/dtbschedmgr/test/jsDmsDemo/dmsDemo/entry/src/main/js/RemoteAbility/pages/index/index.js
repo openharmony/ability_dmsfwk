@@ -18,10 +18,10 @@ import RemoteDeviceModel from '../../../model/RemoteDeviceModel.js';
 import rpc from "@ohos.rpc";
 import prompt from '@system.prompt';
 
-var mRemote;
-var DEVICE_LIST_LOCALHOST;
-var connectedAbility;
-var localDeviceId = "";
+let mRemote;
+let DEVICE_LIST_LOCALHOST;
+let connectedAbility;
+const localDeviceId = "";
 
 export default {
     data: {
@@ -43,16 +43,16 @@ export default {
         let self = this;
         this.remoteDeviceModel.registerDeviceListCallback(() => {
             console.info('registerDeviceListCallback, callback entered');
-            var list = [];
+            const list = [];
             list[0] = DEVICE_LIST_LOCALHOST;
-            var deviceList;
+            let deviceList;
             if (self.remoteDeviceModel.discoverList.length > 0) {
                 deviceList = self.remoteDeviceModel.discoverList;
             } else {
                 deviceList = self.remoteDeviceModel.deviceList;
             }
             console.info('on remote device updated, count=' + deviceList.length);
-            for (var i = 0; i < deviceList.length; i++) {
+            for (let i = 0; i < deviceList.length; i++) {
                 console.info('device ' + i + '/' + deviceList.length + ' deviceId='
                 + deviceList[i].deviceId + ' deviceName=' + deviceList[i].deviceName + ' deviceType='
                 + deviceList[i].deviceType);
@@ -74,7 +74,7 @@ export default {
     onStartLocalAbilityClick() {
         console.info('[dmsDemo] onStartLocalAbilityClick begin');
         console.info('[dmsDemo] onStartLocalAbilityClick deviceId is ' + localDeviceId);
-        var wantValue = {
+        const wantValue = {
             bundleName: 'ohos.dms.jsDemo',
             abilityName: 'ohos.dms.jsDemo.LocalAbility',
             deviceId: localDeviceId,
@@ -103,8 +103,8 @@ export default {
             }
             if (this.remoteDeviceModel.discoverList.length > 0) {
                 console.info('[dmsDemo] start to  device');
-                var name = null;
-                for (var i = 0; i < this.remoteDeviceModel.discoverList.length; i++) {
+                let name = null;
+                for (let i = 0; i < this.remoteDeviceModel.discoverList.length; i++) {
                     if (this.remoteDeviceModel.discoverList[i].deviceId === e.value) {
                         name = this.remoteDeviceModel.discoverList[i].deviceName;
                         break;
@@ -119,7 +119,7 @@ export default {
                 let self = this;
                 this.remoteDeviceModel.authDevice(e.value, () => {
                     console.info('[dmsDemo] onRadioChangeForStart auth and online finished');
-                    for (i = 0; i < self.remoteDeviceModel.deviceList.length; i++) {
+                    for (let i = 0; i < self.remoteDeviceModel.deviceList.length; i++) {
                         if (self.remoteDeviceModel.deviceList[i].deviceName === name) {
                             this.startRemoteAbility(self.remoteDeviceModel.deviceList[i].deviceId,
                                 self.remoteDeviceModel.deviceList[i].deviceName);
@@ -128,7 +128,7 @@ export default {
                 });
             } else {
                 console.info('[dmsDemo] onRadioChangeForStart start to authed device');
-                for (i = 0; i < this.remoteDeviceModel.deviceList.length; i++) {
+                for (let i = 0; i < this.remoteDeviceModel.deviceList.length; i++) {
                     if (this.remoteDeviceModel.deviceList[i].deviceId === e.value) {
                         this.startRemoteAbility(this.remoteDeviceModel.deviceList[i].deviceId,
                             this.remoteDeviceModel.deviceList[i].deviceName);
@@ -140,10 +140,10 @@ export default {
 
     startRemoteAbility(deviceId, deviceName) {
         this.$element('dialogForStartAbility').close();
-        var params;
+        let params;
         console.info('[dmsDemo] featureAbility.startAbility deviceId=' + deviceId
         + ' deviceName=' + deviceName);
-        var wantValue = {
+        const wantValue = {
             bundleName: 'ohos.dms.jsDemo',
             abilityName: 'ohos.dms.jsDemo.RemoteAbility',
             deviceId: deviceId,
@@ -190,8 +190,8 @@ export default {
             }
             if (this.remoteDeviceModel.discoverList.length > 0) {
                 console.info('[dmsDemo] onRadioChangeForContinue to  device');
-                var name = null;
-                for (var i = 0; i < this.remoteDeviceModel.discoverList.length; i++) {
+                let name = null;
+                for (let i = 0; i < this.remoteDeviceModel.discoverList.length; i++) {
                     if (this.remoteDeviceModel.discoverList[i].deviceId === e.value) {
                         name = this.remoteDeviceModel.discoverList[i].deviceName;
                         break;
@@ -308,8 +308,8 @@ export default {
             }
             if (this.remoteDeviceModel.discoverList.length > 0) {
                 console.info('[dmsDemo] onRadioChangeForConnect to  device');
-                var name = null;
-                for (var i = 0; i < this.remoteDeviceModel.discoverList.length; i++) {
+                let name = null;
+                for (let i = 0; i < this.remoteDeviceModel.discoverList.length; i++) {
                     if (this.remoteDeviceModel.discoverList[i].deviceId === e.value) {
                         name = this.remoteDeviceModel.discoverList[i].deviceName;
                         break;

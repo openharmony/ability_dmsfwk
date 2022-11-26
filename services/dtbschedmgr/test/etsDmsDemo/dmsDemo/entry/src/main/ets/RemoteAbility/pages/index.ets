@@ -48,7 +48,7 @@ function registerDeviceListCallback() {
     if (numDevices === 0) {
       if (discoveredDevices > 0) {
         prompt.showToast({
-          message: "registerDeviceListCallback dicovered " + discoveredDevices + " devices, need to authenticate"
+          message: "registerDeviceListCallback discovered " + discoveredDevices + " devices, need to authenticate"
         });
       } else {
         prompt.showToast({

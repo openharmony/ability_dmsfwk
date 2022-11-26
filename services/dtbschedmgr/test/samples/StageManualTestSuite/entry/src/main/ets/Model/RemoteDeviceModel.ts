@@ -15,7 +15,7 @@
 
 import deviceManager from '@ohos.distributedHardware.deviceManager';
 
-var SUBSCRIBE_ID = 100;
+const SUBSCRIBE_ID = 100;
 
 export default class RemoteDeviceModel {
     deviceList = [];
@@ -56,7 +56,7 @@ export default class RemoteDeviceModel {
         }
 
         console.info('[ServiceExtensionDemo] getTrustedDeviceListSync begin');
-        var list = this.MyDeviceManager.getTrustedDeviceListSync();
+        const list = this.MyDeviceManager.getTrustedDeviceListSync();
         console.info('[ServiceExtensionDemo] getTrustedDeviceListSync end, deviceList=' + JSON.stringify(list));
         if (typeof (list) != 'undefined' && typeof (list.length) != 'undefined') {
             this.deviceList = list;
@@ -67,7 +67,7 @@ export default class RemoteDeviceModel {
 
     getTrustDeviceList(callback) {
         console.info('[ServiceExtensionDemo] getTrustDeviceListSync begin');
-        var list = this.MyDeviceManager.getTrustedDeviceListSync();
+        const list = this.MyDeviceManager.getTrustedDeviceListSync();
         console.info('[ServiceExtensionDemo] getTrustedDeviceListSync end, deviceList=' + JSON.stringify(list));
         if (typeof (list) != 'undefined' && typeof (list.length) != 'undefined') {
             this.deviceList = list;

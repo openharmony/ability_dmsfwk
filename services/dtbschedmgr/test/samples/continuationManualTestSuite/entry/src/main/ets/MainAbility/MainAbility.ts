@@ -26,7 +26,7 @@ const PERMISSION_REJECT = -1
 class ContentStorage {
 }
 
-var g_object = distributedObject.createDistributedObject({name:undefined});
+const g_object = distributedObject.createDistributedObject({name: undefined});
 
 export default class MainAbility extends Ability {
 
