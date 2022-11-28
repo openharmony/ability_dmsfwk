@@ -442,13 +442,11 @@ bool DistributedAbilityManagerService::HandleDisconnectAbility()
         HILOGD("HandleDisconnectAbility called.");
         int32_t errCode = DisconnectAbility();
         if (errCode != ERR_OK) {
+            HILOGE("DisconnectAbility errCode:%d", errCode);
             return;
         }
     };
-    if (!continuationHandler_->PostTask(func)) {
-        HILOGE("continuationHandler_ postTask failed");
-        return false;
-    }
+    continuationHandler_->PostTask(func);
     return true;
 }
 
@@ -541,10 +539,7 @@ bool DistributedAbilityManagerService::HandleDeviceConnect(const sptr<IRemoteObj
         auto proxy = std::make_unique<DeviceSelectionNotifierProxy>(notifier);
         proxy->OnDeviceConnect(continuationResults);
     };
-    if (!continuationHandler_->PostTask(func)) {
-        HILOGE("continuationHandler_ postTask failed");
-        return false;
-    }
+    continuationHandler_->PostTask(func);
     return true;
 }
 
@@ -560,10 +555,7 @@ bool DistributedAbilityManagerService::HandleDeviceDisconnect(const sptr<IRemote
         auto proxy = std::make_unique<DeviceSelectionNotifierProxy>(notifier);
         proxy->OnDeviceDisconnect(continuationResults);
     };
-    if (!continuationHandler_->PostTask(func)) {
-        HILOGE("continuationHandler_ postTask failed");
-        return false;
-    }
+    continuationHandler_->PostTask(func);
     return true;
 }
 
@@ -576,7 +568,6 @@ void DistributedAbilityManagerService::ScheduleStartDeviceManager(const sptr<IRe
         return;
     }
     HandleStartDeviceManager(token, continuationExtraParams);
-    return;
 }
 
 void DistributedAbilityManagerService::HandleStartDeviceManager(int32_t token,
@@ -625,10 +616,7 @@ void DistributedAbilityManagerService::HandleStartDeviceManager(int32_t token,
         int32_t result = appProxy->SendRequest(START_DEVICE_MANAGER_CODE, data, reply, option);
         HILOGD("result is %{public}d", result);
     };
-    if (!continuationHandler_->PostTask(func)) {
-        HILOGE("continuationHandler_ postTask failed");
-        return;
-    }
+    continuationHandler_->PostTask(func);
 }
 
 void DistributedAbilityManagerService::HandleUpdateConnectStatus(int32_t token, std::string deviceId,
@@ -654,10 +642,7 @@ void DistributedAbilityManagerService::HandleUpdateConnectStatus(int32_t token, 
         int32_t result = appProxy->SendRequest(UPDATE_CONNECT_STATUS_CODE, data, reply, option);
         HILOGD("result is %{public}d", result);
     };
-    if (!continuationHandler_->PostTask(func)) {
-        HILOGE("continuationHandler_ postTask failed");
-        return;
-    }
+    continuationHandler_->PostTask(func);
 }
 
 bool DistributedAbilityManagerService::QueryTokenByNotifier(const sptr<IRemoteObject>& notifier, int32_t& token)
@@ -723,10 +708,7 @@ void DistributedAbilityManagerService::HandleNotifierDied(const sptr<IRemoteObje
         // disconnect to app when third-party app died
         (void)HandleDisconnectAbility();
     };
-    if (!continuationHandler_->PostTask(func)) {
-        HILOGE("continuationHandler_ postTask failed");
-        return;
-    }
+    continuationHandler_->PostTask(func);
 }
 
 bool DistributedAbilityManagerService::IsDistributedSchedLoaded()

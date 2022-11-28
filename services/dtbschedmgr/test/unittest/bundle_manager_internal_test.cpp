@@ -330,5 +330,27 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerCallBackTest_002, TestSize.Leve
     EXPECT_TRUE(ERR_OK != ret);
     DTEST_LOG << "BundleManagerCallBackTest BundleManagerCallBackTest_002 end "<< std::endl;
 }
+
+/**
+ * @tc.name: GetBundleNameListFromBms_001
+ * @tc.desc: test GetBundleNameListFromBms
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, GetBundleNameListFromBms_001, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerCallBackTest GetBundleNameListFromBms_001 begin" << std::endl;
+    const std::string bundleName = "com.ohos.launcher";
+    int32_t uid = BundleManagerInternal::GetUidFromBms(bundleName);
+    if (uid <= 0) {
+        return;
+    }
+    std::vector<std::u16string> u16BundleNameList;
+    BundleManagerInternal::GetBundleNameListFromBms(uid, u16BundleNameList);
+    EXPECT_TRUE(!u16BundleNameList.empty());
+    u16BundleNameList.clear();
+    BundleManagerInternal::GetBundleNameListFromBms(-1, u16BundleNameList);
+    EXPECT_TRUE(u16BundleNameList.empty());
+    DTEST_LOG << "BundleManagerCallBackTest GetBundleNameListFromBms_001 end "<< std::endl;
+}
 }
 }
