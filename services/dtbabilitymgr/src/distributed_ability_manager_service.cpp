@@ -585,7 +585,7 @@ void DistributedAbilityManagerService::HandleStartDeviceManager(int32_t token,
         HILOGE("continuationHandler_ is nullptr");
         return;
     }
-    auto func = [this, token, continuationExtraParams]() {
+    auto func = [this, token, continuationExtraParams, appProxy = appProxy_]() {
         HILOGD("HandleStartDeviceManager called.");
         MessageParcel data;
         if (!data.WriteInterfaceToken(HIPLAY_PANEL_INTERFACE_TOKEN)) {
@@ -621,7 +621,7 @@ void DistributedAbilityManagerService::HandleStartDeviceManager(int32_t token,
         }
         MessageParcel reply;
         MessageOption option;
-        int32_t result = appProxy_->SendRequest(START_DEVICE_MANAGER_CODE, data, reply, option);
+        int32_t result = appProxy->SendRequest(START_DEVICE_MANAGER_CODE, data, reply, option);
         HILOGD("result is %{public}d", result);
     };
     if (!continuationHandler_->PostTask(func)) {
@@ -637,7 +637,7 @@ void DistributedAbilityManagerService::HandleUpdateConnectStatus(int32_t token, 
         HILOGE("continuationHandler_ is nullptr");
         return;
     }
-    auto func = [this, token, deviceId, deviceConnectStatus]() {
+    auto func = [this, token, deviceId, deviceConnectStatus, appProxy = appProxy_]() {
         HILOGD("HandleUpdateConnectStatus called.");
         MessageParcel data;
         if (!data.WriteInterfaceToken(HIPLAY_PANEL_INTERFACE_TOKEN)) {
@@ -650,7 +650,7 @@ void DistributedAbilityManagerService::HandleUpdateConnectStatus(int32_t token, 
         PARCEL_WRITE_HELPER_NORET(data, Int32, static_cast<int32_t>(deviceConnectStatus));
         MessageParcel reply;
         MessageOption option;
-        int32_t result = appProxy_->SendRequest(UPDATE_CONNECT_STATUS_CODE, data, reply, option);
+        int32_t result = appProxy->SendRequest(UPDATE_CONNECT_STATUS_CODE, data, reply, option);
         HILOGD("result is %{public}d", result);
     };
     if (!continuationHandler_->PostTask(func)) {
