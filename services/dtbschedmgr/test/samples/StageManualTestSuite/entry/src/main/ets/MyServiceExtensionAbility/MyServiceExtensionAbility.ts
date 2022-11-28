@@ -16,7 +16,8 @@
 
 import rpc from '@ohos.rpc';
 import ServiceExtensionAbility from '@ohos.application.ServiceExtensionAbility';
-var printLog = '[ServiceExtension]'
+
+const printLog = '[ServiceExtension]';
 
 class MyServiceExtensionAbilityStub extends rpc.RemoteObject {
     constructor(des) {
