@@ -332,12 +332,31 @@ ohos_unittest("hisyseventreporttest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("distributeduidtest") {
+  module_out_path = module_output_path
+
+  sources = [ "unittest/distributed_sched_uid_test.cpp" ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":bundlemanagerinternaltest",
     ":distributedcalltest",
     ":distributedschedsvrtest",
+    ":distributeduidtest",
     ":dmsfreeinstallcbtest",
     ":dschedconnecttest",
     ":dschedcontinuetest",
