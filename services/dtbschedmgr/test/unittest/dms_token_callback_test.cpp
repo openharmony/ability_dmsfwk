@@ -26,7 +26,9 @@ using namespace testing::ext;
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
+const char* DISTSCHED_PROCESS_NAME = "distributedsched";
 const char* FOUNDATION_PROCESS_NAME = "foundation";
+const char* INVALID_PROCESS_NAME = "invalid_process";
 }
 
 void DmsTokenCallbackTest::SetUpTestCase()
@@ -48,11 +50,12 @@ void DmsTokenCallbackTest::SetUp()
 {
     DTEST_LOG << "DmsTokenCallbackTest::SetUp" << std::endl;
     dmsTokenCallback_ = new DmsTokenCallback();
+    DistributedSchedUtil::MockProcess(FOUNDATION_PROCESS_NAME);
 }
 
 /**
  * @tc.name: SendResultTest_001
- * @tc.desc: call SendResult out from foundation
+ * @tc.desc: call SendResult from distributedsched
  * @tc.type: FUNC
  * @tc.require: I5RWIV
  */
@@ -64,6 +67,7 @@ HWTEST_F(DmsTokenCallbackTest, SendResultTest_001, TestSize.Level3)
     int32_t requestCode = 0;
     uint32_t accessToken = 0;
     int32_t resultCode = 0;
+    DistributedSchedUtil::MockProcess(DISTSCHED_PROCESS_NAME);
     int32_t result = dmsTokenCallback_->SendResult(want, callerUid, requestCode, accessToken, resultCode);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DmsTokenCallbackTest SendResultTest_001 end" << std::endl;
@@ -83,7 +87,6 @@ HWTEST_F(DmsTokenCallbackTest, SendResultTest_002, TestSize.Level3)
     int32_t requestCode = 0;
     uint32_t accessToken = 0;
     int32_t resultCode = 0;
-    DistributedSchedUtil::MockProcess(FOUNDATION_PROCESS_NAME);
     int32_t result = dmsTokenCallback_->SendResult(want, callerUid, requestCode, accessToken, resultCode);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DmsTokenCallbackTest SendResultTest_002 end" << std::endl;
@@ -106,10 +109,50 @@ HWTEST_F(DmsTokenCallbackTest, SendResultTest_003, TestSize.Level3)
     int32_t requestCode = 0;
     uint32_t accessToken = 0;
     int32_t resultCode = 0;
-    DistributedSchedUtil::MockProcess(FOUNDATION_PROCESS_NAME);
     int32_t result = dmsTokenCallback_->SendResult(want, callerUid, requestCode, accessToken, resultCode);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DmsTokenCallbackTest SendResultTest_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: SendResultTest_004
+ * @tc.desc: call SendResult from invalid process
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DmsTokenCallbackTest, SendResultTest_004, TestSize.Level3)
+{
+    DTEST_LOG << "DmsTokenCallbackTest SendResultTest_004 begin" << std::endl;
+    AAFwk::Want want;
+    int32_t callerUid = 0;
+    int32_t requestCode = 0;
+    uint32_t accessToken = 0;
+    int32_t resultCode = 0;
+    DistributedSchedUtil::MockProcess(INVALID_PROCESS_NAME);
+    int32_t result = dmsTokenCallback_->SendResult(want, callerUid, requestCode, accessToken, resultCode);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DmsTokenCallbackTest SendResultTest_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: SendResultTest_005
+ * @tc.desc: call SendResult with remote device id
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DmsTokenCallbackTest, SendResultTest_005, TestSize.Level3)
+{
+    DTEST_LOG << "DmsTokenCallbackTest SendResultTest_005 begin" << std::endl;
+    AAFwk::Want want;
+    string remoteDeviceId = "remoteDeviceId";
+    want.SetParam("dmsSrcNetworkId", remoteDeviceId);
+    int32_t callerUid = 0;
+    int32_t requestCode = 0;
+    uint32_t accessToken = 0;
+    int32_t resultCode = 0;
+    int32_t result = dmsTokenCallback_->SendResult(want, callerUid, requestCode, accessToken, resultCode);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DmsTokenCallbackTest SendResultTest_005 end" << std::endl;
 }
 
 /**

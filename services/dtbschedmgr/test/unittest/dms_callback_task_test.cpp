@@ -541,5 +541,89 @@ HWTEST_F(DmsCallbackTaskTest, NotifyDeviceOffline_003, TestSize.Level3)
     EXPECT_EQ(dmsCallbackTask_->callbackMap_.size(), 0);
     DTEST_LOG << "DmsCallbackTaskTest NotifyDeviceOffline_003 end" << std::endl;
 }
+
+/**
+ * @tc.name: ProcessEvent_001
+ * @tc.desc: event is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DmsCallbackTaskTest, ProcessEvent_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsCallbackTaskTest ProcessEvent_001 begin" << std::endl;
+    AppExecFwk::InnerEvent *event = nullptr;
+    auto destructor = [](AppExecFwk::InnerEvent *event) {
+        if (event != nullptr) {
+            delete event;
+        }
+    };
+    dmsCallbackTask_->dmsCallbackHandler_->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
+    EXPECT_EQ(event, nullptr);
+    DTEST_LOG << "DmsCallbackTaskTest ProcessEvent_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProcessEvent_002
+ * @tc.desc: taskId is invalid
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DmsCallbackTaskTest, ProcessEvent_002, TestSize.Level3)
+{
+    DTEST_LOG << "DmsCallbackTaskTest ProcessEvent_002 begin" << std::endl;
+    AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
+    event->innerEventId_ = -1;
+    auto destructor = [](AppExecFwk::InnerEvent *event) {
+        if (event != nullptr) {
+            delete event;
+        }
+    };
+    dmsCallbackTask_->dmsCallbackHandler_->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
+    EXPECT_NE(event, nullptr);
+    DTEST_LOG << "DmsCallbackTaskTest ProcessEvent_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProcessEvent_003
+ * @tc.desc: callback_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DmsCallbackTaskTest, ProcessEvent_003, TestSize.Level3)
+{
+    DTEST_LOG << "DmsCallbackTaskTest ProcessEvent_003 begin" << std::endl;
+    AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
+    event->innerEventId_ = 1;
+    auto destructor = [](AppExecFwk::InnerEvent *event) {
+        if (event != nullptr) {
+            delete event;
+        }
+    };
+    dmsCallbackTask_->dmsCallbackHandler_->callback_ = nullptr;
+    dmsCallbackTask_->dmsCallbackHandler_->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
+    EXPECT_NE(event, nullptr);
+    DTEST_LOG << "DmsCallbackTaskTest ProcessEvent_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProcessEvent_004
+ * @tc.desc: callback_ is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DmsCallbackTaskTest, ProcessEvent_004, TestSize.Level3)
+{
+    DTEST_LOG << "DmsCallbackTaskTest ProcessEvent_004 begin" << std::endl;
+    AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
+    event->innerEventId_ = 1;
+    auto destructor = [](AppExecFwk::InnerEvent *event) {
+        if (event != nullptr) {
+            delete event;
+        }
+    };
+    dmsCallbackTask_->dmsCallbackHandler_->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
+    EXPECT_NE(event, nullptr);
+    DTEST_LOG << "DmsCallbackTaskTest ProcessEvent_004 end" << std::endl;
+}
 }
 }
