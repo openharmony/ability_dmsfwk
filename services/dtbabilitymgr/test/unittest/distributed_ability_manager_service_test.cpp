@@ -39,7 +39,7 @@ const std::string DEVICE_ID = "testDeviceId";
 }
 
 sptr<DistributedAbilityManagerService>  DistributedAbilityManagerServiceTest::dtbabilitymgrService_;
-bool DistributedAbilityManagerServiceTest::isCaseDone_ = false;
+int32_t DistributedAbilityManagerServiceTest::startTaskNum_ = 2;
 std::mutex DistributedAbilityManagerServiceTest::caseDoneLock_;
 std::condition_variable DistributedAbilityManagerServiceTest::caseDoneCondition_;
 
@@ -103,8 +103,8 @@ void DistributedAbilityManagerServiceTest::TearDownTestCase()
     // Wait until all asyn tasks are completed before exiting the test suite
     auto caseDoneNotifyTask = []() {
         std::lock_guard<std::mutex> autoLock(caseDoneLock_);
-        isCaseDone_ = true;
-        caseDoneCondition_.notify_all();
+        --startTaskNum_;
+        caseDoneCondition_.notify_one();
     };
     if (DistributedSchedMissionManager::GetInstance().distributedDataStorage_ != nullptr) {
         std::shared_ptr<AppExecFwk::EventHandler> dmsDataStorageHandler =
@@ -113,9 +113,12 @@ void DistributedAbilityManagerServiceTest::TearDownTestCase()
             dmsDataStorageHandler->PostTask(caseDoneNotifyTask);
         }
     }
+    if (dtbabilitymgrService_->continuationHandler_ != nullptr) {
+        dtbabilitymgrService_->continuationHandler_->PostTask(caseDoneNotifyTask);
+    }
     std::unique_lock<std::mutex> lock(caseDoneLock_);
     caseDoneCondition_.wait_for(lock, std::chrono::milliseconds(MAX_WAIT_TIME),
-        [&] () { return isCaseDone_; });
+        [&] () { return startTaskNum_ == 0; });
     DTEST_LOG << "DistributedAbilityManagerServiceTest::TearDownTestCase" << std::endl;
 }
 
@@ -341,11 +344,13 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_005, TestSize.Lev
 HWTEST_F(DistributedAbilityManagerServiceTest, DeviceOnlineNotify_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest DeviceOnlineNotify_001 start" << std::endl;
-    sptr<DistributedAbilityManagerService>  dtbabilitymgrService =
-        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
-    dtbabilitymgrService->InitDmsImplFunc();
-    EXPECT_EQ(dtbabilitymgrService->isLoaded_, true);
-    dtbabilitymgrService->DeviceOnlineNotify(DEVICE_ID);
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    dtbabilitymgrService_->InitDmsImplFunc();
+    EXPECT_EQ(dtbabilitymgrService_->isLoaded_, true);
+    dtbabilitymgrService_->DeviceOnlineNotify(DEVICE_ID);
     DTEST_LOG << "DistributedAbilityManagerServiceTest DeviceOnlineNotify_001 end" << std::endl;
 }
 
@@ -357,11 +362,11 @@ HWTEST_F(DistributedAbilityManagerServiceTest, DeviceOnlineNotify_001, TestSize.
 HWTEST_F(DistributedAbilityManagerServiceTest, DeviceOfflineNotify_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest DeviceOfflineNotify_001 start" << std::endl;
-    sptr<DistributedAbilityManagerService>  dtbabilitymgrService =
-        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
-    dtbabilitymgrService->InitDmsImplFunc();
-    EXPECT_EQ(dtbabilitymgrService->isLoaded_, true);
-    dtbabilitymgrService->DeviceOfflineNotify(DEVICE_ID);
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    dtbabilitymgrService_->DeviceOfflineNotify(DEVICE_ID);
     DTEST_LOG << "DistributedAbilityManagerServiceTest DeviceOfflineNotify_001 end" << std::endl;
 }
 
@@ -373,15 +378,49 @@ HWTEST_F(DistributedAbilityManagerServiceTest, DeviceOfflineNotify_001, TestSize
 HWTEST_F(DistributedAbilityManagerServiceTest, ConnectAbility_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest ConnectAbility_001 start" << std::endl;
-    sptr<DistributedAbilityManagerService>  dtbabilitymgrService =
-        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
-    dtbabilitymgrService->InitDmsImplFunc();
-    EXPECT_EQ(dtbabilitymgrService->isLoaded_, true);
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    EXPECT_EQ(dtbabilitymgrService_->isLoaded_, true);
     sptr<DmsNotifier> dmsNotifier(new MockDmsNotifier());
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
-    int32_t ret = dtbabilitymgrService->ConnectAbility(dmsNotifier, 1, continuationExtraParams);
+    int32_t ret = dtbabilitymgrService_->ConnectAbility(dmsNotifier, 1, continuationExtraParams);
     EXPECT_NE(ret, true);
     DTEST_LOG << "DistributedAbilityManagerServiceTest ConnectAbility_001 end" << std::endl;
+}
+
+
+/**
+ * @tc.name: HandleDeviceDisconnect
+ * @tc.desc: test HandleDeviceDisconnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceDisconnect_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest HandleDeviceDisconnect_001 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+
+    std::vector<ContinuationResult> continuationResults;
+    bool ret = dtbabilitymgrService_->HandleDeviceDisconnect(dtbabilitymgrService_, continuationResults);
+    EXPECT_NE(ret, true);
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    dtbabilitymgrService_->ScheduleStartDeviceManager(nullptr, 1, continuationExtraParams);
+    dtbabilitymgrService_->ScheduleStartDeviceManager(dtbabilitymgrService_, 1, continuationExtraParams);
+    dtbabilitymgrService_->HandleStartDeviceManager(1, continuationExtraParams);
+    dtbabilitymgrService_->HandleStartDeviceManager(1, nullptr);
+    if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
+        auto runner = AppExecFwk::EventRunner::Create("continuation_manager");
+        dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    }
+    bool result = dtbabilitymgrService_->HandleDeviceConnect(dtbabilitymgrService_, continuationResults);
+    dtbabilitymgrService_->HandleStartDeviceManager(1, continuationExtraParams);
+    dtbabilitymgrService_->HandleStartDeviceManager(1, nullptr);
+    EXPECT_EQ(result, true);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest HandleDeviceDisconnect_001 end" << std::endl;
 }
 
 /**
@@ -392,18 +431,48 @@ HWTEST_F(DistributedAbilityManagerServiceTest, ConnectAbility_001, TestSize.Leve
 HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceConnect_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleDeviceConnect_001 start" << std::endl;
-    sptr<DistributedAbilityManagerService>  dtbabilitymgrService =
-        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
-    std::vector<ContinuationResult> continuationResults;
-    int32_t ret = dtbabilitymgrService->HandleDeviceConnect(dtbabilitymgrService, continuationResults);
-    EXPECT_NE(ret, true);
-    if (dtbabilitymgrService->continuationHandler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create("continuation_manager");
-        dtbabilitymgrService->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
     }
-    ret = dtbabilitymgrService->HandleDeviceConnect(dtbabilitymgrService, continuationResults);
+    std::vector<ContinuationResult> continuationResults;
+    int32_t ret = dtbabilitymgrService_->HandleDeviceConnect(dtbabilitymgrService_, continuationResults);
     EXPECT_EQ(ret, true);
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleDeviceConnect_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleNotifierDied
+ * @tc.desc: test HandleNotifierDied
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, HandleNotifierDied_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest HandleNotifierDied_001 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    std::vector<ContinuationResult> continuationResults;
+    dtbabilitymgrService_->HandleNotifierDied(dtbabilitymgrService_);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest HandleNotifierDied_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleNotifierDied
+ * @tc.desc: test HandleNotifierDied
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceCancel_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest OnDeviceCancel_001 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    int32_t ret = dtbabilitymgrService_->OnDeviceCancel();
+    EXPECT_NE(ret, true);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest OnDeviceCancel_001 end" << std::endl;
 }
 
 /**
@@ -414,15 +483,17 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceConnect_001, TestSize
 HWTEST_F(DistributedAbilityManagerServiceTest, HandleUpdateConnectStatus_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleUpdateConnectStatus_001 start" << std::endl;
-    sptr<DistributedAbilityManagerService>  dtbabilitymgrService =
-        new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
-    DeviceConnectStatus deviceConnectStatus = DeviceConnectStatus::CONNECTING;
-    dtbabilitymgrService->HandleUpdateConnectStatus(1, DEVICE_ID, deviceConnectStatus);
-    if (dtbabilitymgrService->continuationHandler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create("continuation_manager");
-        dtbabilitymgrService->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
     }
-    dtbabilitymgrService->HandleUpdateConnectStatus(1, DEVICE_ID, deviceConnectStatus);
+    DeviceConnectStatus deviceConnectStatus = DeviceConnectStatus::CONNECTING;
+    dtbabilitymgrService_->HandleUpdateConnectStatus(1, DEVICE_ID, deviceConnectStatus);
+    if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
+        auto runner = AppExecFwk::EventRunner::Create("continuation_manager");
+        dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    }
+    dtbabilitymgrService_->HandleUpdateConnectStatus(1, DEVICE_ID, deviceConnectStatus);
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleUpdateConnectStatus_001 end" << std::endl;
 }
 }
