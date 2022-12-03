@@ -110,6 +110,7 @@ ohos_unittest("distributedabilitymanagerservicetest") {
     "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_stub.cpp",
     "${distributed_service}/dtbschedmgr/test/unittest/distributed_sched_util.cpp",
     "unittest/distributed_ability_manager_service_test.cpp",
+    "unittest/distributed_ability_manager_stub_test.cpp",
   ]
   configs = [
     ":test_config",
