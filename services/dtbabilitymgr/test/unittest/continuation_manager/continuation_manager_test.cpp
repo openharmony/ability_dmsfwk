@@ -277,8 +277,16 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_003, TestS
     int32_t result2 = DistributedAbilityManagerClient::GetInstance().RegisterDeviceSelectionCallback(
         token, INVALID_CALLBACK_TYPE, notifier);
     DTEST_LOG << "result2:" << result2 << std::endl;
+    int32_t result3 = DistributedAbilityManagerClient::GetInstance().RegisterDeviceSelectionCallback(
+        token, "", notifier);
+    DTEST_LOG << "result3:" << result3 << std::endl;
+    int32_t result4 = DistributedAbilityManagerClient::GetInstance().RegisterDeviceSelectionCallback(
+        token, INVALID_CALLBACK_TYPE, nullptr);
+    DTEST_LOG << "result4:" << result4 << std::endl;
     EXPECT_EQ(ERR_OK, result1);
     EXPECT_EQ(UNKNOWN_CALLBACK_TYPE, result2);
+    EXPECT_EQ(ERR_NULL_OBJECT, result3);
+    EXPECT_EQ(ERR_NULL_OBJECT, result4);
     DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_003 end" << std::endl;
 }
 
@@ -637,6 +645,26 @@ HWTEST_F(ContinuationManagerTest, UnregisterDeviceSelectionCallbackTest_004, Tes
     EXPECT_EQ(UNKNOWN_CALLBACK_TYPE, result2);
     DTEST_LOG << "ContinuationManagerTest UnregisterDeviceSelectionCallbackTest_004 end" << std::endl;
 }
+
+/**
+ * @tc.name: UnregisterDeviceSelectionCallbackTest_005
+ * @tc.desc: test register device selection callback with invalid param
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContinuationManagerTest, UnregisterDeviceSelectionCallbackTest_005, TestSize.Level1)
+{
+    DTEST_LOG << "ContinuationManagerTest UnregisterDeviceSelectionCallbackTest_005 start" << std::endl;
+    int32_t token = -1;
+    int32_t result1 = DistributedAbilityManagerClient::GetInstance().Register(nullptr, token);
+    DTEST_LOG << "result1:" << result1 << std::endl;
+    int32_t result2 = DistributedAbilityManagerClient::GetInstance().UnregisterDeviceSelectionCallback(
+        token, "");
+    DTEST_LOG << "result2:" << result2 << std::endl;
+    EXPECT_EQ(ERR_OK, result1);
+    EXPECT_EQ(ERR_NULL_OBJECT, result2);
+    DTEST_LOG << "ContinuationManagerTest UnregisterDeviceSelectionCallbackTest_005 end" << std::endl;
+}
+
 
 /**
  * @tc.name: StartDeviceManagerTest_001

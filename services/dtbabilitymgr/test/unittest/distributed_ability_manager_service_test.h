@@ -31,7 +31,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    static bool isCaseDone_;
+    static int32_t startTaskNum_;
     static std::mutex caseDoneLock_;
     static std::condition_variable caseDoneCondition_;
     static sptr<DistributedAbilityManagerService>  dtbabilitymgrService_;
