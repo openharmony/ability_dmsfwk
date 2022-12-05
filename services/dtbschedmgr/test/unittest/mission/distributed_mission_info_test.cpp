@@ -137,10 +137,43 @@ HWTEST_F(DistributedMissionInfoTest, testUnmarshalling002, TestSize.Level3)
  */
 HWTEST_F(DistributedMissionInfoTest, testMarshalling001, TestSize.Level3)
 {
+    /**
+     * @tc.steps: step1. test Marshalling.
+     */
     DstbMissionInfo dstbMissionInfo;
     Parcel data;
     auto ret = dstbMissionInfo.Marshalling(data);
     EXPECT_EQ(ret, true);
+    /**
+     * @tc.steps: step2. test OnChange when insertEntries is not empty.
+     */
+    std::vector<DistributedKv::Entry> insertEntries;
+    std::vector<DistributedKv::Entry> updateEntries;
+    std::vector<DistributedKv::Entry> deleteEntries;
+    DistributedKv::Entry entry;
+    entry.key = "key";
+    entry.value = "value";
+    insertEntries.emplace_back(entry);
+    updateEntries.emplace_back(entry);
+    deleteEntries.emplace_back(entry);
+    std::string deviceId = "device";
+    DistributedKv::ChangeNotification changeNotification(std::move(insertEntries), std::move(updateEntries),
+        std::move(deleteEntries), deviceId, false);
+    DistributedDataChangeListener distributedDataChangeListener;
+    distributedDataChangeListener.OnChange(changeNotification);
+    /**
+     * @tc.steps: step3. test KeyInfo when strVector.size() == MAX_SPLIT_VARS.
+     */
+    insertEntries.clear();
+    updateEntries.clear();
+    deleteEntries.clear();
+    entry.key = "key_0";
+    insertEntries.emplace_back(entry);
+    updateEntries.emplace_back(entry);
+    deleteEntries.emplace_back(entry);
+    DistributedKv::ChangeNotification changeNotification1(std::move(insertEntries), std::move(updateEntries),
+        std::move(deleteEntries), deviceId, false);
+    distributedDataChangeListener.OnChange(changeNotification);
 }
 
 /**
@@ -151,6 +184,9 @@ HWTEST_F(DistributedMissionInfoTest, testMarshalling001, TestSize.Level3)
  */
 HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel001, TestSize.Level3)
 {
+     /**
+     * @tc.steps: step1. test ReadDstbMissionInfosFromParcel.
+     */
     DTEST_LOG << "DistributedMissionInfoTest testReadDstbMissionInfosFromParcel001 start" << std::endl;
     DstbMissionInfo dstbMissionInfo;
     Parcel parcel;
@@ -158,6 +194,23 @@ HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel001, Test
     bool ret = dstbMissionInfo.ReadDstbMissionInfosFromParcel(parcel, missionInfos);
     EXPECT_TRUE(ret);
     EXPECT_EQ(0, missionInfos.size());
+    /**
+     * @tc.steps: step2. test KeyInfo when StrToInt failed.
+     */
+    std::vector<DistributedKv::Entry> insertEntries;
+    std::vector<DistributedKv::Entry> updateEntries;
+    std::vector<DistributedKv::Entry> deleteEntries;
+    DistributedKv::Entry entry;
+    entry.key = "invalid_key";
+    entry.value = "value";
+    insertEntries.emplace_back(entry);
+    updateEntries.emplace_back(entry);
+    deleteEntries.emplace_back(entry);
+    std::string deviceId = "device";
+    DistributedKv::ChangeNotification changeNotification(std::move(insertEntries), std::move(updateEntries),
+        std::move(deleteEntries), deviceId, false);
+    DistributedDataChangeListener distributedDataChangeListener;
+    distributedDataChangeListener.OnChange(changeNotification);
     DTEST_LOG << "DistributedMissionInfoTest testReadDstbMissionInfosFromParcel001 end" << std::endl;
 }
 
