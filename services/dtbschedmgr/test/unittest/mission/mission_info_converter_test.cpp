@@ -137,11 +137,11 @@ HWTEST_F(MissionInfoConverterTest, testWriteMissionInfosToParcel_001, TestSize.L
     result = MissionInfoConverter::ReadMissionInfosFromParcel(parcel, missionInfos);
     EXPECT_TRUE(result);
     /**
-     * @tc.steps: step3. test ReadMissionInfosFromParcel when missionInfos is not empty;
+     * @tc.steps: step3. test WriteMissionInfosToParcel when missionInfos is not empty;
      */
     AAFwk::MissionInfo missionInfo;
     missionInfos.emplace_back(missionInfo);
-    result = MissionInfoConverter::ReadMissionInfosFromParcel(parcel, missionInfos);
+    result = MissionInfoConverter::WriteMissionInfosToParcel(parcel, missionInfos);
     EXPECT_TRUE(result);
 }
 
