@@ -2042,7 +2042,6 @@ HWTEST_F(ContinuationManagerTest, OnDeviceEvent_001, TestSize.Level3)
      */
     ret = appDeviceCallbackStub.OnDeviceCancel();
     EXPECT_EQ(ERR_NULL_OBJECT, ret);
-
 }
 
 /**

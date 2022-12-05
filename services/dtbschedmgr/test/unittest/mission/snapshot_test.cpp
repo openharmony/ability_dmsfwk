@@ -124,6 +124,7 @@ HWTEST_F(SnapshotTest, testWriteToParcel004, TestSize.Level3)
      * @tc.steps: step3. CreatePixelMap when buffer == nullptr
      */
     std::unique_ptr<Media::PixelMap> pixelMap = snapshot.CreatePixelMap(nullptr, TEST_PARCEL_WRITE_VALUE);
+    EXPECT_EQ(nullptr, pixelMap);
     DTEST_LOG << "SnapshotTest testWriteToParcel004 end" << std::endl;
 }
 
