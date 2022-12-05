@@ -17,6 +17,7 @@
 #define DISTRIBUTED_SCHED_STUB_TEST_H
 
 #include "distributed_sched_interface.h"
+#include "event_handler.h"
 #include "iremote_stub.h"
 #include "gtest/gtest.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
@@ -35,6 +36,13 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    void WaitHandlerTaskDone(const std::shared_ptr<AppExecFwk::EventHandler> &handler);
+    void CallerInfoMarshalling(const CallerInfo& callerInfo, MessageParcel& data);
+    void FreeInstallInfoMarshalling(const CallerInfo& callerInfo,
+        const DistributedSchedService::AccountInfo accountInfo, const int64_t taskId, MessageParcel& data);
+    bool isTaskDone_;
+    std::mutex taskDoneLock_;
+    std::condition_variable taskDoneCondition_;
     sptr<DistributedSchedStub> distributedSchedStub_;
 };
 } // namespace DistributedSchedule

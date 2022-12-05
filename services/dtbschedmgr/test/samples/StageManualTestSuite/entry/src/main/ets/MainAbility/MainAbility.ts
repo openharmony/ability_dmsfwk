@@ -18,12 +18,12 @@ import Ability from '@ohos.application.Ability'
 import RemoteDeviceModel from '../Model/RemoteDeviceModel'
 import rpc from '@ohos.rpc'
 
-var printLog = '[MainAbility]'
-var remoteDeviceModel = new RemoteDeviceModel
-var messageProxy = null
-var connectedAbility
+const printLog = '[MainAbility]';
+const remoteDeviceModel = new RemoteDeviceModel;
+let messageProxy = null;
+let connectedAbility;
 
-var options = {
+const options = {
     onConnect: async function (elementName, proxy) {
         showLog(printLog + "service extension ability connect success")
         if (proxy === null) {
@@ -39,7 +39,7 @@ var options = {
     onFailed: function () {
         showLog(printLog + "service extension ability connect fail")
     }
-}
+};
 
 function ConnectRemoteAbility() {
     showLog(printLog + "connect service extension ability begin")
@@ -87,7 +87,7 @@ function showLog(logMessage) {
 function RegisterDeviceListCallback() {
     remoteDeviceModel.registerDeviceListCallback(() => {
         let deviceSize = remoteDeviceModel.deviceList.length
-        for (var i = 0; i < deviceSize; i++) {
+        for (let i = 0; i < deviceSize; i++) {
             globalThis.DeviceIdList.push(remoteDeviceModel.deviceList[i].deviceId)
         }
     })

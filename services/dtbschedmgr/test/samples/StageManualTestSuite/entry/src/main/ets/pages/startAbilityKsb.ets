@@ -162,7 +162,7 @@ struct StartAbility {
       })
 
       Button() {
-        Text('StartAbilityPromiseKSB004，跨设备，跨应用，对端FA的visable为false无法拉起')
+        Text('StartAbilityPromiseKSB004，跨设备，跨应用，对端FA的visible为false无法拉起')
           .fontSize($r('app.float.font_20'))
           .width('100%')
           .fontColor(Color.White)

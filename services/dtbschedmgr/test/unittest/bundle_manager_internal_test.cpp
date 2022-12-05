@@ -330,5 +330,78 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerCallBackTest_002, TestSize.Leve
     EXPECT_TRUE(ERR_OK != ret);
     DTEST_LOG << "BundleManagerCallBackTest BundleManagerCallBackTest_002 end "<< std::endl;
 }
+
+/**
+ * @tc.name: BundleManagerCallBackTest_003
+ * @tc.desc: test OnRemoteRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, BundleManagerCallBackTest_003, TestSize.Level1)
+{
+    DTEST_LOG << "BundleManagerCallBackTest BundleManagerCallBackTest_003 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    auto callback = new DmsBundleManagerCallbackStub();
+    int32_t ret = callback->OnRemoteRequest(-1, data, reply, option);
+    EXPECT_TRUE(ERR_OK != ret);
+    DTEST_LOG << "BundleManagerCallBackTest BundleManagerCallBackTest_003 end "<< std::endl;
+}
+
+/**
+ * @tc.name: GetBundleNameListFromBms_001
+ * @tc.desc: test GetBundleNameListFromBms
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, GetBundleNameListFromBms_001, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerCallBackTest GetBundleNameListFromBms_001 begin" << std::endl;
+    const std::string bundleName = "com.ohos.launcher";
+    int32_t uid = BundleManagerInternal::GetUidFromBms(bundleName);
+    if (uid <= 0) {
+        return;
+    }
+    std::vector<std::u16string> u16BundleNameList;
+    BundleManagerInternal::GetBundleNameListFromBms(uid, u16BundleNameList);
+    EXPECT_TRUE(!u16BundleNameList.empty());
+    u16BundleNameList.clear();
+    BundleManagerInternal::GetBundleNameListFromBms(-1, u16BundleNameList);
+    EXPECT_TRUE(u16BundleNameList.empty());
+    DTEST_LOG << "BundleManagerCallBackTest GetBundleNameListFromBms_001 end "<< std::endl;
+}
+
+/**
+ * @tc.name: GetCallerAppIdFromBms_001
+ * @tc.desc: test get callerappId from bms
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, GetCallerAppIdFromBms_001, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest GetCallerAppIdFromBms_001 begin" << std::endl;
+    const std::string bundleName = "com.ohos.launcher";
+    int32_t uid = BundleManagerInternal::GetUidFromBms(bundleName);
+    if (uid <= 0) {
+        return;
+    }
+    string appId;
+    bool ret = BundleManagerInternal::GetCallerAppIdFromBms(uid, appId);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "BundleManagerInternalTest GetCallerAppIdFromBms_001 end "<< std::endl;
+}
+
+/**
+ * @tc.name: IsSameAppId_001
+ * @tc.desc: test IsSameAppId with invalid param
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, IsSameAppId_001, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest IsSameAppId_001 begin" << std::endl;
+    string appId = "1001";
+    string targetBundleName = "ohos.samples.dms.testApp";
+    bool ret = BundleManagerInternal::IsSameAppId(appId, targetBundleName);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "BundleManagerInternalTest IsSameAppId_001 end "<< std::endl;
+}
 }
 }
