@@ -1949,7 +1949,7 @@ HWTEST_F(ContinuationManagerTest, OnDeviceEvent_001, TestSize.Level3)
     /**
      * @tc.steps: step5. test OnDeviceDisconnect when dmsNotifier_ == nullptr
      */
-    ret = appDeviceCallbackStub.OnDeviceDisconnect(TEST_TOKEN, continuationResults);
+    ret = appDeviceCallbackStub.OnDeviceDisconnect(TEST_TOKEN, deviceIds);
     EXPECT_EQ(ERR_NULL_OBJECT, ret);
     /**
      * @tc.steps: step6. test OnDeviceCancel when dmsNotifier_ == nullptr
