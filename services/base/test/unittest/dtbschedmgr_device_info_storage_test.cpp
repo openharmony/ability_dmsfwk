@@ -226,6 +226,16 @@ HWTEST_F(DtbschedmgrDeviceInfoStorageTest, GetDeviceIdSetTest_001, TestSize.Leve
     set<std::string> deviceIdSet;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceIdSet(deviceIdSet);
     EXPECT_TRUE(deviceIdSet.empty());
+    /**
+     * @tc.steps: step2. test GetDeviceIdSet when remoteDevices_ is not empty;
+     */
+    std::string deviceId = "invalid deviceId for DeviceOnlineNotify";
+    std::string deviceName = "invalid deviceName for DeviceOnlineNotify";
+    int32_t deviceType = 0;
+    std::shared_ptr<DmsDeviceInfo> devInfo = make_shared<DmsDeviceInfo>(deviceName, deviceType, deviceId);
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[deviceId] = devInfo;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceIdSet(deviceIdSet);
+    EXPECT_FALSE(deviceIdSet.empty());
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest GetDeviceIdSetTest_001 end" << std::endl;
 }
 
