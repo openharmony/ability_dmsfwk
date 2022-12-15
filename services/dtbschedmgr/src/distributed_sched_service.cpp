@@ -1062,8 +1062,19 @@ int32_t DistributedSchedService::StartRemoteShareForm(const std::string& remoteD
             DnetworkAdapter::AnonymizeDeviceId(remoteDeviceId).c_str());
         return GET_REMOTE_DMS_FAIL;
     }
-
-    int32_t result = remoteDms->StartShareFormFromRemote(remoteDeviceId, formShareInfo);
+    std::string localDeviceId = "";
+    GetLocalDeviceId(localDeviceId);
+    OHOS::AppExecFwk::FormShareInfo formShareInfoCopy;
+    formShareInfoCopy.formId = formShareInfo.formId;
+    formShareInfoCopy.formName = formShareInfo.formName;
+    formShareInfoCopy.bundleName = formShareInfo.bundleName;
+    formShareInfoCopy.moduleName = formShareInfo.moduleName;
+    formShareInfoCopy.abilityName = formShareInfo.abilityName;
+    formShareInfoCopy.formTempFlag = formShareInfo.formTempFlag;
+    formShareInfoCopy.dimensionId = formShareInfo.dimensionId;
+    formShareInfoCopy.providerShareData = formShareInfo.providerShareData;
+    formShareInfoCopy.deviceId = localDeviceId;
+    int32_t result = remoteDms->StartShareFormFromRemote(remoteDeviceId, formShareInfoCopy);
     HILOGD("[PerformanceTest] StartRemoteShareForm RPC end");
     if (result != ERR_OK) {
         HILOGE("StartRemoteShareForm failed, result : %{public}d", result);
