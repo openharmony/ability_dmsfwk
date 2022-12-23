@@ -21,7 +21,7 @@ START_REMOTE_ABILITY:
   TARGET_BUNDLE: {type: STRING, desc: target bundle name}
   TARGET_ABILITY: {type: STRING, desc: target ability name}
   CALLING_APP_UID: {type: INT32, desc: calling app uid}
-  RESULT: {type: INT32, desc: result}
+  RESULT: {type: INT32, desc: result code}
 
 CONNECT_REMOTE_ABILITY:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: connect, desc: connect remote ability}
@@ -31,7 +31,7 @@ CONNECT_REMOTE_ABILITY:
   TARGET_BUNDLE: {type: STRING, desc: target bundle name}
   TARGET_ABILITY: {type: STRING, desc: target ability name}
   CALLING_APP_UID: {type: INT32, desc: calling app uid}
-  RESULT: {type: INT32, desc: result}
+  RESULT: {type: INT32, desc: result code}
 
 DISCONNECT_REMOTE_ABILITY:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: connect, desc: disconnect remote ability}
@@ -41,7 +41,7 @@ DISCONNECT_REMOTE_ABILITY:
   TARGET_BUNDLE: {type: STRING, desc: target bundle name}
   TARGET_ABILITY: {type: STRING, desc: target ability name}
   CALLING_APP_UID: {type: INT32, desc: calling app uid}
-  RESULT: {type: INT32, desc: result}
+  RESULT: {type: INT32, desc: result code}
 
 START_REMOTE_ABILITY_BYCALL:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: start, desc: start remote ability by call}
@@ -51,7 +51,7 @@ START_REMOTE_ABILITY_BYCALL:
   TARGET_BUNDLE: {type: STRING, desc: target bundle name}
   TARGET_ABILITY: {type: STRING, desc: target ability name}
   CALLING_APP_UID: {type: INT32, desc: calling app uid}
-  RESULT: {type: INT32, desc: result}
+  RESULT: {type: INT32, desc: result code}
 
 RELEASE_REMOTE_ABILITY:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: start, desc: release remote ability}
@@ -61,7 +61,7 @@ RELEASE_REMOTE_ABILITY:
   TARGET_BUNDLE: {type: STRING, desc: target bundle name}
   TARGET_ABILITY: {type: STRING, desc: target ability name}
   CALLING_APP_UID: {type: INT32, desc: calling app uid}
-  RESULT: {type: INT32, desc: result}
+  RESULT: {type: INT32, desc: result code}
 
 START_CONTINUATION:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: continue, desc: start continuation}
@@ -71,7 +71,7 @@ START_CONTINUATION:
   TARGET_BUNDLE: {type: STRING, desc: target bundle name}
   TARGET_ABILITY: {type: STRING, desc: target ability name}
   CALLING_APP_UID: {type: INT32, desc: calling app uid}
-  RESULT: {type: INT32, desc: result}
+  RESULT: {type: INT32, desc: result code}
 
 
 START_ABILITY_FAILED:

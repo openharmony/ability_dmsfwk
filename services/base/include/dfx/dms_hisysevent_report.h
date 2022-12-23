@@ -22,31 +22,31 @@
 namespace OHOS {
 namespace DistributedSchedule {
 namespace BehaviorEvent {
-    constexpr const char* START_REMOTE_ABILITY = "START_REMOTE_ABILITY";
-    constexpr const char* CONNECT_REMOTE_ABILITY = "CONNECT_REMOTE_ABILITY";
-    constexpr const char* DISCONNECT_REMOTE_ABILITY = "DISCONNECT_REMOTE_ABILITY";
-    constexpr const char* START_REMOTE_ABILITY_BYCALL = "START_REMOTE_ABILITY_BYCALL";
-    constexpr const char* RELEASE_REMOTE_ABILITY = "RELEASE_REMOTE_ABILITY";
-    constexpr const char* START_CONTINUATION = "START_CONTINUATION";
+constexpr const char* START_REMOTE_ABILITY = "START_REMOTE_ABILITY";
+constexpr const char* CONNECT_REMOTE_ABILITY = "CONNECT_REMOTE_ABILITY";
+constexpr const char* DISCONNECT_REMOTE_ABILITY = "DISCONNECT_REMOTE_ABILITY";
+constexpr const char* START_REMOTE_ABILITY_BYCALL = "START_REMOTE_ABILITY_BYCALL";
+constexpr const char* RELEASE_REMOTE_ABILITY = "RELEASE_REMOTE_ABILITY";
+constexpr const char* START_CONTINUATION = "START_CONTINUATION";
 }
 
 namespace FaultEvent {
-    constexpr const char* START_REMOTE_ABILITY = "START_ABILITY_FAILED";
-    constexpr const char* CONNECT_REMOTE_ABILITY = "CONNECT_ABILITY_FAILED";
-    constexpr const char* DISCONNECT_REMOTE_ABILITY = "DISCONNECT_ABILITY_FAILED";
-    constexpr const char* START_REMOTE_ABILITY_BYCALL = "START_ABILITY_BYCALL_FAILED";
-    constexpr const char* RELEASE_REMOTE_ABILITY = "RELEASE_ABILITY_FAILED";
-    constexpr const char* START_CONTINUATION = "START_CONTINUATION_FAILED";
+constexpr const char* START_REMOTE_ABILITY = "START_ABILITY_FAILED";
+constexpr const char* CONNECT_REMOTE_ABILITY = "CONNECT_ABILITY_FAILED";
+constexpr const char* DISCONNECT_REMOTE_ABILITY = "DISCONNECT_ABILITY_FAILED";
+constexpr const char* START_REMOTE_ABILITY_BYCALL = "START_ABILITY_BYCALL_FAILED";
+constexpr const char* RELEASE_REMOTE_ABILITY = "RELEASE_ABILITY_FAILED";
+constexpr const char* START_CONTINUATION = "START_CONTINUATION_FAILED";
 }
 
 namespace EventErrorType {
-    constexpr const char* GET_BUNDLE_MGR_FAILED = "GET_BUNDLE_MGR_FAILED";
-    constexpr const char* GET_ABILITY_MGR_FAILED = "GET_ABILITY_MGR_FAILED";
+constexpr const char* GET_BUNDLE_MGR_FAILED = "GET_BUNDLE_MGR_FAILED";
+constexpr const char* GET_ABILITY_MGR_FAILED = "GET_ABILITY_MGR_FAILED";
 }
 
 namespace EventCallingType {
-    constexpr const char* LOCAL = "LOCAL";
-    constexpr const char* REMOTE = "REMOTE";
+constexpr const char* LOCAL = "LOCAL";
+constexpr const char* REMOTE = "REMOTE";
 }
 
 struct BehaviorEventParam {
