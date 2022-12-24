@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 
 ohos_prebuilt_etc("distributedsched_trust") {
-  source = "distributedsched_trust.xml"
+  source = "distributedsched_trust.json"
   module_install_dir = "profile"
   part_name = "dmsfwk"
   subsystem_name = "ability"
