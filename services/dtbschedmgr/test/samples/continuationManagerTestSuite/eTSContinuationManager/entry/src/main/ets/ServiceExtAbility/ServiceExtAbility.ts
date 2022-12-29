@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import Extension from '@ohos.application.ServiceExtensionAbility'
+import Extension from '@ohos.app.ability.ServiceExtensionAbility'
 import rpc from '@ohos.rpc'
 
 class StubTest extends rpc.RemoteObject {

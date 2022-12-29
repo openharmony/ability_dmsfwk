@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-import Ability from '@ohos.application.Ability'
-import AbilityConstant from '@ohos.application.AbilityConstant'
+import Ability from '@ohos.app.ability.UIAbility'
+import AbilityConstant from '@ohos.app.ability.AbilityConstant'
 import accessControl from "@ohos.abilityAccessCtrl";
 import bundle from '@ohos.bundle';
 import distributedObject from '@ohos.data.distributedDataObject';
