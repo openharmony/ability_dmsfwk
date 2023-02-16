@@ -19,6 +19,7 @@
 
 #include "bundle/bundle_manager_internal.h"
 #include "device_manager.h"
+#include "distributed_sched_permission.h"
 #include "distributed_sched_proxy.h"
 #include "distributed_sched_service.h"
 #include "distributed_sched_util.h"
@@ -1303,9 +1304,16 @@ HWTEST_F(DistributedSchedServiceTest, ConnectAbilityFromRemote_002, TestSize.Lev
     callerInfo.sourceDeviceId = LOCAL_DEVICEID;
     IDistributedSched::AccountInfo accountInfo;
     accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    int ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
+    int32_t ret1 = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
         abilityInfo, connect, callerInfo, accountInfo);
-    EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
+    AppExecFwk::AbilityInfo targetAbility;
+    bool ret2 = DistributedSchedPermission::GetInstance().GetTargetAbility(want, targetAbility, true);
+    EXPECT_EQ(ret2, true);
+    if (targetAbility.visible) {
+        EXPECT_EQ(ret1, ERR_OK);
+    } else {
+        EXPECT_EQ(ret1, DMS_START_CONTROL_PERMISSION_DENIED);
+    }
     DTEST_LOG << "DistributedSchedServiceTest ConnectAbilityFromRemote_002 end" << std::endl;
 }
 
@@ -1321,8 +1329,7 @@ HWTEST_F(DistributedSchedServiceTest, StartLocalAbility_005, TestSize.Level3)
     AAFwk::Want want;
     std::string localDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
-    AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME,
-        ABILITY_NAME);
+    AppExecFwk::ElementName element(localDeviceId, "com.ohos.note", "MainAbility");
     want.SetElement(element);
     want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
     AppExecFwk::AbilityInfo abilityInfo;
@@ -1330,7 +1337,7 @@ HWTEST_F(DistributedSchedServiceTest, StartLocalAbility_005, TestSize.Level3)
     CallerInfo callerInfo;
     callerInfo.uid = 0;
     callerInfo.sourceDeviceId = LOCAL_DEVICEID;
-    bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
+    bool result = BundleManagerInternal::GetCallerAppIdFromBms("com.ohos.note", callerInfo.callerAppId);
     EXPECT_TRUE(result);
     IDistributedSched::AccountInfo accountInfo;
     accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
