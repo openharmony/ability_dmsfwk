@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -39,20 +39,24 @@ dtbabilitymgr_external_deps = [
   "access_token:libaccesstoken_sdk",
   "access_token:libnativetoken",
   "access_token:libtoken_setproc",
+  "bundle_framework:appexecfwk_base",
+  "bundle_framework:appexecfwk_core",
   "c_utils:utils",
   "device_auth:deviceauth_sdk",
   "device_manager:devicemanagersdk",
+  "dmsfwk:common_sdk",
+  "dmsfwk:continuation_manager",
   "eventhandler:libeventhandler",
   "hiviewdfx_hilog_native:libhilog",
   "init:libbegetutil",
   "ipc:ipc_core",
   "kv_store:distributeddata_inner",
+  "os_account:os_account_innerkits",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
 ]
 
 dtbabilitymgr_public_deps = [
-  "//foundation/ability/dmsfwk/services/base:dmsbaseinner",
   "//foundation/ability/dmsfwk/services/dtbschedmgr:distributedschedsvr",
   "//third_party/googletest:gmock_main",
   "//third_party/googletest:gtest_main",
@@ -60,6 +64,8 @@ dtbabilitymgr_public_deps = [
 ]
 
 dtbabilitymgr_sources = [
+  "${distributed_service}/dtbabilitymgr/src/continuation_manager/app_connection_stub.cpp",
+  "${distributed_service}/dtbabilitymgr/src/continuation_manager/app_device_callback_stub.cpp",
   "${distributed_service}/dtbabilitymgr/src/continuation_manager/connect_status_info.cpp",
   "${distributed_service}/dtbabilitymgr/src/continuation_manager/continuation_extra_params.cpp",
   "${distributed_service}/dtbabilitymgr/src/continuation_manager/continuation_result.cpp",
@@ -68,6 +74,7 @@ dtbabilitymgr_sources = [
   "${distributed_service}/dtbabilitymgr/src/continuation_manager/notifier_death_recipient.cpp",
   "${distributed_service}/dtbabilitymgr/src/continuation_manager/notifier_info.cpp",
   "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_client.cpp",
+  "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_dumper.cpp",
   "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_proxy.cpp",
   "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_service.cpp",
   "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_stub.cpp",
@@ -77,8 +84,8 @@ ohos_unittest("continuationmanagertest") {
   module_out_path = module_output_path
   sources = [
     "${distributed_service}/dtbschedmgr/test/unittest/distributed_sched_util.cpp",
+    "unittest/continuation_manager/app_connection_stub_test.cpp",
     "unittest/continuation_manager/continuation_manager_test.cpp",
-    "unittest/distributed_ability_manager_dumper_test.cpp",
   ]
   sources += dtbabilitymgr_sources
   configs = [
@@ -98,20 +105,12 @@ ohos_unittest("continuationmanagertest") {
 ohos_unittest("distributedabilitymanagerservicetest") {
   module_out_path = module_output_path
   sources = [
-    "${distributed_service}/dtbabilitymgr/src/continuation_manager/app_device_callback_stub.cpp",
-    "${distributed_service}/dtbabilitymgr/src/continuation_manager/connect_status_info.cpp",
-    "${distributed_service}/dtbabilitymgr/src/continuation_manager/continuation_extra_params.cpp",
-    "${distributed_service}/dtbabilitymgr/src/continuation_manager/continuation_result.cpp",
-    "${distributed_service}/dtbabilitymgr/src/continuation_manager/device_selection_notifier_proxy.cpp",
-    "${distributed_service}/dtbabilitymgr/src/continuation_manager/notifier_death_recipient.cpp",
-    "${distributed_service}/dtbabilitymgr/src/continuation_manager/notifier_info.cpp",
-    "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_dumper.cpp",
-    "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_service.cpp",
-    "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_stub.cpp",
     "${distributed_service}/dtbschedmgr/test/unittest/distributed_sched_util.cpp",
+    "unittest/distributed_ability_manager_dumper_test.cpp",
     "unittest/distributed_ability_manager_service_test.cpp",
     "unittest/distributed_ability_manager_stub_test.cpp",
   ]
+  sources += dtbabilitymgr_sources
   configs = [
     ":test_config",
     "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",

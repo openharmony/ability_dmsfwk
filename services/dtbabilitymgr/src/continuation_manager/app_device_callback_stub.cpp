@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,21 +17,16 @@
 
 #include <string>
 
-#include "continuation_extra_params.h"
-#include "dtbschedmgr_log.h"
+#include "base/continuationmgr_log.h"
+#include "base/parcel_helper.h"
+#include "distributed_ability_manager_service.h"
 #include "ipc_object_stub.h"
 #include "ipc_types.h"
-#include "parcel_helper.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string TAG = "AppDeviceCallbackStub";
-}
-
-AppDeviceCallbackStub::AppDeviceCallbackStub(const sptr<DmsNotifier>& dmsNotifier)
-{
-    dmsNotifier_ = dmsNotifier;
 }
 
 int32_t AppDeviceCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
@@ -79,35 +74,20 @@ int32_t AppDeviceCallbackStub::OnDeviceConnect(int32_t token,
     const std::vector<ContinuationResult>& continuationResults)
 {
     HILOGD("called.");
-    if (dmsNotifier_ == nullptr) {
-        HILOGE("dmsNotifier_ is nullptr");
-        return ERR_NULL_OBJECT;
-    }
-    int32_t result = dmsNotifier_->OnDeviceConnect(token, continuationResults);
-    return result;
+    return DistributedAbilityManagerService::GetInstance().OnDeviceConnect(token, continuationResults);
 }
 
 int32_t AppDeviceCallbackStub::OnDeviceDisconnect(int32_t token,
     const std::vector<ContinuationResult>& continuationResults)
 {
     HILOGD("called.");
-    if (dmsNotifier_ == nullptr) {
-        HILOGE("dmsNotifier_ is nullptr");
-        return ERR_NULL_OBJECT;
-    }
-    int32_t result = dmsNotifier_->OnDeviceDisconnect(token, continuationResults);
-    return result;
+    return DistributedAbilityManagerService::GetInstance().OnDeviceDisconnect(token, continuationResults);
 }
 
 int32_t AppDeviceCallbackStub::OnDeviceCancel()
 {
     HILOGD("called.");
-    if (dmsNotifier_ == nullptr) {
-        HILOGE("dmsNotifier_ is nullptr");
-        return ERR_NULL_OBJECT;
-    }
-    int32_t result = dmsNotifier_->OnDeviceCancel();
-    return result;
+    return DistributedAbilityManagerService::GetInstance().OnDeviceCancel();
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

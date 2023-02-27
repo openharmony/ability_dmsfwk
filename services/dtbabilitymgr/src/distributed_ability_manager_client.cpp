@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,8 +14,8 @@
  */
 #include "distributed_ability_manager_client.h"
 
+#include "base/continuationmgr_log.h"
 #include "distributed_ability_manager_proxy.h"
-#include "dtbschedmgr_log.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -24,21 +24,21 @@
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-const std::string TAG = "DistributedAbilityManagerClient";
+const std::string TAG = "ContinuationManagerClient";
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DistributedAbilityManagerClient);
 
-sptr<IDistributedAbilityManager> DistributedAbilityManagerClient::GetDmsProxy()
+sptr<IDistributedAbilityManager> DistributedAbilityManagerClient::GetContinuationMgrService()
 {
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
         HILOGE("get samgr failed.");
         return nullptr;
     }
-    sptr<IRemoteObject> remoteObj = samgrProxy->GetSystemAbility(DISTRIBUTED_SCHED_SA_ID);
+    sptr<IRemoteObject> remoteObj = samgrProxy->GetSystemAbility(CONTINUATION_MANAGER_SA_ID);
     if (remoteObj == nullptr) {
-        HILOGE("get dms SA failed.");
+        HILOGE("get continuationMgrService SA failed.");
         return nullptr;
     }
     return iface_cast<IDistributedAbilityManager>(remoteObj);
@@ -48,70 +48,70 @@ int32_t DistributedAbilityManagerClient::Register(
     const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams, int32_t& token)
 {
     HILOGD("called.");
-    sptr<IDistributedAbilityManager> dmsProxy = GetDmsProxy();
-    if (dmsProxy == nullptr) {
-        HILOGE("dmsProxy is nullptr");
+    sptr<IDistributedAbilityManager> continuationMgrProxy = GetContinuationMgrService();
+    if (continuationMgrProxy == nullptr) {
+        HILOGE("continuationMgrProxy is nullptr");
         return ERR_NULL_OBJECT;
     }
-    return dmsProxy->Register(continuationExtraParams, token);
+    return continuationMgrProxy->Register(continuationExtraParams, token);
 }
 
 int32_t DistributedAbilityManagerClient::Unregister(int32_t token)
 {
     HILOGD("called.");
-    sptr<IDistributedAbilityManager> dmsProxy = GetDmsProxy();
-    if (dmsProxy == nullptr) {
-        HILOGE("dmsProxy is nullptr");
+    sptr<IDistributedAbilityManager> continuationMgrProxy = GetContinuationMgrService();
+    if (continuationMgrProxy == nullptr) {
+        HILOGE("continuationMgrProxy is nullptr");
         return ERR_NULL_OBJECT;
     }
-    return dmsProxy->Unregister(token);
+    return continuationMgrProxy->Unregister(token);
 }
 
 int32_t DistributedAbilityManagerClient::RegisterDeviceSelectionCallback(int32_t token, const std::string& cbType,
     const sptr<DeviceSelectionNotifierStub>& notifier)
 {
     HILOGD("called.");
-    sptr<IDistributedAbilityManager> dmsProxy = GetDmsProxy();
-    if (dmsProxy == nullptr) {
-        HILOGE("dmsProxy is nullptr");
+    sptr<IDistributedAbilityManager> continuationMgrProxy = GetContinuationMgrService();
+    if (continuationMgrProxy == nullptr) {
+        HILOGE("continuationMgrProxy is nullptr");
         return ERR_NULL_OBJECT;
     }
-    return dmsProxy->RegisterDeviceSelectionCallback(token, cbType, notifier);
+    return continuationMgrProxy->RegisterDeviceSelectionCallback(token, cbType, notifier);
 }
 
 int32_t DistributedAbilityManagerClient::UnregisterDeviceSelectionCallback(int32_t token, const std::string& cbType)
 {
     HILOGD("called.");
-    sptr<IDistributedAbilityManager> dmsProxy = GetDmsProxy();
-    if (dmsProxy == nullptr) {
-        HILOGE("dmsProxy is nullptr");
+    sptr<IDistributedAbilityManager> continuationMgrProxy = GetContinuationMgrService();
+    if (continuationMgrProxy == nullptr) {
+        HILOGE("continuationMgrProxy is nullptr");
         return ERR_NULL_OBJECT;
     }
-    return dmsProxy->UnregisterDeviceSelectionCallback(token, cbType);
+    return continuationMgrProxy->UnregisterDeviceSelectionCallback(token, cbType);
 }
 
 int32_t DistributedAbilityManagerClient::UpdateConnectStatus(int32_t token, const std::string& deviceId,
     const DeviceConnectStatus& deviceConnectStatus)
 {
     HILOGD("called.");
-    sptr<IDistributedAbilityManager> dmsProxy = GetDmsProxy();
-    if (dmsProxy == nullptr) {
-        HILOGE("dmsProxy is nullptr");
+    sptr<IDistributedAbilityManager> continuationMgrProxy = GetContinuationMgrService();
+    if (continuationMgrProxy == nullptr) {
+        HILOGE("continuationMgrProxy is nullptr");
         return ERR_NULL_OBJECT;
     }
-    return dmsProxy->UpdateConnectStatus(token, deviceId, deviceConnectStatus);
+    return continuationMgrProxy->UpdateConnectStatus(token, deviceId, deviceConnectStatus);
 }
 
 int32_t DistributedAbilityManagerClient::StartDeviceManager(
     int32_t token, const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams)
 {
     HILOGD("called.");
-    sptr<IDistributedAbilityManager> dmsProxy = GetDmsProxy();
-    if (dmsProxy == nullptr) {
-        HILOGE("dmsProxy is nullptr");
+    sptr<IDistributedAbilityManager> continuationMgrProxy = GetContinuationMgrService();
+    if (continuationMgrProxy == nullptr) {
+        HILOGE("continuationMgrProxy is nullptr");
         return ERR_NULL_OBJECT;
     }
-    return dmsProxy->StartDeviceManager(token, continuationExtraParams);
+    return continuationMgrProxy->StartDeviceManager(token, continuationExtraParams);
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

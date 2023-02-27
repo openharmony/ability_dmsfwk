@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,22 +19,20 @@
 #include <string>
 #include <vector>
 
-#include "dms_dumper.h"
-
 namespace OHOS {
 namespace DistributedSchedule {
 class DistributedAbilityManagerDumper {
 public:
-    static bool Dump(const sptr<DmsDumper>& dmsDumper, const std::vector<std::string>& args, std::string& result);
+    static bool Dump(const std::vector<std::string>& args, std::string& result);
 private:
     DistributedAbilityManagerDumper() = default;
     ~DistributedAbilityManagerDumper() = default;
 
+    static bool CanDump();
+    static bool DumpDefault(std::string& result);
+    static void ShowAppRegisterInfo(std::string& result);
     static void ShowHelp(std::string& result);
     static void IllegalInput(std::string& result);
-    static bool CanDump();
-    static bool ProcessDistributedSchedDump(const sptr<DmsDumper>& dmsDumper,
-        const std::vector<std::string>& args, std::string& result);
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,7 +68,7 @@ HWTEST_F(DistributedSchedDumperTest, Dump_001, TestSize.Level3)
     const std::vector<std::string> args = {};
     std::string result = "";
     bool res = DistributedSchedDumper::Dump(args, result);
-    EXPECT_EQ(res, true);
+    EXPECT_EQ(res, false);
     DTEST_LOG << "DistributedSchedDumperTest Dump_001 end" << std::endl;
 }
 
@@ -84,7 +84,7 @@ HWTEST_F(DistributedSchedDumperTest, Dump_002, TestSize.Level3)
     const std::vector<std::string> args = {"-connect"};
     std::string result = "";
     bool res = DistributedSchedDumper::Dump(args, result);
-    EXPECT_EQ(res, true);
+    EXPECT_EQ(res, false);
     DTEST_LOG << "DistributedSchedDumperTest Dump_002 end" << std::endl;
 }
 

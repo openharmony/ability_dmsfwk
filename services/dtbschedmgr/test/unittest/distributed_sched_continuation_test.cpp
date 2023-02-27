@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,11 +34,13 @@ const std::u16string MOCK_DEVICE_ID = u"MOCK_DEVICE_ID";
 constexpr int32_t MOCK_SESSION_ID = 123;
 constexpr int32_t MOCK_TASK_ID = 456;
 const string LOCAL_DEVICE_ID = "192.168.43.100";
-constexpr int32_t REQUEST_CODE_ERR = 305;
 }
 
 void DSchedContinuationTest::SetUpTestCase()
 {
+    if (!DistributedSchedUtil::LoadDistributedSchedService()) {
+        DTEST_LOG << "DSchedContinuationTest::SetUpTestCase LoadDistributedSchedService failed" << std::endl;
+    }
     const std::string pkgName = "DBinderBus_" + std::to_string(getpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
@@ -102,12 +104,12 @@ sptr<IDistributedSched> DSchedContinuationTest::GetDms()
     }
     DTEST_LOG << "DSchedContinuationTest sm is not nullptr" << std::endl;
     auto distributedObject = sm->GetSystemAbility(DISTRIBUTED_SCHED_SA_ID);
-    EXPECT_TRUE(distributedObject != nullptr);
     proxy_ = iface_cast<IDistributedSched>(distributedObject);
     if (proxy_ == nullptr) {
         DTEST_LOG << "DSchedContinuationTest DistributedSched is nullptr" << std::endl;
+    } else {
+        DTEST_LOG << "DSchedContinuationTest DistributedSched is not nullptr" << std::endl;
     }
-    DTEST_LOG << "DSchedContinuationTest DistributedSched is not nullptr" << std::endl;
     return proxy_;
 }
 
@@ -1291,7 +1293,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallContinueMission001, TestSize.Level3)
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId);
     WantParams wantParams;
     int32_t ret = proxy->ContinueMission(srcDeviceId, "MockdevId", 0, GetDSchedService(), wantParams);
-    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, MISSION_FOR_CONTINUING_IS_NOT_ALIVE);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallContinueMission001 end" << std::endl;
 }
 
@@ -1312,7 +1314,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallContinueMission002, TestSize.Level3)
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId);
     WantParams wantParams;
     int32_t ret = proxy->ContinueMission(srcDeviceId, "MockdevId", 0, nullptr, wantParams);
-    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallContinueMission002 end" << std::endl;
 }
 
@@ -1332,7 +1334,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallStartContinuation001, TestSize.Level3)
     OHOS::AAFwk::Want want;
     want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
     int32_t ret = proxy->StartContinuation(want, 0, 0, 0, 0);
-    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallStartContinuation001 end" << std::endl;
 }
 
@@ -1353,7 +1355,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallNotifyContinuationResultFromRemote001,
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId);
     proxy->NotifyCompleteContinuation(Str8ToStr16(srcDeviceId), 0, true);
     int32_t ret = proxy->NotifyContinuationResultFromRemote(0, true);
-    EXPECT_EQ(ret, REQUEST_CODE_ERR);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallNotifyContinuationResultFromRemote001 end" << std::endl;
 }
 
@@ -1396,7 +1398,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallStartRemoteAbilityByCall001, TestSize.
     string abilityName = "abilityName";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
     int32_t ret = proxy->StartRemoteAbilityByCall(*spWant, nullptr, 0, 0, 1);
-    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallStartRemoteAbilityByCall001 end" << std::endl;
 }
 
@@ -1437,7 +1439,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallReleaseRemoteAbility001, TestSize.Leve
     AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
         "com.ohos.distributedmusicplayer.MainAbility");
     int32_t ret = proxy->ReleaseRemoteAbility(nullptr, element);
-    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallReleaseRemoteAbility001 end" << std::endl;
 }
 
@@ -1489,7 +1491,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallStartAbilityByCallFromRemote001, TestS
     accountInfo.groupIdList.push_back("123456");
 
     int32_t ret = proxy->StartAbilityByCallFromRemote(*spWant, nullptr, callerInfo, accountInfo);
-    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallReleaseRemoteAbility001 end" << std::endl;
 }
 
@@ -1547,7 +1549,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallReleaseAbilityFromRemote001, TestSize.
     AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
         "com.ohos.distributedmusicplayer.MainAbility");
     int32_t ret = proxy->ReleaseAbilityFromRemote(nullptr, element, callerInfo);
-    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallReleaseAbilityFromRemote001 end" << std::endl;
 }
 
@@ -1619,7 +1621,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallStartRemoteFreeInstall002, TestSize.Le
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
 
     int32_t ret = proxy->StartRemoteFreeInstall(*spWant, 0, 1, 1, nullptr);
-    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallStartRemoteFreeInstall002 end" << std::endl;
 }
 
@@ -1676,7 +1678,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallStartShareFormFromRemote001, TestSize.
     }
     const OHOS::AppExecFwk::FormShareInfo formShareInfo {};
     int32_t ret = proxy->StartShareFormFromRemote("", formShareInfo);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallStartShareFormFromRemote001 end" << std::endl;
 }
 

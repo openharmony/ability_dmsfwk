@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,9 +23,9 @@ using namespace testing::ext;
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-constexpr int32_t DISTRIBUTED_SCHED_SA_ID = 1401;
+constexpr int32_t REQUEST_CODE_ERR = 305;
 constexpr int32_t INVALID_CODE = 123456;
-const std::u16string DMS_PROXY_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
+const std::u16string DMS_PROXY_INTERFACE_TOKEN = u"OHOS.DistributedSchedule.IDistributedAbilityManager";
 }
 
 void DistributedAbilityManagerStubTest::SetUpTestCase()
@@ -40,7 +40,7 @@ void DistributedAbilityManagerStubTest::TearDownTestCase()
 
 void DistributedAbilityManagerStubTest::SetUp()
 {
-    dtbabilitymgrStub_ = new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
+    dtbabilitymgrStub_ = new DistributedAbilityManagerService();
     DTEST_LOG << "DistributedAbilityManagerStubTest::SetUp" << std::endl;
 }
 
@@ -78,14 +78,12 @@ HWTEST_F(DistributedAbilityManagerStubTest, OnRemoteRequest_001, TestSize.Level3
 HWTEST_F(DistributedAbilityManagerStubTest, OnRemoteRequest_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerStubTest OnRemoteRequest_002 start" << std::endl;
-    uint32_t code = INVALID_CODE;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    dtbabilitymgrStub_->distributedFuncMap_[INVALID_CODE] = nullptr;
     data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN);
-    int32_t result = dtbabilitymgrStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(result, ERR_NULL_OBJECT);
+    int32_t result = dtbabilitymgrStub_->OnRemoteRequest(INVALID_CODE, data, reply, option);
+    EXPECT_EQ(result, REQUEST_CODE_ERR);
     DTEST_LOG << "DistributedAbilityManagerStubTest OnRemoteRequest_002 end" << std::endl;
 }
 
@@ -184,23 +182,6 @@ HWTEST_F(DistributedAbilityManagerStubTest, StartDeviceManagerInner_001, TestSiz
     int32_t result = dtbabilitymgrStub_->StartDeviceManagerInner(data, reply);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedAbilityManagerStubTest StartDeviceManagerInner_001 end" << std::endl;
-}
-
-/**
- * @tc.name: GetDistributedComponentListInner_001
- * @tc.desc: test GetDistributedComponentListInner with interfaceToken is empty
- * @tc.type: FUNC
- * @tc.require: I64FU7
- */
-HWTEST_F(DistributedAbilityManagerStubTest, GetDistributedComponentListInner_001, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedAbilityManagerStubTest GetDistributedComponentListInner_001 start" << std::endl;
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    int32_t result = dtbabilitymgrStub_->GetDistributedComponentListInner(data, reply, option);
-    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
-    DTEST_LOG << "DistributedAbilityManagerStubTest GetDistributedComponentListInner_001 end" << std::endl;
 }
 }
 }

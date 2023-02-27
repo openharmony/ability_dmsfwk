@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -119,6 +119,9 @@ void AbilityConnectionWrapperStubTest::OnAbilityDisconnectDone(const AppExecFwk:
 
 void DistributedSchedConnectTest::SetUpTestCase()
 {
+    if (!DistributedSchedUtil::LoadDistributedSchedService()) {
+        DTEST_LOG << "DistributedSchedConnectTest::SetUpTestCase LoadDistributedSchedService failed" << std::endl;
+    }
     const std::string pkgName = "DBinderBus_" + std::to_string(getpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
@@ -228,7 +231,6 @@ sptr<IDistributedSched> DistributedSchedConnectTest::GetDms()
         DTEST_LOG << "distributedObject sm is nullptr" << std::endl;
         return nullptr;
     }
-    EXPECT_TRUE(distributedObject != nullptr);
     return iface_cast<IDistributedSched>(distributedObject);
 }
 
@@ -248,6 +250,10 @@ HWTEST_F(DistributedSchedConnectTest, DumpConnectInfo_001, TestSize.Level1)
     }
 
     auto dms = samgr->GetSystemAbility(DISTRIBUTED_SCHED_SA_ID);
+    if (dms == nullptr) {
+        DTEST_LOG << "dms is nullptr" << std::endl;
+        return;
+    }
     std::vector<std::u16string> args;
     args.push_back(u"-connect");
     int32_t result = dms->Dump(STDOUT_FD, args);

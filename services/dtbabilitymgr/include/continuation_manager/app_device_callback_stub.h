@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,9 +19,8 @@
 #include <iosfwd>
 #include <vector>
 
-#include "continuation_result.h"
-#include "dms_notifier.h"
 #include "app_device_callback_interface.h"
+#include "continuation_result.h"
 #include "iremote_stub.h"
 #include "message_option.h"
 #include "message_parcel.h"
@@ -32,7 +31,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 class AppDeviceCallbackStub : public IRemoteStub<AppDeviceCallbackInterface> {
 public:
-    explicit AppDeviceCallbackStub(const sptr<DmsNotifier>& dmsNotifier);
+    AppDeviceCallbackStub() = default;
     virtual ~AppDeviceCallbackStub() = default;
 
     virtual int32_t OnRemoteRequest(uint32_t code, MessageParcel& data,
@@ -43,8 +42,6 @@ private:
     int32_t OnDeviceConnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
     int32_t OnDeviceDisconnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
     int32_t OnDeviceCancel() override;
-
-    sptr<DmsNotifier> dmsNotifier_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

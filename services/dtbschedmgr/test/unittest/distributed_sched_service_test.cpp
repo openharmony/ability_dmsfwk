@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,6 +87,9 @@ protected:
 
 void DistributedSchedServiceTest::SetUpTestCase()
 {
+    if (!DistributedSchedUtil::LoadDistributedSchedService()) {
+        DTEST_LOG << "DistributedSchedServiceTest::SetUpTestCase LoadDistributedSchedService failed" << std::endl;
+    }
     const std::string pkgName = "DBinderBus_" + std::to_string(getpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
@@ -119,12 +122,12 @@ sptr<IDistributedSched> DistributedSchedServiceTest::GetDms()
     }
     DTEST_LOG << "DistributedSchedServiceTest sm is not nullptr" << std::endl;
     auto distributedObject = sm->GetSystemAbility(DISTRIBUTED_SCHED_SA_ID);
-    EXPECT_TRUE(distributedObject != nullptr);
     proxy_ = iface_cast<IDistributedSched>(distributedObject);
     if (proxy_ == nullptr) {
         DTEST_LOG << "DistributedSchedServiceTest DistributedSched is nullptr" << std::endl;
+    } else {
+        DTEST_LOG << "DistributedSchedServiceTest DistributedSched is not nullptr" << std::endl;
     }
-    DTEST_LOG << "DistributedSchedServiceTest DistributedSched is not nullptr" << std::endl;
     return proxy_;
 }
 
@@ -1214,9 +1217,9 @@ HWTEST_F(DistributedSchedServiceTest, StartAbilityByCallFromRemote_001, TestSize
     EXPECT_EQ(result, true);
     IDistributedSched::AccountInfo accountInfo;
     accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    int ret = DistributedSchedService::GetInstance().StartAbilityByCallFromRemote(want, connect,
-        callerInfo, accountInfo);
-    EXPECT_NE(ret, ERR_OK);
+    auto mockDms = iface_cast<IDistributedSched>(GetDSchedService());
+    int ret = mockDms->StartAbilityByCallFromRemote(want, connect, callerInfo, accountInfo);
+    EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedServiceTest StartAbilityByCallFromRemote_001 end" << std::endl;
 }
 
@@ -1274,8 +1277,8 @@ HWTEST_F(DistributedSchedServiceTest, ConnectAbilityFromRemote_001, TestSize.Lev
     EXPECT_TRUE(result);
     IDistributedSched::AccountInfo accountInfo;
     accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    int ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
-        abilityInfo, connect, callerInfo, accountInfo);
+    auto mockDms = iface_cast<IDistributedSched>(GetDSchedService());
+    int ret = mockDms->ConnectAbilityFromRemote(want, abilityInfo, connect, callerInfo, accountInfo);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedServiceTest ConnectAbilityFromRemote_001 end" << std::endl;
 }

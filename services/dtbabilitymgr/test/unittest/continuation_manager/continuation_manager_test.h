@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,22 +47,6 @@ public:
     void OnDeviceConnect(const std::vector<ContinuationResult>& continuationResults) override;
     void OnDeviceDisconnect(const std::vector<ContinuationResult>& continuationResults) override;
 };
-
-class MockDmsNotifier : public DmsNotifier {
-public:
-    MockDmsNotifier() = default;
-    ~MockDmsNotifier() = default;
-
-    void DeviceOnlineNotify(const std::string& deviceId) override;
-    void DeviceOfflineNotify(const std::string& deviceId) override;
-    void ProcessNotifierDied(const sptr<IRemoteObject>& notifier) override;
-    void ScheduleStartDeviceManager(const sptr<IRemoteObject>& appProxy, int32_t token,
-        const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams = nullptr) override;
-    int32_t OnDeviceConnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
-    int32_t OnDeviceDisconnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
-    int32_t OnDeviceCancel() override;
-};
-
 } // namespace DistributedSchedule
 } // namespace OHOS
 #endif // OHOS_DISTRIBUTED_ABILITY_MANAGER_CONTINUATION_MANAGER_TEST_H

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 #ifndef OHOS_DISTRIBUTED_ABILITY_MANAGER_NOTIFIER_DEATH_RECIPIENT_H
 #define OHOS_DISTRIBUTED_ABILITY_MANAGER_NOTIFIER_DEATH_RECIPIENT_H
 
-#include "dms_notifier.h"
 #include "iremote_object.h"
 #include "refbase.h"
 
@@ -24,13 +23,10 @@ namespace OHOS {
 namespace DistributedSchedule {
 class NotifierDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    explicit NotifierDeathRecipient(const sptr<DmsNotifier>& dmsNotifier);
-    ~NotifierDeathRecipient() override = default;
+    NotifierDeathRecipient() = default;
+    virtual ~NotifierDeathRecipient() = default;
 
     void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
-
-private:
-    sptr<DmsNotifier> dmsNotifier_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

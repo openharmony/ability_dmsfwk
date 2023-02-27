@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,11 +21,9 @@
 #include <set>
 #include <unordered_map>
 
-#include "continuation_extra_params.h"
 #include "distributed_sched_stub.h"
 #include "distributed_sched_continuation.h"
 #include "dms_callback_task.h"
-#include "dms_notifier.h"
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
 #include "form_mgr_interface.h"
 #endif
@@ -36,6 +34,7 @@
 #include "nocopyable.h"
 #endif
 #include "single_instance.h"
+#include "system_ability.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -62,13 +61,18 @@ struct ProcessDiedNotifyInfo {
     TargetComponent targetComponent;
 };
 
-class DistributedSchedService : public DistributedSchedStub {
-
-DECLARE_SINGLE_INSTANCE_BASE(DistributedSchedService);
+class DistributedSchedService : public SystemAbility, public DistributedSchedStub {
+    DECLARE_SYSTEM_ABILITY(DistributedSchedService);
+    DECLARE_SINGLE_INSTANCE_BASE(DistributedSchedService);
 
 public:
     ~DistributedSchedService() = default;
-    void OnStart();
+    void OnStart() override;
+    void OnStop() override;
+    int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
+    void DeviceOnlineNotify(const std::string& deviceId);
+    void DeviceOfflineNotify(const std::string& deviceId);
+
     int32_t StartRemoteAbility(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t requestCode,
         uint32_t accessToken) override;
     int32_t StartAbilityFromRemote(const OHOS::AAFwk::Want& want,
@@ -98,13 +102,6 @@ public:
         std::vector<AAFwk::MissionInfo>& missionInfos) override;
     int32_t NotifyMissionsChangedFromRemote(const std::vector<DstbMissionInfo>& missionInfos,
         const CallerInfo& callerInfo) override;
-#endif
-    void ProcessConnectDied(const sptr<IRemoteObject>& connect);
-    void ProcessDeviceOffline(const std::string& deviceId);
-    void DumpConnectInfo(std::string& info);
-    void DumpSessionsLocked(const std::list<ConnectAbilitySession>& sessionsList, std::string& info);
-    void DumpElementLocked(const std::list<AppExecFwk::ElementName>& elementsList, std::string& info);
-#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     int32_t GetRemoteMissionSnapshotInfo(const std::string& networkId, int32_t missionId,
         std::unique_ptr<AAFwk::MissionSnapshot>& missionSnapshot) override;
     int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;
@@ -115,6 +112,11 @@ public:
     int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
     int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
 #endif
+    void ProcessConnectDied(const sptr<IRemoteObject>& connect);
+    void ProcessDeviceOffline(const std::string& deviceId);
+    void DumpConnectInfo(std::string& info);
+    void DumpSessionsLocked(const std::list<ConnectAbilitySession>& sessionsList, std::string& info);
+    void DumpElementLocked(const std::list<AppExecFwk::ElementName>& elementsList, std::string& info);
     int32_t StartRemoteAbilityByCall(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
         int32_t callerUid, int32_t callerPid, uint32_t accessToken) override;
     int32_t ReleaseRemoteAbility(const sptr<IRemoteObject>& connect,
@@ -141,10 +143,6 @@ public:
     void SetContinuationTimeout(int32_t missionId, int32_t timeout);
     void RemoveContinuationTimeout(int32_t missionId);
     std::string GetContinuaitonDevice(int32_t missionId);
-
-    int32_t ConnectAbility(const sptr<DmsNotifier>& dmsNotifier, int32_t token,
-        const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams);
-    int32_t DisconnectAbility();
 private:
     DistributedSchedService();
     bool Init();
@@ -220,7 +218,6 @@ private:
     std::mutex callerLock_;
     std::map<sptr<IRemoteObject>, std::list<ConnectAbilitySession>> callerMap_;
     sptr<IRemoteObject::DeathRecipient> callerDeathRecipientForLocalDevice_;
-    sptr<IRemoteObject> connect_;
 };
 
 class ConnectAbilitySession {

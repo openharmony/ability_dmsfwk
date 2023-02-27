@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,15 +34,6 @@ public:
     ~DistributedAbilityManagerStub();
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data,
         MessageParcel& reply, MessageOption& option) override;
-    virtual int32_t SendRequestToImpl(uint32_t code, MessageParcel& data, MessageParcel& reply,
-        MessageOption& option)
-    {
-        return ERR_NONE;
-    }
-    virtual bool IsDistributedSchedLoaded()
-    {
-        return false;
-    }
 
 private:
     bool EnforceInterfaceToken(MessageParcel& data);
@@ -53,14 +44,10 @@ private:
     int32_t UnregisterDeviceSelectionCallbackInner(MessageParcel& data, MessageParcel& reply);
     int32_t UpdateConnectStatusInner(MessageParcel& data, MessageParcel& reply);
     int32_t StartDeviceManagerInner(MessageParcel& data, MessageParcel& reply);
-    int32_t GetDistributedComponentListInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     bool VerifyPermission(uint32_t accessToken, const std::string& permissionName) const;
 
     using Func = int32_t(DistributedAbilityManagerStub::*)(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, Func> funcsMap_;
-    using distributedFunc = int32_t(DistributedAbilityManagerStub::*)(MessageParcel& data,
-        MessageParcel& reply, MessageOption& option);
-    std::map<uint32_t, distributedFunc> distributedFuncMap_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
