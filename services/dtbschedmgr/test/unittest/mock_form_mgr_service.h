@@ -106,6 +106,10 @@ public:
     {
         return ERR_OK;
     };
+    int32_t BackgroundEvent(const int64_t formId, Want &want, const sptr<IRemoteObject> &callerToken) override
+    {
+        return ERR_OK;
+    };
     int32_t DeleteInvalidForms(const std::vector<int64_t> &formIds, const sptr<IRemoteObject> &callerToken,
                                    int32_t &numFormsDeleted) override
     {
