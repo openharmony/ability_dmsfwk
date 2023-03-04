@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,9 @@
 
 #include "distributed_ability_manager_dumper_test.h"
 
+#define private public
 #include "distributed_ability_manager_dumper.h"
+#undef private
 #include "dtbschedmgr_log.h"
 #include "nativetoken_kit.h"
 #include "test_log.h"
@@ -26,17 +28,11 @@ namespace DistributedSchedule {
 using namespace testing;
 using namespace testing::ext;
 namespace {
-constexpr int32_t DISTRIBUTED_SCHED_SA_ID = 1401;
 const char* HIDUMPER_PROCESS_NAME = "hidumper_service";
 const char* DISTSCHED_PROCESS_NAME = "distributedsched";
 const char* INVALID_PROCESS_NAME = "invalid_process";
-bool g_mockResult = false;
 }
 
-static bool MockDistributedSchedDumpFunc(const std::vector<std::string>& args, std::string& result)
-{
-    return g_mockResult;
-}
 static void MockProcess(const char* processName)
 {
     uint64_t tokenId;
@@ -66,7 +62,7 @@ void DistributedAbilityManagerDumperTest::TearDownTestCase()
 
 void DistributedAbilityManagerDumperTest::SetUp()
 {
-    dtbabilitymgrService_ = new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
+    dtbabilitymgrService_ = new DistributedAbilityManagerService();
     MockProcess(HIDUMPER_PROCESS_NAME);
     DTEST_LOG << "DistributedAbilityManagerDumperTest::SetUp" << std::endl;
 }
@@ -117,96 +113,6 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dump_002, TestSize.Level3)
 }
 
 /**
- * @tc.name: ProcessDistributedSchedDump_001
- * @tc.desc: call ProcessDistributedSchedDump with distributed server not load.
- * @tc.type: FUNC
- * @tc.require: I5PUBK
- */
-HWTEST_F(DistributedAbilityManagerDumperTest, ProcessDistributedSchedDump_001, TestSize.Level3)
-{
-    DTEST_LOG << "ContinuationManagerTest ProcessDistributedSchedDump_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
-    dtbabilitymgrService_->isLoaded_ = false;
-    dtbabilitymgrService_->distributedSchedDumpFunc_ = nullptr;
-    const std::vector<std::string> args;
-    std::string dumpResult;
-    bool result = dtbabilitymgrService_->ProcessDistributedSchedDump(args, dumpResult);
-    EXPECT_EQ(false, result);
-    DTEST_LOG << "ContinuationManagerTest ProcessDistributedSchedDump_001 end" << std::endl;
-}
-
-/**
- * @tc.name: ProcessDistributedSchedDump_002
- * @tc.desc: call ProcessDistributedSchedDump with distributedSchedDumpFunc_ is nullptr.
- * @tc.type: FUNC
- * @tc.require: I5PUBK
- */
-HWTEST_F(DistributedAbilityManagerDumperTest, ProcessDistributedSchedDump_002, TestSize.Level3)
-{
-    DTEST_LOG << "ContinuationManagerTest ProcessDistributedSchedDump_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
-    dtbabilitymgrService_->isLoaded_ = true;
-    dtbabilitymgrService_->distributedSchedDumpFunc_ = nullptr;
-    const std::vector<std::string> args;
-    std::string dumpResult;
-    bool result = dtbabilitymgrService_->ProcessDistributedSchedDump(args, dumpResult);
-    EXPECT_EQ(false, result);
-    DTEST_LOG << "ContinuationManagerTest ProcessDistributedSchedDump_002 end" << std::endl;
-}
-
-/**
- * @tc.name: ProcessDistributedSchedDump_003
- * @tc.desc: call ProcessDistributedSchedDump with distributed server load.
- * @tc.type: FUNC
- * @tc.require: I5PUBK
- */
-HWTEST_F(DistributedAbilityManagerDumperTest, ProcessDistributedSchedDump_003, TestSize.Level3)
-{
-    DTEST_LOG << "ContinuationManagerTest ProcessDistributedSchedDump_003 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
-    dtbabilitymgrService_->isLoaded_ = true;
-    g_mockResult = true;
-    dtbabilitymgrService_->distributedSchedDumpFunc_ = &MockDistributedSchedDumpFunc;
-    const std::vector<std::string> args;
-    std::string dumpResult;
-    bool result = dtbabilitymgrService_->ProcessDistributedSchedDump(args, dumpResult);
-    EXPECT_EQ(true, result);
-    DTEST_LOG << "ContinuationManagerTest ProcessDistributedSchedDump_003 end" << std::endl;
-}
-
-/**
- * @tc.name: ProcessDistributedSchedDump_004
- * @tc.desc: call ProcessDistributedSchedDump with distributed server load.
- * @tc.type: FUNC
- * @tc.require: I5PUBK
- */
-HWTEST_F(DistributedAbilityManagerDumperTest, ProcessDistributedSchedDump_004, TestSize.Level3)
-{
-    DTEST_LOG << "ContinuationManagerTest ProcessDistributedSchedDump_004 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
-    dtbabilitymgrService_->isLoaded_ = true;
-    g_mockResult = false;
-    dtbabilitymgrService_->distributedSchedDumpFunc_ = &MockDistributedSchedDumpFunc;
-    const std::vector<std::string> args;
-    std::string dumpResult;
-    bool result = dtbabilitymgrService_->ProcessDistributedSchedDump(args, dumpResult);
-    EXPECT_EQ(false, result);
-    DTEST_LOG << "ContinuationManagerTest ProcessDistributedSchedDump_004 end" << std::endl;
-}
-
-/**
  * @tc.name: Dumper_Dump_001
  * @tc.desc: call DistributedAbilityManagerDumper::Dump not from hidumper.
  * @tc.type: FUNC
@@ -222,7 +128,7 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_001, TestSize.Level3)
     MockProcess(DISTSCHED_PROCESS_NAME);
     const std::vector<std::string> args;
     std::string dumpResult;
-    bool result = DistributedAbilityManagerDumper::Dump(dtbabilitymgrService_, args, dumpResult);
+    bool result = DistributedAbilityManagerDumper::Dump(args, dumpResult);
     EXPECT_EQ(false, result);
     DTEST_LOG << "ContinuationManagerTest Dumper_Dump_001 end" << std::endl;
 }
@@ -240,12 +146,9 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_002, TestSize.Level3)
         DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
         return;
     }
-    dtbabilitymgrService_->isLoaded_ = true;
-    g_mockResult = true;
-    dtbabilitymgrService_->distributedSchedDumpFunc_ = &MockDistributedSchedDumpFunc;
     const std::vector<std::string> args;
     std::string dumpResult;
-    bool result = DistributedAbilityManagerDumper::Dump(dtbabilitymgrService_, args, dumpResult);
+    bool result = DistributedAbilityManagerDumper::Dump(args, dumpResult);
     EXPECT_EQ(true, result);
     DTEST_LOG << "ContinuationManagerTest Dumper_Dump_002 end" << std::endl;
 }
@@ -263,19 +166,16 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_003, TestSize.Level3)
         DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
         return;
     }
-    dtbabilitymgrService_->isLoaded_ = true;
-    g_mockResult = true;
-    dtbabilitymgrService_->distributedSchedDumpFunc_ = &MockDistributedSchedDumpFunc;
     const std::vector<std::string> args = {"-h"};
     std::string dumpResult;
-    bool result = DistributedAbilityManagerDumper::Dump(dtbabilitymgrService_, args, dumpResult);
+    bool result = DistributedAbilityManagerDumper::Dump(args, dumpResult);
     EXPECT_EQ(true, result);
     DTEST_LOG << "ContinuationManagerTest Dumper_Dump_003 end" << std::endl;
 }
 
 /**
  * @tc.name: Dumper_Dump_004
- * @tc.desc: call DistributedAbilityManagerDumper::Dump with args -connect.
+ * @tc.desc: call DistributedAbilityManagerDumper::Dump with args -register.
  * @tc.type: FUNC
  * @tc.require: I5PUBK
  */
@@ -286,12 +186,9 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_004, TestSize.Level3)
         DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
         return;
     }
-    dtbabilitymgrService_->isLoaded_ = true;
-    g_mockResult = true;
-    dtbabilitymgrService_->distributedSchedDumpFunc_ = &MockDistributedSchedDumpFunc;
-    const std::vector<std::string> args = {"-connect"};
+    const std::vector<std::string> args = {"-register"};
     std::string dumpResult;
-    bool result = DistributedAbilityManagerDumper::Dump(dtbabilitymgrService_, args, dumpResult);
+    bool result = DistributedAbilityManagerDumper::Dump(args, dumpResult);
     EXPECT_EQ(true, result);
     DTEST_LOG << "ContinuationManagerTest Dumper_Dump_004 end" << std::endl;
 }
@@ -309,12 +206,9 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_005, TestSize.Level3)
         DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
         return;
     }
-    dtbabilitymgrService_->isLoaded_ = true;
-    g_mockResult = true;
-    dtbabilitymgrService_->distributedSchedDumpFunc_ = &MockDistributedSchedDumpFunc;
     const std::vector<std::string> args = {"-mockArgs"};
     std::string dumpResult;
-    bool result = DistributedAbilityManagerDumper::Dump(dtbabilitymgrService_, args, dumpResult);
+    bool result = DistributedAbilityManagerDumper::Dump(args, dumpResult);
     EXPECT_EQ(false, result);
     DTEST_LOG << "ContinuationManagerTest Dumper_Dump_005 end" << std::endl;
     DTEST_LOG << dumpResult << std::endl;
@@ -322,32 +216,13 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_005, TestSize.Level3)
 
 /**
  * @tc.name: Dumper_Dump_006
- * @tc.desc: call DistributedAbilityManagerDumper::Dump with dmsDumper is nullptr.
+ * @tc.desc: call DistributedAbilityManagerDumper::Dump from invalid process.
  * @tc.type: FUNC
  * @tc.require: I5PUBK
  */
 HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_006, TestSize.Level4)
 {
     DTEST_LOG << "ContinuationManagerTest Dumper_Dump_006 start" << std::endl;
-    dtbabilitymgrService_->isLoaded_ = true;
-    g_mockResult = true;
-    dtbabilitymgrService_->distributedSchedDumpFunc_ = &MockDistributedSchedDumpFunc;
-    const std::vector<std::string> args;
-    std::string dumpResult;
-    bool result = DistributedAbilityManagerDumper::Dump(nullptr, args, dumpResult);
-    EXPECT_EQ(false, result);
-    DTEST_LOG << "ContinuationManagerTest Dumper_Dump_006 end" << std::endl;
-}
-
-/**
- * @tc.name: Dumper_Dump_007
- * @tc.desc: call DistributedAbilityManagerDumper::Dump from invalid process.
- * @tc.type: FUNC
- * @tc.require: I5PUBK
- */
-HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_007, TestSize.Level4)
-{
-    DTEST_LOG << "ContinuationManagerTest Dumper_Dump_007 start" << std::endl;
     if (dtbabilitymgrService_ == nullptr) {
         DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
         return;
@@ -355,9 +230,45 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_007, TestSize.Level4)
     MockProcess(INVALID_PROCESS_NAME);
     const std::vector<std::string> args;
     std::string dumpResult;
-    bool result = DistributedAbilityManagerDumper::Dump(dtbabilitymgrService_, args, dumpResult);
+    bool result = DistributedAbilityManagerDumper::Dump(args, dumpResult);
     EXPECT_EQ(false, result);
-    DTEST_LOG << "ContinuationManagerTest Dumper_Dump_007 end" << std::endl;
+    DTEST_LOG << "ContinuationManagerTest Dumper_Dump_006 end" << std::endl;
+}
+
+/**
+ * @tc.name: Dumper_DumpDefault_001
+ * @tc.desc: call DistributedAbilityManagerDumper::DumpDefault.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_DumpDefault_001, TestSize.Level4)
+{
+    DTEST_LOG << "ContinuationManagerTest Dumper_DumpDefault_001 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    std::string dumpResult;
+    bool result = DistributedAbilityManagerDumper::DumpDefault(dumpResult);
+    EXPECT_EQ(true, result);
+    DTEST_LOG << "ContinuationManagerTest Dumper_DumpDefault_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: Dumper_ShowAppRegisterInfo_001
+ * @tc.desc: call DistributedAbilityManagerDumper::ShowAppRegisterInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_ShowAppRegisterInfo_001, TestSize.Level4)
+{
+    DTEST_LOG << "ContinuationManagerTest Dumper_ShowAppRegisterInfo_001 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    std::string dumpResult;
+    DistributedAbilityManagerDumper::ShowAppRegisterInfo(dumpResult);
+    EXPECT_EQ(false, dumpResult.empty());
+    DTEST_LOG << "ContinuationManagerTest Dumper_ShowAppRegisterInfo_001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

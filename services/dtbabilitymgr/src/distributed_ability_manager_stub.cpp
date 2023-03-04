@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,21 +21,19 @@
 #include <utility>
 
 #include "accesstoken_kit.h"
+#include "base/continuationmgr_log.h"
+#include "base/parcel_helper.h"
 #include "continuation_extra_params.h"
 #include "device_connect_status.h"
-#include "dtbschedmgr_log.h"
 #include "iremote_object.h"
-#include "parcel_helper.h"
 #include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 using namespace OHOS::Security;
 namespace {
-const std::string TAG = "DistributedAbilityManagerStub";
+const std::string TAG = "ContinuationManagerStub";
 const std::string PERMISSION_DISTRIBUTED_DATASYNC = "ohos.permission.DISTRIBUTED_DATASYNC";
-const std::u16string DMS_STUB_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
-constexpr int32_t GET_DISTRIBUTED_COMPONENT_LIST_REQUEST_CODE = 161;
 }
 
 DistributedAbilityManagerStub::DistributedAbilityManagerStub()
@@ -48,15 +46,11 @@ DistributedAbilityManagerStub::DistributedAbilityManagerStub()
         &DistributedAbilityManagerStub::UnregisterDeviceSelectionCallbackInner;
     funcsMap_[UPDATE_CONNECT_STATUS] = &DistributedAbilityManagerStub::UpdateConnectStatusInner;
     funcsMap_[START_DEVICE_MANAGER] = &DistributedAbilityManagerStub::StartDeviceManagerInner;
-
-    distributedFuncMap_[GET_DISTRIBUTED_COMPONENT_LIST_REQUEST_CODE] =
-        &DistributedAbilityManagerStub::GetDistributedComponentListInner;
 }
 
 DistributedAbilityManagerStub::~DistributedAbilityManagerStub()
 {
     funcsMap_.clear();
-    distributedFuncMap_.clear();
 }
 
 int32_t DistributedAbilityManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
@@ -82,23 +76,13 @@ int32_t DistributedAbilityManagerStub::OnRemoteRequest(uint32_t code, MessagePar
             return ERR_NULL_OBJECT;
         }
     }
-    auto distributedFuncIter = distributedFuncMap_.find(code);
-    if (distributedFuncIter != distributedFuncMap_.end()) {
-        auto func = distributedFuncIter->second;
-        if (func != nullptr) {
-            return (this->*func)(data, reply, option);
-        } else {
-            HILOGE("func is nullptr");
-            return ERR_NULL_OBJECT;
-        }
-    }
-    return SendRequestToImpl(code, data, reply, option);
+    return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
 bool DistributedAbilityManagerStub::EnforceInterfaceToken(MessageParcel& data)
 {
     std::u16string interfaceToken = data.ReadInterfaceToken();
-    return interfaceToken == DMS_STUB_INTERFACE_TOKEN;
+    return interfaceToken == IDistributedAbilityManager::GetDescriptor();
 }
 
 int32_t DistributedAbilityManagerStub::RegisterInner(MessageParcel& data, MessageParcel& reply)
@@ -201,23 +185,6 @@ int32_t DistributedAbilityManagerStub::StartDeviceManagerInner(MessageParcel& da
     int32_t result = StartDeviceManager(token, continuationExtraParamsPtr);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_HELPER(reply, Int32, result);
-    return ERR_NONE;
-}
-
-int32_t DistributedAbilityManagerStub::GetDistributedComponentListInner(MessageParcel& data,
-    MessageParcel& reply, MessageOption& option)
-{
-    if (IsDistributedSchedLoaded()) {
-        return SendRequestToImpl(GET_DISTRIBUTED_COMPONENT_LIST_REQUEST_CODE, data, reply, option);
-    }
-    if (!EnforceInterfaceToken(data)) {
-        HILOGE("interface token check failed!");
-        return DMS_PERMISSION_DENIED;
-    }
-    HILOGI("DistributedSched is not loaded, return empty");
-    PARCEL_WRITE_HELPER(reply, Int32, ERR_NONE);
-    std::vector<std::string> distributedComponents;
-    PARCEL_WRITE_HELPER(reply, StringVector, distributedComponents);
     return ERR_NONE;
 }
 

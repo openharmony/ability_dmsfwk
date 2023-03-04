@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,7 +27,6 @@ using namespace std;
 using namespace testing;
 using namespace testing::ext;
 namespace {
-constexpr int32_t DISTRIBUTED_SCHED_SA_ID = 1401;
 constexpr int32_t INVALID_LEN = -1;
 constexpr int32_t UNREGISTER_TOKEN = 10000;
 constexpr int32_t TEST_TOKEN = 1000;
@@ -90,38 +89,6 @@ void DeviceSelectionNotifierTest::OnDeviceDisconnect(const std::vector<Continuat
     }
 }
 
-void MockDmsNotifier::DeviceOnlineNotify(const std::string& deviceId)
-{
-}
-
-void MockDmsNotifier::DeviceOfflineNotify(const std::string& deviceId)
-{
-}
-
-void MockDmsNotifier::ProcessNotifierDied(const sptr<IRemoteObject>& notifier)
-{
-}
-
-void MockDmsNotifier::ScheduleStartDeviceManager(const sptr<IRemoteObject>& appProxy, int32_t token,
-    const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams)
-{
-}
-
-int32_t MockDmsNotifier::OnDeviceConnect(int32_t token, const std::vector<ContinuationResult>& continuationResults)
-{
-    return 0;
-}
-
-int32_t MockDmsNotifier::OnDeviceDisconnect(int32_t token, const std::vector<ContinuationResult>& continuationResults)
-{
-    return 0;
-}
-
-int32_t MockDmsNotifier::OnDeviceCancel()
-{
-    return 0;
-}
-
 void ContinuationManagerTest::SetUpTestCase()
 {
     DTEST_LOG << "ContinuationManagerTest::SetUpTestCase" << std::endl;
@@ -134,7 +101,7 @@ void ContinuationManagerTest::TearDownTestCase()
 
 void ContinuationManagerTest::SetUp()
 {
-    dtbabilitymgrService_ = new DistributedAbilityManagerService(DISTRIBUTED_SCHED_SA_ID, true);
+    dtbabilitymgrService_ = new DistributedAbilityManagerService();
     DTEST_LOG << "ContinuationManagerTest::SetUp" << std::endl;
 }
 
@@ -1744,9 +1711,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_004, TestSize.Level3)
     /**
      * @tc.steps: step2. test OnRemoteDied when dmsNotifier_ == nullptr.
      */
-    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
-    NotifierDeathRecipient notifierDeathRecipient(dmsNotifier);
-    notifierDeathRecipient.dmsNotifier_ = nullptr;
+    NotifierDeathRecipient notifierDeathRecipient;
     wptr<IRemoteObject> remote = nullptr;
     notifierDeathRecipient.OnRemoteDied(remote);
 }
@@ -1836,8 +1801,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_007, TestSize.Level3)
  */
 HWTEST_F(ContinuationManagerTest, OnRemoteRequest_008, TestSize.Level3)
 {
-    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
-    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    AppDeviceCallbackStub appDeviceCallbackStub;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1887,8 +1851,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_008, TestSize.Level3)
  */
 HWTEST_F(ContinuationManagerTest, OnRemoteRequest_009, TestSize.Level3)
 {
-    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
-    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    AppDeviceCallbackStub appDeviceCallbackStub;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1896,7 +1859,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_009, TestSize.Level3)
     data.WriteInt32(TEST_TOKEN);
     int32_t ret = appDeviceCallbackStub.OnRemoteRequest(
         AppDeviceCallbackInterface::EVENT_DEVICE_CONNECT, data, reply, option);
-    EXPECT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(DISCONNECT_ABILITY_FAILED, ret);
 }
 
 /**
@@ -1907,8 +1870,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_009, TestSize.Level3)
  */
 HWTEST_F(ContinuationManagerTest, OnRemoteRequest_010, TestSize.Level3)
 {
-    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
-    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    AppDeviceCallbackStub appDeviceCallbackStub;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1929,8 +1891,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_010, TestSize.Level3)
  */
 HWTEST_F(ContinuationManagerTest, OnRemoteRequest_011, TestSize.Level3)
 {
-    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
-    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    AppDeviceCallbackStub appDeviceCallbackStub;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1938,7 +1899,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_011, TestSize.Level3)
     data.WriteInt32(TEST_TOKEN);
     int32_t ret = appDeviceCallbackStub.OnRemoteRequest(
         AppDeviceCallbackInterface::EVENT_DEVICE_DISCONNECT, data, reply, option);
-    EXPECT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(DISCONNECT_ABILITY_FAILED, ret);
 }
 
 /**
@@ -1949,8 +1910,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_011, TestSize.Level3)
  */
 HWTEST_F(ContinuationManagerTest, OnRemoteRequest_012, TestSize.Level3)
 {
-    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
-    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    AppDeviceCallbackStub appDeviceCallbackStub;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1971,15 +1931,14 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_012, TestSize.Level3)
  */
 HWTEST_F(ContinuationManagerTest, OnRemoteRequest_013, TestSize.Level3)
 {
-    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
-    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    AppDeviceCallbackStub appDeviceCallbackStub;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(AppDeviceCallbackInterface::GetDescriptor());
     int32_t ret = appDeviceCallbackStub.OnRemoteRequest(
         AppDeviceCallbackInterface::EVENT_DEVICE_CANCEL, data, reply, option);
-    EXPECT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(DISCONNECT_ABILITY_FAILED, ret);
 }
 
 /**
@@ -1990,8 +1949,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_013, TestSize.Level3)
  */
 HWTEST_F(ContinuationManagerTest, OnRemoteRequest_014, TestSize.Level3)
 {
-    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
-    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    AppDeviceCallbackStub appDeviceCallbackStub;
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -2008,40 +1966,23 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_014, TestSize.Level3)
  */
 HWTEST_F(ContinuationManagerTest, OnDeviceEvent_001, TestSize.Level3)
 {
-    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
-    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    AppDeviceCallbackStub appDeviceCallbackStub;
     std::vector<ContinuationResult> continuationResults;
     /**
      * @tc.steps: step1. test OnDeviceConnect
      */
     int32_t ret = appDeviceCallbackStub.OnDeviceConnect(TEST_TOKEN, continuationResults);
-    EXPECT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(DISCONNECT_ABILITY_FAILED, ret);
     /**
      * @tc.steps: step2. test OnDeviceDisconnect
      */
     ret = appDeviceCallbackStub.OnDeviceDisconnect(TEST_TOKEN, continuationResults);
-    EXPECT_EQ(ERR_NONE, ret);
+    EXPECT_EQ(DISCONNECT_ABILITY_FAILED, ret);
     /**
      * @tc.steps: step3. test OnDeviceCancel
      */
     ret = appDeviceCallbackStub.OnDeviceCancel();
-    EXPECT_EQ(ERR_NONE, ret);
-    appDeviceCallbackStub.dmsNotifier_ = nullptr;
-    /**
-     * @tc.steps: step4. test OnDeviceConnect when dmsNotifier_ == nullptr
-     */
-    ret = appDeviceCallbackStub.OnDeviceConnect(TEST_TOKEN, continuationResults);
-    EXPECT_EQ(ERR_NULL_OBJECT, ret);
-    /**
-     * @tc.steps: step5. test OnDeviceDisconnect when dmsNotifier_ == nullptr
-     */
-    ret = appDeviceCallbackStub.OnDeviceDisconnect(TEST_TOKEN, continuationResults);
-    EXPECT_EQ(ERR_NULL_OBJECT, ret);
-    /**
-     * @tc.steps: step6. test OnDeviceCancel when dmsNotifier_ == nullptr
-     */
-    ret = appDeviceCallbackStub.OnDeviceCancel();
-    EXPECT_EQ(ERR_NULL_OBJECT, ret);
+    EXPECT_EQ(DISCONNECT_ABILITY_FAILED, ret);
 }
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,10 @@
 #define DISTRIBUTED_SCHED_UTIL_H
 
 #include <cstdint>
+#include <mutex>
+
+#include "iremote_object.h"
+#include "system_ability_load_callback_stub.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -26,6 +30,23 @@ public:
     static void MockProcess(const char* processName);
     static void MockProcessAndPermission(const char* processName,
         const char *perms[] = nullptr, int32_t permsNum = 0);
+    static bool LoadDistributedSchedService();
+    static void LoadSystemAbilitySuccessNotify(const sptr<IRemoteObject>& remoteObject);
+    static void LoadSystemAbilityFailNotify();
+
+    static std::mutex remoteMutex_;
+    static sptr<IRemoteObject> remote_;
+    static std::condition_variable remoteConVar_;
+};
+
+class DistributedSchedLoadCallback : public SystemAbilityLoadCallbackStub {
+public:
+    DistributedSchedLoadCallback() = default;
+    ~DistributedSchedLoadCallback() = default;
+
+    void OnLoadSystemAbilitySuccess(int32_t systemAbilityId,
+        const sptr<IRemoteObject> &remoteObject) override;
+    void OnLoadSystemAbilityFail(int32_t systemAbilityId) override;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

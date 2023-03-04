@@ -68,7 +68,6 @@
             "//foundation/ability/dmsfwk/etc/init:etc",
             "//foundation/ability/dmsfwk/etc/profile:distributedsched_trust",
             "//foundation/ability/dmsfwk/sa_profile:dms_sa_profile",
-            "//foundation/ability/dmsfwk/services/base:dmsbaseinner",
             "//foundation/ability/dmsfwk/services/dtbabilitymgr:distributed_ability_manager_svr",
             "//foundation/ability/dmsfwk/services/dtbschedmgr:distributedschedsvr"
           ]
@@ -93,14 +92,14 @@
               "header_base": "//foundation/ability/dmsfwk/interfaces/innerkits/common/include",
               "header_files": [
                 "distributed_ability_manager_client.h",
-                "distributed_ability_manager_proxy.h"
+                "distributed_ability_manager_proxy.h",
+                "dms_constant.h"
               ]
             },
             "name": "//foundation/ability/dmsfwk/interfaces/innerkits/common:common_sdk"
           }
         ],
         "test": [
-          "//foundation/ability/dmsfwk/services/base:unittest",
           "//foundation/ability/dmsfwk/services/dtbschedmgr:unittest",
           "//foundation/ability/dmsfwk/services/dtbabilitymgr:unittest",
           "//foundation/ability/dmsfwk/test/fuzztest/continuationmanager_fuzzer:fuzztest"

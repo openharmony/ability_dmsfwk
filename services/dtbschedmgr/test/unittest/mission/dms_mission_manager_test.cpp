@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,6 +60,9 @@ std::condition_variable DMSMissionManagerTest::caseDoneCondition_;
 
 void DMSMissionManagerTest::SetUpTestCase()
 {
+    if (!DistributedSchedUtil::LoadDistributedSchedService()) {
+        DTEST_LOG << "DMSMissionManagerTest::SetUpTestCase LoadDistributedSchedService failed" << std::endl;
+    }
     const std::string pkgName = "DBinderBus_" + std::to_string(getpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
@@ -102,12 +105,12 @@ sptr<IDistributedSched> DMSMissionManagerTest::GetDms()
     }
     DTEST_LOG << "DMSMissionManagerTest sm is not nullptr" << std::endl;
     auto distributedObject = sm->GetSystemAbility(DISTRIBUTED_SCHED_SA_ID);
-    EXPECT_TRUE(distributedObject != nullptr);
     proxy_ = iface_cast<IDistributedSched>(distributedObject);
     if (proxy_ == nullptr) {
         DTEST_LOG << "DMSMissionManagerTest DistributedSched is nullptr" << std::endl;
+    } else {
+        DTEST_LOG << "DMSMissionManagerTest DistributedSched is not nullptr" << std::endl;
     }
-    DTEST_LOG << "DMSMissionManagerTest DistributedSched is not nullptr" << std::endl;
     return proxy_;
 }
 

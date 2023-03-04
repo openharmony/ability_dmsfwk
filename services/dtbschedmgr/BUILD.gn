@@ -43,10 +43,14 @@ ohos_shared_library("distributedschedsvr") {
   sources = [
     "src/ability_connection_wrapper_proxy.cpp",
     "src/ability_connection_wrapper_stub.cpp",
-    "src/app_connection_stub.cpp",
+    "src/adapter/dnetwork_adapter.cpp",
     "src/bundle/bundle_manager_callback_stub.cpp",
     "src/bundle/bundle_manager_internal.cpp",
     "src/connect_death_recipient.cpp",
+    "src/deviceManager/dms_device_info.cpp",
+    "src/dfx/dms_hisysevent_report.cpp",
+    "src/dfx/dms_hitrace_chain.cpp",
+    "src/distributed_device_node_listener.cpp",
     "src/distributed_sched_adapter.cpp",
     "src/distributed_sched_continuation.cpp",
     "src/distributed_sched_dumper.cpp",
@@ -59,6 +63,8 @@ ohos_shared_library("distributedschedsvr") {
     "src/dms_free_install_callback_proxy.cpp",
     "src/dms_free_install_callback_stub.cpp",
     "src/dms_token_callback.cpp",
+    "src/dms_version_manager.cpp",
+    "src/dtbschedmgr_device_info_storage.cpp",
   ]
 
   configs = [
@@ -74,8 +80,10 @@ ohos_shared_library("distributedschedsvr") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
+    "device_info_manager:distributed_device_profile_client",
     "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
+    "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
     "hitrace_native:libhitracechain",
     "hiviewdfx_hilog_native:libhilog",
@@ -90,8 +98,6 @@ ohos_shared_library("distributedschedsvr") {
   if (efficiency_manager_service_enable) {
     external_deps += [ "efficiency_manager:suspend_manager_client" ]
   }
-
-  deps = [ "//foundation/ability/dmsfwk/services/base:dmsbaseinner" ]
 
   if (dmsfwk_standard_form_share) {
     external_deps += [ "form_fwk:form_manager" ]

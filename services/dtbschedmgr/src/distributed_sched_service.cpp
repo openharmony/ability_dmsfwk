@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@
 #include "ability_manager_client.h"
 #include "ability_manager_errors.h"
 #include "adapter/dnetwork_adapter.h"
-#include "app_connection_stub.h"
 #include "bundle/bundle_manager_internal.h"
 #include "connect_death_recipient.h"
 #include "datetime_ex.h"
@@ -96,55 +95,10 @@ constexpr int64_t CONTINUATION_TIMEOUT = 20000; // 20s
 constexpr int64_t CHECK_REMOTE_INSTALL_ABILITY = 40000;
 }
 
-extern "C" {
-void OnStart()
-{
-    DistributedSchedService::GetInstance().OnStart();
-}
-
-int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
-    MessageOption& option)
-{
-    return DistributedSchedService::GetInstance().OnRemoteRequest(code, data, reply, option);
-}
-
-void DeviceOnlineNotify(const std::string& deviceId)
-{
-    DistributedSchedAdapter::GetInstance().DeviceOnline(deviceId);
-#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    DistributedSchedMissionManager::GetInstance().DeviceOnlineNotify(deviceId);
-#endif
-}
-
-void DeviceOfflineNotify(const std::string& deviceId)
-{
-    DistributedSchedAdapter::GetInstance().DeviceOffline(deviceId);
-#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(deviceId);
-#endif
-}
-
-int32_t ConnectAbility(const sptr<DmsNotifier>& dmsNotifier, int32_t token,
-    const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams)
-{
-    return DistributedSchedService::GetInstance().ConnectAbility(dmsNotifier, token, continuationExtraParams);
-}
-
-int32_t DisconnectAbility()
-{
-    return DistributedSchedService::GetInstance().DisconnectAbility();
-}
-
-bool DistributedSchedDump(const std::vector<std::string>& args, std::string& result)
-{
-    return DistributedSchedDumper::Dump(args, result);
-}
-}
-
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedService);
-static const sptr<DistributedSchedService> INSTANCE = &DistributedSchedService::GetInstance();
+const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&DistributedSchedService::GetInstance());
 
-DistributedSchedService::DistributedSchedService()
+DistributedSchedService::DistributedSchedService() : SystemAbility(DISTRIBUTED_SCHED_SA_ID, true)
 {
 }
 
@@ -163,25 +117,64 @@ void DistributedSchedService::OnStart()
         HILOGW("DmsCallbackTaskInitCallbackFunc timeout, taskId:%{public}" PRId64 ".", taskId);
         NotifyCompleteFreeInstallFromRemote(taskId, AAFwk::FREE_INSTALL_TIMEOUT);
     };
-
     dschedContinuation_ = std::make_shared<DSchedContinuation>();
     dmsCallbackTask_ = std::make_shared<DmsCallbackTask>();
     dschedContinuation_->Init(continuationCallback);
     dmsCallbackTask_->Init(freeCallback);
     HILOGI("OnStart start service success.");
+    Publish(this);
+}
+
+void DistributedSchedService::OnStop()
+{
+    HILOGD("begin");
+}
+
+int32_t DistributedSchedService::Dump(int32_t fd, const std::vector<std::u16string>& args)
+{
+    std::vector<std::string> argsInStr8;
+    for (const auto& arg : args) {
+        argsInStr8.emplace_back(Str16ToStr8(arg));
+    }
+    std::string result;
+    DistributedSchedDumper::Dump(argsInStr8, result);
+
+    if (!SaveStringToFd(fd, result)) {
+        HILOGE("save to fd failed");
+        return DMS_WRITE_FILE_FAILED_ERR;
+    }
+    return ERR_OK;
+}
+
+void DistributedSchedService::DeviceOnlineNotify(const std::string& deviceId)
+{
+    DistributedSchedAdapter::GetInstance().DeviceOnline(deviceId);
+#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
+    DistributedSchedMissionManager::GetInstance().DeviceOnlineNotify(deviceId);
+#endif
+}
+
+void DistributedSchedService::DeviceOfflineNotify(const std::string& deviceId)
+{
+    DistributedSchedAdapter::GetInstance().DeviceOffline(deviceId);
+#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
+    DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(deviceId);
+#endif
 }
 
 bool DistributedSchedService::Init()
 {
-    HILOGD("Init ready to init.");
+    HILOGD("ready to init.");
+    DnetworkAdapter::GetInstance()->Init();
+    if (!DtbschedmgrDeviceInfoStorage::GetInstance().Init()) {
+        HILOGW("DtbschedmgrDeviceInfoStorage init failed.");
+    }
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     DistributedSchedMissionManager::GetInstance().Init();
-#endif
-    HILOGD("Init init success.");
-    DistributedSchedAdapter::GetInstance().Init();
-#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     DistributedSchedMissionManager::GetInstance().InitDataStorage();
 #endif
+    DistributedSchedAdapter::GetInstance().Init();
+    HILOGD("init success.");
     connectDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new ConnectDeathRecipient());
     callerDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new CallerDeathRecipient());
     callerDeathRecipientForLocalDevice_ = sptr<IRemoteObject::DeathRecipient>(
@@ -2025,42 +2018,6 @@ int32_t DistributedSchedService::NotifyFreeInstallResult(const CallbackTaskItem 
     MessageParcel reply;
     MessageOption option;
     return item.callback->SendRequest(IASS_CALLBACK_ON_REMOTE_FREE_INSTALL_DONE, data, reply, option);
-}
-
-int32_t DistributedSchedService::ConnectAbility(const sptr<DmsNotifier>& dmsNotifier, int32_t token,
-    const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams)
-{
-    Want want;
-    want.SetAction(DMS_HIPLAY_ACTION);
-    AppExecFwk::ExtensionAbilityInfo extensionAbility;
-    if (!BundleManagerInternal::QueryExtensionAbilityInfo(want, extensionAbility)) {
-        HILOGE("QueryExtensionAbilityInfo failed");
-        return CONNECT_ABILITY_FAILED;
-    }
-    if (connect_ == nullptr) {
-        connect_ = new AppConnectionStub(dmsNotifier, token, continuationExtraParams);
-    }
-    int32_t errCode = DistributedSchedAdapter::GetInstance().ConnectAbility(want, connect_, this);
-    if (errCode != ERR_OK) {
-        HILOGE("ConnectAbility failed");
-        connect_ = nullptr;
-        return CONNECT_ABILITY_FAILED;
-    }
-    return ERR_OK;
-}
-
-int32_t DistributedSchedService::DisconnectAbility()
-{
-    if (connect_ == nullptr) {
-        return ERR_NULL_OBJECT;
-    }
-    int32_t errCode = DistributedSchedAdapter::GetInstance().DisconnectAbility(connect_);
-    connect_ = nullptr;
-    if (errCode != ERR_OK) {
-        HILOGE("DisconnectAbility failed");
-        return DISCONNECT_ABILITY_FAILED;
-    }
-    return ERR_OK;
 }
 
 int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& want,

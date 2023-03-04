@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,48 +18,47 @@
 #include <chrono>
 #include <thread>
 
-#include "adapter/dnetwork_adapter.h"
+#include "ability_manager_client.h"
+#include "base/continuationmgr_log.h"
+#include "base/parcel_helper.h"
+#include "bundlemgr/bundle_mgr_interface.h"
+#include "bundlemgr/bundle_mgr_proxy.h"
+#include "continuation_manager/app_connection_stub.h"
 #include "continuation_manager/app_device_callback_stub.h"
 #include "continuation_manager/device_selection_notifier_proxy.h"
 #include "continuation_manager/notifier_death_recipient.h"
-#include "dlfcn.h"
 #include "distributed_ability_manager_dumper.h"
-#include "dtbschedmgr_device_info_storage.h"
-#include "dtbschedmgr_log.h"
 #include "file_ex.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "os_account_manager.h"
 #include "parameters.h"
-#include "parcel_helper.h"
 #include "system_ability_definition.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-const std::string TAG = "DistributedAbilityManagerService";
+const std::string TAG = "ContinuationManagerService";
 const std::u16string HIPLAY_PANEL_INTERFACE_TOKEN = u"ohos.hiplay.panel";
 const std::string TOKEN_KEY = "distributedsched.continuationmanager.token";
 const std::string DEFAULT_TOKEN_VALUE = "0";
+const std::string DMS_HIPLAY_ACTION = "ohos.ability.action.deviceSelect";
 constexpr int32_t MAX_TOKEN_NUM = 100000000;
 constexpr int32_t MAX_REGISTER_NUM = 600;
 constexpr int32_t START_DEVICE_MANAGER_CODE = 1;
 constexpr int32_t UPDATE_CONNECT_STATUS_CODE = 2;
 }
 
-REGISTER_SYSTEM_ABILITY_BY_ID(DistributedAbilityManagerService, DISTRIBUTED_SCHED_SA_ID, true);
+IMPLEMENT_SINGLE_INSTANCE(DistributedAbilityManagerService);
+const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&DistributedAbilityManagerService::GetInstance());
 
-DistributedAbilityManagerService::DistributedAbilityManagerService(
-    int32_t systemAbilityId, bool runOnCreate) : SystemAbility(systemAbilityId, runOnCreate)
+DistributedAbilityManagerService::DistributedAbilityManagerService() : SystemAbility(CONTINUATION_MANAGER_SA_ID, true)
 {
 }
 
 void DistributedAbilityManagerService::OnStart()
 {
     HILOGI("begin");
-    DnetworkAdapter::GetInstance()->Init();
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().Init(this)) {
-        HILOGW("Init DtbschedmgrDeviceInfoStorage init failed.");
-    }
     {
         std::lock_guard<std::mutex> tokenLock(tokenMutex_);
         std::string tokenStr = system::GetParameter(TOKEN_KEY, DEFAULT_TOKEN_VALUE);
@@ -67,7 +66,7 @@ void DistributedAbilityManagerService::OnStart()
             token_.store(std::stoi(tokenStr));
         }
     }
-    notifierDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new NotifierDeathRecipient(this));
+    notifierDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new NotifierDeathRecipient());
     if (continuationHandler_ == nullptr) {
         auto runner = AppExecFwk::EventRunner::Create("continuation_manager");
         continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
@@ -80,108 +79,62 @@ void DistributedAbilityManagerService::OnStop()
     HILOGI("begin");
 }
 
-bool DistributedAbilityManagerService::InitDmsImplFunc()
+int32_t DistributedAbilityManagerService::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
-    std::lock_guard<std::mutex> lock(libLoadLock_);
-    if (isLoaded_) {
-        return true;
+    std::vector<std::string> argsInStr8;
+    for (const auto& arg : args) {
+        argsInStr8.emplace_back(Str16ToStr8(arg));
     }
-    HILOGI("begin");
-    dmsImplHandle_ = dlopen("libdistributedschedsvr.z.so", RTLD_NOW);
-    if (dmsImplHandle_ == nullptr) {
-        HILOGE("dlopen libdistributedschedsvr failed with errno:%s!", dlerror());
-        return false;
+    std::string result;
+    DistributedAbilityManagerDumper::Dump(argsInStr8, result);
+    if (!SaveStringToFd(fd, result)) {
+        HILOGE("save to fd failed");
+        return DMS_WRITE_FILE_FAILED_ERR;
     }
-    if (!InitFunc()) {
-        dlclose(dmsImplHandle_);
-        return false;
-    }
-    OnStartFunc onStartFunc = reinterpret_cast<OnStartFunc>(dlsym(dmsImplHandle_, "OnStart"));
-    if (onStartFunc == nullptr) {
-        dlclose(dmsImplHandle_);
-        HILOGE("get OnStart function error");
-        return false;
-    }
-    onStartFunc();
-    isLoaded_ = true;
-    HILOGI("end");
-    return true;
+    return ERR_OK;
 }
 
-bool DistributedAbilityManagerService::InitFunc()
+void DistributedAbilityManagerService::DumpAppRegisterInfo(std::string& info)
 {
-    onRemoteRequestFunc_ = reinterpret_cast<OnRemoteRequestFunc>(dlsym(dmsImplHandle_, "OnRemoteRequest"));
-    if (onRemoteRequestFunc_ == nullptr) {
-        HILOGE("get OnRemoteRequest function error");
-        return false;
-    }
-    deviceOnlineNotifyFunc_ = reinterpret_cast<DeviceOnlineNotifyFunc>(dlsym(dmsImplHandle_, "DeviceOnlineNotify"));
-    if (deviceOnlineNotifyFunc_ == nullptr) {
-        HILOGE("get DeviceOnlineNotify function error");
-        return false;
-    }
-    deviceOfflineNotifyFunc_ = reinterpret_cast<DeviceOfflineNotifyFunc>(dlsym(dmsImplHandle_, "DeviceOfflineNotify"));
-    if (deviceOfflineNotifyFunc_ == nullptr) {
-        HILOGE("get DeviceOfflineNotify function error");
-        return false;
-    }
-    connectAbilityFunc_ = reinterpret_cast<ConnectAbilityFunc>(dlsym(dmsImplHandle_, "ConnectAbility"));
-    if (connectAbilityFunc_ == nullptr) {
-        HILOGE("get ConnectAbility function error");
-        return false;
-    }
-    disconnectAbilityFunc_ = reinterpret_cast<DisconnectAbilityFunc>(dlsym(dmsImplHandle_, "DisconnectAbility"));
-    if (disconnectAbilityFunc_ == nullptr) {
-        HILOGE("get DisconnectAbility function error");
-        return false;
-    }
-    distributedSchedDumpFunc_ = reinterpret_cast<DistributedSchedDumpFunc>(dlsym(dmsImplHandle_,
-        "DistributedSchedDump"));
-    if (distributedSchedDumpFunc_ == nullptr) {
-        HILOGE("get Dump function error");
-        return false;
-    }
-    return true;
-}
-
-int32_t DistributedAbilityManagerService::SendRequestToImpl(uint32_t code, MessageParcel& data,
-    MessageParcel& reply, MessageOption& option)
-{
-    if (InitDmsImplFunc()) {
-        return onRemoteRequestFunc_(code, data, reply, option);
-    }
-    return INVALID_PARAMETERS_ERR;
-}
-
-void DistributedAbilityManagerService::DeviceOnlineNotify(const std::string& deviceId)
-{
-    if (InitDmsImplFunc()) {
-        deviceOnlineNotifyFunc_(deviceId);
+    std::lock_guard<std::mutex> autoLock(tokenMapMutex_);
+    info += "application register infos:\n";
+    info += "  ";
+    if (!tokenMap_.empty()) {
+        for (const auto& tokenMap : tokenMap_) {
+            info += "accessToken: ";
+            info += std::to_string(tokenMap.first);
+            std::vector<int32_t> tokenVec = tokenMap.second;
+            DumpNotifierLocked(tokenVec, info);
+            info += "\n";
+            info += "  ";
+        }
+    } else {
+        info += "  <none info>\n";
     }
 }
 
-void DistributedAbilityManagerService::DeviceOfflineNotify(const std::string& deviceId)
+void DistributedAbilityManagerService::DumpNotifierLocked(const std::vector<int32_t>& tokenVec, std::string& info)
 {
-    if (InitDmsImplFunc()) {
-        deviceOfflineNotifyFunc_(deviceId);
+    for (const auto& token : tokenVec) {
+        info += ", ";
+        info += "token: ";
+        info += std::to_string(token);
+        if (callbackMap_.find(token) == callbackMap_.end()) {
+            continue;
+        }
+        if (!callbackMap_[token]->IsNotifierMapEmpty()) {
+            info += ", ";
+            info += "cbType: ";
+            if (callbackMap_[token]->GetNotifier(EVENT_CONNECT) != nullptr) {
+                info += " ";
+                info += EVENT_CONNECT;
+            }
+            if (callbackMap_[token]->GetNotifier(EVENT_DISCONNECT) != nullptr) {
+                info += " ";
+                info += EVENT_DISCONNECT;
+            }
+        }
     }
-}
-
-int32_t DistributedAbilityManagerService::ConnectAbility(const sptr<DmsNotifier>& dmsNotifier, int32_t token,
-    const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams)
-{
-    if (InitDmsImplFunc()) {
-        return connectAbilityFunc_(dmsNotifier, token, continuationExtraParams);
-    }
-    return INVALID_PARAMETERS_ERR;
-}
-
-int32_t DistributedAbilityManagerService::DisconnectAbility()
-{
-    if (InitDmsImplFunc()) {
-        return disconnectAbilityFunc_();
-    }
-    return INVALID_PARAMETERS_ERR;
 }
 
 int32_t DistributedAbilityManagerService::Register(
@@ -374,12 +327,101 @@ int32_t DistributedAbilityManagerService::StartDeviceManager(
             return ERR_OK;
         }
     }
-    int32_t errCode = ConnectAbility(this, token, continuationExtraParams);
+    int32_t errCode = ConnectAbility(token, continuationExtraParams);
     if (errCode != ERR_OK) {
         HILOGE("token %{public}d connect to app failed", token);
         return CONNECT_ABILITY_FAILED;
     }
     // 2. sendRequest data(token, filter, dmsStub, connectStatusInfo) to app by app proxy when connect callback.
+    return ERR_OK;
+}
+
+int32_t DistributedAbilityManagerService::ConnectAbility(int32_t token,
+    const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams)
+{
+    AAFwk::Want want;
+    want.SetAction(DMS_HIPLAY_ACTION);
+    std::vector<int32_t> ids;
+    int32_t errCode = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (errCode != ERR_OK || ids.empty()) {
+        return INVALID_PARAMETERS_ERR;
+    }
+    AppExecFwk::ExtensionAbilityInfo extensionInfo;
+    if (!QueryExtensionAbilityInfo(ids, want, extensionInfo)) {
+        HILOGE("QueryExtensionAbilityInfo failed");
+        return CONNECT_ABILITY_FAILED;
+    }
+    if (connect_ == nullptr) {
+        connect_ = new AppConnectionStub(token, continuationExtraParams);
+    }
+    errCode = AAFwk::AbilityManagerClient::GetInstance()->Connect();
+    if (errCode != ERR_OK) {
+        HILOGE("connect ability manager server failed, errCode=%{public}d", errCode);
+        return errCode;
+    }
+    errCode = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want,
+        iface_cast<AAFwk::IAbilityConnection>(connect_), this, ids[0]);
+    if (errCode != ERR_OK) {
+        HILOGE("ConnectAbility failed");
+        connect_ = nullptr;
+        return CONNECT_ABILITY_FAILED;
+    }
+    return ERR_OK;
+}
+
+bool DistributedAbilityManagerService::QueryExtensionAbilityInfo(const std::vector<int32_t>& ids,
+    const AAFwk::Want& want, AppExecFwk::ExtensionAbilityInfo& extensionInfo)
+{
+    auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgrProxy == nullptr) {
+        HILOGE("get samgr failed");
+        return false;
+    }
+    sptr<IRemoteObject> bmsProxy = samgrProxy->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (bmsProxy == nullptr) {
+        HILOGE("get bms from samgr failed");
+        return false;
+    }
+    auto bundleMgr = iface_cast<AppExecFwk::IBundleMgr>(bmsProxy);
+    if (bundleMgr == nullptr) {
+        HILOGE("bms iface_cast failed");
+        return false;
+    }
+    std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    bundleMgr->QueryExtensionAbilityInfos(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT
+        | AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION, ids[0], extensionInfos);
+    IPCSkeleton::SetCallingIdentity(identity);
+    if (extensionInfos.empty()) {
+        HILOGE("QueryExtensionAbilityInfo failed");
+        return false;
+    }
+    extensionInfo = extensionInfos.front();
+    if (extensionInfo.bundleName.empty() || extensionInfo.name.empty()) {
+        HILOGE("ExtensionAbilityInfo is empty.");
+        return false;
+    }
+    HILOGD("ExtensionAbilityInfo found, name=%{public}s.", extensionInfo.name.c_str());
+    return true;
+}
+
+int32_t DistributedAbilityManagerService::DisconnectAbility()
+{
+    if (connect_ == nullptr) {
+        return ERR_NULL_OBJECT;
+    }
+    int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->Connect();
+    if (errCode != ERR_OK) {
+        HILOGE("connect ability manager server failed, errCode=%{public}d", errCode);
+        return errCode;
+    }
+    errCode = AAFwk::AbilityManagerClient::GetInstance()->DisconnectAbility(
+        iface_cast<AAFwk::IAbilityConnection>(connect_));
+    connect_ = nullptr;
+    if (errCode != ERR_OK) {
+        HILOGE("DisconnectAbility failed");
+        return DISCONNECT_ABILITY_FAILED;
+    }
     return ERR_OK;
 }
 
@@ -591,7 +633,7 @@ void DistributedAbilityManagerService::HandleStartDeviceManager(int32_t token,
             PARCEL_WRITE_HELPER_NORET(data, Int32, VALUE_OBJECT);
             PARCEL_WRITE_HELPER_NORET(data, Parcelable, continuationExtraParams.get());
         }
-        sptr<AppDeviceCallbackStub> callback = new AppDeviceCallbackStub(this);
+        sptr<AppDeviceCallbackStub> callback = new AppDeviceCallbackStub();
         PARCEL_WRITE_HELPER_NORET(data, RemoteObject, callback);
         // query whether the connect status needs to be send
         {
@@ -709,43 +751,6 @@ void DistributedAbilityManagerService::HandleNotifierDied(const sptr<IRemoteObje
         (void)HandleDisconnectAbility();
     };
     continuationHandler_->PostTask(func);
-}
-
-bool DistributedAbilityManagerService::IsDistributedSchedLoaded()
-{
-    return isLoaded_;
-}
-
-int32_t DistributedAbilityManagerService::Dump(int32_t fd, const std::vector<std::u16string>& args)
-{
-    std::vector<std::string> argsInStr8;
-    for (const auto& arg : args) {
-        argsInStr8.emplace_back(Str16ToStr8(arg));
-    }
-    std::string result;
-    DistributedAbilityManagerDumper::Dump(this, argsInStr8, result);
-
-    if (!SaveStringToFd(fd, result)) {
-        HILOGE("save to fd failed");
-        return DMS_WRITE_FILE_FAILED_ERR;
-    }
-    return ERR_OK;
-}
-
-bool DistributedAbilityManagerService::ProcessDistributedSchedDump(const std::vector<std::string>& args,
-    std::string& result)
-{
-    std::lock_guard<std::mutex> lock(libLoadLock_);
-    if (!IsDistributedSchedLoaded() || distributedSchedDumpFunc_ == nullptr) {
-        result.append("<none info>\n");
-        return false;
-    }
-
-    if (!distributedSchedDumpFunc_(args, result)) {
-        HILOGE("distributedSched dump failed");
-        return false;
-    }
-    return true;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

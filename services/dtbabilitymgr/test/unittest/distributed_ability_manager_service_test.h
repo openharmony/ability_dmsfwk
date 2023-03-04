@@ -34,7 +34,7 @@ public:
     static int32_t startTaskNum_;
     static std::mutex caseDoneLock_;
     static std::condition_variable caseDoneCondition_;
-    static sptr<DistributedAbilityManagerService>  dtbabilitymgrService_;
+    static sptr<DistributedAbilityManagerService> dtbabilitymgrService_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

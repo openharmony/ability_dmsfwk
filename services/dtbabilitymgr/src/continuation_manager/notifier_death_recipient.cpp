@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,8 @@
 #include <iosfwd>
 #include <string>
 
-#include "dtbschedmgr_log.h"
+#include "base/continuationmgr_log.h"
+#include "distributed_ability_manager_service.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -26,19 +27,10 @@ namespace {
 const std::string TAG = "NotifierDeathRecipient";
 }
 
-NotifierDeathRecipient::NotifierDeathRecipient(const sptr<DmsNotifier>& dmsNotifier)
-{
-    dmsNotifier_ = dmsNotifier;
-}
-
 void NotifierDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     HILOGD("called");
-    if (dmsNotifier_ == nullptr) {
-        HILOGE("dmsNotifier_ is nullptr");
-        return;
-    }
-    dmsNotifier_->ProcessNotifierDied(remote.promote());
+    DistributedAbilityManagerService::GetInstance().ProcessNotifierDied(remote.promote());
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

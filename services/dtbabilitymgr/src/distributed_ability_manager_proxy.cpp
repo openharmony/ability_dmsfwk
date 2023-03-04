@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,16 +15,15 @@
 
 #include "distributed_ability_manager_proxy.h"
 
-#include "dtbschedmgr_log.h"
+#include "base/continuationmgr_log.h"
+#include "base/parcel_helper.h"
 #include "ipc_types.h"
-#include "parcel_helper.h"
 #include "string_ex.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-const std::string TAG = "DistributedAbilityManagerProxy";
-const std::u16string DMS_PROXY_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
+const std::string TAG = "ContinuationManagerProxy";
 }
 
 int32_t DistributedAbilityManagerProxy::Register(
@@ -37,7 +36,7 @@ int32_t DistributedAbilityManagerProxy::Register(
         return ERR_NULL_OBJECT;
     }
     MessageParcel data;
-    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+    if (!data.WriteInterfaceToken(IDistributedAbilityManager::GetDescriptor())) {
         return ERR_FLATTEN_OBJECT;
     }
     if (continuationExtraParams == nullptr) {
@@ -71,7 +70,7 @@ int32_t DistributedAbilityManagerProxy::Unregister(int32_t token)
         return ERR_NULL_OBJECT;
     }
     MessageParcel data;
-    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+    if (!data.WriteInterfaceToken(IDistributedAbilityManager::GetDescriptor())) {
         return ERR_FLATTEN_OBJECT;
     }
     PARCEL_WRITE_HELPER(data, Int32, token);
@@ -98,7 +97,7 @@ int32_t DistributedAbilityManagerProxy::RegisterDeviceSelectionCallback(
     }
 
     MessageParcel data;
-    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+    if (!data.WriteInterfaceToken(IDistributedAbilityManager::GetDescriptor())) {
         return ERR_FLATTEN_OBJECT;
     }
     PARCEL_WRITE_HELPER(data, Int32, token);
@@ -121,7 +120,7 @@ int32_t DistributedAbilityManagerProxy::UnregisterDeviceSelectionCallback(int32_
         return ERR_NULL_OBJECT;
     }
     MessageParcel data;
-    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+    if (!data.WriteInterfaceToken(IDistributedAbilityManager::GetDescriptor())) {
         return ERR_FLATTEN_OBJECT;
     }
     PARCEL_WRITE_HELPER(data, Int32, token);
@@ -140,7 +139,7 @@ int32_t DistributedAbilityManagerProxy::UpdateConnectStatus(int32_t token, const
         return ERR_NULL_OBJECT;
     }
     MessageParcel data;
-    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+    if (!data.WriteInterfaceToken(IDistributedAbilityManager::GetDescriptor())) {
         return ERR_FLATTEN_OBJECT;
     }
     PARCEL_WRITE_HELPER(data, Int32, token);
@@ -160,7 +159,7 @@ int32_t DistributedAbilityManagerProxy::StartDeviceManager(
         return ERR_NULL_OBJECT;
     }
     MessageParcel data;
-    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+    if (!data.WriteInterfaceToken(IDistributedAbilityManager::GetDescriptor())) {
         return ERR_FLATTEN_OBJECT;
     }
     PARCEL_WRITE_HELPER(data, Int32, token);

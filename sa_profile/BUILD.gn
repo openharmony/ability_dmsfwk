@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,6 +14,9 @@
 import("//build/ohos/sa_profile/sa_profile.gni")
 
 ohos_sa_profile("dms_sa_profile") {
-  sources = [ "1401.xml" ]
+  sources = [
+    "1401.json",
+    "1404.xml",
+  ]
   part_name = "dmsfwk"
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,7 +15,7 @@
 
 #include "js_device_selection_listener.h"
 
-#include "dtbschedmgr_log.h"
+#include "base/continuationmgr_log.h"
 #include "js_runtime_utils.h"
 #include "napi_common_util.h"
 
