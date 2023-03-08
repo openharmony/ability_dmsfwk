@@ -14,6 +14,7 @@
  */
 
 #include "snapshot_test.h"
+
 #define private public
 #include "mission/snapshot.h"
 #undef private

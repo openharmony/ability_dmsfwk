@@ -32,10 +32,10 @@ void JsDeviceSelectionListener::OnDeviceConnect(const std::vector<ContinuationRe
     CallJsMethod(EVENT_CONNECT, continuationResults);
 }
 
-void JsDeviceSelectionListener::OnDeviceDisconnect(const std::vector<std::string>& deviceIds)
+void JsDeviceSelectionListener::OnDeviceDisconnect(const std::vector<ContinuationResult>& continuationResults)
 {
     HILOGD("called.");
-    CallJsMethod(EVENT_DISCONNECT, deviceIds);
+    CallJsMethod(EVENT_DISCONNECT, continuationResults);
 }
 
 void JsDeviceSelectionListener::AddCallback(const std::string& cbType, NativeValue* jsListenerObj)

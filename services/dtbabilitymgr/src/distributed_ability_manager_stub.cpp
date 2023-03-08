@@ -20,16 +20,20 @@
 #include <string>
 #include <utility>
 
+#include "accesstoken_kit.h"
 #include "continuation_extra_params.h"
 #include "device_connect_status.h"
 #include "dtbschedmgr_log.h"
 #include "iremote_object.h"
 #include "parcel_helper.h"
+#include "ipc_skeleton.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
+using namespace OHOS::Security;
 namespace {
 const std::string TAG = "DistributedAbilityManagerStub";
+const std::string PERMISSION_DISTRIBUTED_DATASYNC = "ohos.permission.DISTRIBUTED_DATASYNC";
 const std::u16string DMS_STUB_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
 constexpr int32_t GET_DISTRIBUTED_COMPONENT_LIST_REQUEST_CODE = 161;
 }
@@ -64,6 +68,11 @@ int32_t DistributedAbilityManagerStub::OnRemoteRequest(uint32_t code, MessagePar
         auto func = iter->second;
         if (!EnforceInterfaceToken(data)) {
             HILOGE("interface token check failed!");
+            return DMS_PERMISSION_DENIED;
+        }
+        uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+        if (!VerifyPermission(accessToken, PERMISSION_DISTRIBUTED_DATASYNC)) {
+            HILOGE("DISTRIBUTED_DATASYNC permission check failed!");
             return DMS_PERMISSION_DENIED;
         }
         if (func != nullptr) {
@@ -211,5 +220,17 @@ int32_t DistributedAbilityManagerStub::GetDistributedComponentListInner(MessageP
     PARCEL_WRITE_HELPER(reply, StringVector, distributedComponents);
     return ERR_NONE;
 }
+
+bool DistributedAbilityManagerStub::VerifyPermission(uint32_t accessToken, const std::string& permissionName) const
+{
+    int32_t result = AccessToken::AccessTokenKit::VerifyAccessToken(accessToken, permissionName);
+    if (result == AccessToken::PermissionState::PERMISSION_DENIED) {
+        HILOGE("permission denied, permissionName:%{public}s", permissionName.c_str());
+        return false;
+    }
+    HILOGD("permission matched.");
+    return true;
+}
+
 } // namespace DistributedSchedule
 } // namespace OHOS

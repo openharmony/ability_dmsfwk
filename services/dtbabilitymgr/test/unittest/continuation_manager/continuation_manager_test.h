@@ -45,7 +45,7 @@ public:
     ~DeviceSelectionNotifierTest() = default;
 
     void OnDeviceConnect(const std::vector<ContinuationResult>& continuationResults) override;
-    void OnDeviceDisconnect(const std::vector<std::string>& deviceIds) override;
+    void OnDeviceDisconnect(const std::vector<ContinuationResult>& continuationResults) override;
 };
 
 class MockDmsNotifier : public DmsNotifier {
@@ -59,9 +59,10 @@ public:
     void ScheduleStartDeviceManager(const sptr<IRemoteObject>& appProxy, int32_t token,
         const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams = nullptr) override;
     int32_t OnDeviceConnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
-    int32_t OnDeviceDisconnect(int32_t token, const std::vector<std::string>& deviceIds) override;
+    int32_t OnDeviceDisconnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
     int32_t OnDeviceCancel() override;
 };
+
 } // namespace DistributedSchedule
 } // namespace OHOS
 #endif // OHOS_DISTRIBUTED_ABILITY_MANAGER_CONTINUATION_MANAGER_TEST_H

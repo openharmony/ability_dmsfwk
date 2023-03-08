@@ -30,7 +30,7 @@ public:
     virtual ~JsDeviceSelectionListener() = default;
 
     void OnDeviceConnect(const std::vector<ContinuationResult>& continuationResults) override;
-    void OnDeviceDisconnect(const std::vector<std::string>& deviceIds) override;
+    void OnDeviceDisconnect(const std::vector<ContinuationResult>& continuationResults) override;
 
     void AddCallback(const std::string& cbType, NativeValue* jsListenerObj);
     void RemoveCallback(const std::string& cbType);

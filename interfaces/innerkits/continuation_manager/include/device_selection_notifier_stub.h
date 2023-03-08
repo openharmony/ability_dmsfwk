@@ -35,7 +35,7 @@ public:
 private:
     DISALLOW_COPY_AND_MOVE(DeviceSelectionNotifierStub);
     int32_t OnDeviceConnectInner(const std::vector<ContinuationResult>& continuationResults);
-    int32_t OnDeviceDisconnectInner(const std::vector<std::string>& deviceIds);
+    int32_t OnDeviceDisconnectInner(const std::vector<ContinuationResult>& continuationResults);
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

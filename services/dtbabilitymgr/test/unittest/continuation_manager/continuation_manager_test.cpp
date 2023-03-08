@@ -16,6 +16,7 @@
 #include "continuation_manager_test.h"
 
 #include "distributed_ability_manager_client.h"
+#include "distributed_sched_util.h"
 #include "dtbschedmgr_log.h"
 #include "mock_remote_stub.h"
 #include "test_log.h"
@@ -34,11 +35,11 @@ constexpr int32_t TEST_ACCESS_TOKEN = 10000000;
 constexpr int32_t ERROR_CONNECT_STATUS = 10;
 constexpr int32_t ERROR_CONTINUATION_MODE = 10;
 constexpr uint32_t SELECTED_DEVICE_SIZE = 2;
-constexpr uint32_t UNSELECTED_DEVICE_SIZE = 3;
+constexpr uint32_t UNSELECTED_DEVICE_SIZE = 2;
 const std::string TEST_DEVICE_ID = "test deviceId";
 const std::string EMPTY_DEVICE_ID = "";
-const std::string CALLBACK_TYPE1 = "deviceConnect";
-const std::string CALLBACK_TYPE2 = "deviceDisconnect";
+const std::string CALLBACK_TYPE1 = "deviceSelected";
+const std::string CALLBACK_TYPE2 = "deviceUnselected";
 const std::string INVALID_CALLBACK_TYPE = "deviceCancel";
 const std::string SELECTED_DEVICE_ID1 = "selected deviceId1";
 const std::string SELECTED_DEVICE_ID2 = "selected deviceId2";
@@ -76,15 +77,19 @@ void DeviceSelectionNotifierTest::OnDeviceConnect(const std::vector<Continuation
     }
 }
 
-void DeviceSelectionNotifierTest::OnDeviceDisconnect(const std::vector<std::string>& deviceIds)
+void DeviceSelectionNotifierTest::OnDeviceDisconnect(const std::vector<ContinuationResult>& continuationResults)
 {
-    EXPECT_EQ(UNSELECTED_DEVICE_SIZE, deviceIds.size());
-    for (size_t i = 0; i < deviceIds.size(); ++i) {
-        DTEST_LOG << "DeviceSelectionNotifierTest::OnDeviceDisconnect unselected deviceId:"<<
-            deviceIds[i] << std::endl;
-	}
+    EXPECT_EQ(UNSELECTED_DEVICE_SIZE, continuationResults.size());
+    for (size_t i = 0; i < continuationResults.size(); ++i) {
+        DTEST_LOG << "DeviceSelectionNotifierTest::OnDeviceDisconnect selected deviceId:"<<
+            continuationResults[i].GetDeviceId() << std::endl;
+        DTEST_LOG << "DeviceSelectionNotifierTest::OnDeviceDisconnect selected deviceType:" <<
+            continuationResults[i].GetDeviceType() << std::endl;
+        DTEST_LOG << "DeviceSelectionNotifierTest::OnDeviceDisconnect selected deviceNane:" <<
+            continuationResults[i].GetDeviceName() << std::endl;
+    }
 }
-			
+
 void MockDmsNotifier::DeviceOnlineNotify(const std::string& deviceId)
 {
 }
@@ -107,7 +112,7 @@ int32_t MockDmsNotifier::OnDeviceConnect(int32_t token, const std::vector<Contin
     return 0;
 }
 
-int32_t MockDmsNotifier::OnDeviceDisconnect(int32_t token, const std::vector<std::string>& deviceIds)
+int32_t MockDmsNotifier::OnDeviceDisconnect(int32_t token, const std::vector<ContinuationResult>& continuationResults)
 {
     return 0;
 }
@@ -146,6 +151,7 @@ void ContinuationManagerTest::TearDown()
 HWTEST_F(ContinuationManagerTest, RegisterTest_001, TestSize.Level1)
 {
     DTEST_LOG << "ContinuationManagerTest RegisterTest_001 start" << std::endl;
+    DistributedSchedUtil::MockPermission();
     int32_t token1 = -1;
     int32_t result1 = DistributedAbilityManagerClient::GetInstance().Register(nullptr, token1);
     DTEST_LOG << "result1:" << result1 << std::endl;
@@ -286,7 +292,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_003, TestS
 
 /**
  * @tc.name: RegisterDeviceSelectionCallbackTest_004
- * @tc.desc: test dms deviceConnect callback called when device selection callback has registered.
+ * @tc.desc: test dms deviceSelected callback called when device selection callback has registered.
  * @tc.type: FUNC
  */
 HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_004, TestSize.Level1)
@@ -324,7 +330,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_004, TestS
 
 /**
  * @tc.name: RegisterDeviceSelectionCallbackTest_005
- * @tc.desc: test dms deviceConnect callback called when device selection callback has not registered.
+ * @tc.desc: test dms deviceSelected callback called when device selection callback has not registered.
  * @tc.type: FUNC
  */
 HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_005, TestSize.Level1)
@@ -362,7 +368,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_005, TestS
 
 /**
  * @tc.name: RegisterDeviceSelectionCallbackTest_006
- * @tc.desc: test dms deviceDisconnect callback called when device selection callback has registered.
+ * @tc.desc: test dms deviceUnselected callback called when device selection callback has registered.
  * @tc.type: FUNC
  */
 HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_006, TestSize.Level1)
@@ -379,11 +385,18 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_006, TestS
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
         token, CALLBACK_TYPE2, notifier);
     DTEST_LOG << "result2:" << result2 << std::endl;
-    std::vector<std::string> deviceIds;
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID1);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID2);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID3);
-    int32_t result3 = dtbabilitymgrService_->OnDeviceDisconnect(token, deviceIds);
+    std::vector<ContinuationResult> continuationResults;
+    ContinuationResult continuationResult1;
+    continuationResult1.SetDeviceId(SELECTED_DEVICE_ID1);
+    continuationResult1.SetDeviceType(SELECTED_DEVICE_TYPE1);
+    continuationResult1.SetDeviceName(SELECTED_DEVICE_NAME1);
+    ContinuationResult continuationResult2;
+    continuationResult2.SetDeviceId(SELECTED_DEVICE_ID2);
+    continuationResult2.SetDeviceType(SELECTED_DEVICE_TYPE2);
+    continuationResult2.SetDeviceName(SELECTED_DEVICE_NAME2);
+    continuationResults.emplace_back(continuationResult1);
+    continuationResults.emplace_back(continuationResult2);
+    int32_t result3 = dtbabilitymgrService_->OnDeviceDisconnect(token, continuationResults);
     DTEST_LOG << "result3:" << result3 << std::endl;
     EXPECT_EQ(ERR_OK, result1);
     EXPECT_EQ(ERR_OK, result2);
@@ -393,7 +406,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_006, TestS
 
 /**
  * @tc.name: RegisterDeviceSelectionCallbackTest_007
- * @tc.desc: test dms deviceDisconnect callback called when device selection callback has not registered.
+ * @tc.desc: test dms deviceUnselected callback called when device selection callback has not registered.
  * @tc.type: FUNC
  */
 HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_007, TestSize.Level1)
@@ -410,11 +423,18 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_007, TestS
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
         token, CALLBACK_TYPE1, notifier);
     DTEST_LOG << "result2:" << result2 << std::endl;
-    std::vector<std::string> deviceIds;
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID1);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID2);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID3);
-    int32_t result3 = dtbabilitymgrService_->OnDeviceDisconnect(token, deviceIds);
+    std::vector<ContinuationResult> continuationResults;
+    ContinuationResult continuationResult1;
+    continuationResult1.SetDeviceId(SELECTED_DEVICE_ID1);
+    continuationResult1.SetDeviceType(SELECTED_DEVICE_TYPE1);
+    continuationResult1.SetDeviceName(SELECTED_DEVICE_NAME1);
+    ContinuationResult continuationResult2;
+    continuationResult2.SetDeviceId(SELECTED_DEVICE_ID2);
+    continuationResult2.SetDeviceType(SELECTED_DEVICE_TYPE2);
+    continuationResult2.SetDeviceName(SELECTED_DEVICE_NAME2);
+    continuationResults.emplace_back(continuationResult1);
+    continuationResults.emplace_back(continuationResult2);
+    int32_t result3 = dtbabilitymgrService_->OnDeviceDisconnect(token, continuationResults);
     DTEST_LOG << "result3:" << result3 << std::endl;
     EXPECT_EQ(ERR_OK, result1);
     EXPECT_EQ(ERR_OK, result2);
@@ -450,11 +470,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_008, TestS
     continuationResults.emplace_back(continuationResult2);
     int32_t result2 = dtbabilitymgrService_->OnDeviceConnect(token, continuationResults);
     DTEST_LOG << "result2:" << result2 << std::endl;
-    std::vector<std::string> deviceIds;
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID1);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID2);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID3);
-    int32_t result3 = dtbabilitymgrService_->OnDeviceDisconnect(token, deviceIds);
+    int32_t result3 = dtbabilitymgrService_->OnDeviceDisconnect(token, continuationResults);
     DTEST_LOG << "result3:" << result3 << std::endl;
     EXPECT_EQ(ERR_OK, result1);
     EXPECT_EQ(DISCONNECT_ABILITY_FAILED, result2);
@@ -495,11 +511,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_009, TestS
     int32_t result3 = dtbabilitymgrService_->OnDeviceConnect(
         UNREGISTER_TOKEN, continuationResults);
     DTEST_LOG << "result3:" << result3 << std::endl;
-    std::vector<std::string> deviceIds;
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID1);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID2);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID3);
-    int32_t result4 = dtbabilitymgrService_->OnDeviceDisconnect(UNREGISTER_TOKEN, deviceIds);
+    int32_t result4 = dtbabilitymgrService_->OnDeviceDisconnect(UNREGISTER_TOKEN, continuationResults);
     DTEST_LOG << "result4:" << result4 << std::endl;
     EXPECT_EQ(TOKEN_HAS_NOT_REGISTERED, result1);
     EXPECT_EQ(TOKEN_HAS_NOT_REGISTERED, result2);
@@ -534,11 +546,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_010, TestS
     int32_t result1 = dtbabilitymgrService_->OnDeviceConnect(
         UNREGISTER_TOKEN, continuationResults);
     DTEST_LOG << "result1:" << result1 << std::endl;
-    std::vector<std::string> deviceIds;
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID1);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID2);
-    deviceIds.emplace_back(UNSELECTED_DEVICE_ID3);
-    int32_t result2 = dtbabilitymgrService_->OnDeviceDisconnect(UNREGISTER_TOKEN, deviceIds);
+    int32_t result2 = dtbabilitymgrService_->OnDeviceDisconnect(UNREGISTER_TOKEN, continuationResults);
     DTEST_LOG << "result2:" << result2 << std::endl;
     EXPECT_EQ(DISCONNECT_ABILITY_FAILED, result1);
     EXPECT_EQ(DISCONNECT_ABILITY_FAILED, result2);
@@ -1753,17 +1761,30 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_005, TestSize.Level3)
 {
     MessageParcel data;
     data.WriteInterfaceToken(IDeviceSelectionNotifier::GetDescriptor());
-    std::vector<std::string> deviceIds;
-    deviceIds.emplace_back(SELECTED_DEVICE_ID1);
-    deviceIds.emplace_back(SELECTED_DEVICE_ID2);
-    deviceIds.emplace_back(SELECTED_DEVICE_ID3);
-    data.WriteStringVector(deviceIds);
+    std::vector<ContinuationResult> continuationResults;
+    ContinuationResult continuationResult1;
+    continuationResult1.SetDeviceId(SELECTED_DEVICE_ID1);
+    continuationResult1.SetDeviceType(SELECTED_DEVICE_TYPE1);
+    continuationResult1.SetDeviceName(SELECTED_DEVICE_NAME1);
+    ContinuationResult continuationResult2;
+    continuationResult2.SetDeviceId(SELECTED_DEVICE_ID2);
+    continuationResult2.SetDeviceType(SELECTED_DEVICE_TYPE2);
+    continuationResult2.SetDeviceName(SELECTED_DEVICE_NAME2);
+    continuationResults.emplace_back(continuationResult1);
+    continuationResults.emplace_back(continuationResult2);
+
+    bool result1 = ContinuationResult::WriteContinuationResultsToParcel(data, continuationResults);
+    if (!result1) {
+        DTEST_LOG << "WriteContinuationResultsToParcel failed" << std::endl;
+        return;
+    }
 
     MessageParcel reply;
     MessageOption option;
     DeviceSelectionNotifierTest deviceSelectionNotifierTest;
     int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_DISCONNECT,
         data, reply, option);
+
     EXPECT_EQ(ERR_OK, result);
 }
 
@@ -1789,11 +1810,31 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_006, TestSize.Level3)
 
 /**
  * @tc.name: OnRemoteRequest_007
+ * @tc.desc: test OnRemoteRequest, code = EVENT_DEVICE_DISCONNECT but read from parcel failed
+ * @tc.type: FUNC
+ * @tc.require: I621C1
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_007, TestSize.Level3)
+{
+    MessageParcel data;
+    data.WriteInterfaceToken(IDeviceSelectionNotifier::GetDescriptor());
+    data.WriteInt32(VALUE_OBJECT);
+    data.WriteInt32(INVALID_LEN);
+    MessageParcel reply;
+    MessageOption option;
+    DeviceSelectionNotifierTest deviceSelectionNotifierTest;
+    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_DISCONNECT,
+        data, reply, option);
+    EXPECT_EQ(ERR_FLATTEN_OBJECT, result);
+}
+
+/**
+ * @tc.name: OnRemoteRequest_008
  * @tc.desc: test OnRemoteRequest when descriptor != remoteDescriptor.
  * @tc.type: FUNC
  * @tc.require: I5M4CD
  */
-HWTEST_F(ContinuationManagerTest, OnRemoteRequest_007, TestSize.Level3)
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_008, TestSize.Level3)
 {
     sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
     AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
@@ -1816,12 +1857,8 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_007, TestSize.Level3)
     /**
      * @tc.steps: step3. DeviceSelectionNotifierProxy::OnDeviceDisconnect when continuationResults is nullptr.
      */
-    std::vector<std::string> deviceIds;
-    deviceSelectionNotifierProxy.OnDeviceDisconnect(deviceIds);
+    deviceSelectionNotifierProxy.OnDeviceDisconnect(continuationResults);
 
-    /**
-     * @tc.steps: step4. DeviceSelectionNotifierProxy::OnDeviceConnect.
-     */
     ContinuationResult continuationResult1;
     continuationResult1.SetDeviceId(SELECTED_DEVICE_ID1);
     continuationResult1.SetDeviceType(SELECTED_DEVICE_TYPE1);
@@ -1832,23 +1869,23 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_007, TestSize.Level3)
     continuationResult2.SetDeviceName(SELECTED_DEVICE_NAME2);
     continuationResults.emplace_back(continuationResult1);
     continuationResults.emplace_back(continuationResult2);
+    /**
+     * @tc.steps: step4. DeviceSelectionNotifierProxy::OnDeviceConnect.
+     */
     deviceSelectionNotifierProxy.OnDeviceConnect(continuationResults);
     /**
      * @tc.steps: step5. DeviceSelectionNotifierProxy::OnDeviceDisconnect.
      */
-    deviceIds.emplace_back(SELECTED_DEVICE_ID1);
-    deviceIds.emplace_back(SELECTED_DEVICE_ID2);
-    deviceIds.emplace_back(SELECTED_DEVICE_ID3);
-    deviceSelectionNotifierProxy.OnDeviceDisconnect(deviceIds);
+    deviceSelectionNotifierProxy.OnDeviceDisconnect(continuationResults);
 }
 
 /**
- * @tc.name: OnRemoteRequest_008
+ * @tc.name: OnRemoteRequest_009
  * @tc.desc: test OnRemoteRequest when code = AppDeviceCallbackInterface::EVENT_DEVICE_CONNECT.
  * @tc.type: FUNC
  * @tc.require: I621C1
  */
-HWTEST_F(ContinuationManagerTest, OnRemoteRequest_008, TestSize.Level3)
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_009, TestSize.Level3)
 {
     sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
     AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
@@ -1863,12 +1900,12 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_008, TestSize.Level3)
 }
 
 /**
- * @tc.name: OnRemoteRequest_009
+ * @tc.name: OnRemoteRequest_010
  * @tc.desc: test OnRemoteRequest when ContinuationResult read from parcel failed.
  * @tc.type: FUNC
  * @tc.require: I621C1
  */
-HWTEST_F(ContinuationManagerTest, OnRemoteRequest_009, TestSize.Level3)
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_010, TestSize.Level3)
 {
     sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
     AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
@@ -1885,12 +1922,12 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_009, TestSize.Level3)
 }
 
 /**
- * @tc.name: OnRemoteRequest_010
+ * @tc.name: OnRemoteRequest_011
  * @tc.desc: test OnRemoteRequest when code = AppDeviceCallbackInterface::EVENT_DEVICE_DISCONNECT.
  * @tc.type: FUNC
  * @tc.require: I621C1
  */
-HWTEST_F(ContinuationManagerTest, OnRemoteRequest_010, TestSize.Level3)
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_011, TestSize.Level3)
 {
     sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
     AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
@@ -1905,12 +1942,34 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_010, TestSize.Level3)
 }
 
 /**
- * @tc.name: OnRemoteRequest_011
+ * @tc.name: OnRemoteRequest_012
+ * @tc.desc: test OnRemoteRequest when ContinuationResult read from parcel failed.
+ * @tc.type: FUNC
+ * @tc.require: I621C1
+ */
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_012, TestSize.Level3)
+{
+    sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
+    AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(AppDeviceCallbackInterface::GetDescriptor());
+    data.WriteInt32(TEST_TOKEN);
+    data.WriteInt32(VALUE_OBJECT);
+    data.WriteInt32(INVALID_LEN);
+    int32_t ret = appDeviceCallbackStub.OnRemoteRequest(
+        AppDeviceCallbackInterface::EVENT_DEVICE_DISCONNECT, data, reply, option);
+    EXPECT_EQ(ERR_FLATTEN_OBJECT, ret);
+}
+
+/**
+ * @tc.name: OnRemoteRequest_013
  * @tc.desc: test OnRemoteRequest when code = AppDeviceCallbackInterface::EVENT_DEVICE_CANCEL.
  * @tc.type: FUNC
  * @tc.require: I621C1
  */
-HWTEST_F(ContinuationManagerTest, OnRemoteRequest_011, TestSize.Level3)
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_013, TestSize.Level3)
 {
     sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
     AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
@@ -1924,12 +1983,12 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_011, TestSize.Level3)
 }
 
 /**
- * @tc.name: OnRemoteRequest_012
+ * @tc.name: OnRemoteRequest_014
  * @tc.desc: test OnRemoteRequest when code = INVALID_EVENT_DEVICE_CODE.
  * @tc.type: FUNC
  * @tc.require: I621C1
  */
-HWTEST_F(ContinuationManagerTest, OnRemoteRequest_012, TestSize.Level3)
+HWTEST_F(ContinuationManagerTest, OnRemoteRequest_014, TestSize.Level3)
 {
     sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
     AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
@@ -1951,17 +2010,16 @@ HWTEST_F(ContinuationManagerTest, OnDeviceEvent_001, TestSize.Level3)
 {
     sptr<DmsNotifier> dmsNotifier = new MockDmsNotifier();
     AppDeviceCallbackStub appDeviceCallbackStub(dmsNotifier);
+    std::vector<ContinuationResult> continuationResults;
     /**
      * @tc.steps: step1. test OnDeviceConnect
      */
-    std::vector<ContinuationResult> continuationResults;
     int32_t ret = appDeviceCallbackStub.OnDeviceConnect(TEST_TOKEN, continuationResults);
     EXPECT_EQ(ERR_NONE, ret);
     /**
      * @tc.steps: step2. test OnDeviceDisconnect
      */
-    std::vector<std::string> deviceIds;
-    ret = appDeviceCallbackStub.OnDeviceDisconnect(TEST_TOKEN, deviceIds);
+    ret = appDeviceCallbackStub.OnDeviceDisconnect(TEST_TOKEN, continuationResults);
     EXPECT_EQ(ERR_NONE, ret);
     /**
      * @tc.steps: step3. test OnDeviceCancel
@@ -1977,7 +2035,7 @@ HWTEST_F(ContinuationManagerTest, OnDeviceEvent_001, TestSize.Level3)
     /**
      * @tc.steps: step5. test OnDeviceDisconnect when dmsNotifier_ == nullptr
      */
-    ret = appDeviceCallbackStub.OnDeviceDisconnect(TEST_TOKEN, deviceIds);
+    ret = appDeviceCallbackStub.OnDeviceDisconnect(TEST_TOKEN, continuationResults);
     EXPECT_EQ(ERR_NULL_OBJECT, ret);
     /**
      * @tc.steps: step6. test OnDeviceCancel when dmsNotifier_ == nullptr
