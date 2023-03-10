@@ -52,6 +52,7 @@ const std::string PERMISSION_DISTRIBUTED_DATASYNC = "ohos.permission.DISTRIBUTED
 const std::string PARAM_FREEINSTALL_APPID = "ohos.freeinstall.params.callingAppId";
 const std::string PARAM_FREEINSTALL_BUNDLENAMES = "ohos.freeinstall.params.callingBundleNames";
 const std::string CMPT_PARAM_FREEINSTALL_BUNDLENAMES = "ohos.extra.param.key.allowedBundles";
+const std::string DMS_VERSION_ID = "dmsVersion";
 const int DEFAULT_REQUEST_CODE = -1;
 }
 
@@ -204,9 +205,8 @@ int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, M
     }
     nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
     if (!extraInfoJson.is_discarded()) {
-        uint32_t accessToken = extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN];
-        callerInfo.accessToken = accessToken;
-        HILOGD("parse extra info, accessTokenID = %u", accessToken);
+        SaveExtraInfo(extraInfoJson, callerInfo);
+        HILOGD("parse extra info");
     }
     int32_t result = StartAbilityFromRemote(*want, abilityInfo, requestCode, callerInfo, accountInfo);
     BehaviorEventParam eventParam = { EventCallingType::REMOTE, BehaviorEvent::START_REMOTE_ABILITY, result,
@@ -219,6 +219,18 @@ int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, M
     PARCEL_WRITE_HELPER(reply, String, package);
     PARCEL_WRITE_HELPER(reply, String, deviceId);
     return ERR_NONE;
+}
+
+void DistributedSchedStub::SaveExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo)
+{
+    uint32_t accessToken = extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN];
+    callerInfo.accessToken = accessToken;
+    HILOGD("parse extra info, accessTokenID = %u", accessToken);
+    if (extraInfoJson.find(DMS_VERSION_ID) != extraInfoJson.end()) {
+        std::string dmsVersion = extraInfoJson[DMS_VERSION_ID];
+        callerInfo.extraInfoJson[DMS_VERSION_ID] = dmsVersion;
+        HILOGD("save dms version");
+    }
 }
 
 int32_t DistributedSchedStub::SendResultFromRemoteInner(MessageParcel& data, MessageParcel& reply)
@@ -449,9 +461,8 @@ int32_t DistributedSchedStub::ConnectAbilityFromRemoteInner(MessageParcel& data,
     }
     nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
     if (!extraInfoJson.is_discarded()) {
-        uint32_t accessToken = extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN];
-        callerInfo.accessToken = accessToken;
-        HILOGD("parse extra info, accessTokenID = %u", accessToken);
+        SaveExtraInfo(extraInfoJson, callerInfo);
+        HILOGD("parse extra info");
     }
     std::string package = abilityInfo.bundleName;
     std::string deviceId = abilityInfo.deviceId;
@@ -819,9 +830,8 @@ int32_t DistributedSchedStub::StartAbilityByCallFromRemoteInner(MessageParcel& d
     }
     nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
     if (!extraInfoJson.is_discarded()) {
-        uint32_t accessToken = extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN];
-        callerInfo.accessToken = accessToken;
-        HILOGD("parse extra info, accessToken = %u", accessToken);
+        SaveExtraInfo(extraInfoJson, callerInfo);
+        HILOGD("parse extra info");
     }
     shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
@@ -986,9 +996,7 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
     nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
     int32_t requestCode = DEFAULT_REQUEST_CODE;
     if (!extraInfoJson.is_discarded()) {
-        uint32_t accessToken = extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN];
-        callerInfo.accessToken = accessToken;
-        HILOGD("parse extra info, accessTokenID = %u", accessToken);
+        SaveExtraInfo(extraInfoJson, callerInfo);
         if (extraInfoJson.contains(EXTRO_INFO_JSON_KEY_REQUEST_CODE)) {
             requestCode = extraInfoJson[EXTRO_INFO_JSON_KEY_REQUEST_CODE];
             HILOGD("parse extra info, requestCode = %d", requestCode);

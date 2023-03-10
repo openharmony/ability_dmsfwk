@@ -35,6 +35,7 @@ const std::string FOUNDATION_PROCESS_NAME = "foundation";
 const std::string DMS_API_VERSION = "dmsApiVersion";
 const std::string DMS_IS_CALLER_BACKGROUND = "dmsIsCallerBackGround";
 const std::string DMS_MISSION_ID = "dmsMissionId";
+const std::string DMS_VERSION_ID = "dmsVersion";
 const std::string PERMISSION_START_ABILIIES_FROM_BACKGROUND = "ohos.permission.START_ABILIIES_FROM_BACKGROUND";
 const std::string PERMISSION_START_ABILITIES_FROM_BACKGROUND = "ohos.permission.START_ABILITIES_FROM_BACKGROUND";
 const std::string PERMISSION_START_INVISIBLE_ABILITY = "ohos.permission.START_INVISIBLE_ABILITY";
@@ -380,6 +381,11 @@ bool DistributedSchedPermission::CheckCustomPermission(const AppExecFwk::Ability
 bool DistributedSchedPermission::CheckBackgroundPermission(const AppExecFwk::AbilityInfo& targetAbility,
     const CallerInfo& callerInfo, const AAFwk::Want& want, bool needCheckApiVersion) const
 {
+    if (callerInfo.extraInfoJson.empty() ||
+        callerInfo.extraInfoJson.find(DMS_VERSION_ID) == callerInfo.extraInfoJson.end()) {
+        HILOGD("the version is low");
+        return true;
+    }
     AAFwk::Want* remoteWant = const_cast<Want*>(&want);
     bool isCallerBackGround = remoteWant->GetBoolParam(DMS_IS_CALLER_BACKGROUND, true);
     remoteWant->RemoveParam(DMS_IS_CALLER_BACKGROUND);
