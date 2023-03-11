@@ -81,6 +81,8 @@ const std::string COMPONENT_TYPE_KEY = "componentType";
 const std::string DEVICE_TYPE_KEY = "deviceType";
 const std::string CHANGE_TYPE_KEY = "changeType";
 const std::string DMS_HIPLAY_ACTION = "ohos.ability.action.deviceSelect";
+const std::string DMS_VERSION_ID = "dmsVersion";
+const std::string DMS_VERSION = "3.2.0";
 constexpr int32_t BIND_CONNECT_RETRY_TIMES = 3;
 constexpr int32_t BIND_CONNECT_TIMEOUT = 500; // 500ms
 constexpr int32_t MAX_DISTRIBUTED_CONNECT_NUM = 600;
@@ -220,6 +222,7 @@ int32_t DistributedSchedService::StartRemoteAbility(const OHOS::AAFwk::Want& wan
         HILOGE("GetBundleNameListFromBms failed");
         return INVALID_PARAMETERS_ERR;
     }
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     AccountInfo accountInfo;
     int32_t ret = DistributedSchedPermission::GetInstance().GetAccountInfo(deviceId, callerInfo, accountInfo);
     if (ret != ERR_OK) {
@@ -688,7 +691,7 @@ int32_t DistributedSchedService::ConnectRemoteAbility(const OHOS::AAFwk::Want& w
         HILOGE("GetBundleNameListFromBms failed");
         return INVALID_PARAMETERS_ERR;
     }
-
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     HILOGD("[PerformanceTest] ConnectRemoteAbility begin");
     int32_t result = TryConnectRemoteAbility(want, connect, callerInfo);
     if (result != ERR_OK) {
@@ -923,6 +926,7 @@ int32_t DistributedSchedService::StartRemoteAbilityByCall(const OHOS::AAFwk::Wan
         HILOGE("GetBundleNameListFromBms failed");
         return INVALID_PARAMETERS_ERR;
     }
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     int32_t ret = TryStartRemoteAbilityByCall(want, connect, callerInfo);
     if (ret != ERR_OK) {
         HILOGE("StartRemoteAbilityByCall result is %{public}d", ret);
@@ -1800,6 +1804,7 @@ int32_t DistributedSchedService::SetCallerInfo(
         HILOGE("GetBundleNameListFromBms failed");
         return INVALID_PARAMETERS_ERR;
     }
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     return ERR_OK;
 }
 
