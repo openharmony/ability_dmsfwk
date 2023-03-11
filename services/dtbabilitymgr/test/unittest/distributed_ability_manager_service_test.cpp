@@ -54,7 +54,7 @@ public:
     void ScheduleStartDeviceManager(const sptr<IRemoteObject>& appProxy, int32_t token,
         const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams = nullptr) override;
     int32_t OnDeviceConnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
-    int32_t OnDeviceDisconnect(int32_t token, const std::vector<std::string>& deviceIds) override;
+    int32_t OnDeviceDisconnect(int32_t token, const std::vector<ContinuationResult>& continuationResults) override;
     int32_t OnDeviceCancel() override;
 };
 
@@ -82,7 +82,7 @@ int32_t MockDmsNotifier::OnDeviceConnect(int32_t token,
 }
 
 int32_t MockDmsNotifier::OnDeviceDisconnect(int32_t token,
-    const std::vector<std::string>& deviceIds)
+    const std::vector<ContinuationResult>& continuationResults)
 {
     return 0;
 }
@@ -294,7 +294,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_003, TestSize.Lev
 
 /**
  * @tc.name: OnRemoteRequest_004
- * @tc.desc: test OnRemoteRequest
+ * @tc.desc: test OnRemoteRequest to start funcsMap_ without DATASYNC permission
  * @tc.type: FUNC
  * @tc.require: I5NOA1
  */
@@ -305,13 +305,35 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_004, TestSize.Lev
         DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
         return;
     }
-	MessageParcel data;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    int32_t result = dtbabilitymgrService_->OnRemoteRequest(UPDATE_CONNECT_STATUS, data, reply, option);
+    EXPECT_EQ(DMS_PERMISSION_DENIED, result);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnRemoteRequest_005
+ * @tc.desc: test OnRemoteRequest to start funcsMap_ with DATASYNC permission
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_005, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_005 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    DistributedSchedUtil::MockPermission();
+    MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     int32_t result = dtbabilitymgrService_->OnRemoteRequest(UPDATE_CONNECT_STATUS, data, reply, option);
     EXPECT_NE(ERR_NONE, result);
-    DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_004 end" << std::endl;
+    DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_005 end" << std::endl;
 }
 
 /**
@@ -381,8 +403,9 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceDisconnect_001, TestS
         DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
         return;
     }
-    std::vector<std::string> deviceIds;
-    bool ret = dtbabilitymgrService_->HandleDeviceDisconnect(dtbabilitymgrService_, deviceIds);
+
+    std::vector<ContinuationResult> continuationResults;
+    bool ret = dtbabilitymgrService_->HandleDeviceDisconnect(dtbabilitymgrService_, continuationResults);
     EXPECT_NE(ret, true);
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     dtbabilitymgrService_->ScheduleStartDeviceManager(nullptr, 1, continuationExtraParams);
@@ -393,7 +416,6 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceDisconnect_001, TestS
         auto runner = AppExecFwk::EventRunner::Create("continuation_manager");
         dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
-    std::vector<ContinuationResult> continuationResults;
     bool result = dtbabilitymgrService_->HandleDeviceConnect(dtbabilitymgrService_, continuationResults);
     dtbabilitymgrService_->HandleStartDeviceManager(1, continuationExtraParams);
     dtbabilitymgrService_->HandleStartDeviceManager(1, nullptr);

@@ -34,7 +34,7 @@ public:
     virtual ~DeviceSelectionNotifierProxy() = default;
 
     void OnDeviceConnect(const std::vector<ContinuationResult>& continuationResults) override;
-    void OnDeviceDisconnect(const std::vector<std::string>& deviceIds) override;
+    void OnDeviceDisconnect(const std::vector<ContinuationResult>& continuationResults) override;
 private:
     static inline BrokerDelegator<DeviceSelectionNotifierProxy> delegator_;
 };

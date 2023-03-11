@@ -185,7 +185,7 @@ HWTEST_F(DistributedMissionInfoTest, testMarshalling001, TestSize.Level3)
 HWTEST_F(DistributedMissionInfoTest, testReadDstbMissionInfosFromParcel001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedMissionInfoTest testReadDstbMissionInfosFromParcel001 start" << std::endl;
-    /**
+     /**
      * @tc.steps: step1. test ReadDstbMissionInfosFromParcel.
      */
     DstbMissionInfo dstbMissionInfo;
@@ -421,7 +421,7 @@ HWTEST_F(DistributedMissionInfoTest, testToString001, TestSize.Level3)
     remoteObject = new MockRemoteStub();
     MissionChangedNotify::NotifyNetDisconnect(remoteObject, TEST_DEVICEID, state);
     /**
-     * @tc.steps: step3. test NotifyNetDisconnect when remoteObject return false
+     * @tc.steps: step3. test NotifyNetDisconnect when remoteObject is not nullptr
      */
     MissionChangedNotify::NotifyNetDisconnect(remoteObject, TEST_DEVICEID_TO_RETURN_FALSE, state);
     /**

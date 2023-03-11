@@ -20,6 +20,10 @@ namespace OHOS {
 namespace DistributedSchedule {
 enum {
     /**
+     * Result(201) for permission denied.
+     */
+    PERMISSION_DENIED = 201,
+    /**
      * Result(401) for parameter check failed.
      */
     PARAMETER_CHECK_FAILED = 401,
@@ -28,15 +32,15 @@ enum {
      */
     SYSTEM_WORK_ABNORMALLY = 16600001,
     /**
-     * Result(16600003) for token or callback not registered.
+     * Result(16600002) for token or callback not registered.
      */
     CALLBACK_TOKEN_UNREGISTERED = 16600002,
     /**
-     * Result(16600004) for token register max times.
+     * Result(16600003) for token register max times.
      */
     OVER_MAX_REGISTERED_TIMES = 16600003,
     /**
-     * Result(16600005) for token has been registered.
+     * Result(16600004) for token has been registered.
      */
     REPEATED_REGISTRATION = 16600004,
 };
