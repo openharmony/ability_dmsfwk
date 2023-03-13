@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <thread>
 
 #include "distributed_sched_continuation_test.h"
 #include "distributed_sched_util.h"
@@ -25,7 +26,6 @@ using namespace testing::ext;
 using namespace OHOS::AAFwk;
 using namespace OHOS::AppExecFwk;
 using namespace OHOS::DistributedHardware;
-using string = std::string;
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -33,7 +33,8 @@ namespace {
 const std::u16string MOCK_DEVICE_ID = u"MOCK_DEVICE_ID";
 constexpr int32_t MOCK_SESSION_ID = 123;
 constexpr int32_t MOCK_TASK_ID = 456;
-const string LOCAL_DEVICE_ID = "192.168.43.100";
+const std::string LOCAL_DEVICE_ID = "192.168.43.100";
+constexpr int32_t SLEEP_TIME = 1000;
 }
 
 void DSchedContinuationTest::SetUpTestCase()
@@ -44,6 +45,8 @@ void DSchedContinuationTest::SetUpTestCase()
     const std::string pkgName = "DBinderBus_" + std::to_string(getpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
+    DistributedSchedUtil::InstallThirdPartyHap();
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
 }
 
 void DSchedContinuationTest::TearDownTestCase()
@@ -82,7 +85,8 @@ int32_t DSchedContinuationTest::PushAbilityToken()
     return sessionId;
 }
 
-std::shared_ptr<Want> DSchedContinuationTest::MockWant(const string& bundleName, const string& ability, int32_t flags)
+std::shared_ptr<Want> DSchedContinuationTest::MockWant(const std::string& bundleName,
+    const std::string& ability, int32_t flags)
 {
     ElementName element("", bundleName, ability);
     std::shared_ptr<Want> spWant = std::make_shared<Want>();
@@ -115,9 +119,9 @@ sptr<IDistributedSched> DSchedContinuationTest::GetDms()
 
 int32_t DSchedContinuationTest::StartContinuation(int32_t missionId, int32_t flags)
 {
-    string bundleName = "bundleName";
-    string abilityName = "abilityName";
-    string devId = "devId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string devId = "devId";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, flags);
     int callerUid = 0;
     return DistributedSchedService::GetInstance().StartContinuation(*spWant, missionId, callerUid, 0, 0);
@@ -125,9 +129,9 @@ int32_t DSchedContinuationTest::StartContinuation(int32_t missionId, int32_t fla
 
 int32_t DSchedContinuationTest::StartRemoteFreeInstall(int32_t flags, const sptr<IRemoteObject>& callback)
 {
-    string bundleName = "bundleName";
-    string abilityName = "abilityName";
-    string devId = "devId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::string devId = "devId";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, flags);
     int callerUid = 0;
     return DistributedSchedService::GetInstance().StartRemoteFreeInstall(*spWant, callerUid, 0, 0, callback);
@@ -303,8 +307,8 @@ HWTEST_F(DSchedContinuationTest, SetWantForContinuation_001, TestSize.Level1)
      * @tc.steps: step1. input invalid bundleName.
      * @tc.expected: step1. return err.
      */
-    string bundleName = "bundleName";
-    string abilityName = "abilityName";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
     int32_t missionId = 0;
     int32_t ret = DistributedSchedService::GetInstance().SetWantForContinuation(*spWant, missionId);
@@ -324,8 +328,8 @@ HWTEST_F(DSchedContinuationTest, SetWantForContinuation_002, TestSize.Level1)
      * @tc.steps: step1. input valid bundleName.
      * @tc.expected: step1. return OK.
      */
-    string bundleName = "ohos.samples.distributedcalc";
-    string abilityName = "MainAbility";
+    std::string bundleName = "com.third.hiworld.example";
+    std::string abilityName = "bmsThirdBundle";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
     int32_t missionId = 0;
     int32_t ret = DistributedSchedService::GetInstance().SetWantForContinuation(*spWant, missionId);
@@ -345,7 +349,7 @@ HWTEST_F(DSchedContinuationTest, ContinueLocalMission_001, TestSize.Level1)
      * @tc.steps: step1. input invalid missionId.
      * @tc.expected: step1. return err.
      */
-    string deviceId = "123456";
+    std::string deviceId = "123456";
     int32_t missionId = 0;
     auto callback = GetDSchedService();
     WantParams wantParams;
@@ -367,7 +371,7 @@ HWTEST_F(DSchedContinuationTest, ContinueLocalMission_002, TestSize.Level1)
      * @tc.steps: step1. input invalid mission.
      * @tc.expected: step1. return err.
      */
-    string deviceId = "123456";
+    std::string deviceId = "123456";
     int32_t missionId = 0;
     auto callback = GetDSchedService();
     WantParams wantParams;
@@ -391,7 +395,7 @@ HWTEST_F(DSchedContinuationTest, ContinueLocalMission_002, TestSize.Level1)
 HWTEST_F(DSchedContinuationTest, ContinueLocalMission_003, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinuationTest ContinueLocalMission_003 start" << std::endl;
-    string deviceId = "123456";
+    std::string deviceId = "123456";
     int32_t missionId = -1;
     auto callback = GetDSchedService();
     WantParams wantParams;
@@ -411,7 +415,7 @@ HWTEST_F(DSchedContinuationTest, ContinueLocalMission_003, TestSize.Level1)
 HWTEST_F(DSchedContinuationTest, ContinueLocalMission_004, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinuationTest ContinueLocalMission_004 start" << std::endl;
-    string deviceId;
+    std::string deviceId;
     int32_t missionId = -1;
     auto callback = GetDSchedService();
     WantParams wantParams;
@@ -434,8 +438,8 @@ HWTEST_F(DSchedContinuationTest, ContinueRemoteMission_001, TestSize.Level1)
      * @tc.steps: step1. input invalid deviceId.
      * @tc.expected: step1. return err.
      */
-    string srcDeviceId = "123456";
-    string dstDeviceid = "123456";
+    std::string srcDeviceId = "123456";
+    std::string dstDeviceid = "123456";
     int32_t missionId = 0;
     auto callback = GetDSchedService();
     WantParams wantParams;
@@ -457,9 +461,9 @@ HWTEST_F(DSchedContinuationTest, ContinueRemoteMission_002, TestSize.Level1)
      * @tc.steps: step1. input invalid param.
      * @tc.expected: step1. return err.
      */
-    string srcDeviceId;
+    std::string srcDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId);
-    string dstDeviceid = "123456";
+    std::string dstDeviceid = "123456";
     int32_t missionId = 0;
     auto callback = GetDSchedService();
     WantParams wantParams;
@@ -1394,8 +1398,8 @@ HWTEST_F(DSchedContinuationTest, ProxyCallStartRemoteAbilityByCall001, TestSize.
     if (proxy == nullptr) {
         return;
     }
-    string bundleName = "bundleName";
-    string abilityName = "abilityName";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
     int32_t ret = proxy->StartRemoteAbilityByCall(*spWant, nullptr, 0, 0, 1);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -1415,8 +1419,8 @@ HWTEST_F(DSchedContinuationTest, ProxyCallStartRemoteAbilityByCall002, TestSize.
     if (proxy == nullptr) {
         return;
     }
-    string bundleName = "bundleName";
-    string abilityName = "abilityName";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
     int32_t ret = proxy->StartRemoteAbilityByCall(*spWant, GetDSchedService(), 0, 0, 1);
     EXPECT_NE(ret, ERR_NULL_OBJECT);
@@ -1477,8 +1481,8 @@ HWTEST_F(DSchedContinuationTest, ProxyCallStartAbilityByCallFromRemote001, TestS
         return;
     }
     // mock want
-    string bundleName = "bundleName";
-    string abilityName = "abilityName";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
     // mock callerinfo
     CallerInfo callerInfo;
@@ -1509,8 +1513,8 @@ HWTEST_F(DSchedContinuationTest, ProxyCallStartAbilityByCallFromRemote002, TestS
         return;
     }
     // mock want
-    string bundleName = "bundleName";
-    string abilityName = "abilityName";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
     // mock callerinfo
     CallerInfo callerInfo;
@@ -1593,8 +1597,8 @@ HWTEST_F(DSchedContinuationTest, ProxyCallStartRemoteFreeInstall001, TestSize.Le
         return;
     }
     // mock want
-    string bundleName = "bundleName";
-    string abilityName = "abilityName";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
 
     int32_t ret = proxy->StartRemoteFreeInstall(*spWant, 0, 1, 1, GetDSchedService());
@@ -1616,8 +1620,8 @@ HWTEST_F(DSchedContinuationTest, ProxyCallStartRemoteFreeInstall002, TestSize.Le
         return;
     }
     // mock want
-    string bundleName = "bundleName";
-    string abilityName = "abilityName";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
 
     int32_t ret = proxy->StartRemoteFreeInstall(*spWant, 0, 1, 1, nullptr);

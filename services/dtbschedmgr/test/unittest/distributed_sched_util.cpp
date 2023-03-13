@@ -15,20 +15,66 @@
 
 #include "distributed_sched_util.h"
 
+#include <future>
+
 #include "accesstoken_kit.h"
+#include "bundle_installer_interface.h"
 #include "dtbschedmgr_log.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "nativetoken_kit.h"
+#include "nocopyable.h"
+#include "status_receiver_host.h"
+#include "status_receiver_interface.h"
 #include "system_ability_definition.h"
 #include "token_setproc.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
+using namespace AppExecFwk;
 namespace {
-    const std::string TAG = "DistributedSchedUtil";
+const std::string TAG = "DistributedSchedUtil";
+const std::string HAP_FILE_PATH = "/data/test/resource/dmsfwk/resource/bmsThirdBundle.hap";
 const char* DISTSCHED_PROCESS_NAME = "distributedsched";
 constexpr int32_t DMS_LOAD_SA_TIMEOUT_MS = 10000;
+constexpr int32_t USER_ID = 100;
+constexpr int32_t FAILED_RETURN = -1;
+}
+
+class StatusReceiverImpl : public StatusReceiverHost {
+public:
+    StatusReceiverImpl();
+    ~StatusReceiverImpl() override;
+    void OnStatusNotify(const int progress) override;
+    void OnFinished(const int32_t resultCode, const std::string &resultMsg) override;
+
+private:
+    mutable std::promise<std::string> resultMsgSignal_;
+    int iProgress_ = 0;
+
+    DISALLOW_COPY_AND_MOVE(StatusReceiverImpl);
+};
+
+StatusReceiverImpl::StatusReceiverImpl()
+{
+    HILOGI("create status receiver instance");
+}
+
+StatusReceiverImpl::~StatusReceiverImpl()
+{
+    HILOGI("destroy status receiver instance");
+}
+
+void StatusReceiverImpl::OnStatusNotify(const int progress)
+{
+    iProgress_ = progress;
+    HILOGI("OnStatusNotify progress:%{public}d", progress);
+}
+
+void StatusReceiverImpl::OnFinished(const int32_t resultCode, const std::string &resultMsg)
+{
+    HILOGI("on finished result is %{public}d, %{public}s", resultCode, resultMsg.c_str());
+    resultMsgSignal_.set_value(resultMsg);
 }
 
 sptr<IRemoteObject> DistributedSchedUtil::remote_ = nullptr;
@@ -46,6 +92,46 @@ void DistributedSchedUtil::MockPermission()
 void DistributedSchedUtil::MockProcess(const char* processName)
 {
     MockProcessAndPermission(processName);
+}
+
+sptr<AppExecFwk::IBundleMgr> DistributedSchedUtil::GetBundleManager()
+{
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgrProxy == nullptr) {
+        return nullptr;
+    }
+    sptr<IRemoteObject> bmsProxy = samgrProxy->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (bmsProxy == nullptr) {
+        HILOGE("failed to get bms from samgr");
+        return nullptr;
+    }
+    return iface_cast<AppExecFwk::IBundleMgr>(bmsProxy);
+}
+
+int32_t DistributedSchedUtil::InstallThirdPartyHap()
+{
+    auto bms = GetBundleManager();
+    if (bms == nullptr) {
+        HILOGE("bms is null");
+        return FAILED_RETURN;
+    }
+    auto installer = bms->GetBundleInstaller();
+    if (!installer) {
+        HILOGE("installer is null");
+        return FAILED_RETURN;
+    }
+    InstallParam installParam;
+    installParam.installFlag = InstallFlag::NORMAL;
+    installParam.userId = USER_ID;
+    sptr<StatusReceiverImpl> statusReceiver(new (std::nothrow) StatusReceiverImpl());
+    if (!statusReceiver) {
+        return FAILED_RETURN;
+    }
+    bool result = installer->Install(HAP_FILE_PATH, installParam, statusReceiver);
+    if (!result) {
+        return FAILED_RETURN;
+    }
+    return 0;
 }
 
 void DistributedSchedUtil::MockProcessAndPermission(const char* processName, const char *perms[], int32_t permsNum)
