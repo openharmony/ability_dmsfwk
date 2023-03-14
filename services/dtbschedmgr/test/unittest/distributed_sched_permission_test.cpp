@@ -54,6 +54,8 @@ const string INVALID_PERMISSION_NAME = "ohos.permission.TEST";
 const string DMS_IS_CALLER_BACKGROUND = "dmsIsCallerBackGround";
 const string DMS_API_VERSION = "dmsApiVersion";
 const string DMS_MISSION_ID = "dmsMissionId";
+const string DMS_VERSION_ID = "dmsVersion";
+const string DMS_VERSION = "4.0.0";
 const int API_VERSION = 9;
 const int FA_MODULE_ALLOW_MIN_API_VERSION = 8;
 
@@ -559,6 +561,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckGetCallerPermission_003, TestSize.
     CallerInfo callerInfo;
     bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
     EXPECT_EQ(result, true);
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     IDistributedSched::AccountInfo accountInfo;
     accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
     AppExecFwk::AbilityInfo targetAbility;
@@ -583,6 +586,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckGetCallerPermission_004, TestSize.
     CallerInfo callerInfo;
     bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
     EXPECT_EQ(result, true);
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     IDistributedSched::AccountInfo accountInfo;
     accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
     AppExecFwk::AbilityInfo targetAbility;
@@ -608,6 +612,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckGetCallerPermission_005, TestSize.
     CallerInfo callerInfo;
     bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
     EXPECT_EQ(result, true);
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     IDistributedSched::AccountInfo accountInfo;
     accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
     AppExecFwk::AbilityInfo targetAbility;
@@ -854,6 +859,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckBackgroundPermission_001, TestSize
     DTEST_LOG << "DistributedSchedPermissionTest CheckBackgroundPermission_001 begin" << std::endl;
     AppExecFwk::AbilityInfo targetAbility;
     CallerInfo callerInfo;
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     AAFwk::Want want;
     want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
     bool ret = DistributedSchedPermission::GetInstance().CheckBackgroundPermission(targetAbility, callerInfo, want,
@@ -873,6 +879,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckBackgroundPermission_002, TestSize
     DTEST_LOG << "DistributedSchedPermissionTest CheckBackgroundPermission_002 begin" << std::endl;
     AppExecFwk::AbilityInfo targetAbility;
     CallerInfo callerInfo;
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     AAFwk::Want want;
     bool ret = DistributedSchedPermission::GetInstance().CheckBackgroundPermission(targetAbility, callerInfo, want,
         false);
@@ -892,6 +899,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckBackgroundPermission_003, TestSize
     AppExecFwk::AbilityInfo targetAbility;
     targetAbility.isStageBasedModel = true;
     CallerInfo callerInfo;
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     AAFwk::Want want;
     bool ret = DistributedSchedPermission::GetInstance().CheckBackgroundPermission(targetAbility, callerInfo, want,
         true);
@@ -911,6 +919,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckBackgroundPermission_004, TestSize
     AppExecFwk::AbilityInfo targetAbility;
     targetAbility.type = AppExecFwk::AbilityType::SERVICE;
     CallerInfo callerInfo;
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     AAFwk::Want want;
     want.SetParam(DMS_API_VERSION, FA_MODULE_ALLOW_MIN_API_VERSION);
     bool ret = DistributedSchedPermission::GetInstance().CheckBackgroundPermission(targetAbility, callerInfo, want,
@@ -930,6 +939,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckBackgroundPermission_005, TestSize
     DTEST_LOG << "DistributedSchedPermissionTest CheckBackgroundPermission_005 begin" << std::endl;
     AppExecFwk::AbilityInfo targetAbility;
     CallerInfo callerInfo;
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     callerInfo.sourceDeviceId = "";
     callerInfo.accessToken = GetSelfTokenID();
     AAFwk::Want want;
@@ -950,6 +960,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckBackgroundPermission_006, TestSize
     DTEST_LOG << "DistributedSchedPermissionTest CheckBackgroundPermission_006 begin" << std::endl;
     AppExecFwk::AbilityInfo targetAbility;
     CallerInfo callerInfo;
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     callerInfo.sourceDeviceId = deviceId_;
     uint64_t tokenId = GetSelfTokenID();
     callerInfo.accessToken = tokenId;

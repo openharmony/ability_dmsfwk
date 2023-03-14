@@ -71,6 +71,7 @@ private:
     bool CheckCallingUid();
     bool EnforceInterfaceToken(MessageParcel& data);
     bool CallerInfoUnmarshalling(CallerInfo& callerInfo, MessageParcel& data);
+    void SaveExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo);
 
     using DistributedSchedFunc = int32_t(DistributedSchedStub::*)(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, DistributedSchedFunc> remoteFuncsMap_;
