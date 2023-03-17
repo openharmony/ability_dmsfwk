@@ -16,6 +16,7 @@ import("//build/ohos.gni")
 import("//build/ohos_var.gni")
 import("//build/test.gni")
 import("//foundation/ability/dmsfwk/dmsfwk.gni")
+import("../../../dmsfwk.gni")
 
 module_output_path = "dmsfwk/distributedschedsvrtest"
 
@@ -135,6 +136,11 @@ if (dmsfwk_standard_form_share) {
 ohos_unittest("distributedschedsvrtest") {
   module_out_path = module_output_path
 
+  deps = [
+    "${dms_path}/test/sceneProject/unittest/bundle_dependencies/bmsThirdBundle:bmsThirdBundle",
+    "${dms_path}/test/sceneProject/unittest/ohos_test:copy_ohos_test",
+  ]
+
   sources = [
     "unittest/distributed_sched_adapter_test.cpp",
     "unittest/distributed_sched_dumper_test.cpp",
@@ -205,7 +211,6 @@ ohos_unittest("dmsfreeinstallcbtest") {
 
 ohos_unittest("dschedcontinuetest") {
   module_out_path = module_output_path
-
   sources = [
     "unittest/distributed_sched_continuation_test.cpp",
     "unittest/dms_version_manager_test.cpp",
@@ -222,6 +227,11 @@ ohos_unittest("dschedcontinuetest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
+
+  deps = [
+    "${dms_path}/test/sceneProject/unittest/bundle_dependencies/bmsThirdBundle:bmsThirdBundle",
+    "${dms_path}/test/sceneProject/unittest/ohos_test:copy_ohos_test",
+  ]
 
   if (dmsfwk_mission_manager) {
     defines = [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
@@ -311,7 +321,11 @@ ohos_unittest("bundlemanagerinternaltest") {
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
   ]
   configs += dsched_configs
-  deps = [ "${distributed_service}/dtbschedmgr:distributedschedsvr" ]
+  deps = [
+    "${distributed_service}/dtbschedmgr:distributedschedsvr",
+    "${dms_path}/test/sceneProject/unittest/bundle_dependencies/bmsThirdBundle:bmsThirdBundle",
+    "${dms_path}/test/sceneProject/unittest/ohos_test:copy_ohos_test",
+  ]
   if (is_standard_system) {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps

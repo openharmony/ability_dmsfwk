@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <thread>
 
 #define private public
 #define protected public
@@ -59,6 +60,7 @@ namespace {
     const string ABILITY_NAME = "com.ohos.launcher.MainAbility";
     const string BUNDLE_NAME = "com.ohos.launcher";
     const string DMS_IS_CALLER_BACKGROUND = "dmsIsCallerBackGround";
+    constexpr int32_t SLEEP_TIME = 1000;
 }
 
 class DistributedSchedServiceTest : public testing::Test {
@@ -68,6 +70,7 @@ public:
     void SetUp();
     void TearDown();
     sptr<IDistributedSched> GetDms();
+    int32_t InstallBundle(const std::string &bundlePath) const;
     sptr<IDistributedSched> proxy_;
 
 protected:
@@ -93,6 +96,8 @@ void DistributedSchedServiceTest::SetUpTestCase()
     const std::string pkgName = "DBinderBus_" + std::to_string(getpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
+    DistributedSchedUtil::InstallThirdPartyHap();
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
 }
 
 void DistributedSchedServiceTest::TearDownTestCase()
@@ -1179,8 +1184,8 @@ HWTEST_F(DistributedSchedServiceTest, SendResultFromRemote_007, TestSize.Level3)
     std::string localDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
     want.SetParam(DMS_SRC_NETWORK_ID, localDeviceId);
-    AppExecFwk::ElementName element(localDeviceId, "ohos.samples.distributedcalc",
-        "ohos.samples.distributedcalc.MainAbility");
+    AppExecFwk::ElementName element(localDeviceId, "com.third.hiworld.example",
+        "bmsThirdBundle");
     want.SetElement(element);
     CallerInfo callerInfo;
     callerInfo.uid = 0;
@@ -1204,15 +1209,15 @@ HWTEST_F(DistributedSchedServiceTest, StartAbilityByCallFromRemote_001, TestSize
     AAFwk::Want want;
     std::string localDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
-    AppExecFwk::ElementName element(localDeviceId, "ohos.samples.distributedcalc",
-        "ohos.samples.distributedcalc.MainAbility");
+    AppExecFwk::ElementName element(localDeviceId, "com.third.hiworld.example",
+        "bmsThirdBundle");
     want.SetElement(element);
     want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
     sptr<IRemoteObject> connect = new MockDistributedSched();
     CallerInfo callerInfo;
     callerInfo.uid = 0;
     callerInfo.sourceDeviceId = LOCAL_DEVICEID;
-    bool result = BundleManagerInternal::GetCallerAppIdFromBms("ohos.samples.distributedcalc",
+    bool result = BundleManagerInternal::GetCallerAppIdFromBms("com.third.hiworld.example",
         callerInfo.callerAppId);
     EXPECT_EQ(result, true);
     IDistributedSched::AccountInfo accountInfo;
@@ -1235,8 +1240,8 @@ HWTEST_F(DistributedSchedServiceTest, StartAbilityByCallFromRemote_002, TestSize
     AAFwk::Want want;
     std::string localDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
-    AppExecFwk::ElementName element(localDeviceId, "ohos.samples.distributedcalc",
-        "ohos.samples.distributedcalc.MainAbility");
+    AppExecFwk::ElementName element(localDeviceId, "com.third.hiworld.example",
+        "bmsThirdBundle");
     want.SetElement(element);
     want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
     sptr<IRemoteObject> connect = new MockDistributedSched();
@@ -1332,7 +1337,7 @@ HWTEST_F(DistributedSchedServiceTest, StartLocalAbility_005, TestSize.Level3)
     AAFwk::Want want;
     std::string localDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
-    AppExecFwk::ElementName element(localDeviceId, "com.ohos.note", "MainAbility");
+    AppExecFwk::ElementName element(localDeviceId, "com.third.hiworld.example", "bmsThirdBundle");
     want.SetElement(element);
     want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
     AppExecFwk::AbilityInfo abilityInfo;
@@ -1340,7 +1345,7 @@ HWTEST_F(DistributedSchedServiceTest, StartLocalAbility_005, TestSize.Level3)
     CallerInfo callerInfo;
     callerInfo.uid = 0;
     callerInfo.sourceDeviceId = LOCAL_DEVICEID;
-    bool result = BundleManagerInternal::GetCallerAppIdFromBms("com.ohos.note", callerInfo.callerAppId);
+    bool result = BundleManagerInternal::GetCallerAppIdFromBms("com.third.hiworld.example", callerInfo.callerAppId);
     EXPECT_TRUE(result);
     IDistributedSched::AccountInfo accountInfo;
     accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;

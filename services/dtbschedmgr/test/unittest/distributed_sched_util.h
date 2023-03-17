@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <mutex>
 
+#include "bundle_mgr_interface.h"
 #include "iremote_object.h"
 #include "system_ability_load_callback_stub.h"
 
@@ -33,6 +34,8 @@ public:
     static bool LoadDistributedSchedService();
     static void LoadSystemAbilitySuccessNotify(const sptr<IRemoteObject>& remoteObject);
     static void LoadSystemAbilityFailNotify();
+    static sptr<AppExecFwk::IBundleMgr> GetBundleManager();
+    static int32_t InstallThirdPartyHap();
 
     static std::mutex remoteMutex_;
     static sptr<IRemoteObject> remote_;

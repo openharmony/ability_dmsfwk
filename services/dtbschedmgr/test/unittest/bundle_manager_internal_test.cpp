@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <thread>
+
 #include "bundle_manager_internal_test.h"
 #include "bundle/bundle_manager_internal.h"
 
@@ -20,6 +22,7 @@
 #include "bundle/bundle_manager_callback_stub.h"
 #undef private
 
+#include "distributed_sched_util.h"
 #include "dtbschedmgr_log.h"
 #include "test_log.h"
 
@@ -30,11 +33,14 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const string GROUP_ID = "TEST_GROUP_ID";
+constexpr int32_t SLEEP_TIME = 1000;
 }
 
 void BundleManagerInternalTest::SetUpTestCase()
 {
     DTEST_LOG << "BundleManagerInternalTest::SetUpTestCase" << std::endl;
+    DistributedSchedUtil::InstallThirdPartyHap();
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
 }
 
 void BundleManagerInternalTest::TearDownTestCase()
@@ -136,7 +142,7 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_005, TestSize.Leve
 {
     DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_005 begin" << std::endl;
     string deviceId = "123456";
-    string bundleName = "ohos.samples.distributedcalc";
+    string bundleName = "com.third.hiworld.example";
     AppExecFwk::DistributedBundleInfo remoteBundleInfo;
     int ret = BundleManagerInternal::CheckRemoteBundleInfoForContinuation(deviceId, bundleName, remoteBundleInfo);
     EXPECT_TRUE(CONTINUE_REMOTE_UNINSTALLED_UNSUPPORT_FREEINSTALL == ret);
@@ -153,9 +159,9 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_006, TestSize.Leve
 {
     DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_006 begin" << std::endl;
     string deviceId = "123456";
-    string bundleName = "ohos.samples.distributedcalc";
+    string bundleName = "com.third.hiworld.example";
     string moduleName = "entry";
-    string abilityName = "MainAbility";
+    string abilityName = "bmsThirdBundle";
     AAFwk::Want want;
     want.SetElementName(deviceId, bundleName, abilityName, moduleName);
     int32_t missionId = 0;
