@@ -52,6 +52,7 @@ namespace {
     const string LOCAL_DEVICEID = "192.168.43.100";
     const string REMOTE_DEVICEID = "255.255.255.255";
     const std::u16string DEVICE_ID = u"192.168.43.100";
+    const std::u16string DEVICE_ID_NULL = u"";
     constexpr int32_t SESSION_ID = 123;
     const std::string DMS_MISSION_ID = "dmsMissionId";
     constexpr int32_t MISSION_ID = 1;
@@ -1080,6 +1081,153 @@ HWTEST_F(DistributedSchedServiceTest, StartContinuation_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: StartContinuation_003
+ * @tc.desc: call StartContinuation
+ * @tc.type: FUNC
+ * @tc.require: I6O5T3
+ */
+HWTEST_F(DistributedSchedServiceTest, StartContinuation_003, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_003 start" << std::endl;
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    int32_t flags = Want::FLAG_ABILITY_CONTINUATION;
+    want.SetElement(element);
+    want.SetFlags(flags);
+    int32_t missionId = 0;
+    int32_t callerUid = 1;
+    int32_t status = ERR_OK;
+    uint32_t accessToken = 0;
+    int32_t ret = DistributedSchedService::GetInstance().StartContinuation(
+        want, missionId, callerUid, status, accessToken);
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), ret);
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartContinuation_004
+ * @tc.desc: call StartContinuation
+ * @tc.type: FUNC
+ * @tc.require: I6O5T3
+ */
+HWTEST_F(DistributedSchedServiceTest, StartContinuation_004, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_004 start" << std::endl;
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    int32_t flags = Want::FLAG_ABILITY_CONTINUATION;
+    want.SetElement(element);
+    want.SetFlags(flags);
+    int32_t missionId = 0;
+    int32_t callerUid = 0;
+    int32_t status = ERR_OK;
+    uint32_t accessToken = 1;
+    int32_t ret = DistributedSchedService::GetInstance().StartContinuation(
+        want, missionId, callerUid, status, accessToken);
+    DistributedSchedService::GetInstance().OnStop();
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), ret);
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartContinuation_005
+ * @tc.desc: call StartContinuation
+ * @tc.type: FUNC
+ * @tc.require: I6O5T3
+ */
+HWTEST_F(DistributedSchedServiceTest, StartContinuation_005, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_005 start" << std::endl;
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    int32_t flags = Want::FLAG_ABILITY_CONTINUATION;
+    want.SetElement(element);
+    want.SetFlags(flags);
+    int32_t missionId = 0;
+    int32_t callerUid = 1;
+    int32_t status = ERR_OK;
+    uint32_t accessToken = 1;
+    bool resultCode = true;
+    int32_t ret = DistributedSchedService::GetInstance().StartContinuation(
+        want, missionId, callerUid, status, accessToken);
+    DistributedSchedService::GetInstance().NotifyContinuationCallbackResult(missionId, resultCode);
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), ret);
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_005 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartContinuation_006
+ * @tc.desc: call StartContinuation
+ * @tc.type: FUNC
+ * @tc.require: I6O5T3
+ */
+HWTEST_F(DistributedSchedServiceTest, StartContinuation_006, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_006 start" << std::endl;
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    int32_t flags = Want::FLAG_ABILITY_CONTINUATION;
+    want.SetElement(element);
+    want.SetFlags(flags);
+    int32_t missionId = 0;
+    int32_t callerUid = 0;
+    int32_t status = ERR_OK;
+    uint32_t accessToken = 0;
+    bool resultCode = ERR_OK;
+    int32_t ret = DistributedSchedService::GetInstance().StartContinuation(
+        want, missionId, callerUid, status, accessToken);
+    DistributedSchedService::GetInstance().NotifyContinuationCallbackResult(missionId, resultCode);
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), ret);
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_006 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartContinuation_007
+ * @tc.desc: call StartContinuation
+ * @tc.type: FUNC
+ * @tc.type: I6O5T3
+ */
+HWTEST_F(DistributedSchedServiceTest, StartContinuation_007, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_007 start" << std::endl;
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    int32_t flags = Want::FLAG_ABILITY_CONTINUATION;
+    want.SetElement(element);
+    want.SetFlags(flags);
+    int32_t missionId = 0;
+    int32_t callerUid = 0;
+    int32_t status = ERR_OK;
+    uint32_t accessToken = 0;
+    bool isSuccess = false;
+    int32_t ret = DistributedSchedService::GetInstance().StartContinuation(
+        want, missionId, callerUid, status, accessToken);
+    DistributedSchedService::GetInstance().NotifyCompleteContinuation(DEVICE_ID_NULL, SESSION_ID, isSuccess);
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), ret);
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_007 end" << std::endl;
+}
+
+/**
  * @tc.name: NotifyCompleteContinuation_001
  * @tc.desc: call NotifyCompleteContinuation
  * @tc.type: FUNC
@@ -1354,6 +1502,46 @@ HWTEST_F(DistributedSchedServiceTest, StartLocalAbility_005, TestSize.Level3)
     int ret = DistributedSchedService::GetInstance().StartLocalAbility(info, 0, 0);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedServiceTest StartLocalAbility_005 end" << std::endl;
+}
+
+/**
+ * @tc.name: Dump001
+ * @tc.desc: call Dump
+ * @tc.type: FUNC
+ * @tc.require: I6O5T3
+ */
+HWTEST_F(DistributedSchedServiceTest, Dump001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest Dump001 start" << std::endl;
+    int32_t fd = 1;
+    const std::vector<std::u16string> args;
+    const wptr<IRemoteObject> remote;
+    int32_t missionId = 0;
+    bool resultCode = ERR_OK;
+    int32_t ret = DistributedSchedService::GetInstance().Dump(fd, args);
+    DistributedSchedService::GetInstance().NotifyContinuationCallbackResult(missionId, resultCode);
+    DistributedSchedService::GetInstance().ProcessFormMgrDied(remote);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceTest Dump001 end" << std::endl;
+}
+
+/**
+ * @tc.name: Dump002
+ * @tc.desc: call Dump
+ * @tc.type: FUNC
+ * @tc.require: I6O5T3
+ */
+HWTEST_F(DistributedSchedServiceTest, Dump002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest Dump002 start" << std::endl;
+    int32_t fd = 0;
+    const std::vector<std::u16string> args;
+    const std::string deviceId;
+    int32_t ret = DistributedSchedService::GetInstance().Dump(fd, args);
+    DistributedSchedService::GetInstance().DeviceOnlineNotify(deviceId);
+    DistributedSchedService::GetInstance().DeviceOfflineNotify(deviceId);
+    EXPECT_EQ(ret, DMS_WRITE_FILE_FAILED_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest Dump002 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
