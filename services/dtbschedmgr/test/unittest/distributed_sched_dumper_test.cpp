@@ -14,6 +14,7 @@
  */
 
 #include "distributed_sched_dumper_test.h"
+#include "distributed_sched_util.h"
 #include "test_log.h"
 
 using namespace testing;
@@ -21,6 +22,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+const char* HIDUMPER_PROCESS_NAME = "hidumper_service";
+}
 void DistributedSchedDumperTest::SetUpTestCase()
 {
     DTEST_LOG << "DistributedSchedDumperTest::SetUpTestCase" << std::endl;
@@ -118,6 +122,89 @@ HWTEST_F(DistributedSchedDumperTest, Dump_004, TestSize.Level3)
     bool res = DistributedSchedDumper::Dump(args, result);
     EXPECT_EQ(res, false);
     DTEST_LOG << "DistributedSchedDumperTest Dump_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: Dump_005
+ * @tc.desc: dump info with one arg
+ * @tc.type: FUNC
+ * @tc.require: I6ONQ3
+ */
+HWTEST_F(DistributedSchedDumperTest, Dump_005, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedDumperTest Dump_005 begin" << std::endl;
+    DistributedSchedUtil::MockProcess(HIDUMPER_PROCESS_NAME);
+    const std::vector<std::string> args = {"-h"};
+    std::string result = "";
+    bool res = DistributedSchedDumper::Dump(args, result);
+    EXPECT_TRUE(res);
+    DTEST_LOG << "DistributedSchedDumperTest Dump_005 end" << std::endl;
+}
+
+/**
+ * @tc.name: Dump_006
+ * @tc.desc: dump info with one arg
+ * @tc.type: FUNC
+ * @tc.require: I6ONQ3
+ */
+HWTEST_F(DistributedSchedDumperTest, Dump_006, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedDumperTest Dump_006 begin" << std::endl;
+    DistributedSchedUtil::MockProcess(HIDUMPER_PROCESS_NAME);
+    const std::vector<std::string> args = {"-connect"};
+    std::string result = "";
+    bool res = DistributedSchedDumper::Dump(args, result);
+    EXPECT_TRUE(res);
+    DTEST_LOG << "DistributedSchedDumperTest Dump_006 end" << std::endl;
+}
+
+/**
+ * @tc.name: Dump_007
+ * @tc.desc: dump info with one arg
+ * @tc.type: FUNC
+ * @tc.require: I6ONQ3
+ */
+HWTEST_F(DistributedSchedDumperTest, Dump_007, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedDumperTest Dump_007 begin" << std::endl;
+    DistributedSchedUtil::MockProcess(HIDUMPER_PROCESS_NAME);
+    const std::vector<std::string> args = {"-invalid"};
+    std::string result = "";
+    bool res = DistributedSchedDumper::Dump(args, result);
+    EXPECT_FALSE(res);
+    DTEST_LOG << "DistributedSchedDumperTest Dump_007 end" << std::endl;
+}
+
+/**
+ * @tc.name: Dump_008
+ * @tc.desc: dump info with two arg
+ * @tc.type: FUNC
+ * @tc.require: I6ONQ3
+ */
+HWTEST_F(DistributedSchedDumperTest, Dump_008, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedDumperTest Dump_008 begin" << std::endl;
+    DistributedSchedUtil::MockProcess(HIDUMPER_PROCESS_NAME);
+    const std::vector<std::string> args = {"-invalid1", "-invalid2"};
+    std::string result = "";
+    bool res = DistributedSchedDumper::Dump(args, result);
+    EXPECT_FALSE(res);
+    DTEST_LOG << "DistributedSchedDumperTest Dump_008 end" << std::endl;
+}
+
+/**
+ * @tc.name: CanDump_001
+ * @tc.desc: CanDump
+ * @tc.type: FUNC
+ * @tc.require: I6ONQ3
+ */
+HWTEST_F(DistributedSchedDumperTest, CanDump_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedDumperTest CanDump_001 begin" << std::endl;
+    DistributedSchedUtil::MockProcess(HIDUMPER_PROCESS_NAME);
+    bool res = DistributedSchedDumper::CanDump();
+    EXPECT_TRUE(res);
+    DTEST_LOG << "DistributedSchedDumperTest CanDump_001 end" << std::endl;
 }
 }
 }
