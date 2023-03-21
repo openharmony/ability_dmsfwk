@@ -18,6 +18,7 @@
 
 #include <condition_variable>
 #include <shared_mutex>
+#include "device_selection_notifier_stub.h"
 #define private public
 #include "distributed_ability_manager_service.h"
 #undef private
@@ -35,6 +36,15 @@ public:
     static std::mutex caseDoneLock_;
     static std::condition_variable caseDoneCondition_;
     static sptr<DistributedAbilityManagerService> dtbabilitymgrService_;
+};
+
+class DeviceSelectionNotifierTest : public DeviceSelectionNotifierStub {
+public:
+    DeviceSelectionNotifierTest() = default;
+    ~DeviceSelectionNotifierTest() = default;
+
+    void OnDeviceConnect(const std::vector<ContinuationResult>& continuationResults) override;
+    void OnDeviceDisconnect(const std::vector<ContinuationResult>& continuationResults) override;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

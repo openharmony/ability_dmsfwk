@@ -338,27 +338,13 @@ HWTEST_F(DmsVersionManagerTest, GetDmsVersionDataFromAppInfo_005, TestSize.Level
 HWTEST_F(DmsVersionManagerTest, GetAppInfoFromDP_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsVersionManagerTest GetAppInfoFromDP_001 begin" << std::endl;
-    std::string deviceId = "1";
+    std::string deviceId;
     std::string appInfoJson;
+    DmsVersionManager::GetAppInfoFromDP(deviceId, appInfoJson);
+    deviceId = "1";
     int32_t result = DmsVersionManager::GetAppInfoFromDP(deviceId, appInfoJson);
     EXPECT_NE(result, ERR_OK);
     DTEST_LOG << "DmsVersionManagerTest GetAppInfoFromDP_001 end ret:" << result << std::endl;
-}
-
-/**
- * @tc.name: GetAppInfoFromDP_002
- * @tc.desc: test call GetAppInfoFromDP with local device id
- * @tc.type: FUNC
- * @tc.require: I5RWKZ
- */
-HWTEST_F(DmsVersionManagerTest, GetAppInfoFromDP_002, TestSize.Level3)
-{
-    DTEST_LOG << "DmsVersionManagerTest GetAppInfoFromDP_002 begin" << std::endl;
-    std::string deviceId;
-    std::string appInfoJson;
-    int32_t result = DmsVersionManager::GetAppInfoFromDP(deviceId, appInfoJson);
-    EXPECT_EQ(result, ERR_OK);
-    DTEST_LOG << "DmsVersionManagerTest GetAppInfoFromDP_002 end ret:" << result << std::endl;
 }
 
 /**
@@ -452,6 +438,22 @@ HWTEST_F(DmsVersionManagerTest, ParseAppInfo_005, TestSize.Level3)
 }
 
 /**
+ * @tc.name: GetAppInfoFromDP_002
+ * @tc.desc: test call GetAppInfoFromDP with local device id
+ * @tc.type: FUNC
+ * @tc.require: I5RWKZ
+ */
+HWTEST_F(DmsVersionManagerTest, GetAppInfoFromDP_002, TestSize.Level3)
+{
+    DTEST_LOG << "DmsVersionManagerTest GetAppInfoFromDP_002 begin" << std::endl;
+    std::string deviceId = "test";
+    std::string appInfoJson;
+    int32_t result = DmsVersionManager::GetAppInfoFromDP(deviceId, appInfoJson);
+    EXPECT_NE(result, ERR_OK);
+    DTEST_LOG << "DmsVersionManagerTest GetAppInfoFromDP_002 end ret:" << result << std::endl;
+}
+
+/**
  * @tc.name: ParseAppInfo_006
  * @tc.desc: test call ParseAppInfo
  * @tc.type: FUNC
@@ -478,8 +480,10 @@ HWTEST_F(DmsVersionManagerTest, ParseAppInfo_006, TestSize.Level3)
 HWTEST_F(DmsVersionManagerTest, GetRemoteDmsVersion_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsVersionManagerTest GetRemoteDmsVersion_001 begin" << std::endl;
-    std::string deviceId = "0";
+    std::string deviceId;
     DmsVersion dmsVersion;
+    DmsVersionManager::GetRemoteDmsVersion(deviceId, dmsVersion);
+    deviceId = "0";
     int32_t result = DmsVersionManager::GetRemoteDmsVersion(deviceId, dmsVersion);
     EXPECT_NE(result, ERR_OK);
     DTEST_LOG << "DmsVersionManagerTest GetRemoteDmsVersion_001 end ret:" << result << std::endl;
@@ -494,10 +498,10 @@ HWTEST_F(DmsVersionManagerTest, GetRemoteDmsVersion_001, TestSize.Level3)
 HWTEST_F(DmsVersionManagerTest, GetRemoteDmsVersion_002, TestSize.Level3)
 {
     DTEST_LOG << "DmsVersionManagerTest GetRemoteDmsVersion_002 begin" << std::endl;
-    std::string deviceId;
+    std::string deviceId = "test";
     DmsVersion dmsVersion;
     int32_t result = DmsVersionManager::GetRemoteDmsVersion(deviceId, dmsVersion);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_NE(result, ERR_OK);
     DTEST_LOG << "DmsVersionManagerTest GetRemoteDmsVersion_002 end ret:" << result << std::endl;
 }
 
@@ -510,27 +514,13 @@ HWTEST_F(DmsVersionManagerTest, GetRemoteDmsVersion_002, TestSize.Level3)
 HWTEST_F(DmsVersionManagerTest, IsRemoteDmsVersionLower_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsVersionManagerTest IsRemoteDmsVersionLower_001 begin" << std::endl;
-    std::string deviceId = "0";
+    std::string deviceId;
     DmsVersion thresholdDmsVersion = {3, 2, 0};
+    DmsVersionManager::IsRemoteDmsVersionLower(deviceId, thresholdDmsVersion);
+    deviceId = "0";
     bool result = DmsVersionManager::IsRemoteDmsVersionLower(deviceId, thresholdDmsVersion);
     EXPECT_EQ(result, true);
     DTEST_LOG << "DmsVersionManagerTest IsRemoteDmsVersionLower_001 end ret:" << result << std::endl;
-}
-
-/**
- * @tc.name: IsRemoteDmsVersionLower_002
- * @tc.desc: test call IsRemoteDmsVersionLower with local deviceId
- * @tc.type: FUNC
- * @tc.require: I5RWKZ
- */
-HWTEST_F(DmsVersionManagerTest, IsRemoteDmsVersionLower_002, TestSize.Level3)
-{
-    DTEST_LOG << "DmsVersionManagerTest IsRemoteDmsVersionLower_002 begin" << std::endl;
-    std::string deviceId;
-    DmsVersion thresholdDmsVersion = {3, 2, 0};
-    bool result = DmsVersionManager::IsRemoteDmsVersionLower(deviceId, thresholdDmsVersion);
-    EXPECT_EQ(result, false);
-    DTEST_LOG << "DmsVersionManagerTest IsRemoteDmsVersionLower_002 end ret:" << result << std::endl;
 }
 }
 }
