@@ -15,17 +15,17 @@
 <configuration ver="2.0">
     <target name="distributedschedsvrtest">
         <preparer>
-            <option name="push" value="resource/bmsThirdBundle.hap -> /data/test/resource/dmsfwk/resource/" src="res"/>
+            <option name="push" value="bmsThirdBundle.hap -> /data/test/resource/dmsfwk/resource/" src="res"/>
         </preparer>
     </target>
     <target name="bundlemanagerinternaltest">
         <preparer>
-            <option name="push" value="resource/bmsThirdBundle.hap -> /data/test/resource/dmsfwk/resource/" src="res"/>
+            <option name="push" value="bmsThirdBundle.hap -> /data/test/resource/dmsfwk/resource/" src="res"/>
         </preparer>
     </target>
     <target name="dschedcontinuetest">
         <preparer>
-            <option name="push" value="resource/bmsThirdBundle.hap -> /data/test/resource/dmsfwk/resource/" src="res"/>
+            <option name="push" value="bmsThirdBundle.hap -> /data/test/resource/dmsfwk/resource/" src="res"/>
         </preparer>
     </target>
 </configuration>
