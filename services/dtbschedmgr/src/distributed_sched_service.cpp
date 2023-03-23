@@ -2110,8 +2110,14 @@ int32_t DistributedSchedService::StopExtensionAbilityFromRemote(const OHOS::AAFw
     want.RemoveParam(DMS_SRC_NETWORK_ID);
     sptr<IRemoteObject> callerToken = new DmsTokenCallback();
 
+    std::vector<int> ids;
+    ErrCode ret = OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (ret != ERR_OK || ids.empty()) {
+        return INVALID_PARAMETERS_ERR;
+    }
+
     return AAFwk::AbilityManagerClient::GetInstance()->StopExtensionAbility(
-        want, callerToken, callerInfo.uid, static_cast<AppExecFwk::ExtensionAbilityType>(extensionType));
+        want, callerToken, ids[0], static_cast<AppExecFwk::ExtensionAbilityType>(extensionType));
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
