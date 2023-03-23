@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -865,6 +865,55 @@ int32_t DistributedSchedProxy::GetDistributedComponentList(std::vector<std::stri
     }
     PARCEL_READ_HELPER(reply, StringVector, &distributedComponents);
     return ERR_NONE;
+}
+
+int32_t DistributedSchedProxy::StopRemoteExtensionAbility(
+    const OHOS::AAFwk::Want& want, int32_t callerUid, uint32_t accessToken, int32_t extensionType)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("StopRemoteExtensionAbility remote service null");
+        return ERR_NULL_OBJECT;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        HILOGE("StopRemoteExtensionAbility WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_WRITE_HELPER(data, Parcelable, &want);
+    PARCEL_WRITE_HELPER(data, Int32, callerUid);
+    PARCEL_WRITE_HELPER(data, Uint32, accessToken);
+    PARCEL_WRITE_HELPER(data, Int32, extensionType);
+    MessageParcel reply;
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, STOP_REMOTE_EXTERNSION_ABILITY, data, reply);
+}
+
+int32_t DistributedSchedProxy::StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& want,
+    const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t extensionType)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("StopExtensionAbilityFromRemote remote service null");
+        return ERR_NULL_OBJECT;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        HILOGE("StopExtensionAbilityFromRemote WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_WRITE_HELPER(data, Parcelable, &want);
+    PARCEL_WRITE_HELPER(data, Int32, extensionType);
+    PARCEL_WRITE_HELPER(data, Int32, callerInfo.uid);
+    PARCEL_WRITE_HELPER(data, String, callerInfo.sourceDeviceId);
+    PARCEL_WRITE_HELPER(data, Int32, accountInfo.accountType);
+    PARCEL_WRITE_HELPER(data, StringVector, accountInfo.groupIdList);
+    PARCEL_WRITE_HELPER(data, String, callerInfo.callerAppId);
+    nlohmann::json extraInfoJson;
+    extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN] = callerInfo.accessToken;
+    std::string extraInfo = extraInfoJson.dump();
+    PARCEL_WRITE_HELPER(data, String, extraInfo);
+    MessageParcel reply;
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, STOP_EXTERNSION_ABILITY_REMOTE, data, reply);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

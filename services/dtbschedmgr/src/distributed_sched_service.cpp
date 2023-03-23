@@ -2052,5 +2052,66 @@ int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& 
     HILOGE("CheckTargetPermission denied!!");
     return DMS_PERMISSION_DENIED;
 }
+
+int32_t DistributedSchedService::StopRemoteExtensionAbility(const OHOS::AAFwk::Want& want, int32_t callerUid,
+    uint32_t accessToken, int32_t extensionType)
+{
+    std::string localDeviceId;
+    std::string deviceId = want.GetDeviceId();
+    if(!GetLocalDeviceId(localDeviceId) || !CheckDeviceId(localDeviceId, deviceId)) {
+        HILOGE("CheckDeviceId failed");
+        return INVALID_PARAMETERS_ERR;
+    }
+    sptr<IDistributedSched> remoteDms = GetRemoteDms(deviceId);
+    if(remoteDms == nullptr) {
+        HILOGE("GetRemoteDms failed");
+        return INVALID_PARAMETERS_ERR;
+    }
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = localDeviceId;
+    callerInfo.uid = callerUid;
+    callerInfo.accessToken = accessToken;
+    if(!BundleManagerInternal::GetCallerAppIdFromBms(callerInfo.uid, callerInfo.callerAppId)) {
+        HILOGE("GetCallerAppIdFromBms failed");
+        return INVALID_PARAMETERS_ERR;
+    }
+    if(!BundleManagerInternal::GetBundleNameListFromBms(callerInfo.uid, callerInfo.bundleNames)) {
+        HILOGE("GetBundleNameListFromBms failed");
+        return INVALID_PARAMETERS_ERR;
+    }
+    AccountInfo accountInfo = {};
+    if ((DistributedSchedPermission::GetInstance().GetAccountInfo(deviceId, callerInfo, accountInfo)) != ERR_OK) {
+        HILOGE("GetAccountInfo failed");
+        return INVALID_PARAMETERS_ERR;
+    }
+    AAFwk::Want remoteWant = want;
+    remoteWant.SetParam(DMS_SRC_NETWORK_ID, localDeviceId);
+    return remoteDms->StopExtensionAbilityFromRemote(remoteWant, callerInfo, accountInfo, extensionType);
+}
+
+int32_t DistributedSchedService::StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& remoteWant,
+    const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t extensionType)
+{
+    std::string deviceId = remoteWant.GetElement().GetDeviceID();
+    std::string localDeviceId;
+    std::string destinationDeviceId = remoteWant.GetElement().GetDeviceID();
+    if (!GetLocalDeviceId(localDeviceId) ||
+        !CheckDeviceIdFromRemote(localDeviceId, destinationDeviceId, callerInfo.sourceDeviceId)) {
+        HILOGE("check deviceId failed");
+        return INVALID_REMOTE_PARAMETERS_ERR;
+    }
+
+    int32_t permissionValid = CheckTargetPermission(remoteWant, callerInfo, accountInfo, CALL_PERMISSION, true);
+    if (permissionValid != ERR_OK) {
+        HILOGE("CheckTargetPermission failed!!");
+        return DMS_PERMISSION_DENIED;
+    }
+    Want want = remoteWant;
+    want.RemoveParam(DMS_SRC_NETWORK_ID);
+    sptr<IRemoteObject> callerToken = new DmsTokenCallback();
+
+    return AAFwk::AbilityManagerClient::GetInstance()->StopExtensionAbility(
+        want, callerToken, callerInfo.uid, static_cast<AppExecFwk::ExtensionAbilityType>(extensionType));
+}
 } // namespace DistributedSchedule
 } // namespace OHOS

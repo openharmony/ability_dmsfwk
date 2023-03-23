@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -212,5 +212,15 @@ int32_t MockDistributedSched::StartShareFormFromRemote(
     return ERR_NONE;
 }
 #endif
+int32_t MockDistributedSched::StopRemoteExtensionAbility(
+    const OHOS::AAFwk::Want& want, int32_t callerUid, uint32_t accessToken, int32_t extensionType)
+{
+    return ERR_NONE;
+}
+int32_t MockDistributedSched::StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& want,
+    const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t extensionType)
+{
+    return ERR_NONE;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS

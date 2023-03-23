@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,10 @@ private:
     bool EnforceInterfaceToken(MessageParcel& data);
     bool CallerInfoUnmarshalling(CallerInfo& callerInfo, MessageParcel& data);
     void SaveExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo);
+	void InitCallBackInnerFirst();
+
+    int32_t StopRemoteExtensionAbilityInner(MessageParcel& data, MessageParcel& reply);
+    int32_t StopExtensionAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
 
     using DistributedSchedFunc = int32_t(DistributedSchedStub::*)(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, DistributedSchedFunc> remoteFuncsMap_;

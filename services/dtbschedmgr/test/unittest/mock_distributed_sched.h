@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -85,6 +85,10 @@ public:
     int32_t StartFreeInstallFromRemote(const FreeInstallInfo& info, int64_t taskId) override;
     int32_t NotifyCompleteFreeInstallFromRemote(int64_t taskId, int32_t resultCode) override;
     int32_t NotifyCompleteFreeInstall(const FreeInstallInfo& info, int64_t taskId, int32_t resultCode);
+    int32_t StopRemoteExtensionAbility(
+        const OHOS::AAFwk::Want& want, int32_t callerUid, uint32_t accessToken, int32_t extensionType) override;
+    int32_t StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& want,
+        const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t extensionType) override;
 private:
     bool expectedTrue_ = false;
 };

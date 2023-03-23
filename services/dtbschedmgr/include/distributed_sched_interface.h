@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,6 +125,12 @@ public:
         const std::string& remoteDeviceId, const OHOS::AppExecFwk::FormShareInfo& formShareInfo) = 0;
 #endif
     virtual int32_t GetDistributedComponentList(std::vector<std::string>& distributedComponents) = 0;
+
+    virtual int32_t StopRemoteExtensionAbility(
+        const OHOS::AAFwk::Want& want, int32_t callerUid, uint32_t accessToken, int32_t extensionType) = 0;
+    virtual int32_t StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& want,
+        const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t extensionType) = 0;
+
     enum {
         START_REMOTE_ABILITY = 1,
         STOP_REMOTE_ABILITY = 3,
@@ -181,6 +187,10 @@ public:
         // form share
         START_REMOTE_SHARE_FORM = 220,
         START_SHARE_FORM_FROM_REMOTE = 221,
+
+        // stop externsion ability
+        STOP_REMOTE_EXTERNSION_ABILITY = 225,
+        STOP_EXTERNSION_ABILITY_REMOTE = 226,
     };
 };
 } // namespace DistributedSchedule
