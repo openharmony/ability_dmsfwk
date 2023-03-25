@@ -1863,5 +1863,97 @@ HWTEST_F(DistributedSchedServiceTest, TryConnectRemoteAbility002, TestSize.Level
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest TryConnectRemoteAbility002 end" << std::endl;
 }
+
+/**
+ * @tc.name: StopRemoteExtensionAbility_001
+ * @tc.desc: StopRemoteExtensionAbility with uninitialized params, return INVALID_PARAMETERS_ERR.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceTest, StopRemoteExtensionAbility_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StopRemoteExtensionAbility_001 start" << std::endl;
+    AAFwk::Want want;
+    int32_t callerUid = 0;
+    uint32_t accessToken = 0;
+    int32_t extensionType = 3;
+    std::string deviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(deviceId);
+    AppExecFwk::ElementName element(deviceId, "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    want.SetElement(element);
+    EXPECT_EQ(DistributedSchedService::GetInstance().StopRemoteExtensionAbility(want, callerUid, accessToken,
+        extensionType), INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest StopRemoteExtensionAbility_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StopRemoteExtensionAbility_002
+ * @tc.desc: StopRemoteExtensionAbility with empty want's deviceId, return INVALID_PARAMETERS_ERR.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceTest, StopRemoteExtensionAbility_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StopRemoteExtensionAbility_002 start" << std::endl;
+    AAFwk::Want want;
+    int32_t callerUid = 0;
+    uint32_t accessToken = 0;
+    int32_t extensionType = 3;
+    AppExecFwk::ElementName element("abcdefg123456", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    want.SetElement(element);
+    EXPECT_EQ(DistributedSchedService::GetInstance().StopRemoteExtensionAbility(want, callerUid, accessToken,
+        extensionType), INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest StopRemoteExtensionAbility_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: StopExtensionAbilityFromRemote_001
+ * @tc.desc: StopExtensionAbilityFromRemote with uninitialized params, return INVALID_REMOTE_PARAMETERS_ERR.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    AAFwk::Want remoteWant;
+    std::string deviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(deviceId);
+    AppExecFwk::ElementName element(deviceId, "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    remoteWant.SetElement(element);
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = "255.255.255.255";
+    IDistributedSched::AccountInfo accountInfo;
+    int32_t extensionType = 3;
+    EXPECT_EQ(DistributedSchedService::GetInstance().StopExtensionAbilityFromRemote(remoteWant, callerInfo,
+        accountInfo, extensionType), DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StopExtensionAbilityFromRemote_002
+ * @tc.desc: StopExtensionAbilityFromRemote with empty want's deviceId, return DMS_PERMISSION_DENIED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_002 start" << std::endl;
+    AAFwk::Want remoteWant;
+    AppExecFwk::ElementName element("abcdefg123456", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    remoteWant.SetElement(element);
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = "255.255.255.255";
+    IDistributedSched::AccountInfo accountInfo;
+    int32_t extensionType = 3;
+    EXPECT_EQ(DistributedSchedService::GetInstance().StopExtensionAbilityFromRemote(remoteWant, callerInfo,
+        accountInfo, extensionType), INVALID_REMOTE_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_002 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
