@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1920,6 +1920,97 @@ HWTEST_F(DistributedSchedStubTest, NotifyCompleteFreeInstallFromRemoteInner_001,
     result = distributedSchedStub_->NotifyCompleteFreeInstallFromRemoteInner(data, reply);
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest NotifyCompleteFreeInstallFromRemoteInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StopRemoteExtensionAbilityInner_001
+ * @tc.desc: check StopRemoteExtensionAbilityInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, StopRemoteExtensionAbilityInner_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedStubTest StopRemoteExtensionAbilityInner_001 begin" << std::endl;
+    const char* processName = "testCase";
+    const char* PermissionState[] = {
+        "ohos.permission.ACCESS_SERVICE_DM"
+    };
+    Want want;
+    want.SetElementName("test.test.test", "Ability");
+    int32_t callerUid = 0;
+    uint32_t accessToken = 0;
+    int32_t serviceType = 0;
+    MessageParcel reply;
+
+    MessageParcel dataFirst;
+    DistributedSchedUtil::MockProcessAndPermission(processName, PermissionState, 1);
+    auto result = distributedSchedStub_->StopRemoteExtensionAbilityInner(dataFirst, reply);
+    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+
+    DistributedSchedUtil::MockProcessAndPermission(FOUNDATION_PROCESS_NAME, PermissionState, 1);
+    MessageParcel dataSecond;
+    result = distributedSchedStub_->StopRemoteExtensionAbilityInner(dataSecond, reply);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+
+    DistributedSchedUtil::MockProcessAndPermission(FOUNDATION_PROCESS_NAME, PermissionState, 1);
+
+    MessageParcel dataThird;
+    dataThird.WriteParcelable(&want);
+    dataThird.WriteInt32(callerUid);
+    dataThird.WriteUint32(accessToken);
+    dataThird.WriteInt32(serviceType);
+    result = distributedSchedStub_->StopRemoteExtensionAbilityInner(dataThird, reply);
+    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedStubTest StopRemoteExtensionAbilityInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StopExtensionAbilityFromRemoteInner_001
+ * @tc.desc: check StopExtensionAbilityFromRemoteInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, StopExtensionAbilityFromRemoteInner_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedStubTest StopExtensionAbilityFromRemoteInner_001 begin" << std::endl;
+    Want want;
+    want.SetElementName("test.test.test", "Ability");
+    int32_t callerUid = 0;
+    int32_t serviceType = 0;
+    std::string deviceId = "1234567890abcdefghijklmnopqrstuvwxyz";
+    std::vector<std::string> list = {
+        "test1",
+        "test2"
+    };
+    std::string appId = "1234567890abcdefghijklmnopqrstuvwxyz";
+    std::string extraInfo = "{ \"accessTokenID\": 1989 }";
+    std::string extraInfoEmptr = "";
+    MessageParcel reply;
+
+    MessageParcel dataFirst;
+    auto result = distributedSchedStub_->StopExtensionAbilityFromRemoteInner(dataFirst, reply);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+
+    MessageParcel dataSecond;
+    dataSecond.WriteParcelable(&want);
+    dataSecond.WriteInt32(serviceType);
+    dataSecond.WriteInt32(callerUid);
+    dataSecond.WriteString(deviceId);
+    dataSecond.WriteStringVector(list);
+    dataSecond.WriteString(appId);
+    dataSecond.WriteString(extraInfo);
+    result = distributedSchedStub_->StopExtensionAbilityFromRemoteInner(dataSecond, reply);
+    EXPECT_EQ(result, ERR_NONE);
+
+    MessageParcel dataThird;
+    dataThird.WriteParcelable(&want);
+    dataThird.WriteInt32(serviceType);
+    dataThird.WriteInt32(callerUid);
+    dataThird.WriteString(deviceId);
+    dataThird.WriteStringVector(list);
+    dataThird.WriteString(appId);
+    dataThird.WriteString(extraInfoEmptr);
+    result = distributedSchedStub_->StopExtensionAbilityFromRemoteInner(dataThird, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedStubTest StopExtensionAbilityFromRemoteInner_001 end" << std::endl;
 }
 }
 }

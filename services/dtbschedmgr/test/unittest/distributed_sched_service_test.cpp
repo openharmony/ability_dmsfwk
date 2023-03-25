@@ -1955,5 +1955,31 @@ HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_002, TestSi
         accountInfo, extensionType), INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_002 end" << std::endl;
 }
+
+/**
+ * @tc.name: StopExtensionAbilityFromRemote_003
+ * @tc.desc: StopExtensionAbilityFromRemote with empty want's deviceId, return INVALID_REMOTE_PARAMETERS_ERR.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_003, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_003 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    AAFwk::Want remoteWant;
+    AppExecFwk::ElementName element("abcdefg123456", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    remoteWant.SetElement(element);
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = "255.255.255.255";
+    IDistributedSched::AccountInfo accountInfo;
+    int32_t extensionType = 3;
+    EXPECT_EQ(proxy->StopExtensionAbilityFromRemote(remoteWant, callerInfo,
+        accountInfo, extensionType), IPC_STUB_UNKNOW_TRANS_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_003 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
