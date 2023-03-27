@@ -2101,7 +2101,7 @@ int32_t DistributedSchedService::StopExtensionAbilityFromRemote(const OHOS::AAFw
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
 
-    int32_t permissionValid = CheckTargetPermission(remoteWant, callerInfo, accountInfo, CALL_PERMISSION, true);
+    int32_t permissionValid = CheckTargetPermission(remoteWant, callerInfo, accountInfo, START_PERMISSION, true);
     if (permissionValid != ERR_OK) {
         HILOGE("CheckTargetPermission failed!!");
         return DMS_PERMISSION_DENIED;
