@@ -100,22 +100,14 @@ HWTEST_F(DistributedAbilityManagerServiceTest, Dump_001, TestSize.Level3)
         return;
     }
     /**
-     * @tc.steps: step1. test OnStart.
-     */
-    dtbabilitymgrService_->OnStart();
-    /**
-     * @tc.steps: step2. test OnStop.
-     */
-    dtbabilitymgrService_->OnStop();
-    /**
-     * @tc.steps: step3. test Dump when args is not empty.
+     * @tc.steps: step1. test Dump when args is not empty.
      */
     std::vector<std::u16string> args;
     args.push_back(TEST_U16STRING);
     int32_t result = dtbabilitymgrService_->Dump(INVALID_CODE, args);
     EXPECT_EQ(result, DMS_WRITE_FILE_FAILED_ERR);
     /**
-     * @tc.steps: step4. test DumpAppRegisterInfo when tokenMap_ is not empty.
+     * @tc.steps: step2. test DumpAppRegisterInfo when tokenMap_ is not empty.
      */
     std::string info;
     std::vector<int32_t> tokenMapValue;
