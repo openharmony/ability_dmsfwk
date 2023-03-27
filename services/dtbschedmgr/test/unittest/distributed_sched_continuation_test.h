@@ -36,6 +36,7 @@ class DSchedContinuationTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
+    void MockOnStart();
     void SetUp();
     void TearDown();
     sptr<IDistributedSched> GetDms();
