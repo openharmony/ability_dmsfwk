@@ -849,6 +849,17 @@ HWTEST_F(DistributedSchedServiceTest, StartShareFormFromRemote_002, TestSize.Lev
     DTEST_LOG << "DistributedSchedServiceTest StartShareFormFromRemote_002 start" << std::endl;
     std::string remoteDeviceId = "123456";
     const OHOS::AppExecFwk::FormShareInfo formShareInfo {};
+    /**
+     * @tc.steps: step1. call GetContinuaitonDevice
+     */
+    DTEST_LOG << "DistributedSchedServiceTest GetContinuaitonDevice_001 start" << std::endl;
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    int32_t missionId = MISSION_ID;
+    (void)DistributedSchedService::GetInstance().GetContinuaitonDevice(missionId);
+    DTEST_LOG << "DistributedSchedServiceTest GetContinuaitonDevice_001 end" << std::endl;
+
     auto result = DistributedSchedService::GetInstance().StartShareFormFromRemote(remoteDeviceId, formShareInfo);
     DTEST_LOG << "result:" << result << std::endl;
     EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), result);
@@ -906,19 +917,9 @@ HWTEST_F(DistributedSchedServiceTest, SendResultFromRemote_006, TestSize.Level1)
     callerInfo.uid = 0;
     callerInfo.sourceDeviceId = LOCAL_DEVICEID;
     IDistributedSched::AccountInfo accountInfo;
-    int result = DistributedSchedService::GetInstance().SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
-    DTEST_LOG << "result:" << result << std::endl;
-    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), result);
-    DTEST_LOG << "DistributedSchedServiceTest SendResultFromRemote_006 end" << std::endl;
-}
-
-/**
- * @tc.name: RemoveContinuationTimeout_001
- * @tc.desc: call RemoveContinuationTimeout
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedServiceTest, RemoveContinuationTimeout_001, TestSize.Level1)
-{
+    /**
+     * @tc.steps: step1. call RemoveContinuationTimeout
+     */
     DTEST_LOG << "DistributedSchedServiceTest RemoveContinuationTimeout_001 start" << std::endl;
     if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
         DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
@@ -926,6 +927,11 @@ HWTEST_F(DistributedSchedServiceTest, RemoveContinuationTimeout_001, TestSize.Le
     int32_t missionId = MISSION_ID;
     DistributedSchedService::GetInstance().RemoveContinuationTimeout(missionId);
     DTEST_LOG << "DistributedSchedServiceTest RemoveContinuationTimeout_001 end" << std::endl;
+
+    int result = DistributedSchedService::GetInstance().SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
+    DTEST_LOG << "result:" << result << std::endl;
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), result);
+    DTEST_LOG << "DistributedSchedServiceTest SendResultFromRemote_006 end" << std::endl;
 }
 
 /**
@@ -943,22 +949,6 @@ HWTEST_F(DistributedSchedServiceTest, SetContinuationTimeout_001, TestSize.Level
     int32_t timeout = 5;
     DistributedSchedService::GetInstance().SetContinuationTimeout(missionId, timeout);
     DTEST_LOG << "DistributedSchedServiceTest SetContinuationTimeout_001 end" << std::endl;
-}
-
-/**
- * @tc.name: GetContinuaitonDevice_001
- * @tc.desc: call GetContinuaitonDevice
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedServiceTest, GetContinuaitonDevice_001, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedSchedServiceTest GetContinuaitonDevice_001 start" << std::endl;
-    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
-        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
-    }
-    int32_t missionId = MISSION_ID;
-    (void)DistributedSchedService::GetInstance().GetContinuaitonDevice(missionId);
-    DTEST_LOG << "DistributedSchedServiceTest GetContinuaitonDevice_001 end" << std::endl;
 }
 
 /**
@@ -1220,6 +1210,15 @@ HWTEST_F(DistributedSchedServiceTest, StartContinuation_007, TestSize.Level3)
     int32_t status = ERR_OK;
     uint32_t accessToken = 0;
     bool isSuccess = false;
+    /**
+     * @tc.steps: step1. call GetFormMgrProxy
+     */
+    #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
+    DTEST_LOG << "DSchedContinuationTest GetFormMgrProxy_001 start" << std::endl;
+    DistributedSchedService::GetInstance().GetFormMgrProxy();
+    DTEST_LOG << "DSchedContinuationTest GetFormMgrProxy_001 end" << std::endl;
+    #endif
+    
     int32_t ret = DistributedSchedService::GetInstance().StartContinuation(
         want, missionId, callerUid, status, accessToken);
     DistributedSchedService::GetInstance().NotifyCompleteContinuation(DEVICE_ID_NULL, SESSION_ID, isSuccess);
@@ -1273,20 +1272,6 @@ HWTEST_F(DistributedSchedServiceTest, NotifyContinuationCallbackResult_002, Test
     DistributedSchedService::GetInstance().NotifyContinuationCallbackResult(missionId, resultCode);
     DTEST_LOG << "DSchedContinuationTest NotifyContinuationCallbackResult_002 end" << std::endl;
 }
-
-/**
- * @tc.name: GetFormMgrProxy_001
- * @tc.desc: call GetFormMgrProxy
- * @tc.type: FUNC
- */
-#ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
-HWTEST_F(DistributedSchedServiceTest, GetFormMgrProxy_001, TestSize.Level1)
-{
-    DTEST_LOG << "DSchedContinuationTest GetFormMgrProxy_001 start" << std::endl;
-    DistributedSchedService::GetInstance().GetFormMgrProxy();
-    DTEST_LOG << "DSchedContinuationTest GetFormMgrProxy_001 end" << std::endl;
-}
-#endif
 
 /**
  * @tc.name: StartAbilityFromRemote_007
@@ -1418,7 +1403,7 @@ HWTEST_F(DistributedSchedServiceTest, SendResultFromRemote_010, TestSize.Level3)
     callerInfo.sourceDeviceId = localDeviceId;
     IDistributedSched::AccountInfo accountInfo;
     accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    int ret = DistributedSchedService::GetInstance().SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
+    int32_t ret = DistributedSchedService::GetInstance().SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedServiceTest SendResultFromRemote_010 end" << std::endl;
 }
