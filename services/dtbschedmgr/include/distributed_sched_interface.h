@@ -190,7 +190,7 @@ public:
 
         // stop externsion ability
         STOP_REMOTE_EXTERNSION_ABILITY = 225,
-        STOP_EXTERNSION_ABILITY_REMOTE = 226,
+        STOP_EXTERNSION_ABILITY_FROM_REMOTE = 226,
     };
 };
 } // namespace DistributedSchedule

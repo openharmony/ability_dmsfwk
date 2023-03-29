@@ -122,7 +122,7 @@ void DistributedSchedStub::InitRemoteFuncsInner()
     remoteFuncsMap_[START_FREE_INSTALL_FROM_REMOTE] = &DistributedSchedStub::StartFreeInstallFromRemoteInner;
     remoteFuncsMap_[NOTIFY_COMPLETE_FREE_INSTALL_FROM_REMOTE] =
         &DistributedSchedStub::NotifyCompleteFreeInstallFromRemoteInner;
-    remoteFuncsMap_[STOP_EXTERNSION_ABILITY_REMOTE] =
+    remoteFuncsMap_[STOP_EXTERNSION_ABILITY_FROM_REMOTE] =
         &DistributedSchedStub::StopExtensionAbilityFromRemoteInner;
 }
 
