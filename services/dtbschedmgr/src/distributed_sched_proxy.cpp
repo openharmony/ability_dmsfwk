@@ -913,7 +913,7 @@ int32_t DistributedSchedProxy::StopExtensionAbilityFromRemote(const OHOS::AAFwk:
     std::string extraInfo = extraInfoJson.dump();
     PARCEL_WRITE_HELPER(data, String, extraInfo);
     MessageParcel reply;
-    PARCEL_TRANSACT_SYNC_RET_INT(remote, STOP_EXTERNSION_ABILITY_REMOTE, data, reply);
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, STOP_EXTERNSION_ABILITY_FROM_REMOTE, data, reply);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
