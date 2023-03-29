@@ -100,22 +100,14 @@ HWTEST_F(DistributedAbilityManagerServiceTest, Dump_001, TestSize.Level3)
         return;
     }
     /**
-     * @tc.steps: step1. test OnStart.
-     */
-    dtbabilitymgrService_->OnStart();
-    /**
-     * @tc.steps: step2. test OnStop.
-     */
-    dtbabilitymgrService_->OnStop();
-    /**
-     * @tc.steps: step3. test Dump when args is not empty.
+     * @tc.steps: step1. test Dump when args is not empty.
      */
     std::vector<std::u16string> args;
     args.push_back(TEST_U16STRING);
     int32_t result = dtbabilitymgrService_->Dump(INVALID_CODE, args);
     EXPECT_EQ(result, DMS_WRITE_FILE_FAILED_ERR);
     /**
-     * @tc.steps: step4. test DumpAppRegisterInfo when tokenMap_ is not empty.
+     * @tc.steps: step2. test DumpAppRegisterInfo when tokenMap_ is not empty.
      */
     std::string info;
     std::vector<int32_t> tokenMapValue;
@@ -336,6 +328,45 @@ HWTEST_F(DistributedAbilityManagerServiceTest, Unregister_001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: Unregister_002
+ * @tc.desc: test Unregister when iter->second is not empty.
+ * @tc.type: FUNC
+ * @tc.require: I5NOA1
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, Unregister_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest Unregister_002 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    /**
+     * @tc.steps: step1. test Unregister when iter->second is not empty.
+     */
+    int32_t token = 0;
+    int32_t tokenBackup = 0;
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = dtbabilitymgrService_->Register(continuationExtraParams, tokenBackup);
+    EXPECT_EQ(ret, ERR_OK);
+    {
+        std::lock_guard<std::mutex> callbackMapLock(dtbabilitymgrService_->callbackMapMutex_);
+        std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
+        dtbabilitymgrService_->callbackMap_[token] = std::move(notifierInfo);;
+    }
+    ret = dtbabilitymgrService_->Unregister(token);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = dtbabilitymgrService_->Unregister(tokenBackup);
+    EXPECT_EQ(ret, ERR_OK);
+    {
+        std::lock_guard<std::mutex> callbackMapLock(dtbabilitymgrService_->callbackMapMutex_);
+        dtbabilitymgrService_->callbackMap_.clear();
+    }
+    DTEST_LOG << "DistributedAbilityManagerServiceTest Unregister_002 end" << std::endl;
+}
+
+/**
  * @tc.name: RegisterDeviceSelectionCallback_001
  * @tc.desc: test RegisterDeviceSelectionCallback
  * @tc.type: FUNC
@@ -371,6 +402,40 @@ HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_0
     ret = dtbabilitymgrService_->Unregister(token);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DistributedAbilityManagerServiceTest RegisterDeviceSelectionCallback_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: RegisterDeviceSelectionCallback_002
+ * @tc.desc: test RegisterDeviceSelectionCallback
+ * @tc.type: FUNC
+ * @tc.require: I5NOA1
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest RegisterDeviceSelectionCallback_002 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    /**
+     * @tc.steps: step1. test RegisterDeviceSelectionCallback when iter->second != nullptr.
+     */
+    int32_t token = 0;
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
+    EXPECT_EQ(ret, ERR_OK);
+    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_CONNECT, notifier);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_DISCONNECT, notifier);
+    EXPECT_EQ(ret, ERR_OK);
+    
+    ret = dtbabilitymgrService_->UnregisterDeviceSelectionCallback(token, EVENT_CONNECT);
+    ret = dtbabilitymgrService_->UnregisterDeviceSelectionCallback(token, EVENT_DISCONNECT);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = dtbabilitymgrService_->Unregister(token);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest RegisterDeviceSelectionCallback_002 end" << std::endl;
 }
 
 /**
@@ -425,6 +490,41 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UnregisterDeviceSelectionCallback
 }
 
 /**
+ * @tc.name: UnregisterDeviceSelectionCallback_002
+ * @tc.desc: test UnregisterDeviceSelectionCallback when callback is registered.
+ * @tc.type: FUNC
+ * @tc.require: I5NOA1
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, UnregisterDeviceSelectionCallback_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest UnregisterDeviceSelectionCallback_002 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    /**
+     * @tc.steps: step1. test UnregisterDeviceSelectionCallback when callback is registered.
+     */
+    int32_t token = 0;
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
+    EXPECT_EQ(ret, ERR_OK);
+    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_CONNECT, notifier);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_DISCONNECT, notifier);
+    EXPECT_EQ(ret, ERR_OK);
+
+    ret = dtbabilitymgrService_->UnregisterDeviceSelectionCallback(token, EVENT_CONNECT);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = dtbabilitymgrService_->UnregisterDeviceSelectionCallback(token, EVENT_DISCONNECT);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = dtbabilitymgrService_->Unregister(token);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest UnregisterDeviceSelectionCallback_002 end" << std::endl;
+}
+
+/**
  * @tc.name: UpdateConnectStatus_001
  * @tc.desc: test UpdateConnectStatus
  * @tc.type: FUNC
@@ -462,6 +562,15 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UpdateConnectStatus_001, TestSize
     sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
     ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_CONNECT, notifier);
     EXPECT_EQ(ret, ERR_OK);
+    ret = dtbabilitymgrService_->UpdateConnectStatus(token, DEVICE_ID, DeviceConnectStatus::IDLE);
+    EXPECT_EQ(ret, ERR_OK);
+    /**
+     * @tc.steps: step5. test UpdateConnectStatus when appProxy_ is nullptr.
+     */
+    {
+        std::lock_guard<std::mutex> appProxyLock(dtbabilitymgrService_->appProxyMutex_);
+        dtbabilitymgrService_->appProxy_ = nullptr;
+    }
     ret = dtbabilitymgrService_->UpdateConnectStatus(token, DEVICE_ID, DeviceConnectStatus::IDLE);
     EXPECT_EQ(ret, ERR_OK);
 
@@ -771,8 +880,8 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleNotifierDied_001, TestSize.
 }
 
 /**
- * @tc.name: HandleNotifierDied
- * @tc.desc: test HandleNotifierDied
+ * @tc.name: OnDeviceCancel_001
+ * @tc.desc: test OnDeviceCancel
  * @tc.type: FUNC
  */
 HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceCancel_001, TestSize.Level3)
