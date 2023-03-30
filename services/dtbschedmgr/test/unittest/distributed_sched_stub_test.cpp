@@ -1927,7 +1927,7 @@ HWTEST_F(DistributedSchedStubTest, NotifyCompleteFreeInstallFromRemoteInner_001,
  * @tc.desc: check StopRemoteExtensionAbilityInner
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedStubTest, StopRemoteExtensionAbilityInner_001, TestSize.Level3)
+HWTEST_F(DistributedSchedStubTest, StopRemoteExtensionAbilityInner_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedStubTest StopRemoteExtensionAbilityInner_001 begin" << std::endl;
     const char* processName = "testCase";
@@ -1968,7 +1968,7 @@ HWTEST_F(DistributedSchedStubTest, StopRemoteExtensionAbilityInner_001, TestSize
  * @tc.desc: check StopExtensionAbilityFromRemoteInner
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedStubTest, StopExtensionAbilityFromRemoteInner_001, TestSize.Level3)
+HWTEST_F(DistributedSchedStubTest, StopExtensionAbilityFromRemoteInner_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedStubTest StopExtensionAbilityFromRemoteInner_001 begin" << std::endl;
     Want want;

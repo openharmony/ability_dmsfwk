@@ -2058,12 +2058,12 @@ int32_t DistributedSchedService::StopRemoteExtensionAbility(const OHOS::AAFwk::W
 {
     std::string localDeviceId;
     std::string deviceId = want.GetDeviceId();
-    if(!GetLocalDeviceId(localDeviceId) || !CheckDeviceId(localDeviceId, deviceId)) {
+    if (!GetLocalDeviceId(localDeviceId) || !CheckDeviceId(localDeviceId, deviceId)) {
         HILOGE("CheckDeviceId failed");
         return INVALID_PARAMETERS_ERR;
     }
     sptr<IDistributedSched> remoteDms = GetRemoteDms(deviceId);
-    if(remoteDms == nullptr) {
+    if (remoteDms == nullptr) {
         HILOGE("GetRemoteDms failed");
         return INVALID_PARAMETERS_ERR;
     }
@@ -2071,11 +2071,11 @@ int32_t DistributedSchedService::StopRemoteExtensionAbility(const OHOS::AAFwk::W
     callerInfo.sourceDeviceId = localDeviceId;
     callerInfo.uid = callerUid;
     callerInfo.accessToken = accessToken;
-    if(!BundleManagerInternal::GetCallerAppIdFromBms(callerInfo.uid, callerInfo.callerAppId)) {
+    if (!BundleManagerInternal::GetCallerAppIdFromBms(callerInfo.uid, callerInfo.callerAppId)) {
         HILOGE("GetCallerAppIdFromBms failed");
         return INVALID_PARAMETERS_ERR;
     }
-    if(!BundleManagerInternal::GetBundleNameListFromBms(callerInfo.uid, callerInfo.bundleNames)) {
+    if (!BundleManagerInternal::GetBundleNameListFromBms(callerInfo.uid, callerInfo.bundleNames)) {
         HILOGE("GetBundleNameListFromBms failed");
         return INVALID_PARAMETERS_ERR;
     }
@@ -2092,7 +2092,6 @@ int32_t DistributedSchedService::StopRemoteExtensionAbility(const OHOS::AAFwk::W
 int32_t DistributedSchedService::StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& remoteWant,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t extensionType)
 {
-    std::string deviceId = remoteWant.GetElement().GetDeviceID();
     std::string localDeviceId;
     std::string destinationDeviceId = remoteWant.GetElement().GetDeviceID();
     if (!GetLocalDeviceId(localDeviceId) ||
