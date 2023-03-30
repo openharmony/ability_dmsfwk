@@ -143,6 +143,10 @@ public:
     void SetContinuationTimeout(int32_t missionId, int32_t timeout);
     void RemoveContinuationTimeout(int32_t missionId);
     std::string GetContinuaitonDevice(int32_t missionId);
+    int32_t StopRemoteExtensionAbility(const OHOS::AAFwk::Want& want, int32_t callerUid,
+        uint32_t accessToken, int32_t extensionType) override;
+    int32_t StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& remoteWant, const CallerInfo& callerInfo,
+        const AccountInfo& accountInfo, int32_t extensionType) override;
 private:
     DistributedSchedService();
     bool Init();

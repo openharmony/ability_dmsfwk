@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,6 +86,10 @@ public:
         const std::string& remoteDeviceId, const AppExecFwk::FormShareInfo& formShareInfo) override;
 #endif
     int32_t GetDistributedComponentList(std::vector<std::string>& distributedComponents) override;
+    virtual int32_t StopRemoteExtensionAbility(
+        const OHOS::AAFwk::Want& want, int32_t callerUid, uint32_t accessToken, int32_t extensionType) override;
+    virtual int32_t StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& want,
+        const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t extensionType) override;
 private:
     bool CallerInfoMarshalling(const CallerInfo& callerInfo, MessageParcel& data);
     static inline BrokerDelegator<DistributedSchedProxy> delegator_;

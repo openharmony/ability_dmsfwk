@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -58,6 +58,18 @@ const int DEFAULT_REQUEST_CODE = -1;
 
 DistributedSchedStub::DistributedSchedStub()
 {
+    InitLocalFuncsInner();
+    InitRemoteFuncsInner();
+}
+
+DistributedSchedStub::~DistributedSchedStub()
+{
+    remoteFuncsMap_.clear();
+    localFuncsMap_.clear();
+}
+
+void DistributedSchedStub::InitLocalFuncsInner()
+{
     localFuncsMap_[START_REMOTE_ABILITY] = &DistributedSchedStub::StartRemoteAbilityInner;
     localFuncsMap_[CONTINUE_MISSION] = &DistributedSchedStub::ContinueMissionInner;
     localFuncsMap_[START_CONTINUATION] = &DistributedSchedStub::StartContinuationInner;
@@ -73,6 +85,19 @@ DistributedSchedStub::DistributedSchedStub()
     localFuncsMap_[START_SYNC_MISSIONS] = &DistributedSchedStub::StartSyncRemoteMissionsInner;
     localFuncsMap_[STOP_SYNC_MISSIONS] = &DistributedSchedStub::StopSyncRemoteMissionsInner;
 #endif
+    localFuncsMap_[START_REMOTE_ABILITY_BY_CALL] = &DistributedSchedStub::StartRemoteAbilityByCallInner;
+    localFuncsMap_[RELEASE_REMOTE_ABILITY] = &DistributedSchedStub::ReleaseRemoteAbilityInner;
+#ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
+    localFuncsMap_[START_REMOTE_SHARE_FORM] = &DistributedSchedStub::StartRemoteShareFormInner;
+#endif
+    localFuncsMap_[GET_DISTRIBUTED_COMPONENT_LIST] = &DistributedSchedStub::GetDistributedComponentListInner;
+    localFuncsMap_[START_REMOTE_FREE_INSTALL] = &DistributedSchedStub::StartRemoteFreeInstallInner;
+    localFuncsMap_[STOP_REMOTE_EXTERNSION_ABILITY] =
+        &DistributedSchedStub::StopRemoteExtensionAbilityInner;
+}
+
+void DistributedSchedStub::InitRemoteFuncsInner()
+{
     remoteFuncsMap_[START_ABILITY_FROM_REMOTE] = &DistributedSchedStub::StartAbilityFromRemoteInner;
     remoteFuncsMap_[SEND_RESULT_FROM_REMOTE] = &DistributedSchedStub::SendResultFromRemoteInner;
     remoteFuncsMap_[NOTIFY_CONTINUATION_RESULT_FROM_REMOTE] =
@@ -89,26 +114,16 @@ DistributedSchedStub::DistributedSchedStub()
     remoteFuncsMap_[NOTIFY_MISSIONS_CHANGED_FROM_REMOTE] = &DistributedSchedStub::NotifyMissionsChangedFromRemoteInner;
 #endif
     remoteFuncsMap_[CONTINUE_MISSION] = &DistributedSchedStub::ContinueMissionInner;
-    // request codes for call ability
-    localFuncsMap_[START_REMOTE_ABILITY_BY_CALL] = &DistributedSchedStub::StartRemoteAbilityByCallInner;
-    localFuncsMap_[RELEASE_REMOTE_ABILITY] = &DistributedSchedStub::ReleaseRemoteAbilityInner;
     remoteFuncsMap_[START_ABILITY_BY_CALL_FROM_REMOTE] = &DistributedSchedStub::StartAbilityByCallFromRemoteInner;
     remoteFuncsMap_[RELEASE_ABILITY_FROM_REMOTE] = &DistributedSchedStub::ReleaseAbilityFromRemoteInner;
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
-    localFuncsMap_[START_REMOTE_SHARE_FORM] = &DistributedSchedStub::StartRemoteShareFormInner;
     remoteFuncsMap_[START_SHARE_FORM_FROM_REMOTE] = &DistributedSchedStub::StartShareFormFromRemoteInner;
 #endif
-    localFuncsMap_[GET_DISTRIBUTED_COMPONENT_LIST] = &DistributedSchedStub::GetDistributedComponentListInner;
-    localFuncsMap_[START_REMOTE_FREE_INSTALL] = &DistributedSchedStub::StartRemoteFreeInstallInner;
     remoteFuncsMap_[START_FREE_INSTALL_FROM_REMOTE] = &DistributedSchedStub::StartFreeInstallFromRemoteInner;
     remoteFuncsMap_[NOTIFY_COMPLETE_FREE_INSTALL_FROM_REMOTE] =
         &DistributedSchedStub::NotifyCompleteFreeInstallFromRemoteInner;
-}
-
-DistributedSchedStub::~DistributedSchedStub()
-{
-    remoteFuncsMap_.clear();
-    localFuncsMap_.clear();
+    remoteFuncsMap_[STOP_EXTERNSION_ABILITY_FROM_REMOTE] =
+        &DistributedSchedStub::StopExtensionAbilityFromRemoteInner;
 }
 
 int32_t DistributedSchedStub::OnRemoteRequest(uint32_t code,
@@ -1029,6 +1044,71 @@ int32_t DistributedSchedStub::NotifyCompleteFreeInstallFromRemoteInner(MessagePa
     int32_t result = NotifyCompleteFreeInstallFromRemote(taskId, resultCode);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+
+int32_t DistributedSchedStub::StopRemoteExtensionAbilityInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!DistributedSchedPermission::GetInstance().IsFoundationCall()) {
+        HILOGW("request DENIED!");
+        return DMS_PERMISSION_DENIED;
+    }
+    shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    if (want == nullptr) {
+        HILOGW("Stop reomte extension ability want readParcelable failed!");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t callerUid = 0;
+    PARCEL_READ_HELPER(data, Int32, callerUid);
+    uint32_t accessToken = 0;
+    PARCEL_READ_HELPER(data, Uint32, accessToken);
+    int32_t serviceType = 0;
+    PARCEL_READ_HELPER(data, Int32, serviceType);
+    HILOGD("get callerUid = %{private}d, AccessTokenID = %{private}u", callerUid, accessToken);
+    if (DistributedSchedPermission::GetInstance().CheckPermission(accessToken,
+        PERMISSION_DISTRIBUTED_DATASYNC) != ERR_OK) {
+        HILOGE("check data_sync permission failed!");
+        return DMS_PERMISSION_DENIED;
+    }
+    auto result = StopRemoteExtensionAbility(*want, callerUid, accessToken, serviceType);
+    HILOGD("StartRemoteAbilityInner result = %{public}d", result);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+
+int32_t DistributedSchedStub::StopExtensionAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CheckCallingUid()) {
+        HILOGW("request DENIED!");
+        return DMS_PERMISSION_DENIED;
+    }
+    shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    if (want == nullptr) {
+        HILOGW("want readParcelable failed!");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t serviceType = 0;
+    PARCEL_READ_HELPER(data, Int32, serviceType);
+    CallerInfo callerInfo;
+    PARCEL_READ_HELPER(data, Int32, callerInfo.uid);
+    PARCEL_READ_HELPER(data, String, callerInfo.sourceDeviceId);
+    callerInfo.callerType = CALLER_TYPE_HARMONY;
+    AccountInfo accountInfo;
+    accountInfo.accountType = data.ReadInt32();
+    PARCEL_READ_HELPER(data, StringVector, &accountInfo.groupIdList);
+    callerInfo.callerAppId = data.ReadString();
+    std::string extraInfo = data.ReadString();
+    if (extraInfo.empty()) {
+        HILOGD("extra info is empty!");
+    }
+    nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
+    if (!extraInfoJson.is_discarded()) {
+        uint32_t accessToken = extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN];
+        callerInfo.accessToken = accessToken;
+        HILOGD("parse extra info, accessTokenID = %{private}u", accessToken);
+    }
+    auto result = StopExtensionAbilityFromRemote(*want, callerInfo, accountInfo, serviceType);
+    HILOGD("result = %{public}d", result);
+    PARCEL_WRITE_HELPER(reply, Int32, result);
+    return ERR_NONE;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
