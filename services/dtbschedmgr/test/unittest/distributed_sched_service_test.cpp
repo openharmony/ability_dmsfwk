@@ -1854,7 +1854,7 @@ HWTEST_F(DistributedSchedServiceTest, TryConnectRemoteAbility002, TestSize.Level
  * @tc.desc: StopRemoteExtensionAbility with uninitialized params, return INVALID_PARAMETERS_ERR.
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceTest, StopRemoteExtensionAbility_001, TestSize.Level1)
+HWTEST_F(DistributedSchedServiceTest, StopRemoteExtensionAbility_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest StopRemoteExtensionAbility_001 start" << std::endl;
     AAFwk::Want want;
@@ -1876,7 +1876,7 @@ HWTEST_F(DistributedSchedServiceTest, StopRemoteExtensionAbility_001, TestSize.L
  * @tc.desc: StopRemoteExtensionAbility with empty want's deviceId, return INVALID_PARAMETERS_ERR.
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceTest, StopRemoteExtensionAbility_002, TestSize.Level1)
+HWTEST_F(DistributedSchedServiceTest, StopRemoteExtensionAbility_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest StopRemoteExtensionAbility_002 start" << std::endl;
     AAFwk::Want want;
@@ -1896,7 +1896,7 @@ HWTEST_F(DistributedSchedServiceTest, StopRemoteExtensionAbility_002, TestSize.L
  * @tc.desc: StopExtensionAbilityFromRemote with uninitialized params, return INVALID_REMOTE_PARAMETERS_ERR.
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_001, TestSize.Level1)
+HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
@@ -1924,7 +1924,7 @@ HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_001, TestSi
  * @tc.desc: StopExtensionAbilityFromRemote with empty want's deviceId, return DMS_PERMISSION_DENIED.
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_002, TestSize.Level1)
+HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_002 start" << std::endl;
     AAFwk::Want remoteWant;
@@ -1946,7 +1946,7 @@ HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_002, TestSi
  * @tc.desc: StopExtensionAbilityFromRemote with empty want's deviceId, return INVALID_REMOTE_PARAMETERS_ERR.
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_003, TestSize.Level1)
+HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_003 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();

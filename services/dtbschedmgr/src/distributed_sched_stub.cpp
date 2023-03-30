@@ -1061,7 +1061,7 @@ int32_t DistributedSchedStub::StopRemoteExtensionAbilityInner(MessageParcel& dat
     PARCEL_READ_HELPER(data, Int32, callerUid);
     uint32_t accessToken = 0;
     PARCEL_READ_HELPER(data, Uint32, accessToken);
-    int32_t serviceType = static_cast<int32_t>(AppExecFwk::ExtensionAbilityType::SERVICE);
+    int32_t serviceType = 0;
     PARCEL_READ_HELPER(data, Int32, serviceType);
     HILOGD("get callerUid = %{private}d, AccessTokenID = %{private}u", callerUid, accessToken);
     if (DistributedSchedPermission::GetInstance().CheckPermission(accessToken,
@@ -1085,7 +1085,7 @@ int32_t DistributedSchedStub::StopExtensionAbilityFromRemoteInner(MessageParcel&
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
-    int32_t serviceType = static_cast<int32_t>(AppExecFwk::ExtensionAbilityType::SERVICE);
+    int32_t serviceType = 0;
     PARCEL_READ_HELPER(data, Int32, serviceType);
     CallerInfo callerInfo;
     PARCEL_READ_HELPER(data, Int32, callerInfo.uid);

@@ -2112,6 +2112,7 @@ int32_t DistributedSchedService::StopExtensionAbilityFromRemote(const OHOS::AAFw
     std::vector<int> ids;
     ErrCode ret = OsAccountManager::QueryActiveOsAccountIds(ids);
     if (ret != ERR_OK || ids.empty()) {
+        HILOGE("QueryActiveOsAccountIds failed!!");
         return INVALID_PARAMETERS_ERR;
     }
 
