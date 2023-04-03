@@ -54,6 +54,7 @@ public:
         AccountInfo& accountInfo);
     bool GetTargetAbility(const AAFwk::Want& want, AppExecFwk::AbilityInfo& targetAbility,
         bool needQueryExtension = false) const;
+    void MarkUriPermission(OHOS::AAFwk::Want& want, uint32_t accessToken);
 
 private:
     bool GetRelatedGroups(const std::string& udid, const std::vector<std::string>& bundleNames,

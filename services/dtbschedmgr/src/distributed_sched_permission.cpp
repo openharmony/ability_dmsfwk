@@ -24,6 +24,7 @@
 #include "distributed_sched_adapter.h"
 #include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -36,6 +37,8 @@ const std::string DMS_API_VERSION = "dmsApiVersion";
 const std::string DMS_IS_CALLER_BACKGROUND = "dmsIsCallerBackGround";
 const std::string DMS_MISSION_ID = "dmsMissionId";
 const std::string DMS_VERSION_ID = "dmsVersion";
+const std::string PARAMS_URI = "ability.verify.uri";
+const std::string PARAMS_STREAM = "ability.params.stream";
 const std::string PERMISSION_START_ABILIIES_FROM_BACKGROUND = "ohos.permission.START_ABILIIES_FROM_BACKGROUND";
 const std::string PERMISSION_START_ABILITIES_FROM_BACKGROUND = "ohos.permission.START_ABILITIES_FROM_BACKGROUND";
 const std::string PERMISSION_START_INVISIBLE_ABILITY = "ohos.permission.START_INVISIBLE_ABILITY";
@@ -251,6 +254,44 @@ int32_t DistributedSchedPermission::CheckPermission(uint32_t accessToken, const 
         return ERR_OK;
     }
     return DMS_PERMISSION_DENIED;
+}
+
+void DistributedSchedPermission::MarkUriPermission(OHOS::AAFwk::Want& want, uint32_t accessToken)
+{
+    if ((want.GetFlags() & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
+        return;
+    }
+    auto bms = BundleManagerInternal::GetBundleManager();
+    if (bms == nullptr) {
+        HILOGW("Failed to get bms.");
+        return;
+    }
+    std::vector<std::string> uriVec = want.GetStringArrayParam(PARAMS_STREAM);
+    std::string uriStr = want.GetUri().ToString();
+    uriVec.emplace_back(uriStr);
+    std::vector<std::string> uriVecPermission;
+    HILOGI("GrantUriPermission uriVec size: %{public}zu", uriVec.size());
+    for (std::string str : uriVec) {
+        Uri uri(str);
+        std::string authority = uri.GetAuthority();
+        HILOGI("uri authority is %{public}s.", authority.c_str());
+        AppExecFwk::BundleInfo bundleInfo;
+        std::vector<int32_t> ids;
+        int32_t errCode = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+        if (errCode != ERR_OK || ids.empty()) {
+            return;
+        }
+        if (!bms->GetBundleInfo(authority,
+            AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO, bundleInfo, ids[0])) {
+            HILOGW("To fail to get bundle info according to uri.");
+            continue;
+        }
+        if (bundleInfo.applicationInfo.accessTokenId == accessToken) {
+            HILOGI("uri token is true.");
+            uriVecPermission.emplace_back(str);
+        }
+    }
+    want.SetParam(PARAMS_URI, uriVecPermission);
 }
 
 bool DistributedSchedPermission::IsNativeCall(uint32_t accessToken) const

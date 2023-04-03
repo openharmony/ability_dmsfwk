@@ -174,6 +174,7 @@ int32_t DistributedSchedStub::StartRemoteAbilityInner(MessageParcel& data, Messa
         HILOGE("check data_sync permission failed!");
         return DMS_PERMISSION_DENIED;
     }
+    DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
     int32_t result = StartRemoteAbility(*want, callerUid, requestCode, accessToken);
     BehaviorEventParam eventParam = { EventCallingType::LOCAL, BehaviorEvent::START_REMOTE_ABILITY, result,
         want->GetElement().GetBundleName(), want->GetElement().GetAbilityName(), callerUid };
@@ -338,6 +339,7 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
         HILOGE("check data_sync permission failed!");
         return DMS_PERMISSION_DENIED;
     }
+    DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
     int32_t result = StartContinuation(*want, missionId, callerUid, status, accessToken);
     BehaviorEventParam eventParam = { EventCallingType::LOCAL, BehaviorEvent::START_CONTINUATION, result,
         want->GetElement().GetBundleName(), want->GetElement().GetAbilityName(), callerUid };
