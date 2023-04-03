@@ -62,6 +62,7 @@ namespace {
     const string BUNDLE_NAME = "com.ohos.launcher";
     const string DMS_IS_CALLER_BACKGROUND = "dmsIsCallerBackGround";
     constexpr int32_t SLEEP_TIME = 1000;
+    constexpr int32_t FOREGROUND = 2;
 }
 
 class DistributedSchedServiceTest : public testing::Test {
@@ -1491,6 +1492,83 @@ HWTEST_F(DistributedSchedServiceTest, StartAbilityByCallFromRemote_002, TestSize
         callerInfo, accountInfo);
     EXPECT_EQ(ret, CALL_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedServiceTest StartAbilityByCallFromRemote_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyStateChangedFromRemote_001
+ * @tc.desc: call NotifyStateChangedFromRemote with illegal params
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DistributedSchedServiceTest, NotifyStateChangedFromRemote_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceTest NotifyStateChangedFromRemote_001 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    AppExecFwk::ElementName element("", BUNDLE_NAME, ABILITY_NAME);
+    int result1 = proxy->NotifyStateChangedFromRemote(0, 0, element);
+    DTEST_LOG << "result1:" << result1 << std::endl;
+
+    EXPECT_NE(result1, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceTest NotifyStateChangedFromRemote_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyStateChanged_001
+ * @tc.desc: test NotifyStateChanged
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DistributedSchedServiceTest, NotifyStateChanged_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest NotifyStateChanged_001 start" << std::endl;
+    int32_t abilityState = FOREGROUND;
+    std::string localDeviceId;
+    AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME, ABILITY_NAME);
+    int32_t ret = DistributedSchedService::GetInstance().NotifyStateChanged(abilityState, element);
+    DTEST_LOG << "ret:" << ret << std::endl;
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest NotifyStateChanged_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyStateChangedFromRemote_002
+ * @tc.desc: test NotifyStateChangedFromRemote
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DistributedSchedServiceTest, NotifyStateChangedFromRemote_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest NotifyStateChangedFromRemote_002 start" << std::endl;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME, ABILITY_NAME);
+
+    int ret = DistributedSchedService::GetInstance().NotifyStateChangedFromRemote(0, 0, element);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest NotifyStateChangedFromRemote_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyStateChangedFromRemote_003
+ * @tc.desc: test NotifyStateChangedFromRemote
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DistributedSchedServiceTest, NotifyStateChangedFromRemote_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest NotifyStateChangedFromRemote_003 start" << std::endl;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME, ABILITY_NAME);
+
+    sptr<IRemoteObject> connect = nullptr;
+    DistributedSchedService::GetInstance().callMap_[0] = {connect, localDeviceId};
+    int ret = DistributedSchedService::GetInstance().NotifyStateChangedFromRemote(0, 0, element);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest NotifyStateChangedFromRemote_003 end" << std::endl;
 }
 
 /**

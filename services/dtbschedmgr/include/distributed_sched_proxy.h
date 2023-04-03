@@ -85,6 +85,8 @@ public:
     int32_t StartShareFormFromRemote(
         const std::string& remoteDeviceId, const AppExecFwk::FormShareInfo& formShareInfo) override;
 #endif
+    int32_t NotifyStateChangedFromRemote(int32_t abilityState, int32_t missionId,
+        const AppExecFwk::ElementName& element) override;
     int32_t GetDistributedComponentList(std::vector<std::string>& distributedComponents) override;
     virtual int32_t StopRemoteExtensionAbility(
         const OHOS::AAFwk::Want& want, int32_t callerUid, uint32_t accessToken, int32_t extensionType) override;

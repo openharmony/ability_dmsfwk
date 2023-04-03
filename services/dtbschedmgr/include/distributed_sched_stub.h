@@ -66,6 +66,7 @@ private:
     int32_t StartRemoteShareFormInner(MessageParcel& data, MessageParcel& reply);
     int32_t StartShareFormFromRemoteInner(MessageParcel& data, MessageParcel& reply);
 #endif
+    int32_t NotifyStateChangedFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetDistributedComponentListInner(MessageParcel& data, MessageParcel& reply);
     bool CheckDmsRequestPermission();
     bool CheckCallingUid();

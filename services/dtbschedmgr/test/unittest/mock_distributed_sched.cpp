@@ -172,6 +172,12 @@ int32_t MockDistributedSched::ReleaseAbilityFromRemote(const sptr<IRemoteObject>
     return ERR_NONE;
 }
 
+int32_t MockDistributedSched::NotifyStateChangedFromRemote(int32_t abilityState, int32_t missionId,
+    const AppExecFwk::ElementName& element)
+{
+    return ERR_NONE;
+}
+
 int32_t MockDistributedSched::GetDistributedComponentList(std::vector<std::string>& distributedComponents)
 {
     return ERR_NONE;
