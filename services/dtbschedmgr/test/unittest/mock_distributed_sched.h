@@ -73,6 +73,8 @@ public:
         const CallerInfo& callerInfo, const AccountInfo& accountInfo) override;
     int32_t ReleaseAbilityFromRemote(const sptr<IRemoteObject>& connect, const AppExecFwk::ElementName &element,
         const CallerInfo& callerInfo) override;
+    int32_t NotifyStateChangedFromRemote(int32_t abilityState, int32_t missionId,
+        const AppExecFwk::ElementName& element) override;
     int32_t GetDistributedComponentList(std::vector<std::string>& distributedComponents) override;
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
     int32_t StartRemoteShareForm(const std::string& remoteDeviceId,

@@ -840,6 +840,29 @@ int32_t DistributedSchedProxy::StartShareFormFromRemote(
 }
 #endif
 
+int32_t DistributedSchedProxy::NotifyStateChangedFromRemote(int32_t abilityState, int32_t missionId,
+    const AppExecFwk::ElementName& element)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("NotifyStateChangedFromRemote remote service null");
+        return ERR_NULL_OBJECT;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        HILOGE("WriteInterfaceToken failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_WRITE_HELPER(data, Int32, abilityState);
+    PARCEL_WRITE_HELPER(data, Int32, missionId);
+    if (!data.WriteParcelable(&element)) {
+        HILOGE("NotifyStateChangedFromRemote write element error.");
+        return ERR_INVALID_VALUE;
+    }
+    MessageParcel reply;
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, NOTIFY_STATE_CHANGED_FROM_REMOTE, data, reply);
+}
+
 int32_t DistributedSchedProxy::GetDistributedComponentList(std::vector<std::string>& distributedComponents)
 {
     sptr<IRemoteObject> remote = Remote();

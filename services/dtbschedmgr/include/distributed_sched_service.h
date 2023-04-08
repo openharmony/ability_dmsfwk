@@ -21,6 +21,8 @@
 #include <set>
 #include <unordered_map>
 
+#include "app_mgr_interface.h"
+#include "app_state_observer.h"
 #include "distributed_sched_stub.h"
 #include "distributed_sched_continuation.h"
 #include "dms_callback_task.h"
@@ -59,6 +61,19 @@ struct ProcessDiedNotifyInfo {
     std::string remoteDeviceId;
     CallerInfo callerInfo;
     TargetComponent targetComponent;
+};
+
+struct CallInfo {
+    sptr<IRemoteObject> connect;
+    std::string remoteDeviceId;
+};
+
+struct ObserverInfo {
+    sptr<AppStateObserver> appStateObserver;
+    std::string srcDeviceId;
+    int32_t srcMissionId;
+    std::string dstBundleName;
+    std::string dstAbilityName;
 };
 
 class DistributedSchedService : public SystemAbility, public DistributedSchedStub {
@@ -143,6 +158,9 @@ public:
     void SetContinuationTimeout(int32_t missionId, int32_t timeout);
     void RemoveContinuationTimeout(int32_t missionId);
     std::string GetContinuaitonDevice(int32_t missionId);
+    int32_t NotifyStateChangedFromRemote(int32_t abilityState, int32_t missionId,
+        const AppExecFwk::ElementName& element) override;
+    int32_t NotifyStateChanged(int32_t abilityState, AppExecFwk::ElementName& element);
     int32_t StopRemoteExtensionAbility(const OHOS::AAFwk::Want& want, int32_t callerUid,
         uint32_t accessToken, int32_t extensionType) override;
     int32_t StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& remoteWant, const CallerInfo& callerInfo,
@@ -199,6 +217,10 @@ private:
     void GetConnectComponentList(std::vector<std::string>& distributedComponents);
     void GetCallComponentList(std::vector<std::string>& distributedComponents);
     void ProcessFreeInstallOffline(const std::string& deviceId);
+    bool RegisterAppStateObserver(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
+        const sptr<IRemoteObject>& callbackWrapper);
+    void UnregisterAppStateObserver(const sptr<IRemoteObject>& callbackWrapper);
+    sptr<AppExecFwk::IAppMgr> GetAppManager();
     int32_t CheckTargetPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
 
@@ -222,6 +244,10 @@ private:
     std::mutex callerLock_;
     std::map<sptr<IRemoteObject>, std::list<ConnectAbilitySession>> callerMap_;
     sptr<IRemoteObject::DeathRecipient> callerDeathRecipientForLocalDevice_;
+    std::mutex observerLock_;
+    std::map<sptr<IRemoteObject>, ObserverInfo> observerMap_;
+    std::mutex callLock_;
+    std::map<int32_t, CallInfo> callMap_;
 };
 
 class ConnectAbilitySession {

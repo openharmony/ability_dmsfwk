@@ -116,6 +116,8 @@ void DistributedSchedStub::InitRemoteFuncsInner()
     remoteFuncsMap_[CONTINUE_MISSION] = &DistributedSchedStub::ContinueMissionInner;
     remoteFuncsMap_[START_ABILITY_BY_CALL_FROM_REMOTE] = &DistributedSchedStub::StartAbilityByCallFromRemoteInner;
     remoteFuncsMap_[RELEASE_ABILITY_FROM_REMOTE] = &DistributedSchedStub::ReleaseAbilityFromRemoteInner;
+    remoteFuncsMap_[NOTIFY_STATE_CHANGED_FROM_REMOTE] =
+        &DistributedSchedStub::NotifyStateChangedFromRemoteInner;
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
     remoteFuncsMap_[START_SHARE_FORM_FROM_REMOTE] = &DistributedSchedStub::StartShareFormFromRemoteInner;
 #endif
@@ -947,6 +949,26 @@ int32_t DistributedSchedStub::GetDistributedComponentListInner(MessageParcel& da
     PARCEL_WRITE_HELPER(reply, Int32, result);
     PARCEL_WRITE_HELPER(reply, StringVector, distributedComponents);
     return ERR_NONE;
+}
+
+int32_t DistributedSchedStub::NotifyStateChangedFromRemoteInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CheckCallingUid()) {
+        HILOGW("request DENIED!");
+        return DMS_PERMISSION_DENIED;
+    }
+    int32_t abilityState = 0;
+    PARCEL_READ_HELPER(data, Int32, abilityState);
+    int32_t missionId = 0;
+    PARCEL_READ_HELPER(data, Int32, missionId);
+    shared_ptr<AppExecFwk::ElementName> element(data.ReadParcelable<AppExecFwk::ElementName>());
+    if (element == nullptr) {
+        HILOGE("NotifyStateChangedFromRemoteInner receive element is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = NotifyStateChangedFromRemote(abilityState, missionId, *element);
+    HILOGI("result = %{public}d", result);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 
 int32_t DistributedSchedStub::StartRemoteFreeInstallInner(MessageParcel& data, MessageParcel& reply)

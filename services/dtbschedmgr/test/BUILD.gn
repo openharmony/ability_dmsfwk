@@ -37,6 +37,7 @@ dsched_external_deps = [
   "ability_base:want",
   "ability_base:zuri",
   "ability_runtime:ability_manager",
+  "ability_runtime:app_manager",
   "access_token:libaccesstoken_sdk",
   "access_token:libnativetoken",
   "access_token:libtoken_setproc",
@@ -90,6 +91,7 @@ dtbschedmgr_sources = [
   "${distributed_service}/dtbschedmgr/src/ability_connection_wrapper_proxy.cpp",
   "${distributed_service}/dtbschedmgr/src/ability_connection_wrapper_stub.cpp",
   "${distributed_service}/dtbschedmgr/src/adapter/dnetwork_adapter.cpp",
+  "${distributed_service}/dtbschedmgr/src/app_state_observer.cpp",
   "${distributed_service}/dtbschedmgr/src/bundle/bundle_manager_callback_stub.cpp",
   "${distributed_service}/dtbschedmgr/src/bundle/bundle_manager_internal.cpp",
   "${distributed_service}/dtbschedmgr/src/connect_death_recipient.cpp",
@@ -174,7 +176,10 @@ ohos_unittest("distributedschedsvrtest") {
 ohos_unittest("distributedcalltest") {
   module_out_path = module_output_path
 
-  sources = [ "unittest/distributed_sched_call_test.cpp" ]
+  sources = [
+    "unittest/app_state_observer_test.cpp",
+    "unittest/distributed_sched_call_test.cpp",
+  ]
   sources += dtbschedmgr_sources
   configs = [
     ":test_config",
