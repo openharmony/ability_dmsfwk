@@ -32,6 +32,7 @@ using namespace DistributedHardware;
 
 namespace {
 constexpr int32_t RETRY_REGISTER_CALLBACK_TIMES = 5;
+constexpr int32_t RETRY_REGISTER_CALLBACK_DELAY_TIME = 1000; // 1s
 const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getpid());
 
 constexpr int32_t NON_ANONYMIZED_LENGTH = 6;
@@ -127,7 +128,7 @@ bool DnetworkAdapter::AddDeviceChangeListener(const std::shared_ptr<DeviceListen
             int32_t ret = DeviceManager::GetInstance().InitDeviceManager(PKG_NAME, initCallback_);
             if (ret != ERR_OK) {
                 HILOGE("init device manager failed, ret:%{public}d", ret);
-                std::this_thread::sleep_for(1s);
+                std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_REGISTER_CALLBACK_DELAY_TIME));
                 continue;
             }
             errCode = DeviceManager::GetInstance().RegisterDevStateCallback(PKG_NAME, "", stateCallback_);
@@ -135,7 +136,7 @@ bool DnetworkAdapter::AddDeviceChangeListener(const std::shared_ptr<DeviceListen
                 HILOGD("AddDeviceChangeListener Reg errCode = %{public}d, retrying...", errCode);
                 errCode = DeviceManager::GetInstance().UnRegisterDevStateCallback(PKG_NAME);
                 HILOGD("AddDeviceChangeListener Unreg errCode = %{public}d", errCode);
-                std::this_thread::sleep_for(1s);
+                std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_REGISTER_CALLBACK_DELAY_TIME));
                 continue;
             }
             if (UpdateDeviceInfoStorage()) {

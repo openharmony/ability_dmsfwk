@@ -69,8 +69,8 @@ bool DistributedAbilityManagerDumper::CanDump()
 
 bool DistributedAbilityManagerDumper::DumpDefault(std::string& result)
 {
-    result.append("ContinuationManagerService Dump\n");
-    result.append("\n");
+    result.append("ContinuationManagerService Dump\n")
+        .append("\n");
     ShowAppRegisterInfo(result);
     return true;
 }
