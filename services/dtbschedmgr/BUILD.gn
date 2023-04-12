@@ -22,6 +22,7 @@ group("unittest") {
 
 config("distributed_sched_config") {
   visibility = [ ":*" ]
+  visibility += [ "./test/*" ]
   include_dirs = [ "include" ]
   defines = []
   if (dmsfwk_mission_manager) {
