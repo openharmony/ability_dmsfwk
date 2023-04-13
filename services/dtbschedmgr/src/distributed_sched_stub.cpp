@@ -968,7 +968,8 @@ int32_t DistributedSchedStub::NotifyStateChangedFromRemoteInner(MessageParcel& d
     }
     int32_t result = NotifyStateChangedFromRemote(abilityState, missionId, *element);
     HILOGI("result = %{public}d", result);
-    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+    PARCEL_WRITE_HELPER(reply, Int32, result);
+    return ERR_NONE;
 }
 
 int32_t DistributedSchedStub::StartRemoteFreeInstallInner(MessageParcel& data, MessageParcel& reply)
