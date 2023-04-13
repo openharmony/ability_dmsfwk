@@ -2178,7 +2178,6 @@ int32_t DistributedSchedService::NotifyStateChanged(int32_t abilityState, AppExe
                 break;
             }
         }
-        HILOGE("observer not exits");
     }
     HILOGD("Get missionId = %{public}d", missionId);
 

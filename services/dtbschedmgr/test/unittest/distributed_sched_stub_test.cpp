@@ -2012,5 +2012,49 @@ HWTEST_F(DistributedSchedStubTest, StopExtensionAbilityFromRemoteInner_001, Test
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest StopExtensionAbilityFromRemoteInner_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: NotifyStateChangedFromRemoteInner_001
+ * @tc.desc: check NotifyStateChangedFromRemoteInner
+ * @tc.type: FUNC
+ * @tc.require: I6VDBO
+ */
+HWTEST_F(DistributedSchedStubTest, NotifyStateChangedFromRemoteInner_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest NotifyStateChangedFromRemoteInner_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t abilityState = 0;
+    data.WriteInt32(abilityState);
+    int32_t missionId = 0;
+    data.WriteInt32(missionId);
+    ElementName element;
+    data.WriteParcelable(&element);
+
+    int32_t result = distributedSchedStub_->NotifyStateChangedFromRemoteInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedStubTest NotifyStateChangedFromRemoteInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyStateChangedFromRemoteInner_002
+ * @tc.desc: check NotifyStateChangedFromRemoteInner
+ * @tc.type: FUNC
+ * @tc.require: I6VDBO
+ */
+HWTEST_F(DistributedSchedStubTest, NotifyStateChangedFromRemoteInner_002, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest NotifyStateChangedFromRemoteInner_002 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t abilityState = 0;
+    data.WriteInt32(abilityState);
+    int32_t missionId = 0;
+    data.WriteInt32(missionId);
+    int32_t result = distributedSchedStub_->NotifyStateChangedFromRemoteInner(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    DTEST_LOG << "DistributedSchedStubTest NotifyStateChangedFromRemoteInner_002 end" << std::endl;
+}
 }
 }
