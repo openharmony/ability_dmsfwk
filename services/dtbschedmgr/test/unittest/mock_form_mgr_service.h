@@ -173,6 +173,14 @@ public:
     {
         return false;
     }
+    int32_t GetFormsCount(bool isTempFormFlag, int32_t &formCount) override
+    {
+        return ERR_OK;
+    }
+    int32_t GetHostFormsCount(std::string &bundleName, int32_t &formCount) override
+    {
+        return ERR_OK;
+    }
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
