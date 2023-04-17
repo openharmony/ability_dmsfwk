@@ -172,7 +172,11 @@ public:
     bool CheckFMSReady() override
     {
         return false;
-    }
+    };
+    int32_t SetBackgroundFunction(const std::string method, const std::string params) override
+    {
+        return ERR_OK;
+    };
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
