@@ -21,6 +21,7 @@ group("unittest") {
 
 config("distributed_ability_manager_config") {
   visibility = [ ":*" ]
+  visibility += [ "./test/*" ]
   include_dirs = [ "include/" ]
 }
 
