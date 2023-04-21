@@ -36,8 +36,10 @@ constexpr const char*  KEY_CALLING_UID = "CALLING_UID";
 constexpr const char*  KEY_ERROR_TYPE = "ERROR_TYPE";
 
 constexpr const char*  KEY_RESULT = "RESULT";
-constexpr const char*  KEY_TARGET_ABILITY = "TARGET_ABILITY";
-constexpr const char*  KEY_TARGET_BUNDLE = "TARGET_BUNDLE";
+constexpr const char*  KEY_CALLEE_ABILITY = "CALLEE_ABILITY";
+constexpr const char*  KEY_CALLEE_BUNDLE = "CALLEE_BUNDLE";
+constexpr const char*  KEY_CALLER_BUNDLE = "CALLER_BUNDLE";
+constexpr const char*  KEY_VERSION = "VERSION";
 }
 
 int DmsHiSysEventReport::ReportBehaviorEvent(const BehaviorEventParam& param)
@@ -47,9 +49,11 @@ int DmsHiSysEventReport::ReportBehaviorEvent(const BehaviorEventParam& param)
         KEY_CALLING_UID, IPCSkeleton::GetCallingUid(),
         KEY_CALLING_PID, IPCSkeleton::GetCallingPid(),
         KEY_CALLING_APP_UID, param.callingAppUid,
-        KEY_TARGET_BUNDLE, param.bundleName,
-        KEY_TARGET_ABILITY, param.abilityName,
-        KEY_RESULT, param.eventResult);
+        KEY_CALLEE_BUNDLE, param.bundleName,
+        KEY_CALLEE_ABILITY, param.abilityName,
+        KEY_RESULT, param.eventResult,
+        KEY_CALLER_BUNDLE, param.srcBundleName,
+        KEY_VERSION, param.version);
     if (result != 0) {
         HILOGE("hisysevent report failed! ret %{public}d.", result);
     }
