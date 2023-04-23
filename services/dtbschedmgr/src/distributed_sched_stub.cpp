@@ -17,6 +17,7 @@
 
 #include "ability_info.h"
 #include "adapter/dnetwork_adapter.h"
+#include "bundle/bundle_manager_internal.h"
 #include "caller_info.h"
 #include "datetime_ex.h"
 #include "dfx/dms_hisysevent_report.h"
@@ -33,7 +34,6 @@
 #endif
 #include "ipc_skeleton.h"
 #include "message_parcel.h"
-
 #include "parcel_helper.h"
 
 namespace OHOS {
@@ -178,11 +178,32 @@ int32_t DistributedSchedStub::StartRemoteAbilityInner(MessageParcel& data, Messa
     }
     DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
     int32_t result = StartRemoteAbility(*want, callerUid, requestCode, accessToken);
-    BehaviorEventParam eventParam = { EventCallingType::LOCAL, BehaviorEvent::START_REMOTE_ABILITY, result,
-        want->GetElement().GetBundleName(), want->GetElement().GetAbilityName(), callerUid };
-    DmsHiSysEventReport::ReportBehaviorEvent(eventParam);
+    ReportEvent(*want, BehaviorEvent::START_REMOTE_ABILITY, result, callerUid);
     HILOGI("StartRemoteAbilityInner result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+
+int32_t DistributedSchedStub::ReportEvent(const OHOS::AAFwk::Want& want, const std::string& eventName, int32_t result,
+    int32_t callerUid)
+{
+    std::vector<std::string> bundleNames;
+    if (!BundleManagerInternal::GetBundleNameListFromBms(callerUid, bundleNames)) {
+        HILOGE("GetBundleNameListFromBms failed");
+        return INVALID_PARAMETERS_ERR;
+    }
+    std::string srcBundleName = bundleNames.empty() ? std::string() : bundleNames.front();
+    HILOGD("srcBundleName %{public}s", srcBundleName.c_str());
+    AppExecFwk::BundleInfo localBundleInfo;
+    if (BundleManagerInternal::GetLocalBundleInfo(srcBundleName, localBundleInfo) != ERR_OK) {
+        HILOGE("get local bundle info failed");
+        return INVALID_PARAMETERS_ERR;
+    }
+    HILOGD("version %{public}s", localBundleInfo.versionName.c_str());
+
+    BehaviorEventParam eventParam = { EventCallingType::LOCAL, eventName, result, want.GetElement().GetBundleName(),
+        want.GetElement().GetAbilityName(), callerUid, srcBundleName, localBundleInfo.versionName };
+    DmsHiSysEventReport::ReportBehaviorEvent(eventParam);
+    return ERR_OK;
 }
 
 int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply)
@@ -343,9 +364,7 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
     }
     DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
     int32_t result = StartContinuation(*want, missionId, callerUid, status, accessToken);
-    BehaviorEventParam eventParam = { EventCallingType::LOCAL, BehaviorEvent::START_CONTINUATION, result,
-        want->GetElement().GetBundleName(), want->GetElement().GetAbilityName(), callerUid };
-    DmsHiSysEventReport::ReportBehaviorEvent(eventParam);
+    ReportEvent(*want, BehaviorEvent::START_CONTINUATION, result, callerUid);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
@@ -413,9 +432,7 @@ int32_t DistributedSchedStub::ConnectRemoteAbilityInner(MessageParcel& data, Mes
         return DMS_PERMISSION_DENIED;
     }
     int32_t result = ConnectRemoteAbility(*want, connect, callerUid, callerPid, accessToken);
-    BehaviorEventParam eventParam = { EventCallingType::LOCAL, BehaviorEvent::CONNECT_REMOTE_ABILITY, result,
-        want->GetElement().GetBundleName(), want->GetElement().GetAbilityName(), callerUid };
-    DmsHiSysEventReport::ReportBehaviorEvent(eventParam);
+    ReportEvent(*want, BehaviorEvent::CONNECT_REMOTE_ABILITY, result, callerUid);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
@@ -798,9 +815,7 @@ int32_t DistributedSchedStub::StartRemoteAbilityByCallInner(MessageParcel& data,
         return DMS_PERMISSION_DENIED;
     }
     int32_t result = StartRemoteAbilityByCall(*want, connect, callerUid, callerPid, accessToken);
-    BehaviorEventParam eventParam = { EventCallingType::LOCAL, BehaviorEvent::START_REMOTE_ABILITY_BYCALL, result,
-        want->GetElement().GetBundleName(), want->GetElement().GetAbilityName(), callerUid };
-    DmsHiSysEventReport::ReportBehaviorEvent(eventParam);
+    ReportEvent(*want, BehaviorEvent::START_REMOTE_ABILITY_BYCALL, result, callerUid);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
