@@ -183,27 +183,27 @@ int32_t DistributedSchedStub::StartRemoteAbilityInner(MessageParcel& data, Messa
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 
-int32_t DistributedSchedStub::ReportEvent(const OHOS::AAFwk::Want& want, const std::string& eventName, int32_t result,
+void DistributedSchedStub::ReportEvent(const OHOS::AAFwk::Want& want, const std::string& eventName, int32_t result,
     int32_t callerUid)
 {
     std::vector<std::string> bundleNames;
     if (!BundleManagerInternal::GetBundleNameListFromBms(callerUid, bundleNames)) {
         HILOGE("GetBundleNameListFromBms failed");
-        return INVALID_PARAMETERS_ERR;
+        return;
     }
     std::string srcBundleName = bundleNames.empty() ? std::string() : bundleNames.front();
     HILOGD("srcBundleName %{public}s", srcBundleName.c_str());
     AppExecFwk::BundleInfo localBundleInfo;
     if (BundleManagerInternal::GetLocalBundleInfo(srcBundleName, localBundleInfo) != ERR_OK) {
         HILOGE("get local bundle info failed");
-        return INVALID_PARAMETERS_ERR;
+        return;
     }
     HILOGD("version %{public}s", localBundleInfo.versionName.c_str());
 
     BehaviorEventParam eventParam = { EventCallingType::LOCAL, eventName, result, want.GetElement().GetBundleName(),
         want.GetElement().GetAbilityName(), callerUid, srcBundleName, localBundleInfo.versionName };
     DmsHiSysEventReport::ReportBehaviorEvent(eventParam);
-    return ERR_OK;
+    HILOGD("report event success!");
 }
 
 int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply)
