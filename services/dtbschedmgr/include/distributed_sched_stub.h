@@ -68,6 +68,7 @@ private:
 #endif
     int32_t NotifyStateChangedFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetDistributedComponentListInner(MessageParcel& data, MessageParcel& reply);
+    void ReportEvent(const OHOS::AAFwk::Want& want, const std::string& eventName, int32_t result, int32_t callerUid);
     bool CheckDmsRequestPermission();
     bool CheckCallingUid();
     bool EnforceInterfaceToken(MessageParcel& data);
