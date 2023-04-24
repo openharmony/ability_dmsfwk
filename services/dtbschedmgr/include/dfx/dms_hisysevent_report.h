@@ -57,7 +57,7 @@ struct BehaviorEventParam {
     std::string abilityName = "";
     int32_t callingAppUid = -1;
     std::string srcBundleName = "";
-    std::string version ="";
+    std::string version = "";
 };
 
 class DmsHiSysEventReport {

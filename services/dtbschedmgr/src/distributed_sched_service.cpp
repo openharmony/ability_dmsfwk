@@ -783,6 +783,9 @@ void DistributedSchedService::HandleLocalCallerDied(const sptr<IRemoteObject>& c
             }
             callerMap_.erase(it);
             HILOGI("remove connection success");
+        } else {
+            HILOGW("HandleLocalCallerDied connect not found");
+            return;
         }
     }
     {
@@ -813,7 +816,8 @@ void DistributedSchedService::ProcessCalleeDied(const sptr<IRemoteObject>& conne
             callbackWrapper = itConnect->second.callbackWrapper;
             calleeMap_.erase(itConnect);
         } else {
-            HILOGD("ProcessCalleeDied connect not found");
+            HILOGW("ProcessCalleeDied connect not found");
+            return;
         }
     }
     UnregisterAppStateObserver(callbackWrapper);
@@ -895,6 +899,9 @@ void DistributedSchedService::RemoveCallerComponent(const sptr<IRemoteObject>& c
             }
             callerMap_.erase(it);
             HILOGI("remove connection success");
+        } else {
+            HILOGW("RemoveCallerComponent connect not found");
+            return;
         }
     }
     {
