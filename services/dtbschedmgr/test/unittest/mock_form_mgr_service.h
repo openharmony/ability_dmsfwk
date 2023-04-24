@@ -177,7 +177,11 @@ public:
     bool CheckFMSReady() override
     {
         return false;
-    }
+    };
+    int32_t SetBackgroundFunction(const std::string method, const std::string params) override
+    {
+        return ERR_OK;
+    };
     int32_t GetFormsCount(bool isTempFormFlag, int32_t &formCount) override
     {
         return ERR_OK;
