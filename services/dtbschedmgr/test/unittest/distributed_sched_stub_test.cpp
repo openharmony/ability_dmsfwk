@@ -2056,5 +2056,33 @@ HWTEST_F(DistributedSchedStubTest, NotifyStateChangedFromRemoteInner_002, TestSi
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     DTEST_LOG << "DistributedSchedStubTest NotifyStateChangedFromRemoteInner_002 end" << std::endl;
 }
+
+/**
+ * @tc.name: StopRemoteExtensionAbilityInner_002
+ * @tc.desc: check StopRemoteExtensionAbilityInner
+ * @tc.type: FUNC
+ * @tc.require: I6YLV1
+ */
+HWTEST_F(DistributedSchedStubTest, StopRemoteExtensionAbilityInner_002, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest StopRemoteExtensionAbilityInner_002 begin" << std::endl;
+    int32_t code = DistributedSchedStub::STOP_REMOTE_EXTERNSION_ABILITY;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+
+    data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    Want want;
+    data.WriteParcelable(&want);
+    int32_t callingUid = 0;
+    data.WriteInt32(callingUid);
+    uint32_t accessToken = GetSelfTokenID();
+    data.WriteUint32(accessToken);
+    int32_t serviceType = 0;
+    data.WriteInt32(serviceType);
+    int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedStubTest StopRemoteExtensionAbilityInner_002 end" << std::endl;
+}
 }
 }

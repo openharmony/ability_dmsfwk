@@ -18,6 +18,7 @@
 #define protected public
 #include "gtest/gtest.h"
 
+#include "ability_connection_wrapper_stub.h"
 #include "bundle/bundle_manager_internal.h"
 #include "device_manager.h"
 #include "distributed_sched_permission.h"
@@ -61,6 +62,8 @@ namespace {
     const string ABILITY_NAME = "com.ohos.launcher.MainAbility";
     const string BUNDLE_NAME = "com.ohos.launcher";
     const string DMS_IS_CALLER_BACKGROUND = "dmsIsCallerBackGround";
+    const string DMS_VERSION_ID = "dmsVersion";
+    const string DMS_VERSION = "4.0.0";
     constexpr int32_t SLEEP_TIME = 1000;
     constexpr int32_t FOREGROUND = 2;
 }
@@ -1767,6 +1770,162 @@ HWTEST_F(DistributedSchedServiceTest, NotifyStateChangedFromRemote_006, TestSize
 }
 
 /**
+ * @tc.name: StartAbilityByCallFromRemote_003
+ * @tc.desc: call StartAbilityByCallFromRemote
+ * @tc.type: FUNC
+ * @tc.require: I6YLV1
+ */
+HWTEST_F(DistributedSchedServiceTest, StartAbilityByCallFromRemote_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StartAbilityByCallFromRemote_003 start" << std::endl;
+    AAFwk::Want want;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    AppExecFwk::ElementName element(localDeviceId, "com.third.hiworld.example",
+        "bmsThirdBundle");
+    want.SetElement(element);
+    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
+    CallerInfo callerInfo;
+    bool result = BundleManagerInternal::GetCallerAppIdFromBms("com.third.hiworld.example", callerInfo.callerAppId);
+    EXPECT_EQ(result, true);
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = localDeviceId;
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
+    sptr<IRemoteObject> callbackWrapper = new AbilityConnectionWrapperStub(connect, localDeviceId);
+    ConnectInfo connectInfo {callerInfo, callbackWrapper, want.GetElement()};
+    DistributedSchedService::GetInstance().calleeMap_[connect] = connectInfo;
+    int ret = DistributedSchedService::GetInstance().StartAbilityByCallFromRemote(want, connect,
+        callerInfo, accountInfo);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest StartAbilityByCallFromRemote_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartAbilityByCallFromRemote_004
+ * @tc.desc: call StartAbilityByCallFromRemote
+ * @tc.type: FUNC
+ * @tc.require: I6YLV1
+ */
+HWTEST_F(DistributedSchedServiceTest, StartAbilityByCallFromRemote_004, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StartAbilityByCallFromRemote_004 start" << std::endl;
+    AAFwk::Want want;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    AppExecFwk::ElementName element(localDeviceId, "com.third.hiworld.example",
+        "bmsThirdBundle");
+    want.SetElement(element);
+    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
+    CallerInfo callerInfo;
+    bool result = BundleManagerInternal::GetCallerAppIdFromBms("com.third.hiworld.example", callerInfo.callerAppId);
+    EXPECT_EQ(result, true);
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = localDeviceId;
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
+    int ret = DistributedSchedService::GetInstance().StartAbilityByCallFromRemote(want, connect,
+        callerInfo, accountInfo);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest StartAbilityByCallFromRemote_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleLocalCallerDied_001
+ * @tc.desc: call HandleLocalCallerDied
+ * @tc.type: FUNC
+ * @tc.require: I6YLV1
+ */
+HWTEST_F(DistributedSchedServiceTest, HandleLocalCallerDied_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceTest HandleLocalCallerDied_001 start" << std::endl;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    std::list<ConnectAbilitySession> sessionsList;
+    DistributedSchedService::GetInstance().callerMap_[connect] = sessionsList;
+    DistributedSchedService::GetInstance().callMap_[0] = {connect, localDeviceId};
+    DistributedSchedService::GetInstance().HandleLocalCallerDied(connect);
+    DistributedSchedService::GetInstance().callerMap_.clear();
+    EXPECT_TRUE(DistributedSchedService::GetInstance().callerMap_.empty());
+    DistributedSchedService::GetInstance().callMap_.clear();
+    EXPECT_TRUE(DistributedSchedService::GetInstance().callMap_.empty());
+    DTEST_LOG << "DistributedSchedServiceTest HandleLocalCallerDied_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProcessCalleeDied_001
+ * @tc.desc: call ProcessCalleeDied
+ * @tc.type: FUNC
+ * @tc.require: I6YLV1
+ */
+HWTEST_F(DistributedSchedServiceTest, ProcessCalleeDied_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProcessCalleeDied_001 start" << std::endl;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    DistributedSchedService::GetInstance().ProcessCalleeDied(connect);
+    DistributedSchedService::GetInstance().calleeMap_.clear();
+    EXPECT_TRUE(DistributedSchedService::GetInstance().calleeMap_.empty());
+    DTEST_LOG << "DistributedSchedServiceTest ProcessCalleeDied_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: RemoveCallerComponent_001
+ * @tc.desc: call RemoveCallerComponent
+ * @tc.type: FUNC
+ * @tc.require: I6YLV1
+ */
+HWTEST_F(DistributedSchedServiceTest, RemoveCallerComponent_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceTest RemoveCallerComponent_001 start" << std::endl;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    std::list<ConnectAbilitySession> sessionsList;
+    DistributedSchedService::GetInstance().callerMap_[connect] = sessionsList;
+    DistributedSchedService::GetInstance().callMap_[0] = {connect, localDeviceId};
+    DistributedSchedService::GetInstance().RemoveCallerComponent(connect);
+    DistributedSchedService::GetInstance().callerMap_.clear();
+    EXPECT_TRUE(DistributedSchedService::GetInstance().callerMap_.empty());
+    DistributedSchedService::GetInstance().callMap_.clear();
+    EXPECT_TRUE(DistributedSchedService::GetInstance().callMap_.empty());
+    DTEST_LOG << "DistributedSchedServiceTest RemoveCallerComponent_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProcessCalleeOffline_001
+ * @tc.desc: call ProcessCalleeOffline
+ * @tc.type: FUNC
+ * @tc.require: I6YLV1
+ */
+HWTEST_F(DistributedSchedServiceTest, ProcessCalleeOffline_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ProcessCalleeOffline_001 start" << std::endl;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    std::list<ConnectAbilitySession> sessionsList;
+    DistributedSchedService::GetInstance().callerMap_[connect] = sessionsList;
+    DistributedSchedService::GetInstance().callMap_[0] = {connect, localDeviceId};
+    DistributedSchedService::GetInstance().ProcessCalleeOffline(REMOTE_DEVICEID);
+
+    sptr<IRemoteObject> mockConnect;
+    DistributedSchedService::GetInstance().callerMap_[mockConnect] = sessionsList;
+    DistributedSchedService::GetInstance().ProcessCalleeOffline(localDeviceId);
+    DistributedSchedService::GetInstance().callerMap_.clear();
+    EXPECT_TRUE(DistributedSchedService::GetInstance().callerMap_.empty());
+    DistributedSchedService::GetInstance().callMap_.clear();
+    EXPECT_TRUE(DistributedSchedService::GetInstance().callMap_.empty());
+    DTEST_LOG << "DistributedSchedServiceTest ProcessCalleeOffline_001 end" << std::endl;
+}
+
+/**
  * @tc.name: ConnectAbilityFromRemote_001
  * @tc.desc: test ConnectAbilityFromRemote
  * @tc.type: FUNC
@@ -2238,6 +2397,64 @@ HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_003, TestSi
     EXPECT_EQ(proxy->StopExtensionAbilityFromRemote(remoteWant, callerInfo,
         accountInfo, extensionType), IPC_STUB_UNKNOW_TRANS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: StopExtensionAbilityFromRemote_004
+ * @tc.desc: call StopExtensionAbilityFromRemote
+ * @tc.type: FUNC
+ * @tc.require: I6YLV1
+ */
+HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_004, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_004 start" << std::endl;
+    AAFwk::Want want;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME,
+        ABILITY_NAME);
+    want.SetElement(element);
+    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
+    AppExecFwk::AbilityInfo abilityInfo;
+    abilityInfo.permissions.clear();
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = LOCAL_DEVICEID;
+    bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
+    EXPECT_TRUE(result);
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
+    int32_t extensionType = 3;
+    int ret = DistributedSchedService::GetInstance().StopExtensionAbilityFromRemote(want, callerInfo,
+        accountInfo, extensionType);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: StopRemoteExtensionAbility_003
+ * @tc.desc: call StopRemoteExtensionAbility
+ * @tc.type: FUNC
+ * @tc.require: I6YLV1
+ */
+HWTEST_F(DistributedSchedServiceTest, StopRemoteExtensionAbility_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StopRemoteExtensionAbility_003 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    AAFwk::Want want;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME,
+        ABILITY_NAME);
+    want.SetElement(element);
+    int32_t extensionType = 3;
+    int result = proxy->StopRemoteExtensionAbility(want, 0, 0, extensionType);
+    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedServiceTest StopRemoteExtensionAbility_003 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
