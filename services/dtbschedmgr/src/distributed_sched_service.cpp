@@ -785,7 +785,6 @@ void DistributedSchedService::HandleLocalCallerDied(const sptr<IRemoteObject>& c
             HILOGI("remove connection success");
         } else {
             HILOGW("HandleLocalCallerDied connect not found");
-            return;
         }
     }
     {
@@ -901,7 +900,6 @@ void DistributedSchedService::RemoveCallerComponent(const sptr<IRemoteObject>& c
             HILOGI("remove connection success");
         } else {
             HILOGW("RemoveCallerComponent connect not found");
-            return;
         }
     }
     {
