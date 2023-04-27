@@ -1659,7 +1659,7 @@ HWTEST_F(DistributedSchedServiceTest, GetAppManager_001, TestSize.Level3)
  * @tc.name: NotifyStateChanged_002
  * @tc.desc: test NotifyStateChanged
  * @tc.type: FUNC
- * @tc.require: I6VDBO 
+ * @tc.require: I6VDBO
  */
 HWTEST_F(DistributedSchedServiceTest, NotifyStateChanged_002, TestSize.Level3)
 {
@@ -1683,7 +1683,7 @@ HWTEST_F(DistributedSchedServiceTest, NotifyStateChanged_002, TestSize.Level3)
  * @tc.name: NotifyStateChanged_003
  * @tc.desc: test NotifyStateChanged
  * @tc.type: FUNC
- * @tc.require: I6VDBO 
+ * @tc.require: I6VDBO
  */
 HWTEST_F(DistributedSchedServiceTest, NotifyStateChanged_003, TestSize.Level3)
 {
@@ -1727,7 +1727,7 @@ HWTEST_F(DistributedSchedServiceTest, NotifyStateChangedFromRemote_004, TestSize
  * @tc.name: NotifyStateChangedFromRemote_005
  * @tc.desc: test NotifyStateChangedFromRemote
  * @tc.type: FUNC
- * @tc.require: I6VDBO 
+ * @tc.require: I6VDBO
  */
 HWTEST_F(DistributedSchedServiceTest, NotifyStateChangedFromRemote_005, TestSize.Level3)
 {
@@ -1750,7 +1750,7 @@ HWTEST_F(DistributedSchedServiceTest, NotifyStateChangedFromRemote_005, TestSize
  * @tc.name: NotifyStateChangedFromRemote_006
  * @tc.desc: test NotifyStateChangedFromRemote
  * @tc.type: FUNC
- * @tc.require: I6VDBO 
+ * @tc.require: I6VDBO
  */
 HWTEST_F(DistributedSchedServiceTest, NotifyStateChangedFromRemote_006, TestSize.Level3)
 {
