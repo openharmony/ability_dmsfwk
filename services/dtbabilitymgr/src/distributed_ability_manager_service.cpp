@@ -283,11 +283,11 @@ int32_t DistributedAbilityManagerService::UpdateConnectStatus(int32_t token, con
     if (!IsTokenRegistered(accessToken, token)) {
         return TOKEN_HAS_NOT_REGISTERED;
     }
-    if (!IsNotifierRegistered(token)) {
-        return CALLBACK_HAS_NOT_REGISTERED;
-    }
     {
         std::lock_guard<std::mutex> callbackMapLock(callbackMapMutex_);
+        if (!IsNotifierRegistered(token)) {
+            return CALLBACK_HAS_NOT_REGISTERED;
+        }
         std::shared_ptr<ConnectStatusInfo> connectStatusInfo =
             std::make_shared<ConnectStatusInfo>(deviceId, deviceConnectStatus);
         callbackMap_[token]->SetConnectStatusInfo(connectStatusInfo);
@@ -316,8 +316,11 @@ int32_t DistributedAbilityManagerService::StartDeviceManager(
     if (!IsTokenRegistered(accessToken, token)) {
         return TOKEN_HAS_NOT_REGISTERED;
     }
-    if (!IsNotifierRegistered(token)) {
-        return CALLBACK_HAS_NOT_REGISTERED;
+    {
+        std::lock_guard<std::mutex> callbackMapLock(callbackMapMutex_);
+        if (!IsNotifierRegistered(token)) {
+            return CALLBACK_HAS_NOT_REGISTERED;
+        }
     }
     // 1. connect to app and get the app proxy if appProxy_ is null, otherwise start device manager directly.
     {
