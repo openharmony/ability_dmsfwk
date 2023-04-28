@@ -195,7 +195,7 @@ public:
     {
         return 0;
     }
-    int32_t GetFormInstancesById(const int64_t formId, std::vector<FormInstance> &formInstances) override
+    int32_t GetFormInstanceById(const int64_t formId, FormInstance &formInstance) override
     {
         return 0;
     }
