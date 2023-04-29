@@ -24,6 +24,7 @@
 #endif
 #include "parcel_helper.h"
 #include "string_ex.h"
+#include "distributedWant/distributed_want.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -65,6 +66,7 @@ int32_t DistributedSchedProxy::StartAbilityFromRemote(const OHOS::AAFwk::Want& w
     const OHOS::AppExecFwk::AbilityInfo& abilityInfo, int32_t requestCode,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo)
 {
+    HILOGI("StartAbilityFromRemote called");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGE("StartAbilityFromRemote remote service null");
@@ -74,7 +76,8 @@ int32_t DistributedSchedProxy::StartAbilityFromRemote(const OHOS::AAFwk::Want& w
     if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
         return ERR_FLATTEN_OBJECT;
     }
-    PARCEL_WRITE_HELPER(data, Parcelable, &want);
+    DistributedWant dstbWant(want);
+    PARCEL_WRITE_HELPER(data, Parcelable, &dstbWant);
     AppExecFwk::CompatibleAbilityInfo compatibleAbilityInfo;
     abilityInfo.ConvertToCompatiableAbilityInfo(compatibleAbilityInfo);
     PARCEL_WRITE_HELPER(data, Parcelable, &compatibleAbilityInfo);
@@ -99,6 +102,7 @@ int32_t DistributedSchedProxy::StartAbilityFromRemote(const OHOS::AAFwk::Want& w
 int32_t DistributedSchedProxy::SendResultFromRemote(OHOS::AAFwk::Want& want, int32_t requestCode,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t resultCode)
 {
+    HILOGI("SendResultFromRemote called");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGE("SendResultFromRemote remote service null");
@@ -108,7 +112,8 @@ int32_t DistributedSchedProxy::SendResultFromRemote(OHOS::AAFwk::Want& want, int
     if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
         return ERR_FLATTEN_OBJECT;
     }
-    PARCEL_WRITE_HELPER(data, Parcelable, &want);
+    DistributedWant dstbWant(want);
+    PARCEL_WRITE_HELPER(data, Parcelable, &dstbWant);
     PARCEL_WRITE_HELPER(data, Int32, requestCode);
     PARCEL_WRITE_HELPER(data, Int32, callerInfo.uid);
     PARCEL_WRITE_HELPER(data, String, callerInfo.sourceDeviceId);
@@ -257,6 +262,7 @@ int32_t DistributedSchedProxy::ConnectAbilityFromRemote(const OHOS::AAFwk::Want&
     const AppExecFwk::AbilityInfo& abilityInfo, const sptr<IRemoteObject>& connect,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo)
 {
+    HILOGI("ConnectAbilityFromRemote called");
     if (connect == nullptr) {
         HILOGE("ConnectAbilityFromRemote connect is null");
         return ERR_NULL_OBJECT;
@@ -271,7 +277,8 @@ int32_t DistributedSchedProxy::ConnectAbilityFromRemote(const OHOS::AAFwk::Want&
     if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
         return ERR_FLATTEN_OBJECT;
     }
-    PARCEL_WRITE_HELPER(data, Parcelable, &want);
+    DistributedWant dstbWant(want);
+    PARCEL_WRITE_HELPER(data, Parcelable, &dstbWant);
     AppExecFwk::CompatibleAbilityInfo compatibleAbilityInfo;
     abilityInfo.ConvertToCompatiableAbilityInfo(compatibleAbilityInfo);
     PARCEL_WRITE_HELPER(data, Parcelable, &compatibleAbilityInfo);
@@ -629,6 +636,7 @@ int32_t DistributedSchedProxy::ReleaseRemoteAbility(const sptr<IRemoteObject>& c
 int32_t DistributedSchedProxy::StartAbilityByCallFromRemote(const OHOS::AAFwk::Want& want,
     const sptr<IRemoteObject>& connect, const CallerInfo& callerInfo, const AccountInfo& accountInfo)
 {
+    HILOGI("StartAbilityByCallFromRemote called");
     if (connect == nullptr) {
         HILOGE("StartAbilityByCallFromRemote connect is null");
         return ERR_NULL_OBJECT;
@@ -657,7 +665,8 @@ int32_t DistributedSchedProxy::StartAbilityByCallFromRemote(const OHOS::AAFwk::W
     }
     std::string extraInfo = extraInfoJson.dump();
     PARCEL_WRITE_HELPER(data, String, extraInfo);
-    PARCEL_WRITE_HELPER(data, Parcelable, &want);
+    DistributedWant dstbWant(want);
+    PARCEL_WRITE_HELPER(data, Parcelable, &dstbWant);
     MessageParcel reply;
     HITRACE_METER_NAME(TraceTag::DSCHED, TraceValue::REMOTE_PROCEDURE_CALL);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, START_ABILITY_BY_CALL_FROM_REMOTE, data, reply);
@@ -725,7 +734,7 @@ int32_t DistributedSchedProxy::StartRemoteFreeInstall(const OHOS::AAFwk::Want& w
 
 int32_t DistributedSchedProxy::StartFreeInstallFromRemote(const FreeInstallInfo& info, int64_t taskId)
 {
-    HILOGD("called.");
+    HILOGI("StartFreeInstallFromRemote called.");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGE("remote is null");
@@ -738,14 +747,15 @@ int32_t DistributedSchedProxy::StartFreeInstallFromRemote(const FreeInstallInfo&
         return ERR_FLATTEN_OBJECT;
     }
 
-    PARCEL_WRITE_HELPER(data, Parcelable, &info.want);
+    DistributedWant dstbWant(info.want);
+    PARCEL_WRITE_HELPER(data, Parcelable, &dstbWant);
     PARCEL_WRITE_HELPER(data, Int32, info.callerInfo.uid);
     PARCEL_WRITE_HELPER(data, String, info.callerInfo.sourceDeviceId);
     PARCEL_WRITE_HELPER(data, Int32, info.accountInfo.accountType);
     PARCEL_WRITE_HELPER(data, StringVector, info.accountInfo.groupIdList);
     PARCEL_WRITE_HELPER(data, String, info.callerInfo.callerAppId);
     PARCEL_WRITE_HELPER(data, Int64, taskId);
-    OHOS::AAFwk::Want cmpWant;
+    OHOS::AAFwk::DistributedWant cmpWant;
     cmpWant.SetParam(CMPT_PARAM_FREEINSTALL_BUNDLENAMES, info.callerInfo.bundleNames);
     PARCEL_WRITE_HELPER(data, Parcelable, &cmpWant);
     nlohmann::json extraInfoJson;
@@ -914,6 +924,7 @@ int32_t DistributedSchedProxy::StopRemoteExtensionAbility(
 int32_t DistributedSchedProxy::StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& want,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t extensionType)
 {
+    HILOGI("StopExtensionAbilityFromRemote called");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGE("StopExtensionAbilityFromRemote remote service null");
@@ -924,7 +935,8 @@ int32_t DistributedSchedProxy::StopExtensionAbilityFromRemote(const OHOS::AAFwk:
         HILOGE("StopExtensionAbilityFromRemote WriteInterfaceToken failed");
         return ERR_FLATTEN_OBJECT;
     }
-    PARCEL_WRITE_HELPER(data, Parcelable, &want);
+    DistributedWant dstbWant(want);
+    PARCEL_WRITE_HELPER(data, Parcelable, &dstbWant);
     PARCEL_WRITE_HELPER(data, Int32, extensionType);
     PARCEL_WRITE_HELPER(data, Int32, callerInfo.uid);
     PARCEL_WRITE_HELPER(data, String, callerInfo.sourceDeviceId);
