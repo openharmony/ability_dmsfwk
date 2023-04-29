@@ -30,10 +30,13 @@ config("test_config") {
   include_dirs = [
     "//foundation/ability/dmsfwk/utils/native/include",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/unittest",
+    "//foundation/ability/ability_base/interfaces/kits/native/want/include",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/include/distributedWant",
   ]
 }
 
 dsched_external_deps = [
+  "ability_base:base",
   "ability_base:want",
   "ability_base:zuri",
   "ability_runtime:ability_manager",
@@ -98,6 +101,11 @@ dtbschedmgr_sources = [
   "${distributed_service}/dtbschedmgr/src/deviceManager/dms_device_info.cpp",
   "${distributed_service}/dtbschedmgr/src/dfx/dms_hisysevent_report.cpp",
   "${distributed_service}/dtbschedmgr/src/dfx/dms_hitrace_chain.cpp",
+  "${distributed_service}/dtbschedmgr/src/distributedWant/distributed_operation.cpp",
+  "${distributed_service}/dtbschedmgr/src/distributedWant/distributed_operation_builder.cpp",
+  "${distributed_service}/dtbschedmgr/src/distributedWant/distributed_want.cpp",
+  "${distributed_service}/dtbschedmgr/src/distributedWant/distributed_want_params.cpp",
+  "${distributed_service}/dtbschedmgr/src/distributedWant/distributed_want_params_wrapper.cpp",
   "${distributed_service}/dtbschedmgr/src/distributed_device_node_listener.cpp",
   "${distributed_service}/dtbschedmgr/src/distributed_sched_adapter.cpp",
   "${distributed_service}/dtbschedmgr/src/distributed_sched_continuation.cpp",
@@ -376,6 +384,24 @@ ohos_unittest("distributeduidtest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("distributedwanttest") {
+  module_out_path = module_output_path
+
+  sources = [ "unittest/distributedWant/distributed_want_test.cpp" ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 ohos_unittest("dmsbasetest") {
   module_out_path = module_output_path
   sources = [
@@ -405,6 +431,7 @@ group("unittest") {
     ":distributedcalltest",
     ":distributedschedsvrtest",
     ":distributeduidtest",
+    ":distributedwanttest",
     ":dmsbasetest",
     ":dmsfreeinstallcbtest",
     ":dschedconnecttest",
