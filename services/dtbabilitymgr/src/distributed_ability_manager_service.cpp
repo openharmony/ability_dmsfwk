@@ -68,7 +68,7 @@ void DistributedAbilityManagerService::OnStart()
     }
     notifierDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new NotifierDeathRecipient());
     if (continuationHandler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create("continuation_manager");
+        auto runner = AppExecFwk::EventRunner::Create("ContinuationMgr");
         continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
     Publish(this);
