@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,60 +18,72 @@ START_REMOTE_ABILITY:
   CALLING_TYPE: {type: STRING, desc: calling type}
   CALLING_UID: {type: INT32, desc: calling uid}
   CALLING_PID: {type: INT32, desc: calling pid}
-  TARGET_BUNDLE: {type: STRING, desc: target bundle name}
-  TARGET_ABILITY: {type: STRING, desc: target ability name}
+  CALLEE_BUNDLE: {type: STRING, desc: callee bundle name}
+  CALLEE_ABILITY: {type: STRING, desc: callee ability name}
   CALLING_APP_UID: {type: INT32, desc: calling app uid}
   RESULT: {type: INT32, desc: result code}
+  CALLER_BUNDLE: {type: STRING, desc: caller bundle name}
+  VERSION: {type: STRING, desc: caller bundle version}
 
 CONNECT_REMOTE_ABILITY:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: connect, desc: connect remote ability}
   CALLING_TYPE: {type: STRING, desc: calling type}
   CALLING_UID: {type: INT32, desc: calling uid}
   CALLING_PID: {type: INT32, desc: calling pid}
-  TARGET_BUNDLE: {type: STRING, desc: target bundle name}
-  TARGET_ABILITY: {type: STRING, desc: target ability name}
+  CALLEE_BUNDLE: {type: STRING, desc: callee bundle name}
+  CALLEE_ABILITY: {type: STRING, desc: callee ability name}
   CALLING_APP_UID: {type: INT32, desc: calling app uid}
   RESULT: {type: INT32, desc: result code}
+  CALLER_BUNDLE: {type: STRING, desc: caller bundle name}
+  VERSION: {type: STRING, desc: caller bundle version}
 
 DISCONNECT_REMOTE_ABILITY:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: connect, desc: disconnect remote ability}
   CALLING_TYPE: {type: STRING, desc: calling type}
   CALLING_UID: {type: INT32, desc: calling uid}
   CALLING_PID: {type: INT32, desc: calling pid}
-  TARGET_BUNDLE: {type: STRING, desc: target bundle name}
-  TARGET_ABILITY: {type: STRING, desc: target ability name}
+  CALLEE_BUNDLE: {type: STRING, desc: callee bundle name}
+  CALLEE_ABILITY: {type: STRING, desc: callee ability name}
   CALLING_APP_UID: {type: INT32, desc: calling app uid}
   RESULT: {type: INT32, desc: result code}
+  CALLER_BUNDLE: {type: STRING, desc: caller bundle name}
+  VERSION: {type: STRING, desc: caller bundle version}
 
 START_REMOTE_ABILITY_BYCALL:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: start, desc: start remote ability by call}
   CALLING_TYPE: {type: STRING, desc: calling type}
   CALLING_UID: {type: INT32, desc: calling uid}
   CALLING_PID: {type: INT32, desc: calling pid}
-  TARGET_BUNDLE: {type: STRING, desc: target bundle name}
-  TARGET_ABILITY: {type: STRING, desc: target ability name}
+  CALLEE_BUNDLE: {type: STRING, desc: callee bundle name}
+  CALLEE_ABILITY: {type: STRING, desc: callee ability name}
   CALLING_APP_UID: {type: INT32, desc: calling app uid}
   RESULT: {type: INT32, desc: result code}
+  CALLER_BUNDLE: {type: STRING, desc: caller bundle name}
+  VERSION: {type: STRING, desc: caller bundle version}
 
 RELEASE_REMOTE_ABILITY:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: start, desc: release remote ability}
   CALLING_TYPE: {type: STRING, desc: calling type}
   CALLING_UID: {type: INT32, desc: calling uid}
   CALLING_PID: {type: INT32, desc: calling pid}
-  TARGET_BUNDLE: {type: STRING, desc: target bundle name}
-  TARGET_ABILITY: {type: STRING, desc: target ability name}
+  CALLEE_BUNDLE: {type: STRING, desc: callee bundle name}
+  CALLEE_ABILITY: {type: STRING, desc: callee ability name}
   CALLING_APP_UID: {type: INT32, desc: calling app uid}
   RESULT: {type: INT32, desc: result code}
+  CALLER_BUNDLE: {type: STRING, desc: caller bundle name}
+  VERSION: {type: STRING, desc: caller bundle version}
 
 START_CONTINUATION:
   __BASE: {type: BEHAVIOR, level: MINOR, tag: continue, desc: start continuation}
   CALLING_TYPE: {type: STRING, desc: calling type}
   CALLING_UID: {type: INT32, desc: calling uid}
   CALLING_PID: {type: INT32, desc: calling pid}
-  TARGET_BUNDLE: {type: STRING, desc: target bundle name}
-  TARGET_ABILITY: {type: STRING, desc: target ability name}
+  CALLEE_BUNDLE: {type: STRING, desc: callee bundle name}
+  CALLEE_ABILITY: {type: STRING, desc: callee ability name}
   CALLING_APP_UID: {type: INT32, desc: calling app uid}
   RESULT: {type: INT32, desc: result code}
+  CALLER_BUNDLE: {type: STRING, desc: caller bundle name}
+  VERSION: {type: STRING, desc: caller bundle version}
 
 
 START_ABILITY_FAILED:
