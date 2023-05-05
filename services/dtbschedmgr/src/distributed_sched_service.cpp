@@ -81,9 +81,10 @@ const std::string DEVICE_TYPE_KEY = "deviceType";
 const std::string CHANGE_TYPE_KEY = "changeType";
 const std::string DMS_HIPLAY_ACTION = "ohos.ability.action.deviceSelect";
 const std::string DMS_VERSION_ID = "dmsVersion";
+const std::string DMS_CONNECT_TOKEN = "connectToken";
 const std::string DMS_VERSION = "4.0.0";
 const std::string DMS_MISSION_ID = "dmsMissionId";
-constexpr int32_t DEFAULT_DMS_MISSION_ID = -1;
+constexpr int32_t DEFAULT_DMS_CONNECT_TOKEN = -1;
 constexpr int32_t BIND_CONNECT_RETRY_TIMES = 3;
 constexpr int32_t BIND_CONNECT_TIMEOUT = 500; // 500ms
 constexpr int32_t MAX_DISTRIBUTED_CONNECT_NUM = 600;
@@ -97,6 +98,7 @@ constexpr int32_t SEND_RESULT_PERMISSION = 2;
 constexpr int64_t CONTINUATION_TIMEOUT = 20000; // 20s
 // BundleDistributedManager set timeout to 3s, so we set 1s longer
 constexpr int64_t CHECK_REMOTE_INSTALL_ABILITY = 40000;
+constexpr int32_t MAX_TOKEN_NUM = 100000000;
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedService);
@@ -790,7 +792,7 @@ void DistributedSchedService::HandleLocalCallerDied(const sptr<IRemoteObject>& c
     {
         std::lock_guard<std::mutex> autoLock(callLock_);
         for (auto iter = callMap_.begin(); iter != callMap_.end(); iter++) {
-            if (iter->second.connect == connect) {
+            if (iter->first == connect) {
                 callMap_.erase(iter);
                 HILOGI("remove callMap_ connect success");
                 break;
@@ -822,6 +824,24 @@ void DistributedSchedService::ProcessCalleeDied(const sptr<IRemoteObject>& conne
     UnregisterAppStateObserver(callbackWrapper);
 }
 
+void DistributedSchedService::ProcessCallResult(const sptr<IRemoteObject>& calleeConnect,
+    const sptr<IRemoteObject>& callerConnect)
+{
+    sptr<IRemoteObject> token;
+    AbilityManagerClient::GetInstance()->GetAbilityTokenByCalleeObj(calleeConnect, token);
+    if (token == nullptr) {
+        return;
+    }
+    std::lock_guard<std::mutex> autoLock(observerLock_);
+    for (auto iter = observerMap_.begin(); iter != observerMap_.end(); iter++) {
+        if (iter->second.srcConnect == callerConnect) {
+            iter->second.token = token;
+            return;
+        }
+    }
+    HILOGE("observerMap can not find callerConnect");
+}
+
 int32_t DistributedSchedService::TryStartRemoteAbilityByCall(const OHOS::AAFwk::Want& want,
     const sptr<IRemoteObject>& connect, const CallerInfo& callerInfo)
 {
@@ -840,7 +860,11 @@ int32_t DistributedSchedService::TryStartRemoteAbilityByCall(const OHOS::AAFwk::
         HILOGE("GetAccountInfo failed");
         return ret;
     }
-    int32_t result = remoteDms->StartAbilityByCallFromRemote(want, connect, callerInfo, accountInfo);
+    AAFwk::Want remoteWant = want;
+    int32_t connectToken = SaveConnectToken(want, connect);
+    remoteWant.SetParam(DMS_CONNECT_TOKEN, connectToken);
+    HILOGD("connectToken is %{public}d", connectToken);
+    int32_t result = remoteDms->StartAbilityByCallFromRemote(remoteWant, connect, callerInfo, accountInfo);
     HILOGD("[PerformanceTest] TryStartRemoteAbilityByCall RPC end");
     if (result == ERR_OK) {
         SaveCallerComponent(want, connect, callerInfo);
@@ -853,35 +877,26 @@ int32_t DistributedSchedService::TryStartRemoteAbilityByCall(const OHOS::AAFwk::
 void DistributedSchedService::SaveCallerComponent(const OHOS::AAFwk::Want& want,
     const sptr<IRemoteObject>& connect, const CallerInfo& callerInfo)
 {
-    int32_t missionId = want.GetIntParam(DMS_MISSION_ID, DEFAULT_DMS_MISSION_ID);
-    HILOGD("Get missionId = %{public}d", missionId);
-    {
-        std::lock_guard<std::mutex> autoLock(callLock_);
-        callMap_[missionId] = {connect, want.GetElement().GetDeviceID()};
-        HILOGI("add connect success");
+    std::lock_guard<std::mutex> autoLock(callerLock_);
+    auto itConnect = callerMap_.find(connect);
+    if (itConnect == callerMap_.end()) {
+        connect->AddDeathRecipient(callerDeathRecipientForLocalDevice_);
+        ReportDistributedComponentChange(callerInfo, DISTRIBUTED_COMPONENT_ADD, IDistributedSched::CALL,
+            IDistributedSched::CALLER);
     }
-    {
-        std::lock_guard<std::mutex> autoLock(callerLock_);
-        auto itConnect = callerMap_.find(connect);
-        if (itConnect == callerMap_.end()) {
-            connect->AddDeathRecipient(callerDeathRecipientForLocalDevice_);
-            ReportDistributedComponentChange(callerInfo, DISTRIBUTED_COMPONENT_ADD, IDistributedSched::CALL,
-                IDistributedSched::CALLER);
+    auto& sessionsList = callerMap_[connect];
+    std::string remoteDeviceId = want.GetElement().GetDeviceID();
+    for (auto& session : sessionsList) {
+        if (remoteDeviceId == session.GetDestinationDeviceId()) {
+            session.AddElement(want.GetElement());
+            // already added session for remote device
+            return;
         }
-        auto& sessionsList = callerMap_[connect];
-        std::string remoteDeviceId = want.GetElement().GetDeviceID();
-        for (auto& session : sessionsList) {
-            if (remoteDeviceId == session.GetDestinationDeviceId()) {
-                session.AddElement(want.GetElement());
-                // already added session for remote device
-                return;
-            }
-        }
-        // connect to another remote device, add a new session to list
-        auto& session = sessionsList.emplace_back(callerInfo.sourceDeviceId, remoteDeviceId, callerInfo);
-        session.AddElement(want.GetElement());
-        HILOGD("add connection success");
     }
+    // connect to another remote device, add a new session to list
+    auto& session = sessionsList.emplace_back(callerInfo.sourceDeviceId, remoteDeviceId, callerInfo);
+    session.AddElement(want.GetElement());
+    HILOGD("add connection success");
 }
 
 void DistributedSchedService::RemoveCallerComponent(const sptr<IRemoteObject>& connect)
@@ -905,7 +920,7 @@ void DistributedSchedService::RemoveCallerComponent(const sptr<IRemoteObject>& c
     {
         std::lock_guard<std::mutex> autoLock(callLock_);
         for (auto iter = callMap_.begin(); iter != callMap_.end(); iter++) {
-            if (iter->second.connect == connect) {
+            if (iter->first == connect) {
                 callMap_.erase(iter);
                 HILOGI("remove callMap_ connect success");
                 break;
@@ -954,6 +969,25 @@ void DistributedSchedService::ProcessCalleeOffline(const std::string& deviceId)
     }
 }
 
+int32_t DistributedSchedService::SaveConnectToken(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect)
+{
+    int32_t tToken = -1;
+    {
+        std::lock_guard<std::mutex> tokenLock(tokenMutex_);
+        tToken = token_.load();
+        if (++tToken > MAX_TOKEN_NUM) {
+            tToken = 1;
+        }
+        token_.store(tToken);
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(callLock_);
+        callMap_[connect] = {tToken, want.GetElement().GetDeviceID()};
+        HILOGI("add connect success");
+    }
+    return tToken;
+}
+
 int32_t DistributedSchedService::StartRemoteAbilityByCall(const OHOS::AAFwk::Want& want,
     const sptr<IRemoteObject>& connect, int32_t callerUid, int32_t callerPid, uint32_t accessToken)
 {
@@ -981,6 +1015,10 @@ int32_t DistributedSchedService::StartRemoteAbilityByCall(const OHOS::AAFwk::Wan
     callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     int32_t ret = TryStartRemoteAbilityByCall(want, connect, callerInfo);
     if (ret != ERR_OK) {
+        {
+            std::lock_guard<std::mutex> autoLock(callLock_);
+            callMap_.erase(connect);
+        }
         HILOGE("StartRemoteAbilityByCall result is %{public}d", ret);
     }
     return ret;
@@ -1059,7 +1097,7 @@ int32_t DistributedSchedService::StartAbilityByCallFromRemote(const OHOS::AAFwk:
             calleeMap_.emplace(connect, connectInfo);
         }
         connect->AddDeathRecipient(callerDeathRecipient_);
-        if (!RegisterAppStateObserver(want, callerInfo, callbackWrapper)) {
+        if (!RegisterAppStateObserver(want, callerInfo, connect, callbackWrapper)) {
             HILOGE("RegisterAppStateObserver failed");
         }
     }
@@ -2089,30 +2127,43 @@ int32_t DistributedSchedService::NotifyFreeInstallResult(const CallbackTaskItem 
 }
 
 bool DistributedSchedService::RegisterAppStateObserver(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
-    const sptr<IRemoteObject>& callbackWrapper)
+    const sptr<IRemoteObject>& srcConnect, const sptr<IRemoteObject>& callbackWrapper)
 {
     HILOGD("register app state observer called");
+    int32_t connectToken = want.GetIntParam(DMS_CONNECT_TOKEN, DEFAULT_DMS_CONNECT_TOKEN);
+    HILOGD("Get connectToken = %{private}d", connectToken);
+    if (connectToken == DEFAULT_DMS_CONNECT_TOKEN) {
+        return false;
+    }
     sptr<AppExecFwk::IAppMgr> appObject = GetAppManager();
     if (appObject == nullptr) {
         HILOGE("failed to get app manager service");
         return false;
     }
-    sptr<AppStateObserver> appStateObserver = sptr<AppStateObserver>(new (std::nothrow) AppStateObserver());
-    std::vector<std::string> bundleNameList = {want.GetElement().GetBundleName()};
-    int ret = appObject->RegisterApplicationStateObserver(appStateObserver, bundleNameList);
-    if (ret != ERR_OK) {
-        HILOGE("failed to register application state observer, ret = %{public}d", ret);
-        return false;
+    sptr<AppStateObserver> appStateObserver;
+    std::string bundleName = want.GetElement().GetBundleName();
+    {
+        std::lock_guard<std::mutex> autoLock(registerMutex_);
+        if (!bundleNameMap_.count(bundleName)) {
+            std::vector<std::string> bundleNameList = {bundleName};
+            appStateObserver = sptr<AppStateObserver>(new (std::nothrow) AppStateObserver());
+            bundleNameMap_[bundleName] = appStateObserver;
+            int ret = appObject->RegisterApplicationStateObserver(appStateObserver, bundleNameList);
+            if (ret != ERR_OK) {
+                HILOGE("failed to register application state observer, ret = %{public}d", ret);
+                return false;
+            }
+        }
+        appStateObserver = bundleNameMap_[bundleName];
     }
     HILOGI("register application state observer success");
     {
         std::lock_guard<std::mutex> autoLock(observerLock_);
-        int32_t missionId = want.GetIntParam(DMS_MISSION_ID, DEFAULT_DMS_MISSION_ID);
-        HILOGD("Get missionId = %{public}d", missionId);
         Want* newWant = const_cast<Want*>(&want);
         newWant->RemoveParam(DMS_MISSION_ID);
-        observerMap_[callbackWrapper] = {appStateObserver, callerInfo.sourceDeviceId, missionId,
-            want.GetElement().GetBundleName(), want.GetElement().GetAbilityName()};
+        newWant->RemoveParam(DMS_CONNECT_TOKEN);
+        observerMap_[callbackWrapper] = {appStateObserver, callerInfo.sourceDeviceId, connectToken,
+            want.GetElement().GetBundleName(), want.GetElement().GetAbilityName(), srcConnect};
         HILOGI("add observerMap_ success");
     }
     return true;
@@ -2125,6 +2176,8 @@ void DistributedSchedService::UnregisterAppStateObserver(const sptr<IRemoteObjec
         HILOGD("callbackWrapper is nullptr");
         return;
     }
+    bool unRegisterFlag = true;
+    std::string bundleName;
     sptr<AppStateObserver> appStateObserver;
     {
         std::lock_guard<std::mutex> autoLock(observerLock_);
@@ -2134,19 +2187,31 @@ void DistributedSchedService::UnregisterAppStateObserver(const sptr<IRemoteObjec
             return;
         }
         appStateObserver = it->second.appStateObserver;
+        bundleName = it->second.dstBundleName;
         observerMap_.erase(it);
+        for (auto iter = observerMap_.begin(); iter != observerMap_.end(); iter++) {
+            if (iter->second.dstBundleName == bundleName) {
+                unRegisterFlag = false;
+                break;
+            }
+        }
         HILOGI("remove app state observer success");
     }
-
-    sptr<AppExecFwk::IAppMgr> appObject = GetAppManager();
-    if (appObject == nullptr) {
-        HILOGE("failed to get app manager service");
-        return;
-    }
-    int ret = appObject->UnregisterApplicationStateObserver(appStateObserver);
-    if (ret != ERR_OK) {
-        HILOGE("failed to unregister application state observer, ret = %{public}d", ret);
-        return;
+    if (unRegisterFlag) {
+        {
+            std::lock_guard<std::mutex> autoLock(registerMutex_);
+            bundleNameMap_.erase(bundleName);
+        }
+        sptr<AppExecFwk::IAppMgr> appObject = GetAppManager();
+        if (appObject == nullptr) {
+            HILOGE("failed to get app manager service");
+            return;
+        }
+        int ret = appObject->UnregisterApplicationStateObserver(appStateObserver);
+        if (ret != ERR_OK) {
+            HILOGE("failed to unregister application state observer, ret = %{public}d", ret);
+            return;
+        }
     }
     HILOGI("unregister application state observer success");
 }
@@ -2168,54 +2233,51 @@ sptr<AppExecFwk::IAppMgr> DistributedSchedService::GetAppManager()
     return appObject;
 }
 
-int32_t DistributedSchedService::NotifyStateChanged(int32_t abilityState, AppExecFwk::ElementName& element)
+int32_t DistributedSchedService::NotifyStateChanged(int32_t abilityState, AppExecFwk::ElementName& element,
+    const sptr<IRemoteObject>& token)
 {
     std::string srcDeviceId = "";
-    int32_t missionId = 0;
+    int32_t connectToken = 0;
     {
         std::lock_guard<std::mutex> autoLock(observerLock_);
         for (auto iter = observerMap_.begin(); iter != observerMap_.end(); iter++) {
             if (iter->second.dstBundleName == element.GetBundleName() &&
-                iter->second.dstAbilityName == element.GetAbilityName()) {
+                iter->second.dstAbilityName == element.GetAbilityName() && token == iter->second.token) {
                 srcDeviceId = iter->second.srcDeviceId;
-                missionId = iter->second.srcMissionId;
+                connectToken = iter->second.connectToken;
                 HILOGD("get srcDeviceId and missionId success");
                 break;
             }
         }
     }
-    HILOGD("Get missionId = %{public}d", missionId);
-
+    HILOGD("Get connectToken = %{private}d", connectToken);
     std::string localDeviceId;
     if (!GetLocalDeviceId(localDeviceId) || !CheckDeviceId(localDeviceId, srcDeviceId)) {
         HILOGE("check deviceId failed");
         return INVALID_PARAMETERS_ERR;
     }
-
     sptr<IDistributedSched> remoteDms = GetRemoteDms(srcDeviceId);
     if (remoteDms == nullptr) {
         HILOGE("get remoteDms failed");
         return INVALID_PARAMETERS_ERR;
     }
-
     element.SetDeviceID(localDeviceId);
-
-    return remoteDms->NotifyStateChangedFromRemote(abilityState, missionId, element);
+    return remoteDms->NotifyStateChangedFromRemote(abilityState, connectToken, element);
 }
 
-int32_t DistributedSchedService::NotifyStateChangedFromRemote(int32_t abilityState, int32_t missionId,
+int32_t DistributedSchedService::NotifyStateChangedFromRemote(int32_t abilityState, int32_t connectToken,
     const AppExecFwk::ElementName& element)
 {
-    HILOGD("Get missionId = %{public}d", missionId);
+    HILOGD("Get connectToken = %{private}d", connectToken);
     sptr<IRemoteObject> connect;
     {
         std::lock_guard<std::mutex> autoLock(callLock_);
-        auto itConnect = callMap_.find(missionId);
-        if (itConnect == callMap_.end()) {
-            HILOGE("missonId is not in callMap_");
-            return INVALID_PARAMETERS_ERR;
+        for (auto iter = callMap_.begin(); iter != callMap_.end(); iter++) {
+            if (iter->second.connectToken == connectToken) {
+                connect = iter->first;
+                break;
+            }
         }
-        connect = callMap_[missionId].connect;
         HILOGD("get connect success");
     }
     if (connect == nullptr) {

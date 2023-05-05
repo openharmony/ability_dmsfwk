@@ -840,7 +840,7 @@ int32_t DistributedSchedProxy::StartShareFormFromRemote(
 }
 #endif
 
-int32_t DistributedSchedProxy::NotifyStateChangedFromRemote(int32_t abilityState, int32_t missionId,
+int32_t DistributedSchedProxy::NotifyStateChangedFromRemote(int32_t abilityState, int32_t connectToken,
     const AppExecFwk::ElementName& element)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -854,7 +854,7 @@ int32_t DistributedSchedProxy::NotifyStateChangedFromRemote(int32_t abilityState
         return ERR_FLATTEN_OBJECT;
     }
     PARCEL_WRITE_HELPER(data, Int32, abilityState);
-    PARCEL_WRITE_HELPER(data, Int32, missionId);
+    PARCEL_WRITE_HELPER(data, Int32, connectToken);
     if (!data.WriteParcelable(&element)) {
         HILOGE("NotifyStateChangedFromRemote write element error.");
         return ERR_INVALID_VALUE;

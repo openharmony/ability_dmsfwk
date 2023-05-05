@@ -64,16 +64,18 @@ struct ProcessDiedNotifyInfo {
 };
 
 struct CallInfo {
-    sptr<IRemoteObject> connect;
+    int32_t connectToken;
     std::string remoteDeviceId;
 };
 
 struct ObserverInfo {
     sptr<AppStateObserver> appStateObserver;
     std::string srcDeviceId;
-    int32_t srcMissionId;
+    int32_t connectToken;
     std::string dstBundleName;
     std::string dstAbilityName;
+    sptr<IRemoteObject> srcConnect;
+    sptr<IRemoteObject> token;
 };
 
 class DistributedSchedService : public SystemAbility, public DistributedSchedStub {
@@ -149,6 +151,7 @@ public:
 #endif
     void ProcessCallerDied(const sptr<IRemoteObject>& connect, int32_t deviceType);
     void ProcessCalleeDied(const sptr<IRemoteObject>& connect);
+    void ProcessCallResult(const sptr<IRemoteObject>& calleeConnect, const sptr<IRemoteObject>& callerConnect);
     int32_t StartRemoteFreeInstall(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t requestCode,
         uint32_t accessToken, const sptr<IRemoteObject>& callback) override;
     int32_t StartFreeInstallFromRemote(const FreeInstallInfo& info, int64_t taskId) override;
@@ -158,9 +161,10 @@ public:
     void SetContinuationTimeout(int32_t missionId, int32_t timeout);
     void RemoveContinuationTimeout(int32_t missionId);
     std::string GetContinuaitonDevice(int32_t missionId);
-    int32_t NotifyStateChangedFromRemote(int32_t abilityState, int32_t missionId,
+    int32_t NotifyStateChangedFromRemote(int32_t abilityState, int32_t connectToken,
         const AppExecFwk::ElementName& element) override;
-    int32_t NotifyStateChanged(int32_t abilityState, AppExecFwk::ElementName& element);
+    int32_t NotifyStateChanged(int32_t abilityState, AppExecFwk::ElementName& element,
+        const sptr<IRemoteObject>& token);
     int32_t StopRemoteExtensionAbility(const OHOS::AAFwk::Want& want, int32_t callerUid,
         uint32_t accessToken, int32_t extensionType) override;
     int32_t StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& remoteWant, const CallerInfo& callerInfo,
@@ -218,11 +222,12 @@ private:
     void GetCallComponentList(std::vector<std::string>& distributedComponents);
     void ProcessFreeInstallOffline(const std::string& deviceId);
     bool RegisterAppStateObserver(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
-        const sptr<IRemoteObject>& callbackWrapper);
+        const sptr<IRemoteObject>& srcConnect, const sptr<IRemoteObject>& callbackWrapper);
     void UnregisterAppStateObserver(const sptr<IRemoteObject>& callbackWrapper);
     sptr<AppExecFwk::IAppMgr> GetAppManager();
     int32_t CheckTargetPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
+    int32_t SaveConnectToken(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect);
 
     std::shared_ptr<DSchedContinuation> dschedContinuation_;
     std::map<sptr<IRemoteObject>, std::list<ConnectAbilitySession>> distributedConnectAbilityMap_;
@@ -247,7 +252,11 @@ private:
     std::mutex observerLock_;
     std::map<sptr<IRemoteObject>, ObserverInfo> observerMap_;
     std::mutex callLock_;
-    std::map<int32_t, CallInfo> callMap_;
+    std::map<sptr<IRemoteObject>, CallInfo> callMap_;
+    std::mutex tokenMutex_;
+    std::mutex registerMutex_;
+    std::atomic<int32_t> token_ {0};
+    std::map<std::string, sptr<AppStateObserver>> bundleNameMap_;
 };
 
 class ConnectAbilitySession {
