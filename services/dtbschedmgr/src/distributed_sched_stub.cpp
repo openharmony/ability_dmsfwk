@@ -216,7 +216,10 @@ int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, M
     }
 
     shared_ptr<AAFwk::DistributedWant> dstbWant(data.ReadParcelable<AAFwk::DistributedWant>());
-    shared_ptr<AAFwk::Want> want = dstbWant->ToWant();
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -283,7 +286,10 @@ int32_t DistributedSchedStub::SendResultFromRemoteInner(MessageParcel& data, Mes
         return DMS_PERMISSION_DENIED;
     }
     shared_ptr<AAFwk::DistributedWant> dstbWant(data.ReadParcelable<AAFwk::DistributedWant>());
-    shared_ptr<AAFwk::Want> want = dstbWant->ToWant();
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -475,7 +481,10 @@ int32_t DistributedSchedStub::ConnectAbilityFromRemoteInner(MessageParcel& data,
     }
 
     shared_ptr<AAFwk::DistributedWant> dstbWant(data.ReadParcelable<AAFwk::DistributedWant>());
-    shared_ptr<AAFwk::Want> want = dstbWant->ToWant();
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -875,7 +884,10 @@ int32_t DistributedSchedStub::StartAbilityByCallFromRemoteInner(MessageParcel& d
         HILOGD("parse extra info");
     }
     shared_ptr<AAFwk::DistributedWant> dstbWant(data.ReadParcelable<AAFwk::DistributedWant>());
-    shared_ptr<AAFwk::Want> want = dstbWant->ToWant();
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -1035,7 +1047,10 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
         return DMS_PERMISSION_DENIED;
     }
     shared_ptr<AAFwk::DistributedWant> dstbWant(data.ReadParcelable<AAFwk::DistributedWant>());
-    shared_ptr<AAFwk::Want> want = dstbWant->ToWant();
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGE("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -1054,7 +1069,10 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
     callerInfo.callerAppId = data.ReadString();
     PARCEL_READ_HELPER(data, Int64, taskId);
     shared_ptr<AAFwk::DistributedWant> cmpDstbWant(data.ReadParcelable<AAFwk::DistributedWant>());
-    shared_ptr<AAFwk::Want> cmpWant = cmpDstbWant->ToWant();
+    shared_ptr<AAFwk::Want> cmpWant = nullptr;
+    if (cmpDstbWant != nullptr) {
+        cmpWant = cmpDstbWant->ToWant();
+    }
     std::string extraInfo = data.ReadString();
     if (extraInfo.empty()) {
         HILOGD("extra info is empty!");
@@ -1133,7 +1151,10 @@ int32_t DistributedSchedStub::StopExtensionAbilityFromRemoteInner(MessageParcel&
         return DMS_PERMISSION_DENIED;
     }
     shared_ptr<AAFwk::DistributedWant> dstbWant(data.ReadParcelable<AAFwk::DistributedWant>());
-    shared_ptr<AAFwk::Want> want = dstbWant->ToWant();
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
