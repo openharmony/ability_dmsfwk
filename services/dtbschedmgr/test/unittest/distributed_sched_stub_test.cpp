@@ -14,6 +14,7 @@
  */
 
 #define private public
+#include "bundle/bundle_manager_internal.h"
 #include "distributed_sched_service.h"
 #undef private
 #include "distributed_sched_stub_test.h"
@@ -224,6 +225,7 @@ HWTEST_F(DistributedSchedStubTest, StartRemoteAbilityInner_003, TestSize.Level3)
  * @tc.name: StartRemoteAbilityInner_004
  * @tc.desc: check StartRemoteAbilityInner
  * @tc.type: FUNC
+ * @tc.require: I70WDT
  */
 HWTEST_F(DistributedSchedStubTest, StartRemoteAbilityInner_004, TestSize.Level3)
 {
@@ -235,8 +237,21 @@ HWTEST_F(DistributedSchedStubTest, StartRemoteAbilityInner_004, TestSize.Level3)
     
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     DistributedSchedUtil::MockPermission();
-    int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+    int32_t ret = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
+
+    Want want;
+    std::string eventName;
+    int32_t result = 0;
+    int32_t uid = -1;
+    distributedSchedStub_->ReportEvent(want, eventName, result, uid);
+
+    const std::string bundleName = "com.third.hiworld.example";
+    uid = BundleManagerInternal::GetUidFromBms(bundleName);
+    if (uid <= 0) {
+        return;
+    }
+    distributedSchedStub_->ReportEvent(want, eventName, result, uid);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedStubTest StartRemoteAbilityInner_004 end" << std::endl;
 }
 
