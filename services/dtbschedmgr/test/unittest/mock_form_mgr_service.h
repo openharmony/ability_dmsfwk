@@ -190,6 +190,15 @@ public:
     {
         return ERR_OK;
     }
+    ErrCode GetRunningFormInfos(std::vector<RunningFormInfo> &runningFormInfos) override
+    {
+        return ERR_OK;
+    }
+    ErrCode GetRunningFormInfosByBundleName(const std::string &bundleName,
+        std::vector<RunningFormInfo> &runningFormInfos) override
+    {
+        return ERR_OK;
+    }
     int32_t GetFormInstancesByFilter(const FormInstancesFilter &formInstancesFilter,
         std::vector<FormInstance> &formInstances) override
     {
