@@ -196,6 +196,7 @@ void DistributedWant::SetParameters(std::shared_ptr<Want>& want, DistributedWant
             auto param = DistributedWantParamWrapper::Unbox(IDistributedWantParams::Query(it->second));
             SetParameters(want, param);
         }
+    }
 }
 
 std::shared_ptr<Want> DistributedWant::ToWant() {
