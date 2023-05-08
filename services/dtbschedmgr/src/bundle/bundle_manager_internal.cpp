@@ -267,6 +267,20 @@ sptr<AppExecFwk::IBundleMgr> BundleManagerInternal::GetBundleManager()
     return iface_cast<AppExecFwk::IBundleMgr>(bmsProxy);
 }
 
+sptr<AppExecFwk::IDistributedBms> BundleManagerInternal::GetDistributedBundleManager()
+{
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgrProxy == nullptr) {
+        return nullptr;
+    }
+    sptr<IRemoteObject> dbmsProxy = samgrProxy->GetSystemAbility(DISTRIBUTED_BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+    if (dbmsProxy == nullptr) {
+        HILOGE("failed to get dbms from samgr");
+        return nullptr;
+    }
+    return iface_cast<AppExecFwk::IDistributedBms>(dbmsProxy);
+}
+
 int32_t BundleManagerInternal::GetUidFromBms(const std::string& bundleName)
 {
     auto bundleMgr = GetBundleManager();
@@ -280,6 +294,42 @@ int32_t BundleManagerInternal::GetUidFromBms(const std::string& bundleName)
         return -1;
     }
     return bundleMgr->GetUidByBundleName(bundleName, ids[0]);
+}
+
+bool BundleManagerInternal::GetBundleIdFromBms(const std::string& bundleName, uint32_t& accessTokenId){
+    auto bundleMgr = GetBundleManager();
+    if (bundleMgr == nullptr) {
+        HILOGE("failed to get bms");
+        return false;
+    }
+    std::vector<int> ids;
+    ErrCode result = OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (result != ERR_OK || ids.empty()) {
+        return false;
+    }
+    AppExecFwk::ApplicationInfo appInfo;
+    int32_t flag = static_cast<int32_t>(AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
+    result = bundleMgr->GetApplicationInfoV9(bundleName, flag, ids[0], appInfo);
+    if (result != ERR_OK){
+        HILOGE("failed to get appInfo from bms");
+        return false;
+    }
+    accessTokenId = appInfo.accessTokenId;
+    return true;
+}
+
+bool BundleManagerInternal::GetBundleNameFromDbms(const std::string& networkId, const uint32_t accessTokenId, std::string& bundleName){
+    auto bundleMgr = GetDistributedBundleManager();
+    if (bundleMgr == nullptr) {
+        HILOGE("failed to get dbms");
+        return false;
+    }
+    int32_t result = bundleMgr->GetDistributedBundleName(networkId, accessTokenId, bundleName);
+    if (result != ERR_OK){
+        HILOGE("failed to get bundleName from dbms");
+        return false;
+    }
+    return true;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
