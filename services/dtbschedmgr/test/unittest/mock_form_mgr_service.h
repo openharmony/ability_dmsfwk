@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -189,6 +189,15 @@ public:
     int32_t GetHostFormsCount(std::string &bundleName, int32_t &formCount) override
     {
         return ERR_OK;
+    }
+    int32_t GetFormInstancesByFilter(const FormInstancesFilter &formInstancesFilter,
+        std::vector<FormInstance> &formInstances) override
+    {
+        return 0;
+    }
+    int32_t GetFormInstanceById(const int64_t formId, FormInstance &formInstance) override
+    {
+        return 0;
     }
 };
 }  // namespace AppExecFwk
