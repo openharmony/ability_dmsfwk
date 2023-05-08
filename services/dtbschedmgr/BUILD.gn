@@ -25,11 +25,9 @@ config("distributed_sched_config") {
   visibility += [ "./test/*" ]
   include_dirs = [
     "include",
-    "//foundation/ability/ability_base/interfaces/inner_api/log/include",
     "//foundation/ability/ability_base/interfaces/kits/native/uri/include",
     "//foundation/ability/ability_base/interfaces/kits/native/want/include",
     "//third_party/json/include",
-    "//foundation/ability/ability_base/interfaces/inner_api/base/include",
   ]
   defines = []
   if (dmsfwk_mission_manager) {
