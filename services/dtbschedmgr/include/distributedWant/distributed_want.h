@@ -831,7 +831,7 @@ private:
     void ToUriStringInner(std::string& uriString) const;
     nlohmann::json ToJson() const;
     bool ReadFromJson(nlohmann::json& wantJson);
-
+    void DistributedWant::SetParameters(std::shared_ptr<Want>& want, DistributedWantParams& params);
 };
 }  // namespace AAFwk
 }  // namespace OHOS

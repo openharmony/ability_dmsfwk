@@ -138,20 +138,8 @@ DistributedWant::DistributedWant(const Want&want)
     }
 }
 
-std::shared_ptr<Want> DistributedWant::ToWant() {
-    auto want = std::make_shared<Want>();
-    want->SetFlags(GetFlags());
-    want->SetElement(GetElement());
-    want->SetUri(GetUri());
-    want->SetAction(GetAction());
-    want->SetBundle(GetBundle());
-    want->SetType(GetType());
-    std::vector<std::string> ents = GetEntities();
-    for (auto it = ents.begin(); it != ents.end(); it++) {
-        want->AddEntity(*it);
-    }
-
-    std::map<std::string, sptr<IInterface>> data = GetParams().GetParams();
+void DistributedWant::SetParameters(std::shared_ptr<Want>& want, DistributedWantParams& params) {
+    std::map<std::string, sptr<IInterface>> data = params.GetParams();
     for (auto it = data.begin(); it != data.end(); it++) {
         auto tp = DistributedWantParams::GetDataType(it->second);
         if (tp == DistributedWantParams::VALUE_TYPE_BOOLEAN) {
@@ -173,9 +161,56 @@ std::shared_ptr<Want> DistributedWant::ToWant() {
         } else if (tp == DistributedWantParams::VALUE_TYPE_STRING) {
             want->SetParam(it->first, GetStringParam(it->first));
         } else if (tp == DistributedWantParams::VALUE_TYPE_ARRAY) {
-            want->SetParam(it->first, GetStringArrayParam(it->first));
+            IArray* ao = IArray::Query(it->second);
+            if (Array::IsBooleanArray(ao)) {
+                want->SetParam(it->first, GetBoolArrayParam(it->first));
+            } else if (Array::IsCharArray(ao)) {
+                want->SetParam(it->first, GetCharArrayParam(it->first));
+            } else if (Array::IsByteArray(ao)) {
+                want->SetParam(it->first, GetByteArrayParam(it->first));
+            } else if (Array::IsShortArray(ao)) {
+                want->SetParam(it->first, GetShortArrayParam(it->first));
+            } else if (Array::IsIntegerArray(ao)) {
+                want->SetParam(it->first, GetIntArrayParam(it->first));
+            } else if (Array::IsLongArray(ao)) {
+                want->SetParam(it->first, GetLongArrayParam(it->first));
+            } else if (Array::IsFloatArray(ao)) {
+                want->SetParam(it->first, GetFloatArrayParam(it->first));
+            } else if (Array::IsDoubleArray(ao)) {
+                want->SetParam(it->first, GetDoubleArrayParam(it->first));
+            } else if (Array::IsStringArray(ao)) {
+                want->SetParam(it->first, GetStringArrayParam(it->first));
+            } else if (Array::IsWantParamsArray(ao)) {
+                auto func = [&](AAFwk::IInterface *object) {
+                    if (object != nullptr) {
+                        auto* value = IDistributedWantParams::Query(object);
+                        if (value != nullptr) {
+                            auto param = DistributedWantParamWrapper::Unbox(value);
+                            SetParameters(want, param);
+                        }
+                    }
+                };
+                Array::ForEach(ao, func);
+            }
+        } else if (tp == DistributedWantParams::VALUE_TYPE_WANTPARAMS) {
+            auto param = DistributedWantParamWrapper::Unbox(IDistributedWantParams::Query(it->second));
+            SetParameters(want, param);
         }
+}
+
+std::shared_ptr<Want> DistributedWant::ToWant() {
+    auto want = std::make_shared<Want>();
+    want->SetFlags(GetFlags());
+    want->SetElement(GetElement());
+    want->SetUri(GetUri());
+    want->SetAction(GetAction());
+    want->SetBundle(GetBundle());
+    want->SetType(GetType());
+    std::vector<std::string> ents = GetEntities();
+    for (auto it = ents.begin(); it != ents.end(); it++) {
+        want->AddEntity(*it);
     }
+    SetParameters(want, parameters_);
     return want;
 }
 

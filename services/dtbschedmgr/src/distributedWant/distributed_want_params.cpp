@@ -128,7 +128,7 @@ std::string DistributedWantParams::GetStringByType(const sptr<IInterface> iIt, i
     } else if (typeId == VALUE_TYPE_ARRAY) {
         return static_cast<Array *>(IArray::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_WANTPARAMS) {
-        return static_cast<WantParamWrapper *>(IWantParams::Query(iIt))->ToString();
+        return static_cast<DistributedWantParamWrapper *>(IDistributedWantParams::Query(iIt))->ToString();
     } else {
         return "";
     }
@@ -170,9 +170,9 @@ bool DistributedWantParams::NewParams(const DistributedWantParams& source, Distr
             dest.params_[it->first] = Float::Box(Float::Unbox(IFloat::Query(o)));
         } else if (IDouble::Query(o) != nullptr) {
             dest.params_[it->first] = Double::Box(Double::Unbox(IDouble::Query(o)));
-        } else if (IWantParams::Query(o) != nullptr) {
-            WantParams newDest(WantParamWrapper::Unbox(IWantParams::Query(o)));
-            dest.params_[it->first] = WantParamWrapper::Box(newDest);
+        } else if (IDistributedWantParams::Query(o) != nullptr) {
+            DistributedWantParams newDest(DistributedWantParamWrapper::Unbox(IDistributedWantParams::Query(o)));
+            dest.params_[it->first] = DistributedWantParamWrapper::Box(newDest);
         } else if (IArray::Query(o) != nullptr) {
             sptr<IArray> destAO = nullptr;
             if (!NewArrayData(IArray::Query(o), destAO)) {
@@ -266,7 +266,7 @@ int DistributedWantParams::GetDataType(const sptr<IInterface> iIt)
         return VALUE_TYPE_STRING;
     } else if (iIt != nullptr && IArray::Query(iIt) != nullptr) {
         return VALUE_TYPE_ARRAY;
-    } else if (iIt != nullptr && IWantParams::Query(iIt) != nullptr) {
+    } else if (iIt != nullptr && IDistributedWantParams::Query(iIt) != nullptr) {
         return VALUE_TYPE_WANTPARAMS;
     }
 
@@ -337,8 +337,8 @@ bool DistributedWantParams::CompareInterface(const sptr<IInterface> iIt1, const 
             flag = static_cast<Array*>(IArray::Query(iIt1))->Equals(*(static_cast<Array*>(IArray::Query(iIt1))));
             break;
         case VALUE_TYPE_WANTPARAMS:
-            flag = static_cast<WantParamWrapper *>(IWantParams::Query(iIt1))
-                       ->Equals(*(static_cast<WantParamWrapper*>(IWantParams::Query(iIt1))));
+            flag = static_cast<DistributedWantParamWrapper *>(IDistributedWantParams::Query(iIt1))
+                       ->Equals(*(static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(iIt1))));
             break;
         default:
             break;
@@ -453,11 +453,12 @@ bool DistributedWantParams::WriteToParcelBool(Parcel& parcel, sptr<IInterface>& 
 }
 bool DistributedWantParams::WriteToParcelWantParams(Parcel& parcel, sptr<IInterface>& o) const
 {
-    WantParams value = WantParamWrapper::Unbox(IWantParams::Query(o));
+    WantParams value = DistributedWantParamWrapper::Unbox(IDistributedWantParams::Query(o));
     if (!parcel.WriteInt32(VALUE_TYPE_WANTPARAMS)) {
         return false;
     }
-    return parcel.WriteString16(Str8ToStr16(static_cast<WantParamWrapper*>(IWantParams::Query(o))->ToString()));
+    return parcel.WriteString16(Str8ToStr16(
+        static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(o))->ToString()));
 }
 bool DistributedWantParams::WriteToParcelByte(Parcel& parcel, sptr<IInterface>& o) const
 {
@@ -542,7 +543,7 @@ bool DistributedWantParams::WriteMarshalling(Parcel& parcel, sptr<IInterface>& o
         return WriteToParcelFloat(parcel, o);
     } else if (IDouble::Query(o) != nullptr) {
         return WriteToParcelDouble(parcel, o);
-    } else if (IWantParams::Query(o) != nullptr) {
+    } else if (IDistributedWantParams::Query(o) != nullptr) {
         return WriteToParcelWantParams(parcel, o);
     } else {
         IArray* ao = IArray::Query(o);
@@ -1124,7 +1125,7 @@ bool DistributedWantParams::ReadFromParcelInt(Parcel& parcel, const std::string&
 bool DistributedWantParams::ReadFromParcelWantParamWrapper(Parcel& parcel, const std::string& key)
 {
     std::u16string value = parcel.ReadString16();
-    sptr<IInterface> intf = WantParamWrapper::Parse(Str16ToStr8(value));
+    sptr<IInterface> intf = DistributedWantParamWrapper::Parse(Str16ToStr8(value));
     if (intf) {
         SetParam(key, intf);
     }
