@@ -14,7 +14,7 @@
  */
 
 #include "distributedWant/distributed_want_params.h"
-
+#include "distributedWant/distributed_want_params_wrapper.h"
 #include "ability_base_log_wrapper.h"
 #include "array_wrapper.h"
 #include "base_interfaces.h"
