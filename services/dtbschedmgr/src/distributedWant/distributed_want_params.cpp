@@ -453,7 +453,7 @@ bool DistributedWantParams::WriteToParcelBool(Parcel& parcel, sptr<IInterface>& 
 }
 bool DistributedWantParams::WriteToParcelWantParams(Parcel& parcel, sptr<IInterface>& o) const
 {
-    WantParams value = DistributedWantParamWrapper::Unbox(IDistributedWantParams::Query(o));
+    DistributedWantParams value = DistributedWantParamWrapper::Unbox(IDistributedWantParams::Query(o));
     if (!parcel.WriteInt32(VALUE_TYPE_WANTPARAMS)) {
         return false;
     }
