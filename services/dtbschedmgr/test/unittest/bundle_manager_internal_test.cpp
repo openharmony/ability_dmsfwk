@@ -439,3 +439,5 @@ HWTEST_F(BundleManagerInternalTest, GetBundleIdFromBms_002, TestSize.Level3)
     EXPECT_EQ(ret, true);
     DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_002 end "<< std::endl;
 }
+}
+}
