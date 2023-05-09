@@ -420,8 +420,8 @@ HWTEST_F(BundleManagerInternalTest, GetBundleIdFromBms_001, TestSize.Level3)
     DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_001 begin" << std::endl;
     const std::string bundleName = "ohos.samples.dms.testApp";
     uint32_t accessTokenId;
-    bool ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
-    EXPECT_EQ(ret, false);
+    int32_t ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
+    EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
     DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_001 end "<< std::endl;
 }
 
@@ -435,8 +435,8 @@ HWTEST_F(BundleManagerInternalTest, GetBundleIdFromBms_002, TestSize.Level3)
     DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_002 begin" << std::endl;
     const std::string bundleName = "com.ohos.camera";
     uint32_t accessTokenId;
-    bool ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
-    EXPECT_EQ(ret, true);
+    int32_t ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
+    EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_002 end "<< std::endl;
 }
 }

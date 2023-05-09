@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -271,11 +271,12 @@ sptr<AppExecFwk::IDistributedBms> BundleManagerInternal::GetDistributedBundleMan
 {
     sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
+        HILOGE("failed to get samgrProxy from dbms");
         return nullptr;
     }
     sptr<IRemoteObject> dbmsProxy = samgrProxy->GetSystemAbility(DISTRIBUTED_BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
     if (dbmsProxy == nullptr) {
-        HILOGE("failed to get dbms from samgr");
+        HILOGE("failed to get dbmsProxy from dbms");
         return nullptr;
     }
     return iface_cast<AppExecFwk::IDistributedBms>(dbmsProxy);
@@ -296,42 +297,44 @@ int32_t BundleManagerInternal::GetUidFromBms(const std::string& bundleName)
     return bundleMgr->GetUidByBundleName(bundleName, ids[0]);
 }
 
-bool BundleManagerInternal::GetBundleIdFromBms(const std::string& bundleName, uint32_t& accessTokenId)
+int32_t BundleManagerInternal::GetBundleIdFromBms(const std::string& bundleName, uint32_t& accessTokenId)
 {
     auto bundleMgr = GetBundleManager();
     if (bundleMgr == nullptr) {
         HILOGE("failed to get bms");
-        return false;
+        return INVALID_PARAMETERS_ERR;
     }
     std::vector<int> ids;
     ErrCode result = OsAccountManager::QueryActiveOsAccountIds(ids);
     if (result != ERR_OK || ids.empty()) {
-        return false;
+        HILOGE("fild to get userId");
+        return INVALID_PARAMETERS_ERR;
     }
     AppExecFwk::ApplicationInfo appInfo;
     int32_t flag = static_cast<int32_t>(AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
     result = bundleMgr->GetApplicationInfoV9(bundleName, flag, ids[0], appInfo);
     if (result != ERR_OK) {
         HILOGE("failed to get appInfo from bms");
-        return false;
+        return CAN_NOT_FOUND_ABILITY_ERR;
     }
     accessTokenId = appInfo.accessTokenId;
-    return true;
+    return ERR_OK;
 }
 
-bool BundleManagerInternal::GetBundleNameFromDbms(const std::string& networkId, const uint32_t accessTokenId, std::string& bundleName)
+int32_t BundleManagerInternal::GetBundleNameFromDbms(const std::string& networkId,
+    const uint32_t accessTokenId, std::string& bundleName)
 {
     auto bundleMgr = GetDistributedBundleManager();
     if (bundleMgr == nullptr) {
         HILOGE("failed to get dbms");
-        return false;
+        return INVALID_PARAMETERS_ERR;
     }
     int32_t result = bundleMgr->GetDistributedBundleName(networkId, accessTokenId, bundleName);
     if (result != ERR_OK) {
         HILOGE("failed to get bundleName from dbms");
-        return false;
+        return CAN_NOT_FOUND_ABILITY_ERR;
     }
-    return true;
+    return ERR_OK;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
