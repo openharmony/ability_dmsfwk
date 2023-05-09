@@ -262,10 +262,13 @@ int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, M
 
 void DistributedSchedStub::SaveExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo)
 {
-    uint32_t accessToken = extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN];
-    callerInfo.accessToken = accessToken;
-    HILOGD("parse extra info, accessTokenID = %u", accessToken);
-    if (extraInfoJson.find(DMS_VERSION_ID) != extraInfoJson.end()) {
+    if (extraInfoJson.find(EXTRO_INFO_JSON_KEY_ACCESS_TOKEN) != extraInfoJson.end() &&
+        extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN].is_number_unsigned()) {
+        uint32_t accessToken = extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN];
+        callerInfo.accessToken = accessToken;
+        HILOGD("parse extra info, accessTokenID = %u", accessToken);
+    }
+    if (extraInfoJson.find(DMS_VERSION_ID) != extraInfoJson.end() && extraInfoJson[DMS_VERSION_ID].is_string()) {
         std::string dmsVersion = extraInfoJson[DMS_VERSION_ID];
         callerInfo.extraInfoJson[DMS_VERSION_ID] = dmsVersion;
         HILOGD("save dms version");
@@ -1052,7 +1055,8 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
     int32_t requestCode = DEFAULT_REQUEST_CODE;
     if (!extraInfoJson.is_discarded()) {
         SaveExtraInfo(extraInfoJson, callerInfo);
-        if (extraInfoJson.contains(EXTRO_INFO_JSON_KEY_REQUEST_CODE)) {
+        if (extraInfoJson.find(EXTRO_INFO_JSON_KEY_REQUEST_CODE) != extraInfoJson.end() &&
+            extraInfoJson[EXTRO_INFO_JSON_KEY_REQUEST_CODE].is_number_integer()) {
             requestCode = extraInfoJson[EXTRO_INFO_JSON_KEY_REQUEST_CODE];
             HILOGD("parse extra info, requestCode = %d", requestCode);
         }
@@ -1140,7 +1144,8 @@ int32_t DistributedSchedStub::StopExtensionAbilityFromRemoteInner(MessageParcel&
         HILOGD("extra info is empty!");
     }
     nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
-    if (!extraInfoJson.is_discarded()) {
+    if (!extraInfoJson.is_discarded() && extraInfoJson.find(EXTRO_INFO_JSON_KEY_ACCESS_TOKEN) != extraInfoJson.end() &&
+        extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN].is_number_unsigned()) {
         uint32_t accessToken = extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN];
         callerInfo.accessToken = accessToken;
         HILOGD("parse extra info, accessTokenID = %{private}u", accessToken);
