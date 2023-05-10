@@ -18,12 +18,3 @@ js_declaration("continuation_manager") {
 
   part_name = "dmsfwk"
 }
-
-ohos_copy("continuation_manager_declaration") {
-  sources = [ "./api" ]
-
-  outputs = [ target_out_dir + "/$target_name/" ]
-
-  module_source_dir = target_out_dir + "/$target_name"
-  module_install_name = ""
-}
