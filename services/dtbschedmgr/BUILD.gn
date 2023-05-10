@@ -25,8 +25,6 @@ config("distributed_sched_config") {
   visibility += [ "./test/*" ]
   include_dirs = [
     "include",
-    "//foundation/ability/ability_base/interfaces/kits/native/uri/include",
-    "//foundation/ability/ability_base/interfaces/kits/native/want/include",
     "//third_party/json/include",
   ]
   defines = []

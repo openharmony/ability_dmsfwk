@@ -20,13 +20,13 @@
 #include <vector>
 #include <algorithm>
 
-#include "distributedWant/distributed_want_params.h"
 #include "distributedWant/distributed_operation.h"
-#include "want.h"
-#include "uri.h"
+#include "distributedWant/distributed_want_params.h"
 #include "element_name.h"
-#include "parcel.h"
 #include "nlohmann/json.hpp"
+#include "parcel.h"
+#include "uri.h"
+#include "want.h"
 
 using DistributedOperation = OHOS::AAFwk::DistributedOperation;
 

@@ -30,8 +30,7 @@ config("test_config") {
   include_dirs = [
     "//foundation/ability/dmsfwk/utils/native/include",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/unittest",
-    "//foundation/ability/ability_base/interfaces/kits/native/want/include",
-    "//foundation/ability/dmsfwk/services/dtbschedmgr/include/distributedWant",
+    "${distributed_service}/dtbschedmgr/include/distributedWant",
   ]
 }
 
@@ -391,7 +390,7 @@ ohos_unittest("distributedwanttest") {
   sources += dtbschedmgr_sources
   configs = [
     ":test_config",
-    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
   ]
   configs += dsched_configs
   if (is_standard_system) {

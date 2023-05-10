@@ -14,24 +14,25 @@
  */
 
 #include "distributedWant/distributed_want_params.h"
-#include "distributedWant/distributed_want_params_wrapper.h"
+
 #include "ability_base_log_wrapper.h"
 #include "array_wrapper.h"
 #include "base_interfaces.h"
 #include "base_object.h"
 #include "bool_wrapper.h"
 #include "byte_wrapper.h"
+#include "distributedWant/distributed_want_params_wrapper.h"
 #include "double_wrapper.h"
 #include "float_wrapper.h"
 #include "int_wrapper.h"
 #include "long_wrapper.h"
-#include "short_wrapper.h"
-#include "string_wrapper.h"
-#include "zchar_wrapper.h"
 #include "parcel.h"
 #include "securec.h"
+#include "short_wrapper.h"
 #include "string_ex.h"
+#include "string_wrapper.h"
 #include "want_params_wrapper.h"
+#include "zchar_wrapper.h"
 
 namespace OHOS {
 namespace AAFwk {

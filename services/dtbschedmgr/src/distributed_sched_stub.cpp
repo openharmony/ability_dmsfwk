@@ -23,6 +23,7 @@
 #include "dfx/dms_hisysevent_report.h"
 #include "dfx/dms_hitrace_chain.h"
 #include "dfx/dms_hitrace_constants.h"
+#include "distributedWant/distributed_want.h"
 #include "distributed_sched_permission.h"
 #include "dtbschedmgr_log.h"
 #include "dtbschedmgr_device_info_storage.h"
@@ -35,7 +36,6 @@
 #include "ipc_skeleton.h"
 #include "message_parcel.h"
 #include "parcel_helper.h"
-#include "distributedWant/distributed_want.h"
 
 namespace OHOS {
 namespace DistributedSchedule {

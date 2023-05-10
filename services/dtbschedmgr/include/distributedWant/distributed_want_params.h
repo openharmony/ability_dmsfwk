@@ -20,8 +20,8 @@
 #include <set>
 #include <vector>
 #include "base_interfaces.h"
-#include "refbase.h"
 #include "parcel.h"
+#include "refbase.h"
 
 namespace OHOS {
 namespace AAFwk {

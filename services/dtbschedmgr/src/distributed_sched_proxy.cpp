@@ -16,6 +16,7 @@
 #include "distributed_sched_proxy.h"
 
 #include "dfx/dms_hitrace_constants.h"
+#include "distributedWant/distributed_want.h"
 #include "dtbschedmgr_log.h"
 #include "ipc_types.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
@@ -24,7 +25,6 @@
 #endif
 #include "parcel_helper.h"
 #include "string_ex.h"
-#include "distributedWant/distributed_want.h"
 
 namespace OHOS {
 namespace DistributedSchedule {

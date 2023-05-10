@@ -17,9 +17,10 @@
 #define OHOS_ABILITY_BASE_DISTRIBUTED_OPERATION_H
 
 #include <string>
-#include "uri.h"
+
 #include "parcel.h"
 #include "string_ex.h"
+#include "uri.h"
 
 namespace OHOS {
 namespace AAFwk {

@@ -14,9 +14,11 @@
  */
 #ifndef OHOS_ABILITY_BASE_DISTRIBUTED_WANT_PARAMS_WRAPPER_H
 #define OHOS_ABILITY_BASE_DISTRIBUTED_WANT_PARAMS_WRAPPER_H
+
 #include "base_def.h"
 #include "base_object.h"
 #include "distributed_want_params.h"
+
 namespace OHOS {
 namespace AAFwk {
 class DistributedWantParams;
