@@ -181,7 +181,7 @@ void DistributedWant::SetParameters(std::shared_ptr<Want>& want, DistributedWant
             } else if (Array::IsStringArray(ao)) {
                 want->SetParam(it->first, GetStringArrayParam(it->first));
             } else if (Array::IsWantParamsArray(ao)) {
-                auto func = [&](AAFwk::IInterface *object) {
+                auto func = [&](AAFwk::IInterface* object) {
                     if (object != nullptr) {
                         auto* value = IDistributedWantParams::Query(object);
                         if (value != nullptr) {
@@ -558,7 +558,7 @@ DistributedWant& DistributedWant::SetParams(const DistributedWantParams& wantPar
 
 /**
  * @description: Obtains a bool-type value matching the given key.
- * @param key   Indicates the key of IntentParams.
+ * @param key   Indicates the key of Params.
  * @param defaultValue  Indicates the default bool-type value.
  * @return Returns the bool-type value of the parameter matching the given key;
  * returns the default value if the key does not exist.
@@ -575,7 +575,7 @@ bool DistributedWant::GetBoolParam(const std::string& key, bool defaultValue) co
 
 /**
  * @description:Obtains a bool-type array matching the given key.
- * @param key   Indicates the key of IntentParams.
+ * @param key   Indicates the key of Params.
  * @return Returns the bool-type array of the parameter matching the given key;
  * returns null if the key does not exist.
  */
@@ -632,7 +632,7 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
 
 /**
  * @description: Obtains a byte-type value matching the given key.
- * @param key   Indicates the key of IntentParams.
+ * @param key   Indicates the key of Params.
  * @param defaultValue  Indicates the default byte-type value.
  * @return Returns the byte-type value of the parameter matching the given key;
  * returns the default value if the key does not exist.
@@ -649,7 +649,7 @@ byte DistributedWant::GetByteParam(const std::string& key, const byte defaultVal
 
 /**
  * @description: Obtains a byte-type array matching the given key.
- * @param key   Indicates the key of IntentParams.
+ * @param key   Indicates the key of Params.
  * @return Returns the byte-type array of the parameter matching the given key;
  * returns null if the key does not exist.
  */
@@ -676,7 +676,7 @@ std::vector<byte> DistributedWant::GetByteArrayParam(const std::string& key) con
  * @description: Sets a parameter value of the byte type.
  * @param key   Indicates the key matching the parameter.
  * @param value Indicates the byte-type value of the parameter.
- * @return Returns this Intent object containing the parameter value.
+ * @return Returns this object containing the parameter value.
  */
 DistributedWant& DistributedWant::SetParam(const std::string& key, byte value)
 {
@@ -688,7 +688,7 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, byte value)
  * @description: Sets a parameter value of the byte array type.
  * @param key   Indicates the key matching the parameter.
  * @param value Indicates the byte array of the parameter.
- * @return Returns this Intent object containing the parameter value.
+ * @return Returns this object containing the parameter value.
  */
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<byte>& value)
 {
@@ -824,7 +824,7 @@ std::vector<int> DistributedWant::GetIntArrayParam(const std::string& key) const
  * @description: Sets a parameter value of the int type.
  * @param key   Indicates the key matching the parameter.
  * @param value Indicates the int value of the parameter.
- * @return Returns this Intent object containing the parameter value.
+ * @return Returns this object containing the parameter value.
  */
 DistributedWant& DistributedWant::SetParam(const std::string& key, int value)
 {
@@ -836,7 +836,7 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, int value)
  * @description: Sets a parameter value of the int array type.
  * @param key   Indicates the key matching the parameter.
  * @param value Indicates the int array of the parameter.
- * @return Returns this Intent object containing the parameter value.
+ * @return Returns this object containing the parameter value.
  */
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<int>& value)
 {
@@ -871,7 +871,7 @@ double DistributedWant::GetDoubleParam(const std::string& key, double defaultVal
 
 /**
  * @description: Obtains a double array matching the given key.
- * @param key   Indicates the key of IntentParams.
+ * @param key   Indicates the key of Params.
  * @return Returns the double array of the parameter matching the given key;
  * returns null if the key does not exist.
  */
@@ -898,7 +898,7 @@ std::vector<double> DistributedWant::GetDoubleArrayParam(const std::string& key)
  * @description: Sets a parameter value of the double type.
  * @param key   Indicates the key matching the parameter.
  * @param value Indicates the int value of the parameter.
- * @return Returns this Intent object containing the parameter value.
+ * @return Returns this object containing the parameter value.
  */
 DistributedWant& DistributedWant::SetParam(const std::string& key, double value)
 {
@@ -945,7 +945,7 @@ float DistributedWant::GetFloatParam(const std::string& key, float defaultValue)
 
 /**
  * @description: Obtains a float array matching the given key.
- * @param key Indicates the key of IntentParams.
+ * @param key Indicates the key of Params.
  * @return Obtains a float array matching the given key.
  */
 std::vector<float> DistributedWant::GetFloatArrayParam(const std::string& key) const
@@ -1060,7 +1060,7 @@ std::vector<long> DistributedWant::GetLongArrayParam(const std::string& key) con
         Array::ForEach(ao, func);
     } else if (ao != nullptr && Array::IsStringArray(ao)) {
         // Marshalling
-        auto func = [&](IInterface *object) { ArrayAddData(object, array); };
+        auto func = [&](IInterface* object) { ArrayAddData(object, array); };
         Array::ForEach(ao, func);
     }
     return array;

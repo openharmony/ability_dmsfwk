@@ -109,27 +109,27 @@ DistributedUnsupportedData& DistributedUnsupportedData::operator=(DistributedUns
 std::string DistributedWantParams::GetStringByType(const sptr<IInterface> iIt, int typeId)
 {
     if (typeId == VALUE_TYPE_BOOLEAN) {
-        return static_cast<Boolean *>(IBoolean::Query(iIt))->ToString();
+        return static_cast<Boolean*>(IBoolean::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_BYTE) {
-        return static_cast<Byte *>(IByte::Query(iIt))->ToString();
+        return static_cast<Byte*>(IByte::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_CHAR) {
-        return static_cast<Char *>(IChar::Query(iIt))->ToString();
+        return static_cast<Char*>(IChar::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_SHORT) {
-        return static_cast<Short *>(IShort::Query(iIt))->ToString();
+        return static_cast<Short*>(IShort::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_INT) {
-        return static_cast<Integer *>(IInteger::Query(iIt))->ToString();
+        return static_cast<Integer*>(IInteger::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_LONG) {
-        return static_cast<Long *>(ILong::Query(iIt))->ToString();
+        return static_cast<Long*>(ILong::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_FLOAT) {
-        return static_cast<Float *>(IFloat::Query(iIt))->ToString();
+        return static_cast<Float*>(IFloat::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_DOUBLE) {
-        return static_cast<Double *>(IDouble::Query(iIt))->ToString();
+        return static_cast<Double*>(IDouble::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_STRING) {
-        return static_cast<String *>(IString::Query(iIt))->ToString();
+        return static_cast<String*>(IString::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_ARRAY) {
-        return static_cast<Array *>(IArray::Query(iIt))->ToString();
+        return static_cast<Array*>(IArray::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_WANTPARAMS) {
-        return static_cast<DistributedWantParamWrapper *>(IDistributedWantParams::Query(iIt))->ToString();
+        return static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(iIt))->ToString();
     } else {
         return "";
     }
@@ -138,9 +138,9 @@ std::string DistributedWantParams::GetStringByType(const sptr<IInterface> iIt, i
 template<typename T1, typename T2, typename T3>
 static void SetNewArray(const AAFwk::InterfaceID& id, AAFwk::IArray* orgIArray, sptr<AAFwk::IArray>& ao);
 /**
- * @description: A constructor used to create an IntentParams instance by using the parameters of an existing
- * IntentParams object.
- * @param intentParams  Indicates the existing IntentParams object.
+ * @description: A constructor used to create an Params instance by using the parameters of an existing
+ * Params object.
+ * @param Params  Indicates the existing Params object.
  */
 DistributedWantParams::DistributedWantParams(const DistributedWantParams& wantParams)
 {
@@ -218,7 +218,7 @@ bool DistributedWantParams::NewArrayData(IArray* source, sptr<IArray>& dest)
 /**
  * @description: A DistributedWantParams used to
  *
- * @param intentParams  Indicates the existing IntentParams object.
+ * @param Params  Indicates the existing Params object.
  */
 DistributedWantParams& DistributedWantParams::operator=(const DistributedWantParams& other)
 {
@@ -338,7 +338,7 @@ bool DistributedWantParams::CompareInterface(const sptr<IInterface> iIt1, const 
             flag = static_cast<Array*>(IArray::Query(iIt1))->Equals(*(static_cast<Array*>(IArray::Query(iIt1))));
             break;
         case VALUE_TYPE_WANTPARAMS:
-            flag = static_cast<DistributedWantParamWrapper *>(IDistributedWantParams::Query(iIt1))
+            flag = static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(iIt1))
                        ->Equals(*(static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(iIt1))));
             break;
         default:
@@ -408,9 +408,9 @@ void DistributedWantParams::Remove(const std::string& key)
 }
 
 /**
- * @description: Checks whether the Intent contains the given key.
+ * @description: Checks whether the  contains the given key.
  * @param key Indicates the key to check.
- * @return Returns true if the Intent contains the key; returns false otherwise.
+ * @return Returns true if the  contains the key; returns false otherwise.
  */
 bool DistributedWantParams::HasParam(const std::string& key) const
 {
@@ -418,7 +418,7 @@ bool DistributedWantParams::HasParam(const std::string& key) const
 }
 
 /**
- * @description: Obtains the number of parameters contained in this IntentParams object.
+ * @description: Obtains the number of parameters contained in this Params object.
  * @return Returns the number of parameters.
  */
 int DistributedWantParams::Size() const
@@ -427,7 +427,7 @@ int DistributedWantParams::Size() const
 }
 
 /**
- * @description: Checks whether this IntentParams object contains no parameters.
+ * @description: Checks whether this Params object contains no parameters.
  * @return Returns true if this object does not contain any parameters; returns false otherwise.
  */
 bool DistributedWantParams::IsEmpty() const
@@ -606,8 +606,8 @@ bool DistributedWantParams::DoMarshalling(Parcel& parcel) const
 }
 
 /**
- * @description: Marshals an IntentParams object into a Parcel.
- * @param Key-value pairs in the IntentParams are marshalled separately.
+ * @description: Marshals an Params object into a Parcel.
+ * @param Key-value pairs in the Params are marshalled separately.
  * @return If any key-value pair fails to be marshalled, false is returned.
  */
 bool DistributedWantParams::Marshalling(Parcel& parcel) const
@@ -656,7 +656,7 @@ static void FillArray(IArray* ao, std::vector<T1>&array)
 {
     auto func = [&](IInterface* object) {
         if (object != nullptr) {
-            T3 *value = T3::Query(object);
+            T3* value = T3::Query(object);
             if (value != nullptr) {
                 array.push_back(T2::Unbox(value));
             }
@@ -674,7 +674,7 @@ static void SetNewArray(const AAFwk::InterfaceID& id, AAFwk::IArray* orgIArray, 
     std::vector<T1> array;
     auto func = [&](IInterface* object) {
         if (object != nullptr) {
-            T3 *value = T3::Query(object);
+            T3* value = T3::Query(object);
             if (value != nullptr) {
                 array.push_back(T2::Unbox(value));
             }
@@ -1302,8 +1302,8 @@ bool DistributedWantParams::ReadFromParcel(Parcel& parcel)
 }
 
 /**
- * @description: Unmarshals an IntentParams object from a Parcel.
- * @param Key-value pairs in the IntentParams are unmarshalled separately.
+ * @description: Unmarshals an Params object from a Parcel.
+ * @param Key-value pairs in the Params are unmarshalled separately.
  * @return If any key-value pair fails to be unmarshalled, false is returned.
  */
 DistributedWantParams* DistributedWantParams::Unmarshalling(Parcel& parcel)
@@ -1321,7 +1321,7 @@ DistributedWantParams* DistributedWantParams::Unmarshalling(Parcel& parcel)
         ABILITYBASE_LOGI("%{public}s read length fail.", __func__);
         return nullptr;
     }
-    const uint8_t *dataInBytes = parcel.ReadUnpadBuffer(bufferSize);
+    const uint8_t* dataInBytes = parcel.ReadUnpadBuffer(bufferSize);
     if (dataInBytes == nullptr) {
         ABILITYBASE_LOGI("%{public}s read buffer fail.", __func__);
         return nullptr;
