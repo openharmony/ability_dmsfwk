@@ -47,6 +47,7 @@ dsched_external_deps = [
   "device_auth:deviceauth_sdk",
   "device_info_manager:distributed_device_profile_client",
   "device_manager:devicemanagersdk",
+  "distributed_bundle_framework:dbms_fwk",
   "dmsfwk:continuation_manager",
   "eventhandler:libeventhandler",
   "hisysevent_native:libhisysevent",

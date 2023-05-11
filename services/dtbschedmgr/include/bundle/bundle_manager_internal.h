@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "bundlemgr/bundle_mgr_proxy.h"
+#include "distributed_bms_interface.h"
 #include "single_instance.h"
 
 namespace OHOS {
@@ -41,8 +42,12 @@ public:
     static int32_t CheckRemoteBundleInfoForContinuation(const std::string& dstDeviceId,
         const std::string& bundleName, AppExecFwk::DistributedBundleInfo& remoteBundleInfo);
     static sptr<AppExecFwk::IBundleMgr> GetBundleManager();
+    static sptr<AppExecFwk::IDistributedBms> GetDistributedBundleManager();
     static int32_t GetUidFromBms(const std::string& bundleName);
     static bool CheckIfRemoteCanInstall(const AAFwk::Want& want, int32_t missionId);
+    static int32_t GetBundleIdFromBms(const std::string& bundleName, uint32_t& accessTokenId);
+    static int32_t GetBundleNameFromDbms(const std::string& networkId,
+        const uint32_t accessTokenId, std::string& bundleName);
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

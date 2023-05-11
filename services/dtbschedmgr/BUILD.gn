@@ -86,6 +86,7 @@ ohos_shared_library("distributedschedsvr") {
     "device_auth:deviceauth_sdk",
     "device_info_manager:distributed_device_profile_client",
     "device_manager:devicemanagersdk",
+    "distributed_bundle_framework:dbms_fwk",
     "eventhandler:libeventhandler",
     "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
