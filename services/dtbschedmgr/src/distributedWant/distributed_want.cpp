@@ -311,7 +311,7 @@ DistributedWant& DistributedWant::SetElement(const OHOS::AppExecFwk::ElementName
  * @description: Obtains the description of all entities in a DistributedWant.
  * @return Returns a set of entities
  */
-const std::vector<std::string>&DistributedWant::GetEntities() const
+const std::vector<std::string>& DistributedWant::GetEntities() const
 {
     return operation_.GetEntities();
 }
@@ -605,7 +605,7 @@ std::vector<bool> DistributedWant::GetBoolArrayParam(const std::string& key) con
  * @param value Indicates the boolean value of the parameter.
  * @return Returns this DistributedWant object containing the parameter value.
  */
-DistributedWant&DistributedWant::SetParam(const std::string&key, bool value)
+DistributedWant& DistributedWant::SetParam(const std::string&key, bool value)
 {
     parameters_.SetParam(key, Boolean::Box(value));
     return *this;
@@ -1072,7 +1072,7 @@ std::vector<long> DistributedWant::GetLongArrayParam(const std::string& key) con
  * @param value Indicates the byte-type value of the parameter.
  * @return Returns this DistributedWant object containing the parameter value.
  */
-DistributedWant&DistributedWant::SetParam(const std::string& key, long value)
+DistributedWant& DistributedWant::SetParam(const std::string& key, long value)
 {
     parameters_.SetParam(key, Long::Box(value));
     return *this;
@@ -1084,7 +1084,7 @@ DistributedWant&DistributedWant::SetParam(const std::string& key, long value)
  * @param value Indicates the byte-type value of the parameter.
  * @return Returns this DistributedWant object containing the parameter value.
  */
-DistributedWant&DistributedWant::SetParam(const std::string& key, const std::vector<long>& value)
+DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<long>& value)
 {
     std::size_t size = value.size();
     sptr<IArray> ao = new (std::nothrow) Array(size, g_IID_ILong);
@@ -1098,7 +1098,7 @@ DistributedWant&DistributedWant::SetParam(const std::string& key, const std::vec
     return *this;
 }
 
-DistributedWant&DistributedWant::SetParam(const std::string& key, long long value)
+DistributedWant& DistributedWant::SetParam(const std::string& key, long long value)
 {
     parameters_.SetParam(key, Long::Box(value));
     return *this;
@@ -1523,7 +1523,7 @@ void DistributedWant::ToUriStringInner(std::string& uriString) const
  * @param uri Indicates the URI to format.
  * @return Returns this DistributedWant object that contains the formatted uri attribute.
  */
-DistributedWant&DistributedWant::FormatUri(const std::string& uri)
+DistributedWant& DistributedWant::FormatUri(const std::string& uri)
 {
     return FormatUri(Uri(uri));
 }
@@ -1535,7 +1535,7 @@ DistributedWant&DistributedWant::FormatUri(const std::string& uri)
  * @param uri Indicates the URI to format.
  * @return Returns this DistributedWant object that contains the formatted uri attribute.
  */
-DistributedWant&DistributedWant::FormatUri(const Uri& uri)
+DistributedWant& DistributedWant::FormatUri(const Uri& uri)
 {
     operation_.SetUri(GetLowerCaseScheme(uri));
     return *this;
@@ -1556,7 +1556,7 @@ bool DistributedWant::HasParameter(const std::string& key) const
  * @param wantParams Indicates the WantParams object containing the new parameters.
  * @return Returns this DistributedWant object containing the new parameters.
  */
-DistributedWant*DistributedWant::ReplaceParams(DistributedWantParams& wantParams)
+DistributedWant* DistributedWant::ReplaceParams(DistributedWantParams& wantParams)
 {
     parameters_ = wantParams;
     return this;
@@ -1567,7 +1567,7 @@ DistributedWant*DistributedWant::ReplaceParams(DistributedWantParams& wantParams
  * @param want Indicates the DistributedWant object containing the new parameters.
  * @return Returns this DistributedWant object containing the new parameters.
  */
-DistributedWant*DistributedWant::ReplaceParams(DistributedWant& want)
+DistributedWant* DistributedWant::ReplaceParams(DistributedWant& want)
 {
     parameters_ = want.parameters_;
     return this;
