@@ -16,9 +16,9 @@
 #ifndef OHOS_ABILITY_BASE_DISTRIBUTED_OPERATION_BUILDER_H
 #define OHOS_ABILITY_BASE_DISTRIBUTED_OPERATION_BUILDER_H
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include "uri.h"
 

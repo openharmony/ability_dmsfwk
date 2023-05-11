@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-#include "distributedWant/distributed_want_params.h"
-
 #include "ability_base_log_wrapper.h"
 #include "array_wrapper.h"
 #include "base_interfaces.h"
 #include "base_object.h"
 #include "bool_wrapper.h"
 #include "byte_wrapper.h"
+#include "distributedWant/distributed_want_params.h"
 #include "distributedWant/distributed_want_params_wrapper.h"
 #include "double_wrapper.h"
 #include "float_wrapper.h"
@@ -1359,6 +1358,17 @@ void DistributedWantParams::DumpInfo(int level) const
         }
     }
     ABILITYBASE_LOGI("=======DistributedWantParams::DumpInfo level: %{public}d end=============", level);
+}
+
+WantParams DistributedWantParams::ToWantParams() {
+    ABILITYBASE_LOGI("ToWantParams called.");
+    WantParams wantParams;
+    std::map<std::string, sptr<IInterface>> data = GetParams();
+    for (auto it = data.begin(); it != data.end(); it++) {
+        wantParams.SetParam(it->first, it->second);
+    }
+    ABILITYBASE_LOGI("ToWantParams new wantParams size: %{public}zu", params_.size());
+    return wantParams;
 }
 }  // namespace AAFwk
 }  // namespace OHOS

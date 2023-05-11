@@ -22,6 +22,7 @@
 #include "base_interfaces.h"
 #include "parcel.h"
 #include "refbase.h"
+#include "want_params.h"
 
 namespace OHOS {
 namespace AAFwk {
@@ -81,6 +82,8 @@ public:
     static DistributedWantParams* Unmarshalling(Parcel& parcel);
 
     void DumpInfo(int level) const;
+
+    WantParams ToWantParams();
 
 private:
     enum {

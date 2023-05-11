@@ -16,9 +16,9 @@
 #ifndef OHOS_AAFWK_DISTRIBUTED_WANT_H
 #define OHOS_AAFWK_DISTRIBUTED_WANT_H
 
+#include <algorithm>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 #include "distributedWant/distributed_operation.h"
 #include "distributedWant/distributed_want_params.h"

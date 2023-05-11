@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "distributedWant/distributed_want.h"
-
 #include <algorithm>
 #include <climits>
 #include <cstdlib>
@@ -25,6 +23,9 @@
 #include "base_object.h"
 #include "bool_wrapper.h"
 #include "byte_wrapper.h"
+#include "distributedWant/distributed_operation_builder.h"
+#include "distributedWant/distributed_want.h"
+#include "distributedWant/distributed_want_params_wrapper.h"
 #include "double_wrapper.h"
 #include "float_wrapper.h"
 #include "int_wrapper.h"
@@ -34,9 +35,6 @@
 #include "string_ex.h"
 #include "string_wrapper.h"
 #include "zchar_wrapper.h"
-
-#include "distributedWant/distributed_operation_builder.h"
-#include "distributedWant/distributed_want_params_wrapper.h"
 
 using namespace OHOS::AppExecFwk;
 using OHOS::AppExecFwk::ElementName;
@@ -138,67 +136,6 @@ DistributedWant::DistributedWant(const Want& want)
     }
 }
 
-void DistributedWant::SetParameters(std::shared_ptr<Want>& want, DistributedWantParams& params) {
-    std::map<std::string, sptr<IInterface>> data = params.GetParams();
-    for (auto it = data.begin(); it != data.end(); it++) {
-        auto tp = DistributedWantParams::GetDataType(it->second);
-        if (tp == DistributedWantParams::VALUE_TYPE_BOOLEAN) {
-            want->SetParam(it->first, GetBoolParam(it->first, false));
-        } else if (tp == DistributedWantParams::VALUE_TYPE_BYTE) {
-            want->SetParam(it->first, GetByteParam(it->first, 0));
-        } else if (tp == DistributedWantParams::VALUE_TYPE_CHAR) {
-            want->SetParam(it->first, GetCharParam(it->first, 0));
-        } else if (tp == DistributedWantParams::VALUE_TYPE_SHORT) {
-            want->SetParam(it->first, GetShortParam(it->first, 0));
-        } else if (tp == DistributedWantParams::VALUE_TYPE_INT) {
-            want->SetParam(it->first, GetIntParam(it->first, 0));
-        } else if (tp == DistributedWantParams::VALUE_TYPE_LONG) {
-            want->SetParam(it->first, GetLongParam(it->first, 0));
-        } else if (tp == DistributedWantParams::VALUE_TYPE_FLOAT) {
-            want->SetParam(it->first, GetFloatParam(it->first, 0));
-        } else if (tp == DistributedWantParams::VALUE_TYPE_DOUBLE) {
-            want->SetParam(it->first, GetDoubleParam(it->first, 0));
-        } else if (tp == DistributedWantParams::VALUE_TYPE_STRING) {
-            want->SetParam(it->first, GetStringParam(it->first));
-        } else if (tp == DistributedWantParams::VALUE_TYPE_ARRAY) {
-            IArray* ao = IArray::Query(it->second);
-            if (Array::IsBooleanArray(ao)) {
-                want->SetParam(it->first, GetBoolArrayParam(it->first));
-            } else if (Array::IsCharArray(ao)) {
-                want->SetParam(it->first, GetCharArrayParam(it->first));
-            } else if (Array::IsByteArray(ao)) {
-                want->SetParam(it->first, GetByteArrayParam(it->first));
-            } else if (Array::IsShortArray(ao)) {
-                want->SetParam(it->first, GetShortArrayParam(it->first));
-            } else if (Array::IsIntegerArray(ao)) {
-                want->SetParam(it->first, GetIntArrayParam(it->first));
-            } else if (Array::IsLongArray(ao)) {
-                want->SetParam(it->first, GetLongArrayParam(it->first));
-            } else if (Array::IsFloatArray(ao)) {
-                want->SetParam(it->first, GetFloatArrayParam(it->first));
-            } else if (Array::IsDoubleArray(ao)) {
-                want->SetParam(it->first, GetDoubleArrayParam(it->first));
-            } else if (Array::IsStringArray(ao)) {
-                want->SetParam(it->first, GetStringArrayParam(it->first));
-            } else if (Array::IsWantParamsArray(ao)) {
-                auto func = [&](AAFwk::IInterface* object) {
-                    if (object != nullptr) {
-                        auto* value = IDistributedWantParams::Query(object);
-                        if (value != nullptr) {
-                            auto param = DistributedWantParamWrapper::Unbox(value);
-                            SetParameters(want, param);
-                        }
-                    }
-                };
-                Array::ForEach(ao, func);
-            }
-        } else if (tp == DistributedWantParams::VALUE_TYPE_WANTPARAMS) {
-            auto param = DistributedWantParamWrapper::Unbox(IDistributedWantParams::Query(it->second));
-            SetParameters(want, param);
-        }
-    }
-}
-
 std::shared_ptr<Want> DistributedWant::ToWant() {
     auto want = std::make_shared<Want>();
     want->SetFlags(GetFlags());
@@ -211,7 +148,7 @@ std::shared_ptr<Want> DistributedWant::ToWant() {
     for (auto it = ents.begin(); it != ents.end(); it++) {
         want->AddEntity(*it);
     }
-    SetParameters(want, parameters_);
+    want->SetParams(parameters_.ToWantParams());
     return want;
 }
 

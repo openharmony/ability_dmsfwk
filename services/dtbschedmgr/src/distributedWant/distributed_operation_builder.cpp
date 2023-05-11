@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "distributedWant/distributed_operation_builder.h"
 #include "distributedWant/distributed_operation.h"
+#include "distributedWant/distributed_operation_builder.h"
 
 namespace OHOS {
 namespace AAFwk {
