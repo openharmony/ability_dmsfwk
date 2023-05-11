@@ -107,7 +107,7 @@ DistributedWant&DistributedWant::operator=(const DistributedWant& other)
     return *this;
 }
 
-DistributedWant::DistributedWant(const Want&want) 
+DistributedWant::DistributedWant(const Want& want) 
 {
     DistributedOperationBuilder builder;
     builder.WithAbilityName(want.GetElement().GetAbilityName());
