@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_BASE_DISTRIBUTED_OPERATION_BUILDER_H
-#define OHOS_ABILITY_BASE_DISTRIBUTED_OPERATION_BUILDER_H
+#ifndef OHOS_DISTRIBUTEDWANT_OPERATION_BUILDER_H
+#define OHOS_DISTRIBUTEDWANT_OPERATION_BUILDER_H
 
 #include <memory>
 #include <string>
 #include <vector>
-
 #include "uri.h"
 
 namespace OHOS {
-namespace AAFwk {
+namespace DistributedSchedule {
 class DistributedOperation;
 class DistributedOperationBuilder {
 public:
@@ -70,7 +69,7 @@ public:
      * @description: Sets a Uri in an DistributedOperationBuilder.
      * @return Returns this DistributedOperationBuilder object containing the Uri.
      */
-    DistributedOperationBuilder& WithUri(const Uri& uri);
+    DistributedOperationBuilder& WithUri(const OHOS::Uri& uri);
     std::shared_ptr<DistributedOperation> build();
 
 private:
@@ -80,9 +79,9 @@ private:
     std::string deviceId_ = "";
     std::vector<std::string> entities_ = {};
     unsigned int flags_ = 0;
-    Uri uri_;
+    OHOS::Uri uri_;
 };
-}  // namespace AAFwk
+}  // namespace DistributedSchedule
 }  // namespace OHOS
 
-#endif  // OHOS_ABILITY_BASE_DISTRIBUTED_OPERATION_BUILDER_H
+#endif  // OHOS_DISTRIBUTEDWANT_OPERATION_BUILDER_H

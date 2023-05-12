@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-#include "distributedWant/distributed_operation.h"
-#include "distributedWant/distributed_operation_builder.h"
+#include "distributed_operation.h"
+#include "distributed_operation_builder.h"
 #include "parcel_macro_base.h"
 
-using namespace OHOS::AppExecFwk;
 namespace OHOS {
-namespace AAFwk {
+namespace DistributedSchedule {
 DistributedOperation::DistributedOperation() : flags_(0), uri_("")
 {
 }
@@ -384,5 +383,5 @@ void DistributedOperation::SetModuleName(const std::string& moduleName)
 {
     moduleName_ = moduleName;
 }
-}  // namespace AAFwk
+}  // namespace DistributedSchedule
 }  // namespace OHOS

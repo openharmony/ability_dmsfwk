@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef OHOS_AAFWK_DISTRIBUTED_WANT_PARAMS_H
-#define OHOS_AAFWK_DISTRIBUTED_WANT_PARAMS_H
+#ifndef OHOS_DISTRIBUTEDWANT_WANT_PARAMS_H
+#define OHOS_DISTRIBUTEDWANT_WANT_PARAMS_H
 
 #include <iostream>
 #include <map>
@@ -25,7 +25,7 @@
 #include "want_params.h"
 
 namespace OHOS {
-namespace AAFwk {
+namespace DistributedSchedule {
 class DistributedUnsupportedData {
 public:
     std::u16string key;
@@ -53,19 +53,19 @@ public:
 
     bool operator==(const DistributedWantParams& other);
 
-    static sptr<IInterface> GetInterfaceByType(int typeId, const std::string& value);
+    static sptr<AAFwk::IInterface> GetInterfaceByType(int typeId, const std::string& value);
 
-    static bool CompareInterface(const sptr<IInterface> iIt1, const sptr<IInterface> iIt2, int typeId);
+    static bool CompareInterface(const sptr<AAFwk::IInterface> iIt1, const sptr<AAFwk::IInterface> iIt2, int typeId);
 
-    static int GetDataType(const sptr<IInterface> iIt);
+    static int GetDataType(const sptr<AAFwk::IInterface> iIt);
 
-    static std::string GetStringByType(const sptr<IInterface> iIt, int typeId);
+    static std::string GetStringByType(const sptr<AAFwk::IInterface> iIt, int typeId);
 
-    void SetParam(const std::string& key, IInterface* value);
+    void SetParam(const std::string& key, AAFwk::IInterface* value);
 
-    sptr<IInterface> GetParam(const std::string& key) const;
+    sptr<AAFwk::IInterface> GetParam(const std::string& key) const;
 
-    const std::map<std::string, sptr<IInterface>>& GetParams() const;
+    const std::map<std::string, sptr<AAFwk::IInterface>>& GetParams() const;
 
     const std::set<std::string> KeySet() const;
 
@@ -81,7 +81,7 @@ public:
 
     static DistributedWantParams* Unmarshalling(Parcel& parcel);
 
-    WantParams ToWantParams();
+    AAFwk::WantParams ToWantParams();
 
 private:
     enum {
@@ -116,8 +116,8 @@ private:
         VALUE_TYPE_ARRAY = 102,
     };
 
-    bool WriteArrayToParcel(Parcel& parcel, IArray* ao) const;
-    bool ReadArrayToParcel(Parcel& parcel, int type, sptr<IArray>& ao);
+    bool WriteArrayToParcel(Parcel& parcel, AAFwk::IArray* ao) const;
+    bool ReadArrayToParcel(Parcel& parcel, int type, sptr<AAFwk::IArray>& ao);
     bool ReadFromParcel(Parcel& parcel);
     bool ReadFromParcelParam(Parcel& parcel, const std::string& key, int type);
     bool ReadFromParcelString(Parcel& parcel, const std::string& key);
@@ -130,39 +130,39 @@ private:
     bool ReadFromParcelFloat(Parcel& parcel, const std::string& key);
     bool ReadFromParcelDouble(Parcel& parcel, const std::string& key);
 
-    bool ReadFromParcelArrayString(Parcel& parcel, sptr<IArray>& ao);
-    bool ReadFromParcelArrayBool(Parcel& parcel, sptr<IArray>& ao);
-    bool ReadFromParcelArrayByte(Parcel& parcel, sptr<IArray>& ao);
-    bool ReadFromParcelArrayChar(Parcel& parcel, sptr<IArray>& ao);
-    bool ReadFromParcelArrayShort(Parcel& parcel, sptr<IArray>& ao);
+    bool ReadFromParcelArrayString(Parcel& parcel, sptr<AAFwk::IArray>& ao);
+    bool ReadFromParcelArrayBool(Parcel& parcel, sptr<AAFwk::IArray>& ao);
+    bool ReadFromParcelArrayByte(Parcel& parcel, sptr<AAFwk::IArray>& ao);
+    bool ReadFromParcelArrayChar(Parcel& parcel, sptr<AAFwk::IArray>& ao);
+    bool ReadFromParcelArrayShort(Parcel& parcel, sptr<AAFwk::IArray>& ao);
 
-    bool ReadFromParcelArrayInt(Parcel& parcel, sptr<IArray>& ao);
-    bool ReadFromParcelArrayLong(Parcel& parcel, sptr<IArray>& ao);
-    bool ReadFromParcelArrayFloat(Parcel& parcel, sptr<IArray>& ao);
-    bool ReadFromParcelArrayDouble(Parcel& parcel, sptr<IArray>& ao);
+    bool ReadFromParcelArrayInt(Parcel& parcel, sptr<AAFwk::IArray>& ao);
+    bool ReadFromParcelArrayLong(Parcel& parcel, sptr<AAFwk::IArray>& ao);
+    bool ReadFromParcelArrayFloat(Parcel& parcel, sptr<AAFwk::IArray>& ao);
+    bool ReadFromParcelArrayDouble(Parcel& parcel, sptr<AAFwk::IArray>& ao);
     bool ReadFromParcelWantParamWrapper(Parcel& parcel, const std::string& key);
 
-    bool WriteArrayToParcelString(Parcel& parcel, IArray* ao) const;
-    bool WriteArrayToParcelBool(Parcel& parcel, IArray* ao) const;
-    bool WriteArrayToParcelByte(Parcel& parcel, IArray* ao) const;
-    bool WriteArrayToParcelChar(Parcel& parcel, IArray* ao) const;
-    bool WriteArrayToParcelShort(Parcel& parcel, IArray* ao) const;
-    bool WriteArrayToParcelInt(Parcel& parcel, IArray* ao) const;
-    bool WriteArrayToParcelLong(Parcel& parcel, IArray* ao) const;
-    bool WriteArrayToParcelFloat(Parcel& parcel, IArray* ao) const;
-    bool WriteArrayToParcelDouble(Parcel& parcel, IArray* ao) const;
+    bool WriteArrayToParcelString(Parcel& parcel, AAFwk::IArray* ao) const;
+    bool WriteArrayToParcelBool(Parcel& parcel, AAFwk::IArray* ao) const;
+    bool WriteArrayToParcelByte(Parcel& parcel, AAFwk::IArray* ao) const;
+    bool WriteArrayToParcelChar(Parcel& parcel, AAFwk::IArray* ao) const;
+    bool WriteArrayToParcelShort(Parcel& parcel, AAFwk::IArray* ao) const;
+    bool WriteArrayToParcelInt(Parcel& parcel, AAFwk::IArray* ao) const;
+    bool WriteArrayToParcelLong(Parcel& parcel, AAFwk::IArray* ao) const;
+    bool WriteArrayToParcelFloat(Parcel& parcel, AAFwk::IArray* ao) const;
+    bool WriteArrayToParcelDouble(Parcel& parcel, AAFwk::IArray* ao) const;
 
-    bool WriteMarshalling(Parcel& parcel, sptr<IInterface>& o) const;
-    bool WriteToParcelString(Parcel& parcel, sptr<IInterface>& o) const;
-    bool WriteToParcelBool(Parcel& parcel, sptr<IInterface>& o) const;
-    bool WriteToParcelByte(Parcel& parcel, sptr<IInterface>& o) const;
-    bool WriteToParcelChar(Parcel& parcel, sptr<IInterface>& o) const;
-    bool WriteToParcelShort(Parcel& parcel, sptr<IInterface>& o) const;
-    bool WriteToParcelInt(Parcel& parcel, sptr<IInterface>& o) const;
-    bool WriteToParcelLong(Parcel& parcel, sptr<IInterface>& o) const;
-    bool WriteToParcelFloat(Parcel& parcel, sptr<IInterface>& o) const;
-    bool WriteToParcelDouble(Parcel& parcel, sptr<IInterface>& o) const;
-    bool WriteToParcelWantParams(Parcel& parcel, sptr<IInterface>& o) const;
+    bool WriteMarshalling(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
+    bool WriteToParcelString(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
+    bool WriteToParcelBool(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
+    bool WriteToParcelByte(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
+    bool WriteToParcelChar(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
+    bool WriteToParcelShort(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
+    bool WriteToParcelInt(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
+    bool WriteToParcelLong(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
+    bool WriteToParcelFloat(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
+    bool WriteToParcelDouble(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
+    bool WriteToParcelWantParams(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
 
     bool DoMarshalling(Parcel& parcel) const;
     bool ReadUnsupportedData(Parcel& parcel, const std::string& key, int type);
@@ -170,12 +170,12 @@ private:
     friend class DistributedWantParamWrapper;
     friend class DistributedWant;
     // inner use function
-    bool NewArrayData(IArray* source, sptr<IArray>& dest);
+    bool NewArrayData(AAFwk::IArray* source, sptr<AAFwk::IArray>& dest);
     bool NewParams(const DistributedWantParams& source, DistributedWantParams& dest);
-    std::map<std::string, sptr<IInterface>> params_;
+    std::map<std::string, sptr<AAFwk::IInterface>> params_;
     std::vector<DistributedUnsupportedData> cachedUnsupportedData_;
 };
-}  // namespace AAFwk
+}  // namespace DistributedSchedule
 }  // namespace OHOS
 
-#endif  // OHOS_AAFWK_DISTRIBUTED_WANT_PARAMS_H
+#endif  // OHOS_DISTRIBUTEDWANT_WANT_PARAMS_H

@@ -12,19 +12,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef OHOS_ABILITY_BASE_DISTRIBUTED_WANT_PARAMS_WRAPPER_H
-#define OHOS_ABILITY_BASE_DISTRIBUTED_WANT_PARAMS_WRAPPER_H
+#ifndef OHOS_DISTRIBUTEDWANT_WANT_PARAMS_WRAPPER_H
+#define OHOS_DISTRIBUTEDWANT_WANT_PARAMS_WRAPPER_H
 
 #include "base_def.h"
 #include "base_object.h"
 #include "distributed_want_params.h"
 
+using InterfaceID = OHOS::AAFwk::InterfaceID;
+using IInterface = OHOS::AAFwk::IInterface;
 namespace OHOS {
-namespace AAFwk {
+namespace DistributedSchedule {
 class DistributedWantParams;
 INTERFACE(IDistributedWantParams, a75b9db6 - 9813 - 4371 - 8848 - d2966ce6ec68)
 {
-    inline static IDistributedWantParams* Query(IInterface* object)
+    inline static IDistributedWantParams* Query(AAFwk::IInterface* object)
     {
         if (object == nullptr) {
             return nullptr;
@@ -34,7 +36,7 @@ INTERFACE(IDistributedWantParams, a75b9db6 - 9813 - 4371 - 8848 - d2966ce6ec68)
 
     virtual ErrCode GetValue(DistributedWantParams& value) = 0;
 };
-class DistributedWantParamWrapper final : public Object, public IDistributedWantParams {
+class DistributedWantParamWrapper final : public AAFwk::Object, public IDistributedWantParams {
 public:
     inline DistributedWantParamWrapper(const DistributedWantParams& value) : wantParams_(value)
     {}
@@ -77,6 +79,6 @@ public:
 private:
     DistributedWantParams wantParams_;
 };
-}  // namespace AAFwk
+}  // namespace DistributedSchedule
 }  // namespace OHOS
-#endif  // OHOS_ABILITY_BASE_DISTRIBUTED_WANT_PARAMS_WRAPPER_H
+#endif  // OHOS_DISTRIBUTEDWANT_WANT_PARAMS_WRAPPER_H

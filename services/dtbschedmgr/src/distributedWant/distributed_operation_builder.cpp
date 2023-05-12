@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "distributedWant/distributed_operation.h"
-#include "distributedWant/distributed_operation_builder.h"
+#include "distributed_operation.h"
+#include "distributed_operation_builder.h"
 
 namespace OHOS {
-namespace AAFwk {
+namespace DistributedSchedule {
 DistributedOperationBuilder::DistributedOperationBuilder()
     : abilityName_(""), action_(""), bundleName_(""), deviceId_(""), flags_(0), uri_("")
 {
@@ -110,5 +110,5 @@ std::shared_ptr<DistributedOperation> DistributedOperationBuilder::build()
 
     return operation;
 }
-}  // namespace AAFwk
+}  // namespace DistributedSchedule
 }  // namespace OHOS

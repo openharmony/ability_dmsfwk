@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AAFWK_DISTRIBUTED_WANT_H
-#define OHOS_AAFWK_DISTRIBUTED_WANT_H
+#ifndef OHOS_DISTRIBUTEDWANT_WANT_H
+#define OHOS_DISTRIBUTEDWANT_WANT_H
 
 #include <algorithm>
 #include <string>
 #include <vector>
-
 #include "distributedWant/distributed_operation.h"
 #include "distributedWant/distributed_want_params.h"
 #include "element_name.h"
@@ -28,10 +27,10 @@
 #include "uri.h"
 #include "want.h"
 
-using DistributedOperation = OHOS::AAFwk::DistributedOperation;
+using DistributedOperation = OHOS::DistributedSchedule::DistributedOperation;
 
 namespace OHOS {
-namespace AAFwk {
+namespace DistributedSchedule {
 class DistributedWant final : public Parcelable {
 public:
     /**
@@ -115,7 +114,7 @@ public:
      */
     DistributedWant(const DistributedWant& want);
     DistributedWant& operator=(const DistributedWant&);
-    DistributedWant(const Want& want);
+    DistributedWant(const AAFwk::Want& want);
 
     /**
      * @description: Sets a flag in a DistributedWant.
@@ -203,7 +202,7 @@ public:
      * @description: Obtains the description of a URI in a DistributedWant.
      * @return Returns the URI description in the DistributedWant.
      */
-    Uri GetUri() const;
+    OHOS::Uri GetUri() const;
 
     /**
      * @description: Obtains the string representation of the URI in this DistributedWant.
@@ -223,7 +222,7 @@ public:
      * @param uri Indicates the URI description.
      * @return Returns this DistributedWant object containing the URI.
      */
-    DistributedWant& SetUri(const Uri& uri);
+    DistributedWant& SetUri(const OHOS::Uri& uri);
 
     /**
      * @description: Sets the description of a URI and a type in this DistributedWant.
@@ -231,7 +230,7 @@ public:
      * @param type Indicates the type description.
      * @return Returns the DistributedWant object containing the URI and the type by setting.
      */
-    DistributedWant& SetUriAndType(const Uri& uri, const std::string& type);
+    DistributedWant& SetUriAndType(const OHOS::Uri& uri, const std::string& type);
 
     /**
      * @description: Converts a DistributedWant into a URI string containing a representation of it.
@@ -262,7 +261,7 @@ public:
      * @param uri Indicates the URI to format.
      * @return Returns this DistributedWant object that contains the formatted URI attribute.
      */
-    DistributedWant& FormatUri(const Uri& uri);
+    DistributedWant& FormatUri(const OHOS::Uri& uri);
 
     /**
      * @description: Obtains the description of an action in a DistributedWant.
@@ -362,7 +361,7 @@ public:
      * @param type Indicates the MIME type to format.
      * @return Returns this DistributedWant object that contains the formatted URI and type attributes.
      */
-    DistributedWant& FormatUriAndType(const Uri& uri, const std::string& type);
+    DistributedWant& FormatUriAndType(const OHOS::Uri& uri, const std::string& type);
 
     /**
      * @description: This method formats data of a specified MIME type
@@ -433,7 +432,7 @@ public:
      * @return Returns the byte-type value of the parameter matching the given key;
      * returns the default value if the key does not exist.
      */
-    byte GetByteParam(const std::string& key, byte defaultValue) const;
+    AAFwk::byte GetByteParam(const std::string& key, AAFwk::byte defaultValue) const;
 
     /**
      * @description: Obtains a byte-type array matching the given key.
@@ -441,7 +440,7 @@ public:
      * @return Returns the byte-type array of the parameter matching the given key;
      * returns null if the key does not exist.
      */
-    std::vector<byte> GetByteArrayParam(const std::string& key) const;
+    std::vector<AAFwk::byte> GetByteArrayParam(const std::string& key) const;
 
     /**
      * @description: Sets a parameter value of the byte type.
@@ -449,7 +448,7 @@ public:
      * @param value Indicates the byte-type value of the parameter.
      * @return Returns this DistributedWant object containing the parameter value.
      */
-    DistributedWant& SetParam(const std::string& key, byte value);
+    DistributedWant& SetParam(const std::string& key, AAFwk::byte value);
 
     /**
      * @description: Sets a parameter value of the byte array type.
@@ -457,7 +456,7 @@ public:
      * @param value Indicates the byte array of the parameter.
      * @return Returns this DistributedWant object containing the parameter value.
      */
-    DistributedWant& SetParam(const std::string& key, const std::vector<byte>& value);
+    DistributedWant& SetParam(const std::string& key, const std::vector<AAFwk::byte>& value);
 
     /**
      * @description: Obtains a char value matching the given key.
@@ -466,7 +465,7 @@ public:
      * @return Returns the char value of the parameter matching the given key;
      * returns the default value if the key does not exist.
      */
-    zchar GetCharParam(const std::string& key, zchar defaultValue) const;
+    AAFwk::zchar GetCharParam(const std::string& key, AAFwk::zchar defaultValue) const;
 
     /**
      * @description: Obtains a char array matching the given key.
@@ -474,7 +473,7 @@ public:
      * @return Returns the char array of the parameter matching the given key;
      * returns null if the key does not exist.
      */
-    std::vector<zchar> GetCharArrayParam(const std::string& key) const;
+    std::vector<AAFwk::zchar> GetCharArrayParam(const std::string& key) const;
 
     /**
      * @description: Sets a parameter value of the char type.
@@ -482,7 +481,7 @@ public:
      * @param value Indicates the char value of the parameter.
      * @return Returns this DistributedWant object containing the parameter value.
      */
-    DistributedWant& SetParam(const std::string& key, zchar value);
+    DistributedWant& SetParam(const std::string& key, AAFwk::zchar value);
 
     /**
      * @description: Sets a parameter value of the char array type.
@@ -490,7 +489,7 @@ public:
      * @param value Indicates the char array of the parameter.
      * @return Returns this DistributedWant object containing the parameter value.
      */
-    DistributedWant& SetParam(const std::string& key, const std::vector<zchar>& value);
+    DistributedWant& SetParam(const std::string& key, const std::vector<AAFwk::zchar>& value);
 
     /**
      * @description: Obtains an int value matching the given key.
@@ -727,7 +726,7 @@ public:
      * @description: Sets the description of an operation in a DistributedWant.
      * @param operation Indicates the operation description.
      */
-    void SetOperation(const OHOS::AAFwk::DistributedOperation& operation);
+    void SetOperation(const DistributedOperation& operation);
 
     /**
      * @description: Sets the description of an operation in a DistributedWant.
@@ -762,7 +761,7 @@ public:
 
     static DistributedWant* FromString(std::string& string);
 
-    std::shared_ptr<Want> ToWant();
+    std::shared_ptr<AAFwk::Want> ToWant();
 
     /**
     * @description: Sets a device id in a DistributedWant.
@@ -771,11 +770,8 @@ public:
     */
     DistributedWant& SetDeviceId(const std::string& deviceId);
 public:
-    // action definition
     static const std::string ACTION_PLAY;
     static const std::string ACTION_HOME;
-
-    // entity definition
     static const std::string ENTITY_HOME;
     static const std::string ENTITY_VIDEO;
     static const std::string FLAG_HOME_INTENT_FROM_SYSTEM;
@@ -788,15 +784,10 @@ public:
     static const std::string ENTITY_MESSAGING;
     static const std::string ENTITY_FILES;
     static const std::string ENTITY_GALLERY;
-
-    // flag definition
     static unsigned int FLAG_ABILITY_NEW_MISSION;
     static unsigned int FLAG_ABILITY_CLEAR_MISSION;
-
     static constexpr int HEX_STRING_BUF_LEN = 36;
     static constexpr int HEX_STRING_LEN = 10;
-
-    // reserved param definition
     static const std::string PARAM_RESV_WINDOW_MODE;
     static const std::string PARAM_RESV_DISPLAY_ID;
     static const std::string PARAM_RESV_CALLER_TOKEN;
@@ -812,9 +803,7 @@ private:
     static const std::string MIME_TYPE;
     static const std::string WANT_HEADER;
 
-    // no object in parcel
     static constexpr int VALUE_NULL = -1;
-    // object exist in parcel
     static constexpr int VALUE_OBJECT = 1;
 
 private:
@@ -825,13 +814,12 @@ private:
     static bool ParseUriInternal(const std::string& content, OHOS::AppExecFwk::ElementName& element, DistributedWant& want);
     bool ReadFromParcel(Parcel& parcel);
     static bool CheckAndSetParameters(DistributedWant& want, const std::string& key, std::string& prop, const std::string& value);
-    Uri GetLowerCaseScheme(const Uri& uri);
+    OHOS::Uri GetLowerCaseScheme(const OHOS::Uri& uri);
     void ToUriStringInner(std::string& uriString) const;
     nlohmann::json ToJson() const;
     bool ReadFromJson(nlohmann::json& wantJson);
-    void SetParameters(std::shared_ptr<Want>& want, DistributedWantParams& params);
 };
-}  // namespace AAFwk
+}  // namespace DistributedSchedule
 }  // namespace OHOS
 
-#endif  // OHOS_AAFWK_DISTRIBUTED_WANT_H
+#endif  // OHOS_DISTRIBUTEDWANT_WANT_H

@@ -14,9 +14,8 @@
  */
 
 #include "distributed_sched_proxy.h"
-
 #include "dfx/dms_hitrace_constants.h"
-#include "distributedWant/distributed_want.h"
+#include "distributed_want.h"
 #include "dtbschedmgr_log.h"
 #include "ipc_types.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
@@ -755,7 +754,7 @@ int32_t DistributedSchedProxy::StartFreeInstallFromRemote(const FreeInstallInfo&
     PARCEL_WRITE_HELPER(data, StringVector, info.accountInfo.groupIdList);
     PARCEL_WRITE_HELPER(data, String, info.callerInfo.callerAppId);
     PARCEL_WRITE_HELPER(data, Int64, taskId);
-    OHOS::AAFwk::DistributedWant cmpWant;
+    DistributedWant cmpWant;
     cmpWant.SetParam(CMPT_PARAM_FREEINSTALL_BUNDLENAMES, info.callerInfo.bundleNames);
     PARCEL_WRITE_HELPER(data, Parcelable, &cmpWant);
     nlohmann::json extraInfoJson;

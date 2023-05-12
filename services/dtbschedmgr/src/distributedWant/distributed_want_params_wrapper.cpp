@@ -14,10 +14,11 @@
  */
 
 #include <algorithm>
-#include "distributedWant/distributed_want_params_wrapper.h"
+#include "distributed_want_params_wrapper.h"
 
+using namespace OHOS::AAFwk;
 namespace OHOS {
-namespace AAFwk {
+namespace DistributedSchedule {
 constexpr int32_t DISTRIBUTEDWANT_PARAM_WRAPPER_TWO = 2;
 
 IINTERFACE_IMPL_1(DistributedWantParamWrapper, Object, IDistributedWantParams);
@@ -213,5 +214,5 @@ DistributedWantParams DistributedWantParamWrapper::ParseWantParams(const std::st
     }
     return wantPaqrams;
 }
-}  // namespace AAFwk
+}  // namespace DistributedSchedule
 }  // namespace OHOS

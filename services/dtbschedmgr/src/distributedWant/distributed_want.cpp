@@ -18,14 +18,13 @@
 #include <cstdlib>
 #include <regex>
 #include <securec.h>
-
 #include "array_wrapper.h"
 #include "base_object.h"
 #include "bool_wrapper.h"
 #include "byte_wrapper.h"
-#include "distributedWant/distributed_operation_builder.h"
-#include "distributedWant/distributed_want.h"
-#include "distributedWant/distributed_want_params_wrapper.h"
+#include "distributed_operation_builder.h"
+#include "distributed_want.h"
+#include "distributed_want_params_wrapper.h"
 #include "double_wrapper.h"
 #include "float_wrapper.h"
 #include "int_wrapper.h"
@@ -40,7 +39,7 @@ using namespace OHOS::AppExecFwk;
 using OHOS::AppExecFwk::ElementName;
 
 namespace OHOS {
-namespace AAFwk {
+namespace DistributedSchedule {
 namespace {
 const std::regex NUMBER_REGEX("^[-+]?([0-9]+)([.]([0-9]+))?$");
 };  // namespace
@@ -105,7 +104,7 @@ DistributedWant&DistributedWant::operator=(const DistributedWant& other)
     return *this;
 }
 
-DistributedWant::DistributedWant(const Want& want) 
+DistributedWant::DistributedWant(const AAFwk::Want& want) 
 {
     DistributedOperationBuilder builder;
     builder.WithAbilityName(want.GetElement().GetAbilityName());
@@ -117,9 +116,9 @@ DistributedWant::DistributedWant(const Want& want)
     builder.WithUri(want.GetUri());
     std::shared_ptr<DistributedOperation> op = builder.build();
     operation_ = *op;
-    std::map<std::string, sptr<IInterface>> data = want.GetParams().GetParams();
+    std::map<std::string, sptr<AAFwk::IInterface>> data = want.GetParams().GetParams();
     for (auto it = data.begin(); it != data.end(); it++) {
-        auto tp = WantParams::GetDataType(it->second);
+        auto tp = AAFwk::WantParams::GetDataType(it->second);
         if ((tp == DistributedWantParams::VALUE_TYPE_BOOLEAN) ||
             (tp == DistributedWantParams::VALUE_TYPE_BYTE) ||
             (tp == DistributedWantParams::VALUE_TYPE_CHAR) ||
@@ -136,8 +135,8 @@ DistributedWant::DistributedWant(const Want& want)
     }
 }
 
-std::shared_ptr<Want> DistributedWant::ToWant() {
-    auto want = std::make_shared<Want>();
+std::shared_ptr<AAFwk::Want> DistributedWant::ToWant() {
+    auto want = std::make_shared<AAFwk::Want>();
     want->SetFlags(GetFlags());
     want->SetElement(GetElement());
     want->SetUri(GetUri());
@@ -323,9 +322,9 @@ DistributedWant& DistributedWant::SetBundle(const std::string& bundleName)
 std::string DistributedWant::GetType() const
 {
     auto value = parameters_.GetParam(MIME_TYPE);
-    IString* ao = IString::Query(value);
+    AAFwk::IString* ao = AAFwk::IString::Query(value);
     if (ao != nullptr) {
-        return String::Unbox(ao);
+        return AAFwk::String::Unbox(ao);
     }
     return std::string();
 }
@@ -337,7 +336,7 @@ std::string DistributedWant::GetType() const
  */
 DistributedWant& DistributedWant::SetType(const std::string& type)
 {
-    sptr<IString> valueObj = String::Parse(type);
+    sptr<AAFwk::IString> valueObj = AAFwk::String::Parse(type);
     parameters_.SetParam(MIME_TYPE, valueObj);
     return *this;
 }
@@ -503,9 +502,9 @@ DistributedWant& DistributedWant::SetParams(const DistributedWantParams& wantPar
 bool DistributedWant::GetBoolParam(const std::string& key, bool defaultValue) const
 {
     auto value = parameters_.GetParam(key);
-    IBoolean* bo = IBoolean::Query(value);
+    AAFwk::IBoolean* bo = AAFwk::IBoolean::Query(value);
     if (bo != nullptr) {
-        return Boolean::Unbox(bo);
+        return AAFwk::Boolean::Unbox(bo);
     }
     return defaultValue;
 }
@@ -520,18 +519,17 @@ std::vector<bool> DistributedWant::GetBoolArrayParam(const std::string& key) con
 {
     std::vector<bool> array;
     auto value = parameters_.GetParam(key);
-    IArray* ao = IArray::Query(value);
-    if (ao != nullptr && Array::IsBooleanArray(ao)) {
-        auto func = [&](IInterface* object) {
+    AAFwk::IArray* ao = AAFwk::IArray::Query(value);
+    if (ao != nullptr && AAFwk::Array::IsBooleanArray(ao)) {
+        auto func = [&](AAFwk::IInterface* object) {
             if (object != nullptr) {
-                IBoolean* value = IBoolean::Query(object);
+                AAFwk::IBoolean* value = AAFwk::IBoolean::Query(object);
                 if (value != nullptr) {
-                    array.push_back(Boolean::Unbox(value));
+                    array.push_back(AAFwk::Boolean::Unbox(value));
                 }
             }
         };
-
-        Array::ForEach(ao, func);
+        AAFwk::Array::ForEach(ao, func);
     }
     return array;
 }
@@ -544,7 +542,7 @@ std::vector<bool> DistributedWant::GetBoolArrayParam(const std::string& key) con
  */
 DistributedWant& DistributedWant::SetParam(const std::string&key, bool value)
 {
-    parameters_.SetParam(key, Boolean::Box(value));
+    parameters_.SetParam(key, AAFwk::Boolean::Box(value));
     return *this;
 }
 
@@ -557,10 +555,10 @@ DistributedWant& DistributedWant::SetParam(const std::string&key, bool value)
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<bool>& value)
 {
     std::size_t size = value.size();
-    sptr<IArray> ao = new (std::nothrow) Array(size, g_IID_IBoolean);
+    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IBoolean);
     if (ao != nullptr) {
         for (std::size_t i = 0; i < size; i++) {
-            ao->Set(i, Boolean::Box(value[i]));
+            ao->Set(i, AAFwk::Boolean::Box(value[i]));
         }
         parameters_.SetParam(key, ao);
     }
@@ -574,12 +572,12 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
  * @return Returns the byte-type value of the parameter matching the given key;
  * returns the default value if the key does not exist.
  */
-byte DistributedWant::GetByteParam(const std::string& key, const byte defaultValue) const
+AAFwk::byte DistributedWant::GetByteParam(const std::string& key, const AAFwk::byte defaultValue) const
 {
     auto value = parameters_.GetParam(key);
-    IByte* bo = IByte::Query(value);
+    AAFwk::IByte* bo = AAFwk::IByte::Query(value);
     if (bo != nullptr) {
-        return Byte::Unbox(bo);
+        return AAFwk::Byte::Unbox(bo);
     }
     return defaultValue;
 }
@@ -590,21 +588,21 @@ byte DistributedWant::GetByteParam(const std::string& key, const byte defaultVal
  * @return Returns the byte-type array of the parameter matching the given key;
  * returns null if the key does not exist.
  */
-std::vector<byte> DistributedWant::GetByteArrayParam(const std::string& key) const
+std::vector<AAFwk::byte> DistributedWant::GetByteArrayParam(const std::string& key) const
 {
-    std::vector<byte> array;
+    std::vector<AAFwk::byte> array;
     auto value = parameters_.GetParam(key);
-    IArray* ao = IArray::Query(value);
-    if (ao != nullptr && Array::IsByteArray(ao)) {
-        auto func = [&](IInterface* object) {
+    AAFwk::IArray* ao = AAFwk::IArray::Query(value);
+    if (ao != nullptr && AAFwk::Array::IsByteArray(ao)) {
+        auto func = [&](AAFwk::IInterface* object) {
             if (object != nullptr) {
-                IByte* value = IByte::Query(object);
+                AAFwk::IByte* value = AAFwk::IByte::Query(object);
                 if (value != nullptr) {
-                    array.push_back(Byte::Unbox(value));
+                    array.push_back(AAFwk::Byte::Unbox(value));
                 }
             }
         };
-        Array::ForEach(ao, func);
+        AAFwk::Array::ForEach(ao, func);
     }
     return array;
 }
@@ -615,9 +613,9 @@ std::vector<byte> DistributedWant::GetByteArrayParam(const std::string& key) con
  * @param value Indicates the byte-type value of the parameter.
  * @return Returns this object containing the parameter value.
  */
-DistributedWant& DistributedWant::SetParam(const std::string& key, byte value)
+DistributedWant& DistributedWant::SetParam(const std::string& key, AAFwk::byte value)
 {
-    parameters_.SetParam(key, Byte::Box(value));
+    parameters_.SetParam(key, AAFwk::Byte::Box(value));
     return *this;
 }
 
@@ -627,15 +625,15 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, byte value)
  * @param value Indicates the byte array of the parameter.
  * @return Returns this object containing the parameter value.
  */
-DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<byte>& value)
+DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<AAFwk::byte>& value)
 {
     std::size_t size = value.size();
-    sptr<IArray> ao = new (std::nothrow) Array(size, g_IID_IByte);
+    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IByte);
     if (ao == nullptr) {
         return *this;
     }
     for (std::size_t i = 0; i < size; i++) {
-        ao->Set(i, Byte::Box(value[i]));
+        ao->Set(i, AAFwk::Byte::Box(value[i]));
     }
     parameters_.SetParam(key, ao);
     return *this;
@@ -648,12 +646,12 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
  * @return Returns the char value of the parameter matching the given key;
  * returns the default value if the key does not exist.
  */
-zchar DistributedWant::GetCharParam(const std::string& key, zchar defaultValue) const
+AAFwk::zchar DistributedWant::GetCharParam(const std::string& key, AAFwk::zchar defaultValue) const
 {
     auto value = parameters_.GetParam(key);
-    IChar* ao = IChar::Query(value);
+    AAFwk::IChar* ao = AAFwk::IChar::Query(value);
     if (ao != nullptr) {
-        return Char::Unbox(ao);
+        return AAFwk::Char::Unbox(ao);
     }
     return defaultValue;
 }
@@ -664,21 +662,21 @@ zchar DistributedWant::GetCharParam(const std::string& key, zchar defaultValue) 
  * @return Returns the char array of the parameter matching the given key;
  * returns null if the key does not exist.
  */
-std::vector<zchar> DistributedWant::GetCharArrayParam(const std::string& key) const
+std::vector<AAFwk::zchar> DistributedWant::GetCharArrayParam(const std::string& key) const
 {
-    std::vector<zchar> array;
+    std::vector<AAFwk::zchar> array;
     auto value = parameters_.GetParam(key);
-    IArray* ao = IArray::Query(value);
-    if (ao != nullptr && Array::IsCharArray(ao)) {
-        auto func = [&](IInterface* object) {
+    AAFwk::IArray* ao = AAFwk::IArray::Query(value);
+    if (ao != nullptr && AAFwk::Array::IsCharArray(ao)) {
+        auto func = [&](AAFwk::IInterface* object) {
             if (object != nullptr) {
-                IChar* value = IChar::Query(object);
+                AAFwk::IChar* value = AAFwk::IChar::Query(object);
                 if (value != nullptr) {
-                    array.push_back(Char::Unbox(value));
+                    array.push_back(AAFwk::Char::Unbox(value));
                 }
             }
         };
-        Array::ForEach(ao, func);
+        AAFwk::Array::ForEach(ao, func);
     }
     return array;
 }
@@ -689,9 +687,9 @@ std::vector<zchar> DistributedWant::GetCharArrayParam(const std::string& key) co
  * @param value Indicates the char value of the parameter.
  * @return Returns this DistributedWant object containing the parameter value.
  */
-DistributedWant& DistributedWant::SetParam(const std::string& key, zchar value)
+DistributedWant& DistributedWant::SetParam(const std::string& key, AAFwk::zchar value)
 {
-    parameters_.SetParam(key, Char::Box(value));
+    parameters_.SetParam(key, AAFwk::Char::Box(value));
     return *this;
 }
 
@@ -701,15 +699,15 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, zchar value)
  * @param value Indicates the char array of the parameter.
  * @return Returns this DistributedWant object containing the parameter value.
  */
-DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<zchar>& value)
+DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<AAFwk::zchar>& value)
 {
     std::size_t size = value.size();
-    sptr<IArray> ao = new (std::nothrow) Array(size, g_IID_IChar);
+    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IChar);
     if (ao == nullptr) {
         return *this;
     }
     for (std::size_t i = 0; i < size; i++) {
-        ao->Set(i, Char::Box(value[i]));
+        ao->Set(i, AAFwk::Char::Box(value[i]));
     }
     parameters_.SetParam(key, ao);
     return *this;
@@ -725,9 +723,9 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
 int DistributedWant::GetIntParam(const std::string& key, const int defaultValue) const
 {
     auto value = parameters_.GetParam(key);
-    IInteger* ao = IInteger::Query(value);
+    AAFwk::IInteger* ao = AAFwk::IInteger::Query(value);
     if (ao != nullptr) {
-        return Integer::Unbox(ao);
+        return AAFwk::Integer::Unbox(ao);
     }
     return defaultValue;
 }
@@ -742,17 +740,17 @@ std::vector<int> DistributedWant::GetIntArrayParam(const std::string& key) const
 {
     std::vector<int> array;
     auto value = parameters_.GetParam(key);
-    IArray* ao = IArray::Query(value);
-    if (ao != nullptr && Array::IsIntegerArray(ao)) {
-        auto func = [&](IInterface* object) {
+    AAFwk::IArray* ao = AAFwk::IArray::Query(value);
+    if (ao != nullptr && AAFwk::Array::IsIntegerArray(ao)) {
+        auto func = [&](AAFwk::IInterface* object) {
             if (object != nullptr) {
-                IInteger* value = IInteger::Query(object);
+                AAFwk::IInteger* value = AAFwk::IInteger::Query(object);
                 if (value != nullptr) {
-                    array.push_back(Integer::Unbox(value));
+                    array.push_back(AAFwk::Integer::Unbox(value));
                 }
             }
         };
-        Array::ForEach(ao, func);
+        AAFwk::Array::ForEach(ao, func);
     }
     return array;
 }
@@ -765,7 +763,7 @@ std::vector<int> DistributedWant::GetIntArrayParam(const std::string& key) const
  */
 DistributedWant& DistributedWant::SetParam(const std::string& key, int value)
 {
-    parameters_.SetParam(key, Integer::Box(value));
+    parameters_.SetParam(key, AAFwk::Integer::Box(value));
     return *this;
 }
 
@@ -778,12 +776,12 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, int value)
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<int>& value)
 {
     std::size_t size = value.size();
-    sptr<IArray> ao = new (std::nothrow) Array(size, g_IID_IInteger);
+    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IInteger);
     if (ao == nullptr) {
         return *this;
     }
     for (std::size_t i = 0; i < size; i++) {
-        ao->Set(i, Integer::Box(value[i]));
+        ao->Set(i, AAFwk::Integer::Box(value[i]));
     }
     parameters_.SetParam(key, ao);
     return *this;
@@ -799,9 +797,9 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
 double DistributedWant::GetDoubleParam(const std::string& key, double defaultValue) const
 {
     auto value = parameters_.GetParam(key);
-    IDouble* ao = IDouble::Query(value);
+    AAFwk::IDouble* ao = AAFwk::IDouble::Query(value);
     if (ao != nullptr) {
-        return Double::Unbox(ao);
+        return AAFwk::Double::Unbox(ao);
     }
     return defaultValue;
 }
@@ -816,17 +814,17 @@ std::vector<double> DistributedWant::GetDoubleArrayParam(const std::string& key)
 {
     std::vector<double> array;
     auto value = parameters_.GetParam(key);
-    IArray* ao = IArray::Query(value);
-    if (ao != nullptr && Array::IsDoubleArray(ao)) {
-        auto func = [&](IInterface* object) {
+    AAFwk::IArray* ao = AAFwk::IArray::Query(value);
+    if (ao != nullptr && AAFwk::Array::IsDoubleArray(ao)) {
+        auto func = [&](AAFwk::IInterface* object) {
             if (object != nullptr) {
-                IDouble* value = IDouble::Query(object);
+                AAFwk::IDouble* value = AAFwk::IDouble::Query(object);
                 if (value != nullptr) {
-                    array.push_back(Double::Unbox(value));
+                    array.push_back(AAFwk::Double::Unbox(value));
                 }
             }
         };
-        Array::ForEach(ao, func);
+        AAFwk::Array::ForEach(ao, func);
     }
     return array;
 }
@@ -839,7 +837,7 @@ std::vector<double> DistributedWant::GetDoubleArrayParam(const std::string& key)
  */
 DistributedWant& DistributedWant::SetParam(const std::string& key, double value)
 {
-    parameters_.SetParam(key, Double::Box(value));
+    parameters_.SetParam(key, AAFwk::Double::Box(value));
     return *this;
 }
 
@@ -852,12 +850,12 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, double value)
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<double>& value)
 {
     std::size_t size = value.size();
-    sptr<IArray> ao = new (std::nothrow) Array(size, g_IID_IDouble);
+    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IDouble);
     if (ao == nullptr) {
         return *this;
     }
     for (std::size_t i = 0; i < size; i++) {
-        ao->Set(i, Double::Box(value[i]));
+        ao->Set(i, AAFwk::Double::Box(value[i]));
     }
     parameters_.SetParam(key, ao);
     return *this;
@@ -873,9 +871,9 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
 float DistributedWant::GetFloatParam(const std::string& key, float defaultValue) const
 {
     auto value = parameters_.GetParam(key);
-    IFloat* ao = IFloat::Query(value);
+    AAFwk::IFloat* ao = AAFwk::IFloat::Query(value);
     if (ao != nullptr) {
-        return Float::Unbox(ao);
+        return AAFwk::Float::Unbox(ao);
     }
     return defaultValue;
 }
@@ -889,17 +887,17 @@ std::vector<float> DistributedWant::GetFloatArrayParam(const std::string& key) c
 {
     std::vector<float> array;
     auto value = parameters_.GetParam(key);
-    IArray* ao = IArray::Query(value);
-    if (ao != nullptr && Array::IsFloatArray(ao)) {
-        auto func = [&](IInterface* object) {
+    AAFwk::IArray* ao = AAFwk::IArray::Query(value);
+    if (ao != nullptr && AAFwk::Array::IsFloatArray(ao)) {
+        auto func = [&](AAFwk::IInterface* object) {
             if (object != nullptr) {
-                IFloat* value = IFloat::Query(object);
+                AAFwk::IFloat* value = AAFwk::IFloat::Query(object);
                 if (value != nullptr) {
-                    array.push_back(Float::Unbox(value));
+                    array.push_back(AAFwk::Float::Unbox(value));
                 }
             }
         };
-        Array::ForEach(ao, func);
+        AAFwk::Array::ForEach(ao, func);
     }
     return array;
 }
@@ -912,7 +910,7 @@ std::vector<float> DistributedWant::GetFloatArrayParam(const std::string& key) c
  */
 DistributedWant& DistributedWant::SetParam(const std::string& key, float value)
 {
-    parameters_.SetParam(key, Float::Box(value));
+    parameters_.SetParam(key, AAFwk::Float::Box(value));
     return *this;
 }
 
@@ -925,13 +923,13 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, float value)
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<float>& value)
 {
     std::size_t size = value.size();
-    sptr<IArray> ao = new (std::nothrow) Array(size, g_IID_IFloat);
+    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IFloat);
     if (ao == nullptr) {
         return *this;
     }
 
     for (std::size_t i = 0; i < size; i++) {
-        ao->Set(i, Float::Box(value[i]));
+        ao->Set(i, AAFwk::Float::Box(value[i]));
     }
     parameters_.SetParam(key, ao);
     return *this;
@@ -948,11 +946,11 @@ long DistributedWant::GetLongParam(const std::string& key, long defaultValue) co
 {
     auto value = parameters_.GetParam(key);
 
-    if (ILong::Query(value) != nullptr) {
-        return Long::Unbox(ILong::Query(value));
-    } else if (IString::Query(value) != nullptr) {
+    if (AAFwk::ILong::Query(value) != nullptr) {
+        return AAFwk::Long::Unbox(AAFwk::ILong::Query(value));
+    } else if (AAFwk::IString::Query(value) != nullptr) {
         // Marshalling
-        std::string str = String::Unbox(IString::Query(value));
+        std::string str = AAFwk::String::Unbox(AAFwk::IString::Query(value));
         if (std::regex_match(str, NUMBER_REGEX)) {
             return std::atoll(str.c_str());
         }
@@ -960,15 +958,15 @@ long DistributedWant::GetLongParam(const std::string& key, long defaultValue) co
 
     return defaultValue;
 }
-void ArrayAddData(IInterface* object, std::vector<long>& array)
+void ArrayAddData(AAFwk::IInterface* object, std::vector<long>& array)
 {
     if (object == nullptr) {
         return;
     }
 
-    IString* o = IString::Query(object);
+    AAFwk::IString* o = AAFwk::IString::Query(object);
     if (o != nullptr) {
-        std::string str = String::Unbox(o);
+        std::string str = AAFwk::String::Unbox(o);
         if (std::regex_match(str, NUMBER_REGEX)) {
             array.push_back(std::atoll(str.c_str()));
         }
@@ -984,21 +982,21 @@ std::vector<long> DistributedWant::GetLongArrayParam(const std::string& key) con
 {
     std::vector<long> array;
     auto value = parameters_.GetParam(key);
-    IArray* ao = IArray::Query(value);
-    if (ao != nullptr && Array::IsLongArray(ao)) {
-        auto func = [&](IInterface* object) {
+    AAFwk::IArray* ao = AAFwk::IArray::Query(value);
+    if (ao != nullptr && AAFwk::Array::IsLongArray(ao)) {
+        auto func = [&](AAFwk::IInterface* object) {
             if (object != nullptr) {
-                ILong* value = ILong::Query(object);
+                AAFwk::ILong* value = AAFwk::ILong::Query(object);
                 if (value != nullptr) {
-                    array.push_back(Long::Unbox(value));
+                    array.push_back(AAFwk::Long::Unbox(value));
                 }
             }
         };
-        Array::ForEach(ao, func);
-    } else if (ao != nullptr && Array::IsStringArray(ao)) {
+        AAFwk::Array::ForEach(ao, func);
+    } else if (ao != nullptr && AAFwk::Array::IsStringArray(ao)) {
         // Marshalling
-        auto func = [&](IInterface* object) { ArrayAddData(object, array); };
-        Array::ForEach(ao, func);
+        auto func = [&](AAFwk::IInterface* object) { ArrayAddData(object, array); };
+        AAFwk::Array::ForEach(ao, func);
     }
     return array;
 }
@@ -1011,7 +1009,7 @@ std::vector<long> DistributedWant::GetLongArrayParam(const std::string& key) con
  */
 DistributedWant& DistributedWant::SetParam(const std::string& key, long value)
 {
-    parameters_.SetParam(key, Long::Box(value));
+    parameters_.SetParam(key, AAFwk::Long::Box(value));
     return *this;
 }
 
@@ -1024,12 +1022,12 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, long value)
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<long>& value)
 {
     std::size_t size = value.size();
-    sptr<IArray> ao = new (std::nothrow) Array(size, g_IID_ILong);
+    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_ILong);
     if (ao == nullptr) {
         return *this;
     }
     for (std::size_t i = 0; i < size; i++) {
-        ao->Set(i, Long::Box(value[i]));
+        ao->Set(i, AAFwk::Long::Box(value[i]));
     }
     parameters_.SetParam(key, ao);
     return *this;
@@ -1037,7 +1035,7 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
 
 DistributedWant& DistributedWant::SetParam(const std::string& key, long long value)
 {
-    parameters_.SetParam(key, Long::Box(value));
+    parameters_.SetParam(key, AAFwk::Long::Box(value));
     return *this;
 }
 
@@ -1051,9 +1049,9 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, long long val
 short DistributedWant::GetShortParam(const std::string& key, short defaultValue) const
 {
     auto value = parameters_.GetParam(key);
-    IShort* ao = IShort::Query(value);
+    AAFwk::IShort* ao = AAFwk::IShort::Query(value);
     if (ao != nullptr) {
-        return Short::Unbox(ao);
+        return AAFwk::Short::Unbox(ao);
     }
     return defaultValue;
 }
@@ -1068,17 +1066,17 @@ std::vector<short> DistributedWant::GetShortArrayParam(const std::string& key) c
 {
     std::vector<short> array;
     auto value = parameters_.GetParam(key);
-    IArray* ao = IArray::Query(value);
-    if (ao != nullptr && Array::IsShortArray(ao)) {
-        auto func = [&](IInterface* object) {
+    AAFwk::IArray* ao = AAFwk::IArray::Query(value);
+    if (ao != nullptr && AAFwk::Array::IsShortArray(ao)) {
+        auto func = [&](AAFwk::IInterface* object) {
             if (object != nullptr) {
-                IShort* value = IShort::Query(object);
+                AAFwk::IShort* value = AAFwk::IShort::Query(object);
                 if (value != nullptr) {
-                    array.push_back(Short::Unbox(value));
+                    array.push_back(AAFwk::Short::Unbox(value));
                 }
             }
         };
-        Array::ForEach(ao, func);
+        AAFwk::Array::ForEach(ao, func);
     }
     return array;
 }
@@ -1091,7 +1089,7 @@ std::vector<short> DistributedWant::GetShortArrayParam(const std::string& key) c
  */
 DistributedWant& DistributedWant::SetParam(const std::string& key, short value)
 {
-    parameters_.SetParam(key, Short::Box(value));
+    parameters_.SetParam(key, AAFwk::Short::Box(value));
     return *this;
 }
 
@@ -1104,12 +1102,12 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, short value)
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<short>& value)
 {
     std::size_t size = value.size();
-    sptr<IArray> ao = new (std::nothrow) Array(size, g_IID_IShort);
+    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IShort);
     if (ao == nullptr) {
         return *this;
     }
     for (std::size_t i = 0; i < size; i++) {
-        ao->Set(i, Short::Box(value[i]));
+        ao->Set(i, AAFwk::Short::Box(value[i]));
     }
     parameters_.SetParam(key, ao);
     return *this;
@@ -1124,9 +1122,9 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
 std::string DistributedWant::GetStringParam(const std::string& key) const
 {
     auto value = parameters_.GetParam(key);
-    IString* ao = IString::Query(value);
+    AAFwk::IString* ao = AAFwk::IString::Query(value);
     if (ao != nullptr) {
-        return String::Unbox(ao);
+        return AAFwk::String::Unbox(ao);
     }
     return std::string();
 }
@@ -1141,17 +1139,17 @@ std::vector<std::string> DistributedWant::GetStringArrayParam(const std::string&
 {
     std::vector<std::string> array;
     auto value = parameters_.GetParam(key);
-    IArray* ao = IArray::Query(value);
-    if (ao != nullptr && Array::IsStringArray(ao)) {
-        auto func = [&](IInterface* object) {
+    AAFwk::IArray* ao = AAFwk::IArray::Query(value);
+    if (ao != nullptr && AAFwk::Array::IsStringArray(ao)) {
+        auto func = [&](AAFwk::IInterface* object) {
             if (object != nullptr) {
-                IString* value = IString::Query(object);
+                AAFwk::IString* value = AAFwk::IString::Query(object);
                 if (value != nullptr) {
-                    array.push_back(String::Unbox(value));
+                    array.push_back(AAFwk::String::Unbox(value));
                 }
             }
         };
-        Array::ForEach(ao, func);
+        AAFwk::Array::ForEach(ao, func);
     }
     return array;
 }
@@ -1164,7 +1162,7 @@ std::vector<std::string> DistributedWant::GetStringArrayParam(const std::string&
  */
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::string& value)
 {
-    parameters_.SetParam(key, String::Box(value));
+    parameters_.SetParam(key, AAFwk::String::Box(value));
     return *this;
 }
 
@@ -1177,12 +1175,12 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::st
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<std::string>& value)
 {
     std::size_t size = value.size();
-    sptr<IArray> ao = new (std::nothrow) Array(size, g_IID_IString);
+    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IString);
     if (ao == nullptr) {
         return *this;
     }
     for (std::size_t i = 0; i < size; i++) {
-        ao->Set(i, String::Box(value[i]));
+        ao->Set(i, AAFwk::String::Box(value[i]));
     }
     parameters_.SetParam(key, ao);
     return *this;
@@ -1201,7 +1199,7 @@ DistributedOperation DistributedWant::GetOperation() const
  * @description: Sets the description of an operation in a DistributedWant.
  * @param operation Indicates the operation description.
  */
-void DistributedWant::SetOperation(const OHOS::AAFwk::DistributedOperation& operation)
+void DistributedWant::SetOperation(const DistributedOperation& operation)
 {
     operation_ = operation;
 }
@@ -1222,7 +1220,7 @@ bool DistributedWant::OperationEquals(const DistributedWant& want)
  */
 DistributedWant* DistributedWant::CloneOperation()
 {
-    DistributedWant*want = new (std::nothrow) DistributedWant();
+    DistributedWant* want = new (std::nothrow) DistributedWant();
     if (want == nullptr) {
         return nullptr;
     }
@@ -1327,7 +1325,7 @@ std::string DistributedWant::GetUriString() const
  * @description: Obtains the description of a URI in a DistributedWant.
  * @return Returns the URI description in the DistributedWant.
  */
-Uri DistributedWant::GetUri() const
+OHOS::Uri DistributedWant::GetUri() const
 {
     return operation_.GetUri();
 }
@@ -1339,7 +1337,7 @@ Uri DistributedWant::GetUri() const
  */
 DistributedWant& DistributedWant::SetUri(const std::string& uri)
 {
-    operation_.SetUri(Uri(uri));
+    operation_.SetUri(OHOS::Uri(uri));
     return *this;
 }
 
@@ -1348,7 +1346,7 @@ DistributedWant& DistributedWant::SetUri(const std::string& uri)
  * @param uri Indicates the URI description.
  * @return Returns this DistributedWant object containing the URI.
  */
-DistributedWant& DistributedWant::SetUri(const Uri& uri)
+DistributedWant& DistributedWant::SetUri(const OHOS::Uri& uri)
 {
     operation_.SetUri(uri);
     return *this;
@@ -1360,7 +1358,7 @@ DistributedWant& DistributedWant::SetUri(const Uri& uri)
  * @param type Indicates the type description.
  * @return Returns this DistributedWant object containing the URI and the type.
  */
-DistributedWant& DistributedWant::SetUriAndType(const Uri& uri, const std::string& type)
+DistributedWant& DistributedWant::SetUriAndType(const OHOS::Uri& uri, const std::string& type)
 {
     operation_.SetUri(uri);
     return SetType(type);
@@ -1427,29 +1425,29 @@ void DistributedWant::ToUriStringInner(std::string& uriString) const
     auto params = parameters_.GetParams();
     auto iter = params.cbegin();
     while (iter != params.cend()) {
-        sptr<IInterface> o = iter->second;
-        if (IString::Query(o) != nullptr) {
-            uriString += String::SIGNATURE;
-        } else if (IBoolean::Query(o) != nullptr) {
-            uriString += Boolean::SIGNATURE;
-        } else if (IChar::Query(o) != nullptr) {
-            uriString += Char::SIGNATURE;
-        } else if (IByte::Query(o) != nullptr) {
-            uriString += Byte::SIGNATURE;
-        } else if (IShort::Query(o) != nullptr) {
-            uriString += Short::SIGNATURE;
-        } else if (IInteger::Query(o) != nullptr) {
-            uriString += Integer::SIGNATURE;
-        } else if (ILong::Query(o) != nullptr) {
-            uriString += Long::SIGNATURE;
-        } else if (IFloat::Query(o) != nullptr) {
-            uriString += Float::SIGNATURE;
-        } else if (IDouble::Query(o) != nullptr) {
-            uriString += Double::SIGNATURE;
-        } else if (IArray::Query(o) != nullptr) {
-            uriString += Array::SIGNATURE;
+        sptr<AAFwk::IInterface> o = iter->second;
+        if (AAFwk::IString::Query(o) != nullptr) {
+            uriString += AAFwk::String::SIGNATURE;
+        } else if (AAFwk::IBoolean::Query(o) != nullptr) {
+            uriString += AAFwk::Boolean::SIGNATURE;
+        } else if (AAFwk::IChar::Query(o) != nullptr) {
+            uriString += AAFwk::Char::SIGNATURE;
+        } else if (AAFwk::IByte::Query(o) != nullptr) {
+            uriString += AAFwk::Byte::SIGNATURE;
+        } else if (AAFwk::IShort::Query(o) != nullptr) {
+            uriString += AAFwk::Short::SIGNATURE;
+        } else if (AAFwk::IInteger::Query(o) != nullptr) {
+            uriString += AAFwk::Integer::SIGNATURE;
+        } else if (AAFwk::ILong::Query(o) != nullptr) {
+            uriString += AAFwk::Long::SIGNATURE;
+        } else if (AAFwk::IFloat::Query(o) != nullptr) {
+            uriString += AAFwk::Float::SIGNATURE;
+        } else if (AAFwk::IDouble::Query(o) != nullptr) {
+            uriString += AAFwk::Double::SIGNATURE;
+        } else if (AAFwk::IArray::Query(o) != nullptr) {
+            uriString += AAFwk::Array::SIGNATURE;
         }
-        uriString += "." + Encode(iter->first) + "=" + Encode(Object::ToString(*(o.GetRefPtr()))) + ";";
+        uriString += "." + Encode(iter->first) + "=" + Encode(AAFwk::Object::ToString(*(o.GetRefPtr()))) + ";";
         iter++;
     }
 }
@@ -1462,7 +1460,7 @@ void DistributedWant::ToUriStringInner(std::string& uriString) const
  */
 DistributedWant& DistributedWant::FormatUri(const std::string& uri)
 {
-    return FormatUri(Uri(uri));
+    return FormatUri(OHOS::Uri(uri));
 }
 
 /**
@@ -1472,7 +1470,7 @@ DistributedWant& DistributedWant::FormatUri(const std::string& uri)
  * @param uri Indicates the URI to format.
  * @return Returns this DistributedWant object that contains the formatted uri attribute.
  */
-DistributedWant& DistributedWant::FormatUri(const Uri& uri)
+DistributedWant& DistributedWant::FormatUri(const OHOS::Uri& uri)
 {
     operation_.SetUri(GetLowerCaseScheme(uri));
     return *this;
@@ -1530,7 +1528,7 @@ void DistributedWant::ClearWant(DistributedWant* want)
     want->SetFlags(0);
     OHOS::AppExecFwk::ElementName elementName;
     want->SetElement(elementName);
-    OHOS::AAFwk::DistributedOperation operation;
+    DistributedOperation operation;
     want->SetOperation(operation);
     DistributedWantParams parameters;
     want->SetParams(parameters);
@@ -1834,62 +1832,62 @@ std::string DistributedWant::Encode(const std::string& str)
 bool DistributedWant::CheckAndSetParameters(DistributedWant& want, const std::string& key, 
                                             std::string& prop, const std::string& value)
 {
-    if (prop[0] == String::SIGNATURE && prop[1] == '.') {
-        sptr<IString> valueObj = String::Parse(value);
+    if (prop[0] == AAFwk::String::SIGNATURE && prop[1] == '.') {
+        sptr<AAFwk::IString> valueObj = AAFwk::String::Parse(value);
         if (valueObj == nullptr) {
             return false;
         }
         want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == Boolean::SIGNATURE && prop[1] == '.') {
-        sptr<IBoolean> valueObj = Boolean::Parse(value);
+    } else if (prop[0] == AAFwk::Boolean::SIGNATURE && prop[1] == '.') {
+        sptr<AAFwk::IBoolean> valueObj = AAFwk::Boolean::Parse(value);
         if (valueObj == nullptr) {
             return false;
         }
         want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == Char::SIGNATURE && prop[1] == '.') {
-        sptr<IChar> valueObj = Char::Parse(value);
+    } else if (prop[0] == AAFwk::Char::SIGNATURE && prop[1] == '.') {
+        sptr<AAFwk::IChar> valueObj = AAFwk::Char::Parse(value);
         if (valueObj == nullptr) {
             return false;
         }
         want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == Byte::SIGNATURE && prop[1] == '.') {
-        sptr<IByte> valueObj = Byte::Parse(value);
+    } else if (prop[0] == AAFwk::Byte::SIGNATURE && prop[1] == '.') {
+        sptr<AAFwk::IByte> valueObj = AAFwk::Byte::Parse(value);
         if (valueObj == nullptr) {
             return false;
         }
         want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == Short::SIGNATURE && prop[1] == '.') {
-        sptr<IShort> valueObj = Short::Parse(value);
+    } else if (prop[0] == AAFwk::Short::SIGNATURE && prop[1] == '.') {
+        sptr<AAFwk::IShort> valueObj = AAFwk::Short::Parse(value);
         if (valueObj == nullptr) {
             return false;
         }
         want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == Integer::SIGNATURE && prop[1] == '.') {
-        sptr<IInteger> valueObj = Integer::Parse(value);
+    } else if (prop[0] == AAFwk::Integer::SIGNATURE && prop[1] == '.') {
+        sptr<AAFwk::IInteger> valueObj = AAFwk::Integer::Parse(value);
         if (valueObj == nullptr) {
             return false;
         }
         want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == Long::SIGNATURE && prop[1] == '.') {
-        sptr<ILong> valueObj = Long::Parse(value);
+    } else if (prop[0] == AAFwk::Long::SIGNATURE && prop[1] == '.') {
+        sptr<AAFwk::ILong> valueObj = AAFwk::Long::Parse(value);
         if (valueObj == nullptr) {
             return false;
         }
         want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == Float::SIGNATURE && prop[1] == '.') {
-        sptr<IFloat> valueObj = Float::Parse(value);
+    } else if (prop[0] == AAFwk::Float::SIGNATURE && prop[1] == '.') {
+        sptr<AAFwk::IFloat> valueObj = AAFwk::Float::Parse(value);
         if (valueObj == nullptr) {
             return false;
         }
         want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == Double::SIGNATURE && prop[1] == '.') {
-        sptr<IDouble> valueObj = Double::Parse(value);
+    } else if (prop[0] == AAFwk::Double::SIGNATURE && prop[1] == '.') {
+        sptr<AAFwk::IDouble> valueObj = AAFwk::Double::Parse(value);
         if (valueObj == nullptr) {
             return false;
         }
         want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == Array::SIGNATURE && prop[1] == '.') {
-        sptr<IArray> valueObj = Array::Parse(value);
+    } else if (prop[0] == AAFwk::Array::SIGNATURE && prop[1] == '.') {
+        sptr<AAFwk::IArray> valueObj = AAFwk::Array::Parse(value);
         if (valueObj == nullptr) {
             return false;
         }
@@ -1999,5 +1997,5 @@ DistributedWant& DistributedWant::SetDeviceId(const std::string& deviceId)
     operation_.SetDeviceId(deviceId);
     return *this;
 }
-}  // namespace AAFwk
+}  // namespace DistributedSchedule
 }  // namespace OHOS

@@ -25,6 +25,7 @@ config("distributed_sched_config") {
   visibility += [ "./test/*" ]
   include_dirs = [
     "include",
+    "include/distributedWant",
     "//third_party/json/include",
   ]
   defines = []

@@ -13,17 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ABILITY_BASE_DISTRIBUTED_OPERATION_H
-#define OHOS_ABILITY_BASE_DISTRIBUTED_OPERATION_H
+#ifndef OHOS_DISTRIBUTEDWANT_OPERATION_H
+#define OHOS_DISTRIBUTEDWANT_OPERATION_H
 
 #include <string>
-
 #include "parcel.h"
 #include "string_ex.h"
 #include "uri.h"
 
 namespace OHOS {
-namespace AAFwk {
+namespace DistributedSchedule {
 class DistributedOperationBuilder;
 
 class DistributedOperation : public Parcelable {
@@ -150,14 +149,14 @@ private:
      * @param uri Indicates uri object to set.
      * @return -
      */
-    void SetUri(const Uri& uri);
+    void SetUri(const OHOS::Uri& uri);
 
     /**
      * @description: Gets a uri in this DistributedOperation.
      * @param uri Indicates uri object to set.
      * @return Returns a uri in this DistributedOperation.
      */
-    Uri& GetUri(const Uri& uri);
+    OHOS::Uri& GetUri(const OHOS::Uri& uri);
 
     /**
      * @description: Sets the value of the abilityName attribute included in this DistributedOperation.
@@ -201,7 +200,7 @@ private:
     std::string moduleName_;
     std::vector<std::string> entities_;
     unsigned int flags_;
-    Uri uri_;
+    OHOS::Uri uri_;
 
     // no object in parcel
     static constexpr int VALUE_NULL = -1;
@@ -210,7 +209,7 @@ private:
 
     bool ReadFromParcel(Parcel& parcel);
 };
-}  // namespace AAFwk
+}  // namespace DistributedSchedule
 }  // namespace OHOS
 
-#endif  // OHOS_ABILITY_BASE_DISTRIBUTED_OPERATION_H
+#endif  // OHOS_DISTRIBUTEDWANT_OPERATION_H

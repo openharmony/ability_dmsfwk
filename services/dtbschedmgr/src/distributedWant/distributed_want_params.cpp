@@ -18,8 +18,8 @@
 #include "base_object.h"
 #include "bool_wrapper.h"
 #include "byte_wrapper.h"
-#include "distributedWant/distributed_want_params.h"
-#include "distributedWant/distributed_want_params_wrapper.h"
+#include "distributed_want_params.h"
+#include "distributed_want_params_wrapper.h"
 #include "double_wrapper.h"
 #include "float_wrapper.h"
 #include "int_wrapper.h"
@@ -33,7 +33,7 @@
 #include "zchar_wrapper.h"
 
 namespace OHOS {
-namespace AAFwk {
+namespace DistributedSchedule {
 DistributedUnsupportedData::~DistributedUnsupportedData()
 {
     if (buffer != nullptr) {
@@ -100,28 +100,28 @@ DistributedUnsupportedData& DistributedUnsupportedData::operator=(DistributedUns
     return *this;
 }
 
-std::string DistributedWantParams::GetStringByType(const sptr<IInterface> iIt, int typeId)
+std::string DistributedWantParams::GetStringByType(const sptr<AAFwk::IInterface> iIt, int typeId)
 {
     if (typeId == VALUE_TYPE_BOOLEAN) {
-        return static_cast<Boolean*>(IBoolean::Query(iIt))->ToString();
+        return static_cast<AAFwk::Boolean*>(AAFwk::IBoolean::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_BYTE) {
-        return static_cast<Byte*>(IByte::Query(iIt))->ToString();
+        return static_cast<AAFwk::Byte*>(AAFwk::IByte::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_CHAR) {
-        return static_cast<Char*>(IChar::Query(iIt))->ToString();
+        return static_cast<AAFwk::Char*>(AAFwk::IChar::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_SHORT) {
-        return static_cast<Short*>(IShort::Query(iIt))->ToString();
+        return static_cast<AAFwk::Short*>(AAFwk::IShort::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_INT) {
-        return static_cast<Integer*>(IInteger::Query(iIt))->ToString();
+        return static_cast<AAFwk::Integer*>(AAFwk::IInteger::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_LONG) {
-        return static_cast<Long*>(ILong::Query(iIt))->ToString();
+        return static_cast<AAFwk::Long*>(AAFwk::ILong::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_FLOAT) {
-        return static_cast<Float*>(IFloat::Query(iIt))->ToString();
+        return static_cast<AAFwk::Float*>(AAFwk::IFloat::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_DOUBLE) {
-        return static_cast<Double*>(IDouble::Query(iIt))->ToString();
+        return static_cast<AAFwk::Double*>(AAFwk::IDouble::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_STRING) {
-        return static_cast<String*>(IString::Query(iIt))->ToString();
+        return static_cast<AAFwk::String*>(AAFwk::IString::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_ARRAY) {
-        return static_cast<Array*>(IArray::Query(iIt))->ToString();
+        return static_cast<AAFwk::Array*>(AAFwk::IArray::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_WANTPARAMS) {
         return static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(iIt))->ToString();
     } else {
@@ -147,30 +147,30 @@ bool DistributedWantParams::NewParams(const DistributedWantParams& source, Distr
     // Deep copy
     for (auto it = source.params_.begin(); it != source.params_.end(); it++) {
         sptr<IInterface> o = it->second;
-        if (IString::Query(o) != nullptr) {
-            dest.params_[it->first] = String::Box(String::Unbox(IString::Query(o)));
-        } else if (IBoolean::Query(o) != nullptr) {
-            dest.params_[it->first] = Boolean::Box(Boolean::Unbox(IBoolean::Query(o)));
-        } else if (IByte::Query(o) != nullptr) {
-            dest.params_[it->first] = Byte::Box(Byte::Unbox(IByte::Query(o)));
-        } else if (IChar::Query(o) != nullptr) {
-            dest.params_[it->first] = Char::Box(Char::Unbox(IChar::Query(o)));
-        } else if (IShort::Query(o) != nullptr) {
-            dest.params_[it->first] = Short::Box(Short::Unbox(IShort::Query(o)));
-        } else if (IInteger::Query(o) != nullptr) {
-            dest.params_[it->first] = Integer::Box(Integer::Unbox(IInteger::Query(o)));
-        } else if (ILong::Query(o) != nullptr) {
-            dest.params_[it->first] = Long::Box(Long::Unbox(ILong::Query(o)));
-        } else if (IFloat::Query(o) != nullptr) {
-            dest.params_[it->first] = Float::Box(Float::Unbox(IFloat::Query(o)));
-        } else if (IDouble::Query(o) != nullptr) {
-            dest.params_[it->first] = Double::Box(Double::Unbox(IDouble::Query(o)));
+        if (AAFwk::IString::Query(o) != nullptr) {
+            dest.params_[it->first] = AAFwk::String::Box(AAFwk::String::Unbox(AAFwk::IString::Query(o)));
+        } else if (AAFwk::IBoolean::Query(o) != nullptr) {
+            dest.params_[it->first] = AAFwk::Boolean::Box(AAFwk::Boolean::Unbox(AAFwk::IBoolean::Query(o)));
+        } else if (AAFwk::IByte::Query(o) != nullptr) {
+            dest.params_[it->first] = AAFwk::Byte::Box(AAFwk::Byte::Unbox(AAFwk::IByte::Query(o)));
+        } else if (AAFwk::IChar::Query(o) != nullptr) {
+            dest.params_[it->first] = AAFwk::Char::Box(AAFwk::Char::Unbox(AAFwk::IChar::Query(o)));
+        } else if (AAFwk::IShort::Query(o) != nullptr) {
+            dest.params_[it->first] = AAFwk::Short::Box(AAFwk::Short::Unbox(AAFwk::IShort::Query(o)));
+        } else if (AAFwk::IInteger::Query(o) != nullptr) {
+            dest.params_[it->first] = AAFwk::Integer::Box(AAFwk::Integer::Unbox(AAFwk::IInteger::Query(o)));
+        } else if (AAFwk::ILong::Query(o) != nullptr) {
+            dest.params_[it->first] = AAFwk::Long::Box(AAFwk::Long::Unbox(AAFwk::ILong::Query(o)));
+        } else if (AAFwk::IFloat::Query(o) != nullptr) {
+            dest.params_[it->first] = AAFwk::Float::Box(AAFwk::Float::Unbox(AAFwk::IFloat::Query(o)));
+        } else if (AAFwk::IDouble::Query(o) != nullptr) {
+            dest.params_[it->first] = AAFwk::Double::Box(AAFwk::Double::Unbox(AAFwk::IDouble::Query(o)));
         } else if (IDistributedWantParams::Query(o) != nullptr) {
             DistributedWantParams newDest(DistributedWantParamWrapper::Unbox(IDistributedWantParams::Query(o)));
             dest.params_[it->first] = DistributedWantParamWrapper::Box(newDest);
-        } else if (IArray::Query(o) != nullptr) {
-            sptr<IArray> destAO = nullptr;
-            if (!NewArrayData(IArray::Query(o), destAO)) {
+        } else if (AAFwk::IArray::Query(o) != nullptr) {
+            sptr<AAFwk::IArray> destAO = nullptr;
+            if (!NewArrayData(AAFwk::IArray::Query(o), destAO)) {
                 continue;
             }
             dest.params_[it->first] = destAO;
@@ -179,25 +179,25 @@ bool DistributedWantParams::NewParams(const DistributedWantParams& source, Distr
     return true;
 }  // namespace AAFwk
 // inner use
-bool DistributedWantParams::NewArrayData(IArray* source, sptr<IArray>& dest)
+bool DistributedWantParams::NewArrayData(AAFwk::IArray* source, sptr<AAFwk::IArray>& dest)
 {
-    if (Array::IsBooleanArray(source)) {
+    if (AAFwk::Array::IsBooleanArray(source)) {
         SetNewArray<bool, AAFwk::Boolean, AAFwk::IBoolean>(AAFwk::g_IID_IBoolean, source, dest);
-    } else if (Array::IsCharArray(source)) {
+    } else if (AAFwk::Array::IsCharArray(source)) {
         SetNewArray<char, AAFwk::Char, AAFwk::IChar>(AAFwk::g_IID_IChar, source, dest);
-    } else if (Array::IsByteArray(source)) {
-        SetNewArray<byte, AAFwk::Byte, AAFwk::IByte>(AAFwk::g_IID_IByte, source, dest);
-    } else if (Array::IsShortArray(source)) {
+    } else if (AAFwk::Array::IsByteArray(source)) {
+        SetNewArray<AAFwk::byte, AAFwk::Byte, AAFwk::IByte>(AAFwk::g_IID_IByte, source, dest);
+    } else if (AAFwk::Array::IsShortArray(source)) {
         SetNewArray<short, AAFwk::Short, AAFwk::IShort>(AAFwk::g_IID_IShort, source, dest);
-    } else if (Array::IsIntegerArray(source)) {
+    } else if (AAFwk::Array::IsIntegerArray(source)) {
         SetNewArray<int, AAFwk::Integer, AAFwk::IInteger>(AAFwk::g_IID_IInteger, source, dest);
-    } else if (Array::IsLongArray(source)) {
+    } else if (AAFwk::Array::IsLongArray(source)) {
         SetNewArray<long, AAFwk::Long, AAFwk::ILong>(AAFwk::g_IID_ILong, source, dest);
-    } else if (Array::IsFloatArray(source)) {
+    } else if (AAFwk::Array::IsFloatArray(source)) {
         SetNewArray<float, AAFwk::Float, AAFwk::IFloat>(AAFwk::g_IID_IFloat, source, dest);
-    } else if (Array::IsDoubleArray(source)) {
+    } else if (AAFwk::Array::IsDoubleArray(source)) {
         SetNewArray<double, AAFwk::Double, AAFwk::IDouble>(AAFwk::g_IID_IDouble, source, dest);
-    } else if (Array::IsStringArray(source)) {
+    } else if (AAFwk::Array::IsStringArray(source)) {
         SetNewArray<std::string, AAFwk::String, AAFwk::IString>(AAFwk::g_IID_IString, source, dest);
     } else {
         return false;
@@ -241,25 +241,25 @@ bool DistributedWantParams::operator==(const DistributedWantParams& other)
 
 int DistributedWantParams::GetDataType(const sptr<IInterface> iIt)
 {
-    if (iIt != nullptr && IBoolean::Query(iIt) != nullptr) {
+    if (iIt != nullptr && AAFwk::IBoolean::Query(iIt) != nullptr) {
         return VALUE_TYPE_BOOLEAN;
-    } else if (iIt != nullptr && IByte::Query(iIt) != nullptr) {
+    } else if (iIt != nullptr && AAFwk::IByte::Query(iIt) != nullptr) {
         return VALUE_TYPE_BYTE;
-    } else if (iIt != nullptr && IChar::Query(iIt) != nullptr) {
+    } else if (iIt != nullptr && AAFwk::IChar::Query(iIt) != nullptr) {
         return VALUE_TYPE_CHAR;
-    } else if (iIt != nullptr && IShort::Query(iIt) != nullptr) {
+    } else if (iIt != nullptr && AAFwk::IShort::Query(iIt) != nullptr) {
         return VALUE_TYPE_SHORT;
-    } else if (iIt != nullptr && IInteger::Query(iIt) != nullptr) {
+    } else if (iIt != nullptr && AAFwk::IInteger::Query(iIt) != nullptr) {
         return VALUE_TYPE_INT;
-    } else if (iIt != nullptr && ILong::Query(iIt) != nullptr) {
+    } else if (iIt != nullptr && AAFwk::ILong::Query(iIt) != nullptr) {
         return VALUE_TYPE_LONG;
-    } else if (iIt != nullptr && IFloat::Query(iIt) != nullptr) {
+    } else if (iIt != nullptr && AAFwk::IFloat::Query(iIt) != nullptr) {
         return VALUE_TYPE_FLOAT;
-    } else if (iIt != nullptr && IDouble::Query(iIt) != nullptr) {
+    } else if (iIt != nullptr && AAFwk::IDouble::Query(iIt) != nullptr) {
         return VALUE_TYPE_DOUBLE;
-    } else if (iIt != nullptr && IString::Query(iIt) != nullptr) {
+    } else if (iIt != nullptr && AAFwk::IString::Query(iIt) != nullptr) {
         return VALUE_TYPE_STRING;
-    } else if (iIt != nullptr && IArray::Query(iIt) != nullptr) {
+    } else if (iIt != nullptr && AAFwk::IArray::Query(iIt) != nullptr) {
         return VALUE_TYPE_ARRAY;
     } else if (iIt != nullptr && IDistributedWantParams::Query(iIt) != nullptr) {
         return VALUE_TYPE_WANTPARAMS;
@@ -271,25 +271,25 @@ int DistributedWantParams::GetDataType(const sptr<IInterface> iIt)
 sptr<IInterface> DistributedWantParams::GetInterfaceByType(int typeId, const std::string& value)
 {
     if (typeId == VALUE_TYPE_BOOLEAN) {
-        return Boolean::Parse(value);
+        return AAFwk::Boolean::Parse(value);
     } else if (typeId == VALUE_TYPE_BYTE) {
-        return Byte::Parse(value);
+        return AAFwk::Byte::Parse(value);
     } else if (typeId == VALUE_TYPE_CHAR) {
-        return Char::Parse(value);
+        return AAFwk::Char::Parse(value);
     } else if (typeId == VALUE_TYPE_SHORT) {
-        return Short::Parse(value);
+        return AAFwk::Short::Parse(value);
     } else if (typeId == VALUE_TYPE_INT) {
-        return Integer::Parse(value);
+        return AAFwk::Integer::Parse(value);
     } else if (typeId == VALUE_TYPE_LONG) {
-        return Long::Parse(value);
+        return AAFwk::Long::Parse(value);
     } else if (typeId == VALUE_TYPE_FLOAT) {
-        return Float::Parse(value);
+        return AAFwk::Float::Parse(value);
     } else if (typeId == VALUE_TYPE_DOUBLE) {
-        return Double::Parse(value);
+        return AAFwk::Double::Parse(value);
     } else if (typeId == VALUE_TYPE_STRING) {
-        return String::Parse(value);
+        return AAFwk::String::Parse(value);
     } else if (typeId == VALUE_TYPE_ARRAY) {
-        return Array::Parse(value);
+        return AAFwk::Array::Parse(value);
     }
 
     return nullptr;
@@ -300,40 +300,48 @@ bool DistributedWantParams::CompareInterface(const sptr<IInterface> iIt1, const 
     bool flag = false;
     switch (typeId) {
         case VALUE_TYPE_BOOLEAN:
-            flag =
-                static_cast<Boolean*>(IBoolean::Query(iIt1))->Equals(*(static_cast<Boolean*>(IBoolean::Query(iIt1))));
+            flag = static_cast<AAFwk::Boolean*>(AAFwk::IBoolean::Query(iIt1))
+                ->Equals(*(static_cast<AAFwk::Boolean*>(AAFwk::IBoolean::Query(iIt1))));
             break;
         case VALUE_TYPE_BYTE:
-            flag = static_cast<Byte*>(IByte::Query(iIt1))->Equals(*(static_cast<Byte*>(IByte::Query(iIt1))));
+            flag = static_cast<AAFwk::Byte*>(AAFwk::IByte::Query(iIt1))
+                ->Equals(*(static_cast<AAFwk::Byte*>(AAFwk::IByte::Query(iIt1))));
             break;
         case VALUE_TYPE_CHAR:
-            flag = static_cast<Char*>(IChar::Query(iIt1))->Equals(*(static_cast<Char*>(IChar::Query(iIt1))));
+            flag = static_cast<AAFwk::Char*>(AAFwk::IChar::Query(iIt1))
+                ->Equals(*(static_cast<AAFwk::Char*>(AAFwk::IChar::Query(iIt1))));
             break;
         case VALUE_TYPE_SHORT:
-            flag = static_cast<Short*>(IShort::Query(iIt1))->Equals(*(static_cast<Short*>(IShort::Query(iIt1))));
+            flag = static_cast<AAFwk::Short*>(AAFwk::IShort::Query(iIt1))
+                ->Equals(*(static_cast<AAFwk::Short*>(AAFwk::IShort::Query(iIt1))));
             break;
         case VALUE_TYPE_INT:
-            flag =
-                static_cast<Integer*>(IInteger::Query(iIt1))->Equals(*(static_cast<Integer*>(IInteger::Query(iIt1))));
+            flag = static_cast<AAFwk::Integer*>(AAFwk::IInteger::Query(iIt1))
+                ->Equals(*(static_cast<AAFwk::Integer*>(AAFwk::IInteger::Query(iIt1))));
             break;
         case VALUE_TYPE_LONG:
-            flag = static_cast<Long*>(ILong::Query(iIt1))->Equals(*(static_cast<Long*>(ILong::Query(iIt1))));
+            flag = static_cast<AAFwk::Long*>(AAFwk::ILong::Query(iIt1))
+                ->Equals(*(static_cast<AAFwk::Long*>(AAFwk::ILong::Query(iIt1))));
             break;
         case VALUE_TYPE_FLOAT:
-            flag = static_cast<Float*>(IFloat::Query(iIt1))->Equals(*(static_cast<Float*>(IFloat::Query(iIt1))));
+            flag = static_cast<AAFwk::Float*>(AAFwk::IFloat::Query(iIt1))
+                ->Equals(*(static_cast<AAFwk::Float*>(AAFwk::IFloat::Query(iIt1))));
             break;
         case VALUE_TYPE_DOUBLE:
-            flag = static_cast<Double*>(IDouble::Query(iIt1))->Equals(*(static_cast<Double*>(IDouble::Query(iIt1))));
+            flag = static_cast<AAFwk::Double*>(AAFwk::IDouble::Query(iIt1))
+                ->Equals(*(static_cast<AAFwk::Double*>(AAFwk::IDouble::Query(iIt1))));
             break;
         case VALUE_TYPE_STRING:
-            flag = static_cast<String*>(IString::Query(iIt1))->Equals(*(static_cast<String*>(IString::Query(iIt1))));
+            flag = static_cast<AAFwk::String*>(AAFwk::IString::Query(iIt1))
+                ->Equals(*(static_cast<AAFwk::String*>(AAFwk::IString::Query(iIt1))));
             break;
         case VALUE_TYPE_ARRAY:
-            flag = static_cast<Array*>(IArray::Query(iIt1))->Equals(*(static_cast<Array*>(IArray::Query(iIt1))));
+            flag = static_cast<AAFwk::Array*>(AAFwk::IArray::Query(iIt1))
+                ->Equals(*(static_cast<AAFwk::Array*>(AAFwk::IArray::Query(iIt1))));
             break;
         case VALUE_TYPE_WANTPARAMS:
             flag = static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(iIt1))
-                       ->Equals(*(static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(iIt1))));
+                ->Equals(*(static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(iIt1))));
             break;
         default:
             break;
@@ -431,7 +439,7 @@ bool DistributedWantParams::IsEmpty() const
 
 bool DistributedWantParams::WriteToParcelString(Parcel& parcel, sptr<IInterface>& o) const
 {
-    std::string value = String::Unbox(IString::Query(o));
+    std::string value = AAFwk::String::Unbox(AAFwk::IString::Query(o));
     if (!parcel.WriteInt32(VALUE_TYPE_STRING)) {
         return false;
     }
@@ -440,7 +448,7 @@ bool DistributedWantParams::WriteToParcelString(Parcel& parcel, sptr<IInterface>
 
 bool DistributedWantParams::WriteToParcelBool(Parcel& parcel, sptr<IInterface>& o) const
 {
-    bool value = Boolean::Unbox(IBoolean::Query(o));
+    bool value = AAFwk::Boolean::Unbox(AAFwk::IBoolean::Query(o));
     if (!parcel.WriteInt32(VALUE_TYPE_BOOLEAN)) {
         return false;
     }
@@ -457,7 +465,7 @@ bool DistributedWantParams::WriteToParcelWantParams(Parcel& parcel, sptr<IInterf
 }
 bool DistributedWantParams::WriteToParcelByte(Parcel& parcel, sptr<IInterface>& o) const
 {
-    byte value = Byte::Unbox(IByte::Query(o));
+    AAFwk::byte value = AAFwk::Byte::Unbox(AAFwk::IByte::Query(o));
     if (!parcel.WriteInt32(VALUE_TYPE_BYTE)) {
         return false;
     }
@@ -466,7 +474,7 @@ bool DistributedWantParams::WriteToParcelByte(Parcel& parcel, sptr<IInterface>& 
 
 bool DistributedWantParams::WriteToParcelChar(Parcel& parcel, sptr<IInterface>& o) const
 {
-    zchar value = Char::Unbox(IChar::Query(o));
+    AAFwk::zchar value = AAFwk::Char::Unbox(AAFwk::IChar::Query(o));
     if (!parcel.WriteInt32(VALUE_TYPE_CHAR)) {
         return false;
     }
@@ -475,7 +483,7 @@ bool DistributedWantParams::WriteToParcelChar(Parcel& parcel, sptr<IInterface>& 
 
 bool DistributedWantParams::WriteToParcelShort(Parcel& parcel, sptr<IInterface>& o) const
 {
-    short value = Short::Unbox(IShort::Query(o));
+    short value = AAFwk::Short::Unbox(AAFwk::IShort::Query(o));
     if (!parcel.WriteInt32(VALUE_TYPE_SHORT)) {
         return false;
     }
@@ -484,7 +492,7 @@ bool DistributedWantParams::WriteToParcelShort(Parcel& parcel, sptr<IInterface>&
 
 bool DistributedWantParams::WriteToParcelInt(Parcel& parcel, sptr<IInterface>& o) const
 {
-    int value = Integer::Unbox(IInteger::Query(o));
+    int value = AAFwk::Integer::Unbox(AAFwk::IInteger::Query(o));
     if (!parcel.WriteInt32(VALUE_TYPE_INT)) {
         return false;
     }
@@ -493,7 +501,7 @@ bool DistributedWantParams::WriteToParcelInt(Parcel& parcel, sptr<IInterface>& o
 
 bool DistributedWantParams::WriteToParcelLong(Parcel& parcel, sptr<IInterface>& o) const
 {
-    long value = Long::Unbox(ILong::Query(o));
+    long value = AAFwk::Long::Unbox(AAFwk::ILong::Query(o));
     if (!parcel.WriteInt32(VALUE_TYPE_LONG)) {
         return false;
     }
@@ -502,7 +510,7 @@ bool DistributedWantParams::WriteToParcelLong(Parcel& parcel, sptr<IInterface>& 
 
 bool DistributedWantParams::WriteToParcelFloat(Parcel& parcel, sptr<IInterface>& o) const
 {
-    float value = Float::Unbox(IFloat::Query(o));
+    float value = AAFwk::Float::Unbox(AAFwk::IFloat::Query(o));
     if (!parcel.WriteInt32(VALUE_TYPE_FLOAT)) {
         return false;
     }
@@ -511,7 +519,7 @@ bool DistributedWantParams::WriteToParcelFloat(Parcel& parcel, sptr<IInterface>&
 
 bool DistributedWantParams::WriteToParcelDouble(Parcel& parcel, sptr<IInterface>& o) const
 {
-    double value = Double::Unbox(IDouble::Query(o));
+    double value = AAFwk::Double::Unbox(AAFwk::IDouble::Query(o));
     if (!parcel.WriteInt32(VALUE_TYPE_DOUBLE)) {
         return false;
     }
@@ -520,30 +528,30 @@ bool DistributedWantParams::WriteToParcelDouble(Parcel& parcel, sptr<IInterface>
 
 bool DistributedWantParams::WriteMarshalling(Parcel& parcel, sptr<IInterface>& o) const
 {
-    if (IString::Query(o) != nullptr) {
+    if (AAFwk::IString::Query(o) != nullptr) {
         return WriteToParcelString(parcel, o);
-    } else if (IBoolean::Query(o) != nullptr) {
+    } else if (AAFwk::IBoolean::Query(o) != nullptr) {
         return WriteToParcelBool(parcel, o);
-    } else if (IByte::Query(o) != nullptr) {
+    } else if (AAFwk::IByte::Query(o) != nullptr) {
         return WriteToParcelByte(parcel, o);
-    } else if (IChar::Query(o) != nullptr) {
+    } else if (AAFwk::IChar::Query(o) != nullptr) {
         return WriteToParcelChar(parcel, o);
-    } else if (IShort::Query(o) != nullptr) {
+    } else if (AAFwk::IShort::Query(o) != nullptr) {
         return WriteToParcelShort(parcel, o);
-    } else if (IInteger::Query(o) != nullptr) {
+    } else if (AAFwk::IInteger::Query(o) != nullptr) {
         return WriteToParcelInt(parcel, o);
-    } else if (ILong::Query(o) != nullptr) {
+    } else if (AAFwk::ILong::Query(o) != nullptr) {
         return WriteToParcelLong(parcel, o);
-    } else if (IFloat::Query(o) != nullptr) {
+    } else if (AAFwk::IFloat::Query(o) != nullptr) {
         return WriteToParcelFloat(parcel, o);
-    } else if (IDouble::Query(o) != nullptr) {
+    } else if (AAFwk::IDouble::Query(o) != nullptr) {
         return WriteToParcelDouble(parcel, o);
     } else if (IDistributedWantParams::Query(o) != nullptr) {
         return WriteToParcelWantParams(parcel, o);
     } else {
-        IArray* ao = IArray::Query(o);
+        AAFwk::IArray* ao = AAFwk::IArray::Query(o);
         if (ao != nullptr) {
-            sptr<IArray> array(ao);
+            sptr<AAFwk::IArray> array(ao);
             return WriteArrayToParcel(parcel, array);
         } else {
             return true;
@@ -565,7 +573,7 @@ bool DistributedWantParams::DoMarshalling(Parcel& parcel) const
     auto iter = params_.cbegin();
     while (iter != params_.cend()) {
         std::string key = iter->first;
-        sptr<IInterface> o = iter->second;
+        sptr<AAFwk::IInterface> o = iter->second;
         if (!parcel.WriteString16(Str8ToStr16(key))) {
             return false;
         }
@@ -632,10 +640,10 @@ bool DistributedWantParams::Marshalling(Parcel& parcel) const
 }
 
 template<typename dataType, typename className>
-static bool SetArray(const InterfaceID& id, const std::vector<dataType>& value, sptr<IArray>& ao)
+static bool SetArray(const AAFwk::InterfaceID& id, const std::vector<dataType>& value, sptr<AAFwk::IArray>& ao)
 {
     typename std::vector<dataType>::size_type size = value.size();
-    ao = new (std::nothrow) Array(size, id);
+    ao = new (std::nothrow) AAFwk::Array(size, id);
     if (ao != nullptr) {
         for (typename std::vector<dataType>::size_type i = 0; i < size; i++) {
             ao->Set(i, className::Box(value[i]));
@@ -646,9 +654,9 @@ static bool SetArray(const InterfaceID& id, const std::vector<dataType>& value, 
 }
 
 template<typename T1, typename T2, typename T3>
-static void FillArray(IArray* ao, std::vector<T1>&array)
+static void FillArray(AAFwk::IArray* ao, std::vector<T1>&array)
 {
-    auto func = [&](IInterface* object) {
+    auto func = [&](AAFwk::IInterface* object) {
         if (object != nullptr) {
             T3* value = T3::Query(object);
             if (value != nullptr) {
@@ -656,7 +664,7 @@ static void FillArray(IArray* ao, std::vector<T1>&array)
             }
         }
     };
-    Array::ForEach(ao, func);
+    AAFwk::Array::ForEach(ao, func);
 }
 // inner use template function
 template<typename T1, typename T2, typename T3>
@@ -666,7 +674,7 @@ static void SetNewArray(const AAFwk::InterfaceID& id, AAFwk::IArray* orgIArray, 
         return;
     }
     std::vector<T1> array;
-    auto func = [&](IInterface* object) {
+    auto func = [&](AAFwk::IInterface* object) {
         if (object != nullptr) {
             T3* value = T3::Query(object);
             if (value != nullptr) {
@@ -674,7 +682,7 @@ static void SetNewArray(const AAFwk::InterfaceID& id, AAFwk::IArray* orgIArray, 
             }
         }
     };
-    Array::ForEach(orgIArray, func);
+    AAFwk::Array::ForEach(orgIArray, func);
 
     typename std::vector<T1>::size_type size = array.size();
     if (size > 0) {
@@ -687,7 +695,7 @@ static void SetNewArray(const AAFwk::InterfaceID& id, AAFwk::IArray* orgIArray, 
     }
 }
 
-bool DistributedWantParams::WriteArrayToParcelString(Parcel& parcel, IArray* ao) const
+bool DistributedWantParams::WriteArrayToParcelString(Parcel& parcel, AAFwk::IArray* ao) const
 {
     if (ao == nullptr) {
         return false;
@@ -695,11 +703,11 @@ bool DistributedWantParams::WriteArrayToParcelString(Parcel& parcel, IArray* ao)
 
     std::vector<std::u16string> array;
     auto func = [&](IInterface* object) {
-        std::string s = String::Unbox(IString::Query(object));
+        std::string s = AAFwk::String::Unbox(AAFwk::IString::Query(object));
         array.push_back(Str8ToStr16(s));
     };
 
-    Array::ForEach(ao, func);
+    AAFwk::Array::ForEach(ao, func);
 
     if (!parcel.WriteInt32(VALUE_TYPE_STRINGARRAY)) {
         return false;
@@ -707,7 +715,7 @@ bool DistributedWantParams::WriteArrayToParcelString(Parcel& parcel, IArray* ao)
     return parcel.WriteString16Vector(array);
 }
 
-bool DistributedWantParams::WriteArrayToParcelBool(Parcel& parcel, IArray* ao) const
+bool DistributedWantParams::WriteArrayToParcelBool(Parcel& parcel, AAFwk::IArray* ao) const
 {
     if (ao == nullptr) {
         return false;
@@ -715,7 +723,7 @@ bool DistributedWantParams::WriteArrayToParcelBool(Parcel& parcel, IArray* ao) c
 
     std::vector<int8_t> array;
     std::vector<int32_t> intArray;
-    FillArray<int8_t, Boolean, IBoolean>(ao, array);
+    FillArray<int8_t, AAFwk::Boolean, AAFwk::IBoolean>(ao, array);
     if (!parcel.WriteInt32(VALUE_TYPE_BOOLEANARRAY)) {
         return false;
     }
@@ -726,130 +734,130 @@ bool DistributedWantParams::WriteArrayToParcelBool(Parcel& parcel, IArray* ao) c
     return parcel.WriteInt32Vector(intArray);
 }
 
-bool DistributedWantParams::WriteArrayToParcelByte(Parcel& parcel, IArray* ao) const
+bool DistributedWantParams::WriteArrayToParcelByte(Parcel& parcel, AAFwk::IArray* ao) const
 {
     if (ao == nullptr) {
         return false;
     }
 
     std::vector<int8_t> array;
-    FillArray<int8_t, Byte, IByte>(ao, array);
+    FillArray<int8_t, AAFwk::Byte, AAFwk::IByte>(ao, array);
     if (!parcel.WriteInt32(VALUE_TYPE_BYTEARRAY)) {
         return false;
     }
     return parcel.WriteInt8Vector(array);
 }
 
-bool DistributedWantParams::WriteArrayToParcelChar(Parcel& parcel, IArray* ao) const
+bool DistributedWantParams::WriteArrayToParcelChar(Parcel& parcel, AAFwk::IArray* ao) const
 {
     if (ao == nullptr) {
         return false;
     }
 
     std::vector<int32_t> array;
-    FillArray<int32_t, Char, IChar>(ao, array);
+    FillArray<int32_t, AAFwk::Char, AAFwk::IChar>(ao, array);
     if (!parcel.WriteInt32(VALUE_TYPE_CHARARRAY)) {
         return false;
     }
     return parcel.WriteInt32Vector(array);
 }
 
-bool DistributedWantParams::WriteArrayToParcelShort(Parcel& parcel, IArray* ao) const
+bool DistributedWantParams::WriteArrayToParcelShort(Parcel& parcel, AAFwk::IArray* ao) const
 {
     if (ao == nullptr) {
         return false;
     }
 
     std::vector<short> array;
-    FillArray<short, Short, IShort>(ao, array);
+    FillArray<short, AAFwk::Short, AAFwk::IShort>(ao, array);
     if (!parcel.WriteInt32(VALUE_TYPE_SHORTARRAY)) {
         return false;
     }
     return parcel.WriteInt16Vector(array);
 }
 
-bool DistributedWantParams::WriteArrayToParcelInt(Parcel& parcel, IArray* ao) const
+bool DistributedWantParams::WriteArrayToParcelInt(Parcel& parcel, AAFwk::IArray* ao) const
 {
     if (ao == nullptr) {
         return false;
     }
 
     std::vector<int> array;
-    FillArray<int, Integer, IInteger>(ao, array);
+    FillArray<int, AAFwk::Integer, AAFwk::IInteger>(ao, array);
     if (!parcel.WriteInt32(VALUE_TYPE_INTARRAY)) {
         return false;
     }
     return parcel.WriteInt32Vector(array);
 }
 
-bool DistributedWantParams::WriteArrayToParcelLong(Parcel& parcel, IArray* ao) const
+bool DistributedWantParams::WriteArrayToParcelLong(Parcel& parcel, AAFwk::IArray* ao) const
 {
     if (ao == nullptr) {
         return false;
     }
 
     std::vector<int64_t> array;
-    FillArray<int64_t, Long, ILong>(ao, array);
+    FillArray<int64_t, AAFwk::Long, AAFwk::ILong>(ao, array);
     if (!parcel.WriteInt32(VALUE_TYPE_LONGARRAY)) {
         return false;
     }
     return parcel.WriteInt64Vector(array);
 }
 
-bool DistributedWantParams::WriteArrayToParcelFloat(Parcel& parcel, IArray* ao) const
+bool DistributedWantParams::WriteArrayToParcelFloat(Parcel& parcel, AAFwk::IArray* ao) const
 {
     if (ao == nullptr) {
         return false;
     }
 
     std::vector<float> array;
-    FillArray<float, Float, IFloat>(ao, array);
+    FillArray<float, AAFwk::Float, AAFwk::IFloat>(ao, array);
     if (!parcel.WriteInt32(VALUE_TYPE_FLOATARRAY)) {
         return false;
     }
     return parcel.WriteFloatVector(array);
 }
 
-bool DistributedWantParams::WriteArrayToParcelDouble(Parcel& parcel, IArray* ao) const
+bool DistributedWantParams::WriteArrayToParcelDouble(Parcel& parcel, AAFwk::IArray* ao) const
 {
     if (ao == nullptr) {
         return false;
     }
 
     std::vector<double> array;
-    FillArray<double, Double, IDouble>(ao, array);
+    FillArray<double, AAFwk::Double, AAFwk::IDouble>(ao, array);
     if (!parcel.WriteInt32(VALUE_TYPE_DOUBLEARRAY)) {
         return false;
     }
     return parcel.WriteDoubleVector(array);
 }
 
-bool DistributedWantParams::WriteArrayToParcel(Parcel& parcel, IArray* ao) const
+bool DistributedWantParams::WriteArrayToParcel(Parcel& parcel, AAFwk::IArray* ao) const
 {
-    if (Array::IsStringArray(ao)) {
+    if (AAFwk::Array::IsStringArray(ao)) {
         return WriteArrayToParcelString(parcel, ao);
-    } else if (Array::IsBooleanArray(ao)) {
+    } else if (AAFwk::Array::IsBooleanArray(ao)) {
         return WriteArrayToParcelBool(parcel, ao);
-    } else if (Array::IsByteArray(ao)) {
+    } else if (AAFwk::Array::IsByteArray(ao)) {
         return WriteArrayToParcelByte(parcel, ao);
-    } else if (Array::IsCharArray(ao)) {
+    } else if (AAFwk::Array::IsCharArray(ao)) {
         return WriteArrayToParcelChar(parcel, ao);
-    } else if (Array::IsShortArray(ao)) {
+    } else if (AAFwk::Array::IsShortArray(ao)) {
         return WriteArrayToParcelShort(parcel, ao);
-    } else if (Array::IsIntegerArray(ao)) {
+    } else if (AAFwk::Array::IsIntegerArray(ao)) {
         return WriteArrayToParcelInt(parcel, ao);
-    } else if (Array::IsLongArray(ao)) {
+    } else if (AAFwk::Array::IsLongArray(ao)) {
         return WriteArrayToParcelLong(parcel, ao);
-    } else if (Array::IsFloatArray(ao)) {
+    } else if (AAFwk::Array::IsFloatArray(ao)) {
         return WriteArrayToParcelFloat(parcel, ao);
-    } else if (Array::IsDoubleArray(ao)) {
+    } else if (AAFwk::Array::IsDoubleArray(ao)) {
         return WriteArrayToParcelDouble(parcel, ao);
     } else {
         return true;
     }
 }
 
-bool DistributedWantParams::ReadFromParcelArrayString(Parcel& parcel, sptr<IArray>& ao)
+bool DistributedWantParams::ReadFromParcelArrayString(Parcel& parcel, sptr<AAFwk::IArray>& ao)
 {
     std::vector<std::u16string> value;
     if (!parcel.ReadString16Vector(&value)) {
@@ -857,17 +865,17 @@ bool DistributedWantParams::ReadFromParcelArrayString(Parcel& parcel, sptr<IArra
     }
 
     std::vector<std::u16string>::size_type size = value.size();
-    ao = new (std::nothrow) Array(size, g_IID_IString);
+    ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IString);
     if (ao != nullptr) {
         for (std::vector<std::u16string>::size_type i = 0; i < size; i++) {
-            ao->Set(i, String::Box(Str16ToStr8(value[i])));
+            ao->Set(i, AAFwk::String::Box(Str16ToStr8(value[i])));
         }
         return true;
     }
     return false;
 }
 
-bool DistributedWantParams::ReadFromParcelArrayBool(Parcel& parcel, sptr<IArray>& ao)
+bool DistributedWantParams::ReadFromParcelArrayBool(Parcel& parcel, sptr<AAFwk::IArray>& ao)
 {
     std::vector<int32_t> value;
     std::vector<int8_t> boolValue;
@@ -879,46 +887,46 @@ bool DistributedWantParams::ReadFromParcelArrayBool(Parcel& parcel, sptr<IArray>
     for (std::vector<int32_t>::size_type i = 0; i < size; i++) {
         boolValue.push_back(value[i]);
     }
-    return SetArray<int8_t, Boolean>(g_IID_IBoolean, boolValue, ao);
+    return SetArray<int8_t, AAFwk::Boolean>(AAFwk::g_IID_IBoolean, boolValue, ao);
 }
 
-bool DistributedWantParams::ReadFromParcelArrayByte(Parcel& parcel, sptr<IArray>& ao)
+bool DistributedWantParams::ReadFromParcelArrayByte(Parcel& parcel, sptr<AAFwk::IArray>& ao)
 {
     std::vector<int8_t> value;
     if (!parcel.ReadInt8Vector(&value)) {
         return false;
     }
-    return SetArray<int8_t, Byte>(g_IID_IByte, value, ao);
+    return SetArray<int8_t, AAFwk::Byte>(AAFwk::g_IID_IByte, value, ao);
 }
 
-bool DistributedWantParams::ReadFromParcelArrayChar(Parcel& parcel, sptr<IArray>& ao)
+bool DistributedWantParams::ReadFromParcelArrayChar(Parcel& parcel, sptr<AAFwk::IArray>& ao)
 {
     std::vector<int32_t> value;
     if (!parcel.ReadInt32Vector(&value)) {
         return false;
     }
-    return SetArray<int32_t, Char>(g_IID_IChar, value, ao);
+    return SetArray<int32_t, AAFwk::Char>(AAFwk::g_IID_IChar, value, ao);
 }
 
-bool DistributedWantParams::ReadFromParcelArrayShort(Parcel& parcel, sptr<IArray>& ao)
+bool DistributedWantParams::ReadFromParcelArrayShort(Parcel& parcel, sptr<AAFwk::IArray>& ao)
 {
     std::vector<short> value;
     if (!parcel.ReadInt16Vector(&value)) {
         return false;
     }
-    return SetArray<short, Short>(g_IID_IShort, value, ao);
+    return SetArray<short, AAFwk::Short>(AAFwk::g_IID_IShort, value, ao);
 }
 
-bool DistributedWantParams::ReadFromParcelArrayInt(Parcel& parcel, sptr<IArray>& ao)
+bool DistributedWantParams::ReadFromParcelArrayInt(Parcel& parcel, sptr<AAFwk::IArray>& ao)
 {
     std::vector<int> value;
     if (!parcel.ReadInt32Vector(&value)) {
         return false;
     }
-    return SetArray<int, Integer>(g_IID_IInteger, value, ao);
+    return SetArray<int, AAFwk::Integer>(AAFwk::g_IID_IInteger, value, ao);
 }
 
-bool DistributedWantParams::ReadFromParcelArrayLong(Parcel& parcel, sptr<IArray>& ao)
+bool DistributedWantParams::ReadFromParcelArrayLong(Parcel& parcel, sptr<AAFwk::IArray>& ao)
 {
     std::vector<int64_t> value;
     if (!parcel.ReadInt64Vector(&value)) {
@@ -932,29 +940,29 @@ bool DistributedWantParams::ReadFromParcelArrayLong(Parcel& parcel, sptr<IArray>
     for (size_t i = 0; i < value.size(); i++) {
         strList.push_back(std::to_string(value[i]));
     }
-    return SetArray<std::string, String>(g_IID_IString, strList, ao);
+    return SetArray<std::string, AAFwk::String>(AAFwk::g_IID_IString, strList, ao);
 #endif
 }
 
-bool DistributedWantParams::ReadFromParcelArrayFloat(Parcel& parcel, sptr<IArray>& ao)
+bool DistributedWantParams::ReadFromParcelArrayFloat(Parcel& parcel, sptr<AAFwk::IArray>& ao)
 {
     std::vector<float> value;
     if (!parcel.ReadFloatVector(&value)) {
         return false;
     }
-    return SetArray<float, Float>(g_IID_IFloat, value, ao);
+    return SetArray<float, AAFwk::Float>(AAFwk::g_IID_IFloat, value, ao);
 }
 
-bool DistributedWantParams::ReadFromParcelArrayDouble(Parcel& parcel, sptr<IArray>& ao)
+bool DistributedWantParams::ReadFromParcelArrayDouble(Parcel& parcel, sptr<AAFwk::IArray>& ao)
 {
     std::vector<double> value;
     if (!parcel.ReadDoubleVector(&value)) {
         return false;
     }
-    return SetArray<double, Double>(g_IID_IDouble, value, ao);
+    return SetArray<double, AAFwk::Double>(AAFwk::g_IID_IDouble, value, ao);
 }
 
-bool DistributedWantParams::ReadArrayToParcel(Parcel& parcel, int type, sptr<IArray>& ao)
+bool DistributedWantParams::ReadArrayToParcel(Parcel& parcel, int type, sptr<AAFwk::IArray>& ao)
 {
     switch (type) {
         case VALUE_TYPE_STRINGARRAY:
@@ -987,7 +995,7 @@ bool DistributedWantParams::ReadFromParcelString(Parcel& parcel, const std::stri
 {
     std::u16string value = parcel.ReadString16();
     std::string strValue(Str16ToStr8(value));
-    sptr<IInterface> intf = String::Box(Str16ToStr8(value));
+    sptr<IInterface> intf = AAFwk::String::Box(Str16ToStr8(value));
     if (intf) {
         SetParam(key, intf);
     }
@@ -998,7 +1006,7 @@ bool DistributedWantParams::ReadFromParcelBool(Parcel& parcel, const std::string
 {
     int8_t value;
     if (parcel.ReadInt8(value)) {
-        sptr<IInterface> intf = Boolean::Box(value);
+        sptr<IInterface> intf = AAFwk::Boolean::Box(value);
         if (intf) {
             SetParam(key, intf);
         }
@@ -1012,7 +1020,7 @@ bool DistributedWantParams::ReadFromParcelInt8(Parcel& parcel, const std::string
 {
     int8_t value;
     if (parcel.ReadInt8(value)) {
-        sptr<IInterface> intf = Byte::Box(value);
+        sptr<IInterface> intf = AAFwk::Byte::Box(value);
         if (intf) {
             SetParam(key, intf);
         }
@@ -1026,7 +1034,7 @@ bool DistributedWantParams::ReadFromParcelChar(Parcel& parcel, const std::string
 {
     int32_t value;
     if (parcel.ReadInt32(value)) {
-        sptr<IInterface> intf = Char::Box(value);
+        sptr<IInterface> intf = AAFwk::Char::Box(value);
         if (intf) {
             SetParam(key, intf);
         }
@@ -1040,7 +1048,7 @@ bool DistributedWantParams::ReadFromParcelShort(Parcel& parcel, const std::strin
 {
     short value;
     if (parcel.ReadInt16(value)) {
-        sptr<IInterface> intf = Short::Box(value);
+        sptr<IInterface> intf = AAFwk::Short::Box(value);
         if (intf) {
             SetParam(key, intf);
         }
@@ -1054,7 +1062,7 @@ bool DistributedWantParams::ReadFromParcelInt(Parcel& parcel, const std::string&
 {
     int value;
     if (parcel.ReadInt32(value)) {
-        sptr<IInterface> intf = Integer::Box(value);
+        sptr<IInterface> intf = AAFwk::Integer::Box(value);
         if (intf) {
             SetParam(key, intf);
         }
@@ -1080,7 +1088,7 @@ bool DistributedWantParams::ReadFromParcelLong(Parcel& parcel, const std::string
 #ifdef WANT_PARAM_USE_LONG
         sptr<IInterface> intf = Long::Box(value);
 #else
-        sptr<IInterface> intf = String::Box(std::to_string(value));
+        sptr<IInterface> intf = AAFwk::String::Box(std::to_string(value));
 #endif
         if (intf) {
             SetParam(key, intf);
@@ -1095,7 +1103,7 @@ bool DistributedWantParams::ReadFromParcelFloat(Parcel& parcel, const std::strin
 {
     float value;
     if (parcel.ReadFloat(value)) {
-        sptr<IInterface> intf = Float::Box(value);
+        sptr<IInterface> intf = AAFwk::Float::Box(value);
         if (intf) {
             SetParam(key, intf);
         }
@@ -1109,7 +1117,7 @@ bool DistributedWantParams::ReadFromParcelDouble(Parcel& parcel, const std::stri
 {
     double value;
     if (parcel.ReadDouble(value)) {
-        sptr<IInterface> intf = Double::Box(value);
+        sptr<IInterface> intf = AAFwk::Double::Box(value);
         if (intf) {
             SetParam(key, intf);
         }
@@ -1189,7 +1197,7 @@ bool DistributedWantParams::ReadFromParcelParam(Parcel& parcel, const std::strin
             }
             break;
         default: {
-            sptr<IArray> ao = nullptr;
+            sptr<AAFwk::IArray> ao = nullptr;
             if (!ReadArrayToParcel(parcel, type, ao)) {
                 return false;
             }
@@ -1257,13 +1265,13 @@ DistributedWantParams* DistributedWantParams::Unmarshalling(Parcel& parcel)
     return wantParams;
 }
 
-WantParams DistributedWantParams::ToWantParams() {
-    WantParams wantParams;
+AAFwk::WantParams DistributedWantParams::ToWantParams() {
+    AAFwk::WantParams wantParams;
     std::map<std::string, sptr<IInterface>> data = GetParams();
     for (auto it = data.begin(); it != data.end(); it++) {
         wantParams.SetParam(it->first, it->second);
     }
     return wantParams;
 }
-}  // namespace AAFwk
+}  // namespace DistributedSchedule
 }  // namespace OHOS
