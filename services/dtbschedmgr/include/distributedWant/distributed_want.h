@@ -758,8 +758,6 @@ public:
      */
     static DistributedWant* Unmarshalling(Parcel& parcel);
 
-    void DumpInfo(int level) const;
-
     std::string ToString() const;
 
     static DistributedWant* FromString(std::string& string);

@@ -1898,14 +1898,6 @@ bool DistributedWant::CheckAndSetParameters(DistributedWant& want, const std::st
     return true;
 }
 
-void DistributedWant::DumpInfo(int level) const
-{
-    ABILITYBASE_LOGI("==================Want::DumpInfo level: %{public}d start=============", level);
-    operation_.DumpInfo(level);
-    parameters_.DumpInfo(level);
-    ABILITYBASE_LOGI("==================Want::DumpInfo level: %{public}d end=============", level);
-}
-
 nlohmann::json DistributedWant::ToJson() const
 {
     DistributedWantParamWrapper wrapper(parameters_);
@@ -1943,7 +1935,6 @@ bool DistributedWant::ReadFromJson(nlohmann::json& wantJson)
         || (wantJson.find("action") == jsonObjectEnd)
         || (wantJson.find("parameters") == jsonObjectEnd)
         || (wantJson.find("entities") == jsonObjectEnd)) {
-        ABILITYBASE_LOGE("Incomplete wantJson");
         return false;
     }
 
@@ -1967,9 +1958,7 @@ bool DistributedWant::ReadFromJson(nlohmann::json& wantJson)
     std::string parametersString = wantJson.at("parameters").get<std::string>();
     DistributedWantParams parameters = DistributedWantParamWrapper::ParseWantParams(parametersString);
     SetParams(parameters);
-    if (wantJson.at("entities").is_null()) {
-        ABILITYBASE_LOGI("entities is null");
-    } else {
+    if (!wantJson.at("entities").is_null()) {
         std::vector<std::string> entities;
         wantJson.at("entities").get_to<std::vector<std::string>>(entities);
         for (size_t i = 0; i < entities.size(); i++) {
@@ -1987,7 +1976,6 @@ std::string DistributedWant::ToString() const
 DistributedWant* DistributedWant::FromString(std::string& string)
 {
     if (string.empty()) {
-        ABILITYBASE_LOGE("Invalid string.");
         return nullptr;
     }
 

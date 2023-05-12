@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "ability_base_log_wrapper.h"
 #include "array_wrapper.h"
 #include "base_interfaces.h"
 #include "base_object.h"
@@ -50,8 +49,6 @@ DistributedUnsupportedData::DistributedUnsupportedData(const DistributedUnsuppor
 {
     buffer = new uint8_t[size];
     if (memcpy_s(buffer, size, other.buffer, size) != EOK) {
-        ABILITYBASE_LOGI("copy construct fail due to memcpy");
-
         key.clear();
         type = 0;
         size = 0;
@@ -78,8 +75,6 @@ DistributedUnsupportedData& DistributedUnsupportedData::operator=(const Distribu
     size = other.size;
     buffer = new uint8_t[size];
     if (memcpy_s(buffer, size, other.buffer, size) != EOK) {
-        ABILITYBASE_LOGI("copy assignment fail due to memcpy");
-
         key.clear();
         type = 0;
         size = 0;
@@ -726,7 +721,6 @@ bool DistributedWantParams::WriteArrayToParcelBool(Parcel& parcel, IArray* ao) c
     }
 
     for (std::vector<int8_t>::size_type i = 0; i < array.size(); i++) {
-        ABILITYBASE_LOGI("%{public}s bool of array: %{public}d", __func__, array[i]);
         intArray.push_back(array[i]);
     }
     return parcel.WriteInt32Vector(intArray);
@@ -857,10 +851,8 @@ bool DistributedWantParams::WriteArrayToParcel(Parcel& parcel, IArray* ao) const
 
 bool DistributedWantParams::ReadFromParcelArrayString(Parcel& parcel, sptr<IArray>& ao)
 {
-    ABILITYBASE_LOGI("%{public}s called.", __func__);
     std::vector<std::u16string> value;
     if (!parcel.ReadString16Vector(&value)) {
-        ABILITYBASE_LOGI("%{public}s read string of array fail.", __func__);
         return false;
     }
 
@@ -871,19 +863,15 @@ bool DistributedWantParams::ReadFromParcelArrayString(Parcel& parcel, sptr<IArra
             ao->Set(i, String::Box(Str16ToStr8(value[i])));
         }
         return true;
-    } else {
-        ABILITYBASE_LOGI("%{public}s create string of array fail.", __func__);
     }
     return false;
 }
 
 bool DistributedWantParams::ReadFromParcelArrayBool(Parcel& parcel, sptr<IArray>& ao)
 {
-    ABILITYBASE_LOGI("%{public}s called.", __func__);
     std::vector<int32_t> value;
     std::vector<int8_t> boolValue;
     if (!parcel.ReadInt32Vector(&value)) {
-        ABILITYBASE_LOGI("%{public}s read bool of array fail.", __func__);
         return false;
     }
 
@@ -896,10 +884,8 @@ bool DistributedWantParams::ReadFromParcelArrayBool(Parcel& parcel, sptr<IArray>
 
 bool DistributedWantParams::ReadFromParcelArrayByte(Parcel& parcel, sptr<IArray>& ao)
 {
-    ABILITYBASE_LOGI("%{public}s called.", __func__);
     std::vector<int8_t> value;
     if (!parcel.ReadInt8Vector(&value)) {
-        ABILITYBASE_LOGI("%{public}s read byte of array fail.", __func__);
         return false;
     }
     return SetArray<int8_t, Byte>(g_IID_IByte, value, ao);
@@ -907,10 +893,8 @@ bool DistributedWantParams::ReadFromParcelArrayByte(Parcel& parcel, sptr<IArray>
 
 bool DistributedWantParams::ReadFromParcelArrayChar(Parcel& parcel, sptr<IArray>& ao)
 {
-    ABILITYBASE_LOGI("%{public}s called.", __func__);
     std::vector<int32_t> value;
     if (!parcel.ReadInt32Vector(&value)) {
-        ABILITYBASE_LOGI("%{public}s char bool of array fail.", __func__);
         return false;
     }
     return SetArray<int32_t, Char>(g_IID_IChar, value, ao);
@@ -918,10 +902,8 @@ bool DistributedWantParams::ReadFromParcelArrayChar(Parcel& parcel, sptr<IArray>
 
 bool DistributedWantParams::ReadFromParcelArrayShort(Parcel& parcel, sptr<IArray>& ao)
 {
-    ABILITYBASE_LOGI("%{public}s called.", __func__);
     std::vector<short> value;
     if (!parcel.ReadInt16Vector(&value)) {
-        ABILITYBASE_LOGI("%{public}s read short of array fail.", __func__);
         return false;
     }
     return SetArray<short, Short>(g_IID_IShort, value, ao);
@@ -929,10 +911,8 @@ bool DistributedWantParams::ReadFromParcelArrayShort(Parcel& parcel, sptr<IArray
 
 bool DistributedWantParams::ReadFromParcelArrayInt(Parcel& parcel, sptr<IArray>& ao)
 {
-    ABILITYBASE_LOGI("%{public}s called.", __func__);
     std::vector<int> value;
     if (!parcel.ReadInt32Vector(&value)) {
-        ABILITYBASE_LOGI("%{public}s read int of array fail.", __func__);
         return false;
     }
     return SetArray<int, Integer>(g_IID_IInteger, value, ao);
@@ -940,10 +920,8 @@ bool DistributedWantParams::ReadFromParcelArrayInt(Parcel& parcel, sptr<IArray>&
 
 bool DistributedWantParams::ReadFromParcelArrayLong(Parcel& parcel, sptr<IArray>& ao)
 {
-    ABILITYBASE_LOGI("%{public}s called.", __func__);
     std::vector<int64_t> value;
     if (!parcel.ReadInt64Vector(&value)) {
-        ABILITYBASE_LOGI("%{public}s read long of array fail.", __func__);
         return false;
     }
 
@@ -960,10 +938,8 @@ bool DistributedWantParams::ReadFromParcelArrayLong(Parcel& parcel, sptr<IArray>
 
 bool DistributedWantParams::ReadFromParcelArrayFloat(Parcel& parcel, sptr<IArray>& ao)
 {
-    ABILITYBASE_LOGI("%{public}s called.", __func__);
     std::vector<float> value;
     if (!parcel.ReadFloatVector(&value)) {
-        ABILITYBASE_LOGI("%{public}s read float of array fail.", __func__);
         return false;
     }
     return SetArray<float, Float>(g_IID_IFloat, value, ao);
@@ -971,10 +947,8 @@ bool DistributedWantParams::ReadFromParcelArrayFloat(Parcel& parcel, sptr<IArray
 
 bool DistributedWantParams::ReadFromParcelArrayDouble(Parcel& parcel, sptr<IArray>& ao)
 {
-    ABILITYBASE_LOGI("%{public}s called.", __func__);
     std::vector<double> value;
     if (!parcel.ReadDoubleVector(&value)) {
-        ABILITYBASE_LOGI("%{public}s read double of array fail.", __func__);
         return false;
     }
     return SetArray<double, Double>(g_IID_IDouble, value, ao);
@@ -985,34 +959,24 @@ bool DistributedWantParams::ReadArrayToParcel(Parcel& parcel, int type, sptr<IAr
     switch (type) {
         case VALUE_TYPE_STRINGARRAY:
         case VALUE_TYPE_CHARSEQUENCEARRAY:
-            ABILITYBASE_LOGI("%{public}s type=VALUE_TYPE_STRINGARRAY|VALUE_TYPE_CHARSEQUENCEARRAY.", __func__);
             return ReadFromParcelArrayString(parcel, ao);
         case VALUE_TYPE_BOOLEANARRAY:
-            ABILITYBASE_LOGI("%{public}s type=VALUE_TYPE_BOOLEANARRAY.", __func__);
             return ReadFromParcelArrayBool(parcel, ao);
         case VALUE_TYPE_BYTEARRAY:
-            ABILITYBASE_LOGI("%{public}s type=VALUE_TYPE_BYTEARRAY.", __func__);
             return ReadFromParcelArrayByte(parcel, ao);
         case VALUE_TYPE_CHARARRAY:
-            ABILITYBASE_LOGI("%{public}s type=VALUE_TYPE_CHARARRAY.", __func__);
             return ReadFromParcelArrayChar(parcel, ao);
         case VALUE_TYPE_SHORTARRAY:
-            ABILITYBASE_LOGI("%{public}s type=VALUE_TYPE_SHORTARRAY.", __func__);
             return ReadFromParcelArrayShort(parcel, ao);
         case VALUE_TYPE_INTARRAY:
-            ABILITYBASE_LOGI("%{public}s type=VALUE_TYPE_INTARRAY.", __func__);
             return ReadFromParcelArrayInt(parcel, ao);
         case VALUE_TYPE_LONGARRAY:
-            ABILITYBASE_LOGI("%{public}s type=VALUE_TYPE_LONGARRAY.", __func__);
             return ReadFromParcelArrayLong(parcel, ao);
         case VALUE_TYPE_FLOATARRAY:
-            ABILITYBASE_LOGI("%{public}s type=VALUE_TYPE_FLOATARRAY.", __func__);
             return ReadFromParcelArrayFloat(parcel, ao);
         case VALUE_TYPE_DOUBLEARRAY:
-            ABILITYBASE_LOGI("%{public}s type=VALUE_TYPE_DOUBLEARRAY.", __func__);
             return ReadFromParcelArrayDouble(parcel, ao);
         default:
-            ABILITYBASE_LOGI("%{public}s type=UNKNOWN, nothing to do.", __func__);
             break;
     }
 
@@ -1023,102 +987,79 @@ bool DistributedWantParams::ReadFromParcelString(Parcel& parcel, const std::stri
 {
     std::u16string value = parcel.ReadString16();
     std::string strValue(Str16ToStr8(value));
-    ABILITYBASE_LOGI("%{public}s key=%{public}s.", __func__, key.c_str());
     sptr<IInterface> intf = String::Box(Str16ToStr8(value));
     if (intf) {
         SetParam(key, intf);
-    } else {
-        ABILITYBASE_LOGI("%{public}s read data fail: key=%{public}s", __func__, key.c_str());
     }
     return true;
 }
 
 bool DistributedWantParams::ReadFromParcelBool(Parcel& parcel, const std::string& key)
 {
-    ABILITYBASE_LOGI("%{public}s key=%{public}s.", __func__, key.c_str());
     int8_t value;
     if (parcel.ReadInt8(value)) {
         sptr<IInterface> intf = Boolean::Box(value);
         if (intf) {
             SetParam(key, intf);
-        } else {
-            ABILITYBASE_LOGI("%{public}s insert param fail: key=%{public}s", __func__, key.c_str());
         }
         return true;
     } else {
-        ABILITYBASE_LOGI("%{public}s read data fail: key=%{public}s", __func__, key.c_str());
         return false;
     }
 }
 
 bool DistributedWantParams::ReadFromParcelInt8(Parcel& parcel, const std::string& key)
 {
-    ABILITYBASE_LOGI("%{public}s key=%{public}s.", __func__, key.c_str());
     int8_t value;
     if (parcel.ReadInt8(value)) {
         sptr<IInterface> intf = Byte::Box(value);
         if (intf) {
             SetParam(key, intf);
-        } else {
-            ABILITYBASE_LOGI("%{public}s insert param fail: key=%{public}s", __func__, key.c_str());
         }
         return true;
     } else {
-        ABILITYBASE_LOGI("%{public}s read data fail: key=%{public}s", __func__, key.c_str());
         return false;
     }
 }
 
 bool DistributedWantParams::ReadFromParcelChar(Parcel& parcel, const std::string& key)
 {
-    ABILITYBASE_LOGI("%{public}s key=%{public}s.", __func__, key.c_str());
     int32_t value;
     if (parcel.ReadInt32(value)) {
         sptr<IInterface> intf = Char::Box(value);
         if (intf) {
             SetParam(key, intf);
-        } else {
-            ABILITYBASE_LOGI("%{public}s insert param fail: key=%{public}s", __func__, key.c_str());
         }
         return true;
     } else {
-        ABILITYBASE_LOGI("%{public}s read data fail: key=%{public}s", __func__, key.c_str());
         return false;
     }
 }
 
 bool DistributedWantParams::ReadFromParcelShort(Parcel& parcel, const std::string& key)
 {
-    ABILITYBASE_LOGI("%{public}s key=%{public}s.", __func__, key.c_str());
     short value;
     if (parcel.ReadInt16(value)) {
         sptr<IInterface> intf = Short::Box(value);
         if (intf) {
             SetParam(key, intf);
-        } else {
-            ABILITYBASE_LOGI("%{public}s insert param fail: key=%{public}s", __func__, key.c_str());
         }
         return true;
     } else {
-        ABILITYBASE_LOGI("%{public}s read data fail: key=%{public}s", __func__, key.c_str());
         return false;
     }
 }
 
 bool DistributedWantParams::ReadFromParcelInt(Parcel& parcel, const std::string& key)
 {
-    ABILITYBASE_LOGI("%{public}s key=%{public}s.", __func__, key.c_str());
     int value;
     if (parcel.ReadInt32(value)) {
         sptr<IInterface> intf = Integer::Box(value);
         if (intf) {
             SetParam(key, intf);
-        } else {
-            ABILITYBASE_LOGI("%{public}s insert param fail: key=%{public}s", __func__, key.c_str());
         }
         return true;
     } else {
-        ABILITYBASE_LOGI("%{public}s read data fail: key=%{public}s", __func__, key.c_str());
         return false;
     }
 }
@@ -1133,7 +1074,6 @@ bool DistributedWantParams::ReadFromParcelWantParamWrapper(Parcel& parcel, const
 }
 bool DistributedWantParams::ReadFromParcelLong(Parcel& parcel, const std::string& key)
 {
-    ABILITYBASE_LOGI("%{public}s key=%{public}s.", __func__, key.c_str());
     int64_t value;
     if (parcel.ReadInt64(value)) {
         std::string strValue(std::to_string(value));
@@ -1144,48 +1084,37 @@ bool DistributedWantParams::ReadFromParcelLong(Parcel& parcel, const std::string
 #endif
         if (intf) {
             SetParam(key, intf);
-        } else {
-            ABILITYBASE_LOGI("%{public}s insert param fail: key=%{public}s", __func__, key.c_str());
         }
         return true;
     } else {
-        ABILITYBASE_LOGI("%{public}s read data fail: key=%{public}s", __func__, key.c_str());
         return false;
     }
 }
 
 bool DistributedWantParams::ReadFromParcelFloat(Parcel& parcel, const std::string& key)
 {
-    ABILITYBASE_LOGI("%{public}s key=%{public}s.", __func__, key.c_str());
     float value;
     if (parcel.ReadFloat(value)) {
         sptr<IInterface> intf = Float::Box(value);
         if (intf) {
             SetParam(key, intf);
-        } else {
-            ABILITYBASE_LOGI("%{public}s insert param fail: key=%{public}s", __func__, key.c_str());
         }
         return true;
     } else {
-        ABILITYBASE_LOGI("%{public}s read data fail: key=%{public}s", __func__, key.c_str());
         return false;
     }
 }
 
 bool DistributedWantParams::ReadFromParcelDouble(Parcel& parcel, const std::string& key)
 {
-    ABILITYBASE_LOGI("%{public}s key=%{public}s.", __func__, key.c_str());
     double value;
     if (parcel.ReadDouble(value)) {
         sptr<IInterface> intf = Double::Box(value);
         if (intf) {
             SetParam(key, intf);
-        } else {
-            ABILITYBASE_LOGI("%{public}s insert param fail: key=%{public}s", __func__, key.c_str());
         }
         return true;
     } else {
-        ABILITYBASE_LOGI("%{public}s read data fail: key=%{public}s", __func__, key.c_str());
         return false;
     }
 }
@@ -1200,7 +1129,6 @@ bool DistributedWantParams::ReadUnsupportedData(Parcel& parcel, const std::strin
         return false;
     }
 
-    // Corresponding to Parcel#writeByteArray() in Java.
     int32_t length = 0;
     if (!parcel.ReadInt32(length)) {
         return false;
@@ -1261,7 +1189,6 @@ bool DistributedWantParams::ReadFromParcelParam(Parcel& parcel, const std::strin
             }
             break;
         default: {
-            // handle array
             sptr<IArray> ao = nullptr;
             if (!ReadArrayToParcel(parcel, type, ao)) {
                 return false;
@@ -1280,20 +1207,15 @@ bool DistributedWantParams::ReadFromParcel(Parcel& parcel)
 {
     int32_t size;
     if (!parcel.ReadInt32(size)) {
-        ABILITYBASE_LOGI("%{public}s read size fail.", __func__);
         return false;
     }
-    ABILITYBASE_LOGI("%{public}s size=%{public}d.", __func__, size);
     for (int32_t i = 0; i < size; i++) {
-        ABILITYBASE_LOGI("%{public}s get i=%{public}d", __func__, i);
         std::u16string key = parcel.ReadString16();
         int type;
         if (!parcel.ReadInt32(type)) {
-            ABILITYBASE_LOGI("%{public}s read type fail.", __func__);
             return false;
         }
         if (!ReadFromParcelParam(parcel, Str16ToStr8(key), type)) {
-            ABILITYBASE_LOGI("%{public}s get i=%{public}d fail.", __func__, i);
             return false;
         }
     }
@@ -1309,26 +1231,21 @@ DistributedWantParams* DistributedWantParams::Unmarshalling(Parcel& parcel)
 {
     int32_t bufferSize;
     if (!parcel.ReadInt32(bufferSize)) {
-        ABILITYBASE_LOGI("%{public}s read bufferSize fail.", __func__);
         return nullptr;
     }
-    ABILITYBASE_LOGI("%{public}s bufferSize=%{public}d.", __func__, bufferSize);
 
     // Corresponding to Parcel#writeByteArray() in Java.
     int32_t length;
     if (!parcel.ReadInt32(length)) {
-        ABILITYBASE_LOGI("%{public}s read length fail.", __func__);
         return nullptr;
     }
     const uint8_t* dataInBytes = parcel.ReadUnpadBuffer(bufferSize);
     if (dataInBytes == nullptr) {
-        ABILITYBASE_LOGI("%{public}s read buffer fail.", __func__);
         return nullptr;
     }
 
     Parcel tempParcel;
     if (!tempParcel.WriteBuffer(dataInBytes, bufferSize)) {
-        ABILITYBASE_LOGI("%{public}s tempParcel.WriteBuffer fail.", __func__);
         return nullptr;
     }
 
@@ -1340,34 +1257,12 @@ DistributedWantParams* DistributedWantParams::Unmarshalling(Parcel& parcel)
     return wantParams;
 }
 
-void DistributedWantParams::DumpInfo(int level) const
-{
-    ABILITYBASE_LOGI("=======DistributedWantParams::DumpInfo level: %{public}d start=============", level);
-    size_t params_size = params_.size();
-    ABILITYBASE_LOGI("===DistributedWantParams::params_: count %{public}u =============", (uint32_t)params_size);
-    int typeId = VALUE_TYPE_NULL;
-    for (auto it : params_) {
-        typeId = VALUE_TYPE_NULL;
-        typeId = DistributedWantParams::GetDataType(it.second);
-        if (typeId != VALUE_TYPE_NULL) {
-            std::string value = DistributedWantParams::GetStringByType(it.second, typeId);
-            ABILITYBASE_LOGI(
-                "=DistributedWantParams::params_[%{public}s] : %{private}s =============", it.first.c_str(), value.c_str());
-        } else {
-            ABILITYBASE_LOGI("=DistributedWantParams::params_[%{public}s] : type error =============", it.first.c_str());
-        }
-    }
-    ABILITYBASE_LOGI("=======DistributedWantParams::DumpInfo level: %{public}d end=============", level);
-}
-
 WantParams DistributedWantParams::ToWantParams() {
-    ABILITYBASE_LOGI("ToWantParams called.");
     WantParams wantParams;
     std::map<std::string, sptr<IInterface>> data = GetParams();
     for (auto it = data.begin(); it != data.end(); it++) {
         wantParams.SetParam(it->first, it->second);
     }
-    ABILITYBASE_LOGI("ToWantParams new wantParams size: %{public}zu", params_.size());
     return wantParams;
 }
 }  // namespace AAFwk

@@ -384,21 +384,5 @@ void DistributedOperation::SetModuleName(const std::string& moduleName)
 {
     moduleName_ = moduleName;
 }
-
-void DistributedOperation::DumpInfo(int level) const
-{
-    ABILITYBASE_LOGI("===DistributedOperation::abilityName_ %{public}s =============", abilityName_.c_str());
-    ABILITYBASE_LOGI("===DistributedOperation::action_ %{public}s =============", action_.c_str());
-    ABILITYBASE_LOGI("===DistributedOperation::bundleName_ %{public}s =============", bundleName_.c_str());
-    ABILITYBASE_LOGI("===DistributedOperation::moduleName_ %{public}s =============", moduleName_.c_str());
-    size_t entities_count = entities_.size();
-    ABILITYBASE_LOGI("===DistributedOperation::entities_: count %{public}u =============", (uint32_t)entities_count);
-    for (size_t i = 0; i < entities_count; i++) {
-        ABILITYBASE_LOGI("=DistributedOperation::entities_[%{public}u]: %{public}s =============", (uint32_t)i,
-            entities_[i].c_str());
-    }
-    ABILITYBASE_LOGI("===DistributedOperation::flags_ %{public}ud =============", flags_);
-    ABILITYBASE_LOGI("===DistributedOperation::uri_ %{public}s =============", uri_.ToString().c_str());
-}
 }  // namespace AAFwk
 }  // namespace OHOS

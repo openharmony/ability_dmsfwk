@@ -81,8 +81,6 @@ public:
 
     static DistributedWantParams* Unmarshalling(Parcel& parcel);
 
-    void DumpInfo(int level) const;
-
     WantParams ToWantParams();
 
 private:
