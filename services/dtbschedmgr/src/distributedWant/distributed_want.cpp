@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
+#include "distributed_want.h"
+
 #include <algorithm>
 #include <climits>
 #include <cstdlib>
 #include <regex>
 #include <securec.h>
+
 #include "array_wrapper.h"
 #include "base_object.h"
 #include "bool_wrapper.h"
 #include "byte_wrapper.h"
 #include "distributed_operation_builder.h"
-#include "distributed_want.h"
 #include "distributed_want_params_wrapper.h"
 #include "double_wrapper.h"
 #include "float_wrapper.h"
@@ -37,7 +39,6 @@
 
 using namespace OHOS::AppExecFwk;
 using OHOS::AppExecFwk::ElementName;
-
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
@@ -70,27 +71,12 @@ const std::string DistributedWant::PARAM_RESV_CALLER_TOKEN("ohos.aafwk.param.cal
 const std::string DistributedWant::PARAM_RESV_CALLER_UID("ohos.aafwk.param.callerUid");
 const std::string DistributedWant::PARAM_RESV_CALLER_PID("ohos.aafwk.param.callerPid");
 
-/**
- * @description:Default construcotr of DistributedWant class, which is used to initialzie flags and URI.
- * @param None
- * @return None
- */
 DistributedWant::DistributedWant()
 {}
 
-/**
- * @description: Default deconstructor of DistributedWant class
- * @param None
- * @return None
- */
 DistributedWant::~DistributedWant()
 {}
 
-/**
- * @description: Copy construcotr of DistributedWant class, which is used to initialzie flags, URI, etc.
- * @param want the source instance of DistributedWant.
- * @return None
- */
 DistributedWant::DistributedWant(const DistributedWant& other)
 {
     operation_ = other.operation_;
@@ -151,62 +137,33 @@ std::shared_ptr<AAFwk::Want> DistributedWant::ToWant() {
     return want;
 }
 
-/**
- * @description: Obtains the description of flags in a DistributedWant.
- * @return Returns the flag description in the DistributedWant.
- */
 unsigned int DistributedWant::GetFlags() const
 {
     return operation_.GetFlags();
 }
 
-/**
- * @description: Sets a flag in a DistributedWant.
- * @param flags Indicates the flag to set.
- * @return Returns this DistributedWant object containing the flag.
- */
 DistributedWant& DistributedWant::SetFlags(unsigned int flags)
 {
     operation_.SetFlags(flags);
     return *this;
 }
 
-/**
- * @description: Adds a flag to a DistributedWant.
- * @param flags Indicates the flag to add.
- * @return Returns the DistributedWant object with the added flag.
- */
 DistributedWant& DistributedWant::AddFlags(unsigned int flags)
 {
     operation_.AddFlags(flags);
     return *this;
 }
 
-/**
- * @description: Removes the description of a flag from a DistributedWant.
- * @param flags Indicates the flag to remove.
- * @return Removes the description of a flag from a DistributedWant.
- */
 void DistributedWant::RemoveFlags(unsigned int flags)
 {
     operation_.RemoveFlags(flags);
 }
 
-/**
- * @description: Obtains the description of the ElementName object in a DistributedWant.
- * @return Returns the ElementName description in the DistributedWant.
- */
 OHOS::AppExecFwk::ElementName DistributedWant::GetElement() const
 {
     return ElementName(operation_.GetDeviceId(), operation_.GetBundleName(), operation_.GetAbilityName());
 }
 
-/**
- * @description: Sets the bundleName and abilityName attributes for this DistributedWant object.
- * @param bundleName Indicates the bundleName to set for the operation attribute in the DistributedWant.
- * @param abilityName Indicates the abilityName to set for the operation attribute in the DistributedWant.
- * @return Returns this DistributedWant object that contains the specified bundleName and abilityName attributes.
- */
 DistributedWant& DistributedWant::SetElementName(const std::string& bundleName, const std::string& abilityName)
 {
     operation_.SetBundleName(bundleName);
@@ -214,13 +171,6 @@ DistributedWant& DistributedWant::SetElementName(const std::string& bundleName, 
     return *this;
 }
 
-/**
- * @description: Sets the bundleName and abilityName attributes for this DistributedWant object.
- * @param deviceId Indicates the deviceId to set for the operation attribute in the DistributedWant.
- * @param bundleName Indicates the bundleName to set for the operation attribute in the DistributedWant.
- * @param abilityName Indicates the abilityName to set for the operation attribute in the DistributedWant.
- * @return Returns this DistributedWant object that contains the specified bundleName and abilityName attributes.
- */
 DistributedWant& DistributedWant::SetElementName(const std::string& deviceId, const std::string& bundleName, 
                                                  const std::string& abilityName)
 {
@@ -230,11 +180,6 @@ DistributedWant& DistributedWant::SetElementName(const std::string& deviceId, co
     return *this;
 }
 
-/**
- * @description: Sets an ElementName object in a DistributedWant.
- * @param element Indicates the ElementName description.
- * @return Returns this DistributedWant object containing the ElementName
- */
 DistributedWant& DistributedWant::SetElement(const OHOS::AppExecFwk::ElementName& element)
 {
     operation_.SetDeviceId(element.GetDeviceID());
@@ -243,82 +188,43 @@ DistributedWant& DistributedWant::SetElement(const OHOS::AppExecFwk::ElementName
     return *this;
 }
 
-/**
- * @description: Obtains the description of all entities in a DistributedWant.
- * @return Returns a set of entities
- */
 const std::vector<std::string>& DistributedWant::GetEntities() const
 {
     return operation_.GetEntities();
 }
 
-/**
- * @description: Adds the description of an entity to a DistributedWant
- * @param entity Indicates the entity description to add
- * @return Returns this DistributedWant object containing the entity.
- */
 DistributedWant& DistributedWant::AddEntity(const std::string& entity)
 {
     operation_.AddEntity(entity);
     return *this;
 }
 
-/**
- * @description: Removes the description of an entity from a DistributedWant
- * @param entity Indicates the entity description to remove.
- * @return void
- */
 void DistributedWant::RemoveEntity(const std::string& entity)
 {
     operation_.RemoveEntity(entity);
 }
 
-/**
- * @description: Checks whether a DistributedWant contains the given entity
- * @param entity Indicates the entity to check
- * @return Returns true if the given entity is contained; returns false otherwise
- */
 bool DistributedWant::HasEntity(const std::string& entity) const
 {
     return operation_.HasEntity(entity);
 }
 
-/**
- * @description: Obtains the number of entities in a DistributedWant
- * @return Returns the entity quantity
- */
 int DistributedWant::CountEntities()
 {
     return operation_.CountEntities();
 }
 
-/**
- * @description: Obtains the name of the bundle specified in a DistributedWant
- * @return Returns the bundle name specified in the DistributedWant
- */
 std::string DistributedWant::GetBundle() const
 {
     return operation_.GetBundleName();
 }
 
-/**
- * @description: Sets a bundle name in this DistributedWant.
- * If a bundle name is specified in a DistributedWant, the DistributedWant will match only
- * the abilities in the specified bundle. You cannot use this method and
- * setPicker(ohos.aafwk.content.DistributedWant) on the same DistributedWant.
- * @param bundleName Indicates the bundle name to set.
- * @return Returns a DistributedWant object containing the specified bundle name.
- */
 DistributedWant& DistributedWant::SetBundle(const std::string& bundleName)
 {
     operation_.SetBundleName(bundleName);
     return *this;
 }
 
-/**
- * @description: Obtains the description of the type in this DistributedWant
- * @return Returns the type description in this DistributedWant
- */
 std::string DistributedWant::GetType() const
 {
     auto value = parameters_.GetParam(MIME_TYPE);
@@ -329,11 +235,6 @@ std::string DistributedWant::GetType() const
     return std::string();
 }
 
-/**
- * @description: Sets the description of a type in this DistributedWant
- * @param type Indicates the type description
- * @return Returns this DistributedWant object containing the type
- */
 DistributedWant& DistributedWant::SetType(const std::string& type)
 {
     sptr<AAFwk::IString> valueObj = AAFwk::String::Parse(type);
@@ -341,13 +242,6 @@ DistributedWant& DistributedWant::SetType(const std::string& type)
     return *this;
 }
 
-/**
- * @description: Formats a specified MIME type. This method uses
- * the formatMimeType(java.lang.String) method to format a MIME type
- * and then saves the formatted type to this DistributedWant object.
- * @param type Indicates the MIME type to format
- * @return Returns this DistributedWant object that contains the formatted type attribute
- */
 DistributedWant& DistributedWant::FormatType(const std::string& type)
 {
     std::string typetemp = FormatMimeType(type);
@@ -355,11 +249,6 @@ DistributedWant& DistributedWant::FormatType(const std::string& type)
     return *this;
 }
 
-/**
- * @description: Convert the scheme of URI to lower-case, and return the uri which be converted.
- * @param uri Indicates the URI to format.
- * @return Returns this URI Object.
- */
 Uri DistributedWant::GetLowerCaseScheme(const Uri& uri)
 {
     std::string strUri = const_cast<Uri&>(uri).ToString();
@@ -386,27 +275,11 @@ Uri DistributedWant::GetLowerCaseScheme(const Uri& uri)
     return Uri(strUri);
 }
 
-/**
- * @description: Formats a specified URI and MIME type.
- * This method works in the same way as formatUri(ohos.utils.net.URI)
- * and formatType(java.lang.String).
- * @param uri Indicates the URI to format.
- * @param type Indicates the MIME type to format.
- * @return Returns this DistributedWant object that contains the formatted URI and type attributes.
- */
 DistributedWant& DistributedWant::FormatUriAndType(const Uri& uri, const std::string& type)
 {
     return SetUriAndType(GetLowerCaseScheme(uri), FormatMimeType(type));
 }
 
-/**
- * @description: This method formats data of a specified MIME type
- * by removing spaces from the data and converting the data into
- * lowercase letters. You can use this method to normalize
- * the external data used to create DistributedWant information.
- * @param type Indicates the MIME type to format
- * @return Returns this DistributedWant object that contains the formatted type attribute
- */
 std::string DistributedWant::FormatMimeType(const std::string& mimeType)
 {
     std::string strMimeType = mimeType;
@@ -423,42 +296,22 @@ std::string DistributedWant::FormatMimeType(const std::string& mimeType)
     return strMimeType;
 }
 
-/**
- * @description: Obtains the description of an action in a DistributedWant.
- * @return Returns the action description in the DistributedWant.
- */
 std::string DistributedWant::GetAction() const
 {
     return operation_.GetAction();
 }
 
-/**
- * @description: Sets the description of an action in a DistributedWant.
- * @param action Indicates the action description.
- * @return Returns this DistributedWant object containing the action.
- */
 DistributedWant& DistributedWant::SetAction(const std::string& action)
 {
     operation_.SetAction(action);
     return *this;
 }
 
-/**
- * @description: Obtains the description of the URI scheme in this DistributedWant.
- * @return Returns the URI scheme description in this DistributedWant.
- */
 const std::string DistributedWant::GetScheme() const
 {
     return operation_.GetUri().GetScheme();
 }
 
-/**
- * @description: Creates a DistributedWant with its corresponding attributes specified for starting the main ability of an
- * application.
- * @param ElementName  Indicates the ElementName object defining the deviceId, bundleName,
- * and abilityName sub-attributes of the operation attribute in a DistributedWant.
- * @return Returns the DistributedWant object used to start the main ability of an application.
- */
 DistributedWant* DistributedWant::MakeMainAbility(const OHOS::AppExecFwk::ElementName& elementName)
 {
     DistributedWant* want = new (std::nothrow) DistributedWant();
@@ -472,33 +325,17 @@ DistributedWant* DistributedWant::MakeMainAbility(const OHOS::AppExecFwk::Elemen
     return want;
 }
 
-/**
- * @description: Obtains the description of the WantParams object in a DistributedWant
- * @return Returns the DistributedWantParams description in the DistributedWant
- */
 const DistributedWantParams& DistributedWant::GetParams() const
 {
     return parameters_;
 }
 
-/**
- * @description: Sets a wantParams object in a DistributedWant.
- * @param wantParams  Indicates the wantParams description.
- * @return Returns this DistributedWant object containing the wantParams.
- */
 DistributedWant& DistributedWant::SetParams(const DistributedWantParams& wantParams)
 {
     parameters_ = wantParams;
     return *this;
 }
 
-/**
- * @description: Obtains a bool-type value matching the given key.
- * @param key   Indicates the key of Params.
- * @param defaultValue  Indicates the default bool-type value.
- * @return Returns the bool-type value of the parameter matching the given key;
- * returns the default value if the key does not exist.
- */
 bool DistributedWant::GetBoolParam(const std::string& key, bool defaultValue) const
 {
     auto value = parameters_.GetParam(key);
@@ -509,12 +346,6 @@ bool DistributedWant::GetBoolParam(const std::string& key, bool defaultValue) co
     return defaultValue;
 }
 
-/**
- * @description:Obtains a bool-type array matching the given key.
- * @param key   Indicates the key of Params.
- * @return Returns the bool-type array of the parameter matching the given key;
- * returns null if the key does not exist.
- */
 std::vector<bool> DistributedWant::GetBoolArrayParam(const std::string& key) const
 {
     std::vector<bool> array;
@@ -534,24 +365,12 @@ std::vector<bool> DistributedWant::GetBoolArrayParam(const std::string& key) con
     return array;
 }
 
-/**
- * @description: Sets a parameter value of the boolean type.
- * @param key   Indicates the key matching the parameter.
- * @param value Indicates the boolean value of the parameter.
- * @return Returns this DistributedWant object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string&key, bool value)
 {
     parameters_.SetParam(key, AAFwk::Boolean::Box(value));
     return *this;
 }
 
-/**
- * @description: Sets a parameter value of the boolean array type.
- * @param key   Indicates the key matching the parameter.
- * @param value Indicates the boolean array of the parameter.
- * @return Returns this DistributedWant object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<bool>& value)
 {
     std::size_t size = value.size();
@@ -565,13 +384,6 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
     return *this;
 }
 
-/**
- * @description: Obtains a byte-type value matching the given key.
- * @param key   Indicates the key of Params.
- * @param defaultValue  Indicates the default byte-type value.
- * @return Returns the byte-type value of the parameter matching the given key;
- * returns the default value if the key does not exist.
- */
 AAFwk::byte DistributedWant::GetByteParam(const std::string& key, const AAFwk::byte defaultValue) const
 {
     auto value = parameters_.GetParam(key);
@@ -582,12 +394,6 @@ AAFwk::byte DistributedWant::GetByteParam(const std::string& key, const AAFwk::b
     return defaultValue;
 }
 
-/**
- * @description: Obtains a byte-type array matching the given key.
- * @param key   Indicates the key of Params.
- * @return Returns the byte-type array of the parameter matching the given key;
- * returns null if the key does not exist.
- */
 std::vector<AAFwk::byte> DistributedWant::GetByteArrayParam(const std::string& key) const
 {
     std::vector<AAFwk::byte> array;
@@ -607,24 +413,12 @@ std::vector<AAFwk::byte> DistributedWant::GetByteArrayParam(const std::string& k
     return array;
 }
 
-/**
- * @description: Sets a parameter value of the byte type.
- * @param key   Indicates the key matching the parameter.
- * @param value Indicates the byte-type value of the parameter.
- * @return Returns this object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, AAFwk::byte value)
 {
     parameters_.SetParam(key, AAFwk::Byte::Box(value));
     return *this;
 }
 
-/**
- * @description: Sets a parameter value of the byte array type.
- * @param key   Indicates the key matching the parameter.
- * @param value Indicates the byte array of the parameter.
- * @return Returns this object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<AAFwk::byte>& value)
 {
     std::size_t size = value.size();
@@ -639,13 +433,6 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
     return *this;
 }
 
-/**
- * @description: Obtains a char value matching the given key.
- * @param key   Indicates the key of wnatParams.
- * @param value Indicates the default char value.
- * @return Returns the char value of the parameter matching the given key;
- * returns the default value if the key does not exist.
- */
 AAFwk::zchar DistributedWant::GetCharParam(const std::string& key, AAFwk::zchar defaultValue) const
 {
     auto value = parameters_.GetParam(key);
@@ -656,12 +443,6 @@ AAFwk::zchar DistributedWant::GetCharParam(const std::string& key, AAFwk::zchar 
     return defaultValue;
 }
 
-/**
- * @description: Obtains a char array matching the given key.
- * @param key   Indicates the key of wantParams.
- * @return Returns the char array of the parameter matching the given key;
- * returns null if the key does not exist.
- */
 std::vector<AAFwk::zchar> DistributedWant::GetCharArrayParam(const std::string& key) const
 {
     std::vector<AAFwk::zchar> array;
@@ -681,24 +462,12 @@ std::vector<AAFwk::zchar> DistributedWant::GetCharArrayParam(const std::string& 
     return array;
 }
 
-/**
- * @description: Sets a parameter value of the char type.
- * @param key   Indicates the key of wantParams.
- * @param value Indicates the char value of the parameter.
- * @return Returns this DistributedWant object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, AAFwk::zchar value)
 {
     parameters_.SetParam(key, AAFwk::Char::Box(value));
     return *this;
 }
 
-/**
- * @description: Sets a parameter value of the char array type.
- * @param key   Indicates the key of wantParams.
- * @param value Indicates the char array of the parameter.
- * @return Returns this DistributedWant object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<AAFwk::zchar>& value)
 {
     std::size_t size = value.size();
@@ -713,13 +482,6 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
     return *this;
 }
 
-/**
- * @description: Obtains an int value matching the given key.
- * @param key   Indicates the key of wantParams.
- * @param value Indicates the default int value.
- * @return Returns the int value of the parameter matching the given key;
- * returns the default value if the key does not exist.
- */
 int DistributedWant::GetIntParam(const std::string& key, const int defaultValue) const
 {
     auto value = parameters_.GetParam(key);
@@ -730,12 +492,6 @@ int DistributedWant::GetIntParam(const std::string& key, const int defaultValue)
     return defaultValue;
 }
 
-/**
- * @description: Obtains an int array matching the given key.
- * @param key   Indicates the key of wantParams.
- * @return Returns the int array of the parameter matching the given key;
- * returns null if the key does not exist.
- */
 std::vector<int> DistributedWant::GetIntArrayParam(const std::string& key) const
 {
     std::vector<int> array;
@@ -755,24 +511,12 @@ std::vector<int> DistributedWant::GetIntArrayParam(const std::string& key) const
     return array;
 }
 
-/**
- * @description: Sets a parameter value of the int type.
- * @param key   Indicates the key matching the parameter.
- * @param value Indicates the int value of the parameter.
- * @return Returns this object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, int value)
 {
     parameters_.SetParam(key, AAFwk::Integer::Box(value));
     return *this;
 }
 
-/**
- * @description: Sets a parameter value of the int array type.
- * @param key   Indicates the key matching the parameter.
- * @param value Indicates the int array of the parameter.
- * @return Returns this object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<int>& value)
 {
     std::size_t size = value.size();
@@ -787,13 +531,6 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
     return *this;
 }
 
-/**
- * @description: Obtains a double value matching the given key.
- * @param key   Indicates the key of wantParams.
- * @param defaultValue  Indicates the default double value.
- * @return Returns the double value of the parameter matching the given key;
- * returns the default value if the key does not exist.
- */
 double DistributedWant::GetDoubleParam(const std::string& key, double defaultValue) const
 {
     auto value = parameters_.GetParam(key);
@@ -804,12 +541,6 @@ double DistributedWant::GetDoubleParam(const std::string& key, double defaultVal
     return defaultValue;
 }
 
-/**
- * @description: Obtains a double array matching the given key.
- * @param key   Indicates the key of Params.
- * @return Returns the double array of the parameter matching the given key;
- * returns null if the key does not exist.
- */
 std::vector<double> DistributedWant::GetDoubleArrayParam(const std::string& key) const
 {
     std::vector<double> array;
@@ -829,24 +560,12 @@ std::vector<double> DistributedWant::GetDoubleArrayParam(const std::string& key)
     return array;
 }
 
-/**
- * @description: Sets a parameter value of the double type.
- * @param key   Indicates the key matching the parameter.
- * @param value Indicates the int value of the parameter.
- * @return Returns this object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, double value)
 {
     parameters_.SetParam(key, AAFwk::Double::Box(value));
     return *this;
 }
 
-/**
- * @description: Sets a parameter value of the double array type.
- * @param key   Indicates the key matching the parameter.
- * @param value Indicates the double array of the parameter.
- * @return Returns this DistributedWant object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<double>& value)
 {
     std::size_t size = value.size();
@@ -861,13 +580,6 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
     return *this;
 }
 
-/**
- * @description: Obtains a float value matching the given key.
- * @param key   Indicates the key of wnatParams.
- * @param value Indicates the default float value.
- * @return Returns the float value of the parameter matching the given key;
- * returns the default value if the key does not exist.
- */
 float DistributedWant::GetFloatParam(const std::string& key, float defaultValue) const
 {
     auto value = parameters_.GetParam(key);
@@ -878,11 +590,6 @@ float DistributedWant::GetFloatParam(const std::string& key, float defaultValue)
     return defaultValue;
 }
 
-/**
- * @description: Obtains a float array matching the given key.
- * @param key Indicates the key of Params.
- * @return Obtains a float array matching the given key.
- */
 std::vector<float> DistributedWant::GetFloatArrayParam(const std::string& key) const
 {
     std::vector<float> array;
@@ -902,24 +609,12 @@ std::vector<float> DistributedWant::GetFloatArrayParam(const std::string& key) c
     return array;
 }
 
-/**
- * @description: Sets a parameter value of the float type.
- * @param key Indicates the key matching the parameter.
- * @param value Indicates the byte-type value of the parameter.
- * @return Returns this DistributedWant object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, float value)
 {
     parameters_.SetParam(key, AAFwk::Float::Box(value));
     return *this;
 }
 
-/**
- * @description: Sets a parameter value of the float array type.
- * @param key Indicates the key matching the parameter.
- * @param value Indicates the byte-type value of the parameter.
- * @return Returns this DistributedWant object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<float>& value)
 {
     std::size_t size = value.size();
@@ -935,13 +630,6 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
     return *this;
 }
 
-/**
- * @description: Obtains a long value matching the given key.
- * @param key Indicates the key of wantParams.
- * @param value Indicates the default long value.
- * @return Returns the long value of the parameter matching the given key;
- * returns the default value if the key does not exist.
- */
 long DistributedWant::GetLongParam(const std::string& key, long defaultValue) const
 {
     auto value = parameters_.GetParam(key);
@@ -958,6 +646,7 @@ long DistributedWant::GetLongParam(const std::string& key, long defaultValue) co
 
     return defaultValue;
 }
+
 void ArrayAddData(AAFwk::IInterface* object, std::vector<long>& array)
 {
     if (object == nullptr) {
@@ -972,12 +661,7 @@ void ArrayAddData(AAFwk::IInterface* object, std::vector<long>& array)
         }
     }
 }
-/**
- * @description: Obtains a long array matching the given key.
- * @param key Indicates the key of wantParams.
- * @return Returns the long array of the parameter matching the given key;
- * returns null if the key does not exist.
- */
+
 std::vector<long> DistributedWant::GetLongArrayParam(const std::string& key) const
 {
     std::vector<long> array;
@@ -1001,24 +685,12 @@ std::vector<long> DistributedWant::GetLongArrayParam(const std::string& key) con
     return array;
 }
 
-/**
- * @description: Sets a parameter value of the long type.
- * @param key Indicates the key matching the parameter.
- * @param value Indicates the byte-type value of the parameter.
- * @return Returns this DistributedWant object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, long value)
 {
     parameters_.SetParam(key, AAFwk::Long::Box(value));
     return *this;
 }
 
-/**
- * @description: Sets a parameter value of the long array type.
- * @param key Indicates the key matching the parameter.
- * @param value Indicates the byte-type value of the parameter.
- * @return Returns this DistributedWant object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<long>& value)
 {
     std::size_t size = value.size();
@@ -1039,13 +711,6 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, long long val
     return *this;
 }
 
-/**
- * @description: a short value matching the given key.
- * @param key Indicates the key of wantParams.
- * @param defaultValue Indicates the default short value.
- * @return Returns the short value of the parameter matching the given key;
- * returns the default value if the key does not exist.
- */
 short DistributedWant::GetShortParam(const std::string& key, short defaultValue) const
 {
     auto value = parameters_.GetParam(key);
@@ -1056,12 +721,6 @@ short DistributedWant::GetShortParam(const std::string& key, short defaultValue)
     return defaultValue;
 }
 
-/**
- * @description: Obtains a short array matching the given key.
- * @param key Indicates the key of wantParams.
- * @return Returns the short array of the parameter matching the given key;
- * returns null if the key does not exist.
- */
 std::vector<short> DistributedWant::GetShortArrayParam(const std::string& key) const
 {
     std::vector<short> array;
@@ -1081,24 +740,12 @@ std::vector<short> DistributedWant::GetShortArrayParam(const std::string& key) c
     return array;
 }
 
-/**
- * @description: Sets a parameter value of the short type.
- * @param key Indicates the key matching the parameter.
- * @param value Indicates the byte-type value of the parameter.
- * @return Returns this DistributedWant object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, short value)
 {
     parameters_.SetParam(key, AAFwk::Short::Box(value));
     return *this;
 }
 
-/**
- * @description: Sets a parameter value of the short array type.
- * @param key Indicates the key matching the parameter.
- * @param value Indicates the byte-type value of the parameter.
- * @return Returns this DistributedWant object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<short>& value)
 {
     std::size_t size = value.size();
@@ -1113,12 +760,6 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
     return *this;
 }
 
-/**
- * @description: Obtains a string value matching the given key.
- * @param key Indicates the key of wantParams.
- * @return Returns the string value of the parameter matching the given key;
- * returns null if the key does not exist.
- */
 std::string DistributedWant::GetStringParam(const std::string& key) const
 {
     auto value = parameters_.GetParam(key);
@@ -1129,12 +770,6 @@ std::string DistributedWant::GetStringParam(const std::string& key) const
     return std::string();
 }
 
-/**
- * @description: Obtains a string array matching the given key.
- * @param key Indicates the key of wantParams.
- * @return Returns the string array of the parameter matching the given key;
- * returns null if the key does not exist.
- */
 std::vector<std::string> DistributedWant::GetStringArrayParam(const std::string& key) const
 {
     std::vector<std::string> array;
@@ -1154,24 +789,12 @@ std::vector<std::string> DistributedWant::GetStringArrayParam(const std::string&
     return array;
 }
 
-/**
- * @description: Sets a parameter value of the string type.
- * @param key Indicates the key matching the parameter.
- * @param value Indicates the byte-type value of the parameter.
- * @return Returns this DistributedWant object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::string& value)
 {
     parameters_.SetParam(key, AAFwk::String::Box(value));
     return *this;
 }
 
-/**
- * @description: Sets a parameter value of the string array type.
- * @param key Indicates the key matching the parameter.
- * @param value Indicates the byte-type value of the parameter.
- * @return Returns this DistributedWant object containing the parameter value.
- */
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<std::string>& value)
 {
     std::size_t size = value.size();
@@ -1186,38 +809,21 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
     return *this;
 }
 
-/**
- * @description: Gets the description of an operation in a DistributedWant.
- * @return Returns the operation included in this DistributedWant.
- */
 DistributedOperation DistributedWant::GetOperation() const
 {
     return operation_;
 }
 
-/**
- * @description: Sets the description of an operation in a DistributedWant.
- * @param operation Indicates the operation description.
- */
 void DistributedWant::SetOperation(const DistributedOperation& operation)
 {
     operation_ = operation;
 }
 
-/**
- * @description: Sets the description of an operation in a DistributedWant.
- * @param want Indicates the DistributedWant object to compare.
- * @return Returns true if the operation components of the two objects are equal; returns false otherwise.
- */
 bool DistributedWant::OperationEquals(const DistributedWant& want)
 {
     return (operation_ == want.operation_);
 }
 
-/**
- * @description: Creates a DistributedWant object that contains only the operation component of this DistributedWant.
- * @return Returns the created DistributedWant object.
- */
 DistributedWant* DistributedWant::CloneOperation()
 {
     DistributedWant* want = new (std::nothrow) DistributedWant();
@@ -1228,12 +834,6 @@ DistributedWant* DistributedWant::CloneOperation()
     return want;
 }
 
-/**
- * @description: Creates a DistributedWant instance by using a given Uniform Resource Identifier (URI).
- * This method parses the input URI and saves it in a DistributedWant object.
- * @param uri Indicates the URI to parse.
- * @return Returns a DistributedWant object containing the URI.
- */
 DistributedWant* DistributedWant::ParseUri(const std::string& uri)
 {
     if (uri.length() <= 0) {
@@ -1297,12 +897,6 @@ DistributedWant* DistributedWant::ParseUri(const std::string& uri)
     return want;
 }
 
-/**
- * @description: Creates a DistributedWant instance by using a given Uniform Resource Identifier (URI).
- * This method parses the input URI and saves it in a DistributedWant object.
- * @param uri Indicates the URI to parse.
- * @return Returns a DistributedWant object containing the URI.
- */
 DistributedWant* DistributedWant::WantParseUri(const char* uri)
 {
     if (uri == nullptr) {
@@ -1312,72 +906,39 @@ DistributedWant* DistributedWant::WantParseUri(const char* uri)
     return ParseUri(strUri);
 }
 
-/**
- * @description: Obtains the string representation of the URI in this DistributedWant.
- * @return Returns the string of the URI.
- */
 std::string DistributedWant::GetUriString() const
 {
     return operation_.GetUri().ToString();
 }
 
-/**
- * @description: Obtains the description of a URI in a DistributedWant.
- * @return Returns the URI description in the DistributedWant.
- */
 OHOS::Uri DistributedWant::GetUri() const
 {
     return operation_.GetUri();
 }
 
-/**
- * @description: Sets the description of a URI in a DistributedWant.
- * @param uri Indicates the string of URI description.
- * @return Returns this DistributedWant object containing the URI.
- */
 DistributedWant& DistributedWant::SetUri(const std::string& uri)
 {
     operation_.SetUri(OHOS::Uri(uri));
     return *this;
 }
 
-/**
- * @description: Sets the description of a URI in a DistributedWant.
- * @param uri Indicates the URI description.
- * @return Returns this DistributedWant object containing the URI.
- */
 DistributedWant& DistributedWant::SetUri(const OHOS::Uri& uri)
 {
     operation_.SetUri(uri);
     return *this;
 }
 
-/**
- * @description: Sets the description of a URI and a type in this DistributedWant.
- * @param uri Indicates the URI description.
- * @param type Indicates the type description.
- * @return Returns this DistributedWant object containing the URI and the type.
- */
 DistributedWant& DistributedWant::SetUriAndType(const OHOS::Uri& uri, const std::string& type)
 {
     operation_.SetUri(uri);
     return SetType(type);
 }
 
-/**
- * @description: Converts a DistributedWant into a URI string containing a representation of it.
- * @param want Indicates the DistributedWant description.--Want.
- * @return  Returns an encoding URI string describing the DistributedWant object.
- */
 std::string DistributedWant::WantToUri(DistributedWant& want)
 {
     return want.ToUri();
 }
 
-/**
- * @description: Converts parameter information in a DistributedWant into a URI string.
- * @return Returns the URI string.
- */
 std::string DistributedWant::ToUri() const
 {
     std::string uriString = WANT_HEADER;
@@ -1385,6 +946,7 @@ std::string DistributedWant::ToUri() const
     uriString += "end";
     return uriString;
 }
+
 void DistributedWant::ToUriStringInner(std::string& uriString) const
 {
     if (operation_.GetAction().length() > 0) {
@@ -1451,76 +1013,40 @@ void DistributedWant::ToUriStringInner(std::string& uriString) const
         iter++;
     }
 }
-/**
- * @description: Formats a specified URI.
- * This method uses the Uri.getLowerCaseScheme() method to format a URI and then saves
- * the formatted URI to this DistributedWant object.
- * @param uri Indicates the URI to format.
- * @return Returns this DistributedWant object that contains the formatted uri attribute.
- */
+
 DistributedWant& DistributedWant::FormatUri(const std::string& uri)
 {
     return FormatUri(OHOS::Uri(uri));
 }
 
-/**
- * @description: Formats a specified URI.
- * This method uses the GetLowerCaseScheme() method to format a URI and then saves
- * the formatted URI to this DistributedWant object.
- * @param uri Indicates the URI to format.
- * @return Returns this DistributedWant object that contains the formatted uri attribute.
- */
 DistributedWant& DistributedWant::FormatUri(const OHOS::Uri& uri)
 {
     operation_.SetUri(GetLowerCaseScheme(uri));
     return *this;
 }
 
-/**
- * @description: Checks whether a DistributedWant contains the parameter matching a given key.
- * @param key Indicates the key.
- * @return Returns true if the DistributedWant contains the parameter; returns false otherwise.
- */
 bool DistributedWant::HasParameter(const std::string& key) const
 {
     return parameters_.HasParam(key);
 }
 
-/**
- * @description: Replaces parameters in this DistributedWant object with those in the given WantParams object.
- * @param wantParams Indicates the WantParams object containing the new parameters.
- * @return Returns this DistributedWant object containing the new parameters.
- */
 DistributedWant* DistributedWant::ReplaceParams(DistributedWantParams& wantParams)
 {
     parameters_ = wantParams;
     return this;
 }
 
-/**
- * @description: Replaces parameters in this DistributedWant object with those in the given DistributedWant object.
- * @param want Indicates the DistributedWant object containing the new parameters.
- * @return Returns this DistributedWant object containing the new parameters.
- */
 DistributedWant* DistributedWant::ReplaceParams(DistributedWant& want)
 {
     parameters_ = want.parameters_;
     return this;
 }
 
-/**
- * @description: Removes the parameter matching the given key.
- * @param key Indicates the key matching the parameter to be removed.
- */
 void DistributedWant::RemoveParam(const std::string& key)
 {
     parameters_.Remove(key);
 }
 
-/**
- * @description: clear the specific DistributedWant object.
- * @param want Indicates the want to clear
- */
 void DistributedWant::ClearWant(DistributedWant* want)
 {
     want->SetType("");
@@ -1534,12 +1060,6 @@ void DistributedWant::ClearWant(DistributedWant* want)
     want->SetParams(parameters);
 }
 
-/**
- * @description: Marshals a DistributedWant into a Parcel.
- * Fields in the DistributedWant are marshalled separately. If any field fails to be marshalled, false is returned.
- * @param parcel Indicates the Parcel object for marshalling.
- * @return Returns true if the marshalling is successful; returns false otherwise.
- */
 bool DistributedWant::Marshalling(Parcel& parcel) const
 {
     // write action
@@ -1616,12 +1136,6 @@ bool DistributedWant::Marshalling(Parcel& parcel) const
     return true;
 }
 
-/**
- * @description: Unmarshals a DistributedWant from a Parcel.
- * Fields in the DistributedWant are unmarshalled separately. If any field fails to be unmarshalled, false is returned.
- * @param parcel Indicates the Parcel object for unmarshalling.
- * @return Returns true if the unmarshalling is successful; returns false otherwise.
- */
 DistributedWant* DistributedWant::Unmarshalling(Parcel& parcel)
 {
     DistributedWant* want = new (std::nothrow) DistributedWant();
@@ -1987,15 +1501,10 @@ DistributedWant* DistributedWant::FromString(std::string& string)
     return want;
 }
 
-/**
- * @description: Sets a device id in a DistributedWant.
- * @param deviceId Indicates the device id to set.
- * @return Returns this DistributedWant object containing the flag.
- */
 DistributedWant& DistributedWant::SetDeviceId(const std::string& deviceId)
 {
     operation_.SetDeviceId(deviceId);
     return *this;
 }
-}  // namespace DistributedSchedule
-}  // namespace OHOS
+} // namespace DistributedSchedule
+} // namespace OHOS

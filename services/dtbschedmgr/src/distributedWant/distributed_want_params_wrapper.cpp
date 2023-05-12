@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include <algorithm>
 #include "distributed_want_params_wrapper.h"
+
+#include <algorithm>
 
 using namespace OHOS::AAFwk;
 namespace OHOS {
@@ -214,5 +215,5 @@ DistributedWantParams DistributedWantParamWrapper::ParseWantParams(const std::st
     }
     return wantPaqrams;
 }
-}  // namespace DistributedSchedule
-}  // namespace OHOS
+} // namespace DistributedSchedule
+} // namespace OHOS

@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include "distributed_want_params.h"
+
 #include "array_wrapper.h"
 #include "base_interfaces.h"
 #include "base_object.h"
 #include "bool_wrapper.h"
 #include "byte_wrapper.h"
-#include "distributed_want_params.h"
 #include "distributed_want_params_wrapper.h"
 #include "double_wrapper.h"
 #include "float_wrapper.h"
@@ -131,11 +132,7 @@ std::string DistributedWantParams::GetStringByType(const sptr<AAFwk::IInterface>
 }
 template<typename T1, typename T2, typename T3>
 static void SetNewArray(const AAFwk::InterfaceID& id, AAFwk::IArray* orgIArray, sptr<AAFwk::IArray>& ao);
-/**
- * @description: A constructor used to create an Params instance by using the parameters of an existing
- * Params object.
- * @param Params  Indicates the existing Params object.
- */
+
 DistributedWantParams::DistributedWantParams(const DistributedWantParams& wantParams)
 {
     params_.clear();
@@ -209,11 +206,7 @@ bool DistributedWantParams::NewArrayData(AAFwk::IArray* source, sptr<AAFwk::IArr
 
     return true;
 }
-/**
- * @description: A DistributedWantParams used to
- *
- * @param Params  Indicates the existing Params object.
- */
+
 DistributedWantParams& DistributedWantParams::operator=(const DistributedWantParams& other)
 {
     if (this != &other) {
@@ -222,6 +215,7 @@ DistributedWantParams& DistributedWantParams::operator=(const DistributedWantPar
     }
     return *this;
 }
+
 bool DistributedWantParams::operator==(const DistributedWantParams& other)
 {
     if (this->params_.size() != other.params_.size()) {
@@ -349,20 +343,11 @@ bool DistributedWantParams::CompareInterface(const sptr<IInterface> iIt1, const 
     return flag;
 }
 
-/**
- * @description: Sets a parameter in key-value pair format.
- * @param key Indicates the key matching the parameter.
- */
 void DistributedWantParams::SetParam(const std::string& key, IInterface* value)
 {
     params_[key] = value;
 }
 
-/**
- * @description: Obtains the parameter value based on a given key.
- * @param key Indicates the key matching the parameter.
- * @return Returns the value matching the given key.
- */
 sptr<IInterface> DistributedWantParams::GetParam(const std::string& key) const
 {
     auto it = params_.find(key);
@@ -372,22 +357,11 @@ sptr<IInterface> DistributedWantParams::GetParam(const std::string& key) const
     return it->second;
 }
 
-/**
- * @description: Obtains the parameter value based on a given key.
- * @param key Indicates the key matching the parameter.
- * @return Returns the value matching the given key.
- */
-
 const std::map<std::string, sptr<IInterface>>& DistributedWantParams::GetParams() const
 {
     return params_;
 }
 
-/**
- * @description: Obtains a set of the keys of all parameters.
- * @param
- * @return Returns a set of keys.
- */
 const std::set<std::string> DistributedWantParams::KeySet() const
 {
     std::set<std::string> keySet;
@@ -400,38 +374,21 @@ const std::set<std::string> DistributedWantParams::KeySet() const
     return keySet;
 }
 
-/**
- * @description: Removes the parameter matching the given key.
- * @param key Indicates the key matching the parameter to be removed.
- */
 void DistributedWantParams::Remove(const std::string& key)
 {
     params_.erase(key);
 }
 
-/**
- * @description: Checks whether the  contains the given key.
- * @param key Indicates the key to check.
- * @return Returns true if the  contains the key; returns false otherwise.
- */
 bool DistributedWantParams::HasParam(const std::string& key) const
 {
     return (params_.count(key) > 0);
 }
 
-/**
- * @description: Obtains the number of parameters contained in this Params object.
- * @return Returns the number of parameters.
- */
 int DistributedWantParams::Size() const
 {
     return params_.size();
 }
 
-/**
- * @description: Checks whether this Params object contains no parameters.
- * @return Returns true if this object does not contain any parameters; returns false otherwise.
- */
 bool DistributedWantParams::IsEmpty() const
 {
     return (params_.size() == 0);
@@ -454,6 +411,7 @@ bool DistributedWantParams::WriteToParcelBool(Parcel& parcel, sptr<IInterface>& 
     }
     return parcel.WriteInt8(value);
 }
+
 bool DistributedWantParams::WriteToParcelWantParams(Parcel& parcel, sptr<IInterface>& o) const
 {
     DistributedWantParams value = DistributedWantParamWrapper::Unbox(IDistributedWantParams::Query(o));
@@ -463,6 +421,7 @@ bool DistributedWantParams::WriteToParcelWantParams(Parcel& parcel, sptr<IInterf
     return parcel.WriteString16(Str8ToStr16(
         static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(o))->ToString()));
 }
+
 bool DistributedWantParams::WriteToParcelByte(Parcel& parcel, sptr<IInterface>& o) const
 {
     AAFwk::byte value = AAFwk::Byte::Unbox(AAFwk::IByte::Query(o));
@@ -607,11 +566,6 @@ bool DistributedWantParams::DoMarshalling(Parcel& parcel) const
     return true;
 }
 
-/**
- * @description: Marshals an Params object into a Parcel.
- * @param Key-value pairs in the Params are marshalled separately.
- * @return If any key-value pair fails to be marshalled, false is returned.
- */
 bool DistributedWantParams::Marshalling(Parcel& parcel) const
 {
     Parcel tempParcel;
@@ -1071,6 +1025,7 @@ bool DistributedWantParams::ReadFromParcelInt(Parcel& parcel, const std::string&
         return false;
     }
 }
+
 bool DistributedWantParams::ReadFromParcelWantParamWrapper(Parcel& parcel, const std::string& key)
 {
     std::u16string value = parcel.ReadString16();
@@ -1080,6 +1035,7 @@ bool DistributedWantParams::ReadFromParcelWantParamWrapper(Parcel& parcel, const
     }
     return true;
 }
+
 bool DistributedWantParams::ReadFromParcelLong(Parcel& parcel, const std::string& key)
 {
     int64_t value;
@@ -1230,11 +1186,6 @@ bool DistributedWantParams::ReadFromParcel(Parcel& parcel)
     return true;
 }
 
-/**
- * @description: Unmarshals an Params object from a Parcel.
- * @param Key-value pairs in the Params are unmarshalled separately.
- * @return If any key-value pair fails to be unmarshalled, false is returned.
- */
 DistributedWantParams* DistributedWantParams::Unmarshalling(Parcel& parcel)
 {
     int32_t bufferSize;
@@ -1265,7 +1216,8 @@ DistributedWantParams* DistributedWantParams::Unmarshalling(Parcel& parcel)
     return wantParams;
 }
 
-AAFwk::WantParams DistributedWantParams::ToWantParams() {
+AAFwk::WantParams DistributedWantParams::ToWantParams()
+{
     AAFwk::WantParams wantParams;
     std::map<std::string, sptr<IInterface>> data = GetParams();
     for (auto it = data.begin(); it != data.end(); it++) {
@@ -1273,5 +1225,5 @@ AAFwk::WantParams DistributedWantParams::ToWantParams() {
     }
     return wantParams;
 }
-}  // namespace DistributedSchedule
-}  // namespace OHOS
+} // namespace DistributedSchedule
+} // namespace OHOS

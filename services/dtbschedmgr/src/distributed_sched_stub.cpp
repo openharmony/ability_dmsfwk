@@ -209,7 +209,6 @@ void DistributedSchedStub::ReportEvent(const OHOS::AAFwk::Want& want, const std:
 
 int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply)
 {
-    HILOGI("StartAbilityFromRemoteInner called");
     if (!CheckCallingUid()) {
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
@@ -280,7 +279,6 @@ void DistributedSchedStub::SaveExtraInfo(const nlohmann::json& extraInfoJson, Ca
 
 int32_t DistributedSchedStub::SendResultFromRemoteInner(MessageParcel& data, MessageParcel& reply)
 {
-    HILOGI("SendResultFromRemoteInner called");
     if (!CheckCallingUid()) {
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
@@ -858,7 +856,6 @@ int32_t DistributedSchedStub::ReleaseRemoteAbilityInner(MessageParcel& data, Mes
 
 int32_t DistributedSchedStub::StartAbilityByCallFromRemoteInner(MessageParcel& data, MessageParcel& reply)
 {
-    HILOGI("StartAbilityByCallFromRemoteInner called");
     if (!CheckCallingUid()) {
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
@@ -1041,7 +1038,6 @@ int32_t DistributedSchedStub::StartRemoteFreeInstallInner(MessageParcel& data, M
 
 int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& data, MessageParcel& reply)
 {
-    HILOGI("StartFreeInstallFromRemoteInner called");
     if (!CheckCallingUid()) {
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
@@ -1145,7 +1141,6 @@ int32_t DistributedSchedStub::StopRemoteExtensionAbilityInner(MessageParcel& dat
 
 int32_t DistributedSchedStub::StopExtensionAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply)
 {
-    HILOGI("StopExtensionAbilityFromRemoteInner called");
     if (!CheckCallingUid()) {
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;

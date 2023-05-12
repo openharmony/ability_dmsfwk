@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,6 @@
 namespace OHOS {
 namespace DistributedSchedule {
 class DistributedOperationBuilder;
-
 class DistributedOperation : public Parcelable {
     friend class DistributedOperationBuilder;
     friend class DistributedWant;
@@ -209,7 +208,6 @@ private:
 
     bool ReadFromParcel(Parcel& parcel);
 };
-}  // namespace DistributedSchedule
-}  // namespace OHOS
-
-#endif  // OHOS_DISTRIBUTEDWANT_OPERATION_H
+} // namespace DistributedSchedule
+} // namespace OHOS
+#endif // OHOS_DISTRIBUTEDWANT_OPERATION_H

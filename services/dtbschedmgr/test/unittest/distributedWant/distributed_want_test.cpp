@@ -38,7 +38,7 @@ using OHOS::Parcel;
 using OHOS::AppExecFwk::ElementName;
 
 namespace OHOS {
-namespace AAFwk {
+namespace DistributedSchedule {
 class DistributedWantBaseTest : public testing::Test {
 public:
     DistributedWantBaseTest()
@@ -83,11 +83,10 @@ void DistributedWantBaseTest::SetUp(void)
 void DistributedWantBaseTest::TearDown(void)
 {}
 
-
 /**
  * @tc.number: AaExecFwk_DistributedWant_Convert_0100
- * @tc.name: SetType/GetType
- * @tc.desc: Validate when normally entering a string
+ * @tc.name: distributedwant
+ * @tc.desc: Verifying successful conversion of want to distributedwant.
  */
 HWTEST_F(DistributedWantBaseTest, AaExecFwk_DistributedWant_Convert_0100, Function | MediumTest | Level1)
 {
@@ -185,8 +184,8 @@ HWTEST_F(DistributedWantBaseTest, AaExecFwk_DistributedWant_Convert_0100, Functi
 
 /**
  * @tc.number: AaFwk_Want_Action_0100
- * @tc.name: SetAction/GetAction
- * @tc.desc: Validate when normally entering a string
+ * @tc.name: ToWant
+ * @tc.desc: Verifying successful conversion of distributedwant to want.
  */
 HWTEST_F(DistributedWantBaseTest, AaExecFwk_DistributedWant_Convert_0200, Function | MediumTest | Level1)
 {
@@ -280,8 +279,6 @@ HWTEST_F(DistributedWantBaseTest, AaExecFwk_DistributedWant_Convert_0200, Functi
     EXPECT_EQ(want->GetDoubleArrayParam(doubleArrayType).size(), dwant->GetDoubleArrayParam(doubleArrayType).size());
     EXPECT_STREQ(want->GetStringParam(stringType).c_str(), dwant->GetStringParam(stringType).c_str());
     EXPECT_EQ(want->GetStringArrayParam(stringArrayType).size(), dwant->GetStringArrayParam(stringArrayType).size());
-
 }
-
 }  // namespace AAFwk
 }  // namespace OHOS

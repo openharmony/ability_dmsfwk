@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -175,7 +175,6 @@ private:
     std::map<std::string, sptr<AAFwk::IInterface>> params_;
     std::vector<DistributedUnsupportedData> cachedUnsupportedData_;
 };
-}  // namespace DistributedSchedule
-}  // namespace OHOS
-
-#endif  // OHOS_DISTRIBUTEDWANT_WANT_PARAMS_H
+} // namespace DistributedSchedule
+} // namespace OHOS
+#endif // OHOS_DISTRIBUTEDWANT_WANT_PARAMS_H

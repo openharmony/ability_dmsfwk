@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,70 +27,42 @@ DistributedOperationBuilder::DistributedOperationBuilder()
 DistributedOperationBuilder::~DistributedOperationBuilder()
 {}
 
-/**
- * @description: Sets a AbilityName in an DistributedOperationBuilder.
- * @return Returns this DistributedOperationBuilder object containing the AbilityName.
- */
 DistributedOperationBuilder& DistributedOperationBuilder::WithAbilityName(const std::string& abilityName)
 {
     abilityName_ = abilityName;
     return *this;
 }
 
-/**
- * @description: Sets a BundleName in an DistributedOperationBuilder.
- * @return Returns this DistributedOperationBuilder object containing the BundleName.
- */
 DistributedOperationBuilder& DistributedOperationBuilder::WithBundleName(const std::string& bundleName)
 {
     bundleName_ = bundleName;
     return *this;
 }
 
-/**
- * @description: Sets a DeviceId in an DistributedOperationBuilder.
- * @return Returns this DistributedOperationBuilder object containing the DeviceId.
- */
 DistributedOperationBuilder& DistributedOperationBuilder::WithDeviceId(const std::string& deviceID)
 {
     deviceId_ = deviceID;
     return *this;
 }
 
-/**
- * @description: Sets a Action in an DistributedOperationBuilder.
- * @return Returns this DistributedOperationBuilder object containing the Action.
- */
 DistributedOperationBuilder& DistributedOperationBuilder::WithAction(const std::string& action)
 {
     action_ = action;
     return *this;
 }
 
-/**
- * @description: Sets a Entities in an DistributedOperationBuilder.
- * @return Returns this DistributedOperationBuilder object containing the Entities.
- */
 DistributedOperationBuilder& DistributedOperationBuilder::WithEntities(const std::vector<std::string>& entities)
 {
     entities_ = entities;
     return *this;
 }
 
-/**
- * @description: Sets a Flags in an DistributedOperationBuilder.
- * @return Returns this DistributedOperationBuilder object containing the Flags.
- */
 DistributedOperationBuilder& DistributedOperationBuilder::WithFlags(unsigned int flags)
 {
     flags_ = flags;
     return *this;
 }
 
-/**
- * @description: Sets a Uri in an DistributedOperationBuilder.
- * @return Returns this DistributedOperationBuilder object containing the Uri.
- */
 DistributedOperationBuilder& DistributedOperationBuilder::WithUri(const Uri& uri)
 {
     uri_ = uri;
@@ -110,5 +82,5 @@ std::shared_ptr<DistributedOperation> DistributedOperationBuilder::build()
 
     return operation;
 }
-}  // namespace DistributedSchedule
-}  // namespace OHOS
+} // namespace DistributedSchedule
+} // namespace OHOS

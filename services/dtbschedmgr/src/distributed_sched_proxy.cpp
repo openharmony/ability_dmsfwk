@@ -65,7 +65,6 @@ int32_t DistributedSchedProxy::StartAbilityFromRemote(const OHOS::AAFwk::Want& w
     const OHOS::AppExecFwk::AbilityInfo& abilityInfo, int32_t requestCode,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo)
 {
-    HILOGI("StartAbilityFromRemote called");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGE("StartAbilityFromRemote remote service null");
@@ -101,7 +100,6 @@ int32_t DistributedSchedProxy::StartAbilityFromRemote(const OHOS::AAFwk::Want& w
 int32_t DistributedSchedProxy::SendResultFromRemote(OHOS::AAFwk::Want& want, int32_t requestCode,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t resultCode)
 {
-    HILOGI("SendResultFromRemote called");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGE("SendResultFromRemote remote service null");
@@ -261,7 +259,6 @@ int32_t DistributedSchedProxy::ConnectAbilityFromRemote(const OHOS::AAFwk::Want&
     const AppExecFwk::AbilityInfo& abilityInfo, const sptr<IRemoteObject>& connect,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo)
 {
-    HILOGI("ConnectAbilityFromRemote called");
     if (connect == nullptr) {
         HILOGE("ConnectAbilityFromRemote connect is null");
         return ERR_NULL_OBJECT;
@@ -635,7 +632,6 @@ int32_t DistributedSchedProxy::ReleaseRemoteAbility(const sptr<IRemoteObject>& c
 int32_t DistributedSchedProxy::StartAbilityByCallFromRemote(const OHOS::AAFwk::Want& want,
     const sptr<IRemoteObject>& connect, const CallerInfo& callerInfo, const AccountInfo& accountInfo)
 {
-    HILOGI("StartAbilityByCallFromRemote called");
     if (connect == nullptr) {
         HILOGE("StartAbilityByCallFromRemote connect is null");
         return ERR_NULL_OBJECT;
@@ -733,7 +729,7 @@ int32_t DistributedSchedProxy::StartRemoteFreeInstall(const OHOS::AAFwk::Want& w
 
 int32_t DistributedSchedProxy::StartFreeInstallFromRemote(const FreeInstallInfo& info, int64_t taskId)
 {
-    HILOGI("StartFreeInstallFromRemote called.");
+    HILOGD("called.");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGE("remote is null");
@@ -923,7 +919,6 @@ int32_t DistributedSchedProxy::StopRemoteExtensionAbility(
 int32_t DistributedSchedProxy::StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& want,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t extensionType)
 {
-    HILOGI("StopExtensionAbilityFromRemote called");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGE("StopExtensionAbilityFromRemote remote service null");
