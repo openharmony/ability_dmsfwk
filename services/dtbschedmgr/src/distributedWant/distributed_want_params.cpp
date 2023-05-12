@@ -174,8 +174,8 @@ bool DistributedWantParams::NewParams(const DistributedWantParams& source, Distr
         }
     }
     return true;
-}  // namespace AAFwk
-// inner use
+}
+
 bool DistributedWantParams::NewArrayData(AAFwk::IArray* source, sptr<AAFwk::IArray>& dest)
 {
     if (AAFwk::Array::IsBooleanArray(source)) {

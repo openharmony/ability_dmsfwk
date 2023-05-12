@@ -158,7 +158,8 @@ public:
      * @param abilityName Indicates the abilityName to set for the operation attribute in the DistributedWant.
      * @return Returns this DistributedWant object that contains the specified bundleName and abilityName attributes.
      */
-    DistributedWant& SetElementName(const std::string& deviceId, const std::string& bundleName, const std::string& abilityName);
+    DistributedWant& SetElementName(
+        const std::string& deviceId, const std::string& bundleName, const std::string& abilityName);
 
     /**
      * @description: Sets an ElementName object in a DistributedWant.
@@ -174,8 +175,8 @@ public:
     OHOS::AppExecFwk::ElementName GetElement() const;
 
     /**
-     * @description: Creates a DistributedWant with its corresponding attributes specified for starting the main ability of an
-     * application.
+     * @description: Creates a DistributedWant with its corresponding attributes specified for 
+     * starting the main ability of an application.
      * @param ElementName  Indicates the ElementName object defining the deviceId, bundleName,
      * and abilityName sub-attributes of the operation attribute in a DistributedWant.
      * @return Returns the DistributedWant object used to start the main ability of an application.
@@ -736,7 +737,8 @@ public:
     bool OperationEquals(const DistributedWant& want);
 
     /**
-     * @description: Creates a DistributedWant object that contains only the operation component of this DistributedWant.
+     * @description: Creates a DistributedWant object that contains only
+     * the operation component of this DistributedWant.
      * @return Returns the created DistributedWant object.
      */
     DistributedWant* CloneOperation();
@@ -751,7 +753,8 @@ public:
 
     /**
      * @description: Unmarshals a DistributedWant from a Parcel.
-     * Fields in the DistributedWant are unmarshalled separately. If any field fails to be unmarshalled, false is returned.
+     * Fields in the DistributedWant are unmarshalled separately.
+     * If any field fails to be unmarshalled, false is returned.
      * @param parcel Indicates the Parcel object for unmarshalling.
      * @return Returns true if the unmarshalling is successful; returns false otherwise.
      */
@@ -811,9 +814,11 @@ private:
     static std::string Decode(const std::string& str);
     static std::string Encode(const std::string& str);
     static bool ParseContent(const std::string& content, std::string& prop, std::string& value);
-    static bool ParseUriInternal(const std::string& content, OHOS::AppExecFwk::ElementName& element, DistributedWant& want);
+    static bool ParseUriInternal(
+        const std::string& content, OHOS::AppExecFwk::ElementName& element, DistributedWant& want);
     bool ReadFromParcel(Parcel& parcel);
-    static bool CheckAndSetParameters(DistributedWant& want, const std::string& key, std::string& prop, const std::string& value);
+    static bool CheckAndSetParameters(
+        DistributedWant& want, const std::string& key, std::string& prop, const std::string& value);
     OHOS::Uri GetLowerCaseScheme(const OHOS::Uri& uri);
     void ToUriStringInner(std::string& uriString) const;
     nlohmann::json ToJson() const;

@@ -280,5 +280,5 @@ HWTEST_F(DistributedWantBaseTest, AaExecFwk_DistributedWant_Convert_0200, Functi
     EXPECT_STREQ(want->GetStringParam(stringType).c_str(), dwant->GetStringParam(stringType).c_str());
     EXPECT_EQ(want->GetStringArrayParam(stringArrayType).size(), dwant->GetStringArrayParam(stringArrayType).size());
 }
-}  // namespace AAFwk
-}  // namespace OHOS
+} // namespace DistributedSchedule
+} // namespace OHOS
