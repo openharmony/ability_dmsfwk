@@ -116,6 +116,12 @@ dtbschedmgr_sources = [
   "unittest/distributed_sched_util.cpp",
 ]
 
+if (!distributed_sched_softbus_adapter_common) {
+  dtbschedmgr_sources += [ "${distributed_service}/dtbschedmgr/src/softbus_adapter/softbus_adapter.cpp" ]
+} else {
+  dtbschedmgr_sources += [ "${distributed_service}/dtbschedmgr/src/softbus_adapter/softbus_adapter_common.cpp" ]
+}
+
 if (dmsfwk_mission_manager) {
   dtbschedmgr_sources += [
     "${distributed_service}/dtbschedmgr/src/mission/distributed_data_change_listener.cpp",
@@ -325,6 +331,28 @@ ohos_unittest("bundlemanagerinternaltest") {
   configs = [
     ":test_config",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = [
+    "${distributed_service}/dtbschedmgr:distributedschedsvr",
+    "${dms_path}/test/sceneProject/unittest/bundle_dependencies/bmsThirdBundle:bmsThirdBundle",
+    "${dms_path}/test/sceneProject/unittest/ohos_test:copy_ohos_test",
+  ]
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("softbusadaptertest") {
+  module_out_path = module_output_path
+  sources = [ "unittest/softbus_adapter/softbus_adapter_test.cpp" ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
   ]
   configs += dsched_configs
   deps = [

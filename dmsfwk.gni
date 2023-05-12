@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,11 +13,13 @@
 
 declare_args() {
   dms_path = "//foundation/ability/dmsfwk"
+  communication_path = "//foundation/communication"
   dmsfwk_standard_form_share = true
   dmsfwk_mission_manager = false
   efficiency_manager_service_enable = false
   dmsfwk_report_memmgr = false
   dmsfwk_report_memmgr_plugins = false
+  distributed_sched_softbus_adapter_common = true
   if (defined(global_parts_info)) {
     if (defined(global_parts_info.multimedia_multimedia_image_framework)) {
       dmsfwk_mission_manager = true
