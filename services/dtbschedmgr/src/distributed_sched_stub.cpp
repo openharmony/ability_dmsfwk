@@ -23,6 +23,7 @@
 #include "dfx/dms_hisysevent_report.h"
 #include "dfx/dms_hitrace_chain.h"
 #include "dfx/dms_hitrace_constants.h"
+#include "distributed_want.h"
 #include "distributed_sched_permission.h"
 #include "dtbschedmgr_log.h"
 #include "dtbschedmgr_device_info_storage.h"
@@ -213,7 +214,11 @@ int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, M
         return DMS_PERMISSION_DENIED;
     }
 
-    shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -278,7 +283,11 @@ int32_t DistributedSchedStub::SendResultFromRemoteInner(MessageParcel& data, Mes
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
     }
-    shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -469,7 +478,11 @@ int32_t DistributedSchedStub::ConnectAbilityFromRemoteInner(MessageParcel& data,
         return DMS_PERMISSION_DENIED;
     }
 
-    shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -867,7 +880,11 @@ int32_t DistributedSchedStub::StartAbilityByCallFromRemoteInner(MessageParcel& d
         SaveExtraInfo(extraInfoJson, callerInfo);
         HILOGD("parse extra info");
     }
-    shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -1025,7 +1042,11 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
     }
-    shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGE("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -1043,7 +1064,11 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
     PARCEL_READ_HELPER(data, StringVector, &accountInfo.groupIdList);
     callerInfo.callerAppId = data.ReadString();
     PARCEL_READ_HELPER(data, Int64, taskId);
-    shared_ptr<AAFwk::Want> cmpWant(data.ReadParcelable<AAFwk::Want>());
+    shared_ptr<DistributedWant> cmpDstbWant(data.ReadParcelable<DistributedWant>());
+    shared_ptr<AAFwk::Want> cmpWant = nullptr;
+    if (cmpDstbWant != nullptr) {
+        cmpWant = cmpDstbWant->ToWant();
+    }
     std::string extraInfo = data.ReadString();
     if (extraInfo.empty()) {
         HILOGD("extra info is empty!");
@@ -1120,7 +1145,11 @@ int32_t DistributedSchedStub::StopExtensionAbilityFromRemoteInner(MessageParcel&
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
     }
-    shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
