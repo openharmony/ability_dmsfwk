@@ -57,6 +57,7 @@ public:
     void ProcessCallerDied(const sptr<IRemoteObject>& connect, int32_t deviceType);
     void ProcessCalleeDied(const sptr<IRemoteObject>& connect);
     bool InitHichainService();
+    void ProcessCallResult(const sptr<IRemoteObject>& calleeConnect, const sptr<IRemoteObject>& callerConnect);
     bool CheckAccessToGroup(const std::string& groupId, const std::string& targetBundleName);
     bool GetRelatedGroups(const std::string& udid, const std::string& bundleName, std::string& returnGroups);
 private:

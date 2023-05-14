@@ -124,7 +124,7 @@ public:
     virtual int32_t StartShareFormFromRemote(
         const std::string& remoteDeviceId, const OHOS::AppExecFwk::FormShareInfo& formShareInfo) = 0;
 #endif
-    virtual int32_t NotifyStateChangedFromRemote(int32_t abilityState, int32_t missionId,
+    virtual int32_t NotifyStateChangedFromRemote(int32_t abilityState, int32_t connectToken,
         const AppExecFwk::ElementName& element) = 0;
     virtual int32_t GetDistributedComponentList(std::vector<std::string>& distributedComponents) = 0;
     virtual int32_t StopRemoteExtensionAbility(

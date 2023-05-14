@@ -178,6 +178,26 @@ void DistributedSchedAdapter::ProcessCalleeDied(const sptr<IRemoteObject>& conne
     }
 }
 
+void DistributedSchedAdapter::ProcessCallResult(const sptr<IRemoteObject>& calleeConnect,
+    const sptr<IRemoteObject>& callerConnect)
+{
+    if (dmsAdapterHandler_ == nullptr) {
+        HILOGE("ProcessCallResult dmsAdapterHandler is null");
+        return;
+    }
+    if (calleeConnect == nullptr || callerConnect == nullptr) {
+        HILOGE("ProcessCallResult connect is null");
+        return;
+    }
+    HILOGD("process call result start");
+    auto callback = [calleeConnect, callerConnect] () {
+        DistributedSchedService::GetInstance().ProcessCallResult(calleeConnect, callerConnect);
+    };
+    if (!dmsAdapterHandler_->PostTask(callback)) {
+        HILOGE("ProcessCalleeDied PostTask failed");
+    }
+}
+
 void DistributedSchedAdapter::ProcessCallerDied(const sptr<IRemoteObject>& connect, int32_t deviceType)
 {
     if (dmsAdapterHandler_ == nullptr) {

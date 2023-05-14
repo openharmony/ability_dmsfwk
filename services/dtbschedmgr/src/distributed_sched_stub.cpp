@@ -974,14 +974,14 @@ int32_t DistributedSchedStub::NotifyStateChangedFromRemoteInner(MessageParcel& d
     }
     int32_t abilityState = 0;
     PARCEL_READ_HELPER(data, Int32, abilityState);
-    int32_t missionId = 0;
-    PARCEL_READ_HELPER(data, Int32, missionId);
+    int32_t connectToken = 0;
+    PARCEL_READ_HELPER(data, Int32, connectToken);
     shared_ptr<AppExecFwk::ElementName> element(data.ReadParcelable<AppExecFwk::ElementName>());
     if (element == nullptr) {
         HILOGE("NotifyStateChangedFromRemoteInner receive element is nullptr");
         return ERR_INVALID_VALUE;
     }
-    int32_t result = NotifyStateChangedFromRemote(abilityState, missionId, *element);
+    int32_t result = NotifyStateChangedFromRemote(abilityState, connectToken, *element);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_HELPER(reply, Int32, result);
     return ERR_NONE;

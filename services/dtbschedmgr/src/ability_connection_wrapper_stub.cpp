@@ -86,6 +86,7 @@ void AbilityConnectionWrapperStub::OnAbilityConnectDone(const AppExecFwk::Elemen
     if (isCall_) {
         HILOGD("OnAbilityConnectDone get caller callback");
         AppExecFwk::ElementName elementWithDeviceId(localDeviceId_, element.GetBundleName(), element.GetAbilityName());
+        DistributedSchedAdapter::GetInstance().ProcessCallResult(remoteObject, distributedConnection_);
         proxy->OnAbilityConnectDone(elementWithDeviceId, remoteObject, resultCode);
         return;
     }
