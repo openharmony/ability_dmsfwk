@@ -593,7 +593,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckGetCallerPermission_004, TestSize.
     targetAbility.bundleName = BUNDLE_NAME;
     int32_t ret = DistributedSchedPermission::GetInstance().CheckGetCallerPermission(want, callerInfo, accountInfo,
         targetAbility);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, CALL_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedPermissionTest CheckGetCallerPermission_004 end ret:" << ret << std::endl;
 }
 
@@ -620,7 +620,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckGetCallerPermission_005, TestSize.
     targetAbility.permissions.push_back(INVALID_PERMISSION_NAME);
     int32_t ret = DistributedSchedPermission::GetInstance().CheckGetCallerPermission(want, callerInfo, accountInfo,
         targetAbility);
-    EXPECT_EQ(ret, DMS_COMPONENT_ACCESS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, CALL_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedPermissionTest CheckGetCallerPermission_005 end ret:" << ret << std::endl;
 }
 
@@ -659,7 +659,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckStartControlPermission_002, TestSi
     AAFwk::Want want;
     want.AddFlags(want.FLAG_ABILITY_CONTINUATION);
     bool ret = DistributedSchedPermission::GetInstance().CheckStartControlPermission(targetAbility, callerInfo, want);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
     DTEST_LOG << "DistributedSchedPermissionTest CheckStartControlPermission_002 end ret:" << ret << std::endl;
 }
 
@@ -735,7 +735,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckStartControlPermission_006, TestSi
     AAFwk::Want want;
     want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
     bool ret = DistributedSchedPermission::GetInstance().CheckStartControlPermission(targetAbility, callerInfo, want);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
     DTEST_LOG << "DistributedSchedPermissionTest CheckStartControlPermission_006 end ret:" << ret << std::endl;
 }
 

@@ -1304,7 +1304,7 @@ HWTEST_F(DistributedSchedServiceTest, StartAbilityFromRemote_007, TestSize.Level
     accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
     int ret = DistributedSchedService::GetInstance().StartAbilityFromRemote(want,
         abilityInfo, 0, callerInfo, accountInfo);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_007 end" << std::endl;
 }
 
@@ -2428,7 +2428,7 @@ HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_004, TestSi
     int32_t extensionType = 3;
     int ret = DistributedSchedService::GetInstance().StopExtensionAbilityFromRemote(want, callerInfo,
         accountInfo, extensionType);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_004 end" << std::endl;
 }
 

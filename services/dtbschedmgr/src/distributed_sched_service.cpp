@@ -1400,6 +1400,11 @@ bool DistributedSchedService::CheckDeviceIdFromRemote(const std::string& localDe
         HILOGE("destinationDeviceId is different with localDeviceId and destinationDeviceId");
         return false;
     }
+
+    if (sourceDeviceId != IPCSkeleton::GetCallingDeviceID()) {
+        HILOGE("sourceDeviceId is not correct");
+        return false;
+    }
     return true;
 }
 
