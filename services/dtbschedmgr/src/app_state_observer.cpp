@@ -45,7 +45,8 @@ void AppStateObserver::OnAbilityStateChanged(const AppExecFwk::AbilityStateData&
         } else {
             connectAbilityMap_[abilityStateData.token]++;
         }
-        if (connectAbilityMap_[abilityStateData.token] != NOTIFY_COUNT) {
+        if (connectAbilityMap_[abilityStateData.token] != NOTIFY_COUNT &&
+            abilityStateData.abilityState == FOREGROUND) {
             HILOGD("ignore first notify");
             return;
         }
