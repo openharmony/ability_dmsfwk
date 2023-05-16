@@ -28,6 +28,7 @@
 #include "distributed_operation_builder.h"
 #include "distributed_want_params_wrapper.h"
 #include "double_wrapper.h"
+#include "dtbschedmgr_log.h"
 #include "float_wrapper.h"
 #include "int_wrapper.h"
 #include "long_wrapper.h"
@@ -43,6 +44,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::regex NUMBER_REGEX("^[-+]?([0-9]+)([.]([0-9]+))?$");
+const std::string TAG = "DistributedWant";
 };  // namespace
 const std::string DistributedWant::ACTION_PLAY("action.system.play");
 const std::string DistributedWant::ACTION_HOME("action.system.home");
@@ -1435,7 +1437,7 @@ nlohmann::json DistributedWant::ToJson() const
     return wantJson;
 }
 
-bool DistributedWant::ReadFromJson(nlohmann::json& wantJson)
+bool DistributedWant::CanReadFromJson(nlohmann::json& wantJson)
 {
     const auto& jsonObjectEnd = wantJson.end();
     if ((wantJson.find("deviceId") == jsonObjectEnd)
@@ -1449,7 +1451,47 @@ bool DistributedWant::ReadFromJson(nlohmann::json& wantJson)
         || (wantJson.find("entities") == jsonObjectEnd)) {
         return false;
     }
+    if (!wantJson["deviceId"].is_string()) {
+        HILOGE("device id is not string");
+        return false;
+    }
+    if (!wantJson["bundleName"].is_string()) {
+        HILOGE("bundle name is not string");
+        return false;
+    }
+    if (!wantJson["abilityName"].is_string()) {
+        HILOGE("ability name is not string");
+        return false;
+    }
+    if (!wantJson["uri"].is_string()) {
+        HILOGE("uri is not string");
+        return false;
+    }
+    if (!wantJson["type"].is_string()) {
+        HILOGE("type is not string");
+        return false;
+    }
+    if (!wantJson["flags"].is_number_unsigned()) {
+        HILOGE("flags is not a number");
+        return false;
+    }
+    if (!wantJson["action"].is_string()) {
+        HILOGE("action is not string");
+        return false;
+    }
+    if (!wantJson["parameters"].is_string()) {
+        HILOGE("parameters is not string");
+        return false;
+    }
+    return true;
+}
 
+bool DistributedWant::ReadFromJson(nlohmann::json& wantJson)
+{
+    if (!CanReadFromJson(wantJson)) {
+        HILOGE("can not read from json");
+        return false;
+    }
     std::string deviceId = wantJson.at("deviceId").get<std::string>();
     std::string bundleName = wantJson.at("bundleName").get<std::string>();
     std::string abilityName = wantJson.at("abilityName").get<std::string>();

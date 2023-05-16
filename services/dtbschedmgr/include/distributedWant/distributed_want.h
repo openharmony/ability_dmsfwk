@@ -823,6 +823,7 @@ private:
     void ToUriStringInner(std::string& uriString) const;
     nlohmann::json ToJson() const;
     bool ReadFromJson(nlohmann::json& wantJson);
+    bool CanReadFromJson(nlohmann::json& wantJson);
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
