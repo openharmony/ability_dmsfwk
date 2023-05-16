@@ -47,5 +47,6 @@ ohos_shared_library("common_sdk") {
   ]
 
   subsystem_name = "ability"
+  innerapi_tags = [ "platformsdk" ]
   part_name = "dmsfwk"
 }
