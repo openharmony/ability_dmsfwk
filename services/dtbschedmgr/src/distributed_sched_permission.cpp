@@ -21,6 +21,8 @@
 #include "caller_info.h"
 #include "datetime_ex.h"
 #include "device_auth_defines.h"
+#include "device_security_defines.h"
+#include "device_security_info.h"
 #include "distributed_sched_adapter.h"
 #include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
@@ -45,6 +47,7 @@ const std::string PERMISSION_START_INVISIBLE_ABILITY = "ohos.permission.START_IN
 constexpr int32_t DEFAULT_DMS_API_VERSION = 9;
 const int DEFAULT_DMS_MISSION_ID = -1;
 const int FA_MODULE_ALLOW_MIN_API_VERSION = 8;
+const int DEFAULT_DEVICE_SECURITY_LEVEL = -1;
 }
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedPermission);
 void from_json(const nlohmann::json& jsonObject, GroupInfo& groupInfo)
@@ -222,7 +225,13 @@ int32_t DistributedSchedPermission::CheckGetCallerPermission(const AAFwk::Want& 
         HILOGE("Check background permission failed!");
         return DMS_BACKGROUND_PERMISSION_DENIED;
     }
-    // 4.check application custom permissions
+    // 4. check device security level
+    if (!targetAbility.visible &&
+        !CheckDeviceSecurityLevel(callerInfo.sourceDeviceId, want.GetElement().GetDeviceID())) {
+        HILOGE("check device security level failed!");
+        return CALL_PERMISSION_DENIED;
+    }
+    // 5.check application custom permissions
     if (!CheckCustomPermission(targetAbility, callerInfo)) {
         HILOGE("CheckCustomPermission denied or failed! the caller component do not have permission");
         return DMS_COMPONENT_ACCESS_PERMISSION_DENIED;
@@ -353,6 +362,11 @@ bool DistributedSchedPermission::CheckStartControlPermission(const AppExecFwk::A
 {
     // 1. check if continuation with same appid
     if ((want.GetFlags() & AAFwk::Want::FLAG_ABILITY_CONTINUATION) != 0) {
+        if (!targetAbility.visible &&
+            !CheckDeviceSecurityLevel(callerInfo.sourceDeviceId, want.GetElement().GetDeviceID())) {
+            HILOGE("check device security level failed!");
+            return false;
+        }
         if (BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
             HILOGD("the appId is the same, check permission success!");
             return true;
@@ -365,17 +379,23 @@ bool DistributedSchedPermission::CheckStartControlPermission(const AppExecFwk::A
         HILOGE("Check background permission failed!");
         return false;
     }
-    // 3. check start or connect ability with same appid
+    // 3. check device security level
+    if (!targetAbility.visible &&
+        !CheckDeviceSecurityLevel(callerInfo.sourceDeviceId, want.GetElement().GetDeviceID())) {
+        HILOGE("check device security level failed!");
+        return false;
+    }
+    // 4. check start or connect ability with same appid
     if (BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
         HILOGD("the appId is the same, check permission success!");
         return true;
     }
-    // 4. check if target ability is not visible and without PERMISSION_START_INVISIBLE_ABILITY
+    // 5. check if target ability is not visible and without PERMISSION_START_INVISIBLE_ABILITY
     if (!CheckTargetAbilityVisible(targetAbility, callerInfo)) {
         HILOGE("target ability is not visible and has no PERMISSION_START_INVISIBLE_ABILITY, permission denied!");
         return false;
     }
-    // 5. check if service of fa mode can associatedWakeUp
+    // 6. check if service of fa mode can associatedWakeUp
     if (!targetAbility.isStageBasedModel && targetAbility.type == AppExecFwk::AbilityType::SERVICE &&
         !targetAbility.applicationInfo.associatedWakeUp) {
         HILOGE("target ability is service ability(FA) and associatedWakeUp is false, permission denied!");
@@ -466,6 +486,58 @@ bool DistributedSchedPermission::CheckMinApiVersion(const AppExecFwk::AbilityInf
         return true;
     }
     return false;
+}
+
+bool DistributedSchedPermission::CheckDeviceSecurityLevel(const std::string& srcDeviceId,
+    const std::string& dstDeviceId) const
+{
+    std::string srcUdid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(srcDeviceId);
+    if (srcUdid.empty()) {
+        HILOGE("src udid is empty");
+        return false;
+    }
+    std::string dstUdid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(dstDeviceId);
+    if (dstUdid.empty()) {
+        HILOGE("dst udid is empty");
+        return false;
+    }
+    int32_t srcDeviceSecurityLevel = GetDeviceSecurityLevel(srcUdid);
+    int32_t dstDeviceSecurityLevel = GetDeviceSecurityLevel(dstUdid);
+    if (srcDeviceSecurityLevel == DEFAULT_DEVICE_SECURITY_LEVEL ||
+        srcDeviceSecurityLevel < dstDeviceSecurityLevel) {
+        HILOGE("the device security of source device is lower");
+        return false;
+    }
+    return true;
+}
+
+int32_t DistributedSchedPermission::GetDeviceSecurityLevel(const std::string& udid) const
+{
+    DeviceIdentify devIdentify;
+    devIdentify.length = DEVICE_ID_MAX_LEN;
+    int32_t ret = memcpy_s(devIdentify.identity, DEVICE_ID_MAX_LEN, udid.c_str(), DEVICE_ID_MAX_LEN);
+    if (ret != 0) {
+        HILOGE("str copy failed %{public}d", ret);
+        return DEFAULT_DEVICE_SECURITY_LEVEL;
+    }
+    DeviceSecurityInfo *info = nullptr;
+    ret = RequestDeviceSecurityInfo(&devIdentify, nullptr, &info);
+    if (ret != SUCCESS) {
+        HILOGE("request device security info failed %{public}d", ret);
+        FreeDeviceSecurityInfo(info);
+        info = nullptr;
+        return DEFAULT_DEVICE_SECURITY_LEVEL;
+    }
+    int32_t level = 0;
+    ret = GetDeviceSecurityLevelValue(info, &level);
+    HILOGD("get device security level, level is %{public}d", level);
+    FreeDeviceSecurityInfo(info);
+    info = nullptr;
+    if (ret != SUCCESS) {
+        HILOGE("get device security level failed %{public}d", ret);
+        return DEFAULT_DEVICE_SECURITY_LEVEL;
+    }
+    return level;
 }
 
 bool DistributedSchedPermission::CheckTargetAbilityVisible(const AppExecFwk::AbilityInfo& targetAbility,
