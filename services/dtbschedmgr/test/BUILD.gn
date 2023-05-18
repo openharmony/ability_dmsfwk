@@ -388,6 +388,7 @@ ohos_unittest("distributedwanttest") {
 
   sources = [
     "unittest/distributedWant/distributed_operation_test.cpp",
+    "unittest/distributedWant/distributed_want_params_test.cpp",
     "unittest/distributedWant/distributed_want_params_wrapper_test.cpp",
     "unittest/distributedWant/distributed_want_test.cpp",
   ]
