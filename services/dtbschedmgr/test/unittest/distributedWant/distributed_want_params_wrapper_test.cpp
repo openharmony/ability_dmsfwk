@@ -68,7 +68,7 @@ void DistributedWantParamWrapperBaseTest::TearDown(void)
  * @tc.name: GetValue
  * @tc.desc: Verify the "GetValue" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0100, Function | MediumTest | Level3)
 {
     DistributedWantParams wantParams;
     ErrCode result = wantParamWrapperPtr_->GetValue(wantParams);
@@ -83,7 +83,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_010
  * @tc.name: GetValue
  * @tc.desc: Verify the "GetValue" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0200, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0200, Function | MediumTest | Level3)
 {
     DistributedWantParams wantParams;
     ErrCode result = wantParamWrapperPtr_->GetValue(wantParams);
@@ -101,7 +101,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_020
  * @tc.name: Equals
  * @tc.desc: Verify the "Equals" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0300, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0300, Function | MediumTest | Level3)
 {
     DistributedWantParams wantParams;
     wantParams.SetParam(STRING_WANT_PARAMS_KEY_01, String::Box(STRING_WANT_PARAMS_VALUE_01));
@@ -117,7 +117,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_030
  * @tc.name: Equals
  * @tc.desc: Verify the "Equals" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0400, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0400, Function | MediumTest | Level3)
 {
     DistributedWantParams wantParams;
     DistributedWantParamWrapper wantParamWrapper(wantParams);
@@ -132,7 +132,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_040
  * @tc.name: Box
  * @tc.desc: Verify the "Box" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0500, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0500, Function | MediumTest | Level3)
 {
     auto wantParamsPtr = DistributedWantParamWrapper::Box(wantParams_);
 
@@ -149,7 +149,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_050
  * @tc.name: Box
  * @tc.desc: Verify the "Box" function with am empty object.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0600, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0600, Function | MediumTest | Level3)
 {
     auto wantParamsPtr = DistributedWantParamWrapper::Box({});
 
@@ -171,7 +171,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_060
  * @tc.name: Unbox
  * @tc.desc: Verify the "Unbox" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0700, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0700, Function | MediumTest | Level3)
 {
     auto wantParamsPtr = DistributedWantParamWrapper::Box(wantParams_);
 
@@ -185,7 +185,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_070
  * @tc.name: Unbox
  * @tc.desc: Verify the "Unbox" function with a nullptr
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0800, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0800, Function | MediumTest | Level3)
 {
     auto wantParams = DistributedWantParamWrapper::Unbox(nullptr);
 
@@ -200,7 +200,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_080
  * @tc.name: ValidateStr
  * @tc.desc: Verify the "ValidateStr" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0900, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0900, Function | MediumTest | Level3)
 {
     bool result = DistributedWantParamWrapper::ValidateStr("{");
 
@@ -212,7 +212,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_090
  * @tc.name: ValidateStr
  * @tc.desc: Verify the "ValidateStr" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1000, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1000, Function | MediumTest | Level3)
 {
     bool result = DistributedWantParamWrapper::ValidateStr("}");
 
@@ -224,7 +224,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_100
  * @tc.name: ValidateStr
  * @tc.desc: Verify the "ValidateStr" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1100, Function | MediumTest | Level3)
 {
     bool result = DistributedWantParamWrapper::ValidateStr("}{");
 
@@ -236,7 +236,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_110
  * @tc.name: ValidateStr
  * @tc.desc: Verify the "ValidateStr" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1200, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1200, Function | MediumTest | Level3)
 {
     bool result = DistributedWantParamWrapper::ValidateStr("{\"\"}");
 
@@ -248,7 +248,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_120
  * @tc.name: Parse
  * @tc.desc: Verify the "Parse" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1300, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1300, Function | MediumTest | Level3)
 {
     auto wantParamsPtr = DistributedWantParamWrapper::Parse("");
 
@@ -265,7 +265,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_130
  * @tc.name: Parse
  * @tc.desc: Verify the "Parse" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1400, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1400, Function | MediumTest | Level3)
 {
     auto wantParamsPtr = DistributedWantParamWrapper::Parse("{}");
 
@@ -282,7 +282,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_140
  * @tc.name: ToString
  * @tc.desc: Verify the "ToString" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1500, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1500, Function | MediumTest | Level3)
 {
     auto wantParamsString = wantParamWrapperPtr_->ToString();
 
@@ -294,7 +294,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_150
  * @tc.name: ToString
  * @tc.desc: Verify the "ToString" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1600, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1600, Function | MediumTest | Level3)
 {
     DistributedWantParams wantParams = {};
     DistributedWantParamWrapper wantParamWrapper(wantParams);
@@ -309,7 +309,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_160
  * @tc.name: ToString
  * @tc.desc: Verify the "ToString" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1700, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1700, Function | MediumTest | Level3)
 {
     DistributedWantParams wantParams = {};
     wantParams.SetParam(STRING_WANT_PARAMS_KEY_02, String::Box(STRING_WANT_PARAMS_VALUE_02));
@@ -326,7 +326,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_170
  * @tc.name: from ToString to Parse
  * @tc.desc: Verify the "from ToString to Parse" function.
  */
-HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1800, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1800, Function | MediumTest | Level3)
 {
     auto wantParamsString = wantParamWrapperPtr_->ToString();
 

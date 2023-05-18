@@ -59,7 +59,7 @@ void DistributedOperationBaseTest::TearDown(void)
  * @tc.name: WithAbilityName/GetAbilityName.
  * @tc.desc: Verify the function when the input string contains special characters.
  */
-HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetAbilityName_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetAbilityName_0100, Function | MediumTest | Level3)
 {
     std::string value = "enter";
     GTEST_LOG_(INFO) << "DmsFwk_DistributedOperation_GetAbilityName_0100 start";
@@ -90,7 +90,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetAbilityNam
  * @tc.name: WithBundleName/GetBundleName
  * @tc.desc: Verify the function when the input string contains special characters.
  */
-HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetBundleName_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetBundleName_0100, Function | MediumTest | Level3)
 {
     std::string value = "value";
     operationbuilder_->WithBundleName(value);
@@ -116,7 +116,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetBundleName
  * @tc.name: WithDeviceId/GetDeviceId
  * @tc.desc: Verify the function when the input string contains special characters.
  */
-HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetDeviceId_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetDeviceId_0100, Function | MediumTest | Level3)
 {
     std::string value = "value";
     operationbuilder_->WithDeviceId(value);
@@ -142,7 +142,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetDeviceId_0
  * @tc.name: WithAction/GetAction
  * @tc.desc: Verify the function when the input string contains special characters.
  */
-HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetAction_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetAction_0100, Function | MediumTest | Level3)
 {
     std::string value = "value";
     operationbuilder_->WithAction(value);
@@ -168,7 +168,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetAction_020
  * @tc.name: WithEntities/GetEntities
  * @tc.desc: Verify the function when the input string contains special characters.
  */
-HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetEntities_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetEntities_0100, Function | MediumTest | Level3)
 {
     std::vector<std::string> value;
     value.push_back("string1");
@@ -202,7 +202,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetEntities_0
  * @tc.name: WithFlags/GetFlags
  * @tc.desc: Verify the function when the input string contains special characters.
  */
-HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetFlags_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetFlags_0100, Function | MediumTest | Level3)
 {
     unsigned int value = 1;
     operationbuilder_->WithFlags(value);
@@ -228,7 +228,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetFlags_0200
  * @tc.name: WithUri/GetUri
  * @tc.desc: Verify the function when the input string contains special characters.
  */
-HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetUri_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetUri_0100, Function | MediumTest | Level3)
 {
     std::string value = "scheme://authority/path1/path2/path3?id = 1&name = mingming&old#fragment";
     OHOS::Uri uri(value);
@@ -257,7 +257,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetUri_0200, 
  * @tc.name: build
  * @tc.desc: Verify that the parameters are correct.
  */
-HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_build_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_build_0100, Function | MediumTest | Level3)
 {
     std::string value = "value";
     OHOS::Uri uri(value);
@@ -292,7 +292,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_build_0100, F
  * @tc.name: Marshalling/Unmarshalling
  * @tc.desc: Validation serialization.
  */
-HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Marshalling_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Marshalling_0100, Function | MediumTest | Level3)
 {
     std::string value = "value";
     OHOS::Uri uri(value);
@@ -322,7 +322,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Marshalling_0
  * @tc.name: Operator
  * @tc.desc: Verify string overload.
  */
-HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_0100, Function | MediumTest | Level3)
 {
     DistributedOperation operation_;
     std::string value = "value";

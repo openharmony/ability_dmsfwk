@@ -74,7 +74,7 @@ void DistributedWantParamsBaseTest::TearDown(void)
  * @tc.name: Marshalling/Unmarshalling
  * @tc.desc: marshalling WantParams, and then check result.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0100, Function | MediumTest | Level3)
 {
     std::string keyStr = "12345667";
     std::string valueStr = "sdasdfdsffdgfdg";
@@ -93,7 +93,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0100, 
  * @tc.name: Marshalling/Unmarshalling
  * @tc.desc: marshalling WantParams, and then check result.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0200, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0200, Function | MediumTest | Level3)
 {
     std::string keyStr = "12345667";
     bool valueBool = true;
@@ -112,7 +112,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0200, 
  * @tc.name: Marshalling/Unmarshalling
  * @tc.desc: marshalling WantParams, and then check result.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0300, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0300, Function | MediumTest | Level3)
 {
     std::string keyStr = "12345667";
     int valueInteger = 12345;
@@ -135,7 +135,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0300, 
  * @tc.name: Marshalling/Unmarshalling
  * @tc.desc: marshalling WantParams, and then check result.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0400, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0400, Function | MediumTest | Level3)
 {
     std::string keyStr = "12345667";
     long valueLong = 1234567;
@@ -153,7 +153,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0400, 
  * @tc.name: Marshalling/Unmarshalling
  * @tc.desc: marshalling nested WantParams, and then check result.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0600, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0600, Function | MediumTest | Level3)
 {
     DistributedWantParams wp;
 
@@ -179,7 +179,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0600, 
  * @tc.name: Marshalling/Unmarshalling
  * @tc.desc: marshalling array, and then check result.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0700, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0700, Function | MediumTest | Level3)
 {
     sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(2, AAFwk::g_IID_IString);
 
@@ -216,7 +216,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0700, 
  * @tc.name: GetStringByType
  * @tc.desc: Test get bool with invalid type in the WantParam.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0200, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0200, Function | MediumTest | Level3)
 {
     const std::string value = "true";
     sptr<IInterface> boolObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_BOOLEAN, value);
@@ -229,7 +229,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0
  * @tc.name: GetStringByType
  * @tc.desc: Test get string with invalid type in the WantParam.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0300, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0300, Function | MediumTest | Level3)
 {
     const std::string value = "string";
     sptr<IInterface> stringObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_STRING, value);
@@ -242,7 +242,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0
  * @tc.name: GetStringByType
  * @tc.desc: Test get byte with invalid type in the WantParam.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0400, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0400, Function | MediumTest | Level3)
 {
     const std::string value = "129";
     sptr<IInterface> byteObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_BYTE, value);
@@ -255,7 +255,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0
  * @tc.name: GetStringByType
  * @tc.desc: Test get char with invalid type in the WantParam.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0500, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0500, Function | MediumTest | Level3)
 {
     const std::string value = "I";
     sptr<IInterface> charObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_CHAR, value);
@@ -268,7 +268,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0
  * @tc.name: GetStringByType
  * @tc.desc: Test get short with invalid type in the WantParam.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0600, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0600, Function | MediumTest | Level3)
 {
     const std::string value = "123";
     sptr<IInterface> shortObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_SHORT, value);
@@ -281,7 +281,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0
  * @tc.name: GetStringByType
  * @tc.desc: Test get int with invalid type in the WantParam.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0700, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0700, Function | MediumTest | Level3)
 {
     const std::string value = "-1";
     sptr<IInterface> intObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_INT, value);
@@ -294,7 +294,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0
  * @tc.name: GetStringByType
  * @tc.desc: Test get long with invalid type in the WantParam.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0800, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0800, Function | MediumTest | Level3)
 {
     const std::string value = "-1";
     sptr<IInterface> longObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_LONG, value);
@@ -307,7 +307,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0
  * @tc.name: GetStringByType
  * @tc.desc: Test get float with invalid type in the WantParam.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0900, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0900, Function | MediumTest | Level3)
 {
     const std::string value = "-1.0004";
     sptr<IInterface> floatObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_FLOAT, value);
@@ -320,7 +320,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_0
  * @tc.name: GetStringByType
  * @tc.desc: Test get float with invalid type in the WantParam.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_1000, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_1000, Function | MediumTest | Level3)
 {
     const std::string value = "-1.00000004";
     sptr<IInterface> doubleObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_DOUBLE, value);
@@ -333,7 +333,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_1
  * @tc.name: GetStringByType
  * @tc.desc: Test get float with invalid type in the WantParam.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_1100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_1100, Function | MediumTest | Level3)
 {
     const std::string value = "I5{2,3,5,7,11}";
     sptr<IInterface> arrayObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_ARRAY, value);
@@ -346,7 +346,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_1
  * @tc.name: NewArrayData
  * @tc.desc: Test NewArrayData with invalid sptr<IArray> parameter.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_NewArrayData_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_NewArrayData_0100, Function | MediumTest | Level3)
 {
     sptr<AAFwk::IArray> array = new (std::nothrow) AAFwk::Array(0, g_IID_IDistributedWantParams);
     DistributedWantParams wp;
@@ -362,7 +362,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_NewArrayData_0100
  * @tc.name: GetDataType
  * @tc.desc: Test GetDataType with invalid parameter.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0100, Function | MediumTest | Level3)
 {
     int type = DistributedWantParams::GetDataType(nullptr);
     EXPECT_EQ(type, DistributedWantParams::VALUE_TYPE_NULL);
@@ -373,7 +373,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0100,
  * @tc.name: GetDataType
  * @tc.desc: Test GetDataType with bool parameter.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0200, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0200, Function | MediumTest | Level3)
 {
     const std::string value = "true";
     sptr<IInterface> boolObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_BOOLEAN, value);
@@ -386,7 +386,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0200,
  * @tc.name: GetDataType
  * @tc.desc: Test GetDataType with byte parameter.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0300, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0300, Function | MediumTest | Level3)
 {
     const std::string value = "129";
     sptr<IInterface> byteObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_BYTE, value);
@@ -399,7 +399,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0300,
  * @tc.name: GetDataType
  * @tc.desc: Test GetDataType with char parameter.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0400, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0400, Function | MediumTest | Level3)
 {
     const std::string value = "I";
     sptr<IInterface> charObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_CHAR, value);
@@ -412,7 +412,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0400,
  * @tc.name: GetDataType
  * @tc.desc: Test GetDataType with short parameter.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0500, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0500, Function | MediumTest | Level3)
 {
     const std::string value = "123";
     sptr<IInterface> shortObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_SHORT, value);
@@ -425,7 +425,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0500,
  * @tc.name: GetDataType
  * @tc.desc: Test GetDataType with int parameter.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0600, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0600, Function | MediumTest | Level3)
 {
     const std::string value = "-1";
     sptr<IInterface> intObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_INT, value);
@@ -438,7 +438,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0600,
  * @tc.name: GetDataType
  * @tc.desc: Test GetDataType with long parameter.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0700, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0700, Function | MediumTest | Level3)
 {
     const std::string value = "-1";
     sptr<IInterface> longObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_LONG, "-1");
@@ -451,7 +451,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0700,
  * @tc.name: GetDataType
  * @tc.desc: Test GetDataType with float parameter.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0800, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0800, Function | MediumTest | Level3)
 {
     const std::string value = "-1.0004";
     sptr<IInterface> floatObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_FLOAT, "-1.0004");
@@ -464,7 +464,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0800,
  * @tc.name: GetDataType
  * @tc.desc: Test GetDataType with double parameter.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0900, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0900, Function | MediumTest | Level3)
 {
     const std::string value = "-1.00000004";
     sptr<IInterface> doubleObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_DOUBLE, "-1.00000004");
@@ -477,7 +477,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_0900,
  * @tc.name: GetDataType
  * @tc.desc: Test GetDataType with string parameter.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_1000, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_1000, Function | MediumTest | Level3)
 {
     const std::string value = "hello";
     sptr<IInterface> stringObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_STRING, "hello");
@@ -490,7 +490,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_1000,
  * @tc.name: GetDataType
  * @tc.desc: Test GetDataType with array parameter.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_1100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_1100, Function | MediumTest | Level3)
 {
     const std::string value = "I5{2,3,5,7,11}";
     sptr<IInterface> interfaceObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_ARRAY, value);
@@ -503,7 +503,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetDataType_1100,
  * @tc.name: GetInterfaceByType
  * @tc.desc: Test GetInterfaceByType with boolean type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0100, Function | MediumTest | Level3)
 {
     const std::string value = "true";
     sptr<IInterface> boolObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_BOOLEAN, value);
@@ -515,7 +515,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByTyp
  * @tc.name: GetInterfaceByType
  * @tc.desc: Test GetInterfaceByType with byte type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0200, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0200, Function | MediumTest | Level3)
 {
     const std::string value = "129";
     sptr<IInterface> byteObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_BYTE, value);
@@ -527,7 +527,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByTyp
  * @tc.name: GetInterfaceByType
  * @tc.desc: Test GetInterfaceByType with char type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0300, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0300, Function | MediumTest | Level3)
 {
     const std::string value = "I";
     sptr<IInterface> charObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_CHAR, value);
@@ -539,7 +539,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByTyp
  * @tc.name: GetInterfaceByType
  * @tc.desc: Test GetInterfaceByType with short type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0400, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0400, Function | MediumTest | Level3)
 {
     const std::string value = "123";
     sptr<IInterface> shortObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_SHORT, value);
@@ -551,7 +551,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByTyp
  * @tc.name: GetInterfaceByType
  * @tc.desc: Test GetInterfaceByType with integer type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0500, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0500, Function | MediumTest | Level3)
 {
     const std::string value = "-1";
     sptr<IInterface> intObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_INT, value);
@@ -563,7 +563,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByTyp
  * @tc.name: GetInterfaceByType
  * @tc.desc: Test GetInterfaceByType with long type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0600, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0600, Function | MediumTest | Level3)
 {
     const std::string value = "-1";
     sptr<IInterface> longObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_LONG, "-1");
@@ -575,7 +575,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByTyp
  * @tc.name: GetInterfaceByType
  * @tc.desc: Test GetInterfaceByType with float type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0700, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0700, Function | MediumTest | Level3)
 {
     const std::string value = "-1.0004";
     sptr<IInterface> floatObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_FLOAT, "-1.0004");
@@ -587,7 +587,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByTyp
  * @tc.name: GetInterfaceByType
  * @tc.desc: Test GetInterfaceByType with double type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0800, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0800, Function | MediumTest | Level3)
 {
     const std::string value = "-1.00000004";
     sptr<IInterface> doubleObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_DOUBLE, "-1.00000004");
@@ -599,7 +599,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByTyp
  * @tc.name: GetInterfaceByType
  * @tc.desc: Test GetInterfaceByType with string type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0900, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_0900, Function | MediumTest | Level3)
 {
     const std::string value = "hello";
     sptr<IInterface> stringObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_STRING, "hello");
@@ -611,7 +611,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByTyp
  * @tc.name: GetInterfaceByType
  * @tc.desc: Test GetInterfaceByType with array type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_1000, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_1000, Function | MediumTest | Level3)
 {
     const std::string value = "I5{2,3,5,7,11}";
     sptr<IInterface> interfaceObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_ARRAY, value);
@@ -634,7 +634,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByTyp
  * @tc.name: GetInterfaceByType
  * @tc.desc: Test GetInterfaceByType with invalid type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_1100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByType_1100, Function | MediumTest | Level3)
 {
     const std::string value = "123";
     sptr<IInterface> arrayObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_NULL, value);
@@ -646,7 +646,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetInterfaceByTyp
  * @tc.name: CompareInterface
  * @tc.desc: Test CompareInterface with bool type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0100, Function | MediumTest | Level3)
 {
     const std::string value = "true";
     sptr<IInterface> interfaceObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_BOOLEAN, value);
@@ -659,7 +659,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_
  * @tc.name: CompareInterface
  * @tc.desc: Test CompareInterface with byte type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0200, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0200, Function | MediumTest | Level3)
 {
     const std::string value = "129";
     sptr<IInterface> interfaceObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_BYTE, value);
@@ -672,7 +672,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_
  * @tc.name: CompareInterface
  * @tc.desc: Test CompareInterface with char type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0300, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0300, Function | MediumTest | Level3)
 {
     const std::string value = "I";
     sptr<IInterface> interfaceObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_CHAR, value);
@@ -685,7 +685,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_
  * @tc.name: CompareInterface
  * @tc.desc: Test CompareInterface with short type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0400, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0400, Function | MediumTest | Level3)
 {
     const std::string value = "123";
     sptr<IInterface> interfaceObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_SHORT, value);
@@ -698,7 +698,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_
  * @tc.name: CompareInterface
  * @tc.desc: Test CompareInterface with integer type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0500, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0500, Function | MediumTest | Level3)
 {
     const std::string value = "-1";
     sptr<IInterface> interfaceObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_INT, value);
@@ -711,7 +711,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_
  * @tc.name: CompareInterface
  * @tc.desc: Test CompareInterface with long type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0600, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0600, Function | MediumTest | Level3)
 {
     const std::string value = "-1";
     sptr<IInterface> interfaceObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_LONG, "-1");
@@ -724,7 +724,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_
  * @tc.name: CompareInterface
  * @tc.desc: Test CompareInterface with float type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0700, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0700, Function | MediumTest | Level3)
 {
     const std::string value = "-1.0004";
     sptr<IInterface> interfaceObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_FLOAT, "-1.0004");
@@ -737,7 +737,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_
  * @tc.name: CompareInterface
  * @tc.desc: Test CompareInterface with double type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0800, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0800, Function | MediumTest | Level3)
 {
     const std::string value = "-1.00000004";
     sptr<IInterface> interfaceObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_DOUBLE, "-1.00000004");
@@ -750,7 +750,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_
  * @tc.name: CompareInterface
  * @tc.desc: Test CompareInterface with string type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0900, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_0900, Function | MediumTest | Level3)
 {
     const std::string value = "hello";
     sptr<IInterface> interfaceObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_STRING, "hello");
@@ -763,7 +763,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_
  * @tc.name: CompareInterface
  * @tc.desc: Test CompareInterface with array type.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_1000, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_1000, Function | MediumTest | Level3)
 {
     const std::string value = "I5{2,3,5,7,11}";
     sptr<IInterface> interfaceObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_ARRAY, value);
@@ -776,7 +776,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_CompareInterface_
  * @tc.name: WriteArrayToParcelString
  * @tc.desc: Test WriteArrayToParcelString string content.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelString_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelString_0100, Function | MediumTest | Level3)
 {
     Parcel parcel;
     DistributedWantParams wp;
@@ -789,7 +789,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParce
  * @tc.name: WriteArrayToParcelBool
  * @tc.desc: Test WriteArrayToParcelBool bool content.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelBool_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelBool_0100, Function | MediumTest | Level3)
 {
     Parcel parcel;
     DistributedWantParams wp;
@@ -802,7 +802,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParce
  * @tc.name: WriteArrayToParcelByte
  * @tc.desc: Test WriteArrayToParcelByte byte content.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelByte_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelByte_0100, Function | MediumTest | Level3)
 {
     Parcel parcel;
     DistributedWantParams wp;
@@ -815,7 +815,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParce
  * @tc.name: WriteArrayToParcelChar
  * @tc.desc: Test WriteArrayToParcelChar char content.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelChar_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelChar_0100, Function | MediumTest | Level3)
 {
     Parcel parcel;
     DistributedWantParams wp;
@@ -828,7 +828,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParce
  * @tc.name: WriteArrayToParcelShort
  * @tc.desc: Test WriteArrayToParcelShort short content.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelShort_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelShort_0100, Function | MediumTest | Level3)
 {
     Parcel parcel;
     DistributedWantParams wp;
@@ -841,7 +841,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParce
  * @tc.name: WriteArrayToParcelInt
  * @tc.desc: Test WriteArrayToParcelInt int content.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelInt_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelInt_0100, Function | MediumTest | Level3)
 {
     Parcel parcel;
     DistributedWantParams wp;
@@ -854,7 +854,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParce
  * @tc.name: WriteArrayToParcelLong
  * @tc.desc: Test WriteArrayToParcelLong long content.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelLong_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelLong_0100, Function | MediumTest | Level3)
 {
     Parcel parcel;
     DistributedWantParams wp;
@@ -867,7 +867,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParce
  * @tc.name: WriteArrayToParcelFloat
  * @tc.desc: Test WriteArrayToParcelFloat float content.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelFloat_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelFloat_0100, Function | MediumTest | Level3)
 {
     Parcel parcel;
     DistributedWantParams wp;
@@ -880,7 +880,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParce
  * @tc.name: WriteArrayToParcelDouble
  * @tc.desc: Test WriteArrayToParcelDouble double content.
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelDouble_0100, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelDouble_0100, Function | MediumTest | Level3)
 {
     Parcel parcel;
     DistributedWantParams wp;
@@ -924,7 +924,7 @@ void DistributedUnsupportedDataTest::TearDown(void)
  * @tc.desc: Test ReadArrayToParcel.
  * @tc.require: issueI648W6
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_ReadArrayToParcel_1000, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_ReadArrayToParcel_1000, Function | MediumTest | Level3)
 {
     DistributedWantParams wantParams;
     Parcel parcel;
@@ -940,7 +940,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_ReadArrayToParcel
  * @tc.desc: Test ReadUnsupportedData.
  * @tc.require: issueI648W6
  */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_ReadUnsupportedData_1000, Function | MediumTest | Level1)
+HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_ReadUnsupportedData_1000, Function | MediumTest | Level3)
 {
     DistributedWantParams wantParams;
     Parcel parcel;
