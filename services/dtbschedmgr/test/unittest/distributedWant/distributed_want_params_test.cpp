@@ -1051,71 +1051,6 @@ void DistributedUnsupportedDataTest::TearDown(void)
 }
 
 /**
- * @tc.number: Distributed_WantParams_GetStringParam_1000
- * @tc.name: GetStringParam
- * @tc.desc: Test GetStringParam.
- * @tc.require: issueI648W6
- */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringParam_1000, Function | MediumTest | Level1)
-{
-    DistributedWantParams wantParams;
-    std::string key = "";
-    std::string result = wantParams.GetStringParam(key);
-    EXPECT_EQ(result, "");
-}
-
-/**
- * @tc.number: Distributed_WantParams_WriteToParcelFD_1000
- * @tc.name: WriteToParcelFD
- * @tc.desc: Test WriteToParcelFD.
- * @tc.require: issueI648W6
- */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteToParcelFD_1000, Function | MediumTest | Level1)
-{
-    DistributedWantParams wantParams;
-    Parcel parcel;
-    DistributedWantParams value;
-    bool result = wantParams.WriteToParcelFD(parcel, value);
-    EXPECT_EQ(result, false);
-}
-
-/**
- * @tc.number: Distributed_WantParams_WriteToParcelRemoteObject_1000
- * @tc.name: WriteToParcelRemoteObject
- * @tc.desc: Test WriteToParcelRemoteObject.
- * @tc.require: issueI648W6
- */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteToParcelRemoteObject_1000, Function | MediumTest | Level1)
-{
-    DistributedWantParams wantParams;
-    Parcel parcel;
-    DistributedWantParams value;
-    bool result = wantParams.WriteToParcelRemoteObject(parcel, value);
-    EXPECT_EQ(result, false);
-
-    std::string keyStr = "vlan";
-    std::string valueStr = "vlan";
-    wantParamsIn_->SetParam(keyStr, String::Box(valueStr));
-    bool result1 = wantParams.WriteToParcelRemoteObject(parcel, value);
-    EXPECT_EQ(result1, false);
-}
-
-/**
- * @tc.number: Distributed_WantParams_WriteArrayToParcelWantParams_1000
- * @tc.name: WriteArrayToParcelWantParams
- * @tc.desc: Test WriteArrayToParcelWantParams.
- * @tc.require: issueI648W6
- */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_WriteArrayToParcelWantParams_1000, Function | MediumTest | Level1)
-{
-    DistributedWantParams wantParams;
-    Parcel parcel;
-    int depth = 1;
-    bool result = wantParams.WriteArrayToParcelWantParams(parcel, nullptr, depth);
-    EXPECT_EQ(result, false);
-}
-
-/**
  * @tc.number: Distributed_WantParams_ReadArrayToParcel_1000
  * @tc.name: ReadArrayToParcel
  * @tc.desc: Test ReadArrayToParcel.
@@ -1127,37 +1062,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_ReadArrayToParcel
     Parcel parcel;
     int type = 1;
     sptr<IArray> destAO = nullptr;
-    bool result = wantParams.ReadArrayToParcel(parcel, type, destAO, 1);
-    EXPECT_EQ(result, true);
-}
-
-/**
- * @tc.number: Distributed_WantParams_ReadFromParcelFD_1000
- * @tc.name: ReadFromParcelFD
- * @tc.desc: Test ReadFromParcelFD.
- * @tc.require: issueI648W6
- */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_ReadFromParcelFD_1000, Function | MediumTest | Level1)
-{
-    DistributedWantParams wantParams;
-    Parcel parcel;
-    std::string key = "this is key";
-    bool result = wantParams.ReadFromParcelFD(parcel, key);
-    EXPECT_EQ(result, true);
-}
-
-/**
- * @tc.number: Distributed_WantParams_ReadFromParcelRemoteObject_1000
- * @tc.name: ReadFromParcelRemoteObject
- * @tc.desc: Test ReadFromParcelRemoteObject.
- * @tc.require: issueI648W6
- */
-HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_ReadFromParcelRemoteObject_1000, Function | MediumTest | Level1)
-{
-    DistributedWantParams wantParams;
-    Parcel parcel;
-    std::string key = "this is key";
-    bool result = wantParams.ReadFromParcelRemoteObject(parcel, key);
+    bool result = wantParams.ReadArrayToParcel(parcel, type, destAO);
     EXPECT_EQ(result, true);
 }
 
@@ -1181,6 +1086,6 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_ReadUnsupportedDa
     EXPECT_EQ(result1, false);
 
     int type1 = 50;
-    bool result2 = wantParams.ReadFromParcelParam(parcel, key, type1, 1);
+    bool result2 = wantParams.ReadFromParcelParam(parcel, key, type1);
     EXPECT_EQ(result2, false);
 }
