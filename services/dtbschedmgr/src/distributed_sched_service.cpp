@@ -84,6 +84,7 @@ const std::string DMS_VERSION_ID = "dmsVersion";
 const std::string DMS_CONNECT_TOKEN = "connectToken";
 const std::string DMS_VERSION = "4.0.0";
 const std::string DMS_MISSION_ID = "dmsMissionId";
+constexpr int32_t DEFAULT_DMS_MISSION_ID = -1;
 constexpr int32_t DEFAULT_DMS_CONNECT_TOKEN = -1;
 constexpr int32_t BIND_CONNECT_RETRY_TIMES = 3;
 constexpr int32_t BIND_CONNECT_TIMEOUT = 500; // 500ms
@@ -263,6 +264,26 @@ int32_t DistributedSchedService::SendResultFromRemote(OHOS::AAFwk::Want& want, i
         !CheckDeviceIdFromRemote(localDeviceId, deviceId, callerInfo.sourceDeviceId)) {
         HILOGE("check deviceId failed");
         return INVALID_REMOTE_PARAMETERS_ERR;
+    }
+    if (want.GetElement().GetBundleName().empty() && want.GetElement().GetAbilityName().empty()) {
+        HILOGW("Remote died abnormal");
+        int32_t missionId = want.GetIntParam(DMS_MISSION_ID, DEFAULT_DMS_MISSION_ID);
+        ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->Connect();
+        if (ret != ERR_OK) {
+            HILOGE("connect ability server failed %{public}d", ret);
+            return ret;
+        }
+        MissionInfo missionInfo;
+        ret = AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, missionInfo);
+        if (ret != ERR_OK) {
+            HILOGE("SendResult failed %{public}d", ret);
+            return ret;
+        }
+        std::string bundleName = missionInfo.want.GetElement().GetBundleName();
+        std::string abilityName = missionInfo.want.GetElement().GetAbilityName();
+        HILOGD("bundlename: %{public}s, ability is %{public}s", bundleName.c_str(), abilityName.c_str());
+        ElementName element{"", bundleName, abilityName};
+        want.SetElement(element);
     }
     int32_t result = CheckTargetPermission(want, callerInfo, accountInfo, SEND_RESULT_PERMISSION, false);
     if (result != ERR_OK) {
