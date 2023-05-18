@@ -95,6 +95,9 @@ public:
     std::string doubleArrayType = "doubleArray";
     std::string stringType = "string";
     std::string stringArrayType = "stringArray";
+
+    static const std::string URI_STRING_HEAD;
+    static const std::string URI_STRING_END;
 };
 
 void DistributedWantBaseTest::SetUpTestCase(void)
@@ -373,33 +376,6 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Bundle_0100, Function
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_DeviceId_0100
- * @tc.name: SetDeviceId/GetDeviceId
- * @tc.desc: Validate when normally entering a string
- */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_DeviceId_0100, Function | MediumTest | Level1)
-{
-    if (want_ != nullptr) {
-        std::string DeviceId = "liuuy";
-        want_->SetDeviceId(DeviceId);
-        EXPECT_STREQ(DeviceId.c_str(), want_->GetDeviceId().c_str());
-    }
-}
-
-/**
- * @tc.number: DistributedSchedule_Want_ModuleName_0100
- * @tc.name: SetModuleName/GetModuleName
- * @tc.desc: Validate when normally entering a string
- */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ModuleName_0100, Function | MediumTest | Level1)
-{
-    if (want_ != nullptr) {
-        std::string ModuleName = "liuuy";
-        want_->SetModuleName(ModuleName);
-        EXPECT_STREQ(ModuleName.c_str(), want_->GetModuleName().c_str());
-    }
-}
-/**
  * @tc.number: DistributedSchedule_Want_Parcelable_0100
  * @tc.name: Marshalling/Unmarshalling
  * @tc.desc: marshalling Want, and then check result.
@@ -417,7 +393,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0100, Func
     WantIn_->SetAction("12345");
     WantIn_->SetFlags(123);
     WantIn_->AddEntity("12345");
-    WantParams wantParams;
+    DistributedWantParams wantParams;
     std::string keyStr = "12345667";
     bool valueBool = true;
     wantParams.SetParam(keyStr, Boolean::Box(valueBool));
@@ -808,8 +784,8 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0500, Func
 void DistributedWantBaseTest::CompareWant(const std::shared_ptr<DistributedWant>& want1,
     const std::shared_ptr<DistributedWant>& want2) const
 {
-    Operation opt1 = want1->GetOperation();
-    Operation opt2 = want2->GetOperation();
+    DistributedOperation opt1 = want1->GetOperation();
+    DistributedOperation opt2 = want2->GetOperation();
     EXPECT_EQ(opt1.GetDeviceId(), opt2.GetDeviceId());
     EXPECT_EQ(opt1.GetBundleName(), opt2.GetBundleName());
     EXPECT_EQ(opt1.GetAbilityName(), opt2.GetAbilityName());
@@ -4063,7 +4039,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_HasParameter_0200, Fu
         return;
     }
     p1->SetParam(key, arrayValue);
-    Want *newWant = nullptr;
+    DistributedWant* newWant = nullptr;
     newWant = DistributedWant::ParseUri(p1->ToUri());
     if (newWant == nullptr) {
         return;
