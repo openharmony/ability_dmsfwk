@@ -30,18 +30,18 @@ const std::string TAG = "DistributedDeviceNodeListener";
 void DistributedDeviceNodeListener::OnDeviceOnline(const DistributedHardware::DmDeviceInfo& deviceInfo)
 {
     auto dmsDeviceInfo = std::make_shared<DmsDeviceInfo>(
-        deviceInfo.deviceName, deviceInfo.deviceTypeId, deviceInfo.deviceId);
+        deviceInfo.deviceName, deviceInfo.deviceTypeId, deviceInfo.networkId);
     DtbschedmgrDeviceInfoStorage::GetInstance().DeviceOnlineNotify(dmsDeviceInfo);
 }
 
 void DistributedDeviceNodeListener::OnDeviceOffline(const DistributedHardware::DmDeviceInfo& deviceInfo)
 {
-    DtbschedmgrDeviceInfoStorage::GetInstance().DeviceOfflineNotify(deviceInfo.deviceId);
+    DtbschedmgrDeviceInfoStorage::GetInstance().DeviceOfflineNotify(deviceInfo.networkId);
 }
 
 void DistributedDeviceNodeListener::OnDeviceInfoChanged(const DistributedHardware::DmDeviceInfo& deviceInfo)
 {
-    DtbschedmgrDeviceInfoStorage::GetInstance().OnDeviceInfoChanged(deviceInfo.deviceId);
+    DtbschedmgrDeviceInfoStorage::GetInstance().OnDeviceInfoChanged(deviceInfo.networkId);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -98,37 +98,40 @@ int32_t DistributedSchedAdapter::DisconnectAbility(const sptr<IRemoteObject>& co
     return ret;
 }
 
-void DistributedSchedAdapter::DeviceOnline(const std::string& deviceId)
+void DistributedSchedAdapter::DeviceOnline(const std::string& networkId)
 {
     if (dmsAdapterHandler_ == nullptr) {
         HILOGE("DeviceOnline dmsAdapterHandler is null");
         return;
     }
 
-    if (deviceId.empty()) {
-        HILOGW("DeviceOnline deviceId is empty");
+    if (networkId.empty()) {
+        HILOGW("DeviceOnline networkId is empty");
         return;
     }
-    HILOGD("process DeviceOnline deviceId is %s", deviceId.c_str());
-    dmsAdapterHandler_->RemoveTask(deviceId);
+
+    HILOGD("process DeviceOnline networkId is %{public}s",
+        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+    dmsAdapterHandler_->RemoveTask(networkId);
 }
 
-void DistributedSchedAdapter::DeviceOffline(const std::string& deviceId)
+void DistributedSchedAdapter::DeviceOffline(const std::string& networkId)
 {
     if (dmsAdapterHandler_ == nullptr) {
         HILOGE("DeviceOffline dmsAdapterHandler is null");
         return;
     }
 
-    if (deviceId.empty()) {
-        HILOGW("DeviceOffline deviceId is empty");
+    if (networkId.empty()) {
+        HILOGW("DeviceOffline networkId is empty");
         return;
     }
-    HILOGD("process DeviceOffline deviceId is %s", deviceId.c_str());
-    auto callback = [deviceId, this] () {
-        ProcessDeviceOffline(deviceId);
+    HILOGD("process DeviceOffline networkId is %{public}s",
+        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+    auto callback = [networkId, this] () {
+        ProcessDeviceOffline(networkId);
     };
-    if (!dmsAdapterHandler_->PostTask(callback, deviceId, DEVICE_OFFLINE_DELAY_TIME)) {
+    if (!dmsAdapterHandler_->PostTask(callback, networkId, DEVICE_OFFLINE_DELAY_TIME)) {
         HILOGW("DeviceOffline PostTask failed");
     }
 }

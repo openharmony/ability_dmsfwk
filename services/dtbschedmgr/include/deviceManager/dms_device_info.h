@@ -35,22 +35,21 @@ enum {
 
 class DmsDeviceInfo : public Parcelable {
 public:
-    DmsDeviceInfo(const std::string& deviceName, int32_t deviceType, const std::string& deviceId,
-        int32_t deviceState = ONLINE)
-        : deviceName_(deviceName), deviceType_(deviceType), deviceId_(deviceId), deviceState_(deviceState) {}
+    DmsDeviceInfo(const std::string& deviceName, int32_t deviceType,
+        const std::string& networkId, int32_t deviceState = ONLINE)
+        : deviceName_(deviceName), deviceType_(deviceType), networkId_(networkId), deviceState_(deviceState) {}
     ~DmsDeviceInfo() = default;
 
     const std::string& GetDeviceName() const;
-    const std::string& GetDeviceId() const;
+    const std::string& GetNetworkId() const;
     int32_t GetDeviceType() const;
     int32_t GetDeviceState() const;
     bool Marshalling(Parcel& parcel) const override;
 
 private:
-
     std::string deviceName_;
     int32_t deviceType_ = UNKNOWN_TYPE;
-    std::string deviceId_;
+    std::string networkId_;
     int32_t deviceState_ = UNKNOWN_STATE;
 };
 } // namespace DistributedSchedule

@@ -62,7 +62,7 @@ public:
     std::string GetUuidByNetworkId(const std::string& networkId);
     bool GetLocalBasicInfo(DistributedHardware::DmDeviceInfo& dmDeviceInfo);
 
-    static std::string AnonymizeDeviceId(const std::string& deviceId);
+    static std::string AnonymizeNetworkId(const std::string& deviceId);
     static std::shared_ptr<DnetworkAdapter> GetInstance();
 
 private:

@@ -246,12 +246,12 @@ bool DistributedDataStorage::Insert(const string& networkId, int32_t missionId,
         bool ret = InsertInnerLocked(uuid, missionId, byteStream, len);
         if (!ret) {
             HILOGE("Insert uuid = %{public}s + missionId = %{public}d failed!",
-                DnetworkAdapter::AnonymizeDeviceId(uuid).c_str(), missionId);
+                DnetworkAdapter::AnonymizeNetworkId(uuid).c_str(), missionId);
             return false;
         }
     }
     HILOGI("Insert uuid = %{public}s + missionId = %{public}d successful!",
-        DnetworkAdapter::AnonymizeDeviceId(uuid).c_str(), missionId);
+        DnetworkAdapter::AnonymizeNetworkId(uuid).c_str(), missionId);
     return true;
 }
 
@@ -297,12 +297,12 @@ bool DistributedDataStorage::Delete(const string& networkId, int32_t missionId)
         bool ret = DeleteInnerLocked(uuid, missionId);
         if (!ret) {
             HILOGE("Delete uuid = %{public}s + missionId = %{public}d failed!",
-                DnetworkAdapter::AnonymizeDeviceId(uuid).c_str(), missionId);
+                DnetworkAdapter::AnonymizeNetworkId(uuid).c_str(), missionId);
             return false;
         }
     }
     HILOGI("Delete uuid = %{public}s + missionId = %{public}d successful!",
-        DnetworkAdapter::AnonymizeDeviceId(uuid).c_str(), missionId);
+        DnetworkAdapter::AnonymizeNetworkId(uuid).c_str(), missionId);
     return true;
 }
 
@@ -335,11 +335,12 @@ bool DistributedDataStorage::FuzzyDelete(const string& networkId)
         unique_lock<shared_mutex> writeLock(initLock_);
         bool ret = FuzzyDeleteInnerLocked(networkId);
         if (!ret) {
-            HILOGW("FuzzyDelete networkId = %{public}s failed!", DnetworkAdapter::AnonymizeDeviceId(networkId).c_str());
+            HILOGW("FuzzyDelete networkId = %{public}s failed!",
+                DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
             return false;
         }
     }
-    HILOGI("FuzzyDelete networkId = %{public}s successful!", DnetworkAdapter::AnonymizeDeviceId(networkId).c_str());
+    HILOGI("FuzzyDelete networkId = %{public}s successful!", DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
     return true;
 }
 
@@ -380,12 +381,12 @@ bool DistributedDataStorage::Query(const string& networkId, int32_t missionId, V
         bool ret = QueryInnerLocked(uuid, missionId, value);
         if (!ret) {
             HILOGE("Query uuid = %{public}s + missionId = %{public}d failed!",
-                DnetworkAdapter::AnonymizeDeviceId(uuid).c_str(), missionId);
+                DnetworkAdapter::AnonymizeNetworkId(uuid).c_str(), missionId);
             return false;
         }
     }
     HILOGI("Query uuid = %{public}s + missionId = %{public}d successful!",
-        DnetworkAdapter::AnonymizeDeviceId(uuid).c_str(), missionId);
+        DnetworkAdapter::AnonymizeNetworkId(uuid).c_str(), missionId);
     return true;
 }
 

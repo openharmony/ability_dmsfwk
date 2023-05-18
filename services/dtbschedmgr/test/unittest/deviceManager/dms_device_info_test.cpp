@@ -51,15 +51,17 @@ void DmsDeviceInfoTest::TearDown()
 HWTEST_F(DmsDeviceInfoTest, testGet_001, TestSize.Level1)
 {
     DTEST_LOG << "DmsDeviceInfoTest testGet_001 begin" << std::endl;
-    DmsDeviceInfo dmsDeviceInfo("invalid deviceName", 1, "invalid deivceId");
+    DmsDeviceInfo dmsDeviceInfo("invalid deviceName", 1, "invalid networkId");
     /**
      * @tc.steps: step1. test GetDeviceName;
      */
     EXPECT_EQ("invalid deviceName", dmsDeviceInfo.GetDeviceName());
+
     /**
-     * @tc.steps: step2. test GetDeviceId;
+     * @tc.steps: step2. test GetNetworkId;
      */
-    EXPECT_EQ("invalid deivceId", dmsDeviceInfo.GetDeviceId());
+    EXPECT_EQ("invalid networkId", dmsDeviceInfo.GetNetworkId());
+
     /**
      * @tc.steps: step3. test GetDeviceType;
      */
@@ -72,16 +74,16 @@ HWTEST_F(DmsDeviceInfoTest, testGet_001, TestSize.Level1)
      * @tc.steps: step5. test Marshalling;
      */
     Parcel parcel;
-    std::u16string deviceId;
+    std::u16string networkId;
     std::u16string deviceName;
     int32_t deviceType;
     int32_t deviceState;
     EXPECT_TRUE(dmsDeviceInfo.Marshalling(parcel));
-    PARCEL_READ_HELPER_NORET(parcel, String16, deviceId);
+    PARCEL_READ_HELPER_NORET(parcel, String16, networkId);
     PARCEL_READ_HELPER_NORET(parcel, String16, deviceName);
     PARCEL_READ_HELPER_NORET(parcel, Int32, deviceType);
     PARCEL_READ_HELPER_NORET(parcel, Int32, deviceState);
-    EXPECT_FALSE(deviceId.empty());
+    EXPECT_FALSE(networkId.empty());
     EXPECT_FALSE(deviceName.empty());
     EXPECT_EQ(1, deviceType);
     EXPECT_EQ(1, deviceState);
