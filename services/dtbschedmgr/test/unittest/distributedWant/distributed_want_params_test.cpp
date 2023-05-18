@@ -34,16 +34,16 @@
 #undef protected
 
 using namespace testing::ext;
-using namespace OHOS::AAFwk;
-using namespace OHOS::DistributedSchedule;
+using namespace OHOS;
+using namespace AAFwk;
+using namespace DistributedSchedule;
 using OHOS::Parcel;
 class DistributedWantParamsBaseTest : public testing::Test {
 public:
     DistributedWantParamsBaseTest()
     {}
     ~DistributedWantParamsBaseTest()
-    {
-    }
+    {}
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
@@ -155,7 +155,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0400, 
  */
 HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_Parcelable_0500, Function | MediumTest | Level1)
 {
-    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(2, AAFwk::g_IID_IDistributedWantParams);
+    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(2, g_IID_IDistributedWantParams);
     for (size_t i = 0; i < 2; i++) {
         DistributedWantParams wp;
         wp.SetParam("hello", String::Box("World"));
@@ -480,7 +480,7 @@ HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_GetStringByType_1
  */
 HWTEST_F(DistributedWantParamsBaseTest, Distributed_WantParams_NewArrayData_0100, Function | MediumTest | Level1)
 {
-    sptr<AAFwk::IArray> array = new (std::nothrow) AAFwk::Array(0, AAFwk::g_IID_IDistributedWantParams);
+    sptr<AAFwk::IArray> array = new (std::nothrow) AAFwk::Array(0, g_IID_IDistributedWantParams);
     DistributedWantParams wp;
     wp.SetParam("param1", array);
     IArray *iarray = IArray::Query(array);
