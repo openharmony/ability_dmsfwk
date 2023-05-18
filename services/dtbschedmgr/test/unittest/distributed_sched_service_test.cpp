@@ -899,7 +899,7 @@ HWTEST_F(DistributedSchedServiceTest, StartAbilityFromRemote_006, TestSize.Level
     int result = DistributedSchedService::GetInstance().StartAbilityFromRemote(want,
         abilityInfo, 0, callerInfo, accountInfo);
     DTEST_LOG << "result:" << result << std::endl;
-    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), result);
+    EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), result);
     DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_006 end" << std::endl;
 }
 
@@ -935,7 +935,7 @@ HWTEST_F(DistributedSchedServiceTest, SendResultFromRemote_006, TestSize.Level1)
 
     int result = DistributedSchedService::GetInstance().SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
     DTEST_LOG << "result:" << result << std::endl;
-    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), result);
+    EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), result);
     DTEST_LOG << "DistributedSchedServiceTest SendResultFromRemote_006 end" << std::endl;
 }
 
@@ -1305,7 +1305,7 @@ HWTEST_F(DistributedSchedServiceTest, StartAbilityFromRemote_007, TestSize.Level
     accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
     int ret = DistributedSchedService::GetInstance().StartAbilityFromRemote(want,
         abilityInfo, 0, callerInfo, accountInfo);
-    EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_007 end" << std::endl;
 }
 
@@ -1494,7 +1494,7 @@ HWTEST_F(DistributedSchedServiceTest, StartAbilityByCallFromRemote_002, TestSize
     accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
     int ret = DistributedSchedService::GetInstance().StartAbilityByCallFromRemote(want, connect,
         callerInfo, accountInfo);
-    EXPECT_EQ(ret, CALL_PERMISSION_DENIED);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest StartAbilityByCallFromRemote_002 end" << std::endl;
 }
 
@@ -1992,7 +1992,7 @@ HWTEST_F(DistributedSchedServiceTest, ConnectAbilityFromRemote_002, TestSize.Lev
     if (targetAbility.visible) {
         EXPECT_EQ(ret1, ERR_OK);
     } else {
-        EXPECT_EQ(ret1, DMS_START_CONTROL_PERMISSION_DENIED);
+        EXPECT_EQ(ret1, INVALID_REMOTE_PARAMETERS_ERR);
     }
     DTEST_LOG << "DistributedSchedServiceTest ConnectAbilityFromRemote_002 end" << std::endl;
 }
@@ -2350,7 +2350,7 @@ HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_001, TestSi
     IDistributedSched::AccountInfo accountInfo;
     int32_t extensionType = 3;
     EXPECT_EQ(DistributedSchedService::GetInstance().StopExtensionAbilityFromRemote(remoteWant, callerInfo,
-        accountInfo, extensionType), DMS_PERMISSION_DENIED);
+        accountInfo, extensionType), INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_001 end" << std::endl;
 }
 
@@ -2431,7 +2431,7 @@ HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_004, TestSi
     int32_t extensionType = 3;
     int ret = DistributedSchedService::GetInstance().StopExtensionAbilityFromRemote(want, callerInfo,
         accountInfo, extensionType);
-    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_004 end" << std::endl;
 }
 
