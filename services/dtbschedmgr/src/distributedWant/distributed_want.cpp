@@ -85,14 +85,14 @@ DistributedWant::DistributedWant(const DistributedWant& other)
     parameters_ = other.parameters_;
 }
 
-DistributedWant&DistributedWant::operator=(const DistributedWant& other)
+DistributedWant& DistributedWant::operator=(const DistributedWant& other)
 {
     operation_ = other.operation_;
     parameters_ = other.parameters_;
     return *this;
 }
 
-DistributedWant::DistributedWant(const AAFwk::Want& want) 
+DistributedWant::DistributedWant(const AAFwk::Want& want)
 {
     DistributedOperationBuilder builder;
     builder.WithAbilityName(want.GetElement().GetAbilityName());
@@ -173,7 +173,7 @@ DistributedWant& DistributedWant::SetElementName(const std::string& bundleName, 
     return *this;
 }
 
-DistributedWant& DistributedWant::SetElementName(const std::string& deviceId, const std::string& bundleName, 
+DistributedWant& DistributedWant::SetElementName(const std::string& deviceId, const std::string& bundleName,
                                                  const std::string& abilityName)
 {
     operation_.SetDeviceId(deviceId);
@@ -1345,7 +1345,7 @@ std::string DistributedWant::Encode(const std::string& str)
     return encode;
 }
 
-bool DistributedWant::CheckAndSetParameters(DistributedWant& want, const std::string& key, 
+bool DistributedWant::CheckAndSetParameters(DistributedWant& want, const std::string& key,
                                             std::string& prop, const std::string& value)
 {
     if (prop[0] == AAFwk::String::SIGNATURE && prop[1] == '.') {

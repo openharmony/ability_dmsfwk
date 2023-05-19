@@ -387,7 +387,12 @@ ohos_unittest("distributeduidtest") {
 ohos_unittest("distributedwanttest") {
   module_out_path = module_output_path
 
-  sources = [ "unittest/distributedWant/distributed_want_test.cpp" ]
+  sources = [
+    "unittest/distributedWant/distributed_operation_test.cpp",
+    "unittest/distributedWant/distributed_want_params_test.cpp",
+    "unittest/distributedWant/distributed_want_params_wrapper_test.cpp",
+    "unittest/distributedWant/distributed_want_test.cpp",
+  ]
   sources += dtbschedmgr_sources
   configs = [
     ":test_config",

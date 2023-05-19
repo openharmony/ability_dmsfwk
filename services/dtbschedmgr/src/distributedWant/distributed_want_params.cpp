@@ -45,7 +45,7 @@ DistributedUnsupportedData::~DistributedUnsupportedData()
 
 DistributedUnsupportedData::DistributedUnsupportedData() = default;
 
-DistributedUnsupportedData::DistributedUnsupportedData(const DistributedUnsupportedData& other) : 
+DistributedUnsupportedData::DistributedUnsupportedData(const DistributedUnsupportedData& other) :
     key(other.key), type(other.type), size(other.size)
 {
     buffer = new uint8_t[size];
