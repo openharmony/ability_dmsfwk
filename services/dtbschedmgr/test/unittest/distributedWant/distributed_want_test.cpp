@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,7 +76,6 @@ public:
     void AddStringParams(DistributedWant &want,
         std::map<std::string, std::string> &keys, int loop, unsigned int flag) const;
 
-
     std::string boolType = "bool";
     std::string boolArrayType = "boolArray";
     std::string byteType = "byte";
@@ -120,18 +119,15 @@ bool CompareArrayData(const std::vector<T> &arr1, const std::vector<T> &arr2)
     if (arr1.size() != arr2.size()) {
         return false;
     }
-
     for (std::uint32_t i = 0; i < arr1.size(); i++) {
         if (arr1[i] != arr2[i]) {
             return false;
         }
     }
-
     return true;
 };
 
 enum type { FLAG_TEST_SINGLE = 0x01, FLAG_TEST_ARRAY, FLAG_TEST_BOTH };
-
 const std::string DistributedWantBaseTest::URI_STRING_HEAD("#Intent;");
 const std::string DistributedWantBaseTest::URI_STRING_END(";end");
 
@@ -235,7 +231,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_DistributedWant_Convert_01
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Action_0100
+ * @tc.number: DistributedScheduleWant_Action_0100
  * @tc.name: ToWant
  * @tc.desc: Verifying successful conversion of distributedwant to want.
  */
@@ -334,11 +330,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_DistributedWant_Convert_02
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Type_0100
+ * @tc.number: DistributedScheduleWant_Type_0100
  * @tc.name: SetType/GetType
  * @tc.desc: Validate when normally entering a string
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Type_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Type_0100, Function | MediumTest | Level3)
 {
     if (want_ != nullptr) {
         std::string description = "liuuy";
@@ -348,11 +344,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Type_0100, Function |
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Action_0100
+ * @tc.number: DistributedScheduleWant_Action_0100
  * @tc.name: SetAction/GetAction
  * @tc.desc: Validate when normally entering a string
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Action_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Action_0100, Function | MediumTest | Level3)
 {
     if (want_ != nullptr) {
         std::string actiondescription = "liuuy";
@@ -362,11 +358,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Action_0100, Function
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Bundle_0100
+ * @tc.number: DistributedScheduleWant_Bundle_0100
  * @tc.name: SetBundle/GetBundle
  * @tc.desc: Validate when normally entering a string
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Bundle_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Bundle_0100, Function | MediumTest | Level3)
 {
     if (want_ != nullptr) {
         std::string bundleName = "liuuy";
@@ -376,11 +372,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Bundle_0100, Function
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Parcelable_0100
+ * @tc.number: DistributedScheduleWant_Parcelable_0100
  * @tc.name: Marshalling/Unmarshalling
  * @tc.desc: marshalling Want, and then check result.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0100, Function | MediumTest | Level3)
 {
     std::shared_ptr<DistributedWant> WantIn_ = std::make_shared<DistributedWant>();
     if (WantIn_ == nullptr) {
@@ -440,11 +436,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0100, Func
     }
 }
 /**
- * @tc.number: DistributedSchedule_Want_Parcelable_0200
+ * @tc.number: DistributedScheduleWant_Parcelable_0200
  * @tc.name: Marshalling/Unmarshalling
  * @tc.desc: marshalling Want, and then check result.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0200, Function | MediumTest | Level3)
 {
     std::shared_ptr<DistributedWant> WantIn_ = std::make_shared<DistributedWant>();
     if (WantIn_ == nullptr) {
@@ -497,11 +493,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0200, Func
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Parcelable_0300
+ * @tc.number: DistributedScheduleWant_Parcelable_0300
  * @tc.name: Marshalling/Unmarshalling
  * @tc.desc: marshalling Want, and then check result.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0300, Function | MediumTest | Level3)
 {
     std::shared_ptr<DistributedWant> WantIn_ = std::make_shared<DistributedWant>();
     if (WantIn_ == nullptr) {
@@ -560,11 +556,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0300, Func
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Parcelable_0400
+ * @tc.number: DistributedScheduleWant_Parcelable_0400
  * @tc.name: Marshalling/Unmarshalling
  * @tc.desc: marshalling Want, and then check result.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0400, Function | MediumTest | Level3)
 {
     std::shared_ptr<DistributedWant> WantIn_ = std::make_shared<DistributedWant>();
     if (WantIn_ == nullptr) {
@@ -625,13 +621,13 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0400, Func
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Parcelable_0500
+ * @tc.number: DistributedScheduleWant_Parcelable_0500
  * @tc.name: Marshalling/Unmarshalling
  * @tc.desc: marshalling Want, and then check result.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0500, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0500, Function | MediumTest | Level3)
 {
-    GTEST_LOG_(INFO) << "DistributedSchedule_Want_Parcelable_005 start";
+    GTEST_LOG_(INFO) << "DistributedScheduleWant_Parcelable_005 start";
     std::shared_ptr<DistributedWant> WantIn_ = std::make_shared<DistributedWant>();
     if (WantIn_ == nullptr) {
         return;
@@ -777,7 +773,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0500, Func
         arraycompare = CompareArrayData<std::string>(retstringArrayValue, stringArrayValue);
         EXPECT_EQ(arraycompare, true);
 
-        GTEST_LOG_(INFO) << "DistributedSchedule_Want_Parcelable_005 end";
+        GTEST_LOG_(INFO) << "DistributedScheduleWant_Parcelable_005 end";
     }
 }
 
@@ -1161,11 +1157,11 @@ void DistributedWantBaseTest::AddStringParams(DistributedWant& want,
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Parcelable_0600
+ * @tc.number: DistributedScheduleWant_Parcelable_0600
  * @tc.name: parcelable
  * @tc.desc: Verify parcelable.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0600, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0600, Function | MediumTest | Level3)
 {
     std::string action = "want.action.test";
     unsigned int flag = 0x789;
@@ -1186,11 +1182,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0600, Func
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Parcelable_0700
+ * @tc.number: DistributedScheduleWant_Parcelable_0700
  * @tc.name: parcelable
  * @tc.desc: Verify parcelable.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0700, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0700, Function | MediumTest | Level3)
 {
     std::string action = "want.action.test";
     unsigned int flag = 0x789;
@@ -1221,11 +1217,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0700, Func
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Parcelable_0800
+ * @tc.number: DistributedScheduleWant_Parcelable_0800
  * @tc.name: parcelable
  * @tc.desc: Verify parcelable.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0800, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0800, Function | MediumTest | Level3)
 {
     std::string action = "want.action.test";
     unsigned int flag = 0x789;
@@ -1245,11 +1241,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Parcelable_0800, Func
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_FormatMimeType_0100
+ * @tc.number: DistributedScheduleWant_FormatMimeType_0100
  * @tc.name: formatMimeType
  * @tc.desc: formats data of a specified MIME type.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_FormatMimeType_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_FormatMimeType_0100, Function | MediumTest | Level3)
 {
     std::string mimeType = "Application/Envoy";
     std::string mimeTypeResult = "application/envoy";
@@ -1258,11 +1254,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_FormatMimeType_0100, 
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_FormatMimeType_0200
+ * @tc.number: DistributedScheduleWant_FormatMimeType_0200
  * @tc.name: formatMimeType
  * @tc.desc: formats data of a specified MIME type.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_FormatMimeType_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_FormatMimeType_0200, Function | MediumTest | Level3)
 {
     std::string mimeType = "APPLICATION/ENVOY";
     std::string mimeTypeResult = "application/envoy";
@@ -1271,11 +1267,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_FormatMimeType_0200, 
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_FormatMimeType_0300
+ * @tc.number: DistributedScheduleWant_FormatMimeType_0300
  * @tc.name: formatMimeType
  * @tc.desc: formats data of a specified MIME type.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_FormatMimeType_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_FormatMimeType_0300, Function | MediumTest | Level3)
 {
     std::string mimeType = " Appl icati on/ Envoy ";
     std::string mimeTypeResult = "application/envoy";
@@ -1284,11 +1280,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_FormatMimeType_0300, 
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_FormatMimeType_0400
+ * @tc.number: DistributedScheduleWant_FormatMimeType_0400
  * @tc.name: formatMimeType
  * @tc.desc: formats data of a specified MIME type.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_FormatMimeType_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_FormatMimeType_0400, Function | MediumTest | Level3)
 {
     std::string mimeType = " Appl icati on/ Envoy ; yovnE ;no itaci lppA ";
     std::string mimeTypeResult = "application/envoy";
@@ -1297,11 +1293,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_FormatMimeType_0400, 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_ParseUri_ToUri_0100
+ * @tc.number:  DistributedScheduleWant_ParseUri_ToUri_0100
  * @tc.name: ParseUri and ToUri
  * @tc.desc: Verify the function when Want is empty.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0100, Function | MediumTest | Level3)
 {
     std::size_t pos = 0;
     std::size_t content = 0;
@@ -1341,11 +1337,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0100, 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_ParseUri_ToUri_0200
+ * @tc.number:  DistributedScheduleWant_ParseUri_ToUri_0200
  * @tc.name: ParseUri and ToUri
  * @tc.desc: Verify the function when Want only has action/entity/flag/element.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0200, Function | MediumTest | Level3)
 {
     std::string search;
 
@@ -1384,12 +1380,12 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0200, 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_ParseUri_ToUri_0300
+ * @tc.number:  DistributedScheduleWant_ParseUri_ToUri_0300
  * @tc.name: ParseUri and ToUri
  * @tc.desc:  Verify the function when Want only has parameter and the parameter
  *            has only 1 float type element.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0300, Function | MediumTest | Level3)
 {
     std::string search;
     std::string substring;
@@ -1451,12 +1447,12 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0300, 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_ParseUri_ToUri_0400
+ * @tc.number:  DistributedScheduleWant_ParseUri_ToUri_0400
  * @tc.name: ParseUri and ToUri
  * @tc.desc: Verify the function when Want only has parameter and the parameter
  *           has only one float and one string type element.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0400, Function | MediumTest | Level3)
 {
     std::string search;
     std::string substring;
@@ -1543,12 +1539,12 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0400, 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_ParseUri_ToUri_0500
+ * @tc.number:  DistributedScheduleWant_ParseUri_ToUri_0500
  * @tc.name: ParseUri and ToUri
  * @tc.desc: Verify the function when Want only has parameter and the parameter
  *           has only one float array type element.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0500, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0500, Function | MediumTest | Level3)
 {
     std::string search;
     std::string substring;
@@ -1615,12 +1611,12 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0500, 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_ParseUri_ToUri_0600
+ * @tc.number:  DistributedScheduleWant_ParseUri_ToUri_0600
  * @tc.name: ParseUri and ToUri
  * @tc.desc: Verify the function when Want only has parameter and the parameter
  *           has only one int array and one string array type element
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0600, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0600, Function | MediumTest | Level3)
 {
     std::string search;
     std::string substring;
@@ -1716,11 +1712,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0600, 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_ParseUri_ToUri_0700
+ * @tc.number:  DistributedScheduleWant_ParseUri_ToUri_0700
  * @tc.name: ParseUri and ToUri
  * @tc.desc: Verify the function when the length of input string is 0.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0700, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0700, Function | MediumTest | Level3)
 {
     std::string uri;
     EXPECT_EQ(static_cast<int>(uri.length()), 0);
@@ -1734,11 +1730,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0700, 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_ParseUri_ToUri_0800
+ * @tc.number:  DistributedScheduleWant_ParseUri_ToUri_0800
  * @tc.name: ParseUri and ToUri
  * @tc.desc: Verify the function when the action etc. are empty.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0800, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0800, Function | MediumTest | Level3)
 {
     std::string empty;
     std::string uri = "#Intent;action=;entity=;device=;bundle=;ability=;flag=;end";
@@ -1761,11 +1757,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0800, 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_ParseUri_ToUri_0900
+ * @tc.number:  DistributedScheduleWant_ParseUri_ToUri_0900
  * @tc.name: ParseUri and ToUri
  * @tc.desc: Verify the function when flag is not number.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0900, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0900, Function | MediumTest | Level3)
 {
     std::string empty;
     std::string uri = "#Intent;action=want.action.VIEW;flag=\"123\";end";
@@ -1780,11 +1776,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_0900, 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_ParseUri_ToUri_1000
+ * @tc.number:  DistributedScheduleWant_ParseUri_ToUri_1000
  * @tc.name: ParseUri and ToUri
  * @tc.desc: Verify the function when head is not "#Intent".
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_1000, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_1000, Function | MediumTest | Level3)
 {
     std::string empty;
     std::string uri = "action=want.action.VIEW;end";
@@ -1799,11 +1795,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_1000, 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_ParseUri_ToUri_1100
+ * @tc.number:  DistributedScheduleWant_ParseUri_ToUri_1100
  * @tc.name: ParseUri and ToUri
  * @tc.desc: Verify the function when flag is empty.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_1100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_1100, Function | MediumTest | Level3)
 {
     std::string empty;
     std::string uri = "#Intent;flag=;end";
@@ -1819,11 +1815,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_1100, 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_ParseUri_ToUri_1200
+ * @tc.number:  DistributedScheduleWant_ParseUri_ToUri_1200
  * @tc.name: ParseUri and ToUri
  * @tc.desc: Verify the function when x is capital.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_1200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_1200, Function | MediumTest | Level3)
 {
     std::string empty;
     unsigned int flag = 0X12345678;
@@ -1840,11 +1836,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_1200, 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_ParseUri_ToUri_1300
+ * @tc.number:  DistributedScheduleWant_ParseUri_ToUri_1300
  * @tc.name: ParseUri and ToUri
  * @tc.desc: Verify the function when special character.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_1300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_1300, Function | MediumTest | Level3)
 {
     std::string action = "\\";
     std::string entity = "../../../jj/j=075/./.;;/07507399/\\\\;;--==.com.\a\b\tfoobar.vide\073\\075";
@@ -1878,11 +1874,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_1300, 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_ParseUri_ToUri_1400
+ * @tc.number:  DistributedScheduleWant_ParseUri_ToUri_1400
  * @tc.name: ParseUri and ToUri
  * @tc.desc: Verify the function when no '=' or only has a '='.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_1400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_1400, Function | MediumTest | Level3)
 {
     std::string uri = "#Intent;action;end";
     DistributedWant* want = DistributedWant::ParseUri(uri);
@@ -1982,11 +1978,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ParseUri_ToUri_1400, 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_Flags_0100
+ * @tc.number:  DistributedScheduleWant_Flags_0100
  * @tc.name: SetFlags/AddFlags/GetFlags/RemoveFlags
  * @tc.desc: Verify SetFlags/AddFlags/GetFlags/RemoveFlags.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Flags_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Flags_0100, Function | MediumTest | Level3)
 {
     int flags = 3;
     int returnsflags;
@@ -2003,11 +1999,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Flags_0100, Function 
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_MakeMainAbility_0100
+ * @tc.number:  DistributedScheduleWant_MakeMainAbility_0100
  * @tc.name: MakeMainAbility
  * @tc.desc: Verify MakeMainAbility.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_MakeMainAbility_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_MakeMainAbility_0100, Function | MediumTest | Level3)
 {
     ElementName elementName;
 
@@ -2031,11 +2027,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_MakeMainAbility_0100,
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_ClearWant_0100
+ * @tc.number:  DistributedScheduleWant_ClearWant_0100
  * @tc.name: ClearWant
  * @tc.desc: Verify ClearWant.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ClearWant_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ClearWant_0100, Function | MediumTest | Level3)
 {
     DistributedWant want;
     ElementName elementName;
@@ -2051,11 +2047,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ClearWant_0100, Funct
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_replaceParams_0100
+ * @tc.number:  DistributedScheduleWant_replaceParams_0100
  * @tc.name: replaceParams(wantParams)
  * @tc.desc: Verify the function when the input string is empty.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_replaceParams_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_replaceParams_0100, Function | MediumTest | Level3)
 {
     DistributedWantParams wantParams;
     std::string keyStr = "123";
@@ -2067,11 +2063,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_replaceParams_0100, F
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_setElement_0100
+ * @tc.number:  DistributedScheduleWant_setElement_0100
  * @tc.name:setElement / setElementName
  * @tc.desc: Verify the function when the input string is empty.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_setElement_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_setElement_0100, Function | MediumTest | Level3)
 {
     std::string valueStr1 = "xxxxx";
     std::string valueStr2 = "uaid";
@@ -2104,11 +2100,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_setElement_0100, Func
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_Action_0200
+ * @tc.number:  DistributedScheduleWant_Action_0200
  * @tc.name:SetAction / GetAction
  * @tc.desc: Verify the function when the input string is empty.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Action_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Action_0200, Function | MediumTest | Level3)
 {
     std::string setValue;
     want_->SetAction(setValue);
@@ -2116,11 +2112,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Action_0200, Function
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_Action_0300
+ * @tc.number:  DistributedScheduleWant_Action_0300
  * @tc.name:SetAction / GetAction
  * @tc.desc: Verify the function when the input string contains special characters.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Action_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Action_0300, Function | MediumTest | Level3)
 {
     std::string setValue("action.system.com");
     want_->SetAction(setValue);
@@ -2160,11 +2156,11 @@ void DistributedWantParametersBoolArrayTest::TearDown(void)
 {}
 
 /**
- * @tc.number:  DistributedSchedule_Want_BoolArray_0100
+ * @tc.number:  DistributedScheduleWant_BoolArr_0100
  * @tc.name:SetBoolArrayParam/GetBoolArrayParam
  * @tc.desc: Verify when parameter change.
  */
-HWTEST_P(DistributedWantParametersBoolArrayTest, DistributedSchedule_Want_BoolArray_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantParametersBoolArrayTest, DistributedScheduleWant_BoolArr_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -2179,7 +2175,8 @@ INSTANTIATE_TEST_SUITE_P(WantParametersBoolArrayTestCaseP, DistributedWantParame
     testing::Values(testByteType("", "aa", '#', 'U', 'U'), testByteType("", "", 'N', 'K', 'N'),
         testByteType("1*中_aR", "aa", 'a', '%', '%'), testByteType("1*中_aR", "1*中_aR", 'a', 'z', 'a')));
 
-using testBoolArrayType = std::tuple<std::string, std::string, std::vector<bool>, std::vector<bool>, std::vector<bool>>;
+using testBoolArrayType =
+    std::tuple<std::string, std::string, std::vector<bool>, std::vector<bool>, std::vector<bool>>;
 class DistributedWantBoolArrayParamTest : public testing::TestWithParam<testBoolArrayType> {
 public:
     DistributedWantBoolArrayParamTest()
@@ -2212,11 +2209,11 @@ void DistributedWantBoolArrayParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number:  DistributedSchedule_Want_BoolArray_0200
+ * @tc.number:  DistributedScheduleWant_BoolArray_0200
  * @tc.name:SetBoolArrayParam/GetBoolArrayParam
  * @tc.desc: Verify when parameter change.
  */
-HWTEST_P(DistributedWantBoolArrayParamTest, DistributedSchedule_Want_BoolArray_0200, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantBoolArrayParamTest, DistributedScheduleWant_BoolArray_0200, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -2267,11 +2264,11 @@ void DistributedWantCharArrayParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number:  DistributedSchedule_Want_Parameters_CharArray_0100
+ * @tc.number:  DistributedScheduleWant_Parameters_CharArray_0100
  * @tc.name: SetParam/GetCharArrayParam
  * @tc.desc: Verify when parameter change.
  */
-HWTEST_P(DistributedWantCharArrayParamTest, DistributedSchedule_Want_Parameters_CharArray_0100,
+HWTEST_P(DistributedWantCharArrayParamTest, DistributedScheduleWant_Parameters_CharArray_0100,
     Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
@@ -2290,11 +2287,11 @@ INSTANTIATE_TEST_SUITE_P(WantCharArrayParamTestCaseP, DistributedWantCharArrayPa
         testCharArrayType("1*中_aR", "1*中_aR", {U'中', U'文'}, {}, {U'中', U'文'})));
 
 /**
- * @tc.number:  DistributedSchedule_Want_Parameters_CharArray_0200
+ * @tc.number:  DistributedScheduleWant_Parameters_CharArray_0200
  * @tc.name:  GetCharArrayParam
  * @tc.desc: Verify when the value is char array.
  */
-HWTEST_F(DistributedWantCharArrayParamTest, DistributedSchedule_Want_Parameters_CharArray_0200,
+HWTEST_F(DistributedWantCharArrayParamTest, DistributedScheduleWant_Parameters_CharArray_0200,
     Function | MediumTest | Level3)
 {
     std::vector<zchar> defaultValue;
@@ -2303,11 +2300,11 @@ HWTEST_F(DistributedWantCharArrayParamTest, DistributedSchedule_Want_Parameters_
 }
 
 /**
- * @tc.number:  DistributedSchedule_Want_Parameters_CharArray_0300
+ * @tc.number:  DistributedScheduleWant_Parameters_CharArray_0300
  * @tc.name:  SetParam/GetCharArrayParam
  * @tc.desc: Verify when the value is char array.
  */
-HWTEST_F(DistributedWantCharArrayParamTest, DistributedSchedule_Want_Parameters_CharArray_0300,
+HWTEST_F(DistributedWantCharArrayParamTest, DistributedScheduleWant_Parameters_CharArray_0300,
     Function | MediumTest | Level3)
 {
     std::string emptyStr("ff");
@@ -2325,11 +2322,11 @@ HWTEST_F(DistributedWantCharArrayParamTest, DistributedSchedule_Want_Parameters_
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Parameters_CharArray_0400
+ * @tc.number: DistributedScheduleWant_Parameters_CharArray_0400
  * @tc.name:  SetParam/GetCharArrayParam
  * @tc.desc: Verify when the value is char array.
  */
-HWTEST_F(DistributedWantCharArrayParamTest, DistributedSchedule_Want_Parameters_CharArray_0400,
+HWTEST_F(DistributedWantCharArrayParamTest, DistributedScheduleWant_Parameters_CharArray_0400,
     Function | MediumTest | Level3)
 {
     std::string firstKey("%1uH3");
@@ -2378,11 +2375,11 @@ void DistributedWantCharParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number: DistributedSchedule_Want_Parameters_Char_0100
+ * @tc.number: DistributedScheduleWant_Parameters_Char_0100
  * @tc.name:  SetParam/GetCharParam
  * @tc.desc: Verify when the value is char array.
  */
-HWTEST_P(DistributedWantCharParamTest, DistributedSchedule_Want_Parameters_Char_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantCharParamTest, DistributedScheduleWant_Parameters_Char_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -2398,11 +2395,11 @@ INSTANTIATE_TEST_SUITE_P(WantParametersCharTestCaseP, DistributedWantCharParamTe
         testCharType("1*中_aR", "aa", U'a', U'中', U'中'), testCharType("1*中_aR", "1*中_aR", U'中', U'z', U'中')));
 
 /**
- * @tc.number: DistributedSchedule_Want_Parameters_Char_0200
+ * @tc.number: DistributedScheduleWant_Parameters_Char_0200
  * @tc.name:  SetParam/GetCharParam
  * @tc.desc: Verify when the value is char
  */
-HWTEST_F(DistributedWantCharParamTest, DistributedSchedule_Want_Parameters_Char_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantCharParamTest, DistributedScheduleWant_Parameters_Char_0200, Function | MediumTest | Level3)
 {
     zchar defaultValue = U'文';
     std::string getKey("aa");
@@ -2410,11 +2407,11 @@ HWTEST_F(DistributedWantCharParamTest, DistributedSchedule_Want_Parameters_Char_
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Parameters_Char_0300
+ * @tc.number: DistributedScheduleWant_Parameters_Char_0300
  * @tc.name:  SetParam/GetCharParam
  * @tc.desc: Verify when the value is char.
  */
-HWTEST_F(DistributedWantCharParamTest, DistributedSchedule_Want_Parameters_Char_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantCharParamTest, DistributedScheduleWant_Parameters_Char_0300, Function | MediumTest | Level3)
 {
     std::string emptyStr("jj");
     zchar firstValue = U'中';
@@ -2432,11 +2429,11 @@ HWTEST_F(DistributedWantCharParamTest, DistributedSchedule_Want_Parameters_Char_
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Parameters_Char_0400
+ * @tc.number: DistributedScheduleWant_Parameters_Char_0400
  * @tc.name:  SetParam/GetCharParam
  * @tc.desc: Verify when the value is char.
  */
-HWTEST_F(DistributedWantCharParamTest, DistributedSchedule_Want_Parameters_Char_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantCharParamTest, DistributedScheduleWant_Parameters_Char_0400, Function | MediumTest | Level3)
 {
     std::string firstKey("%1uH3");
     zchar firstValue = U'中';
@@ -2486,11 +2483,11 @@ void DistributedWantDoubleArrayParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number: DistributedSchedule_Want_DoubleArray_0100
+ * @tc.number: DistributedScheduleWant_DoubleArray_0100
  * @tc.name:  SetParam/GetDoubleArrayParam
  * @tc.desc: Verify when parameter change.
  */
-HWTEST_P(DistributedWantDoubleArrayParamTest, DistributedSchedule_Want_DoubleArray_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantDoubleArrayParamTest, DistributedScheduleWant_DoubleArray_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -2508,11 +2505,11 @@ INSTANTIATE_TEST_SUITE_P(WantDoubleArrayParamTestCaseP, DistributedWantDoubleArr
         testDoubleArrayType("1*中_aR", "1*中_aR", {5000.1, 5001.1}, {}, {5000.1, 5001.1})));
 
 /**
- * @tc.number: DistributedSchedule_Want_DoubleArray_0200
+ * @tc.number: DistributedScheduleWant_DoubleArray_0200
  * @tc.name:  SetParam/GetDoubleArrayParam
  * @tc.desc: Verify when parameter change.
  */
-HWTEST_F(DistributedWantDoubleArrayParamTest, DistributedSchedule_Want_DoubleArray_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantDoubleArrayParamTest, DistributedScheduleWant_DoubleArray_0200, Function | MediumTest | Level3)
 {
     std::vector<double> defaultValue;
     std::string key = "aa";
@@ -2520,11 +2517,11 @@ HWTEST_F(DistributedWantDoubleArrayParamTest, DistributedSchedule_Want_DoubleArr
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_DoubleArray_0300
+ * @tc.number: DistributedScheduleWant_DoubleArray_0300
  * @tc.name:  SetParam/GetDoubleArrayParam
  * @tc.desc: set empty-string key repeatedly, but get param of another nonexistent key
  */
-HWTEST_F(DistributedWantDoubleArrayParamTest, DistributedSchedule_Want_DoubleArray_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantDoubleArrayParamTest, DistributedScheduleWant_DoubleArray_0300, Function | MediumTest | Level3)
 {
     std::vector<double> defaultValue;
     std::string setKey1 = "cc";
@@ -2542,11 +2539,11 @@ HWTEST_F(DistributedWantDoubleArrayParamTest, DistributedSchedule_Want_DoubleArr
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_DoubleArray_0400
+ * @tc.number: DistributedScheduleWant_DoubleArray_0400
  * @tc.name:  SetParam/GetDoubleArrayParam
  * @tc.desc: set empty-string key repeatedly, then get param of the key
  */
-HWTEST_F(DistributedWantDoubleArrayParamTest, DistributedSchedule_Want_DoubleArray_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantDoubleArrayParamTest, DistributedScheduleWant_DoubleArray_0400, Function | MediumTest | Level3)
 {
     std::vector<double> defaultValue;
     std::string setKey1 = "%1uH3";
@@ -2598,11 +2595,11 @@ void DistributedWantFloatArrayParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number: DistributedSchedule_Want_FloatArray_0100
+ * @tc.number: DistributedScheduleWant_FloatArray_0100
  * @tc.name:  SetParam/GetFloatArrayParam
  * @tc.desc: Verify when parameter change.
  */
-HWTEST_P(DistributedWantFloatArrayParamTest, DistributedSchedule_Want_FloatArray_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantFloatArrayParamTest, DistributedScheduleWant_FloatArray_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -2620,11 +2617,11 @@ INSTANTIATE_TEST_SUITE_P(WantFloatArrayParamTestCaseP, DistributedWantFloatArray
         testFloatArrayType("1*中_aR", "1*中_aR", {5000.1, 5001.1}, {}, {5000.1, 5001.1})));
 
 /**
- * @tc.number: DistributedSchedule_Want_FloatArray_0200
+ * @tc.number: DistributedScheduleWant_FloatArray_0200
  * @tc.name:  SetParam/GetFloatArrayParam
  * @tc.desc: get param when WantParam is empty
  */
-HWTEST_F(DistributedWantFloatArrayParamTest, DistributedSchedule_Want_FloatArray_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantFloatArrayParamTest, DistributedScheduleWant_FloatArray_0200, Function | MediumTest | Level3)
 {
     std::vector<float> defaultValue;
     std::string key = "aa";
@@ -2632,11 +2629,11 @@ HWTEST_F(DistributedWantFloatArrayParamTest, DistributedSchedule_Want_FloatArray
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_FloatArray_0300
+ * @tc.number: DistributedScheduleWant_FloatArray_0300
  * @tc.name:  SetParam & GetFloatArrayParam
  * @tc.desc: set empty-string key repeatedly, but get param of another nonexistent key
  */
-HWTEST_F(DistributedWantFloatArrayParamTest, DistributedSchedule_Want_FloatArray_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantFloatArrayParamTest, DistributedScheduleWant_FloatArray_0300, Function | MediumTest | Level3)
 {
     std::vector<float> defaultValue;
     std::string setKey1 = "hh";
@@ -2653,11 +2650,11 @@ HWTEST_F(DistributedWantFloatArrayParamTest, DistributedSchedule_Want_FloatArray
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_FloatArray_0400
+ * @tc.number: DistributedScheduleWant_FloatArray_0400
  * @tc.name:  SetParam & GetFloatArrayParam
  * @tc.desc: set empty-string key repeatedly, then get param of the key
  */
-HWTEST_F(DistributedWantFloatArrayParamTest, DistributedSchedule_Want_FloatArray_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantFloatArrayParamTest, DistributedScheduleWant_FloatArray_0400, Function | MediumTest | Level3)
 {
     std::vector<float> defaultValue;
     std::string setKey1 = "%1uH3";
@@ -2674,7 +2671,8 @@ HWTEST_F(DistributedWantFloatArrayParamTest, DistributedSchedule_Want_FloatArray
     EXPECT_EQ(defaultValue, want_->GetFloatArrayParam(setKey2));
 }
 
-using testLongArrayType = std::tuple<std::string, std::string, std::vector<long>, std::vector<long>, std::vector<long>>;
+using testLongArrayType =
+    std::tuple<std::string, std::string, std::vector<long>, std::vector<long>, std::vector<long>>;
 class DistributedWantLongArrayParamTest : public testing::TestWithParam<testLongArrayType> {
 public:
     DistributedWantLongArrayParamTest()
@@ -2707,11 +2705,11 @@ void DistributedWantLongArrayParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number: DistributedSchedule_Want_LongArray_0100
+ * @tc.number: DistributedScheduleWant_LongArray_0100
  * @tc.name:  SetParam & GetLongArrayParam
  * @tc.desc: Verify when parameter change.
  */
-HWTEST_P(DistributedWantLongArrayParamTest, DistributedSchedule_Want_LongArray_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantLongArrayParamTest, DistributedScheduleWant_LongArray_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -2729,11 +2727,11 @@ INSTANTIATE_TEST_SUITE_P(WantLongArrayParamTestCaseP, DistributedWantLongArrayPa
         testLongArrayType("1*中_aR", "1*中_aR", {-5000}, {}, {-5000})));
 
 /**
- * @tc.number: DistributedSchedule_Want_LongArray_0200
+ * @tc.number: DistributedScheduleWant_LongArray_0200
  * @tc.name:  SetParam & GetLongArrayParam
  * @tc.desc: get param when WantParam is empty
  */
-HWTEST_F(DistributedWantLongArrayParamTest, DistributedSchedule_Want_LongArray_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantLongArrayParamTest, DistributedScheduleWant_LongArray_0200, Function | MediumTest | Level3)
 {
     std::vector<long> defaultValue;
     std::string key = "aa";
@@ -2741,11 +2739,11 @@ HWTEST_F(DistributedWantLongArrayParamTest, DistributedSchedule_Want_LongArray_0
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_LongArray_0300
+ * @tc.number: DistributedScheduleWant_LongArray_0300
  * @tc.name:  SetParam & GetLongArrayParam
  * @tc.desc: set empty-string key repeatedly, but get param of another nonexistent key
  */
-HWTEST_F(DistributedWantLongArrayParamTest, DistributedSchedule_Want_LongArray_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantLongArrayParamTest, DistributedScheduleWant_LongArray_0300, Function | MediumTest | Level3)
 {
     std::vector<long> defaultValue;
     std::string setKey1 = "bb";
@@ -2762,11 +2760,11 @@ HWTEST_F(DistributedWantLongArrayParamTest, DistributedSchedule_Want_LongArray_0
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_LongArray_0400
+ * @tc.number: DistributedScheduleWant_LongArray_0400
  * @tc.name:  SetParam & GetLongArrayParam
  * @tc.desc: set empty-string key repeatedly, then get param of the key
  */
-HWTEST_F(DistributedWantLongArrayParamTest, DistributedSchedule_Want_LongArray_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantLongArrayParamTest, DistributedScheduleWant_LongArray_0400, Function | MediumTest | Level3)
 {
     std::vector<long> defaultValue;
     std::string setKey1 = "%1uH3";
@@ -2816,11 +2814,11 @@ void DistributedWantShortArrayParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number: DistributedSchedule_Want_ShortArray_0100
+ * @tc.number: DistributedScheduleWant_ShortArray_0100
  * @tc.name:  SetParam/GetShortArrayParam
  * @tc.desc: Verify when parameter change.
  */
-HWTEST_P(DistributedWantShortArrayParamTest, DistributedSchedule_Want_ShortArray_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantShortArrayParamTest, DistributedScheduleWant_ShortArray_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -2838,11 +2836,11 @@ INSTANTIATE_TEST_SUITE_P(WantShortArrayParamTestCaseP, DistributedWantShortArray
         testShortArrayType("1*中_aR", "1*中_aR", {-5000}, {}, {-5000})));
 
 /**
- * @tc.number: DistributedSchedule_Want_ShortArray_0200
+ * @tc.number: DistributedScheduleWant_ShortArray_0200
  * @tc.name:  SetParam/GetShortArrayParam
  * @tc.desc: Verify when the value is short array
  */
-HWTEST_F(DistributedWantShortArrayParamTest, DistributedSchedule_Want_ShortArray_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantShortArrayParamTest, DistributedScheduleWant_ShortArray_0200, Function | MediumTest | Level3)
 {
     std::vector<short> defaultValue;
     std::string getKey("aa");
@@ -2850,11 +2848,11 @@ HWTEST_F(DistributedWantShortArrayParamTest, DistributedSchedule_Want_ShortArray
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_ShortArray_0300
+ * @tc.number: DistributedScheduleWant_ShortArray_0300
  * @tc.name:  SetParam/GetShortArrayParam
  * @tc.desc: Verify when the value is short array
  */
-HWTEST_F(DistributedWantShortArrayParamTest, DistributedSchedule_Want_ShortArray_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantShortArrayParamTest, DistributedScheduleWant_ShortArray_0300, Function | MediumTest | Level3)
 {
     std::string emptyStr("hh");
     std::vector<short> firstValue({1, 4, -9});
@@ -2871,11 +2869,11 @@ HWTEST_F(DistributedWantShortArrayParamTest, DistributedSchedule_Want_ShortArray
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_ShortArray_0400
+ * @tc.number: DistributedScheduleWant_ShortArray_0400
  * @tc.name:  SetParam/GetShortArrayParam
  * @tc.desc: Verify when the value is short array
  */
-HWTEST_F(DistributedWantShortArrayParamTest, DistributedSchedule_Want_ShortArray_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantShortArrayParamTest, DistributedScheduleWant_ShortArray_0400, Function | MediumTest | Level3)
 {
     std::string firstKey("%1uH3");
     std::vector<short> firstValue({-1, -2});
@@ -2922,11 +2920,11 @@ void DistributedWantShortParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number: DistributedSchedule_Want_Short_0100
+ * @tc.number: DistributedScheduleWant_Short_0100
  * @tc.name:  SetParam/GetShortParam
  * @tc.desc: Verify when parameter change.
  */
-HWTEST_P(DistributedWantShortParamTest, DistributedSchedule_Want_Short_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantShortParamTest, DistributedScheduleWant_Short_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -2942,22 +2940,22 @@ INSTANTIATE_TEST_SUITE_P(WantShortParamTestCaseP, DistributedWantShortParamTest,
         testShortType("1*中_aR", "aa", 50, 5, 5), testShortType("1*中_aR", "1*中_aR", -5000, 5000, -5000)));
 
 /**
- * @tc.number: DistributedSchedule_Want_Short_0200
+ * @tc.number: DistributedScheduleWant_Short_0200
  * @tc.name:  SetParam/GetShortParam
  * @tc.desc: Verify when the value is short
  */
-HWTEST_F(DistributedWantShortParamTest, DistributedSchedule_Want_Short_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantShortParamTest, DistributedScheduleWant_Short_0200, Function | MediumTest | Level3)
 {
     short defaultValue = 200;
     std::string getKey("aa");
     EXPECT_EQ(defaultValue, want_->GetShortParam(getKey, defaultValue));
 }
 /**
- * @tc.number: DistributedSchedule_Want_Short_0300
+ * @tc.number: DistributedScheduleWant_Short_0300
  * @tc.name:  SetParam/GetShortParam
  * @tc.desc: Verify when the value is short
  */
-HWTEST_F(DistributedWantShortParamTest, DistributedSchedule_Want_Short_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantShortParamTest, DistributedScheduleWant_Short_0300, Function | MediumTest | Level3)
 {
     std::string emptyStr("bb");
     short firstValue = 1;
@@ -2975,11 +2973,11 @@ HWTEST_F(DistributedWantShortParamTest, DistributedSchedule_Want_Short_0300, Fun
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Short_0400
+ * @tc.number: DistributedScheduleWant_Short_0400
  * @tc.name:  SetParam/GetShortParam
  * @tc.desc: Verify when the value is short
  */
-HWTEST_F(DistributedWantShortParamTest, DistributedSchedule_Want_Short_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantShortParamTest, DistributedScheduleWant_Short_0400, Function | MediumTest | Level3)
 {
     std::string firstKey("%1uH3");
     short firstValue = -1;
@@ -3028,11 +3026,11 @@ void DistributedWantStringArrayParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number: DistributedSchedule_Want_StringArray_0100
+ * @tc.number: DistributedScheduleWant_StringArray_0100
  * @tc.name:  SetParam/GetStringArrayParam
  * @tc.desc: Verify when parameter change.
  */
-HWTEST_P(DistributedWantStringArrayParamTest, DistributedSchedule_Want_StringArray_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantStringArrayParamTest, DistributedScheduleWant_StringArray_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -3050,11 +3048,11 @@ INSTANTIATE_TEST_SUITE_P(WantStringArrayParamTestCaseP, DistributedWantStringArr
         testStrArrayType("1*中_aR", "1*中_aR", {"1*中_aR", "dbdb"}, {}, {"1*中_aR", "dbdb"})));
 
 /**
- * @tc.number: DistributedSchedule_Want_StringArray_0200
+ * @tc.number: DistributedScheduleWant_StringArray_0200
  * @tc.name:  SetParam/GetStringArrayParam
  * @tc.desc: get param when WantParam is empty
  */
-HWTEST_F(DistributedWantStringArrayParamTest, DistributedSchedule_Want_StringArray_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantStringArrayParamTest, DistributedScheduleWant_StringArray_0200, Function | MediumTest | Level3)
 {
     std::vector<std::string> defaultValue;
     std::string key = "aa";
@@ -3063,11 +3061,11 @@ HWTEST_F(DistributedWantStringArrayParamTest, DistributedSchedule_Want_StringArr
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_StringArray_0300
+ * @tc.number: DistributedScheduleWant_StringArray_0300
  * @tc.name:  SetParam/GetStringArrayParam
  * @tc.desc: set empty-string key repeatedly, but get param of another nonexistent key
  */
-HWTEST_F(DistributedWantStringArrayParamTest, DistributedSchedule_Want_StringArray_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantStringArrayParamTest, DistributedScheduleWant_StringArray_0300, Function | MediumTest | Level3)
 {
     std::vector<std::string> defaultValue;
     std::vector<std::string> setValue1 = {"aaa", "2132"};
@@ -3086,11 +3084,11 @@ HWTEST_F(DistributedWantStringArrayParamTest, DistributedSchedule_Want_StringArr
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_StringArray_0400
+ * @tc.number: DistributedScheduleWant_StringArray_0400
  * @tc.name:  SetParam/GetStringArrayParam
  * @tc.desc: set empty-string key repeatedly, then get param of the key
  */
-HWTEST_F(DistributedWantStringArrayParamTest, DistributedSchedule_Want_StringArray_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantStringArrayParamTest, DistributedScheduleWant_StringArray_0400, Function | MediumTest | Level3)
 {
     std::vector<std::string> defaultValue;
     std::vector<std::string> setValue = {"aaa", "2132"};
@@ -3140,11 +3138,11 @@ void DistributedWantStringParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number: DistributedSchedule_Want_String_0100
+ * @tc.number: DistributedScheduleWant_String_0100
  * @tc.name:  SetParam/GetStringParam
  * @tc.desc: Verify when parameter change.
  */
-HWTEST_P(DistributedWantStringParamTest, DistributedSchedule_Want_String_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantStringParamTest, DistributedScheduleWant_String_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -3160,11 +3158,11 @@ INSTANTIATE_TEST_SUITE_P(WantStringParamTestCaseP, DistributedWantStringParamTes
         testStrType("1*中_aR", "aa", "aaa", "", ""), testStrType("1*中_aR", "1*中_aR", "aaa", "", "aaa")));
 
 /**
- * @tc.number: DistributedSchedule_Want_String_0200
+ * @tc.number: DistributedScheduleWant_String_0200
  * @tc.name:  SetParam/GetStringParam
  * @tc.desc: get param when WantParam is empty.
  */
-HWTEST_F(DistributedWantStringParamTest, DistributedSchedule_Want_String_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantStringParamTest, DistributedScheduleWant_String_0200, Function | MediumTest | Level3)
 {
     std::string defaultStrValue;
     std::string key = "aa";
@@ -3172,11 +3170,11 @@ HWTEST_F(DistributedWantStringParamTest, DistributedSchedule_Want_String_0200, F
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_String_0300
+ * @tc.number: DistributedScheduleWant_String_0300
  * @tc.name:  SetParam/GetStringParam
  * @tc.desc: set empty-string key repeatedly, but get param of another nonexistent key.
  */
-HWTEST_F(DistributedWantStringParamTest, DistributedSchedule_Want_String_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantStringParamTest, DistributedScheduleWant_String_0300, Function | MediumTest | Level3)
 {
     std::string defaultStrValue;
     std::string setValue1 = "aaa";
@@ -3192,11 +3190,11 @@ HWTEST_F(DistributedWantStringParamTest, DistributedSchedule_Want_String_0300, F
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_String_0400
+ * @tc.number: DistributedScheduleWant_String_0400
  * @tc.name:  SetParam/GetStringParam
  * @tc.desc: set empty-string key repeatedly, then get param of the key.
  */
-HWTEST_F(DistributedWantStringParamTest, DistributedSchedule_Want_String_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantStringParamTest, DistributedScheduleWant_String_0400, Function | MediumTest | Level3)
 {
     std::string key1 = "%1uH3";
     std::string defaultStrValue;
@@ -3242,11 +3240,11 @@ void DistributedWantLongParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number: DistributedSchedule_Want_LongParam_0100
+ * @tc.number: DistributedScheduleWant_LongParam_0100
  * @tc.name:  SetParam/GetLongParam
  * @tc.desc: Verify when parameter change.
  */
-HWTEST_P(DistributedWantLongParamTest, DistributedSchedule_Want_LongParam_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantLongParamTest, DistributedScheduleWant_LongParam_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -3262,11 +3260,11 @@ INSTANTIATE_TEST_SUITE_P(WantLongParamTestCaseP, DistributedWantLongParamTest,
         testLongType("b5", "b5", 50, 6, 50), testLongType("b6", "b7", 1000, 2200, 2200)));
 
 /**
- * @tc.number: DistributedSchedule_Want_LongParam_0200
+ * @tc.number: DistributedScheduleWant_LongParam_0200
  * @tc.name:  SetParam/GetLongParam
  * @tc.desc:  get param when WantParam is empty.
  */
-HWTEST_F(DistributedWantLongParamTest, DistributedSchedule_Want_LongParam_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantLongParamTest, DistributedScheduleWant_LongParam_0200, Function | MediumTest | Level3)
 {
     long defaultValue = 100;
     std::string key = "aa";
@@ -3274,11 +3272,11 @@ HWTEST_F(DistributedWantLongParamTest, DistributedSchedule_Want_LongParam_0200, 
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_LongParam_0300
+ * @tc.number: DistributedScheduleWant_LongParam_0300
  * @tc.name:  SetParam/GetLongParam
  * @tc.desc:  set empty-string key repeatedly, but get param of another nonexistent key.
  */
-HWTEST_F(DistributedWantLongParamTest, DistributedSchedule_Want_LongParam_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantLongParamTest, DistributedScheduleWant_LongParam_0300, Function | MediumTest | Level3)
 {
     std::string setKey1 = "dd";
     std::string setKey2 = "aa";
@@ -3296,11 +3294,11 @@ HWTEST_F(DistributedWantLongParamTest, DistributedSchedule_Want_LongParam_0300, 
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_LongParam_0400
+ * @tc.number: DistributedScheduleWant_LongParam_0400
  * @tc.name:  SetParam/GetLongParam
  * @tc.desc:  set empty-string key repeatedly, then get param of the key.
  */
-HWTEST_F(DistributedWantLongParamTest, DistributedSchedule_Want_LongParam_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantLongParamTest, DistributedScheduleWant_LongParam_0400, Function | MediumTest | Level3)
 {
     std::string setKey1 = "%1uH3";
     std::string setKey2 = "aa";
@@ -3350,11 +3348,11 @@ void DistributedWantIntParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number: DistributedSchedule_Want_IntParam_0100
+ * @tc.number: DistributedScheduleWant_IntParam_0100
  * @tc.name:  SetParam/GetIntParam
  * @tc.desc:  Verify when parameter change.
  */
-HWTEST_P(DistributedWantIntParamTest, DistributedSchedule_Want_IntParam_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantIntParamTest, DistributedScheduleWant_IntParam_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -3370,11 +3368,11 @@ INSTANTIATE_TEST_SUITE_P(WantParametersIntTestCaseP, DistributedWantIntParamTest
         testIntType("1*中_aR", "aa", 50, 5, 5), testIntType("1*中_aR", "1*中_aR", -5000, 5000, -5000)));
 
 /**
- * @tc.number: DistributedSchedule_Want_IntParam_0200
+ * @tc.number: DistributedScheduleWant_IntParam_0200
  * @tc.name:  SetParam/GetIntParam
  * @tc.desc:  Verify when the value is integer.
  */
-HWTEST_F(DistributedWantIntParamTest, DistributedSchedule_Want_IntParam_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantIntParamTest, DistributedScheduleWant_IntParam_0200, Function | MediumTest | Level3)
 {
     int defaultValue = 200;
     std::string getKey("aa");
@@ -3382,11 +3380,11 @@ HWTEST_F(DistributedWantIntParamTest, DistributedSchedule_Want_IntParam_0200, Fu
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_IntParam_0300
+ * @tc.number: DistributedScheduleWant_IntParam_0300
  * @tc.name:  SetParam/GetIntParam
  * @tc.desc:  Verify when the value is integer.
  */
-HWTEST_F(DistributedWantIntParamTest, DistributedSchedule_Want_IntParam_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantIntParamTest, DistributedScheduleWant_IntParam_0300, Function | MediumTest | Level3)
 {
     std::string emptyStr("bb");
     int firstValue = 1;
@@ -3404,11 +3402,11 @@ HWTEST_F(DistributedWantIntParamTest, DistributedSchedule_Want_IntParam_0300, Fu
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_IntParam_0400
+ * @tc.number: DistributedScheduleWant_IntParam_0400
  * @tc.name:  SetParam/GetIntParam
  * @tc.desc:  Verify when the value is integer.
  */
-HWTEST_F(DistributedWantIntParamTest, DistributedSchedule_Want_IntParam_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantIntParamTest, DistributedScheduleWant_IntParam_0400, Function | MediumTest | Level3)
 {
     std::string firstKey("%1uH3");
     int firstValue = -1;
@@ -3458,11 +3456,11 @@ void DistributedWantIntArrayParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number: DistributedSchedule_Want_IntArrayParam_0100
+ * @tc.number: DistributedScheduleWant_IntArrayParam_0100
  * @tc.name:  SetParam/GetIntArrayParam
  * @tc.desc:  Verify when parameter change.
  */
-HWTEST_P(DistributedWantIntArrayParamTest, DistributedSchedule_Want_IntArrayParam_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantIntArrayParamTest, DistributedScheduleWant_IntArrayParam_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -3480,11 +3478,11 @@ INSTANTIATE_TEST_SUITE_P(WantIntArrayParamTestCaseP, DistributedWantIntArrayPara
         testIntArrayType("1*中_aR", "1*中_aR", {-5000}, {}, {-5000})));
 
 /**
- * @tc.number: DistributedSchedule_Want_IntArrayParam_0200
+ * @tc.number: DistributedScheduleWant_IntArrayParam_0200
  * @tc.name:  SetParam/GetIntArrayParam
  * @tc.desc:  Verify when the value is integer array.
  */
-HWTEST_F(DistributedWantIntArrayParamTest, DistributedSchedule_Want_IntArrayParam_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantIntArrayParamTest, DistributedScheduleWant_IntArrayParam_0200, Function | MediumTest | Level3)
 {
     std::vector<int> defaultValue;
     std::string getKey("aa");
@@ -3492,11 +3490,11 @@ HWTEST_F(DistributedWantIntArrayParamTest, DistributedSchedule_Want_IntArrayPara
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_IntArrayParam_0300
+ * @tc.number: DistributedScheduleWant_IntArrayParam_0300
  * @tc.name:  SetParam/GetIntArrayParam
  * @tc.desc:  Verify when the value is integer array.
  */
-HWTEST_F(DistributedWantIntArrayParamTest, DistributedSchedule_Want_IntArrayParam_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantIntArrayParamTest, DistributedScheduleWant_IntArrayParam_0300, Function | MediumTest | Level3)
 {
     std::string emptyStr("cc");
     std::vector<int> firstValue({1, 4, -9});
@@ -3513,11 +3511,11 @@ HWTEST_F(DistributedWantIntArrayParamTest, DistributedSchedule_Want_IntArrayPara
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_IntArrayParam_0400
+ * @tc.number: DistributedScheduleWant_IntArrayParam_0400
  * @tc.name:  SetParam/GetIntArrayParam
  * @tc.desc:  Verify when the value is integer array.
  */
-HWTEST_F(DistributedWantIntArrayParamTest, DistributedSchedule_Want_IntArrayParam_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantIntArrayParamTest, DistributedScheduleWant_IntArrayParam_0400, Function | MediumTest | Level3)
 {
     std::string firstKey("%1uH3");
     std::vector<int> firstValue({-1, -2});
@@ -3567,11 +3565,11 @@ void DistributedWantFloatParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number: DistributedSchedule_Want_FloatParam_0100
+ * @tc.number: DistributedScheduleWant_FloatParam_0100
  * @tc.name:  SetParam/GetFloatParam
  * @tc.desc:  Verify when parameter change.
  */
-HWTEST_P(DistributedWantFloatParamTest, DistributedSchedule_Want_FloatParam_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantFloatParamTest, DistributedScheduleWant_FloatParam_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -3587,11 +3585,11 @@ INSTANTIATE_TEST_SUITE_P(WantFloatParamTestCaseP, DistributedWantFloatParamTest,
         testFloatType("1*中_aR", "aa", 50.1, 5.1, 5.1), testFloatType("1*中_aR", "1*中_aR", -5000.1, 5000.1, -5000.1)));
 
 /**
- * @tc.number: DistributedSchedule_Want_FloatParam_0200
+ * @tc.number: DistributedScheduleWant_FloatParam_0200
  * @tc.name:  SetParam/GetFloatParam
  * @tc.desc:  get param when WantParam is empty.
  */
-HWTEST_F(DistributedWantFloatParamTest, DistributedSchedule_Want_FloatParam_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantFloatParamTest, DistributedScheduleWant_FloatParam_0200, Function | MediumTest | Level3)
 {
     float defaultValue = 100.1;
     std::string key = "aa";
@@ -3599,11 +3597,11 @@ HWTEST_F(DistributedWantFloatParamTest, DistributedSchedule_Want_FloatParam_0200
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_FloatParam_0300
+ * @tc.number: DistributedScheduleWant_FloatParam_0300
  * @tc.name:  SetParam/GetFloatParam
  * @tc.desc:  set empty-string key repeatedly, but get param of another nonexistent key.
  */
-HWTEST_F(DistributedWantFloatParamTest, DistributedSchedule_Want_FloatParam_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantFloatParamTest, DistributedScheduleWant_FloatParam_0300, Function | MediumTest | Level3)
 {
     std::string setKey1 = "ee";
     std::string setKey2 = "aa";
@@ -3621,11 +3619,11 @@ HWTEST_F(DistributedWantFloatParamTest, DistributedSchedule_Want_FloatParam_0300
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_FloatParam_0400
+ * @tc.number: DistributedScheduleWant_FloatParam_0400
  * @tc.name:  SetParam/GetFloatParam
  * @tc.desc:  set empty-string key repeatedly, but get param of another nonexistent key.
  */
-HWTEST_F(DistributedWantFloatParamTest, DistributedSchedule_Want_FloatParam_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantFloatParamTest, DistributedScheduleWant_FloatParam_0400, Function | MediumTest | Level3)
 {
     std::string setKey1 = "%1uH3";
     std::string setKey2 = "aa";
@@ -3675,11 +3673,11 @@ void DistributedWantDoubleParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number: DistributedSchedule_Want_DoubleParam_0100
+ * @tc.number: DistributedScheduleWant_DoubleParam_0100
  * @tc.name:  SetParam/GetDoubleParam
  * @tc.desc:  Verify when parameter change.
  */
-HWTEST_P(DistributedWantDoubleParamTest, DistributedSchedule_Want_DoubleParam_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantDoubleParamTest, DistributedScheduleWant_DoubleParam_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -3696,11 +3694,11 @@ INSTANTIATE_TEST_SUITE_P(WantDoubleParamTestCaseP, DistributedWantDoubleParamTes
         testDoubleType("1*中_aR", "1*中_aR", -5000.1, 5000.1, -5000.1)));
 
 /**
- * @tc.number: DistributedSchedule_Want_DoubleParam_0300
+ * @tc.number: DistributedScheduleWant_DoubleParam_0300
  * @tc.name:  SetParam & GetDoubleParam
  * @tc.desc:  set empty-string key repeatedly, but get param of another nonexistent key.
  */
-HWTEST_F(DistributedWantDoubleParamTest, DistributedSchedule_Want_DoubleParam_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantDoubleParamTest, DistributedScheduleWant_DoubleParam_0300, Function | MediumTest | Level3)
 {
     double defaultValue = 100.1;
     std::string key = "aa";
@@ -3708,11 +3706,11 @@ HWTEST_F(DistributedWantDoubleParamTest, DistributedSchedule_Want_DoubleParam_03
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_DoubleParam_0400
+ * @tc.number: DistributedScheduleWant_DoubleParam_0400
  * @tc.name:  SetParam & GetDoubleParam
  * @tc.desc:  set empty-string key repeatedly, then get param of the key.
  */
-HWTEST_F(DistributedWantDoubleParamTest, DistributedSchedule_Want_DoubleParam_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantDoubleParamTest, DistributedScheduleWant_DoubleParam_0400, Function | MediumTest | Level3)
 {
     std::string setKey1 = "ff";
     std::string setKey2 = "aa";
@@ -3730,11 +3728,11 @@ HWTEST_F(DistributedWantDoubleParamTest, DistributedSchedule_Want_DoubleParam_04
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_ByteArray_0100
+ * @tc.number: DistributedScheduleWant_ByteArray_0100
  * @tc.name:  SetParam/GetByteArrayParam
  * @tc.desc:  Verify when parameter change.
  */
-HWTEST_F(DistributedWantDoubleParamTest, DistributedSchedule_Want_ByteArray_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantDoubleParamTest, DistributedScheduleWant_ByteArray_0100, Function | MediumTest | Level3)
 {
     std::string setKey1 = "%1uH3";
     std::string setKey2 = "aa";
@@ -3751,7 +3749,8 @@ HWTEST_F(DistributedWantDoubleParamTest, DistributedSchedule_Want_ByteArray_0100
     EXPECT_EQ(setValue1, want_->GetDoubleParam(setKey2, setValue1));
 }
 
-using testByteArrayType = std::tuple<std::string, std::string, std::vector<byte>, std::vector<byte>, std::vector<byte>>;
+using testByteArrayType =
+    std::tuple<std::string, std::string, std::vector<byte>, std::vector<byte>, std::vector<byte>>;
 class DistributedWantByteArrayParamTest : public testing::TestWithParam<testByteArrayType> {
 public:
     DistributedWantByteArrayParamTest()
@@ -3784,11 +3783,11 @@ void DistributedWantByteArrayParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number: DistributedSchedule_Want_ByteArray_0100
+ * @tc.number: DistributedScheduleWant_ByteArray_0100
  * @tc.name:  SetParam/GetByteArrayParam
  * @tc.desc:  Verify when parameter change.
  */
-HWTEST_P(DistributedWantByteArrayParamTest, DistributedSchedule_Want_ByteArray_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantByteArrayParamTest, DistributedScheduleWant_ByteArray_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -3805,11 +3804,11 @@ INSTANTIATE_TEST_SUITE_P(WantByteArrayParamTestCaseP, DistributedWantByteArrayPa
         testByteArrayType("1*中_aR", "1*中_aR", {'R', 'b'}, {}, {'R', 'b'})));
 
 /**
- * @tc.number: DistributedSchedule_Want_ByteArray_0200
+ * @tc.number: DistributedScheduleWant_ByteArray_0200
  * @tc.name:  SetParam/GetByteArrayParam
  * @tc.desc:  Verify when the value is byte array.
  */
-HWTEST_F(DistributedWantByteArrayParamTest, DistributedSchedule_Want_ByteArray_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantByteArrayParamTest, DistributedScheduleWant_ByteArray_0200, Function | MediumTest | Level3)
 {
     std::vector<byte> defaultValue;
     std::string getKey("aa");
@@ -3817,11 +3816,11 @@ HWTEST_F(DistributedWantByteArrayParamTest, DistributedSchedule_Want_ByteArray_0
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_ByteArray_0300
+ * @tc.number: DistributedScheduleWant_ByteArray_0300
  * @tc.name:  SetParam/GetByteArrayParam
  * @tc.desc:  Verify when the value is byte array.
  */
-HWTEST_F(DistributedWantByteArrayParamTest, DistributedSchedule_Want_ByteArray_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantByteArrayParamTest, DistributedScheduleWant_ByteArray_0300, Function | MediumTest | Level3)
 {
     std::string emptyStr("gg");
     std::vector<byte> firstValue({'a', '2'});
@@ -3838,11 +3837,11 @@ HWTEST_F(DistributedWantByteArrayParamTest, DistributedSchedule_Want_ByteArray_0
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_ByteArray_0400
+ * @tc.number: DistributedScheduleWant_ByteArray_0400
  * @tc.name:  SetParam/GetByteArrayParam
  * @tc.desc:  Verify when the value is byte array.
  */
-HWTEST_F(DistributedWantByteArrayParamTest, DistributedSchedule_Want_ByteArray_0400, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantByteArrayParamTest, DistributedScheduleWant_ByteArray_0400, Function | MediumTest | Level3)
 {
     std::string firstKey("%1uH3");
     std::vector<byte> firstValue({'a', '2'});
@@ -3890,11 +3889,11 @@ void DistributedWantBoolParamTest::TearDown(void)
 {}
 
 /**
- * @tc.number: DistributedSchedule_Want_BoolParam_0100
+ * @tc.number: DistributedScheduleWant_BoolParam_0100
  * @tc.name: SetParam/GetBoolParam
  * @tc.desc: Verify when parameter change.
  */
-HWTEST_P(DistributedWantBoolParamTest, DistributedSchedule_Want_BoolParam_0100, Function | MediumTest | Level3)
+HWTEST_P(DistributedWantBoolParamTest, DistributedScheduleWant_BoolParam_0100, Function | MediumTest | Level3)
 {
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
@@ -3915,11 +3914,11 @@ INSTANTIATE_TEST_SUITE_P(WantBoolParamTestCaseP, DistributedWantBoolParamTest,
         testBoolType("_中文ddPEJKJ#(&*~#^%", "123", true, false, false)));
 
 /**
- * @tc.number: DistributedSchedule_Want_BoolParam_0200
+ * @tc.number: DistributedScheduleWant_BoolParam_0200
  * @tc.name:   SetParam/GetBoolParam
  * @tc.desc: Verify when set twice and get twice.
  */
-HWTEST_F(DistributedWantBoolParamTest, DistributedSchedule_Want_BoolParam_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBoolParamTest, DistributedScheduleWant_BoolParam_0200, Function | MediumTest | Level3)
 {
     std::string firstKey("_中文ddPEJKJ#(&*~#^%");
     std::string secondKey("key33");
@@ -3930,11 +3929,11 @@ HWTEST_F(DistributedWantBoolParamTest, DistributedSchedule_Want_BoolParam_0200, 
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_BoolParam_0300
+ * @tc.number: DistributedScheduleWant_BoolParam_0300
  * @tc.name:   SetParam/GetBoolParam
  * @tc.desc: Verify when set 20 times, and get once.
  */
-HWTEST_F(DistributedWantBoolParamTest, DistributedSchedule_Want_BoolParam_0300, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBoolParamTest, DistributedScheduleWant_BoolParam_0300, Function | MediumTest | Level3)
 {
     std::string keyStr("_中文ddPEJKJ#(&*~#^%");
     for (int i = 0; i < 20; i++) {
@@ -3944,11 +3943,11 @@ HWTEST_F(DistributedWantBoolParamTest, DistributedSchedule_Want_BoolParam_0300, 
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Want_0100
+ * @tc.number: DistributedScheduleWant_Want_0100
  * @tc.name:   Want() and Want(want)
  * @tc.desc: Verify Want()
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Want_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Want_0100, Function | MediumTest | Level3)
 {
     DistributedWant want;
 
@@ -3971,11 +3970,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Want_0100, Function |
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_Entity_0100
+ * @tc.number: DistributedScheduleWant_Entity_0100
  * @tc.name:    [AddEntity or RemoveEntity] & HasEntity &CountEntities
  * @tc.desc: Verify [AddEntity or RemoveEntity] & HasEntity &CountEntities
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Entity_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Entity_0100, Function | MediumTest | Level3)
 {
     std::string entity1 = "entity.system.entity1";
 
@@ -4008,11 +4007,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_Entity_0100, Function
 }
 
 /**
- * @tc.number: DistributedSchedule_Want_HasParameter_0100
+ * @tc.number: DistributedScheduleWant_HasParameter_0100
  * @tc.name:    SetParam and HasParameter
  * @tc.desc: Verify HasParameter()
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_HasParameter_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_HasParameter_0100, Function | MediumTest | Level3)
 {
     std::vector<std::string> vector;
     std::string key = "system.want.test.key";
@@ -4026,11 +4025,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_HasParameter_0100, Fu
     EXPECT_EQ(true, want_->HasParameter(key2));
 }
 /**
- * @tc.number: DistributedSchedule_Want_HasParameter_0200
+ * @tc.number: DistributedScheduleWant_HasParameter_0200
  * @tc.name:    SetParam and HasParameter
  * @tc.desc: Verify HasParameter()
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_HasParameter_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_HasParameter_0200, Function | MediumTest | Level3)
 {
     std::string key = std::to_string(Array::SIGNATURE) + ".#Intent;key=3{\"\\b\\\";end";
     std::vector<zchar> arrayValue = {'.', '=', ';'};
@@ -4048,11 +4047,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_HasParameter_0200, Fu
     CompareWant(p1, p2);
 }
 /**
- * @tc.number: DistributedSchedule_Want_ToString_0100
+ * @tc.number: DistributedScheduleWant_ToString_0100
  * @tc.name:    ToString and FromString
  * @tc.desc: Verify FromString()
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Want_ToString_0100, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ToString_0100, Function | MediumTest | Level3)
 {
     std::string deviceId = "deviceId";
     std::string bundleName = "bundleName";
