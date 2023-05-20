@@ -1151,7 +1151,6 @@ DistributedWant* DistributedWant::Unmarshalling(Parcel& parcel)
 bool DistributedWant::ReadFromParcel(Parcel& parcel)
 {
     int empty;
-    std::string value;
     std::vector<std::string> entities;
     // read action
     operation_.SetAction(Str16ToStr8(parcel.ReadString16()));
@@ -1260,10 +1259,9 @@ bool DistributedWant::ParseUriInternal(const std::string& content, ElementName& 
 
 bool DistributedWant::ParseContent(const std::string& content, std::string& prop, std::string& value)
 {
-    std::string subString;
     std::size_t pos = content.find("=");
     if (pos != std::string::npos) {
-        subString = content.substr(0, pos);
+        std::string subString = content.substr(0, pos);
         prop = Decode(subString);
         subString = content.substr(pos + 1, content.length() - pos - 1);
         value = Decode(subString);
