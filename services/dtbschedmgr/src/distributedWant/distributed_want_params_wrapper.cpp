@@ -115,9 +115,9 @@ bool DistributedWantParamWrapper::ValidateStr(const std::string& str)
 sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::string& str)
 {
     DistributedWantParams wantPaqrams;
-    std::string key = "";
-    int typeId = 0;
     if (ValidateStr(str)) {
+        std::string key = "";
+        int typeId = 0;
         for (size_t strnum = 0; strnum < str.size(); strnum++) {
             if (str[strnum] == '{' && key != "" && typeId == DistributedWantParams::VALUE_TYPE_WANTPARAMS) {
                 size_t num;
