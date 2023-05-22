@@ -34,6 +34,8 @@ const std::u16string MOCK_DEVICE_ID = u"MOCK_DEVICE_ID";
 constexpr int32_t MOCK_SESSION_ID = 123;
 constexpr int32_t MOCK_TASK_ID = 456;
 const std::string LOCAL_DEVICE_ID = "192.168.43.100";
+const string DMS_VERSION_ID = "dmsVersion";
+const string DMS_VERSION = "4.0.0";
 constexpr int32_t SLEEP_TIME = 1000;
 constexpr int64_t FREE_INSTALL_TIMEOUT = 50000;
 constexpr int32_t REQUEST_CODE_ERR = 305;
@@ -1084,6 +1086,45 @@ HWTEST_F(DSchedContinuationTest, StartFreeInstallFromRemote_005, TestSize.Level1
     int result2 = DistributedSchedService::GetInstance().StartFreeInstallFromRemote(info, 0);
     DTEST_LOG << "result2:" << result2 << std::endl;
     DTEST_LOG << "DSchedContinuationTest StartFreeInstallFromRemote_005 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartFreeInstallFromRemote_006
+ * @tc.desc: call StartFreeInstallFromRemote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinuationTest, StartFreeInstallFromRemote_006, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest StartFreeInstallFromRemote_006 start" << std::endl;
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    want.SetElement(element);
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = "255.255.255.255";
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
+    IDistributedSched::AccountInfo accountInfo;
+    IDistributedSched::FreeInstallInfo info = {.want = want,
+        .requestCode = 0,
+        .callerInfo = callerInfo,
+        .accountInfo = accountInfo
+    };
+
+    int result1 = proxy->StartFreeInstallFromRemote(info, 0);
+    DTEST_LOG << "result1 is" << result1 << std::endl;
+
+    AppExecFwk::ElementName element2("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbilityService");
+    want.SetElement(element2);
+    int result2 = proxy->StartFreeInstallFromRemote(info, 0);
+    DTEST_LOG << "result2:" << result2 << std::endl;
+    DTEST_LOG << "DSchedContinuationTest StartFreeInstallFromRemote_006 end" << std::endl;
 }
 
 /**

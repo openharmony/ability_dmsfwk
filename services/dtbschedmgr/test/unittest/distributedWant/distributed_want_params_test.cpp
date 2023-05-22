@@ -115,13 +115,13 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Parcelable_0300, F
     std::string keyStr = "12345667";
     int valueInteger = 12345;
     wantParamsIn_->SetParam(keyStr, Integer::Box(valueInteger));
-    int right = Integer::Unbox(IInteger::Query(wantParamsIn_->GetParam(keyStr)));
+    Integer::Unbox(IInteger::Query(wantParamsIn_->GetParam(keyStr)));
 
     Parcel in;
     wantParamsIn_->Marshalling(in);
     std::shared_ptr<DistributedWantParams> wantParamsOut_(DistributedWantParams::Unmarshalling(in));
     if (wantParamsOut_ != nullptr) {
-        right = Integer::Unbox(IInteger::Query(wantParamsOut_->GetParam(keyStr)));
+        int right = Integer::Unbox(IInteger::Query(wantParamsOut_->GetParam(keyStr)));
         EXPECT_EQ(valueInteger, right);
         wantParamsOut_ = nullptr;
     }
@@ -454,7 +454,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_GetDataType_0600, 
 HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_GetDataType_0700, Function | MediumTest | Level3)
 {
     const std::string value = "-1";
-    sptr<IInterface> longObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_LONG, "-1");
+    sptr<IInterface> longObj = DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_LONG, value);
     int type = DistributedWantParams::GetDataType(longObj);
     EXPECT_EQ(type, DistributedWantParams::VALUE_TYPE_LONG);
 }
@@ -468,7 +468,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_GetDataType_0800, 
 {
     const std::string value = "-1.0004";
     sptr<IInterface> floatObj =
-        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_FLOAT, "-1.0004");
+        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_FLOAT, value);
     int type = DistributedWantParams::GetDataType(floatObj);
     EXPECT_EQ(type, DistributedWantParams::VALUE_TYPE_FLOAT);
 }
@@ -482,7 +482,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_GetDataType_0900, 
 {
     const std::string value = "-1.00000004";
     sptr<IInterface> doubleObj =
-        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_DOUBLE, "-1.00000004");
+        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_DOUBLE, value);
     int type = DistributedWantParams::GetDataType(doubleObj);
     EXPECT_EQ(type, DistributedWantParams::VALUE_TYPE_DOUBLE);
 }
@@ -496,7 +496,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_GetDataType_1000, 
 {
     const std::string value = "hello";
     sptr<IInterface> stringObj =
-        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_STRING, "hello");
+        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_STRING, value);
     int type = DistributedWantParams::GetDataType(stringObj);
     EXPECT_EQ(type, DistributedWantParams::VALUE_TYPE_STRING);
 }
@@ -588,7 +588,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_GetInterfaceByType
 {
     const std::string value = "-1";
     sptr<IInterface> longObj =
-        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_LONG, "-1");
+        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_LONG, value);
     EXPECT_EQ(Long::Unbox(ILong::Query(longObj)), -1);
 }
 
@@ -601,7 +601,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_GetInterfaceByType
 {
     const std::string value = "-1.0004";
     sptr<IInterface> floatObj =
-        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_FLOAT, "-1.0004");
+        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_FLOAT, value);
     EXPECT_FLOAT_EQ(Float::Unbox(IFloat::Query(floatObj)), -1.0004);
 }
 
@@ -614,7 +614,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_GetInterfaceByType
 {
     const std::string value = "-1.00000004";
     sptr<IInterface> doubleObj =
-        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_DOUBLE, "-1.00000004");
+        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_DOUBLE, value);
     EXPECT_DOUBLE_EQ(Double::Unbox(IDouble::Query(doubleObj)), -1.00000004);
 }
 
@@ -627,7 +627,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_GetInterfaceByType
 {
     const std::string value = "hello";
     sptr<IInterface> stringObj =
-        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_STRING, "hello");
+        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_STRING, value);
     EXPECT_EQ(String::Unbox(IString::Query(stringObj)), std::string("hello"));
 }
 
@@ -752,7 +752,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_CompareInterface_0
 {
     const std::string value = "-1";
     sptr<IInterface> interfaceObj =
-        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_LONG, "-1");
+        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_LONG, value);
     bool result =
         DistributedWantParams::CompareInterface(interfaceObj, interfaceObj, DistributedWantParams::VALUE_TYPE_LONG);
     EXPECT_TRUE(result);
@@ -767,7 +767,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_CompareInterface_0
 {
     const std::string value = "-1.0004";
     sptr<IInterface> interfaceObj =
-        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_FLOAT, "-1.0004");
+        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_FLOAT, value);
     bool result =
         DistributedWantParams::CompareInterface(interfaceObj, interfaceObj, DistributedWantParams::VALUE_TYPE_FLOAT);
     EXPECT_TRUE(result);
@@ -782,7 +782,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_CompareInterface_0
 {
     const std::string value = "-1.00000004";
     sptr<IInterface> interfaceObj =
-        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_DOUBLE, "-1.00000004");
+        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_DOUBLE, value);
     bool result =
         DistributedWantParams::CompareInterface(interfaceObj, interfaceObj, DistributedWantParams::VALUE_TYPE_DOUBLE);
     EXPECT_TRUE(result);
@@ -797,7 +797,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_CompareInterface_0
 {
     const std::string value = "hello";
     sptr<IInterface> interfaceObj =
-        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_STRING, "hello");
+        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_STRING, value);
     bool result =
         DistributedWantParams::CompareInterface(interfaceObj, interfaceObj, DistributedWantParams::VALUE_TYPE_STRING);
     EXPECT_TRUE(result);

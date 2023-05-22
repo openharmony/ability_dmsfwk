@@ -397,6 +397,8 @@ HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_001, TestSize.Leve
 HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_002, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest RegisterMissionListener_002 begin" << std::endl;
+    const sptr<IRemoteObject> connect = new MockRemoteStub();
+    distributedSchedAdapter_->ProcessCallResult(connect, nullptr);
     const sptr<DistributedMissionChangeListener> listener = new DistributedMissionChangeListener();
     int32_t result = distributedSchedAdapter_->RegisterMissionListener(listener);
     EXPECT_NE(result, ERR_OK);
@@ -412,6 +414,8 @@ HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_002, TestSize.Leve
 HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_001, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest UnRegisterMissionListener_001 begin" << std::endl;
+    const sptr<IRemoteObject> connect = new MockRemoteStub();
+    distributedSchedAdapter_->ProcessCallResult(nullptr, connect);
     const sptr<DistributedMissionChangeListener> listener = nullptr;
     int32_t result = distributedSchedAdapter_->UnRegisterMissionListener(listener);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
@@ -427,6 +431,8 @@ HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_001, TestSize.Le
 HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_002, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest UnRegisterMissionListener_002 begin" << std::endl;
+    const sptr<IRemoteObject> connect = new MockRemoteStub();
+    distributedSchedAdapter_->ProcessCallResult(connect, connect);
     const sptr<DistributedMissionChangeListener> listener = new DistributedMissionChangeListener();
     int32_t result = distributedSchedAdapter_->UnRegisterMissionListener(listener);
     EXPECT_NE(result, INVALID_PARAMETERS_ERR);
@@ -442,6 +448,7 @@ HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_002, TestSize.Le
 HWTEST_F(DistributedSchedAdapterTest, GetLocalMissionSnapshotInfo_001, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest GetLocalMissionSnapshotInfo_001 begin" << std::endl;
+    distributedSchedAdapter_->ProcessCallResult(nullptr, nullptr);
     const std::string networkId = "invalidNetworkId";
     int32_t missionId = 0;
     AAFwk::MissionSnapshot missionSnapshot;

@@ -40,6 +40,7 @@ const std::u16string DMS_STUB_INTERFACE_TOKEN = u"ohos.distributedschedule.acces
 const std::u16string MOCK_INVALID_DESCRIPTOR = u"invalid descriptor";
 const std::string EXTRO_INFO_JSON_KEY_ACCESS_TOKEN = "accessTokenID";
 const std::string EXTRO_INFO_JSON_KEY_REQUEST_CODE = "requestCode";
+const std::string DMS_VERSION_ID = "dmsVersion";
 const std::string CMPT_PARAM_FREEINSTALL_BUNDLENAMES = "ohos.extra.param.key.allowedBundles";
 constexpr const char* FOUNDATION_PROCESS_NAME = "foundation";
 constexpr int32_t MAX_WAIT_TIME = 5000;
@@ -2060,6 +2061,21 @@ HWTEST_F(DistributedSchedStubTest, NotifyStateChangedFromRemoteInner_001, TestSi
 HWTEST_F(DistributedSchedStubTest, NotifyStateChangedFromRemoteInner_002, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedStubTest NotifyStateChangedFromRemoteInner_002 begin" << std::endl;
+
+    nlohmann::json extraInfoJson;
+    CallerInfo callerInfo;
+    distributedSchedStub_->SaveExtraInfo(extraInfoJson, callerInfo);
+
+    nlohmann::json extraInfoJson1;
+    extraInfoJson[DMS_VERSION_ID] = "4";
+    CallerInfo callerInfo1;
+    distributedSchedStub_->SaveExtraInfo(extraInfoJson1, callerInfo1);
+
+    nlohmann::json extraInfoJson2;
+    extraInfoJson[DMS_VERSION_ID] = 4;
+    CallerInfo callerInfo2;
+    distributedSchedStub_->SaveExtraInfo(extraInfoJson2, callerInfo2);
+
     MessageParcel data;
     MessageParcel reply;
 
@@ -2081,6 +2097,21 @@ HWTEST_F(DistributedSchedStubTest, NotifyStateChangedFromRemoteInner_002, TestSi
 HWTEST_F(DistributedSchedStubTest, StopRemoteExtensionAbilityInner_002, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedStubTest StopRemoteExtensionAbilityInner_002 begin" << std::endl;
+
+    nlohmann::json extraInfoJson;
+    CallerInfo callerInfo;
+    distributedSchedStub_->SaveExtraInfo(extraInfoJson, callerInfo);
+
+    nlohmann::json extraInfoJson1;
+    extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN] = 0;
+    CallerInfo callerInfo1;
+    distributedSchedStub_->SaveExtraInfo(extraInfoJson1, callerInfo1);
+
+    nlohmann::json extraInfoJson2;
+    extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN] = "4";
+    CallerInfo callerInfo2;
+    distributedSchedStub_->SaveExtraInfo(extraInfoJson2, callerInfo2);
+
     int32_t code = DistributedSchedStub::STOP_REMOTE_EXTERNSION_ABILITY;
     MessageParcel data;
     MessageParcel reply;
