@@ -432,6 +432,31 @@ HWTEST_F(DistributedSchedPermissionTest, CheckStartPermission_005, TestSize.Leve
 }
 
 /**
+ * @tc.name: CheckStartPermission_006
+ * @tc.desc: input invalid params
+ * @tc.type: FUNC
+ * @tc.require: issueI5T6GJ
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckStartPermission_006, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckStartPermission_006 begin" << std::endl;
+    AAFwk::Want want;
+    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
+    CallerInfo callerInfo;
+    callerInfo.accessToken = 0;
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
+    AppExecFwk::AbilityInfo targetAbility;
+    targetAbility.visible = true;
+    targetAbility.isStageBasedModel = true;
+    int32_t ret = DistributedSchedPermission::GetInstance().CheckStartPermission(want,
+        callerInfo, accountInfo, targetAbility);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckStartPermission_006 end ret:" << ret << std::endl;
+}
+
+
+/**
  * @tc.name: GetTargetAbility_001
  * @tc.desc: input invalid params
  * @tc.type: FUNC
@@ -2045,6 +2070,45 @@ HWTEST_F(DistributedSchedPermissionTest, FromJson_002, TestSize.Level3)
     from_json(jsonObject, groupInfo);
     EXPECT_EQ(groupInfo.groupName, "");
     DTEST_LOG << "DistributedSchedPermissionTest FromJson_002 end " <<  std::endl;
+}
+
+/**
+ * @tc.name: MarkUriPermission_001
+ * @tc.desc: parse groupInfo from json with invalid params
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedPermissionTest, MarkUriPermission_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest MarkUriPermission_001 begin" << std::endl;
+    AAFwk::Want want;
+    want.AddFlags(want.FLAG_ABILITY_CONTINUATION);
+    want.SetUri("urifile");
+    DistributedSchedPermission::GetInstance().MarkUriPermission(want, 0);
+    CallerInfo callerInfo;
+    callerInfo.accessToken = ACCESS_TOKEN;
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.accountType = IDistributedSched::DIFF_ACCOUNT_TYPE;
+    std::string groupId = INVALID_GROUP_ID;
+    accountInfo.groupIdList.push_back(groupId);
+    string targetBundle = INVALID_BUNDLE_NAME;
+    bool ret = DistributedSchedPermission::GetInstance().CheckAccountAccessPermission(
+        callerInfo, accountInfo, targetBundle);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest MarkUriPermission_001 end " <<  std::endl;
+}
+
+/**
+ * @tc.name: MarkUriPermission_001
+ * @tc.desc: parse groupInfo from json with invalid params
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedPermissionTest, GetDeviceSecurityLevel_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest GetDeviceSecurityLevel_001 begin" << std::endl;
+    string udid = "123456";
+    int32_t ret = DistributedSchedPermission::GetInstance().GetDeviceSecurityLevel(udid);
+    EXPECT_NE(ret, 0);
+    DTEST_LOG << "DistributedSchedPermissionTest GetDeviceSecurityLevel_001 end " <<  std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

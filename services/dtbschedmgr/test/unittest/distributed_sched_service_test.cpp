@@ -1232,6 +1232,45 @@ HWTEST_F(DistributedSchedServiceTest, StartContinuation_007, TestSize.Level3)
 }
 
 /**
+ * @tc.name: StartContinuation_007
+ * @tc.desc: call StartContinuation
+ * @tc.type: FUNC
+ * @tc.type: I6O5T3
+ */
+HWTEST_F(DistributedSchedServiceTest, StartContinuation_008, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_008 start" << std::endl;
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    int32_t flags = Want::FLAG_ABILITY_CONTINUATION;
+    want.SetElement(element);
+    want.SetFlags(flags);
+    int32_t missionId = 0;
+    int32_t callerUid = 0;
+    int32_t status = ERR_OK;
+    uint32_t accessToken = 0;
+    bool isSuccess = false;
+    /**
+     * @tc.steps: step1. call GetFormMgrProxy
+     */
+    #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
+    DTEST_LOG << "DSchedContinuationTest GetFormMgrProxy_001 start" << std::endl;
+    DistributedSchedService::GetInstance().GetFormMgrProxy();
+    DTEST_LOG << "DSchedContinuationTest GetFormMgrProxy_001 end" << std::endl;
+    #endif
+    
+    int32_t ret = DistributedSchedService::GetInstance().StartContinuation(
+        want, missionId, callerUid, status, accessToken);
+    DistributedSchedService::GetInstance().NotifyCompleteContinuation(DEVICE_ID_NULL, SESSION_ID, isSuccess);
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), ret);
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_008 end" << std::endl;
+}
+
+/**
  * @tc.name: NotifyCompleteContinuation_001
  * @tc.desc: call NotifyCompleteContinuation
  * @tc.type: FUNC
