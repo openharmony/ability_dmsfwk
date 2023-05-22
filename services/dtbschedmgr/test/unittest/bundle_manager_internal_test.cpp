@@ -411,6 +411,51 @@ HWTEST_F(BundleManagerInternalTest, IsSameAppId_001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: IsSameAppId_002
+ * @tc.desc: test IsSameAppId with invalid param
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, IsSameAppId_002, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest IsSameAppId_002 begin" << std::endl;
+    string appId = "1001";
+    string targetBundleName = "";
+    bool ret = BundleManagerInternal::IsSameAppId(appId, targetBundleName);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "BundleManagerInternalTest IsSameAppId_002 end "<< std::endl;
+}
+
+/**
+ * @tc.name: IsSameAppId_003
+ * @tc.desc: test IsSameAppId with invalid param
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, IsSameAppId_003, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest IsSameAppId_003 begin" << std::endl;
+    string appId = "";
+    string targetBundleName = "ohos.samples.dms.testApp";
+    bool ret = BundleManagerInternal::IsSameAppId(appId, targetBundleName);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "BundleManagerInternalTest IsSameAppId_003 end "<< std::endl;
+}
+
+/**
+ * @tc.name: IsSameAppId_004
+ * @tc.desc: test IsSameAppId with invalid param
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, IsSameAppId_004, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest IsSameAppId_004 begin" << std::endl;
+    string appId = "";
+    string targetBundleName = "";
+    bool ret = BundleManagerInternal::IsSameAppId(appId, targetBundleName);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "BundleManagerInternalTest IsSameAppId_004 end "<< std::endl;
+}
+
+/**
  * @tc.name: GetBundleIdFromBms_001
  * @tc.desc: test get accessTokenId from bms
  * @tc.type: FUNC
@@ -435,6 +480,7 @@ HWTEST_F(BundleManagerInternalTest, GetBundleIdFromBms_002, TestSize.Level3)
     DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_002 begin" << std::endl;
     const std::string bundleName = "com.ohos.camera";
     uint32_t accessTokenId;
+    BundleManagerInternal::GetDistributedBundleManager();
     int32_t ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_002 end "<< std::endl;
