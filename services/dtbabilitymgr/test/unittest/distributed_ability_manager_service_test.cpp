@@ -18,8 +18,10 @@
 #include "distributed_sched_util.h"
 #include "dtbschedmgr_log.h"
 #define private public
-#include "mission/distributed_sched_mission_manager.h"
 #include "continuation_extra_params.h"
+#include "continuation_manager/app_connection_stub.h"
+#include "continuation_manager/notifier_info.h"
+#include "mission/distributed_sched_mission_manager.h"
 #undef private
 #include "test_log.h"
 
@@ -916,6 +918,341 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleUpdateConnectStatus_001, Te
     }
     dtbabilitymgrService_->HandleUpdateConnectStatus(1, DEVICE_ID, deviceConnectStatus);
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleUpdateConnectStatus_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DumpNotifierLocked_002
+ * @tc.desc: test DumpNotifierLocked
+ * @tc.type: FUNC
+ * @tc.require: I76U22
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, DumpNotifierLocked_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest DumpNotifierLocked_002 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    /**
+     * @tc.steps: step1. test DumpNotifierLocked when callbackMap_ is not empty.
+     */
+    std::vector<int32_t> tokenVec;
+    std::string info;
+    std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
+    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    notifierInfo->SetNotifier(EVENT_CONNECT, notifier);
+    {
+        std::lock_guard<std::mutex> autoLock(dtbabilitymgrService_->callbackMapMutex_);
+        dtbabilitymgrService_->callbackMap_.clear();
+        dtbabilitymgrService_->callbackMap_[INVALID_CODE] = std::move(notifierInfo);;
+    }
+    tokenVec.push_back(INVALID_CODE);
+    dtbabilitymgrService_->DumpNotifierLocked(tokenVec, info);
+    EXPECT_NE(dtbabilitymgrService_, nullptr);
+    {
+        std::lock_guard<std::mutex> autoLock(dtbabilitymgrService_->callbackMapMutex_);
+        dtbabilitymgrService_->callbackMap_.clear();
+    }
+    DTEST_LOG << "DistributedAbilityManagerServiceTest DumpNotifierLocked_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: Register_002
+ * @tc.desc: test Register when continuationExtraParams != nullptr.
+ * @tc.type: FUNC
+ * @tc.require: I76U22
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, Register_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest Register_002 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+
+    int32_t token = 0;
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    ContinuationMode continuationMode = static_cast<ContinuationMode>(-1);
+    continuationExtraParams->SetContinuationMode(continuationMode);
+    int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
+    EXPECT_EQ(ret, INVALID_CONTINUATION_MODE);
+    {
+        std::lock_guard<std::mutex> tokenLock(dtbabilitymgrService_->tokenMutex_);
+        dtbabilitymgrService_->tokenMap_.clear();
+    }
+    DTEST_LOG << "DistributedAbilityManagerServiceTest Register_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: UpdateConnectStatus_002
+ * @tc.desc: test UpdateConnectStatus
+ * @tc.type: FUNC
+ * @tc.require: I76U22
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, UpdateConnectStatus_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest UpdateConnectStatus_002 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+
+    int32_t token = 0;
+    DeviceConnectStatus deviceConnectStatus = static_cast<DeviceConnectStatus>(-1);
+    int32_t ret = dtbabilitymgrService_->UpdateConnectStatus(token, DEVICE_ID, deviceConnectStatus);
+    EXPECT_EQ(ret, INVALID_CONNECT_STATUS);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest UpdateConnectStatus_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartDeviceManager_001
+ * @tc.desc: test StartDeviceManager when continuationExtraParams != nullptr.
+ * @tc.type: FUNC
+ * @tc.require: I76U22
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, StartDeviceManager_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest StartDeviceManager_001 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+
+    int32_t token = 0;
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    ContinuationMode continuationMode = static_cast<ContinuationMode>(-1);
+    continuationExtraParams->SetContinuationMode(continuationMode);
+    int32_t ret = dtbabilitymgrService_->StartDeviceManager(token, continuationExtraParams);
+    EXPECT_EQ(ret, INVALID_CONTINUATION_MODE);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest StartDeviceManager_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartDeviceManager_002
+ * @tc.desc: test StartDeviceManager when continuationExtraParams != nullptr.
+ * @tc.type: FUNC
+ * @tc.require: I76U22
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, StartDeviceManager_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest StartDeviceManager_002 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+
+    int32_t token = 0;
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    int32_t ret = dtbabilitymgrService_->StartDeviceManager(token, continuationExtraParams);
+    EXPECT_EQ(ret, TOKEN_HAS_NOT_REGISTERED);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest StartDeviceManager_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartDeviceManager_003
+ * @tc.desc: test StartDeviceManager when continuationExtraParams != nullptr.
+ * @tc.type: FUNC
+ * @tc.require: I76U22
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, StartDeviceManager_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest StartDeviceManager_003 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+
+    int32_t token = 0;
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    int32_t res = dtbabilitymgrService_->Register(continuationExtraParams, token);
+    EXPECT_EQ(res, ERR_OK);
+
+    std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
+    {
+        std::lock_guard<std::mutex> autoLock(dtbabilitymgrService_->callbackMapMutex_);
+        dtbabilitymgrService_->callbackMap_.clear();
+        dtbabilitymgrService_->callbackMap_[token] = std::move(notifierInfo);
+    }
+    int32_t ret = dtbabilitymgrService_->StartDeviceManager(token, continuationExtraParams);
+    EXPECT_EQ(ret, ERR_OK);
+    {
+        std::lock_guard<std::mutex> tokenLock(dtbabilitymgrService_->tokenMutex_);
+        dtbabilitymgrService_->tokenMap_.clear();
+    }
+    {
+        std::lock_guard<std::mutex> autoLock(dtbabilitymgrService_->callbackMapMutex_);
+        dtbabilitymgrService_->callbackMap_.clear();
+    }
+    DTEST_LOG << "DistributedAbilityManagerServiceTest StartDeviceManager_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectAbility_001
+ * @tc.desc: test DisconnectAbility when continuationExtraParams != nullptr.
+ * @tc.type: FUNC
+ * @tc.require: I76U22
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, DisconnectAbility_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest DisconnectAbility_001 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    int32_t token = 0;
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    dtbabilitymgrService_->connect_ = new AppConnectionStub(token, continuationExtraParams);
+    int32_t ret = dtbabilitymgrService_->DisconnectAbility();
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest DisconnectAbility_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnDeviceConnect_001
+ * @tc.desc: test OnDeviceConnect when continuationHandler_ != nullptr.
+ * @tc.type: FUNC
+ * @tc.require: I76U22
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceConnect_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest OnDeviceConnect_001 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
+        auto runner = AppExecFwk::EventRunner::Create("ContinuationMgr");
+        dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    }
+    int32_t token = 0;
+    std::vector<ContinuationResult> continuationResults;
+    int32_t ret = dtbabilitymgrService_->OnDeviceConnect(token, continuationResults);
+    EXPECT_EQ(ret, CALLBACK_HAS_NOT_REGISTERED);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest DisconnectAbility_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnDeviceConnect_002
+ * @tc.desc: test OnDeviceConnect when continuationHandler_ != nullptr.
+ * @tc.type: FUNC
+ * @tc.require: I76U22
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceConnect_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest OnDeviceConnect_002 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
+        auto runner = AppExecFwk::EventRunner::Create("ContinuationMgr");
+        dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    }
+    int32_t token = 0;
+    std::vector<ContinuationResult> continuationResults;
+    std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
+    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    notifierInfo->SetNotifier(EVENT_CONNECT, notifier);
+    {
+        std::lock_guard<std::mutex> autoLock(dtbabilitymgrService_->callbackMapMutex_);
+        dtbabilitymgrService_->callbackMap_.clear();
+        dtbabilitymgrService_->callbackMap_[token] = std::move(notifierInfo);
+    }
+    int32_t ret = dtbabilitymgrService_->OnDeviceConnect(token, continuationResults);
+    {
+        std::lock_guard<std::mutex> autoLock(dtbabilitymgrService_->callbackMapMutex_);
+        dtbabilitymgrService_->callbackMap_.clear();
+    }
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest OnDeviceConnect_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleStartDeviceManager_001
+ * @tc.desc: test HandleStartDeviceManager
+ * @tc.type: FUNC
+ * @tc.require: I76U22
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, HandleStartDeviceManager_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest HandleStartDeviceManager_001 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
+        auto runner = AppExecFwk::EventRunner::Create("ContinuationMgr");
+        dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    }
+    int32_t token = 0;
+    dtbabilitymgrService_->HandleStartDeviceManager(token, nullptr);
+    EXPECT_NE(dtbabilitymgrService_, nullptr);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest HandleStartDeviceManager_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleStartDeviceManager_002
+ * @tc.desc: test HandleStartDeviceManager
+ * @tc.type: FUNC
+ * @tc.require: I76U22
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, HandleStartDeviceManager_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest HandleStartDeviceManager_002 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
+        auto runner = AppExecFwk::EventRunner::Create("ContinuationMgr");
+        dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    }
+    int32_t token = 0;
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
+    {
+        std::lock_guard<std::mutex> autoLock(dtbabilitymgrService_->callbackMapMutex_);
+        dtbabilitymgrService_->callbackMap_.clear();
+        dtbabilitymgrService_->callbackMap_[token] = std::move(notifierInfo);
+    }
+    dtbabilitymgrService_->HandleStartDeviceManager(token, continuationExtraParams);
+    {
+        std::lock_guard<std::mutex> autoLock(dtbabilitymgrService_->callbackMapMutex_);
+        dtbabilitymgrService_->callbackMap_.clear();
+    }
+    EXPECT_NE(dtbabilitymgrService_, nullptr);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest HandleStartDeviceManager_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleNotifierDied_002
+ * @tc.desc: test HandleNotifierDied
+ * @tc.type: FUNC
+ * @tc.require: I76U22
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, HandleNotifierDied_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest HandleNotifierDied_002 start" << std::endl;
+    if (dtbabilitymgrService_ == nullptr) {
+        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
+        return;
+    }
+    int32_t token = 0;
+    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
+    notifierInfo->SetNotifier(EVENT_CONNECT, notifier);
+    {
+        std::lock_guard<std::mutex> callbackMapLock(dtbabilitymgrService_->callbackMapMutex_);
+        dtbabilitymgrService_->callbackMap_.clear();
+        dtbabilitymgrService_->callbackMap_[token] = std::move(notifierInfo);;
+    }
+    dtbabilitymgrService_->HandleNotifierDied(dtbabilitymgrService_);
+    {
+        std::lock_guard<std::mutex> autoLock(dtbabilitymgrService_->callbackMapMutex_);
+        dtbabilitymgrService_->callbackMap_.clear();
+    }
+    EXPECT_NE(dtbabilitymgrService_, nullptr);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest HandleNotifierDied_002 end" << std::endl;
 }
 }
 }
