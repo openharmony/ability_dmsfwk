@@ -21,14 +21,15 @@
 #include "base_object.h"
 #include "bool_wrapper.h"
 #include "byte_wrapper.h"
+#include "distributed_want_params.h"
+#include "distributed_want_params_wrapper.h"
 #include "double_wrapper.h"
 #include "float_wrapper.h"
 #include "int_wrapper.h"
 #include "long_wrapper.h"
 #include "short_wrapper.h"
 #include "string_wrapper.h"
-#include "distributed_want_params.h"
-#include "distributed_want_params_wrapper.h"
+#include "test_log.h"
 #include "zchar_wrapper.h"
 #undef private
 #undef protected
@@ -50,10 +51,15 @@ public:
     void TearDown();
     std::shared_ptr<DistributedWantParams> wantParamsIn_ = nullptr;
     std::shared_ptr<DistributedWantParams> wantParamsOut_ = nullptr;
+    static sptr<DistributedWantParams> distributedWantParams_;
 };
 
+sptr<DistributedWantParams> DistributedWantParamsBaseTest::distributedWantParams_;
+
 void DistributedWantParamsBaseTest::SetUpTestCase(void)
-{}
+{
+    distributedWantParams_ = new DistributedWantParams();
+}
 
 void DistributedWantParamsBaseTest::TearDownTestCase(void)
 {}
@@ -1003,4 +1009,169 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_ReadUnsupportedDat
     int type1 = 50;
     bool result2 = wantParams.ReadFromParcelParam(parcel, key, type1);
     EXPECT_EQ(result2, false);
+}
+
+/**
+ * @tc.number: DistributedWantParams_Operator_1000
+ * @tc.name: Operator
+ * @tc.desc: Test Operator.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Operator_1000, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_Operator_1000 begin" << std::endl;
+    DistributedWantParams wantParams1;
+    DistributedWantParams wantParams2;
+    int32_t typeId = DistributedWantParams::VALUE_TYPE_WANTPARAMS;
+    DistributedWantParams ret = (wantParams1 = wantParams2);
+    EXPECT_EQ(typeId, DistributedWantParams::VALUE_TYPE_WANTPARAMS);
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_Operator_1000 end" << std::endl;
+}
+
+/**
+ * @tc.number: DistributedWantParams_Operator_2000
+ * @tc.name: Operator
+ * @tc.desc: Test Operator.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Operator_2000, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_Operator_2000 begin" << std::endl;
+    DistributedWantParams wantParams1;
+    const DistributedWantParams wantParams2;
+    int32_t typeId = DistributedWantParams::VALUE_TYPE_WANTPARAMS;
+    DistributedWantParams ret = (wantParams1 = wantParams2);
+    EXPECT_EQ(typeId, DistributedWantParams::VALUE_TYPE_WANTPARAMS);
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_Operator_2000 end" << std::endl;
+}
+
+/**
+ * @tc.number: DistributedWantParams_Operator_3000
+ * @tc.name: Operator
+ * @tc.desc: Test Operator.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Operator_3000, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_Operator_3000 begin" << std::endl;
+    DistributedUnsupportedData data1;
+    const DistributedUnsupportedData data2;
+    int32_t typeId = DistributedWantParams::VALUE_TYPE_WANTPARAMS;
+    DistributedUnsupportedData ret = (data1 = data2);
+    EXPECT_EQ(typeId, DistributedWantParams::VALUE_TYPE_WANTPARAMS);
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_Operator_3000 end" << std::endl;
+}
+
+/**
+ * @tc.number: DistributedWantParams_CompareInterface_1200
+ * @tc.name: CompareInterface
+ * @tc.desc: Test CompareInterface.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_CompareInterface_1200, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_CompareInterface_1200 begin" << std::endl;
+    const std::string value = "wantParam";
+    sptr<IInterface> interfaceObj =
+        DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_NULL, value);
+    int32_t typeId = DistributedWantParams::VALUE_TYPE_NULL;
+    bool result =
+        DistributedWantParams::CompareInterface(interfaceObj, interfaceObj, DistributedWantParams::VALUE_TYPE_NULL);
+    EXPECT_EQ(typeId, DistributedWantParams::VALUE_TYPE_NULL);
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_CompareInterface_1200 end" << std::endl;
+}
+
+/**
+ * @tc.number: DistributedWantParams_remove_0100
+ * @tc.name: remove
+ * @tc.desc: Test remove.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_remove_0100, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_remove_0100 begin" << std::endl;
+    distributedWantParams_->params_["hello"] = String::Box("World");
+    distributedWantParams_->Remove("hello");
+    distributedWantParams_->params_.clear();
+    EXPECT_TRUE(distributedWantParams_->params_.empty());
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_remove_0100 end" << std::endl;
+}
+
+/**
+ * @tc.number: DistributedWantParams_IsEmpty_0100
+ * @tc.name: IsEmpty
+ * @tc.desc: Test IsEmpty.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_IsEmpty_0100, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_IsEmpty_0100 begin" << std::endl;
+    distributedWantParams_->params_.clear();
+    EXPECT_TRUE(distributedWantParams_->IsEmpty());
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_IsEmpty_0100 end" << std::endl;
+}
+
+/**
+ * @tc.number: DistributedWantParams_DoMarshalling_0100
+ * @tc.name: DoMarshalling
+ * @tc.desc: Test DoMarshalling.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_DoMarshalling_0100, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_DoMarshalling_0100 begin" << std::endl;
+    DistributedUnsupportedData data;
+    distributedWantParams_->cachedUnsupportedData_.emplace_back(std::move(data));
+    Parcel tempParcel;
+    bool result = wantParamsIn_->DoMarshalling(tempParcel);
+    distributedWantParams_->cachedUnsupportedData_.clear();
+    EXPECT_TRUE(result);
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_DoMarshalling_0100 end" << std::endl;
+}
+
+
+/**
+ * @tc.number: DistributedWantParams_ReadUnsupportedData_1100
+ * @tc.name: ReadUnsupportedData
+ * @tc.desc: Test ReadUnsupportedData.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_ReadUnsupportedData_1100, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_ReadUnsupportedData_1100 begin" << std::endl;
+    DistributedWantParams wantParams;
+    Parcel parcel;
+    std::string key = "this is key";
+    int type = 1;
+    parcel.WriteInt32(0);
+    bool result = wantParams.ReadUnsupportedData(parcel, key, type);
+    EXPECT_FALSE(result);
+
+    int bufferSize = 1;
+    parcel.WriteInt32(bufferSize);
+    parcel.WriteInt32(0);
+    bool result2 = wantParams.ReadUnsupportedData(parcel, key, type);
+    EXPECT_FALSE(result2);
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_ReadUnsupportedData_1100 end" << std::endl;
+}
+
+/**
+ * @tc.number: DistributedWantParams_ReadFromParcelParam_1000
+ * @tc.name: ReadFromParcelParam
+ * @tc.desc: Test ReadFromParcelParam.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_ReadFromParcelParam_1000, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_ReadFromParcelParam_1000 begin" << std::endl;
+    DistributedWantParams wantParams;
+    Parcel parcel;
+    std::string key = "this is key";
+    int type = 51;
+    int bufferSize = 1;
+    parcel.WriteInt32(bufferSize);
+    parcel.WriteInt32(0);
+    bool result = wantParams.ReadFromParcelParam(parcel, key, type);
+    EXPECT_TRUE(result);
+    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_ReadFromParcelParam_1000 end" << std::endl;
 }

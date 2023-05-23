@@ -21,7 +21,9 @@
 #include "distributed_operation_builder.h"
 #undef private
 #undef protected
+#include "test_log.h"
 
+using namespace OHOS;
 using namespace testing::ext;
 using namespace OHOS::DistributedSchedule;
 using OHOS::Parcel;
@@ -38,10 +40,15 @@ public:
     void TearDown();
 
     std::shared_ptr<DistributedOperationBuilder> operationbuilder_ = nullptr;
+    static sptr<DistributedOperation> distributedOperation_;
 };
 
+sptr<DistributedOperation> DistributedOperationBaseTest::distributedOperation_;
+
 void DistributedOperationBaseTest::SetUpTestCase(void)
-{}
+{
+    distributedOperation_ = new DistributedOperation();
+}
 
 void DistributedOperationBaseTest::TearDownTestCase(void)
 {}
@@ -340,4 +347,233 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_0100
     operation_ = *(operation.get());
 
     EXPECT_EQ(true, operation_ == *(operation.get()));
+}
+
+/**
+ * @tc.number: DmsFwk_DistributedOperation_AddEntity_0100
+ * @tc.name: AddEntity
+ * @tc.desc: test AddEntity.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_AddEntity_0100, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_AddEntity_0100 begin" << std::endl;
+    std::string entity = "test";
+    distributedOperation_->entities_.emplace_back(entity);
+    distributedOperation_->AddEntity(entity);
+    distributedOperation_->entities_.clear();
+    EXPECT_TRUE(distributedOperation_->entities_.empty());
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_AddEntity_0100 end" << std::endl;
+}
+
+/**
+ * @tc.number: DmsFwk_DistributedOperation_RemoveEntity_0100
+ * @tc.name: RemoveEntity
+ * @tc.desc: test RemoveEntity.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_RemoveEntity_0100, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_RemoveEntity_0100 begin" << std::endl;
+    std::string entity = "test";
+    distributedOperation_->entities_.clear();
+    distributedOperation_->RemoveEntity(entity);
+    distributedOperation_->entities_.clear();
+    EXPECT_TRUE(distributedOperation_->entities_.empty());
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_RemoveEntity_0100 end" << std::endl;
+}
+
+/**
+ * @tc.number: DmsFwk_DistributedOperation_RemoveEntity_0200
+ * @tc.name: RemoveEntity
+ * @tc.desc: test RemoveEntity.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_RemoveEntity_0200, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_RemoveEntity_0200 begin" << std::endl;
+    std::string entity = "test";
+    distributedOperation_->entities_.emplace_back(entity);
+    std::string entity1 = "test1";
+    distributedOperation_->RemoveEntity(entity1);
+    distributedOperation_->entities_.clear();
+    EXPECT_TRUE(distributedOperation_->entities_.empty());
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_RemoveEntity_0200 end" << std::endl;
+}
+
+/**
+ * @tc.number: DmsFwk_DistributedOperation_Operator_0200
+ * @tc.name: Operator
+ * @tc.desc: test Operator.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_0200, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0200 begin" << std::endl;
+    DistributedOperation operation1;
+    DistributedOperation operation2;
+    operation1.abilityName_ = "test";
+    EXPECT_FALSE(operation1 == operation2);
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0200 end" << std::endl;
+}
+
+/**
+ * @tc.number: DmsFwk_DistributedOperation_Operator_0300
+ * @tc.name: Operator
+ * @tc.desc: test Operator.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_0300, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0300 begin" << std::endl;
+    DistributedOperation operation1;
+    DistributedOperation operation2;
+    operation1.action_ = "test";
+    EXPECT_FALSE(operation1 == operation2);
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0300 end" << std::endl;
+}
+
+/**
+ * @tc.number: DmsFwk_DistributedOperation_Operator_0400
+ * @tc.name: Operator
+ * @tc.desc: test Operator.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_0400, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0400 begin" << std::endl;
+    DistributedOperation operation1;
+    DistributedOperation operation2;
+    operation1.bundleName_ = "test";
+    EXPECT_FALSE(operation1 == operation2);
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0400 end" << std::endl;
+}
+
+/**
+ * @tc.number: DmsFwk_DistributedOperation_Operator_0500
+ * @tc.name: Operator
+ * @tc.desc: test Operator.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_0500, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0500 begin" << std::endl;
+    DistributedOperation operation1;
+    DistributedOperation operation2;
+    operation1.deviceId_ = "test";
+    EXPECT_FALSE(operation1 == operation2);
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0500 end" << std::endl;
+}
+
+/**
+ * @tc.number: DmsFwk_DistributedOperation_Operator_0600
+ * @tc.name: Operator
+ * @tc.desc: test Operator.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_0600, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0600 begin" << std::endl;
+    DistributedOperation operation1;
+    DistributedOperation operation2;
+    operation1.moduleName_ = "test";
+    EXPECT_FALSE(operation1 == operation2);
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0600 end" << std::endl;
+}
+
+/**
+ * @tc.number: DmsFwk_DistributedOperation_Operator_0700
+ * @tc.name: Operator
+ * @tc.desc: test Operator.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_0700, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0700 begin" << std::endl;
+    DistributedOperation operation1;
+    DistributedOperation operation2;
+    std::string entity = "test";
+    operation1.entities_.emplace_back(entity);
+    EXPECT_FALSE(operation1 == operation2);
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0700 end" << std::endl;
+}
+
+/**
+ * @tc.number: DmsFwk_DistributedOperation_Operator_0800
+ * @tc.name: Operator
+ * @tc.desc: test Operator.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_0800, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0800 begin" << std::endl;
+    DistributedOperation operation1;
+    DistributedOperation operation2;
+    std::string entity = "test";
+    operation1.entities_.emplace_back(entity);
+    std::string entity1 = "test1";
+    operation2.entities_.emplace_back(entity1);
+    EXPECT_FALSE(operation1 == operation2);
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0800 end" << std::endl;
+}
+
+/**
+ * @tc.number: DmsFwk_DistributedOperation_Operator_0900
+ * @tc.name: Operator
+ * @tc.desc: test Operator.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_0900, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0900 begin" << std::endl;
+    DistributedOperation operation1;
+    DistributedOperation operation2;
+    operation1.flags_ = 1;
+    EXPECT_FALSE(operation1 == operation2);
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_0900 end" << std::endl;
+}
+
+/**
+ * @tc.number: DmsFwk_DistributedOperation_Operator_1000
+ * @tc.name: Operator
+ * @tc.desc: test Operator.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_1000, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_1000 begin" << std::endl;
+    DistributedOperation operation1;
+    DistributedOperation operation2;
+    std::string value = "test";
+    OHOS::Uri uri(value);
+    operation1.uri_ = uri;
+    EXPECT_FALSE(operation1 == operation2);
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Operator_1000 end" << std::endl;
+}
+
+/**
+ * @tc.number: DmsFwk_DistributedOperation_Marshalling_0200
+ * @tc.name: Marshalling
+ * @tc.desc: test Marshalling.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Marshalling_0200, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Marshalling_0200 begin" << std::endl;
+    std::string value = "";
+    OHOS::Uri uri(value);
+    std::vector<std::string> columns;
+    columns.push_back("string1");
+    operationbuilder_->WithUri(uri);
+    operationbuilder_->WithAction(value);
+    operationbuilder_->WithEntities(columns);
+    operationbuilder_->WithDeviceId(value);
+    operationbuilder_->WithBundleName(value);
+    operationbuilder_->WithAbilityName(value);
+
+    std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
+    Parcel in;
+    bool ret = operation->Marshalling(in);
+    EXPECT_TRUE(ret);
+    DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Marshalling_0200 begin" << std::endl;
 }

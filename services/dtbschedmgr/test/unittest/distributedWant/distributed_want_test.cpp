@@ -4232,5 +4232,73 @@ HWTEST_F(DistributedWantBaseTest, ParseURI_test_001, TestSize.Level3)
 
     GTEST_LOG_(INFO) << "ParseURI_test_001 end";
 }
+
+/**
+ * @tc.number: GetLowerCaseScheme_test_001
+ * @tc.name: GetLowerCaseScheme
+ * @tc.desc: Test GetLowerCaseScheme.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantBaseTest, GetLowerCaseScheme_test_001, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_001 start";
+    std::string strUri = "";
+    Uri uri(strUri);
+    Want want;
+    want.GetLowerCaseScheme(uri);
+    EXPECT_TRUE(strUri.empty());
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_001 end";
+}
+
+/**
+ * @tc.number: GetLowerCaseScheme_test_002
+ * @tc.name: GetLowerCaseScheme
+ * @tc.desc: Test GetLowerCaseScheme.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantBaseTest, GetLowerCaseScheme_test_002, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_002 start";
+    std::string strUri = "#Test;action;end";
+    Uri uri(strUri);
+    Want want;
+    want.GetLowerCaseScheme(uri);
+    EXPECT_FALSE(strUri.empty());
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_002 end";
+}
+
+/**
+ * @tc.number: GetLowerCaseScheme_test_003
+ * @tc.name: GetLowerCaseScheme
+ * @tc.desc: Test GetLowerCaseScheme.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantBaseTest, GetLowerCaseScheme_test_003, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_003 start";
+    std::string strUri = "#Test;action;end";
+    Uri uri(strUri);
+    uri.scheme_ = "NOT VALID";
+    Want want;
+    want.GetLowerCaseScheme(uri);
+    EXPECT_FALSE(strUri.empty());
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_003 end";
+}
+
+/**
+ * @tc.number: WantParseUri_test_001
+ * @tc.name: WantParseUri
+ * @tc.desc: Test WantParseUri.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantBaseTest, WantParseUri_test_001, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "WantParseUri_test_001 start";
+    char* uri = nullptr;
+    DistributedWant* newWant = nullptr;
+    newWant->WantParseUri(uri);
+    EXPECT_EQ(uri, nullptr);
+    GTEST_LOG_(INFO) << "WantParseUri_test_001 end";
+}
 }  // namespace DistributedSchedule
 }  // namespace OHOS
