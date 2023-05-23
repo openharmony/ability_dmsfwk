@@ -1,0 +1,11 @@
+{
+    "process": "foundation",
+    "systemability": [
+        {
+            "name": 1404,
+            "libpath": "libdistributed_ability_manager_svr.z.so",
+            "run-on-create": true,
+            "distributed": false
+        }
+    ]
+}
