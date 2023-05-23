@@ -57,8 +57,8 @@ public:
      */
     void OnProcessDied(const AppExecFwk::ProcessData& processData) override;
 private:
-    int32_t count_ = 0;
     std::mutex countLock_;
+    std::map<sptr<IRemoteObject>, int32_t> connectAbilityMap_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

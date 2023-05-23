@@ -56,6 +56,7 @@ namespace {
     const std::u16string DEVICE_ID_NULL = u"";
     constexpr int32_t SESSION_ID = 123;
     const std::string DMS_MISSION_ID = "dmsMissionId";
+    const std::string DMS_CONNECT_TOKEN = "connectToken";
     constexpr int32_t MISSION_ID = 1;
     const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
     const int DEFAULT_REQUEST_CODE = -1;
@@ -64,8 +65,9 @@ namespace {
     const string DMS_IS_CALLER_BACKGROUND = "dmsIsCallerBackGround";
     const string DMS_VERSION_ID = "dmsVersion";
     const string DMS_VERSION = "4.0.0";
-    constexpr int32_t SLEEP_TIME = 1000;
     constexpr int32_t FOREGROUND = 2;
+    constexpr int32_t MAX_TOKEN_NUM = 100000000;
+    constexpr int32_t SLEEP_TIME = 1000;
 }
 
 class DistributedSchedServiceTest : public testing::Test {
@@ -898,7 +900,7 @@ HWTEST_F(DistributedSchedServiceTest, StartAbilityFromRemote_006, TestSize.Level
     int result = DistributedSchedService::GetInstance().StartAbilityFromRemote(want,
         abilityInfo, 0, callerInfo, accountInfo);
     DTEST_LOG << "result:" << result << std::endl;
-    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), result);
+    EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), result);
     DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_006 end" << std::endl;
 }
 
@@ -934,7 +936,12 @@ HWTEST_F(DistributedSchedServiceTest, SendResultFromRemote_006, TestSize.Level1)
 
     int result = DistributedSchedService::GetInstance().SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
     DTEST_LOG << "result:" << result << std::endl;
-    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), result);
+    EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), result);
+    /**
+     * @tc.steps: step2. call RemoteConnectAbilityMappingLocked when connect == nullptr;
+     */
+    DistributedSchedService::GetInstance().RemoteConnectAbilityMappingLocked(nullptr,
+        localDeviceId, localDeviceId, element, callerInfo, TargetComponent::HARMONY_COMPONENT);
     DTEST_LOG << "DistributedSchedServiceTest SendResultFromRemote_006 end" << std::endl;
 }
 
@@ -1231,6 +1238,45 @@ HWTEST_F(DistributedSchedServiceTest, StartContinuation_007, TestSize.Level3)
 }
 
 /**
+ * @tc.name: StartContinuation_007
+ * @tc.desc: call StartContinuation
+ * @tc.type: FUNC
+ * @tc.type: I6O5T3
+ */
+HWTEST_F(DistributedSchedServiceTest, StartContinuation_008, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_008 start" << std::endl;
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    int32_t flags = Want::FLAG_ABILITY_CONTINUATION;
+    want.SetElement(element);
+    want.SetFlags(flags);
+    int32_t missionId = 0;
+    int32_t callerUid = 0;
+    int32_t status = ERR_OK;
+    uint32_t accessToken = 0;
+    bool isSuccess = false;
+    /**
+     * @tc.steps: step1. call GetFormMgrProxy
+     */
+    #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
+    DTEST_LOG << "DSchedContinuationTest GetFormMgrProxy_001 start" << std::endl;
+    DistributedSchedService::GetInstance().GetFormMgrProxy();
+    DTEST_LOG << "DSchedContinuationTest GetFormMgrProxy_001 end" << std::endl;
+    #endif
+    
+    int32_t ret = DistributedSchedService::GetInstance().StartContinuation(
+        want, missionId, callerUid, status, accessToken);
+    DistributedSchedService::GetInstance().NotifyCompleteContinuation(DEVICE_ID_NULL, SESSION_ID, isSuccess);
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), ret);
+    DTEST_LOG << "DSchedContinuationTest StartContinuation_008 end" << std::endl;
+}
+
+/**
  * @tc.name: NotifyCompleteContinuation_001
  * @tc.desc: call NotifyCompleteContinuation
  * @tc.type: FUNC
@@ -1304,7 +1350,7 @@ HWTEST_F(DistributedSchedServiceTest, StartAbilityFromRemote_007, TestSize.Level
     accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
     int ret = DistributedSchedService::GetInstance().StartAbilityFromRemote(want,
         abilityInfo, 0, callerInfo, accountInfo);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_007 end" << std::endl;
 }
 
@@ -1493,7 +1539,7 @@ HWTEST_F(DistributedSchedServiceTest, StartAbilityByCallFromRemote_002, TestSize
     accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
     int ret = DistributedSchedService::GetInstance().StartAbilityByCallFromRemote(want, connect,
         callerInfo, accountInfo);
-    EXPECT_EQ(ret, CALL_PERMISSION_DENIED);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest StartAbilityByCallFromRemote_002 end" << std::endl;
 }
 
@@ -1530,7 +1576,7 @@ HWTEST_F(DistributedSchedServiceTest, NotifyStateChanged_001, TestSize.Level3)
     int32_t abilityState = FOREGROUND;
     std::string localDeviceId;
     AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME, ABILITY_NAME);
-    int32_t ret = DistributedSchedService::GetInstance().NotifyStateChanged(abilityState, element);
+    int32_t ret = DistributedSchedService::GetInstance().NotifyStateChanged(abilityState, element, nullptr);
     DTEST_LOG << "ret:" << ret << std::endl;
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest NotifyStateChanged_001 end" << std::endl;
@@ -1568,7 +1614,7 @@ HWTEST_F(DistributedSchedServiceTest, NotifyStateChangedFromRemote_003, TestSize
     AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME, ABILITY_NAME);
 
     sptr<IRemoteObject> connect = nullptr;
-    DistributedSchedService::GetInstance().callMap_[0] = {connect, localDeviceId};
+    DistributedSchedService::GetInstance().callMap_[connect] = {1, localDeviceId};
     int ret = DistributedSchedService::GetInstance().NotifyStateChangedFromRemote(0, 0, element);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest NotifyStateChangedFromRemote_003 end" << std::endl;
@@ -1589,11 +1635,12 @@ HWTEST_F(DistributedSchedServiceTest, RegisterAppStateObserver_001, TestSize.Lev
     AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME, ABILITY_NAME);
     want.SetElement(element);
     want.SetParam(DMS_MISSION_ID, 0);
+    want.SetParam(DMS_CONNECT_TOKEN, 0);
     sptr<IRemoteObject> connect = new MockDistributedSched();
     CallerInfo callerInfo;
     callerInfo.uid = 0;
     callerInfo.sourceDeviceId = localDeviceId;
-    bool ret = DistributedSchedService::GetInstance().RegisterAppStateObserver(want, callerInfo, connect);
+    bool ret = DistributedSchedService::GetInstance().RegisterAppStateObserver(want, callerInfo, nullptr, connect);
     DistributedSchedService::GetInstance().UnregisterAppStateObserver(connect);
     EXPECT_TRUE(ret);
     DTEST_LOG << "DistributedSchedServiceTest RegisterAppStateObserver_001 end" << std::endl;
@@ -1629,11 +1676,12 @@ HWTEST_F(DistributedSchedServiceTest, UnregisterAppStateObserver_002, TestSize.L
     AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME, ABILITY_NAME);
     want.SetElement(element);
     want.SetParam(DMS_MISSION_ID, 0);
+    want.SetParam(DMS_CONNECT_TOKEN, 0);
     sptr<IRemoteObject> connect = new MockDistributedSched();
     CallerInfo callerInfo;
     callerInfo.uid = 0;
     callerInfo.sourceDeviceId = localDeviceId;
-    bool ret = DistributedSchedService::GetInstance().RegisterAppStateObserver(want, callerInfo, connect);
+    bool ret = DistributedSchedService::GetInstance().RegisterAppStateObserver(want, callerInfo, nullptr, connect);
     EXPECT_TRUE(ret);
     sptr<IRemoteObject> connect1 = new MockDistributedSched();
     DistributedSchedService::GetInstance().UnregisterAppStateObserver(connect1);
@@ -1672,7 +1720,7 @@ HWTEST_F(DistributedSchedServiceTest, NotifyStateChanged_002, TestSize.Level3)
     DistributedSchedService::GetInstance().observerMap_[connect] = {appStateObserver, localDeviceId, 0, BUNDLE_NAME,
         ABILITY_NAME};
     AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME, ABILITY_NAME);
-    int32_t ret = DistributedSchedService::GetInstance().NotifyStateChanged(abilityState, element);
+    int32_t ret = DistributedSchedService::GetInstance().NotifyStateChanged(abilityState, element, nullptr);
     DTEST_LOG << "ret:" << ret << std::endl;
     DistributedSchedService::GetInstance().observerMap_.clear();
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -1696,7 +1744,7 @@ HWTEST_F(DistributedSchedServiceTest, NotifyStateChanged_003, TestSize.Level3)
     DistributedSchedService::GetInstance().observerMap_[connect] = {appStateObserver, REMOTE_DEVICEID, 0, BUNDLE_NAME,
         ABILITY_NAME};
     AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME, ABILITY_NAME);
-    int32_t ret = DistributedSchedService::GetInstance().NotifyStateChanged(abilityState, element);
+    int32_t ret = DistributedSchedService::GetInstance().NotifyStateChanged(abilityState, element, nullptr);
     DTEST_LOG << "ret:" << ret << std::endl;
     DistributedSchedService::GetInstance().observerMap_.clear();
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -1737,7 +1785,7 @@ HWTEST_F(DistributedSchedServiceTest, NotifyStateChangedFromRemote_005, TestSize
     std::string localDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
     sptr<IRemoteObject> connect = nullptr;
-    DistributedSchedService::GetInstance().callMap_[0] = {connect, localDeviceId};
+    DistributedSchedService::GetInstance().callMap_[connect] = {2, localDeviceId};
     AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME, ABILITY_NAME);
     int32_t ret = DistributedSchedService::GetInstance().NotifyStateChangedFromRemote(abilityState, 0, element);
     DTEST_LOG << "ret:" << ret << std::endl;
@@ -1760,9 +1808,9 @@ HWTEST_F(DistributedSchedServiceTest, NotifyStateChangedFromRemote_006, TestSize
     std::string localDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
     sptr<IRemoteObject> connect = new MockDistributedSched();
-    DistributedSchedService::GetInstance().callMap_[0] = {connect, localDeviceId};
+    DistributedSchedService::GetInstance().callMap_[connect] = {3, localDeviceId};
     AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME, ABILITY_NAME);
-    int32_t ret = DistributedSchedService::GetInstance().NotifyStateChangedFromRemote(abilityState, 0, element);
+    int32_t ret = DistributedSchedService::GetInstance().NotifyStateChangedFromRemote(abilityState, 3, element);
     DTEST_LOG << "ret:" << ret << std::endl;
     DistributedSchedService::GetInstance().callMap_.clear();
     EXPECT_EQ(ret, ERR_OK);
@@ -1848,7 +1896,7 @@ HWTEST_F(DistributedSchedServiceTest, HandleLocalCallerDied_001, TestSize.Level1
     sptr<IRemoteObject> connect = new MockDistributedSched();
     std::list<ConnectAbilitySession> sessionsList;
     DistributedSchedService::GetInstance().callerMap_[connect] = sessionsList;
-    DistributedSchedService::GetInstance().callMap_[0] = {connect, localDeviceId};
+    DistributedSchedService::GetInstance().callMap_[connect] = {4, localDeviceId};
     DistributedSchedService::GetInstance().HandleLocalCallerDied(connect);
     DistributedSchedService::GetInstance().callerMap_.clear();
     EXPECT_TRUE(DistributedSchedService::GetInstance().callerMap_.empty());
@@ -1889,7 +1937,7 @@ HWTEST_F(DistributedSchedServiceTest, RemoveCallerComponent_001, TestSize.Level1
     sptr<IRemoteObject> connect = new MockDistributedSched();
     std::list<ConnectAbilitySession> sessionsList;
     DistributedSchedService::GetInstance().callerMap_[connect] = sessionsList;
-    DistributedSchedService::GetInstance().callMap_[0] = {connect, localDeviceId};
+    DistributedSchedService::GetInstance().callMap_[connect] = {5, localDeviceId};
     DistributedSchedService::GetInstance().RemoveCallerComponent(connect);
     DistributedSchedService::GetInstance().callerMap_.clear();
     EXPECT_TRUE(DistributedSchedService::GetInstance().callerMap_.empty());
@@ -1912,7 +1960,7 @@ HWTEST_F(DistributedSchedServiceTest, ProcessCalleeOffline_001, TestSize.Level1)
     sptr<IRemoteObject> connect = new MockDistributedSched();
     std::list<ConnectAbilitySession> sessionsList;
     DistributedSchedService::GetInstance().callerMap_[connect] = sessionsList;
-    DistributedSchedService::GetInstance().callMap_[0] = {connect, localDeviceId};
+    DistributedSchedService::GetInstance().callMap_[connect] = {6, localDeviceId};
     DistributedSchedService::GetInstance().ProcessCalleeOffline(REMOTE_DEVICEID);
 
     sptr<IRemoteObject> mockConnect;
@@ -1989,7 +2037,7 @@ HWTEST_F(DistributedSchedServiceTest, ConnectAbilityFromRemote_002, TestSize.Lev
     if (targetAbility.visible) {
         EXPECT_EQ(ret1, ERR_OK);
     } else {
-        EXPECT_EQ(ret1, DMS_START_CONTROL_PERMISSION_DENIED);
+        EXPECT_EQ(ret1, INVALID_REMOTE_PARAMETERS_ERR);
     }
     DTEST_LOG << "DistributedSchedServiceTest ConnectAbilityFromRemote_002 end" << std::endl;
 }
@@ -2347,7 +2395,7 @@ HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_001, TestSi
     IDistributedSched::AccountInfo accountInfo;
     int32_t extensionType = 3;
     EXPECT_EQ(DistributedSchedService::GetInstance().StopExtensionAbilityFromRemote(remoteWant, callerInfo,
-        accountInfo, extensionType), DMS_PERMISSION_DENIED);
+        accountInfo, extensionType), INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_001 end" << std::endl;
 }
 
@@ -2428,7 +2476,7 @@ HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_004, TestSi
     int32_t extensionType = 3;
     int ret = DistributedSchedService::GetInstance().StopExtensionAbilityFromRemote(want, callerInfo,
         accountInfo, extensionType);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_004 end" << std::endl;
 }
 
@@ -2455,6 +2503,377 @@ HWTEST_F(DistributedSchedServiceTest, StopRemoteExtensionAbility_003, TestSize.L
     int result = proxy->StopRemoteExtensionAbility(want, 0, 0, extensionType);
     EXPECT_EQ(result, DMS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedServiceTest StopRemoteExtensionAbility_003 end" << std::endl;
+}
+
+#ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
+/**
+ * @tc.name: StartRemoteShareForm_003
+ * @tc.desc: call StartAbilityFromRemote with dms
+ * @tc.type: FUNC
+ * @tc.require: I76THI
+ */
+HWTEST_F(DistributedSchedServiceTest, StartRemoteShareForm_003, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StartRemoteShareForm_003 start" << std::endl;
+    /**
+    * @tc.steps: step1. call StartAbilityFromRemote when remoteDeviceId is valid.
+    */
+    const std::string remoteDeviceId = "123456";
+    const OHOS::AppExecFwk::FormShareInfo formShareInfo {};
+    int32_t result = DistributedSchedService::GetInstance().StartRemoteShareForm(remoteDeviceId, formShareInfo);
+    EXPECT_EQ(result, GET_REMOTE_DMS_FAIL);
+    DTEST_LOG << "DistributedSchedServiceTest StartRemoteShareForm_003 end" << std::endl;
+}
+#endif
+
+/**
+ * @tc.name: GetConnectComponentList_001
+ * @tc.desc: call GetConnectComponentList
+ * @tc.type: FUNC
+ * @tc.require: I76THI
+ */
+HWTEST_F(DistributedSchedServiceTest, GetConnectComponentList_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceTest GetConnectComponentList_001 start" << std::endl;
+    /**
+    * @tc.steps: step1. call GetConnectComponentList when iter.second is empty.
+    */
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    std::list<ConnectAbilitySession> sessionsList;
+    std::vector<std::string> distributedComponents;
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedService::GetInstance().distributedLock_);
+        DistributedSchedService::GetInstance().distributedConnectAbilityMap_.clear();
+        DistributedSchedService::GetInstance().distributedConnectAbilityMap_[connect] = sessionsList;
+    }
+    DistributedSchedService::GetInstance().GetConnectComponentList(distributedComponents);
+    EXPECT_TRUE(distributedComponents.empty());
+    /**
+    * @tc.steps: step2. call GetConnectComponentList when iter.second is not empty.
+    */
+    CallerInfo callerInfo;
+    ConnectAbilitySession connectAbilitySession("sourceDeviceId", "destinationDeviceId", callerInfo);
+    sessionsList.emplace_back(connectAbilitySession);
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedService::GetInstance().distributedLock_);
+        DistributedSchedService::GetInstance().distributedConnectAbilityMap_[connect] = sessionsList;
+    }
+    DistributedSchedService::GetInstance().GetConnectComponentList(distributedComponents);
+    EXPECT_FALSE(distributedComponents.empty());
+    /**
+    * @tc.steps: step3. call GetConnectComponentList when connectAbilityMap_ is not empty.
+    */
+    distributedComponents.clear();
+    ConnectInfo connectInfo;
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedService::GetInstance().connectLock_);
+        DistributedSchedService::GetInstance().connectAbilityMap_[connect] = connectInfo;
+    }
+    DistributedSchedService::GetInstance().GetConnectComponentList(distributedComponents);
+    EXPECT_FALSE(distributedComponents.empty());
+    DTEST_LOG << "DistributedSchedServiceTest GetConnectComponentList_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetCallComponentList_001
+ * @tc.desc: call GetCallComponentList
+ * @tc.type: FUNC
+ * @tc.require: I76THI
+ */
+HWTEST_F(DistributedSchedServiceTest, GetCallComponentList_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceTest GetCallComponentList_001 start" << std::endl;
+    /**
+    * @tc.steps: step1. call GetCallComponentList when iter.second is empty.
+    */
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    std::list<ConnectAbilitySession> sessionsList;
+    std::vector<std::string> distributedComponents;
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedService::GetInstance().callerLock_);
+        DistributedSchedService::GetInstance().callerMap_.clear();
+        DistributedSchedService::GetInstance().callerMap_[connect] = sessionsList;
+    }
+    DistributedSchedService::GetInstance().GetCallComponentList(distributedComponents);
+    EXPECT_TRUE(distributedComponents.empty());
+    /**
+    * @tc.steps: step2. call GetCallComponentList when iter.second is not empty.
+    */
+    CallerInfo callerInfo;
+    ConnectAbilitySession connectAbilitySession("sourceDeviceId", "destinationDeviceId", callerInfo);
+    sessionsList.emplace_back(connectAbilitySession);
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedService::GetInstance().callerLock_);
+        DistributedSchedService::GetInstance().callerMap_[connect] = sessionsList;
+    }
+    DistributedSchedService::GetInstance().GetCallComponentList(distributedComponents);
+    EXPECT_FALSE(distributedComponents.empty());
+    /**
+    * @tc.steps: step3. call GetCallComponentList when calleeMap_ is not empty.
+    */
+    distributedComponents.clear();
+    ConnectInfo connectInfo;
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedService::GetInstance().calleeLock_);
+        DistributedSchedService::GetInstance().calleeMap_[connect] = connectInfo;
+    }
+    DistributedSchedService::GetInstance().GetCallComponentList(distributedComponents);
+    EXPECT_FALSE(distributedComponents.empty());
+    DTEST_LOG << "DistributedSchedServiceTest GetCallComponentList_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SaveConnectToken_001
+ * @tc.desc: call SaveConnectToken
+ * @tc.type: FUNC
+ * @tc.require: I76THI
+ */
+HWTEST_F(DistributedSchedServiceTest, SaveConnectToken_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest SaveConnectToken_001 start" << std::endl;
+    AAFwk::Want want;
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME,
+        ABILITY_NAME);
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    /**
+    * @tc.steps: step1. call SaveConnectToken
+    * @tc.expected: step1. SaveConnectToken return token_
+    */
+    int32_t token = 0;
+    {
+        std::lock_guard<std::mutex> tokenLock(DistributedSchedService::GetInstance().tokenMutex_);
+        token = DistributedSchedService::GetInstance().token_.load();
+    }
+    int32_t result = DistributedSchedService::GetInstance().SaveConnectToken(want, connect);
+    EXPECT_EQ(result, token + 1);
+    /**
+    * @tc.steps: step2. call SaveConnectToken when tToken > MAX_TOKEN_NUM
+    * @tc.expected: step2. SaveConnectToken return 1
+    */
+    {
+        std::lock_guard<std::mutex> tokenLock(DistributedSchedService::GetInstance().tokenMutex_);
+        DistributedSchedService::GetInstance().token_.store(MAX_TOKEN_NUM);
+    }
+    result = DistributedSchedService::GetInstance().SaveConnectToken(want, connect);
+    EXPECT_EQ(result, 1);
+    DTEST_LOG << "DistributedSchedServiceTest SaveConnectToken_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartRemoteAbilityByCall_001
+ * @tc.desc: call StartRemoteAbilityByCall
+ * @tc.type: FUNC
+ * @tc.require: I76THI
+ */
+HWTEST_F(DistributedSchedServiceTest, StartRemoteAbilityByCall_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StartRemoteAbilityByCall_001 start" << std::endl;
+    AAFwk::Want want;
+    int32_t callerUid = 0;
+    int32_t callerPid = 0;
+    uint32_t accessToken = 0;
+    AppExecFwk::ElementName element("remoteDeviceId", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    want.SetElement(element);
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    int32_t result = DistributedSchedService::GetInstance().StartRemoteAbilityByCall(want,
+        connect, callerUid, callerPid, accessToken);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest StartRemoteAbilityByCall_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReleaseAbilityFromRemote_001
+ * @tc.desc: call ReleaseAbilityFromRemote
+ * @tc.type: FUNC
+ * @tc.require: I76THI
+ */
+HWTEST_F(DistributedSchedServiceTest, ReleaseAbilityFromRemote_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ReleaseAbilityFromRemote_001 start" << std::endl;
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    AAFwk::Want want;
+    AppExecFwk::ElementName element;
+    CallerInfo callerInfo;
+    /**
+    * @tc.steps: step1. call ReleaseAbilityFromRemote when callerInfo.sourceDeviceId is empty.
+    * @tc.expected: step1. ReleaseAbilityFromRemote return INVALID_REMOTE_PARAMETERS_ERR
+    */
+    int32_t result = DistributedSchedService::GetInstance().ReleaseAbilityFromRemote(connect, element, callerInfo);
+    EXPECT_EQ(result, INVALID_REMOTE_PARAMETERS_ERR);
+    /**
+    * @tc.steps: step2. call ReleaseAbilityFromRemote when localDeviceId == callerInfo.sourceDeviceId.
+    * @tc.expected: step2. ReleaseAbilityFromRemote return INVALID_REMOTE_PARAMETERS_ERR
+    */
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    callerInfo.sourceDeviceId = localDeviceId;
+    result = DistributedSchedService::GetInstance().ReleaseAbilityFromRemote(connect, element, callerInfo);
+    EXPECT_EQ(result, INVALID_REMOTE_PARAMETERS_ERR);
+    /**
+    * @tc.steps: step3. call ReleaseAbilityFromRemote when itConnect == calleeMap_.end().
+    * @tc.expected: step3. ReleaseAbilityFromRemote return INVALID_REMOTE_PARAMETERS_ERR
+    */
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedService::GetInstance().calleeLock_);
+        DistributedSchedService::GetInstance().calleeMap_.clear();
+    }
+    callerInfo.sourceDeviceId = "sourceDeviceId";
+    result = DistributedSchedService::GetInstance().ReleaseAbilityFromRemote(connect, element, callerInfo);
+    EXPECT_EQ(result, INVALID_REMOTE_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest ReleaseAbilityFromRemote_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReleaseAbilityFromRemote_002
+ * @tc.desc: call ReleaseAbilityFromRemote when itConnect != calleeMap_.end().
+ * @tc.type: FUNC
+ * @tc.require: I76THI
+ */
+HWTEST_F(DistributedSchedServiceTest, ReleaseAbilityFromRemote_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ReleaseAbilityFromRemote_002 start" << std::endl;
+    /**
+    * @tc.steps: step1. call ReleaseAbilityFromRemote when itConnect != calleeMap_.end().
+    */
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    AAFwk::Want want;
+    AppExecFwk::ElementName element;
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = "sourceDeviceId";
+    ConnectInfo connectInfo;
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedService::GetInstance().calleeLock_);
+        DistributedSchedService::GetInstance().calleeMap_[connect] = connectInfo;
+    }
+    int32_t result = DistributedSchedService::GetInstance().ReleaseAbilityFromRemote(connect, element, callerInfo);
+    EXPECT_NE(result, ERR_OK);
+    /**
+    * @tc.steps: step2. call ProcessConnectDied when connectSessionsList is empty.
+    */
+    std::list<ConnectAbilitySession> sessionsList;
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedService::GetInstance().distributedLock_);
+        DistributedSchedService::GetInstance().distributedConnectAbilityMap_[connect] = sessionsList;
+    }
+    DistributedSchedService::GetInstance().ProcessConnectDied(connect);
+    /**
+    * @tc.steps: step3. call ProcessConnectDied when sessionsList is empty.
+    */
+    DistributedSchedService::GetInstance().ProcessConnectDied(connect);
+    DTEST_LOG << "DistributedSchedServiceTest ReleaseAbilityFromRemote_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyProcessDiedFromRemote_001
+ * @tc.desc: call NotifyProcessDiedFromRemote when sourceDeviceId == sourceDeviceId.
+ * @tc.type: FUNC
+ * @tc.require: I76THI
+ */
+HWTEST_F(DistributedSchedServiceTest, NotifyProcessDiedFromRemote_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest NotifyProcessDiedFromRemote_001 start" << std::endl;
+    /**
+    * @tc.steps: step1. call NotifyProcessDiedFromRemote when sourceDeviceId == sourceDeviceId.
+    */
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    ConnectInfo connectInfo;
+    connectInfo.callerInfo.sourceDeviceId = LOCAL_DEVICEID;
+    connectInfo.callerInfo.uid = 0;
+    connectInfo.callerInfo.pid = 0;
+    connectInfo.callerInfo.callerType = 0;
+    {
+        std::lock_guard<std::mutex> autoLock(DistributedSchedService::GetInstance().connectLock_);
+        DistributedSchedService::GetInstance().calleeMap_[connect] = connectInfo;
+    }
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = LOCAL_DEVICEID;
+    callerInfo.uid = 0;
+    callerInfo.pid = 0;
+    callerInfo.callerType = 0;
+    int32_t result = DistributedSchedService::GetInstance().NotifyProcessDiedFromRemote(callerInfo);
+    EXPECT_EQ(result, ERR_OK);
+    /**
+    * @tc.steps: step2. call NotifyProcessDiedFromRemote when sourceDeviceId != sourceDeviceId.
+    */
+    callerInfo.sourceDeviceId = REMOTE_DEVICEID;
+    result = DistributedSchedService::GetInstance().NotifyProcessDiedFromRemote(callerInfo);
+    EXPECT_EQ(result, ERR_OK);
+
+    /**
+    * @tc.steps: step3. call ProcessFreeInstallOffline when dmsCallbackTask_ is not empty.
+    */
+    DistributedSchedService::GetInstance().dmsCallbackTask_ = make_shared<DmsCallbackTask>();
+    DistributedSchedService::GetInstance().ProcessCalleeOffline("deviceId");
+    DTEST_LOG << "DistributedSchedServiceTest NotifyProcessDiedFromRemote_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetCallerInfo_001
+ * @tc.desc: call SetCallerInfo
+ * @tc.type: FUNC
+ * @tc.require: I76THI
+ */
+HWTEST_F(DistributedSchedServiceTest, SetCallerInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest SetCallerInfo_001 start" << std::endl;
+    /**
+    * @tc.steps: step1. call SetCallerInfo with invalid parameters.
+    */
+    CallerInfo callerInfo;
+    int32_t result = DistributedSchedService::GetInstance().SetCallerInfo(0, LOCAL_DEVICEID, 0, callerInfo);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    /**
+    * @tc.steps: step2. call OnRemoteDied.
+    */
+    const wptr<IRemoteObject> remote;
+    CallerDeathRecipient callerDeathRecipient;
+    callerDeathRecipient.OnRemoteDied(remote);
+    DTEST_LOG << "DistributedSchedServiceTest StartRemoteAbilityByCall_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartRemoteFreeInstall_001
+ * @tc.desc: call StartRemoteFreeInstall
+ * @tc.type: FUNC
+ * @tc.require: I76THI
+ */
+HWTEST_F(DistributedSchedServiceTest, StartRemoteFreeInstall_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest StartRemoteFreeInstall_001 start" << std::endl;
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("devicdId", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    want.SetElement(element);
+    auto callback = GetDSchedService();
+    int32_t result = DistributedSchedService::GetInstance().StartRemoteFreeInstall(want, 0, 0, 0, callback);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceTest StartRemoteFreeInstall_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyCompleteFreeInstall_001
+ * @tc.desc: call NotifyCompleteFreeInstall
+ * @tc.type: FUNC
+ * @tc.require: I76THI
+ */
+HWTEST_F(DistributedSchedServiceTest, NotifyCompleteFreeInstall_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceTest NotifyCompleteFreeInstall_001 start" << std::endl;
+    /**
+    * @tc.steps: step1. call NotifyCompleteFreeInstall when resultCode is not ERR_OK.
+    */
+    IDistributedSched::FreeInstallInfo info;
+    int32_t result = DistributedSchedService::GetInstance().NotifyCompleteFreeInstall(info, 1, -1);
+    EXPECT_NE(result, ERR_OK);
+    /**
+    * @tc.steps: step2. call ProcessCallResult.
+    */
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    DistributedSchedService::GetInstance().ProcessCallResult(connect, connect);
+    DTEST_LOG << "DistributedSchedServiceTest NotifyCompleteFreeInstall_001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

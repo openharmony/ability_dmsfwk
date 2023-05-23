@@ -27,6 +27,8 @@ config("distributed_sched_config") {
     "include",
     "${communication_path}/dsoftbus/dsoftbus_enhance/interfaces/kits/broadcast",
     "${communication_path}/dsoftbus/interfaces/kits/common",
+    "include/distributedWant",
+    "//third_party/json/include",
   ]
   defines = []
   if (dmsfwk_mission_manager) {
@@ -56,6 +58,11 @@ ohos_shared_library("distributedschedsvr") {
     "src/deviceManager/dms_device_info.cpp",
     "src/dfx/dms_hisysevent_report.cpp",
     "src/dfx/dms_hitrace_chain.cpp",
+    "src/distributedWant/distributed_operation.cpp",
+    "src/distributedWant/distributed_operation_builder.cpp",
+    "src/distributedWant/distributed_want.cpp",
+    "src/distributedWant/distributed_want_params.cpp",
+    "src/distributedWant/distributed_want_params_wrapper.cpp",
     "src/distributed_device_node_listener.cpp",
     "src/distributed_sched_adapter.cpp",
     "src/distributed_sched_continuation.cpp",
@@ -87,6 +94,7 @@ ohos_shared_library("distributedschedsvr") {
   deps = [ "${communication_path}/dsoftbus/sdk:softbus_client" ]
 
   external_deps = [
+    "ability_base:base",
     "ability_base:want",
     "ability_base:zuri",
     "ability_runtime:ability_manager",
@@ -98,6 +106,7 @@ ohos_shared_library("distributedschedsvr") {
     "device_auth:deviceauth_sdk",
     "device_info_manager:distributed_device_profile_client",
     "device_manager:devicemanagersdk",
+    "device_security_level:dslm_sdk",
     "distributed_bundle_framework:dbms_fwk",
     "eventhandler:libeventhandler",
     "hisysevent_native:libhisysevent",

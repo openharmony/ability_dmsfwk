@@ -23,6 +23,7 @@
 #include "dfx/dms_hisysevent_report.h"
 #include "dfx/dms_hitrace_chain.h"
 #include "dfx/dms_hitrace_constants.h"
+#include "distributed_want.h"
 #include "distributed_sched_permission.h"
 #include "dtbschedmgr_log.h"
 #include "dtbschedmgr_device_info_storage.h"
@@ -213,7 +214,11 @@ int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, M
         return DMS_PERMISSION_DENIED;
     }
 
-    shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -262,10 +267,13 @@ int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, M
 
 void DistributedSchedStub::SaveExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo)
 {
-    uint32_t accessToken = extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN];
-    callerInfo.accessToken = accessToken;
-    HILOGD("parse extra info, accessTokenID = %u", accessToken);
-    if (extraInfoJson.find(DMS_VERSION_ID) != extraInfoJson.end()) {
+    if (extraInfoJson.find(EXTRO_INFO_JSON_KEY_ACCESS_TOKEN) != extraInfoJson.end() &&
+        extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN].is_number_unsigned()) {
+        uint32_t accessToken = extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN];
+        callerInfo.accessToken = accessToken;
+        HILOGD("parse extra info, accessTokenID = %u", accessToken);
+    }
+    if (extraInfoJson.find(DMS_VERSION_ID) != extraInfoJson.end() && extraInfoJson[DMS_VERSION_ID].is_string()) {
         std::string dmsVersion = extraInfoJson[DMS_VERSION_ID];
         callerInfo.extraInfoJson[DMS_VERSION_ID] = dmsVersion;
         HILOGD("save dms version");
@@ -278,7 +286,11 @@ int32_t DistributedSchedStub::SendResultFromRemoteInner(MessageParcel& data, Mes
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
     }
-    shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -469,7 +481,11 @@ int32_t DistributedSchedStub::ConnectAbilityFromRemoteInner(MessageParcel& data,
         return DMS_PERMISSION_DENIED;
     }
 
-    shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -867,7 +883,11 @@ int32_t DistributedSchedStub::StartAbilityByCallFromRemoteInner(MessageParcel& d
         SaveExtraInfo(extraInfoJson, callerInfo);
         HILOGD("parse extra info");
     }
-    shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -974,14 +994,14 @@ int32_t DistributedSchedStub::NotifyStateChangedFromRemoteInner(MessageParcel& d
     }
     int32_t abilityState = 0;
     PARCEL_READ_HELPER(data, Int32, abilityState);
-    int32_t missionId = 0;
-    PARCEL_READ_HELPER(data, Int32, missionId);
+    int32_t connectToken = 0;
+    PARCEL_READ_HELPER(data, Int32, connectToken);
     shared_ptr<AppExecFwk::ElementName> element(data.ReadParcelable<AppExecFwk::ElementName>());
     if (element == nullptr) {
         HILOGE("NotifyStateChangedFromRemoteInner receive element is nullptr");
         return ERR_INVALID_VALUE;
     }
-    int32_t result = NotifyStateChangedFromRemote(abilityState, missionId, *element);
+    int32_t result = NotifyStateChangedFromRemote(abilityState, connectToken, *element);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_HELPER(reply, Int32, result);
     return ERR_NONE;
@@ -1025,7 +1045,11 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
     }
-    shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGE("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -1043,7 +1067,11 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
     PARCEL_READ_HELPER(data, StringVector, &accountInfo.groupIdList);
     callerInfo.callerAppId = data.ReadString();
     PARCEL_READ_HELPER(data, Int64, taskId);
-    shared_ptr<AAFwk::Want> cmpWant(data.ReadParcelable<AAFwk::Want>());
+    shared_ptr<DistributedWant> cmpDstbWant(data.ReadParcelable<DistributedWant>());
+    shared_ptr<AAFwk::Want> cmpWant = nullptr;
+    if (cmpDstbWant != nullptr) {
+        cmpWant = cmpDstbWant->ToWant();
+    }
     std::string extraInfo = data.ReadString();
     if (extraInfo.empty()) {
         HILOGD("extra info is empty!");
@@ -1052,7 +1080,8 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
     int32_t requestCode = DEFAULT_REQUEST_CODE;
     if (!extraInfoJson.is_discarded()) {
         SaveExtraInfo(extraInfoJson, callerInfo);
-        if (extraInfoJson.contains(EXTRO_INFO_JSON_KEY_REQUEST_CODE)) {
+        if (extraInfoJson.find(EXTRO_INFO_JSON_KEY_REQUEST_CODE) != extraInfoJson.end() &&
+            extraInfoJson[EXTRO_INFO_JSON_KEY_REQUEST_CODE].is_number_integer()) {
             requestCode = extraInfoJson[EXTRO_INFO_JSON_KEY_REQUEST_CODE];
             HILOGD("parse extra info, requestCode = %d", requestCode);
         }
@@ -1120,7 +1149,11 @@ int32_t DistributedSchedStub::StopExtensionAbilityFromRemoteInner(MessageParcel&
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
     }
-    shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -1140,7 +1173,8 @@ int32_t DistributedSchedStub::StopExtensionAbilityFromRemoteInner(MessageParcel&
         HILOGD("extra info is empty!");
     }
     nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
-    if (!extraInfoJson.is_discarded()) {
+    if (!extraInfoJson.is_discarded() && extraInfoJson.find(EXTRO_INFO_JSON_KEY_ACCESS_TOKEN) != extraInfoJson.end() &&
+        extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN].is_number_unsigned()) {
         uint32_t accessToken = extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN];
         callerInfo.accessToken = accessToken;
         HILOGD("parse extra info, accessTokenID = %{private}u", accessToken);
