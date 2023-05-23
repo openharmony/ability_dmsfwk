@@ -25,6 +25,8 @@ config("distributed_sched_config") {
   visibility += [ "./test/*" ]
   include_dirs = [
     "include",
+    "${communication_path}/dsoftbus/dsoftbus_enhance/interfaces/kits/broadcast",
+    "${communication_path}/dsoftbus/interfaces/kits/common",
     "include/distributedWant",
     "//third_party/json/include",
   ]
@@ -78,10 +80,18 @@ ohos_shared_library("distributedschedsvr") {
     "src/dtbschedmgr_device_info_storage.cpp",
   ]
 
+  if (!distributed_sched_softbus_adapter_common) {
+    sources += [ "src/softbus_adapter/softbus_adapter.cpp" ]
+  } else {
+    sources += [ "src/softbus_adapter/softbus_adapter_common.cpp" ]
+  }
+
   configs = [
     ":distributed_sched_config",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
   ]
+
+  deps = [ "${communication_path}/dsoftbus/sdk:softbus_client" ]
 
   external_deps = [
     "ability_base:base",
