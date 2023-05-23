@@ -124,6 +124,7 @@ HWTEST_F(DtbschedmgrDeviceInfoStorageTest, InitNetworkIdManagerTest_001, TestSiz
      */
     bool result = DtbschedmgrDeviceInfoStorage::GetInstance().InitNetworkIdManager(dnetworkAdapter);
     EXPECT_TRUE(result);
+
     /**
      * @tc.steps: step2. test InitNetworkIdManager when networkIdMgrHandler_ is not nullptr;
      */
