@@ -1074,10 +1074,9 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_CompareInterface_1
     const std::string value = "wantParam";
     sptr<IInterface> interfaceObj =
         DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_NULL, value);
-    int32_t typeId = DistributedWantParams::VALUE_TYPE_NULL;
     bool result =
         DistributedWantParams::CompareInterface(interfaceObj, interfaceObj, DistributedWantParams::VALUE_TYPE_NULL);
-    EXPECT_EQ(typeId, DistributedWantParams::VALUE_TYPE_NULL);
+    EXPECT_FALSE(result);
     DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_CompareInterface_1200 end" << std::endl;
 }
 
