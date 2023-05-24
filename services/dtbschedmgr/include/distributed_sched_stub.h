@@ -36,6 +36,7 @@ private:
     int32_t StartAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t SendResultFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t ContinueMissionInner(MessageParcel& data, MessageParcel& reply);
+    int32_t ContinueMissionOfBundleNameInner(MessageParcel& data, MessageParcel& reply);
     int32_t StartContinuationInner(MessageParcel& data, MessageParcel& reply);
     int32_t NotifyCompleteContinuationInner(MessageParcel& data, MessageParcel& reply);
     int32_t NotifyContinuationResultFromRemoteInner(MessageParcel& data, MessageParcel& reply);
@@ -48,6 +49,8 @@ private:
     int32_t GetMissionInfosInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetRemoteMissionSnapshotInfoInner(MessageParcel& data, MessageParcel& reply);
     int32_t RegisterMissionListenerInner(MessageParcel& data, MessageParcel& reply);
+    int32_t RegisterOnListenerInner(MessageParcel& data, MessageParcel& reply);
+    int32_t RegisterOffListenerInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnRegisterMissionListenerInner(MessageParcel& data, MessageParcel& reply);
     int32_t StartSyncRemoteMissionsInner(MessageParcel& data, MessageParcel& reply);
     int32_t StartSyncMissionsFromRemoteInner(MessageParcel& data, MessageParcel& reply);
