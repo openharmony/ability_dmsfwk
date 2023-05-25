@@ -38,14 +38,17 @@ ohos_shared_library("continuationmanager_napi") {
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
   ]
 
+  deps = [
+    "../../../innerkits/common:common_sdk",
+    "../../../innerkits/continuation_manager:continuation_manager",
+  ]
+
   external_deps = [
     "ability_base:want",
     "ability_runtime:abilitykit_native",
     "ability_runtime:napi_common",
     "ability_runtime:runtime",
     "c_utils:utils",
-    "dmsfwk:common_sdk",
-    "dmsfwk:continuation_manager",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",

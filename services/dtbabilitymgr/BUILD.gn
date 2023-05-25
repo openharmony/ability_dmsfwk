@@ -49,6 +49,11 @@ ohos_shared_library("distributed_ability_manager_svr") {
 
   ldflags = [ "-rdynamic" ]
 
+  deps = [
+    "../../interfaces/innerkits/common:common_sdk",
+    "../../interfaces/innerkits/continuation_manager:continuation_manager",
+  ]
+
   external_deps = [
     "ability_base:want",
     "ability_runtime:ability_manager",
@@ -56,8 +61,6 @@ ohos_shared_library("distributed_ability_manager_svr") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "dmsfwk:common_sdk",
-    "dmsfwk:continuation_manager",
     "eventhandler:libeventhandler",
     "hiviewdfx_hilog_native:libhilog",
     "init:libbegetutil",
