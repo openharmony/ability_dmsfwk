@@ -153,19 +153,19 @@ int32_t DistributedSchedService::Dump(int32_t fd, const std::vector<std::u16stri
     return ERR_OK;
 }
 
-void DistributedSchedService::DeviceOnlineNotify(const std::string& deviceId)
+void DistributedSchedService::DeviceOnlineNotify(const std::string& networkId)
 {
-    DistributedSchedAdapter::GetInstance().DeviceOnline(deviceId);
+    DistributedSchedAdapter::GetInstance().DeviceOnline(networkId);
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    DistributedSchedMissionManager::GetInstance().DeviceOnlineNotify(deviceId);
+    DistributedSchedMissionManager::GetInstance().DeviceOnlineNotify(networkId);
 #endif
 }
 
-void DistributedSchedService::DeviceOfflineNotify(const std::string& deviceId)
+void DistributedSchedService::DeviceOfflineNotify(const std::string& networkId)
 {
-    DistributedSchedAdapter::GetInstance().DeviceOffline(deviceId);
+    DistributedSchedAdapter::GetInstance().DeviceOffline(networkId);
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(deviceId);
+    DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(networkId);
 #endif
 }
 
@@ -871,7 +871,7 @@ int32_t DistributedSchedService::TryStartRemoteAbilityByCall(const OHOS::AAFwk::
     sptr<IDistributedSched> remoteDms = GetRemoteDms(remoteDeviceId);
     if (remoteDms == nullptr) {
         HILOGE("TryStartRemoteAbilityByCall get remote DMS failed, remoteDeviceId : %{public}s",
-            DnetworkAdapter::AnonymizeDeviceId(remoteDeviceId).c_str());
+            DnetworkAdapter::AnonymizeNetworkId(remoteDeviceId).c_str());
         return INVALID_PARAMETERS_ERR;
     }
     HILOGD("[PerformanceTest] TryStartRemoteAbilityByCall RPC begin");
@@ -1059,7 +1059,7 @@ int32_t DistributedSchedService::ReleaseRemoteAbility(const sptr<IRemoteObject>&
     sptr<IDistributedSched> remoteDms = GetRemoteDms(element.GetDeviceID());
     if (remoteDms == nullptr) {
         HILOGE("ReleaseRemoteAbility get remote dms failed, devId : %{public}s",
-            DnetworkAdapter::AnonymizeDeviceId(element.GetDeviceID()).c_str());
+            DnetworkAdapter::AnonymizeNetworkId(element.GetDeviceID()).c_str());
         return INVALID_PARAMETERS_ERR;
     }
     CallerInfo callerInfo;
@@ -1178,7 +1178,7 @@ int32_t DistributedSchedService::StartRemoteShareForm(const std::string& remoteD
     sptr<IDistributedSched> remoteDms = GetRemoteDms(remoteDeviceId);
     if (remoteDms == nullptr) {
         HILOGE("StartRemoteShareForm get remote DMS failed, remoteDeviceId : %{public}s",
-            DnetworkAdapter::AnonymizeDeviceId(remoteDeviceId).c_str());
+            DnetworkAdapter::AnonymizeNetworkId(remoteDeviceId).c_str());
         return GET_REMOTE_DMS_FAIL;
     }
     std::string localDeviceId = "";
@@ -1209,8 +1209,8 @@ int32_t DistributedSchedService::StartShareFormFromRemote(
     GetLocalDeviceId(localDeviceId);
     if (CheckDeviceId(localDeviceId, remoteDeviceId)) {
         HILOGE("localId is %{public}s != %{public}s",
-            DnetworkAdapter::AnonymizeDeviceId(localDeviceId).c_str(),
-            DnetworkAdapter::AnonymizeDeviceId(remoteDeviceId).c_str());
+            DnetworkAdapter::AnonymizeNetworkId(localDeviceId).c_str(),
+            DnetworkAdapter::AnonymizeNetworkId(remoteDeviceId).c_str());
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
 

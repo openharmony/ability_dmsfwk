@@ -28,9 +28,9 @@ const std::string& DmsDeviceInfo::GetDeviceName() const
     return deviceName_;
 }
 
-const std::string& DmsDeviceInfo::GetDeviceId() const
+const std::string& DmsDeviceInfo::GetNetworkId() const
 {
-    return deviceId_;
+    return networkId_;
 }
 
 int32_t DmsDeviceInfo::GetDeviceType() const
@@ -45,7 +45,7 @@ int32_t DmsDeviceInfo::GetDeviceState() const
 
 bool DmsDeviceInfo::Marshalling(Parcel& parcel) const
 {
-    PARCEL_WRITE_HELPER_RET(parcel, String16, Str8ToStr16(deviceId_), false);
+    PARCEL_WRITE_HELPER_RET(parcel, String16, Str8ToStr16(networkId_), false);
     PARCEL_WRITE_HELPER_RET(parcel, String16, Str8ToStr16(deviceName_), false);
     PARCEL_WRITE_HELPER_RET(parcel, Int32, deviceType_, false);
     PARCEL_WRITE_HELPER_RET(parcel, Int32, deviceState_, false);

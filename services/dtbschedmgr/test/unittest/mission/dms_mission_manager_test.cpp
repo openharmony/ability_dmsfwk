@@ -1827,7 +1827,8 @@ HWTEST_F(DMSMissionManagerTest, testIsDeviceIdValidated002, TestSize.Level1)
     }
 
     int32_t deviceType = 0;
-    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo = make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, localDeviceId_);
+    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo =
+        make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, localDeviceId_);
     {
         lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
         DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[localDeviceId_] = dmsDeviceInfo;
@@ -1852,7 +1853,8 @@ HWTEST_F(DMSMissionManagerTest, testGetMissionInfos007, TestSize.Level3)
     }
 
     int32_t deviceType = 0;
-    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo = make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
+    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo =
+        make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
     {
         lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
         DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[DEVICE_ID] = dmsDeviceInfo;
@@ -1878,7 +1880,8 @@ HWTEST_F(DMSMissionManagerTest, testGetMissionInfos008, TestSize.Level3)
     }
 
     int32_t deviceType = 0;
-    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo = make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
+    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo =
+        make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
     {
         lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
         DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[DEVICE_ID] = dmsDeviceInfo;
@@ -1904,7 +1907,8 @@ HWTEST_F(DMSMissionManagerTest, testGetMissionInfos009, TestSize.Level3)
     }
 
     int32_t deviceType = 0;
-    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo = make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
+    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo =
+        make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
     {
         lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
         DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[localDeviceId_] = dmsDeviceInfo;
@@ -2854,7 +2858,8 @@ HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedToRemote003, TestSize.L
         DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_.clear();
     }
     int32_t deviceType = 0;
-    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo = make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, localDeviceId_);
+    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo =
+        make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
     {
         lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
         DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[localDeviceId_] = dmsDeviceInfo;
@@ -2915,7 +2920,8 @@ HWTEST_F(DMSMissionManagerTest, testFetchDeviceHandler003, TestSize.Level3)
     }
 
     int32_t deviceType = 0;
-    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo = make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
+    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo =
+        make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
     {
         lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
         DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[DEVICE_ID] = dmsDeviceInfo;
@@ -2938,7 +2944,8 @@ HWTEST_F(DMSMissionManagerTest, testFetchDeviceHandler004, TestSize.Level3)
         DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_.clear();
     }
     int32_t deviceType = 0;
-    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo = make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
+    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo =
+        make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
     {
         lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
         DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[DEVICE_ID] = dmsDeviceInfo;
@@ -2971,7 +2978,8 @@ HWTEST_F(DMSMissionManagerTest, testFetchDeviceHandler005, TestSize.Level3)
         DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_.clear();
     }
     int32_t deviceType = 0;
-    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo = make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
+    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo =
+        make_shared<DmsDeviceInfo>(DEVICE_NAME, deviceType, DEVICE_ID);
     {
         lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
         DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[DEVICE_ID] = dmsDeviceInfo;
@@ -2986,7 +2994,7 @@ HWTEST_F(DMSMissionManagerTest, testFetchDeviceHandler005, TestSize.Level3)
         lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
         DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_[uuid] = DEVICE_ID;
     }
-    auto anonyUuid = DnetworkAdapter::AnonymizeDeviceId(uuid);
+    auto anonyUuid = DnetworkAdapter::AnonymizeNetworkId(uuid);
     auto runner = AppExecFwk::EventRunner::Create(anonyUuid + "_MissionN");
     auto handler = std::make_shared<AppExecFwk::EventHandler>(runner);
     DistributedSchedMissionManager::GetInstance().deviceHandle_.emplace(uuid, handler);

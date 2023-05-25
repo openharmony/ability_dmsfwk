@@ -789,7 +789,7 @@ bool DistributedSchedStub::CallerInfoUnmarshalling(CallerInfo& callerInfo, Messa
     std::string sourceDeviceId;
     PARCEL_READ_HELPER_RET(data, String, sourceDeviceId, false);
     HILOGI("sourceDeviceId = %{public}s",
-        DnetworkAdapter::AnonymizeDeviceId(sourceDeviceId).c_str());
+        DnetworkAdapter::AnonymizeNetworkId(sourceDeviceId).c_str());
     int32_t duid = -1;
     PARCEL_READ_HELPER_RET(data, Int32, duid, false);
     std::string callerAppId;

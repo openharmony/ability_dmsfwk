@@ -63,7 +63,7 @@ void DistributedDataChangeListener::OnChange(const ChangeNotification &changeNot
     for (const auto& entry : inserts) {
         unique_ptr<KeyInfo> keyInfo = KeyInfo::ParseInfo(entry.key.ToString());
         if (keyInfo != nullptr) {
-            string keyStr = DnetworkAdapter::AnonymizeDeviceId(keyInfo->uuid) + "_" +
+            string keyStr = DnetworkAdapter::AnonymizeNetworkId(keyInfo->uuid) + "_" +
                 to_string(keyInfo->missionId);
             HILOGI("insertEntries Key:%{public}s, Value:%{public}s", keyStr.c_str(), entry.value.ToString().c_str());
             string networkId = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdByUuid(keyInfo->uuid);
@@ -79,7 +79,7 @@ void DistributedDataChangeListener::OnChange(const ChangeNotification &changeNot
     for (const auto& entry : deletes) {
         unique_ptr<KeyInfo> keyInfo = KeyInfo::ParseInfo(entry.key.ToString());
         if (keyInfo != nullptr) {
-            string keyStr = DnetworkAdapter::AnonymizeDeviceId(keyInfo->uuid) + "_" +
+            string keyStr = DnetworkAdapter::AnonymizeNetworkId(keyInfo->uuid) + "_" +
                 to_string(keyInfo->missionId);
             HILOGI("deleteEntries Key:%{public}s, Value:%{public}s", keyStr.c_str(), entry.value.ToString().c_str());
             (void)DistributedSchedMissionManager::GetInstance().DequeueCachedSnapshotInfo(keyInfo->uuid,
@@ -91,7 +91,7 @@ void DistributedDataChangeListener::OnChange(const ChangeNotification &changeNot
     for (const auto& entry : updates) {
         unique_ptr<KeyInfo> keyInfo = KeyInfo::ParseInfo(entry.key.ToString());
         if (keyInfo != nullptr) {
-            string keyStr = DnetworkAdapter::AnonymizeDeviceId(keyInfo->uuid) + "_" +
+            string keyStr = DnetworkAdapter::AnonymizeNetworkId(keyInfo->uuid) + "_" +
                 to_string(keyInfo->missionId);
             HILOGI("updateEntries Key:%{public}s, Value:%{public}s", keyStr.c_str(), entry.value.ToString().c_str());
             string networkId = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdByUuid(keyInfo->uuid);

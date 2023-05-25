@@ -66,7 +66,7 @@ void DnetworkAdapter::DeviceInitCallBack::OnRemoteDied()
 
 void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOnline(const DmDeviceInfo& deviceInfo)
 {
-    HILOGI("OnNodeOnline netwokId = %{public}s", AnonymizeDeviceId(deviceInfo.deviceId).c_str());
+    HILOGI("OnNodeOnline netwokId = %{public}s", AnonymizeNetworkId(deviceInfo.networkId).c_str());
     auto onlineNotifyTask = [deviceInfo]() {
         std::lock_guard<std::mutex> autoLock(listenerSetMutex_);
         for (auto& listener : listenerSet_) {
@@ -81,7 +81,7 @@ void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOnline(const DmDeviceInfo&
 
 void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOffline(const DmDeviceInfo& deviceInfo)
 {
-    HILOGI("OnNodeOffline networkId = %{public}s", AnonymizeDeviceId(deviceInfo.deviceId).c_str());
+    HILOGI("OnNodeOffline networkId = %{public}s", AnonymizeNetworkId(deviceInfo.networkId).c_str());
     auto offlineNotifyTask = [deviceInfo]() {
         std::lock_guard<std::mutex> autoLock(listenerSetMutex_);
         for (auto& listener : listenerSet_) {
@@ -223,14 +223,14 @@ std::string DnetworkAdapter::GetUuidByNetworkId(const std::string& networkId)
     return uuid;
 }
 
-std::string DnetworkAdapter::AnonymizeDeviceId(const std::string& deviceId)
+std::string DnetworkAdapter::AnonymizeNetworkId(const std::string& networkId)
 {
-    if (deviceId.length() < NON_ANONYMIZED_LENGTH) {
+    if (networkId.length() < NON_ANONYMIZED_LENGTH) {
         return EMPTY_DEVICE_ID;
     }
-    std::string anonDeviceId = deviceId.substr(0, NON_ANONYMIZED_LENGTH);
-    anonDeviceId.append("******");
-    return anonDeviceId;
+    std::string anonNetworkId = networkId.substr(0, NON_ANONYMIZED_LENGTH);
+    anonNetworkId.append("******");
+    return anonNetworkId;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

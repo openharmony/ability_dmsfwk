@@ -40,18 +40,18 @@ class DtbschedmgrDeviceInfoStorage {
 public:
     bool Init();
     void Stop();
-    bool GetLocalDeviceId(std::string& deviceId);
+    bool GetLocalDeviceId(std::string& networkId);
     void DeviceOnlineNotify(const std::shared_ptr<DmsDeviceInfo> devInfo);
-    void DeviceOfflineNotify(const std::string& deviceId);
-    void OnDeviceInfoChanged(const std::string& deviceId);
+    void DeviceOfflineNotify(const std::string& networkId);
+    void OnDeviceInfoChanged(const std::string& networkId);
 
     /**
      * get device info by device id
      *
-     * @param deviceId, string
+     * @param networkId, string
      * @return shared_ptr<DmsDeviceInfo>
      */
-    std::shared_ptr<DmsDeviceInfo> GetDeviceInfoById(const std::string& deviceId);
+    std::shared_ptr<DmsDeviceInfo> GetDeviceInfoById(const std::string& networkId);
 
     /**
      * get uuid by networkId
@@ -70,7 +70,7 @@ public:
     /**
      * GetDeviceIdSet get all of the device Id in same network
      *
-     * @param deviceIdSet Returns the device set.
+     * @param networkIdSet Returns the device set.
      */
     void GetDeviceIdSet(std::set<std::string>& deviceIdSet);
 
@@ -86,7 +86,7 @@ private:
     bool ConnectSoftbus();
     void ClearAllDevices();
     bool WaitForDnetworkReady();
-    bool GetLocalDeviceFromDnet(std::string& deviceId);
+    bool GetLocalDeviceFromDnet(std::string& networkId);
     void RegisterUuidNetworkIdMap(const std::string& networkId);
     void UnregisterUuidNetworkIdMap(const std::string& networkId);
     std::mutex deviceLock_;
