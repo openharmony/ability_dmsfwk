@@ -93,6 +93,9 @@ int32_t DmsVersionManager::ParseAppInfo(const std::string& appInfoJsonData, std:
         return DMS_VERSION_EMPTY;
     }
     nlohmann::json appInfoJson = nlohmann::json::parse(appInfoJsonData.c_str(), nullptr, false);
+    if (appInfoJson.is_discarded()) {
+        return DMS_VERSION_EMPTY;
+    }
     if (appInfoJson.find(PACKAGE_NAMES) == appInfoJson.end() || !appInfoJson.at(PACKAGE_NAMES).is_string()) {
         return DMS_VERSION_EMPTY;
     }

@@ -175,7 +175,7 @@ public:
     OHOS::AppExecFwk::ElementName GetElement() const;
 
     /**
-     * @description: Creates a DistributedWant with its corresponding attributes specified for 
+     * @description: Creates a DistributedWant with its corresponding attributes specified for
      * starting the main ability of an application.
      * @param ElementName  Indicates the ElementName object defining the deviceId, bundleName,
      * and abilityName sub-attributes of the operation attribute in a DistributedWant.
@@ -816,14 +816,24 @@ private:
     static bool ParseContent(const std::string& content, std::string& prop, std::string& value);
     static bool ParseUriInternal(
         const std::string& content, OHOS::AppExecFwk::ElementName& element, DistributedWant& want);
+    static bool CheckBeforeParseUri(const std::string& uri);
     bool ReadFromParcel(Parcel& parcel);
     static bool CheckAndSetParameters(
         DistributedWant& want, const std::string& key, std::string& prop, const std::string& value);
     OHOS::Uri GetLowerCaseScheme(const OHOS::Uri& uri);
+    void GenerateUriString(std::string& uriString) const;
     void ToUriStringInner(std::string& uriString) const;
     nlohmann::json ToJson() const;
     bool ReadFromJson(nlohmann::json& wantJson);
     bool CanReadFromJson(nlohmann::json& wantJson);
+    bool MarshallingWriteEntities(Parcel& parcel) const;
+    bool MarshallingWriteElement(Parcel& parcel) const;
+    bool MarshallingWriteParameters(Parcel& parcel) const;
+    bool MarshallingWriteUri(Parcel& parcel) const;
+    bool ReadUriFromParcel(Parcel& parcel);
+    bool ReadEntitiesFromParcel(Parcel& parcel);
+    bool ReadElementFromParcel(Parcel& parcel);
+    bool ReadParametersFromParcel(Parcel& parcel);
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

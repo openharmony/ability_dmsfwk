@@ -123,7 +123,8 @@ DistributedWant::DistributedWant(const AAFwk::Want& want)
     }
 }
 
-std::shared_ptr<AAFwk::Want> DistributedWant::ToWant() {
+std::shared_ptr<AAFwk::Want> DistributedWant::ToWant()
+{
     auto want = std::make_shared<AAFwk::Want>();
     want->SetFlags(GetFlags());
     want->SetElement(GetElement());
@@ -255,7 +256,6 @@ Uri DistributedWant::GetLowerCaseScheme(const Uri& uri)
 {
     std::string strUri = const_cast<Uri&>(uri).ToString();
     std::string schemeStr = const_cast<Uri&>(uri).GetScheme();
-
     if (strUri.empty() || schemeStr.empty()) {
         return uri;
     }
@@ -635,7 +635,6 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::ve
 long DistributedWant::GetLongParam(const std::string& key, long defaultValue) const
 {
     auto value = parameters_.GetParam(key);
-
     if (AAFwk::ILong::Query(value) != nullptr) {
         return AAFwk::Long::Unbox(AAFwk::ILong::Query(value));
     } else if (AAFwk::IString::Query(value) != nullptr) {
@@ -836,23 +835,31 @@ DistributedWant* DistributedWant::CloneOperation()
     return want;
 }
 
-DistributedWant* DistributedWant::ParseUri(const std::string& uri)
+bool DistributedWant::CheckBeforeParseUri(const std::string& uri)
 {
     if (uri.length() <= 0) {
-        return nullptr;
+        return false;
     }
     std::string head = WANT_HEADER;
     std::string end = ";end";
     if (uri.find(head) != 0) {
-        return nullptr;
+        return false;
     }
     if (uri.rfind(end) != (uri.length() - end.length())) {
+        return false;
+    }
+    return true;
+}
+
+DistributedWant* DistributedWant::ParseUri(const std::string& uri)
+{
+    if (!CheckBeforeParseUri(uri)) {
         return nullptr;
     }
     bool ret = true;
     std::string content;
     std::size_t pos;
-    std::size_t begin = head.length();
+    std::size_t begin = WANT_HEADER.length();
     ElementName element;
     DistributedWant* want = new (std::nothrow) DistributedWant();
     if (want == nullptr) {
@@ -949,7 +956,7 @@ std::string DistributedWant::ToUri() const
     return uriString;
 }
 
-void DistributedWant::ToUriStringInner(std::string& uriString) const
+void DistributedWant::GenerateUriString(std::string& uriString) const
 {
     if (operation_.GetAction().length() > 0) {
         uriString += "action=" + Encode(operation_.GetAction()) + ";";
@@ -986,6 +993,11 @@ void DistributedWant::ToUriStringInner(std::string& uriString) const
         uriString.append(Encode(operation_.GetBundleName()));
         uriString.append(";");
     }
+}
+
+void DistributedWant::ToUriStringInner(std::string& uriString) const
+{
+    GenerateUriString(uriString);
     auto params = parameters_.GetParams();
     auto iter = params.cbegin();
     while (iter != params.cend()) {
@@ -1062,13 +1074,8 @@ void DistributedWant::ClearWant(DistributedWant* want)
     want->SetParams(parameters);
 }
 
-bool DistributedWant::Marshalling(Parcel& parcel) const
+bool DistributedWant::MarshallingWriteUri(Parcel& parcel) const
 {
-    // write action
-    if (!parcel.WriteString16(Str8ToStr16(GetAction()))) {
-        return false;
-    }
-    // write uri
     if (GetUriString().empty()) {
         if (!parcel.WriteInt32(VALUE_NULL)) {
             return false;
@@ -1081,7 +1088,11 @@ bool DistributedWant::Marshalling(Parcel& parcel) const
             return false;
         }
     }
-    // write entities
+    return true;
+}
+
+bool DistributedWant::MarshallingWriteEntities(Parcel& parcel) const
+{
     std::vector<std::u16string> entityU16;
     std::vector<std::string> entities = GetEntities();
     for (std::vector<std::string>::size_type i = 0; i < entities.size(); i++) {
@@ -1099,11 +1110,11 @@ bool DistributedWant::Marshalling(Parcel& parcel) const
             return false;
         }
     }
-    // write flags
-    if (!parcel.WriteUint32(GetFlags())) {
-        return false;
-    }
-    // write element
+    return true;
+}
+
+bool DistributedWant::MarshallingWriteElement(Parcel& parcel) const
+{
     ElementName emptyElement;
     ElementName element = GetElement();
     if (element == emptyElement) {
@@ -1118,7 +1129,11 @@ bool DistributedWant::Marshalling(Parcel& parcel) const
             return false;
         }
     }
-    // write parameters
+    return true;
+}
+
+bool DistributedWant::MarshallingWriteParameters(Parcel& parcel) const
+{
     if (parameters_.Size() == 0) {
         if (!parcel.WriteInt32(VALUE_NULL)) {
             return false;
@@ -1130,6 +1145,35 @@ bool DistributedWant::Marshalling(Parcel& parcel) const
         if (!parcel.WriteParcelable(&parameters_)) {
             return false;
         }
+    }
+    return true;
+}
+
+bool DistributedWant::Marshalling(Parcel& parcel) const
+{
+    // write action
+    if (!parcel.WriteString16(Str8ToStr16(GetAction()))) {
+        return false;
+    }
+    // write uri
+    if (!MarshallingWriteUri(parcel)) {
+        return false;
+    }
+    // write entities
+    if (!MarshallingWriteEntities(parcel)) {
+        return false;
+    }
+    // write flags
+    if (!parcel.WriteUint32(GetFlags())) {
+        return false;
+    }
+    // write element
+    if (!MarshallingWriteElement(parcel)) {
+        return false;
+    }
+    // write parameters
+    if (!MarshallingWriteParameters(parcel)) {
+        return false;
     }
     // write package
     if (!parcel.WriteString16(Str8ToStr16(GetBundle()))) {
@@ -1148,23 +1192,23 @@ DistributedWant* DistributedWant::Unmarshalling(Parcel& parcel)
     return want;
 }
 
-bool DistributedWant::ReadFromParcel(Parcel& parcel)
+bool DistributedWant::ReadUriFromParcel(Parcel& parcel)
 {
-    int empty;
-    std::vector<std::string> entities;
-    // read action
-    operation_.SetAction(Str16ToStr8(parcel.ReadString16()));
-    // read uri
-    empty = VALUE_NULL;
+    int empty = VALUE_NULL;
     if (!parcel.ReadInt32(empty)) {
         return false;
     }
     if (empty == VALUE_OBJECT) {
         SetUri(Str16ToStr8(parcel.ReadString16()));
     }
-    // read entities
+    return true;
+}
+
+bool DistributedWant::ReadEntitiesFromParcel(Parcel& parcel)
+{
+    std::vector<std::string> entities;
     std::vector<std::u16string> entityU16;
-    empty = VALUE_NULL;
+    int empty = VALUE_NULL;
     if (!parcel.ReadInt32(empty)) {
         return false;
     }
@@ -1177,14 +1221,12 @@ bool DistributedWant::ReadFromParcel(Parcel& parcel)
         entities.push_back(Str16ToStr8(entityU16[i]));
     }
     operation_.SetEntities(entities);
-    // read flags
-    unsigned int flags;
-    if (!parcel.ReadUint32(flags)) {
-        return false;
-    }
-    operation_.SetFlags(flags);
-    // read element
-    empty = VALUE_NULL;
+    return true;
+}
+
+bool DistributedWant::ReadElementFromParcel(Parcel& parcel)
+{
+    int empty = VALUE_NULL;
     if (!parcel.ReadInt32(empty)) {
         return false;
     }
@@ -1197,8 +1239,12 @@ bool DistributedWant::ReadFromParcel(Parcel& parcel)
             return false;
         }
     }
-    // read parameters
-    empty = VALUE_NULL;
+    return true;
+}
+
+bool DistributedWant::ReadParametersFromParcel(Parcel& parcel)
+{
+    int empty = VALUE_NULL;
     if (!parcel.ReadInt32(empty)) {
         return false;
     }
@@ -1211,6 +1257,35 @@ bool DistributedWant::ReadFromParcel(Parcel& parcel)
         } else {
             return false;
         }
+    }
+    return true;
+}
+
+bool DistributedWant::ReadFromParcel(Parcel& parcel)
+{
+    // read action
+    operation_.SetAction(Str16ToStr8(parcel.ReadString16()));
+    // read uri
+    if (!ReadUriFromParcel(parcel)) {
+        return false;
+    }
+    // read entities
+    if (!ReadEntitiesFromParcel(parcel)) {
+        return false;
+    }
+    // read flags
+    unsigned int flags;
+    if (!parcel.ReadUint32(flags)) {
+        return false;
+    }
+    operation_.SetFlags(flags);
+    // read element
+    if (!ReadElementFromParcel(parcel)) {
+        return false;
+    }
+    // read parameters
+    if (!ReadParametersFromParcel(parcel)) {
+        return false;
     }
     // read package
     operation_.SetBundleName(Str16ToStr8(parcel.ReadString16()));

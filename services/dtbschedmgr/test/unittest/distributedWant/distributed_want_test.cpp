@@ -127,7 +127,7 @@ bool CompareArrayData(const std::vector<T> &arr1, const std::vector<T> &arr2)
     return true;
 };
 
-enum type { FLAG_TEST_SINGLE = 0x01, FLAG_TEST_ARRAY, FLAG_TEST_BOTH };
+enum Type { FLAG_TEST_SINGLE = 0x01, FLAG_TEST_ARRAY, FLAG_TEST_BOTH };
 const std::string DistributedWantBaseTest::URI_STRING_HEAD("#Intent;");
 const std::string DistributedWantBaseTest::URI_STRING_END(";end");
 
