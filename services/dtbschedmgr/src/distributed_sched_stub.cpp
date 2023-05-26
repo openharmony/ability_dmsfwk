@@ -207,18 +207,23 @@ void DistributedSchedStub::ReportEvent(const OHOS::AAFwk::Want& want, const std:
     HILOGD("report event success!");
 }
 
+shared_ptr<AAFwk::Want> DistributedSchedStub::ReadDistributedWant(MessageParcel& data)
+{
+    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
+    shared_ptr<AAFwk::Want> want = nullptr;
+    if (dstbWant != nullptr) {
+        want = dstbWant->ToWant();
+    }
+    return want;
+}
+
 int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply)
 {
     if (!CheckCallingUid()) {
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
     }
-
-    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
-    shared_ptr<AAFwk::Want> want = nullptr;
-    if (dstbWant != nullptr) {
-        want = dstbWant->ToWant();
-    }
+    shared_ptr<AAFwk::Want> want = ReadDistributedWant(data);
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -244,13 +249,12 @@ int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, M
     PARCEL_READ_HELPER(data, StringVector, &accountInfo.groupIdList);
     callerInfo.callerAppId = data.ReadString();
     std::string extraInfo = data.ReadString();
-    if (extraInfo.empty()) {
-        HILOGD("extra info is empty!");
-    }
-    nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
-    if (!extraInfoJson.is_discarded()) {
-        SaveExtraInfo(extraInfoJson, callerInfo);
-        HILOGD("parse extra info");
+    if (!extraInfo.empty()) {
+        nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
+        if (!extraInfoJson.is_discarded()) {
+            SaveExtraInfo(extraInfoJson, callerInfo);
+            HILOGD("parse extra info");
+        }
     }
     int32_t result = StartAbilityFromRemote(*want, abilityInfo, requestCode, callerInfo, accountInfo);
     BehaviorEventParam eventParam = { EventCallingType::REMOTE, BehaviorEvent::START_REMOTE_ABILITY, result,
@@ -480,12 +484,7 @@ int32_t DistributedSchedStub::ConnectAbilityFromRemoteInner(MessageParcel& data,
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
     }
-
-    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
-    shared_ptr<AAFwk::Want> want = nullptr;
-    if (dstbWant != nullptr) {
-        want = dstbWant->ToWant();
-    }
+    shared_ptr<AAFwk::Want> want = ReadDistributedWant(data);
     if (want == nullptr) {
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
@@ -1045,22 +1044,16 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
     }
-    shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
-    shared_ptr<AAFwk::Want> want = nullptr;
-    if (dstbWant != nullptr) {
-        want = dstbWant->ToWant();
-    }
+    shared_ptr<AAFwk::Want> want = ReadDistributedWant(data);
     if (want == nullptr) {
         HILOGE("want readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
-
     int64_t begin = GetTickCount();
     CallerInfo callerInfo = {.accessToken = 0};
     callerInfo.callerType = CALLER_TYPE_HARMONY;
     AccountInfo accountInfo = {};
     int64_t taskId = 0;
-
     PARCEL_READ_HELPER(data, Int32, callerInfo.uid);
     PARCEL_READ_HELPER(data, String, callerInfo.sourceDeviceId);
     accountInfo.accountType = data.ReadInt32();
@@ -1086,7 +1079,6 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
             HILOGD("parse extra info, requestCode = %d", requestCode);
         }
     }
-
     FreeInstallInfo info = {
         .want = *want, .callerInfo = callerInfo, .accountInfo = accountInfo, .requestCode = requestCode};
     info.want.SetParam(PARAM_FREEINSTALL_APPID, callerInfo.callerAppId);

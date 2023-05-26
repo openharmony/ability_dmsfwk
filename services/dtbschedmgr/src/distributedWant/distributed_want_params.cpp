@@ -45,8 +45,8 @@ DistributedUnsupportedData::~DistributedUnsupportedData()
 
 DistributedUnsupportedData::DistributedUnsupportedData() = default;
 
-DistributedUnsupportedData::DistributedUnsupportedData(const DistributedUnsupportedData& other) :
-    key(other.key), type(other.type), size(other.size)
+DistributedUnsupportedData::DistributedUnsupportedData(const DistributedUnsupportedData& other)
+    : key(other.key), type(other.type), size(other.size)
 {
     buffer = new uint8_t[size];
     if (memcpy_s(buffer, size, other.buffer, size) != EOK) {
@@ -628,7 +628,7 @@ static void SetNewArray(const AAFwk::InterfaceID& id, AAFwk::IArray* orgIArray, 
         return;
     }
     std::vector<T1> array;
-    auto func = [&](AAFwk::IInterface* object) {
+    auto func = [&array](AAFwk::IInterface* object) {
         if (object != nullptr) {
             T3* value = T3::Query(object);
             if (value != nullptr) {

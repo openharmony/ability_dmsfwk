@@ -76,6 +76,7 @@ private:
     void SaveExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo);
     void InitLocalFuncsInner();
     void InitRemoteFuncsInner();
+    std::shared_ptr<AAFwk::Want> ReadDistributedWant(MessageParcel& data);
 
     int32_t StopRemoteExtensionAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t StopExtensionAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);

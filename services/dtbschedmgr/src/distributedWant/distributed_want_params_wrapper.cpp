@@ -114,7 +114,7 @@ bool DistributedWantParamWrapper::ValidateStr(const std::string& str)
 
 sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::string& str)
 {
-    DistributedWantParams wantPaqrams;
+    DistributedWantParams wantParams;
     if (ValidateStr(str)) {
         std::string key = "";
         int typeId = 0;
@@ -132,7 +132,7 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
                         break;
                     }
                 }
-                wantPaqrams.SetParam(key, DistributedWantParamWrapper::Parse(str.substr(strnum, num - strnum + 1)));
+                wantParams.SetParam(key, DistributedWantParamWrapper::Parse(str.substr(strnum, num - strnum + 1)));
                 key = "";
                 typeId = 0;
                 strnum = num + 1;
@@ -150,7 +150,7 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
                     strnum = str.find('"', strnum);
                 } else {
                     strnum++;
-                    wantPaqrams.SetParam(key,
+                    wantParams.SetParam(key,
                         DistributedWantParams::GetInterfaceByType(typeId,
                             str.substr(strnum, str.find('"', strnum) - strnum)));
                     strnum = str.find('"', strnum);
@@ -160,17 +160,16 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
             }
         }
     }
-    sptr<IDistributedWantParams> iwantParams = new (std::nothrow) DistributedWantParamWrapper(wantPaqrams);
+    sptr<IDistributedWantParams> iwantParams = new (std::nothrow) DistributedWantParamWrapper(wantParams);
     return iwantParams;
 }
-
 DistributedWantParams DistributedWantParamWrapper::ParseWantParams(const std::string& str)
 {
-    DistributedWantParams wantPaqrams;
+    DistributedWantParams wantParams;
     std::string key = "";
     int typeId = 0;
     if (!ValidateStr(str)) {
-        return wantPaqrams;
+        return wantParams;
     }
     for (size_t strnum = 0; strnum < str.size(); strnum++) {
         if (str[strnum] == '{' && key != "" && typeId == DistributedWantParams::VALUE_TYPE_WANTPARAMS) {
@@ -186,7 +185,7 @@ DistributedWantParams DistributedWantParamWrapper::ParseWantParams(const std::st
                     break;
                 }
             }
-            wantPaqrams.SetParam(key, DistributedWantParamWrapper::Parse(str.substr(strnum, num - strnum)));
+            wantParams.SetParam(key, DistributedWantParamWrapper::Parse(str.substr(strnum, num - strnum)));
             key = "";
             typeId = 0;
             strnum = num + 1;
@@ -199,12 +198,12 @@ DistributedWantParams DistributedWantParamWrapper::ParseWantParams(const std::st
                 strnum++;
                 typeId = atoi(str.substr(strnum, str.find('"', strnum) - strnum).c_str());
                 if (errno == ERANGE) {
-                    return wantPaqrams;
+                    return wantParams;
                 }
                 strnum = str.find('"', strnum);
             } else {
                 strnum++;
-                wantPaqrams.SetParam(key,
+                wantParams.SetParam(key,
                     DistributedWantParams::GetInterfaceByType(typeId,
                         str.substr(strnum, str.find('"', strnum) - strnum)));
                 strnum = str.find('"', strnum);
@@ -213,7 +212,7 @@ DistributedWantParams DistributedWantParamWrapper::ParseWantParams(const std::st
             }
         }
     }
-    return wantPaqrams;
+    return wantParams;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

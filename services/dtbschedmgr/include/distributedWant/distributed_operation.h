@@ -84,7 +84,7 @@ public:
     DistributedOperation& operator=(const DistributedOperation& other);
 
     bool Marshalling(Parcel& parcel) const;
-    static DistributedOperation*Unmarshalling(Parcel& parcel);
+    static DistributedOperation* Unmarshalling(Parcel& parcel);
 
 private:
     /**

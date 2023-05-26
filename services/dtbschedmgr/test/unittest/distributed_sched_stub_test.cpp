@@ -1947,7 +1947,7 @@ HWTEST_F(DistributedSchedStubTest, StopRemoteExtensionAbilityInner_001, TestSize
 {
     DTEST_LOG << "DistributedSchedStubTest StopRemoteExtensionAbilityInner_001 begin" << std::endl;
     const char* processName = "testCase";
-    const char* PermissionState[] = {
+    const char* permissionState[] = {
         "ohos.permission.ACCESS_SERVICE_DM"
     };
     Want want;
@@ -1958,16 +1958,16 @@ HWTEST_F(DistributedSchedStubTest, StopRemoteExtensionAbilityInner_001, TestSize
     MessageParcel reply;
 
     MessageParcel dataFirst;
-    DistributedSchedUtil::MockProcessAndPermission(processName, PermissionState, 1);
+    DistributedSchedUtil::MockProcessAndPermission(processName, permissionState, 1);
     auto result = distributedSchedStub_->StopRemoteExtensionAbilityInner(dataFirst, reply);
     EXPECT_EQ(result, DMS_PERMISSION_DENIED);
 
-    DistributedSchedUtil::MockProcessAndPermission(FOUNDATION_PROCESS_NAME, PermissionState, 1);
+    DistributedSchedUtil::MockProcessAndPermission(FOUNDATION_PROCESS_NAME, permissionState, 1);
     MessageParcel dataSecond;
     result = distributedSchedStub_->StopRemoteExtensionAbilityInner(dataSecond, reply);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
 
-    DistributedSchedUtil::MockProcessAndPermission(FOUNDATION_PROCESS_NAME, PermissionState, 1);
+    DistributedSchedUtil::MockProcessAndPermission(FOUNDATION_PROCESS_NAME, permissionState, 1);
 
     MessageParcel dataThird;
     dataThird.WriteParcelable(&want);
