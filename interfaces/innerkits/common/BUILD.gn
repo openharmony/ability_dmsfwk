@@ -38,9 +38,10 @@ ohos_shared_library("common_sdk") {
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
   ]
 
+  deps = [ "../../innerkits/continuation_manager:continuation_manager" ]
+
   external_deps = [
     "c_utils:utils",
-    "dmsfwk:continuation_manager",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
