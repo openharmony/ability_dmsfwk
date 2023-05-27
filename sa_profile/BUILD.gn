@@ -16,7 +16,7 @@ import("//build/ohos/sa_profile/sa_profile.gni")
 ohos_sa_profile("dms_sa_profile") {
   sources = [
     "1401.json",
-    "1404.xml",
+    "1404.json",
   ]
   part_name = "dmsfwk"
 }
