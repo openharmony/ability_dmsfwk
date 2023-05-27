@@ -138,8 +138,15 @@ NativeValue* JsContinuationManager::OnRegister(NativeEngine &engine, NativeCallb
     }
     AsyncTask::CompleteCallback complete =
         [continuationExtraParams, unwrapArgc, errCode](NativeEngine &engine, AsyncTask &task, int32_t status) {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(reinterpret_cast<napi_env>(&engine), &scope);
+        if (scope == nullptr) {
+            return;
+        }
+
         if (errCode != 0) {
             task.Reject(engine, CreateJsError(engine, errCode, "Invalidate params."));
+            napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
             return;
         }
         int32_t token = -1;
@@ -150,6 +157,8 @@ NativeValue* JsContinuationManager::OnRegister(NativeEngine &engine, NativeCallb
         } else {
             task.Reject(engine, CreateJsError(engine, ret, "Register failed."));
         }
+
+        napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
     };
 
     NativeValue* lastParam = (info.argc <= unwrapArgc) ? nullptr : info.argv[unwrapArgc];
@@ -187,6 +196,12 @@ NativeValue* JsContinuationManager::OnRegisterContinuation(NativeEngine &engine,
     }
     AsyncTask::CompleteCallback complete =
         [this, continuationExtraParams, unwrapArgc](NativeEngine &engine, AsyncTask &task, int32_t status) {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(reinterpret_cast<napi_env>(&engine), &scope);
+        if (scope == nullptr) {
+            return;
+        }
+        
         int32_t token = -1;
         int32_t errCode = (unwrapArgc == 0) ? DistributedAbilityManagerClient::GetInstance().Register(nullptr, token) :
             DistributedAbilityManagerClient::GetInstance().Register(continuationExtraParams, token);
@@ -196,6 +211,8 @@ NativeValue* JsContinuationManager::OnRegisterContinuation(NativeEngine &engine,
             errCode = ErrorCodeReturn(errCode);
             task.Reject(engine, CreateJsError(engine, errCode, ErrorMessageReturn(errCode)));
         }
+
+        napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
     };
 
     NativeValue* lastParam = (info.argc <= unwrapArgc) ? nullptr : info.argv[unwrapArgc];
@@ -220,8 +237,15 @@ NativeValue* JsContinuationManager::OnUnregister(NativeEngine &engine, NativeCal
     }
     AsyncTask::CompleteCallback complete =
         [token, errCode](NativeEngine &engine, AsyncTask &task, int32_t status) {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(reinterpret_cast<napi_env>(&engine), &scope);
+        if (scope == nullptr) {
+            return;
+        }
+
         if (errCode != 0) {
             task.Reject(engine, CreateJsError(engine, errCode, "Invalidate params."));
+            napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
             return;
         }
         int32_t ret = DistributedAbilityManagerClient::GetInstance().Unregister(token);
@@ -230,6 +254,8 @@ NativeValue* JsContinuationManager::OnUnregister(NativeEngine &engine, NativeCal
         } else {
             task.Reject(engine, CreateJsError(engine, ret, "Unregister failed."));
         }
+
+        napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
     };
 
     NativeValue* lastParam = (info.argc <= ARG_COUNT_ONE) ? nullptr : info.argv[ARG_COUNT_ONE];
@@ -260,6 +286,12 @@ NativeValue* JsContinuationManager::OnUnregisterContinuation(NativeEngine &engin
     }
     AsyncTask::CompleteCallback complete =
         [this, token](NativeEngine &engine, AsyncTask &task, int32_t status) {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(reinterpret_cast<napi_env>(&engine), &scope);
+        if (scope == nullptr) {
+            return;
+        }
+        
         int32_t errCode = DistributedAbilityManagerClient::GetInstance().Unregister(token);
         if (errCode == ERR_OK) {
             task.Resolve(engine, engine.CreateNull());
@@ -267,6 +299,8 @@ NativeValue* JsContinuationManager::OnUnregisterContinuation(NativeEngine &engin
             errCode = ErrorCodeReturn(errCode);
             task.Reject(engine, CreateJsError(engine, errCode, ErrorMessageReturn(errCode)));
         }
+
+        napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
     };
 
     NativeValue* lastParam = (info.argc == ARG_COUNT_ONE) ? nullptr : info.argv[ARG_COUNT_ONE];
@@ -420,8 +454,15 @@ NativeValue *JsContinuationManager::OnUpdateConnectStatus(NativeEngine &engine, 
     }
     AsyncTask::CompleteCallback complete =
         [token, deviceId, deviceConnectStatus, errCode](NativeEngine &engine, AsyncTask &task, int32_t status) {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(reinterpret_cast<napi_env>(&engine), &scope);
+        if (scope == nullptr) {
+            return;
+        }
+
         if (errCode != 0) {
             task.Reject(engine, CreateJsError(engine, errCode, "Invalidate params."));
+            napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
             return;
         }
         int32_t ret = DistributedAbilityManagerClient::GetInstance().UpdateConnectStatus(
@@ -431,6 +472,7 @@ NativeValue *JsContinuationManager::OnUpdateConnectStatus(NativeEngine &engine, 
         } else {
             task.Reject(engine, CreateJsError(engine, ret, "UpdateConnectStatus failed."));
         }
+        napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
     };
 
     NativeValue* lastParam = (info.argc <= ARG_COUNT_THREE) ? nullptr : info.argv[ARG_COUNT_THREE];
@@ -475,6 +517,12 @@ NativeValue* JsContinuationManager::OnUpdateContinuationState(NativeEngine &engi
     }
     AsyncTask::CompleteCallback complete =
         [this, token, deviceId, deviceConnectStatus](NativeEngine &engine, AsyncTask &task, int32_t status) {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(reinterpret_cast<napi_env>(&engine), &scope);
+        if (scope == nullptr) {
+            return;
+        }
+
         int32_t errCode = DistributedAbilityManagerClient::GetInstance().UpdateConnectStatus(
             token, deviceId, deviceConnectStatus);
         if (errCode == ERR_OK) {
@@ -483,6 +531,8 @@ NativeValue* JsContinuationManager::OnUpdateContinuationState(NativeEngine &engi
             errCode = ErrorCodeReturn(errCode);
             task.Reject(engine, CreateJsError(engine, errCode, ErrorMessageReturn(errCode)));
         }
+
+        napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
     };
 
     NativeValue* lastParam = (info.argc == ARG_COUNT_THREE) ? nullptr : info.argv[ARG_COUNT_THREE];
@@ -518,8 +568,15 @@ NativeValue *JsContinuationManager::OnStartDeviceManager(NativeEngine &engine, N
     }
     AsyncTask::CompleteCallback complete =
         [token, continuationExtraParams, unwrapArgc, errCode](NativeEngine &engine, AsyncTask &task, int32_t status) {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(reinterpret_cast<napi_env>(&engine), &scope);
+        if (scope == nullptr) {
+            return;
+        }
+
         if (errCode != 0) {
             task.Reject(engine, CreateJsError(engine, errCode, "Invalidate params."));
+            napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
             return;
         }
         int32_t ret = (unwrapArgc == ARG_COUNT_ONE) ?
@@ -530,6 +587,8 @@ NativeValue *JsContinuationManager::OnStartDeviceManager(NativeEngine &engine, N
         } else {
             task.Reject(engine, CreateJsError(engine, ret, "StartDeviceManager failed."));
         }
+
+        napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
     };
 
     NativeValue* lastParam = (info.argc <= unwrapArgc) ? nullptr : info.argv[unwrapArgc];
@@ -571,6 +630,12 @@ NativeValue* JsContinuationManager::OnStartContinuationDeviceManager(NativeEngin
     }
     AsyncTask::CompleteCallback complete =
         [this, token, continuationExtraParams, unwrapArgc](NativeEngine &engine, AsyncTask &task, int32_t status) {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(reinterpret_cast<napi_env>(&engine), &scope);
+        if (scope == nullptr) {
+            return;
+        }
+
         int32_t errCode = (unwrapArgc == ARG_COUNT_ONE) ?
             DistributedAbilityManagerClient::GetInstance().StartDeviceManager(token) :
             DistributedAbilityManagerClient::GetInstance().StartDeviceManager(token, continuationExtraParams);
@@ -580,6 +645,8 @@ NativeValue* JsContinuationManager::OnStartContinuationDeviceManager(NativeEngin
             errCode = ErrorCodeReturn(errCode);
             task.Reject(engine, CreateJsError(engine, errCode, ErrorMessageReturn(errCode)));
         }
+
+        napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
     };
 
     NativeValue* lastParam = (info.argc <= unwrapArgc) ? nullptr : info.argv[unwrapArgc];

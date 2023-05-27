@@ -75,7 +75,15 @@ void JsDeviceSelectionListener::CallJsMethod(const std::string& methodName,
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>
         ([this, methodName, continuationResults]
             (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(reinterpret_cast<napi_env>(&engine), &scope);
+            if (scope == nullptr) {
+                return;
+            }
+
             CallJsMethodInner(methodName, continuationResults);
+
+            napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
         });
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
@@ -107,7 +115,15 @@ void JsDeviceSelectionListener::CallJsMethod(const std::string& methodName, cons
     std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>
         ([this, methodName, deviceIds]
             (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            napi_handle_scope scope = nullptr;
+            napi_open_handle_scope(reinterpret_cast<napi_env>(&engine), &scope);
+            if (scope == nullptr) {
+                return;
+            }
+            
             CallJsMethodInner(methodName, deviceIds);
+
+            napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
         });
     NativeReference* callback = nullptr;
     std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
