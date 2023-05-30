@@ -78,7 +78,6 @@ HWTEST_F(SoftbusAdapterTest, StopSoftbusEvent_001, TestSize.Level3)
 HWTEST_F(SoftbusAdapterTest, RegisterSoftbusEventListener_001, TestSize.Level3)
 {
     DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_001 begin" << std::endl;
-    //SoftbusAdapterListener *listener = nullptr;
     std::shared_ptr<SubSoftbusAdapterListener> listener = std::make_shared<SubSoftbusAdapterListener>();
     uint32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
     EXPECT_NE(result, SOFTBUS_OK);
@@ -93,7 +92,6 @@ HWTEST_F(SoftbusAdapterTest, RegisterSoftbusEventListener_001, TestSize.Level3)
 HWTEST_F(SoftbusAdapterTest, UnregisterSoftbusEventListener_001, TestSize.Level3)
 {
     DTEST_LOG << "SoftbusAdapterTest UnregisterSoftbusEventListener_001 begin" << std::endl;
-    //SoftbusAdapterListener *listener = nullptr;
     std::shared_ptr<SubSoftbusAdapterListener> listener = std::make_shared<SubSoftbusAdapterListener>();
     uint32_t result = SoftbusAdapter::GetInstance().UnregisterSoftbusEventListener(listener);
     EXPECT_NE(result, SOFTBUS_OK);

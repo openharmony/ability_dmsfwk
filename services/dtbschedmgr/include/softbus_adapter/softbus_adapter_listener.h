@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_DISTRIBUTED_SOFTBUS_ADAPTER_LISTENER_H
-#define OHOS_DISTRIBUTED_SOFTBUS_ADAPTER_LISTENER_H
+#ifndef OHOS_SOFTBUS_ADAPTER_LISTENER_H
+#define OHOS_SOFTBUS_ADAPTER_LISTENER_H
 
 #include <string>
 
@@ -28,8 +28,7 @@ class SoftbusAdapterListener {
 public:
     virtual ~SoftbusAdapterListener() = default;
     virtual void OnDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen) = 0;
-
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS
-#endif  // OHOS_DISTRIBUTED_SOFTBUS_ADAPTER_LISTENER_H
+#endif  // OHOS_SOFTBUS_ADAPTER_LISTENER_H

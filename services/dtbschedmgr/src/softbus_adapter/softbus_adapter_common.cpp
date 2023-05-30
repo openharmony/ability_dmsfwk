@@ -38,12 +38,12 @@ void SoftbusAdapter::OnBroadCastRecv(std::string& networkId, uint8_t* data, uint
     return;
 }
 
-int32_t SoftbusAdapter::RegisterSoftbusEventListener(std::shared_ptr<SoftbusAdapterListener>& listener)
+int32_t SoftbusAdapter::RegisterSoftbusEventListener(const std::shared_ptr<SoftbusAdapterListener>& listener)
 {
     return 0;
 }
 
-int32_t SoftbusAdapter::UnregisterSoftbusEventListener(std::shared_ptr<SoftbusAdapterListener>& listener)
+int32_t SoftbusAdapter::UnregisterSoftbusEventListener(const std::shared_ptr<SoftbusAdapterListener>& listener)
 {
     return 0;
 }
