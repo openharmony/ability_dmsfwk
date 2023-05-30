@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SOFTBUS_ADAPTER_H
-#define SOFTBUS_ADAPTER_H
+#ifndef SOFTBUS_ADAPTER_TEST_H
+#define SOFTBUS_ADAPTER_TEST_H
 
 #include "gtest/gtest.h"
 
@@ -38,4 +38,4 @@ public:
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
-#endif // SOFTBUS_ADAPTER_H
+#endif // SOFTBUS_ADAPTER_TEST_H

@@ -55,7 +55,7 @@ int32_t SoftbusAdapter::StopSoftbusEvent()
 
 static void EventListenerReceived(const EventNotify *eventNotify)
 {
-    HILOG_INFO("%{public}s called.", __func__);
+    HILOGI("%{public}s called.", __func__);
     std::string networkId(eventNotify->senderNetworkId);
     SoftbusAdapter::GetInstance().OnBroadCastRecv(networkId, eventNotify->data, eventNotify->dataLen);
 }
@@ -64,16 +64,16 @@ void SoftbusAdapter::OnBroadCastRecv(std::string& networkId, uint8_t* data, uint
 {
     if (softbusAdapterListener_ != nullptr) {
         softbusAdapterListener_->OnDataRecv(networkId, data, dataLen);
-	} else {
+    } else {
         HILOGE("softbusAdapterListener_ is nullptr");
     }
 }
 
-int32_t SoftbusAdapter::RegisterSoftbusEventListener(std::shared_ptr<SoftbusAdapterListener>& listener)
+int32_t SoftbusAdapter::RegisterSoftbusEventListener(const std::shared_ptr<SoftbusAdapterListener>& listener)
 {
     if (listener == nullptr) {
         HILOGE("Registering listener failed");
-        return -1;
+        return SOFTBUS_INVALID_PARAM;
     }
     softbusAdapterListener_ = listener;
     EventListener eventListener;
@@ -89,11 +89,11 @@ int32_t SoftbusAdapter::RegisterSoftbusEventListener(std::shared_ptr<SoftbusAdap
     return SOFTBUS_OK;
 }
 
-int32_t SoftbusAdapter::UnregisterSoftbusEventListener(std::shared_ptr<SoftbusAdapterListener>& listener)
+int32_t SoftbusAdapter::UnregisterSoftbusEventListener(const std::shared_ptr<SoftbusAdapterListener>& listener)
 {
     if (listener == nullptr) {
         HILOGE("Unregistering listener failed");
-        return -1;
+        return SOFTBUS_INVALID_PARAM;
     }
     softbusAdapterListener_ = listener;
     EventListener eventListener;

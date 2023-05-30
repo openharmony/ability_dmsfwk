@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_DISTRIBUTED_DMS_SOFTBUSADAPTER_H
-#define OHOS_DISTRIBUTED_DMS_SOFTBUSADAPTER_H
+#ifndef OHOS_SOFTBUS_ADAPTER_H
+#define OHOS_SOFTBUS_ADAPTER_H
 
 #include <string>
 #include "single_instance.h"
@@ -28,17 +28,15 @@ public:
 public:
     int32_t SendSoftbusEvent(uint8_t* sendData, uint32_t sendDataLen);
     int32_t StopSoftbusEvent();
-    int32_t RegisterSoftbusEventListener(std::shared_ptr<SoftbusAdapterListener>& listener);
-    int32_t UnregisterSoftbusEventListener(std::shared_ptr<SoftbusAdapterListener>& listener);
+    int32_t RegisterSoftbusEventListener(const std::shared_ptr<SoftbusAdapterListener>& listener);
+    int32_t UnregisterSoftbusEventListener(const std::shared_ptr<SoftbusAdapterListener>& listener);
     void OnBroadCastRecv(std::string& networkId, uint8_t* data, uint32_t dataLen);
-
-public:
-    std::shared_ptr<SoftbusAdapterListener> softbusAdapterListener_;
 
 private:
     SoftbusAdapter() {}
+    std::shared_ptr<SoftbusAdapterListener> softbusAdapterListener_;
     std::string pkgName_ = "ohos.ability.distributedsched";
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
-#endif /* OHOS_DISTRIBUTED_DMS_SOFTBUSADAPTER_H */
+#endif /* OHOS_SOFTBUS_ADAPTER_H */
