@@ -23,7 +23,8 @@
         "dmsfwk_standard_form_share",
         "dmsfwk_mission_manager",
         "dmsfwk_report_memmgr",
-        "dmsfwk_report_memmgr_plugins"
+        "dmsfwk_report_memmgr_plugins",
+        "dmsfwk_softbus_adapter_common"
       ],
       "hisysevent_config": [
         "//foundation/ability/dmsfwk/hisysevent.yaml"
