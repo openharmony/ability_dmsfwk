@@ -124,7 +124,7 @@ dtbschedmgr_sources = [
   "unittest/distributed_sched_util.cpp",
 ]
 
-if (!distributed_sched_softbus_adapter_common) {
+if (!dmsfwk_softbus_adapter_common) {
   dtbschedmgr_sources += [ "${distributed_service}/dtbschedmgr/src/softbus_adapter/softbus_adapter.cpp" ]
 } else {
   dtbschedmgr_sources += [ "${distributed_service}/dtbschedmgr/src/softbus_adapter/softbus_adapter_common.cpp" ]

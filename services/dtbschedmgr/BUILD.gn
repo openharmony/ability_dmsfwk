@@ -80,7 +80,7 @@ ohos_shared_library("distributedschedsvr") {
     "src/dtbschedmgr_device_info_storage.cpp",
   ]
 
-  if (!distributed_sched_softbus_adapter_common) {
+  if (!dmsfwk_softbus_adapter_common) {
     sources += [ "src/softbus_adapter/softbus_adapter.cpp" ]
   } else {
     sources += [ "src/softbus_adapter/softbus_adapter_common.cpp" ]
