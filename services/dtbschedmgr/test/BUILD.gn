@@ -121,14 +121,9 @@ dtbschedmgr_sources = [
   "${distributed_service}/dtbschedmgr/src/dms_token_callback.cpp",
   "${distributed_service}/dtbschedmgr/src/dms_version_manager.cpp",
   "${distributed_service}/dtbschedmgr/src/dtbschedmgr_device_info_storage.cpp",
+  "${distributed_service}/dtbschedmgr/src/softbus_adapter/softbus_adapter_common.cpp",
   "unittest/distributed_sched_util.cpp",
 ]
-
-if (!dmsfwk_softbus_adapter_common) {
-  dtbschedmgr_sources += [ "${distributed_service}/dtbschedmgr/src/softbus_adapter/softbus_adapter.cpp" ]
-} else {
-  dtbschedmgr_sources += [ "${distributed_service}/dtbschedmgr/src/softbus_adapter/softbus_adapter_common.cpp" ]
-}
 
 if (dmsfwk_mission_manager) {
   dtbschedmgr_sources += [
@@ -364,7 +359,6 @@ ohos_unittest("softbusadaptertest") {
   ]
   configs += dsched_configs
   deps = [
-    "${communication_path}/dsoftbus/sdk:softbus_client",
     "${distributed_service}/dtbschedmgr:distributedschedsvr",
     "${dms_path}/test/sceneProject/unittest/bundle_dependencies/bmsThirdBundle:bmsThirdBundle",
     "${dms_path}/test/sceneProject/unittest/ohos_test:copy_ohos_test",
