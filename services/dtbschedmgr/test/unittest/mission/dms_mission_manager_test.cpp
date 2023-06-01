@@ -2159,7 +2159,7 @@ HWTEST_F(DMSMissionManagerTest, testDeviceOfflineNotify003, TestSize.Level3)
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().DeviceOnlineNotify(DEVICE_ID);
     sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
-    sptr<IDistributedSched> remoteDmsObj = iface_cast<IDistributedSched>(listener);
+    sptr<IDistributedSched> remoteDmsObj = new DistributedSchedProxy(listener);
     {
         std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
         DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
@@ -3200,7 +3200,7 @@ HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied006, TestSize.Level3)
     auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
     DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     sptr<IRemoteObject> remote = new RemoteMissionListenerTest();
-    sptr<IDistributedSched> remoteDmsObj = iface_cast<IDistributedSched>(remote);
+    sptr<IDistributedSched> remoteDmsObj = new DistributedSchedProxy(remote);
     {
         std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
         DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
@@ -3251,7 +3251,7 @@ HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied008, TestSize.Level3)
     auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
     DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     sptr<IRemoteObject> remote = new RemoteMissionListenerTest();
-    sptr<IDistributedSched> remoteDmsObj = iface_cast<IDistributedSched>(remote);
+    sptr<IDistributedSched> remoteDmsObj = new DistributedSchedProxy(remote);
     {
         std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
         DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
