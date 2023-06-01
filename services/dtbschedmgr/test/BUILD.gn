@@ -367,6 +367,7 @@ ohos_unittest("softbusadaptertest") {
     "${distributed_service}/dtbschedmgr:distributedschedsvr",
     "${dms_path}/test/sceneProject/unittest/bundle_dependencies/bmsThirdBundle:bmsThirdBundle",
     "${dms_path}/test/sceneProject/unittest/ohos_test:copy_ohos_test",
+    "${communication_path}/dsoftbus/sdk:softbus_client",
   ]
   if (is_standard_system) {
     external_deps = dsched_external_deps
