@@ -364,6 +364,7 @@ ohos_unittest("softbusadaptertest") {
   ]
   configs += dsched_configs
   deps = [
+    "${communication_path}/dsoftbus/sdk:softbus_client",
     "${distributed_service}/dtbschedmgr:distributedschedsvr",
     "${dms_path}/test/sceneProject/unittest/bundle_dependencies/bmsThirdBundle:bmsThirdBundle",
     "${dms_path}/test/sceneProject/unittest/ohos_test:copy_ohos_test",
