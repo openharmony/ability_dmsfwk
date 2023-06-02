@@ -21,6 +21,7 @@
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "bundlemgr/bundle_mgr_proxy.h"
 #include "distributed_bms_interface.h"
+#include "distributed_bms_proxy.h"
 #include "single_instance.h"
 
 namespace OHOS {

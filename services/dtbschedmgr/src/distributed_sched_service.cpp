@@ -46,6 +46,7 @@
 #endif
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission/distributed_mission_info.h"
+#include "mission/distributed_sched_continue_manager.h"
 #include "mission/distributed_sched_mission_manager.h"
 #endif
 #include "os_account_manager.h"
@@ -134,6 +135,9 @@ void DistributedSchedService::OnStart()
 
 void DistributedSchedService::OnStop()
 {
+#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
+    DistributedSchedContinueManager::GetInstance().UnInit();
+#endif
     HILOGD("begin");
 }
 
@@ -179,6 +183,7 @@ bool DistributedSchedService::Init()
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().InitDataStorage();
+    DistributedSchedContinueManager::GetInstance().Init();
 #endif
     DistributedSchedAdapter::GetInstance().Init();
     HILOGD("init success.");

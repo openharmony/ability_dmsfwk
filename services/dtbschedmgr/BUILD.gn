@@ -134,8 +134,12 @@ ohos_shared_library("distributedschedsvr") {
     sources += [
       "src/mission/distributed_data_change_listener.cpp",
       "src/mission/distributed_data_storage.cpp",
+      "src/mission/distributed_mission_broadcast_listener.cpp",
       "src/mission/distributed_mission_change_listener.cpp",
+      "src/mission/distributed_mission_died_listener.cpp",
+      "src/mission/distributed_mission_focused_listener.cpp",
       "src/mission/distributed_mission_info.cpp",
+      "src/mission/distributed_sched_continue_manager.cpp",
       "src/mission/distributed_sched_mission_manager.cpp",
       "src/mission/kvstore_death_recipient.cpp",
       "src/mission/mission_changed_notify.cpp",

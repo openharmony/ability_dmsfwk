@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -338,7 +338,7 @@ int32_t DistributedSchedAdapter::GetLocalMissionInfos(int32_t numMissions,
     return MissionInfoConverter::ConvertToDstbMissionInfos(amsMissions, missionInfos);
 }
 
-int32_t DistributedSchedAdapter::RegisterMissionListener(const sptr<DstbMissionChangeListener>& listener)
+int32_t DistributedSchedAdapter::RegisterMissionListener(const sptr<IMissionListener>& listener)
 {
     HILOGD("called.");
     if (listener == nullptr) {
@@ -358,7 +358,7 @@ int32_t DistributedSchedAdapter::RegisterMissionListener(const sptr<DstbMissionC
     return ERR_OK;
 }
 
-int32_t DistributedSchedAdapter::UnRegisterMissionListener(const sptr<DstbMissionChangeListener>& listener)
+int32_t DistributedSchedAdapter::UnRegisterMissionListener(const sptr<IMissionListener>& listener)
 {
     if (listener == nullptr) {
         HILOGE("listener is null");
