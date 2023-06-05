@@ -45,5 +45,6 @@ ohos_shared_library("continuation_manager") {
   ]
 
   subsystem_name = "ability"
+  innerapi_tags = [ "platformsdk" ]
   part_name = "dmsfwk"
 }
