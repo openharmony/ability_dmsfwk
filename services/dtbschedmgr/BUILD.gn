@@ -91,8 +91,6 @@ ohos_shared_library("distributedschedsvr") {
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
   ]
 
-  deps = [ "${communication_path}/dsoftbus/sdk:softbus_client" ]
-
   external_deps = [
     "ability_base:base",
     "ability_base:want",
@@ -108,6 +106,7 @@ ohos_shared_library("distributedschedsvr") {
     "device_manager:devicemanagersdk",
     "device_security_level:dslm_sdk",
     "distributed_bundle_framework:dbms_fwk",
+    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
