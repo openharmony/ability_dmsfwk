@@ -1133,7 +1133,6 @@ HWTEST_F(DistributedSchedServiceTest, StartContinuation_004, TestSize.Level3)
     uint32_t accessToken = 1;
     int32_t ret = DistributedSchedService::GetInstance().StartContinuation(
         want, missionId, callerUid, status, accessToken);
-    DistributedSchedService::GetInstance().OnStop();
     EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), ret);
     DTEST_LOG << "DSchedContinuationTest StartContinuation_004 end" << std::endl;
 }
