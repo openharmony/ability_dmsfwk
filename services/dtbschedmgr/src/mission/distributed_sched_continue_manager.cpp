@@ -15,13 +15,13 @@
 
 #include "mission/distributed_sched_continue_manager.h"
 
-#include <sys/prctl.h>
-#include "datetime_ex.h"
 #include "adapter/dnetwork_adapter.h"
+#include "datetime_ex.h"
 #include "distributed_sched_adapter.h"
 #include "dtbschedmgr_log.h"
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
+#include <sys/prctl.h>
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -44,14 +44,14 @@ void DistributedSchedContinueManager::Init()
     missionFocusedListener_ = new DistributedMissionFocusedListener();
     int32_t ret = DistributedSchedAdapter::GetInstance().RegisterMissionListener(missionFocusedListener_);
     if (ret != ERR_OK) {
-        HILOGE("get RegisterMissionListener failed");
+        HILOGE("get RegisterMissionListener failed, ret: %{public}d", ret);
         return;
     }
     std::shared_ptr<SoftbusAdapterListener> missionBroadcastListener =
         std::make_shared<DistributedMissionBroadcastListener>();
-    int32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(missionBroadcastListener);
-    if (result != ERR_OK) {
-        HILOGE("get RegisterSoftbusEventListener failed");
+    ret = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(missionBroadcastListener);
+    if (ret != ERR_OK) {
+        HILOGE("get RegisterSoftbusEventListener failed, ret: %{public}d", ret);
         return;
     }
     missionDiedListener_ = new DistributedMissionDiedListener();
@@ -66,9 +66,13 @@ void DistributedSchedContinueManager::Init()
 void DistributedSchedContinueManager::UnInit()
 {
     HILOGI("UnInit start");
-    eventHandler_->GetEventRunner()->Stop();
-    eventThread_.join();
-    eventHandler_ = nullptr;
+    if (eventHandler_ != nullptr) {
+        eventHandler_->GetEventRunner()->Stop();
+        eventThread_.join();
+        eventHandler_ = nullptr;
+    } else {
+        HILOGE("eventHandler_ is nullptr");
+    }
     HILOGI("UnInit end");
 }
 
@@ -80,6 +84,8 @@ void DistributedSchedContinueManager::NotifyMissionFocused(const int32_t mission
     };
     if (eventHandler_ != nullptr) {
         eventHandler_->PostTask(feedfunc);
+    } else {
+        HILOGE("eventHandler_ is nullptr");
     }
     HILOGI("NotifyMissionFocused end");
 }
@@ -92,6 +98,8 @@ void DistributedSchedContinueManager::NotifyMissionUnfocused(const int32_t missi
     };
     if (eventHandler_ != nullptr) {
         eventHandler_->PostTask(feedfunc);
+    } else {
+        HILOGE("eventHandler_ is nullptr");
     }
     HILOGI("NotifyMissionUnfocused end");
 }
@@ -101,13 +109,13 @@ void DistributedSchedContinueManager::NotifyDataRecv(std::string& senderNetworkI
     HILOGI("NotifyDataRecv start, senderNetworkId: %{public}s, dataLen: %{public}d",
         DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), dataLen);
     if (dataLen != DMS_SEND_LEN) {
-        HILOGI("dataLen error, dataLen: %{public}d", dataLen);
+        HILOGE("dataLen error, dataLen: %{public}d", dataLen);
         return;
     }
     uint8_t type = (payload[0] & DMS_0XF0) >> CONTINUE_SHIFT_04;
     uint8_t len = payload[0] & DMS_0X0F;
     if (len != sizeof(uint32_t) || (type != DMS_UNFOCUSED_TYPE && type != DMS_FOCUSED_TYPE)) {
-        HILOGI("len or type error, len: %{public}d, type: %{public}d", len, type);
+        HILOGE("len or type error, len: %{public}d, type: %{public}d", len, type);
         return;
     }
     uint32_t accessTokenId = payload[1] << CONTINUE_SHIFT_24 | payload[INDEX_2] << CONTINUE_SHIFT_16 |
@@ -121,6 +129,8 @@ void DistributedSchedContinueManager::NotifyDataRecv(std::string& senderNetworkI
     };
     if (eventHandler_ != nullptr) {
         eventHandler_->PostTask(feedfunc);
+    } else {
+        HILOGE("eventHandler_ is nullptr");
     }
     HILOGI("NotifyDataRecv end");
 }
@@ -142,13 +152,11 @@ int32_t DistributedSchedContinueManager::RegisterOnListener(const std::string& t
     for (auto iter : iterItem->second) {
         if (iter == obj) {
             HILOGI("already have obj");
-            return ERR_OK;
-        } else {
-            obj->AddDeathRecipient(missionDiedListener_);
-            iterItem->second.emplace_back(obj);
-            return ERR_OK;
+            return NO_MISSION_INFO_FOR_MISSION_ID;
         }
     }
+    obj->AddDeathRecipient(missionDiedListener_);
+    iterItem->second.emplace_back(obj);
     HILOGI("RegisterOnListener end");
     return ERR_OK;
 }
@@ -188,7 +196,7 @@ int32_t DistributedSchedContinueManager::GetMissionId(const std::string& bundleN
     std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
     auto iterItem = focusedMission_.find(bundleName);
     if (iterItem == focusedMission_.end()) {
-        HILOGD("get iterItem failed from focusedMission_, bundleName: %{public}s", bundleName.c_str());
+        HILOGE("get iterItem failed from focusedMission_, bundleName: %{public}s", bundleName.c_str());
         return INVALID_PARAMETERS_ERR;
     }
     missionId = iterItem->second;
@@ -213,24 +221,29 @@ void DistributedSchedContinueManager::StartEvent()
 int32_t DistributedSchedContinueManager::DealFocusedBusiness(const int32_t missionId)
 {
     HILOGI("DealFocusedBusiness start, missionId: %{public}d", missionId);
-    bool isMissionContibuable;
-    std::string bundleName;
-    int32_t result = GetBundleName(missionId, isMissionContibuable, bundleName);
-    if (result != ERR_OK) {
-        HILOGE("get bundleName failed, missionId: %{public}d", missionId);
-        return NO_MISSION_INFO_FOR_MISSION_ID;
+    AAFwk::MissionInfo info;
+    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, info);
+    if (ret != ERR_OK) {
+        HILOGE("get missionInfo failed, missionId: %{public}d, ret: %{public}d", missionId, ret);
+        return ret;
     }
+    bool isMissionContibuable = info.continuable;
     {
         std::lock_guard<std::mutex> currentMissionIdLock(eventMutex_);
         info_.currentMissionId = missionId;
         info_.currentIsContibuable = isMissionContibuable;
     }
+    if (!isMissionContibuable) {
+        HILOGE("can not MissionContinue, missionId: %{public}d", missionId);
+        return REMOTE_DEVICE_BIND_ABILITY_ERR;
+    }
+    std::string bundleName = info.want.GetBundle();
     focusedMission_[bundleName] = missionId;
     uint32_t accessTokenId;
-    int32_t ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
+    ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
     if (ret != ERR_OK) {
-        HILOGE("get focused accessTokenId failed, accessTokenId: %{public}d", accessTokenId);
-        return CAN_NOT_FOUND_ABILITY_ERR;
+        HILOGE("get focused accessTokenId failed, accessTokenId: %{public}d, ret: %{public}d", accessTokenId, ret);
+        return ret;
     }
     HILOGE("get focused accessTokenId success, accessTokenId: %{public}d", accessTokenId);
     uint32_t sendDataLen = DMS_SEND_LEN;
@@ -244,8 +257,8 @@ int32_t DistributedSchedContinueManager::DealFocusedBusiness(const int32_t missi
     data[INDEX_4] = accessTokenId & DMS_0XFF;
     ret = SoftbusAdapter::GetInstance().SendSoftbusEvent(data, sendDataLen);
     if (ret != ERR_OK) {
-        HILOGD("SendSoftbusEvent focused failed");
-        return REMOTE_DEVICE_BIND_ABILITY_ERR;
+        HILOGE("SendSoftbusEvent focused failed,ret: %{public}d", ret);
+        return ret;
     }
     HILOGI("DealFocusedBusiness end");
     return ERR_OK;
@@ -254,29 +267,23 @@ int32_t DistributedSchedContinueManager::DealFocusedBusiness(const int32_t missi
 int32_t DistributedSchedContinueManager::DealUnfocusedBusiness(const int32_t missionId)
 {
     HILOGI("DealUnfocusedBusiness start, missionId: %{public}d", missionId);
-    bool isMissionContibuable;
     std::string bundleName;
-    int32_t result = GetBundleName(missionId, isMissionContibuable, bundleName);
-    if (result != ERR_OK) {
-        HILOGE("get bundleName failed, missionId: %{public}d", missionId);
+    int32_t ret = GetBundleName(missionId, bundleName);
+    if (ret != ERR_OK) {
+        HILOGE("get bundleName failed, mission can not change, missionId: %{public}d, ret: %{public}d", missionId, ret);
+        return ret;
+    }
+    /*determine if it is necessary to send a lost focus broadcast*/
+    bool isContinue = IsContinue(missionId, bundleName);
+    if (!isContinue) {
+        HILOGE("mission is not continue, missionId: %{public}d", missionId);
         return NO_MISSION_INFO_FOR_MISSION_ID;
     }
-    {
-        std::lock_guard<std::mutex> currentMissionIdLock(eventMutex_);
-        if (missionId == info_.currentMissionId && isMissionContibuable == info_.currentIsContibuable) {
-            auto iterItem = focusedMission_.find(bundleName);
-            if (iterItem == focusedMission_.end()) {
-                HILOGE("get iterItem failed from focusedMission_, missionId: %{public}d", missionId);
-            }
-            focusedMission_.erase(iterItem);
-            return INVALID_PARAMETERS_ERR;
-        }
-    }
     uint32_t accessTokenId;
-    int32_t ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
+    ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
     if (ret != ERR_OK) {
-        HILOGE("get unfocused accessTokenId failed, accessTokenId: %{public}d", accessTokenId);
-        return CAN_NOT_FOUND_ABILITY_ERR;
+        HILOGE("get unfocused accessTokenId failed, accessTokenId: %{public}d, ret: %{public}d", accessTokenId, ret);
+        return ret;
     }
     uint32_t sendDataLen = DMS_SEND_LEN;
     uint8_t data[DMS_SEND_LEN];
@@ -289,8 +296,8 @@ int32_t DistributedSchedContinueManager::DealUnfocusedBusiness(const int32_t mis
     data[INDEX_4] = accessTokenId & DMS_0XFF;
     ret = SoftbusAdapter::GetInstance().SendSoftbusEvent(data, sendDataLen);
     if (ret != ERR_OK) {
-        HILOGE("SendSoftbusEvent unfocused failed, sendDataLen: %{public}d", sendDataLen);
-        return REMOTE_DEVICE_BIND_ABILITY_ERR;
+        HILOGE("SendSoftbusEvent unfocused failed, sendDataLen: %{public}d, ret: %{public}d", sendDataLen, ret);
+        return ret;
     }
     std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
     auto iterItem = focusedMission_.find(bundleName);
@@ -310,14 +317,14 @@ int32_t DistributedSchedContinueManager::DealUnBroadcastdBusiness(std::string& s
     std::string bundleName;
     int32_t ret = BundleManagerInternal::GetBundleNameFromDbms(senderNetworkId, accessTokenId, bundleName);
     if (ret != ERR_OK) {
-        HILOGE("get bundleName failed, senderNetworkId: %{public}s, , accessTokenId: %{public}d",
-            DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), accessTokenId);
-        return CAN_NOT_FOUND_ABILITY_ERR;
+        HILOGE("get bundleName failed, senderNetworkId: %{public}s, accessTokenId: %{public}d, ret: %{public}d",
+            DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), accessTokenId, ret);
+        return ret;
     }
     std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     auto iterItem = registerOnListener_.find(onType_);
     if (iterItem == registerOnListener_.end()) {
-        HILOGD("get iterItem failed from registerOnListener_, accessTokenId: %{public}d", accessTokenId);
+        HILOGE("get iterItem failed from registerOnListener_, accessTokenId: %{public}d", accessTokenId);
         return INVALID_PARAMETERS_ERR;
     }
     std::vector<sptr<IRemoteObject>> objs = iterItem->second;
@@ -355,22 +362,33 @@ void DistributedSchedContinueManager::NotifyRecvBroadcast(const sptr<IRemoteObje
     HILOGI("NotifyRecvBroadcast end");
 }
 
-int32_t DistributedSchedContinueManager::GetBundleName(const int32_t missionId,
-    bool& isMissionContibuable, std::string& bundleName)
+int32_t DistributedSchedContinueManager::GetBundleName(const int32_t missionId, std::string& bundleName)
 {
-    AAFwk::MissionInfo info;
-    int32_t result = AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, info);
-    if (result != ERR_OK) {
-        HILOGE("get missionInfo failed, missionId: %{public}d", missionId);
-        return NO_MISSION_INFO_FOR_MISSION_ID;
+    for (auto iterItem = focusedMission_.begin(); iterItem != focusedMission_.end(); iterItem++) {
+        if (iterItem->second == missionId) {
+            bundleName = iterItem->first;
+            return ERR_OK;
+        }
     }
-    isMissionContibuable = info.continuable;
-    if (!isMissionContibuable) {
-        HILOGD("can not MissionContinue, missionId: %{public}d", missionId);
-        return REMOTE_DEVICE_BIND_ABILITY_ERR;
+    return INVALID_PARAMETERS_ERR;
+}
+
+bool DistributedSchedContinueManager::IsContinue(const int32_t& missionId, const std::string& bundleName)
+{
+    if ((missionId != info_.currentMissionId && info_.currentIsContibuable == true)) {
+        /*missionId and currentMissionId are not equal but currentMission can change,
+            continue to not send unfocus broadcast*/
+        std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
+        focusedMission_.erase(bundleName);
+        HILOGI("mission is not continue, missionId: %{public}d, currentMissionId: %{public}d",
+            missionId, info_.currentMissionId);
+        return false;
     }
-    bundleName = info.want.GetBundle();
-    return ERR_OK;
+    /*missionId and currentMissionId are equal, or missionId and currentMissionId are not equal
+        and currentIsContibuable not change, continue to send unfocus broadcast*/
+    HILOGI("mission is continue, missionId: %{public}d, currentMissionId: %{public}d",
+        missionId, info_.currentMissionId);
+    return true;
 }
 
 void DistributedSchedContinueManager::NotifyDeid(const sptr<IRemoteObject>& obj)

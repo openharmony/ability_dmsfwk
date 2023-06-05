@@ -69,7 +69,8 @@ private:
     int32_t DealUnBroadcastdBusiness(std::string& senderNetworkId, uint32_t accessTokenId, const int32_t state);
     void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const std::string& networkId,
         const std::string& bundleName, const int32_t state);
-    int32_t GetBundleName(const int32_t missionId, bool& isMissionContibuable, std::string& bundleName);
+    int32_t GetBundleName(const int32_t missionId, std::string& bundleName);
+    bool IsContinue(const int32_t& missionId, const std::string& bundleName);
 private:
     currentMissionInfo info_;
     sptr<DistributedMissionFocusedListener> missionFocusedListener_;
@@ -82,6 +83,6 @@ private:
     std::mutex eventMutex_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
 };
-}
-}
+} // namespace DistributedSchedule
+} // namespace OHOS
 #endif // DISTRIBUTEDSCHED_CONTINUE_MANAGER_H

@@ -29,5 +29,5 @@ void DistributedMissionBroadcastListener::OnDataRecv(std::string& senderNetworkI
     HILOGI("OnDataRecv, dataLen = %{public}d", dataLen);
     DistributedSchedContinueManager::GetInstance().NotifyDataRecv(senderNetworkId, payload, dataLen);
 }
-}
-}
+} // namespace DistributedSchedule
+} // namespace OHOS
