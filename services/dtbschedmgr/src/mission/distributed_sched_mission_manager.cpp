@@ -310,6 +310,10 @@ int32_t DistributedSchedMissionManager::RegisterMissionListener(const std::u16st
     const sptr<IRemoteObject>& listener)
 {
     std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(Str16ToStr8(devId));
+    if (uuid.empty()) {
+        HILOGE("uuid is empty!");
+        return INVALID_PARAMETERS_ERR;
+    }
     if (missionHandler_ != nullptr) {
         HILOGI("RemoveTask");
         missionHandler_->RemoveTask(DELETE_DATA_STORAGE + uuid);
@@ -400,6 +404,9 @@ int32_t DistributedSchedMissionManager::UnRegisterMissionListener(const std::u16
     if (listener == nullptr) {
         return INVALID_PARAMETERS_ERR;
     }
+    if (!IsDeviceIdValidated(Str16ToStr8(devId))) {
+        return INVALID_PARAMETERS_ERR;
+    }
     std::string localDeviceId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)
         || localDeviceId == Str16ToStr8(devId)) {
@@ -477,6 +484,9 @@ int32_t DistributedSchedMissionManager::StartSyncRemoteMissions(const std::strin
     int64_t tag)
 {
     std::string localDeviceId;
+    if (!IsDeviceIdValidated(dstDevId)) {
+        return INVALID_PARAMETERS_ERR;
+    }
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)
         || (dstDevId == localDeviceId)) {
         HILOGE("check deviceId fail");
