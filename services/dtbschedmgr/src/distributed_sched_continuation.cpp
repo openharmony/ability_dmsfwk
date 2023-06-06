@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -199,6 +199,7 @@ sptr<IRemoteObject> DSchedContinuation::PopCallback(int32_t missionId)
         HILOGD("%{public}d need pop from freeInstall_", missionId);
         (void)freeInstall_.erase(it);
     }
+    (void)cleanMission_.erase(missionId);
     (void)callbackMap_.erase(iter);
     return callback;
 }
@@ -242,6 +243,23 @@ void DSchedContinuation::ContinuationHandler::ProcessEvent(const InnerEvent::Poi
     if (contCallback_ != nullptr) {
         contCallback_(sessionId);
     }
+}
+
+void DSchedContinuation::SetCleanMissionFlag(int32_t missionId, bool isCleanMission)
+{
+    std::lock_guard<std::mutex> autoLock(continuationLock_);
+    cleanMission_.emplace(missionId, isCleanMission);
+}
+
+bool DSchedContinuation::IsCleanMission(int32_t missionId)
+{
+    std::lock_guard<std::mutex> autoLock(continuationLock_);
+    auto iter = cleanMission_.find(missionId);
+    if (iter != cleanMission_.end()) {
+        HILOGD("Application need not exit after continue, missionId:%{public}d exist!", missionId);
+        return iter->second;
+    }
+    return true;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

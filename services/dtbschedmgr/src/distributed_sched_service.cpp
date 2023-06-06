@@ -22,6 +22,7 @@
 #include "ability_manager_client.h"
 #include "ability_manager_errors.h"
 #include "adapter/dnetwork_adapter.h"
+#include "bool_wrapper.h"
 #include "bundle/bundle_manager_internal.h"
 #include "connect_death_recipient.h"
 #include "datetime_ex.h"
@@ -85,6 +86,7 @@ const std::string DMS_VERSION_ID = "dmsVersion";
 const std::string DMS_CONNECT_TOKEN = "connectToken";
 const std::string DMS_VERSION = "4.0.0";
 const std::string DMS_MISSION_ID = "dmsMissionId";
+const std::string SUPPORT_CONTINUE_SOURCE_EXIT_KEY = "ohos.extra.param.key.supportContinueSourceExit";
 constexpr int32_t DEFAULT_DMS_MISSION_ID = -1;
 constexpr int32_t DEFAULT_DMS_CONNECT_TOKEN = -1;
 constexpr int32_t BIND_CONNECT_RETRY_TIMES = 3;
@@ -492,6 +494,7 @@ int32_t DistributedSchedService::StartContinuation(const OHOS::AAFwk::Want& want
         return result;
     }
     bool flag = dschedContinuation_->IsFreeInstall(missionId);
+    SetCleanMissionFlag(want, missionId);
     if (flag) {
         result = StartRemoteFreeInstall(newWant, callerUid, DEFAULT_REQUEST_CODE, accessToken, nullptr);
         if (result != ERR_OK) {
@@ -604,7 +607,7 @@ void DistributedSchedService::NotifyContinuationCallbackResult(int32_t missionId
 
     int32_t result = 0;
     if (dschedContinuation_->IsInContinuationProgress(missionId)) {
-        if (resultCode == ERR_OK) {
+        if (resultCode == ERR_OK && dschedContinuation_->IsCleanMission(missionId)) {
             result = AbilityManagerClient::GetInstance()->CleanMission(missionId);
             HILOGD("clean mission result:%{public}d", result);
         }
@@ -2423,6 +2426,17 @@ int32_t DistributedSchedService::StopExtensionAbilityFromRemote(const OHOS::AAFw
 
     return AAFwk::AbilityManagerClient::GetInstance()->StopExtensionAbility(
         want, callerToken, ids[0], static_cast<AppExecFwk::ExtensionAbilityType>(extensionType));
+}
+
+void DistributedSchedService::SetCleanMissionFlag(const OHOS::AAFwk::Want& want, int32_t missionId)
+{
+    auto value =  want.GetParams().GetParam(SUPPORT_CONTINUE_SOURCE_EXIT_KEY);
+    IBoolean *ao = IBoolean::Query(value);
+    bool isCleanMission = true;
+    if (ao != nullptr) {
+        isCleanMission = AAFwk::Boolean::Unbox(ao);
+    }
+    dschedContinuation_->SetCleanMissionFlag(missionId, isCleanMission);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

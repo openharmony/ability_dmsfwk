@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,8 @@ public:
     int32_t NotifyMissionCenterResult(int32_t missionId, int32_t resultCode);
     bool IsFreeInstall(int32_t missionId);
     std::string GetTargetDevice(int32_t missionId);
+    bool IsCleanMission(int32_t missionId);
+    void SetCleanMissionFlag(int32_t missionId, bool isCleanMission);
 
 private:
     class ContinuationHandler : public AppExecFwk::EventHandler {
@@ -65,6 +67,7 @@ private:
     std::map<int32_t, sptr<IRemoteObject>> continuationMap_;
     std::map<int32_t, sptr<IRemoteObject>> callbackMap_;
     std::map<int32_t, bool> freeInstall_;
+    std::map<int32_t, bool> cleanMission_;
     std::map<int32_t, std::string> continuationDevices_;
 };
 } // namespace DistributedSchedule
