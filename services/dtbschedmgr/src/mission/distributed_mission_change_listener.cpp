@@ -63,5 +63,5 @@ void DistributedMissionChangeListener::OnMissionClosed(int32_t missionId)
 void DistributedMissionChangeListener::OnMissionLabelUpdated(int32_t missionId)
 {
 }
-}
-}
+} // namespace DistributedSchedule
+} // namespace OHOS

@@ -24,7 +24,6 @@ class DistributedMissionDiedListener : public IRemoteObject::DeathRecipient {
 public:
     DistributedMissionDiedListener() = default;
     virtual ~DistributedMissionDiedListener() = default;
-    
     void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
 };
 } // namespace DistributedSchedule

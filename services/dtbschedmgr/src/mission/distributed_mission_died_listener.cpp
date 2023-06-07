@@ -28,5 +28,5 @@ void DistributedMissionDiedListener::OnRemoteDied(const wptr<IRemoteObject>& rem
     HILOGD("called");
     DistributedSchedContinueManager::GetInstance().NotifyDeid(remote.promote());
 }
-}
-}
+} // namespace DistributedSchedule
+} // namespace OHOS

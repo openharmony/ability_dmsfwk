@@ -31,6 +31,7 @@ void DistributedMissionFocusedListener::OnMissionCreated(int32_t missionId)
 void DistributedMissionFocusedListener::OnMissionDestroyed(int32_t missionId)
 {
     HILOGI("OnMissionDestroyed, missionId = %{public}d", missionId);
+    DistributedSchedContinueManager::GetInstance().NotifyMissionUnfocused(missionId);
 }
 
 void DistributedMissionFocusedListener::OnMissionSnapshotChanged(int32_t missionId)
@@ -56,18 +57,20 @@ void DistributedMissionFocusedListener::OnMissionUnfocused(int32_t missionId)
 }
 
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-void DistributedMissionFocusedListener::OnMissionIconUpdated(int32_t missionId,
-    const std::shared_ptr<OHOS::Media::PixelMap> &icon)
+void DistributedMissionFocusedListener::OnMissionIconUpdated([[maybe_unused]]int32_t missionId,
+    [[maybe_unused]]const std::shared_ptr<OHOS::Media::PixelMap> &icon)
 {
 }
 #endif
 
 void DistributedMissionFocusedListener::OnMissionClosed(int32_t missionId)
 {
+    HILOGI("OnMissionClosed, missionId = %{public}d", missionId);
+    DistributedSchedContinueManager::GetInstance().NotifyMissionUnfocused(missionId);
 }
 
-void DistributedMissionFocusedListener::OnMissionLabelUpdated(int32_t missionId)
+void DistributedMissionFocusedListener::OnMissionLabelUpdated([[maybe_unused]]int32_t missionId)
 {
 }
-}
-}
+} // namespace DistributedSchedule
+} // namespace OHOS
