@@ -43,6 +43,8 @@ namespace DistributedSchedule {
 namespace {
 const std::string DEVICE_NAME = "DEVICE_PHONE_001";
 const std::string DEVICE_ID = "123456789ABCD";
+const std::string DEVICE_ID_FALSE = "123456789ABCDF";
+const std::string DEVICE_ID_FALSE_AGAIN = "123456789ABCDFA";
 const std::u16string U16DEVICE_ID = u"123456789ABCD";
 const std::string BUNDLE_NAME = "ohos.test.test";
 constexpr int32_t TASK_ID = 11;
@@ -234,11 +236,12 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions003, TestSize.Level1)
 HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions004, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions004 begin" << std::endl;
+    auto deviceInfo = std::make_shared<DmsDeviceInfo>("", 0, "");
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[DEVICE_ID] = deviceInfo;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(DEVICE_ID, false, 0);
     EXPECT_EQ(ret, ERR_NONE);
     DTEST_LOG << "testStartSyncRemoteMissions004 end" << std::endl;
 }
-
 /**
  * @tc.name: testStartSyncRemoteMissions005
  * @tc.desc: prepare and sync missions from remote
@@ -248,7 +251,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions005, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions005 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions("", false, 0);
-    EXPECT_EQ(ret, ERR_NONE);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "testStartSyncRemoteMissions005 end" << std::endl;
 }
 
@@ -273,6 +276,8 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions006, TestSize.Level3)
 HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions007, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions007 begin" << std::endl;
+    auto deviceInfo = std::make_shared<DmsDeviceInfo>("", 0, "");
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[DEVICE_ID] = deviceInfo;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(DEVICE_ID, true, 0);
     EXPECT_EQ(ret, ERR_NONE);
     DTEST_LOG << "testStartSyncRemoteMissions007 end" << std::endl;
@@ -287,7 +292,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions008, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions008 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions("", true, 0);
-    EXPECT_EQ(ret, ERR_NONE);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "testStartSyncRemoteMissions008 end" << std::endl;
 }
 
@@ -312,6 +317,8 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions009, TestSize.Level3)
 HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions010, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions010 begin" << std::endl;
+    auto deviceInfo = std::make_shared<DmsDeviceInfo>("", 0, "");
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[DEVICE_ID] = deviceInfo;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(DEVICE_ID, true, 1);
     EXPECT_EQ(ret, ERR_NONE);
     DTEST_LOG << "testStartSyncRemoteMissions010 end" << std::endl;
@@ -326,7 +333,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions011, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions011 begin" << std::endl;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions("", true, 1);
-    EXPECT_EQ(ret, ERR_NONE);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "testStartSyncRemoteMissions011 end" << std::endl;
 }
 
@@ -649,7 +656,7 @@ HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener003, TestSize.Level3)
     DTEST_LOG << "testRegisterMissionListener003 begin" << std::endl;
     sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
     auto ret = DistributedSchedMissionManager::GetInstance().RegisterMissionListener(u"", listener);
-    EXPECT_EQ(ret, ERR_NONE);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "testRegisterMissionListener003 end" << std::endl;
 }
 
@@ -662,6 +669,7 @@ HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener004, TestSize.Level3)
 {
     DTEST_LOG << "testRegisterMissionListener004 begin" << std::endl;
     sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_["1234567"] = DEVICE_ID;
     auto ret = DistributedSchedMissionManager::GetInstance().RegisterMissionListener(U16DEVICE_ID, listener);
     EXPECT_EQ(ret, ERR_NONE);
     DTEST_LOG << "testRegisterMissionListener004 end" << std::endl;
@@ -813,10 +821,10 @@ HWTEST_F(DMSMissionManagerTest, testIsDeviceIdValidated001, TestSize.Level1)
     auto ret = DistributedSchedMissionManager::GetInstance().IsDeviceIdValidated(emptyDeviceId);
     EXPECT_FALSE(ret);
 
-    ret = DistributedSchedMissionManager::GetInstance().IsDeviceIdValidated(DEVICE_ID);
+    ret = DistributedSchedMissionManager::GetInstance().IsDeviceIdValidated(DEVICE_ID_FALSE);
     EXPECT_FALSE(ret);
 
-    ret = DistributedSchedMissionManager::GetInstance().IsDeviceIdValidated(localDeviceId_);
+    ret = DistributedSchedMissionManager::GetInstance().IsDeviceIdValidated(DEVICE_ID_FALSE_AGAIN);
     EXPECT_FALSE(ret);
 }
 
@@ -1117,7 +1125,7 @@ HWTEST_F(DMSMissionManagerTest, testInitDataStorage002, TestSize.Level3)
 HWTEST_F(DMSMissionManagerTest, testStoreSnapshotInfo002, TestSize.Level3)
 {
     DTEST_LOG << "testStoreSnapshotInfo002 begin" << std::endl;
-    auto ret = DistributedSchedMissionManager::GetInstance().StoreSnapshotInfo(DEVICE_ID, 0, 0, 0);
+    auto ret = DistributedSchedMissionManager::GetInstance().StoreSnapshotInfo(DEVICE_ID_FALSE, 0, 0, 0);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "testStoreSnapshotInfo002 end" << std::endl;
 }
@@ -1130,7 +1138,7 @@ HWTEST_F(DMSMissionManagerTest, testStoreSnapshotInfo002, TestSize.Level3)
 HWTEST_F(DMSMissionManagerTest, testRemoveSnapshotInfo002, TestSize.Level3)
 {
     DTEST_LOG << "testRemoveSnapshotInfo002 begin" << std::endl;
-    auto ret = DistributedSchedMissionManager::GetInstance().RemoveSnapshotInfo(DEVICE_ID, 0);
+    auto ret = DistributedSchedMissionManager::GetInstance().RemoveSnapshotInfo(DEVICE_ID_FALSE, 0);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "testRemoveSnapshotInfo002 end" << std::endl;
 }
@@ -1281,14 +1289,14 @@ HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedFromRemote001, TestSize
 {
     DTEST_LOG << "testNotifyMissionsChangedFromRemote001 begin" << std::endl;
     CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = "";
+    callerInfo.sourceDeviceId = DEVICE_ID;
     callerInfo.uid = 0;
     callerInfo.pid = 0;
     callerInfo.dmsVersion = 0;
     std::vector<DstbMissionInfo> missionInfos;
     DistributedSchedMissionManager::GetInstance().Init();
     auto ret = DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedFromRemote(callerInfo, missionInfos);
-    EXPECT_EQ(ret, ERR_NONE);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "testNotifyMissionsChangedFromRemote001 end" << std::endl;
 }
 
@@ -1307,8 +1315,11 @@ HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedFromRemote002, TestSize
     callerInfo.dmsVersion = 0;
     std::vector<DstbMissionInfo> missionInfos;
     DistributedSchedMissionManager::GetInstance().Init();
+    sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    auto& listenerInfo = DistributedSchedMissionManager::GetInstance().listenDeviceMap_[U16DEVICE_ID];
+    EXPECT_EQ(listenerInfo.Emplace(listener), true);
     auto ret = DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedFromRemote(callerInfo, missionInfos);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, ERR_NONE);
     DTEST_LOG << "testNotifyMissionsChangedFromRemote002 end" << std::endl;
 }
 
@@ -1889,7 +1900,7 @@ HWTEST_F(DMSMissionManagerTest, testGetMissionInfos008, TestSize.Level3)
     int32_t numMissions = NORMAL_NUM_MISSIONS;
     std::vector<AAFwk::MissionInfo> missionInfos;
     auto ret = DistributedSchedMissionManager::GetInstance().GetMissionInfos(DEVICE_ID, numMissions, missionInfos);
-    EXPECT_NE(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "testGetMissionInfos008 end" << std::endl;
 }
 
@@ -2268,6 +2279,8 @@ HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener006, TestSize.Level
         std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
         DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
     }
+    auto deviceInfo = std::make_shared<DmsDeviceInfo>("", 0, "");
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[DEVICE_ID] = deviceInfo;
     auto ret = DistributedSchedMissionManager::GetInstance().UnRegisterMissionListener(U16DEVICE_ID, listener);
     EXPECT_EQ(ret, ERR_NONE);
     DTEST_LOG << "testUnRegisterMissionListener006 end" << std::endl;
@@ -2303,6 +2316,8 @@ HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener007, TestSize.Level
         DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
     }
     sptr<IRemoteObject> listener = new RemoteMissionListenerTest();
+    auto deviceInfo = std::make_shared<DmsDeviceInfo>("", 0, "");
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[DEVICE_ID] = deviceInfo;
     auto ret = DistributedSchedMissionManager::GetInstance().UnRegisterMissionListener(deviceId, listener);
     EXPECT_EQ(ret, ERR_NONE);
     DTEST_LOG << "testUnRegisterMissionListener007 end" << std::endl;
@@ -2358,6 +2373,8 @@ HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener008, TestSize.Level
         listenerInfo.Emplace(listener);
         DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
     }
+    auto deviceInfo = std::make_shared<DmsDeviceInfo>("", 0, "");
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[DEVICE_ID] = deviceInfo;
     auto ret = DistributedSchedMissionManager::GetInstance().UnRegisterMissionListener(deviceId, listener);
     EXPECT_EQ(ret, ERR_NONE);
     DTEST_LOG << "testUnRegisterMissionListener008 end" << std::endl;
@@ -2393,6 +2410,8 @@ HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener009, TestSize.Level
         listenerInfo.Emplace(nullListener);
         DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
     }
+    auto deviceInfo = std::make_shared<DmsDeviceInfo>("", 0, "");
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[DEVICE_ID] = deviceInfo;
     auto ret = DistributedSchedMissionManager::GetInstance().UnRegisterMissionListener(deviceId, listener);
     EXPECT_EQ(ret, ERR_NONE);
     DTEST_LOG << "testUnRegisterMissionListener009 end" << std::endl;
