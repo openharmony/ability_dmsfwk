@@ -69,6 +69,11 @@ public:
         const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t resultCode) = 0;
     virtual int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
         int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams) = 0;
+    virtual int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
+        const std::string& bundleName, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
+    {
+        return 0;
+    }
     virtual int32_t StartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId, int32_t callerUid,
         int32_t status, uint32_t accessToken) = 0;
     virtual void NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId, bool isSuccess) = 0;
@@ -89,6 +94,14 @@ public:
     virtual int32_t StopSyncRemoteMissions(const std::string& devId) = 0;
     virtual int32_t StopSyncMissionsFromRemote(const CallerInfo& callerInfo) = 0;
     virtual int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) = 0;
+    virtual int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj)
+    {
+        return 0;
+    }
+    virtual int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj)
+    {
+        return 0;
+    }
     virtual int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) = 0;
     virtual int32_t GetMissionInfos(const std::string& deviceId, int32_t numMissions,
         std::vector<AAFwk::MissionInfo>& missionInfos) = 0;
@@ -151,6 +164,7 @@ public:
         SEND_RESULT_FROM_REMOTE = 20,
         GET_REMOTE_APPTHREAD = 35,
         CONTINUE_MISSION = 36,
+        CONTINUE_MISSION_OF_BUNDLENAME = 37,
 
         // requeset code for free install
         START_FREE_INSTALL_FROM_REMOTE = 51,
@@ -193,6 +207,8 @@ public:
         // stop externsion ability
         STOP_REMOTE_EXTERNSION_ABILITY = 225,
         STOP_EXTERNSION_ABILITY_FROM_REMOTE = 226,
+        REGISTER_ON_LISTENER = 260,
+        REGISTER_OFF_LISTENER = 261,
     };
 };
 } // namespace DistributedSchedule

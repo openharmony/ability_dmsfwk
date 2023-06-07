@@ -39,6 +39,9 @@ public:
         const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t resultCode) override;
     int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
         int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams) override;
+    int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
+        const std::string& bundleName, const sptr<IRemoteObject>& callback,
+        const OHOS::AAFwk::WantParams& wantParams) override;
     int32_t StartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId, int32_t callerUid,
         int32_t status, uint32_t accessToken) override;
     void NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId, bool isSuccess) override;
@@ -56,6 +59,8 @@ public:
     int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;
     int32_t StopSyncRemoteMissions(const std::string& devId) override;
     int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
+    int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
+    int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
     int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
     int32_t GetMissionInfos(const std::string& deviceId, int32_t numMissions,
         std::vector<AAFwk::MissionInfo>& missionInfos) override;
