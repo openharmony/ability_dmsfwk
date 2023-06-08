@@ -963,6 +963,40 @@ HWTEST_F(DistributedSchedServiceTest, SetContinuationTimeout_001, TestSize.Level
 }
 
 /**
+ * @tc.name: ContinueRemoteMission_001
+ * @tc.desc: call ContinueRemoteMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceTest, ContinueRemoteMission_001, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest ContinueRemoteMission_001 start" << std::endl;
+    WantParams wantParams;
+    auto callback = GetDSchedService();
+    int32_t result = DistributedSchedService::GetInstance().ContinueRemoteMission(
+        "", "string", "bundleName", callback, wantParams);
+    EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), result);
+    DTEST_LOG << "DSchedContinuationTest ContinueRemoteMission_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinueRemoteMission_002
+ * @tc.desc: call ContinueRemoteMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceTest, ContinueRemoteMission_002, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest ContinueRemoteMission_002 start" << std::endl;
+    WantParams wantParams;
+    auto callback = GetDSchedService();
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    int32_t result = DistributedSchedService::GetInstance().ContinueRemoteMission(
+        "string", localDeviceId, "bundleName", callback, wantParams);
+    EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), result);
+    DTEST_LOG << "DSchedContinuationTest ContinueRemoteMission_002 end" << std::endl;
+}
+
+/**
  * @tc.name: ContinueMission_001
  * @tc.desc: call ContinueMission
  * @tc.type: FUNC
@@ -998,6 +1032,40 @@ HWTEST_F(DistributedSchedServiceTest, ContinueMission_002, TestSize.Level1)
         "string", "string", missionId, callback, wantParams);
     EXPECT_EQ(static_cast<int>(OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET), result);
     DTEST_LOG << "DSchedContinuationTest ContinueMission_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinueMissionBundleName_001
+ * @tc.desc: call ContinueMissionBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceTest, ContinueMissionBundleName_001, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest ContinueMissionBundleName_001 start" << std::endl;
+    WantParams wantParams;
+    auto callback = GetDSchedService();
+    std::string localDeviceId;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
+    int32_t result = DistributedSchedService::GetInstance().ContinueMission(
+        "string", localDeviceId, "bundleName", callback, wantParams);
+    EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), result);
+    DTEST_LOG << "DSchedContinuationTest ContinueMissionBundleName_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinueMissionBundleName_002
+ * @tc.desc: call ContinueMissionBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceTest, ContinueMissionBundleName_002, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest ContinueMissionBundleName_002 start" << std::endl;
+    WantParams wantParams;
+    auto callback = GetDSchedService();
+    int32_t result = DistributedSchedService::GetInstance().ContinueMission(
+        "string", "string", "bundleName", callback, wantParams);
+    EXPECT_EQ(static_cast<int>(OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET), result);
+    DTEST_LOG << "DSchedContinuationTest ContinueMissionBundleName_002 end" << std::endl;
 }
 
 /**
