@@ -76,6 +76,7 @@ private:
     bool CheckDeviceSecurityLevel(const std::string& srcDeviceId, const std::string& dstDeviceId) const;
     int32_t GetDeviceSecurityLevel(const std::string& udid) const;
     bool CheckTargetAbilityVisible(const AppExecFwk::AbilityInfo& targetAbility, const CallerInfo& callerInfo) const;
+    bool IsDistributedFile(const std::string& path) const;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

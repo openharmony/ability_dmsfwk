@@ -44,6 +44,7 @@ const std::string PARAMS_STREAM = "ability.params.stream";
 const std::string PERMISSION_START_ABILIIES_FROM_BACKGROUND = "ohos.permission.START_ABILIIES_FROM_BACKGROUND";
 const std::string PERMISSION_START_ABILITIES_FROM_BACKGROUND = "ohos.permission.START_ABILITIES_FROM_BACKGROUND";
 const std::string PERMISSION_START_INVISIBLE_ABILITY = "ohos.permission.START_INVISIBLE_ABILITY";
+const std::string DISTRIBUTED_FILES_PATH = "/data/storage/el2/distributedfiles/";
 constexpr int32_t DEFAULT_DMS_API_VERSION = 9;
 const int DEFAULT_DMS_MISSION_ID = -1;
 const int FA_MODULE_ALLOW_MIN_API_VERSION = 8;
@@ -282,6 +283,9 @@ void DistributedSchedPermission::MarkUriPermission(OHOS::AAFwk::Want& want, uint
     HILOGI("GrantUriPermission uriVec size: %{public}zu", uriVec.size());
     for (std::string str : uriVec) {
         Uri uri(str);
+        if (!IsDistributedFile(uri.GetPath())) {
+            continue;
+        }
         std::string authority = uri.GetAuthority();
         HILOGI("uri authority is %{public}s.", authority.c_str());
         AppExecFwk::BundleInfo bundleInfo;
@@ -301,6 +305,15 @@ void DistributedSchedPermission::MarkUriPermission(OHOS::AAFwk::Want& want, uint
         }
     }
     want.SetParam(PARAMS_URI, uriVecPermission);
+}
+
+bool DistributedSchedPermission::IsDistributedFile(const std::string& path) const
+{
+    if (path.compare(0, DISTRIBUTED_FILES_PATH.size(), DISTRIBUTED_FILES_PATH) == 0) {
+        return true;
+    }
+    HILOGE("uri path is false.");
+    return false;
 }
 
 bool DistributedSchedPermission::IsNativeCall(uint32_t accessToken) const
