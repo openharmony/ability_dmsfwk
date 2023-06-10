@@ -273,6 +273,8 @@ int32_t DistributedSchedContinueManager::DealUnfocusedBusiness(const int32_t mis
         HILOGE("get bundleName failed, mission can not change, missionId: %{public}d, ret: %{public}d", missionId, ret);
         return ret;
     }
+    HILOGI("get bundleName ,mission can change, missionId: %{public}d, bundleName: %{public}s",
+        missionId, bundleName.c_str());
     /*determine if it is necessary to send a lost focus broadcast*/
     bool isContinue = IsContinue(missionId, bundleName);
     if (!isContinue) {
@@ -312,8 +314,8 @@ int32_t DistributedSchedContinueManager::DealUnfocusedBusiness(const int32_t mis
 int32_t DistributedSchedContinueManager::DealUnBroadcastdBusiness(std::string& senderNetworkId,
     uint32_t accessTokenId, const int32_t state)
 {
-    HILOGI("DealUnBroadcastdBusiness start, senderNetworkId: %{public}s, , accessTokenId: %{public}d",
-        DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), accessTokenId);
+    HILOGI("DealUnBroadcastdBusiness start, senderNetworkId: %{public}s, accessTokenId: %{public}d, state: %{public}d",
+        DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), accessTokenId, state);
     std::string bundleName;
     int32_t ret = BundleManagerInternal::GetBundleNameFromDbms(senderNetworkId, accessTokenId, bundleName);
     if (ret != ERR_OK) {
@@ -321,6 +323,7 @@ int32_t DistributedSchedContinueManager::DealUnBroadcastdBusiness(std::string& s
             DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), accessTokenId, ret);
         return ret;
     }
+    HILOGI("get bundleName, bundleName: %{public}s", bundleName.c_str());
     std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     auto iterItem = registerOnListener_.find(onType_);
     if (iterItem == registerOnListener_.end()) {
