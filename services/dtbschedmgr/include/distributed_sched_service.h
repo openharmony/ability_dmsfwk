@@ -235,6 +235,7 @@ private:
     int32_t CheckTargetPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
     int32_t SaveConnectToken(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect);
+    void SetCleanMissionFlag(const OHOS::AAFwk::Want& want, int32_t missionId);
 
     std::shared_ptr<DSchedContinuation> dschedContinuation_;
     std::map<sptr<IRemoteObject>, std::list<ConnectAbilitySession>> distributedConnectAbilityMap_;
