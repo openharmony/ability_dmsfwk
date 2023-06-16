@@ -53,19 +53,21 @@ const int DEFAULT_DEVICE_SECURITY_LEVEL = -1;
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedPermission);
 void from_json(const nlohmann::json& jsonObject, GroupInfo& groupInfo)
 {
-    if (jsonObject.find(FIELD_GROUP_NAME) != jsonObject.end()) {
+    if (jsonObject.find(FIELD_GROUP_NAME) != jsonObject.end() && jsonObject[FIELD_GROUP_NAME].is_string()) {
         jsonObject.at(FIELD_GROUP_NAME).get_to(groupInfo.groupName);
     }
-    if (jsonObject.find(FIELD_GROUP_ID) != jsonObject.end()) {
+    if (jsonObject.find(FIELD_GROUP_ID) != jsonObject.end() && jsonObject[FIELD_GROUP_ID].is_string()) {
         jsonObject.at(FIELD_GROUP_ID).get_to(groupInfo.groupId);
     }
-    if (jsonObject.find(FIELD_GROUP_OWNER) != jsonObject.end()) {
+    if (jsonObject.find(FIELD_GROUP_OWNER) != jsonObject.end() && jsonObject[FIELD_GROUP_OWNER].is_string()) {
         jsonObject.at(FIELD_GROUP_OWNER).get_to(groupInfo.groupOwner);
     }
-    if (jsonObject.find(FIELD_GROUP_TYPE) != jsonObject.end()) {
+    if (jsonObject.find(FIELD_GROUP_TYPE) != jsonObject.end() &&
+        jsonObject[FIELD_GROUP_TYPE].is_number_integer()) {
         jsonObject.at(FIELD_GROUP_TYPE).get_to(groupInfo.groupType);
     }
-    if (jsonObject.find(FIELD_GROUP_VISIBILITY) != jsonObject.end()) {
+    if (jsonObject.find(FIELD_GROUP_VISIBILITY) != jsonObject.end() &&
+        jsonObject[FIELD_GROUP_VISIBILITY].is_number_integer()) {
         jsonObject.at(FIELD_GROUP_VISIBILITY).get_to(groupInfo.groupVisibility);
     }
 }
