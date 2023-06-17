@@ -41,7 +41,7 @@ int32_t AppDeviceCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
     }
     int32_t token = -1;
     switch (code) {
-        case AppDeviceCallbackInterface::EVENT_DEVICE_CONNECT: {
+        case static_cast<uint32_t>(IDRequestCallbackInterfaceCode::EVENT_DEVICE_CONNECT): {
             PARCEL_READ_HELPER(data, Int32, token);
             std::vector<ContinuationResult> continuationResults;
             if (!ContinuationResult::ReadContinuationResultsFromParcel(data, continuationResults)) {
@@ -50,7 +50,7 @@ int32_t AppDeviceCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
             int32_t result = OnDeviceConnect(token, continuationResults);
             return result;
         }
-        case AppDeviceCallbackInterface::EVENT_DEVICE_DISCONNECT: {
+        case static_cast<uint32_t>(IDRequestCallbackInterfaceCode::EVENT_DEVICE_DISCONNECT): {
             PARCEL_READ_HELPER(data, Int32, token);
             std::vector<ContinuationResult> continuationResults;
             if (!ContinuationResult::ReadContinuationResultsFromParcel(data, continuationResults)) {
@@ -59,7 +59,7 @@ int32_t AppDeviceCallbackStub::OnRemoteRequest(uint32_t code, MessageParcel& dat
             int32_t result = OnDeviceDisconnect(token, continuationResults);
             return result;
         }
-        case AppDeviceCallbackInterface::EVENT_DEVICE_CANCEL: {
+        case static_cast<uint32_t>(IDRequestCallbackInterfaceCode::EVENT_DEVICE_CANCEL): {
             int32_t result = OnDeviceCancel();
             return result;
         }

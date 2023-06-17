@@ -38,14 +38,18 @@ const std::string PERMISSION_DISTRIBUTED_DATASYNC = "ohos.permission.DISTRIBUTED
 
 DistributedAbilityManagerStub::DistributedAbilityManagerStub()
 {
-    funcsMap_[REGISTER] = &DistributedAbilityManagerStub::RegisterInner;
-    funcsMap_[UNREGISTER] = &DistributedAbilityManagerStub::UnregisterInner;
-    funcsMap_[REGISTER_DEVICE_SELECTION_CALLBACK] =
+    funcsMap_[static_cast<uint32_t>(IDAbilityManagerInterfaceCode::REGISTER)] =
+        &DistributedAbilityManagerStub::RegisterInner;
+    funcsMap_[static_cast<uint32_t>(IDAbilityManagerInterfaceCode::UNREGISTER)] =
+        &DistributedAbilityManagerStub::UnregisterInner;
+    funcsMap_[static_cast<uint32_t>(IDAbilityManagerInterfaceCode::REGISTER_DEVICE_SELECTION_CALLBACK)] =
         &DistributedAbilityManagerStub::RegisterDeviceSelectionCallbackInner;
-    funcsMap_[UNREGISTER_DEVICE_SELECTION_CALLBACK] =
+    funcsMap_[static_cast<uint32_t>(IDAbilityManagerInterfaceCode::UNREGISTER_DEVICE_SELECTION_CALLBACK)] =
         &DistributedAbilityManagerStub::UnregisterDeviceSelectionCallbackInner;
-    funcsMap_[UPDATE_CONNECT_STATUS] = &DistributedAbilityManagerStub::UpdateConnectStatusInner;
-    funcsMap_[START_DEVICE_MANAGER] = &DistributedAbilityManagerStub::StartDeviceManagerInner;
+    funcsMap_[static_cast<uint32_t>(IDAbilityManagerInterfaceCode::UPDATE_CONNECT_STATUS)] =
+        &DistributedAbilityManagerStub::UpdateConnectStatusInner;
+    funcsMap_[static_cast<uint32_t>(IDAbilityManagerInterfaceCode::START_DEVICE_MANAGER)] =
+        &DistributedAbilityManagerStub::StartDeviceManagerInner;
 }
 
 DistributedAbilityManagerStub::~DistributedAbilityManagerStub()

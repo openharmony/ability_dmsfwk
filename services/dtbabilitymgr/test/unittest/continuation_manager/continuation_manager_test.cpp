@@ -1629,8 +1629,8 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_001, TestSize.Level3)
     MessageParcel reply;
     MessageOption option;
     DeviceSelectionNotifierTest deviceSelectionNotifierTest;
-    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_CONNECT,
-        data, reply, option);
+    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(static_cast<uint32_t>
+        (IDRequestInterfaceCode::EVENT_DEVICE_CONNECT), data, reply, option);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
 }
 
@@ -1683,8 +1683,8 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_003, TestSize.Level3)
     MessageParcel reply;
     MessageOption option;
     DeviceSelectionNotifierTest deviceSelectionNotifierTest;
-    int32_t result2 = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_CONNECT,
-        data, reply, option);
+    int32_t result2 = deviceSelectionNotifierTest.OnRemoteRequest(static_cast<uint32_t>
+        (IDRequestInterfaceCode::EVENT_DEVICE_CONNECT), data, reply, option);
 
     EXPECT_EQ(true, result1);
     EXPECT_EQ(ERR_OK, result2);
@@ -1705,8 +1705,8 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_004, TestSize.Level3)
     MessageParcel reply;
     MessageOption option;
     DeviceSelectionNotifierTest deviceSelectionNotifierTest;
-    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_DISCONNECT,
-        data, reply, option);
+    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(static_cast<uint32_t>
+        (IDRequestInterfaceCode::EVENT_DEVICE_DISCONNECT), data, reply, option);
     EXPECT_EQ(ERR_INVALID_VALUE, result);
     /**
      * @tc.steps: step2. test OnRemoteDied when dmsNotifier_ == nullptr.
@@ -1747,8 +1747,8 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_005, TestSize.Level3)
     MessageParcel reply;
     MessageOption option;
     DeviceSelectionNotifierTest deviceSelectionNotifierTest;
-    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_DISCONNECT,
-        data, reply, option);
+    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(static_cast<uint32_t>
+        (IDRequestInterfaceCode::EVENT_DEVICE_DISCONNECT), data, reply, option);
 
     EXPECT_EQ(ERR_OK, result);
 }
@@ -1768,8 +1768,8 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_006, TestSize.Level3)
     MessageParcel reply;
     MessageOption option;
     DeviceSelectionNotifierTest deviceSelectionNotifierTest;
-    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_CONNECT,
-        data, reply, option);
+    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(static_cast<uint32_t>
+        (IDRequestInterfaceCode::EVENT_DEVICE_CONNECT), data, reply, option);
     EXPECT_EQ(ERR_FLATTEN_OBJECT, result);
 }
 
@@ -1788,8 +1788,8 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_007, TestSize.Level3)
     MessageParcel reply;
     MessageOption option;
     DeviceSelectionNotifierTest deviceSelectionNotifierTest;
-    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(IDeviceSelectionNotifier::EVENT_DEVICE_DISCONNECT,
-        data, reply, option);
+    int32_t result = deviceSelectionNotifierTest.OnRemoteRequest(static_cast<uint32_t>
+        (IDRequestInterfaceCode::EVENT_DEVICE_DISCONNECT), data, reply, option);
     EXPECT_EQ(ERR_FLATTEN_OBJECT, result);
 }
 
@@ -1845,7 +1845,8 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_008, TestSize.Level3)
 
 /**
  * @tc.name: OnRemoteRequest_009
- * @tc.desc: test OnRemoteRequest when code = AppDeviceCallbackInterface::EVENT_DEVICE_CONNECT.
+ * @tc.desc: test OnRemoteRequest when code = static_cast<uint32_t>
+ *     (IDRequestCallbackInterfaceCode::EVENT_DEVICE_CONNECT).
  * @tc.type: FUNC
  * @tc.require: I621C1
  */
@@ -1858,7 +1859,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_009, TestSize.Level3)
     data.WriteInterfaceToken(AppDeviceCallbackInterface::GetDescriptor());
     data.WriteInt32(TEST_TOKEN);
     int32_t ret = appDeviceCallbackStub.OnRemoteRequest(
-        AppDeviceCallbackInterface::EVENT_DEVICE_CONNECT, data, reply, option);
+        static_cast<uint32_t>(IDRequestCallbackInterfaceCode::EVENT_DEVICE_CONNECT), data, reply, option);
     EXPECT_EQ(DISCONNECT_ABILITY_FAILED, ret);
 }
 
@@ -1879,13 +1880,14 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_010, TestSize.Level3)
     data.WriteInt32(VALUE_OBJECT);
     data.WriteInt32(INVALID_LEN);
     int32_t ret = appDeviceCallbackStub.OnRemoteRequest(
-        AppDeviceCallbackInterface::EVENT_DEVICE_CONNECT, data, reply, option);
+        static_cast<uint32_t>(IDRequestCallbackInterfaceCode::EVENT_DEVICE_CONNECT), data, reply, option);
     EXPECT_EQ(ERR_FLATTEN_OBJECT, ret);
 }
 
 /**
  * @tc.name: OnRemoteRequest_011
- * @tc.desc: test OnRemoteRequest when code = AppDeviceCallbackInterface::EVENT_DEVICE_DISCONNECT.
+ * @tc.desc: test OnRemoteRequest when code = static_cast<uint32_t>
+ *     (IDRequestCallbackInterfaceCode::EVENT_DEVICE_DISCONNECT).
  * @tc.type: FUNC
  * @tc.require: I621C1
  */
@@ -1898,7 +1900,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_011, TestSize.Level3)
     data.WriteInterfaceToken(AppDeviceCallbackInterface::GetDescriptor());
     data.WriteInt32(TEST_TOKEN);
     int32_t ret = appDeviceCallbackStub.OnRemoteRequest(
-        AppDeviceCallbackInterface::EVENT_DEVICE_DISCONNECT, data, reply, option);
+        static_cast<uint32_t>(IDRequestCallbackInterfaceCode::EVENT_DEVICE_DISCONNECT), data, reply, option);
     EXPECT_EQ(DISCONNECT_ABILITY_FAILED, ret);
 }
 
@@ -1919,13 +1921,14 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_012, TestSize.Level3)
     data.WriteInt32(VALUE_OBJECT);
     data.WriteInt32(INVALID_LEN);
     int32_t ret = appDeviceCallbackStub.OnRemoteRequest(
-        AppDeviceCallbackInterface::EVENT_DEVICE_DISCONNECT, data, reply, option);
+        static_cast<uint32_t>(IDRequestCallbackInterfaceCode::EVENT_DEVICE_DISCONNECT), data, reply, option);
     EXPECT_EQ(ERR_FLATTEN_OBJECT, ret);
 }
 
 /**
  * @tc.name: OnRemoteRequest_013
- * @tc.desc: test OnRemoteRequest when code = AppDeviceCallbackInterface::EVENT_DEVICE_CANCEL.
+ * @tc.desc: test OnRemoteRequest when code = static_cast<uint32_t>
+ *     (IDRequestCallbackInterfaceCode::EVENT_DEVICE_CANCEL).
  * @tc.type: FUNC
  * @tc.require: I621C1
  */
@@ -1937,7 +1940,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_013, TestSize.Level3)
     MessageOption option;
     data.WriteInterfaceToken(AppDeviceCallbackInterface::GetDescriptor());
     int32_t ret = appDeviceCallbackStub.OnRemoteRequest(
-        AppDeviceCallbackInterface::EVENT_DEVICE_CANCEL, data, reply, option);
+        static_cast<uint32_t>(IDRequestCallbackInterfaceCode::EVENT_DEVICE_CANCEL), data, reply, option);
     EXPECT_EQ(DISCONNECT_ABILITY_FAILED, ret);
 }
 

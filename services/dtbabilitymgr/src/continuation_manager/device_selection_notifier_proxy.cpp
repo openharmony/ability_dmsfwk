@@ -43,7 +43,8 @@ void DeviceSelectionNotifierProxy::OnDeviceConnect(const std::vector<Continuatio
     if (!ContinuationResult::WriteContinuationResultsToParcel(data, continuationResults)) {
         return;
     }
-    int32_t errCode = Remote()->SendRequest(IDeviceSelectionNotifier::EVENT_DEVICE_CONNECT, data, reply, option);
+    int32_t errCode = Remote()->SendRequest(static_cast<uint32_t>
+        (IDRequestInterfaceCode::EVENT_DEVICE_CONNECT), data, reply, option);
     HILOGD("result = %{public}d", errCode);
 }
 
@@ -59,7 +60,8 @@ void DeviceSelectionNotifierProxy::OnDeviceDisconnect(const std::vector<Continua
     if (!ContinuationResult::WriteContinuationResultsToParcel(data, continuationResults)) {
         return;
     }
-    int32_t errCode = Remote()->SendRequest(IDeviceSelectionNotifier::EVENT_DEVICE_DISCONNECT, data, reply, option);
+    int32_t errCode = Remote()->SendRequest(static_cast<uint32_t>
+        (IDRequestInterfaceCode::EVENT_DEVICE_DISCONNECT), data, reply, option);
     HILOGD("result = %{public}d", errCode);
 }
 } // namespace DistributedSchedule

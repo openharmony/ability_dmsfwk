@@ -42,7 +42,7 @@ int32_t DeviceSelectionNotifierStub::OnRemoteRequest(uint32_t code, MessageParce
         return ERR_INVALID_VALUE;
     }
     switch (code) {
-        case IDeviceSelectionNotifier::EVENT_DEVICE_CONNECT: {
+        case static_cast<uint32_t>(IDRequestInterfaceCode::EVENT_DEVICE_CONNECT): {
             std::vector<ContinuationResult> continuationResults;
             if (!ContinuationResult::ReadContinuationResultsFromParcel(data, continuationResults)) {
                 return ERR_FLATTEN_OBJECT;
@@ -50,7 +50,7 @@ int32_t DeviceSelectionNotifierStub::OnRemoteRequest(uint32_t code, MessageParce
             int32_t result = OnDeviceConnectInner(continuationResults);
             return result;
         }
-        case IDeviceSelectionNotifier::EVENT_DEVICE_DISCONNECT: {
+        case static_cast<uint32_t>(IDRequestInterfaceCode::EVENT_DEVICE_DISCONNECT): {
             std::vector<ContinuationResult> continuationResults;
             if (!ContinuationResult::ReadContinuationResultsFromParcel(data, continuationResults)) {
                 return ERR_FLATTEN_OBJECT;

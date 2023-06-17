@@ -47,7 +47,8 @@ int32_t DistributedAbilityManagerProxy::Register(
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t error = remote->SendRequest(REGISTER, data, reply, option);
+    int32_t error = remote->SendRequest(static_cast<uint32_t>(IDAbilityManagerInterfaceCode::REGISTER),
+        data, reply, option);
     if (error != ERR_NONE) {
         HILOGE("SendRequest error = %{public}d", error);
         return error;
@@ -75,7 +76,7 @@ int32_t DistributedAbilityManagerProxy::Unregister(int32_t token)
     }
     PARCEL_WRITE_HELPER(data, Int32, token);
     MessageParcel reply;
-    PARCEL_TRANSACT_SYNC_RET_INT(remote, UNREGISTER, data, reply);
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDAbilityManagerInterfaceCode::UNREGISTER), data, reply);
 }
 
 int32_t DistributedAbilityManagerProxy::RegisterDeviceSelectionCallback(
@@ -104,7 +105,8 @@ int32_t DistributedAbilityManagerProxy::RegisterDeviceSelectionCallback(
     PARCEL_WRITE_HELPER(data, String, cbType);
     PARCEL_WRITE_HELPER(data, RemoteObject, notifier);
     MessageParcel reply;
-    PARCEL_TRANSACT_SYNC_RET_INT(remote, REGISTER_DEVICE_SELECTION_CALLBACK, data, reply);
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>
+        (IDAbilityManagerInterfaceCode::REGISTER_DEVICE_SELECTION_CALLBACK), data, reply);
 }
 
 int32_t DistributedAbilityManagerProxy::UnregisterDeviceSelectionCallback(int32_t token, const std::string& cbType)
@@ -126,7 +128,8 @@ int32_t DistributedAbilityManagerProxy::UnregisterDeviceSelectionCallback(int32_
     PARCEL_WRITE_HELPER(data, Int32, token);
     PARCEL_WRITE_HELPER(data, String, cbType);
     MessageParcel reply;
-    PARCEL_TRANSACT_SYNC_RET_INT(remote, UNREGISTER_DEVICE_SELECTION_CALLBACK, data, reply);
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>
+        (IDAbilityManagerInterfaceCode::UNREGISTER_DEVICE_SELECTION_CALLBACK), data, reply);
 }
 
 int32_t DistributedAbilityManagerProxy::UpdateConnectStatus(int32_t token, const std::string& deviceId,
@@ -146,7 +149,8 @@ int32_t DistributedAbilityManagerProxy::UpdateConnectStatus(int32_t token, const
     PARCEL_WRITE_HELPER(data, String, deviceId);
     PARCEL_WRITE_HELPER(data, Int32, static_cast<int32_t>(deviceConnectStatus));
     MessageParcel reply;
-    PARCEL_TRANSACT_SYNC_RET_INT(remote, UPDATE_CONNECT_STATUS, data, reply);
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDAbilityManagerInterfaceCode::UPDATE_CONNECT_STATUS),
+        data, reply);
 }
 
 int32_t DistributedAbilityManagerProxy::StartDeviceManager(
@@ -170,7 +174,8 @@ int32_t DistributedAbilityManagerProxy::StartDeviceManager(
         PARCEL_WRITE_HELPER(data, Parcelable, continuationExtraParams.get());
     }
     MessageParcel reply;
-    PARCEL_TRANSACT_SYNC_RET_INT(remote, START_DEVICE_MANAGER, data, reply);
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDAbilityManagerInterfaceCode::START_DEVICE_MANAGER),
+        data, reply);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

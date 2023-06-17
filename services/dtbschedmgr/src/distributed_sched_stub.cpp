@@ -71,65 +71,97 @@ DistributedSchedStub::~DistributedSchedStub()
 
 void DistributedSchedStub::InitLocalFuncsInner()
 {
-    localFuncsMap_[START_REMOTE_ABILITY] = &DistributedSchedStub::StartRemoteAbilityInner;
-    localFuncsMap_[CONTINUE_MISSION] = &DistributedSchedStub::ContinueMissionInner;
-    localFuncsMap_[CONTINUE_MISSION_OF_BUNDLENAME] = &DistributedSchedStub::ContinueMissionOfBundleNameInner;
-    localFuncsMap_[START_CONTINUATION] = &DistributedSchedStub::StartContinuationInner;
-    localFuncsMap_[NOTIFY_COMPLETE_CONTINUATION] = &DistributedSchedStub::NotifyCompleteContinuationInner;
-    localFuncsMap_[CONNECT_REMOTE_ABILITY] = &DistributedSchedStub::ConnectRemoteAbilityInner;
-    localFuncsMap_[DISCONNECT_REMOTE_ABILITY] = &DistributedSchedStub::DisconnectRemoteAbilityInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_ABILITY)] =
+        &DistributedSchedStub::StartRemoteAbilityInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_MISSION)] =
+        &DistributedSchedStub::ContinueMissionInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_MISSION_OF_BUNDLENAME)] =
+        &DistributedSchedStub::ContinueMissionOfBundleNameInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_CONTINUATION)] =
+        &DistributedSchedStub::StartContinuationInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_COMPLETE_CONTINUATION)] =
+        &DistributedSchedStub::NotifyCompleteContinuationInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::CONNECT_REMOTE_ABILITY)] =
+        &DistributedSchedStub::ConnectRemoteAbilityInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::DISCONNECT_REMOTE_ABILITY)] =
+        &DistributedSchedStub::DisconnectRemoteAbilityInner;
     // request codes for mission manager
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    localFuncsMap_[GET_REMOTE_MISSION_SNAPSHOT_INFO] = &DistributedSchedStub::GetRemoteMissionSnapshotInfoInner;
-    localFuncsMap_[REGISTER_MISSION_LISTENER] = &DistributedSchedStub::RegisterMissionListenerInner;
-    localFuncsMap_[REGISTER_ON_LISTENER] = &DistributedSchedStub::RegisterOnListenerInner;
-    localFuncsMap_[REGISTER_OFF_LISTENER] = &DistributedSchedStub::RegisterOffListenerInner;
-    localFuncsMap_[UNREGISTER_MISSION_LISTENER] = &DistributedSchedStub::UnRegisterMissionListenerInner;
-    localFuncsMap_[GET_MISSION_INFOS] = &DistributedSchedStub::GetMissionInfosInner;
-    localFuncsMap_[START_SYNC_MISSIONS] = &DistributedSchedStub::StartSyncRemoteMissionsInner;
-    localFuncsMap_[STOP_SYNC_MISSIONS] = &DistributedSchedStub::StopSyncRemoteMissionsInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_REMOTE_MISSION_SNAPSHOT_INFO)] =
+        &DistributedSchedStub::GetRemoteMissionSnapshotInfoInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_MISSION_LISTENER)] =
+        &DistributedSchedStub::RegisterMissionListenerInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_ON_LISTENER)] =
+        &DistributedSchedStub::RegisterOnListenerInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_OFF_LISTENER)] =
+        &DistributedSchedStub::RegisterOffListenerInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::UNREGISTER_MISSION_LISTENER)] =
+        &DistributedSchedStub::UnRegisterMissionListenerInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_MISSION_INFOS)] =
+        &DistributedSchedStub::GetMissionInfosInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_SYNC_MISSIONS)] =
+        &DistributedSchedStub::StartSyncRemoteMissionsInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::STOP_SYNC_MISSIONS)] =
+        &DistributedSchedStub::StopSyncRemoteMissionsInner;
 #endif
-    localFuncsMap_[START_REMOTE_ABILITY_BY_CALL] = &DistributedSchedStub::StartRemoteAbilityByCallInner;
-    localFuncsMap_[RELEASE_REMOTE_ABILITY] = &DistributedSchedStub::ReleaseRemoteAbilityInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_ABILITY_BY_CALL)] =
+        &DistributedSchedStub::StartRemoteAbilityByCallInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::RELEASE_REMOTE_ABILITY)] =
+        &DistributedSchedStub::ReleaseRemoteAbilityInner;
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
-    localFuncsMap_[START_REMOTE_SHARE_FORM] = &DistributedSchedStub::StartRemoteShareFormInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_SHARE_FORM)] =
+        &DistributedSchedStub::StartRemoteShareFormInner;
 #endif
-    localFuncsMap_[GET_DISTRIBUTED_COMPONENT_LIST] = &DistributedSchedStub::GetDistributedComponentListInner;
-    localFuncsMap_[START_REMOTE_FREE_INSTALL] = &DistributedSchedStub::StartRemoteFreeInstallInner;
-    localFuncsMap_[STOP_REMOTE_EXTERNSION_ABILITY] =
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_DISTRIBUTED_COMPONENT_LIST)] =
+        &DistributedSchedStub::GetDistributedComponentListInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_FREE_INSTALL)] =
+        &DistributedSchedStub::StartRemoteFreeInstallInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::STOP_REMOTE_EXTERNSION_ABILITY)] =
         &DistributedSchedStub::StopRemoteExtensionAbilityInner;
 }
 
 void DistributedSchedStub::InitRemoteFuncsInner()
 {
-    remoteFuncsMap_[START_ABILITY_FROM_REMOTE] = &DistributedSchedStub::StartAbilityFromRemoteInner;
-    remoteFuncsMap_[SEND_RESULT_FROM_REMOTE] = &DistributedSchedStub::SendResultFromRemoteInner;
-    remoteFuncsMap_[NOTIFY_CONTINUATION_RESULT_FROM_REMOTE] =
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_ABILITY_FROM_REMOTE)] =
+        &DistributedSchedStub::StartAbilityFromRemoteInner;
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::SEND_RESULT_FROM_REMOTE)] =
+        &DistributedSchedStub::SendResultFromRemoteInner;
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_CONTINUATION_RESULT_FROM_REMOTE)] =
         &DistributedSchedStub::NotifyContinuationResultFromRemoteInner;
-    remoteFuncsMap_[CONNECT_ABILITY_FROM_REMOTE] = &DistributedSchedStub::ConnectAbilityFromRemoteInner;
-    remoteFuncsMap_[DISCONNECT_ABILITY_FROM_REMOTE] = &DistributedSchedStub::DisconnectAbilityFromRemoteInner;
-    remoteFuncsMap_[NOTIFY_PROCESS_DIED_FROM_REMOTE] = &DistributedSchedStub::NotifyProcessDiedFromRemoteInner;
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::CONNECT_ABILITY_FROM_REMOTE)] =
+        &DistributedSchedStub::ConnectAbilityFromRemoteInner;
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::DISCONNECT_ABILITY_FROM_REMOTE)] =
+        &DistributedSchedStub::DisconnectAbilityFromRemoteInner;
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_PROCESS_DIED_FROM_REMOTE)] =
+        &DistributedSchedStub::NotifyProcessDiedFromRemoteInner;
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     // request codes for mission manager
-    remoteFuncsMap_[START_SYNC_MISSIONS_FROM_REMOTE] =
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_SYNC_MISSIONS_FROM_REMOTE)] =
         &DistributedSchedStub::StartSyncMissionsFromRemoteInner;
-    remoteFuncsMap_[STOP_SYNC_MISSIONS_FROM_REMOTE] =
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::STOP_SYNC_MISSIONS_FROM_REMOTE)] =
         &DistributedSchedStub::StopSyncMissionsFromRemoteInner;
-    remoteFuncsMap_[NOTIFY_MISSIONS_CHANGED_FROM_REMOTE] = &DistributedSchedStub::NotifyMissionsChangedFromRemoteInner;
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_MISSIONS_CHANGED_FROM_REMOTE)] =
+        &DistributedSchedStub::NotifyMissionsChangedFromRemoteInner;
 #endif
-    remoteFuncsMap_[CONTINUE_MISSION] = &DistributedSchedStub::ContinueMissionInner;
-    remoteFuncsMap_[CONTINUE_MISSION_OF_BUNDLENAME] = &DistributedSchedStub::ContinueMissionOfBundleNameInner;
-    remoteFuncsMap_[START_ABILITY_BY_CALL_FROM_REMOTE] = &DistributedSchedStub::StartAbilityByCallFromRemoteInner;
-    remoteFuncsMap_[RELEASE_ABILITY_FROM_REMOTE] = &DistributedSchedStub::ReleaseAbilityFromRemoteInner;
-    remoteFuncsMap_[NOTIFY_STATE_CHANGED_FROM_REMOTE] =
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_MISSION)] =
+        &DistributedSchedStub::ContinueMissionInner;
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_MISSION_OF_BUNDLENAME)] =
+        &DistributedSchedStub::ContinueMissionOfBundleNameInner;
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_ABILITY_BY_CALL_FROM_REMOTE)] =
+        &DistributedSchedStub::StartAbilityByCallFromRemoteInner;
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::RELEASE_ABILITY_FROM_REMOTE)] =
+        &DistributedSchedStub::ReleaseAbilityFromRemoteInner;
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_STATE_CHANGED_FROM_REMOTE)] =
         &DistributedSchedStub::NotifyStateChangedFromRemoteInner;
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
-    remoteFuncsMap_[START_SHARE_FORM_FROM_REMOTE] = &DistributedSchedStub::StartShareFormFromRemoteInner;
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_SHARE_FORM_FROM_REMOTE)] =
+        &DistributedSchedStub::StartShareFormFromRemoteInner;
 #endif
-    remoteFuncsMap_[START_FREE_INSTALL_FROM_REMOTE] = &DistributedSchedStub::StartFreeInstallFromRemoteInner;
-    remoteFuncsMap_[NOTIFY_COMPLETE_FREE_INSTALL_FROM_REMOTE] =
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_FREE_INSTALL_FROM_REMOTE)] =
+        &DistributedSchedStub::StartFreeInstallFromRemoteInner;
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_COMPLETE_FREE_INSTALL_FROM_REMOTE)] =
         &DistributedSchedStub::NotifyCompleteFreeInstallFromRemoteInner;
-    remoteFuncsMap_[STOP_EXTERNSION_ABILITY_FROM_REMOTE] =
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::STOP_EXTERNSION_ABILITY_FROM_REMOTE)] =
         &DistributedSchedStub::StopExtensionAbilityFromRemoteInner;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,7 +57,8 @@ void DmsFreeInstallCallbackProxy::OnInstallFinished(
         return;
     }
 
-    int32_t error = Remote()->SendRequest(IDmsFreeInstallCallbackCmd::ON_FREE_INSTALL_DONE, data, reply, option);
+    int32_t error = Remote()->SendRequest(static_cast<uint32_t>
+        (IDRreeInstallCallbackInterfaceCode::ON_FREE_INSTALL_DONE), data, reply, option);
     if (error != NO_ERROR) {
         HILOGE("OnFinished fail, error: %{public}d", error);
         return;
