@@ -447,9 +447,11 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
         return INVALID_PARAMETERS_ERR;
     }
 
-    if (srcDeviceId == localDevId) {
+    if (srcDeviceId == localDevId &&
+        DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(dstDeviceId) != nullptr) {
         return ContinueLocalMission(dstDeviceId, missionId, callback, wantParams);
-    } else if (dstDeviceId == localDevId) {
+    } else if (dstDeviceId == localDevId &&
+               DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(srcDeviceId) != nullptr) {
         return ContinueRemoteMission(srcDeviceId, dstDeviceId, missionId, callback, wantParams);
     } else {
         HILOGE("source or target device must be local!");
@@ -473,7 +475,8 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
         return INVALID_PARAMETERS_ERR;
     }
 
-    if (srcDeviceId == localDevId) {
+    if (srcDeviceId == localDevId &&
+        DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(dstDeviceId) != nullptr) {
         int32_t missionId = 1;
         #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
         int32_t ret = DistributedSchedContinueManager::GetInstance().GetMissionId(bundleName, missionId);
@@ -483,7 +486,8 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
         }
         #endif
         return ContinueLocalMission(dstDeviceId, missionId, callback, wantParams);
-    } else if (dstDeviceId == localDevId) {
+    } else if (dstDeviceId == localDevId &&
+               DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(srcDeviceId) != nullptr) {
         return ContinueRemoteMission(srcDeviceId, dstDeviceId, bundleName, callback, wantParams);
     } else {
         HILOGE("source or target device must be local!");
