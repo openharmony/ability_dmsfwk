@@ -70,7 +70,7 @@ void DistributedAbilityManagerServiceTest::TearDownTestCase()
         caseDoneCondition_.notify_one();
     };
     if (dtbabilitymgrService_->continuationHandler_ != nullptr) {
-        dtbabilitymgrService_->continuationHandler_->PostTask(caseDoneNotifyTask);
+        dtbabilitymgrService_->continuationHandler_->submit(caseDoneNotifyTask);
     }
     std::unique_lock<std::mutex> lock(caseDoneLock_);
     caseDoneCondition_.wait_for(lock, std::chrono::milliseconds(MAX_WAIT_TIME),
@@ -618,8 +618,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceDisconnect_001, TestSize.
      * @tc.steps: step1. test OnDeviceDisconnect when callback has not registered.
      */
     if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create("ContinuationMgr");
-        dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+        dtbabilitymgrService_->continuationHandler_ = std::make_shared<ffrt::queue>("ContinuationMgr");
     }
     std::vector<ContinuationResult> continuationResults;
     int32_t ret = dtbabilitymgrService_->OnDeviceDisconnect(INVALID_CODE, continuationResults);
@@ -734,8 +733,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceDisconnect_001, TestS
     dtbabilitymgrService_->HandleStartDeviceManager(1, continuationExtraParams);
     dtbabilitymgrService_->HandleStartDeviceManager(1, nullptr);
     if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create("ContinuationMgr");
-        dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+        dtbabilitymgrService_->continuationHandler_ = std::make_shared<ffrt::queue>("ContinuationMgr");
     }
     bool result = dtbabilitymgrService_->HandleDeviceConnect(dtbabilitymgrService_, continuationResults);
     dtbabilitymgrService_->HandleStartDeviceManager(1, continuationExtraParams);
@@ -765,8 +763,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceDisconnect_002, TestS
     /**
      * @tc.steps: step2. test HandleDeviceConnect when continuationHandler_ is not nullptr.
      */
-    auto runner = AppExecFwk::EventRunner::Create("ContinuationMgr");
-    dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    dtbabilitymgrService_->continuationHandler_ = std::make_shared<ffrt::queue>("ContinuationMgr");
     sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
     std::vector<ContinuationResult> continuationResults;
     bool ret = dtbabilitymgrService_->HandleDeviceDisconnect(notifier, continuationResults);
@@ -833,8 +830,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, QueryTokenByNotifier_001, TestSiz
     /**
      * @tc.steps: step4. test HandleNotifierDied when QueryTokenByNotifier returns true.
      */
-    auto runner = AppExecFwk::EventRunner::Create("ContinuationMgr");
-    dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    dtbabilitymgrService_->continuationHandler_ = std::make_shared<ffrt::queue>("ContinuationMgr");
     std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
     notifierInfo->SetNotifier(EVENT_CONNECT, notifier);
     {
@@ -913,8 +909,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleUpdateConnectStatus_001, Te
     DeviceConnectStatus deviceConnectStatus = DeviceConnectStatus::CONNECTING;
     dtbabilitymgrService_->HandleUpdateConnectStatus(1, DEVICE_ID, deviceConnectStatus);
     if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create("ContinuationMgr");
-        dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+        dtbabilitymgrService_->continuationHandler_ = std::make_shared<ffrt::queue>("ContinuationMgr");
     }
     dtbabilitymgrService_->HandleUpdateConnectStatus(1, DEVICE_ID, deviceConnectStatus);
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleUpdateConnectStatus_001 end" << std::endl;
@@ -1121,8 +1116,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceConnect_001, TestSize.Lev
         return;
     }
     if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create("ContinuationMgr");
-        dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+        dtbabilitymgrService_->continuationHandler_ = std::make_shared<ffrt::queue>("ContinuationMgr");
     }
     int32_t token = 0;
     std::vector<ContinuationResult> continuationResults;
@@ -1145,8 +1139,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceConnect_002, TestSize.Lev
         return;
     }
     if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create("ContinuationMgr");
-        dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+        dtbabilitymgrService_->continuationHandler_ = std::make_shared<ffrt::queue>("ContinuationMgr");
     }
     int32_t token = 0;
     std::vector<ContinuationResult> continuationResults;
@@ -1181,8 +1174,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleStartDeviceManager_001, Tes
         return;
     }
     if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create("ContinuationMgr");
-        dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+        dtbabilitymgrService_->continuationHandler_ = std::make_shared<ffrt::queue>("ContinuationMgr");
     }
     int32_t token = 0;
     dtbabilitymgrService_->HandleStartDeviceManager(token, nullptr);
@@ -1204,8 +1196,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleStartDeviceManager_002, Tes
         return;
     }
     if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create("ContinuationMgr");
-        dtbabilitymgrService_->continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+        dtbabilitymgrService_->continuationHandler_ = std::make_shared<ffrt::queue>("ContinuationMgr");
     }
     int32_t token = 0;
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();

@@ -60,7 +60,8 @@
           "os_account",
           "safwk",
           "samgr",
-          "startup_l2"
+          "startup_l2",
+          "ffrt"
         ],
         "third_party": []
       },
