@@ -43,15 +43,14 @@
           "device_security_level",
           "device_manager",
           "distributed_bundle_framework",
-          "distributeddatamgr",
           "dmsfwk",
           "dsoftbus",
           "efficiency_manager",
           "eventhandler",
           "form_fwk",
-          "hisysevent_native",
-          "hitrace_native",
-          "hiviewdfx_hilog_native",
+          "hisysevent",
+          "hitrace",
+          "hilog",
           "init",
           "ipc",
           "kv_store",
@@ -59,8 +58,7 @@
           "napi",
           "os_account",
           "safwk",
-          "samgr",
-          "startup_l2"
+          "samgr"
         ],
         "third_party": []
       },
