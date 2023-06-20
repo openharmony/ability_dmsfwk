@@ -469,6 +469,7 @@ group("unittest") {
     ":dmsfreeinstallcbtest",
     ":dschedconnecttest",
     ":dschedcontinuetest",
+    ":softbusadaptertest",
   ]
   if (dmsfwk_mission_manager) {
     deps += [

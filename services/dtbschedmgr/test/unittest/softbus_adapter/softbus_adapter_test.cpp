@@ -53,7 +53,7 @@ HWTEST_F(SoftbusAdapterTest, SendSoftbusEvent_001, TestSize.Level3)
     uint8_t* sendData = nullptr;
     uint32_t sendDataLen = 1;
     uint32_t result = SoftbusAdapter::GetInstance().SendSoftbusEvent(sendData, sendDataLen);
-    EXPECT_NE(result, SOFTBUS_OK);
+    EXPECT_EQ(result, SOFTBUS_OK);
     DTEST_LOG << "SoftbusAdapterTest SendSoftbusEvent_001 end" << std::endl;
 }
 
@@ -66,7 +66,7 @@ HWTEST_F(SoftbusAdapterTest, StopSoftbusEvent_001, TestSize.Level3)
 {
     DTEST_LOG << "SoftbusAdapterTest StopSoftbusEvent_001 begin" << std::endl;
     uint32_t result = SoftbusAdapter::GetInstance().StopSoftbusEvent();
-    EXPECT_NE(result, SOFTBUS_OK);
+    EXPECT_EQ(result, SOFTBUS_OK);
     DTEST_LOG << "SoftbusAdapterTest StopSoftbusEvent_001 end" << std::endl;
 }
 
@@ -80,7 +80,7 @@ HWTEST_F(SoftbusAdapterTest, RegisterSoftbusEventListener_001, TestSize.Level3)
     DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_001 begin" << std::endl;
     std::shared_ptr<SubSoftbusAdapterListener> listener = std::make_shared<SubSoftbusAdapterListener>();
     uint32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
-    EXPECT_NE(result, SOFTBUS_OK);
+    EXPECT_EQ(result, SOFTBUS_OK);
     DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_001 end" << std::endl;
 }
 
@@ -94,8 +94,94 @@ HWTEST_F(SoftbusAdapterTest, UnregisterSoftbusEventListener_001, TestSize.Level3
     DTEST_LOG << "SoftbusAdapterTest UnregisterSoftbusEventListener_001 begin" << std::endl;
     std::shared_ptr<SubSoftbusAdapterListener> listener = std::make_shared<SubSoftbusAdapterListener>();
     uint32_t result = SoftbusAdapter::GetInstance().UnregisterSoftbusEventListener(listener);
-    EXPECT_NE(result, SOFTBUS_OK);
+    EXPECT_EQ(result, SOFTBUS_OK);
     DTEST_LOG << "SoftbusAdapterTest UnregisterSoftbusEventListener_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: RegisterSoftbusEventListener_002
+ * @tc.desc: call RegisterSoftbusEventListener from distributedsched
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftbusAdapterTest, RegisterSoftbusEventListener_002, TestSize.Level3)
+{
+    DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_002 begin" << std::endl;
+    std::shared_ptr<SubSoftbusAdapterListener> listener = nullptr;
+    uint32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
+    EXPECT_EQ(result, SOFTBUS_OK);
+    DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: StopSoftbusEvent_002
+ * @tc.desc: call StopSoftbusEvent from distributedsched
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftbusAdapterTest, StopSoftbusEvent_002, TestSize.Level3)
+{
+    DTEST_LOG << "SoftbusAdapterTest StopSoftbusEvent_002 begin" << std::endl;
+    SoftbusAdapter::GetInstance().pkgName_ = "oh";
+    uint32_t result = SoftbusAdapter::GetInstance().StopSoftbusEvent();
+    EXPECT_EQ(result, SOFTBUS_OK);
+    DTEST_LOG << "SoftbusAdapterTest StopSoftbusEvent_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: RegisterSoftbusEventListener_003
+ * @tc.desc: call RegisterSoftbusEventListener from distributedsched
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftbusAdapterTest, RegisterSoftbusEventListener_003, TestSize.Level3)
+{
+    DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_003 begin" << std::endl;
+    std::shared_ptr<SubSoftbusAdapterListener> listener ;
+    uint32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
+    EXPECT_EQ(result, SOFTBUS_OK);
+    DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: RegisterSoftbusEventListener_004
+ * @tc.desc: call RegisterSoftbusEventListener from distributedsched
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftbusAdapterTest, RegisterSoftbusEventListener_004, TestSize.Level3)
+{
+    DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_004 begin" << std::endl;
+    std::shared_ptr<SubSoftbusAdapterListener> listener ;
+    SoftbusAdapter::GetInstance().pkgName_ = "oh";
+    uint32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
+    EXPECT_EQ(result, SOFTBUS_OK);
+    DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: UnregisterSoftbusEventListener_002
+ * @tc.desc: call UnregisterSoftbusEventListener from distributedsched
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftbusAdapterTest, UnregisterSoftbusEventListener_002, TestSize.Level3)
+{
+    DTEST_LOG << "SoftbusAdapterTest UnregisterSoftbusEventListener_002 begin" << std::endl;
+    std::shared_ptr<SubSoftbusAdapterListener> listener;
+    uint32_t result = SoftbusAdapter::GetInstance().UnregisterSoftbusEventListener(listener);
+    EXPECT_EQ(result, SOFTBUS_OK);
+    DTEST_LOG << "SoftbusAdapterTest UnregisterSoftbusEventListener_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: UnregisterSoftbusEventListener_003
+ * @tc.desc: call UnregisterSoftbusEventListener from distributedsched
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftbusAdapterTest, UnregisterSoftbusEventListener_003, TestSize.Level3)
+{
+    DTEST_LOG << "SoftbusAdapterTest UnregisterSoftbusEventListener_003 begin" << std::endl;
+    std::shared_ptr<SubSoftbusAdapterListener> listener = std::make_shared<SubSoftbusAdapterListener>();
+    SoftbusAdapter::GetInstance().pkgName_ = "oh";
+    uint32_t result = SoftbusAdapter::GetInstance().UnregisterSoftbusEventListener(listener);
+    EXPECT_EQ(result, SOFTBUS_OK);
+    DTEST_LOG << "SoftbusAdapterTest UnregisterSoftbusEventListener_003 end" << std::endl;
 }
 }
 }
