@@ -447,11 +447,15 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
         return INVALID_PARAMETERS_ERR;
     }
 
-    if (srcDeviceId == localDevId &&
-        DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(dstDeviceId) != nullptr) {
+    if (srcDeviceId == localDevId) {
+        if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(dstDeviceId) == nullptr) {
+            return INVALID_REMOTE_PARAMETERS_ERR;
+        }
         return ContinueLocalMission(dstDeviceId, missionId, callback, wantParams);
-    } else if (dstDeviceId == localDevId &&
-               DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(srcDeviceId) != nullptr) {
+    } else if (dstDeviceId == localDevId) {
+        if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(srcDeviceId) == nullptr) {
+            return INVALID_REMOTE_PARAMETERS_ERR;
+        }
         return ContinueRemoteMission(srcDeviceId, dstDeviceId, missionId, callback, wantParams);
     } else {
         HILOGE("source or target device must be local!");
@@ -475,8 +479,10 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
         return INVALID_PARAMETERS_ERR;
     }
 
-    if (srcDeviceId == localDevId &&
-        DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(dstDeviceId) != nullptr) {
+    if (srcDeviceId == localDevId) {
+        if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(dstDeviceId) == nullptr) {
+            return INVALID_REMOTE_PARAMETERS_ERR;
+        }
         int32_t missionId = 1;
         #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
         int32_t ret = DistributedSchedContinueManager::GetInstance().GetMissionId(bundleName, missionId);
@@ -486,8 +492,10 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
         }
         #endif
         return ContinueLocalMission(dstDeviceId, missionId, callback, wantParams);
-    } else if (dstDeviceId == localDevId &&
-               DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(srcDeviceId) != nullptr) {
+    } else if (dstDeviceId == localDevId) {
+        if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(srcDeviceId) == nullptr) {
+            return INVALID_REMOTE_PARAMETERS_ERR;
+        }
         return ContinueRemoteMission(srcDeviceId, dstDeviceId, bundleName, callback, wantParams);
     } else {
         HILOGE("source or target device must be local!");
