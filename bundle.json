@@ -47,6 +47,7 @@
           "dsoftbus",
           "efficiency_manager",
           "eventhandler",
+          "ffrt",
           "form_fwk",
           "hisysevent",
           "hitrace",
