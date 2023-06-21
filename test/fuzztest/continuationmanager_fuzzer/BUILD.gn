@@ -52,7 +52,7 @@ dtbabilitymgr_external_deps = [
   "c_utils:utils",
   "device_manager:devicemanagersdk",
   "eventhandler:libeventhandler",
-  "hiviewdfx_hilog_native:libhilog",
+  "hilog:libhilog",
   "init:libbegetutil",
   "ipc:ipc_core",
   "os_account:os_account_innerkits",
