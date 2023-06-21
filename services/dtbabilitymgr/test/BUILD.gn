@@ -48,7 +48,7 @@ dtbabilitymgr_external_deps = [
   "dmsfwk:continuation_manager",
   "eventhandler:libeventhandler",
   "ffrt:libffrt",
-  "hiviewdfx_hilog_native:libhilog",
+  "hilog:libhilog",
   "init:libbegetutil",
   "ipc:ipc_core",
   "kv_store:distributeddata_inner",
