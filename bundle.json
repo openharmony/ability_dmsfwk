@@ -58,7 +58,8 @@
           "napi",
           "os_account",
           "safwk",
-          "samgr"
+          "samgr",
+          "ffrt"
         ],
         "third_party": []
       },

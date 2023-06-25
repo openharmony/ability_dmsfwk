@@ -21,6 +21,7 @@
 #include "continuation_manager/notifier_info.h"
 #include "distributed_ability_manager_stub.h"
 #include "event_handler.h"
+#include "ffrt.h"
 #include "single_instance.h"
 #include "system_ability.h"
 
@@ -89,7 +90,7 @@ private:
     sptr<IRemoteObject> connect_;
     std::mutex appProxyMutex_;
     sptr<IRemoteObject> appProxy_;
-    std::shared_ptr<AppExecFwk::EventHandler> continuationHandler_;
+    std::shared_ptr<ffrt::queue> continuationHandler_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
