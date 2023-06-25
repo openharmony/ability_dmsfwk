@@ -1035,6 +1035,44 @@ HWTEST_F(DistributedSchedServiceTest, ContinueMission_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ContinueMission_003
+ * @tc.desc: call ContinueMission
+ * @tc.type: FUNC
+ * @tc.require: I7F8KH
+ */
+HWTEST_F(DistributedSchedServiceTest, ContinueMission_003, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest ContinueMission_003 start" << std::endl;
+
+    WantParams wantParams;
+    auto callback = GetDSchedService();
+    std::string bundleName = BUNDLE_NAME;
+
+    /**
+     * @tc.steps: step1. test ContinueMission when srcDeviceId is empty;
+     */
+    int32_t result = DistributedSchedService::GetInstance().ContinueMission(
+        "", "string", BUNDLE_NAME, callback, wantParams);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    
+    /**
+     * @tc.steps: step2. test ContinueMission when dstDeviceId is empty;
+     */
+    result = DistributedSchedService::GetInstance().ContinueMission(
+        "string", "", bundleName, callback, wantParams);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+
+    /**
+     * @tc.steps: step3. test ContinueMission when callback is empty;
+     */
+    result = DistributedSchedService::GetInstance().ContinueMission(
+        "string", "string", bundleName, nullptr, wantParams);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+
+    DTEST_LOG << "DSchedContinuationTest ContinueMission_003 end" << std::endl;
+}
+
+/**
  * @tc.name: ContinueMissionBundleName_001
  * @tc.desc: call ContinueMissionBundleName
  * @tc.type: FUNC

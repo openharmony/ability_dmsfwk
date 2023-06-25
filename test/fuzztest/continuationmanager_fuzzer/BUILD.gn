@@ -52,6 +52,7 @@ dtbabilitymgr_external_deps = [
   "c_utils:utils",
   "device_manager:devicemanagersdk",
   "eventhandler:libeventhandler",
+  "ffrt:libffrt",
   "hilog:libhilog",
   "init:libbegetutil",
   "ipc:ipc_core",

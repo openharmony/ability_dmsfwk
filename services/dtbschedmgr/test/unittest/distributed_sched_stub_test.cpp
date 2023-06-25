@@ -556,6 +556,34 @@ HWTEST_F(DistributedSchedStubTest, ContinueMissionInner_002, TestSize.Level3)
 }
 
 /**
+ * @tc.name:ContinueMissionOfBundleNameInner_003
+ * @tc.desc: call ContinueMissionOfBundleNameInner
+ * @tc.type: FUNC
+ * @tc.require: I7F8KH
+ */
+HWTEST_F(DistributedSchedStubTest, ContinueMissionOfBundleNameInner_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedStubTest ContinueMissionOfBundleNameInner_003 start" << std::endl;
+
+    MessageParcel data;
+    MessageParcel reply;
+
+    /**
+     * @tc.steps: step1. test ContinueMission when callback is nullptr;
+     */
+    std::string srcDevId = "srcDevId";
+    std::string dstDevId = "dstDevId";
+    std::string bundleName = "bundleName";
+    data.WriteString(srcDevId);
+    data.WriteString(dstDevId);
+    data.WriteString(bundleName);
+    int32_t result = distributedSchedStub_->ContinueMissionOfBundleNameInner(data, reply);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+
+    DTEST_LOG << "DistributedSchedStubTest ContinueMissionOfBundleNameInner_003 end" << std::endl;
+}
+
+/**
  * @tc.name: StartContinuationInner_001
  * @tc.desc: check StartContinuationInner
  * @tc.type: FUNC
@@ -1128,6 +1156,44 @@ HWTEST_F(DistributedSchedStubTest, RegisterMissionListenerInner_002, TestSize.Le
     result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest RegisterMissionListenerInner_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: RegisterMissionListenerInner_003
+ * @tc.desc: check RegisterOnListenerInner
+ * @tc.type: FUNC
+ * @tc.require: I7F8KH
+ */
+HWTEST_F(DistributedSchedStubTest, RegisterOnListenerInner_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedStubTest RegisterMissionListenerInner_003 begin" << std::endl;
+    
+    MessageParcel data;
+    MessageParcel reply;
+
+    /**
+     * @tc.steps: step1. test RegisterOnListenerInner when type is empty;
+     */
+    int32_t result = distributedSchedStub_->RegisterOnListenerInner(data, reply);
+    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+
+    /**
+     * @tc.steps: step2. test RegisterOnListenerInner when type is not empty;
+     */
+    data.WriteString("type");
+    result = distributedSchedStub_->RegisterOnListenerInner(data, reply);
+    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+
+    /**
+     * @tc.steps: step3. test RegisterOnListenerInner when onListener is not empty;
+     */
+    data.WriteString("type");
+    sptr<IRemoteObject> onListener = new DistributedSchedService();
+    data.WriteRemoteObject(onListener);
+    result = distributedSchedStub_->RegisterOnListenerInner(data, reply);
+    EXPECT_EQ(result, ERR_OK);
+
+    DTEST_LOG << "DistributedSchedStubTest RegisterMissionListenerInner_003 end" << std::endl;
 }
 
 /**

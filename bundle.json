@@ -47,7 +47,6 @@
           "dsoftbus",
           "efficiency_manager",
           "eventhandler",
-          "ffrt",
           "form_fwk",
           "hisysevent",
           "hitrace",
@@ -59,7 +58,8 @@
           "napi",
           "os_account",
           "safwk",
-          "samgr"
+          "samgr",
+          "ffrt"
         ],
         "third_party": []
       },

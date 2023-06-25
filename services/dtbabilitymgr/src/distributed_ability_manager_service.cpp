@@ -68,8 +68,7 @@ void DistributedAbilityManagerService::OnStart()
     }
     notifierDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new NotifierDeathRecipient());
     if (continuationHandler_ == nullptr) {
-        auto runner = AppExecFwk::EventRunner::Create("ContinuationMgr");
-        continuationHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+        continuationHandler_ = std::make_shared<ffrt::queue>("ContinuationMgr");
     }
     Publish(this);
 }
@@ -491,7 +490,7 @@ bool DistributedAbilityManagerService::HandleDisconnectAbility()
             return;
         }
     };
-    continuationHandler_->PostTask(func);
+    continuationHandler_->submit(func);
     return true;
 }
 
@@ -584,7 +583,7 @@ bool DistributedAbilityManagerService::HandleDeviceConnect(const sptr<IRemoteObj
         auto proxy = std::make_unique<DeviceSelectionNotifierProxy>(notifier);
         proxy->OnDeviceConnect(continuationResults);
     };
-    continuationHandler_->PostTask(func);
+    continuationHandler_->submit(func);
     return true;
 }
 
@@ -600,7 +599,7 @@ bool DistributedAbilityManagerService::HandleDeviceDisconnect(const sptr<IRemote
         auto proxy = std::make_unique<DeviceSelectionNotifierProxy>(notifier);
         proxy->OnDeviceDisconnect(continuationResults);
     };
-    continuationHandler_->PostTask(func);
+    continuationHandler_->submit(func);
     return true;
 }
 
@@ -661,7 +660,7 @@ void DistributedAbilityManagerService::HandleStartDeviceManager(int32_t token,
         int32_t result = appProxy->SendRequest(START_DEVICE_MANAGER_CODE, data, reply, option);
         HILOGD("result is %{public}d", result);
     };
-    continuationHandler_->PostTask(func);
+    continuationHandler_->submit(func);
 }
 
 void DistributedAbilityManagerService::HandleUpdateConnectStatus(int32_t token, std::string deviceId,
@@ -687,7 +686,7 @@ void DistributedAbilityManagerService::HandleUpdateConnectStatus(int32_t token, 
         int32_t result = appProxy->SendRequest(UPDATE_CONNECT_STATUS_CODE, data, reply, option);
         HILOGD("result is %{public}d", result);
     };
-    continuationHandler_->PostTask(func);
+    continuationHandler_->submit(func);
 }
 
 bool DistributedAbilityManagerService::QueryTokenByNotifier(const sptr<IRemoteObject>& notifier, int32_t& token)
@@ -753,7 +752,7 @@ void DistributedAbilityManagerService::HandleNotifierDied(const sptr<IRemoteObje
         // disconnect to app when third-party app died
         (void)HandleDisconnectAbility();
     };
-    continuationHandler_->PostTask(func);
+    continuationHandler_->submit(func);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
