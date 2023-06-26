@@ -52,6 +52,7 @@ dsched_external_deps = [
   "distributed_bundle_framework:dbms_fwk",
   "dmsfwk:continuation_manager",
   "eventhandler:libeventhandler",
+  "ffrt:libffrt",
   "hilog:libhilog",
   "hisysevent:libhisysevent",
   "hitrace:hitrace_meter",
