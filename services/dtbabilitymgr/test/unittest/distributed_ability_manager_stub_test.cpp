@@ -165,6 +165,26 @@ HWTEST_F(DistributedAbilityManagerStubTest, UnregisterDeviceSelectionCallbackInn
 }
 
 /**
+ * @tc.name: UnregisterDeviceSelectionCallbackInner_002
+ * @tc.desc: test UnregisterDeviceSelectionCallbackInner with cbType is empty
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DistributedAbilityManagerStubTest, UnregisterDeviceSelectionCallbackInner_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerStubTest UnregisterDeviceSelectionCallbackInner_002 start" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t token = 0;
+    data.WriteInt32(token);
+    std::string cbType = "12345";
+    data.WriteString(cbType);
+    int32_t result = dtbabilitymgrStub_->UnregisterDeviceSelectionCallbackInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedAbilityManagerStubTest UnregisterDeviceSelectionCallbackInner_002 end" << std::endl;
+}
+
+/**
  * @tc.name: StartDeviceManagerInner_001
  * @tc.desc: test StartDeviceManagerInner with continuationExtraParams is nullptr
  * @tc.type: FUNC
@@ -182,6 +202,26 @@ HWTEST_F(DistributedAbilityManagerStubTest, StartDeviceManagerInner_001, TestSiz
     int32_t result = dtbabilitymgrStub_->StartDeviceManagerInner(data, reply);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedAbilityManagerStubTest StartDeviceManagerInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartDeviceManagerInner_002
+ * @tc.desc: test StartDeviceManagerInner with continuationExtraParams is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DistributedAbilityManagerStubTest, StartDeviceManagerInner_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerStubTest StartDeviceManagerInner_001 start" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t token = 0;
+    data.WriteInt32(token);
+    int32_t flag = VALUE_NULL;
+    data.WriteInt32(flag);
+    int32_t result = dtbabilitymgrStub_->StartDeviceManagerInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedAbilityManagerStubTest StartDeviceManagerInner_002 end" << std::endl;
 }
 }
 }
