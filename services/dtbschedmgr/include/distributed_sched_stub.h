@@ -57,6 +57,7 @@ private:
     int32_t StopSyncRemoteMissionsInner(MessageParcel& data, MessageParcel& reply);
     int32_t StopSyncMissionsFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t NotifyMissionsChangedFromRemoteInner(MessageParcel& data, MessageParcel& reply);
+    int32_t SetMissionContinueStateInner(MessageParcel& data, MessageParcel& reply);
 #endif
     int32_t StartRemoteAbilityByCallInner(MessageParcel& data, MessageParcel& reply);
     int32_t ReleaseRemoteAbilityInner(MessageParcel& data, MessageParcel& reply);

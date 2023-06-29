@@ -83,6 +83,9 @@ enum class IDSchedInterfaceCode : uint32_t {
     STOP_EXTERNSION_ABILITY_FROM_REMOTE = 226,
     REGISTER_ON_LISTENER = 260,
     REGISTER_OFF_LISTENER = 261,
+
+    // request code for set continue state
+    SET_MISSION_CONTINUE_STATE = 300,
 };
 
 enum class IDRreeInstallCallbackInterfaceCode : uint32_t {

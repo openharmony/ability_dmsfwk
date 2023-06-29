@@ -133,6 +133,7 @@ public:
     int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
     int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
     int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
+    int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state) override;
 #endif
     void ProcessConnectDied(const sptr<IRemoteObject>& connect);
     void ProcessDeviceOffline(const std::string& deviceId);
@@ -197,6 +198,8 @@ private:
     static int32_t GetUidLocked(const std::list<ConnectAbilitySession>& sessionList);
     int32_t TryConnectRemoteAbility(const OHOS::AAFwk::Want& want,
         const sptr<IRemoteObject>& connect, const CallerInfo& callerInfo);
+    int32_t PrecheckContinueLocalMission(const std::string& dstDeviceId, int32_t missionId,
+        const sptr<IRemoteObject>& callback);
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
     sptr<AppExecFwk::IFormMgr> GetFormMgrProxy();
 #endif

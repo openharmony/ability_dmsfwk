@@ -29,6 +29,7 @@
 #include "distributed_mission_broadcast_listener.h"
 #include "distributed_mission_died_listener.h"
 #include "event_handler.h"
+#include "mission_info.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -61,6 +62,7 @@ public:
     int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj);
     int32_t GetMissionId(const std::string& bundleName, int32_t& missionId);
     void NotifyDeid(const sptr<IRemoteObject>& obj);
+    int32_t SetMissionContinueState(const int32_t missionId, const AAFwk::ContinueState &state);
 
 private:
     void StartEvent();
@@ -71,6 +73,8 @@ private:
         const std::string& bundleName, const int32_t state);
     int32_t GetBundleName(const int32_t missionId, std::string& bundleName);
     bool IsContinue(const int32_t& missionId, const std::string& bundleName);
+    int32_t DealSetMissionContinueStateBusiness(const int32_t missionId, const AAFwk::ContinueState &state);
+    int32_t CheckContinueState(const int32_t missionId);
 private:
     currentMissionInfo info_;
     sptr<DistributedMissionFocusedListener> missionFocusedListener_;
