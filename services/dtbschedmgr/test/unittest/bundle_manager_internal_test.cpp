@@ -355,6 +355,42 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerCallBackTest_003, TestSize.Leve
 }
 
 /**
+ * @tc.name: BundleManagerCallBackTest_004
+ * @tc.desc: test OnRemoteRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, BundleManagerCallBackTest_004, TestSize.Level1)
+{
+    DTEST_LOG << "BundleManagerCallBackTest BundleManagerCallBackTest_004 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    auto callback = new DmsBundleManagerCallbackStub();
+    data.WriteInterfaceToken(callback->GetDescriptor());
+    int32_t ret = callback->OnRemoteRequest(-1, data, reply, option);
+    EXPECT_TRUE(ERR_OK != ret);
+    DTEST_LOG << "BundleManagerCallBackTest BundleManagerCallBackTest_004 end "<< std::endl;
+}
+
+/**
+ * @tc.name: BundleManagerCallBackTest_005
+ * @tc.desc: test OnRemoteRequest
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, BundleManagerCallBackTest_005, TestSize.Level1)
+{
+    DTEST_LOG << "BundleManagerCallBackTest BundleManagerCallBackTest_005 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    auto callback = new DmsBundleManagerCallbackStub();
+    data.WriteInterfaceToken(callback->GetDescriptor());
+    int32_t ret = callback->OnRemoteRequest(1, data, reply, option);
+    EXPECT_TRUE(ERR_OK != ret);
+    DTEST_LOG << "BundleManagerCallBackTest BundleManagerCallBackTest_005 end "<< std::endl;
+}
+
+/**
  * @tc.name: GetBundleNameListFromBms_001
  * @tc.desc: test GetBundleNameListFromBms
  * @tc.type: FUNC
