@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef OHOS_DMS_FREE_INSTALL_CALLBACK_INTERFACE_H
 #define OHOS_DMS_FREE_INSTALL_CALLBACK_INTERFACE_H
 
+#include "distributedsched_ipc_interface_code.h"
 #include <iremote_broker.h>
 #include "want.h"
 
@@ -37,12 +38,6 @@ public:
      * @param resultCode, ERR_OK on success, others on failure.
      */
     virtual void OnInstallFinished(const AAFwk::Want& want, int32_t requestCode, int32_t resultCode) = 0;
-
-protected:
-    enum IDmsFreeInstallCallbackCmd {
-        ON_FREE_INSTALL_DONE = 0,
-        CMD_MAX,
-    };
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS

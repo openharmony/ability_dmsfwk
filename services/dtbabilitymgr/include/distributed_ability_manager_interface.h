@@ -18,6 +18,7 @@
 
 #include "continuation_extra_params.h"
 #include "continuation_result.h"
+#include "dtbabilitymgr_ipc_interface_code.h"
 #include "device_connect_status.h"
 #include "iremote_broker.h"
 
@@ -41,16 +42,6 @@ public:
         const DeviceConnectStatus& deviceConnectStatus) = 0;
     virtual int32_t StartDeviceManager(
         int32_t token, const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams = nullptr) = 0;
-
-    enum {
-        // request code for continuation manager
-        REGISTER = 500,
-        UNREGISTER = 501,
-        REGISTER_DEVICE_SELECTION_CALLBACK = 502,
-        UNREGISTER_DEVICE_SELECTION_CALLBACK = 503,
-        UPDATE_CONNECT_STATUS = 504,
-        START_DEVICE_MANAGER = 505,
-    };
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
