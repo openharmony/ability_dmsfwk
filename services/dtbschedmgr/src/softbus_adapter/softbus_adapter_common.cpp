@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "dtbschedmgr_log.h"
 #include "softbus_adapter/softbus_adapter.h"
 
 namespace OHOS {
@@ -25,6 +26,7 @@ IMPLEMENT_SINGLE_INSTANCE(SoftbusAdapter);
 
 int32_t SoftbusAdapter::SendSoftbusEvent(uint8_t* sendData, uint32_t sendDataLen)
 {
+    HILOGD("send softbus event common");
     return 0;
 }
 
