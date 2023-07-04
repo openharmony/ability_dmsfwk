@@ -142,11 +142,12 @@ int32_t DistributedSchedContinueManager::RegisterOnListener(const std::string& t
     std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     auto iterItem = registerOnListener_.find(type);
     if (iterItem == registerOnListener_.end()) {
-        HILOGD("get iterItem failed from registerOnListener_, type: %{public}s", type.c_str());
+        HILOGD("The itemItem does not exist in the registerOnListener_, adding, type: %{public}s", type.c_str());
         std::vector<sptr<IRemoteObject>> objs;
         obj->AddDeathRecipient(missionDiedListener_);
         objs.emplace_back(obj);
         registerOnListener_[type] = objs;
+        HILOGI("RegisterOnListener end");
         return ERR_OK;
     }
     for (auto iter : iterItem->second) {
@@ -299,7 +300,6 @@ int32_t DistributedSchedContinueManager::DealUnfocusedBusiness(const int32_t mis
     ret = SoftbusAdapter::GetInstance().SendSoftbusEvent(data, sendDataLen);
     if (ret != ERR_OK) {
         HILOGE("SendSoftbusEvent unfocused failed, sendDataLen: %{public}d, ret: %{public}d", sendDataLen, ret);
-        return ret;
     }
     std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
     auto iterItem = focusedMission_.find(bundleName);
