@@ -26,27 +26,31 @@ IMPLEMENT_SINGLE_INSTANCE(SoftbusAdapter);
 
 int32_t SoftbusAdapter::SendSoftbusEvent(uint8_t* sendData, uint32_t sendDataLen)
 {
-    HILOGD("send softbus event common");
+    HILOGI("%{public}s common called. ", __func__);
     return 0;
 }
 
 int32_t SoftbusAdapter::StopSoftbusEvent()
 {
+    HILOGI("%{public}s common called. ", __func__);
     return 0;
 }
 
 void SoftbusAdapter::OnBroadCastRecv(std::string& networkId, uint8_t* data, uint32_t dataLen)
 {
+    HILOGI("%{public}s common called. ", __func__);
     return;
 }
 
 int32_t SoftbusAdapter::RegisterSoftbusEventListener(const std::shared_ptr<SoftbusAdapterListener>& listener)
 {
+    HILOGI("%{public}s common called. ", __func__);
     return 0;
 }
 
 int32_t SoftbusAdapter::UnregisterSoftbusEventListener(const std::shared_ptr<SoftbusAdapterListener>& listener)
 {
+    HILOGI("%{public}s common called. ", __func__);
     return 0;
 }
 } // namespace DistributedSchedule

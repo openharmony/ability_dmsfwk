@@ -31,7 +31,7 @@ int32_t SoftbusAdapter::SendSoftbusEvent(uint8_t* sendData, uint32_t sendDataLen
     HILOGI("SendSoftbusEvent pkgName: %{public}s.", pkgName_.c_str());
     EventData eventData;
     eventData.event = FOREGROUND_APP;
-    eventData.freq = EVENT_HIGH_FREQ;
+    eventData.freq = EVENT_MID_FREQ;
     eventData.data = sendData;
     eventData.dataLen = sendDataLen;
     int32_t ret = SendEvent(pkgName_.c_str(), BROADCAST_TARGET_AREA, &eventData);
@@ -78,7 +78,7 @@ int32_t SoftbusAdapter::RegisterSoftbusEventListener(const std::shared_ptr<Softb
     softbusAdapterListener_ = listener;
     EventListener eventListener;
     eventListener.event = FOREGROUND_APP;
-    eventListener.freq = EVENT_HIGH_FREQ;
+    eventListener.freq = EVENT_MID_FREQ;
     eventListener.OnEventReceived = EventListenerReceived;
     HILOGI("RegisterSoftbusEventListener pkgName: %s.", pkgName_.c_str());
     int32_t ret = RegisterEventListener(pkgName_.c_str(), &eventListener);
@@ -98,7 +98,7 @@ int32_t SoftbusAdapter::UnregisterSoftbusEventListener(const std::shared_ptr<Sof
     softbusAdapterListener_ = listener;
     EventListener eventListener;
     eventListener.event = FOREGROUND_APP;
-    eventListener.freq = EVENT_HIGH_FREQ;
+    eventListener.freq = EVENT_MID_FREQ;
     eventListener.OnEventReceived = EventListenerReceived;
     HILOGI("UnregisterSoftbusEventListener pkgName: %s.", pkgName_.c_str());
     int32_t ret = UnregisterEventListener(pkgName_.c_str(), &eventListener);
