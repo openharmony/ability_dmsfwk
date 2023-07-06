@@ -54,7 +54,7 @@
           "init",
           "ipc",
           "kv_store",
-          "multimedia_image_framework",
+          "image_framework",
           "napi",
           "os_account",
           "safwk",
