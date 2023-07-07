@@ -103,6 +103,8 @@ void DistributedSchedStub::InitLocalFuncsInner()
         &DistributedSchedStub::StartSyncRemoteMissionsInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::STOP_SYNC_MISSIONS)] =
         &DistributedSchedStub::StopSyncRemoteMissionsInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::SET_MISSION_CONTINUE_STATE)] =
+        &DistributedSchedStub::SetMissionContinueStateInner;
 #endif
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_ABILITY_BY_CALL)] =
         &DistributedSchedStub::StartRemoteAbilityByCallInner;
@@ -879,6 +881,23 @@ int32_t DistributedSchedStub::StartSyncRemoteMissionsInner(MessageParcel& data, 
     bool fixConflict = data.ReadBool();
     int64_t tag = data.ReadInt64();
     int32_t result = StartSyncRemoteMissions(deviceId, fixConflict, tag);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+
+int32_t DistributedSchedStub::SetMissionContinueStateInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CheckCallingUid()) {
+        HILOGW("request DENIED!");
+        return DMS_PERMISSION_DENIED;
+    }
+
+    int32_t missionId = 0;
+    PARCEL_READ_HELPER(data, Int32, missionId);
+    int32_t state = 0;
+    PARCEL_READ_HELPER(data, Int32, state);
+
+    int32_t result = SetMissionContinueState(missionId, static_cast<AAFwk::ContinueState>(state));
+    HILOGI("result %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 #endif

@@ -336,8 +336,8 @@ std::string DistributedSchedService::GetContinuaitonDevice(int32_t missionId)
     return dschedContinuation_->GetTargetDevice(missionId);
 }
 
-int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDeviceId, int32_t missionId,
-    const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
+int32_t DistributedSchedService::PrecheckContinueLocalMission(const std::string& dstDeviceId, int32_t missionId,
+    const sptr<IRemoteObject>& callback)
 {
     if (dschedContinuation_ == nullptr) {
         HILOGE("continuation object null!");
@@ -352,12 +352,27 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
         HILOGI("remote dms is low version");
         return ContinueAbilityWithTimeout(dstDeviceId, missionId, callback);
     }
+    return ERR_OK;
+}
+
+int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDeviceId, int32_t missionId,
+    const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
+{
+    int32_t result = PrecheckContinueLocalMission(dstDeviceId, missionId, callback);
+    if (result != ERR_OK) {
+        HILOGE("continue local mission precheck fail!");
+        return result;
+    }
 
     MissionInfo missionInfo;
-    int32_t result = AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, missionInfo);
+    result = AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, missionInfo);
     if (result != ERR_OK) {
         HILOGE("get missionInfo failed");
         return NO_MISSION_INFO_FOR_MISSION_ID;
+    }
+    if (missionInfo.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
+        HILOGE("Mission continue state set to INACTIVE. Can't continue. Mission id: %{public}d", missionId);
+        return INVALID_PARAMETERS_ERR;
     }
     std::string bundleName = missionInfo.want.GetBundle();
     missionInfo.want.SetParams(wantParams);
@@ -372,7 +387,7 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
         HILOGE("remote not installed and app not support free install");
         return result;
     }
-    // if remote not installed
+
     isFreeInstall = missionInfo.want.GetBoolParam("isFreeInstall", false);
     if (!isFreeInstall) {
         HILOGE("remote not installed but support freeInstall, try again with freeInstall flag");
@@ -1982,6 +1997,11 @@ int32_t DistributedSchedService::StopSyncMissionsFromRemote(const CallerInfo& ca
 {
     DistributedSchedMissionManager::GetInstance().StopSyncMissionsFromRemote(callerInfo.sourceDeviceId);
     return ERR_NONE;
+}
+
+int32_t DistributedSchedService::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
+{
+    return DistributedSchedContinueManager::GetInstance().SetMissionContinueState(missionId, state);
 }
 #endif
 

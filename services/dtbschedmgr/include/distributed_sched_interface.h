@@ -110,6 +110,10 @@ public:
         std::unique_ptr<AAFwk::MissionSnapshot>& missionSnapshot) = 0;
     virtual int32_t NotifyMissionsChangedFromRemote(const std::vector<DstbMissionInfo>& missionInfos,
          const CallerInfo& callerInfo) = 0;
+    virtual int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
+    {
+        return 0;
+    }
 #endif
     virtual int32_t StartRemoteAbilityByCall(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
         int32_t callerUid, int32_t callerPid, uint32_t accessToken) = 0;

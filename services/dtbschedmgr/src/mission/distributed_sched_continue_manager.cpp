@@ -240,6 +240,12 @@ int32_t DistributedSchedContinueManager::DealFocusedBusiness(const int32_t missi
     }
     std::string bundleName = info.want.GetBundle();
     focusedMission_[bundleName] = missionId;
+
+    if (info.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
+        HILOGE("Mission continue state set to INACTIVE. Broadcast task abort.");
+        return INVALID_PARAMETERS_ERR;
+    }
+
     uint32_t accessTokenId;
     ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
     if (ret != ERR_OK) {
@@ -265,6 +271,21 @@ int32_t DistributedSchedContinueManager::DealFocusedBusiness(const int32_t missi
     return ERR_OK;
 }
 
+int32_t DistributedSchedContinueManager::CheckContinueState(const int32_t missionId)
+{
+    AAFwk::MissionInfo info;
+    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, info);
+    if (ret != ERR_OK) {
+        HILOGE("get missionInfo failed, missionId: %{public}d, ret: %{public}d", missionId, ret);
+        return ret;
+    }
+    if (info.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
+        HILOGE("Mission continue state set to INACTIVE. Broadcast task abort.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    return ERR_OK;
+}
+
 int32_t DistributedSchedContinueManager::DealUnfocusedBusiness(const int32_t missionId)
 {
     HILOGI("DealUnfocusedBusiness start, missionId: %{public}d", missionId);
@@ -276,12 +297,19 @@ int32_t DistributedSchedContinueManager::DealUnfocusedBusiness(const int32_t mis
     }
     HILOGI("get bundleName ,mission can change, missionId: %{public}d, bundleName: %{public}s",
         missionId, bundleName.c_str());
-    /*determine if it is necessary to send a lost focus broadcast*/
+
     bool isContinue = IsContinue(missionId, bundleName);
     if (!isContinue) {
         HILOGE("mission is not continue, missionId: %{public}d", missionId);
         return NO_MISSION_INFO_FOR_MISSION_ID;
     }
+
+    ret = CheckContinueState(missionId);
+    if (ret != ERR_OK) {
+        HILOGE("Check mission continue state error, mission id : %{public}d, ret: %{public}d", missionId, ret);
+        return ret;
+    }
+
     uint32_t accessTokenId;
     ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
     if (ret != ERR_OK) {
@@ -392,6 +420,77 @@ bool DistributedSchedContinueManager::IsContinue(const int32_t& missionId, const
     HILOGI("mission is continue, missionId: %{public}d, currentMissionId: %{public}d",
         missionId, info_.currentMissionId);
     return true;
+}
+
+int32_t DistributedSchedContinueManager::SetMissionContinueState(const int32_t missionId,
+    const AAFwk::ContinueState &state)
+{
+    HILOGI("SetMissionContinueState start, missionId: %{public}d, state: %{public}d", missionId, state);
+    auto feedfunc = [this, missionId, state]() {
+        DealSetMissionContinueStateBusiness(missionId, state);
+    };
+    if (eventHandler_ != nullptr) {
+        eventHandler_->PostTask(feedfunc);
+    } else {
+        HILOGE("eventHandler_ is nullptr");
+        return ERR_NULL_OBJECT;
+    }
+    HILOGI("SetMissionContinueState end");
+    return ERR_OK;
+}
+
+int32_t DistributedSchedContinueManager::DealSetMissionContinueStateBusiness(const int32_t missionId,
+    const AAFwk::ContinueState &state)
+{
+    HILOGI("DealSetMissionContinueStateBusiness start, missionId: %{public}d, state: %{public}d", missionId, state);
+
+    if (info_.currentMissionId != missionId) {
+        HILOGE("mission is not focused, broadcast task abort, missionId: %{public}d", missionId);
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    if (!info_.currentIsContibuable) {
+        HILOGE("mission is not continuable, broadcast task abort, missionId: %{public}d", missionId);
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    std::string bundleName;
+    int32_t ret = GetBundleName(missionId, bundleName);
+    if (ret != ERR_OK) {
+        HILOGE("get bundleName failed, broadcast task abort, missionId: %{public}d, ret: %{public}d",
+            missionId, ret);
+        return ret;
+    }
+    HILOGI("get bundleName success, missionId: %{public}d, bundleName: %{public}s", missionId, bundleName.c_str());
+
+    uint32_t accessTokenId;
+    ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
+    if (ret != ERR_OK) {
+        HILOGE("get setContinueState accessTokenId failed, accessTokenId: %{public}d, ret: %{public}d",
+            accessTokenId, ret);
+        return ret;
+    }
+
+    uint32_t sendDataLen = DMS_SEND_LEN;
+    uint8_t data[DMS_SEND_LEN];
+    uint8_t len = sizeof(uint32_t);
+    uint8_t type = DMS_FOCUSED_TYPE;
+    if (state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE) {
+        type = DMS_UNFOCUSED_TYPE;
+    }
+    data[0] = (type << CONTINUE_SHIFT_04) | len;
+    data[1] = (accessTokenId >> CONTINUE_SHIFT_24) & DMS_0XFF;
+    data[INDEX_2] = (accessTokenId >> CONTINUE_SHIFT_16) & DMS_0XFF;
+    data[INDEX_3] = (accessTokenId >> CONTINUE_SHIFT_08) & DMS_0XFF;
+    data[INDEX_4] = accessTokenId & DMS_0XFF;
+    ret = SoftbusAdapter::GetInstance().SendSoftbusEvent(data, sendDataLen);
+    if (ret != ERR_OK) {
+        HILOGE("SendSoftbusEvent setContinueState failed, sendDataLen: %{public}d, ret: %{public}d", sendDataLen, ret);
+        return ret;
+    }
+
+    HILOGI("DealSetMissionContinueStateBusiness end. ContinueState set to: %{public}d", state);
+    return ERR_OK;
 }
 
 void DistributedSchedContinueManager::NotifyDeid(const sptr<IRemoteObject>& obj)

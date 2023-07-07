@@ -646,6 +646,26 @@ int32_t DistributedSchedProxy::GetRemoteMissionSnapshotInfo(const std::string& n
     missionSnapshot = std::move(missionSnapshotPtr);
     return ERR_NONE;
 }
+
+int32_t DistributedSchedProxy::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
+{
+    HILOGD("DistributedSchedProxy::SetMissionContinueState called");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("SetMissionContinueState remote is null");
+        return ERR_NULL_OBJECT;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_WRITE_HELPER(data, Int32, missionId);
+    PARCEL_WRITE_HELPER(data, Int32, static_cast<int32_t>(state));
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::SET_MISSION_CONTINUE_STATE),
+        data, reply);
+}
 #endif
 
 bool DistributedSchedProxy::CallerInfoMarshalling(const CallerInfo& callerInfo, MessageParcel& data)
