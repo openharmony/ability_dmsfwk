@@ -15,7 +15,8 @@
     "deviceType": [
       "tablet",
       "default",
-      "phone"
+      "phone",
+      "2in1"
     ],
     "distro": {
       "deliveryWithInstall": true,
