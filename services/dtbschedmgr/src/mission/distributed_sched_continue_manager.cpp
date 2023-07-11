@@ -277,7 +277,7 @@ int32_t DistributedSchedContinueManager::CheckContinueState(const int32_t missio
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, info);
     if (ret != ERR_OK) {
         HILOGE("get missionInfo failed, missionId: %{public}d, ret: %{public}d", missionId, ret);
-        return ret;
+        return ERR_OK;
     }
     if (info.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
         HILOGE("Mission continue state set to INACTIVE. Broadcast task abort.");
