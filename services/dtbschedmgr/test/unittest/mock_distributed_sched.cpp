@@ -146,6 +146,11 @@ int32_t MockDistributedSched::StopSyncRemoteMissions(const std::string& devId)
 {
     return ERR_NONE;
 }
+
+int32_t MockDistributedSched::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
+{
+    return ERR_NONE;
+}
 #endif
 
 int32_t MockDistributedSched::StartRemoteAbilityByCall(const OHOS::AAFwk::Want& want,
