@@ -373,5 +373,59 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeid001, TestSize.Level1)
     DistributedSchedContinueManager::GetInstance().NotifyDeid(obj01);
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeid001 end" << std::endl;
 }
+
+/**
+ * @tc.name: testSetMissionContinueState001
+ * @tc.desc: test SetMissionContinueState
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testSetMissionContinueState001, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest testSetMissionContinueState001 start" << std::endl;
+    DistributedSchedContinueManager::GetInstance().Init();
+    OHOS::AAFwk::ContinueState state = OHOS::AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
+
+     /**
+     * @tc.steps: step1. test SetMissionContinueState when eventHandler is not nullptr;
+     */
+    DistributedSchedContinueManager::GetInstance().SetMissionContinueState(0, state);
+    EXPECT_NE(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
+
+    /**
+     * @tc.steps: step2. test SetMissionContinueState when eventHandler is nullptr;
+     */
+    DistributedSchedContinueManager::GetInstance().UnInit();
+    DistributedSchedContinueManager::GetInstance().SetMissionContinueState(0, state);
+    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
+    DTEST_LOG << "DMSContinueManagerTest testSetMissionContinueState001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testDealSetMissionContinueStateBusiness001
+ * @tc.desc: test DealSetMissionContinueStateBusiness.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testDealSetMissionContinueStateBusiness001, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest testDealSetMissionContinueStateBusiness001 start" << std::endl;
+    OHOS::AAFwk::ContinueState state = OHOS::AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
+    DistributedSchedContinueManager::GetInstance().info_.currentMissionId = MISSIONID_01;
+
+    /**
+     * @tc.steps: step1. test DealSetMissionContinueStateBusiness when missionId is invalid;
+     */
+    int32_t ret = DistributedSchedContinueManager::GetInstance().DealSetMissionContinueStateBusiness(MISSIONID_02,
+        state);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    /**
+     * @tc.steps: step2. test DealUnfocusedBusiness when mission is not continueable;
+     */
+    DistributedSchedContinueManager::GetInstance().info_.currentIsContibuable = false;
+    ret = DistributedSchedContinueManager::GetInstance().DealSetMissionContinueStateBusiness(MISSIONID_01, state);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    DTEST_LOG << "DMSContinueManagerTest testDealSetMissionContinueStateBusiness001 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS

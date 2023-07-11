@@ -1431,6 +1431,26 @@ HWTEST_F(DistributedSchedStubTest, StartSyncRemoteMissionsInner_002, TestSize.Le
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest StartSyncRemoteMissionsInner_002 end" << std::endl;
 }
+
+/**
+ * @tc.name: SetMissionContinueStateInner_001
+ * @tc.desc: check SetMissionContinueStateInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, SetMissionContinueStateInner_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedStubTest SetMissionContinueStateInner_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+
+    int32_t missionId = 0;
+    int32_t state = 0;
+    data.WriteInt32(missionId);
+    data.WriteInt32(state);
+    int32_t result = distributedSchedStub_->SetMissionContinueStateInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedStubTest SetMissionContinueStateInner_001 end" << std::endl;
+}
 #endif
 
 /**
