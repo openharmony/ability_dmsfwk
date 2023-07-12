@@ -352,6 +352,15 @@ int32_t DistributedSchedContinueManager::DealUnBroadcastdBusiness(std::string& s
         return ret;
     }
     HILOGI("get bundleName, bundleName: %{public}s", bundleName.c_str());
+    AppExecFwk::BundleInfo localBundleInfo;
+    if (BundleManagerInternal::GetLocalBundleInfoV9(bundleName, localBundleInfo) != ERR_OK) {
+        HILOGE("The app is not installed on the local device.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    if (localBundleInfo.applicationInfo.bundleType != AppExecFwk::BundleType::APP) {
+        HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
+        return INVALID_PARAMETERS_ERR;
+    }
     std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     auto iterItem = registerOnListener_.find(onType_);
     if (iterItem == registerOnListener_.end()) {

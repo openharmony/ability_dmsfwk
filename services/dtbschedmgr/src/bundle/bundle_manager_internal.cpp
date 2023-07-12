@@ -189,6 +189,29 @@ int32_t BundleManagerInternal::GetLocalBundleInfo(const std::string& bundleName,
     return ERR_OK;
 }
 
+int32_t BundleManagerInternal::GetLocalBundleInfoV9(const std::string& bundleName,
+    AppExecFwk::BundleInfo &bundleInfo)
+{
+    auto bms = GetBundleManager();
+    if (bms == nullptr) {
+        HILOGE("get bundle manager failed");
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    std::vector<int> ids;
+    ErrCode ret = OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (ret != ERR_OK || ids.empty()) {
+        HILOGE("QueryActiveOsAccountIds failed");
+        return INVALID_PARAMETERS_ERR;
+    }
+    ret = bms->GetBundleInfoV9(bundleName,
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION), bundleInfo, ids[0]);
+    if (ret != ERR_OK) {
+        HILOGE("get local bundle info failed, ret: %{public}d", ret);
+    }
+    return ret;
+}
+
 int32_t BundleManagerInternal::CheckRemoteBundleInfoForContinuation(const std::string& dstDeviceId,
     const std::string& bundleName, AppExecFwk::DistributedBundleInfo& remoteBundleInfo)
 {
