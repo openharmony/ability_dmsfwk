@@ -167,8 +167,8 @@ private:
     bool WriteToParcelFloat(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
     bool WriteToParcelDouble(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
     bool WriteToParcelWantParams(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
-    bool WriteToParcelFD(Parcel &parcel, const DistributedWantParams &value) const;
-    bool WriteToParcelRemoteObject(Parcel &parcel, const DistributedWantParams &value) const;
+    bool WriteToParcelFD(Parcel& parcel, const DistributedWantParams& value) const;
+    bool WriteToParcelRemoteObject(Parcel& parcel, const DistributedWantParams& value) const;
 
     bool DoMarshalling(Parcel& parcel) const;
     bool ReadUnsupportedData(Parcel& parcel, const std::string& key, int type);

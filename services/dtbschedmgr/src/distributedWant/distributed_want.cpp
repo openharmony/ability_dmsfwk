@@ -381,7 +381,7 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const sptr<IR
     return *this;
 }
 
-sptr<IRemoteObject> DistributedWant::GetRemoteObject(const std::string &key) const
+sptr<IRemoteObject> DistributedWant::GetRemoteObject(const std::string& key) const
 {
     auto value = parameters_.GetParam(key);
     IDistributedWantParams* iwp = IDistributedWantParams::Query(value);
@@ -407,7 +407,7 @@ sptr<IRemoteObject> DistributedWant::GetRemoteObject(const std::string &key) con
     return AAFwk::RemoteObjectWrap::UnBox(iRemoteObj);
 }
 
-DistributedWant& DistributedWant::SetParam(const std::string&key, bool value)
+DistributedWant& DistributedWant::SetParam(const std::string& key, bool value)
 {
     parameters_.SetParam(key, AAFwk::Boolean::Box(value));
     return *this;

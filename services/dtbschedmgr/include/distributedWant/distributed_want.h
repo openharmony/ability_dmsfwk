@@ -425,7 +425,7 @@ public:
      * @return Returns the IRemoteObject-type value of the parameter matching the given key;
      * returns the nullptr if the key does not exist.
      */
-    sptr<IRemoteObject> GetRemoteObject(const std::string &key) const;
+    sptr<IRemoteObject> GetRemoteObject(const std::string& key) const;
 
     /**
      * @description: Sets a parameter value of the boolean type.
