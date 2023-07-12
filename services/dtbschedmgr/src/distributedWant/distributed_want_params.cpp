@@ -32,9 +32,16 @@
 #include "string_wrapper.h"
 #include "want_params_wrapper.h"
 #include "zchar_wrapper.h"
+#include "remote_object_wrapper.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+const char* FD = "FD";
+const char* REMOTE_OBJECT = "RemoteObject";
+const char* TYPE_PROPERTY = "type";
+const char* VALUE_PROPERTY = "value";
+}
 DistributedUnsupportedData::~DistributedUnsupportedData()
 {
     if (buffer != nullptr) {
@@ -162,6 +169,9 @@ bool DistributedWantParams::NewParams(const DistributedWantParams& source, Distr
             dest.params_[it->first] = AAFwk::Float::Box(AAFwk::Float::Unbox(AAFwk::IFloat::Query(o)));
         } else if (AAFwk::IDouble::Query(o) != nullptr) {
             dest.params_[it->first] = AAFwk::Double::Box(AAFwk::Double::Unbox(AAFwk::IDouble::Query(o)));
+        } else if (AAFwk::IRemoteObjectWrap::Query(o) != nullptr) {
+            dest.params_[it->first] =
+                AAFwk::RemoteObjectWrap::Box(AAFwk::RemoteObjectWrap::UnBox(AAFwk::IRemoteObjectWrap::Query(o)));
         } else if (IDistributedWantParams::Query(o) != nullptr) {
             DistributedWantParams newDest(DistributedWantParamWrapper::Unbox(IDistributedWantParams::Query(o)));
             dest.params_[it->first] = DistributedWantParamWrapper::Box(newDest);
@@ -415,11 +425,65 @@ bool DistributedWantParams::WriteToParcelBool(Parcel& parcel, sptr<IInterface>& 
 bool DistributedWantParams::WriteToParcelWantParams(Parcel& parcel, sptr<IInterface>& o) const
 {
     DistributedWantParams value = DistributedWantParamWrapper::Unbox(IDistributedWantParams::Query(o));
+
+    auto type = value.GetParam(TYPE_PROPERTY);
+    AAFwk::IString *typeP = AAFwk::IString::Query(type);
+    if (typeP != nullptr) {
+        std::string typeValue = AAFwk::String::Unbox(typeP);
+        if (typeValue == FD) {
+            return WriteToParcelFD(parcel, value);
+        }
+        if (typeValue == REMOTE_OBJECT) {
+            return WriteToParcelRemoteObject(parcel, value);
+        }
+    }
+
     if (!parcel.WriteInt32(VALUE_TYPE_WANTPARAMS)) {
         return false;
     }
     return parcel.WriteString16(Str8ToStr16(
         static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(o))->ToString()));
+}
+
+bool DistributedWantParams::WriteToParcelFD(Parcel& parcel, const DistributedWantParams& value) const
+{
+    if (!parcel.WriteInt32(VALUE_TYPE_FD)) {
+        return false;
+    }
+
+    auto fdWrap = value.GetParam(VALUE_PROPERTY);
+    AAFwk::IInteger *fdIWrap = AAFwk::IInteger::Query(fdWrap);
+    if (fdIWrap != nullptr) {
+        int fd = AAFwk::Integer::Unbox(fdIWrap);
+        auto messageParcel = static_cast<MessageParcel*>(&parcel);
+        if (messageParcel == nullptr) {
+            return false;
+        }
+        bool ret = messageParcel->WriteFileDescriptor(fd);
+        return ret;
+    }
+
+    return false;
+}
+
+bool DistributedWantParams::WriteToParcelRemoteObject(Parcel& parcel, const DistributedWantParams& value) const
+{
+    if (!parcel.WriteInt32(VALUE_TYPE_REMOTE_OBJECT)) {
+        return false;
+    }
+
+    auto remoteObjectWrap = value.GetParam(VALUE_PROPERTY);
+    AAFwk::IRemoteObjectWrap *remoteObjectIWrap = AAFwk::IRemoteObjectWrap::Query(remoteObjectWrap);
+    if (remoteObjectIWrap != nullptr) {
+        auto remoteObject = AAFwk::RemoteObjectWrap::UnBox(remoteObjectIWrap);
+        auto messageParcel = static_cast<MessageParcel*>(&parcel);
+        if (messageParcel == nullptr) {
+            return false;
+        }
+        bool ret = messageParcel->WriteRemoteObject(remoteObject);
+        return ret;
+    }
+    return false;
 }
 
 bool DistributedWantParams::WriteToParcelByte(Parcel& parcel, sptr<IInterface>& o) const
@@ -568,29 +632,7 @@ bool DistributedWantParams::DoMarshalling(Parcel& parcel) const
 
 bool DistributedWantParams::Marshalling(Parcel& parcel) const
 {
-    Parcel tempParcel;
-    if (!DoMarshalling(tempParcel)) {
-        return false;
-    }
-
-    int size = static_cast<int>(tempParcel.GetDataSize());
-    if (!parcel.WriteInt32(size)) {
-        return false;
-    }
-    const uint8_t* buffer = tempParcel.ReadUnpadBuffer(size);
-    if (buffer == nullptr) {
-        return false;
-    }
-
-    // Corresponding to Parcel#writeByteArray() in Java.
-    if (!parcel.WriteInt32(size)) {
-        return false;
-    }
-    if (!parcel.WriteBuffer(buffer, size)) {
-        return false;
-    }
-
-    return true;
+    return DoMarshalling(parcel);
 }
 
 template<typename dataType, typename className>
@@ -1026,13 +1068,45 @@ bool DistributedWantParams::ReadFromParcelInt(Parcel& parcel, const std::string&
     }
 }
 
-bool DistributedWantParams::ReadFromParcelWantParamWrapper(Parcel& parcel, const std::string& key)
+bool DistributedWantParams::ReadFromParcelWantParamWrapper(Parcel& parcel, const std::string& key, int type)
 {
+    if (type == VALUE_TYPE_FD) {
+        return ReadFromParcelFD(parcel, key);
+    }
+
+    if (type == VALUE_TYPE_REMOTE_OBJECT) {
+        return ReadFromParcelRemoteObject(parcel, key);
+    }
+
     std::u16string value = parcel.ReadString16();
     sptr<IInterface> intf = DistributedWantParamWrapper::Parse(Str16ToStr8(value));
     if (intf) {
         SetParam(key, intf);
     }
+    return true;
+}
+
+bool DistributedWantParams::ReadFromParcelFD(Parcel& parcel, const std::string& key)
+{
+    auto messageParcel = static_cast<MessageParcel*>(&parcel);
+    auto fd = messageParcel->ReadFileDescriptor();
+    DistributedWantParams wp;
+    wp.SetParam(TYPE_PROPERTY, AAFwk::String::Box(FD));
+    wp.SetParam(VALUE_PROPERTY, AAFwk::Integer::Box(fd));
+    sptr<IDistributedWantParams> pWantParams = DistributedWantParamWrapper::Box(wp);
+    SetParam(key, pWantParams);
+    return true;
+}
+
+bool DistributedWantParams::ReadFromParcelRemoteObject(Parcel& parcel, const std::string& key)
+{
+    auto messageParcel = static_cast<MessageParcel*>(&parcel);
+    auto remoteObject = messageParcel->ReadRemoteObject();
+    DistributedWantParams wp;
+    wp.SetParam(TYPE_PROPERTY, AAFwk::String::Box(REMOTE_OBJECT));
+    wp.SetParam(VALUE_PROPERTY, AAFwk::RemoteObjectWrap::Box(remoteObject));
+    sptr<IDistributedWantParams> pWantParams = DistributedWantParamWrapper::Box(wp);
+    SetParam(key, pWantParams);
     return true;
 }
 
@@ -1089,7 +1163,8 @@ bool DistributedWantParams::ReadUnsupportedData(Parcel& parcel, const std::strin
     if (!parcel.ReadInt32(bufferSize)) {
         return false;
     }
-    if (bufferSize < 0) {
+    static constexpr int32_t maxAllowedSize = 100 * 1024 * 1024;
+    if (bufferSize < 0 || bufferSize > maxAllowedSize) {
         return false;
     }
 
@@ -1141,7 +1216,9 @@ bool DistributedWantParams::ReadFromParcelParam(Parcel& parcel, const std::strin
         case VALUE_TYPE_DOUBLE:
             return ReadFromParcelDouble(parcel, key);
         case VALUE_TYPE_WANTPARAMS:
-            return ReadFromParcelWantParamWrapper(parcel, key);
+        case VALUE_TYPE_FD:
+        case VALUE_TYPE_REMOTE_OBJECT:
+            return ReadFromParcelWantParamWrapper(parcel, key, type);
         case VALUE_TYPE_NULL:
             break;
         case VALUE_TYPE_PARCELABLE:
@@ -1188,28 +1265,8 @@ bool DistributedWantParams::ReadFromParcel(Parcel& parcel)
 
 DistributedWantParams* DistributedWantParams::Unmarshalling(Parcel& parcel)
 {
-    int32_t bufferSize;
-    if (!parcel.ReadInt32(bufferSize)) {
-        return nullptr;
-    }
-
-    // Corresponding to Parcel#writeByteArray() in Java.
-    int32_t length;
-    if (!parcel.ReadInt32(length)) {
-        return nullptr;
-    }
-    const uint8_t* dataInBytes = parcel.ReadUnpadBuffer(bufferSize);
-    if (dataInBytes == nullptr) {
-        return nullptr;
-    }
-
-    Parcel tempParcel;
-    if (!tempParcel.WriteBuffer(dataInBytes, bufferSize)) {
-        return nullptr;
-    }
-
     DistributedWantParams* wantParams = new (std::nothrow) DistributedWantParams();
-    if (wantParams != nullptr && !wantParams->ReadFromParcel(tempParcel)) {
+    if (wantParams != nullptr && !wantParams->ReadFromParcel(parcel)) {
         delete wantParams;
         wantParams = nullptr;
     }

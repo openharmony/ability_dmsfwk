@@ -411,6 +411,23 @@ public:
     std::vector<bool> GetBoolArrayParam(const std::string& key) const;
 
     /**
+     * @description: Sets a parameter value of the IRemoteObject type.
+     * @param key   Indicates the key matching the parameter.
+     * @param value Indicates the IRemoteObject value of the parameter.
+     * @return Returns this want object containing the parameter value.
+     */
+    DistributedWant& SetParam(const std::string& key, const sptr<IRemoteObject>& remoteObject);
+
+    /**
+     * @description: Obtains a IRemoteObject-type value matching the given key.
+     * @param key   Indicates the key of WantParams.
+     * @param defaultValue  Indicates the default IRemoteObject-type value.
+     * @return Returns the IRemoteObject-type value of the parameter matching the given key;
+     * returns the nullptr if the key does not exist.
+     */
+    sptr<IRemoteObject> GetRemoteObject(const std::string &key) const;
+
+    /**
      * @description: Sets a parameter value of the boolean type.
      * @param key   Indicates the key matching the parameter.
      * @param value Indicates the boolean value of the parameter.
@@ -816,7 +833,6 @@ private:
     static bool ParseContent(const std::string& content, std::string& prop, std::string& value);
     static bool ParseUriInternal(
         const std::string& content, OHOS::AppExecFwk::ElementName& element, DistributedWant& want);
-    static bool CheckBeforeParseUri(const std::string& uri);
     bool ReadFromParcel(Parcel& parcel);
     static bool CheckAndSetParameters(
         DistributedWant& want, const std::string& key, std::string& prop, const std::string& value);

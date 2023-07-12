@@ -33,6 +33,7 @@
 #include "int_wrapper.h"
 #include "long_wrapper.h"
 #include "parcel_macro_base.h"
+#include "remote_object_wrapper.h"
 #include "short_wrapper.h"
 #include "string_ex.h"
 #include "string_wrapper.h"
@@ -45,6 +46,9 @@ namespace DistributedSchedule {
 namespace {
 const std::regex NUMBER_REGEX("^[-+]?([0-9]+)([.]([0-9]+))?$");
 const std::string TAG = "DistributedWant";
+const char* REMOTE_OBJECT = "RemoteObject";
+const char* TYPE_PROPERTY = "type";
+const char* VALUE_PROPERTY = "value";
 };  // namespace
 const std::string DistributedWant::ACTION_PLAY("action.system.play");
 const std::string DistributedWant::ACTION_HOME("action.system.home");
@@ -117,6 +121,7 @@ DistributedWant::DistributedWant(const AAFwk::Want& want)
             (tp == DistributedWantParams::VALUE_TYPE_DOUBLE) ||
             (tp == DistributedWantParams::VALUE_TYPE_STRING) ||
             (tp == DistributedWantParams::VALUE_TYPE_ARRAY) ||
+            (tp == DistributedWantParams::VALUE_TYPE_REMOTE_OBJECT) ||
             (tp == DistributedWantParams::VALUE_TYPE_WANTPARAMS)) {
             parameters_.SetParam(it->first, it->second);
         }
@@ -365,6 +370,41 @@ std::vector<bool> DistributedWant::GetBoolArrayParam(const std::string& key) con
         AAFwk::Array::ForEach(ao, func);
     }
     return array;
+}
+
+DistributedWant& DistributedWant::SetParam(const std::string& key, const sptr<IRemoteObject>& remoteObject)
+{
+    DistributedWantParams wp;
+    wp.SetParam(TYPE_PROPERTY, AAFwk::String::Box(AAFwk::REMOTE_OBJECT));
+    wp.SetParam(AAFwk::VALUE_PROPERTY, AAFwk::RemoteObjectWrap::Box(remoteObject));
+    parameters_.SetParam(key, DistributedWantParamWrapper::Box(wp));
+    return *this;
+}
+
+sptr<IRemoteObject> DistributedWant::GetRemoteObject(const std::string &key) const
+{
+    auto value = parameters_.GetParam(key);
+    IDistributedWantParams* iwp = IDistributedWantParams::Query(value);
+    if (iwp == nullptr) {
+        return nullptr;
+    }
+    auto wp = DistributedWantParamWrapper::Unbox(iwp);
+
+    auto type = wp.GetParam(TYPE_PROPERTY);
+    AAFwk::IString* iString = AAFwk::IString::Query(type);
+    if (iString == nullptr) {
+        return nullptr;
+    }
+    if (REMOTE_OBJECT != AAFwk::String::Unbox(iString)) {
+        return nullptr;
+    }
+
+    auto remoteObjVal = wp.GetParam(VALUE_PROPERTY);
+    AAFwk::IRemoteObjectWrap* iRemoteObj = AAFwk::IRemoteObjectWrap::Query(remoteObjVal);
+    if (iRemoteObj == nullptr) {
+        return nullptr;
+    }
+    return AAFwk::RemoteObjectWrap::UnBox(iRemoteObj);
 }
 
 DistributedWant& DistributedWant::SetParam(const std::string&key, bool value)
@@ -835,31 +875,23 @@ DistributedWant* DistributedWant::CloneOperation()
     return want;
 }
 
-bool DistributedWant::CheckBeforeParseUri(const std::string& uri)
+DistributedWant* DistributedWant::ParseUri(const std::string& uri)
 {
     if (uri.length() <= 0) {
-        return false;
+        return nullptr;
     }
     std::string head = WANT_HEADER;
     std::string end = ";end";
     if (uri.find(head) != 0) {
-        return false;
+        return nullptr;
     }
     if (uri.rfind(end) != (uri.length() - end.length())) {
-        return false;
-    }
-    return true;
-}
-
-DistributedWant* DistributedWant::ParseUri(const std::string& uri)
-{
-    if (!CheckBeforeParseUri(uri)) {
         return nullptr;
     }
     bool ret = true;
     std::string content;
     std::size_t pos;
-    std::size_t begin = WANT_HEADER.length();
+    std::size_t begin = head.length();
     ElementName element;
     DistributedWant* want = new (std::nothrow) DistributedWant();
     if (want == nullptr) {
