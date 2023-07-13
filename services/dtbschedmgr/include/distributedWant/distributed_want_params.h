@@ -114,6 +114,8 @@ private:
 
         VALUE_TYPE_WANTPARAMS = 101,
         VALUE_TYPE_ARRAY = 102,
+        VALUE_TYPE_FD = 103,
+        VALUE_TYPE_REMOTE_OBJECT = 104
     };
 
     bool WriteArrayToParcel(Parcel& parcel, AAFwk::IArray* ao) const;
@@ -140,7 +142,9 @@ private:
     bool ReadFromParcelArrayLong(Parcel& parcel, sptr<AAFwk::IArray>& ao);
     bool ReadFromParcelArrayFloat(Parcel& parcel, sptr<AAFwk::IArray>& ao);
     bool ReadFromParcelArrayDouble(Parcel& parcel, sptr<AAFwk::IArray>& ao);
-    bool ReadFromParcelWantParamWrapper(Parcel& parcel, const std::string& key);
+    bool ReadFromParcelWantParamWrapper(Parcel& parcel, const std::string& key, int type);
+    bool ReadFromParcelFD(Parcel& parcel, const std::string& key);
+    bool ReadFromParcelRemoteObject(Parcel& parcel, const std::string& key);
 
     bool WriteArrayToParcelString(Parcel& parcel, AAFwk::IArray* ao) const;
     bool WriteArrayToParcelBool(Parcel& parcel, AAFwk::IArray* ao) const;
@@ -163,6 +167,8 @@ private:
     bool WriteToParcelFloat(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
     bool WriteToParcelDouble(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
     bool WriteToParcelWantParams(Parcel& parcel, sptr<AAFwk::IInterface>& o) const;
+    bool WriteToParcelFD(Parcel& parcel, const DistributedWantParams& value) const;
+    bool WriteToParcelRemoteObject(Parcel& parcel, const DistributedWantParams& value) const;
 
     bool DoMarshalling(Parcel& parcel) const;
     bool ReadUnsupportedData(Parcel& parcel, const std::string& key, int type);
