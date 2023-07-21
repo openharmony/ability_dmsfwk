@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -255,11 +255,20 @@ bool DistributedSchedPermission::IsFoundationCall() const
 
 int32_t DistributedSchedPermission::CheckPermission(uint32_t accessToken, const std::string& permissionName) const
 {
-    HILOGI("called.");
+    HILOGI("CheckPermission called.");
     // if called from xts, granted directly, no need to check permissions.
     if (IsNativeCall(accessToken)) {
         return ERR_OK;
     }
+    if (VerifyPermission(accessToken, permissionName)) {
+        return ERR_OK;
+    }
+    return DMS_PERMISSION_DENIED;
+}
+
+int32_t DistributedSchedPermission::CheckPermissionAll(uint32_t accessToken, const std::string& permissionName) const
+{
+    HILOGI("CheckPermissionAll called.");
     if (VerifyPermission(accessToken, permissionName)) {
         return ERR_OK;
     }
@@ -566,7 +575,7 @@ bool DistributedSchedPermission::CheckTargetAbilityVisible(const AppExecFwk::Abi
         HILOGE("dAccessTokenID is invalid!");
         return false;
     }
-    if (CheckPermission(dAccessToken, PERMISSION_START_INVISIBLE_ABILITY) != ERR_OK) {
+    if (CheckPermissionAll(dAccessToken, PERMISSION_START_INVISIBLE_ABILITY) != ERR_OK) {
         HILOGE("CheckTargetAbilityVisible failed.");
         return false;
     }
