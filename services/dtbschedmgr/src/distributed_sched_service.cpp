@@ -86,7 +86,9 @@ const std::string DMS_VERSION_ID = "dmsVersion";
 const std::string DMS_CONNECT_TOKEN = "connectToken";
 const std::string DMS_VERSION = "4.0.0";
 const std::string DMS_MISSION_ID = "dmsMissionId";
+const std::string SUPPORT_CONTINUE_PAGE_STACK_KEY = "ohos.extra.param.key.supportContinuePageStack";
 const std::string SUPPORT_CONTINUE_SOURCE_EXIT_KEY = "ohos.extra.param.key.supportContinueSourceExit";
+const std::string SUPPORT_CONTINUE_MODULE_NAME_UPDATE_KEY = "ohos.extra.param.key.supportContinueModuleNameUpdate";
 constexpr int32_t DEFAULT_DMS_MISSION_ID = -1;
 constexpr int32_t DEFAULT_DMS_CONNECT_TOKEN = -1;
 constexpr int32_t BIND_CONNECT_RETRY_TIMES = 3;
@@ -103,6 +105,7 @@ constexpr int64_t CONTINUATION_TIMEOUT = 20000; // 20s
 // BundleDistributedManager set timeout to 3s, so we set 1s longer
 constexpr int64_t CHECK_REMOTE_INSTALL_ABILITY = 40000;
 constexpr int32_t MAX_TOKEN_NUM = 100000000;
+constexpr uint32_t MAX_MODULENAME_LEN = 2048;
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedService);
@@ -534,6 +537,14 @@ int32_t DistributedSchedService::SetWantForContinuation(AAFwk::Want& newWant, in
         return INVALID_PARAMETERS_ERR;
     }
     newWant.SetParam(VERSION_CODE_KEY, static_cast<int32_t>(localBundleInfo.versionCode));
+
+    bool isPageStackContinue = newWant.GetBoolParam(SUPPORT_CONTINUE_PAGE_STACK_KEY, true);
+    std::string moduleName = newWant.GetStringParam(SUPPORT_CONTINUE_MODULE_NAME_UPDATE_KEY);
+    if (!isPageStackContinue && !moduleName.empty() && moduleName.length() <= MAX_MODULENAME_LEN) {
+        HILOGD("set application moduleName = %{private}s!", moduleName.c_str());
+        OHOS::AppExecFwk::ElementName element = newWant.GetElement();
+        newWant.SetElementName(element.GetDeviceID(), element.GetBundleName(), element.GetAbilityName(), moduleName);    
+    }
     HILOGD("local version = %{public}u!", localBundleInfo.versionCode);
     return ERR_OK;
 }
