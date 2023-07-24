@@ -543,7 +543,7 @@ int32_t DistributedSchedService::SetWantForContinuation(AAFwk::Want& newWant, in
     if (!isPageStackContinue && !moduleName.empty() && moduleName.length() <= MAX_MODULENAME_LEN) {
         HILOGD("set application moduleName = %{private}s!", moduleName.c_str());
         OHOS::AppExecFwk::ElementName element = newWant.GetElement();
-        newWant.SetElementName(element.GetDeviceID(), element.GetBundleName(), element.GetAbilityName(), moduleName);    
+        newWant.SetElementName(element.GetDeviceID(), element.GetBundleName(), element.GetAbilityName(), moduleName);
     }
     HILOGD("local version = %{public}u!", localBundleInfo.versionCode);
     return ERR_OK;
