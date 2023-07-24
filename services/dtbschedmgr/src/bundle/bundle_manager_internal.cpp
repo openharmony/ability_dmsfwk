@@ -51,12 +51,13 @@ bool BundleManagerInternal::GetCallerAppIdFromBms(const std::string& bundleName,
         HILOGE("failed to get bms");
         return false;
     }
-    std::vector<int> ids;
+    std::vector<int32_t> ids;
     ErrCode result = OsAccountManager::QueryActiveOsAccountIds(ids);
     if (result != ERR_OK || ids.empty()) {
         return false;
     }
-    appId = bundleMgr->GetAppIdByBundleName(bundleName, ids[0]);
+    int32_t activeAccountId = ids[0];
+    appId = bundleMgr->GetAppIdByBundleName(bundleName, activeAccountId);
     HILOGD("appId:%s", appId.c_str());
     return true;
 }
@@ -97,13 +98,14 @@ bool BundleManagerInternal::QueryAbilityInfo(const AAFwk::Want& want, AppExecFwk
     if (ret != ERR_OK || ids.empty()) {
         return false;
     }
+    int32_t activeAccountId = ids[0];
     auto bundleMgr = GetBundleManager();
     if (bundleMgr == nullptr) {
         HILOGE("failed to get bms");
         return false;
     }
     bool result = bundleMgr->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT
-        | AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION, ids[0], abilityInfo);
+        | AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION, activeAccountId, abilityInfo);
     if (!result) {
         HILOGE("QueryAbilityInfo failed");
         return false;
@@ -119,6 +121,7 @@ bool BundleManagerInternal::QueryExtensionAbilityInfo(const AAFwk::Want& want,
     if (ret != ERR_OK || ids.empty()) {
         return false;
     }
+    int32_t activeAccountId = ids[0];
     auto bundleMgr = GetBundleManager();
     if (bundleMgr == nullptr) {
         HILOGE("failed to get bms");
@@ -126,7 +129,7 @@ bool BundleManagerInternal::QueryExtensionAbilityInfo(const AAFwk::Want& want,
     }
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
     bundleMgr->QueryExtensionAbilityInfos(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT
-        | AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION, ids[0], extensionInfos);
+        | AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION, activeAccountId, extensionInfos);
     if (extensionInfos.empty()) {
         HILOGE("QueryExtensionAbilityInfo failed.");
         return false;
@@ -175,14 +178,15 @@ int32_t BundleManagerInternal::GetLocalBundleInfo(const std::string& bundleName,
         return INVALID_PARAMETERS_ERR;
     }
 
-    std::vector<int> ids;
+    std::vector<int32_t> ids;
     ErrCode ret = OsAccountManager::QueryActiveOsAccountIds(ids);
     if (ret != ERR_OK || ids.empty()) {
         HILOGE("QueryActiveOsAccountIds failed");
         return INVALID_PARAMETERS_ERR;
     }
+    int32_t activeAccountId = ids[0];
     if (!bms->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT,
-        localBundleInfo, ids[0])) {
+        localBundleInfo, activeAccountId)) {
         HILOGE("get local bundle info failed");
         return INVALID_PARAMETERS_ERR;
     }
@@ -198,14 +202,16 @@ int32_t BundleManagerInternal::GetLocalBundleInfoV9(const std::string& bundleNam
         return INVALID_PARAMETERS_ERR;
     }
 
-    std::vector<int> ids;
+    std::vector<int32_t> ids;
     ErrCode ret = OsAccountManager::QueryActiveOsAccountIds(ids);
     if (ret != ERR_OK || ids.empty()) {
         HILOGE("QueryActiveOsAccountIds failed");
         return INVALID_PARAMETERS_ERR;
     }
+    int32_t activeAccountId = ids[0];
     ret = bms->GetBundleInfoV9(bundleName,
-        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION), bundleInfo, ids[0]);
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION),
+        bundleInfo, activeAccountId);
     if (ret != ERR_OK) {
         HILOGE("get local bundle info failed, ret: %{public}d", ret);
     }
@@ -264,12 +270,13 @@ bool BundleManagerInternal::CheckIfRemoteCanInstall(const AAFwk::Want& want, int
 
     AAFwk::Want newWant;
     newWant.SetElementName(deviceId, bundleName, abilityName, moduleName);
-    std::vector<int> ids;
+    std::vector<int32_t> ids;
     ErrCode result = OsAccountManager::QueryActiveOsAccountIds(ids);
     if (result != ERR_OK || ids.empty()) {
         return false;
     }
-    bool ret = bms->CheckAbilityEnableInstall(newWant, missionId, ids[0], new DmsBundleManagerCallbackStub());
+    int32_t activeAccountId = ids[0];
+    bool ret = bms->CheckAbilityEnableInstall(newWant, missionId, activeAccountId, new DmsBundleManagerCallbackStub());
     if (ret != true) {
         HILOGE("CheckAbilityEnableInstall from bms failed");
     }
@@ -312,12 +319,13 @@ int32_t BundleManagerInternal::GetUidFromBms(const std::string& bundleName)
         HILOGE("failed to get bms");
         return -1;
     }
-    std::vector<int> ids;
+    std::vector<int32_t> ids;
     ErrCode result = OsAccountManager::QueryActiveOsAccountIds(ids);
     if (result != ERR_OK || ids.empty()) {
         return -1;
     }
-    return bundleMgr->GetUidByBundleName(bundleName, ids[0]);
+    int32_t activeAccountId = ids[0];
+    return bundleMgr->GetUidByBundleName(bundleName, activeAccountId);
 }
 
 int32_t BundleManagerInternal::GetBundleIdFromBms(const std::string& bundleName, uint32_t& accessTokenId)
@@ -327,15 +335,16 @@ int32_t BundleManagerInternal::GetBundleIdFromBms(const std::string& bundleName,
         HILOGE("failed to get bms");
         return INVALID_PARAMETERS_ERR;
     }
-    std::vector<int> ids;
+    std::vector<int32_t> ids;
     ErrCode result = OsAccountManager::QueryActiveOsAccountIds(ids);
     if (result != ERR_OK || ids.empty()) {
         HILOGE("fild to get userId");
         return INVALID_PARAMETERS_ERR;
     }
+    int32_t activeAccountId = ids[0];
     AppExecFwk::ApplicationInfo appInfo;
     int32_t flag = static_cast<int32_t>(AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
-    result = bundleMgr->GetApplicationInfoV9(bundleName, flag, ids[0], appInfo);
+    result = bundleMgr->GetApplicationInfoV9(bundleName, flag, activeAccountId, appInfo);
     if (result != ERR_OK) {
         HILOGE("failed to get appInfo from bms");
         return CAN_NOT_FOUND_ABILITY_ERR;
