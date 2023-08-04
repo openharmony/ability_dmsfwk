@@ -28,7 +28,6 @@ config("distributed_sched_config") {
     "${communication_path}/dsoftbus/dsoftbus_enhance/interfaces/kits/broadcast",
     "${communication_path}/dsoftbus/interfaces/kits/common",
     "include/distributedWant",
-    "//third_party/json/include",
   ]
   defines = []
   if (dmsfwk_mission_manager) {
