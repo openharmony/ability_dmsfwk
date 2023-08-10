@@ -368,5 +368,19 @@ int32_t BundleManagerInternal::GetBundleNameFromDbms(const std::string& networkI
     }
     return ERR_OK;
 }
+
+int32_t BundleManagerInternal::GetApplicationInfoFromBms(const std::string& bundleName,
+    const AppExecFwk::BundleFlag flag, const int32_t userId, AppExecFwk::ApplicationInfo &appInfo)
+{
+    auto bundleMgr = GetBundleManager();
+    if (bundleMgr == nullptr) {
+        HILOGE("failed to get bms");
+        return INVALID_PARAMETERS_ERR;
+    }
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    bundleMgr->GetApplicationInfo(bundleName, flag, userId, appInfo);
+    IPCSkeleton::SetCallingIdentity(identity);
+    return ERR_OK;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS

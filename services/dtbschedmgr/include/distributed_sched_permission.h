@@ -49,6 +49,7 @@ public:
     int32_t CheckGetCallerPermission(const AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility);
     bool IsFoundationCall() const;
+    bool IsSceneBoardCall() const;
     int32_t CheckPermission(uint32_t accessToken, const std::string& permissionName) const;
     int32_t CheckPermissionAll(uint32_t accessToken, const std::string& permissionName) const;
     int32_t GetAccountInfo(const std::string& remoteNetworkId, const CallerInfo& callerInfo,

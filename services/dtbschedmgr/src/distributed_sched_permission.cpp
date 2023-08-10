@@ -45,6 +45,8 @@ const std::string PERMISSION_START_ABILIIES_FROM_BACKGROUND = "ohos.permission.S
 const std::string PERMISSION_START_ABILITIES_FROM_BACKGROUND = "ohos.permission.START_ABILITIES_FROM_BACKGROUND";
 const std::string PERMISSION_START_INVISIBLE_ABILITY = "ohos.permission.START_INVISIBLE_ABILITY";
 const std::string DISTRIBUTED_FILES_PATH = "/data/storage/el2/distributedfiles/";
+const std::string BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
+constexpr int32_t U0_USER_ID = 0;
 constexpr int32_t DEFAULT_DMS_API_VERSION = 9;
 const int DEFAULT_DMS_MISSION_ID = -1;
 const int FA_MODULE_ALLOW_MIN_API_VERSION = 8;
@@ -251,6 +253,22 @@ bool DistributedSchedPermission::IsFoundationCall() const
     }
     HILOGE("not foundation called, processName:%{private}s", nativeTokenInfo.processName.c_str());
     return false;
+}
+
+bool DistributedSchedPermission::IsSceneBoardCall() const
+{
+    AppExecFwk::ApplicationInfo appInfo;
+    if (BundleManagerInternal::GetApplicationInfoFromBms(BUNDLE_NAME_SCENEBOARD,
+        AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, U0_USER_ID, appInfo) != ERR_OK) {
+        HILOGE("get applicationInfo failed.");
+        return false;
+    }
+    auto accessTokenId = IPCSkeleton::GetCallingTokenID();
+    if (accessTokenId != appInfo.accessTokenId) {
+        HILOGE("not sceneBoard called.");
+        return false;
+    }
+    return true;
 }
 
 int32_t DistributedSchedPermission::CheckPermission(uint32_t accessToken, const std::string& permissionName) const
