@@ -658,7 +658,8 @@ bool DistributedSchedStub::EnforceInterfaceToken(MessageParcel& data)
 int32_t DistributedSchedStub::GetMissionInfosInner(MessageParcel& data, MessageParcel& reply)
 {
     HILOGI("[PerformanceTest] called, IPC end = %{public}" PRId64, GetTickCount());
-    if (!DistributedSchedPermission::GetInstance().IsFoundationCall()) {
+    if (!DistributedSchedPermission::GetInstance().IsFoundationCall() &&
+        !DistributedSchedPermission::GetInstance().IsSceneBoardCall()) {
         return DMS_PERMISSION_DENIED;
     }
     std::u16string deviceId = data.ReadString16();
@@ -677,7 +678,8 @@ int32_t DistributedSchedStub::GetMissionInfosInner(MessageParcel& data, MessageP
 int32_t DistributedSchedStub::GetRemoteMissionSnapshotInfoInner(MessageParcel& data, MessageParcel& reply)
 {
     HILOGI("[PerformanceTest] called, IPC end = %{public}" PRId64, GetTickCount());
-    if (!DistributedSchedPermission::GetInstance().IsFoundationCall()) {
+    if (!DistributedSchedPermission::GetInstance().IsFoundationCall() &&
+        !DistributedSchedPermission::GetInstance().IsSceneBoardCall()) {
         return DMS_PERMISSION_DENIED;
     }
     string networkId = data.ReadString();
@@ -886,7 +888,7 @@ int32_t DistributedSchedStub::StartSyncRemoteMissionsInner(MessageParcel& data, 
 
 int32_t DistributedSchedStub::SetMissionContinueStateInner(MessageParcel& data, MessageParcel& reply)
 {
-    if (!CheckCallingUid()) {
+    if (!CheckCallingUid() && !DistributedSchedPermission::GetInstance().IsSceneBoardCall()) {
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
     }

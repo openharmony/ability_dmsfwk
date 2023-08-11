@@ -50,6 +50,8 @@ public:
     static int32_t GetBundleIdFromBms(const std::string& bundleName, uint32_t& accessTokenId);
     static int32_t GetBundleNameFromDbms(const std::string& networkId,
         const uint32_t accessTokenId, std::string& bundleName);
+    static int32_t GetApplicationInfoFromBms(const std::string& bundleName, const AppExecFwk::BundleFlag flag,
+        const int32_t userId, AppExecFwk::ApplicationInfo &appInfo);
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
