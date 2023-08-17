@@ -179,6 +179,7 @@ private:
     bool NewArrayData(AAFwk::IArray* source, sptr<AAFwk::IArray>& dest);
     bool NewParams(const DistributedWantParams& source, DistributedWantParams& dest);
     std::map<std::string, sptr<AAFwk::IInterface>> params_;
+    std::vector<int> fds_;
     std::vector<DistributedUnsupportedData> cachedUnsupportedData_;
 };
 } // namespace DistributedSchedule
