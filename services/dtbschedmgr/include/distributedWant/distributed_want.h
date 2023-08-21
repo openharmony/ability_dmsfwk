@@ -836,6 +836,8 @@ private:
     bool ReadFromParcel(Parcel& parcel);
     static bool CheckAndSetParameters(
         DistributedWant& want, const std::string& key, std::string& prop, const std::string& value);
+    static bool CheckAndSetNumberParameters(
+        DistributedWant& want, const std::string& key, std::string& prop, const std::string& value);
     OHOS::Uri GetLowerCaseScheme(const OHOS::Uri& uri);
     void GenerateUriString(std::string& uriString) const;
     void ToUriStringInner(std::string& uriString) const;

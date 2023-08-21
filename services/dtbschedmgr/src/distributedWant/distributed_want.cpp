@@ -1477,7 +1477,22 @@ bool DistributedWant::CheckAndSetParameters(DistributedWant& want, const std::st
             return false;
         }
         want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == AAFwk::Short::SIGNATURE && prop[1] == '.') {
+    } else if (prop[0] == AAFwk::Array::SIGNATURE && prop[1] == '.') {
+        sptr<AAFwk::IArray> valueObj = AAFwk::Array::Parse(value);
+        if (valueObj == nullptr) {
+            return false;
+        }
+        want.parameters_.SetParam(key, valueObj);
+    } else if (!CheckAndSetNumberParameters(want, key, prop, value)) {
+        return false;
+    }
+    return true;
+}
+
+bool DistributedWant::CheckAndSetNumberParameters(DistributedWant& want, const std::string& key,
+                                                  std::string& prop, const std::string& value)
+{
+    if (prop[0] == AAFwk::Short::SIGNATURE && prop[1] == '.') {
         sptr<AAFwk::IShort> valueObj = AAFwk::Short::Parse(value);
         if (valueObj == nullptr) {
             return false;
@@ -1503,12 +1518,6 @@ bool DistributedWant::CheckAndSetParameters(DistributedWant& want, const std::st
         want.parameters_.SetParam(key, valueObj);
     } else if (prop[0] == AAFwk::Double::SIGNATURE && prop[1] == '.') {
         sptr<AAFwk::IDouble> valueObj = AAFwk::Double::Parse(value);
-        if (valueObj == nullptr) {
-            return false;
-        }
-        want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == AAFwk::Array::SIGNATURE && prop[1] == '.') {
-        sptr<AAFwk::IArray> valueObj = AAFwk::Array::Parse(value);
         if (valueObj == nullptr) {
             return false;
         }
