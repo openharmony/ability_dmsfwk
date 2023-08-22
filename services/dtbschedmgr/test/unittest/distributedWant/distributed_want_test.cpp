@@ -56,6 +56,12 @@ public:
         const std::shared_ptr<DistributedWant> &want2) const;
     bool CompareWant(const std::shared_ptr<DistributedWant> &want1,
         const std::shared_ptr<DistributedWant> &want2, std::map<std::string, std::string> &keys) const;
+    bool CompareWantOthers(const std::shared_ptr<DistributedWant>& want1,
+        const std::shared_ptr<DistributedWant>& want2, std::map<std::string, std::string>::iterator it) const;
+    bool CompareWantNumber(const std::shared_ptr<DistributedWant>& want1,
+        const std::shared_ptr<DistributedWant>& want2, std::map<std::string, std::string>::iterator it) const;
+    bool CompareWantArray(const std::shared_ptr<DistributedWant>& want1,
+        const std::shared_ptr<DistributedWant>& want2, std::map<std::string, std::string>::iterator it) const;
     void SendParcelTest(const std::shared_ptr<DistributedWant> &want, std::map<std::string, std::string> &keys) const;
     void AddBoolParams(DistributedWant &want,
         std::map<std::string, std::string> &keys, int loop, unsigned int flag) const;
@@ -839,93 +845,132 @@ bool DistributedWantBaseTest::CompareWant(const std::shared_ptr<DistributedWant>
     EXPECT_EQ(want1->GetElement(), want2->GetElement());
 
     for (auto it = keys.begin(); it != keys.end(); it++) {
-        if (it->second == boolType) {
-            bool v1 = want1->GetBoolParam(it->first, false);
-            bool v2 = want2->GetBoolParam(it->first, false);
-            EXPECT_EQ(v1, v2);
-            EXPECT_EQ(v1, true);
-        } else if (it->second == boolArrayType) {
-            std::vector<bool> v1 = want1->GetBoolArrayParam(it->first);
-            std::vector<bool> v2 = want2->GetBoolArrayParam(it->first);
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == byteType) {
-            byte v1 = want1->GetByteParam(it->first, 'j');
-            byte v2 = want2->GetByteParam(it->first, 'k');
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == byteArrayType) {
-            std::vector<byte> v1 = want1->GetByteArrayParam(it->first);
-            std::vector<byte> v2 = want2->GetByteArrayParam(it->first);
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == charType) {
-            zchar v1 = want1->GetCharParam(it->first, 0x01AB);
-            zchar v2 = want2->GetCharParam(it->first, 0x02CD);
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == charArrayType) {
-            std::vector<zchar> v1 = want1->GetCharArrayParam(it->first);
-            std::vector<zchar> v2 = want2->GetCharArrayParam(it->first);
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == shortType) {
-            short default1 = 123;
-            short default2 = 456;
-            short v1 = want1->GetShortParam(it->first, default1);
-            short v2 = want2->GetShortParam(it->first, default2);
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == shortArrayType) {
-            std::vector<short> v1 = want1->GetShortArrayParam(it->first);
-            std::vector<short> v2 = want2->GetShortArrayParam(it->first);
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == intType) {
-            int default1 = 1230000;
-            int default2 = 4560000;
-            int v1 = want1->GetIntParam(it->first, default1);
-            int v2 = want2->GetIntParam(it->first, default2);
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == intArrayType) {
-            std::vector<int> v1 = want1->GetIntArrayParam(it->first);
-            std::vector<int> v2 = want2->GetIntArrayParam(it->first);
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == longType) {
-            long default1 = 1e8;
-            long default2 = 2e8;
-            long v1 = want1->GetLongParam(it->first, default1);
-            long v2 = want2->GetLongParam(it->first, default2);
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == longArrayType) {
-            std::vector<long> v1 = want1->GetLongArrayParam(it->first);
-            std::vector<long> v2 = want2->GetLongArrayParam(it->first);
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == floatType) {
-            float default1 = 12.3;
-            float default2 = 45.6;
-            float v1 = want1->GetFloatParam(it->first, default1);
-            float v2 = want2->GetFloatParam(it->first, default2);
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == floatArrayType) {
-            std::vector<float> v1 = want1->GetFloatArrayParam(it->first);
-            std::vector<float> v2 = want2->GetFloatArrayParam(it->first);
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == doubleType) {
-            double default1 = 12.3;
-            double default2 = 45.6;
-            double v1 = want1->GetDoubleParam(it->first, default1);
-            double v2 = want2->GetDoubleParam(it->first, default2);
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == doubleArrayType) {
-            std::vector<double> v1 = want1->GetDoubleArrayParam(it->first);
-            std::vector<double> v2 = want2->GetDoubleArrayParam(it->first);
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == stringType) {
-            std::string v1 = want1->GetStringParam(it->first);
-            std::string v2 = want2->GetStringParam(it->first);
-            EXPECT_EQ(v1, v2);
-        } else if (it->second == stringArrayType) {
-            std::vector<std::string> v1 = want1->GetStringArrayParam(it->first);
-            std::vector<std::string> v2 = want2->GetStringArrayParam(it->first);
-            EXPECT_EQ(v1, v2);
-        }
+        if (!CompareWantNumber(want1, want2, it) && !CompareWantOthers(want1, want2, it) &&
+            !CompareWantArray(want1, want2, it)) {};
     }
 
     return true;
+}
+
+bool DistributedWantBaseTest::CompareWantNumber(const std::shared_ptr<DistributedWant>& want1,
+    const std::shared_ptr<DistributedWant>& want2, std::map<std::string, std::string>::iterator it) const
+{
+    if (it->second == shortType) {
+        short default1 = 123;
+        short default2 = 456;
+        short v1 = want1->GetShortParam(it->first, default1);
+        short v2 = want2->GetShortParam(it->first, default2);
+        EXPECT_EQ(v1, v2);
+        return true;
+    } else if (it->second == intType) {
+        int default1 = 1230000;
+        int default2 = 4560000;
+        int v1 = want1->GetIntParam(it->first, default1);
+        int v2 = want2->GetIntParam(it->first, default2);
+        EXPECT_EQ(v1, v2);
+        return true;
+    } else if (it->second == longType) {
+        long default1 = 1e8;
+        long default2 = 2e8;
+        long v1 = want1->GetLongParam(it->first, default1);
+        long v2 = want2->GetLongParam(it->first, default2);
+        EXPECT_EQ(v1, v2);
+        return true;
+    } else if (it->second == floatType) {
+        float default1 = 12.3;
+        float default2 = 45.6;
+        float v1 = want1->GetFloatParam(it->first, default1);
+        float v2 = want2->GetFloatParam(it->first, default2);
+        EXPECT_EQ(v1, v2);
+        return true;
+    } else if (it->second == doubleType) {
+        double default1 = 12.3;
+        double default2 = 45.6;
+        double v1 = want1->GetDoubleParam(it->first, default1);
+        double v2 = want2->GetDoubleParam(it->first, default2);
+        EXPECT_EQ(v1, v2);
+        return true;
+    }
+    return false;
+}
+
+bool DistributedWantBaseTest::CompareWantOthers(const std::shared_ptr<DistributedWant>& want1,
+    const std::shared_ptr<DistributedWant>& want2, std::map<std::string, std::string>::iterator it) const
+{
+    if (it->second == boolType) {
+        bool v1 = want1->GetBoolParam(it->first, false);
+        bool v2 = want2->GetBoolParam(it->first, false);
+        EXPECT_EQ(v1, v2);
+        EXPECT_EQ(v1, true);
+        return true;
+    } else if (it->second == byteType) {
+        byte v1 = want1->GetByteParam(it->first, 'j');
+        byte v2 = want2->GetByteParam(it->first, 'k');
+        EXPECT_EQ(v1, v2);
+        return true;
+    } else if (it->second == charType) {
+        zchar v1 = want1->GetCharParam(it->first, 0x01AB);
+        zchar v2 = want2->GetCharParam(it->first, 0x02CD);
+        EXPECT_EQ(v1, v2);
+        return true;
+    } else if (it->second == stringType) {
+        std::string v1 = want1->GetStringParam(it->first);
+        std::string v2 = want2->GetStringParam(it->first);
+        EXPECT_EQ(v1, v2);
+        return true;
+    }
+    return false;
+}
+
+bool DistributedWantBaseTest::CompareWantArray(const std::shared_ptr<DistributedWant>& want1,
+    const std::shared_ptr<DistributedWant>& want2, std::map<std::string, std::string>::iterator it) const
+{
+    if (it->second == boolArrayType) {
+        std::vector<bool> v1 = want1->GetBoolArrayParam(it->first);
+        std::vector<bool> v2 = want2->GetBoolArrayParam(it->first);
+        EXPECT_EQ(v1, v2);
+        return true;
+    } else if (it->second == byteArrayType) {
+        std::vector<byte> v1 = want1->GetByteArrayParam(it->first);
+        std::vector<byte> v2 = want2->GetByteArrayParam(it->first);
+        EXPECT_EQ(v1, v2);
+        return true;
+    } else if (it->second == charArrayType) {
+        std::vector<zchar> v1 = want1->GetCharArrayParam(it->first);
+        std::vector<zchar> v2 = want2->GetCharArrayParam(it->first);
+        EXPECT_EQ(v1, v2);
+        return true;
+    } else if (it->second == shortArrayType) {
+        std::vector<short> v1 = want1->GetShortArrayParam(it->first);
+        std::vector<short> v2 = want2->GetShortArrayParam(it->first);
+        EXPECT_EQ(v1, v2);
+    } else if (it->second == intArrayType) {
+        std::vector<int> v1 = want1->GetIntArrayParam(it->first);
+        std::vector<int> v2 = want2->GetIntArrayParam(it->first);
+        EXPECT_EQ(v1, v2);
+        return true;
+    } else if (it->second == longArrayType) {
+        std::vector<long> v1 = want1->GetLongArrayParam(it->first);
+        std::vector<long> v2 = want2->GetLongArrayParam(it->first);
+        EXPECT_EQ(v1, v2);
+        return true;
+    } else if (it->second == floatArrayType) {
+        std::vector<float> v1 = want1->GetFloatArrayParam(it->first);
+        std::vector<float> v2 = want2->GetFloatArrayParam(it->first);
+        EXPECT_EQ(v1, v2);
+        return true;
+    } else if (it->second == doubleArrayType) {
+        std::vector<double> v1 = want1->GetDoubleArrayParam(it->first);
+        std::vector<double> v2 = want2->GetDoubleArrayParam(it->first);
+        EXPECT_EQ(v1, v2);
+        return true;
+    }  else if (it->second == stringArrayType) {
+        std::vector<std::string> v1 = want1->GetStringArrayParam(it->first);
+        std::vector<std::string> v2 = want2->GetStringArrayParam(it->first);
+        EXPECT_EQ(v1, v2);
+        return true;
+    }
+    return false;
 }
 
 void DistributedWantBaseTest::SendParcelTest(const std::shared_ptr<DistributedWant> &want,

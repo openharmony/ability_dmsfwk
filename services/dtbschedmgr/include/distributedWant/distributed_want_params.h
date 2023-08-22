@@ -59,6 +59,8 @@ public:
 
     static int GetDataType(const sptr<AAFwk::IInterface> iIt);
 
+    static int GetNumberDataType(const sptr<AAFwk::IInterface> iIt);
+
     static std::string GetStringByType(const sptr<AAFwk::IInterface> iIt, int typeId);
 
     void SetParam(const std::string& key, AAFwk::IInterface* value);

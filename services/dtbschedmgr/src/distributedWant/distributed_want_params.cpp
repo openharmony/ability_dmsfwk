@@ -251,7 +251,20 @@ int DistributedWantParams::GetDataType(const sptr<IInterface> iIt)
         return VALUE_TYPE_BYTE;
     } else if (iIt != nullptr && AAFwk::IChar::Query(iIt) != nullptr) {
         return VALUE_TYPE_CHAR;
-    } else if (iIt != nullptr && AAFwk::IShort::Query(iIt) != nullptr) {
+    } else if (iIt != nullptr && AAFwk::IString::Query(iIt) != nullptr) {
+        return VALUE_TYPE_STRING;
+    } else if (iIt != nullptr && AAFwk::IArray::Query(iIt) != nullptr) {
+        return VALUE_TYPE_ARRAY;
+    } else if (iIt != nullptr && IDistributedWantParams::Query(iIt) != nullptr) {
+        return VALUE_TYPE_WANTPARAMS;
+    } else {
+        return GetNumberDataType(iIt);
+    }
+}
+
+int DistributedWantParams::GetNumberDataType(const sptr<AAFwk::IInterface> iIt)
+{
+    if (iIt != nullptr && AAFwk::IShort::Query(iIt) != nullptr) {
         return VALUE_TYPE_SHORT;
     } else if (iIt != nullptr && AAFwk::IInteger::Query(iIt) != nullptr) {
         return VALUE_TYPE_INT;
@@ -261,14 +274,7 @@ int DistributedWantParams::GetDataType(const sptr<IInterface> iIt)
         return VALUE_TYPE_FLOAT;
     } else if (iIt != nullptr && AAFwk::IDouble::Query(iIt) != nullptr) {
         return VALUE_TYPE_DOUBLE;
-    } else if (iIt != nullptr && AAFwk::IString::Query(iIt) != nullptr) {
-        return VALUE_TYPE_STRING;
-    } else if (iIt != nullptr && AAFwk::IArray::Query(iIt) != nullptr) {
-        return VALUE_TYPE_ARRAY;
-    } else if (iIt != nullptr && IDistributedWantParams::Query(iIt) != nullptr) {
-        return VALUE_TYPE_WANTPARAMS;
     }
-
     return VALUE_TYPE_NULL;
 }
 
