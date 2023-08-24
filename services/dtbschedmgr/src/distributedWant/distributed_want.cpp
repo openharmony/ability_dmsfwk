@@ -875,23 +875,29 @@ DistributedWant* DistributedWant::CloneOperation()
     return want;
 }
 
-DistributedWant* DistributedWant::ParseUri(const std::string& uri)
+bool DistributedWant::CheckParams(const std::string& uri)
 {
     if (uri.length() <= 0) {
-        return nullptr;
+        return false;
     }
-    std::string head = WANT_HEADER;
     std::string end = ";end";
-    if (uri.find(head) != 0) {
-        return nullptr;
+    if (uri.find(WANT_HEADER) != 0) {
+        return false;
     }
     if (uri.rfind(end) != (uri.length() - end.length())) {
+        return false;
+    }
+    return true;
+}
+
+DistributedWant* DistributedWant::ParseUri(const std::string& uri)
+{
+    if (!CheckParams(uri)) {
         return nullptr;
     }
     bool ret = true;
-    std::string content;
     std::size_t pos;
-    std::size_t begin = head.length();
+    std::size_t begin = WANT_HEADER.length();
     ElementName element;
     DistributedWant* want = new (std::nothrow) DistributedWant();
     if (want == nullptr) {
@@ -902,7 +908,7 @@ DistributedWant* DistributedWant::ParseUri(const std::string& uri)
     pos = uri.find_first_of(";", begin);
     do {
         if (pos != std::string::npos) {
-            content = uri.substr(begin, pos - begin);
+            std::string content = uri.substr(begin, pos - begin);
             if (content.compare("PICK") == 0) {
                 want = new (std::nothrow) DistributedWant();
                 if (want == nullptr) {
@@ -925,8 +931,6 @@ DistributedWant* DistributedWant::ParseUri(const std::string& uri)
         }
     } while (true);
     if (inPicker) {
-        if (baseWant->GetBundle().empty()) {
-        }
         want = baseWant;
     }
     if (ret) {

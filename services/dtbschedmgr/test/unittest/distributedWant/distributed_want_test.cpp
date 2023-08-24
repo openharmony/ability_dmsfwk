@@ -81,6 +81,14 @@ public:
         std::map<std::string, std::string> &keys, int loop, unsigned int flag) const;
     void AddStringParams(DistributedWant &want,
         std::map<std::string, std::string> &keys, int loop, unsigned int flag) const;
+    void TestStringForParseUri(std::string uri,
+        std::string keyString, std::size_t &length, std::string valueStringOrigin);
+    void TestFloatForParseUri(std::string uri,
+        std::string keyFloat, std::size_t &length, float valueFloatOrigin);
+    void TestFloatArrayForParseUri(std::string uri,
+        std::string keyFloatArray, std::size_t &length, std::vector<float> valueFloatArrayOrigin);
+    void TestStringArrayForParseUri(std::string uri,
+        std::string keyStringArray, std::size_t &length, std::vector<std::string> valueStringArrayOrigin);
 
     std::string boolType = "bool";
     std::string boolArrayType = "boolArray";
@@ -153,56 +161,20 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_DistributedWant_Convert_01
     want.SetAction("Action");
     want.AddEntity("Entity1");
     want.SetParam(boolType, true);
-    std::vector<bool> bv;
-    bv.emplace_back(true);
-    bv.emplace_back(false);
-    want.SetParam(boolArrayType, bv);
     want.SetParam(byteType, 1);
-    std::vector<byte> byv;
-    byv.emplace_back(2);
-    byv.emplace_back(3);
-    want.SetParam(byteArrayType, byv);
     want.SetParam(charType, 6);
-    std::vector<zchar> chv;
-    chv.emplace_back('\n');
-    chv.emplace_back('p');
-    chv.emplace_back('i');
-    want.SetParam(charArrayType, chv);
     want.SetParam(shortType, 444);
-    std::vector<short> shv;
-    shv.emplace_back(111);
-    shv.emplace_back(222);
-    shv.emplace_back(333);
-    want.SetParam(shortArrayType, shv);
     want.SetParam(intType, 1111);
-    std::vector<int> inv;
-    inv.emplace_back(1111);
-    inv.emplace_back(2222);
-    inv.emplace_back(3333);
-    inv.emplace_back(4444);
-    want.SetParam(intArrayType, inv);
     want.SetParam(longType, 12345);
-    std::vector<long> lgv;
-    lgv.emplace_back(1111);
-    lgv.emplace_back(2222);
-    lgv.emplace_back(3333);
-    lgv.emplace_back(4444);
-    want.SetParam(longArrayType, lgv);
     want.SetParam(floatType, 1.1);
-    std::vector<float> ftv;
-    ftv.emplace_back(1111.1);
-    ftv.emplace_back(2222.2);
-    ftv.emplace_back(3333.3);
-    ftv.emplace_back(4444.4);
-    want.SetParam(floatArrayType, ftv);
     want.SetParam(doubleType, 1.11);
+    want.SetParam(stringType, std::string("string..."));
     std::vector<double> dbv;
     dbv.emplace_back(1111.11);
     dbv.emplace_back(2222.22);
     dbv.emplace_back(3333.33);
     dbv.emplace_back(4444.44);
     want.SetParam(doubleArrayType, dbv);
-    want.SetParam(stringType, std::string("string..."));
     std::vector<std::string> strv;
     strv.emplace_back("1111.11");
     strv.emplace_back("2222.22");
@@ -217,31 +189,78 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_DistributedWant_Convert_01
     EXPECT_STREQ(want.GetAction().c_str(), dstbWant.GetAction().c_str());
     EXPECT_EQ(want.GetEntities().size(), dstbWant.GetEntities().size());
     EXPECT_EQ(want.GetBoolParam(boolType, false), dstbWant.GetBoolParam(boolType, true));
-    EXPECT_EQ(want.GetBoolArrayParam(boolArrayType).size(), dstbWant.GetBoolArrayParam(boolArrayType).size());
     EXPECT_EQ(want.GetByteParam(byteType, 0), dstbWant.GetByteParam(byteType, 0));
-    EXPECT_EQ(want.GetByteArrayParam(byteArrayType).size(), dstbWant.GetByteArrayParam(byteArrayType).size());
     EXPECT_EQ(want.GetCharParam(charType, 0), dstbWant.GetCharParam(charType, 0));
-    EXPECT_EQ(want.GetCharArrayParam(charArrayType).size(), dstbWant.GetCharArrayParam(charArrayType).size());
     EXPECT_EQ(want.GetShortParam(shortType, 0), dstbWant.GetShortParam(shortType, 0));
-    EXPECT_EQ(want.GetShortArrayParam(shortArrayType).size(), dstbWant.GetShortArrayParam(shortArrayType).size());
     EXPECT_EQ(want.GetIntParam(intType, 0), dstbWant.GetIntParam(intType, 0));
-    EXPECT_EQ(want.GetIntArrayParam(intArrayType).size(), dstbWant.GetIntArrayParam(intArrayType).size());
     EXPECT_EQ(want.GetLongParam(longType, 0), dstbWant.GetLongParam(longType, 0));
-    EXPECT_EQ(want.GetLongArrayParam(longArrayType).size(), dstbWant.GetLongArrayParam(longArrayType).size());
     EXPECT_EQ(want.GetFloatParam(floatType, 0), dstbWant.GetFloatParam(floatType, 0));
-    EXPECT_EQ(want.GetFloatArrayParam(floatArrayType).size(), dstbWant.GetFloatArrayParam(floatArrayType).size());
     EXPECT_EQ(want.GetDoubleParam(doubleType, 0), dstbWant.GetDoubleParam(doubleType, 0));
-    EXPECT_EQ(want.GetDoubleArrayParam(doubleArrayType).size(), dstbWant.GetDoubleArrayParam(doubleArrayType).size());
     EXPECT_STREQ(want.GetStringParam(stringType).c_str(), dstbWant.GetStringParam(stringType).c_str());
+    EXPECT_EQ(want.GetDoubleArrayParam(doubleArrayType).size(), dstbWant.GetDoubleArrayParam(doubleArrayType).size());
     EXPECT_EQ(want.GetStringArrayParam(stringArrayType).size(), dstbWant.GetStringArrayParam(stringArrayType).size());
 }
 
 /**
- * @tc.number: DistributedScheduleWant_Action_0100
+ * @tc.number: DistributedSchedule_DistributedWant_Convert_0101
+ * @tc.name: distributedwant
+ * @tc.desc: Verifying successful conversion of want to distributedwant.
+ */
+HWTEST_F(DistributedWantBaseTest, DistributedSchedule_DistributedWant_Convert_0101, Function | MediumTest | Level3)
+{
+    Want want;
+    std::vector<bool> bv;
+    bv.emplace_back(true);
+    bv.emplace_back(false);
+    want.SetParam(boolArrayType, bv);
+    std::vector<byte> byv;
+    byv.emplace_back(2);
+    byv.emplace_back(3);
+    want.SetParam(byteArrayType, byv);
+    std::vector<zchar> chv;
+    chv.emplace_back('\n');
+    chv.emplace_back('p');
+    chv.emplace_back('i');
+    want.SetParam(charArrayType, chv);
+    std::vector<short> shv;
+    shv.emplace_back(111);
+    shv.emplace_back(222);
+    shv.emplace_back(333);
+    want.SetParam(shortArrayType, shv);
+    std::vector<int> inv;
+    inv.emplace_back(1111);
+    inv.emplace_back(2222);
+    inv.emplace_back(3333);
+    inv.emplace_back(4444);
+    want.SetParam(intArrayType, inv);
+    std::vector<long> lgv;
+    lgv.emplace_back(1111);
+    lgv.emplace_back(2222);
+    lgv.emplace_back(3333);
+    lgv.emplace_back(4444);
+    want.SetParam(longArrayType, lgv);
+    std::vector<float> ftv;
+    ftv.emplace_back(1111.1);
+    ftv.emplace_back(2222.2);
+    ftv.emplace_back(3333.3);
+    ftv.emplace_back(4444.4);
+    want.SetParam(floatArrayType, ftv);
+    DistributedWant dstbWant(want);
+    EXPECT_EQ(want.GetBoolArrayParam(boolArrayType).size(), dstbWant.GetBoolArrayParam(boolArrayType).size());
+    EXPECT_EQ(want.GetByteArrayParam(byteArrayType).size(), dstbWant.GetByteArrayParam(byteArrayType).size());
+    EXPECT_EQ(want.GetCharArrayParam(charArrayType).size(), dstbWant.GetCharArrayParam(charArrayType).size());
+    EXPECT_EQ(want.GetShortArrayParam(shortArrayType).size(), dstbWant.GetShortArrayParam(shortArrayType).size());
+    EXPECT_EQ(want.GetIntArrayParam(intArrayType).size(), dstbWant.GetIntArrayParam(intArrayType).size());
+    EXPECT_EQ(want.GetLongArrayParam(longArrayType).size(), dstbWant.GetLongArrayParam(longArrayType).size());
+    EXPECT_EQ(want.GetFloatArrayParam(floatArrayType).size(), dstbWant.GetFloatArrayParam(floatArrayType).size());
+}
+
+/**
+ * @tc.number: DistributedSchedule_DistributedWant_Convert_0200
  * @tc.name: ToWant
  * @tc.desc: Verifying successful conversion of distributedwant to want.
  */
-HWTEST_F(DistributedWantBaseTest, DistributedSchedule_DistributedWant_Convert_0200, Function | MediumTest | Level3)
+HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Distributedwant_Convert_0200, Function | MediumTest | Level3)
 {
     std::shared_ptr<DistributedWant> dwant = std::make_shared<DistributedWant>();
     std::string description = "liuuy";
@@ -252,62 +271,26 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_DistributedWant_Convert_02
     dwant->SetAction("Action");
     dwant->AddEntity("Entity1");
     dwant->SetParam(boolType, true);
-    std::vector<bool> bv;
-    bv.emplace_back(true);
-    bv.emplace_back(false);
-    dwant->SetParam(boolArrayType, bv);
     dwant->SetParam(byteType, 1);
-    std::vector<byte> byv;
-    byv.emplace_back(2);
-    byv.emplace_back(3);
-    dwant->SetParam(byteArrayType, byv);
     dwant->SetParam(charType, 6);
-    std::vector<zchar> chv;
-    chv.emplace_back('\n');
-    chv.emplace_back('p');
-    chv.emplace_back('i');
-    dwant->SetParam(charArrayType, chv);
     dwant->SetParam(shortType, 444);
-    std::vector<short> shv;
-    shv.emplace_back(111);
-    shv.emplace_back(222);
-    shv.emplace_back(333);
-    dwant->SetParam(shortArrayType, shv);
     dwant->SetParam(intType, 1111);
-    std::vector<int> inv;
-    inv.emplace_back(1111);
-    inv.emplace_back(2222);
-    inv.emplace_back(3333);
-    inv.emplace_back(4444);
-    dwant->SetParam(intArrayType, inv);
     dwant->SetParam(longType, 12345);
-    std::vector<long> lgv;
-    lgv.emplace_back(1111);
-    lgv.emplace_back(2222);
-    lgv.emplace_back(3333);
-    lgv.emplace_back(4444);
-    dwant->SetParam(longArrayType, lgv);
     dwant->SetParam(floatType, 1.1);
-    std::vector<float> ftv;
-    ftv.emplace_back(1111.1);
-    ftv.emplace_back(2222.2);
-    ftv.emplace_back(3333.3);
-    ftv.emplace_back(4444.4);
-    dwant->SetParam(floatArrayType, ftv);
     dwant->SetParam(doubleType, 1.11);
+    dwant->SetParam(stringType, std::string("string..."));
     std::vector<double> dbv;
     dbv.emplace_back(1111.11);
     dbv.emplace_back(2222.22);
     dbv.emplace_back(3333.33);
     dbv.emplace_back(4444.44);
     dwant->SetParam(doubleArrayType, dbv);
-    dwant->SetParam(stringType, std::string("string..."));
     std::vector<std::string> strv;
     strv.emplace_back("1111.11");
     strv.emplace_back("2222.22");
     dwant->SetParam(stringArrayType, strv);
     std::shared_ptr<Want> want = dwant->ToWant();
-    EXPECT_STREQ(want->GetAction().c_str(), dwant->GetAction().c_str());
+    EXPECT_STREQ(want->GetType().c_str(), dwant->GetType().c_str());
     EXPECT_STREQ(want->GetElement().GetDeviceID().c_str(), dwant->GetElement().GetDeviceID().c_str());
     EXPECT_STREQ(want->GetElement().GetBundleName().c_str(), dwant->GetElement().GetBundleName().c_str());
     EXPECT_STREQ(want->GetElement().GetAbilityName().c_str(), dwant->GetElement().GetAbilityName().c_str());
@@ -316,23 +299,70 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_DistributedWant_Convert_02
     EXPECT_STREQ(want->GetAction().c_str(), dwant->GetAction().c_str());
     EXPECT_EQ(want->GetEntities().size(), dwant->GetEntities().size());
     EXPECT_EQ(want->GetBoolParam(boolType, false), dwant->GetBoolParam(boolType, true));
-    EXPECT_EQ(want->GetBoolArrayParam(boolArrayType).size(), dwant->GetBoolArrayParam(boolArrayType).size());
     EXPECT_EQ(want->GetByteParam(byteType, 0), dwant->GetByteParam(byteType, 0));
-    EXPECT_EQ(want->GetByteArrayParam(byteArrayType).size(), dwant->GetByteArrayParam(byteArrayType).size());
     EXPECT_EQ(want->GetCharParam(charType, 0), dwant->GetCharParam(charType, 0));
-    EXPECT_EQ(want->GetCharArrayParam(charArrayType).size(), dwant->GetCharArrayParam(charArrayType).size());
     EXPECT_EQ(want->GetShortParam(shortType, 0), dwant->GetShortParam(shortType, 0));
-    EXPECT_EQ(want->GetShortArrayParam(shortArrayType).size(), dwant->GetShortArrayParam(shortArrayType).size());
     EXPECT_EQ(want->GetIntParam(intType, 0), dwant->GetIntParam(intType, 0));
-    EXPECT_EQ(want->GetIntArrayParam(intArrayType).size(), dwant->GetIntArrayParam(intArrayType).size());
     EXPECT_EQ(want->GetLongParam(longType, 0), dwant->GetLongParam(longType, 0));
-    EXPECT_EQ(want->GetLongArrayParam(longArrayType).size(), dwant->GetLongArrayParam(longArrayType).size());
     EXPECT_EQ(want->GetFloatParam(floatType, 0), dwant->GetFloatParam(floatType, 0));
-    EXPECT_EQ(want->GetFloatArrayParam(floatArrayType).size(), dwant->GetFloatArrayParam(floatArrayType).size());
     EXPECT_EQ(want->GetDoubleParam(doubleType, 0), dwant->GetDoubleParam(doubleType, 0));
-    EXPECT_EQ(want->GetDoubleArrayParam(doubleArrayType).size(), dwant->GetDoubleArrayParam(doubleArrayType).size());
     EXPECT_STREQ(want->GetStringParam(stringType).c_str(), dwant->GetStringParam(stringType).c_str());
+    EXPECT_EQ(want->GetDoubleArrayParam(doubleArrayType).size(), dwant->GetDoubleArrayParam(doubleArrayType).size());
     EXPECT_EQ(want->GetStringArrayParam(stringArrayType).size(), dwant->GetStringArrayParam(stringArrayType).size());
+}
+
+/**
+ * @tc.number: DistributedSchedule_DistributedWant_Convert_0201
+ * @tc.name: ToWant
+ * @tc.desc: Verifying successful conversion of distributedwant to want.
+ */
+HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Distributedwant_Convert_0201, Function | MediumTest | Level3)
+{
+    std::shared_ptr<DistributedWant> dwant = std::make_shared<DistributedWant>();
+    std::vector<bool> bv;
+    bv.emplace_back(true);
+    bv.emplace_back(false);
+    dwant->SetParam(boolArrayType, bv);
+    std::vector<byte> byv;
+    byv.emplace_back(2);
+    byv.emplace_back(3);
+    dwant->SetParam(byteArrayType, byv);
+    std::vector<zchar> chv;
+    chv.emplace_back('\n');
+    chv.emplace_back('p');
+    chv.emplace_back('i');
+    dwant->SetParam(charArrayType, chv);
+    std::vector<short> shv;
+    shv.emplace_back(111);
+    shv.emplace_back(222);
+    shv.emplace_back(333);
+    dwant->SetParam(shortArrayType, shv);
+    std::vector<int> inv;
+    inv.emplace_back(1111);
+    inv.emplace_back(2222);
+    inv.emplace_back(3333);
+    inv.emplace_back(4444);
+    dwant->SetParam(intArrayType, inv);
+    std::vector<long> lgv;
+    lgv.emplace_back(1111);
+    lgv.emplace_back(2222);
+    lgv.emplace_back(3333);
+    lgv.emplace_back(4444);
+    dwant->SetParam(longArrayType, lgv);
+    std::vector<float> ftv;
+    ftv.emplace_back(1111.1);
+    ftv.emplace_back(2222.2);
+    ftv.emplace_back(3333.3);
+    ftv.emplace_back(4444.4);
+    dwant->SetParam(floatArrayType, ftv);
+    std::shared_ptr<Want> want = dwant->ToWant();
+    EXPECT_EQ(want->GetBoolArrayParam(boolArrayType).size(), dwant->GetBoolArrayParam(boolArrayType).size());
+    EXPECT_EQ(want->GetByteArrayParam(byteArrayType).size(), dwant->GetByteArrayParam(byteArrayType).size());
+    EXPECT_EQ(want->GetCharArrayParam(charArrayType).size(), dwant->GetCharArrayParam(charArrayType).size());
+    EXPECT_EQ(want->GetShortArrayParam(shortArrayType).size(), dwant->GetShortArrayParam(shortArrayType).size());
+    EXPECT_EQ(want->GetIntArrayParam(intArrayType).size(), dwant->GetIntArrayParam(intArrayType).size());
+    EXPECT_EQ(want->GetLongArrayParam(longArrayType).size(), dwant->GetLongArrayParam(longArrayType).size());
+    EXPECT_EQ(want->GetFloatArrayParam(floatArrayType).size(), dwant->GetFloatArrayParam(floatArrayType).size());
 }
 
 /**
@@ -391,9 +421,6 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0100, Funct
 
     WantIn_->SetAction("12345");
     WantIn_->SetFlags(123);
-
-    WantIn_->SetAction("12345");
-    WantIn_->SetFlags(123);
     WantIn_->AddEntity("12345");
     DistributedWantParams wantParams;
     std::string keyStr = "12345667";
@@ -406,14 +433,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0100, Funct
     element.SetDeviceID("12345");
     WantIn_->SetElement(element);
     WantIn_->SetType("12345");
-    size_t pos1;
-    size_t pos2;
-    bool result = false;
 
     Parcel in;
-    pos1 = in.GetWritePosition();
-    result = WantIn_->Marshalling(in);
-    pos2 = in.GetWritePosition();
+    size_t pos1 = in.GetWritePosition();
+    bool result = WantIn_->Marshalling(in);
+    size_t pos2 = in.GetWritePosition();
     EXPECT_EQ(result, true);
     GTEST_LOG_(INFO) << " Marshalling: pos1: " << pos1 << ", pos2: " << pos2 << ", result: " << result;
 
@@ -590,14 +614,10 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0400, Funct
     WantIn_->SetElement(element);
     WantIn_->SetType("12345");
 
-    size_t pos1;
-    size_t pos2;
-    bool result = false;
-
     Parcel in;
-    pos1 = in.GetWritePosition();
-    result = WantIn_->Marshalling(in);
-    pos2 = in.GetWritePosition();
+    size_t pos1 = in.GetWritePosition();
+    bool result = WantIn_->Marshalling(in);
+    size_t pos2 = in.GetWritePosition();
     EXPECT_EQ(result, true);
     GTEST_LOG_(INFO) << "Marshalling: pos1: " << pos1 << ", pos2: " << pos2 << ", result: " << result;
 
@@ -633,14 +653,12 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0400, Funct
  */
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0500, Function | MediumTest | Level3)
 {
-    GTEST_LOG_(INFO) << "DistributedScheduleWant_Parcelable_005 start";
+    GTEST_LOG_(INFO) << "DistributedScheduleWant_Parcelable_0500 start";
     std::shared_ptr<DistributedWant> WantIn_ = std::make_shared<DistributedWant>();
     if (WantIn_ == nullptr) {
         return;
     }
 
-    WantIn_->SetAction("system.test.action");
-    WantIn_->SetFlags(64);
     WantIn_->AddEntity("system.test.entity");
 
     OHOS::AppExecFwk::ElementName element;
@@ -658,54 +676,12 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0500, Funct
     wantParams.SetParam(keyStr, String::Box(valueString));
     WantIn_->SetParams(wantParams);
 
-    // want SetParam  arraydata  test
-    std::vector<bool> boolArrayValue = {true, false, true};
-    WantIn_->SetParam(std::string("bool_arraykey"), boolArrayValue);
-
-    std::vector<byte> byteArrayValue = {'?', 'a', '\\'};
-    WantIn_->SetParam(std::string("byte_arraykey"), byteArrayValue);
-
-    std::vector<zchar> charArrayValue = {U'e', U'l', U'l', U'o'};
-    WantIn_->SetParam(std::string("char_arraykey"), charArrayValue);
-
-    std::vector<short> shortArrayValue = {-1, 0, 1};
-    WantIn_->SetParam(std::string("short_arraykey"), shortArrayValue);
-
-    std::vector<int> intArrayValue = {-10, 0, 10};
-    WantIn_->SetParam(std::string("int_arraykey"), intArrayValue);
-
-    std::vector<long> longArrayValue = {-100, 0, 100};
-    WantIn_->SetParam(std::string("long_arraykey"), longArrayValue);
-
-    std::vector<float> floatArrayValue = {-100.1, 0.1, 100.1};
-    WantIn_->SetParam(std::string("float_arraykey"), floatArrayValue);
-
-    std::vector<double> doubleArrayValue = {-1000.1, 0.1, 1000.1};
-    WantIn_->SetParam(std::string("double_arraykey"), doubleArrayValue);
-
-    std::vector<std::string> stringArrayValue = {"stringtest1", "string@test2", "string@!#test2"};
-    WantIn_->SetParam(std::string("string_arraykey"), stringArrayValue);
-
-    DistributedWant wantCopy(*WantIn_);
-    std::vector<std::string> teststringArrayValue1 = WantIn_->GetStringArrayParam(std::string("string_arraykey"));
-    std::vector<std::string> teststringArrayValue2 = wantCopy.GetStringArrayParam(std::string("string_arraykey"));
-    bool copyarraycompare = CompareArrayData<std::string>(teststringArrayValue1, teststringArrayValue1);
-    EXPECT_EQ(copyarraycompare, true);
-    std::string str = (copyarraycompare == true) ? "true" : "false";
-    GTEST_LOG_(INFO) << "copyarraycompare=" << str.c_str();
-
     Parcel in;
     bool result = false;
     result = WantIn_->Marshalling(in);
     EXPECT_EQ(result, true);
     std::shared_ptr<DistributedWant> WantOut_(DistributedWant::Unmarshalling(in));
     if (WantOut_ != nullptr) {
-        GTEST_LOG_(INFO) << "WantOut_->GetAction().c_str(): " << WantOut_->GetAction().c_str();
-        EXPECT_STREQ(WantOut_->GetAction().c_str(), std::string("system.test.action").c_str());
-
-        int flags = WantOut_->GetFlags();
-        GTEST_LOG_(INFO) << "WantOut_->GetFlags(): " << flags;
-        EXPECT_EQ(static_cast<int>(flags), 64);
 
         bool hasentity = WantOut_->HasEntity("system.test.entity");
         GTEST_LOG_(INFO) << "WantOut_->HasEntity(system.test.entity)" << hasentity;
@@ -732,7 +708,54 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0500, Funct
         std::string param_content = WantOut_->GetStringParam(keyStr);
         GTEST_LOG_(INFO) << "WantOut_->GetStringParam(keyStr): " << param_content.c_str();
 
-        // want SetParam  arraydata test
+        GTEST_LOG_(INFO) << "DistributedScheduleWant_Parcelable_005 end";
+    }
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_Parcelable_0501
+ * @tc.name: Marshalling/Unmarshalling
+ * @tc.desc: marshalling Want, and then check result.
+ */
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0501, Function | MediumTest | Level3)
+{
+    GTEST_LOG_(INFO) << "DistributedScheduleWant_Parcelable_0501 start";
+    std::shared_ptr<DistributedWant> WantIn_ = std::make_shared<DistributedWant>();
+    if (WantIn_ == nullptr) {
+        return;
+    }
+
+    WantIn_->SetAction("system.test.action");
+
+    std::vector<bool> boolArrayValue = {true, false, true};
+    WantIn_->SetParam(std::string("bool_arraykey"), boolArrayValue);
+
+    std::vector<byte> byteArrayValue = {'?', 'a', '\\'};
+    WantIn_->SetParam(std::string("byte_arraykey"), byteArrayValue);
+
+    std::vector<zchar> charArrayValue = {U'e', U'l', U'l', U'o'};
+    WantIn_->SetParam(std::string("char_arraykey"), charArrayValue);
+
+    std::vector<std::string> stringArrayValue = {"stringtest1", "string@test2", "string@!#test2"};
+    WantIn_->SetParam(std::string("string_arraykey"), stringArrayValue);
+
+    DistributedWant wantCopy(*WantIn_);
+    std::vector<std::string> teststringArrayValue1 = WantIn_->GetStringArrayParam(std::string("string_arraykey"));
+    std::vector<std::string> teststringArrayValue2 = wantCopy.GetStringArrayParam(std::string("string_arraykey"));
+    bool copyarraycompare = CompareArrayData<std::string>(teststringArrayValue1, teststringArrayValue1);
+    EXPECT_EQ(copyarraycompare, true);
+    std::string str = (copyarraycompare == true) ? "true" : "false";
+    GTEST_LOG_(INFO) << "copyarraycompare=" << str.c_str();
+
+    Parcel in;
+    bool result = false;
+    result = WantIn_->Marshalling(in);
+    EXPECT_EQ(result, true);
+    std::shared_ptr<DistributedWant> WantOut_(DistributedWant::Unmarshalling(in));
+    if (WantOut_ != nullptr) {
+        GTEST_LOG_(INFO) << "WantOut_->GetAction().c_str(): " << WantOut_->GetAction().c_str();
+        EXPECT_STREQ(WantOut_->GetAction().c_str(), std::string("system.test.action").c_str());
+
         std::vector<bool> retboolArray;
         retboolArray = WantOut_->GetBoolArrayParam(std::string("bool_arraykey"));
 
@@ -749,9 +772,56 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0500, Funct
         arraycompare = CompareArrayData<zchar>(retcharArrayValue, charArrayValue);
         EXPECT_EQ(arraycompare, true);
 
+        std::vector<std::string> retstringArrayValue;
+        retstringArrayValue = WantOut_->GetStringArrayParam(std::string("string_arraykey"));
+        arraycompare = CompareArrayData<std::string>(retstringArrayValue, stringArrayValue);
+        EXPECT_EQ(arraycompare, true);
+    }
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_Parcelable_0502
+ * @tc.name: Marshalling/Unmarshalling
+ * @tc.desc: marshalling Want, and then check result.
+ */
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0502, Function | MediumTest | Level3)
+{
+    GTEST_LOG_(INFO) << "DistributedScheduleWant_Parcelable_0502 start";
+    std::shared_ptr<DistributedWant> WantIn_ = std::make_shared<DistributedWant>();
+    if (WantIn_ == nullptr) {
+        return;
+    }
+
+    WantIn_->SetFlags(64);
+
+    std::vector<short> shortArrayValue = {-1, 0, 1};
+    WantIn_->SetParam(std::string("short_arraykey"), shortArrayValue);
+
+    std::vector<int> intArrayValue = {-10, 0, 10};
+    WantIn_->SetParam(std::string("int_arraykey"), intArrayValue);
+
+    std::vector<long> longArrayValue = {-100, 0, 100};
+    WantIn_->SetParam(std::string("long_arraykey"), longArrayValue);
+
+    std::vector<float> floatArrayValue = {-100.1, 0.1, 100.1};
+    WantIn_->SetParam(std::string("float_arraykey"), floatArrayValue);
+
+    std::vector<double> doubleArrayValue = {-1000.1, 0.1, 1000.1};
+    WantIn_->SetParam(std::string("double_arraykey"), doubleArrayValue);
+
+    Parcel in;
+    bool result = false;
+    result = WantIn_->Marshalling(in);
+    EXPECT_EQ(result, true);
+    std::shared_ptr<DistributedWant> WantOut_(DistributedWant::Unmarshalling(in));
+    if (WantOut_ != nullptr) {
+        int flags = WantOut_->GetFlags();
+        GTEST_LOG_(INFO) << "WantOut_->GetFlags(): " << flags;
+        EXPECT_EQ(static_cast<int>(flags), 64);
+
         std::vector<short> retshortArrayValue;
         retshortArrayValue = WantOut_->GetShortArrayParam(std::string("short_arraykey"));
-        arraycompare = CompareArrayData<short>(retshortArrayValue, shortArrayValue);
+        bool arraycompare = CompareArrayData<short>(retshortArrayValue, shortArrayValue);
         EXPECT_EQ(arraycompare, true);
 
         std::vector<int> retintArrayValue;
@@ -773,13 +843,6 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0500, Funct
         retdoubleArrayValue = WantOut_->GetDoubleArrayParam(std::string("double_arraykey"));
         arraycompare = CompareArrayData<double>(retdoubleArrayValue, doubleArrayValue);
         EXPECT_EQ(arraycompare, true);
-
-        std::vector<std::string> retstringArrayValue;
-        retstringArrayValue = WantOut_->GetStringArrayParam(std::string("string_arraykey"));
-        arraycompare = CompareArrayData<std::string>(retstringArrayValue, stringArrayValue);
-        EXPECT_EQ(arraycompare, true);
-
-        GTEST_LOG_(INFO) << "DistributedScheduleWant_Parcelable_005 end";
     }
 }
 
@@ -1201,6 +1264,99 @@ void DistributedWantBaseTest::AddStringParams(DistributedWant& want,
     }
 }
 
+void DistributedWantBaseTest::TestStringForParseUri(std::string uri,
+    std::string keyString, std::size_t &length, std::string valueStringOrigin)
+{
+    std::size_t head = length;
+    std::string search = String::SIGNATURE + std::string(".") + keyString + std::string("=");
+    std::size_t result = uri.find(search);
+    EXPECT_NE(result, std::string::npos);
+    EXPECT_GE(result, head);
+    length += search.length();
+    if (result != std::string::npos) {
+        std::size_t pos = result + search.length();
+        std::size_t delims = uri.find(";", pos);
+        if (delims != std::string::npos) {
+            std::string substring = uri.substr(pos, delims - pos);
+            std::string valueStringNew = String::Unbox(String::Parse(substring));
+            EXPECT_EQ(valueStringNew, valueStringOrigin);
+            length += substring.length() + 1;
+        }
+    }
+}
+
+void DistributedWantBaseTest::TestFloatForParseUri(std::string uri,
+    std::string keyFloat, std::size_t &length, float valueFloatOrigin)
+{
+    std::size_t head = length;
+    std::string search = Float::SIGNATURE + std::string(".") + keyFloat + std::string("=");
+    std::size_t result = uri.find(search);
+    EXPECT_NE(result, std::string::npos);
+    EXPECT_GE(result, head);
+    length += search.length();
+    if (result != std::string::npos) {
+        std::size_t pos = result + search.length();
+        std::size_t delims = uri.find(";", pos);
+        if (delims != std::string::npos) {
+            std::string substring = uri.substr(pos, delims - pos);
+            float valueFloatNew = Float::Unbox(Float::Parse(substring));
+            EXPECT_EQ(valueFloatNew, valueFloatOrigin);
+            length += substring.length() + 1;
+        }
+    }
+}
+
+void DistributedWantBaseTest::TestFloatArrayForParseUri(std::string uri,
+    std::string keyFloatArray, std::size_t &length, std::vector<float> valueFloatArrayOrigin)
+{
+    std::size_t head = length;
+    std::string search = Array::SIGNATURE + std::string(".") + keyFloatArray + std::string("=");
+    std::size_t result = uri.find(search);
+    EXPECT_NE(result, std::string::npos);
+    EXPECT_GE(result, head);
+    length += search.length();
+    if (result != std::string::npos) {
+        std::size_t pos = result + search.length();
+        std::size_t delims = uri.find(";", result);
+        if (delims != std::string::npos) {
+            std::string substring = uri.substr(pos, delims - pos);
+            sptr<IArray> array = Array::Parse(substring);
+            std::vector<float> valueFloatArrayNew;
+            auto func = [&valueFloatArrayNew](
+                            IInterface *object) { valueFloatArrayNew.push_back(Float::Unbox(IFloat::Query(object))); };
+            Array::ForEach(array, func);
+            EXPECT_EQ(valueFloatArrayNew, valueFloatArrayOrigin);
+            length += substring.length() + 1;
+        }
+    }
+}
+
+void DistributedWantBaseTest::TestStringArrayForParseUri(std::string uri,
+    std::string keyStringArray, std::size_t &length, std::vector<std::string> valueStringArrayOrigin)
+{
+    std::size_t head = length;
+    std::string search = Array::SIGNATURE + std::string(".") + keyStringArray + std::string("=");
+    std::size_t result = uri.find(search);
+    EXPECT_NE(result, std::string::npos);
+    EXPECT_GE(result, head);
+    length += search.length();
+    if (result != std::string::npos) {
+        std::size_t pos = result + search.length();
+        std::size_t delims = uri.find(";", result);
+        if (delims != std::string::npos) {
+            std::string substring = uri.substr(pos, delims - pos);
+            sptr<IArray> array = Array::Parse(substring);
+            std::vector<std::string> valueStringArrayNew;
+            auto func = [&valueStringArrayNew](IInterface *object) {
+                valueStringArrayNew.push_back(String::Unbox(IString::Query(object)));
+            };
+            Array::ForEach(array, func);
+            EXPECT_EQ(valueStringArrayNew, valueStringArrayOrigin);
+            length += substring.length() + 1;
+        }
+    }
+}
+
 /**
  * @tc.number: DistributedScheduleWant_Parcelable_0600
  * @tc.name: parcelable
@@ -1432,12 +1588,8 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0200, F
  */
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0300, Function | MediumTest | Level3)
 {
-    std::string search;
-    std::string substring;
     std::size_t pos = 0;
     std::size_t length = 0;
-    std::size_t result = 0;
-    std::size_t delims = 0;
     std::size_t head = 0;
     Want wantOrigin;
     std::string keyFloat = "keyFloat";
@@ -1446,29 +1598,14 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0300, F
 
     std::string uri = wantOrigin.ToUri();
 
-    search = DistributedWantBaseTest::URI_STRING_HEAD;
-    result = uri.find(search, pos);
+    std::string search = DistributedWantBaseTest::URI_STRING_HEAD;
+    std::size_t result = uri.find(search, pos);
     EXPECT_EQ(result, pos);
     if (result != std::string::npos) {
         head = result + search.length();
     }
     length += head;
-
-    search = Float::SIGNATURE + std::string(".") + keyFloat + std::string("=");
-    result = uri.find(search);
-    EXPECT_NE(result, std::string::npos);
-    EXPECT_GE(result, head);
-    length += search.length();
-    if (result != std::string::npos) {
-        pos = result + search.length();
-        delims = uri.find(";", pos);
-        if (delims != std::string::npos) {
-            substring = uri.substr(pos, delims - pos);
-            float valueFloatNew = Float::Unbox(Float::Parse(substring));
-            EXPECT_EQ(valueFloatNew, valueFloatOrigin);
-            length += substring.length() + 1;
-        }
-    }
+    TestFloatForParseUri(uri, keyFloat, length, valueFloatOrigin);
 
     search = DistributedWantBaseTest::URI_STRING_END;
     result = uri.find(search);
@@ -1499,12 +1636,8 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0300, F
  */
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0400, Function | MediumTest | Level3)
 {
-    std::string search;
-    std::string substring;
     std::size_t pos = 0;
     std::size_t length = 0;
-    std::size_t result = 0;
-    std::size_t delims = 0;
     std::size_t head = 0;
     DistributedWant wantOrigin;
     std::string keyFloat = "keyFloat";
@@ -1516,46 +1649,16 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0400, F
 
     std::string uri = wantOrigin.ToUri();
 
-    search = DistributedWantBaseTest::URI_STRING_HEAD;
-    result = uri.find(search, pos);
+    std::string search = DistributedWantBaseTest::URI_STRING_HEAD;
+    std::size_t result = uri.find(search, pos);
     EXPECT_NE(result, std::string::npos);
     EXPECT_EQ(result, pos);
     if (result != std::string::npos) {
         head = result + search.length();
     }
     length += head;
-
-    search = Float::SIGNATURE + std::string(".") + keyFloat + std::string("=");
-    result = uri.find(search);
-    EXPECT_NE(result, std::string::npos);
-    EXPECT_GE(result, head);
-    length += search.length();
-    if (result != std::string::npos) {
-        pos = result + search.length();
-        delims = uri.find(";", pos);
-        if (delims != std::string::npos) {
-            substring = uri.substr(pos, delims - pos);
-            float valueFloatNew = Float::Unbox(Float::Parse(substring));
-            EXPECT_EQ(valueFloatNew, valueFloatOrigin);
-            length += substring.length() + 1;
-        }
-    }
-
-    search = String::SIGNATURE + std::string(".") + keyString + std::string("=");
-    result = uri.find(search);
-    EXPECT_NE(result, std::string::npos);
-    EXPECT_GE(result, head);
-    length += search.length();
-    if (result != std::string::npos) {
-        pos = result + search.length();
-        delims = uri.find(";", result);
-        if (delims != std::string::npos) {
-            std::string substring = uri.substr(pos, delims - pos);
-            std::string valueStringNew = String::Unbox(String::Parse(substring));
-            EXPECT_EQ(valueStringNew, valueStringOrigin);
-            length += substring.length() + 1;
-        }
-    }
+    TestFloatForParseUri(uri, keyFloat, length, valueFloatOrigin);
+    TestStringForParseUri(uri, keyString, length, valueStringOrigin);
 
     search = DistributedWantBaseTest::URI_STRING_END;
     result = uri.find(search);
@@ -1614,26 +1717,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0500, F
     }
     length += head;
 
-    search = Array::SIGNATURE + std::string(".") + keyFloatArray + std::string("=");
-    result = uri.find(search);
-    EXPECT_NE(result, std::string::npos);
-    EXPECT_GE(result, head);
-    length += search.length();
-    if (result != std::string::npos) {
-        pos = result + search.length();
-        delims = uri.find(";", result);
-        if (delims != std::string::npos) {
-            std::string substring = uri.substr(pos, delims - pos);
-            sptr<IArray> array = Array::Parse(substring);
-            std::vector<float> valueFloatArrayNew;
-            auto func = [&valueFloatArrayNew](
-                            IInterface *object) { valueFloatArrayNew.push_back(Float::Unbox(IFloat::Query(object))); };
-            Array::ForEach(array, func);
-            EXPECT_EQ(valueFloatArrayNew, valueFloatArrayOrigin);
-            length += substring.length() + 1;
-        }
-    }
-
+    TestFloatArrayForParseUri(uri, keyFloatArray, length, valueFloatArrayOrigin);
     search = DistributedWantBaseTest::URI_STRING_END;
     result = uri.find(search);
     EXPECT_NE(result, std::string::npos);
@@ -1663,12 +1747,8 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0500, F
  */
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0600, Function | MediumTest | Level3)
 {
-    std::string search;
-    std::string substring;
     std::size_t pos = 0;
     std::size_t length = 0;
-    std::size_t result = 0;
-    std::size_t delims = 0;
     std::size_t head = 0;
     DistributedWant wantOrigin;
     std::string keyFloatArray = "keyFloatArray";
@@ -1680,8 +1760,8 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0600, F
 
     std::string uri = wantOrigin.ToUri();
 
-    search = DistributedWantBaseTest::URI_STRING_HEAD;
-    result = uri.find(search, pos);
+    std::string search = DistributedWantBaseTest::URI_STRING_HEAD;
+    std::size_t result = uri.find(search, pos);
     EXPECT_NE(result, std::string::npos);
     EXPECT_EQ(result, pos);
     if (result != std::string::npos) {
@@ -1689,46 +1769,8 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_0600, F
     }
     length += head;
 
-    search = Array::SIGNATURE + std::string(".") + keyFloatArray + std::string("=");
-    result = uri.find(search);
-    EXPECT_NE(result, std::string::npos);
-    EXPECT_GE(result, head);
-    length += search.length();
-    if (result != std::string::npos) {
-        pos = result + search.length();
-        delims = uri.find(";", result);
-        if (delims != std::string::npos) {
-            std::string substring = uri.substr(pos, delims - pos);
-            sptr<IArray> array = Array::Parse(substring);
-            std::vector<float> valueFloatArrayNew;
-            auto func = [&valueFloatArrayNew](
-                            IInterface *object) { valueFloatArrayNew.push_back(Float::Unbox(IFloat::Query(object))); };
-            Array::ForEach(array, func);
-            EXPECT_EQ(valueFloatArrayNew, valueFloatArrayOrigin);
-            length += substring.length() + 1;
-        }
-    }
-
-    search = Array::SIGNATURE + std::string(".") + keyStringArray + std::string("=");
-    result = uri.find(search);
-    EXPECT_NE(result, std::string::npos);
-    EXPECT_GE(result, head);
-    length += search.length();
-    if (result != std::string::npos) {
-        pos = result + search.length();
-        delims = uri.find(";", result);
-        if (delims != std::string::npos) {
-            std::string substring = uri.substr(pos, delims - pos);
-            sptr<IArray> array = Array::Parse(substring);
-            std::vector<std::string> valueStringArrayNew;
-            auto func = [&valueStringArrayNew](IInterface *object) {
-                valueStringArrayNew.push_back(String::Unbox(IString::Query(object)));
-            };
-            Array::ForEach(array, func);
-            EXPECT_EQ(valueStringArrayNew, valueStringArrayOrigin);
-            length += substring.length() + 1;
-        }
-    }
+    TestFloatArrayForParseUri(uri, keyFloatArray, length, valueFloatArrayOrigin);
+    TestStringArrayForParseUri(uri, keyStringArray, length, valueStringArrayOrigin);
 
     search = DistributedWantBaseTest::URI_STRING_END;
     result = uri.find(search);
@@ -1972,9 +2014,17 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_1400, F
         delete want;
         want = nullptr;
     }
+}
 
-    uri = "#Intent;param;end";
-    want = DistributedWant::ParseUri(uri);
+/**
+ * @tc.number:  DistributedScheduleWant_ParseUri_ToUri_1401
+ * @tc.name: ParseUri and ToUri
+ * @tc.desc: Verify the function when no '=' or only has a '='.
+ */
+HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_1401, Function | MediumTest | Level3)
+{
+    std::string uri = "#Intent;param;end"; // test string
+    DistributedWant* want = DistributedWant::ParseUri(uri);
     EXPECT_EQ(want, nullptr);
     if (want != nullptr) {
         delete want;
@@ -1982,7 +2032,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_1400, F
     }
 
     uri = "#Intent;=;end";
-    want = DistributedWant::ParseUri(uri);
+    want  = DistributedWant::ParseUri(uri);
     EXPECT_NE(want, nullptr);
     if (want != nullptr) {
         delete want;

@@ -199,6 +199,8 @@ public:
      */
     static DistributedWant* ParseUri(const std::string& uri);
 
+    static bool CheckParams(const std::string& uri);
+
     /**
      * @description: Obtains the description of a URI in a DistributedWant.
      * @return Returns the URI description in the DistributedWant.
