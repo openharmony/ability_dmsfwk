@@ -45,13 +45,13 @@ std::string DistributedWantParamWrapper::ToString()
     if (wantParams_.Size() != 0) {
         result += "{";
         for (auto it : wantParams_.GetParams()) {
-            int typeId = DistributedWantParams::GetDataType(it.second);
-            result = result + "\"" + it.first + "\":{\"" + std::to_string(typeId) + "\":";
+            int dTypeId = DistributedWantParams::GetDataType(it.second);
+            result = result + "\"" + it.first + "\":{\"" + std::to_string(dTypeId) + "\":";
             if (IDistributedWantParams::Query(it.second) != nullptr) {
                 result = result +
                     static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(it.second))->ToString();
             } else {
-                result = result + "\"" + DistributedWantParams::GetStringByType(it.second, typeId) + "\"";
+                result = result + "\"" + DistributedWantParams::GetStringByType(it.second, dTypeId) + "\"";
             }
             if (it == *wantParams_.GetParams().rbegin()) {
                 result += "}";
@@ -97,15 +97,15 @@ bool DistributedWantParamWrapper::ValidateStr(const std::string& str)
     if (count(str.begin(), str.end(), '{') != count(str.begin(), str.end(), '}')) {
         return false;
     }
-    int count = 0;
+    int counter = 0;
     for (auto it : str) {
         if (it == '{') {
-            count++;
+            counter++;
         }
         if (it == '}') {
-            count--;
+            counter--;
         }
-        if (count < 0) {
+        if (counter < 0) {
             return false;
         }
     }
@@ -116,10 +116,10 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
 {
     DistributedWantParams wantParams;
     if (ValidateStr(str)) {
-        std::string key = "";
+        std::string strKey = "";
         int typeId = 0;
         for (size_t strnum = 0; strnum < str.size(); strnum++) {
-            if (str[strnum] == '{' && key != "" && typeId == DistributedWantParams::VALUE_TYPE_WANTPARAMS) {
+            if (str[strnum] == '{' && strKey != "" && typeId == DistributedWantParams::VALUE_TYPE_WANTPARAMS) {
                 size_t num;
                 int count = 0;
                 for (num = strnum; num < str.size(); num++) {
@@ -132,14 +132,14 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
                         break;
                     }
                 }
-                wantParams.SetParam(key, DistributedWantParamWrapper::Parse(str.substr(strnum, num - strnum + 1)));
-                key = "";
+                wantParams.SetParam(strKey, DistributedWantParamWrapper::Parse(str.substr(strnum, num - strnum + 1)));
+                strKey = "";
                 typeId = 0;
                 strnum = num + 1;
             } else if (str[strnum] == '"') {
-                if (key == "") {
+                if (strKey == "") {
                     strnum++;
-                    key = str.substr(strnum, str.find('"', strnum) - strnum);
+                    strKey = str.substr(strnum, str.find('"', strnum) - strnum);
                     strnum = str.find('"', strnum);
                 } else if (typeId == 0) {
                     strnum++;
@@ -150,12 +150,12 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
                     strnum = str.find('"', strnum);
                 } else {
                     strnum++;
-                    wantParams.SetParam(key,
+                    wantParams.SetParam(strKey,
                         DistributedWantParams::GetInterfaceByType(typeId,
                             str.substr(strnum, str.find('"', strnum) - strnum)));
                     strnum = str.find('"', strnum);
                     typeId = 0;
-                    key = "";
+                    strKey = "";
                 }
             }
         }
@@ -174,14 +174,14 @@ DistributedWantParams DistributedWantParamWrapper::ParseWantParams(const std::st
     for (size_t strnum = 0; strnum < str.size(); strnum++) {
         if (str[strnum] == '{' && key != "" && typeId == DistributedWantParams::VALUE_TYPE_WANTPARAMS) {
             size_t num;
-            int count = 0;
+            int counter = 0;
             for (num = strnum; num < str.size(); num++) {
                 if (str[num] == '{') {
-                    count++;
+                    counter++;
                 } else if (str[num] == '}') {
-                    count--;
+                    counter--;
                 }
-                if (count == 0) {
+                if (counter == 0) {
                     break;
                 }
             }

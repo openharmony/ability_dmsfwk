@@ -143,12 +143,12 @@ bool DistributedOperation::operator==(const DistributedOperation& other) const
         return false;
     }
 
-    size_t entitiesCount = entities_.size();
+    size_t dEntitiesCount = entities_.size();
     size_t otherEntitiesCount = other.entities_.size();
-    if (entitiesCount != otherEntitiesCount) {
+    if (dEntitiesCount != otherEntitiesCount) {
         return false;
     } else {
-        for (size_t i = 0; i < entitiesCount; i++) {
+        for (size_t i = 0; i < dEntitiesCount; i++) {
             if (entities_[i] != other.entities_[i]) {
                 return false;
             }
@@ -187,8 +187,8 @@ bool DistributedOperation::Marshalling(Parcel& parcel) const
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(StringVector, parcel, entities_);
     WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Uint32, parcel, flags_);
 
-    Uri uri("");
-    if (uri_ == uri) {
+    Uri dUri("");
+    if (uri_ == dUri) {
         WRITE_PARCEL_AND_RETURN_FALSE_IF_FAIL(Int32, parcel, VALUE_NULL);
     } else {
         if (!parcel.WriteInt32(VALUE_OBJECT)) {
@@ -214,33 +214,33 @@ DistributedOperation* DistributedOperation::Unmarshalling(Parcel& parcel)
 
 bool DistributedOperation::ReadFromParcel(Parcel& parcel)
 {
-    std::u16string readString16;
-    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, readString16);
-    abilityName_ = Str16ToStr8(readString16);
-    readString16.clear();
+    std::u16string dReadString16;
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, dReadString16);
+    abilityName_ = Str16ToStr8(dReadString16);
+    dReadString16.clear();
 
-    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, readString16);
-    action_ = Str16ToStr8(readString16);
-    readString16.clear();
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, dReadString16);
+    action_ = Str16ToStr8(dReadString16);
+    dReadString16.clear();
 
-    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, readString16);
-    bundleName_ = Str16ToStr8(readString16);
-    readString16.clear();
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, dReadString16);
+    bundleName_ = Str16ToStr8(dReadString16);
+    dReadString16.clear();
 
-    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, readString16);
-    deviceId_ = Str16ToStr8(readString16);
-    readString16.clear();
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(String16, parcel, dReadString16);
+    deviceId_ = Str16ToStr8(dReadString16);
+    dReadString16.clear();
 
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(StringVector, parcel, &entities_);
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Uint32, parcel, flags_);
 
     // uri_
-    int32_t empty = VALUE_NULL;
-    if (!parcel.ReadInt32(empty)) {
+    int32_t value = VALUE_NULL;
+    if (!parcel.ReadInt32(value)) {
         return false;
     }
 
-    if (empty == VALUE_OBJECT) {
+    if (value == VALUE_OBJECT) {
         auto uri = parcel.ReadParcelable<Uri>();
         if (uri != nullptr) {
             uri_ = *uri;

@@ -57,9 +57,9 @@ int32_t DistributedSchedProxy::StartRemoteAbility(const OHOS::AAFwk::Want& want,
     PARCEL_WRITE_HELPER(data, Int32, callerUid);
     PARCEL_WRITE_HELPER(data, Int32, requestCode);
     PARCEL_WRITE_HELPER(data, Uint32, accessToken);
-    MessageParcel reply;
+    MessageParcel msgReply;
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_ABILITY),
-        data, reply);
+        data, msgReply);
 }
 
 int32_t DistributedSchedProxy::StartAbilityFromRemote(const OHOS::AAFwk::Want& want,
@@ -148,8 +148,8 @@ int32_t DistributedSchedProxy::ContinueMission(const std::string& srcDeviceId, c
     PARCEL_WRITE_HELPER(data, Int32, missionId);
     PARCEL_WRITE_HELPER(data, RemoteObject, callback);
     PARCEL_WRITE_HELPER(data, Parcelable, &wantParams);
-    MessageParcel reply;
-    PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_MISSION), data, reply);
+    MessageParcel msgReply;
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_MISSION), data, msgReply);
 }
 
 int32_t DistributedSchedProxy::ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
@@ -173,9 +173,9 @@ int32_t DistributedSchedProxy::ContinueMission(const std::string& srcDeviceId, c
     PARCEL_WRITE_HELPER(data, String, bundleName);
     PARCEL_WRITE_HELPER(data, RemoteObject, callback);
     PARCEL_WRITE_HELPER(data, Parcelable, &wantParams);
-    MessageParcel reply;
+    MessageParcel msgReply;
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_MISSION_OF_BUNDLENAME),
-        data, reply);
+        data, msgReply);
 }
 
 int32_t DistributedSchedProxy::StartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId, int32_t callerUid,
@@ -195,8 +195,9 @@ int32_t DistributedSchedProxy::StartContinuation(const OHOS::AAFwk::Want& want, 
     PARCEL_WRITE_HELPER(data, Int32, callerUid);
     PARCEL_WRITE_HELPER(data, Int32, status);
     PARCEL_WRITE_HELPER(data, Uint32, accessToken);
-    MessageParcel reply;
-    PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::START_CONTINUATION), data, reply);
+    MessageParcel msgReply;
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::START_CONTINUATION),
+        data, msgReply);
 }
 
 void DistributedSchedProxy::NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId, bool isSuccess)
