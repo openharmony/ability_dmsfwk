@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -259,9 +259,9 @@ DistributedWant& DistributedWant::FormatType(const std::string& type)
 
 Uri DistributedWant::GetLowerCaseScheme(const Uri& uri)
 {
-    std::string strUri = const_cast<Uri&>(uri).ToString();
+    std::string dStrUri = const_cast<Uri&>(uri).ToString();
     std::string schemeStr = const_cast<Uri&>(uri).GetScheme();
-    if (strUri.empty() || schemeStr.empty()) {
+    if (dStrUri.empty() || schemeStr.empty()) {
         return uri;
     }
 
@@ -274,12 +274,12 @@ Uri DistributedWant::GetLowerCaseScheme(const Uri& uri)
         return uri;
     }
 
-    std::size_t pos = strUri.find_first_of(schemeStr, 0);
+    std::size_t pos = dStrUri.find_first_of(schemeStr, 0);
     if (pos != std::string::npos) {
-        strUri.replace(pos, schemeStr.length(), lowSchemeStr);
+        dStrUri.replace(pos, schemeStr.length(), lowSchemeStr);
     }
 
-    return Uri(strUri);
+    return Uri(dStrUri);
 }
 
 DistributedWant& DistributedWant::FormatUriAndType(const Uri& uri, const std::string& type)
@@ -289,18 +289,19 @@ DistributedWant& DistributedWant::FormatUriAndType(const Uri& uri, const std::st
 
 std::string DistributedWant::FormatMimeType(const std::string& mimeType)
 {
-    std::string strMimeType = mimeType;
-    strMimeType.erase(std::remove(strMimeType.begin(), strMimeType.end(), ' '), strMimeType.end());
-    std::transform(
-        strMimeType.begin(), strMimeType.end(), strMimeType.begin(), [](unsigned char c) { return std::tolower(c); });
+    std::string dStrMimeType = mimeType;
+    dStrMimeType.erase(std::remove(dStrMimeType.begin(), dStrMimeType.end(), ' '), dStrMimeType.end());
+    std::transform(dStrMimeType.begin(), dStrMimeType.end(), dStrMimeType.begin(), [](unsigned char c) {
+        return std::tolower(c);
+    });
 
     std::size_t pos = 0;
     std::size_t begin = 0;
-    pos = strMimeType.find_first_of(";", begin);
+    pos = dStrMimeType.find_first_of(";", begin);
     if (pos != std::string::npos) {
-        strMimeType = strMimeType.substr(begin, pos - begin);
+        dStrMimeType = dStrMimeType.substr(begin, pos - begin);
     }
-    return strMimeType;
+    return dStrMimeType;
 }
 
 std::string DistributedWant::GetAction() const
@@ -996,9 +997,9 @@ void DistributedWant::GenerateUriString(std::string& uriString) const
     if (GetUriString().length() > 0) {
         uriString += "uri=" + Encode(GetUriString()) + ";";
     }
-    for (auto entity : operation_.GetEntities()) {
-        if (entity.length() > 0) {
-            uriString += "entity=" + Encode(entity) + ";";
+    for (auto dEntity : operation_.GetEntities()) {
+        if (dEntity.length() > 0) {
+            uriString += "entity=" + Encode(dEntity) + ";";
         }
     }
     if (operation_.GetDeviceId().length() > 0) {
@@ -1013,8 +1014,8 @@ void DistributedWant::GenerateUriString(std::string& uriString) const
     if (operation_.GetFlags() != 0) {
         uriString += "flag=";
         char buf[HEX_STRING_BUF_LEN] {0};
-        int len = snprintf_s(buf, HEX_STRING_BUF_LEN, HEX_STRING_BUF_LEN - 1, "0x%08x", operation_.GetFlags());
-        if (len == HEX_STRING_LEN) {
+        int lenth = snprintf_s(buf, HEX_STRING_BUF_LEN, HEX_STRING_BUF_LEN - 1, "0x%08x", operation_.GetFlags());
+        if (lenth == HEX_STRING_LEN) {
             std::string flag = buf;
             uriString += Encode(flag);
             uriString += ";";
@@ -1112,14 +1113,17 @@ bool DistributedWant::MarshallingWriteUri(Parcel& parcel) const
         if (!parcel.WriteInt32(VALUE_NULL)) {
             return false;
         }
-    } else {
-        if (!parcel.WriteInt32(VALUE_OBJECT)) {
-            return false;
-        }
-        if (!parcel.WriteString16(Str8ToStr16(GetUriString()))) {
-            return false;
-        }
+        return true;
     }
+    
+    if (!parcel.WriteInt32(VALUE_OBJECT)) {
+        return false;
+    }
+
+    if (!parcel.WriteString16(Str8ToStr16(GetUriString()))) {
+        return false;
+    }
+    
     return true;
 }
 
@@ -1147,9 +1151,9 @@ bool DistributedWant::MarshallingWriteEntities(Parcel& parcel) const
 
 bool DistributedWant::MarshallingWriteElement(Parcel& parcel) const
 {
-    ElementName emptyElement;
+    ElementName empty;
     ElementName element = GetElement();
-    if (element == emptyElement) {
+    if (element == empty) {
         if (!parcel.WriteInt32(VALUE_NULL)) {
             return false;
         }
@@ -1170,13 +1174,15 @@ bool DistributedWant::MarshallingWriteParameters(Parcel& parcel) const
         if (!parcel.WriteInt32(VALUE_NULL)) {
             return false;
         }
-    } else {
-        if (!parcel.WriteInt32(VALUE_OBJECT)) {
-            return false;
-        }
-        if (!parcel.WriteParcelable(&parameters_)) {
-            return false;
-        }
+        return true;
+    }
+
+    if (!parcel.WriteInt32(VALUE_OBJECT)) {
+        return false;
+    }
+    
+    if (!parcel.WriteParcelable(&parameters_)) {
+        return false;
     }
     return true;
 }
@@ -1226,11 +1232,11 @@ DistributedWant* DistributedWant::Unmarshalling(Parcel& parcel)
 
 bool DistributedWant::ReadUriFromParcel(Parcel& parcel)
 {
-    int empty = VALUE_NULL;
-    if (!parcel.ReadInt32(empty)) {
+    int value = VALUE_NULL;
+    if (!parcel.ReadInt32(value)) {
         return false;
     }
-    if (empty == VALUE_OBJECT) {
+    if (value == VALUE_OBJECT) {
         SetUri(Str16ToStr8(parcel.ReadString16()));
     }
     return true;
@@ -1240,11 +1246,11 @@ bool DistributedWant::ReadEntitiesFromParcel(Parcel& parcel)
 {
     std::vector<std::string> entities;
     std::vector<std::u16string> entityU16;
-    int empty = VALUE_NULL;
-    if (!parcel.ReadInt32(empty)) {
+    int value = VALUE_NULL;
+    if (!parcel.ReadInt32(value)) {
         return false;
     }
-    if (empty == VALUE_OBJECT) {
+    if (value == VALUE_OBJECT) {
         if (!parcel.ReadString16Vector(&entityU16)) {
             return false;
         }
@@ -1258,11 +1264,11 @@ bool DistributedWant::ReadEntitiesFromParcel(Parcel& parcel)
 
 bool DistributedWant::ReadElementFromParcel(Parcel& parcel)
 {
-    int empty = VALUE_NULL;
-    if (!parcel.ReadInt32(empty)) {
+    int value = VALUE_NULL;
+    if (!parcel.ReadInt32(value)) {
         return false;
     }
-    if (empty == VALUE_OBJECT) {
+    if (value == VALUE_OBJECT) {
         auto element = parcel.ReadParcelable<ElementName>();
         if (element != nullptr) {
             SetElement(*element);
@@ -1327,37 +1333,37 @@ bool DistributedWant::ReadFromParcel(Parcel& parcel)
 bool DistributedWant::ParseUriInternal(const std::string& content, ElementName& element, DistributedWant& want)
 {
     static constexpr int TYPE_TAG_SIZE = 2;
-    std::string prop;
+    std::string dProp;
     std::string value;
 
     if (content.empty() || content[0] == '=') {
         return true;
     }
-    if (!ParseContent(content, prop, value)) {
+    if (!ParseContent(content, dProp, value)) {
         return false;
     }
     if (value.empty()) {
         return true;
     }
-    if (prop == "action") {
+    if (dProp == "action") {
         want.SetAction(value);
-    } else if (prop == "entity") {
+    } else if (dProp == "entity") {
         want.AddEntity(value);
-    } else if (prop == "flag") {
+    } else if (dProp == "flag") {
         if (!ParseFlag(value, want)) {
             return false;
         }
-    } else if (prop == "device") {
+    } else if (dProp == "device") {
         element.SetDeviceID(value);
-    } else if (prop == "bundle") {
+    } else if (dProp == "bundle") {
         element.SetBundleName(value);
-    } else if (prop == "ability") {
+    } else if (dProp == "ability") {
         element.SetAbilityName(value);
-    } else if (prop == "package") {
+    } else if (dProp == "package") {
         want.SetBundle(Decode(value));
-    } else if (prop.length() > TYPE_TAG_SIZE) {
-        std::string key = prop.substr(TYPE_TAG_SIZE);
-        if (!DistributedWant::CheckAndSetParameters(want, key, prop, value)) {
+    } else if (dProp.length() > TYPE_TAG_SIZE) {
+        std::string key = dProp.substr(TYPE_TAG_SIZE);
+        if (!DistributedWant::CheckAndSetParameters(want, key, dProp, value)) {
             return false;
         }
     }
@@ -1366,11 +1372,11 @@ bool DistributedWant::ParseUriInternal(const std::string& content, ElementName& 
 
 bool DistributedWant::ParseContent(const std::string& content, std::string& prop, std::string& value)
 {
-    std::size_t pos = content.find("=");
-    if (pos != std::string::npos) {
-        std::string subString = content.substr(0, pos);
+    std::size_t dPos = content.find("=");
+    if (dPos != std::string::npos) {
+        std::string subString = content.substr(0, dPos);
         prop = Decode(subString);
-        subString = content.substr(pos + 1, content.length() - pos - 1);
+        subString = content.substr(dPos + 1, content.length() - dPos - 1);
         value = Decode(subString);
         return true;
     }
@@ -1379,20 +1385,20 @@ bool DistributedWant::ParseContent(const std::string& content, std::string& prop
 
 bool DistributedWant::ParseFlag(const std::string& content, DistributedWant& want)
 {
-    std::string contentLower = LowerStr(content);
+    std::string dContentLower = LowerStr(content);
     std::string prefix = "0x";
-    if (!contentLower.empty()) {
-        if (contentLower.find(prefix) != 0) {
+    if (!dContentLower.empty()) {
+        if (dContentLower.find(prefix) != 0) {
             return false;
         }
 
-        for (std::size_t i = prefix.length(); i < contentLower.length(); i++) {
-            if (!isxdigit(contentLower[i])) {
+        for (std::size_t i = prefix.length(); i < dContentLower.length(); i++) {
+            if (!isxdigit(dContentLower[i])) {
                 return false;
             }
         }
         int base = 16;  // hex string
-        unsigned int flag = std::stoul(contentLower, nullptr, base);
+        unsigned int flag = std::stoul(dContentLower, nullptr, base);
         want.SetFlags(flag);
     }
     return true;
@@ -1400,54 +1406,54 @@ bool DistributedWant::ParseFlag(const std::string& content, DistributedWant& wan
 
 std::string DistributedWant::Decode(const std::string& str)
 {
-    std::string decode;
+    std::string dDecode;
     for (std::size_t i = 0; i < str.length();) {
         if (str[i] == '\\') {
             if (++i >= str.length()) {
-                decode += "\\";
+                dDecode += "\\";
                 break;
             }
             if (str[i] == '\\') {
-                decode += "\\";
+                dDecode += "\\";
                 i++;
             } else if (str[i] == '0') {
                 if (str.compare(i, OCT_EQUALSTO.length(), OCT_EQUALSTO) == 0) {
-                    decode += "=";
+                    dDecode += "=";
                     i += OCT_EQUALSTO.length();
                 } else if (str.compare(i, OCT_SEMICOLON.length(), OCT_SEMICOLON) == 0) {
-                    decode += ";";
+                    dDecode += ";";
                     i += OCT_SEMICOLON.length();
                 } else {
-                    decode += "\\" + str.substr(i, 1);
+                    dDecode += "\\" + str.substr(i, 1);
                     i++;
                 }
             } else {
-                decode += "\\" + str.substr(i, 1);
+                dDecode += "\\" + str.substr(i, 1);
                 i++;
             }
         } else {
-            decode += str[i];
+            dDecode += str[i];
             i++;
         }
     }
-    return decode;
+    return dDecode;
 }
 
 std::string DistributedWant::Encode(const std::string& str)
 {
-    std::string encode;
+    std::string dEncode;
     for (std::size_t i = 0; i < str.length(); i++) {
         if (str[i] == '\\') {
-            encode += "\\\\";
+            dEncode += "\\\\";
         } else if (str[i] == '=') {
-            encode += "\\" + OCT_EQUALSTO;
+            dEncode += "\\" + OCT_EQUALSTO;
         } else if (str[i] == ';') {
-            encode += "\\" + OCT_SEMICOLON;
+            dEncode += "\\" + OCT_SEMICOLON;
         } else {
-            encode += str[i];
+            dEncode += str[i];
         }
     }
-    return encode;
+    return dEncode;
 }
 
 bool DistributedWant::CheckAndSetParameters(DistributedWant& want, const std::string& key,
@@ -1531,10 +1537,10 @@ nlohmann::json DistributedWant::ToJson() const
     DistributedWantParamWrapper wrapper(parameters_);
     std::string parametersString = wrapper.ToString();
 
-    nlohmann::json entitiesJson;
+    nlohmann::json dEntitiesJson;
     std::vector<std::string> entities = GetEntities();
     for (auto entity : entities) {
-        entitiesJson.emplace_back(entity);
+        dEntitiesJson.emplace_back(entity);
     }
 
     nlohmann::json wantJson = nlohmann::json {
@@ -1546,7 +1552,7 @@ nlohmann::json DistributedWant::ToJson() const
         {"flags", GetFlags()},
         {"action", GetAction()},
         {"parameters", parametersString},
-        {"entities", entitiesJson},
+        {"entities", dEntitiesJson},
     };
     return wantJson;
 }

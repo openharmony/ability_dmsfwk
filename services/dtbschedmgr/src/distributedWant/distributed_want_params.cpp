@@ -432,8 +432,8 @@ bool DistributedWantParams::WriteToParcelWantParams(Parcel& parcel, sptr<IInterf
 {
     DistributedWantParams value = DistributedWantParamWrapper::Unbox(IDistributedWantParams::Query(o));
 
-    auto type = value.GetParam(TYPE_PROPERTY);
-    AAFwk::IString *typeP = AAFwk::IString::Query(type);
+    auto dType = value.GetParam(TYPE_PROPERTY);
+    AAFwk::IString *typeP = AAFwk::IString::Query(dType);
     if (typeP != nullptr) {
         std::string typeValue = AAFwk::String::Unbox(typeP);
         if (typeValue == FD) {
@@ -457,8 +457,8 @@ bool DistributedWantParams::WriteToParcelFD(Parcel& parcel, const DistributedWan
         return false;
     }
 
-    auto fdWrap = value.GetParam(VALUE_PROPERTY);
-    AAFwk::IInteger *fdIWrap = AAFwk::IInteger::Query(fdWrap);
+    auto dFdWrap = value.GetParam(VALUE_PROPERTY);
+    AAFwk::IInteger *fdIWrap = AAFwk::IInteger::Query(dFdWrap);
     if (fdIWrap != nullptr) {
         int fd = AAFwk::Integer::Unbox(fdIWrap);
         auto messageParcel = static_cast<MessageParcel*>(&parcel);
@@ -478,8 +478,8 @@ bool DistributedWantParams::WriteToParcelRemoteObject(Parcel& parcel, const Dist
         return false;
     }
 
-    auto remoteObjectWrap = value.GetParam(VALUE_PROPERTY);
-    AAFwk::IRemoteObjectWrap *remoteObjectIWrap = AAFwk::IRemoteObjectWrap::Query(remoteObjectWrap);
+    auto remoteObjWrap = value.GetParam(VALUE_PROPERTY);
+    AAFwk::IRemoteObjectWrap *remoteObjectIWrap = AAFwk::IRemoteObjectWrap::Query(remoteObjWrap);
     if (remoteObjectIWrap != nullptr) {
         auto remoteObject = AAFwk::RemoteObjectWrap::UnBox(remoteObjectIWrap);
         auto messageParcel = static_cast<MessageParcel*>(&parcel);
@@ -590,12 +590,12 @@ bool DistributedWantParams::WriteMarshalling(Parcel& parcel, sptr<IInterface>& o
 
 bool DistributedWantParams::DoMarshalling(Parcel& parcel) const
 {
-    size_t size = params_.size();
+    size_t dSize = params_.size();
     if (!cachedUnsupportedData_.empty()) {
-        size += cachedUnsupportedData_.size();
+        dSize += cachedUnsupportedData_.size();
     }
 
-    if (!parcel.WriteInt32(size)) {
+    if (!parcel.WriteInt32(dSize)) {
         return false;
     }
 
@@ -614,21 +614,21 @@ bool DistributedWantParams::DoMarshalling(Parcel& parcel) const
     }
 
     if (!cachedUnsupportedData_.empty()) {
-        for (const DistributedUnsupportedData& data : cachedUnsupportedData_) {
-            if (!parcel.WriteString16(data.key)) {
+        for (const DistributedUnsupportedData& dData : cachedUnsupportedData_) {
+            if (!parcel.WriteString16(dData.key)) {
                 return false;
             }
-            if (!parcel.WriteInt32(data.type)) {
+            if (!parcel.WriteInt32(dData.type)) {
                 return false;
             }
-            if (!parcel.WriteInt32(data.size)) {
+            if (!parcel.WriteInt32(dData.size)) {
                 return false;
             }
             // Corresponding to Parcel#writeByteArray() in Java.
-            if (!parcel.WriteInt32(data.size)) {
+            if (!parcel.WriteInt32(dData.size)) {
                 return false;
             }
-            if (!parcel.WriteBuffer(data.buffer, data.size)) {
+            if (!parcel.WriteBuffer(dData.buffer, dData.size)) {
                 return false;
             }
         }
@@ -675,23 +675,23 @@ static void SetNewArray(const AAFwk::InterfaceID& id, AAFwk::IArray* orgIArray, 
     if (orgIArray == nullptr) {
         return;
     }
-    std::vector<T1> array;
-    auto func = [&array](AAFwk::IInterface* object) {
+    std::vector<T1> dArray;
+    auto func = [&dArray](AAFwk::IInterface* object) {
         if (object != nullptr) {
             T3* value = T3::Query(object);
             if (value != nullptr) {
-                array.push_back(T2::Unbox(value));
+                dArray.push_back(T2::Unbox(value));
             }
         }
     };
     AAFwk::Array::ForEach(orgIArray, func);
 
-    typename std::vector<T1>::size_type size = array.size();
+    typename std::vector<T1>::size_type size = dArray.size();
     if (size > 0) {
         ao = new (std::nothrow) AAFwk::Array(size, id);
         if (ao != nullptr) {
             for (typename std::vector<T1>::size_type i = 0; i < size; i++) {
-                ao->Set(i, T2::Box(array[i]));
+                ao->Set(i, T2::Box(dArray[i]));
             }
         }
     }
@@ -1183,19 +1183,19 @@ bool DistributedWantParams::ReadUnsupportedData(Parcel& parcel, const std::strin
         return false;
     }
 
-    DistributedUnsupportedData data;
-    data.key = Str8ToStr16(key);
-    data.type = type;
-    data.size = bufferSize;
-    data.buffer = new (std::nothrow) uint8_t[bufferSize];
-    if (data.buffer == nullptr) {
+    DistributedUnsupportedData dData;
+    dData.key = Str8ToStr16(key);
+    dData.type = type;
+    dData.size = bufferSize;
+    dData.buffer = new (std::nothrow) uint8_t[bufferSize];
+    if (dData.buffer == nullptr) {
         return false;
     }
 
-    if (memcpy_s(data.buffer, bufferSize, bufferP, bufferSize) != EOK) {
+    if (memcpy_s(dData.buffer, bufferSize, bufferP, bufferSize) != EOK) {
         return false;
     }
-    cachedUnsupportedData_.emplace_back(std::move(data));
+    cachedUnsupportedData_.emplace_back(std::move(dData));
     return true;
 }
 
@@ -1240,9 +1240,9 @@ bool DistributedWantParams::ReadFromParcelParam(Parcel& parcel, const std::strin
             if (!ReadArrayToParcel(parcel, type, ao)) {
                 return false;
             }
-            sptr<IInterface> intf = ao;
-            if (intf) {
-                SetParam(key, intf);
+            sptr<IInterface> dIntf = ao;
+            if (dIntf) {
+                SetParam(key, dIntf);
             }
             break;
         }

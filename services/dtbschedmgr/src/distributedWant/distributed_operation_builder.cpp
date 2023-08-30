@@ -71,16 +71,16 @@ DistributedOperationBuilder& DistributedOperationBuilder::WithUri(const Uri& uri
 
 std::shared_ptr<DistributedOperation> DistributedOperationBuilder::build()
 {
-    std::shared_ptr<DistributedOperation> operation = std::make_shared<DistributedOperation>();
-    operation->abilityName_ = abilityName_;
-    operation->bundleName_ = bundleName_;
-    operation->deviceId_ = deviceId_;
-    operation->action_ = action_;
-    operation->entities_ = entities_;
-    operation->flags_ = flags_;
-    operation->uri_ = uri_;
+    std::shared_ptr<DistributedOperation> dOperation = std::make_shared<DistributedOperation>();
+    dOperation->abilityName_ = abilityName_;
+    dOperation->bundleName_ = bundleName_;
+    dOperation->deviceId_ = deviceId_;
+    dOperation->action_ = action_;
+    dOperation->entities_ = entities_;
+    dOperation->flags_ = flags_;
+    dOperation->uri_ = uri_;
 
-    return operation;
+    return dOperation;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
