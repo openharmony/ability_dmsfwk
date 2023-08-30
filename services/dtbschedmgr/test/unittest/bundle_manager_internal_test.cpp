@@ -514,7 +514,7 @@ HWTEST_F(BundleManagerInternalTest, GetBundleIdFromBms_001, TestSize.Level3)
 HWTEST_F(BundleManagerInternalTest, GetBundleIdFromBms_002, TestSize.Level3)
 {
     DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_002 begin" << std::endl;
-    const std::string bundleName = "com.ohos.launcher";
+    const std::string bundleName = "com.ohos.mms";
     uint32_t accessTokenId;
     BundleManagerInternal::GetDistributedBundleManager();
     int32_t ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
