@@ -142,6 +142,7 @@ Status DistributedDataStorage::GetKvStore()
         .createIfMissing = true,
         .encrypt = false,
         .autoSync = true,
+        .securityLevel = DistributedKv::SecurityLevel::S2,
         .kvStoreType = KvStoreType::SINGLE_VERSION,
         .area = 1,
         .baseDir = KVDB_PATH
