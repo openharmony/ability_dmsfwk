@@ -305,22 +305,11 @@ sptr<IInterface> DistributedWantParams::GetInterfaceByType(int typeId, const std
     return nullptr;
 }
 
-bool DistributedWantParams::CompareInterface(const sptr<IInterface> iIt1, const sptr<IInterface> iIt2, int typeId)
+bool DistributedWantParams::CompareNumberInterface(const sptr<IInterface> iIt1,
+    const sptr<IInterface> iIt2, int typeId)
 {
     bool flag = false;
     switch (typeId) {
-        case VALUE_TYPE_BOOLEAN:
-            flag = static_cast<AAFwk::Boolean*>(AAFwk::IBoolean::Query(iIt1))
-                ->Equals(*(static_cast<AAFwk::Boolean*>(AAFwk::IBoolean::Query(iIt1))));
-            break;
-        case VALUE_TYPE_BYTE:
-            flag = static_cast<AAFwk::Byte*>(AAFwk::IByte::Query(iIt1))
-                ->Equals(*(static_cast<AAFwk::Byte*>(AAFwk::IByte::Query(iIt1))));
-            break;
-        case VALUE_TYPE_CHAR:
-            flag = static_cast<AAFwk::Char*>(AAFwk::IChar::Query(iIt1))
-                ->Equals(*(static_cast<AAFwk::Char*>(AAFwk::IChar::Query(iIt1))));
-            break;
         case VALUE_TYPE_SHORT:
             flag = static_cast<AAFwk::Short*>(AAFwk::IShort::Query(iIt1))
                 ->Equals(*(static_cast<AAFwk::Short*>(AAFwk::IShort::Query(iIt1))));
@@ -341,6 +330,28 @@ bool DistributedWantParams::CompareInterface(const sptr<IInterface> iIt1, const 
             flag = static_cast<AAFwk::Double*>(AAFwk::IDouble::Query(iIt1))
                 ->Equals(*(static_cast<AAFwk::Double*>(AAFwk::IDouble::Query(iIt1))));
             break;
+        default:
+            break;
+    }
+    return flag;
+}
+
+bool DistributedWantParams::CompareInterface(const sptr<IInterface> iIt1, const sptr<IInterface> iIt2, int typeId)
+{
+    bool flag = false;
+    switch (typeId) {
+        case VALUE_TYPE_BOOLEAN:
+            flag = static_cast<AAFwk::Boolean*>(AAFwk::IBoolean::Query(iIt1))
+                ->Equals(*(static_cast<AAFwk::Boolean*>(AAFwk::IBoolean::Query(iIt1))));
+            break;
+        case VALUE_TYPE_BYTE:
+            flag = static_cast<AAFwk::Byte*>(AAFwk::IByte::Query(iIt1))
+                ->Equals(*(static_cast<AAFwk::Byte*>(AAFwk::IByte::Query(iIt1))));
+            break;
+        case VALUE_TYPE_CHAR:
+            flag = static_cast<AAFwk::Char*>(AAFwk::IChar::Query(iIt1))
+                ->Equals(*(static_cast<AAFwk::Char*>(AAFwk::IChar::Query(iIt1))));
+            break;
         case VALUE_TYPE_STRING:
             flag = static_cast<AAFwk::String*>(AAFwk::IString::Query(iIt1))
                 ->Equals(*(static_cast<AAFwk::String*>(AAFwk::IString::Query(iIt1))));
@@ -354,6 +365,7 @@ bool DistributedWantParams::CompareInterface(const sptr<IInterface> iIt1, const 
                 ->Equals(*(static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(iIt1))));
             break;
         default:
+            flag = CompareNumberInterface(iIt1, iIt2, typeId);
             break;
     }
     return flag;

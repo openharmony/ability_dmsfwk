@@ -546,6 +546,18 @@ int32_t DistributedSchedStub::DisconnectRemoteAbilityInner(MessageParcel& data, 
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 
+int32_t DistributedSchedStub::ReadDataForConnect(MessageParcel& data, CallerInfo callerInfo, AccountInfo accountInfo)
+{
+    PARCEL_READ_HELPER(data, Int32, callerInfo.uid);
+    PARCEL_READ_HELPER(data, Int32, callerInfo.pid);
+    PARCEL_READ_HELPER(data, String, callerInfo.sourceDeviceId);
+    callerInfo.callerType = CALLER_TYPE_HARMONY;
+    accountInfo.accountType = data.ReadInt32();
+    PARCEL_READ_HELPER(data, StringVector, &accountInfo.groupIdList);
+    callerInfo.callerAppId = data.ReadString();
+    return ERR_NONE;
+}
+
 int32_t DistributedSchedStub::ConnectAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply)
 {
     if (!CheckCallingUid()) {
@@ -566,14 +578,11 @@ int32_t DistributedSchedStub::ConnectAbilityFromRemoteInner(MessageParcel& data,
     cmpAbilityInfo->ConvertToAbilityInfo(abilityInfo);
     sptr<IRemoteObject> connect = data.ReadRemoteObject();
     CallerInfo callerInfo;
-    PARCEL_READ_HELPER(data, Int32, callerInfo.uid);
-    PARCEL_READ_HELPER(data, Int32, callerInfo.pid);
-    PARCEL_READ_HELPER(data, String, callerInfo.sourceDeviceId);
-    callerInfo.callerType = CALLER_TYPE_HARMONY;
     AccountInfo accountInfo;
-    accountInfo.accountType = data.ReadInt32();
-    PARCEL_READ_HELPER(data, StringVector, &accountInfo.groupIdList);
-    callerInfo.callerAppId = data.ReadString();
+    int32_t result = ReadDataForConnect(data, callerInfo, accountInfo);
+    if (result != ERR_NONE) {
+        return result;
+    }
     std::string extraInfo = data.ReadString();
     if (extraInfo.empty()) {
         HILOGD("extra info is empty!");
@@ -586,7 +595,7 @@ int32_t DistributedSchedStub::ConnectAbilityFromRemoteInner(MessageParcel& data,
     std::string package = abilityInfo.bundleName;
     std::string deviceId = abilityInfo.deviceId;
     int64_t begin = GetTickCount();
-    int32_t result = ConnectAbilityFromRemote(*want, abilityInfo, connect, callerInfo, accountInfo);
+    result = ConnectAbilityFromRemote(*want, abilityInfo, connect, callerInfo, accountInfo);
     BehaviorEventParam eventParam = { EventCallingType::REMOTE, BehaviorEvent::CONNECT_REMOTE_ABILITY, result,
         want->GetElement().GetBundleName(), want->GetElement().GetAbilityName(), callerInfo.uid };
     DmsHiSysEventReport::ReportBehaviorEvent(eventParam);
@@ -1165,6 +1174,19 @@ int32_t DistributedSchedStub::StartRemoteFreeInstallInner(MessageParcel& data, M
     return ERR_NONE;
 }
 
+int32_t DistributedSchedStub::ReadDataForFreeInstall(MessageParcel& data, CallerInfo &callerInfo,
+    AccountInfo &accountInfo, int64_t &taskId)
+{
+    callerInfo.callerType = CALLER_TYPE_HARMONY;
+    PARCEL_READ_HELPER(data, Int32, callerInfo.uid);
+    PARCEL_READ_HELPER(data, String, callerInfo.sourceDeviceId);
+    accountInfo.accountType = data.ReadInt32();
+    PARCEL_READ_HELPER(data, StringVector, &accountInfo.groupIdList);
+    callerInfo.callerAppId = data.ReadString();
+    PARCEL_READ_HELPER(data, Int64, taskId);
+    return ERR_NONE;
+}
+
 int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& data, MessageParcel& reply)
 {
     if (!CheckCallingUid()) {
@@ -1178,15 +1200,12 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
     }
     int64_t begin = GetTickCount();
     CallerInfo callerInfo = {.accessToken = 0};
-    callerInfo.callerType = CALLER_TYPE_HARMONY;
     AccountInfo accountInfo = {};
     int64_t taskId = 0;
-    PARCEL_READ_HELPER(data, Int32, callerInfo.uid);
-    PARCEL_READ_HELPER(data, String, callerInfo.sourceDeviceId);
-    accountInfo.accountType = data.ReadInt32();
-    PARCEL_READ_HELPER(data, StringVector, &accountInfo.groupIdList);
-    callerInfo.callerAppId = data.ReadString();
-    PARCEL_READ_HELPER(data, Int64, taskId);
+    int32_t result = ReadDataForFreeInstall(data, callerInfo, accountInfo, taskId);
+    if (result != ERR_NONE) {
+        return result;
+    }
     shared_ptr<DistributedWant> cmpDstbWant(data.ReadParcelable<DistributedWant>());
     shared_ptr<AAFwk::Want> cmpWant = nullptr;
     if (cmpDstbWant != nullptr) {
@@ -1211,7 +1230,7 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
     info.want.SetParam(PARAM_FREEINSTALL_APPID, callerInfo.callerAppId);
     info.want.SetParam(
         PARAM_FREEINSTALL_BUNDLENAMES, (*cmpWant).GetStringArrayParam(CMPT_PARAM_FREEINSTALL_BUNDLENAMES));
-    int32_t result = StartFreeInstallFromRemote(info, taskId);
+    result = StartFreeInstallFromRemote(info, taskId);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_HELPER(reply, Int32, result);
     int64_t end = GetTickCount();

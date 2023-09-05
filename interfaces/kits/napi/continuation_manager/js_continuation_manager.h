@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "continuation_extra_params.h"
+#include "device_connect_status.h"
 #include "js_device_selection_listener.h"
 #include "native_engine/native_engine.h"
 #include "nlohmann/json.hpp"
@@ -54,12 +55,17 @@ private:
     NativeValue* OnUnregisterDeviceSelectionCallback(NativeEngine &engine, NativeCallbackInfo &info);
     NativeValue* OnUpdateConnectStatus(NativeEngine &engine, NativeCallbackInfo &info);
     NativeValue* OnStartDeviceManager(NativeEngine &engine, NativeCallbackInfo &info);
+    int32_t CheckParamAndGetToken(NativeEngine &engine, NativeCallbackInfo &info, int32_t &token);
     NativeValue* OnInitDeviceConnectStateObject(NativeEngine &engine, NativeCallbackInfo &info);
     NativeValue* OnInitContinuationModeObject(NativeEngine &engine, NativeCallbackInfo &info);
     static napi_status SetEnumItem(const napi_env& env, napi_value object, const char* name, int32_t value);
     NativeValue* OnRegisterContinuation(NativeEngine &engine, NativeCallbackInfo &info);
     NativeValue* OnUnregisterContinuation(NativeEngine &engine, NativeCallbackInfo &info);
     NativeValue* OnUpdateContinuationState(NativeEngine &engine, NativeCallbackInfo &info);
+    std::string GetErrorInfo(NativeEngine &engine, NativeCallbackInfo &info, int32_t &token,
+        std::string &deviceId, DeviceConnectStatus &deviceConnectStatus);
+    std::string GetErrorForStartContinuation(NativeEngine &engine, NativeCallbackInfo &info,
+        int32_t &token, int32_t &unwrapArgc, std::shared_ptr<ContinuationExtraParams> &continuationExtraParams);
     NativeValue* OnStartContinuationDeviceManager(NativeEngine &engine, NativeCallbackInfo &info);
 
     static bool IsCallbackValid(NativeValue* listenerObj);

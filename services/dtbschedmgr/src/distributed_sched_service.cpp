@@ -1695,15 +1695,8 @@ int32_t DistributedSchedService::NotifyProcessDiedFromRemote(const CallerInfo& c
     return errCode;
 }
 
-void DistributedSchedService::ProcessDeviceOffline(const std::string& deviceId)
+void DistributedSchedService::RemoveConnectAbilityInfo(const std::string& deviceId)
 {
-    HILOGI("ProcessDeviceOffline called");
-    std::string localDeviceId;
-    if (!GetLocalDeviceId(localDeviceId) || !CheckDeviceId(localDeviceId, deviceId)) {
-        HILOGE("ProcessDeviceOffline check deviceId failed");
-        return;
-    }
-
     {
         std::lock_guard<std::mutex> autoLock(distributedLock_);
         for (auto iter = distributedConnectAbilityMap_.begin(); iter != distributedConnectAbilityMap_.end();) {
@@ -1748,6 +1741,17 @@ void DistributedSchedService::ProcessDeviceOffline(const std::string& deviceId)
             }
         }
     }
+}
+
+void DistributedSchedService::ProcessDeviceOffline(const std::string& deviceId)
+{
+    HILOGI("ProcessDeviceOffline called");
+    std::string localDeviceId;
+    if (!GetLocalDeviceId(localDeviceId) || !CheckDeviceId(localDeviceId, deviceId)) {
+        HILOGE("ProcessDeviceOffline check deviceId failed");
+        return;
+    }
+    RemoveConnectAbilityInfo(deviceId);
     ProcessCalleeOffline(deviceId);
     ProcessFreeInstallOffline(deviceId);
 }
@@ -2051,13 +2055,11 @@ int32_t DistributedSchedService::StartRemoteFreeInstall(const OHOS::AAFwk::Want&
         HILOGE("check deviceId failed");
         return INVALID_PARAMETERS_ERR;
     }
-
     sptr<IDistributedSched> remoteDms = GetRemoteDms(deviceId);
     if (remoteDms == nullptr) {
         HILOGE("get remoteDms failed");
         return INVALID_PARAMETERS_ERR;
     }
-
     if (dmsCallbackTask_ == nullptr) {
         HILOGE("callbackTask object null!");
         return INVALID_REMOTE_PARAMETERS_ERR;
@@ -2087,8 +2089,7 @@ int32_t DistributedSchedService::StartRemoteFreeInstall(const OHOS::AAFwk::Want&
     }
     AAFwk::Want* newWant = const_cast<Want*>(&want);
     newWant->SetParam(DMS_SRC_NETWORK_ID, localDeviceId);
-    FreeInstallInfo info = {.want = *newWant, .requestCode = requestCode, .callerInfo = callerInfo,
-        .accountInfo = accountInfo};
+    FreeInstallInfo info = {*newWant, requestCode, callerInfo, accountInfo};
     int32_t result = remoteDms->StartFreeInstallFromRemote(info, taskId);
     if (result != ERR_OK) {
         HILOGE("result = %{public}d", result);

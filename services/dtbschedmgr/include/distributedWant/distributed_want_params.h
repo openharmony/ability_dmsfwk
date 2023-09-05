@@ -57,6 +57,9 @@ public:
 
     static bool CompareInterface(const sptr<AAFwk::IInterface> iIt1, const sptr<AAFwk::IInterface> iIt2, int typeId);
 
+    static bool CompareNumberInterface(const sptr<AAFwk::IInterface> iIt1,
+        const sptr<AAFwk::IInterface> iIt2, int typeId);
+
     static int GetDataType(const sptr<AAFwk::IInterface> iIt);
 
     static int GetNumberDataType(const sptr<AAFwk::IInterface> iIt);
