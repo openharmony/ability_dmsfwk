@@ -946,23 +946,6 @@ HWTEST_F(DistributedSchedServiceTest, SendResultFromRemote_006, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetContinuationTimeout_001
- * @tc.desc: call GetContinuaitonDevice
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedServiceTest, SetContinuationTimeout_001, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedSchedServiceTest SetContinuationTimeout_001 start" << std::endl;
-    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
-        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
-    }
-    int32_t missionId = MISSION_ID;
-    int32_t timeout = 5;
-    DistributedSchedService::GetInstance().SetContinuationTimeout(missionId, timeout);
-    DTEST_LOG << "DistributedSchedServiceTest SetContinuationTimeout_001 end" << std::endl;
-}
-
-/**
  * @tc.name: ContinueRemoteMission_001
  * @tc.desc: call ContinueRemoteMission
  * @tc.type: FUNC
@@ -970,6 +953,12 @@ HWTEST_F(DistributedSchedServiceTest, SetContinuationTimeout_001, TestSize.Level
 HWTEST_F(DistributedSchedServiceTest, ContinueRemoteMission_001, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinuationTest ContinueRemoteMission_001 start" << std::endl;
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    int32_t missionId = MISSION_ID;
+    int32_t timeout = 5;
+    DistributedSchedService::GetInstance().SetContinuationTimeout(missionId, timeout);
     WantParams wantParams;
     auto callback = GetDSchedService();
     int32_t result = DistributedSchedService::GetInstance().ContinueRemoteMission(
