@@ -546,7 +546,7 @@ int32_t DistributedSchedStub::DisconnectRemoteAbilityInner(MessageParcel& data, 
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 
-int32_t DistributedSchedStub::ReadDataForConnect(MessageParcel& data, CallerInfo callerInfo, AccountInfo accountInfo)
+int32_t DistributedSchedStub::ReadDataForConnect(MessageParcel& data, CallerInfo& callerInfo, AccountInfo& accountInfo)
 {
     PARCEL_READ_HELPER(data, Int32, callerInfo.uid);
     PARCEL_READ_HELPER(data, Int32, callerInfo.pid);
