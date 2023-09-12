@@ -40,10 +40,10 @@ namespace DistributedSchedule {
 namespace {
 constexpr uint32_t ACCESS_TOKEN = 100000000;
 constexpr uint32_t INVALID_ACCESS_TOKEN = 0;
-const string BUNDLE_NAME = "com.ohos.launcher";
+const string BUNDLE_NAME = "com.ohos.mms";
 const string INVALID_BUNDLE_NAME = "";
-const string PACKAGE_NAME = "com.ohos.launcher";
-const string ABILITY_NAME = "com.ohos.launcher.MainAbility";
+const string PACKAGE_NAME = "com.ohos.mms";
+const string ABILITY_NAME = "com.ohos.mms.MainAbility";
 const string INVALID_ABILITY_NAME = "";
 const string GROUP_ID = "TEST_GROUP_ID";
 const string INVALID_GROUP_ID = "";
@@ -487,7 +487,7 @@ HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_002, TestSize.Level3)
     want.SetElement(name);
     AppExecFwk::AbilityInfo targetAbility;
     bool ret = DistributedSchedPermission::GetInstance().GetTargetAbility(want, targetAbility, false);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
     DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_002 end ret:" << ret << std::endl;
 }
 
@@ -508,7 +508,7 @@ HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_003, TestSize.Level3)
     want.SetParam(DMS_MISSION_ID, 0);
     AppExecFwk::AbilityInfo targetAbility;
     bool ret = DistributedSchedPermission::GetInstance().GetTargetAbility(want, targetAbility, false);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
     DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_003 end ret:" << ret << std::endl;
 }
 
@@ -2350,7 +2350,7 @@ HWTEST_F(DistributedSchedPermissionTest, MarkUriPermission_002, TestSize.Level3)
     DTEST_LOG << "DistributedSchedPermissionTest MarkUriPermission_002 begin" << std::endl;
     AAFwk::Want want;
     want.AddFlags(want.FLAG_AUTH_READ_URI_PERMISSION);
-    want.SetUri("file://com.ohos.launcher/data/test_B");
+    want.SetUri("file://com.ohos.mms/data/test_B");
     DistributedSchedPermission::GetInstance().MarkUriPermission(want, 0);
     CallerInfo callerInfo;
     callerInfo.accessToken = ACCESS_TOKEN;
@@ -2375,8 +2375,8 @@ HWTEST_F(DistributedSchedPermissionTest, MarkUriPermission_003, TestSize.Level3)
     DTEST_LOG << "DistributedSchedPermissionTest MarkUriPermission_003 begin" << std::endl;
     AAFwk::Want want;
     want.AddFlags(want.FLAG_AUTH_READ_URI_PERMISSION);
-    want.SetUri("file://com.ohos.launcher/data/test_B");
-    const std::string bundleName = "com.ohos.launcher";
+    want.SetUri("file://com.ohos.mms/data/test_B");
+    const std::string bundleName = "com.ohos.mms";
     uint32_t accessTokenId;
     int32_t ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
     EXPECT_EQ(ret, ERR_OK);

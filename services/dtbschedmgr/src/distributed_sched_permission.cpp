@@ -26,6 +26,7 @@
 #include "distributed_sched_adapter.h"
 #include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
+#include "json_util.h"
 #include "os_account_manager.h"
 
 namespace OHOS {
@@ -33,7 +34,6 @@ namespace DistributedSchedule {
 using namespace OHOS::Security;
 using namespace AAFwk;
 namespace {
-const std::string TAG = "DistributedSchedPermission";
 const std::string FOUNDATION_PROCESS_NAME = "foundation";
 const std::string DMS_API_VERSION = "dmsApiVersion";
 const std::string DMS_IS_CALLER_BACKGROUND = "dmsIsCallerBackGround";
@@ -55,21 +55,48 @@ const int DEFAULT_DEVICE_SECURITY_LEVEL = -1;
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedPermission);
 void from_json(const nlohmann::json& jsonObject, GroupInfo& groupInfo)
 {
-    if (jsonObject.find(FIELD_GROUP_NAME) != jsonObject.end()) {
-        jsonObject.at(FIELD_GROUP_NAME).get_to(groupInfo.groupName);
-    }
-    if (jsonObject.find(FIELD_GROUP_ID) != jsonObject.end()) {
-        jsonObject.at(FIELD_GROUP_ID).get_to(groupInfo.groupId);
-    }
-    if (jsonObject.find(FIELD_GROUP_OWNER) != jsonObject.end()) {
-        jsonObject.at(FIELD_GROUP_OWNER).get_to(groupInfo.groupOwner);
-    }
-    if (jsonObject.find(FIELD_GROUP_TYPE) != jsonObject.end()) {
-        jsonObject.at(FIELD_GROUP_TYPE).get_to(groupInfo.groupType);
-    }
-    if (jsonObject.find(FIELD_GROUP_VISIBILITY) != jsonObject.end()) {
-        jsonObject.at(FIELD_GROUP_VISIBILITY).get_to(groupInfo.groupVisibility);
-    }
+    const auto &jsonObjectEnd = jsonObject.end();
+    int32_t parseResult = ERR_OK;
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        FIELD_GROUP_NAME,
+        groupInfo.groupName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        FIELD_GROUP_ID,
+        groupInfo.groupId,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        FIELD_GROUP_OWNER,
+        groupInfo.groupOwner,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        FIELD_GROUP_TYPE,
+        groupInfo.groupType,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<int32_t>(jsonObject,
+        jsonObjectEnd,
+        FIELD_GROUP_VISIBILITY,
+        groupInfo.groupVisibility,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
 }
 
 int32_t DistributedSchedPermission::CheckSendResultPermission(const AAFwk::Want& want, const CallerInfo& callerInfo,
