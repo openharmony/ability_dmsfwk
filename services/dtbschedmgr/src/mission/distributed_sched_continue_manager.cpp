@@ -219,6 +219,21 @@ void DistributedSchedContinueManager::StartEvent()
     HILOGI("StartEvent end");
 }
 
+int32_t DistributedSchedContinueManager::SendSoftbusEvent(uint32_t accessTokenId, uint8_t type)
+{
+    HILOGD("SendSoftbusEvent start, accessTokenId: %{public}d", accessTokenId);
+    uint8_t data[DMS_SEND_LEN];
+    uint8_t len = sizeof(uint32_t);
+    data[0] = (type << CONTINUE_SHIFT_04) | len;
+    data[1] = (accessTokenId >> CONTINUE_SHIFT_24) & DMS_0XFF;
+    data[INDEX_2] = (accessTokenId >> CONTINUE_SHIFT_16) & DMS_0XFF;
+    data[INDEX_3] = (accessTokenId >> CONTINUE_SHIFT_08) & DMS_0XFF;
+    data[INDEX_4] = accessTokenId & DMS_0XFF;
+    int32_t ret = SoftbusAdapter::GetInstance().SendSoftbusEvent(data, DMS_SEND_LEN);
+    HILOGD("SendSoftbusEvent end. Result: %{public}d", ret);
+    return ret;
+}
+
 int32_t DistributedSchedContinueManager::DealFocusedBusiness(const int32_t missionId)
 {
     HILOGI("DealFocusedBusiness start, missionId: %{public}d", missionId);
@@ -253,16 +268,9 @@ int32_t DistributedSchedContinueManager::DealFocusedBusiness(const int32_t missi
         return ret;
     }
     HILOGE("get focused accessTokenId success, accessTokenId: %{public}d", accessTokenId);
-    uint32_t sendDataLen = DMS_SEND_LEN;
-    uint8_t data[DMS_SEND_LEN];
+
     uint8_t type = DMS_FOCUSED_TYPE;
-    uint8_t len = sizeof(uint32_t);
-    data[0] = (type << CONTINUE_SHIFT_04) | len;
-    data[1] = (accessTokenId >> CONTINUE_SHIFT_24) & DMS_0XFF;
-    data[INDEX_2] = (accessTokenId >> CONTINUE_SHIFT_16) & DMS_0XFF;
-    data[INDEX_3] = (accessTokenId >> CONTINUE_SHIFT_08) & DMS_0XFF;
-    data[INDEX_4] = accessTokenId & DMS_0XFF;
-    ret = SoftbusAdapter::GetInstance().SendSoftbusEvent(data, sendDataLen);
+    ret = SendSoftbusEvent(accessTokenId, type);
     if (ret != ERR_OK) {
         HILOGE("SendSoftbusEvent focused failed,ret: %{public}d", ret);
         return ret;
@@ -316,18 +324,11 @@ int32_t DistributedSchedContinueManager::DealUnfocusedBusiness(const int32_t mis
         HILOGE("get unfocused accessTokenId failed, accessTokenId: %{public}d, ret: %{public}d", accessTokenId, ret);
         return ret;
     }
-    uint32_t sendDataLen = DMS_SEND_LEN;
-    uint8_t data[DMS_SEND_LEN];
+
     uint8_t type = DMS_UNFOCUSED_TYPE;
-    uint8_t len = sizeof(uint32_t);
-    data[0] = (type << CONTINUE_SHIFT_04) | len;
-    data[1] = (accessTokenId >> CONTINUE_SHIFT_24) & DMS_0XFF;
-    data[INDEX_2] = (accessTokenId >> CONTINUE_SHIFT_16) & DMS_0XFF;
-    data[INDEX_3] = (accessTokenId >> CONTINUE_SHIFT_08) & DMS_0XFF;
-    data[INDEX_4] = accessTokenId & DMS_0XFF;
-    ret = SoftbusAdapter::GetInstance().SendSoftbusEvent(data, sendDataLen);
+    ret = SendSoftbusEvent(accessTokenId, type);
     if (ret != ERR_OK) {
-        HILOGE("SendSoftbusEvent unfocused failed, sendDataLen: %{public}d, ret: %{public}d", sendDataLen, ret);
+        HILOGE("SendSoftbusEvent unfocused failed, ret: %{public}d", ret);
     }
     std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
     auto iterItem = focusedMission_.find(bundleName);
@@ -480,21 +481,13 @@ int32_t DistributedSchedContinueManager::DealSetMissionContinueStateBusiness(con
         return ret;
     }
 
-    uint32_t sendDataLen = DMS_SEND_LEN;
-    uint8_t data[DMS_SEND_LEN];
-    uint8_t len = sizeof(uint32_t);
     uint8_t type = DMS_FOCUSED_TYPE;
     if (state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE) {
         type = DMS_UNFOCUSED_TYPE;
     }
-    data[0] = (type << CONTINUE_SHIFT_04) | len;
-    data[1] = (accessTokenId >> CONTINUE_SHIFT_24) & DMS_0XFF;
-    data[INDEX_2] = (accessTokenId >> CONTINUE_SHIFT_16) & DMS_0XFF;
-    data[INDEX_3] = (accessTokenId >> CONTINUE_SHIFT_08) & DMS_0XFF;
-    data[INDEX_4] = accessTokenId & DMS_0XFF;
-    ret = SoftbusAdapter::GetInstance().SendSoftbusEvent(data, sendDataLen);
+    ret = SendSoftbusEvent(accessTokenId, type);
     if (ret != ERR_OK) {
-        HILOGE("SendSoftbusEvent setContinueState failed, sendDataLen: %{public}d, ret: %{public}d", sendDataLen, ret);
+        HILOGE("SendSoftbusEvent setContinueState failed, ret: %{public}d", ret);
         return ret;
     }
 
