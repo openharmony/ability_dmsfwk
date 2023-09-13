@@ -444,6 +444,7 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
     if (DistributedSchedPermission::GetInstance().CheckPermission(accessToken,
         PERMISSION_DISTRIBUTED_DATASYNC) != ERR_OK) {
         HILOGE("check data_sync permission failed!");
+        StartContinuation(*want, missionId, callerUid, DMS_PERMISSION_DENIED, accessToken);
         return DMS_PERMISSION_DENIED;
     }
     DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
