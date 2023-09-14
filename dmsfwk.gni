@@ -13,6 +13,7 @@
 
 declare_args() {
   dms_path = "//foundation/ability/dmsfwk"
+  module_output_path = "dmsfwk/dmsfwk"
   communication_path = "//foundation/communication"
   dmsfwk_standard_form_share = true
   dmsfwk_mission_manager = false

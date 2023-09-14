@@ -43,7 +43,7 @@ private:
     int32_t ConnectRemoteAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t DisconnectRemoteAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t ConnectAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
-    int32_t ReadDataForConnect(MessageParcel& data, CallerInfo callerInfo, AccountInfo accountInfo);
+    int32_t ReadDataForConnect(MessageParcel& data, CallerInfo& callerInfo, AccountInfo& accountInfo);
     int32_t DisconnectAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t NotifyProcessDiedFromRemoteInner(MessageParcel& data, MessageParcel& reply);
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER

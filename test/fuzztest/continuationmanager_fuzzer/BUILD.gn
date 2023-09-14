@@ -15,7 +15,7 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-module_output_path = "dmsfwk/continuationmanager"
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
 distributed_service = "//foundation/ability/dmsfwk/services"
 
 config("continuationmanager_fuzz_config") {
