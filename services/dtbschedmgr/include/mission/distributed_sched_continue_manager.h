@@ -65,6 +65,7 @@ public:
     int32_t SetMissionContinueState(const int32_t missionId, const AAFwk::ContinueState &state);
 
 private:
+    int32_t SendSoftbusEvent(uint32_t accessTokenId, uint8_t type);
     void StartEvent();
     int32_t DealFocusedBusiness(const int32_t missionId);
     int32_t DealUnfocusedBusiness(const int32_t missionId);
