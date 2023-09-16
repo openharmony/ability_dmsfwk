@@ -38,16 +38,17 @@ void JsDeviceSelectionListener::OnDeviceDisconnect(const std::vector<Continuatio
     CallJsMethod(EVENT_DISCONNECT, continuationResults);
 }
 
-void JsDeviceSelectionListener::AddCallback(const std::string& cbType, NativeValue* jsListenerObj)
+void JsDeviceSelectionListener::AddCallback(const std::string& cbType, napi_value jsListenerObj)
 {
     HILOGD("called.");
+    napi_ref tempRef = nullptr;
     std::unique_ptr<NativeReference> callbackRef;
     if (engine_ == nullptr) {
         HILOGE("engine_ is nullptr");
         return;
     }
-    callbackRef.reset(engine_->CreateReference(jsListenerObj, 1));
-
+    napi_create_reference(engine_, jsListenerObj, 1, &tempRef);
+    callbackRef.reset(reinterpret_cast<NativeReference *>(tempRef));
     std::lock_guard<std::mutex> jsCallBackMapLock(jsCallBackMapMutex_);
     jsCallBackMap_[cbType] = std::move(callbackRef);
     HILOGD("jsCallBackMap_ cbType: %{public}s, size: %{public}u!",
@@ -72,36 +73,36 @@ void JsDeviceSelectionListener::CallJsMethod(const std::string& methodName,
         return;
     }
     // js callback should run in js thread
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
         ([this, methodName, continuationResults]
-            (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            (napi_env env, NapiAsyncTask &task, int32_t status) {
             napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(reinterpret_cast<napi_env>(&engine), &scope);
+            napi_open_handle_scope(env, &scope);
             if (scope == nullptr) {
                 return;
             }
 
             CallJsMethodInner(methodName, continuationResults);
 
-            napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
+            napi_close_handle_scope(env, scope);
         });
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsDeviceSelectionListener::OnDeviceConnect",
-        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDeviceSelectionListener::OnDeviceConnect",
+        engine_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsDeviceSelectionListener::CallJsMethodInner(const std::string& methodName,
     const std::vector<ContinuationResult>& continuationResults)
 {
     std::lock_guard<std::mutex> jsCallBackMapLock(jsCallBackMapMutex_);
-    NativeValue* method = jsCallBackMap_[methodName]->Get();
+    napi_value method = jsCallBackMap_[methodName]->GetNapiValue();
     if (method == nullptr) {
         HILOGE("Failed to get %{public}s from object", methodName.c_str());
         return;
     }
-    NativeValue* argv[] = { WrapContinuationResultArray(*engine_, continuationResults) };
-    engine_->CallFunction(engine_->CreateUndefined(), method, argv, ArraySize(argv));
+    napi_value argv[] = { WrapContinuationResultArray(engine_, continuationResults) };
+    napi_call_function(engine_, CreateJsUndefined(engine_), method, ArraySize(argv), argv, nullptr);
 }
 
 void JsDeviceSelectionListener::CallJsMethod(const std::string& methodName, const std::vector<std::string>& deviceIds)
@@ -112,71 +113,79 @@ void JsDeviceSelectionListener::CallJsMethod(const std::string& methodName, cons
         return;
     }
     // js callback should run in js thread
-    std::unique_ptr<AsyncTask::CompleteCallback> complete = std::make_unique<AsyncTask::CompleteCallback>
+    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
         ([this, methodName, deviceIds]
-            (NativeEngine &engine, AsyncTask &task, int32_t status) {
+            (napi_env env, NapiAsyncTask &task, int32_t status) {
             napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(reinterpret_cast<napi_env>(&engine), &scope);
+            napi_open_handle_scope(env, &scope);
             if (scope == nullptr) {
                 return;
             }
-            
             CallJsMethodInner(methodName, deviceIds);
 
-            napi_close_handle_scope(reinterpret_cast<napi_env>(&engine), scope);
+            napi_close_handle_scope(env, scope);
         });
-    NativeReference* callback = nullptr;
-    std::unique_ptr<AsyncTask::ExecuteCallback> execute = nullptr;
-    AsyncTask::Schedule("JsDeviceSelectionListener::OnDeviceDisconnect",
-        *engine_, std::make_unique<AsyncTask>(callback, std::move(execute), std::move(complete)));
+    napi_ref callback = nullptr;
+    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
+    NapiAsyncTask::Schedule("JsDeviceSelectionListener::OnDeviceDisconnect",
+        engine_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
 }
 
 void JsDeviceSelectionListener::CallJsMethodInner(const std::string& methodName,
     const std::vector<std::string>& deviceIds)
 {
     std::lock_guard<std::mutex> jsCallBackMapLock(jsCallBackMapMutex_);
-    NativeValue* method = jsCallBackMap_[methodName]->Get();
+    napi_value method = jsCallBackMap_[methodName]->GetNapiValue();
     if (method == nullptr) {
         HILOGE("Failed to get %{public}s from object", methodName.c_str());
         return;
     }
-    NativeValue* argv[] = { WrapDeviceIdArray(*engine_, deviceIds) };
-    engine_->CallFunction(engine_->CreateUndefined(), method, argv, ArraySize(argv));
+    napi_value argv[] = { WrapDeviceIdArray(engine_, deviceIds) };
+    napi_call_function(engine_, CreateJsUndefined(engine_), method, ArraySize(argv), argv, nullptr);
 }
 
-NativeValue* JsDeviceSelectionListener::WrapContinuationResult(NativeEngine& engine,
+napi_value JsDeviceSelectionListener::WrapContinuationResult(napi_env env,
     const ContinuationResult& continuationResult)
 {
-    NativeValue* objValue = engine.CreateObject();
-    NativeObject* object = ConvertNativeValueTo<NativeObject>(objValue);
-    object->SetProperty("id", CreateJsValue(engine, continuationResult.GetDeviceId()));
-    object->SetProperty("type", CreateJsValue(engine, continuationResult.GetDeviceType()));
-    object->SetProperty("name", CreateJsValue(engine, continuationResult.GetDeviceName()));
+    napi_value objValue;
+    napi_create_object(env, &objValue);
+    SetKeyValue(env, objValue, "id", continuationResult.GetDeviceId());
+    SetKeyValue(env, objValue, "type", continuationResult.GetDeviceType());
+    SetKeyValue(env, objValue, "name", continuationResult.GetDeviceName());
     return objValue;
 }
 
-NativeValue* JsDeviceSelectionListener::WrapContinuationResultArray(NativeEngine& engine,
+napi_value JsDeviceSelectionListener::WrapContinuationResultArray(napi_env env,
     const std::vector<ContinuationResult>& continuationResults)
 {
-    NativeValue* arrayValue = engine.CreateArray(continuationResults.size());
-    NativeArray* array = ConvertNativeValueTo<NativeArray>(arrayValue);
+    napi_value arrayValue;
+    napi_create_array_with_length(env, continuationResults.size(), &arrayValue);
     uint32_t index = 0;
     for (const auto& continuationResult : continuationResults) {
-        array->SetElement(index++, WrapContinuationResult(engine, continuationResult));
+        napi_set_element(env,
+            arrayValue, index++, WrapContinuationResult(env, continuationResult));
     }
     return arrayValue;
 }
 
-NativeValue* JsDeviceSelectionListener::WrapDeviceIdArray(NativeEngine& engine,
+napi_value JsDeviceSelectionListener::WrapDeviceIdArray(napi_env env,
     const std::vector<std::string>& deviceIds)
 {
-    NativeValue* arrayValue = engine.CreateArray(deviceIds.size());
-    NativeArray* array = ConvertNativeValueTo<NativeArray>(arrayValue);
+    napi_value arrayValue;
+    napi_create_array_with_length(env, deviceIds.size(), &arrayValue);
     uint32_t index = 0;
     for (const auto& deviceId : deviceIds) {
-        array->SetElement(index++, CreateJsValue(engine, deviceId));
+        napi_set_element(env, arrayValue, index++, CreateJsValue(env, deviceId));
     }
     return arrayValue;
+}
+
+void JsDeviceSelectionListener::SetKeyValue(napi_env env,
+    const napi_value object, const std::string &strKey, const std::string &strValue) const
+{
+    napi_value attrValue = nullptr;
+    napi_create_string_utf8(env, strValue.c_str(), NAPI_AUTO_LENGTH, &attrValue);
+    napi_set_named_property(env, object, strKey.c_str(), attrValue);
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

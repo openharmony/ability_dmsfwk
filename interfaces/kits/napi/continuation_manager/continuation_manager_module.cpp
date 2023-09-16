@@ -16,14 +16,13 @@
 #include "native_engine/native_engine.h"
 #include "js_continuation_manager.h"
 
+static napi_module _module = {
+    .nm_modname = "continuation.continuationManager",
+    .nm_filename = "continuation/libcontinuationmanager_napi.so/continuationmanager.js",
+    .nm_register_func = OHOS::DistributedSchedule::JsContinuationManagerInit,
+};
+
 __attribute__((constructor)) static void NAPI_application_continuationmanager_AutoRegister()
 {
-    auto moduleManager = NativeModuleManager::GetInstance();
-    NativeModule newModuleInfo = {
-        .name = "continuation.continuationManager",
-        .fileName = "continuation/libcontinuationmanager_napi.so/continuationmanager.js",
-        .registerCallback = OHOS::DistributedSchedule::JsContinuationManagerInit,
-    };
-
-    moduleManager->Register(&newModuleInfo);
+    napi_module_register(&_module);
 }
