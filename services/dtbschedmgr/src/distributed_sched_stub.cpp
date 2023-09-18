@@ -32,6 +32,7 @@
 #include "mission/distributed_sched_mission_manager.h"
 #include "mission/mission_info_converter.h"
 #include "mission/snapshot_converter.h"
+#include "napi_error_code.h"
 #endif
 #include "ipc_skeleton.h"
 #include "message_parcel.h"
@@ -444,7 +445,7 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
     if (DistributedSchedPermission::GetInstance().CheckPermission(accessToken,
         PERMISSION_DISTRIBUTED_DATASYNC) != ERR_OK) {
         HILOGE("check data_sync permission failed!");
-        StartContinuation(*want, missionId, callerUid, DMS_PERMISSION_DENIED, accessToken);
+        StartContinuation(*want, missionId, callerUid, DistributedSchedule::PERMISSION_DENIED, accessToken);
         return DMS_PERMISSION_DENIED;
     }
     DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
