@@ -24,7 +24,8 @@
         "dmsfwk_mission_manager",
         "dmsfwk_report_memmgr",
         "dmsfwk_report_memmgr_plugins",
-        "dmsfwk_softbus_adapter_common"
+        "dmsfwk_softbus_adapter_common",
+        "dmsfwk_service_disable"
       ],
       "hisysevent_config": [
         "//foundation/ability/dmsfwk/hisysevent.yaml"
