@@ -117,6 +117,10 @@ DistributedSchedService::DistributedSchedService() : SystemAbility(DISTRIBUTED_S
 
 void DistributedSchedService::OnStart()
 {
+#ifdef DMS_SERVICE_DISABLE
+    HILOGI("DMS service disabled, exiting.");
+    _exit(0);
+#endif
     if (!Init()) {
         HILOGE("failed to init DistributedSchedService");
         return;
