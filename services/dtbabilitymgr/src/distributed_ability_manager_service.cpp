@@ -343,26 +343,30 @@ int32_t DistributedAbilityManagerService::ConnectAbility(int32_t token,
 {
     AAFwk::Want want;
     want.SetAction(DMS_HIPLAY_ACTION);
+    int32_t activeAccountId = -1;
+#ifdef OS_ACCOUNT_PART
     std::vector<int32_t> ids;
-    int32_t errCode = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
-    if (errCode != ERR_OK || ids.empty()) {
+    int32_t ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (ret != ERR_OK || ids.empty()) {
         return INVALID_PARAMETERS_ERR;
     }
+    activeAccountId = ids[0];
+#endif
     AppExecFwk::ExtensionAbilityInfo extensionInfo;
-    if (!QueryExtensionAbilityInfo(ids, want, extensionInfo)) {
+    if (!QueryExtensionAbilityInfo(activeAccountId, want, extensionInfo)) {
         HILOGE("QueryExtensionAbilityInfo failed");
         return CONNECT_ABILITY_FAILED;
     }
     if (connect_ == nullptr) {
         connect_ = new AppConnectionStub(token, continuationExtraParams);
     }
-    errCode = AAFwk::AbilityManagerClient::GetInstance()->Connect();
+    int32_t errCode = AAFwk::AbilityManagerClient::GetInstance()->Connect();
     if (errCode != ERR_OK) {
         HILOGE("connect ability manager server failed, errCode=%{public}d", errCode);
         return errCode;
     }
     errCode = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want,
-        iface_cast<AAFwk::IAbilityConnection>(connect_), this, ids[0]);
+        iface_cast<AAFwk::IAbilityConnection>(connect_), this, activeAccountId);
     if (errCode != ERR_OK) {
         HILOGE("ConnectAbility failed");
         connect_ = nullptr;
@@ -371,7 +375,7 @@ int32_t DistributedAbilityManagerService::ConnectAbility(int32_t token,
     return ERR_OK;
 }
 
-bool DistributedAbilityManagerService::QueryExtensionAbilityInfo(const std::vector<int32_t>& ids,
+bool DistributedAbilityManagerService::QueryExtensionAbilityInfo(const int32_t& activeAccountId,
     const AAFwk::Want& want, AppExecFwk::ExtensionAbilityInfo& extensionInfo)
 {
     auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -392,7 +396,7 @@ bool DistributedAbilityManagerService::QueryExtensionAbilityInfo(const std::vect
     std::vector<AppExecFwk::ExtensionAbilityInfo> extensionInfos;
     std::string identity = IPCSkeleton::ResetCallingIdentity();
     bundleMgr->QueryExtensionAbilityInfos(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT
-        | AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION, ids[0], extensionInfos);
+        | AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION, activeAccountId, extensionInfos);
     IPCSkeleton::SetCallingIdentity(identity);
     if (extensionInfos.empty()) {
         HILOGE("QueryExtensionAbilityInfo failed");

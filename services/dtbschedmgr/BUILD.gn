@@ -46,6 +46,9 @@ config("distributed_sched_config") {
   if (dmsfwk_service_disable) {
     defines += [ "DMS_SERVICE_DISABLE" ]
   }
+  if (os_account_part) {
+    defines += [ "OS_ACCOUNT_PART" ]
+  }
 }
 
 ohos_shared_library("distributedschedsvr") {
@@ -119,10 +122,12 @@ ohos_shared_library("distributedschedsvr") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
-    "os_account:os_account_innerkits",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+  if (os_account_part) {
+    external_deps += [ "os_account:os_account_innerkits" ]
+  }
 
   if (efficiency_manager_service_enable) {
     external_deps += [ "efficiency_manager:suspend_manager_client" ]
