@@ -2738,7 +2738,6 @@ HWTEST_F(DistributedSchedServiceTest, NotifyProcessDiedFromRemote_001, TestSize.
         "com.ohos.distributedmusicplayer", "192.168.43.100", abilityInfo);
     int result2 = DistributedSchedService::GetInstance().StartAbilityFromRemote(want,
         abilityInfo, 0, callerInfo1, accountInfo);
-    DTEST_LOG << "result2:" << result2 << std::endl;
     
     /**
     * @tc.steps: step1. call NotifyProcessDiedFromRemote when sourceDeviceId == sourceDeviceId.
