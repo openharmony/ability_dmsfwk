@@ -84,6 +84,32 @@ HWTEST_F(DMSContinueManagerTest, testUnInit001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: testAddCancelMissionFocusedTimer001
+ * @tc.desc: test AddCancelMissionFocusedTimer
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testAddCancelMissionFocusedTimer001, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest testAddCancelMissionFocusedTimer001 begin" << std::endl;
+
+    DistributedSchedContinueManager::GetInstance().Init();
+
+    /**
+     * @tc.steps: step1. test AddCancelMissionFocusedTimer when eventHandler is not nullptr;
+     */
+    DistributedSchedContinueManager::GetInstance().AddCancelMissionFocusedTimer(0);
+    EXPECT_NE(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
+
+    /**
+     * @tc.steps: step2. test AddCancelMissionFocusedTimer when eventHandler is nullptr;
+     */
+    DistributedSchedContinueManager::GetInstance().UnInit();
+    DistributedSchedContinueManager::GetInstance().AddCancelMissionFocusedTimer(0);
+    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
+    DTEST_LOG << "DMSContinueManagerTest testAddCancelMissionFocusedTimer001 end" << std::endl;
+}
+
+/**
  * @tc.name: testNotifyMissionFocused001
  * @tc.desc: test NotifyMissionFocused
  * @tc.type: FUNC
@@ -249,14 +275,14 @@ HWTEST_F(DMSContinueManagerTest, testDealUnfocusedBusiness001, TestSize.Level3)
     /**
      * @tc.steps: step1. test DealUnfocusedBusiness when missionId is invalid;
      */
-    int32_t ret = DistributedSchedContinueManager::GetInstance().DealUnfocusedBusiness(-1);
+    int32_t ret = DistributedSchedContinueManager::GetInstance().DealUnfocusedBusiness(-1, true);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     /**
      * @tc.steps: step2. test DealUnfocusedBusiness when missionId is not invalid;
      */
     DistributedSchedContinueManager::GetInstance().focusedMission_[BUNDLENAME_01] = MISSIONID_01;
-    ret = DistributedSchedContinueManager::GetInstance().DealUnfocusedBusiness(MISSIONID_01);
+    ret = DistributedSchedContinueManager::GetInstance().DealUnfocusedBusiness(MISSIONID_01, true);
     EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
 
     /**
@@ -346,14 +372,14 @@ HWTEST_F(DMSContinueManagerTest, testIsContinue001, TestSize.Level1)
     DTEST_LOG << "DMSContinueManagerTest testIsContinue001 start" << std::endl;
     DistributedSchedContinueManager::GetInstance().focusedMission_[BUNDLENAME_02] = MISSIONID_02;
     DistributedSchedContinueManager::GetInstance().info_.currentMissionId = MISSIONID_01;
-    DistributedSchedContinueManager::GetInstance().info_.currentIsContibuable = true;
+    DistributedSchedContinueManager::GetInstance().info_.currentIsContinuable = true;
     bool ret = DistributedSchedContinueManager::GetInstance().IsContinue(MISSIONID_02, BUNDLENAME_02);
     EXPECT_EQ(ret, false);
 
     ret = DistributedSchedContinueManager::GetInstance().IsContinue(MISSIONID_01, BUNDLENAME_01);
     EXPECT_EQ(ret, true);
 
-    DistributedSchedContinueManager::GetInstance().info_.currentIsContibuable = false;
+    DistributedSchedContinueManager::GetInstance().info_.currentIsContinuable = false;
     ret = DistributedSchedContinueManager::GetInstance().IsContinue(MISSIONID_01, BUNDLENAME_01);
     EXPECT_EQ(ret, true);
     DTEST_LOG << "DMSContinueManagerTest testIsContinue001 end" << std::endl;
@@ -421,7 +447,7 @@ HWTEST_F(DMSContinueManagerTest, testDealSetMissionContinueStateBusiness001, Tes
     /**
      * @tc.steps: step2. test DealUnfocusedBusiness when mission is not continueable;
      */
-    DistributedSchedContinueManager::GetInstance().info_.currentIsContibuable = false;
+    DistributedSchedContinueManager::GetInstance().info_.currentIsContinuable = false;
     ret = DistributedSchedContinueManager::GetInstance().DealSetMissionContinueStateBusiness(MISSIONID_01, state);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
