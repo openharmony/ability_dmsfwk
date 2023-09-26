@@ -61,7 +61,6 @@ dtbabilitymgr_public_deps = [
   "//foundation/ability/dmsfwk/services/dtbschedmgr:distributedschedsvr",
   "//third_party/googletest:gmock_main",
   "//third_party/googletest:gtest_main",
-  "//third_party/libxml2:libxml2",
 ]
 
 dtbabilitymgr_sources = [
