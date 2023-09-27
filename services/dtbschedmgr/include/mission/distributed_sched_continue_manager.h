@@ -38,6 +38,12 @@ struct currentMissionInfo {
     int32_t currentMissionId;
     bool currentIsContinuable;
 };
+
+struct currentIconInfo {
+    std::string senderNetworkId;
+    std::string bundleName;
+};
+
 class DistributedSchedContinueManager {
     DECLARE_SINGLE_INSTANCE(DistributedSchedContinueManager);
 
@@ -63,7 +69,7 @@ public:
     int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj);
     int32_t GetMissionId(const std::string& bundleName, int32_t& missionId);
     void NotifyDeid(const sptr<IRemoteObject>& obj);
-    int32_t SetMissionContinueState(const int32_t missionId, const AAFwk::ContinueState &state);
+    int32_t SetMissionContinueState(const int32_t missionId, const AAFwk::ContinueState& state);
 
 private:
     void AddCancelMissionFocusedTimer(const int32_t missionId);
@@ -71,15 +77,17 @@ private:
     void StartEvent();
     int32_t DealFocusedBusiness(const int32_t missionId);
     int32_t DealUnfocusedBusiness(const int32_t missionId, bool isUnfocused);
-    int32_t DealUnBroadcastdBusiness(std::string& senderNetworkId, uint32_t accessTokenId, const int32_t state);
+    int32_t VerifyBroadcastSource(std::string& senderNetworkId, std::string& bundleName, const int32_t state);
+    int32_t DealOnBroadcastBusiness(std::string& senderNetworkId, uint32_t accessTokenId, const int32_t state);
     void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const std::string& networkId,
         const std::string& bundleName, const int32_t state);
     int32_t GetBundleName(const int32_t missionId, std::string& bundleName);
     bool IsContinue(const int32_t& missionId, const std::string& bundleName);
-    int32_t DealSetMissionContinueStateBusiness(const int32_t missionId, const AAFwk::ContinueState &state);
+    int32_t DealSetMissionContinueStateBusiness(const int32_t missionId, const AAFwk::ContinueState& state);
     int32_t CheckContinueState(const int32_t missionId);
 private:
     currentMissionInfo info_ = { INVALID_MISSION_ID, false };
+    currentIconInfo iconInfo_;
     sptr<DistributedMissionFocusedListener> missionFocusedListener_;
     sptr<DistributedMissionDiedListener> missionDiedListener_;
     std::string onType_;
@@ -88,6 +96,7 @@ private:
     std::thread eventThread_;
     std::condition_variable eventCon_;
     std::mutex eventMutex_;
+    std::mutex iconMutex_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
 };
 } // namespace DistributedSchedule

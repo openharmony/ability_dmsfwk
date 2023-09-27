@@ -32,6 +32,8 @@ const std::string BUNDLENAME_01 = "bundleName01";
 const std::string BUNDLENAME_02 = "bundleName02";
 constexpr int32_t MISSIONID_01 = 1;
 constexpr int32_t MISSIONID_02 = 2;
+constexpr int32_t ACTIVE = 0;
+constexpr int32_t INACTIVE = 1;
 }
 
 void DMSContinueManagerTest::SetUpTestCase()
@@ -307,22 +309,84 @@ HWTEST_F(DMSContinueManagerTest, testDealUnfocusedBusiness001, TestSize.Level3)
 }
 
 /**
- * @tc.name: testDealUnBroadcastdBusiness001
- * @tc.desc: test DealUnBroadcastdBusiness.
+ * @tc.name: testVerifyBroadcastSource001
+ * @tc.desc: test testVerifyBroadcastSource001.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testVerifyBroadcastSource001, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest testVerifyBroadcastSource001 start" << std::endl;
+
+    int32_t state = ACTIVE;
+    std::string networkId = "test networkId";
+    std::string bundleName = "test bundleName";
+    int32_t ret = DistributedSchedContinueManager::GetInstance().VerifyBroadcastSource(networkId, bundleName, state);
+    EXPECT_EQ(ret, ERR_OK);
+
+    state = INACTIVE;
+    ret = DistributedSchedContinueManager::GetInstance().VerifyBroadcastSource(networkId, bundleName, state);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: testVerifyBroadcastSource002
+ * @tc.desc: test testVerifyBroadcastSource002.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testVerifyBroadcastSource002, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest testVerifyBroadcastSource002 start" << std::endl;
+
+    int32_t state = ACTIVE;
+    std::string networkId = "test networkId";
+    std::string bundleName = "test bundleName";
+    int32_t ret = DistributedSchedContinueManager::GetInstance().VerifyBroadcastSource(networkId, bundleName, state);
+    EXPECT_EQ(ret, ERR_OK);
+
+    state = INACTIVE;
+    networkId = "invalid networkId";
+    ret = DistributedSchedContinueManager::GetInstance().VerifyBroadcastSource(networkId, bundleName, state);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+}
+
+/**
+ * @tc.name: testVerifyBroadcastSource003
+ * @tc.desc: test testVerifyBroadcastSource003.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testVerifyBroadcastSource003, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest testVerifyBroadcastSource003 start" << std::endl;
+
+    int32_t state = ACTIVE;
+    std::string networkId = "test networkId";
+    std::string bundleName = "test bundleName";
+    int32_t ret = DistributedSchedContinueManager::GetInstance().VerifyBroadcastSource(networkId, bundleName, state);
+    EXPECT_EQ(ret, ERR_OK);
+
+    state = INACTIVE;
+    bundleName = "invalid bundleName";
+    ret = DistributedSchedContinueManager::GetInstance().VerifyBroadcastSource(networkId, bundleName, state);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+}
+
+/**
+ * @tc.name: testDealOnBroadcastBusiness001
+ * @tc.desc: test DealOnBroadcastBusiness.
  * @tc.type: FUNC
  * @tc.require: I7F8KH
  */
-HWTEST_F(DMSContinueManagerTest, testDealUnBroadcastdBusiness001, TestSize.Level3)
+HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3)
 {
-    DTEST_LOG << "DMSContinueManagerTest testDealUnBroadcastdBusiness001 start" << std::endl;
+    DTEST_LOG << "DMSContinueManagerTest testDealOnBroadcastBusiness001 start" << std::endl;
 
     /**
-     * @tc.steps: step1. test DealUnBroadcastdBusiness when senderNetworkId is invalid;
+     * @tc.steps: step1. test DealOnBroadcastBusiness when senderNetworkId is invalid;
      */
     std::string senderNetworkId = "invalid senderNetworkId";
     uint32_t accessTokenId = 0;
     int32_t state = 0;
-    int32_t ret = DistributedSchedContinueManager::GetInstance().DealUnBroadcastdBusiness(
+    int32_t ret = DistributedSchedContinueManager::GetInstance().DealOnBroadcastBusiness(
         senderNetworkId, accessTokenId, state);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
@@ -340,7 +404,7 @@ HWTEST_F(DMSContinueManagerTest, testDealUnBroadcastdBusiness001, TestSize.Level
     obj =  new RemoteOnListenerStubTest();
     DistributedSchedContinueManager::GetInstance().NotifyRecvBroadcast(obj, networkId, bundleName, state);
 
-    DTEST_LOG << "DMSContinueManagerTest testDealUnBroadcastdBusiness001 end" << std::endl;
+    DTEST_LOG << "DMSContinueManagerTest testDealOnBroadcastBusiness001 end" << std::endl;
 }
 
 /**

@@ -146,7 +146,7 @@ void DistributedSchedContinueManager::NotifyDataRecv(std::string& senderNetworkI
         state = INACTIVE;
     }
     auto feedfunc = [this, senderNetworkId, accessTokenId, state]() mutable {
-        DealUnBroadcastdBusiness(senderNetworkId, accessTokenId, state);
+        DealOnBroadcastBusiness(senderNetworkId, accessTokenId, state);
     };
     if (eventHandler_ != nullptr) {
         eventHandler_->PostTask(feedfunc);
@@ -364,10 +364,36 @@ int32_t DistributedSchedContinueManager::DealUnfocusedBusiness(const int32_t mis
     return ERR_OK;
 }
 
-int32_t DistributedSchedContinueManager::DealUnBroadcastdBusiness(std::string& senderNetworkId,
+int32_t DistributedSchedContinueManager::VerifyBroadcastSource(std::string& senderNetworkId, std::string& bundleName,
+    const int32_t state)
+{
+    std::lock_guard<std::mutex> currentIconLock(iconMutex_);
+    if (state == ACTIVE) {
+        iconInfo_.senderNetworkId = senderNetworkId;
+        iconInfo_.bundleName = bundleName;
+    } else {
+        if (senderNetworkId != iconInfo_.senderNetworkId) {
+            HILOGE("Sender not match, task abort. senderNetworkId: %{public}s, saved NetworkId: %{public}s",
+                DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(),
+                DnetworkAdapter::AnonymizeNetworkId(iconInfo_.senderNetworkId).c_str());
+            return INVALID_PARAMETERS_ERR;
+        }
+
+        if (bundleName != iconInfo_.bundleName) {
+            HILOGE("BundleName not match, task abort. bundleName: %{public}s, saved bundleName: %{public}s",
+                bundleName.c_str(), iconInfo_.bundleName.c_str());
+            return INVALID_PARAMETERS_ERR;
+        }
+        iconInfo_.senderNetworkId = "";
+        iconInfo_.bundleName = "";
+    }
+    return ERR_OK;
+}
+
+int32_t DistributedSchedContinueManager::DealOnBroadcastBusiness(std::string& senderNetworkId,
     uint32_t accessTokenId, const int32_t state)
 {
-    HILOGI("DealUnBroadcastdBusiness start, senderNetworkId: %{public}s, accessTokenId: %{public}d, state: %{public}d",
+    HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, accessTokenId: %{public}d, state: %{public}d",
         DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), accessTokenId, state);
     std::string bundleName;
     int32_t ret = BundleManagerInternal::GetBundleNameFromDbms(senderNetworkId, accessTokenId, bundleName);
@@ -386,6 +412,10 @@ int32_t DistributedSchedContinueManager::DealUnBroadcastdBusiness(std::string& s
         HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
         return INVALID_PARAMETERS_ERR;
     }
+    ret = VerifyBroadcastSource(senderNetworkId, bundleName, state);
+    if (ret != ERR_OK) {
+        return ret;
+    }
     std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     auto iterItem = registerOnListener_.find(onType_);
     if (iterItem == registerOnListener_.end()) {
@@ -396,7 +426,7 @@ int32_t DistributedSchedContinueManager::DealUnBroadcastdBusiness(std::string& s
     for (auto iter : objs) {
         NotifyRecvBroadcast(iter, senderNetworkId, bundleName, state);
     }
-    HILOGI("DealUnBroadcastdBusiness end");
+    HILOGI("DealOnBroadcastBusiness end");
     return ERR_OK;
 }
 
