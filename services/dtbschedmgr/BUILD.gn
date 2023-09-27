@@ -27,6 +27,7 @@ config("distributed_sched_config") {
     "include",
     "${communication_path}/dsoftbus/dsoftbus_enhance/interfaces/kits/broadcast",
     "${communication_path}/dsoftbus/interfaces/kits/common",
+    "${dms_path}/interfaces/kits/napi/include",
     "include/distributedWant",
   ]
   defines = []
@@ -41,6 +42,9 @@ config("distributed_sched_config") {
   }
   if (efficiency_manager_service_enable) {
     defines += [ "EFFICIENCY_MANAGER_ENABLE" ]
+  }
+  if (dmsfwk_service_disable) {
+    defines += [ "DMS_SERVICE_DISABLE" ]
   }
 }
 

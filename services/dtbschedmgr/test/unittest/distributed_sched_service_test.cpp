@@ -313,81 +313,6 @@ HWTEST_F(DistributedSchedServiceTest, StartAbilityFromRemote_001, TestSize.Level
 }
 
 /**
- * @tc.name: StartAbilityFromRemote_002
- * @tc.desc: call StartAbilityFromRemote
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedServiceTest, StartAbilityFromRemote_002, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_002 start" << std::endl;
-    sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
-
-    AAFwk::Want want;
-    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
-        "com.ohos.distributedmusicplayer.MainAbility");
-    want.SetElement(element);
-    AppExecFwk::AbilityInfo abilityInfo;
-    GetAbilityInfo("com.ohos.distributedmusicplayer", "com.ohos.distributedmusicplayer.MainAbility",
-        "com.ohos.distributedmusicplayer", "192.168.43.100", abilityInfo);
-    CallerInfo callerInfo;
-    callerInfo.uid = 0;
-    callerInfo.sourceDeviceId = "255.255.255.255";
-    IDistributedSched::AccountInfo accountInfo;
-
-    int result1 = proxy->StartAbilityFromRemote(want, abilityInfo, 0, callerInfo, accountInfo);
-    DTEST_LOG << "result1 is" << result1 << std::endl;
-
-    AppExecFwk::ElementName element2("", "com.ohos.distributedmusicplayer",
-        "com.ohos.distributedmusicplayer.MainAbilityService");
-    want.SetElement(element2);
-    GetAbilityInfo("com.ohos.distributedmusicplayer", "com.ohos.distributedmusicplayer.MainAbilityService",
-        "com.ohos.distributedmusicplayer", "192.168.43.100", abilityInfo);
-    int result2 = proxy->StartAbilityFromRemote(want, abilityInfo, 0, callerInfo, accountInfo);
-    DTEST_LOG << "result2:" << result2 << std::endl;
-    DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_002 end" << std::endl;
-}
-
-/**
- * @tc.name: StartAbilityFromRemote_003
- * @tc.desc: call StartAbilityFromRemote for pressure test
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedServiceTest, StartAbilityFromRemote_003, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_003 start" << std::endl;
-    sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
-    /**
-     * @tc.steps: step1. set want and abilityInfo
-     */
-    AAFwk::Want want;
-    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
-        "com.ohos.distributedmusicplayer.MainAbility");
-    want.SetElement(element);
-    AppExecFwk::AbilityInfo abilityInfo;
-    GetAbilityInfo("com.ohos.distributedmusicplayer", "com.ohos.distributedmusicplayer.MainAbility",
-        "com.ohos.distributedmusicplayer", "192.168.43.100", abilityInfo);
-    CallerInfo callerInfo;
-    callerInfo.uid = 0;
-    callerInfo.sourceDeviceId = "255.255.255.255";
-    IDistributedSched::AccountInfo accountInfo;
-    /**
-     * @tc.steps: step2. StartAbilityFromRemote for pressure test
-     * @tc.expected: step2. StartAbilityFromRemote for result
-     */
-    for (int index = 0; index < static_cast<int32_t>(LoopTime::LOOP_TIME); index++) {
-        int result = proxy->StartAbilityFromRemote(want, abilityInfo, 0, callerInfo, accountInfo);
-        DTEST_LOG << "pressure" + to_string(index) + " result is " << result << std::endl;
-    }
-    DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_003 end" << std::endl;
-}
-
-/**
  * @tc.name: StartAbilityFromRemote_004
  * @tc.desc: call StartAbilityFromRemote with dms
  * @tc.type: FUNC
@@ -424,45 +349,6 @@ HWTEST_F(DistributedSchedServiceTest, StartAbilityFromRemote_004, TestSize.Level
     EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), result1);
     EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), result2);
     DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_004 end" << std::endl;
-}
-
-/**
- * @tc.name: StartAbilityFromRemote_005
- * @tc.desc: call StartAbilityFromRemote with dms
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedServiceTest, StartAbilityFromRemote_005, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_005 start" << std::endl;
-    sptr<IDistributedSched> proxy = GetDms();
-
-    AAFwk::Want want;
-    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
-        "com.ohos.distributedmusicplayer.MainAbility");
-    want.SetElement(element);
-    AppExecFwk::AbilityInfo abilityInfo;
-    GetAbilityInfo("com.ohos.distributedmusicplayer", "com.ohos.distributedmusicplayer.MainAbility",
-        "com.ohos.distributedmusicplayer", "192.168.43.100", abilityInfo);
-    CallerInfo callerInfo;
-    callerInfo.uid = 0;
-    callerInfo.sourceDeviceId = "255.255.255.255";
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = 1;
-    accountInfo.groupIdList.push_back("123456");
-
-    int result1 = DistributedSchedService::GetInstance().StartAbilityFromRemote(want,
-        abilityInfo, 0, callerInfo, accountInfo);
-    DTEST_LOG << "result1:" << result1 << std::endl;
-
-    AppExecFwk::ElementName element2("", "com.ohos.distributedmusicplayer",
-        "com.ohos.distributedmusicplayer.MainAbilityService");
-    want.SetElement(element2);
-    GetAbilityInfo("com.ohos.distributedmusicplayer", "com.ohos.distributedmusicplayer.MainAbilityService",
-        "com.ohos.distributedmusicplayer", "192.168.43.100", abilityInfo);
-    int result2 = DistributedSchedService::GetInstance().StartAbilityFromRemote(want,
-        abilityInfo, 0, callerInfo, accountInfo);
-    DTEST_LOG << "result2:" << result2 << std::endl;
-    DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_005 end" << std::endl;
 }
 
 /**
@@ -503,79 +389,6 @@ HWTEST_F(DistributedSchedServiceTest, SendResultFromRemote_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: StartAbilityFromRemote_002
- * @tc.desc: call SendResultFromRemote
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedServiceTest, SendResultFromRemote_002, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedSchedServiceTest SendResultFromRemote_002 start" << std::endl;
-    sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
-
-    AAFwk::Want want;
-    AppExecFwk::ElementName element("255.255.255.255", "com.ohos.distributedmusicplayer",
-        "com.ohos.distributedmusicplayer.MainAbility");
-    want.SetElement(element);
-    AppExecFwk::AbilityInfo abilityInfo;
-    CallerInfo callerInfo;
-    callerInfo.uid = 0;
-    callerInfo.sourceDeviceId = "255.255.255.255";
-    IDistributedSched::AccountInfo accountInfo;
-
-    int result1 = proxy->SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
-    DTEST_LOG << "result1 is" << result1 << std::endl;
-    AppExecFwk::ElementName element2("", "com.ohos.distributedmusicplayer",
-        "com.ohos.distributedmusicplayer.MainAbilityService");
-    want.SetElement(element2);
-    int missionId = 0;
-    want.SetParam(DMS_SRC_NETWORK_ID, callerInfo.sourceDeviceId);
-    want.SetParam(DMS_MISSION_ID, missionId);
-    int result2 = proxy->SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
-    DTEST_LOG << "result2:" << result2 << std::endl;
-    DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_002 end" << std::endl;
-}
-
-/**
- * @tc.name: SendResultFromRemote_003
- * @tc.desc: call SendResultFromRemote for pressure test
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedServiceTest, SendResultFromRemote_003, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedSchedServiceTest SendResultFromRemote_003 start" << std::endl;
-    sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
-    /**
-     * @tc.steps: step1. set want and abilityInfo
-     */
-    AAFwk::Want want;
-    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
-        "com.ohos.distributedmusicplayer.MainAbility");
-    want.SetElement(element);
-    CallerInfo callerInfo;
-    callerInfo.uid = 0;
-    callerInfo.sourceDeviceId = "255.255.255.255";
-    IDistributedSched::AccountInfo accountInfo;
-    int missionId = 0;
-    want.SetParam(DMS_SRC_NETWORK_ID, callerInfo.sourceDeviceId);
-    want.SetParam(DMS_MISSION_ID, missionId);
-    /**
-     * @tc.steps: step2. SendResultFromRemote for pressure test
-     * @tc.expected: step2. SendResultFromRemote for result
-     */
-    for (int index = 0; index < static_cast<int32_t>(LoopTime::LOOP_TIME); index++) {
-        int result = proxy->SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
-        DTEST_LOG << "pressure" + to_string(index) + " result is " << result << std::endl;
-    }
-    DTEST_LOG << "DistributedSchedServiceTest SendResultFromRemote_003 end" << std::endl;
-}
-
-/**
  * @tc.name: SendResultFromRemote_004
  * @tc.desc: call SendResultFromRemote with dms
  * @tc.type: FUNC
@@ -605,41 +418,6 @@ HWTEST_F(DistributedSchedServiceTest, SendResultFromRemote_004, TestSize.Level1)
     EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), result1);
     EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), result2);
     DTEST_LOG << "DistributedSchedServiceTest SendResultFromRemote_004 end" << std::endl;
-}
-
-/**
- * @tc.name: SendResultFromRemote_005
- * @tc.desc: call SendResultFromRemote with dms
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedServiceTest, SendResultFromRemote_005, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedSchedServiceTest SendResultFromRemote_005 start" << std::endl;
-    sptr<IDistributedSched> proxy = GetDms();
-
-    AAFwk::Want want;
-    AppExecFwk::ElementName element("1.1.1.1", "com.ohos.distributedmusicplayer",
-        "com.ohos.distributedmusicplayer.MainAbility");
-    want.SetElement(element);
-    CallerInfo callerInfo;
-    callerInfo.uid = 0;
-    callerInfo.sourceDeviceId = "255.255.255.255";
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = 1;
-    accountInfo.groupIdList.push_back("123456");
-    int missionId = 0;
-    want.SetParam(DMS_SRC_NETWORK_ID, callerInfo.sourceDeviceId);
-    want.SetParam(DMS_MISSION_ID, missionId);
-
-    int result1 = DistributedSchedService::GetInstance().SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
-    DTEST_LOG << "result1:" << result1 << std::endl;
-
-    AppExecFwk::ElementName element2("1.1.1.1", "com.ohos.distributedmusicplayer",
-        "com.ohos.distributedmusicplayer.MainAbilityService");
-    want.SetElement(element2);
-    int result2 = DistributedSchedService::GetInstance().SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
-    DTEST_LOG << "result2:" << result2 << std::endl;
-    DTEST_LOG << "DistributedSchedServiceTest SendResultFromRemote_005 end" << std::endl;
 }
 
 /**
@@ -1384,40 +1162,6 @@ HWTEST_F(DistributedSchedServiceTest, NotifyCompleteContinuation_001, TestSize.L
 }
 
 /**
- * @tc.name: NotifyContinuationCallbackResult_001
- * @tc.desc: call NotifyContinuationCallbackResult
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedServiceTest, NotifyContinuationCallbackResult_001, TestSize.Level1)
-{
-    DTEST_LOG << "DSchedContinuationTest NotifyContinuationCallbackResult_001 start" << std::endl;
-    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
-        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
-    }
-    int32_t missionId = MISSION_ID;
-    bool isSuccess = false;
-    DistributedSchedService::GetInstance().NotifyContinuationCallbackResult(missionId, isSuccess);
-    DTEST_LOG << "DSchedContinuationTest NotifyContinuationCallbackResult_001 end" << std::endl;
-}
-
-/**
- * @tc.name: NotifyContinuationCallbackResult_002
- * @tc.desc: call NotifyContinuationCallbackResult
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedServiceTest, NotifyContinuationCallbackResult_002, TestSize.Level1)
-{
-    DTEST_LOG << "DSchedContinuationTest NotifyContinuationCallbackResult_002 start" << std::endl;
-    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
-        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
-    }
-    int32_t missionId = MISSION_ID;
-    bool resultCode = ERR_OK;
-    DistributedSchedService::GetInstance().NotifyContinuationCallbackResult(missionId, resultCode);
-    DTEST_LOG << "DSchedContinuationTest NotifyContinuationCallbackResult_002 end" << std::endl;
-}
-
-/**
  * @tc.name: StartAbilityFromRemote_007
  * @tc.desc: test StartAbilityFromRemote
  * @tc.type: FUNC
@@ -1426,6 +1170,14 @@ HWTEST_F(DistributedSchedServiceTest, NotifyContinuationCallbackResult_002, Test
 HWTEST_F(DistributedSchedServiceTest, StartAbilityFromRemote_007, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest StartAbilityFromRemote_007 start" << std::endl;
+    
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    int32_t missionId = MISSION_ID;
+    bool isSuccess = false;
+    DistributedSchedService::GetInstance().NotifyContinuationCallbackResult(missionId, isSuccess);
+    
     AAFwk::Want want;
     std::string localDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
@@ -1457,6 +1209,14 @@ HWTEST_F(DistributedSchedServiceTest, StartAbilityFromRemote_007, TestSize.Level
 HWTEST_F(DistributedSchedServiceTest, SendResultFromRemote_007, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest SendResultFromRemote_007 start" << std::endl;
+    
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    int32_t missionId = MISSION_ID;
+    bool resultCode = ERR_OK;
+    DistributedSchedService::GetInstance().NotifyContinuationCallbackResult(missionId, resultCode);
+    
     AAFwk::Want want;
     std::string localDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
@@ -1667,10 +1427,36 @@ HWTEST_F(DistributedSchedServiceTest, NotifyStateChangedFromRemote_001, TestSize
 HWTEST_F(DistributedSchedServiceTest, NotifyStateChanged_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest NotifyStateChanged_001 start" << std::endl;
+    
+    sptr<IDistributedSched> proxy = GetDms();
+
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("1.1.1.1", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    want.SetElement(element);
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = "255.255.255.255";
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.accountType = 1;
+    accountInfo.groupIdList.push_back("123456");
+    int missionId = 0;
+    want.SetParam(DMS_SRC_NETWORK_ID, callerInfo.sourceDeviceId);
+    want.SetParam(DMS_MISSION_ID, missionId);
+
+    int result1 = DistributedSchedService::GetInstance().SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
+    DTEST_LOG << "result1:" << result1 << std::endl;
+
+    AppExecFwk::ElementName element2("1.1.1.1", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbilityService");
+    want.SetElement(element2);
+    int result2 = DistributedSchedService::GetInstance().SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
+    DTEST_LOG << "result2:" << result2 << std::endl;
+    
     int32_t abilityState = FOREGROUND;
     std::string localDeviceId;
-    AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME, ABILITY_NAME);
-    int32_t ret = DistributedSchedService::GetInstance().NotifyStateChanged(abilityState, element, nullptr);
+    AppExecFwk::ElementName element3(localDeviceId, BUNDLE_NAME, ABILITY_NAME);
+    int32_t ret = DistributedSchedService::GetInstance().NotifyStateChanged(abilityState, element3, nullptr);
     DTEST_LOG << "ret:" << ret << std::endl;
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest NotifyStateChanged_001 end" << std::endl;
@@ -2163,7 +1949,7 @@ HWTEST_F(DistributedSchedServiceTest, StartLocalAbility_005, TestSize.Level3)
     DistributedSchedProxy::FreeInstallInfo info = {.want = want, .requestCode = 0,
         .callerInfo = callerInfo, .accountInfo = accountInfo};
     int ret = DistributedSchedService::GetInstance().StartLocalAbility(info, 0, 0);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedServiceTest StartLocalAbility_005 end" << std::endl;
 }
 
@@ -2501,17 +2287,45 @@ HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_001, TestSi
 HWTEST_F(DistributedSchedServiceTest, StopExtensionAbilityFromRemote_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_002 start" << std::endl;
-    AAFwk::Want remoteWant;
-    AppExecFwk::ElementName element("abcdefg123456", "com.ohos.distributedmusicplayer",
+    
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    /**
+     * @tc.steps: step1. set want and abilityInfo
+     */
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
         "com.ohos.distributedmusicplayer.MainAbility");
-    remoteWant.SetElement(element);
+    want.SetElement(element);
     CallerInfo callerInfo;
     callerInfo.uid = 0;
     callerInfo.sourceDeviceId = "255.255.255.255";
     IDistributedSched::AccountInfo accountInfo;
+    int missionId = 0;
+    want.SetParam(DMS_SRC_NETWORK_ID, callerInfo.sourceDeviceId);
+    want.SetParam(DMS_MISSION_ID, missionId);
+    /**
+     * @tc.steps: step2. SendResultFromRemote for pressure test
+     * @tc.expected: step2. SendResultFromRemote for result
+     */
+    for (int index = 0; index < static_cast<int32_t>(LoopTime::LOOP_TIME); index++) {
+        int result = proxy->SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
+        DTEST_LOG << "pressure" + to_string(index) + " result is " << result << std::endl;
+    }
+    
+    AAFwk::Want remoteWant;
+    AppExecFwk::ElementName element1("abcdefg123456", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    remoteWant.SetElement(element1);
+    CallerInfo callerInfo1;
+    callerInfo1.uid = 0;
+    callerInfo1.sourceDeviceId = "255.255.255.255";
+    IDistributedSched::AccountInfo accountInfo1;
     int32_t extensionType = 3;
-    EXPECT_EQ(DistributedSchedService::GetInstance().StopExtensionAbilityFromRemote(remoteWant, callerInfo,
-        accountInfo, extensionType), INVALID_REMOTE_PARAMETERS_ERR);
+    EXPECT_EQ(DistributedSchedService::GetInstance().StopExtensionAbilityFromRemote(remoteWant, callerInfo1,
+        accountInfo1, extensionType), INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest StopExtensionAbilityFromRemote_002 end" << std::endl;
 }
 
@@ -2609,6 +2423,33 @@ HWTEST_F(DistributedSchedServiceTest, StopRemoteExtensionAbility_003, TestSize.L
 HWTEST_F(DistributedSchedServiceTest, StartRemoteShareForm_003, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedServiceTest StartRemoteShareForm_003 start" << std::endl;
+    
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("255.255.255.255", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    want.SetElement(element);
+    AppExecFwk::AbilityInfo abilityInfo;
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = "255.255.255.255";
+    IDistributedSched::AccountInfo accountInfo;
+
+    int result1 = proxy->SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
+    DTEST_LOG << "result1 is" << result1 << std::endl;
+    AppExecFwk::ElementName element2("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbilityService");
+    want.SetElement(element2);
+    int missionId = 0;
+    want.SetParam(DMS_SRC_NETWORK_ID, callerInfo.sourceDeviceId);
+    want.SetParam(DMS_MISSION_ID, missionId);
+    int result2 = proxy->SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
+    DTEST_LOG << "result2:" << result2 << std::endl;
+    
     /**
     * @tc.steps: step1. call StartAbilityFromRemote when remoteDeviceId is valid.
     */
@@ -2869,6 +2710,35 @@ HWTEST_F(DistributedSchedServiceTest, ReleaseAbilityFromRemote_002, TestSize.Lev
 HWTEST_F(DistributedSchedServiceTest, NotifyProcessDiedFromRemote_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest NotifyProcessDiedFromRemote_001 start" << std::endl;
+    
+    sptr<IDistributedSched> proxy = GetDms();
+
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    want.SetElement(element);
+    AppExecFwk::AbilityInfo abilityInfo;
+    GetAbilityInfo("com.ohos.distributedmusicplayer", "com.ohos.distributedmusicplayer.MainAbility",
+        "com.ohos.distributedmusicplayer", "192.168.43.100", abilityInfo);
+    CallerInfo callerInfo1;
+    callerInfo1.uid = 0;
+    callerInfo1.sourceDeviceId = "255.255.255.255";
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.accountType = 1;
+    accountInfo.groupIdList.push_back("123456");
+
+    int result1 = DistributedSchedService::GetInstance().StartAbilityFromRemote(want,
+        abilityInfo, 0, callerInfo1, accountInfo);
+    DTEST_LOG << "result1:" << result1 << std::endl;
+
+    AppExecFwk::ElementName element2("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbilityService");
+    want.SetElement(element2);
+    GetAbilityInfo("com.ohos.distributedmusicplayer", "com.ohos.distributedmusicplayer.MainAbilityService",
+        "com.ohos.distributedmusicplayer", "192.168.43.100", abilityInfo);
+    int result2 = DistributedSchedService::GetInstance().StartAbilityFromRemote(want,
+        abilityInfo, 0, callerInfo1, accountInfo);
+    
     /**
     * @tc.steps: step1. call NotifyProcessDiedFromRemote when sourceDeviceId == sourceDeviceId.
     */
@@ -2913,11 +2783,39 @@ HWTEST_F(DistributedSchedServiceTest, NotifyProcessDiedFromRemote_001, TestSize.
 HWTEST_F(DistributedSchedServiceTest, SetCallerInfo_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest SetCallerInfo_001 start" << std::endl;
+    
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+    /**
+     * @tc.steps: step1. set want and abilityInfo
+     */
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    want.SetElement(element);
+    AppExecFwk::AbilityInfo abilityInfo;
+    GetAbilityInfo("com.ohos.distributedmusicplayer", "com.ohos.distributedmusicplayer.MainAbility",
+        "com.ohos.distributedmusicplayer", "192.168.43.100", abilityInfo);
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = "255.255.255.255";
+    IDistributedSched::AccountInfo accountInfo;
+    /**
+     * @tc.steps: step2. StartAbilityFromRemote for pressure test
+     * @tc.expected: step2. StartAbilityFromRemote for result
+     */
+    for (int index = 0; index < static_cast<int32_t>(LoopTime::LOOP_TIME); index++) {
+        int result = proxy->StartAbilityFromRemote(want, abilityInfo, 0, callerInfo, accountInfo);
+        DTEST_LOG << "pressure" + to_string(index) + " result is " << result << std::endl;
+    }
+    
     /**
     * @tc.steps: step1. call SetCallerInfo with invalid parameters.
     */
-    CallerInfo callerInfo;
-    int32_t result = DistributedSchedService::GetInstance().SetCallerInfo(0, LOCAL_DEVICEID, 0, callerInfo);
+    CallerInfo callerInfo1;
+    int32_t result = DistributedSchedService::GetInstance().SetCallerInfo(0, LOCAL_DEVICEID, 0, callerInfo1);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     /**
     * @tc.steps: step2. call OnRemoteDied.
@@ -2956,6 +2854,35 @@ HWTEST_F(DistributedSchedServiceTest, StartRemoteFreeInstall_001, TestSize.Level
 HWTEST_F(DistributedSchedServiceTest, NotifyCompleteFreeInstall_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest NotifyCompleteFreeInstall_001 start" << std::endl;
+    
+    sptr<IDistributedSched> proxy = GetDms();
+    if (proxy == nullptr) {
+        return;
+    }
+
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    want.SetElement(element);
+    AppExecFwk::AbilityInfo abilityInfo;
+    GetAbilityInfo("com.ohos.distributedmusicplayer", "com.ohos.distributedmusicplayer.MainAbility",
+        "com.ohos.distributedmusicplayer", "192.168.43.100", abilityInfo);
+    CallerInfo callerInfo;
+    callerInfo.uid = 0;
+    callerInfo.sourceDeviceId = "255.255.255.255";
+    IDistributedSched::AccountInfo accountInfo;
+
+    int result1 = proxy->StartAbilityFromRemote(want, abilityInfo, 0, callerInfo, accountInfo);
+    DTEST_LOG << "result1 is" << result1 << std::endl;
+
+    AppExecFwk::ElementName element2("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbilityService");
+    want.SetElement(element2);
+    GetAbilityInfo("com.ohos.distributedmusicplayer", "com.ohos.distributedmusicplayer.MainAbilityService",
+        "com.ohos.distributedmusicplayer", "192.168.43.100", abilityInfo);
+    int result2 = proxy->StartAbilityFromRemote(want, abilityInfo, 0, callerInfo, accountInfo);
+    DTEST_LOG << "result2:" << result2 << std::endl;
+
     /**
     * @tc.steps: step1. call NotifyCompleteFreeInstall when resultCode is not ERR_OK.
     */

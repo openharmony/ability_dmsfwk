@@ -89,7 +89,6 @@ if (efficiency_manager_service_enable) {
 dsched_public_deps = [
   "//third_party/googletest:gmock_main",
   "//third_party/googletest:gtest_main",
-  "//third_party/libxml2:libxml2",
 ]
 
 dtbschedmgr_sources = [

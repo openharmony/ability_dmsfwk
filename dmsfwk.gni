@@ -21,6 +21,7 @@ declare_args() {
   dmsfwk_report_memmgr = false
   dmsfwk_report_memmgr_plugins = false
   dmsfwk_softbus_adapter_common = true
+  dmsfwk_service_disable = false
   if (defined(global_parts_info)) {
     if (defined(global_parts_info.multimedia_image_framework)) {
       dmsfwk_mission_manager = true

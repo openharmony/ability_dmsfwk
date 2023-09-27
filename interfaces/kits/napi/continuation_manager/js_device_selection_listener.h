@@ -26,13 +26,13 @@ namespace OHOS {
 namespace DistributedSchedule {
 class JsDeviceSelectionListener : public DeviceSelectionNotifierStub {
 public:
-    explicit JsDeviceSelectionListener(NativeEngine* engine) : engine_(engine) {}
+    explicit JsDeviceSelectionListener(napi_env env) : engine_(env) {}
     virtual ~JsDeviceSelectionListener() = default;
 
     void OnDeviceConnect(const std::vector<ContinuationResult>& continuationResults) override;
     void OnDeviceDisconnect(const std::vector<ContinuationResult>& continuationResults) override;
 
-    void AddCallback(const std::string& cbType, NativeValue* jsListenerObj);
+    void AddCallback(const std::string& cbType, napi_value jsListenerObj);
     void RemoveCallback(const std::string& cbType);
 
 private:
@@ -40,12 +40,14 @@ private:
     void CallJsMethod(const std::string& methodName, const std::vector<std::string>& deviceIds);
     void CallJsMethodInner(const std::string& methodName, const std::vector<ContinuationResult>& continuationResults);
     void CallJsMethodInner(const std::string& methodName, const std::vector<std::string>& deviceIds);
-    NativeValue* WrapContinuationResult(NativeEngine& engine, const ContinuationResult& continuationResult);
-    NativeValue* WrapContinuationResultArray(NativeEngine& engine,
+    napi_value WrapContinuationResult(napi_env env, const ContinuationResult& continuationResult);
+    napi_value WrapContinuationResultArray(napi_env env,
         const std::vector<ContinuationResult>& continuationResults);
-    NativeValue* WrapDeviceIdArray(NativeEngine& engine, const std::vector<std::string>& deviceIds);
+    napi_value WrapDeviceIdArray(napi_env env, const std::vector<std::string>& deviceIds);
+    void SetKeyValue(napi_env env,
+        const napi_value object, const std::string &strKey, const std::string &strValue) const;
 
-    NativeEngine* engine_ = nullptr;
+    napi_env engine_ = nullptr;
     std::mutex jsCallBackMapMutex_;
     std::map<std::string, std::unique_ptr<NativeReference>> jsCallBackMap_;
 };
