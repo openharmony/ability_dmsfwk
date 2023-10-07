@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,13 +37,10 @@ struct ListenerInfo {
     bool Emplace(sptr<IRemoteObject> listener)
     {
         auto pairRet = listenerSet.emplace(listener);
-        if (!pairRet.second) {
-            return false;
-        }
-        return true;
+        return pairRet.second;
     }
 
-    bool Find(sptr<IRemoteObject> listener)
+    bool Find(const sptr<IRemoteObject> listener)
     {
         auto iter = listenerSet.find(listener);
         if (iter == listenerSet.end()) {
@@ -73,7 +70,7 @@ class DistributedSchedMissionManager {
 public:
     void Init();
     int32_t GetMissionInfos(const std::string& deviceId, int32_t numMissions,
-        std::vector<AAFwk::MissionInfo>& missionInfos);
+        std::vector<AAFwk::MissionInfo>& missionInfoSet);
     int32_t InitDataStorage();
     int32_t StopDataStorage();
     int32_t StoreSnapshotInfo(const std::string& deviceId, int32_t missionId,
@@ -87,7 +84,7 @@ public:
     int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj);
     int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj);
     int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag);
-    int32_t StartSyncMissionsFromRemote(const CallerInfo& callerInfo, std::vector<DstbMissionInfo>& missionInfos);
+    int32_t StartSyncMissionsFromRemote(const CallerInfo& callerInfo, std::vector<DstbMissionInfo>& missionInfoSet);
     int32_t StopSyncRemoteMissions(const std::string& dstDevId, bool offline, bool exit = false);
     void StopSyncMissionsFromRemote(const std::string& deviceId);
     bool NeedSyncDevice(const std::string& deviceId);
@@ -97,9 +94,9 @@ public:
 
     void EnqueueCachedSnapshotInfo(const std::string& deviceId, int32_t missionId, std::unique_ptr<Snapshot> snapshot);
     std::unique_ptr<Snapshot> DequeueCachedSnapshotInfo(const std::string& deviceId, int32_t missionId);
-    int32_t NotifyMissionsChangedToRemote(const std::vector<DstbMissionInfo>& missionInfos);
+    int32_t NotifyMissionsChangedToRemote(const std::vector<DstbMissionInfo>& missionInfoSet);
     int32_t NotifyMissionsChangedFromRemote(const CallerInfo& callerInfo,
-        const std::vector<DstbMissionInfo>& missionInfos);
+        const std::vector<DstbMissionInfo>& missionInfoSet);
     void OnRemoteDmsDied(const wptr<IRemoteObject>& remote);
     void NotifyDmsProxyProcessDied();
     void OnDnetDied();
@@ -117,7 +114,7 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> FetchDeviceHandler(const std::string& deviceId);
     bool GenerateCallerInfo(CallerInfo& callerInfo);
     void NotifyMissionsChangedToRemoteInner(const std::string& remoteUuid,
-        const std::vector<DstbMissionInfo>& missionInfos, const CallerInfo& callerInfo);
+        const std::vector<DstbMissionInfo>& missionInfoSet, const CallerInfo& callerInfo);
     std::string GenerateKeyInfo(const std::string& devId, int32_t missionId)
     {
         return devId + "_" + std::to_string(missionId);
@@ -130,13 +127,13 @@ private:
     bool HasSyncListener(const std::string& networkId);
     void DeleteCachedSnapshotInfo(const std::string& networkId);
     int32_t FetchCachedRemoteMissions(const std::string& srcId, int32_t numMissions,
-        std::vector<DstbMissionInfo>& missionInfos);
-    void RebornMissionCache(const std::string& deviceId, const std::vector<DstbMissionInfo>& missionInfos);
+        std::vector<DstbMissionInfo>& missionInfoSet);
+    void RebornMissionCache(const std::string& deviceId, const std::vector<DstbMissionInfo>& missionInfoSet);
     void CleanMissionCache(const std::string& deviceId);
     void OnMissionListenerDied(const sptr<IRemoteObject>& remote);
     void OnRemoteDmsDied(const sptr<IRemoteObject>& remote);
     void RetryRegisterMissionChange(int32_t retryTimes);
-    void InitAllSnapshots(const std::vector<DstbMissionInfo>& missionInfos);
+    void InitAllSnapshots(const std::vector<DstbMissionInfo>& missionInfoSet);
     int32_t MissionSnapshotChanged(int32_t missionId);
     int32_t MissionSnapshotDestroyed(int32_t missionId);
     int32_t MissionSnapshotSequence(const Snapshot& snapshot, MessageParcel& data);
@@ -171,6 +168,6 @@ private:
     std::shared_ptr<AppExecFwk::EventHandler> missionHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> updateHandler_;
 };
-}
-}
+} // namespace DistributedSchedule
+} // namespace OHOS
 #endif // DISTRIBUTEDSCHED_MISSION_MANAGER_H

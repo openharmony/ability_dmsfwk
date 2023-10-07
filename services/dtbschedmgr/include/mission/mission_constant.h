@@ -21,9 +21,9 @@ namespace DistributedSchedule {
 namespace Constants {
 namespace Mission {
 constexpr int32_t GET_MAX_MISSIONS = 20;
-} // Mission
-} // Constants
-} // DistributedSchedule
-} // OHOS
+} // namespace Mission
+} // namespace Constants
+} // namespace DistributedSchedule
+} // namespace OHOS
 
 #endif

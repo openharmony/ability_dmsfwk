@@ -159,6 +159,10 @@ void DistributedSchedContinueManager::NotifyDataRecv(std::string& senderNetworkI
 int32_t DistributedSchedContinueManager::RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj)
 {
     HILOGI("RegisterOnListener start, type: %{public}s", type.c_str());
+    if (obj == nullptr) {
+        HILOGE("obj is null, type: %{public}s", type.c_str());
+        return INVALID_PARAMETERS_ERR;
+    }
     onType_ = type;
     std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     auto iterItem = registerOnListener_.find(type);
@@ -364,8 +368,8 @@ int32_t DistributedSchedContinueManager::DealUnfocusedBusiness(const int32_t mis
     return ERR_OK;
 }
 
-int32_t DistributedSchedContinueManager::VerifyBroadcastSource(std::string& senderNetworkId, std::string& bundleName,
-    const int32_t state)
+int32_t DistributedSchedContinueManager::VerifyBroadcastSource(const std::string& senderNetworkId,
+    const std::string& bundleName, const int32_t state)
 {
     std::lock_guard<std::mutex> currentIconLock(iconMutex_);
     if (state == ACTIVE) {
@@ -390,7 +394,7 @@ int32_t DistributedSchedContinueManager::VerifyBroadcastSource(std::string& send
     return ERR_OK;
 }
 
-int32_t DistributedSchedContinueManager::DealOnBroadcastBusiness(std::string& senderNetworkId,
+int32_t DistributedSchedContinueManager::DealOnBroadcastBusiness(const std::string& senderNetworkId,
     uint32_t accessTokenId, const int32_t state)
 {
     HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, accessTokenId: %{public}d, state: %{public}d",
@@ -558,6 +562,7 @@ void DistributedSchedContinueManager::NotifyDeid(const sptr<IRemoteObject>& obj)
 {
     HILOGI("NotifyDeid start");
     if (obj == nullptr) {
+        HILOGE("obj is null");
         return;
     }
     for (auto iterItem = registerOnListener_.begin(); iterItem != registerOnListener_.end();) {

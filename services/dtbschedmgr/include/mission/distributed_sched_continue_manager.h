@@ -16,18 +16,18 @@
 #ifndef DISTRIBUTEDSCHED_CONTINUE_MANAGER_H
 #define DISTRIBUTEDSCHED_CONTINUE_MANAGER_H
 
+#include <deque>
 #include <map>
-#include <string>
 #include <mutex>
 #include <queue>
-#include <deque>
+#include <string>
 #include <thread>
 #include <vector>
 
 #include "bundle/bundle_manager_internal.h"
-#include "distributed_mission_focused_listener.h"
 #include "distributed_mission_broadcast_listener.h"
 #include "distributed_mission_died_listener.h"
+#include "distributed_mission_focused_listener.h"
 #include "event_handler.h"
 #include "mission_info.h"
 
@@ -77,8 +77,9 @@ private:
     void StartEvent();
     int32_t DealFocusedBusiness(const int32_t missionId);
     int32_t DealUnfocusedBusiness(const int32_t missionId, bool isUnfocused);
-    int32_t VerifyBroadcastSource(std::string& senderNetworkId, std::string& bundleName, const int32_t state);
-    int32_t DealOnBroadcastBusiness(std::string& senderNetworkId, uint32_t accessTokenId, const int32_t state);
+    int32_t VerifyBroadcastSource(const std::string& senderNetworkId, const std::string& bundleName,
+        const int32_t state);
+    int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint32_t accessTokenId, const int32_t state);
     void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const std::string& networkId,
         const std::string& bundleName, const int32_t state);
     int32_t GetBundleName(const int32_t missionId, std::string& bundleName);
