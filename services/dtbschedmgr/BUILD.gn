@@ -49,6 +49,12 @@ config("distributed_sched_config") {
 }
 
 ohos_shared_library("distributedschedsvr") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   install_enable = true
   sources = [
     "src/ability_connection_wrapper_proxy.cpp",

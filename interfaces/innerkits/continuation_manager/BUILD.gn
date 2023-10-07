@@ -27,6 +27,12 @@ config("continuation_manager_public_config") {
 }
 
 ohos_shared_library("continuation_manager") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   sources = [
     "//foundation/ability/dmsfwk/services/dtbabilitymgr/src/continuation_manager/continuation_extra_params.cpp",
     "//foundation/ability/dmsfwk/services/dtbabilitymgr/src/continuation_manager/continuation_result.cpp",
