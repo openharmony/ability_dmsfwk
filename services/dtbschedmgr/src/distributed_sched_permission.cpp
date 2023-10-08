@@ -343,13 +343,17 @@ void DistributedSchedPermission::MarkUriPermission(OHOS::AAFwk::Want& want, uint
         std::string authority = uri.GetAuthority();
         HILOGI("uri authority is %{public}s.", authority.c_str());
         AppExecFwk::BundleInfo bundleInfo;
+        int32_t activeAccountId = 0;
+#ifdef OS_ACCOUNT_PART
         std::vector<int32_t> ids;
         int32_t errCode = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
         if (errCode != ERR_OK || ids.empty()) {
             return;
         }
+        activeAccountId = ids[0];
+#endif
         if (!bms->GetBundleInfo(authority,
-            AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO, bundleInfo, ids[0])) {
+            AppExecFwk::BundleFlag::GET_BUNDLE_WITH_EXTENSION_INFO, bundleInfo, activeAccountId)) {
             HILOGW("To fail to get bundle info according to uri.");
             continue;
         }

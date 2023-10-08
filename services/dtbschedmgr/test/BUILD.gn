@@ -61,10 +61,12 @@ dsched_external_deps = [
   "init:libbegetutil",
   "ipc:ipc_core",
   "kv_store:distributeddata_inner",
-  "os_account:os_account_innerkits",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
 ]
+if (os_account_part) {
+  dsched_external_deps += [ "os_account:os_account_innerkits" ]
+}
 
 if (dmsfwk_report_memmgr) {
   dsched_external_deps += [ "memmgr:memmgrclient" ]

@@ -73,14 +73,18 @@ int32_t DistributedSchedAdapter::ConnectAbility(const OHOS::AAFwk::Want& want,
             EventErrorType::GET_ABILITY_MGR_FAILED);
         return errCode;
     }
+    int32_t activeAccountId = -1;
+#ifdef OS_ACCOUNT_PART
     std::vector<int> ids;
-    ErrCode ret = OsAccountManager::QueryActiveOsAccountIds(ids);
-    if (ret != ERR_OK || ids.empty()) {
+    errCode = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (errCode != ERR_OK || ids.empty()) {
         return INVALID_PARAMETERS_ERR;
     }
-    ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want,
-        iface_cast<AAFwk::IAbilityConnection>(connect), callerToken, ids[0]);
-    return ret;
+    activeAccountId = ids[0];
+#endif
+    errCode = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want,
+        iface_cast<AAFwk::IAbilityConnection>(connect), callerToken, activeAccountId);
+    return errCode;
 }
 
 int32_t DistributedSchedAdapter::DisconnectAbility(const sptr<IRemoteObject>& connect)
