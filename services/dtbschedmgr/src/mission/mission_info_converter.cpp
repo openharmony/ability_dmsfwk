@@ -16,8 +16,8 @@
 #include "mission/mission_info_converter.h"
 
 #include "adapter/adapter_constant.h"
-#include "mission/mission_constant.h"
 #include "dtbschedmgr_log.h"
+#include "mission/mission_constant.h"
 #include "parcel_helper.h"
 
 using namespace std;
@@ -27,15 +27,15 @@ using namespace Constants::Adapter;
 namespace {
 const std::string TAG = "MissionInfoConverter";
 }
-int32_t MissionInfoConverter::ConvertToDstbMissionInfos(std::vector<AAFwk::MissionInfo>& missionInfos,
-    std::vector<DstbMissionInfo>& dstbMissionInfos)
+int32_t MissionInfoConverter::ConvertToDstbMissionInfos(std::vector<AAFwk::MissionInfo>& missionInfoSet,
+    std::vector<DstbMissionInfo>& dstbMissionInfoSet)
 {
-    if (missionInfos.empty()) {
+    if (missionInfoSet.empty()) {
         return ERR_OK;
     }
-    for (auto iter = missionInfos.begin(); iter != missionInfos.end(); iter++) {
+    for (auto iter = missionInfoSet.begin(); iter != missionInfoSet.end(); iter++) {
         DstbMissionInfo dstbMissionInfo;
-        dstbMissionInfo.id  = iter->id;
+        dstbMissionInfo.id = iter->id;
         dstbMissionInfo.runingState = iter->runningState;
         dstbMissionInfo.lockedState = iter->lockedState;
         dstbMissionInfo.label = iter->label;
@@ -43,18 +43,18 @@ int32_t MissionInfoConverter::ConvertToDstbMissionInfos(std::vector<AAFwk::Missi
         shared_ptr<AAFwk::Want> spWant = make_shared<AAFwk::Want>(iter->want);
         dstbMissionInfo.baseWant = spWant;
         dstbMissionInfo.continuable = iter->continuable ? 1 : 0;
-        dstbMissionInfos.push_back(dstbMissionInfo);
+        dstbMissionInfoSet.push_back(dstbMissionInfo);
     }
     return ERR_OK;
 }
 
-int32_t MissionInfoConverter::ConvertToMissionInfos(std::vector<DstbMissionInfo>& dstbMissionInfos,
-    std::vector<AAFwk::MissionInfo>& missionInfos)
+int32_t MissionInfoConverter::ConvertToMissionInfos(std::vector<DstbMissionInfo>& dstbMissionInfoSet,
+    std::vector<AAFwk::MissionInfo>& missionInfoSet)
 {
-    if (dstbMissionInfos.empty()) {
+    if (dstbMissionInfoSet.empty()) {
         return ERR_OK;
     }
-    for (auto iter = dstbMissionInfos.begin(); iter != dstbMissionInfos.end(); iter++) {
+    for (auto iter = dstbMissionInfoSet.begin(); iter != dstbMissionInfoSet.end(); iter++) {
         AAFwk::MissionInfo missionInfo;
         missionInfo.id = iter->id;
         missionInfo.runningState = iter->runingState;
@@ -63,13 +63,13 @@ int32_t MissionInfoConverter::ConvertToMissionInfos(std::vector<DstbMissionInfo>
         missionInfo.iconPath = iter->iconPath;
         missionInfo.want = *(iter->baseWant);
         missionInfo.continuable = iter->continuable == 1;
-        missionInfos.push_back(missionInfo);
+        missionInfoSet.push_back(missionInfo);
     }
     return ERR_OK;
 }
 
 bool MissionInfoConverter::ReadMissionInfosFromParcel(Parcel& parcel,
-    std::vector<AAFwk::MissionInfo>& missionInfos)
+    std::vector<AAFwk::MissionInfo>& missionInfoSet)
 {
     int32_t empty = parcel.ReadInt32();
     if (empty == VALUE_OBJECT) {
@@ -83,26 +83,26 @@ bool MissionInfoConverter::ReadMissionInfosFromParcel(Parcel& parcel,
             HILOGE("Failed to read MissionInfo vector, size = %{public}zu", size);
             return false;
         }
-        missionInfos.clear();
+        missionInfoSet.clear();
         for (size_t i = 0; i < size; i++) {
             AAFwk::MissionInfo *ptr = parcel.ReadParcelable<AAFwk::MissionInfo>();
             if (ptr == nullptr) {
                 HILOGW("read MissionInfo failed");
                 return false;
             }
-            missionInfos.emplace_back(*ptr);
+            missionInfoSet.emplace_back(*ptr);
             delete ptr;
         }
     }
 
-    HILOGI("ReadMissionInfosFromParcel end. info size is:%{public}zu", missionInfos.size());
+    HILOGI("ReadMissionInfosFromParcel end. info size is:%{public}zu", missionInfoSet.size());
     return true;
 }
 
 bool MissionInfoConverter::WriteMissionInfosToParcel(Parcel& parcel,
-    const std::vector<AAFwk::MissionInfo>& missionInfos)
+    const std::vector<AAFwk::MissionInfo>& missionInfoSet)
 {
-    size_t size = missionInfos.size();
+    size_t size = missionInfoSet.size();
     if (size == 0) {
         PARCEL_WRITE_HELPER_RET(parcel, Int32, VALUE_NULL, false);
         return true;
@@ -110,10 +110,10 @@ bool MissionInfoConverter::WriteMissionInfosToParcel(Parcel& parcel,
 
     PARCEL_WRITE_HELPER_RET(parcel, Int32, VALUE_OBJECT, false);
     PARCEL_WRITE_HELPER_RET(parcel, Int32, size, false);
-    for (auto& info : missionInfos) {
+    for (auto& info : missionInfoSet) {
         PARCEL_WRITE_HELPER_RET(parcel, Parcelable, &info, false);
     }
     return true;
 }
-}
-}
+} // namespace DistributedSchedule
+} // namespace OHOS

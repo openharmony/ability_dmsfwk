@@ -26,13 +26,13 @@ namespace OHOS {
 namespace DistributedSchedule {
 class MissionInfoConverter {
 public:
-    static int32_t ConvertToDstbMissionInfos(std::vector<AAFwk::MissionInfo>& missionInfos,
-        std::vector<DstbMissionInfo>& dstbMissionInfos);
-    static int32_t ConvertToMissionInfos(std::vector<DstbMissionInfo>& dstbMissionInfos,
-        std::vector<AAFwk::MissionInfo>& missionInfos);
-    static bool ReadMissionInfosFromParcel(Parcel& parcel, std::vector<AAFwk::MissionInfo>& missionInfos);
-    static bool WriteMissionInfosToParcel(Parcel& parcel, const std::vector<AAFwk::MissionInfo>& missionInfos);
+    static int32_t ConvertToDstbMissionInfos(std::vector<AAFwk::MissionInfo>& missionInfoSet,
+        std::vector<DstbMissionInfo>& dstbMissionInfoSet);
+    static int32_t ConvertToMissionInfos(std::vector<DstbMissionInfo>& dstbMissionInfoSet,
+        std::vector<AAFwk::MissionInfo>& missionInfoSet);
+    static bool ReadMissionInfosFromParcel(Parcel& parcel, std::vector<AAFwk::MissionInfo>& missionInfoSet);
+    static bool WriteMissionInfosToParcel(Parcel& parcel, const std::vector<AAFwk::MissionInfo>& missionInfoSet);
 };
-}
-}
+} // namespace DistributedSchedule
+} // namespace OHOS
 #endif // DISTRIBUTEDSCHED_MISSION_INFO_CONVERTER_H

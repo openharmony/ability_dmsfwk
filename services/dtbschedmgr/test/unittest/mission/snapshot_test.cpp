@@ -116,9 +116,9 @@ HWTEST_F(SnapshotTest, testWriteToParcel004, TestSize.Level3)
     bool ret = snapshot.WriteToParcel(data);
     EXPECT_TRUE(ret);
     /**
-     * @tc.steps: step2. FillSnapShot
+     * @tc.steps: step2. FillSnapshot
      */
-    std::unique_ptr<Snapshot> snapShotReturn = snapshot.FillSnapShot(data);
+    std::unique_ptr<Snapshot> snapShotReturn = snapshot.FillSnapshot(data);
     EXPECT_NE(nullptr, snapShotReturn);
     /**
      * @tc.steps: step3. CreatePixelMap when buffer == nullptr
@@ -129,16 +129,16 @@ HWTEST_F(SnapshotTest, testWriteToParcel004, TestSize.Level3)
 }
 
 /**
- * @tc.name: testFillSnapShot001
+ * @tc.name: testFillSnapshot001
  * @tc.desc: fill up a snapshot
  * @tc.type: FUNC
 * @tc.require: I5O2P9
  */
-HWTEST_F(SnapshotTest, testFillSnapShot001, TestSize.Level1)
+HWTEST_F(SnapshotTest, testFillSnapshot001, TestSize.Level1)
 {
     Snapshot snapshot;
     MessageParcel data;
-    auto ret = snapshot.FillSnapShot(data);
+    auto ret = snapshot.FillSnapshot(data);
     EXPECT_EQ(ret, nullptr);
 }
 

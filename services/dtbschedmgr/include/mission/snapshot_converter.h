@@ -30,6 +30,6 @@ public:
     static int32_t ConvertToMissionSnapshot(Snapshot& snapshot,
         std::unique_ptr<AAFwk::MissionSnapshot>& missionSnapshot);
 };
-}
-}
+} // namespace DistributedSchedule
+} // namespace OHOS
 #endif // DISTRIBUTEDSCHED_SNAPSHOT_CONVERTER_H

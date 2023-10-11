@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@ public:
     int32_t orientation_ = 0;
     std::unique_ptr<Rect> rect_;
     bool reducedResolution_ = true;
-    float scale_ = 0.0;
+    float scale_ = 0.0f;
     bool isRealSnapshot_ = true;
     int32_t windowingMode_ = 0;
     int32_t systemUiVisibility_ = 0;
@@ -56,7 +56,7 @@ public:
     void UpdateLastAccessTime(int64_t accessTime);
 private:
     static std::unique_ptr<Media::PixelMap> CreatePixelMap(const uint8_t* buffer, uint32_t bufferSize);
-    static std::unique_ptr<Snapshot> FillSnapShot(MessageParcel& data);
+    static std::unique_ptr<Snapshot> FillSnapshot(MessageParcel& data);
 
     // inner used
     int64_t createdTime_ = 0;
@@ -74,16 +74,8 @@ struct Rect : public Parcelable {
 
     bool Marshalling(Parcel &parcel) const override
     {
-        if (!parcel.WriteInt32(left)) {
-            return false;
-        }
-        if (!parcel.WriteInt32(top)) {
-            return false;
-        }
-        if (!parcel.WriteInt32(right)) {
-            return false;
-        }
-        if (!parcel.WriteInt32(bottom)) {
+        if (!parcel.WriteInt32(left) || !parcel.WriteInt32(top) ||
+            !parcel.WriteInt32(right) || !parcel.WriteInt32(bottom)) {
             return false;
         }
         return true;
@@ -104,6 +96,6 @@ struct Rect : public Parcelable {
     int32_t right = 0;
     int32_t bottom = 0;
 };
-} // DistributedSchedule
-} // OHOS
+} // namespace DistributedSchedule
+} // namespace OHOS
 #endif /* SERVICES_DTBSCHEDMGR_INCLUDE_SNAPSHOT_SNAP_SHOT_H */
