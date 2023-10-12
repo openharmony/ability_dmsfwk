@@ -36,8 +36,6 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_bm_storage.h"
-#include "mission/dsched_sync_e2e.h"
-#include "multi_user_manager.h"
 #include "ipc_skeleton.h"
 #include "parcel_helper.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
@@ -698,12 +696,8 @@ int32_t DSchedContinue::GetMissionIdByBundleName()
 {
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     if (continueInfo_.missionId_ == 0) {
-        auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-        if (sendMgr == nullptr) {
-            HILOGI("GetSendMgr failed.");
-            return DMS_NOT_GET_MANAGER;
-        }
-        return sendMgr->GetMissionIdByBundleName(continueInfo_.sourceBundleName_, continueInfo_.missionId_);
+        return DMSContinueSendMgr::GetInstance().GetMissionIdByBundleName(continueInfo_.sourceBundleName_,
+            continueInfo_.missionId_);
     }
 #endif
     return ERR_OK;
@@ -711,7 +705,7 @@ int32_t DSchedContinue::GetMissionIdByBundleName()
 
 int32_t DSchedContinue::CheckContinueAbilityPermission()
 {
-    if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(continueInfo_.sourceBundleName_)) {
+    if (!CheckBundleContinueConfig(continueInfo_.sourceBundleName_)) {
         HILOGI("App does not allow continue in config file, bundle name %{public}s",
             continueInfo_.sourceBundleName_.c_str());
         return REMOTE_DEVICE_BIND_ABILITY_ERR;

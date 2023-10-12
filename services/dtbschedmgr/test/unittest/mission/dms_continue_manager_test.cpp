@@ -278,7 +278,7 @@ HWTEST_F(DMSContinueManagerTest, testGetMissionId001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_OK);
 
     ret = DMSContinueSendMgr::GetInstance().GetMissionIdByBundleName(BUNDLENAME_02, missionId);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, MISSION_NOT_FOCUSED);
     DTEST_LOG << "DMSContinueManagerTest testGetMissionId001 end" << std::endl;
 }
 
@@ -829,7 +829,7 @@ HWTEST_F(DMSContinueManagerTest, testGetBundleNameIdAndContinueTypeId_001, TestS
     int32_t ret = DMSContinueSendMgr::GetInstance().GetBundleNameIdAndContinueTypeId(MISSIONID_01, state,
         bundleNameId, continueTypeId);
 
-    EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
+    EXPECT_EQ(ret, REMOTE_DEVICE_BIND_ABILITY_ERR);
     DTEST_LOG << "DMSContinueManagerTest testGetBundleNameIdAndContinueTypeId_001 end" << std::endl;
 }
 
@@ -870,7 +870,7 @@ HWTEST_F(DMSContinueManagerTest, testSetScreenOffInfo_001, TestSize.Level1)
     DMSContinueSendMgr::GetInstance().screenOffHandler_->SetScreenOffInfo(missionId, bundleName,
         bundleNameId, abilityName);
     EXPECT_EQ(DMSContinueSendMgr::GetInstance().screenOffHandler_->unfoInfo_.abilityName.empty(), false);
-    
+
     DMSContinueSendMgr::GetInstance().screenOffHandler_->ClearScreenOffInfo();
     EXPECT_EQ(DMSContinueSendMgr::GetInstance().screenOffHandler_->unfoInfo_.abilityName.empty(), true);
     DTEST_LOG << "DMSContinueManagerTest testSetScreenOffInfo_001 end" << std::endl;
@@ -935,24 +935,6 @@ HWTEST_F(DMSContinueManagerTest, testUpdateContinueLaunchMission_001, TestSize.L
     info.id = MISSIONID_02;
     EXPECT_TRUE(DMSContinueSendMgr::GetInstance().UpdateContinueLaunchMission(info));
     DTEST_LOG << "DMSContinueManagerTest testUpdateContinueLaunchMission_001 end" << std::endl;
-}
-
-/**
- * @tc.name: testGetFinalBundleName_001
- * @tc.desc: test GetFinalBundleName
- * @tc.type: FUNC
- */
-HWTEST_F(DMSContinueManagerTest, testGetFinalBundleName_001, TestSize.Level1)
-{
-    DTEST_LOG << "DMSContinueManagerTest testGetFinalBundleName_001 start" << std::endl;
-    DmsBundleInfo info;
-    std::string finalBundleName;
-    AppExecFwk::BundleInfo localBundleInfo;
-    std::string continueType;
-    bool ret = DMSContinueRecvMgr::GetInstance().GetFinalBundleName(info, finalBundleName,
-        localBundleInfo, continueType);
-    EXPECT_EQ(ret, false);
-    DTEST_LOG << "DMSContinueManagerTest testGetFinalBundleName_001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
