@@ -142,7 +142,7 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_005, TestSize.Leve
 {
     DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_005 begin" << std::endl;
     string deviceId = "123456";
-    string bundleName = "com.third.hiworld.example";
+    string bundleName = "com.ohos.mms";
     AppExecFwk::DistributedBundleInfo remoteBundleInfo;
     int ret = BundleManagerInternal::CheckRemoteBundleInfoForContinuation(deviceId, bundleName, remoteBundleInfo);
     EXPECT_TRUE(CONTINUE_REMOTE_UNINSTALLED_UNSUPPORT_FREEINSTALL == ret);
@@ -159,7 +159,7 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_006, TestSize.Leve
 {
     DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_006 begin" << std::endl;
     string deviceId = "123456";
-    string bundleName = "com.third.hiworld.example";
+    string bundleName = "com.ohos.mms";
     string moduleName = "entry";
     string abilityName = "bmsThirdBundle";
     AAFwk::Want want;

@@ -112,8 +112,7 @@ bool DstbMissionInfo::ReadDstbMissionInfosFromParcel(Parcel& parcel,
             return false;
         }
         size_t size = static_cast<size_t>(len);
-        if ((size > Constants::Mission::GET_MAX_MISSIONS) || (size * sizeof(DstbMissionInfo) >
-            parcel.GetReadableBytes())) {
+        if (size > Constants::Mission::GET_MAX_MISSIONS) {
             HILOGE("Failed to read DstbMissionInfo vector, size = %{public}zu", size);
             return false;
         }
