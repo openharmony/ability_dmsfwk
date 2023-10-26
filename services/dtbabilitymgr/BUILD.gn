@@ -24,6 +24,10 @@ config("distributed_ability_manager_config") {
   visibility = [ ":*" ]
   visibility += [ "./test/*" ]
   include_dirs = [ "include/" ]
+  defines = []
+  if (os_account_part) {
+    defines += [ "OS_ACCOUNT_PART" ]
+  }
 }
 
 ohos_shared_library("distributed_ability_manager_svr") {
