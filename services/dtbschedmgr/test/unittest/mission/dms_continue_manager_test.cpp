@@ -30,6 +30,7 @@ namespace {
 const std::string TYPE = "type";
 const std::string BUNDLENAME_01 = "bundleName01";
 const std::string BUNDLENAME_02 = "bundleName02";
+const std::string NETWORKID_01 = "networkId01";
 constexpr int32_t MISSIONID_01 = 1;
 constexpr int32_t MISSIONID_02 = 2;
 constexpr int32_t ACTIVE = 0;
@@ -516,6 +517,25 @@ HWTEST_F(DMSContinueManagerTest, testDealSetMissionContinueStateBusiness001, Tes
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     DTEST_LOG << "DMSContinueManagerTest testDealSetMissionContinueStateBusiness001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyScreenLockorOff001
+ * @tc.desc: test NotifyScreenLockorOff normal
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testNotifyScreenLockorOff001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testNotifyScreenLockorOff001 start" << std::endl;
+    sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
+    DistributedSchedContinueManager::GetInstance().RegisterOnListener(TYPE, obj01);
+    EXPECT_NE(DistributedSchedContinueManager::GetInstance().registerOnListener_.size(), 0);
+
+    DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId = NETWORKID_01;
+    DistributedSchedContinueManager::GetInstance().NotifyScreenLockorOff();
+    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId, "");
+
+    DTEST_LOG << "DMSContinueManagerTest testNotifyScreenLockorOff001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

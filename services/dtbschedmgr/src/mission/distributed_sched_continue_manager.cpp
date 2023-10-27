@@ -57,6 +57,14 @@ void DistributedSchedContinueManager::Init()
         return;
     }
     missionDiedListener_ = new DistributedMissionDiedListener();
+
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    auto applyMonitor = std::make_shared<CommonEventListener>(subscribeInfo);
+    EventFwk::CommonEventManager::SubscribeCommonEvent(applyMonitor);
+
     eventThread_ = std::thread(&DistributedSchedContinueManager::StartEvent, this);
     std::unique_lock<std::mutex> lock(eventMutex_);
     eventCon_.wait(lock, [this] {
@@ -582,6 +590,39 @@ void DistributedSchedContinueManager::NotifyDeid(const sptr<IRemoteObject>& obj)
         }
     }
     HILOGI("NotifyDeid end");
+}
+
+void DistributedSchedContinueManager::NotifyScreenLockorOff()
+{
+    HILOGI("NotifyScreenLockorOff begin");
+    std::string senderNetworkId;
+    std::string bundleName;
+    {
+        std::lock_guard<std::mutex> currentIconLock(iconMutex_);
+        if (iconInfo_.isEmpty()) {
+            HILOGW("Saved iconInfo has already been cleared, task abort.");
+            return;
+        }
+        senderNetworkId = iconInfo_.senderNetworkId;
+        bundleName = iconInfo_.bundleName;
+        iconInfo_.senderNetworkId = "";
+        iconInfo_.bundleName = "";
+    }
+    HILOGI("Saved iconInfo cleared, networkId = %{public}s, bundleName = %{public}s",
+        DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), bundleName.c_str());
+    {
+        std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
+        auto iterItem = registerOnListener_.find(onType_);
+        if (iterItem == registerOnListener_.end()) {
+            HILOGI("Get iterItem failed from registerOnListener_, nobody registed");
+            return;
+        }
+        std::vector<sptr<IRemoteObject>> objs = iterItem->second;
+        for (auto iter : objs) {
+            NotifyRecvBroadcast(iter, senderNetworkId, bundleName, INACTIVE);
+        }
+    }
+    HILOGI("NotifyScreenLockorOff end");
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

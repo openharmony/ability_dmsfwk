@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "bundle/bundle_manager_internal.h"
+#include "common_event_listener.h"
 #include "distributed_mission_broadcast_listener.h"
 #include "distributed_mission_died_listener.h"
 #include "distributed_mission_focused_listener.h"
@@ -42,6 +43,11 @@ struct currentMissionInfo {
 struct currentIconInfo {
     std::string senderNetworkId;
     std::string bundleName;
+
+    bool isEmpty()
+    {
+        return (this->senderNetworkId == "" && this->bundleName == "");
+    }
 };
 
 class DistributedSchedContinueManager {
@@ -70,6 +76,7 @@ public:
     int32_t GetMissionId(const std::string& bundleName, int32_t& missionId);
     void NotifyDeid(const sptr<IRemoteObject>& obj);
     int32_t SetMissionContinueState(const int32_t missionId, const AAFwk::ContinueState& state);
+    void NotifyScreenLockorOff();
 
 private:
     void AddCancelMissionFocusedTimer(const int32_t missionId);
