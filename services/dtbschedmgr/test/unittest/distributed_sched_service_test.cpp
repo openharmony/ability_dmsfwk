@@ -60,8 +60,8 @@ namespace {
     constexpr int32_t MISSION_ID = 1;
     const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
     const int DEFAULT_REQUEST_CODE = -1;
-    const string ABILITY_NAME = "com.ohos.launcher.MainAbility";
-    const string BUNDLE_NAME = "com.ohos.launcher";
+    const string ABILITY_NAME = "com.ohos.permissionmanager.MainAbility";
+    const string BUNDLE_NAME = "com.ohos.permissionmanager";
     const string DMS_IS_CALLER_BACKGROUND = "dmsIsCallerBackGround";
     const string DMS_VERSION_ID = "dmsVersion";
     const string DMS_VERSION = "4.0.0";
@@ -1934,7 +1934,7 @@ HWTEST_F(DistributedSchedServiceTest, StartLocalAbility_005, TestSize.Level3)
     AAFwk::Want want;
     std::string localDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
-    AppExecFwk::ElementName element(localDeviceId, "com.third.hiworld.example", "bmsThirdBundle");
+    AppExecFwk::ElementName element(localDeviceId, "com.ohos.mms", "bmsThirdBundle");
     want.SetElement(element);
     want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
     AppExecFwk::AbilityInfo abilityInfo;
