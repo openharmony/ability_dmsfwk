@@ -31,7 +31,7 @@ int32_t SoftbusAdapter::SendSoftbusEvent(uint8_t* sendData, uint32_t sendDataLen
     HILOGI("SendSoftbusEvent pkgName: %{public}s.", pkgName_.c_str());
     EventData eventData;
     eventData.event = FOREGROUND_APP;
-    eventData.freq = EVENT_MID_FREQ;
+    eventData.freq = EVENT_HIGH_FREQ;
     eventData.data = sendData;
     eventData.dataLen = sendDataLen;
     int32_t ret = SendEvent(pkgName_.c_str(), BROADCAST_TARGET_AREA, &eventData);
