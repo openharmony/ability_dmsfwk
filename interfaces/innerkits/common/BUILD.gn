@@ -28,6 +28,13 @@ config("common_public_config") {
 }
 
 ohos_shared_library("common_sdk") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   sources = [
     "//foundation/ability/dmsfwk/services/dtbabilitymgr/src/distributed_ability_manager_client.cpp",
     "//foundation/ability/dmsfwk/services/dtbabilitymgr/src/distributed_ability_manager_proxy.cpp",

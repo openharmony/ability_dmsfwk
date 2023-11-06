@@ -58,6 +58,14 @@ void DistributedSchedContinueManager::Init()
         return;
     }
     missionDiedListener_ = new DistributedMissionDiedListener();
+
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    auto applyMonitor = std::make_shared<CommonEventListener>(subscribeInfo);
+    EventFwk::CommonEventManager::SubscribeCommonEvent(applyMonitor);
+
     eventThread_ = std::thread(&DistributedSchedContinueManager::StartEvent, this);
     std::unique_lock<std::mutex> lock(eventMutex_);
     eventCon_.wait(lock, [this] {
@@ -160,6 +168,10 @@ void DistributedSchedContinueManager::NotifyDataRecv(std::string& senderNetworkI
 int32_t DistributedSchedContinueManager::RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj)
 {
     HILOGI("RegisterOnListener start, type: %{public}s", type.c_str());
+    if (obj == nullptr) {
+        HILOGE("obj is null, type: %{public}s", type.c_str());
+        return INVALID_PARAMETERS_ERR;
+    }
     onType_ = type;
     std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     auto iterItem = registerOnListener_.find(type);
@@ -365,8 +377,8 @@ int32_t DistributedSchedContinueManager::DealUnfocusedBusiness(const int32_t mis
     return ERR_OK;
 }
 
-int32_t DistributedSchedContinueManager::VerifyBroadcastSource(std::string& senderNetworkId, std::string& bundleName,
-    const int32_t state)
+int32_t DistributedSchedContinueManager::VerifyBroadcastSource(const std::string& senderNetworkId,
+    const std::string& bundleName, const int32_t state)
 {
     std::lock_guard<std::mutex> currentIconLock(iconMutex_);
     if (state == ACTIVE) {
@@ -391,7 +403,7 @@ int32_t DistributedSchedContinueManager::VerifyBroadcastSource(std::string& send
     return ERR_OK;
 }
 
-int32_t DistributedSchedContinueManager::DealOnBroadcastBusiness(std::string& senderNetworkId,
+int32_t DistributedSchedContinueManager::DealOnBroadcastBusiness(const std::string& senderNetworkId,
     uint32_t accessTokenId, const int32_t state)
 {
     HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, accessTokenId: %{public}d, state: %{public}d",
@@ -559,6 +571,7 @@ void DistributedSchedContinueManager::NotifyDeid(const sptr<IRemoteObject>& obj)
 {
     HILOGI("NotifyDeid start");
     if (obj == nullptr) {
+        HILOGE("obj is null");
         return;
     }
     for (auto iterItem = registerOnListener_.begin(); iterItem != registerOnListener_.end();) {
@@ -578,6 +591,39 @@ void DistributedSchedContinueManager::NotifyDeid(const sptr<IRemoteObject>& obj)
         }
     }
     HILOGI("NotifyDeid end");
+}
+
+void DistributedSchedContinueManager::NotifyScreenLockorOff()
+{
+    HILOGI("NotifyScreenLockorOff begin");
+    std::string senderNetworkId;
+    std::string bundleName;
+    {
+        std::lock_guard<std::mutex> currentIconLock(iconMutex_);
+        if (iconInfo_.isEmpty()) {
+            HILOGW("Saved iconInfo has already been cleared, task abort.");
+            return;
+        }
+        senderNetworkId = iconInfo_.senderNetworkId;
+        bundleName = iconInfo_.bundleName;
+        iconInfo_.senderNetworkId = "";
+        iconInfo_.bundleName = "";
+    }
+    HILOGI("Saved iconInfo cleared, networkId = %{public}s, bundleName = %{public}s",
+        DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), bundleName.c_str());
+    {
+        std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
+        auto iterItem = registerOnListener_.find(onType_);
+        if (iterItem == registerOnListener_.end()) {
+            HILOGI("Get iterItem failed from registerOnListener_, nobody registed");
+            return;
+        }
+        std::vector<sptr<IRemoteObject>> objs = iterItem->second;
+        for (auto iter : objs) {
+            NotifyRecvBroadcast(iter, senderNetworkId, bundleName, INACTIVE);
+        }
+    }
+    HILOGI("NotifyScreenLockorOff end");
 }
 
 void DistributedSchedContinueManager::NotifyDeviceOffline(const std::string& networkId)

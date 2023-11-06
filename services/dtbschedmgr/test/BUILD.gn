@@ -46,6 +46,7 @@ dsched_external_deps = [
   "bundle_framework:appexecfwk_base",
   "bundle_framework:appexecfwk_core",
   "c_utils:utils",
+  "common_event_service:cesfwk_innerkits",
   "device_auth:deviceauth_sdk",
   "device_info_manager:distributed_device_profile_client",
   "device_manager:devicemanagersdk",
@@ -61,10 +62,12 @@ dsched_external_deps = [
   "init:libbegetutil",
   "ipc:ipc_core",
   "kv_store:distributeddata_inner",
-  "os_account:os_account_innerkits",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
 ]
+if (os_account_part) {
+  dsched_external_deps += [ "os_account:os_account_innerkits" ]
+}
 
 if (dmsfwk_report_memmgr) {
   dsched_external_deps += [ "memmgr:memmgrclient" ]
@@ -98,6 +101,7 @@ dtbschedmgr_sources = [
   "${distributed_service}/dtbschedmgr/src/app_state_observer.cpp",
   "${distributed_service}/dtbschedmgr/src/bundle/bundle_manager_callback_stub.cpp",
   "${distributed_service}/dtbschedmgr/src/bundle/bundle_manager_internal.cpp",
+  "${distributed_service}/dtbschedmgr/src/common_event_listener.cpp",
   "${distributed_service}/dtbschedmgr/src/connect_death_recipient.cpp",
   "${distributed_service}/dtbschedmgr/src/deviceManager/dms_device_info.cpp",
   "${distributed_service}/dtbschedmgr/src/dfx/dms_hisysevent_report.cpp",

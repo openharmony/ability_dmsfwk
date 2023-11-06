@@ -52,6 +52,7 @@ public:
         const uint32_t accessTokenId, std::string& bundleName);
     static int32_t GetApplicationInfoFromBms(const std::string& bundleName, const AppExecFwk::BundleFlag flag,
         const int32_t userId, AppExecFwk::ApplicationInfo &appInfo);
+    static ErrCode QueryOsAccount(int32_t& activeAccountId);
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

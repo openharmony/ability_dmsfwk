@@ -42,4 +42,10 @@ declare_args() {
   } else {
     token_sync_enable = false
   }
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.account_os_account)) {
+    os_account_part = true
+  } else {
+    os_account_part = false
+  }
 }

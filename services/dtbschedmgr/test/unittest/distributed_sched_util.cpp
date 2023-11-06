@@ -38,7 +38,7 @@ const std::string HAP_FILE_PATH = "/data/test/resource/dmsfwk/resource/bmsThirdB
 const char* DISTSCHED_PROCESS_NAME = "distributedsched";
 constexpr int32_t DMS_LOAD_SA_TIMEOUT_MS = 10000;
 constexpr int32_t USER_ID = 100;
-constexpr int32_t PERMS_NUM = 2;
+constexpr int32_t PERMS_NUM = 4;
 constexpr int32_t FAILED_RETURN = -1;
 }
 
@@ -85,8 +85,11 @@ std::condition_variable DistributedSchedUtil::remoteConVar_;
 void DistributedSchedUtil::MockPermission()
 {
     static const char *PERMS[] = {
+        "ohos.permission.ABILITY_BACKGROUND_COMMUNICATION",
+        "ohos.permission.ACCESS_SERVICE_DM",
         "ohos.permission.DISTRIBUTED_DATASYNC",
-        "ohos.permission.ACCESS_SERVICE_DM"
+        "ohos.permission.RUNNING_STATE_OBSERVER"
+        
     };
     MockProcessAndPermission(DISTSCHED_PROCESS_NAME, PERMS, PERMS_NUM);
 }

@@ -56,10 +56,12 @@ dtbabilitymgr_external_deps = [
   "hilog:libhilog",
   "init:libbegetutil",
   "ipc:ipc_core",
-  "os_account:os_account_innerkits",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
 ]
+if (os_account_part) {
+  dtbabilitymgr_external_deps += [ "os_account:os_account_innerkits" ]
+}
 
 ##############################fuzztest##########################################
 ohos_fuzztest("ContinuationManagerFuzzTest") {

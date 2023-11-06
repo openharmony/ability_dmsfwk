@@ -63,7 +63,7 @@ bool DstbMissionInfo::ReadFromParcel(Parcel& parcel)
 DstbMissionInfo* DstbMissionInfo::Unmarshalling(Parcel& parcel)
 {
     DstbMissionInfo* info = new DstbMissionInfo();
-    if (info && !info->ReadFromParcel(parcel)) {
+    if (info != nullptr && !info->ReadFromParcel(parcel)) {
         HILOGE("read from parcel failed!");
         delete info;
         info = nullptr;
@@ -112,7 +112,7 @@ bool DstbMissionInfo::ReadDstbMissionInfosFromParcel(Parcel& parcel,
             return false;
         }
         size_t size = static_cast<size_t>(len);
-        if ((size > parcel.GetReadableBytes()) || (size > Constants::Mission::GET_MAX_MISSIONS)) {
+        if (size > Constants::Mission::GET_MAX_MISSIONS) {
             HILOGE("Failed to read DstbMissionInfo vector, size = %{public}zu", size);
             return false;
         }

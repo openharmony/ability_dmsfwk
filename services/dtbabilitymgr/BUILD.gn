@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//build/ohos_var.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
 group("unittest") {
   testonly = true
@@ -23,9 +24,20 @@ config("distributed_ability_manager_config") {
   visibility = [ ":*" ]
   visibility += [ "./test/*" ]
   include_dirs = [ "include/" ]
+  defines = []
+  if (os_account_part) {
+    defines += [ "OS_ACCOUNT_PART" ]
+  }
 }
 
 ohos_shared_library("distributed_ability_manager_svr") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   install_enable = true
   sources = [
     "src/continuation_manager/app_connection_stub.cpp",
@@ -66,10 +78,12 @@ ohos_shared_library("distributed_ability_manager_svr") {
     "hilog:libhilog",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "os_account:os_account_innerkits",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+  if (os_account_part) {
+    external_deps += [ "os_account:os_account_innerkits" ]
+  }
 
   part_name = "dmsfwk"
   subsystem_name = "ability"

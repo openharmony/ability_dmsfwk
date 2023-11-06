@@ -68,7 +68,7 @@ void DistributedSchedMissionManager::Init()
 }
 
 int32_t DistributedSchedMissionManager::GetMissionInfos(const std::string& deviceId,
-    int32_t numMissions, std::vector<AAFwk::MissionInfo>& missionInfos)
+    int32_t numMissions, std::vector<AAFwk::MissionInfo>& missionInfoSet)
 {
     HILOGI("start!");
     if (!IsDeviceIdValidated(deviceId)) {
@@ -78,22 +78,22 @@ int32_t DistributedSchedMissionManager::GetMissionInfos(const std::string& devic
         HILOGE("numMissions is illegal! numMissions:%{public}d", numMissions);
         return INVALID_PARAMETERS_ERR;
     }
-    std::vector<DstbMissionInfo> dstbMissionInfos;
-    int32_t ret = FetchCachedRemoteMissions(deviceId, numMissions, dstbMissionInfos);
+    std::vector<DstbMissionInfo> dstbMissionInfoSet;
+    int32_t ret = FetchCachedRemoteMissions(deviceId, numMissions, dstbMissionInfoSet);
     if (ret != ERR_OK) {
         HILOGE("FetchCachedRemoteMissions failed, ret = %{public}d", ret);
         return ret;
     }
-    return MissionInfoConverter::ConvertToMissionInfos(dstbMissionInfos, missionInfos);
+    return MissionInfoConverter::ConvertToMissionInfos(dstbMissionInfoSet, missionInfoSet);
 }
 
 sptr<IDistributedSched> DistributedSchedMissionManager::GetRemoteDms(const std::string& deviceId)
 {
-    int64_t begin = GetTickCount();
     if (deviceId.empty()) {
         HILOGE("GetRemoteDms remoteDeviceId is empty");
         return nullptr;
     }
+    int64_t begin = GetTickCount();
     {
         std::lock_guard<std::mutex> autoLock(remoteDmsLock_);
         auto iter = remoteDmsMap_.find(deviceId);
@@ -504,7 +504,7 @@ int32_t DistributedSchedMissionManager::StartSyncRemoteMissions(const std::strin
 }
 
 int32_t DistributedSchedMissionManager::StartSyncMissionsFromRemote(const CallerInfo& callerInfo,
-    std::vector<DstbMissionInfo>& missionInfos)
+    std::vector<DstbMissionInfo>& missionInfoSet)
 {
     auto deviceId = callerInfo.sourceDeviceId;
     HILOGD("remote version is %{public}d!", callerInfo.dmsVersion);
@@ -513,15 +513,15 @@ int32_t DistributedSchedMissionManager::StartSyncMissionsFromRemote(const Caller
         remoteSyncDeviceSet_.emplace(deviceId);
     }
     int32_t result = DistributedSchedAdapter::GetInstance().GetLocalMissionInfos(Mission::GET_MAX_MISSIONS,
-        missionInfos);
-    auto func = [this, missionInfos]() {
+        missionInfoSet);
+    auto func = [this, missionInfoSet]() {
         HILOGD("RegisterMissionListener called.");
         if (!isRegMissionChange_) {
             int32_t ret = DistributedSchedAdapter::GetInstance().RegisterMissionListener(missonChangeListener_);
             if (ret == ERR_OK) {
                 isRegMissionChange_ = true;
             }
-            InitAllSnapshots(missionInfos);
+            InitAllSnapshots(missionInfoSet);
         }
     };
     if (!missionHandler_->PostTask(func)) {
@@ -552,6 +552,10 @@ void DistributedSchedMissionManager::StopSyncMissionsFromRemote(const std::strin
 
 bool DistributedSchedMissionManager::NeedSyncDevice(const std::string& deviceId)
 {
+    if (deviceId.empty()) {
+        HILOGD("deviceId empty!");
+        return false;
+    }
     std::lock_guard<std::mutex> autoLock(remoteSyncDeviceLock_);
     if (remoteSyncDeviceSet_.count(deviceId) == 0) {
         return false;
@@ -588,6 +592,7 @@ void DistributedSchedMissionManager::OnRemoteDied(const wptr<IRemoteObject>& rem
     HILOGD("OnRemoteDied!");
     sptr<IRemoteObject> listener = remote.promote();
     if (listener == nullptr) {
+        HILOGW("listener is null");
         return;
     }
     auto remoteDiedFunc = [this, listener]() {
@@ -657,10 +662,12 @@ std::unique_ptr<Snapshot> DistributedSchedMissionManager::DequeueCachedSnapshotI
 void DistributedSchedMissionManager::DeleteCachedSnapshotInfo(const std::string& networkId)
 {
     if (networkId.empty()) {
+        HILOGW("networkId empty!");
         return;
     }
     std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(networkId);
     if (uuid.empty()) {
+        HILOGW("uuid empty!");
         return;
     }
     std::lock_guard<std::mutex> autoLock(listenDeviceLock_);
@@ -675,7 +682,7 @@ void DistributedSchedMissionManager::DeleteCachedSnapshotInfo(const std::string&
 }
 
 int32_t DistributedSchedMissionManager::FetchCachedRemoteMissions(const std::string& srcId, int32_t numMissions,
-    std::vector<DstbMissionInfo>& missionInfos)
+    std::vector<DstbMissionInfo>& missionInfoSet)
 {
     std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(srcId);
     if (uuid.empty()) {
@@ -696,13 +703,13 @@ int32_t DistributedSchedMissionManager::FetchCachedRemoteMissions(const std::str
         HILOGE("invalid size!");
         return ERR_NULL_OBJECT;
     }
-    missionInfos.assign((iter->second).begin(),
+    missionInfoSet.assign((iter->second).begin(),
         (actualNums > numMissions) ? (iter->second).begin() + numMissions : (iter->second).end());
     return ERR_NONE;
 }
 
 void DistributedSchedMissionManager::RebornMissionCache(const std::string& deviceId,
-    const std::vector<DstbMissionInfo>& missionInfos)
+    const std::vector<DstbMissionInfo>& missionInfoSet)
 {
     HILOGI("start! deviceId is %{public}s",
         DnetworkAdapter::AnonymizeNetworkId(deviceId).c_str());
@@ -713,7 +720,7 @@ void DistributedSchedMissionManager::RebornMissionCache(const std::string& devic
     }
     {
         std::lock_guard<std::mutex> autoLock(remoteMissionInfosLock_);
-        deviceMissionInfos_[uuid] = missionInfos;
+        deviceMissionInfos_[uuid] = missionInfoSet;
     }
     HILOGI("RebornMissionCache end!");
 }
@@ -735,11 +742,11 @@ void DistributedSchedMissionManager::CleanMissionCache(const std::string& device
 }
 
 int32_t DistributedSchedMissionManager::NotifyMissionsChangedFromRemote(const CallerInfo& callerInfo,
-    const std::vector<DstbMissionInfo>& missionInfos)
+    const std::vector<DstbMissionInfo>& missionInfoSet)
 {
     HILOGI("NotifyMissionsChangedFromRemote version is %{public}d!", callerInfo.dmsVersion);
     std::u16string u16DevId = Str8ToStr16(callerInfo.sourceDeviceId);
-    RebornMissionCache(callerInfo.sourceDeviceId, missionInfos);
+    RebornMissionCache(callerInfo.sourceDeviceId, missionInfoSet);
     {
         HILOGI("NotifyMissionsChangedFromRemote notify mission start!");
         std::lock_guard<std::mutex> autoLock(listenDeviceLock_);
@@ -822,7 +829,8 @@ void DistributedSchedMissionManager::NotifyMissionSnapshotDestroyed(int32_t miss
     }
 }
 
-int32_t DistributedSchedMissionManager::NotifyMissionsChangedToRemote(const std::vector<DstbMissionInfo>& missionInfos)
+int32_t DistributedSchedMissionManager::NotifyMissionsChangedToRemote(
+    const std::vector<DstbMissionInfo> &missionInfoSet)
 {
     CallerInfo callerInfo;
     if (!GenerateCallerInfo(callerInfo)) {
@@ -835,8 +843,8 @@ int32_t DistributedSchedMissionManager::NotifyMissionsChangedToRemote(const std:
             HILOGE("NotifyMissionsChangedToRemote fetch handler failed!");
             continue;
         }
-        auto callback = [destDeviceId, missionInfos, callerInfo, this] () {
-            NotifyMissionsChangedToRemoteInner(destDeviceId, missionInfos, callerInfo);
+        auto callback = [destDeviceId, missionInfoSet, callerInfo, this] () {
+            NotifyMissionsChangedToRemoteInner(destDeviceId, missionInfoSet, callerInfo);
         };
         if (!handler->PostTask(callback)) {
             HILOGE("NotifyMissionsChangedToRemote PostTask failed!");
@@ -848,7 +856,7 @@ int32_t DistributedSchedMissionManager::NotifyMissionsChangedToRemote(const std:
 }
 
 void DistributedSchedMissionManager::NotifyMissionsChangedToRemoteInner(const std::string& deviceId,
-    const std::vector<DstbMissionInfo>& missionInfos, const CallerInfo& callerInfo)
+    const std::vector<DstbMissionInfo>& missionInfoSet, const CallerInfo& callerInfo)
 {
     sptr<IDistributedSched> remoteDms = GetRemoteDms(deviceId);
     if (remoteDms == nullptr) {
@@ -856,7 +864,7 @@ void DistributedSchedMissionManager::NotifyMissionsChangedToRemoteInner(const st
         return;
     }
     int64_t begin = GetTickCount();
-    int32_t result = remoteDms->NotifyMissionsChangedFromRemote(missionInfos, callerInfo);
+    int32_t result = remoteDms->NotifyMissionsChangedFromRemote(missionInfoSet, callerInfo);
     HILOGI("[PerformanceTest] NotifyMissionsChangedFromRemote ret:%{public}d, spend %{public}" PRId64 " ms",
         result, GetTickCount() - begin);
 }
@@ -1035,9 +1043,9 @@ void DistributedSchedMissionManager::RetryRegisterMissionChange(int32_t retryTim
     }
 }
 
-void DistributedSchedMissionManager::InitAllSnapshots(const std::vector<DstbMissionInfo>& missionInfos)
+void DistributedSchedMissionManager::InitAllSnapshots(const std::vector<DstbMissionInfo>& missionInfoSet)
 {
-    for (auto iter = missionInfos.begin(); iter != missionInfos.end(); iter++) {
+    for (auto iter = missionInfoSet.begin(); iter != missionInfoSet.end(); iter++) {
         ErrCode errCode = MissionSnapshotChanged(iter->id);
         if (errCode != ERR_OK) {
             HILOGE("mission snapshot changed failed, missionId=%{public}d, errCode=%{public}d", iter->id, errCode);

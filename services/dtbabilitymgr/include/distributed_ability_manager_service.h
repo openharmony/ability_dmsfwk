@@ -70,7 +70,7 @@ private:
         const std::vector<ContinuationResult>& continuationResults);
     int32_t ConnectAbility(int32_t token, const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams);
     int32_t DisconnectAbility();
-    bool QueryExtensionAbilityInfo(const std::vector<int32_t>& ids, const AAFwk::Want& want,
+    bool QueryExtensionAbilityInfo(const int32_t& activeAccountId, const AAFwk::Want& want,
         AppExecFwk::ExtensionAbilityInfo& extensionInfo);
     bool HandleDisconnectAbility();
     void HandleNotifierDied(const sptr<IRemoteObject>& notifier);

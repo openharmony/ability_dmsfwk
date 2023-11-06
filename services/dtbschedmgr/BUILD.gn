@@ -46,9 +46,19 @@ config("distributed_sched_config") {
   if (dmsfwk_service_disable) {
     defines += [ "DMS_SERVICE_DISABLE" ]
   }
+  if (os_account_part) {
+    defines += [ "OS_ACCOUNT_PART" ]
+  }
 }
 
 ohos_shared_library("distributedschedsvr") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   install_enable = true
   sources = [
     "src/ability_connection_wrapper_proxy.cpp",
@@ -57,6 +67,7 @@ ohos_shared_library("distributedschedsvr") {
     "src/app_state_observer.cpp",
     "src/bundle/bundle_manager_callback_stub.cpp",
     "src/bundle/bundle_manager_internal.cpp",
+    "src/common_event_listener.cpp",
     "src/connect_death_recipient.cpp",
     "src/deviceManager/dms_device_info.cpp",
     "src/dfx/dms_hisysevent_report.cpp",
@@ -105,6 +116,7 @@ ohos_shared_library("distributedschedsvr") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
     "device_auth:deviceauth_sdk",
     "device_info_manager:distributed_device_profile_client",
     "device_manager:devicemanagersdk",
@@ -119,10 +131,12 @@ ohos_shared_library("distributedschedsvr") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
-    "os_account:os_account_innerkits",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+  if (os_account_part) {
+    external_deps += [ "os_account:os_account_innerkits" ]
+  }
 
   if (efficiency_manager_service_enable) {
     external_deps += [ "efficiency_manager:suspend_manager_client" ]

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_DISTRIBUTED_MISSION_CONSTANT_H
-#define OHOS_DISTRIBUTED_MISSION_CONSTANT_H
+#include "common_event_listener.h"
+
+#include "dtbschedmgr_log.h"
+#include "mission/distributed_sched_continue_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
-namespace Constants {
-namespace Mission {
-constexpr int32_t GET_MAX_MISSIONS = 20;
-} // namespace Mission
-} // namespace Constants
+namespace {
+const std::string TAG = "CommonEventListener";
+}
+void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
+{
+    HILOGD("OnReceiveEvent called");
+    DistributedSchedContinueManager::GetInstance().NotifyScreenLockorOff();
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
-
-#endif

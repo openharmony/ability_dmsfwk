@@ -521,6 +521,25 @@ HWTEST_F(DMSContinueManagerTest, testDealSetMissionContinueStateBusiness001, Tes
 }
 
 /**
+ * @tc.name: testNotifyScreenLockorOff001
+ * @tc.desc: test NotifyScreenLockorOff normal
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testNotifyScreenLockorOff001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testNotifyScreenLockorOff001 start" << std::endl;
+    sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
+    DistributedSchedContinueManager::GetInstance().RegisterOnListener(TYPE, obj01);
+    EXPECT_NE(DistributedSchedContinueManager::GetInstance().registerOnListener_.size(), 0);
+
+    DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId = NETWORKID_01;
+    DistributedSchedContinueManager::GetInstance().NotifyScreenLockorOff();
+    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId, "");
+
+    DTEST_LOG << "DMSContinueManagerTest testNotifyScreenLockorOff001 end" << std::endl;
+}
+
+/**
  * @tc.name: testNotifyDeviceOffline001
  * @tc.desc: test NotifyDeviceOffline normal
  * @tc.type: FUNC

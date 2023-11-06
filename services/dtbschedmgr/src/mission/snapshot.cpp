@@ -81,7 +81,7 @@ bool Snapshot::WriteToParcel(MessageParcel& data) const
     return true;
 }
 
-unique_ptr<Snapshot> Snapshot::FillSnapShot(MessageParcel& data)
+unique_ptr<Snapshot> Snapshot::FillSnapshot(MessageParcel& data)
 {
     int32_t version = 0;
     PARCEL_READ_HELPER_RET(data, Int32, version, nullptr);
@@ -178,9 +178,9 @@ unique_ptr<Snapshot> Snapshot::Create(const vector<uint8_t>& data)
         HILOGE("Snapshot dataParcel write failed!");
         return nullptr;
     }
-    unique_ptr<Snapshot> snapShot = FillSnapShot(dataParcel);
+    unique_ptr<Snapshot> snapShot = FillSnapshot(dataParcel);
     if (snapShot == nullptr) {
-        HILOGW("Snapshot: FillSnapShot failed!");
+        HILOGW("Snapshot: FillSnapshot failed!");
         return nullptr;
     }
     dataBuffer += msgSize;
