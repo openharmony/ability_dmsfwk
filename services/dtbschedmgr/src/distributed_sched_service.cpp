@@ -178,6 +178,7 @@ void DistributedSchedService::DeviceOfflineNotify(const std::string& networkId)
 {
     DistributedSchedAdapter::GetInstance().DeviceOffline(networkId);
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
+    DistributedSchedContinueManager::GetInstance().NotifyDeviceOffline(networkId);
     DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(networkId);
 #endif
 }

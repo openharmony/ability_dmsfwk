@@ -31,6 +31,7 @@ const std::string TYPE = "type";
 const std::string BUNDLENAME_01 = "bundleName01";
 const std::string BUNDLENAME_02 = "bundleName02";
 const std::string NETWORKID_01 = "networkId01";
+const std::string NETWORKID_02 = "networkId02";
 constexpr int32_t MISSIONID_01 = 1;
 constexpr int32_t MISSIONID_02 = 2;
 constexpr int32_t ACTIVE = 0;
@@ -460,7 +461,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeid001, TestSize.Level1)
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeid001 start" << std::endl;
     sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
     int32_t ret = DistributedSchedContinueManager::GetInstance().RegisterOnListener(TYPE, obj01);
-    EXPECT_EQ(ret, DistributedSchedContinueManager::GetInstance().registerOnListener_.empty());
+    EXPECT_EQ(false, DistributedSchedContinueManager::GetInstance().registerOnListener_.empty());
     DistributedSchedContinueManager::GetInstance().NotifyDeid(obj01);
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeid001 end" << std::endl;
 }
@@ -536,6 +537,55 @@ HWTEST_F(DMSContinueManagerTest, testNotifyScreenLockorOff001, TestSize.Level1)
     EXPECT_EQ(DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId, "");
 
     DTEST_LOG << "DMSContinueManagerTest testNotifyScreenLockorOff001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyDeviceOffline001
+ * @tc.desc: test NotifyDeviceOffline normal
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline001 start" << std::endl;
+    sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
+    DistributedSchedContinueManager::GetInstance().RegisterOnListener(TYPE, obj01);
+    EXPECT_NE(DistributedSchedContinueManager::GetInstance().registerOnListener_.size(), 0);
+
+    DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId = NETWORKID_01;
+    DistributedSchedContinueManager::GetInstance().NotifyDeviceOffline(NETWORKID_01);
+    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId, "");
+
+    DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyDeviceOffline002
+ * @tc.desc: test NotifyDeviceOffline networkId empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline002 start" << std::endl;
+    DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId = NETWORKID_01;
+    DistributedSchedContinueManager::GetInstance().NotifyDeviceOffline("");
+    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId, NETWORKID_01);
+
+    DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyDeviceOffline003
+ * @tc.desc: test NotifyDeviceOffline networkId not match
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline003, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline003 start" << std::endl;
+    DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId = NETWORKID_01;
+    DistributedSchedContinueManager::GetInstance().NotifyDeviceOffline(NETWORKID_02);
+    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId, NETWORKID_01);
+
+    DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline003 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

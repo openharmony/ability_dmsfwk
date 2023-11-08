@@ -18,6 +18,7 @@
 #include "adapter/dnetwork_adapter.h"
 #include "datetime_ex.h"
 #include "distributed_sched_adapter.h"
+#include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
@@ -623,6 +624,48 @@ void DistributedSchedContinueManager::NotifyScreenLockorOff()
         }
     }
     HILOGI("NotifyScreenLockorOff end");
+}
+
+void DistributedSchedContinueManager::NotifyDeviceOffline(const std::string& networkId)
+{
+    if (networkId.empty()) {
+        HILOGE("NotifyDeviceOffline networkId empty");
+        return;
+    }
+    HILOGI("NotifyDeviceOffline begin. networkId = %{public}s", DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+    std::string localNetworkId;
+    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localNetworkId)) {
+        HILOGE("Get local networkId failed");
+        return;
+    }
+    std::string senderNetworkId;
+    std::string bundleName;
+    {
+        std::lock_guard<std::mutex> currentIconLock(iconMutex_);
+        if (networkId != iconInfo_.senderNetworkId && networkId != localNetworkId) {
+            HILOGI("NotifyDeviceOffline irrelevant device offline, ignore");
+            return;
+        }
+        senderNetworkId = iconInfo_.senderNetworkId;
+        bundleName = iconInfo_.bundleName;
+        iconInfo_.senderNetworkId = "";
+        iconInfo_.bundleName = "";
+    }
+    HILOGI("Saved iconInfo cleared, networkId = %{public}s, bundleName = %{public}s",
+        DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), bundleName.c_str());
+    {
+        std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
+        auto iterItem = registerOnListener_.find(onType_);
+        if (iterItem == registerOnListener_.end()) {
+            HILOGI("Get iterItem failed from registerOnListener_, nobody registed");
+            return;
+        }
+        std::vector<sptr<IRemoteObject>> objs = iterItem->second;
+        for (auto iter : objs) {
+            NotifyRecvBroadcast(iter, senderNetworkId, bundleName, INACTIVE);
+        }
+    }
+    HILOGI("NotifyDeviceOffline end");
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
