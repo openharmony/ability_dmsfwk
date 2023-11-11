@@ -80,6 +80,7 @@ public:
     void NotifyScreenLockorOff();
 
 private:
+    int32_t GetCurrentMissionId();
     void AddCancelMissionFocusedTimer(const int32_t missionId);
     int32_t SendSoftbusEvent(uint32_t accessTokenId, uint8_t type);
     void StartEvent();
