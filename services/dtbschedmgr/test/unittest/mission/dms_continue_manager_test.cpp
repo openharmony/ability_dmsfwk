@@ -36,6 +36,7 @@ constexpr int32_t MISSIONID_01 = 1;
 constexpr int32_t MISSIONID_02 = 2;
 constexpr int32_t ACTIVE = 0;
 constexpr int32_t INACTIVE = 1;
+constexpr int32_t CANCEL_FOCUSED_DELAYED = 10000;
 }
 
 void DMSContinueManagerTest::SetUpTestCase()
@@ -101,14 +102,14 @@ HWTEST_F(DMSContinueManagerTest, testAddCancelMissionFocusedTimer001, TestSize.L
     /**
      * @tc.steps: step1. test AddCancelMissionFocusedTimer when eventHandler is not nullptr;
      */
-    DistributedSchedContinueManager::GetInstance().AddCancelMissionFocusedTimer(0);
+    DistributedSchedContinueManager::GetInstance().AddCancelMissionFocusedTimer(0, CANCEL_FOCUSED_DELAYED);
     EXPECT_NE(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
 
     /**
      * @tc.steps: step2. test AddCancelMissionFocusedTimer when eventHandler is nullptr;
      */
     DistributedSchedContinueManager::GetInstance().UnInit();
-    DistributedSchedContinueManager::GetInstance().AddCancelMissionFocusedTimer(0);
+    DistributedSchedContinueManager::GetInstance().AddCancelMissionFocusedTimer(0, CANCEL_FOCUSED_DELAYED);
     EXPECT_EQ(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
     DTEST_LOG << "DMSContinueManagerTest testAddCancelMissionFocusedTimer001 end" << std::endl;
 }
