@@ -32,6 +32,8 @@ const std::string BUNDLENAME_01 = "bundleName01";
 const std::string BUNDLENAME_02 = "bundleName02";
 const std::string NETWORKID_01 = "networkId01";
 const std::string NETWORKID_02 = "networkId02";
+constexpr static int32_t DMS_SEND_LEN = 5;
+constexpr static uint8_t DMS_0X0F = 0x0f;
 constexpr int32_t MISSIONID_01 = 1;
 constexpr int32_t MISSIONID_02 = 2;
 constexpr int32_t ACTIVE = 0;
@@ -586,6 +588,40 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline003, TestSize.Level1)
     EXPECT_EQ(DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId, NETWORKID_01);
 
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNotifyDataRecv001
+ * @tc.desc: NotifyDataRecv
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testNotifyDataRecv001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testNotifyDataRecv001 start" << std::endl;
+    std::string senderNetworkId = NETWORKID_01;
+    uint8_t payload[] = {0xf0};
+    uint32_t dataLen1 = DMS_SEND_LEN - 1;
+    DistributedSchedContinueManager::GetInstance().NotifyDataRecv(senderNetworkId, payload, dataLen1);
+
+    uint32_t dataLen2 = DMS_SEND_LEN;
+    DistributedSchedContinueManager::GetInstance().NotifyDataRecv(senderNetworkId, payload, dataLen2);
+    EXPECT_NE(payload[0] & DMS_0X0F, sizeof(uint32_t));
+    DTEST_LOG << "DMSContinueManagerTest testNotifyDataRecv001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testSendSoftbusEvent001
+ * @tc.desc: SendSoftbusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testSendSoftbusEvent001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testSendSoftbusEvent001 start" << std::endl;
+    uint32_t accessTokenId = 0;
+    uint8_t type = 0;
+    bool ret = DistributedSchedContinueManager::GetInstance().SendSoftbusEvent(accessTokenId, type);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DMSContinueManagerTest testSendSoftbusEvent001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
