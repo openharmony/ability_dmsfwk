@@ -22,6 +22,10 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+const std::string NETWORKID_01 = "networkId01";
+}
+
 void SoftbusAdapterTest::SetUpTestCase()
 {
     DTEST_LOG << "SoftbusAdapterTest::SetUpTestCase" << std::endl;
@@ -77,6 +81,13 @@ HWTEST_F(SoftbusAdapterTest, StopSoftbusEvent_001, TestSize.Level3)
  */
 HWTEST_F(SoftbusAdapterTest, RegisterSoftbusEventListener_001, TestSize.Level3)
 {
+    DTEST_LOG << "SoftbusAdapterTest OnBroadCastRecv_001 begin" << std::endl;
+    std::string networkId = NETWORKID_01;
+    uint8_t* sendData = nullptr;
+    uint32_t sendDataLen = 1;
+    SoftbusAdapter::GetInstance().OnBroadCastRecv(networkId, sendData, sendDataLen);
+    DTEST_LOG << "SoftbusAdapterTest OnBroadCastRecv_001 end" << std::endl;
+    
     DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_001 begin" << std::endl;
     std::shared_ptr<SubSoftbusAdapterListener> listener = std::make_shared<SubSoftbusAdapterListener>();
     uint32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);

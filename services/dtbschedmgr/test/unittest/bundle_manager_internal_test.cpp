@@ -413,6 +413,28 @@ HWTEST_F(BundleManagerInternalTest, GetBundleNameListFromBms_001, TestSize.Level
 }
 
 /**
+ * @tc.name: GetBundleNameListFromBms_002
+ * @tc.desc: test GetBundleNameListFromBms
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, GetBundleNameListFromBms_002, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerCallBackTest GetBundleNameListFromBms_002 begin" << std::endl;
+    const std::string bundleName = "com.ohos.permissionmanager";
+    int32_t uid = BundleManagerInternal::GetUidFromBms(bundleName);
+    if (uid <= 0) {
+        return;
+    }
+    std::vector<std::u16string> u16BundleNameList;
+    bool ret1 = BundleManagerInternal::GetBundleNameListFromBms(uid, u16BundleNameList);
+    EXPECT_EQ(ret1, true);
+    u16BundleNameList.clear();
+    bool ret2 = BundleManagerInternal::GetBundleNameListFromBms(-1, u16BundleNameList);
+    EXPECT_EQ(ret2, false);
+    DTEST_LOG << "BundleManagerCallBackTest GetBundleNameListFromBms_002 end "<< std::endl;
+}
+
+/**
  * @tc.name: GetCallerAppIdFromBms_001
  * @tc.desc: test get callerappId from bms
  * @tc.type: FUNC

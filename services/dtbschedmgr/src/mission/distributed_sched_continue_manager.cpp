@@ -45,32 +45,42 @@ IMPLEMENT_SINGLE_INSTANCE(DistributedSchedContinueManager);
 void DistributedSchedContinueManager::Init()
 {
     HILOGI("Init start");
-    missionFocusedListener_ = new DistributedMissionFocusedListener();
-    int32_t ret = DistributedSchedAdapter::GetInstance().RegisterMissionListener(missionFocusedListener_);
-    if (ret != ERR_OK) {
-        HILOGE("get RegisterMissionListener failed, ret: %{public}d", ret);
-        return;
-    }
-    std::shared_ptr<SoftbusAdapterListener> missionBroadcastListener =
-        std::make_shared<DistributedMissionBroadcastListener>();
-    ret = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(missionBroadcastListener);
-    if (ret != ERR_OK) {
-        HILOGE("get RegisterSoftbusEventListener failed, ret: %{public}d", ret);
-        return;
-    }
-    missionDiedListener_ = new DistributedMissionDiedListener();
-    MMIAdapter::GetInstance().Init();
-    EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
-    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
-    auto applyMonitor = std::make_shared<CommonEventListener>(subscribeInfo);
-    EventFwk::CommonEventManager::SubscribeCommonEvent(applyMonitor);
+    {
+        missionFocusedListener_ = new DistributedMissionFocusedListener();
+        int32_t ret = DistributedSchedAdapter::GetInstance().RegisterMissionListener(missionFocusedListener_);
+        if (ret != ERR_OK) {
+            HILOGE("get RegisterMissionListener failed, ret: %{public}d", ret);
+            return;
+        }
+        std::shared_ptr<SoftbusAdapterListener> missionBroadcastListener =
+            std::make_shared<DistributedMissionBroadcastListener>();
+        ret = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(missionBroadcastListener);
+        if (ret != ERR_OK) {
+            HILOGE("get RegisterSoftbusEventListener failed, ret: %{public}d", ret);
+            return;
+        }
+        missionDiedListener_ = new DistributedMissionDiedListener();
 
-    eventThread_ = std::thread(&DistributedSchedContinueManager::StartEvent, this);
-    std::unique_lock<std::mutex> lock(eventMutex_);
-    eventCon_.wait(lock, [this] {
-        return eventHandler_ != nullptr;
-    });
+        MMIAdapter::GetInstance().Init();
+        EventFwk::MatchingSkills matchingSkills;
+        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+        EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+        auto applyMonitor = std::make_shared<CommonEventListener>(subscribeInfo);
+        EventFwk::CommonEventManager::SubscribeCommonEvent(applyMonitor);
+
+        eventThread_ = std::thread(&DistributedSchedContinueManager::StartEvent, this);
+        std::unique_lock<std::mutex> lock(eventMutex_);
+        eventCon_.wait(lock, [this] {
+            return eventHandler_ != nullptr;
+        });
+    }
+
+    int32_t missionId = GetCurrentMissionId();
+    if (missionId <= 0) {
+        HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
+        return;
+    }
+    NotifyMissionFocused(missionId);
     HILOGI("Init end");
 }
 
@@ -85,6 +95,20 @@ void DistributedSchedContinueManager::UnInit()
         HILOGE("eventHandler_ is nullptr");
     }
     HILOGI("UnInit end");
+}
+
+int32_t DistributedSchedContinueManager::GetCurrentMissionId()
+{
+    HILOGI("GetCurrentMission begin");
+    sptr<IRemoteObject> token;
+    int ret = AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility(token);
+    if (ret != ERR_OK || token == nullptr) {
+        HILOGE("GetTopAbility failed, ret: %{public}d", ret);
+        return INVALID_MISSION_ID;
+    }
+    int32_t missionId = INVALID_MISSION_ID;
+    AAFwk::AbilityManagerClient::GetInstance()->GetMissionIdByToken(token, missionId);
+    return missionId;
 }
 
 void DistributedSchedContinueManager::AddCancelMissionFocusedTimer(const int32_t missionId, const int32_t delay)
@@ -669,32 +693,39 @@ void DistributedSchedContinueManager::NotifyDeid(const sptr<IRemoteObject>& obj)
 void DistributedSchedContinueManager::NotifyScreenLockorOff()
 {
     HILOGI("NotifyScreenLockorOff begin");
-    std::string senderNetworkId;
-    std::string bundleName;
-    {
-        std::lock_guard<std::mutex> currentIconLock(iconMutex_);
-        if (iconInfo_.isEmpty()) {
-            HILOGW("Saved iconInfo has already been cleared, task abort.");
-            return;
+    auto func = [this]() {
+        std::string senderNetworkId;
+        std::string bundleName;
+        {
+            std::lock_guard<std::mutex> currentIconLock(iconMutex_);
+            if (iconInfo_.isEmpty()) {
+                HILOGW("Saved iconInfo has already been cleared, task abort.");
+                return;
+            }
+            senderNetworkId = iconInfo_.senderNetworkId;
+            bundleName = iconInfo_.bundleName;
+            iconInfo_.senderNetworkId = "";
+            iconInfo_.bundleName = "";
         }
-        senderNetworkId = iconInfo_.senderNetworkId;
-        bundleName = iconInfo_.bundleName;
-        iconInfo_.senderNetworkId = "";
-        iconInfo_.bundleName = "";
-    }
-    HILOGI("Saved iconInfo cleared, networkId = %{public}s, bundleName = %{public}s",
-        DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), bundleName.c_str());
-    {
-        std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
-        auto iterItem = registerOnListener_.find(onType_);
-        if (iterItem == registerOnListener_.end()) {
-            HILOGI("Get iterItem failed from registerOnListener_, nobody registed");
-            return;
+        HILOGI("Saved iconInfo cleared, networkId = %{public}s, bundleName = %{public}s",
+            DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), bundleName.c_str());
+        {
+            std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
+            auto iterItem = registerOnListener_.find(onType_);
+            if (iterItem == registerOnListener_.end()) {
+                HILOGI("Get iterItem failed from registerOnListener_, nobody registed");
+                return;
+            }
+            std::vector<sptr<IRemoteObject>> objs = iterItem->second;
+            for (auto iter : objs) {
+                NotifyRecvBroadcast(iter, senderNetworkId, bundleName, INACTIVE);
+            }
         }
-        std::vector<sptr<IRemoteObject>> objs = iterItem->second;
-        for (auto iter : objs) {
-            NotifyRecvBroadcast(iter, senderNetworkId, bundleName, INACTIVE);
-        }
+    };
+    if (eventHandler_ != nullptr) {
+        eventHandler_->PostTask(func);
+    } else {
+        HILOGE("eventHandler_ is nullptr");
     }
     HILOGI("NotifyScreenLockorOff end");
 }

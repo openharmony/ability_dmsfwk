@@ -81,6 +81,7 @@ public:
     void onMMIEvent();
 
 private:
+    int32_t GetCurrentMissionId();
     void AddCancelMissionFocusedTimer(const int32_t missionId, const int32_t delay);
     int32_t SendSoftbusEvent(uint32_t accessTokenId, uint8_t type);
     void StartEvent();
