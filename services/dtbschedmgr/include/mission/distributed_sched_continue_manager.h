@@ -78,14 +78,16 @@ public:
     void NotifyDeviceOffline(const std::string& networkId);
     int32_t SetMissionContinueState(const int32_t missionId, const AAFwk::ContinueState& state);
     void NotifyScreenLockorOff();
+    void onMMIEvent();
 
 private:
     int32_t GetCurrentMissionId();
-    void AddCancelMissionFocusedTimer(const int32_t missionId);
+    void AddCancelMissionFocusedTimer(const int32_t missionId, const int32_t delay);
     int32_t SendSoftbusEvent(uint32_t accessTokenId, uint8_t type);
     void StartEvent();
     int32_t DealFocusedBusiness(const int32_t missionId);
     int32_t DealUnfocusedBusiness(const int32_t missionId, bool isUnfocused);
+    void DealTimerUnfocusedBussiness(const int32_t missionId);
     int32_t VerifyBroadcastSource(const std::string& senderNetworkId, const std::string& bundleName,
         const int32_t state);
     int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint32_t accessTokenId, const int32_t state);
@@ -95,6 +97,8 @@ private:
     bool IsContinue(const int32_t& missionId, const std::string& bundleName);
     int32_t DealSetMissionContinueStateBusiness(const int32_t missionId, const AAFwk::ContinueState& state);
     int32_t CheckContinueState(const int32_t missionId);
+    void AddMMIListener();
+    void RemoveMMIListener();
 private:
     currentMissionInfo info_ = { INVALID_MISSION_ID, false };
     currentIconInfo iconInfo_;
@@ -107,7 +111,11 @@ private:
     std::condition_variable eventCon_;
     std::mutex eventMutex_;
     std::mutex iconMutex_;
+    std::mutex mmiMutex_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
+    int32_t mmiMonitorId_ = INVALID_MISSION_ID;
+    int64_t lastMMIEvent_ = 0;
+    bool needMMIBroadcast_ = false;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
