@@ -78,7 +78,7 @@ public:
     void NotifyDeviceOffline(const std::string& networkId);
     int32_t SetMissionContinueState(const int32_t missionId, const AAFwk::ContinueState& state);
     void NotifyScreenLockorOff();
-    void onMMIEvent();
+    void OnMMIEvent();
 
 private:
     int32_t GetCurrentMissionId();
