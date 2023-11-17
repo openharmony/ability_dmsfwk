@@ -772,7 +772,7 @@ void DistributedSchedContinueManager::NotifyDeviceOffline(const std::string& net
     HILOGI("NotifyDeviceOffline end");
 }
 
-void DistributedSchedContinueManager::onMMIEvent()
+void DistributedSchedContinueManager::OnMMIEvent()
 {
     std::lock_guard<std::mutex> mmiEventLock(mmiMutex_);
     lastMMIEvent_ = GetTickCount();

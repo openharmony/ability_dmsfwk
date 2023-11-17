@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,17 +35,17 @@ void MMIAdapter::Init()
 
 void MMIAdapter::MMIEventCallback::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
 {
-    DistributedSchedContinueManager::GetInstance().onMMIEvent();
+    DistributedSchedContinueManager::GetInstance().OnMMIEvent();
 }
 
 void MMIAdapter::MMIEventCallback::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
 {
-    DistributedSchedContinueManager::GetInstance().onMMIEvent();
+    DistributedSchedContinueManager::GetInstance().OnMMIEvent();
 }
 
 void MMIAdapter::MMIEventCallback::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const
 {
-    DistributedSchedContinueManager::GetInstance().onMMIEvent();
+    DistributedSchedContinueManager::GetInstance().OnMMIEvent();
 }
 
 int32_t MMIAdapter::AddMMIListener()
