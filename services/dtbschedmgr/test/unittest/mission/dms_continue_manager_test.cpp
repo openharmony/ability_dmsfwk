@@ -531,14 +531,20 @@ HWTEST_F(DMSContinueManagerTest, testDealSetMissionContinueStateBusiness001, Tes
 HWTEST_F(DMSContinueManagerTest, testNotifyScreenLockorOff001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyScreenLockorOff001 start" << std::endl;
-    sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
-    DistributedSchedContinueManager::GetInstance().RegisterOnListener(TYPE, obj01);
-    EXPECT_NE(DistributedSchedContinueManager::GetInstance().registerOnListener_.size(), 0);
+    DistributedSchedContinueManager::GetInstance().Init();
 
-    DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId = NETWORKID_01;
+     /**
+     * @tc.steps: step1. test NotifyScreenLockorOff when eventHandler is not nullptr;
+     */
     DistributedSchedContinueManager::GetInstance().NotifyScreenLockorOff();
-    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId, "");
+    EXPECT_NE(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
 
+    /**
+     * @tc.steps: step2. test NotifyScreenLockorOff when eventHandler is nullptr;
+     */
+    DistributedSchedContinueManager::GetInstance().UnInit();
+    DistributedSchedContinueManager::GetInstance().NotifyScreenLockorOff();
+    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
     DTEST_LOG << "DMSContinueManagerTest testNotifyScreenLockorOff001 end" << std::endl;
 }
 
