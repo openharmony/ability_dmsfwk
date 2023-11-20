@@ -14,13 +14,12 @@
  */
 
 import Logger from './Logger'
-import missionManager from '@ohos.application.missionManager'
+import missionManager from '@ohos.app.ability.missionManager';
 
 export default class Mission{
-  visibility: Visibility = Visibility.Visible
-  missionInfo
-  snapshot
-  constructor(missionInfo) {
+  visibility: Visibility = Visibility.Visible;
+  missionInfo: missionManager.MissionInfo;
+  constructor(missionInfo: missionManager.MissionInfo) {
     this.missionInfo = missionInfo
   }
 }

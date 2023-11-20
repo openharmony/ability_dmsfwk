@@ -13,21 +13,23 @@
  * limitations under the License.
  */
 
-import missionManager from '@ohos.application.missionManager'
+import missionManager from '@ohos.app.ability.missionManager';
+import distributedDeviceManager from '@ohos.distributedDeviceManager';
 import DeviceManager from './DeviceManager'
 import LocalMissionManager from './LocalMissionManager'
 import Mission from './Mission'
 import RemoteMissionManager from './RemoteMissionManager'
 import Logger from './Logger'
+import { BusinessError } from '@ohos.base';
 
 const NUM_MAX: number = 20
 
 export default class Device{
-  isLocal: boolean = true
-  color: Color = Color.Gray
-  deviceInfo
+  isLocal: boolean = true;
+  color: Color = Color.Gray;
+  deviceInfo: distributedDeviceManager.DeviceBasicInfo;
   missionList: Mission[] = [];
-  constructor(deviceInfo, isLocal: boolean) {
+  constructor(deviceInfo: distributedDeviceManager.DeviceBasicInfo, isLocal: boolean) {
     Logger.info('Device construct');
     this.deviceInfo = deviceInfo
     this.isLocal = isLocal
@@ -45,7 +47,11 @@ export default class Device{
   updateMissionInfos(){
     let self = this;
     Logger.info('get MissionInfos begin, device = ' + this.deviceInfo.networkId);
-    var promise = missionManager.getMissionInfos(this.deviceInfo.networkId, NUM_MAX).catch(function(error){
+    if (!this.deviceInfo.networkId) {
+      Logger.info('updateMissionInfos failed, param error');
+      return;
+    }
+    let promise = missionManager.getMissionInfos(this.deviceInfo.networkId, NUM_MAX).catch((error: BusinessError) => {
       Logger.info('get MissionInfos failed, error.code = ' + error.code);
     })
     promise.then(missions => {
@@ -60,11 +66,11 @@ export default class Device{
       writeList.add("com.ohos.note")
       writeList.add("com.huawei.himovie")
       writeList.add("ohos.samples.distributedcalc")
-      for (var i = 0; i < missions.length; i++) {
+      for (let i = 0; i < missions.length; i++) {
         Logger.info('update mission = ' + JSON.stringify(missions[i]));
         self.missionList.push(new Mission(missions[i]))
       }
-      DeviceManager.update()
+      DeviceManager.getInstance().update();
     })
   }
 }

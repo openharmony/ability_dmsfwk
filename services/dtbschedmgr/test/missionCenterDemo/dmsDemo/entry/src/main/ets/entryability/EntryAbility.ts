@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import UIAbility from '@ohos.app.ability.UIAbility';
+import Want from '@ohos.app.ability.Want';
 import hilog from '@ohos.hilog';
 import window from '@ohos.window';
 import Permission from '../Util/Permission'
@@ -23,11 +25,11 @@ import abilityAccessCtrl, { Permissions } from '@ohos.abilityAccessCtrl';
 export default class EntryAbility extends UIAbility {
     async checkAccessToken(permission: Permissions): Promise<abilityAccessCtrl.GrantStatus> {
         let atManager = abilityAccessCtrl.createAtManager();
-        let grantStatus: abilityAccessCtrl.GrantStatus;
-        let tokenId: number;
+        let grantStatus: abilityAccessCtrl.GrantStatus = abilityAccessCtrl.GrantStatus.PERMISSION_DENIED;
+        let tokenId: number = -1;
         try {
-            let bundleInfo: bundleManager.BundleInfo = await bundleManager.getBundleInfoForSelf
-                (bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
+            let bundleInfo: bundleManager.BundleInfo =
+                await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
             let appInfo: bundleManager.ApplicationInfo = bundleInfo.appInfo;
             tokenId = appInfo.accessTokenId;
         } catch (err) {
@@ -43,30 +45,29 @@ export default class EntryAbility extends UIAbility {
         return grantStatus;
     }
     async checkPermissions(): Promise<void> {
-    const permissions: Array<Permissions> = ['ohos.permission.DISTRIBUTED_DATASYNC'];
-    let grantStatus: abilityAccessCtrl.GrantStatus = await this.checkAccessToken(permissions[0]);
-    if (grantStatus === abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
-    hilog.info(0x0000, 'testTag', '%{public}s', 'Permission already granted.');
-} else {
-    let atManager = abilityAccessCtrl.createAtManager();
-    try {
-        atManager.requestPermissionsFromUser(this.context, ['ohos.permission.DISTRIBUTED_DATASYNC'], (err, data)=>{
-            hilog.info(0x0000, 'testTag', 'data: %{public}s', JSON.stringify(data));
-            hilog.info(0x0000, 'testTag', 'data permissions: %{public}s', data.permissions);
-            hilog.info(0x0000, 'testTag', 'data authResults: %{public}s', data.authResults);
-        });
-    } catch (err) {
-        hilog.error(0x0000, 'testTag', 'catch err-> %{public}s', JSON.stringify(err) ?? '');
-        return;
+        const permissions: Array<Permissions> = ['ohos.permission.DISTRIBUTED_DATASYNC'];
+        let grantStatus: abilityAccessCtrl.GrantStatus = await this.checkAccessToken(permissions[0]);
+        if (grantStatus === abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED) {
+        hilog.info(0x0000, 'testTag', '%{public}s', 'Permission already granted.');
+        } else {
+            let atManager = abilityAccessCtrl.createAtManager();
+            try {
+                atManager.requestPermissionsFromUser(this.context, ['ohos.permission.DISTRIBUTED_DATASYNC'], (err, data)=>{
+                    hilog.info(0x0000, 'testTag', 'data: %{public}s', JSON.stringify(data));
+                    hilog.info(0x0000, 'testTag', 'data permissions: %{public}s', data.permissions);
+                    hilog.info(0x0000, 'testTag', 'data authResults: %{public}s', data.authResults);
+                });
+            } catch (err) {
+                hilog.error(0x0000, 'testTag', 'catch err-> %{public}s', JSON.stringify(err) ?? '');
+                return;
+            }
+        }
     }
-}
-}
-    onCreate(want, launchParam) {
+    onCreate(want: Want, param: AbilityConstant.LaunchParam): void {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onCreate');
-        globalThis.abilityWant = want;
         this.checkPermissions();
     }
-    onDestroy() {
+    onDestroy(): void {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onDestroy');
     }
     onWindowStageCreate(windowStage: window.WindowStage) {
@@ -82,15 +83,15 @@ export default class EntryAbility extends UIAbility {
                 JSON.stringify(data) ?? '');
         });
     }
-    onWindowStageDestroy() {
+    onWindowStageDestroy(): void {
         /* Main window is destroyed, release UI related resources */
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageDestroy');
     }
-    onForeground() {
+    onForeground(): void {
         /* Ability has brought to foreground */
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onForeground');
     }
-    onBackground() {
+    onBackground(): void {
         /* Ability has back to background */
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onBackground');
     }

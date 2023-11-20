@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import missionManager from '@ohos.application.missionManager'
+import missionManager from '@ohos.app.ability.missionManager';
+import distributedMissionManager from '@ohos.distributedMissionManager';
 import Device from './Device';
 import Logger from './Logger'
 
@@ -23,28 +23,32 @@ class LocalMissionManager{
   }
 
   registerMissionListener(Device: Device){
-    var listener = {
-      onMissionCreated: async function(mission){
+    let listener: missionManager.MissionListener = {
+      onMissionCreated: (mission) => {
         Logger.info('onMissionCreated mission = ' + mission);
         Device.updateMissionInfos()
       },
-      onMissionDestroyed: async function(mission){
+      onMissionDestroyed: (mission) => {
         Logger.info('onMissionDestroyed mission = ' + mission);
         Device.updateMissionInfos()
       },
-      onMissionSnapshotChanged: async function(mission){
+      onMissionSnapshotChanged: (mission) => {
         Logger.info('onMissionSnapshotChanged mission = ' + mission);
         Device.updateMissionInfos()
       },
-      onMissionMovedToFront: async function(mission){
+      onMissionMovedToFront: (mission) => {
         Logger.info('onMissionMovedToFront mission = ' + mission);
         Device.updateMissionInfos()
-      },onMissionIconUpdated : async function(mission){
-      },onMissionClosed : async function(mission){
+      },
+      onMissionIconUpdated: (mission) => {
+      },
+      onMissionClosed :(mission) => {
+      },
+      onMissionLabelUpdated: (mission: number) => {
+        throw new Error('Function not implement.')
       }
     }
-    // @ts-ignore
-    missionManager.registerMissionListener(listener)
+    missionManager.on('mission',listener);
     Device.updateMissionInfos()
   }
 }

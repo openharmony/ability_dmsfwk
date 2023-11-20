@@ -16,6 +16,9 @@
 import distributedMissionManager from '@ohos.distributedMissionManager'
 import Device from './Device';
 import Logger from './Logger'
+import { BusinessError } from '@ohos.base'
+import CommonTools from './common';
+import distributedDeviceManager from '@ohos.distributedDeviceManager';
 
 class RemoteMissionManager{
   constructor() {
@@ -24,8 +27,9 @@ class RemoteMissionManager{
 
   startSyncRemoteMissions(Device: Device){
     Logger.info("sync RemoteMissions start")
-    var device = {
-      deviceId: Device.deviceInfo.networkId,
+    let networkId: string = CommonTools.getInstance().getNetworkId(Device);
+    let device: distributedMissionManager.MissionParameter = {
+      deviceId: networkId,
       fixConflict: false,
       tag: 0
     };
@@ -33,33 +37,34 @@ class RemoteMissionManager{
     .then(data => {
       Logger.info("sync RemoteMissions success, data = " + data)
       Device.updateMissionInfos()
-    }).catch(error => {
+    }).catch((error: BusinessError) => {
       Logger.error('sync RemoteMissions failed, error = ' + error);
     })
   }
 
   registerMissionListener(Device: Device){
     Logger.info("register MissionListener start")
-    var MissionCallback = {
-      notifyMissionsChanged: async function(deviceId){
+    let MissionCallback: distributedMissionManager.MissionCallback = {
+      notifyMissionsChanged: (deviceId: string) => {
         Logger.info('notifyMissionsChanged deviceId = ' + deviceId);
         Device.updateMissionInfos()
       },
-      notifySnapshot: async function(deviceId, missionId){
+      notifySnapshot: (deviceId: string, missionId: number) => {
         Logger.info('notifySnapshot missionId = ' + missionId);
       },
-      notifyNetDisconnect: async function(deviceId, state){
+      notifyNetDisconnect: (deviceId: string, state: number) => {
         Logger.info('notifyNetDisconnect deviceId = ' + deviceId);
       },
     }
-    var device = {
-      deviceId:Device.deviceInfo.networkId
+    let networkId: string = CommonTools.getInstance().getNetworkId(Device);
+    let device: distributedMissionManager.MissionDeviceInfo = {
+      deviceId: networkId
     }
     let self = this
     distributedMissionManager.registerMissionListener(device, MissionCallback).then(data => {
       Logger.info("register MissionListener success")
       self.startSyncRemoteMissions(Device)
-    }).catch(error => {
+    }).catch((error: BusinessError) => {
       Logger.info("register MissionListener failed, error = " + error)
     })
   }

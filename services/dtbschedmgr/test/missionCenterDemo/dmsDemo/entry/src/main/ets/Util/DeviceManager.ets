@@ -14,43 +14,86 @@
  */
 
 import Mission from './Mission';
-import deviceManager from '@ohos.distributedHardware.deviceManager';
+import distributedDeviceManager from '@ohos.distributedDeviceManager';
 import distributedMissionManager from '@ohos.distributedMissionManager'
 import Logger from './Logger'
 import Device from './Device';
+import { BusinessError } from '@ohos.base'
+import CommonTools from './common'
+import { DEFAULT } from '@ohos/hypium';
 
 const BUNDLE_NAME = "com.example.mission_center"
+const PHONE_CODE: number = 0x0E;
+const TABLET_CODE: number = 0x11;
+const PHONE: string = 'PHONE';
+const PAD: string = 'PAD'
+const UNKNOWN = 'UNKNOWN';
 
 class DeviceManager {
-  private myDeviceManager: deviceManager.DeviceManager
+  private myDeviceManager: distributedDeviceManager.DeviceManager =
+      distributedDeviceManager.createDeviceManager(BUNDLE_NAME);
   toDeviceId: string = ''
   fromDeviceId: string = ''
   fromMissionId: number = -1
   isFreeInstall: boolean = true
-  localDevice: Device
+  localDevice: Device = new Device({deviceId: '', deviceName: '', deviceType: ''}, true)
   trustedDeviceList: Device[] = []
-  currentDevice: Device
+  currentDevice: Device = new Device({deviceId: '', deviceName: '', deviceType: ''}, true)
+  private static instance: DeviceManager | null;
 
-  constructor() {
+  public static getInstance() {
+    if (!DeviceManager.instance) {
+      DeviceManager.instance = new DeviceManager();
+    }
+    return DeviceManager.instance;
+  }
+
+  public static releaseIns() {
+    if (DeviceManager.instance) {
+      DeviceManager.instance = null;
+    }
+  }
+
+  private constructor() {
     Logger.info('create DeviceManager begin');
-    let self = this;
-    deviceManager.createDeviceManager(BUNDLE_NAME, (error, value) => {
-      if (error) {
-        Logger.error('create DeviceManager failed');
-        return;
+    try {
+      let self = this;
+      self.myDeviceManager = distributedDeviceManager.createDeviceManager(BUNDLE_NAME);
+      if (self.myDeviceManager) {
+        Logger.info('create DeviceManager success');
+        self.initTrustedDeviceMissionList()
+        self.initLocalDeviceMission()
+        Logger.info('lxw success' + JSON.stringify(self.localDevice));
+        let networkId = CommonTools.getInstance().getNetworkId(self.localDevice);
+        self.fromDeviceId = networkId;
+        self.currentDevice = self.localDevice
+        self.ready()
+      } else {
+        Logger.error('create DeviceManager error');
       }
-      self.myDeviceManager = value;
-      Logger.info('create DeviceManager success');
-      self.initTrustedDeviceMissionList()
-      self.initLocalDeviceMission()
-      Logger.info('lxw success' + JSON.stringify(self.localDevice));
-      self.fromDeviceId = self.localDevice.deviceInfo.networkId
-      self.currentDevice = self.localDevice
-      self.ready()
-    });
+
+    } catch (err) {
+      Logger.error('create DeviceManager error: ' , JSON.stringify(err));
+    }
+
+
     Logger.info('create DeviceManager end');
     this.update()
-    AppStorage.SetOrCreate<DeviceManager>('DeviceManager', this)
+    AppStorage.setOrCreate<DeviceManager>('DeviceManager', this)
+  }
+
+  private getDeviceType(deviceType: number): string {
+    switch (deviceType) {
+      case PHONE_CODE: {
+        return PHONE;
+      }
+      case TABLET_CODE: {
+        return PAD;
+      }
+      default : {
+        return UNKNOWN;
+      }
+    }
   }
 
   private initTrustedDeviceMissionList() {
@@ -59,13 +102,13 @@ class DeviceManager {
       Logger.error('DeviceManager not initialized');
       return
     }
-    var trustedDeviceList = this.myDeviceManager.getTrustedDeviceListSync();
+    let trustedDeviceList = this.myDeviceManager.getAvailableDeviceListSync();
     Logger.info('init TrustedDeviceMissionList end, deviceList = ' + JSON.stringify(trustedDeviceList));
     if (typeof (trustedDeviceList) == 'undefined' || typeof (trustedDeviceList.length) == 'undefined') {
       Logger.info('TrustedDeviceMissionList is null');
     } else {
-      for (var i = 0; i < trustedDeviceList.length; i++) {
-        var device = new Device(trustedDeviceList[i], false)
+      for (let i = 0; i < trustedDeviceList.length; i++) {
+        let device = new Device(trustedDeviceList[i], false)
         this.trustedDeviceList[this.trustedDeviceList.length] = device
       }
     }
@@ -79,7 +122,12 @@ class DeviceManager {
       Logger.error('DeviceManager not initialized');
       return
     }
-    var deviceInfo = this.myDeviceManager.getLocalDeviceInfoSync();
+    let deviceInfo: distributedDeviceManager.DeviceBasicInfo = {
+      deviceId: this.myDeviceManager.getLocalDeviceId(),
+      deviceName: this.myDeviceManager.getLocalDeviceName(),
+      deviceType: this.getDeviceType(this.myDeviceManager.getLocalDeviceType()),
+      networkId: this.myDeviceManager.getLocalDeviceNetworkId()
+    }
     Logger.info('init LocalDeviceMission end, device = ' + JSON.stringify(deviceInfo));
     if (typeof (deviceInfo) != 'undefined') {
       this.localDevice = new Device(deviceInfo, true)
@@ -91,13 +139,13 @@ class DeviceManager {
 
   update() {
     Logger.info('update begin');
-    AppStorage.Set('isUpdate',!AppStorage.Get('isUpdate'))
+    AppStorage.set('isUpdate',!AppStorage.get<boolean>('isUpdate'))
     Logger.info('update end');
   }
 
   ready() {
     Logger.info('update begin');
-    AppStorage.Set('isReady', true)
+    AppStorage.set('isReady', true)
     Logger.info('update end');
   }
 
@@ -117,10 +165,7 @@ class DeviceManager {
     if (this.enableContinue()) {
       Logger.info('continue mission start');
       AppStorage.SetOrCreate<string>('continueResult', '等待迁移结果...')
-      function OnContinueDone(resultCode) {
-        Logger.info('OnContinueDone resultCode: ' + JSON.stringify(resultCode));
-        AppStorage.SetOrCreate<string>('continueResult', JSON.stringify(resultCode))
-      }
+
 
       try {
         distributedMissionManager.continueMission({
@@ -128,12 +173,14 @@ class DeviceManager {
           dstDeviceId: this.toDeviceId,
           missionId: this.fromMissionId,
           wantParam: { "isFreeInstall": this.isFreeInstall }
-        }, {onContinueDone: OnContinueDone })
-          .then(data => {
+        }, {onContinueDone: (resultCode: number) => {
+          Logger.info('OnContinueDone resultCode: ' + JSON.stringify(resultCode));
+          AppStorage.setOrCreate<string>('continueResult', JSON.stringify(resultCode))}
+        }).then(data => {
             Logger.info('continueMission start success');
             AppStorage.SetOrCreate<string>('continueResult', '0')
           })
-          .catch(error => {
+          .catch((error: BusinessError) => {
             Logger.info('continueMission failed result ' + JSON.stringify(error));
             Logger.info('continueMission failed info ' + JSON.stringify(error.message));
             AppStorage.SetOrCreate<string>('continueResult', JSON.stringify(error))
@@ -169,4 +216,4 @@ class DeviceManager {
   }
 }
 
-export default new DeviceManager
+export default DeviceManager
