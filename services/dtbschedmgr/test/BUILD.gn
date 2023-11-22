@@ -46,7 +46,6 @@ dsched_external_deps = [
   "bundle_framework:appexecfwk_base",
   "bundle_framework:appexecfwk_core",
   "c_utils:utils",
-  "common_event_service:cesfwk_innerkits",
   "device_auth:deviceauth_sdk",
   "device_info_manager:distributed_device_profile_client",
   "device_manager:devicemanagersdk",
@@ -60,7 +59,6 @@ dsched_external_deps = [
   "hitrace:hitrace_meter",
   "hitrace:libhitracechain",
   "init:libbegetutil",
-  "input:libmmi-client",
   "ipc:ipc_core",
   "kv_store:distributeddata_inner",
   "safwk:system_ability_fwk",
@@ -90,6 +88,14 @@ if (efficiency_manager_service_enable) {
   dsched_external_deps += [ "efficiency_manager:suspend_manager_client" ]
 }
 
+if (dmsfwk_ces_listener) {
+  dsched_external_deps += [ "common_event_service:cesfwk_innerkits" ]
+}
+
+if (dmsfwk_mmi_listener) {
+  dsched_external_deps += [ "input:libmmi-client" ]
+}
+
 dsched_public_deps = [
   "//third_party/googletest:gmock_main",
   "//third_party/googletest:gtest_main",
@@ -99,11 +105,9 @@ dtbschedmgr_sources = [
   "${distributed_service}/dtbschedmgr/src/ability_connection_wrapper_proxy.cpp",
   "${distributed_service}/dtbschedmgr/src/ability_connection_wrapper_stub.cpp",
   "${distributed_service}/dtbschedmgr/src/adapter/dnetwork_adapter.cpp",
-  "${distributed_service}/dtbschedmgr/src/adapter/mmi_adapter.cpp",
   "${distributed_service}/dtbschedmgr/src/app_state_observer.cpp",
   "${distributed_service}/dtbschedmgr/src/bundle/bundle_manager_callback_stub.cpp",
   "${distributed_service}/dtbschedmgr/src/bundle/bundle_manager_internal.cpp",
-  "${distributed_service}/dtbschedmgr/src/common_event_listener.cpp",
   "${distributed_service}/dtbschedmgr/src/connect_death_recipient.cpp",
   "${distributed_service}/dtbschedmgr/src/deviceManager/dms_device_info.cpp",
   "${distributed_service}/dtbschedmgr/src/dfx/dms_hisysevent_report.cpp",
@@ -154,6 +158,16 @@ if (dmsfwk_mission_manager) {
 if (dmsfwk_standard_form_share) {
   dtbschedmgr_sources +=
       [ "${distributed_service}/dtbschedmgr/src/form_mgr_death_recipient.cpp" ]
+}
+
+if (dmsfwk_ces_listener) {
+  dtbschedmgr_sources +=
+      [ "${distributed_service}/dtbschedmgr/src/common_event_listener.cpp" ]
+}
+
+if (dmsfwk_mmi_listener) {
+  dtbschedmgr_sources +=
+      [ "${distributed_service}/dtbschedmgr/src/adapter/mmi_adapter.cpp" ]
 }
 
 ohos_unittest("distributedschedsvrtest") {
