@@ -13,13 +13,24 @@
  * limitations under the License.
  */
 
-import Logger from './Logger'
-import missionManager from '@ohos.app.ability.missionManager';
+import Device from './Device';
+export default class CommonTools {
+  private static instance: CommonTools;
 
-export default class Mission{
-  visibility: Visibility = Visibility.Visible;
-  missionInfo: missionManager.MissionInfo;
-  constructor(missionInfo: missionManager.MissionInfo) {
-    this.missionInfo = missionInfo
+  private constructor() {
+  }
+
+  public static getInstance() {
+    if (!CommonTools.instance) {
+      CommonTools.instance = new CommonTools();
+    }
+    return CommonTools.instance;
+  }
+
+  getNetworkId(device: Device): string {
+    if (device.deviceInfo.networkId) {
+      return device.deviceInfo.networkId;
+    }
+    return '';
   }
 }

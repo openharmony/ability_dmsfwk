@@ -20,7 +20,7 @@ import Logger from '../Util/Logger'
 @Entry
 @Component
 struct Index {
-  @State deviceManager: typeof DeviceManager = AppStorage.Get<typeof DeviceManager>('DeviceManager')
+  @State deviceManager: DeviceManager = AppStorage.get<DeviceManager>('DeviceManager')
   @State dstDeviceId: string = ''
   @State srcDeviceId: string = ''
   @State missionId: string = ''
