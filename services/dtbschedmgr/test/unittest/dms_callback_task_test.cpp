@@ -572,7 +572,7 @@ HWTEST_F(DmsCallbackTaskTest, ProcessEvent_002, TestSize.Level3)
 {
     DTEST_LOG << "DmsCallbackTaskTest ProcessEvent_002 begin" << std::endl;
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
-    event->innerEventId_ = -1;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -593,7 +593,7 @@ HWTEST_F(DmsCallbackTaskTest, ProcessEvent_003, TestSize.Level3)
 {
     DTEST_LOG << "DmsCallbackTaskTest ProcessEvent_003 begin" << std::endl;
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
-    event->innerEventId_ = 1;
+    event->innerEventId_ = 1u;
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -615,7 +615,7 @@ HWTEST_F(DmsCallbackTaskTest, ProcessEvent_004, TestSize.Level3)
 {
     DTEST_LOG << "DmsCallbackTaskTest ProcessEvent_004 begin" << std::endl;
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
-    event->innerEventId_ = 1;
+    event->innerEventId_ = 1u;
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
