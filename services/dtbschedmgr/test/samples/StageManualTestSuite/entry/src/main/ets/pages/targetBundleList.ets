@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,18 @@
  * limitations under the License.
  */
 
-import router from '@system.router';
+import router from '@ohos.router';
 import featureAbility from '@ohos.ability.featureAbility';
-import wantConstant from '@ohos.ability.wantConstant'
+import wantConstant from '@ohos.app.ability.wantConstant';
 import Prompt from '@system.prompt';
 import RemoteDeviceModel from '../Model/getRemoteDeviceModel';
+import { BusinessError } from '@ohos.base';
+import { GlobalThis } from '../Model/GlobalThis';
+import common from '@ohos.app.ability.common';
+import Want from '@ohos.app.ability.Want';
 
 let remoteDeviceId = '';
-let remoteDeviceModel = null;
+let remoteDeviceModel : null | RemoteDeviceModel = null;
 
 @Entry
 @Component
@@ -35,6 +39,7 @@ struct TargetBundleList {
   private contextText: string= '';
   private tipsMsg = '请输入对端的deviceId';
   private isOn = false;
+  private context = getContext(this) as common.UIAbilityContext;
 
   build() {
     Flex({ direction: FlexDirection.Column, alignItems: ItemAlign.Start, justifyContent: FlexAlign.Center }) {
@@ -103,7 +108,7 @@ struct TargetBundleList {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME,
           'moduleName': this.MODULE_NAME_ENTRY,
@@ -135,8 +140,7 @@ struct TargetBundleList {
         if ('' === remoteDeviceId && '' === this.contextText) {
           this.tips(this.tipsMsg);
         }
-        var str = {
-
+        let str: Want = {
           'deviceId': '' === this.contextText ? remoteDeviceId : this.contextText,
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME,
@@ -155,44 +159,32 @@ struct TargetBundleList {
     .height('100%')
   }
 
-  async startAbilityPromise(tag, str) {
+  async startAbilityPromise(tag: string, str: Want) {
     console.info(tag + ' startAbility startAbilityPromise START' + JSON.stringify(str));
-    let code;
-    await globalThis.abilityContext.startAbility(str)
+    await this.context.startAbility(str)
       .then((data) => {
         console.info(tag + ' startAbility Operation successful. Promise Data: ' + JSON.stringify(data))
-        code = data;
-      }).catch((error) => {
+      }).catch((error: BusinessError) => {
         console.info(tag + ' startAbility Operation failed. Promise Cause: ' + JSON.stringify(error));
-        code = error;
       })
-    console.info(tag + ' startAbility Operation code Promise: ' + JSON.stringify(code));
-    if (code === 0) {
-      this.tips('成功');
-    } else {
-      this.tips('错误码：' + code.code);
-    }
     console.info(tag + ' startAbility startAbilityPromise END');
   }
 
-  async startAbilityForResultPromise(tag, str) {
+  async startAbilityForResultPromise(tag: string, str: Want) {
     console.info(tag + ' startAbilityForResultPromise START' + JSON.stringify(str));
-    let newData;
-    await globalThis.abilityContext.startAbilityForResult(str)
+
+    await this.context.startAbilityForResult(str)
       .then((data) => {
         this.tips('成功');
-        newData = data;
         console.info(tag + ' startAbilityForResultPromise Operation successful. Promise Data: ' + JSON.stringify(data))
-      }).catch((error) => {
+      }).catch((error: BusinessError) => {
         console.info(tag + ' startAbilityForResultPromise Operation failed. Promise Cause: ' + JSON.stringify(error));
-        newData = error;
         this.tips('失败');
       })
-    console.info(tag + ' startAbilityForResultPromise Operation newData Promise: ' + JSON.stringify(newData));
     console.info(tag + ' startAbilityForResultPromise startAbilityPromise END');
   }
 
-  tips(msg) {
+  tips(msg: string) {
     Prompt.showToast({
       message: msg,
       duration: 2000,
@@ -209,24 +201,43 @@ struct TargetBundleList {
   aboutToAppear(): void {
     console.info('[startAbility] aboutToAppear in');
     remoteDeviceModel = new RemoteDeviceModel;
-    remoteDeviceModel.registerDeviceListCallback();
+    if (remoteDeviceModel) {
+      remoteDeviceModel.registerDeviceListCallback();
+    } else {
+      console.error('[startAbility] aboutToAppear remoteDeviceModel is null');
+    }
     console.info('[startAbility] aboutToAppear end');
   }
 
   onPageShow(): void{
     console.info('[startAbility] onPageShow in');
-    let numDevices = remoteDeviceModel.deviceList.length;
+    let numDevices: number = 0;
+    if (remoteDeviceModel) {
+      numDevices = remoteDeviceModel.deviceList.length;
+    } else {
+      console.error('[startAbility] aboutToDisappear remoteDeviceModel is null');
+    }
+
     if (numDevices === 0) {
       this.tips('[startAbility] onStartRemoteAbility no device found')
       return;
     }
-    remoteDeviceId = remoteDeviceModel.deviceList[0].deviceId;
-    console.info('[startAbility] onPageShow deviceId is ' + remoteDeviceId);
+
+    if (remoteDeviceModel) {
+      remoteDeviceId = remoteDeviceModel.deviceList[0].deviceId;
+      console.info('[startAbility] onPageShow deviceId is ' + remoteDeviceId);
+    } else {
+      console.error('[startAbility] onPageShow remoteDeviceModel is null');
+    }
   }
 
   aboutToDisappear() {
     console.info('[startAbility] aboutToDisappear in');
-    remoteDeviceModel.unregisterDeviceListCallback();
+    if (remoteDeviceModel) {
+      remoteDeviceModel.unregisterDeviceListCallback();
+    } else {
+      console.error('[startAbility] aboutToDisappear remoteDeviceModel is null');
+    }
     console.info('[startAbility] aboutToDisappear out');
   }
 }

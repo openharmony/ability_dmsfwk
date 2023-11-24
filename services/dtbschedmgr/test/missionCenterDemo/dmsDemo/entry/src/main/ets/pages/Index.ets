@@ -20,17 +20,19 @@ import router from '@ohos.router';
 import Mission from '../Util/Mission'
 import CommonTools from '../Util/common'
 
-if(!AppStorage.Has('isReady')){
-  AppStorage.SetOrCreate('isReady',false)
+if(!AppStorage.has('isReady')){
+  AppStorage.setOrCreate('isReady',false)
 }
 
-if(!AppStorage.Has('isUpdate')){
-  AppStorage.SetOrCreate('isUpdate', false)
+if(!AppStorage.has('isUpdate')){
+  AppStorage.setOrCreate('isUpdate', false)
 }
 
 function getBundleNameFromMissionInfo(item: Mission): string {
   if (item.missionInfo.want.bundleName !== undefined) {
-    return item.missionInfo.want.bundleName.split(".")[2];
+    let missionArray = item.missionInfo.want.bundleName.split('.');
+    let len = missionArray.length;
+    return missionArray[len - 1];
   }
   return '';
 }
@@ -65,7 +67,7 @@ struct Index {
           .width('80%')
           .height('5%')
           .onClick(() => {
-            router.push({ url: 'pages/faultCase' })
+            router.pushUrl({ url: 'pages/faultCase' })
           })
         Blank().height('2.5%')
         Row() {

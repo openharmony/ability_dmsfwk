@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,33 @@
  * limitations under the License.
  */
 
-import router from '@system.router'
+import { GlobalThis } from '../Model/GlobalThis';
+import router from '@ohos.router';
+import RemoteDeviceModel from '../Model/RemoteDeviceModel';
+import distributedDeviceManager from '@ohos.distributedDeviceManager';
 
-var printLog = '[ServiceExtensionDemo]'
-AppStorage.Link("message")
-AppStorage.Link("receiveMessage")
+const remoteDeviceModel = new RemoteDeviceModel();
+let printLog = '[ServiceExtensionDemo]'
+AppStorage.link<string>("message")
+AppStorage.link<string>("receiveMessage")
 
 @Entry
 @Component
 struct Index {
-  @State selectDeviceName : string = ""
-  @StorageLink("message") message : string = ""
-  @StorageLink("receiveMessage") receiveMessage : string = ""
+  @State selectDeviceName : string = "";
+  @State DeviceIdList: string[] = [];
+  @StorageLink("message") message : string = "";
+  @StorageLink("receiveMessage") receiveMessage : string = "";
+
+  RegisterDeviceListCallback() {
+    remoteDeviceModel.registerDeviceListCallback(()=>{
+      this.DeviceIdList = [];
+      let deviceSize = remoteDeviceModel.deviceList.length;
+      for (let i = 0; i < deviceSize; ++i) {
+        this.DeviceIdList.push(remoteDeviceModel.deviceList[i].networkId);
+      }
+    })
+  }
 
   build() {
     Column() {
@@ -46,35 +61,40 @@ struct Index {
             .onClick(() => {
               router.back();
             })
-
+          Button('InitDeviceList')
+            .width(100)
+            .height(50)
+            .onClick(() => {
+              this.RegisterDeviceListCallback();
+            })
           Button('connect')
             .width(100)
             .height(50)
             .onClick(() => {
-              globalThis.ConnectRemoteAbility()
+              GlobalThis.ConnectRemoteAbility();
             })
 
           Button('discon')
             .width(100)
             .height(50)
             .onClick(() => {
-              globalThis.DisconnectRemoteAbility()
+              GlobalThis.DisconnectRemoteAbility();
             })
 
           List({ space: 10, initialIndex: 0}) {
-            ForEach(globalThis.DeviceIdList, (item : string) => {
+            ForEach(GlobalThis.DeviceIdList, (item : string) => {
               ListItem() {
                 Button(item)
                   .width('100%').height(50).fontSize(10)
                   .onClick(() => {
                     console.log(printLog + "select device : " + item)
                     this.selectDeviceName = item
-                    globalThis.selectDevice = item
-                    AppStorage.Set<string>('receiveMessage', AppStorage.Get<string>("receiveMessage") + "select device:" + item + '\n')
+                    GlobalThis.selectDevice = item
+                    AppStorage.set<string>('receiveMessage', AppStorage.get<string>("receiveMessage") + "select device:" + item + '\n')
                   })
-              }.editable(this.editFlag)
+              }//.editable(true);
             }, (item : string) => item.toString())
-          }.height('75%').width('100%').borderWidth(1).align(ItemAlign.Start)
+          }.height('75%').width('100%').borderWidth(1).align(Alignment.Start)
         }.width('30%').height('100%').padding(5)
 
         Column() {
@@ -93,7 +113,7 @@ struct Index {
               .textAlign(TextAlign.Start)
           }.scrollBar(BarState.Auto)
           .height('55%')
-          .align(ItemAlign.Start)
+          .align(Alignment.Start)
           .borderWidth(1)
 
           Text("待发送数据：")
@@ -111,13 +131,13 @@ struct Index {
             .borderWidth(1)
             .textAlign(TextAlign.Start)
 
-          TextInput("输入消息")
+          TextInput({text: "输入消息"})
             .width('100%')
             .height('10%')
             .borderStyle(BorderStyle.Solid)
             .type(InputType.Normal)
             .onChange((value : string) => {
-              AppStorage.Set<string>('message', value)
+              AppStorage.set<string>('message', value)
             })
 
           Row() {
@@ -125,7 +145,7 @@ struct Index {
               .width(100)
               .height(50)
               .onClick(() => {
-                globalThis.SendMessage()
+                GlobalThis.SendMessage();
               })
           }.height('15%')
         }.width('70%').height('100%')

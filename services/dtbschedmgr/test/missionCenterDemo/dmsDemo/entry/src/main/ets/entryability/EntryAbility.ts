@@ -18,7 +18,6 @@ import UIAbility from '@ohos.app.ability.UIAbility';
 import Want from '@ohos.app.ability.Want';
 import hilog from '@ohos.hilog';
 import window from '@ohos.window';
-import Permission from '../Util/Permission'
 import bundleManager from '@ohos.bundle.bundleManager';
 import abilityAccessCtrl, { Permissions } from '@ohos.abilityAccessCtrl';
 
@@ -72,7 +71,6 @@ export default class EntryAbility extends UIAbility {
     }
     onWindowStageCreate(windowStage: window.WindowStage) {
         hilog.info(0x0000, 'testTag', '%{public}s', 'Ability onWindowStageCreate');
-        Permission.requestPermissions(this.context)
         windowStage.loadContent('pages/Index', (err, data) => {
             if (err.code) {
                 hilog.error(0x0000, 'testTag', 'Failed to load the content. Cause: %{public}s',

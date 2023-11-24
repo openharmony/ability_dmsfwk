@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,77 +13,66 @@
  * limitations under the License.
  */
 
-import deviceManager from '@ohos.distributedHardware.deviceManager';
+import distributedDeviceManager from '@ohos.distributedDeviceManager';
+import { Callback } from '@ohos.base';
+import { GlobalThis } from '../Model/GlobalThis';
 
 const SUBSCRIBE_ID = 100;
+const BundleName = 'com.example.serviceextensiondemo';
+const PrintLog = '[ServiceExtensionDemo]: ';
 
 export default class RemoteDeviceModel {
-    deviceList = [];
-    discoverList = [];
-    callback;
+    deviceList: distributedDeviceManager.DeviceBasicInfo[] = [];
+    discoverList: distributedDeviceManager.DeviceBasicInfo[] = [];
+    callback: Callback<void> = () => {};
     authCallback = null;
-    MyDeviceManager;
+    MyDeviceManager: distributedDeviceManager.DeviceManager = distributedDeviceManager.createDeviceManager(BundleName);
 
     constructor() {
     }
 
-    registerDeviceListCallback(callback) {
+    registerDeviceListCallback(callback: Callback<void>): void {
+        console.info(PrintLog + 'registerDeviceListCallback in');
         if (typeof (this.MyDeviceManager) === 'undefined') {
-            console.log('[ServiceExtensionDemo] deviceManager.createDeviceManager begin');
-            let self = this;
-            deviceManager.createDeviceManager('com.example.serviceextensiondemo', (error, value) => {
-                if (error) {
-                    console.error('createDeviceManager failed.');
-                    return;
-                }
-                self.MyDeviceManager = value;
-                self.registerDeviceListCallback_(callback);
-                console.log('[ServiceExtensionDemo] createDeviceManager callback returned, error=' + error + ' value=' + value);
-            });
-            console.log('[ServiceExtensionDemo] deviceManager.createDeviceManager end');
+            console.log(PrintLog + ' deviceManager.createDeviceManager begin');
+            try {
+                this.MyDeviceManager = distributedDeviceManager.createDeviceManager(BundleName);
+                this.registerDeviceListCallback_(callback);
+            } catch (err) {
+                console.error(PrintLog + 'createDeviceManager error: ' + JSON.stringify(err));
+            }
+            console.log(PrintLog + ' deviceManager.createDeviceManager end');
         } else {
             this.registerDeviceListCallback_(callback);
         }
     }
 
-    registerDeviceListCallback_(callback) {
-        console.info('[ServiceExtensionDemo] registerDeviceListCallback');
+    registerDeviceListCallback_(callback: Callback<void>): void {
+        console.info(PrintLog + ' registerDeviceListCallback_');
         this.callback = callback;
         if (this.MyDeviceManager == undefined) {
-            console.error('[ServiceExtensionDemo] deviceManager has not initialized');
+            console.error(PrintLog + ' deviceManager has not initialized');
             this.callback();
-            return;
+        } else {
+            console.info(PrintLog + ' getTrustedDeviceListSync begin');
+            const list = this.MyDeviceManager.getAvailableDeviceListSync();
+            console.info(PrintLog + ' getTrustedDeviceListSync end, deviceList=' + JSON.stringify(list));
+            if (typeof (list) != 'undefined' && typeof (list.length) != 'undefined') {
+                this.deviceList = list;
+            }
+            this.callback();
         }
-
-        console.info('[ServiceExtensionDemo] getTrustedDeviceListSync begin');
-        const list = this.MyDeviceManager.getTrustedDeviceListSync();
-        console.info('[ServiceExtensionDemo] getTrustedDeviceListSync end, deviceList=' + JSON.stringify(list));
-        if (typeof (list) != 'undefined' && typeof (list.length) != 'undefined') {
-            this.deviceList = list;
-        }
-        this.callback();
-        console.info('[ServiceExtensionDemo] callback finished');
+        console.info(PrintLog + ' callback finished');
     }
 
-    getTrustDeviceList(callback) {
-        console.info('[ServiceExtensionDemo] getTrustDeviceListSync begin');
-        const list = this.MyDeviceManager.getTrustedDeviceListSync();
-        console.info('[ServiceExtensionDemo] getTrustedDeviceListSync end, deviceList=' + JSON.stringify(list));
+    getTrustDeviceList(callback: Callback<void>): void {
+        console.info(PrintLog + ' getTrustDeviceListSync begin');
+        const list = this.MyDeviceManager.getAvailableDeviceListSync();
+        console.info(PrintLog + ' getTrustedDeviceListSync end, deviceList=' + JSON.stringify(list));
         if (typeof (list) != 'undefined' && typeof (list.length) != 'undefined') {
             this.deviceList = list;
         }
-
-        console.info('[ServiceExtensionDemo] getTrustDeviceListSync end');
+        console.info(PrintLog + ' getTrustDeviceListSync end');
         callback();
-    }
-
-    unregisterDeviceListCallback() {
-        console.info('[dmsDemo] stopDeviceDiscovery ' + SUBSCRIBE_ID);
-        this.MyDeviceManager.stopDeviceDiscovery(SUBSCRIBE_ID);
-        this.MyDeviceManager.off('deviceStateChange');
-        this.MyDeviceManager.off('deviceFound');
-        this.MyDeviceManager.off('discoverFail');
-        this.MyDeviceManager.off('serviceDie');
-        this.deviceList = [];
     }
 }
