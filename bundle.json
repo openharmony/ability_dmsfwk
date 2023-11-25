@@ -71,6 +71,8 @@
           "fwk_group": [
             "//foundation/ability/dmsfwk/interfaces/innerkits/common:common_sdk",
             "//foundation/ability/dmsfwk/interfaces/innerkits/continuation_manager:continuation_manager",
+            "//foundation/ability/dmsfwk/interfaces/innerkits/distributed_event:distributed_sdk",
+            "//foundation/ability/dmsfwk/interfaces/innerkits/tests:dms_sdk_demo",
             "//foundation/ability/dmsfwk/interfaces/kits/napi:napi_packages"
           ],
           "service_group": [

@@ -92,6 +92,10 @@ void DistributedSchedStub::InitLocalFuncsInner()
         &DistributedSchedStub::GetRemoteMissionSnapshotInfoInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_MISSION_LISTENER)] =
         &DistributedSchedStub::RegisterMissionListenerInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_DSCHED_EVENT_LISTENER)] =
+        &DistributedSchedStub::RegisterDSchedEventListenerInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::UNREGISTER_DSCHED_EVENT_LISTENER)] =
+        &DistributedSchedStub::UnRegisterDSchedEventListenerInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_ON_LISTENER)] =
         &DistributedSchedStub::RegisterOnListenerInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_OFF_LISTENER)] =
@@ -131,6 +135,8 @@ void DistributedSchedStub::InitRemoteFuncsInner()
         &DistributedSchedStub::SendResultFromRemoteInner;
     remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_CONTINUATION_RESULT_FROM_REMOTE)] =
         &DistributedSchedStub::NotifyContinuationResultFromRemoteInner;
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_DSCHED_EVENT_RESULT_FROM_REMOTE)] =
+        &DistributedSchedStub::NotifyDSchedEventResultFromRemoteInner;
     remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::CONNECT_ABILITY_FROM_REMOTE)] =
         &DistributedSchedStub::ConnectAbilityFromRemoteInner;
     remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::DISCONNECT_ABILITY_FROM_REMOTE)] =
@@ -476,6 +482,21 @@ int32_t DistributedSchedStub::NotifyCompleteContinuationInner(MessageParcel& dat
     return ERR_OK;
 }
 
+int32_t DistributedSchedStub::NotifyDSchedEventResultFromRemoteInner(MessageParcel& data,
+    [[maybe_unused]] MessageParcel& reply)
+{
+    if (!CheckCallingUid()) {
+        HILOGW("request DENIED!");
+        return DMS_PERMISSION_DENIED;
+    }
+
+    std::string type = "";
+    PARCEL_READ_HELPER(data, String, type);
+    int32_t dSchedEventResult = -1;
+    PARCEL_READ_HELPER(data, Int32, dSchedEventResult);
+    return NotifyDSchedEventResultFromRemote(type, dSchedEventResult);
+}
+
 int32_t DistributedSchedStub::NotifyContinuationResultFromRemoteInner(MessageParcel& data,
     [[maybe_unused]] MessageParcel& reply)
 {
@@ -740,6 +761,40 @@ int32_t DistributedSchedStub::RegisterMissionListenerInner(MessageParcel& data, 
         return ERR_FLATTEN_OBJECT;
     }
     int32_t result = RegisterMissionListener(devId, missionChangedListener);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+
+int32_t DistributedSchedStub::RegisterDSchedEventListenerInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("[PerformanceTest] called, IPC end = %{public}" PRId64, GetTickCount());
+    string type = data.ReadString();
+    if (type.empty()) {
+        HILOGW("read type failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    sptr<IRemoteObject> dSchedEventListener = data.ReadRemoteObject();
+    if (dSchedEventListener == nullptr) {
+        HILOGW("read IRemoteObject failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = RegisterDSchedEventListener(type, dSchedEventListener);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+
+int32_t DistributedSchedStub::UnRegisterDSchedEventListenerInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("[PerformanceTest] called, IPC end = %{public}" PRId64, GetTickCount());
+    string type = data.ReadString();
+    if (type.empty()) {
+        HILOGW("read type failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    sptr<IRemoteObject> dSchedEventListener = data.ReadRemoteObject();
+    if (dSchedEventListener == nullptr) {
+        HILOGW("read IRemoteObject failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = UnRegisterDSchedEventListener(type, dSchedEventListener);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 

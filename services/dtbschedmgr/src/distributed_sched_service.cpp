@@ -89,6 +89,7 @@ const std::string DMS_MISSION_ID = "dmsMissionId";
 const std::string SUPPORT_CONTINUE_PAGE_STACK_KEY = "ohos.extra.param.key.supportContinuePageStack";
 const std::string SUPPORT_CONTINUE_SOURCE_EXIT_KEY = "ohos.extra.param.key.supportContinueSourceExit";
 const std::string SUPPORT_CONTINUE_MODULE_NAME_UPDATE_KEY = "ohos.extra.param.key.supportContinueModuleNameUpdate";
+const std::string DSCHED_EVENT_KEY = "IDSchedEventListener";
 constexpr int32_t DEFAULT_DMS_MISSION_ID = -1;
 constexpr int32_t DEFAULT_DMS_CONNECT_TOKEN = -1;
 constexpr int32_t BIND_CONNECT_RETRY_TIMES = 3;
@@ -514,11 +515,17 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
             return ret;
         }
         #endif
+        dschedContinuation_->continueEvent_.srcNetworkId = srcDeviceId;
+        dschedContinuation_->continueEvent_.dstNetworkId = dstDeviceId;
+        dschedContinuation_->continueEvent_.bundleName = bundleName;
         return ContinueLocalMission(dstDeviceId, missionId, callback, wantParams);
     } else if (dstDeviceId == localDevId) {
         if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(srcDeviceId) == nullptr) {
             return INVALID_REMOTE_PARAMETERS_ERR;
         }
+        dschedContinuation_->continueEvent_.srcNetworkId = dstDeviceId;
+        dschedContinuation_->continueEvent_.dstNetworkId = srcDeviceId;
+        dschedContinuation_->continueEvent_.bundleName = bundleName;
         return ContinueRemoteMission(srcDeviceId, dstDeviceId, bundleName, callback, wantParams);
     } else {
         HILOGE("source or target device must be local!");
@@ -554,10 +561,33 @@ int32_t DistributedSchedService::SetWantForContinuation(AAFwk::Want& newWant, in
     return ERR_OK;
 }
 
+int32_t DistributedSchedService::DealDSchedEventResult(const OHOS::AAFwk::Want& want, int32_t status)
+{
+    dschedContinuation_->continueEvent_.moduleName = want.GetElement().GetModuleName();
+    HILOGI("dschedContinuation_->continueEvent_.moduleName %{public}s",
+        dschedContinuation_->continueEvent_.moduleName.c_str());
+    dschedContinuation_->continueEvent_.abilityName = want.GetElement().GetAbilityName();
+    HILOGI("dschedContinuation_->continueEvent_.abilityName %{public}s",
+        dschedContinuation_->continueEvent_.abilityName.c_str());
+    if (status != ERR_OK) {
+        HILOGD("want.GetElement().GetDeviceId result:%{public}s", want.GetElement().GetDeviceID().c_str());
+        std::string deviceId = want.GetElement().GetDeviceID();
+        sptr<IDistributedSched> remoteDms = GetRemoteDms(deviceId);
+        if (remoteDms == nullptr) {
+            HILOGE("NotifyCompleteContinuation get remote dms null!");
+            return INVALID_REMOTE_PARAMETERS_ERR;
+        }
+        int dSchedEventresult = remoteDms->NotifyDSchedEventResultFromRemote(DSCHED_EVENT_KEY, status);
+        HILOGI("NotifyDSchedEventResultFromRemote result:%{public}d", dSchedEventresult);
+    }
+    return ERR_OK;
+}
+
 int32_t DistributedSchedService::StartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId,
     int32_t callerUid, int32_t status, uint32_t accessToken)
 {
     HILOGD("[PerformanceTest] StartContinuation begin");
+    DealDSchedEventResult(want, status);
     if (status != ERR_OK) {
         HILOGE("continuation has been rejected, status: %{public}d", status);
         NotifyContinuationCallbackResult(missionId, status);
@@ -571,7 +601,6 @@ int32_t DistributedSchedService::StartContinuation(const OHOS::AAFwk::Want& want
     HILOGD("StartContinuation: devId = %{private}s, bundleName = %{private}s, abilityName = %{private}s",
         want.GetElement().GetDeviceID().c_str(), want.GetElement().GetBundleName().c_str(),
         want.GetElement().GetAbilityName().c_str());
-
     if (dschedContinuation_ == nullptr) {
         HILOGE("StartContinuation continuation object null!");
         return INVALID_REMOTE_PARAMETERS_ERR;
@@ -579,7 +608,6 @@ int32_t DistributedSchedService::StartContinuation(const OHOS::AAFwk::Want& want
     if (!dschedContinuation_->IsInContinuationProgress(missionId)) {
         dschedContinuation_->SetTimeOut(missionId, CONTINUATION_TIMEOUT);
     }
-
     AAFwk::Want newWant = want;
     int result = SetWantForContinuation(newWant, missionId);
     if (result != ERR_OK) {
@@ -601,7 +629,6 @@ int32_t DistributedSchedService::StartContinuation(const OHOS::AAFwk::Want& want
             return result;
         }
     }
-
     HILOGD("[PerformanceTest] StartContinuation end");
     return result;
 }
@@ -622,6 +649,8 @@ void DistributedSchedService::NotifyCompleteContinuation(const std::u16string& d
         HILOGE("NotifyCompleteContinuation get remote dms null!");
         return;
     }
+    int dSchedEventresult = dschedContinuation_->NotifyDSchedEventResult(DSCHED_EVENT_KEY, ERR_OK);
+    HILOGI("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
     remoteDms->NotifyContinuationResultFromRemote(sessionId, isSuccess);
 }
 
@@ -634,6 +663,12 @@ int32_t DistributedSchedService::NotifyContinuationResultFromRemote(int32_t sess
 
     int32_t missionId = sessionId;
     NotifyContinuationCallbackResult(missionId, isSuccess ? 0 : NOTIFYCOMPLETECONTINUATION_FAILED);
+    return ERR_OK;
+}
+
+int32_t DistributedSchedService::NotifyDSchedEventResultFromRemote(const std::string type, int32_t dSchedEventResult)
+{
+    NotifyDSchedEventCallbackResult(DSCHED_EVENT_KEY, dSchedEventResult);
     return ERR_OK;
 }
 
@@ -710,6 +745,17 @@ void DistributedSchedService::NotifyContinuationCallbackResult(int32_t missionId
         dschedContinuation_->RemoveTimeOut(missionId);
     }
     HILOGD("NotifyContinuationCallbackResult result:%{public}d", result);
+}
+
+void DistributedSchedService::NotifyDSchedEventCallbackResult(const std::string type, int32_t resultCode)
+{
+    HILOGD("Continuation result is: %{public}d", resultCode);
+    if (dschedContinuation_ == nullptr) {
+        HILOGE("continuation object null!");
+        return;
+    }
+    int dSchedEventresult = dschedContinuation_->NotifyDSchedEventResult(DSCHED_EVENT_KEY, resultCode);
+    HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
 }
 
 void DistributedSchedService::RemoteConnectAbilityMappingLocked(const sptr<IRemoteObject>& connect,
@@ -1991,6 +2037,29 @@ int32_t DistributedSchedService::RegisterMissionListener(const std::u16string& d
     const sptr<IRemoteObject>& obj)
 {
     return DistributedSchedMissionManager::GetInstance().RegisterMissionListener(devId, obj);
+}
+
+int32_t DistributedSchedService::RegisterDSchedEventListener(const std::string& type,
+    const sptr<IRemoteObject>& callback)
+{
+    int32_t result = dschedContinuation_->PushCallback(type, callback);
+    HILOGI("result: %{public}d!", result);
+    if (result == ERR_INVALID_VALUE) {
+        return MISSION_FOR_CONTINUING_IS_NOT_ALIVE;
+    }
+    return result;
+}
+
+int32_t DistributedSchedService::UnRegisterDSchedEventListener(const std::string& type,
+    const sptr<IRemoteObject>& callback)
+{
+    sptr<IRemoteObject> result = dschedContinuation_->CleanupCallback(type);
+    if (result == nullptr) {
+        HILOGI("The callback does not exist.");
+    } else {
+        HILOGI("Clearing the callback succeeded.");
+    }
+    return 0;
 }
 
 int32_t DistributedSchedService::RegisterOnListener(const std::string& type,

@@ -17,5 +17,7 @@ group("innerkits_target") {
   deps = [
     "common:common_sdk",
     "continuation_manager:continuation_manager",
+    "distributed_event:distributed_sdk",
+    "tests:dms_sdk_demo",
   ]
 }
