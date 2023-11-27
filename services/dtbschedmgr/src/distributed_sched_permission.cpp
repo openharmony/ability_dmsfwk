@@ -46,7 +46,6 @@ const std::string PERMISSION_START_ABILITIES_FROM_BACKGROUND = "ohos.permission.
 const std::string PERMISSION_START_INVISIBLE_ABILITY = "ohos.permission.START_INVISIBLE_ABILITY";
 const std::string DISTRIBUTED_FILES_PATH = "/data/storage/el2/distributedfiles/";
 const std::string BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
-constexpr int32_t U0_USER_ID = 0;
 constexpr int32_t DEFAULT_DMS_API_VERSION = 9;
 const int DEFAULT_DMS_MISSION_ID = -1;
 const int FA_MODULE_ALLOW_MIN_API_VERSION = 8;
@@ -284,9 +283,19 @@ bool DistributedSchedPermission::IsFoundationCall() const
 
 bool DistributedSchedPermission::IsSceneBoardCall() const
 {
+    int32_t activeAccountId = 0;
+#ifdef OS_ACCOUNT_PART
+    std::vector<int32_t> ids;
+    int32_t errCode = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (errCode != ERR_OK || ids.empty()) {
+        HILOGE("QueryActiveOsAccountIds failed.");
+        return false;
+    }
+    activeAccountId = ids[0];
+#endif
     AppExecFwk::ApplicationInfo appInfo;
     if (BundleManagerInternal::GetApplicationInfoFromBms(BUNDLE_NAME_SCENEBOARD,
-        AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, U0_USER_ID, appInfo) != ERR_OK) {
+        AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, activeAccountId, appInfo) != ERR_OK) {
         HILOGE("get applicationInfo failed.");
         return false;
     }
