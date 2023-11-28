@@ -114,6 +114,7 @@ void DistributedAbilityManagerService::DumpAppRegisterInfo(std::string& info)
 
 void DistributedAbilityManagerService::DumpNotifierLocked(const std::vector<int32_t>& tokenVec, std::string& info)
 {
+    std::lock_guard<std::mutex> callbackMapLock(callbackMapMutex_);
     for (const auto& token : tokenVec) {
         info += ", ";
         info += "token: ";
