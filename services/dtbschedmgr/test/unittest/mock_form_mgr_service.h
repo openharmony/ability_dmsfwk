@@ -234,11 +234,11 @@ public:
     {
         return ERR_OK;
     }
-    ErrCode RegisterClickCallbackEventObserver(const sptr<IRemoteObject> &observer) override
+    ErrCode RegisterClickEventObserver(const sptr<IRemoteObject> &observer) override
     {
         return ERR_OK;
     }
-    ErrCode UnregisterClickCallbackEventObserver(const sptr<IRemoteObject> &observer) override
+    ErrCode UnregisterClickEventObserver(const sptr<IRemoteObject> &observer) override
     {
         return ERR_OK;
     }
