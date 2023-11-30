@@ -234,6 +234,14 @@ public:
     {
         return ERR_OK;
     }
+    ErrCode RegisterClickEventObserver(const sptr<IRemoteObject> &observer) override
+    {
+        return ERR_OK;
+    }
+    ErrCode UnregisterClickEventObserver(const sptr<IRemoteObject> &observer) override
+    {
+        return ERR_OK;
+    }
 };
 }  // namespace AppExecFwk
 }  // namespace OHOS
