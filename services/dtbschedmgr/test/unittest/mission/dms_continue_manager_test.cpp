@@ -523,6 +523,7 @@ HWTEST_F(DMSContinueManagerTest, testDealSetMissionContinueStateBusiness001, Tes
     DTEST_LOG << "DMSContinueManagerTest testDealSetMissionContinueStateBusiness001 end" << std::endl;
 }
 
+#ifdef SUPPORT_COMMON_EVENT_SERVICE
 /**
  * @tc.name: testNotifyScreenLockorOff001
  * @tc.desc: test NotifyScreenLockorOff normal
@@ -547,6 +548,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyScreenLockorOff001, TestSize.Level1)
     EXPECT_EQ(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
     DTEST_LOG << "DMSContinueManagerTest testNotifyScreenLockorOff001 end" << std::endl;
 }
+#endif
 
 /**
  * @tc.name: testNotifyDeviceOffline001

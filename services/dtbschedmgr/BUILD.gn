@@ -49,6 +49,12 @@ config("distributed_sched_config") {
   if (os_account_part) {
     defines += [ "OS_ACCOUNT_PART" ]
   }
+  if (dmsfwk_ces_listener) {
+    defines += [ "SUPPORT_COMMON_EVENT_SERVICE" ]
+  }
+  if (dmsfwk_mmi_listener) {
+    defines += [ "SUPPORT_MULTIMODALINPUT_SERVICE" ]
+  }
 }
 
 ohos_shared_library("distributedschedsvr") {
@@ -64,11 +70,9 @@ ohos_shared_library("distributedschedsvr") {
     "src/ability_connection_wrapper_proxy.cpp",
     "src/ability_connection_wrapper_stub.cpp",
     "src/adapter/dnetwork_adapter.cpp",
-    "src/adapter/mmi_adapter.cpp",
     "src/app_state_observer.cpp",
     "src/bundle/bundle_manager_callback_stub.cpp",
     "src/bundle/bundle_manager_internal.cpp",
-    "src/common_event_listener.cpp",
     "src/connect_death_recipient.cpp",
     "src/deviceManager/dms_device_info.cpp",
     "src/dfx/dms_hisysevent_report.cpp",
@@ -117,7 +121,6 @@ ohos_shared_library("distributedschedsvr") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
-    "common_event_service:cesfwk_innerkits",
     "device_auth:deviceauth_sdk",
     "device_info_manager:distributed_device_profile_client",
     "device_manager:devicemanagersdk",
@@ -130,7 +133,6 @@ ohos_shared_library("distributedschedsvr") {
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
     "init:libbegetutil",
-    "input:libmmi-client",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "safwk:system_ability_fwk",
@@ -175,6 +177,16 @@ ohos_shared_library("distributedschedsvr") {
 
   if (dmsfwk_report_memmgr_plugins) {
     external_deps += [ "memmgr_plugin:memmgrclient" ]
+  }
+
+  if (dmsfwk_ces_listener) {
+    external_deps += [ "common_event_service:cesfwk_innerkits" ]
+    sources += [ "src/common_event_listener.cpp" ]
+  }
+
+  if (dmsfwk_mmi_listener) {
+    external_deps += [ "input:libmmi-client" ]
+    sources += [ "src/adapter/mmi_adapter.cpp" ]
   }
 
   install_images = [ system_base_dir ]
