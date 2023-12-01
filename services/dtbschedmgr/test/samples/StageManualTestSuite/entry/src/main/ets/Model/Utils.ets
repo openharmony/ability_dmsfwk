@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +14,10 @@
  */
 
 export default class Utils {
-  static sleep(time) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve()
+  static sleep(time: number) {
+    return new Promise<number>((resolve, reject) => {
+      setTimeout((data: number) => {
+        resolve(data);
       }, time)
     }).then(() => {
       console.info(`sleep ${time} over...`)

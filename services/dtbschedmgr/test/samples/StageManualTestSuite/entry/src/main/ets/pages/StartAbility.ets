@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import router from '@system.router';
+import router from '@ohos.router';
 
 @Entry
 @Component
@@ -86,14 +86,14 @@ struct Index {
   }
 }
 
-async function routePage(page) {
-  let options = {
-    uri: page
+async function routePage(page: string) {
+  let options: router.RouterOptions = {
+    url: page
   }
   try {
-    await router.push(options)
+    await router.pushUrl(options)
   } catch (err) {
-    console.error(`fail callback, code: ${err.code}, msg: ${err.msg}`)
+    console.error(`fail callback, code: ${JSON.stringify(err)}`);
   }
 }
 

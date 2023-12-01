@@ -13,55 +13,53 @@
  * limitations under the License.
  */
 
-import deviceManager from '@ohos.distributedHardware.deviceManager';
+import distributedDeviceManager from '@ohos.distributedDeviceManager';
 
-var SUBSCRIBE_ID = 100;
-
+const SUBSCRIBE_ID = 100;
+const PrintLog = '[dmsDemo] ';
+const BundleName = 'com.ohos.distributedmusicplayer';
 export default class RemoteDeviceModel {
-  deviceList = [];
-  deviceManager;
+  deviceList:distributedDeviceManager.DeviceBasicInfo[] = [];
+  deviceManager: distributedDeviceManager.DeviceManager = distributedDeviceManager.createDeviceManager(BundleName);
 
   constructor() {
   }
 
-  registerDeviceListCallback() {
+
+  registerDeviceListCallback(): void {
+    console.info(PrintLog + 'registerDeviceListCallback in');
     if (typeof (this.deviceManager) === 'undefined') {
-      console.log('[dmsDemo] deviceManager.createDeviceManager begin');
-      let self = this;
-      deviceManager.createDeviceManager('com.ohos.distributedmusicplayer', (error, value) => {
-        if (error) {
-          console.error('createDeviceManager failed.');
-          return;
-        }
-        self.deviceManager = value;
-        self.registerDeviceListCallback_();
-        console.log('[dmsDemo] createDeviceManager callback returned, error=' + error + ' value=' + JSON.stringify(value));
-      });
-      console.log('[dmsDemo] deviceManager.createDeviceManager end');
+      console.log(PrintLog + ' deviceManager.createDeviceManager begin');
+      try {
+        this.registerDeviceListCallback_();
+      } catch (err) {
+        console.error(PrintLog + 'createDeviceManager error: ' + JSON.stringify(err));
+      }
+      console.log(PrintLog + ' deviceManager.createDeviceManager end');
     } else {
       this.registerDeviceListCallback_();
     }
   }
 
-  registerDeviceListCallback_(){
+  registerDeviceListCallback_(): void {
     console.info('[dmsDemo] registerDeviceListCallback');
     if (this.deviceManager == undefined) {
       console.error('[dmsDemo] deviceManager has not initialized');
       return;
-    }
-
-    console.info('[dmsDemo] getTrustedDeviceListSync begin');
-    var list = this.deviceManager.getTrustedDeviceListSync();
-    console.info('[dmsDemo] getTrustedDeviceListSync end, deviceList=' + JSON.stringify(list));
-    if (typeof (list) != 'undefined' && typeof (list.length) != 'undefined') {
-      this.deviceList = list;
+    } else {
+      console.info('[dmsDemo] getTrustedDeviceListSync begin');
+      let list = this.deviceManager.getAvailableDeviceListSync();
+      console.info('[dmsDemo] getTrustedDeviceListSync end, deviceList=' + JSON.stringify(list));
+      if (typeof (list) != 'undefined' && typeof (list.length) != 'undefined') {
+        this.deviceList = list;
+      }
     }
     console.info('[dmsDemo] callback finished');
   }
 
-  unregisterDeviceListCallback() {
+  unregisterDeviceListCallback(): void {
     console.info('[dmsDemo] stopDeviceDiscovery ' + SUBSCRIBE_ID);
-    this.deviceManager.stopDeviceDiscovery(SUBSCRIBE_ID);
+    this.deviceManager.stopDiscovering();
     this.deviceList = [];
   }
 }

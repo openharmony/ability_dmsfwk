@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,18 @@
  * limitations under the License.
  */
 
-import router from '@system.router';
-import wantConstant from '@ohos.ability.wantConstant'
+import router from '@ohos.router';
+import wantConstant from '@ohos.app.ability.wantConstant';
 import Prompt from '@system.prompt';
 import Utils from '../Model/Utils';
+import Want from '@ohos.app.ability.Want';
+import StartOptions from '@ohos.app.ability.StartOptions';
+import { BusinessError } from '@ohos.base';
+import common from '@ohos.app.ability.common';
 
 @Entry
 @Component
 struct StartAbilityAndStartAbilityForResultModel {
-  private content: string = "Second Page";
   private contextText: string= '';
   private localDeviceId: string= '';
   private BUNDLE_NAME = 'com.example.continue.freeInstall';
@@ -34,6 +37,7 @@ struct StartAbilityAndStartAbilityForResultModel {
   private MODULE_NAME_FOURTH = 'module4';
   private MODULE_NAME_ERROR = 'module';
   private isOn = false;
+  private context = getContext(this) as common.UIAbilityContext;
 
   build() {
     Flex({ direction: FlexDirection.Column, alignItems: ItemAlign.Start, justifyContent: FlexAlign.Center }) {
@@ -103,12 +107,12 @@ struct StartAbilityAndStartAbilityForResultModel {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'bundleName': 'com.dms.stage_manual_test_suite',
           'abilityName': 'ServiceAbility2',
         };
         if (this.isOn) {
-          var str1 = {
+          let str1: Want = {
             'bundleName': 'com.dms.stage_manual_test_suite',
             'abilityName': 'ServiceAbility',
           }
@@ -133,14 +137,14 @@ struct StartAbilityAndStartAbilityForResultModel {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'deviceId': '',
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME,
           'moduleName': this.MODULE_NAME_ENTRY,
           'flags': wantConstant.Flags.FLAG_INSTALL_ON_DEMAND
         };
-        var options ={
+        let options: StartOptions ={
           windowMode: 0,
           displayId:2
         }
@@ -166,7 +170,7 @@ struct StartAbilityAndStartAbilityForResultModel {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME,
           'moduleName': this.MODULE_NAME_ENTRY,
@@ -194,13 +198,13 @@ struct StartAbilityAndStartAbilityForResultModel {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME,
           'moduleName': this.MODULE_NAME_ENTRY,
           'flags': wantConstant.Flags.FLAG_INSTALL_ON_DEMAND
         };
-        var options ={
+        let options: StartOptions ={
           windowMode: 0,
           displayId:2
         }
@@ -230,7 +234,7 @@ struct StartAbilityAndStartAbilityForResultModel {
           this.tips('请输入本设备的deviceId！');
           return;
         }
-        var str = {
+        let str: Want = {
           'deviceId': this.contextText,
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME,
@@ -259,7 +263,7 @@ struct StartAbilityAndStartAbilityForResultModel {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME_FIRST,
           'moduleName': this.MODULE_NAME_SECOND,
@@ -287,7 +291,7 @@ struct StartAbilityAndStartAbilityForResultModel {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME,
           'moduleName': this.MODULE_NAME_ENTRY,
@@ -315,13 +319,13 @@ struct StartAbilityAndStartAbilityForResultModel {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME,
           'moduleName': this.MODULE_NAME_ENTRY,
           'flags': 1717
         };
-        var options ={
+        let options: StartOptions ={
           windowMode: 0,
           displayId:2
         }
@@ -329,66 +333,6 @@ struct StartAbilityAndStartAbilityForResultModel {
           this.startAbilityForResultPromise('StartAbilityPromise008', str, 1);
         } else {
           this.startAbilityPromiseAddOperation('StartAbilityPromise008', str, options);
-        }
-      })
-
-      Button() {
-        Text('StartAbilityPromise009，传入错误的flags=‘94.31’')
-          .fontSize($r('app.float.font_20'))
-          .width('100%')
-          .fontColor(Color.White)
-          .align(Alignment.Center)
-          .margin({ left: $r('app.float.wh_value_15'), right: $r('app.float.wh_value_15') })
-      }
-      .height($r('app.float.wh_value_60'))
-      .margin({
-        left: $r('app.float.wh_value_15'),
-        right: $r('app.float.wh_value_15'),
-        top: $r('app.float.wh_value_15')
-      })
-      .onClick(() => {
-        var str = {
-          'bundleName': this.BUNDLE_NAME,
-          'abilityName': this.ABILITY_NAME,
-          'moduleName': this.MODULE_NAME_ENTRY,
-          'flags': '94.31'
-        };
-        var options ={
-          windowMode: 0,
-          displayId:2
-        }
-        if (this.isOn) {
-          this.startAbilityForResultPromise('StartAbilityPromise009', str, 1);
-        } else {
-          this.startAbilityPromiseAddOperation('StartAbilityPromise009', str, options);
-        }
-      })
-
-      Button() {
-        Text('StartAbilityPromise010，传入错误的flags=‘ ’')
-          .fontSize($r('app.float.font_20'))
-          .width('100%')
-          .fontColor(Color.White)
-          .align(Alignment.Center)
-          .margin({ left: $r('app.float.wh_value_15'), right: $r('app.float.wh_value_15') })
-      }
-      .height($r('app.float.wh_value_60'))
-      .margin({
-        left: $r('app.float.wh_value_15'),
-        right: $r('app.float.wh_value_15'),
-        top: $r('app.float.wh_value_15')
-      })
-      .onClick(() => {
-        var str = {
-          'bundleName': this.BUNDLE_NAME,
-          'abilityName': this.ABILITY_NAME,
-          'moduleName': this.MODULE_NAME_ENTRY,
-          'flags': ''
-        };
-        if (this.isOn) {
-          this.startAbilityForResultPromise('StartAbilityPromise010', str, 1);
-        } else {
-          this.startAbilityPromise('StartAbilityPromise010', str);
         }
       })
 
@@ -407,12 +351,12 @@ struct StartAbilityAndStartAbilityForResultModel {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME,
           'moduleName': this.MODULE_NAME_ENTRY
         };
-        var options ={
+        let options: StartOptions ={
           windowMode: 0,
           displayId:2
         }
@@ -438,7 +382,7 @@ struct StartAbilityAndStartAbilityForResultModel {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME,
           'moduleName': this.MODULE_NAME_ENTRY,
@@ -466,7 +410,7 @@ struct StartAbilityAndStartAbilityForResultModel {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME,
           'moduleName': this.MODULE_NAME_ENTRY,
@@ -499,13 +443,13 @@ struct StartAbilityAndStartAbilityForResultModel {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME,
           'moduleName': this.MODULE_NAME_ENTRY,
           'flags': wantConstant.Flags.FLAG_INSTALL_ON_DEMAND
         };
-        var options ={
+        let options: StartOptions ={
           windowMode: 0,
           displayId:2
         }
@@ -531,7 +475,7 @@ struct StartAbilityAndStartAbilityForResultModel {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME,
           'moduleName': this.MODULE_NAME_ENTRY,
@@ -559,7 +503,7 @@ struct StartAbilityAndStartAbilityForResultModel {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME_FIRST,
           'moduleName': this.MODULE_NAME_FOURTH,
@@ -587,7 +531,7 @@ struct StartAbilityAndStartAbilityForResultModel {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME,
           'moduleName': this.MODULE_NAME_ERROR,
@@ -615,12 +559,12 @@ struct StartAbilityAndStartAbilityForResultModel {
         top: $r('app.float.wh_value_15')
       })
       .onClick(() => {
-        var str = {
+        let str: Want = {
           'bundleName': this.BUNDLE_NAME,
           'abilityName': this.ABILITY_NAME,
           'flags': wantConstant.Flags.FLAG_INSTALL_ON_DEMAND
         };
-        var options ={
+        let options: StartOptions ={
           windowMode: 0,
           displayId:2
         }
@@ -635,17 +579,17 @@ struct StartAbilityAndStartAbilityForResultModel {
     .height('100%')
   }
 
-  async startMainAbility2(tag, str1, type) {
+  async startMainAbility2(tag: string, str1: Want, type: number) {
     console.info(tag + ' startMainAbility2 START');
-    var str = {
+    let str: Want = {
       "deviceId": "",
       "bundleName": "com.dms.stage_manual_test_suite",
       "abilityName": "MainAbility1",
     };
-    globalThis.abilityContext.startAbility(str)
-      .then((data) => {
-        console.info(tag + ' startAbility Operation successful. Promise Data: ' + JSON.stringify(data))
-      }).catch((error) => {
+    this.context.startAbility(str)
+      .then(() => {
+        console.info(tag + ' startAbility Operation successful.')
+      }).catch((error: BusinessError) => {
       console.info(tag + ' startAbility Operation failed. Promise Cause: ' + JSON.stringify(error));
     })
     if (type === 0) {
@@ -655,97 +599,71 @@ struct StartAbilityAndStartAbilityForResultModel {
     }
   }
 
-  async startAbilityPromise(tag, str) {
+  async startAbilityPromise(tag: string, str: Want) {
     if ('StartAbilityPromise012' === tag || 'StartAbilityPromise014' === tag) {
       await Utils.sleep(5000);
     }
     console.info(tag + ' startAbility startAbilityPromise START' + JSON.stringify(str));
-    let code;
-    await globalThis.abilityContext.startAbility(str)
+    await this.context.startAbility(str)
       .then((data) => {
         console.info(tag + ' startAbility Operation successful. Promise Data: ' + JSON.stringify(data))
-        code = data;
-      }).catch((error) => {
+        this.tips('成功');
+      }).catch((error: BusinessError) => {
         console.info(tag + ' startAbility Operation failed. Promise Cause: ' + JSON.stringify(error));
-        code = error;
+        this.tips('失败：' + JSON.stringify(error));
       })
-    console.info(tag + ' startAbility Operation code Promise: ' + JSON.stringify(code));
-    this.tips(code);
-    if (code === 0) {
-      this.tips('成功');
-    } else {
-      this.tips('错误码：' + code.code);
-    }
     console.info(tag + ' startAbility startAbilityPromise END');
   }
 
-  async startAbilityPromiseAddOperation(tag, str, options) {
+  async startAbilityPromiseAddOperation(tag: string, str: Want, options: StartOptions) {
     if ('StartAbilityPromise012' === tag || 'StartAbilityPromise014' === tag) {
       await Utils.sleep(5000);
     }
     console.info(tag + ' startAbility startAbilityPromiseAndOperation START' + JSON.stringify(str));
-    let code;
-    await globalThis.abilityContext.startAbility(str, options)
-      .then((data) => {
+    await this.context.startAbility(str, options)
+      .then((data:void) => {
         console.info(tag + ' startAbility Operation successful. Promise Data: ' + JSON.stringify(data))
-        code = data;
-      }).catch((error) => {
+        this.tips('成功');
+      }).catch((error: BusinessError) => {
         console.info(tag + ' startAbility Operation failed. Promise Cause: ' + JSON.stringify(error));
-        code = error;
+        this.tips('失败:' + JSON.stringify(error));
       })
-    console.info(tag + ' startAbility Operation code Promise: ' + JSON.stringify(code));
-    this.tips(code);
-    if (code === 0) {
-      this.tips('成功');
-    } else {
-      this.tips('错误码：' + code.code);
-    }
     console.info(tag + ' startAbility startAbilityPromise END');
   }
 
-  async startAbilityCallBack(tag, str) {
+  async startAbilityCallBack(tag: string, str: Want) {
     console.info(tag + 'startAbility startAbilityCallBack START' + JSON.stringify(str));
-    let code;
-    globalThis.abilityContext.startAbility(str, (err, data) => {
-      code = data;
+    this.context.startAbility(str, (err, data) => {
       if (err) {
-        code = err;
+        this.tips("失败: " + JSON.stringify(err));
       }
-      if (code === 0) {
-        this.tips('成功');
-      } else {
-        this.tips('错误码：' + code.code);
-      }
+      this.tips('成功');
       console.info(tag + 'Operation CallBack err: ' + JSON.stringify(err) + ', data: ' + JSON.stringify(data))
     });
     console.info(tag + 'startAbility startAbilityCallBack END');
   }
 
-  async startAbilityForResultPromise(tag, str, type) {
+  async startAbilityForResultPromise(tag: string, str: Want, type: number) {
     if ('StartAbilityPromise012' === tag || 'StartAbilityPromise014' === tag) {
       await Utils.sleep(5000);
     }
     console.info(tag + ' startAbilityForResultPromise START' + JSON.stringify(str));
-    let newData;
-    await globalThis.abilityContext.startAbilityForResult(str)
+    await this.context.startAbilityForResult(str)
       .then((data) => {
         if (0 === type) {
           this.tips('成功');
         }
-        newData = data;
         console.info(tag + ' startAbilityForResultPromise Operation successful. Promise Data: ' + JSON.stringify(data))
-      }).catch((error) => {
+      }).catch((error: BusinessError) => {
         console.info(tag + ' startAbilityForResultPromise Operation failed. Promise Cause: ' + JSON.stringify(error));
-        newData = error;
         this.tips('失败');
       })
-    console.info(tag + ' startAbilityForResultPromise Operation newData Promise: ' + JSON.stringify(newData));
     console.info(tag + ' startAbilityForResultPromise startAbilityPromise END');
   }
 
-  async startAbilityForResultCallBack(tag, str) {
+  async startAbilityForResultCallBack(tag: string, str: Want) {
     console.info(tag + 'startAbilityForResultCallBack START' + JSON.stringify(str));
-    globalThis.abilityContext.startAbilityForResult(str, (err, data) => {
+    this.context.startAbilityForResult(str, (err, data) => {
       console.info(tag + 'startAbilityForResultCallBack Operation CallBack Data: ' + JSON.stringify(data))
       if (err) {
         this.tips('失败');
@@ -757,7 +675,7 @@ struct StartAbilityAndStartAbilityForResultModel {
     console.info(tag + 'startAbilityForResultCallBack END');
   }
 
-  tips(msg) {
+  tips(msg: string) {
     Prompt.showToast({
       message: msg,
       duration: 2000,

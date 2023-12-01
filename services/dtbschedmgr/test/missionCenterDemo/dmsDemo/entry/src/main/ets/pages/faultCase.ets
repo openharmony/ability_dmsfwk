@@ -20,7 +20,7 @@ import Logger from '../Util/Logger'
 @Entry
 @Component
 struct Index {
-  @State deviceManager: DeviceManager = AppStorage.get<DeviceManager>('DeviceManager')
+  @State deviceManager: DeviceManager|undefined = AppStorage.get<DeviceManager>('DeviceManager')
   @State dstDeviceId: string = ''
   @State srcDeviceId: string = ''
   @State missionId: string = ''
@@ -66,8 +66,12 @@ struct Index {
           .height('5%')
           .width('100%')
           .onClick(() => {
-            if (this.deviceManager.trustedDeviceList.length > 0) {
-              this.dstDeviceId = this.deviceManager.trustedDeviceList[0].deviceInfo.networkId
+            if (this.deviceManager && this.deviceManager.trustedDeviceList.length > 0) {
+              if (this.deviceManager.trustedDeviceList[0].deviceInfo.networkId) {
+                this.dstDeviceId = this.deviceManager.trustedDeviceList[0].deviceInfo.networkId;
+              } else {
+                this.dstDeviceId = '';
+              }
             }
           })
         }.width('60%')
@@ -93,7 +97,13 @@ struct Index {
           .height('5%')
           .width('100%')
           .onClick(() => {
-            this.srcDeviceId = this.deviceManager.localDevice.deviceInfo.deviceId
+            if (this.deviceManager && this.deviceManager.localDevice.deviceInfo.deviceId) {
+              this.srcDeviceId = this.deviceManager.localDevice.deviceInfo.deviceId;
+            } else {
+              this.srcDeviceId = '';
+              Logger.error("Continue Mission dm not init");
+            }
+
           })
         }.width('60%')
 
@@ -133,15 +143,19 @@ struct Index {
       .width('80%')
       .height('7%')
       .onClick(() => {
-        this.deviceManager.toDeviceId = this.dstDeviceId
-        this.deviceManager.fromDeviceId = this.srcDeviceId
-        this.deviceManager.fromMissionId = Number(this.missionId)
-        this.deviceManager.isFreeInstall = this.isFreeInstall
-        Logger.info("toDeviceId: " + this.deviceManager.toDeviceId)
-        Logger.info("fromDeviceId: " + this.deviceManager.fromDeviceId)
-        Logger.info("fromMissionId: " + this.deviceManager.fromMissionId)
-        Logger.info("isFreeInstall: " + this.deviceManager.isFreeInstall)
-        this.deviceManager.onContinueAbility()
+        if (this.deviceManager) {
+          this.deviceManager.toDeviceId = this.dstDeviceId
+          this.deviceManager.fromDeviceId = this.srcDeviceId
+          this.deviceManager.fromMissionId = Number(this.missionId)
+          this.deviceManager.isFreeInstall = this.isFreeInstall
+          Logger.info("toDeviceId: " + this.deviceManager.toDeviceId)
+          Logger.info("fromDeviceId: " + this.deviceManager.fromDeviceId)
+          Logger.info("fromMissionId: " + this.deviceManager.fromMissionId)
+          Logger.info("isFreeInstall: " + this.deviceManager.isFreeInstall)
+          this.deviceManager.onContinueAbility()
+        } else {
+          Logger.error("Continue Mission dm not init");
+        }
       })
       Blank().height('5%')
       Row() {
