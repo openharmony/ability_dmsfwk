@@ -30,6 +30,8 @@ config("test_config") {
     "//foundation/ability/dmsfwk/utils/native/include",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/include",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/unittest",
+    "${dms_path}/interfaces/innerkits/distributed_event/include",
+    "${dms_path}/interfaces/innerkits/tests",
   ]
 }
 
@@ -80,6 +82,10 @@ dtbabilitymgr_sources = [
   "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_proxy.cpp",
   "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_service.cpp",
   "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_stub.cpp",
+  "${dms_path}/interfaces/innerkits/distributed_event/src/dms_client.cpp",
+  "${dms_path}/interfaces/innerkits/distributed_event/src/dms_handler.cpp",
+  "${dms_path}/interfaces/innerkits/distributed_event/src/dms_listener_stub.cpp",
+  "${dms_path}/interfaces/innerkits/distributed_event/src/dms_sa_client.cpp",
 ]
 
 ohos_unittest("continuationmanagertest") {
@@ -126,10 +132,42 @@ ohos_unittest("distributedabilitymanagerservicetest") {
   part_name = "dmsfwk"
 }
 
+ohos_unittest("distributedeventtest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+  sources = [
+    "${distributed_service}/dtbschedmgr/test/unittest/distributed_sched_util.cpp",
+    "unittest/dms_client_test.cpp",
+    "unittest/dms_handler_test.cpp",
+    "unittest/dms_listener_stub_test.cpp",
+    "unittest/dms_sa_cilent_test.cpp",
+  ]
+  sources += dtbabilitymgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dtbabilitymgr_configs
+  deps = [
+    "${dms_path}/interfaces/innerkits/distributed_event:distributed_sdk",
+    "${dms_path}/interfaces/innerkits/tests:dms_sdk_demo",
+  ]
+  if (is_standard_system) {
+    external_deps = dtbabilitymgr_external_deps
+    public_deps = dtbabilitymgr_public_deps
+  }
+  part_name = "dmsfwk"
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":continuationmanagertest",
     ":distributedabilitymanagerservicetest",
+    ":distributedeventtest",
   ]
 }
