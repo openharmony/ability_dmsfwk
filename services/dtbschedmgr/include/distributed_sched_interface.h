@@ -79,6 +79,10 @@ public:
         int32_t status, uint32_t accessToken) = 0;
     virtual void NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId, bool isSuccess) = 0;
     virtual int32_t NotifyContinuationResultFromRemote(int32_t sessionId, bool isSuccess) = 0;
+    virtual int32_t NotifyDSchedEventResultFromRemote(const std::string type, int32_t dSchedEventResult)
+    {
+        return 0;
+    }
     virtual int32_t ConnectRemoteAbility(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
         int32_t callerUid, int32_t callerPid, uint32_t accessToken) = 0;
     virtual int32_t DisconnectRemoteAbility(const sptr<IRemoteObject>& connect, int32_t callerUid,
@@ -95,6 +99,14 @@ public:
     virtual int32_t StopSyncRemoteMissions(const std::string& devId) = 0;
     virtual int32_t StopSyncMissionsFromRemote(const CallerInfo& callerInfo) = 0;
     virtual int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) = 0;
+    virtual int32_t RegisterDSchedEventListener(const std::string& type, const sptr<IRemoteObject>& obj)
+    {
+        return 0;
+    }
+    virtual int32_t UnRegisterDSchedEventListener(const std::string& type, const sptr<IRemoteObject>& obj)
+    {
+        return 0;
+    }
     virtual int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj)
     {
         return 0;

@@ -219,6 +219,24 @@ void DistributedSchedProxy::NotifyCompleteContinuation(const std::u16string& dev
         data, reply);
 }
 
+int32_t DistributedSchedProxy::NotifyDSchedEventResultFromRemote(const std::string type, int32_t dSchedEventResult)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("NotifyDSchedEventResultFromRemote remote service null");
+        return ERR_NULL_OBJECT;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_WRITE_HELPER(data, String, type);
+    PARCEL_WRITE_HELPER(data, Int32, dSchedEventResult);
+    MessageParcel reply;
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>
+    (IDSchedInterfaceCode::NOTIFY_DSCHED_EVENT_RESULT_FROM_REMOTE), data, reply);
+}
+
 int32_t DistributedSchedProxy::NotifyContinuationResultFromRemote(int32_t sessionId, bool isSuccess)
 {
     sptr<IRemoteObject> remote = Remote();
@@ -488,6 +506,26 @@ int32_t DistributedSchedProxy::RegisterMissionListener(const std::u16string& dev
     PARCEL_WRITE_HELPER(data, String16, devId);
     PARCEL_WRITE_HELPER(data, RemoteObject, obj);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_MISSION_LISTENER),
+        data, reply);
+}
+
+int32_t DistributedSchedProxy::RegisterDSchedEventListener(const std::string& type,
+    const sptr<IRemoteObject>& obj)
+{
+    HILOGI("RegisterDSchedEventListener called");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("remote system ability is null");
+        return ERR_NULL_OBJECT;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_WRITE_HELPER(data, String, type);
+    PARCEL_WRITE_HELPER(data, RemoteObject, obj);
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_DSCHED_EVENT_LISTENER),
         data, reply);
 }
 

@@ -12,6 +12,7 @@
 # limitations under the License.
 
 declare_args() {
+  ams_path = "//foundation/ability/ability_runtime"
   dms_path = "//foundation/ability/dmsfwk"
   module_output_path = "dmsfwk/dmsfwk"
   communication_path = "//foundation/communication"

@@ -1,0 +1,64 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("../../../dmsfwk.gni")
+
+config("dms_sdk_public_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${ams_path}/interfaces/inner_api/ability_manager/include/",
+    "${ams_path}/services/common/include/",
+    "${dms_path}/interfaces/innerkits/distributed_event/include/",
+    "${dms_path}/services/dtbabilitymgr/include/",
+    "${dms_path}/services/dtbschedmgr/include/",
+    "${dms_path}/utils/native/include/",
+  ]
+
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+}
+
+ohos_shared_library("distributed_sdk") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  sources = [
+    "${dms_path}/interfaces/innerkits/distributed_event/src/dms_client.cpp",
+    "${dms_path}/interfaces/innerkits/distributed_event/src/dms_handler.cpp",
+    "${dms_path}/interfaces/innerkits/distributed_event/src/dms_listener_stub.cpp",
+    "${dms_path}/interfaces/innerkits/distributed_event/src/dms_sa_client.cpp",
+  ]
+
+  public_configs = [
+    ":dms_sdk_public_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+
+  subsystem_name = "ability"
+  innerapi_tags = [ "platformsdk" ]
+  part_name = "dmsfwk"
+}

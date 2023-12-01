@@ -28,6 +28,13 @@ namespace OHOS {
 namespace DistributedSchedule {
 using FuncContinuationCallback = std::function<void(int32_t missionId)>;
 
+struct ContinueEvent {
+    std::string srcNetworkId;
+    std::string dstNetworkId;
+    std::string bundleName;
+    std::string moduleName;
+    std::string abilityName;
+};
 class DSchedContinuation : public std::enable_shared_from_this<DSchedContinuation> {
 public:
     void Init(const FuncContinuationCallback& contCallback);
@@ -39,12 +46,17 @@ public:
     void RemoveTimeOut(int32_t missionId);
     bool PushCallback(int32_t missionId, const sptr<IRemoteObject>& callback,
         std::string deviceId, bool isFreeInstall);
+    bool PushCallback(const std::string& type, const sptr<IRemoteObject>& callback);
+    sptr<IRemoteObject> CleanupCallback(const std::string& type);
+    sptr<IRemoteObject> GetCallback(const std::string& type);
     sptr<IRemoteObject> PopCallback(int32_t missionId);
     int32_t NotifyMissionCenterResult(int32_t missionId, int32_t resultCode);
+    int32_t NotifyDSchedEventResult(const std::string& type, int32_t resultCode);
     bool IsFreeInstall(int32_t missionId);
     std::string GetTargetDevice(int32_t missionId);
     bool IsCleanMission(int32_t missionId);
     void SetCleanMissionFlag(int32_t missionId, bool isCleanMission);
+    ContinueEvent continueEvent_;
 
 private:
     class ContinuationHandler : public AppExecFwk::EventHandler {
@@ -65,6 +77,7 @@ private:
     std::mutex continuationLock_;
     int32_t currSessionId_ = 1;
     std::map<int32_t, sptr<IRemoteObject>> continuationMap_;
+    std::map<std::string, sptr<IRemoteObject>> continuationCallbackMap_;
     std::map<int32_t, sptr<IRemoteObject>> callbackMap_;
     std::map<int32_t, bool> freeInstall_;
     std::map<int32_t, bool> cleanMission_;

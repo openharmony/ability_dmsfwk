@@ -40,6 +40,7 @@ private:
     int32_t StartContinuationInner(MessageParcel& data, MessageParcel& reply);
     int32_t NotifyCompleteContinuationInner(MessageParcel& data, MessageParcel& reply);
     int32_t NotifyContinuationResultFromRemoteInner(MessageParcel& data, MessageParcel& reply);
+    int32_t NotifyDSchedEventResultFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t ConnectRemoteAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t DisconnectRemoteAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t ConnectAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
@@ -50,6 +51,8 @@ private:
     int32_t GetMissionInfosInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetRemoteMissionSnapshotInfoInner(MessageParcel& data, MessageParcel& reply);
     int32_t RegisterMissionListenerInner(MessageParcel& data, MessageParcel& reply);
+    int32_t RegisterDSchedEventListenerInner(MessageParcel& data, MessageParcel& reply);
+    int32_t UnRegisterDSchedEventListenerInner(MessageParcel& data, MessageParcel& reply);
     int32_t RegisterOnListenerInner(MessageParcel& data, MessageParcel& reply);
     int32_t RegisterOffListenerInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnRegisterMissionListenerInner(MessageParcel& data, MessageParcel& reply);

@@ -26,6 +26,8 @@ constexpr int64_t CONTINUATION_DELAY_TIME = 20000;
 const std::string TAG = "DSchedContinuation";
 const std::u16string NAPI_MISSION_CENTER_INTERFACE_TOKEN = u"ohos.DistributedSchedule.IMissionCallback";
 constexpr int32_t NOTIFY_MISSION_CENTER_RESULT = 4;
+const std::u16string DSCHED_EVENT_TOKEN = u"ohos.distributedSchedule.dschedeventlistener";
+constexpr int32_t DSCHED_EVENT_CALLBACK = 0;
 }
 
 void DSchedContinuation::Init(const FuncContinuationCallback& contCallback)
@@ -150,6 +152,29 @@ std::string DSchedContinuation::GetTargetDevice(int32_t missionId)
     return "";
 }
 
+bool DSchedContinuation::PushCallback(const std::string& type, const sptr<IRemoteObject>& callback)
+{
+    HILOGI("DSchedContinuation PushCallback start!");
+    if (callback == nullptr) {
+        HILOGE("callback null!");
+        return false;
+    }
+
+    if (continuationHandler_ == nullptr) {
+        HILOGE("not initialized!");
+        return false;
+    }
+
+    std::lock_guard<std::mutex> autoLock(continuationLock_);
+    auto iterSession = continuationCallbackMap_.find(type);
+    if (iterSession != continuationCallbackMap_.end()) {
+        HILOGE("type:%{public}s exist!", type.c_str());
+        return false;
+    }
+    (void)continuationCallbackMap_.emplace(type, callback);
+    return true;
+}
+
 bool DSchedContinuation::PushCallback(int32_t missionId, const sptr<IRemoteObject>& callback,
     std::string deviceId, bool isFreeInstall)
 {
@@ -178,6 +203,31 @@ bool DSchedContinuation::PushCallback(int32_t missionId, const sptr<IRemoteObjec
     return true;
 }
 
+sptr<IRemoteObject> DSchedContinuation::GetCallback(const std::string& type)
+{
+    std::lock_guard<std::mutex> autoLock(continuationLock_);
+    auto iter = continuationCallbackMap_.find(type);
+    if (iter == continuationCallbackMap_.end()) {
+        HILOGW("PopCallback not found, type:%{public}s", type.c_str());
+        return nullptr;
+    }
+    sptr<IRemoteObject> callback = iter->second;
+    return callback;
+}
+
+sptr<IRemoteObject> DSchedContinuation::CleanupCallback(const std::string& type)
+{
+    std::lock_guard<std::mutex> autoLock(continuationLock_);
+    auto iter = continuationCallbackMap_.find(type);
+    if (iter == continuationCallbackMap_.end()) {
+        HILOGW("PopCallback not found, type:%{public}s", type.c_str());
+        return nullptr;
+    }
+    sptr<IRemoteObject> callback = iter->second;
+    continuationCallbackMap_.erase(iter);
+    return callback;
+}
+
 sptr<IRemoteObject> DSchedContinuation::PopCallback(int32_t missionId)
 {
     std::lock_guard<std::mutex> autoLock(continuationLock_);
@@ -202,6 +252,32 @@ sptr<IRemoteObject> DSchedContinuation::PopCallback(int32_t missionId)
     (void)cleanMission_.erase(missionId);
     (void)callbackMap_.erase(iter);
     return callback;
+}
+
+int32_t DSchedContinuation::NotifyDSchedEventResult(const std::string& type, int32_t resultCode)
+{
+    HILOGI("GetCallback IDSchedEventListener");
+    sptr<IRemoteObject> callback = GetCallback(type);
+    if (callback == nullptr) {
+        HILOGE("NotifyMissionCenterResult IDSchedEventListener is null");
+        return INVALID_PARAMETERS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(DSCHED_EVENT_TOKEN)) {
+        HILOGE("NotifyMissionCenterResult write token failed");
+        return INVALID_PARAMETERS_ERR;
+    }
+    PARCEL_WRITE_HELPER_RET(data, Int32, resultCode, false);
+    PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.srcNetworkId, false);
+    PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.dstNetworkId, false);
+    PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.bundleName, false);
+    PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.moduleName, false);
+    PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.abilityName, false);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t error = callback->SendRequest(DSCHED_EVENT_CALLBACK, data, reply, option);
+    HILOGI("NotifyDSchedEventListenerResult transact result: %{public}d", error);
+    return error;
 }
 
 int32_t DSchedContinuation::NotifyMissionCenterResult(int32_t missionId, int32_t resultCode)
