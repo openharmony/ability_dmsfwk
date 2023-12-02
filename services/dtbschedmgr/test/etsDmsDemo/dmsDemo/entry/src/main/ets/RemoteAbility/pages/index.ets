@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,15 +16,17 @@
 import featureAbility from '@ohos.ability.featureAbility';
 import prompt from '@system.prompt';
 import rpc from "@ohos.rpc";
-import RemoteDeviceModel from '../../model/RemoteDeviceModel.ets';
+import RemoteDeviceModel from '../../model/RemoteDeviceModel';
+import Want from '@ohos.app.ability.Want';
 
-var connectedAbility;
-var localDeviceId = "";
-var mRemote;
-var remoteDeviceModel = new RemoteDeviceModel;
-var mIndex;
-var mDiscoveredSize = 0;
-var mDeviceSize = 0;
+let connectedAbility: number|null;
+let localDeviceId = "";
+let mRemote: rpc.IRemoteObject;
+let remoteDeviceModel = new RemoteDeviceModel;
+let mIndex: number;
+let mValue: string;
+let mDiscoveredSize = 0;
+let mDeviceSize = 0;
 
 enum Operation {
   AuthDeviceOperation,
@@ -65,7 +67,7 @@ function registerDeviceListCallback() {
   console.info('[dmsDemo] registerDeviceListCallback end');
 }
 
-function authDevice(index) {
+function authDevice(index: number) {
   console.info('[dmsDemo] authDevice begin');
   if (remoteDeviceModel.deviceList.length >= 1 && remoteDeviceModel.discoverList.length == 0) {
     prompt.showToast({
@@ -97,7 +99,7 @@ function unregisterDeviceListCallback() {
 function onStartLocalAbility() {
   console.info('[dmsDemo] onStartLocalAbility begin');
   console.info('[dmsDemo] onStartLocalAbility deviceId is ' + localDeviceId);
-  var wantValue = {
+  let wantValue: Want = {
     deviceId: localDeviceId,
     bundleName: 'ohos.dms.etsDemo',
     abilityName: 'ohos.dms.etsDemo.LocalAbility',
@@ -110,7 +112,7 @@ function onStartLocalAbility() {
   console.info('[dmsDemo] onStartLocalAbility end');
 }
 
-function onStartRemoteAbility(index) {
+function onStartRemoteAbility(index: number) {
   console.info('[dmsDemo] onStartRemoteAbility begin');
   let numDevices = remoteDeviceModel.deviceList.length;
   if (numDevices === 0) {
@@ -119,14 +121,12 @@ function onStartRemoteAbility(index) {
     });
     return;
   }
-  let deviceIdForStart = remoteDeviceModel.deviceList[index - 1].deviceId;
+  let deviceIdForStart: string = remoteDeviceModel.deviceList[index - 1].deviceId;
   console.info('[dmsDemo] onStartRemoteAbility deviceId is ' + deviceIdForStart);
-  var params;
-  var wantValue = {
+  let wantValue: Want = {
     bundleName: 'ohos.dms.etsDemo',
     abilityName: 'ohos.dms.etsDemo.RemoteAbility',
-    deviceId: deviceIdForStart,
-    parameters: params
+    deviceId: deviceIdForStart
   };
   console.info('[dmsDemo] onStartRemoteAbility want=' + JSON.stringify(wantValue));
   featureAbility.startAbility({
@@ -137,80 +137,9 @@ function onStartRemoteAbility(index) {
   console.info('[dmsDemo] onStartRemoteAbility end');
 }
 
-async function onContinueLocalAbility() {
-  console.info('[dmsDemo] onContinueLocalAbility begin');
-  console.info('[dmsDemo] onContinueLocalAbility deviceId is ' + localDeviceId);
-  let continueAbilityOptions = {
-    reversible: false,
-    deviceId: localDeviceId,
-  };
-  function ContinueAbilityCallback(err, data) {
-    console.info("[dmsDemo] onContinueLocalAbility ContinueAbilityCallback, result err = " + JSON.stringify(err));
-    console.info("[dmsDemo] onContinueLocalAbility ContinueAbilityCallback, result data= " + JSON.stringify(data));
-  };
-  await featureAbility.continueAbility(continueAbilityOptions, ContinueAbilityCallback);
-  console.info('[dmsDemo] onContinueLocalAbility end');
-}
-
-async function onContinueAbility(index) {
-  console.info('[dmsDemo] onContinueAbility begin');
-  let numDevices = remoteDeviceModel.deviceList.length;
-  if (numDevices === 0) {
-    prompt.showToast({
-      message: "onContinueAbility no device found"
-    });
-    return;
-  }
-  let deviceIdForContinue = remoteDeviceModel.deviceList[index - 1].deviceId;
-  console.info('[dmsDemo] onContinueAbility deviceId is ' + deviceIdForContinue);
-  let continueAbilityOptions = {
-    reversible: false,
-    deviceId: deviceIdForContinue,
-  };
-  function ContinueAbilityCallback(err, data) {
-    console.info("[dmsDemo] onContinueAbility ContinueAbilityCallback, result err = " + JSON.stringify(err));
-    console.info("[dmsDemo] onContinueAbility ContinueAbilityCallback, result data= " + JSON.stringify(data));
-  };
-  await featureAbility.continueAbility(continueAbilityOptions, ContinueAbilityCallback);
-  console.info('[dmsDemo] onContinueAbility end');
-}
-
 function onConnectLocalService() {
   console.info('[dmsDemo] onConnectLocalService begin');
   console.info('[dmsDemo] onConnectLocalService deviceId is ' + localDeviceId);
-  async function onConnectCallback(element, remote) {
-    console.log('[dmsDemo] onConnectLocalService onConnectDone element: ' + element);
-    console.log('[dmsDemo] onConnectLocalService onConnectDone remote: ' + remote);
-    mRemote = remote;
-    if (mRemote == null) {
-      prompt.showToast({
-        message: "onConnectLocalService not connected yet"
-      });
-      return;
-    }
-    let option = new rpc.MessageOption();
-    let data = new rpc.MessageParcel();
-    let reply = new rpc.MessageParcel();
-    data.writeInt(1);
-    data.writeInt(99);
-    await mRemote.sendRequest(1, data, reply, option);
-    let msg = reply.readInt();
-    prompt.showToast({
-      message: "onConnectLocalService connect result: " + msg,
-      duration: 3000
-    });
-  }
-
-  function onDisconnectCallback(element) {
-    console.log('[dmsDemo] onConnectLocalService onDisconnectDone element: ' + element);
-  }
-
-  function onFailedCallback(code) {
-    console.log('[dmsDemo] onConnectLocalService onFailed errCode: ' + code)
-    prompt.showToast({
-      message: "onConnectLocalService onFailed: " + code
-    });
-  }
 
   connectedAbility = featureAbility.connectAbility(
     {
@@ -219,49 +148,44 @@ function onConnectLocalService() {
       abilityName: "ohos.dms.js.ServiceAbility",
     },
     {
-      onConnect: onConnectCallback,
-      onDisconnect: onDisconnectCallback,
-      onFailed: onFailedCallback,
+      onConnect: async (element, remote) => {
+        console.log('[dmsDemo] onConnectLocalService onConnectDone element: ' + element);
+        console.log('[dmsDemo] onConnectLocalService onConnectDone remote: ' + remote);
+        mRemote = remote;
+        if (mRemote == null) {
+          prompt.showToast({
+            message: "onConnectLocalService not connected yet"
+          });
+          return;
+        }
+        let option = new rpc.MessageOption();
+        let data = new rpc.MessageSequence();
+        let reply = new rpc.MessageSequence();
+        data.writeInt(1);
+        data.writeInt(99);
+        await mRemote.sendMessageRequest(1, data, reply, option);
+        let msg = reply.readInt();
+        prompt.showToast({
+          message: "onConnectLocalService connect result: " + msg,
+          duration: 3000
+        });
+      },
+      onDisconnect: (element) => {
+        console.log('[dmsDemo] onConnectLocalService onDisconnectDone element: ' + element);
+      },
+      onFailed: (code) => {
+        console.log('[dmsDemo] onConnectLocalService onFailed errCode: ' + code)
+        prompt.showToast({
+          message: "onConnectLocalService onFailed: " + code
+        });
+      },
     },
   );
   console.log('[dmsDemo] onConnectLocalService connectedAbility: ' + connectedAbility)
 }
 
-function onConnectRemoteService(index) {
+function onConnectRemoteService(index: number) {
   console.info('[dmsDemo] onConnectRemoteService begin');
-  async function onConnectCallback(element, remote) {
-    console.log('[dmsDemo] onConnectRemoteService onConnectDone element: ' + element);
-    console.log('[dmsDemo] onConnectRemoteService onConnectDone remote: ' + remote);
-    mRemote = remote;
-    if (mRemote == null) {
-      prompt.showToast({
-        message: "onConnectRemoteService not connected yet"
-      });
-      return;
-    }
-    let option = new rpc.MessageOption();
-    let data = new rpc.MessageParcel();
-    let reply = new rpc.MessageParcel();
-    data.writeInt(1);
-    data.writeInt(99);
-    await mRemote.sendRequest(1, data, reply, option);
-    let msg = reply.readInt();
-    prompt.showToast({
-      message: "onConnectRemoteService connect result: " + msg,
-      duration: 3000
-    });
-  }
-
-  function onDisconnectCallback(element) {
-    console.log('[dmsDemo] onConnectRemoteService onDisconnectDone element: ' + element);
-  }
-
-  function onFailedCallback(code) {
-    console.log('[dmsDemo] onConnectRemoteService onFailed errCode: ' + code)
-    prompt.showToast({
-      message: "onConnectRemoteService onFailed: " + code
-    });
-  }
 
   let numDevices = remoteDeviceModel.deviceList.length;
   if (numDevices === 0) {
@@ -270,20 +194,53 @@ function onConnectRemoteService(index) {
     });
     return;
   }
-  let deviceIdForConnect = remoteDeviceModel.deviceList[index - 1].deviceId;
-  console.info('[dmsDemo] onConnectRemoteService deviceId is ' + deviceIdForConnect);
-  connectedAbility = featureAbility.connectAbility(
-    {
-      deviceId: deviceIdForConnect,
-      bundleName: "ohos.dms.js",
-      abilityName: "ohos.dms.js.ServiceAbility",
-    },
-    {
-      onConnect: onConnectCallback,
-      onDisconnect: onDisconnectCallback,
-      onFailed: onFailedCallback,
-    },
-  );
+  let networkId = remoteDeviceModel.deviceList[index - 1].networkId;
+
+  if (networkId) {
+    console.info('[dmsDemo] onConnectRemoteService networkId is ' + networkId);
+    connectedAbility = featureAbility.connectAbility(
+      {
+        deviceId: networkId,
+        bundleName: "ohos.dms.js",
+        abilityName: "ohos.dms.js.ServiceAbility",
+      },
+      {
+        onConnect: async (element, remote) => {
+          console.log('[dmsDemo] onConnectRemoteService onConnectDone element: ' + element);
+          console.log('[dmsDemo] onConnectRemoteService onConnectDone remote: ' + remote);
+          mRemote = remote;
+          if (mRemote == null) {
+            prompt.showToast({
+              message: "onConnectRemoteService not connected yet"
+            });
+            return;
+          }
+          let option = new rpc.MessageOption();
+          let data = new rpc.MessageSequence();
+          let reply = new rpc.MessageSequence();
+          data.writeInt(1);
+          data.writeInt(99);
+          await mRemote.sendMessageRequest(1, data, reply, option);
+          let msg = reply.readInt();
+          prompt.showToast({
+            message: "onConnectRemoteService connect result: " + msg,
+            duration: 3000
+          });
+        },
+        onDisconnect: (element) => {
+          console.log('[dmsDemo] onConnectRemoteService onDisconnectDone element: ' + element);
+        },
+        onFailed: (code) => {
+          console.log('[dmsDemo] onConnectRemoteService onFailed errCode: ' + code)
+          prompt.showToast({
+            message: "onConnectRemoteService onFailed: " + code
+          });
+        },
+      },
+    );
+  } else {
+    console.error('[dmsDemo] onConnectRemoteService get networkId error');
+  }
   console.log('[dmsDemo] onConnectRemoteService connectedAbility: ' + connectedAbility)
 }
 
@@ -305,8 +262,8 @@ async function onDisconnectService() {
 @CustomDialog
 struct CustomDialogExample {
   controller: CustomDialogController
-  cancel: () => void
-  confirm: () => void
+  cancel: () => void = ()=>{}
+  confirm: () => void = ()=>{}
 
   build() {
     Column() {
@@ -315,7 +272,7 @@ struct CustomDialogExample {
         .enterKeyType(EnterKeyType.Send)
         .onChange((value) => {
           console.log('[dmsDemo] TextInput onChange:' + value);
-          mIndex = value;
+          mValue = value;
         }).onSubmit((enterKey) => {
         console.log('[dmsDemo] TextInput onSubmit:' + enterKey);
       }).onEditChanged((isEditing) => {
@@ -375,15 +332,6 @@ struct Index {
         return;
       }
       onStartRemoteAbility(mIndex);
-    } else if (mOperation === Operation.ContinueAbilityOperation) {
-      console.info('[dmsDemo] call onContinueAbility, device index: ' + mIndex);
-      if (mIndex > mDeviceSize) {
-        prompt.showToast({
-          message: "Please input correct device index."
-        });
-        return;
-      }
-      onContinueAbility(mIndex);
     } else if (mOperation === Operation.ConnectRemoteServiceOperation){
       console.info('[dmsDemo] call onConnectRemoteService, device index: ' + mIndex);
       if (mIndex > mDeviceSize) {
@@ -467,19 +415,6 @@ struct Index {
         mOperation = Operation.StartRemoteAbilityOperation;
         console.info('[dmsDemo] StartRemoteAbility onClick, mOperation is ' + mOperation);
         this.dialogController.open();
-      })
-
-      Button() {
-        Text('ContinueLocalAbility')
-          .fontSize(20)
-          .fontWeight(FontWeight.Bold)
-      }.type(ButtonType.Capsule)
-      .margin({
-        top: 20
-      })
-      .backgroundColor('#0D9FFB')
-      .onClick(() => {
-        onContinueLocalAbility();
       })
 
       Button() {

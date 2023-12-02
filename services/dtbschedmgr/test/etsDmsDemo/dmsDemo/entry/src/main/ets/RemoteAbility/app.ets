@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,28 @@
  * limitations under the License.
  */
 
-export default {
+class RemoteAbility {
   onCreate() {
     console.info('Application onCreate')
-  },
+  }
   onDestroy() {
     console.info('Application onDestroy')
-  },
+  }
   onStartContinuation() {
     console.info('onStartContinuation');
     return true;
-  },
-  onRestoreData(data) {
+  }
+  onRestoreData(data: string) {
     console.info('onRestoreData' + data);
     return true;
-  },
-  onSaveData(data) {
+  }
+  onSaveData(data: string) {
     console.info('onSaveData');
     return true;
-  },
-  onCompleteContinuation(result) {
+  }
+  onCompleteContinuation(result: string) {
     console.info('onCompleteContinuation:' + result);
   }
 }
+
+export default new RemoteAbility();
