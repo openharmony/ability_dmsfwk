@@ -47,8 +47,8 @@ public:
     bool PushCallback(int32_t missionId, const sptr<IRemoteObject>& callback,
         std::string deviceId, bool isFreeInstall);
     bool PushCallback(const std::string& type, const sptr<IRemoteObject>& callback);
-    sptr<IRemoteObject> CleanupCallback(const std::string& type);
-    sptr<IRemoteObject> GetCallback(const std::string& type);
+    bool CleanupCallback(const std::string& type, const sptr<IRemoteObject>& callback);
+    std::vector<sptr<IRemoteObject>> GetCallback(const std::string& type);
     sptr<IRemoteObject> PopCallback(int32_t missionId);
     int32_t NotifyMissionCenterResult(int32_t missionId, int32_t resultCode);
     int32_t NotifyDSchedEventResult(const std::string& type, int32_t resultCode);
@@ -77,7 +77,7 @@ private:
     std::mutex continuationLock_;
     int32_t currSessionId_ = 1;
     std::map<int32_t, sptr<IRemoteObject>> continuationMap_;
-    std::map<std::string, sptr<IRemoteObject>> continuationCallbackMap_;
+    std::map<std::string, std::vector<sptr<IRemoteObject>>> continuationCallbackMap_;
     std::map<int32_t, sptr<IRemoteObject>> callbackMap_;
     std::map<int32_t, bool> freeInstall_;
     std::map<int32_t, bool> cleanMission_;

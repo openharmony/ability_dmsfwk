@@ -60,6 +60,7 @@ const int DEFAULT_REQUEST_CODE = -1;
 
 DistributedSchedStub::DistributedSchedStub()
 {
+    InitExtendedLocalFuncsInner();
     InitLocalFuncsInner();
     InitRemoteFuncsInner();
 }
@@ -68,6 +69,17 @@ DistributedSchedStub::~DistributedSchedStub()
 {
     remoteFuncsMap_.clear();
     localFuncsMap_.clear();
+}
+
+void DistributedSchedStub::InitExtendedLocalFuncsInner()
+{
+    // request codes for mission manager
+#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_DSCHED_EVENT_LISTENER)] =
+        &DistributedSchedStub::RegisterDSchedEventListenerInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::UNREGISTER_DSCHED_EVENT_LISTENER)] =
+        &DistributedSchedStub::UnRegisterDSchedEventListenerInner;
+#endif
 }
 
 void DistributedSchedStub::InitLocalFuncsInner()
@@ -92,10 +104,6 @@ void DistributedSchedStub::InitLocalFuncsInner()
         &DistributedSchedStub::GetRemoteMissionSnapshotInfoInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_MISSION_LISTENER)] =
         &DistributedSchedStub::RegisterMissionListenerInner;
-    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_DSCHED_EVENT_LISTENER)] =
-        &DistributedSchedStub::RegisterDSchedEventListenerInner;
-    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::UNREGISTER_DSCHED_EVENT_LISTENER)] =
-        &DistributedSchedStub::UnRegisterDSchedEventListenerInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_ON_LISTENER)] =
         &DistributedSchedStub::RegisterOnListenerInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_OFF_LISTENER)] =

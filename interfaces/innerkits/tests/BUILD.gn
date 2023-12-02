@@ -29,7 +29,7 @@ config("tests_public_config") {
   }
 }
 
-ohos_shared_library("dms_sdk_demo") {
+ohos_executable("dms_sdk_demo") {
   branch_protector_ret = "pac_ret"
   sanitize = {
     cfi = true
