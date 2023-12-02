@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,14 @@
  */
 
 import prompt from '@system.prompt';
+import { GlobalThis } from './GlobalThis';
 
 @Entry
 @Component
 struct Index {
-  private scroller: Scroller = new Scroller();
+  scroller: Scroller = new Scroller();
 
-  private aboutToAppear() {
+  aboutToAppear() {
     prompt.showToast({
       message: "MainAbility aboutToAppear"
     });
@@ -46,7 +47,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.register();
+              GlobalThis.register();
             })
 
             Button() {
@@ -62,7 +63,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.registerWithExtraParams();
+              GlobalThis.registerWithExtraParams();
             })
 
             Button() {
@@ -78,7 +79,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.registerWithInvalidFilter();
+              GlobalThis.registerWithInvalidFilter();
             })
 
             Button() {
@@ -94,7 +95,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.registerWithoutFilter();
+              GlobalThis.registerWithoutFilter();
             })
 
             Button() {
@@ -110,7 +111,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.registerWithInvalidContinuationMode();
+              GlobalThis.registerWithInvalidContinuationMode();
             })
 
             Button() {
@@ -126,7 +127,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.onDeviceConnect();
+              GlobalThis.onDeviceConnect();
             })
 
             Button() {
@@ -142,7 +143,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.onDeviceConnectWithInvalidToken();
+              GlobalThis.onDeviceConnectWithInvalidToken();
             })
 
             Button() {
@@ -158,7 +159,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.onDeviceDisconnect();
+              GlobalThis.onDeviceDisconnect();
             })
 
             Button() {
@@ -174,7 +175,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.onDeviceDisconnectWithInvalidToken();
+              GlobalThis.onDeviceDisconnectWithInvalidToken();
             })
 
             Button() {
@@ -190,7 +191,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.startDeviceManager();
+              GlobalThis.startDeviceManager();
             })
 
             Button() {
@@ -206,7 +207,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.startDeviceManagerWithExtraParam();
+              GlobalThis.startDeviceManagerWithExtraParam();
             })
 
             Button() {
@@ -222,7 +223,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.startDeviceManagerWithInvalidToken();
+              GlobalThis.startDeviceManagerWithInvalidToken();
             })
 
             Button() {
@@ -238,7 +239,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.startDeviceManagerWithInvalidFilter();
+              GlobalThis.startDeviceManagerWithInvalidFilter();
             })
 
             Button() {
@@ -254,7 +255,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.startDeviceManagerWithoutFilter();
+              GlobalThis.startDeviceManagerWithoutFilter();
             })
 
             Button() {
@@ -270,7 +271,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.startDeviceManagerWithInvalidContinuationMode();
+              GlobalThis.startDeviceManagerWithInvalidContinuationMode();
             })
 
             Button() {
@@ -286,7 +287,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.updateConnectStatus();
+              GlobalThis.updateConnectStatus();
             })
 
             Button() {
@@ -302,7 +303,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.updateConnectStatusWithInvalidToken();
+              GlobalThis.updateConnectStatusWithInvalidToken();
             })
 
             Button() {
@@ -318,7 +319,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.updateConnectStatusWithInvalidDeviceId();
+              GlobalThis.updateConnectStatusWithInvalidDeviceId();
             })
 
             Button() {
@@ -334,7 +335,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.updateConnectStatusWithInvalidConnectStatus();
+              GlobalThis.updateConnectStatusWithInvalidConnectStatus();
             })
 
             Button() {
@@ -350,7 +351,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.offDeviceConnect();
+              GlobalThis.offDeviceConnect();
             })
 
             Button() {
@@ -366,7 +367,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.offDeviceConnectWithInvalidToken();
+              GlobalThis.offDeviceConnectWithInvalidToken();
             })
 
             Button() {
@@ -382,7 +383,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.offDeviceDisconnect();
+              GlobalThis.offDeviceDisconnect();
             })
 
             Button() {
@@ -398,7 +399,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.offDeviceDisconnectWithInvalidToken();
+              GlobalThis.offDeviceDisconnectWithInvalidToken();
             })
 
             Button() {
@@ -414,7 +415,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.unregister();
+              GlobalThis.unregister();
             })
 
             Button() {
@@ -430,7 +431,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.unregisterWithInvalidToken();
+              GlobalThis.unregisterWithInvalidToken();
             })
 
             Button() {
@@ -446,7 +447,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.startRemoteAbility();
+              GlobalThis.startRemoteAbility();
             })
 
             Button() {
@@ -462,7 +463,7 @@ struct Index {
             .width(350)
             .height(30)
             .onClick(() => {
-              globalThis.connectRemoteAbility();
+              GlobalThis.connectRemoteAbility();
             })
 
           }

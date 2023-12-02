@@ -1,0 +1,1 @@
+export const GlobalThis = globalThis;

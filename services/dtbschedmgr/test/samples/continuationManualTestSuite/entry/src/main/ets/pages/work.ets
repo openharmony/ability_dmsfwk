@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import router from '@system.router';
+import router from '@ohos.router';
 import pageName from '../MainAbility/stringConst';
 import Logger from '../MainAbility/Logger';
 
@@ -23,9 +23,7 @@ struct Work {
   private content: string = pageName.page1;
   @StorageLink('ContinueWork') inputTxt: string = '';
 
-  controller: CustomDialogController
-  cancel: () => void
-  confirm: () => void
+  controller: CustomDialogController|null = null;
   build() {
     Flex({ direction: FlexDirection.Column, alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center }) {
       Text(`${this.content}`)
@@ -37,7 +35,7 @@ struct Work {
           .onChange((value) => {
             Logger.info(`TextInput onChange: ${value}`);
             this.inputTxt = value;
-            AppStorage.Set('ContinueWork', value);
+            AppStorage.set('ContinueWork', value);
           })
           .width('50%')
           .height(50)
@@ -53,7 +51,7 @@ struct Work {
       })
       .backgroundColor('#0D9FFB')
       .onClick(() => {
-        router.back()
+        router.back();
       })
     }
     .width('100%')

@@ -16,6 +16,7 @@
 import Extension from '@ohos.app.ability.ServiceExtensionAbility'
 import rpc from '@ohos.rpc'
 
+const START_DEVICE_MANAGER = 505;
 class StubTest extends rpc.RemoteObject {
     constructor(des) {
         super(des);

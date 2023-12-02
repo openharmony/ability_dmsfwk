@@ -14,11 +14,13 @@
  */
 
 import Ability from '@ohos.app.ability.UIAbility'
-import abilityAccessCtrl from "@ohos.abilityAccessCtrl";
+import abilityAccessCtrl, { Permissions } from "@ohos.abilityAccessCtrl";
 import bundle from '@ohos.bundle';
 import continuationManager from '@ohos.continuation.continuationManager';
 import prompt from '@system.prompt';
 import rpc from '@ohos.rpc'
+import bundleManager from '@ohos.bundle.bundleManager';
+import Want from '@ohos.app.ability.Want';
 
 const SHOW_TOAST_TIME = 3000; // ms
 const DEVICE_TYPE = "00E";
@@ -30,62 +32,30 @@ let mRemote;
 let connectedAbility;
 let token = -1;
 
-async function requestPermission() {
-    let permissions: Array<string> = [
-        "ohos.permission.DISTRIBUTED_DATASYNC"
-    ];
-    let needGrantPermission = false;
-    let accessManger = abilityAccessCtrl.createAtManager();
 
-    let bundleInfo = await bundle.getApplicationInfo('ohos.samples.continuationmanager', 0, 100)
-    for (const permission of permissions) {
-        console.info('[Demo]app permission query grant status' + permission);
-        try {
-            let grantStatus = await accessManger.verifyAccessToken(bundleInfo.accessTokenId, permission);
-            if (grantStatus === abilityAccessCtrl.GrantStatus.PERMISSION_DENIED) {
-                needGrantPermission = true;
-                break;
-            }
-        } catch (err) {
-            console.error('[Demo]app permission query grant status error' + JSON.stringify(err));
-            needGrantPermission = true;
-            break;
-        }
-    }
-    if (needGrantPermission) {
-        console.info('[Demo]app permission needGrantPermission');
-        try {
-            await globalThis.context.requestPermissionsFromUser(permissions);
-        } catch (err) {
-            console.error('[Demo]app permission' + JSON.stringify(err));
-        }
-    } else {
-        console.info('[Demo]app permission already granted');
-    }
-}
 
-function register() {
-    console.info('[Demo]register begin');
-    continuationManager.register()
+function registerContinuation(): void {
+    console.info('[Demo]registerContinuation begin');
+    continuationManager.registerContinuation()
     .then((data) => {
-        console.info('[Demo]register finished, ' + JSON.stringify(data));
+        console.info('[Demo]registerContinuation finished, ' + JSON.stringify(data));
         token = data;
         prompt.showToast({
-            message: "[Demo]register token: " + JSON.stringify(data),
+            message: "[Demo]registerContinuation token: " + JSON.stringify(data),
             duration: SHOW_TOAST_TIME
         });
     })
     .catch((err) => {
-        console.error('[Demo]register failed, cause: ' + JSON.stringify(err));
+        console.error('[Demo]registerContinuation failed, cause: ' + JSON.stringify(err));
         prompt.showToast({
-            message: "[Demo]register err: " + err,
+            message: "[Demo]registerContinuation err: " + err,
             duration: SHOW_TOAST_TIME
         });
     });
-    console.info('[Demo]register end');
+    console.info('[Demo]registerContinuation end');
 }
 
-function registerWithExtraParams() {
+function registerWithExtraParams(): void {
     console.info('[Demo]registerWithExtraParams begin');
     let continuationExtraParams = {
         deviceType: [DEVICE_TYPE],
@@ -95,7 +65,7 @@ function registerWithExtraParams() {
         continuationMode: continuationManager.ContinuationMode.COLLABORATION_MULTIPLE,
         authInfo: {"name": "authInfo", "length": 8}
     };
-    continuationManager.register(continuationExtraParams)
+    continuationManager.registerContinuation(continuationExtraParams)
     .then((data) => {
         console.info('[Demo]registerWithExtraParams finished, ' + JSON.stringify(data));
         token = data;
@@ -114,7 +84,7 @@ function registerWithExtraParams() {
     console.info('[Demo]registerWithExtraParams end');
 }
 
-function registerWithInvalidFilter() {
+function registerWithInvalidFilter(): void {
     console.info('[Demo]registerWithInvalidFilter begin');
     let continuationExtraParams = {
         deviceType: [DEVICE_TYPE],
@@ -124,7 +94,7 @@ function registerWithInvalidFilter() {
         continuationMode: continuationManager.ContinuationMode.COLLABORATION_MULTIPLE,
         authInfo: {"name": "authInfo", "length": 8}
     };
-    continuationManager.register(continuationExtraParams)
+    continuationManager.registerContinuation(continuationExtraParams)
     .then((data) => {
         console.info('[Demo]registerWithInvalidFilter finished, ' + JSON.stringify(data));
         token = data;
@@ -143,7 +113,7 @@ function registerWithInvalidFilter() {
     console.info('[Demo]registerWithInvalidFilter end');
 }
 
-function registerWithoutFilter() {
+function registerWithoutFilter(): void {
     console.info('[Demo]registerWithoutFilter begin');
     let continuationExtraParams = {
         deviceType: [DEVICE_TYPE],
@@ -152,7 +122,7 @@ function registerWithoutFilter() {
         continuationMode: continuationManager.ContinuationMode.COLLABORATION_MULTIPLE,
         authInfo: {"name": "authInfo", "length": 8}
     };
-    continuationManager.register(continuationExtraParams)
+    continuationManager.registerContinuation(continuationExtraParams)
     .then((data) => {
         console.info('[Demo]registerWithoutFilter finished, ' + JSON.stringify(data));
         token = data;
@@ -171,7 +141,7 @@ function registerWithoutFilter() {
     console.info('[Demo]registerWithoutFilter end');
 }
 
-function registerWithInvalidContinuationMode() {
+function registerWithInvalidContinuationMode(): void {
     console.info('[Demo]registerWithInvalidContinuationMode begin');
     let continuationExtraParams = {
         deviceType: [DEVICE_TYPE],
@@ -181,7 +151,7 @@ function registerWithInvalidContinuationMode() {
         continuationMode: INVALID_CONTINUATION_MODE,
         authInfo: {"name": "authInfo", "length": 8}
     };
-    continuationManager.register(continuationExtraParams)
+    continuationManager.registerContinuation(continuationExtraParams)
     .then((data) => {
         console.info('[Demo]registerWithInvalidContinuationMode finished, ' + JSON.stringify(data));
         token = data;
@@ -200,9 +170,9 @@ function registerWithInvalidContinuationMode() {
     console.info('[Demo]registerWithInvalidContinuationMode end');
 }
 
-function onDeviceConnect() {
+function onDeviceConnect() : void{
     console.info('[Demo]onDeviceConnect begin');
-    continuationManager.on("deviceConnect", token, (data) => {
+    continuationManager.on("deviceSelected", token, (data) => {
         console.info('[Demo]onDeviceConnect len: ' + data.length);
         for (let i = 0; i < data.length; i++) {
             console.info('[Demo]onDeviceConnect deviceId: ' + JSON.stringify(data[i].id));
@@ -218,9 +188,9 @@ function onDeviceConnect() {
     console.info('[Demo]onDeviceConnect end');
 }
 
-function onDeviceConnectWithInvalidToken() {
+function onDeviceConnectWithInvalidToken(): void {
     console.info('[Demo]onDeviceConnectWithInvalidToken begin');
-    continuationManager.on("deviceConnect", INVALID_TOKEN, (data) => {
+    continuationManager.on("deviceSelected", INVALID_TOKEN, (data) => {
         console.info('[Demo]onDeviceConnectWithInvalidToken len: ' + data.length);
         for (let i = 0; i < data.length; i++) {
             console.info('[Demo]onDeviceConnectWithInvalidToken deviceId: ' + JSON.stringify(data[i].id));
@@ -236,9 +206,9 @@ function onDeviceConnectWithInvalidToken() {
     console.info('[Demo]onDeviceConnectWithInvalidToken end');
 }
 
-function onDeviceDisconnect() {
+function onDeviceDisconnect(): void {
     console.info('[Demo]onDeviceDisconnect begin');
-    continuationManager.on("deviceDisconnect", token, (data) => {
+    continuationManager.on("deviceUnselected", token, (data) => {
         console.info('[Demo]onDeviceDisconnect len: ' + data.length);
         for (let i = 0; i < data.length; i++) {
             console.info('[Demo]onDeviceDisconnect deviceId: ' + JSON.stringify(data[i]));
@@ -252,9 +222,9 @@ function onDeviceDisconnect() {
     console.info('[Demo]onDeviceDisconnect end');
 }
 
-function onDeviceDisconnectWithInvalidToken() {
+function onDeviceDisconnectWithInvalidToken(): void {
     console.info('[Demo]onDeviceDisconnectWithInvalidToken begin');
-    continuationManager.on("deviceDisconnect", INVALID_TOKEN, (data) => {
+    continuationManager.on("deviceUnselected", INVALID_TOKEN, (data) => {
         console.info('[Demo]onDeviceDisconnectWithInvalidToken len: ' + data.length);
         for (let i = 0; i < data.length; i++) {
             console.info('[Demo]onDeviceDisconnectWithInvalidToken deviceId: ' + JSON.stringify(data[i]));
@@ -268,27 +238,27 @@ function onDeviceDisconnectWithInvalidToken() {
     console.info('[Demo]onDeviceDisconnectWithInvalidToken end');
 }
 
-function startDeviceManager() {
-    console.info('[Demo]startDeviceManager begin');
-    continuationManager.startDeviceManager(token)
+function startContinuationDeviceManager(): void {
+    console.info('[Demo]startContinuationDeviceManager begin');
+    continuationManager.startContinuationDeviceManager(token)
     .then((data) => {
-        console.info('[Demo]startDeviceManager finished, ' + JSON.stringify(data));
+        console.info('[Demo]startContinuationDeviceManager finished, ' + JSON.stringify(data));
         prompt.showToast({
-            message: "[Demo]startDeviceManager data: " + JSON.stringify(data),
+            message: "[Demo]startContinuationDeviceManager data: " + JSON.stringify(data),
             duration: SHOW_TOAST_TIME
         });
     })
     .catch((err) => {
-        console.error('[Demo]startDeviceManager failed, cause: ' + JSON.stringify(err));
+        console.error('[Demo]startContinuationDeviceManager failed, cause: ' + JSON.stringify(err));
         prompt.showToast({
-            message: "[Demo]startDeviceManager err: " + err,
+            message: "[Demo]startContinuationDeviceManager err: " + err,
             duration: SHOW_TOAST_TIME
         });
     });
-    console.info('[Demo]startDeviceManager end');
+    console.info('[Demo]startContinuationDeviceManager end');
 }
 
-function startDeviceManagerWithExtraParam() {
+function startDeviceManagerWithExtraParam(): void {
     console.info('[Demo]startDeviceManagerWithExtraParam begin');
     let continuationExtraParams = {
         deviceType: [DEVICE_TYPE],
@@ -298,7 +268,7 @@ function startDeviceManagerWithExtraParam() {
         continuationMode: continuationManager.ContinuationMode.COLLABORATION_MULTIPLE,
         authInfo: {"name": "authInfo", "length": 8}
     };
-    continuationManager.startDeviceManager(token, continuationExtraParams)
+    continuationManager.startContinuationDeviceManager(token, continuationExtraParams)
     .then((data) => {
         console.info('[Demo]startDeviceManagerWithExtraParam finished, ' + JSON.stringify(data));
         prompt.showToast({
@@ -316,9 +286,9 @@ function startDeviceManagerWithExtraParam() {
     console.info('[Demo]startDeviceManagerWithExtraParam end');
 }
 
-function startDeviceManagerWithInvalidToken() {
+function startDeviceManagerWithInvalidToken(): void {
     console.info('[Demo]startDeviceManagerWithInvalidToken begin');
-    continuationManager.startDeviceManager(INVALID_TOKEN)
+    continuationManager.startContinuationDeviceManager(INVALID_TOKEN)
     .then((data) => {
         console.info('[Demo]startDeviceManagerWithInvalidToken finished, ' + JSON.stringify(data));
         prompt.showToast({
@@ -336,7 +306,7 @@ function startDeviceManagerWithInvalidToken() {
     console.info('[Demo]startDeviceManagerWithInvalidToken end');
 }
 
-function startDeviceManagerWithInvalidFilter() {
+function startDeviceManagerWithInvalidFilter(): void {
     console.info('[Demo]startDeviceManagerWithInvalidFilter begin');
     let continuationExtraParams = {
         deviceType: [DEVICE_TYPE],
@@ -346,7 +316,7 @@ function startDeviceManagerWithInvalidFilter() {
         continuationMode: continuationManager.ContinuationMode.COLLABORATION_MULTIPLE,
         authInfo: {"name": "authInfo", "length": 8}
     };
-    continuationManager.startDeviceManager(token, continuationExtraParams)
+    continuationManager.startContinuationDeviceManager(token, continuationExtraParams)
     .then((data) => {
         console.info('[Demo]startDeviceManagerWithInvalidFilter finished, ' + JSON.stringify(data));
         prompt.showToast({
@@ -364,7 +334,7 @@ function startDeviceManagerWithInvalidFilter() {
     console.info('[Demo]startDeviceManagerWithInvalidFilter end');
 }
 
-function startDeviceManagerWithoutFilter() {
+function startDeviceManagerWithoutFilter(): void {
     console.info('[Demo]startDeviceManagerWithoutFilter begin');
     let continuationExtraParams = {
         deviceType: [DEVICE_TYPE],
@@ -373,7 +343,7 @@ function startDeviceManagerWithoutFilter() {
         continuationMode: continuationManager.ContinuationMode.COLLABORATION_MULTIPLE,
         authInfo: {"name": "authInfo", "length": 8}
     };
-    continuationManager.startDeviceManager(token, continuationExtraParams)
+    continuationManager.startContinuationDeviceManager(token, continuationExtraParams)
     .then((data) => {
         console.info('[Demo]startDeviceManagerWithoutFilter finished, ' + JSON.stringify(data));
         prompt.showToast({
@@ -391,7 +361,7 @@ function startDeviceManagerWithoutFilter() {
     console.info('[Demo]startDeviceManagerWithoutFilter end');
 }
 
-function startDeviceManagerWithInvalidContinuationMode() {
+function startDeviceManagerWithInvalidContinuationMode(): void {
     console.info('[Demo]startDeviceManagerWithInvalidContinuationMode begin');
     let continuationExtraParams = {
         deviceType: [DEVICE_TYPE],
@@ -401,7 +371,7 @@ function startDeviceManagerWithInvalidContinuationMode() {
         continuationMode: INVALID_CONTINUATION_MODE,
         authInfo: {"name": "authInfo", "length": 8}
     };
-    continuationManager.startDeviceManager(token, continuationExtraParams)
+    continuationManager.startContinuationDeviceManager(token, continuationExtraParams)
     .then((data) => {
         console.info('[Demo]startDeviceManagerWithInvalidContinuationMode finished, ' + JSON.stringify(data));
         prompt.showToast({
@@ -419,33 +389,33 @@ function startDeviceManagerWithInvalidContinuationMode() {
     console.info('[Demo]startDeviceManagerWithInvalidContinuationMode end');
 }
 
-function updateConnectStatus() {
-    console.info('[Demo]updateConnectStatus begin');
+function updateContinuationState(): void {
+    console.info('[Demo]updateContinuationState begin');
     let deviceId: string = "test deviceId";
     let deviceConnectStatus = continuationManager.DeviceConnectState.CONNECTED;
-    continuationManager.updateConnectStatus(token, deviceId, deviceConnectStatus)
+    continuationManager.updateContinuationState(token, deviceId, deviceConnectStatus)
     .then((data) => {
-        console.info('[Demo]updateConnectStatus finished, ' + JSON.stringify(data));
+        console.info('[Demo]updateContinuationState finished, ' + JSON.stringify(data));
         prompt.showToast({
-            message: "[Demo]updateConnectStatus data: " + JSON.stringify(data),
+            message: "[Demo]updateContinuationState data: " + JSON.stringify(data),
             duration: SHOW_TOAST_TIME
         });
     })
     .catch((err) => {
-        console.error('[Demo]updateConnectStatus failed, cause: ' + JSON.stringify(err));
+        console.error('[Demo]updateContinuationState failed, cause: ' + JSON.stringify(err));
         prompt.showToast({
-            message: "[Demo]updateConnectStatus err: " + err,
+            message: "[Demo]updateContinuationState err: " + err,
             duration: SHOW_TOAST_TIME
         });
     });
-    console.info('[Demo]updateConnectStatus end');
+    console.info('[Demo]updateContinuationState end');
 }
 
-function updateConnectStatusWithInvalidToken() {
+function updateConnectStatusWithInvalidToken(): void {
     console.info('[Demo]updateConnectStatusWithInvalidToken begin');
     let deviceId: string = "test deviceId";
     let deviceConnectStatus = continuationManager.DeviceConnectState.CONNECTED;
-    continuationManager.updateConnectStatus(INVALID_TOKEN, deviceId, deviceConnectStatus)
+    continuationManager.updateContinuationState(INVALID_TOKEN, deviceId, deviceConnectStatus)
     .then((data) => {
         console.info('[Demo]updateConnectStatusWithInvalidToken finished, ' + JSON.stringify(data));
         prompt.showToast({
@@ -463,11 +433,11 @@ function updateConnectStatusWithInvalidToken() {
     console.info('[Demo]updateConnectStatusWithInvalidToken end');
 }
 
-function updateConnectStatusWithInvalidDeviceId() {
+function updateConnectStatusWithInvalidDeviceId(): void {
     console.info('[Demo]updateConnectStatusWithInvalidDeviceId begin');
     let deviceId: string = "";
     let deviceConnectStatus = continuationManager.DeviceConnectState.CONNECTED;
-    continuationManager.updateConnectStatus(token, deviceId, deviceConnectStatus)
+    continuationManager.updateContinuationState(token, deviceId, deviceConnectStatus)
     .then((data) => {
         console.info('[Demo]updateConnectStatusWithInvalidDeviceId finished, ' + JSON.stringify(data));
         prompt.showToast({
@@ -485,11 +455,11 @@ function updateConnectStatusWithInvalidDeviceId() {
     console.info('[Demo]updateConnectStatusWithInvalidDeviceId end');
 }
 
-function updateConnectStatusWithInvalidConnectStatus() {
+function updateConnectStatusWithInvalidConnectStatus(): void {
     console.info('[Demo]updateConnectStatusWithInvalidConnectStatus begin');
     let deviceId: string = "test deviceId";
     let deviceConnectStatus = INVALID_CONNECT_STATUS;
-    continuationManager.updateConnectStatus(token, deviceId, deviceConnectStatus)
+    continuationManager.updateContinuationState(token, deviceId, deviceConnectStatus)
     .then((data) => {
         console.info('[Demo]updateConnectStatusWithInvalidConnectStatus finished, ' + JSON.stringify(data));
         prompt.showToast({
@@ -507,53 +477,53 @@ function updateConnectStatusWithInvalidConnectStatus() {
     console.info('[Demo]updateConnectStatusWithInvalidConnectStatus end');
 }
 
-function offDeviceConnect() {
+function offDeviceConnect(): void {
     console.info('[Demo]offDeviceConnect begin');
-    continuationManager.off("deviceConnect", token);
+    continuationManager.off("deviceSelected", token);
     console.info('[Demo]offDeviceConnect end');
 }
 
-function offDeviceConnectWithInvalidToken() {
+function offDeviceConnectWithInvalidToken(): void {
     console.info('[Demo]offDeviceConnectWithInvalidToken begin');
-    continuationManager.off("deviceConnect", INVALID_TOKEN);
+    continuationManager.off("deviceSelected", INVALID_TOKEN);
     console.info('[Demo]offDeviceConnectWithInvalidToken end');
 }
 
-function offDeviceDisconnect() {
+function offDeviceDisconnect(): void {
     console.info('[Demo]offDeviceDisconnect begin');
-    continuationManager.off("deviceDisconnect", token);
+    continuationManager.off("deviceUnselected", token);
     console.info('[Demo]offDeviceDisconnect end');
 }
 
-function offDeviceDisconnectWithInvalidToken() {
+function offDeviceDisconnectWithInvalidToken(): void {
     console.info('[Demo]offDeviceDisconnectWithInvalidToken begin');
-    continuationManager.off("deviceDisconnect", INVALID_TOKEN);
+    continuationManager.off("deviceUnselected", INVALID_TOKEN);
     console.info('[Demo]offDeviceDisconnectWithInvalidToken end');
 }
 
-function unregister() {
-    console.info('[Demo]unregister begin');
-    continuationManager.unregister(token)
+function unregisterContinuation(): void {
+    console.info('[Demo]unregisterContinuation begin');
+    continuationManager.unregisterContinuation(token)
     .then((data) => {
-        console.info('[Demo]unregister finished, ' + JSON.stringify(data));
+        console.info('[Demo]unregisterContinuation finished, ' + JSON.stringify(data));
         prompt.showToast({
-            message: "[Demo]unregister data: " + JSON.stringify(data),
+            message: "[Demo]unregisterContinuation data: " + JSON.stringify(data),
             duration: SHOW_TOAST_TIME
         });
     })
     .catch((err) => {
-        console.error('[Demo]unregister failed, cause: ' + JSON.stringify(err));
+        console.error('[Demo]unregisterContinuation failed, cause: ' + JSON.stringify(err));
         prompt.showToast({
-            message: "[Demo]unregister err: " + err,
+            message: "[Demo]unregisterContinuation err: " + err,
             duration: SHOW_TOAST_TIME
         });
     });
-    console.info('[Demo]unregister end');
+    console.info('[Demo]unregisterContinuation end');
 }
 
-function unregisterWithInvalidToken() {
+function unregisterWithInvalidToken(): void {
     console.info('[Demo]unregisterWithInvalidToken begin');
-    continuationManager.unregister(INVALID_TOKEN)
+    continuationManager.unregisterContinuation(INVALID_TOKEN)
     .then((data) => {
         console.info('[Demo]unregisterWithInvalidToken finished, ' + JSON.stringify(data));
         prompt.showToast({
@@ -571,15 +541,15 @@ function unregisterWithInvalidToken() {
     console.info('[Demo]unregisterWithInvalidToken end');
 }
 
-function startRemoteAbility() {
+function startRemoteAbility(): void {
     let token = -1;
-    continuationManager.register()
+    continuationManager.registerContinuation()
     .then((data) => {
-        console.info('[Demo]register finished, ' + JSON.stringify(data));
+        console.info('[Demo]registerContinuation finished, ' + JSON.stringify(data));
         token = data;
         globalThis.token = data;
-        console.info('[Demo]startRemoteAbility register token = ' + globalThis.token);
-        continuationManager.on("deviceConnect", token, (data) => {
+        console.info('[Demo]startRemoteAbility registerContinuation token = ' + globalThis.token);
+        continuationManager.on("deviceSelected", token, (data) => {
             console.info('[Demo]registerDeviceConnectCallback len: ' + data.length);
             if (data.length <= 0) {
                 console.info('[Demo]no selected device');
@@ -589,22 +559,22 @@ function startRemoteAbility() {
                 startRemoteAbilityWithDeviceId(data[i].id);
             }
         });
-        continuationManager.startDeviceManager(token)
+        continuationManager.startContinuationDeviceManager(token)
         .then((data) => {
-            console.info('[Demo]startDeviceManager finished, ' + JSON.stringify(data));
+            console.info('[Demo]startContinuationDeviceManager finished, ' + JSON.stringify(data));
         })
         .catch((err) => {
-            console.error('[Demo]startDeviceManager failed, cause: ' + JSON.stringify(err));
+            console.error('[Demo]startContinuationDeviceManager failed, cause: ' + JSON.stringify(err));
         });
     })
     .catch((err) => {
-        console.error('[Demo]register failed, cause: ' + JSON.stringify(err));
+        console.error('[Demo]registerContinuation failed, cause: ' + JSON.stringify(err));
     });
 }
 
-function startRemoteAbilityWithDeviceId(remoteDeviceId) {
+function startRemoteAbilityWithDeviceId(remoteDeviceId): void {
     console.info('[Demo]startRemoteAbilityWithDeviceId remoteDeviceId = ' + remoteDeviceId);
-    let want = {
+    let want: Want = {
         deviceId: remoteDeviceId,
         bundleName: 'ohos.samples.continuationmanager',
         abilityName: 'MainAbility'
@@ -614,15 +584,15 @@ function startRemoteAbilityWithDeviceId(remoteDeviceId) {
     });
 }
 
-function connectRemoteAbility() {
+function connectRemoteAbility(): void {
     let token = -1;
-    continuationManager.register()
+    continuationManager.registerContinuation()
     .then((data) => {
-        console.info('[Demo]register finished, ' + JSON.stringify(data));
+        console.info('[Demo]registerContinuation finished, ' + JSON.stringify(data));
         token = data;
         globalThis.token = data;
-        console.info('[Demo]connectRemoteAbility register token = ' + globalThis.token);
-        continuationManager.on("deviceConnect", token, (data) => {
+        console.info('[Demo]connectRemoteAbility registerContinuation token = ' + globalThis.token);
+        continuationManager.on("deviceSelected", token, (data) => {
             console.info('[Demo]registerDeviceConnectCallback len: ' + data.length);
             if (data.length <= 0) {
                 console.info('[Demo]no selected device');
@@ -632,20 +602,20 @@ function connectRemoteAbility() {
                 connectRemoteAbilityWithDeviceId(data[i].id);
             }
         });
-        continuationManager.startDeviceManager(token)
+        continuationManager.startContinuationDeviceManager(token)
         .then((data) => {
-            console.info('[Demo]startDeviceManager finished, ' + JSON.stringify(data));
+            console.info('[Demo]startContinuationDeviceManager finished, ' + JSON.stringify(data));
         })
         .catch((err) => {
-            console.error('[Demo]startDeviceManager failed, cause: ' + JSON.stringify(err));
+            console.error('[Demo]startContinuationDeviceManager failed, cause: ' + JSON.stringify(err));
         });
     })
     .catch((err) => {
-        console.error('[Demo]register failed, cause: ' + JSON.stringify(err));
+        console.error('[Demo]registerContinuation failed, cause: ' + JSON.stringify(err));
     });
 }
 
-function connectRemoteAbilityWithDeviceId(remoteDeviceId) {
+function connectRemoteAbilityWithDeviceId(remoteDeviceId): void {
     console.info('[Demo]connectRemoteAbilityWithDeviceId remoteDeviceId = ' + remoteDeviceId);
     async function onConnectCallback(element, remote) {
         console.log('[Demo]connectRemoteAbilityWithDeviceId onConnectDone element: ' + element);
@@ -658,8 +628,8 @@ function connectRemoteAbilityWithDeviceId(remoteDeviceId) {
             return;
         }
         let option = new rpc.MessageOption();
-        let data = new rpc.MessageParcel();
-        let reply = new rpc.MessageParcel();
+        let data = new rpc.MessageSequence();
+        let reply = new rpc.MessageSequence();
         data.writeInt(1);
         data.writeInt(99);
         await mRemote.sendRequest(1, data, reply, option);
@@ -669,10 +639,10 @@ function connectRemoteAbilityWithDeviceId(remoteDeviceId) {
             duration: SHOW_TOAST_TIME
         });
     }
-    function onDisconnectCallback(element) {
+    function onDisconnectCallback(element): void {
         console.log('[Demo]connectRemoteAbilityWithDeviceId onDisconnectDone element: ' + element);
     }
-    function onFailedCallback(code) {
+    function onFailedCallback(code): void {
         console.log('[Demo]connectRemoteAbilityWithDeviceId onFailed errCode: ' + code);
     }
     connectedAbility = globalThis.context.connectAbility(
@@ -690,6 +660,53 @@ function connectRemoteAbilityWithDeviceId(remoteDeviceId) {
 }
 
 export default class MainAbility extends Ability {
+    //获取当前应用的权限的授予状态：grantStatus（授予返回：0，未授予：-1）
+    async getGrantStatus(permission: Permissions): Promise<abilityAccessCtrl.GrantStatus>{
+        let atManager = abilityAccessCtrl.createAtManager();
+        let grantStatus : abilityAccessCtrl.GrantStatus = -1;
+
+        //获取tokenId:
+        let tokenId :number = 0;
+        try {
+            let bundleInfo: bundleManager.BundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
+            let appInfo: bundleManager.ApplicationInfo = bundleInfo.appInfo;
+            tokenId = appInfo.accessTokenId;
+        }catch (err){
+            console.info('Failed to get bundle info for self,cause ${public}s' ,JSON.stringify(err)??'');
+        }
+
+        // 检验应用是否被授予此权限，授予返回：PERMISSION_GRANTED = 0，未授予：PERMISSION_DENIED = -1
+        try {
+            grantStatus = await atManager.checkAccessToken(tokenId,permission);
+        }catch (err){
+            console.info('Failed to check Access Token ,cause %{public}s' ,JSON.stringify(err)??'');
+        }
+
+        return grantStatus;
+    }
+
+    //检验权限授予情况&动态申请权限
+    async checkPermissions():Promise<void>{
+        const permissions:Array<Permissions> = ['ohos.permission.DISTRIBUTED_DATASYNC'];
+
+        let grantStatus:abilityAccessCtrl.GrantStatus = await this.getGrantStatus(permissions[0]);
+        // 检验权限授予情况
+        if(grantStatus === abilityAccessCtrl.GrantStatus.PERMISSION_GRANTED){
+            //已授予
+            console.info('Permission already granted.');
+        }else{
+            //未授予,向用户弹框动态申请授权
+            let atManager = abilityAccessCtrl.createAtManager();
+            try {
+                atManager.requestPermissionsFromUser(this.context, ['ohos.permission.DISTRIBUTED_DATASYNC'], (err, data) => {
+                    console.info('data: ' + JSON.stringify(data));
+                });
+            }catch (err){
+                console.info('catch err ,' + JSON.stringify(err)??'');
+                return;
+            }
+        }
+    }
     onCreate(want, launchParam) {
         console.log("[Demo] MainAbility onCreate")
         globalThis.abilityWant = want;
@@ -703,9 +720,9 @@ export default class MainAbility extends Ability {
     onWindowStageCreate(windowStage) {
         // Main window is created, set main page for this ability
         console.log("[Demo] MainAbility onWindowStageCreate")
-        requestPermission();
+        this.checkPermissions();
 
-        globalThis.register = (()=>{ register(); })
+        globalThis.registerContinuation = (()=>{ registerContinuation(); })
         globalThis.registerWithExtraParams = (()=>{ registerWithExtraParams(); })
         globalThis.registerWithInvalidFilter = (()=>{ registerWithInvalidFilter(); })
         globalThis.registerWithoutFilter = (()=>{ registerWithoutFilter(); })
@@ -714,13 +731,13 @@ export default class MainAbility extends Ability {
         globalThis.onDeviceConnectWithInvalidToken = (()=>{ onDeviceConnectWithInvalidToken(); })
         globalThis.onDeviceDisconnect = (()=>{ onDeviceDisconnect(); })
         globalThis.onDeviceDisconnectWithInvalidToken = (()=>{ onDeviceDisconnectWithInvalidToken(); })
-        globalThis.startDeviceManager = (()=>{ startDeviceManager(); })
+        globalThis.startContinuationDeviceManager = (()=>{ startContinuationDeviceManager(); })
         globalThis.startDeviceManagerWithExtraParam = (()=>{ startDeviceManagerWithExtraParam(); })
         globalThis.startDeviceManagerWithInvalidToken = (()=>{ startDeviceManagerWithInvalidToken(); })
         globalThis.startDeviceManagerWithInvalidFilter = (()=>{ startDeviceManagerWithInvalidFilter(); })
         globalThis.startDeviceManagerWithoutFilter = (()=>{ startDeviceManagerWithoutFilter(); })
         globalThis.startDeviceManagerWithInvalidContinuationMode = (()=>{ startDeviceManagerWithInvalidContinuationMode(); })
-        globalThis.updateConnectStatus = (()=>{ updateConnectStatus(); })
+        globalThis.updateContinuationState = (()=>{ updateContinuationState(); })
         globalThis.updateConnectStatusWithInvalidToken = (()=>{ updateConnectStatusWithInvalidToken(); })
         globalThis.updateConnectStatusWithInvalidDeviceId = (()=>{ updateConnectStatusWithInvalidDeviceId(); })
         globalThis.updateConnectStatusWithInvalidConnectStatus = (()=>{ updateConnectStatusWithInvalidConnectStatus(); })
@@ -728,7 +745,7 @@ export default class MainAbility extends Ability {
         globalThis.offDeviceConnectWithInvalidToken = (()=>{ offDeviceConnectWithInvalidToken(); })
         globalThis.offDeviceDisconnect = (()=>{ offDeviceDisconnect(); })
         globalThis.offDeviceDisconnectWithInvalidToken = (()=>{ offDeviceDisconnectWithInvalidToken(); })
-        globalThis.unregister = (()=>{ unregister(); })
+        globalThis.unregisterContinuation = (()=>{ unregisterContinuation(); })
         globalThis.unregisterWithInvalidToken = (()=>{ unregisterWithInvalidToken(); })
         globalThis.startRemoteAbility = (()=>{ startRemoteAbility(); })
         globalThis.connectRemoteAbility = (()=>{ connectRemoteAbility(); })
@@ -749,13 +766,13 @@ export default class MainAbility extends Ability {
     onBackground() {
         // Ability has back to background
         console.log("[Demo] MainAbility onBackground")
-        console.info('[Demo]onBackground unregister, token = ' + globalThis.token);
-        continuationManager.unregister(globalThis.token)
+        console.info('[Demo]onBackground unregisterContinuation, token = ' + globalThis.token);
+        continuationManager.unregisterContinuation(globalThis.token)
         .then((data) => {
-            console.info('[Demo]unregister finished, ' + JSON.stringify(data));
+            console.info('[Demo]unregisterContinuation finished, ' + JSON.stringify(data));
         })
         .catch((err) => {
-            console.error('[Demo]unregister failed, cause: ' + JSON.stringify(err));
+            console.error('[Demo]unregisterContinuation failed, cause: ' + JSON.stringify(err));
         });
     }
 };

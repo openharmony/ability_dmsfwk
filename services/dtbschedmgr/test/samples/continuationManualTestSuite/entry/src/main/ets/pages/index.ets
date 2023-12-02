@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,16 @@
  * limitations under the License.
  */
 
-import router from '@system.router';
+import router from '@ohos.router';
 import pageName from '../MainAbility/stringConst';
 import Logger from '../MainAbility/Logger';
 
-async function routePage(pageIndex) {
+async function routePage(pageIndex: string) : Promise<void> {
   Logger.info("routePage");
-  let options = {
-    uri: pageIndex
-  }
   try {
-    await router.push(options)
+    await router.pushUrl({ url: pageIndex });
   } catch (err) {
-    Logger.error(`fail callback, code: ${err.code}, msg: ${err.msg}`)
+    Logger.error(`fail callback err ${JSON.stringify(err)}`);
   }
 }
 
