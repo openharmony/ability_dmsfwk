@@ -451,6 +451,10 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
     sptr<IDistributedSched> remoteDms = GetRemoteDms(srcDeviceId);
     if (remoteDms == nullptr) {
         HILOGE("get remote dms null!");
+        if (dschedContinuation_ == nullptr) {
+            HILOGE("continuation object null!");
+            return INVALID_PARAMETERS_ERR;
+        }
         int32_t dSchedEventresult = dschedContinuation_->NotifyDSchedEventResult(DSCHED_EVENT_KEY,
             INVALID_REMOTE_PARAMETERS_ERR);
         HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
@@ -459,6 +463,10 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
     int32_t result = remoteDms->ContinueMission(srcDeviceId, dstDeviceId, bundleName, callback, wantParams);
     HILOGI("ContinueRemoteMission result: %{public}d!", result);
     if (result != ERR_OK) {
+        if (dschedContinuation_ == nullptr) {
+            HILOGE("continuation object null!");
+            return INVALID_PARAMETERS_ERR;
+        }
         int32_t dSchedEventresult = dschedContinuation_->NotifyDSchedEventResult(DSCHED_EVENT_KEY, result);
         HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
     }
@@ -522,6 +530,10 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
             return ret;
         }
         #endif
+        if (dschedContinuation_ == nullptr) {
+            HILOGE("continuation object null!");
+            return INVALID_PARAMETERS_ERR;
+        }
         dschedContinuation_->continueEvent_.srcNetworkId = srcDeviceId;
         dschedContinuation_->continueEvent_.dstNetworkId = dstDeviceId;
         dschedContinuation_->continueEvent_.bundleName = bundleName;
@@ -529,6 +541,10 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
     } else if (dstDeviceId == localDevId) {
         if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(srcDeviceId) == nullptr) {
             return INVALID_REMOTE_PARAMETERS_ERR;
+        }
+        if (dschedContinuation_ == nullptr) {
+            HILOGE("continuation object null!");
+            return INVALID_PARAMETERS_ERR;
         }
         dschedContinuation_->continueEvent_.srcNetworkId = dstDeviceId;
         dschedContinuation_->continueEvent_.dstNetworkId = srcDeviceId;
@@ -570,6 +586,10 @@ int32_t DistributedSchedService::SetWantForContinuation(AAFwk::Want& newWant, in
 
 int32_t DistributedSchedService::DealDSchedEventResult(const OHOS::AAFwk::Want& want, int32_t status)
 {
+    if (dschedContinuation_ == nullptr) {
+        HILOGE("continuation object null!");
+        return INVALID_PARAMETERS_ERR;
+    }
     dschedContinuation_->continueEvent_.moduleName = want.GetElement().GetModuleName();
     HILOGI("dschedContinuation_->continueEvent_.moduleName %{public}s",
         dschedContinuation_->continueEvent_.moduleName.c_str());
@@ -654,6 +674,10 @@ void DistributedSchedService::NotifyCompleteContinuation(const std::u16string& d
     sptr<IDistributedSched> remoteDms = GetRemoteDms(deviceId);
     if (remoteDms == nullptr) {
         HILOGE("NotifyCompleteContinuation get remote dms null!");
+        return;
+    }
+    if (dschedContinuation_ == nullptr) {
+        HILOGE("continuation object null!");
         return;
     }
     int dSchedEventresult = dschedContinuation_->NotifyDSchedEventResult(DSCHED_EVENT_KEY, ERR_OK);
@@ -2049,6 +2073,10 @@ int32_t DistributedSchedService::RegisterMissionListener(const std::u16string& d
 int32_t DistributedSchedService::RegisterDSchedEventListener(const std::string& type,
     const sptr<IRemoteObject>& callback)
 {
+    if (dschedContinuation_ == nullptr) {
+        HILOGE("continuation object null!");
+        return INVALID_PARAMETERS_ERR;
+    }
     int32_t result = dschedContinuation_->PushCallback(type, callback);
     HILOGI("result: %{public}d!", result);
     if (result == ERR_INVALID_VALUE) {
@@ -2060,6 +2088,10 @@ int32_t DistributedSchedService::RegisterDSchedEventListener(const std::string& 
 int32_t DistributedSchedService::UnRegisterDSchedEventListener(const std::string& type,
     const sptr<IRemoteObject>& callback)
 {
+    if (dschedContinuation_ == nullptr) {
+        HILOGE("continuation object null!");
+        return INVALID_PARAMETERS_ERR;
+    }
     bool result = dschedContinuation_->CleanupCallback(type, callback);
     if (!result) {
         HILOGI("The callback does not exist.");
