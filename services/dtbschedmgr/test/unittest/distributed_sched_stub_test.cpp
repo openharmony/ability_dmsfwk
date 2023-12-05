@@ -1141,7 +1141,7 @@ HWTEST_F(DistributedSchedStubTest, RegisterMissionListenerInner_002, TestSize.Le
 
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
 
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     std::u16string devId = u"192.168.43.100";
@@ -1231,7 +1231,7 @@ HWTEST_F(DistributedSchedStubTest, UnRegisterMissionListenerInner_002, TestSize.
 
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
 
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     std::u16string devId = u"192.168.43.100";
@@ -1319,7 +1319,7 @@ HWTEST_F(DistributedSchedStubTest, StopSyncRemoteMissionsInner_002, TestSize.Lev
 
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
 
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     std::u16string deviceId = u"192.168.43.100";
@@ -1418,7 +1418,7 @@ HWTEST_F(DistributedSchedStubTest, StartSyncRemoteMissionsInner_002, TestSize.Le
 
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
 
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     std::u16string deviceId = u"192.168.43.100";

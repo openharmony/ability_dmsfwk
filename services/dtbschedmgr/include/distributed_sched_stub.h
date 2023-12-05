@@ -85,6 +85,7 @@ private:
     bool CallerInfoUnmarshalling(CallerInfo& callerInfo, MessageParcel& data);
     void SaveExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo);
     void InitLocalFuncsInner();
+    void InitLocalMissionManagerInner();
     void InitRemoteFuncsInner();
     std::shared_ptr<AAFwk::Want> ReadDistributedWant(MessageParcel& data);
 
