@@ -62,7 +62,6 @@ private:
     bool GetRelatedGroups(const std::string& udid, const std::vector<std::string>& bundleNames,
         AccountInfo& accountInfo);
     bool ParseGroupInfos(const std::string& returnGroupStr, std::vector<GroupInfo>& groupInfos);
-    bool IsNativeCall(uint32_t accessToken) const;
     bool VerifyPermission(uint32_t accessToken, const std::string& permissionName) const;
     bool CheckAccountAccessPermission(const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, const std::string& targetBundleName);
