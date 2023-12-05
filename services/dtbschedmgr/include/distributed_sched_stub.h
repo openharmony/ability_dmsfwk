@@ -84,6 +84,7 @@ private:
     bool EnforceInterfaceToken(MessageParcel& data);
     bool CallerInfoUnmarshalling(CallerInfo& callerInfo, MessageParcel& data);
     void SaveExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo);
+    void InitExtendedLocalFuncsInner();
     void InitLocalFuncsInner();
     void InitRemoteFuncsInner();
     std::shared_ptr<AAFwk::Want> ReadDistributedWant(MessageParcel& data);

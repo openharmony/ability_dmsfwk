@@ -74,7 +74,6 @@
             "//foundation/ability/dmsfwk/interfaces/innerkits/common:common_sdk",
             "//foundation/ability/dmsfwk/interfaces/innerkits/continuation_manager:continuation_manager",
             "//foundation/ability/dmsfwk/interfaces/innerkits/distributed_event:distributed_sdk",
-            "//foundation/ability/dmsfwk/interfaces/innerkits/tests:dms_sdk_demo",
             "//foundation/ability/dmsfwk/interfaces/kits/napi:napi_packages"
           ],
           "service_group": [
@@ -113,6 +112,7 @@
           }
         ],
         "test": [
+          "//foundation/ability/dmsfwk/interfaces/innerkits/tests:dms_sdk_demo",
           "//foundation/ability/dmsfwk/services/dtbschedmgr:unittest",
           "//foundation/ability/dmsfwk/services/dtbabilitymgr:unittest",
           "//foundation/ability/dmsfwk/test/fuzztest/continuationmanager_fuzzer:fuzztest"

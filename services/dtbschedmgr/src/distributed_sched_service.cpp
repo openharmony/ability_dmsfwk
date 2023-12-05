@@ -451,10 +451,17 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
     sptr<IDistributedSched> remoteDms = GetRemoteDms(srcDeviceId);
     if (remoteDms == nullptr) {
         HILOGE("get remote dms null!");
+        int32_t dSchedEventresult = dschedContinuation_->NotifyDSchedEventResult(DSCHED_EVENT_KEY,
+            INVALID_REMOTE_PARAMETERS_ERR);
+        HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
     int32_t result = remoteDms->ContinueMission(srcDeviceId, dstDeviceId, bundleName, callback, wantParams);
     HILOGI("ContinueRemoteMission result: %{public}d!", result);
+    if (result != ERR_OK) {
+        int32_t dSchedEventresult = dschedContinuation_->NotifyDSchedEventResult(DSCHED_EVENT_KEY, result);
+        HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
+    }
     return result;
 }
 
@@ -2053,8 +2060,8 @@ int32_t DistributedSchedService::RegisterDSchedEventListener(const std::string& 
 int32_t DistributedSchedService::UnRegisterDSchedEventListener(const std::string& type,
     const sptr<IRemoteObject>& callback)
 {
-    sptr<IRemoteObject> result = dschedContinuation_->CleanupCallback(type);
-    if (result == nullptr) {
+    bool result = dschedContinuation_->CleanupCallback(type, callback);
+    if (!result) {
         HILOGI("The callback does not exist.");
     } else {
         HILOGI("Clearing the callback succeeded.");
