@@ -279,7 +279,7 @@ int32_t DSchedContinuation::NotifyDSchedEventResult(const std::string& type, int
         PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.abilityName, false);
         MessageParcel reply;
         MessageOption option;
-        int32_t error = (*callback)->SendRequest(DSCHED_EVENT_CALLBACK, data, reply, option);
+        error = (*callback)->SendRequest(DSCHED_EVENT_CALLBACK, data, reply, option);
         HILOGI("NotifyDSchedEventListenerResult transact result: %{public}d", error);
     }
     return error;
