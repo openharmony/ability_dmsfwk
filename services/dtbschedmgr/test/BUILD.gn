@@ -171,6 +171,11 @@ if (dmsfwk_mmi_listener) {
 }
 
 ohos_unittest("distributedschedsvrtest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
 
   deps = [
@@ -208,6 +213,11 @@ ohos_unittest("distributedschedsvrtest") {
 }
 
 ohos_unittest("distributedcalltest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
 
   sources = [
@@ -229,6 +239,11 @@ ohos_unittest("distributedcalltest") {
 }
 
 ohos_unittest("dmsfreeinstallcbtest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
 
   sources = [
@@ -250,6 +265,11 @@ ohos_unittest("dmsfreeinstallcbtest") {
 }
 
 ohos_unittest("dschedcontinuetest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
   sources = [
     "unittest/distributed_sched_continuation_test.cpp",
@@ -286,6 +306,11 @@ ohos_unittest("dschedcontinuetest") {
 }
 
 ohos_unittest("dschedconnecttest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
 
   sources = [
@@ -307,6 +332,11 @@ ohos_unittest("dschedconnecttest") {
 }
 
 ohos_unittest("dschedpermissiontest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
 
   sources = [ "unittest/distributed_sched_permission_test.cpp" ]
@@ -328,6 +358,11 @@ ohos_unittest("dschedpermissiontest") {
 }
 
 ohos_unittest("dschedmissionmanagertest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
   sources = [
     "unittest/mission/distributed_data_storage_test.cpp",
@@ -354,6 +389,11 @@ ohos_unittest("dschedmissionmanagertest") {
 }
 
 ohos_unittest("bundlemanagerinternaltest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
   sources = [ "unittest/bundle_manager_internal_test.cpp" ]
   sources += dtbschedmgr_sources
@@ -376,6 +416,11 @@ ohos_unittest("bundlemanagerinternaltest") {
 }
 
 ohos_unittest("softbusadaptertest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
   sources = [ "unittest/softbus_adapter/softbus_adapter_test.cpp" ]
   sources += dtbschedmgr_sources
@@ -398,6 +443,11 @@ ohos_unittest("softbusadaptertest") {
 }
 
 ohos_unittest("hisyseventreporttest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
   sources = [ "unittest/dms_hisysevent_report_test.cpp" ]
   sources += dtbschedmgr_sources
@@ -416,6 +466,11 @@ ohos_unittest("hisyseventreporttest") {
 }
 
 ohos_unittest("distributeduidtest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
 
   sources = [ "unittest/distributed_sched_uid_test.cpp" ]
@@ -434,6 +489,11 @@ ohos_unittest("distributeduidtest") {
 }
 
 ohos_unittest("distributedwanttest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
 
   sources = [
@@ -457,6 +517,11 @@ ohos_unittest("distributedwanttest") {
 }
 
 ohos_unittest("dmsbasetest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
   module_out_path = module_output_path
   sources = [
     "unittest/deviceManager/dms_device_info_test.cpp",
