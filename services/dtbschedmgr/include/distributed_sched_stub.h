@@ -86,6 +86,7 @@ private:
     void SaveExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo);
     void InitExtendedLocalFuncsInner();
     void InitLocalFuncsInner();
+    void InitLocalMissionManagerInner();
     void InitRemoteFuncsInner();
     std::shared_ptr<AAFwk::Want> ReadDistributedWant(MessageParcel& data);
 

@@ -100,6 +100,26 @@ void DistributedSchedStub::InitLocalFuncsInner()
         &DistributedSchedStub::DisconnectRemoteAbilityInner;
     // request codes for mission manager
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
+    InitLocalMissionManagerInner();
+#endif
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_ABILITY_BY_CALL)] =
+        &DistributedSchedStub::StartRemoteAbilityByCallInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::RELEASE_REMOTE_ABILITY)] =
+        &DistributedSchedStub::ReleaseRemoteAbilityInner;
+#ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_SHARE_FORM)] =
+        &DistributedSchedStub::StartRemoteShareFormInner;
+#endif
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_DISTRIBUTED_COMPONENT_LIST)] =
+        &DistributedSchedStub::GetDistributedComponentListInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_FREE_INSTALL)] =
+        &DistributedSchedStub::StartRemoteFreeInstallInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::STOP_REMOTE_EXTERNSION_ABILITY)] =
+        &DistributedSchedStub::StopRemoteExtensionAbilityInner;
+}
+
+void DistributedSchedStub::InitLocalMissionManagerInner()
+{
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_REMOTE_MISSION_SNAPSHOT_INFO)] =
         &DistributedSchedStub::GetRemoteMissionSnapshotInfoInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_MISSION_LISTENER)] =
@@ -118,21 +138,6 @@ void DistributedSchedStub::InitLocalFuncsInner()
         &DistributedSchedStub::StopSyncRemoteMissionsInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::SET_MISSION_CONTINUE_STATE)] =
         &DistributedSchedStub::SetMissionContinueStateInner;
-#endif
-    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_ABILITY_BY_CALL)] =
-        &DistributedSchedStub::StartRemoteAbilityByCallInner;
-    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::RELEASE_REMOTE_ABILITY)] =
-        &DistributedSchedStub::ReleaseRemoteAbilityInner;
-#ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
-    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_SHARE_FORM)] =
-        &DistributedSchedStub::StartRemoteShareFormInner;
-#endif
-    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_DISTRIBUTED_COMPONENT_LIST)] =
-        &DistributedSchedStub::GetDistributedComponentListInner;
-    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_FREE_INSTALL)] =
-        &DistributedSchedStub::StartRemoteFreeInstallInner;
-    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::STOP_REMOTE_EXTERNSION_ABILITY)] =
-        &DistributedSchedStub::StopRemoteExtensionAbilityInner;
 }
 
 void DistributedSchedStub::InitRemoteFuncsInner()
@@ -761,7 +766,7 @@ int32_t DistributedSchedStub::RegisterMissionListenerInner(MessageParcel& data, 
     u16string devId = data.ReadString16();
     if (devId.empty()) {
         HILOGW("read deviceId failed!");
-        return ERR_FLATTEN_OBJECT;
+        return INVALID_PARAMETERS_ERR;
     }
     sptr<IRemoteObject> missionChangedListener = data.ReadRemoteObject();
     if (missionChangedListener == nullptr) {
@@ -855,7 +860,7 @@ int32_t DistributedSchedStub::UnRegisterMissionListenerInner(MessageParcel& data
     u16string devId = data.ReadString16();
     if (devId.empty()) {
         HILOGW("read deviceId failed!");
-        return ERR_FLATTEN_OBJECT;
+        return INVALID_PARAMETERS_ERR;
     }
     sptr<IRemoteObject> missionChangedListener = data.ReadRemoteObject();
     if (missionChangedListener == nullptr) {
@@ -900,7 +905,7 @@ int32_t DistributedSchedStub::StopSyncRemoteMissionsInner(MessageParcel& data, M
     u16string devId = data.ReadString16();
     if (devId.empty()) {
         HILOGW("read deviceId failed!");
-        return ERR_FLATTEN_OBJECT;
+        return INVALID_PARAMETERS_ERR;
     }
     int32_t result = StopSyncRemoteMissions(Str16ToStr8(devId));
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
@@ -951,7 +956,7 @@ int32_t DistributedSchedStub::StartSyncRemoteMissionsInner(MessageParcel& data, 
     u16string devId = data.ReadString16();
     if (devId.empty()) {
         HILOGW("read deviceId failed!");
-        return ERR_FLATTEN_OBJECT;
+        return INVALID_PARAMETERS_ERR;
     }
     string deviceId = Str16ToStr8(devId);
     bool fixConflict = data.ReadBool();
