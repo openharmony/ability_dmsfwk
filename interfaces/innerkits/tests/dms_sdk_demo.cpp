@@ -24,9 +24,11 @@ using namespace DistributedSchedule;
 using namespace std;
  
 Business g_business;
+namespace {
 DmsHandler &dmsSourceHandlerdemo = DmsHandler::GetInstance();
 std::string g_type = "IDSchedEventListener";
 sptr<IDSchedEventListener> listener = sptr<IDSchedEventListener>(new Business());
+}
  
 void Business::Register()
 {
