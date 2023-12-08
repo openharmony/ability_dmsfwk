@@ -461,12 +461,6 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
     uint32_t accessToken = 0;
     PARCEL_READ_HELPER(data, Uint32, accessToken);
     HILOGI("get AccessTokenID = %{public}u", accessToken);
-    if (DistributedSchedPermission::GetInstance().CheckPermission(accessToken,
-        PERMISSION_DISTRIBUTED_DATASYNC) != ERR_OK) {
-        HILOGE("check data_sync permission failed!");
-        StartContinuation(*want, missionId, callerUid, DistributedSchedule::PERMISSION_DENIED, accessToken);
-        return DMS_PERMISSION_DENIED;
-    }
     DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
     int32_t result = StartContinuation(*want, missionId, callerUid, status, accessToken);
     ReportEvent(*want, BehaviorEvent::START_CONTINUATION, result, callerUid);

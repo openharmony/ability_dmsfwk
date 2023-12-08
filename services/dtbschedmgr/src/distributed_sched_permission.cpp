@@ -310,10 +310,6 @@ bool DistributedSchedPermission::IsSceneBoardCall() const
 int32_t DistributedSchedPermission::CheckPermission(uint32_t accessToken, const std::string& permissionName) const
 {
     HILOGI("CheckPermission called.");
-    // if called from xts, granted directly, no need to check permissions.
-    if (IsNativeCall(accessToken)) {
-        return ERR_OK;
-    }
     if (VerifyPermission(accessToken, permissionName)) {
         return ERR_OK;
     }
@@ -380,15 +376,6 @@ bool DistributedSchedPermission::IsDistributedFile(const std::string& path) cons
         return true;
     }
     HILOGE("uri path is false.");
-    return false;
-}
-
-bool DistributedSchedPermission::IsNativeCall(uint32_t accessToken) const
-{
-    auto tokenType = AccessToken::AccessTokenKit::GetTokenTypeFlag(accessToken);
-    if (tokenType == AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        return true;
-    }
     return false;
 }
 

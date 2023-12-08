@@ -661,7 +661,7 @@ HWTEST_F(DistributedSchedStubTest, StartContinuationInner_003, TestSize.Level3)
     uint32_t accessToken = 0;
     data.WriteUint32(accessToken);
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest StartContinuationInner_003 end" << std::endl;
 }
 
