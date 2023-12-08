@@ -5,6 +5,7 @@
             "name": 1401,
             "libpath": "libdistributedschedsvr.z.so",
             "run-on-create": false,
+            "auto-restart":true,
             "distributed": true,
             "dump-level": 1,
             "start-on-demand": {
