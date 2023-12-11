@@ -84,6 +84,7 @@ public:
 #endif
 #ifdef SUPPORT_MULTIMODALINPUT_SERVICE
     void OnMMIEvent();
+    void ResetMMIFlag();
 #endif
 
 private:

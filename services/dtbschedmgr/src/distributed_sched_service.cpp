@@ -766,9 +766,14 @@ void DistributedSchedService::NotifyContinuationCallbackResult(int32_t missionId
 
     int32_t result = 0;
     if (dschedContinuation_->IsInContinuationProgress(missionId)) {
-        if (resultCode == ERR_OK && dschedContinuation_->IsCleanMission(missionId)) {
+        bool needClean = dschedContinuation_->IsCleanMission(missionId);
+        if (resultCode == ERR_OK && needClean) {
             result = AbilityManagerClient::GetInstance()->CleanMission(missionId);
             HILOGD("clean mission result:%{public}d", result);
+        } else {
+#ifdef SUPPORT_MULTIMODALINPUT_SERVICE
+            DistributedSchedContinueManager::GetInstance().ResetMMIFlag();
+#endif
         }
         result = dschedContinuation_->NotifyMissionCenterResult(missionId, resultCode);
     } else {

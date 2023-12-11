@@ -813,6 +813,13 @@ void DistributedSchedContinueManager::OnMMIEvent()
     DistributedSchedContinueManager::GetInstance().NotifyMissionFocused(info_.currentMissionId);
     needMMIBroadcast_ = false;
 }
+
+void DistributedSchedContinueManager::ResetMMIFlag()
+{
+    HILOGI("Reset MMI focus flag");
+    std::lock_guard<std::mutex> mmiEventLock(mmiMutex_);
+    needMMIBroadcast_ = true;
+}
 #endif
 } // namespace DistributedSchedule
 } // namespace OHOS
