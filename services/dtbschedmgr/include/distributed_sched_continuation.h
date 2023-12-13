@@ -20,6 +20,7 @@
 #include <map>
 #include <mutex>
 
+#include "distributed_event_died_listener.h"
 #include "event_handler.h"
 #include "iremote_object.h"
 #include "refbase.h"
@@ -78,6 +79,7 @@ private:
     int32_t currSessionId_ = 1;
     std::map<int32_t, sptr<IRemoteObject>> continuationMap_;
     std::map<std::string, std::vector<sptr<IRemoteObject>>> continuationCallbackMap_;
+    sptr<DistributedEventDiedListener> diedListener_;
     std::map<int32_t, sptr<IRemoteObject>> callbackMap_;
     std::map<int32_t, bool> freeInstall_;
     std::map<int32_t, bool> cleanMission_;

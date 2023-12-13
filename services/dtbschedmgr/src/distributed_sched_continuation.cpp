@@ -34,6 +34,7 @@ void DSchedContinuation::Init(const FuncContinuationCallback& contCallback)
 {
     auto runner = EventRunner::Create("dsched_continuation");
     continuationHandler_ = std::make_shared<ContinuationHandler>(runner, shared_from_this(), contCallback);
+    diedListener_ = new DistributedEventDiedListener();
 }
 
 bool DSchedContinuation::PushAbilityToken(int32_t sessionId, const sptr<IRemoteObject>& abilityToken)
@@ -135,7 +136,7 @@ bool DSchedContinuation::IsInContinuationProgress(int32_t missionId)
     std::lock_guard<std::mutex> autoLock(continuationLock_);
     auto iterSession = callbackMap_.find(missionId);
     if (iterSession != callbackMap_.end()) {
-        HILOGE("Continuation in progress, missionId:%{public}d exist!", missionId);
+        HILOGW("Continuation in progress, missionId:%{public}d exist!", missionId);
         return true;
     }
     return false;
@@ -167,12 +168,13 @@ bool DSchedContinuation::PushCallback(const std::string& type, const sptr<IRemot
     std::vector<sptr<IRemoteObject>> vecCallback = continuationCallbackMap_[type];
     for (auto ele = vecCallback.begin(); ele != vecCallback.end(); ++ele) {
         if ((*ele) == callback) {
-            HILOGE("type:%{public}s, callback is exists!", type.c_str());
+            HILOGE("type:%{public}s, callback already  exists!", type.c_str());
             return false;
         }
     }
     vecCallback.push_back(callback);
     continuationCallbackMap_[type] = vecCallback;
+    callback->AddDeathRecipient(diedListener_);
     return true;
 }
 
@@ -261,7 +263,7 @@ int32_t DSchedContinuation::NotifyDSchedEventResult(const std::string& type, int
     HILOGI("GetCallback IDSchedEventListener");
     std::vector<sptr<IRemoteObject>> vecCallback = GetCallback(type);
     if (vecCallback.empty()) {
-        HILOGE("NotifyMissionCenterResult IDSchedEventListener is null");
+        HILOGW("No listening has been registered, no need to report events");
         return INVALID_PARAMETERS_ERR;
     }
     int32_t error = -1;

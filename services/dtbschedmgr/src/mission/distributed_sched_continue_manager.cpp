@@ -344,7 +344,7 @@ int32_t DistributedSchedContinueManager::DealFocusedBusiness(const int32_t missi
         info_.currentIsContinuable = isMissionContinuable;
     }
     if (!isMissionContinuable) {
-        HILOGE("Mission is not continuable, task abort, missionId: %{public}d", missionId);
+        HILOGW("Mission is not continuable, task abort, missionId: %{public}d", missionId);
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
     std::string bundleName = info.want.GetBundle();
@@ -446,7 +446,7 @@ int32_t DistributedSchedContinueManager::DealUnfocusedBusiness(const int32_t mis
     std::string bundleName;
     int32_t ret = GetBundleName(missionId, bundleName);
     if (ret != ERR_OK) {
-        HILOGE("Get bundleName failed, mission is not continuable, missionId: %{public}d, ret: %{public}d",
+        HILOGW("Get bundleName failed, mission is not continuable, missionId: %{public}d, ret: %{public}d",
             missionId, ret);
         return ret;
     }
@@ -647,7 +647,7 @@ int32_t DistributedSchedContinueManager::DealSetMissionContinueStateBusiness(con
     }
 
     if (!info_.currentIsContinuable) {
-        HILOGE("mission is not continuable, broadcast task abort, missionId: %{public}d", missionId);
+        HILOGW("mission is not continuable, broadcast task abort, missionId: %{public}d", missionId);
         return INVALID_PARAMETERS_ERR;
     }
 
