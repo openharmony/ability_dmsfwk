@@ -766,8 +766,7 @@ void DistributedSchedService::NotifyContinuationCallbackResult(int32_t missionId
 
     int32_t result = 0;
     if (dschedContinuation_->IsInContinuationProgress(missionId)) {
-        bool needClean = dschedContinuation_->IsCleanMission(missionId);
-        if (resultCode == ERR_OK && needClean) {
+        if (resultCode == ERR_OK && dschedContinuation_->IsCleanMission(missionId)) {
             result = AbilityManagerClient::GetInstance()->CleanMission(missionId);
             HILOGD("clean mission result:%{public}d", result);
         } else {
