@@ -491,6 +491,7 @@ ohos_unittest("distributeduidtest") {
 
 ohos_unittest("distributedwanttest") {
   sanitize = {
+    blocklist = "./cfi_blocklist.txt"
     cfi = true
     cfi_cross_dso = true
     debug = false
