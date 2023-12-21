@@ -77,6 +77,29 @@ void NativeTokenGet()
     ASSERT_NE(tokenId, 0);
     SetSelfTokenID(tokenId);
 }
+
+void EnablePermissionAccess(const char* perms[], size_t permsNum, uint64_t &tokenId)
+{
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = permsNum,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = perms,
+        .acls = nullptr,
+        .aplStr = "system_basic",
+    };
+
+    infoInstance.processName = "DistributedSchedPermissionTest";
+    tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
+    OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
+}
+
+void DisablePermissionAccess(const uint64_t &tokenId)
+{
+    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(tokenId);
+}
 }
 
 void DistributedSchedPermissionTest::SetUpTestCase()
@@ -95,11 +118,16 @@ void DistributedSchedPermissionTest::TearDownTestCase()
 void DistributedSchedPermissionTest::TearDown()
 {
     DTEST_LOG << "DistributedSchedPermissionTest::TearDown" << std::endl;
+    DisablePermissionAccess(tokenId_);
 }
 
 void DistributedSchedPermissionTest::SetUp()
 {
     DTEST_LOG << "DistributedSchedPermissionTest::SetUp" << std::endl;
+    const char* perms[] = {
+        "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED",
+    };
+    EnablePermissionAccess(perms, sizeof(perms) / sizeof(perms[0]), tokenId_);
     DistributedSchedUtil::MockPermission();
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(deviceId_);
 
