@@ -29,6 +29,7 @@ public:
     void TearDown();
 
     std::string deviceId_;
+    uint64_t tokenId_;
 
 protected:
     class DeviceInitCallBack : public OHOS::DistributedHardware::DmInitCallback {
