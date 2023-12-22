@@ -455,6 +455,28 @@ HWTEST_F(DSchedContinuationTest, ContinueLocalMission_004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ContinueLocalMissionDealFreeInstall_001
+ * @tc.desc: input invalid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinuationTest, ContinueLocalMissionDealFreeInstall_001, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest ContinueLocalMissionDealFreeInstall_001 start" << std::endl;
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
+    spWant->SetParam("isFreeInstall", false);
+
+    int32_t missionId = 0;
+    std::string deviceId = "123456";
+    auto callback = GetDSchedService();
+    int32_t ret = DistributedSchedService::GetInstance().ContinueLocalMissionDealFreeInstall(*spWant,
+        missionId, deviceId, callback);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DSchedContinuationTest ContinueLocalMissionDealFreeInstall_001 end" << std::endl;
+}
+
+/**
  * @tc.name: ContinueRemoteMission_001
  * @tc.desc: input invalid params.
  * @tc.type: FUNC

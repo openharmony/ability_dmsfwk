@@ -345,8 +345,30 @@ std::string DistributedSchedService::GetContinuaitonDevice(int32_t missionId)
     return dschedContinuation_->GetTargetDevice(missionId);
 }
 
-int32_t DistributedSchedService::PrecheckContinueLocalMission(const std::string& dstDeviceId, int32_t missionId,
-    const sptr<IRemoteObject>& callback)
+int32_t DistributedSchedService::ContinueLocalMissionDealFreeInstall(OHOS::AAFwk::Want& want, int32_t missionId,
+    const std::string& dstDeviceId, const sptr<IRemoteObject>& callback)
+{
+    bool isFreeInstall = want.GetBoolParam("isFreeInstall", false);
+    if (!isFreeInstall) {
+        HILOGE("remote not installed but support freeInstall, try again with freeInstall flag");
+        return CONTINUE_REMOTE_UNINSTALLED_SUPPORT_FREEINSTALL;
+    }
+
+    dschedContinuation_->PushCallback(missionId, callback, dstDeviceId, true);
+    SetContinuationTimeout(missionId, CHECK_REMOTE_INSTALL_ABILITY);
+
+    want.SetDeviceId(dstDeviceId);
+    if (!BundleManagerInternal::CheckIfRemoteCanInstall(want, missionId)) {
+        HILOGE("call CheckIfRemoteCanInstall failed");
+        RemoveContinuationTimeout(missionId);
+        dschedContinuation_->PopCallback(missionId);
+        return INVALID_PARAMETERS_ERR;
+    }
+    return ERR_OK;
+}
+
+int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDeviceId, int32_t missionId,
+    const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
     if (dschedContinuation_ == nullptr) {
         HILOGE("continuation object null!");
@@ -361,20 +383,9 @@ int32_t DistributedSchedService::PrecheckContinueLocalMission(const std::string&
         HILOGI("remote dms is low version");
         return ContinueAbilityWithTimeout(dstDeviceId, missionId, callback);
     }
-    return ERR_OK;
-}
-
-int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDeviceId, int32_t missionId,
-    const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
-{
-    int32_t result = PrecheckContinueLocalMission(dstDeviceId, missionId, callback);
-    if (result != ERR_OK) {
-        HILOGE("continue local mission precheck fail!");
-        return result;
-    }
 
     MissionInfo missionInfo;
-    result = AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, missionInfo);
+    int32_t result = AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, missionInfo);
     if (result != ERR_OK) {
         HILOGE("get missionInfo failed");
         return NO_MISSION_INFO_FOR_MISSION_ID;
@@ -385,7 +396,6 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
     }
     std::string bundleName = missionInfo.want.GetBundle();
     missionInfo.want.SetParams(wantParams);
-    bool isFreeInstall = false;
     DistributedBundleInfo remoteBundleInfo;
     result = BundleManagerInternal::CheckRemoteBundleInfoForContinuation(dstDeviceId,
         bundleName, remoteBundleInfo);
@@ -397,23 +407,7 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
         return result;
     }
 
-    isFreeInstall = missionInfo.want.GetBoolParam("isFreeInstall", false);
-    if (!isFreeInstall) {
-        HILOGE("remote not installed but support freeInstall, try again with freeInstall flag");
-        return CONTINUE_REMOTE_UNINSTALLED_SUPPORT_FREEINSTALL;
-    }
-
-    dschedContinuation_->PushCallback(missionId, callback, dstDeviceId, true);
-    SetContinuationTimeout(missionId, CHECK_REMOTE_INSTALL_ABILITY);
-
-    missionInfo.want.SetDeviceId(dstDeviceId);
-    if (!BundleManagerInternal::CheckIfRemoteCanInstall(missionInfo.want, missionId)) {
-        HILOGE("call CheckIfRemoteCanInstall failed");
-        RemoveContinuationTimeout(missionId);
-        dschedContinuation_->PopCallback(missionId);
-        return INVALID_PARAMETERS_ERR;
-    }
-    return ERR_OK;
+    return ContinueLocalMissionDealFreeInstall(missionInfo.want, missionId, dstDeviceId, callback);
 }
 
 int32_t DistributedSchedService::ContinueAbilityWithTimeout(const std::string& dstDeviceId, int32_t missionId,
