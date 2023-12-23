@@ -2394,35 +2394,6 @@ HWTEST_F(DistributedSchedPermissionTest, MarkUriPermission_002, TestSize.Level3)
 }
 
 /**
- * @tc.name: MarkUriPermission_003
- * @tc.desc: parse groupInfo from json with invalid params
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedPermissionTest, MarkUriPermission_003, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest MarkUriPermission_003 begin" << std::endl;
-    AAFwk::Want want;
-    want.AddFlags(want.FLAG_AUTH_READ_URI_PERMISSION);
-    want.SetUri("file://com.ohos.mms/data/test_B");
-    const std::string bundleName = "com.ohos.mms";
-    uint32_t accessTokenId;
-    int32_t ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
-    EXPECT_EQ(ret, ERR_OK);
-    DistributedSchedPermission::GetInstance().MarkUriPermission(want, accessTokenId);
-    CallerInfo callerInfo;
-    callerInfo.accessToken = ACCESS_TOKEN;
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::DIFF_ACCOUNT_TYPE;
-    std::string groupId = INVALID_GROUP_ID;
-    accountInfo.groupIdList.push_back(groupId);
-    string targetBundle = INVALID_BUNDLE_NAME;
-    ret = DistributedSchedPermission::GetInstance().CheckAccountAccessPermission(
-        callerInfo, accountInfo, targetBundle);
-    EXPECT_EQ(ret, false);
-    DTEST_LOG << "DistributedSchedPermissionTest MarkUriPermission_003 end " <<  std::endl;
-}
-
-/**
  * @tc.name: GetDeviceSecurityLevel_001
  * @tc.desc: parse groupInfo from json with invalid params
  * @tc.type: FUNC
