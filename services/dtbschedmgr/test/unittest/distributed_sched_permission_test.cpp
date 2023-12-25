@@ -77,29 +77,6 @@ void NativeTokenGet()
     ASSERT_NE(tokenId, 0);
     SetSelfTokenID(tokenId);
 }
-
-void EnablePermissionAccess(const char* perms[], size_t permsNum, uint64_t &tokenId)
-{
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = permsNum,
-        .aclsNum = 0,
-        .dcaps = nullptr,
-        .perms = perms,
-        .acls = nullptr,
-        .aplStr = "system_basic",
-    };
-
-    infoInstance.processName = "DistributedSchedPermissionTest";
-    tokenId = GetAccessTokenId(&infoInstance);
-    SetSelfTokenID(tokenId);
-    OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
-}
-
-void DisablePermissionAccess(const uint64_t &tokenId)
-{
-    OHOS::Security::AccessToken::AccessTokenKit::DeleteToken(tokenId);
-}
 }
 
 void DistributedSchedPermissionTest::SetUpTestCase()
@@ -118,16 +95,11 @@ void DistributedSchedPermissionTest::TearDownTestCase()
 void DistributedSchedPermissionTest::TearDown()
 {
     DTEST_LOG << "DistributedSchedPermissionTest::TearDown" << std::endl;
-    DisablePermissionAccess(tokenId_);
 }
 
 void DistributedSchedPermissionTest::SetUp()
 {
     DTEST_LOG << "DistributedSchedPermissionTest::SetUp" << std::endl;
-    const char* perms[] = {
-        "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED",
-    };
-    EnablePermissionAccess(perms, sizeof(perms) / sizeof(perms[0]), tokenId_);
     DistributedSchedUtil::MockPermission();
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(deviceId_);
 
@@ -485,6 +457,7 @@ HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_001, TestSize.Level3)
 HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_002 begin" << std::endl;
+    DistributedSchedUtil::MockBundlePermission();
     AAFwk::Want want;
     ElementName name;
     name.SetAbilityName(ABILITY_NAME);
@@ -505,6 +478,7 @@ HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_002, TestSize.Level3)
 HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_003 begin" << std::endl;
+    DistributedSchedUtil::MockBundlePermission();
     AAFwk::Want want;
     ElementName name;
     name.SetAbilityName(ABILITY_NAME);
@@ -526,6 +500,7 @@ HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_003, TestSize.Level3)
 HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_004, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_004 begin" << std::endl;
+    DistributedSchedUtil::MockBundlePermission();
     AAFwk::Want want;
     ElementName name;
     name.SetAbilityName(ABILITY_NAME);
@@ -546,6 +521,7 @@ HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_004, TestSize.Level3)
 HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_005, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_005 begin" << std::endl;
+    DistributedSchedUtil::MockBundlePermission();
     AAFwk::Want want;
     ElementName name;
     name.SetAbilityName(ABILITY_NAME);
@@ -567,6 +543,7 @@ HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_005, TestSize.Level3)
 HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_006, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_006 begin" << std::endl;
+    DistributedSchedUtil::MockBundlePermission();
     AAFwk::Want want;
     ElementName name;
     name.SetAbilityName(ABILITY_NAME);
@@ -589,6 +566,7 @@ HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_006, TestSize.Level3)
 HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_007, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_007 begin" << std::endl;
+    DistributedSchedUtil::MockBundlePermission();
     AAFwk::Want want;
     ElementName name;
     name.SetAbilityName(ABILITY_NAME);
@@ -651,6 +629,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckGetCallerPermission_002, TestSize.
 HWTEST_F(DistributedSchedPermissionTest, CheckGetCallerPermission_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedPermissionTest CheckGetCallerPermission_003 begin" << std::endl;
+    DistributedSchedUtil::MockBundlePermission();
     AAFwk::Want want;
     CallerInfo callerInfo;
     bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
@@ -951,6 +930,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckStartControlPermission_011, TestSi
 HWTEST_F(DistributedSchedPermissionTest, CheckStartControlPermission_012, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedPermissionTest CheckStartControlPermission_012 begin" << std::endl;
+    DistributedSchedUtil::MockBundlePermission();
     AppExecFwk::AbilityInfo targetAbility;
     targetAbility.visible = true;
     targetAbility.type = AppExecFwk::AbilityType::SERVICE;
@@ -2222,6 +2202,7 @@ HWTEST_F(DistributedSchedPermissionTest, MarkUriPermission_002, TestSize.Level3)
 HWTEST_F(DistributedSchedPermissionTest, MarkUriPermission_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedPermissionTest MarkUriPermission_003 begin" << std::endl;
+    DistributedSchedUtil::MockBundlePermission();
     AAFwk::Want want;
     want.AddFlags(want.FLAG_AUTH_READ_URI_PERMISSION);
     want.SetUri("file://com.ohos.mms/data/test_B");
