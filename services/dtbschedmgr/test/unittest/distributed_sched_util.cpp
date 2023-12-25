@@ -94,6 +94,14 @@ void DistributedSchedUtil::MockPermission()
     MockProcessAndPermission(DISTSCHED_PROCESS_NAME, PERMS, PERMS_NUM);
 }
 
+void DistributedSchedUtil::MockBundlePermission()
+{
+    static const char *PERMS[] = {
+        "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED"
+    };
+    MockProcessAndPermission("DistributedSchedPermissionTest", PERMS, sizeof(PERMS) / sizeof(PERMS[0]));
+}
+
 void DistributedSchedUtil::MockProcess(const char* processName)
 {
     MockProcessAndPermission(processName);
