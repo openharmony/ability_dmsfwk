@@ -1894,6 +1894,7 @@ HWTEST_F(DistributedSchedServiceTest, ConnectAbilityFromRemote_001, TestSize.Lev
 HWTEST_F(DistributedSchedServiceTest, ConnectAbilityFromRemote_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest ConnectAbilityFromRemote_002 start" << std::endl;
+    DistributedSchedUtil::MockBundlePermission();
     AAFwk::Want want;
     std::string localDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);

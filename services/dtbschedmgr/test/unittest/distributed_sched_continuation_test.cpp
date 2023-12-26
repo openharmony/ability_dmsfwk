@@ -356,6 +356,7 @@ HWTEST_F(DSchedContinuationTest, SetWantForContinuation_002, TestSize.Level1)
      * @tc.steps: step1. input valid bundleName.
      * @tc.expected: step1. return OK.
      */
+    DistributedSchedUtil::MockBundlePermission();
     std::string bundleName = "com.ohos.mms";
     std::string abilityName = "bmsThirdBundle";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
