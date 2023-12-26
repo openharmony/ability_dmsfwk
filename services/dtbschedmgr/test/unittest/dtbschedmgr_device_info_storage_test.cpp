@@ -203,6 +203,7 @@ HWTEST_F(DtbschedmgrDeviceInfoStorageTest, GetDeviceIdSetTest_001, TestSize.Leve
 HWTEST_F(DtbschedmgrDeviceInfoStorageTest, GetLocalDeviceFromDnetTest_001, TestSize.Level3)
 {
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest GetLocalDeviceFromDnetTest_001 start" << std::endl;
+    DistributedSchedUtil::MockBundlePermission();
     std::string deviceId;
     /**
      * @tc.steps: step1. test GetLocalDeviceFromDnet;

@@ -21,6 +21,7 @@
 #define private public
 #include "adapter/dnetwork_adapter.h"
 #undef private
+#include "distributed_sched_util.h"
 #include "dtbschedmgr_device_info_storage.h"
 
 using namespace std;
@@ -381,6 +382,7 @@ HWTEST_F(DMSNetworkAdapterTest, RemoveDeviceChangeListener_002, TestSize.Level3)
  */
 HWTEST_F(DMSNetworkAdapterTest, UpdateDeviceInfoStorage_001, TestSize.Level3)
 {
+    DistributedSchedUtil::MockBundlePermission();
     bool result = DnetworkAdapter::GetInstance()->UpdateDeviceInfoStorage();
     EXPECT_EQ(result, true);
 }
