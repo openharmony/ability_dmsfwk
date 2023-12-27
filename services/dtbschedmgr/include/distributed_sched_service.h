@@ -203,8 +203,8 @@ private:
     static int32_t GetUidLocked(const std::list<ConnectAbilitySession>& sessionList);
     int32_t TryConnectRemoteAbility(const OHOS::AAFwk::Want& want,
         const sptr<IRemoteObject>& connect, const CallerInfo& callerInfo);
-    int32_t PrecheckContinueLocalMission(const std::string& dstDeviceId, int32_t missionId,
-        const sptr<IRemoteObject>& callback);
+    int32_t ContinueLocalMissionDealFreeInstall(OHOS::AAFwk::Want& want, int32_t missionId,
+        const std::string& dstDeviceId, const sptr<IRemoteObject>& callback);
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
     sptr<AppExecFwk::IFormMgr> GetFormMgrProxy();
 #endif

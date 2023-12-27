@@ -105,7 +105,7 @@ bool BundleManagerInternal::QueryAbilityInfo(const AAFwk::Want& want, AppExecFwk
     bool result = bundleMgr->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT
         | AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_PERMISSION, activeAccountId, abilityInfo);
     if (!result) {
-        HILOGE("QueryAbilityInfo failed");
+        HILOGW("QueryAbilityInfo failed");
         return false;
     }
     return true;
