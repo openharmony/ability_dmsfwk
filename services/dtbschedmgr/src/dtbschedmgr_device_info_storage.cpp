@@ -182,6 +182,7 @@ void DtbschedmgrDeviceInfoStorage::UpdateDeviceInfoStorage(
         std::string networkId = deviceInfo->GetNetworkId();
         RegisterUuidNetworkIdMap(networkId);
         {
+            HILOGI("remoteDevices networkId = %{public}s", DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
             lock_guard<mutex> autoLock(deviceLock_);
             remoteDevices_[networkId] = deviceInfo;
         }
