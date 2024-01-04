@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,7 +43,7 @@ DSchedEventListenerStub::~DSchedEventListenerStub()
 int32_t DSchedEventListenerStub::OnRemoteRequest(uint32_t code,
     MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
-    HILOGI("DSchedEventListenerStub OnRemoteRequest code: %d", code);
+    HILOGI("DSchedEventListenerStub OnRemoteRequest code: %u", code);
     std::u16string desc = DSchedEventListenerStub::GetDescriptor();
     std::u16string remoteDesc = data.ReadInterfaceToken();
     if (desc != remoteDesc) {

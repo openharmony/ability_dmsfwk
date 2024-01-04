@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -191,7 +191,7 @@ int32_t DistributedSchedStub::OnRemoteRequest(uint32_t code,
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     bool IsLocalCalling = IPCSkeleton::IsLocalCalling();
-    HILOGI("OnRemoteRequest, code = %{public}d, flags = %{public}d, IsLocalCalling = %{public}d.",
+    HILOGI("OnRemoteRequest, code = %{public}u, flags = %{public}d, IsLocalCalling = %{public}d.",
         code, option.GetFlags(), IsLocalCalling);
 
     const auto& funcsMap = IsLocalCalling ? localFuncsMap_ : remoteFuncsMap_;
