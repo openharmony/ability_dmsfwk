@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef OHOS_DISTRIBUTED_DTBSCHEDMGR_DEVICE_INFO_INTERFACE_H
 #define OHOS_DISTRIBUTED_DTBSCHEDMGR_DEVICE_INFO_INTERFACE_H
 
+#include <map>
 #include <set>
 
 #include "adapter/dnetwork_adapter.h"
@@ -24,6 +25,7 @@
 #include "event_handler.h"
 #include "iremote_object.h"
 #include "single_instance.h"
+#include "sync_completed_callback_stub.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -41,6 +43,7 @@ public:
     bool Init();
     void Stop();
     bool GetLocalDeviceId(std::string& networkId);
+    bool GetLocalUdid(std::string& udid);
     void DeviceOnlineNotify(const std::shared_ptr<DmsDeviceInfo> devInfo);
     void DeviceOfflineNotify(const std::string& networkId);
     void OnDeviceInfoChanged(const std::string& networkId);
@@ -81,12 +84,20 @@ public:
      */
     void UpdateDeviceInfoStorage(const std::vector<DistributedHardware::DmDeviceInfo>& dmDeviceInfoList);
 
+    /**
+     * Sync dms version info to remote
+     *
+     * @param remoteNetworkId
+     */
+    int32_t SyncDmsVersionInfoToRemote(const std::string& remoteNetworkId);
+
 private:
     bool InitNetworkIdManager(std::shared_ptr<DnetworkAdapter> dnetworkAdapter);
     bool ConnectSoftbus();
     void ClearAllDevices();
     bool WaitForDnetworkReady();
     bool GetLocalDeviceFromDnet(std::string& networkId);
+    bool GetLocalDeviceUdid(std::string& udid);
     void RegisterUuidNetworkIdMap(const std::string& networkId);
     void UnregisterUuidNetworkIdMap(const std::string& networkId);
     std::mutex deviceLock_;
@@ -97,6 +108,9 @@ private:
     std::mutex uuidNetworkIdLock_;
     std::shared_ptr<AppExecFwk::EventHandler> initHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> networkIdMgrHandler_;
+    class SyncCallback : public OHOS::DistributedDeviceProfile::SyncCompletedCallbackStub {
+        void OnSyncCompleted(const std::map<std::string, OHOS::DistributedDeviceProfile::SyncStatus> &syncResults);
+    };
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -398,6 +398,37 @@ HWTEST_F(DtbschedmgrDeviceInfoStorageTest, UpdateDeviceInfoStorageTest_002, Test
     DtbschedmgrDeviceInfoStorage::GetInstance().UpdateDeviceInfoStorage(dmDeviceInfoList);
     EXPECT_EQ(!dmDeviceInfoList.empty(), true);
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest UpdateDeviceInfoStorageTest_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetLocalDeviceUdidTest_001
+ * @tc.desc: test GetLocalDeviceUdid
+ * @tc.type: FUNC
+ */
+HWTEST_F(DtbschedmgrDeviceInfoStorageTest, GetLocalDeviceUdidTest_001, TestSize.Level3)
+{
+    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest GetLocalDeviceUdidTest_001 start" << std::endl;
+    std::string udid = "";
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
+    EXPECT_EQ(udid.empty(), true);
+    DistributedSchedUtil::MockPermission();
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
+    EXPECT_EQ(!udid.empty(), true);
+    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest GetLocalDeviceUdidTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SyncDmsVersionInfoToRemoteTest_001
+ * @tc.desc: test SyncDmsVersionInfoToRemote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DtbschedmgrDeviceInfoStorageTest, SyncDmsVersionInfoToRemoteTest_001, TestSize.Level3)
+{
+    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest SyncDmsVersionInfoToRemoteTest_001 start" << std::endl;
+    std::string remoteNetworkId = "test";
+    int32_t result = DtbschedmgrDeviceInfoStorage::GetInstance().SyncDmsVersionInfoToRemote(remoteNetworkId);
+    EXPECT_TRUE(result != DistributedDeviceProfile::DP_SUCCESS);
+    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest SyncDmsVersionInfoToRemoteTest_001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

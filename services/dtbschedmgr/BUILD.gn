@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,6 +29,7 @@ config("distributed_sched_config") {
     "${communication_path}/dsoftbus/interfaces/kits/common",
     "${dms_path}/interfaces/kits/napi/include",
     "include/distributedWant",
+    "//third_party/cJSON",
   ]
   defines = []
   if (dmsfwk_mission_manager) {
@@ -111,6 +112,8 @@ ohos_shared_library("distributedschedsvr") {
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
   ]
 
+  deps = [ "//third_party/cJSON:cjson" ]
+
   external_deps = [
     "ability_base:base",
     "ability_base:want",
@@ -123,7 +126,8 @@ ohos_shared_library("distributedschedsvr") {
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
-    "device_info_manager:distributed_device_profile_client",
+    "device_info_manager:distributed_device_profile_common",
+    "device_info_manager:distributed_device_profile_sdk",
     "device_manager:devicemanagersdk",
     "device_security_level:dslm_sdk",
     "distributed_bundle_framework:dbms_fwk",

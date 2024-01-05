@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,17 @@
 #include "dms_version_manager.h"
 
 #include "distributed_device_profile_client.h"
+#include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "nlohmann/json.hpp"
 #include "string_ex.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DmsVersionManager";
-const std::string DMS_SERVICE_ID = "appInfo";
+const std::string DMS_SERVICE_ID = "dmsfwk_svr_id";
+const std::string DMS_CHAR_ID = "dmsInfo";
 const std::string DMS_SERVICE_TYPE = "appInfo";
 const std::string PACKAGE_NAMES = "packageNames";
 const std::string VERSIONS = "versions";
@@ -76,13 +79,15 @@ int32_t DmsVersionManager::GetRemoteDmsVersion(const std::string& deviceId, DmsV
 
 int32_t DmsVersionManager::GetAppInfoFromDP(const std::string& deviceId, std::string& appInfoJsonData)
 {
-    DeviceProfile::ServiceCharacteristicProfile profile;
-    int32_t result = DeviceProfile::DistributedDeviceProfileClient::GetInstance().GetDeviceProfile(deviceId,
-        DMS_SERVICE_ID, profile);
+    DistributedDeviceProfile::CharacteristicProfile profile;
+    std::string udid = "";
+    udid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(deviceId);
+    int32_t result = DistributedDeviceProfile::DistributedDeviceProfileClient::GetInstance().GetCharacteristicProfile(
+        udid, DMS_SERVICE_ID, DMS_CHAR_ID, profile);
     if (result != ERR_OK) {
         return result;
     }
-    appInfoJsonData = profile.GetCharacteristicProfileJson();
+    appInfoJsonData = profile.GetCharacteristicValue();
     return ERR_OK;
 }
 

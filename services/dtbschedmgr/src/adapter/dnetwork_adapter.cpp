@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,7 +66,8 @@ void DnetworkAdapter::DeviceInitCallBack::OnRemoteDied()
 
 void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOnline(const DmDeviceInfo& deviceInfo)
 {
-    HILOGI("OnNodeOnline netwokId = %{public}s", AnonymizeNetworkId(deviceInfo.networkId).c_str());
+    std::string networkId = deviceInfo.networkId;
+    HILOGI("OnNodeOnline netwokId = %{public}s", AnonymizeNetworkId(networkId).c_str());
     auto onlineNotifyTask = [deviceInfo]() {
         std::lock_guard<std::mutex> autoLock(listenerSetMutex_);
         for (auto& listener : listenerSet_) {
@@ -77,6 +78,7 @@ void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOnline(const DmDeviceInfo&
         HILOGE("OnNodeOnline post task failed");
         return;
     }
+    DtbschedmgrDeviceInfoStorage::GetInstance().SyncDmsVersionInfoToRemote(networkId);
 }
 
 void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOffline(const DmDeviceInfo& deviceInfo)
