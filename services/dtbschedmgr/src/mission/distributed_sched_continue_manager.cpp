@@ -183,7 +183,7 @@ void DistributedSchedContinueManager::StartEvent()
 
 int32_t DistributedSchedContinueManager::SendSoftbusEvent(uint32_t accessTokenId, uint8_t type)
 {
-    HILOGD("SendSoftbusEvent start, accessTokenId: %{public}d", accessTokenId);
+    HILOGD("SendSoftbusEvent start, accessTokenId: %{public}u", accessTokenId);
     uint8_t data[DMS_SEND_LEN];
     uint8_t len = sizeof(uint32_t);
     data[0] = (type << CONTINUE_SHIFT_04) | len;
@@ -259,10 +259,10 @@ int32_t DistributedSchedContinueManager::DealFocusedBusiness(const int32_t missi
     uint32_t accessTokenId;
     ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
     if (ret != ERR_OK) {
-        HILOGE("Get focused accessTokenId failed, accessTokenId: %{public}d, ret: %{public}d", accessTokenId, ret);
+        HILOGE("Get focused accessTokenId failed, accessTokenId: %{public}u, ret: %{public}d", accessTokenId, ret);
         return ret;
     }
-    HILOGI("Get focused accessTokenId success, accessTokenId: %{public}d", accessTokenId);
+    HILOGI("Get focused accessTokenId success, accessTokenId: %{public}u", accessTokenId);
 
     uint8_t type = DMS_FOCUSED_TYPE;
     ret = SendSoftbusEvent(accessTokenId, type);
@@ -373,7 +373,7 @@ int32_t DistributedSchedContinueManager::DealUnfocusedBusiness(const int32_t mis
     uint32_t accessTokenId;
     ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
     if (ret != ERR_OK) {
-        HILOGE("Get unfocused accessTokenId failed, accessTokenId: %{public}d, ret: %{public}d", accessTokenId, ret);
+        HILOGE("Get unfocused accessTokenId failed, accessTokenId: %{public}u, ret: %{public}d", accessTokenId, ret);
         return ret;
     }
 
@@ -469,7 +469,7 @@ int32_t DistributedSchedContinueManager::DealSetMissionContinueStateBusiness(con
     uint32_t accessTokenId;
     ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
     if (ret != ERR_OK) {
-        HILOGE("get setContinueState accessTokenId failed, accessTokenId: %{public}d, ret: %{public}d",
+        HILOGE("get setContinueState accessTokenId failed, accessTokenId: %{public}u, ret: %{public}d",
             accessTokenId, ret);
         return ret;
     }

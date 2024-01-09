@@ -26,7 +26,7 @@ const std::string TAG = "DistributedMissionBroadcastListener";
 }
 void DistributedMissionBroadcastListener::OnDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen)
 {
-    HILOGI("OnDataRecv, dataLen = %{public}d", dataLen);
+    HILOGI("OnDataRecv, dataLen = %{public}u", dataLen);
     DistributedSchedContinueRecvManager::GetInstance().NotifyDataRecv(senderNetworkId, payload, dataLen);
 }
 } // namespace DistributedSchedule
