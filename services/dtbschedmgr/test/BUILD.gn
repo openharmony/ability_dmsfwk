@@ -148,6 +148,7 @@ if (dmsfwk_mission_manager) {
     "${distributed_service}/dtbschedmgr/src/mission/distributed_mission_focused_listener.cpp",
     "${distributed_service}/dtbschedmgr/src/mission/distributed_mission_info.cpp",
     "${distributed_service}/dtbschedmgr/src/mission/distributed_sched_continue_manager.cpp",
+    "${distributed_service}/dtbschedmgr/src/mission/distributed_sched_continue_recv_manager.cpp",
     "${distributed_service}/dtbschedmgr/src/mission/distributed_sched_mission_manager.cpp",
     "${distributed_service}/dtbschedmgr/src/mission/kvstore_death_recipient.cpp",
     "${distributed_service}/dtbschedmgr/src/mission/mission_changed_notify.cpp",

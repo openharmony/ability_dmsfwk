@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "dtbschedmgr_log.h"
 #define private public
 #include "mission/distributed_sched_continue_manager.h"
+#include "mission/distributed_sched_continue_recv_manager.h"
 #undef private
 #include "test_log.h"
 
@@ -177,15 +178,16 @@ HWTEST_F(DMSContinueManagerTest, testNotifyMissionUnfocused001, TestSize.Level3)
 HWTEST_F(DMSContinueManagerTest, testRegisterOnListener001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testRegisterOnListener001 start" << std::endl;
+    DistributedSchedContinueRecvManager::GetInstance().Init();
     sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
-    int32_t ret = DistributedSchedContinueManager::GetInstance().RegisterOnListener(TYPE, obj01);
+    int32_t ret = DistributedSchedContinueRecvManager::GetInstance().RegisterOnListener(TYPE, obj01);
     EXPECT_EQ(ret, ERR_OK);
 
-    ret = DistributedSchedContinueManager::GetInstance().RegisterOnListener(TYPE, obj01);
+    ret = DistributedSchedContinueRecvManager::GetInstance().RegisterOnListener(TYPE, obj01);
     EXPECT_EQ(ret, NO_MISSION_INFO_FOR_MISSION_ID);
 
     sptr<IRemoteObject> obj02 = new RemoteOnListenerStubTest();
-    ret = DistributedSchedContinueManager::GetInstance().RegisterOnListener(TYPE, obj02);
+    ret = DistributedSchedContinueRecvManager::GetInstance().RegisterOnListener(TYPE, obj02);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DMSContinueManagerTest testRegisterOnListener001 end" << std::endl;
 }
@@ -199,11 +201,11 @@ HWTEST_F(DMSContinueManagerTest, testRegisterOffListener001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testRegisterOffListener001 start" << std::endl;
     sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
-    int32_t ret = DistributedSchedContinueManager::GetInstance().RegisterOnListener(TYPE, obj01);
-    ret = DistributedSchedContinueManager::GetInstance().RegisterOffListener(TYPE, obj01);
+    int32_t ret = DistributedSchedContinueRecvManager::GetInstance().RegisterOnListener(TYPE, obj01);
+    ret = DistributedSchedContinueRecvManager::GetInstance().RegisterOffListener(TYPE, obj01);
     EXPECT_EQ(ret, ERR_OK);
 
-    ret = DistributedSchedContinueManager::GetInstance().RegisterOffListener(TYPE, nullptr);
+    ret = DistributedSchedContinueRecvManager::GetInstance().RegisterOffListener(TYPE, nullptr);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DMSContinueManagerTest testRegisterOffListener001 end" << std::endl;
 }
@@ -218,15 +220,15 @@ HWTEST_F(DMSContinueManagerTest, testRegisterOffListener002, TestSize.Level3)
 {
     DTEST_LOG << "DMSContinueManagerTest testRegisterOffListener002 start" << std::endl;
     sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
-    int32_t ret = DistributedSchedContinueManager::GetInstance().RegisterOnListener(TYPE, obj01);
+    int32_t ret = DistributedSchedContinueRecvManager::GetInstance().RegisterOnListener(TYPE, obj01);
     EXPECT_EQ(ret, ERR_OK);
 
     {
         std::lock_guard<std::mutex> registerOnListenerMapLock(
-            DistributedSchedContinueManager::GetInstance().eventMutex_);
-        DistributedSchedContinueManager::GetInstance().registerOnListener_[TYPE].clear();
+            DistributedSchedContinueRecvManager::GetInstance().eventMutex_);
+        DistributedSchedContinueRecvManager::GetInstance().registerOnListener_[TYPE].clear();
     }
-    ret = DistributedSchedContinueManager::GetInstance().RegisterOffListener(TYPE, obj01);
+    ret = DistributedSchedContinueRecvManager::GetInstance().RegisterOffListener(TYPE, obj01);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DMSContinueManagerTest testRegisterOffListener002 end" << std::endl;
 }
@@ -304,8 +306,8 @@ HWTEST_F(DMSContinueManagerTest, testDealUnfocusedBusiness001, TestSize.Level3)
     std::vector<sptr<IRemoteObject>> objs;
     {
         std::lock_guard<std::mutex> registerOnListenerMapLock(
-            DistributedSchedContinueManager::GetInstance().eventMutex_);
-        DistributedSchedContinueManager::GetInstance().registerOnListener_[TYPE] = objs;
+            DistributedSchedContinueRecvManager::GetInstance().eventMutex_);
+        DistributedSchedContinueRecvManager::GetInstance().registerOnListener_[TYPE] = objs;
     }
     obj01 = new RemoteOnListenerStubTest();
     DistributedSchedContinueManager::GetInstance().NotifyDeid(obj01);
@@ -325,11 +327,12 @@ HWTEST_F(DMSContinueManagerTest, testVerifyBroadcastSource001, TestSize.Level3)
     int32_t state = ACTIVE;
     std::string networkId = "test networkId";
     std::string bundleName = "test bundleName";
-    int32_t ret = DistributedSchedContinueManager::GetInstance().VerifyBroadcastSource(networkId, bundleName, state);
+    int32_t ret = DistributedSchedContinueRecvManager::GetInstance().VerifyBroadcastSource(networkId,
+        bundleName, state);
     EXPECT_EQ(ret, ERR_OK);
 
     state = INACTIVE;
-    ret = DistributedSchedContinueManager::GetInstance().VerifyBroadcastSource(networkId, bundleName, state);
+    ret = DistributedSchedContinueRecvManager::GetInstance().VerifyBroadcastSource(networkId, bundleName, state);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -345,12 +348,14 @@ HWTEST_F(DMSContinueManagerTest, testVerifyBroadcastSource002, TestSize.Level3)
     int32_t state = ACTIVE;
     std::string networkId = "test networkId";
     std::string bundleName = "test bundleName";
-    int32_t ret = DistributedSchedContinueManager::GetInstance().VerifyBroadcastSource(networkId, bundleName, state);
+    int32_t ret = DistributedSchedContinueRecvManager::GetInstance().VerifyBroadcastSource(networkId,
+        bundleName, state);
     EXPECT_EQ(ret, ERR_OK);
 
     state = INACTIVE;
     networkId = "invalid networkId";
-    ret = DistributedSchedContinueManager::GetInstance().VerifyBroadcastSource(networkId, bundleName, state);
+    ret = DistributedSchedContinueRecvManager::GetInstance().VerifyBroadcastSource(networkId,
+        bundleName, state);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 }
 
@@ -366,12 +371,13 @@ HWTEST_F(DMSContinueManagerTest, testVerifyBroadcastSource003, TestSize.Level3)
     int32_t state = ACTIVE;
     std::string networkId = "test networkId";
     std::string bundleName = "test bundleName";
-    int32_t ret = DistributedSchedContinueManager::GetInstance().VerifyBroadcastSource(networkId, bundleName, state);
+    int32_t ret = DistributedSchedContinueRecvManager::GetInstance().VerifyBroadcastSource(networkId,
+        bundleName, state);
     EXPECT_EQ(ret, ERR_OK);
 
     state = INACTIVE;
     bundleName = "invalid bundleName";
-    ret = DistributedSchedContinueManager::GetInstance().VerifyBroadcastSource(networkId, bundleName, state);
+    ret = DistributedSchedContinueRecvManager::GetInstance().VerifyBroadcastSource(networkId, bundleName, state);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 }
 
@@ -391,7 +397,7 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
     std::string senderNetworkId = "invalid senderNetworkId";
     uint32_t accessTokenId = 0;
     int32_t state = 0;
-    int32_t ret = DistributedSchedContinueManager::GetInstance().DealOnBroadcastBusiness(
+    int32_t ret = DistributedSchedContinueRecvManager::GetInstance().DealOnBroadcastBusiness(
         senderNetworkId, accessTokenId, state);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
@@ -401,13 +407,13 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
     sptr<IRemoteObject> obj = nullptr;
     std::string networkId = "invalid networkId";
     std::string bundleName = "invalid bundleName";
-    DistributedSchedContinueManager::GetInstance().NotifyRecvBroadcast(obj, networkId, bundleName, state);
+    DistributedSchedContinueRecvManager::GetInstance().NotifyRecvBroadcast(obj, networkId, bundleName, state);
 
     /**
      * @tc.steps: step3. test NotifyRecvBroadcast when missionId is invalid;
      */
     obj =  new RemoteOnListenerStubTest();
-    DistributedSchedContinueManager::GetInstance().NotifyRecvBroadcast(obj, networkId, bundleName, state);
+    DistributedSchedContinueRecvManager::GetInstance().NotifyRecvBroadcast(obj, networkId, bundleName, state);
 
     DTEST_LOG << "DMSContinueManagerTest testDealOnBroadcastBusiness001 end" << std::endl;
 }
@@ -463,8 +469,8 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeid001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeid001 start" << std::endl;
     sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
-    int32_t ret = DistributedSchedContinueManager::GetInstance().RegisterOnListener(TYPE, obj01);
-    EXPECT_EQ(false, DistributedSchedContinueManager::GetInstance().registerOnListener_.empty());
+    int32_t ret = DistributedSchedContinueRecvManager::GetInstance().RegisterOnListener(TYPE, obj01);
+    EXPECT_EQ(false, DistributedSchedContinueRecvManager::GetInstance().registerOnListener_.empty());
     DistributedSchedContinueManager::GetInstance().NotifyDeid(obj01);
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeid001 end" << std::endl;
 }
@@ -537,14 +543,14 @@ HWTEST_F(DMSContinueManagerTest, testNotifyScreenLockorOff001, TestSize.Level1)
      /**
      * @tc.steps: step1. test NotifyScreenLockorOff when eventHandler is not nullptr;
      */
-    DistributedSchedContinueManager::GetInstance().NotifyScreenLockorOff();
+    DistributedSchedContinueRecvManager::GetInstance().NotifyScreenLockorOff();
     EXPECT_NE(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
 
     /**
      * @tc.steps: step2. test NotifyScreenLockorOff when eventHandler is nullptr;
      */
     DistributedSchedContinueManager::GetInstance().UnInit();
-    DistributedSchedContinueManager::GetInstance().NotifyScreenLockorOff();
+    DistributedSchedContinueRecvManager::GetInstance().NotifyScreenLockorOff();
     EXPECT_EQ(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
     DTEST_LOG << "DMSContinueManagerTest testNotifyScreenLockorOff001 end" << std::endl;
 }
@@ -559,12 +565,12 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline001 start" << std::endl;
     sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
-    DistributedSchedContinueManager::GetInstance().RegisterOnListener(TYPE, obj01);
-    EXPECT_NE(DistributedSchedContinueManager::GetInstance().registerOnListener_.size(), 0);
+    DistributedSchedContinueRecvManager::GetInstance().RegisterOnListener(TYPE, obj01);
+    EXPECT_NE(DistributedSchedContinueRecvManager::GetInstance().registerOnListener_.size(), 0);
 
-    DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId = NETWORKID_01;
-    DistributedSchedContinueManager::GetInstance().NotifyDeviceOffline(NETWORKID_01);
-    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId, "");
+    DistributedSchedContinueRecvManager::GetInstance().iconInfo_.senderNetworkId = NETWORKID_01;
+    DistributedSchedContinueRecvManager::GetInstance().NotifyDeviceOffline(NETWORKID_01);
+    EXPECT_EQ(DistributedSchedContinueRecvManager::GetInstance().iconInfo_.senderNetworkId, "");
 
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline001 end" << std::endl;
 }
@@ -577,9 +583,9 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline001, TestSize.Level1)
 HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline002, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline002 start" << std::endl;
-    DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId = NETWORKID_01;
-    DistributedSchedContinueManager::GetInstance().NotifyDeviceOffline("");
-    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId, NETWORKID_01);
+    DistributedSchedContinueRecvManager::GetInstance().iconInfo_.senderNetworkId = NETWORKID_01;
+    DistributedSchedContinueRecvManager::GetInstance().NotifyDeviceOffline("");
+    EXPECT_EQ(DistributedSchedContinueRecvManager::GetInstance().iconInfo_.senderNetworkId, NETWORKID_01);
 
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline002 end" << std::endl;
 }
@@ -592,9 +598,9 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline002, TestSize.Level1)
 HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline003, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline003 start" << std::endl;
-    DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId = NETWORKID_01;
-    DistributedSchedContinueManager::GetInstance().NotifyDeviceOffline(NETWORKID_02);
-    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().iconInfo_.senderNetworkId, NETWORKID_01);
+    DistributedSchedContinueRecvManager::GetInstance().iconInfo_.senderNetworkId = NETWORKID_01;
+    DistributedSchedContinueRecvManager::GetInstance().NotifyDeviceOffline(NETWORKID_02);
+    EXPECT_EQ(DistributedSchedContinueRecvManager::GetInstance().iconInfo_.senderNetworkId, NETWORKID_01);
 
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline003 end" << std::endl;
 }
@@ -610,10 +616,10 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDataRecv001, TestSize.Level1)
     std::string senderNetworkId = NETWORKID_01;
     uint8_t payload[] = {0xf0};
     uint32_t dataLen1 = DMS_SEND_LEN - 1;
-    DistributedSchedContinueManager::GetInstance().NotifyDataRecv(senderNetworkId, payload, dataLen1);
+    DistributedSchedContinueRecvManager::GetInstance().NotifyDataRecv(senderNetworkId, payload, dataLen1);
 
     uint32_t dataLen2 = DMS_SEND_LEN;
-    DistributedSchedContinueManager::GetInstance().NotifyDataRecv(senderNetworkId, payload, dataLen2);
+    DistributedSchedContinueRecvManager::GetInstance().NotifyDataRecv(senderNetworkId, payload, dataLen2);
     EXPECT_NE(payload[0] & DMS_0X0F, sizeof(uint32_t));
     DTEST_LOG << "DMSContinueManagerTest testNotifyDataRecv001 end" << std::endl;
 }
