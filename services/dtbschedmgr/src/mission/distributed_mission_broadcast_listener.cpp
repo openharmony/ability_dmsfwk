@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 
 #include <string>
 #include "dtbschedmgr_log.h"
-#include "mission/distributed_sched_continue_manager.h"
+#include "mission/distributed_sched_continue_recv_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -27,7 +27,7 @@ const std::string TAG = "DistributedMissionBroadcastListener";
 void DistributedMissionBroadcastListener::OnDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen)
 {
     HILOGI("OnDataRecv, dataLen = %{public}u", dataLen);
-    DistributedSchedContinueManager::GetInstance().NotifyDataRecv(senderNetworkId, payload, dataLen);
+    DistributedSchedContinueRecvManager::GetInstance().NotifyDataRecv(senderNetworkId, payload, dataLen);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

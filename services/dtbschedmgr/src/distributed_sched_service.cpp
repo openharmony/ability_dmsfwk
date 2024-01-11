@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,7 @@
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission/distributed_mission_info.h"
 #include "mission/distributed_sched_continue_manager.h"
+#include "mission/distributed_sched_continue_recv_manager.h"
 #include "mission/distributed_sched_mission_manager.h"
 #endif
 #include "os_account_manager.h"
@@ -147,6 +148,7 @@ void DistributedSchedService::OnStop()
 {
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     DistributedSchedContinueManager::GetInstance().UnInit();
+    DistributedSchedContinueRecvManager::GetInstance().UnInit();
 #endif
     HILOGD("begin");
 }
@@ -179,7 +181,7 @@ void DistributedSchedService::DeviceOfflineNotify(const std::string& networkId)
 {
     DistributedSchedAdapter::GetInstance().DeviceOffline(networkId);
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    DistributedSchedContinueManager::GetInstance().NotifyDeviceOffline(networkId);
+    DistributedSchedContinueRecvManager::GetInstance().NotifyDeviceOffline(networkId);
     DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(networkId);
 #endif
 }
@@ -195,6 +197,7 @@ bool DistributedSchedService::Init()
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().InitDataStorage();
     DistributedSchedContinueManager::GetInstance().Init();
+    DistributedSchedContinueRecvManager::GetInstance().Init();
 #endif
     DistributedSchedAdapter::GetInstance().Init();
     HILOGD("init success.");
@@ -2102,13 +2105,13 @@ int32_t DistributedSchedService::UnRegisterDSchedEventListener(const std::string
 int32_t DistributedSchedService::RegisterOnListener(const std::string& type,
     const sptr<IRemoteObject>& obj)
 {
-    return DistributedSchedContinueManager::GetInstance().RegisterOnListener(type, obj);
+    return DistributedSchedContinueRecvManager::GetInstance().RegisterOnListener(type, obj);
 }
 
 int32_t DistributedSchedService::RegisterOffListener(const std::string& type,
     const sptr<IRemoteObject>& obj)
 {
-    return DistributedSchedContinueManager::GetInstance().RegisterOffListener(type, obj);
+    return DistributedSchedContinueRecvManager::GetInstance().RegisterOffListener(type, obj);
 }
 
 int32_t DistributedSchedService::UnRegisterMissionListener(const std::u16string& devId,
