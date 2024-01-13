@@ -16,9 +16,7 @@
 #include "mission/distributed_sched_continue_manager.h"
 
 #include "adapter/dnetwork_adapter.h"
-#ifdef SUPPORT_MULTIMODALINPUT_SERVICE
 #include "adapter/mmi_adapter.h"
-#endif
 #include "datetime_ex.h"
 #include "distributed_sched_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
@@ -52,9 +50,7 @@ void DistributedSchedContinueManager::Init()
             return;
         }
         missionDiedListener_ = new DistributedMissionDiedListener();
-#ifdef SUPPORT_MULTIMODALINPUT_SERVICE
         MMIAdapter::GetInstance().Init();
-#endif
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
         EventFwk::MatchingSkills matchingSkills;
         matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
@@ -196,7 +192,6 @@ int32_t DistributedSchedContinueManager::SendSoftbusEvent(uint32_t accessTokenId
     return ret;
 }
 
-#ifdef SUPPORT_MULTIMODALINPUT_SERVICE
 void DistributedSchedContinueManager::AddMMIListener()
 {
     if (mmiMonitorId_ >= 0) {
@@ -213,7 +208,6 @@ void DistributedSchedContinueManager::AddMMIListener()
 
 void DistributedSchedContinueManager::RemoveMMIListener()
 {
-    std::lock_guard<std::mutex> mmiEventLock(mmiMutex_);
     if (mmiMonitorId_ < 0) {
         HILOGI("No MMI listener to be removed, monitor id: %{public}d", mmiMonitorId_);
         return;
@@ -222,10 +216,8 @@ void DistributedSchedContinueManager::RemoveMMIListener()
     HILOGI("MMI listener has been removed, monitor id: %{public}d", mmiMonitorId_);
 
     mmiMonitorId_ = INVALID_MISSION_ID;
-    needMMIBroadcast_ = false;
     return;
 }
-#endif
 
 int32_t DistributedSchedContinueManager::DealFocusedBusiness(const int32_t missionId)
 {
@@ -292,40 +284,6 @@ int32_t DistributedSchedContinueManager::CheckContinueState(const int32_t missio
 void DistributedSchedContinueManager::DealTimerUnfocusedBussiness(const int32_t missionId)
 {
     HILOGI("DealTimerUnfocusedBussiness start, missionId: %{public}d", missionId);
-#ifdef SUPPORT_MULTIMODALINPUT_SERVICE
-    int64_t interval = GetTickCount() - lastMMIEvent_;
-    if (interval < CANCEL_FOCUSED_DELAYED) {
-        HILOGD("Last MMI event happened in interval, keep mission focused.");
-        auto refocusedTask = [this, missionId, interval]() {
-            if (missionId == info_.currentMissionId && info_.currentIsContinuable) {
-                AddCancelMissionFocusedTimer(missionId, CANCEL_FOCUSED_DELAYED - static_cast<int32_t>(interval));
-            }
-            DealFocusedBusiness(missionId);
-        };
-        if (eventHandler_ != nullptr) {
-            eventHandler_->RemoveTask(CANCEL_FOCUSED_TASK);
-            eventHandler_->PostTask(refocusedTask);
-        } else {
-            HILOGE("eventHandler_ is nullptr");
-        }
-        return;
-    }
-    {
-        HILOGD("Last MMI event happened out of interval, set mission unfocused.");
-        std::lock_guard<std::mutex> mmiEventLock(mmiMutex_);
-        needMMIBroadcast_ = true;
-        auto unfocusedTask = [this, missionId]() {
-            DealUnfocusedBusiness(missionId, false);
-        };
-        if (eventHandler_ != nullptr) {
-            eventHandler_->RemoveTask(CANCEL_FOCUSED_TASK);
-            eventHandler_->PostTask(unfocusedTask);
-        } else {
-            HILOGE("eventHandler_ is nullptr");
-        }
-        return;
-    }
-#else
     auto unfocusedTask = [this, missionId]() {
         DealUnfocusedBusiness(missionId, false);
     };
@@ -336,7 +294,6 @@ void DistributedSchedContinueManager::DealTimerUnfocusedBussiness(const int32_t 
         HILOGE("eventHandler_ is nullptr");
     }
     return;
-#endif
 }
 
 int32_t DistributedSchedContinueManager::DealUnfocusedBusiness(const int32_t missionId, bool isUnfocused)
@@ -477,14 +434,10 @@ int32_t DistributedSchedContinueManager::DealSetMissionContinueStateBusiness(con
     uint8_t type = DMS_FOCUSED_TYPE;
     if (state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE) {
         type = DMS_UNFOCUSED_TYPE;
-    }
-#ifdef SUPPORT_MULTIMODALINPUT_SERVICE
-    if (state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE) {
         RemoveMMIListener();
     } else {
         AddMMIListener();
     }
-#endif
 
     ret = SendSoftbusEvent(accessTokenId, type);
     if (ret != ERR_OK) {
@@ -522,26 +475,10 @@ void DistributedSchedContinueManager::NotifyDeid(const sptr<IRemoteObject>& obj)
     HILOGI("NotifyDeid end");
 }
 
-#ifdef SUPPORT_MULTIMODALINPUT_SERVICE
 void DistributedSchedContinueManager::OnMMIEvent()
 {
-    std::lock_guard<std::mutex> mmiEventLock(mmiMutex_);
-    lastMMIEvent_ = GetTickCount();
-
-    if (!needMMIBroadcast_) {
-        return;
-    }
-    HILOGD("Need to resend focus broadcast, missionId = %{public}d", info_.currentMissionId);
+    HILOGD("OnMMIEvent, missionId = %{public}d", info_.currentMissionId);
     DistributedSchedContinueManager::GetInstance().NotifyMissionFocused(info_.currentMissionId);
-    needMMIBroadcast_ = false;
 }
-
-void DistributedSchedContinueManager::ResetMMIFlag()
-{
-    HILOGI("Reset MMI focus flag");
-    std::lock_guard<std::mutex> mmiEventLock(mmiMutex_);
-    needMMIBroadcast_ = true;
-}
-#endif
 } // namespace DistributedSchedule
 } // namespace OHOS

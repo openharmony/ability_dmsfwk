@@ -16,13 +16,18 @@
 #ifndef OHOS_DTBSCHEDMGR_MMI_ADAPTER_H
 #define OHOS_DTBSCHEDMGR_MMI_ADAPTER_H
 
+#ifdef SUPPORT_MULTIMODALINPUT_SERVICE
+#include <thread>
+
+#include "event_handler.h"
+
 #include "i_input_event_consumer.h"
 #include "input_manager.h"
+#endif
 #include "single_instance.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
-
 class MMIAdapter {
 public:
     DECLARE_SINGLE_INSTANCE_BASE(MMIAdapter);
@@ -30,17 +35,30 @@ public:
     MMIAdapter() = default;
     virtual ~MMIAdapter() = default;
 
-class MMIEventCallback : public MMI::IInputEventConsumer {
-    void OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const override;
-    void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override;
-    void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override;
-};
     void Init();
     int32_t AddMMIListener();
     void RemoveMMIListener(int32_t monitorId);
+#ifdef SUPPORT_MULTIMODALINPUT_SERVICE
+    class MMIEventCallback : public MMI::IInputEventConsumer {
+        void OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const override;
+        void OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const override;
+        void OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const override;
+    };
 
 private:
+    void StartEvent();
+    void PostRawMMIEvent();
+    void PostUnfreezeMMIEvent();
+    void HandleRawMMIEvent();
+    void HandleUnfreezeMMIEvent();
+
+    std::thread eventThread_;
+    std::condition_variable eventCon_;
+    std::mutex eventMutex_;
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     std::shared_ptr<MMI::IInputEventConsumer> mmiCallback_;
+    bool isMMIFreezed_ = false;
+#endif
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS
