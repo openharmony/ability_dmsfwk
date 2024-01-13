@@ -64,10 +64,7 @@ public:
     int32_t GetMissionId(const std::string& bundleName, int32_t& missionId);
     void NotifyDeid(const sptr<IRemoteObject>& obj);
     int32_t SetMissionContinueState(const int32_t missionId, const AAFwk::ContinueState& state);
-#ifdef SUPPORT_MULTIMODALINPUT_SERVICE
     void OnMMIEvent();
-    void ResetMMIFlag();
-#endif
 
 private:
     int32_t GetCurrentMissionId();
@@ -81,10 +78,8 @@ private:
     bool IsContinue(const int32_t& missionId, const std::string& bundleName);
     int32_t DealSetMissionContinueStateBusiness(const int32_t missionId, const AAFwk::ContinueState& state);
     int32_t CheckContinueState(const int32_t missionId);
-#ifdef SUPPORT_MULTIMODALINPUT_SERVICE
     void AddMMIListener();
     void RemoveMMIListener();
-#endif
 private:
     currentMissionInfo info_ = { INVALID_MISSION_ID, false };
     sptr<DistributedMissionFocusedListener> missionFocusedListener_;
@@ -97,12 +92,7 @@ private:
     std::mutex eventMutex_;
     std::mutex iconMutex_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
-#ifdef SUPPORT_MULTIMODALINPUT_SERVICE
-    std::mutex mmiMutex_;
     int32_t mmiMonitorId_ = INVALID_MISSION_ID;
-    int64_t lastMMIEvent_ = 0;
-    bool needMMIBroadcast_ = false;
-#endif
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

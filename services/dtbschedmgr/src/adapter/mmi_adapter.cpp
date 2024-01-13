@@ -15,6 +15,10 @@
 
 #include "adapter/mmi_adapter.h"
 
+#include <mutex>
+#include <thread>
+#include <sys/prctl.h>
+
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_sched_continue_manager.h"
 
@@ -23,6 +27,9 @@ namespace DistributedSchedule {
 
 namespace {
 const std::string TAG = "MMIAdapter";
+const std::string MMI_ADAPTER = "mmi_adapter";
+const std::string FREEZE_MMI_EVENT_TASK = "task_freeze_mmi_event";
+constexpr int32_t FREEZE_MMI_EVENT_INTERVAL = 5000;
 }
 
 IMPLEMENT_SINGLE_INSTANCE(MMIAdapter);
@@ -31,21 +38,25 @@ void MMIAdapter::Init()
 {
     HILOGI("Init");
     mmiCallback_ = std::make_shared<MMIAdapter::MMIEventCallback>();
+    eventThread_ = std::thread(&MMIAdapter::StartEvent, this);
+    std::unique_lock<std::mutex> lock(eventMutex_);
+    eventCon_.wait(lock, [this] {
+        return eventHandler_ != nullptr;
+    });
 }
 
-void MMIAdapter::MMIEventCallback::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
+void MMIAdapter::StartEvent()
 {
-    DistributedSchedContinueManager::GetInstance().OnMMIEvent();
-}
-
-void MMIAdapter::MMIEventCallback::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
-{
-    DistributedSchedContinueManager::GetInstance().OnMMIEvent();
-}
-
-void MMIAdapter::MMIEventCallback::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const
-{
-    DistributedSchedContinueManager::GetInstance().OnMMIEvent();
+    HILOGI("StartEvent start");
+    prctl(PR_SET_NAME, MMI_ADAPTER.c_str());
+    auto runner = AppExecFwk::EventRunner::Create();
+    {
+        std::lock_guard<std::mutex> lock(eventMutex_);
+        eventHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
+    }
+    eventCon_.notify_one();
+    runner->Run();
+    HILOGI("StartEvent end");
 }
 
 int32_t MMIAdapter::AddMMIListener()
@@ -53,6 +64,7 @@ int32_t MMIAdapter::AddMMIListener()
     HILOGD("AddMMIListener called");
     int32_t ret = MMI::InputManager::GetInstance()->AddMonitor(mmiCallback_);
     HILOGD("AddMMIListener result: %{public}d", ret);
+    isMMIFreezed_ = false;
     return ret;
 }
 
@@ -61,6 +73,60 @@ void MMIAdapter::RemoveMMIListener(int32_t monitorId)
     HILOGD("RemoveMMIListener called, monitor id = %{public}d", monitorId);
     MMI::InputManager::GetInstance()->RemoveMonitor(monitorId);
     return;
+}
+
+void MMIAdapter::PostRawMMIEvent()
+{
+    auto func = [this]() {
+        HandleRawMMIEvent();
+    };
+    if (eventHandler_ != nullptr) {
+        eventHandler_->PostTask(func);
+    } else {
+        HILOGE("eventHandler_ is nullptr");
+    }
+}
+
+void MMIAdapter::PostUnfreezeMMIEvent()
+{
+    auto func = [this]() {
+        HandleUnfreezeMMIEvent();
+    };
+    if (eventHandler_ != nullptr) {
+        eventHandler_->PostTask(func, FREEZE_MMI_EVENT_TASK, FREEZE_MMI_EVENT_INTERVAL);
+    } else {
+        HILOGE("eventHandler_ is nullptr");
+    }
+}
+
+void MMIAdapter::HandleRawMMIEvent()
+{
+    if (isMMIFreezed_) {
+        return;
+    }
+    isMMIFreezed_ = true;
+    DistributedSchedContinueManager::GetInstance().OnMMIEvent();
+    PostUnfreezeMMIEvent();
+}
+
+void MMIAdapter::HandleUnfreezeMMIEvent()
+{
+    isMMIFreezed_ = false;
+}
+
+void MMIAdapter::MMIEventCallback::OnInputEvent(std::shared_ptr<MMI::KeyEvent> keyEvent) const
+{
+    MMIAdapter::GetInstance().PostRawMMIEvent();
+}
+
+void MMIAdapter::MMIEventCallback::OnInputEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent) const
+{
+    MMIAdapter::GetInstance().PostRawMMIEvent();
+}
+
+void MMIAdapter::MMIEventCallback::OnInputEvent(std::shared_ptr<MMI::AxisEvent> axisEvent) const
+{
+    MMIAdapter::GetInstance().PostRawMMIEvent();
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
