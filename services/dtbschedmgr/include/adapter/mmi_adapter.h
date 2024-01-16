@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,11 @@
 #ifndef OHOS_DTBSCHEDMGR_MMI_ADAPTER_H
 #define OHOS_DTBSCHEDMGR_MMI_ADAPTER_H
 
-#ifdef SUPPORT_MULTIMODALINPUT_SERVICE
 #include <thread>
 
 #include "event_handler.h"
 
+#ifdef SUPPORT_MULTIMODALINPUT_SERVICE
 #include "i_input_event_consumer.h"
 #include "input_manager.h"
 #endif
@@ -36,6 +36,7 @@ public:
     virtual ~MMIAdapter() = default;
 
     void Init();
+    void UnInit();
     int32_t AddMMIListener();
     void RemoveMMIListener(int32_t monitorId);
 #ifdef SUPPORT_MULTIMODALINPUT_SERVICE

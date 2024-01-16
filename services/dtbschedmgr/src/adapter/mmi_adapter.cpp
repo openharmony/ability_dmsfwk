@@ -49,7 +49,7 @@ void MMIAdapter::StartEvent()
 {
     HILOGI("StartEvent start");
     prctl(PR_SET_NAME, MMI_ADAPTER.c_str());
-    auto runner = AppExecFwk::EventRunner::Create();
+    auto runner = AppExecFwk::EventRunner::Create(false);
     {
         std::lock_guard<std::mutex> lock(eventMutex_);
         eventHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
@@ -57,6 +57,19 @@ void MMIAdapter::StartEvent()
     eventCon_.notify_one();
     runner->Run();
     HILOGI("StartEvent end");
+}
+
+void MMIAdapter::UnInit()
+{
+    HILOGI("UnInit start");
+    if (eventHandler_ != nullptr) {
+        eventHandler_->GetEventRunner()->Stop();
+        eventThread_.join();
+        eventHandler_ = nullptr;
+    } else {
+        HILOGE("eventHandler_ is nullptr");
+    }
+    HILOGI("UnInit end");
 }
 
 int32_t MMIAdapter::AddMMIListener()
