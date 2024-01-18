@@ -77,6 +77,7 @@ void DistributedSchedContinueManager::Init()
 void DistributedSchedContinueManager::UnInit()
 {
     HILOGI("UnInit start");
+    MMIAdapter::GetInstance().UnInit();
     if (eventHandler_ != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
         eventThread_.join();

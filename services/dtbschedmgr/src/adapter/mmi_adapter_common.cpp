@@ -26,16 +26,23 @@ IMPLEMENT_SINGLE_INSTANCE(MMIAdapter);
 
 void MMIAdapter::Init()
 {
-    HILOGD("called");
+    HILOGI("%{public}s common called. ", __func__);
 }
+
+void MMIAdapter::UnInit()
+{
+    HILOGI("%{public}s common called. ", __func__);
+}
+
 int32_t MMIAdapter::AddMMIListener()
 {
-    HILOGD("called");
+    HILOGI("%{public}s common called. ", __func__);
+    return 0;
 }
 
 void MMIAdapter::RemoveMMIListener(int32_t monitorId)
 {
-    HILOGD("called");
+    HILOGI("%{public}s common called. ", __func__);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
