@@ -32,8 +32,11 @@ constexpr int32_t INDEX_2 = 2;
 constexpr int32_t INDEX_3 = 3;
 constexpr int32_t INDEX_4 = 4;
 constexpr int32_t CANCEL_FOCUSED_DELAYED = 60000;
+constexpr int32_t SCREEN_OFF_DELAY_TIME = 10000;
+constexpr int64_t TIME_DELAYED = 500; // determines whether normal unfocused or lockoff
 const std::string TAG = "DistributedSchedContinueManager";
 const std::string CANCEL_FOCUSED_TASK = "cancel_mission_focused_task";
+const std::string SCREEN_LOCKOFF_TASK = "screen_lockoff_task";
 const std::u16string DESCRIPTOR = u"ohos.aafwk.RemoteOnListener";
 }
 
@@ -119,6 +122,10 @@ void DistributedSchedContinueManager::AddCancelMissionFocusedTimer(const int32_t
 void DistributedSchedContinueManager::NotifyMissionFocused(const int32_t missionId)
 {
     HILOGI("NotifyMissionFocused start, missionId: %{public}d", missionId);
+    {
+        std::lock_guard<std::mutex> screenLockMapLock(screenLockMutex_);
+        screenLockInfo_.clear();
+    }
     auto feedfunc = [this, missionId]() {
         DealFocusedBusiness(missionId);
         if (missionId == info_.currentMissionId && info_.currentIsContinuable) {
@@ -127,6 +134,7 @@ void DistributedSchedContinueManager::NotifyMissionFocused(const int32_t mission
     };
 
     if (eventHandler_ != nullptr) {
+        eventHandler_->RemoveTask(SCREEN_LOCKOFF_TASK);
         eventHandler_->RemoveTask(CANCEL_FOCUSED_TASK);
         eventHandler_->PostTask(feedfunc);
     } else {
@@ -138,6 +146,16 @@ void DistributedSchedContinueManager::NotifyMissionFocused(const int32_t mission
 void DistributedSchedContinueManager::NotifyMissionUnfocused(const int32_t missionId)
 {
     HILOGI("NotifyMissionUnfocused start, missionId: %{public}d", missionId);
+    {
+        std::lock_guard<std::mutex> screenLockMapLock(screenLockMutex_);
+        if (screenLockInfo_.empty()) {
+            int64_t time = GetTickCount();
+            screenLockInfo_[missionId] = time;
+        } else {
+            HILOGI("Screen lock now, no need to NotifyMissionUnfocused");
+            return;
+        }
+    }
     auto feedfunc = [this, missionId]() {
         DealUnfocusedBusiness(missionId, true);
     };
@@ -148,6 +166,44 @@ void DistributedSchedContinueManager::NotifyMissionUnfocused(const int32_t missi
         HILOGE("eventHandler_ is nullptr");
     }
     HILOGI("NotifyMissionUnfocused end");
+}
+
+void DistributedSchedContinueManager::NotifyScreenLockorOff()
+{
+    HILOGI("NotifyScreenLockorOff start");
+    if (eventHandler_ == nullptr) {
+        HILOGE("eventHandler_ is nullptr");
+        return;
+    }
+    eventHandler_->RemoveAllEvents();
+    int32_t missionId = lastMissionId_;
+
+    if (missionId == -1) {
+        HILOGI("current no focused mission");
+        return;
+    }
+
+    auto feedUnfocusedFunc = [this, missionId]() {
+        DealUnfocusedBusiness(missionId, false);
+    };
+    auto feedFocusedFunc = [this, missionId]() {
+        DealFocusedBusiness(missionId);
+    };
+
+    int64_t time = GetTickCount();
+    {
+        std::lock_guard<std::mutex> screenLockMapLock(screenLockMutex_);
+        if (screenLockInfo_.size() != 0) {
+            auto it = screenLockInfo_.begin();
+            if (time - it->second < TIME_DELAYED) {
+                eventHandler_->PostTask(feedFocusedFunc);
+            }
+        } else {
+            screenLockInfo_[missionId] = time;
+        }
+    }
+    eventHandler_->PostTask(feedUnfocusedFunc, SCREEN_LOCKOFF_TASK, SCREEN_OFF_DELAY_TIME);
+    HILOGI("NotifyMissionFocused end");
 }
 
 int32_t DistributedSchedContinueManager::GetMissionId(const std::string& bundleName, int32_t& missionId)
@@ -241,6 +297,7 @@ int32_t DistributedSchedContinueManager::DealFocusedBusiness(const int32_t missi
     }
     std::string bundleName = info.want.GetBundle();
     focusedMission_[bundleName] = missionId;
+    lastMissionId_ = missionId;
 
     if (info.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
         HILOGE("Mission continue state set to INACTIVE. Broadcast task abort.");
@@ -256,7 +313,6 @@ int32_t DistributedSchedContinueManager::DealFocusedBusiness(const int32_t missi
         return ret;
     }
     HILOGI("Get focused accessTokenId success, accessTokenId: %{public}u", accessTokenId);
-
     uint8_t type = DMS_FOCUSED_TYPE;
     ret = SendSoftbusEvent(accessTokenId, type);
     if (ret != ERR_OK) {
@@ -285,6 +341,7 @@ int32_t DistributedSchedContinueManager::CheckContinueState(const int32_t missio
 void DistributedSchedContinueManager::DealTimerUnfocusedBussiness(const int32_t missionId)
 {
     HILOGI("DealTimerUnfocusedBussiness start, missionId: %{public}d", missionId);
+    lastMissionId_ = -1;
     auto unfocusedTask = [this, missionId]() {
         DealUnfocusedBusiness(missionId, false);
     };

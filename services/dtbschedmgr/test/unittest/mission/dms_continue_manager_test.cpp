@@ -160,11 +160,16 @@ HWTEST_F(DMSContinueManagerTest, testNotifyMissionUnfocused001, TestSize.Level3)
      */
     DistributedSchedContinueManager::GetInstance().NotifyMissionUnfocused(0);
     EXPECT_NE(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
+    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().screenLockInfo_.size(), 1);
+    DistributedSchedContinueManager::GetInstance().NotifyMissionUnfocused(0);
+    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().screenLockInfo_.size(), 1);
+
 
     /**
      * @tc.steps: step2. test NotifyMissionUnfocused when eventHandler is nullptr;
      */
     DistributedSchedContinueManager::GetInstance().UnInit();
+    DistributedSchedContinueManager::GetInstance().screenLockInfo_.clear();
     DistributedSchedContinueManager::GetInstance().NotifyMissionUnfocused(0);
     EXPECT_EQ(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
     DTEST_LOG << "DMSContinueManagerTest testNotifyMissionUnfocused001 end" << std::endl;
@@ -538,19 +543,22 @@ HWTEST_F(DMSContinueManagerTest, testDealSetMissionContinueStateBusiness001, Tes
 HWTEST_F(DMSContinueManagerTest, testNotifyScreenLockorOff001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyScreenLockorOff001 start" << std::endl;
-    DistributedSchedContinueManager::GetInstance().Init();
 
      /**
      * @tc.steps: step1. test NotifyScreenLockorOff when eventHandler is not nullptr;
      */
-    DistributedSchedContinueRecvManager::GetInstance().NotifyScreenLockorOff();
+    DistributedSchedContinueManager::GetInstance().Init();
+    DistributedSchedContinueManager::GetInstance().NotifyScreenLockorOff();
+    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().screenLockInfo_.size(), 1); // 1: size
+    DistributedSchedContinueManager::GetInstance().NotifyScreenLockorOff();
+    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().screenLockInfo_.size(), 1); // 1: size
     EXPECT_NE(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
 
     /**
      * @tc.steps: step2. test NotifyScreenLockorOff when eventHandler is nullptr;
      */
     DistributedSchedContinueManager::GetInstance().UnInit();
-    DistributedSchedContinueRecvManager::GetInstance().NotifyScreenLockorOff();
+    DistributedSchedContinueManager::GetInstance().NotifyScreenLockorOff();
     EXPECT_EQ(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
     DTEST_LOG << "DMSContinueManagerTest testNotifyScreenLockorOff001 end" << std::endl;
 }
