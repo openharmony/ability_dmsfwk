@@ -27,8 +27,8 @@ const std::string TAG = "CommonEventListener";
 void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
 {
     HILOGD("OnReceiveEvent called");
-    DistributedSchedContinueManager::GetInstance().NotifyScreenLockorOff();
-    DistributedSchedContinueRecvManager::GetInstance().NotifyScreenLockorOff();
+    DistributedSchedContinueManager::GetInstance().NotifyScreenOff();
+    DistributedSchedContinueRecvManager::GetInstance().NotifyScreenOff();
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

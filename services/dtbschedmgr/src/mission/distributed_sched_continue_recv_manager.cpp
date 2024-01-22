@@ -321,9 +321,9 @@ void DistributedSchedContinueRecvManager::NotifyDeid(const sptr<IRemoteObject>& 
 }
 
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
-void DistributedSchedContinueRecvManager::NotifyScreenLockorOff()
+void DistributedSchedContinueRecvManager::NotifyScreenOff()
 {
-    HILOGI("NotifyScreenLockorOff begin");
+    HILOGI("NotifyScreenOff begin");
     auto func = [this]() {
         std::string senderNetworkId;
         std::string bundleName;
@@ -358,7 +358,7 @@ void DistributedSchedContinueRecvManager::NotifyScreenLockorOff()
     } else {
         HILOGE("eventHandler_ is nullptr");
     }
-    HILOGI("NotifyScreenLockorOff end");
+    HILOGI("NotifyScreenOff end");
 }
 #endif
 

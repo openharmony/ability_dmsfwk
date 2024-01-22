@@ -41,6 +41,15 @@ struct currentMissionInfo {
     bool currentIsContinuable;
 };
 
+enum class FocusedReason {
+    MIN,
+    NORMAL,
+    INIT,
+    SCREENOFF,
+    MMI,
+    MAX
+};
+
 class DistributedSchedContinueManager {
     DECLARE_SINGLE_INSTANCE(DistributedSchedContinueManager);
 
@@ -59,9 +68,9 @@ public:
 
     void Init();
     void UnInit();
-    void NotifyMissionFocused(const int32_t missionId);
+    void NotifyMissionFocused(const int32_t missionId, FocusedReason focusedReason);
     void NotifyMissionUnfocused(const int32_t missionId);
-    void NotifyScreenLockorOff();
+    void NotifyScreenOff();
     int32_t GetMissionId(const std::string& bundleName, int32_t& missionId);
     void NotifyDeid(const sptr<IRemoteObject>& obj);
     int32_t SetMissionContinueState(const int32_t missionId, const AAFwk::ContinueState& state);
@@ -69,11 +78,12 @@ public:
 
 private:
     int32_t GetCurrentMissionId();
-    void AddCancelMissionFocusedTimer(const int32_t missionId, const int32_t delay);
+    void AddCancelMissionFocusedTimer(const int32_t missionId, const std::string eventName, const int32_t delay);
     int32_t SendSoftbusEvent(uint32_t accessTokenId, uint8_t type);
     void StartEvent();
     int32_t DealFocusedBusiness(const int32_t missionId);
     int32_t DealUnfocusedBusiness(const int32_t missionId, bool isUnfocused);
+    void DealScreenOff();
     void DealTimerUnfocusedBussiness(const int32_t missionId);
     int32_t GetBundleName(const int32_t missionId, std::string& bundleName);
     bool IsContinue(const int32_t& missionId, const std::string& bundleName);
@@ -94,8 +104,6 @@ private:
     std::mutex iconMutex_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     int32_t mmiMonitorId_ = INVALID_MISSION_ID;
-    int32_t lastMissionId_ = -1;
-    std::mutex screenLockMutex_;
     std::map<int32_t, int64_t> screenLockInfo_;
 };
 } // namespace DistributedSchedule
