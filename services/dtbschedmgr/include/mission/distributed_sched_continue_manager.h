@@ -61,6 +61,7 @@ public:
     void UnInit();
     void NotifyMissionFocused(const int32_t missionId);
     void NotifyMissionUnfocused(const int32_t missionId);
+    void NotifyScreenLockorOff();
     int32_t GetMissionId(const std::string& bundleName, int32_t& missionId);
     void NotifyDeid(const sptr<IRemoteObject>& obj);
     int32_t SetMissionContinueState(const int32_t missionId, const AAFwk::ContinueState& state);
@@ -93,6 +94,9 @@ private:
     std::mutex iconMutex_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     int32_t mmiMonitorId_ = INVALID_MISSION_ID;
+    int32_t lastMissionId_ = -1;
+    std::mutex screenLockMutex_;
+    std::map<int32_t, int64_t> screenLockInfo_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
