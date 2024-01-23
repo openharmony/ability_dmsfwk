@@ -47,7 +47,7 @@ void DistributedMissionFocusedListener::OnMissionMovedToFront(int32_t missionId)
 void DistributedMissionFocusedListener::OnMissionFocused(int32_t missionId)
 {
     HILOGI("OnMissionFocused, missionId = %{public}d", missionId);
-    DistributedSchedContinueManager::GetInstance().NotifyMissionFocused(missionId);
+    DistributedSchedContinueManager::GetInstance().NotifyMissionFocused(missionId, FocusedReason::NORMAL);
 }
 
 void DistributedMissionFocusedListener::OnMissionUnfocused(int32_t missionId)
