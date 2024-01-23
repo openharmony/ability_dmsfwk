@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
-static constexpr OHOS::HiviewDFX::HiLogLabel DSCHED_SERVICE_LABEL = {LOG_CORE, 0xD001800, "DSched_Service"};
+static constexpr OHOS::HiviewDFX::HiLogLabel DSCHED_SERVICE_LABEL = {LOG_CORE, 0xD004170, "DSched_Service"};
 
 #ifdef HILOGD
 #undef HILOGD

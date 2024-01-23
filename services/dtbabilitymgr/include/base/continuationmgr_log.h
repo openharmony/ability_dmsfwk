@@ -23,7 +23,7 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
-static constexpr OHOS::HiviewDFX::HiLogLabel CONTINUATION_MANAGER_LABEL = {LOG_CORE, 0xD001800,
+static constexpr OHOS::HiviewDFX::HiLogLabel CONTINUATION_MANAGER_LABEL = {LOG_CORE, 0xD004170,
     "ContinuationMgrService"};
 
 #ifdef HILOGD

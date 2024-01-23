@@ -43,7 +43,7 @@ ohos_executable("dms_sdk_demo") {
   defines = [
     "HI_LOG_ENABLE",
     "LOG_TAG=\"dms_sdk_demo\"",
-    "LOG_DOMAIN=0xD004100",
+    "LOG_DOMAIN=0xD004170",
     "DH_LOG_TAG=\"dms_sdk_demo\"",
     "VERSION_STR=\"1.0.0.302\"",
     "DMS_SOURCE",
