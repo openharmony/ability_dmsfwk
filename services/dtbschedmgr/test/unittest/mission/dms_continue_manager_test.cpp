@@ -15,6 +15,8 @@
 
 #include "dms_continue_manager_test.h"
 
+#include "datetime_ex.h"
+#include "distributed_sched_util.h"
 #include "dtbschedmgr_log.h"
 #define private public
 #include "mission/distributed_sched_continue_manager.h"
@@ -33,6 +35,7 @@ const std::string BUNDLENAME_01 = "bundleName01";
 const std::string BUNDLENAME_02 = "bundleName02";
 const std::string NETWORKID_01 = "networkId01";
 const std::string NETWORKID_02 = "networkId02";
+const std::string CANCEL_FOCUSED_TASK = "cancel_mission_focused_task";
 constexpr static int32_t DMS_SEND_LEN = 5;
 constexpr static uint8_t DMS_0X0F = 0x0f;
 constexpr int32_t MISSIONID_01 = 1;
@@ -73,6 +76,7 @@ HWTEST_F(DMSContinueManagerTest, testUnInit001, TestSize.Level3)
 {
     DTEST_LOG << "DMSContinueManagerTest testUnInit001 begin" << std::endl;
     
+    DistributedSchedUtil::MockManageMissions();
     DistributedSchedContinueManager::GetInstance().Init();
     EXPECT_NE(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
 
@@ -100,19 +104,22 @@ HWTEST_F(DMSContinueManagerTest, testAddCancelMissionFocusedTimer001, TestSize.L
 {
     DTEST_LOG << "DMSContinueManagerTest testAddCancelMissionFocusedTimer001 begin" << std::endl;
 
+    DistributedSchedUtil::MockManageMissions();
     DistributedSchedContinueManager::GetInstance().Init();
 
     /**
      * @tc.steps: step1. test AddCancelMissionFocusedTimer when eventHandler is not nullptr;
      */
-    DistributedSchedContinueManager::GetInstance().AddCancelMissionFocusedTimer(0, CANCEL_FOCUSED_DELAYED);
+    DistributedSchedContinueManager::GetInstance().AddCancelMissionFocusedTimer(0,
+        CANCEL_FOCUSED_TASK, CANCEL_FOCUSED_DELAYED);
     EXPECT_NE(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
 
     /**
      * @tc.steps: step2. test AddCancelMissionFocusedTimer when eventHandler is nullptr;
      */
     DistributedSchedContinueManager::GetInstance().UnInit();
-    DistributedSchedContinueManager::GetInstance().AddCancelMissionFocusedTimer(0, CANCEL_FOCUSED_DELAYED);
+    DistributedSchedContinueManager::GetInstance().AddCancelMissionFocusedTimer(0,
+        CANCEL_FOCUSED_TASK, CANCEL_FOCUSED_DELAYED);
     EXPECT_EQ(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
     DTEST_LOG << "DMSContinueManagerTest testAddCancelMissionFocusedTimer001 end" << std::endl;
 }
@@ -126,20 +133,22 @@ HWTEST_F(DMSContinueManagerTest, testAddCancelMissionFocusedTimer001, TestSize.L
 HWTEST_F(DMSContinueManagerTest, testNotifyMissionFocused001, TestSize.Level3)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyMissionFocused001 begin" << std::endl;
-    
+
+    DistributedSchedUtil::MockManageMissions();
     DistributedSchedContinueManager::GetInstance().Init();
 
     /**
      * @tc.steps: step1. test NotifyMissionFocused when eventHandler is not nullptr;
      */
-    DistributedSchedContinueManager::GetInstance().NotifyMissionFocused(0);
+    DistributedSchedContinueManager::GetInstance().NotifyMissionFocused(0, FocusedReason::NORMAL);
+    DistributedSchedContinueManager::GetInstance().NotifyMissionFocused(0, FocusedReason::SCREENOFF);
     EXPECT_NE(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
 
     /**
      * @tc.steps: step2. test NotifyMissionFocused when eventHandler is nullptr;
      */
     DistributedSchedContinueManager::GetInstance().UnInit();
-    DistributedSchedContinueManager::GetInstance().NotifyMissionFocused(0);
+    DistributedSchedContinueManager::GetInstance().NotifyMissionFocused(0, FocusedReason::NORMAL);
     EXPECT_EQ(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
     DTEST_LOG << "DMSContinueManagerTest testNotifyMissionFocused001 end" << std::endl;
 }
@@ -153,23 +162,20 @@ HWTEST_F(DMSContinueManagerTest, testNotifyMissionFocused001, TestSize.Level3)
 HWTEST_F(DMSContinueManagerTest, testNotifyMissionUnfocused001, TestSize.Level3)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyMissionUnfocused001 begin" << std::endl;
-    
+
+    DistributedSchedUtil::MockManageMissions();
     DistributedSchedContinueManager::GetInstance().Init();
     /**
      * @tc.steps: step1. test NotifyMissionUnfocused when eventHandler is not nullptr;
      */
     DistributedSchedContinueManager::GetInstance().NotifyMissionUnfocused(0);
-    EXPECT_NE(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
-    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().screenLockInfo_.size(), 1);
     DistributedSchedContinueManager::GetInstance().NotifyMissionUnfocused(0);
-    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().screenLockInfo_.size(), 1);
-
+    EXPECT_NE(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
 
     /**
      * @tc.steps: step2. test NotifyMissionUnfocused when eventHandler is nullptr;
      */
     DistributedSchedContinueManager::GetInstance().UnInit();
-    DistributedSchedContinueManager::GetInstance().screenLockInfo_.clear();
     DistributedSchedContinueManager::GetInstance().NotifyMissionUnfocused(0);
     EXPECT_EQ(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
     DTEST_LOG << "DMSContinueManagerTest testNotifyMissionUnfocused001 end" << std::endl;
@@ -488,6 +494,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeid001, TestSize.Level1)
 HWTEST_F(DMSContinueManagerTest, testSetMissionContinueState001, TestSize.Level3)
 {
     DTEST_LOG << "DMSContinueManagerTest testSetMissionContinueState001 start" << std::endl;
+    DistributedSchedUtil::MockManageMissions();
     DistributedSchedContinueManager::GetInstance().Init();
     OHOS::AAFwk::ContinueState state = OHOS::AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
 
@@ -536,31 +543,52 @@ HWTEST_F(DMSContinueManagerTest, testDealSetMissionContinueStateBusiness001, Tes
 
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
 /**
- * @tc.name: testNotifyScreenLockorOff001
- * @tc.desc: test NotifyScreenLockorOff normal
+ * @tc.name: testNotifyScreenOff001
+ * @tc.desc: test NotifyScreenOff normal
  * @tc.type: FUNC
  */
-HWTEST_F(DMSContinueManagerTest, testNotifyScreenLockorOff001, TestSize.Level1)
+HWTEST_F(DMSContinueManagerTest, testNotifyScreenOff001, TestSize.Level1)
 {
-    DTEST_LOG << "DMSContinueManagerTest testNotifyScreenLockorOff001 start" << std::endl;
+    DTEST_LOG << "DMSContinueManagerTest testNotifyScreenOff001 start" << std::endl;
 
+    DistributedSchedUtil::MockManageMissions();
      /**
-     * @tc.steps: step1. test NotifyScreenLockorOff when eventHandler is not nullptr;
+     * @tc.steps: step1. test NotifyScreenOff when eventHandler is not nullptr;
      */
     DistributedSchedContinueManager::GetInstance().Init();
-    DistributedSchedContinueManager::GetInstance().NotifyScreenLockorOff();
-    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().screenLockInfo_.size(), 1); // 1: size
-    DistributedSchedContinueManager::GetInstance().NotifyScreenLockorOff();
-    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().screenLockInfo_.size(), 1); // 1: size
+    DistributedSchedContinueManager::GetInstance().NotifyScreenOff();
     EXPECT_NE(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
 
     /**
-     * @tc.steps: step2. test NotifyScreenLockorOff when eventHandler is nullptr;
+     * @tc.steps: step2. test NotifyScreenOff when eventHandler is nullptr;
      */
     DistributedSchedContinueManager::GetInstance().UnInit();
-    DistributedSchedContinueManager::GetInstance().NotifyScreenLockorOff();
+    DistributedSchedContinueManager::GetInstance().NotifyScreenOff();
     EXPECT_EQ(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
-    DTEST_LOG << "DMSContinueManagerTest testNotifyScreenLockorOff001 end" << std::endl;
+    DTEST_LOG << "DMSContinueManagerTest testNotifyScreenOff001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testDealScreenOff001
+ * @tc.desc: test DealScreenOff normal
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, DealScreenOff001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest DealScreenOff001 start" << std::endl;
+    DistributedSchedContinueManager::GetInstance().info_.currentMissionId = 0;
+    DistributedSchedContinueManager::GetInstance().screenLockInfo_[0] = 0;
+    DistributedSchedContinueManager::GetInstance().DealScreenOff();
+    DistributedSchedContinueManager::GetInstance().info_.currentMissionId = 1;
+    DistributedSchedContinueManager::GetInstance().screenLockInfo_[0] = 0;
+    DistributedSchedContinueManager::GetInstance().DealScreenOff();
+    int64_t time = GetTickCount();
+    DistributedSchedContinueManager::GetInstance().screenLockInfo_[0] = time;
+    DistributedSchedContinueManager::GetInstance().DealScreenOff();
+    DistributedSchedContinueManager::GetInstance().screenLockInfo_.clear();
+    DistributedSchedContinueManager::GetInstance().DealScreenOff();
+    EXPECT_EQ(DistributedSchedContinueManager::GetInstance().screenLockInfo_.size(), 1);
+    DTEST_LOG << "DMSContinueManagerTest DealScreenOff001 end" << std::endl;
 }
 #endif
 

@@ -118,6 +118,42 @@ HWTEST_F(DistributedDataStorageTest, InsertTest_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InsertTest_002
+ * @tc.desc: test insert DistributedDataStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedDataStorageTest, InsertTest_002, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedDataStorageTest InsertTest_002 start" << std::endl;
+    distributedDataStorage_->Init();
+    this_thread::sleep_for(1s);
+    std::string deviceId;
+    uint8_t* byteStream = InitByteStream();
+    bool ret = distributedDataStorage_->Insert(deviceId, TASK_ID_1, byteStream, BYTESTREAM_LENGTH);
+    EXPECT_EQ(false, ret);
+    distributedDataStorage_->Stop();
+    DTEST_LOG << "DistributedDataStorageTest InsertTest_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: InsertTest_003
+ * @tc.desc: test insert DistributedDataStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedDataStorageTest, InsertTest_003, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedDataStorageTest InsertTest_003 start" << std::endl;
+    distributedDataStorage_->Init();
+    this_thread::sleep_for(1s);
+    std::string deviceId = GetLocalDeviceId();
+    uint8_t* byteStream = InitByteStream();
+    bool ret = distributedDataStorage_->Insert(deviceId, -1, byteStream, BYTESTREAM_LENGTH);
+    EXPECT_EQ(false, ret);
+    distributedDataStorage_->Stop();
+    DTEST_LOG << "DistributedDataStorageTest InsertTest_003 end" << std::endl;
+}
+
+/**
  * @tc.name: DeleteTest_001
  * @tc.desc: test delete DistributedDataStorage
  * @tc.type: FUNC
@@ -151,6 +187,42 @@ HWTEST_F(DistributedDataStorageTest, DeleteTest_002, TestSize.Level1)
     EXPECT_EQ(true, ret);
     distributedDataStorage_->Stop();
     DTEST_LOG << "DistributedDataStorageTest DeleteTest_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: DeleteTest_003
+ * @tc.desc: test delete DistributedDataStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedDataStorageTest, DeleteTest_003, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedDataStorageTest DeleteTest_003 start" << std::endl;
+    distributedDataStorage_->Init();
+    this_thread::sleep_for(1s);
+    std::string networkId;
+    int32_t missionId = 0;
+    bool ret = distributedDataStorage_->Delete(networkId, missionId);
+    EXPECT_EQ(false, ret);
+    distributedDataStorage_->Stop();
+    DTEST_LOG << "DistributedDataStorageTest DeleteTest_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: DeleteTest_004
+ * @tc.desc: test delete DistributedDataStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedDataStorageTest, DeleteTest_004, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedDataStorageTest DeleteTest_004 start" << std::endl;
+    distributedDataStorage_->Init();
+    this_thread::sleep_for(1s);
+    std::string networkId = GetLocalDeviceId();
+    int32_t missionId = -1;
+    bool ret = distributedDataStorage_->Delete(networkId, missionId);
+    EXPECT_EQ(false, ret);
+    distributedDataStorage_->Stop();
+    DTEST_LOG << "DistributedDataStorageTest DeleteTest_004 end" << std::endl;
 }
 
 /**
@@ -258,6 +330,42 @@ HWTEST_F(DistributedDataStorageTest, QueryTest_005, TestSize.Level1)
     EXPECT_EQ(true, ret);
     distributedDataStorage_->Stop();
     DTEST_LOG << "DistributedDataStorageTest QueryTest_005 end" << std::endl;
+}
+
+/**
+ * @tc.name: QueryTest_006
+ * @tc.desc: test query DistributedDataStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedDataStorageTest, QueryTest_006, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedDataStorageTest QueryTest_006 start" << std::endl;
+    distributedDataStorage_->Init();
+    this_thread::sleep_for(1s);
+    std::string deviceId;
+    Value value;
+    bool ret = distributedDataStorage_->Query(deviceId, TASK_ID_1, value);
+    EXPECT_EQ(false, ret);
+    distributedDataStorage_->Stop();
+    DTEST_LOG << "DistributedDataStorageTest QueryTest_006 end" << std::endl;
+}
+
+/**
+ * @tc.name: QueryTest_007
+ * @tc.desc: test query DistributedDataStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedDataStorageTest, QueryTest_007, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedDataStorageTest QueryTest_007 start" << std::endl;
+    distributedDataStorage_->Init();
+    this_thread::sleep_for(1s);
+    std::string deviceId = GetLocalDeviceId();
+    Value value;
+    bool ret = distributedDataStorage_->Query(deviceId, -1, value);
+    EXPECT_EQ(false, ret);
+    distributedDataStorage_->Stop();
+    DTEST_LOG << "DistributedDataStorageTest QueryTest_007 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
