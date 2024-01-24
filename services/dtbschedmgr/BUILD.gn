@@ -28,6 +28,7 @@ config("distributed_sched_config") {
     "${communication_path}/dsoftbus/dsoftbus_enhance/interfaces/kits/broadcast",
     "${communication_path}/dsoftbus/interfaces/kits/common",
     "${dms_path}/interfaces/kits/napi/include",
+    "${dms_path}/interfaces/innerkits/common/include",
     "include/distributedWant",
     "//third_party/cJSON",
   ]

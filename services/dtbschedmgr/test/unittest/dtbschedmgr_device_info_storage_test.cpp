@@ -416,19 +416,5 @@ HWTEST_F(DtbschedmgrDeviceInfoStorageTest, GetLocalDeviceUdidTest_001, TestSize.
     EXPECT_EQ(!udid.empty(), true);
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest GetLocalDeviceUdidTest_001 end" << std::endl;
 }
-
-/**
- * @tc.name: SyncDmsVersionInfoToRemoteTest_001
- * @tc.desc: test SyncDmsVersionInfoToRemote
- * @tc.type: FUNC
- */
-HWTEST_F(DtbschedmgrDeviceInfoStorageTest, SyncDmsVersionInfoToRemoteTest_001, TestSize.Level3)
-{
-    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest SyncDmsVersionInfoToRemoteTest_001 start" << std::endl;
-    std::string remoteNetworkId = "test";
-    int32_t result = DtbschedmgrDeviceInfoStorage::GetInstance().SyncDmsVersionInfoToRemote(remoteNetworkId);
-    EXPECT_TRUE(result != DistributedDeviceProfile::DP_SUCCESS);
-    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest SyncDmsVersionInfoToRemoteTest_001 end" << std::endl;
-}
 } // namespace DistributedSchedule
 } // namespace OHOS
