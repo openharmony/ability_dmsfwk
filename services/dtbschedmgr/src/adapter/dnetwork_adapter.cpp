@@ -78,7 +78,6 @@ void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOnline(const DmDeviceInfo&
         HILOGE("OnNodeOnline post task failed");
         return;
     }
-    DtbschedmgrDeviceInfoStorage::GetInstance().SyncDmsVersionInfoToRemote(networkId);
 }
 
 void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOffline(const DmDeviceInfo& deviceInfo)

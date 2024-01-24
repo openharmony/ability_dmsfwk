@@ -16,6 +16,7 @@
 #include "dms_version_manager.h"
 
 #include "distributed_device_profile_client.h"
+#include "dms_constant.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "nlohmann/json.hpp"
@@ -23,14 +24,11 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
+
+using namespace Constants;
+
 namespace {
 const std::string TAG = "DmsVersionManager";
-const std::string DMS_SERVICE_ID = "dmsfwk_svr_id";
-const std::string DMS_CHAR_ID = "dmsInfo";
-const std::string DMS_SERVICE_TYPE = "appInfo";
-const std::string PACKAGE_NAMES = "packageNames";
-const std::string VERSIONS = "versions";
-const std::string DMS_NAME = "dmsfwk";
 const int32_t DMS_VERSION_LENGTH = 3;
 const int32_t DMS_MAJOR_VERSION_INDEX = 0;
 const int32_t DMS_MINOR_VERSION_INDEX = 1;
@@ -81,7 +79,7 @@ int32_t DmsVersionManager::GetAppInfoFromDP(const std::string& deviceId, std::st
 {
     DistributedDeviceProfile::CharacteristicProfile profile;
     std::string udid = "";
-    udid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(deviceId);
+    udid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(deviceId);
     int32_t result = DistributedDeviceProfile::DistributedDeviceProfileClient::GetInstance().GetCharacteristicProfile(
         udid, DMS_SERVICE_ID, DMS_CHAR_ID, profile);
     if (result != ERR_OK) {

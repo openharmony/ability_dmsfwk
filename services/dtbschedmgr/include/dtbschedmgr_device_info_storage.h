@@ -25,7 +25,6 @@
 #include "event_handler.h"
 #include "iremote_object.h"
 #include "single_instance.h"
-#include "sync_completed_callback_stub.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -64,6 +63,13 @@ public:
     std::string GetUuidByNetworkId(const std::string& networkId);
 
     /**
+     * get udid by networkId
+     *
+     * @param networkId
+     */
+    std::string GetUdidByNetworkId(const std::string& networkId);
+
+    /**
      * get networkId by uuid
      *
      * @param uuid
@@ -84,13 +90,6 @@ public:
      */
     void UpdateDeviceInfoStorage(const std::vector<DistributedHardware::DmDeviceInfo>& dmDeviceInfoList);
 
-    /**
-     * Sync dms version info to remote
-     *
-     * @param remoteNetworkId
-     */
-    int32_t SyncDmsVersionInfoToRemote(const std::string& remoteNetworkId);
-
 private:
     bool InitNetworkIdManager(std::shared_ptr<DnetworkAdapter> dnetworkAdapter);
     bool ConnectSoftbus();
@@ -108,9 +107,6 @@ private:
     std::mutex uuidNetworkIdLock_;
     std::shared_ptr<AppExecFwk::EventHandler> initHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> networkIdMgrHandler_;
-    class SyncCallback : public OHOS::DistributedDeviceProfile::SyncCompletedCallbackStub {
-        void OnSyncCompleted(const std::map<std::string, OHOS::DistributedDeviceProfile::SyncStatus> &syncResults);
-    };
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

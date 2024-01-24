@@ -19,13 +19,11 @@
 #include <thread>
 
 #include "distributed_device_node_listener.h"
-#include "distributed_device_profile_client.h"
 #include "distributed_sched_service.h"
 #include "dtbschedmgr_log.h"
 #include "ipc_object_proxy.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
-#include "cJSON.h"
 #include "system_ability_definition.h"
 
 using namespace std;
@@ -33,18 +31,11 @@ namespace OHOS {
 namespace DistributedSchedule {
 using namespace std::chrono_literals;
 using namespace DistributedHardware;
-using namespace DistributedDeviceProfile;
 
 namespace {
 constexpr int32_t RETRY_TIMES = 30;
 constexpr int32_t CONNECT_SOFTBUS_RETRY_TIMES = 60;
 const std::string TAG = "DtbschedmgrDeviceInfoStorage";
-const std::string DMS_SERVICE_ID = "dmsfwk_svr_id";
-const std::string DMS_CHAR_ID = "dmsInfo";
-const std::string DMS_VERSION = "4.1.0";
-const std::string DMS_NAMES = "dmsfwk";
-constexpr const char *PACKAGE_NAMES = "packageNames";
-constexpr const char *VERSIONS = "versions";
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DtbschedmgrDeviceInfoStorage);
@@ -198,52 +189,6 @@ void DtbschedmgrDeviceInfoStorage::UpdateDeviceInfoStorage(
     }
 }
 
-int32_t DtbschedmgrDeviceInfoStorage::SyncDmsVersionInfoToRemote(const std::string& remoteNetworkId)
-{
-    std::string localUdid = "";
-    GetLocalUdid(localUdid);
-    if (localUdid.empty()) {
-        HILOGE("getlocaludid failed, localUdid is empty");
-    }
-    DistributedDeviceProfile::ServiceProfile serviceProfile;
-    serviceProfile.SetDeviceId(localUdid);
-    serviceProfile.SetServiceName(DMS_SERVICE_ID);
-    serviceProfile.SetServiceType(DMS_SERVICE_ID);
-    DistributedDeviceProfile::DistributedDeviceProfileClient::GetInstance().PutServiceProfile(serviceProfile);
-
-    DistributedDeviceProfile::CharacteristicProfile characteristicProfile;
-    characteristicProfile.SetDeviceId(localUdid);
-    characteristicProfile.SetServiceName(DMS_SERVICE_ID);
-    characteristicProfile.SetCharacteristicKey(DMS_CHAR_ID);
-    cJSON *jObject = cJSON_CreateObject();
-    if (jObject == nullptr) {
-        HILOGE("Failed to create cJSON object.");
-        return ERR_NULL_OBJECT;
-    }
-    cJSON_AddStringToObject(jObject, PACKAGE_NAMES, DMS_NAMES.c_str());
-    cJSON_AddStringToObject(jObject, VERSIONS, DMS_VERSION.c_str());
-    char *jsonData = cJSON_PrintUnformatted(jObject);
-    if (jsonData == nullptr) {
-        HILOGE("Failed to create JSON data.");
-        cJSON_Delete(jObject);
-        return ERR_NULL_OBJECT;
-    }
-    std::string dmsInfo(jsonData);
-    cJSON_Delete(jObject);
-    cJSON_free(jsonData);
-    characteristicProfile.SetCharacteristicValue(dmsInfo);
-    DistributedDeviceProfile::DistributedDeviceProfileClient::GetInstance().
-        PutCharacteristicProfile(characteristicProfile);
-
-    SyncOptions syncOptions;
-    syncOptions.AddDevice(remoteNetworkId);
-    syncOptions.SetSyncMode(SyncMode::PUSH_PULL);
-    sptr<ISyncCompletedCallback> syncCallback = new(std::nothrow) SyncCallback;
-    int32_t syncRes = DistributedDeviceProfileClient::GetInstance().SyncDeviceProfile(syncOptions, syncCallback);
-    HILOGI("SyncDeviceProfile result: %{public}d", syncRes);
-    return syncRes;
-}
-
 bool DtbschedmgrDeviceInfoStorage::GetLocalDeviceId(std::string& networkId)
 {
     return GetLocalDeviceFromDnet(networkId);
@@ -326,6 +271,16 @@ std::string DtbschedmgrDeviceInfoStorage::GetUuidByNetworkId(const std::string& 
     return uuid;
 }
 
+std::string DtbschedmgrDeviceInfoStorage::GetUdidByNetworkId(const std::string& networkId)
+{
+    if (networkId.empty()) {
+        HILOGW("GetUdidByNetworkId networkId empty!");
+        return "";
+    }
+    std::string udid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(networkId);
+    return udid;
+}
+
 std::string DtbschedmgrDeviceInfoStorage::GetNetworkIdByUuid(const std::string& uuid)
 {
     if (uuid.empty()) {
@@ -399,17 +354,6 @@ void DtbschedmgrDeviceInfoStorage::DeviceOfflineNotify(const std::string& networ
 void DtbschedmgrDeviceInfoStorage::OnDeviceInfoChanged(const std::string& deviceId)
 {
     HILOGI("OnDeviceInfoChanged called");
-}
-
-void DtbschedmgrDeviceInfoStorage::SyncCallback::OnSyncCompleted(const std::map<std::string,
-    OHOS::DistributedDeviceProfile::SyncStatus> &syncResults)
-{
-    for (const auto &item : syncResults) {
-        std::string networkId = item.first;
-        int32_t syncResult = item.second;
-        HILOGI("networkId: %{public}s, SyncStatus: %{public}d",
-            DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), syncResult);
-    }
 }
 
 void DnetServiceDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
