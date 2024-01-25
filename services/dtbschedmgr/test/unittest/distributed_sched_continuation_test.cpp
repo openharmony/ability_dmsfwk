@@ -456,6 +456,33 @@ HWTEST_F(DSchedContinuationTest, ContinueLocalMission_004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ContinueLocalMission_005
+ * @tc.desc: input invalid params.
+ * @tc.type: FUNC
+ * @tc.require: I5RWKZ
+ */
+HWTEST_F(DSchedContinuationTest, ContinueLocalMission_005, TestSize.Level1)
+{
+    DTEST_LOG << "DSchedContinuationTest ContinueLocalMission_005 start" << std::endl;
+    /**
+     * @tc.steps: step1. input invalid mission.
+     * @tc.expected: step1. return err.
+     */
+    std::string deviceId = "123456";
+    int32_t missionId = 0;
+    auto callback = GetDSchedService();
+    WantParams wantParams;
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        return;
+    }
+    DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    DistributedSchedService::GetInstance().dschedContinuation_->PushCallback(missionId, callback, deviceId, false);
+    int32_t ret = DistributedSchedService::GetInstance().ContinueAbilityWithTimeout(deviceId, missionId, callback);
+    EXPECT_EQ(CONTINUE_ALREADY_IN_PROGRESS, ret);
+    DTEST_LOG << "DSchedContinuationTest ContinueLocalMission_005 end" << std::endl;
+}
+
+/**
  * @tc.name: ContinueLocalMissionDealFreeInstall_001
  * @tc.desc: input invalid params.
  * @tc.type: FUNC
