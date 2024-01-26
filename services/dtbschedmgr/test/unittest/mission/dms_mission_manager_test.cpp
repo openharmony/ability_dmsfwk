@@ -1230,6 +1230,7 @@ HWTEST_F(DMSMissionManagerTest, testOnRemoteDied002, TestSize.Level3)
 HWTEST_F(DMSMissionManagerTest, testStartSyncMissionsFromRemote001, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncMissionsFromRemote001 begin" << std::endl;
+    DistributedSchedUtil::MockManageMissions();
     std::vector<DstbMissionInfo> missionInfos;
     CallerInfo callerInfo;
     DistributedSchedMissionManager::GetInstance().Init();
@@ -2457,6 +2458,7 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions013, TestSize.Level3)
 HWTEST_F(DMSMissionManagerTest, testStartSyncMissionsFromRemote002, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncMissionsFromRemote002 begin" << std::endl;
+    DistributedSchedUtil::MockManageMissions();
     /**
      * @tc.steps: step1. test GetRemoteDms
      */
@@ -2493,6 +2495,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncMissionsFromRemote002, TestSize.Lev
 HWTEST_F(DMSMissionManagerTest, testStartSyncMissionsFromRemote003, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncMissionsFromRemote003 begin" << std::endl;
+    DistributedSchedUtil::MockManageMissions();
     /**
      * @tc.steps: step1. test notify remote died
      */

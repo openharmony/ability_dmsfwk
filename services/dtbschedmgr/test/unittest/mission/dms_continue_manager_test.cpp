@@ -16,6 +16,7 @@
 #include "dms_continue_manager_test.h"
 
 #include "datetime_ex.h"
+#include "distributed_sched_util.h"
 #include "dtbschedmgr_log.h"
 #define private public
 #include "mission/distributed_sched_continue_manager.h"
@@ -75,6 +76,7 @@ HWTEST_F(DMSContinueManagerTest, testUnInit001, TestSize.Level3)
 {
     DTEST_LOG << "DMSContinueManagerTest testUnInit001 begin" << std::endl;
     
+    DistributedSchedUtil::MockManageMissions();
     DistributedSchedContinueManager::GetInstance().Init();
     EXPECT_NE(DistributedSchedContinueManager::GetInstance().eventHandler_, nullptr);
 
@@ -102,6 +104,7 @@ HWTEST_F(DMSContinueManagerTest, testAddCancelMissionFocusedTimer001, TestSize.L
 {
     DTEST_LOG << "DMSContinueManagerTest testAddCancelMissionFocusedTimer001 begin" << std::endl;
 
+    DistributedSchedUtil::MockManageMissions();
     DistributedSchedContinueManager::GetInstance().Init();
 
     /**
@@ -131,6 +134,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyMissionFocused001, TestSize.Level3)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyMissionFocused001 begin" << std::endl;
 
+    DistributedSchedUtil::MockManageMissions();
     DistributedSchedContinueManager::GetInstance().Init();
 
     /**
@@ -159,6 +163,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyMissionUnfocused001, TestSize.Level3)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyMissionUnfocused001 begin" << std::endl;
 
+    DistributedSchedUtil::MockManageMissions();
     DistributedSchedContinueManager::GetInstance().Init();
     /**
      * @tc.steps: step1. test NotifyMissionUnfocused when eventHandler is not nullptr;
@@ -489,6 +494,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeid001, TestSize.Level1)
 HWTEST_F(DMSContinueManagerTest, testSetMissionContinueState001, TestSize.Level3)
 {
     DTEST_LOG << "DMSContinueManagerTest testSetMissionContinueState001 start" << std::endl;
+    DistributedSchedUtil::MockManageMissions();
     DistributedSchedContinueManager::GetInstance().Init();
     OHOS::AAFwk::ContinueState state = OHOS::AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
 
@@ -545,6 +551,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyScreenOff001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyScreenOff001 start" << std::endl;
 
+    DistributedSchedUtil::MockManageMissions();
      /**
      * @tc.steps: step1. test NotifyScreenOff when eventHandler is not nullptr;
      */

@@ -29,6 +29,7 @@ class DistributedSchedUtil {
 public:
     static void MockPermission();
     static void MockBundlePermission();
+    static void MockManageMissions();
     static void MockProcess(const char* processName);
     static void MockProcessAndPermission(const char* processName,
         const char *perms[] = nullptr, int32_t permsNum = 0);

@@ -68,6 +68,15 @@ HWTEST_F(DmsSaClientTest, AddDSchedEventListener_001, TestSize.Level3)
         DTEST_LOG << "dmssaClient_ is nullptr" << std::endl;
         return;
     }
+
+    DTEST_LOG << "DmsSaClientTest OnAddSystemAbility_002 start" << std::endl;
+    int32_t systemAbilityId = 1;
+    dmssaClient_->OnAddSystemAbility(systemAbilityId, DEVICE_ID);
+
+    systemAbilityId = DISTRIBUTED_SCHED_SA_ID;
+    dmssaClient_->OnAddSystemAbility(systemAbilityId, DEVICE_ID);
+    DTEST_LOG << "DmsSaClientTest OnAddSystemAbility_002 end" << std::endl;
+
     sptr<IDSchedEventListenerTest> listener = new IDSchedEventListenerTest();
     dmssaClient_->hasSubscribeDmsSA_ = true;
     int32_t result = dmssaClient_->AddDSchedEventListener(TYPE, listener);
@@ -88,6 +97,15 @@ HWTEST_F(DmsSaClientTest, AddDSchedEventListener_002, TestSize.Level3)
         DTEST_LOG << "dmssaClient_ is nullptr" << std::endl;
         return;
     }
+
+    DTEST_LOG << "DmsSaClientTest OnRemoveSystemAbility_001 start" << std::endl;
+    int32_t systemAbilityId = 1;
+    dmssaClient_->OnAddSystemAbility(systemAbilityId, DEVICE_ID);
+
+    systemAbilityId = DISTRIBUTED_SCHED_SA_ID;
+    dmssaClient_->OnRemoveSystemAbility(systemAbilityId, DEVICE_ID);
+    DTEST_LOG << "DmsSaClientTest OnRemoveSystemAbility_001 end" << std::endl;
+
     sptr<IDSchedEventListenerTest> listener = new IDSchedEventListenerTest();
     int32_t result = dmssaClient_->AddDSchedEventListener(TYPE, listener);
     EXPECT_EQ(result, NO_ERROR);
