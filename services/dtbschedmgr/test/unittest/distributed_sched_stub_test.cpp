@@ -1272,6 +1272,7 @@ HWTEST_F(DistributedSchedStubTest, StartSyncMissionsFromRemoteInner_001, TestSiz
 HWTEST_F(DistributedSchedStubTest, StartSyncMissionsFromRemoteInner_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedStubTest StartSyncMissionsFromRemoteInner_002 begin" << std::endl;
+    DistributedSchedUtil::MockManageMissions();
     MessageParcel data;
     MessageParcel reply;
     CallerInfo callerInfo;

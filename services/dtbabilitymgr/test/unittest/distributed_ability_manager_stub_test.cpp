@@ -105,6 +105,23 @@ HWTEST_F(DistributedAbilityManagerStubTest, RegisterInner_001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: RegisterInner_002
+ * @tc.desc: test RegisterInner
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DistributedAbilityManagerStubTest, RegisterInner_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerStubTest RegisterInner_002 start" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(VALUE_NULL);
+    int32_t result = dtbabilitymgrStub_->RegisterInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedAbilityManagerStubTest RegisterInner_002 end" << std::endl;
+}
+
+/**
  * @tc.name: RegisterDeviceSelectionCallbackInner_001
  * @tc.desc: test RegisterDeviceSelectionCallbackInner with cbType is empty
  * @tc.type: FUNC
@@ -222,6 +239,42 @@ HWTEST_F(DistributedAbilityManagerStubTest, StartDeviceManagerInner_002, TestSiz
     int32_t result = dtbabilitymgrStub_->StartDeviceManagerInner(data, reply);
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedAbilityManagerStubTest StartDeviceManagerInner_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: UnregisterInner_001
+ * @tc.desc: test UnregisterInner
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DistributedAbilityManagerStubTest, UnregisterInner_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerStubTest UnregisterInner_001 start" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(VALUE_OBJECT);
+    int32_t result = dtbabilitymgrStub_->UnregisterInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedAbilityManagerStubTest UnregisterInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: UpdateConnectStatusInner_001
+ * @tc.desc: test UpdateConnectStatusInner
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DistributedAbilityManagerStubTest, UpdateConnectStatusInner_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerStubTest UpdateConnectStatusInner_001 start" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    std::string deviceId = "12345";
+    data.WriteInt32(VALUE_OBJECT);
+    data.WriteString(deviceId);
+    int32_t result = dtbabilitymgrStub_->UpdateConnectStatusInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedAbilityManagerStubTest UpdateConnectStatusInner_001 end" << std::endl;
 }
 }
 }

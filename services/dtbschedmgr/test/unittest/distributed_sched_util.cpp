@@ -102,6 +102,14 @@ void DistributedSchedUtil::MockBundlePermission()
     MockProcessAndPermission("DistributedSchedPermissionTest", PERMS, sizeof(PERMS) / sizeof(PERMS[0]));
 }
 
+void DistributedSchedUtil::MockManageMissions()
+{
+    static const char *perms[] = {
+        "ohos.permission.MANAGE_MISSIONS"
+    };
+    MockProcessAndPermission("DistributedSchedPermissionTest", perms, sizeof(perms) / sizeof(perms[0]));
+}
+
 void DistributedSchedUtil::MockProcess(const char* processName)
 {
     MockProcessAndPermission(processName);
