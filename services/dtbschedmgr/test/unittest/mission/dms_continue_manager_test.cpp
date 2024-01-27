@@ -43,6 +43,7 @@ constexpr int32_t MISSIONID_02 = 2;
 constexpr int32_t ACTIVE = 0;
 constexpr int32_t INACTIVE = 1;
 constexpr int32_t CANCEL_FOCUSED_DELAYED = 10000;
+constexpr int32_t DBMS_RETRY_MAX_TIME = 5;
 }
 
 void DMSContinueManagerTest::SetUpTestCase()
@@ -409,8 +410,12 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
     uint32_t accessTokenId = 0;
     int32_t state = 0;
     int32_t ret = DistributedSchedContinueRecvManager::GetInstance().DealOnBroadcastBusiness(
-        senderNetworkId, accessTokenId, state);
+        senderNetworkId, accessTokenId, state, DBMS_RETRY_MAX_TIME);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = DistributedSchedContinueRecvManager::GetInstance().DealOnBroadcastBusiness(
+        senderNetworkId, accessTokenId, state, 0);
+    EXPECT_EQ(ret, 0);
 
     /**
      * @tc.steps: step2. test NotifyRecvBroadcast when obj is nullptr;
@@ -427,6 +432,24 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
     DistributedSchedContinueRecvManager::GetInstance().NotifyRecvBroadcast(obj, networkId, bundleName, state);
 
     DTEST_LOG << "DMSContinueManagerTest testDealOnBroadcastBusiness001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testPostOnBroadcastBusiness001
+ * @tc.desc: test PostOnBroadcastBusiness
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testPostOnBroadcastBusiness001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testPostOnBroadcastBusiness001 start" << std::endl;
+    std::string senderNetworkId = "invalid senderNetworkId";
+    uint32_t accessTokenId = 0;
+    int32_t state = 0;
+
+    DistributedSchedContinueRecvManager::GetInstance().PostOnBroadcastBusiness(senderNetworkId, accessTokenId, state);
+    EXPECT_NE(DistributedSchedContinueRecvManager::GetInstance().eventHandler_, nullptr);
+
+    DTEST_LOG << "DMSContinueManagerTest testPostOnBroadcastBusiness001 end" << std::endl;
 }
 
 /**
