@@ -20,7 +20,7 @@
 #include <sys/prctl.h>
 
 #include "dtbschedmgr_log.h"
-#include "mission/distributed_sched_continue_manager.h"
+#include "mission/dms_continue_send_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -118,7 +118,7 @@ void MMIAdapter::HandleRawMMIEvent()
         return;
     }
     isMMIFreezed_ = true;
-    DistributedSchedContinueManager::GetInstance().OnMMIEvent();
+    DMSContinueSendMgr::GetInstance().OnMMIEvent();
     PostUnfreezeMMIEvent();
 }
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "mission/distributed_sched_continue_recv_manager.h"
+#include "mission/dms_continue_recv_manager.h"
 
 #include "adapter/dnetwork_adapter.h"
 #include "datetime_ex.h"
@@ -33,14 +33,14 @@ constexpr int32_t INACTIVE = 1;
 constexpr int32_t INDEX_2 = 2;
 constexpr int32_t INDEX_3 = 3;
 constexpr int32_t INDEX_4 = 4;
-const std::string TAG = "DistributedSchedContinueRecvManager";
+const std::string TAG = "DMSContinueRecvMgr";
 const std::string CANCEL_FOCUSED_TASK = "cancel_mission_focused_task";
 const std::u16string DESCRIPTOR = u"ohos.aafwk.RemoteOnListener";
 }
 
-IMPLEMENT_SINGLE_INSTANCE(DistributedSchedContinueRecvManager);
+IMPLEMENT_SINGLE_INSTANCE(DMSContinueRecvMgr);
 
-void DistributedSchedContinueRecvManager::Init()
+void DMSContinueRecvMgr::Init()
 {
     HILOGI("Init start");
     {
@@ -52,22 +52,16 @@ void DistributedSchedContinueRecvManager::Init()
             return;
         }
         missionDiedListener_ = new DistributedMissionDiedListener();
-        eventThread_ = std::thread(&DistributedSchedContinueRecvManager::StartEvent, this);
+        eventThread_ = std::thread(&DMSContinueRecvMgr::StartEvent, this);
         std::unique_lock<std::mutex> lock(eventMutex_);
         eventCon_.wait(lock, [this] {
             return eventHandler_ != nullptr;
         });
     }
-
-    int32_t missionId = GetCurrentMissionId();
-    if (missionId <= 0) {
-        HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
-        return;
-    }
     HILOGI("Init end");
 }
 
-void DistributedSchedContinueRecvManager::UnInit()
+void DMSContinueRecvMgr::UnInit()
 {
     HILOGI("UnInit start");
     if (eventHandler_ != nullptr) {
@@ -80,21 +74,7 @@ void DistributedSchedContinueRecvManager::UnInit()
     HILOGI("UnInit end");
 }
 
-int32_t DistributedSchedContinueRecvManager::GetCurrentMissionId()
-{
-    HILOGI("GetCurrentMission begin");
-    sptr<IRemoteObject> token;
-    int ret = AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility(token);
-    if (ret != ERR_OK || token == nullptr) {
-        HILOGE("GetTopAbility failed, ret: %{public}d", ret);
-        return INVALID_MISSION_ID;
-    }
-    int32_t missionId = INVALID_MISSION_ID;
-    AAFwk::AbilityManagerClient::GetInstance()->GetMissionIdByToken(token, missionId);
-    return missionId;
-}
-
-void DistributedSchedContinueRecvManager::NotifyDataRecv(std::string& senderNetworkId,
+void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
     uint8_t* payload, uint32_t dataLen)
 {
     HILOGI("NotifyDataRecv start, senderNetworkId: %{public}s, dataLen: %{public}u",
@@ -126,7 +106,7 @@ void DistributedSchedContinueRecvManager::NotifyDataRecv(std::string& senderNetw
     HILOGI("NotifyDataRecv end");
 }
 
-int32_t DistributedSchedContinueRecvManager::RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj)
+int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj)
 {
     HILOGI("RegisterOnListener start, type: %{public}s", type.c_str());
     if (obj == nullptr) {
@@ -157,7 +137,7 @@ int32_t DistributedSchedContinueRecvManager::RegisterOnListener(const std::strin
     return ERR_OK;
 }
 
-int32_t DistributedSchedContinueRecvManager::RegisterOffListener(const std::string& type,
+int32_t DMSContinueRecvMgr::RegisterOffListener(const std::string& type,
     const sptr<IRemoteObject>& obj)
 {
     HILOGI("RegisterOffListener start, type: %{public}s", type.c_str());
@@ -187,7 +167,7 @@ int32_t DistributedSchedContinueRecvManager::RegisterOffListener(const std::stri
     return ERR_OK;
 }
 
-void DistributedSchedContinueRecvManager::StartEvent()
+void DMSContinueRecvMgr::StartEvent()
 {
     HILOGI("StartEvent start");
     prctl(PR_SET_NAME, CONTINUE_RECV_MANAGER.c_str());
@@ -201,7 +181,7 @@ void DistributedSchedContinueRecvManager::StartEvent()
     HILOGI("StartEvent end");
 }
 
-int32_t DistributedSchedContinueRecvManager::VerifyBroadcastSource(const std::string& senderNetworkId,
+int32_t DMSContinueRecvMgr::VerifyBroadcastSource(const std::string& senderNetworkId,
     const std::string& bundleName, const int32_t state)
 {
     std::lock_guard<std::mutex> currentIconLock(iconMutex_);
@@ -227,7 +207,7 @@ int32_t DistributedSchedContinueRecvManager::VerifyBroadcastSource(const std::st
     return ERR_OK;
 }
 
-int32_t DistributedSchedContinueRecvManager::DealOnBroadcastBusiness(const std::string& senderNetworkId,
+int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNetworkId,
     uint32_t accessTokenId, const int32_t state)
 {
     HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, accessTokenId: %{public}u, state: %{public}d",
@@ -267,7 +247,7 @@ int32_t DistributedSchedContinueRecvManager::DealOnBroadcastBusiness(const std::
     return ERR_OK;
 }
 
-void DistributedSchedContinueRecvManager::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
+void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
     const std::string& networkId, const std::string& bundleName, const int32_t state)
 {
     HILOGI("NotifyRecvBroadcast start");
@@ -294,9 +274,9 @@ void DistributedSchedContinueRecvManager::NotifyRecvBroadcast(const sptr<IRemote
     HILOGI("NotifyRecvBroadcast end");
 }
 
-void DistributedSchedContinueRecvManager::NotifyDeid(const sptr<IRemoteObject>& obj)
+void DMSContinueRecvMgr::NotifyDied(const sptr<IRemoteObject>& obj)
 {
-    HILOGI("NotifyDeid start");
+    HILOGI("NotifyDied start");
     if (obj == nullptr) {
         HILOGE("obj is null");
         return;
@@ -317,11 +297,11 @@ void DistributedSchedContinueRecvManager::NotifyDeid(const sptr<IRemoteObject>& 
             iterItem++;
         }
     }
-    HILOGI("NotifyDeid end");
+    HILOGI("NotifyDied end");
 }
 
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
-void DistributedSchedContinueRecvManager::NotifyScreenOff()
+void DMSContinueRecvMgr::NotifyScreenOff()
 {
     HILOGI("NotifyScreenOff begin");
     auto func = [this]() {
@@ -362,7 +342,7 @@ void DistributedSchedContinueRecvManager::NotifyScreenOff()
 }
 #endif
 
-void DistributedSchedContinueRecvManager::NotifyDeviceOffline(const std::string& networkId)
+void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
 {
     if (networkId.empty()) {
         HILOGE("NotifyDeviceOffline networkId empty");

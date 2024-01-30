@@ -97,7 +97,19 @@ void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOffline(const DmDeviceInfo
 
 void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceChanged(const DmDeviceInfo& deviceInfo)
 {
-    HILOGD("called");
+    HILOGI("called");
+    std::string networkId = deviceInfo.networkId;
+    HILOGI("OnDeviceChanged netwokId = %{public}s", AnonymizeNetworkId(networkId).c_str());
+    auto onlineNotifyTask = [deviceInfo]() {
+        std::lock_guard<std::mutex> autoLock(listenerSetMutex_);
+        for (auto& listener : listenerSet_) {
+            listener->OnDeviceOnline(deviceInfo);
+        }
+    };
+    if (!dnetworkHandler_->PostTask(onlineNotifyTask)) {
+        HILOGE("OnNodeOnline post task failed");
+        return;
+    }
 }
 
 void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceReady(const DmDeviceInfo& deviceInfo)
