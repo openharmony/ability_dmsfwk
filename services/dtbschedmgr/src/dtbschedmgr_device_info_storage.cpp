@@ -331,7 +331,7 @@ void DtbschedmgrDeviceInfoStorage::DeviceOfflineNotify(const std::string& networ
         HILOGE("DeviceOfflineNotify networkId empty");
         return;
     }
-    HILOGI("DeviceOfflineNotify networkId = %{public}s",
+    HILOGD("DeviceOfflineNotify networkId = %{public}s",
         DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
     if (networkIdMgrHandler_ == nullptr) {
         HILOGE("DeviceOfflineNotify networkIdMgrHandler null");

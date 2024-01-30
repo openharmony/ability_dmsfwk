@@ -167,7 +167,7 @@ void DistributedDataStorage::SubscribeDistributedDataStorage()
     if (distributedDataChangeListener_ != nullptr) {
         HILOGD("SubscribeKvStore start.");
         Status status = kvStorePtr_->SubscribeKvStore(subscribeType, move(distributedDataChangeListener_));
-        HILOGI("[PerformanceTest] SubscribeKvStore spend %{public}" PRId64 " ms", GetTickCount() - begin);
+        HILOGD("[PerformanceTest] SubscribeKvStore spend %{public}" PRId64 " ms", GetTickCount() - begin);
         if (status != Status::SUCCESS) {
             HILOGE("SubscribeKvStore failed! status = %{public}d.", status);
             return;
