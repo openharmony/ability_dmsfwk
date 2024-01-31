@@ -416,7 +416,11 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
 int32_t DistributedSchedService::ContinueAbilityWithTimeout(const std::string& dstDeviceId, int32_t missionId,
     const sptr<IRemoteObject>& callback, uint32_t remoteBundleVersion)
 {
-    dschedContinuation_->PushCallback(missionId, callback, dstDeviceId, false);
+    bool isPushSucceed = dschedContinuation_->PushCallback(missionId, callback, dstDeviceId, false);
+    if (!isPushSucceed) {
+        HILOGE("Callback already in progress!");
+        return CONTINUE_ALREADY_IN_PROGRESS;
+    }
     SetContinuationTimeout(missionId, CONTINUATION_TIMEOUT);
     int32_t result = AbilityManagerClient::GetInstance()->ContinueAbility(dstDeviceId, missionId, remoteBundleVersion);
     HILOGI("result: %{public}d!", result);
