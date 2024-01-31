@@ -136,7 +136,7 @@ bool DSchedContinuation::IsInContinuationProgress(int32_t missionId)
     std::lock_guard<std::mutex> autoLock(continuationLock_);
     auto iterSession = callbackMap_.find(missionId);
     if (iterSession != callbackMap_.end()) {
-        HILOGW("Continuation in progress, missionId:%{public}d exist!", missionId);
+        HILOGD("Continuation in progress, missionId:%{public}d exist!", missionId);
         return true;
     }
     return false;
@@ -263,7 +263,7 @@ int32_t DSchedContinuation::NotifyDSchedEventResult(const std::string& type, int
     HILOGI("GetCallback IDSchedEventListener");
     std::vector<sptr<IRemoteObject>> vecCallback = GetCallback(type);
     if (vecCallback.empty()) {
-        HILOGW("No listening has been registered, no need to report events");
+        HILOGD("No listening has been registered, no need to report events");
         return INVALID_PARAMETERS_ERR;
     }
     int32_t error = -1;

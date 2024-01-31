@@ -47,8 +47,8 @@
 #endif
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission/distributed_mission_info.h"
-#include "mission/distributed_sched_continue_manager.h"
-#include "mission/distributed_sched_continue_recv_manager.h"
+#include "mission/dms_continue_send_manager.h"
+#include "mission/dms_continue_recv_manager.h"
 #include "mission/distributed_sched_mission_manager.h"
 #endif
 #include "os_account_manager.h"
@@ -147,8 +147,8 @@ void DistributedSchedService::OnStart()
 void DistributedSchedService::OnStop()
 {
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    DistributedSchedContinueManager::GetInstance().UnInit();
-    DistributedSchedContinueRecvManager::GetInstance().UnInit();
+    DMSContinueSendMgr::GetInstance().UnInit();
+    DMSContinueRecvMgr::GetInstance().UnInit();
 #endif
     HILOGD("begin");
 }
@@ -181,7 +181,7 @@ void DistributedSchedService::DeviceOfflineNotify(const std::string& networkId)
 {
     DistributedSchedAdapter::GetInstance().DeviceOffline(networkId);
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    DistributedSchedContinueRecvManager::GetInstance().NotifyDeviceOffline(networkId);
+    DMSContinueRecvMgr::GetInstance().NotifyDeviceOffline(networkId);
     DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(networkId);
 #endif
 }
@@ -196,8 +196,8 @@ bool DistributedSchedService::Init()
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().InitDataStorage();
-    DistributedSchedContinueManager::GetInstance().Init();
-    DistributedSchedContinueRecvManager::GetInstance().Init();
+    DMSContinueSendMgr::GetInstance().Init();
+    DMSContinueRecvMgr::GetInstance().Init();
 #endif
     DistributedSchedAdapter::GetInstance().Init();
     HILOGD("init success.");
@@ -416,7 +416,11 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
 int32_t DistributedSchedService::ContinueAbilityWithTimeout(const std::string& dstDeviceId, int32_t missionId,
     const sptr<IRemoteObject>& callback, uint32_t remoteBundleVersion)
 {
-    dschedContinuation_->PushCallback(missionId, callback, dstDeviceId, false);
+    bool isPushSucceed = dschedContinuation_->PushCallback(missionId, callback, dstDeviceId, false);
+    if (!isPushSucceed) {
+        HILOGE("Callback already in progress!");
+        return CONTINUE_ALREADY_IN_PROGRESS;
+    }
     SetContinuationTimeout(missionId, CONTINUATION_TIMEOUT);
     int32_t result = AbilityManagerClient::GetInstance()->ContinueAbility(dstDeviceId, missionId, remoteBundleVersion);
     HILOGI("result: %{public}d!", result);
@@ -521,7 +525,7 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
         }
         int32_t missionId = 1;
         #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-        int32_t ret = DistributedSchedContinueManager::GetInstance().GetMissionId(bundleName, missionId);
+        int32_t ret = DMSContinueSendMgr::GetInstance().GetMissionId(bundleName, missionId);
         if (ret != ERR_OK) {
             HILOGE("get missionId failed");
             return ret;
@@ -678,7 +682,7 @@ void DistributedSchedService::NotifyCompleteContinuation(const std::u16string& d
         return;
     }
     int dSchedEventresult = dschedContinuation_->NotifyDSchedEventResult(DSCHED_EVENT_KEY, ERR_OK);
-    HILOGI("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
+    HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
     remoteDms->NotifyContinuationResultFromRemote(sessionId, isSuccess);
 }
 
@@ -2101,13 +2105,13 @@ int32_t DistributedSchedService::UnRegisterDSchedEventListener(const std::string
 int32_t DistributedSchedService::RegisterOnListener(const std::string& type,
     const sptr<IRemoteObject>& obj)
 {
-    return DistributedSchedContinueRecvManager::GetInstance().RegisterOnListener(type, obj);
+    return DMSContinueRecvMgr::GetInstance().RegisterOnListener(type, obj);
 }
 
 int32_t DistributedSchedService::RegisterOffListener(const std::string& type,
     const sptr<IRemoteObject>& obj)
 {
-    return DistributedSchedContinueRecvManager::GetInstance().RegisterOffListener(type, obj);
+    return DMSContinueRecvMgr::GetInstance().RegisterOffListener(type, obj);
 }
 
 int32_t DistributedSchedService::UnRegisterMissionListener(const std::u16string& devId,
@@ -2140,7 +2144,7 @@ int32_t DistributedSchedService::StopSyncMissionsFromRemote(const CallerInfo& ca
 
 int32_t DistributedSchedService::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
 {
-    return DistributedSchedContinueManager::GetInstance().SetMissionContinueState(missionId, state);
+    return DMSContinueSendMgr::GetInstance().SetMissionContinueState(missionId, state);
 }
 #endif
 

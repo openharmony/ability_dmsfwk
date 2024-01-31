@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DISTRIBUTEDSCHED_CONTINUE_RECV_MANAGER_H
-#define DISTRIBUTEDSCHED_CONTINUE_RECV_MANAGER_H
+#ifndef DMS_CONTINUE_SEND_MANAGER_H
+#define DMS_CONTINUE_SEND_MANAGER_H
 
 #include <deque>
 #include <map>
@@ -28,7 +28,6 @@
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
 #include "common_event_listener.h"
 #endif
-#include "distributed_mission_broadcast_listener.h"
 #include "distributed_mission_died_listener.h"
 #include "distributed_mission_focused_listener.h"
 #include "event_handler.h"
@@ -36,19 +35,23 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
-const std::string CONTINUE_RECV_MANAGER = "continue_recv_manager";
-struct currentIconInfo {
-    std::string senderNetworkId;
-    std::string bundleName;
-
-    bool isEmpty()
-    {
-        return (this->senderNetworkId == "" && this->bundleName == "");
-    }
+const std::string CONTINUE_MANAGER = "continue_manager";
+struct currentMissionInfo {
+    int32_t currentMissionId;
+    bool currentIsContinuable;
 };
 
-class DistributedSchedContinueRecvManager {
-    DECLARE_SINGLE_INSTANCE(DistributedSchedContinueRecvManager);
+enum class FocusedReason {
+    MIN,
+    NORMAL,
+    INIT,
+    SCREENOFF,
+    MMI,
+    MAX
+};
+
+class DMSContinueSendMgr {
+    DECLARE_SINGLE_INSTANCE(DMSContinueSendMgr);
 
 public:
     constexpr static int32_t DMS_SEND_LEN = 5;
@@ -65,37 +68,44 @@ public:
 
     void Init();
     void UnInit();
-    void NotifyDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen);
-    int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj);
-    int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj);
-    void NotifyDeid(const sptr<IRemoteObject>& obj);
-    void NotifyDeviceOffline(const std::string& networkId);
-#ifdef SUPPORT_COMMON_EVENT_SERVICE
+    void NotifyMissionFocused(const int32_t missionId, FocusedReason focusedReason);
+    void NotifyMissionUnfocused(const int32_t missionId);
     void NotifyScreenOff();
-#endif
+    int32_t GetMissionId(const std::string& bundleName, int32_t& missionId);
+    void NotifyDied(const sptr<IRemoteObject>& obj);
+    int32_t SetMissionContinueState(const int32_t missionId, const AAFwk::ContinueState& state);
+    void OnMMIEvent();
 
 private:
     int32_t GetCurrentMissionId();
+    void AddCancelMissionFocusedTimer(const int32_t missionId, const std::string eventName, const int32_t delay);
+    int32_t SendSoftbusEvent(uint32_t accessTokenId, uint8_t type);
     void StartEvent();
-    int32_t VerifyBroadcastSource(const std::string& senderNetworkId, const std::string& bundleName,
-        const int32_t state);
-    void PostOnBroadcastBusiness(const std::string& senderNetworkId, uint32_t accessTokenId, const int32_t state,
-        const int32_t delay = 0, const int32_t retry = 0);
-    int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint32_t accessTokenId, const int32_t state,
-        const int32_t retry = 0);
-    void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const std::string& networkId,
-        const std::string& bundleName, const int32_t state);
+    int32_t DealFocusedBusiness(const int32_t missionId);
+    int32_t DealUnfocusedBusiness(const int32_t missionId, bool isUnfocused);
+    void DealScreenOff();
+    void DealTimerUnfocusedBussiness(const int32_t missionId);
+    int32_t GetBundleName(const int32_t missionId, std::string& bundleName);
+    bool IsContinue(const int32_t& missionId, const std::string& bundleName);
+    int32_t DealSetMissionContinueStateBusiness(const int32_t missionId, const AAFwk::ContinueState& state);
+    int32_t CheckContinueState(const int32_t missionId);
+    void AddMMIListener();
+    void RemoveMMIListener();
 private:
-    currentIconInfo iconInfo_;
+    currentMissionInfo info_ = { INVALID_MISSION_ID, false };
+    sptr<DistributedMissionFocusedListener> missionFocusedListener_;
     sptr<DistributedMissionDiedListener> missionDiedListener_;
     std::string onType_;
+    std::map<std::string, int32_t> focusedMission_;
     std::map<std::string, std::vector<sptr<IRemoteObject>>> registerOnListener_;
     std::thread eventThread_;
     std::condition_variable eventCon_;
     std::mutex eventMutex_;
     std::mutex iconMutex_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
+    int32_t mmiMonitorId_ = INVALID_MISSION_ID;
+    std::map<int32_t, int64_t> screenLockInfo_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
-#endif // DISTRIBUTEDSCHED_CONTINUE_RECV_MANAGER_H
+#endif // DMS_CONTINUE_SEND_MANAGER_H
