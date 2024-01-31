@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DISTRIBUTEDSCHED_CONTINUE_MANAGER_H
-#define DISTRIBUTEDSCHED_CONTINUE_MANAGER_H
+#ifndef DMS_CONTINUE_SEND_MANAGER_H
+#define DMS_CONTINUE_SEND_MANAGER_H
 
 #include <deque>
 #include <map>
@@ -50,8 +50,8 @@ enum class FocusedReason {
     MAX
 };
 
-class DistributedSchedContinueManager {
-    DECLARE_SINGLE_INSTANCE(DistributedSchedContinueManager);
+class DMSContinueSendMgr {
+    DECLARE_SINGLE_INSTANCE(DMSContinueSendMgr);
 
 public:
     constexpr static int32_t DMS_SEND_LEN = 5;
@@ -72,7 +72,7 @@ public:
     void NotifyMissionUnfocused(const int32_t missionId);
     void NotifyScreenOff();
     int32_t GetMissionId(const std::string& bundleName, int32_t& missionId);
-    void NotifyDeid(const sptr<IRemoteObject>& obj);
+    void NotifyDied(const sptr<IRemoteObject>& obj);
     int32_t SetMissionContinueState(const int32_t missionId, const AAFwk::ContinueState& state);
     void OnMMIEvent();
 
@@ -108,4 +108,4 @@ private:
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
-#endif // DISTRIBUTEDSCHED_CONTINUE_MANAGER_H
+#endif // DMS_CONTINUE_SEND_MANAGER_H

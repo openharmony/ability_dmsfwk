@@ -260,7 +260,7 @@ int32_t DistributedSchedAdapter::StartAbilityByCall(const OHOS::AAFwk::Want& wan
 bool DistributedSchedAdapter::InitHichainService()
 {
     if (hichainGmInstance_ != nullptr) {
-        HILOGI("hichain GmInstance is already exist");
+        HILOGD("hichain GmInstance is already exist");
         return true;
     }
     if (InitDeviceAuthService() != ERR_OK) {
