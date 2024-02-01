@@ -674,5 +674,18 @@ HWTEST_F(DMSContinueManagerTest, testSendSoftbusEvent001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DMSContinueManagerTest testSendSoftbusEvent001 end" << std::endl;
 }
+
+/**
+ * @tc.name: testNotifyDeviceOnline001
+ * @tc.desc: NotifyDeviceOnline
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOnline001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOnline001 start" << std::endl;
+    uint32_t ret = DMSContinueSendMgr::GetInstance().NotifyDeviceOnline();
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOnline001 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS

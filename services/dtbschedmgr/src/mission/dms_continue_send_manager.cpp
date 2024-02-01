@@ -539,5 +539,15 @@ void DMSContinueSendMgr::OnMMIEvent()
     HILOGD("OnMMIEvent, missionId = %{public}d", info_.currentMissionId);
     DMSContinueSendMgr::GetInstance().NotifyMissionFocused(info_.currentMissionId, FocusedReason::MMI);
 }
+
+uint32_t DMSContinueSendMgr::NotifyDeviceOnline()
+{
+    HILOGD("NotifyDeviceOnline called");
+    if (GetCurrentMissionId() <= 0) {
+        return INVALID_MISSION_ID;
+    }
+    NotifyMissionFocused(info_.currentMissionId, FocusedReason::ONLINE);
+    return ERR_OK;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
