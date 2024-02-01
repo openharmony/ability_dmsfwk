@@ -33,8 +33,10 @@ constexpr int32_t INACTIVE = 1;
 constexpr int32_t INDEX_2 = 2;
 constexpr int32_t INDEX_3 = 3;
 constexpr int32_t INDEX_4 = 4;
+constexpr int32_t DBMS_RETRY_MAX_TIME = 5;
+constexpr int32_t DBMS_RETRY_DELAY = 1000;
 const std::string TAG = "DMSContinueRecvMgr";
-const std::string CANCEL_FOCUSED_TASK = "cancel_mission_focused_task";
+const std::string DBMS_RETRY_TASK = "retry_on_boradcast_task";
 const std::u16string DESCRIPTOR = u"ohos.aafwk.RemoteOnListener";
 }
 
@@ -95,14 +97,7 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
     if (type == DMS_UNFOCUSED_TYPE) {
         state = INACTIVE;
     }
-    auto feedfunc = [this, senderNetworkId, accessTokenId, state]() mutable {
-        DealOnBroadcastBusiness(senderNetworkId, accessTokenId, state);
-    };
-    if (eventHandler_ != nullptr) {
-        eventHandler_->PostTask(feedfunc);
-    } else {
-        HILOGE("eventHandler_ is nullptr");
-    }
+    PostOnBroadcastBusiness(senderNetworkId, accessTokenId, state);
     HILOGI("NotifyDataRecv end");
 }
 
@@ -207,17 +202,35 @@ int32_t DMSContinueRecvMgr::VerifyBroadcastSource(const std::string& senderNetwo
     return ERR_OK;
 }
 
+void DMSContinueRecvMgr::PostOnBroadcastBusiness(const std::string& senderNetworkId,
+    uint32_t accessTokenId, const int32_t state, const int32_t delay, const int32_t retry)
+{
+    auto feedfunc = [this, senderNetworkId, accessTokenId, state, retry]() mutable {
+        DealOnBroadcastBusiness(senderNetworkId, accessTokenId, state, retry);
+    };
+    if (eventHandler_ != nullptr) {
+        eventHandler_->RemoveTask(DBMS_RETRY_TASK);
+        eventHandler_->PostTask(feedfunc, DBMS_RETRY_TASK, delay);
+    } else {
+        HILOGE("eventHandler_ is nullptr");
+    }
+}
+
 int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNetworkId,
-    uint32_t accessTokenId, const int32_t state)
+    uint32_t accessTokenId, const int32_t state, const int32_t retry)
 {
     HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, accessTokenId: %{public}u, state: %{public}d",
         DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), accessTokenId, state);
     std::string bundleName;
     int32_t ret = BundleManagerInternal::GetBundleNameFromDbms(senderNetworkId, accessTokenId, bundleName);
     if (ret != ERR_OK) {
-        HILOGE("get bundleName failed, senderNetworkId: %{public}s, accessTokenId: %{public}u, ret: %{public}d",
-            DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), accessTokenId, ret);
-        return ret;
+        HILOGW("get bundleName failed, ret: %{public}d, try = %{public}d", ret, retry);
+        if (retry == DBMS_RETRY_MAX_TIME) {
+            HILOGE("meet max retry time!");
+            return INVALID_PARAMETERS_ERR;
+        }
+        PostOnBroadcastBusiness(senderNetworkId, accessTokenId, state, DBMS_RETRY_DELAY, retry + 1);
+        return ERR_OK;
     }
     HILOGI("get bundleName, bundleName: %{public}s", bundleName.c_str());
     AppExecFwk::BundleInfo localBundleInfo;
