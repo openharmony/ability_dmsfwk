@@ -21,6 +21,7 @@
 #include "deviceManager/dms_device_info.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "mission/dms_continue_send_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -32,6 +33,7 @@ void DistributedDeviceNodeListener::OnDeviceOnline(const DistributedHardware::Dm
     auto dmsDeviceInfo = std::make_shared<DmsDeviceInfo>(
         deviceInfo.deviceName, deviceInfo.deviceTypeId, deviceInfo.networkId);
     DtbschedmgrDeviceInfoStorage::GetInstance().DeviceOnlineNotify(dmsDeviceInfo);
+    DMSContinueSendMgr::GetInstance().NotifyDeviceOnline();
 }
 
 void DistributedDeviceNodeListener::OnDeviceOffline(const DistributedHardware::DmDeviceInfo& deviceInfo)

@@ -46,6 +46,7 @@ enum class FocusedReason {
     NORMAL,
     INIT,
     SCREENOFF,
+    ONLINE,
     MMI,
     MAX
 };
@@ -75,6 +76,7 @@ public:
     void NotifyDied(const sptr<IRemoteObject>& obj);
     int32_t SetMissionContinueState(const int32_t missionId, const AAFwk::ContinueState& state);
     void OnMMIEvent();
+    uint32_t NotifyDeviceOnline();
 
 private:
     int32_t GetCurrentMissionId();
