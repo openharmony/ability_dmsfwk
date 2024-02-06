@@ -26,9 +26,14 @@ const std::string TAG = "CommonEventListener";
 }
 void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
 {
-    HILOGD("OnReceiveEvent called");
-    DMSContinueSendMgr::GetInstance().NotifyScreenOff();
-    DMSContinueRecvMgr::GetInstance().NotifyScreenOff();
+    std::string action = eventData.GetWant().GetAction();
+    HILOGD("OnReceiveEvent called, action = %{public}s", action.c_str());
+    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
+        DMSContinueSendMgr::GetInstance().OnDeviceScreenOff();
+        DMSContinueRecvMgr::GetInstance().OnDeviceScreenOff();
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
+        DMSContinueSendMgr::GetInstance().OnDeviceScreenOn();
+    }
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

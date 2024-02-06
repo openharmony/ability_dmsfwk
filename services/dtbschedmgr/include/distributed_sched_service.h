@@ -183,6 +183,7 @@ public:
 private:
     DistributedSchedService();
     bool Init();
+    void InitCommonEventListener();
     void RemoteConnectAbilityMappingLocked(const sptr<IRemoteObject>& connect, const std::string& localDeviceId,
         const std::string& remoteDeviceId, const AppExecFwk::ElementName& element, const CallerInfo& callerInfo,
         TargetComponent targetComponent);
