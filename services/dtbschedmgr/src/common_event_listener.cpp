@@ -16,8 +16,8 @@
 #include "common_event_listener.h"
 
 #include "dtbschedmgr_log.h"
-#include "mission/distributed_sched_continue_recv_manager.h"
-#include "mission/distributed_sched_continue_manager.h"
+#include "mission/dms_continue_recv_manager.h"
+#include "mission/dms_continue_send_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -27,8 +27,8 @@ const std::string TAG = "CommonEventListener";
 void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
 {
     HILOGD("OnReceiveEvent called");
-    DistributedSchedContinueManager::GetInstance().NotifyScreenOff();
-    DistributedSchedContinueRecvManager::GetInstance().NotifyScreenOff();
+    DMSContinueSendMgr::GetInstance().NotifyScreenOff();
+    DMSContinueRecvMgr::GetInstance().NotifyScreenOff();
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
