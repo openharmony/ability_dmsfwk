@@ -314,9 +314,9 @@ void DMSContinueRecvMgr::NotifyDied(const sptr<IRemoteObject>& obj)
 }
 
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
-void DMSContinueRecvMgr::NotifyScreenOff()
+void DMSContinueRecvMgr::OnDeviceScreenOff()
 {
-    HILOGI("NotifyScreenOff begin");
+    HILOGI("OnDeviceScreenOff called");
     auto func = [this]() {
         std::string senderNetworkId;
         std::string bundleName;
@@ -346,12 +346,11 @@ void DMSContinueRecvMgr::NotifyScreenOff()
             }
         }
     };
-    if (eventHandler_ != nullptr) {
-        eventHandler_->PostTask(func);
-    } else {
+    if (eventHandler_ == nullptr) {
         HILOGE("eventHandler_ is nullptr");
+        return;
     }
-    HILOGI("NotifyScreenOff end");
+    eventHandler_->PostTask(func);
 }
 #endif
 

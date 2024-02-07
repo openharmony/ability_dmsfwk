@@ -25,9 +25,6 @@
 #include <vector>
 
 #include "bundle/bundle_manager_internal.h"
-#ifdef SUPPORT_COMMON_EVENT_SERVICE
-#include "common_event_listener.h"
-#endif
 #include "distributed_mission_broadcast_listener.h"
 #include "distributed_mission_died_listener.h"
 #include "distributed_mission_focused_listener.h"
@@ -70,9 +67,7 @@ public:
     int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj);
     void NotifyDied(const sptr<IRemoteObject>& obj);
     void NotifyDeviceOffline(const std::string& networkId);
-#ifdef SUPPORT_COMMON_EVENT_SERVICE
-    void NotifyScreenOff();
-#endif
+    void OnDeviceScreenOff();
 
 private:
     void StartEvent();
