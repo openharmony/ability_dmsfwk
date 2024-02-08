@@ -24,6 +24,9 @@
 #include "adapter/dnetwork_adapter.h"
 #include "bool_wrapper.h"
 #include "bundle/bundle_manager_internal.h"
+#ifdef SUPPORT_COMMON_EVENT_SERVICE
+#include "common_event_listener.h"
+#endif
 #include "connect_death_recipient.h"
 #include "datetime_ex.h"
 #include "distributed_sched_adapter.h"
@@ -196,6 +199,7 @@ bool DistributedSchedService::Init()
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().InitDataStorage();
+    InitCommonEventListener();
     DMSContinueSendMgr::GetInstance().Init();
     DMSContinueRecvMgr::GetInstance().Init();
 #endif
@@ -210,6 +214,19 @@ bool DistributedSchedService::Init()
         componentChangeHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
     return true;
+}
+
+void DistributedSchedService::InitCommonEventListener()
+{
+    HILOGI("InitCommonEventListener called");
+#ifdef SUPPORT_COMMON_EVENT_SERVICE
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    auto applyMonitor = std::make_shared<CommonEventListener>(subscribeInfo);
+    EventFwk::CommonEventManager::SubscribeCommonEvent(applyMonitor);
+#endif
 }
 
 int32_t DistributedSchedService::StartRemoteAbility(const OHOS::AAFwk::Want& want,
@@ -525,7 +542,7 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
         }
         int32_t missionId = 1;
         #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-        int32_t ret = DMSContinueSendMgr::GetInstance().GetMissionId(bundleName, missionId);
+        int32_t ret = DMSContinueSendMgr::GetInstance().GetMissionIdByBundleName(bundleName, missionId);
         if (ret != ERR_OK) {
             HILOGE("get missionId failed");
             return ret;
