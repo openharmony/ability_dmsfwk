@@ -25,9 +25,6 @@
 #include <vector>
 
 #include "bundle/bundle_manager_internal.h"
-#ifdef SUPPORT_COMMON_EVENT_SERVICE
-#include "common_event_listener.h"
-#endif
 #include "distributed_mission_died_listener.h"
 #include "distributed_mission_focused_listener.h"
 #include "event_handler.h"
@@ -41,12 +38,29 @@ struct currentMissionInfo {
     bool currentIsContinuable;
 };
 
+struct lastUnfoInfo {
+    int32_t missionId;
+    int32_t unfoTime;
+    std::string bundleName;
+    uint32_t accessToken;
+};
+
 enum class FocusedReason {
-    MIN,
+    MIN = -1,
     NORMAL,
     INIT,
     SCREENOFF,
     MMI,
+    MAX
+};
+
+enum class UnfocusedReason {
+    MIN = -1,
+    NORMAL,
+    DESTORY,
+    CLOSE,
+    TIMEOUT,
+    SCREENOFF,
     MAX
 };
 
@@ -66,26 +80,46 @@ public:
     constexpr static uint8_t CONTINUE_SHIFT_04 = 0x04;
     constexpr static int32_t INVALID_MISSION_ID = -1;
 
+    class ScreenOffHandler {
+    public:
+        ScreenOffHandler() = default;
+        virtual ~ScreenOffHandler() = default;
+
+        int32_t GetMissionId();
+        std::string GetBundleName();
+        uint32_t GetAccessTokenId();
+        bool IsDeviceScreenOn();
+        void OnDeviceScreenOff(int32_t missionId);
+        void OnDeviceScreenOn();
+        void ClearScreenOffInfo();
+        void SetScreenOffInfo(int32_t missionId, std::string bundleName, uint32_t accessTokenId);
+
+    private:
+        bool isScreenOn_ = true;
+        lastUnfoInfo unfoInfo_ = { INVALID_MISSION_ID, 0, "", 0 };
+    };
+
     void Init();
     void UnInit();
-    void NotifyMissionFocused(const int32_t missionId, FocusedReason focusedReason);
-    void NotifyMissionUnfocused(const int32_t missionId);
-    void NotifyScreenOff();
-    int32_t GetMissionId(const std::string& bundleName, int32_t& missionId);
-    void NotifyDied(const sptr<IRemoteObject>& obj);
+    void NotifyMissionFocused(const int32_t missionId, FocusedReason reason);
+    void NotifyMissionUnfocused(const int32_t missionId, UnfocusedReason reason);
+    int32_t GetMissionIdByBundleName(const std::string& bundleName, int32_t& missionId);
     int32_t SetMissionContinueState(const int32_t missionId, const AAFwk::ContinueState& state);
     void OnMMIEvent();
+    void OnDeviceScreenOff();
+    void OnDeviceScreenOn();
+    int32_t SendScreenOffEvent(uint8_t type);
 
 private:
     int32_t GetCurrentMissionId();
-    void AddCancelMissionFocusedTimer(const int32_t missionId, const std::string eventName, const int32_t delay);
+    void PostUnfocusedTaskWithDelay(const int32_t missionId, UnfocusedReason reason);
     int32_t SendSoftbusEvent(uint32_t accessTokenId, uint8_t type);
     void StartEvent();
     int32_t DealFocusedBusiness(const int32_t missionId);
-    int32_t DealUnfocusedBusiness(const int32_t missionId, bool isUnfocused);
+    int32_t DealUnfocusedBusiness(const int32_t missionId, UnfocusedReason reason);
     void DealScreenOff();
     void DealTimerUnfocusedBussiness(const int32_t missionId);
-    int32_t GetBundleName(const int32_t missionId, std::string& bundleName);
+    int32_t GetBundleNameByMissionId(const int32_t missionId, std::string& bundleName);
     bool IsContinue(const int32_t& missionId, const std::string& bundleName);
     int32_t DealSetMissionContinueStateBusiness(const int32_t missionId, const AAFwk::ContinueState& state);
     int32_t CheckContinueState(const int32_t missionId);
@@ -94,17 +128,13 @@ private:
 private:
     currentMissionInfo info_ = { INVALID_MISSION_ID, false };
     sptr<DistributedMissionFocusedListener> missionFocusedListener_;
-    sptr<DistributedMissionDiedListener> missionDiedListener_;
-    std::string onType_;
     std::map<std::string, int32_t> focusedMission_;
-    std::map<std::string, std::vector<sptr<IRemoteObject>>> registerOnListener_;
     std::thread eventThread_;
     std::condition_variable eventCon_;
     std::mutex eventMutex_;
-    std::mutex iconMutex_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
+    std::shared_ptr<ScreenOffHandler> screenOffHandler_;
     int32_t mmiMonitorId_ = INVALID_MISSION_ID;
-    std::map<int32_t, int64_t> screenLockInfo_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

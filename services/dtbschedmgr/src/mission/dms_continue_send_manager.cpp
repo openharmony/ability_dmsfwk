@@ -33,11 +33,10 @@ constexpr int32_t INDEX_3 = 3;
 constexpr int32_t INDEX_4 = 4;
 constexpr int32_t CANCEL_FOCUSED_DELAYED = 60000;
 constexpr int32_t SCREEN_OFF_DELAY_TIME = 10000;
-constexpr int64_t TIME_DELAYED = 500; // determines whether normal unfocused or lockoff
+constexpr int64_t TIME_DELAYED = 250; // determines whether normal unfocused or lockoff
 const std::string TAG = "DMSContinueSendMgr";
-const std::string CANCEL_FOCUSED_TASK = "cancel_mission_focused_task";
-const std::string SCREEN_OFF_TASK = "screen_off_task";
-const std::u16string DESCRIPTOR = u"ohos.aafwk.RemoteOnListener";
+const std::string TIMEOUT_UNFOCUSED_TASK = "timeout_unfocused_task";
+const std::string SCREEN_OFF_UNFOCUSED_TASK = "screen_off_unfocused_task";
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DMSContinueSendMgr);
@@ -52,15 +51,9 @@ void DMSContinueSendMgr::Init()
             HILOGE("get RegisterMissionListener failed, ret: %{public}d", ret);
             return;
         }
-        missionDiedListener_ = new DistributedMissionDiedListener();
         MMIAdapter::GetInstance().Init();
-#ifdef SUPPORT_COMMON_EVENT_SERVICE
-        EventFwk::MatchingSkills matchingSkills;
-        matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
-        EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
-        auto applyMonitor = std::make_shared<CommonEventListener>(subscribeInfo);
-        EventFwk::CommonEventManager::SubscribeCommonEvent(applyMonitor);
-#endif
+        screenOffHandler_ = std::make_shared<ScreenOffHandler>();
+
         eventThread_ = std::thread(&DMSContinueSendMgr::StartEvent, this);
         std::unique_lock<std::mutex> lock(eventMutex_);
         eventCon_.wait(lock, [this] {
@@ -105,122 +98,90 @@ int32_t DMSContinueSendMgr::GetCurrentMissionId()
     return missionId;
 }
 
-void DMSContinueSendMgr::AddCancelMissionFocusedTimer(const int32_t missionId,
-    const std::string eventName, const int32_t delay)
+void DMSContinueSendMgr::PostUnfocusedTaskWithDelay(const int32_t missionId, UnfocusedReason reason)
 {
-    HILOGD("AddCancelMissionFocusedTimer start, missionId: %{public}d", missionId);
-    auto cancelfunc = [this, missionId, delay]() {
-        if (delay == CANCEL_FOCUSED_DELAYED) {
-            screenLockInfo_[missionId] = 0;
-        }
-        DealTimerUnfocusedBussiness(missionId);
-    };
-    if (eventHandler_ != nullptr) {
-        eventHandler_->PostTask(cancelfunc, eventName, delay);
-    } else {
-        HILOGE("eventHandler_ is nullptr");
-    }
-    HILOGD("AddCancelMissionFocusedTimer end");
-}
-
-void DMSContinueSendMgr::NotifyMissionFocused(const int32_t missionId, FocusedReason focusedReason)
-{
-    HILOGI("NotifyMissionFocused start, missionId: %{public}d, reason: %{public}d", missionId, focusedReason);
-    if (focusedReason <= FocusedReason::MIN || focusedReason >= FocusedReason::MAX) {
-        HILOGI("Unknow focusedReason, no need to deal NotifyMissionFocused");
-        return;
-    }
-    auto feedfunc = [this, missionId, focusedReason]() {
-        if (focusedReason != FocusedReason::SCREENOFF) {
-            screenLockInfo_.clear();
-        }
-        DealFocusedBusiness(missionId);
-        if (missionId == info_.currentMissionId && info_.currentIsContinuable &&
-            focusedReason != FocusedReason::SCREENOFF) {
-            AddCancelMissionFocusedTimer(missionId, CANCEL_FOCUSED_TASK, CANCEL_FOCUSED_DELAYED);
-        }
-    };
-
-    if (eventHandler_ != nullptr) {
-        eventHandler_->RemoveTask(SCREEN_OFF_TASK);
-        eventHandler_->RemoveTask(CANCEL_FOCUSED_TASK);
-        eventHandler_->PostTask(feedfunc);
-    } else {
-        HILOGE("eventHandler_ is nullptr");
-    }
-    HILOGI("NotifyMissionFocused end");
-}
-
-void DMSContinueSendMgr::NotifyMissionUnfocused(const int32_t missionId)
-{
-    HILOGI("NotifyMissionUnfocused start, missionId: %{public}d", missionId);
-
-    auto feedfunc = [this, missionId]() {
-        if (screenLockInfo_.empty()) {
-            int64_t time = GetTickCount();
-            screenLockInfo_[missionId] = time;
-        } else {
-            HILOGI("Screen lock now, no need to NotifyMissionUnfocused");
-            return;
-        }
-        DealUnfocusedBusiness(missionId, true);
-    };
-    if (eventHandler_ != nullptr) {
-        eventHandler_->RemoveTask(CANCEL_FOCUSED_TASK);
-        eventHandler_->PostTask(feedfunc);
-    } else {
-        HILOGE("eventHandler_ is nullptr");
-    }
-    HILOGI("NotifyMissionUnfocused end");
-}
-
-void DMSContinueSendMgr::NotifyScreenOff()
-{
-    HILOGI("NotifyScreenOff start");
+    HILOGI("called, missionId: %{public}d, reason: %{public}d", missionId, reason);
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler_ is nullptr");
         return;
     }
-    eventHandler_->RemoveAllEvents();
-    auto feedfunc = [this]() {
-        DealScreenOff();
-    };
-    eventHandler_->PostTask(feedfunc);
-
-    HILOGI("NotifyScreenOff end");
+    if (reason == UnfocusedReason::TIMEOUT) {
+        auto funcOut = [this, missionId]() {
+            DealUnfocusedBusiness(missionId, UnfocusedReason::TIMEOUT);
+        };
+        eventHandler_->RemoveTask(TIMEOUT_UNFOCUSED_TASK);
+        eventHandler_->PostTask(funcOut, TIMEOUT_UNFOCUSED_TASK, CANCEL_FOCUSED_DELAYED);
+    } else if (reason == UnfocusedReason::SCREENOFF) {
+        auto funcOff = [this]() {
+            SendScreenOffEvent(DMS_UNFOCUSED_TYPE);
+        };
+        eventHandler_->RemoveTask(SCREEN_OFF_UNFOCUSED_TASK);
+        eventHandler_->PostTask(funcOff, SCREEN_OFF_UNFOCUSED_TASK, SCREEN_OFF_DELAY_TIME);
+    }
 }
 
-void DMSContinueSendMgr::DealScreenOff()
+void DMSContinueSendMgr::NotifyMissionFocused(const int32_t missionId, FocusedReason reason)
 {
-    int32_t missionId = info_.currentMissionId;
-    if (screenLockInfo_.count(missionId) != 0 && screenLockInfo_[missionId] == 0) {
-        HILOGI("no need to deal screenlock process in case of timed-unfocused");
+    HILOGI("NotifyMissionFocused called, missionId: %{public}d, reason: %{public}d", missionId, reason);
+    if (reason <= FocusedReason::MIN || reason >= FocusedReason::MAX) {
+        HILOGI("Unknown focusedReason, no need to deal NotifyMissionFocused");
         return;
     }
-    int64_t time = GetTickCount();
-    if (screenLockInfo_.size() != 0) {
-        auto it = screenLockInfo_.begin();
-        if (time - it->second < TIME_DELAYED) {
-            NotifyMissionFocused(missionId, FocusedReason::SCREENOFF);
+    auto feedfunc = [this, missionId, reason]() {
+        if (reason == FocusedReason::NORMAL) {
+            screenOffHandler_->ClearScreenOffInfo();
         }
-    } else {
-        screenLockInfo_[missionId] = time;
+        DealFocusedBusiness(missionId);
+        if (missionId == info_.currentMissionId && info_.currentIsContinuable) {
+            PostUnfocusedTaskWithDelay(missionId, UnfocusedReason::TIMEOUT);
+        }
+    };
+
+    if (eventHandler_ == nullptr) {
+        HILOGE("eventHandler_ is nullptr");
+        return;
     }
-    AddCancelMissionFocusedTimer(missionId, SCREEN_OFF_TASK, SCREEN_OFF_DELAY_TIME);
+    eventHandler_->RemoveTask(TIMEOUT_UNFOCUSED_TASK);
+    eventHandler_->RemoveTask(SCREEN_OFF_UNFOCUSED_TASK);
+    eventHandler_->PostTask(feedfunc);
 }
 
-int32_t DMSContinueSendMgr::GetMissionId(const std::string& bundleName, int32_t& missionId)
+void DMSContinueSendMgr::NotifyMissionUnfocused(const int32_t missionId, UnfocusedReason reason)
 {
-    HILOGI("GetMissionId start, bundleName: %{public}s", bundleName.c_str());
+    HILOGI("NotifyMissionUnfocused start, missionId: %{public}d, reason: %{public}d", missionId, reason);
+    if (reason <= UnfocusedReason::MIN || reason >= UnfocusedReason::MAX) {
+        HILOGE("unknown unfocused reason!");
+        return;
+    }
+    auto feedfunc = [this, missionId, reason]() {
+        DealUnfocusedBusiness(missionId, reason);
+    };
+    if (eventHandler_ != nullptr) {
+        eventHandler_->RemoveTask(TIMEOUT_UNFOCUSED_TASK);
+        eventHandler_->PostTask(feedfunc);
+    } else {
+        HILOGE("eventHandler_ is nullptr");
+    }
+}
+
+int32_t DMSContinueSendMgr::GetMissionIdByBundleName(const std::string& bundleName, int32_t& missionId)
+{
+    HILOGI("start, bundleName: %{public}s", bundleName.c_str());
     std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
     auto iterItem = focusedMission_.find(bundleName);
-    if (iterItem == focusedMission_.end()) {
-        HILOGE("get iterItem failed from focusedMission_, bundleName: %{public}s", bundleName.c_str());
-        return INVALID_PARAMETERS_ERR;
+    if (iterItem != focusedMission_.end()) {
+        missionId = iterItem->second;
+        HILOGI("get missionId end, missionId: %{public}d", missionId);
+        return ERR_OK;
     }
-    missionId = iterItem->second;
-    HILOGI("get missionId end, missionId: %{public}d", missionId);
-    return ERR_OK;
+    HILOGW("get iterItem failed from focusedMission_, try screenOffHandler_");
+    if (bundleName == screenOffHandler_->GetBundleName()) {
+        missionId = screenOffHandler_->GetMissionId();
+        HILOGI("get missionId end, missionId: %{public}d", missionId);
+        return ERR_OK;
+    }
+    HILOGE("get bundleName failed from screenOffHandler_");
+    return INVALID_PARAMETERS_ERR;
 }
 
 void DMSContinueSendMgr::StartEvent()
@@ -340,26 +301,11 @@ int32_t DMSContinueSendMgr::CheckContinueState(const int32_t missionId)
     return ERR_OK;
 }
 
-void DMSContinueSendMgr::DealTimerUnfocusedBussiness(const int32_t missionId)
-{
-    HILOGD("DealTimerUnfocusedBussiness start, missionId: %{public}d", missionId);
-    auto unfocusedTask = [this, missionId]() {
-        DealUnfocusedBusiness(missionId, false);
-    };
-    if (eventHandler_ != nullptr) {
-        eventHandler_->RemoveTask(CANCEL_FOCUSED_TASK);
-        eventHandler_->PostTask(unfocusedTask);
-    } else {
-        HILOGE("eventHandler_ is nullptr");
-    }
-    return;
-}
-
-int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, bool isUnfocused)
+int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, UnfocusedReason reason)
 {
     HILOGI("DealUnfocusedBusiness start, missionId: %{public}d", missionId);
     std::string bundleName;
-    int32_t ret = GetBundleName(missionId, bundleName);
+    int32_t ret = GetBundleNameByMissionId(missionId, bundleName);
     if (ret != ERR_OK) {
         HILOGI("Get bundleName failed, mission is not continuable, missionId: %{public}d, ret: %{public}d",
             missionId, ret);
@@ -368,7 +314,7 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, bool 
     HILOGI("Get bundleName success, mission is continuable, missionId: %{public}d, bundleName: %{public}s",
         missionId, bundleName.c_str());
 
-    if (isUnfocused) {
+    if (reason != UnfocusedReason::TIMEOUT) {
         bool isContinue = IsContinue(missionId, bundleName);
         if (!isContinue) {
             HILOGE("Not current mission to be continued, missionId: %{public}d", missionId);
@@ -393,21 +339,44 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, bool 
         return ret;
     }
 
-    uint8_t type = DMS_UNFOCUSED_TYPE;
-    ret = SendSoftbusEvent(accessTokenId, type);
-    if (ret != ERR_OK) {
-        HILOGE("SendSoftbusEvent unfocused failed, ret: %{public}d", ret);
+    if (screenOffHandler_->IsDeviceScreenOn()) {
+        uint8_t type = DMS_UNFOCUSED_TYPE;
+        ret = SendSoftbusEvent(accessTokenId, type);
+        if (ret != ERR_OK) {
+            HILOGE("SendSoftbusEvent unfocused failed, ret: %{public}d", ret);
+        }
     }
 
-    if (isUnfocused) {
+    if (reason != UnfocusedReason::TIMEOUT) {
         std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
         focusedMission_.erase(bundleName);
+    }
+
+    if (reason == UnfocusedReason::NORMAL) {
+        screenOffHandler_->SetScreenOffInfo(missionId, bundleName, accessTokenId);
     }
     HILOGI("DealUnfocusedBusiness end");
     return ERR_OK;
 }
 
-int32_t DMSContinueSendMgr::GetBundleName(const int32_t missionId, std::string& bundleName)
+int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
+{
+    int32_t missionId = screenOffHandler_->GetMissionId();
+    std::string bundleName = screenOffHandler_->GetBundleName();
+    uint32_t accessTokenId = screenOffHandler_->GetAccessTokenId();
+
+    HILOGI("start, type: %{public}d, missionId: %{public}d, bundleName: %{public}s, accessTokenId: %{public}u",
+        type, missionId, bundleName.c_str(), accessTokenId);
+
+    int32_t ret = SendSoftbusEvent(accessTokenId, type);
+    if (ret != ERR_OK) {
+        HILOGE("SendSoftbusEvent unfocused failed, ret: %{public}d", ret);
+    }
+    HILOGI("end");
+    return ERR_OK;
+}
+
+int32_t DMSContinueSendMgr::GetBundleNameByMissionId(const int32_t missionId, std::string& bundleName)
 {
     for (auto iterItem = focusedMission_.begin(); iterItem != focusedMission_.end(); iterItem++) {
         if (iterItem->second == missionId) {
@@ -444,11 +413,11 @@ int32_t DMSContinueSendMgr::SetMissionContinueState(const int32_t missionId,
         DealSetMissionContinueStateBusiness(missionId, state);
         if (state == AAFwk::ContinueState::CONTINUESTATE_ACTIVE && missionId == info_.currentMissionId &&
             info_.currentIsContinuable) {
-            AddCancelMissionFocusedTimer(missionId, CANCEL_FOCUSED_TASK, CANCEL_FOCUSED_DELAYED);
+            PostUnfocusedTaskWithDelay(missionId, UnfocusedReason::TIMEOUT);
         }
     };
     if (eventHandler_ != nullptr) {
-        eventHandler_->RemoveTask(CANCEL_FOCUSED_TASK);
+        eventHandler_->RemoveTask(TIMEOUT_UNFOCUSED_TASK);
         eventHandler_->PostTask(feedfunc);
     } else {
         HILOGE("eventHandler_ is nullptr");
@@ -474,7 +443,7 @@ int32_t DMSContinueSendMgr::DealSetMissionContinueStateBusiness(const int32_t mi
     }
 
     std::string bundleName;
-    int32_t ret = GetBundleName(missionId, bundleName);
+    int32_t ret = GetBundleNameByMissionId(missionId, bundleName);
     if (ret != ERR_OK) {
         HILOGE("get bundleName failed, broadcast task abort, missionId: %{public}d, ret: %{public}d",
             missionId, ret);
@@ -508,36 +477,99 @@ int32_t DMSContinueSendMgr::DealSetMissionContinueStateBusiness(const int32_t mi
     return ERR_OK;
 }
 
-void DMSContinueSendMgr::NotifyDied(const sptr<IRemoteObject>& obj)
-{
-    HILOGI("NotifyDied start");
-    if (obj == nullptr) {
-        HILOGE("obj is null");
-        return;
-    }
-    for (auto iterItem = registerOnListener_.begin(); iterItem != registerOnListener_.end();) {
-        for (auto iter = iterItem->second.begin(); iter != iterItem->second.end();) {
-            if (*iter == obj) {
-                obj->RemoveDeathRecipient(missionDiedListener_);
-                iter = iterItem->second.erase(iter);
-            } else {
-                iter++;
-            }
-        }
-        if (iterItem->second.empty()) {
-            std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
-            iterItem = registerOnListener_.erase(iterItem);
-        } else {
-            iterItem++;
-        }
-    }
-    HILOGI("NotifyDied end");
-}
-
 void DMSContinueSendMgr::OnMMIEvent()
 {
     HILOGD("OnMMIEvent, missionId = %{public}d", info_.currentMissionId);
     DMSContinueSendMgr::GetInstance().NotifyMissionFocused(info_.currentMissionId, FocusedReason::MMI);
+}
+
+void DMSContinueSendMgr::OnDeviceScreenOff()
+{
+    HILOGI("OnDeviceScreenOff called");
+    if (!info_.currentIsContinuable) {
+        HILOGW("current mission is not continuable, ignore");
+        return;
+    }
+    int32_t missionId = info_.currentMissionId;
+    auto feedfunc = [this, missionId]() {
+        screenOffHandler_->OnDeviceScreenOff(missionId);
+    };
+    if (eventHandler_ == nullptr) {
+        HILOGE("eventHandler_ is nullptr");
+        return;
+    }
+    eventHandler_->PostTask(feedfunc);
+}
+
+void DMSContinueSendMgr::OnDeviceScreenOn()
+{
+    HILOGI("OnDeviceScreenOn called");
+    auto feedfunc = [this]() {
+        screenOffHandler_->OnDeviceScreenOn();
+    };
+    if (eventHandler_ == nullptr) {
+        HILOGE("eventHandler_ is nullptr");
+        return;
+    }
+    eventHandler_->PostTask(feedfunc);
+}
+
+int32_t DMSContinueSendMgr::ScreenOffHandler::GetMissionId()
+{
+    return unfoInfo_.missionId;
+}
+
+std::string DMSContinueSendMgr::ScreenOffHandler::GetBundleName()
+{
+    return unfoInfo_.bundleName;
+}
+
+uint32_t DMSContinueSendMgr::ScreenOffHandler::GetAccessTokenId()
+{
+    return unfoInfo_.accessToken;
+}
+
+bool DMSContinueSendMgr::ScreenOffHandler::IsDeviceScreenOn()
+{
+    return isScreenOn_;
+}
+
+
+void DMSContinueSendMgr::ScreenOffHandler::OnDeviceScreenOff(int32_t missionId)
+{
+    HILOGI("ScreenOffHandler::OnDeviceScreenOff called");
+    isScreenOn_ = false;
+    if (unfoInfo_.missionId != INVALID_MISSION_ID && (GetTickCount()- unfoInfo_.unfoTime) < TIME_DELAYED) {
+        // handle unfocus before screen off
+        DMSContinueSendMgr::GetInstance().SendScreenOffEvent(DMS_FOCUSED_TYPE);
+    }
+    DMSContinueSendMgr::GetInstance().PostUnfocusedTaskWithDelay(missionId, UnfocusedReason::SCREENOFF);
+}
+
+void DMSContinueSendMgr::ScreenOffHandler::OnDeviceScreenOn()
+{
+    HILOGI("ScreenOffHandler::OnDeviceScreenOn called");
+    isScreenOn_ = true;
+}
+
+void DMSContinueSendMgr::ScreenOffHandler::ClearScreenOffInfo()
+{
+    HILOGI("clear last unfocused info");
+    unfoInfo_.missionId = INVALID_MISSION_ID;
+    unfoInfo_.unfoTime = 0;
+    unfoInfo_.bundleName = "";
+    unfoInfo_.accessToken = 0;
+}
+
+void DMSContinueSendMgr::ScreenOffHandler::SetScreenOffInfo(int32_t missionId, std::string bundleName,
+    uint32_t accessTokenId)
+{
+    HILOGI("set last unfocused info, missionId: %{public}d, bundleName: %{public}s, accessTokenId: %{public}u",
+        missionId, bundleName.c_str(), accessTokenId);
+    unfoInfo_.missionId = missionId;
+    unfoInfo_.unfoTime = GetTickCount();
+    unfoInfo_.bundleName = bundleName;
+    unfoInfo_.accessToken = accessTokenId;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

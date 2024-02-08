@@ -96,32 +96,31 @@ HWTEST_F(DMSContinueManagerTest, testUnInit001, TestSize.Level3)
 }
 
 /**
- * @tc.name: testAddCancelMissionFocusedTimer001
- * @tc.desc: test AddCancelMissionFocusedTimer
+ * @tc.name: testPostUnfocusedTaskWithDelay001
+ * @tc.desc: test PostUnfocusedTaskWithDelay
  * @tc.type: FUNC
  */
-HWTEST_F(DMSContinueManagerTest, testAddCancelMissionFocusedTimer001, TestSize.Level3)
+HWTEST_F(DMSContinueManagerTest, testPostUnfocusedTaskWithDelay001, TestSize.Level3)
 {
-    DTEST_LOG << "DMSContinueManagerTest testAddCancelMissionFocusedTimer001 begin" << std::endl;
+    DTEST_LOG << "DMSContinueManagerTest testPostUnfocusedTaskWithDelay001 begin" << std::endl;
 
     DistributedSchedUtil::MockManageMissions();
     DMSContinueSendMgr::GetInstance().Init();
 
     /**
-     * @tc.steps: step1. test AddCancelMissionFocusedTimer when eventHandler is not nullptr;
+     * @tc.steps: step1. test PostUnfocusedTaskWithDelay when eventHandler is not nullptr;
      */
-    DMSContinueSendMgr::GetInstance().AddCancelMissionFocusedTimer(0,
-        CANCEL_FOCUSED_TASK, CANCEL_FOCUSED_DELAYED);
+    DMSContinueSendMgr::GetInstance().PostUnfocusedTaskWithDelay(0, UnfocusedReason::TIMEOUT);
+    DMSContinueSendMgr::GetInstance().PostUnfocusedTaskWithDelay(0, UnfocusedReason::SCREENOFF);
     EXPECT_NE(DMSContinueSendMgr::GetInstance().eventHandler_, nullptr);
 
     /**
-     * @tc.steps: step2. test AddCancelMissionFocusedTimer when eventHandler is nullptr;
+     * @tc.steps: step2. test PostUnfocusedTaskWithDelay when eventHandler is nullptr;
      */
     DMSContinueSendMgr::GetInstance().UnInit();
-    DMSContinueSendMgr::GetInstance().AddCancelMissionFocusedTimer(0,
-        CANCEL_FOCUSED_TASK, CANCEL_FOCUSED_DELAYED);
+    DMSContinueSendMgr::GetInstance().PostUnfocusedTaskWithDelay(0, UnfocusedReason::TIMEOUT);
     EXPECT_EQ(DMSContinueSendMgr::GetInstance().eventHandler_, nullptr);
-    DTEST_LOG << "DMSContinueManagerTest testAddCancelMissionFocusedTimer001 end" << std::endl;
+    DTEST_LOG << "DMSContinueManagerTest testPostUnfocusedTaskWithDelay001 end" << std::endl;
 }
 
 /**
@@ -168,15 +167,14 @@ HWTEST_F(DMSContinueManagerTest, testNotifyMissionUnfocused001, TestSize.Level3)
     /**
      * @tc.steps: step1. test NotifyMissionUnfocused when eventHandler is not nullptr;
      */
-    DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(0);
-    DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(0);
+    DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(0, UnfocusedReason::NORMAL);
     EXPECT_NE(DMSContinueSendMgr::GetInstance().eventHandler_, nullptr);
 
     /**
      * @tc.steps: step2. test NotifyMissionUnfocused when eventHandler is nullptr;
      */
     DMSContinueSendMgr::GetInstance().UnInit();
-    DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(0);
+    DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(0, UnfocusedReason::NORMAL);
     EXPECT_EQ(DMSContinueSendMgr::GetInstance().eventHandler_, nullptr);
     DTEST_LOG << "DMSContinueManagerTest testNotifyMissionUnfocused001 end" << std::endl;
 }
@@ -254,11 +252,11 @@ HWTEST_F(DMSContinueManagerTest, testGetMissionId001, TestSize.Level1)
     DTEST_LOG << "DMSContinueManagerTest testGetMissionId001 start" << std::endl;
     DMSContinueSendMgr::GetInstance().focusedMission_[BUNDLENAME_01] = MISSIONID_01;
     int32_t missionId;
-    int32_t ret = DMSContinueSendMgr::GetInstance().GetMissionId(BUNDLENAME_01, missionId);
+    int32_t ret = DMSContinueSendMgr::GetInstance().GetMissionIdByBundleName(BUNDLENAME_01, missionId);
     EXPECT_EQ(missionId, MISSIONID_01);
     EXPECT_EQ(ret, ERR_OK);
 
-    ret = DMSContinueSendMgr::GetInstance().GetMissionId(BUNDLENAME_02, missionId);
+    ret = DMSContinueSendMgr::GetInstance().GetMissionIdByBundleName(BUNDLENAME_02, missionId);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DMSContinueManagerTest testGetMissionId001 end" << std::endl;
 }
@@ -295,21 +293,21 @@ HWTEST_F(DMSContinueManagerTest, testDealUnfocusedBusiness001, TestSize.Level3)
     /**
      * @tc.steps: step1. test DealUnfocusedBusiness when missionId is invalid;
      */
-    int32_t ret = DMSContinueSendMgr::GetInstance().DealUnfocusedBusiness(-1, true);
+    int32_t ret = DMSContinueSendMgr::GetInstance().DealUnfocusedBusiness(-1, UnfocusedReason::NORMAL);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     /**
      * @tc.steps: step2. test DealUnfocusedBusiness when missionId is not invalid;
      */
     DMSContinueSendMgr::GetInstance().focusedMission_[BUNDLENAME_01] = MISSIONID_01;
-    ret = DMSContinueSendMgr::GetInstance().DealUnfocusedBusiness(MISSIONID_01, true);
+    ret = DMSContinueSendMgr::GetInstance().DealUnfocusedBusiness(MISSIONID_01, UnfocusedReason::NORMAL);
     EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
 
     /**
      * @tc.steps: step3. test NotifyDied when obj is nullptr;
      */
     sptr<IRemoteObject> obj01 = nullptr;
-    DMSContinueSendMgr::GetInstance().NotifyDied(obj01);
+    DMSContinueRecvMgr::GetInstance().NotifyDied(obj01);
 
     /**
      * @tc.steps: step4. test NotifyDied when iterItem->second is empty;
@@ -321,7 +319,7 @@ HWTEST_F(DMSContinueManagerTest, testDealUnfocusedBusiness001, TestSize.Level3)
         DMSContinueRecvMgr::GetInstance().registerOnListener_[TYPE] = objs;
     }
     obj01 = new RemoteOnListenerStubTest();
-    DMSContinueSendMgr::GetInstance().NotifyDied(obj01);
+    DMSContinueRecvMgr::GetInstance().NotifyDied(obj01);
 
     DTEST_LOG << "DMSContinueManagerTest testDealUnfocusedBusiness001 end" << std::endl;
 }
@@ -439,11 +437,11 @@ HWTEST_F(DMSContinueManagerTest, testGetBundleName001, TestSize.Level1)
     DTEST_LOG << "DMSContinueManagerTest testGetBundleName001 start" << std::endl;
     DMSContinueSendMgr::GetInstance().focusedMission_[BUNDLENAME_01] = MISSIONID_01;
     std::string bundleName;
-    int32_t ret = DMSContinueSendMgr::GetInstance().GetBundleName(MISSIONID_01, bundleName);
+    int32_t ret = DMSContinueSendMgr::GetInstance().GetBundleNameByMissionId(MISSIONID_01, bundleName);
     EXPECT_EQ(bundleName, BUNDLENAME_01);
     EXPECT_EQ(ret, ERR_OK);
 
-    ret = DMSContinueSendMgr::GetInstance().GetBundleName(MISSIONID_02, bundleName);
+    ret = DMSContinueSendMgr::GetInstance().GetBundleNameByMissionId(MISSIONID_02, bundleName);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DMSContinueManagerTest testGetBundleName001 end" << std::endl;
 }
@@ -482,7 +480,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDied001, TestSize.Level1)
     sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
     int32_t ret = DMSContinueRecvMgr::GetInstance().RegisterOnListener(TYPE, obj01);
     EXPECT_EQ(false, DMSContinueRecvMgr::GetInstance().registerOnListener_.empty());
-    DMSContinueSendMgr::GetInstance().NotifyDied(obj01);
+    DMSContinueRecvMgr::GetInstance().NotifyDied(obj01);
     DTEST_LOG << "DMSContinueManagerTest testNotifyDied001 end" << std::endl;
 }
 
@@ -543,52 +541,29 @@ HWTEST_F(DMSContinueManagerTest, testDealSetMissionContinueStateBusiness001, Tes
 
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
 /**
- * @tc.name: testNotifyScreenOff001
- * @tc.desc: test NotifyScreenOff normal
+ * @tc.name: testOnDeviceScreenOff001
+ * @tc.desc: test OnDeviceScreenOff normal
  * @tc.type: FUNC
  */
-HWTEST_F(DMSContinueManagerTest, testNotifyScreenOff001, TestSize.Level1)
+HWTEST_F(DMSContinueManagerTest, testOnDeviceScreenOff001, TestSize.Level1)
 {
-    DTEST_LOG << "DMSContinueManagerTest testNotifyScreenOff001 start" << std::endl;
+    DTEST_LOG << "DMSContinueManagerTest testOnDeviceScreenOff001 start" << std::endl;
 
     DistributedSchedUtil::MockManageMissions();
      /**
-     * @tc.steps: step1. test NotifyScreenOff when eventHandler is not nullptr;
+     * @tc.steps: step1. test OnDeviceScreenOff when eventHandler is not nullptr;
      */
     DMSContinueSendMgr::GetInstance().Init();
-    DMSContinueSendMgr::GetInstance().NotifyScreenOff();
+    DMSContinueSendMgr::GetInstance().OnDeviceScreenOff();
     EXPECT_NE(DMSContinueSendMgr::GetInstance().eventHandler_, nullptr);
 
     /**
-     * @tc.steps: step2. test NotifyScreenOff when eventHandler is nullptr;
+     * @tc.steps: step2. test OnDeviceScreenOff when eventHandler is nullptr;
      */
     DMSContinueSendMgr::GetInstance().UnInit();
-    DMSContinueSendMgr::GetInstance().NotifyScreenOff();
+    DMSContinueSendMgr::GetInstance().OnDeviceScreenOff();
     EXPECT_EQ(DMSContinueSendMgr::GetInstance().eventHandler_, nullptr);
-    DTEST_LOG << "DMSContinueManagerTest testNotifyScreenOff001 end" << std::endl;
-}
-
-/**
- * @tc.name: testDealScreenOff001
- * @tc.desc: test DealScreenOff normal
- * @tc.type: FUNC
- */
-HWTEST_F(DMSContinueManagerTest, DealScreenOff001, TestSize.Level1)
-{
-    DTEST_LOG << "DMSContinueManagerTest DealScreenOff001 start" << std::endl;
-    DMSContinueSendMgr::GetInstance().info_.currentMissionId = 0;
-    DMSContinueSendMgr::GetInstance().screenLockInfo_[0] = 0;
-    DMSContinueSendMgr::GetInstance().DealScreenOff();
-    DMSContinueSendMgr::GetInstance().info_.currentMissionId = 1;
-    DMSContinueSendMgr::GetInstance().screenLockInfo_[0] = 0;
-    DMSContinueSendMgr::GetInstance().DealScreenOff();
-    int64_t time = GetTickCount();
-    DMSContinueSendMgr::GetInstance().screenLockInfo_[0] = time;
-    DMSContinueSendMgr::GetInstance().DealScreenOff();
-    DMSContinueSendMgr::GetInstance().screenLockInfo_.clear();
-    DMSContinueSendMgr::GetInstance().DealScreenOff();
-    EXPECT_EQ(DMSContinueSendMgr::GetInstance().screenLockInfo_.size(), 1);
-    DTEST_LOG << "DMSContinueManagerTest DealScreenOff001 end" << std::endl;
+    DTEST_LOG << "DMSContinueManagerTest testOnDeviceScreenOff001 end" << std::endl;
 }
 #endif
 
