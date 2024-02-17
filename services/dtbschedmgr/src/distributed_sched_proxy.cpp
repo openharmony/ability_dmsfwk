@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -237,7 +237,8 @@ int32_t DistributedSchedProxy::NotifyDSchedEventResultFromRemote(const std::stri
     (IDSchedInterfaceCode::NOTIFY_DSCHED_EVENT_RESULT_FROM_REMOTE), data, reply);
 }
 
-int32_t DistributedSchedProxy::NotifyContinuationResultFromRemote(int32_t sessionId, bool isSuccess)
+int32_t DistributedSchedProxy::NotifyContinuationResultFromRemote(int32_t sessionId, bool isSuccess,
+    const std::string dstInfo)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -250,6 +251,7 @@ int32_t DistributedSchedProxy::NotifyContinuationResultFromRemote(int32_t sessio
     }
     PARCEL_WRITE_HELPER(data, Int32, sessionId);
     PARCEL_WRITE_HELPER(data, Bool, isSuccess);
+    PARCEL_WRITE_HELPER(data, String, dstInfo);
     MessageParcel reply;
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>
     (IDSchedInterfaceCode::NOTIFY_CONTINUATION_RESULT_FROM_REMOTE), data, reply);
