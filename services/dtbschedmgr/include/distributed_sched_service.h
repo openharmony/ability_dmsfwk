@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,6 +89,7 @@ public:
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
     void DeviceOnlineNotify(const std::string& deviceId);
     void DeviceOfflineNotify(const std::string& deviceId);
+    void DurationStart(const std::string srcDeviceId, const std::string dstDeviceId);
 
     int32_t StartRemoteAbility(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t requestCode,
         uint32_t accessToken) override;
@@ -99,6 +100,12 @@ public:
         const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t resultCode) override;
     int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
         int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams) override;
+    int32_t ProcessContinueLocalMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
+        const std::string& bundleName, const sptr<IRemoteObject>& callback,
+        const OHOS::AAFwk::WantParams& wantParams);
+    int32_t ProcessContinueRemoteMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
+        const std::string& bundleName, const sptr<IRemoteObject>& callback,
+        const OHOS::AAFwk::WantParams& wantParams);
     int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
         const std::string& bundleName, const sptr<IRemoteObject>& callback,
         const OHOS::AAFwk::WantParams& wantParams) override;
@@ -106,7 +113,7 @@ public:
     int32_t StartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId, int32_t callerUid,
         int32_t status, uint32_t accessToken) override;
     void NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId, bool isSuccess) override;
-    int32_t NotifyContinuationResultFromRemote(int32_t sessionId, bool isSuccess) override;
+    int32_t NotifyContinuationResultFromRemote(int32_t sessionId, bool isSuccess, const std::string dstInfo) override;
     int32_t NotifyDSchedEventResultFromRemote(const std::string type, int32_t dSchedEventResult) override;
     void NotifyContinuationCallbackResult(int32_t missionId, int32_t resultCode);
     void NotifyDSchedEventCallbackResult(const std::string type, int32_t resultCode);

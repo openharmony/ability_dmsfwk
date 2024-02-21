@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 #include <thread>
 
+#include "dfx/dms_continue_time_dumper.h"
 #include "distributed_sched_continuation_test.h"
 #include "distributed_sched_util.h"
 #include "dtbschedmgr_device_info_storage.h"
@@ -301,7 +302,9 @@ HWTEST_F(DSchedContinuationTest, NotifyContinuationResultFromRemote_001, TestSiz
      * @tc.steps: step1. input invalid session.
      * @tc.expected: step1. return false.
      */
-    DistributedSchedService::GetInstance().NotifyContinuationResultFromRemote(-1, true);
+    std::string info;
+    DmsContinueTime::GetInstance().Init();
+    DistributedSchedService::GetInstance().NotifyContinuationResultFromRemote(-1, true, info);
     EXPECT_TRUE(!timeoutFlag_);
     DTEST_LOG << "DSchedContinuationTest NotifyContinuationResultFromRemote_001 end" << std::endl;
 }
@@ -318,7 +321,9 @@ HWTEST_F(DSchedContinuationTest, NotifyContinuationResultFromRemote_002, TestSiz
      * @tc.steps: step1. get remote dms failed.
      * @tc.expected: step1. return false.
      */
-    DistributedSchedService::GetInstance().NotifyContinuationResultFromRemote(MOCK_SESSION_ID, true);
+    std::string info;
+    DmsContinueTime::GetInstance().Init();
+    DistributedSchedService::GetInstance().NotifyContinuationResultFromRemote(MOCK_SESSION_ID, true, info);
     EXPECT_TRUE(!timeoutFlag_);
     DTEST_LOG << "DSchedContinuationTest NotifyContinuationResultFromRemote_002 end" << std::endl;
 }
@@ -1465,9 +1470,10 @@ HWTEST_F(DSchedContinuationTest, ProxyCallNotifyContinuationResultFromRemote001,
     sptr<IDistributedSched> proxy = GetDms();
     EXPECT_NE(proxy, nullptr);
     std::string srcDeviceId;
+    std::string info;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId);
     proxy->NotifyCompleteContinuation(Str8ToStr16(srcDeviceId), 0, true);
-    int32_t ret = proxy->NotifyContinuationResultFromRemote(0, true);
+    int32_t ret = proxy->NotifyContinuationResultFromRemote(0, true, info);
     EXPECT_EQ(ret, REQUEST_CODE_ERR);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallNotifyContinuationResultFromRemote001 end" << std::endl;
 }
