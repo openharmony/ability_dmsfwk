@@ -77,7 +77,6 @@ ohos_shared_library("distributedschedsvr") {
     "src/bundle/bundle_manager_internal.cpp",
     "src/connect_death_recipient.cpp",
     "src/deviceManager/dms_device_info.cpp",
-    "src/dfx/dms_continue_time_dumper.cpp",
     "src/dfx/dms_hisysevent_report.cpp",
     "src/dfx/dms_hitrace_chain.cpp",
     "src/distributedWant/distributed_operation.cpp",

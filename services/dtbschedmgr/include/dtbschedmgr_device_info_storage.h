@@ -46,7 +46,6 @@ public:
     void DeviceOnlineNotify(const std::shared_ptr<DmsDeviceInfo> devInfo);
     void DeviceOfflineNotify(const std::string& networkId);
     void OnDeviceInfoChanged(const std::string& networkId);
-    std::string GetDeviceName(std::string netWorkId);
 
     /**
      * get device info by device id
