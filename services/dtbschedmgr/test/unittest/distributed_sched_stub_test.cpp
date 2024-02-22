@@ -729,8 +729,6 @@ HWTEST_F(DistributedSchedStubTest, NotifyContinuationResultFromRemoteInner_001, 
     data.WriteInt32(sessionId);
     bool continuationResult = false;
     data.WriteBool(continuationResult);
-    std::string info(DMS_VERSION_ID);
-    data.WriteString(info.c_str());
     int32_t result = distributedSchedStub_->NotifyContinuationResultFromRemoteInner(data, reply);
     EXPECT_EQ(result, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedStubTest NotifyContinuationResultFromRemoteInner_001 end" << std::endl;
