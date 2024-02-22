@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #include "distributed_sched_dumper.h"
 
 #include "accesstoken_kit.h"
+#include "dfx/dms_continue_time_dumper.h"
 #include "distributed_sched_service.h"
 #include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
@@ -27,6 +28,7 @@ const std::string TAG = "DistributedSchedDumper";
 const std::string HIDUMPER_PROCESS_NAME = "hidumper_service";
 const std::string ARGS_HELP = "-h";
 const std::string ARGS_CONNECT_REMOTE_ABILITY = "-connect";
+const std::string ARGS_CONNECT_CONTINUETIME_ABILITY = "-continueTime";
 constexpr size_t MIN_ARGS_SIZE = 1;
 }
 
@@ -49,6 +51,11 @@ bool DistributedSchedDumper::Dump(const std::vector<std::string>& args, std::str
         // -connect
         if (args[0] == ARGS_CONNECT_REMOTE_ABILITY) {
             ShowConnectRemoteAbility(result);
+            return true;
+        }
+        // -continueTime
+        if (args[0] == ARGS_CONNECT_CONTINUETIME_ABILITY) {
+            ShowDuration(result);
             return true;
         }
     }
@@ -78,6 +85,11 @@ bool DistributedSchedDumper::DumpDefault(std::string& result)
 void DistributedSchedDumper::ShowConnectRemoteAbility(std::string& result)
 {
     DistributedSchedService::GetInstance().DumpConnectInfo(result);
+}
+
+void DistributedSchedDumper::ShowDuration(std::string& result)
+{
+    DmsContinueTime::GetInstance().ShowInfo(result);
 }
 
 void DistributedSchedDumper::ShowHelp(std::string& result)

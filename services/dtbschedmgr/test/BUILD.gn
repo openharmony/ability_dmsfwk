@@ -111,6 +111,7 @@ dtbschedmgr_sources = [
   "${distributed_service}/dtbschedmgr/src/bundle/bundle_manager_internal.cpp",
   "${distributed_service}/dtbschedmgr/src/connect_death_recipient.cpp",
   "${distributed_service}/dtbschedmgr/src/deviceManager/dms_device_info.cpp",
+  "${distributed_service}/dtbschedmgr/src/dfx/dms_continue_time_dumper.cpp",
   "${distributed_service}/dtbschedmgr/src/dfx/dms_hisysevent_report.cpp",
   "${distributed_service}/dtbschedmgr/src/dfx/dms_hitrace_chain.cpp",
   "${distributed_service}/dtbschedmgr/src/distributedWant/distributed_operation.cpp",
@@ -537,6 +538,7 @@ ohos_unittest("dmsbasetest") {
   module_out_path = module_output_path
   sources = [
     "unittest/deviceManager/dms_device_info_test.cpp",
+    "unittest/dfx/dms_continue_time_dumper_test.cpp",
     "unittest/dfx/dms_hisysevent_report_test.cpp",
     "unittest/dms_network_adapter_test.cpp",
     "unittest/dtbschedmgr_device_info_storage_test.cpp",
