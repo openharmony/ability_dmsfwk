@@ -361,5 +361,16 @@ void DnetServiceDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
     HILOGI("OnRemoteDied dnetwork service died");
     DtbschedmgrDeviceInfoStorage::GetInstance().Init();
 }
+
+std::string DtbschedmgrDeviceInfoStorage::GetDeviceName(std::string netWorkId)
+{
+    for (auto device = remoteDevices_.begin(); device != remoteDevices_.end(); ++device) {
+        if (device->second->GetNetworkId() == netWorkId) {
+            HILOGI("deviceName = %{public}s", device->second->GetDeviceName().c_str());
+            return device->second->GetDeviceName();
+        }
+    }
+    return "";
+}
 }
 }

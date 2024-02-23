@@ -20,6 +20,7 @@
 #include "bundle/bundle_manager_internal.h"
 #include "caller_info.h"
 #include "datetime_ex.h"
+#include "dfx/dms_continue_time_dumper.h"
 #include "dfx/dms_hisysevent_report.h"
 #include "dfx/dms_hitrace_chain.h"
 #include "dfx/dms_hitrace_constants.h"
@@ -445,6 +446,9 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
 
 int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, MessageParcel& reply)
 {
+    int64_t saveDataEnd = GetTickCount();
+    DmsContinueTime::GetInstance().SetSaveDataDurationEnd(saveDataEnd);
+    
     if (!DistributedSchedPermission::GetInstance().IsFoundationCall()) {
         return DMS_PERMISSION_DENIED;
     }
@@ -516,7 +520,9 @@ int32_t DistributedSchedStub::NotifyContinuationResultFromRemoteInner(MessagePar
     PARCEL_READ_HELPER(data, Int32, sessionId);
     bool continuationResult = false;
     PARCEL_READ_HELPER(data, Bool, continuationResult);
-    return NotifyContinuationResultFromRemote(sessionId, continuationResult);
+    std::string dstInfo;
+    PARCEL_READ_HELPER_NORET(data, String, dstInfo);
+    return NotifyContinuationResultFromRemote(sessionId, continuationResult, dstInfo);
 }
 
 int32_t DistributedSchedStub::ConnectRemoteAbilityInner(MessageParcel& data, MessageParcel& reply)
