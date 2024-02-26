@@ -69,6 +69,7 @@ void DmsContinueTimeTest::TearDown()
 void DmsContinueTimeTest::SetUp()
 {
     DTEST_LOG << "DmsContinueTimeTest::SetUp" << std::endl;
+    DmsContinueTime::GetInstance().Init();
 }
 
 /**
@@ -370,6 +371,7 @@ HWTEST_F(DmsContinueTimeTest, AppendInfo_002, TestSize.Level3)
     std::string result;
     DmsContinueTime::GetInstance().SetSrcBundleName(BUNDLE_NAME);
     DmsContinueTime::GetInstance().SetDstBundleName(BUNDLE_NAME);
+    DmsContinueTime::GetInstance().SetPull(false);
     DmsContinueTime::GetInstance().AppendInfo();
     DmsContinueTime::GetInstance().ShowInfo(result);
     EXPECT_EQ(result.empty(), false);
