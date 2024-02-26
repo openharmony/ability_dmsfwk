@@ -187,16 +187,25 @@ DmsDumperInfo DmsContinueTime::GetDstInfo()
 
 void DmsContinueTime::SetDurationBegin(const int32_t idx, const int64_t time)
 {
+    if (durationInfo_.empty()) {
+        return;
+    }
     durationInfo_[idx].SetBeginTime(time);
 }
 
 void DmsContinueTime::SetDurationEnd(const int32_t idx, const int64_t time)
 {
+    if (durationInfo_.empty()) {
+        return;
+    }
     durationInfo_[idx].SetEndTime(time);
 }
 
 void DmsContinueTime::SetDurationStrTime(const int32_t idx, const std::string info)
 {
+    if (durationInfo_.empty()) {
+        return;
+    }
     durationInfo_[idx].SetStrTime(info);
 }
 
@@ -372,6 +381,7 @@ void DmsContinueTime::AppendInfo()
     }
     timeInfoList_.push_back(appendInfo_);
     appendInfo_.clear();
+    durationInfo_.clear();
 }
 
 void DmsContinueTime::ShowInfo(std::string& result)

@@ -200,6 +200,7 @@ void DistributedSchedService::DeviceOfflineNotify(const std::string& networkId)
 bool DistributedSchedService::Init()
 {
     HILOGD("ready to init.");
+    DmsContinueTime::GetInstance().Init();
     DnetworkAdapter::GetInstance()->Init();
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().Init()) {
         HILOGW("DtbschedmgrDeviceInfoStorage init failed.");
