@@ -64,10 +64,10 @@ public:
 
     static std::string AnonymizeNetworkId(const std::string& deviceId);
     static std::shared_ptr<DnetworkAdapter> GetInstance();
+    bool UpdateDeviceInfoStorage();
 
 private:
     DISALLOW_COPY_AND_MOVE(DnetworkAdapter);
-    bool UpdateDeviceInfoStorage();
 
     static std::shared_ptr<AppExecFwk::EventHandler> dnetworkHandler_;
     static std::mutex listenerSetMutex_;
