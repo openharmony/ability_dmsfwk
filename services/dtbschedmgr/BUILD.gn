@@ -29,7 +29,12 @@ config("distributed_sched_config") {
     "${communication_path}/dsoftbus/interfaces/kits/common",
     "${dms_path}/interfaces/kits/napi/include",
     "${dms_path}/interfaces/innerkits/common/include",
+    "include/continue",
+    "include/continue/state",
+    "include/continue/state/source_state",
+    "include/continue/state/sink_state",
     "include/distributedWant",
+    "include/softbus_adapter/transport",
     "//third_party/cJSON",
   ]
   defines = []
@@ -76,6 +81,19 @@ ohos_shared_library("distributedschedsvr") {
     "src/bundle/bundle_manager_callback_stub.cpp",
     "src/bundle/bundle_manager_internal.cpp",
     "src/connect_death_recipient.cpp",
+    "src/continue/dsched_continue.cpp",
+    "src/continue/dsched_continue_event.cpp",
+    "src/continue/dsched_continue_event_handler.cpp",
+    "src/continue/dsched_continue_manager.cpp",
+    "src/continue/state/dsched_continue_state_machine.cpp",
+    "src/continue/state/sink_state/dsched_continue_data_state.cpp",
+    "src/continue/state/sink_state/dsched_continue_sink_end_state.cpp",
+    "src/continue/state/sink_state/dsched_continue_sink_start_state.cpp",
+    "src/continue/state/sink_state/dsched_continue_sink_wait_end_state.cpp",
+    "src/continue/state/source_state/dsched_continue_ability_state.cpp",
+    "src/continue/state/source_state/dsched_continue_source_end_state.cpp",
+    "src/continue/state/source_state/dsched_continue_source_start_state.cpp",
+    "src/continue/state/source_state/dsched_continue_source_wait_end_state.cpp",
     "src/deviceManager/dms_device_info.cpp",
     "src/dfx/dms_continue_time_dumper.cpp",
     "src/dfx/dms_hisysevent_report.cpp",
@@ -101,6 +119,9 @@ ohos_shared_library("distributedschedsvr") {
     "src/dms_token_callback.cpp",
     "src/dms_version_manager.cpp",
     "src/dtbschedmgr_device_info_storage.cpp",
+    "src/softbus_adapter/transport/dsched_data_buffer.cpp",
+    "src/softbus_adapter/transport/dsched_softbus_session.cpp",
+    "src/softbus_adapter/transport/dsched_transport_softbus_adapter.cpp",
   ]
 
   if (!dmsfwk_softbus_adapter_common) {
