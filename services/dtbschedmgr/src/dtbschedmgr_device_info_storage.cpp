@@ -242,11 +242,24 @@ void DtbschedmgrDeviceInfoStorage::ClearAllDevices()
 
 std::shared_ptr<DmsDeviceInfo> DtbschedmgrDeviceInfoStorage::GetDeviceInfoById(const string& networkId)
 {
+    HILOGI("GetDeviceInfoById start, networkId = %{public}s.", DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
     lock_guard<mutex> autoLock(deviceLock_);
     auto iter = remoteDevices_.find(networkId);
     if (iter == remoteDevices_.end()) {
-        return nullptr;
+        bool updateSuccess = DnetworkAdapter::GetInstance()->UpdateDeviceInfoStorage();
+        if (!updateSuccess) {
+            HILOGE("DeviceInfo not in local cache,UpdateDeviceInfoStorage failed.");
+            return nullptr;
+        }
+        auto it = remoteDevices_.find(networkId);
+        if (it == remoteDevices_.end()) {
+            HILOGE("DeviceInfo not in DM.");
+            return nullptr;
+        }
+        HILOGI("Get deviceInfo from DM success");
+        return it->second;
     }
+    HILOGI("Get deviceInfo from DMS local cache success");
     return iter->second;
 }
 

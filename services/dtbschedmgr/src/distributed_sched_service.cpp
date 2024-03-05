@@ -538,6 +538,7 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
 int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
     int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
+    HILOGI("ContinueMission called");
     if (srcDeviceId.empty() || dstDeviceId.empty() || callback == nullptr) {
         HILOGE("srcDeviceId or dstDeviceId or callback is null!");
         return INVALID_PARAMETERS_ERR;
@@ -551,12 +552,16 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
 
     if (srcDeviceId == localDevId) {
         if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(dstDeviceId) == nullptr) {
+            HILOGE("GetDeviceInfoById failed, dstDeviceId: %{public}s.",
+                DnetworkAdapter::AnonymizeNetworkId(dstDeviceId).c_str());
             return INVALID_REMOTE_PARAMETERS_ERR;
         }
         return ContinueLocalMission(dstDeviceId, missionId, callback, wantParams);
     } else if (dstDeviceId == localDevId) {
         DmsContinueTime::GetInstance().SetPull(true);
         if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(srcDeviceId) == nullptr) {
+            HILOGE("GetDeviceInfoById failed, srcDeviceId: %{public}s.",
+                DnetworkAdapter::AnonymizeNetworkId(srcDeviceId).c_str());
             return INVALID_REMOTE_PARAMETERS_ERR;
         }
         return ContinueRemoteMission(srcDeviceId, dstDeviceId, missionId, callback, wantParams);
@@ -570,7 +575,10 @@ int32_t DistributedSchedService::ProcessContinueLocalMission(const std::string& 
     const std::string& dstDeviceId, const std::string& bundleName, const sptr<IRemoteObject>& callback,
     const OHOS::AAFwk::WantParams& wantParams)
 {
+    HILOGI("ProcessContinueLocalMission called.");
     if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(dstDeviceId) == nullptr) {
+            HILOGE("GetDeviceInfoById failed, dstDeviceId: %{public}s.",
+                DnetworkAdapter::AnonymizeNetworkId(dstDeviceId).c_str());
             return INVALID_REMOTE_PARAMETERS_ERR;
         }
         int32_t missionId = 1;
@@ -595,7 +603,10 @@ int32_t DistributedSchedService::ProcessContinueRemoteMission(const std::string&
     const std::string& dstDeviceId, const std::string& bundleName, const sptr<IRemoteObject>& callback,
     const OHOS::AAFwk::WantParams& wantParams)
 {
+    HILOGI("ProcessContinueRemoteMission start.");
     if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(srcDeviceId) == nullptr) {
+        HILOGE("GetDeviceInfoById failed, srcDeviceId: %{public}s.",
+            DnetworkAdapter::AnonymizeNetworkId(srcDeviceId).c_str());
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
     if (dschedContinuation_ == nullptr) {
@@ -605,6 +616,7 @@ int32_t DistributedSchedService::ProcessContinueRemoteMission(const std::string&
     dschedContinuation_->continueEvent_.srcNetworkId = dstDeviceId;
     dschedContinuation_->continueEvent_.dstNetworkId = srcDeviceId;
     dschedContinuation_->continueEvent_.bundleName = bundleName;
+    HILOGI("ProcessContinueRemoteMission end.");
     return ContinueRemoteMission(srcDeviceId, dstDeviceId, bundleName, callback, wantParams);
 }
 
