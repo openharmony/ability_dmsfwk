@@ -355,6 +355,7 @@ int32_t DistributedSchedAdapter::RegisterMissionListener(const sptr<IMissionList
         return errCode;
     }
     ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->RegisterMissionListener(listener);
+    DmsRadar::GetInstance().RegisterFocusedRes("RegisterMissionListener", ret);
     if (ret != ERR_OK) {
         HILOGE("RegisterMissionListener failed, ret=%{public}d", ret);
         return ret;

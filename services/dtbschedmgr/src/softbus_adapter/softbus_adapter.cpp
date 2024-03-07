@@ -15,6 +15,7 @@
 
 #include "softbus_adapter/softbus_adapter.h"
 #include "broadcast.h"
+#include "distributed_radar.h"
 #include "dtbschedmgr_log.h"
 #include "softbus_error_code.h"
 
@@ -82,6 +83,7 @@ int32_t SoftbusAdapter::RegisterSoftbusEventListener(const std::shared_ptr<Softb
     eventListener.OnEventReceived = EventListenerReceived;
     HILOGI("RegisterSoftbusEventListener pkgName: %s.", pkgName_.c_str());
     int32_t ret = RegisterEventListener(pkgName_.c_str(), &eventListener);
+    DmsRadar::GetInstance().RegisterSoftbusCallbackRes("RegisterSoftbusEventListener", ret);
     if (ret != SOFTBUS_OK) {
         HILOGE("RegisterSoftbusEventListener failed, ret:%d.", ret);
         return ret;

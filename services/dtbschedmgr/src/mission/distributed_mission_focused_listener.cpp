@@ -15,6 +15,7 @@
 
 #include "mission/distributed_mission_focused_listener.h"
 
+#include "distributed_radar.h"
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_send_manager.h"
 
@@ -47,6 +48,7 @@ void DistributedMissionFocusedListener::OnMissionMovedToFront(int32_t missionId)
 void DistributedMissionFocusedListener::OnMissionFocused(int32_t missionId)
 {
     HILOGD("OnMissionFocused, missionId = %{public}d", missionId);
+    DmsRadar::GetInstance().DmsFocused("OnMissionFocused", NORMAL);
     DMSContinueSendMgr::GetInstance().NotifyMissionFocused(missionId, FocusedReason::NORMAL);
 }
 
