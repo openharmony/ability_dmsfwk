@@ -339,6 +339,29 @@ HWTEST_F(DMSNetworkAdapterTest, AddDeviceChangeListener_006, TestSize.Level3)
 }
 
 /**
+ * @tc.name: AddDeviceChangeListener_007
+ * @tc.desc: test OnDeviceChanged
+ * @tc.type: FUNC
+ * @tc.require: I621C1
+ */
+HWTEST_F(DMSNetworkAdapterTest, AddDeviceChangeListener_007, TestSize.Level3)
+{
+    DistributedHardware::DmDeviceInfo deviceInfo;
+    /**
+     * @tc.steps: step1. OnDeviceChanged
+     */
+    DnetworkAdapter::GetInstance()->stateCallback_->OnDeviceChanged(deviceInfo);
+    /**
+     * @tc.steps: step2. AddDeviceChangeListener
+     */
+    DnetworkAdapter::listenerSet_.clear();
+    std::shared_ptr<DeviceListener> deviceNodeListener = std::make_shared<MockDeviceListener>();
+    DnetworkAdapter::listenerSet_.insert(deviceNodeListener);
+    bool res = DnetworkAdapter::GetInstance()->AddDeviceChangeListener(deviceNodeListener);
+    EXPECT_EQ(res, true);
+}
+
+/**
  * @tc.name: RemoveDeviceChangeListener_001
  * @tc.desc: listenerSet_ size is 0
  * @tc.type: FUNC
