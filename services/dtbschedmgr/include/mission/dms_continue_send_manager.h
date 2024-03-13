@@ -127,6 +127,8 @@ private:
     int32_t CheckContinueState(const int32_t missionId);
     void AddMMIListener();
     void RemoveMMIListener();
+    int32_t GetAccessTokenIdSendEvent(std::string bundleName, UnfocusedReason reason, uint32_t& accessTokenId);
+    int32_t SetStateSendEvent(const uint32_t accessTokenId, const AAFwk::ContinueState &state);
 private:
     currentMissionInfo info_ = { INVALID_MISSION_ID, false };
     sptr<DistributedMissionFocusedListener> missionFocusedListener_;

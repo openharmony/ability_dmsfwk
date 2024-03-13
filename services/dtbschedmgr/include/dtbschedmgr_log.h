@@ -66,23 +66,6 @@ constexpr ErrCode DMS_SERVICE_ERR_OFFSET = ErrCodeOffset(SUBSYS_DISTRIBUTEDSCHED
 
 enum {
     /**
-     * Result(16300502) for failed to get the missionInfo of the specified missionId.
-     */
-    NO_MISSION_INFO_FOR_MISSION_ID = 16300502,
-    /**
-     * Result(16300505) for the operation device must be the device where the application to be continued
-     * is located or the target device to be continued.
-     */
-    OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET = 16300505,
-    /**
-     * Result(16300506) for the local continuation task is already in progress.
-     */
-    CONTINUE_ALREADY_IN_PROGRESS = 16300506,
-    /**
-     * Result(16300507) for the mission for continuing is not alive, try again after restart mission.
-     */
-    MISSION_FOR_CONTINUING_IS_NOT_ALIVE = 16300507,
-    /**
      * Result(29360128) for invalid parameters.
      */
     INVALID_PARAMETERS_ERR = DMS_SERVICE_ERR_OFFSET,
@@ -438,6 +421,23 @@ enum {
      * Result(29360220) for start control permission check failed.
      */
     DMS_START_CONTROL_PERMISSION_DENIED = 29360220,
+    /**
+     * Result(29360221) for failed to get the missionInfo of the specified missionId.
+     */
+    NO_MISSION_INFO_FOR_MISSION_ID = 29360221,
+    /**
+     * Result(29360222) for the operation device must be the device where the application to be continued
+     * is located or the target device to be continued.
+     */
+    OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET = 29360222,
+    /**
+     * Result(29360223) for the local continuation task is already in progress.
+     */
+    CONTINUE_ALREADY_IN_PROGRESS = 29360223,
+    /**
+     * Result(29360224) for the mission for continuing is not alive, try again after restart mission.
+     */
+    MISSION_FOR_CONTINUING_IS_NOT_ALIVE = 29360224,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
