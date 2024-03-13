@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,16 +106,16 @@ void DistributedSchedContinueManager::NotifyMissionUnfocused(const int32_t missi
 
 void DistributedSchedContinueManager::NotifyDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen)
 {
-    HILOGI("NotifyDataRecv start, senderNetworkId: %{public}s, dataLen: %{public}d",
+    HILOGI("NotifyDataRecv start, senderNetworkId: %{public}s, dataLen: %{public}u",
         DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), dataLen);
     if (dataLen != DMS_SEND_LEN) {
-        HILOGE("dataLen error, dataLen: %{public}d", dataLen);
+        HILOGE("dataLen error, dataLen: %{public}u", dataLen);
         return;
     }
     uint8_t type = (payload[0] & DMS_0XF0) >> CONTINUE_SHIFT_04;
     uint8_t len = payload[0] & DMS_0X0F;
     if (len != sizeof(uint32_t) || (type != DMS_UNFOCUSED_TYPE && type != DMS_FOCUSED_TYPE)) {
-        HILOGE("len or type error, len: %{public}d, type: %{public}d", len, type);
+        HILOGE("len or type error, len: %{public}u, type: %{public}u", len, type);
         return;
     }
     uint32_t accessTokenId = payload[1] << CONTINUE_SHIFT_24 | payload[INDEX_2] << CONTINUE_SHIFT_16 |
@@ -249,10 +249,10 @@ int32_t DistributedSchedContinueManager::DealFocusedBusiness(const int32_t missi
     uint32_t accessTokenId;
     ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
     if (ret != ERR_OK) {
-        HILOGE("get focused accessTokenId failed, accessTokenId: %{public}d, ret: %{public}d", accessTokenId, ret);
+        HILOGE("get focused accessTokenId failed, accessTokenId: %{public}u, ret: %{public}d", accessTokenId, ret);
         return ret;
     }
-    HILOGE("get focused accessTokenId success, accessTokenId: %{public}d", accessTokenId);
+    HILOGE("get focused accessTokenId success, accessTokenId: %{public}u", accessTokenId);
     uint32_t sendDataLen = DMS_SEND_LEN;
     uint8_t data[DMS_SEND_LEN];
     uint8_t type = DMS_FOCUSED_TYPE;
@@ -313,7 +313,7 @@ int32_t DistributedSchedContinueManager::DealUnfocusedBusiness(const int32_t mis
     uint32_t accessTokenId;
     ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
     if (ret != ERR_OK) {
-        HILOGE("get unfocused accessTokenId failed, accessTokenId: %{public}d, ret: %{public}d", accessTokenId, ret);
+        HILOGE("get unfocused accessTokenId failed, accessTokenId: %{public}u, ret: %{public}d", accessTokenId, ret);
         return ret;
     }
     uint32_t sendDataLen = DMS_SEND_LEN;
@@ -475,7 +475,7 @@ int32_t DistributedSchedContinueManager::DealSetMissionContinueStateBusiness(con
     uint32_t accessTokenId;
     ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
     if (ret != ERR_OK) {
-        HILOGE("get setContinueState accessTokenId failed, accessTokenId: %{public}d, ret: %{public}d",
+        HILOGE("get setContinueState accessTokenId failed, accessTokenId: %{public}u, ret: %{public}d",
             accessTokenId, ret);
         return ret;
     }
@@ -494,7 +494,7 @@ int32_t DistributedSchedContinueManager::DealSetMissionContinueStateBusiness(con
     data[INDEX_4] = accessTokenId & DMS_0XFF;
     ret = SoftbusAdapter::GetInstance().SendSoftbusEvent(data, sendDataLen);
     if (ret != ERR_OK) {
-        HILOGE("SendSoftbusEvent setContinueState failed, sendDataLen: %{public}d, ret: %{public}d", sendDataLen, ret);
+        HILOGE("SendSoftbusEvent setContinueState failed, sendDataLen: %{public}u, ret: %{public}d", sendDataLen, ret);
         return ret;
     }
 
