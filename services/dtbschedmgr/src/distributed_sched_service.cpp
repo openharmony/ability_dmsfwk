@@ -118,7 +118,7 @@ constexpr int32_t DMSDURATION_BEGINTIME = 0;
 constexpr int32_t DMSDURATION_ENDTIME = 1;
 constexpr int32_t DMSDURATION_TOTALTIME = 2;
 constexpr int32_t DMSDURATION_DSTTOSRCRPCTIME = 3;
-constexpr int32_t DMSDURATION_SRCTODSTSAVETIME = 5;
+constexpr int32_t DMSDURATION_SRCTODSTRPCTIME = 5;
 constexpr int32_t DMSDURATION_STARTABILITY = 6;
 }
 
@@ -286,13 +286,13 @@ int32_t DistributedSchedService::StartRemoteAbility(const OHOS::AAFwk::Want& wan
     HILOGI("[PerformanceTest] StartRemoteAbility transact begin");
     if (!DmsContinueTime::GetInstance().GetPull()) {
         int64_t begin = GetTickCount();
-        DmsContinueTime::GetInstance().SetDurationBegin(DMSDURATION_STARTABILITY, begin);
+        DmsContinueTime::GetInstance().SetDurationBegin(DMSDURATION_SRCTODSTRPCTIME, begin);
     }
     int32_t result = remoteDms->StartAbilityFromRemote(*newWant, abilityInfo, requestCode, callerInfo, accountInfo);
     if (!DmsContinueTime::GetInstance().GetPull()) {
         int64_t end = GetTickCount();
-        DmsContinueTime::GetInstance().SetDurationBegin(DMSDURATION_SRCTODSTSAVETIME, end);
-        DmsContinueTime::GetInstance().SetDurationEnd(DMSDURATION_STARTABILITY, end);
+        DmsContinueTime::GetInstance().SetDurationBegin(DMSDURATION_STARTABILITY, end);
+        DmsContinueTime::GetInstance().SetDurationEnd(DMSDURATION_SRCTODSTRPCTIME, end);
     }
     HILOGI("[PerformanceTest] StartRemoteAbility transact end");
     return result;
@@ -785,7 +785,7 @@ void DistributedSchedService::NotifyCompleteContinuation(const std::u16string& d
     if (DmsContinueTime::GetInstance().GetPull()) {
         int64_t end = GetTickCount();
         std::string strEndTime = DmsContinueTime::GetInstance().GetCurrentTime();
-        DmsContinueTime::GetInstance().SetDurationEnd(DMSDURATION_SRCTODSTSAVETIME, end);
+        DmsContinueTime::GetInstance().SetDurationEnd(DMSDURATION_STARTABILITY, end);
         DmsContinueTime::GetInstance().SetDurationEnd(DMSDURATION_TOTALTIME, end);
         DmsContinueTime::GetInstance().SetDurationStrTime(DMSDURATION_ENDTIME, strEndTime);
         DmsContinueTime::GetInstance().AppendInfo();
@@ -809,7 +809,7 @@ int32_t DistributedSchedService::NotifyContinuationResultFromRemote(int32_t sess
     }
     if (dstInfo.length() != 0) {
         int64_t end = GetTickCount();
-        DmsContinueTime::GetInstance().SetDurationEnd(DMSDURATION_SRCTODSTSAVETIME, end);
+        DmsContinueTime::GetInstance().SetDurationEnd(DMSDURATION_STARTABILITY, end);
         std::string strEndTime = DmsContinueTime::GetInstance().GetCurrentTime();
         DmsContinueTime::GetInstance().SetDurationStrTime(DMSDURATION_ENDTIME, strEndTime);
         DmsContinueTime::GetInstance().ReadDstInfo(dstInfo.c_str());
@@ -2436,7 +2436,7 @@ int32_t DistributedSchedService::StartAbility(const OHOS::AAFwk::Want& want, int
         HILOGI("StartAbility start");
         if (DmsContinueTime::GetInstance().GetPull()) {
             int64_t begin = GetTickCount();
-            DmsContinueTime::GetInstance().SetDurationBegin(DMSDURATION_SRCTODSTSAVETIME, begin);
+            DmsContinueTime::GetInstance().SetDurationBegin(DMSDURATION_STARTABILITY, begin);
         }
         DmsContinueTime::GetInstance().SetDstAbilityName(want.GetElement().GetAbilityName());
         DmsContinueTime::GetInstance().SetDstBundleName(want.GetElement().GetBundleName());
