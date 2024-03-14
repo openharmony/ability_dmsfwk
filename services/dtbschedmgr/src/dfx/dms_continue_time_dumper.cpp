@@ -42,7 +42,7 @@ constexpr int32_t DMSDURATION_SPACE = 40;
 constexpr int32_t DMSDURATION_TOTALTIME = 2;
 constexpr int32_t DMSDURATION_DSTTOSRCRPCTIME = 3;
 constexpr int32_t DMSDURATION_SAVETIME = 4;
-constexpr int32_t DMSDURATION_SRCTODSTSAVETIME = 5;
+constexpr int32_t DMSDURATION_SRCTODSTRPCTIME = 5;
 constexpr int32_t DMSDURATION_STARTABILITY = 6;
 }
 
@@ -311,13 +311,13 @@ void DmsContinueTime::DealDurationPull()
             duration.SetStrTime(std::to_string(duration.GetDurationTime()) += "ms");
         }
     }
-    durationInfo_[DMSDURATION_STARTABILITY].SetDurationTime(
+    durationInfo_[DMSDURATION_SRCTODSTRPCTIME].SetDurationTime(
         durationInfo_[DMSDURATION_TOTALTIME].GetDurationTime() -
         durationInfo_[DMSDURATION_DSTTOSRCRPCTIME].GetDurationTime() -
         durationInfo_[DMSDURATION_SAVETIME].GetDurationTime() -
-        durationInfo_[DMSDURATION_SRCTODSTSAVETIME].GetDurationTime());
-    durationInfo_[DMSDURATION_STARTABILITY].SetStrTime(
-        std::to_string(durationInfo_[DMSDURATION_STARTABILITY].GetDurationTime()) += "ms");
+        durationInfo_[DMSDURATION_STARTABILITY].GetDurationTime());
+    durationInfo_[DMSDURATION_SRCTODSTRPCTIME].SetStrTime(
+        std::to_string(durationInfo_[DMSDURATION_SRCTODSTRPCTIME].GetDurationTime()) += "ms");
 }
 
 void DmsContinueTime::DealDurationPush()
@@ -334,7 +334,7 @@ void DmsContinueTime::DealDurationPush()
     durationInfo_[DMSDURATION_TOTALTIME].SetDurationTime(
         durationInfo_[DMSDURATION_SAVETIME].GetDurationTime() +
         durationInfo_[DMSDURATION_STARTABILITY].GetDurationTime() +
-        durationInfo_[DMSDURATION_SRCTODSTSAVETIME].GetDurationTime());
+        durationInfo_[DMSDURATION_SRCTODSTRPCTIME].GetDurationTime());
     durationInfo_[DMSDURATION_TOTALTIME].SetStrTime(
         std::to_string(durationInfo_[DMSDURATION_TOTALTIME].GetDurationTime()) += "ms");
 }
