@@ -193,6 +193,7 @@ ohos_unittest("distributedschedsvrtest") {
   ]
 
   sources = [
+    "unittest/distributed_radar_test.cpp",
     "unittest/distributed_sched_adapter_test.cpp",
     "unittest/distributed_sched_dumper_test.cpp",
     "unittest/distributed_sched_service_first_test.cpp",
