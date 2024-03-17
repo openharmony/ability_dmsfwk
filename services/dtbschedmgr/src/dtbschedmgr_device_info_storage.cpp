@@ -18,6 +18,7 @@
 #include <chrono>
 #include <thread>
 
+#include "device_manager.h"
 #include "distributed_device_node_listener.h"
 #include "distributed_sched_service.h"
 #include "dtbschedmgr_log.h"
@@ -36,6 +37,7 @@ namespace {
 constexpr int32_t RETRY_TIMES = 30;
 constexpr int32_t CONNECT_SOFTBUS_RETRY_TIMES = 60;
 const std::string TAG = "DtbschedmgrDeviceInfoStorage";
+const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getpid());
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DtbschedmgrDeviceInfoStorage);
@@ -246,20 +248,29 @@ std::shared_ptr<DmsDeviceInfo> DtbschedmgrDeviceInfoStorage::GetDeviceInfoById(c
     lock_guard<mutex> autoLock(deviceLock_);
     auto iter = remoteDevices_.find(networkId);
     if (iter == remoteDevices_.end()) {
-        bool updateSuccess = DnetworkAdapter::GetInstance()->UpdateDeviceInfoStorage();
-        if (!updateSuccess) {
-            HILOGE("DeviceInfo not in local cache,UpdateDeviceInfoStorage failed.");
+        HILOGE("DeviceInfo not in cache, obtained from DM.");
+        std::vector<DistributedHardware::DmDeviceInfo> dmDeviceInfoList;
+        int32_t errCode = DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", dmDeviceInfoList);
+        if (errCode != ERR_OK) {
+            HILOGD("GetTrustedDeviceList failed, errCode = %{public}d.", errCode);
             return nullptr;
         }
-        auto it = remoteDevices_.find(networkId);
-        if (it == remoteDevices_.end()) {
-            HILOGE("DeviceInfo not in DM.");
+        std::map<std::string, std::shared_ptr<DmsDeviceInfo>> remoteDevices;
+        for (const auto& dmDeviceInfo : dmDeviceInfoList) {
+            auto deviceInfo = std::make_shared<DmsDeviceInfo>(
+                dmDeviceInfo.deviceName, dmDeviceInfo.deviceTypeId, dmDeviceInfo.networkId);
+            RegisterUuidNetworkIdMap(networkId);
+            remoteDevices[networkId] = deviceInfo;
+        }
+        auto it = remoteDevices.find(networkId);
+        if (it == remoteDevices.end()) {
+            HILOGD("DeviceInfo not in DM.");
             return nullptr;
         }
-        HILOGI("Get deviceInfo from DM success");
+        HILOGD("Get deviceInfo from DM success.");
         return it->second;
     }
-    HILOGI("Get deviceInfo from DMS local cache success");
+    HILOGI("Get deviceInfo from DMS local cache success.");
     return iter->second;
 }
 
