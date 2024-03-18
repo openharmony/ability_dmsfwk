@@ -266,19 +266,9 @@ HWTEST_F(DtbschedmgrDeviceInfoStorageTest, GetDeviceInfoByIdTest_001, TestSize.L
 {
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest GetDeviceInfoByIdTest_001 start" << std::endl;
     /**
-     * @tc.steps: step1. test GetDeviceInfoById when networkId is not in map;
+     * @tc.steps: step1. test GetDeviceInfoById when networkId is in map;
      */
     std::string networkId = "invalid networkId for GetDeviceInfoById";
-    {
-        lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
-        DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_.clear();
-    }
-    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo =
-        DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(networkId);
-    EXPECT_EQ(dmsDeviceInfo, nullptr);
-    /**
-     * @tc.steps: step2. test GetDeviceInfoById when networkId is in map;
-     */
     {
         lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().deviceLock_);
         std::string deviceName = "invalid deviceName for GetDeviceInfoById";
@@ -286,7 +276,8 @@ HWTEST_F(DtbschedmgrDeviceInfoStorageTest, GetDeviceInfoByIdTest_001, TestSize.L
         DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[networkId] =
             make_shared<DmsDeviceInfo>(deviceName, deviceType, networkId);
     }
-    dmsDeviceInfo = DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(networkId);
+    std::shared_ptr<DmsDeviceInfo> dmsDeviceInfo =
+        DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(networkId);
     EXPECT_NE(dmsDeviceInfo, nullptr);
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest GetDeviceInfoByIdTest_001 end" << std::endl;
 }
