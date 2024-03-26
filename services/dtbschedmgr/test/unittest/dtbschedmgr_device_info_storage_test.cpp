@@ -368,27 +368,8 @@ HWTEST_F(DtbschedmgrDeviceInfoStorageTest, GetNetworkIdByUuidTest_001, TestSize.
 HWTEST_F(DtbschedmgrDeviceInfoStorageTest, UpdateDeviceInfoStorageTest_001, TestSize.Level3)
 {
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest UpdateDeviceInfoStorageTest_001 start" << std::endl;
-    std::vector<DistributedHardware::DmDeviceInfo> dmDeviceInfoList;
-    dmDeviceInfoList.clear();
-    DtbschedmgrDeviceInfoStorage::GetInstance().UpdateDeviceInfoStorage(dmDeviceInfoList);
-    EXPECT_EQ(dmDeviceInfoList.empty(), true);
+    EXPECT_EQ(DtbschedmgrDeviceInfoStorage::GetInstance().UpdateDeviceInfoStorage(), true);
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest UpdateDeviceInfoStorageTest_001 end" << std::endl;
-}
-
-/**
- * @tc.name: UpdateDeviceInfoStorageTest_002
- * @tc.desc: test UpdateDeviceInfoStorage
- * @tc.type: FUNC
- */
-HWTEST_F(DtbschedmgrDeviceInfoStorageTest, UpdateDeviceInfoStorageTest_002, TestSize.Level3)
-{
-    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest UpdateDeviceInfoStorageTest_002 start" << std::endl;
-    std::vector<DistributedHardware::DmDeviceInfo> dmDeviceInfoList;
-    DistributedHardware::DmDeviceInfo dmDeviceInfo;
-    dmDeviceInfoList.emplace_back(dmDeviceInfo);
-    DtbschedmgrDeviceInfoStorage::GetInstance().UpdateDeviceInfoStorage(dmDeviceInfoList);
-    EXPECT_EQ(!dmDeviceInfoList.empty(), true);
-    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest UpdateDeviceInfoStorageTest_002 end" << std::endl;
 }
 
 /**
