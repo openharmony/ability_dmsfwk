@@ -15,16 +15,18 @@
 
 #include "mission/dms_continue_send_manager.h"
 
+#include <sys/prctl.h>
+
 #include "adapter/dnetwork_adapter.h"
 #include "adapter/mmi_adapter.h"
 #include "datetime_ex.h"
 #include "distributed_radar.h"
 #include "distributed_sched_adapter.h"
+#include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
-#include <sys/prctl.h>
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -264,6 +266,11 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
     std::string bundleName = info.want.GetBundle();
+    if (!CheckBundleContinueConfig(bundleName)) {
+        HILOGI("App does not allow continue in config file, bundle name %{public}s, missionId: %{public}d",
+            bundleName.c_str(), missionId);
+        return REMOTE_DEVICE_BIND_ABILITY_ERR;
+    }
     focusedMission_[bundleName] = missionId;
 
     if (info.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
@@ -281,8 +288,7 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
         return ret;
     }
     HILOGI("Get focused accessTokenId success, accessTokenId: %{public}u", accessTokenId);
-    uint8_t type = DMS_FOCUSED_TYPE;
-    ret = SendSoftbusEvent(accessTokenId, type);
+    ret = SendSoftbusEvent(accessTokenId, DMS_FOCUSED_TYPE);
     DmsRadar::GetInstance().NormalFocusedSendEventRes("SendSoftbusEvent", ret);
     if (ret != ERR_OK) {
         HILOGE("SendSoftbusEvent focused failed, ret: %{public}d", ret);
@@ -450,6 +456,12 @@ int32_t DMSContinueSendMgr::DealSetMissionContinueStateBusiness(const int32_t mi
         return ret;
     }
     HILOGI("get bundleName success, missionId: %{public}d, bundleName: %{public}s", missionId, bundleName.c_str());
+    if (!CheckBundleContinueConfig(bundleName)) {
+        HILOGI("App does not allow continue in config file, bundle name %{public}s, missionId: %{public}d",
+            bundleName.c_str(), missionId);
+        return REMOTE_DEVICE_BIND_ABILITY_ERR;
+    }
+
     uint32_t accessTokenId;
     ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
     if (state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE) {
@@ -577,6 +589,7 @@ void DMSContinueSendMgr::ScreenOffHandler::SetScreenOffInfo(int32_t missionId, s
     unfoInfo_.bundleName = bundleName;
     unfoInfo_.accessToken = accessTokenId;
 }
+
 int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
     UnfocusedReason reason, uint32_t& accessTokenId)
 {
@@ -594,8 +607,7 @@ int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
     }
 
     if (screenOffHandler_->IsDeviceScreenOn()) {
-        uint8_t type = DMS_UNFOCUSED_TYPE;
-        ret = SendSoftbusEvent(accessTokenId, type);
+        ret = SendSoftbusEvent(accessTokenId, DMS_UNFOCUSED_TYPE);
         bool res = (reason != UnfocusedReason::TIMEOUT)
             ? DmsRadar::GetInstance().NormalUnfocusedSendEventRes("SendSoftbusEvent", ret)
                 : DmsRadar::GetInstance().MultimodeUnfocusedSendEventRes("SendSoftbusEvent", ret);
@@ -613,14 +625,13 @@ int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
 
 int32_t DMSContinueSendMgr::SetStateSendEvent(const uint32_t accessTokenId, const AAFwk::ContinueState &state)
 {
-    uint8_t type = DMS_FOCUSED_TYPE;
     if (state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE) {
-        type = DMS_UNFOCUSED_TYPE;
         RemoveMMIListener();
     } else {
         AddMMIListener();
     }
 
+    uint8_t type = state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE ? DMS_UNFOCUSED_TYPE : DMS_FOCUSED_TYPE;
     int32_t ret = SendSoftbusEvent(accessTokenId, type);
     bool res = (state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE)
         ? DmsRadar::GetInstance().ChangeStateUnfocusedSendEventRes("SendSoftbusEvent", ret)

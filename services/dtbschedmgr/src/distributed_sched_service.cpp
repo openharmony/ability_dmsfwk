@@ -18,37 +18,48 @@
 #include <cinttypes>
 #include <unistd.h>
 
-#include "ability_connection_wrapper_stub.h"
 #include "ability_manager_client.h"
 #include "ability_manager_errors.h"
-#include "adapter/dnetwork_adapter.h"
 #include "bool_wrapper.h"
-#include "bundle/bundle_manager_internal.h"
-#ifdef SUPPORT_COMMON_EVENT_SERVICE
-#include "common_event_listener.h"
-#endif
-#include "connect_death_recipient.h"
 #include "datetime_ex.h"
+#include "element_name.h"
+#include "file_ex.h"
+#include "ipc_skeleton.h"
+#include "iservice_registry.h"
+#include "os_account_manager.h"
+#include "parameters.h"
+#include "string_ex.h"
+#include "system_ability_definition.h"
+#ifdef SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR
+#include "mem_mgr_client.h"
+#endif
+#ifdef EFFICIENCY_MANAGER_ENABLE
+#include "report_event_type.h"
+#include "suspend_manager_client.h"
+#endif
+
+#include "ability_connection_wrapper_stub.h"
+#include "adapter/dnetwork_adapter.h"
+#include "bundle/bundle_manager_internal.h"
+#include "connect_death_recipient.h"
 #include "dfx/dms_continue_time_dumper.h"
 #include "distributed_radar.h"
 #include "distributed_sched_adapter.h"
 #include "distributed_sched_dumper.h"
 #include "distributed_sched_permission.h"
+#include "distributed_sched_utils.h"
 #include "dms_callback_task.h"
 #include "dms_free_install_callback.h"
 #include "dms_token_callback.h"
 #include "dms_version_manager.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
-#include "element_name.h"
-#include "file_ex.h"
+#include "parcel_helper.h"
+#ifdef SUPPORT_COMMON_EVENT_SERVICE
+#include "common_event_listener.h"
+#endif
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
 #include "form_mgr_death_recipient.h"
-#endif
-#include "ipc_skeleton.h"
-#include "iservice_registry.h"
-#ifdef SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR
-#include "mem_mgr_client.h"
 #endif
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission/distributed_mission_info.h"
@@ -56,15 +67,6 @@
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/distributed_sched_mission_manager.h"
 #endif
-#include "os_account_manager.h"
-#include "parameters.h"
-#include "parcel_helper.h"
-#ifdef EFFICIENCY_MANAGER_ENABLE
-#include "report_event_type.h"
-#include "suspend_manager_client.h"
-#endif
-#include "string_ex.h"
-#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -201,6 +203,11 @@ void DistributedSchedService::DeviceOfflineNotify(const std::string& networkId)
 bool DistributedSchedService::Init()
 {
     HILOGD("ready to init.");
+    int32_t ret = LoadContinueConfig();
+    if (ret != ERR_OK) {
+        HILOGE("Load continue config fail, ret %{public}d.", ret);
+    }
+
     DmsContinueTime::GetInstance().Init();
     DnetworkAdapter::GetInstance()->Init();
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().Init()) {
@@ -449,6 +456,11 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
         return INVALID_PARAMETERS_ERR;
     }
     std::string bundleName = missionInfo.want.GetBundle();
+    if (!CheckBundleContinueConfig(bundleName)) {
+        HILOGI("App does not allow continue in config file, bundle name %{public}s, missionId: %{public}d",
+            bundleName.c_str(), missionId);
+        return REMOTE_DEVICE_BIND_ABILITY_ERR;
+    }
     missionInfo.want.SetParams(wantParams);
     DistributedBundleInfo remoteBundleInfo;
     result = BundleManagerInternal::CheckRemoteBundleInfoForContinuation(dstDeviceId,

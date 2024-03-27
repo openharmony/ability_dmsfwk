@@ -175,20 +175,27 @@ void DtbschedmgrDeviceInfoStorage::GetDeviceIdSet(std::set<std::string>& deviceI
     }
 }
 
-void DtbschedmgrDeviceInfoStorage::UpdateDeviceInfoStorage(
-    const std::vector<DmDeviceInfo>& dmDeviceInfoList)
+bool DtbschedmgrDeviceInfoStorage::UpdateDeviceInfoStorage()
 {
+    std::vector<DistributedHardware::DmDeviceInfo> dmDeviceInfoList;
+    int32_t errCode = DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", dmDeviceInfoList);
+    if (errCode != ERR_OK) {
+        HILOGE("Get device manager trusted device list fail, errCode %{public}d", errCode);
+        return false;
+    }
     for (const auto& dmDeviceInfo : dmDeviceInfoList) {
         auto deviceInfo = std::make_shared<DmsDeviceInfo>(
             dmDeviceInfo.deviceName, dmDeviceInfo.deviceTypeId, dmDeviceInfo.networkId);
         std::string networkId = deviceInfo->GetNetworkId();
         RegisterUuidNetworkIdMap(networkId);
         {
-            HILOGI("remoteDevices networkId = %{public}s", DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+            HILOGI("Add remote device networkId %{public}s", DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
             lock_guard<mutex> autoLock(deviceLock_);
             remoteDevices_[networkId] = deviceInfo;
         }
     }
+    HILOGI("Update remote devices info storage success.");
+    return true;
 }
 
 bool DtbschedmgrDeviceInfoStorage::GetLocalDeviceId(std::string& networkId)
@@ -242,36 +249,37 @@ void DtbschedmgrDeviceInfoStorage::ClearAllDevices()
     remoteDevices_.clear();
 }
 
-std::shared_ptr<DmsDeviceInfo> DtbschedmgrDeviceInfoStorage::GetDeviceInfoById(const string& networkId)
+std::shared_ptr<DmsDeviceInfo> DtbschedmgrDeviceInfoStorage::FindDeviceInfoInStorage(const std::string& networkId)
 {
-    HILOGI("GetDeviceInfoById start, networkId = %{public}s.", DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
     lock_guard<mutex> autoLock(deviceLock_);
     auto iter = remoteDevices_.find(networkId);
     if (iter == remoteDevices_.end()) {
-        HILOGE("DeviceInfo not in cache, obtained from DM.");
-        std::vector<DistributedHardware::DmDeviceInfo> dmDeviceInfoList;
-        int32_t errCode = DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", dmDeviceInfoList);
-        if (errCode != ERR_OK) {
-            HILOGD("GetTrustedDeviceList failed, errCode = %{public}d.", errCode);
-            return nullptr;
-        }
-        std::map<std::string, std::shared_ptr<DmsDeviceInfo>> remoteDevices;
-        for (const auto& dmDeviceInfo : dmDeviceInfoList) {
-            auto deviceInfo = std::make_shared<DmsDeviceInfo>(
-                dmDeviceInfo.deviceName, dmDeviceInfo.deviceTypeId, dmDeviceInfo.networkId);
-            RegisterUuidNetworkIdMap(networkId);
-            remoteDevices[networkId] = deviceInfo;
-        }
-        auto it = remoteDevices.find(networkId);
-        if (it == remoteDevices.end()) {
-            HILOGD("DeviceInfo not in DM.");
-            return nullptr;
-        }
-        HILOGD("Get deviceInfo from DM success.");
-        return it->second;
+        HILOGE("Get remote device info from storage fail, networkId %{public}s.",
+            DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+        return nullptr;
     }
-    HILOGI("Get deviceInfo from DMS local cache success.");
+    HILOGI("Get remote device info from storage success, networkId %{public}s.",
+        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
     return iter->second;
+}
+
+std::shared_ptr<DmsDeviceInfo> DtbschedmgrDeviceInfoStorage::GetDeviceInfoById(const std::string& networkId)
+{
+    HILOGI("Get device info by networkId %{public}s start.", DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+    auto devInfo = FindDeviceInfoInStorage(networkId);
+    if (devInfo != nullptr) {
+        return devInfo;
+    }
+
+    HILOGI("NetworkId %{public}s not in storage, update devices info from device manager.",
+        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+    if (!UpdateDeviceInfoStorage()) {
+        HILOGE("Update device info storage from device manager trusted device list fail.");
+        return nullptr;
+    }
+
+    devInfo = FindDeviceInfoInStorage(networkId);
+    return devInfo;
 }
 
 std::string DtbschedmgrDeviceInfoStorage::GetUuidByNetworkId(const std::string& networkId)

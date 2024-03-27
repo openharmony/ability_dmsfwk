@@ -98,6 +98,7 @@ if (dmsfwk_mmi_listener) {
 }
 
 dsched_public_deps = [
+  "${dms_path}/common:distributed_sched_utils",
   "//third_party/googletest:gmock_main",
   "//third_party/googletest:gtest_main",
 ]

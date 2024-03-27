@@ -25,8 +25,10 @@ config("distributed_sched_config") {
   visibility += [ "./test/*" ]
   include_dirs = [
     "include",
+    "${cjson_path}",
     "${communication_path}/dsoftbus/dsoftbus_enhance/interfaces/kits/broadcast",
     "${communication_path}/dsoftbus/interfaces/kits/common",
+    "${dms_path}/common/include",
     "${dms_path}/interfaces/kits/napi/include",
     "${dms_path}/interfaces/innerkits/common/include",
     "include/continue",
@@ -35,7 +37,6 @@ config("distributed_sched_config") {
     "include/continue/state/sink_state",
     "include/distributedWant",
     "include/softbus_adapter/transport",
-    "//third_party/cJSON",
   ]
   defines = []
   if (dmsfwk_mission_manager) {
@@ -136,7 +137,7 @@ ohos_shared_library("distributedschedsvr") {
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
   ]
 
-  deps = [ "//third_party/cJSON:cjson" ]
+  deps = [ "${dms_path}/common:distributed_sched_utils" ]
 
   external_deps = [
     "ability_base:base",
@@ -148,6 +149,7 @@ ohos_shared_library("distributedschedsvr") {
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
     "c_utils:utils",
     "device_auth:deviceauth_sdk",
     "device_info_manager:distributed_device_profile_common",
