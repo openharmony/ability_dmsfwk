@@ -156,15 +156,8 @@ bool DnetworkAdapter::AddDeviceChangeListener(const std::shared_ptr<DeviceListen
 
 bool DnetworkAdapter::UpdateDeviceInfoStorage()
 {
-    std::vector<DistributedHardware::DmDeviceInfo> dmDeviceInfoList;
-    int32_t errCode = DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", dmDeviceInfoList);
-    if (errCode != ERR_OK) {
-        HILOGE("GetTrustedDeviceList failed, errCode = %{public}d", errCode);
-        return false;
-    }
-    DtbschedmgrDeviceInfoStorage::GetInstance().UpdateDeviceInfoStorage(dmDeviceInfoList);
-    HILOGI("UpdateDeviceInfoStorage success");
-    return true;
+    HILOGI("UpdateDeviceInfoStorage start.");
+    return DtbschedmgrDeviceInfoStorage::GetInstance().UpdateDeviceInfoStorage();
 }
 
 void DnetworkAdapter::RemoveDeviceChangeListener(const std::shared_ptr<DeviceListener>& listener)

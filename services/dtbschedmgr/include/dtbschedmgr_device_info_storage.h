@@ -18,6 +18,7 @@
 
 #include <map>
 #include <set>
+#include <string>
 
 #include "adapter/dnetwork_adapter.h"
 #include "deviceManager/dms_device_info.h"
@@ -86,14 +87,13 @@ public:
 
     /**
      * UpdateDeviceInfoStorage update device Info cache
-     *
-     * @param dmDeviceInfoList
      */
-    void UpdateDeviceInfoStorage(const std::vector<DistributedHardware::DmDeviceInfo>& dmDeviceInfoList);
+    bool UpdateDeviceInfoStorage();
 
 private:
     bool InitNetworkIdManager(std::shared_ptr<DnetworkAdapter> dnetworkAdapter);
     bool ConnectSoftbus();
+    std::shared_ptr<DmsDeviceInfo> FindDeviceInfoInStorage(const std::string& networkId);
     void ClearAllDevices();
     bool WaitForDnetworkReady();
     bool GetLocalDeviceFromDnet(std::string& networkId);
