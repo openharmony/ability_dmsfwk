@@ -13,9 +13,12 @@
 
 declare_args() {
   ams_path = "//foundation/ability/ability_runtime"
+  cjson_path = "//third_party/cJSON"
+  communication_path = "//foundation/communication"
+
   dms_path = "//foundation/ability/dmsfwk"
   module_output_path = "dmsfwk/dmsfwk"
-  communication_path = "//foundation/communication"
+
   dmsfwk_standard_form_share = true
   dmsfwk_mission_manager = false
   efficiency_manager_service_enable = false
