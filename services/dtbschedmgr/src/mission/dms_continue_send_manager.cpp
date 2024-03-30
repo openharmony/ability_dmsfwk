@@ -274,7 +274,6 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
     focusedMission_[bundleName] = missionId;
-
     if (info.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
         HILOGE("Mission continue state set to INACTIVE. Broadcast task abort.");
         return INVALID_PARAMETERS_ERR;
@@ -290,9 +289,7 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
         return ret;
     }
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    HILOGI("IsContinueSwitchOn : %{public}s",  IsContinueSwitchOn);
     if (!IsContinueSwitchOn) {
-        HILOGE("continuation switch is off!");
         return DMS_PERMISSION_DENIED;
     }
     HILOGI("Get focused accessTokenId success, accessTokenId: %{public}u", accessTokenId);
@@ -624,8 +621,7 @@ int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
     if (screenOffHandler_->IsDeviceScreenOn()) {
         bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
         HILOGI("IsContinueSwitchOn : %{public}s", IsContinueSwitchOn);
-        if (!IsContinueSwitchOn)
-        {
+        if (!IsContinueSwitchOn) {
             HILOGE("continuation switch is off!");
             return DMS_PERMISSION_DENIED;
         }

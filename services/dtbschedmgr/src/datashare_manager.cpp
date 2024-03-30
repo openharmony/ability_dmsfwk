@@ -42,10 +42,10 @@ std::shared_ptr<DataShare::DataShareHelper> DataShareManager::CreateDataShareHel
 bool DataShareManager::IsCreateDataShareHelper(const std::string &datashareUri)
 {
     HILOGI("DataShareManager IsCreateDataShareHelper start");
-    if (CreateDataShareHelper() == nullptr){
+    if (CreateDataShareHelper() == nullptr) {
         HILOGE("create helper failed for uri:%{public}s", datashareUri_.c_str());
         return false;
-    }else {
+    } else {
         HILOGI("create new helper success for uri:%{public}s", datashareUri_.c_str());
         return true;
     }
@@ -54,7 +54,7 @@ bool DataShareManager::IsCreateDataShareHelper(const std::string &datashareUri)
 void DataShareManager::RegisterObserver(const std::string &datashareUri)
 {
     HILOGI("DataShareManager RegisterObserver start");
-    if (IsCreateDataShareHelper(datashareUri)){
+    if (IsCreateDataShareHelper(datashareUri)) {
         Uri uri(SETTINGS_DATA_URI);
         std::shared_ptr<DataShareRegisterObserver> dataObserver = std::make_shared<DataShareRegisterObserver>();
         helper_->RegisterObserverExt(uri, dataObserver, true);

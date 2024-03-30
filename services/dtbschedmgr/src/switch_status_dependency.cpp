@@ -56,7 +56,7 @@ std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, cons
     Uri uri = Uri(SETTINGS_DATA_URI);
     DataShare::DataSharePredicates dataSharePredicates;
     std::vector<std::string> columns;
-    dataSharePredicates.EqualTo(SETTINGS_DATA_FILELD_KEY,key);
+    dataSharePredicates.EqualTo(SETTINGS_DATA_FILELD_KEY, key);
     columns.emplace_back(SETTINGS_DATA_FILELD_VAL);
     auto resultSet = dataShareHelper->Query(uri, dataSharePredicates, columns);
     if (result == nullptr) {
@@ -66,7 +66,7 @@ std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, cons
     }
     int32_t numRows = 0;
     resultSet->GetRowCount(numRows);
-    if(numRows==0) {
+    if (numRows == 0) {
         HILOGE("get switch status, resultSet is nullptr with key is %{public}s", key.c_str());
         resultSet->Close();
         dataShareHelper->Release();
@@ -76,8 +76,8 @@ std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, cons
     int32_t rowNumber = 0;
     resultSet->GoToRow(rowNumber);
     std::string valueResult;
-    int32_t ret = resultSet->GetString(columnIndex,valueResult);
-    if (ret != 0){
+    int32_t ret = resultSet->GetString(columnIndex, valueResult);
+    if (ret != 0) {
         HILOGE("get switch status, resultSet->GetString not ok with key is %{public}s", key.c_str());
         resultSet->Close();
         dataShareHelper->Release();

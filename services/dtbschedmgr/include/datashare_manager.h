@@ -19,8 +19,8 @@
 #include <shared_mutex>
 #include "datashare_helper.h"
 
-namespace OHOS{
-namespace DistributedSchedule{
+namespace OHOS {
+namespace DistributedSchedule {
 using ChangeInfo = DataShare::DataShareObserver::ChangeInfo;
 const std::string SETTINGS_DATA_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=Continue_Switch_Status";
@@ -42,10 +42,10 @@ private:
     std::string datashareUri_;
 };
 
-class DataShareRegisterObserver : public DataShare::DataShareObserver{
-    public:
-    DataShareRegisterObserver(){}
-    ~DataShareRegisterObserver(){}
+class DataShareRegisterObserver : public DataShare::DataShareObserver {
+public:
+    DataShareRegisterObserver() {}
+    ~DataShareRegisterObserver() {}
     void OnChange(const ChangeInfo &changeInfo) override;
 };
 } // namespace DistributedSchedule

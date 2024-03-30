@@ -23,7 +23,7 @@
 #include "datashare_helper.h"
 
 namespace OHOS {
-namespace DistributedSchedule{
+namespace DistributedSchedule {
 
 class SwitchStatusDependency {
 public:
@@ -42,7 +42,7 @@ private:
     const std::string CONTINUE_SWITCH_OFF = "continue_switch_off";
     const std::string CONTINUE_SWITCH_ON = "continue_switch_on";
     std::string switchStatus_;
-};    
+};
 } // namespace DistributedSchedule
 } // namespace OHOS
 
