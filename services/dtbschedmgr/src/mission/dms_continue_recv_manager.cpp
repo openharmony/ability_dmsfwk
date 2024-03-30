@@ -89,8 +89,8 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
     HILOGI("IsContinueSwitchOn : %{public}d", IsContinueSwitchOn);
     if (!IsContinueSwitchOn) {
-        HILOGE("ContinueSwitch status is off!");
-        return DMS_PERMISSION_DENIED;
+        HILOGE("ContinueSwitch status is off");
+        return;
     }
     if (dataLen != DMS_SEND_LEN) {
         HILOGE("dataLen error, dataLen: %{public}u", dataLen);

@@ -432,9 +432,9 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
     const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    HILOGI("IsContinueSwitchOn : %{public}s",  IsContinueSwitchOn);
+    HILOGI("IsContinueSwitchOn : %{public}d",  IsContinueSwitchOn);
     if (!IsContinueSwitchOn) {
-        HILOGE("continuation switch is off!");
+        HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }
     if (dschedContinuation_ == nullptr) {

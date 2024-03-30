@@ -289,8 +289,7 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
         HILOGE("Get focused accessTokenId failed, accessTokenId: %{public}u, ret: %{public}d", accessTokenId, ret);
         return ret;
     }
-    bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    if (!IsContinueSwitchOn) { return DMS_PERMISSION_DENIED;}
+    if (!SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) { return DMS_PERMISSION_DENIED;}
     HILOGI("Get focused accessTokenId success, accessTokenId: %{public}u", accessTokenId);
     ret = SendSoftbusEvent(accessTokenId, DMS_FOCUSED_TYPE);
     DmsRadar::GetInstance().NormalFocusedSendEventRes("SendSoftbusEvent", ret);
@@ -378,7 +377,7 @@ int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
     HILOGI("IsContinueSwitchOn : %{public}d",  IsContinueSwitchOn);
     if (!IsContinueSwitchOn) {
-        HILOGE("ContinueSwitch status is off!");
+        HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }
 
@@ -621,7 +620,7 @@ int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
         bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
         HILOGI("IsContinueSwitchOn : %{public}d", IsContinueSwitchOn);
         if (!IsContinueSwitchOn) {
-            HILOGE("ContinueSwitch status is off!");
+            HILOGE("ContinueSwitch status is off");
             return DMS_PERMISSION_DENIED;
         }
         ret = SendSoftbusEvent(accessTokenId, DMS_UNFOCUSED_TYPE);
@@ -651,7 +650,7 @@ int32_t DMSContinueSendMgr::SetStateSendEvent(const uint32_t accessTokenId, cons
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
     HILOGI("IsContinueSwitchOn : %{public}d", IsContinueSwitchOn);
     if (!IsContinueSwitchOn) {
-        HILOGE("ContinueSwitch status is off!");
+        HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }
 
