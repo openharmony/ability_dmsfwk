@@ -76,8 +76,8 @@ enum class BizState : int32_t {
 };
 
 enum class DmsInit : int32_t {
-    REGISTER_SOFTBUS_CALLBACK = 1,
-    REGISTER_ABILITY_FOCUSED = 2,
+    REGISTER_ABILITY_FOCUSED = 1,
+    REGISTER_SOFTBUS_CALLBACK = 2,
 };
 
 enum class NormalOrMultimodeFocused : int32_t {

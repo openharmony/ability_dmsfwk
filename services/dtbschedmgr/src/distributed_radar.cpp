@@ -22,11 +22,11 @@ namespace DistributedSchedule {
 const std::string TAG = "DmsRadar";
 IMPLEMENT_SINGLE_INSTANCE(DmsRadar);
 
-bool DmsRadar::RegisterSoftbusCallbackRes(const std::string& func, int32_t errCode)
+bool DmsRadar::RegisterFocusedRes(const std::string& func, int32_t errCode)
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -34,7 +34,7 @@ bool DmsRadar::RegisterSoftbusCallbackRes(const std::string& func, int32_t errCo
             ORG_PKG, ORG_PKG_NAME,
             FUNC, func,
             BIZ_SCENE, static_cast<int32_t>(BizScene::DMS_INIT),
-            BIZ_STAGE, static_cast<int32_t>(DmsInit::REGISTER_SOFTBUS_CALLBACK),
+            BIZ_STAGE, static_cast<int32_t>(DmsInit::REGISTER_ABILITY_FOCUSED),
             STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC),
             BIZ_STATE, static_cast<int32_t>(BizState::BIZ_STATE_START));
     } else {
@@ -45,23 +45,23 @@ bool DmsRadar::RegisterSoftbusCallbackRes(const std::string& func, int32_t errCo
             ORG_PKG, ORG_PKG_NAME,
             FUNC, func,
             BIZ_SCENE, static_cast<int32_t>(BizScene::DMS_INIT),
-            BIZ_STAGE, static_cast<int32_t>(DmsInit::REGISTER_SOFTBUS_CALLBACK),
+            BIZ_STAGE, static_cast<int32_t>(DmsInit::REGISTER_ABILITY_FOCUSED),
             STAGE_RES, static_cast<int32_t>(StageRes::STAGE_FAIL),
             BIZ_STATE, static_cast<int32_t>(BizState::BIZ_STATE_START),
             ERROR_CODE, errCode);
     }
     if (res != ERR_OK) {
-        HILOGE("RegisterSoftbusCallbackRes error, res:%{public}d", res);
+        HILOGE("RegisterFocusedRes error, res:%{public}d", res);
         return false;
     }
     return true;
 }
 
-bool DmsRadar::RegisterFocusedRes(const std::string& func, int32_t errCode)
+bool DmsRadar::RegisterSoftbusCallbackRes(const std::string& func, int32_t errCode)
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -69,7 +69,7 @@ bool DmsRadar::RegisterFocusedRes(const std::string& func, int32_t errCode)
             ORG_PKG, ORG_PKG_NAME,
             FUNC, func,
             BIZ_SCENE, static_cast<int32_t>(BizScene::DMS_INIT),
-            BIZ_STAGE, static_cast<int32_t>(DmsInit::REGISTER_ABILITY_FOCUSED),
+            BIZ_STAGE, static_cast<int32_t>(DmsInit::REGISTER_SOFTBUS_CALLBACK),
             STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC),
             BIZ_STATE, static_cast<int32_t>(BizState::BIZ_STATE_END),
             TO_CALL_PKG, ABILITY_MANAGER_SERVICE);
@@ -81,14 +81,14 @@ bool DmsRadar::RegisterFocusedRes(const std::string& func, int32_t errCode)
             ORG_PKG, ORG_PKG_NAME,
             FUNC, func,
             BIZ_SCENE, static_cast<int32_t>(BizScene::DMS_INIT),
-            BIZ_STAGE, static_cast<int32_t>(DmsInit::REGISTER_ABILITY_FOCUSED),
+            BIZ_STAGE, static_cast<int32_t>(DmsInit::REGISTER_SOFTBUS_CALLBACK),
             STAGE_RES, static_cast<int32_t>(StageRes::STAGE_FAIL),
             BIZ_STATE, static_cast<int32_t>(BizState::BIZ_STATE_END),
             TO_CALL_PKG, ABILITY_MANAGER_SERVICE,
             ERROR_CODE, errCode);
     }
     if (res != ERR_OK) {
-        HILOGE("RegisterFocusedRes error, res:%{public}d", res);
+        HILOGE("RegisterSoftbusCallbackRes error, res:%{public}d", res);
         return false;
     }
     return true;
@@ -118,7 +118,7 @@ bool DmsRadar::NormalFocusedGetAccessTokenIdRes(const std::string& func, int32_t
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -153,7 +153,7 @@ bool DmsRadar::NormalFocusedSendEventRes(const std::string& func, int32_t errCod
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -209,7 +209,7 @@ bool DmsRadar::ChangeStateFocusedGetAccessTokenIdRes(const std::string& func, in
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -244,7 +244,7 @@ bool DmsRadar::ChangeStateFocusedSendEventRes(const std::string& func, int32_t e
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -300,7 +300,7 @@ bool DmsRadar::NormalUnfocusedGetAccessTokenIdRes(const std::string& func, int32
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -335,7 +335,7 @@ bool DmsRadar::NormalUnfocusedSendEventRes(const std::string& func, int32_t errC
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -391,7 +391,7 @@ bool DmsRadar::MultimodeUnfocusedGetAccessTokenIdRes(const std::string& func, in
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -426,7 +426,7 @@ bool DmsRadar::MultimodeUnfocusedSendEventRes(const std::string& func, int32_t e
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -482,7 +482,7 @@ bool DmsRadar::ChangeStateUnfocusedGetAccessTokenIdRes(const std::string& func, 
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -517,7 +517,7 @@ bool DmsRadar::ChangeStateUnfocusedSendEventRes(const std::string& func, int32_t
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -575,7 +575,7 @@ bool DmsRadar::FocusedGetBundleName(const std::string& func, int32_t errCode)
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -610,7 +610,7 @@ bool DmsRadar::NotifyDockFocused(const std::string& func, int32_t errCode)
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -664,7 +664,7 @@ bool DmsRadar::UnfocusedGetBundleName(const std::string& func, int32_t errCode)
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -699,7 +699,7 @@ bool DmsRadar::NotifyDockUnfocused(const std::string& func, int32_t errCode)
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -732,7 +732,7 @@ bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode)
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -765,7 +765,7 @@ bool DmsRadar::ClickIconDmsStartAbility(const std::string& func, int32_t errCode
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -819,7 +819,7 @@ bool DmsRadar::SaveDataDmsContinue(const std::string& func, int32_t errCode)
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,
@@ -856,7 +856,7 @@ bool DmsRadar::SaveDataDmsRemoteWant(const std::string& func, int32_t errCode)
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
-    if (stageRes ==StageRes::STAGE_SUCC) {
+    if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
             APPLICATION_CONTINUE_BEHAVIOR,

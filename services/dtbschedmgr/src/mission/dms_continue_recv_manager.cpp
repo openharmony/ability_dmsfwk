@@ -97,9 +97,9 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
     int32_t state = ACTIVE;
     if (type == DMS_UNFOCUSED_TYPE) {
         state = INACTIVE;
-        DmsRadar::GetInstance().RecvFocused("NotifyDataRecv");
-    } else {
         DmsRadar::GetInstance().RecvUnfocused("NotifyDataRecv");
+    } else {
+        DmsRadar::GetInstance().RecvFocused("NotifyDataRecv");
     }
     PostOnBroadcastBusiness(senderNetworkId, accessTokenId, state);
     HILOGI("NotifyDataRecv end");
@@ -227,10 +227,10 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), accessTokenId, state);
     std::string bundleName;
     int32_t ret = BundleManagerInternal::GetBundleNameFromDbms(senderNetworkId, accessTokenId, bundleName);
-    bool res = (state == INACTIVE) ? DmsRadar::GetInstance().FocusedGetBundleName("GetBundleNameFromDbms", ret)
-        : DmsRadar::GetInstance().UnfocusedGetBundleName("GetBundleNameFromDbms", ret);
+    bool res = (state == INACTIVE) ? DmsRadar::GetInstance().UnfocusedGetBundleName("GetBundleNameFromDbms", ret)
+        : DmsRadar::GetInstance().FocusedGetBundleName("GetBundleNameFromDbms", ret);
     if (!res) {
-        HILOGE("%{public}s failed", (state == INACTIVE) ? "FocusedGetBundleName" : "UnfocusedGetBundleName");
+        HILOGE("%{public}s failed", (state == INACTIVE) ? "UnfocusedGetBundleName" : "FocusedGetBundleName");
     }
     if (ret != ERR_OK) {
         HILOGW("get bundleName failed, ret: %{public}d, try = %{public}d", ret, retry);
@@ -289,10 +289,10 @@ void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
     PARCEL_WRITE_HELPER_NORET(data, String, bundleName);
     HILOGI("[PerformanceTest] NotifyRecvBroadcast called, IPC begin = %{public}" PRId64, GetTickCount());
     int32_t error = obj->SendRequest(ON_CALLBACK, data, reply, option);
-    bool res = (state == INACTIVE) ? DmsRadar::GetInstance().NotifyDockFocused("NotifyRecvBroadcast", error)
-        : DmsRadar::GetInstance().NotifyDockUnfocused("NotifyRecvBroadcast", error);
+    bool res = (state == INACTIVE) ? DmsRadar::GetInstance().NotifyDockUnfocused("NotifyRecvBroadcast", error)
+        : DmsRadar::GetInstance().NotifyDockFocused("NotifyRecvBroadcast", error);
     if (!res) {
-        HILOGE("%{public}s failed", (state == INACTIVE) ? "NotifyDockFocused" : "NotifyDockUnfocused");
+        HILOGE("%{public}s failed", (state == INACTIVE) ? "NotifyDockUnfocused" : "NotifyDockFocused");
     }
     if (error != ERR_NONE) {
         HILOGE("NotifyRecvBroadcast fail, error: %{public}d", error);
