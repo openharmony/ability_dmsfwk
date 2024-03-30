@@ -73,6 +73,7 @@ void DMSContinueSendMgr::Init()
     }
     DmsRadar::GetInstance().DmsFocused("Init", INIT);
     NotifyMissionFocused(missionId, FocusedReason::INIT);
+    DataShareManager::GetInstance().RegisterObserver(SETTINGS_DATA_URI);
     HILOGI("Init end");
 }
 
@@ -289,9 +290,7 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
         return ret;
     }
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    if (!IsContinueSwitchOn) {
-        return DMS_PERMISSION_DENIED;
-    }
+    if (!IsContinueSwitchOn) { return DMS_PERMISSION_DENIED;}
     HILOGI("Get focused accessTokenId success, accessTokenId: %{public}u", accessTokenId);
     ret = SendSoftbusEvent(accessTokenId, DMS_FOCUSED_TYPE);
     DmsRadar::GetInstance().NormalFocusedSendEventRes("SendSoftbusEvent", ret);
@@ -377,9 +376,9 @@ int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
         type, missionId, bundleName.c_str(), accessTokenId);
 
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    HILOGI("IsContinueSwitchOn : %{public}s",  IsContinueSwitchOn);
+    HILOGI("IsContinueSwitchOn : %{public}d",  IsContinueSwitchOn);
     if (!IsContinueSwitchOn) {
-        HILOGE("continuation switch is off!");
+        HILOGE("ContinueSwitch status is off!");
         return DMS_PERMISSION_DENIED;
     }
 
@@ -620,9 +619,9 @@ int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
 
     if (screenOffHandler_->IsDeviceScreenOn()) {
         bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-        HILOGI("IsContinueSwitchOn : %{public}s", IsContinueSwitchOn);
+        HILOGI("IsContinueSwitchOn : %{public}d", IsContinueSwitchOn);
         if (!IsContinueSwitchOn) {
-            HILOGE("continuation switch is off!");
+            HILOGE("ContinueSwitch status is off!");
             return DMS_PERMISSION_DENIED;
         }
         ret = SendSoftbusEvent(accessTokenId, DMS_UNFOCUSED_TYPE);
@@ -650,9 +649,9 @@ int32_t DMSContinueSendMgr::SetStateSendEvent(const uint32_t accessTokenId, cons
     }
 
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    HILOGI("IsContinueSwitchOn : %{public}s",  IsContinueSwitchOn);
+    HILOGI("IsContinueSwitchOn : %{public}d", IsContinueSwitchOn);
     if (!IsContinueSwitchOn) {
-        HILOGE("continuation switch is off!");
+        HILOGE("ContinueSwitch status is off!");
         return DMS_PERMISSION_DENIED;
     }
 

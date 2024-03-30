@@ -31,7 +31,7 @@ DataShareManager &DataShareManager::GetInstance()
 
 std::shared_ptr<DataShare::DataShareHelper> DataShareManager::CreateDataShareHelper()
 {
-    HILOGI("create DataShareHelper intance");
+    HILOGI("create DataShareHelper instance");
     DataShare::CreateOptions options;
     options.isProxy_ = true;
     datashareUri_ = SETTINGS_DATA_URI;
@@ -43,10 +43,10 @@ bool DataShareManager::IsCreateDataShareHelper(const std::string &datashareUri)
 {
     HILOGI("DataShareManager IsCreateDataShareHelper start");
     if (CreateDataShareHelper() == nullptr) {
-        HILOGE("create helper failed for uri:%{public}s", datashareUri_.c_str());
+        HILOGE("create helper failed for uri:%{public}s", datashareUri.c_str());
         return false;
     } else {
-        HILOGI("create new helper success for uri:%{public}s", datashareUri_.c_str());
+        HILOGI("create new helper success for uri:%{public}s", datashareUri.c_str());
         return true;
     }
 }
@@ -67,8 +67,8 @@ void DataShareRegisterObserver::OnChange(const ChangeInfo &changeInfo)
 {
     HILOGI("DataShareRegisterObserver OnChange start");
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    HILOGI("IsContinueSwitchOn : %{public}s",  IsContinueSwitchOn);
-    HILOGI("DataShareRegisterObserver  OnChange done");
+    HILOGI("IsContinueSwitchOn : %{public}d", IsContinueSwitchOn);
+    HILOGI("DataShareRegisterObserver OnChange done");
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

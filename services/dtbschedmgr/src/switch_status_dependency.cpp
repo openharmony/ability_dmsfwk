@@ -17,9 +17,10 @@
 
 #include <fstream>
 #include <iostream>
-#include "if_system_abilty_manager.h"
+#include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "system_ability_definition.h"
 #include "uri.h"
 
 #include "dtbschedmgr_log.h"
@@ -40,7 +41,7 @@ bool SwitchStatusDependency::IsContinueSwitchOn()
 {
     HILOGI("IsContinueSwitchOn start");
     std::lock_guard<std::mutex> lock(dataShareMutex_);
-    HILOGI("start query switch from dataShare");
+    HILOGI("start query switch status from dataShare");
     switchStatus_ = GetSwitchStatus(CONTINUE_SWITCH_STATUS_KEY, CONTINUE_SWITCH_ON);
     return switchStatus_ == CONTINUE_SWITCH_ON;
 }
@@ -48,7 +49,7 @@ bool SwitchStatusDependency::IsContinueSwitchOn()
 std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, const std::string &defaultValue)
 {
     HILOGI("GetSwitchStatus start, key is %{public}s", key.c_str());
-    std::shared_ptr<Datashare::DataShareHelper> dataShareHelper = GetDataShareHelper();
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = GetDataShareHelper();
     if (dataShareHelper == nullptr) {
         HILOGE("dataShareHelper is null, key is %{public}s", key.c_str());
         return CONTINUE_SWITCH_OFF;
@@ -56,10 +57,10 @@ std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, cons
     Uri uri = Uri(SETTINGS_DATA_URI);
     DataShare::DataSharePredicates dataSharePredicates;
     std::vector<std::string> columns;
-    dataSharePredicates.EqualTo(SETTINGS_DATA_FILELD_KEY, key);
-    columns.emplace_back(SETTINGS_DATA_FILELD_VAL);
+    dataSharePredicates.EqualTo(SETTINGS_DATA_FIELD_KEY, key);
+    columns.emplace_back(SETTINGS_DATA_FIELD_VAL);
     auto resultSet = dataShareHelper->Query(uri, dataSharePredicates, columns);
-    if (result == nullptr) {
+    if (resultSet == nullptr) {
         HILOGE("get switch status, resultSet is nullptr with key is %{public}s", key.c_str());
         dataShareHelper->Release();
         return CONTINUE_SWITCH_OFF;
@@ -67,7 +68,7 @@ std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, cons
     int32_t numRows = 0;
     resultSet->GetRowCount(numRows);
     if (numRows == 0) {
-        HILOGE("get switch status, resultSet is nullptr with key is %{public}s", key.c_str());
+        HILOGE("get switch status, numRows is zero with key is %{public}s", key.c_str());
         resultSet->Close();
         dataShareHelper->Release();
         return CONTINUE_SWITCH_OFF;
@@ -86,7 +87,7 @@ std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, cons
     resultSet->Close();
     dataShareHelper->Release();
     HILOGI("get switch status, query end");
-    HILOGI("GetSwitchStatus, setting value is %{public}s with key is %{public}s", valueResult.c_str(), key.c_str());
+    HILOGI("GetStringValue, setting value is %{public}s with key is %{public}s", valueResult.c_str(), key.c_str());
     return valueResult;
 }
 
