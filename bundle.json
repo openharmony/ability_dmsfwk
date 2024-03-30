@@ -49,6 +49,7 @@
           "distributed_bundle_framework",
           "dmsfwk",
           "dsoftbus",
+          "data_share",
           "efficiency_manager",
           "eventhandler",
           "ffrt",
