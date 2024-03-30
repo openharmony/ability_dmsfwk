@@ -67,6 +67,7 @@
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/distributed_sched_mission_manager.h"
 #endif
+#include "switch_status_dependency.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
