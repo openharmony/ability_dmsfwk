@@ -431,6 +431,12 @@ int32_t DistributedSchedService::ContinueLocalMissionDealFreeInstall(OHOS::AAFwk
 int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDeviceId, int32_t missionId,
     const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
+    bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
+    HILOGI("IsContinueSwitchOn : %{public}s",  IsContinueSwitchOn);
+    if (!IsContinueSwitchOn) {
+        HILOGE("continuation switch is off!");
+        return DMS_PERMISSION_DENIED;
+    }
     if (dschedContinuation_ == nullptr) {
         HILOGE("continuation object null!");
         return INVALID_PARAMETERS_ERR;

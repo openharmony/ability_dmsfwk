@@ -27,6 +27,8 @@
 #include "dtbschedmgr_log.h"
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
+#include "switch_status_dependency.h"
+#include "datashare_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -287,6 +289,12 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
         HILOGE("Get focused accessTokenId failed, accessTokenId: %{public}u, ret: %{public}d", accessTokenId, ret);
         return ret;
     }
+    bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
+    HILOGI("IsContinueSwitchOn : %{public}s",  IsContinueSwitchOn);
+    if (!IsContinueSwitchOn) {
+        HILOGE("continuation switch is off!");
+        return DMS_PERMISSION_DENIED;
+    }
     HILOGI("Get focused accessTokenId success, accessTokenId: %{public}u", accessTokenId);
     ret = SendSoftbusEvent(accessTokenId, DMS_FOCUSED_TYPE);
     DmsRadar::GetInstance().NormalFocusedSendEventRes("SendSoftbusEvent", ret);
@@ -370,6 +378,13 @@ int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
 
     HILOGI("start, type: %{public}d, missionId: %{public}d, bundleName: %{public}s, accessTokenId: %{public}u",
         type, missionId, bundleName.c_str(), accessTokenId);
+
+    bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
+    HILOGI("IsContinueSwitchOn : %{public}s",  IsContinueSwitchOn);
+    if (!IsContinueSwitchOn) {
+        HILOGE("continuation switch is off!");
+        return DMS_PERMISSION_DENIED;
+    }
 
     int32_t ret = SendSoftbusEvent(accessTokenId, type);
     if (ret != ERR_OK) {
@@ -607,6 +622,13 @@ int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
     }
 
     if (screenOffHandler_->IsDeviceScreenOn()) {
+        bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
+        HILOGI("IsContinueSwitchOn : %{public}s", IsContinueSwitchOn);
+        if (!IsContinueSwitchOn)
+        {
+            HILOGE("continuation switch is off!");
+            return DMS_PERMISSION_DENIED;
+        }
         ret = SendSoftbusEvent(accessTokenId, DMS_UNFOCUSED_TYPE);
         bool res = (reason != UnfocusedReason::TIMEOUT)
             ? DmsRadar::GetInstance().NormalUnfocusedSendEventRes("SendSoftbusEvent", ret)
@@ -629,6 +651,13 @@ int32_t DMSContinueSendMgr::SetStateSendEvent(const uint32_t accessTokenId, cons
         RemoveMMIListener();
     } else {
         AddMMIListener();
+    }
+
+    bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
+    HILOGI("IsContinueSwitchOn : %{public}s",  IsContinueSwitchOn);
+    if (!IsContinueSwitchOn) {
+        HILOGE("continuation switch is off!");
+        return DMS_PERMISSION_DENIED;
     }
 
     uint8_t type = state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE ? DMS_UNFOCUSED_TYPE : DMS_FOCUSED_TYPE;

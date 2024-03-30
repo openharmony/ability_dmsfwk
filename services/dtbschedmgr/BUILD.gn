@@ -124,6 +124,8 @@ ohos_shared_library("distributedschedsvr") {
     "src/softbus_adapter/transport/dsched_data_buffer.cpp",
     "src/softbus_adapter/transport/dsched_softbus_session.cpp",
     "src/softbus_adapter/transport/dsched_transport_softbus_adapter.cpp",
+    "src/switch_status_dependency.cpp",
+    "src/datashare_manager.cpp",
   ]
 
   if (!dmsfwk_softbus_adapter_common) {
@@ -168,6 +170,7 @@ ohos_shared_library("distributedschedsvr") {
     "kv_store:distributeddata_inner",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "data_share:datashare_consumer",
   ]
   if (os_account_part) {
     external_deps += [ "os_account:os_account_innerkits" ]

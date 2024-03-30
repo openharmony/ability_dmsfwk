@@ -24,6 +24,8 @@
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
 #include <sys/prctl.h>
+#include "switch_status_dependency.h"
+#include "datashare_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -60,6 +62,8 @@ void DMSContinueRecvMgr::Init()
         eventCon_.wait(lock, [this] {
             return eventHandler_ != nullptr;
         });
+        
+        DataShareManager::GetInstance().RegisterObserver(SETTINGS_DATA_URI);
     }
     HILOGI("Init end");
 }
@@ -82,6 +86,12 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
 {
     HILOGI("NotifyDataRecv start, senderNetworkId: %{public}s, dataLen: %{public}u",
         DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), dataLen);
+    bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
+    HILOGI("IsContinueSwitchOn : %{public}s",  IsContinueSwitchOn);
+    if (!IsContinueSwitchOn) {
+        HILOGE("continuation switch is off!");
+        return DMS_PERMISSION_DENIED;
+    }
     if (dataLen != DMS_SEND_LEN) {
         HILOGE("dataLen error, dataLen: %{public}u", dataLen);
         return;
