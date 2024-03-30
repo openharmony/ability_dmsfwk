@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,13 +17,16 @@
 #define SERVICES_DTBSCHEDMGR_INCLUDE_DTBSCHEDMGR_LOG_H_
 
 #include "errors.h"
-#include "hilog/log_c.h"
-#include "hilog/log_cpp.h"
+#include "hilog/log.h"
 #include "inttypes.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
-static constexpr OHOS::HiviewDFX::HiLogLabel DSCHED_SERVICE_LABEL = {LOG_CORE, 0xD004170, "DSched_Service"};
+#undef LOG_DOMAIN
+#define LOG_DOMAIN 0xD004170
+
+#undef LOG_TAG
+#define LOG_TAG "DSched_Service"
 
 #ifdef HILOGD
 #undef HILOGD
@@ -45,14 +48,11 @@ static constexpr OHOS::HiviewDFX::HiLogLabel DSCHED_SERVICE_LABEL = {LOG_CORE, 0
 #undef HILOGI
 #endif
 
-#define DMS_LOG(level, fmt, ...) HiviewDFX::HiLog::level(DSCHED_SERVICE_LABEL, \
-    "%{public}s::%{public}s " fmt, TAG.c_str(), __FUNCTION__, ##__VA_ARGS__)
-
-#define HILOGF(fmt, ...) DMS_LOG(Fatal, fmt, ##__VA_ARGS__)
-#define HILOGE(fmt, ...) DMS_LOG(Error, fmt, ##__VA_ARGS__)
-#define HILOGW(fmt, ...) DMS_LOG(Warn,  fmt, ##__VA_ARGS__)
-#define HILOGI(fmt, ...) DMS_LOG(Info,  fmt, ##__VA_ARGS__)
-#define HILOGD(fmt, ...) DMS_LOG(Debug, fmt, ##__VA_ARGS__)
+#define HILOGF(fmt, ...) HILOG_FATAL(LOG_CORE, "%{public}s::%{public}s" fmt, TAG.c_str(), __FUNCTION__, ##__VA_ARGS__)
+#define HILOGE(fmt, ...) HILOG_ERROR(LOG_CORE, "%{public}s::%{public}s" fmt, TAG.c_str(), __FUNCTION__, ##__VA_ARGS__)
+#define HILOGW(fmt, ...) HILOG_WARN(LOG_CORE, "%{public}s::%{public}s" fmt, TAG.c_str(), __FUNCTION__, ##__VA_ARGS__)
+#define HILOGI(fmt, ...) HILOG_INFO(LOG_CORE, "%{public}s::%{public}s" fmt, TAG.c_str(), __FUNCTION__, ##__VA_ARGS__)
+#define HILOGD(fmt, ...) HILOG_DEBUG(LOG_CORE, "%{public}s::%{public}s" fmt, TAG.c_str(), __FUNCTION__, ##__VA_ARGS__)
 
 enum {
     /**
