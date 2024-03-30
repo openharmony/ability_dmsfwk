@@ -55,6 +55,7 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "parcel_helper.h"
+#include "switch_status_dependency.h"
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
 #include "common_event_listener.h"
 #endif
@@ -67,7 +68,6 @@
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/distributed_sched_mission_manager.h"
 #endif
-#include "switch_status_dependency.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
