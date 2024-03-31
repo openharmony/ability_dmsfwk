@@ -564,10 +564,59 @@ ohos_unittest("dmsbasetest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("dschedswitchstatustest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+
+  sources = [ "unittest/switch_status_dependency_test.cpp" ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = [ "${distributed_service}/dtbschedmgr:distributedschedsvr" ]
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("datasharemanagertest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+
+  sources = [ "unittest/datashare_manager_test.cpp" ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = [ "${distributed_service}/dtbschedmgr:distributedschedsvr" ]
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":bundlemanagerinternaltest",
+    ":datasharemanagertest",
     ":distributedcalltest",
     ":distributedschedsvrtest",
     ":distributeduidtest",
@@ -576,6 +625,7 @@ group("unittest") {
     ":dmsfreeinstallcbtest",
     ":dschedconnecttest",
     ":dschedcontinuetest",
+    ":dschedswitchstatustest",
     ":softbusadaptertest",
     "${dms_path}/common/test/unittest:distributed_sched_utils_test",
   ]
