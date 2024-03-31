@@ -20,10 +20,13 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
+constexpr static int32_t INVALID_MISSION_ID = -1;
+
 bool IsValidPath(const std::string &inFilePath, std::string &realFilePath);
 bool UpdateAllowAppList(const std::string &cfgJsonStr);
 int32_t LoadContinueConfig();
 bool CheckBundleContinueConfig(const std::string &bundleName);
+int32_t GetCurrentMissionId();
 } // namespace DistributedSchedule
 } // namespace OHOS
 #endif // OHOS_DISTRIBUTED_SCHED_SERVICE_H

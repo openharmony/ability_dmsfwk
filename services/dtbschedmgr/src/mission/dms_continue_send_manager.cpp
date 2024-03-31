@@ -72,8 +72,8 @@ void DMSContinueSendMgr::Init()
         return;
     }
     DmsRadar::GetInstance().DmsFocused("Init", INIT);
-    NotifyMissionFocused(missionId, FocusedReason::INIT);
     DataShareManager::GetInstance().RegisterObserver(SETTINGS_DATA_URI);
+    NotifyMissionFocused(missionId, FocusedReason::INIT);
     HILOGI("Init end");
 }
 
@@ -373,6 +373,11 @@ int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
 
     HILOGI("start, type: %{public}d, missionId: %{public}d, bundleName: %{public}s, accessTokenId: %{public}u",
         type, missionId, bundleName.c_str(), accessTokenId);
+    if (!CheckBundleContinueConfig(bundleName)) {
+        HILOGI("App does not allow continue in config file, bundle name %{public}s, missionId: %{public}d",
+            bundleName.c_str(), missionId);
+        return REMOTE_DEVICE_BIND_ABILITY_ERR;
+    }
 
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
     HILOGI("IsContinueSwitchOn : %{public}d",  IsContinueSwitchOn);
