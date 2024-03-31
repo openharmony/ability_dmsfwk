@@ -574,6 +574,7 @@ group("unittest") {
     ":dschedconnecttest",
     ":dschedcontinuetest",
     ":softbusadaptertest",
+    "${dms_path}/common/test/unittest:distributed_sched_utils_test",
   ]
   if (dmsfwk_mission_manager) {
     deps += [
