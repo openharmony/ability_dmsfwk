@@ -46,6 +46,7 @@ dsched_external_deps = [
   "bundle_framework:appexecfwk_base",
   "bundle_framework:appexecfwk_core",
   "c_utils:utils",
+  "data_share:datashare_consumer",
   "device_auth:deviceauth_sdk",
   "device_info_manager:distributed_device_profile_common",
   "device_info_manager:distributed_device_profile_sdk",
@@ -111,6 +112,7 @@ dtbschedmgr_sources = [
   "${distributed_service}/dtbschedmgr/src/bundle/bundle_manager_callback_stub.cpp",
   "${distributed_service}/dtbschedmgr/src/bundle/bundle_manager_internal.cpp",
   "${distributed_service}/dtbschedmgr/src/connect_death_recipient.cpp",
+  "${distributed_service}/dtbschedmgr/src/datashare_manager.cpp",
   "${distributed_service}/dtbschedmgr/src/deviceManager/dms_device_info.cpp",
   "${distributed_service}/dtbschedmgr/src/dfx/dms_continue_time_dumper.cpp",
   "${distributed_service}/dtbschedmgr/src/dfx/dms_hisysevent_report.cpp",
@@ -138,6 +140,7 @@ dtbschedmgr_sources = [
   "${distributed_service}/dtbschedmgr/src/dms_version_manager.cpp",
   "${distributed_service}/dtbschedmgr/src/dtbschedmgr_device_info_storage.cpp",
   "${distributed_service}/dtbschedmgr/src/softbus_adapter/softbus_adapter_common.cpp",
+  "${distributed_service}/dtbschedmgr/src/switch_status_dependency.cpp",
   "unittest/distributed_sched_util.cpp",
 ]
 

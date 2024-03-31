@@ -55,6 +55,7 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "parcel_helper.h"
+#include "switch_status_dependency.h"
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
 #include "common_event_listener.h"
 #endif
@@ -431,6 +432,12 @@ int32_t DistributedSchedService::ContinueLocalMissionDealFreeInstall(OHOS::AAFwk
 int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDeviceId, int32_t missionId,
     const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
+    bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
+    HILOGI("IsContinueSwitchOn : %{public}d",  IsContinueSwitchOn);
+    if (!IsContinueSwitchOn) {
+        HILOGE("ContinueSwitch status is off");
+        return DMS_PERMISSION_DENIED;
+    }
     if (dschedContinuation_ == nullptr) {
         HILOGE("continuation object null!");
         return INVALID_PARAMETERS_ERR;
