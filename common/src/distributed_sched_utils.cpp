@@ -23,6 +23,7 @@
 #include <vector>
 #include "cJSON.h"
 
+#include "ability_manager_client.h"
 #include "config_policy_utils.h"
 
 #include "dtbschedmgr_log.h"
@@ -169,6 +170,20 @@ bool CheckBundleContinueConfig(const std::string &bundleName)
     HILOGI("Current app is allow to continue in config file, bundleName %{public}s, cfgPath %{public}s.",
         bundleName.c_str(), g_continueCfgFullPath.c_str());
     return true;
+}
+
+int32_t GetCurrentMissionId()
+{
+    HILOGI("GetCurrentMission begin");
+    sptr<IRemoteObject> token;
+    int ret = AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility(token);
+    if (ret != ERR_OK || token == nullptr) {
+        HILOGE("GetTopAbility failed, ret: %{public}d", ret);
+        return INVALID_MISSION_ID;
+    }
+    int32_t missionId = INVALID_MISSION_ID;
+    AAFwk::AbilityManagerClient::GetInstance()->GetMissionIdByToken(token, missionId);
+    return missionId;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

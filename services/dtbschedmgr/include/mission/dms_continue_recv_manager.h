@@ -68,6 +68,7 @@ public:
     void NotifyDied(const sptr<IRemoteObject>& obj);
     void NotifyDeviceOffline(const std::string& networkId);
     void OnDeviceScreenOff();
+    void OnContinueSwitchOff();
 
 private:
     void StartEvent();

@@ -14,7 +14,11 @@
  */
 
 #include "datashare_manager.h"
+
+#include "distributed_sched_utils.h"
 #include "dtbschedmgr_log.h"
+#include "mission/dms_continue_recv_manager.h"
+#include "mission/dms_continue_send_manager.h"
 #include "switch_status_dependency.h"
 
 namespace OHOS {
@@ -68,6 +72,18 @@ void DataShareRegisterObserver::OnChange(const ChangeInfo &changeInfo)
     HILOGI("DataShareRegisterObserver OnChange start");
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
     HILOGI("IsContinueSwitchOn : %{public}d", IsContinueSwitchOn);
+    int32_t missionId = GetCurrentMissionId();
+    if (missionId <= 0) {
+        HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
+        return;
+    }
+
+    if (IsContinueSwitchOn) {
+        DMSContinueSendMgr::GetInstance().NotifyMissionFocused(missionId, FocusedReason::INIT);
+    } else {
+        DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(missionId, UnfocusedReason::NORMAL);
+        DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
+    }
     HILOGI("DataShareRegisterObserver OnChange done");
 }
 } // namespace DistributedSchedule

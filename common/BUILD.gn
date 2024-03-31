@@ -32,6 +32,7 @@ ohos_shared_library("distributed_sched_utils") {
   deps = []
 
   external_deps = [
+    "ability_runtime:ability_manager",
     "cJSON:cjson",
     "c_utils:utils",
     "config_policy:configpolicy_util",
