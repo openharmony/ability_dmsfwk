@@ -67,6 +67,10 @@ private:
         const AccountInfo& accountInfo, const std::string& targetBundleName);
     bool CheckComponentAccessPermission(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AccountInfo& accountInfo, const AAFwk::Want& want) const;
+    bool CheckMigrateStartCtrlPer(const AppExecFwk::AbilityInfo& targetAbility,
+        const CallerInfo& callerInfo, const AAFwk::Want& want) const;
+    bool CheckCollaborateStartCtrlPer(const AppExecFwk::AbilityInfo& targetAbility,
+        const CallerInfo& callerInfo, const AAFwk::Want& want) const;
     bool CheckStartControlPermission(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AAFwk::Want& want) const;
     bool CheckBackgroundPermission(const AppExecFwk::AbilityInfo& targetAbility,

@@ -522,6 +522,11 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
     HILOGI("%{public}s. srcDeviceId: %{public}s. dstDeviceId: %{public}s. bundleName: %{public}s.", __func__,
         DnetworkAdapter::AnonymizeNetworkId(srcDeviceId).c_str(),
         DnetworkAdapter::AnonymizeNetworkId(dstDeviceId).c_str(), bundleName.c_str());
+    if (!CheckBundleContinueConfig(bundleName)) {
+        HILOGI("App does not allow continue in config file, bundle name %{public}s", bundleName.c_str());
+        return REMOTE_DEVICE_BIND_ABILITY_ERR;
+    }
+
     if (DmsContinueTime::GetInstance().GetPull()) {
         int64_t begin = GetTickCount();
         DmsContinueTime::GetInstance().SetDurationBegin(DMSDURATION_DSTTOSRCRPCTIME, begin);
@@ -599,26 +604,28 @@ int32_t DistributedSchedService::ProcessContinueLocalMission(const std::string& 
 {
     HILOGI("ProcessContinueLocalMission called.");
     if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(dstDeviceId) == nullptr) {
-            HILOGE("GetDeviceInfoById failed, dstDeviceId: %{public}s.",
-                DnetworkAdapter::AnonymizeNetworkId(dstDeviceId).c_str());
-            return INVALID_REMOTE_PARAMETERS_ERR;
-        }
-        int32_t missionId = 1;
-        #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-        int32_t ret = DMSContinueSendMgr::GetInstance().GetMissionIdByBundleName(bundleName, missionId);
-        if (ret != ERR_OK) {
-            HILOGE("get missionId failed");
-            return ret;
-        }
-        #endif
-        if (dschedContinuation_ == nullptr) {
-            HILOGE("continuation object null!");
-            return INVALID_PARAMETERS_ERR;
-        }
-        dschedContinuation_->continueEvent_.srcNetworkId = srcDeviceId;
-        dschedContinuation_->continueEvent_.dstNetworkId = dstDeviceId;
-        dschedContinuation_->continueEvent_.bundleName = bundleName;
-        return ContinueLocalMission(dstDeviceId, missionId, callback, wantParams);
+        HILOGE("GetDeviceInfoById failed, dstDeviceId: %{public}s.",
+            DnetworkAdapter::AnonymizeNetworkId(dstDeviceId).c_str());
+        return INVALID_REMOTE_PARAMETERS_ERR;
+    }
+
+    int32_t missionId = 1;
+#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
+    int32_t ret = DMSContinueSendMgr::GetInstance().GetMissionIdByBundleName(bundleName, missionId);
+    if (ret != ERR_OK) {
+        HILOGE("get missionId failed");
+        return ret;
+    }
+#endif
+
+    if (dschedContinuation_ == nullptr) {
+        HILOGE("continuation object null!");
+        return INVALID_PARAMETERS_ERR;
+    }
+    dschedContinuation_->continueEvent_.srcNetworkId = srcDeviceId;
+    dschedContinuation_->continueEvent_.dstNetworkId = dstDeviceId;
+    dschedContinuation_->continueEvent_.bundleName = bundleName;
+    return ContinueLocalMission(dstDeviceId, missionId, callback, wantParams);
 }
 
 int32_t DistributedSchedService::ProcessContinueRemoteMission(const std::string& srcDeviceId,
@@ -2734,10 +2741,10 @@ int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& 
         HILOGD("start CheckStartPermission");
         return permissionInstance.CheckStartPermission(want, callerInfo, accountInfo, targetAbility);
     } else if (flag == CALL_PERMISSION) {
-        HILOGD("start CheckGetCallerPermission");
+        HILOGD("Collaboration start check get caller permission");
         return permissionInstance.CheckGetCallerPermission(want, callerInfo, accountInfo, targetAbility);
     } else if (flag == SEND_RESULT_PERMISSION) {
-        HILOGD("start CheckSendResultPermission");
+        HILOGD("Collaboration start check send result permission");
         return permissionInstance.CheckSendResultPermission(want, callerInfo, accountInfo, targetAbility);
     }
     HILOGE("CheckTargetPermission denied!!");

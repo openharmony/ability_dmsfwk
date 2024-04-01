@@ -72,6 +72,8 @@ public:
 
 private:
     void StartEvent();
+    int32_t RetryPostBroadcast(const std::string& senderNetworkId, uint32_t accessTokenId,
+        const int32_t state, const int32_t retry);
     int32_t VerifyBroadcastSource(const std::string& senderNetworkId, const std::string& bundleName,
         const int32_t state);
     void PostOnBroadcastBusiness(const std::string& senderNetworkId, uint32_t accessTokenId, const int32_t state,

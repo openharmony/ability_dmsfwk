@@ -16,18 +16,20 @@
 #include "distributed_sched_permission.h"
 
 #include "accesstoken_kit.h"
-#include "adapter/dnetwork_adapter.h"
-#include "bundle/bundle_manager_internal.h"
-#include "caller_info.h"
 #include "datetime_ex.h"
 #include "device_auth_defines.h"
 #include "device_security_defines.h"
 #include "device_security_info.h"
-#include "distributed_sched_adapter.h"
-#include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
-#include "json_util.h"
 #include "os_account_manager.h"
+
+#include "adapter/dnetwork_adapter.h"
+#include "bundle/bundle_manager_internal.h"
+#include "caller_info.h"
+#include "distributed_sched_adapter.h"
+#include "distributed_sched_utils.h"
+#include "dtbschedmgr_log.h"
+#include "json_util.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -409,52 +411,72 @@ bool DistributedSchedPermission::CheckComponentAccessPermission(const AppExecFwk
     return true;
 }
 
-bool DistributedSchedPermission::CheckStartControlPermission(const AppExecFwk::AbilityInfo& targetAbility,
+bool DistributedSchedPermission::CheckMigrateStartCtrlPer(const AppExecFwk::AbilityInfo& targetAbility,
     const CallerInfo& callerInfo, const AAFwk::Want& want) const
 {
-    // 1. check if continuation with same appid
-    if ((want.GetFlags() & AAFwk::Want::FLAG_ABILITY_CONTINUATION) != 0) {
-        if (!targetAbility.visible &&
-            !CheckDeviceSecurityLevel(callerInfo.sourceDeviceId, want.GetElement().GetDeviceID())) {
-            HILOGE("check device security level failed!");
-            return false;
-        }
-        if (BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
-            HILOGD("the appId is the same, check permission success!");
-            return true;
-        }
-        HILOGE("the appId is different in the migration scenario, permission denied!");
+    std::string bundleName = want.GetBundle();
+    if (!CheckBundleContinueConfig(bundleName)) {
+        HILOGI("App does not allow continue in config file, bundle name %{public}s", bundleName.c_str());
         return false;
     }
-    // 2. check background permission
-    if (!CheckBackgroundPermission(targetAbility, callerInfo, want, true)) {
-        HILOGE("Check background permission failed!");
-        return false;
-    }
-    // 3. check device security level
+
+    // check if continuation with same appid
+    HILOGI("Check migration start control permission with same appid enter.");
     if (!targetAbility.visible &&
         !CheckDeviceSecurityLevel(callerInfo.sourceDeviceId, want.GetElement().GetDeviceID())) {
         HILOGE("check device security level failed!");
         return false;
     }
-    // 4. check start or connect ability with same appid
+    if (BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
+        HILOGD("the appId is the same, check migration start control permission success!");
+        return true;
+    }
+    HILOGE("the appId is different in the migration scenario, permission denied!");
+    return false;
+}
+
+bool DistributedSchedPermission::CheckCollaborateStartCtrlPer(const AppExecFwk::AbilityInfo& targetAbility,
+    const CallerInfo& callerInfo, const AAFwk::Want& want) const
+{
+    HILOGI("Check collaboration start control permission enter.");
+    // 1. check background permission
+    if (!CheckBackgroundPermission(targetAbility, callerInfo, want, true)) {
+        HILOGE("Check background permission failed!");
+        return false;
+    }
+    // 2. check device security level
+    if (!targetAbility.visible &&
+        !CheckDeviceSecurityLevel(callerInfo.sourceDeviceId, want.GetElement().GetDeviceID())) {
+        HILOGE("check device security level failed!");
+        return false;
+    }
+    // 3. check start or connect ability with same appid
     if (BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
         HILOGD("the appId is the same, check permission success!");
         return true;
     }
-    // 5. check if target ability is not visible and without PERMISSION_START_INVISIBLE_ABILITY
+    // 4. check if target ability is not visible and without PERMISSION_START_INVISIBLE_ABILITY
     if (!CheckTargetAbilityVisible(targetAbility, callerInfo)) {
         HILOGE("target ability is not visible and has no PERMISSION_START_INVISIBLE_ABILITY, permission denied!");
         return false;
     }
-    // 6. check if service of fa mode can associatedWakeUp
+    // 5. check if service of fa mode can associatedWakeUp
     if (!targetAbility.isStageBasedModel && targetAbility.type == AppExecFwk::AbilityType::SERVICE &&
         !targetAbility.applicationInfo.associatedWakeUp) {
         HILOGE("target ability is service ability(FA) and associatedWakeUp is false, permission denied!");
         return false;
     }
-    HILOGD("CheckStartControlPermission success");
+    HILOGD("Check collaboration start control permission success");
     return true;
+}
+
+bool DistributedSchedPermission::CheckStartControlPermission(const AppExecFwk::AbilityInfo& targetAbility,
+    const CallerInfo& callerInfo, const AAFwk::Want& want) const
+{
+    HILOGD("Check start control permission enter");
+    return ((want.GetFlags() & AAFwk::Want::FLAG_ABILITY_CONTINUATION) != 0) ?
+        CheckMigrateStartCtrlPer(targetAbility, callerInfo, want) :
+        CheckCollaborateStartCtrlPer(targetAbility, callerInfo, want);
 }
 
 bool DistributedSchedPermission::CheckBackgroundPermission(const AppExecFwk::AbilityInfo& targetAbility,
