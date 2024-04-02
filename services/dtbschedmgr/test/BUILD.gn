@@ -87,7 +87,7 @@ if (dmsfwk_mission_manager) {
 }
 
 if (efficiency_manager_service_enable) {
-  dsched_external_deps += [ "efficiency_manager:suspend_manager_client" ]
+  dsched_external_deps += [ "resource_schedule_service:ressched_client" ]
 }
 
 if (dmsfwk_ces_listener) {

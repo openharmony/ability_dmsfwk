@@ -177,7 +177,7 @@ ohos_shared_library("distributedschedsvr") {
   }
 
   if (efficiency_manager_service_enable) {
-    external_deps += [ "efficiency_manager:suspend_manager_client" ]
+    external_deps += [ "resource_schedule_service:ressched_client" ]
   }
 
   if (dmsfwk_standard_form_share) {
