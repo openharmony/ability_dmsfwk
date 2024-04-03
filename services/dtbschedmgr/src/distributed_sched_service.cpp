@@ -34,8 +34,8 @@
 #include "mem_mgr_client.h"
 #endif
 #ifdef EFFICIENCY_MANAGER_ENABLE
-#include "report_event_type.h"
-#include "suspend_manager_client.h"
+#include "res_type.h"
+#include "res_sched_client.h"
 #endif
 
 #include "ability_connection_wrapper_stub.h"
@@ -1631,17 +1631,16 @@ void DistributedSchedService::ReportDistributedComponentChange(const CallerInfo&
     HILOGI("caller report");
     auto func = [this, callerInfo, changeType, componentType, deviceType]() {
 #ifdef EFFICIENCY_MANAGER_ENABLE
-        nlohmann::json componentInfoJson;
-        componentInfoJson[PID_KEY] = callerInfo.pid;
-        componentInfoJson[UID_KEY] = callerInfo.uid;
-        componentInfoJson[BUNDLE_NAME_KEY] =
+        std::unordered_map<std::string, std::string> payload;
+        payload[PID_KEY] = std::to_string(callerInfo.pid);
+        payload[UID_KEY] = std::to_string(callerInfo.uid);
+        payload[BUNDLE_NAME_KEY] =
             callerInfo.bundleNames.empty() ? std::string() : callerInfo.bundleNames.front();
-        componentInfoJson[COMPONENT_TYPE_KEY] = componentType;
-        componentInfoJson[DEVICE_TYPE_KEY] = deviceType;
-        componentInfoJson[CHANGE_TYPE_KEY] = changeType;
-        std::string componentInfo = componentInfoJson.dump();
-        SuspendManager::SuspendManagerClient::GetInstance().ReportStateChangeEvent(
-            SuspendManager::ReportEventType::DIS_COMP_CHANGE, componentInfo);
+        payload[COMPONENT_TYPE_KEY] = std::to_string(componentType);
+        payload[DEVICE_TYPE_KEY] = std::to_string(deviceType);
+        payload[CHANGE_TYPE_KEY] = std::to_string(changeType);
+        uint32_t type = ResourceSchedule::ResType::RES_TYPE_REPORT_DISTRIBUTE_COMPONENT_CHANGE;
+        ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, 0, payload);
 #endif
 #ifdef SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR
         Memory::MemMgrClient::GetInstance().NotifyDistDevStatus(callerInfo.pid, callerInfo.uid,
@@ -1663,15 +1662,14 @@ void DistributedSchedService::ReportDistributedComponentChange(const ConnectInfo
 #ifdef EFFICIENCY_MANAGER_ENABLE
     HILOGI("callee report");
     auto func = [this, connectInfo, changeType, componentType, deviceType]() {
-        nlohmann::json componentInfoJson;
-        componentInfoJson[UID_KEY] = BundleManagerInternal::GetUidFromBms(connectInfo.element.GetBundleName());
-        componentInfoJson[BUNDLE_NAME_KEY] = connectInfo.element.GetBundleName();
-        componentInfoJson[COMPONENT_TYPE_KEY] = componentType;
-        componentInfoJson[DEVICE_TYPE_KEY] = deviceType;
-        componentInfoJson[CHANGE_TYPE_KEY] = changeType;
-        std::string componentInfo = componentInfoJson.dump();
-        SuspendManager::SuspendManagerClient::GetInstance().ReportStateChangeEvent(
-            SuspendManager::ReportEventType::DIS_COMP_CHANGE, componentInfo);
+        std::unordered_map<std::string, std::string> payload;
+        payload[UID_KEY] = std::to_string(BundleManagerInternal::GetUidFromBms(connectInfo.element.GetBundleName()));
+        payload[BUNDLE_NAME_KEY] = connectInfo.element.GetBundleName();
+        payload[COMPONENT_TYPE_KEY] = std::to_string(componentType);
+        payload[DEVICE_TYPE_KEY] = std::to_string(deviceType);
+        payload[CHANGE_TYPE_KEY] = std::to_string(changeType);
+        uint32_t type = ResourceSchedule::ResType::RES_TYPE_REPORT_DISTRIBUTE_COMPONENT_CHANGE;
+        ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, 0, payload);
     };
     if (componentChangeHandler_ != nullptr) {
         componentChangeHandler_->PostTask(func);

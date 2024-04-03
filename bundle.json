@@ -50,7 +50,6 @@
           "dmsfwk",
           "dsoftbus",
           "data_share",
-          "efficiency_manager",
           "eventhandler",
           "ffrt",
           "form_fwk",
@@ -65,6 +64,7 @@
           "memmgr",
           "napi",
           "os_account",
+          "resource_schedule_service",
           "safwk",
           "samgr"
         ],
