@@ -28,6 +28,7 @@ namespace {
 DmsHandler &dmsSourceHandlerdemo = DmsHandler::GetInstance();
 std::string g_type = "IDSchedEventListener";
 sptr<IDSchedEventListener> listener = sptr<IDSchedEventListener>(new Business());
+ContinueInfo g_continueInfo;
 }
  
 void Business::Register()
@@ -52,6 +53,18 @@ void Business::UnRegister()
     }
 }
 
+void Business::GetContinueInfo()
+{
+    int32_t result = 0;
+    result = dmsSourceHandlerdemo.GetContinueInfo(g_continueInfo);
+    if (result < 0) {
+        cout << "GetContinueInfo failed.CODE = " << result << endl;
+    } else {
+        cout << "continueInfo.dstNetworkId_ : " << g_continueInfo.dstNetworkId_ << endl;
+        cout << "continueInfo.srcNetworkId_ : " << g_continueInfo.srcNetworkId_ << endl;
+    }
+}
+
 void Business::DSchedEventNotify(EventNotify& notify)
 {
     cout << endl << "DSchedEventNotify Start." << endl;
@@ -67,7 +80,7 @@ void Business::DSchedEventNotify(EventNotify& notify)
 int main()
 {
     cout << "Please select an option to test the interface:" << endl;
-    cout << "A.RegisterDSchedEventListener  B.UnRegisterDSchedEventListener X.exit" << endl;
+    cout << "A.RegisterDSchedEventListener  B.UnRegisterDSchedEventListener C.GetContinueInfo X.exit" << endl;
     cout << "\n" << endl;
  
     char cmd;
@@ -80,7 +93,9 @@ int main()
                 break;
             case 'B' : g_business.UnRegister();
                 break;
-            case 'X' : g_business.UnRegister();
+            case 'C' : g_business.GetContinueInfo();
+                break;
+            case 'X' :
                 return 0;
             default:
                 cout << "unknown cmd, please input again" << endl;

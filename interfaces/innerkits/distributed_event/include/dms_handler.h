@@ -35,6 +35,7 @@ DECLARE_SINGLE_INSTANCE(DmsHandler);
 public:
     int32_t RegisterDSchedEventListener(std::string type, sptr<IDSchedEventListener> &listener);
     int32_t UnRegisterDSchedEventListener(std::string type, sptr<IDSchedEventListener> &listener);
+    int32_t GetContinueInfo(ContinueInfo &continueInfo);
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS

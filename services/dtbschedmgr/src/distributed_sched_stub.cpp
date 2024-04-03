@@ -80,6 +80,8 @@ void DistributedSchedStub::InitExtendedLocalFuncsInner()
         &DistributedSchedStub::RegisterDSchedEventListenerInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::UNREGISTER_DSCHED_EVENT_LISTENER)] =
         &DistributedSchedStub::UnRegisterDSchedEventListenerInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_CONTINUE_INFO)] =
+        &DistributedSchedStub::GetContinueInfoInner;
 #endif
 }
 
@@ -809,6 +811,17 @@ int32_t DistributedSchedStub::UnRegisterDSchedEventListenerInner(MessageParcel& 
     }
     int32_t result = UnRegisterDSchedEventListener(type, dSchedEventListener);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+
+int32_t DistributedSchedStub::GetContinueInfoInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("[PerformanceTest] called, IPC end = %{public}" PRId64, GetTickCount());
+    std::string dstNetworkId;
+    std::string srcNetworkId;
+    int32_t result = GetContinueInfo(dstNetworkId, srcNetworkId);
+    PARCEL_WRITE_HELPER(reply, String, dstNetworkId);
+    PARCEL_WRITE_HELPER(reply, String, srcNetworkId);
+    return result;
 }
 
 int32_t DistributedSchedStub::RegisterOnListenerInner(MessageParcel& data, MessageParcel& reply)

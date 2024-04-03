@@ -28,6 +28,7 @@ public:
     void DSchedEventNotify(EventNotify &notify) override;
     void Register();
     void UnRegister();
+    void GetContinueInfo();
 };
 }
 }

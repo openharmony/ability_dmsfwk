@@ -35,6 +35,7 @@ public:
     bool SubscribeDmsSA();
     int32_t AddDSchedEventListener(const std::string& type, const sptr<IDSchedEventListener>& listener);
     int32_t DelDSchedEventListener(const std::string& type, const sptr<IDSchedEventListener>& listener);
+    int32_t GetContinueInfo(ContinueInfo &continueInfo);
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
 private:

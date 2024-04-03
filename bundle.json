@@ -115,6 +115,20 @@
               ]
             },
             "name": "//foundation/ability/dmsfwk/interfaces/innerkits/common:common_sdk"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/dmsfwk/interfaces/innerkits/distributed_event/include",
+              "header_files": [
+                "distributed_event_listener.h",
+                "distributed_parcel_helper.h",
+                "dms_client.h",
+                "dms_handler.h",
+                "dms_listener_stub.h",
+                "dms_sa_client.h"
+              ]
+            },
+            "name": "//foundation/ability/dmsfwk/interfaces/innerkits/distributed_event:distributed_sdk"
           }
         ],
         "test": [

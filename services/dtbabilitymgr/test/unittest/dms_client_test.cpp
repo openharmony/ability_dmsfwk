@@ -105,5 +105,24 @@ HWTEST_F(DistributedClientTest, UnRegisterDSchedEventListener_001, TestSize.Leve
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedClientTest UnRegisterDSchedEventListener_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: GetContinueInfo_001
+ * @tc.desc: GetContinueInfo
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DistributedClientTest, GetContinueInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedClientTest GetContinueInfo_001 start" << std::endl;
+    sptr<IRemoteObject> proxy = GetDmsProxy();
+    if (proxy == nullptr) {
+        return;
+    }
+    ContinueInfo continueInfo;
+    int32_t result = distributedClient_.GetContinueInfo(continueInfo);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedClientTest GetContinueInfo_001 end" << std::endl;
+}
 }
 }

@@ -24,13 +24,21 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
+class ContinueInfo {
+public:
+    std::string srcNetworkId_;
+    std::string dstNetworkId_;
+};
+
 class DistributedClient {
 public:
     int32_t RegisterDSchedEventListener(const std::string& type, const sptr<IDSchedEventListener>& obj);
     int32_t UnRegisterDSchedEventListener(const std::string& type, const sptr<IDSchedEventListener>& obj);
+    int32_t GetContinueInfo(ContinueInfo &continueInfo);
     enum {
         REGISTER_DSCHED_EVENT_LISTENER = 262,
         UNREGISTER_DSCHED_EVENT_LISTENER = 263,
+        GET_CONTINUE_INFO = 264,
     };
 private:
     sptr<IRemoteObject> GetDmsProxy();
