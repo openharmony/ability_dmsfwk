@@ -76,5 +76,35 @@ int32_t DistributedClient::UnRegisterDSchedEventListener(const std::string& type
     PARCEL_WRITE_HELPER(data, RemoteObject, obj->AsObject());
     PARCEL_TRANSACT_SYNC_RET_INT(remote, UNREGISTER_DSCHED_EVENT_LISTENER, data, reply);
 }
+
+int32_t DistributedClient::GetContinueInfo(ContinueInfo &continueInfo)
+{
+    HILOG_INFO("%{public}s called", __func__);
+    sptr<IRemoteObject> remote = GetDmsProxy();
+    if (remote == nullptr) {
+        HILOG_ERROR("remote system ablity is null");
+        return AAFwk::INVALID_PARAMETERS_ERR;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        HILOG_DEBUG("write interface token failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageOption option;
+    int32_t ret = remote->SendRequest(GET_CONTINUE_INFO, data, reply, option);
+    if (ret != ERR_NONE) {
+        HILOG_ERROR("sendRequest fail, error: %{public}d", ret);
+        return ret;
+    }
+    continueInfo.dstNetworkId_ = reply.ReadString();
+    continueInfo.srcNetworkId_ = reply.ReadString();
+    if (continueInfo.dstNetworkId_ == "") {
+        HILOG_ERROR("read type failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ret;
+}
 }  // namespace DistributedSchedule
 }  // namespace OHOS

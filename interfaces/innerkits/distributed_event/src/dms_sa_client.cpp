@@ -71,6 +71,21 @@ int32_t DmsSaClient::DelDSchedEventListener(const std::string& type, const sptr<
     return NO_ERROR;
 }
 
+int32_t DmsSaClient::GetContinueInfo(ContinueInfo &continueInfo)
+{
+    HILOGI("%{public}s called", __func__);
+    saMgrProxy_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saMgrProxy_ == nullptr) {
+        HILOGE("fail to get saMgrProxy.");
+        return AAFwk::INNER_ERR;
+    }
+    if (saMgrProxy_->CheckSystemAbility(DISTRIBUTED_SCHED_SA_ID)) {
+        DistributedClient distributedClient;
+        distributedClient.GetContinueInfo(continueInfo);
+    }
+    return NO_ERROR;
+}
+
 void DmsSaClient::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
     HILOGI("%{public}s called, the systemAbilityId is %{public}d", __func__, systemAbilityId);

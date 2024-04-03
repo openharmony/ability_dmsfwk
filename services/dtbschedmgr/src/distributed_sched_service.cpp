@@ -2249,6 +2249,20 @@ int32_t DistributedSchedService::UnRegisterDSchedEventListener(const std::string
     return 0;
 }
 
+int32_t DistributedSchedService::GetContinueInfo(std::string& dstNetworkId, std::string& srcNetworkId)
+{
+    HILOGI("%{public}s called", __func__);
+    if (dschedContinuation_ == nullptr) {
+        HILOGE("continuation object null!");
+        return INVALID_PARAMETERS_ERR;
+    }
+    dstNetworkId = dschedContinuation_->continueEvent_.dstNetworkId;
+    srcNetworkId = dschedContinuation_->continueEvent_.srcNetworkId;
+    HILOGI("dstNetworkId: %{public}s", dstNetworkId.c_str());
+    HILOGI("srcNetworkId: %{public}s", srcNetworkId.c_str());
+    return 0;
+}
+
 int32_t DistributedSchedService::RegisterOnListener(const std::string& type,
     const sptr<IRemoteObject>& obj)
 {

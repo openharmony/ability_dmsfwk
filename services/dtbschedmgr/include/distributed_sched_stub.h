@@ -53,6 +53,7 @@ private:
     int32_t RegisterMissionListenerInner(MessageParcel& data, MessageParcel& reply);
     int32_t RegisterDSchedEventListenerInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnRegisterDSchedEventListenerInner(MessageParcel& data, MessageParcel& reply);
+    int32_t GetContinueInfoInner(MessageParcel& data, MessageParcel& reply);
     int32_t RegisterOnListenerInner(MessageParcel& data, MessageParcel& reply);
     int32_t RegisterOffListenerInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnRegisterMissionListenerInner(MessageParcel& data, MessageParcel& reply);

@@ -108,6 +108,10 @@ public:
     {
         return 0;
     }
+    virtual int32_t GetContinueInfo(std::string& dstNetworkId, std::string& srcNetworkId)
+    {
+        return 0;
+    }
     virtual int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj)
     {
         return 0;

@@ -55,5 +55,16 @@ int32_t DmsHandler::UnRegisterDSchedEventListener(std::string type, sptr<IDSched
     }
     return 0;
 }
+
+int32_t DmsHandler::GetContinueInfo(ContinueInfo &continueInfo)
+{
+    HILOGI("%{public}s called", __func__);
+    int32_t ret = DmsSaClient::GetInstance().GetContinueInfo(continueInfo);
+    if (ret != 0) {
+        HILOGE("DmsSaClient GetContinueInfo fail");
+        return GET_REMOTE_DMS_FAIL;
+    }
+    return 0;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
