@@ -17,6 +17,7 @@
 
 #include "adapter/dnetwork_adapter.h"
 #include "datetime_ex.h"
+#include "distributed_sched_utils.h"
 #include "distributed_radar.h"
 #include "distributed_sched_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
@@ -230,6 +231,18 @@ void DMSContinueRecvMgr::PostOnBroadcastBusiness(const std::string& senderNetwor
     }
 }
 
+int32_t DMSContinueRecvMgr::RetryPostBroadcast(const std::string& senderNetworkId,
+    uint32_t accessTokenId, const int32_t state, const int32_t retry)
+{
+    HILOGI("Retry post broadcast, current retry times %{public}d", retry);
+    if (retry == DBMS_RETRY_MAX_TIME) {
+        HILOGE("meet max retry time!");
+        return INVALID_PARAMETERS_ERR;
+    }
+    PostOnBroadcastBusiness(senderNetworkId, accessTokenId, state, DBMS_RETRY_DELAY, retry + 1);
+    return ERR_OK;
+}
+
 int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNetworkId,
     uint32_t accessTokenId, const int32_t state, const int32_t retry)
 {
@@ -244,13 +257,14 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     }
     if (ret != ERR_OK) {
         HILOGW("get bundleName failed, ret: %{public}d, try = %{public}d", ret, retry);
-        if (retry == DBMS_RETRY_MAX_TIME) {
-            HILOGE("meet max retry time!");
-            return INVALID_PARAMETERS_ERR;
-        }
-        PostOnBroadcastBusiness(senderNetworkId, accessTokenId, state, DBMS_RETRY_DELAY, retry + 1);
-        return ERR_OK;
+        return RetryPostBroadcast(senderNetworkId, accessTokenId, state, retry);
     }
+
+    if (!CheckBundleContinueConfig(bundleName)) {
+        HILOGI("App does not allow continue in config file, bundle name %{public}s", bundleName.c_str());
+        return REMOTE_DEVICE_BIND_ABILITY_ERR;
+    }
+
     HILOGI("get bundleName, bundleName: %{public}s", bundleName.c_str());
     AppExecFwk::BundleInfo localBundleInfo;
     if (BundleManagerInternal::GetLocalBundleInfoV9(bundleName, localBundleInfo) != ERR_OK) {
@@ -261,6 +275,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
         return INVALID_PARAMETERS_ERR;
     }
+
     ret = VerifyBroadcastSource(senderNetworkId, bundleName, state);
     if (ret != ERR_OK) {
         return ret;
