@@ -42,6 +42,7 @@ public:
     void TearDown();
 
     sptr<DmsSaClient> dmssaClient_;
+    sptr<DmsSystemAbilityStatusChange> dmsSaStatusChange_;
 };
 
 class IDSchedEventListenerTest : public IDSchedEventListener {
