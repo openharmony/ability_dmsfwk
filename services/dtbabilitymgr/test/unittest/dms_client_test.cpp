@@ -88,6 +88,21 @@ HWTEST_F(DistributedClientTest, RegisterDSchedEventListener_001, TestSize.Level3
 }
 
 /**
+ * @tc.name: RegisterDSchedEventListener_002
+ * @tc.desc: RegisterDSchedEventListener
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DistributedClientTest, RegisterDSchedEventListener_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedClientTest RegisterDSchedEventListener_002 start" << std::endl;
+    sptr<IDSchedEventListener> listener = sptr<IDSchedEventListener>(new BusinessHandlerTest());
+    int32_t result = distributedClient_.RegisterDSchedEventListener(TYPE, listener);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedClientTest RegisterDSchedEventListener_002 end" << std::endl;
+}
+
+/**
  * @tc.name: UnRegisterDSchedEventListener_001
  * @tc.desc: UnRegisterDSchedEventListener
  * @tc.type: FUNC
@@ -104,6 +119,21 @@ HWTEST_F(DistributedClientTest, UnRegisterDSchedEventListener_001, TestSize.Leve
     int32_t result = distributedClient_.UnRegisterDSchedEventListener(TYPE, listener);
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedClientTest UnRegisterDSchedEventListener_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: UnRegisterDSchedEventListener_002
+ * @tc.desc: UnRegisterDSchedEventListener
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DistributedClientTest, UnRegisterDSchedEventListener_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedClientTest UnRegisterDSchedEventListener_002 start" << std::endl;
+    sptr<IDSchedEventListener> listener = sptr<IDSchedEventListener>(new BusinessHandlerTest());
+    int32_t result = distributedClient_.UnRegisterDSchedEventListener(TYPE, listener);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedClientTest UnRegisterDSchedEventListener_002 end" << std::endl;
 }
 
 /**

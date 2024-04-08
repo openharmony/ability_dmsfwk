@@ -139,5 +139,84 @@ HWTEST_F(DmsSaClientTest, DelDSchedEventListener_001, TestSize.Level3)
     EXPECT_EQ(result2, NO_ERROR);
     DTEST_LOG << "DmsSaClientTest DelDSchedEventListener_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: GetContinueInfo_001
+ * @tc.desc: GetContinueInfo
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DmsSaClientTest, GetContinueInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsSaClientTest GetContinueInfo_001 start" << std::endl;
+    if (dmssaClient_ == nullptr) {
+        DTEST_LOG << "dmssaClient_ is nullptr" << std::endl;
+        return;
+    }
+    //systemAbilityId not is DISTRIBUTED_SCHED_SA_ID
+    dmssaClient_->OnAddSystemAbility(-1, DEVICE_ID);
+    //systemAbilityId is DISTRIBUTED_SCHED_SA_ID
+    dmssaClient_->OnAddSystemAbility(DISTRIBUTED_SCHED_SA_ID, DEVICE_ID);
+    DTEST_LOG << "DmsSaClientTest OnAddSystemAbility_001 end" << std::endl;
+
+    DTEST_LOG << "DmsSaClientTest GetContinueInfo_001 start" << std::endl;
+    ContinueInfo continueInfo;
+    int32_t result1 = dmssaClient_->GetContinueInfo(continueInfo);
+    EXPECT_EQ(result1, NO_ERROR);
+    DTEST_LOG << "DmsSaClientTest GetContinueInfo_001 end" << std::endl;
+}
+
+
+/**
+ * @tc.name: OnAddSystemAbility_001
+ * @tc.desc: OnAddSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DmsSaClientTest, OnAddSystemAbility_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsSaClientTest OnAddSystemAbility_001 start" << std::endl;
+    if (dmsSaStatusChange_ == nullptr) {
+        DTEST_LOG << "dmsSaStatusChange_ is nullptr" << std::endl;
+        return;
+    }
+    //systemAbilityId not is DISTRIBUTED_SCHED_SA_ID
+    dmsSaStatusChange_->OnAddSystemAbility(-1, DEVICE_ID);
+    //systemAbilityId is DISTRIBUTED_SCHED_SA_ID
+    dmsSaStatusChange_->OnAddSystemAbility(DISTRIBUTED_SCHED_SA_ID, DEVICE_ID);
+    DTEST_LOG << "DmsSaClientTest OnAddSystemAbility_001 end" << std::endl;
+
+    DTEST_LOG << "DmsSaClientTest DelDSchedEventListener_001 start" << std::endl;
+    sptr<IDSchedEventListenerTest> listener = new IDSchedEventListenerTest();
+    int32_t result = dmssaClient_->AddDSchedEventListener(TYPE, listener);
+    EXPECT_EQ(result, NO_ERROR);
+    DTEST_LOG << "DmsSaClientTest OnAddSystemAbility_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnRemoveSystemAbility_001
+ * @tc.desc: OnRemoveSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DmsSaClientTest, OnRemoveSystemAbility_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsSaClientTest OnRemoveSystemAbilityy_001 start" << std::endl;
+    if (dmsSaStatusChange_ == nullptr) {
+        DTEST_LOG << "dmsSaStatusChange_ is nullptr" << std::endl;
+        return;
+    }
+    //systemAbilityId not is DISTRIBUTED_SCHED_SA_ID
+    dmsSaStatusChange_->OnRemoveSystemAbility(-1, DEVICE_ID);
+    //systemAbilityId is DISTRIBUTED_SCHED_SA_ID
+    dmsSaStatusChange_->OnRemoveSystemAbility(DISTRIBUTED_SCHED_SA_ID, DEVICE_ID);
+    DTEST_LOG << "DmsSaClientTest OnRemoveSystemAbility_001 end" << std::endl;
+
+    DTEST_LOG << "DmsSaClientTest AddDSchedEventListener_001 start" << std::endl;
+    sptr<IDSchedEventListenerTest> listener = new IDSchedEventListenerTest();
+    int32_t result = dmssaClient_->AddDSchedEventListener(TYPE, listener);
+    EXPECT_EQ(result, NO_ERROR);
+    DTEST_LOG << "DmsSaClientTest OnRemoveSystemAbility_001 end" << std::endl;
+}
 }
 }

@@ -29,6 +29,11 @@ namespace OHOS {
 namespace DistributedSchedule {
 using FuncContinuationCallback = std::function<void(int32_t missionId)>;
 
+struct ContinueInfo {
+    std::string srcNetworkId;
+    std::string dstNetworkId;
+};
+
 struct ContinueEvent {
     std::string srcNetworkId;
     std::string dstNetworkId;
@@ -58,6 +63,7 @@ public:
     bool IsCleanMission(int32_t missionId);
     void SetCleanMissionFlag(int32_t missionId, bool isCleanMission);
     ContinueEvent continueEvent_;
+    ContinueInfo continueInfo_;
 
 private:
     class ContinuationHandler : public AppExecFwk::EventHandler {

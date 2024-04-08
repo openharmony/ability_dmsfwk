@@ -625,6 +625,8 @@ int32_t DistributedSchedService::ProcessContinueLocalMission(const std::string& 
     dschedContinuation_->continueEvent_.srcNetworkId = srcDeviceId;
     dschedContinuation_->continueEvent_.dstNetworkId = dstDeviceId;
     dschedContinuation_->continueEvent_.bundleName = bundleName;
+    dschedContinuation_->continueInfo_.srcNetworkId = srcDeviceId;
+    dschedContinuation_->continueInfo_.dstNetworkId = dstDeviceId;
     return ContinueLocalMission(dstDeviceId, missionId, callback, wantParams);
 }
 
@@ -645,6 +647,8 @@ int32_t DistributedSchedService::ProcessContinueRemoteMission(const std::string&
     dschedContinuation_->continueEvent_.srcNetworkId = dstDeviceId;
     dschedContinuation_->continueEvent_.dstNetworkId = srcDeviceId;
     dschedContinuation_->continueEvent_.bundleName = bundleName;
+    dschedContinuation_->continueInfo_.srcNetworkId = srcDeviceId;
+    dschedContinuation_->continueInfo_.dstNetworkId = dstDeviceId;
     HILOGI("ProcessContinueRemoteMission end.");
     return ContinueRemoteMission(srcDeviceId, dstDeviceId, bundleName, callback, wantParams);
 }
@@ -2256,8 +2260,8 @@ int32_t DistributedSchedService::GetContinueInfo(std::string& dstNetworkId, std:
         HILOGE("continuation object null!");
         return INVALID_PARAMETERS_ERR;
     }
-    dstNetworkId = dschedContinuation_->continueEvent_.dstNetworkId;
-    srcNetworkId = dschedContinuation_->continueEvent_.srcNetworkId;
+    dstNetworkId = dschedContinuation_->continueInfo_.dstNetworkId;
+    srcNetworkId = dschedContinuation_->continueInfo_.srcNetworkId;
     HILOGI("dstNetworkId: %{public}s", dstNetworkId.c_str());
     HILOGI("srcNetworkId: %{public}s", srcNetworkId.c_str());
     return 0;
