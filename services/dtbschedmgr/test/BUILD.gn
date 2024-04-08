@@ -27,9 +27,9 @@ dsched_configs =
 config("test_config") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//foundation/ability/dmsfwk/utils/native/include",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/unittest",
     "${distributed_service}/dtbschedmgr/include/distributedWant",
+    "${dms_path}/common/include",
   ]
 }
 

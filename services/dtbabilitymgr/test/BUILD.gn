@@ -27,9 +27,9 @@ dtbabilitymgr_configs = [
 config("test_config") {
   visibility = [ ":*" ]
   include_dirs = [
-    "//foundation/ability/dmsfwk/utils/native/include",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/include",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/unittest",
+    "${dms_path}/common/include",
     "${dms_path}/interfaces/innerkits/distributed_event/include",
     "${dms_path}/interfaces/innerkits/tests",
   ]
