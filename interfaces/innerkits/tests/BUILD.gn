@@ -17,10 +17,10 @@ import("../../../dmsfwk.gni")
 config("tests_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
+    "${dms_path}/common/include",
     "${dms_path}/interfaces/innerkits/distributed_event/include",
     "${dms_path}/interfaces/innerkits/tests/",
     "${dms_path}/services/dtbabilitymgr/include/",
-    "${dms_path}/utils/native/include/",
   ]
 
   cflags = []

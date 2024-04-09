@@ -19,10 +19,10 @@ config("dms_sdk_public_config") {
   include_dirs = [
     "${ams_path}/interfaces/inner_api/ability_manager/include/",
     "${ams_path}/services/common/include/",
+    "${dms_path}/common/include",
     "${dms_path}/interfaces/innerkits/distributed_event/include/",
     "${dms_path}/services/dtbabilitymgr/include/",
     "${dms_path}/services/dtbschedmgr/include/",
-    "${dms_path}/utils/native/include/",
   ]
 
   cflags = []

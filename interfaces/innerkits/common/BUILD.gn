@@ -12,13 +12,14 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
 config("common_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "include/",
+    "${dms_path}/common/include",
     "//foundation/ability/dmsfwk/services/dtbabilitymgr/include/",
-    "//foundation/ability/dmsfwk/utils/native/include/",
   ]
 
   cflags = []
