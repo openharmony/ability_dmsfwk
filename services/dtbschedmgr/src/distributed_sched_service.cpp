@@ -434,7 +434,7 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
 {
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
     if (!IsContinueSwitchOn) {
-        HILOGW("ContinueSwitch status is off");
+        HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }
     if (dschedContinuation_ == nullptr) {
@@ -506,7 +506,7 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
     int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
     if (!SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
-        HILOGW("ContinueSwitch status is off");
+        HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }
     sptr<IDistributedSched> remoteDms = GetRemoteDms(srcDeviceId);
@@ -2463,7 +2463,7 @@ int32_t DistributedSchedService::StartLocalAbility(const FreeInstallInfo& info, 
 int32_t DistributedSchedService::StartAbility(const OHOS::AAFwk::Want& want, int32_t requestCode)
 {
     if (!SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
-        HILOGW("ContinueSwitch status is off");
+        HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->Connect();
