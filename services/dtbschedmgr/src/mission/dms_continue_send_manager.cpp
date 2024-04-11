@@ -382,7 +382,7 @@ int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
     HILOGI("IsContinueSwitchOn : %{public}d",  IsContinueSwitchOn);
     if (!IsContinueSwitchOn) {
-        HILOGE("ContinueSwitch status is off");
+        HILOGW("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }
 
@@ -647,9 +647,8 @@ int32_t DMSContinueSendMgr::SetStateSendEvent(const uint32_t accessTokenId, cons
     }
 
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    HILOGI("IsContinueSwitchOn : %{public}d", IsContinueSwitchOn);
     if (!IsContinueSwitchOn) {
-        HILOGE("ContinueSwitch status is off");
+        HILOGW("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }
 
