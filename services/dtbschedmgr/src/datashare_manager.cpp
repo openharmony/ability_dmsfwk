@@ -71,7 +71,6 @@ void DataShareRegisterObserver::OnChange(const ChangeInfo &changeInfo)
 {
     HILOGI("DataShareRegisterObserver OnChange start");
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    HILOGI("IsContinueSwitchOn : %{public}d", IsContinueSwitchOn);
     int32_t missionId = GetCurrentMissionId();
     if (missionId <= 0) {
         HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);

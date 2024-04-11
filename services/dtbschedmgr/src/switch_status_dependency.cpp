@@ -68,7 +68,7 @@ std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, cons
     int32_t numRows = 0;
     resultSet->GetRowCount(numRows);
     if (numRows == 0) {
-        HILOGE("get switch status, numRows is zero with key is %{public}s", key.c_str());
+        HILOGW("get switch status, numRows is zero with key is %{public}s", key.c_str());
         resultSet->Close();
         dataShareHelper->Release();
         return CONTINUE_SWITCH_ON;

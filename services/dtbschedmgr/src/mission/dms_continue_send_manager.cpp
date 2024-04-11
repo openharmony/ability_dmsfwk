@@ -380,7 +380,6 @@ int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
     }
 
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    HILOGI("IsContinueSwitchOn : %{public}d",  IsContinueSwitchOn);
     if (!IsContinueSwitchOn) {
         HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
@@ -622,12 +621,6 @@ int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
     }
 
     if (screenOffHandler_->IsDeviceScreenOn()) {
-        bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-        HILOGI("IsContinueSwitchOn : %{public}d", IsContinueSwitchOn);
-        if (!IsContinueSwitchOn) {
-            HILOGE("ContinueSwitch status is off");
-            return DMS_PERMISSION_DENIED;
-        }
         ret = SendSoftbusEvent(accessTokenId, DMS_UNFOCUSED_TYPE);
         bool res = (reason != UnfocusedReason::TIMEOUT)
             ? DmsRadar::GetInstance().NormalUnfocusedSendEventRes("SendSoftbusEvent", ret)
@@ -653,7 +646,6 @@ int32_t DMSContinueSendMgr::SetStateSendEvent(const uint32_t accessTokenId, cons
     }
 
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    HILOGI("IsContinueSwitchOn : %{public}d", IsContinueSwitchOn);
     if (!IsContinueSwitchOn) {
         HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
