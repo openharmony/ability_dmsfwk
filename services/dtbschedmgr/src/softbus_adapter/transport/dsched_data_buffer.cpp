@@ -71,5 +71,5 @@ int32_t DSchedDataBuffer::SetRange(size_t offset, size_t size)
     rangeLength_ = size;
     return ERR_OK;
 }
-}
-}
+}  // namespace DistributedSchedule
+}  // namespace OHOS

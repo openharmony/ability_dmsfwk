@@ -26,7 +26,7 @@ public:
     virtual ~IDataListener() {}
 
     virtual void OnBind(int32_t socket, PeerSocketInfo info) = 0;
-    virtual void OnShutdown(int32_t socket, ShutdownReason reason) = 0;
+    virtual void OnShutdown(int32_t socket, bool isSelfCalled) = 0;
     virtual void OnDataRecv(int32_t socket, std::shared_ptr<DSchedDataBuffer> dataBuffer) = 0;
 };
 }  // namespace DistributedSchedule
