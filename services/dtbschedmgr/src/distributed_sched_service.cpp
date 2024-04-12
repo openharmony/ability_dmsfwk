@@ -830,6 +830,8 @@ void DistributedSchedService::NotifyCompleteContinuation(const std::u16string& d
     int dSchedEventresult = dschedContinuation_->NotifyDSchedEventResult(DSCHED_EVENT_KEY, ERR_OK);
     HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
     remoteDms->NotifyContinuationResultFromRemote(sessionId, isSuccess, dstInfo);
+    dschedContinuation_->continueInfo_.srcNetworkId = "";
+    dschedContinuation_->continueInfo_.dstNetworkId = "";
     DmsRadar::GetInstance().ClickIconDmsRecvOver("NotifyContinuationResultFromRemote", ERR_OK);
 }
 
@@ -851,6 +853,8 @@ int32_t DistributedSchedService::NotifyContinuationResultFromRemote(int32_t sess
 
     int32_t missionId = sessionId;
     NotifyContinuationCallbackResult(missionId, isSuccess ? 0 : NOTIFYCOMPLETECONTINUATION_FAILED);
+    dschedContinuation_->continueInfo_.srcNetworkId = "";
+    dschedContinuation_->continueInfo_.dstNetworkId = "";
     return ERR_OK;
 }
 
