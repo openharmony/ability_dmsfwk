@@ -1270,25 +1270,13 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectAbilityFromRemote_001, TestSiz
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectAbilityFromRemote_001 start" << std::endl;
     AAFwk::Want want;
-    std::string localDeviceId;
-    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
-    AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME,
-        ABILITY_NAME);
-    want.SetElement(element);
-    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
     AppExecFwk::AbilityInfo abilityInfo;
-    abilityInfo.permissions.clear();
-    sptr<IRemoteObject> connect = new MockDistributedSched();
+    sptr<IRemoteObject> connect;
     CallerInfo callerInfo;
-    callerInfo.uid = 0;
-    callerInfo.sourceDeviceId = LOCAL_DEVICEID;
-    bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
-    EXPECT_TRUE(result);
     IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    auto mockDms = iface_cast<IDistributedSched>(GetDSchedService());
-    int ret = mockDms->ConnectAbilityFromRemote(want, abilityInfo, connect, callerInfo, accountInfo);
-    EXPECT_EQ(ret, ERR_OK);
+    int32_t ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
+        abilityInfo, connect, callerInfo, accountInfo);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectAbilityFromRemote_001 end" << std::endl;
 }
 
@@ -1301,33 +1289,36 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectAbilityFromRemote_001, TestSiz
 HWTEST_F(DistributedSchedServiceFirstTest, ConnectAbilityFromRemote_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectAbilityFromRemote_002 start" << std::endl;
-    DistributedSchedUtil::MockBundlePermission();
     AAFwk::Want want;
-    std::string localDeviceId;
-    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
-    AppExecFwk::ElementName element(localDeviceId, BUNDLE_NAME,
-        ABILITY_NAME);
-    want.SetElement(element);
-    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
     AppExecFwk::AbilityInfo abilityInfo;
-    abilityInfo.permissions.clear();
     sptr<IRemoteObject> connect = new MockDistributedSched();
     CallerInfo callerInfo;
-    callerInfo.uid = 0;
-    callerInfo.sourceDeviceId = LOCAL_DEVICEID;
     IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    int32_t ret1 = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
+    int32_t ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
         abilityInfo, connect, callerInfo, accountInfo);
-    AppExecFwk::AbilityInfo targetAbility;
-    bool ret2 = DistributedSchedPermission::GetInstance().GetTargetAbility(want, targetAbility, true);
-    EXPECT_EQ(ret2, true);
-    if (targetAbility.visible) {
-        EXPECT_EQ(ret1, ERR_OK);
-    } else {
-        EXPECT_EQ(ret1, INVALID_REMOTE_PARAMETERS_ERR);
-    }
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectAbilityFromRemote_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectAbilityFromRemote_003
+ * @tc.desc: input invalid params
+ * @tc.type: FUNC
+ * @tc.require: issueI5T6GJ
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, ConnectAbilityFromRemote_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceFirstTest ConnectAbilityFromRemote_003 start" << std::endl;
+    AAFwk::Want want;
+    AppExecFwk::AbilityInfo abilityInfo;
+    sptr<IRemoteObject> connect = new MockDistributedSched();
+    CallerInfo callerInfo;
+    IDistributedSched::AccountInfo accountInfo;
+    callerInfo.callerType = CALLER_TYPE_HARMONY;
+    int32_t ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
+        abilityInfo, connect, callerInfo, accountInfo);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceFirstTest ConnectAbilityFromRemote_003 end" << std::endl;
 }
 
 /**
