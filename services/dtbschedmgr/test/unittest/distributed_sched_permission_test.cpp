@@ -23,6 +23,7 @@
 #include "distributed_sched_permission.h"
 #undef private
 #include "distributed_sched_util.h"
+#include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "nativetoken_kit.h"
@@ -937,6 +938,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckStartControlPermission_012, TestSi
     targetAbility.applicationInfo.associatedWakeUp = true;
     targetAbility.bundleName = BUNDLE_NAME;
     CallerInfo callerInfo;
+    EXPECT_EQ(ERR_OK, LoadContinueConfig());
     bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
     EXPECT_EQ(result, true);
     AAFwk::Want want;
