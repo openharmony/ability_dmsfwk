@@ -39,7 +39,7 @@ private:
 private:
     using DSchedStateFunc = int32_t (DSchedContinueAbilityState::*)(std::shared_ptr<DSchedContinue> dContinue,
         const AppExecFwk::InnerEvent::Pointer &event);
-    
+
     std::weak_ptr<DSchedContinueStateMachine> stateMachine_;
     std::map<uint32_t, DSchedStateFunc> memberFuncMap_;
 };

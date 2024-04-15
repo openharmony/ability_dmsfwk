@@ -15,11 +15,19 @@
 
 #include "dsched_continue_source_end_state.h"
 
+#include "dsched_continue.h"
+#include "dsched_continue_event.h"
+#include "dtbschedmgr_log.h"
+
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+const std::string TAG = "DSchedContinueEndState";
+}
 DSchedContinueEndState::DSchedContinueEndState(std::shared_ptr<DSchedContinueStateMachine> stateMachine)
     : stateMachine_(stateMachine)
 {
+    memberFuncMap_[DSCHED_CONTINUE_END_EVENT] = &DSchedContinueEndState::DoContinueEndTask;
 }
 
 DSchedContinueEndState::~DSchedContinueEndState()
@@ -29,7 +37,18 @@ DSchedContinueEndState::~DSchedContinueEndState()
 int32_t DSchedContinueEndState::Execute(std::shared_ptr<DSchedContinue> dContinue,
     const AppExecFwk::InnerEvent::Pointer &event)
 {
-    return ERR_OK;
+    auto iterFunc = memberFuncMap_.find(event->GetInnerEventId());
+    if (iterFunc == memberFuncMap_.end()) {
+        HILOGI("DSchedContinueEndState execute %d in wrong state", event->GetInnerEventId());
+        return CONTINUE_STATE_MACHINE_INVALID_STATE;
+    }
+
+    auto memberFunc = iterFunc->second;
+    int32_t ret = (this->*memberFunc)(dContinue, event);
+    if (ret != ERR_OK) {
+        HILOGI("DSchedContinueEndState execute %d failed, ret: %d", event->GetInnerEventId(), ret);
+    }
+    return ret;
 }
 
 DSchedContinueStateType DSchedContinueEndState::GetStateType()
@@ -40,7 +59,17 @@ DSchedContinueStateType DSchedContinueEndState::GetStateType()
 int32_t DSchedContinueEndState::DoContinueEndTask(std::shared_ptr<DSchedContinue> dContinue,
     const AppExecFwk::InnerEvent::Pointer &event)
 {
-    return ERR_OK;
+    auto stateMachine = stateMachine_.lock();
+    if (stateMachine == nullptr) {
+        HILOGE("DSchedContinueEndState stateMachine is null");
+        return INVALID_PARAMETERS_ERR;
+    }
+    auto syncContinueData = event->GetSharedObject<int32_t>();
+    int32_t ret = dContinue->ExecuteContinueEnd(*syncContinueData);
+    if (ret != ERR_OK) {
+        HILOGE("DSchedContinueSourceStartState ExecuteContinueEnd failed, ret: %d", ret);
+    }
+    return ret;
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

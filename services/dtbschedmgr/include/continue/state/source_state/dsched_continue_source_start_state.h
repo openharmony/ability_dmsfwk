@@ -31,7 +31,7 @@ public:
     DSchedContinueStateType GetStateType() override;
 
 private:
-    int32_t DoContinueAbiityTask(std::shared_ptr<DSchedContinue> dContinue,
+    int32_t DoContinueAbilityTask(std::shared_ptr<DSchedContinue> dContinue,
         const AppExecFwk::InnerEvent::Pointer &event);
     int32_t DoContinuePushReqTask(std::shared_ptr<DSchedContinue> dContinue,
         const AppExecFwk::InnerEvent::Pointer &event);
@@ -41,7 +41,7 @@ private:
 private:
     using DSchedStateFunc = int32_t (DSchedContinueSourceStartState::*)(std::shared_ptr<DSchedContinue> dContinue,
         const AppExecFwk::InnerEvent::Pointer &event);
-    
+
     std::weak_ptr<DSchedContinueStateMachine> stateMachine_;
     std::map<uint32_t, DSchedStateFunc> memberFuncMap_;
 };

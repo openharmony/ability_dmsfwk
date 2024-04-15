@@ -124,37 +124,42 @@ void DSchedContinue::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
 {
 }
 
-int32_t DSchedContinue::ExecuteContinueReq()
+int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams> wantParams)
 {
     return ERR_OK;
 }
 
-int32_t DSchedContinue::ExecuteContinueAbility()
+int32_t DSchedContinue::ExecuteContinueAbility(int32_t appVersion)
 {
     return ERR_OK;
 }
 
-int32_t DSchedContinue::ExecuteContinueCommReply()
+int32_t DSchedContinue::ExecuteContinueReply()
 {
     return ERR_OK;
 }
 
-int32_t DSchedContinue::ExecuteContinueSend()
+int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data)
 {
     return ERR_OK;
 }
 
-int32_t DSchedContinue::ExecuteContinueData()
+int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
     return ERR_OK;
 }
 
-int32_t DSchedContinue::ExecuteNotifyComplete()
+int32_t DSchedContinue::ExecuteNotifyComplete(int32_t result)
 {
     return ERR_OK;
 }
 
-int32_t DSchedContinue::ExecuteContinueEnd()
+int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
+{
+    return ERR_OK;
+}
+
+int32_t DSchedContinue::ExecuteContinueError(int32_t result)
 {
     return ERR_OK;
 }

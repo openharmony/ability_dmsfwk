@@ -26,6 +26,7 @@
 namespace OHOS {
 namespace DistributedSchedule {
 typedef enum {
+    DSCHED_CONTINUE_INVALID_EVENT = -1,
     DSCHED_CONTINUE_REQ_PULL_EVENT = 0,
     DSCHED_CONTINUE_REPLY_EVENT = 1,
     DSCHED_CONTINUE_DATA_EVENT = 2,
@@ -34,7 +35,8 @@ typedef enum {
     DSHCED_CONTINUE_ABILITY_EVENT = 4,
     DSHCED_CONTINUE_SEND_DATA_EVENT = 5,
 
-    DSCHED_CONTINUE_END_EVENT = 6
+    DSCHED_CONTINUE_COMPLETE_EVENT = 6,
+    DSCHED_CONTINUE_END_EVENT = 7
 } DSchedContinueEventType;
 
 class DSchedContinueCmdBase {

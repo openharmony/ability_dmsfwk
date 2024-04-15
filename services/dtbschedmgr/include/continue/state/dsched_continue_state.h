@@ -16,7 +16,11 @@
 #ifndef OHOS_DSCHED_CONTINUE_STATE_H
 #define OHOS_DSCHED_CONTINUE_STATE_H
 
+#include "ability_manager_client.h"
 #include "event_handler.h"
+#include "distributedWant/distributed_want.h"
+#include "distributedWant/distributed_want_params_wrapper.h"
+#include "distributed_sched_interface.h"
 
 namespace OHOS {
 namespace DistributedSchedule {

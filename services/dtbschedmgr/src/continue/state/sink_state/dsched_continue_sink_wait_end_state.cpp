@@ -15,11 +15,20 @@
 
 #include "dsched_continue_sink_wait_end_state.h"
 
+#include "dsched_continue.h"
+#include "dsched_continue_event.h"
+#include "dtbschedmgr_log.h"
+
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+const std::string TAG = "DSchedContinueSinkWaitEndState";
+}
 DSchedContinueSinkWaitEndState::DSchedContinueSinkWaitEndState(std::shared_ptr<DSchedContinueStateMachine> stateMachine)
     : stateMachine_(stateMachine)
 {
+    memberFuncMap_[DSCHED_CONTINUE_COMPLETE_EVENT] = &DSchedContinueSinkWaitEndState::DoNotifyCompleteTask;
+    memberFuncMap_[DSCHED_CONTINUE_END_EVENT] = &DSchedContinueSinkWaitEndState::DoContinueEndTask;
 }
 
 DSchedContinueSinkWaitEndState::~DSchedContinueSinkWaitEndState()
@@ -29,7 +38,18 @@ DSchedContinueSinkWaitEndState::~DSchedContinueSinkWaitEndState()
 int32_t DSchedContinueSinkWaitEndState::Execute(std::shared_ptr<DSchedContinue> dContinue,
     const AppExecFwk::InnerEvent::Pointer &event)
 {
-    return ERR_OK;
+    auto iterFunc = memberFuncMap_.find(event->GetInnerEventId());
+    if (iterFunc == memberFuncMap_.end()) {
+        HILOGI("DSchedContinueSinkWaitEndState execute %d in wrong state", event->GetInnerEventId());
+        return CONTINUE_STATE_MACHINE_INVALID_STATE;
+    }
+
+    auto memberFunc = iterFunc->second;
+    int32_t ret = (this->*memberFunc)(dContinue, event);
+    if (ret != ERR_OK) {
+        HILOGI("DSchedContinueSinkWaitEndState execute %d failed, ret: %d", event->GetInnerEventId(), ret);
+    }
+    return ret;
 }
 
 DSchedContinueStateType DSchedContinueSinkWaitEndState::GetStateType()
@@ -40,13 +60,33 @@ DSchedContinueStateType DSchedContinueSinkWaitEndState::GetStateType()
 int32_t DSchedContinueSinkWaitEndState::DoNotifyCompleteTask(std::shared_ptr<DSchedContinue> dContinue,
     const AppExecFwk::InnerEvent::Pointer &event)
 {
-    return ERR_OK;
+    auto stateMachine = stateMachine_.lock();
+    if (stateMachine == nullptr) {
+        HILOGE("DSchedContinueSinkWaitEndState stateMachine is null");
+        return INVALID_PARAMETERS_ERR;
+    }
+    auto syncContinueData = event->GetSharedObject<int32_t>();
+    int32_t ret = dContinue->ExecuteNotifyComplete(*syncContinueData);
+    if (ret != ERR_OK) {
+        HILOGE("DSchedContinueSinkWaitEndState sync continue data failed, datat is null");
+    }
+    return ret;
 }
 
 int32_t DSchedContinueSinkWaitEndState::DoContinueEndTask(std::shared_ptr<DSchedContinue> dContinue,
     const AppExecFwk::InnerEvent::Pointer &event)
 {
-    return ERR_OK;
+    auto stateMachine = stateMachine_.lock();
+    if (stateMachine == nullptr) {
+        HILOGE("DSchedContinueSinkWaitEndState stateMachine is null");
+        return INVALID_PARAMETERS_ERR;
+    }
+    auto syncContinueData = event->GetSharedObject<int32_t>();
+    int32_t ret = dContinue->ExecuteContinueError(*syncContinueData);
+    if (ret != ERR_OK) {
+        HILOGE("DSchedContinueSinkWaitEndState ExecuteContinueSend failed, ret: %d", ret);
+    }
+    return ret;
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

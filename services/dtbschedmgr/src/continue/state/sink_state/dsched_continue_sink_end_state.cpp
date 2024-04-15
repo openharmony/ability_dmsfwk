@@ -15,11 +15,19 @@
 
 #include "dsched_continue_sink_end_state.h"
 
+#include "dsched_continue.h"
+#include "dsched_continue_event.h"
+#include "dtbschedmgr_log.h"
+
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+const std::string TAG = "DSchedContinueSinkEndState";
+}
 DSchedContinueSinkEndState::DSchedContinueSinkEndState(std::shared_ptr<DSchedContinueStateMachine> stateMachine)
     : stateMachine_(stateMachine)
 {
+    memberFuncMap_[DSCHED_CONTINUE_END_EVENT] = &DSchedContinueSinkEndState::DoContinueEndTask;
 }
 
 DSchedContinueSinkEndState::~DSchedContinueSinkEndState()
@@ -29,7 +37,18 @@ DSchedContinueSinkEndState::~DSchedContinueSinkEndState()
 int32_t DSchedContinueSinkEndState::Execute(std::shared_ptr<DSchedContinue> dContinue,
     const AppExecFwk::InnerEvent::Pointer &event)
 {
-    return ERR_OK;
+    auto iterFunc = memberFuncMap_.find(event->GetInnerEventId());
+    if (iterFunc == memberFuncMap_.end()) {
+        HILOGI("DSchedContinueSinkEndState execute %d in wrong state", event->GetInnerEventId());
+        return CONTINUE_STATE_MACHINE_INVALID_STATE;
+    }
+
+    auto memberFunc = iterFunc->second;
+    int32_t ret = (this->*memberFunc)(dContinue, event);
+    if (ret != ERR_OK) {
+        HILOGI("DSchedContinueSinkEndState execute %d failed, ret: %d", event->GetInnerEventId(), ret);
+    }
+    return ret;
 }
 
 DSchedContinueStateType DSchedContinueSinkEndState::GetStateType()
@@ -40,7 +59,17 @@ DSchedContinueStateType DSchedContinueSinkEndState::GetStateType()
 int32_t DSchedContinueSinkEndState::DoContinueEndTask(std::shared_ptr<DSchedContinue> dContinue,
     const AppExecFwk::InnerEvent::Pointer &event)
 {
-    return ERR_OK;
+    auto stateMachine = stateMachine_.lock();
+    if (stateMachine == nullptr) {
+        HILOGE("DSchedContinueSinkEndState stateMachine is null");
+        return INVALID_PARAMETERS_ERR;
+    }
+    auto syncContinueData = event->GetSharedObject<int32_t>();
+    int32_t ret = dContinue->ExecuteContinueEnd(*syncContinueData);
+    if (ret != ERR_OK) {
+        HILOGE("DSchedContinueSinkEndState ExecuteContinueEnd failed, ret: %d", ret);
+    }
+    return ret;
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS
