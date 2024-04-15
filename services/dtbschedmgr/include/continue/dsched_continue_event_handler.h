@@ -26,7 +26,7 @@ class DSchedContinue;
 class DSchedContinueEventHandler : public AppExecFwk::EventHandler {
 public:
     explicit DSchedContinueEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner,
-        const std::shared_ptr<DSchedContinue> dschedContinue);
+        const std::shared_ptr<DSchedContinue>& dschedContinue);
     ~DSchedContinueEventHandler() override;
 
     void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event) override;

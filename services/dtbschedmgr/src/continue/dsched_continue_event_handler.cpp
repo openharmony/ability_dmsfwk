@@ -25,7 +25,8 @@ const std::string TAG = "DSchedContinueEventHandler";
 }
 
 DSchedContinueEventHandler::DSchedContinueEventHandler(const std::shared_ptr<AppExecFwk::EventRunner> &runner,
-    const std::shared_ptr<DSchedContinue> dschedContinue)
+    const std::shared_ptr<DSchedContinue>& dschedContinue) : AppExecFwk::EventHandler(runner),
+    dschedContinue_(dschedContinue)
 {
 }
 

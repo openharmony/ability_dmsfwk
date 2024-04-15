@@ -35,6 +35,20 @@ const std::string CONTINUE_CONFIG_RELATIVE_PATH = "etc/distributedhardware/dms/c
 const std::string ALLOW_APP_LIST_KEY = "allow_applist";
 constexpr int32_t MAX_CONFIG_PATH_LEN = 1024;
 
+const uint32_t OFFSET2 = 2;
+const uint32_t OFFSET4 = 4;
+const uint32_t OFFSET6 = 6;
+const uint8_t PARAM_FC = 0xfc;
+const uint8_t PARAM_03 = 0x03;
+const uint8_t PARAM_F0 = 0xf0;
+const uint8_t PARAM_0F = 0x0f;
+const uint8_t PARAM_C0 = 0xc0;
+const uint8_t PARAM_3F = 0x3f;
+const int INDEX_FIRST = 0;
+const int INDEX_SECOND = 1;
+const int INDEX_THIRD = 2;
+const int INDEX_FORTH = 3;
+
 static std::atomic<bool> g_isMissContinueCfg = false;
 static std::string g_continueCfgFullPath = "";
 static std::vector<std::string> g_allowAppList;
@@ -185,5 +199,132 @@ int32_t GetCurrentMissionId()
     AAFwk::AbilityManagerClient::GetInstance()->GetMissionIdByToken(token, missionId);
     return missionId;
 }
+
+std::string ParcelToBase64Str(const Parcel& parcel)
+{
+    auto parcelSize = parcel.GetDataSize();
+    return Base64Encode(reinterpret_cast<const unsigned char *>(parcel.GetData()), parcelSize);
+}
+
+int32_t Base64StrToParcel(const std::string& rawStr, Parcel& parcel)
+{
+    std::string str = Base64Decode(rawStr);
+    auto parcelSize = str.size();
+    if (!parcel.SetDataCapacity(parcelSize)) {
+        return INVALID_PARAMETERS_ERR;
+    }
+    auto ret = memcpy_s((void *)parcel.GetData(), parcel.GetMaxCapacity(), &str[0], parcelSize);
+    if (ret != ERR_OK || !parcel.SetDataSize(parcelSize)) {
+        return INVALID_PARAMETERS_ERR;
+    }
+    return ERR_OK;
+}
+
+std::string Base64Encode(const unsigned char *toEncode, unsigned int len)
+{
+    std::string ret = "";
+    if (len == 0 || toEncode == nullptr) {
+        HILOGE("toEncode is null or len is zero.");
+        return ret;
+    }
+    uint32_t length = len;
+    uint32_t i = 0;
+    unsigned char charArray3[3];
+    unsigned char charArray4[4];
+
+    while (length--) {
+        charArray3[i++] = *(toEncode++);
+        if (i == sizeof(charArray3)) {
+            charArray4[INDEX_FIRST] = (charArray3[INDEX_FIRST] & PARAM_FC) >> OFFSET2;
+            charArray4[INDEX_SECOND] = ((charArray3[INDEX_FIRST] & PARAM_03) << OFFSET4) +
+                ((charArray3[INDEX_SECOND] & PARAM_F0) >> OFFSET4);
+            charArray4[INDEX_THIRD] = ((charArray3[INDEX_SECOND] & PARAM_0F) << OFFSET2) +
+                ((charArray3[INDEX_THIRD] & PARAM_C0) >> OFFSET6);
+            charArray4[INDEX_FORTH] = charArray3[INDEX_THIRD] & PARAM_3F;
+            for (i = 0; i < sizeof(charArray4); i++) {
+                ret += BASE_64_CHARS[charArray4[i]];
+            }
+            i = 0;
+        }
+    }
+
+    if (i > 0) {
+        uint32_t j = 0;
+        for (j = i; j < sizeof(charArray3); j++) {
+            charArray3[j] = '\0';
+        }
+        charArray4[INDEX_FIRST] = (charArray3[INDEX_FIRST] & PARAM_FC) >> OFFSET2;
+        charArray4[INDEX_SECOND] = ((charArray3[INDEX_FIRST] & PARAM_03) << OFFSET4) +
+            ((charArray3[INDEX_SECOND] & PARAM_F0) >> OFFSET4);
+        charArray4[INDEX_THIRD] = ((charArray3[INDEX_SECOND] & PARAM_0F) << OFFSET2) +
+            ((charArray3[INDEX_THIRD] & PARAM_C0) >> OFFSET6);
+        charArray4[INDEX_FORTH] = charArray3[INDEX_THIRD] & PARAM_3F;
+        for (j = 0; j < i + 1; j++) {
+            ret += BASE_64_CHARS[charArray4[j]];
+        }
+        while (i++ < sizeof(charArray3)) {
+            ret += '=';
+        }
+    }
+    return ret;
+}
+
+std::string Base64Decode(const std::string& basicString)
+{
+    std::string ret = "";
+    if (basicString.empty()) {
+        HILOGE("basicString is empty.");
+        return ret;
+    }
+    uint32_t i = 0;
+    int index = 0;
+    int len = static_cast<int>(basicString.size());
+    unsigned char charArray3[3];
+    unsigned char charArray4[4];
+
+    while (len-- && (basicString[index] != '=') && IsBase64(basicString[index])) {
+        charArray4[i++] = basicString[index];
+        index++;
+        if (i == sizeof(charArray4)) {
+            for (i = 0; i < sizeof(charArray4); i++) {
+                charArray4[i] = BASE_64_CHARS.find(charArray4[i]);
+            }
+            charArray3[INDEX_FIRST] = (charArray4[INDEX_FIRST] << OFFSET2) +
+                ((charArray4[INDEX_SECOND] & 0x30) >> OFFSET4);
+            charArray3[INDEX_SECOND] = ((charArray4[INDEX_SECOND] & 0xf) << OFFSET4) +
+                ((charArray4[INDEX_THIRD] & 0x3c) >> OFFSET2);
+            charArray3[INDEX_THIRD] = ((charArray4[INDEX_THIRD] & 0x3) << OFFSET6) + charArray4[INDEX_FORTH];
+            for (i = 0; i < sizeof(charArray3); i++) {
+                ret += charArray3[i];
+            }
+            i = 0;
+        }
+    }
+
+    if (i > 0) {
+        uint32_t j = 0;
+        for (j = i; j < sizeof(charArray4); j++) {
+            charArray4[j] = 0;
+        }
+        for (j = 0; j < sizeof(charArray4); j++) {
+            charArray4[j] = BASE_64_CHARS.find(charArray4[j]);
+        }
+        charArray3[INDEX_FIRST] = (charArray4[INDEX_FIRST] << OFFSET2) +
+            ((charArray4[INDEX_SECOND] & 0x30) >> OFFSET4);
+        charArray3[INDEX_SECOND] = ((charArray4[INDEX_SECOND] & 0xf) << OFFSET4) +
+            ((charArray4[INDEX_THIRD] & 0x3c) >> OFFSET2);
+        charArray3[INDEX_THIRD] = ((charArray4[INDEX_THIRD] & 0x3) << OFFSET6) + charArray4[INDEX_FORTH];
+        for (j = 0; j < i - 1; j++) {
+            ret += charArray3[j];
+        }
+    }
+    return ret;
+}
+
+bool IsBase64(unsigned char c)
+{
+    return (isalnum(c) || (c == '+') || (c == '/'));
+}
+
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -18,15 +18,23 @@
 
 #include <string>
 
+#include "parcel.h"
+
 namespace OHOS {
 namespace DistributedSchedule {
 constexpr static int32_t INVALID_MISSION_ID = -1;
+const std::string BASE_64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 bool IsValidPath(const std::string &inFilePath, std::string &realFilePath);
 bool UpdateAllowAppList(const std::string &cfgJsonStr);
 int32_t LoadContinueConfig();
 bool CheckBundleContinueConfig(const std::string &bundleName);
 int32_t GetCurrentMissionId();
+std::string ParcelToBase64Str(const Parcel& parcel);
+int32_t Base64StrToParcel(const std::string& rawStr, Parcel& parcel);
+std::string Base64Encode(const unsigned char *toEncode, unsigned int len);
+std::string Base64Decode(const std::string& basicString);
+bool IsBase64(unsigned char c);
 } // namespace DistributedSchedule
 } // namespace OHOS
 #endif // OHOS_DISTRIBUTED_SCHED_SERVICE_H
