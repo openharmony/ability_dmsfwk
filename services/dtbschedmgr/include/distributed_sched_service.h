@@ -255,6 +255,7 @@ private:
     void SetCleanMissionFlag(const OHOS::AAFwk::Want& want, int32_t missionId);
     void RemoveConnectAbilityInfo(const std::string& deviceId);
     ErrCode QueryOsAccount(int32_t& activeAccountId);
+    int32_t QuickStartAbility(const std::string& bundleName);
 
     std::shared_ptr<DSchedContinuation> dschedContinuation_;
     std::map<sptr<IRemoteObject>, std::list<ConnectAbilitySession>> distributedConnectAbilityMap_;

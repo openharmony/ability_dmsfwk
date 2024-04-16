@@ -1430,5 +1430,18 @@ HWTEST_F(DistributedSchedServiceSecondTest, ContinueMissionBundleName_002, TestS
     EXPECT_EQ(static_cast<int>(OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET), result);
     DTEST_LOG << "DSchedContinuationTest ContinueMissionBundleName_002 end" << std::endl;
 }
+
+/**
+ * @tc.name: QuickStartAbility_001
+ * @tc.desc: quick start ability test
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, QuickStartAbility_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest QuickStartAbility_001 start" << std::endl;
+    auto ret = DistributedSchedService::GetInstance().QuickStartAbility("bundleName");
+    EXPECT_EQ(static_cast<int>(INVALID_PARAMETERS_ERR), ret);
+    DTEST_LOG << "DSchedContinuationTest QuickStartAbility_001 end" << std::endl;
+}
 }
 }

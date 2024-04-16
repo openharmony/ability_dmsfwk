@@ -95,6 +95,7 @@ ohos_shared_library("distributedschedsvr") {
     "src/continue/state/source_state/dsched_continue_source_end_state.cpp",
     "src/continue/state/source_state/dsched_continue_source_start_state.cpp",
     "src/continue/state/source_state/dsched_continue_source_wait_end_state.cpp",
+    "src/continue_scene_session_handler.cpp",
     "src/datashare_manager.cpp",
     "src/deviceManager/dms_device_info.cpp",
     "src/dfx/dms_continue_time_dumper.cpp",
@@ -171,6 +172,8 @@ ohos_shared_library("distributedschedsvr") {
     "kv_store:distributeddata_inner",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "window_manager:scene_session",
+    "window_manager:session_manager_lite",
   ]
   if (os_account_part) {
     external_deps += [ "os_account:os_account_innerkits" ]

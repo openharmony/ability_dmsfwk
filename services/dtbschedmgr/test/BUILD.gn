@@ -65,6 +65,8 @@ dsched_external_deps = [
   "kv_store:distributeddata_inner",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
+  "window_manager:scene_session",
+  "window_manager:session_manager_lite",
 ]
 if (os_account_part) {
   dsched_external_deps += [ "os_account:os_account_innerkits" ]
@@ -112,6 +114,7 @@ dtbschedmgr_sources = [
   "${distributed_service}/dtbschedmgr/src/bundle/bundle_manager_callback_stub.cpp",
   "${distributed_service}/dtbschedmgr/src/bundle/bundle_manager_internal.cpp",
   "${distributed_service}/dtbschedmgr/src/connect_death_recipient.cpp",
+  "${distributed_service}/dtbschedmgr/src/continue_scene_session_handler.cpp",
   "${distributed_service}/dtbschedmgr/src/datashare_manager.cpp",
   "${distributed_service}/dtbschedmgr/src/deviceManager/dms_device_info.cpp",
   "${distributed_service}/dtbschedmgr/src/dfx/dms_continue_time_dumper.cpp",
@@ -197,6 +200,7 @@ ohos_unittest("distributedschedsvrtest") {
   ]
 
   sources = [
+    "unittest/continue_scene_session_handler_test.cpp",
     "unittest/distributed_radar_test.cpp",
     "unittest/distributed_sched_adapter_test.cpp",
     "unittest/distributed_sched_dumper_test.cpp",
