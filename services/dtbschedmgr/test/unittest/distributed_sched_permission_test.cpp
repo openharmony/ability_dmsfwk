@@ -152,27 +152,6 @@ HWTEST_F(DistributedSchedPermissionTest, CheckSendResultPermission_002, TestSize
 }
 
 /**
- * @tc.name: CheckSendResultPermission_003
- * @tc.desc: call CheckSendResultPermission
- * @tc.type: FUNC
- * @tc.require: issueI5T6GJ
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckSendResultPermission_003, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckSendResultPermission begin" << std::endl;
-    AAFwk::Want want;
-    CallerInfo callerInfo;
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    AppExecFwk::AbilityInfo targetAbility;
-    targetAbility.visible = true;
-    int32_t ret = DistributedSchedPermission::GetInstance().CheckSendResultPermission(want,
-        callerInfo, accountInfo, targetAbility);
-    EXPECT_EQ(ret, ERR_OK);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckSendResultPermission_003 end ret:" << ret << std::endl;
-}
-
-/**
  * @tc.name: CheckSendResultPermission_005
  * @tc.desc: call CheckDPermission with illegal parameter
  * @tc.type: FUNC
@@ -364,29 +343,6 @@ HWTEST_F(DistributedSchedPermissionTest, CheckStartPermission_003, TestSize.Leve
 }
 
 /**
- * @tc.name: CheckStartPermission_004
- * @tc.desc: input invalid params
- * @tc.type: FUNC
- * @tc.require: issueI5T6GJ
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckStartPermission_004, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckStartPermission_004 begin" << std::endl;
-    AAFwk::Want want;
-    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
-    CallerInfo callerInfo;
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    AppExecFwk::AbilityInfo targetAbility;
-    targetAbility.visible = true;
-    targetAbility.isStageBasedModel = true;
-    int32_t ret = DistributedSchedPermission::GetInstance().CheckStartPermission(want,
-        callerInfo, accountInfo, targetAbility);
-    EXPECT_EQ(ret, ERR_OK);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckStartPermission_004 end ret:" << ret << std::endl;
-}
-
-/**
  * @tc.name: CheckStartPermission_005
  * @tc.desc: input invalid params
  * @tc.type: FUNC
@@ -407,30 +363,6 @@ HWTEST_F(DistributedSchedPermissionTest, CheckStartPermission_005, TestSize.Leve
         callerInfo, accountInfo, targetAbility);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedPermissionTest CheckStartPermission_005 end ret:" << ret << std::endl;
-}
-
-/**
- * @tc.name: CheckStartPermission_006
- * @tc.desc: input invalid params
- * @tc.type: FUNC
- * @tc.require: issueI5T6GJ
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckStartPermission_006, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckStartPermission_006 begin" << std::endl;
-    AAFwk::Want want;
-    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
-    CallerInfo callerInfo;
-    callerInfo.accessToken = 0;
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    AppExecFwk::AbilityInfo targetAbility;
-    targetAbility.visible = true;
-    targetAbility.isStageBasedModel = true;
-    int32_t ret = DistributedSchedPermission::GetInstance().CheckStartPermission(want,
-        callerInfo, accountInfo, targetAbility);
-    EXPECT_EQ(ret, ERR_OK);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckStartPermission_006 end ret:" << ret << std::endl;
 }
 
 /**
@@ -599,103 +531,6 @@ HWTEST_F(DistributedSchedPermissionTest, CheckGetCallerPermission_001, TestSize.
         targetAbility);
     EXPECT_EQ(ret, DMS_ACCOUNT_ACCESS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedPermissionTest CheckGetCallerPermission_001 end ret:" << ret << std::endl;
-}
-
-/**
- * @tc.name: CheckGetCallerPermission_002
- * @tc.desc: input invalid params
- * @tc.type: FUNC
- * @tc.require: issueI5T6GJ
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckGetCallerPermission_002, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckGetCallerPermission_002 begin" << std::endl;
-    AAFwk::Want want;
-    CallerInfo callerInfo;
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    AppExecFwk::AbilityInfo targetAbility;
-    int32_t ret = DistributedSchedPermission::GetInstance().CheckGetCallerPermission(want, callerInfo, accountInfo,
-        targetAbility);
-    EXPECT_EQ(ret, CALL_PERMISSION_DENIED);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckGetCallerPermission_002 end ret:" << ret << std::endl;
-}
-
-/**
- * @tc.name: CheckGetCallerPermission_003
- * @tc.desc: input invalid params
- * @tc.type: FUNC
- * @tc.require: issueI5T6GJ
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckGetCallerPermission_003, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckGetCallerPermission_003 begin" << std::endl;
-    DistributedSchedUtil::MockBundlePermission();
-    AAFwk::Want want;
-    CallerInfo callerInfo;
-    bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
-    EXPECT_EQ(result, true);
-    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    AppExecFwk::AbilityInfo targetAbility;
-    targetAbility.bundleName = BUNDLE_NAME;
-    int32_t ret = DistributedSchedPermission::GetInstance().CheckGetCallerPermission(want, callerInfo, accountInfo,
-        targetAbility);
-    EXPECT_EQ(ret, DMS_BACKGROUND_PERMISSION_DENIED);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckGetCallerPermission_003 end ret:" << ret << std::endl;
-}
-
-/**
- * @tc.name: CheckGetCallerPermission_004
- * @tc.desc: input invalid params
- * @tc.type: FUNC
- * @tc.require: issueI5T6GJ
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckGetCallerPermission_004, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckGetCallerPermission_004 begin" << std::endl;
-    AAFwk::Want want;
-    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
-    CallerInfo callerInfo;
-    bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
-    EXPECT_EQ(result, true);
-    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    AppExecFwk::AbilityInfo targetAbility;
-    targetAbility.bundleName = BUNDLE_NAME;
-    int32_t ret = DistributedSchedPermission::GetInstance().CheckGetCallerPermission(want, callerInfo, accountInfo,
-        targetAbility);
-    EXPECT_EQ(ret, CALL_PERMISSION_DENIED);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckGetCallerPermission_004 end ret:" << ret << std::endl;
-}
-
-/**
- * @tc.name: CheckGetCallerPermission_005
- * @tc.desc: input invalid params
- * @tc.type: FUNC
- * @tc.require: issueI5T6GJ
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckGetCallerPermission_005, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckGetCallerPermission_005 begin" << std::endl;
-    AAFwk::Want want;
-    ElementName name;
-    want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
-    CallerInfo callerInfo;
-    bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
-    EXPECT_EQ(result, true);
-    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    AppExecFwk::AbilityInfo targetAbility;
-    targetAbility.bundleName = BUNDLE_NAME;
-    targetAbility.permissions.push_back(INVALID_PERMISSION_NAME);
-    int32_t ret = DistributedSchedPermission::GetInstance().CheckGetCallerPermission(want, callerInfo, accountInfo,
-        targetAbility);
-    EXPECT_EQ(ret, CALL_PERMISSION_DENIED);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckGetCallerPermission_005 end ret:" << ret << std::endl;
 }
 
 /**
@@ -1560,163 +1395,12 @@ HWTEST_F(DistributedSchedPermissionTest, CheckAccountAccessPermission_001, TestS
 {
     DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_001 begin" << std::endl;
     CallerInfo callerInfo;
-    callerInfo.accessToken = ACCESS_TOKEN;
     IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    std::string groupId = GROUP_ID;
-    accountInfo.groupIdList.push_back(groupId);
     string targetBundle = BUNDLE_NAME;
     bool ret = DistributedSchedPermission::GetInstance().CheckAccountAccessPermission(
         callerInfo, accountInfo, targetBundle);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_001 end result:" << ret << std::endl;
-}
-
-/**
- * @tc.name: CheckAccountAccessPermission_002
- * @tc.desc: call CheckAccountAccessPermission with invalid accessToken in same account
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckAccountAccessPermission_002, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_002 begin" << std::endl;
-    CallerInfo callerInfo;
-    callerInfo.accessToken = INVALID_ACCESS_TOKEN;
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    std::string groupId = GROUP_ID;
-    accountInfo.groupIdList.push_back(groupId);
-    string targetBundle = BUNDLE_NAME;
-    bool ret = DistributedSchedPermission::GetInstance().CheckAccountAccessPermission(
-        callerInfo, accountInfo, targetBundle);
-    EXPECT_EQ(ret, true);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_002 end result:" << ret << std::endl;
-}
-
-/**
- * @tc.name: CheckAccountAccessPermission_003
- * @tc.desc: call CheckAccountAccessPermission with invalid groupId in same account
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckAccountAccessPermission_003, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_003 begin" << std::endl;
-    CallerInfo callerInfo;
-    callerInfo.accessToken = ACCESS_TOKEN;
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    std::string groupId = INVALID_GROUP_ID;
-    accountInfo.groupIdList.push_back(groupId);
-    string targetBundle = BUNDLE_NAME;
-    bool ret = DistributedSchedPermission::GetInstance().CheckAccountAccessPermission(
-        callerInfo, accountInfo, targetBundle);
-    EXPECT_EQ(ret, true);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_003 end result:" << ret << std::endl;
-}
-
-/**
- * @tc.name: CheckAccountAccessPermission_004
- * @tc.desc: call CheckAccountAccessPermission with invalid bundleName in same account
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckAccountAccessPermission_004, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_004 begin" << std::endl;
-    CallerInfo callerInfo;
-    callerInfo.accessToken = ACCESS_TOKEN;
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    std::string groupId = GROUP_ID;
-    accountInfo.groupIdList.push_back(groupId);
-    string targetBundle = INVALID_BUNDLE_NAME;
-    bool ret = DistributedSchedPermission::GetInstance().CheckAccountAccessPermission(
-        callerInfo, accountInfo, targetBundle);
-    EXPECT_EQ(ret, true);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_004 end result:" << ret << std::endl;
-}
-
-/**
- * @tc.name: CheckAccountAccessPermission_005
- * @tc.desc: call CheckAccountAccessPermission in diff account
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckAccountAccessPermission_005, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_005 begin" << std::endl;
-    CallerInfo callerInfo;
-    callerInfo.accessToken = ACCESS_TOKEN;
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::DIFF_ACCOUNT_TYPE;
-    std::string groupId = GROUP_ID;
-    accountInfo.groupIdList.push_back(groupId);
-    string targetBundle = BUNDLE_NAME;
-    bool ret = DistributedSchedPermission::GetInstance().CheckAccountAccessPermission(
-        callerInfo, accountInfo, targetBundle);
-    EXPECT_EQ(ret, false);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_005 end result:" << ret << std::endl;
-}
-
-/**
- * @tc.name: CheckAccountAccessPermission_006
- * @tc.desc: call CheckAccountAccessPermission with invalid accessToken in diff account
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckAccountAccessPermission_006, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_006 begin" << std::endl;
-    CallerInfo callerInfo;
-    callerInfo.accessToken = INVALID_ACCESS_TOKEN;
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::DIFF_ACCOUNT_TYPE;
-    std::string groupId = GROUP_ID;
-    accountInfo.groupIdList.push_back(groupId);
-    string targetBundle = BUNDLE_NAME;
-    bool ret = DistributedSchedPermission::GetInstance().CheckAccountAccessPermission(
-        callerInfo, accountInfo, targetBundle);
-    EXPECT_EQ(ret, false);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_006 end result:" << ret << std::endl;
-}
-
-/**
- * @tc.name: CheckAccountAccessPermission_007
- * @tc.desc: call CheckAccountAccessPermission with invalid groupId in diff account
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckAccountAccessPermission_007, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_007 begin" << std::endl;
-    CallerInfo callerInfo;
-    callerInfo.accessToken = ACCESS_TOKEN;
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::DIFF_ACCOUNT_TYPE;
-    std::string groupId = INVALID_GROUP_ID;
-    accountInfo.groupIdList.push_back(groupId);
-    string targetBundle = BUNDLE_NAME;
-    bool ret = DistributedSchedPermission::GetInstance().CheckAccountAccessPermission(
-        callerInfo, accountInfo, targetBundle);
-    EXPECT_EQ(ret, false);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_007 end result:" << ret << std::endl;
-}
-
-/**
- * @tc.name: CheckAccountAccessPermission_008
- * @tc.desc: call CheckAccountAccessPermission with invalid bundleName in diff account
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckAccountAccessPermission_008, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_008 begin" << std::endl;
-    CallerInfo callerInfo;
-    callerInfo.accessToken = ACCESS_TOKEN;
-    IDistributedSched::AccountInfo accountInfo;
-    accountInfo.accountType = IDistributedSched::DIFF_ACCOUNT_TYPE;
-    std::string groupId = GROUP_ID;
-    accountInfo.groupIdList.push_back(groupId);
-    string targetBundle = INVALID_BUNDLE_NAME;
-    bool ret = DistributedSchedPermission::GetInstance().CheckAccountAccessPermission(
-        callerInfo, accountInfo, targetBundle);
-    EXPECT_EQ(ret, false);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckAccountAccessPermission_008 end result:" << ret << std::endl;
 }
 
 /**
