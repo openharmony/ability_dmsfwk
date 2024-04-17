@@ -19,9 +19,7 @@
 #include <condition_variable>
 #include <shared_mutex>
 #include "device_selection_notifier_stub.h"
-#define private public
 #include "distributed_ability_manager_service.h"
-#undef private
 #include "gtest/gtest.h"
 
 namespace OHOS {

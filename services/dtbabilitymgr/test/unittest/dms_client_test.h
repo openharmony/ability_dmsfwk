@@ -16,9 +16,7 @@
 #ifndef OHOS_DMS_CLIENT_TEST_H
 #define OHOS_DMS_CLIENT_TEST_H
 
-#define private public
 #include "dms_client.h"
-#undef private
 
 #include <string>
 

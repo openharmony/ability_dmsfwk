@@ -111,6 +111,7 @@ ohos_unittest("continuationmanagertest") {
 }
 
 ohos_unittest("distributedabilitymanagerservicetest") {
+  cflags = [ "-Dprivate=public" ]
   module_out_path = module_output_path
   sources = [
     "${distributed_service}/dtbschedmgr/test/unittest/distributed_sched_util.cpp",
@@ -138,6 +139,7 @@ ohos_unittest("distributedeventtest") {
     cfi_cross_dso = true
     debug = false
   }
+  cflags = [ "-Dprivate=public" ]
   module_out_path = module_output_path
   sources = [
     "${distributed_service}/dtbschedmgr/test/unittest/distributed_sched_util.cpp",

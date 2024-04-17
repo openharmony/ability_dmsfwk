@@ -16,9 +16,7 @@
 #ifndef OHOS_DMS_SA_CLIENT_TEST_H
 #define OHOS_DMS_SA_CLIENT_TEST_H
 
-#define private public
 #include "dms_sa_client.h"
-#undef private
 
 #include <mutex>
 

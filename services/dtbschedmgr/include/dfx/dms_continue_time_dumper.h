@@ -53,7 +53,7 @@ public:
 private:
     int64_t beginTime_;
     int64_t endTime_;
-    int64_t duration_;
+    int64_t duration_ = 0;
     std::string strTime_;
     std::string durationName_;
 };
