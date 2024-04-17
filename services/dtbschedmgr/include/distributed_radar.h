@@ -125,7 +125,7 @@ enum class RecvUnfocused : int32_t {
 enum class ClickIcon : int32_t {
     DMS_CONTINUE = 4,
     DMS_STARTABILITY = 5,
-    DMS_RECV_OVER = 8,
+    DMS_RECV_OVER = 10,
 };
 
 enum class SaveData : int32_t {

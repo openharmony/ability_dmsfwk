@@ -180,7 +180,7 @@ int32_t BundleManagerInternal::GetLocalBundleInfo(const std::string& bundleName,
     if (err != ERR_OK) {
         return err;
     }
-    if (!bms->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT,
+    if (!bms->GetBundleInfo(bundleName, AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES,
         localBundleInfo, activeAccountId)) {
         HILOGE("get local bundle info failed");
         return INVALID_PARAMETERS_ERR;
