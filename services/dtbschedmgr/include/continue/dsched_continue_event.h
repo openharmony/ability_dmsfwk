@@ -21,6 +21,7 @@
 #include "ability_info.h"
 #include "caller_info.h"
 #include "distributed_sched_interface.h"
+#include "distributedWant/distributed_want_params.h"
 #include "want.h"
 
 namespace OHOS {
@@ -39,43 +40,62 @@ typedef enum {
     DSCHED_CONTINUE_END_EVENT = 7
 } DSchedContinueEventType;
 
+typedef enum {
+    DSCHED_CONTINUE_CMD_MIN = 0,
+    DSCHED_CONTINUE_CMD_START = 1,
+    DSCHED_CONTINUE_CMD_DATA = 2,
+    DSCHED_CONTINUE_CMD_REPLY = 3,
+    DSCHED_CONTINUE_CMD_END = 4,
+} DSchedContinueCommand;
+
 class DSchedContinueCmdBase {
 public:
-    int32_t version_;
-    int32_t serviceType_;
-    int32_t subServiceType_;
-    int32_t command_;
+    DSchedContinueCmdBase() = default;
+    virtual ~DSchedContinueCmdBase() = default;
+    virtual int32_t Marshal(std::string &jsonStr);
+    virtual int32_t Unmarshal(const std::string &jsonStr);
+public:
+    int32_t version_ = 0;
+    int32_t serviceType_ = 0;
+    int32_t subServiceType_ = 0;
+    int32_t command_ = 0;
     std::string srcDeviceId_;
     std::string srcBundleName_;
     std::string dstDeviceId_;
     std::string dstBundleName_;
     std::string continueType_;
-    int32_t continueByType_;
-    int32_t sourceMissionId_;
-    int32_t dmsVersion_;
+    int32_t continueByType_ = 0;
+    int32_t sourceMissionId_ = 0;
+    int32_t dmsVersion_ = 0;
 };
 
-class DSchedContinueStartCmd {
+class DSchedContinueStartCmd : public DSchedContinueCmdBase {
 public:
     int32_t Marshal(std::string &jsonStr);
     int32_t Unmarshal(const std::string &jsonStr);
 
 public:
-    DSchedContinueCmdBase cmdBase_;
-    int32_t direction_;
-    int32_t appVersion_;
-    OHOS::AAFwk::WantParams wantParams_;
+    int32_t direction_ = 0;
+    int32_t appVersion_ = 0;
+    DistributedWantParams wantParams_;
 };
 
-class DSchedContinueDataCmd {
+class DSchedContinueDataCmd : public DSchedContinueCmdBase {
 public:
     int32_t Marshal(std::string &jsonStr);
     int32_t Unmarshal(const std::string &jsonStr);
+
+private:
+    int32_t MarshalCallerInfo(std::string &jsonStr);
+    int32_t MarshalAccountInfo(std::string &jsonStr);
+    int32_t UnmarshalParcel(const std::string &jsonStr);
+    int32_t UnmarshalCallerInfo(std::string &jsonStr);
+    int32_t UnmarshalCallerInfoExtra(std::string &jsonStr);
+    int32_t UnmarshalAccountInfo(std::string &jsonStr);
 
 public:
     using AccountInfo = IDistributedSched::AccountInfo;
 
-    DSchedContinueCmdBase cmdBase_;
     OHOS::AAFwk::Want want_;
     AppExecFwk::CompatibleAbilityInfo abilityInfo_;
     int32_t requestCode_;
@@ -83,26 +103,24 @@ public:
     AccountInfo accountInfo_;
 };
 
-class DSchedContinueReplyCmd {
+class DSchedContinueReplyCmd : public DSchedContinueCmdBase {
 public:
     int32_t Marshal(std::string &jsonStr);
     int32_t Unmarshal(const std::string &jsonStr);
 
 public:
-    DSchedContinueCmdBase cmdBase_;
-    int32_t replyCmd_;
-    int32_t appVersion_;
-    int32_t result_;
+    int32_t replyCmd_ = 0;
+    int32_t appVersion_ = 0;
+    int32_t result_ = 0;
     std::string reason_;
 };
 
-class DSchedContinueEndCmd {
+class DSchedContinueEndCmd : public DSchedContinueCmdBase {
 public:
     int32_t Marshal(std::string &jsonStr);
     int32_t Unmarshal(const std::string &jsonStr);
 
 public:
-    DSchedContinueCmdBase cmdBase_;
     int32_t result_;
 };
 }  // namespace DistributedSchedule
