@@ -348,5 +348,31 @@ void DSchedTransportSoftbusAdapter::RegisterListener(int32_t serviceType, std::s
     HILOGI("listener register success");
     return;
 }
+
+void DSchedTransportSoftbusAdapter::UnregisterListener(int32_t serviceType, std::shared_ptr<IDataListener> listener)
+{
+    HILOGI("start, service type: %d", serviceType);
+    if (listener == nullptr) {
+        HILOGE("listener is null, type: %d", serviceType);
+        return;
+    }
+    std::lock_guard<std::mutex> listenerMapLock(listenerMutex_);
+    if (listeners_.empty() || listeners_.find(serviceType) == listeners_.end()) {
+        HILOGD("service type %d does not exist in the listeners, ignore", serviceType);
+        return;
+    }
+    auto typeListeners = listeners_.find(serviceType);
+    for (size_t i = 0; i < typeListeners->second.size(); i++) {
+        if (typeListeners->second[i] == listener) {
+            typeListeners->second.erase(typeListeners->second.begin() + i);
+            if (typeListeners->second.empty()) {
+                listeners_.erase(typeListeners);
+            }
+            break;
+        }
+    }
+    HILOGI("listener unregister success");
+    return;
+}
 }  // namespace DistributedSchedule
 }  // namespace OHOS

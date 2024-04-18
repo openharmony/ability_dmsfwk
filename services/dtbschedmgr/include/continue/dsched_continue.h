@@ -21,7 +21,11 @@
 #include <thread>
 #include <string>
 
+#include "ability_manager_client.h"
+#include "adapter/dnetwork_adapter.h"
 #include "distributedWant/distributed_want.h"
+#include "distributedWant/distributed_want_params.h"
+#include "distributed_sched_interface.h"
 #include "dsched_data_buffer.h"
 #include "dsched_continue_event.h"
 #include "dsched_continue_event_handler.h"
@@ -30,33 +34,64 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
+
+using AccountInfo = IDistributedSched::AccountInfo;
+
 class DSchedContinueInfo {
 public:
     DSchedContinueInfo() = default;
-    explicit DSchedContinueInfo(std::string sourceNetworkId, std::string sourceBundleName, std::string sinkNetworkId,
-        std::string sinkBundleName, std::string continueType)
-        : sourceNetworkId_(sourceNetworkId), sourceBundleName_(sourceBundleName), sinkNetworkId_(sinkNetworkId),
+    DSchedContinueInfo(const std::string& sourceDeviceId, const std::string& sourceBundleName,
+        const std::string& sinkDeviceId, const std::string& sinkBundleName, const std::string& continueType)
+        : sourceDeviceId_(sourceDeviceId), sourceBundleName_(sourceBundleName), sinkDeviceId_(sinkDeviceId),
         sinkBundleName_(sinkBundleName), continueType_(continueType) {}
 
-    explicit DSchedContinueInfo(std::string sourceNetworkId, std::string sinkNetworkId, int32_t missionId)
-        : sourceNetworkId_(sourceNetworkId), sinkNetworkId_(sinkNetworkId), missionId_(missionId) {}
+    DSchedContinueInfo(const std::string& sourceDeviceId, const std::string& sinkDeviceId, int32_t missionId)
+        : sourceDeviceId_(sourceDeviceId), sinkDeviceId_(sinkDeviceId), missionId_(missionId) {}
     ~DSchedContinueInfo() = default;
+
+    bool operator == (const DSchedContinueInfo &index) const
+    {
+        std::string compareInfo = this->sourceDeviceId_ + this->sourceBundleName_ + this->sinkDeviceId_ +
+            this->sinkBundleName_ + this->continueType_;
+        std::string otherCompareInfo = index.sourceDeviceId_ + index.sourceBundleName_ + index.sinkDeviceId_ +
+            index.sinkBundleName_ + index.continueType_;
+        return compareInfo.compare(otherCompareInfo) == 0;
+    }
 
     bool operator < (const DSchedContinueInfo &index) const
     {
-        std::string compareInfo = this->sourceNetworkId_ + this->sourceBundleName_ + this->sinkNetworkId_ +
-            this->sinkBundleName_ + this->continueType_ + std::to_string(this->missionId_);
-        std::string otherCompareInfo = index.sourceNetworkId_ + index.sourceBundleName_ + index.sinkNetworkId_ +
-            index.sinkBundleName_ + index.continueType_ + std::to_string(index.missionId_);
+        std::string compareInfo = this->sourceDeviceId_ + this->sourceBundleName_ + this->sinkDeviceId_ +
+            this->sinkBundleName_ + this->continueType_;
+        std::string otherCompareInfo = index.sourceDeviceId_ + index.sourceBundleName_ + index.sinkDeviceId_ +
+            index.sinkBundleName_ + index.continueType_;
         return compareInfo < otherCompareInfo;
     }
 
-    std::string sourceNetworkId_;
+    std::string ToStringIgnoreMissionId() const
+    {
+        return "SrcDevId: " + DnetworkAdapter::AnonymizeNetworkId(this->sourceDeviceId_) + " " +
+            "SrcBundle: " + this->sourceBundleName_ + " " +
+            "DstDevId: "+ DnetworkAdapter::AnonymizeNetworkId(this->sinkDeviceId_) + " " +
+            "DstBundle: " + this->sinkBundleName_ + " " +
+            "ContiType: " + this->continueType_;
+    }
+
+    std::string toString() const
+    {
+        return "SrcDevId: " + DnetworkAdapter::AnonymizeNetworkId(this->sourceDeviceId_) + " " +
+            "SrcBundle: " + this->sourceBundleName_ + " " +
+            "DstDevId: "+ DnetworkAdapter::AnonymizeNetworkId(this->sinkDeviceId_) + " " +
+            "DstBundle: " + this->sinkBundleName_ + " " +
+            "ContiType: " + this->continueType_ + " " +
+            "MissionId: " + std::to_string(this->missionId_);
+    }
+
+    std::string sourceDeviceId_;
     std::string sourceBundleName_;
-    std::string sinkNetworkId_;
+    std::string sinkDeviceId_;
     std::string sinkBundleName_;
     std::string continueType_;
-    int32_t missionId_ = -1;
+    int32_t missionId_ = 0;
 };
 
 typedef enum {
@@ -64,27 +99,36 @@ typedef enum {
     CONTINUE_SINK = 1
 } DSchedContinueDirection;
 
+typedef enum {
+    CONTINUE_PULL = 0,
+    CONTINUE_PUSH = 1
+} DSchedContinueSubType;
+
 struct ContinueAbilityData {
     OHOS::AAFwk::Want want;
     int32_t callerUid;
     uint32_t accessToken;
 };
 
+
 class DSchedContinue : public std::enable_shared_from_this<DSchedContinue> {
 public:
-    explicit DSchedContinue(int32_t direction, DSchedContinueInfo &continueInfo);
+    DSchedContinue(int32_t subServiceType, int32_t direction,  const sptr<IRemoteObject>& callback,
+        const DSchedContinueInfo& continueInfo);
+    DSchedContinue(std::shared_ptr<DSchedContinueStartCmd> startCmd, int32_t sessionId);
     ~DSchedContinue();
 
     int32_t Init();
-    void ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event);
+    void ProcessEvent(const AppExecFwk::InnerEvent::Pointer& event);
 
-    int32_t PostStartTask();
-    int32_t PostReplyTask();
-    int32_t PostCotinueAbilityTask();
-    int32_t PostContinueSendTask();
-    int32_t PostContinueDataTask();
-    int32_t PostNotifyCompleteTask();
-    int32_t PostContinueEndTask();
+    int32_t PostStartTask(const OHOS::AAFwk::WantParams& wantParams);
+    int32_t PostReplyTask(std::shared_ptr<DSchedContinueReplyCmd> cmd);
+    int32_t PostCotinueAbilityTask(int32_t appVersion);
+    int32_t PostContinueSendTask(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t status,
+        uint32_t accessToken);
+    int32_t PostContinueDataTask(std::shared_ptr<DSchedContinueDataCmd> cmd);
+    int32_t PostNotifyCompleteTask(int32_t result);
+    int32_t PostContinueEndTask(int32_t result);
 
     int32_t ExecuteContinueReq(std::shared_ptr<DistributedWantParams> wantParams);
     int32_t ExecuteContinueAbility(int32_t appVersion);
@@ -95,12 +139,45 @@ public:
     int32_t ExecuteContinueEnd(int32_t result);
     int32_t ExecuteContinueError(int32_t result);
 
-    void OnDataRecv(std::shared_ptr<DSchedDataBuffer> data);
+    int32_t OnContinueMission(const OHOS::AAFwk::WantParams& wantParams);
+    int32_t OnStartCmd(int32_t appVersion);
+    int32_t OnReplyCmd(std::shared_ptr<DSchedContinueReplyCmd> cmd);
+    int32_t OnStartContinuation(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t status,
+        uint32_t accessToken);
+    int32_t OnContinueDataCmd(std::shared_ptr<DSchedContinueDataCmd> cmd);
+    int32_t OnNotifyComplete(int32_t missionId, bool isSuccess);
+    int32_t OnContinueEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd);
+    int32_t OnContinueEnd(int32_t result);
+
+    void OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffer> dataBuffer);
     void OnShutDown();
     void OnBind();
 
+    int32_t GetSessionId();
+    DSchedContinueInfo GetContinueInfo();
+
 private:
     void StartEventHandler();
+
+    int32_t PackStartCmd(std::shared_ptr<DSchedContinueStartCmd>& cmd,
+        std::shared_ptr<DistributedWantParams> wantParams);
+    int32_t PackDataCmd(std::shared_ptr<DSchedContinueDataCmd>& cmd, const OHOS::AAFwk::Want& want,
+        const AppExecFwk::AbilityInfo& abilityInfo, const CallerInfo& callerInfo,
+        const AccountInfo& accountInfo);
+    int32_t PackEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd, bool result);
+    int32_t PackReplyCmd(std::shared_ptr<DSchedContinueReplyCmd> cmd, int32_t replyCmd, int32_t appVersion,
+        int32_t result, const std::string reason);
+    int32_t SendCommand(std::shared_ptr<DSchedContinueCmdBase> cmd);
+
+    int32_t SetWantForContinuation(AAFwk::Want& newWant);
+    void SetCleanMissionFlag(const OHOS::AAFwk::Want& want);
+    int32_t NotifyContinuationCallbackResult(int32_t result);
+    bool GetLocalDeviceId(std::string& localDeviceId);
+    bool CheckDeviceIdFromRemote(const std::string& localDevId, const std::string& destDevId,
+        const std::string& srcDevId);
+    int32_t GetMissionIdByBundleName();
+    int32_t CheckContinueAbilityPermission();
+    void NotifyDSchedEventResult(const std::string& type, int32_t resultCode);
 
 private:
     std::shared_ptr<DSchedContinueStateMachine> stateMachine_;
@@ -109,13 +186,14 @@ private:
     std::thread eventThread_;
     std::mutex eventMutex_;
 
-    int32_t version_;
-    int32_t subServiceType_;
-    int32_t continueByType_;
-    int32_t direction_;
+    int32_t version_ = 0;
+    int32_t subServiceType_ = 0;
+    int32_t continueByType_ = 0;
+    int32_t direction_ = 0;
     DSchedContinueInfo continueInfo_;
-    bool isSourceExit_;
-    int32_t softbusSessionId_;
+    bool isSourceExit_ = true;
+    int32_t softbusSessionId_ = 0;
+    sptr<IRemoteObject> callback_ = nullptr;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS

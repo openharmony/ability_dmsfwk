@@ -18,33 +18,80 @@
 
 #include <map>
 #include <string>
+#include <atomic>
 
 #include "dsched_data_buffer.h"
 #include "dsched_continue.h"
+#include "idata_listener.h"
 #include "iremote_object.h"
 #include "single_instance.h"
 #include "want.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+constexpr int32_t MAX_CONCURRENT_SINK = 1;
+constexpr int32_t MAX_CONCURRENT_SOURCE = 1;
+constexpr int32_t CONTINUE_TIMEOUT = 7000;
+}
 class DSchedContinueManager {
 DECLARE_SINGLE_INSTANCE_BASE(DSchedContinueManager);
 public:
+    explicit DSchedContinueManager();
+    ~DSchedContinueManager();
     int32_t ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId,
         int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams &wantParams);
     int32_t ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId,
         std::string bundleName, const sptr<IRemoteObject> &callback, const OHOS::AAFwk::WantParams &wantParams);
+    int32_t StartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId, int32_t callerUid, int32_t status,
+        uint32_t accessToken);
+    int32_t NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId, bool isSuccess);
+    int32_t OnContinueEnd(const DSchedContinueInfo& info);
 
-    void OnDataRecv(std::shared_ptr<DSchedDataBuffer> data);
-    void OnShutDown();
+    void Init();
+    void UnInit();
+    void OnDataRecv(int32_t sessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer);
+    void OnShutdown(int32_t socket, bool isSelfCalled);
     void OnBind();
 
 private:
-    DSchedContinueManager();
-    ~DSchedContinueManager();
+    void StartEvent();
+    void HandleContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId, int32_t missionId,
+        const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams);
+    void HandleContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId, std::string bundleName,
+        const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams);
+    void HandleContinueMissionWithBundleName(const DSchedContinueInfo &info, const sptr<IRemoteObject>& callback,
+        const OHOS::AAFwk::WantParams& wantParams);
+    void HandleStartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId, int32_t callerUid,
+        int32_t status, uint32_t accessToken);
+    void HandleNotifyCompleteContinuation(const std::u16string& devId, int32_t missionId, bool isSuccess);
+    void HandleContinueEnd(const DSchedContinueInfo& info);
+    void HandleDataRecv(int32_t sessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer);
+    void NotifyContinueDataRecv(int32_t sessionId, int32_t command, const std::string& jsonStr,
+        std::shared_ptr<DSchedDataBuffer> dataBuffer);
+    int32_t CheckContinuationLimit(const std::string& srcDeviceId, const std::string& dstDeviceId);
+    void SetTimeOut(const DSchedContinueInfo& info, int32_t timeout);
+    void RemoveTimeout(const DSchedContinueInfo& info);
+    bool GetLocalDeviceId(std::string& localDeviceId);
+
+    class SoftbusListener : public IDataListener {
+        void OnBind(int32_t socket, PeerSocketInfo info);
+        void OnShutdown(int32_t socket, bool isSelfCalled);
+        void OnDataRecv(int32_t socket, std::shared_ptr<DSchedDataBuffer> dataBuffer);
+    };
 
 private:
+    std::thread eventThread_;
+    std::condition_variable eventCon_;
+    std::mutex eventMutex_;
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
+    std::shared_ptr<DSchedContinueManager::SoftbusListener> softbusListener_;
+
     std::map<DSchedContinueInfo, std::shared_ptr<DSchedContinue>> continues_;
+    std::mutex continueMutex_;
+
+    std::atomic<int32_t> cntSink_ {0};
+    std::atomic<int32_t> cntSource_ {0};
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS
