@@ -21,7 +21,9 @@
 #include <thread>
 #include <string>
 
+#include "distributedWant/distributed_want.h"
 #include "dsched_data_buffer.h"
+#include "dsched_continue_event.h"
 #include "dsched_continue_event_handler.h"
 #include "dsched_continue_state_machine.h"
 #include "event_handler.h"
@@ -62,6 +64,12 @@ typedef enum {
     CONTINUE_SINK = 1
 } DSchedContinueDirection;
 
+struct ContinueAbilityData {
+    OHOS::AAFwk::Want want;
+    int32_t callerUid;
+    uint32_t accessToken;
+};
+
 class DSchedContinue : public std::enable_shared_from_this<DSchedContinue> {
 public:
     explicit DSchedContinue(int32_t direction, DSchedContinueInfo &continueInfo);
@@ -78,13 +86,14 @@ public:
     int32_t PostNotifyCompleteTask();
     int32_t PostContinueEndTask();
 
-    int32_t ExecuteContinueReq();
-    int32_t ExecuteContinueAbility();
-    int32_t ExecuteContinueCommReply();
-    int32_t ExecuteContinueSend();
-    int32_t ExecuteContinueData();
-    int32_t ExecuteNotifyComplete();
-    int32_t ExecuteContinueEnd();
+    int32_t ExecuteContinueReq(std::shared_ptr<DistributedWantParams> wantParams);
+    int32_t ExecuteContinueAbility(int32_t appVersion);
+    int32_t ExecuteContinueReply();
+    int32_t ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data);
+    int32_t ExecuteContinueData(std::shared_ptr<DSchedContinueDataCmd> cmd);
+    int32_t ExecuteNotifyComplete(int32_t result);
+    int32_t ExecuteContinueEnd(int32_t result);
+    int32_t ExecuteContinueError(int32_t result);
 
     void OnDataRecv(std::shared_ptr<DSchedDataBuffer> data);
     void OnShutDown();

@@ -30,6 +30,7 @@ public:
     DSchedContinueStateType GetStateType();
 
 private:
+    std::shared_ptr<DSchedContinueState> CreateState(DSchedContinueStateType stateType);
     std::shared_ptr<DSchedContinueState> currentState_;
     std::weak_ptr<DSchedContinue> dContinue_;
 };

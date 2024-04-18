@@ -33,13 +33,15 @@ public:
 private:
     int32_t DoContinuePullReqTask(std::shared_ptr<DSchedContinue> dContinue,
         const AppExecFwk::InnerEvent::Pointer &event);
+    int32_t DoContinueAbilityTask(std::shared_ptr<DSchedContinue> dContinue,
+        const AppExecFwk::InnerEvent::Pointer &event);
     int32_t DoContinueEndTask(std::shared_ptr<DSchedContinue> dContinue,
         const AppExecFwk::InnerEvent::Pointer &event);
 
 private:
     using DSchedStateFunc = int32_t (DSchedContinueSinkStartState::*)(std::shared_ptr<DSchedContinue> dContinue,
         const AppExecFwk::InnerEvent::Pointer &event);
-    
+
     std::weak_ptr<DSchedContinueStateMachine> stateMachine_;
     std::map<uint32_t, DSchedStateFunc> memberFuncMap_;
 };

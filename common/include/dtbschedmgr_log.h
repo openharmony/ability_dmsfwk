@@ -438,6 +438,26 @@ enum {
      * Result(29360224) for the mission for continuing is not alive, try again after restart mission.
      */
     MISSION_FOR_CONTINUING_IS_NOT_ALIVE = 29360224,
+    /**
+     * Result(29360225) for sending event failed during continuation.
+     */
+    CONTINUE_SEND_EVENT_FAILED = 29360225,
+    /**
+     * Result(29360226) for state machine receving invalid state code.
+     */
+    CONTINUE_STATE_MACHINE_INVALID_STATE = 29360226,
+    /**
+     * Result(29360227) for session shutdown during continuation.
+     */
+    CONTINUE_SESSION_SHUTDOWN = 29360227,
+    /**
+     * Result(29360228) for calling ContinueAbility failed during continuation.
+     */
+    CONTINUE_CALL_CONTINUE_ABILITY_FAILED = 29360228,
+    /**
+     * Result(29360229) for calling StartAbility failed during continuation.
+     */
+    CONTINUE_CALL_START_ABILITY_FAILED = 29360229,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
