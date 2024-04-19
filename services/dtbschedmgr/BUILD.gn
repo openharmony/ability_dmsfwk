@@ -214,7 +214,7 @@ ohos_shared_library("distributedschedsvr") {
   }
 
   if (dmsfwk_report_memmgr_plugins) {
-    external_deps += [ "memmgr_plugin:memmgrclient" ]
+    external_deps += [ "memmgr_override:memmgrclient" ]
   }
 
   if (dmsfwk_ces_listener) {
