@@ -16,6 +16,7 @@
 #include "common_event_listener.h"
 
 #include "dtbschedmgr_log.h"
+#include "mission/distributed_bm_storage.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/dms_continue_send_manager.h"
 
@@ -26,13 +27,30 @@ const std::string TAG = "CommonEventListener";
 }
 void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
 {
-    std::string action = eventData.GetWant().GetAction();
+    auto want = eventData.GetWant();
+    std::string action = want.GetAction();
+    int32_t userId = 0;
     HILOGD("OnReceiveEvent called, action = %{public}s", action.c_str());
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
         DMSContinueSendMgr::GetInstance().OnDeviceScreenOff();
         DMSContinueRecvMgr::GetInstance().OnDeviceScreenOff();
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
         DMSContinueSendMgr::GetInstance().OnDeviceScreenOn();
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED) {
+        userId = eventData.GetCode();
+        HILOGI("OnReceiveEvent switched userId:%{public}d", userId);
+        DmsBmStorage::GetInstance()->UpdateDistributedData();
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED) {
+        std::string bundleName = want.GetElement().GetBundleName();
+        DmsBmStorage::GetInstance()->SaveStorageDistributeInfo(bundleName);
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED) {
+        std::string bundleName = want.GetElement().GetBundleName();
+        DmsBmStorage::GetInstance()->SaveStorageDistributeInfo(bundleName);
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
+        std::string bundleName = want.GetElement().GetBundleName();
+        DmsBmStorage::GetInstance()->DeleteStorageDistributeInfo(bundleName);
+    } else {
+        HILOGW("OnReceiveEvent undefined action");
     }
 }
 } // namespace DistributedSchedule

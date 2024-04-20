@@ -69,7 +69,8 @@ class DMSContinueSendMgr {
     DECLARE_SINGLE_INSTANCE(DMSContinueSendMgr);
 
 public:
-    constexpr static int32_t DMS_SEND_LEN = 5;
+    constexpr static uint8_t DMS_DATA_LEN = 6; // Dms data Length
+    constexpr static int32_t DMS_SEND_LEN = 7; // Maximum broadcast length
     constexpr static uint8_t DMS_0XF0 = 0xf0;
     constexpr static uint8_t DMS_0X0F = 0x0f;
     constexpr static uint8_t DMS_0XFF = 0xff;
@@ -115,7 +116,7 @@ public:
 private:
     int32_t GetCurrentMissionId();
     void PostUnfocusedTaskWithDelay(const int32_t missionId, UnfocusedReason reason);
-    int32_t SendSoftbusEvent(uint32_t accessTokenId, uint8_t type);
+    int32_t SendSoftbusEvent(uint16_t accessTokenId, uint8_t continueTypeId, uint8_t type);
     void StartEvent();
     int32_t DealFocusedBusiness(const int32_t missionId);
     int32_t DealUnfocusedBusiness(const int32_t missionId, UnfocusedReason reason);
@@ -127,7 +128,7 @@ private:
     int32_t CheckContinueState(const int32_t missionId);
     void AddMMIListener();
     void RemoveMMIListener();
-    int32_t GetAccessTokenIdSendEvent(std::string bundleName, UnfocusedReason reason, uint32_t& accessTokenId);
+    int32_t GetAccessTokenIdSendEvent(std::string bundleName, UnfocusedReason reason, uint16_t& accessTokenId);
     int32_t SetStateSendEvent(const uint32_t accessTokenId, const AAFwk::ContinueState &state);
 private:
     currentMissionInfo info_ = { INVALID_MISSION_ID, false };

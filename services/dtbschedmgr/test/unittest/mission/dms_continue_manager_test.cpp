@@ -665,9 +665,10 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDataRecv001, TestSize.Level1)
 HWTEST_F(DMSContinueManagerTest, testSendSoftbusEvent001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testSendSoftbusEvent001 start" << std::endl;
-    uint32_t accessTokenId = 0;
+    uint16_t accessTokenId = 0;
+    uint8_t continueType = 1;
     uint8_t type = 0;
-    bool ret = DMSContinueSendMgr::GetInstance().SendSoftbusEvent(accessTokenId, type);
+    bool ret = DMSContinueSendMgr::GetInstance().SendSoftbusEvent(accessTokenId, continueType, type);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DMSContinueManagerTest testSendSoftbusEvent001 end" << std::endl;
 }

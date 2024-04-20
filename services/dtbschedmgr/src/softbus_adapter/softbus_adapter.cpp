@@ -56,7 +56,7 @@ int32_t SoftbusAdapter::StopSoftbusEvent()
 
 static void EventListenerReceived(const EventNotify *eventNotify)
 {
-    HILOGI("%{public}s called.", __func__);
+    HILOGD("called.");
     std::string networkId(eventNotify->senderNetworkId);
     SoftbusAdapter::GetInstance().OnBroadCastRecv(networkId, eventNotify->data, eventNotify->dataLen);
 }

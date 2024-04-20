@@ -22,6 +22,8 @@
 #include "bundlemgr/bundle_mgr_proxy.h"
 #include "distributed_bms_interface.h"
 #include "distributed_bms_proxy.h"
+#include "mission/distributed_bm_storage.h"
+#include "mission/distributed_bundle_info.h"
 #include "single_instance.h"
 
 namespace OHOS {
@@ -47,9 +49,11 @@ public:
     static sptr<AppExecFwk::IDistributedBms> GetDistributedBundleManager();
     static int32_t GetUidFromBms(const std::string& bundleName);
     static bool CheckIfRemoteCanInstall(const AAFwk::Want& want, int32_t missionId);
-    static int32_t GetBundleIdFromBms(const std::string& bundleName, uint32_t& accessTokenId);
+    static int32_t GetBundleNameId(const std::string& bundleName, uint16_t& accessTokenId);
+    static std::string GetContinueType(const std::string &networkId,
+        std::string &bundleName, uint8_t continueTypeId);
     static int32_t GetBundleNameFromDbms(const std::string& networkId,
-        const uint32_t accessTokenId, std::string& bundleName);
+        const uint16_t accessTokenId, std::string& bundleName);
     static int32_t GetApplicationInfoFromBms(const std::string& bundleName, const AppExecFwk::BundleFlag flag,
         const int32_t userId, AppExecFwk::ApplicationInfo &appInfo);
     static ErrCode QueryOsAccount(int32_t& activeAccountId);

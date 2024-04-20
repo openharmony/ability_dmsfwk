@@ -48,7 +48,8 @@ class DMSContinueRecvMgr {
     DECLARE_SINGLE_INSTANCE(DMSContinueRecvMgr);
 
 public:
-    constexpr static int32_t DMS_SEND_LEN = 5;
+    constexpr static uint8_t DMS_DATA_LEN = 6; // Dms data Length
+    constexpr static int32_t DMS_SEND_LEN = 1024 * 1024 * 10; // Maximum Broadcast Length
     constexpr static uint8_t DMS_0XF0 = 0xf0;
     constexpr static uint8_t DMS_0X0F = 0x0f;
     constexpr static uint8_t DMS_0XFF = 0xff;
@@ -72,13 +73,13 @@ public:
 
 private:
     void StartEvent();
-    int32_t RetryPostBroadcast(const std::string& senderNetworkId, uint32_t accessTokenId,
+    int32_t RetryPostBroadcast(const std::string& senderNetworkId, uint16_t accessTokenId,
         const int32_t state, const int32_t retry);
     int32_t VerifyBroadcastSource(const std::string& senderNetworkId, const std::string& bundleName,
         const int32_t state);
-    void PostOnBroadcastBusiness(const std::string& senderNetworkId, uint32_t accessTokenId, const int32_t state,
+    void PostOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t accessTokenId, const int32_t state,
         const int32_t delay = 0, const int32_t retry = 0);
-    int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint32_t accessTokenId, const int32_t state,
+    int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t accessTokenId, const int32_t state,
         const int32_t retry = 0);
     void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const std::string& networkId,
         const std::string& bundleName, const int32_t state);

@@ -319,42 +319,42 @@ int32_t BundleManagerInternal::GetUidFromBms(const std::string& bundleName)
     return bundleMgr->GetUidByBundleName(bundleName, activeAccountId);
 }
 
-int32_t BundleManagerInternal::GetBundleIdFromBms(const std::string& bundleName, uint32_t& accessTokenId)
+int32_t BundleManagerInternal::GetBundleNameId(const std::string& bundleName, uint16_t& accessTokenId)
 {
-    auto bundleMgr = GetBundleManager();
-    if (bundleMgr == nullptr) {
-        HILOGE("failed to get bms");
-        return INVALID_PARAMETERS_ERR;
-    }
-    int32_t activeAccountId = 0;
-    ErrCode err = QueryOsAccount(activeAccountId);
-    if (err != ERR_OK) {
-        return err;
-    }
-    AppExecFwk::ApplicationInfo appInfo;
-    int32_t flag = static_cast<int32_t>(AppExecFwk::GetApplicationFlag::GET_APPLICATION_INFO_DEFAULT);
-    ErrCode ret = bundleMgr->GetApplicationInfoV9(bundleName, flag, activeAccountId, appInfo);
-    if (ret != ERR_OK) {
-        HILOGE("failed to get appInfo from bms");
+    HILOGD("called.");
+    bool ret = DmsBmStorage::GetInstance()->GetBundleNameId(bundleName, accessTokenId);
+    HILOGI("accessTokenId: %{public}d end.", accessTokenId);
+    if (!ret) {
+        HILOGE("can not get accessTokenId by bundleName");
         return CAN_NOT_FOUND_ABILITY_ERR;
     }
-    accessTokenId = appInfo.accessTokenId;
+    HILOGD("end.");
     return ERR_OK;
 }
 
-int32_t BundleManagerInternal::GetBundleNameFromDbms(const std::string& networkId,
-    const uint32_t accessTokenId, std::string& bundleName)
+std::string BundleManagerInternal::GetContinueType(const std::string &networkId,
+    std::string &bundleName, uint8_t continueTypeId)
 {
-    auto bundleMgr = GetDistributedBundleManager();
-    if (bundleMgr == nullptr) {
-        HILOGE("failed to get dbms");
-        return INVALID_PARAMETERS_ERR;
+    HILOGD("called.");
+    std::string continueType = DmsBmStorage::GetInstance()->GetContinueType(networkId, bundleName, continueTypeId);
+    HILOGI("continueType: %{public}s end.", continueType.c_str());
+    if (continueType == "") {
+        HILOGE("can not get continueType!");
     }
-    int32_t result = bundleMgr->GetDistributedBundleName(networkId, accessTokenId, bundleName);
-    if (result != ERR_OK) {
-        HILOGE("failed to get bundleName from dbms");
+    HILOGD("end.");
+    return continueType;
+}
+
+int32_t BundleManagerInternal::GetBundleNameFromDbms(const std::string& networkId,
+    const uint16_t accessTokenId, std::string& bundleName)
+{
+    HILOGD("called.");
+    bool result = DmsBmStorage::GetInstance()->GetDistributedBundleName(networkId, accessTokenId, bundleName);
+    if (!result) {
+        HILOGE("failed to get bundleName by accessTokenId");
         return CAN_NOT_FOUND_ABILITY_ERR;
     }
+    HILOGD("end.");
     return ERR_OK;
 }
 

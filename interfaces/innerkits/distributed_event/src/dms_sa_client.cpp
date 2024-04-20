@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,14 +18,14 @@ namespace OHOS {
 namespace DistributedSchedule {
 DmsSaClient &DmsSaClient::GetInstance()
 {
-    HILOGI("%{public}s called.", __func__);
+    HILOGD("called.");
     static DmsSaClient instance;
     return instance;
 }
 
 bool DmsSaClient::SubscribeDmsSA()
 {
-    HILOGI("%{public}s called.", __func__);
+    HILOGD("called.");
     sptr<DmsSystemAbilityStatusChange> callback(new DmsSystemAbilityStatusChange());
     int32_t ret = saMgrProxy_->SubscribeSystemAbility(DISTRIBUTED_SCHED_SA_ID, callback);
     if (ret != ERR_OK) {
