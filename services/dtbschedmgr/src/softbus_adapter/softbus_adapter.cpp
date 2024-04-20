@@ -80,6 +80,7 @@ int32_t SoftbusAdapter::RegisterSoftbusEventListener(const std::shared_ptr<Softb
     EventListener eventListener;
     eventListener.event = FOREGROUND_APP;
     eventListener.freq = EVENT_MID_FREQ;
+    eventListener.deduplicate = true;
     eventListener.OnEventReceived = EventListenerReceived;
     HILOGI("RegisterSoftbusEventListener pkgName: %s.", pkgName_.c_str());
     int32_t ret = RegisterEventListener(pkgName_.c_str(), &eventListener);
@@ -101,6 +102,7 @@ int32_t SoftbusAdapter::UnregisterSoftbusEventListener(const std::shared_ptr<Sof
     EventListener eventListener;
     eventListener.event = FOREGROUND_APP;
     eventListener.freq = EVENT_MID_FREQ;
+    eventListener.deduplicate = true;
     eventListener.OnEventReceived = EventListenerReceived;
     HILOGI("UnregisterSoftbusEventListener pkgName: %s.", pkgName_.c_str());
     int32_t ret = UnregisterEventListener(pkgName_.c_str(), &eventListener);
