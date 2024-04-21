@@ -74,7 +74,7 @@ public:
 
     static sptr<IDistributedWantParams> Parse(const std::string& str);
 
-    static std::string GerTypedIdStr(const std::string& str, size_t& strnum);
+    static int GerTypedId(const std::string& str, size_t& strnum);
 
     static DistributedWantParams ParseWantParams(const std::string& str);
 
