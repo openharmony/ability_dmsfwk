@@ -175,16 +175,15 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
     return iwantParams;
 }
 
-std::string DistributedWantParamWrapper::GerTypedIdStr(const std::string& str, size_t& strnum)
+int DistributedWantParamWrapper::GerTypedId(const std::string& str, size_t& strnum)
 {
-    if (strnum < 0) {
-        return "";
-    }
-    if (str.find('"', strnum) == std::string::npos || str.find('"', strnum) > strnum) {
-        return "";
-    }
+    int typeId = 0;
     std::string typeIdStr = str.substr(strnum, str.find('"', strnum) - strnum);
-    return typeIdStr;
+    if (typeIdStr.empty()) {
+        return typeId;
+    }
+    typeId = std::atoi(typeIdStr.c_str());
+    return typeId;
 }
 
 DistributedWantParams DistributedWantParamWrapper::ParseWantParams(const std::string& str)
@@ -209,7 +208,7 @@ DistributedWantParams DistributedWantParamWrapper::ParseWantParams(const std::st
                 strnum = str.find('"', strnum);
             } else if (typeId == 0) {
                 strnum++;
-                typeId = atoi(GerTypedIdStr(str, strnum).c_str());
+                typeId = GerTypedId(str, strnum);
                 if (errno == ERANGE) {
                     return wantParams;
                 }
