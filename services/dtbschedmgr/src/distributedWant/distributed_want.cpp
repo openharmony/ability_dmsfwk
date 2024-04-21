@@ -1672,7 +1672,7 @@ DistributedWant* DistributedWant::FromString(std::string& string)
 
     nlohmann::json wantJson = nlohmann::json::parse(string);
     if (wantJson.is_discarded()) {
-        HILOGE("wantJson is empty");
+        return nullptr;
     }
 
     DistributedWant* want = new (std::nothrow) DistributedWant();
