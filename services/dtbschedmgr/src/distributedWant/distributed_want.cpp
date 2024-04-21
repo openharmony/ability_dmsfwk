@@ -913,7 +913,6 @@ DistributedWant* DistributedWant::ParseUri(const std::string& uri)
             if (content.compare("PICK") == 0) {
                 want = new (std::nothrow) DistributedWant();
                 if (want == nullptr) {
-                    delete want;
                     delete baseWant;
                     return nullptr;
                 }
