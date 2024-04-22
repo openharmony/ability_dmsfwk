@@ -35,7 +35,7 @@ public:
 private:
     SoftbusAdapter() {}
     std::shared_ptr<SoftbusAdapterListener> softbusAdapterListener_;
-    std::string pkgName_ = "ohos.ability.distributedsched";
+    std::string pkgName_ = "dms";
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

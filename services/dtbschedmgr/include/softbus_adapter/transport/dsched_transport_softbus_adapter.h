@@ -58,6 +58,7 @@ public:
     void OnDataReady(int32_t sessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer, uint32_t dataType);
     void RegisterListener(int32_t serviceType, std::shared_ptr<IDataListener> listener);
     void NotifyListenersSessionShutdown(int32_t sessionId, bool isSelfCalled);
+    void UnregisterListener(int32_t serviceType, std::shared_ptr<IDataListener> listener);
 
 private:
     DSchedTransportSoftbusAdapter();

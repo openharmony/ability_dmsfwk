@@ -188,6 +188,9 @@ public:
         uint32_t accessToken, int32_t extensionType) override;
     int32_t StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& remoteWant, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t extensionType) override;
+    int32_t CheckTargetPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
+        const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
+    ErrCode QueryOsAccount(int32_t& activeAccountId);
 private:
     DistributedSchedService();
     bool Init();
@@ -249,12 +252,9 @@ private:
         const sptr<IRemoteObject>& srcConnect, const sptr<IRemoteObject>& callbackWrapper);
     void UnregisterAppStateObserver(const sptr<IRemoteObject>& callbackWrapper);
     sptr<AppExecFwk::IAppMgr> GetAppManager();
-    int32_t CheckTargetPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
-        const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
     int32_t SaveConnectToken(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect);
     void SetCleanMissionFlag(const OHOS::AAFwk::Want& want, int32_t missionId);
     void RemoveConnectAbilityInfo(const std::string& deviceId);
-    ErrCode QueryOsAccount(int32_t& activeAccountId);
     int32_t QuickStartAbility(const std::string& bundleName);
 
     std::shared_ptr<DSchedContinuation> dschedContinuation_;
