@@ -16,9 +16,7 @@
 #ifndef OHOS_DMS_HANDLER_TEST_H
 #define OHOS_DMS_HANDLER_TEST_H
 
-#define private public
 #include "dms_handler.h"
-#undef private
 
 #include <condition_variable>
 #include <map>

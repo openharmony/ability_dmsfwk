@@ -16,9 +16,7 @@
 #ifndef OHOS_DMS_LISTENER_STUB_TEST_H
 #define OHOS_DMS_LISTENER_STUB_TEST_H
 
-#define private public
 #include "dms_listener_stub.h"
-#undef private
 
 #include <cstdint>
 #include <map>

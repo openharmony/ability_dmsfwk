@@ -913,6 +913,7 @@ DistributedWant* DistributedWant::ParseUri(const std::string& uri)
             if (content.compare("PICK") == 0) {
                 want = new (std::nothrow) DistributedWant();
                 if (want == nullptr) {
+                    delete baseWant;
                     return nullptr;
                 }
                 inPicker = true;
@@ -1380,7 +1381,11 @@ bool DistributedWant::ParseContent(const std::string& content, std::string& prop
     if (dPos != std::string::npos) {
         std::string subString = content.substr(0, dPos);
         prop = Decode(subString);
-        subString = content.substr(dPos + 1, content.length() - dPos - 1);
+        std::size_t length = content.length() - dPos - 1;
+        if (length <= 0) {
+            return false;
+        }
+        subString = content.substr(dPos + 1, length);
         value = Decode(subString);
         return true;
     }
@@ -1616,6 +1621,13 @@ bool DistributedWant::ReadFromJson(nlohmann::json& wantJson)
         HILOGE("can not read from json");
         return false;
     }
+    if (!wantJson.contains("deviceId") || !wantJson.contains("bundleName") || !wantJson.contains("abilityName") ||
+        !wantJson.contains("uri") || !wantJson.contains("type") || !wantJson.contains("flags") ||
+        !wantJson.contains("action") || !wantJson.contains("parameters") || !wantJson.contains("entities")) {
+        HILOGE("data is empty");
+        return false;
+    }
+    
     std::string deviceId = wantJson.at("deviceId").get<std::string>();
     std::string bundleName = wantJson.at("bundleName").get<std::string>();
     std::string abilityName = wantJson.at("abilityName").get<std::string>();
@@ -1658,6 +1670,9 @@ DistributedWant* DistributedWant::FromString(std::string& string)
     }
 
     nlohmann::json wantJson = nlohmann::json::parse(string);
+    if (wantJson.is_discarded()) {
+        return nullptr;
+    }
 
     DistributedWant* want = new (std::nothrow) DistributedWant();
     if (want != nullptr && !want->ReadFromJson(wantJson)) {

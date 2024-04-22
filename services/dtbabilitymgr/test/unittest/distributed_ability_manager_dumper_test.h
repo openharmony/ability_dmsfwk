@@ -18,9 +18,7 @@
 
 #include "gtest/gtest.h"
 
-#define private public
 #include "distributed_ability_manager_service.h"
-#undef private
 
 namespace OHOS {
 namespace DistributedSchedule {

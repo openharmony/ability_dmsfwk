@@ -250,8 +250,16 @@ void DmsContinueTime::ReadDurationInfo(const char* info)
         HILOGW("Accept cJSON Object failed!");
         return;
     }
-    int64_t beginTime = cJSON_GetObjectItem(durationInfo, "beginTime")->valueint;
-    int64_t endTime = cJSON_GetObjectItem(durationInfo, "endTime")->valueint;
+    cJSON* beginTimeItem = cJSON_GetObjectItem(durationInfo, "beginTime");
+    if (beginTimeItem == NULL) {
+        return;
+    }
+    int64_t beginTime = beginTimeItem->valueint;
+    cJSON* endTimeItem = cJSON_GetObjectItem(durationInfo, "endTime");
+    if (endTimeItem == NULL) {
+        return;
+    }
+    int64_t endTime = endTimeItem->valueint;
     saveDataDuration_.SetBeginTime(beginTime);
     saveDataDuration_.SetEndTime(endTime);
     cJSON_Delete(durationInfo);
@@ -283,8 +291,16 @@ void DmsContinueTime::ReadDstInfo(const char* info)
         HILOGW("Accept cJSON Object failed!");
         return;
     }
-    std::string bundleName = cJSON_GetObjectItem(dstInfo, "DstBundleName")->valuestring;
-    std::string abilityName = cJSON_GetObjectItem(dstInfo, "DstAbilityName")->valuestring;
+    cJSON* bundleNameItem = cJSON_GetObjectItem(dstInfo, "DstBundleName");
+    if (bundleNameItem == NULL) {
+        return;
+    }
+    std::string bundleName = bundleNameItem->valuestring;
+    cJSON* abilityNameItem = cJSON_GetObjectItem(dstInfo, "DstAbilityName");
+    if (abilityNameItem == NULL) {
+        return;
+    }
+    std::string abilityName = abilityNameItem->valuestring;
     dstInfo_.bundleName = bundleName;
     dstInfo_.abilityName = abilityName;
     cJSON_Delete(dstInfo);

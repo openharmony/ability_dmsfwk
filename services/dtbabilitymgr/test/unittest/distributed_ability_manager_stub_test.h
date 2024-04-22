@@ -16,9 +16,7 @@
 #ifndef OHOS_DISTRIBUTED_ABILITY_MANAGER_STUB_TEST_H
 #define OHOS_DISTRIBUTED_ABILITY_MANAGER_STUB_TEST_H
 
-#define private public
 #include "distributed_ability_manager_service.h"
-#undef private
 #include "gtest/gtest.h"
 
 namespace OHOS {

@@ -112,6 +112,22 @@ bool DistributedWantParamWrapper::ValidateStr(const std::string& str)
     return true;
 }
 
+size_t DistributedWantParamWrapper::FindMatchingBrace(const std::string& str, size_t strnum)
+{
+    int count = 0;
+    for (size_t num = strnum; num < str.size(); num++) {
+        if (str[num] == '{') {
+            count++;
+        } else if (str[num] == '}') {
+            count--;
+        }
+        if (count == 0) {
+            return num;
+        }
+    }
+    return strnum;
+}
+
 sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::string& str)
 {
     DistributedWantParams wantParams;
@@ -120,18 +136,7 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
         int typeId = 0;
         for (size_t strnum = 0; strnum < str.size(); strnum++) {
             if (str[strnum] == '{' && strKey != "" && typeId == DistributedWantParams::VALUE_TYPE_WANTPARAMS) {
-                size_t num;
-                int count = 0;
-                for (num = strnum; num < str.size(); num++) {
-                    if (str[num] == '{') {
-                        count++;
-                    } else if (str[num] == '}') {
-                        count--;
-                    }
-                    if (count == 0) {
-                        break;
-                    }
-                }
+                size_t num = FindMatchingBrace(str, strnum);
                 wantParams.SetParam(strKey, DistributedWantParamWrapper::Parse(str.substr(strnum, num - strnum + 1)));
                 strKey = "";
                 typeId = 0;
@@ -139,8 +144,11 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
             } else if (str[strnum] == '"') {
                 if (strKey == "") {
                     strnum++;
-                    strKey = str.substr(strnum, str.find('"', strnum) - strnum);
-                    strnum = str.find('"', strnum);
+                    size_t pos = str.find('"', strnum);
+                    if (pos != std::string::npos) {
+                        strKey = str.substr(strnum, pos - strnum);
+                    }
+                    strnum = pos;
                 } else if (typeId == 0) {
                     strnum++;
                     typeId = atoi(str.substr(strnum, str.find('"', strnum) - strnum).c_str());
@@ -161,8 +169,23 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
         }
     }
     sptr<IDistributedWantParams> iwantParams = new (std::nothrow) DistributedWantParamWrapper(wantParams);
+    if (iwantParams == nullptr) {
+        return nullptr;
+    }
     return iwantParams;
 }
+
+int DistributedWantParamWrapper::GerTypedId(const std::string& str, size_t& strnum)
+{
+    int typeId = 0;
+    std::string typeIdStr = str.substr(strnum, str.find('"', strnum) - strnum);
+    if (typeIdStr.empty()) {
+        return typeId;
+    }
+    typeId = std::atoi(typeIdStr.c_str());
+    return typeId;
+}
+
 DistributedWantParams DistributedWantParamWrapper::ParseWantParams(const std::string& str)
 {
     DistributedWantParams wantParams;
@@ -173,18 +196,7 @@ DistributedWantParams DistributedWantParamWrapper::ParseWantParams(const std::st
     }
     for (size_t strnum = 0; strnum < str.size(); strnum++) {
         if (str[strnum] == '{' && key != "" && typeId == DistributedWantParams::VALUE_TYPE_WANTPARAMS) {
-            size_t num;
-            int counter = 0;
-            for (num = strnum; num < str.size(); num++) {
-                if (str[num] == '{') {
-                    counter++;
-                } else if (str[num] == '}') {
-                    counter--;
-                }
-                if (counter == 0) {
-                    break;
-                }
-            }
+            size_t num = FindMatchingBrace(str, strnum);
             wantParams.SetParam(key, DistributedWantParamWrapper::Parse(str.substr(strnum, num - strnum)));
             key = "";
             typeId = 0;
@@ -196,7 +208,7 @@ DistributedWantParams DistributedWantParamWrapper::ParseWantParams(const std::st
                 strnum = str.find('"', strnum);
             } else if (typeId == 0) {
                 strnum++;
-                typeId = atoi(str.substr(strnum, str.find('"', strnum) - strnum).c_str());
+                typeId = GerTypedId(str, strnum);
                 if (errno == ERANGE) {
                     return wantParams;
                 }

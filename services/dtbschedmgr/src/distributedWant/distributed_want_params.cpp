@@ -880,6 +880,9 @@ bool DistributedWantParams::ReadFromParcelArrayString(Parcel& parcel, sptr<AAFwk
 
     std::vector<std::u16string>::size_type size = value.size();
     ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IString);
+    if (ao == nullptr) {
+        return false;
+    }
     if (ao != nullptr) {
         for (std::vector<std::u16string>::size_type i = 0; i < size; i++) {
             ao->Set(i, AAFwk::String::Box(Str16ToStr8(value[i])));
@@ -1266,6 +1269,9 @@ bool DistributedWantParams::ReadFromParcel(Parcel& parcel)
 {
     int32_t size;
     if (!parcel.ReadInt32(size)) {
+        return false;
+    }
+    if (size > parcel.GetDataSize()) {
         return false;
     }
     for (int32_t i = 0; i < size; i++) {

@@ -70,7 +70,11 @@ public:
 
     static bool ValidateStr(const std::string& str);
 
+    static size_t FindMatchingBrace(const std::string& str, size_t strnum);
+
     static sptr<IDistributedWantParams> Parse(const std::string& str);
+
+    static int GerTypedId(const std::string& str, size_t& strnum);
 
     static DistributedWantParams ParseWantParams(const std::string& str);
 
