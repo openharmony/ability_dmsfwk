@@ -243,8 +243,8 @@ bool DmsBundleInfo::FromJsonString(const std::string &jsonString)
         JsonType::NUMBER, false, parseResult, ArrayType::NOT_ARRAY);
     GetValueIfFindKey<int64_t>(jsonObject, jsonObjectEnd, JSON_KEY_UPDATE_TIME, updateTime,
         JsonType::NUMBER, false, parseResult, ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<std::vector<DmsAbilityInfo>>(jsonObject, jsonObjectEnd, JSON_KEY_DMS_ABILITY_INFOS, dmsAbilityInfos,
-        JsonType::ARRAY, false, parseResult, ArrayType::OBJECT);
+    GetValueIfFindKey<std::vector<DmsAbilityInfo>>(jsonObject, jsonObjectEnd, JSON_KEY_DMS_ABILITY_INFOS,
+        dmsAbilityInfos, JsonType::ARRAY, false, parseResult, ArrayType::OBJECT);
     GetValueIfFindKey<std::vector<uint8_t>>(jsonObject, jsonObjectEnd, JSON_KEY_DMS_USERID, userIdArr,
         JsonType::ARRAY, false, parseResult, ArrayType::NUMBER);
     return parseResult == ERR_OK;
