@@ -35,7 +35,6 @@ namespace DistributedSchedule {
 namespace {
 constexpr int32_t INDEX_2 = 2;
 constexpr int32_t INDEX_3 = 3;
-constexpr int32_t INDEX_4 = 4;
 constexpr int32_t CANCEL_FOCUSED_DELAYED = 60000;
 constexpr int32_t SCREEN_OFF_DELAY_TIME = 10000;
 constexpr int64_t TIME_DELAYED = 250; // determines whether normal unfocused or lockoff
@@ -207,16 +206,16 @@ void DMSContinueSendMgr::StartEvent()
     HILOGI("StartEvent end");
 }
 
-int32_t DMSContinueSendMgr::SendSoftbusEvent(uint32_t accessTokenId, uint8_t type)
+int32_t DMSContinueSendMgr::SendSoftbusEvent(uint16_t accessTokenId, uint8_t continueTypeId, uint8_t type)
 {
     HILOGD("SendSoftbusEvent start, accessTokenId: %{public}u", accessTokenId);
     uint8_t data[DMS_SEND_LEN];
-    uint8_t len = sizeof(uint32_t);
+    uint8_t len = DMS_DATA_LEN;
     data[0] = (type << CONTINUE_SHIFT_04) | len;
-    data[1] = (accessTokenId >> CONTINUE_SHIFT_24) & DMS_0XFF;
-    data[INDEX_2] = (accessTokenId >> CONTINUE_SHIFT_16) & DMS_0XFF;
-    data[INDEX_3] = (accessTokenId >> CONTINUE_SHIFT_08) & DMS_0XFF;
-    data[INDEX_4] = accessTokenId & DMS_0XFF;
+    data[1] = (accessTokenId >> CONTINUE_SHIFT_08) & DMS_0XFF;
+    data[INDEX_2] = accessTokenId & DMS_0XFF;
+    data[INDEX_3] = continueTypeId & DMS_0XFF;
+
     int32_t ret = SoftbusAdapter::GetInstance().SendSoftbusEvent(data, DMS_SEND_LEN);
     HILOGD("SendSoftbusEvent end. Result: %{public}d", ret);
     return ret;
@@ -282,16 +281,16 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
 #ifdef SUPPORT_MULTIMODALINPUT_SERVICE
     AddMMIListener();
 #endif
-    uint32_t accessTokenId;
-    ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
-    DmsRadar::GetInstance().NormalFocusedGetAccessTokenIdRes("GetBundleIdFromBms", ret);
+    uint16_t accessTokenId = 0;
+    uint16_t contineTypeId = 0;
+    ret = BundleManagerInternal::GetBundleNameId(bundleName, accessTokenId);
+    DmsRadar::GetInstance().NormalFocusedGetAccessTokenIdRes("GetBundleNameId", ret);
     if (ret != ERR_OK) {
         HILOGE("Get focused accessTokenId failed, accessTokenId: %{public}u, ret: %{public}d", accessTokenId, ret);
         return ret;
     }
     if (!SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) { return DMS_PERMISSION_DENIED;}
-    HILOGI("Get focused accessTokenId success, accessTokenId: %{public}u", accessTokenId);
-    ret = SendSoftbusEvent(accessTokenId, DMS_FOCUSED_TYPE);
+    ret = SendSoftbusEvent(accessTokenId, contineTypeId, DMS_FOCUSED_TYPE);
     DmsRadar::GetInstance().NormalFocusedSendEventRes("SendSoftbusEvent", ret);
     if (ret != ERR_OK) {
         HILOGE("SendSoftbusEvent focused failed, ret: %{public}d", ret);
@@ -347,7 +346,7 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, Unfoc
         return ret;
     }
 
-    uint32_t accessTokenId;
+    uint16_t accessTokenId = 0;
     ret = GetAccessTokenIdSendEvent(bundleName, reason, accessTokenId);
     if (ret != ERR_OK) {
         HILOGE("GetAccessTokenIdSendEvent failed");
@@ -385,7 +384,8 @@ int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
         return DMS_PERMISSION_DENIED;
     }
 
-    int32_t ret = SendSoftbusEvent(accessTokenId, type);
+    uint8_t continueTypeId = 0;
+    int32_t ret = SendSoftbusEvent(accessTokenId, continueTypeId, type);
     if (ret != ERR_OK) {
         HILOGE("SendSoftbusEvent unfocused failed, ret: %{public}d", ret);
     }
@@ -476,12 +476,12 @@ int32_t DMSContinueSendMgr::DealSetMissionContinueStateBusiness(const int32_t mi
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
 
-    uint32_t accessTokenId;
-    ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
+    uint16_t accessTokenId = 0;
+    ret = BundleManagerInternal::GetBundleNameId(bundleName, accessTokenId);
     if (state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE) {
-        DmsRadar::GetInstance().ChangeStateUnfocusedGetAccessTokenIdRes("GetBundleIdFromBms", ret);
+        DmsRadar::GetInstance().ChangeStateUnfocusedGetAccessTokenIdRes("GetBundleNameId", ret);
     } else {
-        DmsRadar::GetInstance().ChangeStateFocusedGetAccessTokenIdRes("GetBundleIdFromBms", ret);
+        DmsRadar::GetInstance().ChangeStateFocusedGetAccessTokenIdRes("GetBundleNameId", ret);
     }
     if (ret != ERR_OK) {
         HILOGE("get setContinueState accessTokenId failed, accessTokenId: %{public}u, ret: %{public}d",
@@ -605,12 +605,12 @@ void DMSContinueSendMgr::ScreenOffHandler::SetScreenOffInfo(int32_t missionId, s
 }
 
 int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
-    UnfocusedReason reason, uint32_t& accessTokenId)
+    UnfocusedReason reason, uint16_t& accessTokenId)
 {
-    int32_t ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
+    int32_t ret = BundleManagerInternal::GetBundleNameId(bundleName, accessTokenId);
     bool res = (reason != UnfocusedReason::TIMEOUT)
-        ? DmsRadar::GetInstance().NormalUnfocusedGetAccessTokenIdRes("GetBundleIdFromBms", ret)
-            : DmsRadar::GetInstance().MultimodeUnfocusedGetAccessTokenIdRes("GetBundleIdFromBms", ret);
+        ? DmsRadar::GetInstance().NormalUnfocusedGetAccessTokenIdRes("GetBundleNameId", ret)
+            : DmsRadar::GetInstance().MultimodeUnfocusedGetAccessTokenIdRes("GetBundleNameId", ret);
     if (!res) {
         HILOGE("%{public}s failed", (reason != UnfocusedReason::TIMEOUT) ? "NormalUnfocusedGetAccessTokenIdRes"
             : "MultimodeUnfocusedGetAccessTokenIdRes");
@@ -621,7 +621,14 @@ int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
     }
 
     if (screenOffHandler_->IsDeviceScreenOn()) {
-        ret = SendSoftbusEvent(accessTokenId, DMS_UNFOCUSED_TYPE);
+        bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
+        HILOGI("IsContinueSwitchOn : %{public}d", IsContinueSwitchOn);
+        if (!IsContinueSwitchOn) {
+            HILOGE("ContinueSwitch status is off");
+            return DMS_PERMISSION_DENIED;
+        }
+        uint8_t continueTypeId = 0;
+        ret = SendSoftbusEvent(accessTokenId, continueTypeId, DMS_UNFOCUSED_TYPE);
         bool res = (reason != UnfocusedReason::TIMEOUT)
             ? DmsRadar::GetInstance().NormalUnfocusedSendEventRes("SendSoftbusEvent", ret)
                 : DmsRadar::GetInstance().MultimodeUnfocusedSendEventRes("SendSoftbusEvent", ret);
@@ -652,7 +659,8 @@ int32_t DMSContinueSendMgr::SetStateSendEvent(const uint32_t accessTokenId, cons
     }
 
     uint8_t type = state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE ? DMS_UNFOCUSED_TYPE : DMS_FOCUSED_TYPE;
-    int32_t ret = SendSoftbusEvent(accessTokenId, type);
+    uint8_t continueTypeId = 0;
+    int32_t ret = SendSoftbusEvent(accessTokenId, continueTypeId, type);
     bool res = (state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE)
         ? DmsRadar::GetInstance().ChangeStateUnfocusedSendEventRes("SendSoftbusEvent", ret)
             : DmsRadar::GetInstance().ChangeStateFocusedSendEventRes("SendSoftbusEvent", ret);

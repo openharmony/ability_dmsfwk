@@ -48,6 +48,7 @@ public:
     void DeviceOfflineNotify(const std::string& networkId);
     void OnDeviceInfoChanged(const std::string& networkId);
     std::string GetDeviceName(std::string netWorkId);
+    std::vector<std::string> GetNetworkIdList();
 
     /**
      * get device info by device id

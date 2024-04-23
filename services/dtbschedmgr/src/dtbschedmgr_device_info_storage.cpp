@@ -238,8 +238,8 @@ bool DtbschedmgrDeviceInfoStorage::GetLocalDeviceUdid(std::string& udid)
         HILOGE("GetLocalBasicInfo error");
         return false;
     }
-    udid = GetUuidByNetworkId(dmDeviceInfo.networkId);
-    HILOGI("GetLocalDeviceUdid = %{public}s", DnetworkAdapter::AnonymizeNetworkId(udid).c_str());
+    udid = GetUdidByNetworkId(dmDeviceInfo.networkId);
+    HILOGD("GetLocalDeviceUdid = %{public}s", DnetworkAdapter::AnonymizeNetworkId(udid).c_str());
     return true;
 }
 
@@ -403,6 +403,16 @@ std::string DtbschedmgrDeviceInfoStorage::GetDeviceName(std::string netWorkId)
         }
     }
     return "";
+}
+
+std::vector<std::string> DtbschedmgrDeviceInfoStorage::GetNetworkIdList()
+{
+    std::vector<std::string> devices;
+    for (auto device = remoteDevices_.begin(); device != remoteDevices_.end(); ++device) {
+        HILOGD("NetworkId: %{public}s", device->second->GetNetworkId().c_str());
+        devices.push_back(device->second->GetNetworkId());
+    }
+    return devices;
 }
 }
 }

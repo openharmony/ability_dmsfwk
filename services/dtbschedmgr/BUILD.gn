@@ -190,6 +190,8 @@ ohos_shared_library("distributedschedsvr") {
 
   if (dmsfwk_mission_manager) {
     sources += [
+      "src/mission/distributed_bm_storage.cpp",
+      "src/mission/distributed_bundle_info.cpp",
       "src/mission/distributed_data_change_listener.cpp",
       "src/mission/distributed_data_storage.cpp",
       "src/mission/distributed_mission_broadcast_listener.cpp",

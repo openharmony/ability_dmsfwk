@@ -36,7 +36,6 @@ constexpr int32_t ACTIVE = 0;
 constexpr int32_t INACTIVE = 1;
 constexpr int32_t INDEX_2 = 2;
 constexpr int32_t INDEX_3 = 3;
-constexpr int32_t INDEX_4 = 4;
 constexpr int32_t DBMS_RETRY_MAX_TIME = 5;
 constexpr int32_t DBMS_RETRY_DELAY = 1000;
 const std::string TAG = "DMSContinueRecvMgr";
@@ -92,18 +91,19 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
         HILOGE("ContinueSwitch status is off");
         return;
     }
-    if (dataLen != DMS_SEND_LEN) {
+    if (dataLen > DMS_SEND_LEN) {
         HILOGE("dataLen error, dataLen: %{public}u", dataLen);
         return;
     }
     uint8_t type = (payload[0] & DMS_0XF0) >> CONTINUE_SHIFT_04;
     uint8_t len = payload[0] & DMS_0X0F;
-    if (len != sizeof(uint32_t) || (type != DMS_UNFOCUSED_TYPE && type != DMS_FOCUSED_TYPE)) {
+    if (len < DMS_DATA_LEN || (type > DMS_0X0F)) {
         HILOGE("len or type error, len: %{public}u, type: %{public}u", len, type);
         return;
     }
-    uint32_t accessTokenId = payload[1] << CONTINUE_SHIFT_24 | payload[INDEX_2] << CONTINUE_SHIFT_16 |
-        payload[INDEX_3] << CONTINUE_SHIFT_08 | payload[INDEX_4];
+    uint16_t bundleNameId = (payload[1] << CONTINUE_SHIFT_08) | payload[INDEX_2];
+    uint16_t continueTypeId = payload[INDEX_3];
+    HILOGD("bundleNameId: %{public}u, continueTypeId: %{public}u", bundleNameId, continueTypeId);
     int32_t state = ACTIVE;
     if (type == DMS_UNFOCUSED_TYPE) {
         state = INACTIVE;
@@ -111,7 +111,7 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
     } else {
         DmsRadar::GetInstance().RecvFocused("NotifyDataRecv");
     }
-    PostOnBroadcastBusiness(senderNetworkId, accessTokenId, state);
+    PostOnBroadcastBusiness(senderNetworkId, bundleNameId, state);
     HILOGI("NotifyDataRecv end");
 }
 
@@ -217,7 +217,7 @@ int32_t DMSContinueRecvMgr::VerifyBroadcastSource(const std::string& senderNetwo
 }
 
 void DMSContinueRecvMgr::PostOnBroadcastBusiness(const std::string& senderNetworkId,
-    uint32_t accessTokenId, const int32_t state, const int32_t delay, const int32_t retry)
+    uint16_t accessTokenId, const int32_t state, const int32_t delay, const int32_t retry)
 {
     auto feedfunc = [this, senderNetworkId, accessTokenId, state, retry]() mutable {
         DealOnBroadcastBusiness(senderNetworkId, accessTokenId, state, retry);
@@ -231,7 +231,7 @@ void DMSContinueRecvMgr::PostOnBroadcastBusiness(const std::string& senderNetwor
 }
 
 int32_t DMSContinueRecvMgr::RetryPostBroadcast(const std::string& senderNetworkId,
-    uint32_t accessTokenId, const int32_t state, const int32_t retry)
+    uint16_t accessTokenId, const int32_t state, const int32_t retry)
 {
     HILOGI("Retry post broadcast, current retry times %{public}d", retry);
     if (retry == DBMS_RETRY_MAX_TIME) {
@@ -243,7 +243,7 @@ int32_t DMSContinueRecvMgr::RetryPostBroadcast(const std::string& senderNetworkI
 }
 
 int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNetworkId,
-    uint32_t accessTokenId, const int32_t state, const int32_t retry)
+    uint16_t accessTokenId, const int32_t state, const int32_t retry)
 {
     HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, accessTokenId: %{public}u, state: %{public}d",
         DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), accessTokenId, state);

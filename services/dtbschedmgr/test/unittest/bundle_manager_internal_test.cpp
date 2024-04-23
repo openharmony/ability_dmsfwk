@@ -522,8 +522,8 @@ HWTEST_F(BundleManagerInternalTest, GetBundleIdFromBms_001, TestSize.Level3)
 {
     DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_001 begin" << std::endl;
     const std::string bundleName = "ohos.samples.dms.testApp";
-    uint32_t accessTokenId;
-    int32_t ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
+    uint16_t accessTokenId = 0;
+    int32_t ret = BundleManagerInternal::GetBundleNameId(bundleName, accessTokenId);
     EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
     DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_001 end "<< std::endl;
 }
@@ -537,10 +537,10 @@ HWTEST_F(BundleManagerInternalTest, GetBundleIdFromBms_002, TestSize.Level3)
 {
     DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_002 begin" << std::endl;
     const std::string bundleName = "com.ohos.mms";
-    uint32_t accessTokenId;
+    uint16_t accessTokenId = 0;
     BundleManagerInternal::GetDistributedBundleManager();
-    int32_t ret = BundleManagerInternal::GetBundleIdFromBms(bundleName, accessTokenId);
-    EXPECT_EQ(ret, ERR_OK);
+    int32_t ret = BundleManagerInternal::GetBundleNameId(bundleName, accessTokenId);
+    EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
     DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_002 end "<< std::endl;
 }
 }
