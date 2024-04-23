@@ -201,27 +201,30 @@ DistributedWantParams DistributedWantParamWrapper::ParseWantParams(const std::st
             key = "";
             typeId = 0;
             strnum = num + 1;
-        } else if (str[strnum] == '"') {
-            if (key == "") {
-                strnum++;
-                key = str.substr(strnum, str.find('"', strnum) - strnum);
-                strnum = str.find('"', strnum);
-            } else if (typeId == 0) {
-                strnum++;
-                typeId = GerTypedId(str, strnum);
-                if (errno == ERANGE) {
-                    return wantParams;
-                }
-                strnum = str.find('"', strnum);
-            } else {
-                strnum++;
-                wantParams.SetParam(key,
-                    DistributedWantParams::GetInterfaceByType(typeId,
-                        str.substr(strnum, str.find('"', strnum) - strnum)));
-                strnum = str.find('"', strnum);
-                typeId = 0;
-                key = "";
+            continue;
+        }
+        if (str[strnum] != '"') {
+            continue;
+        }
+        if (key == "") {
+            strnum++;
+            key = str.substr(strnum, str.find('"', strnum) - strnum);
+            strnum = str.find('"', strnum);
+        } else if (typeId == 0) {
+            strnum++;
+            typeId = GerTypedId(str, strnum);
+            if (errno == ERANGE) {
+                return wantParams;
             }
+            strnum = str.find('"', strnum);
+        } else {
+            strnum++;
+            wantParams.SetParam(key,
+                DistributedWantParams::GetInterfaceByType(typeId,
+                    str.substr(strnum, str.find('"', strnum) - strnum)));
+            strnum = str.find('"', strnum);
+            typeId = 0;
+            key = "";
         }
     }
     return wantParams;
