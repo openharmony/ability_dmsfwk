@@ -273,6 +273,7 @@ int32_t DSchedContinueDataCmd::MarshalCallerInfo(std::string &jsonStr)
             return INVALID_PARAMETERS_ERR;
         }
         cJSON_AddItemToArray(bundleNames, bundleName);
+        cJSON_Delete(bundleName);
     }
     cJSON_AddItemToObject(callerInfoJson, "BundleNames", bundleNames);
 
@@ -313,6 +314,7 @@ int32_t DSchedContinueDataCmd::MarshalAccountInfo(std::string &jsonStr)
             return INVALID_PARAMETERS_ERR;
         }
         cJSON_AddItemToArray(groupIdList, groupId);
+        cJSON_Delete(groupId);
     }
     cJSON_AddItemToObject(accountInfoJson, "GroupIdList", groupIdList);
 
@@ -510,7 +512,7 @@ int32_t DSchedContinueDataCmd::UnmarshalCallerInfoExtra(std::string &jsonStr)
 
     cJSON *accessToken = cJSON_GetObjectItemCaseSensitive(extraInfoValue, EXTRO_INFO_JSON_KEY_ACCESS_TOKEN);
     if (accessToken != nullptr && cJSON_IsNumber(accessToken)) {
-        callerInfo_.accessToken = accessToken->valueint;
+        callerInfo_.accessToken = static_cast<unsigned int>(accessToken->valueint);
     }
 
     cJSON *dmsVersion = cJSON_GetObjectItemCaseSensitive(extraInfoValue, DMS_VERSION_ID);

@@ -48,6 +48,7 @@ DSchedSoftbusSession::DSchedSoftbusSession(SessionInfo &info)
     refCount_ = COUNT_INIT_NUM;
     maxSendBytesSize_ = 0;
     maxQos_ = 0;
+    ResetAssembleFrag();
 }
 
 DSchedSoftbusSession::~DSchedSoftbusSession()
