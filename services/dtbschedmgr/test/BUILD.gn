@@ -65,6 +65,7 @@ dsched_external_deps = [
   "kv_store:distributeddata_inner",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
+  "window_manager:libwsutils",
   "window_manager:scene_session",
   "window_manager:session_manager_lite",
 ]
