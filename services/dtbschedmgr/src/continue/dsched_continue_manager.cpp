@@ -116,6 +116,7 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
         HILOGE("srcDeviceId or dstDeviceId or callback is null!");
         return;
     }
+
     std::string localDevId;
     if (!GetLocalDeviceId(localDevId)) {
         HILOGE("get local deviceId failed!");
@@ -471,6 +472,19 @@ bool DSchedContinueManager::GetLocalDeviceId(std::string& localDeviceId)
         return false;
     }
     return true;
+}
+
+int32_t DSchedContinueManager::GetContinueInfo(std::string &srcDeviceId, std::string &dstDeviceId)
+{
+    HILOGI("called");
+    std::lock_guard<std::mutex> continueLock(continueMutex_);
+    if (continues_.empty()) {
+        HILOGW("No continuation in progress.");
+        return ERR_OK;
+    }
+    dstDeviceId = continues_.begin()->second->GetContinueInfo().sinkDeviceId_;
+    srcDeviceId = continues_.begin()->second->GetContinueInfo().sourceDeviceId_;
+    return ERR_OK;
 }
 
 void DSchedContinueManager::OnShutdown(int32_t socket, bool isSelfCalled)

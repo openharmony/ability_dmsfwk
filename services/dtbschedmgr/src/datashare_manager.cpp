@@ -16,6 +16,7 @@
 #include "datashare_manager.h"
 
 #include "distributed_sched_utils.h"
+#include "dsched_continue_manager.h"
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/dms_continue_send_manager.h"
@@ -79,9 +80,11 @@ void DataShareRegisterObserver::OnChange(const ChangeInfo &changeInfo)
 
     if (IsContinueSwitchOn) {
         DMSContinueSendMgr::GetInstance().NotifyMissionFocused(missionId, FocusedReason::INIT);
+        DSchedContinueManager::GetInstance().Init();
     } else {
         DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(missionId, UnfocusedReason::NORMAL);
         DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
+        DSchedContinueManager::GetInstance().UnInit();
     }
     HILOGI("DataShareRegisterObserver OnChange done");
 }

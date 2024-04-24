@@ -32,11 +32,11 @@ namespace {
 const std::string TAG = "DmsContinueTime";
 const std::string DMSDURATION_STARTTIME = "Continue Start Time: ";
 const std::string DMSDURATION_ENDTIME = "Continue End Time  : ";
-const std::string DMSDURATION_TOTAL = "Total Time Cost          : ";
-const std::string DMSDURATION_SINKTOSOURCERPC = "--Sink to Source RPC Cost: ";
-const std::string DMSDURATION_SOURCEDATASAVE = "--Source Data Save Cost  : ";
-const std::string DMSDURATION_SOURCETOSINKRPC = "--Source to Sink RPC Cost: ";
-const std::string DMSDURATION_SINKABILITYSTART = "--Sink Ability Start Cost: ";
+const std::string DMSDURATION_TOTAL = "Total Time Cost             : ";
+const std::string DMSDURATION_SINKTOSOURCERPC = "-- Request Transaction Cost : ";
+const std::string DMSDURATION_SOURCEDATASAVE = "-- Source Data Save Cost    : ";
+const std::string DMSDURATION_SOURCETOSINKRPC = "-- Data Transaction Cost    : ";
+const std::string DMSDURATION_SINKABILITYSTART = "-- Sink Ability Start Cost  : ";
 constexpr int32_t DMSDURATION_MAXSIZE = 100;
 constexpr int32_t DMSDURATION_SPACE = 40;
 constexpr int32_t DMSDURATION_TOTALTIME = 2;
@@ -347,12 +347,11 @@ void DmsContinueTime::DealDurationPush()
             duration.SetStrTime(std::to_string(duration.GetDurationTime()) += "ms");
         }
     }
-    durationInfo_[DMSDURATION_TOTALTIME].SetDurationTime(
-        durationInfo_[DMSDURATION_SAVETIME].GetDurationTime() +
-        durationInfo_[DMSDURATION_STARTABILITY].GetDurationTime() +
+    durationInfo_[DMSDURATION_STARTABILITY].SetDurationTime(
+        durationInfo_[DMSDURATION_STARTABILITY].GetDurationTime() -
         durationInfo_[DMSDURATION_SRCTODSTRPCTIME].GetDurationTime());
-    durationInfo_[DMSDURATION_TOTALTIME].SetStrTime(
-        std::to_string(durationInfo_[DMSDURATION_TOTALTIME].GetDurationTime()) += "ms");
+    durationInfo_[DMSDURATION_STARTABILITY].SetStrTime(
+        std::to_string(durationInfo_[DMSDURATION_STARTABILITY].GetDurationTime()) += "ms");
 }
 
 void DmsContinueTime::AppendInfo()
@@ -364,10 +363,9 @@ void DmsContinueTime::AppendInfo()
     } else {
         SetDeviceNamePush();
         DealDurationPush();
-        durationInfo_[DMSDURATION_DSTTOSRCRPCTIME].SetStrTime("NA");
         appendInfo_.append("PUSH\n");
     }
-    
+
     std::stringstream str;
     str << "== SOURCE ==\n"
         << "Network Id  : " << std::setw(DMSDURATION_SPACE) << std::left

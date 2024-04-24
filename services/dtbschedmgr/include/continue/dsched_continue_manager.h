@@ -54,6 +54,8 @@ public:
     void OnShutdown(int32_t socket, bool isSelfCalled);
     void OnBind();
 
+    int32_t GetContinueInfo(std::string &srcDeviceId, std::string &dstDeviceId);
+
 private:
     void StartEvent();
     void HandleContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId, int32_t missionId,
