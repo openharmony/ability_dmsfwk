@@ -1423,21 +1423,21 @@ std::string DistributedWant::Decode(const std::string& str)
                 i++;
                 continue;
             }
-            if (str[i] == '0') {
-                if (str.compare(i, OCT_EQUALSTO.length(), OCT_EQUALSTO) == 0) {
-                    dDecode += "=";
-                    i += OCT_EQUALSTO.length();
-                } else if (str.compare(i, OCT_SEMICOLON.length(), OCT_SEMICOLON) == 0) {
-                    dDecode += ";";
-                    i += OCT_SEMICOLON.length();
-                } else {
-                    dDecode += "\\" + str.substr(i, 1);
-                    i++;
-                }
+            if (str[i] != '0') {
+                dDecode += "\\" + str.substr(i, 1);
+                i++;
                 continue;
             }
-            dDecode += "\\" + str.substr(i, 1);
-            i++;
+            if (str.compare(i, OCT_EQUALSTO.length(), OCT_EQUALSTO) == 0) {
+                dDecode += "=";
+                i += OCT_EQUALSTO.length();
+            } else if (str.compare(i, OCT_SEMICOLON.length(), OCT_SEMICOLON) == 0) {
+                dDecode += ";";
+                i += OCT_SEMICOLON.length();
+            } else {
+                dDecode += "\\" + str.substr(i, 1);
+                i++;
+            }
         } else {
             dDecode += str[i];
             i++;
