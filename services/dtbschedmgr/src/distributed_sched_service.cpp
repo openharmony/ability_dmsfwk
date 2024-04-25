@@ -1003,6 +1003,23 @@ void DistributedSchedService::NotifyDSchedEventCallbackResult(const std::string 
     HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
 }
 
+void DistributedSchedService::NotifyDSchedEventCallbackResult(const std::string type, int32_t resultCode,
+    const ContinueEvent& event)
+{
+    HILOGD("Continuation result is: %{public}d", resultCode);
+    if (dschedContinuation_ == nullptr) {
+        HILOGE("continuation object null!");
+        return;
+    }
+    dschedContinuation_->continueEvent_.srcNetworkId = event.srcNetworkId;
+    dschedContinuation_->continueEvent_.dstNetworkId = event.dstNetworkId;
+    dschedContinuation_->continueEvent_.bundleName = event.bundleName;
+    dschedContinuation_->continueEvent_.moduleName = event.moduleName;
+    dschedContinuation_->continueEvent_.abilityName = event.abilityName;
+    int dSchedEventresult = dschedContinuation_->NotifyDSchedEventResult(type, resultCode);
+    HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
+}
+
 void DistributedSchedService::RemoteConnectAbilityMappingLocked(const sptr<IRemoteObject>& connect,
     const std::string& localDeviceId, const std::string& remoteDeviceId, const AppExecFwk::ElementName& element,
     const CallerInfo& callerInfo, TargetComponent targetComponent)

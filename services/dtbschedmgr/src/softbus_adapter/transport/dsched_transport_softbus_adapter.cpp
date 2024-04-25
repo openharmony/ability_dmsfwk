@@ -266,6 +266,7 @@ int32_t DSchedTransportSoftbusAdapter::SendData(int32_t sessionId, int32_t dataT
     std::lock_guard<std::mutex> sessionLock(sessionMutex_);
     if (!sessions_.count(sessionId)) {
         HILOGE("error, invalid session id %d", sessionId);
+        return INVALID_SESSION_ID;
     }
     return sessions_[sessionId]->SendData(dataBuffer, dataType);
 }

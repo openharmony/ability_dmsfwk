@@ -20,8 +20,13 @@
 #include "ability_manager_client.h"
 #include "bool_wrapper.h"
 #include "bundle/bundle_manager_internal.h"
+#include "continue_scene_session_handler.h"
+#include "datetime_ex.h"
+#include "dfx/dms_continue_time_dumper.h"
+#include "distributed_radar.h"
 #include "distributed_sched_permission.h"
 #include "distributed_sched_service.h"
+#include "distributed_sched_utils.h"
 #include "dsched_continue_event.h"
 #include "dsched_continue_manager.h"
 #include "dsched_data_buffer.h"
@@ -45,6 +50,9 @@ const std::string DMS_VERSION_ID = "dmsVersion";
 const std::string SUPPORT_CONTINUE_PAGE_STACK_KEY = "ohos.extra.param.key.supportContinuePageStack";
 const std::string SUPPORT_CONTINUE_SOURCE_EXIT_KEY = "ohos.extra.param.key.supportContinueSourceExit";
 const std::string SUPPORT_CONTINUE_MODULE_NAME_UPDATE_KEY = "ohos.extra.param.key.supportContinueModuleNameUpdate";
+const std::string DMSDURATION_SAVETIME = "ohos.dschedule.SaveDataTime";
+const std::string DMS_PERSISTENT_ID = "ohos.dms.persistentId";
+const std::string DSCHED_EVENT_KEY = "IDSchedEventListener";
 const std::u16string NAPI_MISSION_CALLBACK_INTERFACE_TOKEN = u"ohos.DistributedSchedule.IMissionCallback";
 
 constexpr int32_t DSCHED_CONTINUE_PROTOCOL_VERSION = 1;
@@ -53,6 +61,13 @@ constexpr int32_t DEFAULT_REQUEST_CODE = -1;
 constexpr int32_t NOTIFY_MISSION_CALLBACK_RESULT = 4;
 constexpr int32_t DMS_VERSION = 5;
 constexpr int32_t START_PERMISSION = 0;
+
+constexpr int32_t CONTINUE_BEGIN_TIME = 0;
+constexpr int32_t CONTINUE_END_TIME = 1;
+constexpr int32_t CONTINUE_TOTAL_TIME = 2;
+constexpr int32_t CONTINUE_FIRST_TRANS_TIME = 3;
+constexpr int32_t CONTINUE_DATA_TRANS_TIME = 5;
+constexpr int32_t CONTINUE_START_ABILITY_TIME = 6;
 }
 
 DSchedContinue::DSchedContinue(int32_t subServiceType, int32_t direction,  const sptr<IRemoteObject>& callback,
@@ -382,6 +397,13 @@ void DSchedContinue::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
 int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams> wantParams)
 {
     HILOGI("ExecuteContinueReq start, continueInfo: %s", continueInfo_.toString().c_str());
+    DurationDumperStart();
+    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK);
+
+    if (subServiceType_ == CONTINUE_PULL) {
+        DistributedSchedService::GetInstance().QuickStartAbility(continueInfo_.sinkBundleName_);
+    }
+
     std::string peerDeviceId = (direction_ == CONTINUE_SOURCE) ?
         continueInfo_.sinkDeviceId_ : continueInfo_.sourceDeviceId_;
     softbusSessionId_ = DSchedTransportSoftbusAdapter::GetInstance().ConnectDevice(peerDeviceId);
@@ -406,9 +428,23 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
     }
     if (direction_ == CONTINUE_SINK) {
         stateMachine_->UpdateState(DSCHED_CONTINUE_DATA_STATE);
+        DmsContinueTime::GetInstance().SetDurationEnd(CONTINUE_FIRST_TRANS_TIME, GetTickCount());
     }
     HILOGI("ExecuteContinueReq end");
     return ERR_OK;
+}
+
+void DSchedContinue::DurationDumperStart()
+{
+    DmsContinueTime::GetInstance().Init();
+    DmsContinueTime::GetInstance().SetNetWorkId(continueInfo_.sourceDeviceId_, continueInfo_.sinkDeviceId_);
+    DmsContinueTime::GetInstance().SetPull(subServiceType_ == CONTINUE_PULL);
+
+    std::string strBeginTime = DmsContinueTime::GetInstance().GetCurrentTime();
+    DmsContinueTime::GetInstance().SetDurationStrTime(CONTINUE_BEGIN_TIME, strBeginTime);
+    int64_t tick = GetTickCount();
+    DmsContinueTime::GetInstance().SetDurationBegin(CONTINUE_TOTAL_TIME, tick);
+    DmsContinueTime::GetInstance().SetDurationBegin(CONTINUE_FIRST_TRANS_TIME, tick);
 }
 
 int32_t DSchedContinue::PackStartCmd(std::shared_ptr<DSchedContinueStartCmd>& cmd,
@@ -457,10 +493,15 @@ int32_t DSchedContinue::ExecuteContinueAbility(int32_t appVersion)
         return result;
     }
 
+    auto tick = GetTickCount();
+    DmsContinueTime::GetInstance().SetDurationEnd(CONTINUE_FIRST_TRANS_TIME, tick);
+    DmsContinueTime::GetInstance().SetSaveDataDurationBegin(tick);
+
     HILOGI("ExecuteContinueAbility call continueAbility begin, continueInfo: %s", continueInfo_.toString().c_str());
     result = AbilityManagerClient::GetInstance()->ContinueAbility(continueInfo_.sinkDeviceId_,
         continueInfo_.missionId_, appVersion);
     HILOGI("ExecuteContinueAbility call continueAbility end, result: %d.", result);
+    DmsRadar::GetInstance().SaveDataDmsContinue("ContinueAbility", result);
 
     if (result != ERR_OK) {
         return CONTINUE_CALL_CONTINUE_ABILITY_FAILED;
@@ -484,6 +525,11 @@ int32_t DSchedContinue::GetMissionIdByBundleName()
 
 int32_t DSchedContinue::CheckContinueAbilityPermission()
 {
+    if (!CheckBundleContinueConfig(continueInfo_.sourceBundleName_)) {
+        HILOGI("App does not allow continue in config file, bundle name %s", continueInfo_.sourceBundleName_.c_str());
+        return REMOTE_DEVICE_BIND_ABILITY_ERR;
+    }
+
     MissionInfo missionInfo;
     int32_t result = AbilityManagerClient::GetInstance()->GetMissionInfo("", continueInfo_.missionId_, missionInfo);
     if (result != ERR_OK) {
@@ -501,6 +547,7 @@ int32_t DSchedContinue::CheckContinueAbilityPermission()
 int32_t DSchedContinue::ExecuteContinueReply()
 {
     HILOGI("ExecuteContinueReply start, continueInfo: %s", continueInfo_.toString().c_str());
+
     AppExecFwk::BundleInfo bundleInfo;
     if (BundleManagerInternal::GetLocalBundleInfoV9(continueInfo_.sourceBundleName_, bundleInfo) != ERR_OK) {
         HILOGE("ExecuteContinueReply get local bundleInfo failed, the bundle is not installed on local device.");
@@ -525,6 +572,9 @@ int32_t DSchedContinue::ExecuteContinueReply()
 int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data)
 {
     HILOGI("ExecuteContinueSend start, continueInfo: %s", continueInfo_.toString().c_str());
+    DmsRadar::GetInstance().SaveDataDmsRemoteWant("StartRemoteAbility", ERR_OK);
+    DurationDumperBeforeStartRemoteAbility();
+
     SetCleanMissionFlag(data->want);
 
     AAFwk::Want newWant = data->want;
@@ -569,9 +619,20 @@ int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData>
         HILOGE("ExecuteContinueSend send data cmd failed, ret %d", ret);
         return ret;
     }
+
+    DmsContinueTime::GetInstance().SetDurationEnd(CONTINUE_DATA_TRANS_TIME, GetTickCount());
+
     stateMachine_->UpdateState(DSCHED_CONTINUE_SOURCE_WAIT_END_STATE);
     HILOGI("ExecuteContinueSend end");
     return ERR_OK;
+}
+
+void DSchedContinue::DurationDumperBeforeStartRemoteAbility()
+{
+    auto tick = GetTickCount();
+    DmsContinueTime::GetInstance().SetSaveDataDurationEnd(tick);
+    DmsContinueTime::GetInstance().SetDurationBegin(CONTINUE_DATA_TRANS_TIME, tick);
+    DmsContinueTime::GetInstance().SetDurationBegin(CONTINUE_START_ABILITY_TIME, tick);
 }
 
 void DSchedContinue::SetCleanMissionFlag(const OHOS::AAFwk::Want& want)
@@ -587,12 +648,14 @@ int32_t DSchedContinue::SetWantForContinuation(AAFwk::Want& newWant)
 {
     newWant.SetParam("sessionId", continueInfo_.missionId_);
     newWant.SetParam("deviceId", continueInfo_.sourceDeviceId_);
+
     AppExecFwk::BundleInfo localBundleInfo;
     if (BundleManagerInternal::GetLocalBundleInfo(newWant.GetBundle(), localBundleInfo) != ERR_OK) {
         HILOGE("get local bundle info failed");
         return INVALID_PARAMETERS_ERR;
     }
     newWant.SetParam(VERSION_CODE_KEY, static_cast<int32_t>(localBundleInfo.versionCode));
+    HILOGD("local version = %u!", localBundleInfo.versionCode);
 
     bool isPageStackContinue = newWant.GetBoolParam(SUPPORT_CONTINUE_PAGE_STACK_KEY, true);
     std::string moduleName = newWant.GetStringParam(SUPPORT_CONTINUE_MODULE_NAME_UPDATE_KEY);
@@ -601,7 +664,16 @@ int32_t DSchedContinue::SetWantForContinuation(AAFwk::Want& newWant)
         auto element = newWant.GetElement();
         newWant.SetElementName(element.GetDeviceID(), element.GetBundleName(), element.GetAbilityName(), moduleName);
     }
-    HILOGD("local version = %u!", localBundleInfo.versionCode);
+
+    std::string saveDataTime =
+        DmsContinueTime::GetInstance().WriteDurationInfo(DmsContinueTime::GetInstance().GetSaveDataDuration());
+    newWant.SetParam(DMSDURATION_SAVETIME, saveDataTime);
+    if (subServiceType_ == CONTINUE_PUSH) {
+        DmsContinueTime::GetInstance().SetSrcBundleName(newWant.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetSrcAbilityName(newWant.GetElement().GetAbilityName());
+        DmsContinueTime::GetInstance().SetDstBundleName(newWant.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetDstAbilityName(newWant.GetElement().GetAbilityName());
+    }
     return ERR_OK;
 }
 
@@ -635,6 +707,7 @@ int32_t DSchedContinue::PackDataCmd(std::shared_ptr<DSchedContinueDataCmd>& cmd,
 int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
     HILOGI("ExecuteContinueData start, continueInfo: %s", continueInfo_.toString().c_str());
+    DurationDumperBeforeStartAbility(cmd);
 
     std::string localDeviceId;
     std::string deviceId = cmd->want_.GetElement().GetDeviceID();
@@ -664,8 +737,15 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
         return ret;
     }
 
+    int32_t persistentId;
+    if (ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId) == ERR_OK) {
+        HILOGI("get persistentId success, persistentId: %d", persistentId);
+        cmd->want_.SetParam(DMS_PERSISTENT_ID, persistentId);
+    }
+
     HILOGI("ExecuteContinueData StartAbility start");
     ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(cmd->want_, cmd->requestCode_, activeAccountId);
+    DmsRadar::GetInstance().ClickIconDmsStartAbility("StartAbility", ret);
     if (ret != ERR_OK) {
         HILOGE("ExecuteContinueData StartAbility failed %d", ret);
         return ret;
@@ -676,9 +756,27 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
     return ERR_OK;
 }
 
+void DSchedContinue::DurationDumperBeforeStartAbility(std::shared_ptr<DSchedContinueDataCmd> cmd)
+{
+    if (subServiceType_ == CONTINUE_PULL) {
+        std::string timeInfo = cmd->want_.GetStringParam(DMSDURATION_SAVETIME);
+        DmsContinueTime::GetInstance().ReadDurationInfo(timeInfo.c_str());
+        DmsContinueTime::GetInstance().SetSrcBundleName(cmd->want_.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetSrcAbilityName(cmd->want_.GetElement().GetAbilityName());
+        DmsContinueTime::GetInstance().SetDstBundleName(cmd->want_.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetDstAbilityName(cmd->want_.GetElement().GetAbilityName());
+    }
+    DmsContinueTime::GetInstance().SetDurationBegin(CONTINUE_START_ABILITY_TIME, GetTickCount());
+
+    eventData_.moduleName = cmd->want_.GetElement().GetModuleName();
+    eventData_.abilityName = cmd->want_.GetElement().GetAbilityName();
+}
+
 int32_t DSchedContinue::ExecuteNotifyComplete(int32_t result)
 {
     HILOGI("ExecuteNotifyComplete start, continueInfo: %s", continueInfo_.toString().c_str());
+    DmsContinueTime::GetInstance().SetDurationEnd(CONTINUE_START_ABILITY_TIME, GetTickCount());
+
     int32_t ret = 0;
     if (direction_ == CONTINUE_SINK) {
         auto cmd = std::make_shared<DSchedContinueEndCmd>();
@@ -737,11 +835,6 @@ int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
 {
     HILOGI("ExecuteContinueEnd start, continueInfo: %s", continueInfo_.toString().c_str());
 
-    int32_t ret = NotifyContinuationCallbackResult(result);
-    if (ret != ERR_OK) {
-        HILOGE("ExecuteContinueEnd NotifyContinuationCallbackResult failed, ret %d", ret);
-    }
-
     std::string peerDeviceId = (direction_ == CONTINUE_SOURCE) ?
         continueInfo_.sinkDeviceId_ : continueInfo_.sourceDeviceId_;
     if (result != ERR_OK ||
@@ -753,35 +846,73 @@ int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
     }
 
     if (result == ERR_OK && direction_ == CONTINUE_SOURCE && isSourceExit_) {
-        ret = AbilityManagerClient::GetInstance()->CleanMission(continueInfo_.missionId_);
-        HILOGD("ExecuteContinueEnd clean mission result:%{public}d", ret);
+        int32_t ret = AbilityManagerClient::GetInstance()->CleanMission(continueInfo_.missionId_);
+        HILOGD("ExecuteContinueEnd clean mission result: %d", ret);
     }
+
+    if (direction_ == CONTINUE_SOURCE) {
+        DmsRadar::GetInstance().ClickIconDmsRecvOver("NotifyContinuationResultFromRemote", result);
+    }
+
+    NotifyContinuationCallbackResult(result);
+    NotifyDSchedEventResult(result);
+    DurationDumperComplete(result);
 
     DSchedContinueManager::GetInstance().OnContinueEnd(continueInfo_);
     HILOGI("ExecuteContinueEnd end");
     return ERR_OK;
 }
 
-int32_t DSchedContinue::NotifyContinuationCallbackResult(int32_t result)
+void DSchedContinue::NotifyContinuationCallbackResult(int32_t result)
 {
     HILOGD("continuation result is: %d", result);
     if (callback_ == nullptr) {
         HILOGW("callback object null.");
-        return ERR_OK;
+        return;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(NAPI_MISSION_CALLBACK_INTERFACE_TOKEN)) {
         HILOGE("write token failed");
-        return INVALID_PARAMETERS_ERR;
+        return;
     }
-    PARCEL_WRITE_HELPER_RET(data, Int32, (result == ERR_OK) ? 0 : NOTIFYCOMPLETECONTINUATION_FAILED,
-        INVALID_PARAMETERS_ERR);
+    PARCEL_WRITE_HELPER_NORET(data, Int32, (result == ERR_OK) ? 0 : NOTIFYCOMPLETECONTINUATION_FAILED);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = callback_->SendRequest(NOTIFY_MISSION_CALLBACK_RESULT, data, reply, option);
-    HILOGD("send request ret: %d", ret);
-    return ret;
+    if (ret != ERR_OK) {
+        HILOGE("send request failed, ret: %d", ret);
+    }
+    return;
+}
+
+void DSchedContinue::NotifyDSchedEventResult(int32_t result)
+{
+    if (direction_ == CONTINUE_SINK) {
+        ContinueEvent event;
+        event.srcNetworkId = continueInfo_.sourceDeviceId_;
+        event.dstNetworkId = continueInfo_.sinkDeviceId_;
+        event.bundleName = continueInfo_.sourceBundleName_;
+        event.moduleName = eventData_.moduleName;
+        event.abilityName = eventData_.abilityName;
+        DistributedSchedService::GetInstance().NotifyDSchedEventCallbackResult(DSCHED_EVENT_KEY, result, event);
+    }
+}
+
+void DSchedContinue::DurationDumperComplete(int32_t result)
+{
+    if (result != ERR_OK) {
+        return;
+    }
+    if ((subServiceType_ == CONTINUE_PULL && direction_ == CONTINUE_SINK) ||
+        (subServiceType_ == CONTINUE_PUSH && direction_ == CONTINUE_SOURCE)) {
+        std::string strEndTime = DmsContinueTime::GetInstance().GetCurrentTime();
+        DmsContinueTime::GetInstance().SetDurationEnd(CONTINUE_TOTAL_TIME, GetTickCount());
+        DmsContinueTime::GetInstance().SetDurationStrTime(CONTINUE_END_TIME, strEndTime);
+        DmsContinueTime::GetInstance().AppendInfo();
+        DmsContinueTime::GetInstance().SetPull(false);
+    }
+    return;
 }
 
 int32_t DSchedContinue::ExecuteContinueError(int32_t result)
@@ -828,8 +959,8 @@ int32_t DSchedContinue::SendCommand(std::shared_ptr<DSchedContinueCmdBase> cmd)
         return ret;
     }
     auto buffer = std::make_shared<DSchedDataBuffer>(jsonStr.length() + 1);
-    ret = memcpy_s(buffer->Data(), buffer->Capacity(), reinterpret_cast<uint8_t *>(const_cast<char *>(jsonStr.c_str())),
-        jsonStr.length());
+    ret = memcpy_s(buffer->Data(), buffer->Capacity(),
+        reinterpret_cast<uint8_t *>(const_cast<char *>(jsonStr.c_str())), jsonStr.length());
     if (ret != ERR_OK) {
         HILOGE("SendCommand memcpy_s failed, cmd %d, ret %d", cmd->command_, ret);
         return ret;

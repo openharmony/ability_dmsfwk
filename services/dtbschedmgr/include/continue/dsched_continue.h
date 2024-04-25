@@ -110,6 +110,10 @@ struct ContinueAbilityData {
     uint32_t accessToken;
 };
 
+struct ContinueEventData {
+    std::string moduleName;
+    std::string abilityName;
+};
 
 class DSchedContinue : public std::enable_shared_from_this<DSchedContinue> {
 public:
@@ -171,13 +175,17 @@ private:
 
     int32_t SetWantForContinuation(AAFwk::Want& newWant);
     void SetCleanMissionFlag(const OHOS::AAFwk::Want& want);
-    int32_t NotifyContinuationCallbackResult(int32_t result);
+    void NotifyContinuationCallbackResult(int32_t result);
     bool GetLocalDeviceId(std::string& localDeviceId);
     bool CheckDeviceIdFromRemote(const std::string& localDevId, const std::string& destDevId,
         const std::string& srcDevId);
     int32_t GetMissionIdByBundleName();
     int32_t CheckContinueAbilityPermission();
-    void NotifyDSchedEventResult(const std::string& type, int32_t resultCode);
+    void DurationDumperStart();
+    void DurationDumperBeforeStartRemoteAbility();
+    void DurationDumperBeforeStartAbility(std::shared_ptr<DSchedContinueDataCmd> cmd);
+    void DurationDumperComplete(int32_t result);
+    void NotifyDSchedEventResult(int32_t result);
 
 private:
     std::shared_ptr<DSchedContinueStateMachine> stateMachine_;
@@ -194,6 +202,7 @@ private:
     bool isSourceExit_ = true;
     int32_t softbusSessionId_ = 0;
     sptr<IRemoteObject> callback_ = nullptr;
+    ContinueEventData eventData_;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS
