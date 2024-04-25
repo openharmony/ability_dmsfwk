@@ -1377,10 +1377,11 @@ bool DistributedWant::ParseContent(const std::string& content, std::string& prop
     if (dPos != std::string::npos) {
         std::string subString = content.substr(0, dPos);
         prop = Decode(subString);
-        std::size_t length = content.length() - dPos - 1;
-        if (length <= 0) {
+        std::size_t length = content.length();
+        if (length < dPos + 1) {
             return false;
         }
+        length -= dPos - 1;
         subString = content.substr(dPos + 1, length);
         value = Decode(subString);
         return true;
@@ -1645,7 +1646,10 @@ bool DistributedWant::ReadFromJson(nlohmann::json& wantJson)
 
     std::string action = wantJson.at("action").get<std::string>();
     SetAction(action);
-
+    
+    if (!wantJson.at("parameters").is_string()) {
+        return false;
+    }
     std::string parametersString = wantJson.at("parameters").get<std::string>();
     DistributedWantParams parameters = DistributedWantParamWrapper::ParseWantParams(parametersString);
     SetParams(parameters);

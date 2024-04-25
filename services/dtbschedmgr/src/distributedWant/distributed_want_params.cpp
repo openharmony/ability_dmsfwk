@@ -1271,7 +1271,7 @@ bool DistributedWantParams::ReadFromParcel(Parcel& parcel)
     if (!parcel.ReadInt32(size)) {
         return false;
     }
-    if (size > parcel.GetDataSize()) {
+    if (size > static_cast<int32_t>(parcel.GetDataSize())) {
         return false;
     }
     for (int32_t i = 0; i < size; i++) {

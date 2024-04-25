@@ -382,7 +382,7 @@ void DSchedContinueManager::HandleDataRecv(int32_t sessionId, std::shared_ptr<DS
 
     cJSON *comvalue = cJSON_GetObjectItemCaseSensitive(cmdValue, "Command");
     if (comvalue == nullptr || !cJSON_IsNumber(comvalue)) {
-        cJSON_Delete(comvalue);
+        cJSON_Delete(cmdValue);
         HILOGE("parse command failed");
         return;
     }

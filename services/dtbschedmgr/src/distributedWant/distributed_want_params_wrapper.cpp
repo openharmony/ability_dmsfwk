@@ -131,41 +131,43 @@ size_t DistributedWantParamWrapper::FindMatchingBrace(const std::string& str, si
 sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::string& str)
 {
     DistributedWantParams wantParams;
-    if (ValidateStr(str)) {
-        std::string strKey = "";
-        int typeId = 0;
-        for (size_t strnum = 0; strnum < str.size(); strnum++) {
-            if (str[strnum] == '{' && strKey != "" && typeId == DistributedWantParams::VALUE_TYPE_WANTPARAMS) {
-                size_t num = FindMatchingBrace(str, strnum);
-                wantParams.SetParam(strKey, DistributedWantParamWrapper::Parse(str.substr(strnum, num - strnum + 1)));
-                strKey = "";
-                typeId = 0;
-                strnum = num + 1;
-            } else if (str[strnum] == '"') {
-                if (strKey == "") {
-                    strnum++;
-                    size_t pos = str.find('"', strnum);
-                    if (pos != std::string::npos) {
-                        strKey = str.substr(strnum, pos - strnum);
-                    }
-                    strnum = pos;
-                } else if (typeId == 0) {
-                    strnum++;
-                    typeId = atoi(str.substr(strnum, str.find('"', strnum) - strnum).c_str());
-                    if (errno == ERANGE) {
-                        return nullptr;
-                    }
-                    strnum = str.find('"', strnum);
-                } else {
-                    strnum++;
-                    wantParams.SetParam(strKey,
-                        DistributedWantParams::GetInterfaceByType(typeId,
-                            str.substr(strnum, str.find('"', strnum) - strnum)));
-                    strnum = str.find('"', strnum);
-                    typeId = 0;
-                    strKey = "";
-                }
+    if (!ValidateStr(str)) {
+        return nullptr;
+    }
+    std::string strKey = "";
+    int typeId = 0;
+    for (size_t strnum = 0; strnum < str.size(); strnum++) {
+        if (str[strnum] == '{' && strKey != "" && typeId == DistributedWantParams::VALUE_TYPE_WANTPARAMS) {
+            size_t num = FindMatchingBrace(str, strnum);
+            wantParams.SetParam(strKey, DistributedWantParamWrapper::Parse(str.substr(strnum, num - strnum + 1)));
+            strKey = "";
+            typeId = 0;
+            strnum = num + 1;
+        } else if (str[strnum] != '"') {
+            continue;
+        }
+        if (strKey == "") {
+            strnum++;
+            size_t pos = str.find('"', strnum);
+            if (pos != std::string::npos) {
+                strKey = str.substr(strnum, pos - strnum);
             }
+            strnum = pos;
+        } else if (typeId == 0) {
+            strnum++;
+            typeId = GerTypedId(str, strnum);
+            if (errno == ERANGE) {
+                return nullptr;
+            }
+            strnum = str.find('"', strnum);
+        } else {
+            strnum++;
+            wantParams.SetParam(strKey,
+                DistributedWantParams::GetInterfaceByType(typeId,
+                    str.substr(strnum, str.find('"', strnum) - strnum)));
+            strnum = str.find('"', strnum);
+            typeId = 0;
+            strKey = "";
         }
     }
     sptr<IDistributedWantParams> iwantParams = new (std::nothrow) DistributedWantParamWrapper(wantParams);
@@ -178,7 +180,11 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
 int DistributedWantParamWrapper::GerTypedId(const std::string& str, size_t& strnum)
 {
     int typeId = 0;
-    std::string typeIdStr = str.substr(strnum, str.find('"', strnum) - strnum);
+    size_t nIdx = str.find('"', strnum);
+    if (nIdx < strnum) {
+        return typeId;
+    }
+    std::string typeIdStr = str.substr(strnum, nIdx - strnum);
     if (typeIdStr.empty()) {
         return typeId;
     }
@@ -208,7 +214,11 @@ DistributedWantParams DistributedWantParamWrapper::ParseWantParams(const std::st
         }
         if (key == "") {
             strnum++;
-            key = str.substr(strnum, str.find('"', strnum) - strnum);
+            size_t nIdx = str.find('"', strnum);
+            if (nIdx < strnum) {
+                continue;
+            }
+            key = str.substr(strnum, nIdx - strnum);
             strnum = str.find('"', strnum);
         } else if (typeId == 0) {
             strnum++;
