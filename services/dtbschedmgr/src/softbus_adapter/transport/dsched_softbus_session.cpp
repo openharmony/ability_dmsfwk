@@ -36,6 +36,7 @@ DSchedSoftbusSession::DSchedSoftbusSession()
     isServer_ = false;
     maxSendBytesSize_ = 0;
     maxQos_ = 0;
+    ResetAssembleFrag();
 }
 
 DSchedSoftbusSession::DSchedSoftbusSession(SessionInfo &info)

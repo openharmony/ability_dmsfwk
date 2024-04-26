@@ -471,7 +471,7 @@ int32_t DSchedContinue::PackStartCmd(std::shared_ptr<DSchedContinueStartCmd>& cm
             HILOGE("pack start cmd failed, the bundle is not installed on local device.");
             return ret;
         }
-        cmd->appVersion_ = localBundleInfo.versionCode;
+        cmd->appVersion_ = static_cast<int32_t>(localBundleInfo.versionCode);
     }
     cmd->wantParams_ = *wantParams;
     return ERR_OK;

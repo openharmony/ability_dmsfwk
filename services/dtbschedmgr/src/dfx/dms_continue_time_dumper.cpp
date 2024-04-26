@@ -252,11 +252,13 @@ void DmsContinueTime::ReadDurationInfo(const char* info)
     }
     cJSON* beginTimeItem = cJSON_GetObjectItem(durationInfo, "beginTime");
     if (beginTimeItem == NULL) {
+        cJSON_Delete(durationInfo);
         return;
     }
     int64_t beginTime = beginTimeItem->valueint;
     cJSON* endTimeItem = cJSON_GetObjectItem(durationInfo, "endTime");
     if (endTimeItem == NULL) {
+        cJSON_Delete(durationInfo);
         return;
     }
     int64_t endTime = endTimeItem->valueint;
@@ -293,11 +295,13 @@ void DmsContinueTime::ReadDstInfo(const char* info)
     }
     cJSON* bundleNameItem = cJSON_GetObjectItem(dstInfo, "DstBundleName");
     if (bundleNameItem == NULL) {
+        cJSON_Delete(dstInfo);
         return;
     }
     std::string bundleName = bundleNameItem->valuestring;
     cJSON* abilityNameItem = cJSON_GetObjectItem(dstInfo, "DstAbilityName");
     if (abilityNameItem == NULL) {
+        cJSON_Delete(dstInfo);
         return;
     }
     std::string abilityName = abilityNameItem->valuestring;
