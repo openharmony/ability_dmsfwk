@@ -26,6 +26,7 @@
 #include "dfx/dms_hitrace_constants.h"
 #include "distributed_want.h"
 #include "distributed_sched_permission.h"
+#include "dsched_continue_manager.h"
 #include "dtbschedmgr_log.h"
 #include "dtbschedmgr_device_info_storage.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
@@ -57,6 +58,8 @@ const std::string PARAM_FREEINSTALL_BUNDLENAMES = "ohos.freeinstall.params.calli
 const std::string CMPT_PARAM_FREEINSTALL_BUNDLENAMES = "ohos.extra.param.key.allowedBundles";
 const std::string DMS_VERSION_ID = "dmsVersion";
 const int DEFAULT_REQUEST_CODE = -1;
+
+constexpr bool IS_USING_QOS = true;
 }
 
 DistributedSchedStub::DistributedSchedStub()
@@ -411,7 +414,10 @@ int32_t DistributedSchedStub::ContinueMissionInner(MessageParcel& data, MessageP
         HILOGW("wantParams readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
-    int32_t result = ContinueMission(srcDevId, dstDevId, missionId, callback, *wantParams);
+
+    int32_t result = (IS_USING_QOS) ?
+        DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, missionId, callback, *wantParams) :
+        ContinueMission(srcDevId, dstDevId, missionId, callback, *wantParams);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
@@ -441,7 +447,9 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
         HILOGW("wantParams readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
-    int32_t result = ContinueMission(srcDevId, dstDevId, bundleName, callback, *wantParams);
+    int32_t result = (IS_USING_QOS) ?
+        DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, bundleName, callback, *wantParams) :
+        ContinueMission(srcDevId, dstDevId, bundleName, callback, *wantParams);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
@@ -450,7 +458,7 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
 {
     int64_t saveDataEnd = GetTickCount();
     DmsContinueTime::GetInstance().SetSaveDataDurationEnd(saveDataEnd);
-    
+
     if (!DistributedSchedPermission::GetInstance().IsFoundationCall()) {
         return DMS_PERMISSION_DENIED;
     }
@@ -468,7 +476,10 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
     PARCEL_READ_HELPER(data, Uint32, accessToken);
     HILOGI("get AccessTokenID = %{public}u", accessToken);
     DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
-    int32_t result = StartContinuation(*want, missionId, callerUid, status, accessToken);
+
+    int32_t result = (IS_USING_QOS) ?
+        DSchedContinueManager::GetInstance().StartContinuation(*want, missionId, callerUid, status, accessToken) :
+        StartContinuation(*want, missionId, callerUid, status, accessToken);
     ReportEvent(*want, BehaviorEvent::START_CONTINUATION, result, callerUid);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
@@ -491,7 +502,11 @@ int32_t DistributedSchedStub::NotifyCompleteContinuationInner(MessageParcel& dat
     PARCEL_READ_HELPER(data, Int32, sessionId);
     bool continuationResult = false;
     PARCEL_READ_HELPER(data, Bool, continuationResult);
-    NotifyCompleteContinuation(devId, sessionId, continuationResult);
+    if (IS_USING_QOS) {
+        DSchedContinueManager::GetInstance().NotifyCompleteContinuation(devId, sessionId, continuationResult);
+    } else {
+        NotifyCompleteContinuation(devId, sessionId, continuationResult);
+    }
     return ERR_OK;
 }
 
@@ -818,7 +833,9 @@ int32_t DistributedSchedStub::GetContinueInfoInner(MessageParcel& data, MessageP
     HILOGI("[PerformanceTest] called, IPC end = %{public}" PRId64, GetTickCount());
     std::string dstNetworkId;
     std::string srcNetworkId;
-    int32_t result = GetContinueInfo(dstNetworkId, srcNetworkId);
+    int32_t result = (IS_USING_QOS) ?
+        DSchedContinueManager::GetInstance().GetContinueInfo(dstNetworkId, srcNetworkId) :
+        GetContinueInfo(dstNetworkId, srcNetworkId);
     PARCEL_WRITE_HELPER(reply, String, dstNetworkId);
     PARCEL_WRITE_HELPER(reply, String, srcNetworkId);
     return result;
