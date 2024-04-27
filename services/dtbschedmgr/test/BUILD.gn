@@ -642,6 +642,9 @@ ohos_unittest("datasharemanagertest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("dschedcontinuestatetest") {
+}
+
 group("unittest") {
   testonly = true
   deps = [
