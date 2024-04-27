@@ -1084,7 +1084,7 @@ HWTEST_F(DSchedContinueStateMachineTest, CreateState_001, TestSize.Level3)
 HWTEST_F(DSchedContinueStateMachineTest, GetStateType_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinueStateMachineTest GetStateType_001 begin" << std::endl;
-    stateMachineTest_->currentState_ = nullptr; 
+    stateMachineTest_->currentState_ = nullptr;
     DSchedContinueStateType ret = stateMachineTest_->GetStateType();
     EXPECT_EQ(ret, DSCHED_CONTINUE_SOURCE_START_STATE);
     DTEST_LOG << "DSchedContinueStateMachineTest GetStateType_001 end" << std::endl;
