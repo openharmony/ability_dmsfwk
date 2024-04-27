@@ -996,7 +996,7 @@ HWTEST_F(DSchedContinueStateMachineTest, Execute_001, TestSize.Level3)
             delete event;
         }
     };
-    stateMachineTest_->currentState_ = nullptr; 
+    stateMachineTest_->currentState_ = nullptr;
     int32_t ret = stateMachineTest_->Execute(AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueStateMachineTest Execute_001 end" << std::endl;
