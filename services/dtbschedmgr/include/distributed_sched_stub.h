@@ -69,6 +69,7 @@ private:
     int32_t StartAbilityByCallFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t ReleaseAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t StartRemoteFreeInstallInner(MessageParcel& data, MessageParcel& reply);
+    int32_t CreateJsonObject(std::string& extraInfo, CallerInfo& callerInfo);
     int32_t StartFreeInstallFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t ReadDataForFreeInstall(MessageParcel& data,
         CallerInfo &callerInfo, AccountInfo &accountInfo, int64_t &taskId);

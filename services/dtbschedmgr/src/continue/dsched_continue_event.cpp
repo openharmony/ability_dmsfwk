@@ -273,7 +273,6 @@ int32_t DSchedContinueDataCmd::MarshalCallerInfo(std::string &jsonStr)
             return INVALID_PARAMETERS_ERR;
         }
         cJSON_AddItemToArray(bundleNames, bundleName);
-        cJSON_Delete(bundleName);
     }
     cJSON_AddItemToObject(callerInfoJson, "BundleNames", bundleNames);
 
@@ -314,7 +313,6 @@ int32_t DSchedContinueDataCmd::MarshalAccountInfo(std::string &jsonStr)
             return INVALID_PARAMETERS_ERR;
         }
         cJSON_AddItemToArray(groupIdList, groupId);
-        cJSON_Delete(groupId);
     }
     cJSON_AddItemToObject(accountInfoJson, "GroupIdList", groupIdList);
 

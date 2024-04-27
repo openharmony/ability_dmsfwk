@@ -18,8 +18,8 @@
 
 static napi_module _module = {
     .nm_filename = "continuation/libcontinuationmanager_napi.so/continuationmanager.js",
-    .nm_modname = "continuation.continuationManager",
     .nm_register_func = OHOS::DistributedSchedule::JsContinuationManagerInit,
+    .nm_modname = "continuation.continuationManager",
 };
 
 __attribute__((constructor)) static void NAPI_application_continuationmanager_AutoRegister()
