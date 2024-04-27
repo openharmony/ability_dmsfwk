@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -217,6 +217,40 @@ HWTEST_F(DmsSaClientTest, OnRemoveSystemAbility_001, TestSize.Level3)
     int32_t result = dmssaClient_->AddDSchedEventListener(TYPE, listener);
     EXPECT_EQ(result, NO_ERROR);
     DTEST_LOG << "DmsSaClientTest OnRemoveSystemAbility_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DmsSAStatusChangeOnAddSystemAbility_001
+ * @tc.desc: DmsSAStatusChangeOnAddSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I9K4JN
+ */
+HWTEST_F(DmsSaClientTest, DmsSAStatusChangeOnAddSystemAbility_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsSaClientTest DmsSAStatusChangeOnAddSystemAbility_001 start" << std::endl;
+    DmsSystemAbilityStatusChange dmsSystemAbilityStatusChange;
+    //systemAbilityId not is DISTRIBUTED_SCHED_SA_ID
+    dmsSystemAbilityStatusChange.OnAddSystemAbility(-1, DEVICE_ID);
+    //systemAbilityId is DISTRIBUTED_SCHED_SA_ID
+    dmsSystemAbilityStatusChange.OnAddSystemAbility(DISTRIBUTED_SCHED_SA_ID, DEVICE_ID);
+    DTEST_LOG << "DmsSaClientTest DmsSAStatusChangeOnAddSystemAbility_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DmsSAStatusChangeOnRemoveSystemAbility_001
+ * @tc.desc: DmsSAStatusChangeOnRemoveSystemAbility_001
+ * @tc.type: FUNC
+ * @tc.require: I9K4JN
+ */
+HWTEST_F(DmsSaClientTest, DmsSAStatusChangeOnRemoveSystemAbility_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsSaClientTest DmsSAStatusChangeOnRemoveSystemAbility_001 start" << std::endl;
+    DmsSystemAbilityStatusChange dmsSystemAbilityStatusChange;
+    //systemAbilityId not is DISTRIBUTED_SCHED_SA_ID
+    dmsSystemAbilityStatusChange.OnRemoveSystemAbility(-1, DEVICE_ID);
+    //systemAbilityId is DISTRIBUTED_SCHED_SA_ID
+    dmsSystemAbilityStatusChange.OnRemoveSystemAbility(DISTRIBUTED_SCHED_SA_ID, DEVICE_ID);
+    DTEST_LOG << "DmsSaClientTest DmsSAStatusChangeOnRemoveSystemAbility_001 end" << std::endl;
 }
 }
 }
