@@ -400,7 +400,7 @@ HWTEST_F(DSchedContinueDataStateTest, SinkGetStateType001, TestSize.Level3)
  * @tc.desc: DoContinueData
  * @tc.type: FUNC
  */
- HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueDataTask001, TestSize.Level3)
+HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueDataTask001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinueDataStateTest SinkDoContinueDataTask001 begin" << std::endl;
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
