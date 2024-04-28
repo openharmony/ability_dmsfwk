@@ -642,6 +642,30 @@ ohos_unittest("datasharemanagertest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("dschedcontinuestatetest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [ "unittest/continue/dsched_continue_state_test.cpp" ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = [ "${distributed_service}/dtbschedmgr:distributedschedsvr" ]
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -654,6 +678,7 @@ group("unittest") {
     ":dmsbasetest",
     ":dmsfreeinstallcbtest",
     ":dschedconnecttest",
+    ":dschedcontinuestatetest",
     ":dschedcontinuetest",
     ":dschedswitchstatustest",
     ":softbusadaptertest",
