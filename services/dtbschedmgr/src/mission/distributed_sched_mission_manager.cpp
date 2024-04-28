@@ -19,6 +19,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "datashare_manager.h"
 #include "datetime_ex.h"
 #include "distributed_sched_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
@@ -44,6 +45,7 @@ constexpr int32_t GET_FOREGROUND_SNAPSHOT_DELAY_TIME = 800; // ms
 const std::string DELETE_DATA_STORAGE = "DeleteDataStorage";
 constexpr int32_t DELETE_DATA_STORAGE_DELAYED = 60000; // ms
 const std::string INVAILD_LOCAL_DEVICE_ID = "-1";
+static const std::string CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
 }
 namespace Mission {
 constexpr int32_t GET_MAX_MISSIONS = 20;
@@ -274,6 +276,7 @@ void DistributedSchedMissionManager::DeviceOfflineNotify(const std::string& netw
             remoteDmsMap_.erase(iter);
         }
     }
+    dataShareManager_.UnregisterObserver(CONTINUE_SWITCH_STATUS_KEY);
     HILOGI("DeviceOfflineNotify erase value for networkId: %{public}s",
         DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
 }

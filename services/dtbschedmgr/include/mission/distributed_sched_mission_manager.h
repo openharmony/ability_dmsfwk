@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 
+#include "datashare_manager.h"
 #include "distributed_data_storage.h"
 #include "distributed_mission_change_listener.h"
 #include "distributed_mission_info.h"
@@ -167,6 +168,7 @@ private:
     std::mutex remoteDmsLock_;
     std::shared_ptr<AppExecFwk::EventHandler> missionHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> updateHandler_;
+    DataShareManager dataShareManager_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

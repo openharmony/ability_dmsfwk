@@ -16,37 +16,44 @@
 #ifndef DMS_DATASHARE_MANAGER_H
 #define DMS_DATASHARE_MANAGER_H
 
-#include <shared_mutex>
+#include <map>
+
 #include "datashare_helper.h"
+#include "data_ability_observer_stub.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
-using ChangeInfo = DataShare::DataShareObserver::ChangeInfo;
 const std::string SETTINGS_DATA_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=Continue_Switch_Status";
 
-class DataShareManager {
+class SettingObserver : public AAFwk::DataAbilityObserverStub {
 public:
-    static DataShareManager &GetInstance();
-    std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
-    bool IsCreateDataShareHelper(const std::string &datashareUri);
-    void RegisterObserver(const std::string &datashareUri);
+    SettingObserver();
+    ~SettingObserver() override;
+    void OnChange() override;
 
+    using ObserverCallback = std::function<void()>;
+    void SetObserverCallback(ObserverCallback &observerCallback)
 private:
-    DataShareManager() = default;
-    ~DataShareManager() = default;
-    DISALLOW_COPY_AND_MOVE(DataShareManager);
-
-    static DataShareManager instance_;
-    std::shared_ptr<DataShare::DataShareHelper> helper_;
-    std::string datashareUri_;
+    ObserverCallback observerCallback_  = nullptr;
 };
 
-class DataShareRegisterObserver : public DataShare::DataShareObserver {
+class DataShareManager {
 public:
-    DataShareRegisterObserver() {}
-    ~DataShareRegisterObserver() {}
-    void OnChange(const ChangeInfo &changeInfo) override;
+    void RegisterObserver(const std::string &key, SettingObserver::ObserverCallback &observerCallback);
+    void UnregisterObserver(const std::strin &key);
+
+    using ObserverCallback = std::function<void()>;
+    
+private:
+    std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
+    Uri AssembleUri(const std::string &key);
+    sptr<SettingObserver> GetSettingObserver(const std::string &key);
+
+private:
+    std::map<std::string, sptr<SettingObserver>> settingObserverMap_;
+    std::mutex observerMapMutex_;
+    std::mutex datashareMutex_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

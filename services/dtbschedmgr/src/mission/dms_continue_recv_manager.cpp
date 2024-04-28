@@ -62,8 +62,6 @@ void DMSContinueRecvMgr::Init()
         eventCon_.wait(lock, [this] {
             return eventHandler_ != nullptr;
         });
-        
-        DataShareManager::GetInstance().RegisterObserver(SETTINGS_DATA_URI);
     }
     HILOGI("Init end");
 }

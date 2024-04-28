@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "bundle/bundle_manager_internal.h"
+#include "datashare_manager.h"
 #include "distributed_mission_died_listener.h"
 #include "distributed_mission_focused_listener.h"
 #include "event_handler.h"
@@ -140,6 +141,7 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     std::shared_ptr<ScreenOffHandler> screenOffHandler_;
     int32_t mmiMonitorId_ = INVALID_MISSION_ID;
+    DataShareManager dataShareManager_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -20,6 +20,7 @@
 #include "adapter/dnetwork_adapter.h"
 #include "adapter/mmi_adapter.h"
 #include "datetime_ex.h"
+#include "datashare_manager.h"
 #include "distributed_radar.h"
 #include "distributed_sched_adapter.h"
 #include "distributed_sched_utils.h"
@@ -28,7 +29,8 @@
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
 #include "switch_status_dependency.h"
-#include "datashare_manager.h"
+#include "dsched_continue_manager.h"
+#include "mission/dms_continue_recv_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -41,6 +43,7 @@ constexpr int64_t TIME_DELAYED = 250; // determines whether normal unfocused or 
 const std::string TAG = "DMSContinueSendMgr";
 const std::string TIMEOUT_UNFOCUSED_TASK = "timeout_unfocused_task";
 const std::string SCREEN_OFF_UNFOCUSED_TASK = "screen_off_unfocused_task";
+static const std::string CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DMSContinueSendMgr);
@@ -71,7 +74,24 @@ void DMSContinueSendMgr::Init()
         return;
     }
     DmsRadar::GetInstance().DmsFocused("Init", INIT);
-    DataShareManager::GetInstance().RegisterObserver(SETTINGS_DATA_URI);
+    DataShareManager::ObserverCallback observerCallback = [this](){
+        bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
+        int32_t missionId = GetCurrentMissionId();
+        if (missionId <= 0) {
+            HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
+            return;
+        }
+
+        if (IsContinueSwitchOn) {
+            DMSContinueSendMgr::GetInstance().NotifyMissionFocused(missionId, FocusedReason::INIT);
+            DSchedContinueManager::GetInstance().Init();
+        } else {
+            DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(missionId, UnfocusedReason::NORMAL);
+            DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
+            DSchedContinueManager::GetInstance().UnInit();
+        };
+    };
+    dataShareManager_.RegisterObserver(CONTINUE_SWITCH_STATUS_KEY, observerCallback);
     NotifyMissionFocused(missionId, FocusedReason::INIT);
     HILOGI("Init end");
 }
