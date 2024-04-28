@@ -72,7 +72,7 @@ void DataShareManager::RegisterObserver(const std::string &key, SettingObserver:
     HILOGI("DataShareManager RegisterObserver start");
     sptr<SettingObserver> observer = GetSettingObserver(key);
     if (observer != nullptr) {
-        HILOGI("Observer is already registered with key is %{public}s",key.c_str());
+        HILOGI("Observer is already registered with key is %{public}s", key.c_str());
         UnregisterObserver(key);
     }
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = CreateDataShareHelper();
@@ -92,7 +92,7 @@ void DataShareManager::RegisterObserver(const std::string &key, SettingObserver:
     
     std::lock_guard<std::mutex> lockGuard(observerMapMutex_);
     settingObserverMap_[key] = observer;
-    HILOGI("DataShareManager RegisterObserver success with key is %{public}s",key.c_str());
+    HILOGI("DataShareManager RegisterObserver success with key is %{public}s", key.c_str());
 }
 
 void DataShareManager::UnregisterObserver(const std::string &key)
@@ -100,12 +100,12 @@ void DataShareManager::UnregisterObserver(const std::string &key)
     HILOGI("DataShareManager UnregisterObserver start");
     sptr<SettingObserver> observer = GetSettingObserver(key);
     if (observer == nullptr) {
-        HILOGI("UnregisterObserver, observer is nullptr with key is %{public}s",key.c_str());
+        HILOGI("UnregisterObserver, observer is nullptr with key is %{public}s", key.c_str());
         return;
     }
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = CreateDataShareHelper();
     if (dataShareHelper == nullptr) {
-        HILOGE("Unregister observer failed with key is %{public}s",key.c_str());
+        HILOGE("Unregister observer failed with key is %{public}s", key.c_str());
         return;
     }
     Uri uri = AssembleUri(key);
@@ -114,7 +114,7 @@ void DataShareManager::UnregisterObserver(const std::string &key)
 
     std::lock_guard<std::mutex> lockGuard(observerMapMutex_);
     settingObserverMap_.erase(key);
-    HILOGI("DataShareManager UnregisterObserver success with key is %{public}s",key.c_str());
+    HILOGI("DataShareManager UnregisterObserver success with key is %{public}s", key.c_str());
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

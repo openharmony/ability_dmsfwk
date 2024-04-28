@@ -74,7 +74,7 @@ void DMSContinueSendMgr::Init()
         return;
     }
     DmsRadar::GetInstance().DmsFocused("Init", INIT);
-    DataShareManager::ObserverCallback observerCallback = [this](){
+    DataShareManager::ObserverCallback observerCallback = [this]() {
         bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
         int32_t missionId = GetCurrentMissionId();
         if (missionId <= 0) {
