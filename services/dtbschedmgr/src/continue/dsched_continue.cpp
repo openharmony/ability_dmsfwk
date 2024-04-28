@@ -15,7 +15,9 @@
 
 #include "dsched_continue.h"
 
+#include <chrono>
 #include <sys/prctl.h>
+#include <thread>
 
 #include "ability_manager_client.h"
 #include "bool_wrapper.h"
@@ -68,6 +70,8 @@ constexpr int32_t CONTINUE_TOTAL_TIME = 2;
 constexpr int32_t CONTINUE_FIRST_TRANS_TIME = 3;
 constexpr int32_t CONTINUE_DATA_TRANS_TIME = 5;
 constexpr int32_t CONTINUE_START_ABILITY_TIME = 6;
+constexpr int32_t GET_ABILITY_STATE_RETRY_TIMES = 40;
+constexpr int32_t GET_ABILITY_STATE_SLEEP_TIME = 50;
 }
 
 DSchedContinue::DSchedContinue(int32_t subServiceType, int32_t direction,  const sptr<IRemoteObject>& callback,
@@ -740,6 +744,7 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
     int32_t persistentId;
     if (ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId) == ERR_OK) {
         HILOGI("get persistentId success, persistentId: %d", persistentId);
+        WaitAbilityStateInitial(persistentId);
         cmd->want_.SetParam(DMS_PERSISTENT_ID, persistentId);
     }
 
@@ -754,6 +759,26 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
     stateMachine_->UpdateState(DSCHED_CONTINUE_SINK_WAIT_END_STATE);
     HILOGI("ExecuteContinueData end");
     return ERR_OK;
+}
+
+bool DSchedContinue::WaitAbilityStateInitial(int32_t persistentId)
+{
+    int32_t retryTimeout = GET_ABILITY_STATE_RETRY_TIMES;
+    int32_t err;
+    do {
+        bool state = false;
+        err = AAFwk::AbilityManagerClient::GetInstance()->GetAbilityStateByPersistentId(persistentId, state);
+        if (err == ERR_OK && state) {
+            HILOGI("ability state initial.");
+            return state;
+        }
+        HILOGI("waiting ability state initial...");
+        std::this_thread::sleep_for(std::chrono::milliseconds(GET_ABILITY_STATE_SLEEP_TIME));
+    } while (--retryTimeout > 0);
+
+    HILOGE("wait timeout, persistentId: %{public}d, errorCode: %{public}d",
+           persistentId, err);
+    return false;
 }
 
 void DSchedContinue::DurationDumperBeforeStartAbility(std::shared_ptr<DSchedContinueDataCmd> cmd)
