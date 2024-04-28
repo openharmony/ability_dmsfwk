@@ -33,8 +33,9 @@ const std::string BMS_KV_BASE_DIR = "/data/service/el1/public/database/Distribut
 const int32_t EL1 = 1;
 const int32_t MAX_TIMES = 600;              // 1min
 const int32_t SLEEP_INTERVAL = 100 * 1000;  // 100ms
-const int32_t FLAGS = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES;
-const uint16_t MAX_BUNDLEID = 65535; // size of uint16_t
+const int32_t FLAGS = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES |
+                      AppExecFwk::ApplicationFlag::GET_APPLICATION_INFO_WITH_DISABLE |
+                      AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_DISABLE;
 }  // namespace
 
 std::shared_ptr<DmsBmStorage> DmsBmStorage::instance_ = nullptr;
@@ -147,7 +148,7 @@ bool DmsBmStorage::DeleteStorageDistributeInfo(const std::string &bundleName)
     }
     uint16_t accessTokenId = 0;
     GetBundleNameId(bundleName, accessTokenId);
-    if (bundleNameIdTables_.size() >= accessTokenId) {
+    if (bundleNameIdTables_.size() > accessTokenId) {
         bundleNameIdTables_[accessTokenId] = false;
     }
     std::string keyOfData = DeviceAndNameToKey(udid, bundleName);
@@ -199,7 +200,8 @@ bool DmsBmStorage::GetStorageDistributeInfo(const std::string &networkId,
 bool DmsBmStorage::DealGetBundleName(const std::string &networkId, uint16_t accessTokenId,
     std::string &bundleName)
 {
-    HILOGD("networkId: %{public}s  accessTokenId: %{public}d", networkId.c_str(), accessTokenId);
+    HILOGD("networkId: %{public}s  accessTokenId: %{public}d",
+        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), accessTokenId);
     {
         if (!CheckKvStore()) {
             HILOGE("kvStore is nullptr");
@@ -238,7 +240,8 @@ bool DmsBmStorage::DealGetBundleName(const std::string &networkId, uint16_t acce
 bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, uint16_t accessTokenId,
     std::string &bundleName)
 {
-    HILOGD("networkId: %{public}s  accessTokenId: %{public}d", networkId.c_str(), accessTokenId);
+    HILOGD("networkId: %{public}s  accessTokenId: %{public}d",
+        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), accessTokenId);
     bool ret = DealGetBundleName(networkId, accessTokenId, bundleName);
     if (!ret) {
         HILOGW("GetDistributedBundleName error and try to call again");
@@ -383,12 +386,14 @@ DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::Bun
     distributedBundleInfo.enabled = bundleInfo.applicationInfo.enabled;
     distributedBundleInfo.accessTokenId = CreateBundleNameId();
     distributedBundleInfo.updateTime = bundleInfo.updateTime;
-    int32_t pos = 0;
+    uint8_t pos = 0;
     for (const auto &abilityInfo : bundleInfo.abilityInfos) {
         DmsAbilityInfo dmsAbilityInfo;
         dmsAbilityInfo.abilityName = abilityInfo.name;
-        dmsAbilityInfo.continueType.push_back(abilityInfo.name);
-        dmsAbilityInfo.continueTypeId.push_back(pos++);
+        for (const auto &continueType : abilityInfo.continueType) {
+            dmsAbilityInfo.continueType.push_back(continueType);
+            dmsAbilityInfo.continueTypeId.push_back(pos++);
+        }
         distributedBundleInfo.dmsAbilityInfos.push_back(dmsAbilityInfo);
     }
     return distributedBundleInfo;
@@ -493,7 +498,6 @@ void DmsBmStorage::UpdateDistributedData()
         if (oldDistributedBundleInfos.find(bundleInfo.name) != oldDistributedBundleInfos.end()) {
             int32_t updateTime = oldDistributedBundleInfos[bundleInfo.name].updateTime;
             if (updateTime == bundleInfo.updateTime) {
-                HILOGW("bundleName:%{public}s no need to update", bundleInfo.name.c_str());
                 continue;
             }
         }
@@ -567,8 +571,8 @@ std::string FindContinueType(const DmsBundleInfo& distributedBundleInfo, uint8_t
 std::string DmsBmStorage::GetContinueType(const std::string &networkId, std::string &bundleName,
     uint8_t continueTypeId)
 {
-    HILOGD("networkId: %{public}s,  bundleName: %{public}s,  continueTypeId: %{public}d", networkId.c_str(),
-        bundleName.c_str(), continueTypeId);
+    HILOGD("networkId: %{public}s,  bundleName: %{public}s,  continueTypeId: %{public}d",
+        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), bundleName.c_str(), continueTypeId);
     {
         if (!CheckKvStore()) {
             HILOGE("kvStore is nullptr");
@@ -601,8 +605,116 @@ std::string DmsBmStorage::GetContinueType(const std::string &networkId, std::str
             }
         }
     }
-    HILOGE("Failed to discover continueType");
+    HILOGW("Can't find continueType");
     return "";
+}
+
+std::string FindAbilityName(const DmsBundleInfo& distributedBundleInfo, std::string continueType)
+{
+    for (auto dmsAbilityInfo : distributedBundleInfo.dmsAbilityInfos) {
+        for (auto ele : dmsAbilityInfo.continueType) {
+            if (ele == continueType) {
+                return dmsAbilityInfo.abilityName;
+            }
+        }
+    }
+    return "";
+}
+
+std::string DmsBmStorage::GetAbilityName(const std::string &networkId, std::string &bundleName,
+    std::string &continueType)
+{
+    HILOGD("networkId: %{public}s,  bundleName: %{public}s,  continueTypeId: %{public}s",
+        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), bundleName.c_str(), continueType.c_str());
+    {
+        if (!CheckKvStore()) {
+            HILOGE("kvStore is nullptr");
+            return "";
+        }
+    }
+    std::string udid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(networkId);
+    if (udid == "") {
+        HILOGE("can not get udid by networkId");
+        return "";
+    }
+    Key allEntryKeyPrefix("");
+    std::vector<Entry> allEntries;
+    Status status = kvStorePtr_->GetEntries(allEntryKeyPrefix, allEntries);
+    if (status != Status::SUCCESS) {
+        HILOGE("GetEntries error: %{public}d", status);
+        return "";
+    }
+    for (auto entry : allEntries) {
+        std::string key = entry.key.ToString();
+        std::string value =  entry.value.ToString();
+        if (key.find(udid) == std::string::npos) {
+            continue;
+        }
+        DmsBundleInfo distributedBundleInfo;
+        if (distributedBundleInfo.FromJsonString(value) && distributedBundleInfo.bundleName == bundleName) {
+            std::string abilityName = FindAbilityName(distributedBundleInfo, continueType);
+            if (abilityName != "") {
+                return abilityName;
+            }
+        }
+    }
+    HILOGW("Can't find abilityName");
+    return "";
+}
+
+uint8_t FindContinueTypeId(const DmsBundleInfo& distributedBundleInfo, std::string abilityName)
+{
+    HILOGD("called.");
+    uint8_t pos = 0;
+    for (auto dmsAbilityInfo : distributedBundleInfo.dmsAbilityInfos) {
+        if (dmsAbilityInfo.abilityName == abilityName) {
+            return pos;
+        }
+        ++pos;
+    }
+    return MAX_CONTINUETYPEID;
+}
+
+bool DmsBmStorage::GetContinueTypeId(const std::string bundleName, const std::string &abilityName,
+    uint8_t &continueTypeId)
+{
+    HILOGD("called.");
+    {
+        if (!CheckKvStore()) {
+            HILOGE("kvStore is nullptr");
+            return false;
+        }
+    }
+    std::string udid;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
+    if (udid == "") {
+        HILOGE("can not get udid by networkId");
+        return false;
+    }
+    Key allEntryKeyPrefix("");
+    std::vector<Entry> allEntries;
+    Status status = kvStorePtr_->GetEntries(allEntryKeyPrefix, allEntries);
+    if (status != Status::SUCCESS) {
+        HILOGE("GetEntries error: %{public}d", status);
+        return false;
+    }
+    for (auto entry : allEntries) {
+        std::string key = entry.key.ToString();
+        std::string value =  entry.value.ToString();
+        if (key.find(udid) == std::string::npos) {
+            continue;
+        }
+        DmsBundleInfo distributedBundleInfo;
+        if (distributedBundleInfo.FromJsonString(value) && distributedBundleInfo.bundleName == bundleName) {
+            continueTypeId = FindContinueTypeId(distributedBundleInfo, abilityName);
+            if (continueTypeId != MAX_CONTINUETYPEID) {
+                HILOGD("end.");
+                return true;
+            }
+        }
+    }
+    HILOGW("Can't find continueTypeId");
+    return false;
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

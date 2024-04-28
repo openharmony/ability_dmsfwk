@@ -48,8 +48,8 @@ class DMSContinueRecvMgr {
     DECLARE_SINGLE_INSTANCE(DMSContinueRecvMgr);
 
 public:
-    constexpr static uint8_t DMS_DATA_LEN = 6; // Dms data Length
-    constexpr static int32_t DMS_SEND_LEN = 1024 * 1024 * 10; // Maximum Broadcast Length
+    constexpr static uint8_t DMS_DATA_LEN = 3; // Dms data Length
+    constexpr static int32_t DMS_SEND_LEN = 4; // Maximum Broadcast Length
     constexpr static uint8_t DMS_0XF0 = 0xf0;
     constexpr static uint8_t DMS_0X0F = 0x0f;
     constexpr static uint8_t DMS_0XFF = 0xff;
