@@ -41,7 +41,7 @@ private:
 class DataShareManager {
 public:
     void RegisterObserver(const std::string &key, SettingObserver::ObserverCallback &observerCallback);
-    void UnregisterObserver(const std::strin &key);
+    void UnregisterObserver(const std::string &key);
 
     using ObserverCallback = std::function<void()>;
     
