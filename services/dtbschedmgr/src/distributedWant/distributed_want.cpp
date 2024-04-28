@@ -1381,7 +1381,7 @@ bool DistributedWant::ParseContent(const std::string& content, std::string& prop
         if (length < dPos + 1) {
             return false;
         }
-        length -= dPos - 1;
+        length = length - dPos - 1;
         subString = content.substr(dPos + 1, length);
         value = Decode(subString);
         return true;

@@ -1270,6 +1270,21 @@ int32_t DistributedSchedStub::ReadDataForFreeInstall(MessageParcel& data, Caller
     return ERR_NONE;
 }
 
+int32_t DistributedSchedStub::CreateJsonObject(std::string& extraInfo, CallerInfo& callerInfo)
+{
+    nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
+    int32_t requestCode = DEFAULT_REQUEST_CODE;
+    if (!extraInfoJson.is_discarded()) {
+        SaveExtraInfo(extraInfoJson, callerInfo);
+        if (extraInfoJson.find(EXTRO_INFO_JSON_KEY_REQUEST_CODE) != extraInfoJson.end() &&
+            extraInfoJson[EXTRO_INFO_JSON_KEY_REQUEST_CODE].is_number_integer()) {
+            requestCode = extraInfoJson[EXTRO_INFO_JSON_KEY_REQUEST_CODE];
+            HILOGD("parse extra info, requestCode = %d", requestCode);
+        }
+    }
+    return requestCode;
+}
+
 int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& data, MessageParcel& reply)
 {
     if (!CheckCallingUid()) {
@@ -1298,18 +1313,9 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
     if (extraInfo.empty()) {
         HILOGD("extra info is empty!");
     }
-    nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
-    int32_t requestCode = DEFAULT_REQUEST_CODE;
-    if (!extraInfoJson.is_discarded()) {
-        SaveExtraInfo(extraInfoJson, callerInfo);
-        if (extraInfoJson.find(EXTRO_INFO_JSON_KEY_REQUEST_CODE) != extraInfoJson.end() &&
-            extraInfoJson[EXTRO_INFO_JSON_KEY_REQUEST_CODE].is_number_integer()) {
-            requestCode = extraInfoJson[EXTRO_INFO_JSON_KEY_REQUEST_CODE];
-            HILOGD("parse extra info, requestCode = %d", requestCode);
-        }
-    }
+    int32_t requestCode = CreateJsonObject(extraInfo, callerInfo);
     FreeInstallInfo info = {
-        .want = *want, .callerInfo = callerInfo, .accountInfo = accountInfo, .requestCode = requestCode};
+        .want = *want, .callerInfo = callerInfo, .requestCode = requestCode, .accountInfo = accountInfo};
     info.want.RemoveParam(PARAM_FREEINSTALL_APPID);
     info.want.SetParam(PARAM_FREEINSTALL_APPID, callerInfo.callerAppId);
     info.want.RemoveParam(PARAM_FREEINSTALL_BUNDLENAMES);

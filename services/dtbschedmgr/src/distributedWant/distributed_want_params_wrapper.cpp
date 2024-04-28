@@ -149,7 +149,7 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
         if (strKey == "") {
             strnum++;
             size_t pos = str.find('"', strnum);
-            if (pos != std::string::npos) {
+            if (pos != std::string::npos && pos > strnum) {
                 strKey = str.substr(strnum, pos - strnum);
             }
             strnum = pos;

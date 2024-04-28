@@ -605,7 +605,7 @@ int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData>
     }
     callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     AccountInfo accountInfo;
-    int32_t ret = DistributedSchedPermission::GetInstance().GetAccountInfo(continueInfo_.sourceDeviceId_, callerInfo,
+    int32_t ret = DistributedSchedPermission::GetInstance().GetAccountInfo(continueInfo_.sinkDeviceId_, callerInfo,
         accountInfo);
     if (ret != ERR_OK) {
         HILOGE("GetAccountInfo failed");
