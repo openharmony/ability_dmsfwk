@@ -273,6 +273,7 @@ int32_t DSchedContinue::PostContinueSendTask(const OHOS::AAFwk::Want& want, int3
             HILOGE("PostContinueSendTask eventHandler send event type %d fail", eventType);
             return CONTINUE_SEND_EVENT_FAILED;
         }
+        return ERR_OK;
     }
 
     HILOGI("PostContinueSendTask %d, continueInfo %s", eventType, continueInfo_.toString().c_str());
