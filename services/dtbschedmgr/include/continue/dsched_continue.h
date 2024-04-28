@@ -186,6 +186,7 @@ private:
     void DurationDumperBeforeStartAbility(std::shared_ptr<DSchedContinueDataCmd> cmd);
     void DurationDumperComplete(int32_t result);
     void NotifyDSchedEventResult(int32_t result);
+    bool WaitAbilityStateInitial(int32_t persistentId);
 
 private:
     std::shared_ptr<DSchedContinueStateMachine> stateMachine_;
