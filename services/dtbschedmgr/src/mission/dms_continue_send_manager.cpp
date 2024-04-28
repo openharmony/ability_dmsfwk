@@ -84,11 +84,9 @@ void DMSContinueSendMgr::Init()
 
         if (IsContinueSwitchOn) {
             DMSContinueSendMgr::GetInstance().NotifyMissionFocused(missionId, FocusedReason::INIT);
-            DSchedContinueManager::GetInstance().Init();
         } else {
             DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(missionId, UnfocusedReason::NORMAL);
             DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
-            DSchedContinueManager::GetInstance().UnInit();
         };
     };
     dataShareManager_.RegisterObserver(CONTINUE_SWITCH_STATUS_KEY, observerCallback);
