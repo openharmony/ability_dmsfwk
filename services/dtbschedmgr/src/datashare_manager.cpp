@@ -26,6 +26,8 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DMSDataShareManager";
+const std::string SETTINGS_DATA_URI_PREFIX =
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
 }
 SettingObserver::SettingObserver() = default;
 SettingObserver::~SettingObserver() = default;
@@ -46,7 +48,7 @@ void SettingObserver::SetObserverCallback(ObserverCallback &observerCallback)
 
 sptr<SettingObserver> DataShareManager::GetSettingObserver(const std::string &key)
 {
-    HILOGI('GetSettingObserver with key is %{public}s', key.c_str());
+    HILOGI("GetSettingObserver with key is %{public}s", key.c_str());
     std::lock_guard<std::mutex> lockGuard(observerMapMutex_);
     if (settingObserverMap_.find(key) != settingObserverMap_.end()) {
         return settingObserverMap_.find(key)->second;
