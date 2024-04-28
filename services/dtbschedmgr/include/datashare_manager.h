@@ -33,7 +33,7 @@ public:
     void OnChange() override;
 
     using ObserverCallback = std::function<void()>;
-    void SetObserverCallback(ObserverCallback &observerCallback)
+    void SetObserverCallback(ObserverCallback &observerCallback);
 private:
     ObserverCallback observerCallback_  = nullptr;
 };
