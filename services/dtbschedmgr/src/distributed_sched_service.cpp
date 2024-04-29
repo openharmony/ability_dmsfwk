@@ -53,6 +53,7 @@
 #include "dms_free_install_callback.h"
 #include "dms_token_callback.h"
 #include "dms_version_manager.h"
+#include "dsched_continue_manager.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "parcel_helper.h"
@@ -227,6 +228,9 @@ bool DistributedSchedService::Init()
     DMSContinueRecvMgr::GetInstance().Init();
 #endif
     DistributedSchedAdapter::GetInstance().Init();
+    if (SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
+        DSchedContinueManager::GetInstance().Init();
+    }
     HILOGD("init success.");
     connectDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new ConnectDeathRecipient());
     callerDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new CallerDeathRecipient());
