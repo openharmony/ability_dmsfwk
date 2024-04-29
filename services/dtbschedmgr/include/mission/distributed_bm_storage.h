@@ -35,6 +35,8 @@ namespace {
 // distributed bm
 static std::string DMS_BM_APP_ID = "DistributedSchedule";
 static std::string DISTRIBUTE_BM_STORE_ID = "dms_bundle_datas";
+const uint16_t MAX_BUNDLEID = 65535; // size of uint16_t
+const uint8_t MAX_CONTINUETYPEID = 255; // size of uint8_t
 }
 class DmsBmStorage {
 public:
@@ -50,6 +52,8 @@ public:
         std::string &bundleName);
     bool GetBundleNameId(std::string bundleName, uint16_t &accessTokenId);
     std::string GetContinueType(const std::string &networkId, std::string &bundleName, uint8_t continueTypeId);
+    std::string GetAbilityName(const std::string &networkId, std::string &bundleName, std::string &continueType);
+    bool GetContinueTypeId(const std::string bundleName, const std::string &abilityName, uint8_t &continueTypeId);
     void UpdateDistributedData();
     int32_t PullOtherDistributedData();
     int32_t PushOtherDistributedData();

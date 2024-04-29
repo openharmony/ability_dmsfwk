@@ -2339,8 +2339,8 @@ int32_t DistributedSchedService::GetContinueInfo(std::string& dstNetworkId, std:
     }
     dstNetworkId = dschedContinuation_->continueInfo_.dstNetworkId;
     srcNetworkId = dschedContinuation_->continueInfo_.srcNetworkId;
-    HILOGI("dstNetworkId: %{public}s", dstNetworkId.c_str());
-    HILOGI("srcNetworkId: %{public}s", srcNetworkId.c_str());
+    HILOGI("dstNetworkId: %{public}s", DnetworkAdapter::AnonymizeNetworkId(dstNetworkId).c_str());
+    HILOGI("srcNetworkId: %{public}s", DnetworkAdapter::AnonymizeNetworkId(srcNetworkId).c_str());
     return 0;
 }
 

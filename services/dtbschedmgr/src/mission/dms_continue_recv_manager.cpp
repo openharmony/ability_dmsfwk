@@ -91,7 +91,7 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
         HILOGE("ContinueSwitch status is off");
         return;
     }
-    if (dataLen > DMS_SEND_LEN) {
+    if (dataLen < DMS_SEND_LEN) {
         HILOGE("dataLen error, dataLen: %{public}u", dataLen);
         return;
     }
@@ -102,8 +102,8 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
         return;
     }
     uint16_t bundleNameId = (payload[1] << CONTINUE_SHIFT_08) | payload[INDEX_2];
-    uint16_t continueTypeId = payload[INDEX_3];
-    HILOGD("bundleNameId: %{public}u, continueTypeId: %{public}u", bundleNameId, continueTypeId);
+    uint8_t continueTypeId = payload[INDEX_3];
+    HILOGI("bundleNameId: %{public}u, continueTypeId: %{public}u", bundleNameId, continueTypeId);
     int32_t state = ACTIVE;
     if (type == DMS_UNFOCUSED_TYPE) {
         state = INACTIVE;

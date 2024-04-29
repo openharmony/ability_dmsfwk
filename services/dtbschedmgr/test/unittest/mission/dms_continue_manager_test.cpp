@@ -63,7 +63,7 @@ void DMSContinueManagerTest::TearDown()
 }
 
 void RemoteOnListenerStubTest::OnCallback(const uint32_t ContinueState, const std::string& srcDeviceId,
-    const std::string& bundleName)
+    const std::string &bundleName, const std::string &continueType, const std::string &srcBundleName)
 {
 }
 

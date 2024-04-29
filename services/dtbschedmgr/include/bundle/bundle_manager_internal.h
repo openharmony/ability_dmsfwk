@@ -52,6 +52,9 @@ public:
     static int32_t GetBundleNameId(const std::string& bundleName, uint16_t& accessTokenId);
     static std::string GetContinueType(const std::string &networkId,
         std::string &bundleName, uint8_t continueTypeId);
+    static int32_t GetContinueTypeId(std::string &bundleName,
+        const std::string &abilityName, uint8_t &continueTypeId);
+    static std::string GetAbilityName(const std::string &networkId, std::string &bundleName, std::string &continueType);
     static int32_t GetBundleNameFromDbms(const std::string& networkId,
         const uint16_t accessTokenId, std::string& bundleName);
     static int32_t GetApplicationInfoFromBms(const std::string& bundleName, const AppExecFwk::BundleFlag flag,

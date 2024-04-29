@@ -282,7 +282,7 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
     AddMMIListener();
 #endif
     uint16_t accessTokenId = 0;
-    uint16_t contineTypeId = 0;
+    uint8_t continueTypeId = 0;
     ret = BundleManagerInternal::GetBundleNameId(bundleName, accessTokenId);
     DmsRadar::GetInstance().NormalFocusedGetAccessTokenIdRes("GetBundleNameId", ret);
     if (ret != ERR_OK) {
@@ -290,7 +290,7 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
         return ret;
     }
     if (!SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) { return DMS_PERMISSION_DENIED;}
-    ret = SendSoftbusEvent(accessTokenId, contineTypeId, DMS_FOCUSED_TYPE);
+    ret = SendSoftbusEvent(accessTokenId, continueTypeId, DMS_FOCUSED_TYPE);
     DmsRadar::GetInstance().NormalFocusedSendEventRes("SendSoftbusEvent", ret);
     if (ret != ERR_OK) {
         HILOGE("SendSoftbusEvent focused failed, ret: %{public}d", ret);

@@ -345,6 +345,33 @@ std::string BundleManagerInternal::GetContinueType(const std::string &networkId,
     return continueType;
 }
 
+int32_t BundleManagerInternal::GetContinueTypeId(std::string &bundleName,
+    const std::string &abilityName, uint8_t &continueTypeId)
+{
+    HILOGD("called.");
+    bool ret = DmsBmStorage::GetInstance()->GetContinueTypeId(bundleName, abilityName, continueTypeId);
+    HILOGI("ContinueTypeId: %{public}d ", continueTypeId);
+    if (!ret) {
+        HILOGE("can not get ContinueTypeId!");
+        return CAN_NOT_FOUND_ABILITY_ERR;
+    }
+    HILOGD("end.");
+    return ERR_OK;
+}
+
+std::string BundleManagerInternal::GetAbilityName(const std::string &networkId,
+    std::string &bundleName, std::string &continueType)
+{
+    HILOGD("called.");
+    std::string abilityName = DmsBmStorage::GetInstance()->GetAbilityName(networkId, bundleName, continueType);
+    HILOGI("continueType: %{public}s ", abilityName.c_str());
+    if (abilityName == "") {
+        HILOGE("can not get abilityName!");
+    }
+    HILOGD("end.");
+    return abilityName;
+}
+
 int32_t BundleManagerInternal::GetBundleNameFromDbms(const std::string& networkId,
     const uint16_t accessTokenId, std::string& bundleName)
 {
