@@ -19,7 +19,6 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-#include "datashare_manager.h"
 #include "datetime_ex.h"
 #include "distributed_sched_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
