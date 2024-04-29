@@ -1055,7 +1055,7 @@ HWTEST_F(DSchedContinueStateMachineTest, CreateState_001, TestSize.Level3)
 
     state = stateMachineTest_->CreateState(DSCHED_CONTINUE_SOURCE_WAIT_END_STATE);
     EXPECT_TRUE(state != nullptr);
-    
+
     state = stateMachineTest_->CreateState(DSCHED_CONTINUE_SOURCE_END_STATE);
     EXPECT_TRUE(state != nullptr);
 
@@ -1064,13 +1064,13 @@ HWTEST_F(DSchedContinueStateMachineTest, CreateState_001, TestSize.Level3)
 
     state = stateMachineTest_->CreateState(DSCHED_CONTINUE_DATA_STATE);
     EXPECT_TRUE(state != nullptr);
-    
+
     state = stateMachineTest_->CreateState(DSCHED_CONTINUE_SINK_WAIT_END_STATE);
     EXPECT_TRUE(state != nullptr);
-    
+
     state = stateMachineTest_->CreateState(DSCHED_CONTINUE_SINK_END_STATE);
     EXPECT_TRUE(state != nullptr);
-    
+
     state = stateMachineTest_->CreateState(static_cast<DSchedContinueStateType>(-1));
     EXPECT_TRUE(state == nullptr);
     DTEST_LOG << "DSchedContinueStateMachineTest CreateState_001 end" << std::endl;
