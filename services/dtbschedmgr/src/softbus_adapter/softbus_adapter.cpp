@@ -35,6 +35,7 @@ int32_t SoftbusAdapter::SendSoftbusEvent(uint8_t* sendData, uint32_t sendDataLen
     eventData.freq = EVENT_HIGH_FREQ;
     eventData.data = sendData;
     eventData.dataLen = sendDataLen;
+    eventData.screenOff = true;
     int32_t ret = SendEvent(pkgName_.c_str(), BROADCAST_TARGET_AREA, &eventData);
     if (ret != SOFTBUS_OK) {
         HILOGE("SendEvent failed, ret:%{public}d.", ret);
