@@ -168,7 +168,7 @@ private:
     std::mutex remoteDmsLock_;
     std::shared_ptr<AppExecFwk::EventHandler> missionHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> updateHandler_;
-0};
+};
 } // namespace DistributedSchedule
 } // namespace OHOS
 #endif // DISTRIBUTEDSCHED_MISSION_MANAGER_H
