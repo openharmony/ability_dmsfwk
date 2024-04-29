@@ -33,7 +33,7 @@ using namespace DistributedHardware;
 namespace {
 constexpr int32_t RETRY_REGISTER_CALLBACK_TIMES = 5;
 constexpr int32_t RETRY_REGISTER_CALLBACK_DELAY_TIME = 1000; // 1s
-const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getpid());
+const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getprocpid());
 
 constexpr int32_t NON_ANONYMIZED_LENGTH = 6;
 const std::string EMPTY_DEVICE_ID = "";

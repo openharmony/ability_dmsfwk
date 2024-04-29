@@ -664,7 +664,7 @@ void DistributedSchedCallTest::AddSession(const sptr<IRemoteObject>& connect,
     std::lock_guard<std::mutex> autoLock(DistributedSchedService::GetInstance().distributedLock_);
     CallerInfo callerInfo;
     callerInfo.uid = IPCSkeleton::GetCallingUid();
-    callerInfo.pid = IPCSkeleton::GetCallingPid();
+    callerInfo.pid = IPCSkeleton::GetCallingRealPid();
     callerInfo.sourceDeviceId = localDeviceId;
     callerInfo.callerType = CALLER_TYPE_HARMONY;
     DistributedSchedService::GetInstance().RemoteConnectAbilityMappingLocked(connect, localDeviceId,
@@ -695,7 +695,7 @@ void DistributedSchedCallTest::AddConnectInfo(const sptr<IRemoteObject>& connect
     std::lock_guard<std::mutex> autoLock(DistributedSchedService::GetInstance().distributedLock_);
     CallerInfo callerInfo;
     callerInfo.uid = IPCSkeleton::GetCallingUid();
-    callerInfo.pid = IPCSkeleton::GetCallingPid();
+    callerInfo.pid = IPCSkeleton::GetCallingRealPid();
     callerInfo.sourceDeviceId = localDeviceId;
     callerInfo.callerType = CALLER_TYPE_HARMONY;
 

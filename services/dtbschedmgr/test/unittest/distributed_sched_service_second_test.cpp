@@ -96,7 +96,7 @@ void DistributedSchedServiceSecondTest::SetUpTestCase()
     if (!DistributedSchedUtil::LoadDistributedSchedService()) {
         DTEST_LOG << "DistributedSchedServiceSecondTest::SetUpTestCase LoadDistributedSchedService failed" << std::endl;
     }
-    const std::string pkgName = "DBinderBus_" + std::to_string(getpid());
+    const std::string pkgName = "DBinderBus_" + std::to_string(getprocpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
     DistributedSchedUtil::InstallThirdPartyHap();

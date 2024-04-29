@@ -37,7 +37,7 @@ namespace {
 constexpr int32_t RETRY_TIMES = 30;
 constexpr int32_t CONNECT_SOFTBUS_RETRY_TIMES = 60;
 const std::string TAG = "DtbschedmgrDeviceInfoStorage";
-const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getpid());
+const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getprocpid());
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DtbschedmgrDeviceInfoStorage);

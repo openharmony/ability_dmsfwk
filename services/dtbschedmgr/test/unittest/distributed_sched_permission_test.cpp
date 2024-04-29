@@ -83,7 +83,7 @@ void NativeTokenGet()
 void DistributedSchedPermissionTest::SetUpTestCase()
 {
     DTEST_LOG << "DistributedSchedPermissionTest::SetUpTestCase" << std::endl;
-    const std::string pkgName = "DBinderBus_PermissionTest" + std::to_string(getpid());
+    const std::string pkgName = "DBinderBus_PermissionTest" + std::to_string(getprocpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
 }

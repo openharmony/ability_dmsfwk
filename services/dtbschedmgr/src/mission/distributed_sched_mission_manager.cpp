@@ -877,7 +877,7 @@ bool DistributedSchedMissionManager::GenerateCallerInfo(CallerInfo& callerInfo)
         return false;
     }
     callerInfo.uid = IPCSkeleton::GetCallingUid();
-    callerInfo.pid = IPCSkeleton::GetCallingPid();
+    callerInfo.pid = IPCSkeleton::GetCallingRealPid();
     callerInfo.callerType = CALLER_TYPE_HARMONY;
     callerInfo.sourceDeviceId = localUuid;
     callerInfo.dmsVersion = VERSION;
