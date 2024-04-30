@@ -148,17 +148,6 @@ HWTEST_F(DSchedContinueManagerTest, ContinueMission_004, TestSize.Level3)
 }
 
 /**
- * @tc.name: HandleContinueMissionWithBundleName_001
- * @tc.desc: test HandleContinueMissionWithBundleName func
- * @tc.type: FUNC
- */
-HWTEST_F(DSchedContinueManagerTest, HandleContinueMissionWithBundleName_001, TestSize.Level3)
-{
-    DTEST_LOG << "DSchedContinueManagerTest HandleContinueMissionWithBundleName_001 begin" << std::endl;
-    DTEST_LOG << "DSchedContinueManagerTest HandleContinueMissionWithBundleName_001 end" << std::endl;
-}
-
-/**
  * @tc.name: SetTimeOut_001
  * @tc.desc: test SetTimeOut func
  * @tc.type: FUNC
