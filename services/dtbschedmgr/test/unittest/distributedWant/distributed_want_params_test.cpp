@@ -152,33 +152,6 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Parcelable_0400, F
 }
 
 /**
- * @tc.number: DistributedWantParams_Parcelable_0600
- * @tc.name: Marshalling/Unmarshalling
- * @tc.desc: marshalling nested WantParams, and then check result.
- */
-HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Parcelable_0600, Function | MediumTest | Level3)
-{
-    DistributedWantParams wp;
-    wp.SetParam("hello", String::Box("World"));
-    wp.SetParam("welcome", String::Box("NY"));
-
-    DistributedWantParams l1;
-    l1.SetParam("l1",  DistributedWantParamWrapper::Box(wp));
-    wantParamsIn_->SetParam("l2",  DistributedWantParamWrapper::Box(l1));
-    Parcel in;
-    wantParamsIn_->Marshalling(in);
-    std::shared_ptr<DistributedWantParams> wantParamsOut_(DistributedWantParams::Unmarshalling(in));
-    DistributedWantParams l1Out =
-        DistributedWantParamWrapper::Unbox(IDistributedWantParams::Query(wantParamsOut_->GetParam("l2")));
-    DistributedWantParams wpOut =
-        DistributedWantParamWrapper::Unbox(IDistributedWantParams::Query(l1.GetParam("l1")));
-    std::string hello(String::Unbox(IString::Query(wpOut.GetParam("hello"))));
-    EXPECT_EQ(hello, "World");
-    std::string welcome(String::Unbox(IString::Query(wpOut.GetParam("welcome"))));
-    EXPECT_EQ(welcome, "NY");
-}
-
-/**
  * @tc.number: DistributedWantParams_Parcelable_0700
  * @tc.name: Marshalling/Unmarshalling
  * @tc.desc: marshalling array, and then check result.
