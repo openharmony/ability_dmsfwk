@@ -141,10 +141,11 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
 }
 
 int32_t DSchedContinueManager::ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
-    std::string bundleName, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
+    std::string bundleName, const std::string& continueType,
+    const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
-    auto func = [this, srcDeviceId, dstDeviceId, bundleName, callback, wantParams]() {
-        HandleContinueMission(srcDeviceId, dstDeviceId, bundleName, callback, wantParams);
+    auto func = [this, srcDeviceId, dstDeviceId, bundleName, continueType, callback, wantParams]() {
+        HandleContinueMission(srcDeviceId, dstDeviceId, bundleName, continueType, callback, wantParams);
     };
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler_ is nullptr");
@@ -155,18 +156,19 @@ int32_t DSchedContinueManager::ContinueMission(const std::string& srcDeviceId, c
 }
 
 void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
-    std::string bundleName, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
+    std::string bundleName, const std::string& continueType,
+    const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
-    HILOGI("start, srcDeviceId: %s. dstDeviceId: %s. bundleName: %s.",
+    HILOGI("start, srcDeviceId: %s. dstDeviceId: %s. bundleName: %s. continueType: %s.",
         DnetworkAdapter::AnonymizeNetworkId(srcDeviceId).c_str(),
-        DnetworkAdapter::AnonymizeNetworkId(dstDeviceId).c_str(), bundleName.c_str());
+        DnetworkAdapter::AnonymizeNetworkId(dstDeviceId).c_str(), bundleName.c_str(), continueType.c_str());
 
     if (srcDeviceId.empty() || dstDeviceId.empty() || callback == nullptr) {
         HILOGE("srcDeviceId or dstDeviceId or callback is null!");
         return;
     }
 
-    DSchedContinueInfo info = DSchedContinueInfo(srcDeviceId, bundleName, dstDeviceId, bundleName, "");
+    DSchedContinueInfo info = DSchedContinueInfo(srcDeviceId, bundleName, dstDeviceId, bundleName, continueType);
     HandleContinueMissionWithBundleName(info, callback, wantParams);
     return;
 }

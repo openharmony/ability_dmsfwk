@@ -208,7 +208,8 @@ void DMSContinueSendMgr::StartEvent()
 
 int32_t DMSContinueSendMgr::SendSoftbusEvent(uint16_t accessTokenId, uint8_t continueTypeId, uint8_t type)
 {
-    HILOGD("SendSoftbusEvent start, accessTokenId: %{public}u", accessTokenId);
+    HILOGD("SendSoftbusEvent start, accessTokenId: %{public}u, continueTypeId: %{public}u",
+        accessTokenId, continueTypeId);
     uint8_t data[DMS_SEND_LEN];
     uint8_t len = DMS_DATA_LEN;
     data[0] = (type << CONTINUE_SHIFT_04) | len;
@@ -274,6 +275,10 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
     focusedMission_[bundleName] = missionId;
+        
+    std::string abilityName = info.want.GetElement().GetAbilityName();
+    focusedMissionAbility_[missionId] = abilityName;
+
     if (info.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
         HILOGE("Mission continue state set to INACTIVE. Broadcast task abort.");
         return INVALID_PARAMETERS_ERR;
@@ -281,23 +286,35 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
 #ifdef SUPPORT_MULTIMODALINPUT_SERVICE
     AddMMIListener();
 #endif
-    uint16_t accessTokenId = 0;
-    uint8_t continueTypeId = 0;
-    ret = BundleManagerInternal::GetBundleNameId(bundleName, accessTokenId);
+    if (!SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) { return DMS_PERMISSION_DENIED;}
+    ret = FocusedBusinessSendEvent(bundleName, abilityName);
+    HILOGI("DealFocusedBusiness end");
+    return ret;
+}
+
+int32_t DMSContinueSendMgr::FocusedBusinessSendEvent(std::string bundleName, const std::string& abilityName)
+{
+    uint16_t bundleNameId = 0;
+    int32_t ret = BundleManagerInternal::GetBundleNameId(bundleName, bundleNameId);
     DmsRadar::GetInstance().NormalFocusedGetAccessTokenIdRes("GetBundleNameId", ret);
     if (ret != ERR_OK) {
-        HILOGE("Get focused accessTokenId failed, accessTokenId: %{public}u, ret: %{public}d", accessTokenId, ret);
+        HILOGE("Get focused bundleNameId failed, bundleNameId: %{public}u, ret: %{public}d", bundleNameId, ret);
         return ret;
     }
-    if (!SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) { return DMS_PERMISSION_DENIED;}
-    ret = SendSoftbusEvent(accessTokenId, continueTypeId, DMS_FOCUSED_TYPE);
+
+    uint8_t continueTypeId = 0;
+    ret = BundleManagerInternal::GetContinueTypeId(bundleName, abilityName, continueTypeId);
+    if (ret != ERR_OK) {
+        HILOGE("Get focused contineTypeId failed, contineTypeId: %{public}u, ret: %{public}d", continueTypeId, ret);
+        return ret;
+    }
+
+    ret = SendSoftbusEvent(bundleNameId, continueTypeId, DMS_FOCUSED_TYPE);
     DmsRadar::GetInstance().NormalFocusedSendEventRes("SendSoftbusEvent", ret);
     if (ret != ERR_OK) {
         HILOGE("SendSoftbusEvent focused failed, ret: %{public}d", ret);
-        return ret;
     }
-    HILOGI("DealFocusedBusiness end");
-    return ERR_OK;
+    return ret;
 }
 
 int32_t DMSContinueSendMgr::CheckContinueState(const int32_t missionId)
@@ -321,12 +338,18 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, Unfoc
     std::string bundleName;
     int32_t ret = GetBundleNameByMissionId(missionId, bundleName);
     if (ret != ERR_OK) {
-        HILOGI("Get bundleName failed, mission is not continuable, missionId: %{public}d, ret: %{public}d",
-            missionId, ret);
+        HILOGI("Get bundleName failed, missionId: %{public}d, ret: %{public}d", missionId, ret);
         return ret;
     }
     HILOGI("Get bundleName success, mission is continuable, missionId: %{public}d, bundleName: %{public}s",
         missionId, bundleName.c_str());
+    
+    std::string abilityName;
+    ret = GetAbilityNameByMissionId(missionId, abilityName);
+    if (ret != ERR_OK) {
+        HILOGE("get abilityName failed, missionId: %{public}d, ret: %{public}d", missionId, ret);
+        return ret;
+    }
 
     if (reason != UnfocusedReason::TIMEOUT) {
         bool isContinue = IsContinue(missionId, bundleName);
@@ -347,7 +370,8 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, Unfoc
     }
 
     uint16_t accessTokenId = 0;
-    ret = GetAccessTokenIdSendEvent(bundleName, reason, accessTokenId);
+    uint8_t continueTypeId = 0;
+    ret = GetAccessTokenIdSendEvent(bundleName, reason, accessTokenId, continueTypeId);
     if (ret != ERR_OK) {
         HILOGE("GetAccessTokenIdSendEvent failed");
         return ret;
@@ -355,10 +379,11 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, Unfoc
     if (reason != UnfocusedReason::TIMEOUT) {
         std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
         focusedMission_.erase(bundleName);
+        focusedMissionAbility_.erase(missionId);
     }
 
     if (reason == UnfocusedReason::NORMAL) {
-        screenOffHandler_->SetScreenOffInfo(missionId, bundleName, accessTokenId);
+        screenOffHandler_->SetScreenOffInfo(missionId, bundleName, accessTokenId, abilityName);
     }
     HILOGI("DealUnfocusedBusiness end");
     return ERR_OK;
@@ -369,6 +394,7 @@ int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
     int32_t missionId = screenOffHandler_->GetMissionId();
     std::string bundleName = screenOffHandler_->GetBundleName();
     uint32_t accessTokenId = screenOffHandler_->GetAccessTokenId();
+    std::string abilityName = screenOffHandler_->GetAbilityName();
 
     HILOGI("start, type: %{public}d, missionId: %{public}d, bundleName: %{public}s, accessTokenId: %{public}u",
         type, missionId, bundleName.c_str(), accessTokenId);
@@ -385,7 +411,13 @@ int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
     }
 
     uint8_t continueTypeId = 0;
-    int32_t ret = SendSoftbusEvent(accessTokenId, continueTypeId, type);
+    int32_t ret = BundleManagerInternal::GetContinueTypeId(bundleName, abilityName, continueTypeId);
+    if (ret != ERR_OK) {
+        HILOGE("Get focused contineTypeId failed, abilityName: %{public}s, ret: %{public}d", abilityName.c_str(), ret);
+        return ret;
+    }
+    
+    ret = SendSoftbusEvent(accessTokenId, continueTypeId, type);
     if (ret != ERR_OK) {
         HILOGE("SendSoftbusEvent unfocused failed, ret: %{public}d", ret);
     }
@@ -404,6 +436,26 @@ int32_t DMSContinueSendMgr::GetBundleNameByMissionId(const int32_t missionId, st
     return INVALID_PARAMETERS_ERR;
 }
 
+int32_t DMSContinueSendMgr::GetAbilityNameByMissionId(const int32_t missionId, std::string& abilityName)
+{
+    HILOGI("start, missionId: %{public}d", missionId);
+    std::lock_guard<std::mutex> focusedMissionAbilityMapLock(eventMutex_);
+    auto iterItem = focusedMissionAbility_.find(missionId);
+    if (iterItem != focusedMissionAbility_.end()) {
+        abilityName = iterItem->second;
+        HILOGI("get missionId end, missionId: %{public}d", missionId);
+        return ERR_OK;
+    }
+    HILOGW("get iterItem failed from focusedMissionAbility_, try screenOffHandler_");
+    if (missionId == screenOffHandler_->GetMissionId()) {
+        abilityName = screenOffHandler_->GetAbilityName();
+        HILOGI("get missionId end, abilityName: %{public}s", abilityName.c_str());
+        return ERR_OK;
+    }
+    HILOGE("get abilityName failed from screenOffHandler_");
+    return INVALID_PARAMETERS_ERR;
+}
+
 bool DMSContinueSendMgr::IsContinue(const int32_t& missionId, const std::string& bundleName)
 {
     if (missionId != info_.currentMissionId && info_.currentIsContinuable) {
@@ -411,6 +463,7 @@ bool DMSContinueSendMgr::IsContinue(const int32_t& missionId, const std::string&
             continue to not send unfocus broadcast*/
         std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
         focusedMission_.erase(bundleName);
+        focusedMissionAbility_.erase(missionId);
         HILOGI("mission is not continue, missionId: %{public}d, currentMissionId: %{public}d",
             missionId, info_.currentMissionId);
         return false;
@@ -462,11 +515,31 @@ int32_t DMSContinueSendMgr::DealSetMissionContinueStateBusiness(const int32_t mi
         HILOGI("mission is not continuable, broadcast task abort, missionId: %{public}d", missionId);
         return INVALID_PARAMETERS_ERR;
     }
+    
+    uint16_t bundleNameId = 0;
+    uint8_t continueTypeId = 0;
+    int32_t ret = GetBundleNameIdAndContinueTypeId(missionId, state, bundleNameId, continueTypeId);
+    if (ret != ERR_OK) {
+        HILOGE("Get focused contineTypeId failed, contineTypeId: %{public}u, ret: %{public}d", continueTypeId, ret);
+        return ret;
+    }
+
+    ret = SetStateSendEvent(bundleNameId, continueTypeId, state);
+    if (ret != ERR_OK) {
+        HILOGE("SetStateSendEvent failed");
+        return ret;
+    }
+    HILOGI("DealSetMissionContinueStateBusiness end. ContinueState set to: %{public}d", state);
+    return ERR_OK;
+}
+
+int32_t DMSContinueSendMgr::GetBundleNameIdAndContinueTypeId(const int32_t missionId, const AAFwk::ContinueState& state,
+    uint16_t& bundleNameId, uint8_t& continueTypeId)
+{
     std::string bundleName;
     int32_t ret = GetBundleNameByMissionId(missionId, bundleName);
     if (ret != ERR_OK) {
-        HILOGE("get bundleName failed, broadcast task abort, missionId: %{public}d, ret: %{public}d",
-            missionId, ret);
+        HILOGE("get bundleName failed, missionId: %{public}d, ret: %{public}d", missionId, ret);
         return ret;
     }
     HILOGI("get bundleName success, missionId: %{public}d, bundleName: %{public}s", missionId, bundleName.c_str());
@@ -476,25 +549,26 @@ int32_t DMSContinueSendMgr::DealSetMissionContinueStateBusiness(const int32_t mi
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
 
-    uint16_t accessTokenId = 0;
-    ret = BundleManagerInternal::GetBundleNameId(bundleName, accessTokenId);
+    ret = BundleManagerInternal::GetBundleNameId(bundleName, bundleNameId);
     if (state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE) {
         DmsRadar::GetInstance().ChangeStateUnfocusedGetAccessTokenIdRes("GetBundleNameId", ret);
     } else {
         DmsRadar::GetInstance().ChangeStateFocusedGetAccessTokenIdRes("GetBundleNameId", ret);
     }
     if (ret != ERR_OK) {
-        HILOGE("get setContinueState accessTokenId failed, accessTokenId: %{public}u, ret: %{public}d",
-            accessTokenId, ret);
+        HILOGE("get bundleNameId failed, bundleNameId: %{public}u, ret: %{public}d", bundleNameId, ret);
         return ret;
     }
-    ret = SetStateSendEvent(accessTokenId, state);
+
+    std::string abilityName;
+    ret = GetAbilityNameByMissionId(missionId, abilityName);
     if (ret != ERR_OK) {
-        HILOGE("SetStateSendEvent failed");
+        HILOGE("get abilityName failed, broadcast task abort, missionId: %{public}d, ret: %{public}d",
+            missionId, ret);
         return ret;
     }
-    HILOGI("DealSetMissionContinueStateBusiness end. ContinueState set to: %{public}d", state);
-    return ERR_OK;
+
+    return BundleManagerInternal::GetContinueTypeId(bundleName, abilityName, continueTypeId);
 }
 
 void DMSContinueSendMgr::OnMMIEvent()
@@ -556,6 +630,11 @@ std::string DMSContinueSendMgr::ScreenOffHandler::GetBundleName()
     return unfoInfo_.bundleName;
 }
 
+std::string DMSContinueSendMgr::ScreenOffHandler::GetAbilityName()
+{
+    return unfoInfo_.abilityName;
+}
+
 uint32_t DMSContinueSendMgr::ScreenOffHandler::GetAccessTokenId()
 {
     return unfoInfo_.accessToken;
@@ -591,10 +670,11 @@ void DMSContinueSendMgr::ScreenOffHandler::ClearScreenOffInfo()
     unfoInfo_.unfoTime = 0;
     unfoInfo_.bundleName = "";
     unfoInfo_.accessToken = 0;
+    unfoInfo_.abilityName = "";
 }
 
 void DMSContinueSendMgr::ScreenOffHandler::SetScreenOffInfo(int32_t missionId, std::string bundleName,
-    uint32_t accessTokenId)
+    uint32_t accessTokenId, std::string abilityName)
 {
     HILOGI("set last unfocused info, missionId: %{public}d, bundleName: %{public}s, accessTokenId: %{public}u",
         missionId, bundleName.c_str(), accessTokenId);
@@ -602,10 +682,11 @@ void DMSContinueSendMgr::ScreenOffHandler::SetScreenOffInfo(int32_t missionId, s
     unfoInfo_.unfoTime = GetTickCount();
     unfoInfo_.bundleName = bundleName;
     unfoInfo_.accessToken = accessTokenId;
+    unfoInfo_.abilityName = abilityName;
 }
 
 int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
-    UnfocusedReason reason, uint16_t& accessTokenId)
+    UnfocusedReason reason, uint16_t& accessTokenId, uint8_t& continueTypeId)
 {
     int32_t ret = BundleManagerInternal::GetBundleNameId(bundleName, accessTokenId);
     bool res = (reason != UnfocusedReason::TIMEOUT)
@@ -627,7 +708,7 @@ int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
             HILOGE("ContinueSwitch status is off");
             return DMS_PERMISSION_DENIED;
         }
-        uint8_t continueTypeId = 0;
+
         ret = SendSoftbusEvent(accessTokenId, continueTypeId, DMS_UNFOCUSED_TYPE);
         bool res = (reason != UnfocusedReason::TIMEOUT)
             ? DmsRadar::GetInstance().NormalUnfocusedSendEventRes("SendSoftbusEvent", ret)
@@ -644,7 +725,8 @@ int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
     return ret;
 }
 
-int32_t DMSContinueSendMgr::SetStateSendEvent(const uint32_t accessTokenId, const AAFwk::ContinueState &state)
+int32_t DMSContinueSendMgr::SetStateSendEvent(const uint32_t accessTokenId, const uint8_t& continueTypeId,
+    const AAFwk::ContinueState &state)
 {
     if (state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE) {
         RemoveMMIListener();
@@ -659,7 +741,6 @@ int32_t DMSContinueSendMgr::SetStateSendEvent(const uint32_t accessTokenId, cons
     }
 
     uint8_t type = state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE ? DMS_UNFOCUSED_TYPE : DMS_FOCUSED_TYPE;
-    uint8_t continueTypeId = 0;
     int32_t ret = SendSoftbusEvent(accessTokenId, continueTypeId, type);
     bool res = (state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE)
         ? DmsRadar::GetInstance().ChangeStateUnfocusedSendEventRes("SendSoftbusEvent", ret)

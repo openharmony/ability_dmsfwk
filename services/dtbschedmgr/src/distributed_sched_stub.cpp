@@ -32,6 +32,7 @@
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "image_source.h"
 #include "mission/distributed_sched_mission_manager.h"
+#include "mission/dms_continue_recv_manager.h"
 #include "mission/mission_info_converter.h"
 #include "mission/snapshot_converter.h"
 #include "napi_error_code.h"
@@ -447,9 +448,18 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
         HILOGW("wantParams readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
-    int32_t result = (IS_USING_QOS) ?
-        DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, bundleName, callback, *wantParams) :
-        ContinueMission(srcDevId, dstDevId, bundleName, callback, *wantParams);
+
+    std::string srcBundleName;
+    std::string continueType;
+    PARCEL_READ_HELPER(data, String, srcBundleName);
+    PARCEL_READ_HELPER(data, String, continueType);
+    if (continueType == "") {
+        continueType = DMSContinueRecvMgr::GetInstance().GetContinueType(bundleName);
+    }
+    int32_t result = (IS_USING_QOS)
+        ? DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, bundleName, continueType,
+            callback, *wantParams)
+        : ContinueMission(srcDevId, dstDevId, bundleName, callback, *wantParams);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
