@@ -26,8 +26,8 @@ namespace OHOS {
 namespace DistributedSchedule {
 
 namespace {
-    const std::string LOCAL_DEVICEID = "192.168.43.100";
-    const std::string REMOTE_DEVICEID = "192.168.44.100";
+    const std::string LOCAL_DEVICEID = "localdeviceid";
+    const std::string REMOTE_DEVICEID = "remotedeviceid";
     constexpr int32_t MISSION_ID = 1;
     const std::string BUNDLE_NAME = "com.ohos.permissionmanager";
 }
@@ -203,7 +203,7 @@ HWTEST_F(DSchedContinueManagerTest, CheckContinuationLimit_001, TestSize.Level3)
 HWTEST_F(DSchedContinueManagerTest, GetLocalDeviceId_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinueManagerTest GetLocalDeviceId_001 begin" << std::endl;
-    std::string localDeviceId = "192.168.43.100";
+    std::string localDeviceId = "localdeviceid";
     int32_t ret = DSchedContinueManager::GetInstance().GetLocalDeviceId(localDeviceId);
     EXPECT_EQ(ret, false);
     DTEST_LOG << "DSchedContinueManagerTest GetLocalDeviceId_001 end" << std::endl;
@@ -217,8 +217,8 @@ HWTEST_F(DSchedContinueManagerTest, GetLocalDeviceId_001, TestSize.Level3)
 HWTEST_F(DSchedContinueManagerTest, GetContinueInfo_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinueManagerTest GetContinueInfo_001 begin" << std::endl;
-    std::string localDeviceId = "192.168.43.100";
-    std::string remoteDeviceId = "192.168.44.100";
+    std::string localDeviceId = "localdeviceid";
+    std::string remoteDeviceId = "remotedeviceid";
     int32_t ret = DSchedContinueManager::GetInstance().GetContinueInfo(localDeviceId, remoteDeviceId);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueManagerTest GetContinueInfo_001 end" << std::endl;
