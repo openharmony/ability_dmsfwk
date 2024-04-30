@@ -74,6 +74,11 @@ ohos_shared_library("distributedschedsvr") {
   }
 
   install_enable = true
+
+  if (!dmsfwk_softbus_adapter_common) {
+    cflags = [ "-DDMSFWK_SAME_ACCOUNT" ]
+  }
+
   sources = [
     "src/ability_connection_wrapper_proxy.cpp",
     "src/ability_connection_wrapper_stub.cpp",

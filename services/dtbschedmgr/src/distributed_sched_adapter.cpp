@@ -16,6 +16,7 @@
 #include "distributed_sched_adapter.h"
 
 #include "datetime_ex.h"
+#include "device_manager.h"
 #include "dfx/dms_hisysevent_report.h"
 #include "distributed_sched_service.h"
 #include "dtbschedmgr_device_info_storage.h"
@@ -36,6 +37,7 @@ using namespace std;
 using namespace AAFwk;
 using namespace AccountSA;
 using namespace AppExecFwk;
+using namespace DistributedHardware;
 using DstbMissionChangeListener = DistributedMissionChangeListener;
 namespace {
 // set a non-zero value on need later
@@ -285,11 +287,16 @@ bool DistributedSchedAdapter::CheckAccessToGroup(const std::string& groupId, con
     int32_t ret = hichainGmInstance_->checkAccessToGroup(ANY_OS_ACCOUNT, targetBundleName.c_str(),
         groupId.c_str());
     HILOGI("[PerformanceTest] checkAccessToGroup spend %{public}" PRId64 " ms", GetTickCount() - begin);
-    if (ret != ERR_OK) {
-        HILOGE("hichain checkAccessToGroup failed, ret:%{public}d", ret);
+    if (ret == ERR_OK) {
+        HILOGI("hichain checkAccessToGroup success");
+        return true;
+    }
+
+    HILOGI("hichain checkAccessToGroup fail, ret %{public}d, will try DM CheckRelatedDevice.", ret);
+    if (!DeviceManager::GetInstance().CheckRelatedDevice(groupId, targetBundleName)) {
+        HILOGE("DM CheckRelatedDevice failed");
         return false;
     }
-    HILOGD("hichain checkAccessToGroup success");
     return true;
 }
 
@@ -306,15 +313,17 @@ bool DistributedSchedAdapter::GetRelatedGroups(const std::string& udid, const st
     int32_t ret = hichainGmInstance_->getRelatedGroups(ANY_OS_ACCOUNT, bundleName.c_str(), udid.c_str(),
         &groupsJsonStr, &groupNum);
     HILOGI("[PerformanceTest] getRelatedGroups spend %{public}" PRId64 " ms", GetTickCount() - begin);
-    if (ret != ERR_OK) {
-        HILOGE("hichain getRelatedGroups failed, ret:%{public}d", ret);
+    if (ret == ERR_OK && groupsJsonStr != nullptr && groupNum != 0) {
+        HILOGI("hichain getRelatedGroups success");
+        returnGroups = groupsJsonStr;
+        return true;
+    }
+
+    HILOGI("hichain getRelatedGroups failed, ret %{public}d, will try DM CheckRelatedDevice.", ret);
+    if (!DeviceManager::GetInstance().CheckRelatedDevice(udid, bundleName)) {
+        HILOGE("DM CheckRelatedDevice failed");
         return false;
     }
-    if (groupsJsonStr == nullptr || groupNum == 0) {
-        HILOGE("groupsJsonStr is nullptr");
-        return false;
-    }
-    returnGroups = groupsJsonStr;
     return true;
 }
 
