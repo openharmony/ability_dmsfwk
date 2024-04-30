@@ -39,6 +39,7 @@
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission/dms_continue_send_manager.h"
 #endif
+#include "scene_board_judgement.h"
 #include "softbus_adapter/transport/dsched_transport_softbus_adapter.h"
 
 namespace OHOS {
@@ -54,6 +55,7 @@ const std::string SUPPORT_CONTINUE_SOURCE_EXIT_KEY = "ohos.extra.param.key.suppo
 const std::string SUPPORT_CONTINUE_MODULE_NAME_UPDATE_KEY = "ohos.extra.param.key.supportContinueModuleNameUpdate";
 const std::string DMSDURATION_SAVETIME = "ohos.dschedule.SaveDataTime";
 const std::string DMS_PERSISTENT_ID = "ohos.dms.persistentId";
+const std::string DMS_CONTINUE_SESSION_ID = "ohos.dms.continueSessionId";
 const std::string DSCHED_EVENT_KEY = "IDSchedEventListener";
 const std::u16string NAPI_MISSION_CALLBACK_INTERFACE_TOKEN = u"ohos.DistributedSchedule.IMissionCallback";
 
@@ -273,7 +275,6 @@ int32_t DSchedContinue::PostContinueSendTask(const OHOS::AAFwk::Want& want, int3
             HILOGE("PostContinueSendTask eventHandler send event type %d fail", eventType);
             return CONTINUE_SEND_EVENT_FAILED;
         }
-        return ERR_OK;
     }
 
     HILOGI("PostContinueSendTask %d, continueInfo %s", eventType, continueInfo_.toString().c_str());
@@ -406,7 +407,7 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
     DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK);
 
     if (subServiceType_ == CONTINUE_PULL) {
-        DistributedSchedService::GetInstance().QuickStartAbility(continueInfo_.sinkBundleName_);
+        QuickStartAbility();
     }
 
     std::string peerDeviceId = (direction_ == CONTINUE_SOURCE) ?
@@ -437,6 +438,76 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
     }
     HILOGI("ExecuteContinueReq end");
     return ERR_OK;
+}
+
+int32_t DSchedContinue::QuickStartAbility()
+{
+    HILOGI("called");
+    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
+        HILOGE("sceneBoard not available.");
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    std::string abilityName = QuerySinkAbilityName();
+    if (abilityName.empty()) {
+        HILOGE("QuickStartAbility failed.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    ContinueSceneSessionHandler::GetInstance().UpdateContinueSessionId(continueInfo_.sinkBundleName_, abilityName);
+    std::string continueSessionId = ContinueSceneSessionHandler::GetInstance().GetContinueSessionId();
+    HILOGI("continueSessionId is %{public}s", continueSessionId.c_str());
+
+    AAFwk::Want want;
+    want.SetElementName(continueInfo_.sinkBundleName_, abilityName);
+    want.SetParam(DMS_CONTINUE_SESSION_ID, continueSessionId);
+
+    return StartAbility(want, DEFAULT_REQUEST_CODE);
+}
+
+std::string DSchedContinue::QuerySinkAbilityName()
+{
+    std::string abilityName = BundleManagerInternal::GetAbilityName(continueInfo_.sinkDeviceId_,
+        continueInfo_.sinkBundleName_, continueInfo_.continueType_);
+    if (!abilityName.empty()) {
+        return abilityName;
+    }
+
+    AppExecFwk::BundleInfo localBundleInfo;
+    if (BundleManagerInternal::GetLocalBundleInfo(continueInfo_.sinkBundleName_, localBundleInfo) != ERR_OK) {
+        HILOGE("get local bundle info failed.");
+        return abilityName;
+    }
+    if (localBundleInfo.abilityInfos.empty() || localBundleInfo.abilityInfos.size() > 1) {
+        HILOGE("quick start is not supported, abilityInfos size: %{public}d",
+               static_cast<int32_t>(localBundleInfo.abilityInfos.size()));
+        return abilityName;
+    }
+
+    return localBundleInfo.abilityInfos.front().name;
+}
+
+int32_t DSchedContinue::StartAbility(const OHOS::AAFwk::Want& want, int32_t requestCode)
+{
+    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->Connect();
+    if (ret != ERR_OK) {
+        HILOGE("ExecuteContinueData connect ability server failed %d", ret);
+        return ret;
+    }
+
+    int32_t activeAccountId = 0;
+    ret = DistributedSchedService::GetInstance().QueryOsAccount(activeAccountId);
+    if (ret != ERR_OK) {
+        HILOGE("ExecuteContinueData QueryOsAccount failed %d", ret);
+        return ret;
+    }
+
+    HILOGI("ExecuteContinueData StartAbility start");
+    ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, DEFAULT_REQUEST_CODE, activeAccountId);
+    if (ret != ERR_OK) {
+        HILOGE("StartAbility failed %d", ret);
+        return ret;
+    }
+    return ret;
 }
 
 void DSchedContinue::DurationDumperStart()
@@ -729,37 +800,32 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
         return ret;
     }
 
-    ret = AAFwk::AbilityManagerClient::GetInstance()->Connect();
-    if (ret != ERR_OK) {
-        HILOGE("ExecuteContinueData connect ability server failed %d", ret);
-        return ret;
-    }
+    OHOS::AAFwk::Want want = cmd->want_;
+    std::string srcAbilityName = want.GetElement().GetAbilityName();
+    std::string sinkAbilityName = BundleManagerInternal::GetAbilityName(continueInfo_.sinkDeviceId_,
+        continueInfo_.sinkBundleName_, continueInfo_.continueType_);
+    if (!sinkAbilityName.empty() && sinkAbilityName != srcAbilityName) {
+        OHOS::AppExecFwk::ElementName element = want.GetElement();
+        want.SetElementName(element.GetDeviceID(), element.GetBundleName(), sinkAbilityName);
+        want.RemoveParam(SUPPORT_CONTINUE_PAGE_STACK_KEY);
+        want.SetParam(SUPPORT_CONTINUE_PAGE_STACK_KEY, false);
 
-    int32_t activeAccountId = 0;
-    ret = DistributedSchedService::GetInstance().QueryOsAccount(activeAccountId);
-    if (ret != ERR_OK) {
-        HILOGE("ExecuteContinueData QueryOsAccount failed %d", ret);
-        return ret;
+        DmsContinueTime::GetInstance().SetDstAbilityName(sinkAbilityName);
     }
 
     int32_t persistentId;
     if (ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId) == ERR_OK) {
         HILOGI("get persistentId success, persistentId: %d", persistentId);
         WaitAbilityStateInitial(persistentId);
-        cmd->want_.SetParam(DMS_PERSISTENT_ID, persistentId);
+        want.SetParam(DMS_PERSISTENT_ID, persistentId);
     }
 
-    HILOGI("ExecuteContinueData StartAbility start");
-    ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(cmd->want_, cmd->requestCode_, activeAccountId);
-    DmsRadar::GetInstance().ClickIconDmsStartAbility("StartAbility", ret);
-    if (ret != ERR_OK) {
-        HILOGE("ExecuteContinueData StartAbility failed %d", ret);
-        return ret;
+    ret = StartAbility(want, cmd->requestCode_);
+    if (ret == ERR_OK) {
+        stateMachine_->UpdateState(DSCHED_CONTINUE_SINK_WAIT_END_STATE);
+        HILOGI("ExecuteContinueData end");
     }
-
-    stateMachine_->UpdateState(DSCHED_CONTINUE_SINK_WAIT_END_STATE);
-    HILOGI("ExecuteContinueData end");
-    return ERR_OK;
+    return ret;
 }
 
 bool DSchedContinue::WaitAbilityStateInitial(int32_t persistentId)

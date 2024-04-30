@@ -111,7 +111,7 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
     } else {
         DmsRadar::GetInstance().RecvFocused("NotifyDataRecv");
     }
-    PostOnBroadcastBusiness(senderNetworkId, bundleNameId, state);
+    PostOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state);
     HILOGI("NotifyDataRecv end");
 }
 
@@ -191,12 +191,13 @@ void DMSContinueRecvMgr::StartEvent()
 }
 
 int32_t DMSContinueRecvMgr::VerifyBroadcastSource(const std::string& senderNetworkId,
-    const std::string& bundleName, const int32_t state)
+    const std::string& bundleName, const std::string& continueType, const int32_t state)
 {
     std::lock_guard<std::mutex> currentIconLock(iconMutex_);
     if (state == ACTIVE) {
         iconInfo_.senderNetworkId = senderNetworkId;
         iconInfo_.bundleName = bundleName;
+        iconInfo_.continueType = continueType;
     } else {
         if (senderNetworkId != iconInfo_.senderNetworkId) {
             HILOGW("Sender not match, task abort. senderNetworkId: %{public}s, saved NetworkId: %{public}s",
@@ -210,17 +211,19 @@ int32_t DMSContinueRecvMgr::VerifyBroadcastSource(const std::string& senderNetwo
                 bundleName.c_str(), iconInfo_.bundleName.c_str());
             return INVALID_PARAMETERS_ERR;
         }
+
         iconInfo_.senderNetworkId = "";
         iconInfo_.bundleName = "";
+        iconInfo_.continueType = "";
     }
     return ERR_OK;
 }
 
 void DMSContinueRecvMgr::PostOnBroadcastBusiness(const std::string& senderNetworkId,
-    uint16_t accessTokenId, const int32_t state, const int32_t delay, const int32_t retry)
+    uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state, const int32_t delay, const int32_t retry)
 {
-    auto feedfunc = [this, senderNetworkId, accessTokenId, state, retry]() mutable {
-        DealOnBroadcastBusiness(senderNetworkId, accessTokenId, state, retry);
+    auto feedfunc = [this, senderNetworkId, bundleNameId, continueTypeId, state, retry]() mutable {
+        DealOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state, retry);
     };
     if (eventHandler_ != nullptr) {
         eventHandler_->RemoveTask(DBMS_RETRY_TASK);
@@ -231,24 +234,24 @@ void DMSContinueRecvMgr::PostOnBroadcastBusiness(const std::string& senderNetwor
 }
 
 int32_t DMSContinueRecvMgr::RetryPostBroadcast(const std::string& senderNetworkId,
-    uint16_t accessTokenId, const int32_t state, const int32_t retry)
+    uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state, const int32_t retry)
 {
     HILOGI("Retry post broadcast, current retry times %{public}d", retry);
     if (retry == DBMS_RETRY_MAX_TIME) {
         HILOGE("meet max retry time!");
         return INVALID_PARAMETERS_ERR;
     }
-    PostOnBroadcastBusiness(senderNetworkId, accessTokenId, state, DBMS_RETRY_DELAY, retry + 1);
+    PostOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state, DBMS_RETRY_DELAY, retry + 1);
     return ERR_OK;
 }
 
 int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNetworkId,
-    uint16_t accessTokenId, const int32_t state, const int32_t retry)
+    uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state, const int32_t retry)
 {
-    HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, accessTokenId: %{public}u, state: %{public}d",
-        DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), accessTokenId, state);
+    HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, bundleNameId: %{public}u, state: %{public}d",
+        DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), bundleNameId, state);
     std::string bundleName;
-    int32_t ret = BundleManagerInternal::GetBundleNameFromDbms(senderNetworkId, accessTokenId, bundleName);
+    int32_t ret = BundleManagerInternal::GetBundleNameFromDbms(senderNetworkId, bundleNameId, bundleName);
     bool res = (state == INACTIVE) ? DmsRadar::GetInstance().UnfocusedGetBundleName("GetBundleNameFromDbms", ret)
         : DmsRadar::GetInstance().FocusedGetBundleName("GetBundleNameFromDbms", ret);
     if (!res) {
@@ -256,7 +259,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     }
     if (ret != ERR_OK) {
         HILOGW("get bundleName failed, ret: %{public}d, try = %{public}d", ret, retry);
-        return RetryPostBroadcast(senderNetworkId, accessTokenId, state, retry);
+        return RetryPostBroadcast(senderNetworkId, bundleNameId, continueTypeId, state, retry);
     }
 
     if (!CheckBundleContinueConfig(bundleName)) {
@@ -275,26 +278,27 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         return INVALID_PARAMETERS_ERR;
     }
 
-    ret = VerifyBroadcastSource(senderNetworkId, bundleName, state);
+    std::string continueType = BundleManagerInternal::GetContinueType(senderNetworkId, bundleName, continueTypeId);
+    ret = VerifyBroadcastSource(senderNetworkId, bundleName, continueType, state);
     if (ret != ERR_OK) {
         return ret;
     }
     std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     auto iterItem = registerOnListener_.find(onType_);
     if (iterItem == registerOnListener_.end()) {
-        HILOGE("get iterItem failed from registerOnListener_, accessTokenId: %{public}u", accessTokenId);
+        HILOGE("get iterItem failed from registerOnListener_, bundleNameId: %{public}u", bundleNameId);
         return INVALID_PARAMETERS_ERR;
     }
     std::vector<sptr<IRemoteObject>> objs = iterItem->second;
     for (auto iter : objs) {
-        NotifyRecvBroadcast(iter, senderNetworkId, bundleName, state);
+        NotifyRecvBroadcast(iter, senderNetworkId, bundleName, state, continueType);
     }
     HILOGI("DealOnBroadcastBusiness end");
     return ERR_OK;
 }
 
 void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
-    const std::string& networkId, const std::string& bundleName, const int32_t state)
+    const std::string& networkId, const std::string& bundleName, const int32_t state, const std::string& continueType)
 {
     HILOGI("NotifyRecvBroadcast start");
     if (obj == nullptr) {
@@ -311,6 +315,7 @@ void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
     PARCEL_WRITE_HELPER_NORET(data, Int32, state);
     PARCEL_WRITE_HELPER_NORET(data, String, networkId);
     PARCEL_WRITE_HELPER_NORET(data, String, bundleName);
+    PARCEL_WRITE_HELPER_NORET(data, String, continueType);
     HILOGI("[PerformanceTest] NotifyRecvBroadcast called, IPC begin = %{public}" PRId64, GetTickCount());
     int32_t error = obj->SendRequest(ON_CALLBACK, data, reply, option);
     bool res = (state == INACTIVE) ? DmsRadar::GetInstance().NotifyDockUnfocused("NotifyRecvBroadcast", error)
@@ -358,6 +363,7 @@ void DMSContinueRecvMgr::OnDeviceScreenOff()
     auto func = [this]() {
         std::string senderNetworkId;
         std::string bundleName;
+        std::string continueType;
         {
             std::lock_guard<std::mutex> currentIconLock(iconMutex_);
             if (iconInfo_.isEmpty()) {
@@ -366,8 +372,10 @@ void DMSContinueRecvMgr::OnDeviceScreenOff()
             }
             senderNetworkId = iconInfo_.senderNetworkId;
             bundleName = iconInfo_.bundleName;
+            continueType = iconInfo_.continueType;
             iconInfo_.senderNetworkId = "";
             iconInfo_.bundleName = "";
+            iconInfo_.continueType = "";
         }
         HILOGI("Saved iconInfo cleared, networkId = %{public}s, bundleName = %{public}s",
             DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), bundleName.c_str());
@@ -380,7 +388,7 @@ void DMSContinueRecvMgr::OnDeviceScreenOff()
             }
             std::vector<sptr<IRemoteObject>> objs = iterItem->second;
             for (auto iter : objs) {
-                NotifyRecvBroadcast(iter, senderNetworkId, bundleName, INACTIVE);
+                NotifyRecvBroadcast(iter, senderNetworkId, bundleName, INACTIVE, continueType);
             }
         }
     };
@@ -397,6 +405,7 @@ void DMSContinueRecvMgr::OnContinueSwitchOff()
     auto func = [this]() {
         std::string senderNetworkId;
         std::string bundleName;
+        std::string continueType;
         {
             std::lock_guard<std::mutex> currentIconLock(iconMutex_);
             if (iconInfo_.isEmpty()) {
@@ -405,8 +414,10 @@ void DMSContinueRecvMgr::OnContinueSwitchOff()
             }
             senderNetworkId = iconInfo_.senderNetworkId;
             bundleName = iconInfo_.bundleName;
+            continueType = iconInfo_.continueType;
             iconInfo_.senderNetworkId = "";
             iconInfo_.bundleName = "";
+            iconInfo_.continueType = "";
         }
         HILOGI("Saved iconInfo cleared, networkId = %{public}s, bundleName = %{public}s",
             DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), bundleName.c_str());
@@ -419,7 +430,7 @@ void DMSContinueRecvMgr::OnContinueSwitchOff()
             }
             std::vector<sptr<IRemoteObject>> objs = iterItem->second;
             for (auto iter : objs) {
-                NotifyRecvBroadcast(iter, senderNetworkId, bundleName, INACTIVE);
+                NotifyRecvBroadcast(iter, senderNetworkId, bundleName, INACTIVE, continueType);
             }
         }
     };
@@ -444,6 +455,7 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
     }
     std::string senderNetworkId;
     std::string bundleName;
+    std::string continueType;
     {
         std::lock_guard<std::mutex> currentIconLock(iconMutex_);
         if (networkId != iconInfo_.senderNetworkId && networkId != localNetworkId) {
@@ -452,8 +464,10 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
         }
         senderNetworkId = iconInfo_.senderNetworkId;
         bundleName = iconInfo_.bundleName;
+        continueType = iconInfo_.continueType;
         iconInfo_.senderNetworkId = "";
         iconInfo_.bundleName = "";
+        iconInfo_.continueType = "";
     }
     HILOGI("Saved iconInfo cleared, networkId = %{public}s, bundleName = %{public}s",
         DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), bundleName.c_str());
@@ -466,10 +480,26 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
         }
         std::vector<sptr<IRemoteObject>> objs = iterItem->second;
         for (auto iter : objs) {
-            NotifyRecvBroadcast(iter, senderNetworkId, bundleName, INACTIVE);
+            NotifyRecvBroadcast(iter, senderNetworkId, bundleName, INACTIVE, continueType);
         }
     }
     HILOGI("NotifyDeviceOffline end");
+}
+
+std::string DMSContinueRecvMgr::GetContinueType(const std::string& bundleName)
+{
+    std::lock_guard<std::mutex> currentIconLock(iconMutex_);
+    if (iconInfo_.isEmpty()) {
+        HILOGW("get continueType failed, Saved iconInfo has already been cleared.");
+        return "";
+    }
+    if (iconInfo_.bundleName != bundleName) {
+        HILOGW("BundleName not match, task abort. bundleName: %{public}s, saved bundleName: %{public}s",
+            bundleName.c_str(), iconInfo_.bundleName.c_str());
+        return "";
+    }
+
+    return iconInfo_.continueType;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

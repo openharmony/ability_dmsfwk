@@ -37,10 +37,11 @@ const std::string CONTINUE_RECV_MANAGER = "continue_recv_manager";
 struct currentIconInfo {
     std::string senderNetworkId;
     std::string bundleName;
+    std::string continueType;
 
     bool isEmpty()
     {
-        return (this->senderNetworkId == "" && this->bundleName == "");
+        return (this->senderNetworkId == "" && this->bundleName == "" && this->continueType == "");
     }
 };
 
@@ -70,19 +71,20 @@ public:
     void NotifyDeviceOffline(const std::string& networkId);
     void OnDeviceScreenOff();
     void OnContinueSwitchOff();
+    std::string GetContinueType(const std::string& bundleName);
 
 private:
     void StartEvent();
-    int32_t RetryPostBroadcast(const std::string& senderNetworkId, uint16_t accessTokenId,
+    int32_t RetryPostBroadcast(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t retry);
     int32_t VerifyBroadcastSource(const std::string& senderNetworkId, const std::string& bundleName,
-        const int32_t state);
-    void PostOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t accessTokenId, const int32_t state,
-        const int32_t delay = 0, const int32_t retry = 0);
-    int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t accessTokenId, const int32_t state,
-        const int32_t retry = 0);
+        const std::string& continueType, const int32_t state);
+    void PostOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
+        const int32_t state, const int32_t delay = 0, const int32_t retry = 0);
+    int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
+        const int32_t state, const int32_t retry = 0);
     void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const std::string& networkId,
-        const std::string& bundleName, const int32_t state);
+        const std::string& bundleName, const int32_t state, const std::string& continueType = "");
 private:
     currentIconInfo iconInfo_;
     sptr<DistributedMissionDiedListener> missionDiedListener_;

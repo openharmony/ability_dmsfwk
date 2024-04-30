@@ -52,18 +52,18 @@ public:
     bool operator == (const DSchedContinueInfo &index) const
     {
         std::string compareInfo = this->sourceDeviceId_ + this->sourceBundleName_ + this->sinkDeviceId_ +
-            this->sinkBundleName_ + this->continueType_;
+            this->sinkBundleName_;
         std::string otherCompareInfo = index.sourceDeviceId_ + index.sourceBundleName_ + index.sinkDeviceId_ +
-            index.sinkBundleName_ + index.continueType_;
+            index.sinkBundleName_;
         return compareInfo.compare(otherCompareInfo) == 0;
     }
 
     bool operator < (const DSchedContinueInfo &index) const
     {
         std::string compareInfo = this->sourceDeviceId_ + this->sourceBundleName_ + this->sinkDeviceId_ +
-            this->sinkBundleName_ + this->continueType_;
+            this->sinkBundleName_;
         std::string otherCompareInfo = index.sourceDeviceId_ + index.sourceBundleName_ + index.sinkDeviceId_ +
-            index.sinkBundleName_ + index.continueType_;
+            index.sinkBundleName_;
         return compareInfo < otherCompareInfo;
     }
 
@@ -187,6 +187,9 @@ private:
     void DurationDumperComplete(int32_t result);
     void NotifyDSchedEventResult(int32_t result);
     bool WaitAbilityStateInitial(int32_t persistentId);
+    int32_t StartAbility(const OHOS::AAFwk::Want& want, int32_t requestCode);
+    std::string QuerySinkAbilityName();
+    int32_t QuickStartAbility();
 
 private:
     std::shared_ptr<DSchedContinueStateMachine> stateMachine_;
