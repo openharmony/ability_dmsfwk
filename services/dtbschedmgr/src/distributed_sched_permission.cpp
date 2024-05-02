@@ -154,6 +154,7 @@ int32_t DistributedSchedPermission::GetAccountInfo(const std::string& remoteNetw
         HILOGE("different account");
         return INVALID_PARAMETERS_ERR;
     }
+    return ERR_OK;
 #endif
 
     if (!GetRelatedGroups(udid, callerInfo.bundleNames, accountInfo) &&
@@ -168,19 +169,12 @@ bool DistributedSchedPermission::CheckAclList(const std::string& udid,
     const std::vector<std::string>& bundleNames)
 {
     for (const auto& bundleName : bundleNames) {
-        HILOGI("shihaojie bundleName = %{public}s", bundleName.c_str());
-        if (bundleName == "ohos.samples.distributedcalc3") {
-            if (DeviceManager::GetInstance().CheckRelatedDevice(udid, "ohos.samples.distributedcalc")) {
-             HILOGE("shihaojie check CheckRelatedDevice ohos.samples.distributedcalc3 success");
-                return true;
-            }
-        }
         if (DeviceManager::GetInstance().CheckRelatedDevice(udid, bundleName)) {
-            HILOGE("shihaojie check CheckRelatedDevice success");
+            HILOGI("DM CheckRelatedDevice success");
             return true;
         }
     }
-    HILOGE("shihaojie check filed");
+    HILOGE("DM CheckRelatedDevice failed");
     return false;
 }
 
