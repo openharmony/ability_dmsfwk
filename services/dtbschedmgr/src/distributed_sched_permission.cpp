@@ -18,6 +18,7 @@
 #include "accesstoken_kit.h"
 #include "datetime_ex.h"
 #include "device_auth_defines.h"
+#include "device_manager.h"
 #include "device_security_defines.h"
 #include "device_security_info.h"
 #include "ipc_skeleton.h"
@@ -35,6 +36,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 using namespace OHOS::Security;
 using namespace AAFwk;
+using namespace DistributedHardware;
 namespace {
 const std::string FOUNDATION_PROCESS_NAME = "foundation";
 const std::string DMS_API_VERSION = "dmsApiVersion";
@@ -147,11 +149,33 @@ int32_t DistributedSchedPermission::GetAccountInfo(const std::string& remoteNetw
         return ERR_NULL_OBJECT;
     }
 
-    if (!GetRelatedGroups(udid, callerInfo.bundleNames, accountInfo)) {
+#ifdef DMSFWK_SAME_ACCOUNT
+    if (!DeviceManager::GetInstance().IsSameAccount(udid)) {
+        HILOGE("different account");
+        return INVALID_PARAMETERS_ERR;
+    }
+    return ERR_OK;
+#endif
+
+    if (!GetRelatedGroups(udid, callerInfo.bundleNames, accountInfo) &&
+        !CheckAclList(udid, callerInfo.bundleNames)) {
         HILOGE("GetRelatedGroups failed");
         return INVALID_PARAMETERS_ERR;
     }
     return ERR_OK;
+}
+
+bool DistributedSchedPermission::CheckAclList(const std::string& udid,
+    const std::vector<std::string>& bundleNames)
+{
+    for (const auto& bundleName : bundleNames) {
+        if (DeviceManager::GetInstance().CheckRelatedDevice(udid, bundleName)) {
+            HILOGI("DM CheckRelatedDevice success");
+            return true;
+        }
+    }
+    HILOGE("DM CheckRelatedDevice failed");
+    return false;
 }
 
 bool DistributedSchedPermission::GetRelatedGroups(const std::string& udid,
@@ -179,6 +203,7 @@ bool DistributedSchedPermission::GetRelatedGroups(const std::string& udid,
             }
         }
     }
+
     if (accountInfo.groupIdList.empty()) {
         HILOGE("groupIdList is empty");
         return false;
@@ -381,23 +406,20 @@ bool DistributedSchedPermission::VerifyPermission(uint32_t accessToken, const st
 bool DistributedSchedPermission::CheckAccountAccessPermission(const CallerInfo& callerInfo,
     const AccountInfo& accountInfo, const std::string& targetBundleName)
 {
-    if (accountInfo.accountType == IDistributedSched::SAME_ACCOUNT_TYPE) {
-        HILOGD("no need to check");
-        return true;
-    }
-    if (targetBundleName.empty() || accountInfo.groupIdList.empty()) {
-        HILOGE("targetBundleName or groupIdList is empty");
+    std::string udid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(callerInfo.sourceDeviceId);
+#ifdef DMSFWK_SAME_ACCOUNT
+    if (!DeviceManager::GetInstance().IsSameAccount(udid)) {
+        HILOGE("check same account permission in DM failed");
         return false;
     }
+    return true;
+#endif
 
-    for (const auto& groupId : accountInfo.groupIdList) {
-        HILOGD("groupId:%{public}s targetBundleName:%{public}s", groupId.c_str(), targetBundleName.c_str());
-        if (DistributedSchedAdapter::GetInstance().CheckAccessToGroup(groupId, targetBundleName)) {
-            return true;
-        }
+    if (!DistributedSchedAdapter::GetInstance().CheckAccessToGroup(udid, targetBundleName)) {
+        HILOGE("check different account permission failed");
+        return false;
     }
-    HILOGE("check account permission failed");
-    return false;
+    return true;
 }
 
 bool DistributedSchedPermission::CheckComponentAccessPermission(const AppExecFwk::AbilityInfo& targetAbility,

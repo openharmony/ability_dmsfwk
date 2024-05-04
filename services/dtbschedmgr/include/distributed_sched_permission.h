@@ -59,6 +59,7 @@ public:
     void MarkUriPermission(OHOS::AAFwk::Want& want, uint32_t accessToken);
 
 private:
+    bool CheckAclList(const std::string& udid, const std::vector<std::string>& bundleNames);
     bool GetRelatedGroups(const std::string& udid, const std::vector<std::string>& bundleNames,
         AccountInfo& accountInfo);
     bool ParseGroupInfos(const std::string& returnGroupStr, std::vector<GroupInfo>& groupInfos);
