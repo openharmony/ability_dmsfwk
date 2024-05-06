@@ -28,6 +28,7 @@ namespace DistributedSchedule {
 namespace {
     const std::string LOCAL_DEVICEID = "localdeviceid";
     const std::string REMOTE_DEVICEID = "remotedeviceid";
+    const std::string CONTINUETYPE = "continueType";
     constexpr int32_t MISSION_ID = 1;
     const std::string BUNDLE_NAME = "com.ohos.permissionmanager";
 }
@@ -121,7 +122,7 @@ HWTEST_F(DSchedContinueManagerTest, ContinueMission_003, TestSize.Level3)
     auto callback = GetDSchedService();
     OHOS::AAFwk::WantParams wantParams;
     int32_t ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, BUNDLE_NAME,
-        callback, wantParams);
+        CONTINUETYPE, callback, wantParams);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueManagerTest ContinueMission_003 end" << std::endl;
 }
@@ -136,13 +137,15 @@ HWTEST_F(DSchedContinueManagerTest, ContinueMission_004, TestSize.Level3)
     DTEST_LOG << "DSchedContinueManagerTest ContinueMission_004 begin" << std::endl;
     OHOS::AAFwk::WantParams wantParams;
     auto callback = GetDSchedService();
-    DSchedContinueManager::GetInstance().HandleContinueMission("", REMOTE_DEVICEID, BUNDLE_NAME, callback, wantParams);
-    DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, "", BUNDLE_NAME, callback, wantParams);
+    DSchedContinueManager::GetInstance().HandleContinueMission("", REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE,
+        callback, wantParams);
+    DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, "", BUNDLE_NAME, CONTINUETYPE,
+        callback, wantParams);
     DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, BUNDLE_NAME,
-        nullptr, wantParams);
+        CONTINUETYPE, nullptr, wantParams);
 
     int32_t ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, BUNDLE_NAME,
-        callback, wantParams);
+        CONTINUETYPE, callback, wantParams);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueManagerTest ContinueMission_004 end" << std::endl;
 }
