@@ -74,22 +74,6 @@ void DMSContinueSendMgr::Init()
         return;
     }
     DmsRadar::GetInstance().DmsFocused("Init", INIT);
-    DataShareManager::ObserverCallback observerCallback = [this]() {
-        bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-        int32_t missionId = GetCurrentMissionId();
-        if (missionId <= 0) {
-            HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
-            return;
-        }
-
-        if (IsContinueSwitchOn) {
-            DMSContinueSendMgr::GetInstance().NotifyMissionFocused(missionId, FocusedReason::INIT);
-        } else {
-            DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(missionId, UnfocusedReason::NORMAL);
-            DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
-        };
-    };
-    dataShareManager_.RegisterObserver(CONTINUE_SWITCH_STATUS_KEY, observerCallback);
     NotifyMissionFocused(missionId, FocusedReason::INIT);
     HILOGI("Init end");
 }

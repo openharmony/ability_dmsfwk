@@ -43,6 +43,7 @@
 #include "bundle/bundle_manager_internal.h"
 #include "connect_death_recipient.h"
 #include "continue_scene_session_handler.h"
+#include "datashare_manager.h"
 #include "dfx/dms_continue_time_dumper.h"
 #include "distributed_radar.h"
 #include "distributed_sched_adapter.h"
@@ -58,6 +59,8 @@
 #include "parcel_helper.h"
 #include "scene_board_judgement.h"
 #include "switch_status_dependency.h"
+#include "dsched_continue_manager.h"
+#include "mission/dms_continue_recv_manager.h"
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
 #include "common_event_listener.h"
 #endif
@@ -219,6 +222,25 @@ bool DistributedSchedService::Init()
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().Init()) {
         HILOGW("DtbschedmgrDeviceInfoStorage init failed.");
     }
+
+    DataShareManager::ObserverCallback observerCallback = [this]() {
+        bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
+        int32_t missionId = GetCurrentMissionId();
+        if (missionId <= 0) {
+            HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
+            return;
+        }
+        
+        if (IsContinueSwitchOn) {
+            DMSContinueSendMgr::GetInstance().NotifyMissionFocused(missionId, FocusedReason::INIT);
+            DSchedContinueManager::GetInstance().Init();
+        } else {
+            DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(missionId, UnfocusedReason::NORMAL);
+            DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
+            DSchedContinueManager::GetInstance().UnInit();
+        };
+    };
+    dataShareManager_.RegisterObserver(CONTINUE_SWITCH_STATUS_KEY, observerCallback);
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().InitDataStorage();
