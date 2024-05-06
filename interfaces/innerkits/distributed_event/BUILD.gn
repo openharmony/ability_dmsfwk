@@ -17,8 +17,6 @@ import("../../../dmsfwk.gni")
 config("dms_sdk_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
-    "${ams_path}/interfaces/inner_api/ability_manager/include/",
-    "${ams_path}/services/common/include/",
     "${dms_path}/common/include",
     "${dms_path}/interfaces/innerkits/distributed_event/include/",
     "${dms_path}/services/dtbabilitymgr/include/",
@@ -57,7 +55,7 @@ ohos_shared_library("distributed_sdk") {
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
-
+  public_external_deps = [ "ability_runtime:ability_manager" ]
   subsystem_name = "ability"
   innerapi_tags = [ "platformsdk" ]
   part_name = "dmsfwk"

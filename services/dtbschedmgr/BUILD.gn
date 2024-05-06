@@ -25,9 +25,6 @@ config("distributed_sched_config") {
   visibility += [ "./test/*" ]
   include_dirs = [
     "include",
-    "${cjson_path}",
-    "${communication_path}/dsoftbus/dsoftbus_enhance/interfaces/kits/broadcast",
-    "${communication_path}/dsoftbus/interfaces/kits/common",
     "${dms_path}/common/include",
     "${dms_path}/interfaces/kits/napi/include",
     "${dms_path}/interfaces/innerkits/common/include",

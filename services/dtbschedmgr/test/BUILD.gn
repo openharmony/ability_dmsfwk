@@ -50,6 +50,7 @@ dsched_external_deps = [
   "access_token:libtoken_setproc",
   "bundle_framework:appexecfwk_base",
   "bundle_framework:appexecfwk_core",
+  "cJSON:cjson",
   "c_utils:utils",
   "data_share:datashare_consumer",
   "device_auth:deviceauth_sdk",
