@@ -131,6 +131,7 @@ constexpr int32_t DMSDURATION_TOTALTIME = 2;
 constexpr int32_t DMSDURATION_DSTTOSRCRPCTIME = 3;
 constexpr int32_t DMSDURATION_SRCTODSTRPCTIME = 5;
 constexpr int32_t DMSDURATION_STARTABILITY = 6;
+static const std::string CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedService);

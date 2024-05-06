@@ -23,6 +23,7 @@
 
 #include "app_mgr_interface.h"
 #include "app_state_observer.h"
+#include "datashare_manager.h"
 #include "distributed_sched_stub.h"
 #include "distributed_sched_continuation.h"
 #include "dms_callback_task.h"
@@ -286,6 +287,7 @@ private:
     std::mutex registerMutex_;
     std::atomic<int32_t> token_ {0};
     std::map<std::string, sptr<AppStateObserver>> bundleNameMap_;
+    DataShareManager dataShareManager_;
 };
 
 class ConnectAbilitySession {
