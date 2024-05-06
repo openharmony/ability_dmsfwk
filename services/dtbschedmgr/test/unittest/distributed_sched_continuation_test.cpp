@@ -17,6 +17,7 @@
 #include "dfx/dms_continue_time_dumper.h"
 #include "distributed_sched_continuation_test.h"
 #include "distributed_sched_util.h"
+#include "dms_constant.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "ipc_skeleton.h"
 #include "mock_distributed_sched.h"
@@ -30,13 +31,13 @@ using namespace OHOS::DistributedHardware;
 
 namespace OHOS {
 namespace DistributedSchedule {
+using namespace Constants;
 namespace {
 const std::u16string MOCK_DEVICE_ID = u"MOCK_DEVICE_ID";
 constexpr int32_t MOCK_SESSION_ID = 123;
 constexpr int32_t MOCK_TASK_ID = 456;
 const std::string LOCAL_DEVICE_ID = "192.168.43.100";
 const string DMS_VERSION_ID = "dmsVersion";
-const string DMS_VERSION = "4.0.0";
 constexpr int32_t SLEEP_TIME = 1000;
 constexpr int64_t FREE_INSTALL_TIMEOUT = 50000;
 constexpr int32_t REQUEST_CODE_ERR = 305;

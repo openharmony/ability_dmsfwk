@@ -85,6 +85,7 @@ private:
     bool CheckCallingUid();
     bool EnforceInterfaceToken(MessageParcel& data);
     bool CallerInfoUnmarshalling(CallerInfo& callerInfo, MessageParcel& data);
+    bool IsUsingQos(const std::string& remoteDeviceId);
     void SaveExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo);
     void InitExtendedLocalFuncsInner();
     void InitLocalFuncsInner();
