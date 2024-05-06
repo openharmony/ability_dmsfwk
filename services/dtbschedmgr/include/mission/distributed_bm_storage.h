@@ -66,7 +66,7 @@ private:
     bool DealGetBundleName(const std::string &networkId, uint16_t accessTokenId, std::string &bundleName);
     uint16_t CreateBundleNameId();
     DmsBundleInfo ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo);
-    bool InnerSaveStorageDistributeInfo(const DmsBundleInfo &distributedBundleInfo);
+    bool InnerSaveStorageDistributeInfo(const DmsBundleInfo &distributedBundleInfo, const std::string &localUdid);
     std::map<std::string, DmsBundleInfo> GetAllOldDistributionBundleInfo(
         const std::vector<std::string> &bundleNames);
 

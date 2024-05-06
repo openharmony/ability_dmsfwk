@@ -409,7 +409,7 @@ std::vector<std::string> DtbschedmgrDeviceInfoStorage::GetNetworkIdList()
 {
     std::vector<std::string> devices;
     for (auto device = remoteDevices_.begin(); device != remoteDevices_.end(); ++device) {
-        HILOGD("NetworkId: %{public}s", device->second->GetNetworkId().c_str());
+        HILOGI("NetworkId: %{public}s", DnetworkAdapter::AnonymizeNetworkId(device->second->GetNetworkId()).c_str());
         devices.push_back(device->second->GetNetworkId());
     }
     return devices;

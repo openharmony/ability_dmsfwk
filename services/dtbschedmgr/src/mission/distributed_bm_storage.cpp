@@ -87,24 +87,27 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName)
         DeleteStorageDistributeInfo(bundleName);
         return false;
     }
-    ret = InnerSaveStorageDistributeInfo(ConvertToDistributedBundleInfo(bundleInfo));
+    std::string localUdid;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(localUdid);
+    if (localUdid == "") {
+        HILOGE("GetLocalUdid failed");
+        return false;
+    }
+    ret = InnerSaveStorageDistributeInfo(ConvertToDistributedBundleInfo(bundleInfo), localUdid);
     if (!ret) {
         HILOGW("InnerSaveStorageDistributeInfo:%{public}s  failed", bundleName.c_str());
         return false;
     }
+    PushOtherDistributedData();
     return true;
     HILOGD("end.");
 }
 
-bool DmsBmStorage::InnerSaveStorageDistributeInfo(const DmsBundleInfo &distributedBundleInfo)
+bool DmsBmStorage::InnerSaveStorageDistributeInfo(const DmsBundleInfo &distributedBundleInfo,
+    const std::string &localUdid)
+
 {
-    std::string udid;
-    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
-    if (udid == "") {
-        HILOGE("GetLocalUdid failed");
-        return false;
-    }
-    std::string keyOfData = DeviceAndNameToKey(udid, distributedBundleInfo.bundleName);
+    std::string keyOfData = DeviceAndNameToKey(localUdid, distributedBundleInfo.bundleName);
     Key key(keyOfData);
     Value value(distributedBundleInfo.ToString());
     Status status = kvStorePtr_->Put(key, value);
@@ -121,12 +124,10 @@ bool DmsBmStorage::InnerSaveStorageDistributeInfo(const DmsBundleInfo &distribut
 
 bool DmsBmStorage::DeleteStorageDistributeInfo(const std::string &bundleName)
 {
-    HILOGD("called.");
-    {
-        if (!CheckKvStore()) {
-            HILOGE("kvStore is nullptr");
-            return false;
-        }
+    HILOGI("called.");
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return false;
     }
     std::string udid;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
@@ -162,6 +163,7 @@ bool DmsBmStorage::DeleteStorageDistributeInfo(const std::string &bundleName)
         HILOGE("delete key error: %{public}d", status);
         return false;
     }
+    PushOtherDistributedData();
     return true;
     HILOGD("delete value to kvStore success");
 }
@@ -433,7 +435,7 @@ int32_t DmsBmStorage::PullOtherDistributedData()
     if (status != Status::SUCCESS) {
         HILOGE("sync failed, error = %{public}d", status);
     } else {
-        HILOGI("sync ok");
+        HILOGI("Synchronizing");
     }
     HILOGD("end.");
     return static_cast<int32_t>(status);
@@ -451,7 +453,7 @@ int32_t DmsBmStorage::PushOtherDistributedData()
     if (status != Status::SUCCESS) {
         HILOGE("sync failed, error = %{public}d", status);
     } else {
-        HILOGI("sync ok");
+        HILOGI("Synchronizing");
     }
     HILOGD("end.");
     return static_cast<int32_t>(status);
@@ -460,17 +462,22 @@ int32_t DmsBmStorage::PushOtherDistributedData()
 bool IsContinuable(AppExecFwk::BundleInfo bundleInfo)
 {
     for (auto abilityInfo : bundleInfo.abilityInfos) {
-        if (abilityInfo.continuable == false) {
-            HILOGD("is not continuable");
-            return false;
+        if (abilityInfo.continuable == true) {
+            return true;
         }
     }
-    return true;
+    return false;
 }
 
 void DmsBmStorage::UpdateDistributedData()
 {
     HILOGD("called.");
+    std::string udid;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
+    if (udid == "") {
+        HILOGE("GetLocalUdid failed");
+        return;
+    }
     auto bundleMgr = DmsBmStorage::GetInstance()->GetBundleMgr();
     if (bundleMgr == nullptr) {
         HILOGE("Get bundleMgr shared_ptr nullptr");
@@ -484,7 +491,6 @@ void DmsBmStorage::UpdateDistributedData()
     std::vector<std::string> bundleNames;
     for (const auto &bundleInfo : bundleInfos) {
         if (IsContinuable(bundleInfo)) {
-            HILOGD("need push");
             bundleNames.push_back(bundleInfo.name);
         }
     }
@@ -501,11 +507,12 @@ void DmsBmStorage::UpdateDistributedData()
                 continue;
             }
         }
-        if (!InnerSaveStorageDistributeInfo(ConvertToDistributedBundleInfo(bundleInfo))) {
+        if (!InnerSaveStorageDistributeInfo(ConvertToDistributedBundleInfo(bundleInfo), udid)) {
             HILOGW("UpdateDistributedData SaveStorageDistributeInfo:%{public}s failed", bundleInfo.name.c_str());
         }
     }
     PushOtherDistributedData();
+    PullOtherDistributedData();
     HILOGD("end.");
 }
 
