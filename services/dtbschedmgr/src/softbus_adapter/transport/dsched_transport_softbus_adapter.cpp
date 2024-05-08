@@ -71,7 +71,7 @@ DSchedTransportSoftbusAdapter::~DSchedTransportSoftbusAdapter()
 int32_t DSchedTransportSoftbusAdapter::InitChannel()
 {
     HILOGI("start");
-    int32_t serverSocket_ = CreateServerSocket();
+    serverSocket_ = CreateServerSocket();
     if (serverSocket_ <= 0) {
         HILOGE("create socket failed, ret: %d", serverSocket_);
         return serverSocket_;
