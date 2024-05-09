@@ -586,7 +586,7 @@ ohos_unittest("dmsbasetest") {
     ":test_config",
     "./resource:coverage_flags",
   ]
-  deps = [ "//third_party/cJSON:cjson" ]
+  deps = []
   configs += dsched_configs
   if (is_standard_system) {
     external_deps = dsched_external_deps

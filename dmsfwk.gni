@@ -12,10 +12,6 @@
 # limitations under the License.
 
 declare_args() {
-  ams_path = "//foundation/ability/ability_runtime"
-  cjson_path = "//third_party/cJSON"
-  communication_path = "//foundation/communication"
-
   dms_path = "//foundation/ability/dmsfwk"
   module_output_path = "dmsfwk/dmsfwk"
 
