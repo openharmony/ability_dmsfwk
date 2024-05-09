@@ -404,9 +404,9 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
 {
     HILOGI("ExecuteContinueReq start, continueInfo: %s", continueInfo_.toString().c_str());
     DurationDumperStart();
-    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK);
 
     if (subServiceType_ == CONTINUE_PULL) {
+        DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK);
         QuickStartAbility();
     }
 
@@ -486,30 +486,6 @@ std::string DSchedContinue::QuerySinkAbilityName()
     return localBundleInfo.abilityInfos.front().name;
 }
 
-int32_t DSchedContinue::StartAbility(const OHOS::AAFwk::Want& want, int32_t requestCode)
-{
-    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->Connect();
-    if (ret != ERR_OK) {
-        HILOGE("ExecuteContinueData connect ability server failed %d", ret);
-        return ret;
-    }
-
-    int32_t activeAccountId = 0;
-    ret = DistributedSchedService::GetInstance().QueryOsAccount(activeAccountId);
-    if (ret != ERR_OK) {
-        HILOGE("ExecuteContinueData QueryOsAccount failed %d", ret);
-        return ret;
-    }
-
-    HILOGI("ExecuteContinueData StartAbility start");
-    ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, DEFAULT_REQUEST_CODE, activeAccountId);
-    if (ret != ERR_OK) {
-        HILOGE("StartAbility failed %d", ret);
-        return ret;
-    }
-    return ret;
-}
-
 void DSchedContinue::DurationDumperStart()
 {
     DmsContinueTime::GetInstance().Init();
@@ -556,6 +532,7 @@ int32_t DSchedContinue::PackStartCmd(std::shared_ptr<DSchedContinueStartCmd>& cm
 int32_t DSchedContinue::ExecuteContinueAbility(int32_t appVersion)
 {
     HILOGI("ExecuteContinueAbility start");
+    DmsRadar::GetInstance().SaveDataDmsContinue("ContinueAbility", ERR_OK);
 
     int32_t result = GetMissionIdByBundleName();
     if (result != ERR_OK) {
@@ -577,7 +554,6 @@ int32_t DSchedContinue::ExecuteContinueAbility(int32_t appVersion)
     result = AbilityManagerClient::GetInstance()->ContinueAbility(continueInfo_.sinkDeviceId_,
         continueInfo_.missionId_, appVersion);
     HILOGI("ExecuteContinueAbility call continueAbility end, result: %d.", result);
-    DmsRadar::GetInstance().SaveDataDmsContinue("ContinueAbility", result);
 
     if (result != ERR_OK) {
         return CONTINUE_CALL_CONTINUE_ABILITY_FAILED;
@@ -648,7 +624,6 @@ int32_t DSchedContinue::ExecuteContinueReply()
 int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data)
 {
     HILOGI("ExecuteContinueSend start, continueInfo: %s", continueInfo_.toString().c_str());
-    DmsRadar::GetInstance().SaveDataDmsRemoteWant("StartRemoteAbility", ERR_OK);
     DurationDumperBeforeStartRemoteAbility();
 
     SetCleanMissionFlag(data->want);
@@ -691,6 +666,7 @@ int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData>
     auto cmd = std::make_shared<DSchedContinueDataCmd>();
     PackDataCmd(cmd, newWant, abilityInfo, callerInfo, accountInfo);
     ret = SendCommand(cmd);
+    DmsRadar::GetInstance().SaveDataDmsRemoteWant("SendContinueData", ret);
     if (ret != ERR_OK) {
         HILOGE("ExecuteContinueSend send data cmd failed, ret %d", ret);
         return ret;
@@ -828,6 +804,22 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
     return ret;
 }
 
+void DSchedContinue::DurationDumperBeforeStartAbility(std::shared_ptr<DSchedContinueDataCmd> cmd)
+{
+    if (subServiceType_ == CONTINUE_PULL) {
+        std::string timeInfo = cmd->want_.GetStringParam(DMSDURATION_SAVETIME);
+        DmsContinueTime::GetInstance().ReadDurationInfo(timeInfo.c_str());
+        DmsContinueTime::GetInstance().SetSrcBundleName(cmd->want_.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetSrcAbilityName(cmd->want_.GetElement().GetAbilityName());
+        DmsContinueTime::GetInstance().SetDstBundleName(cmd->want_.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetDstAbilityName(cmd->want_.GetElement().GetAbilityName());
+    }
+    DmsContinueTime::GetInstance().SetDurationBegin(CONTINUE_START_ABILITY_TIME, GetTickCount());
+
+    eventData_.moduleName = cmd->want_.GetElement().GetModuleName();
+    eventData_.abilityName = cmd->want_.GetElement().GetAbilityName();
+}
+
 bool DSchedContinue::WaitAbilityStateInitial(int32_t persistentId)
 {
     int32_t retryTimeout = GET_ABILITY_STATE_RETRY_TIMES;
@@ -848,20 +840,29 @@ bool DSchedContinue::WaitAbilityStateInitial(int32_t persistentId)
     return false;
 }
 
-void DSchedContinue::DurationDumperBeforeStartAbility(std::shared_ptr<DSchedContinueDataCmd> cmd)
+int32_t DSchedContinue::StartAbility(const OHOS::AAFwk::Want& want, int32_t requestCode)
 {
-    if (subServiceType_ == CONTINUE_PULL) {
-        std::string timeInfo = cmd->want_.GetStringParam(DMSDURATION_SAVETIME);
-        DmsContinueTime::GetInstance().ReadDurationInfo(timeInfo.c_str());
-        DmsContinueTime::GetInstance().SetSrcBundleName(cmd->want_.GetElement().GetBundleName());
-        DmsContinueTime::GetInstance().SetSrcAbilityName(cmd->want_.GetElement().GetAbilityName());
-        DmsContinueTime::GetInstance().SetDstBundleName(cmd->want_.GetElement().GetBundleName());
-        DmsContinueTime::GetInstance().SetDstAbilityName(cmd->want_.GetElement().GetAbilityName());
+    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->Connect();
+    if (ret != ERR_OK) {
+        HILOGE("ExecuteContinueData connect ability server failed %d", ret);
+        return ret;
     }
-    DmsContinueTime::GetInstance().SetDurationBegin(CONTINUE_START_ABILITY_TIME, GetTickCount());
 
-    eventData_.moduleName = cmd->want_.GetElement().GetModuleName();
-    eventData_.abilityName = cmd->want_.GetElement().GetAbilityName();
+    int32_t activeAccountId = 0;
+    ret = DistributedSchedService::GetInstance().QueryOsAccount(activeAccountId);
+    if (ret != ERR_OK) {
+        HILOGE("ExecuteContinueData QueryOsAccount failed %d", ret);
+        return ret;
+    }
+
+    HILOGI("ExecuteContinueData StartAbility start");
+    DmsRadar::GetInstance().ClickIconDmsStartAbility("StartAbility", ret);
+    ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, DEFAULT_REQUEST_CODE, activeAccountId);
+    if (ret != ERR_OK) {
+        HILOGE("StartAbility failed %d", ret);
+        return ret;
+    }
+    return ret;
 }
 
 int32_t DSchedContinue::ExecuteNotifyComplete(int32_t result)
@@ -942,7 +943,7 @@ int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
         HILOGD("ExecuteContinueEnd clean mission result: %d", ret);
     }
 
-    if (direction_ == CONTINUE_SOURCE) {
+    if (direction_ == CONTINUE_SINK) {
         DmsRadar::GetInstance().ClickIconDmsRecvOver("NotifyContinuationResultFromRemote", result);
     }
 

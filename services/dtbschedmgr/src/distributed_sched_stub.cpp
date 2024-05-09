@@ -26,6 +26,7 @@
 #include "dfx/dms_hitrace_constants.h"
 #include "distributed_want.h"
 #include "distributed_sched_permission.h"
+#include "dms_version_manager.h"
 #include "dsched_continue_manager.h"
 #include "dtbschedmgr_log.h"
 #include "dtbschedmgr_device_info_storage.h"
@@ -58,9 +59,8 @@ const std::string PARAM_FREEINSTALL_APPID = "ohos.freeinstall.params.callingAppI
 const std::string PARAM_FREEINSTALL_BUNDLENAMES = "ohos.freeinstall.params.callingBundleNames";
 const std::string CMPT_PARAM_FREEINSTALL_BUNDLENAMES = "ohos.extra.param.key.allowedBundles";
 const std::string DMS_VERSION_ID = "dmsVersion";
+constexpr int32_t QOS_THRESHOLD_VERSION = 5;
 const int DEFAULT_REQUEST_CODE = -1;
-
-constexpr bool IS_USING_QOS = true;
 }
 
 DistributedSchedStub::DistributedSchedStub()
@@ -416,9 +416,17 @@ int32_t DistributedSchedStub::ContinueMissionInner(MessageParcel& data, MessageP
         return ERR_NULL_OBJECT;
     }
 
-    int32_t result = (IS_USING_QOS) ?
-        DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, missionId, callback, *wantParams) :
-        ContinueMission(srcDevId, dstDevId, missionId, callback, *wantParams);
+    int32_t result = ERR_OK;
+    if (isLocalCalling) {
+        std::string remoteDeviceId = (IPCSkeleton::GetCallingDeviceID() == srcDevId) ? dstDevId : srcDevId;
+        if (IsUsingQos(remoteDeviceId)) {
+            result = DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, missionId, callback,
+                *wantParams);
+            HILOGI("result = %{public}d", result);
+            PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+        }
+    }
+    result = ContinueMission(srcDevId, dstDevId, missionId, callback, *wantParams);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
@@ -456,10 +464,18 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
     if (continueType == "") {
         continueType = DMSContinueRecvMgr::GetInstance().GetContinueType(bundleName);
     }
-    int32_t result = (IS_USING_QOS)
-        ? DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, bundleName, continueType,
-            callback, *wantParams)
-        : ContinueMission(srcDevId, dstDevId, bundleName, callback, *wantParams);
+
+    int32_t result = ERR_OK;
+    if (isLocalCalling) {
+        std::string remoteDeviceId = (IPCSkeleton::GetCallingDeviceID() == srcDevId) ? dstDevId : srcDevId;
+        if (IsUsingQos(remoteDeviceId)) {
+            result = DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, bundleName, continueType,
+                callback, *wantParams);
+            HILOGI("result = %{public}d", result);
+            PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+        }
+    }
+    result = ContinueMission(srcDevId, dstDevId, bundleName, callback, *wantParams);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
@@ -487,7 +503,8 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
     HILOGI("get AccessTokenID = %{public}u", accessToken);
     DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
 
-    int32_t result = (IS_USING_QOS) ?
+    std::string deviceId = want->GetElement().GetDeviceID();
+    int32_t result = (IsUsingQos(deviceId)) ?
         DSchedContinueManager::GetInstance().StartContinuation(*want, missionId, callerUid, status, accessToken) :
         StartContinuation(*want, missionId, callerUid, status, accessToken);
     ReportEvent(*want, BehaviorEvent::START_CONTINUATION, result, callerUid);
@@ -512,12 +529,27 @@ int32_t DistributedSchedStub::NotifyCompleteContinuationInner(MessageParcel& dat
     PARCEL_READ_HELPER(data, Int32, sessionId);
     bool continuationResult = false;
     PARCEL_READ_HELPER(data, Bool, continuationResult);
-    if (IS_USING_QOS) {
+    if (IsUsingQos(Str16ToStr8(devId))) {
         DSchedContinueManager::GetInstance().NotifyCompleteContinuation(devId, sessionId, continuationResult);
     } else {
         NotifyCompleteContinuation(devId, sessionId, continuationResult);
     }
     return ERR_OK;
+}
+
+bool DistributedSchedStub::IsUsingQos(const std::string& remoteDeviceId)
+{
+    if (remoteDeviceId.empty()) {
+        HILOGW("remote deviceId empty, using rpc");
+        return false;
+    }
+
+    DmsVersion thresholdDmsVersion = {QOS_THRESHOLD_VERSION, 0, 0};
+    if (DmsVersionManager::IsRemoteDmsVersionLower(remoteDeviceId, thresholdDmsVersion)) {
+        HILOGW("remote dms not support qos, using rpc");
+        return false;
+    }
+    return true;
 }
 
 int32_t DistributedSchedStub::NotifyDSchedEventResultFromRemoteInner(MessageParcel& data,
@@ -847,9 +879,7 @@ int32_t DistributedSchedStub::GetContinueInfoInner(MessageParcel& data, MessageP
     }
     std::string dstNetworkId;
     std::string srcNetworkId;
-    int32_t result = (IS_USING_QOS) ?
-        DSchedContinueManager::GetInstance().GetContinueInfo(dstNetworkId, srcNetworkId) :
-        GetContinueInfo(dstNetworkId, srcNetworkId);
+    int32_t result = DSchedContinueManager::GetInstance().GetContinueInfo(dstNetworkId, srcNetworkId);
     PARCEL_WRITE_HELPER(reply, String, dstNetworkId);
     PARCEL_WRITE_HELPER(reply, String, srcNetworkId);
     return result;

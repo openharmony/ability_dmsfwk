@@ -404,13 +404,16 @@ void DSchedContinueManager::NotifyContinueDataRecv(int32_t sessionId, int32_t co
 {
     HILOGI("start, parsed cmd %d, sessionId: %d.", command, sessionId);
     std::lock_guard<std::mutex> continueLock(continueMutex_);
-    for (auto iter = continues_.begin(); iter != continues_.end(); iter++) {
-        if (iter->second != nullptr && sessionId == iter->second->GetSessionId()) {
-            HILOGI("sessionId %d exist.", sessionId);
-            iter->second->OnDataRecv(command, dataBuffer);
-            return;
+    if (!continues_.empty()) {
+        for (auto iter = continues_.begin(); iter != continues_.end(); iter++) {
+            if (iter->second != nullptr && sessionId == iter->second->GetSessionId()) {
+                HILOGI("sessionId %d exist.", sessionId);
+                iter->second->OnDataRecv(command, dataBuffer);
+                return;
+            }
         }
     }
+
     if (command == DSCHED_CONTINUE_CMD_START) {
         HILOGI("recv start cmd, sessionId: %d.", sessionId);
         auto startCmd = std::make_shared<DSchedContinueStartCmd>();
