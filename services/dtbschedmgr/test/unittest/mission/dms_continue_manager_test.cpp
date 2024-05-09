@@ -302,6 +302,7 @@ HWTEST_F(DMSContinueManagerTest, testDealUnfocusedBusiness001, TestSize.Level3)
      * @tc.steps: step2. test DealUnfocusedBusiness when missionId is not invalid;
      */
     DMSContinueSendMgr::GetInstance().focusedMission_[BUNDLENAME_01] = MISSIONID_01;
+    DMSContinueSendMgr::GetInstance().focusedMissionAbility_[MISSIONID_01] = ABILITY_NAME_01;
     ret = DMSContinueSendMgr::GetInstance().DealUnfocusedBusiness(MISSIONID_01, UnfocusedReason::NORMAL);
     EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
 
@@ -744,7 +745,7 @@ HWTEST_F(DMSContinueManagerTest, testGetBundleNameIdAndContinueTypeId_001, TestS
     int32_t ret = DMSContinueSendMgr::GetInstance().GetBundleNameIdAndContinueTypeId(MISSIONID_01, state,
         bundleNameId, continueTypeId);
     
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, REMOTE_DEVICE_BIND_ABILITY_ERR);
     DTEST_LOG << "DMSContinueManagerTest testGetBundleNameIdAndContinueTypeId_001 end" << std::endl;
 }
 

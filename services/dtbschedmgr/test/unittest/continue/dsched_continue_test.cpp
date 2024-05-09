@@ -730,5 +730,125 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0025_1, TestSize.Level0)
     EXPECT_EQ(ret, false);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0025_1 end ret:" << ret << std::endl;
 }
+
+/**
+ * @tc.name: WaitAbilityStateInitialTest_0026_1
+ * @tc.desc: WaitAbilityStateInitialTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueTest, WaitAbilityStateInitialTest_0026_1, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueTest WaitAbilityStateInitialTest_0026_1 begin" << std::endl;
+    std::string deviceId = "123";
+    std::string bundleName = "test";
+    int32_t subType = CONTINUE_PULL;
+    int32_t direction = CONTINUE_SINK;
+    sptr<IRemoteObject> callback = nullptr;
+    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
+    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
+    conti->Init();
+
+    int32_t persistentId = 100;
+    bool ret = conti->WaitAbilityStateInitial(persistentId);
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "DSchedContinueTest WaitAbilityStateInitialTest_0026_1 end ret:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: StartAbilityTest_0027_1
+ * @tc.desc: StartAbilityTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueTest, StartAbilityTest_0027_1, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueTest StartAbilityTest_0027_1 begin" << std::endl;
+    std::string deviceId = "123";
+    std::string bundleName = "test";
+    int32_t subType = CONTINUE_PULL;
+    int32_t direction = CONTINUE_SINK;
+    sptr<IRemoteObject> callback = nullptr;
+    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
+    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
+    conti->Init();
+
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("devicdId", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    want.SetElement(element);
+    int32_t ret = conti->StartAbility(want, 0);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DSchedContinueTest StartAbilityTest_0027_1 end ret:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: QuerySinkAbilityNameTest_0028_1
+ * @tc.desc: QuerySinkAbilityNameTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueTest, QuerySinkAbilityNameTest_0028_1, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueTest QuerySinkAbilityNameTest_0028_1 begin" << std::endl;
+    std::string deviceId = "123";
+    std::string bundleName = "test";
+    int32_t subType = CONTINUE_PULL;
+    int32_t direction = CONTINUE_SINK;
+    std::string continueType = "test";
+    sptr<IRemoteObject> callback = nullptr;
+    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, continueType);
+    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
+    conti->Init();
+
+    std::string sinkBundleName = conti->QuerySinkAbilityName();
+    EXPECT_TRUE(sinkBundleName.empty());
+    DTEST_LOG << "DSchedContinueTest QuerySinkAbilityNameTest_0028_1 end" << std::endl;
+}
+
+/**
+ * @tc.name: QuickStartAbilityTest_0029_1
+ * @tc.desc: QuickStartAbilityTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueTest, QuickStartAbilityTest_0029_1, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueTest QuickStartAbilityTest_0029_1 begin" << std::endl;
+    std::string deviceId = "123";
+    std::string bundleName = "test";
+    int32_t subType = CONTINUE_PULL;
+    int32_t direction = CONTINUE_SINK;
+    sptr<IRemoteObject> callback = nullptr;
+    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
+    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
+    conti->Init();
+
+    int32_t ret = conti->QuickStartAbility();
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedContinueTest QuickStartAbilityTest_0029_1 end ret:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: UpdateWantForContinueTypeTest_0030_1
+ * @tc.desc: UpdateWantForContinueTypeTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueTest, UpdateWantForContinueTypeTest_0030_1, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueTest UpdateWantForContinueTypeTest_0030_1 begin" << std::endl;
+    std::string deviceId = "123";
+    std::string bundleName = "test";
+    int32_t subType = CONTINUE_PULL;
+    int32_t direction = CONTINUE_SINK;
+    sptr<IRemoteObject> callback = nullptr;
+    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
+    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
+    conti->Init();
+
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("devicdId", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    want.SetElement(element);
+    int32_t ret = conti->UpdateWantForContinueType(want);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DSchedContinueTest UpdateWantForContinueTypeTest_0030_1 end ret:" << ret << std::endl;
+}
 }
 }
