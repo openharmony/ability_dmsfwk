@@ -338,6 +338,7 @@ int32_t DSchedContinue::OnNotifyComplete(int32_t missionId, bool isSuccess)
 int32_t DSchedContinue::OnContinueEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd)
 {
     HILOGI("called");
+    ContinueSceneSessionHandler::GetInstance().ClearContinueSessionId();
     return PostNotifyCompleteTask(cmd->result_);
 }
 
@@ -772,30 +773,28 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
     int32_t ret = DistributedSchedService::GetInstance().CheckTargetPermission(cmd->want_, cmd->callerInfo_,
         cmd->accountInfo_, START_PERMISSION, true);
     if (ret != ERR_OK) {
-        HILOGE("ExecuteContinueData CheckTargetPermission failed!!");
+        HILOGE("ExecuteContinueData CheckTargetPermission failed!");
         return ret;
     }
 
     OHOS::AAFwk::Want want = cmd->want_;
-    std::string srcAbilityName = want.GetElement().GetAbilityName();
-    std::string sinkAbilityName = BundleManagerInternal::GetAbilityName(continueInfo_.sinkDeviceId_,
-        continueInfo_.sinkBundleName_, continueInfo_.continueType_);
-    if (!sinkAbilityName.empty() && sinkAbilityName != srcAbilityName) {
-        OHOS::AppExecFwk::ElementName element = want.GetElement();
-        want.SetElementName(element.GetDeviceID(), element.GetBundleName(), sinkAbilityName);
-        want.RemoveParam(SUPPORT_CONTINUE_PAGE_STACK_KEY);
-        want.SetParam(SUPPORT_CONTINUE_PAGE_STACK_KEY, false);
-
-        DmsContinueTime::GetInstance().SetDstAbilityName(sinkAbilityName);
-    }
-
-    int32_t persistentId;
-    if (ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId) == ERR_OK) {
+    if (subServiceType_ == CONTINUE_PULL) {
+        UpdateWantForContinueType(want);
+        int32_t persistentId;
+        if (ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId) != ERR_OK) {
+            HILOGE("get persistentId failed, stop start ability");
+            return OnContinueEnd(ERR_OK);
+        }
         HILOGI("get persistentId success, persistentId: %d", persistentId);
         WaitAbilityStateInitial(persistentId);
         want.SetParam(DMS_PERSISTENT_ID, persistentId);
-    }
 
+        if (ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId) != ERR_OK) {
+            HILOGE("get persistentId failed, stop start ability");
+            return OnContinueEnd(ERR_OK);
+        }
+    }
+    
     ret = StartAbility(want, cmd->requestCode_);
     if (ret == ERR_OK) {
         stateMachine_->UpdateState(DSCHED_CONTINUE_SINK_WAIT_END_STATE);
@@ -818,6 +817,22 @@ void DSchedContinue::DurationDumperBeforeStartAbility(std::shared_ptr<DSchedCont
 
     eventData_.moduleName = cmd->want_.GetElement().GetModuleName();
     eventData_.abilityName = cmd->want_.GetElement().GetAbilityName();
+}
+
+int32_t DSchedContinue::UpdateWantForContinueType(OHOS::AAFwk::Want& want)
+{
+    std::string srcAbilityName = want.GetElement().GetAbilityName();
+    std::string sinkAbilityName = BundleManagerInternal::GetAbilityName(continueInfo_.sinkDeviceId_,
+        continueInfo_.sinkBundleName_, continueInfo_.continueType_);
+    if (!sinkAbilityName.empty() && sinkAbilityName != srcAbilityName) {
+        OHOS::AppExecFwk::ElementName element = want.GetElement();
+        want.SetElementName(element.GetDeviceID(), element.GetBundleName(), sinkAbilityName);
+        want.RemoveParam(SUPPORT_CONTINUE_PAGE_STACK_KEY);
+        want.SetParam(SUPPORT_CONTINUE_PAGE_STACK_KEY, false);
+
+        DmsContinueTime::GetInstance().SetDstAbilityName(sinkAbilityName);
+    }
+    return ERR_OK;
 }
 
 bool DSchedContinue::WaitAbilityStateInitial(int32_t persistentId)

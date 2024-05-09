@@ -79,7 +79,6 @@ int32_t ContinueSceneSessionHandler::GetPersistentId(int32_t& persistentId)
     do {
         auto err = sceneSessionManager->GetSessionInfoByContinueSessionId(continueSessionId_, missionInfo);
         if (err == WSError::WS_OK) {
-            continueSessionId_.clear();
             persistentId = missionInfo.id;
             return ERR_OK;
         }
@@ -88,7 +87,6 @@ int32_t ContinueSceneSessionHandler::GetPersistentId(int32_t& persistentId)
         std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
     } while (--retryTimeout >= 0);
     
-    continueSessionId_.clear();
     return INVALID_PARAMETERS_ERR;
 }
 } // namespace DistributedSchedule
