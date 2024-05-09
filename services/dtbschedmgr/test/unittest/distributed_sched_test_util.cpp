@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-#include "distributed_sched_util.h"
+#include "distributed_sched_test_util.h"
 
 #include <future>
 
 #include "accesstoken_kit.h"
 #include "bundle_installer_interface.h"
-#include "dtbschedmgr_log.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "nativetoken_kit.h"
@@ -28,6 +27,8 @@
 #include "status_receiver_interface.h"
 #include "system_ability_definition.h"
 #include "token_setproc.h"
+
+#include "dtbschedmgr_log.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -84,22 +85,22 @@ std::condition_variable DistributedSchedUtil::remoteConVar_;
 
 void DistributedSchedUtil::MockPermission()
 {
-    static const char *PERMS[] = {
+    static const char *perms[] = {
         "ohos.permission.ABILITY_BACKGROUND_COMMUNICATION",
         "ohos.permission.ACCESS_SERVICE_DM",
         "ohos.permission.DISTRIBUTED_DATASYNC",
         "ohos.permission.RUNNING_STATE_OBSERVER"
         
     };
-    MockProcessAndPermission(DISTSCHED_PROCESS_NAME, PERMS, PERMS_NUM);
+    MockProcessAndPermission(DISTSCHED_PROCESS_NAME, perms, PERMS_NUM);
 }
 
 void DistributedSchedUtil::MockBundlePermission()
 {
-    static const char *PERMS[] = {
+    static const char *perms[] = {
         "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED"
     };
-    MockProcessAndPermission("DistributedSchedPermissionTest", PERMS, sizeof(PERMS) / sizeof(PERMS[0]));
+    MockProcessAndPermission("DistributedSchedPermissionTest", perms, sizeof(perms) / sizeof(perms[0]));
 }
 
 void DistributedSchedUtil::MockManageMissions()

@@ -35,6 +35,7 @@ int32_t Base64StrToParcel(const std::string& rawStr, Parcel& parcel);
 std::string Base64Encode(const unsigned char *toEncode, unsigned int len);
 std::string Base64Decode(const std::string& basicString);
 bool IsBase64(unsigned char c);
+std::string GetAnonymStr(const std::string &value);
 } // namespace DistributedSchedule
 } // namespace OHOS
 #endif // OHOS_DISTRIBUTED_SCHED_SERVICE_H

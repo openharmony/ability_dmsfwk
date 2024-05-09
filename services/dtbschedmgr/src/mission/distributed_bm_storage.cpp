@@ -16,12 +16,14 @@
 
 #include "mission/distributed_bm_storage.h"
 
-#include "dtbschedmgr_device_info_storage.h"
-#include "dtbschedmgr_log.h"
 #include "iservice_registry.h"
-#include "mission/distributed_sched_mission_manager.h"
 #include "system_ability_definition.h"
 #include "os_account_manager.h"
+
+#include "distributed_sched_utils.h"
+#include "dtbschedmgr_device_info_storage.h"
+#include "dtbschedmgr_log.h"
+#include "mission/distributed_sched_mission_manager.h"
 
 using namespace OHOS::DistributedKv;
 
@@ -206,8 +208,7 @@ bool DmsBmStorage::GetStorageDistributeInfo(const std::string &networkId,
 bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_t& bundleNameId,
     std::string &bundleName)
 {
-    HILOGD("networkId: %{public}s  bundleNameId: %{public}d",
-        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), bundleNameId);
+    HILOGD("networkId: %{public}s bundleNameId: %{public}d", GetAnonymStr(networkId).c_str(), bundleNameId);
     if (!CheckKvStore()) {
         HILOGE("kvStore is nullptr");
         return false;
@@ -244,8 +245,7 @@ bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_
 bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, const uint16_t& bundleNameId,
     std::string &bundleName)
 {
-    HILOGD("networkId: %{public}s  bundleNameId: %{public}d",
-        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), bundleNameId);
+    HILOGD("networkId: %{public}s  bundleNameId: %{public}d", GetAnonymStr(networkId).c_str(), bundleNameId);
     bool ret = DealGetBundleName(networkId, bundleNameId, bundleName);
     if (!ret) {
         HILOGW("GetDistributedBundleName error and try to call again");
@@ -619,7 +619,7 @@ std::string DmsBmStorage::GetContinueType(const std::string &networkId, std::str
     uint8_t continueTypeId)
 {
     HILOGD("networkId: %{public}s,  bundleName: %{public}s,  continueTypeId: %{public}d",
-        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), bundleName.c_str(), continueTypeId);
+        GetAnonymStr(networkId).c_str(), bundleName.c_str(), continueTypeId);
     if (!CheckKvStore()) {
         HILOGE("kvStore is nullptr");
         return "";
@@ -670,7 +670,7 @@ std::string DmsBmStorage::GetAbilityName(const std::string &networkId, std::stri
     std::string &continueType)
 {
     HILOGD("networkId: %{public}s,  bundleName: %{public}s,  continueTypeId: %{public}s",
-        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), bundleName.c_str(), continueType.c_str());
+        GetAnonymStr(networkId).c_str(), bundleName.c_str(), continueType.c_str());
     if (!CheckKvStore()) {
         HILOGE("kvStore is nullptr");
         return "";

@@ -19,6 +19,7 @@
 #include "device_manager.h"
 #include "dfx/dms_hisysevent_report.h"
 #include "distributed_sched_service.h"
+#include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
@@ -116,8 +117,7 @@ void DistributedSchedAdapter::DeviceOnline(const std::string& networkId)
         return;
     }
 
-    HILOGD("process DeviceOnline networkId is %{public}s",
-        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+    HILOGD("process DeviceOnline networkId is %{public}s", GetAnonymStr(networkId).c_str());
     dmsAdapterHandler_->RemoveTask(networkId);
 }
 
@@ -132,8 +132,7 @@ void DistributedSchedAdapter::DeviceOffline(const std::string& networkId)
         HILOGW("DeviceOffline networkId is empty");
         return;
     }
-    HILOGD("process DeviceOffline networkId is %{public}s",
-        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+    HILOGD("process DeviceOffline networkId is %{public}s", GetAnonymStr(networkId).c_str());
     auto callback = [networkId, this] () {
         ProcessDeviceOffline(networkId);
     };

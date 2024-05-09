@@ -22,7 +22,7 @@
 #include "bundle/bundle_manager_callback_stub.h"
 #undef private
 
-#include "distributed_sched_util.h"
+#include "distributed_sched_test_util.h"
 #include "dtbschedmgr_log.h"
 #include "test_log.h"
 

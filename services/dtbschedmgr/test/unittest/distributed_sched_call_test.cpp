@@ -14,16 +14,17 @@
  */
 #include "gtest/gtest.h"
 
-#define private public
-#define protected public
 #include "ability_connect_callback_stub.h"
-#include "distributed_sched_adapter.h"
-#include "distributed_sched_service.h"
-#include "dtbschedmgr_device_info_storage.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+
+#define private public
+#define protected public
+#include "distributed_sched_adapter.h"
+#include "distributed_sched_service.h"
+#include "dtbschedmgr_device_info_storage.h"
 #include "test_log.h"
 #undef private
 #undef protected

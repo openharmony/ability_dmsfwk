@@ -484,14 +484,14 @@ int32_t DistributedAbilityManagerService::OnDeviceCancel()
 bool DistributedAbilityManagerService::HandleDisconnectAbility()
 {
     if (continuationHandler_ == nullptr) {
-        HILOGE("continuationHandler_ is nullptr");
+        HILOGE("continuationHandler is null.");
         return false;
     }
     auto func = [this]() {
         HILOGD("HandleDisconnectAbility called.");
         int32_t errCode = DisconnectAbility();
         if (errCode != ERR_OK) {
-            HILOGE("DisconnectAbility errCode:%d", errCode);
+            HILOGE("DisconnectAbility errCode: %{public}d.", errCode);
             return;
         }
     };

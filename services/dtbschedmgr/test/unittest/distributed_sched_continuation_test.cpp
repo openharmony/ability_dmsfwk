@@ -16,7 +16,7 @@
 
 #include "dfx/dms_continue_time_dumper.h"
 #include "distributed_sched_continuation_test.h"
-#include "distributed_sched_util.h"
+#include "distributed_sched_test_util.h"
 #include "dms_constant.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "ipc_skeleton.h"

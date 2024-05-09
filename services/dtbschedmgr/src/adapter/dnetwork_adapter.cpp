@@ -21,9 +21,11 @@
 #include <unistd.h>
 
 #include "errors.h"
+#include "event_runner.h"
+
+#include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
-#include "event_runner.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -35,7 +37,6 @@ constexpr int32_t RETRY_REGISTER_CALLBACK_TIMES = 5;
 constexpr int32_t RETRY_REGISTER_CALLBACK_DELAY_TIME = 1000; // 1s
 const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getprocpid());
 
-constexpr int32_t NON_ANONYMIZED_LENGTH = 6;
 const std::string EMPTY_DEVICE_ID = "";
 const std::string TAG = "DnetworkAdapter";
 }
@@ -67,7 +68,7 @@ void DnetworkAdapter::DeviceInitCallBack::OnRemoteDied()
 void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOnline(const DmDeviceInfo& deviceInfo)
 {
     std::string networkId = deviceInfo.networkId;
-    HILOGI("OnNodeOnline netwokId = %{public}s", AnonymizeNetworkId(networkId).c_str());
+    HILOGI("OnNodeOnline netwokId: %{public}s.", GetAnonymStr(networkId).c_str());
     auto onlineNotifyTask = [deviceInfo]() {
         std::lock_guard<std::mutex> autoLock(listenerSetMutex_);
         for (auto& listener : listenerSet_) {
@@ -82,7 +83,7 @@ void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOnline(const DmDeviceInfo&
 
 void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOffline(const DmDeviceInfo& deviceInfo)
 {
-    HILOGI("OnNodeOffline networkId = %{public}s", AnonymizeNetworkId(deviceInfo.networkId).c_str());
+    HILOGI("OnNodeOffline networkId: %{public}s.", GetAnonymStr(deviceInfo.networkId).c_str());
     auto offlineNotifyTask = [deviceInfo]() {
         std::lock_guard<std::mutex> autoLock(listenerSetMutex_);
         for (auto& listener : listenerSet_) {
@@ -98,7 +99,7 @@ void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOffline(const DmDeviceInfo
 void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceChanged(const DmDeviceInfo& deviceInfo)
 {
     std::string networkId = deviceInfo.networkId;
-    HILOGI("OnDeviceChanged netwokId = %{public}s", AnonymizeNetworkId(networkId).c_str());
+    HILOGI("OnDeviceChanged netwokId: %{public}s.", GetAnonymStr(networkId).c_str());
 }
 
 void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceReady(const DmDeviceInfo& deviceInfo)
@@ -216,16 +217,6 @@ std::string DnetworkAdapter::GetUuidByNetworkId(const std::string& networkId)
         return "";
     }
     return uuid;
-}
-
-std::string DnetworkAdapter::AnonymizeNetworkId(const std::string& networkId)
-{
-    if (networkId.length() < NON_ANONYMIZED_LENGTH) {
-        return EMPTY_DEVICE_ID;
-    }
-    std::string anonNetworkId = networkId.substr(0, NON_ANONYMIZED_LENGTH);
-    anonNetworkId.append("******");
-    return anonNetworkId;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

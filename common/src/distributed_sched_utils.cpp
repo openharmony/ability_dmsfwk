@@ -34,20 +34,23 @@ const std::string TAG = "DistributedSchedUtils";
 const std::string CONTINUE_CONFIG_RELATIVE_PATH = "etc/distributedhardware/dms/continue_config.json";
 const std::string ALLOW_APP_LIST_KEY = "allow_applist";
 constexpr int32_t MAX_CONFIG_PATH_LEN = 1024;
+constexpr size_t INT32_SHORT_ID_LEN = 20;
+constexpr size_t INT32_MIN_ID_LEN = 6;
+constexpr size_t INT32_PLAINTEXT_LEN = 4;
 
-const uint32_t OFFSET2 = 2;
-const uint32_t OFFSET4 = 4;
-const uint32_t OFFSET6 = 6;
-const uint8_t PARAM_FC = 0xfc;
-const uint8_t PARAM_03 = 0x03;
-const uint8_t PARAM_F0 = 0xf0;
-const uint8_t PARAM_0F = 0x0f;
-const uint8_t PARAM_C0 = 0xc0;
-const uint8_t PARAM_3F = 0x3f;
-const int INDEX_FIRST = 0;
-const int INDEX_SECOND = 1;
-const int INDEX_THIRD = 2;
-const int INDEX_FORTH = 3;
+constexpr uint32_t OFFSET2 = 2;
+constexpr uint32_t OFFSET4 = 4;
+constexpr uint32_t OFFSET6 = 6;
+constexpr uint8_t PARAM_FC = 0xfc;
+constexpr uint8_t PARAM_03 = 0x03;
+constexpr uint8_t PARAM_F0 = 0xf0;
+constexpr uint8_t PARAM_0F = 0x0f;
+constexpr uint8_t PARAM_C0 = 0xc0;
+constexpr uint8_t PARAM_3F = 0x3f;
+constexpr uint32_t INDEX_FIRST = 0;
+constexpr uint32_t INDEX_SECOND = 1;
+constexpr uint32_t INDEX_THIRD = 2;
+constexpr uint32_t INDEX_FORTH = 3;
 
 static std::atomic<bool> g_isMissContinueCfg = false;
 static std::string g_continueCfgFullPath = "";
@@ -326,5 +329,26 @@ bool IsBase64(unsigned char c)
     return (isalnum(c) || (c == '+') || (c == '/'));
 }
 
+std::string GetAnonymStr(const std::string &value)
+{
+    std::string res;
+    std::string tmpStr("******");
+    size_t strLen = value.length();
+    if (strLen < INT32_MIN_ID_LEN) {
+        return tmpStr;
+    }
+
+    if (strLen <= INT32_SHORT_ID_LEN) {
+        res += value[0];
+        res += tmpStr;
+        res += value[strLen - 1];
+    } else {
+        res.append(value, 0, INT32_PLAINTEXT_LEN);
+        res += tmpStr;
+        res.append(value, strLen - INT32_PLAINTEXT_LEN, INT32_PLAINTEXT_LEN);
+    }
+
+    return res;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS

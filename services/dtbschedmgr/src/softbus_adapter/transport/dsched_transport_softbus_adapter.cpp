@@ -15,7 +15,7 @@
 
 #include "dsched_transport_softbus_adapter.h"
 
-#include "adapter/dnetwork_adapter.h"
+#include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "softbus_bus_center.h"
@@ -103,7 +103,7 @@ int32_t DSchedTransportSoftbusAdapter::CreateServerSocket()
 
 int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDeviceId)
 {
-    HILOGI("try to connect peer: %s", DnetworkAdapter::AnonymizeNetworkId(peerDeviceId).c_str());
+    HILOGI("try to connect peer: %{public}s.", GetAnonymStr(peerDeviceId).c_str());
     {
         std::lock_guard<std::mutex> sessionLock(sessionMutex_);
         if (!sessions_.empty()) {
@@ -183,7 +183,7 @@ int32_t DSchedTransportSoftbusAdapter::CreateSessionRecord(int32_t sessionId, co
 
 void DSchedTransportSoftbusAdapter::DisconnectDevice(const std::string &peerDeviceId)
 {
-    HILOGI("try to disconnect peer: %s", DnetworkAdapter::AnonymizeNetworkId(peerDeviceId).c_str());
+    HILOGI("try to disconnect peer: %{public}s.", GetAnonymStr(peerDeviceId).c_str());
     int32_t sessionId = 0;
     std::lock_guard<std::mutex> sessionLock(sessionMutex_);
     for (auto iter = sessions_.begin(); iter != sessions_.end(); iter++) {
@@ -193,8 +193,8 @@ void DSchedTransportSoftbusAdapter::DisconnectDevice(const std::string &peerDevi
         }
     }
     if (sessionId != 0 && sessions_[sessionId]->OnDisconnect()) {
-        HILOGI("peer %s shutdown, socket session id: %d",
-            DnetworkAdapter::AnonymizeNetworkId(sessions_[sessionId]->GetPeerDeviceId()).c_str(), sessionId);
+        HILOGI("peer %{public}s shutdown, socket sessionId: %{public}d.",
+            GetAnonymStr(sessions_[sessionId]->GetPeerDeviceId()).c_str(), sessionId);
         Shutdown(sessionId);
         sessions_.erase(sessionId);
         NotifyListenersSessionShutdown(sessionId, true);
@@ -223,8 +223,8 @@ void DSchedTransportSoftbusAdapter::OnShutdown(int32_t sessionId, bool isSelfcal
             HILOGE("error, invalid sessionId %d", sessionId);
             return;
         }
-        HILOGI("peer %s shutdown, socket session id: %d",
-            DnetworkAdapter::AnonymizeNetworkId(sessions_[sessionId]->GetPeerDeviceId()).c_str(), sessionId);
+        HILOGI("peer %{public}s shutdown, socket sessionId: %{public}d.",
+            GetAnonymStr(sessions_[sessionId]->GetPeerDeviceId()).c_str(), sessionId);
         Shutdown(sessionId);
         sessions_.erase(sessionId);
     }
@@ -253,8 +253,8 @@ int32_t DSchedTransportSoftbusAdapter::ReleaseChannel()
     {
         std::lock_guard<std::mutex> sessionLock(sessionMutex_);
         for (auto iter = sessions_.begin(); iter != sessions_.end(); iter++) {
-            HILOGI("shutdown client: %s, socket session id: %d",
-                DnetworkAdapter::AnonymizeNetworkId(iter->second->GetPeerDeviceId()).c_str(), iter->first);
+            HILOGI("shutdown client: %{public}s, socket sessionId: %{public}d.",
+                GetAnonymStr(iter->second->GetPeerDeviceId()).c_str(), iter->first);
             Shutdown(iter->first);
         }
         sessions_.clear();

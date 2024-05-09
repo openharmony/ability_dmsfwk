@@ -13,26 +13,30 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
 #include "dms_mission_manager_test.h"
-#include "distributed_sched_proxy.h"
-#include "distributed_sched_service.h"
-#include "distributed_sched_util.h"
-#include "dtbschedmgr_device_info_storage.h"
+
+#include <thread>
+
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "string_ex.h"
+#include "system_ability_definition.h"
+
+#define private public
+#define protected public
+#include "distributed_sched_proxy.h"
+#include "distributed_sched_service.h"
+#include "distributed_sched_test_util.h"
+#include "distributed_sched_utils.h"
+#include "dtbschedmgr_device_info_storage.h"
 #include "mission/distributed_sched_mission_manager.h"
 #include "mission/mission_constant.h"
 #include "mission/snapshot_converter.h"
-#include "string_ex.h"
-#include "system_ability_definition.h"
 #include "test_log.h"
 #undef private
 #undef protected
 
-#include <thread>
 using namespace std;
 using namespace testing;
 using namespace testing::ext;
@@ -2963,7 +2967,7 @@ HWTEST_F(DMSMissionManagerTest, testFetchDeviceHandler005, TestSize.Level3)
         lock_guard<mutex> autoLock(DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdLock_);
         DtbschedmgrDeviceInfoStorage::GetInstance().uuidNetworkIdMap_[uuid] = DEVICE_ID;
     }
-    auto anonyUuid = DnetworkAdapter::AnonymizeNetworkId(uuid);
+    auto anonyUuid = GetAnonymStr(uuid);
     auto runner = AppExecFwk::EventRunner::Create(anonyUuid + "_MissionN");
     auto handler = std::make_shared<AppExecFwk::EventHandler>(runner);
     DistributedSchedMissionManager::GetInstance().deviceHandle_.emplace(uuid, handler);

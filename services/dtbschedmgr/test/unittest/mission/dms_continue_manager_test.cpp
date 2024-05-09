@@ -16,7 +16,7 @@
 #include "dms_continue_manager_test.h"
 
 #include "datetime_ex.h"
-#include "distributed_sched_util.h"
+#include "distributed_sched_test_util.h"
 #include "dtbschedmgr_log.h"
 #define private public
 #include "mission/dms_continue_send_manager.h"

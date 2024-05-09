@@ -16,7 +16,7 @@
 #include "distributed_data_storage_test.h"
 
 #include <thread>
-#include "distributed_sched_util.h"
+#include "distributed_sched_test_util.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "test_log.h"
 

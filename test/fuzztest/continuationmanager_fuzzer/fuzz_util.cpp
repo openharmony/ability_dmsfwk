@@ -27,10 +27,10 @@ const char* DISTSCHED_PROCESS_NAME = "foundation";
 
 void FuzzUtil::MockPermission()
 {
-    static const char *PERMS[] = {
+    static const char *perms[] = {
         "ohos.permission.DISTRIBUTED_DATASYNC"
     };
-    MockProcessAndPermission(DISTSCHED_PROCESS_NAME, PERMS, 1);
+    MockProcessAndPermission(DISTSCHED_PROCESS_NAME, perms, 1);
 }
 
 void FuzzUtil::MockProcessAndPermission(const char* processName, const char *perms[], int32_t permsNum)

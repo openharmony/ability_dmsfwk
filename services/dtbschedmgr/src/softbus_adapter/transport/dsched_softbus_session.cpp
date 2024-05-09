@@ -17,8 +17,8 @@
 
 #include <chrono>
 
-#include "adapter/dnetwork_adapter.h"
 #include "distributed_sched_adapter.h"
+#include "distributed_sched_utils.h"
 #include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_log.h"
 #include "session.h"
@@ -191,17 +191,16 @@ uint16_t DSchedSoftbusSession::U16Get(const uint8_t *ptr)
 void DSchedSoftbusSession::AssembleNoFrag(std::shared_ptr<DSchedDataBuffer> buffer, SessionDataHeader& headerPara)
 {
     if (headerPara.dataLen != headerPara.totalLen) {
-        HILOGE("error, header lenth not match, dataLen: %d, totalLen: %d, session id: %d peerNetworkId: %s",
-            headerPara.dataLen, headerPara.totalLen, sessionId_,
-            DnetworkAdapter::AnonymizeNetworkId(peerDeviceId_).c_str());
+        HILOGE("header lenth error, dataLen: %{public}d, totalLen: %{public}d, sessionId: %{public}d, peerNetworkId: "
+            "%{public}s.", headerPara.dataLen, headerPara.totalLen, sessionId_, GetAnonymStr(peerDeviceId_).c_str());
         return;
     }
     std::shared_ptr<DSchedDataBuffer> postData = std::make_shared<DSchedDataBuffer>(headerPara.dataLen);
     int32_t ret = memcpy_s(postData->Data(), postData->Size(), buffer->Data() + BINARY_HEADER_FRAG_LEN,
         buffer->Size() - BINARY_HEADER_FRAG_LEN);
     if (ret != ERR_OK) {
-        HILOGE("memcpy_s failed, ret: %d, session id: %d peerNetworkId: %s",
-            ret, sessionId_, DnetworkAdapter::AnonymizeNetworkId(peerDeviceId_).c_str());
+        HILOGE("memcpy failed, ret: %{public}d, sessionId: %{public}d, peerNetworkId: %{public}s.",
+            ret, sessionId_, GetAnonymStr(peerDeviceId_).c_str());
         return;
     }
     DSchedTransportSoftbusAdapter::GetInstance().OnDataReady(sessionId_, postData, headerPara.dataType);
@@ -219,8 +218,8 @@ void DSchedSoftbusSession::AssembleFrag(std::shared_ptr<DSchedDataBuffer> buffer
         int32_t ret = memcpy_s(packBuffer_->Data(), packBuffer_->Size(), buffer->Data() + BINARY_HEADER_FRAG_LEN,
             buffer->Size() - BINARY_HEADER_FRAG_LEN);
         if (ret != ERR_OK) {
-            HILOGE("FRAG_START memcpy_s failed, ret: %d session id: %d peerNetworkId: %s",
-                ret, sessionId_, DnetworkAdapter::AnonymizeNetworkId(peerDeviceId_).c_str());
+            HILOGE("FRAG_START memcpy fail, ret: %{public}d, sessionId: %{public}d peerNetworkId: %{public}s.",
+                ret, sessionId_, GetAnonymStr(peerDeviceId_).c_str());
             ResetAssembleFrag();
             return;
         }
@@ -238,8 +237,8 @@ void DSchedSoftbusSession::AssembleFrag(std::shared_ptr<DSchedDataBuffer> buffer
         ret = memcpy_s(packBuffer_->Data() + offset_, packBuffer_->Size() - offset_,
             buffer->Data() + BINARY_HEADER_FRAG_LEN, buffer->Size() - BINARY_HEADER_FRAG_LEN);
         if (ret != ERR_OK) {
-            HILOGE("memcpy_s failed, ret: %d session id: %d peerNetworkId: %s",
-                ret, sessionId_, DnetworkAdapter::AnonymizeNetworkId(peerDeviceId_).c_str());
+            HILOGE("memcpy_s failed, ret: %{public}d, sessionId: %{public}d, peerNetworkId: %{public}s.",
+                ret, sessionId_, GetAnonymStr(peerDeviceId_).c_str());
             ResetAssembleFrag();
             return;
         }
@@ -255,26 +254,26 @@ void DSchedSoftbusSession::AssembleFrag(std::shared_ptr<DSchedDataBuffer> buffer
 int32_t DSchedSoftbusSession::CheckUnPackBuffer(SessionDataHeader& headerPara)
 {
     if (!isWaiting_) {
-        HILOGE("failed, not waiting, session id: %d peerNetworkId: %s", sessionId_,
-            DnetworkAdapter::AnonymizeNetworkId(peerDeviceId_).c_str());
+        HILOGE("failed, not waiting, sessionId: %{public}d peerNetworkId: %{public}s.",
+            sessionId_, GetAnonymStr(peerDeviceId_).c_str());
         return INVALID_PARAMETERS_ERR;
     }
 
     if (nowSeq_ != headerPara.seqNum) {
-        HILOGE("seq error, nowSeq: %d actualSeq: %d, session id: %d peerNetworkId: %s",
-            nowSeq_, headerPara.seqNum, sessionId_, DnetworkAdapter::AnonymizeNetworkId(peerDeviceId_).c_str());
+        HILOGE("seq error, nowSeq: %{public}d, actualSeq: %{public}d, sessionId: %{public}d, peerNetworkId: "
+            "%{public}s.", nowSeq_, headerPara.seqNum, sessionId_, GetAnonymStr(peerDeviceId_).c_str());
         return INVALID_PARAMETERS_ERR;
     }
 
     if (nowSubSeq_ + 1 != headerPara.subSeq) {
-        HILOGE("subSeq error, nowSeq: %d actualSeq: %d, session id: %d peerNetworkId: %s",
-            nowSubSeq_, headerPara.subSeq, sessionId_, DnetworkAdapter::AnonymizeNetworkId(peerDeviceId_).c_str());
+        HILOGE("subSeq error, nowSeq: %{public}d, actualSeq: %{public}d, sessionId: %{public}d, peerNetworkId: "
+            "%{public}s.", nowSubSeq_, headerPara.subSeq, sessionId_, GetAnonymStr(peerDeviceId_).c_str());
         return INVALID_PARAMETERS_ERR;
     }
 
     if (totalLen_ < headerPara.dataLen + offset_) {
-        HILOGE("data len error cap: %d size: %d, dataLen: %d, session id: %d peerNetworkId: %s", totalLen_,
-            offset_, headerPara.dataLen, sessionId_, DnetworkAdapter::AnonymizeNetworkId(peerDeviceId_).c_str());
+        HILOGE("data len error cap: %{public}d, size: %{public}d, dataLen: %d, sessionId: %{public}d, peerNetworkId: "
+            "%{public}s.", totalLen_, offset_, headerPara.dataLen, sessionId_, GetAnonymStr(peerDeviceId_).c_str());
         return INVALID_PARAMETERS_ERR;
     }
     return ERR_OK;

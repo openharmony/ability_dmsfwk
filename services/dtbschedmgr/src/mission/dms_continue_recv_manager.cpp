@@ -15,8 +15,10 @@
 
 #include "mission/dms_continue_recv_manager.h"
 
-#include "adapter/dnetwork_adapter.h"
+#include <sys/prctl.h>
+
 #include "datetime_ex.h"
+
 #include "distributed_sched_utils.h"
 #include "distributed_radar.h"
 #include "distributed_sched_adapter.h"
@@ -24,7 +26,6 @@
 #include "dtbschedmgr_log.h"
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
-#include <sys/prctl.h>
 #include "switch_status_dependency.h"
 #include "datashare_manager.h"
 
@@ -82,8 +83,8 @@ void DMSContinueRecvMgr::UnInit()
 void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
     uint8_t* payload, uint32_t dataLen)
 {
-    HILOGI("NotifyDataRecv start, senderNetworkId: %{public}s, dataLen: %{public}u",
-        DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), dataLen);
+    HILOGI("NotifyDataRecv start, senderNetworkId: %{public}s, dataLen: %{public}u.",
+        GetAnonymStr(senderNetworkId).c_str(), dataLen);
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
     if (!IsContinueSwitchOn) {
         HILOGE("ContinueSwitch status is off");
@@ -198,9 +199,8 @@ int32_t DMSContinueRecvMgr::VerifyBroadcastSource(const std::string& senderNetwo
         iconInfo_.continueType = continueType;
     } else {
         if (senderNetworkId != iconInfo_.senderNetworkId) {
-            HILOGW("Sender not match, task abort. senderNetworkId: %{public}s, saved NetworkId: %{public}s",
-                DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(),
-                DnetworkAdapter::AnonymizeNetworkId(iconInfo_.senderNetworkId).c_str());
+            HILOGW("Sender not match, task abort. senderNetworkId: %{public}s, saved NetworkId: %{public}s.",
+                GetAnonymStr(senderNetworkId).c_str(), GetAnonymStr(iconInfo_.senderNetworkId).c_str());
             return INVALID_PARAMETERS_ERR;
         }
 
@@ -246,8 +246,8 @@ int32_t DMSContinueRecvMgr::RetryPostBroadcast(const std::string& senderNetworkI
 int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNetworkId,
     uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state, const int32_t retry)
 {
-    HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, bundleNameId: %{public}u, state: %{public}d",
-        DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), bundleNameId, state);
+    HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, bundleNameId: %{public}u, state: %{public}d.",
+        GetAnonymStr(senderNetworkId).c_str(), bundleNameId, state);
     std::string bundleName;
     int32_t ret = BundleManagerInternal::GetBundleNameById(senderNetworkId, bundleNameId, bundleName);
     bool res = (state == INACTIVE) ? DmsRadar::GetInstance().UnfocusedGetBundleName("GetBundleNameById", ret)
@@ -375,8 +375,8 @@ void DMSContinueRecvMgr::OnDeviceScreenOff()
             iconInfo_.bundleName = "";
             iconInfo_.continueType = "";
         }
-        HILOGI("Saved iconInfo cleared, networkId = %{public}s, bundleName = %{public}s",
-            DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), bundleName.c_str());
+        HILOGI("Saved iconInfo cleared, networkId: %{public}s, bundleName: %{public}s.",
+            GetAnonymStr(senderNetworkId).c_str(), bundleName.c_str());
         {
             std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
             auto iterItem = registerOnListener_.find(onType_);
@@ -417,8 +417,8 @@ void DMSContinueRecvMgr::OnContinueSwitchOff()
             iconInfo_.bundleName = "";
             iconInfo_.continueType = "";
         }
-        HILOGI("Saved iconInfo cleared, networkId = %{public}s, bundleName = %{public}s",
-            DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), bundleName.c_str());
+        HILOGI("Saved iconInfo cleared, networkId: %{public}s, bundleName: %{public}s.",
+            GetAnonymStr(senderNetworkId).c_str(), bundleName.c_str());
         {
             std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
             auto iterItem = registerOnListener_.find(onType_);
@@ -445,7 +445,7 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
         HILOGE("NotifyDeviceOffline networkId empty");
         return;
     }
-    HILOGI("NotifyDeviceOffline begin. networkId = %{public}s", DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+    HILOGI("NotifyDeviceOffline begin. networkId: %{public}s.", GetAnonymStr(networkId).c_str());
     std::string localNetworkId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localNetworkId)) {
         HILOGE("Get local networkId failed");
@@ -467,8 +467,8 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
         iconInfo_.bundleName = "";
         iconInfo_.continueType = "";
     }
-    HILOGI("Saved iconInfo cleared, networkId = %{public}s, bundleName = %{public}s",
-        DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), bundleName.c_str());
+    HILOGI("Saved iconInfo cleared, networkId: %{public}s, bundleName: %{public}s.",
+        GetAnonymStr(senderNetworkId).c_str(), bundleName.c_str());
     {
         std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
         auto iterItem = registerOnListener_.find(onType_);

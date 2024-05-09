@@ -417,11 +417,11 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
     softbusSessionId_ = DSchedTransportSoftbusAdapter::GetInstance().ConnectDevice(peerDeviceId);
     if (softbusSessionId_ <= 0) {
         HILOGE("ExecuteContinueReq connect peer device %s failed, ret %d",
-            DnetworkAdapter::AnonymizeNetworkId(peerDeviceId).c_str(), softbusSessionId_);
+            GetAnonymStr(peerDeviceId).c_str(), softbusSessionId_);
         return softbusSessionId_;
     }
     HILOGI("ExecuteContinueReq peer %s connected, sessionId %d",
-        DnetworkAdapter::AnonymizeNetworkId(peerDeviceId).c_str(), softbusSessionId_);
+        GetAnonymStr(peerDeviceId).c_str(), softbusSessionId_);
 
     auto startCmd = std::make_shared<DSchedContinueStartCmd>();
     int32_t ret = PackStartCmd(startCmd, wantParams);
@@ -949,8 +949,7 @@ int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
     if (result != ERR_OK ||
         (subServiceType_ == CONTINUE_PULL && direction_ == CONTINUE_SINK) ||
         (subServiceType_ == CONTINUE_PUSH && direction_ == CONTINUE_SOURCE)) {
-        HILOGI("ExecuteContinueEnd disconnect peer device %s",
-            DnetworkAdapter::AnonymizeNetworkId(peerDeviceId).c_str());
+        HILOGI("ExecuteContinueEnd disconnect peer device %s", GetAnonymStr(peerDeviceId).c_str());
         DSchedTransportSoftbusAdapter::GetInstance().DisconnectDevice(peerDeviceId);
     }
 

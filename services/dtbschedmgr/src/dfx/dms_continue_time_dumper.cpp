@@ -18,9 +18,11 @@
 #include <iomanip>
 #include <sstream>
 
-#include "adapter/dnetwork_adapter.h"
 #include "cJSON.h"
 #include "datetime_ex.h"
+
+#include "adapter/dnetwork_adapter.h"
+#include "distributed_sched_utils.h"
 #include "dtbschedmgr_log.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "deviceManager/dms_device_info.h"
@@ -373,14 +375,14 @@ void DmsContinueTime::AppendInfo()
     std::stringstream str;
     str << "== SOURCE ==\n"
         << "Network Id  : " << std::setw(DMSDURATION_SPACE) << std::left
-        << DnetworkAdapter::AnonymizeNetworkId(srcInfo_.netWorkId.c_str())
+        << GetAnonymStr(srcInfo_.netWorkId.c_str())
         << "Device Name  : " << srcInfo_.deviceName << "\n"
         << "Bundle Name : " << std::setw(DMSDURATION_SPACE) << std::left
         << srcInfo_.bundleName
         << "Ability Name : " << srcInfo_.abilityName << "\n"
         << "== SINK ==\n"
         << "Network Id  : " << std::setw(DMSDURATION_SPACE) << std::left
-        << DnetworkAdapter::AnonymizeNetworkId(dstInfo_.netWorkId.c_str())
+        << GetAnonymStr(dstInfo_.netWorkId.c_str())
         << "Device Name  : " << dstInfo_.deviceName << "\n"
         << "Bundle Name : " << std::setw(DMSDURATION_SPACE) << std::left
         << dstInfo_.bundleName

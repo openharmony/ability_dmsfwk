@@ -119,7 +119,7 @@ void DmsSystemAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, c
 {
     HILOGI("OnAddSystemAbility called, the systemAbilityId is %d", systemAbilityId);
     if (systemAbilityId != DISTRIBUTED_SCHED_SA_ID) {
-        HILOGE("SystemAbilityId must be DISTRIBUTED_SCHED_SA_ID,but it is %d", systemAbilityId);
+        HILOGE("SystemAbilityId must be DISTRIBUTED_SCHED_SA_ID, but it is %{public}d", systemAbilityId);
         return;
     }
 
@@ -131,7 +131,7 @@ void DmsSystemAbilityStatusChange::OnRemoveSystemAbility(int32_t systemAbilityId
 {
     HILOGI("OnRemoveSystemAbility called, the systemAbilityId is %d", systemAbilityId);
     if (systemAbilityId != DISTRIBUTED_SCHED_SA_ID) {
-        HILOGE("SystemAbilityId must be DISTRIBUTED_SCHED_SA_ID,but it is %d", systemAbilityId);
+        HILOGE("SystemAbilityId must be DISTRIBUTED_SCHED_SA_ID, but it is %{public}d", systemAbilityId);
         return;
     }
 
