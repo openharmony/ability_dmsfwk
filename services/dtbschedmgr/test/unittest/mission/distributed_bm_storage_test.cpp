@@ -186,11 +186,104 @@ HWTEST_F(DistributedBmStorageTest, PullOtherDistributedDataTest_001, TestSize.Le
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
-        int32_t userId = 0;
         int32_t ret = dmsBmStorage_->GetInstance()->PullOtherDistributedData();
         EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     }
     DTEST_LOG << "DistributedBmStorageTest PullOtherDistributedDataTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PushOtherDistributedDataDataTest_001
+ * @tc.desc: test delete DistributedBmStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, PushOtherDistributedDataDataTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest PushOtherDistributedDataDataTest_001 start" << std::endl;
+    auto distributedDataStorage = GetDmsBmStorage();
+    EXPECT_NE(distributedDataStorage, nullptr);
+    if (distributedDataStorage != nullptr) {
+        int32_t ret = dmsBmStorage_->GetInstance()->PushOtherDistributedData();
+        EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
+    }
+    DTEST_LOG << "DistributedBmStorageTest PushOtherDistributedDataDataTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetBundleMgrTest_001
+ * @tc.desc: test delete DistributedBmStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, GetBundleMgrTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest GetBundleMgrTest_001 start" << std::endl;
+    auto distributedDataStorage = GetDmsBmStorage();
+    EXPECT_NE(distributedDataStorage, nullptr);
+    if (distributedDataStorage != nullptr) {
+        auto bundleMgr = dmsBmStorage_->GetInstance()->GetBundleMgr();
+        EXPECT_NE(bundleMgr, nullptr);
+    }
+    DTEST_LOG << "DistributedBmStorageTest GetBundleMgrTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetContinueTypeTest_001
+ * @tc.desc: test delete DistributedBmStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, GetContinueTypeTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest GetContinueTypeTest_001 start" << std::endl;
+    auto distributedDataStorage = GetDmsBmStorage();
+    EXPECT_NE(distributedDataStorage, nullptr);
+    if (distributedDataStorage != nullptr) {
+        std::string networkId;
+        std::string bundleName;
+        uint8_t continueTypeId = 0;
+        std::string ret = dmsBmStorage_->GetInstance()->GetContinueType(networkId, bundleName, continueTypeId);
+        EXPECT_EQ(ret, "");
+    }
+    DTEST_LOG << "DistributedBmStorageTest GetContinueTypeTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetAbilityNameTest_001
+ * @tc.desc: test delete DistributedBmStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, GetAbilityNameTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest GetAbilityNameTest_001 start" << std::endl;
+    auto distributedDataStorage = GetDmsBmStorage();
+    EXPECT_NE(distributedDataStorage, nullptr);
+    if (distributedDataStorage != nullptr) {
+        std::string networkId;
+        std::string bundleName;
+        std::string continueType;
+        std::string ret = dmsBmStorage_->GetInstance()->GetAbilityName(networkId, bundleName, continueType);
+        EXPECT_EQ(ret, "");
+    }
+    DTEST_LOG << "DistributedBmStorageTest GetAbilityNameTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetContinueTypeIdTest_001
+ * @tc.desc: test delete DistributedBmStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, GetContinueTypeIdTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest GetContinueTypeIdTest_001 start" << std::endl;
+    auto distributedDataStorage = GetDmsBmStorage();
+    EXPECT_NE(distributedDataStorage, nullptr);
+    if (distributedDataStorage != nullptr) {
+        std::string bundleName;
+        std::string abilityName;
+        uint8_t continueTypeId = 0;
+        int32_t ret = dmsBmStorage_->GetInstance()->GetContinueTypeId(bundleName, abilityName, continueTypeId);
+        EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
+    }
+    DTEST_LOG << "DistributedBmStorageTest GetContinueTypeIdTest_001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
