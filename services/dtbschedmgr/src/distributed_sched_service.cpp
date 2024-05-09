@@ -51,6 +51,7 @@
 #include "distributed_sched_permission.h"
 #include "distributed_sched_utils.h"
 #include "dms_callback_task.h"
+#include "dms_constant.h"
 #include "dms_free_install_callback.h"
 #include "dms_token_callback.h"
 #include "dms_version_manager.h"
@@ -81,6 +82,7 @@ namespace DistributedSchedule {
 using namespace AAFwk;
 using namespace AccountSA;
 using namespace AppExecFwk;
+using namespace Constants;
 
 namespace {
 const std::string TAG = "DistributedSchedService";
@@ -100,7 +102,6 @@ const std::string CHANGE_TYPE_KEY = "changeType";
 const std::string DMS_HIPLAY_ACTION = "ohos.ability.action.deviceSelect";
 const std::string DMS_VERSION_ID = "dmsVersion";
 const std::string DMS_CONNECT_TOKEN = "connectToken";
-const std::string DMS_VERSION = "4.0.0";
 const std::string DMS_MISSION_ID = "dmsMissionId";
 const std::string SUPPORT_CONTINUE_PAGE_STACK_KEY = "ohos.extra.param.key.supportContinuePageStack";
 const std::string SUPPORT_CONTINUE_SOURCE_EXIT_KEY = "ohos.extra.param.key.supportContinueSourceExit";
@@ -272,6 +273,8 @@ void DistributedSchedService::InitCommonEventListener()
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
     DmsBmStorage::GetInstance();
     EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_UNLOCKED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_SWITCHED);
@@ -540,7 +543,6 @@ int32_t DistributedSchedService::ContinueAbilityWithTimeout(const std::string& d
     int64_t saveDataBegin = GetTickCount();
     DmsContinueTime::GetInstance().SetSaveDataDurationBegin(saveDataBegin);
     int32_t result = AbilityManagerClient::GetInstance()->ContinueAbility(dstDeviceId, missionId, remoteBundleVersion);
-    DmsRadar::GetInstance().SaveDataDmsContinue("ContinueAbility", result);
     HILOGI("result: %{public}d!", result);
     if (result == ERR_INVALID_VALUE) {
         return MISSION_FOR_CONTINUING_IS_NOT_ALIVE;
@@ -597,7 +599,6 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
     int32_t result = remoteDms->ContinueMission(srcDeviceId, dstDeviceId, bundleName, callback, wantParams);
-    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", result);
     HILOGI("ContinueRemoteMission result: %{public}d!", result);
     if (DmsContinueTime::GetInstance().GetPull()) {
         int64_t end = GetTickCount();
@@ -864,7 +865,6 @@ int32_t DistributedSchedService::StartContinuation(const OHOS::AAFwk::Want& want
         }
     } else {
         result = StartRemoteAbility(newWant, callerUid, DEFAULT_REQUEST_CODE, accessToken);
-        DmsRadar::GetInstance().SaveDataDmsRemoteWant("StartRemoteAbility", result);
         if (result != ERR_OK) {
             HILOGE("continue ability failed, errorCode = %{public}d", result);
             return result;
@@ -912,7 +912,6 @@ void DistributedSchedService::NotifyCompleteContinuation(const std::u16string& d
     remoteDms->NotifyContinuationResultFromRemote(sessionId, isSuccess, dstInfo);
     dschedContinuation_->continueInfo_.srcNetworkId = "";
     dschedContinuation_->continueInfo_.dstNetworkId = "";
-    DmsRadar::GetInstance().ClickIconDmsRecvOver("NotifyContinuationResultFromRemote", ERR_OK);
 }
 
 int32_t DistributedSchedService::NotifyContinuationResultFromRemote(int32_t sessionId, bool isSuccess,
@@ -2592,7 +2591,6 @@ int32_t DistributedSchedService::StartAbility(const OHOS::AAFwk::Want& want, int
         DmsContinueTime::GetInstance().SetDstBundleName(want.GetElement().GetBundleName());
         err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, requestCode, activeAccountId);
     }
-    DmsRadar::GetInstance().ClickIconDmsStartAbility("StartAbility", err);
     if (err != ERR_OK) {
         HILOGE("StartAbility failed %{public}d", err);
     }

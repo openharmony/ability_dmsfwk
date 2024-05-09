@@ -29,6 +29,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    std::shared_ptr<DSchedContinue> CreateObject();
     sptr<IRemoteObject> GetDSchedService() const;
 };
 } // namespace DistributedSchedule

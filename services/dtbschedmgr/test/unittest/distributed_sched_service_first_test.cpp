@@ -25,6 +25,7 @@
 #include "distributed_sched_proxy.h"
 #include "distributed_sched_service.h"
 #include "distributed_sched_util.h"
+#include "dms_constant.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "form_mgr_errors.h"
@@ -49,6 +50,7 @@ namespace DistributedSchedule {
 using namespace AAFwk;
 using namespace AppExecFwk;
 using namespace DistributedHardware;
+using namespace Constants;
 namespace {
     const string LOCAL_DEVICEID = "192.168.43.100";
     const string REMOTE_DEVICEID = "255.255.255.255";
@@ -62,7 +64,6 @@ namespace {
     const string BUNDLE_NAME = "com.ohos.permissionmanager";
     const string DMS_IS_CALLER_BACKGROUND = "dmsIsCallerBackGround";
     const string DMS_VERSION_ID = "dmsVersion";
-    const string DMS_VERSION = "4.0.0";
     constexpr int32_t SLEEP_TIME = 1000;
 }
 
@@ -466,7 +467,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartAbilityFromRemote_001, TestSize.
 HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteShareForm_002, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest StartRemoteShareForm_002 start" << std::endl;
-    
+
     sptr<IDistributedSched> proxy = GetDms();
     if (proxy == nullptr) {
         return;
@@ -492,7 +493,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteShareForm_002, TestSize.Le
     want.SetParam(DMS_MISSION_ID, missionId);
     int result2 = proxy->SendResultFromRemote(want, 0, callerInfo, accountInfo, 0);
     DTEST_LOG << "result2:" << result2 << std::endl;
-    
+
     /**
     * @tc.steps: step1. call StartAbilityFromRemote when remoteDeviceId is valid.
     */
@@ -584,14 +585,14 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartAbilityFromRemote_004, TestSize.
 HWTEST_F(DistributedSchedServiceFirstTest, StartAbilityFromRemote_005, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest StartAbilityFromRemote_005 start" << std::endl;
-    
+
     if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
         DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
     }
     int32_t missionId = MISSION_ID;
     bool isSuccess = false;
     DistributedSchedService::GetInstance().NotifyContinuationCallbackResult(missionId, isSuccess);
-    
+
     AAFwk::Want want;
     std::string localDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
@@ -733,14 +734,14 @@ HWTEST_F(DistributedSchedServiceFirstTest, SendResultFromRemote_003, TestSize.Le
 HWTEST_F(DistributedSchedServiceFirstTest, SendResultFromRemote_004, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest SendResultFromRemote_004 start" << std::endl;
-    
+
     if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
         DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
     }
     int32_t missionId = MISSION_ID;
     bool resultCode = ERR_OK;
     DistributedSchedService::GetInstance().NotifyContinuationCallbackResult(missionId, resultCode);
-    
+
     AAFwk::Want want;
     std::string localDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
@@ -920,7 +921,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ContinueMission_003, TestSize.Level1)
     int32_t result = DistributedSchedService::GetInstance().ContinueMission(
         "", "string", BUNDLE_NAME, callback, wantParams);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
-    
+
     /**
      * @tc.steps: step2. test ContinueMission when dstDeviceId is empty;
      */
@@ -1166,7 +1167,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartContinuation_007, TestSize.Level
     DistributedSchedService::GetInstance().GetFormMgrProxy();
     DTEST_LOG << "DSchedContinuationTest GetFormMgrProxy_001 end" << std::endl;
     #endif
-    
+
     int32_t ret = DistributedSchedService::GetInstance().StartContinuation(
         want, missionId, callerUid, status, accessToken);
     DistributedSchedService::GetInstance().NotifyCompleteContinuation(DEVICE_ID_NULL, SESSION_ID, isSuccess);
@@ -1205,7 +1206,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartContinuation_008, TestSize.Level
     DistributedSchedService::GetInstance().GetFormMgrProxy();
     DTEST_LOG << "DSchedContinuationTest GetFormMgrProxy_001 end" << std::endl;
     #endif
-    
+
     int32_t ret = DistributedSchedService::GetInstance().StartContinuation(
         want, missionId, callerUid, status, accessToken);
     DistributedSchedService::GetInstance().NotifyCompleteContinuation(DEVICE_ID_NULL, SESSION_ID, isSuccess);
@@ -1330,7 +1331,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectAbilityFromRemote_003, TestSiz
 HWTEST_F(DistributedSchedServiceFirstTest, NotifyProcessDiedFromRemote_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest NotifyProcessDiedFromRemote_001 start" << std::endl;
-    
+
     sptr<IDistributedSched> proxy = GetDms();
 
     AAFwk::Want want;
@@ -1358,7 +1359,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, NotifyProcessDiedFromRemote_001, Test
         "com.ohos.distributedmusicplayer", "192.168.43.100", abilityInfo);
     int result2 = DistributedSchedService::GetInstance().StartAbilityFromRemote(want,
         abilityInfo, 0, callerInfo1, accountInfo);
-    
+
     /**
     * @tc.steps: step1. call NotifyProcessDiedFromRemote when sourceDeviceId == sourceDeviceId.
     */

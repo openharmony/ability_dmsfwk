@@ -24,6 +24,7 @@
 #undef private
 #include "distributed_sched_util.h"
 #include "distributed_sched_utils.h"
+#include "dms_constant.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "nativetoken_kit.h"
@@ -38,6 +39,7 @@ using namespace OHOS::Security::AccessToken;
 
 namespace OHOS {
 namespace DistributedSchedule {
+using namespace Constants;
 namespace {
 constexpr uint32_t ACCESS_TOKEN = 100000000;
 constexpr uint32_t INVALID_ACCESS_TOKEN = 0;
@@ -56,7 +58,6 @@ const string DMS_IS_CALLER_BACKGROUND = "dmsIsCallerBackGround";
 const string DMS_API_VERSION = "dmsApiVersion";
 const string DMS_MISSION_ID = "dmsMissionId";
 const string DMS_VERSION_ID = "dmsVersion";
-const string DMS_VERSION = "4.0.0";
 const int API_VERSION = 9;
 const int FA_MODULE_ALLOW_MIN_API_VERSION = 8;
 

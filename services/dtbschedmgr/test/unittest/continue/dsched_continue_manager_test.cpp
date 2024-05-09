@@ -59,6 +59,18 @@ sptr<IRemoteObject> DSchedContinueManagerTest::GetDSchedService() const
     return dsched;
 }
 
+std::shared_ptr<DSchedContinue> DSchedContinueManagerTest::CreateObject()
+{
+    int32_t subServiceType = 0;
+    int32_t direction = 0;
+    sptr<IRemoteObject> callback = nullptr;
+    DSchedContinueInfo continueInfo;
+    std::shared_ptr<DSchedContinue> dContinue = std::make_shared<DSchedContinue>(subServiceType, direction,
+        callback, continueInfo);
+    dContinue->Init();
+    return dContinue;
+}
+
 /**
  * @tc.name: Init_001
  * @tc.desc: test Init func
@@ -225,6 +237,122 @@ HWTEST_F(DSchedContinueManagerTest, GetContinueInfo_001, TestSize.Level3)
     int32_t ret = DSchedContinueManager::GetInstance().GetContinueInfo(localDeviceId, remoteDeviceId);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueManagerTest GetContinueInfo_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetContinueInfo_002
+ * @tc.desc: test GetContinueInfo func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, GetContinueInfo_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest GetContinueInfo_002 begin" << std::endl;
+    DSchedContinueManager::GetInstance().OnShutdown(1, true);
+
+    DSchedContinueManager::GetInstance().OnShutdown(1, false);
+
+    DSchedContinueManager::GetInstance().OnShutdown(1, false);
+
+    DSchedContinueInfo info;
+    std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    std::string localDeviceId = "localdeviceid";
+    std::string remoteDeviceId = "remotedeviceid";
+    DSchedContinueManager::GetInstance().continues_[info] = dContinue;
+    int32_t ret = DSchedContinueManager::GetInstance().GetContinueInfo(localDeviceId, remoteDeviceId);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DSchedContinueManagerTest GetContinueInfo_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleNotifyCompleteContinuation_001
+ * @tc.desc: test HandleNotifyCompleteContinuation func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, HandleNotifyCompleteContinuation_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest HandleNotifyCompleteContinuation_001 begin" << std::endl;
+    std::u16string devId;
+    int32_t missionId = 0;
+    DSchedContinueManager::GetInstance().continues_.clear();
+    DSchedContinueManager::GetInstance().HandleNotifyCompleteContinuation(devId, missionId, false);
+
+    DSchedContinueInfo info;
+    std::shared_ptr<DSchedContinue> ptr = nullptr;
+    DSchedContinueManager::GetInstance().continues_[info] = ptr;
+    DSchedContinueManager::GetInstance().HandleNotifyCompleteContinuation(devId, missionId, false);
+    bool ret = DSchedContinueManager::GetInstance().continues_.empty();
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DSchedContinueManagerTest HandleNotifyCompleteContinuation_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyCompleteContinuation_001
+ * @tc.desc: test NotifyCompleteContinuation func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, NotifyCompleteContinuation_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest NotifyCompleteContinuation_001 begin" << std::endl;
+    std::u16string devId;
+    int32_t sessionId = 0;
+    bool isSuccess = false;
+    DSchedContinueManager::GetInstance().Init();
+    int32_t ret = DSchedContinueManager::GetInstance().NotifyCompleteContinuation(devId,
+        sessionId, isSuccess);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DSchedContinueManagerTest NotifyCompleteContinuation_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnContinueEnd_001
+ * @tc.desc: test OnContinueEnd func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, OnContinueEnd_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest OnContinueEnd_001 begin" << std::endl;
+    DSchedContinueInfo info(LOCAL_DEVICEID, "sourceBundleName", REMOTE_DEVICEID, "sinkBundleName",
+        "continueType");
+    DSchedContinueManager::GetInstance().UnInit();
+    int32_t ret = DSchedContinueManager::GetInstance().OnContinueEnd(info);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    DSchedContinueManager::GetInstance().Init();
+
+    ret = DSchedContinueManager::GetInstance().OnContinueEnd(info);
+    EXPECT_EQ(ret, ERR_OK);
+    DSchedContinueManager::GetInstance().UnInit();
+    DTEST_LOG << "DSchedContinueManagerTest OnContinueEnd_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleContinueEnd_001
+ * @tc.desc: test HandleContinueEnd func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, HandleContinueEnd_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest HandleContinueEnd_001 begin" << std::endl;
+    DSchedContinueInfo info(LOCAL_DEVICEID, "sourceBundleName", REMOTE_DEVICEID, "sinkBundleName",
+        "continueType");
+    DSchedContinueManager::GetInstance().UnInit();
+    DSchedContinueManager::GetInstance().RemoveTimeout(info);
+
+    DSchedContinueManager::GetInstance().Init();
+    DSchedContinueManager::GetInstance().RemoveTimeout(info);
+
+    DSchedContinueManager::GetInstance().continues_.clear();
+    DSchedContinueManager::GetInstance().HandleContinueEnd(info);
+    int32_t ret = DSchedContinueManager::GetInstance().continues_.empty();
+    EXPECT_EQ(ret, true);
+    
+    DSchedContinueManager::GetInstance().cntSource_ = 0;
+    std::shared_ptr<DSchedContinue> ptr = nullptr;
+    DSchedContinueManager::GetInstance().continues_[info] = ptr;
+    DSchedContinueManager::GetInstance().HandleContinueEnd(info);
+    EXPECT_EQ(DSchedContinueManager::GetInstance().cntSource_, 0);
+    DSchedContinueManager::GetInstance().UnInit();
+    DTEST_LOG << "DSchedContinueManagerTest HandleContinueEnd_001 end" << std::endl;
 }
 }
 }
