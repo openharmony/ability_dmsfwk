@@ -53,6 +53,18 @@ void DSchedContinueManagerTest::SetUp()
     DTEST_LOG << "DSchedContinueManagerTest::SetUp" << std::endl;
 }
 
+std::shared_ptr<DSchedContinue> DSchedContinueManagerTest::CreateObject()
+{
+    int32_t subServiceType = 0;
+    int32_t direction = 0;
+    sptr<IRemoteObject> callback = nullptr;
+    DSchedContinueInfo continueInfo;
+    std::shared_ptr<DSchedContinue> dContinue = std::make_shared<DSchedContinue>(subServiceType, direction,
+        callback, continueInfo);
+    dContinue->Init();
+    return dContinue;
+}
+
 sptr<IRemoteObject> DSchedContinueManagerTest::GetDSchedService() const
 {
     sptr<IRemoteObject> dsched = new MockDistributedSched();

@@ -383,6 +383,17 @@ HWTEST_F(DSchedContinueDataStateTest, SinkExecuteTest001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: SinkExecuteTest002
+ * @tc.desc: Execute
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueDataStateTest, SinkExecuteTest002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueDataStateTest SinkExecuteTest002 begin" << std::endl;
+    DTEST_LOG << "DSchedContinueDataStateTest SinkExecuteTest002 end" << std::endl;
+}
+
+/**
  * @tc.name: SinkGetStateType001
  * @tc.desc: GetStateType
  * @tc.type: FUNC
