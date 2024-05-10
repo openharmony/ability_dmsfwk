@@ -122,7 +122,7 @@ void DistributedSchedConnectTest::SetUpTestCase()
     if (!DistributedSchedUtil::LoadDistributedSchedService()) {
         DTEST_LOG << "DistributedSchedConnectTest::SetUpTestCase LoadDistributedSchedService failed" << std::endl;
     }
-    const std::string pkgName = "DBinderBus_" + std::to_string(getpid());
+    const std::string pkgName = "DBinderBus_" + std::to_string(getprocpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
 }
@@ -154,7 +154,7 @@ void DistributedSchedConnectTest::AddSession(const sptr<IRemoteObject>& connect,
     std::lock_guard<std::mutex> autoLock(DistributedSchedService::GetInstance().distributedLock_);
     CallerInfo callerInfo;
     callerInfo.uid = IPCSkeleton::GetCallingUid();
-    callerInfo.pid = IPCSkeleton::GetCallingPid();
+    callerInfo.pid = IPCSkeleton::GetCallingRealPid();
     callerInfo.sourceDeviceId = localDeviceId;
     callerInfo.callerType = CALLER_TYPE_HARMONY;
     DistributedSchedService::GetInstance().RemoteConnectAbilityMappingLocked(connect, localDeviceId,
@@ -181,7 +181,7 @@ void DistributedSchedConnectTest::AddConnectInfo(const sptr<IRemoteObject>& conn
     std::lock_guard<std::mutex> autoLock(DistributedSchedService::GetInstance().distributedLock_);
     CallerInfo callerInfo;
     callerInfo.uid = IPCSkeleton::GetCallingUid();
-    callerInfo.pid = IPCSkeleton::GetCallingPid();
+    callerInfo.pid = IPCSkeleton::GetCallingRealPid();
     callerInfo.sourceDeviceId = localDeviceId;
     callerInfo.callerType = CALLER_TYPE_HARMONY;
 
@@ -907,7 +907,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectRemoteAbility005, TestSize.Level
     sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
     CallerInfo callerInfo;
     callerInfo.uid = IPCSkeleton::GetCallingUid();
-    callerInfo.pid = IPCSkeleton::GetCallingPid();
+    callerInfo.pid = IPCSkeleton::GetCallingRealPid();
     callerInfo.sourceDeviceId = localDeviceId;
     callerInfo.callerType = CALLER_TYPE_HARMONY;
     DistributedSchedService::GetInstance().SaveCallerComponent(want, connect, callerInfo);
@@ -941,7 +941,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectAbilityFromRemote001, TestSize.L
     sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
     CallerInfo callerInfo;
     callerInfo.uid = IPCSkeleton::GetCallingUid();
-    callerInfo.pid = IPCSkeleton::GetCallingPid();
+    callerInfo.pid = IPCSkeleton::GetCallingRealPid();
     callerInfo.sourceDeviceId = localDeviceId;
     callerInfo.callerType = CALLER_TYPE_HARMONY;
     DistributedSchedService::GetInstance().SaveCallerComponent(want1, connect, callerInfo);
@@ -1005,7 +1005,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectAbilityFromRemote004, TestSize.L
     want.SetElementName(remoteDeviceId, "ohos.demo.bundleName", "abilityName");
     CallerInfo callerInfo;
     callerInfo.uid = IPCSkeleton::GetCallingUid();
-    callerInfo.pid = IPCSkeleton::GetCallingPid();
+    callerInfo.pid = IPCSkeleton::GetCallingRealPid();
     callerInfo.sourceDeviceId = localDeviceId;
     callerInfo.callerType = CALLER_TYPE_HARMONY;
     DistributedSchedService::GetInstance().SaveCallerComponent(want, connect, callerInfo);
@@ -1189,7 +1189,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallDisconnectRemoteAbility002, TestS
     want.SetElementName(remoteDeviceId, "ohos.demo.bundleName", "abilityName");
     CallerInfo callerInfo;
     callerInfo.uid = IPCSkeleton::GetCallingUid();
-    callerInfo.pid = IPCSkeleton::GetCallingPid();
+    callerInfo.pid = IPCSkeleton::GetCallingRealPid();
     callerInfo.sourceDeviceId = localDeviceId;
     callerInfo.callerType = CALLER_TYPE_HARMONY;
     DistributedSchedService::GetInstance().SaveCallerComponent(want, connect, callerInfo);
@@ -1401,7 +1401,7 @@ HWTEST_F(DistributedSchedConnectTest, ConnectRemoteAbility003, TestSize.Level4)
     want.SetElementName(remoteDeviceId, "ohos.demo.bundleName", "abilityName");
     sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
     int32_t uid = IPCSkeleton::GetCallingUid();
-    int32_t pid = IPCSkeleton::GetCallingPid();
+    int32_t pid = IPCSkeleton::GetCallingRealPid();
     int32_t accessToken = IPCSkeleton::GetCallingTokenID();
     int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbility(want, connect, uid, pid, accessToken);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);

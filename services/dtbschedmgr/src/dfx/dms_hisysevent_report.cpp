@@ -47,7 +47,7 @@ int DmsHiSysEventReport::ReportBehaviorEvent(const BehaviorEventParam& param)
     int result = HiSysEventWrite(DOMAIN_NAME, param.eventName, HiSysEvent::EventType::BEHAVIOR,
         KEY_CALLING_TYPE, param.callingType,
         KEY_CALLING_UID, IPCSkeleton::GetCallingUid(),
-        KEY_CALLING_PID, IPCSkeleton::GetCallingPid(),
+        KEY_CALLING_PID, IPCSkeleton::GetCallingRealPid(),
         KEY_CALLING_APP_UID, param.callingAppUid,
         KEY_CALLEE_BUNDLE, param.bundleName,
         KEY_CALLEE_ABILITY, param.abilityName,
