@@ -319,13 +319,13 @@ int32_t BundleManagerInternal::GetUidFromBms(const std::string& bundleName)
     return bundleMgr->GetUidByBundleName(bundleName, activeAccountId);
 }
 
-int32_t BundleManagerInternal::GetBundleNameId(const std::string& bundleName, uint16_t& accessTokenId)
+int32_t BundleManagerInternal::GetBundleNameId(const std::string& bundleName, uint16_t& bundleNameId)
 {
     HILOGD("called.");
-    bool ret = DmsBmStorage::GetInstance()->GetBundleNameId(bundleName, accessTokenId);
-    HILOGI("accessTokenId: %{public}d end.", accessTokenId);
+    bool ret = DmsBmStorage::GetInstance()->GetBundleNameId(bundleName, bundleNameId);
+    HILOGI("bundleNameId: %{public}d end.", bundleNameId);
     if (!ret) {
-        HILOGE("can not get accessTokenId by bundleName");
+        HILOGE("can not get bundleNameId by bundleName");
         return CAN_NOT_FOUND_ABILITY_ERR;
     }
     HILOGD("end.");
@@ -345,7 +345,7 @@ std::string BundleManagerInternal::GetContinueType(const std::string &networkId,
     return continueType;
 }
 
-int32_t BundleManagerInternal::GetContinueTypeId(std::string &bundleName,
+int32_t BundleManagerInternal::GetContinueTypeId(const std::string &bundleName,
     const std::string &abilityName, uint8_t &continueTypeId)
 {
     HILOGD("called.");
@@ -372,13 +372,13 @@ std::string BundleManagerInternal::GetAbilityName(const std::string &networkId,
     return abilityName;
 }
 
-int32_t BundleManagerInternal::GetBundleNameFromDbms(const std::string& networkId,
-    const uint16_t accessTokenId, std::string& bundleName)
+int32_t BundleManagerInternal::GetBundleNameById(const std::string& networkId,
+    const uint16_t& bundleNameId, std::string& bundleName)
 {
     HILOGD("called.");
-    bool result = DmsBmStorage::GetInstance()->GetDistributedBundleName(networkId, accessTokenId, bundleName);
+    bool result = DmsBmStorage::GetInstance()->GetDistributedBundleName(networkId, bundleNameId, bundleName);
     if (!result) {
-        HILOGE("failed to get bundleName by accessTokenId");
+        HILOGE("failed to get bundleName by bundleNameId");
         return CAN_NOT_FOUND_ABILITY_ERR;
     }
     HILOGD("end.");

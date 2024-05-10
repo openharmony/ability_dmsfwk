@@ -44,7 +44,7 @@ struct DmsBundleInfo : public Parcelable {
     std::string appId;
     bool enabled = true;
     // user related fields, assign when calling the get interface
-    uint16_t accessTokenId = 0;
+    uint16_t bundleNameId = 0;
     // bundle update time
     int64_t updateTime = 0;
     std::vector<DmsAbilityInfo> dmsAbilityInfos;
