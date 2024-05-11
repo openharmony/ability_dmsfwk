@@ -514,34 +514,34 @@ HWTEST_F(BundleManagerInternalTest, IsSameAppId_004, TestSize.Level3)
 }
 
 /**
- * @tc.name: GetBundleIdFromBms_001
- * @tc.desc: test get accessTokenId from bms
+ * @tc.name: GetBundleNameId_001
+ * @tc.desc: test get bundleNameId from bms
  * @tc.type: FUNC
  */
-HWTEST_F(BundleManagerInternalTest, GetBundleIdFromBms_001, TestSize.Level3)
+HWTEST_F(BundleManagerInternalTest, GetBundleNameId_001, TestSize.Level3)
 {
-    DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_001 begin" << std::endl;
+    DTEST_LOG << "BundleManagerInternalTest GetBundleNameId_001 begin" << std::endl;
     const std::string bundleName = "ohos.samples.dms.testApp";
-    uint16_t accessTokenId = 0;
-    int32_t ret = BundleManagerInternal::GetBundleNameId(bundleName, accessTokenId);
+    uint16_t bundleNameId = 0;
+    int32_t ret = BundleManagerInternal::GetBundleNameId(bundleName, bundleNameId);
     EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
-    DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_001 end "<< std::endl;
+    DTEST_LOG << "BundleManagerInternalTest GetBundleNameId_001 end "<< std::endl;
 }
 
 /**
- * @tc.name: GetBundleIdFromBms_002
- * @tc.desc: test get accessTokenId from bms
+ * @tc.name: GetBundleNameId_002
+ * @tc.desc: test get bundleNameId from bms
  * @tc.type: FUNC
  */
-HWTEST_F(BundleManagerInternalTest, GetBundleIdFromBms_002, TestSize.Level3)
+HWTEST_F(BundleManagerInternalTest, GetBundleNameId_002, TestSize.Level3)
 {
-    DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_002 begin" << std::endl;
+    DTEST_LOG << "BundleManagerInternalTest GetBundleNameId_002 begin" << std::endl;
     const std::string bundleName = "com.ohos.mms";
-    uint16_t accessTokenId = 0;
+    uint16_t bundleNameId = 0;
     BundleManagerInternal::GetDistributedBundleManager();
-    int32_t ret = BundleManagerInternal::GetBundleNameId(bundleName, accessTokenId);
+    int32_t ret = BundleManagerInternal::GetBundleNameId(bundleName, bundleNameId);
     EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
-    DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_002 end "<< std::endl;
+    DTEST_LOG << "BundleManagerInternalTest GetBundleNameId_002 end "<< std::endl;
 }
 }
 }

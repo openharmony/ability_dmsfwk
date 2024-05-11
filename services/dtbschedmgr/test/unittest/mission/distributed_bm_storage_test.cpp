@@ -152,8 +152,8 @@ HWTEST_F(DistributedBmStorageTest, GetBundleIdTest_001, TestSize.Level0)
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
         const std::string &bundleName = "NonexistentName";
-        uint16_t accessTokenId = 0;
-        bool ret = dmsBmStorage_->GetInstance()->GetBundleNameId(bundleName, accessTokenId);
+        uint16_t bundleNameId = 0;
+        bool ret = dmsBmStorage_->GetInstance()->GetBundleNameId(bundleName, bundleNameId);
         EXPECT_EQ(ret, false);
     }
     DTEST_LOG << "DistributedBmStorageTest GetBundleIdTest_001 end" << std::endl;
@@ -280,8 +280,8 @@ HWTEST_F(DistributedBmStorageTest, GetContinueTypeIdTest_001, TestSize.Level1)
         std::string bundleName;
         std::string abilityName;
         uint8_t continueTypeId = 0;
-        int32_t ret = dmsBmStorage_->GetInstance()->GetContinueTypeId(bundleName, abilityName, continueTypeId);
-        EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
+        bool ret = dmsBmStorage_->GetInstance()->GetContinueTypeId(bundleName, abilityName, continueTypeId);
+        EXPECT_EQ(ret, false);
     }
     DTEST_LOG << "DistributedBmStorageTest GetContinueTypeIdTest_001 end" << std::endl;
 }

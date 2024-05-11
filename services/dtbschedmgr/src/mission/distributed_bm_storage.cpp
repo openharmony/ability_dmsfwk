@@ -107,6 +107,10 @@ bool DmsBmStorage::InnerSaveStorageDistributeInfo(const DmsBundleInfo &distribut
     const std::string &localUdid)
 
 {
+    if (distributedBundleInfo.bundleName == "") {
+        HILOGE("The package information is empty and does not need to be stored!");
+        return false;
+    }
     std::string keyOfData = DeviceAndNameToKey(localUdid, distributedBundleInfo.bundleName);
     Key key(keyOfData);
     Value value(distributedBundleInfo.ToString());
@@ -147,10 +151,10 @@ bool DmsBmStorage::DeleteStorageDistributeInfo(const std::string &bundleName)
         HILOGW("The bundleInfo exists and does not need to be deleted.");
         return true;
     }
-    uint16_t accessTokenId = 0;
-    GetBundleNameId(bundleName, accessTokenId);
-    if (bundleNameIdTables_.size() > accessTokenId) {
-        bundleNameIdTables_[accessTokenId] = false;
+    uint16_t bundleNameId = 0;
+    GetBundleNameId(bundleName, bundleNameId);
+    if (bundleNameIdTables_.size() > bundleNameId) {
+        bundleNameIdTables_[bundleNameId] = false;
     }
     std::string keyOfData = DeviceAndNameToKey(udid, bundleName);
     Key key(keyOfData);
@@ -199,11 +203,11 @@ bool DmsBmStorage::GetStorageDistributeInfo(const std::string &networkId,
     return false;
 }
 
-bool DmsBmStorage::DealGetBundleName(const std::string &networkId, uint16_t accessTokenId,
+bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_t& bundleNameId,
     std::string &bundleName)
 {
-    HILOGD("networkId: %{public}s  accessTokenId: %{public}d",
-        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), accessTokenId);
+    HILOGD("networkId: %{public}s  bundleNameId: %{public}d",
+        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), bundleNameId);
     {
         if (!CheckKvStore()) {
             HILOGE("kvStore is nullptr");
@@ -229,7 +233,7 @@ bool DmsBmStorage::DealGetBundleName(const std::string &networkId, uint16_t acce
             continue;
         }
         DmsBundleInfo distributedBundleInfo;
-        if (distributedBundleInfo.FromJsonString(value) && distributedBundleInfo.accessTokenId == accessTokenId) {
+        if (distributedBundleInfo.FromJsonString(value) && distributedBundleInfo.bundleNameId == bundleNameId) {
             bundleName = distributedBundleInfo.bundleName;
             HILOGD("end.");
             return true;
@@ -239,26 +243,27 @@ bool DmsBmStorage::DealGetBundleName(const std::string &networkId, uint16_t acce
     return false;
 }
 
-bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, uint16_t accessTokenId,
+bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, const uint16_t& bundleNameId,
     std::string &bundleName)
 {
-    HILOGD("networkId: %{public}s  accessTokenId: %{public}d",
-        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), accessTokenId);
-    bool ret = DealGetBundleName(networkId, accessTokenId, bundleName);
+    HILOGD("networkId: %{public}s  bundleNameId: %{public}d",
+        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), bundleNameId);
+    bool ret = DealGetBundleName(networkId, bundleNameId, bundleName);
     if (!ret) {
         HILOGW("GetDistributedBundleName error and try to call again");
         PullOtherDistributedData();
-        ret = DealGetBundleName(networkId, accessTokenId, bundleName);
+        ret = DealGetBundleName(networkId, bundleNameId, bundleName);
     }
     if (bundleName == "") {
-        HILOGE("GetBundleNameId fail");
+        HILOGE("GetBundleName fail");
+        DeleteStorageDistributeInfo(bundleName);
         return false;
     }
     HILOGD("end.");
     return true;
 }
 
-bool DmsBmStorage::GetBundleNameId(std::string bundleName, uint16_t &accessTokenId)
+bool DmsBmStorage::GetBundleNameId(const std::string& bundleName, uint16_t &bundleNameId)
 {
     HILOGD("called.");
     {
@@ -288,12 +293,12 @@ bool DmsBmStorage::GetBundleNameId(std::string bundleName, uint16_t &accessToken
         }
         DmsBundleInfo distributedBundleInfo;
         if (distributedBundleInfo.FromJsonString(value) && distributedBundleInfo.bundleName == bundleName) {
-            accessTokenId = distributedBundleInfo.accessTokenId;
+            bundleNameId = distributedBundleInfo.bundleNameId;
             HILOGD("end.");
             return true;
         }
     }
-    HILOGE("get distributed bundleName no matching data: %{public}s %{public}d", udid.c_str(), accessTokenId);
+    HILOGE("get distributed bundleName no matching data: %{public}s %{public}d", udid.c_str(), bundleNameId);
     return false;
 }
 
@@ -378,6 +383,10 @@ uint16_t DmsBmStorage::CreateBundleNameId()
 DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo)
 {
     DmsBundleInfo distributedBundleInfo;
+    if (bundleInfo.name == "") {
+        HILOGE("The bundleName is empty and does not require conversion!");
+        return distributedBundleInfo;
+    }
     distributedBundleInfo.bundleName = bundleInfo.name;
     distributedBundleInfo.versionCode = bundleInfo.versionCode;
     distributedBundleInfo.compatibleVersionCode = bundleInfo.compatibleVersion;
@@ -386,7 +395,7 @@ DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::Bun
     distributedBundleInfo.targetVersionCode = bundleInfo.targetVersion;
     distributedBundleInfo.appId = bundleInfo.appId;
     distributedBundleInfo.enabled = bundleInfo.applicationInfo.enabled;
-    distributedBundleInfo.accessTokenId = CreateBundleNameId();
+    distributedBundleInfo.bundleNameId = CreateBundleNameId();
     distributedBundleInfo.updateTime = bundleInfo.updateTime;
     uint8_t pos = 0;
     for (const auto &abilityInfo : bundleInfo.abilityInfos) {
@@ -461,6 +470,9 @@ int32_t DmsBmStorage::PushOtherDistributedData()
 
 bool IsContinuable(AppExecFwk::BundleInfo bundleInfo)
 {
+    if (bundleInfo.name == "") {
+        return false;
+    }
     for (auto abilityInfo : bundleInfo.abilityInfos) {
         if (abilityInfo.continuable == true) {
             return true;
@@ -547,7 +559,7 @@ std::map<std::string, DmsBundleInfo> DmsBmStorage::GetAllOldDistributionBundleIn
         DmsBundleInfo distributedBundleInfo;
         if (distributedBundleInfo.FromJsonString(value)) {
             if (std::find(bundleNames.begin(), bundleNames.end(), distributedBundleInfo.bundleName) ==
-                bundleNames.end()) {
+                bundleNames.end() || distributedBundleInfo.bundleName == "") {
                 kvStorePtr_->Delete(entry.key);
                 continue;
             }
@@ -669,7 +681,7 @@ std::string DmsBmStorage::GetAbilityName(const std::string &networkId, std::stri
     return "";
 }
 
-uint8_t FindContinueTypeId(const DmsBundleInfo& distributedBundleInfo, std::string abilityName)
+uint8_t FindContinueTypeId(const DmsBundleInfo& distributedBundleInfo, const std::string& abilityName)
 {
     HILOGD("called.");
     uint8_t pos = 0;
@@ -682,7 +694,7 @@ uint8_t FindContinueTypeId(const DmsBundleInfo& distributedBundleInfo, std::stri
     return MAX_CONTINUETYPEID;
 }
 
-bool DmsBmStorage::GetContinueTypeId(const std::string bundleName, const std::string &abilityName,
+bool DmsBmStorage::GetContinueTypeId(const std::string &bundleName, const std::string &abilityName,
     uint8_t &continueTypeId)
 {
     HILOGD("called.");

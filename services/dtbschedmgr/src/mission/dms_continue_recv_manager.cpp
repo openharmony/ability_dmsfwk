@@ -249,9 +249,9 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, bundleNameId: %{public}u, state: %{public}d",
         DnetworkAdapter::AnonymizeNetworkId(senderNetworkId).c_str(), bundleNameId, state);
     std::string bundleName;
-    int32_t ret = BundleManagerInternal::GetBundleNameFromDbms(senderNetworkId, bundleNameId, bundleName);
-    bool res = (state == INACTIVE) ? DmsRadar::GetInstance().UnfocusedGetBundleName("GetBundleNameFromDbms", ret)
-        : DmsRadar::GetInstance().FocusedGetBundleName("GetBundleNameFromDbms", ret);
+    int32_t ret = BundleManagerInternal::GetBundleNameById(senderNetworkId, bundleNameId, bundleName);
+    bool res = (state == INACTIVE) ? DmsRadar::GetInstance().UnfocusedGetBundleName("GetBundleNameById", ret)
+        : DmsRadar::GetInstance().FocusedGetBundleName("GetBundleNameById", ret);
     if (!res) {
         HILOGE("%{public}s failed", (state == INACTIVE) ? "UnfocusedGetBundleName" : "FocusedGetBundleName");
     }

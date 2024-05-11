@@ -873,10 +873,6 @@ int32_t DistributedSchedStub::UnRegisterDSchedEventListenerInner(MessageParcel& 
 int32_t DistributedSchedStub::GetContinueInfoInner(MessageParcel& data, MessageParcel& reply)
 {
     HILOGI("[PerformanceTest] called, IPC end = %{public}" PRId64, GetTickCount());
-    if (!CheckCallingUid()) {
-        HILOGW("request DENIED!");
-        return DMS_PERMISSION_DENIED;
-    }
     std::string dstNetworkId;
     std::string srcNetworkId;
     int32_t result = DSchedContinueManager::GetInstance().GetContinueInfo(dstNetworkId, srcNetworkId);

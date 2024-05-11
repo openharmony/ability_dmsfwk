@@ -49,14 +49,14 @@ public:
     static sptr<AppExecFwk::IDistributedBms> GetDistributedBundleManager();
     static int32_t GetUidFromBms(const std::string& bundleName);
     static bool CheckIfRemoteCanInstall(const AAFwk::Want& want, int32_t missionId);
-    static int32_t GetBundleNameId(const std::string& bundleName, uint16_t& accessTokenId);
+    static int32_t GetBundleNameId(const std::string& bundleName, uint16_t& bundleNameId);
     static std::string GetContinueType(const std::string &networkId,
         std::string &bundleName, uint8_t continueTypeId);
-    static int32_t GetContinueTypeId(std::string &bundleName,
+    static int32_t GetContinueTypeId(const std::string &bundleName,
         const std::string &abilityName, uint8_t &continueTypeId);
     static std::string GetAbilityName(const std::string &networkId, std::string &bundleName, std::string &continueType);
-    static int32_t GetBundleNameFromDbms(const std::string& networkId,
-        const uint16_t accessTokenId, std::string& bundleName);
+    static int32_t GetBundleNameById(const std::string& networkId,
+        const uint16_t& bundleNameId, std::string& bundleName);
     static int32_t GetApplicationInfoFromBms(const std::string& bundleName, const AppExecFwk::BundleFlag flag,
         const int32_t userId, AppExecFwk::ApplicationInfo &appInfo);
     static ErrCode QueryOsAccount(int32_t& activeAccountId);

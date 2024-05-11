@@ -33,7 +33,7 @@ const std::string JSON_KEY_MIN_COMPATIBLE_VERSION = "minCompatibleVersion";
 const std::string JSON_KEY_TARGET_VERSION_CODE = "targetVersionCode";
 const std::string JSON_KEY_APP_ID = "appId";
 const std::string JSON_KEY_ENABLED = "enabled";
-const std::string JSON_KEY_ACCESS_TOKEN_ID = "accessTokenId";
+const std::string JSON_KEY_BUNDLE_NAME_ID = "bundleNameId";
 const std::string JSON_KEY_UPDATE_TIME = "updateTime";
 const std::string JSON_KEY_DMS_ABILITY_INFOS = "dmsAbilityInfos";
 const std::string JSON_KEY_DMS_ABILITY_NAME = "abilityName";
@@ -138,7 +138,7 @@ bool DmsBundleInfo::ReadFromParcel(Parcel &parcel)
     versionName = Str16ToStr8(parcel.ReadString16());
     appId = Str16ToStr8(parcel.ReadString16());
     enabled = parcel.ReadBool();
-    accessTokenId = parcel.ReadUint16();
+    bundleNameId = parcel.ReadUint16();
     updateTime = parcel.ReadInt64();
     uint32_t abilityInfosSize;
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Uint32, parcel, abilityInfosSize);
@@ -172,7 +172,7 @@ bool DmsBundleInfo::Marshalling(Parcel &parcel) const
     parcel.WriteString16(Str8ToStr16(versionName));
     parcel.WriteString16(Str8ToStr16(appId));
     parcel.WriteBool(enabled);
-    parcel.WriteUint16(accessTokenId);
+    parcel.WriteUint16(bundleNameId);
     parcel.WriteInt64(updateTime);
     for (auto &dmsAbilityInfo : dmsAbilityInfos) {
         (parcel).WriteParcelable(&dmsAbilityInfo);
@@ -205,7 +205,7 @@ std::string DmsBundleInfo::ToString() const
     jsonObject[JSON_KEY_TARGET_VERSION_CODE] = targetVersionCode;
     jsonObject[JSON_KEY_APP_ID] = appId;
     jsonObject[JSON_KEY_ENABLED] = enabled;
-    jsonObject[JSON_KEY_ACCESS_TOKEN_ID] = accessTokenId;
+    jsonObject[JSON_KEY_BUNDLE_NAME_ID] = bundleNameId;
     jsonObject[JSON_KEY_UPDATE_TIME] = updateTime;
     jsonObject[JSON_KEY_DMS_ABILITY_INFOS] = dmsAbilityInfos;
     jsonObject[JSON_KEY_DMS_USERID] = userIdArr;
@@ -239,7 +239,7 @@ bool DmsBundleInfo::FromJsonString(const std::string &jsonString)
         JsonType::STRING, false, parseResult, ArrayType::NOT_ARRAY);
     GetValueIfFindKey<bool>(jsonObject, jsonObjectEnd, JSON_KEY_ENABLED, enabled,
         JsonType::BOOLEAN, false, parseResult, ArrayType::NOT_ARRAY);
-    GetValueIfFindKey<uint16_t>(jsonObject, jsonObjectEnd, JSON_KEY_ACCESS_TOKEN_ID, accessTokenId,
+    GetValueIfFindKey<uint16_t>(jsonObject, jsonObjectEnd, JSON_KEY_BUNDLE_NAME_ID, bundleNameId,
         JsonType::NUMBER, false, parseResult, ArrayType::NOT_ARRAY);
     GetValueIfFindKey<int64_t>(jsonObject, jsonObjectEnd, JSON_KEY_UPDATE_TIME, updateTime,
         JsonType::NUMBER, false, parseResult, ArrayType::NOT_ARRAY);

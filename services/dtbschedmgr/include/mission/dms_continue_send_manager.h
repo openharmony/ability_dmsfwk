@@ -96,7 +96,7 @@ public:
         void OnDeviceScreenOff(int32_t missionId);
         void OnDeviceScreenOn();
         void ClearScreenOffInfo();
-        void SetScreenOffInfo(int32_t missionId, std::string bundleName, uint32_t accessTokenId,
+        void SetScreenOffInfo(int32_t missionId, std::string bundleName, uint16_t bundleNameId,
             std::string abilityName);
 
     private:
@@ -119,7 +119,7 @@ public:
 private:
     int32_t GetCurrentMissionId();
     void PostUnfocusedTaskWithDelay(const int32_t missionId, UnfocusedReason reason);
-    int32_t SendSoftbusEvent(uint16_t accessTokenId, uint8_t continueTypeId, uint8_t type);
+    int32_t SendSoftbusEvent(uint16_t bundleNameId, uint8_t continueTypeId, uint8_t type);
     void StartEvent();
     int32_t DealFocusedBusiness(const int32_t missionId);
     int32_t DealUnfocusedBusiness(const int32_t missionId, UnfocusedReason reason);
@@ -131,9 +131,9 @@ private:
     int32_t CheckContinueState(const int32_t missionId);
     void AddMMIListener();
     void RemoveMMIListener();
-    int32_t GetAccessTokenIdSendEvent(std::string bundleName, UnfocusedReason reason, uint16_t& accessTokenId,
+    int32_t GetAccessTokenIdSendEvent(std::string bundleName, UnfocusedReason reason, uint16_t& bundleNameId,
         uint8_t& continueTypeId);
-    int32_t SetStateSendEvent(const uint32_t accessTokenId, const uint8_t& continueTypeId,
+    int32_t SetStateSendEvent(const uint16_t bundleNameId, const uint8_t& continueTypeId,
         const AAFwk::ContinueState &state);
     int32_t GetAbilityNameByMissionId(const int32_t missionId, std::string& abilityName);
     int32_t FocusedBusinessSendEvent(std::string bundleName, const std::string& abilityName);

@@ -48,12 +48,12 @@ public:
     bool DeleteStorageDistributeInfo(const std::string &bundleName);
     bool GetStorageDistributeInfo(const std::string &networkId, const std::string &bundleName,
         DmsBundleInfo &info);
-    bool GetDistributedBundleName(const std::string &networkId,  uint16_t accessTokenId,
-        std::string &bundleName);
-    bool GetBundleNameId(std::string bundleName, uint16_t &accessTokenId);
+    bool GetDistributedBundleName(const std::string &networkId,  const uint16_t& bundleNameId,
+        std::string& bundleName);
+    bool GetBundleNameId(const std::string& bundleName, uint16_t &bundleNameId);
     std::string GetContinueType(const std::string &networkId, std::string &bundleName, uint8_t continueTypeId);
     std::string GetAbilityName(const std::string &networkId, std::string &bundleName, std::string &continueType);
-    bool GetContinueTypeId(const std::string bundleName, const std::string &abilityName, uint8_t &continueTypeId);
+    bool GetContinueTypeId(const std::string &bundleName, const std::string &abilityName, uint8_t &continueTypeId);
     void UpdateDistributedData();
     int32_t PullOtherDistributedData();
     int32_t PushOtherDistributedData();
@@ -63,7 +63,7 @@ private:
     void TryTwice(const std::function<DistributedKv::Status()> &func) const;
     bool CheckKvStore();
     DistributedKv::Status GetKvStore();
-    bool DealGetBundleName(const std::string &networkId, uint16_t accessTokenId, std::string &bundleName);
+    bool DealGetBundleName(const std::string &networkId, const uint16_t& bundleNameId, std::string &bundleName);
     uint16_t CreateBundleNameId();
     DmsBundleInfo ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo);
     bool InnerSaveStorageDistributeInfo(const DmsBundleInfo &distributedBundleInfo, const std::string &localUdid);

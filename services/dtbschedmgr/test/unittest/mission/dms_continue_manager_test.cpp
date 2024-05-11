@@ -411,7 +411,7 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
      * @tc.steps: step1. test DealOnBroadcastBusiness when senderNetworkId is invalid;
      */
     std::string senderNetworkId = "invalid senderNetworkId";
-    uint32_t bundleNameId = 0;
+    uint16_t bundleNameId = 0;
     uint8_t continueTypeId = 0;
     int32_t state = 0;
     int32_t ret = DMSContinueRecvMgr::GetInstance().DealOnBroadcastBusiness(senderNetworkId, bundleNameId,
@@ -449,7 +449,7 @@ HWTEST_F(DMSContinueManagerTest, testPostOnBroadcastBusiness001, TestSize.Level1
 {
     DTEST_LOG << "DMSContinueManagerTest testPostOnBroadcastBusiness001 start" << std::endl;
     std::string senderNetworkId = "invalid senderNetworkId";
-    uint32_t bundleNameId = 0;
+    uint16_t bundleNameId = 0;
     uint8_t continueTypeId = 0;
     int32_t state = 0;
 
@@ -675,10 +675,10 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDataRecv001, TestSize.Level1)
 HWTEST_F(DMSContinueManagerTest, testSendSoftbusEvent001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testSendSoftbusEvent001 start" << std::endl;
-    uint16_t accessTokenId = 0;
+    uint16_t bundleNameId = 0;
     uint8_t continueType = 1;
     uint8_t type = 0;
-    bool ret = DMSContinueSendMgr::GetInstance().SendSoftbusEvent(accessTokenId, continueType, type);
+    bool ret = DMSContinueSendMgr::GetInstance().SendSoftbusEvent(bundleNameId, continueType, type);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DMSContinueManagerTest testSendSoftbusEvent001 end" << std::endl;
 }
