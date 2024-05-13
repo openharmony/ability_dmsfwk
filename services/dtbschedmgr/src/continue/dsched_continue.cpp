@@ -275,6 +275,7 @@ int32_t DSchedContinue::PostContinueSendTask(const OHOS::AAFwk::Want& want, int3
             HILOGE("PostContinueSendTask eventHandler send event type %d fail", eventType);
             return CONTINUE_SEND_EVENT_FAILED;
         }
+        return ERR_OK;
     }
 
     HILOGI("PostContinueSendTask %d, continueInfo %s", eventType, continueInfo_.toString().c_str());
@@ -778,7 +779,7 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
     }
 
     OHOS::AAFwk::Want want = cmd->want_;
-    if (subServiceType_ == CONTINUE_PULL) {
+    if (subServiceType_ == CONTINUE_PULL && !continueInfo_.continueType_.empty()) {
         UpdateWantForContinueType(want);
         int32_t persistentId;
         if (ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId) != ERR_OK) {
