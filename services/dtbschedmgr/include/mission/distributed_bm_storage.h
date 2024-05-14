@@ -55,6 +55,7 @@ public:
     std::string GetAbilityName(const std::string &networkId, std::string &bundleName, std::string &continueType);
     bool GetContinueTypeId(const std::string &bundleName, const std::string &abilityName, uint8_t &continueTypeId);
     void UpdateDistributedData();
+    int32_t CloudSync();
     int32_t PullOtherDistributedData();
     int32_t PushOtherDistributedData();
 

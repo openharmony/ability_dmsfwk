@@ -176,6 +176,23 @@ HWTEST_F(DistributedBmStorageTest, UpdateDistributedDataTest_001, TestSize.Level
 }
 
 /**
+ * @tc.name: CloudSyncTest_001
+ * @tc.desc: test delete DistributedBmStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, CloudSyncTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest CloudSyncTest_001 start" << std::endl;
+    auto distributedDataStorage = GetDmsBmStorage();
+    EXPECT_NE(distributedDataStorage, nullptr);
+    if (distributedDataStorage != nullptr) {
+        int32_t ret = dmsBmStorage_->GetInstance()->CloudSync();
+        EXPECT_EQ(ret, ERR_OK);
+    }
+    DTEST_LOG << "DistributedBmStorageTest CloudSyncTest_001 end" << std::endl;
+}
+
+/**
  * @tc.name: PullOtherDistributedDataTest_001
  * @tc.desc: test delete DistributedBmStorage
  * @tc.type: FUNC

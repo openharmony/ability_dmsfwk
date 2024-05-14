@@ -69,11 +69,9 @@ std::shared_ptr<DmsBmStorage> DmsBmStorage::GetInstance()
 bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName)
 {
     HILOGD("called.");
-    {
-        if (!CheckKvStore()) {
-            HILOGE("kvStore is nullptr");
-            return false;
-        }
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return false;
     }
     auto bundleMgr = DmsBmStorage::GetInstance()->GetBundleMgr();
     if (bundleMgr == nullptr) {
@@ -109,6 +107,10 @@ bool DmsBmStorage::InnerSaveStorageDistributeInfo(const DmsBundleInfo &distribut
 {
     if (distributedBundleInfo.bundleName == "") {
         HILOGE("The package information is empty and does not need to be stored!");
+        return false;
+    }
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
         return false;
     }
     std::string keyOfData = DeviceAndNameToKey(localUdid, distributedBundleInfo.bundleName);
@@ -176,11 +178,9 @@ bool DmsBmStorage::GetStorageDistributeInfo(const std::string &networkId,
     const std::string &bundleName, DmsBundleInfo &info)
 {
     HILOGD("called.");
-    {
-        if (!CheckKvStore()) {
-            HILOGE("kvStore is nullptr");
-            return false;
-        }
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return false;
     }
     std::string udid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(networkId);
     if (udid == "") {
@@ -208,11 +208,9 @@ bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_
 {
     HILOGD("networkId: %{public}s  bundleNameId: %{public}d",
         DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), bundleNameId);
-    {
-        if (!CheckKvStore()) {
-            HILOGE("kvStore is nullptr");
-            return false;
-        }
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return false;
     }
     std::string udid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(networkId);
     if (udid == "") {
@@ -266,11 +264,9 @@ bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, const 
 bool DmsBmStorage::GetBundleNameId(const std::string& bundleName, uint16_t &bundleNameId)
 {
     HILOGD("called.");
-    {
-        if (!CheckKvStore()) {
-            HILOGE("kvStore is nullptr");
-            return false;
-        }
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return false;
     }
     std::string udid;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
@@ -336,16 +332,23 @@ Status DmsBmStorage::GetKvStore()
         .createIfMissing = true,
         .encrypt = false,
         .autoSync = false,
+        .isPublic = true,
+        .cloudConfig = {
+            .enableCloud = true,
+            .autoSync = true
+        },
         .securityLevel = SecurityLevel::S1,
         .area = EL1,
         .kvStoreType = KvStoreType::SINGLE_VERSION,
+        .dataType = DataType::TYPE_DYNAMICAL,
         .baseDir = BMS_KV_BASE_DIR
     };
     Status status = dataManager_.GetSingleKvStore(options, appId_, storeId_, kvStorePtr_);
-    if (status != Status::SUCCESS) {
-        HILOGE("return error: %{public}d", status);
-    } else {
-        HILOGD("get kvStore success");
+    if (status == Status::SUCCESS) {
+        HILOGI("get kvStore success");
+    } else if (status == DistributedKv::Status::STORE_META_CHANGED) {
+        HILOGE("This db meta changed, remove and rebuild it");
+        dataManager_.DeleteKvStore(appId_, storeId_, BMS_KV_BASE_DIR + appId_.appId);
     }
     HILOGD("end.");
     return status;
@@ -432,12 +435,33 @@ OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> DmsBmStorage::GetBundleMgr()
     return bundleMgr_;
 }
 
+int32_t DmsBmStorage::CloudSync()
+{
+    HILOGI("called.");
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return INVALID_REMOTE_PARAMETERS_ERR;
+    }
+    Status status = kvStorePtr_->CloudSync(nullptr);
+    if (status != Status::SUCCESS) {
+        HILOGE("Cloud sync failed, error = %{public}d", status);
+    } else {
+        HILOGI("Cloud synchronizing");
+    }
+    HILOGD("end.");
+    return static_cast<int32_t>(status);
+}
+
 int32_t DmsBmStorage::PullOtherDistributedData()
 {
     HILOGD("called.");
     std::vector<std::string> networkIdList = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdList();
     if (networkIdList.empty()) {
         HILOGE("GetNetworkIdList failed");
+        return INVALID_REMOTE_PARAMETERS_ERR;
+    }
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
     Status status = kvStorePtr_->Sync(networkIdList, DistributedKv::SyncMode::PULL);
@@ -456,6 +480,10 @@ int32_t DmsBmStorage::PushOtherDistributedData()
     std::vector<std::string> networkIdList = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdList();
     if (networkIdList.empty()) {
         HILOGE("GetNetworkIdList failed");
+        return INVALID_REMOTE_PARAMETERS_ERR;
+    }
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
     Status status = kvStorePtr_->Sync(networkIdList, DistributedKv::SyncMode::PUSH);
@@ -592,11 +620,9 @@ std::string DmsBmStorage::GetContinueType(const std::string &networkId, std::str
 {
     HILOGD("networkId: %{public}s,  bundleName: %{public}s,  continueTypeId: %{public}d",
         DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), bundleName.c_str(), continueTypeId);
-    {
-        if (!CheckKvStore()) {
-            HILOGE("kvStore is nullptr");
-            return "";
-        }
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return "";
     }
     std::string udid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(networkId);
     if (udid == "") {
@@ -645,11 +671,9 @@ std::string DmsBmStorage::GetAbilityName(const std::string &networkId, std::stri
 {
     HILOGD("networkId: %{public}s,  bundleName: %{public}s,  continueTypeId: %{public}s",
         DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), bundleName.c_str(), continueType.c_str());
-    {
-        if (!CheckKvStore()) {
-            HILOGE("kvStore is nullptr");
-            return "";
-        }
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return "";
     }
     std::string udid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(networkId);
     if (udid == "") {
@@ -698,11 +722,9 @@ bool DmsBmStorage::GetContinueTypeId(const std::string &bundleName, const std::s
     uint8_t &continueTypeId)
 {
     HILOGD("called.");
-    {
-        if (!CheckKvStore()) {
-            HILOGE("kvStore is nullptr");
-            return false;
-        }
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return false;
     }
     std::string udid;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
