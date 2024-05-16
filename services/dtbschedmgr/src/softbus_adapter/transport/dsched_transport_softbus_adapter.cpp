@@ -21,6 +21,7 @@
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
+#include "token_setproc.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -122,7 +123,11 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
         return sessionId;
     }
 
-    int32_t ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+    int32_t ret = SetFirstCallerTokenID(callingTokenId_);
+    HILOGD("SetFirstCallerTokenID callingTokenId: %d, ret: %d", callingTokenId_, ret);
+    callingTokenId_ = 0;
+
+    ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
     if (ret != ERR_OK) {
         HILOGE("client bind failed, ret: %d", ret);
         Shutdown(sessionId);
@@ -374,6 +379,11 @@ void DSchedTransportSoftbusAdapter::UnregisterListener(int32_t serviceType, std:
     }
     HILOGI("listener unregister success");
     return;
+}
+
+void DSchedTransportSoftbusAdapter::SetCallingTokenId(int32_t callingTokenId)
+{
+    callingTokenId_ = callingTokenId;
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

@@ -28,6 +28,7 @@
 #include "distributed_sched_permission.h"
 #include "dms_version_manager.h"
 #include "dsched_continue_manager.h"
+#include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_log.h"
 #include "dtbschedmgr_device_info_storage.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
@@ -420,6 +421,7 @@ int32_t DistributedSchedStub::ContinueMissionInner(MessageParcel& data, MessageP
     if (isLocalCalling) {
         std::string remoteDeviceId = (IPCSkeleton::GetCallingDeviceID() == srcDevId) ? dstDevId : srcDevId;
         if (IsUsingQos(remoteDeviceId)) {
+            DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(IPCSkeleton::GetCallingTokenID());
             result = DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, missionId, callback,
                 *wantParams);
             HILOGI("result = %{public}d", result);
@@ -469,6 +471,7 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
     if (isLocalCalling) {
         std::string remoteDeviceId = (IPCSkeleton::GetCallingDeviceID() == srcDevId) ? dstDevId : srcDevId;
         if (IsUsingQos(remoteDeviceId)) {
+            DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(IPCSkeleton::GetCallingTokenID());
             result = DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, bundleName, continueType,
                 callback, *wantParams);
             HILOGI("result = %{public}d", result);

@@ -59,6 +59,7 @@ public:
     void RegisterListener(int32_t serviceType, std::shared_ptr<IDataListener> listener);
     void NotifyListenersSessionShutdown(int32_t sessionId, bool isSelfCalled);
     void UnregisterListener(int32_t serviceType, std::shared_ptr<IDataListener> listener);
+    void SetCallingTokenId(int32_t callingTokenId);
 
 private:
     DSchedTransportSoftbusAdapter();
@@ -76,6 +77,7 @@ private:
     std::mutex listenerMutex_;
     int32_t serverSocket_ = 0;
     std::string localSessionName_;
+    int32_t callingTokenId_ = 0;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS
