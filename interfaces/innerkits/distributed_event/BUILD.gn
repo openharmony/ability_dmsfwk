@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -42,6 +42,7 @@ ohos_shared_library("distributed_sdk") {
     "${dms_path}/interfaces/innerkits/distributed_event/src/dms_handler.cpp",
     "${dms_path}/interfaces/innerkits/distributed_event/src/dms_listener_stub.cpp",
     "${dms_path}/interfaces/innerkits/distributed_event/src/dms_sa_client.cpp",
+    "${dms_path}/interfaces/innerkits/distributed_event/src/dms_static_capability.cpp",
   ]
 
   public_configs = [
@@ -51,6 +52,7 @@ ohos_shared_library("distributed_sdk") {
 
   external_deps = [
     "c_utils:utils",
+    "device_info_manager:distributed_device_profile_common",
     "hilog:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
