@@ -126,7 +126,8 @@
                 "dms_client.h",
                 "dms_handler.h",
                 "dms_listener_stub.h",
-                "dms_sa_client.h"
+                "dms_sa_client.h",
+                "dms_static_capability.h"
               ]
             },
             "name": "//foundation/ability/dmsfwk/interfaces/innerkits/distributed_event:distributed_sdk"
