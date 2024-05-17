@@ -153,6 +153,7 @@ ohos_shared_library("distributedschedsvr") {
     "ability_runtime:dataobs_manager",
     "ability_runtime:mission_info",
     "access_token:libaccesstoken_sdk",
+    "access_token:libtoken_setproc",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
