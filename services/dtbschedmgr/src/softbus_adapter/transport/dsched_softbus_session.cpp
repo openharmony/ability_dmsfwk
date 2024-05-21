@@ -59,15 +59,15 @@ DSchedSoftbusSession::~DSchedSoftbusSession()
 void DSchedSoftbusSession::OnConnect()
 {
     refCount_++;
-    HILOGI("session %d current ref cnt: %d", sessionId_, refCount_.load());
+    HILOGI("session %{public}d current ref cnt: %{public}d", sessionId_, refCount_.load());
 }
 
 bool DSchedSoftbusSession::OnDisconnect()
 {
     refCount_--;
-    HILOGI("session %d current ref cnt: %d", sessionId_, refCount_.load());
+    HILOGI("session %{public}d current ref cnt: %{public}d", sessionId_, refCount_.load());
     if (refCount_ <= 0) {
-        HILOGI("session: %d not in use, clear resource", sessionId_);
+        HILOGI("session: %{public}d not in use, clear resource", sessionId_);
         return true;
     }
     return false;
@@ -97,7 +97,7 @@ void DSchedSoftbusSession::PackRecvData(std::shared_ptr<DSchedDataBuffer> buffer
     uint64_t bufferSize;
     if (buffer->Size() < BINARY_HEADER_FRAG_LEN) {
         bufferSize = static_cast<uint64_t>(buffer->Size());
-        HILOGE("pack recv data error, size: %" PRIu64", session id: %d", bufferSize, sessionId_);
+        HILOGE("pack recv data error, size: %" PRIu64", session id: %{public}d", bufferSize, sessionId_);
         return;
     }
     uint8_t *ptrPacket = buffer->Data();
@@ -106,12 +106,12 @@ void DSchedSoftbusSession::PackRecvData(std::shared_ptr<DSchedDataBuffer> buffer
     if (buffer->Size() != (headerPara.dataLen + BINARY_HEADER_FRAG_LEN) || headerPara.dataLen > headerPara.totalLen ||
         headerPara.dataLen > BINARY_DATA_MAX_LEN || headerPara.totalLen > BINARY_DATA_MAX_TOTAL_LEN) {
         bufferSize = static_cast<uint64_t>(buffer->Size());
-        HILOGE("pack recv data failed, size: %" PRIu64", dataLen: %d, totalLen: %d session id:"
-            " %d", bufferSize, headerPara.dataLen, headerPara.totalLen, sessionId_);
+        HILOGE("pack recv data failed, size: %" PRIu64", dataLen: %{public}d, totalLen: %{public}d session id:"
+            " %{public}d", bufferSize, headerPara.dataLen, headerPara.totalLen, sessionId_);
         return;
     }
     bufferSize = static_cast<uint64_t>(buffer->Size());
-    HILOGD("pack recv data Assemble, size: %" PRIu64", dataLen: %d, totalLen: %d, nowTime: "
+    HILOGD("pack recv data Assemble, size: %" PRIu64", dataLen: %{public}d, totalLen: %{public}d, nowTime: "
         "%" PRId64" start", bufferSize, headerPara.dataLen, headerPara.totalLen, GetNowTimeStampUs());
     if (headerPara.fragFlag == FRAG_START_END) {
         AssembleNoFrag(buffer, headerPara);
@@ -119,7 +119,7 @@ void DSchedSoftbusSession::PackRecvData(std::shared_ptr<DSchedDataBuffer> buffer
         AssembleFrag(buffer, headerPara);
     }
     bufferSize = static_cast<uint64_t>(buffer->Size());
-    HILOGD("pack recv data Assemble, size: %" PRIu64", dataLen: %d, totalLen: %d, nowTime: "
+    HILOGD("pack recv data Assemble, size: %" PRIu64", dataLen: %{public}d, totalLen: %{public}d, nowTime: "
         "%" PRId64" end", bufferSize, headerPara.dataLen, headerPara.totalLen, GetNowTimeStampUs());
 }
 
@@ -130,7 +130,7 @@ void DSchedSoftbusSession::GetFragDataHeader(uint8_t *ptrPacket, SessionDataHead
     while (i < BINARY_HEADER_FRAG_LEN) {
         ret = ReadTlvToHeader(ptrPacket + i, headerPara);
         if (ret < 0) {
-            HILOGE("ReadTlvToHeader failed, ret: %d", ret);
+            HILOGE("ReadTlvToHeader failed, ret: %{public}d", ret);
             break;
         }
         i += ret;
@@ -170,13 +170,13 @@ uint16_t DSchedSoftbusSession::ReadTlvToHeader(uint8_t *ptrPacket, SessionDataHe
             ret = memcpy_s(&headerPara.dataLen, sizeof(headerPara.dataLen), ptr, len);
             break;
         default:
-            HILOGE("invalid type: %d!", type);
+            HILOGE("invalid type: %{public}d!", type);
             ret = INVALID_PARAMETERS_ERR;
             break;
     }
 
     if (ret != ERR_OK) {
-        HILOGE("memcpy_s value of type %d failed!", type);
+        HILOGE("memcpy_s value of type %{public}d failed!", type);
         return -1;
     }
     /* returns value lenth */
@@ -272,8 +272,9 @@ int32_t DSchedSoftbusSession::CheckUnPackBuffer(SessionDataHeader& headerPara)
     }
 
     if (totalLen_ < headerPara.dataLen + offset_) {
-        HILOGE("data len error cap: %{public}d, size: %{public}d, dataLen: %d, sessionId: %{public}d, peerNetworkId: "
-            "%{public}s.", totalLen_, offset_, headerPara.dataLen, sessionId_, GetAnonymStr(peerDeviceId_).c_str());
+        HILOGE("data len error cap: %{public}d, size: %{public}d, dataLen: %{public}d, sessionId: %{public}d,"
+            " peerNetworkId: %{public}s.", totalLen_, offset_, headerPara.dataLen, sessionId_,
+            GetAnonymStr(peerDeviceId_).c_str());
         return INVALID_PARAMETERS_ERR;
     }
     return ERR_OK;
@@ -294,10 +295,11 @@ int32_t DSchedSoftbusSession::UnPackSendData(std::shared_ptr<DSchedDataBuffer> b
     uint32_t maxSendSize = 0;
     int32_t ret = GetSessionOption(sessionId_, SESSION_OPTION_MAX_SENDBYTES_SIZE, &maxSendSize, sizeof(maxSendSize));
     if (ret != ERR_OK) {
-        HILOGE("GetSessionOption get max SendBytes size failed, ret: %d, session: %d", ret, sessionId_);
+        HILOGE("GetSessionOption get max SendBytes size failed, ret: %{public}d, session: %{public}d",
+            ret, sessionId_);
         return ret;
     }
-    HILOGD("GetSessionOption get max SendBytes size: %u, session: %d", maxSendSize, sessionId_);
+    HILOGD("GetSessionOption get max SendBytes size: %{public}u, session: %{public}d", maxSendSize, sessionId_);
 
     if (buffer->Size() <= maxSendSize) {
         return UnPackStartEndData(buffer, dataType);
@@ -312,25 +314,25 @@ int32_t DSchedSoftbusSession::UnPackSendData(std::shared_ptr<DSchedDataBuffer> b
     while (totalLen > offset) {
         SetHeadParaDataLen(headPara, totalLen, offset, maxSendSize);
         bufferSize = static_cast<uint64_t>(buffer->Size());
-        HILOGD("size: %" PRIu64", dataLen: %d, totalLen: %d, nowTime: %" PRId64" start:", bufferSize, headPara.dataLen,
-            headPara.totalLen, GetNowTimeStampUs());
+        HILOGD("size: %" PRIu64", dataLen: %{public}d, totalLen: %{public}d, nowTime: %" PRId64" start:",
+            bufferSize, headPara.dataLen, headPara.totalLen, GetNowTimeStampUs());
 
         auto unpackData = std::make_shared<DSchedDataBuffer>(headPara.dataLen + BINARY_HEADER_FRAG_LEN);
         MakeFragDataHeader(headPara, unpackData->Data(), BINARY_HEADER_FRAG_LEN);
         int32_t ret = memcpy_s(unpackData->Data() + BINARY_HEADER_FRAG_LEN,
             unpackData->Size() - BINARY_HEADER_FRAG_LEN, buffer->Data() + offset, headPara.dataLen);
         if (ret != ERR_OK) {
-            HILOGE("memcpy_s failed, ret: %d, session: %d", ret, sessionId_);
+            HILOGE("memcpy_s failed, ret: %{public}d, session: %{public}d", ret, sessionId_);
             return ret;
         }
 
         ret = DSchedTransportSoftbusAdapter::GetInstance().SendBytesBySoftbus(sessionId_, unpackData);
         if (ret != ERR_OK) {
-            HILOGE("sendData failed, ret: %d, session: %d", ret, sessionId_);
+            HILOGE("sendData failed, ret: %{public}d, session: %{public}d", ret, sessionId_);
             return ret;
         }
-        HILOGD("size: %" PRIu64", dataLen: %d, totalLen: %d, nowTime: %" PRId64" end:", bufferSize, headPara.dataLen,
-            headPara.totalLen, GetNowTimeStampUs());
+        HILOGD("size: %" PRIu64", dataLen: %{public}d, totalLen: %{public}d, nowTime: %" PRId64" end:",
+            bufferSize, headPara.dataLen, headPara.totalLen, GetNowTimeStampUs());
 
         headPara.subSeq++;
         headPara.fragFlag = FRAG_MID;
@@ -338,10 +340,11 @@ int32_t DSchedSoftbusSession::UnPackSendData(std::shared_ptr<DSchedDataBuffer> b
 
         ret = GetSessionOption(sessionId_, SESSION_OPTION_MAX_SENDBYTES_SIZE, &maxSendSize, sizeof(maxSendSize));
         if (ret != ERR_OK) {
-            HILOGE("GetSessionOption get max SendBytes size failed, ret: %d, session: %d", ret, sessionId_);
+            HILOGE("GetSessionOption get max SendBytes size failed, ret: %{public}d, session: %{public}d",
+                ret, sessionId_);
             return ret;
         }
-        HILOGD("GetSessionOption get next SendBytes size: %u, session: %d", maxSendSize, sessionId_);
+        HILOGD("GetSessionOption get next SendBytes size: %{public}u, session: %{public}d", maxSendSize, sessionId_);
     }
     return ERR_OK;
 }
@@ -353,10 +356,11 @@ int32_t DSchedSoftbusSession::UnPackStartEndData(std::shared_ptr<DSchedDataBuffe
     uint32_t maxSendSize = 0;
     int32_t ret = GetSessionOption(sessionId_, SESSION_OPTION_MAX_SENDBYTES_SIZE, &maxSendSize, sizeof(maxSendSize));
     if (ret != ERR_OK) {
-        HILOGE("GetSessionOption get max SendBytes size failed, ret: %d, session: %d", ret, sessionId_);
+        HILOGE("GetSessionOption get max SendBytes size failed, ret: %{public}d, session: %{public}d",
+            ret, sessionId_);
         return ret;
     }
-    HILOGD("GetSessionOption get max SendBytes size: %u, session: %d", maxSendSize, sessionId_);
+    HILOGD("GetSessionOption get max SendBytes size: %{public}u, session: %{public}d", maxSendSize, sessionId_);
 
     headPara.dataLen = buffer->Size();
     auto unpackData = std::make_shared<DSchedDataBuffer>(buffer->Size() + BINARY_HEADER_FRAG_LEN);
@@ -364,7 +368,7 @@ int32_t DSchedSoftbusSession::UnPackStartEndData(std::shared_ptr<DSchedDataBuffe
     ret = memcpy_s(unpackData->Data() + BINARY_HEADER_FRAG_LEN, unpackData->Size() - BINARY_HEADER_FRAG_LEN,
         buffer->Data(), buffer->Size());
     if (ret != ERR_OK) {
-        HILOGE("START_END memcpy_s failed, ret: %d, session: %d", ret, sessionId_);
+        HILOGE("START_END memcpy_s failed, ret: %{public}d, session: %{public}d", ret, sessionId_);
         return ret;
     }
     return DSchedTransportSoftbusAdapter::GetInstance().SendBytesBySoftbus(sessionId_, unpackData);
@@ -394,7 +398,7 @@ void DSchedSoftbusSession::MakeFragDataHeader(const SessionDataHeader& headPara,
         sizeof(uint8_t) * HEADER_UINT8_NUM + sizeof(uint16_t) * HEADER_UINT16_NUM +
         sizeof(uint32_t) * HEADER_UINT32_NUM;
     if (headerLen > len) {
-        HILOGE("MakeFragDataHeader %d over len %d", headerLen, len);
+        HILOGE("MakeFragDataHeader %{public}d over len %{public}d", headerLen, len);
         return;
     }
 
@@ -439,7 +443,7 @@ void DSchedSoftbusSession::WriteTlvToBuffer(const TlvItem& tlvItem, uint8_t *buf
 {
     uint32_t tlvLen = TlvItem::HEADER_TYPE_BYTES + TlvItem::HEADER_LEN_BYTES + tlvItem.len;
     if (bufLen < tlvLen) {
-        HILOGE("tlv len %d over buffer len %d", tlvLen, bufLen);
+        HILOGE("tlv len %{public}d over buffer len %{public}d", tlvLen, bufLen);
         return;
     }
     uint32_t i = 0;
@@ -450,7 +454,7 @@ void DSchedSoftbusSession::WriteTlvToBuffer(const TlvItem& tlvItem, uint8_t *buf
     int32_t ret = memcpy_s(&buffer[i], bufLen - TlvItem::HEADER_TYPE_BYTES + TlvItem::HEADER_LEN_BYTES,
         &tlvItem.value, tlvItem.len);
     if (ret != ERR_OK) {
-        HILOGE("copy tlv value failed!, ret %d", ret);
+        HILOGE("copy tlv value failed!, ret %{public}d", ret);
     }
     return;
 }

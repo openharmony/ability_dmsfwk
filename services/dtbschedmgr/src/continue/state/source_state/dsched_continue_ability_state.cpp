@@ -40,14 +40,15 @@ int32_t DSchedContinueAbilityState::Execute(std::shared_ptr<DSchedContinue> dCon
 {
     auto iterFunc = memberFuncMap_.find(event->GetInnerEventId());
     if (iterFunc == memberFuncMap_.end()) {
-        HILOGI("DSchedContinueAbilityState execute %d in wrong state", event->GetInnerEventId());
+        HILOGI("DSchedContinueAbilityState execute %{public}d in wrong state", event->GetInnerEventId());
         return CONTINUE_STATE_MACHINE_INVALID_STATE;
     }
 
     auto memberFunc = iterFunc->second;
     int32_t ret = (this->*memberFunc)(dContinue, event);
     if (ret != ERR_OK) {
-        HILOGE("DSchedContinueAbilityState execute %d failed, ret: %d", event->GetInnerEventId(), ret);
+        HILOGE("DSchedContinueAbilityState execute %{public}d failed, ret: %{public}d",
+            event->GetInnerEventId(), ret);
     }
     return ret;
 }
@@ -68,7 +69,7 @@ int32_t DSchedContinueAbilityState::DoContinueSendTask(std::shared_ptr<DSchedCon
     auto syncContinueData = event->GetSharedObject<ContinueAbilityData>();
     int32_t ret = dContinue->ExecuteContinueSend(syncContinueData);
     if (ret != ERR_OK) {
-        HILOGE("DSchedContinueAbilityState ExecuteContinueSend failed, ret: %d", ret);
+        HILOGE("DSchedContinueAbilityState ExecuteContinueSend failed, ret: %{public}d", ret);
     }
     return ret;
 }
@@ -84,7 +85,7 @@ int32_t DSchedContinueAbilityState::DoContinueEndTask(std::shared_ptr<DSchedCont
     auto syncContinueData = event->GetSharedObject<int32_t>();
     int32_t ret = dContinue->ExecuteContinueError(*syncContinueData);
     if (ret != ERR_OK) {
-        HILOGE("DSchedContinueAbilityState ExecuteContinueEnd failed, ret: %d", ret);
+        HILOGE("DSchedContinueAbilityState ExecuteContinueEnd failed, ret: %{public}d", ret);
     }
     return ret;
 }
