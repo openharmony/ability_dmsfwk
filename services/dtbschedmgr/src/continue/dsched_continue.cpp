@@ -57,6 +57,7 @@ const std::string DMSDURATION_SAVETIME = "ohos.dschedule.SaveDataTime";
 const std::string DMS_PERSISTENT_ID = "ohos.dms.persistentId";
 const std::string DMS_CONTINUE_SESSION_ID = "ohos.dms.continueSessionId";
 const std::string DSCHED_EVENT_KEY = "IDSchedEventListener";
+const std::string QUICK_START_CONFIGURATION = "_ContinueQuickStart";
 const std::u16string NAPI_MISSION_CALLBACK_INTERFACE_TOKEN = u"ohos.DistributedSchedule.IMissionCallback";
 
 constexpr int32_t DSCHED_CONTINUE_PROTOCOL_VERSION = 1;
@@ -339,7 +340,6 @@ int32_t DSchedContinue::OnNotifyComplete(int32_t missionId, bool isSuccess)
 int32_t DSchedContinue::OnContinueEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd)
 {
     HILOGI("called");
-    ContinueSceneSessionHandler::GetInstance().ClearContinueSessionId();
     return PostNotifyCompleteTask(cmd->result_);
 }
 
@@ -407,7 +407,7 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
     HILOGI("ExecuteContinueReq start, continueInfo: %s", continueInfo_.toString().c_str());
     DurationDumperStart();
 
-    if (subServiceType_ == CONTINUE_PULL) {
+    if (subServiceType_ == CONTINUE_PULL && CheckQuickStartConfiguration()) {
         DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK);
         QuickStartAbility();
     }
@@ -442,6 +442,17 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
     return ERR_OK;
 }
 
+bool DSchedContinue::CheckQuickStartConfiguration()
+{
+    std::string continueType = continueInfo_.continueType_;
+    std::string suffix = QUICK_START_CONFIGURATION;
+
+    if (suffix.length() > continueType.length()) {
+        return false;
+    }
+    return (continueType.rfind(suffix) == (continueType.length() - suffix.length()));
+}
+
 int32_t DSchedContinue::QuickStartAbility()
 {
     HILOGI("called");
@@ -468,8 +479,7 @@ int32_t DSchedContinue::QuickStartAbility()
 
 std::string DSchedContinue::QuerySinkAbilityName()
 {
-    std::string abilityName = BundleManagerInternal::GetAbilityName(continueInfo_.sinkDeviceId_,
-        continueInfo_.sinkBundleName_, continueInfo_.continueType_);
+    std::string abilityName = GetAbilityNameByContinueType();
     if (!abilityName.empty()) {
         return abilityName;
     }
@@ -486,6 +496,24 @@ std::string DSchedContinue::QuerySinkAbilityName()
     }
 
     return localBundleInfo.abilityInfos.front().name;
+}
+
+std::string DSchedContinue::GetAbilityNameByContinueType()
+{
+    std::string continueType = continueInfo_.continueType_;
+    if (CheckQuickStartConfiguration()) {
+        continueType = continueType.substr(0, continueType.rfind(QUICK_START_CONFIGURATION));
+    }
+    std::string abilityName = BundleManagerInternal::GetAbilityName(continueInfo_.sinkDeviceId_,
+        continueInfo_.sinkBundleName_, continueType);
+    if (!abilityName.empty()) {
+        return abilityName;
+    }
+
+    continueType += QUICK_START_CONFIGURATION;
+    abilityName = BundleManagerInternal::GetAbilityName(continueInfo_.sinkDeviceId_,
+        continueInfo_.sinkBundleName_, continueType);
+    return abilityName;
 }
 
 void DSchedContinue::DurationDumperStart()
@@ -779,8 +807,9 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
     }
 
     OHOS::AAFwk::Want want = cmd->want_;
-    if (subServiceType_ == CONTINUE_PULL && !continueInfo_.continueType_.empty()) {
-        UpdateWantForContinueType(want);
+    UpdateWantForContinueType(want);
+    if (subServiceType_ == CONTINUE_PULL &&
+        !ContinueSceneSessionHandler::GetInstance().GetContinueSessionId().empty()) {
         int32_t persistentId;
         if (ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId) != ERR_OK) {
             HILOGE("get persistentId failed, stop start ability");
@@ -823,8 +852,7 @@ void DSchedContinue::DurationDumperBeforeStartAbility(std::shared_ptr<DSchedCont
 int32_t DSchedContinue::UpdateWantForContinueType(OHOS::AAFwk::Want& want)
 {
     std::string srcAbilityName = want.GetElement().GetAbilityName();
-    std::string sinkAbilityName = BundleManagerInternal::GetAbilityName(continueInfo_.sinkDeviceId_,
-        continueInfo_.sinkBundleName_, continueInfo_.continueType_);
+    std::string sinkAbilityName = GetAbilityNameByContinueType();
     if (!sinkAbilityName.empty() && sinkAbilityName != srcAbilityName) {
         OHOS::AppExecFwk::ElementName element = want.GetElement();
         want.SetElementName(element.GetDeviceID(), element.GetBundleName(), sinkAbilityName);

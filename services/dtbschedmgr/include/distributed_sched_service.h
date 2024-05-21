@@ -193,7 +193,6 @@ public:
     int32_t CheckTargetPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
     ErrCode QueryOsAccount(int32_t& activeAccountId);
-    int32_t QuickStartAbility(const std::string& bundleName);
 private:
     DistributedSchedService();
     bool Init();

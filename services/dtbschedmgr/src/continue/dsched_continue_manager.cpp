@@ -20,6 +20,7 @@
 
 #include "cJSON.h"
 
+#include "continue_scene_session_handler.h"
 #include "distributed_sched_utils.h"
 #include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
@@ -326,6 +327,7 @@ void DSchedContinueManager::HandleContinueEnd(const DSchedContinueInfo& info)
     }
     RemoveTimeout(info);
     continues_.erase(info);
+    ContinueSceneSessionHandler::GetInstance().ClearContinueSessionId();
 
     std::string localDevId;
     if (!GetLocalDeviceId(localDevId)) {
