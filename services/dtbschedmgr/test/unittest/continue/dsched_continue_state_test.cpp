@@ -1172,14 +1172,6 @@ HWTEST_F(DSchedContinueStateMachineTest, UpdateState_002, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinueStateMachineTest UpdateState_002 begin" << std::endl;
     DSchedContinueStateType stateType = DSCHED_CONTINUE_ABILITY_STATE;
-    // int32_t subServiceType = 0;
-    // int32_t direction = 0;
-    // sptr<IRemoteObject> callback = nullptr;
-    // DSchedContinueInfo continueInfo;
-    // std::shared_ptr<DSchedContinue> dContinue = std::make_shared<DSchedContinue>(subServiceType, direction,
-    //     callback, continueInfo);
-    // dContinue->Init();
-    // auto stateMachine = std::make_shared<DSchedContinueStateMachine>(dContinue);
     stateMachineTest_->currentState_ = stateMachineTest_->CreateState(stateType);
     stateMachineTest_->UpdateState(stateType);
     EXPECT_NE(stateMachineTest_->currentState_, nullptr);
