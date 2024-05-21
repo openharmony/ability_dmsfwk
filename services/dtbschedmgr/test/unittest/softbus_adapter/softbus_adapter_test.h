@@ -18,9 +18,7 @@
 
 #include "gtest/gtest.h"
 
-#define private public
 #include "softbus_adapter/softbus_adapter.h"
-#undef private
 
 namespace OHOS {
 namespace DistributedSchedule {
