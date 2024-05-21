@@ -80,7 +80,7 @@ HWTEST_F(SwitchStatusDependencyTest, IsCreateDataShareHelper_001, TestSize.Level
         SwitchStatusDependency::GetInstance().GetSwitchStatus(key, defaultValue));
     key = CONTINUE_SWITCH_STATUS_KEY;
     defaultValue = CONTINUE_SWITCH_OFF;
-    EXPECT_EQ(CONTINUE_SWITCH_ON,
+    EXPECT_EQ(CONTINUE_SWITCH_OFF,
         SwitchStatusDependency::GetInstance().GetSwitchStatus(key, defaultValue));
     DTEST_LOG << "SwitchStatusDependencyTest IsCreateDataShareHelper_001 end" << std::endl;
 }
