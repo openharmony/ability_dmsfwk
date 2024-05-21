@@ -20,18 +20,20 @@
 #include <unistd.h>
 
 #include "datetime_ex.h"
-#include "distributed_sched_adapter.h"
-#include "dtbschedmgr_device_info_storage.h"
-#include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "nlohmann/json.hpp"
+#include "string_ex.h"
+#include "system_ability_definition.h"
+
+#include "distributed_sched_adapter.h"
+#include "distributed_sched_utils.h"
+#include "dtbschedmgr_device_info_storage.h"
+#include "dtbschedmgr_log.h"
 #include "mission/mission_changed_notify.h"
 #include "mission/mission_constant.h"
 #include "mission/mission_info_converter.h"
 #include "mission/snapshot_converter.h"
-#include "nlohmann/json.hpp"
-#include "string_ex.h"
-#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -114,8 +116,7 @@ sptr<IDistributedSched> DistributedSchedMissionManager::GetRemoteDms(const std::
     }
     auto object = samgr->CheckSystemAbility(DISTRIBUTED_SCHED_SA_ID, deviceId);
     if (object == nullptr) {
-        HILOGE("GetRemoteDms failed to get dms for remote device:%{public}s!",
-            DnetworkAdapter::AnonymizeNetworkId(deviceId).c_str());
+        HILOGE("GetRemoteDms failed to get dms for remote device: %{public}s!", GetAnonymStr(deviceId).c_str());
         return nullptr;
     }
     auto ret = object->AddDeathRecipient(remoteDmsRecipient_);
@@ -218,13 +219,13 @@ int32_t DistributedSchedMissionManager::GetRemoteMissionSnapshotInfo(const std::
     }
     std::unique_ptr<Snapshot> snapshotPtr = DequeueCachedSnapshotInfo(uuid, missionId);
     if (snapshotPtr != nullptr) {
-        HILOGI("get uuid = %{public}s + missionId = %{public}d snapshot from cache successful!",
-            DnetworkAdapter::AnonymizeNetworkId(uuid).c_str(), missionId);
+        HILOGI("Get snapshot from cache success, uuid: %{public}s, missionId: %{public}d.",
+            GetAnonymStr(uuid).c_str(), missionId);
         SnapshotConverter::ConvertToMissionSnapshot(*snapshotPtr, missionSnapshot);
         return ERR_NONE;
     }
     if (distributedDataStorage_ == nullptr) {
-        HILOGE("DistributedDataStorage null!");
+        HILOGE("DistributedDataStorage is null!");
         return ERR_NULL_OBJECT;
     }
     DistributedKv::Value value;
@@ -238,8 +239,8 @@ int32_t DistributedSchedMissionManager::GetRemoteMissionSnapshotInfo(const std::
         HILOGE("snapshot create failed!");
         return ERR_NULL_OBJECT;
     }
-    HILOGI("get uuid = %{public}s + missionId = %{public}d snapshot from DistributedDB successful!",
-        DnetworkAdapter::AnonymizeNetworkId(uuid).c_str(), missionId);
+    HILOGI("Get snapshot from DistributedDB success, uuid: %{public}s, missionId: %{public}d.",
+        GetAnonymStr(uuid).c_str(), missionId);
     SnapshotConverter::ConvertToMissionSnapshot(*snapshotPtr, missionSnapshot);
     return ERR_NONE;
 }
@@ -274,8 +275,7 @@ void DistributedSchedMissionManager::DeviceOfflineNotify(const std::string& netw
             remoteDmsMap_.erase(iter);
         }
     }
-    HILOGI("DeviceOfflineNotify erase value for networkId: %{public}s",
-        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+    HILOGI("DeviceOfflineNotify erase value for networkId: %{public}s.", GetAnonymStr(networkId).c_str());
 }
 
 void DistributedSchedMissionManager::DeleteDataStorage(const std::string& deviceId, bool isDelayed)
@@ -476,7 +476,7 @@ int32_t DistributedSchedMissionManager::StopSyncRemoteMissions(const std::string
     }
     int64_t begin = GetTickCount();
     int32_t ret = remoteDms->StopSyncMissionsFromRemote(callerInfo);
-    HILOGI("[PerformanceTest] ret:%d, spend %{public}" PRId64 " ms", ret, GetTickCount() - begin);
+    HILOGI("[PerformanceTest] ret: %{public}d, spend %{public}" PRId64 " ms", ret, GetTickCount() - begin);
     return ret;
 }
 
@@ -493,8 +493,7 @@ int32_t DistributedSchedMissionManager::StartSyncRemoteMissions(const std::strin
         return INVALID_PARAMETERS_ERR;
     }
     HILOGI("begin, dstDevId is %{public}s, local deviceId is %{public}s",
-        DnetworkAdapter::AnonymizeNetworkId(dstDevId).c_str(),
-        DnetworkAdapter::AnonymizeNetworkId(localDeviceId).c_str());
+        GetAnonymStr(dstDevId).c_str(), GetAnonymStr(localDeviceId).c_str());
     auto ret = StartSyncRemoteMissions(dstDevId, localDeviceId);
     if (ret != ERR_NONE) {
         HILOGE("StartSyncRemoteMissions failed, %{public}d", ret);
@@ -692,8 +691,7 @@ int32_t DistributedSchedMissionManager::FetchCachedRemoteMissions(const std::str
     std::lock_guard<std::mutex> autoLock(remoteMissionInfosLock_);
     auto iter = deviceMissionInfos_.find(uuid);
     if (iter == deviceMissionInfos_.end()) {
-        HILOGE("can not find uuid, deviceId: %{public}s!",
-            DnetworkAdapter::AnonymizeNetworkId(srcId).c_str());
+        HILOGE("can not find uuid, deviceId: %{public}s!", GetAnonymStr(srcId).c_str());
         return ERR_NULL_OBJECT;
     }
 
@@ -711,8 +709,7 @@ int32_t DistributedSchedMissionManager::FetchCachedRemoteMissions(const std::str
 void DistributedSchedMissionManager::RebornMissionCache(const std::string& deviceId,
     const std::vector<DstbMissionInfo>& missionInfoSet)
 {
-    HILOGI("start! deviceId is %{public}s",
-        DnetworkAdapter::AnonymizeNetworkId(deviceId).c_str());
+    HILOGI("start! deviceId is %{public}s.", GetAnonymStr(deviceId).c_str());
     std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(deviceId);
     if (uuid.empty()) {
         HILOGE("uuid empty!");
@@ -727,8 +724,7 @@ void DistributedSchedMissionManager::RebornMissionCache(const std::string& devic
 
 void DistributedSchedMissionManager::CleanMissionCache(const std::string& deviceId)
 {
-    HILOGI("CleanMissionCache start! deviceId is %{public}s",
-        DnetworkAdapter::AnonymizeNetworkId(deviceId).c_str());
+    HILOGI("CleanMissionCache start! deviceId is %{public}s.", GetAnonymStr(deviceId).c_str());
     std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(deviceId);
     if (uuid.empty()) {
         HILOGE("CleanMissionCache uuid empty!");
@@ -888,8 +884,7 @@ std::shared_ptr<AppExecFwk::EventHandler> DistributedSchedMissionManager::FetchD
     const std::string& deviceId)
 {
     if (!IsDeviceIdValidated(deviceId)) {
-        HILOGW("FetchDeviceHandler device:%{public}s offline.",
-            DnetworkAdapter::AnonymizeNetworkId(deviceId).c_str());
+        HILOGW("FetchDeviceHandler device:%{public}s offline.", GetAnonymStr(deviceId).c_str());
         return nullptr;
     }
 
@@ -904,7 +899,7 @@ std::shared_ptr<AppExecFwk::EventHandler> DistributedSchedMissionManager::FetchD
         return iter->second;
     }
 
-    auto anonyUuid = DnetworkAdapter::AnonymizeNetworkId(uuid);
+    auto anonyUuid = GetAnonymStr(uuid);
     auto runner = AppExecFwk::EventRunner::Create(anonyUuid + "_MissionN");
     auto handler = std::make_shared<AppExecFwk::EventHandler>(runner);
     deviceHandle_.emplace(uuid, handler);

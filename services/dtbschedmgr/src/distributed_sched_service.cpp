@@ -61,8 +61,6 @@
 #include "parcel_helper.h"
 #include "scene_board_judgement.h"
 #include "switch_status_dependency.h"
-#include "dsched_continue_manager.h"
-#include "mission/dms_continue_recv_manager.h"
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
 #include "common_event_listener.h"
 #endif
@@ -570,9 +568,8 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
 int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
     const std::string& bundleName, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
-    HILOGI("%{public}s. srcDeviceId: %{public}s. dstDeviceId: %{public}s. bundleName: %{public}s.", __func__,
-        DnetworkAdapter::AnonymizeNetworkId(srcDeviceId).c_str(),
-        DnetworkAdapter::AnonymizeNetworkId(dstDeviceId).c_str(), bundleName.c_str());
+    HILOGI("ContinueRemoteMission srcDeviceId: %{public}s. dstDeviceId: %{public}s. bundleName: %{public}s.",
+        GetAnonymStr(srcDeviceId).c_str(), GetAnonymStr(dstDeviceId).c_str(), bundleName.c_str());
     if (!CheckBundleContinueConfig(bundleName)) {
         HILOGI("App does not allow continue in config file, bundle name %{public}s", bundleName.c_str());
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
@@ -618,7 +615,7 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
 
 int32_t DistributedSchedService::QuickStartAbility(const std::string& bundleName)
 {
-    HILOGI("%{public}s called", __func__);
+    HILOGI("QuickStartAbility called");
     if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
         HILOGE("sceneBoard not available.");
         return INVALID_PARAMETERS_ERR;
@@ -663,16 +660,14 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
 
     if (srcDeviceId == localDevId) {
         if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(dstDeviceId) == nullptr) {
-            HILOGE("GetDeviceInfoById failed, dstDeviceId: %{public}s.",
-                DnetworkAdapter::AnonymizeNetworkId(dstDeviceId).c_str());
+            HILOGE("GetDeviceInfoById failed, dstDeviceId: %{public}s.", GetAnonymStr(dstDeviceId).c_str());
             return INVALID_REMOTE_PARAMETERS_ERR;
         }
         return ContinueLocalMission(dstDeviceId, missionId, callback, wantParams);
     } else if (dstDeviceId == localDevId) {
         DmsContinueTime::GetInstance().SetPull(true);
         if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(srcDeviceId) == nullptr) {
-            HILOGE("GetDeviceInfoById failed, srcDeviceId: %{public}s.",
-                DnetworkAdapter::AnonymizeNetworkId(srcDeviceId).c_str());
+            HILOGE("GetDeviceInfoById failed, srcDeviceId: %{public}s.", GetAnonymStr(srcDeviceId).c_str());
             return INVALID_REMOTE_PARAMETERS_ERR;
         }
         return ContinueRemoteMission(srcDeviceId, dstDeviceId, missionId, callback, wantParams);
@@ -688,8 +683,7 @@ int32_t DistributedSchedService::ProcessContinueLocalMission(const std::string& 
 {
     HILOGI("ProcessContinueLocalMission called.");
     if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(dstDeviceId) == nullptr) {
-        HILOGE("GetDeviceInfoById failed, dstDeviceId: %{public}s.",
-            DnetworkAdapter::AnonymizeNetworkId(dstDeviceId).c_str());
+        HILOGE("GetDeviceInfoById failed, dstDeviceId: %{public}s.", GetAnonymStr(dstDeviceId).c_str());
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
 
@@ -720,8 +714,7 @@ int32_t DistributedSchedService::ProcessContinueRemoteMission(const std::string&
 {
     HILOGI("ProcessContinueRemoteMission start.");
     if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(srcDeviceId) == nullptr) {
-        HILOGE("GetDeviceInfoById failed, srcDeviceId: %{public}s.",
-            DnetworkAdapter::AnonymizeNetworkId(srcDeviceId).c_str());
+        HILOGE("GetDeviceInfoById failed, srcDeviceId: %{public}s.", GetAnonymStr(srcDeviceId).c_str());
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
     if (dschedContinuation_ == nullptr) {
@@ -740,9 +733,8 @@ int32_t DistributedSchedService::ProcessContinueRemoteMission(const std::string&
 int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
     const std::string& bundleName, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
-    HILOGI("%{public}s. srcDeviceId: %{public}s. dstDeviceId: %{public}s. bundleName: %{public}s.", __func__,
-        DnetworkAdapter::AnonymizeNetworkId(srcDeviceId).c_str(),
-        DnetworkAdapter::AnonymizeNetworkId(dstDeviceId).c_str(), bundleName.c_str());
+    HILOGI("ContinueMission srcDeviceId: %{public}s. dstDeviceId: %{public}s. bundleName: %{public}s.",
+        GetAnonymStr(srcDeviceId).c_str(), GetAnonymStr(dstDeviceId).c_str(), bundleName.c_str());
     if (srcDeviceId.empty() || dstDeviceId.empty() || callback == nullptr) {
         HILOGE("srcDeviceId or dstDeviceId or callback is null!");
         return INVALID_PARAMETERS_ERR;
@@ -946,7 +938,7 @@ int32_t DistributedSchedService::NotifyDSchedEventResultFromRemote(const std::st
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
 sptr<IFormMgr> DistributedSchedService::GetFormMgrProxy()
 {
-    HILOGD("%{public}s begin.", __func__);
+    HILOGD("GetFormMgrProxy begin.");
     std::lock_guard<std::mutex> lock(formMgrLock_);
     if (formMgrProxy_ != nullptr) {
         HILOGD("get fms proxy success.");
@@ -1057,7 +1049,8 @@ void DistributedSchedService::RemoteConnectAbilityMappingLocked(const sptr<IRemo
     if (itConnect == distributedConnectAbilityMap_.end()) {
         // add uid's connect number
         uint32_t number = ++trackingUidMap_[callerInfo.uid];
-        HILOGD("uid %d has %u connection(s), targetComponent:%d", callerInfo.uid, number, targetComponent);
+        HILOGD("uid %{public}d has %{public}u connection(s), targetComponent: %{public}d.",
+            callerInfo.uid, number, targetComponent);
         // new connect, add death recipient
         connect->AddDeathRecipient(connectDeathRecipient_);
         ReportDistributedComponentChange(callerInfo, DISTRIBUTED_COMPONENT_ADD, IDistributedSched::CONNECT,
@@ -1080,12 +1073,12 @@ void DistributedSchedService::RemoteConnectAbilityMappingLocked(const sptr<IRemo
 int32_t DistributedSchedService::CheckDistributedConnectLocked(const CallerInfo& callerInfo) const
 {
     if (callerInfo.uid < 0) {
-        HILOGE("uid %d is invalid", callerInfo.uid);
+        HILOGE("uid %{public}d is invalid.", callerInfo.uid);
         return BIND_ABILITY_UID_INVALID_ERR;
     }
     auto it = trackingUidMap_.find(callerInfo.uid);
     if (it != trackingUidMap_.end() && it->second >= MAX_DISTRIBUTED_CONNECT_NUM) {
-        HILOGE("uid %{public}d connected too much abilities, it maybe leak", callerInfo.uid);
+        HILOGE("uid %{public}d connected too much abilities, it maybe leak.", callerInfo.uid);
         return BIND_ABILITY_LEAK_ERR;
     }
     return ERR_OK;
@@ -1305,8 +1298,8 @@ int32_t DistributedSchedService::TryStartRemoteAbilityByCall(const OHOS::AAFwk::
     HILOGD("[PerformanceTest] TryStartRemoteAbilityByCall get remote DMS");
     sptr<IDistributedSched> remoteDms = GetRemoteDms(remoteDeviceId);
     if (remoteDms == nullptr) {
-        HILOGE("TryStartRemoteAbilityByCall get remote DMS failed, remoteDeviceId : %{public}s",
-            DnetworkAdapter::AnonymizeNetworkId(remoteDeviceId).c_str());
+        HILOGE("TryStartRemoteAbilityByCall get remote DMS failed, remoteDeviceId: %{public}s",
+            GetAnonymStr(remoteDeviceId).c_str());
         return INVALID_PARAMETERS_ERR;
     }
     HILOGD("[PerformanceTest] TryStartRemoteAbilityByCall RPC begin");
@@ -1493,8 +1486,8 @@ int32_t DistributedSchedService::ReleaseRemoteAbility(const sptr<IRemoteObject>&
     }
     sptr<IDistributedSched> remoteDms = GetRemoteDms(element.GetDeviceID());
     if (remoteDms == nullptr) {
-        HILOGE("ReleaseRemoteAbility get remote dms failed, devId : %{public}s",
-            DnetworkAdapter::AnonymizeNetworkId(element.GetDeviceID()).c_str());
+        HILOGE("ReleaseRemoteAbility get remote dms failed, devId: %{public}s",
+            GetAnonymStr(element.GetDeviceID()).c_str());
         return INVALID_PARAMETERS_ERR;
     }
     CallerInfo callerInfo;
@@ -1612,8 +1605,8 @@ int32_t DistributedSchedService::StartRemoteShareForm(const std::string& remoteD
 
     sptr<IDistributedSched> remoteDms = GetRemoteDms(remoteDeviceId);
     if (remoteDms == nullptr) {
-        HILOGE("StartRemoteShareForm get remote DMS failed, remoteDeviceId : %{public}s",
-            DnetworkAdapter::AnonymizeNetworkId(remoteDeviceId).c_str());
+        HILOGE("StartRemoteShareForm get remote DMS failed, remoteDeviceId: %{public}s",
+            GetAnonymStr(remoteDeviceId).c_str());
         return GET_REMOTE_DMS_FAIL;
     }
     std::string localDeviceId = "";
@@ -1643,9 +1636,8 @@ int32_t DistributedSchedService::StartShareFormFromRemote(
     std::string localDeviceId = "";
     GetLocalDeviceId(localDeviceId);
     if (CheckDeviceId(localDeviceId, remoteDeviceId)) {
-        HILOGE("localId is %{public}s != %{public}s",
-            DnetworkAdapter::AnonymizeNetworkId(localDeviceId).c_str(),
-            DnetworkAdapter::AnonymizeNetworkId(remoteDeviceId).c_str());
+        HILOGE("localId is %{public}s != %{public}s", GetAnonymStr(localDeviceId).c_str(),
+            GetAnonymStr(remoteDeviceId).c_str());
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
 
@@ -2358,15 +2350,15 @@ int32_t DistributedSchedService::UnRegisterDSchedEventListener(const std::string
 
 int32_t DistributedSchedService::GetContinueInfo(std::string& dstNetworkId, std::string& srcNetworkId)
 {
-    HILOGI("%{public}s called", __func__);
+    HILOGI("GetContinueInfo called");
     if (dschedContinuation_ == nullptr) {
         HILOGE("continuation object null!");
         return INVALID_PARAMETERS_ERR;
     }
     dstNetworkId = dschedContinuation_->continueInfo_.dstNetworkId;
     srcNetworkId = dschedContinuation_->continueInfo_.srcNetworkId;
-    HILOGI("dstNetworkId: %{public}s", DnetworkAdapter::AnonymizeNetworkId(dstNetworkId).c_str());
-    HILOGI("srcNetworkId: %{public}s", DnetworkAdapter::AnonymizeNetworkId(srcNetworkId).c_str());
+    HILOGI("GetContinueInfo dstNetworkId: %{public}s, srcNetworkId: %{public}s",
+        GetAnonymStr(dstNetworkId).c_str(), GetAnonymStr(srcNetworkId).c_str());
     return 0;
 }
 

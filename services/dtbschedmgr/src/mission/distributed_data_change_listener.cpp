@@ -16,10 +16,13 @@
 #include "mission/distributed_data_change_listener.h"
 
 #include <cinttypes>
+
+#include "string_ex.h"
+
+#include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_sched_mission_manager.h"
-#include "string_ex.h"
 
 using namespace std;
 using namespace OHOS::DistributedKv;
@@ -63,8 +66,7 @@ void DistributedDataChangeListener::OnChange(const ChangeNotification &changeNot
     for (const auto& entry : inserts) {
         unique_ptr<KeyInfo> keyInfo = KeyInfo::ParseInfo(entry.key.ToString());
         if (keyInfo != nullptr) {
-            string keyStr = DnetworkAdapter::AnonymizeNetworkId(keyInfo->uuid) + "_" +
-                to_string(keyInfo->missionId);
+            string keyStr = GetAnonymStr(keyInfo->uuid) + "_" + to_string(keyInfo->missionId);
             HILOGI("insertEntries Key:%{public}s, Value:%{public}s", keyStr.c_str(), entry.value.ToString().c_str());
             string networkId = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdByUuid(keyInfo->uuid);
             if (networkId.empty()) {
@@ -79,8 +81,7 @@ void DistributedDataChangeListener::OnChange(const ChangeNotification &changeNot
     for (const auto& entry : deletes) {
         unique_ptr<KeyInfo> keyInfo = KeyInfo::ParseInfo(entry.key.ToString());
         if (keyInfo != nullptr) {
-            string keyStr = DnetworkAdapter::AnonymizeNetworkId(keyInfo->uuid) + "_" +
-                to_string(keyInfo->missionId);
+            string keyStr = GetAnonymStr(keyInfo->uuid) + "_" + to_string(keyInfo->missionId);
             HILOGI("deleteEntries Key:%{public}s, Value:%{public}s", keyStr.c_str(), entry.value.ToString().c_str());
             (void)DistributedSchedMissionManager::GetInstance().DequeueCachedSnapshotInfo(keyInfo->uuid,
                 keyInfo->missionId);
@@ -91,8 +92,7 @@ void DistributedDataChangeListener::OnChange(const ChangeNotification &changeNot
     for (const auto& entry : updates) {
         unique_ptr<KeyInfo> keyInfo = KeyInfo::ParseInfo(entry.key.ToString());
         if (keyInfo != nullptr) {
-            string keyStr = DnetworkAdapter::AnonymizeNetworkId(keyInfo->uuid) + "_" +
-                to_string(keyInfo->missionId);
+            string keyStr = GetAnonymStr(keyInfo->uuid) + "_" + to_string(keyInfo->missionId);
             HILOGI("updateEntries Key:%{public}s, Value:%{public}s", keyStr.c_str(), entry.value.ToString().c_str());
             string networkId = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdByUuid(keyInfo->uuid);
             if (networkId.empty()) {

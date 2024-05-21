@@ -17,7 +17,7 @@
 #include "distributed_sched_service.h"
 #undef private
 #include "distributed_sched_uid_test.h"
-#include "distributed_sched_util.h"
+#include "distributed_sched_test_util.h"
 #define private public
 #include "mission/distributed_sched_mission_manager.h"
 #undef private

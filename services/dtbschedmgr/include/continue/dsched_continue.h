@@ -22,10 +22,10 @@
 #include <string>
 
 #include "ability_manager_client.h"
-#include "adapter/dnetwork_adapter.h"
 #include "distributedWant/distributed_want.h"
 #include "distributedWant/distributed_want_params.h"
 #include "distributed_sched_interface.h"
+#include "distributed_sched_utils.h"
 #include "dsched_data_buffer.h"
 #include "dsched_continue_event.h"
 #include "dsched_continue_event_handler.h"
@@ -69,18 +69,18 @@ public:
 
     std::string ToStringIgnoreMissionId() const
     {
-        return "SrcDevId: " + DnetworkAdapter::AnonymizeNetworkId(this->sourceDeviceId_) + " " +
+        return "SrcDevId: " + GetAnonymStr(this->sourceDeviceId_) + " " +
             "SrcBundle: " + this->sourceBundleName_ + " " +
-            "DstDevId: "+ DnetworkAdapter::AnonymizeNetworkId(this->sinkDeviceId_) + " " +
+            "DstDevId: "+ GetAnonymStr(this->sinkDeviceId_) + " " +
             "DstBundle: " + this->sinkBundleName_ + " " +
             "ContiType: " + this->continueType_;
     }
 
     std::string toString() const
     {
-        return "SrcDevId: " + DnetworkAdapter::AnonymizeNetworkId(this->sourceDeviceId_) + " " +
+        return "SrcDevId: " + GetAnonymStr(this->sourceDeviceId_) + " " +
             "SrcBundle: " + this->sourceBundleName_ + " " +
-            "DstDevId: "+ DnetworkAdapter::AnonymizeNetworkId(this->sinkDeviceId_) + " " +
+            "DstDevId: "+ GetAnonymStr(this->sinkDeviceId_) + " " +
             "DstBundle: " + this->sinkBundleName_ + " " +
             "ContiType: " + this->continueType_ + " " +
             "MissionId: " + std::to_string(this->missionId_);

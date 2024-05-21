@@ -15,7 +15,7 @@
 
 #include "dms_token_callback_test.h"
 
-#include "distributed_sched_util.h"
+#include "distributed_sched_test_util.h"
 #include "dms_token_callback.h"
 #include "dtbschedmgr_log.h"
 #include "test_log.h"

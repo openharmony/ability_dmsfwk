@@ -15,7 +15,7 @@
 #include "distributed_ability_manager_service_test.h"
 
 #include <thread>
-#include "distributed_sched_util.h"
+#include "distributed_sched_test_util.h"
 #include "dtbschedmgr_log.h"
 #define private public
 #include "continuation_extra_params.h"

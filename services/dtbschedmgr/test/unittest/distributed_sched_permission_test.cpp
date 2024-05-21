@@ -22,7 +22,7 @@
 #define private public
 #include "distributed_sched_permission.h"
 #undef private
-#include "distributed_sched_util.h"
+#include "distributed_sched_test_util.h"
 #include "distributed_sched_utils.h"
 #include "dms_constant.h"
 #include "dtbschedmgr_device_info_storage.h"

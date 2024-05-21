@@ -18,8 +18,9 @@
 #include <sys/prctl.h>
 #include <map>
 
-#include "adapter/dnetwork_adapter.h"
 #include "cJSON.h"
+
+#include "distributed_sched_utils.h"
 #include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
@@ -113,9 +114,8 @@ int32_t DSchedContinueManager::ContinueMission(const std::string& srcDeviceId, c
 void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
     int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
-    HILOGI("start, srcDeviceId: %s. dstDeviceId: %s. missionId: %d.",
-        DnetworkAdapter::AnonymizeNetworkId(srcDeviceId).c_str(),
-        DnetworkAdapter::AnonymizeNetworkId(dstDeviceId).c_str(), missionId);
+    HILOGI("start, srcDeviceId: %s. dstDeviceId: %s. missionId: %d.", GetAnonymStr(srcDeviceId).c_str(),
+        GetAnonymStr(dstDeviceId).c_str(), missionId);
 
     if (srcDeviceId.empty() || dstDeviceId.empty() || callback == nullptr) {
         HILOGE("srcDeviceId or dstDeviceId or callback is null!");
@@ -160,8 +160,8 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
     const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
     HILOGI("start, srcDeviceId: %s. dstDeviceId: %s. bundleName: %s. continueType: %s.",
-        DnetworkAdapter::AnonymizeNetworkId(srcDeviceId).c_str(),
-        DnetworkAdapter::AnonymizeNetworkId(dstDeviceId).c_str(), bundleName.c_str(), continueType.c_str());
+        GetAnonymStr(srcDeviceId).c_str(), GetAnonymStr(dstDeviceId).c_str(),
+        bundleName.c_str(), continueType.c_str());
 
     if (srcDeviceId.empty() || dstDeviceId.empty() || callback == nullptr) {
         HILOGE("srcDeviceId or dstDeviceId or callback is null!");
@@ -284,8 +284,7 @@ void DSchedContinueManager::HandleNotifyCompleteContinuation(const std::u16strin
     bool isSuccess)
 {
     std::string deviceId = Str16ToStr8(devId);
-    HILOGI("begin, deviceId %s, missionId %d, isSuccess %d", DnetworkAdapter::AnonymizeNetworkId(deviceId).c_str(),
-        missionId, isSuccess);
+    HILOGI("begin, deviceId %s, missionId %d, isSuccess %d", GetAnonymStr(deviceId).c_str(), missionId, isSuccess);
     {
         std::lock_guard<std::mutex> continueLock(continueMutex_);
         if (continues_.empty()) {

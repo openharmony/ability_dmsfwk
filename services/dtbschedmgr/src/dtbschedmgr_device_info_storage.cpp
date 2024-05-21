@@ -19,13 +19,15 @@
 #include <thread>
 
 #include "device_manager.h"
-#include "distributed_device_node_listener.h"
-#include "distributed_sched_service.h"
-#include "dtbschedmgr_log.h"
 #include "ipc_object_proxy.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+
+#include "distributed_device_node_listener.h"
+#include "distributed_sched_service.h"
+#include "distributed_sched_utils.h"
+#include "dtbschedmgr_log.h"
 
 using namespace std;
 namespace OHOS {
@@ -77,7 +79,7 @@ bool DtbschedmgrDeviceInfoStorage::ConnectSoftbus()
     }
     std::shared_ptr<DnetworkAdapter> dnetworkAdapter = DnetworkAdapter::GetInstance();
     if (dnetworkAdapter == nullptr) {
-        HILOGE("DnetworkAdapter::GetInstance() null");
+        HILOGE("DnetworkAdapter::GetInstance is null");
         return false;
     }
     if (!InitNetworkIdManager(dnetworkAdapter)) {
@@ -189,7 +191,7 @@ bool DtbschedmgrDeviceInfoStorage::UpdateDeviceInfoStorage()
         std::string networkId = deviceInfo->GetNetworkId();
         RegisterUuidNetworkIdMap(networkId);
         {
-            HILOGI("Add remote device networkId %{public}s", DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+            HILOGI("Add remote device networkId %{public}s", GetAnonymStr(networkId).c_str());
             lock_guard<mutex> autoLock(deviceLock_);
             remoteDevices_[networkId] = deviceInfo;
         }
@@ -221,8 +223,7 @@ bool DtbschedmgrDeviceInfoStorage::GetLocalDeviceFromDnet(std::string& networkId
         return false;
     }
     networkId = dmDeviceInfo.networkId;
-    HILOGI("get local networkId from DnetworkAdapter, networkId = %{public}s",
-        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+    HILOGI("get local networkId from DnetworkAdapter, networkId = %{public}s", GetAnonymStr(networkId).c_str());
     return true;
 }
 
@@ -239,7 +240,7 @@ bool DtbschedmgrDeviceInfoStorage::GetLocalDeviceUdid(std::string& udid)
         return false;
     }
     udid = GetUdidByNetworkId(dmDeviceInfo.networkId);
-    HILOGD("GetLocalDeviceUdid = %{public}s", DnetworkAdapter::AnonymizeNetworkId(udid).c_str());
+    HILOGD("GetLocalDeviceUdid = %{public}s", GetAnonymStr(udid).c_str());
     return true;
 }
 
@@ -254,25 +255,23 @@ std::shared_ptr<DmsDeviceInfo> DtbschedmgrDeviceInfoStorage::FindDeviceInfoInSto
     lock_guard<mutex> autoLock(deviceLock_);
     auto iter = remoteDevices_.find(networkId);
     if (iter == remoteDevices_.end()) {
-        HILOGE("Get remote device info from storage fail, networkId %{public}s.",
-            DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+        HILOGE("Get remote device info from storage fail, networkId %{public}s.", GetAnonymStr(networkId).c_str());
         return nullptr;
     }
-    HILOGI("Get remote device info from storage success, networkId %{public}s.",
-        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+    HILOGI("Get remote device info from storage success, networkId %{public}s.", GetAnonymStr(networkId).c_str());
     return iter->second;
 }
 
 std::shared_ptr<DmsDeviceInfo> DtbschedmgrDeviceInfoStorage::GetDeviceInfoById(const std::string& networkId)
 {
-    HILOGI("Get device info by networkId %{public}s start.", DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+    HILOGI("Get device info by networkId %{public}s start.", GetAnonymStr(networkId).c_str());
     auto devInfo = FindDeviceInfoInStorage(networkId);
     if (devInfo != nullptr) {
         return devInfo;
     }
 
     HILOGI("NetworkId %{public}s not in storage, update devices info from device manager.",
-        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+        GetAnonymStr(networkId).c_str());
     if (!UpdateDeviceInfoStorage()) {
         HILOGE("Update device info storage from device manager trusted device list fail.");
         return nullptr;
@@ -343,9 +342,8 @@ void DtbschedmgrDeviceInfoStorage::DeviceOnlineNotify(const std::shared_ptr<DmsD
         std::string networkId = devInfo->GetNetworkId();
         RegisterUuidNetworkIdMap(networkId);
         std::string uuid = GetUuidByNetworkId(networkId);
-        HILOGI("networkId = %{public}s, uuid = %{public}s, deviceName = %{public}s",
-            DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(),
-            DnetworkAdapter::AnonymizeNetworkId(uuid).c_str(), devInfo->GetDeviceName().c_str());
+        HILOGI("networkId: %{public}s, uuid: %{public}s, deviceName: %{public}s", GetAnonymStr(networkId).c_str(),
+            GetAnonymStr(uuid).c_str(), devInfo->GetDeviceName().c_str());
         {
             lock_guard<mutex> autoLock(deviceLock_);
             remoteDevices_[networkId] = devInfo;
@@ -363,16 +361,15 @@ void DtbschedmgrDeviceInfoStorage::DeviceOfflineNotify(const std::string& networ
         HILOGE("DeviceOfflineNotify networkId empty");
         return;
     }
-    HILOGD("DeviceOfflineNotify networkId = %{public}s",
-        DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+    HILOGD("DeviceOfflineNotify networkId: %{public}s", GetAnonymStr(networkId).c_str());
     if (networkIdMgrHandler_ == nullptr) {
         HILOGE("DeviceOfflineNotify networkIdMgrHandler null");
         return;
     }
     auto nodeOffline = [this, networkId]() {
         std::string uuid = GetUuidByNetworkId(networkId);
-        HILOGI("DeviceOfflineNotify process networkId = %{public}s, uuid = %{public}s",
-            DnetworkAdapter::AnonymizeNetworkId(networkId).c_str(), DnetworkAdapter::AnonymizeNetworkId(uuid).c_str());
+        HILOGI("DeviceOfflineNotify process networkId: %{public}s, uuid: %{public}s",
+            GetAnonymStr(networkId).c_str(), GetAnonymStr(uuid).c_str());
         DistributedSchedService::GetInstance().DeviceOfflineNotify(networkId);
         UnregisterUuidNetworkIdMap(networkId);
         lock_guard<mutex> autoLock(deviceLock_);
@@ -409,7 +406,7 @@ std::vector<std::string> DtbschedmgrDeviceInfoStorage::GetNetworkIdList()
 {
     std::vector<std::string> devices;
     for (auto device = remoteDevices_.begin(); device != remoteDevices_.end(); ++device) {
-        HILOGI("NetworkId: %{public}s", DnetworkAdapter::AnonymizeNetworkId(device->second->GetNetworkId()).c_str());
+        HILOGI("NetworkId: %{public}s", GetAnonymStr(device->second->GetNetworkId()).c_str());
         devices.push_back(device->second->GetNetworkId());
     }
     return devices;

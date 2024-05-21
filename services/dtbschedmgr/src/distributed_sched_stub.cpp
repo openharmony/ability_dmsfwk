@@ -16,32 +16,36 @@
 #include "distributed_sched_stub.h"
 
 #include "ability_info.h"
+#include "datetime_ex.h"
+#include "ipc_skeleton.h"
+#include "message_parcel.h"
+
 #include "adapter/dnetwork_adapter.h"
 #include "bundle/bundle_manager_internal.h"
 #include "caller_info.h"
-#include "datetime_ex.h"
 #include "dfx/dms_continue_time_dumper.h"
 #include "dfx/dms_hisysevent_report.h"
 #include "dfx/dms_hitrace_chain.h"
 #include "dfx/dms_hitrace_constants.h"
 #include "distributed_want.h"
 #include "distributed_sched_permission.h"
+#include "distributed_sched_utils.h"
 #include "dms_version_manager.h"
 #include "dsched_continue_manager.h"
 #include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_log.h"
 #include "dtbschedmgr_device_info_storage.h"
+#include "parcel_helper.h"
+
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "image_source.h"
+
 #include "mission/distributed_sched_mission_manager.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/mission_info_converter.h"
 #include "mission/snapshot_converter.h"
 #include "napi_error_code.h"
 #endif
-#include "ipc_skeleton.h"
-#include "message_parcel.h"
-#include "parcel_helper.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -237,7 +241,7 @@ int32_t DistributedSchedStub::StartRemoteAbilityInner(MessageParcel& data, Messa
     PARCEL_READ_HELPER(data, Int32, requestCode);
     uint32_t accessToken = 0;
     PARCEL_READ_HELPER(data, Uint32, accessToken);
-    HILOGD("get callerUid = %d, AccessTokenID = %u", callerUid, accessToken);
+    HILOGD("get callerUid = %{public}d, AccessTokenID = %{private}u", callerUid, accessToken);
     if (DistributedSchedPermission::GetInstance().CheckPermission(accessToken,
         PERMISSION_DISTRIBUTED_DATASYNC) != ERR_OK) {
         HILOGE("check data_sync permission failed!");
@@ -606,7 +610,7 @@ int32_t DistributedSchedStub::ConnectRemoteAbilityInner(MessageParcel& data, Mes
     PARCEL_READ_HELPER(data, Int32, callerPid);
     uint32_t accessToken = 0;
     PARCEL_READ_HELPER(data, Uint32, accessToken);
-    HILOGD("get callerUid = %d, callerPid = %d, AccessTokenID = %u", callerUid, callerPid,
+    HILOGD("get callerUid = %{public}d, callerPid = %{public}d, AccessTokenID = %{private}u", callerUid, callerPid,
         accessToken);
     if (DistributedSchedPermission::GetInstance().CheckPermission(accessToken,
         PERMISSION_DISTRIBUTED_DATASYNC) != ERR_OK) {
@@ -631,7 +635,7 @@ int32_t DistributedSchedStub::DisconnectRemoteAbilityInner(MessageParcel& data, 
     PARCEL_READ_HELPER(data, Int32, callerUid);
     uint32_t accessToken = 0;
     PARCEL_READ_HELPER(data, Uint32, accessToken);
-    HILOGD("get callerUid = %d, AccessTokenID = %u", callerUid, accessToken);
+    HILOGD("get callerUid = %{public}d, AccessTokenID = %{private}u", callerUid, accessToken);
     if (DistributedSchedPermission::GetInstance().CheckPermission(accessToken,
         PERMISSION_DISTRIBUTED_DATASYNC) != ERR_OK) {
         HILOGE("check data_sync permission failed!");
@@ -1066,8 +1070,7 @@ bool DistributedSchedStub::CallerInfoUnmarshalling(CallerInfo& callerInfo, Messa
     PARCEL_READ_HELPER_RET(data, Int32, callerType, false);
     std::string sourceDeviceId;
     PARCEL_READ_HELPER_RET(data, String, sourceDeviceId, false);
-    HILOGI("sourceDeviceId = %{public}s",
-        DnetworkAdapter::AnonymizeNetworkId(sourceDeviceId).c_str());
+    HILOGI("sourceDeviceId = %{public}s", GetAnonymStr(sourceDeviceId).c_str());
     int32_t duid = -1;
     PARCEL_READ_HELPER_RET(data, Int32, duid, false);
     std::string callerAppId;
@@ -1339,7 +1342,7 @@ int32_t DistributedSchedStub::CreateJsonObject(std::string& extraInfo, CallerInf
         if (extraInfoJson.find(EXTRO_INFO_JSON_KEY_REQUEST_CODE) != extraInfoJson.end() &&
             extraInfoJson[EXTRO_INFO_JSON_KEY_REQUEST_CODE].is_number_integer()) {
             requestCode = extraInfoJson[EXTRO_INFO_JSON_KEY_REQUEST_CODE];
-            HILOGD("parse extra info, requestCode = %d", requestCode);
+            HILOGD("parse extra info, requestCode = %{public}d", requestCode);
         }
     }
     return requestCode;

@@ -87,7 +87,7 @@ int32_t SoftbusAdapter::RegisterSoftbusEventListener(const std::shared_ptr<Softb
     int32_t ret = RegisterEventListener(pkgName_.c_str(), &eventListener);
     DmsRadar::GetInstance().RegisterSoftbusCallbackRes("RegisterSoftbusEventListener", ret);
     if (ret != SOFTBUS_OK) {
-        HILOGE("RegisterSoftbusEventListener failed, ret:%d.", ret);
+        HILOGE("RegisterSoftbusEventListener failed, ret: %{public}d.", ret);
         return ret;
     }
     return SOFTBUS_OK;
@@ -108,7 +108,7 @@ int32_t SoftbusAdapter::UnregisterSoftbusEventListener(const std::shared_ptr<Sof
     HILOGI("UnregisterSoftbusEventListener pkgName: %s.", pkgName_.c_str());
     int32_t ret = UnregisterEventListener(pkgName_.c_str(), &eventListener);
     if (ret != SOFTBUS_OK) {
-        HILOGE("UnregisterSoftbusEventListener failed, ret:%d.", ret);
+        HILOGE("UnregisterSoftbusEventListener failed, ret: %{public}d.", ret);
         return ret;
     }
     return SOFTBUS_OK;

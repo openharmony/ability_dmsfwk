@@ -16,7 +16,7 @@
 #include "continuation_manager_test.h"
 
 #include "distributed_ability_manager_client.h"
-#include "distributed_sched_util.h"
+#include "distributed_sched_test_util.h"
 #include "dtbschedmgr_log.h"
 #include "mock_remote_stub.h"
 #include "test_log.h"

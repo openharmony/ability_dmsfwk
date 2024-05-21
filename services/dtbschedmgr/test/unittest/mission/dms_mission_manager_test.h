@@ -19,8 +19,9 @@
 #include "gtest/gtest.h"
 
 #include "device_manager.h"
-#include "distributed_sched_interface.h"
 #include "remote_mission_listener_stub.h"
+
+#include "distributed_sched_interface.h"
 
 namespace OHOS {
 namespace DistributedSchedule {

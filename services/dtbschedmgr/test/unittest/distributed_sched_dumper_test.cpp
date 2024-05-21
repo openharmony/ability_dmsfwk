@@ -14,7 +14,7 @@
  */
 
 #include "distributed_sched_dumper_test.h"
-#include "distributed_sched_util.h"
+#include "distributed_sched_test_util.h"
 #include "test_log.h"
 
 using namespace testing;

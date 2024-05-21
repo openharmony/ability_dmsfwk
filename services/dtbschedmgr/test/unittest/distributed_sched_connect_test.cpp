@@ -14,22 +14,24 @@
  */
 #include "gtest/gtest.h"
 
-#define private public
-#define protected public
 #include "ability_connect_callback_interface.h"
 #include "ability_connect_callback_stub.h"
-#include "ability_connection_wrapper_stub.h"
 #include "device_manager.h"
-#include "distributed_sched_service.h"
-#include "distributed_sched_util.h"
-#include "dtbschedmgr_device_info_storage.h"
-#include "dtbschedmgr_log.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
-#include "parcel_helper.h"
 #include "system_ability_definition.h"
+
+#include "ability_connection_wrapper_stub.h"
+#include "distributed_sched_test_util.h"
+#include "dtbschedmgr_device_info_storage.h"
+#include "dtbschedmgr_log.h"
+#include "parcel_helper.h"
 #include "test_log.h"
+
+#define private public
+#define protected public
+#include "distributed_sched_service.h"
 #undef private
 #undef protected
 

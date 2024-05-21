@@ -17,14 +17,17 @@
 
 #include <thread>
 #include <unistd.h>
+
 #include "datetime_ex.h"
-#include "dtbschedmgr_device_info_storage.h"
-#include "dtbschedmgr_log.h"
 #include "ipc_object_proxy.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
-#include "mission/distributed_sched_mission_manager.h"
 #include "system_ability_definition.h"
+
+#include "distributed_sched_utils.h"
+#include "dtbschedmgr_device_info_storage.h"
+#include "dtbschedmgr_log.h"
+#include "mission/distributed_sched_mission_manager.h"
 
 using namespace std;
 using namespace OHOS::DistributedKv;
@@ -246,13 +249,11 @@ bool DistributedDataStorage::Insert(const string& networkId, int32_t missionId,
         unique_lock<shared_mutex> writeLock(initLock_);
         bool ret = InsertInnerLocked(uuid, missionId, byteStream, len);
         if (!ret) {
-            HILOGE("Insert uuid = %{public}s + missionId = %{public}d failed!",
-                DnetworkAdapter::AnonymizeNetworkId(uuid).c_str(), missionId);
+            HILOGE("Insert fail, uuid: %{public}s, missionId: %{public}d.", GetAnonymStr(uuid).c_str(), missionId);
             return false;
         }
     }
-    HILOGI("Insert uuid = %{public}s + missionId = %{public}d successful!",
-        DnetworkAdapter::AnonymizeNetworkId(uuid).c_str(), missionId);
+    HILOGI("Insert success, uuid: %{public}s, missionId: %{public}d.", GetAnonymStr(uuid).c_str(), missionId);
     return true;
 }
 
@@ -297,13 +298,11 @@ bool DistributedDataStorage::Delete(const string& networkId, int32_t missionId)
         unique_lock<shared_mutex> writeLock(initLock_);
         bool ret = DeleteInnerLocked(uuid, missionId);
         if (!ret) {
-            HILOGE("Delete uuid = %{public}s + missionId = %{public}d failed!",
-                DnetworkAdapter::AnonymizeNetworkId(uuid).c_str(), missionId);
+            HILOGE("Delete fail, uuid: %{public}s, missionId: %{public}d.", GetAnonymStr(uuid).c_str(), missionId);
             return false;
         }
     }
-    HILOGI("Delete uuid = %{public}s + missionId = %{public}d successful!",
-        DnetworkAdapter::AnonymizeNetworkId(uuid).c_str(), missionId);
+    HILOGI("Delete success, uuid: %{public}s, missionId: %{public}d.", GetAnonymStr(uuid).c_str(), missionId);
     return true;
 }
 
@@ -336,12 +335,11 @@ bool DistributedDataStorage::FuzzyDelete(const string& networkId)
         unique_lock<shared_mutex> writeLock(initLock_);
         bool ret = FuzzyDeleteInnerLocked(networkId);
         if (!ret) {
-            HILOGW("FuzzyDelete networkId = %{public}s failed!",
-                DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+            HILOGW("FuzzyDelete networkId: %{public}s fail.", GetAnonymStr(networkId).c_str());
             return false;
         }
     }
-    HILOGI("FuzzyDelete networkId = %{public}s successful!", DnetworkAdapter::AnonymizeNetworkId(networkId).c_str());
+    HILOGI("FuzzyDelete networkId: %{public}s success.", GetAnonymStr(networkId).c_str());
     return true;
 }
 
@@ -381,13 +379,11 @@ bool DistributedDataStorage::Query(const string& networkId, int32_t missionId, V
         shared_lock<shared_mutex> readLock(initLock_);
         bool ret = QueryInnerLocked(uuid, missionId, value);
         if (!ret) {
-            HILOGE("Query uuid = %{public}s + missionId = %{public}d failed!",
-                DnetworkAdapter::AnonymizeNetworkId(uuid).c_str(), missionId);
+            HILOGE("Query uuid: %{public}s, missionId: %{public}d fail.", GetAnonymStr(uuid).c_str(), missionId);
             return false;
         }
     }
-    HILOGI("Query uuid = %{public}s + missionId = %{public}d successful!",
-        DnetworkAdapter::AnonymizeNetworkId(uuid).c_str(), missionId);
+    HILOGI("Query uuid: %{public}s, missionId: %{public}d success.", GetAnonymStr(uuid).c_str(), missionId);
     return true;
 }
 

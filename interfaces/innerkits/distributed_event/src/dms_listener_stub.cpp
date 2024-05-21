@@ -82,7 +82,7 @@ void DSchedEventListenerStub::DSchedEventNotifyInner(MessageParcel &data, Messag
         DSchedEventNotify(eventNotify);
     } while (0);
     if (!reply.WriteInt32(ret)) {
-        HILOGE("DSchedEventNotifyInner write ret failed, ret = %d", ret);
+        HILOGE("DSchedEventNotifyInner write ret failed, ret = %{public}d", ret);
     }
 }
 }  // namespace DistributedSchedule
