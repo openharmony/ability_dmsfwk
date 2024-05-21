@@ -363,8 +363,8 @@ std::string BundleManagerInternal::GetAbilityName(const std::string &networkId,
     std::string &bundleName, std::string &continueType)
 {
     HILOGD("called.");
+    HILOGI("continueType: %{public}s ", continueType.c_str());
     std::string abilityName = DmsBmStorage::GetInstance()->GetAbilityName(networkId, bundleName, continueType);
-    HILOGI("continueType: %{public}s ", abilityName.c_str());
     if (abilityName == "") {
         HILOGE("can not get abilityName!");
     }

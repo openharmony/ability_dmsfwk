@@ -42,7 +42,6 @@
 #include "adapter/dnetwork_adapter.h"
 #include "bundle/bundle_manager_internal.h"
 #include "connect_death_recipient.h"
-#include "continue_scene_session_handler.h"
 #include "datashare_manager.h"
 #include "dfx/dms_continue_time_dumper.h"
 #include "distributed_radar.h"
@@ -59,7 +58,6 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "parcel_helper.h"
-#include "scene_board_judgement.h"
 #include "switch_status_dependency.h"
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
 #include "common_event_listener.h"
@@ -369,14 +367,7 @@ int32_t DistributedSchedService::StartAbilityFromRemote(const OHOS::AAFwk::Want&
         return result;
     }
 
-    int32_t persistentId;
-    AAFwk::Want newWant = want;
-    int32_t err = ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId);
-    if (err == ERR_OK) {
-        HILOGI("get persistentId success, persistentId: %{public}d", persistentId);
-        newWant.SetParam(DMS_PERSISTENT_ID, persistentId);
-    }
-    return StartAbility(newWant, requestCode);
+    return StartAbility(want, requestCode);
 }
 
 int32_t DistributedSchedService::SendResultFromRemote(OHOS::AAFwk::Want& want, int32_t requestCode,
@@ -581,7 +572,6 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
         DmsContinueTime::GetInstance().SetDurationBegin(DMSDURATION_TOTALTIME, begin);
     }
 
-    QuickStartAbility(bundleName);
     sptr<IDistributedSched> remoteDms = GetRemoteDms(srcDeviceId);
     if (remoteDms == nullptr) {
         HILOGE("get remote dms null!");
@@ -589,7 +579,6 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
             HILOGE("continuation object null!");
             return INVALID_PARAMETERS_ERR;
         }
-        ContinueSceneSessionHandler::GetInstance().ClearContinueSessionId();
         int32_t dSchedEventresult = dschedContinuation_->NotifyDSchedEventResult(DSCHED_EVENT_KEY,
             INVALID_REMOTE_PARAMETERS_ERR);
         HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
@@ -606,41 +595,10 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
             HILOGE("continuation object null!");
             return INVALID_PARAMETERS_ERR;
         }
-        ContinueSceneSessionHandler::GetInstance().ClearContinueSessionId();
         int32_t dSchedEventresult = dschedContinuation_->NotifyDSchedEventResult(DSCHED_EVENT_KEY, result);
         HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
     }
     return result;
-}
-
-int32_t DistributedSchedService::QuickStartAbility(const std::string& bundleName)
-{
-    HILOGI("QuickStartAbility called");
-    if (!Rosen::SceneBoardJudgement::IsSceneBoardEnabled()) {
-        HILOGE("sceneBoard not available.");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    BundleInfo localBundleInfo;
-    if (BundleManagerInternal::GetLocalBundleInfo(bundleName, localBundleInfo) != ERR_OK) {
-        HILOGE("get local bundle info failed.");
-        return INVALID_PARAMETERS_ERR;
-    }
-    if (localBundleInfo.abilityInfos.empty() || localBundleInfo.abilityInfos.size() > 1) {
-        HILOGE("quick start is not supported, abilityInfos size: %{public}d",
-               static_cast<int32_t>(localBundleInfo.abilityInfos.size()));
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    auto abilityInfo = localBundleInfo.abilityInfos.front();
-    ContinueSceneSessionHandler::GetInstance().UpdateContinueSessionId(bundleName, abilityInfo.name);
-    std::string continueSessionId = ContinueSceneSessionHandler::GetInstance().GetContinueSessionId();
-    HILOGI("continueSessionId is %{public}s", continueSessionId.c_str());
-
-    AAFwk::Want want;
-    want.SetElementName(bundleName, abilityInfo.name);
-    want.SetParam(DMS_CONTINUE_SESSION_ID, continueSessionId);
-    return StartAbility(want, DEFAULT_REQUEST_CODE);
 }
 
 int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
