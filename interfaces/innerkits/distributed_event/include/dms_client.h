@@ -32,8 +32,8 @@ public:
 
 class DistributedClient {
 public:
-    int32_t RegisterDSchedEventListener(const std::string& type, const sptr<IDSchedEventListener>& obj);
-    int32_t UnRegisterDSchedEventListener(const std::string& type, const sptr<IDSchedEventListener>& obj);
+    int32_t RegisterDSchedEventListener(const uint8_t& type, const sptr<IDSchedEventListener>& obj);
+    int32_t UnRegisterDSchedEventListener(const uint8_t& type, const sptr<IDSchedEventListener>& obj);
     int32_t GetContinueInfo(ContinueInfo &continueInfo);
     enum {
         REGISTER_DSCHED_EVENT_LISTENER = 262,

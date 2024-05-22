@@ -117,8 +117,8 @@ public:
     int32_t NotifyContinuationResultFromRemote(int32_t sessionId, bool isSuccess, const std::string dstInfo) override;
     int32_t NotifyDSchedEventResultFromRemote(const std::string type, int32_t dSchedEventResult) override;
     void NotifyContinuationCallbackResult(int32_t missionId, int32_t resultCode);
-    void NotifyDSchedEventCallbackResult(const std::string type, int32_t resultCode);
-    void NotifyDSchedEventCallbackResult(const std::string type, int32_t resultCode, const ContinueEvent& event);
+    void NotifyDSchedEventCallbackResult(int32_t resultCode);
+    void NotifyDSchedEventCallbackResult(int32_t resultCode, const EventNotify& event);
     int32_t NotifyFreeInstallResult(const CallbackTaskItem item, int32_t resultCode);
     int32_t ConnectRemoteAbility(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
         int32_t callerUid, int32_t callerPid, uint32_t accessToken) override;
@@ -142,8 +142,8 @@ public:
     int32_t StopSyncRemoteMissions(const std::string& devId) override;
     int32_t StopSyncMissionsFromRemote(const CallerInfo& callerInfo) override;
     int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
-    int32_t RegisterDSchedEventListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
-    int32_t UnRegisterDSchedEventListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
+    int32_t RegisterDSchedEventListener(const uint8_t& type, const sptr<IRemoteObject>& obj) override;
+    int32_t UnRegisterDSchedEventListener(const uint8_t& type, const sptr<IRemoteObject>& obj) override;
     int32_t GetContinueInfo(std::string& dstNetworkId, std::string& srcNetworkId) override;
     int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
     int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj) override;

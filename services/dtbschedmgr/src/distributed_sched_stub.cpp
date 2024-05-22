@@ -846,8 +846,12 @@ int32_t DistributedSchedStub::RegisterMissionListenerInner(MessageParcel& data, 
 int32_t DistributedSchedStub::RegisterDSchedEventListenerInner(MessageParcel& data, MessageParcel& reply)
 {
     HILOGI("[PerformanceTest] called, IPC end = %{public}" PRId64, GetTickCount());
-    string type = data.ReadString();
-    if (type.empty()) {
+    if (!CheckCallingUid()) {
+        HILOGW("request DENIED!");
+        return DMS_PERMISSION_DENIED;
+    }
+    uint8_t type = data.ReadUint8();
+    if (type != DMS_CONTINUE && type != DMS_COLLABRATION && type != DMS_ALL) {
         HILOGW("read type failed!");
         return ERR_FLATTEN_OBJECT;
     }
@@ -863,8 +867,12 @@ int32_t DistributedSchedStub::RegisterDSchedEventListenerInner(MessageParcel& da
 int32_t DistributedSchedStub::UnRegisterDSchedEventListenerInner(MessageParcel& data, MessageParcel& reply)
 {
     HILOGI("[PerformanceTest] called, IPC end = %{public}" PRId64, GetTickCount());
-    string type = data.ReadString();
-    if (type.empty()) {
+    if (!CheckCallingUid()) {
+        HILOGW("request DENIED!");
+        return DMS_PERMISSION_DENIED;
+    }
+    uint8_t type = data.ReadUint8();
+    if (type != DMS_CONTINUE && type != DMS_COLLABRATION && type != DMS_ALL) {
         HILOGW("read type failed!");
         return ERR_FLATTEN_OBJECT;
     }

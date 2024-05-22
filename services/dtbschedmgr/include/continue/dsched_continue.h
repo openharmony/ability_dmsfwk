@@ -30,6 +30,7 @@
 #include "dsched_continue_event.h"
 #include "dsched_continue_event_handler.h"
 #include "dsched_continue_state_machine.h"
+#include "mission/distributed_bm_storage.h"
 #include "event_handler.h"
 
 namespace OHOS {
@@ -193,6 +194,7 @@ private:
     int32_t UpdateWantForContinueType(OHOS::AAFwk::Want& want);
     bool CheckQuickStartConfiguration();
     std::string GetAbilityNameByContinueType();
+    void SetEventData();
 
 private:
     std::shared_ptr<DSchedContinueStateMachine> stateMachine_;
@@ -209,7 +211,7 @@ private:
     bool isSourceExit_ = true;
     int32_t softbusSessionId_ = 0;
     sptr<IRemoteObject> callback_ = nullptr;
-    ContinueEventData eventData_;
+    EventNotify eventData_;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS

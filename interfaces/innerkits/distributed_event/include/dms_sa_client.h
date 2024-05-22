@@ -33,8 +33,8 @@ class DmsSaClient : public SystemAbilityStatusChangeStub {
 public:
     static DmsSaClient &GetInstance();
     bool SubscribeDmsSA();
-    int32_t AddDSchedEventListener(const std::string& type, const sptr<IDSchedEventListener>& listener);
-    int32_t DelDSchedEventListener(const std::string& type, const sptr<IDSchedEventListener>& listener);
+    int32_t AddDSchedEventListener(const uint8_t& type, const sptr<IDSchedEventListener>& listener);
+    int32_t DelDSchedEventListener(const uint8_t& type, const sptr<IDSchedEventListener>& listener);
     int32_t GetContinueInfo(ContinueInfo &continueInfo);
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
@@ -43,7 +43,7 @@ private:
     ~DmsSaClient() {};
     bool hasSubscribeDmsSA_ = false;
     OHOS::sptr<ISystemAbilityManager> saMgrProxy_;
-    std::map<std::string, sptr<IDSchedEventListener>> listeners_;
+    std::map<uint8_t, sptr<IDSchedEventListener>> listeners_;
     std::mutex eventMutex_;
 };
 

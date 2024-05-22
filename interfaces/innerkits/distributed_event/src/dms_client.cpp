@@ -38,7 +38,7 @@ sptr<IRemoteObject> DistributedClient::GetDmsProxy()
     return samgrProxy->CheckSystemAbility(DISTRIBUTED_SCHED_SA_ID);
 }
 
-int32_t DistributedClient::RegisterDSchedEventListener(const std::string& type,
+int32_t DistributedClient::RegisterDSchedEventListener(const uint8_t& type,
     const sptr<IDSchedEventListener>& obj)
 {
     HILOG_INFO("RegisterDSchedEventListener called");
@@ -52,12 +52,12 @@ int32_t DistributedClient::RegisterDSchedEventListener(const std::string& type,
     if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
         return ERR_FLATTEN_OBJECT;
     }
-    PARCEL_WRITE_HELPER(data, String, type);
+    PARCEL_WRITE_HELPER(data, Uint8, type);
     PARCEL_WRITE_HELPER(data, RemoteObject, obj->AsObject());
     PARCEL_TRANSACT_SYNC_RET_INT(remote, REGISTER_DSCHED_EVENT_LISTENER, data, reply);
 }
 
-int32_t DistributedClient::UnRegisterDSchedEventListener(const std::string& type,
+int32_t DistributedClient::UnRegisterDSchedEventListener(const uint8_t& type,
     const sptr<IDSchedEventListener>& obj)
 {
     HILOG_INFO("UnRegisterDSchedEventListener called");
@@ -72,7 +72,7 @@ int32_t DistributedClient::UnRegisterDSchedEventListener(const std::string& type
         HILOG_DEBUG("write interface token failed.");
         return ERR_FLATTEN_OBJECT;
     }
-    PARCEL_WRITE_HELPER(data, String, type);
+    PARCEL_WRITE_HELPER(data, Uint8, type);
     PARCEL_WRITE_HELPER(data, RemoteObject, obj->AsObject());
     PARCEL_TRANSACT_SYNC_RET_INT(remote, UNREGISTER_DSCHED_EVENT_LISTENER, data, reply);
 }

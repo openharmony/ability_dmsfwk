@@ -22,14 +22,32 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
+enum DSchedEventType {
+    DMS_CONTINUE = 0,
+    DMS_COLLABRATION = 1,
+    DMS_ALL = 2,
+};
+
+enum DSchedEventState {
+    DMS_DSCHED_EVENT_START = 0,
+    DMS_DSCHED_EVENT_PROCESSING = 1,
+    DMS_DSCHED_EVENT_STOP = 2,
+    DMS_DSCHED_EVENT_FINISH = 3,
+};
+
 class EventNotify {
 public:
     int32_t eventResult_ = -1;
     std::string srcNetworkId_;
     std::string dstNetworkId_;
-    std::string bundleName_;
-    std::string moduleName_;
-    std::string abilityName_;
+    std::string srcBundleName_;
+    std::string srcModuleName_;
+    std::string srcAbilityName_;
+    std::string destBundleName_;
+    std::string destModuleName_;
+    std::string destAbilityName_;
+    DSchedEventType dSchedEventType_;
+    DSchedEventState state_;
 };
 
 class IDSchedEventListener : public OHOS::IRemoteBroker {

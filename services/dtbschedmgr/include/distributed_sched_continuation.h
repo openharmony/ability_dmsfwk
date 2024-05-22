@@ -33,14 +33,33 @@ struct ContinueInfo {
     std::string srcNetworkId;
     std::string dstNetworkId;
 };
+enum DSchedEventType {
+    DMS_CONTINUE = 0,
+    DMS_COLLABRATION = 1,
+    DMS_ALL = 2,
+};
 
-struct ContinueEvent {
+enum DSchedEventState {
+    DMS_DSCHED_EVENT_START = 0,
+    DMS_DSCHED_EVENT_PROCESSING = 1,
+    DMS_DSCHED_EVENT_STOP = 2,
+    DMS_DSCHED_EVENT_FINISH = 3,
+};
+
+struct EventNotify {
+    int32_t eventResult = -1;
     std::string srcNetworkId;
     std::string dstNetworkId;
-    std::string bundleName;
-    std::string moduleName;
-    std::string abilityName;
+    std::string srcBundleName;
+    std::string srcModuleName;
+    std::string srcAbilityName;
+    std::string destBundleName;
+    std::string destModuleName;
+    std::string destAbilityName;
+    DSchedEventType dSchedEventType;
+    DSchedEventState state;
 };
+
 class DSchedContinuation : public std::enable_shared_from_this<DSchedContinuation> {
 public:
     void Init(const FuncContinuationCallback& contCallback);
@@ -52,17 +71,17 @@ public:
     void RemoveTimeOut(int32_t missionId);
     bool PushCallback(int32_t missionId, const sptr<IRemoteObject>& callback,
         std::string deviceId, bool isFreeInstall);
-    bool PushCallback(const std::string& type, const sptr<IRemoteObject>& callback);
-    bool CleanupCallback(const std::string& type, const sptr<IRemoteObject>& callback);
-    std::vector<sptr<IRemoteObject>> GetCallback(const std::string& type);
+    bool PushCallback(const sptr<IRemoteObject>& callback);
+    bool CleanupCallback(const sptr<IRemoteObject>& callback);
+    std::vector<sptr<IRemoteObject>> GetCallback();
     sptr<IRemoteObject> PopCallback(int32_t missionId);
     int32_t NotifyMissionCenterResult(int32_t missionId, int32_t resultCode);
-    int32_t NotifyDSchedEventResult(const std::string& type, int32_t resultCode);
+    int32_t NotifyDSchedEventResult(int32_t resultCode);
     bool IsFreeInstall(int32_t missionId);
     std::string GetTargetDevice(int32_t missionId);
     bool IsCleanMission(int32_t missionId);
     void SetCleanMissionFlag(int32_t missionId, bool isCleanMission);
-    ContinueEvent continueEvent_;
+    EventNotify continueEvent_;
     ContinueInfo continueInfo_;
 
 private:
@@ -84,7 +103,7 @@ private:
     std::mutex continuationLock_;
     int32_t currSessionId_ = 1;
     std::map<int32_t, sptr<IRemoteObject>> continuationMap_;
-    std::map<std::string, std::vector<sptr<IRemoteObject>>> continuationCallbackMap_;
+    std::vector<sptr<IRemoteObject>> continuationCallbackArr_;
     sptr<DistributedEventDiedListener> diedListener_;
     std::map<int32_t, sptr<IRemoteObject>> callbackMap_;
     std::map<int32_t, bool> freeInstall_;

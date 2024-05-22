@@ -66,19 +66,18 @@ void DSchedEventListenerStub::DSchedEventNotifyInner(MessageParcel &data, Messag
     HILOGI("DSchedEventListenerStub DSchedEventNotifyInner");
     int32_t ret = 0;
     do {
-        int32_t eventResult = data.ReadInt32();
-        std::string srcNetworkId = data.ReadString();
-        std::string dstNetworkId = data.ReadString();
-        std::string bundleName = data.ReadString();
-        std::string moduleName = data.ReadString();
-        std::string abilityName = data.ReadString();
         EventNotify eventNotify;
-        eventNotify.eventResult_ = eventResult;
-        eventNotify.srcNetworkId_ = srcNetworkId;
-        eventNotify.dstNetworkId_ = dstNetworkId;
-        eventNotify.bundleName_ = bundleName;
-        eventNotify.moduleName_ = moduleName;
-        eventNotify.abilityName_ = abilityName;
+        eventNotify.eventResult_ = data.ReadInt32();
+        eventNotify.srcNetworkId_ = data.ReadString();
+        eventNotify.dstNetworkId_ = data.ReadString();
+        eventNotify.srcBundleName_ = data.ReadString();
+        eventNotify.srcModuleName_ = data.ReadString();
+        eventNotify.srcAbilityName_ = data.ReadString();
+        eventNotify.destBundleName_ = data.ReadString();
+        eventNotify.destModuleName_ = data.ReadString();
+        eventNotify.destAbilityName_ = data.ReadString();
+        eventNotify.dSchedEventType_ = static_cast<DSchedEventType>(data.ReadInt32());
+        eventNotify.state_ = static_cast<DSchedEventState>(data.ReadInt32());
         DSchedEventNotify(eventNotify);
     } while (0);
     if (!reply.WriteInt32(ret)) {

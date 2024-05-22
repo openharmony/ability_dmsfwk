@@ -153,7 +153,7 @@ std::string DSchedContinuation::GetTargetDevice(int32_t missionId)
     return "";
 }
 
-bool DSchedContinuation::PushCallback(const std::string& type, const sptr<IRemoteObject>& callback)
+bool DSchedContinuation::PushCallback(const sptr<IRemoteObject>& callback)
 {
     if (continuationHandler_ == nullptr) {
         HILOGE("not initialized!");
@@ -165,15 +165,14 @@ bool DSchedContinuation::PushCallback(const std::string& type, const sptr<IRemot
         return false;
     }
     std::lock_guard<std::mutex> autoLock(continuationLock_);
-    std::vector<sptr<IRemoteObject>> vecCallback = continuationCallbackMap_[type];
-    for (auto ele = vecCallback.begin(); ele != vecCallback.end(); ++ele) {
+    std::vector<sptr<IRemoteObject>> vecCallback = continuationCallbackArr_;
+    for (auto ele = continuationCallbackArr_.begin(); ele != continuationCallbackArr_.end(); ++ele) {
         if ((*ele) == callback) {
-            HILOGE("type:%{public}s, callback already  exists!", type.c_str());
+            HILOGW("callback already  exists!");
             return false;
         }
     }
-    vecCallback.push_back(callback);
-    continuationCallbackMap_[type] = vecCallback;
+    continuationCallbackArr_.push_back(callback);
     callback->AddDeathRecipient(diedListener_);
     return true;
 }
@@ -206,29 +205,27 @@ bool DSchedContinuation::PushCallback(int32_t missionId, const sptr<IRemoteObjec
     return true;
 }
 
-std::vector<sptr<IRemoteObject>> DSchedContinuation::GetCallback(const std::string& type)
+std::vector<sptr<IRemoteObject>> DSchedContinuation::GetCallback()
 {
     std::lock_guard<std::mutex> autoLock(continuationLock_);
-    return continuationCallbackMap_[type];
+    return continuationCallbackArr_;
 }
 
-bool DSchedContinuation::CleanupCallback(const std::string& type, const sptr<IRemoteObject>& callback)
+bool DSchedContinuation::CleanupCallback(const sptr<IRemoteObject>& callback)
 {
     std::lock_guard<std::mutex> autoLock(continuationLock_);
-    std::vector<sptr<IRemoteObject>> vecCallback = continuationCallbackMap_[type];
-    if (vecCallback.empty()) {
-        HILOGE("PopCallback not found, type:%{public}s", type.c_str());
+    if (continuationCallbackArr_.empty()) {
+        HILOGE("No need for cleaning!");
         return false;
     }
-    for (auto ele = vecCallback.begin(); ele != vecCallback.end(); ++ele) {
+    for (auto ele = continuationCallbackArr_.begin(); ele != continuationCallbackArr_.end(); ++ele) {
         if ((*ele) == callback) {
-            vecCallback.erase(ele);
-            continuationCallbackMap_[type] = vecCallback;
-            HILOGI("type:%{public}s, callback is exists, cleared successfully.", type.c_str());
+            continuationCallbackArr_.erase(ele);
+            HILOGI("callback is exists, cleared successfully.");
             return true;
         }
     }
-    HILOGI("type:%{public}s, callback is not exists!", type.c_str());
+    HILOGI("callback is not exists!");
     return false;
 }
 
@@ -258,10 +255,10 @@ sptr<IRemoteObject> DSchedContinuation::PopCallback(int32_t missionId)
     return callback;
 }
 
-int32_t DSchedContinuation::NotifyDSchedEventResult(const std::string& type, int32_t resultCode)
+int32_t DSchedContinuation::NotifyDSchedEventResult(int32_t resultCode)
 {
     HILOGI("GetCallback IDSchedEventListener");
-    std::vector<sptr<IRemoteObject>> vecCallback = GetCallback(type);
+    std::vector<sptr<IRemoteObject>> vecCallback = GetCallback();
     if (vecCallback.empty()) {
         HILOGD("No listening has been registered, no need to report events");
         return INVALID_PARAMETERS_ERR;
@@ -276,9 +273,15 @@ int32_t DSchedContinuation::NotifyDSchedEventResult(const std::string& type, int
         PARCEL_WRITE_HELPER_RET(data, Int32, resultCode, false);
         PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.srcNetworkId, false);
         PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.dstNetworkId, false);
-        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.bundleName, false);
-        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.moduleName, false);
-        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.abilityName, false);
+        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.srcBundleName, false);
+        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.srcModuleName, false);
+        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.srcAbilityName, false);
+        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.destBundleName, false);
+        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.destModuleName, false);
+        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.destAbilityName, false);
+        PARCEL_WRITE_HELPER_RET(data, Int32, continueEvent_.dSchedEventType, false);
+        PARCEL_WRITE_HELPER_RET(data, Int32, continueEvent_.state, false);
+
         MessageParcel reply;
         MessageOption option;
         error = (*callback)->SendRequest(DSCHED_EVENT_CALLBACK, data, reply, option);

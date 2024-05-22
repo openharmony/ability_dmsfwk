@@ -32,7 +32,6 @@ using namespace testing::ext;
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-const std::string TYPE = "type";
 const std::string DEVICE_ID = "123456789ABCD";
 }
 

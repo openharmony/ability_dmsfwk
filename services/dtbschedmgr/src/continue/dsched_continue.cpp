@@ -34,6 +34,7 @@
 #include "dsched_data_buffer.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "mission/distributed_bm_storage.h"
 #include "ipc_skeleton.h"
 #include "parcel_helper.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
@@ -56,7 +57,6 @@ const std::string SUPPORT_CONTINUE_MODULE_NAME_UPDATE_KEY = "ohos.extra.param.ke
 const std::string DMSDURATION_SAVETIME = "ohos.dschedule.SaveDataTime";
 const std::string DMS_PERSISTENT_ID = "ohos.dms.persistentId";
 const std::string DMS_CONTINUE_SESSION_ID = "ohos.dms.continueSessionId";
-const std::string DSCHED_EVENT_KEY = "IDSchedEventListener";
 const std::string QUICK_START_CONFIGURATION = "_ContinueQuickStart";
 const std::u16string NAPI_MISSION_CALLBACK_INTERFACE_TOKEN = u"ohos.DistributedSchedule.IMissionCallback";
 
@@ -84,6 +84,9 @@ DSchedContinue::DSchedContinue(int32_t subServiceType, int32_t direction,  const
     HILOGI("DSchedContinue create");
     version_ = DSCHED_CONTINUE_PROTOCOL_VERSION;
     continueByType_ = !continueInfo.continueType_.empty();
+
+    SetEventData();
+    NotifyDSchedEventResult(ERR_OK);
 }
 
 DSchedContinue::DSchedContinue(std::shared_ptr<DSchedContinueStartCmd> startCmd, int32_t sessionId)
@@ -100,7 +103,8 @@ DSchedContinue::DSchedContinue(std::shared_ptr<DSchedContinueStartCmd> startCmd,
     continueInfo_.continueType_ = startCmd->continueType_;
     continueInfo_.missionId_ = startCmd->sourceMissionId_;
     softbusSessionId_ = sessionId;
-
+    SetEventData();
+    NotifyDSchedEventResult(ERR_OK);
     if (continueInfo_.sourceBundleName_.empty() && continueInfo_.sinkBundleName_.empty()
         && continueInfo_.missionId_ != 0) {
         MissionInfo missionInfo;
@@ -122,6 +126,28 @@ DSchedContinue::~DSchedContinue()
     eventThread_.join();
     eventHandler_ = nullptr;
     HILOGI("DSchedContinue delete end");
+}
+
+void DSchedContinue::SetEventData()
+{
+    HILOGI("called");
+    ContinueEventInfo srcContinueInfo;
+    DmsBmStorage::GetInstance()->GetContinueEventInfo(continueInfo_.sourceDeviceId_, continueInfo_.sourceBundleName_,
+        continueInfo_.continueType_, srcContinueInfo);
+    ContinueEventInfo dstContinueInfo;
+    DmsBmStorage::GetInstance()->GetContinueEventInfo(continueInfo_.sinkDeviceId_, continueInfo_.sinkBundleName_,
+        continueInfo_.continueType_, dstContinueInfo);
+    eventData_.eventResult = 0;
+    eventData_.srcNetworkId = srcContinueInfo.networkId;
+    eventData_.srcBundleName = srcContinueInfo.bundleName;
+    eventData_.srcModuleName = srcContinueInfo.moduleName;
+    eventData_.srcAbilityName = srcContinueInfo.abilityName;
+    eventData_.dstNetworkId = dstContinueInfo.networkId;
+    eventData_.destBundleName = dstContinueInfo.bundleName;
+    eventData_.destModuleName = dstContinueInfo.moduleName;
+    eventData_.destAbilityName = dstContinueInfo.abilityName;
+    eventData_.dSchedEventType = DMS_CONTINUE;
+    eventData_.state = DMS_DSCHED_EVENT_START;
 }
 
 int32_t DSchedContinue::Init()
@@ -844,9 +870,6 @@ void DSchedContinue::DurationDumperBeforeStartAbility(std::shared_ptr<DSchedCont
         DmsContinueTime::GetInstance().SetDstAbilityName(cmd->want_.GetElement().GetAbilityName());
     }
     DmsContinueTime::GetInstance().SetDurationBegin(CONTINUE_START_ABILITY_TIME, GetTickCount());
-
-    eventData_.moduleName = cmd->want_.GetElement().GetModuleName();
-    eventData_.abilityName = cmd->want_.GetElement().GetAbilityName();
 }
 
 int32_t DSchedContinue::UpdateWantForContinueType(OHOS::AAFwk::Want& want)
@@ -981,6 +1004,11 @@ int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
         DSchedTransportSoftbusAdapter::GetInstance().DisconnectDevice(peerDeviceId);
     }
 
+    if (result != ERR_OK) {
+        eventData_.state = DMS_DSCHED_EVENT_STOP;
+    } else {
+        eventData_.state = DMS_DSCHED_EVENT_FINISH;
+    }
     if (result == ERR_OK && direction_ == CONTINUE_SOURCE && isSourceExit_) {
         int32_t ret = AbilityManagerClient::GetInstance()->CleanMission(continueInfo_.missionId_);
         HILOGD("ExecuteContinueEnd clean mission result: %d", ret);
@@ -1001,7 +1029,7 @@ int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
 
 void DSchedContinue::NotifyContinuationCallbackResult(int32_t result)
 {
-    HILOGD("continuation result is: %d", result);
+    HILOGD("continuation result is: %{public}d", result);
     if (callback_ == nullptr) {
         HILOGW("callback object null.");
         return;
@@ -1024,15 +1052,8 @@ void DSchedContinue::NotifyContinuationCallbackResult(int32_t result)
 
 void DSchedContinue::NotifyDSchedEventResult(int32_t result)
 {
-    if (direction_ == CONTINUE_SINK) {
-        ContinueEvent event;
-        event.srcNetworkId = continueInfo_.sourceDeviceId_;
-        event.dstNetworkId = continueInfo_.sinkDeviceId_;
-        event.bundleName = continueInfo_.sourceBundleName_;
-        event.moduleName = eventData_.moduleName;
-        event.abilityName = eventData_.abilityName;
-        DistributedSchedService::GetInstance().NotifyDSchedEventCallbackResult(DSCHED_EVENT_KEY, result, event);
-    }
+    result = (result == ERR_OK) ? ERR_OK : NOTIFYCOMPLETECONTINUATION_FAILED;
+    DistributedSchedService::GetInstance().NotifyDSchedEventCallbackResult(result, eventData_);
 }
 
 void DSchedContinue::DurationDumperComplete(int32_t result)
@@ -1053,6 +1074,7 @@ void DSchedContinue::DurationDumperComplete(int32_t result)
 
 int32_t DSchedContinue::ExecuteContinueError(int32_t result)
 {
+    HILOGI("start, result %{public}d", result);
     auto cmd = std::make_shared<DSchedContinueEndCmd>();
     PackEndCmd(cmd, result);
     SendCommand(cmd);

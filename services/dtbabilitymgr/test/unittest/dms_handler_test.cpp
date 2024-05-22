@@ -27,7 +27,6 @@ using namespace testing::ext;
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-const std::string TYPE = "type";
 }
 
 void DmsHandlerTest::SetUpTestCase()
@@ -68,7 +67,7 @@ HWTEST_F(DmsHandlerTest, RegisterDSchedEventListener_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsHandlerTest RegisterDSchedEventListener_001 start" << std::endl;
     sptr<IDSchedEventListener> listener = nullptr;
-    int32_t result = dmsHandler_.RegisterDSchedEventListener(TYPE, listener);
+    int32_t result = dmsHandler_.RegisterDSchedEventListener(DMS_CONTINUE, listener);;
     EXPECT_EQ(result, GET_REMOTE_DMS_FAIL);
     DTEST_LOG << "DmsHandlerTest RegisterDSchedEventListener_001 end" << std::endl;
 }
@@ -83,7 +82,7 @@ HWTEST_F(DmsHandlerTest, RegisterDSchedEventListener_002, TestSize.Level3)
 {
     DTEST_LOG << "DmsHandlerTest RegisterDSchedEventListener_002 start" << std::endl;
     sptr<IDSchedEventListener> listener = sptr<IDSchedEventListener>(new BusinessTest());
-    int32_t result = dmsHandler_.RegisterDSchedEventListener(TYPE, listener);
+    int32_t result = dmsHandler_.RegisterDSchedEventListener(DMS_CONTINUE, listener);;
     EXPECT_EQ(result, 0);
     DTEST_LOG << "DmsHandlerTest RegisterDSchedEventListener_002 end" << std::endl;
 }
@@ -98,7 +97,7 @@ HWTEST_F(DmsHandlerTest, UnRegisterDSchedEventListener_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsHandlerTest UnRegisterDSchedEventListener_001 start" << std::endl;
     sptr<IDSchedEventListener> listener = nullptr;
-    int32_t result = dmsHandler_.UnRegisterDSchedEventListener(TYPE, listener);
+    int32_t result = dmsHandler_.UnRegisterDSchedEventListener(DMS_CONTINUE, listener);;
     EXPECT_EQ(result, GET_REMOTE_DMS_FAIL);
     DTEST_LOG << "DmsHandlerTest UnRegisterDSchedEventListener_001 end" << std::endl;
 }
@@ -113,7 +112,7 @@ HWTEST_F(DmsHandlerTest, UnRegisterDSchedEventListener_002, TestSize.Level3)
 {
     DTEST_LOG << "DmsHandlerTest UnRegisterDSchedEventListener_002 start" << std::endl;
     sptr<IDSchedEventListener> listener = sptr<IDSchedEventListener>(new BusinessTest());
-    int32_t result = dmsHandler_.UnRegisterDSchedEventListener(TYPE, listener);
+    int32_t result = dmsHandler_.UnRegisterDSchedEventListener(DMS_CONTINUE, listener);;
     EXPECT_EQ(result, 0);
     DTEST_LOG << "DmsHandlerTest UnRegisterDSchedEventListener_002 end" << std::endl;
 }

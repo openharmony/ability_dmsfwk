@@ -26,6 +26,7 @@
 #include "deviceManager/dms_device_info.h"
 #include "distributed_data_change_listener.h"
 #include "distributed_kv_data_manager.h"
+#include "distributed_sched_continuation.h"
 #include "mission/distributed_bundle_info.h"
 #include "kvstore_death_recipient.h"
 
@@ -38,6 +39,13 @@ static std::string DISTRIBUTE_BM_STORE_ID = "dms_bundle_datas";
 const uint16_t MAX_BUNDLEID = 65535; // size of uint16_t
 const uint8_t MAX_CONTINUETYPEID = 255; // size of uint8_t
 }
+struct ContinueEventInfo {
+    std::string networkId;
+    std::string bundleName;
+    std::string moduleName;
+    std::string abilityName;
+};
+
 class DmsBmStorage {
 public:
     DmsBmStorage();
@@ -54,6 +62,8 @@ public:
     std::string GetContinueType(const std::string &networkId, std::string &bundleName, uint8_t continueTypeId);
     std::string GetAbilityName(const std::string &networkId, std::string &bundleName, std::string &continueType);
     bool GetContinueTypeId(const std::string &bundleName, const std::string &abilityName, uint8_t &continueTypeId);
+    bool GetContinueEventInfo(const std::string &networkId, const std::string &bundleName,
+        const std::string& continueType, ContinueEventInfo &continueEventInfo);
     void UpdateDistributedData();
     int32_t CloudSync();
     int32_t PullOtherDistributedData();
