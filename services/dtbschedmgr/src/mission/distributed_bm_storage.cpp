@@ -333,15 +333,15 @@ Status DmsBmStorage::GetKvStore()
         .encrypt = false,
         .autoSync = false,
         .isPublic = true,
+        .securityLevel = SecurityLevel::S1,
         .cloudConfig = {
             .enableCloud = true,
             .autoSync = true
         },
-        .securityLevel = SecurityLevel::S1,
         .area = EL1,
         .kvStoreType = KvStoreType::SINGLE_VERSION,
-        .dataType = DataType::TYPE_DYNAMICAL,
-        .baseDir = BMS_KV_BASE_DIR
+        .baseDir = BMS_KV_BASE_DIR,
+        .dataType = DataType::TYPE_DYNAMICAL
     };
     Status status = dataManager_.GetSingleKvStore(options, appId_, storeId_, kvStorePtr_);
     if (status == Status::SUCCESS) {
