@@ -30,6 +30,7 @@ namespace {
     const std::string REMOTE_DEVICEID = "remotedeviceid";
     const std::string CONTINUETYPE = "continueType";
     constexpr int32_t MISSION_ID = 1;
+    const int32_t WAITTIME = 2000;
     const std::string BUNDLE_NAME = "com.ohos.permissionmanager";
 }
 
@@ -45,11 +46,13 @@ void DSchedContinueManagerTest::TearDownTestCase()
 
 void DSchedContinueManagerTest::TearDown()
 {
+    usleep(WAITTIME);
     DTEST_LOG << "DSchedContinueManagerTest::TearDown" << std::endl;
 }
 
 void DSchedContinueManagerTest::SetUp()
 {
+    usleep(WAITTIME);
     DTEST_LOG << "DSchedContinueManagerTest::SetUp" << std::endl;
 }
 
@@ -277,8 +280,7 @@ HWTEST_F(DSchedContinueManagerTest, HandleNotifyCompleteContinuation_001, TestSi
     DSchedContinueManager::GetInstance().HandleNotifyCompleteContinuation(devId, missionId, false);
 
     DSchedContinueInfo info;
-    std::shared_ptr<DSchedContinue> ptr = nullptr;
-    DSchedContinueManager::GetInstance().continues_[info] = ptr;
+    DSchedContinueManager::GetInstance().continues_[info] = nullptr;
     DSchedContinueManager::GetInstance().HandleNotifyCompleteContinuation(devId, missionId, false);
     bool ret = DSchedContinueManager::GetInstance().continues_.empty();
     EXPECT_EQ(ret, false);
@@ -321,7 +323,6 @@ HWTEST_F(DSchedContinueManagerTest, OnContinueEnd_001, TestSize.Level3)
 
     ret = DSchedContinueManager::GetInstance().OnContinueEnd(info);
     EXPECT_EQ(ret, ERR_OK);
-    DSchedContinueManager::GetInstance().UnInit();
     DTEST_LOG << "DSchedContinueManagerTest OnContinueEnd_001 end" << std::endl;
 }
 
@@ -335,7 +336,6 @@ HWTEST_F(DSchedContinueManagerTest, HandleContinueEnd_001, TestSize.Level3)
     DTEST_LOG << "DSchedContinueManagerTest HandleContinueEnd_001 begin" << std::endl;
     DSchedContinueInfo info(LOCAL_DEVICEID, "sourceBundleName", REMOTE_DEVICEID, "sinkBundleName",
         "continueType");
-    DSchedContinueManager::GetInstance().UnInit();
     DSchedContinueManager::GetInstance().RemoveTimeout(info);
 
     DSchedContinueManager::GetInstance().Init();
@@ -351,7 +351,6 @@ HWTEST_F(DSchedContinueManagerTest, HandleContinueEnd_001, TestSize.Level3)
     DSchedContinueManager::GetInstance().continues_[info] = ptr;
     DSchedContinueManager::GetInstance().HandleContinueEnd(info);
     EXPECT_EQ(DSchedContinueManager::GetInstance().cntSource_, 0);
-    DSchedContinueManager::GetInstance().UnInit();
     DTEST_LOG << "DSchedContinueManagerTest HandleContinueEnd_001 end" << std::endl;
 }
 }

@@ -24,6 +24,10 @@ using namespace testing::ext;
 namespace OHOS {
 namespace DistributedSchedule {
 
+namespace {
+    const int32_t WAITTIME = 1000;
+}
+
 void MMIAdapterTest::SetUpTestCase()
 {
     DTEST_LOG << "MMIAdapterTest::SetUpTestCase" << std::endl;
@@ -37,12 +41,14 @@ void MMIAdapterTest::TearDownTestCase()
 void MMIAdapterTest::TearDown()
 {
     DTEST_LOG << "MMIAdapterTest::TearDown" << std::endl;
+    usleep(WAITTIME);
     MMIAdapter::GetInstance().UnInit();
 }
 
 void MMIAdapterTest::SetUp()
 {
     DTEST_LOG << "MMIAdapterTest::SetUp" << std::endl;
+    usleep(WAITTIME);
     MMIAdapter::GetInstance().Init();
 }
 

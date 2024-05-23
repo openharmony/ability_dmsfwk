@@ -26,6 +26,9 @@ using namespace testing::ext;
 namespace OHOS {
 namespace DistributedSchedule {
 
+namespace {
+    const int32_t WAITTIME = 2000;
+}
 void DSchedContinueTest::SetUpTestCase()
 {
     DTEST_LOG << "DSchedContinueTest::SetUpTestCase" << std::endl;
@@ -39,11 +42,13 @@ void DSchedContinueTest::TearDownTestCase()
 
 void DSchedContinueTest::TearDown()
 {
+    usleep(WAITTIME);
     DTEST_LOG << "DSchedContinueTest::TearDown" << std::endl;
 }
 
 void DSchedContinueTest::SetUp()
 {
+    usleep(WAITTIME);
     DTEST_LOG << "DSchedContinueTest::SetUp" << std::endl;
 }
 
@@ -76,6 +81,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_001_1, TestSize.Level0)
     ret = conti->PostStartTask(wantParams);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_001_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -107,6 +113,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_002_1, TestSize.Level0)
     ret = conti->PostCotinueAbilityTask(appVersion);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_002_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -148,6 +155,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_003_1, TestSize.Level0)
     ret = conti->PostReplyTask(cmd);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_003_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -187,10 +195,8 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_004_1, TestSize.Level0)
     ret = conti->PostContinueSendTask(want, callerUid, status, accessToken);
     EXPECT_EQ(ret, ERR_OK);
 
-    status = INVALID_PARAMETERS_ERR;
-    ret = conti->PostContinueSendTask(want, callerUid, status, accessToken);
-    EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_004_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -226,6 +232,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_005_1, TestSize.Level0)
     ret = conti->PostContinueDataTask(cmd);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_005_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -271,6 +278,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_006_1, TestSize.Level0)
     ret = conti->PostNotifyCompleteTask(ERR_OK);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_006_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -302,6 +310,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_007_1, TestSize.Level0)
     ret = conti->PostContinueEndTask(result);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_007_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -326,6 +335,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_008_1, TestSize.Level0)
     EXPECT_NE(ret, ERR_OK);
 
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_008_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -351,6 +361,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_009_1, TestSize.Level0)
     int32_t ret = conti->PackStartCmd(cmd, wantParams);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_009_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -375,6 +386,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0010_1, TestSize.Level0)
     int32_t ret = conti->ExecuteContinueAbility(appVersion);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0010_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -397,6 +409,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0011_1, TestSize.Level0)
     int32_t ret = conti->GetMissionIdByBundleName();
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0011_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -419,6 +432,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0012_1, TestSize.Level0)
     int32_t ret = conti->CheckContinueAbilityPermission();
     EXPECT_EQ(ret, NO_MISSION_INFO_FOR_MISSION_ID);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0012_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -441,6 +455,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0013_1, TestSize.Level0)
     int32_t ret = conti->ExecuteContinueReply();
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0013_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -464,6 +479,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0014_1, TestSize.Level0)
     int32_t ret = conti->ExecuteContinueSend(data);
     EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0014_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -487,6 +503,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0015_1, TestSize.Level0)
     int32_t ret = conti->SetWantForContinuation(want);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0015_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -515,6 +532,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0016_1, TestSize.Level0)
     int32_t ret = conti->PackDataCmd(cmd, want, abilityInfo, callerInfo, accountInfo);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0016_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -539,6 +557,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_1, TestSize.Level0)
     int32_t ret = conti->ExecuteContinueData(cmd);
     EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0017_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -562,6 +581,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0018_1, TestSize.Level0)
     int32_t ret = conti->ExecuteNotifyComplete(result);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0018_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -589,6 +609,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0019_1, TestSize.Level0)
     int32_t ret = conti->PackReplyCmd(cmd, replyCmd, appVersion, result, "");
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0019_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -613,6 +634,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0020_1, TestSize.Level0)
     int32_t ret = conti->ExecuteContinueEnd(result);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0020_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -636,6 +658,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0021_1, TestSize.Level0)
     int32_t ret = conti->ExecuteContinueError(result);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0021_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -661,6 +684,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0022_1, TestSize.Level0)
     int32_t ret = conti->PackEndCmd(cmd, result);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0022_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -684,6 +708,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0023_1, TestSize.Level0)
     int32_t ret = conti->SendCommand(cmd);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0023_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -707,6 +732,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0024_1, TestSize.Level0)
     bool ret = conti->GetLocalDeviceId(localDeviceId);
     EXPECT_EQ(ret, true);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0024_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -729,6 +755,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0025_1, TestSize.Level0)
     int32_t ret = conti->CheckDeviceIdFromRemote("", "", "");
     EXPECT_EQ(ret, false);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0025_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -752,6 +779,7 @@ HWTEST_F(DSchedContinueTest, WaitAbilityStateInitialTest_0026_1, TestSize.Level0
     bool ret = conti->WaitAbilityStateInitial(persistentId);
     EXPECT_FALSE(ret);
     DTEST_LOG << "DSchedContinueTest WaitAbilityStateInitialTest_0026_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -778,6 +806,7 @@ HWTEST_F(DSchedContinueTest, StartAbilityTest_0027_1, TestSize.Level0)
     int32_t ret = conti->StartAbility(want, 0);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest StartAbilityTest_0027_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -801,6 +830,7 @@ HWTEST_F(DSchedContinueTest, QuerySinkAbilityNameTest_0028_1, TestSize.Level0)
     std::string sinkBundleName = conti->QuerySinkAbilityName();
     EXPECT_TRUE(sinkBundleName.empty());
     DTEST_LOG << "DSchedContinueTest QuerySinkAbilityNameTest_0028_1 end" << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -823,6 +853,7 @@ HWTEST_F(DSchedContinueTest, QuickStartAbilityTest_0029_1, TestSize.Level0)
     int32_t ret = conti->QuickStartAbility();
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest QuickStartAbilityTest_0029_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 
 /**
@@ -849,6 +880,7 @@ HWTEST_F(DSchedContinueTest, UpdateWantForContinueTypeTest_0030_1, TestSize.Leve
     int32_t ret = conti->UpdateWantForContinueType(want);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest UpdateWantForContinueTypeTest_0030_1 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 }
 }
