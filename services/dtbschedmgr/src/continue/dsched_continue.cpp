@@ -172,7 +172,7 @@ int32_t DSchedContinue::PostStartTask(const OHOS::AAFwk::WantParams& wantParams)
 {
     DSchedContinueEventType eventType = (subServiceType_ == CONTINUE_PULL) ?
         DSCHED_CONTINUE_REQ_PULL_EVENT : DSHCED_CONTINUE_REQ_PUSH_EVENT;
-    HILOGI("PostStartTask %d, continueInfo: %s", eventType, continueInfo_.toString().c_str());
+    HILOGI("PostStartTask %{public}d, continueInfo: %{public}s", eventType, continueInfo_.toString().c_str());
     if (eventHandler_ == nullptr) {
         HILOGE("PostStartTask eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
@@ -181,7 +181,7 @@ int32_t DSchedContinue::PostStartTask(const OHOS::AAFwk::WantParams& wantParams)
     auto wantParamsPtr = std::make_shared<OHOS::AAFwk::WantParams>(wantParams);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, wantParamsPtr, 0);
     if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
-        HILOGE("PostStartTask eventHandler send event type %d fail", eventType);
+        HILOGE("PostStartTask eventHandler send event type %{public}d fail", eventType);
         return CONTINUE_SEND_EVENT_FAILED;
     }
     return ERR_OK;
@@ -196,7 +196,8 @@ int32_t DSchedContinue::OnStartCmd(int32_t appVersion)
 int32_t DSchedContinue::PostCotinueAbilityTask(int32_t appVersion)
 {
     DSchedContinueEventType eventType = DSHCED_CONTINUE_ABILITY_EVENT;
-    HILOGI("PostCotinueAbilityTask %d, continueInfo %s", eventType, continueInfo_.toString().c_str());
+    HILOGI("PostCotinueAbilityTask %{public}d, continueInfo %{public}s", eventType,
+        continueInfo_.toString().c_str());
     if (eventHandler_ == nullptr) {
         HILOGE("PostCotinueAbilityTask eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
@@ -204,7 +205,7 @@ int32_t DSchedContinue::PostCotinueAbilityTask(int32_t appVersion)
     auto data = std::make_shared<int32_t>(appVersion);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
-        HILOGE("PostCotinueAbilityTask eventHandler send event type %d fail", eventType);
+        HILOGE("PostCotinueAbilityTask eventHandler send event type %{public}d fail", eventType);
         return CONTINUE_SEND_EVENT_FAILED;
     }
     return ERR_OK;
@@ -218,8 +219,8 @@ int32_t DSchedContinue::OnReplyCmd(std::shared_ptr<DSchedContinueReplyCmd> cmd)
 
 int32_t DSchedContinue::PostReplyTask(std::shared_ptr<DSchedContinueReplyCmd> cmd)
 {
-    HILOGI("PostReplyTask called, replyCmd: %d, result: %d, reason: %s", cmd->replyCmd_, cmd->result_,
-        cmd->reason_.c_str());
+    HILOGI("PostReplyTask called, replyCmd: %{public}d, result: %{public}d, reason: %{public}s", cmd->replyCmd_,
+        cmd->result_, cmd->reason_.c_str());
 
     DSchedContinueEventType eventType = DSCHED_CONTINUE_INVALID_EVENT;
     switch (cmd->replyCmd_) {
@@ -232,11 +233,12 @@ int32_t DSchedContinue::PostReplyTask(std::shared_ptr<DSchedContinueReplyCmd> cm
             break;
         }
         default:
-            HILOGW("PostReplyTask %d, receive irrelevant reply to cmd %d", eventType, cmd->replyCmd_);
+            HILOGW("PostReplyTask %{public}d, receive irrelevant reply to cmd %{public}d", eventType,
+                cmd->replyCmd_);
             return ERR_OK;
     }
 
-    HILOGI("PostReplyTask %d, continueInfo %s", eventType, continueInfo_.toString().c_str());
+    HILOGI("PostReplyTask %{public}d, continueInfo %{public}s", eventType, continueInfo_.toString().c_str());
     if (eventHandler_ == nullptr) {
         HILOGE("PostReplyTask eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
@@ -245,7 +247,7 @@ int32_t DSchedContinue::PostReplyTask(std::shared_ptr<DSchedContinueReplyCmd> cm
     auto result = std::make_shared<int32_t>(cmd->result_);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, result, 0);
     if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
-        HILOGE("PostReplyTask eventHandler send event type %d fail", eventType);
+        HILOGE("PostReplyTask eventHandler send event type %{public}d fail", eventType);
         return CONTINUE_SEND_EVENT_FAILED;
     }
     return ERR_OK;
@@ -268,18 +270,18 @@ int32_t DSchedContinue::PostContinueSendTask(const OHOS::AAFwk::Want& want, int3
     }
     DSchedContinueEventType eventType = DSHCED_CONTINUE_SEND_DATA_EVENT;
     if (status != ERR_OK) {
-        HILOGE("continuation has been rejected, status: %d", status);
+        HILOGE("continuation has been rejected, status: %{public}d", status);
         eventType = DSCHED_CONTINUE_END_EVENT;
         auto result = std::make_shared<int32_t>(status);
         auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, result, 0);
         if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
-            HILOGE("PostContinueSendTask eventHandler send event type %d fail", eventType);
+            HILOGE("PostContinueSendTask eventHandler send event type %{public}d fail", eventType);
             return CONTINUE_SEND_EVENT_FAILED;
         }
         return ERR_OK;
     }
 
-    HILOGI("PostContinueSendTask %d, continueInfo %s", eventType, continueInfo_.toString().c_str());
+    HILOGI("PostContinueSendTask %{public}d, continueInfo %{public}s", eventType, continueInfo_.toString().c_str());
     if (eventHandler_ == nullptr) {
         HILOGE("PostContinueSendTask eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
@@ -291,7 +293,7 @@ int32_t DSchedContinue::PostContinueSendTask(const OHOS::AAFwk::Want& want, int3
 
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
-        HILOGE("PostContinueSendTask eventHandler send event type %d fail", eventType);
+        HILOGE("PostContinueSendTask eventHandler send event type %{public}d fail", eventType);
         return CONTINUE_SEND_EVENT_FAILED;
     }
     return ERR_OK;
@@ -306,7 +308,7 @@ int32_t DSchedContinue::OnContinueDataCmd(std::shared_ptr<DSchedContinueDataCmd>
 int32_t DSchedContinue::PostContinueDataTask(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
     DSchedContinueEventType eventType = DSCHED_CONTINUE_DATA_EVENT;
-    HILOGI("PostContinueDataTask %d, continueInfo %s", eventType, continueInfo_.toString().c_str());
+    HILOGI("PostContinueDataTask %{public}d, continueInfo %{public}s", eventType, continueInfo_.toString().c_str());
     if (eventHandler_ == nullptr) {
         HILOGE("PostContinueDataTask eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
@@ -314,7 +316,7 @@ int32_t DSchedContinue::PostContinueDataTask(std::shared_ptr<DSchedContinueDataC
 
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, cmd, 0);
     if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
-        HILOGE("PostContinueDataTask eventHandler send event type %d fail", eventType);
+        HILOGE("PostContinueDataTask eventHandler send event type %{public}d fail", eventType);
         return CONTINUE_SEND_EVENT_FAILED;
     }
     return ERR_OK;
@@ -346,7 +348,8 @@ int32_t DSchedContinue::OnContinueEndCmd(std::shared_ptr<DSchedContinueEndCmd> c
 int32_t DSchedContinue::PostNotifyCompleteTask(int32_t result)
 {
     DSchedContinueEventType eventType = DSCHED_CONTINUE_COMPLETE_EVENT;
-    HILOGI("PostNotifyCompleteTask %d, continueInfo %s", eventType, continueInfo_.toString().c_str());
+    HILOGI("PostNotifyCompleteTask %{public}d, continueInfo %{public}s", eventType,
+        continueInfo_.toString().c_str());
 
     if (eventHandler_ == nullptr) {
         HILOGE("PostNotifyCompleteTask eventHandler is nullptr");
@@ -356,7 +359,7 @@ int32_t DSchedContinue::PostNotifyCompleteTask(int32_t result)
     auto data = std::make_shared<int32_t>(result);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
-        HILOGE("PostNotifyCompleteTask eventHandler send event type %d fail", eventType);
+        HILOGE("PostNotifyCompleteTask eventHandler send event type %{public}d fail", eventType);
         return CONTINUE_SEND_EVENT_FAILED;
     }
     return ERR_OK;
@@ -371,7 +374,7 @@ int32_t DSchedContinue::OnContinueEnd(int32_t result)
 int32_t DSchedContinue::PostContinueEndTask(int32_t result)
 {
     DSchedContinueEventType eventType = DSCHED_CONTINUE_END_EVENT;
-    HILOGI("PostContinueEndTask %d, continueInfo %s", eventType, continueInfo_.toString().c_str());
+    HILOGI("PostContinueEndTask %{public}d, continueInfo %{public}s", eventType, continueInfo_.toString().c_str());
     if (eventHandler_ == nullptr) {
         HILOGE("PostContinueEndTask eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
@@ -380,7 +383,7 @@ int32_t DSchedContinue::PostContinueEndTask(int32_t result)
     auto data = std::make_shared<int32_t>(result);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
-        HILOGE("PostContinueEndTask eventHandler send event type %d fail", eventType);
+        HILOGE("PostContinueEndTask eventHandler send event type %{public}d fail", eventType);
         return CONTINUE_SEND_EVENT_FAILED;
     }
     return ERR_OK;
@@ -393,10 +396,10 @@ void DSchedContinue::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
         return;
     }
     auto eventId = event->GetInnerEventId();
-    HILOGI("process event %d with state %d", eventId, stateMachine_->GetStateType());
+    HILOGI("process event %{public}d with state %{public}d", eventId, stateMachine_->GetStateType());
     int32_t ret = stateMachine_->Execute(event);
     if (ret != ERR_OK) {
-        HILOGE("event %d excute failed, ret %d", eventId, ret);
+        HILOGE("event %{public}d excute failed, ret %{public}d", eventId, ret);
         OnContinueEnd(ret);
     }
     return;
@@ -404,7 +407,7 @@ void DSchedContinue::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
 
 int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams> wantParams)
 {
-    HILOGI("ExecuteContinueReq start, continueInfo: %s", continueInfo_.toString().c_str());
+    HILOGI("ExecuteContinueReq start, continueInfo: %{public}s", continueInfo_.toString().c_str());
     DurationDumperStart();
 
     if (subServiceType_ == CONTINUE_PULL && CheckQuickStartConfiguration()) {
@@ -416,22 +419,22 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
         continueInfo_.sinkDeviceId_ : continueInfo_.sourceDeviceId_;
     softbusSessionId_ = DSchedTransportSoftbusAdapter::GetInstance().ConnectDevice(peerDeviceId);
     if (softbusSessionId_ <= 0) {
-        HILOGE("ExecuteContinueReq connect peer device %s failed, ret %d",
+        HILOGE("ExecuteContinueReq connect peer device %{public}s failed, ret %{public}d",
             GetAnonymStr(peerDeviceId).c_str(), softbusSessionId_);
         return softbusSessionId_;
     }
-    HILOGI("ExecuteContinueReq peer %s connected, sessionId %d",
+    HILOGI("ExecuteContinueReq peer %{public}s connected, sessionId %{public}d",
         GetAnonymStr(peerDeviceId).c_str(), softbusSessionId_);
 
     auto startCmd = std::make_shared<DSchedContinueStartCmd>();
     int32_t ret = PackStartCmd(startCmd, wantParams);
     if (ret != ERR_OK) {
-        HILOGE("ExecuteContinueReq pack start cmd failed, ret %d", ret);
+        HILOGE("ExecuteContinueReq pack start cmd failed, ret %{public}d", ret);
         return ret;
     }
     ret = SendCommand(startCmd);
     if (ret != ERR_OK) {
-        HILOGE("ExecuteContinueReq send start cmd failed, ret %d", ret);
+        HILOGE("ExecuteContinueReq send start cmd failed, ret %{public}d", ret);
         return ret;
     }
     if (direction_ == CONTINUE_SINK) {
@@ -580,10 +583,11 @@ int32_t DSchedContinue::ExecuteContinueAbility(int32_t appVersion)
     DmsContinueTime::GetInstance().SetDurationEnd(CONTINUE_FIRST_TRANS_TIME, tick);
     DmsContinueTime::GetInstance().SetSaveDataDurationBegin(tick);
 
-    HILOGI("ExecuteContinueAbility call continueAbility begin, continueInfo: %s", continueInfo_.toString().c_str());
+    HILOGI("ExecuteContinueAbility call continueAbility begin, continueInfo: %{public}s",
+        continueInfo_.toString().c_str());
     result = AbilityManagerClient::GetInstance()->ContinueAbility(continueInfo_.sinkDeviceId_,
         continueInfo_.missionId_, appVersion);
-    HILOGI("ExecuteContinueAbility call continueAbility end, result: %d.", result);
+    HILOGI("ExecuteContinueAbility call continueAbility end, result: %{public}d.", result);
 
     if (result != ERR_OK) {
         return CONTINUE_CALL_CONTINUE_ABILITY_FAILED;
@@ -608,7 +612,8 @@ int32_t DSchedContinue::GetMissionIdByBundleName()
 int32_t DSchedContinue::CheckContinueAbilityPermission()
 {
     if (!CheckBundleContinueConfig(continueInfo_.sourceBundleName_)) {
-        HILOGI("App does not allow continue in config file, bundle name %s", continueInfo_.sourceBundleName_.c_str());
+        HILOGI("App does not allow continue in config file, bundle name %{public}s",
+            continueInfo_.sourceBundleName_.c_str());
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
 
@@ -620,7 +625,8 @@ int32_t DSchedContinue::CheckContinueAbilityPermission()
     }
 
     if (missionInfo.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
-        HILOGE("Mission continue state set to INACTIVE. Can't continue. Mission id: %d", continueInfo_.missionId_);
+        HILOGE("Mission continue state set to INACTIVE. Can't continue. Mission id: %{public}d",
+            continueInfo_.missionId_);
         return INVALID_PARAMETERS_ERR;
     }
     return ERR_OK;
@@ -628,7 +634,7 @@ int32_t DSchedContinue::CheckContinueAbilityPermission()
 
 int32_t DSchedContinue::ExecuteContinueReply()
 {
-    HILOGI("ExecuteContinueReply start, continueInfo: %s", continueInfo_.toString().c_str());
+    HILOGI("ExecuteContinueReply start, continueInfo: %{public}s", continueInfo_.toString().c_str());
 
     AppExecFwk::BundleInfo bundleInfo;
     if (BundleManagerInternal::GetLocalBundleInfoV9(continueInfo_.sourceBundleName_, bundleInfo) != ERR_OK) {
@@ -638,12 +644,12 @@ int32_t DSchedContinue::ExecuteContinueReply()
     auto cmd = std::make_shared<DSchedContinueReplyCmd>();
     int32_t ret = PackReplyCmd(cmd, DSCHED_CONTINUE_CMD_START, bundleInfo.versionCode, ERR_OK, "ExecuteContinueReply");
     if (ret != ERR_OK) {
-        HILOGE("ExecuteContinueReply pack reply cmd failed, ret %d", ret);
+        HILOGE("ExecuteContinueReply pack reply cmd failed, ret %{public}d", ret);
         return ret;
     }
     ret = SendCommand(cmd);
     if (ret != ERR_OK) {
-        HILOGE("ExecuteContinueReply send reply cmd failed, ret %d", ret);
+        HILOGE("ExecuteContinueReply send reply cmd failed, ret %{public}d", ret);
         return ret;
     }
     stateMachine_->UpdateState(DSCHED_CONTINUE_DATA_STATE);
@@ -653,7 +659,7 @@ int32_t DSchedContinue::ExecuteContinueReply()
 
 int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data)
 {
-    HILOGI("ExecuteContinueSend start, continueInfo: %s", continueInfo_.toString().c_str());
+    HILOGI("ExecuteContinueSend start, continueInfo: %{public}s", continueInfo_.toString().c_str());
     DurationDumperBeforeStartRemoteAbility();
 
     SetCleanMissionFlag(data->want);
@@ -698,7 +704,7 @@ int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData>
     ret = SendCommand(cmd);
     DmsRadar::GetInstance().SaveDataDmsRemoteWant("SendContinueData", ret);
     if (ret != ERR_OK) {
-        HILOGE("ExecuteContinueSend send data cmd failed, ret %d", ret);
+        HILOGE("ExecuteContinueSend send data cmd failed, ret %{public}d", ret);
         return ret;
     }
 
@@ -737,12 +743,12 @@ int32_t DSchedContinue::SetWantForContinuation(AAFwk::Want& newWant)
         return INVALID_PARAMETERS_ERR;
     }
     newWant.SetParam(VERSION_CODE_KEY, static_cast<int32_t>(localBundleInfo.versionCode));
-    HILOGD("local version = %u!", localBundleInfo.versionCode);
+    HILOGD("local version = %{public}u!", localBundleInfo.versionCode);
 
     bool isPageStackContinue = newWant.GetBoolParam(SUPPORT_CONTINUE_PAGE_STACK_KEY, true);
     std::string moduleName = newWant.GetStringParam(SUPPORT_CONTINUE_MODULE_NAME_UPDATE_KEY);
     if (!isPageStackContinue && !moduleName.empty() && moduleName.length() <= MAX_MODULENAME_LEN) {
-        HILOGD("set application moduleName = %s!", moduleName.c_str());
+        HILOGD("set application moduleName = %{public}s!", moduleName.c_str());
         auto element = newWant.GetElement();
         newWant.SetElementName(element.GetDeviceID(), element.GetBundleName(), element.GetAbilityName(), moduleName);
     }
@@ -788,7 +794,7 @@ int32_t DSchedContinue::PackDataCmd(std::shared_ptr<DSchedContinueDataCmd>& cmd,
 
 int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
-    HILOGI("ExecuteContinueData start, continueInfo: %s", continueInfo_.toString().c_str());
+    HILOGI("ExecuteContinueData start, continueInfo: %{public}s", continueInfo_.toString().c_str());
     DurationDumperBeforeStartAbility(cmd);
 
     std::string localDeviceId;
@@ -815,7 +821,7 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
             HILOGE("get persistentId failed, stop start ability");
             return OnContinueEnd(ERR_OK);
         }
-        HILOGI("get persistentId success, persistentId: %d", persistentId);
+        HILOGI("get persistentId success, persistentId: %{public}d", persistentId);
         WaitAbilityStateInitial(persistentId);
         want.SetParam(DMS_PERSISTENT_ID, persistentId);
 
@@ -888,14 +894,14 @@ int32_t DSchedContinue::StartAbility(const OHOS::AAFwk::Want& want, int32_t requ
 {
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->Connect();
     if (ret != ERR_OK) {
-        HILOGE("ExecuteContinueData connect ability server failed %d", ret);
+        HILOGE("ExecuteContinueData connect ability server failed %{public}d", ret);
         return ret;
     }
 
     int32_t activeAccountId = 0;
     ret = DistributedSchedService::GetInstance().QueryOsAccount(activeAccountId);
     if (ret != ERR_OK) {
-        HILOGE("ExecuteContinueData QueryOsAccount failed %d", ret);
+        HILOGE("ExecuteContinueData QueryOsAccount failed %{public}d", ret);
         return ret;
     }
 
@@ -903,7 +909,7 @@ int32_t DSchedContinue::StartAbility(const OHOS::AAFwk::Want& want, int32_t requ
     DmsRadar::GetInstance().ClickIconDmsStartAbility("StartAbility", ret);
     ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, DEFAULT_REQUEST_CODE, activeAccountId);
     if (ret != ERR_OK) {
-        HILOGE("StartAbility failed %d", ret);
+        HILOGE("StartAbility failed %{public}d", ret);
         return ret;
     }
     return ret;
@@ -911,7 +917,7 @@ int32_t DSchedContinue::StartAbility(const OHOS::AAFwk::Want& want, int32_t requ
 
 int32_t DSchedContinue::ExecuteNotifyComplete(int32_t result)
 {
-    HILOGI("ExecuteNotifyComplete start, continueInfo: %s", continueInfo_.toString().c_str());
+    HILOGI("ExecuteNotifyComplete start, continueInfo: %{public}s", continueInfo_.toString().c_str());
     DmsContinueTime::GetInstance().SetDurationEnd(CONTINUE_START_ABILITY_TIME, GetTickCount());
 
     int32_t ret = 0;
@@ -921,7 +927,7 @@ int32_t DSchedContinue::ExecuteNotifyComplete(int32_t result)
 
         ret = SendCommand(cmd);
         if (ret != ERR_OK) {
-            HILOGE("ExecuteNotifyComplete send end cmd failed, ret %d", ret);
+            HILOGE("ExecuteNotifyComplete send end cmd failed, ret %{public}d", ret);
             return ret;
         }
 
@@ -934,7 +940,7 @@ int32_t DSchedContinue::ExecuteNotifyComplete(int32_t result)
     PackReplyCmd(cmd, DSCHED_CONTINUE_CMD_END, 0, result, "ExecuteNotifyComplete");
     ret = SendCommand(cmd);
     if (ret != ERR_OK) {
-        HILOGE("ExecuteNotifyComplete send reply cmd failed, ret %d", ret);
+        HILOGE("ExecuteNotifyComplete send reply cmd failed, ret %{public}d", ret);
         return ret;
     }
 
@@ -970,20 +976,20 @@ int32_t DSchedContinue::PackReplyCmd(std::shared_ptr<DSchedContinueReplyCmd> cmd
 
 int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
 {
-    HILOGI("ExecuteContinueEnd start, continueInfo: %s", continueInfo_.toString().c_str());
+    HILOGI("ExecuteContinueEnd start, continueInfo: %{public}s", continueInfo_.toString().c_str());
 
     std::string peerDeviceId = (direction_ == CONTINUE_SOURCE) ?
         continueInfo_.sinkDeviceId_ : continueInfo_.sourceDeviceId_;
     if (result != ERR_OK ||
         (subServiceType_ == CONTINUE_PULL && direction_ == CONTINUE_SINK) ||
         (subServiceType_ == CONTINUE_PUSH && direction_ == CONTINUE_SOURCE)) {
-        HILOGI("ExecuteContinueEnd disconnect peer device %s", GetAnonymStr(peerDeviceId).c_str());
+        HILOGI("ExecuteContinueEnd disconnect peer device %{public}s", GetAnonymStr(peerDeviceId).c_str());
         DSchedTransportSoftbusAdapter::GetInstance().DisconnectDevice(peerDeviceId);
     }
 
     if (result == ERR_OK && direction_ == CONTINUE_SOURCE && isSourceExit_) {
         int32_t ret = AbilityManagerClient::GetInstance()->CleanMission(continueInfo_.missionId_);
-        HILOGD("ExecuteContinueEnd clean mission result: %d", ret);
+        HILOGD("ExecuteContinueEnd clean mission result: %{public}d", ret);
     }
 
     if (direction_ == CONTINUE_SINK) {
@@ -1001,7 +1007,7 @@ int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
 
 void DSchedContinue::NotifyContinuationCallbackResult(int32_t result)
 {
-    HILOGD("continuation result is: %d", result);
+    HILOGD("continuation result is: %{public}d", result);
     if (callback_ == nullptr) {
         HILOGW("callback object null.");
         return;
@@ -1017,7 +1023,7 @@ void DSchedContinue::NotifyContinuationCallbackResult(int32_t result)
     MessageOption option;
     int32_t ret = callback_->SendRequest(NOTIFY_MISSION_CALLBACK_RESULT, data, reply, option);
     if (ret != ERR_OK) {
-        HILOGE("send request failed, ret: %d", ret);
+        HILOGE("send request failed, ret: %{public}d", ret);
     }
     return;
 }
@@ -1087,26 +1093,26 @@ int32_t DSchedContinue::PackEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd, bo
 
 int32_t DSchedContinue::SendCommand(std::shared_ptr<DSchedContinueCmdBase> cmd)
 {
-    HILOGI("SendCommand start, cmd %d", cmd->command_);
+    HILOGI("SendCommand start, cmd %{public}d", cmd->command_);
     std::string jsonStr;
     int32_t ret = cmd->Marshal(jsonStr);
     if (ret != ERR_OK) {
-        HILOGE("SendCommand marshal cmd %d failed, ret %d", cmd->command_, ret);
+        HILOGE("SendCommand marshal cmd %{public}d failed, ret %{public}d", cmd->command_, ret);
         return ret;
     }
     auto buffer = std::make_shared<DSchedDataBuffer>(jsonStr.length() + 1);
     ret = memcpy_s(buffer->Data(), buffer->Capacity(),
         reinterpret_cast<uint8_t *>(const_cast<char *>(jsonStr.c_str())), jsonStr.length());
     if (ret != ERR_OK) {
-        HILOGE("SendCommand memcpy_s failed, cmd %d, ret %d", cmd->command_, ret);
+        HILOGE("SendCommand memcpy_s failed, cmd %{public}d, ret %{public}d", cmd->command_, ret);
         return ret;
     }
     ret = DSchedTransportSoftbusAdapter::GetInstance().SendData(softbusSessionId_, SERVICE_TYPE_CONTINUE, buffer);
     if (ret != ERR_OK) {
-        HILOGE("SendCommand send data failed, cmd %d, ret %d", cmd->command_, ret);
+        HILOGE("SendCommand send data failed, cmd %{public}d, ret %{public}d", cmd->command_, ret);
         return ret;
     }
-    HILOGI("SendCommand end, cmd %d", cmd->command_);
+    HILOGI("SendCommand end, cmd %{public}d", cmd->command_);
     return ERR_OK;
 }
 
@@ -1141,9 +1147,9 @@ bool DSchedContinue::CheckDeviceIdFromRemote(const std::string& localDevId, cons
         HILOGE("destDevId is not same with localDevId");
         return false;
     }
-    HILOGD("CheckDeviceIdFromRemote srcDevId %s", srcDevId.c_str());
-    HILOGD("CheckDeviceIdFromRemote localDevId %s", localDevId.c_str());
-    HILOGD("CheckDeviceIdFromRemote destDevId %s", destDevId.c_str());
+    HILOGD("CheckDeviceIdFromRemote srcDevId %{public}s", srcDevId.c_str());
+    HILOGD("CheckDeviceIdFromRemote localDevId %{public}s", localDevId.c_str());
+    HILOGD("CheckDeviceIdFromRemote destDevId %{public}s", destDevId.c_str());
 
     if (srcDevId == destDevId || srcDevId == localDevId) {
         HILOGE("destDevId is different with localDevId and destDevId");
@@ -1159,7 +1165,7 @@ bool DSchedContinue::CheckDeviceIdFromRemote(const std::string& localDevId, cons
 
 void DSchedContinue::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffer> dataBuffer)
 {
-    HILOGI("called, command %d", command);
+    HILOGI("called, command %{public}d", command);
     int32_t ret = 0;
     uint8_t *data = dataBuffer->Data();
     std::string jsonStr(reinterpret_cast<const char *>(data), dataBuffer->Capacity());
@@ -1173,7 +1179,7 @@ void DSchedContinue::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffe
             auto dataCmd = std::make_shared<DSchedContinueDataCmd>();
             ret = dataCmd->Unmarshal(jsonStr);
             if (ret != ERR_OK) {
-                HILOGE("Unmarshal data cmd failed, ret: %d", ret);
+                HILOGE("Unmarshal data cmd failed, ret: %{public}d", ret);
                 return;
             }
             OnContinueDataCmd(dataCmd);
@@ -1183,7 +1189,7 @@ void DSchedContinue::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffe
             auto replyCmd = std::make_shared<DSchedContinueReplyCmd>();
             ret = replyCmd->Unmarshal(jsonStr);
             if (ret != ERR_OK) {
-                HILOGE("Unmarshal reply cmd failed, ret: %d", ret);
+                HILOGE("Unmarshal reply cmd failed, ret: %{public}d", ret);
                 return;
             }
             OnReplyCmd(replyCmd);
@@ -1193,7 +1199,7 @@ void DSchedContinue::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffe
             auto endCmd = std::make_shared<DSchedContinueEndCmd>();
             ret = endCmd->Unmarshal(jsonStr);
             if (ret != ERR_OK) {
-                HILOGE("Unmarshal end cmd failed, ret: %d", ret);
+                HILOGE("Unmarshal end cmd failed, ret: %{public}d", ret);
                 return;
             }
             OnContinueEndCmd(endCmd);

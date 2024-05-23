@@ -115,8 +115,8 @@ int32_t DSchedContinueManager::ContinueMission(const std::string& srcDeviceId, c
 void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
     int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
-    HILOGI("start, srcDeviceId: %s. dstDeviceId: %s. missionId: %d.", GetAnonymStr(srcDeviceId).c_str(),
-        GetAnonymStr(dstDeviceId).c_str(), missionId);
+    HILOGI("start, srcDeviceId: %{public}s. dstDeviceId: %{public}s. missionId: %{public}d.",
+        GetAnonymStr(srcDeviceId).c_str(), GetAnonymStr(dstDeviceId).c_str(), missionId);
 
     if (srcDeviceId.empty() || dstDeviceId.empty() || callback == nullptr) {
         HILOGE("srcDeviceId or dstDeviceId or callback is null!");
@@ -160,8 +160,8 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
     std::string bundleName, const std::string& continueType,
     const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
-    HILOGI("start, srcDeviceId: %s. dstDeviceId: %s. bundleName: %s. continueType: %s.",
-        GetAnonymStr(srcDeviceId).c_str(), GetAnonymStr(dstDeviceId).c_str(),
+    HILOGI("start, srcDeviceId: %{public}s. dstDeviceId: %{public}s. bundleName: %{public}s."
+        " continueType: %{public}s.", GetAnonymStr(srcDeviceId).c_str(), GetAnonymStr(dstDeviceId).c_str(),
         bundleName.c_str(), continueType.c_str());
 
     if (srcDeviceId.empty() || dstDeviceId.empty() || callback == nullptr) {
@@ -179,7 +179,7 @@ void DSchedContinueManager::HandleContinueMissionWithBundleName(const DSchedCont
 {
     int32_t direction = CheckContinuationLimit(info.sourceDeviceId_, info.sinkDeviceId_);
     if (direction != CONTINUE_SOURCE && direction != CONTINUE_SINK) {
-        HILOGE("CheckContinuationLimit failed, ret: %d", direction);
+        HILOGE("CheckContinuationLimit failed, ret: %{public}d", direction);
         return;
     }
 
@@ -203,7 +203,8 @@ void DSchedContinueManager::HandleContinueMissionWithBundleName(const DSchedCont
         SetTimeOut(info, CONTINUE_TIMEOUT);
         newContinue->OnContinueMission(wantParams);
     }
-    HILOGI("end, subType: %d dirction: %d, continue info: %s", subType, direction, info.toString().c_str());
+    HILOGI("end, subType: %{public}d dirction: %{public}d, continue info: %{public}s",
+        subType, direction, info.toString().c_str());
 }
 
 void DSchedContinueManager::SetTimeOut(const DSchedContinueInfo &info, int32_t timeout)
@@ -213,7 +214,7 @@ void DSchedContinueManager::SetTimeOut(const DSchedContinueInfo &info, int32_t t
             HILOGE("continue not exist.");
             return;
         }
-        HILOGE("continue timeout! info: %s", info.toString().c_str());
+        HILOGE("continue timeout! info: %{public}s", info.toString().c_str());
         continues_[info]->OnContinueEnd(CONTINUE_ABILITY_TIMEOUT_ERR);
     };
     if (eventHandler_ == nullptr) {
@@ -250,7 +251,7 @@ void DSchedContinueManager::HandleStartContinuation(const OHOS::AAFwk::Want& wan
     std::string bundleName = want.GetElement().GetBundleName().c_str();
     auto info = DSchedContinueInfo(srcDeviceId, bundleName, dstDeviceId, bundleName, "");
 
-    HILOGI("continue info: %s.", info.toString().c_str());
+    HILOGI("continue info: %{public}s.", info.toString().c_str());
     {
         std::lock_guard<std::mutex> continueLock(continueMutex_);
         if (continues_.empty() || continues_.count(info) == 0) {
@@ -258,7 +259,8 @@ void DSchedContinueManager::HandleStartContinuation(const OHOS::AAFwk::Want& wan
             return;
         }
         if (missionId != continues_[info]->GetContinueInfo().missionId_) {
-            HILOGE("missionId doesn't match the existing continuation, continueInfo: %s.", info.toString().c_str());
+            HILOGE("missionId doesn't match the existing continuation, continueInfo: %{public}s.",
+                info.toString().c_str());
             return;
         }
         continues_[info]->OnStartContinuation(want, callerUid, status, accessToken);
@@ -285,7 +287,8 @@ void DSchedContinueManager::HandleNotifyCompleteContinuation(const std::u16strin
     bool isSuccess)
 {
     std::string deviceId = Str16ToStr8(devId);
-    HILOGI("begin, deviceId %s, missionId %d, isSuccess %d", GetAnonymStr(deviceId).c_str(), missionId, isSuccess);
+    HILOGI("begin, deviceId %{public}s, missionId %{public}d, isSuccess %{public}d",
+        GetAnonymStr(deviceId).c_str(), missionId, isSuccess);
     {
         std::lock_guard<std::mutex> continueLock(continueMutex_);
         if (continues_.empty()) {
@@ -295,7 +298,7 @@ void DSchedContinueManager::HandleNotifyCompleteContinuation(const std::u16strin
         for (auto iter = continues_.begin(); iter != continues_.end(); iter++) {
             if (iter->second != nullptr && deviceId == iter->second->GetContinueInfo().sourceDeviceId_) {
                 iter->second->OnNotifyComplete(missionId, isSuccess);
-                HILOGI("end, continue info: %s.", iter->second->GetContinueInfo().toString().c_str());
+                HILOGI("end, continue info: %{public}s.", iter->second->GetContinueInfo().toString().c_str());
                 return;
             }
         }
@@ -319,7 +322,7 @@ int32_t DSchedContinueManager::OnContinueEnd(const DSchedContinueInfo& info)
 
 void DSchedContinueManager::HandleContinueEnd(const DSchedContinueInfo& info)
 {
-    HILOGI("begin, continue info: %s.", info.toString().c_str());
+    HILOGI("begin, continue info: %{public}s.", info.toString().c_str());
     std::lock_guard<std::mutex> continueLock(continueMutex_);
     if (continues_.empty() || continues_.find(info) == continues_.end()) {
         HILOGE("continue info doesn't match any existing continuation.");
@@ -366,7 +369,7 @@ void DSchedContinueManager::OnDataRecv(int32_t sessionId, std::shared_ptr<DSched
 
 void DSchedContinueManager::HandleDataRecv(int32_t sessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer)
 {
-    HILOGI("start, sessionId: %d.", sessionId);
+    HILOGI("start, sessionId: %{public}d.", sessionId);
     uint8_t *data = dataBuffer->Data();
     std::string jsonStr(reinterpret_cast<const char *>(data), dataBuffer->Capacity());
     cJSON *rootValue = cJSON_Parse(jsonStr.c_str());
@@ -397,18 +400,18 @@ void DSchedContinueManager::HandleDataRecv(int32_t sessionId, std::shared_ptr<DS
     int32_t command = comvalue->valueint;
     cJSON_Delete(cmdValue);
     NotifyContinueDataRecv(sessionId, command, jsonStr, dataBuffer);
-    HILOGI("end, sessionId: %d.", sessionId);
+    HILOGI("end, sessionId: %{public}d.", sessionId);
 }
 
 void DSchedContinueManager::NotifyContinueDataRecv(int32_t sessionId, int32_t command, const std::string& jsonStr,
     std::shared_ptr<DSchedDataBuffer> dataBuffer)
 {
-    HILOGI("start, parsed cmd %d, sessionId: %d.", command, sessionId);
+    HILOGI("start, parsed cmd %{public}d, sessionId: %{public}d.", command, sessionId);
     std::lock_guard<std::mutex> continueLock(continueMutex_);
     if (!continues_.empty()) {
         for (auto iter = continues_.begin(); iter != continues_.end(); iter++) {
             if (iter->second != nullptr && sessionId == iter->second->GetSessionId()) {
-                HILOGI("sessionId %d exist.", sessionId);
+                HILOGI("sessionId %{public}d exist.", sessionId);
                 iter->second->OnDataRecv(command, dataBuffer);
                 return;
             }
@@ -416,16 +419,16 @@ void DSchedContinueManager::NotifyContinueDataRecv(int32_t sessionId, int32_t co
     }
 
     if (command == DSCHED_CONTINUE_CMD_START) {
-        HILOGI("recv start cmd, sessionId: %d.", sessionId);
+        HILOGI("recv start cmd, sessionId: %{public}d.", sessionId);
         auto startCmd = std::make_shared<DSchedContinueStartCmd>();
         int32_t ret = startCmd->Unmarshal(jsonStr);
         if (ret != ERR_OK) {
-            HILOGE("Unmarshal start cmd failed, ret: %d", ret);
+            HILOGE("Unmarshal start cmd failed, ret: %{public}d", ret);
             return;
         }
         ret = CheckContinuationLimit(startCmd->srcDeviceId_, startCmd->dstDeviceId_);
         if (ret != CONTINUE_SINK && ret != CONTINUE_SOURCE) {
-            HILOGE("CheckContinuationSubType failed, ret: %d", ret);
+            HILOGE("CheckContinuationSubType failed, ret: %{public}d", ret);
             return;
         }
         auto newContinue = std::make_shared<DSchedContinue>(startCmd, sessionId);
@@ -433,10 +436,10 @@ void DSchedContinueManager::NotifyContinueDataRecv(int32_t sessionId, int32_t co
         continues_.insert(std::make_pair(newContinue->GetContinueInfo(), newContinue));
 
         newContinue->OnStartCmd(startCmd->appVersion_);
-        HILOGI("end, continue info: %s.", newContinue->GetContinueInfo().toString().c_str());
+        HILOGI("end, continue info: %{public}s.", newContinue->GetContinueInfo().toString().c_str());
         return;
     }
-    HILOGE("No matching session to handle cmd! sessionId: %d, recv cmd %d.", sessionId, command);
+    HILOGE("No matching session to handle cmd! sessionId: %{public}d, recv cmd %{public}d.", sessionId, command);
     return;
 }
 
@@ -452,7 +455,7 @@ int32_t DSchedContinueManager::CheckContinuationLimit(const std::string& srcDevi
     int32_t direction = CONTINUE_SINK;
     if (dstDeviceId == localDevId) {
         if (cntSink_.load() >= MAX_CONCURRENT_SINK) {
-            HILOGE("can't deal more than %d pull requests at the same time.", cntSink_.load());
+            HILOGE("can't deal more than %{public}d pull requests at the same time.", cntSink_.load());
             return CONTINUE_ALREADY_IN_PROGRESS;
         }
         if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(srcDeviceId) == nullptr) {
@@ -461,7 +464,7 @@ int32_t DSchedContinueManager::CheckContinuationLimit(const std::string& srcDevi
         }
     } else if (srcDeviceId == localDevId) {
         if (cntSource_.load() >= MAX_CONCURRENT_SOURCE) {
-            HILOGE("can't deal more than %d push requests at the same time.", cntSource_.load());
+            HILOGE("can't deal more than %{public}d push requests at the same time.", cntSource_.load());
             return CONTINUE_ALREADY_IN_PROGRESS;
         }
         if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(dstDeviceId) == nullptr) {
@@ -501,10 +504,10 @@ int32_t DSchedContinueManager::GetContinueInfo(std::string &srcDeviceId, std::st
 void DSchedContinueManager::OnShutdown(int32_t socket, bool isSelfCalled)
 {
     if (isSelfCalled) {
-        HILOGW("called, shutdown by local, sessionId: %d", socket);
+        HILOGW("called, shutdown by local, sessionId: %{public}d", socket);
         return;
     }
-    HILOGW("called, sessionId: %d, isSelfCalled %d", socket, isSelfCalled);
+    HILOGW("called, sessionId: %{public}d, isSelfCalled %{public}d", socket, isSelfCalled);
     auto func = [this, socket]() {
         std::lock_guard<std::mutex> continueLock(continueMutex_);
         if (continues_.empty()) {

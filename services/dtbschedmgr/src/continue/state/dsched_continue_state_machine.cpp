@@ -49,7 +49,7 @@ int32_t DSchedContinueStateMachine::Execute(const AppExecFwk::InnerEvent::Pointe
     }
     int32_t ret = currentState_->Execute(dContinue, event);
     if (ret != ERR_OK) {
-        HILOGE("DSchedContinueStateMachine currentState: %d excute event %d failed, ret %d",
+        HILOGE("DSchedContinueStateMachine currentState: %{public}d excute event %{public}d failed, ret %{public}d",
             currentState_->GetStateType(), event->GetInnerEventId(), ret);
     }
     return ret;
@@ -58,9 +58,10 @@ int32_t DSchedContinueStateMachine::Execute(const AppExecFwk::InnerEvent::Pointe
 void DSchedContinueStateMachine::UpdateState(DSchedContinueStateType stateType)
 {
     if (stateType != DSCHED_CONTINUE_SOURCE_START_STATE && stateType != DSCHED_CONTINUE_SINK_START_STATE) {
-        HILOGI("DSchedContinueStateMachine update state from %d to %d", currentState_->GetStateType(), stateType);
+        HILOGI("DSchedContinueStateMachine update state from %{public}d to %{public}d",
+            currentState_->GetStateType(), stateType);
     } else {
-        HILOGI("DSchedContinueStateMachine update state %d", stateType);
+        HILOGI("DSchedContinueStateMachine update state %{public}d", stateType);
     }
     currentState_ = CreateState(stateType);
     return;
@@ -104,7 +105,7 @@ std::shared_ptr<DSchedContinueState> DSchedContinueStateMachine::CreateState(DSc
             break;
         }
         default:
-            HILOGE("DSchedContinueStateMachine create state failed, stateType: %d", stateType);
+            HILOGE("DSchedContinueStateMachine create state failed, stateType: %{public}d", stateType);
             break;
     }
     return state;

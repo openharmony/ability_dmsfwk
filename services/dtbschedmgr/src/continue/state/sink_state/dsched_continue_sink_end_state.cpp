@@ -39,14 +39,15 @@ int32_t DSchedContinueSinkEndState::Execute(std::shared_ptr<DSchedContinue> dCon
 {
     auto iterFunc = memberFuncMap_.find(event->GetInnerEventId());
     if (iterFunc == memberFuncMap_.end()) {
-        HILOGI("DSchedContinueSinkEndState execute %d in wrong state", event->GetInnerEventId());
+        HILOGI("DSchedContinueSinkEndState execute %{public}d in wrong state", event->GetInnerEventId());
         return CONTINUE_STATE_MACHINE_INVALID_STATE;
     }
 
     auto memberFunc = iterFunc->second;
     int32_t ret = (this->*memberFunc)(dContinue, event);
     if (ret != ERR_OK) {
-        HILOGI("DSchedContinueSinkEndState execute %d failed, ret: %d", event->GetInnerEventId(), ret);
+        HILOGI("DSchedContinueSinkEndState execute %{public}d failed, ret: %{public}d",
+            event->GetInnerEventId(), ret);
     }
     return ret;
 }
@@ -67,7 +68,7 @@ int32_t DSchedContinueSinkEndState::DoContinueEndTask(std::shared_ptr<DSchedCont
     auto syncContinueData = event->GetSharedObject<int32_t>();
     int32_t ret = dContinue->ExecuteContinueEnd(*syncContinueData);
     if (ret != ERR_OK) {
-        HILOGE("DSchedContinueSinkEndState ExecuteContinueEnd failed, ret: %d", ret);
+        HILOGE("DSchedContinueSinkEndState ExecuteContinueEnd failed, ret: %{public}d", ret);
     }
     return ret;
 }

@@ -41,14 +41,15 @@ int32_t DSchedContinueSourceStartState::Execute(std::shared_ptr<DSchedContinue> 
 {
     auto iterFunc = memberFuncMap_.find(event->GetInnerEventId());
     if (iterFunc == memberFuncMap_.end()) {
-        HILOGI("DSchedContinueSourceStartState execute %d in wrong state", event->GetInnerEventId());
+        HILOGI("DSchedContinueSourceStartState execute %{public}d in wrong state", event->GetInnerEventId());
         return CONTINUE_STATE_MACHINE_INVALID_STATE;
     }
 
     auto memberFunc = iterFunc->second;
     int32_t ret = (this->*memberFunc)(dContinue, event);
     if (ret != ERR_OK) {
-        HILOGI("DSchedContinueSourceStartState execute %d failed, ret: %d", event->GetInnerEventId(), ret);
+        HILOGI("DSchedContinueSourceStartState execute %{public}d failed, ret: %{public}d",
+            event->GetInnerEventId(), ret);
     }
     return ret;
 }
@@ -69,7 +70,7 @@ int32_t DSchedContinueSourceStartState::DoContinuePushReqTask(std::shared_ptr<DS
     auto syncContinueData = event->GetSharedObject<DistributedWantParams>();
     int32_t ret = dContinue->ExecuteContinueReq(syncContinueData);
     if (ret != ERR_OK) {
-        HILOGE("DSchedContinueSourceStartState ExecuteContinueAbility failed, ret: %d", ret);
+        HILOGE("DSchedContinueSourceStartState ExecuteContinueAbility failed, ret: %{public}d", ret);
     }
     return ret;
 }
@@ -85,7 +86,7 @@ int32_t DSchedContinueSourceStartState::DoContinueAbilityTask(std::shared_ptr<DS
     auto syncContinueData = event->GetSharedObject<int32_t>();
     int32_t ret = dContinue->ExecuteContinueAbility(*syncContinueData);
     if (ret != ERR_OK) {
-        HILOGE("DSchedContinueSourceStartState ExecuteContinueAbility failed, ret: %d", ret);
+        HILOGE("DSchedContinueSourceStartState ExecuteContinueAbility failed, ret: %{public}d", ret);
     }
     return ret;
 }
@@ -101,7 +102,7 @@ int32_t DSchedContinueSourceStartState::DoContinueEndTask(std::shared_ptr<DSched
     auto syncContinueData = event->GetSharedObject<int32_t>();
     int32_t ret = dContinue->ExecuteContinueError(*syncContinueData);
     if (ret != ERR_OK) {
-        HILOGE("DSchedContinueSourceStartState ExecuteContinueError failed, ret: %d", ret);
+        HILOGE("DSchedContinueSourceStartState ExecuteContinueError failed, ret: %{public}d", ret);
     }
     return ret;
 }

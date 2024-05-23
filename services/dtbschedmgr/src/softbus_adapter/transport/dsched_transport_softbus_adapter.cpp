@@ -74,13 +74,13 @@ int32_t DSchedTransportSoftbusAdapter::InitChannel()
     HILOGI("start");
     serverSocket_ = CreateServerSocket();
     if (serverSocket_ <= 0) {
-        HILOGE("create socket failed, ret: %d", serverSocket_);
+        HILOGE("create socket failed, ret: %{public}d", serverSocket_);
         return serverSocket_;
     }
 
     int32_t ret = Listen(serverSocket_, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
     if (ret != ERR_OK) {
-        HILOGE("service listen failed, ret: %d", ret);
+        HILOGE("service listen failed, ret: %{public}d", ret);
         return ret;
     }
     HILOGI("end");
@@ -97,7 +97,7 @@ int32_t DSchedTransportSoftbusAdapter::CreateServerSocket()
         .dataType = DATA_TYPE_BYTES
     };
     int32_t socket = Socket(info);
-    HILOGI("finish, socket session id: %d", socket);
+    HILOGI("finish, socket session id: %{public}d", socket);
     return socket;
 }
 
@@ -119,17 +119,19 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
 
     int32_t sessionId = CreateClientSocket(peerDeviceId);
     if (sessionId <= 0) {
-        HILOGE("create socket failed, ret: %d", sessionId);
+        HILOGE("create socket failed, ret: %{public}d", sessionId);
         return sessionId;
     }
 
     int32_t ret = SetFirstCallerTokenID(callingTokenId_);
-    HILOGD("SetFirstCallerTokenID callingTokenId: %d, ret: %d", callingTokenId_, ret);
+    HILOGD("SetFirstCallerTokenID callingTokenId: %{public}d, ret: %{public}d", callingTokenId_, ret);
     callingTokenId_ = 0;
 
+    HILOGI("bind begin");
     ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+    HILOGI("bind end");
     if (ret != ERR_OK) {
-        HILOGE("client bind failed, ret: %d", ret);
+        HILOGE("client bind failed, ret: %{public}d", ret);
         Shutdown(sessionId);
         return INVALID_SESSION_ID;
     }
@@ -159,7 +161,7 @@ int32_t DSchedTransportSoftbusAdapter::CreateClientSocket(const std::string &pee
         .dataType = DATA_TYPE_BYTES
     };
     int32_t sessionId = Socket(info);
-    HILOGI("finish, socket session id: %d", sessionId);
+    HILOGI("finish, socket session id: %{public}d", sessionId);
     return sessionId;
 }
 
@@ -199,7 +201,7 @@ void DSchedTransportSoftbusAdapter::DisconnectDevice(const std::string &peerDevi
         sessions_.erase(sessionId);
         NotifyListenersSessionShutdown(sessionId, true);
     }
-    HILOGI("finish, socket session id: %d", sessionId);
+    HILOGI("finish, socket session id: %{public}d", sessionId);
     return;
 }
 
@@ -220,7 +222,7 @@ void DSchedTransportSoftbusAdapter::OnShutdown(int32_t sessionId, bool isSelfcal
     {
         std::lock_guard<std::mutex> sessionLock(sessionMutex_);
         if (sessions_.empty() || sessions_.count(sessionId) == 0) {
-            HILOGE("error, invalid sessionId %d", sessionId);
+            HILOGE("error, invalid sessionId %{public}d", sessionId);
             return;
         }
         HILOGI("peer %{public}s shutdown, socket sessionId: %{public}d.",
@@ -259,7 +261,7 @@ int32_t DSchedTransportSoftbusAdapter::ReleaseChannel()
         }
         sessions_.clear();
     }
-    HILOGI("shutdown server, socket session id: %d", serverSocket_);
+    HILOGI("shutdown server, socket session id: %{public}d", serverSocket_);
     Shutdown(serverSocket_);
     serverSocket_ = 0;
     return ERR_OK;
@@ -270,7 +272,7 @@ int32_t DSchedTransportSoftbusAdapter::SendData(int32_t sessionId, int32_t dataT
 {
     std::lock_guard<std::mutex> sessionLock(sessionMutex_);
     if (!sessions_.count(sessionId)) {
-        HILOGE("error, invalid session id %d", sessionId);
+        HILOGE("error, invalid session id %{public}d", sessionId);
         return INVALID_SESSION_ID;
     }
     return sessions_[sessionId]->SendData(dataBuffer, dataType);
@@ -285,25 +287,25 @@ int32_t DSchedTransportSoftbusAdapter::SendBytesBySoftbus(int32_t sessionId,
 void DSchedTransportSoftbusAdapter::OnBytes(int32_t sessionId, const void *data, uint32_t dataLen)
 {
     if (dataLen == 0 || dataLen > DSCHED_MAX_RECV_DATA_LEN || data == nullptr) {
-        HILOGE("error, dataLen: %d, session id: %d", dataLen, sessionId);
+        HILOGE("error, dataLen: %{public}d, session id: %{public}d", dataLen, sessionId);
         return;
     }
-    HILOGD("start, sessionId: %d", sessionId);
+    HILOGD("start, sessionId: %{public}d", sessionId);
     {
         std::lock_guard<std::mutex> sessionLock(sessionMutex_);
         if (!sessions_.count(sessionId)) {
-            HILOGE("invalid session id %d", sessionId);
+            HILOGE("invalid session id %{public}d", sessionId);
             return;
         }
         std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(dataLen);
         int32_t ret = memcpy_s(buffer->Data(), buffer->Capacity(), data, dataLen);
         if (ret != ERR_OK) {
-            HILOGE("memcpy_s failed ret: %d", ret);
+            HILOGE("memcpy_s failed ret: %{public}d", ret);
             return;
         }
         sessions_[sessionId]->OnBytesReceived(buffer);
     }
-    HILOGD("end, session id: %d", sessionId);
+    HILOGD("end, session id: %{public}d", sessionId);
     return;
 }
 
@@ -317,7 +319,7 @@ void DSchedTransportSoftbusAdapter::OnDataReady(int32_t sessionId, std::shared_p
     }
     auto iterItem = listeners_.find(dataType);
     if (iterItem == listeners_.end()) {
-        HILOGE("get iterItem failed from listeners_, type %d, sessionId: %d", dataType, sessionId);
+        HILOGE("get iterItem failed from listeners_, type %{public}d, sessionId: %{public}d", dataType, sessionId);
         return;
     }
     std::vector<std::shared_ptr<IDataListener>> objs = iterItem->second;
@@ -329,14 +331,14 @@ void DSchedTransportSoftbusAdapter::OnDataReady(int32_t sessionId, std::shared_p
 
 void DSchedTransportSoftbusAdapter::RegisterListener(int32_t serviceType, std::shared_ptr<IDataListener> listener)
 {
-    HILOGI("start, service type: %d", serviceType);
+    HILOGI("start, service type: %{public}d", serviceType);
     if (listener == nullptr) {
-        HILOGE("listener is null, type: %d", serviceType);
+        HILOGE("listener is null, type: %{public}d", serviceType);
         return;
     }
     std::lock_guard<std::mutex> listenerMapLock(listenerMutex_);
     if (listeners_.empty() || listeners_.find(serviceType) == listeners_.end()) {
-        HILOGD("service type %d does not exist in the listeners, adding", serviceType);
+        HILOGD("service type %{public}d does not exist in the listeners, adding", serviceType);
         std::vector<std::shared_ptr<IDataListener>> newListeners;
         newListeners.emplace_back(listener);
         listeners_[serviceType] = newListeners;
@@ -357,14 +359,14 @@ void DSchedTransportSoftbusAdapter::RegisterListener(int32_t serviceType, std::s
 
 void DSchedTransportSoftbusAdapter::UnregisterListener(int32_t serviceType, std::shared_ptr<IDataListener> listener)
 {
-    HILOGI("start, service type: %d", serviceType);
+    HILOGI("start, service type: %{public}d", serviceType);
     if (listener == nullptr) {
-        HILOGE("listener is null, type: %d", serviceType);
+        HILOGE("listener is null, type: %{public}d", serviceType);
         return;
     }
     std::lock_guard<std::mutex> listenerMapLock(listenerMutex_);
     if (listeners_.empty() || listeners_.find(serviceType) == listeners_.end()) {
-        HILOGD("service type %d does not exist in the listeners, ignore", serviceType);
+        HILOGD("service type %{public}d does not exist in the listeners, ignore", serviceType);
         return;
     }
     auto typeListeners = listeners_.find(serviceType);
