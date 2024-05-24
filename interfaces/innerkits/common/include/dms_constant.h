@@ -22,7 +22,7 @@ namespace Constants {
 constexpr const char* DMS_NAME = "dmsfwk";
 constexpr const char* DMS_VERSION = "5.0.0";
 constexpr const char* DMS_SERVICE_ID = "dmsfwk_svr_id";
-constexpr const char* DMS_CHAR_ID = "dmsInfo";
+constexpr const char* DMS_CHAR_ID = "static_capability";
 constexpr const char* PACKAGE_NAMES = "packageNames";
 constexpr const char* VERSIONS = "versions";
 constexpr const char* DMS_SERVICE_TYPE = "appInfo";
