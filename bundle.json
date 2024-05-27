@@ -69,9 +69,7 @@
           "samgr",
           "window_manager"
         ],
-        "third_party": [
-          "cJSON"
-        ]
+        "third_party": []
       },
       "build": {
         "group_type": {
