@@ -55,7 +55,7 @@ private:
     napi_value OnUnregisterDeviceSelectionCallback(napi_env env, napi_callback_info info);
     napi_value OnUpdateConnectStatus(napi_env env, napi_callback_info info);
     int32_t GetInfoForUpdateConnectStatus(napi_env env,
-        napi_value *argv,int32_t &token, std::string &deviceId, DeviceConnectStatus &deviceConnectStatus);
+        napi_value *argv, int32_t &token, std::string &deviceId, DeviceConnectStatus &deviceConnectStatus);
     napi_value OnStartDeviceManager(napi_env env, napi_callback_info info);
     int32_t CheckParamAndGetToken(napi_env env, size_t argc, napi_value *argv, int32_t &token);
     napi_value OnInitDeviceConnectStateObject(napi_env env, napi_callback_info info);

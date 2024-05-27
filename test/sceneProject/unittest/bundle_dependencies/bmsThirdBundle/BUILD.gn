@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/ohos.gni")
+import("//build/ohos/app/app.gni")
 import("../../../../../dmsfwk.gni")
 
 ohos_hap("bmsThirdBundle") {
@@ -27,9 +27,11 @@ ohos_hap("bmsThirdBundle") {
   certificate_profile =
       "${dms_path}/test/sceneProject/signature/com.third.hiworld.example.p7b"
 }
+
 ohos_js_assets("hjs_demo_js_assets") {
   source_dir = "./src/main/js/default"
 }
+
 ohos_resources("hjs_demo_resources") {
   sources = [ "./src/main/js/resources" ]
   hap_profile = "./src/main/config.json"
