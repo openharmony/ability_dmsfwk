@@ -16,6 +16,7 @@
 #ifndef DISTRIBUTED_BM_STORAGE_H
 #define DISTRIBUTED_BM_STORAGE_H
 
+#include <future>
 #include <map>
 #include <mutex>
 #include <shared_mutex>
@@ -66,8 +67,8 @@ public:
         const std::string& continueType, ContinueEventInfo &continueEventInfo);
     void UpdateDistributedData();
     int32_t CloudSync();
-    int32_t PullOtherDistributedData();
-    int32_t PushOtherDistributedData();
+    int32_t PullOtherDistributedData(const std::vector<std::string> &networkIdList);
+    int32_t PushOtherDistributedData(const std::vector<std::string> &networkIdList);
 
 private:
     std::string DeviceAndNameToKey(const std::string &udid, const std::string &bundleName) const;
@@ -75,11 +76,17 @@ private:
     bool CheckKvStore();
     DistributedKv::Status GetKvStore();
     bool DealGetBundleName(const std::string &networkId, const uint16_t& bundleNameId, std::string &bundleName);
-    uint16_t CreateBundleNameId();
+    uint16_t CreateBundleNameId(const std::string &bundleName);
+    void AddBundleNameId(const uint16_t &bundleNameId, const std::string &bundleName);
+    void DelBundleNameId(const std::string &bundleName);
     DmsBundleInfo ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo);
     bool InnerSaveStorageDistributeInfo(const DmsBundleInfo &distributedBundleInfo, const std::string &localUdid);
     std::map<std::string, DmsBundleInfo> GetAllOldDistributionBundleInfo(
         const std::vector<std::string> &bundleNames);
+    void GetEntries(const std::string &networkId, const OHOS::DistributedKv::Key &allEntryKeyPrefix,
+        std::promise<OHOS::DistributedKv::Status> &resultStatusSignal,
+        std::vector<OHOS::DistributedKv::Entry> &allEntries);
+    OHOS::DistributedKv::Status GetResultSatus(std::promise<OHOS::DistributedKv::Status> &resultStatusSignal);
 
 private:
     static std::mutex mutex_;
@@ -90,7 +97,8 @@ private:
     std::shared_ptr<DistributedKv::SingleKvStore> kvStorePtr_;
     mutable std::mutex kvStorePtrMutex_;
     OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> bundleMgr_;
-    std::vector<bool> bundleNameIdTables_;
+    std::map<uint16_t, std::string> bundleNameIdTables_;
+    int32_t waittingTime_ = 180; // 3 s
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS
