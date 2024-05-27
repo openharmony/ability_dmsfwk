@@ -408,6 +408,7 @@ DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::Bun
             dmsAbilityInfo.continueType.push_back(continueType);
             dmsAbilityInfo.continueTypeId.push_back(pos++);
         }
+        dmsAbilityInfo.moduleName = abilityInfo.moduleName;
         distributedBundleInfo.dmsAbilityInfos.push_back(dmsAbilityInfo);
     }
     return distributedBundleInfo;
@@ -666,6 +667,18 @@ std::string FindAbilityName(const DmsBundleInfo& distributedBundleInfo, std::str
     return "";
 }
 
+std::string FindModuleName(const DmsBundleInfo& distributedBundleInfo, std::string continueType)
+{
+    for (auto dmsAbilityInfo : distributedBundleInfo.dmsAbilityInfos) {
+        for (auto ele : dmsAbilityInfo.continueType) {
+            if (ele == continueType) {
+                return dmsAbilityInfo.moduleName;
+            }
+        }
+    }
+    return "";
+}
+
 std::string DmsBmStorage::GetAbilityName(const std::string &networkId, std::string &bundleName,
     std::string &continueType)
 {
@@ -755,6 +768,47 @@ bool DmsBmStorage::GetContinueTypeId(const std::string &bundleName, const std::s
         }
     }
     HILOGW("Can't find continueTypeId");
+    return false;
+}
+
+bool DmsBmStorage::GetContinueEventInfo(const std::string &networkId, const std::string &bundleName,
+    const std::string& continueType, ContinueEventInfo &continueEventInfo)
+{
+    HILOGI("networkId: %{public}s,  bundleName: %{public}s",
+        GetAnonymStr(networkId).c_str(), bundleName.c_str());
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return false;
+    }
+    std::string udid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(networkId);
+    if (udid == "") {
+        HILOGE("can not get udid by networkId");
+        return false;
+    }
+    Key allEntryKeyPrefix("");
+    std::vector<Entry> allEntries;
+    Status status = kvStorePtr_->GetEntries(allEntryKeyPrefix, allEntries);
+    if (status != Status::SUCCESS) {
+        HILOGE("GetEntries error: %{public}d", status);
+        return false;
+    }
+    for (auto entry : allEntries) {
+        std::string key = entry.key.ToString();
+        std::string value =  entry.value.ToString();
+        if (key.find(udid) == std::string::npos) {
+            continue;
+        }
+        DmsBundleInfo distributedBundleInfo;
+        if (distributedBundleInfo.FromJsonString(value) && distributedBundleInfo.bundleName == bundleName) {
+            HILOGI("value: %{public}s", value.c_str());
+            continueEventInfo.networkId = networkId;
+            continueEventInfo.bundleName = bundleName;
+            continueEventInfo.abilityName = FindAbilityName(distributedBundleInfo, continueType);
+            continueEventInfo.moduleName = FindModuleName(distributedBundleInfo, continueType);
+            return true;
+        }
+    }
+    HILOGE("Can't find ContinueInfo!");
     return false;
 }
 }  // namespace DistributedSchedule

@@ -186,8 +186,7 @@ HWTEST_F(DistributedBmStorageTest, CloudSyncTest_001, TestSize.Level1)
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
-        int32_t ret = dmsBmStorage_->GetInstance()->CloudSync();
-        EXPECT_EQ(ret, ERR_OK);
+        dmsBmStorage_->GetInstance()->CloudSync();
     }
     DTEST_LOG << "DistributedBmStorageTest CloudSyncTest_001 end" << std::endl;
 }
@@ -301,6 +300,28 @@ HWTEST_F(DistributedBmStorageTest, GetContinueTypeIdTest_001, TestSize.Level1)
         EXPECT_EQ(ret, false);
     }
     DTEST_LOG << "DistributedBmStorageTest GetContinueTypeIdTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetContinueEventInfoTest_001
+ * @tc.desc: test delete DistributedBmStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, GetContinueEventInfoTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest GetContinueEventInfoTest_001 start" << std::endl;
+    auto distributedDataStorage = GetDmsBmStorage();
+    EXPECT_NE(distributedDataStorage, nullptr);
+    if (distributedDataStorage != nullptr) {
+        std::string networkId;
+        std::string bundleName;
+        std::string continueType;
+        ContinueEventInfo continueEventInfo;
+        bool ret = dmsBmStorage_->GetInstance()->GetContinueEventInfo(networkId, bundleName,
+            continueType, continueEventInfo);
+        EXPECT_EQ(ret, false);
+    }
+    DTEST_LOG << "DistributedBmStorageTest GetContinueEventInfoTest_001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

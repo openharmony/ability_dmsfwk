@@ -60,7 +60,8 @@ public:
     int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;
     int32_t StopSyncRemoteMissions(const std::string& devId) override;
     int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
-    int32_t RegisterDSchedEventListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
+    int32_t RegisterDSchedEventListener(const uint8_t& type, const sptr<IRemoteObject>& obj) override;
+    int32_t UnRegisterDSchedEventListener(const uint8_t& type, const sptr<IRemoteObject>& obj) override;
     int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
     int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
     int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;

@@ -26,9 +26,9 @@ namespace {
 const std::string TAG = "DmsHandle";
 }
 
-int32_t DmsHandler::RegisterDSchedEventListener(std::string type, sptr<IDSchedEventListener>& listener)
+int32_t DmsHandler::RegisterDSchedEventListener(const uint8_t& type, sptr<IDSchedEventListener>& listener)
 {
-    HILOGI("RegisterListener type:%s", type.c_str());
+    HILOGI("RegisterListener type:%d", type);
     if (listener == nullptr) {
         HILOGE("RegisterListener is null.");
         return GET_REMOTE_DMS_FAIL;
@@ -41,9 +41,9 @@ int32_t DmsHandler::RegisterDSchedEventListener(std::string type, sptr<IDSchedEv
     return 0;
 }
 
-int32_t DmsHandler::UnRegisterDSchedEventListener(std::string type, sptr<IDSchedEventListener> &listener)
+int32_t DmsHandler::UnRegisterDSchedEventListener(const uint8_t& type, sptr<IDSchedEventListener> &listener)
 {
-    HILOGI("UnRegisterListener");
+    HILOGI("RegisterListener type:%d", type);
     if (listener == nullptr) {
         HILOGI("UnRegisterListener is null.");
         return GET_REMOTE_DMS_FAIL;

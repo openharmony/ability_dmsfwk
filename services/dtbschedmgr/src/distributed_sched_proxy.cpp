@@ -511,7 +511,7 @@ int32_t DistributedSchedProxy::RegisterMissionListener(const std::u16string& dev
         data, reply);
 }
 
-int32_t DistributedSchedProxy::RegisterDSchedEventListener(const std::string& type,
+int32_t DistributedSchedProxy::RegisterDSchedEventListener(const uint8_t& type,
     const sptr<IRemoteObject>& obj)
 {
     HILOGI("RegisterDSchedEventListener called");
@@ -525,14 +525,33 @@ int32_t DistributedSchedProxy::RegisterDSchedEventListener(const std::string& ty
     if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
         return ERR_FLATTEN_OBJECT;
     }
-    PARCEL_WRITE_HELPER(data, String, type);
+    PARCEL_WRITE_HELPER(data, Uint8, type);
     PARCEL_WRITE_HELPER(data, RemoteObject, obj);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_DSCHED_EVENT_LISTENER),
         data, reply);
 }
 
-int32_t DistributedSchedProxy::RegisterOnListener(const std::string& type,
+int32_t DistributedSchedProxy::UnRegisterDSchedEventListener(const uint8_t& type,
     const sptr<IRemoteObject>& obj)
+{
+    HILOGI("UnRegisterDSchedEventListener called");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("remote system ability is null");
+        return ERR_NULL_OBJECT;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_WRITE_HELPER(data, Uint8, type);
+    PARCEL_WRITE_HELPER(data, RemoteObject, obj);
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::UNREGISTER_DSCHED_EVENT_LISTENER),
+        data, reply);
+}
+
+int32_t DistributedSchedProxy::RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj)
 {
     HILOGI("RegisterOnListener called");
     sptr<IRemoteObject> remote = Remote();
@@ -551,8 +570,7 @@ int32_t DistributedSchedProxy::RegisterOnListener(const std::string& type,
         data, reply);
 }
 
-int32_t DistributedSchedProxy::RegisterOffListener(const std::string& type,
-    const sptr<IRemoteObject>& obj)
+int32_t DistributedSchedProxy::RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj)
 {
     HILOGI("RegisterOffListener called");
     sptr<IRemoteObject> remote = Remote();

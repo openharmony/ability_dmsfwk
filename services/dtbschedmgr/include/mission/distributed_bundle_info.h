@@ -27,6 +27,7 @@ struct DmsAbilityInfo : public Parcelable {
     std::string abilityName;
     std::vector<std::string> continueType;
     std::vector<uint8_t> continueTypeId;
+    std::string moduleName;
 
     bool ReadFromParcel(Parcel &parcel);
     virtual bool Marshalling(Parcel &parcel) const override;

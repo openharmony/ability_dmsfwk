@@ -26,7 +26,7 @@ using namespace std;
 Business g_business;
 namespace {
 DmsHandler &dmsSourceHandlerdemo = DmsHandler::GetInstance();
-std::string g_type = "IDSchedEventListener";
+uint8_t g_type = DMS_CONTINUE;
 sptr<IDSchedEventListener> listener = sptr<IDSchedEventListener>(new Business());
 ContinueInfo g_continueInfo;
 }
@@ -71,9 +71,14 @@ void Business::DSchedEventNotify(EventNotify& notify)
     cout << "eventResult: " << notify.eventResult_ << endl;
     cout << "srcNetworkId: " << notify.srcNetworkId_ << endl;
     cout << "dstNetworkId: " << notify.dstNetworkId_ << endl;
-    cout << "bundleName: " << notify.bundleName_ << endl;
-    cout << "moduleName: " << notify.moduleName_ << endl;
-    cout << "abilityName: " << notify.abilityName_ << endl;
+    cout << "srcBundleName: " << notify.srcBundleName_ << endl;
+    cout << "srcModuleName: " << notify.srcModuleName_ << endl;
+    cout << "srcAbilityName: " << notify.srcAbilityName_ << endl;
+    cout << "destBundleName: " << notify.destBundleName_ << endl;
+    cout << "destModuleName: " << notify.destModuleName_ << endl;
+    cout << "destAbilityName: " << notify.destAbilityName_ << endl;
+    cout << "dSchedEventType: " << notify.dSchedEventType_ << endl;
+    cout << "state: " << notify.state_ << endl;
     cout << "DSchedEventNotify Success." << endl;
 }
 

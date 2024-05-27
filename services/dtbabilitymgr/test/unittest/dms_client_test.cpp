@@ -29,7 +29,6 @@ using namespace testing::ext;
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-const std::string TYPE = "type";
 const std::string DEVICE_ID = "123456789ABCD";
 }
 
@@ -82,7 +81,7 @@ HWTEST_F(DistributedClientTest, RegisterDSchedEventListener_001, TestSize.Level3
         return;
     }
     sptr<IDSchedEventListener> listener = sptr<IDSchedEventListener>(new BusinessHandlerTest());
-    int32_t result = distributedClient_.RegisterDSchedEventListener(TYPE, listener);
+    int32_t result = distributedClient_.RegisterDSchedEventListener(DMS_CONTINUE, listener);;
     EXPECT_TRUE(result != ERR_NONE);
     DTEST_LOG << "DistributedClientTest RegisterDSchedEventListener_001 end" << std::endl;
 }
@@ -97,7 +96,7 @@ HWTEST_F(DistributedClientTest, RegisterDSchedEventListener_002, TestSize.Level3
 {
     DTEST_LOG << "DistributedClientTest RegisterDSchedEventListener_002 start" << std::endl;
     sptr<IDSchedEventListener> listener = sptr<IDSchedEventListener>(new BusinessHandlerTest());
-    int32_t result = distributedClient_.RegisterDSchedEventListener(TYPE, listener);
+    int32_t result = distributedClient_.RegisterDSchedEventListener(DMS_CONTINUE, listener);;
     EXPECT_TRUE(result != ERR_NONE);
     DTEST_LOG << "DistributedClientTest RegisterDSchedEventListener_002 end" << std::endl;
 }
@@ -116,7 +115,7 @@ HWTEST_F(DistributedClientTest, UnRegisterDSchedEventListener_001, TestSize.Leve
         return;
     }
     sptr<IDSchedEventListener> listener = sptr<IDSchedEventListener>(new BusinessHandlerTest());
-    int32_t result = distributedClient_.UnRegisterDSchedEventListener(TYPE, listener);
+    int32_t result = distributedClient_.UnRegisterDSchedEventListener(DMS_CONTINUE, listener);;
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedClientTest UnRegisterDSchedEventListener_001 end" << std::endl;
 }
@@ -131,7 +130,7 @@ HWTEST_F(DistributedClientTest, UnRegisterDSchedEventListener_002, TestSize.Leve
 {
     DTEST_LOG << "DistributedClientTest UnRegisterDSchedEventListener_002 start" << std::endl;
     sptr<IDSchedEventListener> listener = sptr<IDSchedEventListener>(new BusinessHandlerTest());
-    int32_t result = distributedClient_.UnRegisterDSchedEventListener(TYPE, listener);
+    int32_t result = distributedClient_.UnRegisterDSchedEventListener(DMS_CONTINUE, listener);;
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedClientTest UnRegisterDSchedEventListener_002 end" << std::endl;
 }

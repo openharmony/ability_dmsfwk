@@ -22,12 +22,11 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DistributedEventDiedListener";
-const std::string DSCHED_EVENT_KEY = "IDSchedEventListener";
 }
 void DistributedEventDiedListener::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     HILOGI("DistributedEventDiedListener called");
-    DistributedSchedService::GetInstance().UnRegisterDSchedEventListener(DSCHED_EVENT_KEY, remote.promote());
+    DistributedSchedService::GetInstance().UnRegisterDSchedEventListener(DMS_ALL, remote.promote());
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

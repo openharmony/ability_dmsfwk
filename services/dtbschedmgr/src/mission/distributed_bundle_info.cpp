@@ -40,6 +40,7 @@ const std::string JSON_KEY_DMS_ABILITY_NAME = "abilityName";
 const std::string JSON_KEY_DMS_CONTINUETYPE = "continueType";
 const std::string JSON_KEY_DMS_CONTINUETYPEID = "continueTypeId";
 const std::string JSON_KEY_DMS_USERID = "userIdArr";
+const std::string JSON_KEY_DMS_MODULENAME = "moduleName";
 }
 
 bool DmsAbilityInfo::ReadFromParcel(Parcel &parcel)
@@ -59,6 +60,7 @@ bool DmsAbilityInfo::ReadFromParcel(Parcel &parcel)
     for (auto i = 0; i < continueTypeIdSize; i++) {
         continueTypeId.emplace_back(parcel.ReadUint8());
     }
+    moduleName = Str16ToStr8(parcel.ReadString16());
     return true;
 }
 
@@ -71,6 +73,7 @@ bool DmsAbilityInfo::Marshalling(Parcel &parcel) const
     for (auto &ele : continueTypeId) {
         parcel.WriteUint8(ele);
     }
+    parcel.WriteString16(Str8ToStr16(moduleName));
     return true;
 }
 
@@ -90,7 +93,8 @@ void to_json(nlohmann::json &jsonObject, const DmsAbilityInfo &dmsAbilityInfo)
     jsonObject = nlohmann::json {
         {JSON_KEY_DMS_ABILITY_NAME, dmsAbilityInfo.abilityName},
         {JSON_KEY_DMS_CONTINUETYPE, dmsAbilityInfo.continueType},
-        {JSON_KEY_DMS_CONTINUETYPEID, dmsAbilityInfo.continueTypeId}
+         {JSON_KEY_DMS_CONTINUETYPEID, dmsAbilityInfo.continueTypeId},
+        {JSON_KEY_DMS_MODULENAME, dmsAbilityInfo.moduleName}
     };
 }
 
@@ -122,6 +126,14 @@ void from_json(const nlohmann::json &jsonObject, DmsAbilityInfo &dmsAbilityInfo)
         false,
         parseResult,
         ArrayType::NUMBER);
+    GetValueIfFindKey<std::string>(jsonObject,
+        jsonObjectEnd,
+        JSON_KEY_DMS_MODULENAME,
+        dmsAbilityInfo.moduleName,
+        JsonType::STRING,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
     if (parseResult != ERR_OK) {
         APP_LOGE("read module moduleInfo from jsonObject error, error code : %{public}d", parseResult);
     }
