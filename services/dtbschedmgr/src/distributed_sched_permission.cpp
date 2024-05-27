@@ -150,7 +150,7 @@ int32_t DistributedSchedPermission::GetAccountInfo(const std::string& remoteNetw
     }
 
 #ifdef DMSFWK_SAME_ACCOUNT
-    if (!DeviceManager::GetInstance().IsSameAccount(udid)) {
+    if (!DeviceManager::GetInstance().IsSameAccount(remoteNetworkId)) {
         HILOGE("different account");
         return INVALID_PARAMETERS_ERR;
     }
@@ -408,7 +408,7 @@ bool DistributedSchedPermission::CheckAccountAccessPermission(const CallerInfo& 
 {
     std::string udid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(callerInfo.sourceDeviceId);
 #ifdef DMSFWK_SAME_ACCOUNT
-    if (!DeviceManager::GetInstance().IsSameAccount(udid)) {
+    if (!DeviceManager::GetInstance().IsSameAccount(callerInfo.sourceDeviceId)) {
         HILOGE("check same account permission in DM failed");
         return false;
     }
