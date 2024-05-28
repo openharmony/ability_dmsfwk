@@ -63,6 +63,7 @@ const std::string PERMISSION_DISTRIBUTED_DATASYNC = "ohos.permission.DISTRIBUTED
 const std::string PARAM_FREEINSTALL_APPID = "ohos.freeinstall.params.callingAppId";
 const std::string PARAM_FREEINSTALL_BUNDLENAMES = "ohos.freeinstall.params.callingBundleNames";
 const std::string CMPT_PARAM_FREEINSTALL_BUNDLENAMES = "ohos.extra.param.key.allowedBundles";
+const std::string FEATURE_ABILITY_FLAG_KEY = "ohos.dms.faFlag";
 const std::string DMS_VERSION_ID = "dmsVersion";
 constexpr int32_t QOS_THRESHOLD_VERSION = 5;
 const int DEFAULT_REQUEST_CODE = -1;
@@ -511,7 +512,12 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
     DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
 
     std::string deviceId = want->GetElement().GetDeviceID();
-    int32_t result = (IsUsingQos(deviceId)) ?
+
+    // set in ability runtime, used to seperate callings from FA or stage model
+    bool isFA = want->GetBoolParam(FEATURE_ABILITY_FLAG_KEY, false);
+    want->RemoveParam(FEATURE_ABILITY_FLAG_KEY);
+
+    int32_t result = (!isFA && IsUsingQos(deviceId)) ?
         DSchedContinueManager::GetInstance().StartContinuation(*want, missionId, callerUid, status, accessToken) :
         StartContinuation(*want, missionId, callerUid, status, accessToken);
     ReportEvent(*want, BehaviorEvent::START_CONTINUATION, result, callerUid);

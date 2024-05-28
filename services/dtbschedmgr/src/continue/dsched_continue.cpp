@@ -856,7 +856,7 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
             return OnContinueEnd(ERR_OK);
         }
     }
-    
+
     ret = StartAbility(want, cmd->requestCode_);
     if (ret == ERR_OK) {
         stateMachine_->UpdateState(DSCHED_CONTINUE_SINK_WAIT_END_STATE);
