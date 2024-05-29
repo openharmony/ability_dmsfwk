@@ -71,6 +71,7 @@
 #include "mission/dms_continue_send_manager.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/distributed_sched_mission_manager.h"
+#include "mission/wifi_state_listener.h"
 #endif
 
 namespace OHOS {
@@ -246,12 +247,12 @@ bool DistributedSchedService::Init()
     InitCommonEventListener();
     DMSContinueSendMgr::GetInstance().Init();
     DMSContinueRecvMgr::GetInstance().Init();
+    InitWifiStateListener();
 #endif
     DistributedSchedAdapter::GetInstance().Init();
     if (SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
         DSchedContinueManager::GetInstance().Init();
     }
-    HILOGD("init success.");
     connectDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new ConnectDeathRecipient());
     callerDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new CallerDeathRecipient());
     callerDeathRecipientForLocalDevice_ = sptr<IRemoteObject::DeathRecipient>(
@@ -282,6 +283,20 @@ void DistributedSchedService::InitCommonEventListener()
     EventFwk::CommonEventManager::SubscribeCommonEvent(applyMonitor);
     DmsBmStorage::GetInstance()->UpdateDistributedData();
 #endif
+}
+
+void DistributedSchedService::InitWifiStateListener()
+{
+    HILOGI("InitWifiStateListener called");
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    auto wifiStateListener = std::make_shared<WifiStateListener>(subscribeInfo);
+    wifiStateListener->InitWifiState();
+    bool ret = EventFwk::CommonEventManager::SubscribeCommonEvent(wifiStateListener);
+    if (!ret) {
+        HILOGE("SubscribeCommonEvent wifiStateListener failed!");
+    }
 }
 
 void DistributedSchedService::DurationStart(const std::string srcDeviceId, const std::string dstDeviceId)

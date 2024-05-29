@@ -28,6 +28,7 @@
 #include "softbus_adapter/softbus_adapter.h"
 #include "switch_status_dependency.h"
 #include "datashare_manager.h"
+#include "mission/wifi_state_adapter.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -88,6 +89,10 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
     if (!IsContinueSwitchOn) {
         HILOGE("ContinueSwitch status is off");
+        return;
+    }
+    if (!WifiStateAdapter::GetInstance().IsWifiActive()) {
+        HILOGE("wifi is not activated");
         return;
     }
     if (dataLen < DMS_SEND_LEN) {

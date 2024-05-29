@@ -31,6 +31,7 @@
 #include "switch_status_dependency.h"
 #include "dsched_continue_manager.h"
 #include "mission/dms_continue_recv_manager.h"
+#include "mission/wifi_state_adapter.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -134,6 +135,10 @@ void DMSContinueSendMgr::NotifyMissionFocused(const int32_t missionId, FocusedRe
     HILOGI("NotifyMissionFocused called, missionId: %{public}d, reason: %{public}d", missionId, reason);
     if (reason <= FocusedReason::MIN || reason >= FocusedReason::MAX) {
         HILOGI("Unknown focusedReason, no need to deal NotifyMissionFocused");
+        return;
+    }
+    if (!WifiStateAdapter::GetInstance().IsWifiActive()) {
+        HILOGE("wifi is not activated");
         return;
     }
     auto feedfunc = [this, missionId, reason]() {

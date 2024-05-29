@@ -176,6 +176,7 @@ ohos_shared_library("distributedschedsvr") {
     "kv_store:distributeddata_inner",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "wifi:wifi_sdk",
     "window_manager:libwsutils",
     "window_manager:scene_session",
     "window_manager:session_manager_lite",
@@ -212,6 +213,8 @@ ohos_shared_library("distributedschedsvr") {
       "src/mission/mission_info_converter.cpp",
       "src/mission/snapshot.cpp",
       "src/mission/snapshot_converter.cpp",
+      "src/mission/wifi_state_adapter.cpp",
+      "src/mission/wifi_state_listener.cpp",
     ]
     external_deps += [ "image_framework:image_native" ]
   }
