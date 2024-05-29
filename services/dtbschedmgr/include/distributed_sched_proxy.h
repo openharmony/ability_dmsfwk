@@ -60,8 +60,8 @@ public:
     int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;
     int32_t StopSyncRemoteMissions(const std::string& devId) override;
     int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
-    int32_t RegisterDSchedEventListener(const uint8_t& type, const sptr<IRemoteObject>& obj) override;
-    int32_t UnRegisterDSchedEventListener(const uint8_t& type, const sptr<IRemoteObject>& obj) override;
+    int32_t RegisterDSchedEventListener(const DSchedEventType& type, const sptr<IRemoteObject>& obj) override;
+    int32_t UnRegisterDSchedEventListener(const DSchedEventType& type, const sptr<IRemoteObject>& obj) override;
     int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
     int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
     int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
@@ -101,6 +101,7 @@ public:
         const OHOS::AAFwk::Want& want, int32_t callerUid, uint32_t accessToken, int32_t extensionType) override;
     virtual int32_t StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& want,
         const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t extensionType) override;
+
 private:
     bool CallerInfoMarshalling(const CallerInfo& callerInfo, MessageParcel& data);
     static inline BrokerDelegator<DistributedSchedProxy> delegator_;

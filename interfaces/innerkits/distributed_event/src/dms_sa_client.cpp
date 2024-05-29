@@ -35,7 +35,7 @@ bool DmsSaClient::SubscribeDmsSA()
     return true;
 }
 
-int32_t DmsSaClient::AddDSchedEventListener(const uint8_t& type, const sptr<IDSchedEventListener>& listener)
+int32_t DmsSaClient::AddDSchedEventListener(const DSchedEventType& type, const sptr<IDSchedEventListener>& listener)
 {
     HILOGI("%{public}s called, the type is %{public}d", __func__, type);
     saMgrProxy_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -59,7 +59,7 @@ int32_t DmsSaClient::AddDSchedEventListener(const uint8_t& type, const sptr<IDSc
     return NO_ERROR;
 }
 
-int32_t DmsSaClient::DelDSchedEventListener(const uint8_t& type, const sptr<IDSchedEventListener>& listener)
+int32_t DmsSaClient::DelDSchedEventListener(const DSchedEventType& type, const sptr<IDSchedEventListener>& listener)
 {
     HILOGI("%{public}s called, the type is %{public}d", __func__, type);
     saMgrProxy_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -89,6 +89,27 @@ int32_t DmsSaClient::GetContinueInfo(ContinueInfo &continueInfo)
         distributedClient.GetContinueInfo(continueInfo);
     }
     return NO_ERROR;
+}
+
+int32_t DmsSaClient::GetDSchedEventInfo(const DSchedEventType &type, std::vector<EventNotify> &events)
+{
+    HILOGI("%{public}s called", __func__);
+    saMgrProxy_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (saMgrProxy_ == nullptr) {
+        HILOGE("Get SA manager proxy fail.");
+        return AAFwk::INNER_ERR;
+    }
+    if (!saMgrProxy_->CheckSystemAbility(DISTRIBUTED_SCHED_SA_ID)) {
+        HILOGE("Get SA manager proxy fail.");
+        return AAFwk::INNER_ERR;
+    }
+
+    DistributedClient distributedClient;
+    int32_t ret = distributedClient.GetDSchedEventInfo(type, events);
+    if (ret != ERR_OK) {
+        HILOGE("Get dms event Info proxy call fail, ret %{public}d.", ret);
+    }
+    return ret;
 }
 
 void DmsSaClient::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)

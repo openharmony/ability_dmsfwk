@@ -37,6 +37,7 @@ const std::string EXTRO_INFO_JSON_KEY_ACCESS_TOKEN = "accessTokenID";
 const std::string EXTRO_INFO_JSON_KEY_REQUEST_CODE = "requestCode";
 const std::string CMPT_PARAM_FREEINSTALL_BUNDLENAMES = "ohos.extra.param.key.allowedBundles";
 const std::string DMS_VERSION_ID = "dmsVersion";
+const std::string DMS_UID_SPEC_BUNDLE_NAME = "dmsCallerUidBundleName";
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 constexpr int32_t WAIT_TIME = 15;
 #endif
@@ -511,7 +512,7 @@ int32_t DistributedSchedProxy::RegisterMissionListener(const std::u16string& dev
         data, reply);
 }
 
-int32_t DistributedSchedProxy::RegisterDSchedEventListener(const uint8_t& type,
+int32_t DistributedSchedProxy::RegisterDSchedEventListener(const DSchedEventType& type,
     const sptr<IRemoteObject>& obj)
 {
     HILOGI("RegisterDSchedEventListener called");
@@ -531,7 +532,7 @@ int32_t DistributedSchedProxy::RegisterDSchedEventListener(const uint8_t& type,
         data, reply);
 }
 
-int32_t DistributedSchedProxy::UnRegisterDSchedEventListener(const uint8_t& type,
+int32_t DistributedSchedProxy::UnRegisterDSchedEventListener(const DSchedEventType& type,
     const sptr<IRemoteObject>& obj)
 {
     HILOGI("UnRegisterDSchedEventListener called");
@@ -822,6 +823,10 @@ int32_t DistributedSchedProxy::StartAbilityByCallFromRemote(const OHOS::AAFwk::W
     if (callerInfo.extraInfoJson.find(DMS_VERSION_ID) != callerInfo.extraInfoJson.end()) {
         extraInfoJson[DMS_VERSION_ID] = callerInfo.extraInfoJson[DMS_VERSION_ID];
     }
+    if (callerInfo.extraInfoJson.find(DMS_UID_SPEC_BUNDLE_NAME) != callerInfo.extraInfoJson.end()) {
+        extraInfoJson[DMS_UID_SPEC_BUNDLE_NAME] = callerInfo.extraInfoJson[DMS_UID_SPEC_BUNDLE_NAME];
+    }
+
     std::string extraInfo = extraInfoJson.dump();
     PARCEL_WRITE_HELPER(data, String, extraInfo);
     DistributedWant dstbWant(want);

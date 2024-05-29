@@ -29,6 +29,7 @@
 #include "dfx/dms_hitrace_constants.h"
 #include "distributed_want.h"
 #include "distributed_sched_permission.h"
+#include "distributed_sched_types.h"
 #include "distributed_sched_utils.h"
 #include "dms_version_manager.h"
 #include "dsched_continue_manager.h"
@@ -65,6 +66,7 @@ const std::string PARAM_FREEINSTALL_BUNDLENAMES = "ohos.freeinstall.params.calli
 const std::string CMPT_PARAM_FREEINSTALL_BUNDLENAMES = "ohos.extra.param.key.allowedBundles";
 const std::string FEATURE_ABILITY_FLAG_KEY = "ohos.dms.faFlag";
 const std::string DMS_VERSION_ID = "dmsVersion";
+const std::string DMS_UID_SPEC_BUNDLE_NAME = "dmsCallerUidBundleName";
 constexpr int32_t QOS_THRESHOLD_VERSION = 5;
 const int DEFAULT_REQUEST_CODE = -1;
 }
@@ -92,6 +94,8 @@ void DistributedSchedStub::InitExtendedLocalFuncsInner()
         &DistributedSchedStub::UnRegisterDSchedEventListenerInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_CONTINUE_INFO)] =
         &DistributedSchedStub::GetContinueInfoInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_DSCHED_EVENT_INFO)] =
+        &DistributedSchedStub::GetDSchedEventInfoInner;
 #endif
 }
 
@@ -348,11 +352,18 @@ void DistributedSchedStub::SaveExtraInfo(const nlohmann::json& extraInfoJson, Ca
         callerInfo.accessToken = accessToken;
         HILOGD("parse extra info, accessTokenID = %u", accessToken);
     }
+
     if (extraInfoJson.find(DMS_VERSION_ID) != extraInfoJson.end() && extraInfoJson[DMS_VERSION_ID].is_string()) {
         std::string dmsVersion = extraInfoJson[DMS_VERSION_ID];
         callerInfo.extraInfoJson[DMS_VERSION_ID] = dmsVersion;
-        HILOGD("save dms version");
     }
+
+    if (extraInfoJson.find(DMS_UID_SPEC_BUNDLE_NAME) != extraInfoJson.end() &&
+        extraInfoJson[DMS_UID_SPEC_BUNDLE_NAME].is_string()) {
+        std::string uidBundleName = extraInfoJson[DMS_UID_SPEC_BUNDLE_NAME];
+        callerInfo.extraInfoJson[DMS_UID_SPEC_BUNDLE_NAME] = uidBundleName;
+    }
+    HILOGD("save dms version");
 }
 
 int32_t DistributedSchedStub::SendResultFromRemoteInner(MessageParcel& data, MessageParcel& reply)
@@ -856,11 +867,7 @@ int32_t DistributedSchedStub::RegisterDSchedEventListenerInner(MessageParcel& da
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
     }
-    uint8_t type = data.ReadUint8();
-    if (type != DMS_CONTINUE && type != DMS_COLLABRATION && type != DMS_ALL) {
-        HILOGW("read type failed!");
-        return ERR_FLATTEN_OBJECT;
-    }
+    DSchedEventType type = static_cast<DSchedEventType>(data.ReadUint8());
     sptr<IRemoteObject> dSchedEventListener = data.ReadRemoteObject();
     if (dSchedEventListener == nullptr) {
         HILOGW("read IRemoteObject failed!");
@@ -877,11 +884,7 @@ int32_t DistributedSchedStub::UnRegisterDSchedEventListenerInner(MessageParcel& 
         HILOGW("request DENIED!");
         return DMS_PERMISSION_DENIED;
     }
-    uint8_t type = data.ReadUint8();
-    if (type != DMS_CONTINUE && type != DMS_COLLABRATION && type != DMS_ALL) {
-        HILOGW("read type failed!");
-        return ERR_FLATTEN_OBJECT;
-    }
+    DSchedEventType type = static_cast<DSchedEventType>(data.ReadUint8());
     sptr<IRemoteObject> dSchedEventListener = data.ReadRemoteObject();
     if (dSchedEventListener == nullptr) {
         HILOGW("read IRemoteObject failed!");
@@ -899,6 +902,41 @@ int32_t DistributedSchedStub::GetContinueInfoInner(MessageParcel& data, MessageP
     int32_t result = DSchedContinueManager::GetInstance().GetContinueInfo(dstNetworkId, srcNetworkId);
     PARCEL_WRITE_HELPER(reply, String, dstNetworkId);
     PARCEL_WRITE_HELPER(reply, String, srcNetworkId);
+    return result;
+}
+
+int32_t DistributedSchedStub::GetEncodeDSchedEventNotify(const EventNotify& event, MessageParcel& reply)
+{
+    PARCEL_WRITE_HELPER(reply, Int32, event.eventResult_);
+    PARCEL_WRITE_HELPER(reply, String, event.srcNetworkId_);
+    PARCEL_WRITE_HELPER(reply, String, event.dstNetworkId_);
+    PARCEL_WRITE_HELPER(reply, String, event.srcBundleName_);
+    PARCEL_WRITE_HELPER(reply, String, event.srcModuleName_);
+    PARCEL_WRITE_HELPER(reply, String, event.srcAbilityName_);
+    PARCEL_WRITE_HELPER(reply, String, event.destBundleName_);
+    PARCEL_WRITE_HELPER(reply, String, event.destModuleName_);
+    PARCEL_WRITE_HELPER(reply, String, event.destAbilityName_);
+    PARCEL_WRITE_HELPER(reply, Int32, event.dSchedEventType_);
+    PARCEL_WRITE_HELPER(reply, Int32, event.state_);
+    return ERR_OK;
+}
+
+int32_t DistributedSchedStub::GetDSchedEventInfoInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("[PerformanceTest] called, IPC end = %{public}" PRId64, GetTickCount());
+    DSchedEventType type = static_cast<DSchedEventType>(data.ReadInt32());
+    std::vector<EventNotify> eventInfos;
+    int32_t result = GetDSchedEventInfo(type, eventInfos);
+
+    PARCEL_WRITE_HELPER(reply, Int32, result);
+    PARCEL_WRITE_HELPER(reply, Uint32, eventInfos.size());
+    for (const auto &event : eventInfos) {
+        result = GetEncodeDSchedEventNotify(event, reply);
+        if (result != ERR_OK) {
+            HILOGE("Get encode Dms event notify failed!");
+            return DMS_WRITE_FILE_FAILED_ERR;
+        }
+    }
     return result;
 }
 
@@ -1392,7 +1430,7 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
     }
     int32_t requestCode = CreateJsonObject(extraInfo, callerInfo);
     FreeInstallInfo info = {
-        .want = *want, .callerInfo = callerInfo, .requestCode = requestCode, .accountInfo = accountInfo};
+        .want = *want, .requestCode = requestCode, .callerInfo = callerInfo, .accountInfo = accountInfo};
     info.want.RemoveParam(PARAM_FREEINSTALL_APPID);
     info.want.SetParam(PARAM_FREEINSTALL_APPID, callerInfo.callerAppId);
     info.want.RemoveParam(PARAM_FREEINSTALL_BUNDLENAMES);

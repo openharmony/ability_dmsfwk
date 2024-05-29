@@ -53,6 +53,7 @@ ohos_shared_library("continuationmanager_napi") {
   external_deps = [
     "ability_base:want",
     "ability_runtime:abilitykit_native",
+    "ability_runtime:extensionkit_native",
     "ability_runtime:napi_common",
     "ability_runtime:runtime",
     "c_utils:utils",

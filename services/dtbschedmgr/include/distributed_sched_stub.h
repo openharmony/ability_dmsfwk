@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,7 @@ private:
     int32_t RegisterDSchedEventListenerInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnRegisterDSchedEventListenerInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetContinueInfoInner(MessageParcel& data, MessageParcel& reply);
+    int32_t GetDSchedEventInfoInner(MessageParcel& data, MessageParcel& reply);
     int32_t RegisterOnListenerInner(MessageParcel& data, MessageParcel& reply);
     int32_t RegisterOffListenerInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnRegisterMissionListenerInner(MessageParcel& data, MessageParcel& reply);
@@ -92,6 +93,7 @@ private:
     void InitLocalMissionManagerInner();
     void InitRemoteFuncsInner();
     std::shared_ptr<AAFwk::Want> ReadDistributedWant(MessageParcel& data);
+    int32_t GetEncodeDSchedEventNotify(const EventNotify& event, MessageParcel& reply);
 
     int32_t StopRemoteExtensionAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t StopExtensionAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);

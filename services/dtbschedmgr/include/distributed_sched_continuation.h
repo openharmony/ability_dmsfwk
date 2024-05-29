@@ -20,45 +20,16 @@
 #include <map>
 #include <mutex>
 
-#include "distributed_event_died_listener.h"
 #include "event_handler.h"
 #include "iremote_object.h"
 #include "refbase.h"
 
+#include "distributed_event_died_listener.h"
+#include "distributed_sched_types.h"
+
 namespace OHOS {
 namespace DistributedSchedule {
 using FuncContinuationCallback = std::function<void(int32_t missionId)>;
-
-struct ContinueInfo {
-    std::string srcNetworkId;
-    std::string dstNetworkId;
-};
-enum DSchedEventType {
-    DMS_CONTINUE = 0,
-    DMS_COLLABRATION = 1,
-    DMS_ALL = 2,
-};
-
-enum DSchedEventState {
-    DMS_DSCHED_EVENT_START = 0,
-    DMS_DSCHED_EVENT_PROCESSING = 1,
-    DMS_DSCHED_EVENT_STOP = 2,
-    DMS_DSCHED_EVENT_FINISH = 3,
-};
-
-struct EventNotify {
-    int32_t eventResult = -1;
-    std::string srcNetworkId;
-    std::string dstNetworkId;
-    std::string srcBundleName;
-    std::string srcModuleName;
-    std::string srcAbilityName;
-    std::string destBundleName;
-    std::string destModuleName;
-    std::string destAbilityName;
-    DSchedEventType dSchedEventType;
-    DSchedEventState state;
-};
 
 class DSchedContinuation : public std::enable_shared_from_this<DSchedContinuation> {
 public:
@@ -83,6 +54,9 @@ public:
     void SetCleanMissionFlag(int32_t missionId, bool isCleanMission);
     EventNotify continueEvent_;
     ContinueInfo continueInfo_;
+
+private:
+    int32_t NotifyDSchedEventForOneCB(const sptr<IRemoteObject> &cb, int32_t resultCode);
 
 private:
     class ContinuationHandler : public AppExecFwk::EventHandler {
@@ -112,5 +86,4 @@ private:
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
-
 #endif // OHOS_DISTRIBUTED_SCHED_CONTINUATION_H

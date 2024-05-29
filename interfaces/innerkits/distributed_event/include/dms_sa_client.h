@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,14 +18,16 @@
 
 #include <mutex>
 
-#include "distributed_event_listener.h"
-#include "dms_client.h"
-#include "dms_handler.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "sam_log.h"
 #include "system_ability_status_change_stub.h"
 #include "system_ability_definition.h"
+
+#include "distributed_event_listener.h"
+#include "distributed_sched_types.h"
+#include "dms_client.h"
+#include "dms_handler.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -33,17 +35,19 @@ class DmsSaClient : public SystemAbilityStatusChangeStub {
 public:
     static DmsSaClient &GetInstance();
     bool SubscribeDmsSA();
-    int32_t AddDSchedEventListener(const uint8_t& type, const sptr<IDSchedEventListener>& listener);
-    int32_t DelDSchedEventListener(const uint8_t& type, const sptr<IDSchedEventListener>& listener);
+    int32_t AddDSchedEventListener(const DSchedEventType& type, const sptr<IDSchedEventListener>& listener);
+    int32_t DelDSchedEventListener(const DSchedEventType& type, const sptr<IDSchedEventListener>& listener);
     int32_t GetContinueInfo(ContinueInfo &continueInfo);
+    int32_t GetDSchedEventInfo(const DSchedEventType &type, std::vector<EventNotify> &events);
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+
 private:
     DmsSaClient() {};
     ~DmsSaClient() {};
     bool hasSubscribeDmsSA_ = false;
     OHOS::sptr<ISystemAbilityManager> saMgrProxy_;
-    std::map<uint8_t, sptr<IDSchedEventListener>> listeners_;
+    std::map<DSchedEventType, sptr<IDSchedEventListener>> listeners_;
     std::mutex eventMutex_;
 };
 

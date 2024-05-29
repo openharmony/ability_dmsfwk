@@ -26,11 +26,11 @@ using namespace std;
 Business g_business;
 namespace {
 DmsHandler &dmsSourceHandlerdemo = DmsHandler::GetInstance();
-uint8_t g_type = DMS_CONTINUE;
+DSchedEventType g_type = DMS_CONTINUE;
 sptr<IDSchedEventListener> listener = sptr<IDSchedEventListener>(new Business());
 ContinueInfo g_continueInfo;
 }
- 
+
 void Business::Register()
 {
     int32_t result = 0;
@@ -41,7 +41,7 @@ void Business::Register()
         cout << "RegisterDSchedEventListener succeed.CODE = " << result << endl;
     }
 }
- 
+
 void Business::UnRegister()
 {
     int32_t result = 0;
