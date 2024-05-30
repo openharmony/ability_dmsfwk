@@ -1050,6 +1050,7 @@ void DSchedContinue::NotifyContinuationCallbackResult(int32_t result)
     MessageParcel reply;
     MessageOption option;
     int32_t ret = callback_->SendRequest(NOTIFY_MISSION_CALLBACK_RESULT, data, reply, option);
+    callback_ = nullptr;
     if (ret != ERR_OK) {
         HILOGE("send request failed, ret: %{public}d", ret);
     }

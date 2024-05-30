@@ -202,7 +202,8 @@ HWTEST_F(DistributedBmStorageTest, PullOtherDistributedDataTest_001, TestSize.Le
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
-        int32_t ret = dmsBmStorage_->GetInstance()->PullOtherDistributedData();
+        std::vector<std::string> networkIdList = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdList();
+        int32_t ret = dmsBmStorage_->GetInstance()->PullOtherDistributedData(networkIdList);
         EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     }
     DTEST_LOG << "DistributedBmStorageTest PullOtherDistributedDataTest_001 end" << std::endl;
@@ -219,7 +220,8 @@ HWTEST_F(DistributedBmStorageTest, PushOtherDistributedDataDataTest_001, TestSiz
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
-        int32_t ret = dmsBmStorage_->GetInstance()->PushOtherDistributedData();
+        std::vector<std::string> networkIdList = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdList();
+        int32_t ret = dmsBmStorage_->GetInstance()->PushOtherDistributedData(networkIdList);
         EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     }
     DTEST_LOG << "DistributedBmStorageTest PushOtherDistributedDataDataTest_001 end" << std::endl;

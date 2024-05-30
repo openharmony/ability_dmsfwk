@@ -26,6 +26,7 @@
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "mission/distributed_bm_storage.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -104,7 +105,11 @@ void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceChanged(const DmDeviceInfo
 
 void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceReady(const DmDeviceInfo& deviceInfo)
 {
-    HILOGD("called");
+    HILOGI("called");
+    std::vector<std::string> networkIdList;
+    networkIdList.push_back(deviceInfo.networkId);
+    DmsBmStorage::GetInstance()->PullOtherDistributedData(networkIdList);
+    DmsBmStorage::GetInstance()->PushOtherDistributedData(networkIdList);
 }
 
 bool DnetworkAdapter::AddDeviceChangeListener(const std::shared_ptr<DeviceListener>& listener)
