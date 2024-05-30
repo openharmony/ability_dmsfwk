@@ -203,7 +203,6 @@ bool DistributedSchedPermission::GetRelatedGroups(const std::string& udid,
             }
         }
     }
-
     if (accountInfo.groupIdList.empty()) {
         HILOGE("groupIdList is empty");
         return false;

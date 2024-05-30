@@ -27,6 +27,7 @@
 #include "distributed_sched_stub.h"
 #include "distributed_sched_continuation.h"
 #include "dms_callback_task.h"
+#include "dsched_collaborate_callback_mgr.h"
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
 #include "form_mgr_interface.h"
 #endif
@@ -142,14 +143,15 @@ public:
     int32_t StopSyncRemoteMissions(const std::string& devId) override;
     int32_t StopSyncMissionsFromRemote(const CallerInfo& callerInfo) override;
     int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
-    int32_t RegisterDSchedEventListener(const uint8_t& type, const sptr<IRemoteObject>& obj) override;
-    int32_t UnRegisterDSchedEventListener(const uint8_t& type, const sptr<IRemoteObject>& obj) override;
-    int32_t GetContinueInfo(std::string& dstNetworkId, std::string& srcNetworkId) override;
     int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
     int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
     int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
     int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state) override;
 #endif
+    int32_t RegisterDSchedEventListener(const DSchedEventType& type, const sptr<IRemoteObject>& obj) override;
+    int32_t UnRegisterDSchedEventListener(const DSchedEventType& type, const sptr<IRemoteObject>& obj) override;
+    int32_t GetContinueInfo(std::string& dstNetworkId, std::string& srcNetworkId) override;
+    int32_t GetDSchedEventInfo(const DSchedEventType &type, std::vector<EventNotify> &events) override;
     void ProcessConnectDied(const sptr<IRemoteObject>& connect);
     void ProcessDeviceOffline(const std::string& deviceId);
     void DumpConnectInfo(std::string& info);
@@ -193,6 +195,7 @@ public:
     int32_t CheckTargetPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
     ErrCode QueryOsAccount(int32_t& activeAccountId);
+
 private:
     DistributedSchedService();
     bool Init();
@@ -258,8 +261,25 @@ private:
     void SetCleanMissionFlag(const OHOS::AAFwk::Want& want, int32_t missionId);
     void RemoveConnectAbilityInfo(const std::string& deviceId);
     void InitWifiStateListener();
+    void NotifyContinuateEventResult(int32_t resultCode, const EventNotify& event);
+    void NotifyCollaborateEventResult(int32_t resultCode, const EventNotify& event);
+    void GetContinueEventInfo(int32_t callingUid, std::vector<EventNotify> &events);
+    void GetCollaborateEventInfo(int32_t callingUid, std::vector<EventNotify> &events);
+    void GetCollaborateEventsByCallers(int32_t callingUid, const std::string &callingBundleName,
+        std::vector<EventNotify> &events);
+    void GetCollaborateEventsByCallees(int32_t callingUid, const std::string &callingBundleName,
+        std::vector<EventNotify> &events);
+    void GetCurSrcCollaborateEvent(const CallerInfo &callerInfo, const AppExecFwk::ElementName &element,
+        DSchedEventState state, int32_t ret, EventNotify &event);
+    void GetCurDestCollaborateEvent(const CallerInfo &callerInfo, const AppExecFwk::ElementName &element,
+        DSchedEventState state, int32_t ret, EventNotify &event);
+    void NotifyCollaborateEventWithSessions(const std::list<ConnectAbilitySession> &sessionsList,
+        DSchedEventState state, int32_t ret);
+    bool CheckCallingUid();
 
+private:
     std::shared_ptr<DSchedContinuation> dschedContinuation_;
+    std::shared_ptr<DSchedCollaborationCallbackMgr> collaborateCbMgr_;
     std::map<sptr<IRemoteObject>, std::list<ConnectAbilitySession>> distributedConnectAbilityMap_;
     std::map<sptr<IRemoteObject>, ConnectInfo> connectAbilityMap_;
     std::unordered_map<int32_t, uint32_t> trackingUidMap_;

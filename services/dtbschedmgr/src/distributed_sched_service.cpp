@@ -15,6 +15,7 @@
 
 #include "distributed_sched_service.h"
 
+#include <algorithm>
 #include <cinttypes>
 #include <unistd.h>
 
@@ -98,6 +99,7 @@ const std::string DEVICE_TYPE_KEY = "deviceType";
 const std::string CHANGE_TYPE_KEY = "changeType";
 const std::string DMS_HIPLAY_ACTION = "ohos.ability.action.deviceSelect";
 const std::string DMS_VERSION_ID = "dmsVersion";
+const std::string DMS_UID_SPEC_BUNDLE_NAME = "dmsCallerUidBundleName";
 const std::string DMS_CONNECT_TOKEN = "connectToken";
 const std::string DMS_MISSION_ID = "dmsMissionId";
 const std::string SUPPORT_CONTINUE_PAGE_STACK_KEY = "ohos.extra.param.key.supportContinuePageStack";
@@ -130,6 +132,7 @@ constexpr int32_t DMSDURATION_TOTALTIME = 2;
 constexpr int32_t DMSDURATION_DSTTOSRCRPCTIME = 3;
 constexpr int32_t DMSDURATION_SRCTODSTRPCTIME = 5;
 constexpr int32_t DMSDURATION_STARTABILITY = 6;
+constexpr int32_t HID_HAP = 10000; /* first hap user */
 static const std::string CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
 }
 
@@ -160,8 +163,10 @@ void DistributedSchedService::OnStart()
         NotifyCompleteFreeInstallFromRemote(taskId, AAFwk::FREE_INSTALL_TIMEOUT);
     };
     dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    collaborateCbMgr_ = std::make_shared<DSchedCollaborationCallbackMgr>();
     dmsCallbackTask_ = std::make_shared<DmsCallbackTask>();
     dschedContinuation_->Init(continuationCallback);
+    collaborateCbMgr_->Init();
     dmsCallbackTask_->Init(freeCallback);
     HILOGI("OnStart start service success.");
     Publish(this);
@@ -672,8 +677,8 @@ int32_t DistributedSchedService::ProcessContinueLocalMission(const std::string& 
         HILOGE("continuation object null!");
         return INVALID_PARAMETERS_ERR;
     }
-    dschedContinuation_->continueEvent_.srcNetworkId = srcDeviceId;
-    dschedContinuation_->continueEvent_.dstNetworkId = dstDeviceId;
+    dschedContinuation_->continueEvent_.srcNetworkId_ = srcDeviceId;
+    dschedContinuation_->continueEvent_.dstNetworkId_ = dstDeviceId;
     return ContinueLocalMission(dstDeviceId, missionId, callback, wantParams);
 }
 
@@ -690,8 +695,8 @@ int32_t DistributedSchedService::ProcessContinueRemoteMission(const std::string&
         HILOGE("continuation object null!");
         return INVALID_PARAMETERS_ERR;
     }
-    dschedContinuation_->continueEvent_.srcNetworkId = dstDeviceId;
-    dschedContinuation_->continueEvent_.dstNetworkId = srcDeviceId;
+    dschedContinuation_->continueEvent_.srcNetworkId_ = dstDeviceId;
+    dschedContinuation_->continueEvent_.dstNetworkId_ = srcDeviceId;
     HILOGI("ProcessContinueRemoteMission end.");
     return ContinueRemoteMission(srcDeviceId, dstDeviceId, bundleName, callback, wantParams);
 }
@@ -761,7 +766,7 @@ int32_t DistributedSchedService::DealDSchedEventResult(const OHOS::AAFwk::Want& 
         return INVALID_PARAMETERS_ERR;
     }
     DmsContinueTime::GetInstance().SetSrcBundleName(want.GetElement().GetBundleName());
-    DmsContinueTime::GetInstance().SetSrcAbilityName(dschedContinuation_->continueEvent_.srcAbilityName);
+    DmsContinueTime::GetInstance().SetSrcAbilityName(dschedContinuation_->continueEvent_.srcAbilityName_);
     if (status != ERR_OK) {
         HILOGD("want.GetElement().GetDeviceId result:%{public}s", want.GetElement().GetDeviceID().c_str());
         std::string deviceId = want.GetElement().GetDeviceID();
@@ -862,8 +867,8 @@ void DistributedSchedService::NotifyCompleteContinuation(const std::u16string& d
     int dSchedEventresult = dschedContinuation_->NotifyDSchedEventResult(ERR_OK);
     HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
     remoteDms->NotifyContinuationResultFromRemote(sessionId, isSuccess, dstInfo);
-    dschedContinuation_->continueInfo_.srcNetworkId = "";
-    dschedContinuation_->continueInfo_.dstNetworkId = "";
+    dschedContinuation_->continueInfo_.srcNetworkId_ = "";
+    dschedContinuation_->continueInfo_.dstNetworkId_ = "";
 }
 
 int32_t DistributedSchedService::NotifyContinuationResultFromRemote(int32_t sessionId, bool isSuccess,
@@ -884,8 +889,8 @@ int32_t DistributedSchedService::NotifyContinuationResultFromRemote(int32_t sess
 
     int32_t missionId = sessionId;
     NotifyContinuationCallbackResult(missionId, isSuccess ? 0 : NOTIFYCOMPLETECONTINUATION_FAILED);
-    dschedContinuation_->continueInfo_.srcNetworkId = "";
-    dschedContinuation_->continueInfo_.dstNetworkId = "";
+    dschedContinuation_->continueInfo_.srcNetworkId_ = "";
+    dschedContinuation_->continueInfo_.dstNetworkId_ = "";
     return ERR_OK;
 }
 
@@ -984,6 +989,21 @@ void DistributedSchedService::NotifyDSchedEventCallbackResult(int32_t resultCode
 void DistributedSchedService::NotifyDSchedEventCallbackResult(int32_t resultCode, const EventNotify& event)
 {
     HILOGD("Continuation result is: %{public}d", resultCode);
+    switch (event.dSchedEventType_) {
+        case DMS_CONTINUE:
+            NotifyContinuateEventResult(resultCode, event);
+            break;
+        case DMS_COLLABORATION:
+            NotifyCollaborateEventResult(resultCode, event);
+            break;
+        default:
+            HILOGE("Event does not carry specific operation type, eventType %{public}d.", event.dSchedEventType_);
+            return;
+    }
+}
+
+void DistributedSchedService::NotifyContinuateEventResult(int32_t resultCode, const EventNotify& event)
+{
     if (dschedContinuation_ == nullptr) {
         HILOGE("continuation object null!");
         return;
@@ -991,7 +1011,74 @@ void DistributedSchedService::NotifyDSchedEventCallbackResult(int32_t resultCode
     dschedContinuation_->continueEvent_ = event;
     int dSchedEventresult = dschedContinuation_->NotifyDSchedEventResult(resultCode);
     HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
-    dschedContinuation_->continueEvent_ = EventNotify();
+    if (event.state_ == DMS_DSCHED_EVENT_FINISH || resultCode != ERR_OK) {
+        dschedContinuation_->continueEvent_ = EventNotify();
+    }
+}
+
+void DistributedSchedService::NotifyCollaborateEventResult(int32_t resultCode, const EventNotify& event)
+{
+    if (collaborateCbMgr_ == nullptr) {
+        HILOGE("collaborate callback manager is null.");
+        return;
+    }
+    int32_t collaborateEventRet = collaborateCbMgr_->NotifyDSchedEventResult(resultCode, event);
+    HILOGD("NotifyDSchedEventResult result: %{public}d", collaborateEventRet);
+}
+
+void DistributedSchedService::NotifyCollaborateEventWithSessions(
+    const std::list<ConnectAbilitySession> &sessionsList, DSchedEventState state, int32_t ret)
+{
+    for (const auto &session : sessionsList) {
+        for (const auto &element : session.GetElementsList()) {
+            EventNotify tempEvent;
+            GetCurSrcCollaborateEvent(session.GetCallerInfo(), element, state, ret, tempEvent);
+            NotifyDSchedEventCallbackResult(ret, tempEvent);
+        }
+    }
+}
+
+void DistributedSchedService::GetCurSrcCollaborateEvent(const CallerInfo &callerInfo,
+    const AppExecFwk::ElementName &element, DSchedEventState state, int32_t ret, EventNotify &event)
+{
+    std::string callingBundleName;
+    if (!BundleManagerInternal::GetSpecifyBundleNameFromBms(callerInfo.uid, callingBundleName)) {
+        HILOGE("Get specify bundle name for from Bms fail, connect session caller uid %{public}d.", callerInfo.uid);
+    }
+
+    event.eventResult_ = ret;
+    event.srcNetworkId_ = callerInfo.sourceDeviceId;
+    event.dstNetworkId_ = element.GetDeviceID();
+    event.srcBundleName_ = callingBundleName;
+    event.srcModuleName_ = "";
+    event.srcAbilityName_ = "";
+    event.destBundleName_ = element.GetBundleName();
+    event.destModuleName_ = element.GetModuleName();
+    event.destAbilityName_ = element.GetAbilityName();
+    event.dSchedEventType_ = DMS_COLLABORATION;
+    event.state_ = state;
+}
+
+void DistributedSchedService::GetCurDestCollaborateEvent(const CallerInfo &callerInfo,
+    const AppExecFwk::ElementName &element, DSchedEventState state, int32_t ret, EventNotify &event)
+{
+    std::string callerBundleName;
+    if (callerInfo.extraInfoJson.find(DMS_UID_SPEC_BUNDLE_NAME) != callerInfo.extraInfoJson.end() &&
+        callerInfo.extraInfoJson[DMS_UID_SPEC_BUNDLE_NAME].is_string()) {
+        callerBundleName = callerInfo.extraInfoJson[DMS_UID_SPEC_BUNDLE_NAME];
+    }
+
+    event.eventResult_ = ret;
+    event.srcNetworkId_ = callerInfo.sourceDeviceId;
+    event.dstNetworkId_ = element.GetDeviceID();
+    event.srcBundleName_ = callerBundleName;
+    event.srcModuleName_ = "";
+    event.srcAbilityName_ = "";
+    event.destBundleName_ = element.GetBundleName();
+    event.destModuleName_ = element.GetModuleName();
+    event.destAbilityName_ = element.GetAbilityName();
+    event.dSchedEventType_ = DMS_COLLABORATION;
+    event.state_ = state;
 }
 
 void DistributedSchedService::RemoteConnectAbilityMappingLocked(const sptr<IRemoteObject>& connect,
@@ -1156,15 +1243,21 @@ void DistributedSchedService::ProcessCallerDied(const sptr<IRemoteObject>& conne
         return;
     }
     sptr<IRemoteObject> callbackWrapper = connect;
+    CallerInfo callerInfo;
     AppExecFwk::ElementName element;
+    EventNotify tempEvent;
     {
         std::lock_guard<std::mutex> autoLock(calleeLock_);
         auto itConnect = calleeMap_.find(connect);
         if (itConnect != calleeMap_.end()) {
             callbackWrapper = itConnect->second.callbackWrapper;
             element = itConnect->second.element;
+            callerInfo = itConnect->second.callerInfo;
             ReportDistributedComponentChange(itConnect->second, DISTRIBUTED_COMPONENT_REMOVE,
                 IDistributedSched::CALL, IDistributedSched::CALLEE);
+
+            GetCurDestCollaborateEvent(callerInfo, element, DMS_DSCHED_EVENT_STOP, ERR_OK, tempEvent);
+            NotifyDSchedEventCallbackResult(ERR_OK, tempEvent);
             calleeMap_.erase(itConnect);
         } else {
             HILOGW("ProcessCallerDied connect not found");
@@ -1175,6 +1268,8 @@ void DistributedSchedService::ProcessCallerDied(const sptr<IRemoteObject>& conne
     if (result != ERR_OK) {
         HILOGW("ProcessCallerDied failed, error: %{public}d", result);
     }
+    GetCurDestCollaborateEvent(callerInfo, element, DMS_DSCHED_EVENT_FINISH, result, tempEvent);
+    NotifyDSchedEventCallbackResult(result, tempEvent);
 }
 
 void DistributedSchedService::HandleLocalCallerDied(const sptr<IRemoteObject>& connect)
@@ -1188,6 +1283,7 @@ void DistributedSchedService::HandleLocalCallerDied(const sptr<IRemoteObject>& c
                 ReportDistributedComponentChange(sessionsList.front().GetCallerInfo(), DISTRIBUTED_COMPONENT_REMOVE,
                     IDistributedSched::CALL, IDistributedSched::CALLER);
             }
+            NotifyCollaborateEventWithSessions(sessionsList, DMS_DSCHED_EVENT_FINISH, ERR_OK);
             callerMap_.erase(it);
             HILOGI("remove connection success");
         } else {
@@ -1213,6 +1309,9 @@ void DistributedSchedService::ProcessCalleeDied(const sptr<IRemoteObject>& conne
         return;
     }
     sptr<IRemoteObject> callbackWrapper;
+    CallerInfo callerInfo;
+    AppExecFwk::ElementName element;
+    EventNotify tempEvent;
     {
         std::lock_guard<std::mutex> autoLock(calleeLock_);
         auto itConnect = calleeMap_.find(connect);
@@ -1220,13 +1319,20 @@ void DistributedSchedService::ProcessCalleeDied(const sptr<IRemoteObject>& conne
             ReportDistributedComponentChange(itConnect->second, DISTRIBUTED_COMPONENT_REMOVE,
                 IDistributedSched::CALL, IDistributedSched::CALLEE);
             callbackWrapper = itConnect->second.callbackWrapper;
+            callerInfo = itConnect->second.callerInfo;
+            element = itConnect->second.element;
             calleeMap_.erase(itConnect);
         } else {
             HILOGW("ProcessCalleeDied connect not found");
             return;
         }
     }
+    GetCurDestCollaborateEvent(callerInfo, element, DMS_DSCHED_EVENT_STOP, ERR_OK, tempEvent);
+    NotifyDSchedEventCallbackResult(ERR_OK, tempEvent);
+
     UnregisterAppStateObserver(callbackWrapper);
+    GetCurDestCollaborateEvent(callerInfo, element, DMS_DSCHED_EVENT_FINISH, ERR_OK, tempEvent);
+    NotifyDSchedEventCallbackResult(ERR_OK, tempEvent);
 }
 
 void DistributedSchedService::ProcessCallResult(const sptr<IRemoteObject>& calleeConnect,
@@ -1301,7 +1407,11 @@ void DistributedSchedService::SaveCallerComponent(const OHOS::AAFwk::Want& want,
     // connect to another remote device, add a new session to list
     auto& session = sessionsList.emplace_back(callerInfo.sourceDeviceId, remoteDeviceId, callerInfo);
     session.AddElement(want.GetElement());
+
     HILOGD("add connection success");
+    EventNotify tempEvent;
+    GetCurSrcCollaborateEvent(callerInfo, want.GetElement(), DMS_DSCHED_EVENT_PROCESSING, ERR_OK, tempEvent);
+    NotifyDSchedEventCallbackResult(ERR_OK, tempEvent);
 }
 
 void DistributedSchedService::RemoveCallerComponent(const sptr<IRemoteObject>& connect)
@@ -1316,6 +1426,7 @@ void DistributedSchedService::RemoveCallerComponent(const sptr<IRemoteObject>& c
                 ReportDistributedComponentChange(sessionsList.front().GetCallerInfo(), DISTRIBUTED_COMPONENT_REMOVE,
                     IDistributedSched::CALL, IDistributedSched::CALLER);
             }
+            NotifyCollaborateEventWithSessions(sessionsList, DMS_DSCHED_EVENT_FINISH, ERR_OK);
             callerMap_.erase(it);
             HILOGI("remove connection success");
         } else {
@@ -1346,6 +1457,11 @@ void DistributedSchedService::ProcessCalleeOffline(const std::string& deviceId)
             CallerInfo callerInfo;
             if (itSession != sessionsList.end()) {
                 callerInfo = itSession->GetCallerInfo();
+                for (const auto &element : itSession->GetElementsList()) {
+                    EventNotify tempEvent;
+                    GetCurSrcCollaborateEvent(callerInfo, element, DMS_DSCHED_EVENT_FINISH, ERR_OK, tempEvent);
+                    NotifyDSchedEventCallbackResult(ERR_OK, tempEvent);
+                }
                 sessionsList.erase(itSession);
             }
 
@@ -1418,6 +1534,16 @@ int32_t DistributedSchedService::StartRemoteAbilityByCall(const OHOS::AAFwk::Wan
         return INVALID_PARAMETERS_ERR;
     }
     callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
+    std::string uidSpecBundleName;
+    if (!BundleManagerInternal::GetSpecifyBundleNameFromBms(callerInfo.uid, uidSpecBundleName)) {
+        HILOGE("Get specify bundle name for from Bms fail, connect session caller uid %{public}d.", callerInfo.uid);
+    }
+    callerInfo.extraInfoJson[DMS_UID_SPEC_BUNDLE_NAME] = uidSpecBundleName;
+
+    EventNotify tempEvent;
+    GetCurSrcCollaborateEvent(callerInfo, want.GetElement(), DMS_DSCHED_EVENT_START, ERR_OK, tempEvent);
+    NotifyDSchedEventCallbackResult(ERR_OK, tempEvent);
+
     int32_t ret = TryStartRemoteAbilityByCall(want, connect, callerInfo);
     if (ret != ERR_OK) {
         {
@@ -1468,6 +1594,11 @@ int32_t DistributedSchedService::StartAbilityByCallFromRemote(const OHOS::AAFwk:
         HILOGE("StartAbilityByCallFromRemote connect is null");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
+
+    EventNotify tempEvent;
+    GetCurDestCollaborateEvent(callerInfo, want.GetElement(), DMS_DSCHED_EVENT_START, ERR_OK, tempEvent);
+    NotifyDSchedEventCallbackResult(ERR_OK, tempEvent);
+
     std::string localDeviceId;
     std::string destinationDeviceId = want.GetElement().GetDeviceID();
     if (!GetLocalDeviceId(localDeviceId) ||
@@ -1506,6 +1637,9 @@ int32_t DistributedSchedService::StartAbilityByCallFromRemote(const OHOS::AAFwk:
             HILOGE("RegisterAppStateObserver failed");
         }
     }
+
+    GetCurDestCollaborateEvent(callerInfo, want.GetElement(), DMS_DSCHED_EVENT_PROCESSING, ERR_OK, tempEvent);
+    NotifyDSchedEventCallbackResult(ERR_OK, tempEvent);
     return errCode;
 }
 
@@ -1516,6 +1650,9 @@ int32_t DistributedSchedService::ReleaseAbilityFromRemote(const sptr<IRemoteObje
         HILOGE("ReleaseAbilityFromRemote connect is null");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
+    EventNotify tempEvent;
+    GetCurDestCollaborateEvent(callerInfo, element, DMS_DSCHED_EVENT_STOP, ERR_OK, tempEvent);
+    NotifyDSchedEventCallbackResult(ERR_OK, tempEvent);
 
     HILOGD("[PerformanceTest] ReleaseAbilityFromRemote begin");
     std::string localDeviceId;
@@ -1545,6 +1682,8 @@ int32_t DistributedSchedService::ReleaseAbilityFromRemote(const sptr<IRemoteObje
     if (result != ERR_OK) {
         HILOGE("ReleaseAbilityFromRemote failed, error: %{public}d", result);
     }
+    GetCurDestCollaborateEvent(callerInfo, element, DMS_DSCHED_EVENT_FINISH, result, tempEvent);
+    NotifyDSchedEventCallbackResult(result, tempEvent);
     return result;
 }
 
@@ -2273,80 +2412,6 @@ int32_t DistributedSchedService::RegisterMissionListener(const std::u16string& d
     return DistributedSchedMissionManager::GetInstance().RegisterMissionListener(devId, obj);
 }
 
-int32_t DistributedSchedService::RegisterDSchedEventListener(const uint8_t& type,
-    const sptr<IRemoteObject>& callback)
-{
-    if (dschedContinuation_ == nullptr) {
-        HILOGE("continuation object null!");
-        return INVALID_PARAMETERS_ERR;
-    }
-    int32_t result = 0;
-    switch (type) {
-        case DMS_CONTINUE:
-            result = dschedContinuation_->PushCallback(callback);
-            break;
-        case DMS_COLLABRATION:
-            break;
-        case DMS_ALL:
-            result = dschedContinuation_->PushCallback(callback);
-            break;
-        default:
-            break;
-    }
-
-    if (!result) {
-        HILOGI("The callback does not exist,type: %{public}d", type);
-    } else {
-        HILOGI("Pushing the callback succeeded.");
-    }
-    NotifyDSchedEventCallbackResult(dschedContinuation_->continueEvent_.eventResult,
-        dschedContinuation_->continueEvent_);
-    return result;
-}
-
-int32_t DistributedSchedService::UnRegisterDSchedEventListener(const uint8_t& type,
-    const sptr<IRemoteObject>& callback)
-{
-    if (dschedContinuation_ == nullptr) {
-        HILOGE("continuation object null!");
-        return INVALID_PARAMETERS_ERR;
-    }
-    bool result = 0;
-    switch (type) {
-        case DMS_CONTINUE:
-            result = dschedContinuation_->CleanupCallback(callback);
-            break;
-        case DMS_COLLABRATION:
-            break;
-        case DMS_ALL:
-            result = dschedContinuation_->CleanupCallback(callback);
-            break;
-        default:
-            break;
-    }
-
-    if (!result) {
-        HILOGI("The callback does not exist,type: %{public}d", type);
-    } else {
-        HILOGI("Clearing the callback succeeded.");
-    }
-    return 0;
-}
-
-int32_t DistributedSchedService::GetContinueInfo(std::string& dstNetworkId, std::string& srcNetworkId)
-{
-    HILOGI("GetContinueInfo called");
-    if (dschedContinuation_ == nullptr) {
-        HILOGE("continuation object null!");
-        return INVALID_PARAMETERS_ERR;
-    }
-    dstNetworkId = dschedContinuation_->continueInfo_.dstNetworkId;
-    srcNetworkId = dschedContinuation_->continueInfo_.srcNetworkId;
-    HILOGI("GetContinueInfo dstNetworkId: %{public}s, srcNetworkId: %{public}s",
-        GetAnonymStr(dstNetworkId).c_str(), GetAnonymStr(srcNetworkId).c_str());
-    return 0;
-}
-
 int32_t DistributedSchedService::RegisterOnListener(const std::string& type,
     const sptr<IRemoteObject>& obj)
 {
@@ -2392,6 +2457,192 @@ int32_t DistributedSchedService::SetMissionContinueState(int32_t missionId, cons
     return DMSContinueSendMgr::GetInstance().SetMissionContinueState(missionId, state);
 }
 #endif
+
+int32_t DistributedSchedService::RegisterDSchedEventListener(const DSchedEventType& type,
+    const sptr<IRemoteObject>& callback)
+{
+    if (dschedContinuation_ == nullptr) {
+        HILOGE("continuation object null!");
+        return INVALID_PARAMETERS_ERR;
+    }
+    bool ret = false;
+    switch (type) {
+        case DMS_CONTINUE:
+            ret = dschedContinuation_->PushCallback(callback);
+            break;
+        case DMS_COLLABORATION:
+            ret = collaborateCbMgr_->PushCallback(callback);
+            break;
+        case DMS_ALL:
+            ret = dschedContinuation_->PushCallback(callback) && collaborateCbMgr_->PushCallback(callback);
+            break;
+        default:
+            HILOGE("Not support register Dms event listener with event type: %{public}d.", type);
+            return INVALID_PARAMETERS_ERR;
+    }
+
+    if (!ret) {
+        HILOGE("The callback does not exist, type: %{public}d", type);
+        return CALLBACK_HAS_NOT_REGISTERED;
+    }
+    HILOGD("Push %{public}d callback success.", type);
+    return ERR_OK;
+}
+
+int32_t DistributedSchedService::UnRegisterDSchedEventListener(const DSchedEventType& type,
+    const sptr<IRemoteObject>& callback)
+{
+    if (dschedContinuation_ == nullptr) {
+        HILOGE("continuation object null!");
+        return INVALID_PARAMETERS_ERR;
+    }
+    bool result = 0;
+    switch (type) {
+        case DMS_CONTINUE:
+            result = dschedContinuation_->CleanupCallback(callback);
+            break;
+        case DMS_COLLABORATION:
+            break;
+        case DMS_ALL:
+            result = dschedContinuation_->CleanupCallback(callback);
+            break;
+        default:
+            break;
+    }
+
+    if (!result) {
+        HILOGI("The callback does not exist,type: %{public}d", type);
+    } else {
+        HILOGI("Clearing the callback succeeded.");
+    }
+    return 0;
+}
+
+int32_t DistributedSchedService::GetContinueInfo(std::string& dstNetworkId, std::string& srcNetworkId)
+{
+    HILOGI("GetContinueInfo called");
+    if (dschedContinuation_ == nullptr) {
+        HILOGE("continuation object null!");
+        return INVALID_PARAMETERS_ERR;
+    }
+    dstNetworkId = dschedContinuation_->continueInfo_.dstNetworkId_;
+    srcNetworkId = dschedContinuation_->continueInfo_.srcNetworkId_;
+    HILOGI("GetContinueInfo dstNetworkId: %{public}s, srcNetworkId: %{public}s",
+        GetAnonymStr(dstNetworkId).c_str(), GetAnonymStr(srcNetworkId).c_str());
+    return 0;
+}
+
+int32_t DistributedSchedService::GetDSchedEventInfo(const DSchedEventType &type, std::vector<EventNotify> &events)
+{
+    int32_t callingUid = CheckCallingUid() ? DEFAULT_REQUEST_CODE : IPCSkeleton::GetCallingUid();
+    HILOGI("GetDSchedEventInfo called, uid %{public}d, dms eventType %{public}d.", callingUid, type);
+    switch (type) {
+        case DMS_CONTINUE:
+            GetContinueEventInfo(callingUid, events);
+            break;
+        case DMS_COLLABORATION:
+            GetCollaborateEventInfo(callingUid, events);
+            break;
+        case DMS_ALL:
+            GetContinueEventInfo(callingUid, events);
+            GetCollaborateEventInfo(callingUid, events);
+            break;
+        default:
+            HILOGI("Get dms event info not support eventType %{public}d.", type);
+            return INVALID_PARAMETERS_ERR;
+    }
+    HILOGI("GetDSchedEventInfo end, uid %{public}d, eventType %{public}d, events size %{public}zu.",
+        callingUid, type, events.size());
+    return ERR_OK;
+}
+
+bool DistributedSchedService::CheckCallingUid()
+{
+    // never allow non-system uid for distributed request
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    return callingUid < HID_HAP;
+}
+
+void DistributedSchedService::GetContinueEventInfo(int32_t callingUid, std::vector<EventNotify> &events)
+{
+    if (callingUid == DEFAULT_REQUEST_CODE) {
+        events.emplace_back(dschedContinuation_->continueEvent_);
+        return;
+    }
+
+    std::vector<std::string> bundleNames;
+    if (!BundleManagerInternal::GetBundleNameListFromBms(callingUid, bundleNames)) {
+        HILOGE("Get bundle name from Bms failed");
+        return;
+    }
+    for (const auto &bundleName : bundleNames) {
+        HILOGD("Get bundle name %{public}s from Bms.", bundleName.c_str());
+        if (bundleName == dschedContinuation_->continueEvent_.srcBundleName_ ||
+            bundleName == dschedContinuation_->continueEvent_.destBundleName_) {
+            events.emplace_back(dschedContinuation_->continueEvent_);
+        }
+    }
+}
+
+void DistributedSchedService::GetCollaborateEventInfo(int32_t callingUid, std::vector<EventNotify> &events)
+{
+    if (callingUid == DEFAULT_REQUEST_CODE) {
+        GetCollaborateEventsByCallers(callingUid, "", events);
+        GetCollaborateEventsByCallees(callingUid, "", events);
+        return;
+    }
+
+    std::string callingBundleName;
+    if (!BundleManagerInternal::GetSpecifyBundleNameFromBms(callingUid, callingBundleName)) {
+        HILOGE("Get specify bundle name for from Bms fail, uid %{public}d.", callingUid);
+        return;
+    }
+    GetCollaborateEventsByCallers(callingUid, callingBundleName, events);
+    GetCollaborateEventsByCallees(callingUid, callingBundleName, events);
+}
+
+void DistributedSchedService::GetCollaborateEventsByCallers(int32_t callingUid, const std::string &callingBundleName,
+    std::vector<EventNotify> &events)
+{
+    std::lock_guard<std::mutex> autoLock(callerLock_);
+    for (const auto &iter : callerMap_) {
+        for (const auto &connectSession : iter.second) {
+            auto bundleNames = connectSession.GetCallerInfo().bundleNames;
+            if (callingUid != DEFAULT_REQUEST_CODE && callingUid != connectSession.GetCallerInfo().uid &&
+                std::count(bundleNames.begin(), bundleNames.end(), callingBundleName) == 0) {
+                HILOGE("Connect session callerInfo uid %{public}d is different from callingUid %{public}d, "
+                    "callingbundle %{public}s.", connectSession.GetCallerInfo().uid,
+                    callingUid, callingBundleName.c_str());
+                continue;
+            }
+            for (const auto &element : connectSession.GetElementsList()) {
+                EventNotify tempEvent;
+                GetCurSrcCollaborateEvent(connectSession.GetCallerInfo(), element,
+                    DMS_DSCHED_EVENT_PROCESSING, ERR_OK, tempEvent);
+                events.emplace_back(tempEvent);
+            }
+        }
+    }
+}
+
+void DistributedSchedService::GetCollaborateEventsByCallees(int32_t callingUid, const std::string &callingBundleName,
+    std::vector<EventNotify> &events)
+{
+    std::lock_guard<std::mutex> autoLock(calleeLock_);
+    for (const auto &iter : calleeMap_) {
+        if (callingUid != DEFAULT_REQUEST_CODE && callingBundleName != iter.second.element.GetBundleName()) {
+            HILOGE("Connect session calleeInfo destBundleName %{public}s is different from "
+                "callingBundleName %{public}s, callingUid %{public}d.", iter.second.element.GetBundleName().c_str(),
+                callingBundleName.c_str(), callingUid);
+            continue;
+        }
+
+        EventNotify tempEvent;
+        GetCurDestCollaborateEvent(iter.second.callerInfo, iter.second.element,
+            DMS_DSCHED_EVENT_PROCESSING, ERR_OK, tempEvent);
+        events.emplace_back(tempEvent);
+    }
+}
 
 void CallerDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {

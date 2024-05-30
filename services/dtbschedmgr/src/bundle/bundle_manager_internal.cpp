@@ -61,6 +61,21 @@ bool BundleManagerInternal::GetCallerAppIdFromBms(const std::string& bundleName,
     return true;
 }
 
+bool BundleManagerInternal::GetSpecifyBundleNameFromBms(int32_t callingUid, std::string& bundleName)
+{
+    auto bundleMgr = GetBundleManager();
+    if (bundleMgr == nullptr) {
+        HILOGE("failed to get bms");
+        return false;
+    }
+    bool result = bundleMgr->GetBundleNameForUid(callingUid, bundleName);
+    if (!result) {
+        HILOGE("Get specify bundle name for uid failed, result: %{public}d", result);
+        return false;
+    }
+    return result;
+}
+
 bool BundleManagerInternal::GetBundleNameListFromBms(int32_t callingUid, std::vector<std::string>& bundleNameList)
 {
     auto bundleMgr = GetBundleManager();
@@ -70,7 +85,7 @@ bool BundleManagerInternal::GetBundleNameListFromBms(int32_t callingUid, std::ve
     }
     bool result = bundleMgr->GetBundlesForUid(callingUid, bundleNameList);
     if (!result) {
-        HILOGE("GetBundlesForUid failed, result: %{public}d", result);
+        HILOGE("Get bundle name list for userId which the uid belongs failed, result: %{public}d", result);
         return false;
     }
     return result;
@@ -81,7 +96,7 @@ bool BundleManagerInternal::GetBundleNameListFromBms(int32_t callingUid,
 {
     std::vector<std::string> bundleNameList;
     if (!GetBundleNameListFromBms(callingUid, bundleNameList)) {
-        HILOGE("GetBundleNameListFromBms failed");
+        HILOGE("Get bundle name list for userId which the uid belongs failed.");
         return false;
     }
     for (const std::string& bundleName : bundleNameList) {

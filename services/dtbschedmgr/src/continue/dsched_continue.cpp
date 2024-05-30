@@ -137,17 +137,17 @@ void DSchedContinue::SetEventData()
     ContinueEventInfo dstContinueInfo;
     DmsBmStorage::GetInstance()->GetContinueEventInfo(continueInfo_.sinkDeviceId_, continueInfo_.sinkBundleName_,
         continueInfo_.continueType_, dstContinueInfo);
-    eventData_.eventResult = 0;
-    eventData_.srcNetworkId = srcContinueInfo.networkId;
-    eventData_.srcBundleName = srcContinueInfo.bundleName;
-    eventData_.srcModuleName = srcContinueInfo.moduleName;
-    eventData_.srcAbilityName = srcContinueInfo.abilityName;
-    eventData_.dstNetworkId = dstContinueInfo.networkId;
-    eventData_.destBundleName = dstContinueInfo.bundleName;
-    eventData_.destModuleName = dstContinueInfo.moduleName;
-    eventData_.destAbilityName = dstContinueInfo.abilityName;
-    eventData_.dSchedEventType = DMS_CONTINUE;
-    eventData_.state = DMS_DSCHED_EVENT_START;
+    eventData_.eventResult_ = 0;
+    eventData_.srcNetworkId_ = srcContinueInfo.networkId;
+    eventData_.srcBundleName_ = srcContinueInfo.bundleName;
+    eventData_.srcModuleName_ = srcContinueInfo.moduleName;
+    eventData_.srcAbilityName_ = srcContinueInfo.abilityName;
+    eventData_.dstNetworkId_ = dstContinueInfo.networkId;
+    eventData_.destBundleName_ = dstContinueInfo.bundleName;
+    eventData_.destModuleName_ = dstContinueInfo.moduleName;
+    eventData_.destAbilityName_ = dstContinueInfo.abilityName;
+    eventData_.dSchedEventType_ = DMS_CONTINUE;
+    eventData_.state_ = DMS_DSCHED_EVENT_START;
 }
 
 int32_t DSchedContinue::Init()
@@ -865,19 +865,6 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
     return ret;
 }
 
-void DSchedContinue::DurationDumperBeforeStartAbility(std::shared_ptr<DSchedContinueDataCmd> cmd)
-{
-    if (subServiceType_ == CONTINUE_PULL) {
-        std::string timeInfo = cmd->want_.GetStringParam(DMSDURATION_SAVETIME);
-        DmsContinueTime::GetInstance().ReadDurationInfo(timeInfo.c_str());
-        DmsContinueTime::GetInstance().SetSrcBundleName(cmd->want_.GetElement().GetBundleName());
-        DmsContinueTime::GetInstance().SetSrcAbilityName(cmd->want_.GetElement().GetAbilityName());
-        DmsContinueTime::GetInstance().SetDstBundleName(cmd->want_.GetElement().GetBundleName());
-        DmsContinueTime::GetInstance().SetDstAbilityName(cmd->want_.GetElement().GetAbilityName());
-    }
-    DmsContinueTime::GetInstance().SetDurationBegin(CONTINUE_START_ABILITY_TIME, GetTickCount());
-}
-
 int32_t DSchedContinue::UpdateWantForContinueType(OHOS::AAFwk::Want& want)
 {
     std::string srcAbilityName = want.GetElement().GetAbilityName();
@@ -891,6 +878,19 @@ int32_t DSchedContinue::UpdateWantForContinueType(OHOS::AAFwk::Want& want)
         DmsContinueTime::GetInstance().SetDstAbilityName(sinkAbilityName);
     }
     return ERR_OK;
+}
+
+void DSchedContinue::DurationDumperBeforeStartAbility(std::shared_ptr<DSchedContinueDataCmd> cmd)
+{
+    if (subServiceType_ == CONTINUE_PULL) {
+        std::string timeInfo = cmd->want_.GetStringParam(DMSDURATION_SAVETIME);
+        DmsContinueTime::GetInstance().ReadDurationInfo(timeInfo.c_str());
+        DmsContinueTime::GetInstance().SetSrcBundleName(cmd->want_.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetSrcAbilityName(cmd->want_.GetElement().GetAbilityName());
+        DmsContinueTime::GetInstance().SetDstBundleName(cmd->want_.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetDstAbilityName(cmd->want_.GetElement().GetAbilityName());
+    }
+    DmsContinueTime::GetInstance().SetDurationBegin(CONTINUE_START_ABILITY_TIME, GetTickCount());
 }
 
 bool DSchedContinue::WaitAbilityStateInitial(int32_t persistentId)
@@ -1011,9 +1011,9 @@ int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
     }
 
     if (result != ERR_OK) {
-        eventData_.state = DMS_DSCHED_EVENT_STOP;
+        eventData_.state_ = DMS_DSCHED_EVENT_STOP;
     } else {
-        eventData_.state = DMS_DSCHED_EVENT_FINISH;
+        eventData_.state_ = DMS_DSCHED_EVENT_FINISH;
     }
     if (result == ERR_OK && direction_ == CONTINUE_SOURCE && isSourceExit_) {
         int32_t ret = AbilityManagerClient::GetInstance()->CleanMission(continueInfo_.missionId_);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,36 +20,10 @@
 
 #include "iremote_broker.h"
 
+#include "distributed_sched_types.h"
+
 namespace OHOS {
 namespace DistributedSchedule {
-enum DSchedEventType {
-    DMS_CONTINUE = 0,
-    DMS_COLLABRATION = 1,
-    DMS_ALL = 2,
-};
-
-enum DSchedEventState {
-    DMS_DSCHED_EVENT_START = 0,
-    DMS_DSCHED_EVENT_PROCESSING = 1,
-    DMS_DSCHED_EVENT_STOP = 2,
-    DMS_DSCHED_EVENT_FINISH = 3,
-};
-
-class EventNotify {
-public:
-    int32_t eventResult_ = -1;
-    std::string srcNetworkId_;
-    std::string dstNetworkId_;
-    std::string srcBundleName_;
-    std::string srcModuleName_;
-    std::string srcAbilityName_;
-    std::string destBundleName_;
-    std::string destModuleName_;
-    std::string destAbilityName_;
-    DSchedEventType dSchedEventType_;
-    DSchedEventState state_;
-};
-
 class IDSchedEventListener : public OHOS::IRemoteBroker {
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"ohos.distributedSchedule.dschedeventlistener");

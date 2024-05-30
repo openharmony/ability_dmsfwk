@@ -174,6 +174,11 @@ bool DSchedContinuation::PushCallback(const sptr<IRemoteObject>& callback)
     }
     continuationCallbackArr_.push_back(callback);
     callback->AddDeathRecipient(diedListener_);
+
+    int dSchedEventresult = NotifyDSchedEventForOneCB(callback, ERR_OK);
+    if (dSchedEventresult != ERR_OK) {
+        HILOGE("Push continuation success, notify dms event result: %{public}d.", dSchedEventresult);
+    }
     return true;
 }
 
@@ -255,6 +260,37 @@ sptr<IRemoteObject> DSchedContinuation::PopCallback(int32_t missionId)
     return callback;
 }
 
+int32_t DSchedContinuation::NotifyDSchedEventForOneCB(const sptr<IRemoteObject> &cb, int32_t resultCode)
+{
+    if (cb == nullptr) {
+        HILOGE("NotifyDSchedEventForOneCB input callback is null.");
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(DSCHED_EVENT_TOKEN)) {
+        HILOGE("NotifyDSchedEventForOneCB write token failed");
+        return SEND_REQUEST_DEF_FAIL;
+    }
+    PARCEL_WRITE_HELPER_RET(data, Int32, resultCode, SEND_REQUEST_DEF_FAIL);
+    PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.srcNetworkId_, SEND_REQUEST_DEF_FAIL);
+    PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.dstNetworkId_, SEND_REQUEST_DEF_FAIL);
+    PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.srcBundleName_, SEND_REQUEST_DEF_FAIL);
+    PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.srcModuleName_, SEND_REQUEST_DEF_FAIL);
+    PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.srcAbilityName_, SEND_REQUEST_DEF_FAIL);
+    PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.destBundleName_, SEND_REQUEST_DEF_FAIL);
+    PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.destModuleName_, SEND_REQUEST_DEF_FAIL);
+    PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.destAbilityName_, SEND_REQUEST_DEF_FAIL);
+    PARCEL_WRITE_HELPER_RET(data, Int32, continueEvent_.dSchedEventType_, SEND_REQUEST_DEF_FAIL);
+    PARCEL_WRITE_HELPER_RET(data, Int32, continueEvent_.state_, SEND_REQUEST_DEF_FAIL);
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = cb->SendRequest(DSCHED_EVENT_CALLBACK, data, reply, option);
+    HILOGI("NotifyDSchedEventListenerResult transact end, ret: %{public}d.", ret);
+    return ret;
+}
+
 int32_t DSchedContinuation::NotifyDSchedEventResult(int32_t resultCode)
 {
     HILOGI("GetCallback IDSchedEventListener");
@@ -263,31 +299,20 @@ int32_t DSchedContinuation::NotifyDSchedEventResult(int32_t resultCode)
         HILOGD("No listening has been registered, no need to report events");
         return INVALID_PARAMETERS_ERR;
     }
-    int32_t error = -1;
+    bool isAllSuc = true;
     for (auto callback = vecCallback.begin(); callback != vecCallback.end(); ++callback) {
-        MessageParcel data;
-        if (!data.WriteInterfaceToken(DSCHED_EVENT_TOKEN)) {
-            HILOGE("NotifyMissionCenterResult write token failed");
-            return INVALID_PARAMETERS_ERR;
+        int32_t ret = NotifyDSchedEventForOneCB(*callback, resultCode);
+        if (ret != ERR_OK) {
+            HILOGE("NotifyDSchedEventForOneCB transact fail, ret: %{public}d", ret);
+            isAllSuc = isAllSuc && false;
         }
-        PARCEL_WRITE_HELPER_RET(data, Int32, resultCode, false);
-        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.srcNetworkId, false);
-        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.dstNetworkId, false);
-        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.srcBundleName, false);
-        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.srcModuleName, false);
-        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.srcAbilityName, false);
-        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.destBundleName, false);
-        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.destModuleName, false);
-        PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.destAbilityName, false);
-        PARCEL_WRITE_HELPER_RET(data, Int32, continueEvent_.dSchedEventType, false);
-        PARCEL_WRITE_HELPER_RET(data, Int32, continueEvent_.state, false);
-
-        MessageParcel reply;
-        MessageOption option;
-        error = (*callback)->SendRequest(DSCHED_EVENT_CALLBACK, data, reply, option);
-        HILOGI("NotifyDSchedEventListenerResult transact result: %{public}d", error);
     }
-    return error;
+    if (!isAllSuc) {
+        HILOGE("NotifyDSchedEventListenerResult transact fail, isAllSuc: %{public}d", isAllSuc);
+        return SEND_REQUEST_DEF_FAIL;
+    }
+    HILOGI("NotifyDSchedEventResult transact ok.");
+    return ERR_OK;
 }
 
 int32_t DSchedContinuation::NotifyMissionCenterResult(int32_t missionId, int32_t resultCode)

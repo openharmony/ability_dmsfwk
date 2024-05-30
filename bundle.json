@@ -117,14 +117,15 @@
           },
           {
             "header": {
-              "header_base": "//foundation/ability/dmsfwk/interfaces/innerkits/distributed_event/include",
+              "header_base": "//foundation/ability/dmsfwk/interfaces/innerkits",
               "header_files": [
-                "distributed_event_listener.h",
-                "distributed_parcel_helper.h",
-                "dms_client.h",
-                "dms_handler.h",
-                "dms_listener_stub.h",
-                "dms_sa_client.h"
+                "./common/include/distributed_sched_types.h",
+                "./distributed_event/include/distributed_event_listener.h",
+                "./distributed_event/include/distributed_parcel_helper.h",
+                "./distributed_event/include/dms_client.h",
+                "./distributed_event/include/dms_handler.h",
+                "./distributed_event/include/dms_listener_stub.h",
+                "./distributed_event/include/dms_sa_client.h"
               ]
             },
             "name": "//foundation/ability/dmsfwk/interfaces/innerkits/distributed_event:distributed_sdk"

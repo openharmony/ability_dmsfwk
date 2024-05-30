@@ -153,14 +153,14 @@ int32_t LoadContinueConfig()
         return DMS_PERMISSION_DENIED;
     }
 
-    std::string CfgFileContent;
+    std::string cfgFileContent;
     in.seekg(0, std::ios::end);
-    CfgFileContent.resize(in.tellg());
+    cfgFileContent.resize(in.tellg());
     in.seekg(0, std::ios::beg);
-    in.rdbuf()->sgetn(&CfgFileContent[0], CfgFileContent.size());
+    in.rdbuf()->sgetn(&cfgFileContent[0], cfgFileContent.size());
     in.close();
 
-    if (!UpdateAllowAppList(CfgFileContent)) {
+    if (!UpdateAllowAppList(cfgFileContent)) {
         HILOGE("Update allow app list fail, cfgFullPath %{public}s.", g_continueCfgFullPath.c_str());
         return DMS_PERMISSION_DENIED;
     }

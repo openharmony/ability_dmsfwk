@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,30 +18,24 @@
 
 #include <string>
 
+#include "iremote_broker.h"
+
 #include "ability_manager_errors.h"
 #include "distributed_event_listener.h"
-#include "iremote_broker.h"
+#include "distributed_sched_types.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
-class ContinueInfo {
-public:
-    std::string srcNetworkId_;
-    std::string dstNetworkId_;
-};
-
 class DistributedClient {
 public:
-    int32_t RegisterDSchedEventListener(const uint8_t& type, const sptr<IDSchedEventListener>& obj);
-    int32_t UnRegisterDSchedEventListener(const uint8_t& type, const sptr<IDSchedEventListener>& obj);
+    int32_t RegisterDSchedEventListener(const DSchedEventType& type, const sptr<IDSchedEventListener>& obj);
+    int32_t UnRegisterDSchedEventListener(const DSchedEventType& type, const sptr<IDSchedEventListener>& obj);
     int32_t GetContinueInfo(ContinueInfo &continueInfo);
-    enum {
-        REGISTER_DSCHED_EVENT_LISTENER = 262,
-        UNREGISTER_DSCHED_EVENT_LISTENER = 263,
-        GET_CONTINUE_INFO = 264,
-    };
+    int32_t GetDSchedEventInfo(const DSchedEventType &type, std::vector<EventNotify> &events);
+
 private:
     sptr<IRemoteObject> GetDmsProxy();
+    int32_t GetDecodeDSchedEventNotify(MessageParcel &reply, EventNotify &event);
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS

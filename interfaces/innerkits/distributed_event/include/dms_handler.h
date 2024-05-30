@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,9 +22,11 @@
 #include <string>
 #include <vector>
 
-#include "distributed_event_listener.h"
-#include "dms_sa_client.h"
 #include "refbase.h"
+
+#include "distributed_event_listener.h"
+#include "distributed_sched_types.h"
+#include "dms_sa_client.h"
 #include "single_instance.h"
 
 namespace OHOS {
@@ -33,9 +35,10 @@ class DmsHandler {
 DECLARE_SINGLE_INSTANCE(DmsHandler);
 
 public:
-    int32_t RegisterDSchedEventListener(const uint8_t& type, sptr<IDSchedEventListener> &listener);
-    int32_t UnRegisterDSchedEventListener(const uint8_t& type, sptr<IDSchedEventListener> &listener);
+    int32_t RegisterDSchedEventListener(const DSchedEventType& type, sptr<IDSchedEventListener> &listener);
+    int32_t UnRegisterDSchedEventListener(const DSchedEventType& type, sptr<IDSchedEventListener> &listener);
     int32_t GetContinueInfo(ContinueInfo &continueInfo);
+    int32_t GetDSchedEventInfo(const DSchedEventType &type, std::vector<EventNotify> &events);
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS

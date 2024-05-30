@@ -18,6 +18,7 @@ config("dms_sdk_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${dms_path}/common/include",
+    "${dms_path}/interfaces/innerkits/common/include/",
     "${dms_path}/interfaces/innerkits/distributed_event/include/",
     "${dms_path}/services/dtbabilitymgr/include/",
     "${dms_path}/services/dtbschedmgr/include/",
