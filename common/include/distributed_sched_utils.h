@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_DMS_UTILS_H
-#define OHOS_DMS_UTILS_H
+#ifndef OHOS_DISTRIBUTED_SCHED_UTILS_H
+#define OHOS_DISTRIBUTED_SCHED_UTILS_H
 
+#include "cJSON.h"
+#include <initializer_list>
 #include <string>
 
 #include "parcel.h"
@@ -36,6 +38,10 @@ std::string Base64Encode(const unsigned char *toEncode, unsigned int len);
 std::string Base64Decode(const std::string& basicString);
 bool IsBase64(unsigned char c);
 std::string GetAnonymStr(const std::string &value);
+bool IsInt32(const cJSON *paramValue);
+bool IsString(const cJSON *paramValue);
+bool CJsonParamCheck(const cJSON *jsonObj, const std::initializer_list<std::string> &keys);
+bool GetOsInfoFromDM(const std::string &dmInfoEx, int32_t &osType, std::string &osVersion);
 } // namespace DistributedSchedule
 } // namespace OHOS
-#endif // OHOS_DISTRIBUTED_SCHED_SERVICE_H
+#endif // OHOS_DISTRIBUTED_SCHED_UTILS_H

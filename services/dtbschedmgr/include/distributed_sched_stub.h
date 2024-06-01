@@ -31,9 +31,19 @@ public:
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data,
         MessageParcel& reply, MessageOption& option) override;
 
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    virtual bool CheckRemoteOsType(const std::string& netwokId) = 0;
+    virtual int32_t StartAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) = 0;
+    virtual int32_t StopAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) = 0;
+    virtual int32_t ConnectAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) = 0;
+    virtual int32_t DisconnectAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) = 0;
+    virtual int32_t NotifyAbilityLifecycleChangedFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) = 0;
+#endif
+
 private:
     int32_t StartRemoteAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t StartAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
+    int32_t StopAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t SendResultFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t ContinueMissionInner(MessageParcel& data, MessageParcel& reply);
     int32_t ContinueMissionOfBundleNameInner(MessageParcel& data, MessageParcel& reply);
@@ -44,9 +54,18 @@ private:
     int32_t ConnectRemoteAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t DisconnectRemoteAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t ConnectAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
-    int32_t ReadDataForConnect(MessageParcel& data, CallerInfo& callerInfo, AccountInfo& accountInfo);
     int32_t DisconnectAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t NotifyProcessDiedFromRemoteInner(MessageParcel& data, MessageParcel& reply);
+
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    bool CheckDmsExtensionCallingUid();
+    int32_t StartAbilityFromRemoteAdapterInner(MessageParcel& data, MessageParcel& reply);
+    int32_t StopAbilityFromRemoteAdapterInner(MessageParcel& data, MessageParcel& reply);
+    int32_t ConnectAbilityFromRemoteAdapterInner(MessageParcel& data, MessageParcel& reply);
+    int32_t DisconnectAbilityFromRemoteAdapterInner(MessageParcel& data, MessageParcel& reply);
+    int32_t NotifyAbilityLifecycleChangedFromRemoteAdapterInner(MessageParcel& data, MessageParcel& reply);
+#endif
+
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     int32_t GetMissionInfosInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetRemoteMissionSnapshotInfoInner(MessageParcel& data, MessageParcel& reply);
@@ -92,12 +111,19 @@ private:
     void InitLocalFuncsInner();
     void InitLocalMissionManagerInner();
     void InitRemoteFuncsInner();
-    std::shared_ptr<AAFwk::Want> ReadDistributedWant(MessageParcel& data);
-    int32_t GetEncodeDSchedEventNotify(const EventNotify& event, MessageParcel& reply);
 
     int32_t StopRemoteExtensionAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t StopExtensionAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
 
+    std::shared_ptr<AAFwk::Want> ReadDistributedWant(MessageParcel& data);
+    int32_t GetEncodeDSchedEventNotify(const EventNotify& event, MessageParcel& reply);
+    int32_t ReadDataForConnect(MessageParcel& data, CallerInfo& callerInfo, AccountInfo& accountInfo);
+    int32_t GetStartAbilityFromRemoteExParam(MessageParcel& data, OHOS::AppExecFwk::AbilityInfo& abilityInfo,
+        int32_t& requestCode, CallerInfo& callerInfo, AccountInfo& accountInfo);
+    int32_t GetConnectAbilityFromRemoteExParam(MessageParcel& data, AppExecFwk::AbilityInfo& abilityInfo,
+        sptr<IRemoteObject>& connect, CallerInfo& callerInfo, AccountInfo& accountInfo);
+
+private:
     using DistributedSchedFunc = int32_t(DistributedSchedStub::*)(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, DistributedSchedFunc> remoteFuncsMap_;
     std::map<uint32_t, DistributedSchedFunc> localFuncsMap_;

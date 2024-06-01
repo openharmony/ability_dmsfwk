@@ -19,6 +19,7 @@
 #include <string>
 
 #include "deviceManager/dms_device_info.h"
+#include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_send_manager.h"
@@ -30,8 +31,14 @@ const std::string TAG = "DistributedDeviceNodeListener";
 }
 void DistributedDeviceNodeListener::OnDeviceOnline(const DistributedHardware::DmDeviceInfo& deviceInfo)
 {
-    auto dmsDeviceInfo = std::make_shared<DmsDeviceInfo>(
-        deviceInfo.deviceName, deviceInfo.deviceTypeId, deviceInfo.networkId);
+    int32_t osType = Constants::OH_OS_TYPE;
+    std::string osVersion = "";
+    if (GetOsInfoFromDM(deviceInfo.extraData, osType, osVersion)) {
+        HILOGE("Get Os info from DM device info fail, extraData %{public}s.", deviceInfo.extraData.c_str());
+    }
+
+    auto dmsDeviceInfo = std::make_shared<DmsDeviceInfo>(deviceInfo.deviceName, deviceInfo.deviceTypeId,
+        deviceInfo.networkId, ONLINE, osType, osVersion);
     DtbschedmgrDeviceInfoStorage::GetInstance().DeviceOnlineNotify(dmsDeviceInfo);
     DMSContinueSendMgr::GetInstance().NotifyDeviceOnline();
 }

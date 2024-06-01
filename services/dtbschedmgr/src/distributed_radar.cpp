@@ -798,16 +798,32 @@ bool DmsRadar::ClickIconDmsStartAbility(const std::string& func, int32_t errCode
 
 bool DmsRadar::ClickIconDmsRecvOver(const std::string& func, int32_t errCode)
 {
-    int32_t res = HiSysEventWrite(
-        APP_CONTINUE_DOMAIN,
-        APPLICATION_CONTINUE_BEHAVIOR,
-        HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        ORG_PKG, ORG_PKG_NAME,
-        FUNC, func,
-        BIZ_SCENE, static_cast<int32_t>(BizScene::CLICK_ICON),
-        BIZ_STAGE, static_cast<int32_t>(ClickIcon::DMS_RECV_OVER),
-        STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC),
-        BIZ_STATE, static_cast<int32_t>(BizState::BIZ_STATE_END));
+    int32_t res = ERR_OK;
+    StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
+    if (stageRes == StageRes::STAGE_SUCC) {
+        res = HiSysEventWrite(
+            APP_CONTINUE_DOMAIN,
+            APPLICATION_CONTINUE_BEHAVIOR,
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            ORG_PKG, ORG_PKG_NAME,
+            FUNC, func,
+            BIZ_SCENE, static_cast<int32_t>(BizScene::CLICK_ICON),
+            BIZ_STAGE, static_cast<int32_t>(ClickIcon::DMS_RECV_OVER),
+            STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC),
+            BIZ_STATE, static_cast<int32_t>(BizState::BIZ_STATE_END));
+    } else {
+        res = HiSysEventWrite(
+            APP_CONTINUE_DOMAIN,
+            APPLICATION_CONTINUE_BEHAVIOR,
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            ORG_PKG, ORG_PKG_NAME,
+            FUNC, func,
+            BIZ_SCENE, static_cast<int32_t>(BizScene::CLICK_ICON),
+            BIZ_STAGE, static_cast<int32_t>(ClickIcon::DMS_RECV_OVER),
+            STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC),
+            BIZ_STATE, static_cast<int32_t>(BizState::BIZ_STATE_END),
+            ERROR_CODE, errCode);
+    }
     if (res != ERR_OK) {
         HILOGE("ClickIconDmsRecvOver error, res:%{public}d", res);
         return false;

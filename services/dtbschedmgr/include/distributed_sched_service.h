@@ -21,6 +21,13 @@
 #include <set>
 #include <unordered_map>
 
+#ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
+#include "form_mgr_interface.h"
+#endif
+#include "iremote_object.h"
+#include "iremote_proxy.h"
+#include "system_ability.h"
+
 #include "app_mgr_interface.h"
 #include "app_state_observer.h"
 #include "datashare_manager.h"
@@ -28,17 +35,12 @@
 #include "distributed_sched_continuation.h"
 #include "dms_callback_task.h"
 #include "dsched_collaborate_callback_mgr.h"
-#ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
-#include "form_mgr_interface.h"
-#endif
-#include "iremote_object.h"
-#include "iremote_proxy.h"
+#include "idms_interactive_adapter.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission/distributed_mission_info.h"
 #include "nocopyable.h"
 #endif
 #include "single_instance.h"
-#include "system_ability.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -196,10 +198,21 @@ public:
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
     ErrCode QueryOsAccount(int32_t& activeAccountId);
 
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    bool CheckRemoteOsType(const std::string& netwokId) override;
+    int32_t StartAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
+    int32_t StopAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
+    int32_t ConnectAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
+    int32_t DisconnectAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
+    int32_t NotifyAbilityLifecycleChangedFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
+#endif
+
 private:
     DistributedSchedService();
     bool Init();
     void InitCommonEventListener();
+    int32_t GetCallerInfo(const std::string &localDeviceId, int32_t callerUid, uint32_t accessToken,
+        CallerInfo &callerInfo);
     void RemoteConnectAbilityMappingLocked(const sptr<IRemoteObject>& connect, const std::string& localDeviceId,
         const std::string& remoteDeviceId, const AppExecFwk::ElementName& element, const CallerInfo& callerInfo,
         TargetComponent targetComponent);
@@ -225,7 +238,6 @@ private:
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
     sptr<AppExecFwk::IFormMgr> GetFormMgrProxy();
 #endif
-    int32_t CleanMission(int32_t missionId);
     int32_t SetCallerInfo(int32_t callerUid, std::string localDeviceId, uint32_t accessToken, CallerInfo& callerInfo);
     int32_t SetWantForContinuation(AAFwk::Want& newWant, int32_t missionId);
     int32_t ContinueLocalMission(const std::string& dstDeviceId, int32_t missionId,
@@ -277,6 +289,16 @@ private:
         DSchedEventState state, int32_t ret);
     bool CheckCallingUid();
 
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    int32_t GetDmsInteractiveAdapterProxy();
+    int32_t StartRemoteAbilityAdapter(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t requestCode,
+        uint32_t accessToken);
+    int32_t ConnectRemoteAbilityAdapter(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
+        int32_t callerUid, int32_t callerPid, uint32_t accessToken);
+    int32_t DisconnectRemoteAbilityAdapter(const sptr<IRemoteObject>& connect, int32_t callerUid,
+        uint32_t accessToken);
+#endif
+
 private:
     std::shared_ptr<DSchedContinuation> dschedContinuation_;
     std::shared_ptr<DSchedCollaborationCallbackMgr> collaborateCbMgr_;
@@ -308,6 +330,11 @@ private:
     std::atomic<int32_t> token_ {0};
     std::map<std::string, sptr<AppStateObserver>> bundleNameMap_;
     DataShareManager dataShareManager_;
+
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    std::mutex dmsAdapetrLock_;
+    IDmsInteractiveAdapter dmsAdapetr_;
+#endif
 };
 
 class ConnectAbilitySession {
