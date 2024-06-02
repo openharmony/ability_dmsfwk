@@ -24,6 +24,7 @@ ohos_shared_library("distributed_sched_utils") {
 
   include_dirs = [
     "${dms_path}/common/include",
+    "${dms_path}/interfaces/innerkits/common/include",
     "${dms_path}/services/dtbschedmgr/include",
   ]
 

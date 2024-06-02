@@ -45,6 +45,10 @@ enum class IDSchedInterfaceCode : uint32_t {
     START_FREE_INSTALL_FROM_REMOTE = 51,
     NOTIFY_COMPLETE_FREE_INSTALL_FROM_REMOTE = 52,
 
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    NOTIFY_ABILITY_LIFECYCLE_CHANGED_FROM_REMOTE = 66,
+#endif
+
     // request code for mission
     GET_MISSION_INFOS = 80,
     REGISTER_MISSION_LISTENER = 84,
@@ -73,7 +77,7 @@ enum class IDSchedInterfaceCode : uint32_t {
 
     // request code for upload distributed component info
     GET_DISTRIBUTED_COMPONENT_LIST = 161,
-    
+
     START_REMOTE_FREE_INSTALL = 200,
     // form share
     START_REMOTE_SHARE_FORM = 220,

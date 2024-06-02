@@ -425,7 +425,7 @@ void DSchedContinue::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
     HILOGI("process event %{public}d with state %{public}d", eventId, stateMachine_->GetStateType());
     int32_t ret = stateMachine_->Execute(event);
     if (ret != ERR_OK) {
-        HILOGE("event %{public}d excute failed, ret %{public}d", eventId, ret);
+        HILOGE("event %{public}d execute failed, ret %{public}d", eventId, ret);
         OnContinueEnd(ret);
     }
     return;

@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_DISTRIBUTED_DMS_CONSTANT_H
-#define OHOS_DISTRIBUTED_DMS_CONSTANT_H
+#ifndef OHOS_DMS_CONSTANT_H
+#define OHOS_DMS_CONSTANT_H
 
 namespace OHOS {
 namespace DistributedSchedule {
 namespace Constants {
+constexpr int32_t OH_OS_TYPE = 10;
+constexpr int32_t HO_OS_TYPE = 11;
+
+constexpr const char* PARAM_KEY_OS_TYPE = "OS_TYPE";
+constexpr const char* PARAM_KEY_OS_VERSION = "OS_VERSION";
 constexpr const char* DMS_NAME = "dmsfwk";
 constexpr const char* DMS_VERSION = "5.0.0";
 constexpr const char* DMS_SERVICE_ID = "dmsfwk_svr_id";
@@ -29,4 +34,4 @@ constexpr const char* DMS_SERVICE_TYPE = "appInfo";
 } // Constants
 } // DistributedSchedule
 } // OHOS
-#endif
+#endif // OHOS_DMS_CONSTANT_H

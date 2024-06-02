@@ -74,7 +74,10 @@ ohos_shared_library("distributedschedsvr") {
   install_enable = true
 
   if (!dmsfwk_softbus_adapter_common) {
-    cflags = [ "-DDMSFWK_SAME_ACCOUNT" ]
+    cflags = [
+      "-DDMSFWK_SAME_ACCOUNT",
+      "-DDMSFWK_INTERACTIVE_ADAPTER",
+    ]
   }
 
   sources = [

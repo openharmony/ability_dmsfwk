@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #ifndef DMS_STATIC_CAPABILITY_H
 #define DMS_STATIC_CAPABILITY_H
 
 #include "single_instance.h"
 #include "i_static_capability_collector.h"
-
 
 #ifndef API_EXPORT
 #define API_EXPORT __attribute__((visibility("default")))
