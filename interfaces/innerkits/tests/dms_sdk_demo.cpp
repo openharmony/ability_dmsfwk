@@ -26,15 +26,14 @@ using namespace std;
 Business g_business;
 namespace {
 DmsHandler &dmsSourceHandlerdemo = DmsHandler::GetInstance();
-DSchedEventType g_type = DMS_CONTINUE;
 sptr<IDSchedEventListener> listener = sptr<IDSchedEventListener>(new Business());
 ContinueInfo g_continueInfo;
 }
 
-void Business::Register()
+void Business::Register(DSchedEventType type)
 {
     int32_t result = 0;
-    result = dmsSourceHandlerdemo.RegisterDSchedEventListener(g_type, listener);
+    result = dmsSourceHandlerdemo.RegisterDSchedEventListener(type, listener);
     if (result < 0) {
         cout << "RegisterDSchedEventListener failed.CODE = " << result << endl;
     } else {
@@ -42,10 +41,10 @@ void Business::Register()
     }
 }
 
-void Business::UnRegister()
+void Business::UnRegister(DSchedEventType type)
 {
     int32_t result = 0;
-    result = dmsSourceHandlerdemo.UnRegisterDSchedEventListener(g_type, listener);
+    result = dmsSourceHandlerdemo.UnRegisterDSchedEventListener(type, listener);
     if (result < 0) {
         cout << "UnRegisterDSchedEventListener failed.CODE = " << result << endl;
     } else {
@@ -53,7 +52,7 @@ void Business::UnRegister()
     }
 }
 
-void Business::GetContinueInfo()
+void Business::GetContinueDeviceInfo()
 {
     int32_t result = 0;
     result = dmsSourceHandlerdemo.GetContinueInfo(g_continueInfo);
@@ -63,6 +62,31 @@ void Business::GetContinueInfo()
         cout << "continueInfo.dstNetworkId_ : " << g_continueInfo.dstNetworkId_ << endl;
         cout << "continueInfo.srcNetworkId_ : " << g_continueInfo.srcNetworkId_ << endl;
     }
+}
+
+void Business::GetDSchedEventInfo(DSchedEventType type)
+{
+    vector<EventNotify> notifys;
+    int32_t result = dmsSourceHandlerdemo.GetDSchedEventInfo(type, notifys);
+    if (result < 0) {
+        cout << "GetContinueInfo failed.CODE = " << result << endl;
+    } else {
+        for (auto notify : notifys) {
+            cout << endl << "DSchedEventInfo:" << endl;
+            cout << "eventResult: " << notify.eventResult_ << endl;
+            cout << "srcNetworkId: " << notify.srcNetworkId_ << endl;
+            cout << "dstNetworkId: " << notify.dstNetworkId_ << endl;
+            cout << "srcBundleName: " << notify.srcBundleName_ << endl;
+            cout << "srcModuleName: " << notify.srcModuleName_ << endl;
+            cout << "srcAbilityName: " << notify.srcAbilityName_ << endl;
+            cout << "destBundleName: " << notify.destBundleName_ << endl;
+            cout << "destModuleName: " << notify.destModuleName_ << endl;
+            cout << "destAbilityName: " << notify.destAbilityName_ << endl;
+            cout << "dSchedEventType: " << notify.dSchedEventType_ << endl;
+            cout << "state: " << notify.state_ << endl << endl;
+        }
+    }
+    notifys.clear();
 }
 
 void Business::DSchedEventNotify(EventNotify& notify)
@@ -81,11 +105,13 @@ void Business::DSchedEventNotify(EventNotify& notify)
     cout << "state: " << notify.state_ << endl;
     cout << "DSchedEventNotify Success." << endl;
 }
-
 int main()
 {
     cout << "Please select an option to test the interface:" << endl;
-    cout << "A.RegisterDSchedEventListener  B.UnRegisterDSchedEventListener C.GetContinueInfo X.exit" << endl;
+    cout << "A.RegisterContinueListener       B.UnRegisterContinueListener       C.GetContinueInfo" << endl;
+    cout << "D.RegisterCollaborationListener  E.UnRegisterCollaborationListener  F.GetCollaborationInfo" << endl;
+    cout << "G.RegisterAllListener            H.UnRegisterAllListener            I.GetAllInfo" << endl;
+    cout << "J.GetContinueDeviceInfo          X.exit" << endl;
     cout << "\n" << endl;
  
     char cmd;
@@ -94,11 +120,25 @@ int main()
             cmd = cmd + 'A' - 'a';
         }
         switch (cmd) {
-            case 'A' : g_business.Register();
+            case 'A' : g_business.Register(DMS_CONTINUE);
                 break;
-            case 'B' : g_business.UnRegister();
+            case 'B' : g_business.UnRegister(DMS_CONTINUE);
                 break;
-            case 'C' : g_business.GetContinueInfo();
+            case 'C' : g_business.GetDSchedEventInfo(DMS_CONTINUE);
+                break;
+            case 'D' : g_business.Register(DMS_COLLABORATION);
+                break;
+            case 'E' : g_business.UnRegister(DMS_COLLABORATION);
+                break;
+            case 'F' : g_business.GetDSchedEventInfo(DMS_COLLABORATION);
+                break;
+            case 'G' : g_business.Register(DMS_ALL);
+                break;
+            case 'H' : g_business.UnRegister(DMS_ALL);
+                break;
+            case 'I' : g_business.GetDSchedEventInfo(DMS_ALL);
+                break;
+            case 'J' : g_business.GetContinueDeviceInfo();
                 break;
             case 'X' :
                 return 0;
