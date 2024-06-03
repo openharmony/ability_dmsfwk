@@ -43,7 +43,7 @@ bool SwitchStatusDependency::IsContinueSwitchOn()
     std::lock_guard<std::mutex> lock(dataShareMutex_);
     HILOGI("start query switch status from dataShare");
     switchStatus_ = GetSwitchStatus(CONTINUE_SWITCH_STATUS_KEY, CONTINUE_SWITCH_ON);
-    return switchStatus_ != CONTINUE_SWITCH_OFF;
+    return switchStatus_ == CONTINUE_SWITCH_ON;
 }
 
 std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, const std::string &defaultValue)
