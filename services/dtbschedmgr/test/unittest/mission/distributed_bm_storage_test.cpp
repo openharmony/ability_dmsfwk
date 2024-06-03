@@ -28,6 +28,7 @@ using namespace testing::ext;
 using namespace OHOS::DistributedKv;
 using namespace OHOS::DistributedHardware;
 namespace {
+const std::string BASEDIR = "/data/service/el1/public/database/DistributedSchedule";
 constexpr int32_t TASK_ID_1 = 11;
 constexpr int32_t TASK_ID_2 = 12;
 constexpr size_t BYTESTREAM_LENGTH = 100;
@@ -36,11 +37,13 @@ constexpr uint8_t ONE_BYTE = '6';
 
 void DistributedBmStorageTest::SetUpTestCase()
 {
+    mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
     DTEST_LOG << "DistributedBmStorageTest::SetUpTestCase" << std::endl;
 }
 
 void DistributedBmStorageTest::TearDownTestCase()
 {
+    (void)remove(BASEDIR.c_str());
     DTEST_LOG << "DistributedBmStorageTest::TearDownTestCase" << std::endl;
 }
 
