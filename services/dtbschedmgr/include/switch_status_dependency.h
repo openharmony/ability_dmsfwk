@@ -39,8 +39,8 @@ private:
     const std::string SETTINGS_DATA_FIELD_KEY = "KEYWORD";
     const std::string SETTINGS_DATA_FIELD_VAL = "VALUE";
     const std::string CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
-    const std::string CONTINUE_SWITCH_OFF = "continue_switch_off";
-    const std::string CONTINUE_SWITCH_ON = "continue_switch_on";
+    const std::string CONTINUE_SWITCH_OFF = "0";
+    const std::string CONTINUE_SWITCH_ON = "1";
     std::string switchStatus_;
 };
 } // namespace DistributedSchedule

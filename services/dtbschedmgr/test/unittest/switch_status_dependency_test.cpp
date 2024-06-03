@@ -24,8 +24,8 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
     const std::string CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
-    const std::string CONTINUE_SWITCH_OFF = "continue_switch_off";
-    const std::string CONTINUE_SWITCH_ON = "continue_switch_on";
+    const std::string CONTINUE_SWITCH_OFF = "0";
+    const std::string CONTINUE_SWITCH_ON = "1";
 }
 
 void SwitchStatusDependencyTest::SetUpTestCase()
