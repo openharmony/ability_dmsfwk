@@ -188,7 +188,7 @@ bool DtbschedmgrDeviceInfoStorage::UpdateDeviceInfoStorage()
     for (const auto& dmDeviceInfo : dmDeviceInfoList) {
         int32_t osType = Constants::OH_OS_TYPE;
         std::string osVersion = "";
-        if (GetOsInfoFromDM(dmDeviceInfo.extraData, osType, osVersion)) {
+        if (!GetOsInfoFromDM(dmDeviceInfo.extraData, osType, osVersion)) {
             HILOGE("Get Os info from DM device info fail, extraData %{public}s.", dmDeviceInfo.extraData.c_str());
         }
         auto deviceInfo = std::make_shared<DmsDeviceInfo>(dmDeviceInfo.deviceName, dmDeviceInfo.deviceTypeId,

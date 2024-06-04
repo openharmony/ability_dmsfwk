@@ -19,6 +19,7 @@
 #include <string>
 
 #include "caller_info.h"
+#include "dm_device_info.h"
 #include "message_parcel.h"
 #include "want.h"
 
@@ -40,6 +41,10 @@ typedef struct {
     int32_t (*DisconnectAbilityFromRemoteAdapter)(MessageParcel& data, MessageParcel& reply);
 
     int32_t (*NotifyAbilityLifecycleChangedFromRemoteAdapter)(MessageParcel& data, MessageParcel& reply);
+
+    void (*OnDeviceOnlineEx)(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
+    void (*OnDeviceOfflineEx)(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
+    void (*OnDeviceInfoChangedEx)(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
 } IDmsInteractiveAdapter;
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -31,7 +31,7 @@ public:
 
 private:
     WifiStateAdapter() {}
-    bool isWifiActive_;
+    bool isWifiActive_ = false;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

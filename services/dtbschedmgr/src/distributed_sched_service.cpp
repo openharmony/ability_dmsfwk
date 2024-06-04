@@ -150,6 +150,7 @@ void DistributedSchedService::OnStart()
     HILOGI("DMS service disabled, exiting.");
     _exit(0);
 #endif
+    HILOGI("Dms service OnStart enter.");
     if (!Init()) {
         HILOGE("failed to init DistributedSchedService");
         return;
@@ -171,21 +172,28 @@ void DistributedSchedService::OnStart()
     dmsCallbackTask_->Init(freeCallback);
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
+    HILOGI("Get dms interactive adapter proxy enter.");
     int32_t ret = GetDmsInteractiveAdapterProxy();
     if (ret != ERR_OK) {
         HILOGE("Get remote dms interactive adapter proxy fail, ret %{public}d.", ret);
     }
 #endif
 
-    HILOGI("OnStart start service success.");
+    HILOGI("OnStart dms service success.");
     Publish(this);
 }
 
 void DistributedSchedService::OnStop()
 {
+    HILOGI("OnStop dms service enter.");
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     DMSContinueSendMgr::GetInstance().UnInit();
     DMSContinueRecvMgr::GetInstance().UnInit();
+#endif
+
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    dlclose(dllHandle_);
+    dllHandle_ = nullptr;
 #endif
     HILOGD("begin");
 }
@@ -236,25 +244,8 @@ bool DistributedSchedService::Init()
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().Init()) {
         HILOGW("DtbschedmgrDeviceInfoStorage init failed.");
     }
+    InitDataShareManager();
 
-    DataShareManager::ObserverCallback observerCallback = [this]() {
-        bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-        int32_t missionId = GetCurrentMissionId();
-        if (missionId <= 0) {
-            HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
-            return;
-        }
-        
-        if (IsContinueSwitchOn) {
-            DMSContinueSendMgr::GetInstance().NotifyMissionFocused(missionId, FocusedReason::INIT);
-            DSchedContinueManager::GetInstance().Init();
-        } else {
-            DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(missionId, UnfocusedReason::NORMAL);
-            DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
-            DSchedContinueManager::GetInstance().UnInit();
-        };
-    };
-    dataShareManager_.RegisterObserver(CONTINUE_SWITCH_STATUS_KEY, observerCallback);
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().InitDataStorage();
@@ -276,6 +267,29 @@ bool DistributedSchedService::Init()
         componentChangeHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
     return true;
+}
+
+void DistributedSchedService::InitDataShareManager()
+{
+    DataShareManager::ObserverCallback observerCallback = [this]() {
+        bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
+        int32_t missionId = GetCurrentMissionId();
+        if (missionId <= 0) {
+            HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
+            return;
+        }
+        
+        if (IsContinueSwitchOn) {
+            DMSContinueSendMgr::GetInstance().NotifyMissionFocused(missionId, FocusedReason::INIT);
+            DSchedContinueManager::GetInstance().Init();
+        } else {
+            DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(missionId, UnfocusedReason::NORMAL);
+            DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
+            DSchedContinueManager::GetInstance().UnInit();
+        };
+    };
+    dataShareManager_.RegisterObserver(CONTINUE_SWITCH_STATUS_KEY, observerCallback);
+    HILOGI("Init data share manager, register observer end.");
 }
 
 void DistributedSchedService::InitCommonEventListener()
@@ -332,7 +346,7 @@ bool DistributedSchedService::CheckRemoteOsType(const std::string& netwokId)
 
     HILOGI("Remote device OsType %{public}d, netwokId: %{public}s.", devInfo->GetDeviceOSType(),
         GetAnonymStr(netwokId).c_str());
-    return (devInfo->GetDeviceOSType() == Constants::HO_OS_TYPE);
+    return (devInfo->GetDeviceOSType() == Constants::HO_OS_TYPE_EX);
 }
 
 int32_t DistributedSchedService::GetDmsInteractiveAdapterProxy()
@@ -344,27 +358,27 @@ int32_t DistributedSchedService::GetDmsInteractiveAdapterProxy()
 #else
     char resolvedPath[100] = "/system/lib/libdms_interactive_adapter.z.so";
 #endif
-    int32_t (*GetDmsInterActiveAdapetr)(const sptr<IRemoteObject> &callerToken,
+    int32_t (*GetDmsInteractiveAdapter)(const sptr<IRemoteObject> &callerToken,
         IDmsInteractiveAdapter &dmsAdpHandle) = nullptr;
 
-    void *dllHandle = dlopen(resolvedPath, RTLD_LAZY);
-    if (dllHandle == nullptr) {
+    dllHandle_ = dlopen(resolvedPath, RTLD_LAZY);
+    if (dllHandle_ == nullptr) {
         HILOGE("Open dms interactive adapter shared object fail, resolvedPath [%{public}s].", resolvedPath);
         return NOT_FIND_SERVICE_REGISTRY;
     }
 
     int32_t ret = ERR_OK;
     do {
-        GetDmsInterActiveAdapetr = reinterpret_cast<int32_t (*)(const sptr<IRemoteObject> &callerToken,
-            IDmsInteractiveAdapter &dmsAdpHandle)>(dlsym(dllHandle, "GetDmsInterActiveAdapetr"));
-        if (GetDmsInterActiveAdapetr == nullptr) {
-            HILOGE("Link the GetDmsInterActiveAdapetr symbol in dms interactive adapter fail.");
+        GetDmsInteractiveAdapter = reinterpret_cast<int32_t (*)(const sptr<IRemoteObject> &callerToken,
+            IDmsInteractiveAdapter &dmsAdpHandle)>(dlsym(dllHandle_, "GetDmsInteractiveAdapter"));
+        if (GetDmsInteractiveAdapter == nullptr) {
+            HILOGE("Link the GetDmsInteractiveAdapter symbol in dms interactive adapter fail.");
             ret = NOT_FIND_SERVICE_REGISTRY;
             break;
         }
 
-        int32_t ret = GetDmsInterActiveAdapetr(this, dmsAdapetr_);
-        if (ret == ERR_OK) {
+        int32_t ret = GetDmsInteractiveAdapter(this, dmsAdapetr_);
+        if (ret != ERR_OK) {
             HILOGE("Init remote dms interactive adapter proxy fail, ret %{public}d.", ret);
             ret = INVALID_PARAMETERS_ERR;
             break;
@@ -373,7 +387,11 @@ int32_t DistributedSchedService::GetDmsInteractiveAdapterProxy()
         ret = ERR_OK;
     } while (false);
 
-    dlclose(dllHandle);
+    if (ret != ERR_OK) {
+        HILOGE("Get remote dms interactive adapter proxy fail, dlclose handle.");
+        dlclose(dllHandle_);
+        dllHandle_ = nullptr;
+    }
     return ret;
 }
 
@@ -382,7 +400,7 @@ int32_t DistributedSchedService::StartRemoteAbilityAdapter(const OHOS::AAFwk::Wa
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.StartRemoteAbilityAdapter == nullptr) {
-        HILOGE("Dms interactive start remote ability adapter dllHandle is null.");
+        HILOGE("Dms interactive start remote ability adapter handle  is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -398,7 +416,7 @@ int32_t DistributedSchedService::ConnectRemoteAbilityAdapter(const OHOS::AAFwk::
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.ConnectRemoteAbilityAdapter == nullptr) {
-        HILOGE("Dms interactive connect remote ability adapter dllHandle is null.");
+        HILOGE("Dms interactive connect remote ability adapter handle  is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -414,7 +432,7 @@ int32_t DistributedSchedService::DisconnectRemoteAbilityAdapter(const sptr<IRemo
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.DisconnectRemoteAbilityAdapter == nullptr) {
-        HILOGE("Dms interactive disconnect remote ability adapter dllHandle is null.");
+        HILOGE("Dms interactive disconnect remote ability adapter handle  is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -429,7 +447,7 @@ int32_t DistributedSchedService::StartAbilityFromRemoteAdapter(MessageParcel& da
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.StartAbilityFromRemoteAdapter == nullptr) {
-        HILOGE("Dms interactive start ability from remote adapter dllHandle is null.");
+        HILOGE("Dms interactive start ability from remote adapter handle  is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -444,7 +462,7 @@ int32_t DistributedSchedService::StopAbilityFromRemoteAdapter(MessageParcel& dat
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.StopAbilityFromRemoteAdapter == nullptr) {
-        HILOGE("Dms interactive stop ability from remote adapter dllHandle is null.");
+        HILOGE("Dms interactive stop ability from remote adapter handle  is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -459,7 +477,7 @@ int32_t DistributedSchedService::ConnectAbilityFromRemoteAdapter(MessageParcel& 
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.ConnectAbilityFromRemoteAdapter == nullptr) {
-        HILOGE("Dms interactive connect ability from remote adapter dllHandle is null.");
+        HILOGE("Dms interactive connect ability from remote adapter handle  is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -474,7 +492,7 @@ int32_t DistributedSchedService::DisconnectAbilityFromRemoteAdapter(MessageParce
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.DisconnectAbilityFromRemoteAdapter == nullptr) {
-        HILOGE("Dms interactive disconnect ability from remote adapter dllHandle is null.");
+        HILOGE("Dms interactive disconnect ability from remote adapter handle  is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -490,7 +508,7 @@ int32_t DistributedSchedService::NotifyAbilityLifecycleChangedFromRemoteAdapter(
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.NotifyAbilityLifecycleChangedFromRemoteAdapter == nullptr) {
-        HILOGE("Dms interactive disconnect ability from remote adapter dllHandle is null.");
+        HILOGE("Dms interactive disconnect ability from remote adapter handle  is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -499,6 +517,39 @@ int32_t DistributedSchedService::NotifyAbilityLifecycleChangedFromRemoteAdapter(
         HILOGE("Dms interactive adapter disconnect ability from remote adapter fail, ret %{public}d.", ret);
     }
     return ret;
+}
+
+void DistributedSchedService::OnDeviceOnlineEx(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
+{
+    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
+    if (dmsAdapetr_.OnDeviceOnlineEx == nullptr) {
+        HILOGE("Dms interactive on device online extention handle  is null.");
+        return;
+    }
+
+    dmsAdapetr_.OnDeviceOnlineEx(deviceInfo);
+}
+
+void DistributedSchedService::OnDeviceOfflineEx(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
+{
+    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
+    if (dmsAdapetr_.OnDeviceOfflineEx == nullptr) {
+        HILOGE("Dms interactive on device online extention handle  is null.");
+        return;
+    }
+
+    dmsAdapetr_.OnDeviceOfflineEx(deviceInfo);
+}
+
+void DistributedSchedService::OnDeviceInfoChangedEx(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
+{
+    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
+    if (dmsAdapetr_.OnDeviceInfoChangedEx == nullptr) {
+        HILOGE("Dms interactive on device online extention handle  is null.");
+        return;
+    }
+
+    dmsAdapetr_.OnDeviceInfoChangedEx(deviceInfo);
 }
 #endif // DMSFWK_INTERACTIVE_ADAPTER
 
