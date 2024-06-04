@@ -27,16 +27,19 @@ namespace OHOS {
 namespace DistributedSchedule {
 
 namespace {
+    const std::string BASEDIR = "/data/service/el1/public/database/DistributedSchedule";
     const int32_t WAITTIME = 2000;
 }
 void DSchedContinueTest::SetUpTestCase()
 {
+    mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
     DTEST_LOG << "DSchedContinueTest::SetUpTestCase" << std::endl;
     DistributedSchedService::GetInstance().Init();
 }
 
 void DSchedContinueTest::TearDownTestCase()
 {
+    (void)remove(BASEDIR.c_str());
     DTEST_LOG << "DSchedContinueTest::TearDownTestCase" << std::endl;
 }
 

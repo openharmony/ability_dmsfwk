@@ -25,16 +25,19 @@ using namespace testing::ext;
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
+    const std::string BASEDIR = "/data/service/el1/public/database/DistributedSchedule";
     const int32_t WAITTIME = 2000;
 }
 //DSchedContinueDataStateTest
 void DSchedContinueDataStateTest::SetUpTestCase()
 {
+    mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
     DTEST_LOG << "DSchedContinueDataStateTest::SetUpTestCase" << std::endl;
 }
 
 void DSchedContinueDataStateTest::TearDownTestCase()
 {
+    (void)remove(BASEDIR.c_str());
     DTEST_LOG << "DSchedContinueDataStateTest::TearDownTestCase" << std::endl;
 }
 
@@ -68,11 +71,13 @@ std::shared_ptr<DSchedContinue> DSchedContinueDataStateTest::CreateObject()
 //DSchedContinueSinkEndStateTest
 void DSchedContinueSinkEndStateTest::SetUpTestCase()
 {
+    mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
     DTEST_LOG << "DSchedContinueSinkEndStateTest::SetUpTestCase" << std::endl;
 }
 
 void DSchedContinueSinkEndStateTest::TearDownTestCase()
 {
+    (void)remove(BASEDIR.c_str());
     DTEST_LOG << "DSchedContinueSinkEndStateTest::TearDownTestCase" << std::endl;
 }
 
@@ -106,11 +111,13 @@ std::shared_ptr<DSchedContinue> DSchedContinueSinkEndStateTest::CreateObject()
 //DSchedContinueSinkStartStateTest
 void DSchedContinueSinkStartStateTest::SetUpTestCase()
 {
+    mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
     DTEST_LOG << "DSchedContinueSinkStartStateTest::SetUpTestCase" << std::endl;
 }
 
 void DSchedContinueSinkStartStateTest::TearDownTestCase()
 {
+    (void)remove(BASEDIR.c_str());
     DTEST_LOG << "DSchedContinueSinkStartStateTest::TearDownTestCase" << std::endl;
 }
 
@@ -144,11 +151,13 @@ std::shared_ptr<DSchedContinue> DSchedContinueSinkStartStateTest::CreateObject()
 //DSchedContinueSinkWaitEndStateTest
 void DSchedContinueSinkWaitEndStateTest::SetUpTestCase()
 {
+    mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
     DTEST_LOG << "DSchedContinueSinkWaitEndStateTest::SetUpTestCase" << std::endl;
 }
 
 void DSchedContinueSinkWaitEndStateTest::TearDownTestCase()
 {
+    (void)remove(BASEDIR.c_str());
     DTEST_LOG << "DSchedContinueSinkWaitEndStateTest::TearDownTestCase" << std::endl;
 }
 
@@ -183,11 +192,13 @@ std::shared_ptr<DSchedContinue> DSchedContinueSinkWaitEndStateTest::CreateObject
 //DSchedContinueAbilityStateTest
 void DSchedContinueAbilityStateTest::SetUpTestCase()
 {
+    mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
     DTEST_LOG << "DSchedContinueAbilityStateTest::SetUpTestCase" << std::endl;
 }
 
 void DSchedContinueAbilityStateTest::TearDownTestCase()
 {
+    (void)remove(BASEDIR.c_str());
     DTEST_LOG << "DSchedContinueAbilityStateTest::TearDownTestCase" << std::endl;
 }
 
@@ -222,11 +233,13 @@ std::shared_ptr<DSchedContinue> DSchedContinueAbilityStateTest::CreateObject()
 //DSchedContinueEndStateTest
 void DSchedContinueEndStateTest::SetUpTestCase()
 {
+    mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
     DTEST_LOG << "DSchedContinueEndStateTest::SetUpTestCase" << std::endl;
 }
 
 void DSchedContinueEndStateTest::TearDownTestCase()
 {
+    (void)remove(BASEDIR.c_str());
     DTEST_LOG << "DSchedContinueEndStateTest::TearDownTestCase" << std::endl;
 }
 
@@ -261,11 +274,13 @@ std::shared_ptr<DSchedContinue> DSchedContinueEndStateTest::CreateObject()
 //DSchedContinueSourceStartStateTest
 void DSchedContinueSourceStartStateTest::SetUpTestCase()
 {
+    mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
     DTEST_LOG << "DSchedContinueSourceStartStateTest::SetUpTestCase" << std::endl;
 }
 
 void DSchedContinueSourceStartStateTest::TearDownTestCase()
 {
+    (void)remove(BASEDIR.c_str());
     DTEST_LOG << "DSchedContinueSourceStartStateTest::TearDownTestCase" << std::endl;
 }
 
@@ -300,11 +315,13 @@ std::shared_ptr<DSchedContinue> DSchedContinueSourceStartStateTest::CreateObject
 //DSchedContinueWaitEndStateTest
 void DSchedContinueWaitEndStateTest::SetUpTestCase()
 {
+    mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
     DTEST_LOG << "DSchedContinueWaitEndStateTest::SetUpTestCase" << std::endl;
 }
 
 void DSchedContinueWaitEndStateTest::TearDownTestCase()
 {
+    (void)remove(BASEDIR.c_str());
     DTEST_LOG << "DSchedContinueWaitEndStateTest::TearDownTestCase" << std::endl;
 }
 
@@ -339,11 +356,13 @@ std::shared_ptr<DSchedContinue> DSchedContinueWaitEndStateTest::CreateObject()
 //DSchedContinueStateMachineTest
 void DSchedContinueStateMachineTest::SetUpTestCase()
 {
+    mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
     DTEST_LOG << "DSchedContinueStateMachineTest::SetUpTestCase" << std::endl;
 }
 
 void DSchedContinueStateMachineTest::TearDownTestCase()
 {
+    (void)remove(BASEDIR.c_str());
     DTEST_LOG << "DSchedContinueStateMachineTest::TearDownTestCase" << std::endl;
 }
 

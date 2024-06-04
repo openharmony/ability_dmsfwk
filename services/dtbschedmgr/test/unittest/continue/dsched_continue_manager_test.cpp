@@ -29,6 +29,7 @@ namespace {
     const std::string LOCAL_DEVICEID = "localdeviceid";
     const std::string REMOTE_DEVICEID = "remotedeviceid";
     const std::string CONTINUETYPE = "continueType";
+    const std::string BASEDIR = "/data/service/el1/public/database/DistributedSchedule";
     constexpr int32_t MISSION_ID = 1;
     const int32_t WAITTIME = 2000;
     const std::string BUNDLE_NAME = "com.ohos.permissionmanager";
@@ -36,11 +37,13 @@ namespace {
 
 void DSchedContinueManagerTest::SetUpTestCase()
 {
+    mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
     DTEST_LOG << "DSchedContinueManagerTest::SetUpTestCase" << std::endl;
 }
 
 void DSchedContinueManagerTest::TearDownTestCase()
 {
+    (void)remove(BASEDIR.c_str());
     DTEST_LOG << "DSchedContinueManagerTest::TearDownTestCase" << std::endl;
 }
 
@@ -346,7 +349,6 @@ HWTEST_F(DSchedContinueManagerTest, HandleContinueEnd_001, TestSize.Level3)
     int32_t ret = DSchedContinueManager::GetInstance().continues_.empty();
     EXPECT_EQ(ret, true);
     
-    DSchedContinueManager::GetInstance().cntSource_ = 0;
     std::shared_ptr<DSchedContinue> ptr = nullptr;
     DSchedContinueManager::GetInstance().continues_[info] = ptr;
     DSchedContinueManager::GetInstance().HandleContinueEnd(info);
