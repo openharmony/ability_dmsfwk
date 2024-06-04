@@ -820,7 +820,7 @@ bool DmsRadar::ClickIconDmsRecvOver(const std::string& func, int32_t errCode)
             FUNC, func,
             BIZ_SCENE, static_cast<int32_t>(BizScene::CLICK_ICON),
             BIZ_STAGE, static_cast<int32_t>(ClickIcon::DMS_RECV_OVER),
-            STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC),
+            STAGE_RES, static_cast<int32_t>(StageRes::STAGE_FAIL),
             BIZ_STATE, static_cast<int32_t>(BizState::BIZ_STATE_END),
             ERROR_CODE, errCode);
     }
