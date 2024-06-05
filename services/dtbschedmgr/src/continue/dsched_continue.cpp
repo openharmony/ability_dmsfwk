@@ -928,7 +928,7 @@ int32_t DSchedContinue::StartAbility(const OHOS::AAFwk::Want& want, int32_t requ
         return ret;
     }
 
-    HILOGI("ExecuteContinueData StartAbility start");
+    HILOGI("ExecuteContinueData StartAbility start, flag is %{public}d", want.GetFlags());
     DmsRadar::GetInstance().ClickIconDmsStartAbility("StartAbility", ret);
     ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, DEFAULT_REQUEST_CODE, activeAccountId);
     if (ret != ERR_OK) {

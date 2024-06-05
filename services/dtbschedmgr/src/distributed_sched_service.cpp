@@ -3027,12 +3027,12 @@ int32_t DistributedSchedService::StartAbility(const OHOS::AAFwk::Want& want, int
         return err;
     }
     if (want.GetBoolParam(Want::PARAM_RESV_FOR_RESULT, false)) {
-        HILOGI("StartAbilityForResult start");
+        HILOGI("StartAbilityForResult start, flag is %{public}d", want.GetFlags());
         sptr<IRemoteObject> dmsTokenCallback = new DmsTokenCallback();
         err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, dmsTokenCallback, requestCode,
             activeAccountId);
     } else {
-        HILOGI("StartAbility start");
+        HILOGI("StartAbility start, flag is %{public}d", want.GetFlags());
         if (DmsContinueTime::GetInstance().GetPull()) {
             int64_t begin = GetTickCount();
             DmsContinueTime::GetInstance().SetDurationBegin(DMSDURATION_STARTABILITY, begin);
