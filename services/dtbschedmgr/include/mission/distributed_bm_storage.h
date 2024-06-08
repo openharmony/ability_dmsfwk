@@ -67,8 +67,6 @@ public:
         const std::string& continueType, ContinueEventInfo &continueEventInfo);
     void UpdateDistributedData();
     int32_t CloudSync();
-    int32_t PullOtherDistributedData(const std::vector<std::string> &networkIdList);
-    int32_t PushOtherDistributedData(const std::vector<std::string> &networkIdList);
 
 private:
     std::string DeviceAndNameToKey(const std::string &udid, const std::string &bundleName) const;
@@ -87,6 +85,7 @@ private:
         std::promise<OHOS::DistributedKv::Status> &resultStatusSignal,
         std::vector<OHOS::DistributedKv::Entry> &allEntries);
     OHOS::DistributedKv::Status GetResultSatus(std::promise<OHOS::DistributedKv::Status> &resultStatusSignal);
+    bool DelReduData(const std::string &networkId, const std::vector<OHOS::DistributedKv::Entry> &allEntries);
 
 private:
     static std::mutex mutex_;
