@@ -144,7 +144,7 @@ Status DistributedDataStorage::GetKvStore()
     Options options = {
         .createIfMissing = true,
         .encrypt = false,
-        .autoSync = true,
+        .autoSync = false,
         .securityLevel = DistributedKv::SecurityLevel::S2,
         .area = 1,
         .kvStoreType = KvStoreType::SINGLE_VERSION,
@@ -370,24 +370,20 @@ bool DistributedDataStorage::Query(const string& networkId, int32_t missionId, V
         HILOGW("missionId is invalid!");
         return false;
     }
-    string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(networkId);
-    if (uuid.empty()) {
-        HILOGW("uuid is empty!");
-        return false;
-    }
     {
         shared_lock<shared_mutex> readLock(initLock_);
-        bool ret = QueryInnerLocked(uuid, missionId, value);
+        bool ret = QueryInnerLocked(networkId, missionId, value);
         if (!ret) {
-            HILOGE("Query uuid: %{public}s, missionId: %{public}d fail.", GetAnonymStr(uuid).c_str(), missionId);
+            HILOGE("Query networkId: %{public}s, missionId: %{public}d fail.",
+                GetAnonymStr(networkId).c_str(), missionId);
             return false;
         }
     }
-    HILOGI("Query uuid: %{public}s, missionId: %{public}d success.", GetAnonymStr(uuid).c_str(), missionId);
+    HILOGI("Query networkId: %{public}s, missionId: %{public}d success.", GetAnonymStr(networkId).c_str(), missionId);
     return true;
 }
 
-bool DistributedDataStorage::QueryInnerLocked(const string& uuid, int32_t missionId, Value& value) const
+bool DistributedDataStorage::QueryInnerLocked(const string& networkId, int32_t missionId, Value& value) const
 {
     HILOGD("called.");
     int64_t begin = GetTickCount();
@@ -395,15 +391,39 @@ bool DistributedDataStorage::QueryInnerLocked(const string& uuid, int32_t missio
         HILOGW("kvStorePtr is null!");
         return false;
     }
+    string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(networkId);
+    if (uuid.empty()) {
+        HILOGW("uuid is empty!");
+        return false;
+    }
     Key key;
     GenerateKey(uuid, missionId, key);
-    auto status = kvStorePtr_->Get(key, value);
+    std::promise<OHOS::DistributedKv::Status> resultStatusSignal;
+    kvStorePtr_->Get(key, networkId,
+        [&value, &resultStatusSignal](Status innerStatus, Value innerValue) {
+            HILOGI("The get, result = %{public}d", innerStatus);
+            if (innerStatus == Status::SUCCESS) {
+                value = innerValue;
+            }
+            resultStatusSignal.set_value(innerStatus);
+        });
+    Status status = GetResultSatus(resultStatusSignal);
     HILOGI("[PerformanceTest] Get Snapshot spend %{public}" PRId64 " ms", GetTickCount() - begin);
     if (status != Status::SUCCESS) {
         HILOGE("kvStorePtr Get failed! status = %{public}d.", status);
         return false;
     }
     return true;
+}
+
+Status DistributedDataStorage::GetResultSatus(std::promise<OHOS::DistributedKv::Status> &resultStatusSignal) const
+{
+    auto future = resultStatusSignal.get_future();
+    if (future.wait_for(std::chrono::seconds(waittingTime_)) == std::future_status::ready) {
+        Status status = future.get();
+        return status;
+    }
+    return Status::ERROR;
 }
 
 void DistributedDataStorage::GenerateKey(const string& uuid, int32_t missionId, Key& key)

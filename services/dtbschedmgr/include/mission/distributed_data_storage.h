@@ -17,6 +17,7 @@
 #define OHOS_DISTRIBUTED_DATA_STORAGE_H
 
 #include <atomic>
+#include <future>
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
@@ -99,9 +100,10 @@ private:
     bool InsertInnerLocked(const std::string& uuid, int32_t missionId, const uint8_t* byteStream, size_t len);
     bool DeleteInnerLocked(const std::string& uuid, int32_t missionId);
     bool FuzzyDeleteInnerLocked(const std::string& networkId);
-    bool QueryInnerLocked(const std::string& uuid, int32_t missionId, DistributedKv::Value& value) const;
+    bool QueryInnerLocked(const std::string& networkId, int32_t missionId, DistributedKv::Value& value) const;
     static void GenerateKey(const std::string& uuid, int32_t missionId, DistributedKv::Key& key);
     static void GenerateValue(const uint8_t* byteStream, size_t len, DistributedKv::Value& value);
+    OHOS::DistributedKv::Status GetResultSatus(std::promise<OHOS::DistributedKv::Status> &resultStatusSignal) const;
 
     mutable std::shared_mutex initLock_;
     std::shared_ptr<AppExecFwk::EventHandler> dmsDataStorageHandler_;
@@ -111,6 +113,7 @@ private:
     std::shared_ptr<DistributedKv::SingleKvStore> kvStorePtr_; // protected by initLock_
     std::unique_ptr<DistributedDataChangeListener> distributedDataChangeListener_;
     sptr<IRemoteObject::DeathRecipient> kvStoreDeathRecipient_;
+    int32_t waittingTime_ = 180; // 3 s
 };
 } // DistributedSchedule
 } // OHOS

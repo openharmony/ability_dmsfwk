@@ -26,9 +26,10 @@ namespace DistributedSchedule {
 class Business : public DSchedEventListenerStub {
 public:
     void DSchedEventNotify(EventNotify &notify) override;
-    void Register();
-    void UnRegister();
-    void GetContinueInfo();
+    void Register(DSchedEventType type);
+    void UnRegister(DSchedEventType type);
+    void GetContinueDeviceInfo();
+    void GetDSchedEventInfo(DSchedEventType type);
 };
 }
 }

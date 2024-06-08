@@ -2683,8 +2683,8 @@ int32_t DistributedSchedService::SetMissionContinueState(int32_t missionId, cons
 int32_t DistributedSchedService::RegisterDSchedEventListener(const DSchedEventType& type,
     const sptr<IRemoteObject>& callback)
 {
-    if (dschedContinuation_ == nullptr) {
-        HILOGE("continuation object null!");
+    if (dschedContinuation_ == nullptr || collaborateCbMgr_ == nullptr) {
+        HILOGE("object null!");
         return INVALID_PARAMETERS_ERR;
     }
     bool ret = false;
@@ -2714,8 +2714,8 @@ int32_t DistributedSchedService::RegisterDSchedEventListener(const DSchedEventTy
 int32_t DistributedSchedService::UnRegisterDSchedEventListener(const DSchedEventType& type,
     const sptr<IRemoteObject>& callback)
 {
-    if (dschedContinuation_ == nullptr) {
-        HILOGE("continuation object null!");
+    if (dschedContinuation_ == nullptr || collaborateCbMgr_ == nullptr) {
+        HILOGE("object null!");
         return INVALID_PARAMETERS_ERR;
     }
     bool result = 0;
@@ -2724,9 +2724,10 @@ int32_t DistributedSchedService::UnRegisterDSchedEventListener(const DSchedEvent
             result = dschedContinuation_->CleanupCallback(callback);
             break;
         case DMS_COLLABORATION:
+            result = collaborateCbMgr_->CleanupCallback(callback);
             break;
         case DMS_ALL:
-            result = dschedContinuation_->CleanupCallback(callback);
+            result = dschedContinuation_->CleanupCallback(callback) && collaborateCbMgr_->CleanupCallback(callback);
             break;
         default:
             break;
