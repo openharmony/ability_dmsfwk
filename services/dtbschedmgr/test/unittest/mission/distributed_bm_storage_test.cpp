@@ -195,42 +195,6 @@ HWTEST_F(DistributedBmStorageTest, CloudSyncTest_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: PullOtherDistributedDataTest_001
- * @tc.desc: test delete DistributedBmStorage
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedBmStorageTest, PullOtherDistributedDataTest_001, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedBmStorageTest PullOtherDistributedDataTest_001 start" << std::endl;
-    auto distributedDataStorage = GetDmsBmStorage();
-    EXPECT_NE(distributedDataStorage, nullptr);
-    if (distributedDataStorage != nullptr) {
-        std::vector<std::string> networkIdList = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdList();
-        int32_t ret = dmsBmStorage_->GetInstance()->PullOtherDistributedData(networkIdList);
-        EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
-    }
-    DTEST_LOG << "DistributedBmStorageTest PullOtherDistributedDataTest_001 end" << std::endl;
-}
-
-/**
- * @tc.name: PushOtherDistributedDataDataTest_001
- * @tc.desc: test delete DistributedBmStorage
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedBmStorageTest, PushOtherDistributedDataDataTest_001, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedBmStorageTest PushOtherDistributedDataDataTest_001 start" << std::endl;
-    auto distributedDataStorage = GetDmsBmStorage();
-    EXPECT_NE(distributedDataStorage, nullptr);
-    if (distributedDataStorage != nullptr) {
-        std::vector<std::string> networkIdList = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdList();
-        int32_t ret = dmsBmStorage_->GetInstance()->PushOtherDistributedData(networkIdList);
-        EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
-    }
-    DTEST_LOG << "DistributedBmStorageTest PushOtherDistributedDataDataTest_001 end" << std::endl;
-}
-
-/**
  * @tc.name: GetBundleMgrTest_001
  * @tc.desc: test delete DistributedBmStorage
  * @tc.type: FUNC

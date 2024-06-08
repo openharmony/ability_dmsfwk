@@ -221,7 +221,7 @@ bool DmsBmStorage::GetStorageDistributeInfo(const std::string &networkId,
 bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_t& bundleNameId,
     std::string &bundleName)
 {
-    HILOGD("networkId: %{public}s bundleNameId: %{public}d", GetAnonymStr(networkId).c_str(), bundleNameId);
+    HILOGI("networkId: %{public}s  bundleNameId: %{public}d", GetAnonymStr(networkId).c_str(), bundleNameId);
     if (!CheckKvStore()) {
         HILOGE("kvStore is nullptr");
         return false;
@@ -240,6 +240,7 @@ bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_
         HILOGE("GetEntries error: %{public}d", status);
         return false;
     }
+    uint8_t recordData = 0;
     for (auto entry : allEntries) {
         std::string key = entry.key.ToString();
         std::string value =  entry.value.ToString();
@@ -249,11 +250,62 @@ bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_
         DmsBundleInfo distributedBundleInfo;
         if (distributedBundleInfo.FromJsonString(value) && distributedBundleInfo.bundleNameId == bundleNameId) {
             bundleName = distributedBundleInfo.bundleName;
-            HILOGI("end.");
-            return true;
+            ++recordData;
+            if (recordData > 1) {
+                HILOGE("Redundant data needs to be deleted.");
+                DelReduData(networkId, allEntries);
+                bundleName = "";
+                return false;
+            }
         }
     }
+    if (bundleName != "") {
+        HILOGI("end.");
+        return true;
+    }
+    HILOGE("get bundleName failed");
     return false;
+}
+
+bool DmsBmStorage::DelReduData(const std::string &networkId, const std::vector<DistributedKv::Entry> &allEntries)
+{
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return false;
+    }
+    std::string udid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(networkId);
+    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(networkId);
+    if (udid == "" || uuid == "") {
+        HILOGE("can not get udid or uuid by networkId");
+        return false;
+    }
+    std::vector<Entry> newEntries;
+    Status status = kvStorePtr_->GetEntries(uuid, newEntries);
+    if (status != Status::SUCCESS) {
+        HILOGE("GetEntries error: %{public}d", status);
+        return false;
+    }
+    std::vector<Key> reduKeyArr;
+    std::vector<std::string> newKeyArr;
+    for (auto entry : newEntries) {
+        newKeyArr.push_back(entry.key.ToString());
+    }
+    for (auto entry : allEntries) {
+        std::string key = entry.key.ToString();
+        if (key.find(udid) == std::string::npos) {
+            continue;
+        }
+        if (find(newKeyArr.begin(), newKeyArr.end(), entry.key.ToString()) == newKeyArr.end()) {
+            HILOGE("Redundant data needs to be deleted: %{public}s", GetAnonymStr(entry.key.ToString()).c_str());
+            reduKeyArr.push_back(entry.key);
+        }
+    }
+    status = kvStorePtr_->DeleteBatch(reduKeyArr);
+    if (status != Status::SUCCESS) {
+        HILOGE("DeleteBatch error: %{public}d", status);
+        return false;
+    }
+    return true;
 }
 
 bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, const uint16_t& bundleNameId,
@@ -480,48 +532,6 @@ int32_t DmsBmStorage::CloudSync()
         HILOGE("Cloud sync failed, error = %{public}d", status);
     } else {
         HILOGI("Cloud synchronizing");
-    }
-    HILOGD("end.");
-    return static_cast<int32_t>(status);
-}
-
-int32_t DmsBmStorage::PullOtherDistributedData(const std::vector<std::string> &networkIdList)
-{
-    HILOGD("called.");
-    if (networkIdList.empty()) {
-        HILOGE("GetNetworkIdList failed");
-        return INVALID_REMOTE_PARAMETERS_ERR;
-    }
-    if (!CheckKvStore()) {
-        HILOGE("kvStore is nullptr");
-        return INVALID_REMOTE_PARAMETERS_ERR;
-    }
-    Status status = kvStorePtr_->Sync(networkIdList, DistributedKv::SyncMode::PULL);
-    if (status != Status::SUCCESS) {
-        HILOGE("sync failed, error = %{public}d", status);
-    } else {
-        HILOGI("Synchronizing");
-    }
-    HILOGD("end.");
-    return static_cast<int32_t>(status);
-}
-
-int32_t DmsBmStorage::PushOtherDistributedData(const std::vector<std::string> &networkIdList)
-{
-    HILOGD("called.");
-    if (networkIdList.empty()) {
-        HILOGE("GetNetworkIdList failed");
-        return INVALID_REMOTE_PARAMETERS_ERR;
-    }
-    if (!CheckKvStore()) {
-        HILOGE("kvStore is nullptr");
-        return INVALID_REMOTE_PARAMETERS_ERR;
-    }
-    Status status = kvStorePtr_->Sync(networkIdList, DistributedKv::SyncMode::PUSH);
-    if (status != Status::SUCCESS) {
-        HILOGE("sync failed, error = %{public}d", status);
-    } else {
-        HILOGI("Synchronizing");
     }
     HILOGD("end.");
     return static_cast<int32_t>(status);
