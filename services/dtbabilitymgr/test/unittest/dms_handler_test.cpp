@@ -131,5 +131,20 @@ HWTEST_F(DmsHandlerTest, GetContinueInfo_001, TestSize.Level3)
     EXPECT_EQ(result, 0);
     DTEST_LOG << "DmsHandlerTest GetContinueInfo_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: GetDSchedEventInfo_001
+ * @tc.desc: GetDSchedEventInfo listener not is null
+ * @tc.type: FUNC
+ * @tc.require: I64FU7s
+ */
+HWTEST_F(DmsHandlerTest, GetDSchedEventInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsHandlerTest GetDSchedEventInfo_001 start" << std::endl;
+    std::vector<EventNotify> events;
+    int32_t result = dmsHandler_.GetDSchedEventInfo(DMS_UNKNOW, events);
+    EXPECT_NE(result, 0);
+    DTEST_LOG << "DmsHandlerTest GetDSchedEventInfo_001 end" << std::endl;
+}
 }
 }

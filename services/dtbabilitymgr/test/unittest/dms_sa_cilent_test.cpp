@@ -165,6 +165,31 @@ HWTEST_F(DmsSaClientTest, GetContinueInfo_001, TestSize.Level3)
     DTEST_LOG << "DmsSaClientTest GetContinueInfo_001 end" << std::endl;
 }
 
+/**
+ * @tc.name: GetDSchedEventInfo_001
+ * @tc.desc: GetDSchedEventInfo
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DmsSaClientTest, GetDSchedEventInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsSaClientTest GetDSchedEventInfo_001 start" << std::endl;
+    if (dmssaClient_ == nullptr) {
+        DTEST_LOG << "dmssaClient_ is nullptr" << std::endl;
+        return;
+    }
+    //systemAbilityId not is DISTRIBUTED_SCHED_SA_ID
+    dmssaClient_->OnAddSystemAbility(-1, DEVICE_ID);
+    //systemAbilityId is DISTRIBUTED_SCHED_SA_ID
+    dmssaClient_->OnAddSystemAbility(DISTRIBUTED_SCHED_SA_ID, DEVICE_ID);
+    DTEST_LOG << "DmsSaClientTest OnAddSystemAbility_001 end" << std::endl;
+
+    DTEST_LOG << "DmsSaClientTest GetDSchedEventInfo_001 start" << std::endl;
+    std::vector<EventNotify> events;
+    int32_t result1 = dmssaClient_->GetDSchedEventInfo(DMS_UNKNOW, events);
+    EXPECT_NE(result1, NO_ERROR);
+    DTEST_LOG << "DmsSaClientTest GetDSchedEventInfo_001 end" << std::endl;
+}
 
 /**
  * @tc.name: OnAddSystemAbility_001
