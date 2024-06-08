@@ -149,5 +149,20 @@ HWTEST_F(DistributedClientTest, GetContinueInfo_001, TestSize.Level3)
     EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
     DTEST_LOG << "DistributedClientTest GetContinueInfo_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: GetDSchedEventInfo_001
+ * @tc.desc: GetDSchedEventInfo
+ * @tc.type: FUNC
+ * @tc.require: I64FU7
+ */
+HWTEST_F(DistributedClientTest, GetDSchedEventInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedClientTest GetDSchedEventInfo_001 start" << std::endl;
+    std::vector<EventNotify> events;
+    int32_t result = distributedClient_.GetDSchedEventInfo(DMS_UNKNOW, events);
+    EXPECT_NE(result, ERR_NONE);
+    DTEST_LOG << "DistributedClientTest GetDSchedEventInfo_001 end" << std::endl;
+}
 }
 }
