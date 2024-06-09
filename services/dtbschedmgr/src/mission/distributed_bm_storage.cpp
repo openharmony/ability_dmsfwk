@@ -240,7 +240,7 @@ bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_
         HILOGE("GetEntries error: %{public}d", status);
         return false;
     }
-    uint8_t recordData = 0;
+    std::vector<Entry> reduRiskEntries;
     for (auto entry : allEntries) {
         std::string key = entry.key.ToString();
         std::string value =  entry.value.ToString();
@@ -250,24 +250,24 @@ bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_
         DmsBundleInfo distributedBundleInfo;
         if (distributedBundleInfo.FromJsonString(value) && distributedBundleInfo.bundleNameId == bundleNameId) {
             bundleName = distributedBundleInfo.bundleName;
-            ++recordData;
-            if (recordData > 1) {
-                HILOGE("Redundant data needs to be deleted.");
-                DelReduData(networkId, allEntries);
-                bundleName = "";
-                return false;
-            }
+            reduRiskEntries.push_back(entry);
         }
     }
-    if (bundleName != "") {
-        HILOGI("end.");
-        return true;
+    if (reduRiskEntries.size() > 1) {
+        HILOGE("Redundant data needs to be deleted.");
+        DelReduData(networkId, reduRiskEntries);
+        bundleName = "";
+        return false;
     }
-    HILOGE("get bundleName failed");
-    return false;
+    if (bundleName.empty()) {
+        HILOGI("get bundleName failed.");
+        return false;
+    }
+    HILOGE("end.");
+    return true;
 }
 
-bool DmsBmStorage::DelReduData(const std::string &networkId, const std::vector<DistributedKv::Entry> &allEntries)
+bool DmsBmStorage::DelReduData(const std::string &networkId, const std::vector<DistributedKv::Entry> &reduRiskEntries)
 {
     if (!CheckKvStore()) {
         HILOGE("kvStore is nullptr");
@@ -279,9 +279,12 @@ bool DmsBmStorage::DelReduData(const std::string &networkId, const std::vector<D
         HILOGE("can not get udid or uuid by networkId");
         return false;
     }
+    HILOGE("uuid: %{public}s", GetAnonymStr(uuid).c_str());
     std::vector<Entry> newEntries;
     Status status = kvStorePtr_->GetDeviceEntries(uuid, newEntries);
-    if (status != Status::SUCCESS) {
+    HILOGI("newEntries.size: %{public}u", newEntries.size());
+
+    if (newEntries.empty() || status != Status::SUCCESS) {
         HILOGE("GetEntries error: %{public}d", status);
         return false;
     }
@@ -291,14 +294,11 @@ bool DmsBmStorage::DelReduData(const std::string &networkId, const std::vector<D
         newKeyArr.push_back(entry.key.ToString());
         HILOGI("newKey: %{public}s", GetAnonymStr(entry.key.ToString()).c_str());
     }
-    for (auto entry : allEntries) {
-        std::string key = entry.key.ToString();
-        if (key.find(udid) == std::string::npos) {
-            continue;
-        }
-        if (find(newKeyArr.begin(), newKeyArr.end(), entry.key.ToString()) == newKeyArr.end()) {
-            HILOGE("Redundant data needs to be deleted: %{public}s", GetAnonymStr(entry.key.ToString()).c_str());
-            reduKeyArr.push_back(entry.key);
+    for (auto reduRiskEntry : reduRiskEntries) {
+        std::string key = reduRiskEntry.key.ToString();
+        if (find(newKeyArr.begin(), newKeyArr.end(), reduRiskEntry.key.ToString()) == newKeyArr.end()) {
+            HILOGE("Needs to be deleted: %{public}s", GetAnonymStr(reduRiskEntry.key.ToString()).c_str());
+            reduKeyArr.push_back(reduRiskEntry.key);
         }
     }
     status = kvStorePtr_->DeleteBatch(reduKeyArr);
