@@ -361,7 +361,7 @@ std::string GetAnonymStr(const std::string &value)
 
 bool IsInt32(const cJSON *paramValue)
 {
-    if (paramValue == nullptr || !cJSON_IsObject(paramValue)) {
+    if (paramValue == nullptr) {
         HILOGE("JSON parameter is invalid.");
         return false;
     }
@@ -381,12 +381,12 @@ bool IsInt32(const cJSON *paramValue)
 
 bool IsString(const cJSON *paramValue)
 {
-    if (paramValue == nullptr || !cJSON_IsObject(paramValue)) {
+    if (paramValue == nullptr) {
         HILOGE("JSON parameter is invalid.");
         return false;
     }
 
-    if (cJSON_IsString(paramValue)) {
+    if (!cJSON_IsString(paramValue)) {
         HILOGE("JSON parameter is not string.");
         return false;
     }

@@ -205,11 +205,16 @@ public:
     int32_t ConnectAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
     int32_t DisconnectAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
     int32_t NotifyAbilityLifecycleChangedFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
+
+    void OnDeviceOnlineEx(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
+    void OnDeviceOfflineEx(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
+    void OnDeviceInfoChangedEx(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
 #endif
 
 private:
     DistributedSchedService();
     bool Init();
+    void InitDataShareManager();
     void InitCommonEventListener();
     int32_t GetCallerInfo(const std::string &localDeviceId, int32_t callerUid, uint32_t accessToken,
         CallerInfo &callerInfo);
@@ -333,7 +338,20 @@ private:
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     std::mutex dmsAdapetrLock_;
-    IDmsInteractiveAdapter dmsAdapetr_;
+    void *dllHandle_ = nullptr;
+    IDmsInteractiveAdapter dmsAdapetr_ = {
+        .StartRemoteAbilityAdapter = nullptr,
+        .StartAbilityFromRemoteAdapter = nullptr,
+        .StopAbilityFromRemoteAdapter = nullptr,
+        .ConnectRemoteAbilityAdapter = nullptr,
+        .ConnectAbilityFromRemoteAdapter = nullptr,
+        .DisconnectRemoteAbilityAdapter = nullptr,
+        .DisconnectAbilityFromRemoteAdapter = nullptr,
+        .NotifyAbilityLifecycleChangedFromRemoteAdapter = nullptr,
+        .OnDeviceOnlineEx = nullptr,
+        .OnDeviceOfflineEx = nullptr,
+        .OnDeviceInfoChangedEx = nullptr,
+    };
 #endif
 };
 
