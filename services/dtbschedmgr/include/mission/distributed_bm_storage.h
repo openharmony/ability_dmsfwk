@@ -85,7 +85,7 @@ private:
         std::promise<OHOS::DistributedKv::Status> &resultStatusSignal,
         std::vector<OHOS::DistributedKv::Entry> &allEntries);
     OHOS::DistributedKv::Status GetResultSatus(std::promise<OHOS::DistributedKv::Status> &resultStatusSignal);
-    bool DelReduData(const std::string &networkId, const std::vector<OHOS::DistributedKv::Entry> &allEntries);
+    bool DelReduData(const std::string &networkId, const std::vector<OHOS::DistributedKv::Entry> &reduRiskEntries);
 
 private:
     static std::mutex mutex_;

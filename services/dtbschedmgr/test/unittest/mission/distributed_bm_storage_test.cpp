@@ -143,6 +143,26 @@ HWTEST_F(DistributedBmStorageTest, GetDistributedBundleNameTest_001, TestSize.Le
 }
 
 /**
+ * @tc.name: GetDistributedBundleNameTest_002
+ * @tc.desc: test insert DistributedBmStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, GetDistributedBundleNameTest_002, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest GetDistributedBundleNameTest_002 start" << std::endl;
+    auto distributedDataStorage = GetDmsBmStorage();
+    EXPECT_NE(distributedDataStorage, nullptr);
+    if (distributedDataStorage != nullptr) {
+        std::string networkId = "";
+        std::string bundleName = "";
+        uint16_t bundleNameId = 0;
+        bool ret = dmsBmStorage_->GetInstance()->GetDistributedBundleName(networkId, bundleNameId, bundleName);
+        EXPECT_EQ(ret, false);
+    }
+    DTEST_LOG << "DistributedBmStorageTest GetDistributedBundleNameTest_002 end" << std::endl;
+}
+
+/**
  * @tc.name: GetBundleIdTest_001
  * @tc.desc: test delete DistributedBmStorage
  * @tc.type: FUNC
