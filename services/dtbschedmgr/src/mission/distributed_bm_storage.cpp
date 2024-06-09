@@ -280,7 +280,7 @@ bool DmsBmStorage::DelReduData(const std::string &networkId, const std::vector<D
         return false;
     }
     std::vector<Entry> newEntries;
-    Status status = kvStorePtr_->GetEntries(uuid, newEntries);
+    Status status = kvStorePtr_->GetDeviceEntries(uuid, newEntries);
     if (status != Status::SUCCESS) {
         HILOGE("GetEntries error: %{public}d", status);
         return false;
@@ -289,6 +289,7 @@ bool DmsBmStorage::DelReduData(const std::string &networkId, const std::vector<D
     std::vector<std::string> newKeyArr;
     for (auto entry : newEntries) {
         newKeyArr.push_back(entry.key.ToString());
+        HILOGI("newKey: %{public}s", GetAnonymStr(entry.key.ToString()).c_str());
     }
     for (auto entry : allEntries) {
         std::string key = entry.key.ToString();

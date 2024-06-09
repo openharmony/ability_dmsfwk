@@ -116,7 +116,6 @@ HWTEST_F(DistributedBmStorageTest, GetStorageDistributeInfo_001, TestSize.Level1
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
         const std::string bundleName = "NonexistentName";
-        int32_t userId = 0;
         DmsBundleInfo info;
         bool ret = dmsBmStorage_->GetInstance()->GetStorageDistributeInfo("", bundleName, info);
         EXPECT_EQ(ret, false);
@@ -136,8 +135,8 @@ HWTEST_F(DistributedBmStorageTest, GetDistributedBundleNameTest_001, TestSize.Le
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
         std::string bundleName = "";
-        int32_t userId = 0;
-        bool ret = dmsBmStorage_->GetInstance()->GetDistributedBundleName("", userId, bundleName);
+        uint16_t bundleNameId = 0;
+        bool ret = dmsBmStorage_->GetInstance()->GetDistributedBundleName("", bundleNameId, bundleName);
         EXPECT_EQ(ret, false);
     }
     DTEST_LOG << "DistributedBmStorageTest GetDistributedBundleNameTest_001 end" << std::endl;
