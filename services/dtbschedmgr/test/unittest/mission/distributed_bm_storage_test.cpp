@@ -173,7 +173,7 @@ HWTEST_F(DistributedBmStorageTest, GetBundleIdTest_001, TestSize.Level0)
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
-        const std::string &bundleName = "NonexistentName";
+        const std::string bundleName = "NonexistentName";
         uint16_t bundleNameId = 0;
         bool ret = dmsBmStorage_->GetInstance()->GetBundleNameId(bundleName, bundleNameId);
         EXPECT_EQ(ret, false);

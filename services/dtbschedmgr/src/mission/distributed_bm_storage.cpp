@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-
 #include "mission/distributed_bm_storage.h"
 
+#include "datetime_ex.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "os_account_manager.h"
@@ -200,6 +200,7 @@ bool DmsBmStorage::GetStorageDistributeInfo(const std::string &networkId,
     Key key(keyOfData);
     Value value;
     std::promise<OHOS::DistributedKv::Status> resultStatusSignal;
+    int64_t begin = GetTickCount();
     kvStorePtr_->Get(key, networkId,
         [&value, &resultStatusSignal](Status innerStatus, Value innerValue) {
             HILOGI("The get, result = %{public}d", innerStatus);
@@ -209,6 +210,7 @@ bool DmsBmStorage::GetStorageDistributeInfo(const std::string &networkId,
             resultStatusSignal.set_value(innerStatus);
         });
     Status status = GetResultSatus(resultStatusSignal);
+    HILOGI("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
     if (status == Status::SUCCESS) {
         HILOGI("Get result = ok");
         info.FromJsonString(value.ToString());
@@ -234,8 +236,11 @@ bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_
     Key allEntryKeyPrefix("");
     std::vector<Entry> allEntries;
     std::promise<OHOS::DistributedKv::Status> resultStatusSignal;
+    int64_t begin = GetTickCount();
     GetEntries(networkId, allEntryKeyPrefix, resultStatusSignal, allEntries);
     Status status = GetResultSatus(resultStatusSignal);
+    HILOGI("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
+
     if (status != Status::SUCCESS) {
         HILOGE("GetEntries error: %{public}d", status);
         return false;
@@ -282,8 +287,6 @@ bool DmsBmStorage::DelReduData(const std::string &networkId, const std::vector<D
     HILOGE("uuid: %{public}s", GetAnonymStr(uuid).c_str());
     std::vector<Entry> newEntries;
     Status status = kvStorePtr_->GetDeviceEntries(uuid, newEntries);
-    HILOGI("newEntries.size: %{public}u", newEntries.size());
-
     if (newEntries.empty() || status != Status::SUCCESS) {
         HILOGE("GetEntries error: %{public}d", status);
         return false;
@@ -681,8 +684,10 @@ std::string DmsBmStorage::GetContinueType(const std::string &networkId, std::str
     Key allEntryKeyPrefix("");
     std::vector<Entry> allEntries;
     std::promise<OHOS::DistributedKv::Status> resultStatusSignal;
+    int64_t begin = GetTickCount();
     GetEntries(networkId, allEntryKeyPrefix, resultStatusSignal, allEntries);
     Status status = GetResultSatus(resultStatusSignal);
+    HILOGI("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
     if (status != Status::SUCCESS) {
         HILOGE("GetEntries error: %{public}d", status);
         return "";
@@ -747,8 +752,10 @@ std::string DmsBmStorage::GetAbilityName(const std::string &networkId, std::stri
     Key allEntryKeyPrefix("");
     std::vector<Entry> allEntries;
     std::promise<OHOS::DistributedKv::Status> resultStatusSignal;
+    int64_t begin = GetTickCount();
     GetEntries(networkId, allEntryKeyPrefix, resultStatusSignal, allEntries);
     Status status = GetResultSatus(resultStatusSignal);
+    HILOGI("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
     if (status != Status::SUCCESS) {
         HILOGE("GetEntries error: %{public}d", status);
         return "";
@@ -841,8 +848,10 @@ bool DmsBmStorage::GetContinueEventInfo(const std::string &networkId, const std:
     Key allEntryKeyPrefix("");
     std::vector<Entry> allEntries;
     std::promise<OHOS::DistributedKv::Status> resultStatusSignal;
+    int64_t begin = GetTickCount();
     GetEntries(networkId, allEntryKeyPrefix, resultStatusSignal, allEntries);
     Status status = GetResultSatus(resultStatusSignal);
+    HILOGI("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
     if (status != Status::SUCCESS) {
         HILOGE("GetEntries error: %{public}d", status);
         return false;
