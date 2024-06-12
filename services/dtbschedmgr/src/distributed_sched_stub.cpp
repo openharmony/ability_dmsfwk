@@ -624,7 +624,8 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
     bool isFA = want->GetBoolParam(FEATURE_ABILITY_FLAG_KEY, false);
     want->RemoveParam(FEATURE_ABILITY_FLAG_KEY);
 
-    int32_t result = (!isFA && IsUsingQos(deviceId)) ?
+    bool isFreeInstall = DistributedSchedService::GetInstance().GetIsFreeInstall(missionId);
+    int32_t result = (!isFA && IsUsingQos(deviceId) && !isFreeInstall) ?
         DSchedContinueManager::GetInstance().StartContinuation(*want, missionId, callerUid, status, accessToken) :
         StartContinuation(*want, missionId, callerUid, status, accessToken);
     ReportEvent(*want, BehaviorEvent::START_CONTINUATION, result, callerUid);
