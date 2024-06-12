@@ -29,6 +29,7 @@
 #include "dfx/dms_hitrace_constants.h"
 #include "distributed_want.h"
 #include "distributed_sched_permission.h"
+#include "distributed_sched_service.h"
 #include "distributed_sched_types.h"
 #include "distributed_sched_utils.h"
 #include "dms_version_manager.h"
@@ -523,11 +524,11 @@ int32_t DistributedSchedStub::ContinueMissionInner(MessageParcel& data, MessageP
         if (AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, missionInfo) != ERR_OK) {
             return ERR_NULL_OBJECT;
         }
-        std::string sourceBundleName_ = missionInfo.want.GetBundle();
+        std::string sourceBundleName = missionInfo.want.GetBundle();
         missionInfo.want.SetParams(*wantParams);
         bool isFreeInstall = missionInfo.want.GetBoolParam("isFreeInstall", false);
         if ((!isFreeInstall && IsUsingQos(remoteDeviceId)) ||
-            isFreeInstall && IsInstall(remoteDeviceId, sourceBundleName_)) {
+            (isFreeInstall && IsInstall(remoteDeviceId, sourceBundleName))) {
             DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(IPCSkeleton::GetCallingTokenID());
             result = DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, missionId, callback,
                 *wantParams);
@@ -575,9 +576,13 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
     }
 
     int32_t result = ERR_OK;
+    AAFwk::MissionInfo missionInfo;
     if (isLocalCalling) {
         std::string remoteDeviceId = (IPCSkeleton::GetCallingDeviceID() == srcDevId) ? dstDevId : srcDevId;
-        if (IsUsingQos(remoteDeviceId)) {
+        missionInfo.want.SetParams(*wantParams);
+        bool isFreeInstall = missionInfo.want.GetBoolParam("isFreeInstall", false);
+        if ((!isFreeInstall&&IsUsingQos(remoteDeviceId)) ||
+            (isFreeInstall&&IsInstall(remoteDeviceId, bundleName))) {
             DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(IPCSkeleton::GetCallingTokenID());
             result = DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, bundleName, continueType,
                 callback, *wantParams);
