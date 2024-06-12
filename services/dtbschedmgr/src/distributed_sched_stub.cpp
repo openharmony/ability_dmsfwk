@@ -484,7 +484,7 @@ int32_t DistributedSchedStub::SendResultFromRemoteInner(MessageParcel& data, Mes
 bool DistributedSchedStub::IsInstall(const std::string &networkId, const std::string &bundleName)
 {
     DmsBundleInfo info;
-    DmsBmStorage::GetInstance->GetStorageDistributeInfo(networkId, bundleName, info);
+    DmsBmStorage::GetInstance()->GetStorageDistributeInfo(networkId, bundleName, info);
     if (info.bundleName.empty()) {
         return false;
     }
