@@ -17,6 +17,7 @@
 #include "bundle/bundle_manager_internal.h"
 #include "bundle/bundle_manager_callback_stub.h"
 #include "distributed_sched_adapter.h"
+#include "distributed_sched_utils.h"
 #include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -265,8 +266,8 @@ bool BundleManagerInternal::CheckIfRemoteCanInstall(const AAFwk::Want& want, int
     std::string abilityName = want.GetElement().GetAbilityName();
     std::string deviceId = want.GetElement().GetDeviceID();
     std::string udid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(deviceId);
-    HILOGD("bundleName = %{public}s, moduleName = %{public}s, abilityName = %{public}s, deviceId = %{public}s",
-        bundleName.c_str(), moduleName.c_str(), abilityName.c_str(), deviceId.c_str());
+    HILOGD("bundleName = %{public}s, moduleName = %{public}s, abilityName = %{public}s, udid = %{public}s",
+        bundleName.c_str(), moduleName.c_str(), abilityName.c_str(), GetAnonymStr(udid).c_str());
 
     if (bundleName.empty() || moduleName.empty() || abilityName.empty() || udid.empty()) {
         HILOGE("udid or bundle or module or ability name is empty");
