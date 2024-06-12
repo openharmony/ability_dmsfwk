@@ -114,7 +114,7 @@ public:
         const std::string& bundleName, const sptr<IRemoteObject>& callback,
         const OHOS::AAFwk::WantParams& wantParams) override;
     int32_t DealDSchedEventResult(const OHOS::AAFwk::Want& want, int32_t status);
-    bool GetIsFreeInstall(int32_t missionId)
+    bool GetIsFreeInstall(int32_t missionId);
     int32_t StartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId, int32_t callerUid,
         int32_t status, uint32_t accessToken) override;
     void NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId, bool isSuccess) override;
