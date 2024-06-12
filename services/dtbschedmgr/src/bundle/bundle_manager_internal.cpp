@@ -265,7 +265,7 @@ bool BundleManagerInternal::CheckIfRemoteCanInstall(const AAFwk::Want& want, int
     std::string abilityName = want.GetElement().GetAbilityName();
     std::string deviceId = want.GetElement().GetDeviceID();
     std::string udid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(deviceId);
-    HILOGD("bundleName = %{public}s, moduleName = %{public}s, abilityName = %{public}s, udid = %{public}s",
+    HILOGD("bundleName = %{public}s, moduleName = %{public}s, abilityName = %{public}s, deviceId = %{public}s",
         bundleName.c_str(), moduleName.c_str(), abilityName.c_str(), deviceId.c_str());
 
     if (bundleName.empty() || moduleName.empty() || abilityName.empty() || udid.empty()) {
