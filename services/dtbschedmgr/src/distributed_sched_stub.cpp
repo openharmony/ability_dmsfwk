@@ -480,6 +480,16 @@ int32_t DistributedSchedStub::SendResultFromRemoteInner(MessageParcel& data, Mes
     return ERR_NONE;
 }
 
+bool DistributedSchedStub::IsInstall(const std::string &networkId, const std::string &bundleName)
+{
+    DmsBundleInfo info;
+    DmsBmStorage::GetInstance->GetStorageDistributeInfo(networkId, bundleName, info);
+    if (info.bundleName.empty()) {
+        return false;
+    }
+    return true;
+}
+
 int32_t DistributedSchedStub::ContinueMissionInner(MessageParcel& data, MessageParcel& reply)
 {
     bool isLocalCalling = IPCSkeleton::IsLocalCalling();
@@ -507,9 +517,17 @@ int32_t DistributedSchedStub::ContinueMissionInner(MessageParcel& data, MessageP
     }
 
     int32_t result = ERR_OK;
+    AAFwk::MissionInfo missionInfo;
     if (isLocalCalling) {
         std::string remoteDeviceId = (IPCSkeleton::GetCallingDeviceID() == srcDevId) ? dstDevId : srcDevId;
-        if (IsUsingQos(remoteDeviceId)) {
+        if (AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, missionInfo) != ERR_OK) {
+            return ERR_NULL_OBJECT;
+        }
+        std::string sourceBundleName_ = missionInfo.want.GetBundle();
+        missionInfo.want.SetParams(*wantParams);
+        bool isFreeInstall = missionInfo.want.GetBoolParam("isFreeInstall", false);
+        if ((!isFreeInstall && IsUsingQos(remoteDeviceId)) ||
+            isFreeInstall && IsInstall(remoteDeviceId, sourceBundleName_)) {
             DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(IPCSkeleton::GetCallingTokenID());
             result = DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, missionId, callback,
                 *wantParams);
