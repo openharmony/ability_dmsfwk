@@ -557,12 +557,6 @@ bool IsContinuable(AppExecFwk::BundleInfo bundleInfo)
 void DmsBmStorage::UpdateDistributedData()
 {
     HILOGI("called.");
-    std::string udid;
-    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
-    if (udid == "") {
-        HILOGE("GetLocalUdid failed");
-        return;
-    }
     auto bundleMgr = DmsBmStorage::GetInstance()->GetBundleMgr();
     if (bundleMgr == nullptr) {
         HILOGE("Get bundleMgr shared_ptr nullptr");
@@ -582,6 +576,7 @@ void DmsBmStorage::UpdateDistributedData()
     std::map<std::string, DmsBundleInfo> oldDistributedBundleInfos =
         GetAllOldDistributionBundleInfo(bundleNames);
 
+    std::vector<DmsBundleInfo> dmsBundleInfos;
     for (const auto &bundleInfo : bundleInfos) {
         if (bundleInfo.singleton || !IsContinuable(bundleInfo)) {
             continue;
@@ -592,9 +587,53 @@ void DmsBmStorage::UpdateDistributedData()
                 continue;
             }
         }
-        if (!InnerSaveStorageDistributeInfo(ConvertToDistributedBundleInfo(bundleInfo), udid)) {
-            HILOGW("UpdateDistributedData SaveStorageDistributeInfo:%{public}s failed", bundleInfo.name.c_str());
+        DmsBundleInfo dmsBundleInfo = ConvertToDistributedBundleInfo(bundleInfo);
+        if (dmsBundleInfo.bundleName == "") {
+            HILOGE("The package information is empty and does not need to be stored!");
+            continue;
         }
+        dmsBundleInfos.push_back(dmsBundleInfo);
+    }
+    DmsPutBatch(dmsBundleInfos);
+    HILOGI("end.");
+}
+
+void DmsBmStorage::DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos)
+{
+    HILOGI("called.");
+    if (dmsBundleInfos.empty()) {
+        HILOGI("Data not updated, no need to write");
+        return;
+    }
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return;
+    }
+    std::string udid;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
+    if (udid == "") {
+        HILOGE("GetLocalUdid failed");
+        return;
+    }
+    std::vector<Entry> entries;
+    for (const auto &dmsBundleInfo : dmsBundleInfos) {
+        Entry entrie;
+        std::string keyOfData = DeviceAndNameToKey(udid, dmsBundleInfo.bundleName);
+        Key key(keyOfData);
+        entrie.key = key;
+        Value value(dmsBundleInfo.ToString());
+        entrie.value = value;
+        HILOGI("need be put: %{public}s", dmsBundleInfo.bundleName.c_str());
+        entries.push_back(entrie);
+    }
+    Status status = kvStorePtr_->PutBatch(entries);
+    if (status == Status::IPC_ERROR) {
+        status = kvStorePtr_->PutBatch(entries);
+        HILOGW("distribute database ipc error and try to call again, result = %{public}d", status);
+    }
+    if (status != Status::SUCCESS) {
+        HILOGE("PutBatch to kvStore error: %{public}d", status);
+        return;
     }
     HILOGI("end.");
 }

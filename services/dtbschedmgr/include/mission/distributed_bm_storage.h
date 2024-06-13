@@ -67,6 +67,7 @@ public:
         const std::string& continueType, ContinueEventInfo &continueEventInfo);
     void UpdateDistributedData();
     int32_t CloudSync();
+    void DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos);
 
 private:
     std::string DeviceAndNameToKey(const std::string &udid, const std::string &bundleName) const;
