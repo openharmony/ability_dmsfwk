@@ -45,7 +45,7 @@ private:
     int32_t StartAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t StopAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t SendResultFromRemoteInner(MessageParcel& data, MessageParcel& reply);
-    bool IsInstall(const std::string &networkId, const std::string &bundleName);
+    bool IsRemoteInstall(const std::string &networkId, const std::string &bundleName);
     int32_t ContinueMissionInner(MessageParcel& data, MessageParcel& reply);
     int32_t ContinueMissionOfBundleNameInner(MessageParcel& data, MessageParcel& reply);
     int32_t StartContinuationInner(MessageParcel& data, MessageParcel& reply);
