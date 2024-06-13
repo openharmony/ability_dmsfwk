@@ -481,16 +481,6 @@ int32_t DistributedSchedStub::SendResultFromRemoteInner(MessageParcel& data, Mes
     return ERR_NONE;
 }
 
-bool DistributedSchedStub::IsInstall(const std::string &networkId, const std::string &bundleName)
-{
-    DmsBundleInfo info;
-    DmsBmStorage::GetInstance()->GetStorageDistributeInfo(networkId, bundleName, info);
-    if (info.bundleName.empty()) {
-        return false;
-    }
-    return true;
-}
-
 int32_t DistributedSchedStub::ContinueMissionInner(MessageParcel& data, MessageParcel& reply)
 {
     bool isLocalCalling = IPCSkeleton::IsLocalCalling();
@@ -528,7 +518,7 @@ int32_t DistributedSchedStub::ContinueMissionInner(MessageParcel& data, MessageP
         missionInfo.want.SetParams(*wantParams);
         bool isFreeInstall = missionInfo.want.GetBoolParam("isFreeInstall", false);
         if ((!isFreeInstall && IsUsingQos(remoteDeviceId)) ||
-            (isFreeInstall && IsInstall(remoteDeviceId, sourceBundleName))) {
+            (isFreeInstall && IsRemoteInstall(remoteDeviceId, sourceBundleName))) {
             DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(IPCSkeleton::GetCallingTokenID());
             result = DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, missionId, callback,
                 *wantParams);
@@ -581,8 +571,8 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
         std::string remoteDeviceId = (IPCSkeleton::GetCallingDeviceID() == srcDevId) ? dstDevId : srcDevId;
         missionInfo.want.SetParams(*wantParams);
         bool isFreeInstall = missionInfo.want.GetBoolParam("isFreeInstall", false);
-        if ((!isFreeInstall&&IsUsingQos(remoteDeviceId)) ||
-            (isFreeInstall&&IsInstall(remoteDeviceId, bundleName))) {
+        if ((!isFreeInstall && IsUsingQos(remoteDeviceId)) ||
+            (isFreeInstall && IsRemoteInstall(remoteDeviceId, bundleName))) {
             DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(IPCSkeleton::GetCallingTokenID());
             result = DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, bundleName, continueType,
                 callback, *wantParams);
@@ -593,6 +583,16 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
     result = ContinueMission(srcDevId, dstDevId, bundleName, callback, *wantParams);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+
+bool DistributedSchedStub::IsRemoteInstall(const std::string &networkId, const std::string &bundleName)
+{
+    DmsBundleInfo info;
+    DmsBmStorage::GetInstance()->GetStorageDistributeInfo(networkId, bundleName, info);
+    if (info.bundleName.empty()) {
+        return false;
+    }
+    return true;
 }
 
 int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, MessageParcel& reply)
