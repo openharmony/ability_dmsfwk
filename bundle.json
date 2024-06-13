@@ -135,7 +135,7 @@
           "//foundation/ability/dmsfwk/interfaces/innerkits/tests:dms_sdk_demo",
           "//foundation/ability/dmsfwk/services/dtbschedmgr:unittest",
           "//foundation/ability/dmsfwk/services/dtbabilitymgr:unittest",
-          "//foundation/ability/dmsfwk/test/fuzztest/continuationmanager_fuzzer:fuzztest"
+          "//foundation/ability/dmsfwk/test/fuzztest:fuzztest"
         ]
       }
     }
