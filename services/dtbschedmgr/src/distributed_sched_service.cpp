@@ -1040,6 +1040,11 @@ int32_t DistributedSchedService::DealDSchedEventResult(const OHOS::AAFwk::Want& 
     return ERR_OK;
 }
 
+bool DistributedSchedService::GetIsFreeInstall(int32_t missionId)
+{
+    return dschedContinuation_->IsFreeInstall(missionId);
+}
+
 int32_t DistributedSchedService::StartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId,
     int32_t callerUid, int32_t status, uint32_t accessToken)
 {
@@ -1071,7 +1076,7 @@ int32_t DistributedSchedService::StartContinuation(const OHOS::AAFwk::Want& want
         HILOGE("set new want failed");
         return result;
     }
-    bool flag = dschedContinuation_->IsFreeInstall(missionId);
+    bool flag = GetIsFreeInstall(missionId);
     SetCleanMissionFlag(want, missionId);
     if (flag) {
         result = StartRemoteFreeInstall(newWant, callerUid, DEFAULT_REQUEST_CODE, accessToken, nullptr);

@@ -29,6 +29,7 @@
 #include "dfx/dms_hitrace_constants.h"
 #include "distributed_want.h"
 #include "distributed_sched_permission.h"
+#include "distributed_sched_service.h"
 #include "distributed_sched_types.h"
 #include "distributed_sched_utils.h"
 #include "dms_version_manager.h"
@@ -507,9 +508,17 @@ int32_t DistributedSchedStub::ContinueMissionInner(MessageParcel& data, MessageP
     }
 
     int32_t result = ERR_OK;
+    AAFwk::MissionInfo missionInfo;
     if (isLocalCalling) {
         std::string remoteDeviceId = (IPCSkeleton::GetCallingDeviceID() == srcDevId) ? dstDevId : srcDevId;
-        if (IsUsingQos(remoteDeviceId)) {
+        if (AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, missionInfo) != ERR_OK) {
+            return ERR_NULL_OBJECT;
+        }
+        std::string sourceBundleName = missionInfo.want.GetBundle();
+        missionInfo.want.SetParams(*wantParams);
+        bool isFreeInstall = missionInfo.want.GetBoolParam("isFreeInstall", false);
+        if ((!isFreeInstall && IsUsingQos(remoteDeviceId)) ||
+            (isFreeInstall && IsRemoteInstall(remoteDeviceId, sourceBundleName))) {
             DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(IPCSkeleton::GetCallingTokenID());
             result = DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, missionId, callback,
                 *wantParams);
@@ -557,9 +566,13 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
     }
 
     int32_t result = ERR_OK;
+    AAFwk::MissionInfo missionInfo;
     if (isLocalCalling) {
         std::string remoteDeviceId = (IPCSkeleton::GetCallingDeviceID() == srcDevId) ? dstDevId : srcDevId;
-        if (IsUsingQos(remoteDeviceId)) {
+        missionInfo.want.SetParams(*wantParams);
+        bool isFreeInstall = missionInfo.want.GetBoolParam("isFreeInstall", false);
+        if ((!isFreeInstall && IsUsingQos(remoteDeviceId)) ||
+            (isFreeInstall && IsRemoteInstall(remoteDeviceId, bundleName))) {
             DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(IPCSkeleton::GetCallingTokenID());
             result = DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, bundleName, continueType,
                 callback, *wantParams);
@@ -570,6 +583,16 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
     result = ContinueMission(srcDevId, dstDevId, bundleName, callback, *wantParams);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+
+bool DistributedSchedStub::IsRemoteInstall(const std::string &networkId, const std::string &bundleName)
+{
+    DmsBundleInfo info;
+    DmsBmStorage::GetInstance()->GetStorageDistributeInfo(networkId, bundleName, info);
+    if (info.bundleName.empty()) {
+        return false;
+    }
+    return true;
 }
 
 int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, MessageParcel& reply)
@@ -601,7 +624,8 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
     bool isFA = want->GetBoolParam(FEATURE_ABILITY_FLAG_KEY, false);
     want->RemoveParam(FEATURE_ABILITY_FLAG_KEY);
 
-    int32_t result = (!isFA && IsUsingQos(deviceId)) ?
+    bool isFreeInstall = DistributedSchedService::GetInstance().GetIsFreeInstall(missionId);
+    int32_t result = (!isFA && IsUsingQos(deviceId) && !isFreeInstall) ?
         DSchedContinueManager::GetInstance().StartContinuation(*want, missionId, callerUid, status, accessToken) :
         StartContinuation(*want, missionId, callerUid, status, accessToken);
     ReportEvent(*want, BehaviorEvent::START_CONTINUATION, result, callerUid);
