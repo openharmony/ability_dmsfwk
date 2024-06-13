@@ -107,13 +107,11 @@ void StartContinuationInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    Want want;
     int32_t missionId = *(reinterpret_cast<const int32_t*>(data));
     int32_t callerUid = *(reinterpret_cast<const int32_t*>(data));
     int32_t status = *(reinterpret_cast<const int32_t*>(data));
     uint32_t accessToken = *(reinterpret_cast<const int32_t*>(data));
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    dataParcel.WriteParcelable(&want);
     dataParcel.WriteInt32(missionId);
     dataParcel.WriteInt32(callerUid);
     dataParcel.WriteInt32(status);
