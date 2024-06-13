@@ -311,5 +311,22 @@ HWTEST_F(DistributedBmStorageTest, GetContinueEventInfoTest_001, TestSize.Level1
     }
     DTEST_LOG << "DistributedBmStorageTest GetContinueEventInfoTest_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: DmsPutBatchTest_001
+ * @tc.desc: test delete DistributedBmStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, DmsPutBatchTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest DmsPutBatchTest_001 start" << std::endl;
+    auto distributedDataStorage = GetDmsBmStorage();
+    EXPECT_NE(distributedDataStorage, nullptr);
+    if (distributedDataStorage != nullptr) {
+        std::vector<DmsBundleInfo> dmsBundleInfos;
+        dmsBmStorage_->GetInstance()->DmsPutBatch(dmsBundleInfos);
+    }
+    DTEST_LOG << "DistributedBmStorageTest DmsPutBatchTest_001 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
