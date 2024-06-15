@@ -28,6 +28,7 @@
 #include "distributed_sched_service.h"
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_log.h"
+#include "mission/dms_continue_recv_manager.h"
 
 using namespace std;
 namespace OHOS {
@@ -380,6 +381,11 @@ void DtbschedmgrDeviceInfoStorage::DeviceOfflineNotify(const std::string& networ
 void DtbschedmgrDeviceInfoStorage::OnDeviceInfoChanged(const std::string& deviceId)
 {
     HILOGI("OnDeviceInfoChanged called");
+    if (!DMSContinueRecvMgr::GetInstance().CheckRegSoftbusListener() &&
+        DistributedHardware::DeviceManager::GetInstance().IsSameAccount(deviceId)) {
+        HILOGI("DMSContinueRecvMgr need init");
+        DMSContinueRecvMgr::GetInstance().Init();
+    }
 }
 
 void DnetServiceDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)

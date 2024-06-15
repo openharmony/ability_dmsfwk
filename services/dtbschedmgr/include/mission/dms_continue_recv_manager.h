@@ -72,6 +72,7 @@ public:
     void OnDeviceScreenOff();
     void OnContinueSwitchOff();
     std::string GetContinueType(const std::string& bundleName);
+    bool CheckRegSoftbusListener();
 
 private:
     void StartEvent();
@@ -95,6 +96,7 @@ private:
     std::mutex eventMutex_;
     std::mutex iconMutex_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
+    bool hasRegSoftbusEventListener_ = false;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
