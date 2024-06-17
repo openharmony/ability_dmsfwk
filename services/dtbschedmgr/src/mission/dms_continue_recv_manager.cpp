@@ -58,6 +58,7 @@ void DMSContinueRecvMgr::Init()
             HILOGE("get RegisterSoftbusEventListener failed, ret: %{public}d", ret);
             return;
         }
+        hasRegSoftbusEventListener_ = true;
         missionDiedListener_ = new DistributedMissionDiedListener();
         eventThread_ = std::thread(&DMSContinueRecvMgr::StartEvent, this);
         std::unique_lock<std::mutex> lock(eventMutex_);
@@ -503,6 +504,11 @@ std::string DMSContinueRecvMgr::GetContinueType(const std::string& bundleName)
     }
 
     return iconInfo_.continueType;
+}
+
+bool DMSContinueRecvMgr::CheckRegSoftbusListener()
+{
+    return hasRegSoftbusEventListener_;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

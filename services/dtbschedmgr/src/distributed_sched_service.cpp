@@ -219,6 +219,11 @@ void DistributedSchedService::DeviceOnlineNotify(const std::string& networkId)
     DistributedSchedAdapter::GetInstance().DeviceOnline(networkId);
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     DistributedSchedMissionManager::GetInstance().DeviceOnlineNotify(networkId);
+    if (!DMSContinueRecvMgr::GetInstance().CheckRegSoftbusListener() &&
+        DistributedHardware::DeviceManager::GetInstance().IsSameAccount(networkId)) {
+        HILOGI("DMSContinueRecvMgr need init");
+        DMSContinueRecvMgr::GetInstance().Init();
+    }
 #endif
 }
 
