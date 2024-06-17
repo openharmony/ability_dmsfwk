@@ -22,6 +22,7 @@
 #include <string>
 
 #include "ability_manager_client.h"
+#include "app_state_observer.h"
 #include "distributedWant/distributed_want.h"
 #include "distributedWant/distributed_want_params.h"
 #include "distributed_sched_interface.h"
@@ -195,6 +196,8 @@ private:
     bool CheckQuickStartConfiguration();
     std::string GetAbilityNameByContinueType();
     void SetEventData();
+    bool RegisterAppStateObserver(const std::string abilityName);
+    void UnregisterAppStateObserver();
 
 private:
     std::shared_ptr<DSchedContinueStateMachine> stateMachine_;
@@ -212,6 +215,7 @@ private:
     int32_t softbusSessionId_ = 0;
     sptr<IRemoteObject> callback_ = nullptr;
     EventNotify eventData_;
+    sptr<AppStateObserver> appStateObserver_ = nullptr;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS
