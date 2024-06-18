@@ -242,10 +242,21 @@ void DSchedContinueManager::HandleStartContinuation(const OHOS::AAFwk::Want& wan
     int32_t callerUid, int32_t status, uint32_t accessToken)
 {
     HILOGI("begin");
+    auto dContinue = GetDSchedContinueByWant(want, missionId);
+    if (dContinue != nullptr) {
+        dContinue->OnStartContinuation(want, callerUid, status, accessToken);
+    }
+    HILOGI("end");
+    return;
+}
+
+std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
+    const OHOS::AAFwk::Want& want, int32_t missionId)
+{
     std::string srcDeviceId;
     if (!GetLocalDeviceId(srcDeviceId)) {
         HILOGE("get local deviceId failed!");
-        return;
+        return nullptr;
     }
     std::string dstDeviceId = want.GetElement().GetDeviceID().c_str();
     std::string bundleName = want.GetElement().GetBundleName().c_str();
@@ -256,17 +267,15 @@ void DSchedContinueManager::HandleStartContinuation(const OHOS::AAFwk::Want& wan
         std::lock_guard<std::mutex> continueLock(continueMutex_);
         if (continues_.empty() || continues_.count(info) == 0) {
             HILOGE("continue info doesn't match an existing continuation.");
-            return;
+            return nullptr;
         }
-        if (missionId != continues_[info]->GetContinueInfo().missionId_) {
-            HILOGE("missionId doesn't match the existing continuation, continueInfo: %{public}s.",
-                info.toString().c_str());
-            return;
+        if (missionId == continues_[info]->GetContinueInfo().missionId_) {
+            return continues_[info];
         }
-        continues_[info]->OnStartContinuation(want, callerUid, status, accessToken);
     }
-    HILOGI("end");
-    return;
+    HILOGE("missionId doesn't match the existing continuation, continueInfo: %{public}s.",
+        info.toString().c_str());
+    return nullptr;
 }
 
 int32_t DSchedContinueManager::NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId,
@@ -286,25 +295,34 @@ int32_t DSchedContinueManager::NotifyCompleteContinuation(const std::u16string& 
 void DSchedContinueManager::HandleNotifyCompleteContinuation(const std::u16string& devId, int32_t missionId,
     bool isSuccess)
 {
+    HILOGI("begin, isSuccess %{public}d", isSuccess);
+    auto dContinue = GetDSchedContinueByDevId(devId, missionId);
+    if (dContinue != nullptr) {
+        dContinue->OnNotifyComplete(missionId, isSuccess);
+        HILOGI("end, continue info: %{public}s.", dContinue->GetContinueInfo().toString().c_str());
+    }
+    return;
+}
+
+std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByDevId(
+    const std::u16string& devId, int32_t missionId)
+{
     std::string deviceId = Str16ToStr8(devId);
-    HILOGI("begin, deviceId %{public}s, missionId %{public}d, isSuccess %{public}d",
-        GetAnonymStr(deviceId).c_str(), missionId, isSuccess);
+    HILOGI("begin, deviceId %{public}s, missionId %{public}d", GetAnonymStr(deviceId).c_str(), missionId);
     {
         std::lock_guard<std::mutex> continueLock(continueMutex_);
         if (continues_.empty()) {
             HILOGE("No continuation in progress.");
-            return;
+            return nullptr;
         }
         for (auto iter = continues_.begin(); iter != continues_.end(); iter++) {
             if (iter->second != nullptr && deviceId == iter->second->GetContinueInfo().sourceDeviceId_) {
-                iter->second->OnNotifyComplete(missionId, isSuccess);
-                HILOGI("end, continue info: %{public}s.", iter->second->GetContinueInfo().toString().c_str());
-                return;
+                return iter->second;
             }
         }
     }
     HILOGE("source deviceId doesn't match an existing continuation.");
-    return;
+    return nullptr;
 }
 
 int32_t DSchedContinueManager::OnContinueEnd(const DSchedContinueInfo& info)
