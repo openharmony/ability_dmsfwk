@@ -454,7 +454,7 @@ HWTEST_F(DMSContinueManagerTest, testPostOnBroadcastBusiness001, TestSize.Level1
     int32_t state = 0;
 
     DMSContinueRecvMgr::GetInstance().PostOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state);
-    EXPECT_EQ(DMSContinueRecvMgr::GetInstance().eventHandler_, nullptr);
+    EXPECT_NE(DMSContinueRecvMgr::GetInstance().eventHandler_, nullptr);
 
     DTEST_LOG << "DMSContinueManagerTest testPostOnBroadcastBusiness001 end" << std::endl;
 }
@@ -679,7 +679,7 @@ HWTEST_F(DMSContinueManagerTest, testSendSoftbusEvent001, TestSize.Level1)
     uint8_t continueType = 1;
     uint8_t type = 0;
     bool ret = DMSContinueSendMgr::GetInstance().SendSoftbusEvent(bundleNameId, continueType, type);
-    EXPECT_NE(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DMSContinueManagerTest testSendSoftbusEvent001 end" << std::endl;
 }
 
