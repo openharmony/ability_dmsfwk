@@ -15,6 +15,7 @@
 
 #include "app_state_observer.h"
 #include "distributed_sched_service.h"
+#include "dsched_continue.h"
 #include "dtbschedmgr_log.h"
 #include "element_name.h"
 
@@ -25,6 +26,16 @@ const std::string TAG = "AppStateObserver";
 constexpr int32_t FOREGROUND = 2;
 constexpr int32_t BACKGROUND = 4;
 constexpr int32_t NOTIFY_COUNT = 2;
+constexpr int32_t ABILITY_STATE_TERMINATED = 5;
+}
+
+AppStateObserver::AppStateObserver()
+{
+}
+
+AppStateObserver::AppStateObserver(const std::shared_ptr<DSchedContinue> dContinue, const std::string abilityName)
+    : dschedContinue_(dContinue), abilityName_(abilityName)
+{
 }
 
 void AppStateObserver::OnForegroundApplicationChanged(const AppExecFwk::AppStateData& appStateData)
@@ -34,6 +45,15 @@ void AppStateObserver::OnForegroundApplicationChanged(const AppExecFwk::AppState
 void AppStateObserver::OnAbilityStateChanged(const AppExecFwk::AbilityStateData& abilityStateData)
 {
     HILOGD("OnAbilityStateChanged called.");
+    if (abilityStateData.abilityState == ABILITY_STATE_TERMINATED && abilityStateData.abilityName == abilityName_) {
+        std::shared_ptr<DSchedContinue> dContinue = dschedContinue_.lock();
+        if (dContinue != nullptr) {
+            HILOGE("ability terminated, excute OnContinueEnd");
+            dContinue->OnContinueEnd(CONTINUE_SINK_ABILITY_TERMINATED);
+        }
+        return;
+    }
+
     if (abilityStateData.abilityState != FOREGROUND && abilityStateData.abilityState != BACKGROUND) {
         HILOGD("ability state neither foreground nor background");
         return;
