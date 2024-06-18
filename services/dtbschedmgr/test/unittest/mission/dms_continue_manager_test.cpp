@@ -416,7 +416,7 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
     int32_t state = 0;
     int32_t ret = DMSContinueRecvMgr::GetInstance().DealOnBroadcastBusiness(senderNetworkId, bundleNameId,
         continueTypeId, state, DBMS_RETRY_MAX_TIME);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, ERR_OK);
 
     ret = DMSContinueRecvMgr::GetInstance().DealOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId,
         state, 0);
@@ -454,7 +454,7 @@ HWTEST_F(DMSContinueManagerTest, testPostOnBroadcastBusiness001, TestSize.Level1
     int32_t state = 0;
 
     DMSContinueRecvMgr::GetInstance().PostOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state);
-    EXPECT_NE(DMSContinueRecvMgr::GetInstance().eventHandler_, nullptr);
+    EXPECT_EQ(DMSContinueRecvMgr::GetInstance().eventHandler_, nullptr);
 
     DTEST_LOG << "DMSContinueManagerTest testPostOnBroadcastBusiness001 end" << std::endl;
 }

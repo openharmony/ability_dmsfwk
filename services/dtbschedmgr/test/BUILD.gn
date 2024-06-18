@@ -321,7 +321,6 @@ ohos_unittest("dschedmissionmanagertest") {
   }
   module_out_path = module_output_path
   sources = [
-    "${dms_path}/common/src/distributed_sched_utils.cpp",
     "unittest/mission/distributed_bm_storage_test.cpp",
     "unittest/mission/distributed_data_storage_test.cpp",
     "unittest/mission/distributed_mission_info_test.cpp",
