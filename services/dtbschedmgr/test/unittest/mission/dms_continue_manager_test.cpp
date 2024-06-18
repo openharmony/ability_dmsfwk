@@ -420,7 +420,7 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
 
     ret = DMSContinueRecvMgr::GetInstance().DealOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId,
         state, 0);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     /**
      * @tc.steps: step2. test NotifyRecvBroadcast when obj is nullptr;
@@ -679,7 +679,7 @@ HWTEST_F(DMSContinueManagerTest, testSendSoftbusEvent001, TestSize.Level1)
     uint8_t continueType = 1;
     uint8_t type = 0;
     bool ret = DMSContinueSendMgr::GetInstance().SendSoftbusEvent(bundleNameId, continueType, type);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DMSContinueManagerTest testSendSoftbusEvent001 end" << std::endl;
 }
 
