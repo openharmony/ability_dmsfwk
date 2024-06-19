@@ -621,13 +621,10 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
     std::string deviceId = want->GetElement().GetDeviceID();
 
     // set in ability runtime, used to seperate callings from FA or stage model
-    bool isFA = want->GetBoolParam(FEATURE_ABILITY_FLAG_KEY, false);
     want->RemoveParam(FEATURE_ABILITY_FLAG_KEY);
-
-    bool isFreeInstall = DistributedSchedService::GetInstance().GetIsFreeInstall(missionId);
-    int32_t result = (!isFA && IsUsingQos(deviceId) && !isFreeInstall) ?
-        DSchedContinueManager::GetInstance().StartContinuation(*want, missionId, callerUid, status, accessToken) :
-        StartContinuation(*want, missionId, callerUid, status, accessToken);
+    int32_t result = DSchedContinueManager::GetInstance().GetDSchedContinueByWant(*want, missionId) != nullptr
+        ? DSchedContinueManager::GetInstance().StartContinuation(*want, missionId, callerUid, status, accessToken)
+        : StartContinuation(*want, missionId, callerUid, status, accessToken);
     ReportEvent(*want, BehaviorEvent::START_CONTINUATION, result, callerUid);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
@@ -650,7 +647,8 @@ int32_t DistributedSchedStub::NotifyCompleteContinuationInner(MessageParcel& dat
     PARCEL_READ_HELPER(data, Int32, sessionId);
     bool continuationResult = false;
     PARCEL_READ_HELPER(data, Bool, continuationResult);
-    if (IsUsingQos(Str16ToStr8(devId))) {
+    auto dContinue = DSchedContinueManager::GetInstance().GetDSchedContinueByDevId(devId, sessionId);
+    if (dContinue != nullptr) {
         DSchedContinueManager::GetInstance().NotifyCompleteContinuation(devId, sessionId, continuationResult);
     } else {
         NotifyCompleteContinuation(devId, sessionId, continuationResult);
