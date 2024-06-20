@@ -16,7 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "string_wrapper.h"
-#include "base_object.h"
+#include "base_obj.h"
 #include "bool_wrapper.h"
 #include "int_wrapper.h"
 #include "float_wrapper.h"

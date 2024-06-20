@@ -16,7 +16,7 @@
 #define OHOS_DISTRIBUTEDWANT_WANT_PARAMS_WRAPPER_H
 
 #include "base_def.h"
-#include "base_object.h"
+#include "base_obj.h"
 #include "distributed_want_params.h"
 
 using InterfaceID = OHOS::AAFwk::InterfaceID;
