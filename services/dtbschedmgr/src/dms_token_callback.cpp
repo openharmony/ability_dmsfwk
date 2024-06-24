@@ -19,6 +19,7 @@
 #include "bundle/bundle_manager_internal.h"
 #include "distributed_sched_permission.h"
 #include "distributed_sched_service.h"
+#include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
@@ -105,7 +106,7 @@ sptr<IDistributedSched> DmsTokenCallback::GetRemoteDms(const std::string& remote
         HILOGE("GetRemoteDms remoteDeviceId is empty");
         return nullptr;
     }
-    HILOGD("GetRemoteDms connect deviceid is %s", remoteDeviceId.c_str());
+    HILOGD("GetRemoteDms connect deviceid is %s", GetAnonymStr(remoteDeviceId).c_str());
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgr == nullptr) {
         HILOGE("GetRemoteDms failed to connect to systemAbilityMgr!");
@@ -115,7 +116,7 @@ sptr<IDistributedSched> DmsTokenCallback::GetRemoteDms(const std::string& remote
     auto object = samgr->CheckSystemAbility(DISTRIBUTED_SCHED_SA_ID, remoteDeviceId);
     HILOGD("[PerformanceTest] GetRemoteDms end");
     if (object == nullptr) {
-        HILOGE("GetRemoteDms failed to get remote DistributedSched %{private}s", remoteDeviceId.c_str());
+        HILOGE("GetRemoteDms failed to get remote DistributedSched %{private}s", GetAnonymStr(remoteDeviceId).c_str());
         return nullptr;
     }
     return iface_cast<IDistributedSched>(object);

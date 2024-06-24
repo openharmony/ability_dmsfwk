@@ -2162,7 +2162,7 @@ sptr<IDistributedSched> DistributedSchedService::GetRemoteDms(const std::string&
         HILOGE("GetRemoteDms remoteDeviceId is empty");
         return nullptr;
     }
-    HILOGD("GetRemoteDms connect deviceid is %s", remoteDeviceId.c_str());
+    HILOGD("GetRemoteDms connect deviceid is %s", GetAnonymStr(remoteDeviceId).c_str());
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgr == nullptr) {
         HILOGE("GetRemoteDms failed to connect to systemAbilityMgr!");
@@ -2172,7 +2172,7 @@ sptr<IDistributedSched> DistributedSchedService::GetRemoteDms(const std::string&
     auto object = samgr->CheckSystemAbility(DISTRIBUTED_SCHED_SA_ID, remoteDeviceId);
     HILOGI("[PerformanceTest] GetRemoteDms end");
     if (object == nullptr) {
-        HILOGE("GetRemoteDms failed to get remote DistributedSched %{private}s", remoteDeviceId.c_str());
+        HILOGE("GetRemoteDms failed to get remote DistributedSched %{private}s", GetAnonymStr(remoteDeviceId).c_str());
         return nullptr;
     }
     return iface_cast<IDistributedSched>(object);
@@ -2209,9 +2209,9 @@ bool DistributedSchedService::CheckDeviceIdFromRemote(const std::string& localDe
         HILOGE("destinationDeviceId is not same with localDeviceId");
         return false;
     }
-    HILOGD("CheckDeviceIdFromRemote sourceDeviceId %s", sourceDeviceId.c_str());
-    HILOGD("CheckDeviceIdFromRemote localDeviceId %s", localDeviceId.c_str());
-    HILOGD("CheckDeviceIdFromRemote destinationDeviceId %s", destinationDeviceId.c_str());
+    HILOGD("CheckDeviceIdFromRemote sourceDeviceId %s", GetAnonymStr(sourceDeviceId).c_str());
+    HILOGD("CheckDeviceIdFromRemote localDeviceId %s", GetAnonymStr(localDeviceId).c_str());
+    HILOGD("CheckDeviceIdFromRemote destinationDeviceId %s", GetAnonymStr(destinationDeviceId).c_str());
 
     if (sourceDeviceId == destinationDeviceId || sourceDeviceId == localDeviceId) {
         HILOGE("destinationDeviceId is different with localDeviceId and destinationDeviceId");

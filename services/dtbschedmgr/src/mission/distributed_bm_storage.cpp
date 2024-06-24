@@ -387,7 +387,8 @@ bool DmsBmStorage::GetBundleNameId(const std::string& bundleName, uint16_t &bund
             return true;
         }
     }
-    HILOGE("get distributed bundleName no matching data: %{public}s %{public}d", udid.c_str(), bundleNameId);
+    HILOGE("get distributed bundleName no matching data: %{public}s %{public}d", GetAnonymStr(udid).c_str(),
+        bundleNameId);
     return false;
 }
 

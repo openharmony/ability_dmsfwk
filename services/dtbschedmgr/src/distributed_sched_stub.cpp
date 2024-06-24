@@ -618,8 +618,6 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
     HILOGI("get AccessTokenID = %{public}u", accessToken);
     DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
 
-    std::string deviceId = want->GetElement().GetDeviceID();
-
     // set in ability runtime, used to seperate callings from FA or stage model
     want->RemoveParam(FEATURE_ABILITY_FLAG_KEY);
     int32_t result = DSchedContinueManager::GetInstance().GetDSchedContinueByWant(*want, missionId) != nullptr

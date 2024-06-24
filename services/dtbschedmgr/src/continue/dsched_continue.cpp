@@ -1214,9 +1214,9 @@ bool DSchedContinue::CheckDeviceIdFromRemote(const std::string& localDevId, cons
         HILOGE("destDevId is not same with localDevId");
         return false;
     }
-    HILOGD("CheckDeviceIdFromRemote srcDevId %{public}s", srcDevId.c_str());
-    HILOGD("CheckDeviceIdFromRemote localDevId %{public}s", localDevId.c_str());
-    HILOGD("CheckDeviceIdFromRemote destDevId %{public}s", destDevId.c_str());
+    HILOGD("CheckDeviceIdFromRemote srcDevId %{public}s", GetAnonymStr(srcDevId).c_str());
+    HILOGD("CheckDeviceIdFromRemote localDevId %{public}s", GetAnonymStr(localDevId).c_str());
+    HILOGD("CheckDeviceIdFromRemote destDevId %{public}s", GetAnonymStr(destDevId).c_str());
 
     if (srcDevId == destDevId || srcDevId == localDevId) {
         HILOGE("destDevId is different with localDevId and destDevId");
