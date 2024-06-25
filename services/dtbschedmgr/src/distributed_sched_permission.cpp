@@ -55,7 +55,9 @@ const int DEFAULT_DMS_MISSION_ID = -1;
 const int FA_MODULE_ALLOW_MIN_API_VERSION = 8;
 const int DEFAULT_DEVICE_SECURITY_LEVEL = -1;
 }
+
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedPermission);
+
 void from_json(const nlohmann::json& jsonObject, GroupInfo& groupInfo)
 {
     const auto &jsonObjectEnd = jsonObject.end();

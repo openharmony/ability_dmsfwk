@@ -591,6 +591,12 @@ int32_t DistributedSchedService::StartRemoteAbility(const OHOS::AAFwk::Want& wan
     }
 #endif // DMSFWK_INTERACTIVE_ADAPTER
 
+    sptr<IDistributedSched> remoteDms = GetRemoteDms(deviceId);
+    if (remoteDms == nullptr) {
+        HILOGE("get remoteDms failed");
+        return INVALID_PARAMETERS_ERR;
+    }
+
     CallerInfo callerInfo;
     int32_t ret = GetCallerInfo(localDeviceId, callerUid, accessToken, callerInfo);
     if (ret != ERR_OK) {
@@ -607,11 +613,6 @@ int32_t DistributedSchedService::StartRemoteAbility(const OHOS::AAFwk::Want& wan
     newWant->SetParam(DMS_SRC_NETWORK_ID, localDeviceId);
     AppExecFwk::AbilityInfo abilityInfo;
 
-    sptr<IDistributedSched> remoteDms = GetRemoteDms(deviceId);
-    if (remoteDms == nullptr) {
-        HILOGE("get remoteDms failed");
-        return INVALID_PARAMETERS_ERR;
-    }
     HILOGI("[PerformanceTest] StartRemoteAbility transact begin");
     if (!DmsContinueTime::GetInstance().GetPull()) {
         int64_t begin = GetTickCount();
