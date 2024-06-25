@@ -20,7 +20,6 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
-class DSchedContinue;
 class AppStateObserver : public AppExecFwk::ApplicationStateObserverStub {
 public:
     /**
@@ -57,16 +56,9 @@ public:
      * @param processData Process data.
      */
     void OnProcessDied(const AppExecFwk::ProcessData& processData) override;
-
-    AppStateObserver();
-
-    AppStateObserver(const std::shared_ptr<DSchedContinue> dContinue, const std::string abilityName);
-
 private:
     std::mutex countLock_;
     std::map<sptr<IRemoteObject>, int32_t> connectAbilityMap_;
-    std::weak_ptr<DSchedContinue> dschedContinue_;
-    std::string abilityName_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

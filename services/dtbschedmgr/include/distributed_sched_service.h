@@ -198,7 +198,6 @@ public:
     int32_t CheckTargetPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
     ErrCode QueryOsAccount(int32_t& activeAccountId);
-    sptr<AppExecFwk::IAppMgr> GetAppManager();
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     bool CheckRemoteOsType(const std::string& netwokId) override;
@@ -275,6 +274,7 @@ private:
     bool RegisterAppStateObserver(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
         const sptr<IRemoteObject>& srcConnect, const sptr<IRemoteObject>& callbackWrapper);
     void UnregisterAppStateObserver(const sptr<IRemoteObject>& callbackWrapper);
+    sptr<AppExecFwk::IAppMgr> GetAppManager();
     int32_t SaveConnectToken(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect);
     void SetCleanMissionFlag(const OHOS::AAFwk::Want& want, int32_t missionId);
     void RemoveConnectAbilityInfo(const std::string& deviceId);
