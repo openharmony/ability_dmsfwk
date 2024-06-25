@@ -1137,7 +1137,7 @@ void DistributedSchedService::NotifyCompleteContinuation(const std::u16string& d
             DmsContinueTime::GetInstance().GetDstInfo().abilityName);
     }
     int dSchedEventResult = dschedContinuation_->NotifyDSchedEventResult(ERR_OK);
-    HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
+    HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventResult);
     remoteDms->NotifyContinuationResultFromRemote(sessionId, isSuccess, dstInfo);
     dschedContinuation_->continueInfo_.srcNetworkId_ = "";
     dschedContinuation_->continueInfo_.dstNetworkId_ = "";
