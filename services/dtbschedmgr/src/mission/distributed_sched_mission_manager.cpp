@@ -108,7 +108,7 @@ sptr<IDistributedSched> DistributedSchedMissionManager::GetRemoteDms(const std::
             }
         }
     }
-    HILOGD("GetRemoteDms connect deviceid is %s", deviceId.c_str());
+    HILOGD("GetRemoteDms connect deviceid is %s", GetAnonymStr(deviceId).c_str());
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgr == nullptr) {
         HILOGE("GetRemoteDms failed to connect to systemAbilityMgr!");
@@ -531,7 +531,7 @@ int32_t DistributedSchedMissionManager::StartSyncMissionsFromRemote(const Caller
 
 void DistributedSchedMissionManager::StopSyncMissionsFromRemote(const std::string& networkId)
 {
-    HILOGD(" %{private}s!", networkId.c_str());
+    HILOGD(" %{private}s!", GetAnonymStr(networkId).c_str());
     {
         std::lock_guard<std::mutex> autoLock(remoteSyncDeviceLock_);
         remoteSyncDeviceSet_.erase(networkId);

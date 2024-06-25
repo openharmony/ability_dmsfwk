@@ -59,7 +59,7 @@ bool BundleManagerInternal::GetCallerAppIdFromBms(const std::string& bundleName,
         return false;
     }
     appId = bundleMgr->GetAppIdByBundleName(bundleName, activeAccountId);
-    HILOGD("appId:%s", appId.c_str());
+    HILOGD("appId:%s", GetAnonymStr(appId).c_str());
     return true;
 }
 
@@ -170,16 +170,16 @@ bool BundleManagerInternal::IsSameAppId(const std::string& callerAppId, const st
 {
     if (targetBundleName.empty() || callerAppId.empty()) {
         HILOGE("targetBundleName:%{public}s or callerAppId:%s is empty",
-            targetBundleName.c_str(), callerAppId.c_str());
+            targetBundleName.c_str(), GetAnonymStr(callerAppId).c_str());
         return false;
     }
-    HILOGD("callerAppId:%s", callerAppId.c_str());
+    HILOGD("callerAppId:%s", GetAnonymStr(callerAppId).c_str());
     std::string calleeAppId;
     if (!GetCallerAppIdFromBms(targetBundleName, calleeAppId)) {
         HILOGE("GetCallerAppIdFromBms failed");
         return false;
     }
-    HILOGD("calleeAppId:%s", calleeAppId.c_str());
+    HILOGD("calleeAppId:%s", GetAnonymStr(calleeAppId).c_str());
     return callerAppId == calleeAppId;
 }
 
