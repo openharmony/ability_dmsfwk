@@ -458,10 +458,6 @@ enum {
      * Result(29360229) for calling StartAbility failed during continuation.
      */
     CONTINUE_CALL_START_ABILITY_FAILED = 29360229,
-    /**
-     * Result(29360230) for sink Ability abnormal termination during continuation.
-     */
-    CONTINUE_SINK_ABILITY_TERMINATED = 29360230,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

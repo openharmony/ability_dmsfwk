@@ -36,14 +36,12 @@
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_bm_storage.h"
 #include "ipc_skeleton.h"
-#include "iservice_registry.h"
 #include "parcel_helper.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission/dms_continue_send_manager.h"
 #endif
 #include "scene_board_judgement.h"
 #include "softbus_adapter/transport/dsched_transport_softbus_adapter.h"
-#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -127,7 +125,6 @@ DSchedContinue::~DSchedContinue()
     }
     eventThread_.join();
     eventHandler_ = nullptr;
-    UnregisterAppStateObserver();
     HILOGI("DSchedContinue delete end");
 }
 
@@ -938,48 +935,7 @@ int32_t DSchedContinue::StartAbility(const OHOS::AAFwk::Want& want, int32_t requ
         HILOGE("StartAbility failed %{public}d", ret);
         return ret;
     }
-    if (appStateObserver_ == nullptr) {
-        RegisterAppStateObserver(want.GetElement().GetAbilityName());
-    }
     return ret;
-}
-
-bool DSchedContinue::RegisterAppStateObserver(const std::string abilityName)
-{
-    HILOGI("register app state observer called");
-    sptr<AppExecFwk::IAppMgr> appObject = DistributedSchedService::GetInstance().GetAppManager();
-    if (appObject == nullptr) {
-        HILOGE("failed to get app manager service");
-        return false;
-    }
-
-    std::string bundleName = continueInfo_.sinkBundleName_;
-    std::vector<std::string> bundleNameList = {bundleName};
-    auto dContinue = std::shared_ptr<DSchedContinue>(shared_from_this());
-    appStateObserver_ = sptr<AppStateObserver>(new (std::nothrow) AppStateObserver(dContinue, abilityName));
-    int ret = appObject->RegisterApplicationStateObserver(appStateObserver_, bundleNameList);
-    if (ret != ERR_OK) {
-        HILOGE("failed to register application state observer, ret = %{public}d", ret);
-        return false;
-    }
-    return true;
-}
-
-void DSchedContinue::UnregisterAppStateObserver()
-{
-    HILOGI("unregister app state observer called");
-    sptr<AppExecFwk::IAppMgr> appObject = DistributedSchedService::GetInstance().GetAppManager();
-    if (appObject == nullptr) {
-        HILOGE("failed to get app manager service");
-        return;
-    }
-
-    int ret = appObject->UnregisterApplicationStateObserver(appStateObserver_);
-    if (ret != ERR_OK) {
-        HILOGE("failed to unregister application state observer, ret = %{public}d", ret);
-        return;
-    }
-    HILOGI("unregister application state observer success");
 }
 
 int32_t DSchedContinue::ExecuteNotifyComplete(int32_t result)
