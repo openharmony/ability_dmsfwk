@@ -3105,9 +3105,9 @@ int32_t DistributedSchedService::StartAbility(const OHOS::AAFwk::Want& want, int
         }
         DmsContinueTime::GetInstance().SetDstAbilityName(want.GetElement().GetAbilityName());
         DmsContinueTime::GetInstance().SetDstBundleName(want.GetElement().GetBundleName());
+        DmsRadar::GetInstance().ClickIconDmsStartAbility("StartAbility", err);
         err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, requestCode, activeAccountId);
     }
-    DmsRadar::GetInstance().ClickIconDmsStartAbility("StartAbility", err);
     if (err != ERR_OK) {
         HILOGE("StartAbility failed %{public}d", err);
     }
