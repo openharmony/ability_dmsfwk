@@ -815,6 +815,7 @@ int32_t DistributedSchedService::ContinueAbilityWithTimeout(const std::string& d
     SetContinuationTimeout(missionId, CONTINUATION_TIMEOUT);
     int64_t saveDataBegin = GetTickCount();
     DmsContinueTime::GetInstance().SetSaveDataDurationBegin(saveDataBegin);
+    DmsRadar::GetInstance().SaveDataDmsContinue("ContinueAbility", ERR_OK);
     int32_t result = AbilityManagerClient::GetInstance()->ContinueAbility(dstDeviceId, missionId, remoteBundleVersion);
     HILOGI("result: %{public}d!", result);
     if (result == ERR_INVALID_VALUE) {
@@ -835,6 +836,7 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
         HILOGE("get remote dms null!");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
+    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK);
     int32_t result = remoteDms->ContinueMission(srcDeviceId, dstDeviceId, missionId, callback, wantParams);
     HILOGI("ContinueRemoteMission result: %{public}d!", result);
     return result;
@@ -1091,6 +1093,7 @@ int32_t DistributedSchedService::StartContinuation(const OHOS::AAFwk::Want& want
         }
     } else {
         result = StartRemoteAbility(newWant, callerUid, DEFAULT_REQUEST_CODE, accessToken);
+        DmsRadar::GetInstance().SaveDataDmsRemoteWant("StartRemoteAbility", result);
         if (result != ERR_OK) {
             HILOGE("continue ability failed, errorCode = %{public}d", result);
             return result;
@@ -1133,11 +1136,12 @@ void DistributedSchedService::NotifyCompleteContinuation(const std::u16string& d
         dstInfo = DmsContinueTime::GetInstance().WriteDstInfo(DmsContinueTime::GetInstance().GetDstInfo().bundleName,
             DmsContinueTime::GetInstance().GetDstInfo().abilityName);
     }
-    int dSchedEventresult = dschedContinuation_->NotifyDSchedEventResult(ERR_OK);
-    HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventresult);
+    int dSchedEventResult = dschedContinuation_->NotifyDSchedEventResult(ERR_OK);
+    HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventResult);
     remoteDms->NotifyContinuationResultFromRemote(sessionId, isSuccess, dstInfo);
     dschedContinuation_->continueInfo_.srcNetworkId_ = "";
     dschedContinuation_->continueInfo_.dstNetworkId_ = "";
+    DmsRadar::GetInstance().ClickIconDmsRecvOver("NotifyContinuationResultFromRemote", dSchedEventResult);
 }
 
 int32_t DistributedSchedService::NotifyContinuationResultFromRemote(int32_t sessionId, bool isSuccess,
@@ -3101,6 +3105,7 @@ int32_t DistributedSchedService::StartAbility(const OHOS::AAFwk::Want& want, int
         }
         DmsContinueTime::GetInstance().SetDstAbilityName(want.GetElement().GetAbilityName());
         DmsContinueTime::GetInstance().SetDstBundleName(want.GetElement().GetBundleName());
+        DmsRadar::GetInstance().ClickIconDmsStartAbility("StartAbility", err);
         err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, requestCode, activeAccountId);
     }
     if (err != ERR_OK) {
