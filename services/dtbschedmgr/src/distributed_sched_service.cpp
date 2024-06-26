@@ -836,8 +836,8 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
         HILOGE("get remote dms null!");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
+    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK);
     int32_t result = remoteDms->ContinueMission(srcDeviceId, dstDeviceId, missionId, callback, wantParams);
-    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", result);
     HILOGI("ContinueRemoteMission result: %{public}d!", result);
     return result;
 }
