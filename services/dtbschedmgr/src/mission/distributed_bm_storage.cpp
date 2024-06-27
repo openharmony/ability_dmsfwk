@@ -68,6 +68,19 @@ std::shared_ptr<DmsBmStorage> DmsBmStorage::GetInstance()
     return instance_;
 }
 
+bool IsContinuable(AppExecFwk::BundleInfo bundleInfo)
+{
+    if (bundleInfo.name == "") {
+        return false;
+    }
+    for (auto abilityInfo : bundleInfo.abilityInfos) {
+        if (abilityInfo.continuable == true) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName)
 {
     HILOGI("called.");
@@ -82,8 +95,8 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName)
     }
     AppExecFwk::BundleInfo bundleInfo;
     bool ret = bundleMgr->GetBundleInfo(bundleName, FLAGS, bundleInfo, AppExecFwk::Constants::ALL_USERID);
-    if (!ret) {
-        HILOGW("GetBundleInfo of %{public}s failed", bundleName.c_str());
+    if (!ret || !IsContinuable(bundleInfo)) {
+        HILOGW("GetBundleInfo of %{public}s failed or cannot be continued", bundleName.c_str());
         DeleteStorageDistributeInfo(bundleName);
         return false;
     }
@@ -312,10 +325,32 @@ bool DmsBmStorage::DelReduData(const std::string &networkId, const std::vector<D
     return true;
 }
 
+bool DmsBmStorage::CheckSyncData(const std::string &networkId)
+{
+    HILOGI("called");
+    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(networkId);
+    if (uuid == "") {
+        HILOGE("can not get udid or uuid by networkId");
+        return false;
+    }
+    HILOGE("uuid: %{public}s", GetAnonymStr(uuid).c_str());
+    std::vector<Entry> newEntries;
+    Status status = kvStorePtr_->GetDeviceEntries(uuid, newEntries);
+    if (newEntries.empty() || status != Status::SUCCESS) {
+        HILOGE("CheckSyncData fail: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
 bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, const uint16_t& bundleNameId,
     std::string &bundleName)
 {
     HILOGI("networkId: %{public}s  bundleNameId: %{public}d", GetAnonymStr(networkId).c_str(), bundleNameId);
+    if (!CheckSyncData(networkId)) {
+        HILOGE("CheckSyncData fail");
+        return false;
+    }
     bool ret = DealGetBundleName(networkId, bundleNameId, bundleName);
     if (!ret) {
         HILOGW("get bundleName failed and try to call again");
@@ -540,19 +575,6 @@ int32_t DmsBmStorage::CloudSync()
     }
     HILOGD("end.");
     return static_cast<int32_t>(status);
-}
-
-bool IsContinuable(AppExecFwk::BundleInfo bundleInfo)
-{
-    if (bundleInfo.name == "") {
-        return false;
-    }
-    for (auto abilityInfo : bundleInfo.abilityInfos) {
-        if (abilityInfo.continuable == true) {
-            return true;
-        }
-    }
-    return false;
 }
 
 void DmsBmStorage::UpdateDistributedData()
