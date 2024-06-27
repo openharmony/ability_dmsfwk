@@ -46,6 +46,11 @@ struct lastUnfoInfo {
     std::string abilityName;
 };
 
+struct AliveMissionInfo {
+    std::string bundleName;
+    std::string abilityName;
+};
+
 enum class FocusedReason {
     MIN = -1,
     NORMAL,
@@ -115,6 +120,8 @@ public:
     void OnDeviceScreenOn();
     uint32_t NotifyDeviceOnline();
     int32_t SendScreenOffEvent(uint8_t type);
+    void DeleteAliveMissionInfo(const int32_t missionId);
+    int32_t GetAliveMissionInfo(const int32_t missionId, AliveMissionInfo& missionInfo);
 
 private:
     int32_t GetCurrentMissionId();
@@ -150,6 +157,7 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     std::shared_ptr<ScreenOffHandler> screenOffHandler_;
     int32_t mmiMonitorId_ = INVALID_MISSION_ID;
+    std::map<int32_t, AliveMissionInfo> aliveMission_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

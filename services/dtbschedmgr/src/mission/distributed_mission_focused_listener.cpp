@@ -15,6 +15,7 @@
 
 #include "mission/distributed_mission_focused_listener.h"
 
+#include "continue/dsched_continue_manager.h"
 #include "distributed_radar.h"
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_send_manager.h"
@@ -33,6 +34,8 @@ void DistributedMissionFocusedListener::OnMissionDestroyed(int32_t missionId)
 {
     HILOGD("OnMissionDestroyed, missionId = %{public}d", missionId);
     DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(missionId, UnfocusedReason::DESTORY);
+    DSchedContinueManager::GetInstance().NotifyTerminateContinuation(missionId);
+    DMSContinueSendMgr::GetInstance().DeleteAliveMissionInfo(missionId);
 }
 
 void DistributedMissionFocusedListener::OnMissionSnapshotChanged(int32_t missionId)

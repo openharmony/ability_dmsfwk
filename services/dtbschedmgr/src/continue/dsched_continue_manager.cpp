@@ -25,6 +25,7 @@
 #include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "mission/dms_continue_send_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -323,6 +324,43 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByDevId(
     }
     HILOGE("source deviceId doesn't match an existing continuation.");
     return nullptr;
+}
+
+void DSchedContinueManager::NotifyTerminateContinuation(const int32_t missionId)
+{
+    HILOGI("begin, missionId %{public}d", missionId);
+    {
+        std::lock_guard<std::mutex> continueLock(continueMutex_);
+        if (continues_.empty()) {
+            HILOGW("No continuation in progress.");
+            return;
+        }
+ 
+        AliveMissionInfo missionInfo;
+        int32_t ret = DMSContinueSendMgr::GetInstance().GetAliveMissionInfo(missionId, missionInfo);
+        if (ret != ERR_OK) {
+            HILOGE("get aliveMissionInfo failed, missionId %{public}d", missionId);
+            return;
+        }
+        HILOGI("alive missionInfo bundleName is %{public}s, abilityName is %{public}s",
+            missionInfo.bundleName.c_str(), missionInfo.abilityName.c_str());
+        for (auto iter = continues_.begin(); iter != continues_.end(); iter++) {
+            if (iter->second == nullptr) {
+                break;
+            }
+
+            auto continueInfo = iter->second->GetContinueInfo();
+            HILOGI("continueInfo bundleName is %{public}s, abilityName is %{public}s",
+                continueInfo.sinkBundleName_.c_str(), continueInfo.sinkAbilityName_.c_str());
+            if (missionInfo.bundleName == continueInfo.sinkBundleName_
+                && missionInfo.abilityName == continueInfo.sinkAbilityName_) {
+                HILOGE("Excute onContinueEnd");
+                iter->second->OnContinueEnd(CONTINUE_SINK_ABILITY_TERMINATED);
+                return;
+            }
+        }
+    }
+    HILOGW("doesn't match an existing continuation.");
 }
 
 int32_t DSchedContinueManager::OnContinueEnd(const DSchedContinueInfo& info)
