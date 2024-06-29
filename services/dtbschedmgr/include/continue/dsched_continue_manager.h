@@ -58,6 +58,7 @@ public:
     int32_t GetContinueInfo(std::string &srcDeviceId, std::string &dstDeviceId);
     std::shared_ptr<DSchedContinue> GetDSchedContinueByWant(const OHOS::AAFwk::Want& want, int32_t missionId);
     std::shared_ptr<DSchedContinue> GetDSchedContinueByDevId(const std::u16string& devId, int32_t missionId);
+    void NotifyTerminateContinuation(const int32_t missionId);
     
 private:
     void StartEvent();

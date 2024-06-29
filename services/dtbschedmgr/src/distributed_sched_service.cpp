@@ -255,9 +255,9 @@ bool DistributedSchedService::Init()
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().InitDataStorage();
     InitCommonEventListener();
+    InitWifiStateListener();
     DMSContinueSendMgr::GetInstance().Init();
     DMSContinueRecvMgr::GetInstance().Init();
-    InitWifiStateListener();
 #endif
     DistributedSchedAdapter::GetInstance().Init();
     if (SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {

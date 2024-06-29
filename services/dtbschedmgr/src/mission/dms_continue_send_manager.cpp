@@ -285,6 +285,7 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
         
     std::string abilityName = info.want.GetElement().GetAbilityName();
     focusedMissionAbility_[missionId] = abilityName;
+    aliveMission_[missionId] = { bundleName, abilityName };
 
     if (info.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
         HILOGE("Mission continue state set to INACTIVE. Broadcast task abort.");
@@ -761,6 +762,27 @@ int32_t DMSContinueSendMgr::SetStateSendEvent(const uint16_t bundleNameId, const
         return ret;
     }
     return ret;
+}
+
+void DMSContinueSendMgr::DeleteAliveMissionInfo(const int32_t missionId)
+{
+    HILOGI("called");
+    std::lock_guard<std::mutex> aliveMissionMapLock(eventMutex_);
+    aliveMission_.erase(missionId);
+}
+ 
+int32_t DMSContinueSendMgr::GetAliveMissionInfo(const int32_t missionId, AliveMissionInfo& missionInfo)
+{
+    HILOGI("start, missionId: %{public}d", missionId);
+    std::lock_guard<std::mutex> aliveMissionMapLock(eventMutex_);
+    auto iterItem = aliveMission_.find(missionId);
+    if (iterItem != aliveMission_.end()) {
+        missionInfo = iterItem->second;
+        HILOGI("get missionIdInfo end, missionId: %{public}d", missionId);
+        return ERR_OK;
+    }
+    HILOGE("get iterItem failed from aliveMission_");
+    return INVALID_PARAMETERS_ERR;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
