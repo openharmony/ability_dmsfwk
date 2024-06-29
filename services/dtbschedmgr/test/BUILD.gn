@@ -386,9 +386,17 @@ ohos_unittest("softbusadaptertest") {
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
   sources = [
-    "unittest/softbus_adapter/softbus_adapter_test.cpp",
     "unittest/softbus_adapter/softbus_transport_test.cpp",
   ]
+
+  if (!dmsfwk_softbus_adapter_common) {
+    sources += [
+      "unittest/softbus_adapter/softbus_adapter_test.cpp",
+      "unittest/softbus_adapter/mock_softbus_adapter.cpp",
+    ]
+  } else {
+    sources += [ "unittest/softbus_adapter/softbus_adapter_common_test.cpp" ]
+  }
 
   configs = [
     ":test_config",

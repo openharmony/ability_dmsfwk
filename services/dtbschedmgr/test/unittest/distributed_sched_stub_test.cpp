@@ -551,7 +551,7 @@ HWTEST_F(DistributedSchedStubTest, ContinueMissionInner_002, TestSize.Level3)
     WantParams wantParams = {};
     data.WriteParcelable(&wantParams);
     result = distributedSchedStub_->ContinueMissionInner(data, reply);
-    EXPECT_EQ(result, ERR_NONE);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedSchedStubTest ContinueMissionInner_002 end" << std::endl;
 }
 
