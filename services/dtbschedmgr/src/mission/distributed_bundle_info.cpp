@@ -41,6 +41,78 @@ const std::string JSON_KEY_DMS_CONTINUETYPE = "continueType";
 const std::string JSON_KEY_DMS_CONTINUETYPEID = "continueTypeId";
 const std::string JSON_KEY_DMS_USERID = "userIdArr";
 const std::string JSON_KEY_DMS_MODULENAME = "moduleName";
+const std::string JSON_KEY_DMS_MAX_BUNDLENAME_ID = "maxBundleNameId";
+}
+
+bool PublicRecordsInfo::ReadFromParcel(Parcel &parcel)
+{
+    maxBundleNameId = parcel.ReadUint16();
+    return true;
+}
+
+bool PublicRecordsInfo::Marshalling(Parcel &parcel) const
+{
+    parcel.WriteUint16(maxBundleNameId);
+    return true;
+}
+
+PublicRecordsInfo *PublicRecordsInfo::Unmarshalling(Parcel &parcel)
+{
+    PublicRecordsInfo *info = new (std::nothrow) PublicRecordsInfo();
+    if (info && !info->ReadFromParcel(parcel)) {
+        APP_LOGW("read from parcel failed");
+        delete info;
+        info = nullptr;
+    }
+    return info;
+}
+
+std::string PublicRecordsInfo::ToString() const
+{
+    nlohmann::json jsonObject;
+    jsonObject[JSON_KEY_DMS_MAX_BUNDLENAME_ID] = maxBundleNameId;
+    return jsonObject.dump();
+}
+
+void to_json(nlohmann::json &jsonObject, const PublicRecordsInfo &publicRecordsInfo)
+{
+    APP_LOGI("call");
+    jsonObject = nlohmann::json {
+        {JSON_KEY_DMS_MAX_BUNDLENAME_ID, publicRecordsInfo.maxBundleNameId},
+    };
+    APP_LOGI("end");
+}
+
+void from_json(const nlohmann::json &jsonObject, PublicRecordsInfo &publicRecordsInfo)
+{
+    APP_LOGI("call");
+    const auto &jsonObjectEnd = jsonObject.end();
+    int32_t parseResult = ERR_OK;
+    GetValueIfFindKey<uint16_t>(jsonObject,
+        jsonObjectEnd,
+        JSON_KEY_DMS_CONTINUETYPEID,
+        publicRecordsInfo.maxBundleNameId,
+        JsonType::NUMBER,
+        false,
+        parseResult,
+        ArrayType::NOT_ARRAY);
+    if (parseResult != ERR_OK) {
+        APP_LOGE("read PublicRecordsInfo from jsonObject error, error code : %{public}d", parseResult);
+    }
+    APP_LOGI("end");
+}
+
+bool PublicRecordsInfo::FromJsonString(const std::string &jsonString)
+{
+    nlohmann::json jsonObject = nlohmann::json::parse(jsonString, nullptr, false);
+    if (jsonObject.is_discarded()) {
+        return false;
+    }
+    const auto &jsonObjectEnd = jsonObject.end();
+    int32_t parseResult = ERR_OK;
+    GetValueIfFindKey<uint16_t>(jsonObject, jsonObjectEnd, JSON_KEY_DMS_MAX_BUNDLENAME_ID, maxBundleNameId,
+        JsonType::NUMBER, false, parseResult, ArrayType::NOT_ARRAY);
+    return parseResult == ERR_OK;
 }
 
 bool DmsAbilityInfo::ReadFromParcel(Parcel &parcel)

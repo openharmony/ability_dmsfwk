@@ -666,6 +666,7 @@ bool DistributedSchedStub::IsUsingQos(const std::string& remoteDeviceId)
         HILOGW("remote dms not support qos, using rpc");
         return false;
     }
+    HILOGI("remote device satisfied qos condition");
     return true;
 }
 

@@ -23,6 +23,16 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
+struct PublicRecordsInfo : public Parcelable {
+    uint16_t maxBundleNameId = 0;
+
+    bool ReadFromParcel(Parcel &parcel);
+    bool Marshalling(Parcel &parcel) const override;
+    static PublicRecordsInfo *Unmarshalling(Parcel &parcel);
+    std::string ToString() const;
+    bool FromJsonString(const std::string &jsonString);
+};
+
 struct DmsAbilityInfo : public Parcelable {
     std::string abilityName;
     std::vector<std::string> continueType;
@@ -30,7 +40,7 @@ struct DmsAbilityInfo : public Parcelable {
     std::string moduleName;
 
     bool ReadFromParcel(Parcel &parcel);
-    virtual bool Marshalling(Parcel &parcel) const override;
+    bool Marshalling(Parcel &parcel) const override;
     static DmsAbilityInfo *Unmarshalling(Parcel &parcel);
 };
 
@@ -52,7 +62,7 @@ struct DmsBundleInfo : public Parcelable {
     std::vector<uint8_t> userIdArr;
 
     bool ReadFromParcel(Parcel &parcel);
-    virtual bool Marshalling(Parcel &parcel) const override;
+    bool Marshalling(Parcel &parcel) const override;
     static DmsBundleInfo *Unmarshalling(Parcel &parcel);
     std::string ToString() const;
     bool FromJsonString(const std::string &jsonString);

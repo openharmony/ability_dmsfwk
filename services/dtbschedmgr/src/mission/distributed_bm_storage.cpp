@@ -32,6 +32,7 @@ namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DmsBmDataStorage";
 const std::string BMS_KV_BASE_DIR = "/data/service/el1/public/database/DistributedSchedule";
+const std::string PUBLIC_RECORDS = "publicRecords";
 const int32_t EL1 = 1;
 const int32_t MAX_TIMES = 600;              // 1min
 const int32_t SLEEP_INTERVAL = 100 * 1000;  // 100ms
@@ -115,6 +116,28 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName)
     return true;
 }
 
+bool DmsBmStorage::UpdatePublicRecords(const std::string &localUdid)
+{
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return false;
+    }
+    std::string keyOfPublic = localUdid + AppExecFwk::Constants::FILE_UNDERLINE + PUBLIC_RECORDS;
+    Key publicKey(keyOfPublic);
+    PublicRecordsInfo publicRecordsInfo;
+    GetLastBundleNameId(publicRecordsInfo.maxBundleNameId);
+    publicRecordsInfo.maxBundleNameId =
+        std::max((bundleNameIdTables_.rbegin())->first, publicRecordsInfo.maxBundleNameId);
+    HILOGI("maxBundleNameId = %{public}d", publicRecordsInfo.maxBundleNameId);
+    Value publicValue(publicRecordsInfo.ToString());
+    Status status = kvStorePtr_->Put(publicKey, publicValue);
+    if (status != Status::SUCCESS) {
+        HILOGE("put to kvStore error: %{public}d", status);
+        return false;
+    }
+    return true;
+}
+
 bool DmsBmStorage::InnerSaveStorageDistributeInfo(const DmsBundleInfo &distributedBundleInfo,
     const std::string &localUdid)
 
@@ -139,6 +162,7 @@ bool DmsBmStorage::InnerSaveStorageDistributeInfo(const DmsBundleInfo &distribut
         HILOGE("put to kvStore error: %{public}d", status);
         return false;
     }
+    UpdatePublicRecords(localUdid);
     return true;
 }
 
@@ -191,7 +215,6 @@ bool DmsBmStorage::DeleteStorageDistributeInfo(const std::string &bundleName)
         HILOGE("delete key error: %{public}d", status);
         return false;
     }
-    DelBundleNameId(bundleName);
     HILOGI("delete value to kvStore success");
     return true;
 }
@@ -259,10 +282,11 @@ bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_
         return false;
     }
     std::vector<Entry> reduRiskEntries;
+    std::string keyOfPublic = udid + AppExecFwk::Constants::FILE_UNDERLINE + PUBLIC_RECORDS;
     for (auto entry : allEntries) {
         std::string key = entry.key.ToString();
         std::string value =  entry.value.ToString();
-        if (key.find(udid) == std::string::npos) {
+        if (key.find(udid) == std::string::npos || key.find(keyOfPublic) != std::string::npos) {
             continue;
         }
         DmsBundleInfo distributedBundleInfo;
@@ -396,33 +420,26 @@ bool DmsBmStorage::GetBundleNameId(const std::string& bundleName, uint16_t &bund
         HILOGE("kvStore is nullptr");
         return false;
     }
-    std::string udid;
-    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
-    if (udid == "") {
-        HILOGE("can not get udid by networkId");
+    std::string localUdid;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(localUdid);
+    if (localUdid == "") {
+        HILOGE("can not get localUdid by networkId");
         return false;
     }
-    Key allEntryKeyPrefix("");
-    std::vector<Entry> allEntries;
-    Status status = kvStorePtr_->GetEntries(allEntryKeyPrefix, allEntries);
+    Key key(DeviceAndNameToKey(localUdid, bundleName));
+    Value value;
+    Status status = kvStorePtr_->Get(key, value);
     if (status != Status::SUCCESS) {
-        HILOGE("GetEntries error: %{public}d", status);
+        HILOGW("BundleNameId not found, Get result: %{public}d", status);
         return false;
     }
-    for (auto entry : allEntries) {
-        std::string key = entry.key.ToString();
-        std::string value =  entry.value.ToString();
-        if (key.find(udid) == std::string::npos) {
-            continue;
-        }
-        DmsBundleInfo distributedBundleInfo;
-        if (distributedBundleInfo.FromJsonString(value) && distributedBundleInfo.bundleName == bundleName) {
-            bundleNameId = distributedBundleInfo.bundleNameId;
-            HILOGD("end.");
-            return true;
-        }
+    DmsBundleInfo distributedBundleInfo;
+    if (distributedBundleInfo.FromJsonString(value.ToString()) && distributedBundleInfo.bundleName == bundleName) {
+        bundleNameId = distributedBundleInfo.bundleNameId;
+        HILOGD("end.");
+        return true;
     }
-    HILOGE("get distributed bundleName no matching data: %{public}s %{public}d", GetAnonymStr(udid).c_str(),
+    HILOGE("get distributed bundleName no matching data: %{public}s %{public}d", GetAnonymStr(localUdid).c_str(),
         bundleNameId);
     return false;
 }
@@ -456,7 +473,7 @@ bool DmsBmStorage::CheckKvStore()
 
 Status DmsBmStorage::GetKvStore()
 {
-    HILOGD("called.");
+    HILOGI("called.");
     Options options = {
         .createIfMissing = true,
         .encrypt = false,
@@ -479,7 +496,7 @@ Status DmsBmStorage::GetKvStore()
         HILOGE("This db meta changed, remove and rebuild it");
         dataManager_.DeleteKvStore(appId_, storeId_, BMS_KV_BASE_DIR + appId_.appId);
     }
-    HILOGD("end.");
+    HILOGI("end.");
     return status;
 }
 
@@ -494,17 +511,97 @@ void DmsBmStorage::TryTwice(const std::function<Status()> &func) const
     HILOGD("end.");
 }
 
+bool DmsBmStorage::GetLastBundleNameId(uint16_t &bundleNameId)
+{
+    HILOGI("call.");
+    std::string localUdid;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(localUdid);
+    if (localUdid == "") {
+        HILOGE("GetLocalUdid failed");
+        return false;
+    }
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return false;
+    }
+    std::string keyOfPublic = localUdid + AppExecFwk::Constants::FILE_UNDERLINE + PUBLIC_RECORDS;
+    Key publicKey(keyOfPublic);
+    Value value;
+    Status status = kvStorePtr_->Get(publicKey, value);
+    if (status != Status::SUCCESS) {
+        HILOGE("This information not be found in the database,Get error: %{public}d", status);
+        return false;
+    }
+    PublicRecordsInfo publicRecordsInfo;
+    if (publicRecordsInfo.FromJsonString(value.ToString())) {
+        bundleNameId = publicRecordsInfo.maxBundleNameId;
+        HILOGI("bundleNameId: %{public}d", bundleNameId);
+        return true;
+    }
+    return false;
+}
+
 uint16_t DmsBmStorage::CreateBundleNameId(const std::string &bundleName)
 {
-    std::lock_guard<std::mutex> lock_l(mutex_);
-    for (uint16_t bundleNameId = 0; bundleNameId < MAX_BUNDLEID; ++bundleNameId) {
-        if (bundleNameIdTables_.find(bundleNameId) == bundleNameIdTables_.end()) {
-            bundleNameIdTables_.insert(std::make_pair(bundleNameId, bundleName));
-            return bundleNameId;
-        }
+    HILOGI("called.");
+    uint16_t bundleNameId = 0;
+    if (GetBundleNameId(bundleName, bundleNameId)) {
+        HILOGI("The bundleNameId already exists in the bundleName.");
+        return bundleNameId;
     }
-    HILOGE("CreateBundleNameId failed");
-    return MAX_BUNDLEID;
+    if (bundleNameIdTables_.empty()) {
+        HILOGI("Encode from the first one.");
+        std::lock_guard<std::mutex> lock_l(mutex_);
+        bundleNameIdTables_.insert(std::make_pair(bundleNameId, bundleName));
+        return bundleNameId;
+    }
+    uint16_t lastBundleNameId = 0;
+    GetLastBundleNameId(lastBundleNameId);
+    lastBundleNameId = std::max((bundleNameIdTables_.rbegin())->first, lastBundleNameId);
+    if (lastBundleNameId < MAX_BUNDLEID) {
+        HILOGI("Add bundleNameId.");
+        std::lock_guard<std::mutex> lock_l(mutex_);
+        bundleNameIdTables_.insert(std::make_pair(lastBundleNameId + 1, bundleName));
+        return lastBundleNameId + 1;
+    }
+    HILOGE("The bundleNameId exceeds the maximum value! Delete the local data and re-create the data.");
+    RebuildLocalData();
+    GetBundleNameId(bundleName, bundleNameId);
+    return bundleNameId;
+}
+
+bool DmsBmStorage::RebuildLocalData()
+{
+    HILOGE("called.");
+    std::string localUdid;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(localUdid);
+    if (localUdid == "") {
+        HILOGE("GetLocalUdid failed");
+        return false;
+    }
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return false;
+    }
+    Key allEntryKeyPrefix(localUdid);
+    std::vector<Entry> allEntries;
+    Status status = kvStorePtr_->GetEntries(allEntryKeyPrefix, allEntries);
+    if (status != Status::SUCCESS) {
+        HILOGE("GetEntries error: %{public}d", status);
+        return false;
+    }
+    std::vector<Key> keyArr;
+    for (const auto &entry : allEntries) {
+        keyArr.push_back(entry.key);
+    }
+    status = kvStorePtr_->DeleteBatch(keyArr);
+    if (status != Status::SUCCESS) {
+        HILOGE("DeleteBatch error: %{public}d", status);
+        return false;
+    }
+    bundleNameIdTables_.clear();
+    UpdateDistributedData();
+    return true;
 }
 
 DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo)
@@ -632,16 +729,16 @@ void DmsBmStorage::DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos)
         HILOGE("kvStore is nullptr");
         return;
     }
-    std::string udid;
-    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
-    if (udid == "") {
+    std::string localUdid;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(localUdid);
+    if (localUdid == "") {
         HILOGE("GetLocalUdid failed");
         return;
     }
     std::vector<Entry> entries;
     for (const auto &dmsBundleInfo : dmsBundleInfos) {
         Entry entrie;
-        std::string keyOfData = DeviceAndNameToKey(udid, dmsBundleInfo.bundleName);
+        std::string keyOfData = DeviceAndNameToKey(localUdid, dmsBundleInfo.bundleName);
         Key key(keyOfData);
         entrie.key = key;
         Value value(dmsBundleInfo.ToString());
@@ -649,14 +746,23 @@ void DmsBmStorage::DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos)
         HILOGI("need be put: %{public}s", dmsBundleInfo.bundleName.c_str());
         entries.push_back(entrie);
     }
+    Entry entrie;
+    std::string keyOfData = localUdid + AppExecFwk::Constants::FILE_UNDERLINE + PUBLIC_RECORDS;
+    Key key(keyOfData);
+    entrie.key = key;
+    PublicRecordsInfo publicRecordsInfo;
+    GetLastBundleNameId(publicRecordsInfo.maxBundleNameId);
+    publicRecordsInfo.maxBundleNameId =
+        std::max((bundleNameIdTables_.rbegin())->first, publicRecordsInfo.maxBundleNameId);
+    Value value(publicRecordsInfo.ToString());
+    entrie.value = value;
+    HILOGI("need be put: %{public}d", publicRecordsInfo.maxBundleNameId);
+    entries.push_back(entrie);
+
     Status status = kvStorePtr_->PutBatch(entries);
     if (status == Status::IPC_ERROR) {
         status = kvStorePtr_->PutBatch(entries);
         HILOGW("distribute database ipc error and try to call again, result = %{public}d", status);
-    }
-    if (status != Status::SUCCESS) {
-        HILOGE("PutBatch to kvStore error: %{public}d", status);
-        return;
     }
     HILOGI("end.");
 }
@@ -676,9 +782,9 @@ std::map<std::string, DmsBundleInfo> DmsBmStorage::GetAllOldDistributionBundleIn
         HILOGE("kvStorePtr_ is null");
         return oldDistributedBundleInfos;
     }
-    std::string udid;
-    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
-    if (udid == "") {
+    std::string localUdid;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(localUdid);
+    if (localUdid == "") {
         HILOGE("GetLocalUdid failed");
         return oldDistributedBundleInfos;
     }
@@ -689,22 +795,23 @@ std::map<std::string, DmsBundleInfo> DmsBmStorage::GetAllOldDistributionBundleIn
         HILOGE("GetEntries error: %{public}d", status);
         return oldDistributedBundleInfos;
     }
+    std::string keyOfPublic = localUdid + AppExecFwk::Constants::FILE_UNDERLINE + PUBLIC_RECORDS;
     for (const auto &entry : allEntries) {
         std::string key = entry.key.ToString();
-        if (key.find(udid) == std::string::npos) {
+        if (key.find(localUdid) == std::string::npos || key.find(keyOfPublic) != std::string::npos) {
             continue;
         }
         std::string value = entry.value.ToString();
         DmsBundleInfo distributedBundleInfo;
         if (distributedBundleInfo.FromJsonString(value)) {
+            AddBundleNameId(distributedBundleInfo.bundleNameId, distributedBundleInfo.bundleName);
             if (std::find(bundleNames.begin(), bundleNames.end(), distributedBundleInfo.bundleName) ==
                 bundleNames.end() || distributedBundleInfo.bundleName == "") {
+                HILOGE("Find %{public}s failed,need be delete", distributedBundleInfo.bundleName.c_str());
                 kvStorePtr_->Delete(entry.key);
-                DelBundleNameId(distributedBundleInfo.bundleName);
                 continue;
             }
             oldDistributedBundleInfos.emplace(distributedBundleInfo.bundleName, distributedBundleInfo);
-            AddBundleNameId(distributedBundleInfo.bundleNameId, distributedBundleInfo.bundleName);
         } else {
             HILOGE("DistributionInfo FromJsonString key:%{public}s failed", key.c_str());
         }
