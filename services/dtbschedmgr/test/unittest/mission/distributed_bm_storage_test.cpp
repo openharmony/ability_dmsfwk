@@ -202,6 +202,25 @@ HWTEST_F(DistributedBmStorageTest, GetBundleIdTest_001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: GetBundleIdTest_002
+ * @tc.desc: test delete DistributedBmStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, GetBundleIdTest_002, TestSize.Level0)
+{
+    DTEST_LOG << "DistributedBmStorageTest GetBundleIdTest_002 start" << std::endl;
+    auto distributedDataStorage = GetDmsBmStorage();
+    EXPECT_NE(distributedDataStorage, nullptr);
+    if (distributedDataStorage != nullptr) {
+        const std::string bundleName = "browser";
+        uint16_t bundleNameId = 1;
+        bool ret = dmsBmStorage_->GetInstance()->GetBundleNameId(bundleName, bundleNameId);
+        EXPECT_EQ(ret, false);
+    }
+    DTEST_LOG << "DistributedBmStorageTest GetBundleIdTest_002 end" << std::endl;
+}
+
+/**
  * @tc.name: UpdateDistributedDataTest_001
  * @tc.desc: test delete DistributedBmStorage
  * @tc.type: FUNC

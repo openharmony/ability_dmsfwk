@@ -68,6 +68,7 @@ public:
     void UpdateDistributedData();
     int32_t CloudSync();
     void DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos);
+    bool UpdatePublicRecords(const std::string &localUdid);
 
 private:
     std::string DeviceAndNameToKey(const std::string &udid, const std::string &bundleName) const;
@@ -88,6 +89,8 @@ private:
     OHOS::DistributedKv::Status GetResultSatus(std::promise<OHOS::DistributedKv::Status> &resultStatusSignal);
     bool DelReduData(const std::string &networkId, const std::vector<OHOS::DistributedKv::Entry> &reduRiskEntries);
     bool CheckSyncData(const std::string &networkId);
+    bool RebuildLocalData();
+    bool GetLastBundleNameId(uint16_t &bundleNameId);
 
 private:
     static std::mutex mutex_;
