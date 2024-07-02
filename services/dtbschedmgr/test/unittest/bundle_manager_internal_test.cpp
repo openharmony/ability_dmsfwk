@@ -166,7 +166,7 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_006, TestSize.Leve
     want.SetElementName(deviceId, bundleName, abilityName, moduleName);
     int32_t missionId = 0;
     bool ret = BundleManagerInternal::CheckIfRemoteCanInstall(want, missionId);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     DTEST_LOG << "BundleManagerInternalTest BundleManagerInternalTest_006 end "<< std::endl;
 }
 

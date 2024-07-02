@@ -37,7 +37,6 @@ public:
     void TearDown();
 
 protected:
-    sptr<IRemoteObject> GetDmsProxy();
     DistributedClient distributedClient_;
 };
 
