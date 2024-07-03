@@ -161,7 +161,7 @@ int32_t DistributedClient::GetDSchedEventInfo(const DSchedEventType &type, std::
     }
 
     uint32_t eventNum = reply.ReadUint32();
-    if (eventNum > UINT32_MAX || eventNum > DSCHED_EVENT_MAX_NUM) {
+    if (eventNum > DSCHED_EVENT_MAX_NUM) {
         HILOG_ERROR("Proxy get dms eventInfos num %{public}u is invalid.", eventNum);
         return AAFwk::INVALID_PARAMETERS_ERR;
     }
