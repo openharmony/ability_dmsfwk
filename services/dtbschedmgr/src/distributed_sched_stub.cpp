@@ -61,7 +61,6 @@ const std::string TAG = "DistributedSchedStub";
 const std::u16string DMS_STUB_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
 const std::string EXTRO_INFO_JSON_KEY_ACCESS_TOKEN = "accessTokenID";
 const std::string EXTRO_INFO_JSON_KEY_REQUEST_CODE = "requestCode";
-const std::string PERMISSION_DISTRIBUTED_DATASYNC = "ohos.permission.DISTRIBUTED_DATASYNC";
 const std::string PARAM_FREEINSTALL_APPID = "ohos.freeinstall.params.callingAppId";
 const std::string PARAM_FREEINSTALL_BUNDLENAMES = "ohos.freeinstall.params.callingBundleNames";
 const std::string CMPT_PARAM_FREEINSTALL_BUNDLENAMES = "ohos.extra.param.key.allowedBundles";
@@ -256,11 +255,6 @@ int32_t DistributedSchedStub::StartRemoteAbilityInner(MessageParcel& data, Messa
     uint32_t accessToken = 0;
     PARCEL_READ_HELPER(data, Uint32, accessToken);
     HILOGD("get callerUid = %{public}d, AccessTokenID = %{private}u", callerUid, accessToken);
-    if (DistributedSchedPermission::GetInstance().CheckPermission(accessToken,
-        PERMISSION_DISTRIBUTED_DATASYNC) != ERR_OK) {
-        HILOGE("check data_sync permission failed!");
-        return DMS_PERMISSION_DENIED;
-    }
     DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
     int32_t result = StartRemoteAbility(*want, callerUid, requestCode, accessToken);
     ReportEvent(*want, BehaviorEvent::START_REMOTE_ABILITY, result, callerUid);
@@ -723,11 +717,6 @@ int32_t DistributedSchedStub::ConnectRemoteAbilityInner(MessageParcel& data, Mes
     PARCEL_READ_HELPER(data, Uint32, accessToken);
     HILOGD("get callerUid = %{public}d, callerPid = %{public}d, AccessTokenID = %{private}u", callerUid, callerPid,
         accessToken);
-    if (DistributedSchedPermission::GetInstance().CheckPermission(accessToken,
-        PERMISSION_DISTRIBUTED_DATASYNC) != ERR_OK) {
-        HILOGE("check data_sync permission failed!");
-        return DMS_PERMISSION_DENIED;
-    }
     int32_t result = ConnectRemoteAbility(*want, connect, callerUid, callerPid, accessToken);
     ReportEvent(*want, BehaviorEvent::CONNECT_REMOTE_ABILITY, result, callerUid);
     HILOGI("result = %{public}d", result);
@@ -747,11 +736,6 @@ int32_t DistributedSchedStub::DisconnectRemoteAbilityInner(MessageParcel& data, 
     uint32_t accessToken = 0;
     PARCEL_READ_HELPER(data, Uint32, accessToken);
     HILOGD("get callerUid = %{public}d, AccessTokenID = %{private}u", callerUid, accessToken);
-    if (DistributedSchedPermission::GetInstance().CheckPermission(accessToken,
-        PERMISSION_DISTRIBUTED_DATASYNC) != ERR_OK) {
-        HILOGE("check data_sync permission failed!");
-        return DMS_PERMISSION_DENIED;
-    }
     int32_t result = DisconnectRemoteAbility(connect, callerUid, accessToken);
     BehaviorEventParam eventParam = { EventCallingType::LOCAL, BehaviorEvent::DISCONNECT_REMOTE_ABILITY, result };
     DmsHiSysEventReport::ReportBehaviorEvent(eventParam);
@@ -1252,11 +1236,6 @@ int32_t DistributedSchedStub::StartRemoteAbilityByCallInner(MessageParcel& data,
     PARCEL_READ_HELPER(data, Int32, callerPid);
     uint32_t accessToken = 0;
     PARCEL_READ_HELPER(data, Uint32, accessToken);
-    if (DistributedSchedPermission::GetInstance().CheckPermission(accessToken,
-        PERMISSION_DISTRIBUTED_DATASYNC) != ERR_OK) {
-        HILOGE("check data_sync permission failed!");
-        return DMS_PERMISSION_DENIED;
-    }
     int32_t result = StartRemoteAbilityByCall(*want, connect, callerUid, callerPid, accessToken);
     ReportEvent(*want, BehaviorEvent::START_REMOTE_ABILITY_BYCALL, result, callerUid);
     HILOGI("result = %{public}d", result);
@@ -1455,11 +1434,6 @@ int32_t DistributedSchedStub::StartRemoteFreeInstallInner(MessageParcel& data, M
         HILOGE("read callback failed!");
         return ERR_NULL_OBJECT;
     }
-    if (DistributedSchedPermission::GetInstance().CheckPermission(accessToken,
-        PERMISSION_DISTRIBUTED_DATASYNC) != ERR_OK) {
-        HILOGE("check data_sync permission failed!");
-        return DMS_PERMISSION_DENIED;
-    }
     int32_t result = StartRemoteFreeInstall(*want, callerUid, requestCode, accessToken, callback);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
@@ -1571,11 +1545,6 @@ int32_t DistributedSchedStub::StopRemoteExtensionAbilityInner(MessageParcel& dat
     int32_t serviceType = 0;
     PARCEL_READ_HELPER(data, Int32, serviceType);
     HILOGD("get callerUid = %{private}d, AccessTokenID = %{private}u", callerUid, accessToken);
-    if (DistributedSchedPermission::GetInstance().CheckPermission(accessToken,
-        PERMISSION_DISTRIBUTED_DATASYNC) != ERR_OK) {
-        HILOGE("check data_sync permission failed!");
-        return DMS_PERMISSION_DENIED;
-    }
     auto result = StopRemoteExtensionAbility(*want, callerUid, accessToken, serviceType);
     HILOGD("StartRemoteAbilityInner result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
