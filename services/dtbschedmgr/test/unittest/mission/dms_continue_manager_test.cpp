@@ -691,7 +691,7 @@ HWTEST_F(DMSContinueManagerTest, testSendSoftbusEvent001, TestSize.Level1)
 HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOnline001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOnline001 start" << std::endl;
-    uint32_t ret = DMSContinueSendMgr::GetInstance().NotifyDeviceOnline();
+    int32_t ret = DMSContinueSendMgr::GetInstance().NotifyDeviceOnline();
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOnline001 end" << std::endl;
 }

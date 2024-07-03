@@ -118,7 +118,7 @@ public:
     void OnMMIEvent();
     void OnDeviceScreenOff();
     void OnDeviceScreenOn();
-    uint32_t NotifyDeviceOnline();
+    int32_t NotifyDeviceOnline();
     int32_t SendScreenOffEvent(uint8_t type);
     void DeleteAliveMissionInfo(const int32_t missionId);
     int32_t GetAliveMissionInfo(const int32_t missionId, AliveMissionInfo& missionInfo);

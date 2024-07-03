@@ -586,7 +586,7 @@ void DMSContinueSendMgr::OnMMIEvent()
     DMSContinueSendMgr::GetInstance().NotifyMissionFocused(info_.currentMissionId, FocusedReason::MMI);
 }
 
-uint32_t DMSContinueSendMgr::NotifyDeviceOnline()
+int32_t DMSContinueSendMgr::NotifyDeviceOnline()
 {
     HILOGD("NotifyDeviceOnline called");
     if (GetCurrentMissionId() <= 0) {
