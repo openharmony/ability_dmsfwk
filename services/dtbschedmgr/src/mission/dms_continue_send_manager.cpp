@@ -83,7 +83,7 @@ void DMSContinueSendMgr::UnInit()
 {
     HILOGI("UnInit start");
     MMIAdapter::GetInstance().UnInit();
-    if (eventHandler_ != nullptr) {
+    if (eventHandler_ != nullptr && eventHandler_->GetEventRunner() != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
         eventThread_.join();
         eventHandler_ = nullptr;
@@ -96,14 +96,20 @@ void DMSContinueSendMgr::UnInit()
 int32_t DMSContinueSendMgr::GetCurrentMissionId()
 {
     HILOGI("GetCurrentMission begin");
+    auto abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
+    if (abilityMgr == nullptr) {
+        HILOGE("abilityMgr is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
+
     sptr<IRemoteObject> token;
-    int ret = AAFwk::AbilityManagerClient::GetInstance()->GetTopAbility(token);
+    int ret = abilityMgr->GetTopAbility(token);
     if (ret != ERR_OK || token == nullptr) {
         HILOGE("GetTopAbility failed, ret: %{public}d", ret);
         return INVALID_MISSION_ID;
     }
     int32_t missionId = INVALID_MISSION_ID;
-    AAFwk::AbilityManagerClient::GetInstance()->GetMissionIdByToken(token, missionId);
+    abilityMgr->GetMissionIdByToken(token, missionId);
     return missionId;
 }
 
@@ -142,7 +148,7 @@ void DMSContinueSendMgr::NotifyMissionFocused(const int32_t missionId, FocusedRe
         return;
     }
     auto feedfunc = [this, missionId, reason]() {
-        if (reason == FocusedReason::NORMAL) {
+        if (reason == FocusedReason::NORMAL && screenOffHandler_ != nullptr) {
             screenOffHandler_->ClearScreenOffInfo();
         }
         DealFocusedBusiness(missionId);
@@ -190,7 +196,7 @@ int32_t DMSContinueSendMgr::GetMissionIdByBundleName(const std::string& bundleNa
         return ERR_OK;
     }
     HILOGW("get iterItem failed from focusedMission_, try screenOffHandler_");
-    if (bundleName == screenOffHandler_->GetBundleName()) {
+    if (screenOffHandler_ != nullptr && bundleName == screenOffHandler_->GetBundleName()) {
         missionId = screenOffHandler_->GetMissionId();
         HILOGI("get missionId end, missionId: %{public}d", missionId);
         return ERR_OK;
@@ -209,7 +215,11 @@ void DMSContinueSendMgr::StartEvent()
         eventHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
     }
     eventCon_.notify_one();
-    runner->Run();
+    if (runner != nullptr) {
+        runner->Run();
+    } else {
+        HILOGE("runner is null");
+    }
     HILOGI("StartEvent end");
 }
 
@@ -260,10 +270,16 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
 {
     HILOGI("DealFocusedBusiness start, missionId: %{public}d", missionId);
     AAFwk::MissionInfo info;
-    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, info);
-    if (ret != ERR_OK) {
-        HILOGE("get missionInfo failed, missionId: %{public}d, ret: %{public}d", missionId, ret);
-        return ret;
+    auto abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
+    if (abilityMgr != nullptr) {
+        int32_t ret = abilityMgr->GetMissionInfo("", missionId, info);
+        if (ret != ERR_OK) {
+            HILOGE("get missionInfo failed, missionId: %{public}d, ret: %{public}d", missionId, ret);
+            return ret;
+        }
+    } else {
+        HILOGE("abilityMgr is null");
+        return INVALID_PARAMETERS_ERR;
     }
     bool isMissionContinuable = info.continuable;
     {
@@ -295,7 +311,7 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
     AddMMIListener();
 #endif
     if (!SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) { return DMS_PERMISSION_DENIED;}
-    ret = FocusedBusinessSendEvent(bundleName, abilityName);
+    int32_t ret = FocusedBusinessSendEvent(bundleName, abilityName);
     HILOGI("DealFocusedBusiness end");
     return ret;
 }
@@ -327,8 +343,14 @@ int32_t DMSContinueSendMgr::FocusedBusinessSendEvent(std::string bundleName, con
 
 int32_t DMSContinueSendMgr::CheckContinueState(const int32_t missionId)
 {
+    auto abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
+    if (abilityMgr == nullptr) {
+        HILOGE("abilityMgr is null");
+        return INVALID_PARAMETERS_ERR;
+    }
+
     AAFwk::MissionInfo info;
-    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, info);
+    int32_t ret = abilityMgr->GetMissionInfo("", missionId, info);
     if (ret != ERR_OK) {
         HILOGE("get missionInfo failed, missionId: %{public}d, ret: %{public}d", missionId, ret);
         return ERR_OK;
@@ -390,7 +412,7 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, Unfoc
         focusedMissionAbility_.erase(missionId);
     }
 
-    if (reason == UnfocusedReason::NORMAL) {
+    if (reason == UnfocusedReason::NORMAL && screenOffHandler_ != nullptr) {
         screenOffHandler_->SetScreenOffInfo(missionId, bundleName, bundleNameId, abilityName);
     }
     HILOGI("DealUnfocusedBusiness end");
@@ -399,6 +421,10 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, Unfoc
 
 int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
 {
+    if (screenOffHandler_ == nullptr) {
+        HILOGE("screenOffHandler_ is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
     int32_t missionId = screenOffHandler_->GetMissionId();
     std::string bundleName = screenOffHandler_->GetBundleName();
     uint16_t bundleNameId = screenOffHandler_->GetAccessTokenId();
@@ -455,7 +481,7 @@ int32_t DMSContinueSendMgr::GetAbilityNameByMissionId(const int32_t missionId, s
         return ERR_OK;
     }
     HILOGW("get iterItem failed from focusedMissionAbility_, try screenOffHandler_");
-    if (missionId == screenOffHandler_->GetMissionId()) {
+    if (screenOffHandler_ != nullptr && missionId == screenOffHandler_->GetMissionId()) {
         abilityName = screenOffHandler_->GetAbilityName();
         HILOGI("get missionId end, abilityName: %{public}s", abilityName.c_str());
         return ERR_OK;
@@ -606,7 +632,9 @@ void DMSContinueSendMgr::OnDeviceScreenOff()
     }
     int32_t missionId = info_.currentMissionId;
     auto feedfunc = [this, missionId]() {
-        screenOffHandler_->OnDeviceScreenOff(missionId);
+        if (screenOffHandler_ != nullptr) {
+            screenOffHandler_->OnDeviceScreenOff(missionId);
+        }
     };
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler_ is nullptr");
@@ -619,7 +647,9 @@ void DMSContinueSendMgr::OnDeviceScreenOn()
 {
     HILOGI("OnDeviceScreenOn called");
     auto feedfunc = [this]() {
-        screenOffHandler_->OnDeviceScreenOn();
+        if (screenOffHandler_ != nullptr) {
+            screenOffHandler_->OnDeviceScreenOn();
+        }
     };
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler_ is nullptr");
@@ -709,7 +739,7 @@ int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
         return ret;
     }
 
-    if (screenOffHandler_->IsDeviceScreenOn()) {
+    if (screenOffHandler_ != nullptr && screenOffHandler_->IsDeviceScreenOn()) {
         ret = SendSoftbusEvent(bundleNameId, continueTypeId, DMS_UNFOCUSED_TYPE);
         bool res = (reason != UnfocusedReason::TIMEOUT)
             ? DmsRadar::GetInstance().NormalUnfocusedSendEventRes("SendSoftbusEvent", ret)

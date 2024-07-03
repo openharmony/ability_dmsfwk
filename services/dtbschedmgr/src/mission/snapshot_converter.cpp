@@ -59,6 +59,9 @@ int32_t SnapshotConverter::ConvertToSnapshot(AAFwk::MissionSnapshot& missionSnap
 int32_t SnapshotConverter::ConvertToSnapshot(AAFwk::MissionSnapshot& missionSnapshot,
     std::unique_ptr<Snapshot>& snapshot)
 {
+    if (snapshot == nullptr) {
+        return INVALID_PARAMETERS_ERR;
+    }
     snapshot->version_ = DMS_VERSION;
     snapshot->orientation_ = 0;
     std::unique_ptr<Rect> contentInsets = std::make_unique<Rect>(0, 0, 0, 0);
@@ -92,8 +95,10 @@ int32_t SnapshotConverter::ConvertToSnapshot(AAFwk::MissionSnapshot& missionSnap
 int32_t SnapshotConverter::ConvertToMissionSnapshot(Snapshot& snapshot,
     std::unique_ptr<AAFwk::MissionSnapshot>& missionSnapshot)
 {
-    missionSnapshot->snapshot = snapshot.pixelMap_;
+    if (missionSnapshot != nullptr) {
+        missionSnapshot->snapshot = snapshot.pixelMap_;
+    }
     return ERR_OK;
 }
-}
-}
+} // namespace DistributedSchedule
+} // namespace OHOS

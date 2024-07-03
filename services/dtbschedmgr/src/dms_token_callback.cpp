@@ -33,7 +33,6 @@ using namespace OHOS::Security;
 namespace OHOS {
 namespace DistributedSchedule {
 const std::string TAG = "DmsTokenCallback";
-const std::string PERMISSION_DISTRIBUTED_DATASYNC = "ohos.permission.DISTRIBUTED_DATASYNC";
 const std::string FOUNDATION_PROCESS_NAME = "foundation";
 const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
 

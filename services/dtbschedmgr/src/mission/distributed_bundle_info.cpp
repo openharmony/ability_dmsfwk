@@ -59,7 +59,7 @@ bool PublicRecordsInfo::Marshalling(Parcel &parcel) const
 PublicRecordsInfo *PublicRecordsInfo::Unmarshalling(Parcel &parcel)
 {
     PublicRecordsInfo *info = new (std::nothrow) PublicRecordsInfo();
-    if (info && !info->ReadFromParcel(parcel)) {
+    if (info != nullptr && !info->ReadFromParcel(parcel)) {
         APP_LOGW("read from parcel failed");
         delete info;
         info = nullptr;
@@ -152,7 +152,7 @@ bool DmsAbilityInfo::Marshalling(Parcel &parcel) const
 DmsAbilityInfo *DmsAbilityInfo::Unmarshalling(Parcel &parcel)
 {
     DmsAbilityInfo *info = new (std::nothrow) DmsAbilityInfo();
-    if (info && !info->ReadFromParcel(parcel)) {
+    if (info != nullptr && !info->ReadFromParcel(parcel)) {
         APP_LOGW("read from parcel failed");
         delete info;
         info = nullptr;
@@ -270,7 +270,7 @@ bool DmsBundleInfo::Marshalling(Parcel &parcel) const
 DmsBundleInfo *DmsBundleInfo::Unmarshalling(Parcel &parcel)
 {
     DmsBundleInfo *info = new (std::nothrow) DmsBundleInfo();
-    if (info && !info->ReadFromParcel(parcel)) {
+    if (info != nullptr && !info->ReadFromParcel(parcel)) {
         delete info;
         info = nullptr;
     }
