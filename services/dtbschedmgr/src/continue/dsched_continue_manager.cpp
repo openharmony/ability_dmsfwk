@@ -125,7 +125,7 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
     }
 
     std::string localDevId;
-    if (!GetLocalDeviceId(localDevId)) {
+    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDevId)) {
         HILOGE("get local deviceId failed!");
         return;
     }
@@ -146,6 +146,34 @@ int32_t DSchedContinueManager::ContinueMission(const std::string& srcDeviceId, c
     std::string bundleName, const std::string& continueType,
     const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
+    if (srcDeviceId.empty() || dstDeviceId.empty() || callback == nullptr) {
+        HILOGE("srcDeviceId or dstDeviceId or callback is null!");
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    std::string localDevId;
+    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDevId)) {
+        HILOGE("get local deviceId failed!");
+        return INVALID_PARAMETERS_ERR;
+    }
+    if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(
+        localDevId == srcDeviceId ? dstDeviceId : srcDeviceId) == nullptr) {
+        HILOGE("GetDeviceInfoById fail, locDevId: %{public}s, srcDevId: %{public}s, dstDevId: %{public}s.",
+            GetAnonymStr(localDevId).c_str(), GetAnonymStr(srcDeviceId).c_str(), GetAnonymStr(dstDeviceId).c_str());
+        return INVALID_REMOTE_PARAMETERS_ERR;
+    }
+
+#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
+    if (localDevId == srcDeviceId) {
+        int32_t missionId = -1;
+        int32_t ret = DMSContinueSendMgr::GetInstance().GetMissionIdByBundleName(bundleName, missionId);
+        if (ret != ERR_OK) {
+            HILOGE("get missionId fail, ret %{public}d.", ret);
+            return ret;
+        }
+    }
+#endif
+
     auto func = [this, srcDeviceId, dstDeviceId, bundleName, continueType, callback, wantParams]() {
         HandleContinueMission(srcDeviceId, dstDeviceId, bundleName, continueType, callback, wantParams);
     };
@@ -255,7 +283,7 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
     const OHOS::AAFwk::Want& want, int32_t missionId)
 {
     std::string srcDeviceId;
-    if (!GetLocalDeviceId(srcDeviceId)) {
+    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId)) {
         HILOGE("get local deviceId failed!");
         return nullptr;
     }
@@ -389,7 +417,7 @@ void DSchedContinueManager::HandleContinueEnd(const DSchedContinueInfo& info)
     ContinueSceneSessionHandler::GetInstance().ClearContinueSessionId();
 
     std::string localDevId;
-    if (!GetLocalDeviceId(localDevId)) {
+    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDevId)) {
         HILOGE("get local deviceId failed!");
         return;
     }
@@ -503,7 +531,7 @@ int32_t DSchedContinueManager::CheckContinuationLimit(const std::string& srcDevi
     const std::string& dstDeviceId)
 {
     std::string localDevId;
-    if (!GetLocalDeviceId(localDevId)) {
+    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDevId)) {
         HILOGE("get local deviceId failed!");
         return GET_LOCAL_DEVICE_ERR;
     }
@@ -533,15 +561,6 @@ int32_t DSchedContinueManager::CheckContinuationLimit(const std::string& srcDevi
         return OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET;
     }
     return direction;
-}
-
-bool DSchedContinueManager::GetLocalDeviceId(std::string& localDeviceId)
-{
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
-        HILOGE("GetLocalDeviceId failed");
-        return false;
-    }
-    return true;
 }
 
 int32_t DSchedContinueManager::GetContinueInfo(std::string &srcDeviceId, std::string &dstDeviceId)

@@ -79,7 +79,6 @@ private:
     int32_t CheckContinuationLimit(const std::string& srcDeviceId, const std::string& dstDeviceId);
     void SetTimeOut(const DSchedContinueInfo& info, int32_t timeout);
     void RemoveTimeout(const DSchedContinueInfo& info);
-    bool GetLocalDeviceId(std::string& localDeviceId);
 
     class SoftbusListener : public IDataListener {
         void OnBind(int32_t socket, PeerSocketInfo info);
