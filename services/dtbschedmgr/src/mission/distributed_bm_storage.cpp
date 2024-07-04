@@ -357,7 +357,7 @@ bool DmsBmStorage::CheckSyncData(const std::string &networkId)
         HILOGE("can not get udid or uuid by networkId");
         return false;
     }
-    HILOGE("uuid: %{public}s", GetAnonymStr(uuid).c_str());
+    HILOGI("uuid: %{public}s", GetAnonymStr(uuid).c_str());
     std::vector<Entry> newEntries;
     Status status = kvStorePtr_->GetDeviceEntries(uuid, newEntries);
     if (newEntries.empty() || status != Status::SUCCESS) {
@@ -529,7 +529,7 @@ bool DmsBmStorage::GetLastBundleNameId(uint16_t &bundleNameId)
     Value value;
     Status status = kvStorePtr_->Get(publicKey, value);
     if (status != Status::SUCCESS) {
-        HILOGE("This information not be found in the database,Get error: %{public}d", status);
+        HILOGW("This information not be found in the database, Get error: %{public}d", status);
         return false;
     }
     PublicRecordsInfo publicRecordsInfo;
