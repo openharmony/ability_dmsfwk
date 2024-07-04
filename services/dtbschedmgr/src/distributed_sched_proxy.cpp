@@ -16,6 +16,7 @@
 #include "distributed_sched_proxy.h"
 #include "dfx/dms_hitrace_constants.h"
 #include "distributed_want.h"
+#include "dms_constant.h"
 #include "dtbschedmgr_log.h"
 #include "ipc_types.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
@@ -89,6 +90,8 @@ int32_t DistributedSchedProxy::StartAbilityFromRemote(const OHOS::AAFwk::Want& w
     PARCEL_WRITE_HELPER(data, String, callerInfo.callerAppId);
     nlohmann::json extraInfoJson;
     extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN] = callerInfo.accessToken;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID] = accountInfo.activeAccountId;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID] = accountInfo.userId;
     if (callerInfo.extraInfoJson.find(DMS_VERSION_ID) != callerInfo.extraInfoJson.end()) {
         extraInfoJson[DMS_VERSION_ID] = callerInfo.extraInfoJson[DMS_VERSION_ID];
     }
@@ -121,7 +124,11 @@ int32_t DistributedSchedProxy::SendResultFromRemote(OHOS::AAFwk::Want& want, int
     PARCEL_WRITE_HELPER(data, StringVector, accountInfo.groupIdList);
     PARCEL_WRITE_HELPER(data, String, callerInfo.callerAppId);
     PARCEL_WRITE_HELPER(data, Int32, resultCode);
-    std::string extraInfo = callerInfo.extraInfoJson.dump();
+    nlohmann::json extraInfoJson;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID] = accountInfo.activeAccountId;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID] = accountInfo.userId;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_CALLER_INFO_EX] = callerInfo.extraInfoJson.dump();
+    std::string extraInfo = extraInfoJson.dump();
     PARCEL_WRITE_HELPER(data, String, extraInfo);
     MessageParcel reply;
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::SEND_RESULT_FROM_REMOTE),
@@ -342,6 +349,8 @@ int32_t DistributedSchedProxy::ConnectAbilityFromRemote(const OHOS::AAFwk::Want&
     PARCEL_WRITE_HELPER(data, String, callerInfo.callerAppId);
     nlohmann::json extraInfoJson;
     extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN] = callerInfo.accessToken;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID] = accountInfo.activeAccountId;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID] = accountInfo.userId;
     if (callerInfo.extraInfoJson.find(DMS_VERSION_ID) != callerInfo.extraInfoJson.end()) {
         extraInfoJson[DMS_VERSION_ID] = callerInfo.extraInfoJson[DMS_VERSION_ID];
     }
@@ -820,6 +829,8 @@ int32_t DistributedSchedProxy::StartAbilityByCallFromRemote(const OHOS::AAFwk::W
     PARCEL_WRITE_HELPER(data, String, callerInfo.callerAppId);
     nlohmann::json extraInfoJson;
     extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN] = callerInfo.accessToken;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID] = accountInfo.activeAccountId;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID] = accountInfo.userId;
     if (callerInfo.extraInfoJson.find(DMS_VERSION_ID) != callerInfo.extraInfoJson.end()) {
         extraInfoJson[DMS_VERSION_ID] = callerInfo.extraInfoJson[DMS_VERSION_ID];
     }
@@ -1118,6 +1129,8 @@ int32_t DistributedSchedProxy::StopExtensionAbilityFromRemote(const OHOS::AAFwk:
     PARCEL_WRITE_HELPER(data, String, callerInfo.callerAppId);
     nlohmann::json extraInfoJson;
     extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN] = callerInfo.accessToken;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID] = accountInfo.activeAccountId;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID] = accountInfo.userId;
     std::string extraInfo = extraInfoJson.dump();
     PARCEL_WRITE_HELPER(data, String, extraInfo);
     MessageParcel reply;

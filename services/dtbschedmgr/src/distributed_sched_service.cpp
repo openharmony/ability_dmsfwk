@@ -195,7 +195,7 @@ void DistributedSchedService::OnStop()
     dlclose(dllHandle_);
     dllHandle_ = nullptr;
 #endif
-    HILOGD("begin");
+    HILOGI("OnStop dms service end");
 }
 
 int32_t DistributedSchedService::Dump(int32_t fd, const std::vector<std::u16string>& args)
@@ -405,7 +405,7 @@ int32_t DistributedSchedService::StartRemoteAbilityAdapter(const OHOS::AAFwk::Wa
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.StartRemoteAbilityAdapter == nullptr) {
-        HILOGE("Dms interactive start remote ability adapter handle  is null.");
+        HILOGE("Dms interactive start remote ability adapter handle is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -421,7 +421,7 @@ int32_t DistributedSchedService::ConnectRemoteAbilityAdapter(const OHOS::AAFwk::
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.ConnectRemoteAbilityAdapter == nullptr) {
-        HILOGE("Dms interactive connect remote ability adapter handle  is null.");
+        HILOGE("Dms interactive connect remote ability adapter handle is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -437,7 +437,7 @@ int32_t DistributedSchedService::DisconnectRemoteAbilityAdapter(const sptr<IRemo
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.DisconnectRemoteAbilityAdapter == nullptr) {
-        HILOGE("Dms interactive disconnect remote ability adapter handle  is null.");
+        HILOGE("Dms interactive disconnect remote ability adapter handle is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -452,7 +452,7 @@ int32_t DistributedSchedService::StartAbilityFromRemoteAdapter(MessageParcel& da
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.StartAbilityFromRemoteAdapter == nullptr) {
-        HILOGE("Dms interactive start ability from remote adapter handle  is null.");
+        HILOGE("Dms interactive start ability from remote adapter handle is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -467,7 +467,7 @@ int32_t DistributedSchedService::StopAbilityFromRemoteAdapter(MessageParcel& dat
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.StopAbilityFromRemoteAdapter == nullptr) {
-        HILOGE("Dms interactive stop ability from remote adapter handle  is null.");
+        HILOGE("Dms interactive stop ability from remote adapter handle is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -482,7 +482,7 @@ int32_t DistributedSchedService::ConnectAbilityFromRemoteAdapter(MessageParcel& 
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.ConnectAbilityFromRemoteAdapter == nullptr) {
-        HILOGE("Dms interactive connect ability from remote adapter handle  is null.");
+        HILOGE("Dms interactive connect ability from remote adapter handle is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -497,7 +497,7 @@ int32_t DistributedSchedService::DisconnectAbilityFromRemoteAdapter(MessageParce
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.DisconnectAbilityFromRemoteAdapter == nullptr) {
-        HILOGE("Dms interactive disconnect ability from remote adapter handle  is null.");
+        HILOGE("Dms interactive disconnect ability from remote adapter handle is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -513,7 +513,7 @@ int32_t DistributedSchedService::NotifyAbilityLifecycleChangedFromRemoteAdapter(
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.NotifyAbilityLifecycleChangedFromRemoteAdapter == nullptr) {
-        HILOGE("Dms interactive disconnect ability from remote adapter handle  is null.");
+        HILOGE("Dms interactive disconnect ability from remote adapter handle is null.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -528,7 +528,7 @@ void DistributedSchedService::OnDeviceOnlineEx(const OHOS::DistributedHardware::
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.OnDeviceOnlineEx == nullptr) {
-        HILOGE("Dms interactive on device online extention handle  is null.");
+        HILOGE("Dms interactive on device online extention handle is null.");
         return;
     }
 
@@ -539,7 +539,7 @@ void DistributedSchedService::OnDeviceOfflineEx(const OHOS::DistributedHardware:
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.OnDeviceOfflineEx == nullptr) {
-        HILOGE("Dms interactive on device online extention handle  is null.");
+        HILOGE("Dms interactive on device online extention handle is null.");
         return;
     }
 
@@ -550,7 +550,7 @@ void DistributedSchedService::OnDeviceInfoChangedEx(const OHOS::DistributedHardw
 {
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dmsAdapetr_.OnDeviceInfoChangedEx == nullptr) {
-        HILOGE("Dms interactive on device online extention handle  is null.");
+        HILOGE("Dms interactive on device online extention handle is null.");
         return;
     }
 

@@ -38,6 +38,7 @@ std::string Base64Encode(const unsigned char *toEncode, unsigned int len);
 std::string Base64Decode(const std::string& basicString);
 bool IsBase64(unsigned char c);
 std::string GetAnonymStr(const std::string &value);
+std::string GetAnonymInt32(const int32_t value);
 bool IsInt32(const cJSON *paramValue);
 bool IsString(const cJSON *paramValue);
 bool CJsonParamCheck(const cJSON *jsonObj, const std::initializer_list<std::string> &keys);

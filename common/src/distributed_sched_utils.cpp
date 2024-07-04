@@ -24,6 +24,7 @@
 
 #include "ability_manager_client.h"
 #include "config_policy_utils.h"
+#include "securec.h"
 
 #include "dms_constant.h"
 #include "dtbschedmgr_log.h"
@@ -357,6 +358,12 @@ std::string GetAnonymStr(const std::string &value)
     }
 
     return res;
+}
+
+std::string GetAnonymInt32(const int32_t value)
+{
+    std::string tmpStr = std::to_string(value);
+    return GetAnonymStr(tmpStr);
 }
 
 bool IsInt32(const cJSON *paramValue)

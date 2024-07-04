@@ -32,6 +32,7 @@
 #include "distributed_sched_service.h"
 #include "distributed_sched_types.h"
 #include "distributed_sched_utils.h"
+#include "dms_constant.h"
 #include "dms_version_manager.h"
 #include "dsched_continue_manager.h"
 #include "dsched_transport_softbus_adapter.h"
@@ -320,7 +321,7 @@ int32_t DistributedSchedStub::GetStartAbilityFromRemoteExParam(MessageParcel& da
     if (!extraInfo.empty()) {
         nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
         if (!extraInfoJson.is_discarded()) {
-            SaveExtraInfo(extraInfoJson, callerInfo);
+            SaveExtraInfo(extraInfoJson, callerInfo, accountInfo);
             HILOGD("parse extra info");
         }
     }
@@ -351,7 +352,7 @@ int32_t DistributedSchedStub::GetConnectAbilityFromRemoteExParam(MessageParcel& 
     }
     nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
     if (!extraInfoJson.is_discarded()) {
-        SaveExtraInfo(extraInfoJson, callerInfo);
+        SaveExtraInfo(extraInfoJson, callerInfo, accountInfo);
         HILOGD("parse extra info");
     }
     return ERR_OK;
@@ -412,7 +413,8 @@ int32_t DistributedSchedStub::StopAbilityFromRemoteInner(MessageParcel& data, Me
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 
-void DistributedSchedStub::SaveExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo)
+void DistributedSchedStub::SaveExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo,
+    AccountInfo& accountInfo)
 {
     if (extraInfoJson.find(EXTRO_INFO_JSON_KEY_ACCESS_TOKEN) != extraInfoJson.end() &&
         extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN].is_number_unsigned()) {
@@ -430,6 +432,38 @@ void DistributedSchedStub::SaveExtraInfo(const nlohmann::json& extraInfoJson, Ca
         extraInfoJson[DMS_UID_SPEC_BUNDLE_NAME].is_string()) {
         std::string uidBundleName = extraInfoJson[DMS_UID_SPEC_BUNDLE_NAME];
         callerInfo.extraInfoJson[DMS_UID_SPEC_BUNDLE_NAME] = uidBundleName;
+    }
+
+    if (extraInfoJson.find(Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID) != extraInfoJson.end() &&
+        extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID].is_string()) {
+        accountInfo.activeAccountId = extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID];
+    }
+    if (extraInfoJson.find(Constants::EXTRO_INFO_JSON_KEY_USERID_ID) != extraInfoJson.end() &&
+        extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID].is_number()) {
+        accountInfo.userId = extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID];
+    }
+    HILOGD("save dms version");
+}
+
+void DistributedSchedStub::SaveSendResultExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo,
+    AccountInfo& accountInfo)
+{
+    if (extraInfoJson.find(Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID) != extraInfoJson.end() &&
+        extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID].is_string()) {
+        accountInfo.activeAccountId = extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID];
+    }
+    if (extraInfoJson.find(Constants::EXTRO_INFO_JSON_KEY_USERID_ID) != extraInfoJson.end() &&
+        extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID].is_number()) {
+        accountInfo.userId = extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID];
+    }
+
+    if (extraInfoJson.find(Constants::EXTRO_INFO_JSON_KEY_CALLER_INFO_EX) != extraInfoJson.end() &&
+        extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_CALLER_INFO_EX].is_string()) {
+        std::string callerExJsonStr = extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_CALLER_INFO_EX];
+        if (callerExJsonStr.empty()) {
+            HILOGD("caller extra info json string is empty!");
+        }
+        callerInfo.extraInfoJson = nlohmann::json::parse(callerExJsonStr, nullptr, false);
     }
     HILOGD("save dms version");
 }
@@ -466,7 +500,12 @@ int32_t DistributedSchedStub::SendResultFromRemoteInner(MessageParcel& data, Mes
     if (extraInfo.empty()) {
         HILOGD("extra info is empty!");
     }
-    callerInfo.extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
+    nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
+    if (!extraInfoJson.is_discarded()) {
+        SaveSendResultExtraInfo(extraInfoJson, callerInfo, accountInfo);
+        HILOGD("parse extra info");
+    }
+
     int32_t result = SendResultFromRemote(*want, requestCode, callerInfo, accountInfo, resultCode);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_HELPER(reply, Int32, result);
@@ -1286,7 +1325,7 @@ int32_t DistributedSchedStub::StartAbilityByCallFromRemoteInner(MessageParcel& d
     }
     nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
     if (!extraInfoJson.is_discarded()) {
-        SaveExtraInfo(extraInfoJson, callerInfo);
+        SaveExtraInfo(extraInfoJson, callerInfo, accountInfo);
         HILOGD("parse extra info");
     }
     shared_ptr<DistributedWant> dstbWant(data.ReadParcelable<DistributedWant>());
@@ -1453,12 +1492,13 @@ int32_t DistributedSchedStub::ReadDataForFreeInstall(MessageParcel& data, Caller
     return ERR_NONE;
 }
 
-int32_t DistributedSchedStub::CreateJsonObject(std::string& extraInfo, CallerInfo& callerInfo)
+int32_t DistributedSchedStub::CreateJsonObject(std::string& extraInfo, CallerInfo& callerInfo,
+    AccountInfo& accountInfo)
 {
     nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
     int32_t requestCode = DEFAULT_REQUEST_CODE;
     if (!extraInfoJson.is_discarded()) {
-        SaveExtraInfo(extraInfoJson, callerInfo);
+        SaveExtraInfo(extraInfoJson, callerInfo, accountInfo);
         if (extraInfoJson.find(EXTRO_INFO_JSON_KEY_REQUEST_CODE) != extraInfoJson.end() &&
             extraInfoJson[EXTRO_INFO_JSON_KEY_REQUEST_CODE].is_number_integer()) {
             requestCode = extraInfoJson[EXTRO_INFO_JSON_KEY_REQUEST_CODE];
@@ -1496,7 +1536,7 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
     if (extraInfo.empty()) {
         HILOGD("extra info is empty!");
     }
-    int32_t requestCode = CreateJsonObject(extraInfo, callerInfo);
+    int32_t requestCode = CreateJsonObject(extraInfo, callerInfo, accountInfo);
     FreeInstallInfo info = {
         .want = *want, .requestCode = requestCode, .callerInfo = callerInfo, .accountInfo = accountInfo};
     info.want.RemoveParam(PARAM_FREEINSTALL_APPID);

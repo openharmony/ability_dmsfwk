@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2153,17 +2153,18 @@ HWTEST_F(DistributedSchedStubTest, NotifyStateChangedFromRemoteInner_002, TestSi
 
     nlohmann::json extraInfoJson;
     CallerInfo callerInfo;
-    distributedSchedStub_->SaveExtraInfo(extraInfoJson, callerInfo);
+    IDistributedSched::AccountInfo accountInfo;
+    distributedSchedStub_->SaveExtraInfo(extraInfoJson, callerInfo, accountInfo);
 
     nlohmann::json extraInfoJson1;
     extraInfoJson[DMS_VERSION_ID] = "4";
     CallerInfo callerInfo1;
-    distributedSchedStub_->SaveExtraInfo(extraInfoJson1, callerInfo1);
+    distributedSchedStub_->SaveExtraInfo(extraInfoJson1, callerInfo1, accountInfo);
 
     nlohmann::json extraInfoJson2;
     extraInfoJson[DMS_VERSION_ID] = 4;
     CallerInfo callerInfo2;
-    distributedSchedStub_->SaveExtraInfo(extraInfoJson2, callerInfo2);
+    distributedSchedStub_->SaveExtraInfo(extraInfoJson2, callerInfo2, accountInfo);
 
     MessageParcel data;
     MessageParcel reply;
@@ -2189,17 +2190,18 @@ HWTEST_F(DistributedSchedStubTest, StopRemoteExtensionAbilityInner_002, TestSize
 
     nlohmann::json extraInfoJson;
     CallerInfo callerInfo;
-    distributedSchedStub_->SaveExtraInfo(extraInfoJson, callerInfo);
+    IDistributedSched::AccountInfo accountInfo;
+    distributedSchedStub_->SaveExtraInfo(extraInfoJson, callerInfo, accountInfo);
 
     nlohmann::json extraInfoJson1;
     extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN] = 0;
     CallerInfo callerInfo1;
-    distributedSchedStub_->SaveExtraInfo(extraInfoJson1, callerInfo1);
+    distributedSchedStub_->SaveExtraInfo(extraInfoJson1, callerInfo1, accountInfo);
 
     nlohmann::json extraInfoJson2;
     extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN] = "4";
     CallerInfo callerInfo2;
-    distributedSchedStub_->SaveExtraInfo(extraInfoJson2, callerInfo2);
+    distributedSchedStub_->SaveExtraInfo(extraInfoJson2, callerInfo2, accountInfo);
 
     int32_t code = static_cast<uint32_t>(IDSchedInterfaceCode::STOP_REMOTE_EXTERNSION_ABILITY);
     MessageParcel data;
