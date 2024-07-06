@@ -377,7 +377,7 @@ napi_value JsContinuationManager::OnRegisterDeviceSelectionCallback(napi_env env
             napi_create_reference(env, jsListenerObj, 1, &tempRef);
             std::unique_ptr<NativeReference> callbackRef;
             callbackRef.reset(reinterpret_cast<NativeReference*>(tempRef));
-            sptr<JsDeviceSelectionListener> deviceSelectionListener = new JsDeviceSelectionListener(env);
+            sptr<JsDeviceSelectionListener> deviceSelectionListener(new JsDeviceSelectionListener(env));
             if (deviceSelectionListener == nullptr) {
                 HILOGE("deviceSelectionListener is nullptr!");
                 errCode = SYSTEM_WORK_ABNORMALLY;
@@ -796,7 +796,8 @@ bool JsContinuationManager::IsCallbackRegistered(int32_t token, const std::strin
         HILOGE("cbType %{public}s not registered callback!", cbType.c_str());
         return false;
     }
-    HILOGI("callback already registered, token: %{public}d, cbType %{public}s", GetAnonymStr(tokenStr).c_str(), cbType.c_str());
+    HILOGI("callback already registered, token: %{public}d, cbType %{public}s", 
+    GetAnonymStr(tokenStr).c_str(), cbType.c_str());
     return true;
 }
 

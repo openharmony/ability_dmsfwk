@@ -68,13 +68,13 @@ std::string DistributedWantParamWrapper::ToString()
 
 sptr<IDistributedWantParams> DistributedWantParamWrapper::Box(const DistributedWantParams& value)
 {
-    sptr<IDistributedWantParams> object = new (std::nothrow)DistributedWantParamWrapper(value);
+    sptr<IDistributedWantParams> object(new (std::nothrow)DistributedWantParamWrapper(value));
     return object;
 }
 
 sptr<IDistributedWantParams> DistributedWantParamWrapper::Box(DistributedWantParams&& value)
 {
-    sptr<IDistributedWantParams> object = new (std::nothrow) DistributedWantParamWrapper(std::move(value));
+    sptr<IDistributedWantParams> object(new (std::nothrow) DistributedWantParamWrapper(std::move(value)));
     return object;
 }
 
@@ -170,7 +170,7 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
             strKey = "";
         }
     }
-    sptr<IDistributedWantParams> iwantParams = new (std::nothrow) DistributedWantParamWrapper(wantParams);
+    sptr<IDistributedWantParams> iwantParams(new (std::nothrow) DistributedWantParamWrapper(wantParams));
     if (iwantParams == nullptr) {
         return nullptr;
     }

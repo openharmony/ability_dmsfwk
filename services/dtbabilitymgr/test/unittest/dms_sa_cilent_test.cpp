@@ -76,7 +76,7 @@ HWTEST_F(DmsSaClientTest, AddDSchedEventListener_001, TestSize.Level3)
     dmssaClient_->OnAddSystemAbility(systemAbilityId, DEVICE_ID);
     DTEST_LOG << "DmsSaClientTest OnAddSystemAbility_002 end" << std::endl;
 
-    sptr<IDSchedEventListenerTest> listener = new IDSchedEventListenerTest();
+    sptr<IDSchedEventListenerTest> listener(new IDSchedEventListenerTest());
     dmssaClient_->hasSubscribeDmsSA_ = true;
     int32_t result = dmssaClient_->AddDSchedEventListener(DMS_CONTINUE, listener);;
     EXPECT_EQ(result, NO_ERROR);
@@ -105,7 +105,7 @@ HWTEST_F(DmsSaClientTest, AddDSchedEventListener_002, TestSize.Level3)
     dmssaClient_->OnRemoveSystemAbility(systemAbilityId, DEVICE_ID);
     DTEST_LOG << "DmsSaClientTest OnRemoveSystemAbility_001 end" << std::endl;
 
-    sptr<IDSchedEventListenerTest> listener = new IDSchedEventListenerTest();
+    sptr<IDSchedEventListenerTest> listener(new IDSchedEventListenerTest());
     int32_t result = dmssaClient_->AddDSchedEventListener(DMS_CONTINUE, listener);;
     EXPECT_EQ(result, NO_ERROR);
     DTEST_LOG << "DmsSaClientTest AddDSchedEventListener_002 end" << std::endl;
@@ -131,7 +131,7 @@ HWTEST_F(DmsSaClientTest, DelDSchedEventListener_001, TestSize.Level3)
     DTEST_LOG << "DmsSaClientTest OnAddSystemAbility_001 end" << std::endl;
 
     DTEST_LOG << "DmsSaClientTest DelDSchedEventListener_001 start" << std::endl;
-    sptr<IDSchedEventListenerTest> listener = new IDSchedEventListenerTest();
+    sptr<IDSchedEventListenerTest> listener(new IDSchedEventListenerTest());
     int32_t result1 = dmssaClient_->AddDSchedEventListener(DMS_CONTINUE, listener);;
     EXPECT_EQ(result1, NO_ERROR);
     int32_t result2 = dmssaClient_->DelDSchedEventListener(DMS_CONTINUE, listener);;
@@ -211,7 +211,7 @@ HWTEST_F(DmsSaClientTest, OnAddSystemAbility_001, TestSize.Level3)
     DTEST_LOG << "DmsSaClientTest OnAddSystemAbility_001 end" << std::endl;
 
     DTEST_LOG << "DmsSaClientTest DelDSchedEventListener_001 start" << std::endl;
-    sptr<IDSchedEventListenerTest> listener = new IDSchedEventListenerTest();
+    sptr<IDSchedEventListenerTest> listener(new IDSchedEventListenerTest());
     int32_t result = dmssaClient_->AddDSchedEventListener(DMS_CONTINUE, listener);;
     EXPECT_EQ(result, NO_ERROR);
     DTEST_LOG << "DmsSaClientTest OnAddSystemAbility_001 end" << std::endl;
@@ -237,7 +237,7 @@ HWTEST_F(DmsSaClientTest, OnRemoveSystemAbility_001, TestSize.Level3)
     DTEST_LOG << "DmsSaClientTest OnRemoveSystemAbility_001 end" << std::endl;
 
     DTEST_LOG << "DmsSaClientTest AddDSchedEventListener_001 start" << std::endl;
-    sptr<IDSchedEventListenerTest> listener = new IDSchedEventListenerTest();
+    sptr<IDSchedEventListenerTest> listener(new IDSchedEventListenerTest());
     int32_t result = dmssaClient_->AddDSchedEventListener(DMS_CONTINUE, listener);;
     EXPECT_EQ(result, NO_ERROR);
     DTEST_LOG << "DmsSaClientTest OnRemoveSystemAbility_001 end" << std::endl;
