@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -143,7 +143,7 @@ HWTEST_F(DistributedSchedStubTest, StartRemoteAbilityInner_001, TestSize.Level3)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
@@ -207,7 +207,7 @@ HWTEST_F(DistributedSchedStubTest, StartRemoteAbilityInner_003, TestSize.Level3)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     Want want;
     data.WriteParcelable(&want);
@@ -235,7 +235,7 @@ HWTEST_F(DistributedSchedStubTest, StartRemoteAbilityInner_004, TestSize.Level3)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     DistributedSchedUtil::MockPermission();
     int32_t ret = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
@@ -522,7 +522,7 @@ HWTEST_F(DistributedSchedStubTest, ContinueMissionInner_002, TestSize.Level3)
     data.WriteString(srcDevId);
     result = distributedSchedStub_->ContinueMissionInner(data, reply);
     EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
-    
+
     data.WriteString(srcDevId);
     std::string dstDevId = "";
     data.WriteString(dstDevId);
@@ -539,7 +539,7 @@ HWTEST_F(DistributedSchedStubTest, ContinueMissionInner_002, TestSize.Level3)
     data.WriteString(srcDevId);
     data.WriteString(dstDevId);
     data.WriteInt32(missionId);
-    sptr<IRemoteObject> dsched = new DistributedSchedService();
+    sptr<IRemoteObject> dsched(new DistributedSchedService());
     data.WriteRemoteObject(dsched);
     result = distributedSchedStub_->ContinueMissionInner(data, reply);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
@@ -595,7 +595,7 @@ HWTEST_F(DistributedSchedStubTest, StartContinuationInner_001, TestSize.Level3)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     DistributedSchedUtil::MockPermission();
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
@@ -615,7 +615,7 @@ HWTEST_F(DistributedSchedStubTest, StartContinuationInner_002, TestSize.Level3)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
@@ -677,7 +677,7 @@ HWTEST_F(DistributedSchedStubTest, NotifyCompleteContinuationInner_001, TestSize
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     DistributedSchedUtil::MockPermission();
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
@@ -697,7 +697,7 @@ HWTEST_F(DistributedSchedStubTest, NotifyCompleteContinuationInner_002, TestSize
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
@@ -748,7 +748,7 @@ HWTEST_F(DistributedSchedStubTest, ConnectRemoteAbilityInner_001, TestSize.Level
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     DistributedSchedUtil::MockPermission();
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
@@ -768,7 +768,7 @@ HWTEST_F(DistributedSchedStubTest, ConnectRemoteAbilityInner_002, TestSize.Level
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
@@ -799,7 +799,7 @@ HWTEST_F(DistributedSchedStubTest, ConnectRemoteAbilityInner_003, TestSize.Level
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     Want want;
     data.WriteParcelable(&want);
@@ -826,7 +826,7 @@ HWTEST_F(DistributedSchedStubTest, DisconnectRemoteAbilityInner_001, TestSize.Le
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     DistributedSchedUtil::MockPermission();
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
@@ -848,7 +848,7 @@ HWTEST_F(DistributedSchedStubTest, DisconnectRemoteAbilityInner_002, TestSize.Le
     MessageOption option;
 
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    sptr<IRemoteObject> connect;
+    sptr<IRemoteObject> connect = nullptr;
     data.WriteRemoteObject(connect);
     int32_t callerUid = 0;
     data.WriteInt32(callerUid);
@@ -871,9 +871,9 @@ HWTEST_F(DistributedSchedStubTest, DisconnectRemoteAbilityInner_003, TestSize.Le
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    sptr<IRemoteObject> connect;
+    sptr<IRemoteObject> connect = nullptr;
     data.WriteRemoteObject(connect);
     int32_t callerUid = 0;
     data.WriteInt32(callerUid);
@@ -908,7 +908,7 @@ HWTEST_F(DistributedSchedStubTest, ConnectAbilityFromRemoteInner_001, TestSize.L
     AppExecFwk::CompatibleAbilityInfo compatibleAbilityInfo;
     abilityInfo.ConvertToCompatiableAbilityInfo(compatibleAbilityInfo);
     data.WriteParcelable(&compatibleAbilityInfo);
-    sptr<IRemoteObject> connect;
+    sptr<IRemoteObject> connect = nullptr;
     data.WriteRemoteObject(connect);
     CallerInfo callerInfo;
     callerInfo.uid = 0;
@@ -944,7 +944,7 @@ HWTEST_F(DistributedSchedStubTest, ConnectAbilityFromRemoteInner_002, TestSize.L
     AppExecFwk::CompatibleAbilityInfo compatibleAbilityInfo;
     abilityInfo.ConvertToCompatiableAbilityInfo(compatibleAbilityInfo);
     data.WriteParcelable(&compatibleAbilityInfo);
-    sptr<IRemoteObject> connect;
+    sptr<IRemoteObject> connect = nullptr;
     data.WriteRemoteObject(connect);
     CallerInfo callerInfo;
     callerInfo.uid = 0;
@@ -1023,7 +1023,7 @@ HWTEST_F(DistributedSchedStubTest, GetMissionInfosInner_001, TestSize.Level3)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     DistributedSchedUtil::MockPermission();
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
@@ -1043,7 +1043,7 @@ HWTEST_F(DistributedSchedStubTest, GetMissionInfosInner_002, TestSize.Level3)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     std::u16string deviceId = u"192.168.43.100";
     data.WriteString16(deviceId);
@@ -1066,7 +1066,7 @@ HWTEST_F(DistributedSchedStubTest, GetRemoteMissionSnapshotInfoInner_001, TestSi
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     DistributedSchedUtil::MockPermission();
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
@@ -1086,7 +1086,7 @@ HWTEST_F(DistributedSchedStubTest, GetRemoteMissionSnapshotInfoInner_002, TestSi
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    
+
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
@@ -1153,7 +1153,7 @@ HWTEST_F(DistributedSchedStubTest, RegisterMissionListenerInner_002, TestSize.Le
 
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     data.WriteString16(devId);
-    sptr<IRemoteObject> missionChangedListener = new DistributedSchedService();
+    sptr<IRemoteObject> missionChangedListener(new DistributedSchedService());
     data.WriteRemoteObject(missionChangedListener);
     result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, ERR_NONE);
@@ -1169,7 +1169,7 @@ HWTEST_F(DistributedSchedStubTest, RegisterMissionListenerInner_002, TestSize.Le
 HWTEST_F(DistributedSchedStubTest, RegisterOnListenerInner_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedStubTest RegisterMissionListenerInner_003 begin" << std::endl;
-    
+
     MessageParcel data;
     MessageParcel reply;
 
@@ -1190,7 +1190,7 @@ HWTEST_F(DistributedSchedStubTest, RegisterOnListenerInner_002, TestSize.Level3)
      * @tc.steps: step3. test RegisterOnListenerInner when onListener is not empty;
      */
     data.WriteString("type");
-    sptr<IRemoteObject> onListener = new DistributedSchedService();
+    sptr<IRemoteObject> onListener(new DistributedSchedService());
     data.WriteRemoteObject(onListener);
     result = distributedSchedStub_->RegisterOnListenerInner(data, reply);
     EXPECT_EQ(result, ERR_OK);
@@ -1243,7 +1243,7 @@ HWTEST_F(DistributedSchedStubTest, UnRegisterMissionListenerInner_002, TestSize.
 
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     data.WriteString16(devId);
-    sptr<IRemoteObject> missionChangedListener = new DistributedSchedService();
+    sptr<IRemoteObject> missionChangedListener(new DistributedSchedService());
     data.WriteRemoteObject(missionChangedListener);
     result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, ERR_NONE);
@@ -1525,7 +1525,7 @@ HWTEST_F(DistributedSchedStubTest, StartRemoteAbilityByCallInner_002, TestSize.L
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     Want want;
     data.WriteParcelable(&want);
-    sptr<IRemoteObject> connect;
+    sptr<IRemoteObject> connect = nullptr;
     data.WriteRemoteObject(connect);
     int32_t callerUid = 0;
     data.WriteInt32(callerUid);
@@ -1554,7 +1554,7 @@ HWTEST_F(DistributedSchedStubTest, StartRemoteAbilityByCallInner_003, TestSize.L
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     Want want;
     data.WriteParcelable(&want);
-    sptr<IRemoteObject> connect;
+    sptr<IRemoteObject> connect = nullptr;
     data.WriteRemoteObject(connect);
     int32_t callerUid = 0;
     data.WriteInt32(callerUid);
@@ -1601,7 +1601,7 @@ HWTEST_F(DistributedSchedStubTest, ReleaseRemoteAbilityInner_002, TestSize.Level
     MessageOption option;
 
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    sptr<IRemoteObject> connect;
+    sptr<IRemoteObject> connect = nullptr;
     data.WriteRemoteObject(connect);
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
@@ -1626,7 +1626,7 @@ HWTEST_F(DistributedSchedStubTest, StartAbilityByCallFromRemoteInner_001, TestSi
     MessageParcel data;
     MessageParcel reply;
 
-    sptr<IRemoteObject> connect;
+    sptr<IRemoteObject> connect = nullptr;
     data.WriteRemoteObject(connect);
     CallerInfo callerInfo;
     callerInfo.uid = 0;
@@ -1671,7 +1671,7 @@ HWTEST_F(DistributedSchedStubTest, StartAbilityByCallFromRemoteInner_002, TestSi
     MessageParcel data;
     MessageParcel reply;
 
-    sptr<IRemoteObject> connect;
+    sptr<IRemoteObject> connect = nullptr;
     data.WriteRemoteObject(connect);
     CallerInfo callerInfo;
     callerInfo.uid = 0;
@@ -1708,7 +1708,7 @@ HWTEST_F(DistributedSchedStubTest, ReleaseAbilityFromRemoteInner_001, TestSize.L
     MessageParcel data;
     MessageParcel reply;
 
-    sptr<IRemoteObject> connect;
+    sptr<IRemoteObject> connect = nullptr;
     data.WriteRemoteObject(connect);
     int32_t result = distributedSchedStub_->ReleaseAbilityFromRemoteInner(data, reply);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
@@ -1856,7 +1856,7 @@ HWTEST_F(DistributedSchedStubTest, StartRemoteFreeInstallInner_002, TestSize.Lev
     data.WriteInt32(callerUid);
     data.WriteInt32(requestCode);
     data.WriteUint32(accessToken);
-    sptr<IRemoteObject> callback = new DistributedSchedService();
+    sptr<IRemoteObject> callback(new DistributedSchedService());
     data.WriteRemoteObject(callback);
     result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, DMS_PERMISSION_DENIED);
@@ -1885,7 +1885,7 @@ HWTEST_F(DistributedSchedStubTest, StartRemoteFreeInstallInner_003, TestSize.Lev
     data.WriteInt32(requestCode);
     uint32_t accessToken = GetSelfTokenID();
     data.WriteUint32(accessToken);
-    sptr<IRemoteObject> callback = new DistributedSchedService();
+    sptr<IRemoteObject> callback(new DistributedSchedService());
     data.WriteRemoteObject(callback);
     int32_t result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, ERR_NONE);

@@ -142,7 +142,7 @@ sptr<IDistributedSched> DistributedSchedServiceFirstTest::GetDms()
 
 sptr<IRemoteObject> DistributedSchedServiceFirstTest::GetDSchedService() const
 {
-    sptr<IRemoteObject> dsched = new MockDistributedSched();
+    sptr<IRemoteObject> dsched(new MockDistributedSched());
     return dsched;
 }
 
@@ -1238,7 +1238,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectRemoteAbility001, TestSize.Lev
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectRemoteAbility001 start" << std::endl;
     OHOS::AAFwk::Want want;
     want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
-    const sptr<IRemoteObject> connect;
+    const sptr<IRemoteObject> connect = nullptr;
     int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbility(want, connect, 1, 1, 1);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectRemoteAbility001 end" << std::endl;
@@ -1255,7 +1255,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectRemoteAbility002, TestSize.Lev
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectRemoteAbility002 start" << std::endl;
     OHOS::AAFwk::Want want;
     want.SetElementName("", "ohos.demo.bundleName", "abilityName");
-    const sptr<IRemoteObject> connect;
+    const sptr<IRemoteObject> connect = nullptr;
     int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbility(want, connect, 1, 1, 1);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectRemoteAbility002 end" << std::endl;
@@ -1272,7 +1272,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectAbilityFromRemote_001, TestSiz
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectAbilityFromRemote_001 start" << std::endl;
     AAFwk::Want want;
     AppExecFwk::AbilityInfo abilityInfo;
-    sptr<IRemoteObject> connect;
+    sptr<IRemoteObject> connect = nullptr;
     CallerInfo callerInfo;
     IDistributedSched::AccountInfo accountInfo;
     int32_t ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
@@ -1292,7 +1292,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectAbilityFromRemote_002, TestSiz
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectAbilityFromRemote_002 start" << std::endl;
     AAFwk::Want want;
     AppExecFwk::AbilityInfo abilityInfo;
-    sptr<IRemoteObject> connect = new MockDistributedSched();
+    sptr<IRemoteObject> connect(new MockDistributedSched());
     CallerInfo callerInfo;
     IDistributedSched::AccountInfo accountInfo;
     int32_t ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
@@ -1312,7 +1312,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectAbilityFromRemote_003, TestSiz
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectAbilityFromRemote_003 start" << std::endl;
     AAFwk::Want want;
     AppExecFwk::AbilityInfo abilityInfo;
-    sptr<IRemoteObject> connect = new MockDistributedSched();
+    sptr<IRemoteObject> connect(new MockDistributedSched());
     CallerInfo callerInfo;
     IDistributedSched::AccountInfo accountInfo;
     callerInfo.callerType = CALLER_TYPE_HARMONY;
@@ -1363,7 +1363,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, NotifyProcessDiedFromRemote_001, Test
     /**
     * @tc.steps: step1. call NotifyProcessDiedFromRemote when sourceDeviceId == sourceDeviceId.
     */
-    sptr<IRemoteObject> connect = new MockDistributedSched();
+    sptr<IRemoteObject> connect(new MockDistributedSched());
     ConnectInfo connectInfo;
     connectInfo.callerInfo.sourceDeviceId = LOCAL_DEVICEID;
     connectInfo.callerInfo.uid = 0;
@@ -1411,7 +1411,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartAbilityByCallFromRemote_001, Tes
         "bmsThirdBundle");
     want.SetElement(element);
     want.SetParam(DMS_IS_CALLER_BACKGROUND, false);
-    sptr<IRemoteObject> connect = new MockDistributedSched();
+    sptr<IRemoteObject> connect(new MockDistributedSched());
     CallerInfo callerInfo;
     callerInfo.uid = 0;
     callerInfo.sourceDeviceId = LOCAL_DEVICEID;
@@ -1474,12 +1474,12 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartAbilityByCallFromRemote_003, Tes
     bool result = BundleManagerInternal::GetCallerAppIdFromBms("com.third.hiworld.example", callerInfo.callerAppId);
     EXPECT_EQ(result, true);
     callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
-    sptr<IRemoteObject> connect = new MockDistributedSched();
+    sptr<IRemoteObject> connect(new MockDistributedSched());
     callerInfo.uid = 0;
     callerInfo.sourceDeviceId = localDeviceId;
     IDistributedSched::AccountInfo accountInfo;
     accountInfo.accountType = IDistributedSched::SAME_ACCOUNT_TYPE;
-    sptr<IRemoteObject> callbackWrapper = new AbilityConnectionWrapperStub(connect, localDeviceId);
+    sptr<IRemoteObject> callbackWrapper(new AbilityConnectionWrapperStub(connect, localDeviceId));
     ConnectInfo connectInfo {callerInfo, callbackWrapper, want.GetElement()};
     DistributedSchedService::GetInstance().calleeMap_[connect] = connectInfo;
     int ret = DistributedSchedService::GetInstance().StartAbilityByCallFromRemote(want, connect,
@@ -1508,7 +1508,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartAbilityByCallFromRemote_004, Tes
     bool result = BundleManagerInternal::GetCallerAppIdFromBms("com.third.hiworld.example", callerInfo.callerAppId);
     EXPECT_EQ(result, true);
     callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
-    sptr<IRemoteObject> connect = new MockDistributedSched();
+    sptr<IRemoteObject> connect(new MockDistributedSched());
     callerInfo.uid = 0;
     callerInfo.sourceDeviceId = localDeviceId;
     IDistributedSched::AccountInfo accountInfo;
@@ -1535,7 +1535,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbilityByCall_001, TestSiz
     AppExecFwk::ElementName element("remoteDeviceId", "com.ohos.distributedmusicplayer",
         "com.ohos.distributedmusicplayer.MainAbility");
     want.SetElement(element);
-    sptr<IRemoteObject> connect = new MockDistributedSched();
+    sptr<IRemoteObject> connect(new MockDistributedSched());
     int32_t result = DistributedSchedService::GetInstance().StartRemoteAbilityByCall(want,
         connect, callerUid, callerPid, accessToken);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
@@ -1551,7 +1551,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbilityByCall_001, TestSiz
 HWTEST_F(DistributedSchedServiceFirstTest, ReleaseAbilityFromRemote_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest ReleaseAbilityFromRemote_001 start" << std::endl;
-    sptr<IRemoteObject> connect = new MockDistributedSched();
+    sptr<IRemoteObject> connect(new MockDistributedSched());
     AAFwk::Want want;
     AppExecFwk::ElementName element;
     CallerInfo callerInfo;
@@ -1596,7 +1596,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ReleaseAbilityFromRemote_002, TestSiz
     /**
     * @tc.steps: step1. call ReleaseAbilityFromRemote when itConnect != calleeMap_.end().
     */
-    sptr<IRemoteObject> connect = new MockDistributedSched();
+    sptr<IRemoteObject> connect(new MockDistributedSched());
     AAFwk::Want want;
     AppExecFwk::ElementName element;
     CallerInfo callerInfo;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -287,13 +287,13 @@ int32_t DSchedContinuation::NotifyDSchedEventForOneCB(const sptr<IRemoteObject> 
     MessageParcel reply;
     MessageOption option;
     int32_t ret = cb->SendRequest(DSCHED_EVENT_CALLBACK, data, reply, option);
-    HILOGI("NotifyDSchedEventListenerResult transact end, ret: %{public}d.", ret);
+    HILOGI("NotifyDSchedEventForOneCB transact end, ret: %{public}d.", ret);
     return ret;
 }
 
 int32_t DSchedContinuation::NotifyDSchedEventResult(int32_t resultCode)
 {
-    HILOGI("GetCallback IDSchedEventListener");
+    HILOGI("NotifyDSchedEventResult GetCallback IDSchedEventListener");
     std::vector<sptr<IRemoteObject>> vecCallback = GetCallback();
     if (vecCallback.empty()) {
         HILOGD("No listening has been registered, no need to report events");
@@ -303,7 +303,7 @@ int32_t DSchedContinuation::NotifyDSchedEventResult(int32_t resultCode)
     for (auto callback = vecCallback.begin(); callback != vecCallback.end(); ++callback) {
         int32_t ret = NotifyDSchedEventForOneCB(*callback, resultCode);
         if (ret != ERR_OK) {
-            HILOGE("NotifyDSchedEventForOneCB transact fail, ret: %{public}d", ret);
+            HILOGE("NotifyDSchedEventResult transact fail, ret: %{public}d", ret);
             isAllSuc = isAllSuc && false;
         }
     }
