@@ -797,7 +797,7 @@ bool JsContinuationManager::IsCallbackRegistered(int32_t token, const std::strin
         return false;
     }
     HILOGI("callback already registered, token: %{public}d, cbType %{public}s", 
-    GetAnonymStr(tokenStr).c_str(), cbType.c_str());
+        GetAnonymStr(tokenStr).c_str(), cbType.c_str());
     return true;
 }
 
