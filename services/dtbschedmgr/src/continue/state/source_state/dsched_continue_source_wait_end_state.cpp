@@ -61,9 +61,8 @@ DSchedContinueStateType DSchedContinueWaitEndState::GetStateType()
 int32_t DSchedContinueWaitEndState::DoNotifyCompleteTask(std::shared_ptr<DSchedContinue> dContinue,
     const AppExecFwk::InnerEvent::Pointer &event)
 {
-    auto stateMachine = stateMachine_.lock();
-    if (stateMachine == nullptr) {
-        HILOGE("DSchedContinueWaitEndState stateMachine is null");
+    if (dContinue == nullptr) {
+        HILOGE("dContinue is null");
         return INVALID_PARAMETERS_ERR;
     }
     auto syncContinueData = event->GetSharedObject<int32_t>();
@@ -77,9 +76,8 @@ int32_t DSchedContinueWaitEndState::DoNotifyCompleteTask(std::shared_ptr<DSchedC
 int32_t DSchedContinueWaitEndState::DoContinueEndTask(std::shared_ptr<DSchedContinue> dContinue,
     const AppExecFwk::InnerEvent::Pointer &event)
 {
-    auto stateMachine = stateMachine_.lock();
-    if (stateMachine == nullptr) {
-        HILOGE("DSchedContinueWaitEndState stateMachine is null");
+    if (dContinue == nullptr) {
+        HILOGE("dContinue is null");
         return INVALID_PARAMETERS_ERR;
     }
     auto syncContinueData = event->GetSharedObject<int32_t>();

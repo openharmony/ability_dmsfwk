@@ -196,6 +196,7 @@ private:
     bool CheckQuickStartConfiguration();
     std::string GetAbilityNameByContinueType();
     void SetEventData();
+    void UpdateState(DSchedContinueStateType stateType);
 
 private:
     std::shared_ptr<DSchedContinueStateMachine> stateMachine_;
