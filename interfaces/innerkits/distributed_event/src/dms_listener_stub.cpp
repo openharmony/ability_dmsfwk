@@ -57,6 +57,10 @@ int32_t DSchedEventListenerStub::OnRemoteRequest(uint32_t code,
     }
 
     auto memberFunc = itFunc->second;
+    if (!memberFunc) {
+        HILOGE("memberFunc is null for code %u", code);
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
     (this->*memberFunc)(data, reply);
     return 0;
 }

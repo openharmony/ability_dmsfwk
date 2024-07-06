@@ -806,6 +806,10 @@ bool JsContinuationManager::UnWrapContinuationExtraParams(const napi_env &env, c
         HILOGE("options is invalid.");
         return false;
     }
+    if (!continuationExtraParams) {
+        HILOGE("continuationExtraParams is nullptr.");
+        return false;
+    }
     std::vector<std::string> deviceTypes;
     if (UnwrapStringArrayByPropertyName(env, options, "deviceType", deviceTypes)) {
         continuationExtraParams->SetDeviceType(deviceTypes);
