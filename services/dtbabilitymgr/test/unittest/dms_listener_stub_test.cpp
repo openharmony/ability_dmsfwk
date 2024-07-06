@@ -69,10 +69,7 @@ void DSchedEventListenerStubPub::DSchedEventNotify(EventNotify &notify)
 HWTEST_F(DSchedEventListenerStubTest, OnRemoteRequest_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedEventListenerStubTest OnRemoteRequest_001 start" << std::endl;
-    if (dschedeventlistenerStub_ == nullptr) {
-        DTEST_LOG << "dschedeventlistenerStub_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dschedeventlistenerStub_);
     int32_t code = -1;
     MessageParcel data;
     MessageParcel reply;
@@ -93,10 +90,7 @@ HWTEST_F(DSchedEventListenerStubTest, OnRemoteRequest_001, TestSize.Level3)
 HWTEST_F(DSchedEventListenerStubTest, OnRemoteRequest_002, TestSize.Level3)
 {
     DTEST_LOG << "DSchedEventListenerStubTest DSchedEventNotifyInner_001 start" << std::endl;
-    if (dschedeventlistenerStub_ == nullptr) {
-        DTEST_LOG << "dschedeventlistenerStub_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dschedeventlistenerStub_);
     MessageParcel data1;
     MessageParcel reply1;
     dschedeventlistenerStub_->DSchedEventNotifyInner(data1, reply1);

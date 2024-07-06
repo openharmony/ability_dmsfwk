@@ -63,10 +63,7 @@ sptr<IRemoteObject> IDSchedEventListenerTest::AsObject()
 HWTEST_F(DmsSaClientTest, AddDSchedEventListener_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsSaClientTest AddDSchedEventListener_001 start" << std::endl;
-    if (dmssaClient_ == nullptr) {
-        DTEST_LOG << "dmssaClient_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dmssaClient_);
 
     DTEST_LOG << "DmsSaClientTest OnAddSystemAbility_002 start" << std::endl;
     int32_t systemAbilityId = 1;
@@ -92,10 +89,7 @@ HWTEST_F(DmsSaClientTest, AddDSchedEventListener_001, TestSize.Level3)
 HWTEST_F(DmsSaClientTest, AddDSchedEventListener_002, TestSize.Level3)
 {
     DTEST_LOG << "DmsSaClientTest AddDSchedEventListener_002 start" << std::endl;
-    if (dmssaClient_ == nullptr) {
-        DTEST_LOG << "dmssaClient_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dmssaClient_);
 
     DTEST_LOG << "DmsSaClientTest OnRemoveSystemAbility_001 start" << std::endl;
     int32_t systemAbilityId = 1;
@@ -120,10 +114,7 @@ HWTEST_F(DmsSaClientTest, AddDSchedEventListener_002, TestSize.Level3)
 HWTEST_F(DmsSaClientTest, DelDSchedEventListener_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsSaClientTest OnAddSystemAbility_001 start" << std::endl;
-    if (dmssaClient_ == nullptr) {
-        DTEST_LOG << "dmssaClient_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dmssaClient_);
     //systemAbilityId not is DISTRIBUTED_SCHED_SA_ID
     dmssaClient_->OnAddSystemAbility(-1, DEVICE_ID);
     //systemAbilityId is DISTRIBUTED_SCHED_SA_ID
@@ -148,10 +139,7 @@ HWTEST_F(DmsSaClientTest, DelDSchedEventListener_001, TestSize.Level3)
 HWTEST_F(DmsSaClientTest, GetContinueInfo_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsSaClientTest GetContinueInfo_001 start" << std::endl;
-    if (dmssaClient_ == nullptr) {
-        DTEST_LOG << "dmssaClient_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dmssaClient_);
     //systemAbilityId not is DISTRIBUTED_SCHED_SA_ID
     dmssaClient_->OnAddSystemAbility(-1, DEVICE_ID);
     //systemAbilityId is DISTRIBUTED_SCHED_SA_ID
@@ -174,10 +162,7 @@ HWTEST_F(DmsSaClientTest, GetContinueInfo_001, TestSize.Level3)
 HWTEST_F(DmsSaClientTest, GetDSchedEventInfo_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsSaClientTest GetDSchedEventInfo_001 start" << std::endl;
-    if (dmssaClient_ == nullptr) {
-        DTEST_LOG << "dmssaClient_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dmssaClient_);
     //systemAbilityId not is DISTRIBUTED_SCHED_SA_ID
     dmssaClient_->OnAddSystemAbility(-1, DEVICE_ID);
     //systemAbilityId is DISTRIBUTED_SCHED_SA_ID
@@ -200,10 +185,7 @@ HWTEST_F(DmsSaClientTest, GetDSchedEventInfo_001, TestSize.Level3)
 HWTEST_F(DmsSaClientTest, OnAddSystemAbility_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsSaClientTest OnAddSystemAbility_001 start" << std::endl;
-    if (dmsSaStatusChange_ == nullptr) {
-        DTEST_LOG << "dmsSaStatusChange_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dmsSaStatusChange_);
     //systemAbilityId not is DISTRIBUTED_SCHED_SA_ID
     dmsSaStatusChange_->OnAddSystemAbility(-1, DEVICE_ID);
     //systemAbilityId is DISTRIBUTED_SCHED_SA_ID
@@ -211,6 +193,7 @@ HWTEST_F(DmsSaClientTest, OnAddSystemAbility_001, TestSize.Level3)
     DTEST_LOG << "DmsSaClientTest OnAddSystemAbility_001 end" << std::endl;
 
     DTEST_LOG << "DmsSaClientTest DelDSchedEventListener_001 start" << std::endl;
+    ASSERT_NE(nullptr, dmssaClient_);
     sptr<IDSchedEventListenerTest> listener = new IDSchedEventListenerTest();
     int32_t result = dmssaClient_->AddDSchedEventListener(DMS_CONTINUE, listener);;
     EXPECT_EQ(result, NO_ERROR);
@@ -226,10 +209,7 @@ HWTEST_F(DmsSaClientTest, OnAddSystemAbility_001, TestSize.Level3)
 HWTEST_F(DmsSaClientTest, OnRemoveSystemAbility_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsSaClientTest OnRemoveSystemAbilityy_001 start" << std::endl;
-    if (dmsSaStatusChange_ == nullptr) {
-        DTEST_LOG << "dmsSaStatusChange_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dmsSaStatusChange_);
     //systemAbilityId not is DISTRIBUTED_SCHED_SA_ID
     dmsSaStatusChange_->OnRemoveSystemAbility(-1, DEVICE_ID);
     //systemAbilityId is DISTRIBUTED_SCHED_SA_ID
@@ -237,6 +217,7 @@ HWTEST_F(DmsSaClientTest, OnRemoveSystemAbility_001, TestSize.Level3)
     DTEST_LOG << "DmsSaClientTest OnRemoveSystemAbility_001 end" << std::endl;
 
     DTEST_LOG << "DmsSaClientTest AddDSchedEventListener_001 start" << std::endl;
+    ASSERT_NE(nullptr, dmssaClient_);
     sptr<IDSchedEventListenerTest> listener = new IDSchedEventListenerTest();
     int32_t result = dmssaClient_->AddDSchedEventListener(DMS_CONTINUE, listener);;
     EXPECT_EQ(result, NO_ERROR);

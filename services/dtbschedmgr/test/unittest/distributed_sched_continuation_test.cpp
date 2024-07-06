@@ -76,7 +76,7 @@ void DSchedContinuationTest::DeviceInitCallBack::OnRemoteDied()
 
 sptr<IRemoteObject> DSchedContinuationTest::GetDSchedService() const
 {
-    sptr<IRemoteObject> dsched = new MockDistributedSched();
+    sptr<IRemoteObject> dsched(new MockDistributedSched());
     return dsched;
 }
 
@@ -827,7 +827,7 @@ HWTEST_F(DSchedContinuationTest, PushCallback_002, TestSize.Level3)
     dschedContinuation_->Init(nullptr);
 
     int32_t missionId = 0;
-    const sptr<IRemoteObject> callback = new MockRemoteStub();
+    const sptr<IRemoteObject> callback(new MockRemoteStub());
     std::string deviceId = "";
     bool isFreeInstall = true;
     dschedContinuation_->callbackMap_[missionId] = callback;
@@ -848,7 +848,7 @@ HWTEST_F(DSchedContinuationTest, PushCallback_003, TestSize.Level3)
     dschedContinuation_->Init(nullptr);
 
     int32_t missionId = 0;
-    const sptr<IRemoteObject> callback = new MockRemoteStub();
+    const sptr<IRemoteObject> callback(new MockRemoteStub());
     std::string deviceId = "";
     bool isFreeInstall = true;
     dschedContinuation_->callbackMap_.clear();

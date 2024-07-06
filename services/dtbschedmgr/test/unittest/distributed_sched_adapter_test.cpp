@@ -224,7 +224,7 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessConnectDied_002, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, ProcessConnectDied_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ProcessConnectDied_003 begin" << std::endl;
-    const sptr<IRemoteObject> connect = new MockRemoteStub();
+    const sptr<IRemoteObject> connect(new MockRemoteStub());
     distributedSchedAdapter_->ProcessConnectDied(connect);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
     DTEST_LOG << "DistributedSchedAdapterTest ProcessConnectDied_003 end" << std::endl;
@@ -270,7 +270,7 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessCalleeDied_002, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, ProcessCalleeDied_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCalleeDied_003 begin" << std::endl;
-    const sptr<IRemoteObject> connect = new MockRemoteStub();
+    const sptr<IRemoteObject> connect(new MockRemoteStub());
     distributedSchedAdapter_->ProcessCalleeDied(connect);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCalleeDied_003 end" << std::endl;
@@ -318,7 +318,7 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessCallerDied_002, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, ProcessCallerDied_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCallerDied_003 begin" << std::endl;
-    const sptr<IRemoteObject> connect = new MockRemoteStub();
+    const sptr<IRemoteObject> connect(new MockRemoteStub());
     int32_t deviceType = 0;
     distributedSchedAdapter_->ProcessCallerDied(connect, deviceType);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
@@ -397,9 +397,9 @@ HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_001, TestSize.Leve
 HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_002, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest RegisterMissionListener_002 begin" << std::endl;
-    const sptr<IRemoteObject> connect = new MockRemoteStub();
+    const sptr<IRemoteObject> connect(new MockRemoteStub());
     distributedSchedAdapter_->ProcessCallResult(connect, nullptr);
-    const sptr<DistributedMissionChangeListener> listener = new DistributedMissionChangeListener();
+    const sptr<DistributedMissionChangeListener> listener(new DistributedMissionChangeListener());
     int32_t result = distributedSchedAdapter_->RegisterMissionListener(listener);
     EXPECT_NE(result, ERR_OK);
     DTEST_LOG << "DistributedSchedAdapterTest RegisterMissionListener_002 end" << std::endl;
@@ -414,7 +414,7 @@ HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_002, TestSize.Leve
 HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_001, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest UnRegisterMissionListener_001 begin" << std::endl;
-    const sptr<IRemoteObject> connect = new MockRemoteStub();
+    const sptr<IRemoteObject> connect(new MockRemoteStub());
     distributedSchedAdapter_->ProcessCallResult(nullptr, connect);
     const sptr<DistributedMissionChangeListener> listener = nullptr;
     int32_t result = distributedSchedAdapter_->UnRegisterMissionListener(listener);
@@ -431,9 +431,9 @@ HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_001, TestSize.Le
 HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_002, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest UnRegisterMissionListener_002 begin" << std::endl;
-    const sptr<IRemoteObject> connect = new MockRemoteStub();
+    const sptr<IRemoteObject> connect(new MockRemoteStub());
     distributedSchedAdapter_->ProcessCallResult(connect, connect);
-    const sptr<DistributedMissionChangeListener> listener = new DistributedMissionChangeListener();
+    const sptr<DistributedMissionChangeListener> listener(new DistributedMissionChangeListener());
     int32_t result = distributedSchedAdapter_->UnRegisterMissionListener(listener);
     EXPECT_NE(result, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedAdapterTest UnRegisterMissionListener_002 end" << std::endl;

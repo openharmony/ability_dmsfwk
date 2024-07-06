@@ -58,6 +58,7 @@ void DistributedAbilityManagerStubTest::TearDown()
 HWTEST_F(DistributedAbilityManagerStubTest, OnRemoteRequest_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerStubTest OnRemoteRequest_001 start" << std::endl;
+    ASSERT_NE(nullptr, dtbabilitymgrStub_);
     uint32_t code = INVALID_CODE;
     MessageParcel data;
     MessageParcel reply;
@@ -78,6 +79,7 @@ HWTEST_F(DistributedAbilityManagerStubTest, OnRemoteRequest_001, TestSize.Level3
 HWTEST_F(DistributedAbilityManagerStubTest, OnRemoteRequest_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerStubTest OnRemoteRequest_002 start" << std::endl;
+    ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -96,6 +98,7 @@ HWTEST_F(DistributedAbilityManagerStubTest, OnRemoteRequest_002, TestSize.Level3
 HWTEST_F(DistributedAbilityManagerStubTest, RegisterInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerStubTest RegisterInner_001 start" << std::endl;
+    ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(VALUE_OBJECT);
@@ -113,6 +116,7 @@ HWTEST_F(DistributedAbilityManagerStubTest, RegisterInner_001, TestSize.Level3)
 HWTEST_F(DistributedAbilityManagerStubTest, RegisterInner_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerStubTest RegisterInner_002 start" << std::endl;
+    ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(VALUE_NULL);
@@ -130,6 +134,7 @@ HWTEST_F(DistributedAbilityManagerStubTest, RegisterInner_002, TestSize.Level3)
 HWTEST_F(DistributedAbilityManagerStubTest, RegisterDeviceSelectionCallbackInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerStubTest RegisterDeviceSelectionCallbackInner_001 start" << std::endl;
+    ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
     int32_t token = 0;
@@ -150,6 +155,7 @@ HWTEST_F(DistributedAbilityManagerStubTest, RegisterDeviceSelectionCallbackInner
 HWTEST_F(DistributedAbilityManagerStubTest, RegisterDeviceSelectionCallbackInner_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerStubTest RegisterDeviceSelectionCallbackInner_002 start" << std::endl;
+    ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
     int32_t token = 0;
@@ -170,6 +176,7 @@ HWTEST_F(DistributedAbilityManagerStubTest, RegisterDeviceSelectionCallbackInner
 HWTEST_F(DistributedAbilityManagerStubTest, UnregisterDeviceSelectionCallbackInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerStubTest UnregisterDeviceSelectionCallbackInner_001 start" << std::endl;
+    ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
     int32_t token = 0;
@@ -190,6 +197,7 @@ HWTEST_F(DistributedAbilityManagerStubTest, UnregisterDeviceSelectionCallbackInn
 HWTEST_F(DistributedAbilityManagerStubTest, UnregisterDeviceSelectionCallbackInner_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerStubTest UnregisterDeviceSelectionCallbackInner_002 start" << std::endl;
+    ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
     int32_t token = 0;
@@ -210,6 +218,7 @@ HWTEST_F(DistributedAbilityManagerStubTest, UnregisterDeviceSelectionCallbackInn
 HWTEST_F(DistributedAbilityManagerStubTest, StartDeviceManagerInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerStubTest StartDeviceManagerInner_001 start" << std::endl;
+    ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
     int32_t token = 0;
@@ -230,6 +239,7 @@ HWTEST_F(DistributedAbilityManagerStubTest, StartDeviceManagerInner_001, TestSiz
 HWTEST_F(DistributedAbilityManagerStubTest, StartDeviceManagerInner_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerStubTest StartDeviceManagerInner_001 start" << std::endl;
+    ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
     int32_t token = 0;
@@ -250,6 +260,7 @@ HWTEST_F(DistributedAbilityManagerStubTest, StartDeviceManagerInner_002, TestSiz
 HWTEST_F(DistributedAbilityManagerStubTest, UnregisterInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerStubTest UnregisterInner_001 start" << std::endl;
+    ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(VALUE_OBJECT);
@@ -267,6 +278,7 @@ HWTEST_F(DistributedAbilityManagerStubTest, UnregisterInner_001, TestSize.Level3
 HWTEST_F(DistributedAbilityManagerStubTest, UpdateConnectStatusInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerStubTest UpdateConnectStatusInner_001 start" << std::endl;
+    ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
     std::string deviceId = "12345";

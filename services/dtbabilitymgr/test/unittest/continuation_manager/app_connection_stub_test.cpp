@@ -57,6 +57,7 @@ void AppConnectionStubTest::SetUp()
 HWTEST_F(AppConnectionStubTest, AppConnectionStubTest_001, TestSize.Level3)
 {
     DTEST_LOG << "AppConnectionStubTest AppConnectionStubTest_001 begin" << std::endl;
+    ASSERT_NE(nullptr, appConnectionStub_);
     int32_t code = 0;
     MessageParcel data;
     MessageParcel reply;
@@ -76,6 +77,7 @@ HWTEST_F(AppConnectionStubTest, AppConnectionStubTest_001, TestSize.Level3)
 HWTEST_F(AppConnectionStubTest, AppConnectionStubTest_002, TestSize.Level3)
 {
     DTEST_LOG << "AppConnectionStubTest AppConnectionStubTest_002 begin" << std::endl;
+    ASSERT_NE(nullptr, appConnectionStub_);
     int32_t code = 0;
     MessageParcel data;
     MessageParcel reply;
@@ -95,6 +97,7 @@ HWTEST_F(AppConnectionStubTest, AppConnectionStubTest_002, TestSize.Level3)
 HWTEST_F(AppConnectionStubTest, AppConnectionStubTest_003, TestSize.Level3)
 {
     DTEST_LOG << "AppConnectionStubTest AppConnectionStubTest_003 begin" << std::endl;
+    ASSERT_NE(nullptr, appConnectionStub_);
     int32_t code = 0;
     MessageParcel data;
     MessageParcel reply;
@@ -117,6 +120,7 @@ HWTEST_F(AppConnectionStubTest, AppConnectionStubTest_003, TestSize.Level3)
 HWTEST_F(AppConnectionStubTest, AppConnectionStubTest_004, TestSize.Level3)
 {
     DTEST_LOG << "AppConnectionStubTest AppConnectionStubTest_004 begin" << std::endl;
+    ASSERT_NE(nullptr, appConnectionStub_);
     int32_t code = 0;
     MessageParcel data;
     MessageParcel reply;
@@ -139,6 +143,7 @@ HWTEST_F(AppConnectionStubTest, AppConnectionStubTest_004, TestSize.Level3)
 HWTEST_F(AppConnectionStubTest, AppConnectionStubTest_005, TestSize.Level3)
 {
     DTEST_LOG << "AppConnectionStubTest AppConnectionStubTest_005 begin" << std::endl;
+    ASSERT_NE(nullptr, appConnectionStub_);
     int32_t code = 0;
     MessageParcel data;
     MessageParcel reply;
@@ -161,6 +166,7 @@ HWTEST_F(AppConnectionStubTest, AppConnectionStubTest_005, TestSize.Level3)
 HWTEST_F(AppConnectionStubTest, AppConnectionStubTest_006, TestSize.Level3)
 {
     DTEST_LOG << "AppConnectionStubTest AppConnectionStubTest_006 begin" << std::endl;
+    ASSERT_NE(nullptr, appConnectionStub_);
     int32_t code = 0;
     MessageParcel data;
     MessageParcel reply;
@@ -184,6 +190,7 @@ HWTEST_F(AppConnectionStubTest, AppConnectionStubTest_006, TestSize.Level3)
 HWTEST_F(AppConnectionStubTest, AppConnectionStubTest_007, TestSize.Level3)
 {
     DTEST_LOG << "AppConnectionStubTest AppConnectionStubTest_007 begin" << std::endl;
+    ASSERT_NE(nullptr, appConnectionStub_);
     int32_t code = 0;
     MessageParcel data;
     MessageParcel reply;
@@ -207,6 +214,7 @@ HWTEST_F(AppConnectionStubTest, AppConnectionStubTest_007, TestSize.Level3)
 HWTEST_F(AppConnectionStubTest, AppConnectionStubTest_008, TestSize.Level3)
 {
     DTEST_LOG << "AppConnectionStubTest AppConnectionStubTest_008 begin" << std::endl;
+    ASSERT_NE(nullptr, appConnectionStub_);
     int32_t code = 0;
     MessageParcel data;
     MessageParcel reply;

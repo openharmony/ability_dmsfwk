@@ -122,6 +122,10 @@ void DistributedAbilityManagerService::DumpNotifierLocked(const std::vector<int3
         if (callbackMap_.find(token) == callbackMap_.end()) {
             continue;
         }
+        if (callbackMap_[token] == nullptr) {
+            HILOGE("this ptr is null");
+            return;
+        }
         if (!callbackMap_[token]->IsNotifierMapEmpty()) {
             info += ", ";
             info += "cbType: ";
@@ -583,6 +587,10 @@ bool DistributedAbilityManagerService::HandleDeviceConnect(const sptr<IRemoteObj
         HILOGE("continuationHandler_ is nullptr");
         return false;
     }
+    if (notifier == nullptr) {
+        HILOGE("notifier is nullptr");
+        return false;
+    }
     auto func = [notifier, continuationResults]() {
         HILOGD("HandleDeviceConnect called.");
         auto proxy = std::make_unique<DeviceSelectionNotifierProxy>(notifier);
@@ -597,6 +605,10 @@ bool DistributedAbilityManagerService::HandleDeviceDisconnect(const sptr<IRemote
 {
     if (continuationHandler_ == nullptr) {
         HILOGE("continuationHandler_ is nullptr");
+        return false;
+    }
+    if (notifier == nullptr) {
+        HILOGE("notifier is nullptr");
         return false;
     }
     auto func = [notifier, continuationResults]() {
@@ -662,6 +674,10 @@ void DistributedAbilityManagerService::HandleStartDeviceManager(int32_t token,
         }
         MessageParcel reply;
         MessageOption option;
+        if (appProxy == nullptr) {
+            HILOGE("appProxy is nullptr");
+            return;
+        }
         int32_t result = appProxy->SendRequest(START_DEVICE_MANAGER_CODE, data, reply, option);
         HILOGD("result is %{public}d", result);
     };
