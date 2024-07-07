@@ -33,7 +33,6 @@ namespace {
 const std::string TAG = "DSchedContinueManager";
 const std::string DSCHED_CONTINUE_MANAGER = "dsched_continue_manager";
 const std::string CONTINUE_TIMEOUT_TASK = "continue_timeout_task";
-
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DSchedContinueManager);

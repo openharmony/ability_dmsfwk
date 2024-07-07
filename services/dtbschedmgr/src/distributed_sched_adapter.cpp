@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 #include "distributed_sched_adapter.h"
 
 #include "datetime_ex.h"
-#include "device_manager.h"
 #include "dfx/dms_hisysevent_report.h"
 #include "distributed_sched_service.h"
 #include "distributed_sched_utils.h"
@@ -38,7 +37,6 @@ using namespace std;
 using namespace AAFwk;
 using namespace AccountSA;
 using namespace AppExecFwk;
-using namespace DistributedHardware;
 using DstbMissionChangeListener = DistributedMissionChangeListener;
 namespace {
 // set a non-zero value on need later
@@ -286,16 +284,11 @@ bool DistributedSchedAdapter::CheckAccessToGroup(const std::string& groupId, con
     int32_t ret = hichainGmInstance_->checkAccessToGroup(ANY_OS_ACCOUNT, targetBundleName.c_str(),
         groupId.c_str());
     HILOGI("[PerformanceTest] checkAccessToGroup spend %{public}" PRId64 " ms", GetTickCount() - begin);
-    if (ret == ERR_OK) {
-        HILOGI("hichain checkAccessToGroup success");
-        return true;
-    }
-
-    HILOGI("hichain checkAccessToGroup fail, ret %{public}d, will try DM CheckRelatedDevice.", ret);
-    if (!DeviceManager::GetInstance().CheckRelatedDevice(groupId, targetBundleName)) {
-        HILOGE("DM CheckRelatedDevice failed");
+    if (ret != ERR_OK) {
+        HILOGE("hichain checkAccessToGroup fail, ret %{public}d.", ret);
         return false;
     }
+    HILOGD("hichain checkAccessToGroup success");
     return true;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,11 @@ public:
     void MarkUriPermission(OHOS::AAFwk::Want& want, uint32_t accessToken);
 
 private:
-    bool CheckAclList(const std::string& udid, const std::vector<std::string>& bundleNames);
+    bool GetOsAccountData(AccountInfo& dmsAccountInfo);
+    bool CheckDstSameAccount(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
+        const CallerInfo& callerInfo);
+    bool CheckAclList(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
+        const CallerInfo& callerInfo);
     bool GetRelatedGroups(const std::string& udid, const std::vector<std::string>& bundleNames,
         AccountInfo& accountInfo);
     bool ParseGroupInfos(const std::string& returnGroupStr, std::vector<GroupInfo>& groupInfos);

@@ -179,6 +179,7 @@ ohos_shared_library("distributedschedsvr") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
+    "os_account:libaccountkits",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "wifi:wifi_sdk",

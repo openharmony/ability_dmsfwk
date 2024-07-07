@@ -305,7 +305,7 @@ bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_
         HILOGI("get bundleName failed.");
         return false;
     }
-    HILOGE("end.");
+    HILOGI("end.");
     return true;
 }
 

@@ -16,7 +16,6 @@
 #include "datashare_manager.h"
 
 #include "distributed_sched_utils.h"
-#include "dsched_continue_manager.h"
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/dms_continue_send_manager.h"
