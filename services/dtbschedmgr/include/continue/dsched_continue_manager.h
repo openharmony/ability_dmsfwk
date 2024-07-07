@@ -51,9 +51,9 @@ public:
 
     void Init();
     void UnInit();
+    void NotifyAllConnectDecision(std::string peerDeviceId, bool isSupport);
     void OnDataRecv(int32_t sessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer);
     void OnShutdown(int32_t socket, bool isSelfCalled);
-    void OnBind();
 
     int32_t GetContinueInfo(std::string &srcDeviceId, std::string &dstDeviceId);
     std::shared_ptr<DSchedContinue> GetDSchedContinueByWant(const OHOS::AAFwk::Want& want, int32_t missionId);
@@ -77,6 +77,7 @@ private:
     void NotifyContinueDataRecv(int32_t sessionId, int32_t command, const std::string& jsonStr,
         std::shared_ptr<DSchedDataBuffer> dataBuffer);
     int32_t CheckContinuationLimit(const std::string& srcDeviceId, const std::string& dstDeviceId);
+    void WaitAllConnectDecision(int32_t direction, const DSchedContinueInfo &info, int32_t timeout);
     void SetTimeOut(const DSchedContinueInfo& info, int32_t timeout);
     void RemoveTimeout(const DSchedContinueInfo& info);
 
@@ -87,6 +88,10 @@ private:
     };
 
 private:
+#ifdef DMSFWK_ALL_CONNECT_MGR
+    static constexpr int32_t CONNECT_DECISION_WAIT_S = 60;
+#endif
+
     std::thread eventThread_;
     std::condition_variable eventCon_;
     std::mutex eventMutex_;
@@ -95,6 +100,10 @@ private:
 
     std::map<DSchedContinueInfo, std::shared_ptr<DSchedContinue>> continues_;
     std::mutex continueMutex_;
+
+    std::mutex connectDecisionMutex_;
+    std::condition_variable connectDecisionCond_;
+    std::map<std::string, std::atomic<bool>> peerConnectDecision_;
 
     std::atomic<int32_t> cntSink_ {0};
     std::atomic<int32_t> cntSource_ {0};

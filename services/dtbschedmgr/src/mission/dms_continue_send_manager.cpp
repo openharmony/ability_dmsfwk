@@ -29,7 +29,6 @@
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
 #include "switch_status_dependency.h"
-#include "dsched_continue_manager.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/wifi_state_adapter.h"
 
