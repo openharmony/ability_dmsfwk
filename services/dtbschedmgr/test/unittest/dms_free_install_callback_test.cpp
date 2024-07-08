@@ -58,6 +58,7 @@ void DmsFreeInstallCallbackTest::SetUp()
 HWTEST_F(DmsFreeInstallCallbackTest, DmsFreeInstallCallbackTest_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsFreeInstallCallbackTest DmsFreeInstallCallbackTest_001 begin" << std::endl;
+    ASSERT_NE(dmsFreeInstallCallbackStub_, nullptr);
     int32_t code = 0;
     MessageParcel data;
     MessageParcel reply;
@@ -77,6 +78,7 @@ HWTEST_F(DmsFreeInstallCallbackTest, DmsFreeInstallCallbackTest_001, TestSize.Le
 HWTEST_F(DmsFreeInstallCallbackTest, DmsFreeInstallCallbackTest_002, TestSize.Level4)
 {
     DTEST_LOG << "DmsFreeInstallCallbackTest DmsFreeInstallCallbackTest_002 begin" << std::endl;
+    ASSERT_NE(dmsFreeInstallCallbackStub_, nullptr);
     int32_t code = -1;
     MessageParcel data;
     MessageParcel reply;
@@ -96,6 +98,7 @@ HWTEST_F(DmsFreeInstallCallbackTest, DmsFreeInstallCallbackTest_002, TestSize.Le
 HWTEST_F(DmsFreeInstallCallbackTest, DmsFreeInstallCallbackTest_003, TestSize.Level3)
 {
     DTEST_LOG << "DmsFreeInstallCallbackTest DmsFreeInstallCallbackTest_003 begin" << std::endl;
+    ASSERT_NE(dmsFreeInstallCallbackStub_, nullptr);
     int32_t code = 0;
     MessageParcel data;
     MessageParcel reply;
@@ -115,6 +118,7 @@ HWTEST_F(DmsFreeInstallCallbackTest, DmsFreeInstallCallbackTest_003, TestSize.Le
 HWTEST_F(DmsFreeInstallCallbackTest, DmsFreeInstallCallbackTest_004, TestSize.Level3)
 {
     DTEST_LOG << "DmsFreeInstallCallbackTest DmsFreeInstallCallbackTest_004 begin" << std::endl;
+    ASSERT_NE(dmsFreeInstallCallbackStub_, nullptr);
     int32_t code = 0;
     MessageParcel data;
     MessageParcel reply;
@@ -137,6 +141,7 @@ HWTEST_F(DmsFreeInstallCallbackTest, DmsFreeInstallCallbackTest_004, TestSize.Le
 HWTEST_F(DmsFreeInstallCallbackTest, DmsFreeInstallCallbackTest_005, TestSize.Level3)
 {
     DTEST_LOG << "DmsFreeInstallCallbackTest DmsFreeInstallCallbackTest_005 begin" << std::endl;
+    ASSERT_NE(dmsFreeInstallCallbackProxy_, nullptr);
     AAFwk::Want want;
     int32_t requestCode = -1;
     int32_t resultCode = -1;

@@ -72,6 +72,7 @@ void DistributedSchedUidTest::SetUp()
 HWTEST_F(DistributedSchedUidTest, StartAbilityFromRemoteInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedUidTest StartAbilityFromRemoteInner_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
 
@@ -88,6 +89,7 @@ HWTEST_F(DistributedSchedUidTest, StartAbilityFromRemoteInner_001, TestSize.Leve
 HWTEST_F(DistributedSchedUidTest, SendResultFromRemoteInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedUidTest SendResultFromRemoteInner_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
 
@@ -104,6 +106,7 @@ HWTEST_F(DistributedSchedUidTest, SendResultFromRemoteInner_001, TestSize.Level3
 HWTEST_F(DistributedSchedUidTest, NotifyContinuationResultFromRemoteInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedUidTest NotifyContinuationResultFromRemoteInner_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
 
@@ -120,6 +123,7 @@ HWTEST_F(DistributedSchedUidTest, NotifyContinuationResultFromRemoteInner_001, T
 HWTEST_F(DistributedSchedUidTest, ConnectAbilityFromRemoteInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedUidTest ConnectAbilityFromRemoteInner_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
 
@@ -136,6 +140,7 @@ HWTEST_F(DistributedSchedUidTest, ConnectAbilityFromRemoteInner_001, TestSize.Le
 HWTEST_F(DistributedSchedUidTest, DisconnectAbilityFromRemoteInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedUidTest DisconnectAbilityFromRemoteInner_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
 
@@ -152,6 +157,7 @@ HWTEST_F(DistributedSchedUidTest, DisconnectAbilityFromRemoteInner_001, TestSize
 HWTEST_F(DistributedSchedUidTest, NotifyProcessDiedFromRemoteInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedUidTest NotifyProcessDiedFromRemoteInner_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
 
@@ -169,6 +175,7 @@ HWTEST_F(DistributedSchedUidTest, NotifyProcessDiedFromRemoteInner_001, TestSize
 HWTEST_F(DistributedSchedUidTest, StartSyncMissionsFromRemoteInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedUidTest StartSyncMissionsFromRemoteInner_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
 
@@ -185,6 +192,7 @@ HWTEST_F(DistributedSchedUidTest, StartSyncMissionsFromRemoteInner_001, TestSize
 HWTEST_F(DistributedSchedUidTest, StopSyncMissionsFromRemoteInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedUidTest StopSyncMissionsFromRemoteInner_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
 
@@ -201,6 +209,7 @@ HWTEST_F(DistributedSchedUidTest, StopSyncMissionsFromRemoteInner_001, TestSize.
 HWTEST_F(DistributedSchedUidTest, NotifyMissionsChangedFromRemoteInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedUidTest NotifyMissionsChangedFromRemoteInner_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
 
@@ -218,6 +227,7 @@ HWTEST_F(DistributedSchedUidTest, NotifyMissionsChangedFromRemoteInner_001, Test
 HWTEST_F(DistributedSchedUidTest, StartAbilityByCallFromRemoteInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedUidTest StartAbilityByCallFromRemoteInner_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
 
@@ -234,6 +244,7 @@ HWTEST_F(DistributedSchedUidTest, StartAbilityByCallFromRemoteInner_001, TestSiz
 HWTEST_F(DistributedSchedUidTest, ReleaseAbilityFromRemoteInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedUidTest ReleaseAbilityFromRemoteInner_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
 
@@ -251,6 +262,7 @@ HWTEST_F(DistributedSchedUidTest, ReleaseAbilityFromRemoteInner_001, TestSize.Le
 HWTEST_F(DistributedSchedUidTest, StartShareFormFromRemoteInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedUidTest StartShareFormFromRemoteInner_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
 
@@ -268,6 +280,7 @@ HWTEST_F(DistributedSchedUidTest, StartShareFormFromRemoteInner_001, TestSize.Le
 HWTEST_F(DistributedSchedUidTest, GetDistributedComponentListInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedUidTest GetDistributedComponentListInner_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
 
@@ -284,6 +297,7 @@ HWTEST_F(DistributedSchedUidTest, GetDistributedComponentListInner_001, TestSize
 HWTEST_F(DistributedSchedUidTest, StartFreeInstallFromRemoteInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedUidTest StartFreeInstallFromRemoteInner_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
 
@@ -300,6 +314,7 @@ HWTEST_F(DistributedSchedUidTest, StartFreeInstallFromRemoteInner_001, TestSize.
 HWTEST_F(DistributedSchedUidTest, NotifyCompleteFreeInstallFromRemoteInner_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedUidTest NotifyCompleteFreeInstallFromRemoteInner_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedStub_, nullptr);
     MessageParcel data;
     MessageParcel reply;
 

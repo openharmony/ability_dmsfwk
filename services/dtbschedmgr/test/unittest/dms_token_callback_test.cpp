@@ -62,6 +62,7 @@ void DmsTokenCallbackTest::SetUp()
 HWTEST_F(DmsTokenCallbackTest, SendResultTest_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsTokenCallbackTest SendResultTest_001 begin" << std::endl;
+    ASSERT_NE(dmsTokenCallback_, nullptr);
     AAFwk::Want want;
     int32_t callerUid = 0;
     int32_t requestCode = 0;
@@ -82,6 +83,7 @@ HWTEST_F(DmsTokenCallbackTest, SendResultTest_001, TestSize.Level3)
 HWTEST_F(DmsTokenCallbackTest, SendResultTest_002, TestSize.Level3)
 {
     DTEST_LOG << "DmsTokenCallbackTest SendResultTest_002 begin" << std::endl;
+    ASSERT_NE(dmsTokenCallback_, nullptr);
     AAFwk::Want want;
     int32_t callerUid = 0;
     int32_t requestCode = 0;
@@ -101,6 +103,7 @@ HWTEST_F(DmsTokenCallbackTest, SendResultTest_002, TestSize.Level3)
 HWTEST_F(DmsTokenCallbackTest, SendResultTest_003, TestSize.Level3)
 {
     DTEST_LOG << "DmsTokenCallbackTest SendResultTest_003 begin" << std::endl;
+    ASSERT_NE(dmsTokenCallback_, nullptr);
     AAFwk::Want want;
     string localDeviceId;
     dmsTokenCallback_->GetLocalDeviceId(localDeviceId);
@@ -123,6 +126,7 @@ HWTEST_F(DmsTokenCallbackTest, SendResultTest_003, TestSize.Level3)
 HWTEST_F(DmsTokenCallbackTest, SendResultTest_004, TestSize.Level3)
 {
     DTEST_LOG << "DmsTokenCallbackTest SendResultTest_004 begin" << std::endl;
+    ASSERT_NE(dmsTokenCallback_, nullptr);
     AAFwk::Want want;
     int32_t callerUid = 0;
     int32_t requestCode = 0;
@@ -143,6 +147,7 @@ HWTEST_F(DmsTokenCallbackTest, SendResultTest_004, TestSize.Level3)
 HWTEST_F(DmsTokenCallbackTest, SendResultTest_005, TestSize.Level3)
 {
     DTEST_LOG << "DmsTokenCallbackTest SendResultTest_005 begin" << std::endl;
+    ASSERT_NE(dmsTokenCallback_, nullptr);
     AAFwk::Want want;
     string remoteDeviceId = "remoteDeviceId";
     want.SetParam("dmsSrcNetworkId", remoteDeviceId);
@@ -164,6 +169,7 @@ HWTEST_F(DmsTokenCallbackTest, SendResultTest_005, TestSize.Level3)
 HWTEST_F(DmsTokenCallbackTest, CheckDeviceIdTest_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsTokenCallbackTest CheckDeviceIdTest_001 begin" << std::endl;
+    ASSERT_NE(dmsTokenCallback_, nullptr);
     std::string localDeviceId;
     std::string remoteDeviceId;
     bool result = dmsTokenCallback_->CheckDeviceId(localDeviceId, remoteDeviceId);
@@ -180,6 +186,7 @@ HWTEST_F(DmsTokenCallbackTest, CheckDeviceIdTest_001, TestSize.Level3)
 HWTEST_F(DmsTokenCallbackTest, CheckDeviceIdTest_002, TestSize.Level3)
 {
     DTEST_LOG << "DmsTokenCallbackTest CheckDeviceIdTest_002 begin" << std::endl;
+    ASSERT_NE(dmsTokenCallback_, nullptr);
     std::string localDeviceId = "1";
     std::string remoteDeviceId = "1";
     bool result = dmsTokenCallback_->CheckDeviceId(localDeviceId, remoteDeviceId);
@@ -196,6 +203,7 @@ HWTEST_F(DmsTokenCallbackTest, CheckDeviceIdTest_002, TestSize.Level3)
 HWTEST_F(DmsTokenCallbackTest, CheckDeviceIdTest_003, TestSize.Level3)
 {
     DTEST_LOG << "DmsTokenCallbackTest CheckDeviceIdTest_003 begin" << std::endl;
+    ASSERT_NE(dmsTokenCallback_, nullptr);
     std::string localDeviceId = "1";
     std::string remoteDeviceId = "2";
     bool result = dmsTokenCallback_->CheckDeviceId(localDeviceId, remoteDeviceId);
@@ -212,6 +220,7 @@ HWTEST_F(DmsTokenCallbackTest, CheckDeviceIdTest_003, TestSize.Level3)
 HWTEST_F(DmsTokenCallbackTest, GetRemoteDmsTest_001, TestSize.Level3)
 {
     DTEST_LOG << "DmsTokenCallbackTest GetRemoteDmsTest_001 begin" << std::endl;
+    ASSERT_NE(dmsTokenCallback_, nullptr);
     std::string remoteDeviceId;
     sptr<IDistributedSched> result = dmsTokenCallback_->GetRemoteDms(remoteDeviceId);
     EXPECT_EQ(result, nullptr);
@@ -227,6 +236,7 @@ HWTEST_F(DmsTokenCallbackTest, GetRemoteDmsTest_001, TestSize.Level3)
 HWTEST_F(DmsTokenCallbackTest, GetRemoteDmsTest_002, TestSize.Level3)
 {
     DTEST_LOG << "DmsTokenCallbackTest GetRemoteDmsTest_002 begin" << std::endl;
+    ASSERT_NE(dmsTokenCallback_, nullptr);
     std::string remoteDeviceId = "1";
     sptr<IDistributedSched> result = dmsTokenCallback_->GetRemoteDms(remoteDeviceId);
     EXPECT_EQ(result, nullptr);

@@ -58,6 +58,7 @@ HWTEST_F(AppStateObserverTest, OnAbilityStateChanged_001, TestSize.Level3)
 {
     DTEST_LOG << "AppStateObserverTest OnAbilityStateChanged_001 begin" << std::endl;
 
+    ASSERT_NE(appStateObserver_, nullptr);
     AppExecFwk::AppStateData appStateData;
     appStateObserver_->OnForegroundApplicationChanged(appStateData);
 
@@ -83,6 +84,7 @@ HWTEST_F(AppStateObserverTest, OnAbilityStateChanged_001, TestSize.Level3)
 HWTEST_F(AppStateObserverTest, OnAbilityStateChanged_002, TestSize.Level3)
 {
     DTEST_LOG << "AppStateObserverTest OnAbilityStateChanged_001 begin" << std::endl;
+    ASSERT_NE(appStateObserver_, nullptr);
     AppExecFwk::AbilityStateData abilityStateData;
     abilityStateData.abilityState = FOREGROUND;
     appStateObserver_->OnAbilityStateChanged(abilityStateData);
@@ -102,6 +104,7 @@ HWTEST_F(AppStateObserverTest, OnAbilityStateChanged_002, TestSize.Level3)
 HWTEST_F(AppStateObserverTest, OnAbilityStateChanged_003, TestSize.Level3)
 {
     DTEST_LOG << "AppStateObserverTest OnAbilityStateChanged_001 begin" << std::endl;
+    ASSERT_NE(appStateObserver_, nullptr);
     AppExecFwk::AbilityStateData abilityStateData;
     abilityStateData.abilityState = BACKGROUND;
     appStateObserver_->OnAbilityStateChanged(abilityStateData);

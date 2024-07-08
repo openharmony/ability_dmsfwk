@@ -1482,7 +1482,9 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub001, TestSize.
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub001 start" << std::endl;
     sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    ASSERT_NE(connect, nullptr);
     sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect);
+    ASSERT_NE(connectStub, nullptr);
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         return;
@@ -1507,7 +1509,9 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub002, TestSize.
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub002 start" << std::endl;
     sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    ASSERT_NE(connect, nullptr);
     sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
+    ASSERT_NE(connectStub, nullptr);
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         return;
@@ -1532,7 +1536,9 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub003, TestSize.
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub003 start" << std::endl;
     sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    ASSERT_NE(connect, nullptr);
     sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect);
+    ASSERT_NE(connectStub, nullptr);
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         return;
@@ -1556,7 +1562,9 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub004, TestSize.
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub004 start" << std::endl;
     sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    ASSERT_NE(connect, nullptr);
     sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
+    ASSERT_NE(connectStub, nullptr);
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         return;
@@ -1580,7 +1588,9 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub005, TestSize.
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub005 start" << std::endl;
     sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    ASSERT_NE(connect, nullptr);
     sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
+    ASSERT_NE(connectStub, nullptr);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1602,7 +1612,9 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub006, TestSize.
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub006 start" << std::endl;
     sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    ASSERT_NE(connect, nullptr);
     sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
+    ASSERT_NE(connectStub, nullptr);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1624,7 +1636,9 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub007, TestSize.
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub007 start" << std::endl;
     sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    ASSERT_NE(connect, nullptr);
     sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
+    ASSERT_NE(connectStub, nullptr);
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         return;
@@ -1649,7 +1663,9 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub008, TestSize.
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub008 start" << std::endl;
     sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    ASSERT_NE(connect, nullptr);
     sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
+    ASSERT_NE(connectStub, nullptr);
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         return;
