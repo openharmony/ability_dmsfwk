@@ -19,7 +19,6 @@
 
 #include "base/continuationmgr_log.h"
 #include "distributed_ability_manager_client.h"
-#include "distributed_sched_utils.h"
 #include "js_runtime_utils.h"
 #include "napi_common_util.h"
 #include "napi_error_code.h"
