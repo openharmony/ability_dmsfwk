@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,13 @@ void AbilityConnectionWrapperProxy::OnAbilityConnectDone(const AppExecFwk::Eleme
     PARCEL_WRITE_HELPER_NORET(data, Parcelable, &element);
     PARCEL_WRITE_HELPER_NORET(data, RemoteObject, remoteObject);
     PARCEL_WRITE_HELPER_NORET(data, Int32, resultCode);
-    int32_t errCode = Remote()->SendRequest(IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("remote service null");
+        return;
+    }
+    int32_t errCode = remote->SendRequest(IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
     HILOGD("AbilityConnectionWrapperProxy::OnAbilityConnectDone result %{public}d", errCode);
 }
 
@@ -57,7 +63,12 @@ void AbilityConnectionWrapperProxy::OnAbilityDisconnectDone(const AppExecFwk::El
     MessageOption option;
     PARCEL_WRITE_HELPER_NORET(data, Parcelable, &element);
     PARCEL_WRITE_HELPER_NORET(data, Int32, resultCode);
-    int32_t errCode = Remote()->SendRequest(IAbilityConnection::ON_ABILITY_DISCONNECT_DONE, data, reply, option);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("remote service null");
+        return;
+    }
+    int32_t errCode = remote->SendRequest(IAbilityConnection::ON_ABILITY_DISCONNECT_DONE, data, reply, option);
     HILOGD("AbilityConnectionWrapperProxy::OnAbilityDisconnectDone result %{public}d", errCode);
 }
 } // namespace DistributedSchedule
