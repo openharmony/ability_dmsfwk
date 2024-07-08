@@ -70,6 +70,7 @@ void DistributedWantParamWrapperBaseTest::TearDown(void)
  */
 HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(wantParamWrapperPtr_, nullptr);
     DistributedWantParams wantParams;
     ErrCode result = wantParamWrapperPtr_->GetValue(wantParams);
 
@@ -85,6 +86,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_010
  */
 HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(wantParamWrapperPtr_, nullptr);
     DistributedWantParams wantParams;
     ErrCode result = wantParamWrapperPtr_->GetValue(wantParams);
 
@@ -103,6 +105,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_020
  */
 HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(wantParamWrapperPtr_, nullptr);
     DistributedWantParams wantParams;
     wantParams.SetParam(STRING_WANT_PARAMS_KEY_01, String::Box(STRING_WANT_PARAMS_VALUE_01));
     DistributedWantParamWrapper wantParamWrapper(wantParams);
@@ -119,6 +122,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_030
  */
 HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(wantParamWrapperPtr_, nullptr);
     DistributedWantParams wantParams;
     DistributedWantParamWrapper wantParamWrapper(wantParams);
 
@@ -284,6 +288,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_140
  */
 HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1500, Function | MediumTest | Level3)
 {
+    ASSERT_NE(wantParamWrapperPtr_, nullptr);
     auto wantParamsString = wantParamWrapperPtr_->ToString();
 
     EXPECT_EQ(wantParamsString, STRING_WANT_PARAMS_STRING_01);
@@ -328,6 +333,7 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_170
  */
 HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1800, Function | MediumTest | Level3)
 {
+    ASSERT_NE(wantParamWrapperPtr_, nullptr);
     auto wantParamsString = wantParamWrapperPtr_->ToString();
 
     EXPECT_EQ(wantParamsString, STRING_WANT_PARAMS_STRING_01);

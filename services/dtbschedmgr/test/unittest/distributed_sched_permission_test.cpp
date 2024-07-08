@@ -958,6 +958,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckBackgroundPermission_006, TestSize
 HWTEST_F(DistributedSchedPermissionTest, CheckBackgroundPermission_007, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedPermissionTest CheckBackgroundPermission_007 begin" << std::endl;
+    ASSERT_NE(DnetworkAdapter::GetInstance(), nullptr);
     std::string udid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(deviceId_);
     std::string deviceId = udid;
     AccessTokenKit::DeleteRemoteToken(deviceId, 0x20100000);
@@ -1134,6 +1135,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckTargetAbilityVisible_003, TestSize
 HWTEST_F(DistributedSchedPermissionTest, CheckTargetAbilityVisible_004, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedPermissionTest CheckTargetAbilityVisible_004 begin" << std::endl;
+    ASSERT_NE(DnetworkAdapter::GetInstance(), nullptr);
     std::string udid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(deviceId_);
     std::string deviceId = udid;
     AccessTokenKit::DeleteRemoteToken(deviceId, 0x20100000);
@@ -1188,6 +1190,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckTargetAbilityVisible_004, TestSize
 HWTEST_F(DistributedSchedPermissionTest, CheckTargetAbilityVisible_005, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedPermissionTest CheckTargetAbilityVisible_005 begin" << std::endl;
+    ASSERT_NE(DnetworkAdapter::GetInstance(), nullptr);
     std::string udid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(deviceId_);
     std::string deviceId = udid;
     AccessTokenKit::DeleteRemoteToken(deviceId, 0x20100000);

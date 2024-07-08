@@ -393,7 +393,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_0
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(ret, ERR_OK);
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_CONNECT, notifier);
     EXPECT_EQ(ret, ERR_OK);
     ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_CONNECT, notifier);
@@ -426,7 +426,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_0
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(ret, ERR_OK);
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_CONNECT, notifier);
     EXPECT_EQ(ret, ERR_OK);
     ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_DISCONNECT, notifier);
@@ -460,7 +460,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_0
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(ret, ERR_OK);
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     {
         std::lock_guard<std::mutex> callbackMapLock(dtbabilitymgrService_->callbackMapMutex_);
         dtbabilitymgrService_->callbackMap_[token] = nullptr;
@@ -541,7 +541,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UnregisterDeviceSelectionCallback
     /**
      * @tc.steps: step5. test UnregisterDeviceSelectionCallback when callback is registered.
      */
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_CONNECT, notifier);
     EXPECT_EQ(ret, ERR_OK);
 
@@ -572,7 +572,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UnregisterDeviceSelectionCallback
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(ret, ERR_OK);
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_CONNECT, notifier);
     EXPECT_EQ(ret, ERR_OK);
     ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_DISCONNECT, notifier);
@@ -622,7 +622,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UpdateConnectStatus_001, TestSize
     /**
      * @tc.steps: step4. test UpdateConnectStatus when callback is registered.
      */
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_CONNECT, notifier);
     EXPECT_EQ(ret, ERR_OK);
     ret = dtbabilitymgrService_->UpdateConnectStatus(token, DEVICE_ID, DeviceConnectStatus::IDLE);
@@ -691,7 +691,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceDisconnect_001, TestSize.
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(ret, ERR_OK);
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_DISCONNECT, notifier);
     EXPECT_EQ(ret, ERR_OK);
     ret = dtbabilitymgrService_->OnDeviceDisconnect(token, continuationResults);
@@ -825,7 +825,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceDisconnect_002, TestS
      * @tc.steps: step2. test HandleDeviceConnect when continuationHandler_ is not nullptr.
      */
     dtbabilitymgrService_->continuationHandler_ = std::make_shared<ffrt::queue>("ContinuationMgr");
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     std::vector<ContinuationResult> continuationResults;
     bool ret = dtbabilitymgrService_->HandleDeviceDisconnect(notifier, continuationResults);
     EXPECT_EQ(ret, true);
@@ -871,7 +871,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, QueryTokenByNotifier_001, TestSiz
         dtbabilitymgrService_->callbackMap_.clear();
         dtbabilitymgrService_->callbackMap_[INVALID_CODE] = nullptr;
     }
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t token;
     bool ret = dtbabilitymgrService_->QueryTokenByNotifier(notifier, token);
     EXPECT_FALSE(ret);
@@ -926,7 +926,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleNotifierDied_001, TestSize.
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     int32_t res = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(res, ERR_OK);
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
     notifierInfo->SetNotifier(EVENT_CONNECT, notifier);
     {
@@ -995,7 +995,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, DumpNotifierLocked_002, TestSize.
     std::vector<int32_t> tokenVec;
     std::string info;
     std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     notifierInfo->SetNotifier(EVENT_CONNECT, notifier);
     {
         std::lock_guard<std::mutex> autoLock(dtbabilitymgrService_->callbackMapMutex_);
@@ -1076,7 +1076,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UpdateConnectStatus_003, TestSize
     int32_t token = 0;
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_CONNECT, notifier);
     EXPECT_EQ(ret, ERR_OK);
     dtbabilitymgrService_->ScheduleStartDeviceManager(dtbabilitymgrService_, 1, continuationExtraParams);
@@ -1234,7 +1234,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceConnect_002, TestSize.Lev
     int32_t token = 0;
     std::vector<ContinuationResult> continuationResults;
     std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     notifierInfo->SetNotifier(EVENT_CONNECT, notifier);
     {
         std::lock_guard<std::mutex> autoLock(dtbabilitymgrService_->callbackMapMutex_);
@@ -1319,7 +1319,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleNotifierDied_002, TestSize.
         return;
     }
     int32_t token = 0;
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
     notifierInfo->SetNotifier(EVENT_CONNECT, notifier);
     {

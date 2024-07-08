@@ -35,6 +35,7 @@ config("distributed_sched_config") {
     "include/continue/state/sink_state",
     "include/distributedWant",
     "include/softbus_adapter/transport",
+    "include/softbus_adapter/allconnectmgr",
   ]
   defines = []
   if (dmsfwk_mission_manager) {
@@ -77,6 +78,7 @@ ohos_shared_library("distributedschedsvr") {
     cflags = [
       "-DDMSFWK_SAME_ACCOUNT",
       "-DDMSFWK_INTERACTIVE_ADAPTER",
+      "-DDMSFWK_ALL_CONNECT_MGR",
     ]
   }
 
@@ -130,6 +132,7 @@ ohos_shared_library("distributedschedsvr") {
     "src/dms_token_callback.cpp",
     "src/dms_version_manager.cpp",
     "src/dtbschedmgr_device_info_storage.cpp",
+    "src/softbus_adapter/allconnectmgr/dsched_all_connect_manager.cpp",
     "src/softbus_adapter/transport/dsched_data_buffer.cpp",
     "src/softbus_adapter/transport/dsched_softbus_session.cpp",
     "src/softbus_adapter/transport/dsched_transport_softbus_adapter.cpp",
@@ -179,6 +182,7 @@ ohos_shared_library("distributedschedsvr") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
+    "os_account:libaccountkits",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "wifi:wifi_sdk",

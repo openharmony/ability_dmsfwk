@@ -263,6 +263,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_DistributedWant_Convert_01
 HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Distributedwant_Convert_0200, Function | MediumTest | Level3)
 {
     std::shared_ptr<DistributedWant> dwant = std::make_shared<DistributedWant>();
+    ASSERT_NE(dwant, nullptr);
     std::string description = "liuuy";
     dwant->SetType(description);
     dwant->SetFlags(16);
@@ -319,6 +320,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Distributedwant_Convert_02
 HWTEST_F(DistributedWantBaseTest, DistributedSchedule_Distributedwant_Convert_0201, Function | MediumTest | Level3)
 {
     std::shared_ptr<DistributedWant> dwant = std::make_shared<DistributedWant>();
+    ASSERT_NE(dwant, nullptr);
     std::vector<bool> bv;
     bv.emplace_back(true);
     bv.emplace_back(false);
@@ -2079,6 +2081,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ParseUri_ToUri_1401, F
  */
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Flags_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     int flags = 3;
     int returnsflags;
     int description = 8;
@@ -2100,6 +2103,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Flags_0100, Function |
  */
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_MakeMainAbility_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     ElementName elementName;
 
     std::string action("action.system.home");
@@ -2128,6 +2132,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_MakeMainAbility_0100, 
  */
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ClearWant_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     DistributedWant want;
     ElementName elementName;
     std::string empty = "";
@@ -2148,6 +2153,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ClearWant_0100, Functi
  */
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_replaceParams_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     DistributedWantParams wantParams;
     std::string keyStr = "123";
     std::string valueStr = "123";
@@ -2164,6 +2170,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_replaceParams_0100, Fu
  */
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_setElement_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string valueStr1 = "xxxxx";
     std::string valueStr2 = "uaid";
     std::string valueStr3 = "uaygfi";
@@ -2201,6 +2208,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_setElement_0100, Funct
  */
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Action_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setValue;
     want_->SetAction(setValue);
     EXPECT_EQ(setValue, want_->GetAction());
@@ -2213,6 +2221,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Action_0200, Function 
  */
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Action_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setValue("action.system.com");
     want_->SetAction(setValue);
     EXPECT_STREQ(setValue.c_str(), want_->GetAction().c_str());
@@ -2310,6 +2319,7 @@ void DistributedWantBoolArrayParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantBoolArrayParamTest, DistributedScheduleWant_BoolArray_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     std::vector<bool> setValue = std::get<2>(GetParam());
@@ -2366,6 +2376,7 @@ void DistributedWantCharArrayParamTest::TearDown(void)
 HWTEST_P(DistributedWantCharArrayParamTest, DistributedScheduleWant_Parameters_CharArray_0100,
     Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     std::vector<zchar> setValue = std::get<2>(GetParam());
@@ -2389,6 +2400,7 @@ INSTANTIATE_TEST_SUITE_P(WantCharArrayParamTestCaseP, DistributedWantCharArrayPa
 HWTEST_F(DistributedWantCharArrayParamTest, DistributedScheduleWant_Parameters_CharArray_0200,
     Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<zchar> defaultValue;
     std::string getKey("aa");
     EXPECT_EQ(defaultValue, want_->GetCharArrayParam(getKey));
@@ -2402,6 +2414,7 @@ HWTEST_F(DistributedWantCharArrayParamTest, DistributedScheduleWant_Parameters_C
 HWTEST_F(DistributedWantCharArrayParamTest, DistributedScheduleWant_Parameters_CharArray_0300,
     Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string emptyStr("ff");
     std::vector<zchar> firstValue({U'中', U'文'});
     std::vector<zchar> secondValue({U'字', U'符'});
@@ -2424,6 +2437,7 @@ HWTEST_F(DistributedWantCharArrayParamTest, DistributedScheduleWant_Parameters_C
 HWTEST_F(DistributedWantCharArrayParamTest, DistributedScheduleWant_Parameters_CharArray_0400,
     Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string firstKey("%1uH3");
     std::vector<zchar> firstValue({U'中', U'文'});
     std::vector<zchar> secondValue({U'字', U'符'});
@@ -2476,6 +2490,7 @@ void DistributedWantCharParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantCharParamTest, DistributedScheduleWant_Parameters_Char_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     zchar setValue = std::get<2>(GetParam());
@@ -2496,6 +2511,7 @@ INSTANTIATE_TEST_SUITE_P(WantParametersCharTestCaseP, DistributedWantCharParamTe
  */
 HWTEST_F(DistributedWantCharParamTest, DistributedScheduleWant_Parameters_Char_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     zchar defaultValue = U'文';
     std::string getKey("aa");
     EXPECT_EQ(defaultValue, want_->GetCharParam(getKey, defaultValue));
@@ -2508,6 +2524,7 @@ HWTEST_F(DistributedWantCharParamTest, DistributedScheduleWant_Parameters_Char_0
  */
 HWTEST_F(DistributedWantCharParamTest, DistributedScheduleWant_Parameters_Char_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string emptyStr("jj");
     zchar firstValue = U'中';
     zchar secondValue = U'文';
@@ -2530,6 +2547,7 @@ HWTEST_F(DistributedWantCharParamTest, DistributedScheduleWant_Parameters_Char_0
  */
 HWTEST_F(DistributedWantCharParamTest, DistributedScheduleWant_Parameters_Char_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string firstKey("%1uH3");
     zchar firstValue = U'中';
     zchar secondValue = U'文';
@@ -2584,6 +2602,7 @@ void DistributedWantDoubleArrayParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantDoubleArrayParamTest, DistributedScheduleWant_DoubleArray_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     std::vector<double> setValue = std::get<2>(GetParam());
@@ -2606,6 +2625,7 @@ INSTANTIATE_TEST_SUITE_P(WantDoubleArrayParamTestCaseP, DistributedWantDoubleArr
  */
 HWTEST_F(DistributedWantDoubleArrayParamTest, DistributedScheduleWant_DoubleArray_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<double> defaultValue;
     std::string key = "aa";
     EXPECT_EQ(defaultValue, want_->GetDoubleArrayParam(key));
@@ -2618,6 +2638,7 @@ HWTEST_F(DistributedWantDoubleArrayParamTest, DistributedScheduleWant_DoubleArra
  */
 HWTEST_F(DistributedWantDoubleArrayParamTest, DistributedScheduleWant_DoubleArray_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<double> defaultValue;
     std::string setKey1 = "cc";
     std::string setKey2 = "aa";
@@ -2640,6 +2661,7 @@ HWTEST_F(DistributedWantDoubleArrayParamTest, DistributedScheduleWant_DoubleArra
  */
 HWTEST_F(DistributedWantDoubleArrayParamTest, DistributedScheduleWant_DoubleArray_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<double> defaultValue;
     std::string setKey1 = "%1uH3";
     std::string setKey2 = "aa";
@@ -2696,6 +2718,7 @@ void DistributedWantFloatArrayParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantFloatArrayParamTest, DistributedScheduleWant_FloatArray_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     std::vector<float> setValue = std::get<2>(GetParam());
@@ -2718,6 +2741,7 @@ INSTANTIATE_TEST_SUITE_P(WantFloatArrayParamTestCaseP, DistributedWantFloatArray
  */
 HWTEST_F(DistributedWantFloatArrayParamTest, DistributedScheduleWant_FloatArray_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<float> defaultValue;
     std::string key = "aa";
     EXPECT_EQ(defaultValue, want_->GetFloatArrayParam(key));
@@ -2730,6 +2754,7 @@ HWTEST_F(DistributedWantFloatArrayParamTest, DistributedScheduleWant_FloatArray_
  */
 HWTEST_F(DistributedWantFloatArrayParamTest, DistributedScheduleWant_FloatArray_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<float> defaultValue;
     std::string setKey1 = "hh";
     std::string setKey2 = "aa";
@@ -2751,6 +2776,7 @@ HWTEST_F(DistributedWantFloatArrayParamTest, DistributedScheduleWant_FloatArray_
  */
 HWTEST_F(DistributedWantFloatArrayParamTest, DistributedScheduleWant_FloatArray_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<float> defaultValue;
     std::string setKey1 = "%1uH3";
     std::string setKey2 = "aa";
@@ -2806,6 +2832,7 @@ void DistributedWantLongArrayParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantLongArrayParamTest, DistributedScheduleWant_LongArray_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     std::vector<long> setValue = std::get<2>(GetParam());
@@ -2828,6 +2855,7 @@ INSTANTIATE_TEST_SUITE_P(WantLongArrayParamTestCaseP, DistributedWantLongArrayPa
  */
 HWTEST_F(DistributedWantLongArrayParamTest, DistributedScheduleWant_LongArray_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<long> defaultValue;
     std::string key = "aa";
     EXPECT_EQ(defaultValue, want_->GetLongArrayParam(key));
@@ -2840,6 +2868,7 @@ HWTEST_F(DistributedWantLongArrayParamTest, DistributedScheduleWant_LongArray_02
  */
 HWTEST_F(DistributedWantLongArrayParamTest, DistributedScheduleWant_LongArray_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<long> defaultValue;
     std::string setKey1 = "bb";
     std::string setKey2 = "aa";
@@ -2861,6 +2890,7 @@ HWTEST_F(DistributedWantLongArrayParamTest, DistributedScheduleWant_LongArray_03
  */
 HWTEST_F(DistributedWantLongArrayParamTest, DistributedScheduleWant_LongArray_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<long> defaultValue;
     std::string setKey1 = "%1uH3";
     std::string setKey2 = "aa";
@@ -2915,6 +2945,7 @@ void DistributedWantShortArrayParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantShortArrayParamTest, DistributedScheduleWant_ShortArray_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     std::vector<short> setValue = std::get<2>(GetParam());
@@ -2937,6 +2968,7 @@ INSTANTIATE_TEST_SUITE_P(WantShortArrayParamTestCaseP, DistributedWantShortArray
  */
 HWTEST_F(DistributedWantShortArrayParamTest, DistributedScheduleWant_ShortArray_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<short> defaultValue;
     std::string getKey("aa");
     EXPECT_EQ(defaultValue, want_->GetShortArrayParam(getKey));
@@ -2949,6 +2981,7 @@ HWTEST_F(DistributedWantShortArrayParamTest, DistributedScheduleWant_ShortArray_
  */
 HWTEST_F(DistributedWantShortArrayParamTest, DistributedScheduleWant_ShortArray_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string emptyStr("hh");
     std::vector<short> firstValue({1, 4, -9});
     std::vector<short> secondValue({1, 8, -9});
@@ -2970,6 +3003,7 @@ HWTEST_F(DistributedWantShortArrayParamTest, DistributedScheduleWant_ShortArray_
  */
 HWTEST_F(DistributedWantShortArrayParamTest, DistributedScheduleWant_ShortArray_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string firstKey("%1uH3");
     std::vector<short> firstValue({-1, -2});
     std::vector<short> secondValue({-1, -2, -1, -2, 0});
@@ -3021,6 +3055,7 @@ void DistributedWantShortParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantShortParamTest, DistributedScheduleWant_Short_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     short setValue = std::get<2>(GetParam());
@@ -3052,6 +3087,7 @@ HWTEST_F(DistributedWantShortParamTest, DistributedScheduleWant_Short_0200, Func
  */
 HWTEST_F(DistributedWantShortParamTest, DistributedScheduleWant_Short_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string emptyStr("bb");
     short firstValue = 1;
     short secondValue = 2;
@@ -3074,6 +3110,7 @@ HWTEST_F(DistributedWantShortParamTest, DistributedScheduleWant_Short_0300, Func
  */
 HWTEST_F(DistributedWantShortParamTest, DistributedScheduleWant_Short_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string firstKey("%1uH3");
     short firstValue = -1;
     short secondValue = 0;
@@ -3127,6 +3164,7 @@ void DistributedWantStringArrayParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantStringArrayParamTest, DistributedScheduleWant_StringArray_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     std::vector<std::string> setValue = std::get<2>(GetParam());
@@ -3149,6 +3187,7 @@ INSTANTIATE_TEST_SUITE_P(WantStringArrayParamTestCaseP, DistributedWantStringArr
  */
 HWTEST_F(DistributedWantStringArrayParamTest, DistributedScheduleWant_StringArray_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<std::string> defaultValue;
     std::string key = "aa";
     std::vector<std::string> resultValue = want_->GetStringArrayParam(key);
@@ -3162,6 +3201,7 @@ HWTEST_F(DistributedWantStringArrayParamTest, DistributedScheduleWant_StringArra
  */
 HWTEST_F(DistributedWantStringArrayParamTest, DistributedScheduleWant_StringArray_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<std::string> defaultValue;
     std::vector<std::string> setValue1 = {"aaa", "2132"};
     std::vector<std::string> setValue2 = {"1*中_aR", "dbdb"};
@@ -3185,6 +3225,7 @@ HWTEST_F(DistributedWantStringArrayParamTest, DistributedScheduleWant_StringArra
  */
 HWTEST_F(DistributedWantStringArrayParamTest, DistributedScheduleWant_StringArray_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<std::string> defaultValue;
     std::vector<std::string> setValue = {"aaa", "2132"};
     std::string key1 = "%1uH3";
@@ -3239,6 +3280,7 @@ void DistributedWantStringParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantStringParamTest, DistributedScheduleWant_String_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     std::string setValue = std::get<2>(GetParam());
@@ -3259,6 +3301,7 @@ INSTANTIATE_TEST_SUITE_P(WantStringParamTestCaseP, DistributedWantStringParamTes
  */
 HWTEST_F(DistributedWantStringParamTest, DistributedScheduleWant_String_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string defaultStrValue;
     std::string key = "aa";
     EXPECT_EQ(defaultStrValue, want_->GetStringParam(key));
@@ -3271,6 +3314,7 @@ HWTEST_F(DistributedWantStringParamTest, DistributedScheduleWant_String_0200, Fu
  */
 HWTEST_F(DistributedWantStringParamTest, DistributedScheduleWant_String_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string defaultStrValue;
     std::string setValue1 = "aaa";
     std::string setValue2 = "1*中_aR";
@@ -3291,6 +3335,7 @@ HWTEST_F(DistributedWantStringParamTest, DistributedScheduleWant_String_0300, Fu
  */
 HWTEST_F(DistributedWantStringParamTest, DistributedScheduleWant_String_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string key1 = "%1uH3";
     std::string defaultStrValue;
     std::string setValue1 = "aaa";
@@ -3341,6 +3386,7 @@ void DistributedWantLongParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantLongParamTest, DistributedScheduleWant_LongParam_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     long setValue = std::get<2>(GetParam());
@@ -3361,6 +3407,7 @@ INSTANTIATE_TEST_SUITE_P(WantLongParamTestCaseP, DistributedWantLongParamTest,
  */
 HWTEST_F(DistributedWantLongParamTest, DistributedScheduleWant_LongParam_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     long defaultValue = 100;
     std::string key = "aa";
     EXPECT_EQ(defaultValue, want_->GetLongParam(key, defaultValue));
@@ -3373,6 +3420,7 @@ HWTEST_F(DistributedWantLongParamTest, DistributedScheduleWant_LongParam_0200, F
  */
 HWTEST_F(DistributedWantLongParamTest, DistributedScheduleWant_LongParam_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey1 = "dd";
     std::string setKey2 = "aa";
     long setValue1 = 1;
@@ -3395,6 +3443,7 @@ HWTEST_F(DistributedWantLongParamTest, DistributedScheduleWant_LongParam_0300, F
  */
 HWTEST_F(DistributedWantLongParamTest, DistributedScheduleWant_LongParam_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey1 = "%1uH3";
     std::string setKey2 = "aa";
     long setValue1 = -1;
@@ -3449,6 +3498,7 @@ void DistributedWantIntParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantIntParamTest, DistributedScheduleWant_IntParam_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     int setValue = std::get<2>(GetParam());
@@ -3481,6 +3531,7 @@ HWTEST_F(DistributedWantIntParamTest, DistributedScheduleWant_IntParam_0200, Fun
  */
 HWTEST_F(DistributedWantIntParamTest, DistributedScheduleWant_IntParam_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string emptyStr("bb");
     int firstValue = 1;
     int secondValue = 2;
@@ -3503,6 +3554,7 @@ HWTEST_F(DistributedWantIntParamTest, DistributedScheduleWant_IntParam_0300, Fun
  */
 HWTEST_F(DistributedWantIntParamTest, DistributedScheduleWant_IntParam_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string firstKey("%1uH3");
     int firstValue = -1;
     int secondValue = 0;
@@ -3557,6 +3609,7 @@ void DistributedWantIntArrayParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantIntArrayParamTest, DistributedScheduleWant_IntArrayParam_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     std::vector<int> setValue = std::get<2>(GetParam());
@@ -3579,6 +3632,7 @@ INSTANTIATE_TEST_SUITE_P(WantIntArrayParamTestCaseP, DistributedWantIntArrayPara
  */
 HWTEST_F(DistributedWantIntArrayParamTest, DistributedScheduleWant_IntArrayParam_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<int> defaultValue;
     std::string getKey("aa");
     EXPECT_EQ(defaultValue, want_->GetIntArrayParam(getKey));
@@ -3591,6 +3645,7 @@ HWTEST_F(DistributedWantIntArrayParamTest, DistributedScheduleWant_IntArrayParam
  */
 HWTEST_F(DistributedWantIntArrayParamTest, DistributedScheduleWant_IntArrayParam_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string emptyStr("cc");
     std::vector<int> firstValue({1, 4, -9});
     std::vector<int> secondValue({1, 8, -9});
@@ -3612,6 +3667,7 @@ HWTEST_F(DistributedWantIntArrayParamTest, DistributedScheduleWant_IntArrayParam
  */
 HWTEST_F(DistributedWantIntArrayParamTest, DistributedScheduleWant_IntArrayParam_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string firstKey("%1uH3");
     std::vector<int> firstValue({-1, -2});
     std::vector<int> secondValue({-1, -2, -1, -2, 0});
@@ -3666,6 +3722,7 @@ void DistributedWantFloatParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantFloatParamTest, DistributedScheduleWant_FloatParam_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     float setValue = std::get<2>(GetParam());
@@ -3698,6 +3755,7 @@ HWTEST_F(DistributedWantFloatParamTest, DistributedScheduleWant_FloatParam_0200,
  */
 HWTEST_F(DistributedWantFloatParamTest, DistributedScheduleWant_FloatParam_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey1 = "ee";
     std::string setKey2 = "aa";
     float setValue1 = 1.1;
@@ -3720,6 +3778,7 @@ HWTEST_F(DistributedWantFloatParamTest, DistributedScheduleWant_FloatParam_0300,
  */
 HWTEST_F(DistributedWantFloatParamTest, DistributedScheduleWant_FloatParam_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey1 = "%1uH3";
     std::string setKey2 = "aa";
     float setValue1 = -1.1;
@@ -3774,6 +3833,7 @@ void DistributedWantDoubleParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantDoubleParamTest, DistributedScheduleWant_DoubleParam_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     double setValue = std::get<2>(GetParam());
@@ -3795,6 +3855,7 @@ INSTANTIATE_TEST_SUITE_P(WantDoubleParamTestCaseP, DistributedWantDoubleParamTes
  */
 HWTEST_F(DistributedWantDoubleParamTest, DistributedScheduleWant_DoubleParam_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     double defaultValue = 100.1;
     std::string key = "aa";
     EXPECT_EQ(defaultValue, want_->GetDoubleParam(key, defaultValue));
@@ -3807,6 +3868,7 @@ HWTEST_F(DistributedWantDoubleParamTest, DistributedScheduleWant_DoubleParam_030
  */
 HWTEST_F(DistributedWantDoubleParamTest, DistributedScheduleWant_DoubleParam_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey1 = "ff";
     std::string setKey2 = "aa";
     double setValue1 = 1.1;
@@ -3829,6 +3891,7 @@ HWTEST_F(DistributedWantDoubleParamTest, DistributedScheduleWant_DoubleParam_040
  */
 HWTEST_F(DistributedWantDoubleParamTest, DistributedScheduleWant_ByteArray_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey1 = "%1uH3";
     std::string setKey2 = "aa";
     double setValue1 = -1.1;
@@ -3884,6 +3947,7 @@ void DistributedWantByteArrayParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantByteArrayParamTest, DistributedScheduleWant_ByteArray_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     std::vector<byte> setValue = std::get<2>(GetParam());
@@ -3905,6 +3969,7 @@ INSTANTIATE_TEST_SUITE_P(WantByteArrayParamTestCaseP, DistributedWantByteArrayPa
  */
 HWTEST_F(DistributedWantByteArrayParamTest, DistributedScheduleWant_ByteArray_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<byte> defaultValue;
     std::string getKey("aa");
     EXPECT_EQ(defaultValue, want_->GetByteArrayParam(getKey));
@@ -3917,6 +3982,7 @@ HWTEST_F(DistributedWantByteArrayParamTest, DistributedScheduleWant_ByteArray_02
  */
 HWTEST_F(DistributedWantByteArrayParamTest, DistributedScheduleWant_ByteArray_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string emptyStr("gg");
     std::vector<byte> firstValue({'a', '2'});
     std::vector<byte> secondValue({'1', 'd'});
@@ -3938,6 +4004,7 @@ HWTEST_F(DistributedWantByteArrayParamTest, DistributedScheduleWant_ByteArray_03
  */
 HWTEST_F(DistributedWantByteArrayParamTest, DistributedScheduleWant_ByteArray_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string firstKey("%1uH3");
     std::vector<byte> firstValue({'a', '2'});
     std::vector<byte> secondValue({'w', '$'});
@@ -3990,6 +4057,7 @@ void DistributedWantBoolParamTest::TearDown(void)
  */
 HWTEST_P(DistributedWantBoolParamTest, DistributedScheduleWant_BoolParam_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string setKey = std::get<0>(GetParam());
     std::string getKey = std::get<1>(GetParam());
     bool setValue = std::get<2>(GetParam());
@@ -4015,6 +4083,7 @@ INSTANTIATE_TEST_SUITE_P(WantBoolParamTestCaseP, DistributedWantBoolParamTest,
  */
 HWTEST_F(DistributedWantBoolParamTest, DistributedScheduleWant_BoolParam_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string firstKey("_中文ddPEJKJ#(&*~#^%");
     std::string secondKey("key33");
     want_->SetParam(firstKey, true);
@@ -4030,6 +4099,7 @@ HWTEST_F(DistributedWantBoolParamTest, DistributedScheduleWant_BoolParam_0200, F
  */
 HWTEST_F(DistributedWantBoolParamTest, DistributedScheduleWant_BoolParam_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string keyStr("_中文ddPEJKJ#(&*~#^%");
     for (int i = 0; i < 20; i++) {
         want_->SetParam(keyStr, true);
@@ -4071,6 +4141,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Want_0100, Function | 
  */
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Entity_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::string entity1 = "entity.system.entity1";
 
     want_->AddEntity(entity1);
@@ -4108,6 +4179,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Entity_0100, Function 
  */
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_HasParameter_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(want_, nullptr);
     std::vector<std::string> vector;
     std::string key = "system.want.test.key";
     std::string key2 = "system.want.test.key2";
@@ -4204,6 +4276,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ToString_0100, Functio
 HWTEST_F(DistributedWantBaseTest, array_test_001, TestSize.Level3)
 {
     sptr<Array> arrayObj(new Array(9, g_IID_IInteger));
+    ASSERT_NE(arrayObj, nullptr);
     long size = 0;
     arrayObj->GetLength(size);
     EXPECT_EQ(size, 9);
@@ -4223,6 +4296,7 @@ HWTEST_F(DistributedWantBaseTest, array_test_001, TestSize.Level3)
 HWTEST_F(DistributedWantBaseTest, array_test_002, TestSize.Level3)
 {
     sptr<Array> arrayObj(new Array(19, g_IID_IInteger));
+    ASSERT_NE(arrayObj, nullptr);
     arrayObj->Set(0, Integer::Box(23));
     sptr<IInterface> valueObj = nullptr;
     arrayObj->Get(0, valueObj);
@@ -4243,6 +4317,7 @@ HWTEST_F(DistributedWantBaseTest, array_test_002, TestSize.Level3)
 HWTEST_F(DistributedWantBaseTest, array_test_003, TestSize.Level3)
 {
     sptr<Array> arrayObj(new Array(5, g_IID_IInteger));
+    ASSERT_NE(arrayObj, nullptr);
     arrayObj->Set(0, Integer::Box(2));
     arrayObj->Set(1, Integer::Box(3));
     arrayObj->Set(2, Integer::Box(5));
@@ -4263,6 +4338,7 @@ HWTEST_F(DistributedWantBaseTest, array_test_004, TestSize.Level3)
 {
     sptr<IArray> arrayObj = Array::Parse("I5{2,3,5,7,11}");
     sptr<IInterface> valueObj = nullptr;
+    ASSERT_NE(arrayObj, nullptr);
     arrayObj->Get(0, valueObj);
     EXPECT_EQ(Integer::Unbox(IInteger::Query(valueObj)), 2);
     arrayObj->Get(1, valueObj);
@@ -4288,6 +4364,9 @@ HWTEST_F(DistributedWantBaseTest, array_test_005, TestSize.Level3)
     sptr<IArray> arrayObj1 = Array::Parse("I5{2,3,5,7,11}");
     sptr<IArray> arrayObj2 = Array::Parse("I5{2,3,7,7,11}");
     sptr<IArray> arrayObj3 = Array::Parse("I5{2,3,5,7,11}");
+    ASSERT_NE(arrayObj1, nullptr);
+    ASSERT_NE(arrayObj2, nullptr);
+    ASSERT_NE(arrayObj3, nullptr);
     EXPECT_FALSE(Object::Equals(*(arrayObj1.GetRefPtr()), *(arrayObj2.GetRefPtr())));
     EXPECT_TRUE(Object::Equals(*(arrayObj1.GetRefPtr()), *(arrayObj3.GetRefPtr())));
 }

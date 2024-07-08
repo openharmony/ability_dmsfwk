@@ -76,6 +76,10 @@ bool DSchedSoftbusSession::OnDisconnect()
 int32_t DSchedSoftbusSession::OnBytesReceived(std::shared_ptr<DSchedDataBuffer> buffer)
 {
     HILOGD("called");
+    if (buffer == nullptr) {
+        HILOGE("buffer is null");
+        return INVALID_PARAMETERS_ERR;
+    }
     PackRecvData(buffer);
     return ERR_OK;
 }
@@ -83,6 +87,10 @@ int32_t DSchedSoftbusSession::OnBytesReceived(std::shared_ptr<DSchedDataBuffer> 
 int32_t DSchedSoftbusSession::SendData(std::shared_ptr<DSchedDataBuffer> buffer, int32_t dataType)
 {
     HILOGD("called");
+    if (buffer == nullptr) {
+        HILOGE("buffer is null");
+        return INVALID_PARAMETERS_ERR;
+    }
     UnPackSendData(buffer, dataType);
     return ERR_OK;
 }

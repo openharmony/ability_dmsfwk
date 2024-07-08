@@ -77,11 +77,19 @@ void DSchedContinuationTest::DeviceInitCallBack::OnRemoteDied()
 sptr<IRemoteObject> DSchedContinuationTest::GetDSchedService() const
 {
     sptr<IRemoteObject> dsched = new MockDistributedSched();
+    if (dsched == nullptr) {
+        DTEST_LOG << "GetDSchedService dsched is null" << std::endl;
+        return nullptr;
+    }
     return dsched;
 }
 
 int32_t DSchedContinuationTest::PushAbilityToken()
 {
+    if (dschedContinuation_ == nullptr) {
+        DTEST_LOG << "dschedContinuation_ is null" << std::endl;
+        return -1;
+    }
     FuncContinuationCallback continuationCallback = [this] (int32_t missionId) {
         timeoutFlag_ = true;
     };
@@ -96,6 +104,10 @@ std::shared_ptr<Want> DSchedContinuationTest::MockWant(const std::string& bundle
 {
     ElementName element("", bundleName, ability);
     std::shared_ptr<Want> spWant = std::make_shared<Want>();
+    if (spWant == nullptr) {
+        DTEST_LOG << "spWant is null" << std::endl;
+        return nullptr;
+    }
     spWant->SetElement(element);
     spWant->SetFlags(flags);
     return spWant;
@@ -121,6 +133,14 @@ void DSchedContinuationTest::MockOnStart()
         std::make_shared<DSchedContinuation>();
     DistributedSchedService::GetInstance().dmsCallbackTask_ =
         std::make_shared<DmsCallbackTask>();
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DTEST_LOG << "MockOnStart dschedContinuation_ is nullptr" << std::endl;
+        return;
+    }
+    if (DistributedSchedService::GetInstance().dmsCallbackTask_ == nullptr) {
+        DTEST_LOG << "MockOnStart dmsCallbackTask_ is nullptr" << std::endl;
+        return;
+    }
     DistributedSchedService::GetInstance().dschedContinuation_->Init(continuationCallback);
     DistributedSchedService::GetInstance().dmsCallbackTask_->Init(freeCallback);
 }
@@ -141,6 +161,7 @@ sptr<IDistributedSched> DSchedContinuationTest::GetDms()
     proxy_ = iface_cast<IDistributedSched>(distributedObject);
     if (proxy_ == nullptr) {
         DTEST_LOG << "DSchedContinuationTest DistributedSched is nullptr" << std::endl;
+        return nullptr;
     } else {
         DTEST_LOG << "DSchedContinuationTest DistributedSched is not nullptr" << std::endl;
     }
@@ -154,6 +175,10 @@ int32_t DSchedContinuationTest::StartContinuation(int32_t missionId, int32_t fla
     std::string devId = "devId";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, flags);
     int callerUid = 0;
+    if (spWant == nullptr) {
+        DTEST_LOG << "StartContinuation spWant is nullptr" << std::endl;
+        return -1;
+    }
     return DistributedSchedService::GetInstance().StartContinuation(*spWant, missionId, callerUid, 0, 0);
 }
 
@@ -164,6 +189,10 @@ int32_t DSchedContinuationTest::StartRemoteFreeInstall(int32_t flags, const sptr
     std::string devId = "devId";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, flags);
     int callerUid = 0;
+    if (spWant == nullptr) {
+        DTEST_LOG << "StartRemoteFreeInstall spWant is nullptr" << std::endl;
+        return -1;
+    }
     return DistributedSchedService::GetInstance().StartRemoteFreeInstall(*spWant, callerUid, 0, 0, callback);
 }
 
@@ -212,6 +241,7 @@ HWTEST_F(DSchedContinuationTest, StartContinuation_003, TestSize.Level1)
     if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
         DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
     }
+    ASSERT_NE(DistributedSchedService::GetInstance().dschedContinuation_, nullptr);
     std::string bundleName = "bundleName";
     std::string abilityName = "abilityName";
     int32_t flags = Want::FLAG_ABILITY_CONTINUATION;
@@ -240,6 +270,7 @@ HWTEST_F(DSchedContinuationTest, StartContinuation_004, TestSize.Level1)
     if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
         DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
     }
+    ASSERT_NE(DistributedSchedService::GetInstance().dschedContinuation_, nullptr);
     std::string bundleName = "bundleName";
     std::string abilityName = "abilityName";
     int32_t flags = Want::FLAG_ABILITY_CONTINUATION;
@@ -345,6 +376,7 @@ HWTEST_F(DSchedContinuationTest, SetWantForContinuation_001, TestSize.Level1)
     std::string abilityName = "abilityName";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
     int32_t missionId = 0;
+    ASSERT_NE(spWant, nullptr);
     int32_t ret = DistributedSchedService::GetInstance().SetWantForContinuation(*spWant, missionId);
     EXPECT_TRUE(INVALID_PARAMETERS_ERR == ret);
     DTEST_LOG << "DSchedContinuationTest SetWantForContinuation_001 end" << std::endl;
@@ -367,6 +399,7 @@ HWTEST_F(DSchedContinuationTest, SetWantForContinuation_002, TestSize.Level1)
     std::string abilityName = "bmsThirdBundle";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
     int32_t missionId = 0;
+    ASSERT_NE(spWant, nullptr);
     int32_t ret = DistributedSchedService::GetInstance().SetWantForContinuation(*spWant, missionId);
     EXPECT_TRUE(ERR_OK == ret);
     DTEST_LOG << "DSchedContinuationTest SetWantForContinuation_002 end" << std::endl;
@@ -414,6 +447,7 @@ HWTEST_F(DSchedContinuationTest, ContinueLocalMission_002, TestSize.Level1)
     if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
         return;
     }
+    ASSERT_NE(DistributedSchedService::GetInstance().dschedContinuation_, nullptr);
     DistributedSchedService::GetInstance().dschedContinuation_->PushCallback(missionId, callback, deviceId, false);
     int32_t ret = DistributedSchedService::GetInstance().ContinueLocalMission(
         deviceId, missionId, callback, wantParams);
@@ -482,6 +516,7 @@ HWTEST_F(DSchedContinuationTest, ContinueLocalMission_005, TestSize.Level1)
         return;
     }
     DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    ASSERT_NE(DistributedSchedService::GetInstance().dschedContinuation_, nullptr);
     DistributedSchedService::GetInstance().dschedContinuation_->PushCallback(missionId, callback, deviceId, false);
     int32_t ret = DistributedSchedService::GetInstance().ContinueAbilityWithTimeout(deviceId, missionId, callback);
     EXPECT_EQ(CONTINUE_ALREADY_IN_PROGRESS, ret);
@@ -569,6 +604,8 @@ HWTEST_F(DSchedContinuationTest, PushAbilityToken_001, TestSize.Level1)
      * @tc.steps: step1. input invalid abilityToken.
      * @tc.expected: step1. return false.
      */
+
+    ASSERT_NE(dschedContinuation_, nullptr);
     auto sessionId = dschedContinuation_->GenerateSessionId();
     bool ret = dschedContinuation_->PushAbilityToken(sessionId, nullptr);
     EXPECT_TRUE(!ret);
@@ -587,6 +624,7 @@ HWTEST_F(DSchedContinuationTest, PushAbilityToken_002, TestSize.Level1)
      * @tc.steps: step1. input invalid sessionId.
      * @tc.expected: step1. return false.
      */
+    ASSERT_NE(dschedContinuation_, nullptr);
     bool ret = dschedContinuation_->PushAbilityToken(-1, GetDSchedService());
     EXPECT_TRUE(!ret);
     DTEST_LOG << "DSchedContinuationTest PushAbilityToken_002 end" << std::endl;
@@ -604,6 +642,7 @@ HWTEST_F(DSchedContinuationTest, PushAbilityToken_003, TestSize.Level1)
      * @tc.steps: step1. input valid abilityToken and valid sessionId.
      * @tc.expected: step1. return false.
      */
+    ASSERT_NE(dschedContinuation_, nullptr);
     auto sessionId = dschedContinuation_->GenerateSessionId();
     bool ret = dschedContinuation_->PushAbilityToken(sessionId, GetDSchedService());
     EXPECT_TRUE(!ret);
@@ -622,6 +661,7 @@ HWTEST_F(DSchedContinuationTest, PushAbilityToken_004, TestSize.Level1)
      * @tc.steps: step1. input valid params and init.
      * @tc.expected: step1. return true.
      */
+    ASSERT_NE(dschedContinuation_, nullptr);
     dschedContinuation_->Init(nullptr);
     auto sessionId = dschedContinuation_->GenerateSessionId();
     bool ret = dschedContinuation_->PushAbilityToken(sessionId, GetDSchedService());
@@ -638,6 +678,7 @@ HWTEST_F(DSchedContinuationTest, PushAbilityToken_004, TestSize.Level1)
 HWTEST_F(DSchedContinuationTest, PushAbilityToken_005, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinuationTest PushAbilityToken_005 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     dschedContinuation_->Init(nullptr);
     auto sessionId = 1;
     bool ret = dschedContinuation_->PushAbilityToken(sessionId, GetDSchedService());
@@ -658,6 +699,7 @@ HWTEST_F(DSchedContinuationTest, PopAbilityToken_001, TestSize.Level1)
      * @tc.steps: step1. input invalid sessionId.
      * @tc.expected: step1. return false.
      */
+    ASSERT_NE(dschedContinuation_, nullptr);
     sptr<IRemoteObject> abilityToken = dschedContinuation_->PopAbilityToken(-1);
     EXPECT_TRUE(abilityToken == nullptr);
     DTEST_LOG << "DSchedContinuationTest PopAbilityToken_001 end" << std::endl;
@@ -675,6 +717,7 @@ HWTEST_F(DSchedContinuationTest, PopAbilityToken_002, TestSize.Level1)
      * @tc.steps: step1. pop not exist sessionId.
      * @tc.expected: step1. return false.
      */
+    ASSERT_NE(dschedContinuation_, nullptr);
     int32_t sessionId = dschedContinuation_->GenerateSessionId() + 1;
     sptr<IRemoteObject> abilityToken = dschedContinuation_->PopAbilityToken(sessionId);
     EXPECT_TRUE(abilityToken == nullptr);
@@ -693,6 +736,7 @@ HWTEST_F(DSchedContinuationTest, PopAbilityToken_003, TestSize.Level1)
      * @tc.steps: step1. pop exist sessionId.
      * @tc.expected: step1. return true.
      */
+    ASSERT_NE(dschedContinuation_, nullptr);
     int32_t sessionId = PushAbilityToken();
     sptr<IRemoteObject> abilityToken = dschedContinuation_->PopAbilityToken(sessionId);
     EXPECT_TRUE(abilityToken != nullptr);
@@ -715,6 +759,7 @@ HWTEST_F(DSchedContinuationTest, PopAbilityToken_003, TestSize.Level1)
 HWTEST_F(DSchedContinuationTest, PopAbilityToken_004, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinuationTest PopAbilityToken_004 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     dschedContinuation_->continuationHandler_ = nullptr;
 
     int32_t sessionId = PushAbilityToken();
@@ -732,6 +777,7 @@ HWTEST_F(DSchedContinuationTest, PopAbilityToken_004, TestSize.Level1)
 HWTEST_F(DSchedContinuationTest, GenerateSessionId_001, TestSize.Level4)
 {
     DTEST_LOG << "DSchedContinuationTest GenerateSessionId_001 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     int32_t sessionId =  dschedContinuation_->currSessionId_;
     dschedContinuation_->currSessionId_ = -100;
     dschedContinuation_->GenerateSessionId();
@@ -749,6 +795,7 @@ HWTEST_F(DSchedContinuationTest, GenerateSessionId_001, TestSize.Level4)
 HWTEST_F(DSchedContinuationTest, SetTimeOut_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinuationTest SetTimeOut_001 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     dschedContinuation_->Init(nullptr);
 
     int32_t missionId = 0;
@@ -767,6 +814,7 @@ HWTEST_F(DSchedContinuationTest, SetTimeOut_001, TestSize.Level3)
 HWTEST_F(DSchedContinuationTest, RemoveTimeOut_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinuationTest RemoveTimeOut_001 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     dschedContinuation_->Init(nullptr);
 
     int32_t missionId = 0;
@@ -785,6 +833,7 @@ HWTEST_F(DSchedContinuationTest, RemoveTimeOut_001, TestSize.Level3)
 HWTEST_F(DSchedContinuationTest, GetTargetDevice_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinuationTest GetTargetDevice_001 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     dschedContinuation_->Init(nullptr);
 
     int32_t missionId = 0;
@@ -804,6 +853,7 @@ HWTEST_F(DSchedContinuationTest, GetTargetDevice_001, TestSize.Level3)
 HWTEST_F(DSchedContinuationTest, PushCallback_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinuationTest PushCallback_001 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     dschedContinuation_->Init(nullptr);
 
     int32_t missionId = 0;
@@ -824,6 +874,7 @@ HWTEST_F(DSchedContinuationTest, PushCallback_001, TestSize.Level3)
 HWTEST_F(DSchedContinuationTest, PushCallback_002, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinuationTest PushCallback_002 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     dschedContinuation_->Init(nullptr);
 
     int32_t missionId = 0;
@@ -845,6 +896,7 @@ HWTEST_F(DSchedContinuationTest, PushCallback_002, TestSize.Level3)
 HWTEST_F(DSchedContinuationTest, PushCallback_003, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinuationTest PushCallback_003 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     dschedContinuation_->Init(nullptr);
 
     int32_t missionId = 0;
@@ -1262,6 +1314,7 @@ HWTEST_F(DSchedContinuationTest, NotifyCompleteFreeInstallFromRemote_002, TestSi
 HWTEST_F(DSchedContinuationTest, IsFreeInstall_001, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinuationTest IsFreeInstall_001 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     int32_t missionId = -1;
     bool result = dschedContinuation_->IsFreeInstall(missionId);
     EXPECT_EQ(result, false);
@@ -1277,6 +1330,7 @@ HWTEST_F(DSchedContinuationTest, IsFreeInstall_001, TestSize.Level1)
 HWTEST_F(DSchedContinuationTest, IsFreeInstall_002, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinuationTest IsFreeInstall_002 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     int32_t missionId = 1;
     dschedContinuation_->freeInstall_[missionId] = true;
     bool result = dschedContinuation_->IsFreeInstall(missionId);
@@ -1293,6 +1347,7 @@ HWTEST_F(DSchedContinuationTest, IsFreeInstall_002, TestSize.Level1)
 HWTEST_F(DSchedContinuationTest, IsFreeInstall_003, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinuationTest IsFreeInstall_003 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     int32_t missionId = 1;
     dschedContinuation_->freeInstall_[missionId] = false;
     bool result = dschedContinuation_->IsFreeInstall(missionId);
@@ -1309,6 +1364,7 @@ HWTEST_F(DSchedContinuationTest, IsFreeInstall_003, TestSize.Level1)
 HWTEST_F(DSchedContinuationTest, PopCallback_001, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinuationTest PopCallback_001 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     int32_t missionId = -1;
     dschedContinuation_->callbackMap_.erase(missionId);
     sptr<IRemoteObject> result = dschedContinuation_->PopCallback(missionId);
@@ -1325,6 +1381,7 @@ HWTEST_F(DSchedContinuationTest, PopCallback_001, TestSize.Level1)
 HWTEST_F(DSchedContinuationTest, PopCallback_002, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinuationTest PopCallback_002 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     int32_t missionId = -1;
     dschedContinuation_->callbackMap_[missionId] = GetDSchedService();
     dschedContinuation_->continuationDevices_.erase(missionId);
@@ -1342,6 +1399,7 @@ HWTEST_F(DSchedContinuationTest, PopCallback_002, TestSize.Level1)
 HWTEST_F(DSchedContinuationTest, PopCallback_003, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinuationTest PopCallback_003 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     int32_t missionId = -1;
     dschedContinuation_->callbackMap_[missionId] = GetDSchedService();
     dschedContinuation_->continuationDevices_[missionId] = "mockDevices";
@@ -1360,6 +1418,7 @@ HWTEST_F(DSchedContinuationTest, PopCallback_003, TestSize.Level1)
 HWTEST_F(DSchedContinuationTest, PopCallback_004, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinuationTest PopCallback_004 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     int32_t missionId = -1;
     dschedContinuation_->callbackMap_[missionId] = GetDSchedService();
     dschedContinuation_->continuationDevices_[missionId] = "mockDevices";
@@ -1378,6 +1437,7 @@ HWTEST_F(DSchedContinuationTest, PopCallback_004, TestSize.Level1)
 HWTEST_F(DSchedContinuationTest, NotifyMissionCenterResult_001, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinuationTest NotifyMissionCenterResult_001 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     int32_t missionId = -1;
     int32_t resultCode = 0;
     dschedContinuation_->callbackMap_[missionId] = nullptr;
@@ -1395,6 +1455,7 @@ HWTEST_F(DSchedContinuationTest, NotifyMissionCenterResult_001, TestSize.Level1)
 HWTEST_F(DSchedContinuationTest, NotifyMissionCenterResult_002, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinuationTest NotifyMissionCenterResult_002 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
     int32_t missionId = -1;
     int32_t resultCode = 0;
     dschedContinuation_->callbackMap_[missionId] = GetDSchedService();

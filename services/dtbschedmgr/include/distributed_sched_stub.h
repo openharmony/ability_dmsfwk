@@ -90,7 +90,7 @@ private:
     int32_t StartAbilityByCallFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t ReleaseAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t StartRemoteFreeInstallInner(MessageParcel& data, MessageParcel& reply);
-    int32_t CreateJsonObject(std::string& extraInfo, CallerInfo& callerInfo);
+    int32_t CreateJsonObject(std::string& extraInfo, CallerInfo& callerInfo, AccountInfo& accountInfo);
     int32_t StartFreeInstallFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t ReadDataForFreeInstall(MessageParcel& data,
         CallerInfo &callerInfo, AccountInfo &accountInfo, int64_t &taskId);
@@ -107,7 +107,9 @@ private:
     bool EnforceInterfaceToken(MessageParcel& data);
     bool CallerInfoUnmarshalling(CallerInfo& callerInfo, MessageParcel& data);
     bool IsUsingQos(const std::string& remoteDeviceId);
-    void SaveExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo);
+    void SaveExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo, AccountInfo& accountInfo);
+    void SaveSendResultExtraInfo(const nlohmann::json& extraInfoJson, CallerInfo& callerInfo,
+        AccountInfo& accountInfo);
     void InitExtendedLocalFuncsInner();
     void InitLocalFuncsInner();
     void InitLocalMissionManagerInner();

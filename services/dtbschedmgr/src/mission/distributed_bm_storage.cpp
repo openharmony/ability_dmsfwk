@@ -305,7 +305,7 @@ bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_
         HILOGI("get bundleName failed.");
         return false;
     }
-    HILOGE("end.");
+    HILOGI("end.");
     return true;
 }
 
@@ -357,8 +357,12 @@ bool DmsBmStorage::CheckSyncData(const std::string &networkId)
         HILOGE("can not get udid or uuid by networkId");
         return false;
     }
-    HILOGE("uuid: %{public}s", GetAnonymStr(uuid).c_str());
+    HILOGI("uuid: %{public}s", GetAnonymStr(uuid).c_str());
     std::vector<Entry> newEntries;
+    if (kvStorePtr_ == nullptr) {
+        HILOGE("kvstore is null");
+        return false;
+    }
     Status status = kvStorePtr_->GetDeviceEntries(uuid, newEntries);
     if (newEntries.empty() || status != Status::SUCCESS) {
         HILOGE("CheckSyncData fail: %{public}d", status);
@@ -402,6 +406,10 @@ void DmsBmStorage::GetEntries(const std::string &networkId, const Key &allEntryK
     std::promise<OHOS::DistributedKv::Status> &resultStatusSignal, std::vector<Entry> &allEntries)
 {
     HILOGI("called.");
+    if (kvStorePtr_ == nullptr) {
+        HILOGE("kvstore is null");
+        return;
+    }
     kvStorePtr_->GetEntries(allEntryKeyPrefix, networkId,
         [&resultStatusSignal, &allEntries](Status innerStatus, std::vector<Entry> innerAllEntries) {
             HILOGI("GetEntries, result = %{public}d", innerStatus);
@@ -529,7 +537,7 @@ bool DmsBmStorage::GetLastBundleNameId(uint16_t &bundleNameId)
     Value value;
     Status status = kvStorePtr_->Get(publicKey, value);
     if (status != Status::SUCCESS) {
-        HILOGE("This information not be found in the database,Get error: %{public}d", status);
+        HILOGW("This information not be found in the database, Get error: %{public}d", status);
         return false;
     }
     PublicRecordsInfo publicRecordsInfo;

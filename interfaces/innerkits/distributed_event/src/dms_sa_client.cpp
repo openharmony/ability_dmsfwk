@@ -26,7 +26,16 @@ DmsSaClient &DmsSaClient::GetInstance()
 bool DmsSaClient::SubscribeDmsSA()
 {
     HILOGD("called.");
+    if (!saMgrProxy_) {
+        HILOGE("saMgrProxy_ is null.");
+        return false;
+    }
     sptr<DmsSystemAbilityStatusChange> callback(new DmsSystemAbilityStatusChange());
+    if (!callback) {
+        HILOGE("Failed to create callback object.");
+        return false;
+    }
+    
     int32_t ret = saMgrProxy_->SubscribeSystemAbility(DISTRIBUTED_SCHED_SA_ID, callback);
     if (ret != ERR_OK) {
         HILOGE("Failed to subscribe system ability DISTRIBUTED_SCHED_SA_ID ret:%{public}d", ret);

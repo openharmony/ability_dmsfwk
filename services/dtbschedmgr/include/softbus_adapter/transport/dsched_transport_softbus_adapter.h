@@ -66,7 +66,7 @@ private:
     ~DSchedTransportSoftbusAdapter();
     int32_t CreateServerSocket();
     int32_t CreateClientSocket(const std::string &peerDeviceId);
-    int32_t AddClientSession(int32_t sessionId, std::string &peerDeviceId);
+    int32_t AddNewPeerSession(const std::string &peerDeviceId, int32_t &sessionId);
     bool GetSessionIdByDeviceId(const std::string &peerDeviceId, int32_t &sessionId);
 
 private:

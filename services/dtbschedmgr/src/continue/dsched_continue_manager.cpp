@@ -15,8 +15,8 @@
 
 #include "dsched_continue_manager.h"
 
+#include <chrono>
 #include <sys/prctl.h>
-#include <map>
 
 #include "cJSON.h"
 
@@ -33,7 +33,6 @@ namespace {
 const std::string TAG = "DSchedContinueManager";
 const std::string DSCHED_CONTINUE_MANAGER = "dsched_continue_manager";
 const std::string CONTINUE_TIMEOUT_TASK = "continue_timeout_task";
-
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DSchedContinueManager);
@@ -97,6 +96,15 @@ void DSchedContinueManager::UnInit()
         HILOGE("eventHandler_ is nullptr");
     }
     HILOGI("UnInit end");
+}
+
+void DSchedContinueManager::NotifyAllConnectDecision(std::string peerDeviceId, bool isSupport)
+{
+    HILOGI("Notify all connect decision, peerDeviceId %{public}s, isSupport %{public}d.",
+        GetAnonymStr(peerDeviceId).c_str(), isSupport);
+    std::lock_guard<std::mutex> decisionLock(connectDecisionMutex_);
+    peerConnectDecision_[peerDeviceId] = isSupport;
+    connectDecisionCond_.notify_all();
 }
 
 int32_t DSchedContinueManager::ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
@@ -229,11 +237,39 @@ void DSchedContinueManager::HandleContinueMissionWithBundleName(const DSchedCont
         auto newContinue = std::make_shared<DSchedContinue>(subType, direction, callback, info);
         newContinue->Init();
         continues_.insert(std::make_pair(info, newContinue));
-        SetTimeOut(info, CONTINUE_TIMEOUT);
         newContinue->OnContinueMission(wantParams);
     }
+    WaitAllConnectDecision(direction, info, CONTINUE_TIMEOUT);
     HILOGI("end, subType: %{public}d dirction: %{public}d, continue info: %{public}s",
         subType, direction, info.toString().c_str());
+}
+
+void DSchedContinueManager::WaitAllConnectDecision(int32_t direction, const DSchedContinueInfo &info, int32_t timeout)
+{
+#ifdef DMSFWK_ALL_CONNECT_MGR
+    std::string peerDeviceId = direction == CONTINUE_SOURCE ? info.sinkDeviceId_ : info.sourceDeviceId_;
+    {
+        std::unique_lock<std::mutex> decisionLock(connectDecisionMutex_);
+        connectDecisionCond_.wait_for(decisionLock, std::chrono::seconds(CONNECT_DECISION_WAIT_S),
+            [this, peerDeviceId]() {
+                return peerConnectDecision_.find(peerDeviceId) != peerConnectDecision_.end() &&
+                    peerConnectDecision_.at(peerDeviceId).load();
+            });
+
+        if (peerConnectDecision_.find(peerDeviceId) == peerConnectDecision_.end()) {
+            HILOGE("Not find peerDeviceId %{public}s in peerConnectDecision.", GetAnonymStr(peerDeviceId).c_str());
+            return;
+        }
+        if (!peerConnectDecision_.at(peerDeviceId).load()) {
+            HILOGE("All connect manager refuse bind to PeerDeviceId %{public}s.", GetAnonymStr(peerDeviceId).c_str());
+            peerConnectDecision_.erase(peerDeviceId);
+            SetTimeOut(info, 0);
+            return;
+        }
+        peerConnectDecision_.erase(peerDeviceId);
+    }
+#endif
+    SetTimeOut(info, CONTINUE_TIMEOUT);
 }
 
 void DSchedContinueManager::SetTimeOut(const DSchedContinueInfo &info, int32_t timeout)
@@ -244,13 +280,17 @@ void DSchedContinueManager::SetTimeOut(const DSchedContinueInfo &info, int32_t t
             return;
         }
         HILOGE("continue timeout! info: %{public}s", info.toString().c_str());
-        continues_[info]->OnContinueEnd(CONTINUE_ABILITY_TIMEOUT_ERR);
+        auto dsContinue = continues_[info];
+        if (dsContinue != nullptr) {
+            dsContinue->OnContinueEnd(CONTINUE_ABILITY_TIMEOUT_ERR);
+        }
     };
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler_ is nullptr");
         return;
     }
-    eventHandler_->PostTask(func, info.ToStringIgnoreMissionId(), timeout);
+    timeout > 0 ? eventHandler_->PostTask(func, info.ToStringIgnoreMissionId(), timeout) :
+        eventHandler_->PostTask(func);
 }
 
 int32_t DSchedContinueManager::StartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId,
@@ -298,7 +338,7 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
             HILOGE("continue info doesn't match an existing continuation.");
             return nullptr;
         }
-        if (missionId == continues_[info]->GetContinueInfo().missionId_) {
+        if (continues_[info] != nullptr && missionId == continues_[info]->GetContinueInfo().missionId_) {
             return continues_[info];
         }
     }
@@ -454,6 +494,10 @@ void DSchedContinueManager::OnDataRecv(int32_t sessionId, std::shared_ptr<DSched
 void DSchedContinueManager::HandleDataRecv(int32_t sessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer)
 {
     HILOGI("start, sessionId: %{public}d.", sessionId);
+    if (dataBuffer == nullptr) {
+        HILOGE("dataBuffer is null.");
+        return;
+    }
     uint8_t *data = dataBuffer->Data();
     std::string jsonStr(reinterpret_cast<const char *>(data), dataBuffer->Capacity());
     cJSON *rootValue = cJSON_Parse(jsonStr.c_str());
@@ -571,8 +615,13 @@ int32_t DSchedContinueManager::GetContinueInfo(std::string &srcDeviceId, std::st
         HILOGW("No continuation in progress.");
         return ERR_OK;
     }
-    dstDeviceId = continues_.begin()->second->GetContinueInfo().sinkDeviceId_;
-    srcDeviceId = continues_.begin()->second->GetContinueInfo().sourceDeviceId_;
+    auto dsContinue = continues_.begin()->second;
+    if (dsContinue == nullptr) {
+        HILOGE("dContinue is null");
+        return INVALID_PARAMETERS_ERR;
+    }
+    dstDeviceId = dsContinue->GetContinueInfo().sinkDeviceId_;
+    srcDeviceId = dsContinue->GetContinueInfo().sourceDeviceId_;
     return ERR_OK;
 }
 

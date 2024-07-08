@@ -81,6 +81,7 @@ void DistributedWantParamsBaseTest::TearDown(void)
  */
 HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Parcelable_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(wantParamsIn_, nullptr);
     std::string keyStr = "12345667";
     std::string valueStr = "sdasdfdsffdgfdg";
     wantParamsIn_->SetParam(keyStr, String::Box(valueStr));
@@ -99,6 +100,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Parcelable_0100, F
  */
 HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Parcelable_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(wantParamsIn_, nullptr);
     std::string keyStr = "12345667";
     bool valueBool = true;
     wantParamsIn_->SetParam(keyStr, Boolean::Box(valueBool));
@@ -118,6 +120,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Parcelable_0200, F
  */
 HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Parcelable_0300, Function | MediumTest | Level3)
 {
+    ASSERT_NE(wantParamsIn_, nullptr);
     std::string keyStr = "12345667";
     int valueInteger = 12345;
     wantParamsIn_->SetParam(keyStr, Integer::Box(valueInteger));
@@ -140,6 +143,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Parcelable_0300, F
  */
 HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Parcelable_0400, Function | MediumTest | Level3)
 {
+    ASSERT_NE(wantParamsIn_, nullptr);
     std::string keyStr = "12345667";
     long valueLong = 1234567;
     wantParamsIn_->SetParam(keyStr, Long::Box(valueLong));
@@ -158,6 +162,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Parcelable_0400, F
  */
 HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Parcelable_0700, Function | MediumTest | Level3)
 {
+    ASSERT_NE(wantParamsIn_, nullptr);
     sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(2, AAFwk::g_IID_IString);
     std::string valueStr0 = "TestValue0";
     ao->Set(0, String::Box(valueStr0));
@@ -1062,6 +1067,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_CompareInterface_1
 HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_remove_0100, Function | MediumTest | Level3)
 {
     DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_remove_0100 begin" << std::endl;
+    ASSERT_NE(distributedWantParams_, nullptr);
     distributedWantParams_->params_["hello"] = String::Box("World");
     distributedWantParams_->Remove("hello");
     distributedWantParams_->params_.clear();
@@ -1078,6 +1084,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_remove_0100, Funct
 HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_IsEmpty_0100, Function | MediumTest | Level3)
 {
     DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_IsEmpty_0100 begin" << std::endl;
+    ASSERT_NE(distributedWantParams_, nullptr);
     distributedWantParams_->params_.clear();
     EXPECT_TRUE(distributedWantParams_->IsEmpty());
     DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_IsEmpty_0100 end" << std::endl;
@@ -1092,6 +1099,7 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_IsEmpty_0100, Func
 HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_DoMarshalling_0100, Function | MediumTest | Level3)
 {
     DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_DoMarshalling_0100 begin" << std::endl;
+    ASSERT_NE(distributedWantParams_, nullptr);
     DistributedUnsupportedData data;
     distributedWantParams_->cachedUnsupportedData_.emplace_back(std::move(data));
     Parcel tempParcel;

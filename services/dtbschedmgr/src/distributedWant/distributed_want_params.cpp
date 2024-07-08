@@ -1110,6 +1110,9 @@ bool DistributedWantParams::ReadFromParcelWantParamWrapper(Parcel& parcel, const
 bool DistributedWantParams::ReadFromParcelFD(Parcel& parcel, const std::string& key)
 {
     auto messageParcel = static_cast<MessageParcel*>(&parcel);
+    if (messageParcel == nullptr) {
+        return false;
+    }
     auto fd = messageParcel->ReadFileDescriptor();
     DistributedWantParams wp;
     wp.SetParam(TYPE_PROPERTY, AAFwk::String::Box(FD));
@@ -1122,6 +1125,9 @@ bool DistributedWantParams::ReadFromParcelFD(Parcel& parcel, const std::string& 
 bool DistributedWantParams::ReadFromParcelRemoteObject(Parcel& parcel, const std::string& key)
 {
     auto messageParcel = static_cast<MessageParcel*>(&parcel);
+    if (messageParcel == nullptr) {
+        return false;
+    }
     auto remoteObject = messageParcel->ReadRemoteObject();
     DistributedWantParams wp;
     wp.SetParam(TYPE_PROPERTY, AAFwk::String::Box(REMOTE_OBJECT));

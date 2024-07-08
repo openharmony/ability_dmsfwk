@@ -19,6 +19,7 @@
 #include "parcel.h"
 
 #include "distributed_sched_utils.h"
+#include "dms_constant.h"
 #include "dtbschedmgr_log.h"
 
 namespace OHOS {
@@ -316,6 +317,10 @@ int32_t DSchedContinueDataCmd::MarshalAccountInfo(std::string &jsonStr)
     }
     cJSON_AddItemToObject(accountInfoJson, "GroupIdList", groupIdList);
 
+    cJSON_AddStringToObject(accountInfoJson, Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID.c_str(),
+        accountInfo_.activeAccountId.c_str());
+    cJSON_AddNumberToObject(accountInfoJson, Constants::EXTRO_INFO_JSON_KEY_USERID_ID.c_str(), accountInfo_.userId);
+
     char *data = cJSON_Print(accountInfoJson);
     if (data == nullptr) {
         cJSON_Delete(accountInfoJson);
@@ -547,6 +552,19 @@ int32_t DSchedContinueDataCmd::UnmarshalAccountInfo(std::string &jsonStr)
         groupIdList.push_back(groupId->valuestring);
     }
     accountInfo_.groupIdList = groupIdList;
+
+    cJSON *accountId = cJSON_GetObjectItemCaseSensitive(rootValue, Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID.c_str());
+    if (accountId == nullptr || !cJSON_IsString(accountId)) {
+        cJSON_Delete(rootValue);
+        return INVALID_PARAMETERS_ERR;
+    }
+    accountInfo_.activeAccountId = accountId->valuestring;
+    cJSON *userId = cJSON_GetObjectItemCaseSensitive(rootValue, Constants::EXTRO_INFO_JSON_KEY_USERID_ID.c_str());
+    if (userId == nullptr || !cJSON_IsNumber(userId)) {
+        cJSON_Delete(rootValue);
+        return INVALID_PARAMETERS_ERR;
+    }
+    accountInfo_.userId = userId->valueint;
 
     cJSON_Delete(rootValue);
     return ERR_OK;
