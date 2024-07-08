@@ -280,7 +280,10 @@ void DSchedContinueManager::SetTimeOut(const DSchedContinueInfo &info, int32_t t
             return;
         }
         HILOGE("continue timeout! info: %{public}s", info.toString().c_str());
-        continues_[info]->OnContinueEnd(CONTINUE_ABILITY_TIMEOUT_ERR);
+        auto dsContinue = continues_[info];
+        if (dsContinue != nullptr) {
+            dsContinue->OnContinueEnd(CONTINUE_ABILITY_TIMEOUT_ERR);
+        }
     };
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler_ is nullptr");
@@ -335,7 +338,7 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
             HILOGE("continue info doesn't match an existing continuation.");
             return nullptr;
         }
-        if (missionId == continues_[info]->GetContinueInfo().missionId_) {
+        if (continues_[info] != nullptr && missionId == continues_[info]->GetContinueInfo().missionId_) {
             return continues_[info];
         }
     }
@@ -491,6 +494,10 @@ void DSchedContinueManager::OnDataRecv(int32_t sessionId, std::shared_ptr<DSched
 void DSchedContinueManager::HandleDataRecv(int32_t sessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer)
 {
     HILOGI("start, sessionId: %{public}d.", sessionId);
+    if (dataBuffer == nullptr) {
+        HILOGE("dataBuffer is null.");
+        return;
+    }
     uint8_t *data = dataBuffer->Data();
     std::string jsonStr(reinterpret_cast<const char *>(data), dataBuffer->Capacity());
     cJSON *rootValue = cJSON_Parse(jsonStr.c_str());
@@ -608,8 +615,13 @@ int32_t DSchedContinueManager::GetContinueInfo(std::string &srcDeviceId, std::st
         HILOGW("No continuation in progress.");
         return ERR_OK;
     }
-    dstDeviceId = continues_.begin()->second->GetContinueInfo().sinkDeviceId_;
-    srcDeviceId = continues_.begin()->second->GetContinueInfo().sourceDeviceId_;
+    auto dsContinue = continues_.begin()->second;
+    if (dsContinue == nullptr) {
+        HILOGE("dContinue is null");
+        return INVALID_PARAMETERS_ERR;
+    }
+    dstDeviceId = dsContinue->GetContinueInfo().sinkDeviceId_;
+    srcDeviceId = dsContinue->GetContinueInfo().sourceDeviceId_;
     return ERR_OK;
 }
 

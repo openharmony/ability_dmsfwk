@@ -788,14 +788,14 @@ int32_t DMSContinueSendMgr::SetStateSendEvent(const uint16_t bundleNameId, const
 
 void DMSContinueSendMgr::DeleteAliveMissionInfo(const int32_t missionId)
 {
-    HILOGI("called");
+    HILOGD("called");
     std::lock_guard<std::mutex> aliveMissionMapLock(eventMutex_);
     aliveMission_.erase(missionId);
 }
  
 int32_t DMSContinueSendMgr::GetAliveMissionInfo(const int32_t missionId, AliveMissionInfo& missionInfo)
 {
-    HILOGI("start, missionId: %{public}d", missionId);
+    HILOGD("start, missionId: %{public}d", missionId);
     std::lock_guard<std::mutex> aliveMissionMapLock(eventMutex_);
     auto iterItem = aliveMission_.find(missionId);
     if (iterItem != aliveMission_.end()) {
