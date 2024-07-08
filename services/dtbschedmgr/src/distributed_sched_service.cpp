@@ -82,6 +82,7 @@ using namespace AAFwk;
 using namespace AccountSA;
 using namespace AppExecFwk;
 using namespace Constants;
+using namespace DistributedHardware;
 
 namespace {
 const std::string TAG = "DistributedSchedService";
@@ -110,6 +111,8 @@ const std::string DSCHED_EVENT_KEY = "IDSchedEventListener";
 const std::string DMSDURATION_SAVETIME = "ohos.dschedule.SaveDataTime";
 const std::string DMS_CONTINUE_SESSION_ID = "ohos.dms.continueSessionId";
 const std::string DMS_PERSISTENT_ID = "ohos.dms.persistentId";
+const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getprocpid());
+const std::string BOOT_COMPLETED_EVENT = "usual.event.BOOT_COMPLETED";
 constexpr int32_t DEFAULT_DMS_MISSION_ID = -1;
 constexpr int32_t DEFAULT_DMS_CONNECT_TOKEN = -1;
 constexpr int32_t BIND_CONNECT_RETRY_TIMES = 3;
@@ -144,8 +147,9 @@ DistributedSchedService::DistributedSchedService() : SystemAbility(DISTRIBUTED_S
 {
 }
 
-void DistributedSchedService::OnStart()
+void DistributedSchedService::OnStart(const SystemAbilityOnDemandReason &startReason)
 {
+    HILOGI("OnStart reason %{public}s, reasonId_:%{public}d", startReason.GetName().c_str(), startReason.GetId());
 #ifdef DMS_SERVICE_DISABLE
     HILOGI("DMS service disabled, exiting.");
     _exit(0);
@@ -181,11 +185,12 @@ void DistributedSchedService::OnStart()
 
     HILOGI("OnStart dms service success.");
     Publish(this);
+    HandleBootStart(startReason);
 }
 
-void DistributedSchedService::OnStop()
+void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReason)
 {
-    HILOGI("OnStop dms service enter.");
+    HILOGI("OnStart reason %{public}s, reasonId_:%{public}d", stopReason.GetName().c_str(), stopReason.GetId());
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     DMSContinueSendMgr::GetInstance().UnInit();
     DMSContinueRecvMgr::GetInstance().UnInit();
@@ -196,6 +201,35 @@ void DistributedSchedService::OnStop()
     dllHandle_ = nullptr;
 #endif
     HILOGI("OnStop dms service end");
+}
+
+void DistributedSchedService::OnActive(const SystemAbilityOnDemandReason &activeReason)
+{
+    HILOGI("OnStart reason %{public}s, reasonId_:%{public}d", activeReason.GetName().c_str(), activeReason.GetId());
+    OnStart(activeReason);
+}
+
+void DistributedSchedService::HandleBootStart(const SystemAbilityOnDemandReason &startReason)
+{
+    std::vector<DistributedHardware::DmDeviceInfo> dmDeviceInfoList;
+    int32_t errCode = DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", dmDeviceInfoList);
+    if (errCode != ERR_OK) {
+        HILOGE("Get device manager trusted device list fail, errCode %{public}d", errCode);
+    }
+    if (startReason.GetName() == BOOT_COMPLETED_EVENT && dmDeviceInfoList.empty()) {
+        HILOGI("UnloadSystemAbility dms");
+        auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (samgrProxy == nullptr) {
+            HILOGE("get samgr failed");
+            return;
+        }
+        int32_t ret = samgrProxy->UnloadSystemAbility(DISTRIBUTED_SCHED_SA_ID);
+        if (ret != ERR_OK) {
+            HILOGE("remove system ability failed");
+            return;
+        }
+        HILOGI("UnloadSystemAbility dms ok");
+    }
 }
 
 int32_t DistributedSchedService::Dump(int32_t fd, const std::vector<std::u16string>& args)
