@@ -376,7 +376,7 @@ napi_value JsContinuationManager::OnRegisterDeviceSelectionCallback(napi_env env
             napi_create_reference(env, jsListenerObj, 1, &tempRef);
             std::unique_ptr<NativeReference> callbackRef;
             callbackRef.reset(reinterpret_cast<NativeReference*>(tempRef));
-            sptr<JsDeviceSelectionListener> deviceSelectionListener = new JsDeviceSelectionListener(env);
+            sptr<JsDeviceSelectionListener> deviceSelectionListener(new JsDeviceSelectionListener(env));
             if (deviceSelectionListener == nullptr) {
                 HILOGE("deviceSelectionListener is nullptr!");
                 errCode = SYSTEM_WORK_ABNORMALLY;
@@ -804,6 +804,10 @@ bool JsContinuationManager::UnWrapContinuationExtraParams(const napi_env &env, c
     HILOGD("called.");
     if (!IsTypeForNapiValue(env, options, napi_object)) {
         HILOGE("options is invalid.");
+        return false;
+    }
+    if (!continuationExtraParams) {
+        HILOGE("continuationExtraParams is nullptr.");
         return false;
     }
     std::vector<std::string> deviceTypes;

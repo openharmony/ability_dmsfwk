@@ -96,6 +96,11 @@ void JsDeviceSelectionListener::CallJsMethodInner(const std::string& methodName,
     const std::vector<ContinuationResult>& continuationResults)
 {
     std::lock_guard<std::mutex> jsCallBackMapLock(jsCallBackMapMutex_);
+    auto it = jsCallBackMap_.find(methodName);
+    if (it == jsCallBackMap_.end()) {
+        HILOGE("Callback method %s not found in jsCallBackMap_", methodName.c_str());
+        return;
+    }
     napi_value method = jsCallBackMap_[methodName]->GetNapiValue();
     if (method == nullptr) {
         HILOGE("Failed to get %{public}s from object", methodName.c_str());
@@ -135,6 +140,11 @@ void JsDeviceSelectionListener::CallJsMethodInner(const std::string& methodName,
     const std::vector<std::string>& deviceIds)
 {
     std::lock_guard<std::mutex> jsCallBackMapLock(jsCallBackMapMutex_);
+    auto it = jsCallBackMap_.find(methodName);
+    if (it == jsCallBackMap_.end()) {
+        HILOGE("Callback method %s not found in jsCallBackMap_", methodName.c_str());
+        return;
+    }
     napi_value method = jsCallBackMap_[methodName]->GetNapiValue();
     if (method == nullptr) {
         HILOGE("Failed to get %{public}s from object", methodName.c_str());

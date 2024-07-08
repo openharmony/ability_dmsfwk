@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -143,7 +143,7 @@ HWTEST_F(DmsCallbackTaskTest, PushCallback_003, TestSize.Level3)
 {
     DTEST_LOG << "DmsCallbackTaskTest PushCallback_003 begin" << std::endl;
     int64_t taskId = 1;
-    sptr<IRemoteObject> callback = new MockRemoteStub();
+    sptr<IRemoteObject> callback(new MockRemoteStub());
     std::string deviceId = "mockDeviceId";
     LaunchType launchType = LaunchType::FREEINSTALL_START;
     OHOS::AAFwk::Want want;
@@ -164,7 +164,7 @@ HWTEST_F(DmsCallbackTaskTest, PushCallback_004, TestSize.Level3)
 {
     DTEST_LOG << "DmsCallbackTaskTest PushCallback_004 begin" << std::endl;
     int64_t taskId = 1;
-    sptr<IRemoteObject> callback = new MockRemoteStub();
+    sptr<IRemoteObject> callback(new MockRemoteStub());
     std::string deviceId = "mockDeviceId";
     LaunchType launchType = LaunchType::FREEINSTALL_CONTINUE;
     OHOS::AAFwk::Want want;
@@ -185,7 +185,7 @@ HWTEST_F(DmsCallbackTaskTest, PushCallback_005, TestSize.Level3)
 {
     DTEST_LOG << "DmsCallbackTaskTest PushCallback_005 begin" << std::endl;
     int64_t taskId = 1;
-    sptr<IRemoteObject> callback = new MockRemoteStub();
+    sptr<IRemoteObject> callback(new MockRemoteStub());
     std::string deviceId = "mockDeviceId";
     LaunchType launchType = LaunchType::FREEINSTALL_CONTINUE;
     OHOS::AAFwk::Want want;
@@ -206,7 +206,7 @@ HWTEST_F(DmsCallbackTaskTest, PushCallback_006, TestSize.Level1)
 {
     DTEST_LOG << "DmsCallbackTaskTest PushCallback_006 begin" << std::endl;
     int64_t taskId = 1;
-    sptr<IRemoteObject> callback = new MockRemoteStub();
+    sptr<IRemoteObject> callback(new MockRemoteStub());
     std::string deviceId = "mockDeviceId";
     LaunchType launchType = LaunchType::FREEINSTALL_CONTINUE;
     OHOS::AAFwk::Want want;

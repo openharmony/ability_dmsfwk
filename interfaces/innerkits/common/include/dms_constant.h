@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,10 @@ constexpr const char* DMS_CHAR_ID = "static_capability";
 constexpr const char* PACKAGE_NAMES = "packageNames";
 constexpr const char* VERSIONS = "versions";
 constexpr const char* DMS_SERVICE_TYPE = "appInfo";
+
+const std::string EXTRO_INFO_JSON_KEY_ACCOUNT_ID = "accountId";
+const std::string EXTRO_INFO_JSON_KEY_USERID_ID = "userId";
+const std::string EXTRO_INFO_JSON_KEY_CALLER_INFO_EX = "callerInfo_ExtraInfoJson";
 } // Constants
 } // DistributedSchedule
 } // OHOS

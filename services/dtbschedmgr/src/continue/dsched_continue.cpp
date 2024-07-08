@@ -92,6 +92,10 @@ DSchedContinue::DSchedContinue(int32_t subServiceType, int32_t direction,  const
 DSchedContinue::DSchedContinue(std::shared_ptr<DSchedContinueStartCmd> startCmd, int32_t sessionId)
 {
     HILOGI("DSchedContinue create by start command");
+    if (startCmd == nullptr) {
+        HILOGE("startCmd is null");
+        return;
+    }
     version_ = startCmd->version_;
     subServiceType_ = startCmd->subServiceType_;
     continueByType_ = startCmd->continueByType_;
@@ -156,9 +160,9 @@ int32_t DSchedContinue::Init()
     auto dContinue = std::shared_ptr<DSchedContinue>(shared_from_this());
     stateMachine_ = std::make_shared<DSchedContinueStateMachine>(dContinue);
     if (direction_ == CONTINUE_SOURCE) {
-        stateMachine_->UpdateState(DSCHED_CONTINUE_SOURCE_START_STATE);
+        UpdateState(DSCHED_CONTINUE_SOURCE_START_STATE);
     } else {
-        stateMachine_->UpdateState(DSCHED_CONTINUE_SINK_START_STATE);
+        UpdateState(DSCHED_CONTINUE_SINK_START_STATE);
     }
 
     eventThread_ = std::thread(&DSchedContinue::StartEventHandler, this);
@@ -245,6 +249,10 @@ int32_t DSchedContinue::OnReplyCmd(std::shared_ptr<DSchedContinueReplyCmd> cmd)
 
 int32_t DSchedContinue::PostReplyTask(std::shared_ptr<DSchedContinueReplyCmd> cmd)
 {
+    if (cmd == nullptr) {
+        HILOGE("cmd is null");
+        return INVALID_PARAMETERS_ERR;
+    }
     HILOGI("PostReplyTask called, replyCmd: %{public}d, result: %{public}d, reason: %{public}s", cmd->replyCmd_,
         cmd->result_, cmd->reason_.c_str());
 
@@ -368,6 +376,10 @@ int32_t DSchedContinue::OnNotifyComplete(int32_t missionId, bool isSuccess)
 int32_t DSchedContinue::OnContinueEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd)
 {
     HILOGI("called");
+    if (cmd == nullptr) {
+        HILOGE("cmd is null");
+        return INVALID_PARAMETERS_ERR;
+    }
     return PostNotifyCompleteTask(cmd->result_);
 }
 
@@ -464,7 +476,7 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
         return ret;
     }
     if (direction_ == CONTINUE_SINK) {
-        stateMachine_->UpdateState(DSCHED_CONTINUE_DATA_STATE);
+        UpdateState(DSCHED_CONTINUE_DATA_STATE);
         DmsContinueTime::GetInstance().SetDurationEnd(CONTINUE_FIRST_TRANS_TIME, GetTickCount());
     }
     HILOGI("ExecuteContinueReq end");
@@ -561,6 +573,10 @@ void DSchedContinue::DurationDumperStart()
 int32_t DSchedContinue::PackStartCmd(std::shared_ptr<DSchedContinueStartCmd>& cmd,
     std::shared_ptr<DistributedWantParams> wantParams)
 {
+    if (cmd == nullptr || wantParams == nullptr) {
+        HILOGE("cmd or wantParams is null");
+        return INVALID_PARAMETERS_ERR;
+    }
     cmd->version_ = version_;
     cmd->serviceType_ = SERVICE_TYPE_CONTINUE;
     cmd->subServiceType_ = subServiceType_;
@@ -618,8 +634,7 @@ int32_t DSchedContinue::ExecuteContinueAbility(int32_t appVersion)
     if (result != ERR_OK) {
         return CONTINUE_CALL_CONTINUE_ABILITY_FAILED;
     }
-
-    stateMachine_->UpdateState(DSCHED_CONTINUE_ABILITY_STATE);
+    UpdateState(DSCHED_CONTINUE_ABILITY_STATE);
     HILOGI("ExecuteContinueAbility end");
     return result;
 }
@@ -678,7 +693,8 @@ int32_t DSchedContinue::ExecuteContinueReply()
         HILOGE("ExecuteContinueReply send reply cmd failed, ret %{public}d", ret);
         return ret;
     }
-    stateMachine_->UpdateState(DSCHED_CONTINUE_DATA_STATE);
+
+    UpdateState(DSCHED_CONTINUE_DATA_STATE);
     HILOGI("ExecuteContinueReply end");
     return ERR_OK;
 }
@@ -686,21 +702,22 @@ int32_t DSchedContinue::ExecuteContinueReply()
 int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data)
 {
     HILOGI("ExecuteContinueSend start, continueInfo: %{public}s", continueInfo_.toString().c_str());
+    if (data == nullptr) {
+        return INVALID_PARAMETERS_ERR;
+    }
     DurationDumperBeforeStartRemoteAbility();
 
     SetCleanMissionFlag(data->want);
 
     AAFwk::Want newWant = data->want;
-    auto flags = newWant.GetFlags();
-    if ((flags & AAFwk::Want::FLAG_ABILITY_CONTINUATION) == 0) {
+    if ((newWant.GetFlags() & AAFwk::Want::FLAG_ABILITY_CONTINUATION) == 0) {
         HILOGE("StartContinuation want continuation flags invalid!");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
 
-    int result = SetWantForContinuation(newWant);
-    if (result != ERR_OK) {
+    if (SetWantForContinuation(newWant) != ERR_OK) {
         HILOGE("set new want failed");
-        return result;
+        return INVALID_PARAMETERS_ERR;
     }
 
     AppExecFwk::AbilityInfo abilityInfo;
@@ -735,8 +752,7 @@ int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData>
     }
 
     DmsContinueTime::GetInstance().SetDurationEnd(CONTINUE_DATA_TRANS_TIME, GetTickCount());
-
-    stateMachine_->UpdateState(DSCHED_CONTINUE_SOURCE_WAIT_END_STATE);
+    UpdateState(DSCHED_CONTINUE_SOURCE_WAIT_END_STATE);
     HILOGI("ExecuteContinueSend end");
     return ERR_OK;
 }
@@ -795,6 +811,10 @@ int32_t DSchedContinue::PackDataCmd(std::shared_ptr<DSchedContinueDataCmd>& cmd,
     const OHOS::AAFwk::Want& want, const AppExecFwk::AbilityInfo& abilityInfo, const CallerInfo& callerInfo,
     const AccountInfo& accountInfo)
 {
+    if (cmd == nullptr) {
+        HILOGE("cmd is null");
+        return INVALID_PARAMETERS_ERR;
+    }
     cmd->version_ = version_;
     cmd->serviceType_ = SERVICE_TYPE_CONTINUE;
     cmd->subServiceType_ = subServiceType_;
@@ -821,6 +841,11 @@ int32_t DSchedContinue::PackDataCmd(std::shared_ptr<DSchedContinueDataCmd>& cmd,
 int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
     HILOGI("ExecuteContinueData start, continueInfo: %{public}s", continueInfo_.toString().c_str());
+    if (cmd == nullptr) {
+        HILOGE("cmd is null");
+        return INVALID_PARAMETERS_ERR;
+    }
+
     DurationDumperBeforeStartAbility(cmd);
 
     std::string localDeviceId;
@@ -859,7 +884,7 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
 
     ret = StartAbility(want, cmd->requestCode_);
     if (ret == ERR_OK) {
-        stateMachine_->UpdateState(DSCHED_CONTINUE_SINK_WAIT_END_STATE);
+        UpdateState(DSCHED_CONTINUE_SINK_WAIT_END_STATE);
         HILOGI("ExecuteContinueData end");
     }
     return ret;
@@ -882,7 +907,7 @@ int32_t DSchedContinue::UpdateWantForContinueType(OHOS::AAFwk::Want& want)
 
 void DSchedContinue::DurationDumperBeforeStartAbility(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
-    if (subServiceType_ == CONTINUE_PULL) {
+    if (subServiceType_ == CONTINUE_PULL && cmd != nullptr) {
         std::string timeInfo = cmd->want_.GetStringParam(DMSDURATION_SAVETIME);
         DmsContinueTime::GetInstance().ReadDurationInfo(timeInfo.c_str());
         DmsContinueTime::GetInstance().SetSrcBundleName(cmd->want_.GetElement().GetBundleName());
@@ -955,7 +980,7 @@ int32_t DSchedContinue::ExecuteNotifyComplete(int32_t result)
             return ret;
         }
 
-        stateMachine_->UpdateState(DSCHED_CONTINUE_SINK_END_STATE);
+        UpdateState(DSCHED_CONTINUE_SINK_END_STATE);
         HILOGI("ExecuteNotifyComplete end");
         return ERR_OK;
     }
@@ -968,7 +993,7 @@ int32_t DSchedContinue::ExecuteNotifyComplete(int32_t result)
         return ret;
     }
 
-    stateMachine_->UpdateState(DSCHED_CONTINUE_SOURCE_END_STATE);
+    UpdateState(DSCHED_CONTINUE_SOURCE_END_STATE);
     PostContinueEndTask(result);
 
     HILOGI("ExecuteNotifyComplete end");
@@ -978,6 +1003,10 @@ int32_t DSchedContinue::ExecuteNotifyComplete(int32_t result)
 int32_t DSchedContinue::PackReplyCmd(std::shared_ptr<DSchedContinueReplyCmd> cmd, int32_t replyCmd, int32_t appVersion,
     int32_t result, const std::string reason)
 {
+    if (cmd == nullptr) {
+        HILOGE("cmd is null");
+        return INVALID_PARAMETERS_ERR;
+    }
     cmd->version_ = version_;
     cmd->serviceType_ = SERVICE_TYPE_CONTINUE;
     cmd->subServiceType_ = subServiceType_;
@@ -1087,9 +1116,9 @@ int32_t DSchedContinue::ExecuteContinueError(int32_t result)
     PackEndCmd(cmd, result);
     SendCommand(cmd);
     if (direction_ == CONTINUE_SOURCE) {
-        stateMachine_->UpdateState(DSCHED_CONTINUE_SINK_END_STATE);
+        UpdateState(DSCHED_CONTINUE_SINK_END_STATE);
     } else {
-        stateMachine_->UpdateState(DSCHED_CONTINUE_SOURCE_END_STATE);
+        UpdateState(DSCHED_CONTINUE_SOURCE_END_STATE);
     }
     OnContinueEnd(result);
     HILOGI("ExecuteNotifyComplete end");
@@ -1098,6 +1127,10 @@ int32_t DSchedContinue::ExecuteContinueError(int32_t result)
 
 int32_t DSchedContinue::PackEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd, bool result)
 {
+    if (cmd == nullptr) {
+        HILOGE("cmd is null");
+        return INVALID_PARAMETERS_ERR;
+    }
     cmd->version_ = version_;
     cmd->serviceType_ = SERVICE_TYPE_CONTINUE;
     cmd->subServiceType_ = subServiceType_;
@@ -1117,6 +1150,10 @@ int32_t DSchedContinue::PackEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd, bo
 
 int32_t DSchedContinue::SendCommand(std::shared_ptr<DSchedContinueCmdBase> cmd)
 {
+    if (cmd == nullptr) {
+        HILOGE("cmd is null");
+        return INVALID_PARAMETERS_ERR;
+    }
     HILOGI("SendCommand start, cmd %{public}d", cmd->command_);
     std::string jsonStr;
     int32_t ret = cmd->Marshal(jsonStr);
@@ -1190,6 +1227,10 @@ bool DSchedContinue::CheckDeviceIdFromRemote(const std::string& localDevId, cons
 void DSchedContinue::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffer> dataBuffer)
 {
     HILOGI("called, command %{public}d", command);
+    if (dataBuffer == nullptr) {
+        HILOGE("dataBuffer is null");
+        return;
+    }
     int32_t ret = 0;
     uint8_t *data = dataBuffer->Data();
     std::string jsonStr(reinterpret_cast<const char *>(data), dataBuffer->Capacity());
@@ -1234,6 +1275,15 @@ void DSchedContinue::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffe
             break;
     }
     return;
+}
+
+void DSchedContinue::UpdateState(DSchedContinueStateType stateType)
+{
+    if (stateMachine_ == nullptr) {
+        HILOGE("stateMachine is null");
+        return;
+    }
+    stateMachine_->UpdateState(stateType);
 }
 
 void DSchedContinue::OnShutDown()

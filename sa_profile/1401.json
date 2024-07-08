@@ -14,6 +14,11 @@
                         "name": "deviceonline",
                         "value": "on"
                     }
+                ],
+                "commonevent":[
+                    {
+                        "name":"usual.event.BOOT_COMPLETED"
+                    }
                 ]
             },
             "stop-on-demand": {

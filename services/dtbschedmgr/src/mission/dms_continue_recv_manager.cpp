@@ -72,7 +72,7 @@ void DMSContinueRecvMgr::Init()
 void DMSContinueRecvMgr::UnInit()
 {
     HILOGI("UnInit start");
-    if (eventHandler_ != nullptr) {
+    if (eventHandler_ != nullptr && eventHandler_->GetEventRunner() != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
         eventThread_.join();
         eventHandler_ = nullptr;
@@ -191,7 +191,11 @@ void DMSContinueRecvMgr::StartEvent()
         eventHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
     }
     eventCon_.notify_one();
-    runner->Run();
+    if (runner != nullptr) {
+        runner->Run();
+    } else {
+        HILOGE("runner is null");
+    }
     HILOGI("StartEvent end");
 }
 

@@ -462,6 +462,10 @@ enum {
      * Result(29360230) for sink Ability abnormal termination during continuation.
      */
     CONTINUE_SINK_ABILITY_TERMINATED = 29360230,
+    /**
+     * Result(29360231) for all connect manager reject connect apply.
+     */
+    DMS_CONNECT_APPLY_REJECT_FAILED = 29360231,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

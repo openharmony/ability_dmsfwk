@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -380,8 +380,7 @@ int32_t BundleManagerInternal::GetContinueTypeId(const std::string &bundleName,
 std::string BundleManagerInternal::GetAbilityName(const std::string &networkId,
     std::string &bundleName, std::string &continueType)
 {
-    HILOGD("called.");
-    HILOGI("continueType: %{public}s ", continueType.c_str());
+    HILOGI("called. continueType: %{public}s ", continueType.c_str());
     std::string abilityName = DmsBmStorage::GetInstance()->GetAbilityName(networkId, bundleName, continueType);
     if (abilityName == "") {
         HILOGE("can not get abilityName!");

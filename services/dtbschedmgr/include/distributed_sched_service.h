@@ -88,8 +88,10 @@ class DistributedSchedService : public SystemAbility, public DistributedSchedStu
 
 public:
     ~DistributedSchedService() = default;
-    void OnStart() override;
-    void OnStop() override;
+    void OnStart(const SystemAbilityOnDemandReason &startReason) override;
+    void OnStop(const SystemAbilityOnDemandReason &stopReason) override;
+    void OnActive(const SystemAbilityOnDemandReason &activeReason) override;
+    void HandleBootStart(const SystemAbilityOnDemandReason &startReason);
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
     void DeviceOnlineNotify(const std::string& deviceId);
     void DeviceOfflineNotify(const std::string& deviceId);

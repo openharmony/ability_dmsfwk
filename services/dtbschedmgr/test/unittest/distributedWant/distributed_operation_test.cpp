@@ -68,6 +68,7 @@ void DistributedOperationBaseTest::TearDown(void)
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetAbilityName_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     std::string value = "enter";
     GTEST_LOG_(INFO) << "DmsFwk_DistributedOperation_GetAbilityName_0100 start";
 
@@ -85,10 +86,11 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetAbilityNam
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetAbilityName_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     std::string value = "";
     operationbuilder_->WithAbilityName(value);
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
-
+    ASSERT_NE(operation, nullptr);
     EXPECT_STREQ(value.c_str(), operation->GetAbilityName().c_str());
 }
 
@@ -99,9 +101,11 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetAbilityNam
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetBundleName_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     std::string value = "value";
     operationbuilder_->WithBundleName(value);
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
+    ASSERT_NE(operation, nullptr);
     EXPECT_STREQ(value.c_str(), operation->GetBundleName().c_str());
 }
 
@@ -112,9 +116,11 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetBundleName
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetBundleName_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     std::string value = "";
     operationbuilder_->WithBundleName(value);
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
+    ASSERT_NE(operation, nullptr);
     EXPECT_STREQ(value.c_str(), operation->GetBundleName().c_str());
 }
 
@@ -125,9 +131,11 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetBundleName
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetDeviceId_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     std::string value = "value";
     operationbuilder_->WithDeviceId(value);
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
+    ASSERT_NE(operation, nullptr);
     EXPECT_STREQ(value.c_str(), operation->GetDeviceId().c_str());
 }
 
@@ -138,9 +146,11 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetDeviceId_0
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetDeviceId_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     std::string value = "";
     operationbuilder_->WithDeviceId(value);
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
+    ASSERT_NE(operation, nullptr);
     EXPECT_STREQ(value.c_str(), operation->GetDeviceId().c_str());
 }
 
@@ -151,9 +161,11 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetDeviceId_0
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetAction_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     std::string value = "value";
     operationbuilder_->WithAction(value);
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
+    ASSERT_NE(operation, nullptr);
     EXPECT_STREQ(value.c_str(), operation->GetAction().c_str());
 }
 
@@ -164,9 +176,11 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetAction_010
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetAction_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     std::string value = "";
     operationbuilder_->WithAction(value);
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
+    ASSERT_NE(operation, nullptr);
     EXPECT_STREQ(value.c_str(), operation->GetAction().c_str());
 }
 
@@ -177,11 +191,12 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetAction_020
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetEntities_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     std::vector<std::string> value;
     value.push_back("string1");
     operationbuilder_->WithEntities(value);
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
-
+    ASSERT_NE(operation, nullptr);
     std::vector<std::string> revValue = operation->GetEntities();
 
     if (value.size() > 0 && revValue.size() > 0) {
@@ -198,9 +213,11 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetEntities_0
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetEntities_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     std::vector<std::string> value;
     operationbuilder_->WithEntities(value);
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
+    ASSERT_NE(operation, nullptr);
     EXPECT_EQ(true, operation->GetEntities().size() == 0);
 }
 
@@ -211,9 +228,11 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetEntities_0
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetFlags_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     unsigned int value = 1;
     operationbuilder_->WithFlags(value);
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
+    ASSERT_NE(operation, nullptr);
     EXPECT_EQ(value, operation->GetFlags());
 }
 
@@ -224,9 +243,11 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetFlags_0100
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetFlags_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     unsigned int value = 0;
     operationbuilder_->WithFlags(value);
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
+    ASSERT_NE(operation, nullptr);
     EXPECT_EQ(value, operation->GetFlags());
 }
 
@@ -237,11 +258,12 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetFlags_0200
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetUri_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     std::string value = "scheme://authority/path1/path2/path3?id = 1&name = mingming&old#fragment";
     OHOS::Uri uri(value);
     operationbuilder_->WithUri(uri);
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
-
+    ASSERT_NE(operation, nullptr);
     EXPECT_EQ(uri, operation->GetUri());
 }
 
@@ -252,10 +274,12 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetUri_0100, 
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetUri_0200, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     std::string value = "";
     OHOS::Uri uri(value);
     operationbuilder_->WithUri(uri);
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
+    ASSERT_NE(operation, nullptr);
     EXPECT_EQ(uri, operation->GetUri());
 }
 
@@ -266,6 +290,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_GetUri_0200, 
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_build_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     std::string value = "value";
     OHOS::Uri uri(value);
     std::vector<std::string> columns;
@@ -278,7 +303,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_build_0100, F
     operationbuilder_->WithAbilityName(value);
 
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
-
+    ASSERT_NE(operation, nullptr);
     EXPECT_EQ(uri, operation->GetUri());
     EXPECT_STREQ(value.c_str(), operation->GetAction().c_str());
 
@@ -301,6 +326,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_build_0100, F
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Marshalling_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     std::string value = "value";
     OHOS::Uri uri(value);
     std::vector<std::string> columns;
@@ -313,6 +339,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Marshalling_0
     operationbuilder_->WithAbilityName(value);
 
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
+    ASSERT_NE(operation, nullptr);
     Parcel in;
     operation->Marshalling(in);
 
@@ -331,6 +358,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Marshalling_0
  */
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_0100, Function | MediumTest | Level3)
 {
+    ASSERT_NE(operationbuilder_, nullptr);
     DistributedOperation operation_;
     std::string value = "value";
     OHOS::Uri uri(value);
@@ -344,6 +372,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_0100
     operationbuilder_->WithAbilityName(value);
 
     std::shared_ptr<DistributedOperation> operation = operationbuilder_->build();
+    ASSERT_NE(operation, nullptr);
     operation_ = *(operation.get());
 
     EXPECT_EQ(true, operation_ == *(operation.get()));
@@ -358,6 +387,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_0100
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_AddEntity_0100, Function | MediumTest | Level3)
 {
     DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_AddEntity_0100 begin" << std::endl;
+    ASSERT_NE(distributedOperation_, nullptr);
     std::string entity = "test";
     distributedOperation_->entities_.emplace_back(entity);
     distributedOperation_->AddEntity(entity);
@@ -375,6 +405,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_AddEntity_010
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_RemoveEntity_0100, Function | MediumTest | Level3)
 {
     DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_RemoveEntity_0100 begin" << std::endl;
+    ASSERT_NE(distributedOperation_, nullptr);
     std::string entity = "test";
     distributedOperation_->entities_.clear();
     distributedOperation_->RemoveEntity(entity);
@@ -392,6 +423,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_RemoveEntity_
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_RemoveEntity_0200, Function | MediumTest | Level3)
 {
     DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_RemoveEntity_0200 begin" << std::endl;
+    ASSERT_NE(distributedOperation_, nullptr);
     std::string entity = "test";
     distributedOperation_->entities_.emplace_back(entity);
     std::string entity1 = "test1";
@@ -560,6 +592,7 @@ HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Operator_1000
 HWTEST_F(DistributedOperationBaseTest, DmsFwk_DistributedOperation_Marshalling_0200, Function | MediumTest | Level3)
 {
     DTEST_LOG << "DistributedWantParamsBaseTest DmsFwk_DistributedOperation_Marshalling_0200 begin" << std::endl;
+    ASSERT_NE(operationbuilder_, nullptr);
     std::string value = "";
     OHOS::Uri uri(value);
     std::vector<std::string> columns;

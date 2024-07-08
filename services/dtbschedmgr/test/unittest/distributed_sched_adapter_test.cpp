@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,7 @@ void DistributedSchedAdapterTest::SetUp()
 HWTEST_F(DistributedSchedAdapterTest, Init_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest Init_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     distributedSchedAdapter_->Init();
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
     DTEST_LOG << "DistributedSchedAdapterTest Init_001 end" << std::endl;
@@ -69,9 +70,10 @@ HWTEST_F(DistributedSchedAdapterTest, Init_001, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, ConnectAbility_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ConnectAbility_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const OHOS::AAFwk::Want want;
-    const sptr<IRemoteObject> connect;
-    const sptr<IRemoteObject> callerToken;
+    const sptr<IRemoteObject> connect = nullptr;
+    const sptr<IRemoteObject> callerToken = nullptr;
     int32_t result = distributedSchedAdapter_->ConnectAbility(want, connect, callerToken);
     EXPECT_NE(result, ERR_OK);
     DTEST_LOG << "DistributedSchedAdapterTest ConnectAbility_001 end" << std::endl;
@@ -86,7 +88,8 @@ HWTEST_F(DistributedSchedAdapterTest, ConnectAbility_001, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, DisconnectAbility_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest DisconnectAbility_001 begin" << std::endl;
-    const sptr<IRemoteObject> connect;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
+    const sptr<IRemoteObject> connect = nullptr;
     int32_t result = distributedSchedAdapter_->DisconnectAbility(connect);
     EXPECT_NE(result, ERR_OK);
     DTEST_LOG << "DistributedSchedAdapterTest DisconnectAbility_001 end" << std::endl;
@@ -101,6 +104,7 @@ HWTEST_F(DistributedSchedAdapterTest, DisconnectAbility_001, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, DeviceOnline_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest DeviceOnline_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const std::string deviceId = "";
     distributedSchedAdapter_->dmsAdapterHandler_ = nullptr;
     distributedSchedAdapter_->DeviceOnline(deviceId);
@@ -117,6 +121,7 @@ HWTEST_F(DistributedSchedAdapterTest, DeviceOnline_001, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, DeviceOnline_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest DeviceOnline_002 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const std::string deviceId = "";
     distributedSchedAdapter_->DeviceOnline(deviceId);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
@@ -132,6 +137,7 @@ HWTEST_F(DistributedSchedAdapterTest, DeviceOnline_002, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, DeviceOnline_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest DeviceOnline_003 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const std::string deviceId = "mockDeviceId";
     distributedSchedAdapter_->DeviceOnline(deviceId);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
@@ -147,6 +153,7 @@ HWTEST_F(DistributedSchedAdapterTest, DeviceOnline_003, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, DeviceOffline_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest DeviceOffline_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const std::string deviceId = "";
     distributedSchedAdapter_->dmsAdapterHandler_ = nullptr;
     distributedSchedAdapter_->DeviceOffline(deviceId);
@@ -163,6 +170,7 @@ HWTEST_F(DistributedSchedAdapterTest, DeviceOffline_001, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, DeviceOffline_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest DeviceOffline_002 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const std::string deviceId = "";
     distributedSchedAdapter_->DeviceOffline(deviceId);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
@@ -178,6 +186,7 @@ HWTEST_F(DistributedSchedAdapterTest, DeviceOffline_002, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, DeviceOffline_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest DeviceOffline_003 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const std::string deviceId = "mockDeviceId";
     distributedSchedAdapter_->DeviceOffline(deviceId);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
@@ -193,7 +202,8 @@ HWTEST_F(DistributedSchedAdapterTest, DeviceOffline_003, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, ProcessConnectDied_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ProcessConnectDied_001 begin" << std::endl;
-    const sptr<IRemoteObject> connect;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
+    const sptr<IRemoteObject> connect = nullptr;
     distributedSchedAdapter_->dmsAdapterHandler_ = nullptr;
     distributedSchedAdapter_->ProcessConnectDied(connect);
     EXPECT_EQ(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
@@ -209,6 +219,7 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessConnectDied_001, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, ProcessConnectDied_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ProcessConnectDied_002 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const sptr<IRemoteObject> connect = nullptr;
     distributedSchedAdapter_->ProcessConnectDied(connect);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
@@ -224,6 +235,7 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessConnectDied_002, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, ProcessConnectDied_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ProcessConnectDied_003 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const sptr<IRemoteObject> connect(new MockRemoteStub());
     distributedSchedAdapter_->ProcessConnectDied(connect);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
@@ -239,7 +251,8 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessConnectDied_003, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, ProcessCalleeDied_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCalleeDied_001 begin" << std::endl;
-    const sptr<IRemoteObject> connect;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
+    const sptr<IRemoteObject> connect = nullptr;
     distributedSchedAdapter_->dmsAdapterHandler_ = nullptr;
     distributedSchedAdapter_->ProcessCalleeDied(connect);
     EXPECT_EQ(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
@@ -255,6 +268,7 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessCalleeDied_001, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, ProcessCalleeDied_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCalleeDied_002 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const sptr<IRemoteObject> connect = nullptr;
     distributedSchedAdapter_->ProcessCalleeDied(connect);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
@@ -271,6 +285,7 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessCalleeDied_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCalleeDied_003 begin" << std::endl;
     const sptr<IRemoteObject> connect(new MockRemoteStub());
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     distributedSchedAdapter_->ProcessCalleeDied(connect);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCalleeDied_003 end" << std::endl;
@@ -285,7 +300,8 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessCalleeDied_003, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, ProcessCallerDied_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCallerDied_001 begin" << std::endl;
-    const sptr<IRemoteObject> connect;
+    const sptr<IRemoteObject> connect = nullptr;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     int32_t deviceType = 0;
     distributedSchedAdapter_->dmsAdapterHandler_ = nullptr;
     distributedSchedAdapter_->ProcessCallerDied(connect, deviceType);
@@ -302,6 +318,7 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessCallerDied_001, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, ProcessCallerDied_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCallerDied_002 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const sptr<IRemoteObject> connect = nullptr;
     int32_t deviceType = 0;
     distributedSchedAdapter_->ProcessCallerDied(connect, deviceType);
@@ -334,6 +351,7 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessCallerDied_003, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, GetLocalMissionInfos_001, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest GetLocalMissionInfos_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     int32_t numMissions = -1;
     std::vector<DstbMissionInfo> missionInfos;
     int32_t result = distributedSchedAdapter_->GetLocalMissionInfos(numMissions, missionInfos);
@@ -350,6 +368,7 @@ HWTEST_F(DistributedSchedAdapterTest, GetLocalMissionInfos_001, TestSize.Level4)
 HWTEST_F(DistributedSchedAdapterTest, GetLocalMissionInfos_002, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest GetLocalMissionInfos_002 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     int32_t numMissions = 0;
     std::vector<DstbMissionInfo> missionInfos;
     int32_t result = distributedSchedAdapter_->GetLocalMissionInfos(numMissions, missionInfos);
@@ -366,6 +385,7 @@ HWTEST_F(DistributedSchedAdapterTest, GetLocalMissionInfos_002, TestSize.Level4)
 HWTEST_F(DistributedSchedAdapterTest, GetLocalMissionInfos_003, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest GetLocalMissionInfos_003 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     int32_t numMissions = 10;
     std::vector<DstbMissionInfo> missionInfos;
     int32_t result = distributedSchedAdapter_->GetLocalMissionInfos(numMissions, missionInfos);
@@ -382,6 +402,7 @@ HWTEST_F(DistributedSchedAdapterTest, GetLocalMissionInfos_003, TestSize.Level4)
 HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_001, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest RegisterMissionListener_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const sptr<DistributedMissionChangeListener> listener = nullptr;
     int32_t result = distributedSchedAdapter_->RegisterMissionListener(listener);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
@@ -448,6 +469,7 @@ HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_002, TestSize.Le
 HWTEST_F(DistributedSchedAdapterTest, GetLocalMissionSnapshotInfo_001, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest GetLocalMissionSnapshotInfo_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     distributedSchedAdapter_->ProcessCallResult(nullptr, nullptr);
     const std::string networkId = "invalidNetworkId";
     int32_t missionId = 0;

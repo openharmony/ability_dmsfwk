@@ -63,7 +63,7 @@ void DSchedContinueManagerTest::SetUp()
 
 sptr<IRemoteObject> DSchedContinueManagerTest::GetDSchedService() const
 {
-    sptr<IRemoteObject> dsched = new MockDistributedSched();
+    sptr<IRemoteObject> dsched(new MockDistributedSched());
     return dsched;
 }
 
@@ -353,7 +353,7 @@ HWTEST_F(DSchedContinueManagerTest, HandleContinueEnd_001, TestSize.Level3)
     DSchedContinueManager::GetInstance().HandleContinueEnd(info);
     int32_t ret = DSchedContinueManager::GetInstance().continues_.empty();
     EXPECT_EQ(ret, true);
-    
+
     std::shared_ptr<DSchedContinue> ptr = nullptr;
     DSchedContinueManager::GetInstance().continues_[info] = ptr;
     DSchedContinueManager::GetInstance().HandleContinueEnd(info);

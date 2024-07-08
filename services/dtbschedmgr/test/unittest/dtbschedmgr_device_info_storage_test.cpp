@@ -350,12 +350,13 @@ HWTEST_F(DtbschedmgrDeviceInfoStorageTest, GetNetworkIdByUuidTest_001, TestSize.
      */
     std::string deviceId = "invalid deviceId for OnDeviceInfoChanged";
     DtbschedmgrDeviceInfoStorage::GetInstance().OnDeviceInfoChanged(deviceId);
-    
+
     /**
      * @tc.steps: step5. test OnRemoteDied;
      */
     wptr<IRemoteObject> remote = nullptr;
-    sptr<DnetServiceDeathRecipient> dnetServiceDeathRecipient = new DnetServiceDeathRecipient();
+    sptr<DnetServiceDeathRecipient> dnetServiceDeathRecipient(new DnetServiceDeathRecipient());
+    ASSERT_NE(dnetServiceDeathRecipient, nullptr);
     dnetServiceDeathRecipient->OnRemoteDied(remote);
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest GetNetworkIdByUuidTest_001 end" << std::endl;
 }

@@ -93,6 +93,10 @@ bool DtbschedmgrDeviceInfoStorage::ConnectSoftbus()
 
 bool DtbschedmgrDeviceInfoStorage::InitNetworkIdManager(std::shared_ptr<DnetworkAdapter> dnetworkAdapter)
 {
+    if (dnetworkAdapter == nullptr) {
+        HILOGE("dnetworkAdapter is null");
+        return false;
+    }
     if (networkIdMgrHandler_ == nullptr) {
         auto runner = AppExecFwk::EventRunner::Create("DmsNetworkIdManager");
         networkIdMgrHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
@@ -397,7 +401,7 @@ void DnetServiceDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 std::string DtbschedmgrDeviceInfoStorage::GetDeviceName(std::string netWorkId)
 {
     for (auto device = remoteDevices_.begin(); device != remoteDevices_.end(); ++device) {
-        if (device->second->GetNetworkId() == netWorkId) {
+        if (device->second != nullptr && device->second->GetNetworkId() == netWorkId) {
             HILOGI("deviceName = %{public}s", device->second->GetDeviceName().c_str());
             return device->second->GetDeviceName();
         }
@@ -409,8 +413,10 @@ std::vector<std::string> DtbschedmgrDeviceInfoStorage::GetNetworkIdList()
 {
     std::vector<std::string> devices;
     for (auto device = remoteDevices_.begin(); device != remoteDevices_.end(); ++device) {
-        HILOGI("NetworkId: %{public}s", GetAnonymStr(device->second->GetNetworkId()).c_str());
-        devices.push_back(device->second->GetNetworkId());
+        if (device->second != nullptr) {
+            HILOGI("NetworkId: %{public}s", GetAnonymStr(device->second->GetNetworkId()).c_str());
+            devices.push_back(device->second->GetNetworkId());
+        }
     }
     return devices;
 }

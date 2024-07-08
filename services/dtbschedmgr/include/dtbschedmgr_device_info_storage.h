@@ -97,8 +97,6 @@ private:
     std::shared_ptr<DmsDeviceInfo> FindDeviceInfoInStorage(const std::string& networkId);
     void ClearAllDevices();
     bool WaitForDnetworkReady();
-    bool GetLocalDeviceFromDnet(std::string& networkId);
-    bool GetLocalDeviceUdid(std::string& udid);
     void RegisterUuidNetworkIdMap(const std::string& networkId);
     void UnregisterUuidNetworkIdMap(const std::string& networkId);
     std::mutex deviceLock_;

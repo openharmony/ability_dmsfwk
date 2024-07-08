@@ -170,7 +170,7 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
             strKey = "";
         }
     }
-    sptr<IDistributedWantParams> iwantParams (new (std::nothrow) DistributedWantParamWrapper(wantParams));
+    sptr<IDistributedWantParams> iwantParams(new (std::nothrow) DistributedWantParamWrapper(wantParams));
     if (iwantParams == nullptr) {
         return nullptr;
     }
