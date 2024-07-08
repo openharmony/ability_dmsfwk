@@ -48,7 +48,6 @@ ohos_shared_library("continuationmanager_napi") {
   deps = [
     "../../../innerkits/common:common_sdk",
     "../../../innerkits/continuation_manager:continuation_manager",
-    "../../../common:distributed_sched_utils",
   ]
 
   external_deps = [

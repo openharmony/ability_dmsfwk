@@ -788,16 +788,14 @@ bool JsContinuationManager::IsCallbackValid(napi_env env, napi_value listenerObj
 bool JsContinuationManager::IsCallbackRegistered(int32_t token, const std::string& cbType)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(token) == jsCbMap_.end()) {
-        std::string tokenStr = std::to_string(token);
-        HILOGE("token %{public}d not registered callback!", GetAnonymStr(tokenStr).c_str());
+        HILOGE("token %{public}d not registered callback!", token);
         return false;
     }
     if (jsCbMap_[token].empty() || jsCbMap_[token].find(cbType) == jsCbMap_[token].end()) {
         HILOGE("cbType %{public}s not registered callback!", cbType.c_str());
         return false;
     }
-    HILOGI("callback already registered, token: %{public}d, cbType %{public}s",
-        GetAnonymStr(tokenStr).c_str(), cbType.c_str());
+    HILOGI("callback already registered, token: %{public}d, cbType %{public}s", token, cbType.c_str());
     return true;
 }
 
