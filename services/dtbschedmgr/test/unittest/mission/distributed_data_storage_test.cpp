@@ -92,6 +92,7 @@ std::string DistributedDataStorageTest::GetLocalDeviceId() const
 HWTEST_F(DistributedDataStorageTest, InitTest_001, TestSize.Level0)
 {
     DTEST_LOG << "DistributedDataStorageTest InitTest_001 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
     bool ret = distributedDataStorage_->Init();
     EXPECT_EQ(true, ret);
     this_thread::sleep_for(1s);
@@ -107,6 +108,7 @@ HWTEST_F(DistributedDataStorageTest, InitTest_001, TestSize.Level0)
 HWTEST_F(DistributedDataStorageTest, InsertTest_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedDataStorageTest InsertTest_001 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
     std::string deviceId = GetLocalDeviceId();
@@ -125,6 +127,7 @@ HWTEST_F(DistributedDataStorageTest, InsertTest_001, TestSize.Level1)
 HWTEST_F(DistributedDataStorageTest, InsertTest_002, TestSize.Level1)
 {
     DTEST_LOG << "DistributedDataStorageTest InsertTest_002 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
     std::string deviceId;
@@ -143,6 +146,7 @@ HWTEST_F(DistributedDataStorageTest, InsertTest_002, TestSize.Level1)
 HWTEST_F(DistributedDataStorageTest, InsertTest_003, TestSize.Level1)
 {
     DTEST_LOG << "DistributedDataStorageTest InsertTest_003 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
     std::string deviceId = GetLocalDeviceId();
@@ -161,6 +165,7 @@ HWTEST_F(DistributedDataStorageTest, InsertTest_003, TestSize.Level1)
 HWTEST_F(DistributedDataStorageTest, DeleteTest_001, TestSize.Level0)
 {
     DTEST_LOG << "DistributedDataStorageTest DeleteTest_001 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
     std::string deviceId = GetLocalDeviceId();
@@ -178,6 +183,7 @@ HWTEST_F(DistributedDataStorageTest, DeleteTest_001, TestSize.Level0)
 HWTEST_F(DistributedDataStorageTest, DeleteTest_002, TestSize.Level1)
 {
     DTEST_LOG << "DistributedDataStorageTest DeleteTest_002 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
     std::string deviceId = GetLocalDeviceId();
@@ -197,6 +203,7 @@ HWTEST_F(DistributedDataStorageTest, DeleteTest_002, TestSize.Level1)
 HWTEST_F(DistributedDataStorageTest, DeleteTest_003, TestSize.Level1)
 {
     DTEST_LOG << "DistributedDataStorageTest DeleteTest_003 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
     std::string networkId;
@@ -215,6 +222,7 @@ HWTEST_F(DistributedDataStorageTest, DeleteTest_003, TestSize.Level1)
 HWTEST_F(DistributedDataStorageTest, DeleteTest_004, TestSize.Level1)
 {
     DTEST_LOG << "DistributedDataStorageTest DeleteTest_004 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
     std::string networkId = GetLocalDeviceId();
@@ -233,6 +241,7 @@ HWTEST_F(DistributedDataStorageTest, DeleteTest_004, TestSize.Level1)
 HWTEST_F(DistributedDataStorageTest, QueryTest_001, TestSize.Level0)
 {
     DTEST_LOG << "DistributedDataStorageTest QueryTest_001 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
     std::string deviceId = GetLocalDeviceId();
@@ -251,6 +260,7 @@ HWTEST_F(DistributedDataStorageTest, QueryTest_001, TestSize.Level0)
 HWTEST_F(DistributedDataStorageTest, QueryTest_002, TestSize.Level1)
 {
     DTEST_LOG << "DistributedDataStorageTest QueryTest_002 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
     std::string deviceId = GetLocalDeviceId();
@@ -271,6 +281,7 @@ HWTEST_F(DistributedDataStorageTest, QueryTest_002, TestSize.Level1)
 HWTEST_F(DistributedDataStorageTest, QueryTest_003, TestSize.Level1)
 {
     DTEST_LOG << "DistributedDataStorageTest QueryTest_003 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
     std::string deviceId = GetLocalDeviceId();
@@ -292,6 +303,7 @@ HWTEST_F(DistributedDataStorageTest, QueryTest_003, TestSize.Level1)
 HWTEST_F(DistributedDataStorageTest, QueryTest_004, TestSize.Level1)
 {
     DTEST_LOG << "DistributedDataStorageTest QueryTest_004 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
     std::string deviceId = GetLocalDeviceId();
@@ -316,6 +328,7 @@ HWTEST_F(DistributedDataStorageTest, QueryTest_004, TestSize.Level1)
 HWTEST_F(DistributedDataStorageTest, QueryTest_005, TestSize.Level1)
 {
     DTEST_LOG << "DistributedDataStorageTest QueryTest_005 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
     std::string deviceId = GetLocalDeviceId();
@@ -340,6 +353,7 @@ HWTEST_F(DistributedDataStorageTest, QueryTest_005, TestSize.Level1)
 HWTEST_F(DistributedDataStorageTest, QueryTest_006, TestSize.Level1)
 {
     DTEST_LOG << "DistributedDataStorageTest QueryTest_006 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
     std::string deviceId;
@@ -358,6 +372,7 @@ HWTEST_F(DistributedDataStorageTest, QueryTest_006, TestSize.Level1)
 HWTEST_F(DistributedDataStorageTest, QueryTest_007, TestSize.Level1)
 {
     DTEST_LOG << "DistributedDataStorageTest QueryTest_007 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
     std::string deviceId = GetLocalDeviceId();

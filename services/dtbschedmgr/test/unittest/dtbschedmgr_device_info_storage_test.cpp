@@ -356,6 +356,7 @@ HWTEST_F(DtbschedmgrDeviceInfoStorageTest, GetNetworkIdByUuidTest_001, TestSize.
      */
     wptr<IRemoteObject> remote = nullptr;
     sptr<DnetServiceDeathRecipient> dnetServiceDeathRecipient = new DnetServiceDeathRecipient();
+    ASSERT_NE(dnetServiceDeathRecipient, nullptr);
     dnetServiceDeathRecipient->OnRemoteDied(remote);
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest GetNetworkIdByUuidTest_001 end" << std::endl;
 }

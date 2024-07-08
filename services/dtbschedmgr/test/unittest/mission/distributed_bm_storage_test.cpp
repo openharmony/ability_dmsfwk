@@ -76,6 +76,7 @@ std::shared_ptr<DmsBmStorage> DistributedBmStorageTest::GetDmsBmStorage()
 HWTEST_F(DistributedBmStorageTest, SaveStorageDistributeInfo_001, TestSize.Level0)
 {
     DTEST_LOG << "DistributedBmStorageTest SaveStorageDistributeInfo_001 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
@@ -94,6 +95,7 @@ HWTEST_F(DistributedBmStorageTest, SaveStorageDistributeInfo_001, TestSize.Level
 HWTEST_F(DistributedBmStorageTest, DeleteStorageDistributeInfoTest_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedBmStorageTest DeleteStorageDistributeInfoTest_001 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
@@ -112,6 +114,7 @@ HWTEST_F(DistributedBmStorageTest, DeleteStorageDistributeInfoTest_001, TestSize
 HWTEST_F(DistributedBmStorageTest, GetStorageDistributeInfo_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedBmStorageTest GetStorageDistributeInfo_001 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
@@ -131,6 +134,7 @@ HWTEST_F(DistributedBmStorageTest, GetStorageDistributeInfo_001, TestSize.Level1
 HWTEST_F(DistributedBmStorageTest, GetDistributedBundleNameTest_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedBmStorageTest GetDistributedBundleNameTest_001 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
@@ -150,6 +154,7 @@ HWTEST_F(DistributedBmStorageTest, GetDistributedBundleNameTest_001, TestSize.Le
 HWTEST_F(DistributedBmStorageTest, GetDistributedBundleNameTest_002, TestSize.Level1)
 {
     DTEST_LOG << "DistributedBmStorageTest GetDistributedBundleNameTest_002 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
@@ -170,6 +175,7 @@ HWTEST_F(DistributedBmStorageTest, GetDistributedBundleNameTest_002, TestSize.Le
 HWTEST_F(DistributedBmStorageTest, GetDistributedBundleNameTest_003, TestSize.Level1)
 {
     DTEST_LOG << "DistributedBmStorageTest GetDistributedBundleNameTest_003 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
@@ -190,6 +196,7 @@ HWTEST_F(DistributedBmStorageTest, GetDistributedBundleNameTest_003, TestSize.Le
 HWTEST_F(DistributedBmStorageTest, GetBundleIdTest_001, TestSize.Level0)
 {
     DTEST_LOG << "DistributedBmStorageTest GetBundleIdTest_001 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
@@ -209,6 +216,7 @@ HWTEST_F(DistributedBmStorageTest, GetBundleIdTest_001, TestSize.Level0)
 HWTEST_F(DistributedBmStorageTest, GetBundleIdTest_002, TestSize.Level0)
 {
     DTEST_LOG << "DistributedBmStorageTest GetBundleIdTest_002 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
@@ -228,6 +236,7 @@ HWTEST_F(DistributedBmStorageTest, GetBundleIdTest_002, TestSize.Level0)
 HWTEST_F(DistributedBmStorageTest, UpdateDistributedDataTest_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedBmStorageTest UpdateDistributedDataTest_001 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
@@ -244,6 +253,7 @@ HWTEST_F(DistributedBmStorageTest, UpdateDistributedDataTest_001, TestSize.Level
 HWTEST_F(DistributedBmStorageTest, CloudSyncTest_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedBmStorageTest CloudSyncTest_001 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
@@ -260,6 +270,7 @@ HWTEST_F(DistributedBmStorageTest, CloudSyncTest_001, TestSize.Level1)
 HWTEST_F(DistributedBmStorageTest, GetBundleMgrTest_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedBmStorageTest GetBundleMgrTest_001 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
@@ -277,6 +288,7 @@ HWTEST_F(DistributedBmStorageTest, GetBundleMgrTest_001, TestSize.Level1)
 HWTEST_F(DistributedBmStorageTest, GetContinueTypeTest_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedBmStorageTest GetContinueTypeTest_001 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
@@ -297,6 +309,7 @@ HWTEST_F(DistributedBmStorageTest, GetContinueTypeTest_001, TestSize.Level1)
 HWTEST_F(DistributedBmStorageTest, GetAbilityNameTest_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedBmStorageTest GetAbilityNameTest_001 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
@@ -317,6 +330,7 @@ HWTEST_F(DistributedBmStorageTest, GetAbilityNameTest_001, TestSize.Level1)
 HWTEST_F(DistributedBmStorageTest, GetContinueTypeIdTest_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedBmStorageTest GetContinueTypeIdTest_001 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
@@ -337,6 +351,7 @@ HWTEST_F(DistributedBmStorageTest, GetContinueTypeIdTest_001, TestSize.Level1)
 HWTEST_F(DistributedBmStorageTest, GetContinueEventInfoTest_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedBmStorageTest GetContinueEventInfoTest_001 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
@@ -359,6 +374,7 @@ HWTEST_F(DistributedBmStorageTest, GetContinueEventInfoTest_001, TestSize.Level1
 HWTEST_F(DistributedBmStorageTest, DmsPutBatchTest_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedBmStorageTest DmsPutBatchTest_001 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
     auto distributedDataStorage = GetDmsBmStorage();
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {

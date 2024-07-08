@@ -315,6 +315,7 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerCallBackTest_001, TestSize.Leve
     int32_t missionId = 0;
     int32_t versionCode = 10000;
     auto callback = new DmsBundleManagerCallbackStub();
+    ASSERT_NE(callback, nullptr);
     int32_t ret = callback->OnQueryInstallationFinished(resultCode, missionId, versionCode);
     EXPECT_TRUE(CONTINUE_REMOTE_UNINSTALLED_CANNOT_FREEINSTALL == ret);
     DTEST_LOG << "BundleManagerCallBackTest BundleManagerCallBackTest_001 end "<< std::endl;
@@ -332,6 +333,7 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerCallBackTest_002, TestSize.Leve
     int32_t missionId = 0;
     int32_t versionCode = 10000;
     auto callback = new DmsBundleManagerCallbackStub();
+    ASSERT_NE(callback, nullptr);
     int32_t ret = callback->OnQueryInstallationFinished(resultCode, missionId, versionCode);
     EXPECT_TRUE(ERR_OK != ret);
     DTEST_LOG << "BundleManagerCallBackTest BundleManagerCallBackTest_002 end "<< std::endl;
@@ -349,6 +351,7 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerCallBackTest_003, TestSize.Leve
     MessageParcel reply;
     MessageOption option;
     auto callback = new DmsBundleManagerCallbackStub();
+    ASSERT_NE(callback, nullptr);
     int32_t ret = callback->OnRemoteRequest(-1, data, reply, option);
     EXPECT_TRUE(ERR_OK != ret);
     DTEST_LOG << "BundleManagerCallBackTest BundleManagerCallBackTest_003 end "<< std::endl;
@@ -366,6 +369,7 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerCallBackTest_004, TestSize.Leve
     MessageParcel reply;
     MessageOption option;
     auto callback = new DmsBundleManagerCallbackStub();
+    ASSERT_NE(callback, nullptr);
     data.WriteInterfaceToken(callback->GetDescriptor());
     int32_t ret = callback->OnRemoteRequest(-1, data, reply, option);
     EXPECT_TRUE(ERR_OK != ret);
@@ -384,6 +388,7 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerCallBackTest_005, TestSize.Leve
     MessageParcel reply;
     MessageOption option;
     auto callback = new DmsBundleManagerCallbackStub();
+    ASSERT_NE(callback, nullptr);
     data.WriteInterfaceToken(callback->GetDescriptor());
     int32_t ret = callback->OnRemoteRequest(1, data, reply, option);
     EXPECT_TRUE(ERR_OK != ret);
