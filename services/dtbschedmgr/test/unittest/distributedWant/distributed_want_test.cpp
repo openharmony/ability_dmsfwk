@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4275,7 +4275,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ToString_0100, Functio
  */
 HWTEST_F(DistributedWantBaseTest, array_test_001, TestSize.Level3)
 {
-    sptr<Array> arrayObj = new Array(9, g_IID_IInteger);
+    sptr<Array> arrayObj(new Array(9, g_IID_IInteger));
     ASSERT_NE(arrayObj, nullptr);
     long size = 0;
     arrayObj->GetLength(size);
@@ -4295,10 +4295,10 @@ HWTEST_F(DistributedWantBaseTest, array_test_001, TestSize.Level3)
  */
 HWTEST_F(DistributedWantBaseTest, array_test_002, TestSize.Level3)
 {
-    sptr<Array> arrayObj = new Array(19, g_IID_IInteger);
+    sptr<Array> arrayObj(new Array(19, g_IID_IInteger));
     ASSERT_NE(arrayObj, nullptr);
     arrayObj->Set(0, Integer::Box(23));
-    sptr<IInterface> valueObj;
+    sptr<IInterface> valueObj = nullptr;
     arrayObj->Get(0, valueObj);
     EXPECT_TRUE(valueObj != nullptr);
     EXPECT_EQ(Integer::Unbox(IInteger::Query(valueObj)), 23);
@@ -4316,7 +4316,7 @@ HWTEST_F(DistributedWantBaseTest, array_test_002, TestSize.Level3)
  */
 HWTEST_F(DistributedWantBaseTest, array_test_003, TestSize.Level3)
 {
-    sptr<Array> arrayObj = new Array(5, g_IID_IInteger);
+    sptr<Array> arrayObj(new Array(5, g_IID_IInteger));
     ASSERT_NE(arrayObj, nullptr);
     arrayObj->Set(0, Integer::Box(2));
     arrayObj->Set(1, Integer::Box(3));
@@ -4337,8 +4337,8 @@ HWTEST_F(DistributedWantBaseTest, array_test_003, TestSize.Level3)
 HWTEST_F(DistributedWantBaseTest, array_test_004, TestSize.Level3)
 {
     sptr<IArray> arrayObj = Array::Parse("I5{2,3,5,7,11}");
+    sptr<IInterface> valueObj = nullptr;
     ASSERT_NE(arrayObj, nullptr);
-    sptr<IInterface> valueObj;
     arrayObj->Get(0, valueObj);
     EXPECT_EQ(Integer::Unbox(IInteger::Query(valueObj)), 2);
     arrayObj->Get(1, valueObj);

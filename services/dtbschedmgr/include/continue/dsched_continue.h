@@ -118,13 +118,26 @@ struct ContinueEventData {
 };
 
 class DSchedContinue : public std::enable_shared_from_this<DSchedContinue> {
+    friend class DSchedContinueManager;
+    friend class DSchedContinueEventHandler;
+    friend class DSchedContinueSourceStartState;
+    friend class DSchedContinueAbilityState;
+    friend class DSchedContinueWaitEndState;
+    friend class DSchedContinueEndState;
+    friend class DSchedContinueSinkStartState;
+    friend class DSchedContinueDataState;
+    friend class DSchedContinueSinkWaitEndState;
+    friend class DSchedContinueSinkEndState;
+
 public:
     DSchedContinue(int32_t subServiceType, int32_t direction,  const sptr<IRemoteObject>& callback,
         const DSchedContinueInfo& continueInfo);
     DSchedContinue(std::shared_ptr<DSchedContinueStartCmd> startCmd, int32_t sessionId);
     ~DSchedContinue();
 
+private:
     int32_t Init();
+    void StartEventHandler();
     void ProcessEvent(const AppExecFwk::InnerEvent::Pointer& event);
 
     int32_t PostStartTask(const OHOS::AAFwk::WantParams& wantParams);
@@ -161,9 +174,6 @@ public:
 
     int32_t GetSessionId();
     DSchedContinueInfo GetContinueInfo();
-
-private:
-    void StartEventHandler();
 
     int32_t PackStartCmd(std::shared_ptr<DSchedContinueStartCmd>& cmd,
         std::shared_ptr<DistributedWantParams> wantParams);

@@ -77,7 +77,7 @@ void RemoteOnListenerStubTest::OnCallback(const uint32_t ContinueState, const st
 HWTEST_F(DMSContinueManagerTest, testUnInit001, TestSize.Level3)
 {
     DTEST_LOG << "DMSContinueManagerTest testUnInit001 begin" << std::endl;
-    
+
     DistributedSchedUtil::MockManageMissions();
     DMSContinueSendMgr::GetInstance().Init();
     EXPECT_NE(DMSContinueSendMgr::GetInstance().eventHandler_, nullptr);
@@ -190,14 +190,14 @@ HWTEST_F(DMSContinueManagerTest, testRegisterOnListener001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testRegisterOnListener001 start" << std::endl;
     DMSContinueRecvMgr::GetInstance().Init();
-    sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
+    sptr<IRemoteObject> obj01(new RemoteOnListenerStubTest());
     int32_t ret = DMSContinueRecvMgr::GetInstance().RegisterOnListener(TYPE, obj01);
     EXPECT_EQ(ret, ERR_OK);
 
     ret = DMSContinueRecvMgr::GetInstance().RegisterOnListener(TYPE, obj01);
     EXPECT_EQ(ret, NO_MISSION_INFO_FOR_MISSION_ID);
 
-    sptr<IRemoteObject> obj02 = new RemoteOnListenerStubTest();
+    sptr<IRemoteObject> obj02(new RemoteOnListenerStubTest());
     ret = DMSContinueRecvMgr::GetInstance().RegisterOnListener(TYPE, obj02);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DMSContinueManagerTest testRegisterOnListener001 end" << std::endl;
@@ -211,7 +211,7 @@ HWTEST_F(DMSContinueManagerTest, testRegisterOnListener001, TestSize.Level1)
 HWTEST_F(DMSContinueManagerTest, testRegisterOffListener001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testRegisterOffListener001 start" << std::endl;
-    sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
+    sptr<IRemoteObject> obj01(new RemoteOnListenerStubTest());
     int32_t ret = DMSContinueRecvMgr::GetInstance().RegisterOnListener(TYPE, obj01);
     ret = DMSContinueRecvMgr::GetInstance().RegisterOffListener(TYPE, obj01);
     EXPECT_EQ(ret, ERR_OK);
@@ -230,7 +230,7 @@ HWTEST_F(DMSContinueManagerTest, testRegisterOffListener001, TestSize.Level1)
 HWTEST_F(DMSContinueManagerTest, testRegisterOffListener002, TestSize.Level3)
 {
     DTEST_LOG << "DMSContinueManagerTest testRegisterOffListener002 start" << std::endl;
-    sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
+    sptr<IRemoteObject> obj01(new RemoteOnListenerStubTest());
     int32_t ret = DMSContinueRecvMgr::GetInstance().RegisterOnListener(TYPE, obj01);
     EXPECT_EQ(ret, ERR_OK);
 
@@ -278,7 +278,7 @@ HWTEST_F(DMSContinueManagerTest, testDealFocusedBusiness001, TestSize.Level3)
      */
     int32_t ret = DMSContinueSendMgr::GetInstance().DealFocusedBusiness(-1);
     EXPECT_NE(ret, ERR_OK);
-    
+
     DTEST_LOG << "DMSContinueManagerTest testDealFocusedBusiness001 end" << std::endl;
 }
 
@@ -509,7 +509,7 @@ HWTEST_F(DMSContinueManagerTest, testIsContinue001, TestSize.Level1)
 HWTEST_F(DMSContinueManagerTest, testNotifyDied001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyDied001 start" << std::endl;
-    sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
+    sptr<IRemoteObject> obj01(new RemoteOnListenerStubTest());
     int32_t ret = DMSContinueRecvMgr::GetInstance().RegisterOnListener(TYPE, obj01);
     EXPECT_EQ(false, DMSContinueRecvMgr::GetInstance().registerOnListener_.empty());
     DMSContinueRecvMgr::GetInstance().NotifyDied(obj01);
@@ -607,7 +607,7 @@ HWTEST_F(DMSContinueManagerTest, testOnDeviceScreenOff001, TestSize.Level1)
 HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline001 start" << std::endl;
-    sptr<IRemoteObject> obj01 = new RemoteOnListenerStubTest();
+    sptr<IRemoteObject> obj01(new RemoteOnListenerStubTest());
     DMSContinueRecvMgr::GetInstance().RegisterOnListener(TYPE, obj01);
     EXPECT_NE(DMSContinueRecvMgr::GetInstance().registerOnListener_.size(), 0);
 
@@ -724,7 +724,7 @@ HWTEST_F(DMSContinueManagerTest, testFocusedBusinessSendEvent_001, TestSize.Leve
 {
     DTEST_LOG << "DMSContinueManagerTest testFocusedBusinessSendEvent_001 start" << std::endl;
     int32_t ret = DMSContinueSendMgr::GetInstance().FocusedBusinessSendEvent(BUNDLENAME_01, ABILITY_NAME_01);
-   
+
     EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
     DTEST_LOG << "DMSContinueManagerTest testFocusedBusinessSendEvent_001 end" << std::endl;
 }
@@ -744,7 +744,7 @@ HWTEST_F(DMSContinueManagerTest, testGetBundleNameIdAndContinueTypeId_001, TestS
     OHOS::AAFwk::ContinueState state = OHOS::AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
     int32_t ret = DMSContinueSendMgr::GetInstance().GetBundleNameIdAndContinueTypeId(MISSIONID_01, state,
         bundleNameId, continueTypeId);
-    
+
     EXPECT_EQ(ret, REMOTE_DEVICE_BIND_ABILITY_ERR);
     DTEST_LOG << "DMSContinueManagerTest testGetBundleNameIdAndContinueTypeId_001 end" << std::endl;
 }
@@ -764,7 +764,7 @@ HWTEST_F(DMSContinueManagerTest, testGetContinueType_001, TestSize.Level1)
     int32_t ret = DMSContinueRecvMgr::GetInstance().VerifyBroadcastSource(networkId,
         bundleName, continueType, state);
     EXPECT_EQ(ret, ERR_OK);
-    
+
     EXPECT_FALSE(DMSContinueRecvMgr::GetInstance().GetContinueType(bundleName).empty());
     DTEST_LOG << "DMSContinueManagerTest testGetContinueType_001 end" << std::endl;
 }
