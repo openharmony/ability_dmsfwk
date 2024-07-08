@@ -76,6 +76,10 @@ bool IsValidPath(const std::string &inFilePath, std::string &realFilePath)
     }
 
     realFilePath = std::string(path);
+    if (realFilePath.empty()) {
+        HILOGE("Real file path is empty.");
+        return false;
+    }
     if (!std::filesystem::exists(realFilePath)) {
         HILOGE("The real file path %{public}s does not exist in the file system.", realFilePath.c_str());
         realFilePath = "";
@@ -208,7 +212,10 @@ int32_t GetCurrentMissionId()
         return INVALID_MISSION_ID;
     }
     int32_t missionId = INVALID_MISSION_ID;
-    AAFwk::AbilityManagerClient::GetInstance()->GetMissionIdByToken(token, missionId);
+    if (AAFwk::AbilityManagerClient::GetInstance()->GetMissionIdByToken(token, missionId) != ERR_OK) {
+        HILOGE("GetMissionIdByToken failed");
+        return INVALID_MISSION_ID;
+    }
     return missionId;
 }
 
@@ -416,6 +423,10 @@ bool CJsonParamCheck(const cJSON *jsonObj, const std::initializer_list<std::stri
         auto iter = jsonTypeCheckMap.find(*it);
         if (iter == jsonTypeCheckMap.end()) {
             HILOGE("Check is not supported yet, key %{public}s.", (*it).c_str());
+            return false;
+        }
+        if (iter->second == nullptr) {
+            HILOGE("JsonTypeCheckFunc for key %{public}s is nullptr.", (*it).c_str());
             return false;
         }
         JsonTypeCheckFunc &func = iter->second;

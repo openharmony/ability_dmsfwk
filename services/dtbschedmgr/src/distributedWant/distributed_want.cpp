@@ -417,7 +417,7 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, bool value)
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<bool>& value)
 {
     std::size_t size = value.size();
-    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IBoolean);
+    sptr<AAFwk::IArray> ao(new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IBoolean));
     if (ao != nullptr) {
         for (std::size_t i = 0; i < size; i++) {
             ao->Set(i, AAFwk::Boolean::Box(value[i]));
@@ -465,7 +465,7 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, AAFwk::byte v
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<AAFwk::byte>& value)
 {
     std::size_t size = value.size();
-    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IByte);
+    sptr<AAFwk::IArray> ao(new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IByte));
     if (ao == nullptr) {
         return *this;
     }
@@ -514,7 +514,7 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, AAFwk::zchar 
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<AAFwk::zchar>& value)
 {
     std::size_t size = value.size();
-    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IChar);
+    sptr<AAFwk::IArray> ao(new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IChar));
     if (ao == nullptr) {
         return *this;
     }
@@ -563,7 +563,7 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, int value)
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<int>& value)
 {
     std::size_t size = value.size();
-    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IInteger);
+    sptr<AAFwk::IArray> ao(new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IInteger));
     if (ao == nullptr) {
         return *this;
     }
@@ -612,7 +612,7 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, double value)
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<double>& value)
 {
     std::size_t size = value.size();
-    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IDouble);
+    sptr<AAFwk::IArray> ao(new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IDouble));
     if (ao == nullptr) {
         return *this;
     }
@@ -661,7 +661,7 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, float value)
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<float>& value)
 {
     std::size_t size = value.size();
-    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IFloat);
+    sptr<AAFwk::IArray> ao(new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IFloat));
     if (ao == nullptr) {
         return *this;
     }
@@ -736,7 +736,7 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, long value)
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<long>& value)
 {
     std::size_t size = value.size();
-    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_ILong);
+    sptr<AAFwk::IArray> ao(new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_ILong));
     if (ao == nullptr) {
         return *this;
     }
@@ -791,7 +791,7 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, short value)
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<short>& value)
 {
     std::size_t size = value.size();
-    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IShort);
+    sptr<AAFwk::IArray> ao(new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IShort));
     if (ao == nullptr) {
         return *this;
     }
@@ -840,7 +840,7 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const std::st
 DistributedWant& DistributedWant::SetParam(const std::string& key, const std::vector<std::string>& value)
 {
     std::size_t size = value.size();
-    sptr<AAFwk::IArray> ao = new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IString);
+    sptr<AAFwk::IArray> ao(new (std::nothrow) AAFwk::Array(size, AAFwk::g_IID_IString));
     if (ao == nullptr) {
         return *this;
     }

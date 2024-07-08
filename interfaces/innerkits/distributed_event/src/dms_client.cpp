@@ -57,6 +57,10 @@ int32_t DistributedClient::RegisterDSchedEventListener(const DSchedEventType& ty
         return ERR_FLATTEN_OBJECT;
     }
     PARCEL_WRITE_HELPER(data, Uint8, type);
+    if (obj == nullptr) {
+        HILOG_ERROR("Received null IDSchedEventListener object");
+        return AAFwk::INVALID_PARAMETERS_ERR;
+    }
     PARCEL_WRITE_HELPER(data, RemoteObject, obj->AsObject());
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_DSCHED_EVENT_LISTENER),
         data, reply);
@@ -78,6 +82,10 @@ int32_t DistributedClient::UnRegisterDSchedEventListener(const DSchedEventType& 
         return ERR_FLATTEN_OBJECT;
     }
     PARCEL_WRITE_HELPER(data, Uint8, type);
+    if (obj == nullptr) {
+        HILOG_ERROR("Received null IDSchedEventListener object");
+        return AAFwk::INVALID_PARAMETERS_ERR;
+    }
     PARCEL_WRITE_HELPER(data, RemoteObject, obj->AsObject());
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::UNREGISTER_DSCHED_EVENT_LISTENER),
         data, reply);

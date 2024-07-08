@@ -196,7 +196,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_001, TestS
     int32_t token = -1;
     int32_t result1 = DistributedAbilityManagerClient::GetInstance().Register(nullptr, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = DistributedAbilityManagerClient::GetInstance().RegisterDeviceSelectionCallback(
         token, CALLBACK_TYPE1, notifier);
     DTEST_LOG << "result2:" << result2 << std::endl;
@@ -217,7 +217,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_001, TestS
 HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_002, TestSize.Level1)
 {
     DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_002 start" << std::endl;
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result1 = DistributedAbilityManagerClient::GetInstance().RegisterDeviceSelectionCallback(
         UNREGISTER_TOKEN, CALLBACK_TYPE1, notifier);
     DTEST_LOG << "result1:" << result1 << std::endl;
@@ -240,7 +240,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_003, TestS
     int32_t token = -1;
     int32_t result1 = DistributedAbilityManagerClient::GetInstance().Register(nullptr, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = DistributedAbilityManagerClient::GetInstance().RegisterDeviceSelectionCallback(
         token, INVALID_CALLBACK_TYPE, notifier);
     DTEST_LOG << "result2:" << result2 << std::endl;
@@ -272,7 +272,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_004, TestS
     int32_t token = -1;
     int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
         token, CALLBACK_TYPE1, notifier);
     DTEST_LOG << "result2:" << result2 << std::endl;
@@ -310,7 +310,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_005, TestS
     int32_t token = -1;
     int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
         token, CALLBACK_TYPE2, notifier);
     DTEST_LOG << "result2:" << result2 << std::endl;
@@ -348,7 +348,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_006, TestS
     int32_t token = -1;
     int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
         token, CALLBACK_TYPE2, notifier);
     DTEST_LOG << "result2:" << result2 << std::endl;
@@ -386,7 +386,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_007, TestS
     int32_t token = -1;
     int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
         token, CALLBACK_TYPE1, notifier);
     DTEST_LOG << "result2:" << result2 << std::endl;
@@ -457,7 +457,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_009, TestS
         DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
         return;
     }
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result1 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
         UNREGISTER_TOKEN, CALLBACK_TYPE1, notifier);
     DTEST_LOG << "result1:" << result1 << std::endl;
@@ -531,7 +531,7 @@ HWTEST_F(ContinuationManagerTest, UnregisterDeviceSelectionCallbackTest_001, Tes
     int32_t token = -1;
     int32_t result1 = DistributedAbilityManagerClient::GetInstance().Register(nullptr, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = DistributedAbilityManagerClient::GetInstance().RegisterDeviceSelectionCallback(
         token, CALLBACK_TYPE1, notifier);
     DTEST_LOG << "result2:" << result2 << std::endl;
@@ -711,7 +711,7 @@ HWTEST_F(ContinuationManagerTest, UpdateConnectStatusTest_001, TestSize.Level1)
     int32_t token = -1;
     int32_t result1 = DistributedAbilityManagerClient::GetInstance().Register(nullptr, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = DistributedAbilityManagerClient::GetInstance().RegisterDeviceSelectionCallback(
         token, CALLBACK_TYPE1, notifier);
     DTEST_LOG << "result2:" << result2 << std::endl;
@@ -1013,7 +1013,7 @@ HWTEST_F(ContinuationManagerTest, IsNotifierRegisteredTest_004, TestSize.Level1)
         return;
     }
     std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     notifierInfo->SetNotifier(CALLBACK_TYPE1, notifier);
     dtbabilitymgrService_->callbackMap_[TEST_TOKEN] = std::move(notifierInfo);
     bool result = dtbabilitymgrService_->IsNotifierRegistered(TEST_TOKEN);
@@ -1035,7 +1035,7 @@ HWTEST_F(ContinuationManagerTest, IsNotifierRegisteredLockedTest_005, TestSize.L
         return;
     }
     std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     notifierInfo->SetNotifier(CALLBACK_TYPE1, notifier);
     dtbabilitymgrService_->callbackMap_[TEST_TOKEN] = std::move(notifierInfo);
     bool result = dtbabilitymgrService_->IsNotifierRegisteredLocked(TEST_TOKEN, CALLBACK_TYPE2);
@@ -1057,7 +1057,7 @@ HWTEST_F(ContinuationManagerTest, IsNotifierRegisteredLockedTest_006, TestSize.L
         return;
     }
     std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     notifierInfo->SetNotifier(CALLBACK_TYPE1, notifier);
     dtbabilitymgrService_->callbackMap_[TEST_TOKEN] = std::move(notifierInfo);
     bool result = dtbabilitymgrService_->IsNotifierRegisteredLocked(UNREGISTER_TOKEN, CALLBACK_TYPE1);
@@ -1080,7 +1080,7 @@ HWTEST_F(ContinuationManagerTest, IsNotifierRegisteredLockedTest_007, TestSize.L
         return;
     }
     std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     notifierInfo->SetNotifier(CALLBACK_TYPE1, notifier);
     dtbabilitymgrService_->callbackMap_[TEST_TOKEN] = std::move(notifierInfo);
     bool result = dtbabilitymgrService_->IsNotifierRegisteredLocked(TEST_TOKEN, CALLBACK_TYPE1);
@@ -1102,7 +1102,7 @@ HWTEST_F(ContinuationManagerTest, QueryTokenByNotifier_001, TestSize.Level1)
         return;
     }
     std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     notifierInfo->SetNotifier(CALLBACK_TYPE1, notifier);
     dtbabilitymgrService_->callbackMap_[TEST_TOKEN] = std::move(notifierInfo);
     int32_t token = -1;
@@ -1125,7 +1125,7 @@ HWTEST_F(ContinuationManagerTest, QueryTokenByNotifier_002, TestSize.Level1)
         return;
     }
     std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
-    sptr<DeviceSelectionNotifierTest> notifier = new DeviceSelectionNotifierTest();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     notifierInfo->SetNotifier(CALLBACK_TYPE1, notifier);
     dtbabilitymgrService_->callbackMap_[TEST_TOKEN] = std::move(notifierInfo);
     int32_t token = -1;
@@ -1814,7 +1814,7 @@ HWTEST_F(ContinuationManagerTest, OnRemoteRequest_008, TestSize.Level3)
     /**
      * @tc.steps: step2. DeviceSelectionNotifierProxy::OnDeviceConnect when continuationResults is nullptr.
      */
-    sptr<IRemoteObject> impl = new MockRemoteStub();
+    sptr<IRemoteObject> impl(new MockRemoteStub());
     DeviceSelectionNotifierProxy deviceSelectionNotifierProxy(impl);
     std::vector<ContinuationResult> continuationResults;
     deviceSelectionNotifierProxy.OnDeviceConnect(continuationResults);

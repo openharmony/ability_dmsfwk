@@ -640,7 +640,7 @@ void DistributedAbilityManagerService::HandleStartDeviceManager(int32_t token,
             PARCEL_WRITE_HELPER_NORET(data, Int32, VALUE_OBJECT);
             PARCEL_WRITE_HELPER_NORET(data, Parcelable, continuationExtraParams.get());
         }
-        sptr<AppDeviceCallbackStub> callback = new AppDeviceCallbackStub();
+        sptr<AppDeviceCallbackStub> callback(new AppDeviceCallbackStub());
         PARCEL_WRITE_HELPER_NORET(data, RemoteObject, callback);
         // query whether the connect status needs to be send
         {

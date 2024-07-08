@@ -3068,7 +3068,7 @@ int32_t DistributedSchedService::StartFreeInstallFromRemote(const FreeInstallInf
         return err;
     }
 
-    sptr<DmsFreeInstallCallback> callback = new DmsFreeInstallCallback(taskId, info);
+    sptr<DmsFreeInstallCallback> callback(new DmsFreeInstallCallback(taskId, info));
     err = AAFwk::AbilityManagerClient::GetInstance()->FreeInstallAbilityFromRemote(
         info.want, callback, activeAccountId, info.requestCode);
     if (err != ERR_OK) {
@@ -3129,7 +3129,7 @@ int32_t DistributedSchedService::StartAbility(const OHOS::AAFwk::Want& want, int
     }
     if (want.GetBoolParam(Want::PARAM_RESV_FOR_RESULT, false)) {
         HILOGI("StartAbilityForResult start, flag is %{public}d", want.GetFlags());
-        sptr<IRemoteObject> dmsTokenCallback = new DmsTokenCallback();
+        sptr<IRemoteObject> dmsTokenCallback(new DmsTokenCallback());
         err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, dmsTokenCallback, requestCode,
             activeAccountId);
     } else {
@@ -3479,7 +3479,7 @@ int32_t DistributedSchedService::StopExtensionAbilityFromRemote(const OHOS::AAFw
     }
     Want want = remoteWant;
     want.RemoveParam(DMS_SRC_NETWORK_ID);
-    sptr<IRemoteObject> callerToken = new DmsTokenCallback();
+    sptr<IRemoteObject> callerToken(new DmsTokenCallback());
 
     int32_t activeAccountId = -1;
     ErrCode err = QueryOsAccount(activeAccountId);
