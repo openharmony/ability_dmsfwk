@@ -359,6 +359,10 @@ bool DmsBmStorage::CheckSyncData(const std::string &networkId)
     }
     HILOGI("uuid: %{public}s", GetAnonymStr(uuid).c_str());
     std::vector<Entry> newEntries;
+    if (kvStorePtr_ == nullptr) {
+        HILOGE("kvstore is null");
+        return false;
+    }
     Status status = kvStorePtr_->GetDeviceEntries(uuid, newEntries);
     if (newEntries.empty() || status != Status::SUCCESS) {
         HILOGE("CheckSyncData fail: %{public}d", status);
@@ -402,6 +406,10 @@ void DmsBmStorage::GetEntries(const std::string &networkId, const Key &allEntryK
     std::promise<OHOS::DistributedKv::Status> &resultStatusSignal, std::vector<Entry> &allEntries)
 {
     HILOGI("called.");
+    if (kvStorePtr_ == nullptr) {
+        HILOGE("kvstore is null");
+        return;
+    }
     kvStorePtr_->GetEntries(allEntryKeyPrefix, networkId,
         [&resultStatusSignal, &allEntries](Status innerStatus, std::vector<Entry> innerAllEntries) {
             HILOGI("GetEntries, result = %{public}d", innerStatus);

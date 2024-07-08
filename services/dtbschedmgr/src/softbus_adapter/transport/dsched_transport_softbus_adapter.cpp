@@ -114,10 +114,13 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
     HILOGI("try to connect peer: %{public}s.", GetAnonymStr(peerDeviceId).c_str());
     {
         std::lock_guard<std::mutex> sessionLock(sessionMutex_);
-        if (!sessions_.empty()) {
-            for (auto iter = sessions_.begin(); iter != sessions_.end(); iter++) {
-                if (iter->second != nullptr && peerDeviceId == iter->second->GetPeerDeviceId()) {
-                    HILOGI("peer device already connected");
+        if (sessions_.empty()) {
+            return INVALID_SESSION_ID;
+        }
+        for (auto iter = sessions_.begin(); iter != sessions_.end(); iter++) {
+            if (iter->second != nullptr && peerDeviceId == iter->second->GetPeerDeviceId()) {
+                HILOGI("peer device already connected");
+                if (sessions_[iter->first] != nullptr) {
                     sessions_[iter->first]->OnConnect();
                     return iter->first;
                 }
@@ -242,7 +245,7 @@ void DSchedTransportSoftbusAdapter::DisconnectDevice(const std::string &peerDevi
             break;
         }
     }
-    if (sessionId != 0 && sessions_[sessionId]->OnDisconnect()) {
+    if (sessionId != 0 && sessions_[sessionId] != nullptr && sessions_[sessionId]->OnDisconnect()) {
         HILOGI("peer %{public}s shutdown, socket sessionId: %{public}d.",
             GetAnonymStr(sessions_[sessionId]->GetPeerDeviceId()).c_str(), sessionId);
         Shutdown(sessionId);
@@ -270,7 +273,7 @@ void DSchedTransportSoftbusAdapter::OnShutdown(int32_t sessionId, bool isSelfcal
     std::string peerDeviceId;
     {
         std::lock_guard<std::mutex> sessionLock(sessionMutex_);
-        if (sessions_.empty() || sessions_.count(sessionId) == 0) {
+        if (sessions_.empty() || sessions_.count(sessionId) == 0 || sessions_[sessionId] == nullptr) {
             HILOGE("error, invalid sessionId %{public}d", sessionId);
             return;
         }
@@ -314,8 +317,10 @@ int32_t DSchedTransportSoftbusAdapter::ReleaseChannel()
     {
         std::lock_guard<std::mutex> sessionLock(sessionMutex_);
         for (auto iter = sessions_.begin(); iter != sessions_.end(); iter++) {
-            HILOGI("shutdown client: %{public}s, socket sessionId: %{public}d.",
-                GetAnonymStr(iter->second->GetPeerDeviceId()).c_str(), iter->first);
+            if (iter->second != nullptr) {
+                HILOGI("shutdown client: %{public}s, socket sessionId: %{public}d.",
+                    GetAnonymStr(iter->second->GetPeerDeviceId()).c_str(), iter->first);
+            }
             Shutdown(iter->first);
         }
         sessions_.clear();
@@ -337,7 +342,7 @@ int32_t DSchedTransportSoftbusAdapter::SendData(int32_t sessionId, int32_t dataT
     std::shared_ptr<DSchedDataBuffer> dataBuffer)
 {
     std::lock_guard<std::mutex> sessionLock(sessionMutex_);
-    if (!sessions_.count(sessionId)) {
+    if (!sessions_.count(sessionId) || sessions_[sessionId] == nullptr) {
         HILOGE("error, invalid session id %{public}d", sessionId);
         return INVALID_SESSION_ID;
     }
@@ -347,7 +352,12 @@ int32_t DSchedTransportSoftbusAdapter::SendData(int32_t sessionId, int32_t dataT
 int32_t DSchedTransportSoftbusAdapter::SendBytesBySoftbus(int32_t sessionId,
     std::shared_ptr<DSchedDataBuffer> dataBuffer)
 {
-    return SendBytes(sessionId, dataBuffer->Data(), dataBuffer->Size());
+    if (dataBuffer != nullptr) {
+        return SendBytes(sessionId, dataBuffer->Data(), dataBuffer->Size());
+    } else {
+        HILOGE("dataBuffer is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
 }
 
 void DSchedTransportSoftbusAdapter::OnBytes(int32_t sessionId, const void *data, uint32_t dataLen)
@@ -359,7 +369,7 @@ void DSchedTransportSoftbusAdapter::OnBytes(int32_t sessionId, const void *data,
     HILOGD("start, sessionId: %{public}d", sessionId);
     {
         std::lock_guard<std::mutex> sessionLock(sessionMutex_);
-        if (!sessions_.count(sessionId)) {
+        if (!sessions_.count(sessionId) || sessions_[sessionId] == nullptr) {
             HILOGE("invalid session id %{public}d", sessionId);
             return;
         }

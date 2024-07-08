@@ -1097,6 +1097,9 @@ void DistributedWant::RemoveParam(const std::string& key)
 
 void DistributedWant::ClearWant(DistributedWant* want)
 {
+    if (want == nullptr) {
+        return;
+    }
     want->SetType("");
     want->SetAction("");
     want->SetFlags(0);

@@ -383,6 +383,10 @@ int32_t DistributedSchedMissionManager::StartSyncRemoteMissions(const std::strin
 int32_t DistributedSchedMissionManager::StartSyncRemoteMissions(const std::string& dstDevId,
     const sptr<IDistributedSched>& remoteDms)
 {
+    if (remoteDms == nullptr) {
+        HILOGE("remoteDms is null");
+        return INVALID_PARAMETERS_ERR;
+    }
     std::vector<DstbMissionInfo> missionInfos;
     CallerInfo callerInfo;
     if (!GenerateCallerInfo(callerInfo)) {
@@ -523,7 +527,7 @@ int32_t DistributedSchedMissionManager::StartSyncMissionsFromRemote(const Caller
             InitAllSnapshots(missionInfoSet);
         }
     };
-    if (!missionHandler_->PostTask(func)) {
+    if (missionHandler_ != nullptr && !missionHandler_->PostTask(func)) {
         HILOGE("post RegisterMissionListener and InitAllSnapshots Task failed");
     }
     return result;
@@ -542,7 +546,7 @@ void DistributedSchedMissionManager::StopSyncMissionsFromRemote(const std::strin
                     isRegMissionChange_ = false;
                 }
             };
-            if (!missionHandler_->PostTask(func)) {
+            if (missionHandler_ != nullptr && !missionHandler_->PostTask(func)) {
                 HILOGE("post UnRegisterMissionListener Task failed");
             }
         }
@@ -618,6 +622,10 @@ void DistributedSchedMissionManager::EnqueueCachedSnapshotInfo(const std::string
     std::string keyInfo = GenerateKeyInfo(deviceId, missionId);
     auto iter = cachedSnapshotInfos_.find(keyInfo);
     if (iter != cachedSnapshotInfos_.end()) {
+        if (iter->second == nullptr) {
+            HILOGE("snapshotInfo is null");
+            return;
+        }
         if (snapshot->GetCreatedTime() < iter->second->GetCreatedTime()) {
             return;
         }
@@ -627,6 +635,10 @@ void DistributedSchedMissionManager::EnqueueCachedSnapshotInfo(const std::string
         int64_t oldest = -1;
         auto iterOldest = cachedSnapshotInfos_.end();
         for (auto iterItem = cachedSnapshotInfos_.begin(); iterItem != cachedSnapshotInfos_.end(); ++iterItem) {
+            if (iterItem->second == nullptr) {
+                HILOGE("snapshotInfo is null");
+                continue;
+            }
             if (oldest == -1 || iterItem->second->GetLastAccessTime() < oldest) {
                 oldest = iterItem->second->GetLastAccessTime();
                 iterOldest = iterItem;
@@ -650,6 +662,10 @@ std::unique_ptr<Snapshot> DistributedSchedMissionManager::DequeueCachedSnapshotI
     auto iter = cachedSnapshotInfos_.find(GenerateKeyInfo(deviceId, missionId));
     if (iter != cachedSnapshotInfos_.end()) {
         std::unique_ptr<Snapshot> snapshot = std::move(iter->second);
+        if (snapshot == nullptr) {
+            HILOGE("snapshot is null");
+            return nullptr;
+        }
         snapshot->UpdateLastAccessTime(GetTickCount());
         iter->second = nullptr;
         cachedSnapshotInfos_.erase(iter);
@@ -778,6 +794,10 @@ void DistributedSchedMissionManager::NotifyLocalMissionsChanged()
             HILOGI("NotifyMissionsChangedToRemote result = %{public}d", result);
         }
     };
+    if (missionChangeHandler_ == nullptr) {
+        HILOGE("missionChangeHandler_ is null");
+        return;
+    }
     if (!missionChangeHandler_->PostTask(func)) {
         HILOGE("postTask failed");
     }
@@ -792,6 +812,10 @@ void DistributedSchedMissionManager::NotifyMissionSnapshotCreated(int32_t missio
             HILOGE("mission snapshot changed failed, missionId=%{public}d, errCode=%{public}d", missionId, errCode);
         }
     };
+    if (missionChangeHandler_ == nullptr) {
+        HILOGE("missionChangeHandler_ is null");
+        return;
+    }
     if (!missionChangeHandler_->PostTask(func, GET_FOREGROUND_SNAPSHOT_DELAY_TIME)) {
         HILOGE("post MissionSnapshotChanged delay Task failed");
     }
@@ -806,6 +830,10 @@ void DistributedSchedMissionManager::NotifyMissionSnapshotChanged(int32_t missio
             HILOGE("mission snapshot changed failed, missionId=%{public}d, errCode=%{public}d", missionId, errCode);
         }
     };
+    if (missionChangeHandler_ == nullptr) {
+        HILOGE("missionChangeHandler_ is null");
+        return;
+    }
     if (!missionChangeHandler_->PostTask(func)) {
         HILOGE("post MissionSnapshotChanged Task failed");
     }
@@ -820,6 +848,10 @@ void DistributedSchedMissionManager::NotifyMissionSnapshotDestroyed(int32_t miss
             HILOGE("mission snapshot removed failed, missionId=%{public}d, errCode=%{public}d", missionId, errCode);
         }
     };
+    if (missionChangeHandler_ == nullptr) {
+        HILOGE("missionChangeHandler_ is null");
+        return;
+    }
     if (!missionChangeHandler_->PostTask(func)) {
         HILOGE("post MissionSnapshotDestroyed Task failed");
     }
@@ -964,7 +996,9 @@ void DistributedSchedMissionManager::OnMissionListenerDied(const sptr<IRemoteObj
                 ++iterItem;
                 continue;
             }
-            remote->RemoveDeathRecipient(listenerDeath_);
+            if (remote != nullptr) {
+                remote->RemoveDeathRecipient(listenerDeath_);
+            }
             listenerInfo.Erase(remote);
             if (listenerInfo.Empty()) {
                 if (listenerInfo.called) {
@@ -988,7 +1022,7 @@ void DistributedSchedMissionManager::OnRemoteDmsDied(const sptr<IRemoteObject>& 
     {
         std::lock_guard<std::mutex> autoLock(remoteDmsLock_);
         for (auto iter = remoteDmsMap_.begin(); iter != remoteDmsMap_.end(); ++iter) {
-            if (iter->second->AsObject() == remote) {
+            if (iter->second->AsObject() == remote && iter->second->AsObject() != nullptr) {
                 iter->second->AsObject()->RemoveDeathRecipient(remoteDmsRecipient_);
                 devId = iter->first;
                 remoteDmsMap_.erase(iter);
