@@ -730,7 +730,7 @@ bool DmsRadar::NotifyDockUnfocused(const std::string& func, int32_t errCode)
 
 bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode, std::string peerUdid)
 {
-	if (peerUdid.empty()) {
+    if (peerUdid.empty()) {
         HILOGE("peerUdid is empty.");
         return false;
     }
