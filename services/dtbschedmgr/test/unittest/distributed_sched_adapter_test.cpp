@@ -336,7 +336,6 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessCallerDied_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCallerDied_003 begin" << std::endl;
     const sptr<IRemoteObject> connect(new MockRemoteStub());
-    ASSERT_NE(distributedSchedAdapter_, nullptr);
     int32_t deviceType = 0;
     distributedSchedAdapter_->ProcessCallerDied(connect, deviceType);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
@@ -420,7 +419,6 @@ HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_002, TestSize.Leve
 {
     DTEST_LOG << "DistributedSchedAdapterTest RegisterMissionListener_002 begin" << std::endl;
     const sptr<IRemoteObject> connect(new MockRemoteStub());
-    ASSERT_NE(distributedSchedAdapter_, nullptr);
     distributedSchedAdapter_->ProcessCallResult(connect, nullptr);
     const sptr<DistributedMissionChangeListener> listener(new DistributedMissionChangeListener());
     int32_t result = distributedSchedAdapter_->RegisterMissionListener(listener);
@@ -438,7 +436,6 @@ HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_001, TestSize.Le
 {
     DTEST_LOG << "DistributedSchedAdapterTest UnRegisterMissionListener_001 begin" << std::endl;
     const sptr<IRemoteObject> connect(new MockRemoteStub());
-    ASSERT_NE(distributedSchedAdapter_, nullptr);
     distributedSchedAdapter_->ProcessCallResult(nullptr, connect);
     const sptr<DistributedMissionChangeListener> listener = nullptr;
     int32_t result = distributedSchedAdapter_->UnRegisterMissionListener(listener);
@@ -456,7 +453,6 @@ HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_002, TestSize.Le
 {
     DTEST_LOG << "DistributedSchedAdapterTest UnRegisterMissionListener_002 begin" << std::endl;
     const sptr<IRemoteObject> connect(new MockRemoteStub());
-    ASSERT_NE(distributedSchedAdapter_, nullptr);
     distributedSchedAdapter_->ProcessCallResult(connect, connect);
     const sptr<DistributedMissionChangeListener> listener(new DistributedMissionChangeListener());
     int32_t result = distributedSchedAdapter_->UnRegisterMissionListener(listener);

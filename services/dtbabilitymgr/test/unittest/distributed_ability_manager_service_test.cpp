@@ -69,7 +69,7 @@ void DistributedAbilityManagerServiceTest::TearDownTestCase()
         --startTaskNum_;
         caseDoneCondition_.notify_one();
     };
-    if (dtbabilitymgrService_->continuationHandler_ != nullptr) {
+    if (dtbabilitymgrService_ != nullptr && dtbabilitymgrService_->continuationHandler_ != nullptr) {
         dtbabilitymgrService_->continuationHandler_->submit(caseDoneNotifyTask);
     }
     std::unique_lock<std::mutex> lock(caseDoneLock_);
@@ -97,10 +97,7 @@ void DistributedAbilityManagerServiceTest::TearDown()
 HWTEST_F(DistributedAbilityManagerServiceTest, Dump_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest Dump_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test Dump when args is not empty.
      */
@@ -136,10 +133,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, Dump_001, TestSize.Level3)
 HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -158,10 +152,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_001, TestSize.Lev
 HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -180,10 +171,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_002, TestSize.Lev
 HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_003 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -201,10 +189,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_003, TestSize.Lev
 HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_004, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_004 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -222,10 +207,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_004, TestSize.Lev
 HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_005, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_005 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     DistributedSchedUtil::MockPermission();
     MessageParcel data;
     MessageParcel reply;
@@ -245,10 +227,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_005, TestSize.Lev
 HWTEST_F(DistributedAbilityManagerServiceTest, Register_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest Register_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test DumpNotifierLocked when callbackMap_ is not empty.
      */
@@ -288,10 +267,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, Register_001, TestSize.Level3)
 HWTEST_F(DistributedAbilityManagerServiceTest, Unregister_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest Unregister_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test Unregister when token is not registered.
      */
@@ -338,10 +314,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, Unregister_001, TestSize.Level3)
 HWTEST_F(DistributedAbilityManagerServiceTest, Unregister_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest Unregister_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test Unregister when iter->second is not empty.
      */
@@ -377,10 +350,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, Unregister_002, TestSize.Level3)
 HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest RegisterDeviceSelectionCallback_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test RegisterDeviceSelectionCallback when cbType is invalid.
      */
@@ -415,10 +385,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_0
 HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest RegisterDeviceSelectionCallback_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test RegisterDeviceSelectionCallback when iter->second != nullptr.
      */
@@ -449,10 +416,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_0
 HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest RegisterDeviceSelectionCallback_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test RegisterDeviceSelectionCallback when iter->second != nullptr.
      */
@@ -479,10 +443,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_0
 HWTEST_F(DistributedAbilityManagerServiceTest, IsTokenRegistered_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest IsTokenRegistered_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test RegisterDeviceSelectionCallback when iter->second != nullptr.
      */
@@ -510,10 +471,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, IsTokenRegistered_001, TestSize.L
 HWTEST_F(DistributedAbilityManagerServiceTest, UnregisterDeviceSelectionCallback_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest UnregisterDeviceSelectionCallback_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test UnregisterDeviceSelectionCallback when cbType is invalid.
      */
@@ -561,10 +519,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UnregisterDeviceSelectionCallback
 HWTEST_F(DistributedAbilityManagerServiceTest, UnregisterDeviceSelectionCallback_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest UnregisterDeviceSelectionCallback_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test UnregisterDeviceSelectionCallback when callback is registered.
      */
@@ -596,10 +551,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UnregisterDeviceSelectionCallback
 HWTEST_F(DistributedAbilityManagerServiceTest, UpdateConnectStatus_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest UpdateConnectStatus_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test UpdateConnectStatus when deviceId is empty.
      */
@@ -652,10 +604,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UpdateConnectStatus_001, TestSize
 HWTEST_F(DistributedAbilityManagerServiceTest, ConnectAbility_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest ConnectAbility_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     int32_t ret = dtbabilitymgrService_->ConnectAbility(1, continuationExtraParams);
     EXPECT_NE(ret, true);
@@ -671,10 +620,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, ConnectAbility_001, TestSize.Leve
 HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceDisconnect_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnDeviceDisconnect_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test OnDeviceDisconnect when callback has not registered.
      */
@@ -713,10 +659,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceDisconnect_001, TestSize.
 HWTEST_F(DistributedAbilityManagerServiceTest, IsExceededRegisterMaxNum_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest IsExceededRegisterMaxNum_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     {
         std::lock_guard<std::mutex> tokenMapLock(dtbabilitymgrService_->tokenMapMutex_);
         dtbabilitymgrService_->tokenMap_.clear();
@@ -740,10 +683,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, IsExceededRegisterMaxNum_001, Tes
 HWTEST_F(DistributedAbilityManagerServiceTest, IsNotifierRegistered_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest IsNotifierRegistered_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     {
         std::lock_guard<std::mutex> callbackMapLock(dtbabilitymgrService_->callbackMapMutex_);
         dtbabilitymgrService_->callbackMap_[INVALID_CODE] = nullptr;
@@ -762,10 +702,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, IsNotifierRegistered_001, TestSiz
 HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceConnect_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleDeviceConnect_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     dtbabilitymgrService_->continuationHandler_ = nullptr;
     std::vector<ContinuationResult> continuationResults;
     bool ret = dtbabilitymgrService_->HandleDeviceConnect(nullptr, continuationResults);
@@ -781,10 +718,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceConnect_002, TestSize
 HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceDisconnect_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleDeviceDisconnect_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     std::vector<ContinuationResult> continuationResults;
     bool ret = dtbabilitymgrService_->HandleDeviceDisconnect(dtbabilitymgrService_, continuationResults);
     EXPECT_NE(ret, true);
@@ -812,10 +746,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceDisconnect_001, TestS
 HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceDisconnect_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleDeviceDisconnect_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test HandleUpdateConnectStatus when continuationHandler_ is nullptr.
      */
@@ -840,10 +771,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceDisconnect_002, TestS
 HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceConnect_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleDeviceConnect_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     std::vector<ContinuationResult> continuationResults;
     int32_t ret = dtbabilitymgrService_->HandleDeviceConnect(dtbabilitymgrService_, continuationResults);
     EXPECT_EQ(ret, true);
@@ -859,10 +787,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceConnect_001, TestSize
 HWTEST_F(DistributedAbilityManagerServiceTest, QueryTokenByNotifier_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest QueryTokenByNotifier_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test QueryTokenByNotifier when iter->second == nullptr.
      */
@@ -910,10 +835,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, QueryTokenByNotifier_001, TestSiz
 HWTEST_F(DistributedAbilityManagerServiceTest, HandleNotifierDied_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleNotifierDied_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test HandleNotifierDied.
      */
@@ -946,10 +868,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleNotifierDied_001, TestSize.
 HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceCancel_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnDeviceCancel_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t ret = dtbabilitymgrService_->OnDeviceCancel();
     EXPECT_NE(ret, true);
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnDeviceCancel_001 end" << std::endl;
@@ -963,10 +882,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceCancel_001, TestSize.Leve
 HWTEST_F(DistributedAbilityManagerServiceTest, HandleUpdateConnectStatus_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleUpdateConnectStatus_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     DeviceConnectStatus deviceConnectStatus = DeviceConnectStatus::CONNECTING;
     dtbabilitymgrService_->HandleUpdateConnectStatus(1, DEVICE_ID, deviceConnectStatus);
     if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
@@ -985,10 +901,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleUpdateConnectStatus_001, Te
 HWTEST_F(DistributedAbilityManagerServiceTest, DumpNotifierLocked_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest DumpNotifierLocked_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
      * @tc.steps: step1. test DumpNotifierLocked when callbackMap_ is not empty.
      */
@@ -1021,10 +934,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, DumpNotifierLocked_002, TestSize.
 HWTEST_F(DistributedAbilityManagerServiceTest, Register_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest Register_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
 
     int32_t token = 0;
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
@@ -1048,10 +958,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, Register_002, TestSize.Level3)
 HWTEST_F(DistributedAbilityManagerServiceTest, UpdateConnectStatus_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest UpdateConnectStatus_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
 
     int32_t token = 0;
     DeviceConnectStatus deviceConnectStatus = static_cast<DeviceConnectStatus>(-1);
@@ -1069,10 +976,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UpdateConnectStatus_002, TestSize
 HWTEST_F(DistributedAbilityManagerServiceTest, UpdateConnectStatus_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest UpdateConnectStatus_003 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = 0;
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
@@ -1098,10 +1002,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UpdateConnectStatus_003, TestSize
 HWTEST_F(DistributedAbilityManagerServiceTest, StartDeviceManager_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest StartDeviceManager_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
 
     int32_t token = 0;
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
@@ -1121,10 +1022,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, StartDeviceManager_001, TestSize.
 HWTEST_F(DistributedAbilityManagerServiceTest, StartDeviceManager_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest StartDeviceManager_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
 
     int32_t token = 0;
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
@@ -1142,10 +1040,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, StartDeviceManager_002, TestSize.
 HWTEST_F(DistributedAbilityManagerServiceTest, StartDeviceManager_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest StartDeviceManager_003 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
 
     int32_t token = 0;
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
@@ -1180,10 +1075,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, StartDeviceManager_003, TestSize.
 HWTEST_F(DistributedAbilityManagerServiceTest, DisconnectAbility_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest DisconnectAbility_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = 0;
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     dtbabilitymgrService_->connect_ = new AppConnectionStub(token, continuationExtraParams);
@@ -1201,10 +1093,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, DisconnectAbility_001, TestSize.L
 HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceConnect_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnDeviceConnect_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
         dtbabilitymgrService_->continuationHandler_ = std::make_shared<ffrt::queue>("ContinuationMgr");
     }
@@ -1224,10 +1113,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceConnect_001, TestSize.Lev
 HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceConnect_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnDeviceConnect_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
         dtbabilitymgrService_->continuationHandler_ = std::make_shared<ffrt::queue>("ContinuationMgr");
     }
@@ -1259,10 +1145,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceConnect_002, TestSize.Lev
 HWTEST_F(DistributedAbilityManagerServiceTest, HandleStartDeviceManager_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleStartDeviceManager_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
         dtbabilitymgrService_->continuationHandler_ = std::make_shared<ffrt::queue>("ContinuationMgr");
     }
@@ -1281,10 +1164,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleStartDeviceManager_001, Tes
 HWTEST_F(DistributedAbilityManagerServiceTest, HandleStartDeviceManager_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleStartDeviceManager_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     if (dtbabilitymgrService_->continuationHandler_ == nullptr) {
         dtbabilitymgrService_->continuationHandler_ = std::make_shared<ffrt::queue>("ContinuationMgr");
     }
@@ -1314,10 +1194,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleStartDeviceManager_002, Tes
 HWTEST_F(DistributedAbilityManagerServiceTest, HandleNotifierDied_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleNotifierDied_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = 0;
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();

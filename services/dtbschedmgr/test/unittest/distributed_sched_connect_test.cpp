@@ -187,7 +187,7 @@ void DistributedSchedConnectTest::AddConnectInfo(const sptr<IRemoteObject>& conn
     callerInfo.sourceDeviceId = localDeviceId;
     callerInfo.callerType = CALLER_TYPE_HARMONY;
 
-    sptr<IRemoteObject> callbackWrapper = new AbilityConnectionWrapperStubTest(connect);
+    sptr<IRemoteObject> callbackWrapper(new AbilityConnectionWrapperStubTest(connect));
     ConnectInfo connectInfo {callerInfo, callbackWrapper};
     DistributedSchedService::GetInstance().connectAbilityMap_.emplace(connect, connectInfo);
 }
@@ -276,7 +276,7 @@ HWTEST_F(DistributedSchedConnectTest, DumpConnectInfo_002, TestSize.Level0)
     /**
      * @tc.steps: step1. add one session
      */
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     AddSession(connect, "123_local_device_id", "123_remote_device_id", want);
     /**
      * @tc.steps: step2. and then dump connection info
@@ -308,7 +308,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessConnectDied001, TestSize.Level1)
      * @tc.steps: step1. add one session and check the map
      * @tc.expected: step1. can find the newly-added connect session
      */
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     AddSession(connect, "123_local_device_id", "123_remote_device_id", want);
     {
         std::lock_guard<std::mutex> autoLock(distributedLock);
@@ -345,7 +345,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessConnectDied002, TestSize.Level0)
      * @tc.steps: step1. add one session
      * @tc.expected: step1. can find the newly-added connect session
      */
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     AddSession(connect, "123_local_device_id", "123_remote_device_id", want);
     {
         std::lock_guard<std::mutex> autoLock(distributedLock);
@@ -375,7 +375,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessConnectDied003, TestSize.Level1)
     DTEST_LOG << "DistributedSchedServiceTest ProcessConnectDied003 start" << std::endl;
     OHOS::AAFwk::Want want;
     want.SetElementName("", "ohos.demo.bundleName", "abilityName");
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     AddSession(connect, "123_local_device_id", "123_remote_device_id", want);
 
     auto& trackingUidMap = DistributedSchedService::GetInstance().trackingUidMap_;
@@ -417,7 +417,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessConnectDied004, TestSize.Level1)
      * @tc.steps: step1. add one connectInfo
      * @tc.expected: step1. can find the newly-added connectInfo
      */
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     AddConnectInfo(connect, "123_local_device_id", "123_remote_device_id");
     {
         std::lock_guard<std::mutex> autoLock(distributedLock);
@@ -454,7 +454,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessDeviceOffline001, TestSize.Level0)
     /**
      * @tc.steps: step1. add one session
      */
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     AddSession(connect, "123_local_device_id", "123_remote_device_id", want);
     /**
      * @tc.steps: step2. process device offline and check the map
@@ -486,9 +486,9 @@ HWTEST_F(DistributedSchedConnectTest, ProcessDeviceOffline002, TestSize.Level0)
      * @tc.steps: step1. add one session
      * @tc.expected: step1. can find the two newly-added connect sessions
      */
-    sptr<AbilityConnectCallbackTest> connect1 = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect1(new AbilityConnectCallbackTest());
     AddSession(connect1, "123_local_device_id", "123_remote_device_id", want);
-    sptr<AbilityConnectCallbackTest> connect2 = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect2(new AbilityConnectCallbackTest());
     AddSession(connect2, "123_local_device_id", "123_remote_device_id", want);
     {
         std::lock_guard<std::mutex> autoLock(distributedLock);
@@ -525,7 +525,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessDeviceOffline003, TestSize.Level0)
     /**
      * @tc.steps: step1. add one session
      */
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     AddSession(connect, "123_local_device_id", "123_remote_device_id", want);
     /**
      * @tc.steps: step2. process other device offline and check the map
@@ -552,7 +552,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessDeviceOffline004, TestSize.Level1)
     DTEST_LOG << "DistributedSchedServiceTest ProcessDeviceOffline004 start" << std::endl;
     OHOS::AAFwk::Want want;
     want.SetElementName("", "ohos.demo.bundleName", "abilityName");
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     AddSession(connect, "123_local_device_id", "123_remote_device_id", want);
 
     auto& trackingUidMap = DistributedSchedService::GetInstance().trackingUidMap_;
@@ -593,7 +593,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessDeviceOffline005, TestSize.Level1)
      * @tc.steps: step1. add one connectInfo
      * @tc.expected: step1. can find the newly-added connectInfo
      */
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     AddConnectInfo(connect, "123_local_device_id", "123_remote_device_id");
     {
         std::lock_guard<std::mutex> autoLock(distributedLock);
@@ -629,7 +629,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectRemoteAbility001, TestSize.Level
     /**
      * @tc.steps: step1. add one session
      */
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     AddSession(connect, "123_local_device_id", "123_remote_device_id", want);
     /**
      * @tc.steps: step2. disconnect the ability and check the map
@@ -654,7 +654,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectRemoteAbility002, TestSize.Level
     DTEST_LOG << "DistributedSchedServiceTest DisconnectRemoteAbility002 start" << std::endl;
     OHOS::AAFwk::Want want;
     want.SetElementName("", "ohos.demo.bundleName", "abilityName");
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     AddSession(connect, "123_local_device_id", "123_remote_device_id", want);
 
     auto& trackingUidMap = DistributedSchedService::GetInstance().trackingUidMap_;
@@ -706,7 +706,7 @@ HWTEST_F(DistributedSchedConnectTest, ConnectRemoteAbility001, TestSize.Level4)
     DTEST_LOG << "DistributedSchedServiceTest ConnectRemoteAbility001 start" << std::endl;
     OHOS::AAFwk::Want want;
     want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbility(want, connect, -1, -1, -1);
     EXPECT_EQ(ret, BIND_ABILITY_UID_INVALID_ERR);
     DTEST_LOG << "DistributedSchedServiceTest ConnectRemoteAbility001 end" << std::endl;
@@ -723,7 +723,7 @@ HWTEST_F(DistributedSchedConnectTest, ConnectRemoteAbility002, TestSize.Level4)
     DTEST_LOG << "DistributedSchedServiceTest ConnectRemoteAbility002 start" << std::endl;
     OHOS::AAFwk::Want want;
     want.SetElementName("", "ohos.demo.bundleName", "abilityName");
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbility(want, connect, -1, -1, -1);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest ConnectRemoteAbility002 end" << std::endl;
@@ -741,7 +741,7 @@ HWTEST_F(DistributedSchedConnectTest, ConnectAbilityFromRemote001, TestSize.Leve
     OHOS::AAFwk::Want want;
     want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
     AppExecFwk::AbilityInfo abilityInfo;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     CallerInfo callerInfo;
     IDistributedSched::AccountInfo accountInfo;
     int32_t ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemote(want,
@@ -781,7 +781,7 @@ HWTEST_F(DistributedSchedConnectTest, ConnectAbilityFromRemote003, TestSize.Leve
     DTEST_LOG << "DistributedSchedConnectTest ConnectAbilityFromRemote003 start" << std::endl;
     OHOS::AAFwk::Want want;
     want.SetElementName("", "ohos.demo.bundleName", "abilityName");
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     AppExecFwk::AbilityInfo abilityInfo;
     CallerInfo callerInfo;
     IDistributedSched::AccountInfo accountInfo;
@@ -834,7 +834,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectEachRemoteAbilityLocked001, Test
 HWTEST_F(DistributedSchedConnectTest, DisconnectEachRemoteAbilityLocked002, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedConnectTest DisconnectEachRemoteAbilityLocked002 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     int32_t ret = DistributedSchedService::GetInstance().DisconnectEachRemoteAbilityLocked("", "", connect);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedConnectTest DisconnectEachRemoteAbilityLocked002 end" << std::endl;
@@ -849,7 +849,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectEachRemoteAbilityLocked002, Test
 HWTEST_F(DistributedSchedConnectTest, DisconnectEachRemoteAbilityLocked003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedConnectTest DisconnectEachRemoteAbilityLocked003 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     int32_t ret = DistributedSchedService::GetInstance().DisconnectEachRemoteAbilityLocked(
         "123_remote_device_id", "123_remote_device_id", connect);
     EXPECT_NE(ret, ERR_OK);
@@ -865,7 +865,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectEachRemoteAbilityLocked003, Test
 HWTEST_F(DistributedSchedConnectTest, DisconnectEachRemoteAbilityLocked004, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedConnectTest DisconnectEachRemoteAbilityLocked004 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     std::string deviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(deviceId);
     int32_t ret = DistributedSchedService::GetInstance().DisconnectEachRemoteAbilityLocked(
@@ -883,7 +883,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectEachRemoteAbilityLocked004, Test
 HWTEST_F(DistributedSchedConnectTest, DisconnectRemoteAbility004, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedConnectTest DisconnectRemoteAbility004 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     int32_t ret = DistributedSchedService::GetInstance().DisconnectRemoteAbility(connect, 0, 0);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedConnectTest DisconnectRemoteAbility004 end" << std::endl;
@@ -906,7 +906,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectRemoteAbility005, TestSize.Level
     std::string localDeviceId = "123_local_device_id";
     std::string remoteDeviceId = "123_remote_device_id";
     want.SetElementName(remoteDeviceId, "ohos.demo.bundleName", "abilityName");
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     CallerInfo callerInfo;
     callerInfo.uid = IPCSkeleton::GetCallingUid();
     callerInfo.pid = IPCSkeleton::GetCallingRealPid();
@@ -940,7 +940,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectAbilityFromRemote001, TestSize.L
     want1.SetElementName(remoteDeviceId, "ohos.demo.bundleName1", "abilityName1");
     OHOS::AAFwk::Want want2;
     want2.SetElementName(remoteDeviceId, "ohos.demo.bundleName2", "abilityName2");
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     CallerInfo callerInfo;
     callerInfo.uid = IPCSkeleton::GetCallingUid();
     callerInfo.pid = IPCSkeleton::GetCallingRealPid();
@@ -964,7 +964,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectAbilityFromRemote001, TestSize.L
 HWTEST_F(DistributedSchedConnectTest, DisconnectAbilityFromRemote002, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedConnectTest DisconnectAbilityFromRemote002 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     int32_t ret = DistributedSchedService::GetInstance().DisconnectAbilityFromRemote(connect, 0, "");
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedConnectTest DisconnectAbilityFromRemote002 end" << std::endl;
@@ -979,7 +979,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectAbilityFromRemote002, TestSize.L
 HWTEST_F(DistributedSchedConnectTest, DisconnectAbilityFromRemote003, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedConnectTest DisconnectAbilityFromRemote003 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     std::string deviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(deviceId);
     int32_t ret = DistributedSchedService::GetInstance().DisconnectAbilityFromRemote(connect, 0, deviceId);
@@ -996,7 +996,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectAbilityFromRemote003, TestSize.L
 HWTEST_F(DistributedSchedConnectTest, DisconnectAbilityFromRemote004, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedConnectTest DisconnectAbilityFromRemote004 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     /**
      * @tc.steps: step1. call SaveCallerComponent
      */
@@ -1070,12 +1070,12 @@ HWTEST_F(DistributedSchedConnectTest, NotifyApp001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedConnectTest NotifyApp001 start" << std::endl;
     AppExecFwk::ElementName element;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     /**
      * @tc.steps: step1. call ProcessCalleeDied
      */
     DTEST_LOG << "DistributedSchedServiceTest ProcessCalleeDied002 start" << std::endl;
-    sptr<IRemoteObject> callbackWrapper = new AbilityConnectionWrapperStubTest(connect);
+    sptr<IRemoteObject> callbackWrapper(new AbilityConnectionWrapperStubTest(connect));
     CallerInfo callerInfo;
     ConnectInfo connectInfo {callerInfo, callbackWrapper};
     DistributedSchedService::GetInstance().calleeMap_.emplace(connect, connectInfo);
@@ -1119,7 +1119,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessConnectDied005, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedConnectTest ProcessConnectDied005 start" << std::endl;
     DistributedSchedService::GetInstance().ProcessConnectDied(nullptr);
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     DistributedSchedService::GetInstance().ProcessConnectDied(connect);
     DTEST_LOG << "DistributedSchedConnectTest ProcessConnectDied005 end" << std::endl;
 }
@@ -1157,7 +1157,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallDisconnectRemoteAbility001, TestS
      * @tc.steps: step1. call HandleLocalCallerDied
      */
     DTEST_LOG << "DistributedSchedServiceTest HandleLocalCallerDied002 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     DistributedSchedService::GetInstance().RemoveCallerComponent(connect);
     DistributedSchedService::GetInstance().HandleLocalCallerDied(connect);
     DTEST_LOG << "DistributedSchedServiceTest HandleLocalCallerDied002 end" << std::endl;
@@ -1180,7 +1180,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallDisconnectRemoteAbility002, TestS
     if (proxy == nullptr) {
         return;
     }
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     /**
      * @tc.steps: step1. call HandleLocalCallerDied
      */
@@ -1218,7 +1218,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallConnectRemoteAbility001, TestSize
     }
     OHOS::AAFwk::Want want;
     want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     /**
      * @tc.steps: step1. call GetUidLocked
      */
@@ -1277,7 +1277,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallConnectAbilityFromRemote001, Test
     OHOS::AAFwk::Want want;
     want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
     AppExecFwk::AbilityInfo abilityInfo;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     CallerInfo callerInfo;
     IDistributedSched::AccountInfo accountInfo;
     /**
@@ -1340,7 +1340,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallDisconnectAbilityFromRemote001, T
     if (proxy == nullptr) {
         return;
     }
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     /**
      * @tc.steps: step1. call CheckDistributedConnectLocked
      */
@@ -1376,7 +1376,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallDisconnectAbilityFromRemote002, T
     DTEST_LOG << "DistributedSchedConnectTest CheckDistributedConnectLocked001 start" << std::endl;
     OHOS::AAFwk::Want want;
     want.SetElementName("", "ohos.demo.bundleName", "abilityName");
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     std::string localDeviceId = "123_local_device_id";
     std::string remoteDeviceId = "123_remote_device_id";
     CallerInfo callerInfo;
@@ -1401,7 +1401,7 @@ HWTEST_F(DistributedSchedConnectTest, ConnectRemoteAbility003, TestSize.Level4)
     std::string remoteDeviceId = "remoteDeviceId";
     OHOS::AAFwk::Want want;
     want.SetElementName(remoteDeviceId, "ohos.demo.bundleName", "abilityName");
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     int32_t accessToken = IPCSkeleton::GetCallingTokenID();
@@ -1421,7 +1421,7 @@ HWTEST_F(DistributedSchedConnectTest, TryConnectRemoteAbility001, TestSize.Level
     std::string remoteDeviceId = "remoteDeviceId";
     OHOS::AAFwk::Want want;
     want.SetElementName(remoteDeviceId, "ohos.demo.bundleName", "abilityName");
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     CallerInfo callerInfo;
     int32_t ret = DistributedSchedService::GetInstance().TryConnectRemoteAbility(want, connect, callerInfo);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -1449,7 +1449,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessCallerDied001, TestSize.Level4)
 HWTEST_F(DistributedSchedConnectTest, ProcessCallerDied002, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedServiceTest ProcessCallerDied002 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     int32_t deviceType = IDistributedSched::CALLER;
     DistributedSchedService::GetInstance().ProcessCallerDied(connect, deviceType);
     DTEST_LOG << "DistributedSchedServiceTest ProcessCallerDied002 end" << std::endl;
@@ -1463,10 +1463,10 @@ HWTEST_F(DistributedSchedConnectTest, ProcessCallerDied002, TestSize.Level4)
 HWTEST_F(DistributedSchedConnectTest, ProcessCallerDied003, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedServiceTest ProcessCallerDied003 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     int32_t deviceType = IDistributedSched::CALLEE;
     CallerInfo callerInfo;
-    sptr<IRemoteObject> callbackWrapper = new AbilityConnectionWrapperStubTest(connect);
+    sptr<IRemoteObject> callbackWrapper(new AbilityConnectionWrapperStubTest(connect));
     ConnectInfo connectInfo {callerInfo, callbackWrapper};
     DistributedSchedService::GetInstance().calleeMap_.emplace(connect, connectInfo);
     DistributedSchedService::GetInstance().ProcessCallerDied(connect, deviceType);
@@ -1481,10 +1481,8 @@ HWTEST_F(DistributedSchedConnectTest, ProcessCallerDied003, TestSize.Level4)
 HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub001 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
-    ASSERT_NE(connect, nullptr);
-    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect);
-    ASSERT_NE(connectStub, nullptr);
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
+    sptr<AbilityConnectionWrapperStub> connectStub(new AbilityConnectionWrapperStub(connect));
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         return;
@@ -1508,10 +1506,8 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub001, TestSize.
 HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub002 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
-    ASSERT_NE(connect, nullptr);
-    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
-    ASSERT_NE(connectStub, nullptr);
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
+    sptr<AbilityConnectionWrapperStub> connectStub(new AbilityConnectionWrapperStub(connect, "localDeviceId"));
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         return;
@@ -1535,10 +1531,8 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub002, TestSize.
 HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub003 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
-    ASSERT_NE(connect, nullptr);
-    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect);
-    ASSERT_NE(connectStub, nullptr);
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
+    sptr<AbilityConnectionWrapperStub> connectStub(new AbilityConnectionWrapperStub(connect));
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         return;
@@ -1561,10 +1555,8 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub003, TestSize.
 HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub004, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub004 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
-    ASSERT_NE(connect, nullptr);
-    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
-    ASSERT_NE(connectStub, nullptr);
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
+    sptr<AbilityConnectionWrapperStub> connectStub(new AbilityConnectionWrapperStub(connect, "localDeviceId"));
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         return;
@@ -1587,10 +1579,8 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub004, TestSize.
 HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub005, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub005 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
-    ASSERT_NE(connect, nullptr);
-    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
-    ASSERT_NE(connectStub, nullptr);
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
+    sptr<AbilityConnectionWrapperStub> connectStub(new AbilityConnectionWrapperStub(connect, "localDeviceId"));
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1611,10 +1601,8 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub005, TestSize.
 HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub006, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub006 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
-    ASSERT_NE(connect, nullptr);
-    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
-    ASSERT_NE(connectStub, nullptr);
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
+    sptr<AbilityConnectionWrapperStub> connectStub(new AbilityConnectionWrapperStub(connect, "localDeviceId"));
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -1635,10 +1623,8 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub006, TestSize.
 HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub007, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub007 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
-    ASSERT_NE(connect, nullptr);
-    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
-    ASSERT_NE(connectStub, nullptr);
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
+    sptr<AbilityConnectionWrapperStub> connectStub(new AbilityConnectionWrapperStub(connect, "localDeviceId"));
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         return;
@@ -1662,10 +1648,8 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub007, TestSize.
 HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub008, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest AbilityConnectionWrapperStub008 start" << std::endl;
-    sptr<AbilityConnectCallbackTest> connect = new AbilityConnectCallbackTest();
-    ASSERT_NE(connect, nullptr);
-    sptr<AbilityConnectionWrapperStub> connectStub = new AbilityConnectionWrapperStub(connect, "localDeviceId");
-    ASSERT_NE(connectStub, nullptr);
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
+    sptr<AbilityConnectionWrapperStub> connectStub(new AbilityConnectionWrapperStub(connect, "localDeviceId"));
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         return;

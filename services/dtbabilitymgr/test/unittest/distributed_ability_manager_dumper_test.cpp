@@ -81,10 +81,7 @@ void DistributedAbilityManagerDumperTest::TearDown()
 HWTEST_F(DistributedAbilityManagerDumperTest, Dump_001, TestSize.Level4)
 {
     DTEST_LOG << "ContinuationManagerTest Dump_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t fd = -1;
     const std::vector<std::u16string> args;
     int32_t result = dtbabilitymgrService_->Dump(fd, args);
@@ -101,10 +98,7 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dump_001, TestSize.Level4)
 HWTEST_F(DistributedAbilityManagerDumperTest, Dump_002, TestSize.Level3)
 {
     DTEST_LOG << "ContinuationManagerTest Dump_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t fd = 1;
     const std::vector<std::u16string> args;
     int32_t result = dtbabilitymgrService_->Dump(fd, args);
@@ -121,10 +115,7 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dump_002, TestSize.Level3)
 HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_001, TestSize.Level3)
 {
     DTEST_LOG << "ContinuationManagerTest Dumper_Dump_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     MockProcess(DISTSCHED_PROCESS_NAME);
     const std::vector<std::string> args;
     std::string dumpResult;
@@ -142,10 +133,7 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_001, TestSize.Level3)
 HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_002, TestSize.Level3)
 {
     DTEST_LOG << "ContinuationManagerTest Dumper_Dump_002 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     const std::vector<std::string> args;
     std::string dumpResult;
     bool result = DistributedAbilityManagerDumper::Dump(args, dumpResult);
@@ -162,10 +150,7 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_002, TestSize.Level3)
 HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_003, TestSize.Level3)
 {
     DTEST_LOG << "ContinuationManagerTest Dumper_Dump_003 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     const std::vector<std::string> args = {"-h"};
     std::string dumpResult;
     bool result = DistributedAbilityManagerDumper::Dump(args, dumpResult);
@@ -182,10 +167,7 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_003, TestSize.Level3)
 HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_004, TestSize.Level3)
 {
     DTEST_LOG << "ContinuationManagerTest Dumper_Dump_004 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     const std::vector<std::string> args = {"-register"};
     std::string dumpResult;
     bool result = DistributedAbilityManagerDumper::Dump(args, dumpResult);
@@ -202,10 +184,7 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_004, TestSize.Level3)
 HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_005, TestSize.Level3)
 {
     DTEST_LOG << "ContinuationManagerTest Dumper_Dump_005 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     const std::vector<std::string> args = {"-mockArgs"};
     std::string dumpResult;
     bool result = DistributedAbilityManagerDumper::Dump(args, dumpResult);
@@ -223,10 +202,7 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_005, TestSize.Level3)
 HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_006, TestSize.Level4)
 {
     DTEST_LOG << "ContinuationManagerTest Dumper_Dump_006 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     MockProcess(INVALID_PROCESS_NAME);
     const std::vector<std::string> args;
     std::string dumpResult;
@@ -243,10 +219,7 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_Dump_006, TestSize.Level4)
 HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_DumpDefault_001, TestSize.Level4)
 {
     DTEST_LOG << "ContinuationManagerTest Dumper_DumpDefault_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     std::string dumpResult;
     bool result = DistributedAbilityManagerDumper::DumpDefault(dumpResult);
     EXPECT_EQ(true, result);
@@ -261,10 +234,7 @@ HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_DumpDefault_001, TestSize.L
 HWTEST_F(DistributedAbilityManagerDumperTest, Dumper_ShowAppRegisterInfo_001, TestSize.Level4)
 {
     DTEST_LOG << "ContinuationManagerTest Dumper_ShowAppRegisterInfo_001 start" << std::endl;
-    if (dtbabilitymgrService_ == nullptr) {
-        DTEST_LOG << "dtbabilitymgrService_ is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
     std::string dumpResult;
     DistributedAbilityManagerDumper::ShowAppRegisterInfo(dumpResult);
     EXPECT_EQ(false, dumpResult.empty());
