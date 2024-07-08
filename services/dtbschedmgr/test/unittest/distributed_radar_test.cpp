@@ -530,7 +530,7 @@ HWTEST_F(DistributedRadarTest, NotifyDockUnfocused_002, TestSize.Level3)
 HWTEST_F(DistributedRadarTest, ClickIconDmsContinue_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedRadarTest ClickIconDmsContinue_001 begin" << std::endl;
-    bool ret = DmsRadar::GetInstance().ClickIconDmsContinue(FUNC, ERR_OK);
+    bool ret = DmsRadar::GetInstance().ClickIconDmsContinue(FUNC, ERR_OK, "11111111");
     EXPECT_EQ(ret, true);
     DTEST_LOG << "DistributedRadarTest ClickIconDmsContinue_001 end" << std::endl;
 }
@@ -543,7 +543,7 @@ HWTEST_F(DistributedRadarTest, ClickIconDmsContinue_001, TestSize.Level3)
 HWTEST_F(DistributedRadarTest, ClickIconDmsContinue_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedRadarTest ClickIconDmsContinue_002 begin" << std::endl;
-    bool ret = DmsRadar::GetInstance().ClickIconDmsContinue(FUNC, ERR_NO);
+    bool ret = DmsRadar::GetInstance().ClickIconDmsContinue(FUNC, ERR_NO, "11111111");
     EXPECT_EQ(ret, true);
     DTEST_LOG << "DistributedRadarTest ClickIconDmsContinue_002 end" << std::endl;
 }

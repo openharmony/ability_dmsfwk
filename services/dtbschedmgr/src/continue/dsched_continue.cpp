@@ -447,9 +447,11 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
 {
     HILOGI("ExecuteContinueReq start, continueInfo: %{public}s", continueInfo_.toString().c_str());
     DurationDumperStart();
+    
+    std::string peerUdid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(srcDeviceId);
+    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid);
 
     if (subServiceType_ == CONTINUE_PULL && CheckQuickStartConfiguration()) {
-        DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK);
         QuickStartAbility();
     }
 
