@@ -137,6 +137,7 @@ constexpr int32_t DMSDURATION_DSTTOSRCRPCTIME = 3;
 constexpr int32_t DMSDURATION_SRCTODSTRPCTIME = 5;
 constexpr int32_t DMSDURATION_STARTABILITY = 6;
 constexpr int32_t HID_HAP = 10000; /* first hap user */
+constexpr int32_t WINDOW_MANAGER_SERVICE_ID = 4606;
 static const std::string CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
 }
 
@@ -194,6 +195,8 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     DMSContinueSendMgr::GetInstance().UnInit();
     DMSContinueRecvMgr::GetInstance().UnInit();
+    RemoveSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID);
+    DistributedSchedAdapter::GetInstance().UnRegisterMissionListener(missionFocusedListener_);
 #endif
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
@@ -286,6 +289,10 @@ bool DistributedSchedService::Init()
     InitDataShareManager();
 
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
+    if (!AddSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID)) {
+        HILOGE("Add System Ability Listener failed!");
+        return false;
+    }
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().InitDataStorage();
     InitCommonEventListener();
@@ -306,6 +313,16 @@ bool DistributedSchedService::Init()
         componentChangeHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
     return true;
+}
+
+void DistributedSchedService::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+{
+    HILOGI("OnAddSystemAbility systemAbilityId:%{public}d added!", systemAbilityId);
+    missionFocusedListener_ = sptr<DistributedMissionFocusedListener>(new DistributedMissionFocusedListener());
+    int32_t ret = DistributedSchedAdapter::GetInstance().RegisterMissionListener(missionFocusedListener_);
+    if (ret != ERR_OK) {
+        HILOGE("get RegisterMissionListener failed, ret: %{public}d", ret);
+    }
 }
 
 void DistributedSchedService::InitDataShareManager()
