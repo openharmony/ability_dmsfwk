@@ -911,7 +911,7 @@ bool DmsRadar::SaveDataDmsRemoteWant(const std::string& func, int32_t errCode)
 
 std::string DmsRadar::GetAnonyUdid(std::string udid)
 {
-    if (udid.empty() || udid.length() < INVALID_UDID_LENGTH) {
+    if (udid.empty() || udid.length() < ANONYM_MIN_LENGTH) {
         return "";
     }
     return udid.substr(0, SUBSTR_UDID_LENGTH) + "**" + udid.substr(udid.length() - SUBSTR_UDID_LENGTH);

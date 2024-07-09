@@ -49,7 +49,7 @@ const std::string HOST_PKG = "HOST_PKG";
 const std::string ERROR_CODE = "ERROR_CODE";
 const std::string PEER_UDID = "PEER_UDID";
 constexpr char APP_CONTINUE_DOMAIN[] = "APP_CONTINUE";
-constexpr int32_t INVALID_UDID_LENGTH = 10;
+constexpr int32_t ANONYM_MIN_LENGTH = 10;
 constexpr int32_t SUBSTR_UDID_LENGTH = 5;
 enum class BizScene : int32_t {
     DMS_INIT = 1,
