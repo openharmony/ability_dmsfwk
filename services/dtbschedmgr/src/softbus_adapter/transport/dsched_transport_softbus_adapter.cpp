@@ -295,14 +295,13 @@ void DSchedTransportSoftbusAdapter::OnBind(int32_t sessionId, const std::string 
 
 void DSchedTransportSoftbusAdapter::OnShutdown(int32_t sessionId, bool isSelfcalled)
 {
-    std::string peerDeviceId;
     {
         std::lock_guard<std::mutex> sessionLock(sessionMutex_);
         if (sessions_.empty() || sessions_.count(sessionId) == 0 || sessions_[sessionId] == nullptr) {
             HILOGE("error, invalid sessionId %{public}d", sessionId);
             return;
         }
-        peerDeviceId = sessions_[sessionId]->GetPeerDeviceId();
+        std::string peerDeviceId = sessions_[sessionId]->GetPeerDeviceId();
         HILOGI("peerDeviceId: %{public}s shutdown, socket sessionId: %{public}d.",
             GetAnonymStr(peerDeviceId).c_str(), sessionId);
         ShutdownSession(peerDeviceId, sessionId);

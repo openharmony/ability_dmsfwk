@@ -93,7 +93,7 @@ int32_t DSchedAllConnectManager::GetServiceCollaborationManagerProxy()
     std::string resolvedPath = "/system/lib/libcfwk_allconnect_client.z.so";
 #endif
     char path[PATH_MAX + 1] = {0};
-    if (resolvedPath.empty() || resolvedPath.length() > PATH_MAX || realpath(resolvedPath.c_str(), path) == nullptr) {
+    if (resolvedPath.length() > PATH_MAX || realpath(resolvedPath.c_str(), path) == nullptr) {
         HILOGE("Check all connect so real path failed, resolvedPath [%{public}s].", resolvedPath.c_str());
         return INVALID_PARAMETERS_ERR;
     }
@@ -116,14 +116,12 @@ int32_t DSchedAllConnectManager::GetServiceCollaborationManagerProxy()
             break;
         }
 
-        int32_t ret = ServiceCollaborationManagerExport(&allConnectMgrApi_);
+        ret = ServiceCollaborationManagerExport(&allConnectMgrApi_);
         if (ret != ERR_OK) {
             HILOGE("Init remote dms interactive adapter proxy fail, ret %{public}d.", ret);
-            ret = INVALID_PARAMETERS_ERR;
             break;
         }
         HILOGI("Init remote dms interactive adapter proxy success.");
-        ret = ERR_OK;
     } while (false);
 
     if (ret != ERR_OK) {
