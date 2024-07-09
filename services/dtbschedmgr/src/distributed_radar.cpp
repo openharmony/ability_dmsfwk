@@ -728,8 +728,12 @@ bool DmsRadar::NotifyDockUnfocused(const std::string& func, int32_t errCode)
     return true;
 }
 
-bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode)
+bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode, std::string peerUdid)
 {
+    if (peerUdid.empty()) {
+        HILOGE("peerUdid is empty.");
+        return false;
+    }
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
     if (stageRes == StageRes::STAGE_SUCC) {
@@ -741,7 +745,8 @@ bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode)
             FUNC, func,
             BIZ_SCENE, static_cast<int32_t>(BizScene::CLICK_ICON),
             BIZ_STAGE, static_cast<int32_t>(ClickIcon::DMS_CONTINUE),
-            STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC));
+            STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC),
+            PEER_UDID, GetAnonyUdid(peerUdid));
     } else {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
@@ -752,6 +757,7 @@ bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode)
             BIZ_SCENE, static_cast<int32_t>(BizScene::CLICK_ICON),
             BIZ_STAGE, static_cast<int32_t>(ClickIcon::DMS_CONTINUE),
             STAGE_RES, static_cast<int32_t>(StageRes::STAGE_FAIL),
+            PEER_UDID, GetAnonyUdid(peerUdid),
             ERROR_CODE, errCode);
     }
     if (res != ERR_OK) {
@@ -901,6 +907,14 @@ bool DmsRadar::SaveDataDmsRemoteWant(const std::string& func, int32_t errCode)
         return false;
     }
     return true;
+}
+
+std::string DmsRadar::GetAnonyUdid(std::string udid)
+{
+    if (udid.empty() || udid.length() < ANONYM_MIN_LENGTH) {
+        return "";
+    }
+    return udid.substr(0, SUBSTR_UDID_LENGTH) + "**" + udid.substr(udid.length() - SUBSTR_UDID_LENGTH);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -448,13 +448,16 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
     HILOGI("ExecuteContinueReq start, continueInfo: %{public}s", continueInfo_.toString().c_str());
     DurationDumperStart();
 
+    std::string peerDeviceId = (direction_ == CONTINUE_SOURCE) ?
+        continueInfo_.sinkDeviceId_ : continueInfo_.sourceDeviceId_;
+    
+    std::string peerUdid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(peerDeviceId);
+    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid);
+
     if (subServiceType_ == CONTINUE_PULL && CheckQuickStartConfiguration()) {
-        DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK);
         QuickStartAbility();
     }
 
-    std::string peerDeviceId = (direction_ == CONTINUE_SOURCE) ?
-        continueInfo_.sinkDeviceId_ : continueInfo_.sourceDeviceId_;
     softbusSessionId_ = DSchedTransportSoftbusAdapter::GetInstance().ConnectDevice(peerDeviceId);
     if (softbusSessionId_ <= 0) {
         HILOGE("ExecuteContinueReq connect peer device %{public}s failed, ret %{public}d",

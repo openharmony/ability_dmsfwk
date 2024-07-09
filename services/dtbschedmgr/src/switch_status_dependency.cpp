@@ -39,16 +39,16 @@ SwitchStatusDependency &SwitchStatusDependency::GetInstance()
 }
 bool SwitchStatusDependency::IsContinueSwitchOn()
 {
-    HILOGI("IsContinueSwitchOn start");
+    HILOGD("IsContinueSwitchOn start");
     std::lock_guard<std::mutex> lock(dataShareMutex_);
-    HILOGI("start query switch status from dataShare");
+    HILOGD("start query switch status from dataShare");
     switchStatus_ = GetSwitchStatus(CONTINUE_SWITCH_STATUS_KEY, CONTINUE_SWITCH_ON);
     return switchStatus_ != CONTINUE_SWITCH_OFF;
 }
 
 std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, const std::string &defaultValue)
 {
-    HILOGI("GetSwitchStatus start, key is %{public}s", key.c_str());
+    HILOGD("GetSwitchStatus start, key is %{public}s", key.c_str());
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = GetDataShareHelper();
     if (dataShareHelper == nullptr) {
         HILOGE("dataShareHelper is null, key is %{public}s", key.c_str());
@@ -86,14 +86,14 @@ std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, cons
     }
     resultSet->Close();
     dataShareHelper->Release();
-    HILOGI("get switch status, query end");
+    HILOGD("get switch status, query end");
     HILOGI("GetStringValue, setting value is %{public}s with key is %{public}s", valueResult.c_str(), key.c_str());
     return valueResult;
 }
 
 std::shared_ptr<DataShare::DataShareHelper> SwitchStatusDependency::GetDataShareHelper()
 {
-    HILOGI("create DataShareHelper instance");
+    HILOGD("create DataShareHelper instance");
     DataShare::CreateOptions options;
     options.isProxy_ = true;
     return DataShare::DataShareHelper::Creator(SETTINGS_DATA_URI, options);

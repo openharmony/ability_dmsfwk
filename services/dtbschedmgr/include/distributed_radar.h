@@ -47,7 +47,10 @@ const std::string BIZ_STATE = "BIZ_STATE";
 const std::string TO_CALL_PKG = "TO_CALL_PKG";
 const std::string HOST_PKG = "HOST_PKG";
 const std::string ERROR_CODE = "ERROR_CODE";
+const std::string PEER_UDID = "PEER_UDID";
 constexpr char APP_CONTINUE_DOMAIN[] = "APP_CONTINUE";
+constexpr int32_t ANONYM_MIN_LENGTH = 10;
+constexpr int32_t SUBSTR_UDID_LENGTH = 5;
 enum class BizScene : int32_t {
     DMS_INIT = 1,
     /*2 not our scene*/
@@ -163,11 +166,12 @@ public:
     bool RecvUnfocused(const std::string& func);
     bool UnfocusedGetBundleName(const std::string& func, int32_t errCode);
     bool NotifyDockUnfocused(const std::string& func, int32_t errCode);
-    bool ClickIconDmsContinue(const std::string& func, int32_t errCode);
+    bool ClickIconDmsContinue(const std::string& func, int32_t errCode, std::string peerUdid);
     bool ClickIconDmsStartAbility(const std::string& func, int32_t errCode);
     bool ClickIconDmsRecvOver(const std::string& func, int32_t errCode);
     bool SaveDataDmsContinue(const std::string& func, int32_t errCode);
     bool SaveDataDmsRemoteWant(const std::string& func, int32_t errCode);
+    std::string GetAnonyUdid(std::string udid);
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
