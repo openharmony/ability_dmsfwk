@@ -52,12 +52,6 @@ void DMSContinueSendMgr::Init()
 {
     HILOGI("Init start");
     {
-        missionFocusedListener_ = new DistributedMissionFocusedListener();
-        int32_t ret = DistributedSchedAdapter::GetInstance().RegisterMissionListener(missionFocusedListener_);
-        if (ret != ERR_OK) {
-            HILOGE("get RegisterMissionListener failed, ret: %{public}d", ret);
-            return;
-        }
         MMIAdapter::GetInstance().Init();
         screenOffHandler_ = std::make_shared<ScreenOffHandler>();
 

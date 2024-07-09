@@ -37,6 +37,7 @@
 #include "dsched_collaborate_callback_mgr.h"
 #include "idms_interactive_adapter.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
+#include "mission/distributed_mission_focused_listener.h"
 #include "mission/distributed_mission_info.h"
 #include "nocopyable.h"
 #endif
@@ -152,6 +153,7 @@ public:
     int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
     int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
     int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state) override;
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
 #endif
     int32_t RegisterDSchedEventListener(const DSchedEventType& type, const sptr<IRemoteObject>& obj) override;
     int32_t UnRegisterDSchedEventListener(const DSchedEventType& type, const sptr<IRemoteObject>& obj) override;
@@ -338,6 +340,7 @@ private:
     std::atomic<int32_t> token_ {0};
     std::map<std::string, sptr<AppStateObserver>> bundleNameMap_;
     DataShareManager dataShareManager_;
+    sptr<DistributedMissionFocusedListener> missionFocusedListener_ = nullptr;
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     std::mutex dmsAdapetrLock_;

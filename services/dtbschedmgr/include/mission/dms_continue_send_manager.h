@@ -26,7 +26,6 @@
 
 #include "bundle/bundle_manager_internal.h"
 #include "distributed_mission_died_listener.h"
-#include "distributed_mission_focused_listener.h"
 #include "event_handler.h"
 #include "mission_info.h"
 
@@ -148,7 +147,6 @@ private:
         uint16_t& bundleNameId, uint8_t& continueTypeId);
 private:
     currentMissionInfo info_ = { INVALID_MISSION_ID, false };
-    sptr<DistributedMissionFocusedListener> missionFocusedListener_;
     std::map<std::string, int32_t> focusedMission_;
     std::map<int32_t, std::string> focusedMissionAbility_;
     std::thread eventThread_;
