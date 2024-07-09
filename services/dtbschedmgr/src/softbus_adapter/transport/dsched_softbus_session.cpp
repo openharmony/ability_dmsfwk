@@ -134,27 +134,26 @@ void DSchedSoftbusSession::PackRecvData(std::shared_ptr<DSchedDataBuffer> buffer
 void DSchedSoftbusSession::GetFragDataHeader(uint8_t *ptrPacket, SessionDataHeader& headerPara)
 {
     uint32_t i = 0;
-    uint16_t ret = 0;
     while (i < BINARY_HEADER_FRAG_LEN) {
-        ret = ReadTlvToHeader(ptrPacket + i, headerPara);
-        if (ret < 0) {
-            HILOGE("ReadTlvToHeader failed, ret: %{public}d", ret);
+        uint16_t index = 0;
+        if (ReadTlvToHeader(ptrPacket + i, headerPara, index) != ERR_OK) {
             break;
         }
-        i += ret;
+        i += index;
     }
     return;
 }
 
-uint16_t DSchedSoftbusSession::ReadTlvToHeader(uint8_t *ptrPacket, SessionDataHeader& headerPara)
+int32_t DSchedSoftbusSession::ReadTlvToHeader(uint8_t *ptrPacket, SessionDataHeader& headerPara, uint16_t& index)
 {
     uint8_t *ptr = ptrPacket;
     uint16_t type = U16Get(ptr);
     ptr += sizeof(type);
     uint16_t len = U16Get(ptr);
     ptr += sizeof(len);
+    index = sizeof(type) + sizeof(len) + len;
+    int32_t ret = INVALID_PARAMETERS_ERR;
 
-    bool ret = false;
     switch (type) {
         case TLV_TYPE_VERSION:
             ret = memcpy_s(&headerPara.version, sizeof(headerPara.version), ptr, len);
@@ -179,16 +178,9 @@ uint16_t DSchedSoftbusSession::ReadTlvToHeader(uint8_t *ptrPacket, SessionDataHe
             break;
         default:
             HILOGE("invalid type: %{public}d!", type);
-            ret = INVALID_PARAMETERS_ERR;
             break;
     }
-
-    if (ret != ERR_OK) {
-        HILOGE("memcpy_s value of type %{public}d failed!", type);
-        return -1;
-    }
-    /* returns value lenth */
-    return sizeof(type) + sizeof(len) + len;
+    return ret;
 }
 
 uint16_t DSchedSoftbusSession::U16Get(const uint8_t *ptr)
