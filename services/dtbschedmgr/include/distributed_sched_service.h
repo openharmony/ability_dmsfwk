@@ -91,6 +91,12 @@ public:
     void OnStart(const SystemAbilityOnDemandReason &startReason) override;
     void OnStop(const SystemAbilityOnDemandReason &stopReason) override;
     void OnActive(const SystemAbilityOnDemandReason &activeReason) override;
+
+    /**
+     * @brief If SA is pulled by root and not networked with other devices, uninstall SA after creating the database
+     *
+     * @param startReason, The reason why SA was pulled up.
+     */
     void HandleBootStart(const SystemAbilityOnDemandReason &startReason);
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
     void DeviceOnlineNotify(const std::string& deviceId);

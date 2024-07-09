@@ -348,10 +348,10 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
 }
 
 int32_t DSchedContinueManager::NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId,
-    bool isSuccess)
+    bool isSuccess, const std::string &callerBundleName)
 {
-    auto func = [this, devId, sessionId, isSuccess]() {
-        HandleNotifyCompleteContinuation(devId, sessionId, isSuccess);
+    auto func = [this, devId, sessionId, isSuccess, callerBundleName]() {
+        HandleNotifyCompleteContinuation(devId, sessionId, isSuccess, callerBundleName);
     };
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler_ is nullptr");
@@ -362,11 +362,15 @@ int32_t DSchedContinueManager::NotifyCompleteContinuation(const std::u16string& 
 }
 
 void DSchedContinueManager::HandleNotifyCompleteContinuation(const std::u16string& devId, int32_t missionId,
-    bool isSuccess)
+    bool isSuccess, const std::string &callerBundleName)
 {
     HILOGI("begin, isSuccess %{public}d", isSuccess);
     auto dContinue = GetDSchedContinueByDevId(devId, missionId);
     if (dContinue != nullptr) {
+        if (dContinue->GetContinueInfo().sinkBundleName_ != callerBundleName) {
+            HILOGE("callerBundleName doesn't match the existing continuation");
+            return;
+        }
         dContinue->OnNotifyComplete(missionId, isSuccess);
         HILOGI("end, continue info: %{public}s.", dContinue->GetContinueInfo().toString().c_str());
     }

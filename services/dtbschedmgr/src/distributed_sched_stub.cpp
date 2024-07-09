@@ -678,9 +678,11 @@ int32_t DistributedSchedStub::NotifyCompleteContinuationInner(MessageParcel& dat
     PARCEL_READ_HELPER(data, Int32, sessionId);
     bool continuationResult = false;
     PARCEL_READ_HELPER(data, Bool, continuationResult);
+    std::string callerBundleName = data.ReadString();
     auto dContinue = DSchedContinueManager::GetInstance().GetDSchedContinueByDevId(devId, sessionId);
     if (dContinue != nullptr) {
-        DSchedContinueManager::GetInstance().NotifyCompleteContinuation(devId, sessionId, continuationResult);
+        DSchedContinueManager::GetInstance().NotifyCompleteContinuation(devId, sessionId, continuationResult,
+            callerBundleName);
     } else {
         NotifyCompleteContinuation(devId, sessionId, continuationResult);
     }

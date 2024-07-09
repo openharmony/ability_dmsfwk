@@ -284,12 +284,13 @@ HWTEST_F(DSchedContinueManagerTest, HandleNotifyCompleteContinuation_001, TestSi
     DTEST_LOG << "DSchedContinueManagerTest HandleNotifyCompleteContinuation_001 begin" << std::endl;
     std::u16string devId;
     int32_t missionId = 0;
+    std::string callerBundleName;
     DSchedContinueManager::GetInstance().continues_.clear();
-    DSchedContinueManager::GetInstance().HandleNotifyCompleteContinuation(devId, missionId, false);
+    DSchedContinueManager::GetInstance().HandleNotifyCompleteContinuation(devId, missionId, false, callerBundleName);
 
     DSchedContinueInfo info;
     DSchedContinueManager::GetInstance().continues_[info] = nullptr;
-    DSchedContinueManager::GetInstance().HandleNotifyCompleteContinuation(devId, missionId, false);
+    DSchedContinueManager::GetInstance().HandleNotifyCompleteContinuation(devId, missionId, false, callerBundleName);
     bool ret = DSchedContinueManager::GetInstance().continues_.empty();
     EXPECT_EQ(ret, false);
     DTEST_LOG << "DSchedContinueManagerTest HandleNotifyCompleteContinuation_001 end" << std::endl;
@@ -306,9 +307,10 @@ HWTEST_F(DSchedContinueManagerTest, NotifyCompleteContinuation_001, TestSize.Lev
     std::u16string devId;
     int32_t sessionId = 0;
     bool isSuccess = false;
+    std::string callerBundleName;
     DSchedContinueManager::GetInstance().Init();
     int32_t ret = DSchedContinueManager::GetInstance().NotifyCompleteContinuation(devId,
-        sessionId, isSuccess);
+        sessionId, isSuccess, callerBundleName);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueManagerTest NotifyCompleteContinuation_001 end" << std::endl;
 }
