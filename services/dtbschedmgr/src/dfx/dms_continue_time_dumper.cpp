@@ -419,11 +419,12 @@ void DmsContinueTime::ShowInfo(std::string& result)
 
 int64_t DmsContinueTime::GetTotalTime()
 {
-    if (durationInfo_.empty()) {
-        HILOGE("durationInfo is empty");
+    int32_t totalTime = durationInfo_[DMSDURATION_TOTALTIME].GetDurationTime();
+    if (!totalTime) {
+        HILOGE("totalTime is empty");
         return DMSDURATION_INFOISEMPTY;
     }
-    return durationInfo_[DMSDURATION_TOTALTIME].GetDurationTime();
+    return totalTime;
 }
 }
 }
