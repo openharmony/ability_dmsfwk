@@ -29,6 +29,7 @@
 #include "distributed_sched_permission.h"
 #include "distributed_sched_service.h"
 #include "distributed_sched_utils.h"
+#include "distributed_ue.h"
 #include "dsched_continue_event.h"
 #include "dsched_continue_manager.h"
 #include "dsched_data_buffer.h"
@@ -453,6 +454,9 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
     
     std::string peerUdid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(peerDeviceId);
     DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid);
+
+    DmsUE::GetInstance().TriggerDmsContinue(continueInfo_.sinkBundleName_, continueInfo_.sinkAbilityName_,
+        continueInfo_.sourceDeviceId_, ERR_OK)
 
     if (subServiceType_ == CONTINUE_PULL && CheckQuickStartConfiguration()) {
         QuickStartAbility();
@@ -1060,6 +1064,9 @@ int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
     NotifyContinuationCallbackResult(result);
     NotifyDSchedEventResult(result);
     DurationDumperComplete(result);
+
+    DmsUE::GetInstance().DmsContinueComplete(continueInfo_.sourceBundleName_, continueInfo_.sinkAbilityName_,
+        continueInfo_.sourceDeviceId_, result);
 
     DSchedContinueManager::GetInstance().OnContinueEnd(continueInfo_);
     HILOGI("ExecuteContinueEnd end");

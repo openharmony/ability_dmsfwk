@@ -125,6 +125,7 @@ ohos_shared_library("distributedschedsvr") {
     "src/distributed_sched_proxy.cpp",
     "src/distributed_sched_service.cpp",
     "src/distributed_sched_stub.cpp",
+    "src/distributed_ue.cpp",
     "src/dms_callback_task.cpp",
     "src/dms_free_install_callback.cpp",
     "src/dms_free_install_callback_proxy.cpp",

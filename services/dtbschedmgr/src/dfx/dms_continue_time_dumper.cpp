@@ -415,5 +415,10 @@ void DmsContinueTime::ShowInfo(std::string& result)
         nIdx++;
     }
 }
+
+int64_t DmsContinueTime::GetTotalTime()
+{
+    return durationInfo_[DMSDURATION_TOTALTIME].GetDurationTime();
+}
 }
 }

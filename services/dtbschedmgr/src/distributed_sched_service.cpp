@@ -51,6 +51,7 @@
 #include "distributed_sched_dumper.h"
 #include "distributed_sched_permission.h"
 #include "distributed_sched_utils.h"
+#include "distributed_ue.h"
 #include "dms_callback_task.h"
 #include "dms_constant.h"
 #include "dms_free_install_callback.h"
@@ -334,7 +335,8 @@ void DistributedSchedService::InitDataShareManager()
             HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
             return;
         }
-
+        std::string switchState = IsContinueSwitchOn ? "1" : "0";
+        DmsUE::GetInstance().ChangedSwitchState(switchState, ERR_OK);
         if (IsContinueSwitchOn) {
             DMSContinueSendMgr::GetInstance().NotifyMissionFocused(missionId, FocusedReason::INIT);
             DSchedContinueManager::GetInstance().Init();
@@ -345,6 +347,8 @@ void DistributedSchedService::InitDataShareManager()
         };
     };
     dataShareManager_.RegisterObserver(CONTINUE_SWITCH_STATUS_KEY, observerCallback);
+    std::string switchState = SwitchStatusDependency::GetInstance().IsContinueSwitchOn() ? "1" : "0";
+    DmsUE::GetInstance().OriginalSwitchState(switchState, ERR_OK);
     HILOGI("Init data share manager, register observer end.");
 }
 
@@ -898,6 +902,18 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
     }
     std::string peerUdid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(srcDeviceId);
     DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid);
+
+    MissionInfo missionInfo;
+    int32_t ret AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, missionInfo);
+    if (ret != ERR_OK) {
+        HILOGE("GeGetMissionInfo failed %{public}d", ret);
+        return ret;
+    }
+    std::string bundleName = missionInfo.want.GetElement().GetBundleName();
+    std::string abilityName = missionInfo.want.GetElement().GetAbilityName();
+    HILOGD("bundlename: %{public}s, ability is %{public}s", bundleName.c_str(), abilityName.c_str());
+    DmsUE::GetInstance().TriggerDmsContinue(bundleName, abilityName, srcDeviceId, ERR_OK);
+
     int32_t result = remoteDms->ContinueMission(srcDeviceId, dstDeviceId, missionId, callback, wantParams);
     HILOGI("ContinueRemoteMission result: %{public}d!", result);
     return result;
@@ -1199,6 +1215,10 @@ void DistributedSchedService::NotifyCompleteContinuation(const std::u16string& d
     }
     int dSchedEventResult = dschedContinuation_->NotifyDSchedEventResult(ERR_OK);
     HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventResult);
+    std::string bundleName = DmsContinueTime::GetInstance().GetDstInfo().bundleName;
+    std::string abilityName = DmsContinueTime::GetInstance().GetDstInfo().abilityName;
+    std::string srcNetworkId = dschedContinuation_->continueInfo_.srcNetworkId_;
+    DmsUE::GetInstance().DmsContinueComplete(bundleName, abilityName, srcNetworkId, dSchedEventResult);
     remoteDms->NotifyContinuationResultFromRemote(sessionId, isSuccess, dstInfo);
     dschedContinuation_->continueInfo_.srcNetworkId_ = "";
     dschedContinuation_->continueInfo_.dstNetworkId_ = "";
