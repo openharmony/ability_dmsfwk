@@ -52,7 +52,7 @@ bool DmsUE::NotifyDockShowIcon(const std::string& bundleName, const std::string&
             PVERSIONID, Constants::DMS_VERSION,
             BUNDLE_NAME, bundleName,
             ABILITY_NAME, abilityName,
-            SOURCE_DEVICE_TYPE, GetDeviceTypeByNetworkId(networkId)
+            SOURCE_DEVICE_TYPE, GetDeviceTypeByNetworkId(networkId),
             ERROR_CODE_UE, errCode);
     }
     if (res != ERR_OK) {
@@ -86,7 +86,7 @@ bool DmsUE::TriggerDmsContinue(const std::string& bundleName, const std::string&
             BUNDLE_NAME, bundleName,
             ABILITY_NAME, abilityName,
             SOURCE_DEVICE_TYPE, GetDeviceTypeByNetworkId(networkId),
-            ERROR_CODE, errCode);
+            ERROR_CODE_UE, errCode);
     }
     if (res != ERR_OK) {
         HILOGE("TriggerDmsContinue error, res:%{public}d", res);
@@ -125,7 +125,7 @@ bool DmsUE::DmsContinueComplete(const std::string& bundleName, const std::string
             CONTINUATION_STATE, static_cast<int32_t>(continuationState::CONTINUATION_FAIL),
             FAILED_EXTRAINFO, ConvertErrCodeToStr(errCode),
             CONTINUATION_DURATION, DmsContinueTime::GetInstance().GetTotalTime(),
-            ERROR_CODE, errCode);
+            ERROR_CODE_UE, errCode);
     }
     if (res != ERR_OK) {
         HILOGE("DmsContinueComplete error, res:%{public}d", res);
@@ -153,7 +153,7 @@ bool DmsUE::OriginalSwitchState(const std::string& switchState, int32_t errCode)
             PNAMEID, CONTINUATION_DOMAIN,
             PVERSIONID, Constants::DMS_VERSION,
             SWITCH_STATE, switchState,
-            ERROR_CODE, errCode);
+            ERROR_CODE_UE, errCode);
     }
     if (res != ERR_OK) {
         HILOGE("OriginalSwitchState error, res:%{public}d", res);
@@ -181,7 +181,7 @@ bool DmsUE::ChangedSwitchState(const std::string& switchState, int32_t errCode)
             PNAMEID, CONTINUATION_DOMAIN,
             PVERSIONID, Constants::DMS_VERSION,
             SWITCH_STATE, switchState,
-            ERROR_CODE, errCode);
+            ERROR_CODE_UE, errCode);
     }
     if (res != ERR_OK) {
         HILOGE("ChangedSwitchState error, res:%{public}d", res);
