@@ -51,8 +51,8 @@ const std::string CHANGED_SWITCH_STATE = "CHANGED_SWITCH_STATE";
 constexpr char CONTINUATION_DOMAIN[] = "CONTINUATION_UE";
 
 enum class continuationState : int32_t {
-    CONTINUATION_SUCC = 0;
-    CONTINUATION_FAIL = -1;
+    CONTINUATION_SUCC = 0,
+    CONTINUATION_FAIL = -1,
 };
 
 class DmsUE {
