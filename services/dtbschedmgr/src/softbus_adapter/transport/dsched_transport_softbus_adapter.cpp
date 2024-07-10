@@ -114,13 +114,10 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
     HILOGI("try to connect peer: %{public}s.", GetAnonymStr(peerDeviceId).c_str());
     {
         std::lock_guard<std::mutex> sessionLock(sessionMutex_);
-        if (sessions_.empty()) {
-            return INVALID_SESSION_ID;
-        }
-        for (auto iter = sessions_.begin(); iter != sessions_.end(); iter++) {
-            if (iter->second != nullptr && peerDeviceId == iter->second->GetPeerDeviceId()) {
-                HILOGI("peer device already connected");
-                if (sessions_[iter->first] != nullptr) {
+        if (!sessions_.empty()) {
+            for (auto iter = sessions_.begin(); iter != sessions_.end(); iter++) {
+                if (iter->second != nullptr && peerDeviceId == iter->second->GetPeerDeviceId()) {
+                    HILOGI("peer device already connected");
                     sessions_[iter->first]->OnConnect();
                     return iter->first;
                 }
