@@ -190,7 +190,7 @@ bool DmsUE::ChangedSwitchState(const std::string& switchState, int32_t errCode)
     return true;
 }
 
-int32_t DmsUE::GetDeviceTypeByNetworkId(int32_t networkId)
+int32_t DmsUE::GetDeviceTypeByNetworkId(std::string networkId)
 {
     auto deviceInfo = DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(networkId);
     if (deviceInfo == nullptr) {
