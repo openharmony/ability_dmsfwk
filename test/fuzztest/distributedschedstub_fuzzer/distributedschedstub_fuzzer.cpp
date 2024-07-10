@@ -53,7 +53,7 @@ bool StartRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     dataParcel.WriteInt32(callerUid);
     dataParcel.WriteInt32(requestCode);
     dataParcel.WriteUint32(accessToken);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
     return true;
 }
 
@@ -76,7 +76,7 @@ void ConnectRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     dataParcel.WriteInt32(callerUid);
     dataParcel.WriteInt32(callerPid);
     dataParcel.WriteUint32(accessToken);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void DisconnectRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
@@ -94,7 +94,7 @@ void DisconnectRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     dataParcel.WriteInt32(callerUid);
     dataParcel.WriteUint32(accessToken);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void StartContinuationInnerFuzzTest(const uint8_t* data, size_t size)
@@ -116,7 +116,7 @@ void StartContinuationInnerFuzzTest(const uint8_t* data, size_t size)
     dataParcel.WriteInt32(callerUid);
     dataParcel.WriteInt32(status);
     dataParcel.WriteUint32(accessToken);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void NotifyCompleteContinuationInnerFuzzTest(const uint8_t* data, size_t size)
@@ -132,7 +132,7 @@ void NotifyCompleteContinuationInnerFuzzTest(const uint8_t* data, size_t size)
     int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     dataParcel.WriteInt32(sessionId);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void ContinueMissionInnerFuzzTest(const uint8_t* data, size_t size)
@@ -149,7 +149,7 @@ void ContinueMissionInnerFuzzTest(const uint8_t* data, size_t size)
     dataParcel.WriteString(srcDevId);
     dataParcel.WriteString(dstDevId);
     dataParcel.WriteInt32(missionId);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->ContinueMissionInner(dataParcel, reply);
+    DistributedSchedService::GetInstance().ContinueMissionInner(dataParcel, reply);
 }
 
 void ContinueMissionOfBundleNameInnerFuzzTest(const uint8_t* data, size_t size)
@@ -166,7 +166,7 @@ void ContinueMissionOfBundleNameInnerFuzzTest(const uint8_t* data, size_t size)
     dataParcel.WriteString(srcDevId);
     dataParcel.WriteString(dstDevId);
     dataParcel.WriteString(bundleName);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->ContinueMissionOfBundleNameInner(dataParcel, reply);
+    DistributedSchedService::GetInstance().ContinueMissionOfBundleNameInner(dataParcel, reply);
 }
 
 void GetMissionInfosInnerFuzzTest(const uint8_t* data, size_t size)
@@ -182,7 +182,7 @@ void GetMissionInfosInnerFuzzTest(const uint8_t* data, size_t size)
     int32_t numMissions = *(reinterpret_cast<const int32_t*>(data));
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     dataParcel.WriteInt32(numMissions);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void RegisterMissionListenerInnerFuzzTest(const uint8_t* data, size_t size)
@@ -196,7 +196,7 @@ void RegisterMissionListenerInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void UnRegisterMissionListenerInnerFuzzTest(const uint8_t* data, size_t size)
@@ -210,7 +210,7 @@ void UnRegisterMissionListenerInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void StartSyncRemoteMissionsInnerFuzzTest(const uint8_t* data, size_t size)
@@ -224,7 +224,7 @@ void StartSyncRemoteMissionsInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void StopSyncRemoteMissionsInnerFuzzTest(const uint8_t* data, size_t size)
@@ -238,7 +238,7 @@ void StopSyncRemoteMissionsInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void GetRemoteMissionSnapshotInfoInnerFuzzTest(const uint8_t* data, size_t size)
@@ -256,7 +256,7 @@ void GetRemoteMissionSnapshotInfoInnerFuzzTest(const uint8_t* data, size_t size)
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     dataParcel.WriteString(networkId);
     dataParcel.WriteInt32(missionId);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void StartRemoteAbilityByCallInnerFuzzTest(const uint8_t* data, size_t size)
@@ -274,7 +274,7 @@ void StartRemoteAbilityByCallInnerFuzzTest(const uint8_t* data, size_t size)
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     dataParcel.WriteString(networkId);
     dataParcel.WriteInt32(missionId);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void ReleaseRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
@@ -288,7 +288,7 @@ void ReleaseRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void GetDistributedComponentListInnerFuzzTest(const uint8_t* data, size_t size)
@@ -299,7 +299,7 @@ void GetDistributedComponentListInnerFuzzTest(const uint8_t* data, size_t size)
     FuzzUtil::MockPermission();
     MessageParcel dataParcel;
     MessageParcel reply;
-    DelayedSingleton<DistributedSchedService>::GetInstance()->GetDistributedComponentListInner(dataParcel, reply);
+    DistributedSchedService::GetInstance().GetDistributedComponentListInner(dataParcel, reply);
 }
 
 void StartRemoteFreeInstallInnerFuzzTest(const uint8_t* data, size_t size)
@@ -319,7 +319,7 @@ void StartRemoteFreeInstallInnerFuzzTest(const uint8_t* data, size_t size)
     dataParcel.WriteInt32(callerUid);
     dataParcel.WriteInt32(requestCode);
     dataParcel.WriteUint32(accessToken);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void StartRemoteShareFormInnerFuzzTest(const uint8_t* data, size_t size)
@@ -335,7 +335,7 @@ void StartRemoteShareFormInnerFuzzTest(const uint8_t* data, size_t size)
     std::string deviceId(reinterpret_cast<const char*>(data), size);
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     dataParcel.WriteString(deviceId);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void StopRemoteExtensionAbilityInnerFuzzTest(const uint8_t* data, size_t size)
@@ -354,7 +354,7 @@ void StopRemoteExtensionAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     dataParcel.WriteInt32(callerUid);
     dataParcel.WriteInt32(serviceType);
     dataParcel.WriteUint32(accessToken);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->StopRemoteExtensionAbilityInner(dataParcel, reply);
+    DistributedSchedService::GetInstance().StopRemoteExtensionAbilityInner(dataParcel, reply);
 }
 
 void RegisterOnListenerInnerFuzzTest(const uint8_t* data, size_t size)
@@ -370,7 +370,7 @@ void RegisterOnListenerInnerFuzzTest(const uint8_t* data, size_t size)
     std::string type(reinterpret_cast<const char*>(data), size);
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     dataParcel.WriteString(type);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void RegisterOffListenerInnerFuzzTest(const uint8_t* data, size_t size)
@@ -386,7 +386,7 @@ void RegisterOffListenerInnerFuzzTest(const uint8_t* data, size_t size)
     std::string type(reinterpret_cast<const char*>(data), size);
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     dataParcel.WriteString(type);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void RegisterDSchedEventListenerInnerFuzzTest(const uint8_t* data, size_t size)
@@ -400,7 +400,7 @@ void RegisterDSchedEventListenerInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void UnRegisterDSchedEventListenerInnerFuzzTest(const uint8_t* data, size_t size)
@@ -414,7 +414,7 @@ void UnRegisterDSchedEventListenerInnerFuzzTest(const uint8_t* data, size_t size
     MessageParcel reply;
     MessageOption option;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void SetMissionContinueStateInnerFuzzTest(const uint8_t* data, size_t size)
@@ -432,7 +432,7 @@ void SetMissionContinueStateInnerFuzzTest(const uint8_t* data, size_t size)
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     dataParcel.WriteInt32(missionId);
     dataParcel.WriteInt32(state);
-    DelayedSingleton<DistributedSchedService>::GetInstance()->OnRemoteRequest(code, dataParcel, reply, option);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 }
 }
