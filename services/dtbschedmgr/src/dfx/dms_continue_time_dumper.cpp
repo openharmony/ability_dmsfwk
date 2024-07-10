@@ -46,7 +46,7 @@ constexpr int32_t DMSDURATION_DSTTOSRCRPCTIME = 3;
 constexpr int32_t DMSDURATION_SAVETIME = 4;
 constexpr int32_t DMSDURATION_SRCTODSTRPCTIME = 5;
 constexpr int32_t DMSDURATION_STARTABILITY = 6;
-constexpr int32_t DMSDURATION_ARRAY_OUTOFBOUNDS = 000;
+constexpr int32_t DMSDURATION_INFOISEMPTY = 000;
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DmsContinueTime);
@@ -421,7 +421,7 @@ int64_t DmsContinueTime::GetTotalTime()
 {
     if (durationInfo_.empty()) {
         HILOGE("durationInfo is empty");
-        return DMSDURATION_ARRAY_OUTOFBOUNDS;
+        return DMSDURATION_INFOISEMPTY;
     }
     return durationInfo_[DMSDURATION_TOTALTIME].GetDurationTime();
 }
