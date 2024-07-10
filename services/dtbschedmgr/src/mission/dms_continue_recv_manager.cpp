@@ -335,8 +335,8 @@ void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
     if (state != INACTIVE) {
         std::string bName = bundleName;
         std::string cType = continueType;
-        std::string abilityName = BundleDistributedManager::GetInstance().GetAbilityName(networkId,
-            bName, cType)
+        std::string abilityName = BundleManagerInternal::GetInstance().GetAbilityName(networkId,
+            bName, cType);
         DmsUE::GetInstance().NotifyDockShowIcon(bundleName, abilityName, networkId, error);
     }
     if (error != ERR_NONE) {
