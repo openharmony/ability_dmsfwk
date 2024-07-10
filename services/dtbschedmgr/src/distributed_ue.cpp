@@ -201,6 +201,9 @@ int32_t DmsUE::GetDeviceTypeByNetworkId(int32_t networkId)
 
 std::string DmsUE::ConvertErrCodeToStr(int32_t errorCode)
 {
+    if (errorCode == ERR_OK) {
+        return NO_FAILED_EXTRAINFO;
+    }
     switch(errorCode) {
         case INVALID_PARAMETERS_ERR:
             return "invalid parameters";
