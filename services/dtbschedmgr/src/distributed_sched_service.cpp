@@ -904,7 +904,7 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
     DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid);
 
     MissionInfo missionInfo;
-    int32_t ret AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, missionInfo);
+    int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, missionInfo);
     if (ret != ERR_OK) {
         HILOGE("GeGetMissionInfo failed %{public}d", ret);
         return ret;
