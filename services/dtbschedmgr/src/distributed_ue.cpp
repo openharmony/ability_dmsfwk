@@ -33,7 +33,7 @@ bool DmsUE::NotifyDockShowIcon(const std::string& bundleName, const std::string&
     const std::string& networkId, int32_t errCode)
 {   
     int32_t res = ERR_OK;
-    if(errCode == ERR_OK) {
+    if (errCode == ERR_OK) {
         res = HiSysEventWrite(
             CONTINUATION_DOMAIN,
             SHOW_CONTINUATION_ICON,
@@ -204,7 +204,7 @@ std::string DmsUE::ConvertErrCodeToStr(int32_t errorCode)
     if (errorCode == ERR_OK) {
         return NO_FAILED_EXTRAINFO;
     }
-    switch(errorCode) {
+    switch (errorCode) {
         case INVALID_PARAMETERS_ERR:
             return "invalid parameters";
         case INVALID_REMOTE_PARAMETERS_ERR:
