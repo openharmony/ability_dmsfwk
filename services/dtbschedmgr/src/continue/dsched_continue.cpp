@@ -456,7 +456,7 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
     DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid);
 
     DmsUE::GetInstance().TriggerDmsContinue(continueInfo_.sinkBundleName_, continueInfo_.sinkAbilityName_,
-        continueInfo_.sourceDeviceId_, ERR_OK)
+        continueInfo_.sourceDeviceId_, ERR_OK);
 
     if (subServiceType_ == CONTINUE_PULL && CheckQuickStartConfiguration()) {
         QuickStartAbility();
