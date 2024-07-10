@@ -31,7 +31,7 @@ IMPLEMENT_SINGLE_INSTANCE(DmsUE);
 
 bool DmsUE::NotifyDockShowIcon(const std::string& bundleName, const std::string& abilityName,
     const std::string& networkId, int32_t errCode)
-{   
+{
     int32_t res = ERR_OK;
     if (errCode == ERR_OK) {
         res = HiSysEventWrite(
