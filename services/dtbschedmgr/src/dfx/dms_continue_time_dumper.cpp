@@ -46,6 +46,7 @@ constexpr int32_t DMSDURATION_DSTTOSRCRPCTIME = 3;
 constexpr int32_t DMSDURATION_SAVETIME = 4;
 constexpr int32_t DMSDURATION_SRCTODSTRPCTIME = 5;
 constexpr int32_t DMSDURATION_STARTABILITY = 6;
+constexpr int32_t DMSDURATION_ARRAY_OUTOFBOUNDS = 99999999;
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DmsContinueTime);
@@ -418,6 +419,10 @@ void DmsContinueTime::ShowInfo(std::string& result)
 
 int64_t DmsContinueTime::GetTotalTime()
 {
+    if (DMSDURATION_TOTALTIME > durationInfo_.size()) {
+        HILOGE("Invalid duration index, access out-of-bounds array");
+        return DMSDURATION_ARRAY_OUTOFBOUNDS;
+    }
     return durationInfo_[DMSDURATION_TOTALTIME].GetDurationTime();
 }
 }
