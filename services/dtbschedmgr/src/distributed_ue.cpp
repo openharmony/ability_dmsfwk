@@ -231,8 +231,6 @@ std::string DmsUE::ConvertErrCodeToStr(int32_t errorCode)
             return "calling StartAbility failed during continuation";
         case CONTINUE_SINK_ABILITY_TERMINATED:
             return "sink Ability abnormal termination during continuation";
-        case DMS_CONNECT_APPLY_REJECT_FAILED:
-            return "all connect manager reject connect apply";
         default:
             return "internal error";
     }
