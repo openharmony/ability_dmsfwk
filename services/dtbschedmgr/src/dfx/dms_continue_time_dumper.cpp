@@ -419,7 +419,7 @@ void DmsContinueTime::ShowInfo(std::string& result)
 
 int64_t DmsContinueTime::GetTotalTime()
 {
-    HILOGD("GetTotalTime start, durationInfo_.size is %{public}lu", durationInfo_.size());
+    HILOGD("GetTotalTime start, durationInfo_.size is %{public}zu", durationInfo_.size());
     if (durationInfo_.empty() || durationInfo_.size() < DMSDURATION_TOTALTIME) {
         HILOGE("totalTime is not exist.");
         return DMSDURATION_EMPTY_TIME;
