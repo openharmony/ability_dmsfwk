@@ -134,9 +134,10 @@ bool DmsUE::DmsContinueComplete(const std::string& bundleName, const std::string
     return true;
 }
 
-bool DmsUE::OriginalSwitchState(const std::string& switchState, int32_t errCode)
+bool DmsUE::OriginalSwitchState(bool isContinueSwitchOn, int32_t errCode)
 {
     int32_t res = ERR_OK;
+    std::string switchState = isContinueSwitchOn ? "1" : "0";
     if (errCode == ERR_OK) {
         res = HiSysEventWrite(
             CONTINUATION_DOMAIN,
@@ -162,9 +163,10 @@ bool DmsUE::OriginalSwitchState(const std::string& switchState, int32_t errCode)
     return true;
 }
 
-bool DmsUE::ChangedSwitchState(const std::string& switchState, int32_t errCode)
+bool DmsUE::ChangedSwitchState(bool isContinueSwitchOn, int32_t errCode)
 {
     int32_t res = ERR_OK;
+    std::string switchState = isContinueSwitchOn ? "1" : "0";
     if (errCode == ERR_OK) {
         res = HiSysEventWrite(
             CONTINUATION_DOMAIN,

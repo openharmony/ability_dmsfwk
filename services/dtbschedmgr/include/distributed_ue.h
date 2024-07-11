@@ -64,8 +64,8 @@ public:
         const std::string& networkId, int32_t errCode);
     bool DmsContinueComplete(const std::string& bundleName, const std::string& abilityName,
         const std::string& networkId, int32_t errCode);
-    bool OriginalSwitchState(const std::string& switchState, int32_t errCode);
-    bool ChangedSwitchState(const std::string& switchState, int32_t errCode);
+    bool OriginalSwitchState(bool isContinueSwitchOn, int32_t errCode);
+    bool ChangedSwitchState(bool isContinueSwitchOn, int32_t errCode);
 
     int32_t GetDeviceTypeByNetworkId(std::string networkId);
     std::string ConvertErrCodeToStr(int32_t errorCode);

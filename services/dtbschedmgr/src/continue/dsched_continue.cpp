@@ -1065,9 +1065,6 @@ int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
     NotifyDSchedEventResult(result);
     DurationDumperComplete(result);
 
-    DmsUE::GetInstance().DmsContinueComplete(continueInfo_.sourceBundleName_, continueInfo_.sinkAbilityName_,
-        continueInfo_.sourceDeviceId_, result);
-
     DSchedContinueManager::GetInstance().OnContinueEnd(continueInfo_);
     HILOGI("ExecuteContinueEnd end");
     return ERR_OK;
@@ -1113,6 +1110,8 @@ void DSchedContinue::DurationDumperComplete(int32_t result)
         std::string strEndTime = DmsContinueTime::GetInstance().GetCurrentTime();
         DmsContinueTime::GetInstance().SetDurationEnd(CONTINUE_TOTAL_TIME, GetTickCount());
         DmsContinueTime::GetInstance().SetDurationStrTime(CONTINUE_END_TIME, strEndTime);
+        DmsUE::GetInstance().DmsContinueComplete(continueInfo_.sourceBundleName_, continueInfo_.sinkAbilityName_,
+        continueInfo_.sourceDeviceId_, result);
         DmsContinueTime::GetInstance().AppendInfo();
         DmsContinueTime::GetInstance().SetPull(false);
     }

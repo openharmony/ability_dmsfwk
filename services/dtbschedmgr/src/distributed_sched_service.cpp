@@ -335,8 +335,7 @@ void DistributedSchedService::InitDataShareManager()
             HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
             return;
         }
-        std::string switchState = IsContinueSwitchOn ? "1" : "0";
-        DmsUE::GetInstance().ChangedSwitchState(switchState, ERR_OK);
+        DmsUE::GetInstance().ChangedSwitchState(IsContinueSwitchOn, ERR_OK);
         if (IsContinueSwitchOn) {
             DMSContinueSendMgr::GetInstance().NotifyMissionFocused(missionId, FocusedReason::INIT);
             DSchedContinueManager::GetInstance().Init();
@@ -347,8 +346,7 @@ void DistributedSchedService::InitDataShareManager()
         };
     };
     dataShareManager_.RegisterObserver(CONTINUE_SWITCH_STATUS_KEY, observerCallback);
-    std::string switchState = SwitchStatusDependency::GetInstance().IsContinueSwitchOn() ? "1" : "0";
-    DmsUE::GetInstance().OriginalSwitchState(switchState, ERR_OK);
+    DmsUE::GetInstance().OriginalSwitchState(SwitchStatusDependency::GetInstance().IsContinueSwitchOn(), ERR_OK);
     HILOGI("Init data share manager, register observer end.");
 }
 
@@ -1200,6 +1198,9 @@ void DistributedSchedService::NotifyCompleteContinuation(const std::u16string& d
         HILOGE("continuation object null!");
         return;
     }
+    int dSchedEventResult = dschedContinuation_->NotifyDSchedEventResult(ERR_OK);
+    HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventResult);
+
     std::string dstInfo("");
     if (DmsContinueTime::GetInstance().GetPull()) {
         int64_t end = GetTickCount();
@@ -1207,18 +1208,19 @@ void DistributedSchedService::NotifyCompleteContinuation(const std::u16string& d
         DmsContinueTime::GetInstance().SetDurationEnd(DMSDURATION_STARTABILITY, end);
         DmsContinueTime::GetInstance().SetDurationEnd(DMSDURATION_TOTALTIME, end);
         DmsContinueTime::GetInstance().SetDurationStrTime(DMSDURATION_ENDTIME, strEndTime);
+
+        std::string bundleName = DmsContinueTime::GetInstance().GetDstInfo().bundleName;
+        std::string abilityName = DmsContinueTime::GetInstance().GetDstInfo().abilityName;
+        std::string srcNetworkId = dschedContinuation_->continueInfo_.srcNetworkId_;
+        DmsUE::GetInstance().DmsContinueComplete(bundleName, abilityName, srcNetworkId, dSchedEventResult);
+
         DmsContinueTime::GetInstance().AppendInfo();
         DmsContinueTime::GetInstance().SetPull(false);
     } else {
         dstInfo = DmsContinueTime::GetInstance().WriteDstInfo(DmsContinueTime::GetInstance().GetDstInfo().bundleName,
             DmsContinueTime::GetInstance().GetDstInfo().abilityName);
     }
-    int dSchedEventResult = dschedContinuation_->NotifyDSchedEventResult(ERR_OK);
-    HILOGD("NotifyDSchedEventResult result:%{public}d", dSchedEventResult);
-    std::string bundleName = DmsContinueTime::GetInstance().GetDstInfo().bundleName;
-    std::string abilityName = DmsContinueTime::GetInstance().GetDstInfo().abilityName;
-    std::string srcNetworkId = dschedContinuation_->continueInfo_.srcNetworkId_;
-    DmsUE::GetInstance().DmsContinueComplete(bundleName, abilityName, srcNetworkId, dSchedEventResult);
+
     remoteDms->NotifyContinuationResultFromRemote(sessionId, isSuccess, dstInfo);
     dschedContinuation_->continueInfo_.srcNetworkId_ = "";
     dschedContinuation_->continueInfo_.dstNetworkId_ = "";
