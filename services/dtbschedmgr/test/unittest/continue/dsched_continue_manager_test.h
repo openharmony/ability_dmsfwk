@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 
+#include "device_manager.h"
 #include "dsched_continue_manager.h"
 
 namespace OHOS {
@@ -31,6 +32,10 @@ public:
     void TearDown();
     std::shared_ptr<DSchedContinue> CreateObject();
     sptr<IRemoteObject> GetDSchedService() const;
+protected:
+    class DeviceInitCallBack : public OHOS::DistributedHardware::DmInitCallback {
+        void OnRemoteDied() override;
+    };
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

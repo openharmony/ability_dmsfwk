@@ -37,7 +37,8 @@ void DmsSaClientTest::TearDownTestCase()
 
 void DmsSaClientTest::SetUp()
 {
-    dmssaClient_ = new DmsSaClient();
+    dmssaClient_ = std::make_shared<DmsSaClient>();
+    dmsSaStatusChange_ = std::make_shared<DmsSystemAbilityStatusChange>();
     DTEST_LOG << "DmsSaClientTest::SetUp" << std::endl;
 }
 

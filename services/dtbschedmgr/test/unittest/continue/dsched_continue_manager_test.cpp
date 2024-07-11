@@ -18,11 +18,13 @@
 #include "datetime_ex.h"
 
 #include "dtbschedmgr_device_info_storage.h"
+#include "distributed_sched_test_util.h"
 #include "test_log.h"
 #include "mock_distributed_sched.h"
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::DistributedHardware;
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -40,6 +42,9 @@ namespace {
 void DSchedContinueManagerTest::SetUpTestCase()
 {
     mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
+    const std::string pkgName = "DBinderBus_PermissionTest" + std::to_string(getprocpid());
+    std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
+    DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
     DTEST_LOG << "DSchedContinueManagerTest::SetUpTestCase" << std::endl;
 }
 
@@ -59,6 +64,10 @@ void DSchedContinueManagerTest::SetUp()
 {
     usleep(WAITTIME);
     DTEST_LOG << "DSchedContinueManagerTest::SetUp" << std::endl;
+}
+
+void DSchedContinueManagerTest::DeviceInitCallBack::OnRemoteDied()
+{
 }
 
 sptr<IRemoteObject> DSchedContinueManagerTest::GetDSchedService() const
@@ -139,6 +148,7 @@ HWTEST_F(DSchedContinueManagerTest, ContinueMission_002, TestSize.Level3)
 HWTEST_F(DSchedContinueManagerTest, ContinueMission_003, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinueManagerTest ContinueMission_003 begin" << std::endl;
+    DistributedSchedUtil::MockPermission();
     OHOS::AAFwk::WantParams wantParams;
     int32_t ret = DSchedContinueManager::GetInstance().ContinueMission("", "", BUNDLE_NAME,
         CONTINUETYPE, nullptr, wantParams);
@@ -231,7 +241,7 @@ HWTEST_F(DSchedContinueManagerTest, CheckContinuationLimit_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinueManagerTest CheckContinuationLimit_001 begin" << std::endl;
     int32_t ret = DSchedContinueManager::GetInstance().CheckContinuationLimit(LOCAL_DEVICEID, REMOTE_DEVICEID);
-    EXPECT_EQ(ret, GET_LOCAL_DEVICE_ERR);
+    EXPECT_EQ(ret, OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET);
     DTEST_LOG << "DSchedContinueManagerTest CheckContinuationLimit_001 end" << std::endl;
 }
 

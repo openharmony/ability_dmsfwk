@@ -28,6 +28,8 @@ using namespace testing::ext;
 namespace OHOS {
 namespace DistributedSchedule {
 const std::string TAG = "DistributedSchedUtilsTest";
+constexpr const char* PARAM_KEY_OS_TYPE = "OS_TYPE";
+constexpr const char* PARAM_KEY_OS_VERSION = "OS_VERSION";
 constexpr int32_t MAX_TEST_PATH_LEN = 1024;
 const std::string TEST_CONFIG_RELATIVE_PATH = "etc/distributedhardware/distributed_hardware_components_cfg.json";
 
@@ -172,6 +174,158 @@ HWTEST_F(DistributedSchedUtilsTest, CheckBundleContinueConfig_002, TestSize.Leve
 
     std::string bundleName = "test_bundle_1";
     EXPECT_TRUE(CheckBundleContinueConfig(bundleName));
+}
+
+/**
+ * @tc.name: ParcelToBase64Str_001
+ * @tc.desc: ParcelToBase64Str
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DistributedSchedUtilsTest, ParcelToBase64Str_001, TestSize.Level1)
+{
+    EXPECT_EQ(INVALID_MISSION_ID, GetCurrentMissionId());
+
+    Parcel parcel;
+    std::string rawStr;
+    EXPECT_EQ("", ParcelToBase64Str(parcel));
+
+    EXPECT_EQ(INVALID_PARAMETERS_ERR, Base64StrToParcel(rawStr, parcel));
+
+    unsigned char *toEncode = nullptr;
+    unsigned int len = 0;
+    EXPECT_EQ("", Base64Encode(toEncode, len));
+
+    len = 1;
+    EXPECT_EQ("", Base64Encode(toEncode, len));
+
+    std::string basicString;
+    EXPECT_EQ("", Base64Decode(basicString));
+
+    EXPECT_EQ(true, IsBase64('+'));
+    EXPECT_EQ(true, IsBase64('/'));
+    EXPECT_EQ(true, IsBase64('3'));
+}
+
+/**
+ * @tc.name: Base64Encode_001
+ * @tc.desc: Base64Encode
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DistributedSchedUtilsTest, Base64Encode_001, TestSize.Level1)
+{
+    unsigned char *toEncode = nullptr;
+    unsigned int len = 0;
+    std::string basicString;
+
+    EXPECT_EQ(Base64Encode(toEncode, len), "");
+    len = 1;
+    EXPECT_EQ(Base64Encode(toEncode, len), "");
+
+    EXPECT_EQ(Base64Decode(basicString), "");
+}
+
+/**
+ * @tc.name: IsInt32_001
+ * @tc.desc: IsInt32
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DistributedSchedUtilsTest, IsInt32_001, TestSize.Level1)
+{
+    bool ret = IsInt32(nullptr);
+    EXPECT_FALSE(ret);
+
+    cJSON *paramValue = cJSON_CreateObject();
+    if (paramValue == nullptr) {
+        return;
+    }
+    int32_t data = MAX_TEST_PATH_LEN;
+    cJSON_AddNumberToObject(paramValue, "data", data);
+    ret = IsInt32(paramValue);
+    EXPECT_FALSE(ret);
+    cJSON *dataValue = cJSON_GetObjectItem(paramValue, "data");
+    ret = IsInt32(dataValue);
+    EXPECT_TRUE(ret);
+    if (paramValue != nullptr) {
+        cJSON_Delete(paramValue);
+        paramValue = nullptr;
+    }
+}
+
+/**
+ * @tc.name: IsString_001
+ * @tc.desc: IsString
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DistributedSchedUtilsTest, IsString_001, TestSize.Level1)
+{
+    bool ret = IsString(nullptr);
+    EXPECT_FALSE(ret);
+
+    cJSON *paramValue = nullptr;
+    std::string str("string");
+    paramValue = cJSON_Parse(str.c_str());
+    if (paramValue == nullptr) {
+        return;
+    }
+    ret = IsString(paramValue);
+    EXPECT_TRUE(ret);
+    if (paramValue != nullptr) {
+        cJSON_Delete(paramValue);
+        paramValue = nullptr;
+    }
+}
+
+/**
+ * @tc.name: IsString_002
+ * @tc.desc: IsString
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DistributedSchedUtilsTest, IsString_002, TestSize.Level1)
+{
+    cJSON *paramValue = cJSON_CreateObject();
+    if (paramValue == nullptr) {
+        return;
+    }
+    int32_t data = MAX_TEST_PATH_LEN;
+    cJSON_AddNumberToObject(paramValue, "data", data);
+    bool ret = IsString(paramValue);
+    EXPECT_FALSE(ret);
+    if (paramValue != nullptr) {
+        cJSON_Delete(paramValue);
+        paramValue = nullptr;
+    }
+}
+
+/**
+ * @tc.name: CJsonParamCheck_001
+ * @tc.desc: CJsonParamCheck
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DistributedSchedUtilsTest, CJsonParamCheck_001, TestSize.Level1)
+{
+    bool ret = CJsonParamCheck(nullptr, {PARAM_KEY_OS_TYPE, PARAM_KEY_OS_VERSION});
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: GetOsInfoFromDM_001
+ * @tc.desc: GetOsInfoFromDM
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DistributedSchedUtilsTest, GetOsInfoFromDM_001, TestSize.Level1)
+{
+    std::string dmInfoEx;
+    int32_t osType;
+    std::string osVersion;
+    bool ret = GetOsInfoFromDM(dmInfoEx, osType, osVersion);
+    EXPECT_FALSE(ret);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

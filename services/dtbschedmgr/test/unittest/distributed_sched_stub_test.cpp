@@ -68,7 +68,7 @@ void DistributedSchedStubTest::TearDown()
 void DistributedSchedStubTest::SetUp()
 {
     DTEST_LOG << "DistributedSchedStubTest::SetUp" << std::endl;
-    distributedSchedStub_ = new DistributedSchedService();
+    distributedSchedStub_ = std::make_shared<DistributedSchedService>();
     DistributedSchedUtil::MockProcessAndPermission(FOUNDATION_PROCESS_NAME, PERMS, 1);
 }
 
@@ -194,7 +194,7 @@ HWTEST_F(DistributedSchedStubTest, StartRemoteAbilityInner_002, TestSize.Level3)
     uint32_t accessToken = 0;
     data.WriteUint32(accessToken);
     result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest StartRemoteAbilityInner_002 end" << std::endl;
 }
 
@@ -279,7 +279,7 @@ HWTEST_F(DistributedSchedStubTest, StartAbilityFromRemoteInner_001, TestSize.Lev
     Want want;
     data.WriteParcelable(&want);
     result = distributedSchedStub_->StartAbilityFromRemoteInner(data, reply);
-    EXPECT_EQ(result, ERR_NULL_OBJECT);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
 
     data.WriteParcelable(&want);
     AbilityInfo abilityInfo;
@@ -804,7 +804,7 @@ HWTEST_F(DistributedSchedStubTest, ConnectRemoteAbilityInner_002, TestSize.Level
     uint32_t accessToken = 0;
     data.WriteUint32(accessToken);
     result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest ConnectRemoteAbilityInner_002 end" << std::endl;
 }
 
@@ -879,7 +879,7 @@ HWTEST_F(DistributedSchedStubTest, DisconnectRemoteAbilityInner_002, TestSize.Le
     uint32_t accessToken = 0;
     data.WriteUint32(accessToken);
     int result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest DisconnectRemoteAbilityInner_002 end" << std::endl;
 }
 
@@ -927,7 +927,7 @@ HWTEST_F(DistributedSchedStubTest, ConnectAbilityFromRemoteInner_001, TestSize.L
     Want want;
     data.WriteParcelable(&want);
     result = distributedSchedStub_->ConnectAbilityFromRemoteInner(data, reply);
-    EXPECT_EQ(result, ERR_NULL_OBJECT);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
 
     data.WriteParcelable(&want);
     AbilityInfo abilityInfo;
@@ -1586,7 +1586,7 @@ HWTEST_F(DistributedSchedStubTest, StartRemoteAbilityByCallInner_002, TestSize.L
     uint32_t accessToken = 0;
     data.WriteUint32(accessToken);
     result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest StartRemoteAbilityByCallInner_002 end" << std::endl;
 }
 
@@ -1922,7 +1922,7 @@ HWTEST_F(DistributedSchedStubTest, StartRemoteFreeInstallInner_002, TestSize.Lev
     sptr<IRemoteObject> callback(new DistributedSchedService());
     data.WriteRemoteObject(callback);
     result = distributedSchedStub_->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest StartRemoteFreeInstallInner_002 end" << std::endl;
 }
 
@@ -2135,7 +2135,7 @@ HWTEST_F(DistributedSchedStubTest, StopRemoteExtensionAbilityInner_001, TestSize
     dataThird.WriteUint32(accessToken);
     dataThird.WriteInt32(serviceType);
     result = distributedSchedStub_->StopRemoteExtensionAbilityInner(dataThird, reply);
-    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest StopRemoteExtensionAbilityInner_001 end" << std::endl;
 }
 

@@ -288,10 +288,10 @@ HWTEST_F(DSchedSoftbusSessionTest, GetPeerDeviceId_001, TestSize.Level3)
 HWTEST_F(DSchedSoftbusSessionTest, CheckUnPackBuffer_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedSoftbusSessionTest CheckUnPackBuffer_001 begin" << std::endl;
-    ASSERT_NE(softbusSessionTest_, nullptr);
     SessionInfo info = {0, MYDEVIDEID, PEERDEVICEID, SESSIONNAME, false};
     DSchedSoftbusSession::SessionDataHeader headerPara;
     softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>(info);
+    ASSERT_NE(softbusSessionTest_, nullptr);
     softbusSessionTest_->isWaiting_ = false;
     int32_t ret = softbusSessionTest_->CheckUnPackBuffer(headerPara);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -312,10 +312,10 @@ HWTEST_F(DSchedSoftbusSessionTest, CheckUnPackBuffer_001, TestSize.Level3)
 HWTEST_F(DSchedSoftbusSessionTest, CheckUnPackBuffer_002, TestSize.Level3)
 {
     DTEST_LOG << "DSchedSoftbusSessionTest CheckUnPackBuffer_002 begin" << std::endl;
-    ASSERT_NE(softbusSessionTest_, nullptr);
     SessionInfo info = {0, MYDEVIDEID, PEERDEVICEID, SESSIONNAME, false};
     DSchedSoftbusSession::SessionDataHeader headerPara = {0, 0, 0, SEQ_1, 0, SEQ_2, TOTALLEN_1};
     softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>(info);
+    ASSERT_NE(softbusSessionTest_, nullptr);
     softbusSessionTest_->nowSeq_ = SEQ_1;
     softbusSessionTest_->nowSubSeq_ = SEQ_2;
     softbusSessionTest_->isWaiting_ = true;
@@ -339,10 +339,10 @@ HWTEST_F(DSchedSoftbusSessionTest, CheckUnPackBuffer_002, TestSize.Level3)
 HWTEST_F(DSchedSoftbusSessionTest, CheckUnPackBuffer_003, TestSize.Level3)
 {
     DTEST_LOG << "DSchedSoftbusSessionTest CheckUnPackBuffer_003 begin" << std::endl;
-    ASSERT_NE(softbusSessionTest_, nullptr);
     SessionInfo info = {0, MYDEVIDEID, PEERDEVICEID, SESSIONNAME, false};
     DSchedSoftbusSession::SessionDataHeader headerPara = {0, 0, 0, SEQ_1, 0, SEQ_2, TOTALLEN_1};
     softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>(info);
+    ASSERT_NE(softbusSessionTest_, nullptr);
     softbusSessionTest_->nowSeq_ = SEQ_1;
     softbusSessionTest_->nowSubSeq_ = SEQ_1;
     softbusSessionTest_->totalLen_ = TOTALLEN_2;
@@ -362,9 +362,9 @@ HWTEST_F(DSchedSoftbusSessionTest, CheckUnPackBuffer_003, TestSize.Level3)
 HWTEST_F(DSchedSoftbusSessionTest, UnPackSendData_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedSoftbusSessionTest UnPackSendData_001 begin" << std::endl;
-    ASSERT_NE(softbusSessionTest_, nullptr);
     int32_t dataType = 0;
     softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
+    ASSERT_NE(softbusSessionTest_, nullptr);
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(SIZE_1);
     int32_t ret = softbusSessionTest_->UnPackSendData(buffer, dataType);
     EXPECT_NE(ret, ERR_OK);
@@ -380,9 +380,9 @@ HWTEST_F(DSchedSoftbusSessionTest, UnPackSendData_001, TestSize.Level3)
 HWTEST_F(DSchedSoftbusSessionTest, UnPackStartEndData_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedSoftbusSessionTest UnPackStartEndData_001 begin" << std::endl;
-    ASSERT_NE(softbusSessionTest_, nullptr);
     int32_t dataType = 0;
     softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
+    ASSERT_NE(softbusSessionTest_, nullptr);
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(SIZE_1);
     int32_t ret = softbusSessionTest_->UnPackStartEndData(buffer, dataType);
     EXPECT_NE(ret, ERR_OK);

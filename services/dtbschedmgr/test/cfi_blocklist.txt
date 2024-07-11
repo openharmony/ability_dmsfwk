@@ -13,3 +13,4 @@
 
 [cfi]
 type:*testing::UnitTest*
+src:*third_party/googletest/*

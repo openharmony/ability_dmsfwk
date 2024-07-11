@@ -43,7 +43,7 @@ public:
     bool isTaskDone_;
     std::mutex taskDoneLock_;
     std::condition_variable taskDoneCondition_;
-    sptr<DistributedSchedStub> distributedSchedStub_;
+    std::shared_ptr<DistributedSchedStub> distributedSchedStub_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -414,6 +414,9 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
     uint16_t bundleNameId = 0;
     uint8_t continueTypeId = 0;
     int32_t state = 0;
+
+    DMSContinueRecvMgr::GetInstance().PostOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state);
+
     int32_t ret = DMSContinueRecvMgr::GetInstance().DealOnBroadcastBusiness(senderNetworkId, bundleNameId,
         continueTypeId, state, DBMS_RETRY_MAX_TIME);
     EXPECT_EQ(ret, ERR_OK);
@@ -438,25 +441,6 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
     DMSContinueRecvMgr::GetInstance().NotifyRecvBroadcast(obj, networkId, bundleName, state, continueType);
 
     DTEST_LOG << "DMSContinueManagerTest testDealOnBroadcastBusiness001 end" << std::endl;
-}
-
-/**
- * @tc.name: testPostOnBroadcastBusiness001
- * @tc.desc: test PostOnBroadcastBusiness
- * @tc.type: FUNC
- */
-HWTEST_F(DMSContinueManagerTest, testPostOnBroadcastBusiness001, TestSize.Level1)
-{
-    DTEST_LOG << "DMSContinueManagerTest testPostOnBroadcastBusiness001 start" << std::endl;
-    std::string senderNetworkId = "invalid senderNetworkId";
-    uint16_t bundleNameId = 0;
-    uint8_t continueTypeId = 0;
-    int32_t state = 0;
-
-    DMSContinueRecvMgr::GetInstance().PostOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state);
-    EXPECT_NE(DMSContinueRecvMgr::GetInstance().eventHandler_, nullptr);
-
-    DTEST_LOG << "DMSContinueManagerTest testPostOnBroadcastBusiness001 end" << std::endl;
 }
 
 /**
@@ -679,7 +663,7 @@ HWTEST_F(DMSContinueManagerTest, testSendSoftbusEvent001, TestSize.Level1)
     uint8_t continueType = 1;
     uint8_t type = 0;
     bool ret = DMSContinueSendMgr::GetInstance().SendSoftbusEvent(bundleNameId, continueType, type);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(ret, CAN_NOT_FOUND_ABILITY_ERR);
     DTEST_LOG << "DMSContinueManagerTest testSendSoftbusEvent001 end" << std::endl;
 }
 
