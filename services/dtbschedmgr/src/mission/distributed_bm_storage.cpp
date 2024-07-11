@@ -126,6 +126,10 @@ bool DmsBmStorage::UpdatePublicRecords(const std::string &localUdid)
     Key publicKey(keyOfPublic);
     PublicRecordsInfo publicRecordsInfo;
     GetLastBundleNameId(publicRecordsInfo.maxBundleNameId);
+    if (bundleNameIdTables_.empty()) {
+        HILOGE("bundleNameIdTables_ is empty");
+        return false;
+    }
     publicRecordsInfo.maxBundleNameId =
         std::max((bundleNameIdTables_.rbegin())->first, publicRecordsInfo.maxBundleNameId);
     HILOGI("maxBundleNameId = %{public}d", publicRecordsInfo.maxBundleNameId);

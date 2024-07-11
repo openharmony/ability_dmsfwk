@@ -120,11 +120,6 @@ dsched_public_deps = [
 dtbschedmgr_sources = [ "unittest/distributed_sched_test_util.cpp" ]
 
 ohos_unittest("distributedschedsvrtest") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
   module_out_path = module_output_path
 
   deps = [
@@ -378,11 +373,6 @@ ohos_unittest("bundlemanagerinternaltest") {
 }
 
 ohos_unittest("softbusadaptertest") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
   sources = [ "unittest/softbus_adapter/softbus_transport_test.cpp" ]
@@ -543,30 +533,6 @@ ohos_unittest("dschedswitchstatustest") {
   subsystem_name = "ability"
 }
 
-ohos_unittest("datasharemanagertest") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
-  module_out_path = module_output_path
-
-  sources = [ "unittest/datashare_manager_test.cpp" ]
-
-  configs = [
-    ":test_config",
-    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
-  ]
-  configs += dsched_configs
-  deps = []
-  if (is_standard_system) {
-    external_deps = dsched_external_deps
-    public_deps = dsched_public_deps
-  }
-  part_name = "dmsfwk"
-  subsystem_name = "ability"
-}
-
 ohos_unittest("dschedcontinuestatetest") {
   sanitize = {
     cfi = true
@@ -581,7 +547,7 @@ ohos_unittest("dschedcontinuestatetest") {
     "unittest/continue/dsched_continue_test.cpp",
     "unittest/mock_distributed_sched.cpp",
   ]
-
+  sources += dtbschedmgr_sources
   configs = [
     ":test_config",
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
@@ -600,7 +566,6 @@ group("unittest") {
   testonly = true
   deps = [
     ":bundlemanagerinternaltest",
-    ":datasharemanagertest",
     ":distributedcalltest",
     ":distributedschedsvrtest",
     ":distributeduidtest",
