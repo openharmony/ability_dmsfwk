@@ -24,6 +24,7 @@
 #include "distributed_sched_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "distributed_ue.h"
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
 #include "switch_status_dependency.h"
@@ -330,6 +331,13 @@ void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
         : DmsRadar::GetInstance().NotifyDockFocused("NotifyRecvBroadcast", error);
     if (!res) {
         HILOGE("%{public}s failed", (state == INACTIVE) ? "NotifyDockUnfocused" : "NotifyDockFocused");
+    }
+    if (state != INACTIVE) {
+        std::string bName = bundleName;
+        std::string cType = continueType;
+        std::string abilityName = BundleManagerInternal::GetInstance().GetAbilityName(networkId,
+            bName, cType);
+        DmsUE::GetInstance().NotifyDockShowIcon(bundleName, abilityName, networkId, error);
     }
     if (error != ERR_NONE) {
         HILOGE("NotifyRecvBroadcast fail, error: %{public}d", error);

@@ -46,6 +46,7 @@ constexpr int32_t DMSDURATION_DSTTOSRCRPCTIME = 3;
 constexpr int32_t DMSDURATION_SAVETIME = 4;
 constexpr int32_t DMSDURATION_SRCTODSTRPCTIME = 5;
 constexpr int32_t DMSDURATION_STARTABILITY = 6;
+constexpr int32_t DMSDURATION_EMPTY_TIME = 0;
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DmsContinueTime);
@@ -414,6 +415,16 @@ void DmsContinueTime::ShowInfo(std::string& result)
         result.append("------------------------------------------------------------------------------------\n");
         nIdx++;
     }
+}
+
+int64_t DmsContinueTime::GetTotalTime()
+{
+    HILOGD("GetTotalTime start, durationInfo_.size is %{public}zu", durationInfo_.size());
+    if (durationInfo_.empty() || durationInfo_.size() < DMSDURATION_TOTALTIME) {
+        HILOGE("totalTime is not exist.");
+        return DMSDURATION_EMPTY_TIME;
+    }
+    return durationInfo_[DMSDURATION_TOTALTIME].GetEndTime() - durationInfo_[DMSDURATION_TOTALTIME].GetBeginTime();
 }
 }
 }

@@ -96,6 +96,8 @@ public:
     void AppendInfo();
     void ShowInfo(std::string& result);
 
+    int64_t GetTotalTime();
+
 private:
     bool isPull_;
     std::list<std::string> timeInfoList_;
