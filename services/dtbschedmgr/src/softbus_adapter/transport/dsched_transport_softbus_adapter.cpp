@@ -171,8 +171,7 @@ int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peer
     if (ret != ERR_OK) {
         HILOGE("client bind failed, ret: %{public}d", ret);
         Shutdown(sessionId);
-        sessionId = INVALID_SESSION_ID;
-        return REMOTE_DEVICE_BIND_ABILITY_ERR;
+        return INVALID_SESSION_ID;
     }
 
     std::string localDeviceId;
