@@ -43,7 +43,7 @@ static uint32_t g_QosTV_Param_Index = static_cast<uint32_t>(sizeof(g_qosInfo) / 
 static void OnBind(int32_t socket, PeerSocketInfo info)
 {
     std::string peerDeviceId(info.networkId);
-    DSchedTransportSoftbusAdapter::GetInstance().CreateSessionRecord(socket, peerDeviceId);
+    DSchedTransportSoftbusAdapter::GetInstance().OnBind(socket, peerDeviceId);
 }
 
 static void OnShutdown(int32_t socket, ShutdownReason reason)
@@ -118,7 +118,7 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
             for (auto iter = sessions_.begin(); iter != sessions_.end(); iter++) {
                 if (iter->second != nullptr && peerDeviceId == iter->second->GetPeerDeviceId()) {
                     HILOGI("peer device already connected");
-                    sessions_[iter->first]->OnConnect();
+                    iter->second->OnConnect();
                     return iter->first;
                 }
             }
@@ -134,6 +134,12 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
         HILOGE("Apply advance resource fail, ret: %{public}d.", ret);
         return INVALID_SESSION_ID;
     }
+
+    ret = DSchedAllConnectManager::GetInstance().PublishServiceState(peerDeviceId, "", SCM_PREPARE);
+    if (ret != ERR_OK) {
+        HILOGE("Publish prepare state fail, ret %{public}d, peerDeviceId %{public}s.",
+            ret, GetAnonymStr(peerDeviceId).c_str());
+    }
 #endif
 
     int32_t sessionId = INVALID_SESSION_ID;
@@ -147,17 +153,16 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
 int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peerDeviceId, int32_t &sessionId)
 {
     int32_t ret = ERR_OK;
-#ifdef DMSFWK_ALL_CONNECT_MGR
-    ret = DSchedAllConnectManager::GetInstance().PublishServiceState(peerDeviceId, "", SCM_PREPARE);
-    if (ret != ERR_OK) {
-        HILOGE("Publish connect idle state fail, peerDeviceId: %{public}s, socket sessionId: %{public}d.",
-            GetAnonymStr(peerDeviceId).c_str(), sessionId);
-    }
-#endif
-
     sessionId = CreateClientSocket(peerDeviceId);
     if (sessionId <= 0) {
         HILOGE("create socket failed, sessionId: %{public}d.", sessionId);
+#ifdef DMSFWK_ALL_CONNECT_MGR
+        ret = DSchedAllConnectManager::GetInstance().PublishServiceState(peerDeviceId, "", SCM_IDLE);
+        if (ret != ERR_OK) {
+            HILOGE("Publish idle state fail, ret %{public}d, peerDeviceId %{public}s, sessionId %{public}d.",
+                ret, GetAnonymStr(peerDeviceId).c_str(), sessionId);
+        }
+#endif
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
 
@@ -165,37 +170,28 @@ int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peer
     HILOGD("SetFirstCallerTokenID callingTokenId: %{public}d, ret: %{public}d", callingTokenId_, ret);
     callingTokenId_ = 0;
 
-    HILOGI("bind begin");
-    ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
-    HILOGI("bind end");
-    if (ret != ERR_OK) {
-        HILOGE("client bind failed, ret: %{public}d", ret);
-        Shutdown(sessionId);
-        sessionId = INVALID_SESSION_ID;
-        return ret;
-    }
+    do {
+        HILOGI("bind begin");
+        ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+        HILOGI("bind end");
+        if (ret != ERR_OK) {
+            HILOGE("client bind failed, ret: %{public}d", ret);
+            break;
+        }
 
-    std::string localDeviceId;
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
-        HILOGE("GetLocalDeviceId failed");
-        Shutdown(sessionId);
-        sessionId = INVALID_SESSION_ID;
-        return GET_LOCAL_DEVICE_ERR;
-    }
-    {
-        std::lock_guard<std::mutex> sessionLock(sessionMutex_);
-        SessionInfo info = { sessionId, localDeviceId, peerDeviceId, SOCKET_DMS_SESSION_NAME, false };
-        auto session = std::make_shared<DSchedSoftbusSession>(info);
-        sessions_[sessionId] = session;
-    }
-#ifdef DMSFWK_ALL_CONNECT_MGR
-    ret = DSchedAllConnectManager::GetInstance().PublishServiceState(peerDeviceId, "", SCM_CONNECTED);
+        ret = CreateSessionRecord(sessionId, peerDeviceId, false);
+        if (ret != ERR_OK) {
+            HILOGE("Client create session record fail, ret %{public}d, peerDeviceId %{public}s, sessionId %{public}d.",
+                ret, GetAnonymStr(peerDeviceId).c_str(), sessionId);
+            break;
+        }
+    } while (false);
+
     if (ret != ERR_OK) {
-        HILOGE("Publish connect idle state fail, peerDeviceId: %{public}s, socket sessionId: %{public}d.",
-            GetAnonymStr(peerDeviceId).c_str(), sessionId);
+        ShutdownSession(peerDeviceId, sessionId);
+        sessionId = INVALID_SESSION_ID;
     }
-#endif
-    return ERR_OK;
+    return ret;
 }
 
 int32_t DSchedTransportSoftbusAdapter::CreateClientSocket(const std::string &peerDeviceId)
@@ -213,22 +209,31 @@ int32_t DSchedTransportSoftbusAdapter::CreateClientSocket(const std::string &pee
     return sessionId;
 }
 
-int32_t DSchedTransportSoftbusAdapter::CreateSessionRecord(int32_t sessionId, const std::string &peerDeviceId)
+int32_t DSchedTransportSoftbusAdapter::CreateSessionRecord(int32_t sessionId, const std::string &peerDeviceId,
+    bool isServer)
 {
     std::string localDeviceId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
         HILOGE("GetLocalDeviceId failed");
-        Shutdown(sessionId);
-        return INVALID_SESSION_ID;
+        ShutdownSession(peerDeviceId, sessionId);
+        return GET_LOCAL_DEVICE_ERR;
     }
     {
         std::lock_guard<std::mutex> sessionLock(sessionMutex_);
         std::string sessionName = SOCKET_DMS_SESSION_NAME;
-        SessionInfo info = { sessionId, localDeviceId, peerDeviceId, sessionName, true };
+        SessionInfo info = { sessionId, localDeviceId, peerDeviceId, sessionName, isServer };
         auto session = std::make_shared<DSchedSoftbusSession>(info);
         sessions_[sessionId] = session;
     }
-    return sessionId;
+
+#ifdef DMSFWK_ALL_CONNECT_MGR
+    int32_t ret = DSchedAllConnectManager::GetInstance().PublishServiceState(peerDeviceId, "", SCM_CONNECTED);
+    if (ret != ERR_OK) {
+        HILOGE("Publish connected state fail, ret %{public}d, peerDeviceId %{public}s, sessionId %{public}d.",
+            ret, GetAnonymStr(peerDeviceId).c_str(), sessionId);
+    }
+#endif
+    return ERR_OK;
 }
 
 void DSchedTransportSoftbusAdapter::DisconnectDevice(const std::string &peerDeviceId)
@@ -245,12 +250,24 @@ void DSchedTransportSoftbusAdapter::DisconnectDevice(const std::string &peerDevi
     if (sessionId != 0 && sessions_[sessionId] != nullptr && sessions_[sessionId]->OnDisconnect()) {
         HILOGI("peer %{public}s shutdown, socket sessionId: %{public}d.",
             GetAnonymStr(sessions_[sessionId]->GetPeerDeviceId()).c_str(), sessionId);
-        Shutdown(sessionId);
+        ShutdownSession(peerDeviceId, sessionId);
         sessions_.erase(sessionId);
         NotifyListenersSessionShutdown(sessionId, true);
     }
     HILOGI("finish, socket session id: %{public}d", sessionId);
     return;
+}
+
+void DSchedTransportSoftbusAdapter::ShutdownSession(const std::string &peerDeviceId, int32_t sessionId)
+{
+    Shutdown(sessionId);
+#ifdef DMSFWK_ALL_CONNECT_MGR
+    int32_t ret = DSchedAllConnectManager::GetInstance().PublishServiceState(peerDeviceId, "", SCM_IDLE);
+    if (ret != ERR_OK) {
+        HILOGE("Publish idle state fail, ret %{public}d, peerDeviceId %{public}s, sessionId %{public}d.",
+            ret, GetAnonymStr(peerDeviceId).c_str(), sessionId);
+    }
+#endif
 }
 
 bool DSchedTransportSoftbusAdapter::GetSessionIdByDeviceId(const std::string &peerDeviceId, int32_t &sessionId)
@@ -265,6 +282,15 @@ bool DSchedTransportSoftbusAdapter::GetSessionIdByDeviceId(const std::string &pe
     return false;
 }
 
+void DSchedTransportSoftbusAdapter::OnBind(int32_t sessionId, const std::string &peerDeviceId)
+{
+    int32_t ret = CreateSessionRecord(sessionId, peerDeviceId, true);
+    if (ret != ERR_OK) {
+        HILOGE("Service create session record fail, ret %{public}d, peerDeviceId %{public}s, sessionId %{public}d.",
+            ret, GetAnonymStr(peerDeviceId).c_str(), sessionId);
+    }
+}
+
 void DSchedTransportSoftbusAdapter::OnShutdown(int32_t sessionId, bool isSelfcalled)
 {
     std::string peerDeviceId;
@@ -277,18 +303,9 @@ void DSchedTransportSoftbusAdapter::OnShutdown(int32_t sessionId, bool isSelfcal
         peerDeviceId = sessions_[sessionId]->GetPeerDeviceId();
         HILOGI("peerDeviceId: %{public}s shutdown, socket sessionId: %{public}d.",
             GetAnonymStr(peerDeviceId).c_str(), sessionId);
-        Shutdown(sessionId);
+        ShutdownSession(peerDeviceId, sessionId);
         sessions_.erase(sessionId);
     }
-
-#ifdef DMSFWK_ALL_CONNECT_MGR
-    int32_t ret = DSchedAllConnectManager::GetInstance().PublishServiceState(peerDeviceId, "", SCM_IDLE);
-    if (ret != ERR_OK) {
-        HILOGE("Publish connect idle state fail, peerDeviceId: %{public}s, socket sessionId: %{public}d.",
-            GetAnonymStr(peerDeviceId).c_str(), sessionId);
-    }
-#endif
-
     NotifyListenersSessionShutdown(sessionId, isSelfcalled);
 }
 
@@ -314,11 +331,10 @@ int32_t DSchedTransportSoftbusAdapter::ReleaseChannel()
     {
         std::lock_guard<std::mutex> sessionLock(sessionMutex_);
         for (auto iter = sessions_.begin(); iter != sessions_.end(); iter++) {
-            if (iter->second != nullptr) {
-                HILOGI("shutdown client: %{public}s, socket sessionId: %{public}d.",
-                    GetAnonymStr(iter->second->GetPeerDeviceId()).c_str(), iter->first);
-            }
-            Shutdown(iter->first);
+            std::string peerDeviceId = (iter->second != nullptr) ? iter->second->GetPeerDeviceId() : "";
+            HILOGI("shutdown client: %{public}s, socket sessionId: %{public}d.",
+                GetAnonymStr(peerDeviceId).c_str(), iter->first);
+            ShutdownSession(peerDeviceId, iter->first);
         }
         sessions_.clear();
     }

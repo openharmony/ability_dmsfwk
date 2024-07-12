@@ -405,17 +405,16 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, InitChannel_001, TestSize.Level3)
 }
 
 /**
- * @tc.name: CreateSessionRecord_001
- * @tc.desc: call CreateSessionRecord
+ * @tc.name: OnBind_001
+ * @tc.desc: call OnBind with get local
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedTransportSoftbusAdapterTest, CreateSessionRecord_001, TestSize.Level3)
+HWTEST_F(DSchedTransportSoftbusAdapterTest, OnBind_001, TestSize.Level3)
 {
-    DTEST_LOG << "DSchedTransportSoftbusAdapterTest CreateSessionRecord_001 begin" << std::endl;
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest OnBind_001 begin" << std::endl;
     int32_t sessionId = 0;
-    int32_t ret = DSchedTransportSoftbusAdapter::GetInstance().CreateSessionRecord(sessionId, PEERDEVICEID);
-    EXPECT_EQ(ret, -1);
-    DTEST_LOG << "DSchedTransportSoftbusAdapterTest CreateSessionRecord_001 end" << std::endl;
+    DSchedTransportSoftbusAdapter::GetInstance().OnBind(sessionId, PEERDEVICEID);
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest OnBind_001 end" << std::endl;
 }
 
 /**

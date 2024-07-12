@@ -52,22 +52,24 @@ public:
     int32_t ReleaseChannel();
     int32_t SendData(int32_t sessionId, int32_t dataType, std::shared_ptr<DSchedDataBuffer> dataBuffer);
     int32_t SendBytesBySoftbus(int32_t sessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer);
-    int32_t CreateSessionRecord(int32_t sessionId, const std::string &peerDeviceId);
+    void OnBind(int32_t sessionId, const std::string &peerDeviceId);
     void OnShutdown(int32_t sessionId, bool isSelfCalled);
     void OnBytes(int32_t sessionId, const void *data, uint32_t dataLen);
     void OnDataReady(int32_t sessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer, uint32_t dataType);
     void RegisterListener(int32_t serviceType, std::shared_ptr<IDataListener> listener);
-    void NotifyListenersSessionShutdown(int32_t sessionId, bool isSelfCalled);
     void UnregisterListener(int32_t serviceType, std::shared_ptr<IDataListener> listener);
     void SetCallingTokenId(int32_t callingTokenId);
+    bool GetSessionIdByDeviceId(const std::string &peerDeviceId, int32_t &sessionId);
 
 private:
     DSchedTransportSoftbusAdapter();
     ~DSchedTransportSoftbusAdapter();
     int32_t CreateServerSocket();
     int32_t CreateClientSocket(const std::string &peerDeviceId);
+    int32_t CreateSessionRecord(int32_t sessionId, const std::string &peerDeviceId, bool isServer);
     int32_t AddNewPeerSession(const std::string &peerDeviceId, int32_t &sessionId);
-    bool GetSessionIdByDeviceId(const std::string &peerDeviceId, int32_t &sessionId);
+    void ShutdownSession(const std::string &peerDeviceId, int32_t sessionId);
+    void NotifyListenersSessionShutdown(int32_t sessionId, bool isSelfCalled);
 
 private:
     std::map<int32_t, std::shared_ptr<DSchedSoftbusSession>> sessions_;
