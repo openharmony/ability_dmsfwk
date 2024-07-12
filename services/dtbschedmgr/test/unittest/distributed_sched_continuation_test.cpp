@@ -77,6 +77,10 @@ void DSchedContinuationTest::DeviceInitCallBack::OnRemoteDied()
 sptr<IRemoteObject> DSchedContinuationTest::GetDSchedService() const
 {
     sptr<IRemoteObject> dsched(new MockDistributedSched());
+    if (dsched == nullptr) {
+        DTEST_LOG << "GetDSchedService dsched is null" << std::endl;
+        return nullptr;
+    }
     return dsched;
 }
 
