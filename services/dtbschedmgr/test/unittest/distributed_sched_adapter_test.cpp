@@ -284,8 +284,8 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessCalleeDied_002, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, ProcessCalleeDied_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCalleeDied_003 begin" << std::endl;
-    const sptr<IRemoteObject> connect(new MockRemoteStub());
     ASSERT_NE(distributedSchedAdapter_, nullptr);
+    const sptr<IRemoteObject> connect(new MockRemoteStub());
     distributedSchedAdapter_->ProcessCalleeDied(connect);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCalleeDied_003 end" << std::endl;
@@ -419,8 +419,8 @@ HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_001, TestSize.Leve
 HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_002, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest RegisterMissionListener_002 begin" << std::endl;
-    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const sptr<IRemoteObject> connect(new MockRemoteStub());
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     distributedSchedAdapter_->ProcessCallResult(connect, nullptr);
     const sptr<DistributedMissionChangeListener> listener(new DistributedMissionChangeListener());
     int32_t result = distributedSchedAdapter_->RegisterMissionListener(listener);
@@ -437,8 +437,8 @@ HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_002, TestSize.Leve
 HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_001, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest UnRegisterMissionListener_001 begin" << std::endl;
-    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const sptr<IRemoteObject> connect(new MockRemoteStub());
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     distributedSchedAdapter_->ProcessCallResult(nullptr, connect);
     const sptr<DistributedMissionChangeListener> listener = nullptr;
     int32_t result = distributedSchedAdapter_->UnRegisterMissionListener(listener);
@@ -455,8 +455,8 @@ HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_001, TestSize.Le
 HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_002, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest UnRegisterMissionListener_002 begin" << std::endl;
-    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const sptr<IRemoteObject> connect(new MockRemoteStub());
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     distributedSchedAdapter_->ProcessCallResult(connect, connect);
     const sptr<DistributedMissionChangeListener> listener(new DistributedMissionChangeListener());
     int32_t result = distributedSchedAdapter_->UnRegisterMissionListener(listener);
