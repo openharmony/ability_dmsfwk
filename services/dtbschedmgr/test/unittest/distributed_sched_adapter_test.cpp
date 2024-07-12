@@ -284,8 +284,8 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessCalleeDied_002, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, ProcessCalleeDied_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCalleeDied_003 begin" << std::endl;
-    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const sptr<IRemoteObject> connect(new MockRemoteStub());
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     distributedSchedAdapter_->ProcessCalleeDied(connect);
     EXPECT_NE(distributedSchedAdapter_->dmsAdapterHandler_, nullptr);
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCalleeDied_003 end" << std::endl;
