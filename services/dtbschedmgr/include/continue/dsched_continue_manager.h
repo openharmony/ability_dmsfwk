@@ -46,7 +46,8 @@ public:
         const sptr<IRemoteObject> &callback, const OHOS::AAFwk::WantParams &wantParams);
     int32_t StartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId, int32_t callerUid, int32_t status,
         uint32_t accessToken);
-    int32_t NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId, bool isSuccess);
+    int32_t NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId, bool isSuccess,
+        const std::string &callerBundleName);
     int32_t OnContinueEnd(const DSchedContinueInfo& info);
 
     void Init();
@@ -71,7 +72,8 @@ private:
         const OHOS::AAFwk::WantParams& wantParams);
     void HandleStartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId, int32_t callerUid,
         int32_t status, uint32_t accessToken);
-    void HandleNotifyCompleteContinuation(const std::u16string& devId, int32_t missionId, bool isSuccess);
+    void HandleNotifyCompleteContinuation(const std::u16string& devId, int32_t missionId, bool isSuccess,
+        const std::string &callerBundleName);
     void HandleContinueEnd(const DSchedContinueInfo& info);
     void HandleDataRecv(int32_t sessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer);
     void NotifyContinueDataRecv(int32_t sessionId, int32_t command, const std::string& jsonStr,
