@@ -335,6 +335,7 @@ HWTEST_F(DistributedSchedAdapterTest, ProcessCallerDied_002, TestSize.Level3)
 HWTEST_F(DistributedSchedAdapterTest, ProcessCallerDied_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedAdapterTest ProcessCallerDied_003 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const sptr<IRemoteObject> connect(new MockRemoteStub());
     int32_t deviceType = 0;
     distributedSchedAdapter_->ProcessCallerDied(connect, deviceType);
@@ -418,6 +419,7 @@ HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_001, TestSize.Leve
 HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_002, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest RegisterMissionListener_002 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const sptr<IRemoteObject> connect(new MockRemoteStub());
     distributedSchedAdapter_->ProcessCallResult(connect, nullptr);
     const sptr<DistributedMissionChangeListener> listener(new DistributedMissionChangeListener());
@@ -435,6 +437,7 @@ HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_002, TestSize.Leve
 HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_001, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest UnRegisterMissionListener_001 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const sptr<IRemoteObject> connect(new MockRemoteStub());
     distributedSchedAdapter_->ProcessCallResult(nullptr, connect);
     const sptr<DistributedMissionChangeListener> listener = nullptr;
@@ -452,6 +455,7 @@ HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_001, TestSize.Le
 HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_002, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedAdapterTest UnRegisterMissionListener_002 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
     const sptr<IRemoteObject> connect(new MockRemoteStub());
     distributedSchedAdapter_->ProcessCallResult(connect, connect);
     const sptr<DistributedMissionChangeListener> listener(new DistributedMissionChangeListener());

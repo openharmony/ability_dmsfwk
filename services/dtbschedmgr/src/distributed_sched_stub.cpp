@@ -592,8 +592,8 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
 
     std::string srcBundleName;
     std::string continueType;
-    PARCEL_READ_HELPER(data, String, srcBundleName);
-    PARCEL_READ_HELPER(data, String, continueType);
+    PARCEL_READ_HELPER_NORET(data, String, srcBundleName);
+    PARCEL_READ_HELPER_NORET(data, String, continueType);
     if (continueType == "") {
         continueType = DMSContinueRecvMgr::GetInstance().GetContinueType(bundleName);
     }

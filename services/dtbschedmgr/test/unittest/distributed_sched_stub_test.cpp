@@ -1206,7 +1206,7 @@ HWTEST_F(DistributedSchedStubTest, RegisterOnListenerInner_002, TestSize.Level3)
     DTEST_LOG << "DistributedSchedStubTest RegisterMissionListenerInner_003 begin" << std::endl;
 
     ASSERT_NE(distributedSchedStub_, nullptr);
-    
+
     MessageParcel data;
     MessageParcel reply;
 

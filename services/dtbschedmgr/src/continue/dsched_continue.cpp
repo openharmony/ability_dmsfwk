@@ -451,7 +451,7 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
 
     std::string peerDeviceId = (direction_ == CONTINUE_SOURCE) ?
         continueInfo_.sinkDeviceId_ : continueInfo_.sourceDeviceId_;
-    
+
     std::string peerUdid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(peerDeviceId);
     DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid);
 
