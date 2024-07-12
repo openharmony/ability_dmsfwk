@@ -292,7 +292,6 @@ bool DistributedSchedService::Init()
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     if (!AddSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID)) {
         HILOGE("Add System Ability Listener failed!");
-        return false;
     }
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().InitDataStorage();
