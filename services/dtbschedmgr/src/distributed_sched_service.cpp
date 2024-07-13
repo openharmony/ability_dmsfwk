@@ -1740,7 +1740,7 @@ int32_t DistributedSchedService::TryStartRemoteAbilityByCall(const OHOS::AAFwk::
     AAFwk::Want remoteWant = want;
     int32_t connectToken = SaveConnectToken(want, connect);
     remoteWant.SetParam(DMS_CONNECT_TOKEN, connectToken);
-    HILOGD("connectToken is %{public}d", connectToken);
+    HILOGD("connectToken is %{public}s", GetAnonymStr(std::to_string(connectToken)).c_str());
     int32_t result = remoteDms->StartAbilityByCallFromRemote(remoteWant, connect, callerInfo, accountInfo);
     HILOGD("[PerformanceTest] TryStartRemoteAbilityByCall RPC end");
     if (result == ERR_OK) {
@@ -2332,8 +2332,8 @@ int32_t DistributedSchedService::ConnectAbilityFromRemote(const OHOS::AAFwk::Wan
         HILOGE("ConnectAbilityFromRemote connect is null");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
-    HILOGD("ConnectAbilityFromRemote uid is %{public}d, pid is %{public}d, AccessTokenID is %{public}u",
-        callerInfo.uid, callerInfo.pid, callerInfo.accessToken);
+    HILOGD("ConnectAbilityFromRemote uid is %{public}d, pid is %{public}d, AccessTokenID is %{public}s",
+        callerInfo.uid, callerInfo.pid, GetAnonymStr(std::to_string(callerInfo.accessToken)).c_str());
     std::string localDeviceId;
     std::string destinationDeviceId = want.GetElement().GetDeviceID();
     if (!GetLocalDeviceId(localDeviceId) ||
@@ -3288,7 +3288,7 @@ bool DistributedSchedService::RegisterAppStateObserver(const OHOS::AAFwk::Want& 
 {
     HILOGD("register app state observer called");
     int32_t connectToken = want.GetIntParam(DMS_CONNECT_TOKEN, DEFAULT_DMS_CONNECT_TOKEN);
-    HILOGD("Get connectToken = %{private}d", connectToken);
+    HILOGD("Get connectToken = %{private}s", GetAnonymStr(std::to_string(connectToken)).c_str());
     if (connectToken == DEFAULT_DMS_CONNECT_TOKEN) {
         return false;
     }
@@ -3407,7 +3407,7 @@ int32_t DistributedSchedService::NotifyStateChanged(int32_t abilityState, AppExe
             }
         }
     }
-    HILOGD("Get connectToken = %{private}d", connectToken);
+    HILOGD("Get connectToken = %{private}s", GetAnonymStr(std::to_string(connectToken)).c_str());
     std::string localDeviceId;
     if (!GetLocalDeviceId(localDeviceId) || !CheckDeviceId(localDeviceId, srcDeviceId)) {
         HILOGE("check deviceId failed");
@@ -3425,7 +3425,7 @@ int32_t DistributedSchedService::NotifyStateChanged(int32_t abilityState, AppExe
 int32_t DistributedSchedService::NotifyStateChangedFromRemote(int32_t abilityState, int32_t connectToken,
     const AppExecFwk::ElementName& element)
 {
-    HILOGD("Get connectToken = %{private}d", connectToken);
+    HILOGD("Get connectToken = %{private}s", GetAnonymStr(std::to_string(connectToken)).c_str());
     sptr<IRemoteObject> connect;
     {
         std::lock_guard<std::mutex> autoLock(callLock_);
@@ -3468,8 +3468,9 @@ int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& 
     }
     HILOGD("target ability info bundleName:%{public}s abilityName:%{public}s visible:%{public}d",
         targetAbility.bundleName.c_str(), targetAbility.name.c_str(), targetAbility.visible);
-    HILOGD("callerType:%{public}d accountType:%{public}d callerUid:%{public}d AccessTokenID:%{public}u",
-        callerInfo.callerType, accountInfo.accountType, callerInfo.uid, callerInfo.accessToken);
+    HILOGD("callerType:%{public}d accountType:%{public}d callerUid:%{public}d AccessTokenID:%{public}s",
+        callerInfo.callerType, accountInfo.accountType, callerInfo.uid,
+        GetAnonymStr(std::to_string(callerInfo.accessToken)).c_str());
     if (flag == START_PERMISSION) {
         HILOGD("start CheckStartPermission");
         return permissionInstance.CheckStartPermission(want, callerInfo, accountInfo, targetAbility);

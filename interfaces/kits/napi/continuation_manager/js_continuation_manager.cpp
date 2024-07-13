@@ -19,6 +19,7 @@
 
 #include "base/continuationmgr_log.h"
 #include "distributed_ability_manager_client.h"
+#include "distributed_sched_utils.h"
 #include "js_runtime_utils.h"
 #include "napi_common_util.h"
 #include "napi_error_code.h"
@@ -787,14 +788,15 @@ bool JsContinuationManager::IsCallbackValid(napi_env env, napi_value listenerObj
 bool JsContinuationManager::IsCallbackRegistered(int32_t token, const std::string& cbType)
 {
     if (jsCbMap_.empty() || jsCbMap_.find(token) == jsCbMap_.end()) {
-        HILOGE("token %{public}d not registered callback!", token);
+        HILOGE("token %{public}s not registered callback!", GetAnonymStr(std::to_string(token)).c_str());
         return false;
     }
     if (jsCbMap_[token].empty() || jsCbMap_[token].find(cbType) == jsCbMap_[token].end()) {
         HILOGE("cbType %{public}s not registered callback!", cbType.c_str());
         return false;
     }
-    HILOGI("callback already registered, token: %{public}d, cbType %{public}s", token, cbType.c_str());
+    HILOGI("callback already registered, token: %{public}s, cbType %{public}s",
+        GetAnonymStr(std::to_string(token)).c_str(), cbType.c_str());
     return true;
 }
 

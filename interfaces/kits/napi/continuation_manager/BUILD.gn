@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
 config("continuationmanager_napi_public_config") {
   visibility = [ ":*" ]
@@ -46,6 +47,7 @@ ohos_shared_library("continuationmanager_napi") {
   ]
 
   deps = [
+    "${dms_path}/common:distributed_sched_utils",
     "../../../innerkits/common:common_sdk",
     "../../../innerkits/continuation_manager:continuation_manager",
   ]
@@ -56,6 +58,7 @@ ohos_shared_library("continuationmanager_napi") {
     "ability_runtime:extensionkit_native",
     "ability_runtime:napi_common",
     "ability_runtime:runtime",
+    "cJSON:cjson",
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",

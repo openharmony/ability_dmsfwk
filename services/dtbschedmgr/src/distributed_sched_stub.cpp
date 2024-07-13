@@ -255,7 +255,8 @@ int32_t DistributedSchedStub::StartRemoteAbilityInner(MessageParcel& data, Messa
     PARCEL_READ_HELPER(data, Int32, requestCode);
     uint32_t accessToken = 0;
     PARCEL_READ_HELPER(data, Uint32, accessToken);
-    HILOGD("get callerUid = %{public}d, AccessTokenID = %{private}u", callerUid, accessToken);
+    HILOGD("get callerUid = %{public}d, AccessTokenID = %{private}s", callerUid,
+        GetAnonymStr(std::to_string(accessToken)).c_str());
     DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
     int32_t result = StartRemoteAbility(*want, callerUid, requestCode, accessToken);
     ReportEvent(*want, BehaviorEvent::START_REMOTE_ABILITY, result, callerUid);
@@ -420,7 +421,7 @@ void DistributedSchedStub::SaveExtraInfo(const nlohmann::json& extraInfoJson, Ca
         extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN].is_number_unsigned()) {
         uint32_t accessToken = extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN];
         callerInfo.accessToken = accessToken;
-        HILOGD("parse extra info, accessTokenID = %u", accessToken);
+        HILOGD("parse extra info, accessTokenID = %s", GetAnonymStr(std::to_string(accessToken)).c_str());
     }
 
     if (extraInfoJson.find(DMS_VERSION_ID) != extraInfoJson.end() && extraInfoJson[DMS_VERSION_ID].is_string()) {
@@ -648,7 +649,7 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
     int32_t status = data.ReadInt32();
     uint32_t accessToken = 0;
     PARCEL_READ_HELPER(data, Uint32, accessToken);
-    HILOGI("get AccessTokenID = %{public}u", accessToken);
+    HILOGI("get AccessTokenID = %{public}s", GetAnonymStr(std::to_string(accessToken)).c_str());
     DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
 
     // set in ability runtime, used to seperate callings from FA or stage model
@@ -756,8 +757,8 @@ int32_t DistributedSchedStub::ConnectRemoteAbilityInner(MessageParcel& data, Mes
     PARCEL_READ_HELPER(data, Int32, callerPid);
     uint32_t accessToken = 0;
     PARCEL_READ_HELPER(data, Uint32, accessToken);
-    HILOGD("get callerUid = %{public}d, callerPid = %{public}d, AccessTokenID = %{private}u", callerUid, callerPid,
-        accessToken);
+    HILOGD("get callerUid = %{public}d, callerPid = %{public}d, AccessTokenID = %{private}s", callerUid, callerPid,
+        GetAnonymStr(std::to_string(accessToken)).c_str());
     int32_t result = ConnectRemoteAbility(*want, connect, callerUid, callerPid, accessToken);
     ReportEvent(*want, BehaviorEvent::CONNECT_REMOTE_ABILITY, result, callerUid);
     HILOGI("result = %{public}d", result);
@@ -776,7 +777,8 @@ int32_t DistributedSchedStub::DisconnectRemoteAbilityInner(MessageParcel& data, 
     PARCEL_READ_HELPER(data, Int32, callerUid);
     uint32_t accessToken = 0;
     PARCEL_READ_HELPER(data, Uint32, accessToken);
-    HILOGD("get callerUid = %{public}d, AccessTokenID = %{private}u", callerUid, accessToken);
+    HILOGD("get callerUid = %{public}d, AccessTokenID = %{private}s", callerUid,
+        GetAnonymStr(std::to_string(accessToken)).c_str());
     int32_t result = DisconnectRemoteAbility(connect, callerUid, accessToken);
     BehaviorEventParam eventParam = { EventCallingType::LOCAL, BehaviorEvent::DISCONNECT_REMOTE_ABILITY, result };
     DmsHiSysEventReport::ReportBehaviorEvent(eventParam);
@@ -1586,7 +1588,8 @@ int32_t DistributedSchedStub::StopRemoteExtensionAbilityInner(MessageParcel& dat
     PARCEL_READ_HELPER(data, Uint32, accessToken);
     int32_t serviceType = 0;
     PARCEL_READ_HELPER(data, Int32, serviceType);
-    HILOGD("get callerUid = %{private}d, AccessTokenID = %{private}u", callerUid, accessToken);
+    HILOGD("get callerUid = %{private}d, AccessTokenID = %{private}s", callerUid,
+        GetAnonymStr(std::to_string(accessToken)).c_str());
     auto result = StopRemoteExtensionAbility(*want, callerUid, accessToken, serviceType);
     HILOGD("StartRemoteAbilityInner result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
@@ -1626,7 +1629,7 @@ int32_t DistributedSchedStub::StopExtensionAbilityFromRemoteInner(MessageParcel&
         extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN].is_number_unsigned()) {
         uint32_t accessToken = extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN];
         callerInfo.accessToken = accessToken;
-        HILOGD("parse extra info, accessTokenID = %{private}u", accessToken);
+        HILOGD("parse extra info, accessTokenID = %{private}s", GetAnonymStr(std::to_string(accessToken)).c_str());
     }
     auto result = StopExtensionAbilityFromRemote(*want, callerInfo, accountInfo, serviceType);
     HILOGD("result = %{public}d", result);

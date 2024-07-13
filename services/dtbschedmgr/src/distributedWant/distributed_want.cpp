@@ -912,6 +912,9 @@ DistributedWant* DistributedWant::ParseUri(const std::string& uri)
         }
         std::string content = uri.substr(begin, pos - begin);
         if (content.compare("PICK") == 0) {
+            if (want != nullptr) {
+                delete want;
+            }
             want = new (std::nothrow) DistributedWant();
             if (want == nullptr) {
                 delete baseWant;
@@ -1677,7 +1680,7 @@ DistributedWant* DistributedWant::FromString(std::string& string)
         return nullptr;
     }
 
-    nlohmann::json wantJson = nlohmann::json::parse(string);
+    nlohmann::json wantJson = nlohmann::json::parse(string, nullptr, false);
     if (wantJson.is_discarded()) {
         return nullptr;
     }
