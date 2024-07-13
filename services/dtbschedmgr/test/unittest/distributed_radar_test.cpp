@@ -21,6 +21,10 @@ using namespace testing::ext;
 namespace OHOS {
 namespace DistributedSchedule {
 
+namespace {
+    const std::string DEVICE_ID = "DeviceId";
+}
+
 void DistributedRadarTest::SetUpTestCase()
 {
     DTEST_LOG << "DistributedRadarTest::SetUpTestCase" << std::endl;
@@ -530,7 +534,7 @@ HWTEST_F(DistributedRadarTest, NotifyDockUnfocused_002, TestSize.Level3)
 HWTEST_F(DistributedRadarTest, ClickIconDmsContinue_001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedRadarTest ClickIconDmsContinue_001 begin" << std::endl;
-    bool ret = DmsRadar::GetInstance().ClickIconDmsContinue(FUNC, ERR_OK, "11111111");
+    bool ret = DmsRadar::GetInstance().ClickIconDmsContinue(FUNC, ERR_OK, DEVICE_ID);
     EXPECT_EQ(ret, true);
     DTEST_LOG << "DistributedRadarTest ClickIconDmsContinue_001 end" << std::endl;
 }
@@ -543,7 +547,7 @@ HWTEST_F(DistributedRadarTest, ClickIconDmsContinue_001, TestSize.Level3)
 HWTEST_F(DistributedRadarTest, ClickIconDmsContinue_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedRadarTest ClickIconDmsContinue_002 begin" << std::endl;
-    bool ret = DmsRadar::GetInstance().ClickIconDmsContinue(FUNC, ERR_NO, "11111111");
+    bool ret = DmsRadar::GetInstance().ClickIconDmsContinue(FUNC, ERR_NO, DEVICE_ID);
     EXPECT_EQ(ret, true);
     DTEST_LOG << "DistributedRadarTest ClickIconDmsContinue_002 end" << std::endl;
 }
