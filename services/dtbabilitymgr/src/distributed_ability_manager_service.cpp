@@ -238,7 +238,7 @@ int32_t DistributedAbilityManagerService::RegisterDeviceSelectionCallback(
             callbackMap_[token] = std::move(notifierInfo);
             notifier->AddDeathRecipient(notifierDeathRecipient_);
         }
-        HILOGD("token %{public}d register success", token);
+        HILOGD("token register success");
     }
     return ERR_OK;
 }
@@ -268,7 +268,7 @@ int32_t DistributedAbilityManagerService::UnregisterDeviceSelectionCallback(int3
             }
         }
     }
-    HILOGD("token %{public}d unregister success", token);
+    HILOGD("token unregister success");
     return ERR_OK;
 }
 
@@ -336,7 +336,7 @@ int32_t DistributedAbilityManagerService::StartDeviceManager(
     }
     int32_t errCode = ConnectAbility(token, continuationExtraParams);
     if (errCode != ERR_OK) {
-        HILOGE("token %{public}d connect to app failed", token);
+        HILOGE("token connect to app failed");
         return CONNECT_ABILITY_FAILED;
     }
     // 2. sendRequest data(token, filter, dmsStub, connectStatusInfo) to app by app proxy when connect callback.
@@ -508,7 +508,7 @@ bool DistributedAbilityManagerService::IsExceededRegisterMaxNum(uint32_t accessT
     std::lock_guard<std::mutex> tokenMapLock(tokenMapMutex_);
     auto iter = tokenMap_.find(accessToken);
     if (iter != tokenMap_.end() && iter->second.size() >= MAX_REGISTER_NUM) {
-        HILOGE("accessToken %{public}u registered too much times", accessToken);
+        HILOGE("accessToken registered too much times");
         return true;
     }
     return false;
@@ -547,7 +547,7 @@ bool DistributedAbilityManagerService::IsTokenRegistered(uint32_t accessToken, i
             return true;
         }
     }
-    HILOGE("token %{public}d has not registered", token);
+    HILOGE("token has not registered");
     return false;
 }
 
@@ -560,7 +560,7 @@ bool DistributedAbilityManagerService::IsNotifierRegistered(int32_t token)
         return false;
     }
     if (iter->second == nullptr) {
-        HILOGE("notifierInfo is nullptr, token: %{public}d ", token);
+        HILOGE("notifierInfo is nullptr");
         return false;
     }
     return true;
@@ -573,10 +573,10 @@ bool DistributedAbilityManagerService::IsNotifierRegisteredLocked(int32_t token,
         return false;
     }
     if (callbackMap_[token]->GetNotifier(cbType) != nullptr) {
-        HILOGD("token: %{public}d cbType:%{public}s has already registered", token, cbType.c_str());
+        HILOGD("token and cbType:%{public}s has already registered", cbType.c_str());
         return true;
     }
-    HILOGE("token: %{public}d cbType:%{public}s has not registered", token, cbType.c_str());
+    HILOGE("token and cbType:%{public}s has not registered", cbType.c_str());
     return false;
 }
 

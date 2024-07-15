@@ -167,7 +167,8 @@ int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peer
     }
 
     ret = SetFirstCallerTokenID(callingTokenId_);
-    HILOGD("SetFirstCallerTokenID callingTokenId: %{public}d, ret: %{public}d", callingTokenId_, ret);
+    HILOGD("SetFirstCallerTokenID callingTokenId: %{public}s, ret: %{public}d",
+        GetAnonymStr(std::to_string(callingTokenId_)).c_str(), ret);
     callingTokenId_ = 0;
 
     do {
