@@ -194,7 +194,14 @@ int32_t DMSContinueSendMgr::GetMissionIdByBundleName(const std::string& bundleNa
         HILOGI("get missionId end, missionId: %{public}d", missionId);
         return ERR_OK;
     }
-    HILOGE("get bundleName failed from screenOffHandler_");
+    HILOGW("get bundleName failed from screenOffHandler_");
+    for (auto iter = aliveMission_.begin(); iter != aliveMission_.end(); iter++) {
+        if (iter->second.bundleName == bundleName) {
+            missionId = iter->first;
+            HILOGI("get missionId from aliveMission_, missionId: %{public}d", missionId);
+            return ERR_OK;
+        }
+    }
     return INVALID_PARAMETERS_ERR;
 }
 
