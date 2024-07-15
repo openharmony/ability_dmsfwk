@@ -462,14 +462,14 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
         QuickStartAbility();
     }
 
-    softbusSessionId_ = DSchedTransportSoftbusAdapter::GetInstance().ConnectDevice(peerDeviceId);
-    if (softbusSessionId_ <= 0) {
+    ret = DSchedTransportSoftbusAdapter::GetInstance().ConnectDevice(peerDeviceId);
+    if (ret != ERR_OK) {
         HILOGE("ExecuteContinueReq connect peer device %{public}s failed, ret %{public}d",
-            GetAnonymStr(peerDeviceId).c_str(), softbusSessionId_);
-        return softbusSessionId_;
+            GetAnonymStr(peerDeviceId).c_str(), ret);
+        return ret;
     }
-    HILOGI("ExecuteContinueReq peer %{public}s connected, sessionId %{public}d",
-        GetAnonymStr(peerDeviceId).c_str(), softbusSessionId_);
+    HILOGI("ExecuteContinueReq peer %{public}s connected, ret %{public}d",
+        GetAnonymStr(peerDeviceId).c_str(), ret);
 
     auto startCmd = std::make_shared<DSchedContinueStartCmd>();
     int32_t ret = PackStartCmd(startCmd, wantParams);
