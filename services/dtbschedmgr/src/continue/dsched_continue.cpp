@@ -471,7 +471,7 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
         GetAnonymStr(peerDeviceId).c_str(), softbusSessionId_);
 
     auto startCmd = std::make_shared<DSchedContinueStartCmd>();
-    int32_t ret = PackStartCmd(startCmd, wantParams);
+    ret = PackStartCmd(startCmd, wantParams);
     if (ret != ERR_OK) {
         HILOGE("ExecuteContinueReq pack start cmd failed, ret %{public}d", ret);
         return ret;
