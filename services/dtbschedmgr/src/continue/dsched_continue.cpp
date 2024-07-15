@@ -1047,11 +1047,7 @@ int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
         DSchedTransportSoftbusAdapter::GetInstance().DisconnectDevice(peerDeviceId);
     }
 
-    if (result != ERR_OK) {
-        eventData_.state_ = DMS_DSCHED_EVENT_STOP;
-    } else {
-        eventData_.state_ = DMS_DSCHED_EVENT_FINISH;
-    }
+    eventData_.state_ = result != ERR_OK ? DMS_DSCHED_EVENT_STOP : DMS_DSCHED_EVENT_FINISH;
     if (result == ERR_OK && direction_ == CONTINUE_SOURCE && isSourceExit_) {
         int32_t ret = AbilityManagerClient::GetInstance()->CleanMission(continueInfo_.missionId_);
         HILOGD("ExecuteContinueEnd clean mission result: %{public}d", ret);

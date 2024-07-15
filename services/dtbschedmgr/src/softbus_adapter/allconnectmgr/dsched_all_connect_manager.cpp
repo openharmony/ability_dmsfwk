@@ -44,7 +44,7 @@ ServiceCollaborationManager_CommunicationRequestInfo DSchedAllConnectManager::co
     .maxLatency = DSCHED_QOS_TYPE_MAX_LATENCY,
     .minLatency = DSCHED_QOS_TYPE_MIN_LATENCY,
     .maxWaitTime = 0,
-    .dataType = "DATA_TYPE_FILE",
+    .dataType = "DATA_TYPE_BYTES",
 };
 std::queue<std::string> DSchedAllConnectManager::peerConnectCbQueue_;
 
@@ -265,7 +265,12 @@ int32_t DSchedAllConnectManager::OnStop(const char *peerNetworkId)
 {
     HILOGI("OnStop, when other task prepare to seize bind, disconnect DMS bind with peerNetworkId %{public}s.",
         GetAnonymStr(peerNetworkId).c_str());
-    DSchedTransportSoftbusAdapter::GetInstance().DisconnectDevice(peerNetworkId);
+    int32_t sessionId = -1;
+    if (!DSchedTransportSoftbusAdapter::GetInstance().GetSessionIdByDeviceId(peerNetworkId, sessionId)) {
+        HILOGW("Not find any sessionId by peerNetworkId %{public}s.", GetAnonymStr(peerNetworkId).c_str());
+        return ERR_OK;
+    }
+    DSchedTransportSoftbusAdapter::GetInstance().OnShutdown(sessionId, false);
     return ERR_OK;
 }
 
