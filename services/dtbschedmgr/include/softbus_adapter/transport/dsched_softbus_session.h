@@ -110,13 +110,12 @@ private:
     int32_t CheckUnPackBuffer(SessionDataHeader& headerPara);
     void ResetAssembleFrag();
     void MakeFragDataHeader(const SessionDataHeader& headPara, uint8_t *header, uint32_t len);
-    uint16_t ReadTlvToHeader(uint8_t *ptrPacket, SessionDataHeader& headerPara);
+    int32_t ReadTlvToHeader(uint8_t *ptrPacket, SessionDataHeader& headerPara, uint16_t& index);
     void WriteTlvToBuffer(const TlvItem& tlvItem, uint8_t *buffer,  uint32_t bufLen);
     void SetHeadParaDataLen(SessionDataHeader& headPara, const uint32_t totalLen, const uint32_t offset,
         const uint32_t maxSendSize);
     int64_t GetNowTimeStampUs();
     uint16_t U16Get(const uint8_t *ptr);
-
     std::shared_ptr<DSchedDataBuffer> packBuffer_;
     bool isWaiting_;
     uint32_t nowSeq_;
