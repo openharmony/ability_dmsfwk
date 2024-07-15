@@ -209,6 +209,8 @@ private:
     void UpdateState(DSchedContinueStateType stateType);
 
 private:
+    static constexpr int32_t INVALID_SESSION_ID = -1;
+
     std::shared_ptr<DSchedContinueStateMachine> stateMachine_;
     std::shared_ptr<DSchedContinueEventHandler> eventHandler_;
     std::condition_variable eventCon_;
@@ -221,7 +223,7 @@ private:
     int32_t direction_ = 0;
     DSchedContinueInfo continueInfo_;
     bool isSourceExit_ = true;
-    int32_t softbusSessionId_ = 0;
+    int32_t softbusSessionId_ = INVALID_SESSION_ID;
     sptr<IRemoteObject> callback_ = nullptr;
     EventNotify eventData_;
 };

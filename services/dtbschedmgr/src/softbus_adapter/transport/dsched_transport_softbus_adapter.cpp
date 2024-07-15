@@ -109,7 +109,7 @@ int32_t DSchedTransportSoftbusAdapter::CreateServerSocket()
     return socket;
 }
 
-int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDeviceId)
+int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDeviceId, int32_t &sessionId)
 {
     HILOGI("try to connect peer: %{public}s.", GetAnonymStr(peerDeviceId).c_str());
     {
@@ -119,7 +119,8 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
                 if (iter->second != nullptr && peerDeviceId == iter->second->GetPeerDeviceId()) {
                     HILOGI("peer device already connected");
                     iter->second->OnConnect();
-                    return iter->first;
+                    sessionId = iter->first;
+                    return ERR_OK;
                 }
             }
         }
@@ -132,7 +133,8 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
     ret = DSchedAllConnectManager::GetInstance().ApplyAdvanceResource(peerDeviceId, reqInfoSets);
     if (ret != ERR_OK) {
         HILOGE("Apply advance resource fail, ret: %{public}d.", ret);
-        return INVALID_SESSION_ID;
+        sessionId = INVALID_SESSION_ID;
+        return ret;
     }
 
     ret = DSchedAllConnectManager::GetInstance().PublishServiceState(peerDeviceId, "", SCM_PREPARE);
@@ -142,7 +144,6 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
     }
 #endif
 
-    int32_t sessionId = INVALID_SESSION_ID;
     ret = AddNewPeerSession(peerDeviceId, sessionId);
     if (ret != ERR_OK || sessionId <= 0) {
         HILOGE("Add new peer connect session fail, ret: %{public}d, sessionId: %{public}d.", ret, sessionId);
