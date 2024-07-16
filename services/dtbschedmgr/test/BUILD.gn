@@ -486,12 +486,15 @@ ohos_unittest("dmsbasetest") {
     debug = false
   }
   module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
   sources = [
+    "unittest/collaborate/dsched_collaborate_callback_mgr_test.cpp",
     "unittest/deviceManager/dms_device_info_test.cpp",
     "unittest/dfx/dms_continue_time_dumper_test.cpp",
     "unittest/dfx/dms_hisysevent_report_test.cpp",
     "unittest/dms_network_adapter_test.cpp",
     "unittest/dtbschedmgr_device_info_storage_test.cpp",
+    "unittest/mock_distributed_sched.cpp",
   ]
   sources += dtbschedmgr_sources
 
