@@ -461,6 +461,7 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
     if (subServiceType_ == CONTINUE_PULL && CheckQuickStartConfiguration()) {
         QuickStartAbility();
     }
+
     int32_t ret = DSchedTransportSoftbusAdapter::GetInstance().ConnectDevice(peerDeviceId, softbusSessionId_);
     if (ret != ERR_OK) {
         HILOGE("ExecuteContinueReq connect peer device %{public}s failed, ret %{public}d",
