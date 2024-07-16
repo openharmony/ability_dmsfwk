@@ -66,6 +66,7 @@ int32_t DSchedContinueCmdBase::Unmarshal(const std::string &jsonStr)
 {
     cJSON *rootValue = cJSON_Parse(jsonStr.c_str());
     if (rootValue == nullptr) {
+        HILOGE("Dms continue cmd base json string parse to cjson fail.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -78,6 +79,7 @@ int32_t DSchedContinueCmdBase::Unmarshal(const std::string &jsonStr)
         cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, numKeys[i]);
         if (item == nullptr || !cJSON_IsNumber(item)) {
             cJSON_Delete(rootValue);
+            HILOGE("Dms continue cmd base %{public}s term is null or not number.", numKeys[i]);
             return INVALID_PARAMETERS_ERR;
         }
         *numValues[i] = item->valueint;
@@ -90,6 +92,7 @@ int32_t DSchedContinueCmdBase::Unmarshal(const std::string &jsonStr)
         cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, strKeys[i]);
         if (item == nullptr || !cJSON_IsString(item) || (item->valuestring == nullptr)) {
             cJSON_Delete(rootValue);
+            HILOGE("Dms continue cmd base %{public}s term is null or not string.", strKeys[i]);
             return INVALID_PARAMETERS_ERR;
         }
         *strValues[i] = item->valuestring;
@@ -392,23 +395,27 @@ int32_t DSchedContinueDataCmd::UnmarshalParcel(const std::string &jsonStr)
 {
     cJSON *rootValue = cJSON_Parse(jsonStr.c_str());
     if (rootValue == nullptr) {
+        HILOGE("Want and AbilityInfo json string parse to cjson fail.");
         return INVALID_PARAMETERS_ERR;
     }
 
     cJSON *wantStr = cJSON_GetObjectItemCaseSensitive(rootValue, "Want");
     if (wantStr == nullptr || !cJSON_IsString(wantStr) || (wantStr->valuestring == nullptr)) {
         cJSON_Delete(rootValue);
+        HILOGE("Want term is null or not string.");
         return INVALID_PARAMETERS_ERR;
     }
     Parcel wantParcel;
     int32_t ret = Base64StrToParcel(wantStr->valuestring, wantParcel);
     if (ret != ERR_OK) {
         cJSON_Delete(rootValue);
+        HILOGE("Want parcel Base64Str unmarshal fail, ret %{public}d.", ret);
         return INVALID_PARAMETERS_ERR;
     }
     auto wantPtr = AAFwk::Want::Unmarshalling(wantParcel);
     if (wantPtr == nullptr) {
         cJSON_Delete(rootValue);
+        HILOGE("AAFwk Want unmarshalling fail, check return null.");
         return INVALID_PARAMETERS_ERR;
     }
     want_ = *wantPtr;
@@ -416,17 +423,20 @@ int32_t DSchedContinueDataCmd::UnmarshalParcel(const std::string &jsonStr)
     cJSON *abilityInfoStr = cJSON_GetObjectItemCaseSensitive(rootValue, "AbilityInfo");
     if (abilityInfoStr == nullptr || !cJSON_IsString(abilityInfoStr) || (abilityInfoStr->valuestring == nullptr)) {
         cJSON_Delete(rootValue);
+        HILOGE("AbilityInfo term is null or not string.");
         return INVALID_PARAMETERS_ERR;
     }
     Parcel abilityParcel;
     ret = Base64StrToParcel(abilityInfoStr->valuestring, abilityParcel);
     if (ret != ERR_OK) {
         cJSON_Delete(rootValue);
+        HILOGE("AbilityInfo parcel Base64Str unmarshal fail, ret %{public}d.", ret);
         return INVALID_PARAMETERS_ERR;
     }
     auto abilityInfoPtr = AppExecFwk::CompatibleAbilityInfo::Unmarshalling(abilityParcel);
     if (abilityInfoPtr == nullptr) {
         cJSON_Delete(rootValue);
+        HILOGE("AppExecFwk CompatibleAbilityInfo unmarshalling fail, check return null.");
         return INVALID_PARAMETERS_ERR;
     }
     abilityInfo_ = *abilityInfoPtr;
@@ -439,6 +449,7 @@ int32_t DSchedContinueDataCmd::UnmarshalCallerInfo(std::string &jsonStr)
 {
     cJSON *rootValue = cJSON_Parse(jsonStr.c_str());
     if (rootValue == nullptr) {
+        HILOGE("Caller info json string parse to cjson fail.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -453,6 +464,7 @@ int32_t DSchedContinueDataCmd::UnmarshalCallerInfo(std::string &jsonStr)
         cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, strKeys[i]);
         if (item == nullptr || !cJSON_IsString(item) || (item->valuestring == nullptr)) {
             cJSON_Delete(rootValue);
+            HILOGE("Caller info json %{public}s term is null or not string.", strKeys[i]);
             return INVALID_PARAMETERS_ERR;
         }
         *strValues[i] = item->valuestring;
@@ -469,6 +481,7 @@ int32_t DSchedContinueDataCmd::UnmarshalCallerInfo(std::string &jsonStr)
         cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, numKeys[i]);
         if (item == nullptr || !cJSON_IsNumber(item)) {
             cJSON_Delete(rootValue);
+            HILOGE("Caller info json %{public}s term is null or not number.", numKeys[i]);
             return INVALID_PARAMETERS_ERR;
         }
         *numValues[i] = item->valueint;
@@ -476,6 +489,7 @@ int32_t DSchedContinueDataCmd::UnmarshalCallerInfo(std::string &jsonStr)
 
     if (UnmarshalCallerInfoExtra(jsonStr) != ERR_OK) {
         cJSON_Delete(rootValue);
+        HILOGE("Unmarshal CallerInfoExtra term from caller info json string fail.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -487,6 +501,7 @@ int32_t DSchedContinueDataCmd::UnmarshalCallerInfoExtra(std::string &jsonStr)
 {
     cJSON *rootValue = cJSON_Parse(jsonStr.c_str());
     if (rootValue == nullptr) {
+        HILOGE("Caller info extra json string parse to cjson fail.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -496,6 +511,7 @@ int32_t DSchedContinueDataCmd::UnmarshalCallerInfoExtra(std::string &jsonStr)
     cJSON_ArrayForEach(bundleName, bundleNames) {
         if (bundleName == nullptr || !cJSON_IsString(bundleName) || (bundleName->valuestring == nullptr)) {
             cJSON_Delete(rootValue);
+            HILOGE("BundleNames term in CallerInfoExtra json is null or not string.");
             return INVALID_PARAMETERS_ERR;
         }
         bundleNameList.push_back(bundleName->valuestring);
@@ -505,11 +521,13 @@ int32_t DSchedContinueDataCmd::UnmarshalCallerInfoExtra(std::string &jsonStr)
     cJSON *extraInfo = cJSON_GetObjectItemCaseSensitive(rootValue, "ExtraInfo");
     if (extraInfo == nullptr || !cJSON_IsString(extraInfo) || (extraInfo->valuestring == nullptr)) {
         cJSON_Delete(rootValue);
+        HILOGE("ExtraInfo term in CallerInfoExtra json is null or not string.");
         return INVALID_PARAMETERS_ERR;
     }
     cJSON *extraInfoValue = cJSON_Parse(extraInfo->valuestring);
     if (extraInfoValue == nullptr) {
         cJSON_Delete(rootValue);
+        HILOGE("ExtraInfo term json string parse to cjson fail in CallerInfoExtra json.");
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -531,12 +549,14 @@ int32_t DSchedContinueDataCmd::UnmarshalAccountInfo(std::string &jsonStr)
 {
     cJSON *rootValue = cJSON_Parse(jsonStr.c_str());
     if (rootValue == nullptr) {
+        HILOGE("Account info json string parse to cjson fail.");
         return INVALID_PARAMETERS_ERR;
     }
 
     cJSON *accountType = cJSON_GetObjectItemCaseSensitive(rootValue, "AccountType");
     if (accountType == nullptr || !cJSON_IsNumber(accountType)) {
         cJSON_Delete(rootValue);
+        HILOGE("AccountType term in account info json is null or not number.");
         return INVALID_PARAMETERS_ERR;
     }
     accountInfo_.accountType = accountType->valueint;
@@ -547,6 +567,7 @@ int32_t DSchedContinueDataCmd::UnmarshalAccountInfo(std::string &jsonStr)
     cJSON_ArrayForEach(groupId, groupIdListStr) {
         if (groupId == nullptr || !cJSON_IsString(groupId) || (groupId->valuestring == nullptr)) {
             cJSON_Delete(rootValue);
+            HILOGE("groupId term in account info json is null or not string.");
             return INVALID_PARAMETERS_ERR;
         }
         groupIdList.push_back(groupId->valuestring);
@@ -555,16 +576,16 @@ int32_t DSchedContinueDataCmd::UnmarshalAccountInfo(std::string &jsonStr)
 
     cJSON *accountId = cJSON_GetObjectItemCaseSensitive(rootValue, Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID.c_str());
     if (accountId == nullptr || !cJSON_IsString(accountId)) {
-        cJSON_Delete(rootValue);
-        return INVALID_PARAMETERS_ERR;
+        HILOGE("accountId term in account info json is null or not string.");
+    } else {
+        accountInfo_.activeAccountId = accountId->valuestring;
     }
-    accountInfo_.activeAccountId = accountId->valuestring;
     cJSON *userId = cJSON_GetObjectItemCaseSensitive(rootValue, Constants::EXTRO_INFO_JSON_KEY_USERID_ID.c_str());
     if (userId == nullptr || !cJSON_IsNumber(userId)) {
-        cJSON_Delete(rootValue);
-        return INVALID_PARAMETERS_ERR;
+        HILOGE("userId term in account info json is null or not number.");
+    } else {
+        accountInfo_.userId = userId->valueint;
     }
-    accountInfo_.userId = userId->valueint;
 
     cJSON_Delete(rootValue);
     return ERR_OK;

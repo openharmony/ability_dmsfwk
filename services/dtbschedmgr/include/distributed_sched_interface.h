@@ -46,7 +46,7 @@ public:
         int32_t accountType = DIFF_ACCOUNT_TYPE;
         std::vector<std::string> groupIdList;
         std::string activeAccountId = "";
-        int32_t userId = 0;
+        int32_t userId = -1;
     };
 
     enum {
