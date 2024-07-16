@@ -47,7 +47,7 @@ class DSchedTransportSoftbusAdapter {
 DECLARE_SINGLE_INSTANCE_BASE(DSchedTransportSoftbusAdapter);
 public:
     int32_t InitChannel();
-    int32_t ConnectDevice(const std::string &peerDeviceId);
+    int32_t ConnectDevice(const std::string &peerDeviceId, int32_t &sessionId);
     void DisconnectDevice(const std::string &peerDeviceId);
     int32_t ReleaseChannel();
     int32_t SendData(int32_t sessionId, int32_t dataType, std::shared_ptr<DSchedDataBuffer> dataBuffer);
