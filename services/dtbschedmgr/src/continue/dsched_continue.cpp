@@ -521,6 +521,7 @@ int32_t DSchedContinue::QuickStartAbility()
     AAFwk::Want want;
     want.SetElementName(continueInfo_.sinkBundleName_, abilityName);
     want.SetParam(DMS_CONTINUE_SESSION_ID, continueSessionId);
+    want.SetFlags(AAFwk::Want::FLAG_ABILITY_PREPARE_CONTINUATION);
 
     return StartAbility(want, DEFAULT_REQUEST_CODE);
 }
