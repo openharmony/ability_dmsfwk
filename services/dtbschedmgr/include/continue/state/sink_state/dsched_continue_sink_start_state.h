@@ -35,6 +35,8 @@ private:
         const AppExecFwk::InnerEvent::Pointer &event);
     int32_t DoContinueAbilityTask(std::shared_ptr<DSchedContinue> dContinue,
         const AppExecFwk::InnerEvent::Pointer &event);
+    int32_t DoContinueErrorTask(std::shared_ptr<DSchedContinue> dContinue,
+        const AppExecFwk::InnerEvent::Pointer &event);
     int32_t DoContinueEndTask(std::shared_ptr<DSchedContinue> dContinue,
         const AppExecFwk::InnerEvent::Pointer &event);
 

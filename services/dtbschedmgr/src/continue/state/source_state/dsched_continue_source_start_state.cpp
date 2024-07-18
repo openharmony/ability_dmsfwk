@@ -29,7 +29,8 @@ DSchedContinueSourceStartState::DSchedContinueSourceStartState(std::shared_ptr<D
 {
     memberFuncMap_[DSHCED_CONTINUE_REQ_PUSH_EVENT] = &DSchedContinueSourceStartState::DoContinuePushReqTask;
     memberFuncMap_[DSHCED_CONTINUE_ABILITY_EVENT] = &DSchedContinueSourceStartState::DoContinueAbilityTask;
-    memberFuncMap_[DSCHED_CONTINUE_END_EVENT] = &DSchedContinueSourceStartState::DoContinueEndTask;
+    memberFuncMap_[DSCHED_CONTINUE_COMPLETE_EVENT] = &DSchedContinueSourceStartState::DoContinueEndTask;
+    memberFuncMap_[DSCHED_CONTINUE_END_EVENT] = &DSchedContinueSourceStartState::DoContinueErrorTask;
 }
 
 DSchedContinueSourceStartState::~DSchedContinueSourceStartState()
@@ -39,6 +40,10 @@ DSchedContinueSourceStartState::~DSchedContinueSourceStartState()
 int32_t DSchedContinueSourceStartState::Execute(std::shared_ptr<DSchedContinue> dContinue,
     const AppExecFwk::InnerEvent::Pointer &event)
 {
+    if (event == nullptr) {
+        HILOGE("event is null");
+        return INVALID_PARAMETERS_ERR;
+    }
     auto iterFunc = memberFuncMap_.find(event->GetInnerEventId());
     if (iterFunc == memberFuncMap_.end()) {
         HILOGI("DSchedContinueSourceStartState execute %{public}d in wrong state", event->GetInnerEventId());
@@ -62,8 +67,8 @@ DSchedContinueStateType DSchedContinueSourceStartState::GetStateType()
 int32_t DSchedContinueSourceStartState::DoContinuePushReqTask(std::shared_ptr<DSchedContinue> dContinue,
     const AppExecFwk::InnerEvent::Pointer &event)
 {
-    if (dContinue == nullptr) {
-        HILOGE("dContinue is null");
+    if (dContinue == nullptr || event == nullptr) {
+        HILOGE("dContinue or event is null");
         return INVALID_PARAMETERS_ERR;
     }
     auto syncContinueData = event->GetSharedObject<DistributedWantParams>();
@@ -77,8 +82,8 @@ int32_t DSchedContinueSourceStartState::DoContinuePushReqTask(std::shared_ptr<DS
 int32_t DSchedContinueSourceStartState::DoContinueAbilityTask(std::shared_ptr<DSchedContinue> dContinue,
     const AppExecFwk::InnerEvent::Pointer &event)
 {
-    if (dContinue == nullptr) {
-        HILOGE("dContinue is null");
+    if (dContinue == nullptr || event == nullptr) {
+        HILOGE("dContinue or event is null");
         return INVALID_PARAMETERS_ERR;
     }
     auto syncContinueData = event->GetSharedObject<int32_t>();
@@ -89,15 +94,30 @@ int32_t DSchedContinueSourceStartState::DoContinueAbilityTask(std::shared_ptr<DS
     return ret;
 }
 
-int32_t DSchedContinueSourceStartState::DoContinueEndTask(std::shared_ptr<DSchedContinue> dContinue,
+int32_t DSchedContinueSourceStartState::DoContinueErrorTask(std::shared_ptr<DSchedContinue> dContinue,
     const AppExecFwk::InnerEvent::Pointer &event)
 {
-    if (dContinue == nullptr) {
-        HILOGE("dContinue is null");
+    if (dContinue == nullptr || event == nullptr) {
+        HILOGE("dContinue or event is null");
         return INVALID_PARAMETERS_ERR;
     }
     auto syncContinueData = event->GetSharedObject<int32_t>();
     int32_t ret = dContinue->ExecuteContinueError(*syncContinueData);
+    if (ret != ERR_OK) {
+        HILOGE("DSchedContinueSourceStartState ExecuteContinueError failed, ret: %{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t DSchedContinueSourceStartState::DoContinueEndTask(std::shared_ptr<DSchedContinue> dContinue,
+    const AppExecFwk::InnerEvent::Pointer &event)
+{
+    if (dContinue == nullptr || event == nullptr) {
+        HILOGE("dContinue or event is null");
+        return INVALID_PARAMETERS_ERR;
+    }
+    auto syncContinueData = event->GetSharedObject<int32_t>();
+    int32_t ret = dContinue->ExecuteContinueEnd(*syncContinueData);
     if (ret != ERR_OK) {
         HILOGE("DSchedContinueSourceStartState ExecuteContinueError failed, ret: %{public}d", ret);
     }

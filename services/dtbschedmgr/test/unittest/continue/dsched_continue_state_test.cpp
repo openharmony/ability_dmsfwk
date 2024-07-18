@@ -463,7 +463,7 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueDataTask001, TestSize.Level3
     ASSERT_NE(dataStateTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -485,7 +485,7 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueEndTask001, TestSize.Level3)
     ASSERT_NE(dataStateTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -494,6 +494,28 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueEndTask001, TestSize.Level3)
     int32_t ret = dataStateTest_->DoContinueEndTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueDataStateTest SinkDoContinueEndTask001 end" << std::endl;
+}
+
+ /**
+ * @tc.name: SinkDoContinueErrorTask001
+ * @tc.desc: DoContinueErrorTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueErrorTask001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueDataStateTest SinkDoContinueErrorTask001 begin" << std::endl;
+    ASSERT_NE(dataStateTest_, nullptr);
+    AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
+    ASSERT_NE(event, nullptr);
+    event->innerEventId_ = static_cast<uint32_t>(-1);
+    auto destructor = [](AppExecFwk::InnerEvent *event) {
+        if (event != nullptr) {
+            delete event;
+        }
+    };
+    int32_t ret = dataStateTest_->DoContinueErrorTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DSchedContinueDataStateTest SinkDoContinueErrorTask001 end" << std::endl;
 }
 
  /**
@@ -565,7 +587,7 @@ HWTEST_F(DSchedContinueSinkEndStateTest, TestSinkDoContinueEndTask001, TestSize.
     ASSERT_NE(sinkEndStateTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -645,7 +667,7 @@ HWTEST_F(DSchedContinueSinkStartStateTest, SinkDoContinuePullReqTaskTest_001, Te
     ASSERT_NE(sinkStartStateTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -668,7 +690,7 @@ HWTEST_F(DSchedContinueSinkStartStateTest, SinkDoContinueAbilityTaskTest_001, Te
     ASSERT_NE(sinkStartStateTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -691,7 +713,7 @@ HWTEST_F(DSchedContinueSinkStartStateTest, SinkDoContinueEndTaskTest_001, TestSi
     ASSERT_NE(sinkStartStateTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -701,6 +723,28 @@ HWTEST_F(DSchedContinueSinkStartStateTest, SinkDoContinueEndTaskTest_001, TestSi
         AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSinkStartStateTest SinkDoContinueEndTaskTest_001 end" << std::endl;
+}
+
+ /**
+ * @tc.name: SinkDoContinueErrorTask001
+ * @tc.desc: DoContinueErrorTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueSinkStartStateTest, SinkDoContinueErrorTask001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueSinkStartStateTest SinkDoContinueErrorTask001 begin" << std::endl;
+    ASSERT_NE(sinkStartStateTest_, nullptr);
+    AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
+    ASSERT_NE(event, nullptr);
+    event->innerEventId_ = static_cast<uint32_t>(-1);
+    auto destructor = [](AppExecFwk::InnerEvent *event) {
+        if (event != nullptr) {
+            delete event;
+        }
+    };
+    int32_t ret = sinkStartStateTest_->DoContinueErrorTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DSchedContinueSinkStartStateTest SinkDoContinueErrorTask001 end" << std::endl;
 }
 
  /**
@@ -773,7 +817,7 @@ HWTEST_F(DSchedContinueSinkWaitEndStateTest, SinkDoNotifyCompleteTask001, TestSi
     ASSERT_NE(sinkWaitEndTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -796,7 +840,7 @@ HWTEST_F(DSchedContinueSinkWaitEndStateTest, SinkDoContinueEndTask001, TestSize.
     ASSERT_NE(sinkWaitEndTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -877,7 +921,7 @@ HWTEST_F(DSchedContinueAbilityStateTest, SrcDoContinueSendTask001, TestSize.Leve
     ASSERT_NE(abilityStateTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -899,7 +943,7 @@ HWTEST_F(DSchedContinueAbilityStateTest, SrcDoContinueEndTask001, TestSize.Level
     ASSERT_NE(abilityStateTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -908,6 +952,28 @@ HWTEST_F(DSchedContinueAbilityStateTest, SrcDoContinueEndTask001, TestSize.Level
     int32_t ret = abilityStateTest_->DoContinueEndTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueAbilityStateTest SrcDoContinueEndTask001 end" << std::endl;
+}
+
+ /**
+ * @tc.name: SrcDoContinueErrorTask001
+ * @tc.desc: DoContinueErrorTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueAbilityStateTest, SrcDoContinueErrorTask001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueAbilityStateTest SrcDoContinueErrorTask001 begin" << std::endl;
+    ASSERT_NE(abilityStateTest_, nullptr);
+    AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
+    ASSERT_NE(event, nullptr);
+    event->innerEventId_ = static_cast<uint32_t>(-1);
+    auto destructor = [](AppExecFwk::InnerEvent *event) {
+        if (event != nullptr) {
+            delete event;
+        }
+    };
+    int32_t ret = abilityStateTest_->DoContinueErrorTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DSchedContinueAbilityStateTest SrcDoContinueErrorTask001 end" << std::endl;
 }
 
  /**
@@ -979,7 +1045,7 @@ HWTEST_F(DSchedContinueEndStateTest, SrcDoContinueEndTaskTest001, TestSize.Level
     ASSERT_NE(srcEndStateTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -1059,7 +1125,7 @@ HWTEST_F(DSchedContinueSourceStartStateTest, SrcDoContinuePushReqTaskTest_001, T
     ASSERT_NE(srcStartStateTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -1082,7 +1148,7 @@ HWTEST_F(DSchedContinueSourceStartStateTest, SrcDoContinueAbilityTaskTest_001, T
     ASSERT_NE(srcStartStateTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -1105,7 +1171,7 @@ HWTEST_F(DSchedContinueSourceStartStateTest, SrcDoContinueEndTaskTest_001, TestS
     ASSERT_NE(srcStartStateTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -1115,6 +1181,28 @@ HWTEST_F(DSchedContinueSourceStartStateTest, SrcDoContinueEndTaskTest_001, TestS
         AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSourceStartStateTest SrcDoContinueEndTaskTest_001 end" << std::endl;
+}
+
+ /**
+ * @tc.name: SrcDoContinueErrorTask001
+ * @tc.desc: DoContinueErrorTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueSourceStartStateTest, SrcDoContinueErrorTask001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueSourceStartStateTest SrcDoContinueErrorTask001 begin" << std::endl;
+    ASSERT_NE(srcStartStateTest_, nullptr);
+    AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
+    ASSERT_NE(event, nullptr);
+    event->innerEventId_ = static_cast<uint32_t>(-1);
+    auto destructor = [](AppExecFwk::InnerEvent *event) {
+        if (event != nullptr) {
+            delete event;
+        }
+    };
+    int32_t ret = srcStartStateTest_->DoContinueErrorTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DSchedContinueSourceStartStateTest SrcDoContinueErrorTask001 end" << std::endl;
 }
 
  /**
@@ -1186,7 +1274,7 @@ HWTEST_F(DSchedContinueWaitEndStateTest, SrcDoNotifyCompleteTask_001, TestSize.L
     ASSERT_NE(srcWaitEndTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
@@ -1209,7 +1297,7 @@ HWTEST_F(DSchedContinueWaitEndStateTest, SrcDoContinueEndTask_001, TestSize.Leve
     ASSERT_NE(srcWaitEndTest_, nullptr);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     ASSERT_NE(event, nullptr);
-    event->innerEventId_ = static_cast<uint32_t>(-1);;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
