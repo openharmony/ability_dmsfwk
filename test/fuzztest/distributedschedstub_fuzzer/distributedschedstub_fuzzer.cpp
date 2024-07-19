@@ -41,20 +41,22 @@ bool StartRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return false;
     }
-    FuzzUtil::MockPermission();
     int32_t code = static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_ABILITY);
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
     Want want;
-    int32_t callerUid = *(reinterpret_cast<const int32_t*>(data));
-    int32_t requestCode = *(reinterpret_cast<const int32_t*>(data));
-    uint32_t accessToken = *(reinterpret_cast<const uint32_t*>(data));
+    sptr<IRemoteObject> connect;
+    int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
+    uint32_t uint32Data = *(reinterpret_cast<const uint32_t*>(data));
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    dataParcel.WriteParcelable(&want);
-    dataParcel.WriteInt32(callerUid);
-    dataParcel.WriteInt32(requestCode);
-    dataParcel.WriteUint32(accessToken);
+    PARCEL_WRITE_HELPER(dataParcel, Parcelable, &want);
+    PARCEL_WRITE_HELPER(dataParcel, RemoteObject, connect);
+    PARCEL_WRITE_HELPER(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER(dataParcel, Uint32, uint32Data);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
+    FuzzUtil::MockPermission();
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
     return true;
 }
@@ -70,14 +72,15 @@ void ConnectRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     Want want;
-    int32_t callerUid = *(reinterpret_cast<const int32_t*>(data));
-    int32_t callerPid = *(reinterpret_cast<const int32_t*>(data));
-    uint32_t accessToken = *(reinterpret_cast<const int32_t*>(data));
+    sptr<IRemoteObject> connect;
+    int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
+    uint32_t uint32Data = *(reinterpret_cast<const uint32_t*>(data));
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    dataParcel.WriteParcelable(&want);
-    dataParcel.WriteInt32(callerUid);
-    dataParcel.WriteInt32(callerPid);
-    dataParcel.WriteUint32(accessToken);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &want);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, connect);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Uint32, uint32Data);
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
@@ -91,11 +94,12 @@ void DisconnectRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    int32_t callerUid = *(reinterpret_cast<const int32_t*>(data));
-    uint32_t accessToken = *(reinterpret_cast<const int32_t*>(data));
-    dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    dataParcel.WriteInt32(callerUid);
-    dataParcel.WriteUint32(accessToken);
+    sptr<IRemoteObject> connect;
+    int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
+    uint32_t uint32Data = *(reinterpret_cast<const uint32_t*>(data));
+    PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, connect);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Uint32, uint32Data);
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
@@ -149,15 +153,21 @@ void ContinueMissionInnerFuzzTest(const uint8_t* data, size_t size)
         return;
     }
     FuzzUtil::MockPermission();
+    int32_t code = static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_MISSION);
     MessageParcel dataParcel;
     MessageParcel reply;
-    std::string srcDevId(reinterpret_cast<const char*>(data), size);
-    std::string dstDevId(reinterpret_cast<const char*>(data), size);
-    int32_t missionId = *(reinterpret_cast<const int32_t*>(data));
-    dataParcel.WriteString(srcDevId);
-    dataParcel.WriteString(dstDevId);
-    dataParcel.WriteInt32(missionId);
-    DistributedSchedService::GetInstance().ContinueMissionInner(dataParcel, reply);
+    MessageOption option;
+    int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
+    std::string str(reinterpret_cast<const char*>(data), size);
+    sptr<IRemoteObject> callback;
+    WantParams wantParams;
+    dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, callback);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &wantParams);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void ContinueMissionOfBundleNameInnerFuzzTest(const uint8_t* data, size_t size)
@@ -166,15 +176,20 @@ void ContinueMissionOfBundleNameInnerFuzzTest(const uint8_t* data, size_t size)
         return;
     }
     FuzzUtil::MockPermission();
+    int32_t code = static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_MISSION_OF_BUNDLENAME);
     MessageParcel dataParcel;
     MessageParcel reply;
-    std::string srcDevId(reinterpret_cast<const char*>(data), size);
-    std::string dstDevId(reinterpret_cast<const char*>(data), size);
-    std::string bundleName(reinterpret_cast<const char*>(data), size);
-    dataParcel.WriteString(srcDevId);
-    dataParcel.WriteString(dstDevId);
-    dataParcel.WriteString(bundleName);
-    DistributedSchedService::GetInstance().ContinueMissionOfBundleNameInner(dataParcel, reply);
+    MessageOption option;
+    std::string str(reinterpret_cast<const char*>(data), size);
+    sptr<IRemoteObject> callback;
+    WantParams wantParams;
+    dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, callback);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &wantParams);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void GetMissionInfosInnerFuzzTest(const uint8_t* data, size_t size)
@@ -187,9 +202,11 @@ void GetMissionInfosInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    int32_t numMissions = *(reinterpret_cast<const int32_t*>(data));
+    int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
+    std::string str(reinterpret_cast<const char*>(data), size);
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    dataParcel.WriteInt32(numMissions);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
@@ -203,7 +220,11 @@ void RegisterMissionListenerInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
+    std::string str(reinterpret_cast<const char*>(data), size);
+    sptr<IRemoteObject> obj;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, obj);
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
@@ -217,7 +238,11 @@ void UnRegisterMissionListenerInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
+    std::string str(reinterpret_cast<const char*>(data), size);
+    sptr<IRemoteObject> obj;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, obj);
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
@@ -231,7 +256,13 @@ void StartSyncRemoteMissionsInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
+    int32_t boolData = *(reinterpret_cast<const bool*>(data));
+    int32_t int64Data = *(reinterpret_cast<const int64_t*>(data));
+    std::string str(reinterpret_cast<const char*>(data), size);
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Bool, boolData);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int64, int64Data);
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
@@ -245,7 +276,9 @@ void StopSyncRemoteMissionsInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
+    std::string str(reinterpret_cast<const char*>(data), size);
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
@@ -277,11 +310,16 @@ void StartRemoteAbilityByCallInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    std::string networkId(reinterpret_cast<const char*>(data), size);
-    int32_t missionId = *(reinterpret_cast<const int32_t*>(data));
+    Want want;
+    sptr<IRemoteObject> obj;
+    int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
+    uint32_t uint32Data = *(reinterpret_cast<const uint32_t*>(data));
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    dataParcel.WriteString(networkId);
-    dataParcel.WriteInt32(missionId);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &want);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, obj);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Uint32, uint32Data);
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
@@ -295,7 +333,11 @@ void ReleaseRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
+    sptr<IRemoteObject> connect;
+    AppExecFwk::ElementName element;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, connect);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &element);
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
@@ -305,9 +347,12 @@ void GetDistributedComponentListInnerFuzzTest(const uint8_t* data, size_t size)
         return;
     }
     FuzzUtil::MockPermission();
+    int32_t code = static_cast<uint32_t>(IDSchedInterfaceCode::GET_DISTRIBUTED_COMPONENT_LIST);
     MessageParcel dataParcel;
     MessageParcel reply;
-    DistributedSchedService::GetInstance().GetDistributedComponentListInner(dataParcel, reply);
+    MessageOption option;
+    dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
 void StartRemoteFreeInstallInnerFuzzTest(const uint8_t* data, size_t size)
@@ -320,13 +365,16 @@ void StartRemoteFreeInstallInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    int32_t callerUid = *(reinterpret_cast<const int32_t*>(data));
-    int32_t requestCode = *(reinterpret_cast<const int32_t*>(data));
-    uint32_t accessToken = *(reinterpret_cast<const int32_t*>(data));
+    int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
+    uint32_t uint32Data = *(reinterpret_cast<const uint32_t*>(data));
+    sptr<IRemoteObject> obj;
+    Want want;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    dataParcel.WriteInt32(callerUid);
-    dataParcel.WriteInt32(requestCode);
-    dataParcel.WriteUint32(accessToken);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &want);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, obj);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Uint32, uint32Data);
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
@@ -340,9 +388,11 @@ void StartRemoteShareFormInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    std::string deviceId(reinterpret_cast<const char*>(data), size);
+    std::string str(reinterpret_cast<const char*>(data), size);
+    Want want;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    dataParcel.WriteString(deviceId);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &want);
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
@@ -375,9 +425,11 @@ void RegisterOnListenerInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    std::string type(reinterpret_cast<const char*>(data), size);
+    std::string str(reinterpret_cast<const char*>(data), size);
+    sptr<IRemoteObject> obj;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    dataParcel.WriteString(type);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, obj);
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
@@ -391,9 +443,11 @@ void RegisterOffListenerInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    std::string type(reinterpret_cast<const char*>(data), size);
+    std::string str(reinterpret_cast<const char*>(data), size);
+    sptr<IRemoteObject> obj;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    dataParcel.WriteString(type);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, obj);
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
@@ -407,7 +461,11 @@ void RegisterDSchedEventListenerInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
+    std::string str(reinterpret_cast<const char*>(data), size);
+    sptr<IRemoteObject> obj;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, obj);
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
@@ -421,7 +479,11 @@ void UnRegisterDSchedEventListenerInnerFuzzTest(const uint8_t* data, size_t size
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
+    std::string str(reinterpret_cast<const char*>(data), size);
+    sptr<IRemoteObject> obj;
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, obj);
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
 
@@ -704,6 +766,74 @@ void NotifyStateChangedFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
     }
     DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
 }
+
+void StartFreeInstallFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    int32_t code = static_cast<uint32_t>(IDSchedInterfaceCode::START_FREE_INSTALL_FROM_REMOTE);
+    FuzzUtil::MockPermission();
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    MessageOption option;
+    int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
+    int32_t int64Data = *(reinterpret_cast<const int64_t*>(data));
+    std::string str(reinterpret_cast<const char*>(data), size);
+    std::vector<std::string> strVector = {str};
+    DistributedWant dstbWant;
+    dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &dstbWant);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, StringVector, strVector);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int64, int64Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
+}
+
+void NotifyCompleteFreeInstallFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    int32_t code = static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_COMPLETE_FREE_INSTALL_FROM_REMOTE);
+    FuzzUtil::MockPermission();
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    MessageOption option;
+    int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
+    int32_t int64Data = *(reinterpret_cast<const int64_t*>(data));
+    dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int64, int64Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
+}
+
+void StopRemoteExtensionAbilityInner(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    int32_t code = static_cast<uint32_t>(IDSchedInterfaceCode::STOP_REMOTE_EXTERNSION_ABILITY);
+    FuzzUtil::MockPermission();
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    MessageOption option;
+    int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
+    uint32_t uint32Data = *(reinterpret_cast<const uint32_t*>(data));
+    std::string str(reinterpret_cast<const char*>(data), size);
+    std::vector<std::string> strVector = {str};
+    Want want;
+    dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &want);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Uint32, uint32Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    DistributedSchedService::GetInstance().OnRemoteRequest(code, dataParcel, reply, option);
+}
 }
 }
 
@@ -745,5 +875,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DistributedSchedule::NotifyMissionsChangedFromRemoteInnerFuzzTest(data, size);
     OHOS::DistributedSchedule::ReleaseAbilityFromRemoteInnerFuzzTest(data, size);
     OHOS::DistributedSchedule::NotifyStateChangedFromRemoteInnerFuzzTest(data, size);
+    OHOS::DistributedSchedule::StartFreeInstallFromRemoteInnerFuzzTest(data, size);
+    OHOS::DistributedSchedule::NotifyCompleteFreeInstallFromRemoteInnerFuzzTest(data, size);
+    OHOS::DistributedSchedule::StopRemoteExtensionAbilityInner(data, size);
     return 0;
 }
