@@ -20,5 +20,7 @@ group("fuzztest") {
     "continuationmanager_fuzzer:fuzztest",
     "distributedschedstub_fuzzer:fuzztest",
     "dmsfreeinstallcallbackstub_fuzzer:fuzztest",
+    "dschedsoftbussession_fuzzer:fuzztest",
+    "dschedtransportsoftbusadapter_fuzzer:fuzztest",
   ]
 }
