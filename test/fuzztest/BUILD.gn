@@ -15,7 +15,10 @@ group("fuzztest") {
   testonly = true
 
   deps = [
+    "abilityconnectionwrapperstub_fuzzer:fuzztest",
+    "bundlemanagercallbackstub_fuzzer:fuzztest",
     "continuationmanager_fuzzer:fuzztest",
     "distributedschedstub_fuzzer:fuzztest",
+    "dmsfreeinstallcallbackstub_fuzzer:fuzztest",
   ]
 }
