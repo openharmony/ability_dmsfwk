@@ -23,14 +23,12 @@ ohos_fuzztest("AbilityConnectionWrapperStubFuzzTest") {
   include_dirs = [
     "${dms_path}/test/fuzztest/abilityconnectionwrapperstub_fuzzer",
     "${dms_path}/services/dtbschedmgr/include/",
-    "${dms_path}/services/dtbschedmgr/test/unittest",
     "${dms_path}/interfaces/innerkits/common/include/",
     "${dms_path}/services/dtbschedmgr/include/collaborate/",
     "${dms_path}/common/include/",
   ]
 
-  fuzz_config_file =
-      "${dms_path}/test/fuzztest/abilityconnectionwrapperstub_fuzzer"
+  fuzz_config_file = "${dms_path}/test/fuzztest/abilityconnectionwrapperstub_fuzzer"
 
   configs = [ "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags" ]
 
