@@ -21,14 +21,15 @@ ohos_fuzztest("DmsFreeInstallCallBackStubFuzzTest") {
 
   visibility = [ ":*" ]
   include_dirs = [
-    "${dms_path}/test/fuzztest/dmsfreeinstallcallbackstub_fuzzer",
-    "${dms_path}/services/dtbschedmgr/include/",
-    "${dms_path}/interfaces/innerkits/common/include/",
-    "${dms_path}/services/dtbschedmgr/include/collaborate/",
     "${dms_path}/common/include/",
+    "${dms_path}/interfaces/innerkits/common/include/",
+    "${dms_path}/services/dtbschedmgr/include/",
+    "${dms_path}/services/dtbschedmgr/include/collaborate/",
+    "${dms_path}/test/fuzztest/dmsfreeinstallcallbackstub_fuzzer",
   ]
 
-  fuzz_config_file = "${dms_path}/test/fuzztest/dmsfreeinstallcallbackstub_fuzzer"
+  fuzz_config_file =
+      "${dms_path}/test/fuzztest/dmsfreeinstallcallbackstub_fuzzer"
 
   configs = [ "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags" ]
 
