@@ -4469,9 +4469,7 @@ HWTEST_F(DistributedWantBaseTest, WantParseUri_test_001, TestSize.Level3)
 {
     GTEST_LOG_(INFO) << "WantParseUri_test_001 start";
     char* uri = nullptr;
-    DistributedWant* newWant = nullptr;
-    newWant->WantParseUri(uri);
-    EXPECT_EQ(uri, nullptr);
+    EXPECT_EQ(DistributedWant::WantParseUri(uri), nullptr);
     GTEST_LOG_(INFO) << "WantParseUri_test_001 end";
 }
 }  // namespace DistributedSchedule
