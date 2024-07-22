@@ -68,7 +68,6 @@ const std::string CMPT_PARAM_FREEINSTALL_BUNDLENAMES = "ohos.extra.param.key.all
 const std::string FEATURE_ABILITY_FLAG_KEY = "ohos.dms.faFlag";
 const std::string DMS_VERSION_ID = "dmsVersion";
 const std::string DMS_UID_SPEC_BUNDLE_NAME = "dmsCallerUidBundleName";
-constexpr int32_t QOS_THRESHOLD_VERSION = 5;
 const int DEFAULT_REQUEST_CODE = -1;
 }
 
