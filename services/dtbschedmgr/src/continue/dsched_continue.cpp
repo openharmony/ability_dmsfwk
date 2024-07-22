@@ -1170,8 +1170,7 @@ int32_t DSchedContinue::SendCommand(std::shared_ptr<DSchedContinueCmdBase> cmd)
         return ret;
     }
     auto buffer = std::make_shared<DSchedDataBuffer>(jsonStr.length() + 1);
-    ret = memcpy_s(buffer->Data(), buffer->Capacity(),
-        reinterpret_cast<uint8_t *>(const_cast<char *>(jsonStr.c_str())), jsonStr.length());
+    ret = memcpy_s(buffer->Data(), buffer->Capacity(), jsonStr.c_str(), jsonStr.length());
     if (ret != ERR_OK) {
         HILOGE("SendCommand memcpy_s failed, cmd %{public}d, ret %{public}d", cmd->command_, ret);
         return ret;

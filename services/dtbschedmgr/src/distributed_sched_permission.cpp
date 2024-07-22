@@ -684,7 +684,7 @@ int32_t DistributedSchedPermission::GetDeviceSecurityLevel(const std::string& ud
 {
     DeviceIdentify devIdentify;
     devIdentify.length = DEVICE_ID_MAX_LEN;
-    int32_t ret = memcpy_s(devIdentify.identity, DEVICE_ID_MAX_LEN, udid.c_str(), DEVICE_ID_MAX_LEN);
+    int32_t ret = memcpy_s(devIdentify.identity, DEVICE_ID_MAX_LEN, udid.c_str(), udid.length());
     if (ret != 0) {
         HILOGE("str copy failed %{public}d", ret);
         return DEFAULT_DEVICE_SECURITY_LEVEL;
