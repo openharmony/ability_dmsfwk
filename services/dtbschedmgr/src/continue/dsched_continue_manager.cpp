@@ -21,6 +21,7 @@
 #include "cJSON.h"
 
 #include "continue_scene_session_handler.h"
+#include "distributed_radar.h"
 #include "distributed_sched_utils.h"
 #include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
@@ -214,9 +215,10 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
 void DSchedContinueManager::HandleContinueMissionWithBundleName(const DSchedContinueInfo &info,
     const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
-    int32_t direction = CheckContinuationLimit(info.sourceDeviceId_, info.sinkDeviceId_);
-    if (direction != CONTINUE_SOURCE && direction != CONTINUE_SINK) {
-        HILOGE("CheckContinuationLimit failed, ret: %{public}d", direction);
+    int32_t direction = CONTINUE_SINK;
+    int32_t ret = CheckContinuationLimit(info.sourceDeviceId_, info.sinkDeviceId_, direction);
+    if (ret != ERR_OK) {
+        HILOGE("CheckContinuationLimit failed, ret: %{public}d", ret);
         return;
     }
 
@@ -314,6 +316,8 @@ void DSchedContinueManager::HandleStartContinuation(const OHOS::AAFwk::Want& wan
     auto dContinue = GetDSchedContinueByWant(want, missionId);
     if (dContinue != nullptr) {
         dContinue->OnStartContinuation(want, callerUid, status, accessToken);
+    } else {
+        DmsRadar::GetInstance().SaveDataDmsRemoteWant("HandleStartContinuation", INVALID_PARAMETERS_ERR);
     }
     HILOGI("end");
     return;
@@ -324,6 +328,7 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
 {
     std::string srcDeviceId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId)) {
+        DmsRadar::GetInstance().SaveDataDmsRemoteWant("GetDSchedContinueByWant", GET_LOCAL_DEVICE_ERR);
         HILOGE("get local deviceId failed!");
         return nullptr;
     }
@@ -558,11 +563,16 @@ void DSchedContinueManager::NotifyContinueDataRecv(int32_t sessionId, int32_t co
             HILOGE("Unmarshal start cmd failed, ret: %{public}d", ret);
             return;
         }
-        ret = CheckContinuationLimit(startCmd->srcDeviceId_, startCmd->dstDeviceId_);
-        if (ret != CONTINUE_SINK && ret != CONTINUE_SOURCE) {
+        int32_t direction = CONTINUE_SINK;
+        ret = CheckContinuationLimit(startCmd->srcDeviceId_, startCmd->dstDeviceId_, direction);
+        if (direction == CONTINUE_SINK) {
+            DmsRadar::GetInstance().SaveDataDmsRemoteWant("NotifyContinueDataRecv", ret);
+        }
+        if (ret != ERR_OK) {
             HILOGE("CheckContinuationSubType failed, ret: %{public}d", ret);
             return;
         }
+
         auto newContinue = std::make_shared<DSchedContinue>(startCmd, sessionId);
         newContinue->Init();
         continues_.insert(std::make_pair(newContinue->GetContinueInfo(), newContinue));
@@ -576,7 +586,7 @@ void DSchedContinueManager::NotifyContinueDataRecv(int32_t sessionId, int32_t co
 }
 
 int32_t DSchedContinueManager::CheckContinuationLimit(const std::string& srcDeviceId,
-    const std::string& dstDeviceId)
+    const std::string& dstDeviceId, int32_t &direction)
 {
     std::string localDevId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDevId)) {
@@ -584,7 +594,7 @@ int32_t DSchedContinueManager::CheckContinuationLimit(const std::string& srcDevi
         return GET_LOCAL_DEVICE_ERR;
     }
 
-    int32_t direction = CONTINUE_SINK;
+    direction = CONTINUE_SINK;
     if (dstDeviceId == localDevId) {
         if (cntSink_.load() >= MAX_CONCURRENT_SINK) {
             HILOGE("can't deal more than %{public}d pull requests at the same time.", cntSink_.load());
@@ -608,7 +618,7 @@ int32_t DSchedContinueManager::CheckContinuationLimit(const std::string& srcDevi
         HILOGE("source or target device must be local!");
         return OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET;
     }
-    return direction;
+    return ERR_OK;
 }
 
 int32_t DSchedContinueManager::GetContinueInfo(std::string &srcDeviceId, std::string &dstDeviceId)

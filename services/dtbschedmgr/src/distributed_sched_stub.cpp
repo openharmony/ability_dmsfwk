@@ -696,12 +696,6 @@ bool DistributedSchedStub::IsUsingQos(const std::string& remoteDeviceId)
         HILOGW("remote deviceId empty, using rpc");
         return false;
     }
-
-    DmsVersion thresholdDmsVersion = {QOS_THRESHOLD_VERSION, 0, 0};
-    if (DmsVersionManager::IsRemoteDmsVersionLower(remoteDeviceId, thresholdDmsVersion)) {
-        HILOGW("remote dms not support qos, using rpc");
-        return false;
-    }
     HILOGI("remote device satisfied qos condition");
     return true;
 }
