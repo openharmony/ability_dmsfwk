@@ -613,7 +613,6 @@ void NotifyDSchedEventResultFromRemoteInnerFuzzTest(const uint8_t* data, size_t 
     MessageOption option;
     int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
     std::string str(reinterpret_cast<const char*>(data), size);
-    std::vector<std::string> strVector = {str};
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
@@ -682,7 +681,6 @@ void DisconnectAbilityFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
     AppExecFwk::CompatibleAbilityInfo compatibleAbilityInfo;
     int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
     std::string str(reinterpret_cast<const char*>(data), size);
-    std::vector<std::string> strVector = {str};
 
     sptr<IRemoteObject> connect(new MockDistributedSched());
     PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, connect);
@@ -738,7 +736,6 @@ void NotifyMissionsChangedFromRemoteInnerFuzzTest(const uint8_t* data, size_t si
     MessageOption option;
     int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
     std::string str(reinterpret_cast<const char*>(data), size);
-    std::vector<std::string> strVector = {str};
     std::vector<DstbMissionInfo> missionInfos;
     CallerInfo callerInfo;
     DistributedWant dstbWant;
@@ -769,7 +766,6 @@ void ReleaseAbilityFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
     Want want;
     const CallerInfo callerInfo;
     std::string str(reinterpret_cast<const char*>(data), size);
-    std::vector<std::string> strVector = {str};
     int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, connect);
