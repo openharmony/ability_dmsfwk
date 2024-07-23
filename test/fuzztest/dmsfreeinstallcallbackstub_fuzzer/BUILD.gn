@@ -45,7 +45,7 @@ ohos_fuzztest("DmsFreeInstallCallBackStubFuzzTest") {
   sources = [
     "${dms_path}/test/fuzztest/util/mock_fuzz_util.cpp",
     "dmsfreeinstallcallbackstub_fuzzer.cpp",
-    ]
+  ]
 
   deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
 

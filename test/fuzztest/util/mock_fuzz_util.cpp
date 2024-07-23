@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "fuzz_util.h"
+#include "mock_fuzz_util.h"
 
 #include "accesstoken_kit.h"
 #include "nativetoken_kit.h"
@@ -28,7 +28,25 @@ constexpr const char* FOUNDATION_PROCESS_NAME = "foundation";
 void FuzzUtil::MockPermission()
 {
     static const char *perms[] = {
-        "ohos.permission.DISTRIBUTED_DATASYNC"
+        "ohos.permission.ABILITY_BACKGROUND_COMMUNICATION",
+        "ohos.permission.ACCESS_SERVICE_DM",
+        "ohos.permission.ACCESS_SERVICE_DP",
+        "ohos.permission.DISTRIBUTED_DATASYNC",
+        "ohos.permission.INPUT_MONITORING",
+        "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED",
+        "ohos.permission.GET_WIFI_INFO",
+        "ohos.permission.MANAGE_MISSIONS",
+        "ohos.permission.MANAGE_WIFI_CONNECTION",
+        "ohos.permission.MONITOR_DEVICE_NETWORK_STATE",
+        "ohos.permission.PUBLISH_SYSTEM_COMMON_EVENT",
+        "ohos.permission.REPORT_RESOURCE_SCHEDULE_EVENT",
+        "ohos.permission.RUNNING_STATE_OBSERVER",
+        "ohos.permission.START_INVISIBLE_ABILITY",
+        "ohos.permission.INPUT_MONITORING",
+        "ohos.permission.MANAGE_MISSIONS",
+        "ohos.permission.MANAGE_WIFI_CONNECTION",
+        "ohos.permission.MONITOR_DEVICE_NETWORK_STATE",
+        "ohos.permission.START_INVISIBLE_ABILITY"
     };
     MockProcessAndPermission(FOUNDATION_PROCESS_NAME, perms, 1);
 }
@@ -49,6 +67,7 @@ void FuzzUtil::MockProcessAndPermission(const char* processName, const char *per
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
     OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
+    setuid(0);
 }
 }
 }

@@ -21,13 +21,12 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
 
   visibility = [ ":*" ]
   include_dirs = [
-    "${dms_path}/test/fuzztest/distributedschedstub_fuzzer",
-    "${dms_path}/services/dtbschedmgr/include/",
-    "${dms_path}/services/dtbschedmgr/include/dfx/",
+    "${dms_path}/common/include/",
     "${dms_path}/interfaces/innerkits/common/include/",
-    "${dms_path}/common/include/",
+    "${dms_path}/services/dtbschedmgr/include/",
     "${dms_path}/services/dtbschedmgr/include/collaborate/",
-    "${dms_path}/common/include/",
+    "${dms_path}/services/dtbschedmgr/include/dfx/",
+    "${dms_path}/test/fuzztest/distributedschedstub_fuzzer",
     "${dms_path}/test/fuzztest/util",
   ]
 
@@ -47,7 +46,6 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/unittest/mock_distributed_sched.cpp",
     "${dms_path}/test/fuzztest/util/mock_fuzz_util.cpp",
     "distributedschedstub_fuzzer.cpp",
-    "fuzz_util.cpp",
   ]
 
   deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
