@@ -241,7 +241,8 @@ HWTEST_F(DSchedContinueManagerTest, CheckContinuationLimit_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinueManagerTest CheckContinuationLimit_001 begin" << std::endl;
     int32_t direction = 0;
-    int32_t ret = DSchedContinueManager::GetInstance().CheckContinuationLimit(LOCAL_DEVICEID, REMOTE_DEVICEID, direction);
+    int32_t ret = DSchedContinueManager::GetInstance().CheckContinuationLimit(LOCAL_DEVICEID, REMOTE_DEVICEID,
+        direction);
     EXPECT_EQ(ret, OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET);
     DTEST_LOG << "DSchedContinueManagerTest CheckContinuationLimit_001 end" << std::endl;
 }
