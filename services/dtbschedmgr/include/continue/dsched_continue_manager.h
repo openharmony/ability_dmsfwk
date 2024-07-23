@@ -78,7 +78,7 @@ private:
     void HandleDataRecv(int32_t sessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer);
     void NotifyContinueDataRecv(int32_t sessionId, int32_t command, const std::string& jsonStr,
         std::shared_ptr<DSchedDataBuffer> dataBuffer);
-    int32_t CheckContinuationLimit(const std::string& srcDeviceId, const std::string& dstDeviceId);
+    int32_t CheckContinuationLimit(const std::string& srcDeviceId, const std::string& dstDeviceId, int32_t &direction);
     void WaitAllConnectDecision(int32_t direction, const DSchedContinueInfo &info, int32_t timeout);
     void SetTimeOut(const DSchedContinueInfo& info, int32_t timeout);
     void RemoveTimeout(const DSchedContinueInfo& info);

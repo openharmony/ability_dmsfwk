@@ -41,7 +41,7 @@ bool DmsVersionManager::IsRemoteDmsVersionLower(const std::string& remoteDeviceI
     DmsVersion dmsVersion;
     int32_t result = GetRemoteDmsVersion(remoteDeviceId, dmsVersion);
     if (result != ERR_OK) {
-        return true;
+        return false;
     }
     return CompareDmsVersion(dmsVersion, thresholdDmsVersion);
 }
