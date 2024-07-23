@@ -69,12 +69,12 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
             DmsBmStorage::GetInstance()->UpdateDistributedData();
             break;
         case PACKAGE_ADDED :
-            HILOGI("PACKAGE_ADDED");
+            HILOGI("PACKAGE_ADDED: %{public}s", want.GetElement().GetBundleName().c_str());
             DmsBmStorage::GetInstance()->SaveStorageDistributeInfo(want.GetElement().GetBundleName());
             break;
         case PACKAGE_CHANGED :
-            HILOGI("PACKAGE_CHANGED");
-            DmsBmStorage::GetInstance()->SaveStorageDistributeInfo(want.GetElement().GetBundleName());
+            HILOGI("PACKAGE_CHANGED: %{public}s", want.GetElement().GetBundleName().c_str());
+            DmsBmStorage::GetInstance()->SaveStorageDistributeInfo(want.GetElement().GetBundleName(), true);
             break;
         case PACKAGE_REMOVED :
             HILOGI("PACKAGE_REMOVED");

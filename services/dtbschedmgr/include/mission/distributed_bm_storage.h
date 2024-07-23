@@ -53,7 +53,7 @@ public:
     ~DmsBmStorage();
     static std::shared_ptr<DmsBmStorage> GetInstance();
     OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> GetBundleMgr();
-    bool SaveStorageDistributeInfo(const std::string &bundleName);
+    bool SaveStorageDistributeInfo(const std::string &bundleName, bool isPackageChange = false);
     bool DeleteStorageDistributeInfo(const std::string &bundleName);
     bool GetStorageDistributeInfo(const std::string &networkId, const std::string &bundleName,
         DmsBundleInfo &info);
@@ -69,6 +69,8 @@ public:
     int32_t CloudSync();
     void DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos);
     bool UpdatePublicRecords(const std::string &localUdid);
+    void UpdatePackageChangedAction(const bool &state);
+    bool IsPackageChangedAction();
 
 private:
     std::string DeviceAndNameToKey(const std::string &udid, const std::string &bundleName) const;
@@ -76,10 +78,11 @@ private:
     bool CheckKvStore();
     DistributedKv::Status GetKvStore();
     bool DealGetBundleName(const std::string &networkId, const uint16_t& bundleNameId, std::string &bundleName);
-    uint16_t CreateBundleNameId(const std::string &bundleName);
+    uint16_t CreateBundleNameId(const std::string &bundleName, bool isPackageChange = false);
     void AddBundleNameId(const uint16_t &bundleNameId, const std::string &bundleName);
     void DelBundleNameId(const std::string &bundleName);
-    DmsBundleInfo ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo);
+    DmsBundleInfo ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo,
+        bool isPackageChange = false);
     bool InnerSaveStorageDistributeInfo(const DmsBundleInfo &distributedBundleInfo, const std::string &localUdid);
     std::map<std::string, DmsBundleInfo> GetAllOldDistributionBundleInfo(
         const std::vector<std::string> &bundleNames);
