@@ -68,6 +68,7 @@ const std::string CMPT_PARAM_FREEINSTALL_BUNDLENAMES = "ohos.extra.param.key.all
 const std::string FEATURE_ABILITY_FLAG_KEY = "ohos.dms.faFlag";
 const std::string DMS_VERSION_ID = "dmsVersion";
 const std::string DMS_UID_SPEC_BUNDLE_NAME = "dmsCallerUidBundleName";
+constexpr int32_t QOS_THRESHOLD_VERSION = 5;
 const int DEFAULT_REQUEST_CODE = -1;
 }
 
@@ -693,6 +694,12 @@ bool DistributedSchedStub::IsUsingQos(const std::string& remoteDeviceId)
 {
     if (remoteDeviceId.empty()) {
         HILOGW("remote deviceId empty, using rpc");
+        return false;
+    }
+
+    DmsVersion thresholdDmsVersion = {QOS_THRESHOLD_VERSION, 0, 0};
+    if (DmsVersionManager::IsRemoteDmsVersionLower(remoteDeviceId, thresholdDmsVersion)) {
+        HILOGW("remote dms not support qos, using rpc");
         return false;
     }
     HILOGI("remote device satisfied qos condition");
