@@ -16,23 +16,20 @@ import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/dmsfwk/dmsfwk.gni")
-ohos_fuzztest("DSchedTransportSoftbusAdapterFuzzTest") {
+ohos_fuzztest("DSchedAllConnectManagerFuzzTest") {
   module_out_path = module_output_path
 
   visibility = [ ":*" ]
   include_dirs = [
-    "${dms_path}/test/fuzztest/dschedtransportsoftbusadapter_fuzzer",
+    "${dms_path}/test/fuzztest/dschedallconnectmanager_fuzzer",
     "${dms_path}/services/dtbschedmgr/include/",
     "${dms_path}/interfaces/innerkits/common/include/",
     "${dms_path}/services/dtbschedmgr/include/collaborate/",
     "${dms_path}/common/include/",
-    "${dms_path}/services/dtbschedmgr/include/softbus_adapter/transport",
-    "${dms_path}/services/dtbschedmgr/include/continue",
-    "${dms_path}/services/dtbschedmgr/include/continue/state",
+    "${dms_path}/services/dtbschedmgr/include/softbus_adapter/allconnectmgr",
   ]
 
-  fuzz_config_file =
-      "${dms_path}/test/fuzztest/dschedtransportsoftbusadapter_fuzzer"
+  fuzz_config_file = "${dms_path}/test/fuzztest/dschedallconnectmanager_fuzzer"
 
   configs = [ "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags" ]
 
@@ -44,7 +41,7 @@ ohos_fuzztest("DSchedTransportSoftbusAdapterFuzzTest") {
     "-Dprivate=public",
   ]
 
-  sources = [ "dschedtransportsoftbusadapter_fuzzer.cpp" ]
+  sources = [ "dschedallconnectmanager_fuzzer.cpp" ]
 
   deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
 
@@ -91,5 +88,5 @@ ohos_fuzztest("DSchedTransportSoftbusAdapterFuzzTest") {
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":DSchedTransportSoftbusAdapterFuzzTest" ]
+  deps = [ ":DSchedAllConnectManagerFuzzTest" ]
 }

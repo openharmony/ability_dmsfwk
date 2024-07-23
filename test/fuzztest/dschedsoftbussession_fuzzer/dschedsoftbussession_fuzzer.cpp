@@ -28,6 +28,11 @@ void FuzzOnBytesReceived(const uint8_t* data, size_t size)
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(size);
     DSchedSoftbusSession dschedSoftbusSession;
     dschedSoftbusSession.OnBytesReceived(buffer);
+    dschedSoftbusSession.OnConnect();
+    dschedSoftbusSession.GetPeerDeviceId();
+    int32_t dataType = *(reinterpret_cast<const int32_t*>(data));
+    dschedSoftbusSession.SendData(buffer, dataType);
+    dschedSoftbusSession.OnDisconnect();
 }
 }
 }

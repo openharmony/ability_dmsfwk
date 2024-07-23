@@ -22,6 +22,7 @@ group("fuzztest") {
     "distributedwant_fuzzer:fuzztest",
     "distributedwantparams_fuzzer:fuzztest",
     "dmsfreeinstallcallbackstub_fuzzer:fuzztest",
+    "dschedallconnectmanager_fuzzer:fuzztest",
     "dschedsoftbussession_fuzzer:fuzztest",
     "dschedtransportsoftbusadapter_fuzzer:fuzztest",
   ]
