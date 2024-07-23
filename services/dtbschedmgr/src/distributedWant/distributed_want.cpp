@@ -25,10 +25,7 @@
 #include "base_obj.h"
 #include "bool_wrapper.h"
 #include "byte_wrapper.h"
-#include "distributed_operation_builder.h"
-#include "distributed_want_params_wrapper.h"
 #include "double_wrapper.h"
-#include "dtbschedmgr_log.h"
 #include "float_wrapper.h"
 #include "int_wrapper.h"
 #include "long_wrapper.h"
@@ -38,6 +35,10 @@
 #include "string_ex.h"
 #include "string_wrapper.h"
 #include "zchar_wrapper.h"
+
+#include "distributed_operation_builder.h"
+#include "distributed_want_params_wrapper.h"
+#include "dtbschedmgr_log.h"
 
 using namespace OHOS::AppExecFwk;
 using OHOS::AppExecFwk::ElementName;
@@ -896,51 +897,48 @@ DistributedWant* DistributedWant::ParseUri(const std::string& uri)
     if (!CheckParams(uri)) {
         return nullptr;
     }
-    bool ret = true;
-    std::size_t begin = WANT_HEADER.length();
-    ElementName element;
-    DistributedWant* want = new (std::nothrow) DistributedWant();
-    if (want == nullptr) {
+
+    DistributedWant* baseWant = new (std::nothrow) DistributedWant();
+    if (baseWant == nullptr) {
         return nullptr;
     }
-    DistributedWant* baseWant = want;
+    DistributedWant* pickWant = new (std::nothrow) DistributedWant();
+    if (pickWant == nullptr) {
+        delete baseWant;
+        return nullptr;
+    }
     bool inPicker = false;
+    bool ret = true;
+    ElementName element;
+    std::size_t begin = WANT_HEADER.length();
     std::size_t pos = uri.find_first_of(";", begin);
-    do {
-        if (pos == std::string::npos) {
-            break;
-        }
+    for (; pos != std::string::npos; pos = uri.find(";", begin)) {
         std::string content = uri.substr(begin, pos - begin);
         if (content.compare("PICK") == 0) {
-            if (want != nullptr) {
-                delete want;
-            }
-            want = new (std::nothrow) DistributedWant();
-            if (want == nullptr) {
-                delete baseWant;
-                return nullptr;
-            }
             inPicker = true;
+            begin = pos + 1;
             continue;
         }
-        ret = ParseUriInternal(content, element, *want);
+
+        ret = inPicker ? ParseUriInternal(content, element, *pickWant) : ParseUriInternal(content, element, *baseWant);
         if (!ret) {
+            HILOGE("Parse uri internal fail, pos %{public}zu, inPicker %{public}d.", pos, inPicker);
             break;
         }
         begin = pos + 1;
-        pos = uri.find(";", begin);
-        if (pos == std::string::npos) {
-            break;
-        }
-    } while (true);
-    want = inPicker ? baseWant : want;
-    if (ret) {
-        want->SetElement(element);
-    } else {
-        delete want;
-        want = nullptr;
+    };
+
+    if (!ret) {
+        delete pickWant;
+        delete baseWant;
+        return nullptr;
     }
-    return want;
+
+    DistributedWant* retWant = inPicker ? pickWant : baseWant;
+    DistributedWant* delWant = inPicker ? baseWant : pickWant;
+    delete delWant;
+    retWant->SetElement(element);
+    return retWant;
 }
 
 DistributedWant* DistributedWant::WantParseUri(const char* uri)

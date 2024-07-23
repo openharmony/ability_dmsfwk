@@ -115,7 +115,7 @@ HWTEST_F(DSchedContinueManagerTest, ContinueMission_001, TestSize.Level3)
     OHOS::AAFwk::WantParams wantParams;
     int32_t ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, MISSION_ID,
         callback, wantParams);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueManagerTest ContinueMission_001 end" << std::endl;
 }
 
@@ -136,7 +136,7 @@ HWTEST_F(DSchedContinueManagerTest, ContinueMission_002, TestSize.Level3)
 
     int32_t ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, MISSION_ID,
         callback, wantParams);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueManagerTest ContinueMission_002 end" << std::endl;
 }
 
@@ -228,7 +228,7 @@ HWTEST_F(DSchedContinueManagerTest, StartContinuation_001, TestSize.Level3)
     uint32_t accessToken = 0;
     int32_t ret1 = DSchedContinueManager::GetInstance().StartContinuation(want, missionId,
         callerUid, status, accessToken);
-    EXPECT_EQ(ret1, ERR_OK);
+    EXPECT_EQ(ret1, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueManagerTest StartContinuation_001 end" << std::endl;
 }
 

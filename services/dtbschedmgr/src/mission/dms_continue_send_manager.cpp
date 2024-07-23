@@ -118,14 +118,16 @@ void DMSContinueSendMgr::PostUnfocusedTaskWithDelay(const int32_t missionId, Unf
             DmsRadar::GetInstance().RecordTime("funcOut");
             DealUnfocusedBusiness(missionId, UnfocusedReason::TIMEOUT);
         };
-        eventHandler_->RemoveTask(TIMEOUT_UNFOCUSED_TASK);
-        eventHandler_->PostTask(funcOut, TIMEOUT_UNFOCUSED_TASK, CANCEL_FOCUSED_DELAYED);
+        std::string timeoutTaskName = TIMEOUT_UNFOCUSED_TASK + std::to_string(missionId);
+        eventHandler_->RemoveTask(timeoutTaskName);
+        eventHandler_->PostTask(funcOut, timeoutTaskName, CANCEL_FOCUSED_DELAYED);
     } else if (reason == UnfocusedReason::SCREENOFF) {
         auto funcOff = [this]() {
             SendScreenOffEvent(DMS_UNFOCUSED_TYPE);
         };
-        eventHandler_->RemoveTask(SCREEN_OFF_UNFOCUSED_TASK);
-        eventHandler_->PostTask(funcOff, SCREEN_OFF_UNFOCUSED_TASK, SCREEN_OFF_DELAY_TIME);
+        std::string scrOffTaskName = SCREEN_OFF_UNFOCUSED_TASK + std::to_string(missionId);
+        eventHandler_->RemoveTask(scrOffTaskName);
+        eventHandler_->PostTask(funcOff, scrOffTaskName, SCREEN_OFF_DELAY_TIME);
     }
 }
 
@@ -154,8 +156,8 @@ void DMSContinueSendMgr::NotifyMissionFocused(const int32_t missionId, FocusedRe
         HILOGE("eventHandler_ is nullptr");
         return;
     }
-    eventHandler_->RemoveTask(TIMEOUT_UNFOCUSED_TASK);
-    eventHandler_->RemoveTask(SCREEN_OFF_UNFOCUSED_TASK);
+    eventHandler_->RemoveTask(TIMEOUT_UNFOCUSED_TASK + std::to_string(missionId));
+    eventHandler_->RemoveTask(SCREEN_OFF_UNFOCUSED_TASK + std::to_string(missionId));
     eventHandler_->PostTask(feedfunc);
 }
 
@@ -171,7 +173,7 @@ void DMSContinueSendMgr::NotifyMissionUnfocused(const int32_t missionId, Unfocus
         DealUnfocusedBusiness(missionId, reason);
     };
     if (eventHandler_ != nullptr) {
-        eventHandler_->RemoveTask(TIMEOUT_UNFOCUSED_TASK);
+        eventHandler_->RemoveTask(TIMEOUT_UNFOCUSED_TASK + std::to_string(missionId));
         eventHandler_->PostTask(feedfunc);
     } else {
         HILOGE("eventHandler_ is nullptr");
@@ -521,7 +523,7 @@ int32_t DMSContinueSendMgr::SetMissionContinueState(const int32_t missionId,
         }
     };
     if (eventHandler_ != nullptr) {
-        eventHandler_->RemoveTask(TIMEOUT_UNFOCUSED_TASK);
+        eventHandler_->RemoveTask(TIMEOUT_UNFOCUSED_TASK + std::to_string(missionId));
         eventHandler_->PostTask(feedfunc);
     } else {
         HILOGE("eventHandler_ is nullptr");

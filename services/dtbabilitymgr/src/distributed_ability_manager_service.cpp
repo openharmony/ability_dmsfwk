@@ -539,7 +539,7 @@ bool DistributedAbilityManagerService::IsTokenRegistered(uint32_t accessToken, i
     std::lock_guard<std::mutex> tokenMapLock(tokenMapMutex_);
     auto iter = tokenMap_.find(accessToken);
     if (iter == tokenMap_.end()) {
-        HILOGE("accessToken %{public}u has not registered", accessToken);
+        HILOGE("accessToken has not registered in token map.");
         return false;
     }
     for (auto it = iter->second.begin(); it != iter->second.end(); it++) {
@@ -556,7 +556,7 @@ bool DistributedAbilityManagerService::IsNotifierRegistered(int32_t token)
     // must be in callbackMapLock scope
     auto iter = callbackMap_.find(token);
     if (iter == callbackMap_.end()) {
-        HILOGE("never registered, token: %{public}d ", token);
+        HILOGE("accessToken has not registered in callback map.");
         return false;
     }
     if (iter->second == nullptr) {

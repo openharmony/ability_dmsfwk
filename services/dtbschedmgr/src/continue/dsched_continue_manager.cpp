@@ -110,6 +110,23 @@ void DSchedContinueManager::NotifyAllConnectDecision(std::string peerDeviceId, b
 int32_t DSchedContinueManager::ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
     int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
+    if (srcDeviceId.empty() || dstDeviceId.empty() || callback == nullptr) {
+        HILOGE("srcDeviceId or dstDeviceId or callback is null!");
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    std::string localDevId;
+    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDevId)) {
+        HILOGE("get local deviceId failed!");
+        return INVALID_PARAMETERS_ERR;
+    }
+    if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(
+        localDevId == srcDeviceId ? dstDeviceId : srcDeviceId) == nullptr) {
+        HILOGE("GetDeviceInfoById fail, locDevId: %{public}s, srcDevId: %{public}s, dstDevId: %{public}s.",
+            GetAnonymStr(localDevId).c_str(), GetAnonymStr(srcDeviceId).c_str(), GetAnonymStr(dstDeviceId).c_str());
+        return INVALID_REMOTE_PARAMETERS_ERR;
+    }
+
     auto func = [this, srcDeviceId, dstDeviceId, missionId, callback, wantParams]() {
         HandleContinueMission(srcDeviceId, dstDeviceId, missionId, callback, wantParams);
     };
@@ -296,6 +313,17 @@ void DSchedContinueManager::SetTimeOut(const DSchedContinueInfo &info, int32_t t
 int32_t DSchedContinueManager::StartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId,
     int32_t callerUid, int32_t status, uint32_t accessToken)
 {
+    std::string dstDeviceId = want.GetElement().GetDeviceID();
+    if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(dstDeviceId) == nullptr) {
+        HILOGE("GetDeviceInfoById fail, dstDevId: %{public}s.", GetAnonymStr(dstDeviceId).c_str());
+        return INVALID_REMOTE_PARAMETERS_ERR;
+    }
+    if (GetDSchedContinueByWant(want, missionId) == nullptr) {
+        HILOGE("GetDSchedContinueByWant fail, dstDevId: %{public}s, missionId: %{public}d.",
+            GetAnonymStr(dstDeviceId).c_str(), missionId);
+        return INVALID_REMOTE_PARAMETERS_ERR;
+    }
+
     auto func = [this, want, missionId, callerUid, status, accessToken]() {
         HandleStartContinuation(want, missionId, callerUid, status, accessToken);
     };
@@ -327,8 +355,8 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
         HILOGE("get local deviceId failed!");
         return nullptr;
     }
-    std::string dstDeviceId = want.GetElement().GetDeviceID().c_str();
-    std::string bundleName = want.GetElement().GetBundleName().c_str();
+    std::string dstDeviceId = want.GetElement().GetDeviceID();
+    std::string bundleName = want.GetElement().GetBundleName();
     auto info = DSchedContinueInfo(srcDeviceId, bundleName, dstDeviceId, bundleName, "");
 
     HILOGI("continue info: %{public}s.", info.toString().c_str());

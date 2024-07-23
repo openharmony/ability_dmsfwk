@@ -208,7 +208,7 @@ bool DistributedSchedPermission::CheckDstSameAccount(const std::string& dstNetwo
         .accountId = dmsAccountInfo.activeAccountId,
         .networkId = callerInfo.sourceDeviceId,
         .userId = dmsAccountInfo.userId,
-        .tokenId = 0,
+        .tokenId = callerInfo.accessToken,
     };
     DmAccessCallee dmDstCallee = {
         .networkId = dstNetworkId,
@@ -239,7 +239,7 @@ bool DistributedSchedPermission::CheckAclList(const std::string& dstNetworkId,
         .accountId = dmsAccountInfo.activeAccountId,
         .networkId = callerInfo.sourceDeviceId,
         .userId = dmsAccountInfo.userId,
-        .tokenId = 0,
+        .tokenId = callerInfo.accessToken,
     };
     DmAccessCallee dmDstCallee = {
         .networkId = dstNetworkId,
@@ -497,7 +497,7 @@ bool DistributedSchedPermission::CheckAccountAccessPermission(const CallerInfo& 
         .pkgName = targetBundleName,
         .networkId = callerInfo.sourceDeviceId,
         .userId = accountInfo.userId,
-        .tokenId = 0,
+        .tokenId = callerInfo.accessToken,
     };
     DmAccessCallee dmDstCallee = {
         .networkId = dstNetworkId,
