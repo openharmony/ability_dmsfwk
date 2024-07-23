@@ -26,6 +26,7 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
     "${dms_path}/services/dtbschedmgr/include/",
     "${dms_path}/services/dtbschedmgr/include/collaborate/",
     "${dms_path}/services/dtbschedmgr/include/dfx/",
+    "${dms_path}/services/dtbschedmgr/test/unittest",
     "${dms_path}/test/fuzztest/distributedschedstub_fuzzer",
     "${dms_path}/test/fuzztest/util",
   ]
@@ -54,7 +55,6 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
   if (dmsfwk_mission_manager) {
     defines += [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
   }
-
   if (dmsfwk_standard_form_share) {
     defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
   }
@@ -93,7 +93,6 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
-  
   if (dmsfwk_standard_form_share) {
     external_deps += [ "form_fwk:form_manager" ]
   }
