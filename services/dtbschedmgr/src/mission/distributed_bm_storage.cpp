@@ -82,7 +82,7 @@ bool IsContinuable(AppExecFwk::BundleInfo bundleInfo)
     return false;
 }
 
-bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName)
+bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool isPackageChange)
 {
     HILOGI("called.");
     if (!CheckKvStore()) {
@@ -107,7 +107,7 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName)
         HILOGE("GetLocalUdid failed");
         return false;
     }
-    ret = InnerSaveStorageDistributeInfo(ConvertToDistributedBundleInfo(bundleInfo), localUdid);
+    ret = InnerSaveStorageDistributeInfo(ConvertToDistributedBundleInfo(bundleInfo, isPackageChange), localUdid);
     if (!ret) {
         HILOGW("InnerSaveStorageDistributeInfo:%{public}s  failed", bundleName.c_str());
         return false;
@@ -553,12 +553,12 @@ bool DmsBmStorage::GetLastBundleNameId(uint16_t &bundleNameId)
     return false;
 }
 
-uint16_t DmsBmStorage::CreateBundleNameId(const std::string &bundleName)
+uint16_t DmsBmStorage::CreateBundleNameId(const std::string &bundleName, bool isPackageChange)
 {
     HILOGI("called.");
     uint16_t bundleNameId = 0;
-    if (GetBundleNameId(bundleName, bundleNameId)) {
-        HILOGI("The bundleNameId already exists in the bundleName.");
+    if (isPackageChange && GetBundleNameId(bundleName, bundleNameId)) {
+        HILOGI("The bundleNameId: %{public}d already exists in the bundleName.", bundleNameId);
         return bundleNameId;
     }
     if (bundleNameIdTables_.empty()) {
@@ -571,7 +571,7 @@ uint16_t DmsBmStorage::CreateBundleNameId(const std::string &bundleName)
     GetLastBundleNameId(lastBundleNameId);
     lastBundleNameId = std::max((bundleNameIdTables_.rbegin())->first, lastBundleNameId);
     if (lastBundleNameId < MAX_BUNDLEID) {
-        HILOGI("Add bundleNameId.");
+        HILOGI("Add bundleNameId: %{public}d", lastBundleNameId + 1);
         std::lock_guard<std::mutex> lock_l(mutex_);
         bundleNameIdTables_.insert(std::make_pair(lastBundleNameId + 1, bundleName));
         return lastBundleNameId + 1;
@@ -616,7 +616,8 @@ bool DmsBmStorage::RebuildLocalData()
     return true;
 }
 
-DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo)
+DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo,
+    bool isPackageChange)
 {
     DmsBundleInfo distributedBundleInfo;
     if (bundleInfo.name == "") {
@@ -631,7 +632,7 @@ DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::Bun
     distributedBundleInfo.targetVersionCode = bundleInfo.targetVersion;
     distributedBundleInfo.appId = bundleInfo.appId;
     distributedBundleInfo.enabled = bundleInfo.applicationInfo.enabled;
-    distributedBundleInfo.bundleNameId = CreateBundleNameId(bundleInfo.name);
+    distributedBundleInfo.bundleNameId = CreateBundleNameId(bundleInfo.name, isPackageChange);
     distributedBundleInfo.updateTime = bundleInfo.updateTime;
     uint8_t pos = 0;
     for (const auto &abilityInfo : bundleInfo.abilityInfos) {

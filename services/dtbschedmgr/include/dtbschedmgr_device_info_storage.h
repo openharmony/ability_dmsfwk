@@ -44,6 +44,7 @@ public:
     void Stop();
     bool GetLocalDeviceId(std::string& networkId);
     bool GetLocalUdid(std::string& udid);
+    bool GetLocalUuid(std::string& uuid);
     void DeviceOnlineNotify(const std::shared_ptr<DmsDeviceInfo> devInfo);
     void DeviceOfflineNotify(const std::string& networkId);
     void OnDeviceInfoChanged(const std::string& networkId);

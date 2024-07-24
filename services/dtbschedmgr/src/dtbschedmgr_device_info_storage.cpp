@@ -244,6 +244,23 @@ bool DtbschedmgrDeviceInfoStorage::GetLocalUdid(std::string& udid)
     return true;
 }
 
+bool DtbschedmgrDeviceInfoStorage::GetLocalUuid(std::string& uuid)
+{
+    auto dnetworkAdapter = DnetworkAdapter::GetInstance();
+    if (dnetworkAdapter == nullptr) {
+        HILOGE("GetLocalDeviceFromDnet dnetworkAdapter null");
+        return false;
+    }
+    DmDeviceInfo dmDeviceInfo;
+    if (!dnetworkAdapter->GetLocalBasicInfo(dmDeviceInfo)) {
+        HILOGE("GetLocalBasicInfo error");
+        return false;
+    }
+    uuid = GetUuidByNetworkId(dmDeviceInfo.networkId);
+    HILOGD("GetLocalDeviceUuid = %{public}s", GetAnonymStr(uuid).c_str());
+    return true;
+}
+
 void DtbschedmgrDeviceInfoStorage::ClearAllDevices()
 {
     lock_guard<mutex> autoLock(deviceLock_);
