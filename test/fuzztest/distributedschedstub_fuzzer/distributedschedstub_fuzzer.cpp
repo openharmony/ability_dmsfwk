@@ -39,6 +39,22 @@ const std::u16string DMS_STUB_INTERFACE_TOKEN = u"ohos.distributedschedule.acces
 const uint32_t ONE = 1;
 }
 
+uint32_t GetU32Data(const uint8_t* ptr, size_t size)
+{
+    char *ch = (char *)malloc(size + 1);
+    (void)memset_s(ch, size + 1, 0x00, size + 1);
+    if (memcpy_s(ch, size + 1, ptr, size) != EOK) {
+        std::cout << "copy failed." << std::endl;
+        free(ch);
+        ch = nullptr;
+        return 0;
+    }
+    uint32_t data = (ch[0] << 24) | (ch[1] << 16) | (ch[2] << 8) | ch[3];
+    free(ch);
+    ch = nullptr;
+    return data;
+}
+
 bool StartRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
@@ -278,8 +294,8 @@ void StartSyncRemoteMissionsInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    int32_t boolData = *(reinterpret_cast<const bool*>(data));
-    int32_t int64Data = *(reinterpret_cast<const int64_t*>(data));
+    bool boolData = *(reinterpret_cast<const bool*>(data));
+    int64_t int64Data = static_cast<int64_t>(GetU32Data(data, size));
     std::string str(reinterpret_cast<const char*>(data), size);
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, String16, Str8ToStr16(str));
@@ -811,7 +827,7 @@ void StartFreeInstallFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
-    int32_t int64Data = *(reinterpret_cast<const int64_t*>(data));
+    int64_t int64Data = static_cast<int64_t>(GetU32Data(data, size));
     std::string str(reinterpret_cast<const char*>(data), size);
     std::vector<std::string> strVector = {str};
     DistributedWant dstbWant;
@@ -838,7 +854,7 @@ void NotifyCompleteFreeInstallFromRemoteInnerFuzzTest(const uint8_t* data, size_
     MessageParcel reply;
     MessageOption option;
     int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
-    int32_t int64Data = *(reinterpret_cast<const int64_t*>(data));
+    int64_t int64Data = static_cast<int64_t>(GetU32Data(data, size));
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, Int64, int64Data);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
