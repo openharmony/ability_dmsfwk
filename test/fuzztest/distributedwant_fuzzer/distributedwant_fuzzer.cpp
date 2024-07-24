@@ -170,9 +170,6 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_005(const char* data, size_
     bool boolValue = true;
     want->SetParam(key, boolValue);
     want->GetBoolParam(key, boolValue);
-
-    std::string wantStr = want->ToString();
-    want->FromString(wantStr);
     return true;
 }
 
