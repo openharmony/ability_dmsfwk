@@ -42,6 +42,10 @@ const uint32_t ONE = 1;
 uint32_t GetU32Data(const uint8_t* ptr, size_t size)
 {
     char *ch = (char *)malloc(size + 1);
+    if (ch == nullptr) {
+        std::cout << "malloc failed." << std::endl;
+        return 0;
+    }
     (void)memset_s(ch, size + 1, 0x00, size + 1);
     if (memcpy_s(ch, size + 1, ptr, size) != EOK) {
         std::cout << "copy failed." << std::endl;
