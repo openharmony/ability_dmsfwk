@@ -593,10 +593,8 @@ void DSchedContinueManager::NotifyContinueDataRecv(int32_t sessionId, int32_t co
         }
         int32_t direction = CONTINUE_SINK;
         ret = CheckContinuationLimit(startCmd->srcDeviceId_, startCmd->dstDeviceId_, direction);
-        if (direction == CONTINUE_SINK) {
-            DmsRadar::GetInstance().SaveDataDmsRemoteWant("NotifyContinueDataRecv", ret);
-        }
         if (ret != ERR_OK) {
+            DmsRadar::GetInstance().SaveDataDmsRemoteWant("NotifyContinueDataRecv", ret);
             HILOGE("CheckContinuationSubType failed, ret: %{public}d", ret);
             return;
         }
