@@ -28,4 +28,4 @@ public:
 };
 }
 } // namespace OHOS
-#endif // SAMGR_SERVICES_SAMGR_MOCK_PERMISSION_H
+#endif

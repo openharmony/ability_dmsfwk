@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <iostream>
 
+#include "bool_wrapper.h"
 #include "distributed_want.h"
 #include "securec.h"
 
@@ -49,6 +50,7 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_001(const char* data, size_
     unsigned int flags = static_cast<unsigned int>(GetU32Data(data));
     want->SetFlags(flags);
     want->RemoveFlags(flags);
+    want->AddFlags(flags);
     std::string entity(data, size);
     want->AddEntity(entity);
     want->HasEntity(entity);
@@ -57,6 +59,8 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_001(const char* data, size_
     want->SetBundle(bundleName);
     std::string deviceId(data, size);
     want->SetDeviceId(deviceId);
+    want->SetElementName(bundleName, entity);
+    want->SetElementName(deviceId, bundleName, entity);
     return true;
 }
 
@@ -76,6 +80,15 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_002(const char* data, size_
     want->GetLowerCaseScheme(uri);
     want->FormatUriAndType(uri, type);
     want->FormatMimeType(type);
+
+    std::string str(data, size);
+    want->CheckParams(str);
+    want->ParseUri(str);
+    DistributedWant wantNew;
+    want->WantToUri(wantNew);
+    want->ToUri();
+    want->GenerateUriString(str);
+    want->ToUriStringInner(str);
     return true;
 }
 
@@ -131,6 +144,7 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_004(const char* data, size_
     zchar charValue = U'\0';
     want->SetParam(key, charValue);
     want->GetCharParam(key, charValue);
+    want->GetParams();
     return true;
 }
 
@@ -153,6 +167,9 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_005(const char* data, size_
     float floatValue = 0.0;
     want->SetParam(key, floatValue);
     want->GetFloatParam(key, floatValue);
+    bool boolValue = true;
+    want->SetParam(key, boolValue);
+    want->GetBoolParam(key, boolValue);
     return true;
 }
 
@@ -163,6 +180,9 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_006(const char* data, size_
     std::vector<float> floatVector;
     want->SetParam(key, floatVector);
     want->GetFloatArrayParam(key);
+    long longValue = 0;
+    want->SetParam(key, longValue);
+    want->GetShortParam(key, longValue);
     std::vector<long> longVector;
     want->SetParam(key, longVector);
     want->GetLongArrayParam(key);
@@ -172,8 +192,22 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_006(const char* data, size_
     std::vector<short> shortVector;
     want->SetParam(key, shortVector);
     want->GetShortArrayParam(key);
+    std::string stringValue(data, size);
+    want->SetParam(key, stringValue);
+    want->GetStringParam(key);
     std::vector<std::string> stringVector;
     want->SetParam(key, stringVector);
+    want->GetStringArrayParam(key);
+    want->RemoveParam(key);
+
+    bool boolValue = true;
+    DistributedWantParams dWantParams;
+    dWantParams.SetParam(key, Boolean::Box(boolValue));
+    want->SetParams(dWantParams);
+    want->ReplaceParams(dWantParams);
+    DistributedWant dWant;
+    want->ReplaceParams(dWant);
+    want->ClearWant(&dWant);
     return true;
 }
 }

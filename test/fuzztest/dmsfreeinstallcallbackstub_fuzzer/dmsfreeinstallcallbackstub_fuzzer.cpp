@@ -17,6 +17,7 @@
 
 #include "dms_free_install_callback.h"
 #include "distributed_sched_interface.h"
+#include "mock_fuzz_util.h"
 #include "parcel_helper.h"
 
 namespace OHOS {
@@ -29,6 +30,7 @@ bool OnInstallFinishedInnerFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return false;
     }
+    FuzzUtil::MockPermission();
     int64_t taskId = 0;
     IDistributedSched::FreeInstallInfo info;
     std::shared_ptr<DmsFreeInstallCallback> freeInstall_ =

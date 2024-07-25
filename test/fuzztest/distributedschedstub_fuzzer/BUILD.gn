@@ -21,11 +21,14 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
 
   visibility = [ ":*" ]
   include_dirs = [
-    "${dms_path}/test/fuzztest/distributedschedstub_fuzzer",
-    "${dms_path}/services/dtbschedmgr/include/",
-    "${dms_path}/interfaces/innerkits/common/include/",
-    "${dms_path}/services/dtbschedmgr/include/collaborate/",
     "${dms_path}/common/include/",
+    "${dms_path}/interfaces/innerkits/common/include/",
+    "${dms_path}/services/dtbschedmgr/include/",
+    "${dms_path}/services/dtbschedmgr/include/collaborate/",
+    "${dms_path}/services/dtbschedmgr/include/dfx/",
+    "${dms_path}/services/dtbschedmgr/test/unittest",
+    "${dms_path}/test/fuzztest/distributedschedstub_fuzzer",
+    "${dms_path}/test/fuzztest/util",
   ]
 
   fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedstub_fuzzer"
@@ -41,8 +44,9 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
   ]
 
   sources = [
+    "${dms_path}/services/dtbschedmgr/test/unittest/mock_distributed_sched.cpp",
+    "${dms_path}/test/fuzztest/util/mock_fuzz_util.cpp",
     "distributedschedstub_fuzzer.cpp",
-    "fuzz_util.cpp",
   ]
 
   deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
@@ -50,6 +54,9 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
   defines = []
   if (dmsfwk_mission_manager) {
     defines += [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
+  }
+  if (dmsfwk_standard_form_share) {
+    defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
   }
 
   external_deps = [
@@ -86,6 +93,9 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+  if (dmsfwk_standard_form_share) {
+    external_deps += [ "form_fwk:form_manager" ]
+  }
 }
 
 group("fuzztest") {

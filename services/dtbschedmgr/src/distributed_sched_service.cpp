@@ -2947,7 +2947,7 @@ bool DistributedSchedService::CheckCallingUid()
 
 void DistributedSchedService::GetContinueEventInfo(int32_t callingUid, std::vector<EventNotify> &events)
 {
-    if (callingUid == DEFAULT_REQUEST_CODE) {
+    if (callingUid == DEFAULT_REQUEST_CODE && dschedContinuation_ != nullptr) {
         events.emplace_back(dschedContinuation_->continueEvent_);
         return;
     }

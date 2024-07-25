@@ -26,6 +26,7 @@ ohos_fuzztest("BundleManagerCallBackStubFuzzTest") {
     "${dms_path}/services/dtbschedmgr/include/",
     "${dms_path}/services/dtbschedmgr/include/collaborate/",
     "${dms_path}/test/fuzztest/bundlemanagercallbackstub_fuzzer",
+    "${dms_path}/test/fuzztest/util",
   ]
 
   fuzz_config_file =
@@ -41,7 +42,10 @@ ohos_fuzztest("BundleManagerCallBackStubFuzzTest") {
     "-Dprivate=public",
   ]
 
-  sources = [ "bundlemanagercallbackstub_fuzzer.cpp" ]
+  sources = [
+    "${dms_path}/test/fuzztest/util/mock_fuzz_util.cpp",
+    "bundlemanagercallbackstub_fuzzer.cpp",
+  ]
 
   deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
 

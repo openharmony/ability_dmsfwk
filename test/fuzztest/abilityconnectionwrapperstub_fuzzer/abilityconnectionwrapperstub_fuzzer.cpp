@@ -17,6 +17,7 @@
 
 #include "ability_connection_wrapper_stub.h"
 #include "mock_distributed_sched.h"
+#include "mock_fuzz_util.h"
 #include "parcel_helper.h"
 
 namespace OHOS {
@@ -28,6 +29,7 @@ bool OnAbilityConnectDoneFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return false;
     }
+    FuzzUtil::MockPermission();
     sptr<IRemoteObject> connection(new MockDistributedSched());
     std::string localDeviceId(reinterpret_cast<const char*>(data), size);
     std::shared_ptr<AbilityConnectionWrapperStub> abilityConnection_ =
@@ -37,7 +39,6 @@ bool OnAbilityConnectDoneFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    dataParcel.WriteInt32(resultCode);
     abilityConnection_->OnRemoteRequest(code, dataParcel, reply, option);
 
     std::u16string descriptor = IAbilityConnection::GetDescriptor();
@@ -52,7 +53,9 @@ bool OnAbilityConnectDoneFuzzTest(const uint8_t* data, size_t size)
     abilityConnection_->OnRemoteRequest(code, dataParcel, reply, option);
     
     dataParcel.WriteRemoteObject(connection);
+    dataParcel.WriteInt32(resultCode);
     abilityConnection_->OnRemoteRequest(code, dataParcel, reply, option);
+    abilityConnection_->OnAbilityConnectDone(element, connection, resultCode);
     return true;
 }
 
@@ -61,6 +64,7 @@ bool OnAbilityDisconnectDoneFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return false;
     }
+    FuzzUtil::MockPermission();
     sptr<IRemoteObject> connection(new MockDistributedSched());
     std::shared_ptr<AbilityConnectionWrapperStub> abilityConnection_ =
         std::make_shared<AbilityConnectionWrapperStub>(connection);
@@ -69,7 +73,6 @@ bool OnAbilityDisconnectDoneFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    dataParcel.WriteInt32(resultCode);
     std::string str1(reinterpret_cast<const char*>(data), size);
     std::string str2(reinterpret_cast<const char*>(data), size);
     std::string str3(reinterpret_cast<const char*>(data), size);
@@ -78,7 +81,9 @@ bool OnAbilityDisconnectDoneFuzzTest(const uint8_t* data, size_t size)
     AppExecFwk::ElementName element(str1, str2, str3);
     dataParcel.WriteParcelable(&element);
     dataParcel.WriteRemoteObject(connection);
+    dataParcel.WriteInt32(resultCode);
     abilityConnection_->OnRemoteRequest(code, dataParcel, reply, option);
+    abilityConnection_->OnAbilityDisconnectDone(element, resultCode);
     return true;
 }
 }

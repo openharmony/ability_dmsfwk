@@ -16,6 +16,7 @@
 #include "bundlemanagercallbackstub_fuzzer.h"
 
 #include "bundle/bundle_manager_callback_stub.h"
+#include "mock_fuzz_util.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -25,6 +26,7 @@ bool OnQueryInstallationFinishedInnerFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return false;
     }
+    FuzzUtil::MockPermission();
     std::shared_ptr<DmsBundleManagerCallbackStub> bundleManager_ =
         std::make_shared<DmsBundleManagerCallbackStub>();
     uint32_t code = 0;
@@ -45,6 +47,7 @@ bool OnQueryInstallationFinishedInnerFuzzTest(const uint8_t* data, size_t size)
     dataParcel.WriteUint32(versionCode);
     dataParcel.WriteInt32(missionId);
     bundleManager_->OnRemoteRequest(code, dataParcel, reply, option);
+    bundleManager_->OnQueryInstallationFinishedInner(dataParcel, reply);
     return true;
 }
 }

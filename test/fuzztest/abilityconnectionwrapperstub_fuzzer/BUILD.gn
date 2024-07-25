@@ -27,6 +27,7 @@ ohos_fuzztest("AbilityConnectionWrapperStubFuzzTest") {
     "${dms_path}/services/dtbschedmgr/include/collaborate/",
     "${dms_path}/services/dtbschedmgr/test/unittest",
     "${dms_path}/test/fuzztest/abilityconnectionwrapperstub_fuzzer",
+    "${dms_path}/test/fuzztest/util",
   ]
 
   fuzz_config_file =
@@ -44,6 +45,7 @@ ohos_fuzztest("AbilityConnectionWrapperStubFuzzTest") {
 
   sources = [
     "${dms_path}/services/dtbschedmgr/test/unittest/mock_distributed_sched.cpp",
+    "${dms_path}/test/fuzztest/util/mock_fuzz_util.cpp",
     "abilityconnectionwrapperstub_fuzzer.cpp",
   ]
 
