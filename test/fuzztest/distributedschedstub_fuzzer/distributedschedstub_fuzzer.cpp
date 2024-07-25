@@ -37,10 +37,15 @@ const std::string TAG = "DistributedSchedFuzzTest";
 namespace {
 const std::u16string DMS_STUB_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
 const uint32_t ONE = 1;
+constexpr size_t FOO_MAX_LEN = 1024;
+constexpr size_t U32_AT_SIZE = 4;
 }
 
 uint32_t GetU32Data(const uint8_t* ptr, size_t size)
 {
+    if (size > FOO_MAX_LEN || size < U32_AT_SIZE) {
+        return 0;
+    }
     char *ch = (char *)malloc(size + 1);
     if (ch == nullptr) {
         std::cout << "malloc failed." << std::endl;
