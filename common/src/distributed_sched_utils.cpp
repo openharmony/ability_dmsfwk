@@ -235,7 +235,7 @@ int32_t Base64StrToParcel(const std::string& rawStr, Parcel& parcel)
         return INVALID_PARAMETERS_ERR;
     }
 
-    size_t copySize = std:min(parcelSize, maxCapacity);
+    size_t copySize = std::min(parcelSize, maxCapacity);
     auto ret = memcpy_s((void *)parcel.GetData(), maxCapacity, &str[0], copySize);
     if (ret != ERR_OK || !parcel.SetDataSize(parcelSize)) {
         return INVALID_PARAMETERS_ERR;
