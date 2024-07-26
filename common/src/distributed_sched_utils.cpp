@@ -229,14 +229,10 @@ int32_t Base64StrToParcel(const std::string& rawStr, Parcel& parcel)
 {
     std::string str = Base64Decode(rawStr);
     auto parcelSize = str.size();
-    auto maxCapacity = parcel.GetMaxCapacity();
-
     if (!parcel.SetDataCapacity(parcelSize)) {
         return INVALID_PARAMETERS_ERR;
     }
-
-    size_t copySize = std::min(parcelSize, maxCapacity);
-    auto ret = memcpy_s((void *)parcel.GetData(), maxCapacity, &str[0], copySize);
+    auto ret = memcpy_s((void *)parcel.GetData(), parcel.GetMaxCapacity(), &str[0], parcelSize);
     if (ret != ERR_OK || !parcel.SetDataSize(parcelSize)) {
         return INVALID_PARAMETERS_ERR;
     }
