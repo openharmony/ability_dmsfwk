@@ -22,37 +22,36 @@ namespace OHOS {
 namespace DistributedSchedule {
 void FuzzApplyAdvanceResource(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size < sizeof(size_t))) {
+    if ((data == nullptr) || (size < sizeof(uint32_t))) {
         return;
     }
     const std::string peerNetworkId(reinterpret_cast<const char*>(data), size);
-    uint8_t* data1 = const_cast<uint8_t*>(data);
-    ServiceCollaborationManager_ResourceRequestInfoSets reqInfoSets =
-        *(reinterpret_cast<ServiceCollaborationManager_ResourceRequestInfoSets*>(data1));
+    ServiceCollaborationManager_ResourceRequestInfoSets reqInfoSets;
+    reqInfoSets.remoteHardwareListSize = *(reinterpret_cast<const uint32_t*>(data));
+    reqInfoSets.localHardwareListSize = *(reinterpret_cast<const uint32_t*>(data));
     DSchedAllConnectManager::GetInstance().ApplyAdvanceResource(peerNetworkId, reqInfoSets);
 }
 
 void FuzzGetResourceRequest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size < sizeof(size_t))) {
+    if ((data == nullptr) || (size < sizeof(uint32_t))) {
         return;
     }
-    uint8_t* data2 = const_cast<uint8_t*>(data);
-    ServiceCollaborationManager_ResourceRequestInfoSets reqInfoSets =
-        *(reinterpret_cast<ServiceCollaborationManager_ResourceRequestInfoSets*>(data2));
+    ServiceCollaborationManager_ResourceRequestInfoSets reqInfoSets;
+    reqInfoSets.remoteHardwareListSize = *(reinterpret_cast<const uint32_t*>(data));
+    reqInfoSets.localHardwareListSize = *(reinterpret_cast<const uint32_t*>(data));
     DSchedAllConnectManager::GetInstance().GetResourceRequest(reqInfoSets);
 }
 
 void FuzzPublishServiceState(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size < sizeof(size_t))) {
+    if ((data == nullptr) || (size < sizeof(uint32_t))) {
         return;
     }
     const std::string peerNetworkId(reinterpret_cast<const char*>(data), size);
     const std::string extraInfo(reinterpret_cast<const char*>(data), size);
-    uint8_t* temp = const_cast<uint8_t*>(data);
     ServiceCollaborationManagerBussinessStatus state =
-        *(reinterpret_cast<ServiceCollaborationManagerBussinessStatus*>(temp));
+        *(reinterpret_cast<const ServiceCollaborationManagerBussinessStatus*>(data));
     DSchedAllConnectManager::GetInstance().PublishServiceState(peerNetworkId, extraInfo, state);
 }
 }

@@ -25,6 +25,9 @@ namespace OHOS {
 namespace DistributedSchedule {
 void FuzzOnBytesReceived(const uint8_t* data, size_t size)
 {
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(size);
     DSchedSoftbusSession dschedSoftbusSession;
     dschedSoftbusSession.OnBytesReceived(buffer);
