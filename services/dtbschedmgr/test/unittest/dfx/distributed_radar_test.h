@@ -19,7 +19,7 @@
 #include "gtest/gtest.h"
 #include "test_log.h"
 
-#include "distributed_radar.h"
+#include "dfx/distributed_radar.h"
 
 namespace OHOS {
 namespace DistributedSchedule {

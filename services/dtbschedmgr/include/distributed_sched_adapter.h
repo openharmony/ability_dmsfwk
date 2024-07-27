@@ -20,7 +20,7 @@
 #include "ability_manager_client.h"
 #include "caller_info.h"
 #include "device_auth.h"
-#include "distributed_radar.h"
+#include "dfx/distributed_radar.h"
 #include "distributed_sched_interface.h"
 #include "event_handler.h"
 #include "if_system_ability_manager.h"

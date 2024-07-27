@@ -21,7 +21,7 @@
 #include "cJSON.h"
 
 #include "continue_scene_session_handler.h"
-#include "distributed_radar.h"
+#include "dfx/distributed_radar.h"
 #include "distributed_sched_utils.h"
 #include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
@@ -440,7 +440,7 @@ void DSchedContinueManager::NotifyTerminateContinuation(const int32_t missionId)
             HILOGW("No continuation in progress.");
             return;
         }
- 
+
         AliveMissionInfo missionInfo;
         int32_t ret = DMSContinueSendMgr::GetInstance().GetAliveMissionInfo(missionId, missionInfo);
         if (ret != ERR_OK) {

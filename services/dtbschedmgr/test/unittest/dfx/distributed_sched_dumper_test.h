@@ -19,7 +19,7 @@
 #include "gtest/gtest.h"
 
 #define private public
-#include "distributed_sched_dumper.h"
+#include "dfx/distributed_sched_dumper.h"
 #undef private
 
 namespace OHOS {
