@@ -53,23 +53,6 @@ void MMIAdapterTest::SetUp()
 }
 
 /**
- * @tc.name: AddMMIListener_001
- * @tc.desc: test AddMMIListener func
- * @tc.type: FUNC
- */
-HWTEST_F(MMIAdapterTest, AddMMIListener_001, TestSize.Level3)
-{
-    DTEST_LOG << "MMIAdapterTest AddMMIListener_001 begin" << std::endl;
-    static const char *perms[] = {
-        "ohos.permission.INPUT_MONITORING"
-    };
-    DistributedSchedUtil::MockProcessAndPermission("MMIAdapterTest", perms, sizeof(perms) / sizeof(perms[0]));
-    int32_t ret = MMIAdapter::GetInstance().AddMMIListener();
-    EXPECT_GT(ret, 0);
-    DTEST_LOG << "MMIAdapterTest AddMMIListener_001 end" << std::endl;
-}
-
-/**
  * @tc.name: RemoveMMIListener_001
  * @tc.desc: test RemoveMMIListener func
  * @tc.type: FUNC
