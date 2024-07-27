@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "distributed_radar.h"
+#include "dfx/distributed_radar.h"
 
 #include "hisysevent.h"
 

@@ -15,7 +15,7 @@
 
 #include "softbus_adapter/softbus_adapter.h"
 #include "broadcast.h"
-#include "distributed_radar.h"
+#include "dfx/distributed_radar.h"
 #include "dtbschedmgr_log.h"
 #include "softbus_error_code.h"
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "distributed_sched_dumper.h"
+#include "dfx/distributed_sched_dumper.h"
 
 #include "accesstoken_kit.h"
 #include "dfx/dms_continue_time_dumper.h"

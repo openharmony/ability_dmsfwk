@@ -129,9 +129,9 @@ ohos_unittest("distributedschedsvrtest") {
 
   sources = [
     "unittest/continue_scene_session_handler_test.cpp",
-    "unittest/distributed_radar_test.cpp",
+    "unittest/dfx/distributed_radar_test.cpp",
+    "unittest/dfx/distributed_sched_dumper_test.cpp",
     "unittest/distributed_sched_adapter_test.cpp",
-    "unittest/distributed_sched_dumper_test.cpp",
     "unittest/distributed_sched_service_first_test.cpp",
     "unittest/distributed_sched_service_second_test.cpp",
     "unittest/distributed_sched_stub_test.cpp",

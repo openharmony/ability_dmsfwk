@@ -19,17 +19,17 @@
 
 #include "datetime_ex.h"
 
+#include "datashare_manager.h"
+#include "dfx/distributed_radar.h"
+#include "dfx/distributed_ue.h"
 #include "distributed_sched_utils.h"
-#include "distributed_radar.h"
 #include "distributed_sched_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
-#include "distributed_ue.h"
+#include "mission/wifi_state_adapter.h"
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
 #include "switch_status_dependency.h"
-#include "datashare_manager.h"
-#include "mission/wifi_state_adapter.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -113,9 +113,6 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
     int32_t state = ACTIVE;
     if (type == DMS_UNFOCUSED_TYPE) {
         state = INACTIVE;
-        DmsRadar::GetInstance().RecvUnfocused("NotifyDataRecv");
-    } else {
-        DmsRadar::GetInstance().RecvFocused("NotifyDataRecv");
     }
     PostOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state);
     HILOGI("NotifyDataRecv end");
@@ -261,11 +258,6 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         GetAnonymStr(senderNetworkId).c_str(), bundleNameId, state);
     std::string bundleName;
     int32_t ret = BundleManagerInternal::GetBundleNameById(senderNetworkId, bundleNameId, bundleName);
-    bool res = (state == INACTIVE) ? DmsRadar::GetInstance().UnfocusedGetBundleName("GetBundleNameById", ret)
-        : DmsRadar::GetInstance().FocusedGetBundleName("GetBundleNameById", ret);
-    if (!res) {
-        HILOGE("%{public}s failed", (state == INACTIVE) ? "UnfocusedGetBundleName" : "FocusedGetBundleName");
-    }
     if (ret != ERR_OK) {
         HILOGW("get bundleName failed, ret: %{public}d, try = %{public}d", ret, retry);
         return RetryPostBroadcast(senderNetworkId, bundleNameId, continueTypeId, state, retry);
@@ -327,11 +319,6 @@ void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
     PARCEL_WRITE_HELPER_NORET(data, String, continueType);
     HILOGI("[PerformanceTest] NotifyRecvBroadcast called, IPC begin = %{public}" PRId64, GetTickCount());
     int32_t error = obj->SendRequest(ON_CALLBACK, data, reply, option);
-    bool res = (state == INACTIVE) ? DmsRadar::GetInstance().NotifyDockUnfocused("NotifyRecvBroadcast", error)
-        : DmsRadar::GetInstance().NotifyDockFocused("NotifyRecvBroadcast", error);
-    if (!res) {
-        HILOGE("%{public}s failed", (state == INACTIVE) ? "NotifyDockUnfocused" : "NotifyDockFocused");
-    }
     if (state != INACTIVE) {
         std::string bName = bundleName;
         std::string cType = continueType;
