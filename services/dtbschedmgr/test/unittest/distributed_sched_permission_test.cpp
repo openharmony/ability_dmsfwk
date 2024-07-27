@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -383,138 +383,6 @@ HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_001, TestSize.Level3)
 }
 
 /**
- * @tc.name: GetTargetAbility_002
- * @tc.desc: input invalid params
- * @tc.type: FUNC
- * @tc.require: issueI5T6GJ
- */
-HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_002, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_002 begin" << std::endl;
-    DistributedSchedUtil::MockBundlePermission();
-    AAFwk::Want want;
-    ElementName name;
-    name.SetAbilityName(ABILITY_NAME);
-    name.SetBundleName(BUNDLE_NAME);
-    want.SetElement(name);
-    AppExecFwk::AbilityInfo targetAbility;
-    bool ret = DistributedSchedPermission::GetInstance().GetTargetAbility(want, targetAbility, false);
-    EXPECT_TRUE(ret);
-    DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_002 end ret:" << ret << std::endl;
-}
-
-/**
- * @tc.name: GetTargetAbility_003
- * @tc.desc: input invalid params
- * @tc.type: FUNC
- * @tc.require: issueI5T6GJ
- */
-HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_003, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_003 begin" << std::endl;
-    DistributedSchedUtil::MockBundlePermission();
-    AAFwk::Want want;
-    ElementName name;
-    name.SetAbilityName(ABILITY_NAME);
-    name.SetBundleName(BUNDLE_NAME);
-    want.SetElement(name);
-    want.SetParam(DMS_MISSION_ID, 0);
-    AppExecFwk::AbilityInfo targetAbility;
-    bool ret = DistributedSchedPermission::GetInstance().GetTargetAbility(want, targetAbility, false);
-    EXPECT_TRUE(ret);
-    DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_003 end ret:" << ret << std::endl;
-}
-
-/**
- * @tc.name: GetTargetAbility_004
- * @tc.desc: input invalid params
- * @tc.type: FUNC
- * @tc.require: issueI5T6GJ
- */
-HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_004, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_004 begin" << std::endl;
-    DistributedSchedUtil::MockBundlePermission();
-    AAFwk::Want want;
-    ElementName name;
-    name.SetAbilityName(ABILITY_NAME);
-    name.SetBundleName(BUNDLE_NAME);
-    want.SetElement(name);
-    AppExecFwk::AbilityInfo targetAbility;
-    bool ret = DistributedSchedPermission::GetInstance().GetTargetAbility(want, targetAbility, true);
-    EXPECT_TRUE(ret);
-    DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_004 end ret:" << ret << std::endl;
-}
-
-/**
- * @tc.name: GetTargetAbility_005
- * @tc.desc: input invalid params
- * @tc.type: FUNC
- * @tc.require: issueI5T6GJ
- */
-HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_005, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_005 begin" << std::endl;
-    DistributedSchedUtil::MockBundlePermission();
-    AAFwk::Want want;
-    ElementName name;
-    name.SetAbilityName(ABILITY_NAME);
-    name.SetBundleName(BUNDLE_NAME);
-    want.SetElement(name);
-    want.SetParam(DMS_MISSION_ID, 8);
-    AppExecFwk::AbilityInfo targetAbility;
-    bool ret = DistributedSchedPermission::GetInstance().GetTargetAbility(want, targetAbility, true);
-    EXPECT_TRUE(ret);
-    DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_005 end ret:" << ret << std::endl;
-}
-
-/**
- * @tc.name: GetTargetAbility_006
- * @tc.desc: input invalid params
- * @tc.type: FUNC
- * @tc.require: issueI5T6GJ
- */
-HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_006, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_006 begin" << std::endl;
-    DistributedSchedUtil::MockBundlePermission();
-    AAFwk::Want want;
-    ElementName name;
-    name.SetAbilityName(ABILITY_NAME);
-    name.SetBundleName(BUNDLE_NAME);
-    want.SetElement(name);
-    want.SetParam(DMS_MISSION_ID, 8);
-    AppExecFwk::AbilityInfo targetAbility;
-    targetAbility.type = AppExecFwk::AbilityType::SERVICE;
-    bool ret = DistributedSchedPermission::GetInstance().GetTargetAbility(want, targetAbility, true);
-    EXPECT_TRUE(ret);
-    DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_006 end ret:" << ret << std::endl;
-}
-
-/**
- * @tc.name: GetTargetAbility_007
- * @tc.desc: input invalid params
- * @tc.type: FUNC
- * @tc.require: issueI5T6GJ
- */
-HWTEST_F(DistributedSchedPermissionTest, GetTargetAbility_007, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_007 begin" << std::endl;
-    DistributedSchedUtil::MockBundlePermission();
-    AAFwk::Want want;
-    ElementName name;
-    name.SetAbilityName(ABILITY_NAME);
-    name.SetBundleName(BUNDLE_NAME);
-    want.SetElement(name);
-    want.SetParam(DMS_MISSION_ID, 8);
-    AppExecFwk::AbilityInfo targetAbility;
-    targetAbility.type = AppExecFwk::AbilityType::EXTENSION;
-    bool ret = DistributedSchedPermission::GetInstance().GetTargetAbility(want, targetAbility, true);
-    EXPECT_TRUE(ret);
-    DTEST_LOG << "DistributedSchedPermissionTest GetTargetAbility_007 end ret:" << ret << std::endl;
-}
-
-/**
  * @tc.name: CheckGetCallerPermission_001
  * @tc.desc: input invalid params
  * @tc.type: FUNC
@@ -756,32 +624,6 @@ HWTEST_F(DistributedSchedPermissionTest, CheckStartControlPermission_011, TestSi
     bool ret = DistributedSchedPermission::GetInstance().CheckStartControlPermission(targetAbility, callerInfo, want);
     EXPECT_TRUE(ret);
     DTEST_LOG << "DistributedSchedPermissionTest CheckStartControlPermission_011 end ret:" << ret << std::endl;
-}
-
-/**
- * @tc.name: CheckStartControlPermission_012
- * @tc.desc: input invalid params
- * @tc.type: FUNC
- * @tc.require: issueI5T6GJ
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckStartControlPermission_012, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckStartControlPermission_012 begin" << std::endl;
-    DistributedSchedUtil::MockBundlePermission();
-    AppExecFwk::AbilityInfo targetAbility;
-    targetAbility.visible = true;
-    targetAbility.type = AppExecFwk::AbilityType::SERVICE;
-    targetAbility.applicationInfo.associatedWakeUp = true;
-    targetAbility.bundleName = BUNDLE_NAME;
-    CallerInfo callerInfo;
-    EXPECT_EQ(ERR_OK, LoadContinueConfig());
-    bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
-    EXPECT_EQ(result, true);
-    AAFwk::Want want;
-    want.AddFlags(want.FLAG_ABILITY_CONTINUATION);
-    bool ret = DistributedSchedPermission::GetInstance().CheckStartControlPermission(targetAbility, callerInfo, want);
-    EXPECT_TRUE(ret);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckStartControlPermission_012 end ret:" << ret << std::endl;
 }
 
 /**

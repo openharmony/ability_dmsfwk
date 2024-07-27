@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 
 #include "ability_manager_errors.h"
 #include "distributed_parcel_helper.h"
+#include "distributed_sched_test_util.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -30,6 +31,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string DEVICE_ID = "123456789ABCD";
+const char* FOUNDATION_PROCESS_NAME = "foundation";
 }
 
 void DistributedClientTest::SetUpTestCase()
@@ -45,6 +47,7 @@ void DistributedClientTest::TearDownTestCase()
 void DistributedClientTest::SetUp()
 {
     DTEST_LOG << "DistributedClientTest::SetUp" << std::endl;
+    DistributedSchedUtil::MockProcess(FOUNDATION_PROCESS_NAME);
 }
 
 void DistributedClientTest::TearDown()

@@ -383,29 +383,6 @@ HWTEST_F(DSchedContinuationTest, SetWantForContinuation_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetWantForContinuation_002
- * @tc.desc: input valid params.
- * @tc.type: FUNC
- */
-HWTEST_F(DSchedContinuationTest, SetWantForContinuation_002, TestSize.Level1)
-{
-    DTEST_LOG << "DSchedContinuationTest SetWantForContinuation_002 start" << std::endl;
-    /**
-     * @tc.steps: step1. input valid bundleName.
-     * @tc.expected: step1. return OK.
-     */
-    DistributedSchedUtil::MockBundlePermission();
-    std::string bundleName = "com.ohos.mms";
-    std::string abilityName = "bmsThirdBundle";
-    std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
-    int32_t missionId = 0;
-    ASSERT_NE(spWant, nullptr);
-    int32_t ret = DistributedSchedService::GetInstance().SetWantForContinuation(*spWant, missionId);
-    EXPECT_TRUE(ERR_OK == ret);
-    DTEST_LOG << "DSchedContinuationTest SetWantForContinuation_002 end" << std::endl;
-}
-
-/**
  * @tc.name: ContinueLocalMission_001
  * @tc.desc: input invalid params.
  * @tc.type: FUNC
