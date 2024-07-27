@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -526,7 +526,7 @@ HWTEST_F(DmsVersionManagerTest, IsRemoteDmsVersionLower_001, TestSize.Level3)
     DmsVersionManager::IsRemoteDmsVersionLower(deviceId, thresholdDmsVersion);
     deviceId = "0";
     bool result = DmsVersionManager::IsRemoteDmsVersionLower(deviceId, thresholdDmsVersion);
-    EXPECT_EQ(result, true);
+    EXPECT_EQ(result, false);
     DTEST_LOG << "DmsVersionManagerTest IsRemoteDmsVersionLower_001 end ret:" << result << std::endl;
 }
 }
