@@ -389,5 +389,22 @@ HWTEST_F(DtbschedmgrDeviceInfoStorageTest, GetLocalDeviceUdidTest_001, TestSize.
     EXPECT_EQ(!udid.empty(), true);
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest GetLocalDeviceUdidTest_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: GetLocalDeviceUuidTest_001
+ * @tc.desc: test GetLocalDeviceUuid
+ * @tc.type: FUNC
+ */
+HWTEST_F(DtbschedmgrDeviceInfoStorageTest, GetLocalDeviceUuidTest_001, TestSize.Level3)
+{
+    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest GetLocalDeviceUuidTest_001 start" << std::endl;
+    std::string uuid = "";
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUuid(uuid);
+    EXPECT_EQ(uuid.empty(), true);
+    DistributedSchedUtil::MockPermission();
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUuid(uuid);
+    EXPECT_EQ(!uuid.empty(), true);
+    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest GetLocalDeviceUuidTest_001 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS

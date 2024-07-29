@@ -69,8 +69,6 @@ public:
     int32_t CloudSync();
     void DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos);
     bool UpdatePublicRecords(const std::string &localUdid);
-    void UpdatePackageChangedAction(const bool &state);
-    bool IsPackageChangedAction();
 
 private:
     std::string DeviceAndNameToKey(const std::string &udid, const std::string &bundleName) const;
