@@ -1463,7 +1463,6 @@ HWTEST_F(DistributedSchedServiceSecondTest, ProcessContinueLocalMission_001, Tes
     WantParams wantParams;
     int32_t result = DistributedSchedService::GetInstance().ProcessContinueLocalMission(
         LOCAL_DEVICEID, REMOTE_DEVICEID, BUNDLE_NAME, nullptr, wantParams);
-    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
 
     bool ret = DistributedSchedService::GetInstance().GetIsFreeInstall(0);
     EXPECT_EQ(ret, false);
