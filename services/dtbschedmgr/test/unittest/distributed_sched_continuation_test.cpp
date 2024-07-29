@@ -959,9 +959,9 @@ HWTEST_F(DSchedContinuationTest, NotifyDSchedEventForOneCB_001, TestSize.Level3)
     ASSERT_NE(dschedContinuation_, nullptr);
     const sptr<IRemoteObject> cb(new MockRemoteStub());
     int32_t resultCode = 0;
-    dschedContinuation_->NotifyDSchedEventForOneCB(nullptr, resultCode);
-    int32_t result = dschedContinuation_->NotifyDSchedEventForOneCB(cb, resultCode);
-    EXPECT_NE(result, ERR_OK);
+    dschedContinuation_->NotifyDSchedEventForOneCB(cb, resultCode);
+    int32_t result = dschedContinuation_->NotifyDSchedEventForOneCB(nullptr, resultCode);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinuationTest NotifyDSchedEventForOneCB_001 end" << std::endl;
 }
 
@@ -978,8 +978,11 @@ HWTEST_F(DSchedContinuationTest, NotifyDSchedEventResult_001, TestSize.Level3)
     const sptr<IRemoteObject> callback(new MockRemoteStub());
     int32_t resultCode = 0;
     dschedContinuation_->continuationCallbackArr_.push_back(callback);
+    dschedContinuation_->NotifyDSchedEventResult(resultCode);
+    
+    dschedContinuation_->continuationCallbackArr_.clear();
     int32_t result = dschedContinuation_->NotifyDSchedEventResult(resultCode);
-    EXPECT_NE(result, ERR_OK);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinuationTest NotifyDSchedEventResult_001 end" << std::endl;
 }
 
