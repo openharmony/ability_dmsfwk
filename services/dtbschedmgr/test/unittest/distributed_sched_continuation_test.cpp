@@ -887,6 +887,123 @@ HWTEST_F(DSchedContinuationTest, PushCallback_003, TestSize.Level3)
 }
 
 /**
+ * @tc.name: PushCallback_004
+ * @tc.desc: test PushCallback
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, PushCallback_004, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest PushCallback_004 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
+    const sptr<IRemoteObject> callback = nullptr;
+    dschedContinuation_->PushCallback(callback);
+
+    dschedContinuation_->Init(nullptr);
+    bool result = dschedContinuation_->PushCallback(callback);
+    EXPECT_EQ(result, false);
+    DTEST_LOG << "DSchedContinuationTest PushCallback_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: PushCallback_005
+ * @tc.desc: test PushCallback
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, PushCallback_005, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest PushCallback_005 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
+    const sptr<IRemoteObject> callback(new MockRemoteStub());
+    dschedContinuation_->Init(nullptr);
+    dschedContinuation_->continuationCallbackArr_.clear();
+    dschedContinuation_->PushCallback(callback);
+
+    dschedContinuation_->continuationCallbackArr_.push_back(callback);
+    bool result = dschedContinuation_->PushCallback(callback);
+    EXPECT_EQ(result, false);
+    DTEST_LOG << "DSchedContinuationTest PushCallback_005 end" << std::endl;
+}
+
+/**
+ * @tc.name: CleanupCallback_001
+ * @tc.desc: test CleanupCallback
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, CleanupCallback_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest CleanupCallback_001 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
+    const sptr<IRemoteObject> callback(new MockRemoteStub());
+
+    dschedContinuation_->continuationCallbackArr_.push_back(callback);
+    dschedContinuation_->CleanupCallback(callback);
+
+    dschedContinuation_->continuationCallbackArr_.clear();
+    bool result = dschedContinuation_->CleanupCallback(callback);
+    EXPECT_EQ(result, false);
+    DTEST_LOG << "DSchedContinuationTest CleanupCallback_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyDSchedEventForOneCB_001
+ * @tc.desc: test NotifyDSchedEventForOneCB
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, NotifyDSchedEventForOneCB_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest NotifyDSchedEventForOneCB_001 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
+    const sptr<IRemoteObject> cb(new MockRemoteStub());
+    int32_t resultCode = 0;
+    dschedContinuation_->NotifyDSchedEventForOneCB(nullptr, resultCode);
+    int32_t result = dschedContinuation_->NotifyDSchedEventForOneCB(cb, resultCode);
+    EXPECT_NE(result, ERR_OK);
+    DTEST_LOG << "DSchedContinuationTest NotifyDSchedEventForOneCB_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyDSchedEventResult_001
+ * @tc.desc: test NotifyDSchedEventResult
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, NotifyDSchedEventResult_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest NotifyDSchedEventResult_001 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
+    const sptr<IRemoteObject> callback(new MockRemoteStub());
+    int32_t resultCode = 0;
+    dschedContinuation_->continuationCallbackArr_.push_back(callback);
+    int32_t result = dschedContinuation_->NotifyDSchedEventResult(resultCode);
+    EXPECT_NE(result, ERR_OK);
+    DTEST_LOG << "DSchedContinuationTest NotifyDSchedEventResult_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: IsCleanMission_001
+ * @tc.desc: test IsCleanMission
+ * @tc.type: FUNC
+ * @tc.require: I60TOK
+ */
+HWTEST_F(DSchedContinuationTest, IsCleanMission_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinuationTest IsCleanMission_001 start" << std::endl;
+    ASSERT_NE(dschedContinuation_, nullptr);
+    int32_t missionId = 0;
+    dschedContinuation_->SetCleanMissionFlag(1, true);
+    dschedContinuation_->IsCleanMission(missionId);
+    
+    dschedContinuation_->SetCleanMissionFlag(missionId, false);
+    bool result = dschedContinuation_->IsCleanMission(missionId);
+    EXPECT_EQ(result, false);
+    DTEST_LOG << "DSchedContinuationTest IsCleanMission_001 end" << std::endl;
+}
+
+/**
  * @tc.name: ContinueMission_001
  * @tc.desc: test ContinueMission when srcDeviceId is empty.
  * @tc.type: FUNC
