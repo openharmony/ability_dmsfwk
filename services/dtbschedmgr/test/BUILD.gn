@@ -138,8 +138,6 @@ ohos_unittest("distributedschedsvrtest") {
 
   sources = [
     "unittest/continue_scene_session_handler_test.cpp",
-    "unittest/dfx/distributed_radar_test.cpp",
-    "unittest/dfx/distributed_sched_dumper_test.cpp",
     "unittest/distributed_sched_adapter_test.cpp",
     "unittest/distributed_sched_service_first_test.cpp",
     "unittest/distributed_sched_service_second_test.cpp",
@@ -499,6 +497,9 @@ ohos_unittest("dmsbasetest") {
   sources = [
     "unittest/collaborate/dsched_collaborate_callback_mgr_test.cpp",
     "unittest/deviceManager/dms_device_info_test.cpp",
+    "unittest/dfx/distributed_radar_test.cpp",
+    "unittest/dfx/distributed_sched_dumper_test.cpp",
+    "unittest/dfx/distributed_ue_test.cpp",
     "unittest/dfx/dms_continue_time_dumper_test.cpp",
     "unittest/dfx/dms_hisysevent_report_test.cpp",
     "unittest/dms_network_adapter_test.cpp",
@@ -554,7 +555,6 @@ ohos_unittest("dschedcontinuestatetest") {
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
   sources = [
-    "unittest/continue/dsched_continue_event_test.cpp",
     "unittest/continue/dsched_continue_manager_test.cpp",
     "unittest/continue/dsched_continue_state_test.cpp",
     "unittest/continue/dsched_continue_test.cpp",
