@@ -1145,6 +1145,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, RemoveCallerComponent_001, TestSize.
     DistributedSchedService::GetInstance().callerMap_[connect] = sessionsList;
     DistributedSchedService::GetInstance().callMap_[connect] = {5, localDeviceId};
     DistributedSchedService::GetInstance().RemoveCallerComponent(connect);
+    DistributedSchedService::GetInstance().RemoveCallerComponent(nullptr);
     DistributedSchedService::GetInstance().callerMap_.clear();
     EXPECT_TRUE(DistributedSchedService::GetInstance().callerMap_.empty());
     DistributedSchedService::GetInstance().callMap_.clear();
@@ -1341,6 +1342,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, UnregisterAppStateObserver_002, Test
     sptr<IRemoteObject> connect1(new MockDistributedSched());
     DistributedSchedService::GetInstance().UnregisterAppStateObserver(connect1);
     EXPECT_NE(connect, connect1);
+    DistributedSchedService::GetInstance().SaveCallerComponent(want, nullptr, callerInfo);
     DTEST_LOG << "DistributedSchedServiceSecondTest UnregisterAppStateObserver_002 end" << std::endl;
 }
 
@@ -1412,6 +1414,8 @@ HWTEST_F(DistributedSchedServiceSecondTest, ContinueMissionBundleName_001, TestS
     int32_t result = DistributedSchedService::GetInstance().ContinueMission(
         "string", localDeviceId, "bundleName", callback, wantParams);
     EXPECT_EQ(static_cast<int>(INVALID_REMOTE_PARAMETERS_ERR), result);
+    DistributedSchedService::GetInstance().ContinueMission(
+        localDeviceId, "string", "bundleName", callback, wantParams);
     DTEST_LOG << "DSchedContinuationTest ContinueMissionBundleName_001 end" << std::endl;
 }
 
@@ -1429,6 +1433,56 @@ HWTEST_F(DistributedSchedServiceSecondTest, ContinueMissionBundleName_002, TestS
         "string", "string", "bundleName", callback, wantParams);
     EXPECT_EQ(static_cast<int>(OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET), result);
     DTEST_LOG << "DSchedContinuationTest ContinueMissionBundleName_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetCallerInfo_001
+ * @tc.desc: GetCallerInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, GetCallerInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest GetCallerInfo_001 start" << std::endl;
+    int32_t callerUid = 0;
+    uint32_t accessToken = 0;
+    CallerInfo callerInfo;
+    int32_t result = DistributedSchedService::GetInstance().GetCallerInfo(
+        LOCAL_DEVICEID, callerUid, accessToken, callerInfo);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceSecondTest GetCallerInfo_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProcessContinueLocalMission_001
+ * @tc.desc: ProcessContinueLocalMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, ProcessContinueLocalMission_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest ProcessContinueLocalMission_001 start" << std::endl;
+    WantParams wantParams;
+    int32_t result = DistributedSchedService::GetInstance().ProcessContinueLocalMission(
+        LOCAL_DEVICEID, REMOTE_DEVICEID, BUNDLE_NAME, nullptr, wantParams);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+
+    bool ret = DistributedSchedService::GetInstance().GetIsFreeInstall(0);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedServiceSecondTest ProcessContinueLocalMission_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartAbility_001
+ * @tc.desc: StartAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, StartAbility_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest StartAbility_001 start" << std::endl;
+    Want want;
+    int32_t requestCode = 0;
+    int32_t ret = DistributedSchedService::GetInstance().StartAbility(want, requestCode);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceSecondTest StartAbility_001 end" << std::endl;
 }
 }
 }
