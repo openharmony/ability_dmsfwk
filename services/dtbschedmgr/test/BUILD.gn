@@ -554,6 +554,7 @@ ohos_unittest("dschedcontinuestatetest") {
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
   sources = [
+    "unittest/continue/dsched_continue_event_test.cpp",
     "unittest/continue/dsched_continue_manager_test.cpp",
     "unittest/continue/dsched_continue_state_test.cpp",
     "unittest/continue/dsched_continue_test.cpp",
