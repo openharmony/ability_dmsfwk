@@ -1845,7 +1845,7 @@ void DistributedSchedService::ProcessCalleeOffline(const std::string& deviceId)
                 }
                 ReportDistributedComponentChange(callerInfo, DISTRIBUTED_COMPONENT_REMOVE,
                     IDistributedSched::CALL, IDistributedSched::CALLER);
-                callerMap_.erase(iter++);
+                iter = callerMap_.erase(iter);
             } else {
                 iter++;
             }
@@ -2491,7 +2491,7 @@ int32_t DistributedSchedService::NotifyProcessDiedFromRemote(const CallerInfo& c
                 }
                 ReportDistributedComponentChange(connectInfo, DISTRIBUTED_COMPONENT_REMOVE,
                     IDistributedSched::CONNECT, IDistributedSched::CALLEE);
-                connectAbilityMap_.erase(iter++);
+                iter = connectAbilityMap_.erase(iter);
             } else {
                 iter++;
             }
@@ -2524,7 +2524,7 @@ void DistributedSchedService::RemoveConnectAbilityInfo(const std::string& device
                 DecreaseConnectLocked(uid);
                 ReportDistributedComponentChange(callerInfo, DISTRIBUTED_COMPONENT_REMOVE,
                     IDistributedSched::CONNECT, IDistributedSched::CALLER);
-                distributedConnectAbilityMap_.erase(iter++);
+                iter = distributedConnectAbilityMap_.erase(iter);
             } else {
                 iter++;
             }
@@ -2655,7 +2655,7 @@ void DistributedSchedService::ProcessConnectDied(const sptr<IRemoteObject>& conn
                 }
                 ReportDistributedComponentChange(callerInfo, DISTRIBUTED_COMPONENT_REMOVE,
                     IDistributedSched::CONNECT, IDistributedSched::CALLER);
-                distributedConnectAbilityMap_.erase(iter++);
+                iter = distributedConnectAbilityMap_.erase(iter);
             } else {
                 iter++;
             }
