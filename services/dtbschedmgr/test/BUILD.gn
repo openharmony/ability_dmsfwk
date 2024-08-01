@@ -434,11 +434,6 @@ ohos_unittest("hisyseventreporttest") {
 }
 
 ohos_unittest("distributeduidtest") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
   module_out_path = module_output_path
 
   sources = [ "unittest/distributed_sched_uid_test.cpp" ]
