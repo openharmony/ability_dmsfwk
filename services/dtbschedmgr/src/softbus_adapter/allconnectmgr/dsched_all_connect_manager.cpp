@@ -232,7 +232,7 @@ int32_t DSchedAllConnectManager::WaitAllConnectApplyCb(const std::string &peerNe
 
     if (peerConnectDecision_.find(peerNetworkId) == peerConnectDecision_.end()) {
         HILOGE("Not find peerNetworkId %{public}s in peerConnectDecision.", GetAnonymStr(peerNetworkId).c_str());
-        return CONTINUE_ABILITY_TIMEOUT_ERR;
+        return DMS_CONNECT_APPLY_TIMEOUT_FAILED;
     }
     int32_t ret = peerConnectDecision_.at(peerNetworkId).load() ? ERR_OK : DMS_CONNECT_APPLY_REJECT_FAILED;
     HILOGI("Wait all connect apply decision callback end, peerNetworkId %{public}s, isSupport %{public}d.",

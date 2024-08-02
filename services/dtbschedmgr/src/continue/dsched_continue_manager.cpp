@@ -121,6 +121,11 @@ int32_t DSchedContinueManager::ContinueMission(const std::string& srcDeviceId, c
         HILOGE("get local deviceId failed!");
         return INVALID_PARAMETERS_ERR;
     }
+    if (localDevId != srcDeviceId && localDevId != dstDeviceId) {
+        HILOGE("Input srcDevId: %{public}s or dstDevId: %{public}s must be locDevId: %{public}s.",
+            GetAnonymStr(srcDeviceId).c_str(), GetAnonymStr(dstDeviceId).c_str(), GetAnonymStr(localDevId).c_str());
+        return OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET;
+    }
     if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(
         localDevId == srcDeviceId ? dstDeviceId : srcDeviceId) == nullptr) {
         HILOGE("GetDeviceInfoById fail, locDevId: %{public}s, srcDevId: %{public}s, dstDevId: %{public}s.",
@@ -181,6 +186,11 @@ int32_t DSchedContinueManager::ContinueMission(const std::string& srcDeviceId, c
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDevId)) {
         HILOGE("get local deviceId failed!");
         return INVALID_PARAMETERS_ERR;
+    }
+    if (localDevId != srcDeviceId && localDevId != dstDeviceId) {
+        HILOGE("Input srcDevId: %{public}s or dstDevId: %{public}s must be locDevId: %{public}s.",
+            GetAnonymStr(srcDeviceId).c_str(), GetAnonymStr(dstDeviceId).c_str(), GetAnonymStr(localDevId).c_str());
+        return OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET;
     }
     if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(
         localDevId == srcDeviceId ? dstDeviceId : srcDeviceId) == nullptr) {
@@ -288,7 +298,7 @@ void DSchedContinueManager::WaitAllConnectDecision(int32_t direction, const DSch
         peerConnectDecision_.erase(peerDeviceId);
     }
 #endif
-    SetTimeOut(info, CONTINUE_TIMEOUT);
+    SetTimeOut(info, timeout);
 }
 
 void DSchedContinueManager::SetTimeOut(const DSchedContinueInfo &info, int32_t timeout)

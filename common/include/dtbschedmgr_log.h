@@ -466,6 +466,10 @@ enum {
      * Result(29360231) for all connect manager reject connect apply.
      */
     DMS_CONNECT_APPLY_REJECT_FAILED = 29360231,
+    /**
+     * Result(29360232) for all connect manager reject connect apply.
+     */
+    DMS_CONNECT_APPLY_TIMEOUT_FAILED = 29360232,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
