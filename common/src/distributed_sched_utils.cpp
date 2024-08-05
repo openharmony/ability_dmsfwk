@@ -457,6 +457,10 @@ bool GetOsInfoFromDM(const std::string &dmInfoEx, int32_t &osType, std::string &
 
         osType = cJSON_GetObjectItemCaseSensitive(dataJson, PARAM_KEY_OS_TYPE)->valueint;
         osVersion = std::string(cJSON_GetObjectItemCaseSensitive(dataJson, PARAM_KEY_OS_VERSION)->valuestring);
+        if (!cJSON_IsNumber(osType)) {
+            HILOGE("osType is invalid ");
+            break;
+        }
         isSuccess = true;
     } while (false);
 
