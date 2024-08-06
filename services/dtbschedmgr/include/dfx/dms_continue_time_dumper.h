@@ -17,6 +17,7 @@
 #define OHOS_DISTRIBUTED_CONTINUE_TIME_DUMPER_H
 
 #include <list>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -61,7 +62,7 @@ private:
 class DmsContinueTime {
 public:
     DECLARE_SINGLE_INSTANCE_BASE(DmsContinueTime);
-    
+
 public:
     DmsContinueTime() = default;
     ~DmsContinueTime() = default;
@@ -106,6 +107,7 @@ private:
     DmsDumperInfo srcInfo_;
     DmsDumperInfo dstInfo_;
     DmsDuration saveDataDuration_;
+    std::mutex infoMutex_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

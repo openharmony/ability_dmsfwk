@@ -2396,12 +2396,6 @@ int32_t DistributedSchedService::DisconnectRemoteAbility(const sptr<IRemoteObjec
         return INVALID_PARAMETERS_ERR;
     }
 
-#ifdef DMSFWK_INTERACTIVE_ADAPTER
-    if (distributedConnectAbilityMap_.find(connect) == distributedConnectAbilityMap_.end()) {
-        return DisconnectRemoteAbilityAdapter(connect, callerUid, accessToken);
-    }
-#endif // DMSFWK_INTERACTIVE_ADAPTER
-
     std::list<ConnectAbilitySession> sessionsList;
     {
         std::lock_guard<std::mutex> autoLock(distributedLock_);
@@ -2418,6 +2412,10 @@ int32_t DistributedSchedService::DisconnectRemoteAbility(const sptr<IRemoteObjec
             }
             distributedConnectAbilityMap_.erase(it);
             HILOGI("remove connection success");
+        } else {
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+            return DisconnectRemoteAbilityAdapter(connect, callerUid, accessToken);
+#endif // DMSFWK_INTERACTIVE_ADAPTER
         }
     }
     if (!sessionsList.empty()) {
