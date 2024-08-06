@@ -70,7 +70,7 @@ HWTEST_F(DistributedClientTest, RegisterDSchedEventListener_001, TestSize.Level3
     DTEST_LOG << "DistributedClientTest RegisterDSchedEventListener_001 start" << std::endl;
     sptr<IDSchedEventListener> listener = sptr<IDSchedEventListener>(new BusinessHandlerTest());
     int32_t result = distributedClient_.RegisterDSchedEventListener(DMS_CONTINUE, listener);
-    EXPECT_NE(result, ERR_FLATTEN_OBJECT);
+    EXPECT_TRUE(result == INVALID_PARAMETERS_ERR || result == ERR_NONE);
     DTEST_LOG << "DistributedClientTest RegisterDSchedEventListener_001 end" << std::endl;
 }
 
@@ -85,7 +85,7 @@ HWTEST_F(DistributedClientTest, UnRegisterDSchedEventListener_001, TestSize.Leve
     DTEST_LOG << "DistributedClientTest UnRegisterDSchedEventListener_001 start" << std::endl;
     sptr<IDSchedEventListener> listener = sptr<IDSchedEventListener>(new BusinessHandlerTest());
     int32_t result = distributedClient_.UnRegisterDSchedEventListener(DMS_CONTINUE, listener);
-    EXPECT_NE(result, ERR_FLATTEN_OBJECT);
+    EXPECT_TRUE(result == INVALID_PARAMETERS_ERR || result == ERR_NONE);
     DTEST_LOG << "DistributedClientTest UnRegisterDSchedEventListener_001 end" << std::endl;
 }
 
