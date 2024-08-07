@@ -828,14 +828,18 @@ bool JsContinuationManager::UnWrapContinuationExtraParams(const napi_env &env, c
     if (!UnwrapJsonByPropertyName(env, options, "filter", filter)) {
         return false;
     }
-    continuationExtraParams->SetFilter(filter.dump());
+    if (!filter.empty()) {
+        continuationExtraParams->SetFilter(filter.dump());
+    }
     int32_t continuationMode = 0;
     if (UnwrapInt32ByPropertyName(env, options, "continuationMode", continuationMode)) {
         continuationExtraParams->SetContinuationMode(static_cast<ContinuationMode>(continuationMode));
     }
     nlohmann::json authInfo;
     if (UnwrapJsonByPropertyName(env, options, "authInfo", authInfo)) {
-        continuationExtraParams->SetAuthInfo(authInfo.dump());
+        if (!authInfo.empty()) {
+            continuationExtraParams->SetAuthInfo(authInfo.dump());
+        }
     }
     return true;
 }

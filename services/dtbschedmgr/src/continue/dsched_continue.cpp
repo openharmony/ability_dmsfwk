@@ -453,7 +453,7 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
         continueInfo_.sinkDeviceId_ : continueInfo_.sourceDeviceId_;
 
     std::string peerUdid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(peerDeviceId);
-    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid);
+    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid, continueInfo_.sinkBundleName_);
 
     DmsUE::GetInstance().TriggerDmsContinue(continueInfo_.sinkBundleName_, continueInfo_.sinkAbilityName_,
         continueInfo_.sourceDeviceId_, ERR_OK);
