@@ -20,38 +20,114 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+constexpr uint32_t MIN_SIZE = 38;
+constexpr uint32_t UINT32_T_OFFSET = 4;
+constexpr uint32_t ENUM_OFFSET = 4;
+constexpr uint32_t BOOL_OFFSET = 1;
+constexpr uint32_t INT32_T_OFFSET = 4;
+constexpr uint32_t CHAR_PONTER_OFFSET = 4;
+}
+
 void FuzzApplyAdvanceResource(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size < sizeof(uint32_t))) {
+    if ((data == nullptr) || (size < MIN_SIZE)) {
         return;
     }
-    const std::string peerNetworkId(reinterpret_cast<const char*>(data), size);
     ServiceCollaborationManager_ResourceRequestInfoSets reqInfoSets;
+
     reqInfoSets.remoteHardwareListSize = *(reinterpret_cast<const uint32_t*>(data));
-    reqInfoSets.localHardwareListSize = *(reinterpret_cast<const uint32_t*>(data));
+
+    ServiceCollaborationManager_HardwareRequestInfo remoteHardwareListTemp;
+    uint32_t offset = UINT32_T_OFFSET;
+    remoteHardwareListTemp.hardWareType =
+        *(reinterpret_cast<const ServiceCollaborationManagerHardwareType*>(data + offset));
+    offset += ENUM_OFFSET;
+    remoteHardwareListTemp.canShare = *(reinterpret_cast<const bool*>(data + offset));
+    offset += BOOL_OFFSET;
+    reqInfoSets.remoteHardwareList = &remoteHardwareListTemp;
+
+    reqInfoSets.localHardwareListSize = *(reinterpret_cast<const uint32_t*>(data + offset));
+    offset += UINT32_T_OFFSET;
+
+    ServiceCollaborationManager_HardwareRequestInfo localHardwareListTemp;
+    localHardwareListTemp.hardWareType =
+        *(reinterpret_cast<const ServiceCollaborationManagerHardwareType*>(data + offset));
+    offset += ENUM_OFFSET;
+    localHardwareListTemp.canShare = *(reinterpret_cast<const bool*>(data + offset));
+    offset += BOOL_OFFSET;
+    reqInfoSets.localHardwareList = &localHardwareListTemp;
+
+    ServiceCollaborationManager_CommunicationRequestInfo communicationRequestTemp;
+    communicationRequestTemp.minBandwidth = *(reinterpret_cast<const int32_t*>(data + offset));
+    offset += INT32_T_OFFSET;
+    communicationRequestTemp.maxLatency = *(reinterpret_cast<const int32_t*>(data + offset));
+    offset += INT32_T_OFFSET;
+    communicationRequestTemp.minLatency = *(reinterpret_cast<const int32_t*>(data + offset));
+    offset += INT32_T_OFFSET;
+    communicationRequestTemp.maxWaitTime = *(reinterpret_cast<const int32_t*>(data + offset));
+    offset += INT32_T_OFFSET;
+    communicationRequestTemp.dataType = reinterpret_cast<const char*>(data + offset);
+    offset += CHAR_PONTER_OFFSET;
+    reqInfoSets.communicationRequest = &communicationRequestTemp;
+
+    const std::string peerNetworkId(reinterpret_cast<const char*>(data + offset), size - MIN_SIZE);
     DSchedAllConnectManager::GetInstance().ApplyAdvanceResource(peerNetworkId, reqInfoSets);
 }
 
 void FuzzGetResourceRequest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size < sizeof(uint32_t))) {
+    if ((data == nullptr) || (size < MIN_SIZE)) {
         return;
     }
     ServiceCollaborationManager_ResourceRequestInfoSets reqInfoSets;
+
     reqInfoSets.remoteHardwareListSize = *(reinterpret_cast<const uint32_t*>(data));
-    reqInfoSets.localHardwareListSize = *(reinterpret_cast<const uint32_t*>(data));
+
+    ServiceCollaborationManager_HardwareRequestInfo remoteHardwareListTemp;
+    uint32_t offset = UINT32_T_OFFSET;
+    remoteHardwareListTemp.hardWareType =
+        *(reinterpret_cast<const ServiceCollaborationManagerHardwareType*>(data + offset));
+    offset += ENUM_OFFSET;
+    remoteHardwareListTemp.canShare = *(reinterpret_cast<const bool*>(data + offset));
+    offset += BOOL_OFFSET;
+    reqInfoSets.remoteHardwareList = &remoteHardwareListTemp;
+
+    reqInfoSets.localHardwareListSize = *(reinterpret_cast<const uint32_t*>(data + offset));
+    offset += UINT32_T_OFFSET;
+
+    ServiceCollaborationManager_HardwareRequestInfo localHardwareListTemp;
+    localHardwareListTemp.hardWareType =
+        *(reinterpret_cast<const ServiceCollaborationManagerHardwareType*>(data + offset));
+    offset += ENUM_OFFSET;
+    localHardwareListTemp.canShare = *(reinterpret_cast<const bool*>(data + offset));
+    offset += BOOL_OFFSET;
+    reqInfoSets.localHardwareList = &localHardwareListTemp;
+
+    ServiceCollaborationManager_CommunicationRequestInfo communicationRequestTemp;
+    communicationRequestTemp.minBandwidth = *(reinterpret_cast<const int32_t*>(data + offset));
+    offset += INT32_T_OFFSET;
+    communicationRequestTemp.maxLatency = *(reinterpret_cast<const int32_t*>(data + offset));
+    offset += INT32_T_OFFSET;
+    communicationRequestTemp.minLatency = *(reinterpret_cast<const int32_t*>(data + offset));
+    offset += INT32_T_OFFSET;
+    communicationRequestTemp.maxWaitTime = *(reinterpret_cast<const int32_t*>(data + offset));
+    offset += INT32_T_OFFSET;
+    communicationRequestTemp.dataType = reinterpret_cast<const char*>(data + offset);
+    reqInfoSets.communicationRequest = &communicationRequestTemp;
     DSchedAllConnectManager::GetInstance().GetResourceRequest(reqInfoSets);
 }
 
 void FuzzPublishServiceState(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size < sizeof(uint32_t))) {
+    if ((data == nullptr) || (size < sizeof(size_t))) {
         return;
     }
     const std::string peerNetworkId(reinterpret_cast<const char*>(data), size);
     const std::string extraInfo(reinterpret_cast<const char*>(data), size);
+    uint8_t* temp = const_cast<uint8_t*>(data);
     ServiceCollaborationManagerBussinessStatus state =
-        *(reinterpret_cast<const ServiceCollaborationManagerBussinessStatus*>(data));
+        *(reinterpret_cast<ServiceCollaborationManagerBussinessStatus*>(temp));
     DSchedAllConnectManager::GetInstance().PublishServiceState(peerNetworkId, extraInfo, state);
 }
 }
