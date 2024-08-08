@@ -19,6 +19,7 @@
 #include "distributed_sched_adapter.h"
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_log.h"
+#include "mission/dsched_sync_e2e.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "os_account_manager.h"
@@ -395,7 +396,8 @@ int32_t BundleManagerInternal::GetBundleNameById(const std::string& networkId,
     HILOGD("called.");
     bool result = DmsBmStorage::GetInstance()->GetDistributedBundleName(networkId, bundleNameId, bundleName);
     if (!result) {
-        HILOGE("failed to get bundleName by bundleNameId");
+        HILOGE("failed to get bundleName by bundleNameId, try syncing");
+        DmsKvSyncE2E::GetInstance()->PushAndPullData(networkId);
         return CAN_NOT_FOUND_ABILITY_ERR;
     }
     HILOGD("end.");

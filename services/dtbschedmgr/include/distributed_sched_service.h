@@ -290,6 +290,7 @@ private:
     void RemoveConnectAbilityInfo(const std::string& deviceId);
     void InitWifiStateListener();
     void NotifyContinuateEventResult(int32_t resultCode, const EventNotify& event);
+    void InitDeviceCfg();
     void NotifyCollaborateEventResult(int32_t resultCode, const EventNotify& event);
     void GetContinueEventInfo(int32_t callingUid, std::vector<EventNotify> &events);
     void GetCollaborateEventInfo(int32_t callingUid, std::vector<EventNotify> &events);
