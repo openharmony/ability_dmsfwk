@@ -173,7 +173,7 @@ void DmsCallbackTask::NotifyDeviceOffline(const std::string& deviceId)
                 dmsCallbackHandler_->RemoveEvent(it->second.taskId);
             }
             DistributedSchedService::GetInstance().NotifyFreeInstallResult(it->second, DEVICE_OFFLINE_ERR);
-            (void)callbackMap_.erase(it++);
+            it = callbackMap_.erase(it);
         } else {
             it++;
         }
