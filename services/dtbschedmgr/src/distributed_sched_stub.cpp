@@ -1546,6 +1546,9 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
     info.want.RemoveParam(PARAM_FREEINSTALL_APPID);
     info.want.SetParam(PARAM_FREEINSTALL_APPID, callerInfo.callerAppId);
     info.want.RemoveParam(PARAM_FREEINSTALL_BUNDLENAMES);
+    if (cmpWant == nullptr) {
+        return ERR_NULL_OBJECT;
+    }
     info.want.SetParam(
         PARAM_FREEINSTALL_BUNDLENAMES, (*cmpWant).GetStringArrayParam(CMPT_PARAM_FREEINSTALL_BUNDLENAMES));
     result = StartFreeInstallFromRemote(info, taskId);

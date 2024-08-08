@@ -116,6 +116,10 @@ DistributedUnsupportedData& DistributedUnsupportedData::operator=(DistributedUns
 
 std::string DistributedWantParams::GetStringByType(const sptr<AAFwk::IInterface> iIt, int typeId)
 {
+    if (iIt == nullptr) {
+        return "";
+    }
+
     if (typeId == VALUE_TYPE_BOOLEAN) {
         return static_cast<AAFwk::Boolean*>(AAFwk::IBoolean::Query(iIt))->ToString();
     } else if (typeId == VALUE_TYPE_BYTE) {
@@ -314,6 +318,9 @@ sptr<IInterface> DistributedWantParams::GetInterfaceByType(int typeId, const std
 bool DistributedWantParams::CompareNumberInterface(const sptr<IInterface> iIt1,
     const sptr<IInterface> iIt2, int typeId)
 {
+    if (iIt1 == nullptr) {
+        return false;
+    }
     bool flag = false;
     switch (typeId) {
         case VALUE_TYPE_SHORT:
@@ -344,6 +351,9 @@ bool DistributedWantParams::CompareNumberInterface(const sptr<IInterface> iIt1,
 
 bool DistributedWantParams::CompareInterface(const sptr<IInterface> iIt1, const sptr<IInterface> iIt2, int typeId)
 {
+    if (iIt1 == nullptr) {
+        return false;
+    }
     bool flag = false;
     switch (typeId) {
         case VALUE_TYPE_BOOLEAN:
@@ -463,6 +473,9 @@ bool DistributedWantParams::WriteToParcelWantParams(Parcel& parcel, sptr<IInterf
     }
 
     if (!parcel.WriteInt32(VALUE_TYPE_WANTPARAMS)) {
+        return false;
+    }
+    if (o == nullptr) {
         return false;
     }
     return parcel.WriteString16(Str8ToStr16(
