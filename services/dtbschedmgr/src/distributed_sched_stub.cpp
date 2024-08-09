@@ -197,7 +197,7 @@ void DistributedSchedStub::InitRemoteFuncsInner()
         &DistributedSchedStub::NotifyStateChangedFromRemoteInner;
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
-    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_STATE_CHANGED_FROM_REMOTE)] =
+    remoteFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_ABILITY_LIFECYCLE_CHANGED_FROM_REMOTE)] =
         &DistributedSchedStub::NotifyAbilityLifecycleChangedFromRemoteAdapterInner;
 #endif
 

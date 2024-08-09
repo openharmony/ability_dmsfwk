@@ -103,9 +103,11 @@ void DSchedContinueManager::NotifyAllConnectDecision(std::string peerDeviceId, b
 {
     HILOGI("Notify all connect decision, peerDeviceId %{public}s, isSupport %{public}d.",
         GetAnonymStr(peerDeviceId).c_str(), isSupport);
+#ifdef DMSFWK_ALL_CONNECT_MGR
     std::lock_guard<std::mutex> decisionLock(connectDecisionMutex_);
     peerConnectDecision_[peerDeviceId] = isSupport;
     connectDecisionCond_.notify_all();
+#endif
 }
 
 int32_t DSchedContinueManager::ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
@@ -266,6 +268,15 @@ void DSchedContinueManager::HandleContinueMissionWithBundleName(const DSchedCont
         auto newContinue = std::make_shared<DSchedContinue>(subType, direction, callback, info);
         newContinue->Init();
         continues_.insert(std::make_pair(info, newContinue));
+#ifdef DMSFWK_ALL_CONNECT_MGR
+        {
+            std::unique_lock<std::mutex> decisionLock(connectDecisionMutex_);
+            std::string peerDeviceId = direction == CONTINUE_SOURCE ? info.sinkDeviceId_ : info.sourceDeviceId_;
+            if (peerConnectDecision_.find(peerDeviceId) != peerConnectDecision_.end()) {
+                peerConnectDecision_.erase(peerDeviceId);
+            }
+        }
+#endif
         newContinue->OnContinueMission(wantParams);
     }
     WaitAllConnectDecision(direction, info, CONTINUE_TIMEOUT);
@@ -287,6 +298,7 @@ void DSchedContinueManager::WaitAllConnectDecision(int32_t direction, const DSch
 
         if (peerConnectDecision_.find(peerDeviceId) == peerConnectDecision_.end()) {
             HILOGE("Not find peerDeviceId %{public}s in peerConnectDecision.", GetAnonymStr(peerDeviceId).c_str());
+            SetTimeOut(info, 0);
             return;
         }
         if (!peerConnectDecision_.at(peerDeviceId).load()) {

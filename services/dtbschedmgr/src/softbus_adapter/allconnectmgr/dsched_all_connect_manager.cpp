@@ -18,7 +18,6 @@
 #include <dlfcn.h>
 
 #include "distributed_sched_utils.h"
-#include "dsched_continue_manager.h"
 #include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_log.h"
 
@@ -283,7 +282,6 @@ int32_t DSchedAllConnectManager::ApplyResult(int32_t errorcode, int32_t result, 
         return ERR_OK;
     }
     std::string peerNetworkId = peerConnectCbQueue_.front();
-    DSchedContinueManager::GetInstance().NotifyAllConnectDecision(peerNetworkId, isSupport);
     DSchedAllConnectManager::GetInstance().NotifyAllConnectDecision(peerNetworkId, isSupport);
     peerConnectCbQueue_.pop();
     return ERR_OK;

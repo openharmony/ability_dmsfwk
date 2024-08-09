@@ -17,6 +17,7 @@
 
 #include "distributed_sched_utils.h"
 #include "dsched_all_connect_manager.h"
+#include "dsched_continue_manager.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "softbus_bus_center.h"
@@ -73,24 +74,25 @@ DSchedTransportSoftbusAdapter::~DSchedTransportSoftbusAdapter()
 int32_t DSchedTransportSoftbusAdapter::InitChannel()
 {
     HILOGI("start");
-    serverSocket_ = CreateServerSocket();
-    if (serverSocket_ <= 0) {
-        HILOGE("create socket failed, ret: %{public}d", serverSocket_);
-        return serverSocket_;
-    }
-
-    int32_t ret = Listen(serverSocket_, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
-    if (ret != ERR_OK) {
-        HILOGE("service listen failed, ret: %{public}d", ret);
-        return ret;
-    }
-
+    int32_t ret = ERR_OK;
 #ifdef DMSFWK_ALL_CONNECT_MGR
     ret = DSchedAllConnectManager::GetInstance().InitAllConnectManager();
     if (ret != ERR_OK) {
         HILOGE("Init all connect manager fail, ret: %{public}d.", ret);
     }
 #endif
+
+    serverSocket_ = CreateServerSocket();
+    if (serverSocket_ <= 0) {
+        HILOGE("create socket failed, ret: %{public}d", serverSocket_);
+        return serverSocket_;
+    }
+
+    ret = Listen(serverSocket_, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+    if (ret != ERR_OK) {
+        HILOGE("service listen failed, ret: %{public}d", ret);
+        return ret;
+    }
     HILOGI("end");
     return ERR_OK;
 }
@@ -120,6 +122,9 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
                     HILOGI("peer device already connected");
                     iter->second->OnConnect();
                     sessionId = iter->first;
+#ifdef DMSFWK_ALL_CONNECT_MGR
+                    DSchedContinueManager::GetInstance().NotifyAllConnectDecision(peerDeviceId, true);
+#endif
                     return ERR_OK;
                 }
             }
@@ -134,8 +139,10 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
     if (ret != ERR_OK) {
         HILOGE("Apply advance resource fail, ret: %{public}d.", ret);
         sessionId = INVALID_SESSION_ID;
+        DSchedContinueManager::GetInstance().NotifyAllConnectDecision(peerDeviceId, false);
         return ret;
     }
+    DSchedContinueManager::GetInstance().NotifyAllConnectDecision(peerDeviceId, true);
 
     ret = DSchedAllConnectManager::GetInstance().PublishServiceState(peerDeviceId, "", SCM_PREPARE);
     if (ret != ERR_OK) {
