@@ -21,8 +21,10 @@
 #include "caller_info.h"
 #include "datetime_ex.h"
 #include "device_auth_defines.h"
+#ifdef SUPPORT_DEVICE_SECURITY_LEVEL
 #include "device_security_defines.h"
 #include "device_security_info.h"
+#endif
 #include "distributed_sched_adapter.h"
 #include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
@@ -49,7 +51,9 @@ const std::string BUNDLE_NAME_SCENEBOARD = "com.ohos.sceneboard";
 constexpr int32_t DEFAULT_DMS_API_VERSION = 9;
 const int DEFAULT_DMS_MISSION_ID = -1;
 const int FA_MODULE_ALLOW_MIN_API_VERSION = 8;
+#ifdef SUPPORT_DEVICE_SECURITY_LEVEL
 const int DEFAULT_DEVICE_SECURITY_LEVEL = -1;
+#endif
 }
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedPermission);
 void from_json(const nlohmann::json& jsonObject, GroupInfo& groupInfo)
@@ -244,12 +248,14 @@ int32_t DistributedSchedPermission::CheckGetCallerPermission(const AAFwk::Want& 
         HILOGE("Check background permission failed!");
         return DMS_BACKGROUND_PERMISSION_DENIED;
     }
+    #ifdef SUPPORT_DEVICE_SECURITY_LEVEL
     // 4. check device security level
     if (!targetAbility.visible &&
         !CheckDeviceSecurityLevel(callerInfo.sourceDeviceId, want.GetElement().GetDeviceID())) {
         HILOGE("check device security level failed!");
         return CALL_PERMISSION_DENIED;
     }
+    #endif
     HILOGI("CheckGetCallerPermission success!!");
     return ERR_OK;
 }
@@ -414,11 +420,13 @@ bool DistributedSchedPermission::CheckStartControlPermission(const AppExecFwk::A
 {
     // 1. check if continuation with same appid
     if ((want.GetFlags() & AAFwk::Want::FLAG_ABILITY_CONTINUATION) != 0) {
+        #ifdef SUPPORT_DEVICE_SECURITY_LEVEL
         if (!targetAbility.visible &&
             !CheckDeviceSecurityLevel(callerInfo.sourceDeviceId, want.GetElement().GetDeviceID())) {
             HILOGE("check device security level failed!");
             return false;
         }
+        #endif
         if (BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
             HILOGD("the appId is the same, check permission success!");
             return true;
@@ -431,12 +439,14 @@ bool DistributedSchedPermission::CheckStartControlPermission(const AppExecFwk::A
         HILOGE("Check background permission failed!");
         return false;
     }
+    #ifdef SUPPORT_DEVICE_SECURITY_LEVEL
     // 3. check device security level
     if (!targetAbility.visible &&
         !CheckDeviceSecurityLevel(callerInfo.sourceDeviceId, want.GetElement().GetDeviceID())) {
         HILOGE("check device security level failed!");
         return false;
     }
+    #endif
     // 4. check start or connect ability with same appid
     if (BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
         HILOGD("the appId is the same, check permission success!");
@@ -506,6 +516,7 @@ bool DistributedSchedPermission::CheckMinApiVersion(const AppExecFwk::AbilityInf
     return false;
 }
 
+#ifdef SUPPORT_DEVICE_SECURITY_LEVEL
 bool DistributedSchedPermission::CheckDeviceSecurityLevel(const std::string& srcDeviceId,
     const std::string& dstDeviceId) const
 {
@@ -528,7 +539,9 @@ bool DistributedSchedPermission::CheckDeviceSecurityLevel(const std::string& src
     }
     return true;
 }
+#endif
 
+#ifdef SUPPORT_DEVICE_SECURITY_LEVEL
 int32_t DistributedSchedPermission::GetDeviceSecurityLevel(const std::string& udid) const
 {
     DeviceIdentify devIdentify;
@@ -557,6 +570,7 @@ int32_t DistributedSchedPermission::GetDeviceSecurityLevel(const std::string& ud
     }
     return level;
 }
+#endif
 
 bool DistributedSchedPermission::CheckTargetAbilityVisible(const AppExecFwk::AbilityInfo& targetAbility,
     const CallerInfo& callerInfo) const

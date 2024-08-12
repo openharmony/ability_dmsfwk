@@ -528,6 +528,7 @@ HWTEST_F(BundleManagerInternalTest, GetBundleIdFromBms_001, TestSize.Level3)
     DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_001 end "<< std::endl;
 }
 
+#ifdef SUPPORT_DISTRIBUTED_BUNDLE_FRAMEWORK
 /**
  * @tc.name: GetBundleIdFromBms_002
  * @tc.desc: test get accessTokenId from bms
@@ -543,5 +544,6 @@ HWTEST_F(BundleManagerInternalTest, GetBundleIdFromBms_002, TestSize.Level3)
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "BundleManagerInternalTest GetBundleIdFromBms_002 end "<< std::endl;
 }
+#endif
 }
 }

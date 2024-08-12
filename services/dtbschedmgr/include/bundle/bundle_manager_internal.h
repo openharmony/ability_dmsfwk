@@ -20,8 +20,10 @@
 
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "bundlemgr/bundle_mgr_proxy.h"
+#ifdef SUPPORT_DISTRIBUTED_BUNDLE_FRAMEWORK
 #include "distributed_bms_interface.h"
 #include "distributed_bms_proxy.h"
+#endif
 #include "single_instance.h"
 
 namespace OHOS {
@@ -44,7 +46,9 @@ public:
     static int32_t CheckRemoteBundleInfoForContinuation(const std::string& dstDeviceId,
         const std::string& bundleName, AppExecFwk::DistributedBundleInfo& remoteBundleInfo);
     static sptr<AppExecFwk::IBundleMgr> GetBundleManager();
+#ifdef SUPPORT_DISTRIBUTED_BUNDLE_FRAMEWORK
     static sptr<AppExecFwk::IDistributedBms> GetDistributedBundleManager();
+#endif
     static int32_t GetUidFromBms(const std::string& bundleName);
     static bool CheckIfRemoteCanInstall(const AAFwk::Want& want, int32_t missionId);
     static int32_t GetBundleIdFromBms(const std::string& bundleName, uint32_t& accessTokenId);

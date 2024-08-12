@@ -289,6 +289,7 @@ sptr<AppExecFwk::IBundleMgr> BundleManagerInternal::GetBundleManager()
     return iface_cast<AppExecFwk::IBundleMgr>(bmsProxy);
 }
 
+#ifdef SUPPORT_DISTRIBUTED_BUNDLE_FRAMEWORK
 sptr<AppExecFwk::IDistributedBms> BundleManagerInternal::GetDistributedBundleManager()
 {
     sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -303,6 +304,7 @@ sptr<AppExecFwk::IDistributedBms> BundleManagerInternal::GetDistributedBundleMan
     }
     return iface_cast<AppExecFwk::IDistributedBms>(dbmsProxy);
 }
+#endif
 
 int32_t BundleManagerInternal::GetUidFromBms(const std::string& bundleName)
 {
@@ -345,6 +347,7 @@ int32_t BundleManagerInternal::GetBundleIdFromBms(const std::string& bundleName,
 int32_t BundleManagerInternal::GetBundleNameFromDbms(const std::string& networkId,
     const uint32_t accessTokenId, std::string& bundleName)
 {
+#ifdef SUPPORT_DISTRIBUTED_BUNDLE_FRAMEWORK
     auto bundleMgr = GetDistributedBundleManager();
     if (bundleMgr == nullptr) {
         HILOGE("failed to get dbms");
@@ -356,6 +359,10 @@ int32_t BundleManagerInternal::GetBundleNameFromDbms(const std::string& networkI
         return CAN_NOT_FOUND_ABILITY_ERR;
     }
     return ERR_OK;
+#else
+    HILOGE("not support distributed_bundle_framework");
+    return INVALID_PARAMETERS_ERR;
+#endif
 }
 
 int32_t BundleManagerInternal::GetApplicationInfoFromBms(const std::string& bundleName,

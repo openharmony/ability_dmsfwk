@@ -2224,6 +2224,7 @@ HWTEST_F(DistributedSchedPermissionTest, MarkUriPermission_003, TestSize.Level3)
     DTEST_LOG << "DistributedSchedPermissionTest MarkUriPermission_003 end " <<  std::endl;
 }
 
+#ifdef SUPPORT_DEVICE_SECURITY_LEVEL
 /**
  * @tc.name: GetDeviceSecurityLevel_001
  * @tc.desc: parse groupInfo from json with invalid params
@@ -2237,5 +2238,6 @@ HWTEST_F(DistributedSchedPermissionTest, GetDeviceSecurityLevel_001, TestSize.Le
     EXPECT_NE(ret, 0);
     DTEST_LOG << "DistributedSchedPermissionTest GetDeviceSecurityLevel_001 end " <<  std::endl;
 }
+#endif
 } // namespace DistributedSchedule
 } // namespace OHOS

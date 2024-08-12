@@ -57,6 +57,12 @@ config("distributed_sched_config") {
   if (dmsfwk_mmi_listener) {
     defines += [ "SUPPORT_MULTIMODALINPUT_SERVICE" ]
   }
+  if (dmsfwk_distributed_bundle_framework) {
+    defines += [ "SUPPORT_DISTRIBUTED_BUNDLE_FRAMEWORK" ]
+  }
+  if (dmsfwk_device_security_level) {
+    defines += [ "SUPPORT_DEVICE_SECURITY_LEVEL" ]
+  }
 }
 
 ohos_shared_library("distributedschedsvr") {
@@ -130,8 +136,6 @@ ohos_shared_library("distributedschedsvr") {
     "device_info_manager:distributed_device_profile_common",
     "device_info_manager:distributed_device_profile_sdk",
     "device_manager:devicemanagersdk",
-    "device_security_level:dslm_sdk",
-    "distributed_bundle_framework:dbms_fwk",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
@@ -196,6 +200,14 @@ ohos_shared_library("distributedschedsvr") {
     sources += [ "src/adapter/mmi_adapter.cpp" ]
   } else {
     sources += [ "src/adapter/mmi_adapter_common.cpp" ]
+  }
+
+  if (dmsfwk_distributed_bundle_framework) {
+    external_deps += [ "distributed_bundle_framework:dbms_fwk" ]
+  }
+
+  if (dmsfwk_device_security_level) {
+    external_deps += [ "device_security_level:dslm_sdk" ]
   }
 
   install_images = [ system_base_dir ]

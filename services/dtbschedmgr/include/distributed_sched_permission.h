@@ -72,8 +72,10 @@ private:
     bool CheckBackgroundPermission(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AAFwk::Want& want, bool needCheckApiVersion) const;
     bool CheckMinApiVersion(const AppExecFwk::AbilityInfo& targetAbility, int32_t apiVersion) const;
+    #ifdef SUPPORT_DEVICE_SECURITY_LEVEL
     bool CheckDeviceSecurityLevel(const std::string& srcDeviceId, const std::string& dstDeviceId) const;
     int32_t GetDeviceSecurityLevel(const std::string& udid) const;
+    #endif
     bool CheckTargetAbilityVisible(const AppExecFwk::AbilityInfo& targetAbility, const CallerInfo& callerInfo) const;
     bool IsDistributedFile(const std::string& path) const;
 };

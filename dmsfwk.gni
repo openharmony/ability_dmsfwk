@@ -25,6 +25,8 @@ declare_args() {
   dmsfwk_service_disable = false
   dmsfwk_ces_listener = false
   dmsfwk_mmi_listener = false
+  dmsfwk_distributed_bundle_framework = true
+  dmsfwk_device_security_level = true
   if (defined(global_parts_info)) {
     if (defined(global_parts_info.multimedia_image_framework)) {
       dmsfwk_mission_manager = true
@@ -43,6 +45,12 @@ declare_args() {
     }
     if (defined(global_parts_info.multimodalinput_input)) {
       dmsfwk_mmi_listener = true
+    }
+    if (!defined(global_parts_info.bundlemanager_distributed_bundle_framework)) {
+      dmsfwk_distributed_bundle_framework = false
+    }
+    if (!defined(global_parts_info.security_device_security_level)) {
+      dmsfwk_device_security_level = false
     }
   }
   if (!defined(global_parts_info) ||

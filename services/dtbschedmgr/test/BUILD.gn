@@ -50,8 +50,6 @@ dsched_external_deps = [
   "device_info_manager:distributed_device_profile_common",
   "device_info_manager:distributed_device_profile_sdk",
   "device_manager:devicemanagersdk",
-  "device_security_level:dslm_sdk",
-  "distributed_bundle_framework:dbms_fwk",
   "dmsfwk:continuation_manager",
   "eventhandler:libeventhandler",
   "ffrt:libffrt",
@@ -95,6 +93,14 @@ if (dmsfwk_ces_listener) {
 
 if (dmsfwk_mmi_listener) {
   dsched_external_deps += [ "input:libmmi-client" ]
+}
+
+if (dmsfwk_distributed_bundle_framework) {
+  dsched_external_deps += [ "distributed_bundle_framework:dbms_fwk" ]
+}
+
+if (dmsfwk_device_security_level) {
+  dsched_external_deps += [ "device_security_level:dslm_sdk" ]
 }
 
 dsched_public_deps = [
@@ -307,6 +313,14 @@ ohos_unittest("dschedcontinuetest") {
 
   if (dmsfwk_standard_form_share) {
     defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
+  }
+
+  if (dmsfwk_distributed_bundle_framework) {
+    defines += [ "SUPPORT_DISTRIBUTED_BUNDLE_FRAMEWORK" ]
+  }
+
+  if (dmsfwk_device_security_level) {
+    defines += [ "SUPPORT_DEVICE_SECURITY_LEVEL" ]
   }
 
   part_name = "dmsfwk"
