@@ -528,6 +528,33 @@ HWTEST_F(DMSContinueManagerTest, testSetMissionContinueState001, TestSize.Level3
 }
 
 /**
+ * @tc.name: testSetMissionContinueState002
+ * @tc.desc: test SetMissionContinueState
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testSetMissionContinueState002, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest testSetMissionContinueState002 start" << std::endl;
+    DistributedSchedUtil::MockManageMissions();
+    DMSContinueSendMgr::GetInstance().Init();
+    OHOS::AAFwk::ContinueState state = OHOS::AAFwk::ContinueState::CONTINUESTATE_INACTIVE;
+
+     /**
+     * @tc.steps: step1. test SetMissionContinueState when eventHandler is not nullptr;
+     */
+    DMSContinueSendMgr::GetInstance().SetMissionContinueState(0, state);
+    EXPECT_NE(DMSContinueSendMgr::GetInstance().eventHandler_, nullptr);
+
+    /**
+     * @tc.steps: step2. test SetMissionContinueState when eventHandler is nullptr;
+     */
+    DMSContinueSendMgr::GetInstance().UnInit();
+    DMSContinueSendMgr::GetInstance().SetMissionContinueState(0, state);
+    EXPECT_EQ(DMSContinueSendMgr::GetInstance().eventHandler_, nullptr);
+    DTEST_LOG << "DMSContinueManagerTest testSetMissionContinueState002 end" << std::endl;
+}
+
+/**
  * @tc.name: testDealSetMissionContinueStateBusiness001
  * @tc.desc: test DealSetMissionContinueStateBusiness.
  * @tc.type: FUNC

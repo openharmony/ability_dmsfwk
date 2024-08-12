@@ -145,6 +145,7 @@ private:
     int32_t FocusedBusinessSendEvent(std::string bundleName, const std::string& abilityName);
     int32_t GetBundleNameIdAndContinueTypeId(const int32_t missionId, const AAFwk::ContinueState& state,
         uint16_t& bundleNameId, uint8_t& continueTypeId);
+    void EraseFocusedMission(const std::string& bundleName, const int32_t& missionId, const UnfocusedReason& reason);
 private:
     currentMissionInfo info_ = { INVALID_MISSION_ID, false };
     std::map<std::string, int32_t> focusedMission_;
