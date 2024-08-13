@@ -14,7 +14,6 @@
  */
 
 #include "dfx/distributed_radar.h"
-#include "dfx/distributed_ue.h"
 
 #include "hisysevent.h"
 
@@ -749,7 +748,7 @@ bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode, st
             BIZ_STAGE, static_cast<int32_t>(ClickIcon::DMS_CONTINUE),
             STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC),
             PEER_UDID, GetAnonyUdid(peerUdid),
-            BUNDLE_NAME, bundleName);
+            APP_CALLER, bundleName);
     } else {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
@@ -761,7 +760,7 @@ bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode, st
             BIZ_STAGE, static_cast<int32_t>(ClickIcon::DMS_CONTINUE),
             STAGE_RES, static_cast<int32_t>(StageRes::STAGE_FAIL),
             PEER_UDID, GetAnonyUdid(peerUdid),
-            BUNDLE_NAME, bundleName,
+            APP_CALLER, bundleName,
             ERROR_CODE, errCode);
     }
     if (res != ERR_OK) {
