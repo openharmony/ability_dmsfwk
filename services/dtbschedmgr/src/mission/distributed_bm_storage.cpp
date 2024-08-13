@@ -697,24 +697,21 @@ void DmsBmStorage::UpdateDistributedData()
         return;
     }
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
-    if (!bundleMgr->GetBundleInfos(FLAGS, bundleInfos, AppExecFwk::Constants::ALL_USERID)) {
+    if (!bundleMgr->GetBundleInfosForContinuation(FLAGS, bundleInfos, AppExecFwk::Constants::ALL_USERID)) {
         HILOGE("get bundleInfos failed");
         return;
     }
+    HILOGI("bundleInfos size: %{public}zu", bundleInfos.size());
+
     std::vector<std::string> bundleNames;
     for (const auto &bundleInfo : bundleInfos) {
-        if (IsContinuable(bundleInfo)) {
-            bundleNames.push_back(bundleInfo.name);
-        }
+        bundleNames.push_back(bundleInfo.name);
     }
     std::map<std::string, DmsBundleInfo> oldDistributedBundleInfos =
         GetAllOldDistributionBundleInfo(bundleNames);
 
     std::vector<DmsBundleInfo> dmsBundleInfos;
     for (const auto &bundleInfo : bundleInfos) {
-        if (bundleInfo.singleton || !IsContinuable(bundleInfo)) {
-            continue;
-        }
         if (oldDistributedBundleInfos.find(bundleInfo.name) != oldDistributedBundleInfos.end()) {
             int64_t updateTime = oldDistributedBundleInfos[bundleInfo.name].updateTime;
             if (updateTime != bundleInfo.updateTime) {
