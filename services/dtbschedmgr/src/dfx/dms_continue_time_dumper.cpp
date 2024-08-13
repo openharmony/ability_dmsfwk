@@ -118,15 +118,18 @@ void DmsContinueTime::Init()
     dstInfo_.abilityName.clear();
     dstInfo_.netWorkId.clear();
     dstInfo_.deviceName.clear();
-    durationInfo_.clear();
+    {
+        std::lock_guard<std::mutex> vecLock(infoMutex_);
+        durationInfo_.clear();
 
-    durationInfo_.push_back(DmsDuration(0, 0, DMSDURATION_STARTTIME));
-    durationInfo_.push_back(DmsDuration(0, 0, DMSDURATION_ENDTIME));
-    durationInfo_.push_back(DmsDuration(0, 0, DMSDURATION_TOTAL));
-    durationInfo_.push_back(DmsDuration(0, 0, DMSDURATION_SINKTOSOURCERPC));
-    durationInfo_.push_back(DmsDuration(0, 0, DMSDURATION_SOURCEDATASAVE));
-    durationInfo_.push_back(DmsDuration(0, 0, DMSDURATION_SOURCETOSINKRPC));
-    durationInfo_.push_back(DmsDuration(0, 0, DMSDURATION_SINKABILITYSTART));
+        durationInfo_.push_back(DmsDuration(0, 0, DMSDURATION_STARTTIME));
+        durationInfo_.push_back(DmsDuration(0, 0, DMSDURATION_ENDTIME));
+        durationInfo_.push_back(DmsDuration(0, 0, DMSDURATION_TOTAL));
+        durationInfo_.push_back(DmsDuration(0, 0, DMSDURATION_SINKTOSOURCERPC));
+        durationInfo_.push_back(DmsDuration(0, 0, DMSDURATION_SOURCEDATASAVE));
+        durationInfo_.push_back(DmsDuration(0, 0, DMSDURATION_SOURCETOSINKRPC));
+        durationInfo_.push_back(DmsDuration(0, 0, DMSDURATION_SINKABILITYSTART));
+    }
 }
 
 void DmsContinueTime::SetPull(bool sign)
@@ -190,7 +193,8 @@ DmsDumperInfo DmsContinueTime::GetDstInfo()
 
 void DmsContinueTime::SetDurationBegin(const int32_t idx, const int64_t time)
 {
-    if (durationInfo_.empty()) {
+    std::lock_guard<std::mutex> vecLock(infoMutex_);
+    if (durationInfo_.empty() || durationInfo_.size() <= idx) {
         return;
     }
     durationInfo_[idx].SetBeginTime(time);
@@ -198,7 +202,8 @@ void DmsContinueTime::SetDurationBegin(const int32_t idx, const int64_t time)
 
 void DmsContinueTime::SetDurationEnd(const int32_t idx, const int64_t time)
 {
-    if (durationInfo_.empty()) {
+    std::lock_guard<std::mutex> vecLock(infoMutex_);
+    if (durationInfo_.empty() || durationInfo_.size() <= idx) {
         return;
     }
     durationInfo_[idx].SetEndTime(time);
@@ -206,7 +211,8 @@ void DmsContinueTime::SetDurationEnd(const int32_t idx, const int64_t time)
 
 void DmsContinueTime::SetDurationStrTime(const int32_t idx, const std::string info)
 {
-    if (durationInfo_.empty()) {
+    std::lock_guard<std::mutex> vecLock(infoMutex_);
+    if (durationInfo_.empty() || durationInfo_.size() <= idx) {
         return;
     }
     durationInfo_[idx].SetStrTime(info);
@@ -242,7 +248,7 @@ std::string DmsContinueTime::WriteDurationInfo(DmsDuration duration)
         HILOGW("Write Info failed!");
     }
     cJSON_Delete(durationInfo);
-    free(cjson_str);
+    cJSON_free(cjson_str);
     return message;
 }
 
@@ -254,13 +260,13 @@ void DmsContinueTime::ReadDurationInfo(const char* info)
         return;
     }
     cJSON* beginTimeItem = cJSON_GetObjectItem(durationInfo, "beginTime");
-    if (beginTimeItem == NULL) {
+    if (beginTimeItem == nullptr || !cJSON_IsNumber(beginTimeItem)) {
         cJSON_Delete(durationInfo);
         return;
     }
     int64_t beginTime = beginTimeItem->valueint;
     cJSON* endTimeItem = cJSON_GetObjectItem(durationInfo, "endTime");
-    if (endTimeItem == NULL) {
+    if (endTimeItem == nullptr || !cJSON_IsNumber(endTimeItem)) {
         cJSON_Delete(durationInfo);
         return;
     }
@@ -285,7 +291,7 @@ std::string DmsContinueTime::WriteDstInfo(const std::string bundleName, const st
         HILOGW("Write info failed!");
     }
     cJSON_Delete(info);
-    free(cjson_str);
+    cJSON_free(cjson_str);
     return message;
 }
 
@@ -297,13 +303,13 @@ void DmsContinueTime::ReadDstInfo(const char* info)
         return;
     }
     cJSON* bundleNameItem = cJSON_GetObjectItem(dstInfo, "DstBundleName");
-    if (bundleNameItem == NULL) {
+    if (bundleNameItem == nullptr || !cJSON_IsString(bundleNameItem) || (bundleNameItem->valuestring == nullptr)) {
         cJSON_Delete(dstInfo);
         return;
     }
     std::string bundleName = bundleNameItem->valuestring;
     cJSON* abilityNameItem = cJSON_GetObjectItem(dstInfo, "DstAbilityName");
-    if (abilityNameItem == NULL) {
+    if (abilityNameItem == nullptr || !cJSON_IsString(abilityNameItem) || (abilityNameItem->valuestring == nullptr)) {
         cJSON_Delete(dstInfo);
         return;
     }
@@ -325,6 +331,12 @@ std::string DmsContinueTime::GetCurrentTime()
 
 void DmsContinueTime::DealDurationPull()
 {
+    std::lock_guard<std::mutex> vecLock(infoMutex_);
+    if (durationInfo_.size() <= DMSDURATION_STARTABILITY) {
+        HILOGW("durationInfo_ does not have enough space");
+        return;
+    }
+
     durationInfo_[DMSDURATION_SAVETIME].SetBeginTime(saveDataDuration_.GetBeginTime());
     durationInfo_[DMSDURATION_SAVETIME].SetEndTime(saveDataDuration_.GetEndTime());
 
@@ -345,6 +357,12 @@ void DmsContinueTime::DealDurationPull()
 
 void DmsContinueTime::DealDurationPush()
 {
+    std::lock_guard<std::mutex> vecLock(infoMutex_);
+    if (durationInfo_.size() <= DMSDURATION_STARTABILITY) {
+        HILOGW("durationInfo_ does not have enough space");
+        return;
+    }
+
     durationInfo_[DMSDURATION_SAVETIME].SetBeginTime(saveDataDuration_.GetBeginTime());
     durationInfo_[DMSDURATION_SAVETIME].SetEndTime(saveDataDuration_.GetEndTime());
 
@@ -391,18 +409,21 @@ void DmsContinueTime::AppendInfo()
     appendInfo_.append(str.str());
     appendInfo_.append("------------------------------------------------------------------------------------\n");
 
-    for (auto duration : durationInfo_) {
-        appendInfo_.append(duration.GetDurationName().c_str());
-        appendInfo_.append(duration.GetStrTime().c_str());
-        appendInfo_.append("\n");
-    }
+    {
+        std::lock_guard<std::mutex> vecLock(infoMutex_);
+        for (auto duration : durationInfo_) {
+            appendInfo_.append(duration.GetDurationName().c_str());
+            appendInfo_.append(duration.GetStrTime().c_str());
+            appendInfo_.append("\n");
+        }
 
-    if (timeInfoList_.size() >= DMSDURATION_MAXSIZE) {
-        timeInfoList_.pop_front();
+        if (timeInfoList_.size() >= DMSDURATION_MAXSIZE) {
+            timeInfoList_.pop_front();
+        }
+        timeInfoList_.push_back(appendInfo_);
+        appendInfo_.clear();
+        durationInfo_.clear();
     }
-    timeInfoList_.push_back(appendInfo_);
-    appendInfo_.clear();
-    durationInfo_.clear();
 }
 
 void DmsContinueTime::ShowInfo(std::string& result)
@@ -419,8 +440,9 @@ void DmsContinueTime::ShowInfo(std::string& result)
 
 int64_t DmsContinueTime::GetTotalTime()
 {
+    std::lock_guard<std::mutex> vecLock(infoMutex_);
     HILOGD("GetTotalTime start, durationInfo_.size is %{public}zu", durationInfo_.size());
-    if (durationInfo_.empty() || durationInfo_.size() < DMSDURATION_TOTALTIME) {
+    if (durationInfo_.empty() || durationInfo_.size() <= DMSDURATION_TOTALTIME) {
         HILOGE("totalTime is not exist.");
         return DMSDURATION_EMPTY_TIME;
     }
