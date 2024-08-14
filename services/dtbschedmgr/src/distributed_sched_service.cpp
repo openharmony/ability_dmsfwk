@@ -74,6 +74,7 @@
 #include "mission/dms_continue_send_manager.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/distributed_sched_mission_manager.h"
+#include "mission/dsched_sync_e2e.h"
 #include "mission/wifi_state_listener.h"
 #endif
 
@@ -277,6 +278,7 @@ void DistributedSchedService::DeviceOfflineNotify(const std::string& networkId)
 bool DistributedSchedService::Init()
 {
     HILOGD("ready to init.");
+    InitDeviceCfg();
     int32_t ret = LoadContinueConfig();
     if (ret != ERR_OK) {
         HILOGE("Load continue config fail, ret %{public}d.", ret);
@@ -367,6 +369,9 @@ void DistributedSchedService::InitCommonEventListener()
     auto applyMonitor = std::make_shared<CommonEventListener>(subscribeInfo);
     EventFwk::CommonEventManager::SubscribeCommonEvent(applyMonitor);
     DmsBmStorage::GetInstance()->UpdateDistributedData();
+    if (DmsKvSyncE2E::GetInstance()->CheckDeviceCfg()) {
+        DmsKvSyncE2E::GetInstance()->PushAndPullData();
+    }
 #endif
 }
 
@@ -382,6 +387,12 @@ void DistributedSchedService::InitWifiStateListener()
     if (!ret) {
         HILOGE("SubscribeCommonEvent wifiStateListener failed!");
     }
+}
+
+void DistributedSchedService::InitDeviceCfg()
+{
+    HILOGI("called");
+    DmsKvSyncE2E::GetInstance()->SetDeviceCfg();
 }
 
 void DistributedSchedService::DurationStart(const std::string srcDeviceId, const std::string dstDeviceId)

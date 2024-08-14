@@ -24,6 +24,7 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_sched_mission_manager.h"
+#include "mission/dsched_sync_e2e.h"
 
 using namespace OHOS::DistributedKv;
 
@@ -97,9 +98,7 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
     AppExecFwk::BundleInfo bundleInfo;
     bool ret = bundleMgr->GetBundleInfo(bundleName, FLAGS, bundleInfo, AppExecFwk::Constants::ALL_USERID);
     if (!ret || !IsContinuable(bundleInfo)) {
-        HILOGW("GetBundleInfo of %{public}s failed:%{public}d or cannot be continued",
-            bundleName.c_str(), ret);
-        DeleteStorageDistributeInfo(bundleName);
+        HILOGW("GetBundleInfo of %{public}s failed:%{public}d or cannot be continued", bundleName.c_str(), ret);
         return false;
     }
     std::string localUdid;
@@ -385,12 +384,8 @@ bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, const 
         return false;
     }
     bool ret = DealGetBundleName(networkId, bundleNameId, bundleName);
-    if (!ret) {
-        HILOGW("get bundleName failed and try to call again");
-        ret = DealGetBundleName(networkId, bundleNameId, bundleName);
-    }
-    if (bundleName == "") {
-        HILOGE("GetBundleName fail");
+    if (!ret || bundleName == "") {
+        HILOGE("get bundleName failed: %{public}d", ret);
         return false;
     }
     HILOGI("end.");
