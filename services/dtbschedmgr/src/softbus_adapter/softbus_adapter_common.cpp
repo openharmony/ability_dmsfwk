@@ -24,7 +24,17 @@ const std::string TAG = "SoftbusAdapter";
 
 IMPLEMENT_SINGLE_INSTANCE(SoftbusAdapter);
 
-int32_t SoftbusAdapter::SendSoftbusEvent(uint8_t* sendData, uint32_t sendDataLen)
+void SoftbusAdapter::Init()
+{
+    HILOGI("%{public}s common called. ", __func__);
+}
+
+void SoftbusAdapter::UnInit()
+{
+    HILOGI("%{public}s common called. ", __func__);
+}
+
+int32_t SoftbusAdapter::SendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer)
 {
     HILOGI("%{public}s common called. ", __func__);
     return 0;

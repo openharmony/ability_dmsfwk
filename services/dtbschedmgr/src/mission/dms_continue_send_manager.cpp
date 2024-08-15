@@ -24,6 +24,7 @@
 #include "dfx/distributed_radar.h"
 #include "distributed_sched_adapter.h"
 #include "distributed_sched_utils.h"
+#include "dsched_data_buffer.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_recv_manager.h"
@@ -53,6 +54,7 @@ void DMSContinueSendMgr::Init()
     HILOGI("Init start");
     {
         MMIAdapter::GetInstance().Init();
+        SoftbusAdapter::GetInstance().Init();
         screenOffHandler_ = std::make_shared<ScreenOffHandler>();
 
         eventThread_ = std::thread(&DMSContinueSendMgr::StartEvent, this);
@@ -75,6 +77,7 @@ void DMSContinueSendMgr::UnInit()
 {
     HILOGI("UnInit start");
     MMIAdapter::GetInstance().UnInit();
+    SoftbusAdapter::GetInstance().UnInit();
     if (eventHandler_ != nullptr && eventHandler_->GetEventRunner() != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
         eventThread_.join();
@@ -226,14 +229,13 @@ int32_t DMSContinueSendMgr::SendSoftbusEvent(uint16_t bundleNameId, uint8_t cont
 {
     HILOGD("SendSoftbusEvent start, bundleNameId: %{public}u, continueTypeId: %{public}u",
         bundleNameId, continueTypeId);
-    uint8_t data[DMS_SEND_LEN];
-    uint8_t len = DMS_DATA_LEN;
-    data[0] = (type << CONTINUE_SHIFT_04) | len;
-    data[1] = (bundleNameId >> CONTINUE_SHIFT_08) & DMS_0XFF;
-    data[INDEX_2] = bundleNameId & DMS_0XFF;
-    data[INDEX_3] = continueTypeId & DMS_0XFF;
+    std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(DMS_SEND_LEN);
+    buffer->Data()[0] = (type << CONTINUE_SHIFT_04) | DMS_DATA_LEN;
+    buffer->Data()[1] = (bundleNameId >> CONTINUE_SHIFT_08) & DMS_0XFF;
+    buffer->Data()[INDEX_2] = bundleNameId & DMS_0XFF;
+    buffer->Data()[INDEX_3] = continueTypeId & DMS_0XFF;
 
-    int32_t ret = SoftbusAdapter::GetInstance().SendSoftbusEvent(data, DMS_SEND_LEN);
+    int32_t ret = SoftbusAdapter::GetInstance().SendSoftbusEvent(buffer);
     HILOGD("SendSoftbusEvent end. Result: %{public}d", ret);
     return ret;
 }

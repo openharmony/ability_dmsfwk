@@ -16,6 +16,7 @@
 #include "softbusadapter_fuzzer.h"
 
 #include <cstddef>
+#include "securec.h"
 #include <cstdint>
 
 #include "distributed_mission_broadcast_listener.h"
@@ -28,9 +29,11 @@ void FuzzSendSoftbusEvent(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(uint32_t))) {
         return;
     }
-    uint8_t* sendData = const_cast<uint8_t*>(data);
-    uint32_t sendDataLen = *(reinterpret_cast<const uint32_t*>(data));
-    SoftbusAdapter::GetInstance().SendSoftbusEvent(sendData, sendDataLen);
+    std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(size);
+    if (memcpy_s(buffer->Data(), buffer->Capacity(), data, size) != ERR_OK) {
+        return;
+    }
+    SoftbusAdapter::GetInstance().SendSoftbusEvent(buffer);
     SoftbusAdapter::GetInstance().StopSoftbusEvent();
 }
 
