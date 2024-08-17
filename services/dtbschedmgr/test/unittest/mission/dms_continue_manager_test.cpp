@@ -276,7 +276,7 @@ HWTEST_F(DMSContinueManagerTest, testDealFocusedBusiness001, TestSize.Level3)
     /**
      * @tc.steps: step1. test DealFocusedBusiness when missionId is invalid;
      */
-    int32_t ret = DMSContinueSendMgr::GetInstance().DealFocusedBusiness(-1);
+    int32_t ret = DMSContinueSendMgr::GetInstance().DealFocusedBusiness(-1, FocusedReason::MIN);
     EXPECT_NE(ret, ERR_OK);
 
     DTEST_LOG << "DMSContinueManagerTest testDealFocusedBusiness001 end" << std::endl;

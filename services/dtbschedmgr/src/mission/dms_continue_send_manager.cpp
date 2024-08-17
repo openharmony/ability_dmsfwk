@@ -141,12 +141,16 @@ void DMSContinueSendMgr::NotifyMissionFocused(const int32_t missionId, FocusedRe
         return;
     }
     auto feedfunc = [this, missionId, reason]() {
+        int32_t newMissionId = missionId;
+        if (reason == FocusedReason::MMI) {
+            newMissionId = info_.currentMissionId;
+        }
         if (reason == FocusedReason::NORMAL && screenOffHandler_ != nullptr) {
             screenOffHandler_->ClearScreenOffInfo();
         }
-        DealFocusedBusiness(missionId);
-        if (missionId == info_.currentMissionId && info_.currentIsContinuable) {
-            PostUnfocusedTaskWithDelay(missionId, UnfocusedReason::TIMEOUT);
+        DealFocusedBusiness(newMissionId, reason);
+        if (newMissionId == info_.currentMissionId && info_.currentIsContinuable) {
+            PostUnfocusedTaskWithDelay(newMissionId, UnfocusedReason::TIMEOUT);
         }
     };
 
@@ -265,7 +269,7 @@ void DMSContinueSendMgr::RemoveMMIListener()
     return;
 }
 
-int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
+int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId, FocusedReason reason)
 {
     HILOGI("DealFocusedBusiness start, missionId: %{public}d", missionId);
     AAFwk::MissionInfo info;
@@ -307,7 +311,9 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
         return INVALID_PARAMETERS_ERR;
     }
 #ifdef SUPPORT_MULTIMODALINPUT_SERVICE
-    AddMMIListener();
+    if (reason != FocusedReason::MMI) {
+        AddMMIListener();
+    }
 #endif
     if (!SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) { return DMS_PERMISSION_DENIED;}
     int32_t ret = FocusedBusinessSendEvent(bundleName, abilityName);
@@ -594,8 +600,7 @@ int32_t DMSContinueSendMgr::GetBundleNameIdAndContinueTypeId(const int32_t missi
 
 void DMSContinueSendMgr::OnMMIEvent()
 {
-    HILOGD("OnMMIEvent, missionId = %{public}d", info_.currentMissionId);
-    DMSContinueSendMgr::GetInstance().NotifyMissionFocused(info_.currentMissionId, FocusedReason::MMI);
+    DMSContinueSendMgr::GetInstance().NotifyMissionFocused(INVALID_MISSION_ID, FocusedReason::MMI);
 }
 
 int32_t DMSContinueSendMgr::NotifyDeviceOnline()
