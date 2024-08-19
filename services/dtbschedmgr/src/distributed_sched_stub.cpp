@@ -1546,7 +1546,7 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
     if (cmpDstbWant != nullptr) {
         cmpWant = cmpDstbWant->ToWant();
     }
-    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(cmpDstbWant);
+    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(cmpWant);
     std::string extraInfo = data.ReadString();
     if (extraInfo.empty()) {
         HILOGD("extra info is empty!");
