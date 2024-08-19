@@ -737,10 +737,11 @@ void DistributedSchedPermission::RemoveRemoteObjectFromWant(std::shared_ptr<AAFw
     std::map<std::string, sptr<IInterface>> params = wantParams.GetParams();
     for (auto param : params) {
         sptr<IInterface> object = param.second;
-        if (IWantParams::Query(object) == nullptr) {
+        IWantParams *wp = IWantParams::Query(object);
+        if (wp == nullptr) {
             continue;
         }
-        WantParams value = WantParamWrapper::Unbox(IWantParams::Query(object));
+        WantParams value = WantParamWrapper::Unbox(wp);
         auto type = value.GetParam(TYPE_PROPERTY);
         AAFwk::IString *typeP = AAFwk::IString::Query(type);
         if (typeP == nullptr) {
