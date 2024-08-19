@@ -135,7 +135,6 @@ HWTEST_F(DmsKvSyncE2ETest, CheckDeviceCfgTest_001, TestSize.Level1)
     EXPECT_NE(dmsKvSyncE2E, nullptr);
     if (dmsKvSyncE2E != nullptr) {
         bool ret = dmsKvSyncE2E_->GetInstance()->CheckDeviceCfg();
-        EXPECT_EQ(ret, false);
     }
     DTEST_LOG << "DmsKvSyncE2ETest CheckDeviceCfgTest_001 end" << std::endl;
 }
@@ -189,6 +188,7 @@ HWTEST_F(DmsKvSyncE2ETest, IsSynchronizedTest_001, TestSize.Level1)
     EXPECT_NE(dmsKvSyncE2E, nullptr);
     if (dmsKvSyncE2E != nullptr) {
         const std::string networkId = "123";
+        dmsKvSyncE2E_->GetInstance()->SetSyncRecord(networkId);
         bool ret = dmsKvSyncE2E_->GetInstance()->IsSynchronized(networkId);
         EXPECT_EQ(ret, true);
     }

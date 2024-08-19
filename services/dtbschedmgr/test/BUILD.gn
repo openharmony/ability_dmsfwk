@@ -322,6 +322,7 @@ ohos_unittest("dschedmissionmanagertest") {
     debug = false
   }
   module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
   sources = [
     "unittest/mission/distributed_bm_storage_test.cpp",
     "unittest/mission/distributed_data_storage_test.cpp",
@@ -333,9 +334,6 @@ ohos_unittest("dschedmissionmanagertest") {
     "unittest/mission/snapshot_test.cpp",
     "unittest/mock_remote_stub.cpp",
   ]
-  if (dmsfwk_mmi_listener) {
-    sources += [ "unittest/adapter/mmi_adapter_test.cpp" ]
-  }
   sources += dtbschedmgr_sources
 
   configs = [
@@ -498,8 +496,6 @@ ohos_unittest("dmsbasetest") {
     "unittest/dfx/distributed_ue_test.cpp",
     "unittest/dfx/dms_continue_time_dumper_test.cpp",
     "unittest/dfx/dms_hisysevent_report_test.cpp",
-    "unittest/dms_network_adapter_test.cpp",
-    "unittest/dtbschedmgr_device_info_storage_test.cpp",
     "unittest/mock_distributed_sched.cpp",
   ]
   sources += dtbschedmgr_sources
@@ -602,10 +598,36 @@ ohos_unittest("distributedeventtest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("distributedadaptertest") {
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [
+    "unittest/dms_network_adapter_test.cpp",
+    "unittest/dtbschedmgr_device_info_storage_test.cpp",
+  ]
+  if (dmsfwk_mmi_listener) {
+    sources += [ "unittest/adapter/mmi_adapter_test.cpp" ]
+  }
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = []
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":bundlemanagerinternaltest",
+    ":distributedadaptertest",
     ":distributedcalltest",
     ":distributedeventtest",
     ":distributedschedsvrtest",
