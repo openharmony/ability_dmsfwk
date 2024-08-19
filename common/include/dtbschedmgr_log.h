@@ -467,7 +467,7 @@ enum {
      */
     DMS_CONNECT_APPLY_REJECT_FAILED = 29360231,
     /**
-     * Result(29360232) for all connect manager reject connect apply.
+     * Result(29360232) for all connect manager deal connect apply timeout.
      */
     DMS_CONNECT_APPLY_TIMEOUT_FAILED = 29360232,
 };
