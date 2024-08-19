@@ -743,7 +743,7 @@ void RemoveRemoteObjectFromWant(std::shared_ptr<AAFwk::Want> want) const
             AAFwk::IString *typeP = AAFwk::IString::Query(type);
             if (typeP != nullptr) {
                 std::string typeValue = AAFwk::String::Unbox(typeP);
-                if(typeValue == REMOTE_OBJECT) {
+                if (typeValue == REMOTE_OBJECT) {
                     wantParams.Remove(param.first);
                 }
             }
