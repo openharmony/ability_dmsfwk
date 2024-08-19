@@ -751,5 +751,6 @@ void RemoveRemoteObjectFromWant(std::shared_ptr<AAFwk::Want> want) const
     }
     want->SetParams(wantParams);
 }
+
 }
 }
