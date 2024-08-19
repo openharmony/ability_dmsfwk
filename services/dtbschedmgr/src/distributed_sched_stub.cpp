@@ -249,6 +249,7 @@ int32_t DistributedSchedStub::StartRemoteAbilityInner(MessageParcel& data, Messa
         HILOGW("START_ABILITY want readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
+    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(want);
     int32_t callerUid = 0;
     PARCEL_READ_HELPER(data, Int32, callerUid);
     int32_t requestCode = 0;
@@ -378,6 +379,7 @@ int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, M
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
+    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(want);
 
     AbilityInfo abilityInfo;
     int32_t requestCode = 0;
@@ -484,6 +486,7 @@ int32_t DistributedSchedStub::SendResultFromRemoteInner(MessageParcel& data, Mes
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
+    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(want);
     int64_t begin = GetTickCount();
     int32_t requestCode = 0;
     PARCEL_READ_HELPER(data, Int32, requestCode);
@@ -644,6 +647,7 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
+    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(want);
     int32_t missionId = data.ReadInt32();
     int32_t callerUid = data.ReadInt32();
     int32_t status = data.ReadInt32();
@@ -750,6 +754,7 @@ int32_t DistributedSchedStub::ConnectRemoteAbilityInner(MessageParcel& data, Mes
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
+    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(want);
     sptr<IRemoteObject> connect = data.ReadRemoteObject();
     int32_t callerUid = 0;
     PARCEL_READ_HELPER(data, Int32, callerUid);
@@ -816,6 +821,7 @@ int32_t DistributedSchedStub::ConnectAbilityFromRemoteInner(MessageParcel& data,
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
+    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(want);
 
     AbilityInfo abilityInfo;
     sptr<IRemoteObject> connect = nullptr;
@@ -1272,6 +1278,7 @@ int32_t DistributedSchedStub::StartRemoteAbilityByCallInner(MessageParcel& data,
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
+    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(want);
     sptr<IRemoteObject> connect = data.ReadRemoteObject();
     int32_t callerUid = 0;
     PARCEL_READ_HELPER(data, Int32, callerUid);
@@ -1341,6 +1348,7 @@ int32_t DistributedSchedStub::StartAbilityByCallFromRemoteInner(MessageParcel& d
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
+    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(want);
     int32_t result = StartAbilityByCallFromRemote(*want, connect, callerInfo, accountInfo);
     BehaviorEventParam eventParam = { EventCallingType::REMOTE, BehaviorEvent::START_REMOTE_ABILITY_BYCALL, result,
         want->GetElement().GetBundleName(), want->GetElement().GetAbilityName(), callerInfo.uid };
@@ -1466,6 +1474,7 @@ int32_t DistributedSchedStub::StartRemoteFreeInstallInner(MessageParcel& data, M
         HILOGE("want readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
+    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(want);
     int32_t callerUid = 0;
     int32_t requestCode = 0;
     uint32_t accessToken = 0;
@@ -1523,6 +1532,7 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
         HILOGE("want readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
+    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(want);
     int64_t begin = GetTickCount();
     CallerInfo callerInfo = {.accessToken = 0};
     AccountInfo accountInfo = {};
@@ -1536,6 +1546,7 @@ int32_t DistributedSchedStub::StartFreeInstallFromRemoteInner(MessageParcel& dat
     if (cmpDstbWant != nullptr) {
         cmpWant = cmpDstbWant->ToWant();
     }
+    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(cmpDstbWant);
     std::string extraInfo = data.ReadString();
     if (extraInfo.empty()) {
         HILOGD("extra info is empty!");
@@ -1585,6 +1596,7 @@ int32_t DistributedSchedStub::StopRemoteExtensionAbilityInner(MessageParcel& dat
         HILOGW("Stop reomte extension ability want readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
+    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(want);
     int32_t callerUid = 0;
     PARCEL_READ_HELPER(data, Int32, callerUid);
     uint32_t accessToken = 0;
@@ -1613,6 +1625,7 @@ int32_t DistributedSchedStub::StopExtensionAbilityFromRemoteInner(MessageParcel&
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
+    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(want);
     int32_t serviceType = 0;
     PARCEL_READ_HELPER(data, Int32, serviceType);
     CallerInfo callerInfo;
