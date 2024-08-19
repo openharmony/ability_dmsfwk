@@ -737,16 +737,18 @@ void RemoveRemoteObjectFromWant(std::shared_ptr<AAFwk::Want> want) const
     std::map<std::string, sptr<IInterface>> params = wantParams.GetParams();
     for (auto param : params) {
         sptr<IInterface> object = param.second;
-        if (IWantParams::Query(object) != nullptr) {
-            WantParams value = WantParamWrapper::Unbox(IWantParams::Query(object));
-            auto type = value.GetParam(TYPE_PROPERTY);
-            AAFwk::IString *typeP = AAFwk::IString::Query(type);
-            if (typeP != nullptr) {
-                std::string typeValue = AAFwk::String::Unbox(typeP);
-                if (typeValue == REMOTE_OBJECT) {
-                    wantParams.Remove(param.first);
-                }
-            }
+        if (IWantParams::Query(object) == nullptr) {
+            continue;
+        }
+        WantParams value = WantParamWrapper::Unbox(IWantParams::Query(object));
+        auto type = value.GetParam(TYPE_PROPERTY);
+        AAFwk::IString *typeP = AAFwk::IString::Query(type);
+        if (typeP == nullptr) {
+            continue;
+        }
+        std::string typeValue = AAFwk::String::Unbox(typeP);
+        if (typeValue == REMOTE_OBJECT) {
+            wantParams.Remove(param.first);
         }
     }
     want->SetParams(wantParams);
