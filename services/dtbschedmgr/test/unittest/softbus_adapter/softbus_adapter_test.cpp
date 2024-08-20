@@ -56,11 +56,11 @@ void SoftbusAdapterTest::SetUp()
 HWTEST_F(SoftbusAdapterTest, SendSoftbusEvent_001, TestSize.Level3)
 {
     DTEST_LOG << "SoftbusAdapterTest SendSoftbusEvent_001 begin" << std::endl;
-    uint8_t* sendData = nullptr;
     uint32_t sendDataLen = 1;
+    std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(sendDataLen);
     SoftbusMock sortbusMock;
     EXPECT_CALL(sortbusMock, SendEvent(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    uint32_t result = SoftbusAdapter::GetInstance().SendSoftbusEvent(sendData, sendDataLen);
+    uint32_t result = SoftbusAdapter::GetInstance().SendSoftbusEvent(buffer);
     EXPECT_EQ(result, SOFTBUS_OK);
     DTEST_LOG << "SoftbusAdapterTest SendSoftbusEvent_001 end" << std::endl;
 }
