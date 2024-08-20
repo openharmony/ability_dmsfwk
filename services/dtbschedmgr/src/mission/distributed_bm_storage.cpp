@@ -269,28 +269,25 @@ bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_
         return false;
     }
     std::string udid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(networkId);
-    if (udid == "") {
-        HILOGE("can not get udid by networkId");
+    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(networkId);
+    if (udid == "" || uuid == "") {
+        HILOGE("can not get udid or uuid");
         return false;
     }
-    Key allEntryKeyPrefix("");
-    std::vector<Entry> allEntries;
-    std::promise<OHOS::DistributedKv::Status> resultStatusSignal;
-    int64_t begin = GetTickCount();
-    GetEntries(networkId, allEntryKeyPrefix, resultStatusSignal, allEntries);
-    Status status = GetResultSatus(resultStatusSignal);
-    HILOGI("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
+    HILOGI("uuid: %{public}s", GetAnonymStr(uuid).c_str());
+    std::vector<Entry> remoteEntries;
+    Status status = kvStorePtr_->GetDeviceEntries(uuid, remoteEntries);
+    if (remoteEntries.empty() || status != Status::SUCCESS) {
+        HILOGE("GetDeviceEntries error: %{public}d or remoteEntries is empty", status);
+        return false;
+    }
 
-    if (status != Status::SUCCESS) {
-        HILOGE("GetEntries error: %{public}d", status);
-        return false;
-    }
     std::vector<Entry> reduRiskEntries;
     std::string keyOfPublic = udid + AppExecFwk::Constants::FILE_UNDERLINE + PUBLIC_RECORDS;
-    for (auto entry : allEntries) {
+    for (auto entry : remoteEntries) {
         std::string key = entry.key.ToString();
         std::string value =  entry.value.ToString();
-        if (key.find(udid) == std::string::npos || key.find(keyOfPublic) != std::string::npos) {
+        if (key.find(keyOfPublic) != std::string::npos) {
             continue;
         }
         DmsBundleInfo distributedBundleInfo;
