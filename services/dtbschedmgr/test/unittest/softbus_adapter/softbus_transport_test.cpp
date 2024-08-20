@@ -414,6 +414,7 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, OnBind_001, TestSize.Level3)
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest OnBind_001 begin" << std::endl;
     int32_t sessionId = 0;
     DSchedTransportSoftbusAdapter::GetInstance().OnBind(sessionId, PEERDEVICEID);
+    EXPECT_EQ(sessionId, 0);
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest OnBind_001 end" << std::endl;
 }
 
