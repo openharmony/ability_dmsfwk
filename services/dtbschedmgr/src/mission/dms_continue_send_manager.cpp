@@ -370,50 +370,54 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, Unfoc
     }
     HILOGI("Get bundleName success, mission is continuable, missionId: %{public}d, bundleName: %{public}s",
         missionId, bundleName.c_str());
-
     std::string abilityName;
     ret = GetAbilityNameByMissionId(missionId, abilityName);
     if (ret != ERR_OK) {
         HILOGE("get abilityName failed, missionId: %{public}d, ret: %{public}d", missionId, ret);
         return ret;
     }
-
     if (reason != UnfocusedReason::TIMEOUT) {
         bool isContinue = IsContinue(missionId, bundleName);
         if (!isContinue) {
             HILOGE("Not current mission to be continued, missionId: %{public}d", missionId);
+            EraseFocusedMission(bundleName, missionId, reason);
             return NO_MISSION_INFO_FOR_MISSION_ID;
         }
 #ifdef SUPPORT_MULTIMODALINPUT_SERVICE
         RemoveMMIListener();
 #endif
     }
-
     ret = CheckContinueState(missionId);
     if (ret != ERR_OK) {
         HILOGE("Continue state is inactive or can't be obtained, mission id : %{public}d, ret: %{public}d",
             missionId, ret);
+        EraseFocusedMission(bundleName, missionId, reason);
         return ret;
     }
-
     uint16_t bundleNameId = 0;
     uint8_t continueTypeId = 0;
     ret = GetAccessTokenIdSendEvent(bundleName, reason, bundleNameId, continueTypeId);
     if (ret != ERR_OK) {
         HILOGE("GetAccessTokenIdSendEvent failed");
+        EraseFocusedMission(bundleName, missionId, reason);
         return ret;
     }
-    if (reason != UnfocusedReason::TIMEOUT) {
-        std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
-        focusedMission_.erase(bundleName);
-        focusedMissionAbility_.erase(missionId);
-    }
-
+    EraseFocusedMission(bundleName, missionId, reason);
     if (reason == UnfocusedReason::NORMAL && screenOffHandler_ != nullptr) {
         screenOffHandler_->SetScreenOffInfo(missionId, bundleName, bundleNameId, abilityName);
     }
     HILOGI("DealUnfocusedBusiness end");
     return ERR_OK;
+}
+
+void DMSContinueSendMgr::EraseFocusedMission(const std::string& bundleName, const int32_t& missionId,
+    const UnfocusedReason& reason)
+{
+    if (reason == UnfocusedReason::NORMAL) {
+        std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
+        focusedMission_.erase(bundleName);
+        focusedMissionAbility_.erase(missionId);
+    }
 }
 
 int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
@@ -492,9 +496,6 @@ bool DMSContinueSendMgr::IsContinue(const int32_t& missionId, const std::string&
     if (missionId != info_.currentMissionId && info_.currentIsContinuable) {
         /*missionId and currentMissionId are not equal but currentMission can change,
             continue to not send unfocus broadcast*/
-        std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
-        focusedMission_.erase(bundleName);
-        focusedMissionAbility_.erase(missionId);
         HILOGI("mission is not continue, missionId: %{public}d, currentMissionId: %{public}d",
             missionId, info_.currentMissionId);
         return false;
@@ -532,7 +533,8 @@ int32_t DMSContinueSendMgr::DealSetMissionContinueStateBusiness(const int32_t mi
     const AAFwk::ContinueState &state)
 {
     HILOGI("DealSetMissionContinueStateBusiness start, missionId: %{public}d, state: %{public}d", missionId, state);
-    if (info_.currentMissionId != missionId) {
+    std::string bundleName;
+    if (info_.currentMissionId != missionId && GetBundleNameByMissionId(missionId, bundleName) != ERR_OK) {
         HILOGE("mission is not focused, broadcast task abort, missionId: %{public}d", missionId);
         return INVALID_PARAMETERS_ERR;
     }
