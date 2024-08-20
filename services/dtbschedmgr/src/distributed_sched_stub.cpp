@@ -657,10 +657,15 @@ int32_t DistributedSchedStub::StartContinuationInner(MessageParcel& data, Messag
     DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
 
     // set in ability runtime, used to seperate callings from FA or stage model
+    bool isFA = want->GetBoolParam(FEATURE_ABILITY_FLAG_KEY, false);
     want->RemoveParam(FEATURE_ABILITY_FLAG_KEY);
-    int32_t result = DSchedContinueManager::GetInstance().GetDSchedContinueByWant(*want, missionId) != nullptr
-        ? DSchedContinueManager::GetInstance().StartContinuation(*want, missionId, callerUid, status, accessToken)
-        : StartContinuation(*want, missionId, callerUid, status, accessToken);
+
+    bool isFreeInstall = DistributedSchedService::GetInstance().GetIsFreeInstall(missionId);
+
+    int32_t result = (isFA || isFreeInstall || !IsUsingQos(want->GetElement().GetDeviceID())) ?
+        StartContinuation(*want, missionId, callerUid, status, accessToken) :
+        DSchedContinueManager::GetInstance().StartContinuation(*want, missionId, callerUid, status, accessToken);
+
     ReportEvent(*want, BehaviorEvent::START_CONTINUATION, result, callerUid);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
