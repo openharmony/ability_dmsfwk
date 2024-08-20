@@ -248,14 +248,14 @@ int32_t DistributedSchedPermission::CheckGetCallerPermission(const AAFwk::Want& 
         HILOGE("Check background permission failed!");
         return DMS_BACKGROUND_PERMISSION_DENIED;
     }
-    #ifdef SUPPORT_DEVICE_SECURITY_LEVEL
+#ifdef SUPPORT_DEVICE_SECURITY_LEVEL
     // 4. check device security level
     if (!targetAbility.visible &&
         !CheckDeviceSecurityLevel(callerInfo.sourceDeviceId, want.GetElement().GetDeviceID())) {
         HILOGE("check device security level failed!");
         return CALL_PERMISSION_DENIED;
     }
-    #endif
+#endif
     HILOGI("CheckGetCallerPermission success!!");
     return ERR_OK;
 }
@@ -420,13 +420,13 @@ bool DistributedSchedPermission::CheckStartControlPermission(const AppExecFwk::A
 {
     // 1. check if continuation with same appid
     if ((want.GetFlags() & AAFwk::Want::FLAG_ABILITY_CONTINUATION) != 0) {
-        #ifdef SUPPORT_DEVICE_SECURITY_LEVEL
+#ifdef SUPPORT_DEVICE_SECURITY_LEVEL
         if (!targetAbility.visible &&
             !CheckDeviceSecurityLevel(callerInfo.sourceDeviceId, want.GetElement().GetDeviceID())) {
             HILOGE("check device security level failed!");
             return false;
         }
-        #endif
+#endif
         if (BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
             HILOGD("the appId is the same, check permission success!");
             return true;
@@ -439,14 +439,14 @@ bool DistributedSchedPermission::CheckStartControlPermission(const AppExecFwk::A
         HILOGE("Check background permission failed!");
         return false;
     }
-    #ifdef SUPPORT_DEVICE_SECURITY_LEVEL
+#ifdef SUPPORT_DEVICE_SECURITY_LEVEL
     // 3. check device security level
     if (!targetAbility.visible &&
         !CheckDeviceSecurityLevel(callerInfo.sourceDeviceId, want.GetElement().GetDeviceID())) {
         HILOGE("check device security level failed!");
         return false;
     }
-    #endif
+#endif
     // 4. check start or connect ability with same appid
     if (BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
         HILOGD("the appId is the same, check permission success!");
