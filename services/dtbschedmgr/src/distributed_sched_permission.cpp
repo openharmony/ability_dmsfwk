@@ -24,6 +24,7 @@
 #include "ipc_skeleton.h"
 #include "ohos_account_kits.h"
 #include "os_account_manager.h"
+#include "string_wrapper.h"
 
 #include "adapter/dnetwork_adapter.h"
 #include "bundle/bundle_manager_internal.h"
@@ -728,6 +729,30 @@ bool DistributedSchedPermission::CheckTargetAbilityVisible(const AppExecFwk::Abi
     }
     HILOGD("CheckTargetAbilityVisible passed.");
     return true;
+}
+
+void DistributedSchedPermission::RemoveRemoteObjectFromWant(std::shared_ptr<AAFwk::Want> want) const
+{
+    WantParams wantParams = want->GetParams();
+    std::map<std::string, sptr<IInterface>> params = wantParams.GetParams();
+    for (auto param : params) {
+        sptr<IInterface> object = param.second;
+        IWantParams *wp = IWantParams::Query(object);
+        if (wp == nullptr) {
+            continue;
+        }
+        WantParams value = WantParamWrapper::Unbox(wp);
+        auto type = value.GetParam(TYPE_PROPERTY);
+        AAFwk::IString *typeP = AAFwk::IString::Query(type);
+        if (typeP == nullptr) {
+            continue;
+        }
+        std::string typeValue = AAFwk::String::Unbox(typeP);
+        if (typeValue == REMOTE_OBJECT) {
+            wantParams.Remove(param.first);
+        }
+    }
+    want->SetParams(wantParams);
 }
 }
 }
