@@ -35,7 +35,6 @@ namespace DistributedSchedule {
 using namespace AppExecFwk;
 namespace {
 const std::string TAG = "DistributedSchedUtil";
-const std::string HAP_FILE_PATH = "/data/test/resource/dmsfwk/resource/bmsThirdBundle.hap";
 const char* DISTSCHED_PROCESS_NAME = "distributedsched";
 constexpr int32_t DMS_LOAD_SA_TIMEOUT_MS = 10000;
 constexpr int32_t USER_ID = 100;
@@ -128,32 +127,6 @@ sptr<AppExecFwk::IBundleMgr> DistributedSchedUtil::GetBundleManager()
         return nullptr;
     }
     return iface_cast<AppExecFwk::IBundleMgr>(bmsProxy);
-}
-
-int32_t DistributedSchedUtil::InstallThirdPartyHap()
-{
-    auto bms = GetBundleManager();
-    if (bms == nullptr) {
-        HILOGE("bms is null");
-        return FAILED_RETURN;
-    }
-    auto installer = bms->GetBundleInstaller();
-    if (!installer) {
-        HILOGE("installer is null");
-        return FAILED_RETURN;
-    }
-    InstallParam installParam;
-    installParam.installFlag = InstallFlag::NORMAL;
-    installParam.userId = USER_ID;
-    sptr<StatusReceiverImpl> statusReceiver(new (std::nothrow) StatusReceiverImpl());
-    if (!statusReceiver) {
-        return FAILED_RETURN;
-    }
-    bool result = installer->Install(HAP_FILE_PATH, installParam, statusReceiver);
-    if (!result) {
-        return FAILED_RETURN;
-    }
-    return 0;
 }
 
 void DistributedSchedUtil::MockProcessAndPermission(const char* processName, const char *perms[], int32_t permsNum)
