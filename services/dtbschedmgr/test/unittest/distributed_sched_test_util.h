@@ -37,7 +37,6 @@ public:
     static void LoadSystemAbilitySuccessNotify(const sptr<IRemoteObject>& remoteObject);
     static void LoadSystemAbilityFailNotify();
     static sptr<AppExecFwk::IBundleMgr> GetBundleManager();
-    static int32_t InstallThirdPartyHap();
 
     static std::mutex remoteMutex_;
     static sptr<IRemoteObject> remote_;

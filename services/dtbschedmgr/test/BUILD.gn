@@ -115,8 +115,6 @@ if (dmsfwk_mmi_listener) {
 dsched_public_deps = [
   "${distributed_service}/dtbschedmgr:distributedschedsvr",
   "${dms_path}/common:distributed_sched_utils",
-  "//third_party/googletest:gmock_main",
-  "//third_party/googletest:gtest_main",
 ]
 
 dtbschedmgr_sources = [ "unittest/distributed_sched_test_util.cpp" ]
@@ -130,11 +128,6 @@ distributed_event_sources = [
 
 ohos_unittest("distributedschedsvrtest") {
   module_out_path = module_output_path
-
-  deps = [
-    "${dms_path}/test/sceneProject/unittest/bundle_dependencies/bmsThirdBundle:bmsThirdBundle",
-    "${dms_path}/test/sceneProject/unittest/ohos_test:copy_ohos_test",
-  ]
 
   sources = [
     "unittest/continue_scene_session_handler_test.cpp",
@@ -243,11 +236,6 @@ ohos_unittest("dschedcontinuetest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
-
-  deps = [
-    "${dms_path}/test/sceneProject/unittest/bundle_dependencies/bmsThirdBundle:bmsThirdBundle",
-    "${dms_path}/test/sceneProject/unittest/ohos_test:copy_ohos_test",
-  ]
 
   if (dmsfwk_mission_manager) {
     defines = [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
@@ -366,10 +354,7 @@ ohos_unittest("bundlemanagerinternaltest") {
     "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
   ]
   configs += dsched_configs
-  deps = [
-    "${dms_path}/test/sceneProject/unittest/bundle_dependencies/bmsThirdBundle:bmsThirdBundle",
-    "${dms_path}/test/sceneProject/unittest/ohos_test:copy_ohos_test",
-  ]
+
   if (is_standard_system) {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
@@ -397,14 +382,12 @@ ohos_unittest("softbusadaptertest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
   ]
   configs += dsched_configs
-  deps = [
-    "${dms_path}/test/sceneProject/unittest/bundle_dependencies/bmsThirdBundle:bmsThirdBundle",
-    "${dms_path}/test/sceneProject/unittest/ohos_test:copy_ohos_test",
-  ]
+
   if (is_standard_system) {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
+  external_deps += [ "googletest:gmock" ]
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -639,6 +622,7 @@ group("unittest") {
     ":dschedcontinuestatetest",
     ":dschedcontinuetest",
     ":dschedswitchstatustest",
+    ":hisyseventreporttest",
     ":softbusadaptertest",
     "${dms_path}/common/test/unittest:distributed_sched_utils_test",
   ]
