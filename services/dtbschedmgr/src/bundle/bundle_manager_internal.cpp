@@ -187,12 +187,16 @@ bool BundleManagerInternal::IsSameAppId(const std::string& callerAppId, const st
 bool BundleManagerInternal::IsSameDeveloperId(const std::string& callerDeveloperId, const std::string& targetBundleName)
 {
     if (targetBundleName.empty() || callerDeveloperId.empty()) {
-        HILOGE("targetBundleName:%{public}s or callerDeveloperId:%s is empty",
+        HILOGE("targetBundleName:%{public}s or callerDeveloperId:%{public}s is empty",
             targetBundleName.c_str(), GetAnonymStr(callerDeveloperId).c_str());
         return false;
     }
 
     auto bundleMgr = GetBundleManager();
+    if (bundleMgr == nullptr) {
+        HILOGE("get bundle manager failed");
+        return false;
+    }
     AppExecFwk::AppProvisionInfo targetAppProvisionInfo;
     bundleMgr->GetAppProvisionInfo(targetBundleName, targetAppProvisionInfo);
     return callerDeveloperId == targetAppProvisionInfo.developerId;
@@ -245,15 +249,18 @@ int32_t BundleManagerInternal::GetLocalBundleInfoV9(const std::string& bundleNam
 
 static bool GetContinueBundle4Src(const std::string srcBundleName,
     std::vector<std::string> bundleNameList){
-    // todo: 打桩测试
-    if(srcBundleName == "com.hf.demo"){
-        bundleNameList.emplace_back("com.hf.demo1");
-        return true;
-    }else if(srcBundleName == "com.hf.demo1"){
-        bundleNameList.emplace_back("com.hf.demo");
+    auto bundleMgr = GetBundleManager();
+    if (bundleMgr == nullptr) {
+        HILOGE("get bundle manager failed");
+        return false;
+    }
+    bundleMgr->GetContinueBundleNames(bundleNameList, srcBundleName);
+    if(bundleNameList.empty()){
+        HILOGW("No APP with specified bundle name(%{public}s) configured in continue Bundle ", srcBundleName);
+        return false;
+    }else{
         return true;
     }
-    return false;
 }
 
 int32_t BundleManagerInternal::CheckRemoteBundleInfoForContinuation(const std::string& dstDeviceId,

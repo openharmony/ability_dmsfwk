@@ -22,6 +22,7 @@
 #include <queue>
 #include <string>
 #include <thread>
+#include <utility>
 #include <vector>
 
 #include "bundle/bundle_manager_internal.h"
@@ -44,6 +45,28 @@ struct currentIconInfo {
         return (this->senderNetworkId == "" && this->bundleName == "" && this->continueType == "");
     }
 };
+
+struct DSchedContinueReadyInfo {
+    DSchedContinueReadyInfo() = default;
+
+    DSchedContinueReadyInfo(std::string source_device_id, std::string source_bundle_name,
+                            std::string sink_device_id, std::string sink_bundle_name, std::string continue_type)
+        : sourceDeviceId_(std::move(source_device_id)),
+          sourceBundleName_(std::move(source_bundle_name)),
+          sinkDeviceId_(std::move(sink_device_id)),
+          sinkBundleName_(std::move(sink_bundle_name)),
+          continueType_(std::move(continue_type)) {
+    }
+
+    ~DSchedContinueReadyInfo() = default;
+
+    std::string sourceDeviceId_;
+    std::string sourceBundleName_;
+    std::string sinkDeviceId_;
+    std::string sinkBundleName_;
+    std::string continueType_;
+};
+
 
 class DMSContinueRecvMgr {
     DECLARE_SINGLE_INSTANCE(DMSContinueRecvMgr);
@@ -99,7 +122,7 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     bool hasRegSoftbusEventListener_ = false;
 public:
-    std::vector<DSchedContinueInfo> continueReady_;
+    std::vector<DSchedContinueReadyInfo> continueReady_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -16,6 +16,7 @@
 #ifndef DISTRIBUTED_SCHED_PERMISSION_H
 #define DISTRIBUTED_SCHED_PERMISSION_H
 
+#include <stdint.h>
 #include <string>
 
 #include "distributed_sched_interface.h"
@@ -56,6 +57,10 @@ public:
         AccountInfo& accountInfo);
     bool GetTargetAbility(const AAFwk::Want& want, AppExecFwk::AbilityInfo& targetAbility,
         bool needQueryExtension = false) const;
+
+    bool isSameAppIdOrDeveloperId(const CallerInfo &callerInfo, __resharper_unknown_type &targetAbility,
+                                  int32_t &value);
+
     void MarkUriPermission(OHOS::AAFwk::Want& want, uint32_t accessToken);
     void RemoveRemoteObjectFromWant(std::shared_ptr<AAFwk::Want> want) const;
 

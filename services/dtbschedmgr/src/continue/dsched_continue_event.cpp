@@ -118,8 +118,6 @@ int32_t DSchedContinueStartCmd::Marshal(std::string &jsonStr)
 
     cJSON_AddNumberToObject(rootValue, "Direction", direction_);
     cJSON_AddNumberToObject(rootValue, "AppVersion", appVersion_);
-    cJSON_AddStringToObject(rootValue, "SourceAbilityName", sourceAbilityName_.c_str());
-    cJSON_AddStringToObject(rootValue, "SinkAbilityName", sinkAbilityName_.c_str());
 
     Parcel parcel;
     if (!wantParams_.Marshalling(parcel)) {
@@ -171,20 +169,6 @@ int32_t DSchedContinueStartCmd::Unmarshal(const std::string &jsonStr)
         return INVALID_PARAMETERS_ERR;
     }
     appVersion_ = appVersion->valueint;
-
-    cJSON *sourceAbilityName = cJSON_GetObjectItemCaseSensitive(rootValue, "SourceAbilityName");
-    if (sourceAbilityName == nullptr || !cJSON_IsString(sourceAbilityName) || (sourceAbilityName->valuestring == nullptr)) {
-        cJSON_Delete(rootValue);
-        return INVALID_PARAMETERS_ERR;
-    }
-    sourceAbilityName_ = sourceAbilityName->valuestring;
-
-    cJSON *sinkAbilityName = cJSON_GetObjectItemCaseSensitive(rootValue, "SinkAbilityName");
-    if (sinkAbilityName == nullptr || !cJSON_IsString(sinkAbilityName) || (sinkAbilityName->valuestring == nullptr)) {
-        cJSON_Delete(rootValue);
-        return INVALID_PARAMETERS_ERR;
-    }
-    sinkAbilityName_ = sinkAbilityName->valuestring;
 
     cJSON *wantParams = cJSON_GetObjectItemCaseSensitive(rootValue, "WantParams");
     if (wantParams == nullptr || !cJSON_IsString(wantParams) || (wantParams->valuestring == nullptr)) {

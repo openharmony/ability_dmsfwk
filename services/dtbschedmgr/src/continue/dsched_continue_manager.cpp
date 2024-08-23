@@ -26,9 +26,9 @@
 #include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "mission/distributed_bm_storage.h"
 #include "mission/dms_continue_send_manager.h"
 #include "mission/dms_continue_recv_manager.h"
-#include "mission/distributed_bm_storage.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -243,8 +243,20 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
     return;
 }
 
-void DSchedContinueManager::HandleContinueMissionWithBundleName(const DSchedContinueInfo &info,
-    const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
+std::string DSchedContinueManager::GetFirstContinueBundle(const std::string& bundleName, const std::string& deviceId) {
+    uint16_t bundleNameId;
+    DmsBundleInfo distributedBundleInfo;
+    DmsBmStorage::GetInstance()->GetBundleNameId(bundleName, bundleNameId);
+    bool result = DmsBmStorage::GetInstance()->GetDistributedBundleInfo(deviceId,
+         bundleNameId, distributedBundleInfo);
+    if(result && !distributedBundleInfo.continueBundle.empty()){
+        return distributedBundleInfo.continueBundle[0];
+    }
+    return nullptr;
+}
+
+void DSchedContinueManager::HandleContinueMissionWithBundleName(DSchedContinueInfo &info,
+                                                                const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
     int32_t direction = CONTINUE_SINK;
     int32_t ret = CheckContinuationLimit(info.sourceDeviceId_, info.sinkDeviceId_, direction);
@@ -256,20 +268,15 @@ void DSchedContinueManager::HandleContinueMissionWithBundleName(const DSchedCont
     int32_t subType = CONTINUE_PUSH;
     if (direction == CONTINUE_SOURCE) {
         cntSource_++;
-
-        uint16_t bundleNameId;
-        DmsBundleInfo distributedBundleInfo;
-        DmsBmStorage::GetInstance()->GetBundleNameId(info.sourceBundleName_, bundleNameId);
-        DmsBmStorage::GetInstance()->GetDistributedBundleInfo(info.sourceDeviceId_,
-            bundleNameId, distributedBundleInfo);
-        if(result && !distributedBundleInfo.continueBundle.emplace){
-            info.sinkBundleName_ = distributedBundleInfo.continueBundle[0];
+        std::string sinkBundleName = GetFirstContinueBundle(info.sourceBundleName_, info.sourceDeviceId_);
+        if(!sinkBundleName.empty()) {
+            info.sinkBundleName_ = sinkBundleName;
         }
     } else {
         cntSink_++;
         subType = CONTINUE_PULL;
 
-        std::vector<DSchedContinueInfo> continueReady = DMSContinueRecvMgr::GetInstance().continueReady_;
+        std::vector<DSchedContinueReadyInfo> continueReady = DMSContinueRecvMgr::GetInstance().continueReady_;
         std::string sourceBundleName;
         for(const auto &item : continueReady){
             if(item.sourceDeviceId_ == info.sourceDeviceId_ && item.sinkBundleName_ == info.sinkBundleName_){
@@ -278,26 +285,10 @@ void DSchedContinueManager::HandleContinueMissionWithBundleName(const DSchedCont
             }
         }
         if(sourceBundleName.empty()){
-            uint16_t bundleNameId;
-            DmsBundleInfo distributedBundleInfo;
-            DmsBmStorage::GetInstance()->GetBundleNameId(info.sourceBundleName_, bundleNameId);
-            DmsBmStorage::GetInstance()->GetDistributedBundleInfo(info.sourceDeviceId_,
-                bundleNameId, distributedBundleInfo);
-
-            // 打桩测试
-            if(distributedBundleInfo.bundleName == "com.hf.demo"){
-                distributedBundleInfo.continueBundle.emplace_back("com.hf.demo1");
-            }else if(distributedBundleInfo.bundleName == "com.hf.demo1"){
-                distributedBundleInfo.continueBundle.emplace_back("com.hf.demo");
+            sourceBundleName = GetFirstContinueBundle(info.sinkBundleName_, info.sinkDeviceId_);
+            if(!sourceBundleName.empty()) {
+                info.sourceBundleName_ = sourceBundleName;
             }
-
-            if(result && !distributedBundleInfo.continueBundle.emplace){
-                info.sinkBundleName_ = distributedBundleInfo.continueBundle[0];
-            }
-        }
-
-        if(!sourceBundleName.empty()){
-            info.sourceBundleName_ = sourceBundleName;
         }
     }
 

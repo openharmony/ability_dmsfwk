@@ -77,8 +77,6 @@ public:
 public:
     int32_t direction_ = 0;
     int32_t appVersion_ = 0;
-    std::string sourceAbilityName_;
-    std::string sinkAbilityName_;
     DistributedWantParams wantParams_;
 };
 

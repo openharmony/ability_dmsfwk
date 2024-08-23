@@ -30,7 +30,6 @@
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
 #include "switch_status_dependency.h"
-#include "dsched_continue.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -317,7 +316,6 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         HILOGE("The app is not installed on the local device.");
         return INVALID_PARAMETERS_ERR;
     }
-
     continueReady_.emplace_back(senderNetworkId, bundleName, "", finalBundleName, continueType);
 
     if (localBundleInfo.applicationInfo.bundleType != AppExecFwk::BundleType::APP) {

@@ -193,9 +193,6 @@ void DSchedContinue::SetEventData()
     eventData_.destAbilityName_ = dstContinueInfo.abilityName;
     eventData_.dSchedEventType_ = DMS_CONTINUE;
     eventData_.state_ = DMS_DSCHED_EVENT_START;
-    
-    continueInfo_.sourceAbilityName_ = srcContinueInfo.abilityName;
-    continueInfo_.sinkAbilityName_ = dstContinueInfo.abilityName;
 }
 
 int32_t DSchedContinue::Init()
@@ -640,8 +637,6 @@ int32_t DSchedContinue::PackStartCmd(std::shared_ptr<DSchedContinueStartCmd>& cm
     cmd->sourceMissionId_ = continueInfo_.missionId_;
     cmd->continueByType_ = continueByType_;
     cmd->dmsVersion_ = DMS_VERSION;
-    cmd->sourceAbilityName_ = eventData_.srcAbilityName_;
-    cmd->sinkAbilityName_ = eventData_.destAbilityName_;
 
     cmd->direction_ = direction_;
     if (subServiceType_ == CONTINUE_PULL && continueInfo_.missionId_ == 0) {
@@ -782,6 +777,10 @@ int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData>
     callerinfo.callerBundleName = continueInfo_.sinkBundleName_;
 
     sptr<AppExecFwk::IBundleMgr> bundleMgr = BundleManagerInternal::GetBundleManager();
+    if (bundleMgr == nullptr) {
+        HILOGE("get bundle manager failed");
+        return INVALID_PARAMETERS_ERR;
+    }
     AppExecFwk::AppProvisionInfo appProvisionInfo;
     bundleMgr->GetAppProvisionInfo(bundleNameItem, appProvisionInfo);
     callerInfo.callerDeveloperId = appProvisionInfo.developerId;
@@ -911,14 +910,12 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
 
     std::string localDeviceId;
     std::string deviceId = cmd->want_.GetElement().GetDeviceID();
-    cmd->want_.SetBundle(cmd->dstBundleName_);
     if (!GetLocalDeviceId(localDeviceId) ||
         !CheckDeviceIdFromRemote(localDeviceId, deviceId, cmd->callerInfo_.sourceDeviceId)) {
         HILOGE("check deviceId failed");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
 
-    // todo： 这里会校验appId是否相同，不同则无法在sink端启动app    
     int32_t ret = DistributedSchedService::GetInstance().CheckTargetPermission(cmd->want_, cmd->callerInfo_,
         cmd->accountInfo_, START_PERMISSION, true);
     if (ret != ERR_OK) {

@@ -111,12 +111,12 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
     AppExecFwk::AppProvisionInfo appProvisionInfo;
     ret = bundleMgr->GetAppProvisioninfo(bundleName, appProvisionInfo);
     if(!ret){
-        HILOGW("GetBundleInfo of %{public}s failed:%{public}d or cannot be continued", bundleName.c_str(), ret);
+        HILOGW("GetAppProvisioninfo (developerId) of %{public}s failed: %{public}d", bundleName.c_str(), ret);
         DeleteStorageDistributeInfo(bundleName);
         return false;
     }
 
-    ret = InnerSaveStorageDistributeInfo(ConvertToDistributedBundleInfo(bundleInfo, isPackageChange), localUdid);
+    ret = InnerSaveStorageDistributeInfo(ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo), localUdid);
     if (!ret) {
         HILOGW("InnerSaveStorageDistributeInfo:%{public}s  failed", bundleName.c_str());
         return false;
@@ -681,9 +681,8 @@ DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::Bun
     distributedBundleInfo.enabled = bundleInfo.applicationInfo.enabled;
     distributedBundleInfo.bundleNameId = CreateBundleNameId(bundleInfo.name, isPackageChange);
     distributedBundleInfo.updateTime = bundleInfo.updateTime;
-    // todo: 这里需要适配BMS的接口
     distributedBundleInfo.developerId = appProvisionInfo.developerId;
-    distributedBundleInfo.continueBundle = bundleInfo.continueBundle;
+    distributedBundleInfo.continueBundle = bundleInfo.continueBundleName;
     uint8_t pos = 0;
     for (const auto &abilityInfo : bundleInfo.abilityInfos) {
         DmsAbilityInfo dmsAbilityInfo;
