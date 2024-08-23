@@ -344,10 +344,14 @@ int32_t DistributedSchedPermission::CheckGetCallerPermission(const AAFwk::Want& 
         return DMS_ACCOUNT_ACCESS_PERMISSION_DENIED;
     }
     // 2. check call with same appid
-    if (!BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
+    if(targetAbility.bundleName == callerInfo.callerBundleName && !BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)){
         HILOGE("the appId is different, check permission denied!");
         return CALL_PERMISSION_DENIED;
+    }else if(targetAbility.bundleName != callerInfo.callerBundleName && !BundleManagerInternal::IsSameDeveloperId(callerInfo.callerDeveloperId, targetAbility.bundleName)){
+        HILOGE("the DeveloperId is different, check permission denied!");
+        return CALL_PERMISSION_DENIED;
     }
+
     // 3. check background permission
     if (!CheckBackgroundPermission(targetAbility, callerInfo, want, false)) {
         HILOGE("Check background permission failed!");
@@ -557,12 +561,15 @@ bool DistributedSchedPermission::CheckMigrateStartCtrlPer(const AppExecFwk::Abil
         HILOGE("check device security level failed!");
         return false;
     }
-    if (BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
-        HILOGD("the appId is the same, check migration start control permission success!");
-        return true;
+
+    if(targetAbility.bundleName == callerInfo.callerBundleName && !BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)){
+        HILOGE("the appId is different in the migration scenario, permission denied!");
+        return false;
+    }else if(targetAbility.bundleName != callerInfo.callerBundleName && !BundleManagerInternal::IsSameDeveloperId(callerInfo.callerDeveloperId, targetAbility.bundleName)){
+        HILOGE("the DeveloperId is different in the migration scenario, permission denied!");
+        return false;
     }
-    HILOGE("the appId is different in the migration scenario, permission denied!");
-    return false;
+    return true;
 }
 
 bool DistributedSchedPermission::CheckCollaborateStartCtrlPer(const AppExecFwk::AbilityInfo& targetAbility,
@@ -581,8 +588,11 @@ bool DistributedSchedPermission::CheckCollaborateStartCtrlPer(const AppExecFwk::
         return false;
     }
     // 3. check start or connect ability with same appid
-    if (BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
-        HILOGD("the appId is the same, check permission success!");
+    if(targetAbility.bundleName == callerInfo.callerBundleName && BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)){
+        HILOGE("the appId is the same, check permission success!");
+        return true;
+    }else if(targetAbility.bundleName != callerInfo.callerBundleName && BundleManagerInternal::IsSameDeveloperId(callerInfo.callerDeveloperId, targetAbility.bundleName)){
+        HILOGE("the DeveloperId is the same, check permission success!");
         return true;
     }
     // 4. check if target ability is not visible and without PERMISSION_START_INVISIBLE_ABILITY

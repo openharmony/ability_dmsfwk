@@ -27,6 +27,8 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_send_manager.h"
+#include "mission/dms_continue_recv_manager.h"
+#include "mission/distributed_bm_storage.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -254,9 +256,49 @@ void DSchedContinueManager::HandleContinueMissionWithBundleName(const DSchedCont
     int32_t subType = CONTINUE_PUSH;
     if (direction == CONTINUE_SOURCE) {
         cntSource_++;
+
+        uint16_t bundleNameId;
+        DmsBundleInfo distributedBundleInfo;
+        DmsBmStorage::GetInstance()->GetBundleNameId(info.sourceBundleName_, bundleNameId);
+        DmsBmStorage::GetInstance()->GetDistributedBundleInfo(info.sourceDeviceId_,
+            bundleNameId, distributedBundleInfo);
+        if(result && !distributedBundleInfo.continueBundle.emplace){
+            info.sinkBundleName_ = distributedBundleInfo.continueBundle[0];
+        }
     } else {
         cntSink_++;
         subType = CONTINUE_PULL;
+
+        std::vector<DSchedContinueInfo> continueReady = DMSContinueRecvMgr::GetInstance().continueReady_;
+        std::string sourceBundleName;
+        for(const auto &item : continueReady){
+            if(item.sourceDeviceId_ == info.sourceDeviceId_ && item.sinkBundleName_ == info.sinkBundleName_){
+                sourceBundleName = item.sourceBundleName_;
+                break;
+            }
+        }
+        if(sourceBundleName.empty()){
+            uint16_t bundleNameId;
+            DmsBundleInfo distributedBundleInfo;
+            DmsBmStorage::GetInstance()->GetBundleNameId(info.sourceBundleName_, bundleNameId);
+            DmsBmStorage::GetInstance()->GetDistributedBundleInfo(info.sourceDeviceId_,
+                bundleNameId, distributedBundleInfo);
+
+            // 打桩测试
+            if(distributedBundleInfo.bundleName == "com.hf.demo"){
+                distributedBundleInfo.continueBundle.emplace_back("com.hf.demo1");
+            }else if(distributedBundleInfo.bundleName == "com.hf.demo1"){
+                distributedBundleInfo.continueBundle.emplace_back("com.hf.demo");
+            }
+
+            if(result && !distributedBundleInfo.continueBundle.emplace){
+                info.sinkBundleName_ = distributedBundleInfo.continueBundle[0];
+            }
+        }
+
+        if(!sourceBundleName.empty()){
+            info.sourceBundleName_ = sourceBundleName;
+        }
     }
 
     {
@@ -389,12 +431,16 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
     HILOGI("continue info: %{public}s.", info.toString().c_str());
     {
         std::lock_guard<std::mutex> continueLock(continueMutex_);
-        if (continues_.empty() || continues_.count(info) == 0) {
+        if (continues_.empty(){
             HILOGE("continue info doesn't match an existing continuation.");
             return nullptr;
         }
-        if (continues_[info] != nullptr && missionId == continues_[info]->GetContinueInfo().missionId_) {
-            return continues_[info];
+        for(auto iter = continues_.begin(); iter != continues_.end(); iter++){
+            if(iter->second != nullptr && srcDeviceId == iter->second->GetContinueInfo().sourceDevideId_
+            && bundleName == iter->second->GetContinueInfo().sourceBundleName_
+            && dstDeviceId == iter->second->GetContinueInfo().sinkDeviceid_){
+                return iter->second;
+            }
         }
     }
     HILOGE("missionId doesn't match the existing continuation, continueInfo: %{public}s.",

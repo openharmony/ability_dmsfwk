@@ -68,7 +68,7 @@ private:
     void HandleContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
         std::string bundleName, const std::string& continueType,
         const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams);
-    void HandleContinueMissionWithBundleName(const DSchedContinueInfo &info, const sptr<IRemoteObject>& callback,
+    void HandleContinueMissionWithBundleName(DSchedContinueInfo &info, const sptr<IRemoteObject>& callback,
         const OHOS::AAFwk::WantParams& wantParams);
     void HandleStartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId, int32_t callerUid,
         int32_t status, uint32_t accessToken);

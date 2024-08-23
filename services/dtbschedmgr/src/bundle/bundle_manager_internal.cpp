@@ -184,6 +184,20 @@ bool BundleManagerInternal::IsSameAppId(const std::string& callerAppId, const st
     return callerAppId == calleeAppId;
 }
 
+bool BundleManagerInternal::IsSameDeveloperId(const std::string& callerDeveloperId, const std::string& targetBundleName)
+{
+    if (targetBundleName.empty() || callerDeveloperId.empty()) {
+        HILOGE("targetBundleName:%{public}s or callerDeveloperId:%s is empty",
+            targetBundleName.c_str(), GetAnonymStr(callerDeveloperId).c_str());
+        return false;
+    }
+
+    auto bundleMgr = GetBundleManager();
+    AppExecFwk::AppProvisionInfo targetAppProvisionInfo;
+    bundleMgr->GetAppProvisionInfo(targetBundleName, targetAppProvisionInfo);
+    return callerDeveloperId == targetAppProvisionInfo.developerId;
+}
+
 int32_t BundleManagerInternal::GetLocalBundleInfo(const std::string& bundleName,
     AppExecFwk::BundleInfo &localBundleInfo)
 {
@@ -227,6 +241,19 @@ int32_t BundleManagerInternal::GetLocalBundleInfoV9(const std::string& bundleNam
         HILOGE("get local bundle info failed, ret: %{public}d", ret);
     }
     return ret;
+}
+
+static bool GetContinueBundle4Src(const std::string srcBundleName,
+    std::vector<std::string> bundleNameList){
+    // todo: 打桩测试
+    if(srcBundleName == "com.hf.demo"){
+        bundleNameList.emplace_back("com.hf.demo1");
+        return true;
+    }else if(srcBundleName == "com.hf.demo1"){
+        bundleNameList.emplace_back("com.hf.demo");
+        return true;
+    }
+    return false;
 }
 
 int32_t BundleManagerInternal::CheckRemoteBundleInfoForContinuation(const std::string& dstDeviceId,
