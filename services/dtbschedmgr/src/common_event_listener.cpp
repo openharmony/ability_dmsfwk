@@ -66,7 +66,6 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
             break;
         case USER_SWITCHED :
             HILOGI("USER_SWITCHED");
-            DmsBmStorage::GetInstance()->UpdateDistributedData();
             break;
         case PACKAGE_ADDED :
             HILOGI("PACKAGE_ADDED: %{public}s", want.GetElement().GetBundleName().c_str());

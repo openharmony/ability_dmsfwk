@@ -328,6 +328,7 @@ ohos_unittest("dschedmissionmanagertest") {
     "unittest/mission/distributed_mission_info_test.cpp",
     "unittest/mission/dms_continue_manager_test.cpp",
     "unittest/mission/dms_mission_manager_test.cpp",
+    "unittest/mission/dsched_sync_e2e_test.cpp",
     "unittest/mission/mission_info_converter_test.cpp",
     "unittest/mission/snapshot_test.cpp",
     "unittest/mock_remote_stub.cpp",
