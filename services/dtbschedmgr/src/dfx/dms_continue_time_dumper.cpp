@@ -194,7 +194,7 @@ DmsDumperInfo DmsContinueTime::GetDstInfo()
 void DmsContinueTime::SetDurationBegin(const int32_t idx, const int64_t time)
 {
     std::lock_guard<std::mutex> vecLock(infoMutex_);
-    if (durationInfo_.empty() || durationInfo_.size() <= idx) {
+    if (durationInfo_.empty() || durationInfo_.size() <= static_cast<size_t>(idx)) {
         return;
     }
     durationInfo_[idx].SetBeginTime(time);
@@ -203,7 +203,7 @@ void DmsContinueTime::SetDurationBegin(const int32_t idx, const int64_t time)
 void DmsContinueTime::SetDurationEnd(const int32_t idx, const int64_t time)
 {
     std::lock_guard<std::mutex> vecLock(infoMutex_);
-    if (durationInfo_.empty() || durationInfo_.size() <= idx) {
+    if (durationInfo_.empty() || durationInfo_.size() <= static_cast<size_t>(idx)) {
         return;
     }
     durationInfo_[idx].SetEndTime(time);
@@ -212,7 +212,7 @@ void DmsContinueTime::SetDurationEnd(const int32_t idx, const int64_t time)
 void DmsContinueTime::SetDurationStrTime(const int32_t idx, const std::string info)
 {
     std::lock_guard<std::mutex> vecLock(infoMutex_);
-    if (durationInfo_.empty() || durationInfo_.size() <= idx) {
+    if (durationInfo_.empty() || durationInfo_.size() <= static_cast<size_t>(idx)) {
         return;
     }
     durationInfo_[idx].SetStrTime(info);
