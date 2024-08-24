@@ -57,6 +57,7 @@ public:
     bool GetTargetAbility(const AAFwk::Want& want, AppExecFwk::AbilityInfo& targetAbility,
         bool needQueryExtension = false) const;
     void MarkUriPermission(OHOS::AAFwk::Want& want, uint32_t accessToken);
+    void RemoveRemoteObjectFromWant(std::shared_ptr<AAFwk::Want> want) const;
 
 private:
     bool GetOsAccountData(AccountInfo& dmsAccountInfo);
