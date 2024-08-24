@@ -418,11 +418,11 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
     DMSContinueRecvMgr::GetInstance().PostOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state);
 
     int32_t ret = DMSContinueRecvMgr::GetInstance().DealOnBroadcastBusiness(senderNetworkId, bundleNameId,
-        continueTypeId, state, DBMS_RETRY_MAX_TIME);
+        continueTypeId, state, 0);
     EXPECT_EQ(ret, ERR_OK);
 
     ret = DMSContinueRecvMgr::GetInstance().DealOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId,
-        state, 0);
+        state, DBMS_RETRY_MAX_TIME);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     /**

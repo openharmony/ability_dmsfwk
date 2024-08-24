@@ -24,6 +24,7 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_sched_mission_manager.h"
+#include "mission/dsched_sync_e2e.h"
 
 using namespace OHOS::DistributedKv;
 
@@ -97,8 +98,7 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
     AppExecFwk::BundleInfo bundleInfo;
     bool ret = bundleMgr->GetBundleInfo(bundleName, FLAGS, bundleInfo, AppExecFwk::Constants::ALL_USERID);
     if (!ret || !IsContinuable(bundleInfo)) {
-        HILOGW("GetBundleInfo of %{public}s failed or cannot be continued", bundleName.c_str());
-        DeleteStorageDistributeInfo(bundleName);
+        HILOGW("GetBundleInfo of %{public}s failed:%{public}d or cannot be continued", bundleName.c_str(), ret);
         return false;
     }
     std::string localUdid;
@@ -269,28 +269,25 @@ bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_
         return false;
     }
     std::string udid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(networkId);
-    if (udid == "") {
-        HILOGE("can not get udid by networkId");
+    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(networkId);
+    if (udid == "" || uuid == "") {
+        HILOGE("can not get udid or uuid");
         return false;
     }
-    Key allEntryKeyPrefix("");
-    std::vector<Entry> allEntries;
-    std::promise<OHOS::DistributedKv::Status> resultStatusSignal;
-    int64_t begin = GetTickCount();
-    GetEntries(networkId, allEntryKeyPrefix, resultStatusSignal, allEntries);
-    Status status = GetResultSatus(resultStatusSignal);
-    HILOGI("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
+    HILOGI("uuid: %{public}s", GetAnonymStr(uuid).c_str());
+    std::vector<Entry> remoteEntries;
+    Status status = kvStorePtr_->GetDeviceEntries(uuid, remoteEntries);
+    if (remoteEntries.empty() || status != Status::SUCCESS) {
+        HILOGE("GetDeviceEntries error: %{public}d or remoteEntries is empty", status);
+        return false;
+    }
 
-    if (status != Status::SUCCESS) {
-        HILOGE("GetEntries error: %{public}d", status);
-        return false;
-    }
     std::vector<Entry> reduRiskEntries;
     std::string keyOfPublic = udid + AppExecFwk::Constants::FILE_UNDERLINE + PUBLIC_RECORDS;
-    for (auto entry : allEntries) {
+    for (auto entry : remoteEntries) {
         std::string key = entry.key.ToString();
         std::string value =  entry.value.ToString();
-        if (key.find(udid) == std::string::npos || key.find(keyOfPublic) != std::string::npos) {
+        if (key.find(keyOfPublic) != std::string::npos) {
             continue;
         }
         DmsBundleInfo distributedBundleInfo;
@@ -384,12 +381,8 @@ bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, const 
         return false;
     }
     bool ret = DealGetBundleName(networkId, bundleNameId, bundleName);
-    if (!ret) {
-        HILOGW("get bundleName failed and try to call again");
-        ret = DealGetBundleName(networkId, bundleNameId, bundleName);
-    }
-    if (bundleName == "") {
-        HILOGE("GetBundleName fail");
+    if (!ret || bundleName == "") {
+        HILOGE("get bundleName failed: %{public}d", ret);
         return false;
     }
     HILOGI("end.");

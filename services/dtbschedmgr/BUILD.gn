@@ -218,6 +218,7 @@ ohos_shared_library("distributedschedsvr") {
       "src/mission/distributed_sched_mission_manager.cpp",
       "src/mission/dms_continue_recv_manager.cpp",
       "src/mission/dms_continue_send_manager.cpp",
+      "src/mission/dsched_sync_e2e.cpp",
       "src/mission/kvstore_death_recipient.cpp",
       "src/mission/mission_changed_notify.cpp",
       "src/mission/mission_info_converter.cpp",
