@@ -93,14 +93,16 @@ int32_t DSchedAllConnectManager::GetServiceCollaborationManagerProxy()
 #endif
     char path[PATH_MAX + 1] = {0};
     if (resolvedPath.length() > PATH_MAX || realpath(resolvedPath.c_str(), path) == nullptr) {
-        HILOGE("Check all connect so real path failed, resolvedPath [%{public}s].", resolvedPath.c_str());
+        HILOGE("Check all connect so real path failed, resolvedPath [%{public}s].",
+            GetAnonymStr(resolvedPath).c_str());
         return INVALID_PARAMETERS_ERR;
     }
     int32_t (*ServiceCollaborationManagerExport)(ServiceCollaborationManager_API *exportapi) = nullptr;
 
     dllHandle_ = dlopen(resolvedPath.c_str(), RTLD_LAZY);
     if (dllHandle_ == nullptr) {
-        HILOGE("Open dms interactive adapter shared object fail, resolvedPath [%{public}s].", resolvedPath.c_str());
+        HILOGE("Open dms interactive adapter shared object fail, resolvedPath [%{public}s].",
+            GetAnonymStr(resolvedPath).c_str());
         return NOT_FIND_SERVICE_REGISTRY;
     }
 
