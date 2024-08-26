@@ -94,6 +94,9 @@ public:
     void NotifyDeviceOffline(const std::string& networkId);
     void OnDeviceScreenOff();
     void OnContinueSwitchOff();
+
+    void CleanContinueReadyCache(std::string senderNetworkId, std::string bundleName);
+
     std::string GetContinueType(const std::string& bundleName);
     bool CheckRegSoftbusListener();
 
@@ -101,8 +104,12 @@ private:
     void StartEvent();
     int32_t RetryPostBroadcast(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t retry);
+
+    bool GetFinalBundleName(const std::string &senderNetworkId, uint8_t continueTypeId,
+                            DmsBundleInfo distributedBundleInfo,  std::string &finalBundleName,
+                            AppExecFwk::BundleInfo localBundleInfo, std::string& continueType);
     int32_t VerifyBroadcastSource(const std::string& senderNetworkId, const std::string& bundleName,
-        const std::string& continueType, const int32_t state);
+                                  const std::string& continueType, const int32_t state);
     void PostOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t delay = 0, const int32_t retry = 0);
     int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,

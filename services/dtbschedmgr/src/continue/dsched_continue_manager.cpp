@@ -243,16 +243,39 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
     return;
 }
 
-std::string DSchedContinueManager::GetFirstContinueBundle(const std::string &bundleName, const std::string &deviceId) {
-    uint16_t bundleNameId;
-    DmsBundleInfo distributedBundleInfo;
-    DmsBmStorage::GetInstance()->GetBundleNameId(bundleName, bundleNameId);
-    bool result = DmsBmStorage::GetInstance()->GetDistributedBundleInfo(deviceId,
-                                                                        bundleNameId, distributedBundleInfo);
-    if (result && !distributedBundleInfo.continueBundle.empty()) {
-        return distributedBundleInfo.continueBundle[0];
+void DSchedContinueManager::CompleteBundleName(DSchedContinueInfo &info, int32_t direction, int32_t &subType) {
+    if (direction == CONTINUE_SOURCE) {
+        cntSource_++;
+        uint16_t bundleNameId;
+        DmsBundleInfo distributedBundleInfo;
+        DmsBmStorage::GetInstance()->GetBundleNameId(info.sourceBundleName_, bundleNameId);
+        bool result = DmsBmStorage::GetInstance()->GetDistributedBundleInfo(info.sourceDeviceId_,
+                                                                            bundleNameId, distributedBundleInfo);
+        if (result && !distributedBundleInfo.continueBundle.empty()) {
+            info.sinkBundleName_ = distributedBundleInfo.continueBundle[0];
+        }
+    } else {
+        cntSink_++;
+        subType = CONTINUE_PULL;
+        std::vector<DSchedContinueReadyInfo> continueReady = DMSContinueRecvMgr::GetInstance().continueReady_;
+        std::string sourceBundleName;
+        for (const auto &item: continueReady) {
+            if (item.sourceDeviceId_ == info.sourceDeviceId_ && item.sinkBundleName_ == info.sinkBundleName_) {
+                sourceBundleName = item.sourceBundleName_;
+                break;
+            }
+        }
+        if (sourceBundleName.empty()) {
+            uint16_t bundleNameId;
+            DmsBundleInfo distributedBundleInfo;
+            DmsBmStorage::GetInstance()->GetBundleNameId(info.sinkBundleName_, bundleNameId);
+            bool result = DmsBmStorage::GetInstance()->GetDistributedBundleInfo(info.sinkDeviceId_,
+                bundleNameId, distributedBundleInfo);
+            if (result && !distributedBundleInfo.continueBundle.empty()) {
+                info.sourceBundleName_ = distributedBundleInfo.continueBundle[0];
+            }
+        }
     }
-    return nullptr;
 }
 
 void DSchedContinueManager::HandleContinueMissionWithBundleName(DSchedContinueInfo &info,
@@ -264,33 +287,9 @@ void DSchedContinueManager::HandleContinueMissionWithBundleName(DSchedContinueIn
         HILOGE("CheckContinuationLimit failed, ret: %{public}d", ret);
         return;
     }
-
     int32_t subType = CONTINUE_PUSH;
-    if (direction == CONTINUE_SOURCE) {
-        cntSource_++;
-        std::string sinkBundleName = GetFirstContinueBundle(info.sourceBundleName_, info.sourceDeviceId_);
-        if (!sinkBundleName.empty()) {
-            info.sinkBundleName_ = sinkBundleName;
-        }
-    } else {
-        cntSink_++;
-        subType = CONTINUE_PULL;
-
-        std::vector<DSchedContinueReadyInfo> continueReady = DMSContinueRecvMgr::GetInstance().continueReady_;
-        std::string sourceBundleName;
-        for (const auto &item: continueReady) {
-            if (item.sourceDeviceId_ == info.sourceDeviceId_ && item.sinkBundleName_ == info.sinkBundleName_) {
-                sourceBundleName = item.sourceBundleName_;
-                break;
-            }
-        }
-        if (sourceBundleName.empty()) {
-            sourceBundleName = GetFirstContinueBundle(info.sinkBundleName_, info.sinkDeviceId_);
-            if (!sourceBundleName.empty()) {
-                info.sourceBundleName_ = sourceBundleName;
-            }
-        }
-    } {
+    CompleteBundleName(info, direction, subType);
+    {
         std::lock_guard<std::mutex> continueLock(continueMutex_);
         if (!continues_.empty() && continues_.find(info) != continues_.end()) {
             HILOGE("a same continue task is already in progress.");

@@ -337,12 +337,13 @@ bool DistributedSchedPermission::GetTargetAbility(const AAFwk::Want& want,
 
 bool DistributedSchedPermission::isSameAppIdOrDeveloperId(const CallerInfo &callerInfo,
                                                           AppExecFwk::AbilityInfo &targetAbility) {
-    if (targetAbility.bundleName == callerInfo.callerBundleName && !BundleManagerInternal::IsSameAppId(
-            callerInfo.callerAppId, targetAbility.bundleName)) {
+    if (targetAbility.bundleName == callerInfo.callerBundleName &&
+        !BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
         HILOGE("the appId is different, check permission denied!");
         return true;
-    } else if (targetAbility.bundleName != callerInfo.callerBundleName && !BundleManagerInternal::IsSameDeveloperId(
-                   callerInfo.callerDeveloperId, targetAbility.bundleName)) {
+    }
+    if (targetAbility.bundleName != callerInfo.callerBundleName &&
+        !BundleManagerInternal::IsSameDeveloperId(callerInfo.callerDeveloperId, targetAbility.bundleName)) {
         HILOGE("the DeveloperId is different, check permission denied!");
         return true;
     }
@@ -350,8 +351,7 @@ bool DistributedSchedPermission::isSameAppIdOrDeveloperId(const CallerInfo &call
 }
 
 int32_t DistributedSchedPermission::CheckGetCallerPermission(const AAFwk::Want& want, const CallerInfo& callerInfo,
-                                                             const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility)
-{
+    const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility) {
     // 1.check account access permission in no account networking environment.
     if (!CheckAccountAccessPermission(callerInfo, accountInfo, targetAbility.bundleName)) {
         HILOGE("CheckAccountAccessPermission denied or failed!");

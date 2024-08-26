@@ -747,6 +747,24 @@ int32_t DSchedContinue::ExecuteContinueReply()
     return ERR_OK;
 }
 
+bool DSchedContinue::MakeCallerInfo(std::shared_ptr<ContinueAbilityData> data, CallerInfo &callerInfo) {
+    callerInfo.sourceDeviceId = continueInfo_.sourceDeviceId_;
+    callerInfo.uid = data->callerUid;
+    callerInfo.accessToken = data->accessToken;
+    callerInfo.callerBundleName = continueInfo_.sinkBundleName_;
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
+
+    sptr<AppExecFwk::IBundleMgr> bundleMgr = BundleManagerInternal::GetBundleManager();
+    if (bundleMgr == nullptr) {
+        HILOGE("get bundle manager failed");
+        return false;
+    }
+    AppExecFwk::AppProvisionInfo appProvisionInfo;
+    bundleMgr->GetAppProvisionInfo(continueInfo_.sinkBundleName_, appProvisionInfo);
+    callerInfo.callerDeveloperId = appProvisionInfo.developerId;
+    return true;
+}
+
 int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data) {
     HILOGI("ExecuteContinueSend start, continueInfo: %{public}s", continueInfo_.toString().c_str());
     if (data == nullptr) {
@@ -767,22 +785,11 @@ int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData>
         return INVALID_PARAMETERS_ERR;
     }
 
-
     AppExecFwk::AbilityInfo abilityInfo;
     CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = continueInfo_.sourceDeviceId_;
-    callerInfo.uid = data->callerUid;
-    callerInfo.accessToken = data->accessToken;
-    callerInfo.callerBundleName = continueInfo_.sinkBundleName_;
-
-    sptr<AppExecFwk::IBundleMgr> bundleMgr = BundleManagerInternal::GetBundleManager();
-    if (bundleMgr == nullptr) {
-        HILOGE("get bundle manager failed");
+    if (!MakeCallerInfo(data, callerInfo)) {
         return INVALID_PARAMETERS_ERR;
     }
-    AppExecFwk::AppProvisionInfo appProvisionInfo;
-    bundleMgr->GetAppProvisionInfo(continueInfo_.sinkBundleName_, appProvisionInfo);
-    callerInfo.callerDeveloperId = appProvisionInfo.developerId;
     if (!BundleManagerInternal::GetCallerAppIdFromBms(callerInfo.uid, callerInfo.callerAppId)) {
         HILOGE("GetCallerAppIdFromBms failed");
         return INVALID_PARAMETERS_ERR;
@@ -791,7 +798,7 @@ int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData>
         HILOGE("GetBundleNameListFromBms failed");
         return INVALID_PARAMETERS_ERR;
     }
-    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
+
     AccountInfo accountInfo;
     int32_t ret = DistributedSchedPermission::GetInstance().GetAccountInfo(continueInfo_.sinkDeviceId_, callerInfo,
                                                                            accountInfo);
