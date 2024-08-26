@@ -747,7 +747,8 @@ int32_t DSchedContinue::ExecuteContinueReply()
     return ERR_OK;
 }
 
-bool DSchedContinue::MakeCallerInfo(std::shared_ptr<ContinueAbilityData> data, CallerInfo &callerInfo) {
+bool DSchedContinue::MakeCallerInfo(std::shared_ptr<ContinueAbilityData> data, CallerInfo &callerInfo)
+{
     callerInfo.sourceDeviceId = continueInfo_.sourceDeviceId_;
     callerInfo.uid = data->callerUid;
     callerInfo.accessToken = data->accessToken;
@@ -765,7 +766,8 @@ bool DSchedContinue::MakeCallerInfo(std::shared_ptr<ContinueAbilityData> data, C
     return true;
 }
 
-int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data) {
+int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data)
+{
     HILOGI("ExecuteContinueSend start, continueInfo: %{public}s", continueInfo_.toString().c_str());
     if (data == nullptr) {
         return INVALID_PARAMETERS_ERR;

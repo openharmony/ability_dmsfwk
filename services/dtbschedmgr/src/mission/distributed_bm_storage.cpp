@@ -399,7 +399,8 @@ bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, const 
 }
 
 bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
-                                            const uint16_t &bundleNameId, DmsBundleInfo &distributeBundleInfo) {
+                                            const uint16_t &bundleNameId, DmsBundleInfo &distributeBundleInfo)
+{
     HILOGI("networkId: %{public}s  bundleNameId: %{public}d", GetAnonymStr(networkId).c_str(), bundleNameId);
     if (!CheckKvStore()) {
         HILOGE("kvStore is nullptr");
@@ -665,7 +666,8 @@ bool DmsBmStorage::RebuildLocalData()
 
 DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo,
                                                            AppExecFwk::AppProvisionInfo appProvisionInfo,
-                                                           bool isPackageChange) {
+                                                           bool isPackageChange)
+{
     DmsBundleInfo distributedBundleInfo;
     if (bundleInfo.name == "") {
         HILOGE("The bundleName is empty and does not require conversion!");
@@ -736,7 +738,8 @@ int32_t DmsBmStorage::CloudSync()
     return static_cast<int32_t>(status);
 }
 
-void DmsBmStorage::UpdateDistributedData() {
+void DmsBmStorage::UpdateDistributedData()
+{
     HILOGI("called.");
     auto bundleMgr = DmsBmStorage::GetInstance()->GetBundleMgr();
     if (bundleMgr == nullptr) {

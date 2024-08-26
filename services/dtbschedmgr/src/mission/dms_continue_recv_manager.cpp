@@ -253,51 +253,58 @@ int32_t DMSContinueRecvMgr::RetryPostBroadcast(const std::string& senderNetworkI
 }
 
 
-bool DMSContinueRecvMgr::GetFinalBundleName(const std::string &senderNetworkId, uint8_t continueTypeId, DmsBundleInfo distributedBundleInfo,
-    std::string &finalBundleName, AppExecFwk::BundleInfo localBundleInfo, std::string& continueType) {
+bool DMSContinueRecvMgr::GetFinalBundleName(const std::string &senderNetworkId, uint8_t continueTypeId,
+                                            DmsBundleInfo distributedBundleInfo,
+                                            std::string &finalBundleName, AppExecFwk::BundleInfo localBundleInfo,
+                                            std::string &continueType)
+{
     std::string bundleName = distributedBundleInfo.bundleName;
     continueType = BundleManagerInternal::GetContinueType(senderNetworkId, bundleName, continueTypeId);
     if (continueType.empty()) {
         if (BundleManagerInternal::GetLocalBundleInfoV9(bundleName, localBundleInfo) == ERR_OK) {
             finalBundleName = bundleName;
             return true;
+        }else {
+            return false;
         }
-    } else {
-        bool continueTypeGot = continueTypeCheck(distributedBundleInfo, continueType);
-        if (continueTypeGot && BundleManagerInternal::GetLocalBundleInfoV9(bundleName, localBundleInfo) == ERR_OK) {
-            finalBundleName = bundleName;
-            return true;
+    }
+
+    bool continueTypeGot = continueTypeCheck(distributedBundleInfo, continueType);
+    if (continueTypeGot && BundleManagerInternal::GetLocalBundleInfoV9(bundleName, localBundleInfo) == ERR_OK) {
+        finalBundleName = bundleName;
+        return true;
+    }
+    std::vector<std::string> bundleNameList;
+    bool continueBundleGot = BundleManagerInternal::GetContinueBundle4Src(bundleName, bundleNameList);
+    if (continueBundleGot) {
+        sptr<AppExecFwk::IBundleMgr> bundleMgr = BundleManagerInternal::GetBundleManager();
+        if (bundleMgr == nullptr) {
+            HILOGE("get bundle manager failed");
+            return false;
         }
-        std::vector<std::string> bundleNameList;
-        bool continueBundleGot = BundleManagerInternal::GetContinueBundle4Src(bundleName, bundleNameList);
-        if (continueBundleGot) {
-            sptr<AppExecFwk::IBundleMgr> bundleMgr = BundleManagerInternal::GetBundleManager();
-            if (bundleMgr == nullptr) {
-                HILOGE("get bundle manager failed");
-                return false;
+        for (std::string &bundleNameItem: bundleNameList) {
+            continueType = BundleManagerInternal::GetContinueType(
+                senderNetworkId, bundleNameItem, continueTypeId);
+            if (continueType.empty() || !continueTypeCheck(distributedBundleInfo, continueType)
+                || BundleManagerInternal::GetLocalBundleInfoV9(bundleNameItem, localBundleInfo) != ERR_OK) {
+                continue;
             }
-            for (std::string &bundleNameItem: bundleNameList) {
-                continueType = BundleManagerInternal::GetContinueType(
-                    senderNetworkId, bundleNameItem, continueTypeId);
-                if (continueType.empty() || !continueTypeCheck(distributedBundleInfo, continueType)
-                    || BundleManagerInternal::GetLocalBundleInfoV9(bundleNameItem, localBundleInfo) != ERR_OK) {
-                    continue;
-                }
-                AppExecFwk::AppProvisionInfo appProvisionInfo;
-                if (bundleMgr->GetAppProvisionInfo(bundleNameItem, appProvisionInfo)
-                    && appProvisionInfo.developerId == distributedBundleInfo.developerId) {
-                    finalBundleName = bundleNameItem;
-                    return true;
-                }
+            AppExecFwk::AppProvisionInfo appProvisionInfo;
+            if (bundleMgr->GetAppProvisionInfo(bundleNameItem, appProvisionInfo)
+                && appProvisionInfo.developerId == distributedBundleInfo.developerId) {
+                finalBundleName = bundleNameItem;
+                return true;
             }
         }
     }
+
     return false;
 }
 
 int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string &senderNetworkId,
                                                     uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state,
-                                                    const int32_t retry) {
+                                                    const int32_t retry)
+{
     HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, bundleNameId: %{public}u, state: %{public}d.",
            GetAnonymStr(senderNetworkId).c_str(), bundleNameId, state);
     DmsBundleInfo distributedBundleInfo;
@@ -318,7 +325,8 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string &senderNet
     std::string finalBundleName;
     AppExecFwk::BundleInfo localBundleInfo;
     std::string continueType;
-    if (!GetFinalBundleName(senderNetworkId, continueTypeId, distributedBundleInfo, finalBundleName, localBundleInfo, continueType)) {
+    if (!GetFinalBundleName(senderNetworkId, continueTypeId,
+        distributedBundleInfo, finalBundleName, localBundleInfo, continueType)) {
         HILOGE("The app is not installed on the local device.");
         return INVALID_PARAMETERS_ERR;
     }
@@ -349,7 +357,8 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string &senderNet
 }
 
 bool DMSContinueRecvMgr::continueTypeCheck(const DmsBundleInfo &distributedBundleInfo,
-                                           const std::string &continueType) {
+                                           const std::string &continueType)
+{
     std::vector<DmsAbilityInfo> dmsAbilityInfos = distributedBundleInfo.dmsAbilityInfos;
     bool continueTyoeGot = false;
     for (const auto &abilityInfo: dmsAbilityInfos) {
@@ -508,7 +517,8 @@ void DMSContinueRecvMgr::OnContinueSwitchOff()
     eventHandler_->PostTask(func);
 }
 
-void DMSContinueRecvMgr::CleanContinueReadyCache(std::string senderNetworkId, std::string bundleName) {
+void DMSContinueRecvMgr::CleanContinueReadyCache(std::string senderNetworkId, std::string bundleName)
+{
     auto itr = continueReady_.begin();
     while (itr != continueReady_.end()) {
         if (itr->sourceDeviceId_ == senderNetworkId && itr->sinkBundleName_ == bundleName) {

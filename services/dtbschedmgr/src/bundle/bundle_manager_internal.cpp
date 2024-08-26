@@ -185,7 +185,8 @@ bool BundleManagerInternal::IsSameAppId(const std::string& callerAppId, const st
 }
 
 bool BundleManagerInternal::IsSameDeveloperId(const std::string &callerDeveloperId,
-                                              const std::string &targetBundleName) {
+                                              const std::string &targetBundleName)
+{
     if (targetBundleName.empty() || callerDeveloperId.empty()) {
         HILOGE("targetBundleName:%{public}s or callerDeveloperId:%{public}s is empty",
                targetBundleName.c_str(), GetAnonymStr(callerDeveloperId).c_str());
@@ -248,7 +249,8 @@ int32_t BundleManagerInternal::GetLocalBundleInfoV9(const std::string& bundleNam
 }
 
 bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleName,
-                                                  std::vector<std::string> &bundleNameList) {
+                                                  std::vector<std::string> &bundleNameList)
+{
     auto bundleMgr = GetBundleManager();
     if (bundleMgr == nullptr) {
         HILOGE("get bundle manager failed");
