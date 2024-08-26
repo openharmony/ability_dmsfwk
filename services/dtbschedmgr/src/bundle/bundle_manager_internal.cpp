@@ -256,7 +256,7 @@ bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleNa
         HILOGE("get bundle manager failed");
         return false;
     }
-    bundleMgr->GetContinueBundleNames(bundleNameList, srcBundleName);
+    bundleMgr->GetContinueBundleNames(srcBundleName, bundleNameList);
     if (bundleNameList.empty()) {
         HILOGW("No APP with specified bundle name(%{public}s) configured in continue Bundle ", srcBundleName);
         return false;
