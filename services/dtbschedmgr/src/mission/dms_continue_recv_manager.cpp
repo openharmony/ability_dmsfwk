@@ -264,9 +264,8 @@ bool DMSContinueRecvMgr::GetFinalBundleName(const std::string &senderNetworkId, 
         if (BundleManagerInternal::GetLocalBundleInfoV9(bundleName, localBundleInfo) == ERR_OK) {
             finalBundleName = bundleName;
             return true;
-        }else {
-            return false;
         }
+        return false;
     }
 
     bool continueTypeGot = continueTypeCheck(distributedBundleInfo, continueType);
