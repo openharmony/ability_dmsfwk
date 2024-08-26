@@ -110,7 +110,7 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
 
     AppExecFwk::AppProvisionInfo appProvisionInfo;
     ret = bundleMgr->GetAppProvisioninfo(bundleName, appProvisionInfo);
-    if(!ret){
+    if (!ret) {
         HILOGW("GetAppProvisioninfo (developerId) of %{public}s failed: %{public}d", bundleName.c_str(), ret);
         DeleteStorageDistributeInfo(bundleName);
         return false;
@@ -399,7 +399,7 @@ bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, const 
 }
 
 bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
-    const uint16_t& bundleNameId, DmsBundleInfo& distributeBundleInfo){
+                                            const uint16_t &bundleNameId, DmsBundleInfo &distributeBundleInfo) {
     HILOGI("networkId: %{public}s  bundleNameId: %{public}d", GetAnonymStr(networkId).c_str(), bundleNameId);
     if (!CheckKvStore()) {
         HILOGE("kvStore is nullptr");
@@ -421,9 +421,9 @@ bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
 
     std::vector<Entry> reduRiskEntries;
     std::string keyOfPublic = udid + AppExecFwk::Constants::FILE_UNDERLINE + PUBLIC_RECORDS;
-    for (auto entry : remoteEntries) {
+    for (auto entry: remoteEntries) {
         std::string key = entry.key.ToString();
-        std::string value =  entry.value.ToString();
+        std::string value = entry.value.ToString();
         if (key.find(keyOfPublic) != std::string::npos) {
             continue;
         }
@@ -664,8 +664,8 @@ bool DmsBmStorage::RebuildLocalData()
 }
 
 DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo,
-    AppExecFwk::AppProvisionInfo appProvisionInfo, bool isPackageChange)
-{
+                                                           AppExecFwk::AppProvisionInfo appProvisionInfo,
+                                                           bool isPackageChange) {
     DmsBundleInfo distributedBundleInfo;
     if (bundleInfo.name == "") {
         HILOGE("The bundleName is empty and does not require conversion!");
@@ -684,10 +684,10 @@ DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::Bun
     distributedBundleInfo.developerId = appProvisionInfo.developerId;
     distributedBundleInfo.continueBundle = bundleInfo.continueBundleName;
     uint8_t pos = 0;
-    for (const auto &abilityInfo : bundleInfo.abilityInfos) {
+    for (const auto &abilityInfo: bundleInfo.abilityInfos) {
         DmsAbilityInfo dmsAbilityInfo;
         dmsAbilityInfo.abilityName = abilityInfo.name;
-        for (const auto &continueType : abilityInfo.continueType) {
+        for (const auto &continueType: abilityInfo.continueType) {
             dmsAbilityInfo.continueType.push_back(continueType);
             dmsAbilityInfo.continueTypeId.push_back(pos++);
         }
@@ -736,8 +736,7 @@ int32_t DmsBmStorage::CloudSync()
     return static_cast<int32_t>(status);
 }
 
-void DmsBmStorage::UpdateDistributedData()
-{
+void DmsBmStorage::UpdateDistributedData() {
     HILOGI("called.");
     auto bundleMgr = DmsBmStorage::GetInstance()->GetBundleMgr();
     if (bundleMgr == nullptr) {
@@ -752,14 +751,14 @@ void DmsBmStorage::UpdateDistributedData()
     HILOGI("bundleInfos size: %{public}zu", bundleInfos.size());
 
     std::vector<std::string> bundleNames;
-    for (const auto &bundleInfo : bundleInfos) {
+    for (const auto &bundleInfo: bundleInfos) {
         bundleNames.push_back(bundleInfo.name);
     }
     std::map<std::string, DmsBundleInfo> oldDistributedBundleInfos =
-        GetAllOldDistributionBundleInfo(bundleNames);
+            GetAllOldDistributionBundleInfo(bundleNames);
 
     std::vector<DmsBundleInfo> dmsBundleInfos;
-    for (const auto &bundleInfo : bundleInfos) {
+    for (const auto &bundleInfo: bundleInfos) {
         AppExecFwk::AppProvisionInfo appProvisionInfo;
         bundleMgr->GetAppProvisionInfo(bundleInfo.name, appProvisionInfo);
         if (oldDistributedBundleInfos.find(bundleInfo.name) != oldDistributedBundleInfos.end()) {

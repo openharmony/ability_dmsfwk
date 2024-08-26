@@ -747,8 +747,7 @@ int32_t DSchedContinue::ExecuteContinueReply()
     return ERR_OK;
 }
 
-int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data)
-{
+int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data) {
     HILOGI("ExecuteContinueSend start, continueInfo: %{public}s", continueInfo_.toString().c_str());
     if (data == nullptr) {
         return INVALID_PARAMETERS_ERR;
@@ -768,13 +767,13 @@ int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData>
         return INVALID_PARAMETERS_ERR;
     }
 
-    
+
     AppExecFwk::AbilityInfo abilityInfo;
     CallerInfo callerInfo;
     callerInfo.sourceDeviceId = continueInfo_.sourceDeviceId_;
     callerInfo.uid = data->callerUid;
     callerInfo.accessToken = data->accessToken;
-    callerinfo.callerBundleName = continueInfo_.sinkBundleName_;
+    callerInfo.callerBundleName = continueInfo_.sinkBundleName_;
 
     sptr<AppExecFwk::IBundleMgr> bundleMgr = BundleManagerInternal::GetBundleManager();
     if (bundleMgr == nullptr) {
@@ -782,7 +781,7 @@ int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData>
         return INVALID_PARAMETERS_ERR;
     }
     AppExecFwk::AppProvisionInfo appProvisionInfo;
-    bundleMgr->GetAppProvisionInfo(bundleNameItem, appProvisionInfo);
+    bundleMgr->GetAppProvisionInfo(continueInfo_.sinkBundleName_, appProvisionInfo);
     callerInfo.callerDeveloperId = appProvisionInfo.developerId;
     if (!BundleManagerInternal::GetCallerAppIdFromBms(callerInfo.uid, callerInfo.callerAppId)) {
         HILOGE("GetCallerAppIdFromBms failed");
@@ -795,7 +794,7 @@ int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData>
     callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     AccountInfo accountInfo;
     int32_t ret = DistributedSchedPermission::GetInstance().GetAccountInfo(continueInfo_.sinkDeviceId_, callerInfo,
-        accountInfo);
+                                                                           accountInfo);
     if (ret != ERR_OK) {
         HILOGE("GetAccountInfo failed");
         return ret;

@@ -221,12 +221,12 @@ int32_t DMSContinueRecvMgr::VerifyBroadcastSource(const std::string& senderNetwo
         iconInfo_.senderNetworkId = "";
         iconInfo_.bundleName = "";
         iconInfo_.continueType = "";
-        auto ite = continueReady_.begin();
-        while(itr != continueReady_.end()){
-            if(itr->sourceDeviceId_ == senderNetworkId && itr->sinkBundleName_ == bundleName){
+        auto itr = continueReady_.begin();
+        while (itr != continueReady_.end()) {
+            if (itr->sourceDeviceId_ == senderNetworkId && itr->sinkBundleName_ == bundleName) {
                 itr = continueReady_.erase(itr);
             } else {
-                itr++;
+                ++itr;
             }
         }
     }
@@ -259,13 +259,14 @@ int32_t DMSContinueRecvMgr::RetryPostBroadcast(const std::string& senderNetworkI
     return ERR_OK;
 }
 
-int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNetworkId,
-    uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state, const int32_t retry)
-{
+int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string &senderNetworkId,
+                                                    uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state,
+                                                    const int32_t retry) {
     HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, bundleNameId: %{public}u, state: %{public}d.",
-        GetAnonymStr(senderNetworkId).c_str(), bundleNameId, state);
+           GetAnonymStr(senderNetworkId).c_str(), bundleNameId, state);
     DmsBundleInfo distributedBundleInfo;
-    bool result = DmsBmStorage::GetInstance()->GetDistributedBundleInfo(senderNetworkId, bundleNameId, distributedBundleInfo);
+    bool result = DmsBmStorage::GetInstance()->GetDistributedBundleInfo(senderNetworkId, bundleNameId,
+                                                                        distributedBundleInfo);
     if (!result) {
         HILOGW("get bundleName failed, ret: %{public}d, try = %{public}d", result, retry);
         return RetryPostBroadcast(senderNetworkId, bundleNameId, continueTypeId, state, retry);
@@ -282,37 +283,42 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     std::string continueType = BundleManagerInternal::GetContinueType(senderNetworkId, bundleName, continueTypeId);
     std::string finalBundleName;
 
-    if(continueType.empty()){
-        if(BundleManagerInternal::GetLocalBundleInfoV9(bundleName, localBundleInfo) == ERR_OK){
+    if (continueType.empty()) {
+        if (BundleManagerInternal::GetLocalBundleInfoV9(bundleName, localBundleInfo) == ERR_OK) {
             finalBundleName = bundleName;
         }
     } else {
         bool continueTypeGot = continueTypeCheck(distributedBundleInfo, continueType);
-        if(continueTypeGot && BundleManagerInternal::GetLocalBundleInfoV9(bundleName, localBundleInfo) == ERR_OK){
+        if (continueTypeGot && BundleManagerInternal::GetLocalBundleInfoV9(bundleName, localBundleInfo) == ERR_OK) {
             finalBundleName = bundleName;
         } else {
             std::vector<std::string> bundleNameList;
             bool continueBundleGot = BundleManagerInternal::GetContinueBundle4Src(bundleName, bundleNameList);
-            if(continueBundleGot){
+            if (continueBundleGot) {
                 sptr<AppExecFwk::IBundleMgr> bundleMgr = BundleManagerInternal::GetBundleManager();
-                for(std::string& bundleNameItem : bundleNameList) {
-                    continueType = BundleManagerInternal::GetContinueType(senderNetworkId, bundleNameItem, continueTypeId);
-                    if(continueType.empty() || !continueTypeCheck(distributedBundleInfo, continueType)
-                        || BundleManagerInternal::GetLocalBundleInfoV9(bundleNameItem, localBundleInfo) != ERR_OK){
+                if (bundleMgr == nullptr) {
+                    HILOGE("get bundle manager failed");
+                    return INVALID_PARAMETERS_ERR;
+                }
+                for (std::string &bundleNameItem: bundleNameList) {
+                    continueType = BundleManagerInternal::GetContinueType(
+                        senderNetworkId, bundleNameItem, continueTypeId);
+                    if (continueType.empty() || !continueTypeCheck(distributedBundleInfo, continueType)
+                        || BundleManagerInternal::GetLocalBundleInfoV9(bundleNameItem, localBundleInfo) != ERR_OK) {
                         continue;
                     }
                     AppExecFwk::AppProvisionInfo appProvisionInfo;
-                    if(bundleMgr->GetAppProvisionInfo(bundleNameItem, appProvisionInfo)
-                        && appProvisionInfo.developerId == distributedBundleInfo.developerId){
-                            finalBundleName = bundleNameItem;
-                            break;
+                    if (bundleMgr->GetAppProvisionInfo(bundleNameItem, appProvisionInfo)
+                        && appProvisionInfo.developerId == distributedBundleInfo.developerId) {
+                        finalBundleName = bundleNameItem;
+                        break;
                     }
                 }
             }
         }
     }
 
-    if (finalBundleName.empty) {
+    if (finalBundleName.empty()) {
         HILOGE("The app is not installed on the local device.");
         return INVALID_PARAMETERS_ERR;
     }
@@ -323,7 +329,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         return INVALID_PARAMETERS_ERR;
     }
 
-    uint32_t ret = VerifyBroadcastSource(senderNetworkId, bundleName, continueType, state);
+    uint32_t ret = VerifyBroadcastSource(senderNetworkId, finalBundleName, continueType, state);
     if (ret != ERR_OK) {
         return ret;
     }
@@ -333,8 +339,8 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         HILOGE("get iterItem failed from registerOnListener_, bundleNameId: %{public}u", bundleNameId);
         return INVALID_PARAMETERS_ERR;
     }
-    std::vector<sptr<IRemoteObject>> objs = iterItem->second;
-    for (auto iter : objs) {
+    std::vector<sptr<IRemoteObject> > objs = iterItem->second;
+    for (auto iter: objs) {
         NotifyRecvBroadcast(iter, senderNetworkId, finalBundleName, state, continueType);
     }
     HILOGI("DealOnBroadcastBusiness end");
@@ -528,9 +534,9 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
         iconInfo_.senderNetworkId = "";
         iconInfo_.bundleName = "";
         iconInfo_.continueType = "";
-        auto ite = continueReady_.begin();
-        while(itr != continueReady_.end()){
-            if(itr->sourceDeviceId_ == senderNetworkId && itr->sinkBundleName_ == bundleName){
+        auto itr = continueReady_.begin();
+        while (itr != continueReady_.end()) {
+            if (itr->sourceDeviceId_ == senderNetworkId && itr->sinkBundleName_ == bundleName) {
                 itr = continueReady_.erase(itr);
             } else {
                 itr++;

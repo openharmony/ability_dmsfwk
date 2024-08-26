@@ -184,11 +184,11 @@ bool BundleManagerInternal::IsSameAppId(const std::string& callerAppId, const st
     return callerAppId == calleeAppId;
 }
 
-bool BundleManagerInternal::IsSameDeveloperId(const std::string& callerDeveloperId, const std::string& targetBundleName)
-{
+bool BundleManagerInternal::IsSameDeveloperId(const std::string &callerDeveloperId,
+                                              const std::string &targetBundleName) {
     if (targetBundleName.empty() || callerDeveloperId.empty()) {
         HILOGE("targetBundleName:%{public}s or callerDeveloperId:%{public}s is empty",
-            targetBundleName.c_str(), GetAnonymStr(callerDeveloperId).c_str());
+               targetBundleName.c_str(), GetAnonymStr(callerDeveloperId).c_str());
         return false;
     }
 
@@ -247,18 +247,18 @@ int32_t BundleManagerInternal::GetLocalBundleInfoV9(const std::string& bundleNam
     return ret;
 }
 
-static bool GetContinueBundle4Src(const std::string srcBundleName,
-    std::vector<std::string> bundleNameList){
+bool BundleManagerInternal::GetContinueBundle4Src(const std::string srcBundleName,
+                                  std::vector<std::string> bundleNameList) {
     auto bundleMgr = GetBundleManager();
     if (bundleMgr == nullptr) {
         HILOGE("get bundle manager failed");
         return false;
     }
     bundleMgr->GetContinueBundleNames(bundleNameList, srcBundleName);
-    if(bundleNameList.empty()){
+    if (bundleNameList.empty()) {
         HILOGW("No APP with specified bundle name(%{public}s) configured in continue Bundle ", srcBundleName);
         return false;
-    }else{
+    } else {
         return true;
     }
 }

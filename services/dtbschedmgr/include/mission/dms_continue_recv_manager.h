@@ -109,7 +109,7 @@ private:
         const int32_t state, const int32_t retry = 0);
     void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const std::string& networkId,
         const std::string& bundleName, const int32_t state, const std::string& continueType = "");
-    bool continueTypeCheck(const DmsBundleInfo& distributedBundleInfo, const std::string& continueType);
+    bool continueTypeCheck(const DmsBundleInfo &distributedBundleInfo, const std::string &continueType);
 private:
     currentIconInfo iconInfo_;
     sptr<DistributedMissionDiedListener> missionDiedListener_;

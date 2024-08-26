@@ -59,8 +59,8 @@ public:
         DmsBundleInfo &info);
     bool GetDistributedBundleName(const std::string &networkId,  const uint16_t& bundleNameId,
         std::string& bundleName);
-    bool GetDistributedBundleInfo(const std::string &networkId,  const uint16_t& bundleNameId,
-        DmsBundleInfo& distributeBundleInfo);
+    bool GetDistributedBundleInfo(const std::string &networkId, const uint16_t &bundleNameId,
+                                  DmsBundleInfo &distributeBundleInfo);
     bool GetBundleNameId(const std::string& bundleName, uint16_t &bundleNameId);
     std::string GetContinueType(const std::string &networkId, std::string &bundleName, uint8_t continueTypeId);
     std::string GetAbilityName(const std::string &networkId, std::string &bundleName, std::string &continueType);
@@ -82,7 +82,8 @@ private:
     void AddBundleNameId(const uint16_t &bundleNameId, const std::string &bundleName);
     void DelBundleNameId(const std::string &bundleName);
     DmsBundleInfo ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo,
-        AppExecFwk::AppProvisionInfo appProvisionInfo, bool isPackageChange = false);
+                                                 AppExecFwk::AppProvisionInfo appProvisionInfo,
+                                                 bool isPackageChange = false);
     bool InnerSaveStorageDistributeInfo(const DmsBundleInfo &distributedBundleInfo, const std::string &localUdid);
     std::map<std::string, DmsBundleInfo> GetAllOldDistributionBundleInfo(
         const std::vector<std::string> &bundleNames);

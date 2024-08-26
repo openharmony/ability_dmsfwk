@@ -335,11 +335,14 @@ bool DistributedSchedPermission::GetTargetAbility(const AAFwk::Want& want,
     return false;
 }
 
-bool DistributedSchedPermission::isSameAppIdOrDeveloperId(const CallerInfo &callerInfo, AppExecFwk::AbilityInfo &targetAbility) {
-    if(targetAbility.bundleName == callerInfo.callerBundleName && !BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)){
+bool DistributedSchedPermission::isSameAppIdOrDeveloperId(const CallerInfo &callerInfo,
+                                                          AppExecFwk::AbilityInfo &targetAbility) {
+    if (targetAbility.bundleName == callerInfo.callerBundleName && !BundleManagerInternal::IsSameAppId(
+            callerInfo.callerAppId, targetAbility.bundleName)) {
         HILOGE("the appId is different, check permission denied!");
         return true;
-    }else if(targetAbility.bundleName != callerInfo.callerBundleName && !BundleManagerInternal::IsSameDeveloperId(callerInfo.callerDeveloperId, targetAbility.bundleName)){
+    } else if (targetAbility.bundleName != callerInfo.callerBundleName && !BundleManagerInternal::IsSameDeveloperId(
+                   callerInfo.callerDeveloperId, targetAbility.bundleName)) {
         HILOGE("the DeveloperId is different, check permission denied!");
         return true;
     }

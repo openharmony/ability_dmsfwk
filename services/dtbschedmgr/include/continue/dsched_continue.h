@@ -92,7 +92,6 @@ public:
     std::string sinkDeviceId_;
     std::string sinkBundleName_;
     std::string continueType_;
-    std::string sourceAbilityName_;
     std::string sinkAbilityName_;
     int32_t missionId_ = 0;
 };
