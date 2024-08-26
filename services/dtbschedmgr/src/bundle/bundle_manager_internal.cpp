@@ -247,8 +247,8 @@ int32_t BundleManagerInternal::GetLocalBundleInfoV9(const std::string& bundleNam
     return ret;
 }
 
-bool BundleManagerInternal::GetContinueBundle4Src(const std::string srcBundleName,
-                                  std::vector<std::string> bundleNameList) {
+bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleName,
+                                                  std::vector<std::string> &bundleNameList) {
     auto bundleMgr = GetBundleManager();
     if (bundleMgr == nullptr) {
         HILOGE("get bundle manager failed");
@@ -258,9 +258,8 @@ bool BundleManagerInternal::GetContinueBundle4Src(const std::string srcBundleNam
     if (bundleNameList.empty()) {
         HILOGW("No APP with specified bundle name(%{public}s) configured in continue Bundle ", srcBundleName);
         return false;
-    } else {
-        return true;
     }
+    return true;
 }
 
 int32_t BundleManagerInternal::CheckRemoteBundleInfoForContinuation(const std::string& dstDeviceId,
