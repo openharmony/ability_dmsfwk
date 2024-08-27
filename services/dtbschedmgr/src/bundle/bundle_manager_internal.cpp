@@ -24,6 +24,7 @@
 #include "iservice_registry.h"
 #include "os_account_manager.h"
 #include "system_ability_definition.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -199,7 +200,13 @@ bool BundleManagerInternal::IsSameDeveloperId(const std::string &callerDeveloper
         return false;
     }
     AppExecFwk::AppProvisionInfo targetAppProvisionInfo;
-    bundleMgr->GetAppProvisionInfo(targetBundleName, targetAppProvisionInfo);
+    std::vector<int32_t> ids;
+    ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (ret != ERR_OK || ids.empty()) {
+        HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
+        return false;
+    }
+    bundleMgr->GetAppProvisionInfo(targetBundleName, ids[0], targetAppProvisionInfo);
     return callerDeveloperId == targetAppProvisionInfo.developerId;
 }
 

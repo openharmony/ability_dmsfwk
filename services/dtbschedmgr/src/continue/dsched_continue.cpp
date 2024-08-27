@@ -44,6 +44,7 @@
 #include "scene_board_judgement.h"
 #include "softbus_adapter/transport/dsched_transport_softbus_adapter.h"
 #include "softbus_error_code.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -761,7 +762,13 @@ bool DSchedContinue::MakeCallerInfo(std::shared_ptr<ContinueAbilityData> data, C
         return false;
     }
     AppExecFwk::AppProvisionInfo appProvisionInfo;
-    bundleMgr->GetAppProvisionInfo(continueInfo_.sinkBundleName_, appProvisionInfo);
+    std::vector<int32_t> ids;
+    ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (ret != ERR_OK || ids.empty()) {
+        HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
+        return false;
+    }
+    bundleMgr->GetAppProvisionInfo(continueInfo_.sinkBundleName_, ids[0], appProvisionInfo);
     callerInfo.callerDeveloperId = appProvisionInfo.developerId;
     return true;
 }

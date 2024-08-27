@@ -154,9 +154,6 @@ private:
     int32_t ExecuteContinueReply();
 
     bool MakeCallerInfo(std::shared_ptr<ContinueAbilityData> data, CallerInfo &callerInfo);
-
-    bool MakeCallerInfo(std::shared_ptr<ContinueAbilityData> data, CallerInfo &callerInfo, int32_t &value1);
-
     int32_t ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data);
     int32_t ExecuteContinueData(std::shared_ptr<DSchedContinueDataCmd> cmd);
     int32_t ExecuteNotifyComplete(int32_t result);

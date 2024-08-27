@@ -109,7 +109,13 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
     }
 
     AppExecFwk::AppProvisionInfo appProvisionInfo;
-    ret = bundleMgr->GetAppProvisioninfo(bundleName, appProvisionInfo);
+    std::vector<int32_t> ids;
+    ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (ret != ERR_OK || ids.empty()) {
+        HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
+        return false;
+    }
+    ret = bundleMgr->GetAppProvisioninfo(bundleName, ids[0], appProvisionInfo);
     if (!ret) {
         HILOGW("GetAppProvisioninfo (developerId) of %{public}s failed: %{public}d", bundleName.c_str(), ret);
         DeleteStorageDistributeInfo(bundleName);
@@ -761,9 +767,15 @@ void DmsBmStorage::UpdateDistributedData()
             GetAllOldDistributionBundleInfo(bundleNames);
 
     std::vector<DmsBundleInfo> dmsBundleInfos;
+    std::vector<int32_t> ids;
+    ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (ret != ERR_OK || ids.empty()) {
+        HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
+        return false;
+    }
     for (const auto &bundleInfo: bundleInfos) {
         AppExecFwk::AppProvisionInfo appProvisionInfo;
-        bundleMgr->GetAppProvisionInfo(bundleInfo.name, appProvisionInfo);
+        bundleMgr->GetAppProvisionInfo(bundleInfo.name, ids[0], appProvisionInfo);
         if (oldDistributedBundleInfos.find(bundleInfo.name) != oldDistributedBundleInfos.end()) {
             int64_t updateTime = oldDistributedBundleInfos[bundleInfo.name].updateTime;
             if (updateTime != bundleInfo.updateTime) {
