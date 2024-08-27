@@ -110,12 +110,12 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
 
     AppExecFwk::AppProvisionInfo appProvisionInfo;
     std::vector<int32_t> ids;
-    ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
-    if (ret != ERR_OK || ids.empty()) {
-        HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
+    ErrCode result = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (result != ERR_OK || ids.empty()) {
+        HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", result);
         return false;
     }
-    ret = bundleMgr->GetAppProvisioninfo(bundleName, ids[0], appProvisionInfo);
+    ret = bundleMgr->GetAppProvisionInfo(bundleName, ids[0], appProvisionInfo);
     if (!ret) {
         HILOGW("GetAppProvisioninfo (developerId) of %{public}s failed: %{public}d", bundleName.c_str(), ret);
         DeleteStorageDistributeInfo(bundleName);

@@ -30,6 +30,7 @@
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
 #include "switch_status_dependency.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -281,6 +282,12 @@ bool DMSContinueRecvMgr::GetFinalBundleName(const std::string &senderNetworkId, 
             HILOGE("get bundle manager failed");
             return false;
         }
+        std::vector<int32_t> ids;
+        ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+        if (ret != ERR_OK || ids.empty()) {
+            HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
+            return false;
+        }
         for (std::string &bundleNameItem: bundleNameList) {
             continueType = BundleManagerInternal::GetContinueType(
                 senderNetworkId, bundleNameItem, continueTypeId);
@@ -289,7 +296,7 @@ bool DMSContinueRecvMgr::GetFinalBundleName(const std::string &senderNetworkId, 
                 continue;
             }
             AppExecFwk::AppProvisionInfo appProvisionInfo;
-            if (bundleMgr->GetAppProvisionInfo(bundleNameItem, appProvisionInfo)
+            if (bundleMgr->GetAppProvisionInfo(bundleNameItem, ids[0], appProvisionInfo)
                 && appProvisionInfo.developerId == distributedBundleInfo.developerId) {
                 finalBundleName = bundleNameItem;
                 return true;
