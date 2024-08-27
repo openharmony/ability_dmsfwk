@@ -771,7 +771,7 @@ void DmsBmStorage::UpdateDistributedData()
     ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
     if (ret != ERR_OK || ids.empty()) {
         HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
-        return false;
+        return;
     }
     for (const auto &bundleInfo: bundleInfos) {
         AppExecFwk::AppProvisionInfo appProvisionInfo;
