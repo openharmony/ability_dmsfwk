@@ -440,7 +440,7 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
 
     HILOGI("continue info: %{public}s.", info.toString().c_str()); {
         std::lock_guard<std::mutex> continueLock(continueMutex_);
-        if (continues_.empty() {
+        if (continues_.empty()) {
             HILOGE("continue info doesn't match an existing continuation.");
             return nullptr;
         }

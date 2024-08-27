@@ -42,6 +42,7 @@ constexpr int32_t INDEX_2 = 2;
 constexpr int32_t INDEX_3 = 3;
 constexpr int32_t DBMS_RETRY_MAX_TIME = 5;
 constexpr int32_t DBMS_RETRY_DELAY = 2000;
+constexpr int32_t LAST_RECV_INFO_QUEUE_SIZE = 5;
 const std::string TAG = "DMSContinueRecvMgr";
 const std::string DBMS_RETRY_TASK = "retry_on_boradcast_task";
 const std::u16string DESCRIPTOR = u"ohos.aafwk.RemoteOnListener";
@@ -375,8 +376,9 @@ bool DMSContinueRecvMgr::continueTypeCheck(const DmsBundleInfo &distributedBundl
     return continueTyoeGot;
 }
 
-void DMSContinueRecvMgr::pushLatRecvCache(currentIconInfo &lastRecvInfo) {
-    if (lastRecvList_.size() >= 5) {
+void DMSContinueRecvMgr::pushLatRecvCache(currentIconInfo &lastRecvInfo)
+{
+    if (lastRecvList_.size() >= LAST_RECV_INFO_QUEUE_SIZE) {
         lastRecvList_.erase(lastRecvList_.begin());
     }
     lastRecvList_.push_back(lastRecvInfo);

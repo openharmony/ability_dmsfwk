@@ -265,7 +265,7 @@ bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleNa
     }
     bundleMgr->GetContinueBundleNames(srcBundleName, bundleNameList);
     if (bundleNameList.empty()) {
-        HILOGW("No APP with specified bundle name(%{public}s) configured in continue Bundle ", srcBundleName);
+        HILOGW("No APP with specified bundle name(%{public}s) configured in continue Bundle ", srcBundleName.c_str());
         return false;
     }
     return true;

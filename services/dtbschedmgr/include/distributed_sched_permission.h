@@ -57,7 +57,7 @@ public:
         AccountInfo& accountInfo);
     bool GetTargetAbility(const AAFwk::Want& want, AppExecFwk::AbilityInfo& targetAbility,
         bool needQueryExtension = false) const;
-    bool isSameAppIdOrDeveloperId(const CallerInfo &callerInfo, AppExecFwk::AbilityInfo &targetAbility);
+    bool isSameAppIdOrDeveloperId(const CallerInfo &callerInfo, const AppExecFwk::AbilityInfo &targetAbility);
     void MarkUriPermission(OHOS::AAFwk::Want& want, uint32_t accessToken);
     void RemoveRemoteObjectFromWant(std::shared_ptr<AAFwk::Want> want) const;
 
