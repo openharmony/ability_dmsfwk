@@ -463,10 +463,10 @@ void DSchedContinueManager::NotifyTerminateContinuation(const int32_t missionId)
             return;
         }
 
-        AliveMissionInfo missionInfo;
-        int32_t ret = DMSContinueSendMgr::GetInstance().GetAliveMissionInfo(missionId, missionInfo);
+        ContinueLaunchMissionInfo missionInfo;
+        int32_t ret = DMSContinueSendMgr::GetInstance().GetContinueLaunchMissionInfo(missionId, missionInfo);
         if (ret != ERR_OK) {
-            HILOGE("get aliveMissionInfo failed, missionId %{public}d", missionId);
+            HILOGE("get continueLaunchMissionInfo failed, missionId %{public}d", missionId);
             return;
         }
         HILOGI("alive missionInfo bundleName is %{public}s, abilityName is %{public}s",
