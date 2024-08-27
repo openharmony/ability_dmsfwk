@@ -68,6 +68,8 @@ private:
     void HandleContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
         std::string bundleName, const std::string& continueType,
         const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams);
+    bool getFirstBundleName(DSchedContinueInfo &info, std::string &firstBundleNamme, std::string bundleName,
+                            std::string deviceId);
     void CompleteBundleName(DSchedContinueInfo &info, int32_t direction, int32_t &subType);
     void HandleContinueMissionWithBundleName(DSchedContinueInfo &info, const sptr<IRemoteObject> &callback,
                                              const OHOS::AAFwk::WantParams &wantParams);

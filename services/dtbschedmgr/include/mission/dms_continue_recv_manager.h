@@ -40,33 +40,26 @@ struct currentIconInfo {
     std::string bundleName;
     std::string continueType;
 
+    std::string sourceDeviceId_;
+    std::string sourceBundleName_;
+    std::string sinkBundleName_;
+
     bool isEmpty()
     {
         return (this->senderNetworkId == "" && this->bundleName == "" && this->continueType == "");
     }
-};
 
-struct DSchedContinueReadyInfo {
-    DSchedContinueReadyInfo() = default;
-
-    DSchedContinueReadyInfo(std::string source_device_id, std::string source_bundle_name,
-                            std::string sink_device_id, std::string sink_bundle_name, std::string continue_type)
+    currentIconInfo(std::string source_device_id, std::string source_bundle_name,
+                    std::string sink_bundle_name)
         : sourceDeviceId_(std::move(source_device_id)),
           sourceBundleName_(std::move(source_bundle_name)),
-          sinkDeviceId_(std::move(sink_device_id)),
-          sinkBundleName_(std::move(sink_bundle_name)),
-          continueType_(std::move(continue_type)) {
+          sinkBundleName_(std::move(sink_bundle_name)) {
     }
 
-    ~DSchedContinueReadyInfo() = default;
+    currentIconInfo() = default;
 
-    std::string sourceDeviceId_;
-    std::string sourceBundleName_;
-    std::string sinkDeviceId_;
-    std::string sinkBundleName_;
-    std::string continueType_;
+    ~currentIconInfo() = default;
 };
-
 
 class DMSContinueRecvMgr {
     DECLARE_SINGLE_INSTANCE(DMSContinueRecvMgr);
@@ -94,9 +87,6 @@ public:
     void NotifyDeviceOffline(const std::string& networkId);
     void OnDeviceScreenOff();
     void OnContinueSwitchOff();
-
-    void CleanContinueReadyCache(std::string senderNetworkId, std::string bundleName);
-
     std::string GetContinueType(const std::string& bundleName);
     bool CheckRegSoftbusListener();
 
@@ -117,6 +107,7 @@ private:
     void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const std::string& networkId,
         const std::string& bundleName, const int32_t state, const std::string& continueType = "");
     bool continueTypeCheck(const DmsBundleInfo &distributedBundleInfo, const std::string &continueType);
+    void pushLatRecvCache(currentIconInfo &lastRecvInfo);
 private:
     currentIconInfo iconInfo_;
     sptr<DistributedMissionDiedListener> missionDiedListener_;
@@ -129,7 +120,7 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     bool hasRegSoftbusEventListener_ = false;
 public:
-    std::vector<DSchedContinueReadyInfo> continueReady_;
+    std::vector<currentIconInfo> lastRecvList_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

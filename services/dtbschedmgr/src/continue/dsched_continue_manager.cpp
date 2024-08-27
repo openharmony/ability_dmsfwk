@@ -243,36 +243,59 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
     return;
 }
 
+bool DSchedContinueManager::getFirstBundleName(DSchedContinueInfo &info, std::string &firstBundleNamme,
+                                               std::string bundleName, std::string deviceId) {
+    uint16_t bundleNameId;
+    DmsBundleInfo distributedBundleInfo;
+    DmsBmStorage::GetInstance()->GetBundleNameId(bundleName, bundleNameId);
+    bool result = DmsBmStorage::GetInstance()->GetDistributedBundleInfo(deviceId,
+                                                                        bundleNameId, distributedBundleInfo);
+    if (!result) {
+        HILOGE("GetDistributedBundleInfo faild");
+        return false;
+    }
+    std::vector<DmsAbilityInfo> dmsAbilityInfos = distributedBundleInfo.dmsAbilityInfos;
+    for (DmsAbilityInfo &ability: dmsAbilityInfos) {
+        std::vector<std::string> abilityContinueTypes = ability.continueType;
+        for (std::string &ability_continue_type: abilityContinueTypes) {
+            if (ability_continue_type == info.continueType_ && !ability.continueBundleName.empty()) {
+                firstBundleNamme = *ability.continueBundleName.begin();
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void DSchedContinueManager::CompleteBundleName(DSchedContinueInfo &info, int32_t direction, int32_t &subType) {
     if (direction == CONTINUE_SOURCE) {
         cntSource_++;
-        uint16_t bundleNameId;
-        DmsBundleInfo distributedBundleInfo;
-        DmsBmStorage::GetInstance()->GetBundleNameId(info.sourceBundleName_, bundleNameId);
-        bool result = DmsBmStorage::GetInstance()->GetDistributedBundleInfo(info.sourceDeviceId_,
-                                                                            bundleNameId, distributedBundleInfo);
-        if (result && !distributedBundleInfo.continueBundle.empty()) {
-            info.sinkBundleName_ = distributedBundleInfo.continueBundle[0];
+        std::string firstBundleNamme;
+        std::string bundleName = info.sourceBundleName_;
+        std::string deviceId = info.sourceDeviceId_;
+        if (getFirstBundleName(info, firstBundleNamme, bundleName, deviceId)) {
+            info.sinkBundleName_ = firstBundleNamme;
         }
     } else {
         cntSink_++;
         subType = CONTINUE_PULL;
-        std::vector<DSchedContinueReadyInfo> continueReady = DMSContinueRecvMgr::GetInstance().continueReady_;
+        std::vector<currentIconInfo> lastRecvList = DMSContinueRecvMgr::GetInstance().lastRecvList_;
         std::string sourceBundleName;
-        for (const auto &item: continueReady) {
-            if (item.sourceDeviceId_ == info.sourceDeviceId_ && item.sinkBundleName_ == info.sinkBundleName_) {
-                sourceBundleName = item.sourceBundleName_;
+        std::vector<currentIconInfo>::iterator recvInfoEndItr = lastRecvList.end();
+        while (recvInfoEndItr != lastRecvList.begin()) {
+            if (recvInfoEndItr->sourceDeviceId_ == info.sourceDeviceId_ && recvInfoEndItr->sinkBundleName_ == info.
+                sinkBundleName_) {
+                sourceBundleName = recvInfoEndItr->sourceBundleName_;
                 break;
             }
+            recvInfoEndItr--;
         }
         if (sourceBundleName.empty()) {
-            uint16_t bundleNameId;
-            DmsBundleInfo distributedBundleInfo;
-            DmsBmStorage::GetInstance()->GetBundleNameId(info.sinkBundleName_, bundleNameId);
-            bool result = DmsBmStorage::GetInstance()->GetDistributedBundleInfo(info.sinkDeviceId_,
-                bundleNameId, distributedBundleInfo);
-            if (result && !distributedBundleInfo.continueBundle.empty()) {
-                info.sourceBundleName_ = distributedBundleInfo.continueBundle[0];
+            std::string firstBundleNamme;
+            std::string bundleName = info.sinkBundleName_;
+            std::string deviceId = info.sinkDeviceId_;
+            if (getFirstBundleName(info, firstBundleNamme, bundleName, deviceId)) {
+                info.sourceBundleName_ = firstBundleNamme;
             }
         }
     }

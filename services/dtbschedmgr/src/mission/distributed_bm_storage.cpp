@@ -690,7 +690,6 @@ DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::Bun
     distributedBundleInfo.bundleNameId = CreateBundleNameId(bundleInfo.name, isPackageChange);
     distributedBundleInfo.updateTime = bundleInfo.updateTime;
     distributedBundleInfo.developerId = appProvisionInfo.developerId;
-    distributedBundleInfo.continueBundle = bundleInfo.continueBundleName;
     uint8_t pos = 0;
     for (const auto &abilityInfo: bundleInfo.abilityInfos) {
         DmsAbilityInfo dmsAbilityInfo;
@@ -700,6 +699,7 @@ DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::Bun
             dmsAbilityInfo.continueTypeId.push_back(pos++);
         }
         dmsAbilityInfo.moduleName = abilityInfo.moduleName;
+        dmsAbilityInfo.continueBundleName = abilityInfo.continueBundleName;
         distributedBundleInfo.dmsAbilityInfos.push_back(dmsAbilityInfo);
     }
     return distributedBundleInfo;

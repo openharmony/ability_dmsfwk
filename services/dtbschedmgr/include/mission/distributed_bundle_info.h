@@ -17,6 +17,7 @@
 #define OHOS_DISTRIBUTED_BUNDLE_INFO_H
 
 #include <string>
+#include <unordered_set>
 
 #include "dtbschedmgr_log.h"
 #include "parcel.h"
@@ -38,6 +39,7 @@ struct DmsAbilityInfo : public Parcelable {
     std::vector<std::string> continueType;
     std::vector<uint8_t> continueTypeId;
     std::string moduleName;
+    std::unordered_set<std::string> continueBundleName;
 
     bool ReadFromParcel(Parcel &parcel);
     bool Marshalling(Parcel &parcel) const override;

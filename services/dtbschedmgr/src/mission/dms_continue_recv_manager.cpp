@@ -222,7 +222,6 @@ int32_t DMSContinueRecvMgr::VerifyBroadcastSource(const std::string& senderNetwo
         iconInfo_.senderNetworkId = "";
         iconInfo_.bundleName = "";
         iconInfo_.continueType = "";
-        CleanContinueReadyCache(senderNetworkId, bundleName);
     }
     return ERR_OK;
 }
@@ -336,8 +335,8 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string &senderNet
         HILOGE("The app is not installed on the local device.");
         return INVALID_PARAMETERS_ERR;
     }
-
-    continueReady_.emplace_back(senderNetworkId, bundleName, "", finalBundleName, continueType);
+    currentIconInfo lastRecvInfo = currentIconInfo(senderNetworkId, bundleName, finalBundleName)
+    pushLatRecvCache(lastRecvInfo);
 
     if (localBundleInfo.applicationInfo.bundleType != AppExecFwk::BundleType::APP) {
         HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
@@ -374,6 +373,13 @@ bool DMSContinueRecvMgr::continueTypeCheck(const DmsBundleInfo &distributedBundl
         }
     }
     return continueTyoeGot;
+}
+
+void DMSContinueRecvMgr::pushLatRecvCache(currentIconInfo &lastRecvInfo) {
+    if (lastRecvList_.size() >= 5) {
+        lastRecvList_.erase(lastRecvList_.begin());
+    }
+    lastRecvList_.push_back(lastRecvInfo);
 }
 
 void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
@@ -499,7 +505,6 @@ void DMSContinueRecvMgr::OnContinueSwitchOff()
             iconInfo_.senderNetworkId = "";
             iconInfo_.bundleName = "";
             iconInfo_.continueType = "";
-            continueReady_.clear();
         }
         HILOGI("Saved iconInfo cleared, networkId: %{public}s, bundleName: %{public}s.",
             GetAnonymStr(senderNetworkId).c_str(), bundleName.c_str());
@@ -521,18 +526,6 @@ void DMSContinueRecvMgr::OnContinueSwitchOff()
         return;
     }
     eventHandler_->PostTask(func);
-}
-
-void DMSContinueRecvMgr::CleanContinueReadyCache(std::string senderNetworkId, std::string bundleName)
-{
-    auto itr = continueReady_.begin();
-    while (itr != continueReady_.end()) {
-        if (itr->sourceDeviceId_ == senderNetworkId && itr->sinkBundleName_ == bundleName) {
-            itr = continueReady_.erase(itr);
-        } else {
-            ++itr;
-        }
-    }
 }
 
 void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
@@ -562,7 +555,6 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
         iconInfo_.senderNetworkId = "";
         iconInfo_.bundleName = "";
         iconInfo_.continueType = "";
-        CleanContinueReadyCache(senderNetworkId, bundleName);
     }
     HILOGI("Saved iconInfo cleared, networkId: %{public}s, bundleName: %{public}s.",
         GetAnonymStr(senderNetworkId).c_str(), bundleName.c_str());
