@@ -45,6 +45,7 @@ struct ContinueEventInfo {
     std::string bundleName;
     std::string moduleName;
     std::string abilityName;
+    std::string developerId;
 };
 
 class DmsBmStorage {

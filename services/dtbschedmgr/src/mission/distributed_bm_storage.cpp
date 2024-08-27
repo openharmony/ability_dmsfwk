@@ -1115,6 +1115,7 @@ bool DmsBmStorage::GetContinueEventInfo(const std::string &networkId, const std:
             HILOGI("value: %{public}s", value.c_str());
             continueEventInfo.networkId = networkId;
             continueEventInfo.bundleName = bundleName;
+            continueEventInfo.developerId = distributedBundleInfo.developerId;
             continueEventInfo.abilityName = FindAbilityName(distributedBundleInfo, continueType);
             continueEventInfo.moduleName = FindModuleName(distributedBundleInfo, continueType);
             return true;
