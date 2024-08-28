@@ -336,7 +336,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string &senderNet
         HILOGE("The app is not installed on the local device.");
         return INVALID_PARAMETERS_ERR;
     }
-    currentIconInfo lastRecvInfo = currentIconInfo(senderNetworkId, bundleName, finalBundleName)
+    currentIconInfo lastRecvInfo = currentIconInfo(senderNetworkId, bundleName, finalBundleName);
     pushLatRecvCache(lastRecvInfo);
 
     if (localBundleInfo.applicationInfo.bundleType != AppExecFwk::BundleType::APP) {

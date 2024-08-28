@@ -281,7 +281,6 @@ int32_t DSchedContinuation::NotifyDSchedEventForOneCB(const sptr<IRemoteObject> 
     PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.destBundleName_, SEND_REQUEST_DEF_FAIL);
     PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.destModuleName_, SEND_REQUEST_DEF_FAIL);
     PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.destAbilityName_, SEND_REQUEST_DEF_FAIL);
-    PARCEL_WRITE_HELPER_RET(data, String, continueEvent_.developerId_, SEND_REQUEST_DEF_FAIL);
     PARCEL_WRITE_HELPER_RET(data, Int32, continueEvent_.dSchedEventType_, SEND_REQUEST_DEF_FAIL);
     PARCEL_WRITE_HELPER_RET(data, Int32, continueEvent_.state_, SEND_REQUEST_DEF_FAIL);
 

@@ -336,7 +336,7 @@ bool DistributedSchedPermission::GetTargetAbility(const AAFwk::Want& want,
 }
 
 bool DistributedSchedPermission::isSameAppIdOrDeveloperId(const CallerInfo &callerInfo,
-                                                          const AppExecFwk::AbilityInfo &targetAbility)
+                                                          const AppExecFwk::AbilityInfo &targetAbility) const
 {
     if (targetAbility.bundleName == callerInfo.callerBundleName &&
         !BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {

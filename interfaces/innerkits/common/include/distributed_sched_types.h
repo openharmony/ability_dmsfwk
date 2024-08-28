@@ -52,7 +52,6 @@ public:
     std::string destBundleName_ = "";
     std::string destModuleName_ = "";
     std::string destAbilityName_ = "";
-    std::string developerId_ = "";
     DSchedEventType dSchedEventType_ = DMS_UNKNOW;
     DSchedEventState state_ = DMS_DSCHED_EVENT_INIT;
 };
