@@ -1135,6 +1135,9 @@ int32_t DistributedSchedService::DealDSchedEventResult(const OHOS::AAFwk::Want& 
 
 bool DistributedSchedService::GetIsFreeInstall(int32_t missionId)
 {
+    if (dschedContinuation_ == nullptr) {
+        return false;
+    }
     return dschedContinuation_->IsFreeInstall(missionId);
 }
 

@@ -62,6 +62,9 @@ config("distributed_sched_config") {
   if (dmsfwk_mmi_listener) {
     defines += [ "SUPPORT_MULTIMODALINPUT_SERVICE" ]
   }
+  if (use_libfuzzer || use_clang_coverage) {
+    defines += [ "TEST_COVERAGE" ]
+  }
 }
 
 ohos_shared_library("distributedschedsvr") {
