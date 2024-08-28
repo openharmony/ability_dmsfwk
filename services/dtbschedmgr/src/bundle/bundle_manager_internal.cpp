@@ -22,9 +22,9 @@
 #include "mission/dsched_sync_e2e.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "mock_form_mgr_service.h"
 #include "os_account_manager.h"
 #include "system_ability_definition.h"
-#include "os_account_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -186,11 +186,11 @@ bool BundleManagerInternal::IsSameAppId(const std::string& callerAppId, const st
 }
 
 bool BundleManagerInternal::IsSameDeveloperId(const std::string &callerDeveloperId,
-                                              const std::string &targetBundleName)
+    const std::string &targetBundleName)
 {
     if (targetBundleName.empty() || callerDeveloperId.empty()) {
-        HILOGE("targetBundleName:%{public}s or callerDeveloperId:%{public}s is empty",
-               targetBundleName.c_str(), GetAnonymStr(callerDeveloperId).c_str());
+        HILOGE("targetBundleName: %{public}s or callerDeveloperId: %{public}s is empty",
+            targetBundleName.c_str(), GetAnonymStr(callerDeveloperId).c_str());
         return false;
     }
 
@@ -263,9 +263,16 @@ bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleNa
         HILOGE("get bundle manager failed");
         return false;
     }
-    bundleMgr->GetContinueBundleNames(srcBundleName, bundleNameList);
-    if (bundleNameList.empty()) {
-        HILOGW("No APP with specified bundle name(%{public}s) configured in continue Bundle ", srcBundleName.c_str());
+
+    int32_t activeAccountId = 0;
+    ErrCode ret = QueryOsAccount(activeAccountId);
+    if(ret != ERR_OK) {
+        HILOGE("get os account id failed");
+        return false;
+    }
+    ret = bundleMgr->GetContinueBundleNames(srcBundleName, bundleNameList);
+    if (ret != ERR_OK || bundleNameList.empty()) {
+        HILOGW("No APP with specified bundle name(%{public}s) configured in continue Bundle; ret: %{public}d", srcBundleName.c_str(), ret);
         return false;
     }
     return true;

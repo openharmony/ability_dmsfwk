@@ -80,6 +80,7 @@ void DSchedEventListenerStub::DSchedEventNotifyInner(MessageParcel &data, Messag
         eventNotify.destBundleName_ = data.ReadString();
         eventNotify.destModuleName_ = data.ReadString();
         eventNotify.destAbilityName_ = data.ReadString();
+        eventNotify.developerId_ = data.ReadString();
         eventNotify.dSchedEventType_ = static_cast<DSchedEventType>(data.ReadInt32());
         eventNotify.state_ = static_cast<DSchedEventState>(data.ReadInt32());
         DSchedEventNotify(eventNotify);

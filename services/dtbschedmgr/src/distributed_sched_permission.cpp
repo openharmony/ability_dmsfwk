@@ -338,14 +338,14 @@ bool DistributedSchedPermission::GetTargetAbility(const AAFwk::Want& want,
 bool DistributedSchedPermission::isSameAppIdOrDeveloperId(const CallerInfo &callerInfo,
                                                           const AppExecFwk::AbilityInfo &targetAbility) const
 {
+    HILOGI("check appId target bundle name: %{public}s, caller bundle name: %{public}s",
+        targetAbility.bundleName.c_str(), callerInfo.callerBundleName.c_str());
     if (targetAbility.bundleName == callerInfo.callerBundleName &&
-        !BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
-        HILOGE("the appId is different, check permission denied!");
+        BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
         return true;
     }
     if (targetAbility.bundleName != callerInfo.callerBundleName &&
-        !BundleManagerInternal::IsSameDeveloperId(callerInfo.callerDeveloperId, targetAbility.bundleName)) {
-        HILOGE("the DeveloperId is different, check permission denied!");
+        BundleManagerInternal::IsSameDeveloperId(callerInfo.callerDeveloperId, targetAbility.bundleName)) {
         return true;
     }
     return false;
@@ -360,7 +360,7 @@ int32_t DistributedSchedPermission::CheckGetCallerPermission(const AAFwk::Want& 
         return DMS_ACCOUNT_ACCESS_PERMISSION_DENIED;
     }
     // 2. check call with same appid
-    if (isSameAppIdOrDeveloperId(callerInfo, targetAbility)) {
+    if (!isSameAppIdOrDeveloperId(callerInfo, targetAbility)) {
         return CALL_PERMISSION_DENIED;
     }
 

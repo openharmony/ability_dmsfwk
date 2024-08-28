@@ -23,6 +23,7 @@
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "mock_form_mgr_service.h"
 #include "mission/distributed_sched_mission_manager.h"
 #include "mission/dsched_sync_e2e.h"
 
@@ -109,20 +110,19 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
     }
 
     AppExecFwk::AppProvisionInfo appProvisionInfo;
-    std::vector<int32_t> ids;
-    ErrCode result = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
-    if (result != ERR_OK || ids.empty()) {
-        HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", result);
-        return false;
-    }
-    ret = bundleMgr->GetAppProvisionInfo(bundleName, ids[0], appProvisionInfo);
-    if (!ret) {
-        HILOGW("GetAppProvisioninfo (developerId) of %{public}s failed: %{public}d", bundleName.c_str(), ret);
-        DeleteStorageDistributeInfo(bundleName);
-        return false;
+    std::vector<AccountSA::OsAccountInfo> accounts;
+    uint32_t result = AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
+    if(result == ERR_OK && !accounts.empty()) {
+        for(auto &account: accounts) {
+            result = bundleMgr->GetAppprovisionInfo(bundleName, account.GetLocalId(), appProvisionInfo);
+            if(result == ERR_OK && !appProvisionInfo.developerId.empty()) {
+                break;
+            }
+        }
     }
 
-    ret = InnerSaveStorageDistributeInfo(ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo), localUdid);
+    ret = InnerSaveStorageDistributeInfo(
+        ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo), localUdid);
     if (!ret) {
         HILOGW("InnerSaveStorageDistributeInfo:%{public}s  failed", bundleName.c_str());
         return false;
@@ -435,16 +435,19 @@ bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
             continue;
         }
         DmsBundleInfo distributedBundleInfoTmp;
-        bool parseResult = distributedBundleInfoTmp.FromJsonString(value);
-        if (parseResult && distributedBundleInfoTmp.bundleNameId == bundleNameId) {
+        if (distributedBundleInfoTmp.FromJsonString(value)
+            && distributedBundleInfoTmp.bundleNameId == bundleNameId) {
             distributeBundleInfo = distributedBundleInfoTmp;
             reduRiskEntries.push_back(entry);
         }
     }
-    if (reduRiskEntries.size() != 1) {
+    if (reduRiskEntries.size() > 1) {
         HILOGE("Redundant data needs to be deleted.");
         DelReduData(networkId, reduRiskEntries);
         return false;
+    }
+    if(remoteEntries.empty()) {
+        HILOGE("get distributedBundleInfo failed.")
     }
     HILOGI("end.");
     return true;
@@ -699,7 +702,7 @@ DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::Bun
             dmsAbilityInfo.continueTypeId.push_back(pos++);
         }
         dmsAbilityInfo.moduleName = abilityInfo.moduleName;
-        dmsAbilityInfo.continueBundleName = abilityInfo.continueBundleName;
+        dmsAbilityInfo.continueBundleName = abilityInfo.continueBundleNames;
         distributedBundleInfo.dmsAbilityInfos.push_back(dmsAbilityInfo);
     }
     return distributedBundleInfo;
@@ -760,22 +763,26 @@ void DmsBmStorage::UpdateDistributedData()
     HILOGI("bundleInfos size: %{public}zu", bundleInfos.size());
 
     std::vector<std::string> bundleNames;
-    for (const auto &bundleInfo: bundleInfos) {
+    for (const auto &bundleInfo : bundleInfos) {
         bundleNames.push_back(bundleInfo.name);
     }
     std::map<std::string, DmsBundleInfo> oldDistributedBundleInfos =
-            GetAllOldDistributionBundleInfo(bundleNames);
+        GetAllOldDistributionBundleInfo(bundleNames);
+
+    AppExecFwk::AppProvisionInfo appProvisionInfo;
+    std::vector<AccountSA::OsAccountInfo> accounts;
+    uint32_t result = AccountSA::OsAccountManager::QoeryAllCreatedOsAccounts(accounts);
 
     std::vector<DmsBundleInfo> dmsBundleInfos;
-    std::vector<int32_t> ids;
-    ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
-    if (ret != ERR_OK || ids.empty()) {
-        HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
-        return;
-    }
-    for (const auto &bundleInfo: bundleInfos) {
-        AppExecFwk::AppProvisionInfo appProvisionInfo;
-        bundleMgr->GetAppProvisionInfo(bundleInfo.name, ids[0], appProvisionInfo);
+    for (const auto &bundleInfo : bundleInfos) {
+        if(result == ERR_OK && !accounts.empty()) {
+            for(auto &account : accounts) {
+                result = bundleMgr->GetAppProvisionInfo(bundleInfo.name, account.GetLocalId(), appProvisionInfo);
+                if(result == ERR_OK && !appProvisionInfo.developerId.empty()) {
+                    break;
+                }
+            }
+        }
         if (oldDistributedBundleInfos.find(bundleInfo.name) != oldDistributedBundleInfos.end()) {
             int64_t updateTime = oldDistributedBundleInfos[bundleInfo.name].updateTime;
             if (updateTime != bundleInfo.updateTime) {

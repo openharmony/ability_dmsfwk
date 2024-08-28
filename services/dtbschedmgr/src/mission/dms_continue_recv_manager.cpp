@@ -266,6 +266,7 @@ bool DMSContinueRecvMgr::GetFinalBundleName(const std::string &senderNetworkId, 
             finalBundleName = bundleName;
             return true;
         }
+        HILOGE("continue type is empty and can not get local bundle info for bundle name: %{public}s", bundleName.c_str());
         return false;
     }
 
@@ -296,28 +297,27 @@ bool DMSContinueRecvMgr::GetFinalBundleName(const std::string &senderNetworkId, 
                 continue;
             }
             AppExecFwk::AppProvisionInfo appProvisionInfo;
-            if (bundleMgr->GetAppProvisionInfo(bundleNameItem, ids[0], appProvisionInfo)
+            if (bundleMgr->GetAppProvisionInfo(bundleNameItem, ids[0], appProvisionInfo) == ERR_OK
                 && appProvisionInfo.developerId == distributedBundleInfo.developerId) {
                 finalBundleName = bundleNameItem;
                 return true;
             }
         }
     }
-
+    HILOGE("continue type is not empty and can not get local bundle info and continue nundle for "
+           "bundle name: %{public}s", bundleName.c_str());
     return false;
 }
 
-int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string &senderNetworkId,
-                                                    uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state,
-                                                    const int32_t retry)
+int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNetworkId,
+    uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state, const int32_t retry)
 {
     HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, bundleNameId: %{public}u, state: %{public}d.",
-           GetAnonymStr(senderNetworkId).c_str(), bundleNameId, state);
+        GetAnonymStr(senderNetworkId).c_str(), bundleNameId, state);
     DmsBundleInfo distributedBundleInfo;
-    bool result = DmsBmStorage::GetInstance()->GetDistributedBundleInfo(senderNetworkId, bundleNameId,
-                                                                        distributedBundleInfo);
-    if (!result) {
-        HILOGW("get bundleName failed, ret: %{public}d, try = %{public}d", result, retry);
+    if (!DmsBmStorage::GetInstance()->GetDistributedBundleInfo(senderNetworkId, bundleNameId,
+                                                                        distributedBundleInfo)) {
+        HILOGW("get distributedBundleInfo failed, try = %{public}d", retry);
         return RetryPostBroadcast(senderNetworkId, bundleNameId, continueTypeId, state, retry);
     }
 
@@ -327,7 +327,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string &senderNet
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
 
-    HILOGI("get bundleName, bundleName: %{public}s", bundleName.c_str());
+    HILOGI("get distributedBundleInfo success, bundleName: %{public}s", bundleName.c_str());
     std::string finalBundleName;
     AppExecFwk::BundleInfo localBundleInfo;
     std::string continueType;
@@ -336,6 +336,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string &senderNet
         HILOGE("The app is not installed on the local device.");
         return INVALID_PARAMETERS_ERR;
     }
+    HILOGI("got finalBundleName: %{public}s", finalBundleName.c_str());
     currentIconInfo lastRecvInfo = currentIconInfo(senderNetworkId, bundleName, finalBundleName);
     pushLatRecvCache(lastRecvInfo);
 
@@ -366,14 +367,14 @@ bool DMSContinueRecvMgr::continueTypeCheck(const DmsBundleInfo &distributedBundl
                                            const std::string &continueType)
 {
     std::vector<DmsAbilityInfo> dmsAbilityInfos = distributedBundleInfo.dmsAbilityInfos;
-    bool continueTyoeGot = false;
+    bool continueTypeGot = false;
     for (const auto &abilityInfo: dmsAbilityInfos) {
         std::vector<std::string> continueTypeConfig = abilityInfo.continueType;
         for (const auto &continueTypeConfigItem: continueTypeConfig) {
-            continueTyoeGot = continueTyoeGot || (continueType == continueTypeConfigItem);
+            continueTypeGot = continueTypeGot || (continueType == continueTypeConfigItem);
         }
     }
-    return continueTyoeGot;
+    return continueTypeGot;
 }
 
 void DMSContinueRecvMgr::pushLatRecvCache(currentIconInfo &lastRecvInfo)

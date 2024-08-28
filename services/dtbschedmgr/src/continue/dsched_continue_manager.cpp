@@ -264,6 +264,8 @@ bool DSchedContinueManager::getFirstBundleName(DSchedContinueInfo &info, std::st
             }
         }
     }
+    HILOGE("caon not get abilicy info or continue bundle names is empty for continue type:%{public}s",
+        info.continueType_.c_str());
     return false;
 }
 
@@ -295,9 +297,10 @@ void DSchedContinueManager::CompleteBundleName(DSchedContinueInfo &info, int32_t
             std::string bundleName = info.sinkBundleName_;
             std::string deviceId = info.sinkDeviceId_;
             if (getFirstBundleName(info, firstBundleNamme, bundleName, deviceId)) {
-                info.sourceBundleName_ = firstBundleNamme;
+                sourceBundleName = firstBundleNamme;
             }
         }
+        info.sourceBundleName_ = sourceBundleName;
     }
 }
 
@@ -334,7 +337,7 @@ void DSchedContinueManager::HandleContinueMissionWithBundleName(DSchedContinueIn
     }
     WaitAllConnectDecision(direction, info, CONTINUE_TIMEOUT);
     HILOGI("end, subType: %{public}d dirction: %{public}d, continue info: %{public}s",
-           subType, direction, info.toString().c_str());
+        subType, direction, info.toString().c_str());
 }
 
 void DSchedContinueManager::WaitAllConnectDecision(int32_t direction, const DSchedContinueInfo &info, int32_t timeout)
@@ -427,7 +430,8 @@ void DSchedContinueManager::HandleStartContinuation(const OHOS::AAFwk::Want& wan
 }
 
 std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
-    const OHOS::AAFwk::Want &want, int32_t missionId) {
+    const OHOS::AAFwk::Want& want, int32_t missionId)
+{
     std::string srcDeviceId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(srcDeviceId)) {
         DmsRadar::GetInstance().SaveDataDmsRemoteWant("GetDSchedContinueByWant", GET_LOCAL_DEVICE_ERR);
@@ -438,7 +442,8 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
     std::string bundleName = want.GetElement().GetBundleName();
     auto info = DSchedContinueInfo(srcDeviceId, bundleName, dstDeviceId, bundleName, "");
 
-    HILOGI("continue info: %{public}s.", info.toString().c_str()); {
+    HILOGI("continue info: %{public}s.", info.toString().c_str());
+    {
         std::lock_guard<std::mutex> continueLock(continueMutex_);
         if (continues_.empty()) {
             HILOGE("continue info doesn't match an existing continuation.");
@@ -453,7 +458,7 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
         }
     }
     HILOGE("missionId doesn't match the existing continuation, continueInfo: %{public}s.",
-           info.toString().c_str());
+        info.toString().c_str());
     return nullptr;
 }
 

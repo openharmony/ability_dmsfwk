@@ -192,6 +192,7 @@ void DSchedContinue::SetEventData()
     eventData_.destBundleName_ = dstContinueInfo.bundleName;
     eventData_.destModuleName_ = dstContinueInfo.moduleName;
     eventData_.destAbilityName_ = dstContinueInfo.abilityName;
+    eventData_.developerId_ = srcContinueInfo.developerId;
     eventData_.dSchedEventType_ = DMS_CONTINUE;
     eventData_.state_ = DMS_DSCHED_EVENT_START;
 }
@@ -768,7 +769,11 @@ bool DSchedContinue::MakeCallerInfo(std::shared_ptr<ContinueAbilityData> data, C
         HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
         return false;
     }
-    bundleMgr->GetAppProvisionInfo(continueInfo_.sinkBundleName_, ids[0], appProvisionInfo);
+    uint32_t result = bundleMgr->GetAppProvisionInfo(continueInfo_.sinkBundleName_, ids[0], appProvisionInfo);
+    if(result != ERR_OK) {
+        HILOGE("get app provision info failed for bundle name:%{public}s", continueInfo_.sinkBundleName_.c_str());
+        return false;
+    }
     callerInfo.callerDeveloperId = appProvisionInfo.developerId;
     return true;
 }
@@ -807,10 +812,9 @@ int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData>
         HILOGE("GetBundleNameListFromBms failed");
         return INVALID_PARAMETERS_ERR;
     }
-
     AccountInfo accountInfo;
     int32_t ret = DistributedSchedPermission::GetInstance().GetAccountInfo(continueInfo_.sinkDeviceId_, callerInfo,
-                                                                           accountInfo);
+        accountInfo);
     if (ret != ERR_OK) {
         HILOGE("GetAccountInfo failed");
         return ret;
