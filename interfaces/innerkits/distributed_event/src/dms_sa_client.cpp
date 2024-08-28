@@ -47,7 +47,10 @@ bool DmsSaClient::SubscribeDmsSA()
 int32_t DmsSaClient::AddDSchedEventListener(const DSchedEventType& type, const sptr<IDSchedEventListener>& listener)
 {
     HILOGI("%{public}s called, the type is %{public}d", __func__, type);
-    saMgrProxy_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    {
+        std::lock_guard<std::mutex> lock(saMgrMutex_);
+        saMgrProxy_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    }
     if (saMgrProxy_ == nullptr) {
         HILOGE("fail to get saMgrProxy.");
         return AAFwk::INNER_ERR;
@@ -56,11 +59,13 @@ int32_t DmsSaClient::AddDSchedEventListener(const DSchedEventType& type, const s
         DistributedClient distributedClient;
         distributedClient.RegisterDSchedEventListener(type, listener);
     }
-    std::lock_guard<std::mutex> lock(eventMutex_);
     if (!hasSubscribeDmsSA_) {
         if (SubscribeDmsSA()) {
             hasSubscribeDmsSA_ = true;
-            listeners_[type] = listener;
+            {
+                std::lock_guard<std::mutex> lock(eventMutex_);
+                listeners_[type] = listener;
+            }
         } else {
             return AAFwk::INNER_ERR;
         }
@@ -71,7 +76,10 @@ int32_t DmsSaClient::AddDSchedEventListener(const DSchedEventType& type, const s
 int32_t DmsSaClient::DelDSchedEventListener(const DSchedEventType& type, const sptr<IDSchedEventListener>& listener)
 {
     HILOGI("%{public}s called, the type is %{public}d", __func__, type);
-    saMgrProxy_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    {
+        std::lock_guard<std::mutex> lock(saMgrMutex_);
+        saMgrProxy_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    }
     if (saMgrProxy_ == nullptr) {
         HILOGE("fail to get saMgrProxy.");
         return AAFwk::INNER_ERR;
@@ -88,7 +96,10 @@ int32_t DmsSaClient::DelDSchedEventListener(const DSchedEventType& type, const s
 int32_t DmsSaClient::GetContinueInfo(ContinueInfo &continueInfo)
 {
     HILOGI("%{public}s called", __func__);
-    saMgrProxy_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    {
+        std::lock_guard<std::mutex> lock(saMgrMutex_);
+        saMgrProxy_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    }
     if (saMgrProxy_ == nullptr) {
         HILOGE("fail to get saMgrProxy.");
         return AAFwk::INNER_ERR;
@@ -103,7 +114,10 @@ int32_t DmsSaClient::GetContinueInfo(ContinueInfo &continueInfo)
 int32_t DmsSaClient::GetDSchedEventInfo(const DSchedEventType &type, std::vector<EventNotify> &events)
 {
     HILOGI("%{public}s called", __func__);
-    saMgrProxy_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    {
+        std::lock_guard<std::mutex> lock(saMgrMutex_);
+        saMgrProxy_ = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    }
     if (saMgrProxy_ == nullptr) {
         HILOGE("Get SA manager proxy fail.");
         return AAFwk::INNER_ERR;

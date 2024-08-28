@@ -44,6 +44,57 @@ const char* TYPE_PROPERTY = "type";
 const char* VALUE_PROPERTY = "value";
 const std::string TAG = "DistributedUnsupportedData";
 }
+
+std::map<int, DistributedWantParams::InterfaceQueryToStrFunc> DistributedWantParams::interfaceQueryToStrMap = {
+    std::map<int, DistributedWantParams::InterfaceQueryToStrFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_BOOLEAN, &DistributedWantParams::BooleanQueryToStr),
+    std::map<int, DistributedWantParams::InterfaceQueryToStrFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_BYTE, &DistributedWantParams::ByteQueryToStr),
+    std::map<int, DistributedWantParams::InterfaceQueryToStrFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_CHAR, &DistributedWantParams::CharQueryToStr),
+    std::map<int, DistributedWantParams::InterfaceQueryToStrFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_SHORT, &DistributedWantParams::ShortQueryToStr),
+    std::map<int, DistributedWantParams::InterfaceQueryToStrFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_INT, &DistributedWantParams::IntegerQueryToStr),
+    std::map<int, DistributedWantParams::InterfaceQueryToStrFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_LONG, &DistributedWantParams::LongQueryToStr),
+    std::map<int, DistributedWantParams::InterfaceQueryToStrFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_FLOAT, &DistributedWantParams::FloatQueryToStr),
+    std::map<int, DistributedWantParams::InterfaceQueryToStrFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_DOUBLE, &DistributedWantParams::DoubleQueryToStr),
+    std::map<int, DistributedWantParams::InterfaceQueryToStrFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_STRING, &DistributedWantParams::StringQueryToStr),
+    std::map<int, DistributedWantParams::InterfaceQueryToStrFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_ARRAY, &DistributedWantParams::ArrayQueryToStr),
+    std::map<int, DistributedWantParams::InterfaceQueryToStrFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_WANTPARAMS, &DistributedWantParams::DistributedWantParamsQueryToStr),
+};
+
+std::map<int, DistributedWantParams::InterfaceQueryEqualsFunc> DistributedWantParams::interfaceQueryEqualsMap = {
+    std::map<int, DistributedWantParams::InterfaceQueryEqualsFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_BOOLEAN, &DistributedWantParams::BooleanQueryEquals),
+    std::map<int, DistributedWantParams::InterfaceQueryEqualsFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_BYTE, &DistributedWantParams::ByteQueryEquals),
+    std::map<int, DistributedWantParams::InterfaceQueryEqualsFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_CHAR, &DistributedWantParams::CharQueryEquals),
+    std::map<int, DistributedWantParams::InterfaceQueryEqualsFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_STRING, &DistributedWantParams::StringQueryEquals),
+    std::map<int, DistributedWantParams::InterfaceQueryEqualsFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_ARRAY, &DistributedWantParams::ArrayQueryEquals),
+    std::map<int, DistributedWantParams::InterfaceQueryEqualsFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_WANTPARAMS, &DistributedWantParams::DistributedWantParamsQueryEquals),
+    std::map<int, DistributedWantParams::InterfaceQueryEqualsFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_SHORT, &DistributedWantParams::ShortQueryEquals),
+    std::map<int, DistributedWantParams::InterfaceQueryEqualsFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_INT, &DistributedWantParams::IntegerQueryEquals),
+    std::map<int, DistributedWantParams::InterfaceQueryEqualsFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_LONG, &DistributedWantParams::LongQueryEquals),
+    std::map<int, DistributedWantParams::InterfaceQueryEqualsFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_FLOAT, &DistributedWantParams::FloatQueryEquals),
+    std::map<int, DistributedWantParams::InterfaceQueryEqualsFunc>::value_type(
+        DistributedWantParams::VALUE_TYPE_DOUBLE, &DistributedWantParams::DoubleQueryEquals),
+};
+
 DistributedUnsupportedData::~DistributedUnsupportedData()
 {
     if (buffer != nullptr) {
@@ -114,36 +165,144 @@ DistributedUnsupportedData& DistributedUnsupportedData::operator=(DistributedUns
     return *this;
 }
 
+std::string DistributedWantParams::BooleanQueryToStr(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IBoolean* obj = AAFwk::IBoolean::Query(iIt);
+    return obj == nullptr ? "" : static_cast<AAFwk::Boolean*>(obj)->ToString();
+}
+
+std::string DistributedWantParams::ByteQueryToStr(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IByte* obj = AAFwk::IByte::Query(iIt);
+    return obj == nullptr ? "" : static_cast<AAFwk::Byte*>(obj)->ToString();
+}
+
+std::string DistributedWantParams::CharQueryToStr(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IChar* obj = AAFwk::IChar::Query(iIt);
+    return obj == nullptr ? "" : static_cast<AAFwk::Char*>(obj)->ToString();
+}
+
+std::string DistributedWantParams::ShortQueryToStr(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IShort* obj = AAFwk::IShort::Query(iIt);
+    return obj == nullptr ? "" : static_cast<AAFwk::Short*>(obj)->ToString();
+}
+
+std::string DistributedWantParams::IntegerQueryToStr(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IInteger* obj = AAFwk::IInteger::Query(iIt);
+    return obj == nullptr ? "" : static_cast<AAFwk::Integer*>(obj)->ToString();
+}
+
+std::string DistributedWantParams::LongQueryToStr(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::ILong* obj = AAFwk::ILong::Query(iIt);
+    return obj == nullptr ? "" : static_cast<AAFwk::Long*>(obj)->ToString();
+}
+
+std::string DistributedWantParams::FloatQueryToStr(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IFloat* obj = AAFwk::IFloat::Query(iIt);
+    return obj == nullptr ? "" : static_cast<AAFwk::Float*>(obj)->ToString();
+}
+
+std::string DistributedWantParams::DoubleQueryToStr(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IDouble* obj = AAFwk::IDouble::Query(iIt);
+    return obj == nullptr ? "" : static_cast<AAFwk::Double*>(obj)->ToString();
+}
+
+std::string DistributedWantParams::StringQueryToStr(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IString* obj = AAFwk::IString::Query(iIt);
+    return obj == nullptr ? "" : static_cast<AAFwk::String*>(obj)->ToString();
+}
+
+std::string DistributedWantParams::ArrayQueryToStr(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IArray* obj = AAFwk::IArray::Query(iIt);
+    return obj == nullptr ? "" : static_cast<AAFwk::Array*>(obj)->ToString();
+}
+
+std::string DistributedWantParams::DistributedWantParamsQueryToStr(const sptr<AAFwk::IInterface> iIt)
+{
+    IDistributedWantParams* obj = IDistributedWantParams::Query(iIt);
+    return obj == nullptr ? "" : static_cast<DistributedWantParamWrapper*>(obj)->ToString();
+}
+
+bool DistributedWantParams::BooleanQueryEquals(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IBoolean* obj = AAFwk::IBoolean::Query(iIt);
+    return obj == nullptr ? false : static_cast<AAFwk::Boolean*>(obj)->Equals(*static_cast<AAFwk::Boolean*>(obj));
+}
+
+bool DistributedWantParams::ByteQueryEquals(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IByte* obj = AAFwk::IByte::Query(iIt);
+    return obj == nullptr ? false : static_cast<AAFwk::Byte*>(obj)->Equals(*static_cast<AAFwk::Byte*>(obj));
+}
+
+bool DistributedWantParams::CharQueryEquals(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IChar* obj = AAFwk::IChar::Query(iIt);
+    return obj == nullptr ? false : static_cast<AAFwk::Char*>(obj)->Equals(*static_cast<AAFwk::Char*>(obj));
+}
+
+bool DistributedWantParams::StringQueryEquals(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IString* obj = AAFwk::IString::Query(iIt);
+    return obj == nullptr ? false : static_cast<AAFwk::String*>(obj)->Equals(*static_cast<AAFwk::String*>(obj));
+}
+
+bool DistributedWantParams::ArrayQueryEquals(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IArray* obj = AAFwk::IArray::Query(iIt);
+    return obj == nullptr ? false : static_cast<AAFwk::Array*>(obj)->Equals(*static_cast<AAFwk::Array*>(obj));
+}
+
+bool DistributedWantParams::DistributedWantParamsQueryEquals(const sptr<AAFwk::IInterface> iIt)
+{
+    IDistributedWantParams* obj = IDistributedWantParams::Query(iIt);
+    return obj == nullptr ? false : static_cast<DistributedWantParamWrapper*>(obj)
+        ->Equals(*static_cast<DistributedWantParamWrapper*>(obj));
+}
+bool DistributedWantParams::ShortQueryEquals(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IShort* obj = AAFwk::IShort::Query(iIt);
+    return obj == nullptr ? false : static_cast<AAFwk::Short*>(obj)->Equals(*static_cast<AAFwk::Short*>(obj));
+}
+
+bool DistributedWantParams::IntegerQueryEquals(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IInteger* obj = AAFwk::IInteger::Query(iIt);
+    return obj == nullptr ? false : static_cast<AAFwk::Integer*>(obj)->Equals(*static_cast<AAFwk::Integer*>(obj));
+}
+
+bool DistributedWantParams::LongQueryEquals(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::ILong* obj = AAFwk::ILong::Query(iIt);
+    return obj == nullptr ? false : static_cast<AAFwk::Long*>(obj)->Equals(*static_cast<AAFwk::Long*>(obj));
+}
+
+bool DistributedWantParams::FloatQueryEquals(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IFloat* obj = AAFwk::IFloat::Query(iIt);
+    return obj == nullptr ? false : static_cast<AAFwk::Float*>(obj)->Equals(*static_cast<AAFwk::Float*>(obj));
+}
+
+bool DistributedWantParams::DoubleQueryEquals(const sptr<AAFwk::IInterface> iIt)
+{
+    AAFwk::IDouble* obj = AAFwk::IDouble::Query(iIt);
+    return obj == nullptr ? false : static_cast<AAFwk::Double*>(obj)->Equals(*static_cast<AAFwk::Double*>(obj));
+}
+
 std::string DistributedWantParams::GetStringByType(const sptr<AAFwk::IInterface> iIt, int typeId)
 {
-    if (iIt == nullptr) {
-        return "";
-    }
-
-    if (typeId == VALUE_TYPE_BOOLEAN) {
-        return static_cast<AAFwk::Boolean*>(AAFwk::IBoolean::Query(iIt))->ToString();
-    } else if (typeId == VALUE_TYPE_BYTE) {
-        return static_cast<AAFwk::Byte*>(AAFwk::IByte::Query(iIt))->ToString();
-    } else if (typeId == VALUE_TYPE_CHAR) {
-        return static_cast<AAFwk::Char*>(AAFwk::IChar::Query(iIt))->ToString();
-    } else if (typeId == VALUE_TYPE_SHORT) {
-        return static_cast<AAFwk::Short*>(AAFwk::IShort::Query(iIt))->ToString();
-    } else if (typeId == VALUE_TYPE_INT) {
-        return static_cast<AAFwk::Integer*>(AAFwk::IInteger::Query(iIt))->ToString();
-    } else if (typeId == VALUE_TYPE_LONG) {
-        return static_cast<AAFwk::Long*>(AAFwk::ILong::Query(iIt))->ToString();
-    } else if (typeId == VALUE_TYPE_FLOAT) {
-        return static_cast<AAFwk::Float*>(AAFwk::IFloat::Query(iIt))->ToString();
-    } else if (typeId == VALUE_TYPE_DOUBLE) {
-        return static_cast<AAFwk::Double*>(AAFwk::IDouble::Query(iIt))->ToString();
-    } else if (typeId == VALUE_TYPE_STRING) {
-        return static_cast<AAFwk::String*>(AAFwk::IString::Query(iIt))->ToString();
-    } else if (typeId == VALUE_TYPE_ARRAY) {
-        return static_cast<AAFwk::Array*>(AAFwk::IArray::Query(iIt))->ToString();
-    } else if (typeId == VALUE_TYPE_WANTPARAMS) {
-        return static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(iIt))->ToString();
-    } else {
-        return "";
+    auto iter = interfaceQueryToStrMap.find(typeId);
+    if (iter != interfaceQueryToStrMap.end()) {
+        DistributedWantParams::InterfaceQueryToStrFunc &func = iter->second;
+        return (*func)(iIt);
     }
     return "";
 }
@@ -315,74 +474,13 @@ sptr<IInterface> DistributedWantParams::GetInterfaceByType(int typeId, const std
     return nullptr;
 }
 
-bool DistributedWantParams::CompareNumberInterface(const sptr<IInterface> iIt1,
-    const sptr<IInterface> iIt2, int typeId)
-{
-    if (iIt1 == nullptr) {
-        return false;
-    }
-    bool flag = false;
-    switch (typeId) {
-        case VALUE_TYPE_SHORT:
-            flag = static_cast<AAFwk::Short*>(AAFwk::IShort::Query(iIt1))
-                ->Equals(*(static_cast<AAFwk::Short*>(AAFwk::IShort::Query(iIt1))));
-            break;
-        case VALUE_TYPE_INT:
-            flag = static_cast<AAFwk::Integer*>(AAFwk::IInteger::Query(iIt1))
-                ->Equals(*(static_cast<AAFwk::Integer*>(AAFwk::IInteger::Query(iIt1))));
-            break;
-        case VALUE_TYPE_LONG:
-            flag = static_cast<AAFwk::Long*>(AAFwk::ILong::Query(iIt1))
-                ->Equals(*(static_cast<AAFwk::Long*>(AAFwk::ILong::Query(iIt1))));
-            break;
-        case VALUE_TYPE_FLOAT:
-            flag = static_cast<AAFwk::Float*>(AAFwk::IFloat::Query(iIt1))
-                ->Equals(*(static_cast<AAFwk::Float*>(AAFwk::IFloat::Query(iIt1))));
-            break;
-        case VALUE_TYPE_DOUBLE:
-            flag = static_cast<AAFwk::Double*>(AAFwk::IDouble::Query(iIt1))
-                ->Equals(*(static_cast<AAFwk::Double*>(AAFwk::IDouble::Query(iIt1))));
-            break;
-        default:
-            break;
-    }
-    return flag;
-}
-
 bool DistributedWantParams::CompareInterface(const sptr<IInterface> iIt1, const sptr<IInterface> iIt2, int typeId)
 {
-    if (iIt1 == nullptr) {
-        return false;
-    }
     bool flag = false;
-    switch (typeId) {
-        case VALUE_TYPE_BOOLEAN:
-            flag = static_cast<AAFwk::Boolean*>(AAFwk::IBoolean::Query(iIt1))
-                ->Equals(*(static_cast<AAFwk::Boolean*>(AAFwk::IBoolean::Query(iIt1))));
-            break;
-        case VALUE_TYPE_BYTE:
-            flag = static_cast<AAFwk::Byte*>(AAFwk::IByte::Query(iIt1))
-                ->Equals(*(static_cast<AAFwk::Byte*>(AAFwk::IByte::Query(iIt1))));
-            break;
-        case VALUE_TYPE_CHAR:
-            flag = static_cast<AAFwk::Char*>(AAFwk::IChar::Query(iIt1))
-                ->Equals(*(static_cast<AAFwk::Char*>(AAFwk::IChar::Query(iIt1))));
-            break;
-        case VALUE_TYPE_STRING:
-            flag = static_cast<AAFwk::String*>(AAFwk::IString::Query(iIt1))
-                ->Equals(*(static_cast<AAFwk::String*>(AAFwk::IString::Query(iIt1))));
-            break;
-        case VALUE_TYPE_ARRAY:
-            flag = static_cast<AAFwk::Array*>(AAFwk::IArray::Query(iIt1))
-                ->Equals(*(static_cast<AAFwk::Array*>(AAFwk::IArray::Query(iIt1))));
-            break;
-        case VALUE_TYPE_WANTPARAMS:
-            flag = static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(iIt1))
-                ->Equals(*(static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(iIt1))));
-            break;
-        default:
-            flag = CompareNumberInterface(iIt1, iIt2, typeId);
-            break;
+    auto iter = interfaceQueryEqualsMap.find(typeId);
+    if (iter != interfaceQueryEqualsMap.end()) {
+        DistributedWantParams::InterfaceQueryEqualsFunc &func = iter->second;
+        return (*func)(iIt1);
     }
     return flag;
 }
@@ -475,11 +573,12 @@ bool DistributedWantParams::WriteToParcelWantParams(Parcel& parcel, sptr<IInterf
     if (!parcel.WriteInt32(VALUE_TYPE_WANTPARAMS)) {
         return false;
     }
-    if (o == nullptr) {
+
+    auto wantParams = static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(o));
+    if (wantParams == nullptr) {
         return false;
     }
-    return parcel.WriteString16(Str8ToStr16(
-        static_cast<DistributedWantParamWrapper*>(IDistributedWantParams::Query(o))->ToString()));
+    return parcel.WriteString16(Str8ToStr16(wantParams->ToString()));
 }
 
 bool DistributedWantParams::WriteToParcelFD(Parcel& parcel, const DistributedWantParams& value) const

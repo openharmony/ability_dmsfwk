@@ -733,6 +733,9 @@ bool DistributedSchedPermission::CheckTargetAbilityVisible(const AppExecFwk::Abi
 
 void DistributedSchedPermission::RemoveRemoteObjectFromWant(std::shared_ptr<AAFwk::Want> want) const
 {
+    if (want == nullptr) {
+        return;
+    }
     WantParams wantParams = want->GetParams();
     std::map<std::string, sptr<IInterface>> params = wantParams.GetParams();
     for (auto param : params) {
