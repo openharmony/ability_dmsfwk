@@ -71,7 +71,9 @@ int32_t DSchedAllConnectManager::UninitAllConnectManager()
     if (ret != ERR_OK) {
         HILOGE("Unregist lifecycle callback fail, ret %{public}d.", ret);
     }
+#ifndef TEST_COVERAGE
     dlclose(dllHandle_);
+#endif
     dllHandle_ = nullptr;
     allConnectMgrApi_ = {
         .ServiceCollaborationManager_PublishServiceState = nullptr,
@@ -127,7 +129,9 @@ int32_t DSchedAllConnectManager::GetServiceCollaborationManagerProxy()
 
     if (ret != ERR_OK) {
         HILOGE("Get remote dms interactive adapter proxy fail, dlclose handle.");
+#ifndef TEST_COVERAGE
         dlclose(dllHandle_);
+#endif
         dllHandle_ = nullptr;
     }
     return ret;
