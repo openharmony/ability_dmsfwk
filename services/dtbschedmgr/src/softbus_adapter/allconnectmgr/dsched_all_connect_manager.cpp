@@ -128,7 +128,7 @@ int32_t DSchedAllConnectManager::GetServiceCollaborationManagerProxy()
     if (ret != ERR_OK) {
         HILOGE("Get remote dms interactive adapter proxy fail, dlclose handle.");
 #ifndef TEST_COVERAGE
-        dlclose(dllHandle_);
+        dlclose(dllHandle_)
 #endif
         dllHandle_ = nullptr;
     }
