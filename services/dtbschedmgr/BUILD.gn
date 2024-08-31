@@ -227,7 +227,10 @@ ohos_shared_library("distributedschedsvr") {
       "src/mission/wifi_state_adapter.cpp",
       "src/mission/wifi_state_listener.cpp",
     ]
-    external_deps += [ "image_framework:image_native" ]
+    external_deps += [
+      "config_policy:configpolicy_util",
+      "image_framework:image_native",
+    ]
   }
 
   if (dmsfwk_report_memmgr) {

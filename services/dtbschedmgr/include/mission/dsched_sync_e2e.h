@@ -44,11 +44,16 @@ public:
     void SetSyncRecord(const std::string &networkId);
     void ClearSyncRecord(const std::string &networkId);
     bool IsSynchronized(const std::string &networkId);
+    bool CheckCtrlRule();
+    bool CheckBundleContinueConfig(const std::string &bundleName);
 
 private:
     void TryTwice(const std::function<DistributedKv::Status()> &func) const;
     bool CheckKvStore();
     DistributedKv::Status GetKvStore();
+    bool IsValidPath(const std::string &inFilePath, std::string &realFilePath);
+    bool UpdateWhiteList(const std::string &cfgJsonStr);
+    int32_t LoadContinueConfig();
 
     static std::mutex mutex_;
     static std::shared_ptr<DmsKvSyncE2E> instance_;
@@ -59,6 +64,9 @@ private:
     mutable std::mutex kvStorePtrMutex_;
     std::atomic<bool> isCfgDevices_ = false;
     std::map<std::string, bool> deviceSyncRecord_;
+    std::atomic<bool> isForbidSendAndRecv_ = false;
+    std::string continueCfgFullPath_ = "";
+    std::vector<std::string> whiteList_;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS

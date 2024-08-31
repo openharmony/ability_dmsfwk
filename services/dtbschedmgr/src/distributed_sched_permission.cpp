@@ -545,11 +545,6 @@ bool DistributedSchedPermission::CheckMigrateStartCtrlPer(const AppExecFwk::Abil
     const CallerInfo& callerInfo, const AAFwk::Want& want) const
 {
     std::string bundleName = want.GetBundle();
-    if (!CheckBundleContinueConfig(bundleName)) {
-        HILOGI("App does not allow continue in config file, bundle name %{public}s", bundleName.c_str());
-        return false;
-    }
-
     // check if continuation with same appid
     HILOGI("Check migration start control permission with same appid enter.");
     if (!targetAbility.visible &&

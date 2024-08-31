@@ -279,11 +279,6 @@ bool DistributedSchedService::Init()
 {
     HILOGD("ready to init.");
     InitDeviceCfg();
-    int32_t ret = LoadContinueConfig();
-    if (ret != ERR_OK) {
-        HILOGE("Load continue config fail, ret %{public}d.", ret);
-    }
-
     DmsContinueTime::GetInstance().Init();
     DnetworkAdapter::GetInstance()->Init();
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().Init()) {
@@ -852,7 +847,7 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
         return INVALID_PARAMETERS_ERR;
     }
     std::string bundleName = missionInfo.want.GetBundle();
-    if (!CheckBundleContinueConfig(bundleName)) {
+    if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(bundleName)) {
         HILOGI("App does not allow continue in config file, bundle name %{public}s, missionId: %{public}d",
             bundleName.c_str(), missionId);
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
@@ -933,11 +928,6 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
 {
     HILOGI("ContinueRemoteMission srcDeviceId: %{public}s. dstDeviceId: %{public}s. bundleName: %{public}s.",
         GetAnonymStr(srcDeviceId).c_str(), GetAnonymStr(dstDeviceId).c_str(), bundleName.c_str());
-    if (!CheckBundleContinueConfig(bundleName)) {
-        HILOGI("App does not allow continue in config file, bundle name %{public}s", bundleName.c_str());
-        return REMOTE_DEVICE_BIND_ABILITY_ERR;
-    }
-
     if (DmsContinueTime::GetInstance().GetPull()) {
         int64_t begin = GetTickCount();
         DmsContinueTime::GetInstance().SetDurationBegin(DMSDURATION_DSTTOSRCRPCTIME, begin);
