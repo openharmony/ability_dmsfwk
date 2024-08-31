@@ -385,8 +385,7 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, Unfoc
         return ret;
     }
     if (reason != UnfocusedReason::TIMEOUT) {
-        bool isContinue = IsContinue(missionId, bundleName);
-        if (!isContinue) {
+        if (!IsContinue(missionId, bundleName)) {
             HILOGE("Not current mission to be continued, missionId: %{public}d", missionId);
             EraseFocusedMission(bundleName, missionId, reason);
             return NO_MISSION_INFO_FOR_MISSION_ID;
@@ -394,13 +393,6 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, Unfoc
 #ifdef SUPPORT_MULTIMODALINPUT_SERVICE
         RemoveMMIListener();
 #endif
-    }
-    ret = CheckContinueState(missionId);
-    if (ret != ERR_OK) {
-        HILOGE("Continue state is inactive or can't be obtained, mission id : %{public}d, ret: %{public}d",
-            missionId, ret);
-        EraseFocusedMission(bundleName, missionId, reason);
-        return ret;
     }
     uint16_t bundleNameId = 0;
     uint8_t continueTypeId = 0;
