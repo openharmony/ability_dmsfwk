@@ -26,6 +26,7 @@
 #include "distributed_sched_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "mission/dsched_sync_e2e.h"
 #include "mission/wifi_state_adapter.h"
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
@@ -88,6 +89,10 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
 {
     HILOGI("NotifyDataRecv start, senderNetworkId: %{public}s, dataLen: %{public}u.",
         GetAnonymStr(senderNetworkId).c_str(), dataLen);
+    if (!DmsKvSyncE2E::GetInstance()->CheckCtrlRule()) {
+        HILOGE("Forbid sending and receiving");
+        return;
+    }
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
     if (!IsContinueSwitchOn) {
         HILOGE("ContinueSwitch status is off");
@@ -261,11 +266,6 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     if (ret != ERR_OK) {
         HILOGW("get bundleName failed, ret: %{public}d, try = %{public}d", ret, retry);
         return RetryPostBroadcast(senderNetworkId, bundleNameId, continueTypeId, state, retry);
-    }
-
-    if (!CheckBundleContinueConfig(bundleName)) {
-        HILOGI("App does not allow continue in config file, bundle name %{public}s", bundleName.c_str());
-        return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
 
     HILOGI("get bundleName, bundleName: %{public}s", bundleName.c_str());
