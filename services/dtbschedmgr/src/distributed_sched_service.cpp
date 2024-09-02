@@ -1135,6 +1135,9 @@ int32_t DistributedSchedService::DealDSchedEventResult(const OHOS::AAFwk::Want& 
 
 bool DistributedSchedService::GetIsFreeInstall(int32_t missionId)
 {
+    if (dschedContinuation_ == nullptr) {
+        return false;
+    }
     return dschedContinuation_->IsFreeInstall(missionId);
 }
 
@@ -3469,6 +3472,13 @@ int32_t DistributedSchedService::NotifyStateChangedFromRemote(int32_t abilitySta
 int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& want,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension)
 {
+    return CheckTargetPermission(want, callerInfo, accountInfo, flag, needQueryExtension, true);
+}
+
+int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& want,
+    const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t flag,
+    bool needQueryExtension, bool isSameBundle)
+{
     DistributedSchedPermission& permissionInstance = DistributedSchedPermission::GetInstance();
     AppExecFwk::AbilityInfo targetAbility;
     bool result = permissionInstance.GetTargetAbility(want, targetAbility, needQueryExtension);
@@ -3494,6 +3504,8 @@ int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& 
     HILOGE("CheckTargetPermission denied!!");
     return DMS_PERMISSION_DENIED;
 }
+
+
 
 int32_t DistributedSchedService::StopRemoteExtensionAbility(const OHOS::AAFwk::Want& want, int32_t callerUid,
     uint32_t accessToken, int32_t extensionType)

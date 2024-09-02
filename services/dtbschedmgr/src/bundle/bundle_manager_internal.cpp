@@ -22,7 +22,6 @@
 #include "mission/dsched_sync_e2e.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
-#include "mock_form_mgr_service.h"
 #include "os_account_manager.h"
 #include "system_ability_definition.h"
 
@@ -185,12 +184,12 @@ bool BundleManagerInternal::IsSameAppId(const std::string& callerAppId, const st
     return callerAppId == calleeAppId;
 }
 
-bool BundleManagerInternal::IsSameDeveloperId(const std::string &callerDeveloperId,
-    const std::string &targetBundleName)
+bool BundleManagerInternal::IsSameDeveloperId(const std::string &bundleNameInCurrentSide,
+    const std::string &developerId4OtherSide)
 {
-    if (targetBundleName.empty() || callerDeveloperId.empty()) {
-        HILOGE("targetBundleName: %{public}s or callerDeveloperId: %{public}s is empty",
-            targetBundleName.c_str(), GetAnonymStr(callerDeveloperId).c_str());
+    if (bundleNameInCurrentSide.empty() || developerId4OtherSide.empty()) {
+        HILOGE("bundleNameInCurrentSide: %{public}s or developerId4OtherSide: %{public}s is empty",
+            bundleNameInCurrentSide.c_str(), developerId4OtherSide.c_str());
         return false;
     }
 
@@ -206,8 +205,8 @@ bool BundleManagerInternal::IsSameDeveloperId(const std::string &callerDeveloper
         HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
         return false;
     }
-    bundleMgr->GetAppProvisionInfo(targetBundleName, ids[0], targetAppProvisionInfo);
-    return callerDeveloperId == targetAppProvisionInfo.developerId;
+    bundleMgr->GetAppProvisionInfo(bundleNameInCurrentSide, ids[0], targetAppProvisionInfo);
+    return developerId4OtherSide == targetAppProvisionInfo.developerId;
 }
 
 int32_t BundleManagerInternal::GetLocalBundleInfo(const std::string& bundleName,
@@ -276,6 +275,22 @@ bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleNa
         return false;
     }
     return true;
+}
+
+bool BundleManagerInternal::GetAppProvisionInfo4CurrentUser(const std::string& bundleName, const AppExecFwk::AppProvisionInfo& appProvisionInfo) {
+    sptr<AppExecFwk::IBundleMgr> bundleMgr = GetBundleManager();
+    if (bundleMgr == nullptr) {
+        HILOGE("get bundle manager failed");
+        return false;
+    }
+    std::vector<int32_t> ids;
+    ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (ret != ERR_OK || ids.empty()) {
+        HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
+        return false;
+    }
+    uint32_t result = bundleMgr->GetAppProvisionInfo(bundleName, ids[0], appProvisionInfo);
+    return result == ERR_OK;
 }
 
 int32_t BundleManagerInternal::CheckRemoteBundleInfoForContinuation(const std::string& dstDeviceId,

@@ -243,7 +243,7 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
     return;
 }
 
-bool DSchedContinueManager::getFirstBundleName(DSchedContinueInfo &info, std::string &firstBundleNamme,
+bool DSchedContinueManager::GetFirstBundleName(DSchedContinueInfo &info, std::string &firstBundleName,
                                                std::string bundleName, std::string deviceId) {
     uint16_t bundleNameId;
     DmsBundleInfo distributedBundleInfo;
@@ -259,12 +259,12 @@ bool DSchedContinueManager::getFirstBundleName(DSchedContinueInfo &info, std::st
         std::vector<std::string> abilityContinueTypes = ability.continueType;
         for (std::string &ability_continue_type: abilityContinueTypes) {
             if (ability_continue_type == info.continueType_ && !ability.continueBundleName.empty()) {
-                firstBundleNamme = *ability.continueBundleName.begin();
+                firstBundleName = *ability.continueBundleName.begin();
                 return true;
             }
         }
     }
-    HILOGE("caon not get abilicy info or continue bundle names is empty for continue type:%{public}s",
+    HILOGE("can not get abilicy info or continue bundle names is empty for continue type:%{public}s",
         info.continueType_.c_str());
     return false;
 }
@@ -272,11 +272,11 @@ bool DSchedContinueManager::getFirstBundleName(DSchedContinueInfo &info, std::st
 void DSchedContinueManager::CompleteBundleName(DSchedContinueInfo &info, int32_t direction, int32_t &subType) {
     if (direction == CONTINUE_SOURCE) {
         cntSource_++;
-        std::string firstBundleNamme;
+        std::string firstBundleName;
         std::string bundleName = info.sourceBundleName_;
         std::string deviceId = info.sourceDeviceId_;
-        if (getFirstBundleName(info, firstBundleNamme, bundleName, deviceId)) {
-            info.sinkBundleName_ = firstBundleNamme;
+        if (GetFirstBundleName(info, firstBundleName, bundleName, deviceId)) {
+            info.sinkBundleName_ = firstBundleName;
         }
     } else {
         cntSink_++;
@@ -285,7 +285,7 @@ void DSchedContinueManager::CompleteBundleName(DSchedContinueInfo &info, int32_t
         std::string sourceBundleName;
         std::vector<currentIconInfo>::iterator recvInfoEndItr = lastRecvList.end();
         while (recvInfoEndItr != lastRecvList.begin()) {
-            if (recvInfoEndItr->sourceDeviceId_ == info.sourceDeviceId_ && recvInfoEndItr->sinkBundleName_ == info.
+            if (recvInfoEndItr->senderNetworkId == info.sourceDeviceId_ && recvInfoEndItr->bundleName == info.
                 sinkBundleName_) {
                 sourceBundleName = recvInfoEndItr->sourceBundleName_;
                 break;
@@ -293,10 +293,11 @@ void DSchedContinueManager::CompleteBundleName(DSchedContinueInfo &info, int32_t
             recvInfoEndItr--;
         }
         if (sourceBundleName.empty()) {
+            HILOGW("current sub type is continue pull; but can not get source bundle name from recv cache.");
             std::string firstBundleNamme;
             std::string bundleName = info.sinkBundleName_;
             std::string deviceId = info.sinkDeviceId_;
-            if (getFirstBundleName(info, firstBundleNamme, bundleName, deviceId)) {
+            if (GetFirstBundleName(info, firstBundleNamme, bundleName, deviceId)) {
                 sourceBundleName = firstBundleNamme;
             }
         }
@@ -450,9 +451,13 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
             return nullptr;
         }
         for (auto iter = continues_.begin(); iter != continues_.end(); iter++) {
-            if (iter->second != nullptr && srcDeviceId == iter->second->GetContinueInfo().sourceDeviceId_
-                && bundleName == iter->second->GetContinueInfo().sourceBundleName_
-                && dstDeviceId == iter->second->GetContinueInfo().sinkDeviceId_) {
+            if(iter->second == nullptr) {
+                continue;
+            }
+            DSchedContinueInfo continueInfo = iter->second->GetContinueInfo();
+            if (srcDeviceId == continueInfo.sourceDeviceId_
+                && bundleName == continueInfo.sourceBundleName_
+                && dstDeviceId == continueInfo.sinkDeviceId_) {
                 return iter->second;
             }
         }

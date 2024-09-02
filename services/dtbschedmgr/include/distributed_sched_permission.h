@@ -47,17 +47,18 @@ public:
         const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility);
     int32_t CheckStartPermission(const AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility);
+    int32_t CheckStartPermission(const AAFwk::Want& want, const CallerInfo& callerInfo,
+        const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility, bool isSameBundle);
     int32_t CheckGetCallerPermission(const AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility);
     bool IsFoundationCall() const;
     bool IsSceneBoardCall() const;
-    int32_t CheckPermission(uint32_t accessToken, const std::string& permissionName) const;Z
+    int32_t CheckPermission(uint32_t accessToken, const std::string& permissionName) const;
     int32_t CheckPermissionAll(uint32_t accessToken, const std::string& permissionName) const;
     int32_t GetAccountInfo(const std::string& remoteNetworkId, const CallerInfo& callerInfo,
         AccountInfo& accountInfo);
     bool GetTargetAbility(const AAFwk::Want& want, AppExecFwk::AbilityInfo& targetAbility,
         bool needQueryExtension = false) const;
-    bool isSameAppIdOrDeveloperId(const CallerInfo &callerInfo, const AppExecFwk::AbilityInfo &targetAbility) const;
     void MarkUriPermission(OHOS::AAFwk::Want& want, uint32_t accessToken);
     void RemoveRemoteObjectFromWant(std::shared_ptr<AAFwk::Want> want) const;
 
@@ -81,6 +82,8 @@ private:
         const CallerInfo& callerInfo, const AAFwk::Want& want) const;
     bool CheckStartControlPermission(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AAFwk::Want& want) const;
+    bool CheckStartControlPermission(const AppExecFwk::AbilityInfo& targetAbility,
+        const CallerInfo& callerInfo, const AAFwk::Want& want, bool isSameBundle) const;
     bool CheckBackgroundPermission(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AAFwk::Want& want, bool needCheckApiVersion) const;
     bool CheckMinApiVersion(const AppExecFwk::AbilityInfo& targetAbility, int32_t apiVersion) const;

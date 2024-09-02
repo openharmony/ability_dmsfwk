@@ -61,8 +61,10 @@ public:
     int32_t command_ = 0;
     std::string srcDeviceId_;
     std::string srcBundleName_;
+    std::string srcDeveloperId_;
     std::string dstDeviceId_;
     std::string dstBundleName_;
+    std::string dstDeveloperId_;
     std::string continueType_;
     int32_t continueByType_ = 0;
     int32_t sourceMissionId_ = 0;

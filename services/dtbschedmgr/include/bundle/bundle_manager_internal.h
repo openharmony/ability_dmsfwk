@@ -43,12 +43,14 @@ public:
     static void InitAbilityInfoFromExtension(const AppExecFwk::ExtensionAbilityInfo &extensionAbilityInfo,
         AppExecFwk::AbilityInfo &abilityInfo);
     static bool IsSameAppId(const std::string& callerAppId, const std::string& targetBundleName);
-    static bool IsSameDeveloperId(const std::string &callerDeveloperId,
-        const std::string &targetBundleName);
+    static bool IsSameDeveloperId(const std::string &bundleNameInCurrentSide,
+        const std::string &developerId4OtherSide);
     static int32_t GetLocalBundleInfo(const std::string& bundleName, AppExecFwk::BundleInfo &localBundleInfo);
     static int32_t GetLocalBundleInfoV9(const std::string& bundleName, AppExecFwk::BundleInfo &bundleInfo);
     static bool GetContinueBundle4Src(const std::string& srcBundleName,
                                   std::vector<std::string>& bundleNameList);
+    static bool BundleManagerInternal::GetAppProvisionInfo4CurrentUser(const std::string& bundleName,
+        const AppExecFwk::AppProvisionInfo& appProvisionInfo);
     static int32_t CheckRemoteBundleInfoForContinuation(const std::string& dstDeviceId,
         const std::string& bundleName, AppExecFwk::DistributedBundleInfo& remoteBundleInfo);
     static sptr<AppExecFwk::IBundleMgr> GetBundleManager();

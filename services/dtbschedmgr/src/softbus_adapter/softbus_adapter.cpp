@@ -173,7 +173,10 @@ int32_t SoftbusAdapter::RegisterSoftbusEventListener(const std::shared_ptr<Softb
         HILOGE("Registering listener failed");
         return SOFTBUS_INVALID_PARAM;
     }
-    softbusAdapterListener_ = listener;
+    {
+        std::lock_guard<std::mutex> lock(softbusAdapterListenerMutex_);
+        softbusAdapterListener_ = listener;
+    }
     EventListener eventListener;
     eventListener.event = FOREGROUND_APP;
     eventListener.freq = EVENT_MID_FREQ;
@@ -195,7 +198,10 @@ int32_t SoftbusAdapter::UnregisterSoftbusEventListener(const std::shared_ptr<Sof
         HILOGE("Unregistering listener failed");
         return SOFTBUS_INVALID_PARAM;
     }
-    softbusAdapterListener_ = listener;
+    {
+        std::lock_guard<std::mutex> lock(softbusAdapterListenerMutex_);
+        softbusAdapterListener_ = listener;
+    }
     EventListener eventListener;
     eventListener.event = FOREGROUND_APP;
     eventListener.freq = EVENT_MID_FREQ;

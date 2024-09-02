@@ -36,8 +36,6 @@ struct CallerInfo {
     std::string sourceDeviceId;
     int32_t duid = -1;
     std::string callerAppId;
-    std::string callerBundleName;
-    std::string callerDeveloperId;
     std::vector<std::string> bundleNames;
     int32_t dmsVersion = -1;
     uint32_t accessToken = 0;

@@ -650,6 +650,14 @@ int32_t DSchedContinue::PackStartCmd(std::shared_ptr<DSchedContinueStartCmd>& cm
         }
         cmd->appVersion_ = static_cast<int32_t>(localBundleInfo.versionCode);
     }
+    AppExecFwk::AppProvisionInfo appProvisionInfo;
+    if (subServiceType_ == CONTINUE_PULL
+        && BundleManagerInternal::GetAppProvisionInfo4CurrentUser(cmd->dstBundleName_, appProvisionInfo)) {
+        cmd->dstDeveloperId_ = appProvisionInfo.developerId;
+    } else if (subServiceType_ == CONTINUE_PUSH
+               && BundleManagerInternal::GetAppProvisionInfo4CurrentUser(cmd->srcBundleName_, appProvisionInfo)) {
+        cmd->srcDeveloperId_ = appProvisionInfo.developerId;
+    }
     cmd->wantParams_ = *wantParams;
     return ERR_OK;
 }
@@ -749,35 +757,6 @@ int32_t DSchedContinue::ExecuteContinueReply()
     return ERR_OK;
 }
 
-bool DSchedContinue::MakeCallerInfo(std::shared_ptr<ContinueAbilityData> data, CallerInfo &callerInfo)
-{
-    callerInfo.sourceDeviceId = continueInfo_.sourceDeviceId_;
-    callerInfo.uid = data->callerUid;
-    callerInfo.accessToken = data->accessToken;
-    callerInfo.callerBundleName = continueInfo_.sinkBundleName_;
-    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
-
-    sptr<AppExecFwk::IBundleMgr> bundleMgr = BundleManagerInternal::GetBundleManager();
-    if (bundleMgr == nullptr) {
-        HILOGE("get bundle manager failed");
-        return false;
-    }
-    AppExecFwk::AppProvisionInfo appProvisionInfo;
-    std::vector<int32_t> ids;
-    ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
-    if (ret != ERR_OK || ids.empty()) {
-        HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
-        return false;
-    }
-    uint32_t result = bundleMgr->GetAppProvisionInfo(continueInfo_.sinkBundleName_, ids[0], appProvisionInfo);
-    if(result != ERR_OK) {
-        HILOGE("get app provision info failed for bundle name:%{public}s", continueInfo_.sinkBundleName_.c_str());
-        return false;
-    }
-    callerInfo.callerDeveloperId = appProvisionInfo.developerId;
-    return true;
-}
-
 int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data)
 {
     HILOGI("ExecuteContinueSend start, continueInfo: %{public}s", continueInfo_.toString().c_str());
@@ -801,9 +780,9 @@ int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData>
 
     AppExecFwk::AbilityInfo abilityInfo;
     CallerInfo callerInfo;
-    if (!MakeCallerInfo(data, callerInfo)) {
-        return INVALID_PARAMETERS_ERR;
-    }
+    callerInfo.sourceDeviceId = continueInfo_.sourceDeviceId_;
+    callerInfo.uid = data->callerUid;
+    callerInfo.accessToken = data->accessToken;
     if (!BundleManagerInternal::GetCallerAppIdFromBms(callerInfo.uid, callerInfo.callerAppId)) {
         HILOGE("GetCallerAppIdFromBms failed");
         return INVALID_PARAMETERS_ERR;
@@ -812,6 +791,7 @@ int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData>
         HILOGE("GetBundleNameListFromBms failed");
         return INVALID_PARAMETERS_ERR;
     }
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
     AccountInfo accountInfo;
     int32_t ret = DistributedSchedPermission::GetInstance().GetAccountInfo(continueInfo_.sinkDeviceId_, callerInfo,
         accountInfo);
@@ -856,7 +836,6 @@ int32_t DSchedContinue::SetWantForContinuation(AAFwk::Want& newWant)
 {
     newWant.SetParam("sessionId", continueInfo_.missionId_);
     newWant.SetParam("deviceId", continueInfo_.sourceDeviceId_);
-    newWant.SetBundle(continueInfo_.sourceBundleName_);
 
     AppExecFwk::BundleInfo localBundleInfo;
     if (BundleManagerInternal::GetLocalBundleInfo(newWant.GetBundle(), localBundleInfo) != ERR_OK) {
@@ -871,7 +850,7 @@ int32_t DSchedContinue::SetWantForContinuation(AAFwk::Want& newWant)
     if (!isPageStackContinue && !moduleName.empty() && moduleName.length() <= MAX_MODULENAME_LEN) {
         HILOGD("set application moduleName = %{public}s!", moduleName.c_str());
         auto element = newWant.GetElement();
-        newWant.SetElementName(element.GetDeviceID(), element.GetBundleName(), element.GetAbilityName(), moduleName);
+        newWant.SetElementName(element.GetDeviceID(), continueInfo_.sinkBundleName_, element.GetAbilityName(), moduleName);
     }
 
     std::string saveDataTime =
@@ -934,10 +913,19 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
         HILOGE("check deviceId failed");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
+    int32_t ret;
+    bool permissionCheckResult;
+    if(cmd->srcBundleName_ == cmd->dstBundleName_) {
+        ret = DistributedSchedService::GetInstance().CheckTargetPermission(cmd->want_, cmd->callerInfo_,
+            cmd->accountInfo_, START_PERMISSION, true);
+        permissionCheckResult = ret == ERR_OK;
+    }else {
+        ret = DistributedSchedService::GetInstance().CheckTargetPermission(cmd->want_, cmd->callerInfo_,
+            cmd->accountInfo_, START_PERMISSION, true, false);
+        permissionCheckResult = ret == ERR_OK && BundleManagerInternal::IsSameDeveloperId(cmd->srcBundleName_, cmd->dstDeveloperId_);
+    }
 
-    int32_t ret = DistributedSchedService::GetInstance().CheckTargetPermission(cmd->want_, cmd->callerInfo_,
-        cmd->accountInfo_, START_PERMISSION, true);
-    if (ret != ERR_OK) {
+    if (!permissionCheckResult) {
         HILOGE("ExecuteContinueData CheckTargetPermission failed!");
         return ret;
     }

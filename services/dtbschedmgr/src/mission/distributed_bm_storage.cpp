@@ -23,7 +23,6 @@
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
-#include "mock_form_mgr_service.h"
 #include "mission/distributed_sched_mission_manager.h"
 #include "mission/dsched_sync_e2e.h"
 
@@ -114,7 +113,7 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
     uint32_t result = AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
     if(result == ERR_OK && !accounts.empty()) {
         for(auto &account: accounts) {
-            result = bundleMgr->GetAppprovisionInfo(bundleName, account.GetLocalId(), appProvisionInfo);
+            result = bundleMgr->GetAppProvisionInfo(bundleName, account.GetLocalId(), appProvisionInfo);
             if(result == ERR_OK && !appProvisionInfo.developerId.empty()) {
                 break;
             }
@@ -771,7 +770,7 @@ void DmsBmStorage::UpdateDistributedData()
 
     AppExecFwk::AppProvisionInfo appProvisionInfo;
     std::vector<AccountSA::OsAccountInfo> accounts;
-    uint32_t result = AccountSA::OsAccountManager::QoeryAllCreatedOsAccounts(accounts);
+    uint32_t result = AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
 
     std::vector<DmsBundleInfo> dmsBundleInfos;
     for (const auto &bundleInfo : bundleInfos) {

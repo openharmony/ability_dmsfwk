@@ -40,20 +40,18 @@ struct currentIconInfo {
     std::string bundleName;
     std::string continueType;
 
-    std::string sourceDeviceId_;
     std::string sourceBundleName_;
-    std::string sinkBundleName_;
 
     bool isEmpty()
     {
         return (this->senderNetworkId == "" && this->bundleName == "" && this->continueType == "");
     }
 
-    currentIconInfo(std::string source_device_id, std::string source_bundle_name,
-                    std::string sink_bundle_name)
-        : sourceDeviceId_(std::move(source_device_id)),
-          sourceBundleName_(std::move(source_bundle_name)),
-          sinkBundleName_(std::move(sink_bundle_name)) {
+    currentIconInfo(const std::string& source_device_id, const std::string& source_bundle_name,
+                    const std::string& sink_bundle_name)
+        : senderNetworkId(source_device_id),
+          sourceBundleName_(source_bundle_name),
+          bundleName(sink_bundle_name) {
     }
 
     currentIconInfo() = default;
@@ -95,19 +93,21 @@ private:
     int32_t RetryPostBroadcast(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t retry);
 
-    bool GetFinalBundleName(const std::string &senderNetworkId, uint8_t continueTypeId,
-                            DmsBundleInfo distributedBundleInfo,  std::string &finalBundleName,
-                            AppExecFwk::BundleInfo localBundleInfo, std::string& continueType);
+    bool GetFinalBundleName(const std::string &senderNetworkId, uint8_t& continueTypeId,
+                            DmsBundleInfo& distributedBundleInfo,  std::string &finalBundleName,
+                            AppExecFwk::BundleInfo& localBundleInfo, std::string& continueType);
     int32_t VerifyBroadcastSource(const std::string& senderNetworkId, const std::string& bundleName,
                                   const std::string& continueType, const int32_t state);
     void PostOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t delay = 0, const int32_t retry = 0);
+    void FindContinueType(const DmsBundleInfo &distributedBundleInfo, uint8_t &continueTypeId,
+                          std::string &continueType);
     int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
-        const int32_t state, const int32_t retry = 0);
+                                    const int32_t state, const int32_t retry = 0);
     void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const std::string& networkId,
         const std::string& bundleName, const int32_t state, const std::string& continueType = "");
-    bool continueTypeCheck(const DmsBundleInfo &distributedBundleInfo, const std::string &continueType);
-    void pushLatRecvCache(currentIconInfo &lastRecvInfo);
+    bool ContinueTypeCheck(const AppExecFwk::BundleInfo& bundleInfo, const std::string& continueType);
+    void PushLatRecvCache(currentIconInfo &lastRecvInfo);
 private:
     currentIconInfo iconInfo_;
     sptr<DistributedMissionDiedListener> missionDiedListener_;

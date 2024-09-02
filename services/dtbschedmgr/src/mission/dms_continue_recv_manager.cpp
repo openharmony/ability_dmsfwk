@@ -253,60 +253,66 @@ int32_t DMSContinueRecvMgr::RetryPostBroadcast(const std::string& senderNetworkI
     return ERR_OK;
 }
 
-
-bool DMSContinueRecvMgr::GetFinalBundleName(const std::string &senderNetworkId, uint8_t continueTypeId,
-                                            DmsBundleInfo distributedBundleInfo,
-                                            std::string &finalBundleName, AppExecFwk::BundleInfo localBundleInfo,
-                                            std::string &continueType)
+bool DMSContinueRecvMgr::GetFinalBundleName(const std::string& senderNetworkId, uint8_t& continueTypeId,
+    DmsBundleInfo& distributedBundleInfo, std::string& finalBundleName,
+    AppExecFwk::BundleInfo& localBundleInfo, std::string& continueType)
 {
     std::string bundleName = distributedBundleInfo.bundleName;
-    continueType = BundleManagerInternal::GetContinueType(senderNetworkId, bundleName, continueTypeId);
-    if (continueType.empty()) {
-        if (BundleManagerInternal::GetLocalBundleInfoV9(bundleName, localBundleInfo) == ERR_OK) {
-            finalBundleName = bundleName;
-            return true;
-        }
-        HILOGE("continue type is empty and can not get local bundle info for bundle name: %{public}s", bundleName.c_str());
-        return false;
-    }
-
-    bool continueTypeGot = continueTypeCheck(distributedBundleInfo, continueType);
-    if (continueTypeGot && BundleManagerInternal::GetLocalBundleInfoV9(bundleName, localBundleInfo) == ERR_OK) {
+    if (BundleManagerInternal::GetLocalBundleInfoV9(bundleName, localBundleInfo) == ERR_OK
+        && ContinueTypeCheck(localBundleInfo, continueType)) {
         finalBundleName = bundleName;
         return true;
     }
     std::vector<std::string> bundleNameList;
     bool continueBundleGot = BundleManagerInternal::GetContinueBundle4Src(bundleName, bundleNameList);
     if (continueBundleGot) {
-        sptr<AppExecFwk::IBundleMgr> bundleMgr = BundleManagerInternal::GetBundleManager();
-        if (bundleMgr == nullptr) {
-            HILOGE("get bundle manager failed");
-            return false;
-        }
-        std::vector<int32_t> ids;
-        ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
-        if (ret != ERR_OK || ids.empty()) {
-            HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
-            return false;
-        }
-        for (std::string &bundleNameItem: bundleNameList) {
-            continueType = BundleManagerInternal::GetContinueType(
-                senderNetworkId, bundleNameItem, continueTypeId);
-            if (continueType.empty() || !continueTypeCheck(distributedBundleInfo, continueType)
-                || BundleManagerInternal::GetLocalBundleInfoV9(bundleNameItem, localBundleInfo) != ERR_OK) {
-                continue;
-            }
-            AppExecFwk::AppProvisionInfo appProvisionInfo;
-            if (bundleMgr->GetAppProvisionInfo(bundleNameItem, ids[0], appProvisionInfo) == ERR_OK
-                && appProvisionInfo.developerId == distributedBundleInfo.developerId) {
-                finalBundleName = bundleNameItem;
-                return true;
-            }
+        HILOGE("can not get local bundle info or continue bundle for bundle name: %{public}s", bundleName.c_str());
+        return false;
+    }
+
+    for (std::string &bundleNameItem: bundleNameList) {
+        AppExecFwk::AppProvisionInfo appProvisionInfo;
+        if (BundleManagerInternal::GetAppProvisionInfo4CurrentUser(bundleNameItem, appProvisionInfo)
+            && appProvisionInfo.developerId == distributedBundleInfo.developerId
+            && BundleManagerInternal::GetLocalBundleInfoV9(bundleName, localBundleInfo) == ERR_OK
+            && ContinueTypeCheck(localBundleInfo, continueType)) {
+            finalBundleName = bundleNameItem;
+            return true;
         }
     }
     HILOGE("continue type is not empty and can not get local bundle info and continue nundle for "
            "bundle name: %{public}s", bundleName.c_str());
     return false;
+}
+
+bool DMSContinueRecvMgr::ContinueTypeCheck(const AppExecFwk::BundleInfo& bundleInfo, const std::string& continueType) {
+    for (const auto &abilityInfo: bundleInfo.abilityInfos) {
+        DmsAbilityInfo dmsAbilityInfo;
+        dmsAbilityInfo.abilityName = abilityInfo.name;
+        for (const auto &continueTypeItem: abilityInfo.continueType) {
+            if(continueTypeItem == continueType) {
+                return true;
+            }
+        }
+    }
+    HILOGE("can not mate continue type: %{public}s in buninfo for bundleName: %{public}s", continueType.c_str(), bundleInfo.name.c_str());
+    return false;
+}
+
+void DMSContinueRecvMgr::FindContinueType(const DmsBundleInfo& distributedBundleInfo,
+    uint8_t& continueTypeId, std::string& continueType)
+{
+    uint32_t pos = 0;
+    for (auto dmsAbilityInfo : distributedBundleInfo.dmsAbilityInfos) {
+        for (auto continueTypeElement : dmsAbilityInfo.continueType) {
+            if (pos == continueTypeId) {
+                continueType = continueTypeElement;
+                return;
+            }
+            ++pos;
+        }
+    }
+    continueType = "";
 }
 
 int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNetworkId,
@@ -331,6 +337,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     std::string finalBundleName;
     AppExecFwk::BundleInfo localBundleInfo;
     std::string continueType;
+    FindContinueType(distributedBundleInfo, continueTypeId, continueType);
     if (!GetFinalBundleName(senderNetworkId, continueTypeId,
         distributedBundleInfo, finalBundleName, localBundleInfo, continueType)) {
         HILOGE("The app is not installed on the local device.");
@@ -338,14 +345,14 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     }
     HILOGI("got finalBundleName: %{public}s", finalBundleName.c_str());
     currentIconInfo lastRecvInfo = currentIconInfo(senderNetworkId, bundleName, finalBundleName);
-    pushLatRecvCache(lastRecvInfo);
+    PushLatRecvCache(lastRecvInfo);
 
     if (localBundleInfo.applicationInfo.bundleType != AppExecFwk::BundleType::APP) {
         HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
         return INVALID_PARAMETERS_ERR;
     }
 
-    uint32_t ret = VerifyBroadcastSource(senderNetworkId, finalBundleName, continueType, state);
+    int32_t ret = VerifyBroadcastSource(senderNetworkId, finalBundleName, continueType, state);
     if (ret != ERR_OK) {
         return ret;
     }
@@ -355,7 +362,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         HILOGE("get iterItem failed from registerOnListener_, bundleNameId: %{public}u", bundleNameId);
         return INVALID_PARAMETERS_ERR;
     }
-    std::vector<sptr<IRemoteObject> > objs = iterItem->second;
+    std::vector<sptr<IRemoteObject>> objs = iterItem->second;
     for (auto iter: objs) {
         NotifyRecvBroadcast(iter, senderNetworkId, finalBundleName, state, continueType);
     }
@@ -363,21 +370,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     return ERR_OK;
 }
 
-bool DMSContinueRecvMgr::continueTypeCheck(const DmsBundleInfo &distributedBundleInfo,
-                                           const std::string &continueType)
-{
-    std::vector<DmsAbilityInfo> dmsAbilityInfos = distributedBundleInfo.dmsAbilityInfos;
-    bool continueTypeGot = false;
-    for (const auto &abilityInfo: dmsAbilityInfos) {
-        std::vector<std::string> continueTypeConfig = abilityInfo.continueType;
-        for (const auto &continueTypeConfigItem: continueTypeConfig) {
-            continueTypeGot = continueTypeGot || (continueType == continueTypeConfigItem);
-        }
-    }
-    return continueTypeGot;
-}
-
-void DMSContinueRecvMgr::pushLatRecvCache(currentIconInfo &lastRecvInfo)
+void DMSContinueRecvMgr::PushLatRecvCache(currentIconInfo &lastRecvInfo)
 {
     if (lastRecvList_.size() >= LAST_RECV_INFO_QUEUE_SIZE) {
         lastRecvList_.erase(lastRecvList_.begin());
