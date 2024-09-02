@@ -48,6 +48,7 @@ private:
     std::thread eventThread_;
     std::condition_variable eventCon_;
     std::mutex eventMutex_;
+    std::mutex softbusAdapterListenerMutex_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_ = nullptr;
 };
 } // namespace DistributedSchedule

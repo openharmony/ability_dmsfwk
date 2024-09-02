@@ -19,6 +19,7 @@
 #include <map>
 #include <set>
 #include <vector>
+
 #include "base_interfaces.h"
 #include "parcel.h"
 #include "refbase.h"
@@ -57,9 +58,6 @@ public:
 
     static bool CompareInterface(const sptr<AAFwk::IInterface> iIt1, const sptr<AAFwk::IInterface> iIt2, int typeId);
 
-    static bool CompareNumberInterface(const sptr<AAFwk::IInterface> iIt1,
-        const sptr<AAFwk::IInterface> iIt2, int typeId);
-
     static int GetDataType(const sptr<AAFwk::IInterface> iIt);
 
     static int GetNumberDataType(const sptr<AAFwk::IInterface> iIt);
@@ -89,39 +87,29 @@ public:
     AAFwk::WantParams ToWantParams();
 
 private:
-    enum {
-        VALUE_TYPE_NULL = -1,
-        VALUE_TYPE_BOOLEAN = 1,
-        VALUE_TYPE_BYTE = 2,
-        VALUE_TYPE_CHAR = 3,
-        VALUE_TYPE_SHORT = 4,
-        VALUE_TYPE_INT = 5,
-        VALUE_TYPE_LONG = 6,
-        VALUE_TYPE_FLOAT = 7,
-        VALUE_TYPE_DOUBLE = 8,
-        VALUE_TYPE_STRING = 9,
-        VALUE_TYPE_CHARSEQUENCE = 10,
-        VALUE_TYPE_BOOLEANARRAY = 11,
-        VALUE_TYPE_BYTEARRAY = 12,
-        VALUE_TYPE_CHARARRAY = 13,
-        VALUE_TYPE_SHORTARRAY = 14,
-        VALUE_TYPE_INTARRAY = 15,
-        VALUE_TYPE_LONGARRAY = 16,
-        VALUE_TYPE_FLOATARRAY = 17,
-        VALUE_TYPE_DOUBLEARRAY = 18,
-        VALUE_TYPE_STRINGARRAY = 19,
-        VALUE_TYPE_CHARSEQUENCEARRAY = 20,
+    static std::string BooleanQueryToStr(const sptr<AAFwk::IInterface> iIt);
+    static std::string ByteQueryToStr(const sptr<AAFwk::IInterface> iIt);
+    static std::string CharQueryToStr(const sptr<AAFwk::IInterface> iIt);
+    static std::string ShortQueryToStr(const sptr<AAFwk::IInterface> iIt);
+    static std::string IntegerQueryToStr(const sptr<AAFwk::IInterface> iIt);
+    static std::string LongQueryToStr(const sptr<AAFwk::IInterface> iIt);
+    static std::string FloatQueryToStr(const sptr<AAFwk::IInterface> iIt);
+    static std::string DoubleQueryToStr(const sptr<AAFwk::IInterface> iIt);
+    static std::string StringQueryToStr(const sptr<AAFwk::IInterface> iIt);
+    static std::string ArrayQueryToStr(const sptr<AAFwk::IInterface> iIt);
+    static std::string DistributedWantParamsQueryToStr(const sptr<AAFwk::IInterface> iIt);
 
-        VALUE_TYPE_PARCELABLE = 21,
-        VALUE_TYPE_PARCELABLEARRAY = 22,
-        VALUE_TYPE_SERIALIZABLE = 23,
-        VALUE_TYPE_LIST = 50,
-
-        VALUE_TYPE_WANTPARAMS = 101,
-        VALUE_TYPE_ARRAY = 102,
-        VALUE_TYPE_FD = 103,
-        VALUE_TYPE_REMOTE_OBJECT = 104
-    };
+    static bool BooleanQueryEquals(const sptr<AAFwk::IInterface> iIt);
+    static bool ByteQueryEquals(const sptr<AAFwk::IInterface> iIt);
+    static bool CharQueryEquals(const sptr<AAFwk::IInterface> iIt);
+    static bool StringQueryEquals(const sptr<AAFwk::IInterface> iIt);
+    static bool ArrayQueryEquals(const sptr<AAFwk::IInterface> iIt);
+    static bool DistributedWantParamsQueryEquals(const sptr<AAFwk::IInterface> iIt);
+    static bool ShortQueryEquals(const sptr<AAFwk::IInterface> iIt);
+    static bool IntegerQueryEquals(const sptr<AAFwk::IInterface> iIt);
+    static bool LongQueryEquals(const sptr<AAFwk::IInterface> iIt);
+    static bool FloatQueryEquals(const sptr<AAFwk::IInterface> iIt);
+    static bool DoubleQueryEquals(const sptr<AAFwk::IInterface> iIt);
 
     bool WriteArrayToParcel(Parcel& parcel, AAFwk::IArray* ao) const;
     bool ReadArrayToParcel(Parcel& parcel, int type, sptr<AAFwk::IArray>& ao);
@@ -178,11 +166,52 @@ private:
     bool DoMarshalling(Parcel& parcel) const;
     bool ReadUnsupportedData(Parcel& parcel, const std::string& key, int type);
 
-    friend class DistributedWantParamWrapper;
-    friend class DistributedWant;
-    // inner use function
     bool NewArrayData(AAFwk::IArray* source, sptr<AAFwk::IArray>& dest);
     bool NewParams(const DistributedWantParams& source, DistributedWantParams& dest);
+
+private:
+    enum {
+        VALUE_TYPE_NULL = -1,
+        VALUE_TYPE_BOOLEAN = 1,
+        VALUE_TYPE_BYTE = 2,
+        VALUE_TYPE_CHAR = 3,
+        VALUE_TYPE_SHORT = 4,
+        VALUE_TYPE_INT = 5,
+        VALUE_TYPE_LONG = 6,
+        VALUE_TYPE_FLOAT = 7,
+        VALUE_TYPE_DOUBLE = 8,
+        VALUE_TYPE_STRING = 9,
+        VALUE_TYPE_CHARSEQUENCE = 10,
+        VALUE_TYPE_BOOLEANARRAY = 11,
+        VALUE_TYPE_BYTEARRAY = 12,
+        VALUE_TYPE_CHARARRAY = 13,
+        VALUE_TYPE_SHORTARRAY = 14,
+        VALUE_TYPE_INTARRAY = 15,
+        VALUE_TYPE_LONGARRAY = 16,
+        VALUE_TYPE_FLOATARRAY = 17,
+        VALUE_TYPE_DOUBLEARRAY = 18,
+        VALUE_TYPE_STRINGARRAY = 19,
+        VALUE_TYPE_CHARSEQUENCEARRAY = 20,
+
+        VALUE_TYPE_PARCELABLE = 21,
+        VALUE_TYPE_PARCELABLEARRAY = 22,
+        VALUE_TYPE_SERIALIZABLE = 23,
+        VALUE_TYPE_LIST = 50,
+
+        VALUE_TYPE_WANTPARAMS = 101,
+        VALUE_TYPE_ARRAY = 102,
+        VALUE_TYPE_FD = 103,
+        VALUE_TYPE_REMOTE_OBJECT = 104
+    };
+
+    friend class DistributedWantParamWrapper;
+    friend class DistributedWant;
+    using InterfaceQueryToStrFunc = std::string (*)(const sptr<AAFwk::IInterface> iIt);
+    using InterfaceQueryEqualsFunc = bool (*)(const sptr<AAFwk::IInterface> iIt);
+    static std::map<int, InterfaceQueryToStrFunc> interfaceQueryToStrMap;
+    static std::map<int, InterfaceQueryEqualsFunc> interfaceQueryEqualsMap;
+
+    // inner use function
     std::map<std::string, sptr<AAFwk::IInterface>> params_;
     std::map<std::string, int> fds_;
     std::vector<DistributedUnsupportedData> cachedUnsupportedData_;
