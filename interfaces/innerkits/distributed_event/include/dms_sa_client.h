@@ -45,10 +45,11 @@ public:
 private:
     DmsSaClient() {};
     ~DmsSaClient() {};
-    bool hasSubscribeDmsSA_ = false;
+    std::atomic<bool> hasSubscribeDmsSA_ = false;
     OHOS::sptr<ISystemAbilityManager> saMgrProxy_;
     std::map<DSchedEventType, sptr<IDSchedEventListener>> listeners_;
     std::mutex eventMutex_;
+    std::mutex saMgrMutex_;
 };
 
 class DmsSystemAbilityStatusChange : public SystemAbilityStatusChangeStub {
