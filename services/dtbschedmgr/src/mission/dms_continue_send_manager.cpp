@@ -53,6 +53,10 @@ IMPLEMENT_SINGLE_INSTANCE(DMSContinueSendMgr);
 void DMSContinueSendMgr::Init()
 {
     HILOGI("Init start");
+    if (eventHandler_ != nullptr) {
+        HILOGI("Already inited, end.");
+        return;
+    }
     {
         MMIAdapter::GetInstance().Init();
         SoftbusAdapter::GetInstance().Init();

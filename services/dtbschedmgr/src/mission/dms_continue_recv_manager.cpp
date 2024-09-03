@@ -52,6 +52,10 @@ IMPLEMENT_SINGLE_INSTANCE(DMSContinueRecvMgr);
 void DMSContinueRecvMgr::Init()
 {
     HILOGI("Init start");
+    if (eventHandler_ != nullptr) {
+        HILOGI("Already inited, end.");
+        return;
+    }
     {
         std::shared_ptr<SoftbusAdapterListener> missionBroadcastListener =
             std::make_shared<DistributedMissionBroadcastListener>();
