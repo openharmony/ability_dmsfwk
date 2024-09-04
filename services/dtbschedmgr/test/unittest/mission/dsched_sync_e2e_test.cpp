@@ -194,5 +194,42 @@ HWTEST_F(DmsKvSyncE2ETest, IsSynchronizedTest_001, TestSize.Level1)
     }
     DTEST_LOG << "DmsKvSyncE2ETest IsSynchronizedTest_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: CheckCtrlRuleTest_001
+ * @tc.desc: test insert DmsKvSyncE2E
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsKvSyncE2ETest, CheckCtrlRuleTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DmsKvSyncE2ETest CheckCtrlRuleTest_001 start" << std::endl;
+    ASSERT_NE(dmsKvSyncE2E_, nullptr);
+    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
+    EXPECT_NE(dmsKvSyncE2E, nullptr);
+    if (dmsKvSyncE2E != nullptr) {
+        dmsKvSyncE2E_->GetInstance()->CheckCtrlRule();
+    }
+    DTEST_LOG << "DmsKvSyncE2ETest CheckCtrlRuleTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CheckBundleContinueConfigTest_001
+ * @tc.desc: test insert DmsKvSyncE2E
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsKvSyncE2ETest, CheckBundleContinueConfigTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DmsKvSyncE2ETest CheckBundleContinueConfigTest_001 start" << std::endl;
+    ASSERT_NE(dmsKvSyncE2E_, nullptr);
+    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
+    EXPECT_NE(dmsKvSyncE2E, nullptr);
+    if (dmsKvSyncE2E != nullptr) {
+        const std::string bundleName = "123";
+        bool ret = dmsKvSyncE2E_->GetInstance()->CheckBundleContinueConfig(bundleName);
+        EXPECT_EQ(ret, true);
+    }
+    DTEST_LOG << "DmsKvSyncE2ETest CheckBundleContinueConfigTest_001 end" << std::endl;
+}
+
 } // namespace DistributedSchedule
 } // namespace OHOS

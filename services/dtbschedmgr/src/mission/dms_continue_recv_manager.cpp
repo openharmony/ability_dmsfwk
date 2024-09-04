@@ -26,6 +26,7 @@
 #include "distributed_sched_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "mission/dsched_sync_e2e.h"
 #include "mission/wifi_state_adapter.h"
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
@@ -90,6 +91,10 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
 {
     HILOGI("NotifyDataRecv start, senderNetworkId: %{public}s, dataLen: %{public}u.",
         GetAnonymStr(senderNetworkId).c_str(), dataLen);
+    if (!DmsKvSyncE2E::GetInstance()->CheckCtrlRule()) {
+        HILOGE("Forbid sending and receiving");
+        return;
+    }
     bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
     if (!IsContinueSwitchOn) {
         HILOGE("ContinueSwitch status is off");
