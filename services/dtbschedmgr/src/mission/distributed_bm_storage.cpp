@@ -747,7 +747,8 @@ int32_t DmsBmStorage::CloudSync()
 
 void DmsBmStorage::FindProvishionInfo(OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> bundleMgr,
     AppExecFwk::AppProvisionInfo appProvisionInfo, std::vector<AccountSA::OsAccountInfo> accounts,
-    uint32_t result, const std::string& bundleName) {
+    uint32_t result, const std::string& bundleName)
+{
     if (result == ERR_OK && !accounts.empty()) {
         for (auto &account: accounts) {
             result = bundleMgr->GetAppProvisionInfo(bundleName, account.GetLocalId(), appProvisionInfo);

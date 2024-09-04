@@ -20,7 +20,6 @@
 #include <map>
 #include <mutex>
 #include <shared_mutex>
-#include <bits/stl_vector.h>
 
 #include "bundle_info.h"
 #include "bundle_mgr_interface.h"
