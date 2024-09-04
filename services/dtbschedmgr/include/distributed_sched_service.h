@@ -208,7 +208,9 @@ public:
     int32_t StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& remoteWant, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t extensionType) override;
     int32_t CheckTargetPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
-        const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension, bool isSameBundle = true);
+        const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
+    int32_t CheckTargetPermission4DiffBundle(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
+        const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
     ErrCode QueryOsAccount(int32_t& activeAccountId);
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER

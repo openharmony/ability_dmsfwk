@@ -40,7 +40,7 @@ struct currentIconInfo {
     std::string bundleName;
     std::string continueType;
 
-    std::string sourceBundleName_;
+    std::string sourceBundleName;
 
     bool isEmpty()
     {
@@ -48,10 +48,10 @@ struct currentIconInfo {
     }
 
     currentIconInfo(const std::string &source_device_id, const std::string &source_bundle_name,
-                    const std::string &sink_bundle_name)
+        const std::string &sink_bundle_name)
         : senderNetworkId(source_device_id),
           bundleName(sink_bundle_name),
-          sourceBundleName_(source_bundle_name) {
+          sourceBundleName(source_bundle_name) {
     }
 
     currentIconInfo() = default;
@@ -92,16 +92,14 @@ private:
     void StartEvent();
     int32_t RetryPostBroadcast(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t retry);
-
-    bool GetFinalBundleName(const std::string &senderNetworkId, uint8_t& continueTypeId,
-                            DmsBundleInfo& distributedBundleInfo,  std::string &finalBundleName,
-                            AppExecFwk::BundleInfo& localBundleInfo, std::string& continueType);
+    bool GetFinalBundleName(DmsBundleInfo& distributedBundleInfo,  std::string &finalBundleName,
+        AppExecFwk::BundleInfo& localBundleInfo, std::string& continueType);
     int32_t VerifyBroadcastSource(const std::string& senderNetworkId, const std::string& bundleName,
         const std::string& continueType, const int32_t state);
     void PostOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t delay = 0, const int32_t retry = 0);
     void FindContinueType(const DmsBundleInfo &distributedBundleInfo, uint8_t &continueTypeId,
-                          std::string &continueType);
+        std::string &continueType);
     int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t retry = 0);
     void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const std::string& networkId,

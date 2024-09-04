@@ -244,13 +244,13 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
 }
 
 bool DSchedContinueManager::GetFirstBundleName(DSchedContinueInfo &info, std::string &firstBundleName,
-                                               std::string bundleName, std::string deviceId)
+    std::string bundleName, std::string deviceId)
 {
     uint16_t bundleNameId;
     DmsBundleInfo distributedBundleInfo;
     DmsBmStorage::GetInstance()->GetBundleNameId(bundleName, bundleNameId);
     bool result = DmsBmStorage::GetInstance()->GetDistributedBundleInfo(deviceId,
-                                                                        bundleNameId, distributedBundleInfo);
+        bundleNameId, distributedBundleInfo);
     if (!result) {
         HILOGE("GetDistributedBundleInfo faild");
         return false;
@@ -289,7 +289,7 @@ void DSchedContinueManager::CompleteBundleName(DSchedContinueInfo &info, int32_t
         while (recvInfoEndItr != lastRecvList.begin()) {
             if (recvInfoEndItr->senderNetworkId == info.sourceDeviceId_ && recvInfoEndItr->bundleName == info.
                 sinkBundleName_) {
-                sourceBundleName = recvInfoEndItr->sourceBundleName_;
+                sourceBundleName = recvInfoEndItr->sourceBundleName;
                 break;
             }
             recvInfoEndItr--;
@@ -308,8 +308,7 @@ void DSchedContinueManager::CompleteBundleName(DSchedContinueInfo &info, int32_t
 }
 
 void DSchedContinueManager::HandleContinueMissionWithBundleName(DSchedContinueInfo &info,
-                                                                const sptr<IRemoteObject> &callback,
-                                                                const OHOS::AAFwk::WantParams &wantParams)
+    const sptr<IRemoteObject> &callback, const OHOS::AAFwk::WantParams &wantParams)
 {
     int32_t direction = CONTINUE_SINK;
     int32_t ret = CheckContinuationLimit(info.sourceDeviceId_, info.sinkDeviceId_, direction);

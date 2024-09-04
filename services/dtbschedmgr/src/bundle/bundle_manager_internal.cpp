@@ -185,7 +185,7 @@ bool BundleManagerInternal::IsSameAppId(const std::string& callerAppId, const st
 }
 
 bool BundleManagerInternal::IsSameDeveloperId(const std::string &bundleNameInCurrentSide,
-                                              const std::string &developerId4OtherSide)
+    const std::string &developerId4OtherSide)
 {
     if (bundleNameInCurrentSide.empty() || developerId4OtherSide.empty()) {
         HILOGE("bundleNameInCurrentSide: %{public}s or developerId4OtherSide: %{public}s is empty",
@@ -255,7 +255,7 @@ int32_t BundleManagerInternal::GetLocalBundleInfoV9(const std::string& bundleNam
 }
 
 bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleName,
-                                                  std::vector<std::string> &bundleNameList)
+    std::vector<std::string> &bundleNameList)
 {
     auto bundleMgr = GetBundleManager();
     if (bundleMgr == nullptr) {
@@ -279,7 +279,7 @@ bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleNa
 }
 
 bool BundleManagerInternal::GetAppProvisionInfo4CurrentUser(const std::string &bundleName,
-                                                            AppExecFwk::AppProvisionInfo &appProvisionInfo)
+    AppExecFwk::AppProvisionInfo &appProvisionInfo)
 {
     sptr<AppExecFwk::IBundleMgr> bundleMgr = GetBundleManager();
     if (bundleMgr == nullptr) {

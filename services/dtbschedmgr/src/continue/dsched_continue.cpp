@@ -887,8 +887,6 @@ int32_t DSchedContinue::PackDataCmd(std::shared_ptr<DSchedContinueDataCmd>& cmd,
     cmd->requestCode_ = DEFAULT_REQUEST_CODE;
 
     AppExecFwk::AppProvisionInfo appProvisionInfo;
-    BundleManagerInternal::GetAppProvisionInfo4CurrentUser(cmd->dstBundleName_, appProvisionInfo);
-    cmd->dstDeveloperId_ = appProvisionInfo.developerId;
     BundleManagerInternal::GetAppProvisionInfo4CurrentUser(cmd->srcBundleName_, appProvisionInfo);
     cmd->srcDeveloperId_ = appProvisionInfo.developerId;
     return ERR_OK;
@@ -897,13 +895,13 @@ int32_t DSchedContinue::PackDataCmd(std::shared_ptr<DSchedContinueDataCmd>& cmd,
 int32_t DSchedContinue::CheckStartPermission(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
     if (cmd->srcBundleName_ == cmd->dstBundleName_) {
-        return DistributedSchedService::GetInstance().CheckTargetPermission(cmd->want_, cmd->callerInfo_,
+        return DistributedSchedService::GetInstance().CheckTargetPermission4DiffBundle(cmd->want_, cmd->callerInfo_,
             cmd->accountInfo_, START_PERMISSION, true);
     } else {
         if (!BundleManagerInternal::IsSameDeveloperId(cmd->dstBundleName_, cmd->srcDeveloperId_)) {
             return INVALID_PARAMETERS_ERR;
         }
-        return DistributedSchedService::GetInstance().CheckTargetPermission(cmd->want_, cmd->callerInfo_,
+        return DistributedSchedService::GetInstance().CheckTargetPermission4DiffBundle(cmd->want_, cmd->callerInfo_,
             cmd->accountInfo_, START_PERMISSION, true, false);
     }
 }

@@ -403,7 +403,7 @@ bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, const 
 }
 
 bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
-                                            const uint16_t &bundleNameId, DmsBundleInfo &distributeBundleInfo)
+    const uint16_t &bundleNameId, DmsBundleInfo &distributeBundleInfo)
 {
     HILOGI("networkId: %{public}s  bundleNameId: %{public}d", GetAnonymStr(networkId).c_str(), bundleNameId);
     if (!CheckKvStore()) {
@@ -672,8 +672,7 @@ bool DmsBmStorage::RebuildLocalData()
 }
 
 DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo,
-                                                           AppExecFwk::AppProvisionInfo appProvisionInfo,
-                                                           bool isPackageChange)
+    AppExecFwk::AppProvisionInfo appProvisionInfo, bool isPackageChange)
 {
     DmsBundleInfo distributedBundleInfo;
     if (bundleInfo.name == "") {

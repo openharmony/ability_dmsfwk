@@ -3461,7 +3461,7 @@ int32_t DistributedSchedService::NotifyStateChangedFromRemote(int32_t abilitySta
 
 int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& want,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t flag,
-    bool needQueryExtension, bool isSameBundle)
+    bool needQueryExtension)
 {
     DistributedSchedPermission& permissionInstance = DistributedSchedPermission::GetInstance();
     AppExecFwk::AbilityInfo targetAbility;
@@ -3477,7 +3477,37 @@ int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& 
         GetAnonymStr(std::to_string(callerInfo.accessToken)).c_str());
     if (flag == START_PERMISSION) {
         HILOGD("start CheckStartPermission");
-        return permissionInstance.CheckStartPermission(want, callerInfo, accountInfo, targetAbility, isSameBundle);
+        return permissionInstance.CheckStartPermission(want, callerInfo, accountInfo, targetAbility, true);
+    } else if (flag == CALL_PERMISSION) {
+        HILOGD("Collaboration start check get caller permission");
+        return permissionInstance.CheckGetCallerPermission(want, callerInfo, accountInfo, targetAbility);
+    } else if (flag == SEND_RESULT_PERMISSION) {
+        HILOGD("Collaboration start check send result permission");
+        return permissionInstance.CheckSendResultPermission(want, callerInfo, accountInfo, targetAbility);
+    }
+    HILOGE("CheckTargetPermission denied!!");
+    return DMS_PERMISSION_DENIED;
+}
+
+int32_t DistributedSchedService::CheckTargetPermission4DiffBundle(const OHOS::AAFwk::Want& want,
+    const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t flag,
+    bool needQueryExtension)
+{
+    DistributedSchedPermission& permissionInstance = DistributedSchedPermission::GetInstance();
+    AppExecFwk::AbilityInfo targetAbility;
+    bool result = permissionInstance.GetTargetAbility(want, targetAbility, needQueryExtension);
+    if (!result) {
+        HILOGE("GetTargetAbility can not find the target ability");
+        return INVALID_PARAMETERS_ERR;
+    }
+    HILOGD("target ability info bundleName:%{public}s abilityName:%{public}s visible:%{public}d",
+        targetAbility.bundleName.c_str(), targetAbility.name.c_str(), targetAbility.visible);
+    HILOGD("callerType:%{public}d accountType:%{public}d callerUid:%{public}d AccessTokenID:%{public}s",
+        callerInfo.callerType, accountInfo.accountType, callerInfo.uid,
+        GetAnonymStr(std::to_string(callerInfo.accessToken)).c_str());
+    if (flag == START_PERMISSION) {
+        HILOGD("start CheckStartPermission");
+        return permissionInstance.CheckStartPermission(want, callerInfo, accountInfo, targetAbility, false);
     } else if (flag == CALL_PERMISSION) {
         HILOGD("Collaboration start check get caller permission");
         return permissionInstance.CheckGetCallerPermission(want, callerInfo, accountInfo, targetAbility);

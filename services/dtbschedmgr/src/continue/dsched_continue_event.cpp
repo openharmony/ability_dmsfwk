@@ -87,14 +87,8 @@ int32_t DSchedContinueCmdBase::Unmarshal(const std::string &jsonStr)
         *numValues[i] = item->valueint;
     }
 
-    const char *strKeys[] = {
-        "SrcDeviceId", "SrcBundleName", "SrcDeveloperId", "DstDeviceId", "DstBundleName", "DstDeveloperId",
-        "ContinueType"
-    };
-    std::string *strValues[] = {
-        &srcDeviceId_, &srcBundleName_, &srcDeveloperId_, &dstDeviceId_, &dstBundleName_, &dstDeveloperId_,
-        &continueType_
-    };
+    const char *strKeys[] = {"SrcDeviceId", "SrcBundleName", "DstDeviceId", "DstBundleName", "ContinueType"};
+    std::string *strValues[] = {&srcDeviceId_, &srcBundleName_, &dstDeviceId_, &dstBundleName_, &continueType_};
     int32_t strLength = sizeof(strKeys) / sizeof(strKeys[0]);
     for (int32_t i = 0; i < strLength; i++) {
         cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, strKeys[i]);
@@ -104,6 +98,17 @@ int32_t DSchedContinueCmdBase::Unmarshal(const std::string &jsonStr)
             return INVALID_PARAMETERS_ERR;
         }
         *strValues[i] = item->valuestring;
+    }
+    const char *strNotRequiredKeys[] = {"SrcDeveloperId", "DstDeveloperId"};
+    std::string *strNotRequiredValues[] = { &srcDeveloperId_, &dstDeveloperId_};
+    int32_t strNotRequiredLength = sizeof(strNotRequiredKeys) / sizeof(strNotRequiredKeys[0]);
+    for (int32_t i = 0; i < strNotRequiredLength; i++) {
+        cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, strNotRequiredKeys[i]);
+        if (item == nullptr || !cJSON_IsString(item) || (item->valuestring == nullptr)) {
+            *strNotRequiredValues[i] = "";
+        }else {
+            *strNotRequiredValues[i] = item->valuestring;
+        }
     }
 
     cJSON_Delete(rootValue);

@@ -63,7 +63,7 @@ public:
     bool GetDistributedBundleName(const std::string &networkId,  const uint16_t& bundleNameId,
         std::string& bundleName);
     bool GetDistributedBundleInfo(const std::string &networkId, const uint16_t &bundleNameId,
-                                  DmsBundleInfo &distributeBundleInfo);
+        DmsBundleInfo &distributeBundleInfo);
     bool GetBundleNameId(const std::string& bundleName, uint16_t &bundleNameId);
     std::string GetContinueType(const std::string &networkId, std::string &bundleName, uint8_t continueTypeId);
     std::string GetAbilityName(const std::string &networkId, std::string &bundleName, std::string &continueType);
