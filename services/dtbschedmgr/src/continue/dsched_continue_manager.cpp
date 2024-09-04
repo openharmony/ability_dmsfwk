@@ -244,7 +244,8 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
 }
 
 bool DSchedContinueManager::GetFirstBundleName(DSchedContinueInfo &info, std::string &firstBundleName,
-                                               std::string bundleName, std::string deviceId) {
+                                               std::string bundleName, std::string deviceId)
+{
     uint16_t bundleNameId;
     DmsBundleInfo distributedBundleInfo;
     DmsBmStorage::GetInstance()->GetBundleNameId(bundleName, bundleNameId);
@@ -265,7 +266,7 @@ bool DSchedContinueManager::GetFirstBundleName(DSchedContinueInfo &info, std::st
         }
     }
     HILOGE("can not get abilicy info or continue bundle names is empty for continue type:%{public}s",
-        info.continueType_.c_str());
+           info.continueType_.c_str());
     return false;
 }
 
@@ -307,7 +308,8 @@ void DSchedContinueManager::CompleteBundleName(DSchedContinueInfo &info, int32_t
 
 void DSchedContinueManager::HandleContinueMissionWithBundleName(DSchedContinueInfo &info,
                                                                 const sptr<IRemoteObject> &callback,
-                                                                const OHOS::AAFwk::WantParams &wantParams) {
+                                                                const OHOS::AAFwk::WantParams &wantParams)
+{
     int32_t direction = CONTINUE_SINK;
     int32_t ret = CheckContinuationLimit(info.sourceDeviceId_, info.sinkDeviceId_, direction);
     if (ret != ERR_OK) {
@@ -451,7 +453,7 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
             return nullptr;
         }
         for (auto iter = continues_.begin(); iter != continues_.end(); iter++) {
-            if(iter->second == nullptr) {
+            if (iter->second == nullptr) {
                 continue;
             }
             DSchedContinueInfo continueInfo = iter->second->GetContinueInfo();

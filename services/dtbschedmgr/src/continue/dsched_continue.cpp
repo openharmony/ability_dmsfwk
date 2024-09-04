@@ -912,14 +912,16 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
     }
     int32_t ret;
     bool permissionCheckResult;
-    if(cmd->srcBundleName_ == cmd->dstBundleName_) {
+    if (cmd->srcBundleName_ == cmd->dstBundleName_) {
         ret = DistributedSchedService::GetInstance().CheckTargetPermission(cmd->want_, cmd->callerInfo_,
-            cmd->accountInfo_, START_PERMISSION, true);
+                                                                           cmd->accountInfo_, START_PERMISSION, true);
         permissionCheckResult = ret == ERR_OK;
-    }else {
+    } else {
         ret = DistributedSchedService::GetInstance().CheckTargetPermission(cmd->want_, cmd->callerInfo_,
-            cmd->accountInfo_, START_PERMISSION, true, false);
-        permissionCheckResult = ret == ERR_OK && BundleManagerInternal::IsSameDeveloperId(cmd->dstBundleName_, cmd->srcDeveloperId_);
+                                                                           cmd->accountInfo_, START_PERMISSION, true,
+                                                                           false);
+        permissionCheckResult = ret == ERR_OK && BundleManagerInternal::IsSameDeveloperId(
+                                    cmd->dstBundleName_, cmd->srcDeveloperId_);
     }
 
     if (!permissionCheckResult) {

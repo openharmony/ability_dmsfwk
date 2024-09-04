@@ -185,11 +185,11 @@ bool BundleManagerInternal::IsSameAppId(const std::string& callerAppId, const st
 }
 
 bool BundleManagerInternal::IsSameDeveloperId(const std::string &bundleNameInCurrentSide,
-    const std::string &developerId4OtherSide)
+                                              const std::string &developerId4OtherSide)
 {
     if (bundleNameInCurrentSide.empty() || developerId4OtherSide.empty()) {
         HILOGE("bundleNameInCurrentSide: %{public}s or developerId4OtherSide: %{public}s is empty",
-            bundleNameInCurrentSide.c_str(), developerId4OtherSide.c_str());
+               bundleNameInCurrentSide.c_str(), developerId4OtherSide.c_str());
         return false;
     }
 
@@ -265,19 +265,22 @@ bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleNa
 
     int32_t activeAccountId = 0;
     ErrCode ret = QueryOsAccount(activeAccountId);
-    if(ret != ERR_OK) {
+    if (ret != ERR_OK) {
         HILOGE("get os account id failed");
         return false;
     }
     ret = bundleMgr->GetContinueBundleNames(srcBundleName, bundleNameList, activeAccountId);
     if (ret != ERR_OK || bundleNameList.empty()) {
-        HILOGW("No APP with specified bundle name(%{public}s) configured in continue Bundle; ret: %{public}d", srcBundleName.c_str(), ret);
+        HILOGW("No APP with specified bundle name(%{public}s) configured in continue Bundle; ret: %{public}d",
+               srcBundleName.c_str(), ret);
         return false;
     }
     return true;
 }
 
-bool BundleManagerInternal::GetAppProvisionInfo4CurrentUser(const std::string& bundleName, AppExecFwk::AppProvisionInfo& appProvisionInfo) {
+bool BundleManagerInternal::GetAppProvisionInfo4CurrentUser(const std::string &bundleName,
+                                                            AppExecFwk::AppProvisionInfo &appProvisionInfo)
+{
     sptr<AppExecFwk::IBundleMgr> bundleMgr = GetBundleManager();
     if (bundleMgr == nullptr) {
         HILOGE("get bundle manager failed");

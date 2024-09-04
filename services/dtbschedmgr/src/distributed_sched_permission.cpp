@@ -557,7 +557,7 @@ const CallerInfo& callerInfo, const AAFwk::Want& want, bool isSameBundle)
         HILOGE("check device security level failed!");
         return false;
         }
-    if(!isSameBundle) {
+    if (!isSameBundle) {
         return true;
     }
     if (BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {

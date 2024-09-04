@@ -111,10 +111,10 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
     AppExecFwk::AppProvisionInfo appProvisionInfo;
     std::vector<AccountSA::OsAccountInfo> accounts;
     uint32_t result = AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
-    if(result == ERR_OK && !accounts.empty()) {
-        for(auto &account: accounts) {
+    if (result == ERR_OK && !accounts.empty()) {
+        for (auto &account: accounts) {
             result = bundleMgr->GetAppProvisionInfo(bundleName, account.GetLocalId(), appProvisionInfo);
-            if(result == ERR_OK && !appProvisionInfo.developerId.empty()) {
+            if (result == ERR_OK && !appProvisionInfo.developerId.empty()) {
                 break;
             }
         }
@@ -445,7 +445,7 @@ bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
         DelReduData(networkId, reduRiskEntries);
         return false;
     }
-    if(remoteEntries.empty()) {
+    if (remoteEntries.empty()) {
         HILOGE("get distributedBundleInfo failed.");
     }
     HILOGI("end.");
@@ -773,11 +773,11 @@ void DmsBmStorage::UpdateDistributedData()
     uint32_t result = AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
 
     std::vector<DmsBundleInfo> dmsBundleInfos;
-    for (const auto &bundleInfo : bundleInfos) {
-        if(result == ERR_OK && !accounts.empty()) {
-            for(auto &account : accounts) {
+    for (const auto &bundleInfo: bundleInfos) {
+        if (result == ERR_OK && !accounts.empty()) {
+            for (auto &account: accounts) {
                 result = bundleMgr->GetAppProvisionInfo(bundleInfo.name, account.GetLocalId(), appProvisionInfo);
-                if(result == ERR_OK && !appProvisionInfo.developerId.empty()) {
+                if (result == ERR_OK && !appProvisionInfo.developerId.empty()) {
                     break;
                 }
             }
