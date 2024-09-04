@@ -50,6 +50,9 @@ ohos_fuzztest("DSchedSoftbusSessionFuzzTest") {
     defines += [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
   }
 
+  if (os_account_part) {
+    defines += [ "OS_ACCOUNT_PART" ]
+  }
   external_deps = [
     "ability_base:base",
     "ability_base:want",
@@ -81,9 +84,13 @@ ohos_fuzztest("DSchedSoftbusSessionFuzzTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
+    "os_account:libaccountkits",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+  if (os_account_part) {
+    external_deps += [ "os_account:os_account_innerkits" ]
+  }
 }
 
 group("fuzztest") {

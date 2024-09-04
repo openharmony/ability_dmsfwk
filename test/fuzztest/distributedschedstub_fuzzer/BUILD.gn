@@ -22,11 +22,17 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
   visibility = [ ":*" ]
   include_dirs = [
     "${dms_path}/common/include/",
+    "${dms_path}/common/include/continue/",
     "${dms_path}/interfaces/innerkits/common/include/",
+    "${dms_path}/interfaces/kits/napi/include/",
     "${dms_path}/services/dtbschedmgr/include/",
     "${dms_path}/services/dtbschedmgr/include/collaborate/",
     "${dms_path}/services/dtbschedmgr/include/dfx/",
     "${dms_path}/services/dtbschedmgr/test/unittest",
+    "${dms_path}/services/dtbschedmgr/include/softbus_adapter/transport/",
+    "${dms_path}/services/dtbschedmgr/include/collaborate/",
+    "${dms_path}/services/dtbschedmgr/include/continue/state/",
+    "${dms_path}/services/dtbschedmgr/include/continue/state/transport/",
     "${dms_path}/test/fuzztest/distributedschedstub_fuzzer",
     "${dms_path}/test/fuzztest/util",
   ]
@@ -58,7 +64,9 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
   if (dmsfwk_standard_form_share) {
     defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
   }
-
+  if (os_account_part) {
+    defines += [ "OS_ACCOUNT_PART" ]
+  }
   external_deps = [
     "ability_base:base",
     "ability_base:want",
@@ -90,11 +98,15 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
+    "os_account:libaccountkits",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
   if (dmsfwk_standard_form_share) {
     external_deps += [ "form_fwk:form_manager" ]
+  }
+  if (os_account_part) {
+    external_deps += [ "os_account:os_account_innerkits" ]
   }
 }
 
