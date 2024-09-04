@@ -270,7 +270,8 @@ bool DSchedContinueManager::GetFirstBundleName(DSchedContinueInfo &info, std::st
     return false;
 }
 
-void DSchedContinueManager::CompleteBundleName(DSchedContinueInfo &info, int32_t direction, int32_t &subType) {
+void DSchedContinueManager::CompleteBundleName(DSchedContinueInfo &info, int32_t direction, int32_t &subType)
+{
     if (direction == CONTINUE_SOURCE) {
         cntSource_++;
         std::string firstBundleName;

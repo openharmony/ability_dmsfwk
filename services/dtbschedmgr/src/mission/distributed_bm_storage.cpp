@@ -746,6 +746,19 @@ int32_t DmsBmStorage::CloudSync()
     return static_cast<int32_t>(status);
 }
 
+void DmsBmStorage::FindProvishionInfo(OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> bundleMgr,
+    AppExecFwk::AppProvisionInfo appProvisionInfo, std::vector<AccountSA::OsAccountInfo> accounts,
+    uint32_t result, std::string& bundleName) {
+    if (result == ERR_OK && !accounts.empty()) {
+        for (auto &account: accounts) {
+            result = bundleMgr->GetAppProvisionInfo(bundleName, account.GetLocalId(), appProvisionInfo);
+            if (result == ERR_OK && !appProvisionInfo.developerId.empty()) {
+                break;
+            }
+        }
+    }
+}
+
 void DmsBmStorage::UpdateDistributedData()
 {
     HILOGI("called.");
@@ -774,14 +787,7 @@ void DmsBmStorage::UpdateDistributedData()
 
     std::vector<DmsBundleInfo> dmsBundleInfos;
     for (const auto &bundleInfo: bundleInfos) {
-        if (result == ERR_OK && !accounts.empty()) {
-            for (auto &account: accounts) {
-                result = bundleMgr->GetAppProvisionInfo(bundleInfo.name, account.GetLocalId(), appProvisionInfo);
-                if (result == ERR_OK && !appProvisionInfo.developerId.empty()) {
-                    break;
-                }
-            }
-        }
+        FindProvishionInfo(bundleMgr, appProvisionInfo, accounts, result, bundleInfo.name);
         if (oldDistributedBundleInfos.find(bundleInfo.name) != oldDistributedBundleInfos.end()) {
             int64_t updateTime = oldDistributedBundleInfos[bundleInfo.name].updateTime;
             if (updateTime != bundleInfo.updateTime) {

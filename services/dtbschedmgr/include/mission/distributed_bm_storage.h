@@ -20,6 +20,7 @@
 #include <map>
 #include <mutex>
 #include <shared_mutex>
+#include <bits/stl_vector.h>
 
 #include "bundle_info.h"
 #include "bundle_mgr_interface.h"
@@ -70,6 +71,9 @@ public:
         const std::string& continueType, ContinueEventInfo &continueEventInfo);
     void UpdateDistributedData();
     int32_t CloudSync();
+    void DmsBmStorage::FindProvishionInfo(OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> bundleMgr,
+        AppExecFwk::AppProvisionInfo appProvisionInfo, std::vector<AccountSA::OsAccountInfo> accounts,
+        uint32_t result, std::string& bundleName);
     void DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos);
     bool UpdatePublicRecords(const std::string &localUdid);
 

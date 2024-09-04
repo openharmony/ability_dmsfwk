@@ -542,7 +542,7 @@ bool DistributedSchedPermission::CheckComponentAccessPermission(const AppExecFwk
 }
 
 bool DistributedSchedPermission::CheckMigrateStartCtrlPer(const AppExecFwk::AbilityInfo& targetAbility,
-const CallerInfo& callerInfo, const AAFwk::Want& want, bool isSameBundle)
+    const CallerInfo& callerInfo, const AAFwk::Want& want, bool isSameBundle)
 {
     std::string bundleName = want.GetBundle();
     if (!CheckBundleContinueConfig(bundleName)) {
