@@ -3470,12 +3470,6 @@ int32_t DistributedSchedService::NotifyStateChangedFromRemote(int32_t abilitySta
 }
 
 int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& want,
-    const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension)
-{
-    return CheckTargetPermission(want, callerInfo, accountInfo, flag, needQueryExtension, true);
-}
-
-int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& want,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t flag,
     bool needQueryExtension, bool isSameBundle)
 {
@@ -3493,7 +3487,7 @@ int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& 
         GetAnonymStr(std::to_string(callerInfo.accessToken)).c_str());
     if (flag == START_PERMISSION) {
         HILOGD("start CheckStartPermission");
-        return permissionInstance.CheckStartPermission(want, callerInfo, accountInfo, targetAbility);
+        return permissionInstance.CheckStartPermission(want, callerInfo, accountInfo, targetAbility, isSameBundle);
     } else if (flag == CALL_PERMISSION) {
         HILOGD("Collaboration start check get caller permission");
         return permissionInstance.CheckGetCallerPermission(want, callerInfo, accountInfo, targetAbility);
@@ -3504,8 +3498,6 @@ int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& 
     HILOGE("CheckTargetPermission denied!!");
     return DMS_PERMISSION_DENIED;
 }
-
-
 
 int32_t DistributedSchedService::StopRemoteExtensionAbility(const OHOS::AAFwk::Want& want, int32_t callerUid,
     uint32_t accessToken, int32_t extensionType)

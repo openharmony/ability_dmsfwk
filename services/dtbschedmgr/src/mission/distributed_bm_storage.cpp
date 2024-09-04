@@ -446,7 +446,7 @@ bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
         return false;
     }
     if(remoteEntries.empty()) {
-        HILOGE("get distributedBundleInfo failed.")
+        HILOGE("get distributedBundleInfo failed.");
     }
     HILOGI("end.");
     return true;
@@ -693,10 +693,10 @@ DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::Bun
     distributedBundleInfo.updateTime = bundleInfo.updateTime;
     distributedBundleInfo.developerId = appProvisionInfo.developerId;
     uint8_t pos = 0;
-    for (const auto &abilityInfo: bundleInfo.abilityInfos) {
+    for (const auto &abilityInfo : bundleInfo.abilityInfos) {
         DmsAbilityInfo dmsAbilityInfo;
         dmsAbilityInfo.abilityName = abilityInfo.name;
-        for (const auto &continueType: abilityInfo.continueType) {
+        for (const auto &continueType : abilityInfo.continueType) {
             dmsAbilityInfo.continueType.push_back(continueType);
             dmsAbilityInfo.continueTypeId.push_back(pos++);
         }

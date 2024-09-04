@@ -49,8 +49,8 @@ public:
     static int32_t GetLocalBundleInfoV9(const std::string& bundleName, AppExecFwk::BundleInfo &bundleInfo);
     static bool GetContinueBundle4Src(const std::string& srcBundleName,
                                   std::vector<std::string>& bundleNameList);
-    static bool BundleManagerInternal::GetAppProvisionInfo4CurrentUser(const std::string& bundleName,
-        const AppExecFwk::AppProvisionInfo& appProvisionInfo);
+    static bool GetAppProvisionInfo4CurrentUser(const std::string& bundleName,
+        AppExecFwk::AppProvisionInfo& appProvisionInfo);
     static int32_t CheckRemoteBundleInfoForContinuation(const std::string& dstDeviceId,
         const std::string& bundleName, AppExecFwk::DistributedBundleInfo& remoteBundleInfo);
     static sptr<AppExecFwk::IBundleMgr> GetBundleManager();

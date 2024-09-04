@@ -43,8 +43,10 @@ int32_t DSchedContinueCmdBase::Marshal(std::string &jsonStr)
 
     cJSON_AddStringToObject(rootValue, "SrcDeviceId", srcDeviceId_.c_str());
     cJSON_AddStringToObject(rootValue, "SrcBundleName", srcBundleName_.c_str());
+    cJSON_AddStringToObject(rootValue, "SrcDeveloperId", srcDeveloperId_.c_str());
     cJSON_AddStringToObject(rootValue, "DstDeviceId", dstDeviceId_.c_str());
     cJSON_AddStringToObject(rootValue, "DstBundleName", dstBundleName_.c_str());
+    cJSON_AddStringToObject(rootValue, "DstDeveloperId", dstDeveloperId_.c_str());
     cJSON_AddStringToObject(rootValue, "ContinueType", continueType_.c_str());
 
     cJSON_AddNumberToObject(rootValue, "ContinueByType", continueByType_);
@@ -85,8 +87,8 @@ int32_t DSchedContinueCmdBase::Unmarshal(const std::string &jsonStr)
         *numValues[i] = item->valueint;
     }
 
-    const char *strKeys[] = { "SrcDeviceId", "SrcBundleName", "DstDeviceId", "DstBundleName", "ContinueType" };
-    std::string *strValues[] = { &srcDeviceId_, &srcBundleName_, &dstDeviceId_, &dstBundleName_, &continueType_ };
+    const char *strKeys[] = { "SrcDeviceId", "SrcBundleName", "SrcDeveloperId", "DstDeviceId", "DstBundleName", "DstDeveloperId", "ContinueType" };
+    std::string *strValues[] = { &srcDeviceId_, &srcBundleName_, &srcDeveloperId_, &dstDeviceId_, &dstBundleName_, &dstDeveloperId_, &continueType_ };
     int32_t strLength = sizeof(strKeys) / sizeof(strKeys[0]);
     for (int32_t i = 0; i < strLength; i++) {
         cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, strKeys[i]);

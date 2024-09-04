@@ -47,11 +47,11 @@ struct currentIconInfo {
         return (this->senderNetworkId == "" && this->bundleName == "" && this->continueType == "");
     }
 
-    currentIconInfo(const std::string& source_device_id, const std::string& source_bundle_name,
-                    const std::string& sink_bundle_name)
+    currentIconInfo(const std::string &source_device_id, const std::string &source_bundle_name,
+                    const std::string &sink_bundle_name)
         : senderNetworkId(source_device_id),
-          sourceBundleName_(source_bundle_name),
-          bundleName(sink_bundle_name) {
+          bundleName(sink_bundle_name),
+          sourceBundleName_(source_bundle_name) {
     }
 
     currentIconInfo() = default;

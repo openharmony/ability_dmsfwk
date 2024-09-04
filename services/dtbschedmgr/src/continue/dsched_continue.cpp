@@ -44,7 +44,6 @@
 #include "scene_board_judgement.h"
 #include "softbus_adapter/transport/dsched_transport_softbus_adapter.h"
 #include "softbus_error_code.h"
-#include "os_account_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -650,14 +649,6 @@ int32_t DSchedContinue::PackStartCmd(std::shared_ptr<DSchedContinueStartCmd>& cm
         }
         cmd->appVersion_ = static_cast<int32_t>(localBundleInfo.versionCode);
     }
-    AppExecFwk::AppProvisionInfo appProvisionInfo;
-    if (subServiceType_ == CONTINUE_PULL
-        && BundleManagerInternal::GetAppProvisionInfo4CurrentUser(cmd->dstBundleName_, appProvisionInfo)) {
-        cmd->dstDeveloperId_ = appProvisionInfo.developerId;
-    } else if (subServiceType_ == CONTINUE_PUSH
-               && BundleManagerInternal::GetAppProvisionInfo4CurrentUser(cmd->srcBundleName_, appProvisionInfo)) {
-        cmd->srcDeveloperId_ = appProvisionInfo.developerId;
-    }
     cmd->wantParams_ = *wantParams;
     return ERR_OK;
 }
@@ -893,6 +884,12 @@ int32_t DSchedContinue::PackDataCmd(std::shared_ptr<DSchedContinueDataCmd>& cmd,
     cmd->callerInfo_ = callerInfo;
     cmd->accountInfo_ = accountInfo;
     cmd->requestCode_ = DEFAULT_REQUEST_CODE;
+
+    AppExecFwk::AppProvisionInfo appProvisionInfo;
+    BundleManagerInternal::GetAppProvisionInfo4CurrentUser(cmd->dstBundleName_, appProvisionInfo);
+    cmd->dstDeveloperId_ = appProvisionInfo.developerId;
+    BundleManagerInternal::GetAppProvisionInfo4CurrentUser(cmd->srcBundleName_, appProvisionInfo);
+    cmd->srcDeveloperId_ = appProvisionInfo.developerId;
     return ERR_OK;
 }
 
@@ -1322,6 +1319,7 @@ void DSchedContinue::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffe
         case DSCHED_CONTINUE_CMD_DATA: {
             auto dataCmd = std::make_shared<DSchedContinueDataCmd>();
             ret = dataCmd->Unmarshal(jsonStr);
+            dataCmd->want_.SetBundle(dataCmd->dstBundleName_);
             if (ret != ERR_OK) {
                 HILOGE("Unmarshal data cmd failed, ret: %{public}d", ret);
                 return;

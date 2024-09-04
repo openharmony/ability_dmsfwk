@@ -265,7 +265,7 @@ bool DMSContinueRecvMgr::GetFinalBundleName(const std::string& senderNetworkId, 
     }
     std::vector<std::string> bundleNameList;
     bool continueBundleGot = BundleManagerInternal::GetContinueBundle4Src(bundleName, bundleNameList);
-    if (continueBundleGot) {
+    if (!continueBundleGot) {
         HILOGE("can not get local bundle info or continue bundle for bundle name: %{public}s", bundleName.c_str());
         return false;
     }
@@ -363,7 +363,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         return INVALID_PARAMETERS_ERR;
     }
     std::vector<sptr<IRemoteObject>> objs = iterItem->second;
-    for (auto iter: objs) {
+    for (auto iter : objs) {
         NotifyRecvBroadcast(iter, senderNetworkId, finalBundleName, state, continueType);
     }
     HILOGI("DealOnBroadcastBusiness end");

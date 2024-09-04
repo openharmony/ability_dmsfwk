@@ -269,7 +269,7 @@ bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleNa
         HILOGE("get os account id failed");
         return false;
     }
-    ret = bundleMgr->GetContinueBundleNames(srcBundleName, bundleNameList);
+    ret = bundleMgr->GetContinueBundleNames(srcBundleName, bundleNameList, activeAccountId);
     if (ret != ERR_OK || bundleNameList.empty()) {
         HILOGW("No APP with specified bundle name(%{public}s) configured in continue Bundle; ret: %{public}d", srcBundleName.c_str(), ret);
         return false;
@@ -277,7 +277,7 @@ bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleNa
     return true;
 }
 
-bool BundleManagerInternal::GetAppProvisionInfo4CurrentUser(const std::string& bundleName, const AppExecFwk::AppProvisionInfo& appProvisionInfo) {
+bool BundleManagerInternal::GetAppProvisionInfo4CurrentUser(const std::string& bundleName, AppExecFwk::AppProvisionInfo& appProvisionInfo) {
     sptr<AppExecFwk::IBundleMgr> bundleMgr = GetBundleManager();
     if (bundleMgr == nullptr) {
         HILOGE("get bundle manager failed");

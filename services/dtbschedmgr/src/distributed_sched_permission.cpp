@@ -125,12 +125,6 @@ int32_t DistributedSchedPermission::CheckSendResultPermission(const AAFwk::Want&
 }
 
 int32_t DistributedSchedPermission::CheckStartPermission(const AAFwk::Want& want, const CallerInfo& callerInfo,
-    const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility)
-{
-    return CheckStartPermission(want, callerInfo, accountInfo, targetAbility, true);
-}
-
-int32_t DistributedSchedPermission::CheckStartPermission(const AAFwk::Want& want, const CallerInfo& callerInfo,
     const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility, bool isSameBundle)
 {
     // 1.check account access permission in no account networking environment.
@@ -139,7 +133,7 @@ int32_t DistributedSchedPermission::CheckStartPermission(const AAFwk::Want& want
         return DMS_ACCOUNT_ACCESS_PERMISSION_DENIED;
     }
     // 2.check start control permissions.
-    if (!CheckStartControlPermission(targetAbility, callerInfo, want)) {
+    if (!CheckStartControlPermission(targetAbility, callerInfo, want, isSameBundle)) {
         HILOGE("CheckStartControlPermission denied or failed! the callee component do not have permission");
         return DMS_START_CONTROL_PERMISSION_DENIED;
     }
@@ -352,8 +346,8 @@ int32_t DistributedSchedPermission::CheckGetCallerPermission(const AAFwk::Want& 
     // 2. check call with same appid
     if (!BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
         HILOGE("the appId is different, check permission denied!");
+        return CALL_PERMISSION_DENIED;
     }
-
     // 3. check background permission
     if (!CheckBackgroundPermission(targetAbility, callerInfo, want, false)) {
         HILOGE("Check background permission failed!");
@@ -548,13 +542,7 @@ bool DistributedSchedPermission::CheckComponentAccessPermission(const AppExecFwk
 }
 
 bool DistributedSchedPermission::CheckMigrateStartCtrlPer(const AppExecFwk::AbilityInfo& targetAbility,
-    const CallerInfo& callerInfo, const AAFwk::Want& want) const
-{
-    return CheckMigrateStartCtrlPer(targetAbility, callerInfo, want, true);
-}
-
-bool DistributedSchedPermission::CheckMigrateStartCtrlPer(const AppExecFwk::AbilityInfo& targetAbility,
-const CallerInfo& callerInfo, const AAFwk::Want& want, bool isSameBundle) const
+const CallerInfo& callerInfo, const AAFwk::Want& want, bool isSameBundle)
 {
     std::string bundleName = want.GetBundle();
     if (!CheckBundleContinueConfig(bundleName)) {
@@ -598,6 +586,7 @@ bool DistributedSchedPermission::CheckCollaborateStartCtrlPer(const AppExecFwk::
     // 3. check start or connect ability with same appid
     if (BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
         HILOGD("the appId is the same, check permission success!");
+        return true;
     }
     // 4. check if target ability is not visible and without PERMISSION_START_INVISIBLE_ABILITY
     if (!CheckTargetAbilityVisible(targetAbility, callerInfo)) {
@@ -615,17 +604,11 @@ bool DistributedSchedPermission::CheckCollaborateStartCtrlPer(const AppExecFwk::
 }
 
 bool DistributedSchedPermission::CheckStartControlPermission(const AppExecFwk::AbilityInfo& targetAbility,
-    const CallerInfo& callerInfo, const AAFwk::Want& want) const
-{
-    return CheckStartControlPermission(targetAbility, callerInfo, want, true);
-}
-
-bool DistributedSchedPermission::CheckStartControlPermission(const AppExecFwk::AbilityInfo& targetAbility,
-    const CallerInfo& callerInfo, const AAFwk::Want& want, bool isSameBundle) const
+    const CallerInfo& callerInfo, const AAFwk::Want& want, bool isSameBundle)
 {
     HILOGD("Check start control permission enter");
     return ((want.GetFlags() & AAFwk::Want::FLAG_ABILITY_CONTINUATION) != 0) ?
-        CheckMigrateStartCtrlPer(targetAbility, callerInfo, want) :
+        CheckMigrateStartCtrlPer(targetAbility, callerInfo, want, isSameBundle) :
         CheckCollaborateStartCtrlPer(targetAbility, callerInfo, want);
 }
 
