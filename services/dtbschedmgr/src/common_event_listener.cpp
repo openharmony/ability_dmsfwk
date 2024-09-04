@@ -93,13 +93,11 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
 
 ErrCode CommonEventListener::GetForegroundOsAccountLocalId(int32_t& accountId)
 {
-    int32_t newId;
-    ErrCode err = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(newId);
+    ErrCode err = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(accountId);
     if (err != ERR_OK) {
         HILOGE("GetForegroundOsAccountLocalId passing param invalid or return error!, err : %{public}d", err);
         return INVALID_PARAMETERS_ERR;
     }
-    accountId = newId;
     HILOGD("GetForegroundOsAccountLocalId accountId is: %{public}d", accountId);
     GetOsAccountType(accountId);
     return ERR_OK;

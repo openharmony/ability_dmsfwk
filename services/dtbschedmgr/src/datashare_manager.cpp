@@ -137,7 +137,7 @@ Uri DataShareManager::AssembleUserSecureUri(int userId, const std::string &key)
 
 int32_t DataShareManager::GetLocalAccountId()
 {
-    int32_t id;
+    int32_t id = -1;
     ErrCode err = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(id);
     if (err != ERR_OK) {
         HILOGE("GetLocalAccountId passing param invalid or return error!, err : %{public}d", err);
