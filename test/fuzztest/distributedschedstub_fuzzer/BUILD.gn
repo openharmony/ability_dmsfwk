@@ -31,6 +31,7 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/unittest",
     "${dms_path}/services/dtbschedmgr/include/softbus_adapter/transport/",
     "${dms_path}/services/dtbschedmgr/include/collaborate/",
+    "${dms_path}/services/dtbschedmgr/include/continue/",
     "${dms_path}/services/dtbschedmgr/include/continue/state/",
     "${dms_path}/services/dtbschedmgr/include/continue/state/transport/",
     "${dms_path}/test/fuzztest/distributedschedstub_fuzzer",
