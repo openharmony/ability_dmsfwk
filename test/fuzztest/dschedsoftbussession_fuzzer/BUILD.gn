@@ -84,9 +84,6 @@ ohos_fuzztest("DSchedSoftbusSessionFuzzTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
-  if (os_account_part) {
-    external_deps += [ "os_account:os_account_innerkits" ]
-  }
 }
 
 group("fuzztest") {
