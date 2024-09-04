@@ -31,6 +31,8 @@
 #include "distributed_sched_continuation.h"
 #include "mission/distributed_bundle_info.h"
 #include "kvstore_death_recipient.h"
+#include "os_account_manager.h"
+
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -71,9 +73,9 @@ public:
         const std::string& continueType, ContinueEventInfo &continueEventInfo);
     void UpdateDistributedData();
     int32_t CloudSync();
-    void DmsBmStorage::FindProvishionInfo(OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> bundleMgr,
+    void FindProvishionInfo(OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> bundleMgr,
         AppExecFwk::AppProvisionInfo appProvisionInfo, std::vector<AccountSA::OsAccountInfo> accounts,
-        uint32_t result, std::string& bundleName);
+        uint32_t result, const std::string& bundleName);
     void DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos);
     bool UpdatePublicRecords(const std::string &localUdid);
 

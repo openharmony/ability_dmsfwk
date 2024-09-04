@@ -753,7 +753,7 @@ HWTEST_F(DMSContinueManagerTest, testGetBundleNameIdAndContinueTypeId_001, TestS
     int32_t ret = DMSContinueSendMgr::GetInstance().GetBundleNameIdAndContinueTypeId(MISSIONID_01, state,
         bundleNameId, continueTypeId);
 
-    EXPECT_EQ(ret, REMOTE_DEVICE_BIND_ABILITY_ERR);
+    EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
     DTEST_LOG << "DMSContinueManagerTest testGetBundleNameIdAndContinueTypeId_001 end" << std::endl;
 }
 

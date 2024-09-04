@@ -18,7 +18,6 @@
 #include "datetime_ex.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
-#include "os_account_manager.h"
 
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"
@@ -748,7 +747,7 @@ int32_t DmsBmStorage::CloudSync()
 
 void DmsBmStorage::FindProvishionInfo(OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> bundleMgr,
     AppExecFwk::AppProvisionInfo appProvisionInfo, std::vector<AccountSA::OsAccountInfo> accounts,
-    uint32_t result, std::string& bundleName) {
+    uint32_t result, const std::string& bundleName) {
     if (result == ERR_OK && !accounts.empty()) {
         for (auto &account: accounts) {
             result = bundleMgr->GetAppProvisionInfo(bundleName, account.GetLocalId(), appProvisionInfo);
