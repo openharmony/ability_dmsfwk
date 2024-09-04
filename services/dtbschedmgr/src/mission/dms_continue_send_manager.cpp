@@ -28,6 +28,7 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_recv_manager.h"
+#include "mission/dsched_sync_e2e.h"
 #include "mission/wifi_state_adapter.h"
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
@@ -135,6 +136,10 @@ void DMSContinueSendMgr::PostUnfocusedTaskWithDelay(const int32_t missionId, Unf
 void DMSContinueSendMgr::NotifyMissionFocused(const int32_t missionId, FocusedReason reason)
 {
     HILOGI("NotifyMissionFocused called, missionId: %{public}d, reason: %{public}d", missionId, reason);
+    if (!DmsKvSyncE2E::GetInstance()->CheckCtrlRule()) {
+        HILOGE("Forbid sending and receiving");
+        return;
+    }
     if (reason <= FocusedReason::MIN || reason >= FocusedReason::MAX) {
         HILOGI("Unknown focusedReason, no need to deal NotifyMissionFocused");
         return;
@@ -297,7 +302,7 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId, Focused
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
     std::string bundleName = info.want.GetBundle();
-    if (!CheckBundleContinueConfig(bundleName)) {
+    if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(bundleName)) {
         HILOGI("App does not allow continue in config file, bundle name %{public}s, missionId: %{public}d",
             bundleName.c_str(), missionId);
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
@@ -433,7 +438,7 @@ int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
 
     HILOGI("start, type: %{public}d, missionId: %{public}d, bundleName: %{public}s, bundleNameId: %{public}u",
         type, missionId, bundleName.c_str(), bundleNameId);
-    if (!CheckBundleContinueConfig(bundleName)) {
+    if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(bundleName)) {
         HILOGI("App does not allow continue in config file, bundle name %{public}s, missionId: %{public}d",
             bundleName.c_str(), missionId);
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
@@ -571,7 +576,7 @@ int32_t DMSContinueSendMgr::GetBundleNameIdAndContinueTypeId(const int32_t missi
         return ret;
     }
     HILOGI("get bundleName success, missionId: %{public}d, bundleName: %{public}s", missionId, bundleName.c_str());
-    if (!CheckBundleContinueConfig(bundleName)) {
+    if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(bundleName)) {
         HILOGI("App does not allow continue in config file, bundle name %{public}s, missionId: %{public}d",
             bundleName.c_str(), missionId);
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
