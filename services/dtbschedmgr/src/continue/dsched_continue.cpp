@@ -920,8 +920,8 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
         ret = DistributedSchedService::GetInstance().CheckTargetPermission(cmd->want_, cmd->callerInfo_,
                                                                            cmd->accountInfo_, START_PERMISSION, true,
                                                                            false);
-        permissionCheckResult = ret == ERR_OK && BundleManagerInternal::IsSameDeveloperId(
-                                    cmd->dstBundleName_, cmd->srcDeveloperId_);
+        permissionCheckResult = ((ret == ERR_OK) && BundleManagerInternal::IsSameDeveloperId(
+                                    cmd->dstBundleName_, cmd->srcDeveloperId_));
     }
 
     if (!permissionCheckResult) {
