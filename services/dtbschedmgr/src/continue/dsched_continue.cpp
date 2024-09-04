@@ -841,7 +841,7 @@ int32_t DSchedContinue::SetWantForContinuation(AAFwk::Want& newWant)
     if (!isPageStackContinue && !moduleName.empty() && moduleName.length() <= MAX_MODULENAME_LEN) {
         HILOGD("set application moduleName = %{public}s!", moduleName.c_str());
         auto element = newWant.GetElement();
-        newWant.SetElementName(element.GetDeviceID(), continueInfo_.sinkBundleName_, element.GetAbilityName(), moduleName);
+        newWant.SetElementName(element.GetDeviceID(), element.GetBundleName(), element.GetAbilityName(), moduleName);
     }
 
     std::string saveDataTime =
@@ -919,7 +919,7 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
     }else {
         ret = DistributedSchedService::GetInstance().CheckTargetPermission(cmd->want_, cmd->callerInfo_,
             cmd->accountInfo_, START_PERMISSION, true, false);
-        permissionCheckResult = ret == ERR_OK && BundleManagerInternal::IsSameDeveloperId(cmd->srcBundleName_, cmd->dstDeveloperId_);
+        permissionCheckResult = ret == ERR_OK && BundleManagerInternal::IsSameDeveloperId(cmd->dstBundleName_, cmd->srcDeveloperId_);
     }
 
     if (!permissionCheckResult) {

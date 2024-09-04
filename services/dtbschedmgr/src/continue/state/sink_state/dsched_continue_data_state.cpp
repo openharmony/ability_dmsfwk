@@ -69,7 +69,6 @@ int32_t DSchedContinueDataState::DoContinueDataTask(std::shared_ptr<DSchedContin
         HILOGE("dContinue or event is null");
         return INVALID_PARAMETERS_ERR;
     }
-    // todo: 这里在构造cmd的时候，对bundleName进行了设置，测试一下是否能够带过来
     auto syncContinueData = event->GetSharedObject<DSchedContinueDataCmd>();
     int32_t ret = dContinue->ExecuteContinueData(syncContinueData);
     if (ret != ERR_OK) {

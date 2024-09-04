@@ -287,8 +287,6 @@ bool DMSContinueRecvMgr::GetFinalBundleName(const std::string& senderNetworkId, 
 
 bool DMSContinueRecvMgr::ContinueTypeCheck(const AppExecFwk::BundleInfo& bundleInfo, const std::string& continueType) {
     for (const auto &abilityInfo: bundleInfo.abilityInfos) {
-        DmsAbilityInfo dmsAbilityInfo;
-        dmsAbilityInfo.abilityName = abilityInfo.name;
         for (const auto &continueTypeItem: abilityInfo.continueType) {
             if(continueTypeItem == continueType) {
                 return true;
