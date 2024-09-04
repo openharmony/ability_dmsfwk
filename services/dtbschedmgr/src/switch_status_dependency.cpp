@@ -17,13 +17,13 @@
 
 #include <fstream>
 #include <iostream>
+#include "datashare_manager.h"
+#include "dtbschedmgr_log.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "uri.h"
-
-#include "dtbschedmgr_log.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -54,7 +54,8 @@ std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, cons
         HILOGE("dataShareHelper is null, key is %{public}s", key.c_str());
         return defaultValue;
     }
-    Uri uri = Uri(SETTINGS_DATA_URI);
+    int32_t userId = dataShareManager_.GetLocalAccountId();
+    Uri uri(dataShareManager_.AssembleUserSecureUri(userId, key));
     DataShare::DataSharePredicates dataSharePredicates;
     std::vector<std::string> columns;
     dataSharePredicates.EqualTo(SETTINGS_DATA_FIELD_KEY, key);
@@ -96,7 +97,7 @@ std::shared_ptr<DataShare::DataShareHelper> SwitchStatusDependency::GetDataShare
     HILOGD("create DataShareHelper instance");
     DataShare::CreateOptions options;
     options.isProxy_ = true;
-    return DataShare::DataShareHelper::Creator(SETTINGS_DATA_URI, options);
+    return DataShare::DataShareHelper::Creator(SETTINGS_USER_SECURE_URI, options);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

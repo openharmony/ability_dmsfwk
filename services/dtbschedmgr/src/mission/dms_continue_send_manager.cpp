@@ -444,8 +444,7 @@ int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
 
-    bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    if (!IsContinueSwitchOn) {
+    if (!dataShareManager_.isContinueSwitchOn_.load()) {
         HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }
@@ -742,8 +741,7 @@ int32_t DMSContinueSendMgr::SetStateSendEvent(const uint16_t bundleNameId, const
         AddMMIListener();
     }
 
-    bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    if (!IsContinueSwitchOn) {
+    if (!dataShareManager_.isContinueSwitchOn_.load()) {
         HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }

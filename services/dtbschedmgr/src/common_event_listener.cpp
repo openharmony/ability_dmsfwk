@@ -15,10 +15,13 @@
 
 #include "common_event_listener.h"
 
+#include "datashare_manager.h"
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_bm_storage.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/dms_continue_send_manager.h"
+#include "os_account_manager.h"
+#include "switch_status_dependency.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -42,6 +45,8 @@ std::map<std::string, uint8_t> receiveEvent = {
     {EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED, PACKAGE_CHANGED},
     {EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED, PACKAGE_REMOVED},
 };
+const std::string CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
+const std::string CONTINUE_SWITCH_OFF = "0";
 }
 void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
 {
@@ -66,6 +71,8 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
             break;
         case USER_SWITCHED :
             HILOGI("USER_SWITCHED");
+            int32_t id;
+            GetForegroundOsAccountLocalId(id);
             break;
         case PACKAGE_ADDED :
             HILOGI("PACKAGE_ADDED: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -82,6 +89,35 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
         default:
             HILOGW("OnReceiveEvent undefined action");
     }
+}
+
+ErrCode CommonEventListener::GetForegroundOsAccountLocalId(int32_t& accountId)
+{
+    int32_t newId;
+    ErrCode err = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(newId);
+    if (err != ERR_OK) {
+        HILOGE("GetForegroundOsAccountLocalId passing param invalid or return error!, err : %{public}d", err);
+        return INVALID_PARAMETERS_ERR;
+    }
+    accountId = newId;
+    HILOGD("GetForegroundOsAccountLocalId accountId is: %{public}d", accountId);
+    GetOsAccountType(accountId);
+    return ERR_OK;
+}
+
+ErrCode CommonEventListener::GetOsAccountType(int32_t& accountId)
+{
+    AccountSA::OsAccountType type;
+    ErrCode err = AccountSA::OsAccountManager::GetOsAccountType(accountId, type);
+    if (err != ERR_OK) {
+        HILOGE("GetOsAccountType passing param invalid or return error!, err : %{public}d", err);
+        return INVALID_PARAMETERS_ERR;
+    }
+    if (type == OsAccountType::PRIVATE) {
+        HILOGI("GetOsAccountType : OsAccountType is PRIVATE, type : %{public}d", type);
+        dataShareManager_.UpdateSwitchStatus(CONTINUE_SWITCH_STATUS_KEY, CONTINUE_SWITCH_OFF);
+    }
+    return ERR_OK;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

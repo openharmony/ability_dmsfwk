@@ -325,14 +325,15 @@ void DistributedSchedService::OnAddSystemAbility(int32_t systemAbilityId, const 
 void DistributedSchedService::InitDataShareManager()
 {
     DataShareManager::ObserverCallback observerCallback = [this]() {
-        bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
+        dataShareManager_.isContinueSwitchOn_.store(SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
+        HILOGD("dataShareManager_.isContinueSwitchOn_ : %{public}d", dataShareManager_.isContinueSwitchOn_.load());
         int32_t missionId = GetCurrentMissionId();
         if (missionId <= 0) {
             HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
             return;
         }
-        DmsUE::GetInstance().ChangedSwitchState(IsContinueSwitchOn, ERR_OK);
-        if (IsContinueSwitchOn) {
+        DmsUE::GetInstance().ChangedSwitchState(dataShareManager_.isContinueSwitchOn_.load(), ERR_OK);
+        if (dataShareManager_.isContinueSwitchOn_.load()) {
             DMSContinueSendMgr::GetInstance().NotifyMissionFocused(missionId, FocusedReason::INIT);
             DSchedContinueManager::GetInstance().Init();
         } else {
@@ -817,8 +818,7 @@ int32_t DistributedSchedService::ContinueLocalMissionDealFreeInstall(OHOS::AAFwk
 int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDeviceId, int32_t missionId,
     const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
-    bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    if (!IsContinueSwitchOn) {
+    if (!dataShareManager_.isContinueSwitchOn_.load()) {
         HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }
@@ -894,7 +894,7 @@ int32_t DistributedSchedService::ContinueAbilityWithTimeout(const std::string& d
 int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
     int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
-    if (!SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
+    if (!dataShareManager_.isContinueSwitchOn_.load()) {
         HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }

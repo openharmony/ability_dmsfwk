@@ -21,6 +21,7 @@
 #include <vector>
 #include "json/json.h"
 #include "datashare_helper.h"
+#include "datashare_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -36,12 +37,15 @@ private:
     std::mutex dataShareMutex_;
     const std::string SETTINGS_DATA_URI_PREFIX =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
+    const std::string SETTINGS_USER_SECURE_URI =
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE";
     const std::string SETTINGS_DATA_FIELD_KEY = "KEYWORD";
     const std::string SETTINGS_DATA_FIELD_VAL = "VALUE";
     const std::string CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
     const std::string CONTINUE_SWITCH_OFF = "0";
     const std::string CONTINUE_SWITCH_ON = "1";
     std::string switchStatus_;
+    DataShareManager dataShareManager_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

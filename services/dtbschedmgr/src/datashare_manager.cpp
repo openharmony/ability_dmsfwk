@@ -15,10 +15,13 @@
 
 #include "datashare_manager.h"
 
+#include "dfx/distributed_ue.h"
 #include "distributed_sched_utils.h"
+#include "dsched_continue_manager.h"
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/dms_continue_send_manager.h"
+#include "os_account_manager.h"
 #include "switch_status_dependency.h"
 
 namespace OHOS {
@@ -27,6 +30,9 @@ namespace {
 const std::string TAG = "DMSDataShareManager";
 const std::string SETTINGS_DATA_URI_PREFIX =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
+const std::string SETTINGS_DATA_FIELD_KEY = "KEYWORD";
+const std::string SETTINGS_DATA_FIELD_VAL = "VALUE";
+
 }
 SettingObserver::SettingObserver() = default;
 SettingObserver::~SettingObserver() = default;
@@ -65,7 +71,7 @@ std::shared_ptr<DataShare::DataShareHelper> DataShareManager::CreateDataShareHel
     HILOGI("DataShareManager CreateDataShareHelper start");
     DataShare::CreateOptions options;
     options.isProxy_ = true;
-    return DataShare::DataShareHelper::Creator(SETTINGS_DATA_URI_PREFIX, options);
+    return DataShare::DataShareHelper::Creator(SETTINGS_USER_SECURE_URI, options);
 }
 
 void DataShareManager::RegisterObserver(const std::string &key, SettingObserver::ObserverCallback &observerCallback)
@@ -81,7 +87,8 @@ void DataShareManager::RegisterObserver(const std::string &key, SettingObserver:
         HILOGE("Register observer failed, dataShareHelper is null");
         return;
     }
-    Uri uri = AssembleUri(key);
+    int32_t userId = GetLocalAccountId();
+    Uri uri(AssembleUserSecureUri(userId, key));
     sptr<SettingObserver> newObserver(new SettingObserver());
     observer = newObserver;
     if (observer == nullptr) {
@@ -110,13 +117,61 @@ void DataShareManager::UnregisterObserver(const std::string &key)
         HILOGE("Unregister observer failed with key is %{public}s", key.c_str());
         return;
     }
-    Uri uri = AssembleUri(key);
+    int32_t userId = GetLocalAccountId();
+    Uri uri(AssembleUserSecureUri(userId, key));
     dataShareHelper->UnregisterObserver(uri, observer);
     dataShareHelper->Release();
-
+    if (observer != nullptr){
+        delete observer;
+    }
     std::lock_guard<std::mutex> lockGuard(observerMapMutex_);
     settingObserverMap_.erase(key);
     HILOGI("DataShareManager UnregisterObserver success with key is %{public}s", key.c_str());
+}
+
+Uri DataShareManager::AssembleUserSecureUri(int userId, const std::string &key)
+{
+    Uri uri(SETTING_USER_SECURE_URI + "_" + std::to_string(userId) + "?Proxy=true&key" + key);
+    return uri;
+}
+
+int32_t DataShareManager::GetLocalAccountId()
+{
+    int32_t id;
+    ErrCode err = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(id);
+    if (err != ERR_OK) {
+        HILOGE("GetLocalAccountId passing param invalid or return error!, err : %{public}d", err);
+        return INVALID_PARAMETERS_ERR;
+    }
+    return id;
+}
+
+int32_t DataShareManager::UpdateSwitchStatus(const std::string &key, const std::string &value)
+{
+    HILOGI("Start UpdateSwitchStatus");
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = CreateDataShareHelper();
+    if ( dataShareHelper == nullptr) {
+        HILOGE("dataShareHelper is null, key is %{public}s", key.c_str());
+        return;
+    }
+
+    HILOGD("UpdateSwitchStatus key = %{public}s", key.c_str());
+    int32_t userId = GetLocalAccountId();
+    Uri uri(AssembleUserSecureUri(userId, key));
+    DataShare::DataSharePredicates predicates;
+    predicates.EqualTo(SETTINGS_DATA_FIELD_KEY, KEY);
+
+    DataShare::DataShareValuesBucket bucket;
+    bucket.Put(SETTINGS_DATA_FIELD_KEY, key);
+    bucket.Put(SETTINGS_DATA_FIELD_VAL, value);
+
+    auto result = dataShareHelper->UpDateEx(uri, predicates, bucket);
+    dataShareHelper->Release();
+    if (result.first != 0) {
+        HILOGE("Updata status failed: %{public}d", result.first);
+    }
+    HILOGD("Finish UpdateSwitchStatus, Updata status success: %{public}d", result.first);
+    return;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
