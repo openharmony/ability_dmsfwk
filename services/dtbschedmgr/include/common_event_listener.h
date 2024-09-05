@@ -30,7 +30,7 @@ public:
     virtual ~CommonEventListener() = default;
 
     void OnReceiveEvent(const EventFwk::CommonEventData &eventData);
-    ErrCode GetForegroundOsAccountLocalId(int32_t &accountId);
+    int32_t GetForegroundOsAccountLocalId();
     ErrCode GetOsAccountType(int32_t &accountId);
 };
 }  // namespace DistributedSchedule
