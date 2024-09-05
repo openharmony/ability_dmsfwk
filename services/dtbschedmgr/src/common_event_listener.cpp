@@ -35,7 +35,7 @@ const uint8_t USER_SWITCHED = 4;
 const uint8_t PACKAGE_ADDED = 5;
 const uint8_t PACKAGE_CHANGED = 6;
 const uint8_t PACKAGE_REMOVED = 7;
-static int32_t INVALID_ID = 0;
+constexpr static int32_t INVALID_ID = 0;
 std::map<std::string, uint8_t> receiveEvent = {
     {EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED, SCREEN_LOCKED},
     {EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF, SCREEN_OFF},
@@ -89,8 +89,9 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
     }
 }
 
-ErrCode CommonEventListener::GetForegroundOsAccountLocalId(int32_t& accountId)
+int32_t CommonEventListener::GetForegroundOsAccountLocalId()
 {
+    int32_t accountId = INVALID_ID;
     ErrCode err = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(accountId);
     if (err != ERR_OK || accountId == INVALID_ID) {
         HILOGE("GetForegroundOsAccountLocalId passing param invalid or return error!, err : %{public}d", err);
@@ -98,7 +99,7 @@ ErrCode CommonEventListener::GetForegroundOsAccountLocalId(int32_t& accountId)
     }
     HILOGD("GetForegroundOsAccountLocalId accountId is: %{public}d", accountId);
     GetOsAccountType(accountId);
-    return ERR_OK;
+    return accountId;
 }
 
 ErrCode CommonEventListener::GetOsAccountType(int32_t& accountId)
