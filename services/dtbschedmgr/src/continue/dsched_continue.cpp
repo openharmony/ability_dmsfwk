@@ -192,6 +192,7 @@ void DSchedContinue::SetEventData()
     eventData_.destBundleName_ = dstContinueInfo.bundleName;
     eventData_.destModuleName_ = dstContinueInfo.moduleName;
     eventData_.destAbilityName_ = dstContinueInfo.abilityName;
+    eventData_.developerId_ = srcContinueInfo.developerId;
     eventData_.dSchedEventType_ = DMS_CONTINUE;
     eventData_.state_ = DMS_DSCHED_EVENT_START;
 }
@@ -888,7 +889,25 @@ int32_t DSchedContinue::PackDataCmd(std::shared_ptr<DSchedContinueDataCmd>& cmd,
     cmd->callerInfo_ = callerInfo;
     cmd->accountInfo_ = accountInfo;
     cmd->requestCode_ = DEFAULT_REQUEST_CODE;
+
+    AppExecFwk::AppProvisionInfo appProvisionInfo;
+    BundleManagerInternal::GetAppProvisionInfo4CurrentUser(cmd->srcBundleName_, appProvisionInfo);
+    cmd->srcDeveloperId_ = appProvisionInfo.developerId;
     return ERR_OK;
+}
+
+int32_t DSchedContinue::CheckStartPermission(std::shared_ptr<DSchedContinueDataCmd> cmd)
+{
+    if (cmd->srcBundleName_ == cmd->dstBundleName_) {
+        return DistributedSchedService::GetInstance().CheckTargetPermission4DiffBundle(cmd->want_, cmd->callerInfo_,
+            cmd->accountInfo_, START_PERMISSION, true);
+    } else {
+        if (!BundleManagerInternal::IsSameDeveloperId(cmd->dstBundleName_, cmd->srcDeveloperId_)) {
+            return INVALID_PARAMETERS_ERR;
+        }
+        return DistributedSchedService::GetInstance().CheckTargetPermission4DiffBundle(cmd->want_, cmd->callerInfo_,
+            cmd->accountInfo_, START_PERMISSION, true);
+    }
 }
 
 int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCmd> cmd)
@@ -908,9 +927,7 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
         HILOGE("check deviceId failed");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
-
-    int32_t ret = DistributedSchedService::GetInstance().CheckTargetPermission(cmd->want_, cmd->callerInfo_,
-        cmd->accountInfo_, START_PERMISSION, true);
+    int32_t ret = CheckStartPermission(cmd);
     if (ret != ERR_OK) {
         HILOGE("ExecuteContinueData CheckTargetPermission failed!");
         return ret;
@@ -1312,6 +1329,7 @@ void DSchedContinue::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffe
                 HILOGE("Unmarshal data cmd failed, ret: %{public}d", ret);
                 return;
             }
+            dataCmd->want_.SetBundle(dataCmd->dstBundleName_);
             OnContinueDataCmd(dataCmd);
             break;
         }
@@ -1339,7 +1357,6 @@ void DSchedContinue::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffe
             HILOGW("Invalid command.");
             break;
     }
-    return;
 }
 
 void DSchedContinue::UpdateState(DSchedContinueStateType stateType)
