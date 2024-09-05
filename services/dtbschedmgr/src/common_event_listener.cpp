@@ -70,7 +70,7 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
             break;
         case USER_SWITCHED :
             HILOGI("USER_SWITCHED");
-            GetForegroundOsAccountLocalId(INVALID_ID);
+            GetForegroundOsAccountLocalId();
             break;
         case PACKAGE_ADDED :
             HILOGI("PACKAGE_ADDED: %{public}s", want.GetElement().GetBundleName().c_str());
