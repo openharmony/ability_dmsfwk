@@ -106,7 +106,7 @@ int32_t DSchedContinueCmdBase::Unmarshal(const std::string &jsonStr)
         cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, strNotRequiredKeys[i]);
         if (item == nullptr || !cJSON_IsString(item) || (item->valuestring == nullptr)) {
             *strNotRequiredValues[i] = "";
-        }else {
+        } else {
             *strNotRequiredValues[i] = item->valuestring;
         }
     }
