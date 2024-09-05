@@ -280,7 +280,7 @@ bool DMSContinueRecvMgr::GetFinalBundleName(DmsBundleInfo &distributedBundleInfo
         AppExecFwk::AppProvisionInfo appProvisionInfo;
         if (BundleManagerInternal::GetAppProvisionInfo4CurrentUser(bundleNameItem, appProvisionInfo)
             && appProvisionInfo.developerId == distributedBundleInfo.developerId
-            && BundleManagerInternal::GetLocalBundleInfo(bundleName, localBundleInfo) == ERR_OK
+            && BundleManagerInternal::GetLocalBundleInfo(bundleNameItem, localBundleInfo) == ERR_OK
             && ContinueTypeCheck(localBundleInfo, continueType)) {
             finalBundleName = bundleNameItem;
             return true;
