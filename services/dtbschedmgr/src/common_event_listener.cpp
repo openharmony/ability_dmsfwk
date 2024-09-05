@@ -20,6 +20,7 @@
 #include "mission/distributed_bm_storage.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/dms_continue_send_manager.h"
+#include "os_account_manager.h"
 #include "switch_status_dependency.h"
 
 namespace OHOS {
@@ -34,7 +35,7 @@ const uint8_t USER_SWITCHED = 4;
 const uint8_t PACKAGE_ADDED = 5;
 const uint8_t PACKAGE_CHANGED = 6;
 const uint8_t PACKAGE_REMOVED = 7;
-constexpr static int32_t INVALID_ID = 0;
+static int32_t INVALID_ID = 0;
 std::map<std::string, uint8_t> receiveEvent = {
     {EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED, SCREEN_LOCKED},
     {EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF, SCREEN_OFF},
@@ -69,8 +70,7 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
             break;
         case USER_SWITCHED :
             HILOGI("USER_SWITCHED");
-            int32_t id = INVALID_ID;
-            GetForegroundOsAccountLocalId(id);
+            GetForegroundOsAccountLocalId(INVALID_ID);
             break;
         case PACKAGE_ADDED :
             HILOGI("PACKAGE_ADDED: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -92,7 +92,7 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
 ErrCode CommonEventListener::GetForegroundOsAccountLocalId(int32_t& accountId)
 {
     ErrCode err = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(accountId);
-    if (err != ERR_OK || account == INVALID_ID) {
+    if (err != ERR_OK || accountId == INVALID_ID) {
         HILOGE("GetForegroundOsAccountLocalId passing param invalid or return error!, err : %{public}d", err);
         return INVALID_PARAMETERS_ERR;
     }
@@ -111,7 +111,7 @@ ErrCode CommonEventListener::GetOsAccountType(int32_t& accountId)
     }
     if (type == AccountSA::OsAccountType::PRIVATE) {
         HILOGI("GetOsAccountType : OsAccountType is PRIVATE, type : %{public}d", type);
-        DataShareManger::GetInstance().UpdateSwitchStatus(SwitchStatusDependency::GetInstance()
+        DataShareManager::GetInstance().UpdateSwitchStatus(SwitchStatusDependency::GetInstance()
             .CONTINUE_SWITCH_STATUS_KEY, SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_OFF);
     }
     return ERR_OK;

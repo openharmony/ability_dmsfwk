@@ -15,7 +15,6 @@
 
 #include "datashare_manager.h"
 
-#include "dfx/distributed_ue.h"
 #include "distributed_sched_utils.h"
 #include "dsched_continue_manager.h"
 #include "dtbschedmgr_log.h"
@@ -126,7 +125,7 @@ void DataShareManager::UnregisterObserver(const std::string &key)
 
 Uri DataShareManager::AssembleUserSecureUri(int userId, const std::string &key)
 {
-    Uri uri(SETTING_USER_SECURE_URI + "_" + std::to_string(userId) + "?Proxy=true&key=" + key);
+    Uri uri(SETTINGS_USER_SECURE_URI + "_" + std::to_string(userId) + "?Proxy=true&key=" + key);
     return uri;
 }
 
@@ -171,13 +170,13 @@ void DataShareManager::UpdateSwitchStatus(const std::string &key, const std::str
 
 bool DataShareManager::IsCurrentContinueSwitchOn()
 {
-    HILOGD(IsCurrentContinueSwitchOn start);
+    HILOGD("IsCurrentContinueSwitchOn start");
     return isCurrentContinueSwitchOn_.load();
 }
 
 void DataShareManager::SetCurrentContinueSwitch(bool status)
 {
-    HILOGD(SetCurrentContinueSwitch start);
+    HILOGD("SetCurrentContinueSwitch start");
     isCurrentContinueSwitchOn_.store(status);
 }
 } // namespace DistributedSchedule
