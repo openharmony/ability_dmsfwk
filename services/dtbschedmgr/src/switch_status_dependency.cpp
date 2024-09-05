@@ -37,6 +37,7 @@ SwitchStatusDependency &SwitchStatusDependency::GetInstance()
     static SwitchStatusDependency instance;
     return instance;
 }
+
 bool SwitchStatusDependency::IsContinueSwitchOn()
 {
     HILOGD("IsContinueSwitchOn start");
@@ -54,8 +55,8 @@ std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, cons
         HILOGE("dataShareHelper is null, key is %{public}s", key.c_str());
         return defaultValue;
     }
-    int32_t userId = dataShareManager_.GetLocalAccountId();
-    Uri uri(dataShareManager_.AssembleUserSecureUri(userId, key));
+    int32_t userId = DataShareManager::GetInstance().GetLocalAccountId();
+    Uri uri(DataShareManager::GetInstance().AssembleUserSecureUri(userId, key));
     DataShare::DataSharePredicates dataSharePredicates;
     std::vector<std::string> columns;
     dataSharePredicates.EqualTo(SETTINGS_DATA_FIELD_KEY, key);
@@ -87,7 +88,6 @@ std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, cons
     }
     resultSet->Close();
     dataShareHelper->Release();
-    HILOGD("get switch status, query end");
     HILOGI("GetStringValue, setting value is %{public}s with key is %{public}s", valueResult.c_str(), key.c_str());
     return valueResult;
 }

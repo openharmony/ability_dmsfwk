@@ -20,7 +20,6 @@
 #include "mission/distributed_bm_storage.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/dms_continue_send_manager.h"
-#include "os_account_manager.h"
 #include "switch_status_dependency.h"
 
 namespace OHOS {
@@ -45,8 +44,6 @@ std::map<std::string, uint8_t> receiveEvent = {
     {EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED, PACKAGE_CHANGED},
     {EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED, PACKAGE_REMOVED},
 };
-const std::string CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
-const std::string CONTINUE_SWITCH_OFF = "0";
 }
 void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventData)
 {
@@ -111,9 +108,10 @@ ErrCode CommonEventListener::GetOsAccountType(int32_t& accountId)
         HILOGE("GetOsAccountType passing param invalid or return error!, err : %{public}d", err);
         return INVALID_PARAMETERS_ERR;
     }
-    if (type == OsAccountType::PRIVATE) {
+    if (type == AccountSA::OsAccountType::PRIVATE) {
         HILOGI("GetOsAccountType : OsAccountType is PRIVATE, type : %{public}d", type);
-        dataShareManager_.UpdateSwitchStatus(CONTINUE_SWITCH_STATUS_KEY, CONTINUE_SWITCH_OFF);
+        DataShareManger::GetInstance().UpdateSwitchStatus(SwitchStatusDependency::GetInstance()
+            .CONTINUE_SWITCH_STATUS_KEY, SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_OFF);
     }
     return ERR_OK;
 }

@@ -26,6 +26,7 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
+IMPLEMENT_SINGLE_INSTANCE(DataShareManager);
 namespace {
 const std::string TAG = "DMSDataShareManager";
 const std::string SETTINGS_DATA_URI_PREFIX =
@@ -59,11 +60,6 @@ sptr<SettingObserver> DataShareManager::GetSettingObserver(const std::string &ke
         return settingObserverMap_.find(key)->second;
     }
     return nullptr;
-}
-
-Uri DataShareManager::AssembleUri(const std::string &key)
-{
-    return Uri(SETTINGS_DATA_URI_PREFIX + "&key=" + key);
 }
 
 std::shared_ptr<DataShare::DataShareHelper> DataShareManager::CreateDataShareHelper()
@@ -122,6 +118,7 @@ void DataShareManager::UnregisterObserver(const std::string &key)
     dataShareHelper->UnregisterObserver(uri, observer);
     dataShareHelper->Release();
     if (observer != nullptr){
+        HILOGI("UnregisterObserver delete observer");
         delete observer;
     }
     std::lock_guard<std::mutex> lockGuard(observerMapMutex_);
@@ -131,7 +128,7 @@ void DataShareManager::UnregisterObserver(const std::string &key)
 
 Uri DataShareManager::AssembleUserSecureUri(int userId, const std::string &key)
 {
-    Uri uri(SETTING_USER_SECURE_URI + "_" + std::to_string(userId) + "?Proxy=true&key" + key);
+    Uri uri(SETTING_USER_SECURE_URI + "_" + std::to_string(userId) + "?Proxy=true&key=" + key);
     return uri;
 }
 
@@ -146,11 +143,11 @@ int32_t DataShareManager::GetLocalAccountId()
     return id;
 }
 
-int32_t DataShareManager::UpdateSwitchStatus(const std::string &key, const std::string &value)
+void DataShareManager::UpdateSwitchStatus(const std::string &key, const std::string &value)
 {
     HILOGI("Start UpdateSwitchStatus");
     std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = CreateDataShareHelper();
-    if ( dataShareHelper == nullptr) {
+    if (dataShareHelper == nullptr) {
         HILOGE("dataShareHelper is null, key is %{public}s", key.c_str());
         return;
     }
@@ -159,19 +156,33 @@ int32_t DataShareManager::UpdateSwitchStatus(const std::string &key, const std::
     int32_t userId = GetLocalAccountId();
     Uri uri(AssembleUserSecureUri(userId, key));
     DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(SETTINGS_DATA_FIELD_KEY, KEY);
+    predicates.EqualTo(SETTINGS_DATA_FIELD_KEY, key);
 
     DataShare::DataShareValuesBucket bucket;
     bucket.Put(SETTINGS_DATA_FIELD_KEY, key);
     bucket.Put(SETTINGS_DATA_FIELD_VAL, value);
 
-    auto result = dataShareHelper->UpDateEx(uri, predicates, bucket);
+    auto result = dataShareHelper->UpdateEx(uri, predicates, bucket);
     dataShareHelper->Release();
-    if (result.first != 0) {
-        HILOGE("Updata status failed: %{public}d", result.first);
+    if (result.first != ERR_OK) {
+        HILOGE("Update status failed: %{public}d", result.first);
     }
-    HILOGD("Finish UpdateSwitchStatus, Updata status success: %{public}d", result.first);
+    HILOGI("Finish UpdateSwitchStatus, Updata status success: %{public}d", result.first);
     return;
+}
+
+bool DataShareManager::IsCurrentContinueSwitchOn()
+{
+    HILOGD(IsCurrentContinueSwitchOn start);
+    return isCurrentContinueSwitchOn_.load();
+}
+
+void DataShareManager::SetCurrentContinueSwitch(bool status)
+{
+    HILOGD(SetCurrentContinueSwitch start);
+    isCurrentContinueSwitchOn_.store(status);
+
+    
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

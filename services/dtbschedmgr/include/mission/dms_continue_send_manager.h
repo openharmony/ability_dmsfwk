@@ -25,7 +25,6 @@
 #include <vector>
 
 #include "bundle/bundle_manager_internal.h"
-#include "datashare_manager.h"
 #include "distributed_mission_died_listener.h"
 #include "event_handler.h"
 #include "mission_info.h"
@@ -158,7 +157,6 @@ private:
     std::shared_ptr<ScreenOffHandler> screenOffHandler_;
     int32_t mmiMonitorId_ = INVALID_MISSION_ID;
     std::map<int32_t, AliveMissionInfo> aliveMission_;
-    DataShareManager dataShareManager_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

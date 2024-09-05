@@ -21,7 +21,6 @@
 #include <vector>
 #include "json/json.h"
 #include "datashare_helper.h"
-#include "datashare_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -45,7 +44,6 @@ private:
     const std::string CONTINUE_SWITCH_OFF = "0";
     const std::string CONTINUE_SWITCH_ON = "1";
     std::string switchStatus_;
-    DataShareManager dataShareManager_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

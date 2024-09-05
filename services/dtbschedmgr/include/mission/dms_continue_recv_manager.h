@@ -25,7 +25,6 @@
 #include <vector>
 
 #include "bundle/bundle_manager_internal.h"
-#include "datashare_manager.h"
 #include "distributed_mission_broadcast_listener.h"
 #include "distributed_mission_died_listener.h"
 #include "distributed_mission_focused_listener.h"
@@ -98,7 +97,6 @@ private:
     std::mutex iconMutex_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     bool hasRegSoftbusEventListener_ = false;
-    DataShareManager dataShareManager_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

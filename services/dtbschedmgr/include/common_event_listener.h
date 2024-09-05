@@ -19,9 +19,6 @@
 #include "common_event_data.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
-#include "datashare_manager.h"
-#include "os_account_manager.h"
-#include "switch_status_dependency.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -35,7 +32,6 @@ public:
     void OnReceiveEvent(const EventFwk::CommonEventData &eventData);
     ErrCode GetForegroundOsAccountLocalId(int32_t &accountId);
     ErrCode GetOsAccountType(int32_t &accountId);
-    DataShareManager dataShareManager_;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS

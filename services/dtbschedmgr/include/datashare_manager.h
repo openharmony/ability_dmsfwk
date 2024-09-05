@@ -20,6 +20,7 @@
 
 #include "datashare_helper.h"
 #include "data_ability_observer_stub.h"
+#include "single_instance.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -41,6 +42,8 @@ private:
 };
 
 class DataShareManager {
+    DECLARE_SINGLE_INSTANCE(DataShareManager);
+
 public:
     void RegisterObserver(const std::string &key, SettingObserver::ObserverCallback &observerCallback);
     void UnregisterObserver(const std::string &key);
@@ -50,7 +53,9 @@ public:
     int32_t GetLocalAccountId();
     Uri AssembleUserSecureUri(int userId, const std::string& key);
     void UpdateSwitchStatus(const std::string &key, const std::string &value);
-    std::atomic<bool> isContinueSwitchOn_ = false;
+    std::atomic<bool> isCurrentContinueSwitchOn_ = true;
+    bool IsCurrentContinueSwitchOn();
+    void SetCurrentContinueSwitch(bool status);
     
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
