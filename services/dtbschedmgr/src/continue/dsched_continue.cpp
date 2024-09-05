@@ -199,6 +199,10 @@ void DSchedContinue::SetEventData()
 int32_t DSchedContinue::Init()
 {
     HILOGI("DSchedContinue init start");
+    if (eventHandler_ != nullptr) {
+        HILOGI("Already inited, end.");
+        return ERR_OK;
+    }
     auto dContinue = std::shared_ptr<DSchedContinue>(shared_from_this());
     stateMachine_ = std::make_shared<DSchedContinueStateMachine>(dContinue);
     if (direction_ == CONTINUE_SOURCE) {

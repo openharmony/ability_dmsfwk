@@ -98,6 +98,25 @@ HWTEST_F(DMSContinueManagerTest, testUnInit001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: testUnInit002
+ * @tc.desc: test UnInit
+ * @tc.type: FUNC
+ * @tc.require: I7F8KH
+ */
+HWTEST_F(DMSContinueManagerTest, testUnInit002, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest testUnInit002 begin" << std::endl;
+
+    DistributedSchedUtil::MockManageMissions();
+    DMSContinueSendMgr::GetInstance().Init();
+    EXPECT_NE(DMSContinueSendMgr::GetInstance().eventHandler_, nullptr);
+
+    DMSContinueSendMgr::GetInstance().UnInit();
+    EXPECT_EQ(DMSContinueSendMgr::GetInstance().eventHandler_, nullptr);
+    DTEST_LOG << "DMSContinueManagerTest testUnInit002 end" << std::endl;
+}
+
+/**
  * @tc.name: testPostUnfocusedTaskWithDelay001
  * @tc.desc: test PostUnfocusedTaskWithDelay
  * @tc.type: FUNC

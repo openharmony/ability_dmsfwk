@@ -36,6 +36,10 @@ IMPLEMENT_SINGLE_INSTANCE(SoftbusAdapter);
 
 void SoftbusAdapter::Init()
 {
+    if (eventHandler_ != nullptr) {
+        HILOGI("Already inited, end.");
+        return;
+    }
     eventThread_ = std::thread(&SoftbusAdapter::StartEvent, this);
     std::unique_lock<std::mutex> lock(eventMutex_);
     eventCon_.wait(lock, [this] {
