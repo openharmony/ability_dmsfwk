@@ -29,11 +29,9 @@ namespace DistributedSchedule {
 IMPLEMENT_SINGLE_INSTANCE(DataShareManager);
 namespace {
 const std::string TAG = "DMSDataShareManager";
-const std::string SETTINGS_DATA_URI_PREFIX =
-    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
 const std::string SETTINGS_DATA_FIELD_KEY = "KEYWORD";
 const std::string SETTINGS_DATA_FIELD_VAL = "VALUE";
-
+constexpr static int32_t INVALID_ACCOUNT_ID = -1;
 }
 SettingObserver::SettingObserver() = default;
 SettingObserver::~SettingObserver() = default;
@@ -134,9 +132,9 @@ Uri DataShareManager::AssembleUserSecureUri(int userId, const std::string &key)
 
 int32_t DataShareManager::GetLocalAccountId()
 {
-    int32_t id = -1;
+    int32_t id = INVALID_ACCOUNT_ID;
     ErrCode err = AccountSA::OsAccountManager::GetForegroundOsAccountLocalId(id);
-    if (err != ERR_OK) {
+    if (err != ERR_OK || id == INVALID_ACCOUNT_ID) {
         HILOGE("GetLocalAccountId passing param invalid or return error!, err : %{public}d", err);
         return INVALID_PARAMETERS_ERR;
     }
