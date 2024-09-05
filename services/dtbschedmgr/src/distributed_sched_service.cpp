@@ -343,7 +343,7 @@ void DistributedSchedService::InitDataShareManager()
             DSchedContinueManager::GetInstance().UnInit();
         };
     };
-    dataShareManager.SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance().IsContinueSwitchOn())
+    dataShareManager.SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
     dataShareManager.RegisterObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY,
         observerCallback);
     DmsUE::GetInstance().OriginalSwitchState(SwitchStatusDependency::GetInstance().IsContinueSwitchOn(), ERR_OK);
