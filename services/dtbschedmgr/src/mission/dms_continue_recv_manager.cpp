@@ -285,7 +285,7 @@ bool DMSContinueRecvMgr::GetFinalBundleName(DmsBundleInfo &distributedBundleInfo
         }
     }
     HILOGE("continue type is not empty and can not get local bundle info and continue nundle for "
-           "bundle name: %{public}s", bundleName.c_str());
+        "bundle name: %{public}s", bundleName.c_str());
     return false;
 }
 
@@ -304,7 +304,7 @@ bool DMSContinueRecvMgr::ContinueTypeCheck(const AppExecFwk::BundleInfo &bundleI
 }
 
 void DMSContinueRecvMgr::FindContinueType(const DmsBundleInfo &distributedBundleInfo,
-                                          uint8_t &continueTypeId, std::string &continueType)
+    uint8_t &continueTypeId, std::string &continueType)
 {
     uint32_t pos = 0;
     for (auto dmsAbilityInfo: distributedBundleInfo.dmsAbilityInfos) {
@@ -323,7 +323,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state, const int32_t retry)
 {
     HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, bundleNameId: %{public}u, state: %{public}d.",
-           GetAnonymStr(senderNetworkId).c_str(), bundleNameId, state);
+        GetAnonymStr(senderNetworkId).c_str(), bundleNameId, state);
     DmsBundleInfo distributedBundleInfo;
     if (!DmsBmStorage::GetInstance()->GetDistributedBundleInfo(senderNetworkId, bundleNameId,
         distributedBundleInfo)) {

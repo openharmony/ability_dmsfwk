@@ -189,7 +189,7 @@ bool BundleManagerInternal::IsSameDeveloperId(const std::string &bundleNameInCur
 {
     if (bundleNameInCurrentSide.empty() || developerId4OtherSide.empty()) {
         HILOGE("bundleNameInCurrentSide: %{public}s or developerId4OtherSide: %{public}s is empty",
-               bundleNameInCurrentSide.c_str(), developerId4OtherSide.c_str());
+            bundleNameInCurrentSide.c_str(), developerId4OtherSide.c_str());
         return false;
     }
 
@@ -272,7 +272,7 @@ bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleNa
     ret = bundleMgr->GetContinueBundleNames(srcBundleName, bundleNameList, activeAccountId);
     if (ret != ERR_OK || bundleNameList.empty()) {
         HILOGW("No APP with specified bundle name(%{public}s) configured in continue Bundle; ret: %{public}d",
-               srcBundleName.c_str(), ret);
+            srcBundleName.c_str(), ret);
         return false;
     }
     return true;

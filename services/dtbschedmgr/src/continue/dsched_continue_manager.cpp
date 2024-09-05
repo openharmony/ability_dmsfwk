@@ -287,8 +287,8 @@ void DSchedContinueManager::CompleteBundleName(DSchedContinueInfo &info, int32_t
         std::string sourceBundleName;
         std::vector<currentIconInfo>::iterator recvInfoEndItr = lastRecvList.end();
         while (recvInfoEndItr != lastRecvList.begin()) {
-            if (recvInfoEndItr->senderNetworkId == info.sourceDeviceId_ && recvInfoEndItr->bundleName == info.
-                sinkBundleName_) {
+            if (recvInfoEndItr->senderNetworkId == info.sourceDeviceId_
+                && recvInfoEndItr->bundleName == info.sinkBundleName_) {
                 sourceBundleName = recvInfoEndItr->sourceBundleName;
                 break;
             }
