@@ -82,6 +82,7 @@ void Business::GetDSchedEventInfo(DSchedEventType type)
             cout << "destBundleName: " << notify.destBundleName_ << endl;
             cout << "destModuleName: " << notify.destModuleName_ << endl;
             cout << "destAbilityName: " << notify.destAbilityName_ << endl;
+            cout << "developerId: " << notify.developerId_ << endl;
             cout << "dSchedEventType: " << notify.dSchedEventType_ << endl;
             cout << "state: " << notify.state_ << endl << endl;
         }
@@ -101,6 +102,7 @@ void Business::DSchedEventNotify(EventNotify& notify)
     cout << "destBundleName: " << notify.destBundleName_ << endl;
     cout << "destModuleName: " << notify.destModuleName_ << endl;
     cout << "destAbilityName: " << notify.destAbilityName_ << endl;
+    cout << "developerId: " << notify.developerId_ << endl;
     cout << "dSchedEventType: " << notify.dSchedEventType_ << endl;
     cout << "state: " << notify.state_ << endl;
     cout << "DSchedEventNotify Success." << endl;

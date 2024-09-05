@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #define OHOS_DISTRIBUTED_BUNDLE_MANANGER_INTERNAL_H
 
 #include <string>
+#include <vector>
 
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "bundlemgr/bundle_mgr_proxy.h"
@@ -42,8 +43,14 @@ public:
     static void InitAbilityInfoFromExtension(const AppExecFwk::ExtensionAbilityInfo &extensionAbilityInfo,
         AppExecFwk::AbilityInfo &abilityInfo);
     static bool IsSameAppId(const std::string& callerAppId, const std::string& targetBundleName);
+    static bool IsSameDeveloperId(const std::string &bundleNameInCurrentSide,
+        const std::string &developerId4OtherSide);
     static int32_t GetLocalBundleInfo(const std::string& bundleName, AppExecFwk::BundleInfo &localBundleInfo);
     static int32_t GetLocalBundleInfoV9(const std::string& bundleName, AppExecFwk::BundleInfo &bundleInfo);
+    static bool GetContinueBundle4Src(const std::string& srcBundleName,
+        std::vector<std::string>& bundleNameList);
+    static bool GetAppProvisionInfo4CurrentUser(const std::string& bundleName,
+        AppExecFwk::AppProvisionInfo& appProvisionInfo);
     static int32_t CheckRemoteBundleInfoForContinuation(const std::string& dstDeviceId,
         const std::string& bundleName, AppExecFwk::DistributedBundleInfo& remoteBundleInfo);
     static sptr<AppExecFwk::IBundleMgr> GetBundleManager();

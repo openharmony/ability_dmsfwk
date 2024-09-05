@@ -26,7 +26,9 @@
 #include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "mission/distributed_bm_storage.h"
 #include "mission/dms_continue_send_manager.h"
+#include "mission/dms_continue_recv_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -241,8 +243,72 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
     return;
 }
 
-void DSchedContinueManager::HandleContinueMissionWithBundleName(const DSchedContinueInfo &info,
-    const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
+bool DSchedContinueManager::GetFirstBundleName(DSchedContinueInfo &info, std::string &firstBundleName,
+    std::string bundleName, std::string deviceId)
+{
+    uint16_t bundleNameId;
+    DmsBundleInfo distributedBundleInfo;
+    DmsBmStorage::GetInstance()->GetBundleNameId(bundleName, bundleNameId);
+    bool result = DmsBmStorage::GetInstance()->GetDistributedBundleInfo(deviceId,
+        bundleNameId, distributedBundleInfo);
+    if (!result) {
+        HILOGE("GetDistributedBundleInfo faild");
+        return false;
+    }
+    std::vector<DmsAbilityInfo> dmsAbilityInfos = distributedBundleInfo.dmsAbilityInfos;
+    for (DmsAbilityInfo &ability: dmsAbilityInfos) {
+        std::vector<std::string> abilityContinueTypes = ability.continueType;
+        for (std::string &ability_continue_type: abilityContinueTypes) {
+            if (ability_continue_type == info.continueType_ && !ability.continueBundleName.empty()) {
+                firstBundleName = *ability.continueBundleName.begin();
+                return true;
+            }
+        }
+    }
+    HILOGE("can not get abilicy info or continue bundle names is empty for continue type:%{public}s",
+           info.continueType_.c_str());
+    return false;
+}
+
+void DSchedContinueManager::CompleteBundleName(DSchedContinueInfo &info, int32_t direction, int32_t &subType)
+{
+    if (direction == CONTINUE_SOURCE) {
+        cntSource_++;
+        std::string firstBundleName;
+        std::string bundleName = info.sourceBundleName_;
+        std::string deviceId = info.sourceDeviceId_;
+        if (GetFirstBundleName(info, firstBundleName, bundleName, deviceId)) {
+            info.sinkBundleName_ = firstBundleName;
+        }
+    } else {
+        cntSink_++;
+        subType = CONTINUE_PULL;
+        std::vector<currentIconInfo> lastRecvList = DMSContinueRecvMgr::GetInstance().lastRecvList_;
+        std::string sourceBundleName;
+        std::vector<currentIconInfo>::iterator recvInfoEndItr = lastRecvList.end();
+        while (recvInfoEndItr != lastRecvList.begin()) {
+            if (recvInfoEndItr->senderNetworkId == info.sourceDeviceId_
+                && recvInfoEndItr->bundleName == info.sinkBundleName_) {
+                sourceBundleName = recvInfoEndItr->sourceBundleName;
+                break;
+            }
+            recvInfoEndItr--;
+        }
+        if (sourceBundleName.empty()) {
+            HILOGW("current sub type is continue pull; but can not get source bundle name from recv cache.");
+            std::string firstBundleNamme;
+            std::string bundleName = info.sinkBundleName_;
+            std::string deviceId = info.sinkDeviceId_;
+            if (GetFirstBundleName(info, firstBundleNamme, bundleName, deviceId)) {
+                sourceBundleName = firstBundleNamme;
+            }
+        }
+        info.sourceBundleName_ = sourceBundleName;
+    }
+}
+
+void DSchedContinueManager::HandleContinueMissionWithBundleName(DSchedContinueInfo &info,
+    const sptr<IRemoteObject> &callback, const OHOS::AAFwk::WantParams &wantParams)
 {
     int32_t direction = CONTINUE_SINK;
     int32_t ret = CheckContinuationLimit(info.sourceDeviceId_, info.sinkDeviceId_, direction);
@@ -250,15 +316,8 @@ void DSchedContinueManager::HandleContinueMissionWithBundleName(const DSchedCont
         HILOGE("CheckContinuationLimit failed, ret: %{public}d", ret);
         return;
     }
-
     int32_t subType = CONTINUE_PUSH;
-    if (direction == CONTINUE_SOURCE) {
-        cntSource_++;
-    } else {
-        cntSink_++;
-        subType = CONTINUE_PULL;
-    }
-
+    CompleteBundleName(info, direction, subType);
     {
         std::lock_guard<std::mutex> continueLock(continueMutex_);
         if (!continues_.empty() && continues_.find(info) != continues_.end()) {
@@ -389,12 +448,20 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
     HILOGI("continue info: %{public}s.", info.toString().c_str());
     {
         std::lock_guard<std::mutex> continueLock(continueMutex_);
-        if (continues_.empty() || continues_.count(info) == 0) {
+        if (continues_.empty()) {
             HILOGE("continue info doesn't match an existing continuation.");
             return nullptr;
         }
-        if (continues_[info] != nullptr && missionId == continues_[info]->GetContinueInfo().missionId_) {
-            return continues_[info];
+        for (auto iter = continues_.begin(); iter != continues_.end(); iter++) {
+            if (iter->second == nullptr) {
+                continue;
+            }
+            DSchedContinueInfo continueInfo = iter->second->GetContinueInfo();
+            if (srcDeviceId == continueInfo.sourceDeviceId_
+                && bundleName == continueInfo.sourceBundleName_
+                && dstDeviceId == continueInfo.sinkDeviceId_) {
+                return iter->second;
+            }
         }
     }
     HILOGE("missionId doesn't match the existing continuation, continueInfo: %{public}s.",
