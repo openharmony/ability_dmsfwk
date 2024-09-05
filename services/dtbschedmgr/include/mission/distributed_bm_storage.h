@@ -32,7 +32,6 @@
 #include "kvstore_death_recipient.h"
 #include "os_account_manager.h"
 
-
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {

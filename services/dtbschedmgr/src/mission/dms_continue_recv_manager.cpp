@@ -275,6 +275,8 @@ bool DMSContinueRecvMgr::GetFinalBundleName(DmsBundleInfo &distributedBundleInfo
     }
 
     for (std::string &bundleNameItem: bundleNameList) {
+        HILOGI("find dst bundle name for diff bundle continue. src developer id: %{public}s; ",
+            GetAnonymStr(distributedBundleInfo.developerId));
         AppExecFwk::AppProvisionInfo appProvisionInfo;
         if (BundleManagerInternal::GetAppProvisionInfo4CurrentUser(bundleNameItem, appProvisionInfo)
             && appProvisionInfo.developerId == distributedBundleInfo.developerId

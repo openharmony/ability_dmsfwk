@@ -902,7 +902,7 @@ int32_t DSchedContinue::CheckStartPermission(std::shared_ptr<DSchedContinueDataC
             return INVALID_PARAMETERS_ERR;
         }
         return DistributedSchedService::GetInstance().CheckTargetPermission4DiffBundle(cmd->want_, cmd->callerInfo_,
-            cmd->accountInfo_, START_PERMISSION, true, false);
+            cmd->accountInfo_, START_PERMISSION, true);
     }
 }
 
