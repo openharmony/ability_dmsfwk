@@ -327,7 +327,7 @@ void DistributedSchedService::InitDataShareManager()
 {
     DataShareManager::ObserverCallback observerCallback = [this]() {
         dataShareManager.SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
-        HILOGD("dataShareManager.IsCurrentContinueSwitchOn : %{public}d", dataShareManager.IsCurrentContinueSwitchOn());
+        HILOGD("dsMgr IsCurrentContinueSwitchOn : %{public}d", dataShareManager.IsCurrentContinueSwitchOn());
         int32_t missionId = GetCurrentMissionId();
         if (missionId <= 0) {
             HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
@@ -344,7 +344,8 @@ void DistributedSchedService::InitDataShareManager()
         };
     };
     dataShareManager.SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY)
-    dataShareManager.RegisterObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY, observerCallback);
+    dataShareManager.RegisterObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY,
+        observerCallback);
     DmsUE::GetInstance().OriginalSwitchState(SwitchStatusDependency::GetInstance().IsContinueSwitchOn(), ERR_OK);
     HILOGI("Init data share manager, register observer end.");
 }

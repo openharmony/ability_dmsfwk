@@ -115,7 +115,7 @@ void DataShareManager::UnregisterObserver(const std::string &key)
     Uri uri(AssembleUserSecureUri(userId, key));
     dataShareHelper->UnregisterObserver(uri, observer);
     dataShareHelper->Release();
-    if (observer != nullptr){
+    if (observer != nullptr) {
         HILOGI("UnregisterObserver delete observer");
         delete observer;
     }
@@ -179,8 +179,6 @@ void DataShareManager::SetCurrentContinueSwitch(bool status)
 {
     HILOGD(SetCurrentContinueSwitch start);
     isCurrentContinueSwitchOn_.store(status);
-
-    
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
