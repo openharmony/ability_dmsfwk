@@ -417,9 +417,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Bundle_0100, Function 
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0100, Function | MediumTest | Level3)
 {
     std::shared_ptr<DistributedWant> WantIn_ = std::make_shared<DistributedWant>();
-    if (WantIn_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, WantIn_);
 
     WantIn_->SetAction("12345");
     WantIn_->SetFlags(123);
@@ -475,9 +473,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0100, Funct
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0200, Function | MediumTest | Level3)
 {
     std::shared_ptr<DistributedWant> WantIn_ = std::make_shared<DistributedWant>();
-    if (WantIn_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, WantIn_);
     WantIn_->SetAction("@#￥#3243adsafdf_中文");
     WantIn_->SetFlags(123);
     WantIn_->AddEntity("@#￥#3243adsafdf_中文");
@@ -532,9 +528,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0200, Funct
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0300, Function | MediumTest | Level3)
 {
     std::shared_ptr<DistributedWant> WantIn_ = std::make_shared<DistributedWant>();
-    if (WantIn_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, WantIn_);
 
     WantIn_->SetAction("");
     WantIn_->SetFlags(123);
@@ -595,9 +589,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0300, Funct
 HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0400, Function | MediumTest | Level3)
 {
     std::shared_ptr<DistributedWant> WantIn_ = std::make_shared<DistributedWant>();
-    if (WantIn_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, WantIn_);
 
     WantIn_->SetAction("12345");
     WantIn_->SetFlags(123);
@@ -657,9 +649,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0500, Funct
 {
     GTEST_LOG_(INFO) << "DistributedScheduleWant_Parcelable_0500 start";
     std::shared_ptr<DistributedWant> WantIn_ = std::make_shared<DistributedWant>();
-    if (WantIn_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, WantIn_);
 
     WantIn_->AddEntity("system.test.entity");
 
@@ -723,9 +713,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0501, Funct
 {
     GTEST_LOG_(INFO) << "DistributedScheduleWant_Parcelable_0501 start";
     std::shared_ptr<DistributedWant> WantIn_ = std::make_shared<DistributedWant>();
-    if (WantIn_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, WantIn_);
 
     WantIn_->SetAction("system.test.action");
 
@@ -790,9 +778,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_Parcelable_0502, Funct
 {
     GTEST_LOG_(INFO) << "DistributedScheduleWant_Parcelable_0502 start";
     std::shared_ptr<DistributedWant> WantIn_ = std::make_shared<DistributedWant>();
-    if (WantIn_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, WantIn_);
 
     WantIn_->SetFlags(64);
 
@@ -4201,15 +4187,11 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_HasParameter_0200, Fun
     std::string key = std::to_string(Array::SIGNATURE) + ".#Intent;key=3{\"\\b\\\";end";
     std::vector<zchar> arrayValue = {'.', '=', ';'};
     std::shared_ptr<DistributedWant> p1 = std::make_shared<DistributedWant>();
-    if (p1 == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, p1);
     p1->SetParam(key, arrayValue);
     DistributedWant* newWant = nullptr;
     newWant = DistributedWant::ParseUri(p1->ToUri());
-    if (newWant == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, newWant);
     std::shared_ptr<DistributedWant> p2(newWant);
     CompareWant(p1, p2);
 }
@@ -4243,9 +4225,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ToString_0100, Functio
     parameters.SetParam(keyStr, Integer::Box(valueInt));
 
     std::shared_ptr<DistributedWant> want1 = std::make_shared<DistributedWant>();
-    if (want1 == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, want1);
     want1->SetElementName(deviceId, bundleName, abilityName);
     want1->SetUri(uri);
     want1->SetType(type);
@@ -4257,9 +4237,7 @@ HWTEST_F(DistributedWantBaseTest, DistributedScheduleWant_ToString_0100, Functio
 
     std::string jsonString = want1->ToString();
     DistributedWant* newWant = DistributedWant::FromString(jsonString);
-    if (newWant == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, newWant);
     std::shared_ptr<DistributedWant> want2(newWant);
 
     CompareWant(want1, want2);

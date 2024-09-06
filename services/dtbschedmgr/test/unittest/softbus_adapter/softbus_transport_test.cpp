@@ -405,20 +405,6 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, InitChannel_001, TestSize.Level3)
 }
 
 /**
- * @tc.name: OnBind_001
- * @tc.desc: call OnBind with get local
- * @tc.type: FUNC
- */
-HWTEST_F(DSchedTransportSoftbusAdapterTest, OnBind_001, TestSize.Level3)
-{
-    DTEST_LOG << "DSchedTransportSoftbusAdapterTest OnBind_001 begin" << std::endl;
-    int32_t sessionId = 0;
-    DSchedTransportSoftbusAdapter::GetInstance().OnBind(sessionId, PEERDEVICEID);
-    EXPECT_EQ(sessionId, 0);
-    DTEST_LOG << "DSchedTransportSoftbusAdapterTest OnBind_001 end" << std::endl;
-}
-
-/**
  * @tc.name: GetSessionIdByDeviceId_001
  * @tc.desc: call GetSessionIdByDeviceId
  * @tc.type: FUNC
@@ -427,6 +413,7 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, GetSessionIdByDeviceId_001, TestSize
 {
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest GetSessionIdByDeviceId_001 begin" << std::endl;
     int32_t sessionId = 0;
+    DSchedTransportSoftbusAdapter::GetInstance().OnBind(sessionId, PEERDEVICEID);
     std::shared_ptr<DSchedDataBuffer> dataBuffer = std::make_shared<DSchedDataBuffer>(SIZE_1);
     ASSERT_NE(dataBuffer, nullptr);
     uint32_t dataType = 0;

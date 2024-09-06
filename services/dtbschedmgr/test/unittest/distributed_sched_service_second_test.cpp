@@ -300,9 +300,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, NotifyCompleteFreeInstall_001, TestS
     DTEST_LOG << "DistributedSchedServiceSecondTest NotifyCompleteFreeInstall_001 start" << std::endl;
 
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
 
     AAFwk::Want want;
     AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
@@ -351,9 +349,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, NotifyStateChangedFromRemote_001, Te
 {
     DTEST_LOG << "DistributedSchedServiceSecondTest NotifyStateChangedFromRemote_001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     AppExecFwk::ElementName element("", BUNDLE_NAME, ABILITY_NAME);
     int result1 = proxy->NotifyStateChangedFromRemote(0, 0, element);
     DTEST_LOG << "result1:" << result1 << std::endl;
@@ -610,9 +606,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, StopRemoteExtensionAbility_003, Test
 {
     DTEST_LOG << "DistributedSchedServiceSecondTest StopRemoteExtensionAbility_003 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     AAFwk::Want want;
     std::string localDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);
@@ -634,9 +628,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, StopExtensionAbilityFromRemote_001, 
 {
     DTEST_LOG << "DistributedSchedServiceSecondTest StopExtensionAbilityFromRemote_001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     AAFwk::Want remoteWant;
     std::string deviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(deviceId);
@@ -663,9 +655,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, StopExtensionAbilityFromRemote_002, 
     DTEST_LOG << "DistributedSchedServiceSecondTest StopExtensionAbilityFromRemote_002 start" << std::endl;
 
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     /**
      * @tc.steps: step1. set want and abilityInfo
      */
@@ -712,9 +702,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, StopExtensionAbilityFromRemote_003, 
 {
     DTEST_LOG << "DistributedSchedServiceSecondTest StopExtensionAbilityFromRemote_003 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     AAFwk::Want remoteWant;
     AppExecFwk::ElementName element("abcdefg123456", "com.ohos.distributedmusicplayer",
         "com.ohos.distributedmusicplayer.MainAbility");
@@ -845,9 +833,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, SetCallerInfo_001, TestSize.Level3)
     DTEST_LOG << "DistributedSchedServiceSecondTest SetCallerInfo_001 start" << std::endl;
 
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     /**
      * @tc.steps: step1. set want and abilityInfo
      */

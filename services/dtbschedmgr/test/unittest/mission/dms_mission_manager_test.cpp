@@ -167,9 +167,7 @@ HWTEST_F(DMSMissionManagerTest, testGetRemoteMissionInfo001, TestSize.Level1)
 HWTEST_F(DMSMissionManagerTest, testGetRemoteMissionInfo002, TestSize.Level1)
 {
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     std::vector<AAFwk::MissionInfo> infos;
     auto ret = proxy->GetMissionInfos(DEVICE_ID, 0, infos);
     EXPECT_TRUE(ret != ERR_NONE);
@@ -195,9 +193,7 @@ HWTEST_F(DMSMissionManagerTest, testGetRemoteMissionInfo002, TestSize.Level1)
 HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions001, TestSize.Level1)
 {
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     auto ret = proxy->StartSyncRemoteMissions(DEVICE_ID, false, 0);
     EXPECT_NE(ret, ERR_NONE);
 }
@@ -210,9 +206,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions001, TestSize.Level1)
 HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions002, TestSize.Level1)
 {
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     auto ret = proxy->StartSyncRemoteMissions("", false, 0);
     EXPECT_NE(ret, ERR_NONE);
 }
@@ -225,9 +219,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions002, TestSize.Level1)
 HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions003, TestSize.Level1)
 {
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     auto ret = proxy->StartSyncRemoteMissions(localDeviceId_, false, 0);
     EXPECT_NE(ret, ERR_NONE);
 }
@@ -376,9 +368,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions014, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions014 begin" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(DEVICE_ID, proxy);
     EXPECT_NE(ret, ERR_NONE);
     DTEST_LOG << "testStartSyncRemoteMissions014 end" << std::endl;
@@ -444,9 +434,7 @@ HWTEST_F(DMSMissionManagerTest, testCleanMissionResources001, TestSize.Level3)
 HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions001, TestSize.Level1)
 {
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     auto ret = proxy->StopSyncRemoteMissions(DEVICE_ID);
     EXPECT_NE(ret, ERR_NONE);
 }
@@ -459,9 +447,7 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions001, TestSize.Level1)
 HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions002, TestSize.Level1)
 {
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     auto ret = proxy->StopSyncRemoteMissions(localDeviceId_);
     EXPECT_NE(ret, ERR_NONE);
 }
@@ -474,9 +460,7 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions002, TestSize.Level1)
 HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions003, TestSize.Level1)
 {
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     auto ret = proxy->StopSyncRemoteMissions("");
     EXPECT_NE(ret, ERR_NONE);
 }
@@ -606,9 +590,7 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions012, TestSize.Level3)
 HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener001, TestSize.Level1)
 {
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     auto ret = proxy->RegisterMissionListener(U16DEVICE_ID, nullptr);
     EXPECT_TRUE(ret != ERR_NONE);
 
@@ -627,9 +609,7 @@ HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener001, TestSize.Level1)
 HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener002, TestSize.Level1)
 {
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     sptr<IRemoteObject> listener(new RemoteMissionListenerTest());
     auto ret = proxy->RegisterMissionListener(U16DEVICE_ID, listener);
     EXPECT_TRUE(ret != ERR_NONE);
@@ -745,9 +725,7 @@ HWTEST_F(DMSMissionManagerTest, testRegisterMissionListener008, TestSize.Level3)
 HWTEST_F(DMSMissionManagerTest, testUnRegisterMissionListener001, TestSize.Level1)
 {
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     auto ret = proxy->UnRegisterMissionListener(U16DEVICE_ID, nullptr);
     EXPECT_TRUE(ret != ERR_NONE);
 
@@ -1568,9 +1546,7 @@ HWTEST_F(DMSMissionManagerTest, ProxyCallStopSyncMissionsFromRemote001, TestSize
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallStopSyncMissionsFromRemote001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     CallerInfo callerInfo;
     int32_t ret = proxy->StopSyncMissionsFromRemote(callerInfo);
     EXPECT_EQ(ret, REQUEST_CODE_ERR);
@@ -1587,9 +1563,7 @@ HWTEST_F(DMSMissionManagerTest, ProxyCallNotifyMissionsChangedFromRemote001, Tes
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallNotifyMissionsChangedFromRemote001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     CallerInfo callerInfo;
     std::vector<DstbMissionInfo> missionInfos;
     int32_t ret = proxy->NotifyMissionsChangedFromRemote(missionInfos, callerInfo);
@@ -1607,9 +1581,7 @@ HWTEST_F(DMSMissionManagerTest, ProxyCallGetRemoteMissionSnapshotInfo001, TestSi
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallGetRemoteMissionSnapshotInfo001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     unique_ptr<AAFwk::MissionSnapshot> missionSnapshot = nullptr;
     int32_t ret = proxy->GetRemoteMissionSnapshotInfo("MockDevId", 1, missionSnapshot);
     EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
@@ -1626,9 +1598,7 @@ HWTEST_F(DMSMissionManagerTest, ProxyCallGetRemoteMissionSnapshotInfo002, TestSi
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallGetRemoteMissionSnapshotInfo002 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     unique_ptr<AAFwk::MissionSnapshot> missionSnapshot = nullptr;
     int32_t ret = proxy->GetRemoteMissionSnapshotInfo("", 1, missionSnapshot);
     EXPECT_EQ(ret, ERR_NULL_OBJECT);
@@ -1645,9 +1615,7 @@ HWTEST_F(DMSMissionManagerTest, ProxyCallGetRemoteMissionSnapshotInfo003, TestSi
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallGetRemoteMissionSnapshotInfo003 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     unique_ptr<AAFwk::MissionSnapshot> missionSnapshot = nullptr;
     int32_t ret = proxy->GetRemoteMissionSnapshotInfo("MockDevId", -1, missionSnapshot);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -2177,9 +2145,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions015, TestSize.Level3)
         DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
     }
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     {
         std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
         DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
@@ -2214,9 +2180,7 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions016, TestSize.Level3)
         DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
     }
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     {
         std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
         DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
@@ -2426,9 +2390,7 @@ HWTEST_F(DMSMissionManagerTest, testStopSyncRemoteMissions013, TestSize.Level3)
      */
     DTEST_LOG << "testGetRemoteDms001 begin" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     {
         std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
         DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
@@ -2859,9 +2821,7 @@ HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedToRemoteInner003, TestS
 {
     DTEST_LOG << "testNotifyMissionsChangedToRemoteInner003 begin" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     {
         std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
         DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
@@ -3070,9 +3030,7 @@ HWTEST_F(DMSMissionManagerTest, testRetryStartSyncRemoteMissions005, TestSize.Le
         DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
     }
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     {
         std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
         DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
@@ -3198,9 +3156,7 @@ HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied007, TestSize.Level3)
     DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     sptr<IRemoteObject> remote(new RemoteMissionListenerTest());
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     {
         std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
         DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();

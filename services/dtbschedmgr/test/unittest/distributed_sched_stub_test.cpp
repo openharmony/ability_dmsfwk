@@ -243,13 +243,6 @@ HWTEST_F(DistributedSchedStubTest, StartRemoteAbilityInner_004, TestSize.Level3)
     int32_t result = 0;
     int32_t uid = -1;
     DistributedSchedService::GetInstance().ReportEvent(want, eventName, result, uid);
-
-    const std::string bundleName = "com.third.hiworld.example";
-    uid = BundleManagerInternal::GetUidFromBms(bundleName);
-    if (uid <= 0) {
-        return;
-    }
-    DistributedSchedService::GetInstance().ReportEvent(want, eventName, result, uid);
     EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedStubTest StartRemoteAbilityInner_004 end" << std::endl;
 }

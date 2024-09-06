@@ -402,11 +402,9 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerCallBackTest_005, TestSize.Leve
 HWTEST_F(BundleManagerInternalTest, GetBundleNameListFromBms_001, TestSize.Level3)
 {
     DTEST_LOG << "BundleManagerCallBackTest GetBundleNameListFromBms_001 begin" << std::endl;
-    const std::string bundleName = "com.ohos.launcher";
+    const std::string bundleName = "com.ohos.permissionmanager";
     int32_t uid = BundleManagerInternal::GetUidFromBms(bundleName);
-    if (uid <= 0) {
-        return;
-    }
+    ASSERT_TRUE(uid > 0);
     std::vector<std::u16string> u16BundleNameList;
     BundleManagerInternal::GetBundleNameListFromBms(uid, u16BundleNameList);
     EXPECT_TRUE(!u16BundleNameList.empty());
@@ -426,9 +424,7 @@ HWTEST_F(BundleManagerInternalTest, GetBundleNameListFromBms_002, TestSize.Level
     DTEST_LOG << "BundleManagerCallBackTest GetBundleNameListFromBms_002 begin" << std::endl;
     const std::string bundleName = "com.ohos.permissionmanager";
     int32_t uid = BundleManagerInternal::GetUidFromBms(bundleName);
-    if (uid <= 0) {
-        return;
-    }
+    ASSERT_TRUE(uid > 0);
     std::vector<std::u16string> u16BundleNameList;
     bool ret1 = BundleManagerInternal::GetBundleNameListFromBms(uid, u16BundleNameList);
     EXPECT_EQ(ret1, true);
@@ -446,11 +442,9 @@ HWTEST_F(BundleManagerInternalTest, GetBundleNameListFromBms_002, TestSize.Level
 HWTEST_F(BundleManagerInternalTest, GetCallerAppIdFromBms_001, TestSize.Level3)
 {
     DTEST_LOG << "BundleManagerInternalTest GetCallerAppIdFromBms_001 begin" << std::endl;
-    const std::string bundleName = "com.ohos.launcher";
+    const std::string bundleName = "com.ohos.permissionmanager";
     int32_t uid = BundleManagerInternal::GetUidFromBms(bundleName);
-    if (uid <= 0) {
-        return;
-    }
+    ASSERT_TRUE(uid > 0);
     string appId;
     bool ret = BundleManagerInternal::GetCallerAppIdFromBms(uid, appId);
     EXPECT_EQ(ret, true);

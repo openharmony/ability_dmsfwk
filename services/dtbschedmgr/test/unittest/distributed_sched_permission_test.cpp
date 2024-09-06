@@ -1650,9 +1650,7 @@ HWTEST_F(DistributedSchedPermissionTest, FromJson_001, TestSize.Level3)
         {FIELD_GROUP_TYPE, MOCK_FIELD_GROUP_TYPE},
         {FIELD_GROUP_VISIBILITY, MOCK_FIELD_GROUP_VISIBILITY}
     };
-    if (jsonObject.is_discarded()) {
-        return;
-    }
+    ASSERT_NE(true, jsonObject.is_discarded());
     from_json(jsonObject, groupInfo);
     EXPECT_EQ(groupInfo.groupName, MOCK_FIELD_GROUP_NAME);
     DTEST_LOG << "DistributedSchedPermissionTest FromJson_001 end" <<  std::endl;
@@ -1668,9 +1666,7 @@ HWTEST_F(DistributedSchedPermissionTest, FromJson_002, TestSize.Level3)
     DTEST_LOG << "DistributedSchedPermissionTest FromJson_002 begin" << std::endl;
     GroupInfo groupInfo;
     nlohmann::json jsonObject;
-    if (jsonObject.is_discarded()) {
-        return;
-    }
+    ASSERT_NE(true, jsonObject.is_discarded());
     from_json(jsonObject, groupInfo);
     EXPECT_EQ(groupInfo.groupName, "");
     DTEST_LOG << "DistributedSchedPermissionTest FromJson_002 end " <<  std::endl;
@@ -1734,7 +1730,6 @@ HWTEST_F(DistributedSchedPermissionTest, MarkUriPermission_002, TestSize.Level3)
 HWTEST_F(DistributedSchedPermissionTest, MarkUriPermission_003, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedPermissionTest MarkUriPermission_003 begin" << std::endl;
-    DistributedSchedUtil::MockBundlePermission();
     AAFwk::Want want;
     want.AddFlags(want.FLAG_AUTH_READ_URI_PERMISSION);
     want.SetUri("file://com.ohos.mms/data/test_B");
