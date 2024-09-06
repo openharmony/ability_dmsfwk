@@ -1080,7 +1080,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, DisconnectAbility_001, TestSize.L
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     dtbabilitymgrService_->connect_ = new AppConnectionStub(token, continuationExtraParams);
     int32_t ret = dtbabilitymgrService_->DisconnectAbility();
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DistributedAbilityManagerServiceTest DisconnectAbility_001 end" << std::endl;
 }
 

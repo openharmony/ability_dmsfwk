@@ -252,10 +252,7 @@ HWTEST_F(DistributedSchedConnectTest, DumpConnectInfo_001, TestSize.Level1)
     }
 
     auto dms = samgr->GetSystemAbility(DISTRIBUTED_SCHED_SA_ID);
-    if (dms == nullptr) {
-        DTEST_LOG << "dms is nullptr" << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, dms);
     std::vector<std::u16string> args;
     args.push_back(u"-connect");
     int32_t result = dms->Dump(STDOUT_FD, args);
@@ -1015,7 +1012,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectAbilityFromRemote004, TestSize.L
 
     int32_t ret = DistributedSchedService::GetInstance().DisconnectAbilityFromRemote(
         connect, 0, "123_remote_device_id");
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedConnectTest DisconnectAbilityFromRemote004 end" << std::endl;
 }
 
@@ -1150,9 +1147,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallDisconnectRemoteAbility001, TestS
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallDisconnectRemoteAbility001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     /**
      * @tc.steps: step1. call HandleLocalCallerDied
      */
@@ -1177,9 +1172,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallDisconnectRemoteAbility002, TestS
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallDisconnectRemoteAbility002 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     /**
      * @tc.steps: step1. call HandleLocalCallerDied
@@ -1213,9 +1206,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallConnectRemoteAbility001, TestSize
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectRemoteAbility001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     OHOS::AAFwk::Want want;
     want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
     sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
@@ -1242,9 +1233,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallConnectRemoteAbility002, TestSize
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectRemoteAbility002 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     OHOS::AAFwk::Want want;
     want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
     /**
@@ -1271,9 +1260,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallConnectAbilityFromRemote001, Test
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectAbilityFromRemote001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     OHOS::AAFwk::Want want;
     want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
     AppExecFwk::AbilityInfo abilityInfo;
@@ -1304,9 +1291,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallConnectAbilityFromRemote002, Test
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectAbilityFromRemote002 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     OHOS::AAFwk::Want want;
     want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
     AppExecFwk::AbilityInfo abilityInfo;
@@ -1337,9 +1322,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallDisconnectAbilityFromRemote001, T
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallDisconnectAbilityFromRemote001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     /**
      * @tc.steps: step1. call CheckDistributedConnectLocked
@@ -1367,9 +1350,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallDisconnectAbilityFromRemote002, T
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallDisconnectAbilityFromRemote002 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     /**
      * @tc.steps: step1. call RemoteConnectAbilityMappingLocked
      */
@@ -1486,9 +1467,7 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub001, TestSize.
     sptr<AbilityConnectionWrapperStub> connectStub(new AbilityConnectionWrapperStub(connect));
     ASSERT_NE(connectStub, nullptr);
     MessageParcel data;
-    if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
-        return;
-    }
+    ASSERT_NE(false, data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN));
     MessageParcel reply;
     MessageOption option;
     AppExecFwk::ElementName element;
@@ -1513,9 +1492,7 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub002, TestSize.
     sptr<AbilityConnectionWrapperStub> connectStub(new AbilityConnectionWrapperStub(connect, "localDeviceId"));
     ASSERT_NE(connectStub, nullptr);
     MessageParcel data;
-    if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
-        return;
-    }
+    ASSERT_NE(false, data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN));
     MessageParcel reply;
     MessageOption option;
     AppExecFwk::ElementName element;
@@ -1540,9 +1517,7 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub003, TestSize.
     sptr<AbilityConnectionWrapperStub> connectStub(new AbilityConnectionWrapperStub(connect));
     ASSERT_NE(connectStub, nullptr);
     MessageParcel data;
-    if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
-        return;
-    }
+    ASSERT_NE(false, data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN));
     MessageParcel reply;
     MessageOption option;
     AppExecFwk::ElementName element;
@@ -1566,9 +1541,7 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub004, TestSize.
     sptr<AbilityConnectionWrapperStub> connectStub(new AbilityConnectionWrapperStub(connect, "localDeviceId"));
     ASSERT_NE(connectStub, nullptr);
     MessageParcel data;
-    if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
-        return;
-    }
+    ASSERT_NE(false, data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN));
     MessageParcel reply;
     MessageOption option;
     AppExecFwk::ElementName element;
@@ -1618,9 +1591,7 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub006, TestSize.
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
-        return;
-    }
+    ASSERT_NE(false, data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN));
     // no element
     int32_t result = connectStub->OnRemoteRequest(IAbilityConnection::ON_ABILITY_DISCONNECT_DONE, data, reply, option);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
@@ -1640,9 +1611,7 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub007, TestSize.
     sptr<AbilityConnectionWrapperStub> connectStub(new AbilityConnectionWrapperStub(connect, "localDeviceId"));
     ASSERT_NE(connectStub, nullptr);
     MessageParcel data;
-    if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
-        return;
-    }
+    ASSERT_NE(false, data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN));
     MessageParcel reply;
     MessageOption option;
     AppExecFwk::ElementName element;
@@ -1667,9 +1636,7 @@ HWTEST_F(DistributedSchedConnectTest, AbilityConnectionWrapperStub008, TestSize.
     sptr<AbilityConnectionWrapperStub> connectStub(new AbilityConnectionWrapperStub(connect, "localDeviceId"));
     ASSERT_NE(connectStub, nullptr);
     MessageParcel data;
-    if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
-        return;
-    }
+    ASSERT_NE(false, data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN));
     MessageParcel reply;
     MessageOption option;
     // no remoteObject

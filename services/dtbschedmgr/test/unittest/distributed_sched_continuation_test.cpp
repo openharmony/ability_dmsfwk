@@ -420,9 +420,7 @@ HWTEST_F(DSchedContinuationTest, ContinueLocalMission_002, TestSize.Level1)
     auto callback = GetDSchedService();
     WantParams wantParams;
     MockOnStart();
-    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, DistributedSchedService::GetInstance().dschedContinuation_);
     ASSERT_NE(DistributedSchedService::GetInstance().dschedContinuation_, nullptr);
     DistributedSchedService::GetInstance().dschedContinuation_->PushCallback(missionId, callback, deviceId, false);
     int32_t ret = DistributedSchedService::GetInstance().ContinueLocalMission(
@@ -488,9 +486,7 @@ HWTEST_F(DSchedContinuationTest, ContinueLocalMission_005, TestSize.Level1)
     int32_t missionId = 0;
     auto callback = GetDSchedService();
     WantParams wantParams;
-    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, DistributedSchedService::GetInstance().dschedContinuation_);
     DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
     ASSERT_NE(DistributedSchedService::GetInstance().dschedContinuation_, nullptr);
     DistributedSchedService::GetInstance().dschedContinuation_->PushCallback(missionId, callback, deviceId, false);
@@ -1110,9 +1106,7 @@ HWTEST_F(DSchedContinuationTest, StartFreeInstallFromRemote_001, TestSize.Level0
 {
     DTEST_LOG << "DSchedContinuationTest StartFreeInstallFromRemote_001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     AAFwk::Want want;
     CallerInfo callerInfo;
     callerInfo.uid = 0;
@@ -1150,9 +1144,7 @@ HWTEST_F(DSchedContinuationTest, StartFreeInstallFromRemote_002, TestSize.Level1
 {
     DTEST_LOG << "DSchedContinuationTest StartFreeInstallFromRemote_002 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
 
     AAFwk::Want want;
     AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
@@ -1188,9 +1180,7 @@ HWTEST_F(DSchedContinuationTest, StartFreeInstallFromRemote_003, TestSize.Level1
 {
     DTEST_LOG << "DSchedContinuationTest StartFreeInstallFromRemote_003 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     /**
      * @tc.steps: step1. set want and abilityInfo
      */
@@ -1301,9 +1291,7 @@ HWTEST_F(DSchedContinuationTest, StartFreeInstallFromRemote_006, TestSize.Level1
 {
     DTEST_LOG << "DSchedContinuationTest StartFreeInstallFromRemote_006 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
 
     AAFwk::Want want;
     AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
@@ -1646,9 +1634,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallNotifyProcessDiedFromRemote001, TestSi
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallNotifyProcessDiedFromRemote001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     CallerInfo callerInfo;
     callerInfo.sourceDeviceId = "255.255.255.255";
     callerInfo.uid = 0;
@@ -1687,9 +1673,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallStartRemoteAbilityByCall002, TestSize.
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallStartRemoteAbilityByCall002 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     std::string bundleName = "bundleName";
     std::string abilityName = "abilityName";
     std::shared_ptr<Want> spWant = MockWant(bundleName, abilityName, 0);
@@ -1726,9 +1710,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallReleaseRemoteAbility002, TestSize.Leve
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallReleaseRemoteAbility002 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
         "com.ohos.distributedmusicplayer.MainAbility");
     int32_t ret = proxy->ReleaseRemoteAbility(GetDSchedService(), element);
@@ -1776,9 +1758,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallStartAbilityByCallFromRemote002, TestS
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallReleaseRemoteAbility002 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     // mock want
     std::string bundleName = "bundleName";
     std::string abilityName = "abilityName";
@@ -1832,9 +1812,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallReleaseAbilityFromRemote002, TestSize.
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallReleaseAbilityFromRemote002 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     // mock callerinfo
     CallerInfo callerInfo;
     callerInfo.sourceDeviceId = "255.255.255.255";
@@ -1858,9 +1836,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallStartRemoteFreeInstall001, TestSize.Le
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallStartRemoteFreeInstall001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     // mock want
     std::string bundleName = "bundleName";
     std::string abilityName = "abilityName";
@@ -1902,9 +1878,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallNotifyCompleteFreeInstallFromRemote001
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallNotifyCompleteFreeInstallFromRemote001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     int32_t ret = proxy->NotifyCompleteFreeInstallFromRemote(1, 1);
     EXPECT_NE(ret, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallNotifyCompleteFreeInstallFromRemote001 end" << std::endl;
@@ -1920,9 +1894,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallGetDistributedComponentList001, TestSi
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallGetDistributedComponentList001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     vector<string> distributedComponents = { "test "};
     int32_t ret = proxy->GetDistributedComponentList(distributedComponents);
     EXPECT_NE(ret, ERR_NULL_OBJECT);
@@ -1957,9 +1929,7 @@ HWTEST_F(DSchedContinuationTest, ProxyCallStartShareFormFromRemote002, TestSize.
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallStartShareFormFromRemote002 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     const OHOS::AppExecFwk::FormShareInfo formShareInfo {};
     int32_t ret = proxy->StartShareFormFromRemote("111", formShareInfo);
     EXPECT_NE(ret, ERR_NULL_OBJECT);

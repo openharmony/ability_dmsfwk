@@ -201,9 +201,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility_001, TestSize.Leve
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest StartRemoteAbility_001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     /**
      * @tc.steps: step1. StartRemoteAbility with uninitialized params
      * @tc.expected: step1. StartRemoteAbility return INVALID_PARAMETERS_ERR
@@ -235,9 +233,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility_002, TestSize.Leve
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest StartRemoteAbility_002 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     /**
      * @tc.steps: step1. set want with wrong deviceId
      * @tc.expected: step2. StartRemoteAbility return INVALID_PARAMETERS_ERR
@@ -291,9 +287,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility_004, TestSize.Leve
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest StartRemoteAbility_004 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     /**
      * @tc.steps: step1. set want and abilityInfo
      * @tc.expected: step2. StartRemoteAbility return INVALID_PARAMETERS_ERR
@@ -425,9 +419,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartAbilityFromRemote_001, TestSize.
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest StartAbilityFromRemote_001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     AAFwk::Want want;
     AppExecFwk::AbilityInfo abilityInfo;
     CallerInfo callerInfo;
@@ -468,9 +460,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteShareForm_002, TestSize.Le
     DTEST_LOG << "DistributedSchedServiceFirstTest StartRemoteShareForm_002 start" << std::endl;
 
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
 
     AAFwk::Want want;
     AppExecFwk::ElementName element("255.255.255.255", "com.ohos.distributedmusicplayer",
@@ -623,9 +613,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, SendResultFromRemote_001, TestSize.Le
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest SendResultFromRemote_001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
-    if (proxy == nullptr) {
-        return;
-    }
+    ASSERT_NE(nullptr, proxy);
     AAFwk::Want want;
     CallerInfo callerInfo;
     callerInfo.uid = 0;
