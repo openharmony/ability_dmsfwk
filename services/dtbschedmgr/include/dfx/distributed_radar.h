@@ -48,6 +48,7 @@ const std::string TO_CALL_PKG = "TO_CALL_PKG";
 const std::string HOST_PKG = "HOST_PKG";
 const std::string ERROR_CODE = "ERROR_CODE";
 const std::string PEER_UDID = "PEER_UDID";
+const std::string APP_CALLER = "APP_CALLER";
 constexpr char APP_CONTINUE_DOMAIN[] = "APP_CONTINUE";
 constexpr int32_t ANONYM_MIN_LENGTH = 10;
 constexpr int32_t SUBSTR_UDID_LENGTH = 5;
@@ -166,7 +167,8 @@ public:
     bool RecvUnfocused(const std::string& func);
     bool UnfocusedGetBundleName(const std::string& func, int32_t errCode);
     bool NotifyDockUnfocused(const std::string& func, int32_t errCode);
-    bool ClickIconDmsContinue(const std::string& func, int32_t errCode, std::string peerUdid);
+    bool ClickIconDmsContinue(const std::string& func, int32_t errCode, std::string peerUdid,
+        const std::string& bundleName);
     bool ClickIconDmsStartAbility(const std::string& func, int32_t errCode);
     bool ClickIconDmsRecvOver(const std::string& func, int32_t errCode);
     bool SaveDataDmsContinue(const std::string& func, int32_t errCode);
