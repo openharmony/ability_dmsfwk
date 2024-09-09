@@ -24,11 +24,7 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
-const std::string SETTINGS_DATA_URI =
-    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=Continue_Switch_Status";
-const std::string SETTINGS_USER_SECURE_URI =
-    "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE";
-    
+
 class SettingObserver : public AAFwk::DataAbilityObserverStub {
 public:
     SettingObserver();
@@ -59,7 +55,6 @@ public:
     
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
-    Uri AssembleUri(const std::string &key);
     sptr<SettingObserver> GetSettingObserver(const std::string &key);
 
 private:
