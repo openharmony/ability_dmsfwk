@@ -73,6 +73,7 @@ private:
     static std::set<std::shared_ptr<DeviceListener>> listenerSet_;
 
     std::shared_ptr<DistributedHardware::DeviceStateCallback> stateCallback_;
+    std::shared_ptr<DistributedHardware::DevTrustChangeCallback> devTrustChangeCallback_;
     std::shared_ptr<DistributedHardware::DmInitCallback> initCallback_;
 class DeviceInitCallBack : public DistributedHardware::DmInitCallback {
     void OnRemoteDied() override;
@@ -83,6 +84,11 @@ class DmsDeviceStateCallback : public DistributedHardware::DeviceStateCallback {
     void OnDeviceOffline(const DistributedHardware::DmDeviceInfo& deviceInfo) override;
     void OnDeviceChanged(const DistributedHardware::DmDeviceInfo& deviceInfo) override;
     void OnDeviceReady(const DistributedHardware::DmDeviceInfo& deviceInfo) override;
+};
+
+class DmsDevTrustChangeCallback : public DistributedHardware::DevTrustChangeCallback {
+    void OnDeviceTrustChange(const std::string &udid, const std::string &uuid,
+        const DistributedHardware::DmAuthForm authform) override;
 };
 };
 } // namespace DistributedSchedule

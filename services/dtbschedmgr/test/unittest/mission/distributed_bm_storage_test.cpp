@@ -544,5 +544,25 @@ HWTEST_F(DistributedBmStorageTest, ConvertToDistributedBundleInfoTest_001, TestS
     }
     DTEST_LOG << "DistributedBmStorageTest ConvertToDistributedBundleInfoTest_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: DmsPutBatchTest_001
+ * @tc.desc: test delete DistributedBmStorage
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, DelDataOfLogoutDevTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest DelDataOfLogoutDevTest_001 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
+    auto distributedDataStorage = GetDmsBmStorage();
+    EXPECT_NE(distributedDataStorage, nullptr);
+    if (distributedDataStorage != nullptr) {
+        const std::string udid = "";
+        const std::string uuid = "";
+        bool ret = dmsBmStorage_->GetInstance()->DelDataOfLogoutDev(udid, uuid);
+        EXPECT_EQ(ret, false);
+    }
+    DTEST_LOG << "DistributedBmStorageTest DelDataOfLogoutDevTest_001 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
