@@ -908,8 +908,6 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
         HILOGE("get remote dms null!");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
-    std::string peerUdid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(srcDeviceId);
-    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid);
 
     MissionInfo missionInfo;
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->GetMissionInfo("", missionId, missionInfo);
@@ -921,6 +919,9 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
     std::string abilityName = missionInfo.want.GetElement().GetAbilityName();
     HILOGD("bundlename: %{public}s, ability is %{public}s", bundleName.c_str(), abilityName.c_str());
     DmsUE::GetInstance().TriggerDmsContinue(bundleName, abilityName, srcDeviceId, ERR_OK);
+
+    std::string peerUdid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(srcDeviceId);
+    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid, bundleName);
 
     int32_t result = remoteDms->ContinueMission(srcDeviceId, dstDeviceId, missionId, callback, wantParams);
     HILOGI("ContinueRemoteMission result: %{public}d!", result);
