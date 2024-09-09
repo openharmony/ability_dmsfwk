@@ -178,7 +178,7 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
 }
 
 int32_t DSchedContinueManager::ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
-    std::string bundleName, const std::string& continueType,
+    std::string srcBundleName, std::string bundleName, const std::string& continueType,
     const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
     if (srcDeviceId.empty() || dstDeviceId.empty() || callback == nullptr) {
@@ -214,8 +214,8 @@ int32_t DSchedContinueManager::ContinueMission(const std::string& srcDeviceId, c
     }
 #endif
 
-    auto func = [this, srcDeviceId, dstDeviceId, bundleName, continueType, callback, wantParams]() {
-        HandleContinueMission(srcDeviceId, dstDeviceId, bundleName, continueType, callback, wantParams);
+    auto func = [this, srcDeviceId, dstDeviceId, srcBundleName, bundleName, continueType, callback, wantParams]() {
+        HandleContinueMission(srcDeviceId, dstDeviceId, srcBundleName, bundleName, continueType, callback, wantParams);
     };
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler_ is nullptr");
@@ -226,7 +226,7 @@ int32_t DSchedContinueManager::ContinueMission(const std::string& srcDeviceId, c
 }
 
 void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
-    std::string bundleName, const std::string& continueType,
+    std::string srcBundleName, std::string bundleName, const std::string& continueType,
     const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
     HILOGI("start, srcDeviceId: %{public}s. dstDeviceId: %{public}s. bundleName: %{public}s."
@@ -238,7 +238,7 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
         return;
     }
 
-    DSchedContinueInfo info = DSchedContinueInfo(srcDeviceId, bundleName, dstDeviceId, bundleName, continueType);
+    DSchedContinueInfo info = DSchedContinueInfo(srcDeviceId, srcBundleName, dstDeviceId, bundleName, continueType);
     HandleContinueMissionWithBundleName(info, callback, wantParams);
     return;
 }
@@ -317,7 +317,14 @@ void DSchedContinueManager::HandleContinueMissionWithBundleName(DSchedContinueIn
         return;
     }
     int32_t subType = CONTINUE_PUSH;
-    CompleteBundleName(info, direction, subType);
+    if (direction == CONTINUE_SOURCE) {
+        cntSource_++;
+    } else {
+        cntSink_++;
+        subType = CONTINUE_PULL;
+    }
+    HILOGE("AAAAAAAAA continue info: %{public}s", info.toString().c_str());
+    // CompleteBundleName(info, direction, subType);
     {
         std::lock_guard<std::mutex> continueLock(continueMutex_);
         if (!continues_.empty() && continues_.find(info) != continues_.end()) {
