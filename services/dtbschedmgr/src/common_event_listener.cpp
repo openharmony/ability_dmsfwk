@@ -98,24 +98,22 @@ int32_t CommonEventListener::GetForegroundOsAccountLocalId()
         return INVALID_PARAMETERS_ERR;
     }
     HILOGD("GetForegroundOsAccountLocalId accountId is: %{public}d", accountId);
-    GetOsAccountType(accountId);
+    OnUserSwitched(accountId);
     return accountId;
 }
 
-ErrCode CommonEventListener::GetOsAccountType(int32_t& accountId)
+void CommonEventListener::OnUserSwitched(int32_t& accountId)
 {
     AccountSA::OsAccountType type;
     ErrCode err = AccountSA::OsAccountManager::GetOsAccountType(accountId, type);
     if (err != ERR_OK) {
         HILOGE("GetOsAccountType passing param invalid or return error!, err : %{public}d", err);
-        return INVALID_PARAMETERS_ERR;
     }
     if (type == AccountSA::OsAccountType::PRIVATE) {
         HILOGI("GetOsAccountType : OsAccountType is PRIVATE, type : %{public}d", type);
         DataShareManager::GetInstance().UpdateSwitchStatus(SwitchStatusDependency::GetInstance()
             .CONTINUE_SWITCH_STATUS_KEY, SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_OFF);
     }
-    return ERR_OK;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

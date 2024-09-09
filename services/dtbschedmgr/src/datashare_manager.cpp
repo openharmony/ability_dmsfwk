@@ -114,10 +114,7 @@ void DataShareManager::UnregisterObserver(const std::string &key)
     Uri uri(AssembleUserSecureUri(userId, key));
     dataShareHelper->UnregisterObserver(uri, observer);
     dataShareHelper->Release();
-    if (observer != nullptr) {
-        HILOGI("UnregisterObserver delete observer");
-        delete observer;
-    }
+    
     std::lock_guard<std::mutex> lockGuard(observerMapMutex_);
     settingObserverMap_.erase(key);
     HILOGI("DataShareManager UnregisterObserver success with key is %{public}s", key.c_str());

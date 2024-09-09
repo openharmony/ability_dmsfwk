@@ -31,7 +31,7 @@ public:
 
     void OnReceiveEvent(const EventFwk::CommonEventData &eventData);
     int32_t GetForegroundOsAccountLocalId();
-    ErrCode GetOsAccountType(int32_t &accountId);
+    void OnUserSwitched(int32_t &accountId);
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS
