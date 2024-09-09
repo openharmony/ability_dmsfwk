@@ -42,8 +42,6 @@ private:
     std::string GetSwitchStatus(const std::string &key, const std::string &defaultValue);
     std::shared_ptr<DataShare::DataShareHelper> GetDataShareHelper();
     std::mutex dataShareMutex_;
-    const std::string SETTINGS_DATA_URI_PREFIX =
-    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
     std::string switchStatus_;
 };
 } // namespace DistributedSchedule

@@ -29,8 +29,6 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DMSSwitchStatusDep";
-const std::string SETTINGS_DATA_URI =
-    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=Continue_Switch_Status";
 }
 SwitchStatusDependency &SwitchStatusDependency::GetInstance()
 {

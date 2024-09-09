@@ -70,7 +70,7 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
             break;
         case USER_SWITCHED :
             HILOGI("USER_SWITCHED");
-            GetForegroundOsAccountLocalId();
+            OnUserSwitched();
             break;
         case PACKAGE_ADDED :
             HILOGI("PACKAGE_ADDED: %{public}s", want.GetElement().GetBundleName().c_str());
@@ -98,17 +98,25 @@ int32_t CommonEventListener::GetForegroundOsAccountLocalId()
         return INVALID_PARAMETERS_ERR;
     }
     HILOGD("GetForegroundOsAccountLocalId accountId is: %{public}d", accountId);
-    OnUserSwitched(accountId);
     return accountId;
 }
 
-void CommonEventListener::OnUserSwitched(int32_t& accountId)
+int32_t CommonEventListener::GetOsAccountType(int32_t& accountId)
 {
     AccountSA::OsAccountType type;
     ErrCode err = AccountSA::OsAccountManager::GetOsAccountType(accountId, type);
     if (err != ERR_OK) {
         HILOGE("GetOsAccountType passing param invalid or return error!, err : %{public}d", err);
+        return INVALID_PARAMETERS_ERR;
     }
+    return type;
+}
+
+void CommonEventListener::OnUserSwitched()
+{
+    int32_t accountId = GetForegroundOsAccountLocalId();
+    AccountSA::OsAccountType type = GetOsAccountType(accountId);
+    HILOGI("OnUserSwitched called, accountId = %{public}d, type = %{public}d", accountId, type);
     if (type == AccountSA::OsAccountType::PRIVATE) {
         HILOGI("GetOsAccountType : OsAccountType is PRIVATE, type : %{public}d", type);
         DataShareManager::GetInstance().UpdateSwitchStatus(SwitchStatusDependency::GetInstance()
