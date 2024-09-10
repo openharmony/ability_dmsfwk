@@ -18,6 +18,7 @@
 #include "distributed_sched_service.h"
 #include "dsched_continue.h"
 #include "dtbschedmgr_log.h"
+#include "softbus_error_code.h"
 #include "test_log.h"
 
 using namespace testing;
@@ -28,6 +29,7 @@ namespace DistributedSchedule {
 
 namespace {
     const std::string BASEDIR = "/data/service/el1/public/database/DistributedSchedule";
+    const std::string BUNDLEMAME_1 = "bundleName";
     const int32_t WAITTIME = 2000;
     const uint32_t DSCHED_BUFFER_SIZE = 1024;
 }
@@ -1049,6 +1051,65 @@ HWTEST_F(DSchedContinueTest, UpdateStateTest_033_1, TestSize.Level0)
     conti->UpdateState(stateType);
     EXPECT_NE(nullptr, conti->stateMachine_);
     DTEST_LOG << "DSchedContinueTest UpdateStateTest_033_1 end" << std::endl;
+}
+
+/**
+ * @tc.name: CheckStartPermission_034_1
+ * @tc.desc: CheckStartPermission
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueTest, CheckStartPermission_034_1, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueTest CheckStartPermission_034_1 begin" << std::endl;
+    auto cmd = std::make_shared<DSchedContinueDataCmd>();
+    ASSERT_NE(nullptr, cmd);
+    cmd->srcBundleName_ = BUNDLEMAME_1;
+    cmd->dstBundleName_ = BUNDLEMAME_1;
+    std::string deviceId = "123";
+    std::string bundleName = "test";
+    int32_t subType = CONTINUE_PULL;
+    int32_t direction = CONTINUE_SINK;
+    sptr<IRemoteObject> callback = nullptr;
+    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
+    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
+    conti->Init();
+
+    int32_t ret = conti->CheckStartPermission(cmd);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cmd->srcBundleName_.clear();
+    ret = conti->CheckStartPermission(cmd);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedContinueTest CheckStartPermission_034_1 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConvertToDmsSdkErr_035_1
+ * @tc.desc: ConvertToDmsSdkErr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueTest, ConvertToDmsSdkErr_035_1, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueTest ConvertToDmsSdkErr_035_1 begin" << std::endl;
+    auto cmd = std::make_shared<DSchedContinueDataCmd>();
+    ASSERT_NE(nullptr, cmd);
+    cmd->srcBundleName_ = BUNDLEMAME_1;
+    cmd->dstBundleName_ = BUNDLEMAME_1;
+    std::string deviceId = "123";
+    std::string bundleName = "test";
+    int32_t subType = CONTINUE_PULL;
+    int32_t direction = CONTINUE_SINK;
+    sptr<IRemoteObject> callback = nullptr;
+    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
+    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
+    conti->Init();
+
+    int32_t ret = conti->ConvertToDmsSdkErr(0);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = conti->ConvertToDmsSdkErr(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_AP_STA_CHIP_CONFLICT);
+    EXPECT_EQ(ret,  DmsInterfaceSdkErr::ERR_BIND_REMOTE_HOTSPOT_ENABLE_STATE);
+    ret = conti->ConvertToDmsSdkErr(-1);
+    EXPECT_EQ(ret, DmsInterfaceSdkErr::ERR_DMS_WORK_ABNORMALLY);
+    DTEST_LOG << "DSchedContinueTest ConvertToDmsSdkErr_035_1 end" << std::endl;
 }
 }
 }

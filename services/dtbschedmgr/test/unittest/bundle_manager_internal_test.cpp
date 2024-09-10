@@ -541,5 +541,110 @@ HWTEST_F(BundleManagerInternalTest, GetBundleNameId_002, TestSize.Level3)
     EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
     DTEST_LOG << "BundleManagerInternalTest GetBundleNameId_002 end "<< std::endl;
 }
+
+/**
+ * @tc.name: IsSameDeveloperId_001
+ * @tc.desc: IsSameDeveloperId
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, IsSameDeveloperId_001, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest IsSameDeveloperId_001 begin" << std::endl;
+    std::string bundleNameInCurrentSide;
+    std::string developerId4OtherSide;
+    bool ret = BundleManagerInternal::IsSameDeveloperId(bundleNameInCurrentSide, developerId4OtherSide);
+    EXPECT_EQ(ret, false);
+
+    developerId4OtherSide = "developerId4OtherSide";
+    ret = BundleManagerInternal::IsSameDeveloperId(bundleNameInCurrentSide, developerId4OtherSide);
+    EXPECT_EQ(ret, false);
+
+    bundleNameInCurrentSide = "bundleNameInCurrentSide";
+    ret = BundleManagerInternal::IsSameDeveloperId(bundleNameInCurrentSide, developerId4OtherSide);
+    EXPECT_EQ(ret, false);
+
+    developerId4OtherSide.clear();
+    ret = BundleManagerInternal::IsSameDeveloperId(bundleNameInCurrentSide, developerId4OtherSide);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "BundleManagerInternalTest IsSameDeveloperId_001 end "<< std::endl;
+}
+
+/**
+ * @tc.name: GetContinueBundle4Src_001
+ * @tc.desc: GetContinueBundle4Src
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, GetContinueBundle4Src_001, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest GetContinueBundle4Src_001 begin" << std::endl;
+    std::string srcBundleName;
+    std::vector<std::string> bundleNameList;
+    bool ret = BundleManagerInternal::GetContinueBundle4Src(srcBundleName, bundleNameList);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "BundleManagerInternalTest GetContinueBundle4Src_001 end "<< std::endl;
+}
+
+/**
+ * @tc.name: GetAppProvisionInfo4CurrentUser_001
+ * @tc.desc: GetAppProvisionInfo4CurrentUser
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, GetAppProvisionInfo4CurrentUser_001, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest GetAppProvisionInfo4CurrentUser_001 begin" << std::endl;
+    std::string bundleName;
+    AppExecFwk::AppProvisionInfo appProvisionInfo;
+    bool ret = BundleManagerInternal::GetAppProvisionInfo4CurrentUser(bundleName, appProvisionInfo);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "BundleManagerInternalTest GetAppProvisionInfo4CurrentUser_001 end "<< std::endl;
+}
+
+/**
+ * @tc.name: GetContinueType_001
+ * @tc.desc: GetContinueType
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, GetContinueType_001, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest GetContinueType_001 begin" << std::endl;
+    std::string networkId = "networkId";
+    std::string bundleName;
+    uint8_t continueTypeId = 0;
+    std::string str = BundleManagerInternal::GetContinueType(networkId, bundleName, continueTypeId);
+    EXPECT_EQ(str, "");
+    DTEST_LOG << "BundleManagerInternalTest GetContinueType_001 end "<< std::endl;
+}
+
+/**
+ * @tc.name: GetContinueTypeId_001
+ * @tc.desc: GetContinueTypeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, GetContinueTypeId_001, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest GetContinueTypeId_001 begin" << std::endl;
+    std::string networkId = "networkId";
+    std::string abilityName;
+    uint8_t continueTypeId = 0;
+    int32_t ret = BundleManagerInternal::GetContinueTypeId(networkId, abilityName, continueTypeId);
+    EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
+    DTEST_LOG << "BundleManagerInternalTest GetContinueTypeId_001 end "<< std::endl;
+}
+
+/**
+ * @tc.name: GetBundleNameById_001
+ * @tc.desc: GetBundleNameById
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, GetBundleNameById_001, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest GetBundleNameById_001 begin" << std::endl;
+    std::string networkId = "networkId";
+    std::string bundleName;
+    uint16_t bundleNameId = 0;
+    int32_t ret = BundleManagerInternal::GetBundleNameById(networkId, bundleNameId, bundleName);
+    EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
+    DTEST_LOG << "BundleManagerInternalTest GetBundleNameById_001 end "<< std::endl;
+}
 }
 }
