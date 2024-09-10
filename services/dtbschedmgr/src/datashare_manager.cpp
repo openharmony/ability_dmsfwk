@@ -28,8 +28,6 @@ namespace DistributedSchedule {
 IMPLEMENT_SINGLE_INSTANCE(DataShareManager);
 namespace {
 const std::string TAG = "DMSDataShareManager";
-const std::string SETTINGS_DATA_FIELD_KEY = "KEYWORD";
-const std::string SETTINGS_DATA_FIELD_VAL = "VALUE";
 constexpr static int32_t INVALID_ACCOUNT_ID = -1;
 }
 SettingObserver::SettingObserver() = default;
@@ -64,7 +62,7 @@ std::shared_ptr<DataShare::DataShareHelper> DataShareManager::CreateDataShareHel
     HILOGI("DataShareManager CreateDataShareHelper start");
     DataShare::CreateOptions options;
     options.isProxy_ = true;
-    return DataShare::DataShareHelper::Creator(SETTINGS_USER_SECURE_URI, options);
+    return DataShare::DataShareHelper::Creator(SwitchStatusDependency::SETTINGS_USER_SECURE_URI, options);
 }
 
 void DataShareManager::RegisterObserver(const std::string &key, SettingObserver::ObserverCallback &observerCallback)
@@ -122,7 +120,7 @@ void DataShareManager::UnregisterObserver(const std::string &key)
 
 Uri DataShareManager::AssembleUserSecureUri(int userId, const std::string &key)
 {
-    Uri uri(SETTINGS_USER_SECURE_URI + "_" + std::to_string(userId) + "?Proxy=true&key=" + key);
+    Uri uri(SwitchStatusDependency::SETTINGS_USER_SECURE_URI + "_" + std::to_string(userId) + "?Proxy=true&key=" + key);
     return uri;
 }
 
@@ -150,11 +148,11 @@ void DataShareManager::UpdateSwitchStatus(const std::string &key, const std::str
     int32_t userId = GetLocalAccountId();
     Uri uri(AssembleUserSecureUri(userId, key));
     DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(SETTINGS_DATA_FIELD_KEY, key);
+    predicates.EqualTo(SwitchStatusDependency::SETTINGS_DATA_FIELD_KEY, key);
 
     DataShare::DataShareValuesBucket bucket;
-    bucket.Put(SETTINGS_DATA_FIELD_KEY, key);
-    bucket.Put(SETTINGS_DATA_FIELD_VAL, value);
+    bucket.Put(SwitchStatusDependency::SETTINGS_DATA_FIELD_KEY, key);
+    bucket.Put(SwitchStatusDependency::SETTINGS_DATA_FIELD_VAL, value);
 
     auto result = dataShareHelper->UpdateEx(uri, predicates, bucket);
     dataShareHelper->Release();
@@ -173,7 +171,7 @@ bool DataShareManager::IsCurrentContinueSwitchOn()
 
 void DataShareManager::SetCurrentContinueSwitch(bool status)
 {
-    HILOGD("SetCurrentContinueSwitch start");
+    HILOGD("SetCurrentContinueSwitch start, status : %{public}d", status);
     isCurrentContinueSwitchOn_.store(status);
 }
 } // namespace DistributedSchedule

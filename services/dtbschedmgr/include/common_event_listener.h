@@ -19,6 +19,7 @@
 #include "common_event_data.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -31,7 +32,7 @@ public:
 
     void OnReceiveEvent(const EventFwk::CommonEventData &eventData);
     int32_t GetForegroundOsAccountLocalId();
-    int32_t GetOsAccountType(int32_t &accountId);
+    AccountSA::OsAccountType GetOsAccountType(int32_t &accountId);
     void OnUserSwitched();
 };
 }  // namespace DistributedSchedule

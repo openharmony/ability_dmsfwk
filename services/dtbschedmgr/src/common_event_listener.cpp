@@ -101,13 +101,12 @@ int32_t CommonEventListener::GetForegroundOsAccountLocalId()
     return accountId;
 }
 
-int32_t CommonEventListener::GetOsAccountType(int32_t& accountId)
+AccountSA::OsAccountType CommonEventListener::GetOsAccountType(int32_t& accountId)
 {
     AccountSA::OsAccountType type;
     ErrCode err = AccountSA::OsAccountManager::GetOsAccountType(accountId, type);
     if (err != ERR_OK) {
         HILOGE("GetOsAccountType passing param invalid or return error!, err : %{public}d", err);
-        return INVALID_PARAMETERS_ERR;
     }
     return type;
 }
@@ -122,6 +121,14 @@ void CommonEventListener::OnUserSwitched()
         DataShareManager::GetInstance().UpdateSwitchStatus(SwitchStatusDependency::GetInstance()
             .CONTINUE_SWITCH_STATUS_KEY, SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_OFF);
     }
+
+    DataShareManager::GetInstance().SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance()
+        .IsContinueSwitchOn());
+    if (!dataShareManager.IsCurrentContinueSwitchOn()) {
+        DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
+        HILOGI("ICurrentContinueSwitch is off, %{public}d", DataShareManager::GetInstance()
+            .IsCurrentContinueSwitchOn());
+    };
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
