@@ -29,6 +29,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DMSSwitchStatusDep";
+}
 const std::string SwitchStatusDependency::SETTINGS_USER_SECURE_URI =
     "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE";
 const std::string SwitchStatusDependency::SETTINGS_DATA_FIELD_KEY = "KEYWORD";
@@ -36,7 +37,7 @@ const std::string SwitchStatusDependency::SETTINGS_DATA_FIELD_VAL = "VALUE";
 const std::string SwitchStatusDependency::CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
 const std::string SwitchStatusDependency::CONTINUE_SWITCH_OFF = "0";
 const std::string SwitchStatusDependency::CONTINUE_SWITCH_ON = "1";
-}
+
 SwitchStatusDependency &SwitchStatusDependency::GetInstance()
 {
     static SwitchStatusDependency instance;
