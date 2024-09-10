@@ -124,7 +124,7 @@ void CommonEventListener::OnUserSwitched()
 
     DataShareManager::GetInstance().SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance()
         .IsContinueSwitchOn());
-    if (!dataShareManager.IsCurrentContinueSwitchOn()) {
+    if (!DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
         DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
         HILOGI("ICurrentContinueSwitch is off, %{public}d", DataShareManager::GetInstance()
             .IsCurrentContinueSwitchOn());
