@@ -611,13 +611,14 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
         if ((!isFreeInstall && IsUsingQos(remoteDeviceId)) ||
             (isFreeInstall && IsRemoteInstall(remoteDeviceId, bundleName))) {
             DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(IPCSkeleton::GetCallingTokenID());
-            result = DSchedContinueManager::GetInstance().ContinueMission(srcDevId, dstDevId, bundleName, continueType,
+            result = DSchedContinueManager::GetInstance().ContinueMission(
+                DSchedContinueInfo(srcDevId, srcBundleName, dstDevId, bundleName, continueType),
                 callback, *wantParams);
             HILOGI("result = %{public}d", result);
             PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
         }
     }
-    result = ContinueMission(srcDevId, dstDevId, bundleName, callback, *wantParams);
+    result = ContinueMission(srcDevId, dstDevId, srcBundleName, bundleName, callback, *wantParams);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
