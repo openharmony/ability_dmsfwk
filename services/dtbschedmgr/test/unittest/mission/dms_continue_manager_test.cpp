@@ -456,13 +456,15 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
     std::string sourceBundleName = "invalid sourceBundleName";
     std::string sinkBundleName = "invalid sinkBundleName";
     std::string continueType = "invalid continueType";
-    DMSContinueRecvMgr::GetInstance().NotifyRecvBroadcast(obj, networkId, sourceBundleName, sinkBundleName, state, continueType);
+    DMSContinueRecvMgr::GetInstance().NotifyRecvBroadcast(obj,
+        currentIconInfo(networkId, sourceBundleName, sinkBundleName, continueType), state);
 
     /**
      * @tc.steps: step3. test NotifyRecvBroadcast when missionId is invalid;
      */
     obj =  new RemoteOnListenerStubTest();
-    DMSContinueRecvMgr::GetInstance().NotifyRecvBroadcast(obj, networkId, sourceBundleName, sinkBundleName, state, continueType);
+    DMSContinueRecvMgr::GetInstance().NotifyRecvBroadcast(obj,
+        currentIconInfo(networkId, sourceBundleName, sinkBundleName, continueType), state);
 
     DTEST_LOG << "DMSContinueManagerTest testDealOnBroadcastBusiness001 end" << std::endl;
 }

@@ -51,8 +51,8 @@ struct currentIconInfo {
         const std::string &sink_bundle_name, const std::string &continueType = "")
         : senderNetworkId(source_device_id),
           bundleName(sink_bundle_name),
-          sourceBundleName(source_bundle_name),
-          continueType(continueType) {
+          continueType(continueType),
+          sourceBundleName(source_bundle_name) {
     }
 
     currentIconInfo() = default;
