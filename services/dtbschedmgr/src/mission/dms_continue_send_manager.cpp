@@ -379,8 +379,7 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, Unfoc
     }
 
     if (reason != UnfocusedReason::TIMEOUT) {
-        bool isContinue = IsContinue(missionId, bundleName);
-        if (!isContinue) {
+        if (!IsContinue(missionId, bundleName)) {
             HILOGE("Not current mission to be continued, missionId: %{public}d", missionId);
             return NO_MISSION_INFO_FOR_MISSION_ID;
         }
@@ -388,14 +387,6 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, Unfoc
         RemoveMMIListener();
 #endif
     }
-
-    ret = CheckContinueState(missionId);
-    if (ret != ERR_OK) {
-        HILOGE("Continue state is inactive or can't be obtained, mission id : %{public}d, ret: %{public}d",
-            missionId, ret);
-        return ret;
-    }
-
     uint16_t bundleNameId = 0;
     uint8_t continueTypeId = 0;
     ret = GetAccessTokenIdSendEvent(bundleName, reason, bundleNameId, continueTypeId);
