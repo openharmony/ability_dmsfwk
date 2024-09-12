@@ -370,7 +370,9 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     }
     std::vector<sptr<IRemoteObject>> objs = iterItem->second;
     for (auto iter : objs) {
-        NotifyRecvBroadcast(iter, senderNetworkId, bundleName, finalBundleName, state, continueType);
+        NotifyRecvBroadcast(iter,
+            currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType),
+            state);
     }
     HILOGI("DealOnBroadcastBusiness end");
     return ERR_OK;
@@ -385,8 +387,13 @@ void DMSContinueRecvMgr::PushLatRecvCache(currentIconInfo &lastRecvInfo)
 }
 
 void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
-    const std::string& networkId, const std::string& srcBundleName, const std::string& sinkBundleName, const int32_t state, const std::string& continueType)
+     const currentIconInfo& continueInfo, const int32_t state)
 {
+    std::string networkId = continueInfo.senderNetworkId;
+    std::string srcBundleName = continueInfo.sourceBundleName;
+    std::string sinkBundleName = continueInfo.bundleName;
+    std::string continueType = continueInfo.continueType.empty() ? "" : continueInfo.continueType;
+
     HILOGI("NotifyRecvBroadcast start");
     if (obj == nullptr) {
         HILOGE("obj is null");
@@ -478,7 +485,9 @@ void DMSContinueRecvMgr::OnDeviceScreenOff()
             }
             std::vector<sptr<IRemoteObject>> objs = iterItem->second;
             for (auto iter : objs) {
-                NotifyRecvBroadcast(iter, senderNetworkId, iconInfo_.sourceBundleName, bundleName, INACTIVE, continueType);
+                NotifyRecvBroadcast(iter,
+                    currentIconInfo(senderNetworkId, iconInfo_.sourceBundleName, bundleName, continueType),
+                    INACTIVE);
             }
         }
     };
@@ -520,7 +529,9 @@ void DMSContinueRecvMgr::OnContinueSwitchOff()
             }
             std::vector<sptr<IRemoteObject>> objs = iterItem->second;
             for (auto iter : objs) {
-                NotifyRecvBroadcast(iter, senderNetworkId, iconInfo_.sourceBundleName, bundleName, INACTIVE, continueType);
+                NotifyRecvBroadcast(iter,
+                    currentIconInfo(senderNetworkId, iconInfo_.sourceBundleName, bundleName, continueType),
+                    INACTIVE);
             }
         }
     };
@@ -570,7 +581,9 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
         }
         std::vector<sptr<IRemoteObject>> objs = iterItem->second;
         for (auto iter : objs) {
-            NotifyRecvBroadcast(iter, senderNetworkId, iconInfo_.sourceBundleName, bundleName, INACTIVE, continueType);
+            NotifyRecvBroadcast(iter,
+                currentIconInfo(senderNetworkId, iconInfo_.sourceBundleName, bundleName, continueType),
+                INACTIVE);
         }
     }
     HILOGI("NotifyDeviceOffline end");

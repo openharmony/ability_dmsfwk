@@ -48,10 +48,11 @@ struct currentIconInfo {
     }
 
     currentIconInfo(const std::string &source_device_id, const std::string &source_bundle_name,
-        const std::string &sink_bundle_name)
+        const std::string &sink_bundle_name, const std::string &continueType = "")
         : senderNetworkId(source_device_id),
           bundleName(sink_bundle_name),
-          sourceBundleName(source_bundle_name) {
+          sourceBundleName(source_bundle_name),
+          continueType(continueType) {
     }
 
     currentIconInfo() = default;
@@ -102,8 +103,7 @@ private:
         std::string &continueType);
     int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t retry = 0);
-    void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const std::string& networkId, const std::string& srcBundleName,
-        const std::string& sinkBundleName, const int32_t state, const std::string& continueType = "");
+    void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const currentIconInfo& continueInfo, const int32_t state);
     bool ContinueTypeCheck(const AppExecFwk::BundleInfo& bundleInfo, const std::string& continueType);
     void PushLatRecvCache(currentIconInfo &lastRecvInfo);
 private:
