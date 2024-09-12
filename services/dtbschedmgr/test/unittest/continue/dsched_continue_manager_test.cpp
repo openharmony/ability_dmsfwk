@@ -173,12 +173,14 @@ HWTEST_F(DSchedContinueManagerTest, ContinueMission_003, TestSize.Level3)
 
     std::string locDevId;
     EXPECT_EQ(true, DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(locDevId));
-    ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, locDevId, BUNDLE_NAME,
-        CONTINUETYPE, callback, wantParams);
+    ret = DSchedContinueManager::GetInstance().ContinueMission(
+        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, locDevId, BUNDLE_NAME, CONTINUETYPE),
+        callback, wantParams);
     EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
 
-    ret = DSchedContinueManager::GetInstance().ContinueMission(locDevId, REMOTE_DEVICEID, BUNDLE_NAME,
-        CONTINUETYPE, callback, wantParams);
+    ret = DSchedContinueManager::GetInstance().ContinueMission(
+        DSchedContinueInfo(locDevId, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
+        callback, wantParams);
     EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueManagerTest ContinueMission_003 end" << std::endl;
 }
@@ -200,11 +202,12 @@ HWTEST_F(DSchedContinueManagerTest, HandleContinueMission_001, TestSize.Level3)
         DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, "", BUNDLE_NAME, CONTINUETYPE),
         callback, wantParams);
     DSchedContinueManager::GetInstance().HandleContinueMission(
-        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, LOCAL_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
+        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
         nullptr, wantParams);
 
-    DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, BUNDLE_NAME,
-        CONTINUETYPE, callback, wantParams);
+    DSchedContinueManager::GetInstance().HandleContinueMission(
+        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
+        callback, wantParams);
     DTEST_LOG << "DSchedContinueManagerTest HandleContinueMission_001 end" << std::endl;
 }
 
