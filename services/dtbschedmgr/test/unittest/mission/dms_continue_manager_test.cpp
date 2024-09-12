@@ -453,15 +453,16 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
      */
     sptr<IRemoteObject> obj = nullptr;
     std::string networkId = "invalid networkId";
-    std::string bundleName = "invalid bundleName";
+    std::string sourceBundleName = "invalid sourceBundleName";
+    std::string sinkBundleName = "invalid sinkBundleName";
     std::string continueType = "invalid continueType";
-    DMSContinueRecvMgr::GetInstance().NotifyRecvBroadcast(obj, networkId, bundleName, state, continueType);
+    DMSContinueRecvMgr::GetInstance().NotifyRecvBroadcast(obj, networkId, sourceBundleName, sinkBundleName, state, continueType);
 
     /**
      * @tc.steps: step3. test NotifyRecvBroadcast when missionId is invalid;
      */
     obj =  new RemoteOnListenerStubTest();
-    DMSContinueRecvMgr::GetInstance().NotifyRecvBroadcast(obj, networkId, bundleName, state, continueType);
+    DMSContinueRecvMgr::GetInstance().NotifyRecvBroadcast(obj, networkId, sourceBundleName, sinkBundleName, state, continueType);
 
     DTEST_LOG << "DMSContinueManagerTest testDealOnBroadcastBusiness001 end" << std::endl;
 }
