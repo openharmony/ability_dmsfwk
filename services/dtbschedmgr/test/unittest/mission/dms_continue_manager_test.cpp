@@ -365,7 +365,8 @@ HWTEST_F(DMSContinueManagerTest, testVerifyBroadcastSource001, TestSize.Level3)
     EXPECT_EQ(ret, ERR_OK);
 
     state = INACTIVE;
-    ret = DMSContinueRecvMgr::GetInstance().VerifyBroadcastSource(networkId, sourceBundleName, sinkBundleName, continueType, state);
+    ret = DMSContinueRecvMgr::GetInstance().VerifyBroadcastSource(
+        networkId, sourceBundleName, sinkBundleName, continueType, state);
     EXPECT_EQ(ret, ERR_OK);
 }
 

@@ -387,7 +387,7 @@ void DMSContinueRecvMgr::PushLatRecvCache(currentIconInfo &lastRecvInfo)
 }
 
 void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
-     const currentIconInfo& continueInfo, const int32_t state)
+    const currentIconInfo& continueInfo, const int32_t state)
 {
     std::string networkId = continueInfo.senderNetworkId;
     std::string srcBundleName = continueInfo.sourceBundleName;
