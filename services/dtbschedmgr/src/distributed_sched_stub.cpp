@@ -618,7 +618,7 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
             PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
         }
     }
-    result = ContinueMission(srcDevId, dstDevId, srcBundleName, bundleName, callback, *wantParams);
+    result = ContinueMission(srcDevId, dstDevId, bundleName, callback, *wantParams);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }

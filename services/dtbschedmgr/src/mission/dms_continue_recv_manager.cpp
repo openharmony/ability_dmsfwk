@@ -401,7 +401,7 @@ void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
     }
     PARCEL_WRITE_HELPER_NORET(data, Int32, state);
     PARCEL_WRITE_HELPER_NORET(data, String, networkId);
-    PARCEL_WRITE_HELPER_NORET(data, String, bundleName);
+    PARCEL_WRITE_HELPER_NORET(data, String, sinkBundleName);
     PARCEL_WRITE_HELPER_NORET(data, String, continueType);
     PARCEL_WRITE_HELPER_NORET(data, String, srcBundleName);
     HILOGI("[PerformanceTest] NotifyRecvBroadcast called, IPC begin = %{public}" PRId64, GetTickCount());
