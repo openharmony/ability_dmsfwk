@@ -26,13 +26,10 @@
 #include "config_policy_utils.h"
 #include "securec.h"
 
-#include "dms_constant.h"
 #include "dtbschedmgr_log.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
-using namespace OHOS::DistributedSchedule::Constants;
-
 const std::string TAG = "DistributedSchedUtils";
 const std::string CONTINUE_CONFIG_RELATIVE_PATH = "etc/distributedhardware/dms/continue_config.json";
 const std::string ALLOW_APP_LIST_KEY = "allow_applist";
@@ -59,12 +56,6 @@ static std::atomic<bool> g_isMissContinueCfg = false;
 static std::string g_continueCfgFullPath = "";
 static std::vector<std::string> g_allowAppList;
 std::mutex g_allowAppListMtx;
-
-using JsonTypeCheckFunc = bool (*)(const cJSON *paramValue);
-std::map<std::string, JsonTypeCheckFunc> jsonTypeCheckMap = {
-    std::map<std::string, JsonTypeCheckFunc>::value_type(PARAM_KEY_OS_TYPE, &DistributedSchedule::IsInt32),
-    std::map<std::string, JsonTypeCheckFunc>::value_type(PARAM_KEY_OS_VERSION, &DistributedSchedule::IsString),
-};
 
 bool IsValidPath(const std::string &inFilePath, std::string &realFilePath)
 {
@@ -230,10 +221,12 @@ int32_t Base64StrToParcel(const std::string& rawStr, Parcel& parcel)
     std::string str = Base64Decode(rawStr);
     auto parcelSize = str.size();
     if (!parcel.SetDataCapacity(parcelSize)) {
+        HILOGE("Base64 string parcel set data capacity %{public}zu fail.", parcelSize);
         return INVALID_PARAMETERS_ERR;
     }
     auto ret = memcpy_s((void *)parcel.GetData(), parcel.GetMaxCapacity(), &str[0], parcelSize);
     if (ret != ERR_OK || !parcel.SetDataSize(parcelSize)) {
+        HILOGE("Base64 string parcel memcpy raw string data fail.");
         return INVALID_PARAMETERS_ERR;
     }
     return ERR_OK;
@@ -373,98 +366,5 @@ std::string GetAnonymInt32(const int32_t value)
     return GetAnonymStr(tmpStr);
 }
 
-bool IsInt32(const cJSON *paramValue)
-{
-    if (paramValue == nullptr) {
-        HILOGE("JSON parameter is invalid.");
-        return false;
-    }
-
-    if (!cJSON_IsNumber(paramValue)) {
-        HILOGE("JSON parameter is not number.");
-        return false;
-    }
-
-    int32_t value = paramValue->valueint;
-    if (!(INT32_MIN <= value && value <= INT32_MAX)) {
-        HILOGE("JSON parameter number is outside the int32_t range.");
-        return false;
-    }
-    return true;
-}
-
-bool IsString(const cJSON *paramValue)
-{
-    if (paramValue == nullptr) {
-        HILOGE("JSON parameter is invalid.");
-        return false;
-    }
-
-    if (!cJSON_IsString(paramValue)) {
-        HILOGE("JSON parameter is not string.");
-        return false;
-    }
-    return true;
-}
-
-bool CJsonParamCheck(const cJSON *jsonObj, const std::initializer_list<std::string> &keys)
-{
-    if (jsonObj == nullptr || !cJSON_IsObject(jsonObj)) {
-        HILOGE("JSON parameter is invalid.");
-        return false;
-    }
-
-    for (auto it = keys.begin(); it != keys.end(); it++) {
-        cJSON *paramValue = cJSON_GetObjectItemCaseSensitive(jsonObj, (*it).c_str());
-        if (paramValue == nullptr) {
-            HILOGE("JSON parameter does not contain key: %{public}s", (*it).c_str());
-            return false;
-        }
-        auto iter = jsonTypeCheckMap.find(*it);
-        if (iter == jsonTypeCheckMap.end()) {
-            HILOGE("Check is not supported yet, key %{public}s.", (*it).c_str());
-            return false;
-        }
-        if (iter->second == nullptr) {
-            HILOGE("JsonTypeCheckFunc for key %{public}s is nullptr.", (*it).c_str());
-            return false;
-        }
-        JsonTypeCheckFunc &func = iter->second;
-        bool res = (*func)(paramValue);
-        if (!res) {
-            HILOGE("The key %{public}s value format in JSON is illegal.", (*it).c_str());
-            return false;
-        }
-    }
-    return true;
-}
-
-bool GetOsInfoFromDM(const std::string &dmInfoEx, int32_t &osType, std::string &osVersion)
-{
-    cJSON *dataJson = nullptr;
-    bool isSuccess = false;
-    do {
-        dataJson = cJSON_Parse(dmInfoEx.c_str());
-        if (dataJson == nullptr) {
-            HILOGE("Parse device info extra data to json fail.");
-            break;
-        }
-
-        if (!CJsonParamCheck(dataJson, {PARAM_KEY_OS_TYPE, PARAM_KEY_OS_VERSION})) {
-            HILOGE("Check OS type and version from device extra data json fail.");
-            break;
-        }
-
-        osType = cJSON_GetObjectItemCaseSensitive(dataJson, PARAM_KEY_OS_TYPE)->valueint;
-        osVersion = std::string(cJSON_GetObjectItemCaseSensitive(dataJson, PARAM_KEY_OS_VERSION)->valuestring);
-        isSuccess = true;
-    } while (false);
-
-    if (dataJson != nullptr) {
-        cJSON_Delete(dataJson);
-        dataJson = nullptr;
-    }
-    return isSuccess;
-}
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -21,13 +21,6 @@
 #include <set>
 #include <unordered_map>
 
-#ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
-#include "form_mgr_interface.h"
-#endif
-#include "iremote_object.h"
-#include "iremote_proxy.h"
-#include "system_ability.h"
-
 #include "app_mgr_interface.h"
 #include "app_state_observer.h"
 #include "datashare_manager.h"
@@ -35,13 +28,18 @@
 #include "distributed_sched_continuation.h"
 #include "dms_callback_task.h"
 #include "dsched_collaborate_callback_mgr.h"
-#include "idms_interactive_adapter.h"
+#ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
+#include "form_mgr_interface.h"
+#endif
+#include "iremote_object.h"
+#include "iremote_proxy.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission/distributed_mission_focused_listener.h"
 #include "mission/distributed_mission_info.h"
 #include "nocopyable.h"
 #endif
 #include "single_instance.h"
+#include "system_ability.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -209,23 +207,11 @@ public:
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
     ErrCode QueryOsAccount(int32_t& activeAccountId);
 
-#ifdef DMSFWK_INTERACTIVE_ADAPTER
-    bool CheckRemoteOsType(const std::string& netwokId) override;
-    int32_t StartAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
-    int32_t StopAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
-    int32_t ConnectAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
-    int32_t DisconnectAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
-    int32_t NotifyAbilityLifecycleChangedFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
-
-    void OnDeviceOnlineEx(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
-    void OnDeviceOfflineEx(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
-    void OnDeviceInfoChangedEx(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
-#endif
-
 private:
     DistributedSchedService();
     bool Init();
     void InitDataShareManager();
+    void InitMissionManager();
     void InitCommonEventListener();
     int32_t GetCallerInfo(const std::string &localDeviceId, int32_t callerUid, uint32_t accessToken,
         CallerInfo &callerInfo);
@@ -306,16 +292,6 @@ private:
         DSchedEventState state, int32_t ret);
     bool CheckCallingUid();
 
-#ifdef DMSFWK_INTERACTIVE_ADAPTER
-    int32_t GetDmsInteractiveAdapterProxy();
-    int32_t StartRemoteAbilityAdapter(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t requestCode,
-        uint32_t accessToken);
-    int32_t ConnectRemoteAbilityAdapter(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
-        int32_t callerUid, int32_t callerPid, uint32_t accessToken);
-    int32_t DisconnectRemoteAbilityAdapter(const sptr<IRemoteObject>& connect, int32_t callerUid,
-        uint32_t accessToken);
-#endif
-
 private:
     std::shared_ptr<DSchedContinuation> dschedContinuation_;
     std::shared_ptr<DSchedCollaborationCallbackMgr> collaborateCbMgr_;
@@ -348,24 +324,6 @@ private:
     std::map<std::string, sptr<AppStateObserver>> bundleNameMap_;
     DataShareManager dataShareManager_;
     sptr<DistributedMissionFocusedListener> missionFocusedListener_ = nullptr;
-
-#ifdef DMSFWK_INTERACTIVE_ADAPTER
-    std::mutex dmsAdapetrLock_;
-    void *dllHandle_ = nullptr;
-    IDmsInteractiveAdapter dmsAdapetr_ = {
-        .StartRemoteAbilityAdapter = nullptr,
-        .StartAbilityFromRemoteAdapter = nullptr,
-        .StopAbilityFromRemoteAdapter = nullptr,
-        .ConnectRemoteAbilityAdapter = nullptr,
-        .ConnectAbilityFromRemoteAdapter = nullptr,
-        .DisconnectRemoteAbilityAdapter = nullptr,
-        .DisconnectAbilityFromRemoteAdapter = nullptr,
-        .NotifyAbilityLifecycleChangedFromRemoteAdapter = nullptr,
-        .OnDeviceOnlineEx = nullptr,
-        .OnDeviceOfflineEx = nullptr,
-        .OnDeviceInfoChangedEx = nullptr,
-    };
-#endif
 };
 
 class ConnectAbilitySession {
