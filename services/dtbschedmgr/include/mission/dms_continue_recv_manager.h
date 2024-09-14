@@ -48,9 +48,10 @@ struct currentIconInfo {
     }
 
     currentIconInfo(const std::string &source_device_id, const std::string &source_bundle_name,
-        const std::string &sink_bundle_name)
+        const std::string &sink_bundle_name, const std::string &continueType = "")
         : senderNetworkId(source_device_id),
           bundleName(sink_bundle_name),
+          continueType(continueType),
           sourceBundleName(source_bundle_name) {
     }
 
@@ -94,16 +95,15 @@ private:
         const int32_t state, const int32_t retry);
     bool GetFinalBundleName(DmsBundleInfo& distributedBundleInfo,  std::string &finalBundleName,
         AppExecFwk::BundleInfo& localBundleInfo, std::string& continueType);
-    int32_t VerifyBroadcastSource(const std::string& senderNetworkId, const std::string& bundleName,
-        const std::string& continueType, const int32_t state);
+    int32_t VerifyBroadcastSource(const std::string& senderNetworkId, const std::string& srcBundleName,
+        const std::string& sinkBundleName, const std::string& continueType, const int32_t state);
     void PostOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t delay = 0, const int32_t retry = 0);
     void FindContinueType(const DmsBundleInfo &distributedBundleInfo, uint8_t &continueTypeId,
         std::string &continueType);
     int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t retry = 0);
-    void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const std::string& networkId,
-        const std::string& bundleName, const int32_t state, const std::string& continueType = "");
+    void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const currentIconInfo& continueInfo, const int32_t state);
     bool ContinueTypeCheck(const AppExecFwk::BundleInfo& bundleInfo, const std::string& continueType);
     void PushLatRecvCache(currentIconInfo &lastRecvInfo);
 private:

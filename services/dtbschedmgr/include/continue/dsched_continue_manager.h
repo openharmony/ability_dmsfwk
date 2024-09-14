@@ -41,9 +41,8 @@ public:
     ~DSchedContinueManager();
     int32_t ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId,
         int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams &wantParams);
-    int32_t ContinueMission(const std::string &srcDeviceId, const std::string &dstDeviceId,
-        std::string bundleName, const std::string& continueType,
-        const sptr<IRemoteObject> &callback, const OHOS::AAFwk::WantParams &wantParams);
+    int32_t ContinueMission(const DSchedContinueInfo& continueInfo, const sptr<IRemoteObject> &callback,
+        const OHOS::AAFwk::WantParams &wantParams);
     int32_t StartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId, int32_t callerUid, int32_t status,
         uint32_t accessToken);
     int32_t NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId, bool isSuccess,
@@ -65,12 +64,10 @@ private:
     void StartEvent();
     void HandleContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId, int32_t missionId,
         const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams);
-    void HandleContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
-        std::string bundleName, const std::string& continueType,
+    void HandleContinueMission(const DSchedContinueInfo& continueInfo,
         const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams);
     bool GetFirstBundleName(DSchedContinueInfo &info, std::string &firstBundleNamme, std::string bundleName,
         std::string deviceId);
-    void CompleteBundleName(DSchedContinueInfo &info, int32_t direction, int32_t &subType);
     void HandleContinueMissionWithBundleName(DSchedContinueInfo &info, const sptr<IRemoteObject> &callback,
         const OHOS::AAFwk::WantParams &wantParams);
     void HandleStartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId, int32_t callerUid,

@@ -499,7 +499,8 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
         continueInfo_.sinkDeviceId_ : continueInfo_.sourceDeviceId_;
 
     std::string peerUdid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(peerDeviceId);
-    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid, continueInfo_.sinkBundleName_);
+    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid,
+        continueInfo_.sourceBundleName_, continueInfo_.sinkBundleName_);
 
     DmsUE::GetInstance().TriggerDmsContinue(continueInfo_.sinkBundleName_, continueInfo_.sinkAbilityName_,
         continueInfo_.sourceDeviceId_, ERR_OK);
@@ -853,9 +854,9 @@ int32_t DSchedContinue::SetWantForContinuation(AAFwk::Want& newWant)
         DmsContinueTime::GetInstance().WriteDurationInfo(DmsContinueTime::GetInstance().GetSaveDataDuration());
     newWant.SetParam(DMSDURATION_SAVETIME, saveDataTime);
     if (subServiceType_ == CONTINUE_PUSH) {
-        DmsContinueTime::GetInstance().SetSrcBundleName(newWant.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetSrcBundleName(continueInfo_.sourceBundleName_);
         DmsContinueTime::GetInstance().SetSrcAbilityName(newWant.GetElement().GetAbilityName());
-        DmsContinueTime::GetInstance().SetDstBundleName(newWant.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetDstBundleName(continueInfo_.sinkBundleName_);
         DmsContinueTime::GetInstance().SetDstAbilityName(newWant.GetElement().GetAbilityName());
     }
     return ERR_OK;
@@ -980,9 +981,9 @@ void DSchedContinue::DurationDumperBeforeStartAbility(std::shared_ptr<DSchedCont
     if (subServiceType_ == CONTINUE_PULL && cmd != nullptr) {
         std::string timeInfo = cmd->want_.GetStringParam(DMSDURATION_SAVETIME);
         DmsContinueTime::GetInstance().ReadDurationInfo(timeInfo.c_str());
-        DmsContinueTime::GetInstance().SetSrcBundleName(cmd->want_.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetSrcBundleName(continueInfo_.sourceBundleName_);
         DmsContinueTime::GetInstance().SetSrcAbilityName(cmd->want_.GetElement().GetAbilityName());
-        DmsContinueTime::GetInstance().SetDstBundleName(cmd->want_.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetDstBundleName(continueInfo_.sinkBundleName_);
         DmsContinueTime::GetInstance().SetDstAbilityName(cmd->want_.GetElement().GetAbilityName());
     }
     DmsContinueTime::GetInstance().SetDurationBegin(CONTINUE_START_ABILITY_TIME, GetTickCount());

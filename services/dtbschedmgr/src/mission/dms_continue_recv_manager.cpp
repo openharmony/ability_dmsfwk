@@ -208,13 +208,14 @@ void DMSContinueRecvMgr::StartEvent()
     HILOGI("StartEvent end");
 }
 
-int32_t DMSContinueRecvMgr::VerifyBroadcastSource(const std::string& senderNetworkId,
-    const std::string& bundleName, const std::string& continueType, const int32_t state)
+int32_t DMSContinueRecvMgr::VerifyBroadcastSource(const std::string& senderNetworkId, const std::string& srcBundleName,
+    const std::string& sinkBundleName, const std::string& continueType, const int32_t state)
 {
     std::lock_guard<std::mutex> currentIconLock(iconMutex_);
     if (state == ACTIVE) {
         iconInfo_.senderNetworkId = senderNetworkId;
-        iconInfo_.bundleName = bundleName;
+        iconInfo_.bundleName = sinkBundleName;
+        iconInfo_.sourceBundleName = srcBundleName;
         iconInfo_.continueType = continueType;
     } else {
         if (senderNetworkId != iconInfo_.senderNetworkId) {
@@ -223,9 +224,9 @@ int32_t DMSContinueRecvMgr::VerifyBroadcastSource(const std::string& senderNetwo
             return INVALID_PARAMETERS_ERR;
         }
 
-        if (bundleName != iconInfo_.bundleName) {
+        if (sinkBundleName != iconInfo_.bundleName) {
             HILOGW("BundleName not match, task abort. bundleName: %{public}s, saved bundleName: %{public}s",
-                bundleName.c_str(), iconInfo_.bundleName.c_str());
+                sinkBundleName.c_str(), iconInfo_.bundleName.c_str());
             return INVALID_PARAMETERS_ERR;
         }
 
@@ -357,7 +358,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         return INVALID_PARAMETERS_ERR;
     }
 
-    int32_t ret = VerifyBroadcastSource(senderNetworkId, finalBundleName, continueType, state);
+    int32_t ret = VerifyBroadcastSource(senderNetworkId, bundleName, finalBundleName, continueType, state);
     if (ret != ERR_OK) {
         return ret;
     }
@@ -369,7 +370,9 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     }
     std::vector<sptr<IRemoteObject>> objs = iterItem->second;
     for (auto iter : objs) {
-        NotifyRecvBroadcast(iter, senderNetworkId, finalBundleName, state, continueType);
+        NotifyRecvBroadcast(iter,
+            currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType),
+            state);
     }
     HILOGI("DealOnBroadcastBusiness end");
     return ERR_OK;
@@ -384,8 +387,13 @@ void DMSContinueRecvMgr::PushLatRecvCache(currentIconInfo &lastRecvInfo)
 }
 
 void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
-    const std::string& networkId, const std::string& bundleName, const int32_t state, const std::string& continueType)
+    const currentIconInfo& continueInfo, const int32_t state)
 {
+    std::string networkId = continueInfo.senderNetworkId;
+    std::string srcBundleName = continueInfo.sourceBundleName;
+    std::string sinkBundleName = continueInfo.bundleName;
+    std::string continueType = continueInfo.continueType.empty() ? "" : continueInfo.continueType;
+
     HILOGI("NotifyRecvBroadcast start");
     if (obj == nullptr) {
         HILOGE("obj is null");
@@ -400,16 +408,17 @@ void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
     }
     PARCEL_WRITE_HELPER_NORET(data, Int32, state);
     PARCEL_WRITE_HELPER_NORET(data, String, networkId);
-    PARCEL_WRITE_HELPER_NORET(data, String, bundleName);
+    PARCEL_WRITE_HELPER_NORET(data, String, sinkBundleName);
     PARCEL_WRITE_HELPER_NORET(data, String, continueType);
+    PARCEL_WRITE_HELPER_NORET(data, String, srcBundleName);
     HILOGI("[PerformanceTest] NotifyRecvBroadcast called, IPC begin = %{public}" PRId64, GetTickCount());
     int32_t error = obj->SendRequest(ON_CALLBACK, data, reply, option);
     if (state != INACTIVE) {
-        std::string bName = bundleName;
+        std::string bName = sinkBundleName;
         std::string cType = continueType;
         std::string abilityName = BundleManagerInternal::GetInstance().GetAbilityName(networkId,
             bName, cType);
-        DmsUE::GetInstance().NotifyDockShowIcon(bundleName, abilityName, networkId, error);
+        DmsUE::GetInstance().NotifyDockShowIcon(sinkBundleName, abilityName, networkId, error);
     }
     if (error != ERR_NONE) {
         HILOGE("NotifyRecvBroadcast fail, error: %{public}d", error);
@@ -476,7 +485,9 @@ void DMSContinueRecvMgr::OnDeviceScreenOff()
             }
             std::vector<sptr<IRemoteObject>> objs = iterItem->second;
             for (auto iter : objs) {
-                NotifyRecvBroadcast(iter, senderNetworkId, bundleName, INACTIVE, continueType);
+                NotifyRecvBroadcast(iter,
+                    currentIconInfo(senderNetworkId, iconInfo_.sourceBundleName, bundleName, continueType),
+                    INACTIVE);
             }
         }
     };
@@ -518,7 +529,9 @@ void DMSContinueRecvMgr::OnContinueSwitchOff()
             }
             std::vector<sptr<IRemoteObject>> objs = iterItem->second;
             for (auto iter : objs) {
-                NotifyRecvBroadcast(iter, senderNetworkId, bundleName, INACTIVE, continueType);
+                NotifyRecvBroadcast(iter,
+                    currentIconInfo(senderNetworkId, iconInfo_.sourceBundleName, bundleName, continueType),
+                    INACTIVE);
             }
         }
     };
@@ -568,7 +581,9 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
         }
         std::vector<sptr<IRemoteObject>> objs = iterItem->second;
         for (auto iter : objs) {
-            NotifyRecvBroadcast(iter, senderNetworkId, bundleName, INACTIVE, continueType);
+            NotifyRecvBroadcast(iter,
+                currentIconInfo(senderNetworkId, iconInfo_.sourceBundleName, bundleName, continueType),
+                INACTIVE);
         }
     }
     HILOGI("NotifyDeviceOffline end");

@@ -729,7 +729,7 @@ bool DmsRadar::NotifyDockUnfocused(const std::string& func, int32_t errCode)
 }
 
 bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode, std::string peerUdid,
-    const std::string& bundleName)
+    const std::string& srcBundleName, const std::string& dstBundleName)
 {
     if (peerUdid.empty()) {
         HILOGE("peerUdid is empty.");
@@ -748,7 +748,8 @@ bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode, st
             BIZ_STAGE, static_cast<int32_t>(ClickIcon::DMS_CONTINUE),
             STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC),
             PEER_UDID, GetAnonyUdid(peerUdid),
-            APP_CALLER, bundleName);
+            APP_CALLEE, srcBundleName,
+            APP_CALLER, dstBundleName);
     } else {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
@@ -760,7 +761,8 @@ bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode, st
             BIZ_STAGE, static_cast<int32_t>(ClickIcon::DMS_CONTINUE),
             STAGE_RES, static_cast<int32_t>(StageRes::STAGE_FAIL),
             PEER_UDID, GetAnonyUdid(peerUdid),
-            APP_CALLER, bundleName,
+            APP_CALLEE, srcBundleName,
+            APP_CALLER, dstBundleName,
             ERROR_CODE, errCode);
     }
     if (res != ERR_OK) {

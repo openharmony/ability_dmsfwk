@@ -150,31 +150,37 @@ HWTEST_F(DSchedContinueManagerTest, ContinueMission_003, TestSize.Level3)
     DTEST_LOG << "DSchedContinueManagerTest ContinueMission_003 begin" << std::endl;
     DistributedSchedUtil::MockPermission();
     OHOS::AAFwk::WantParams wantParams;
-    int32_t ret = DSchedContinueManager::GetInstance().ContinueMission("", "", BUNDLE_NAME,
-        CONTINUETYPE, nullptr, wantParams);
+    int32_t ret = DSchedContinueManager::GetInstance().ContinueMission(
+        DSchedContinueInfo("", BUNDLE_NAME, "", BUNDLE_NAME, CONTINUETYPE),
+        nullptr, wantParams);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
-    ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, "", BUNDLE_NAME,
-        CONTINUETYPE, nullptr, wantParams);
+    ret = DSchedContinueManager::GetInstance().ContinueMission(
+        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, "", BUNDLE_NAME, CONTINUETYPE),
+        nullptr, wantParams);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
-    ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, BUNDLE_NAME,
-        CONTINUETYPE, nullptr, wantParams);
+    ret = DSchedContinueManager::GetInstance().ContinueMission(
+        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
+        nullptr, wantParams);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     auto callback = GetDSchedService();
-    ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, BUNDLE_NAME,
-        CONTINUETYPE, callback, wantParams);
+    ret = DSchedContinueManager::GetInstance().ContinueMission(
+        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
+        callback, wantParams);
     EXPECT_EQ(ret, OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET);
 
     std::string locDevId;
     EXPECT_EQ(true, DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(locDevId));
-    ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, locDevId, BUNDLE_NAME,
-        CONTINUETYPE, callback, wantParams);
+    ret = DSchedContinueManager::GetInstance().ContinueMission(
+        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, locDevId, BUNDLE_NAME, CONTINUETYPE),
+        callback, wantParams);
     EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
 
-    ret = DSchedContinueManager::GetInstance().ContinueMission(locDevId, REMOTE_DEVICEID, BUNDLE_NAME,
-        CONTINUETYPE, callback, wantParams);
+    ret = DSchedContinueManager::GetInstance().ContinueMission(
+        DSchedContinueInfo(locDevId, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
+        callback, wantParams);
     EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueManagerTest ContinueMission_003 end" << std::endl;
 }
@@ -189,15 +195,19 @@ HWTEST_F(DSchedContinueManagerTest, HandleContinueMission_001, TestSize.Level3)
     DTEST_LOG << "DSchedContinueManagerTest HandleContinueMission_001 begin" << std::endl;
     OHOS::AAFwk::WantParams wantParams;
     auto callback = GetDSchedService();
-    DSchedContinueManager::GetInstance().HandleContinueMission("", REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE,
+    DSchedContinueManager::GetInstance().HandleContinueMission(
+        DSchedContinueInfo("", BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
         callback, wantParams);
-    DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, "", BUNDLE_NAME, CONTINUETYPE,
+    DSchedContinueManager::GetInstance().HandleContinueMission(
+        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, "", BUNDLE_NAME, CONTINUETYPE),
         callback, wantParams);
-    DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, BUNDLE_NAME,
-        CONTINUETYPE, nullptr, wantParams);
+    DSchedContinueManager::GetInstance().HandleContinueMission(
+        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
+        nullptr, wantParams);
 
-    DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, BUNDLE_NAME,
-        CONTINUETYPE, callback, wantParams);
+    DSchedContinueManager::GetInstance().HandleContinueMission(
+        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
+        callback, wantParams);
     DTEST_LOG << "DSchedContinueManagerTest HandleContinueMission_001 end" << std::endl;
 }
 
@@ -377,32 +387,6 @@ HWTEST_F(DSchedContinueManagerTest, HandleContinueEnd_001, TestSize.Level3)
     DSchedContinueManager::GetInstance().HandleContinueEnd(info);
     EXPECT_EQ(DSchedContinueManager::GetInstance().cntSource_, 0);
     DTEST_LOG << "DSchedContinueManagerTest HandleContinueEnd_001 end" << std::endl;
-}
-
-/**
- * @tc.name: GetFirstBundleName_001
- * @tc.desc: test GetFirstBundleName func
- * @tc.type: FUNC
- */
-HWTEST_F(DSchedContinueManagerTest, GetFirstBundleName_001, TestSize.Level3)
-{
-    DTEST_LOG << "DSchedContinueManagerTest GetFirstBundleName_001 begin" << std::endl;
-    DSchedContinueInfo info(LOCAL_DEVICEID, "sourceBundleName", REMOTE_DEVICEID, "sinkBundleName",
-        "continueType");
-    std::string firstBundleName;
-    std::string bundleName;
-    std::string deviceId;
-    int32_t direction = 1;
-    int32_t subType;
-    const sptr<IRemoteObject> callback = nullptr;
-    const OHOS::AAFwk::WantParams wantParams;
-    DSchedContinueManager::GetInstance().CompleteBundleName(info, direction, subType);
-    direction = 0;
-    DSchedContinueManager::GetInstance().CompleteBundleName(info, direction, subType);
-    DSchedContinueManager::GetInstance().HandleContinueMissionWithBundleName(info, callback, wantParams);
-    bool ret = DSchedContinueManager::GetInstance().GetFirstBundleName(info, firstBundleName, bundleName, deviceId);
-    EXPECT_EQ(ret, false);
-    DTEST_LOG << "DSchedContinueManagerTest GetFirstBundleName_001 end" << std::endl;
 }
 
 /**
