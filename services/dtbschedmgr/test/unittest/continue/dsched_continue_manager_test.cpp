@@ -388,5 +388,64 @@ HWTEST_F(DSchedContinueManagerTest, HandleContinueEnd_001, TestSize.Level3)
     EXPECT_EQ(DSchedContinueManager::GetInstance().cntSource_, 0);
     DTEST_LOG << "DSchedContinueManagerTest HandleContinueEnd_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: GetFirstBundleName_001
+ * @tc.desc: test GetFirstBundleName func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, GetFirstBundleName_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest GetFirstBundleName_001 begin" << std::endl;
+    DSchedContinueInfo info(LOCAL_DEVICEID, "sourceBundleName", REMOTE_DEVICEID, "sinkBundleName",
+        "continueType");
+    std::string firstBundleName;
+    std::string bundleName;
+    std::string deviceId;
+    int32_t direction = 1;
+    int32_t subType;
+    const sptr<IRemoteObject> callback = nullptr;
+    const OHOS::AAFwk::WantParams wantParams;
+    DSchedContinueManager::GetInstance().CompleteBundleName(info, direction, subType);
+    direction = 0;
+    DSchedContinueManager::GetInstance().CompleteBundleName(info, direction, subType);
+    DSchedContinueManager::GetInstance().HandleContinueMissionWithBundleName(info, callback, wantParams);
+    bool ret = DSchedContinueManager::GetInstance().GetFirstBundleName(info, firstBundleName, bundleName, deviceId);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DSchedContinueManagerTest GetFirstBundleName_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetDSchedContinueByWant_001
+ * @tc.desc: test GetDSchedContinueByWant func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, GetDSchedContinueByWant_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest GetDSchedContinueByWant_001 begin" << std::endl;
+    OHOS::AAFwk::Want want;
+    int32_t missionId = 0;
+    DSchedContinueManager::GetInstance().continues_.clear();
+    auto ret = DSchedContinueManager::GetInstance().GetDSchedContinueByWant(want, missionId);
+    EXPECT_EQ(ret, nullptr);
+    DTEST_LOG << "DSchedContinueManagerTest GetDSchedContinueByWant_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyTerminateContinuation_001
+ * @tc.desc: test NotifyTerminateContinuation func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, NotifyTerminateContinuation_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest NotifyTerminateContinuation_001 begin" << std::endl;
+    int32_t missionId = 0;
+    int32_t sessionId = 0;
+    DSchedContinueManager::GetInstance().continues_.clear();
+    DSchedContinueManager::GetInstance().HandleDataRecv(sessionId, nullptr);
+    DSchedContinueManager::GetInstance().NotifyTerminateContinuation(missionId);
+    EXPECT_EQ(DSchedContinueManager::GetInstance().continues_.empty(), true);
+    DTEST_LOG << "DSchedContinueManagerTest NotifyTerminateContinuation_001 end" << std::endl;
+}
 }
 }

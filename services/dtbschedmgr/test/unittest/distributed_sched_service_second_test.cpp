@@ -1468,5 +1468,23 @@ HWTEST_F(DistributedSchedServiceSecondTest, StartAbility_001, TestSize.Level3)
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedServiceSecondTest StartAbility_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: CheckTargetPermission4DiffBundle_001
+ * @tc.desc: CheckTargetPermission4DiffBundle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, CheckTargetPermission4DiffBundle_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest CheckTargetPermission4DiffBundle_001 start" << std::endl;
+    OHOS::AAFwk::Want want;
+    CallerInfo callerInfo;
+    AccountInfo accountInfo;
+    int32_t flag = 0;
+    int32_t ret = DistributedSchedService::GetInstance().CheckTargetPermission4DiffBundle(want,
+        callerInfo, accountInfo, flag, true);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceSecondTest CheckTargetPermission4DiffBundle_001 end" << std::endl;
+}
 }
 }

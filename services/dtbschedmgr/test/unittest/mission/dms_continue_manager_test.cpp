@@ -887,5 +887,38 @@ HWTEST_F(DMSContinueManagerTest, testUpdateContinueLaunchMission_001, TestSize.L
     EXPECT_TRUE(DMSContinueSendMgr::GetInstance().UpdateContinueLaunchMission(info));
     DTEST_LOG << "DMSContinueManagerTest testUpdateContinueLaunchMission_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: testGetFinalBundleName_001
+ * @tc.desc: test GetFinalBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testGetFinalBundleName_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testGetFinalBundleName_001 start" << std::endl;
+    DmsBundleInfo info;
+    std::string finalBundleName;
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::string continueType;
+    bool ret = DMSContinueRecvMgr::GetInstance().GetFinalBundleName(info, finalBundleName,
+        localBundleInfo, continueType);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DMSContinueManagerTest testGetFinalBundleName_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testContinueTypeCheck_001
+ * @tc.desc: test ContinueTypeCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testContinueTypeCheck_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testContinueTypeCheck_001 start" << std::endl;
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::string continueType;
+    bool ret = DMSContinueRecvMgr::GetInstance().ContinueTypeCheck(localBundleInfo, continueType);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DMSContinueManagerTest testContinueTypeCheck_001 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS

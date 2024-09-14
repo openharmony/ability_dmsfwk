@@ -409,21 +409,10 @@ HWTEST_F(DMSMissionManagerTest, testNeedSyncDevice002, TestSize.Level3)
 HWTEST_F(DMSMissionManagerTest, testHasSyncListener001, TestSize.Level3)
 {
     DTEST_LOG << "testHasSyncListener001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().CleanMissionResources(DEVICE_ID);
     bool ret = DistributedSchedMissionManager::GetInstance().HasSyncListener(DEVICE_ID);
     EXPECT_FALSE(ret);
     DTEST_LOG << "testHasSyncListener001 end" << std::endl;
-}
-
-/**
- * @tc.name: testCleanMissionResources001
- * @tc.desc: prepare and sync missions from remote
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testCleanMissionResources001, TestSize.Level3)
-{
-    DTEST_LOG << "testCleanMissionResources001 begin" << std::endl;
-    DistributedSchedMissionManager::GetInstance().CleanMissionResources(DEVICE_ID);
-    DTEST_LOG << "testCleanMissionResources001 end" << std::endl;
 }
 
 /**
@@ -1149,33 +1138,10 @@ HWTEST_F(DMSMissionManagerTest, testDeviceOnlineNotify003, TestSize.Level3)
 {
     DTEST_LOG << "testDeviceOnlineNotify003 begin" << std::endl;
     DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().DeviceOnlineNotify("");
     DistributedSchedMissionManager::GetInstance().DeviceOnlineNotify(DEVICE_ID);
+    EXPECT_NE(DistributedSchedMissionManager::GetInstance().missionHandler_, nullptr);
     DTEST_LOG << "testDeviceOnlineNotify003 end" << std::endl;
-}
-
-/**
- * @tc.name: testDeviceOfflineNotify001
- * @tc.desc: test device offline notify
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testDeviceOfflineNotify001, TestSize.Level3)
-{
-    DTEST_LOG << "testDeviceOfflineNotify001 begin" << std::endl;
-    DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify("");
-    DTEST_LOG << "testDeviceOfflineNotify001 end" << std::endl;
-}
-
-/**
- * @tc.name: testDeviceOfflineNotify002
- * @tc.desc: test device offline notify
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testDeviceOfflineNotify002, TestSize.Level3)
-{
-    DTEST_LOG << "testDeviceOfflineNotify002 begin" << std::endl;
-    std::set<std::string> remoteSyncDeviceSet_ = set<std::string>();
-    DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(DEVICE_ID);
-    DTEST_LOG << "testDeviceOfflineNotify002 end" << std::endl;
 }
 
 /**
@@ -1186,22 +1152,18 @@ HWTEST_F(DMSMissionManagerTest, testDeviceOfflineNotify002, TestSize.Level3)
 HWTEST_F(DMSMissionManagerTest, testOnRemoteDied001, TestSize.Level3)
 {
     DTEST_LOG << "testOnRemoteDied001 begin" << std::endl;
+    //DeviceOfflineNotify
+    DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify("");
+    std::set<std::string> remoteSyncDeviceSet_ = set<std::string>();
+    DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(DEVICE_ID);
+
+    //OnRemoteDied
     wptr<IRemoteObject> remote = nullptr;
     DistributedSchedMissionManager::GetInstance().OnRemoteDied(remote);
-    DTEST_LOG << "testOnRemoteDied001 end" << std::endl;
-}
-
-/**
- * @tc.name: testOnRemoteDied002
- * @tc.desc: test on remote died
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testOnRemoteDied002, TestSize.Level3)
-{
-    DTEST_LOG << "testOnRemoteDied002 begin" << std::endl;
-    wptr<IRemoteObject> remote = new RemoteMissionListenerTest();
+    remote = new RemoteMissionListenerTest();
     DistributedSchedMissionManager::GetInstance().OnRemoteDied(remote);
-    DTEST_LOG << "testOnRemoteDied002 end" << std::endl;
+    EXPECT_NE(remote.promote(), nullptr);
+    DTEST_LOG << "testOnRemoteDied001 end" << std::endl;
 }
 
 /**
@@ -1230,26 +1192,13 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncMissionsFromRemote001, TestSize.Lev
 HWTEST_F(DMSMissionManagerTest, testStopSyncMissionsFromRemote001, TestSize.Level3)
 {
     DTEST_LOG << "testStopSyncMissionsFromRemote001 begin" << std::endl;
-    std::vector<DstbMissionInfo> missionInfos;
-    CallerInfo callerInfo;
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().StopSyncMissionsFromRemote("");
-    DTEST_LOG << "testStopSyncMissionsFromRemote001 end" << std::endl;
-}
-
-/**
- * @tc.name: testStopSyncMissionsFromRemote002
- * @tc.desc: stop sync missions from remote
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testStopSyncMissionsFromRemote002, TestSize.Level3)
-{
-    DTEST_LOG << "testStopSyncMissionsFromRemote002 begin" << std::endl;
-    std::vector<DstbMissionInfo> missionInfos;
-    CallerInfo callerInfo;
-    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().remoteSyncDeviceSet_.clear();
+    DistributedSchedMissionManager::GetInstance().remoteSyncDeviceSet_.insert(DEVICE_ID);
     DistributedSchedMissionManager::GetInstance().StopSyncMissionsFromRemote(DEVICE_ID);
-    DTEST_LOG << "testStopSyncMissionsFromRemote002 end" << std::endl;
+    EXPECT_EQ(DistributedSchedMissionManager::GetInstance().remoteSyncDeviceSet_.empty(), true);
+    DTEST_LOG << "testStopSyncMissionsFromRemote001 end" << std::endl;
 }
 
 /**
@@ -1305,6 +1254,7 @@ HWTEST_F(DMSMissionManagerTest, testNotifyLocalMissionsChanged001, TestSize.Leve
     DTEST_LOG << "testNotifyLocalMissionsChanged001 begin" << std::endl;
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().NotifyLocalMissionsChanged();
+    EXPECT_NE(DistributedSchedMissionManager::GetInstance().missionChangeHandler_, nullptr);
     DTEST_LOG << "testNotifyLocalMissionsChanged001 end" << std::endl;
 }
 
@@ -1316,8 +1266,11 @@ HWTEST_F(DMSMissionManagerTest, testNotifyLocalMissionsChanged001, TestSize.Leve
 HWTEST_F(DMSMissionManagerTest, testNotifyMissionSnapshotCreated001, TestSize.Level3)
 {
     DTEST_LOG << "testNotifyMissionSnapshotCreated001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().missionChangeHandler_ = nullptr;
+    DistributedSchedMissionManager::GetInstance().NotifyMissionSnapshotCreated(1);
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().NotifyMissionSnapshotCreated(1);
+    EXPECT_NE(DistributedSchedMissionManager::GetInstance().missionChangeHandler_, nullptr);
     DTEST_LOG << "testNotifyMissionSnapshotCreated001 end" << std::endl;
 }
 
@@ -1331,6 +1284,7 @@ HWTEST_F(DMSMissionManagerTest, testNotifyMissionSnapshotChanged001, TestSize.Le
     DTEST_LOG << "testNotifyMissionSnapshotChanged001 begin" << std::endl;
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().NotifyMissionSnapshotChanged(1);
+    EXPECT_NE(DistributedSchedMissionManager::GetInstance().missionChangeHandler_, nullptr);
     DTEST_LOG << "testNotifyMissionSnapshotChanged001 end" << std::endl;
 }
 
@@ -1344,6 +1298,7 @@ HWTEST_F(DMSMissionManagerTest, testNotifyMissionSnapshotDestroyed001, TestSize.
     DTEST_LOG << "testNotifyMissionSnapshotDestroyed001 begin" << std::endl;
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().NotifyMissionSnapshotDestroyed(1);
+    EXPECT_NE(DistributedSchedMissionManager::GetInstance().missionChangeHandler_, nullptr);
     DTEST_LOG << "testNotifyMissionSnapshotDestroyed001 end" << std::endl;
 }
 
@@ -1362,35 +1317,6 @@ HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedToRemote001, TestSize.L
 }
 
 /**
- * @tc.name: testNotifyMissionsChangedToRemoteInner001
- * @tc.desc: notify missions changed to remote inner
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedToRemoteInner001, TestSize.Level3)
-{
-    DTEST_LOG << "testNotifyMissionsChangedToRemoteInner001 begin" << std::endl;
-    CallerInfo callerInfo;
-    std::vector<DstbMissionInfo> missionInfos;
-    DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedToRemoteInner("", missionInfos, callerInfo);
-    DTEST_LOG << "testNotifyMissionsChangedToRemoteInner001 end" << std::endl;
-}
-
-/**
- * @tc.name: testNotifyMissionsChangedToRemoteInner002
- * @tc.desc: notify missions changed to remote inner
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedToRemoteInner002, TestSize.Level3)
-{
-    DTEST_LOG << "testNotifyMissionsChangedToRemoteInner002 begin" << std::endl;
-    CallerInfo callerInfo;
-    std::vector<DstbMissionInfo> missionInfos;
-    DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedToRemoteInner(
-        DEVICE_ID, missionInfos, callerInfo);
-    DTEST_LOG << "testNotifyMissionsChangedToRemoteInner002 end" << std::endl;
-}
-
-/**
  * @tc.name: testOnRemoteDmsDied001
  * @tc.desc: on remote dms died
  * @tc.type: FUNC
@@ -1398,100 +1324,22 @@ HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedToRemoteInner002, TestS
 HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied001, TestSize.Level3)
 {
     DTEST_LOG << "testOnRemoteDmsDied001 begin" << std::endl;
+    //NotifyMissionsChangedToRemoteInner
+    CallerInfo callerInfo;
+    std::vector<DstbMissionInfo> missionInfos;
+    DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedToRemoteInner("", missionInfos, callerInfo);
+    DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedToRemoteInner(
+        DEVICE_ID, missionInfos, callerInfo);
+    
     wptr<IRemoteObject> remote = nullptr;
     DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
+    remote = wptr<IRemoteObject>();
+    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
+
+    DistributedSchedMissionManager::GetInstance().missionHandler_ = nullptr;
+    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
+    EXPECT_EQ(DistributedSchedMissionManager::GetInstance().missionHandler_, nullptr);
     DTEST_LOG << "testOnRemoteDmsDied001 end" << std::endl;
-}
-
-/**
- * @tc.name: testOnRemoteDmsDied002
- * @tc.desc: on remote dms died
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied002, TestSize.Level3)
-{
-    DTEST_LOG << "testOnRemoteDmsDied002 begin" << std::endl;
-    wptr<IRemoteObject> remote = wptr<IRemoteObject>();
-    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
-    DTEST_LOG << "testOnRemoteDmsDied002 end" << std::endl;
-}
-
-/**
- * @tc.name: testRetryStartSyncRemoteMissions001
- * @tc.desc: retry start sync remote missions
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testRetryStartSyncRemoteMissions001, TestSize.Level3)
-{
-    DTEST_LOG << "testRetryStartSyncRemoteMissions001 begin" << std::endl;
-    DistributedSchedMissionManager::GetInstance().Init();
-    DistributedSchedMissionManager::GetInstance().RetryStartSyncRemoteMissions("", localDeviceId_, 1);
-    DTEST_LOG << "testRetryStartSyncRemoteMissions001 end" << std::endl;
-}
-
-/**
- * @tc.name: testRetryStartSyncRemoteMissions002
- * @tc.desc: retry start sync remote missions
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testRetryStartSyncRemoteMissions002, TestSize.Level3)
-{
-    DTEST_LOG << "testRetryStartSyncRemoteMissions002 begin" << std::endl;
-    DistributedSchedMissionManager::GetInstance().Init();
-    DistributedSchedMissionManager::GetInstance().RetryStartSyncRemoteMissions(DEVICE_ID, localDeviceId_, 1);
-    DTEST_LOG << "testRetryStartSyncRemoteMissions002 end" << std::endl;
-}
-
-/**
- * @tc.name: testOnMissionListenerDied001
- * @tc.desc: on mission listener died
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testOnMissionListenerDied001, TestSize.Level3)
-{
-    DTEST_LOG << "testOnMissionListenerDied001 begin" << std::endl;
-    sptr<IRemoteObject> remote = nullptr;
-    DistributedSchedMissionManager::GetInstance().OnMissionListenerDied(remote);
-    DTEST_LOG << "testOnMissionListenerDied001 end" << std::endl;
-}
-
-/**
- * @tc.name: testOnMissionListenerDied002
- * @tc.desc: on mission listener died
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testOnMissionListenerDied002, TestSize.Level3)
-{
-    DTEST_LOG << "testOnMissionListenerDied002 begin" << std::endl;
-    sptr<IRemoteObject> remote = sptr<IRemoteObject>();
-    DistributedSchedMissionManager::GetInstance().OnMissionListenerDied(remote);
-    DTEST_LOG << "testOnMissionListenerDied002 end" << std::endl;
-}
-
-/**
- * @tc.name: testOnRemoteDmsDied003
- * @tc.desc: on remote dms died
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied003, TestSize.Level3)
-{
-    DTEST_LOG << "testOnRemoteDmsDied003 begin" << std::endl;
-    sptr<IRemoteObject> remote = nullptr;
-    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
-    DTEST_LOG << "testOnRemoteDmsDied003 end" << std::endl;
-}
-
-/**
- * @tc.name: testOnRemoteDmsDied004
- * @tc.desc: on remote dms died
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied004, TestSize.Level3)
-{
-    DTEST_LOG << "testOnRemoteDmsDied004 begin" << std::endl;
-    sptr<IRemoteObject> remote = sptr<IRemoteObject>();
-    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
-    DTEST_LOG << "testOnRemoteDmsDied004 end" << std::endl;
 }
 
 /**
@@ -1502,8 +1350,21 @@ HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied004, TestSize.Level3)
 HWTEST_F(DMSMissionManagerTest, testRetryRegisterMissionChange001, TestSize.Level3)
 {
     DTEST_LOG << "testRetryRegisterMissionChange001 begin" << std::endl;
+    //RetryStartSyncRemoteMissions
     DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().RetryStartSyncRemoteMissions("", localDeviceId_, 1);
+    DistributedSchedMissionManager::GetInstance().RetryStartSyncRemoteMissions(DEVICE_ID, localDeviceId_, 1);
+
+    //OnMissionListenerDied
+    sptr<IRemoteObject> remote = nullptr;
+    DistributedSchedMissionManager::GetInstance().OnMissionListenerDied(remote);
+
+    remote = sptr<IRemoteObject>();
+    DistributedSchedMissionManager::GetInstance().OnMissionListenerDied(remote);
+
+    //RetryRegisterMissionChange
     DistributedSchedMissionManager::GetInstance().RetryRegisterMissionChange(1);
+    EXPECT_NE(DistributedSchedMissionManager::GetInstance().missionHandler_, nullptr);
     DTEST_LOG << "testRetryRegisterMissionChange001 end" << std::endl;
 }
 
@@ -1524,19 +1385,6 @@ HWTEST_F(DMSMissionManagerTest, testMissionSnapshotChanged001, TestSize.Level3)
 }
 
 /**
- * @tc.name: testOnDnetDied001
- * @tc.desc: on dnet died
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testOnDnetDied001, TestSize.Level3)
-{
-    DTEST_LOG << "testOnDnetDied001 begin" << std::endl;
-    DistributedSchedMissionManager::GetInstance().Init();
-    DistributedSchedMissionManager::GetInstance().OnDnetDied();
-    DTEST_LOG << "testOnDnetDied001 end" << std::endl;
-}
-
-/**
  * @tc.name: ProxyCallStopSyncMissionsFromRemote001
  * @tc.desc: call dms proxy StopSyncMissionsFromRemote
  * @tc.type: FUNC
@@ -1545,6 +1393,13 @@ HWTEST_F(DMSMissionManagerTest, testOnDnetDied001, TestSize.Level3)
 HWTEST_F(DMSMissionManagerTest, ProxyCallStopSyncMissionsFromRemote001, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallStopSyncMissionsFromRemote001 start" << std::endl;
+    //OnDnetDied
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().OnDnetDied();
+    DistributedSchedMissionManager::GetInstance().isRegMissionChange_ = false;
+    DistributedSchedMissionManager::GetInstance().OnDnetDied();
+
+    //proxy StopSyncMissionsFromRemote
     sptr<IDistributedSched> proxy = GetDms();
     ASSERT_NE(nullptr, proxy);
     CallerInfo callerInfo;
@@ -2120,6 +1975,7 @@ HWTEST_F(DMSMissionManagerTest, testDeviceOfflineNotify003, TestSize.Level3)
         DistributedSchedMissionManager::GetInstance().remoteDmsMap_[DEVICE_ID] = remoteDmsObj;
     }
     DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(DEVICE_ID);
+    EXPECT_EQ(DistributedSchedMissionManager::GetInstance().remoteDmsMap_.empty(), true);
     DTEST_LOG << "testDeviceOfflineNotify003 end" << std::endl;
 }
 
@@ -2374,6 +2230,7 @@ HWTEST_F(DMSMissionManagerTest, testCleanMissionResources002, TestSize.Level3)
         DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
     }
     DistributedSchedMissionManager::GetInstance().CleanMissionResources(DEVICE_ID);
+    EXPECT_EQ(DistributedSchedMissionManager::GetInstance().listenDeviceMap_.empty(), true);
     DTEST_LOG << "testCleanMissionResources002 end" << std::endl;
 }
 
@@ -2482,24 +2339,9 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncMissionsFromRemote003, TestSize.Lev
     DistributedSchedMissionManager::GetInstance().GenerateCallerInfo(callerInfo);
     DistributedSchedMissionManager::GetInstance().isRegMissionChange_ = false;
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncMissionsFromRemote(callerInfo, missionInfos);
+    DistributedSchedMissionManager::GetInstance().StopSyncMissionsFromRemote(DEVICE_ID);
     EXPECT_EQ(ret, ERR_NONE);
     DTEST_LOG << "testStartSyncMissionsFromRemote003 end" << std::endl;
-}
-
-/**
- * @tc.name: testStopSyncMissionsFromRemote003
- * @tc.desc: stop sync missions from remote
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testStopSyncMissionsFromRemote003, TestSize.Level3)
-{
-    DTEST_LOG << "testStopSyncMissionsFromRemote003 begin" << std::endl;
-    std::vector<DstbMissionInfo> missionInfos;
-    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
-    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    DistributedSchedMissionManager::GetInstance().missonChangeListener_ = nullptr;
-    DistributedSchedMissionManager::GetInstance().StopSyncMissionsFromRemote(DEVICE_ID);
-    DTEST_LOG << "testStopSyncMissionsFromRemote003 end" << std::endl;
 }
 
 /**
@@ -2607,20 +2449,6 @@ HWTEST_F(DMSMissionManagerTest, testHasSyncListener002, TestSize.Level3)
 }
 
 /**
- * @tc.name: testOnRemoteDied003
- * @tc.desc: test on remote died
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testOnRemoteDied003, TestSize.Level3)
-{
-    DTEST_LOG << "testOnRemoteDied003 begin" << std::endl;
-    wptr<IRemoteObject> remote = new RemoteMissionListenerTest();
-    DistributedSchedMissionManager::GetInstance().missionHandler_ = nullptr;
-    DistributedSchedMissionManager::GetInstance().OnRemoteDied(remote);
-    DTEST_LOG << "testOnRemoteDied003 end" << std::endl;
-}
-
-/**
  * @tc.name: testDequeueCachedSnapshotInfo003
  * @tc.desc: enqueue cached snapshot info
  * @tc.type: FUNC
@@ -2722,37 +2550,6 @@ HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedFromRemote003, TestSize
 }
 
 /**
- * @tc.name: testNotifyMissionSnapshotCreated002
- * @tc.desc: notify mission snapshot created
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testNotifyMissionSnapshotCreated002, TestSize.Level3)
-{
-    DTEST_LOG << "testNotifyMissionSnapshotCreated002 begin" << std::endl;
-    auto missionChangeRunner = AppExecFwk::EventRunner::Create("DistributedMissionChange");
-    DistributedSchedMissionManager::GetInstance().missionChangeHandler_ =
-        std::make_shared<AppExecFwk::EventHandler>(missionChangeRunner);
-    DistributedSchedMissionManager::GetInstance().NotifyMissionSnapshotCreated(1);
-    DTEST_LOG << "testNotifyMissionSnapshotCreated002 end" << std::endl;
-}
-
-/**
- * @tc.name: testNotifyMissionSnapshotCreated003
- * @tc.desc: notify mission snapshot created
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testNotifyMissionSnapshotCreated003, TestSize.Level3)
-{
-    DTEST_LOG << "testNotifyMissionSnapshotCreated003 begin" << std::endl;
-    auto missionChangeRunner = AppExecFwk::EventRunner::Create("DistributedMissionChange");
-    DistributedSchedMissionManager::GetInstance().missionChangeHandler_ =
-        std::make_shared<AppExecFwk::EventHandler>(missionChangeRunner);
-    DistributedSchedMissionManager::GetInstance().distributedDataStorage_ = nullptr;
-    DistributedSchedMissionManager::GetInstance().NotifyMissionSnapshotCreated(1);
-    DTEST_LOG << "testNotifyMissionSnapshotCreated003 end" << std::endl;
-}
-
-/**
  * @tc.name: testNotifyMissionsChangedToRemote002
  * @tc.desc: notify missions changed to remote
  * @tc.type: FUNC
@@ -2810,31 +2607,6 @@ HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedToRemote003, TestSize.L
     auto ret = DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedToRemote(missionInfos);
     EXPECT_EQ(ret, ERR_NONE);
     DTEST_LOG << "testNotifyMissionsChangedToRemote003 end" << std::endl;
-}
-
-/**
- * @tc.name: testNotifyMissionsChangedToRemoteInner003
- * @tc.desc: notify missions changed to remote inner
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testNotifyMissionsChangedToRemoteInner003, TestSize.Level3)
-{
-    DTEST_LOG << "testNotifyMissionsChangedToRemoteInner003 begin" << std::endl;
-    sptr<IDistributedSched> proxy = GetDms();
-    ASSERT_NE(nullptr, proxy);
-    {
-        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
-        DistributedSchedMissionManager::GetInstance().remoteDmsMap_.clear();
-    }
-    {
-        std::lock_guard<std::mutex> autoLock(DistributedSchedMissionManager::GetInstance().remoteDmsLock_);
-        DistributedSchedMissionManager::GetInstance().remoteDmsMap_[DEVICE_ID] = proxy;
-    }
-    CallerInfo callerInfo;
-    std::vector<DstbMissionInfo> missionInfos;
-    DistributedSchedMissionManager::GetInstance().NotifyMissionsChangedToRemoteInner(
-        DEVICE_ID, missionInfos, callerInfo);
-    DTEST_LOG << "testNotifyMissionsChangedToRemoteInner003 end" << std::endl;
 }
 
 /**
@@ -2937,49 +2709,6 @@ HWTEST_F(DMSMissionManagerTest, testFetchDeviceHandler005, TestSize.Level3)
 }
 
 /**
- * @tc.name: testOnRemoteDmsDied009
- * @tc.desc: on remote dms died
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied009, TestSize.Level3)
-{
-    DTEST_LOG << "testOnRemoteDmsDied009 begin" << std::endl;
-    wptr<IRemoteObject> remote = new RemoteMissionListenerTest();
-    DistributedSchedMissionManager::GetInstance().missionHandler_ = nullptr;
-    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
-    DTEST_LOG << "testOnRemoteDmsDied009 end" << std::endl;
-}
-
-/**
- * @tc.name: testOnRemoteDmsDied005
- * @tc.desc: on remote dms died
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied005, TestSize.Level3)
-{
-    DTEST_LOG << "testOnRemoteDmsDied005 begin" << std::endl;
-    wptr<IRemoteObject> remote = new RemoteMissionListenerTest();
-    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
-    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
-    DTEST_LOG << "testOnRemoteDmsDied005 end" << std::endl;
-}
-
-/**
- * @tc.name: testRetryStartSyncRemoteMissions003
- * @tc.desc: retry start sync remote missions
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testRetryStartSyncRemoteMissions003, TestSize.Level3)
-{
-    DTEST_LOG << "testRetryStartSyncRemoteMissions003 begin" << std::endl;
-    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
-    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    DistributedSchedMissionManager::GetInstance().RetryStartSyncRemoteMissions(DEVICE_ID, localDeviceId_, 1);
-    DTEST_LOG << "testRetryStartSyncRemoteMissions003 end" << std::endl;
-}
-
-/**
  * @tc.name: testRetryStartSyncRemoteMissions004
  * @tc.desc: retry start sync remote missions
  * @tc.type: FUNC
@@ -3003,6 +2732,7 @@ HWTEST_F(DMSMissionManagerTest, testRetryStartSyncRemoteMissions004, TestSize.Le
         DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
     }
     DistributedSchedMissionManager::GetInstance().RetryStartSyncRemoteMissions(DEVICE_ID, localDeviceId_, 1);
+    EXPECT_NE(DistributedSchedMissionManager::GetInstance().missionHandler_, nullptr);
     DTEST_LOG << "testRetryStartSyncRemoteMissions004 end" << std::endl;
 }
 
@@ -3040,6 +2770,7 @@ HWTEST_F(DMSMissionManagerTest, testRetryStartSyncRemoteMissions005, TestSize.Le
         DistributedSchedMissionManager::GetInstance().remoteDmsMap_[DEVICE_ID] = proxy;
     }
     DistributedSchedMissionManager::GetInstance().RetryStartSyncRemoteMissions(DEVICE_ID, localDeviceId_, 1);
+    EXPECT_NE(DistributedSchedMissionManager::GetInstance().missionHandler_, nullptr);
     DTEST_LOG << "testRetryStartSyncRemoteMissions005 end" << std::endl;
 }
 
@@ -3065,6 +2796,7 @@ HWTEST_F(DMSMissionManagerTest, testOnMissionListenerDied003, TestSize.Level3)
         DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
     }
     DistributedSchedMissionManager::GetInstance().OnMissionListenerDied(listener);
+    EXPECT_EQ(DistributedSchedMissionManager::GetInstance().listenDeviceMap_.empty(), true);
     DTEST_LOG << "testOnMissionListenerDied003 end" << std::endl;
 }
 
@@ -3092,6 +2824,7 @@ HWTEST_F(DMSMissionManagerTest, testOnMissionListenerDied004, TestSize.Level3)
         DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
     }
     DistributedSchedMissionManager::GetInstance().OnMissionListenerDied(listener);
+    EXPECT_EQ(DistributedSchedMissionManager::GetInstance().listenDeviceMap_.empty(), false);
     DTEST_LOG << "testOnMissionListenerDied004 end" << std::endl;
 }
 
@@ -3117,6 +2850,7 @@ HWTEST_F(DMSMissionManagerTest, testOnMissionListenerDied005, TestSize.Level3)
         DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
     }
     DistributedSchedMissionManager::GetInstance().OnMissionListenerDied(listener);
+    EXPECT_EQ(DistributedSchedMissionManager::GetInstance().listenDeviceMap_.empty(), true);
     DTEST_LOG << "testOnMissionListenerDied005 end" << std::endl;
 }
 
@@ -3141,6 +2875,7 @@ HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied006, TestSize.Level3)
         DistributedSchedMissionManager::GetInstance().remoteDmsMap_[DEVICE_ID] = remoteDmsObj;
     }
     DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
+    EXPECT_EQ(DistributedSchedMissionManager::GetInstance().listenDeviceMap_.empty(), true);
     DTEST_LOG << "testOnRemoteDmsDied006 end" << std::endl;
 }
 
@@ -3166,6 +2901,7 @@ HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied007, TestSize.Level3)
         DistributedSchedMissionManager::GetInstance().remoteDmsMap_[DEVICE_ID] = proxy;
     }
     DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
+    EXPECT_EQ(DistributedSchedMissionManager::GetInstance().listenDeviceMap_.empty(), true);
     DTEST_LOG << "testOnRemoteDmsDied007 end" << std::endl;
 }
 
@@ -3202,36 +2938,8 @@ HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied008, TestSize.Level3)
         DistributedSchedMissionManager::GetInstance().listenDeviceMap_[deviceId] = listenerInfo;
     }
     DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
+    EXPECT_EQ(DistributedSchedMissionManager::GetInstance().listenDeviceMap_.empty(), false);
     DTEST_LOG << "testOnRemoteDmsDied008 end" << std::endl;
-}
-
-/**
- * @tc.name: testRetryRegisterMissionChange002
- * @tc.desc: retry register mission change
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testRetryRegisterMissionChange002, TestSize.Level3)
-{
-    DTEST_LOG << "testRetryRegisterMissionChange002 begin" << std::endl;
-    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
-    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    DistributedSchedMissionManager::GetInstance().RetryRegisterMissionChange(1);
-    DTEST_LOG << "testRetryRegisterMissionChange002 end" << std::endl;
-}
-
-/**
- * @tc.name: testOnDnetDied002
- * @tc.desc: on dnet died
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testOnDnetDied002, TestSize.Level3)
-{
-    DTEST_LOG << "testOnDnetDied002 begin" << std::endl;
-    auto runner = AppExecFwk::EventRunner::Create("MissionManagerHandler");
-    DistributedSchedMissionManager::GetInstance().missionHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    DistributedSchedMissionManager::GetInstance().isRegMissionChange_ = false;
-    DistributedSchedMissionManager::GetInstance().OnDnetDied();
-    DTEST_LOG << "testOnDnetDied002 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
