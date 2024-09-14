@@ -175,33 +175,6 @@ public:
     OHOS::AppExecFwk::ElementName GetElement() const;
 
     /**
-     * @description: Creates a DistributedWant with its corresponding attributes specified for
-     * starting the main ability of an application.
-     * @param ElementName  Indicates the ElementName object defining the deviceId, bundleName,
-     * and abilityName sub-attributes of the operation attribute in a DistributedWant.
-     * @return Returns the DistributedWant object used to start the main ability of an application.
-     */
-    static DistributedWant* MakeMainAbility(const OHOS::AppExecFwk::ElementName& elementName);
-
-    /**
-     * @description: Creates a DistributedWant instance by using a given Uniform Resource Identifier (URI).
-     * This method parses the input URI and saves it in a DistributedWant object.
-     * @param uri Indicates the URI to parse.
-     * @return Returns a DistributedWant object containing the URI.
-     */
-    static DistributedWant* WantParseUri(const char* uri);
-
-    /**
-     * @description: Creates a DistributedWant instance by using a given Uniform Resource Identifier (URI).
-     * This method parses the input URI and saves it in a DistributedWant object.
-     * @param uri Indicates the URI to parse.
-     * @return Returns a DistributedWant object containing the URI.
-     */
-    static DistributedWant* ParseUri(const std::string& uri);
-
-    static bool CheckParams(const std::string& uri);
-
-    /**
      * @description: Obtains the description of a URI in a DistributedWant.
      * @return Returns the URI description in the DistributedWant.
      */
@@ -234,19 +207,6 @@ public:
      * @return Returns the DistributedWant object containing the URI and the type by setting.
      */
     DistributedWant& SetUriAndType(const OHOS::Uri& uri, const std::string& type);
-
-    /**
-     * @description: Converts a DistributedWant into a URI string containing a representation of it.
-     * @param want Indicates the DistributedWant description.--DistributedWant.
-     * @return   Returns an encoding URI string describing the DistributedWant object.
-     */
-    std::string WantToUri(DistributedWant& want);
-
-    /**
-     * @description: Converts parameter information in a DistributedWant into a URI string.
-     * @return Returns the URI string.
-     */
-    std::string ToUri() const;
 
     /**
      * @description: Formats a specified URI.
@@ -348,35 +308,6 @@ public:
     DistributedWant& SetType(const std::string& type);
 
     /**
-     * @description: Formats a specified MIME type. This method uses
-     * the formatMimeType(java.lang.String) method to format a MIME type
-     * and then saves the formatted type to this DistributedWant object.
-     * @param type Indicates the MIME type to format
-     * @return Returns this DistributedWant object that contains the formatted type attribute
-     */
-    DistributedWant& FormatType(const std::string& type);
-
-    /**
-     * @description: Formats a specified URI and MIME type.
-     * This method works in the same way as formatUri(ohos.utils.net.URI)
-     * and formatType(java.lang.String).
-     * @param uri Indicates the URI to format.
-     * @param type Indicates the MIME type to format.
-     * @return Returns this DistributedWant object that contains the formatted URI and type attributes.
-     */
-    DistributedWant& FormatUriAndType(const OHOS::Uri& uri, const std::string& type);
-
-    /**
-     * @description: This method formats data of a specified MIME type
-     * by removing spaces from the data and converting the data into
-     * lowercase letters. You can use this method to normalize
-     * the external data used to create DistributedWant information.
-     * @param type Indicates the MIME type to format
-     * @return Returns this DistributedWant object that contains the formatted type attribute
-     */
-    static std::string FormatMimeType(const std::string& mimeType);
-
-    /**
      * @description: clear the specific DistributedWant object.
      * @param want Indicates the DistributedWant to clear
      */
@@ -419,15 +350,6 @@ public:
      * @return Returns this want object containing the parameter value.
      */
     DistributedWant& SetParam(const std::string& key, const sptr<IRemoteObject>& remoteObject);
-
-    /**
-     * @description: Obtains a IRemoteObject-type value matching the given key.
-     * @param key   Indicates the key of WantParams.
-     * @param defaultValue  Indicates the default IRemoteObject-type value.
-     * @return Returns the IRemoteObject-type value of the parameter matching the given key;
-     * returns the nullptr if the key does not exist.
-     */
-    sptr<IRemoteObject> GetRemoteObject(const std::string& key) const;
 
     /**
      * @description: Sets a parameter value of the boolean type.
@@ -756,13 +678,6 @@ public:
     bool OperationEquals(const DistributedWant& want);
 
     /**
-     * @description: Creates a DistributedWant object that contains only
-     * the operation component of this DistributedWant.
-     * @return Returns the created DistributedWant object.
-     */
-    DistributedWant* CloneOperation();
-
-    /**
      * @description: Marshals a DistributedWant into a Parcel.
      * Fields in the DistributedWant are marshalled separately. If any field fails to be marshalled, false is returned.
      * @param parcel Indicates the Parcel object for marshalling.
@@ -829,20 +744,8 @@ private:
     static constexpr int VALUE_OBJECT = 1;
 
 private:
-    static bool ParseFlag(const std::string& content, DistributedWant& want);
-    static std::string Decode(const std::string& str);
-    static std::string Encode(const std::string& str);
-    static bool ParseContent(const std::string& content, std::string& prop, std::string& value);
-    static bool ParseUriInternal(
-        const std::string& content, OHOS::AppExecFwk::ElementName& element, DistributedWant& want);
     bool ReadFromParcel(Parcel& parcel);
-    static bool CheckAndSetParameters(
-        DistributedWant& want, const std::string& key, std::string& prop, const std::string& value);
-    static bool CheckAndSetNumberParameters(
-        DistributedWant& want, const std::string& key, std::string& prop, const std::string& value);
     OHOS::Uri GetLowerCaseScheme(const OHOS::Uri& uri);
-    void GenerateUriString(std::string& uriString) const;
-    void ToUriStringInner(std::string& uriString) const;
     nlohmann::json ToJson() const;
     bool ReadFromJson(nlohmann::json& wantJson);
     bool CanReadFromJson(nlohmann::json& wantJson);

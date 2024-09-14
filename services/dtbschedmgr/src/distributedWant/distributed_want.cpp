@@ -47,9 +47,7 @@ namespace DistributedSchedule {
 namespace {
 const std::regex NUMBER_REGEX("^[-+]?([0-9]+)([.]([0-9]+))?$");
 const std::string TAG = "DistributedWant";
-const char* REMOTE_OBJECT = "RemoteObject";
 const char* TYPE_PROPERTY = "type";
-const char* VALUE_PROPERTY = "value";
 };  // namespace
 const std::string DistributedWant::ACTION_PLAY("action.system.play");
 const std::string DistributedWant::ACTION_HOME("action.system.home");
@@ -251,13 +249,6 @@ DistributedWant& DistributedWant::SetType(const std::string& type)
     return *this;
 }
 
-DistributedWant& DistributedWant::FormatType(const std::string& type)
-{
-    std::string typetemp = FormatMimeType(type);
-    SetType(typetemp);
-    return *this;
-}
-
 Uri DistributedWant::GetLowerCaseScheme(const Uri& uri)
 {
     std::string dStrUri = const_cast<Uri&>(uri).ToString();
@@ -283,28 +274,6 @@ Uri DistributedWant::GetLowerCaseScheme(const Uri& uri)
     return Uri(dStrUri);
 }
 
-DistributedWant& DistributedWant::FormatUriAndType(const Uri& uri, const std::string& type)
-{
-    return SetUriAndType(GetLowerCaseScheme(uri), FormatMimeType(type));
-}
-
-std::string DistributedWant::FormatMimeType(const std::string& mimeType)
-{
-    std::string dStrMimeType = mimeType;
-    dStrMimeType.erase(std::remove(dStrMimeType.begin(), dStrMimeType.end(), ' '), dStrMimeType.end());
-    std::transform(dStrMimeType.begin(), dStrMimeType.end(), dStrMimeType.begin(), [](unsigned char c) {
-        return std::tolower(c);
-    });
-
-    std::size_t pos = 0;
-    std::size_t begin = 0;
-    pos = dStrMimeType.find_first_of(";", begin);
-    if (pos != std::string::npos) {
-        dStrMimeType = dStrMimeType.substr(begin, pos - begin);
-    }
-    return dStrMimeType;
-}
-
 std::string DistributedWant::GetAction() const
 {
     return operation_.GetAction();
@@ -319,19 +288,6 @@ DistributedWant& DistributedWant::SetAction(const std::string& action)
 const std::string DistributedWant::GetScheme() const
 {
     return operation_.GetUri().GetScheme();
-}
-
-DistributedWant* DistributedWant::MakeMainAbility(const OHOS::AppExecFwk::ElementName& elementName)
-{
-    DistributedWant* want = new (std::nothrow) DistributedWant();
-    if (want != nullptr) {
-        want->SetAction(ACTION_HOME);
-        want->AddEntity(ENTITY_HOME);
-        want->SetElement(elementName);
-    } else {
-        return nullptr;
-    }
-    return want;
 }
 
 const DistributedWantParams& DistributedWant::GetParams() const
@@ -381,32 +337,6 @@ DistributedWant& DistributedWant::SetParam(const std::string& key, const sptr<IR
     wp.SetParam(AAFwk::VALUE_PROPERTY, AAFwk::RemoteObjectWrap::Box(remoteObject));
     parameters_.SetParam(key, DistributedWantParamWrapper::Box(wp));
     return *this;
-}
-
-sptr<IRemoteObject> DistributedWant::GetRemoteObject(const std::string& key) const
-{
-    auto value = parameters_.GetParam(key);
-    IDistributedWantParams* iwp = IDistributedWantParams::Query(value);
-    if (iwp == nullptr) {
-        return nullptr;
-    }
-    auto wp = DistributedWantParamWrapper::Unbox(iwp);
-
-    auto type = wp.GetParam(TYPE_PROPERTY);
-    AAFwk::IString* iString = AAFwk::IString::Query(type);
-    if (iString == nullptr) {
-        return nullptr;
-    }
-    if (REMOTE_OBJECT != AAFwk::String::Unbox(iString)) {
-        return nullptr;
-    }
-
-    auto remoteObjVal = wp.GetParam(VALUE_PROPERTY);
-    AAFwk::IRemoteObjectWrap* iRemoteObj = AAFwk::IRemoteObjectWrap::Query(remoteObjVal);
-    if (iRemoteObj == nullptr) {
-        return nullptr;
-    }
-    return AAFwk::RemoteObjectWrap::UnBox(iRemoteObj);
 }
 
 DistributedWant& DistributedWant::SetParam(const std::string& key, bool value)
@@ -867,89 +797,6 @@ bool DistributedWant::OperationEquals(const DistributedWant& want)
     return (operation_ == want.operation_);
 }
 
-DistributedWant* DistributedWant::CloneOperation()
-{
-    DistributedWant* want = new (std::nothrow) DistributedWant();
-    if (want == nullptr) {
-        return nullptr;
-    }
-    want->SetOperation(operation_);
-    return want;
-}
-
-bool DistributedWant::CheckParams(const std::string& uri)
-{
-    if (uri.length() <= 0) {
-        return false;
-    }
-    std::string end = ";end";
-    if (uri.find(WANT_HEADER) != 0) {
-        return false;
-    }
-    if (uri.rfind(end) != (uri.length() - end.length())) {
-        return false;
-    }
-    return true;
-}
-
-DistributedWant* DistributedWant::ParseUri(const std::string& uri)
-{
-    if (!CheckParams(uri)) {
-        return nullptr;
-    }
-
-    DistributedWant* baseWant = new (std::nothrow) DistributedWant();
-    if (baseWant == nullptr) {
-        return nullptr;
-    }
-    DistributedWant* pickWant = new (std::nothrow) DistributedWant();
-    if (pickWant == nullptr) {
-        delete baseWant;
-        return nullptr;
-    }
-    bool inPicker = false;
-    bool ret = true;
-    ElementName element;
-    std::size_t begin = WANT_HEADER.length();
-    std::size_t pos = uri.find_first_of(";", begin);
-    for (; pos != std::string::npos; pos = uri.find(";", begin)) {
-        std::string content = uri.substr(begin, pos - begin);
-        if (content.compare("PICK") == 0) {
-            inPicker = true;
-            begin = pos + 1;
-            continue;
-        }
-
-        ret = inPicker ? ParseUriInternal(content, element, *pickWant) : ParseUriInternal(content, element, *baseWant);
-        if (!ret) {
-            HILOGE("Parse uri internal fail, pos %{public}zu, inPicker %{public}d.", pos, inPicker);
-            break;
-        }
-        begin = pos + 1;
-    };
-
-    if (!ret) {
-        delete pickWant;
-        delete baseWant;
-        return nullptr;
-    }
-
-    DistributedWant* retWant = inPicker ? pickWant : baseWant;
-    DistributedWant* delWant = inPicker ? baseWant : pickWant;
-    delete delWant;
-    retWant->SetElement(element);
-    return retWant;
-}
-
-DistributedWant* DistributedWant::WantParseUri(const char* uri)
-{
-    if (uri == nullptr) {
-        return nullptr;
-    }
-    std::string strUri(uri);
-    return ParseUri(strUri);
-}
-
 std::string DistributedWant::GetUriString() const
 {
     return operation_.GetUri().ToString();
@@ -976,91 +823,6 @@ DistributedWant& DistributedWant::SetUriAndType(const OHOS::Uri& uri, const std:
 {
     operation_.SetUri(uri);
     return SetType(type);
-}
-
-std::string DistributedWant::WantToUri(DistributedWant& want)
-{
-    return want.ToUri();
-}
-
-std::string DistributedWant::ToUri() const
-{
-    std::string uriString = WANT_HEADER;
-    ToUriStringInner(uriString);
-    uriString += "end";
-    return uriString;
-}
-
-void DistributedWant::GenerateUriString(std::string& uriString) const
-{
-    if (operation_.GetAction().length() > 0) {
-        uriString += "action=" + Encode(operation_.GetAction()) + ";";
-    }
-    if (GetUriString().length() > 0) {
-        uriString += "uri=" + Encode(GetUriString()) + ";";
-    }
-    for (auto dEntity : operation_.GetEntities()) {
-        if (dEntity.length() > 0) {
-            uriString += "entity=" + Encode(dEntity) + ";";
-        }
-    }
-    if (operation_.GetDeviceId().length() > 0) {
-        uriString += "device=" + Encode(operation_.GetDeviceId()) + ";";
-    }
-    if (operation_.GetBundleName().length() > 0) {
-        uriString += "bundle=" + Encode(operation_.GetBundleName()) + ";";
-    }
-    if (operation_.GetAbilityName().length() > 0) {
-        uriString += "ability=" + Encode(operation_.GetAbilityName()) + ";";
-    }
-    if (operation_.GetFlags() != 0) {
-        uriString += "flag=";
-        char buf[HEX_STRING_BUF_LEN] {0};
-        int lenth = snprintf_s(buf, HEX_STRING_BUF_LEN, HEX_STRING_BUF_LEN - 1, "0x%08x", operation_.GetFlags());
-        if (lenth == HEX_STRING_LEN) {
-            std::string flag = buf;
-            uriString += Encode(flag);
-            uriString += ";";
-        }
-    }
-    if (!operation_.GetBundleName().empty()) {
-        uriString.append("package=");
-        uriString.append(Encode(operation_.GetBundleName()));
-        uriString.append(";");
-    }
-}
-
-void DistributedWant::ToUriStringInner(std::string& uriString) const
-{
-    GenerateUriString(uriString);
-    auto params = parameters_.GetParams();
-    auto iter = params.cbegin();
-    while (iter != params.cend()) {
-        sptr<AAFwk::IInterface> o = iter->second;
-        if (AAFwk::IString::Query(o) != nullptr) {
-            uriString += AAFwk::String::SIGNATURE;
-        } else if (AAFwk::IBoolean::Query(o) != nullptr) {
-            uriString += AAFwk::Boolean::SIGNATURE;
-        } else if (AAFwk::IChar::Query(o) != nullptr) {
-            uriString += AAFwk::Char::SIGNATURE;
-        } else if (AAFwk::IByte::Query(o) != nullptr) {
-            uriString += AAFwk::Byte::SIGNATURE;
-        } else if (AAFwk::IShort::Query(o) != nullptr) {
-            uriString += AAFwk::Short::SIGNATURE;
-        } else if (AAFwk::IInteger::Query(o) != nullptr) {
-            uriString += AAFwk::Integer::SIGNATURE;
-        } else if (AAFwk::ILong::Query(o) != nullptr) {
-            uriString += AAFwk::Long::SIGNATURE;
-        } else if (AAFwk::IFloat::Query(o) != nullptr) {
-            uriString += AAFwk::Float::SIGNATURE;
-        } else if (AAFwk::IDouble::Query(o) != nullptr) {
-            uriString += AAFwk::Double::SIGNATURE;
-        } else if (AAFwk::IArray::Query(o) != nullptr) {
-            uriString += AAFwk::Array::SIGNATURE;
-        }
-        uriString += "." + Encode(iter->first) + "=" + Encode(AAFwk::Object::ToString(*(o.GetRefPtr()))) + ";";
-        iter++;
-    }
 }
 
 DistributedWant& DistributedWant::FormatUri(const std::string& uri)
@@ -1332,215 +1094,6 @@ bool DistributedWant::ReadFromParcel(Parcel& parcel)
     }
     // read package
     operation_.SetBundleName(Str16ToStr8(parcel.ReadString16()));
-    return true;
-}
-
-bool DistributedWant::ParseUriInternal(const std::string& content, ElementName& element, DistributedWant& want)
-{
-    static constexpr int TYPE_TAG_SIZE = 2;
-    std::string dProp;
-    std::string value;
-
-    if (content.empty() || content[0] == '=') {
-        return true;
-    }
-    if (!ParseContent(content, dProp, value)) {
-        return false;
-    }
-    if (value.empty()) {
-        return true;
-    }
-    if (dProp == "action") {
-        want.SetAction(value);
-    } else if (dProp == "entity") {
-        want.AddEntity(value);
-    } else if (dProp == "flag") {
-        if (!ParseFlag(value, want)) {
-            return false;
-        }
-    } else if (dProp == "device") {
-        element.SetDeviceID(value);
-    } else if (dProp == "bundle") {
-        element.SetBundleName(value);
-    } else if (dProp == "ability") {
-        element.SetAbilityName(value);
-    } else if (dProp == "package") {
-        want.SetBundle(Decode(value));
-    } else if (dProp.length() > TYPE_TAG_SIZE) {
-        std::string key = dProp.substr(TYPE_TAG_SIZE);
-        if (!DistributedWant::CheckAndSetParameters(want, key, dProp, value)) {
-            return false;
-        }
-    }
-    return true;
-}
-
-bool DistributedWant::ParseContent(const std::string& content, std::string& prop, std::string& value)
-{
-    std::size_t dPos = content.find("=");
-    if (dPos != std::string::npos) {
-        std::string subString = content.substr(0, dPos);
-        prop = Decode(subString);
-        std::size_t length = content.length();
-        if (length < dPos + 1) {
-            return false;
-        }
-        length = length - dPos - 1;
-        subString = content.substr(dPos + 1, length);
-        value = Decode(subString);
-        return true;
-    }
-    return false;
-}
-
-bool DistributedWant::ParseFlag(const std::string& content, DistributedWant& want)
-{
-    std::string dContentLower = LowerStr(content);
-    std::string prefix = "0x";
-    if (!dContentLower.empty()) {
-        if (dContentLower.find(prefix) != 0) {
-            return false;
-        }
-
-        for (std::size_t i = prefix.length(); i < dContentLower.length(); i++) {
-            if (!isxdigit(dContentLower[i])) {
-                return false;
-            }
-        }
-        int base = 16;  // hex string
-        unsigned int flag = std::stoul(dContentLower, nullptr, base);
-        want.SetFlags(flag);
-    }
-    return true;
-}
-
-std::string DistributedWant::Decode(const std::string& str)
-{
-    std::string dDecode;
-    for (std::size_t i = 0; i < str.length();) {
-        if (str[i] == '\\') {
-            if (++i >= str.length()) {
-                dDecode += "\\";
-                break;
-            }
-            if (str[i] == '\\') {
-                dDecode += "\\";
-                i++;
-                continue;
-            }
-            if (str[i] != '0') {
-                dDecode += "\\" + str.substr(i, 1);
-                i++;
-                continue;
-            }
-            if (str.compare(i, OCT_EQUALSTO.length(), OCT_EQUALSTO) == 0) {
-                dDecode += "=";
-                i += OCT_EQUALSTO.length();
-            } else if (str.compare(i, OCT_SEMICOLON.length(), OCT_SEMICOLON) == 0) {
-                dDecode += ";";
-                i += OCT_SEMICOLON.length();
-            } else {
-                dDecode += "\\" + str.substr(i, 1);
-                i++;
-            }
-        } else {
-            dDecode += str[i];
-            i++;
-        }
-    }
-    return dDecode;
-}
-
-std::string DistributedWant::Encode(const std::string& str)
-{
-    std::string dEncode;
-    for (std::size_t i = 0; i < str.length(); i++) {
-        if (str[i] == '\\') {
-            dEncode += "\\\\";
-        } else if (str[i] == '=') {
-            dEncode += "\\" + OCT_EQUALSTO;
-        } else if (str[i] == ';') {
-            dEncode += "\\" + OCT_SEMICOLON;
-        } else {
-            dEncode += str[i];
-        }
-    }
-    return dEncode;
-}
-
-bool DistributedWant::CheckAndSetParameters(DistributedWant& want, const std::string& key,
-                                            std::string& prop, const std::string& value)
-{
-    if (prop[0] == AAFwk::String::SIGNATURE && prop[1] == '.') {
-        sptr<AAFwk::IString> valueObj = AAFwk::String::Parse(value);
-        if (valueObj == nullptr) {
-            return false;
-        }
-        want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == AAFwk::Boolean::SIGNATURE && prop[1] == '.') {
-        sptr<AAFwk::IBoolean> valueObj = AAFwk::Boolean::Parse(value);
-        if (valueObj == nullptr) {
-            return false;
-        }
-        want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == AAFwk::Char::SIGNATURE && prop[1] == '.') {
-        sptr<AAFwk::IChar> valueObj = AAFwk::Char::Parse(value);
-        if (valueObj == nullptr) {
-            return false;
-        }
-        want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == AAFwk::Byte::SIGNATURE && prop[1] == '.') {
-        sptr<AAFwk::IByte> valueObj = AAFwk::Byte::Parse(value);
-        if (valueObj == nullptr) {
-            return false;
-        }
-        want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == AAFwk::Array::SIGNATURE && prop[1] == '.') {
-        sptr<AAFwk::IArray> valueObj = AAFwk::Array::Parse(value);
-        if (valueObj == nullptr) {
-            return false;
-        }
-        want.parameters_.SetParam(key, valueObj);
-    } else if (!CheckAndSetNumberParameters(want, key, prop, value)) {
-        return false;
-    }
-    return true;
-}
-
-bool DistributedWant::CheckAndSetNumberParameters(DistributedWant& want, const std::string& key,
-                                                  std::string& prop, const std::string& value)
-{
-    if (prop[0] == AAFwk::Short::SIGNATURE && prop[1] == '.') {
-        sptr<AAFwk::IShort> valueObj = AAFwk::Short::Parse(value);
-        if (valueObj == nullptr) {
-            return false;
-        }
-        want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == AAFwk::Integer::SIGNATURE && prop[1] == '.') {
-        sptr<AAFwk::IInteger> valueObj = AAFwk::Integer::Parse(value);
-        if (valueObj == nullptr) {
-            return false;
-        }
-        want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == AAFwk::Long::SIGNATURE && prop[1] == '.') {
-        sptr<AAFwk::ILong> valueObj = AAFwk::Long::Parse(value);
-        if (valueObj == nullptr) {
-            return false;
-        }
-        want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == AAFwk::Float::SIGNATURE && prop[1] == '.') {
-        sptr<AAFwk::IFloat> valueObj = AAFwk::Float::Parse(value);
-        if (valueObj == nullptr) {
-            return false;
-        }
-        want.parameters_.SetParam(key, valueObj);
-    } else if (prop[0] == AAFwk::Double::SIGNATURE && prop[1] == '.') {
-        sptr<AAFwk::IDouble> valueObj = AAFwk::Double::Parse(value);
-        if (valueObj == nullptr) {
-            return false;
-        }
-        want.parameters_.SetParam(key, valueObj);
-    }
     return true;
 }
 
