@@ -110,7 +110,11 @@ void DSchedSoftbusSession::PackRecvData(std::shared_ptr<DSchedDataBuffer> buffer
     }
     uint8_t *ptrPacket = buffer->Data();
     SessionDataHeader headerPara;
-    GetFragDataHeader(ptrPacket, headerPara);
+    int32_t ret = GetFragDataHeader(ptrPacket, headerPara);
+    if (ret != ERR_OK) {
+        HILOGE("get frag data header failed, ret %{public}d", ret);
+        return;
+    }
     if (buffer->Size() != (headerPara.dataLen + BINARY_HEADER_FRAG_LEN) || headerPara.dataLen > headerPara.totalLen ||
         headerPara.dataLen > BINARY_DATA_MAX_LEN || headerPara.totalLen > BINARY_DATA_MAX_TOTAL_LEN) {
         bufferSize = static_cast<uint64_t>(buffer->Size());
@@ -131,29 +135,44 @@ void DSchedSoftbusSession::PackRecvData(std::shared_ptr<DSchedDataBuffer> buffer
         "%" PRId64" end", bufferSize, headerPara.dataLen, headerPara.totalLen, GetNowTimeStampUs());
 }
 
-void DSchedSoftbusSession::GetFragDataHeader(uint8_t *ptrPacket, SessionDataHeader& headerPara)
+int32_t DSchedSoftbusSession::GetFragDataHeader(uint8_t *ptrPacket, SessionDataHeader& headerPara)
 {
     uint32_t i = 0;
+    int32_t ret = ERR_OK;
     while (i < BINARY_HEADER_FRAG_LEN) {
         uint16_t index = 0;
-        if (ReadTlvToHeader(ptrPacket + i, headerPara, index) != ERR_OK) {
+        uint16_t byteLeft = BINARY_HEADER_FRAG_LEN - i;
+        if (ptrPacket == nullptr) {
+            ret = ERR_NULL_OBJECT;
+            break;
+        }
+        ret = ReadTlvToHeader(ptrPacket + i, headerPara, index, byteLeft);
+        if (ret != ERR_OK) {
             break;
         }
         i += index;
     }
-    return;
+    return ret;
 }
 
-int32_t DSchedSoftbusSession::ReadTlvToHeader(uint8_t *ptrPacket, SessionDataHeader& headerPara, uint16_t& index)
+int32_t DSchedSoftbusSession::ReadTlvToHeader(uint8_t *ptrPacket, SessionDataHeader& headerPara, uint16_t& index,
+    uint16_t byteLeft)
 {
     uint8_t *ptr = ptrPacket;
+    if (ptr == nullptr || byteLeft < HEADER_UINT16_NUM) { return INVALID_PARAMETERS_ERR; }
     uint16_t type = U16Get(ptr);
     ptr += sizeof(type);
+    byteLeft -= HEADER_UINT16_NUM;
+
+    if (ptr == nullptr || byteLeft < HEADER_UINT16_NUM) { return INVALID_PARAMETERS_ERR; }
     uint16_t len = U16Get(ptr);
     ptr += sizeof(len);
-    index = sizeof(type) + sizeof(len) + len;
-    int32_t ret = INVALID_PARAMETERS_ERR;
+    byteLeft -= HEADER_UINT16_NUM;
 
+    if (ptr == nullptr || byteLeft < len) { return INVALID_PARAMETERS_ERR; }
+    index = sizeof(type) + sizeof(len) + len;
+
+    int32_t ret = INVALID_PARAMETERS_ERR;
     switch (type) {
         case TLV_TYPE_VERSION:
             ret = memcpy_s(&headerPara.version, sizeof(headerPara.version), ptr, len);

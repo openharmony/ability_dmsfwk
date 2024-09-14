@@ -25,6 +25,8 @@ namespace DistributedSchedule {
 namespace {
 constexpr size_t SIZE_1 = 1;
 constexpr size_t SIZE_2 = 2;
+constexpr uint16_t SIZE_4 = 4;
+constexpr uint32_t SIZE_6 = 6;
 constexpr size_t OFFSET_1 = 1;
 constexpr size_t OFFSET_2 = 2;
 constexpr int32_t COUNT = 2;
@@ -36,9 +38,11 @@ constexpr uint32_t TOTALLEN_2 = 8;
 const std::string MYDEVIDEID = "myDeviceId";
 const std::string PEERDEVICEID = "peerDeviceId";
 const std::string SESSIONNAME = "sessionName";
+constexpr uint32_t SHIFT_8 = 8;
+constexpr uint16_t UINT16_SHIFT_MASK_TEST = 0x00ff;
 }
 
-//DSchedDataBufferTest
+// DSchedDataBufferTest
 void DSchedDataBufferTest::SetUpTestCase()
 {
     DTEST_LOG << "DSchedDataBufferTest::SetUpTestCase" << std::endl;
@@ -391,6 +395,43 @@ HWTEST_F(DSchedSoftbusSessionTest, UnPackStartEndData_001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: GetFragDataHeader_001
+ * @tc.desc: call GetFragDataHeader
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedSoftbusSessionTest, GetFragDataHeader_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedSoftbusSessionTest GetFragDataHeader_001 begin" << std::endl;
+    int32_t dataType = 0;
+    softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
+    ASSERT_NE(softbusSessionTest_, nullptr);
+
+    std::shared_ptr<DSchedDataBuffer> buffer =
+        std::make_shared<DSchedDataBuffer>(static_cast<size_t>(DSchedSoftbusSession::BINARY_HEADER_FRAG_LEN));
+
+    auto ptr = buffer->Data();
+    ASSERT_NE(ptr, nullptr);
+    uint32_t i = 0;
+    for (int32_t j = 0; j < SIZE_6; j++) {
+        ptr[i++] = DSchedSoftbusSession::TLV_TYPE_SEQ_NUM >> SHIFT_8;
+        ptr[i++] = DSchedSoftbusSession::TLV_TYPE_SEQ_NUM & UINT16_SHIFT_MASK_TEST;
+        ptr[i++] = SIZE_4 >> SHIFT_8;
+        ptr[i++] = SIZE_4 & UINT16_SHIFT_MASK_TEST;
+        ptr[i++] = 1;
+        ptr[i++] = 0;
+        ptr[i++] = 0;
+        ptr[i++] = 0;
+    }
+
+    DSchedSoftbusSession::SessionDataHeader headerPara;
+    int32_t ret = softbusSessionTest_->GetFragDataHeader(ptr, headerPara);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    softbusSessionTest_ = nullptr;
+    DTEST_LOG << "DSchedSoftbusSessionTest GetFragDataHeader_001 end" << std::endl;
+}
+
+/**
  * @tc.name: InitChannel_001
  * @tc.desc: call InitChannel
  * @tc.type: FUNC
@@ -437,7 +478,7 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, GetSessionIdByDeviceId_001, TestSize
     int32_t serviceType = 0;
     DSchedTransportSoftbusAdapter::GetInstance().RegisterListener(serviceType, listener);
     DSchedTransportSoftbusAdapter::GetInstance().UnregisterListener(serviceType, listener);
- 
+
     bool ret = DSchedTransportSoftbusAdapter::GetInstance().GetSessionIdByDeviceId(PEERDEVICEID, sessionId);
     EXPECT_EQ(ret, false);
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest GetSessionIdByDeviceId_001 end" << std::endl;

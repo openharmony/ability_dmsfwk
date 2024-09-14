@@ -105,12 +105,12 @@ private:
     void AssembleNoFrag(std::shared_ptr<DSchedDataBuffer> buffer, SessionDataHeader &headerPara);
     void AssembleFrag(std::shared_ptr<DSchedDataBuffer> buffer, SessionDataHeader &headerPara);
     int32_t UnPackSendData(std::shared_ptr<DSchedDataBuffer> buffer, int32_t dataType);
-    void GetFragDataHeader(uint8_t *ptrPacket, SessionDataHeader& headerPara);
+    int32_t GetFragDataHeader(uint8_t *ptrPacket, SessionDataHeader& headerPara);
     int32_t UnPackStartEndData(std::shared_ptr<DSchedDataBuffer> buffer, int32_t dataType);
     int32_t CheckUnPackBuffer(SessionDataHeader& headerPara);
     void ResetAssembleFrag();
     void MakeFragDataHeader(const SessionDataHeader& headPara, uint8_t *header, uint32_t len);
-    int32_t ReadTlvToHeader(uint8_t *ptrPacket, SessionDataHeader& headerPara, uint16_t& index);
+    int32_t ReadTlvToHeader(uint8_t *ptrPacket, SessionDataHeader& headerPara, uint16_t& index, uint16_t byteLeft);
     void WriteTlvToBuffer(const TlvItem& tlvItem, uint8_t *buffer,  uint32_t bufLen);
     void SetHeadParaDataLen(SessionDataHeader& headPara, const uint32_t totalLen, const uint32_t offset,
         const uint32_t maxSendSize);
