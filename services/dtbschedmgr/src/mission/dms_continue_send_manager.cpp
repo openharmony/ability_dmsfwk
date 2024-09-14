@@ -365,7 +365,7 @@ int32_t DMSContinueSendMgr::CheckContinueState(const int32_t missionId)
     int32_t ret = abilityMgr->GetMissionInfo("", missionId, info);
     if (ret != ERR_OK) {
         HILOGE("get missionInfo failed, missionId: %{public}d, ret: %{public}d", missionId, ret);
-        return ERR_OK;
+        return INVALID_PARAMETERS_ERR;
     }
     if (info.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
         HILOGE("Mission continue state set to INACTIVE. Broadcast task abort.");
@@ -541,12 +541,16 @@ int32_t DMSContinueSendMgr::DealSetMissionContinueStateBusiness(const int32_t mi
     const AAFwk::ContinueState &state)
 {
     HILOGI("DealSetMissionContinueStateBusiness start, missionId: %{public}d, state: %{public}d", missionId, state);
-    std::string bundleName;
-    if (info_.currentMissionId != missionId && GetBundleNameByMissionId(missionId, bundleName) != ERR_OK) {
+    if (info_.currentMissionId != missionId) {
         HILOGE("mission is not focused, broadcast task abort, missionId: %{public}d", missionId);
         return INVALID_PARAMETERS_ERR;
     }
-
+    std::string bundleName;
+    if (state == AAFwk::ContinueState::CONTINUESTATE_ACTIVE &&
+        GetBundleNameByMissionId(missionId, bundleName) != ERR_OK) {
+        HILOGE("mission is not focused, broadcast task abort, missionId: %{public}d", missionId);
+        return INVALID_PARAMETERS_ERR;
+    }
     if (!info_.currentIsContinuable) {
         HILOGI("mission is not continuable, broadcast task abort, missionId: %{public}d", missionId);
         return INVALID_PARAMETERS_ERR;
@@ -620,11 +624,11 @@ int32_t DMSContinueSendMgr::NotifyDeviceOnline()
 void DMSContinueSendMgr::OnDeviceScreenOff()
 {
     HILOGI("OnDeviceScreenOff called");
-    if (!info_.currentIsContinuable) {
+    int32_t missionId = info_.currentMissionId;
+    if (!info_.currentIsContinuable || CheckContinueState(missionId) != ERR_OK) {
         HILOGW("current mission is not continuable, ignore");
         return;
     }
-    int32_t missionId = info_.currentMissionId;
     auto feedfunc = [this, missionId]() {
         if (screenOffHandler_ != nullptr) {
             screenOffHandler_->OnDeviceScreenOff(missionId);
