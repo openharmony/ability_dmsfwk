@@ -143,6 +143,7 @@ int32_t DSchedSoftbusSession::GetFragDataHeader(uint8_t *ptrPacket, SessionDataH
         uint16_t index = 0;
         uint16_t byteLeft = BINARY_HEADER_FRAG_LEN - i;
         if (ptrPacket == nullptr) {
+            ret = ERR_NULL_OBJECT;
             break;
         }
         ret = ReadTlvToHeader(ptrPacket + i, headerPara, index, byteLeft);
