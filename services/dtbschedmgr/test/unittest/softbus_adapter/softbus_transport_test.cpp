@@ -407,7 +407,7 @@ HWTEST_F(DSchedSoftbusSessionTest, GetFragDataHeader_001, TestSize.Level3)
     ASSERT_NE(softbusSessionTest_, nullptr);
 
     std::shared_ptr<DSchedDataBuffer> buffer =
-        std::make_shared<DSchedDataBuffer>(DSchedSoftbusSession::BINARY_HEADER_FRAG_LEN);
+        std::make_shared<DSchedDataBuffer>(static_cast<size_t>(DSchedSoftbusSession::BINARY_HEADER_FRAG_LEN));
 
     auto ptr = buffer->Data();
     ASSERT_NE(ptr, nullptr);
