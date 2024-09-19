@@ -194,12 +194,10 @@ int32_t DMSContinueSendMgr::GetMissionIdByBundleName(const std::string& bundleNa
         return ERR_OK;
     }
     HILOGW("get bundleName failed from screenOffHandler_");
-    for (auto iter = aliveMission_.begin(); iter != aliveMission_.end(); iter++) {
-        if (iter->second.bundleName == bundleName) {
-            missionId = iter->first;
-            HILOGI("get missionId from aliveMission_, missionId: %{public}d", missionId);
-            return ERR_OK;
-        }
+    if (bundleName == lastFocusedMissionInfo_.bundleName) {
+        missionId = lastFocusedMissionInfo_.missionId;
+        HILOGI("get missionId end, missionId: %{public}d", missionId);
+        return ERR_OK;
     }
     return INVALID_PARAMETERS_ERR;
 }
@@ -300,7 +298,7 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId)
 
     std::string abilityName = info.want.GetElement().GetAbilityName();
     focusedMissionAbility_[missionId] = abilityName;
-    aliveMission_[missionId] = { bundleName, abilityName };
+    UpdateContinueLaunchMission(info);
 
     if (info.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
         HILOGE("Mission continue state set to INACTIVE. Broadcast task abort.");
@@ -403,17 +401,23 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, Unfoc
         HILOGE("GetAccessTokenIdSendEvent failed");
         return ret;
     }
-    if (reason != UnfocusedReason::TIMEOUT) {
-        std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
-        focusedMission_.erase(bundleName);
-        focusedMissionAbility_.erase(missionId);
-    }
-
+    EraseFocusedMission(bundleName, missionId, reason);
     if (reason == UnfocusedReason::NORMAL && screenOffHandler_ != nullptr) {
         screenOffHandler_->SetScreenOffInfo(missionId, bundleName, bundleNameId, abilityName);
     }
     HILOGI("DealUnfocusedBusiness end");
     return ERR_OK;
+}
+
+void DMSContinueSendMgr::EraseFocusedMission(const std::string& bundleName, const int32_t& missionId,
+    const UnfocusedReason& reason)
+{
+    if (reason != UnfocusedReason::TIMEOUT) {
+        std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
+        focusedMission_.erase(bundleName);
+        focusedMissionAbility_.erase(missionId);
+        lastFocusedMissionInfo_ = { missionId, bundleName };
+    }
 }
 
 int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
@@ -495,6 +499,7 @@ bool DMSContinueSendMgr::IsContinue(const int32_t& missionId, const std::string&
         std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
         focusedMission_.erase(bundleName);
         focusedMissionAbility_.erase(missionId);
+        lastFocusedMissionInfo_ = { missionId, bundleName };
         HILOGI("mission is not continue, missionId: %{public}d, currentMissionId: %{public}d",
             missionId, info_.currentMissionId);
         return false;
@@ -751,25 +756,62 @@ int32_t DMSContinueSendMgr::SetStateSendEvent(const uint16_t bundleNameId, const
     return ret;
 }
 
-void DMSContinueSendMgr::DeleteAliveMissionInfo(const int32_t missionId)
+void DMSContinueSendMgr::DeleteContinueLaunchMissionInfo(const int32_t missionId)
 {
     HILOGD("called");
-    std::lock_guard<std::mutex> aliveMissionMapLock(eventMutex_);
-    aliveMission_.erase(missionId);
+    std::lock_guard<std::mutex> continueLaunchMissionMapLock(eventMutex_);
+    if (continueLaunchMission_.empty()) {
+        return;
+    }
+    for (auto iter = continueLaunchMission_.begin(); iter != continueLaunchMission_.end(); iter++) {
+        if (iter->second == missionId) {
+            continueLaunchMission_.erase(iter);
+            return;
+        }
+    }
 }
 
-int32_t DMSContinueSendMgr::GetAliveMissionInfo(const int32_t missionId, AliveMissionInfo& missionInfo)
+int32_t DMSContinueSendMgr::GetContinueLaunchMissionInfo(const int32_t missionId,
+    ContinueLaunchMissionInfo& missionInfo)
 {
     HILOGD("start, missionId: %{public}d", missionId);
-    std::lock_guard<std::mutex> aliveMissionMapLock(eventMutex_);
-    auto iterItem = aliveMission_.find(missionId);
-    if (iterItem != aliveMission_.end()) {
-        missionInfo = iterItem->second;
-        HILOGI("get missionIdInfo end, missionId: %{public}d", missionId);
-        return ERR_OK;
+    std::lock_guard<std::mutex> continueLaunchMissionMapLock(eventMutex_);
+    for (auto iter = continueLaunchMission_.begin(); iter != continueLaunchMission_.end(); iter++) {
+        if (iter->second == missionId) {
+            missionInfo = iter->first;
+            HILOGI("get missionInfo end, missionId: %{public}d", missionId);
+            return ERR_OK;
+        }
     }
-    HILOGE("get iterItem failed from aliveMission_");
+    HILOGW("get missionInfo failed from continueLaunchMission");
     return INVALID_PARAMETERS_ERR;
+}
+
+bool DMSContinueSendMgr::UpdateContinueLaunchMission(const AAFwk::MissionInfo& info)
+{
+    auto flag = info.want.GetFlags();
+    if ((flag & AAFwk::Want::FLAG_ABILITY_CONTINUATION) != AAFwk::Want::FLAG_ABILITY_CONTINUATION &&
+        (flag & AAFwk::Want::FLAG_ABILITY_PREPARE_CONTINUATION) != AAFwk::Want::FLAG_ABILITY_PREPARE_CONTINUATION) {
+        return false;
+    }
+
+    std::string bundleName = info.want.GetBundle();
+    std::string abilityName = info.want.GetElement().GetAbilityName();
+    ContinueLaunchMissionInfo continueLaunchMissionInfo = { bundleName, abilityName };
+
+    std::lock_guard<std::mutex> continueLaunchMissionMapLock(eventMutex_);
+    auto iterItem = continueLaunchMission_.find(continueLaunchMissionInfo);
+    if (iterItem == continueLaunchMission_.end()) {
+        HILOGI("not find continueLaunchMissionInfo");
+        continueLaunchMission_[continueLaunchMissionInfo] = info.id;
+        return true;
+    }
+    if (iterItem->second < info.id) {
+        HILOGI("old missionId: %{public}d, new missionId: %{public}d", iterItem->second, info.id);
+        continueLaunchMission_[continueLaunchMissionInfo] = info.id;
+        return true;
+    }
+    return false;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

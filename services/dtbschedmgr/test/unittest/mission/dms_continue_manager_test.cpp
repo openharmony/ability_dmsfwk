@@ -752,5 +752,49 @@ HWTEST_F(DMSContinueManagerTest, testGetContinueType_001, TestSize.Level1)
     EXPECT_FALSE(DMSContinueRecvMgr::GetInstance().GetContinueType(bundleName).empty());
     DTEST_LOG << "DMSContinueManagerTest testGetContinueType_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: testGetContinueLaunchMissionInfo_001
+ * @tc.desc: test GetContinueLaunchMissionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testGetContinueLaunchMissionInfo_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testGetContinueLaunchMissionInfo_001 start" << std::endl;
+    ContinueLaunchMissionInfo missionInfo = {"com.test.demo", "MainAbility"};
+    DMSContinueSendMgr::GetInstance().continueLaunchMission_.clear();
+    int32_t ret = DMSContinueSendMgr::GetInstance().GetContinueLaunchMissionInfo(MISSIONID_01, missionInfo);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    DMSContinueSendMgr::GetInstance().continueLaunchMission_[missionInfo] = MISSIONID_01;
+    ret = DMSContinueSendMgr::GetInstance().GetContinueLaunchMissionInfo(MISSIONID_01, missionInfo);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DMSContinueManagerTest testGetContinueLaunchMissionInfo_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testUpdateContinueLaunchMission_001
+ * @tc.desc: test UpdateContinueLaunchMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testUpdateContinueLaunchMission_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testUpdateContinueLaunchMission_001 start" << std::endl;
+    AAFwk::Want want;
+    AppExecFwk::ElementName element("", "com.test.demo", "MainAbility", "");
+    want.SetElement(element);
+
+    AAFwk::MissionInfo info;
+    info.id = MISSIONID_01;
+    info.want = want;
+    EXPECT_FALSE(DMSContinueSendMgr::GetInstance().UpdateContinueLaunchMission(info));
+
+    info.want.SetFlags(AAFwk::Want::FLAG_ABILITY_CONTINUATION);
+    EXPECT_TRUE(DMSContinueSendMgr::GetInstance().UpdateContinueLaunchMission(info));
+
+    info.id = MISSIONID_02;
+    EXPECT_TRUE(DMSContinueSendMgr::GetInstance().UpdateContinueLaunchMission(info));
+    DTEST_LOG << "DMSContinueManagerTest testUpdateContinueLaunchMission_001 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
