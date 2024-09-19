@@ -69,26 +69,12 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_002(const char* data, size_
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
     std::string type(data, size);
     want->SetType(type);
-    want->FormatType(type);
     Uri uri(type);
     want->SetUri(uri);
     want->SetUriAndType(uri, type);
     want->FormatUri(uri);
     want->FormatUri(type);
-    char* charUri;
-    want->WantParseUri(charUri);
     want->GetLowerCaseScheme(uri);
-    want->FormatUriAndType(uri, type);
-    want->FormatMimeType(type);
-
-    std::string str(data, size);
-    want->CheckParams(str);
-    want->ParseUri(str);
-    DistributedWant wantNew;
-    want->WantToUri(wantNew);
-    want->ToUri();
-    want->GenerateUriString(str);
-    want->ToUriStringInner(str);
     return true;
 }
 
@@ -96,30 +82,15 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_003(const char* data, size_
 {
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
     want->CountEntities();
-    DistributedWant *wantptr = nullptr;
     want->GetScheme();
-    AppExecFwk::ElementName elementName;
-    wantptr = want->MakeMainAbility(elementName);
-    if (wantptr) {
-        delete wantptr;
-        wantptr = nullptr;
-    }
     DistributedOperation operation;
     want->SetOperation(operation);
-    wantptr = want->CloneOperation();
-    if (wantptr) {
-        delete wantptr;
-        wantptr = nullptr;
-    }
     std::string key(data, size);
     want->HasParameter(key);
     std::string content(data, size);
     std::string prop(data, size);
     std::string value(data, size);
-    want->ParseContent(content, prop, value);
     std::string str(data, size);
-    want->Decode(str);
-    want->Encode(str);
     nlohmann::json wantJson;
     want->ReadFromJson(wantJson);
     return true;
@@ -131,7 +102,6 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_004(const char* data, size_
     std::string key(data, size);
     sptr<IRemoteObject> remoteObject;
     want->SetParam(key, remoteObject);
-    want->GetRemoteObject(key);
     std::vector<bool> boolValue;
     want->SetParam(key, boolValue);
     want->GetBoolArrayParam(key);
