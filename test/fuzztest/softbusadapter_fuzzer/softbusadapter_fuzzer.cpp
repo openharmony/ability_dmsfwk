@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "softbusadapter_fuzzer.h"
+#include "softbusadapte_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
