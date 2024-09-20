@@ -761,7 +761,7 @@ HWTEST_F(DMSContinueManagerTest, testGetContinueType_001, TestSize.Level1)
 HWTEST_F(DMSContinueManagerTest, testGetContinueLaunchMissionInfo_001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testGetContinueLaunchMissionInfo_001 start" << std::endl;
-    ContinueLaunchMissionInfo missionInfo = {"com.test.demo", "MainAbility"};
+    ContinueLaunchMissionInfo missionInfo = {"com.test.missionInfo", "MainAbility"};
     DMSContinueSendMgr::GetInstance().continueLaunchMission_.clear();
     int32_t ret = DMSContinueSendMgr::GetInstance().GetContinueLaunchMissionInfo(MISSIONID_01, missionInfo);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
