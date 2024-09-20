@@ -46,7 +46,7 @@ uint32_t GetU32Data(const uint8_t* ptr, size_t size)
     if (size > FOO_MAX_LEN || size < U32_AT_SIZE) {
         return 0;
     }
-    char *ch = (char *)malloc(size + 1);
+    char *ch = static_cast<char*>(malloc(size + 1));
     if (ch == nullptr) {
         std::cout << "malloc failed." << std::endl;
         return 0;

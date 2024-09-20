@@ -191,13 +191,8 @@ bool DtbschedmgrDeviceInfoStorage::UpdateDeviceInfoStorage()
         return false;
     }
     for (const auto& dmDeviceInfo : dmDeviceInfoList) {
-        int32_t osType = Constants::OH_OS_TYPE;
-        std::string osVersion = "";
-        if (!GetOsInfoFromDM(dmDeviceInfo.extraData, osType, osVersion)) {
-            HILOGE("Get Os info from DM device info fail, extraData %{public}s.", dmDeviceInfo.extraData.c_str());
-        }
-        auto deviceInfo = std::make_shared<DmsDeviceInfo>(dmDeviceInfo.deviceName, dmDeviceInfo.deviceTypeId,
-            dmDeviceInfo.networkId, ONLINE, osType, osVersion);
+        auto deviceInfo = std::make_shared<DmsDeviceInfo>(
+            dmDeviceInfo.deviceName, dmDeviceInfo.deviceTypeId, dmDeviceInfo.networkId);
         std::string networkId = deviceInfo->GetNetworkId();
         RegisterUuidNetworkIdMap(networkId);
         {
@@ -360,9 +355,8 @@ void DtbschedmgrDeviceInfoStorage::DeviceOnlineNotify(const std::shared_ptr<DmsD
         std::string networkId = devInfo->GetNetworkId();
         RegisterUuidNetworkIdMap(networkId);
         std::string uuid = GetUuidByNetworkId(networkId);
-        HILOGI("networkId: %{public}s, uuid: %{public}s, deviceName: %{public}s, osType: %{public}d, "
-            "osVersion: %{public}s.", GetAnonymStr(networkId).c_str(), GetAnonymStr(uuid).c_str(),
-            devInfo->GetDeviceName().c_str(), devInfo->GetDeviceOSType(), devInfo->GetGetDeviceOSVersion().c_str());
+        HILOGI("networkId: %{public}s, uuid: %{public}s, deviceName: %{public}s", GetAnonymStr(networkId).c_str(),
+            GetAnonymStr(uuid).c_str(), devInfo->GetDeviceName().c_str());
         {
             lock_guard<mutex> autoLock(deviceLock_);
             remoteDevices_[networkId] = devInfo;

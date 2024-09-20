@@ -20,9 +20,7 @@
 #include <string>
 
 #include "parcel.h"
-
-#include "dms_constant.h"
-
+ 
 namespace OHOS {
 namespace DistributedSchedule {
 enum {
@@ -37,18 +35,15 @@ enum {
 
 class DmsDeviceInfo : public Parcelable {
 public:
-    DmsDeviceInfo(const std::string& deviceName, int32_t deviceType, const std::string& networkId,
-        int32_t deviceState = ONLINE, int32_t osType = Constants::OH_OS_TYPE, std::string osVersion = "")
-        : deviceName_(deviceName), deviceType_(deviceType), networkId_(networkId), deviceState_(deviceState),
-        osType_(osType), osVersion_(osVersion) {}
+    DmsDeviceInfo(const std::string& deviceName, int32_t deviceType,
+        const std::string& networkId, int32_t deviceState = ONLINE)
+        : deviceName_(deviceName), deviceType_(deviceType), networkId_(networkId), deviceState_(deviceState) {}
     ~DmsDeviceInfo() = default;
 
     const std::string& GetDeviceName() const;
     const std::string& GetNetworkId() const;
     int32_t GetDeviceType() const;
     int32_t GetDeviceState() const;
-    int32_t GetDeviceOSType() const;
-    const std::string& GetGetDeviceOSVersion() const;
     bool Marshalling(Parcel& parcel) const override;
 
 private:
@@ -56,8 +51,6 @@ private:
     int32_t deviceType_ = UNKNOWN_TYPE;
     std::string networkId_;
     int32_t deviceState_ = UNKNOWN_STATE;
-    int32_t osType_ = Constants::OH_OS_TYPE;
-    std::string osVersion_ = "";
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
