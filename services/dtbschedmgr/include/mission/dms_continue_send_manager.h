@@ -149,6 +149,7 @@ private:
     void DealScreenOff();
     void DealTimerUnfocusedBussiness(const int32_t missionId);
     int32_t GetBundleNameByMissionId(const int32_t missionId, std::string& bundleName);
+    int32_t GetBundleNameByScreenOffInfo(const int32_t missionId, std::string& bundleName);
     bool IsContinue(const int32_t& missionId, const std::string& bundleName);
     int32_t DealSetMissionContinueStateBusiness(const int32_t missionId, const AAFwk::ContinueState& state);
     int32_t CheckContinueState(const int32_t missionId);

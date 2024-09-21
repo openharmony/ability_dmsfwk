@@ -131,9 +131,10 @@ void DnetworkAdapter::DmsDevTrustChangeCallback::OnDeviceTrustChange(const std::
         HILOGE("peer is not same account");
         return;
     }
-    if (DmsBmStorage::GetInstance()->DelDataOfLogoutDev(udid, uuid)) {
+    if (!DmsBmStorage::GetInstance()->DelDataOfLogoutDev(udid, uuid)) {
         HILOGE("DelDataOfLogoutDev failed");
     }
+    HILOGI("end");
 }
 
 bool DnetworkAdapter::AddDeviceChangeListener(const std::shared_ptr<DeviceListener>& listener)
@@ -171,6 +172,8 @@ bool DnetworkAdapter::AddDeviceChangeListener(const std::shared_ptr<DeviceListen
                 std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_REGISTER_CALLBACK_DELAY_TIME));
                 continue;
             }
+            errCode = DeviceManager::GetInstance().RegDevTrustChangeCallback(PKG_NAME, devTrustChangeCallback_);
+            HILOGI("RegDevTrustChangeCallback errCode = %{public}d", errCode);
             if (UpdateDeviceInfoStorage()) {
                 break;
             }
