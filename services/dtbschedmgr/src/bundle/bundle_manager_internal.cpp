@@ -292,7 +292,7 @@ bool BundleManagerInternal::GetAppProvisionInfo4CurrentUser(const std::string &b
         HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
         return false;
     }
-    uint32_t result = bundleMgr->GetAppProvisionInfo(bundleName, ids[0], appProvisionInfo);
+    ErrCode result = bundleMgr->GetAppProvisionInfo(bundleName, ids[0], appProvisionInfo);
     HILOGI("find dst bundle name for diff bundle continue. dst developer id: %{public}s; ",
         GetAnonymStr(appProvisionInfo.developerId).c_str());
     return result == ERR_OK;

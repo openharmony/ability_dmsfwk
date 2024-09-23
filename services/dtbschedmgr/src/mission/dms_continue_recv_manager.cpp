@@ -98,8 +98,7 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
         HILOGE("Forbid sending and receiving");
         return;
     }
-    bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    if (!IsContinueSwitchOn) {
+    if (!DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
         HILOGE("ContinueSwitch status is off");
         return;
     }

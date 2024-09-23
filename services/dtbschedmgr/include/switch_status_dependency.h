@@ -29,18 +29,18 @@ class SwitchStatusDependency {
 public:
     static SwitchStatusDependency &GetInstance();
     bool IsContinueSwitchOn();
+    
+    static const std::string SETTINGS_USER_SECURE_URI;
+    static const std::string SETTINGS_DATA_FIELD_KEY;
+    static const std::string SETTINGS_DATA_FIELD_VAL;
+    static const std::string CONTINUE_SWITCH_STATUS_KEY;
+    static const std::string CONTINUE_SWITCH_OFF;
+    static const std::string CONTINUE_SWITCH_ON;
 
 private:
     std::string GetSwitchStatus(const std::string &key, const std::string &defaultValue);
     std::shared_ptr<DataShare::DataShareHelper> GetDataShareHelper();
     std::mutex dataShareMutex_;
-    const std::string SETTINGS_DATA_URI_PREFIX =
-    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true";
-    const std::string SETTINGS_DATA_FIELD_KEY = "KEYWORD";
-    const std::string SETTINGS_DATA_FIELD_VAL = "VALUE";
-    const std::string CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
-    const std::string CONTINUE_SWITCH_OFF = "0";
-    const std::string CONTINUE_SWITCH_ON = "1";
     std::string switchStatus_;
 };
 } // namespace DistributedSchedule

@@ -109,7 +109,7 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
 
     AppExecFwk::AppProvisionInfo appProvisionInfo;
     std::vector<AccountSA::OsAccountInfo> accounts;
-    uint32_t result = AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
+    ErrCode result = AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
     if (result == ERR_OK && !accounts.empty()) {
         for (auto &account: accounts) {
             result = bundleMgr->GetAppProvisionInfo(bundleName, account.GetLocalId(), appProvisionInfo);
@@ -444,8 +444,9 @@ bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
         DelReduData(networkId, reduRiskEntries);
         return false;
     }
-    if (remoteEntries.empty()) {
+    if (reduRiskEntries.empty()) {
         HILOGE("get distributedBundleInfo failed.");
+        return false;
     }
     HILOGI("end.");
     return true;
@@ -746,7 +747,7 @@ int32_t DmsBmStorage::CloudSync()
 
 void DmsBmStorage::FindProvishionInfo(OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> bundleMgr,
     AppExecFwk::AppProvisionInfo appProvisionInfo, std::vector<AccountSA::OsAccountInfo> accounts,
-    uint32_t result, const std::string& bundleName)
+    int32_t result, const std::string& bundleName)
 {
     if (result == ERR_OK && !accounts.empty()) {
         for (auto &account: accounts) {
@@ -782,7 +783,7 @@ void DmsBmStorage::UpdateDistributedData()
 
     AppExecFwk::AppProvisionInfo appProvisionInfo;
     std::vector<AccountSA::OsAccountInfo> accounts;
-    uint32_t result = AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
+    int32_t result = AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
 
     std::vector<DmsBundleInfo> dmsBundleInfos;
     for (const auto &bundleInfo: bundleInfos) {

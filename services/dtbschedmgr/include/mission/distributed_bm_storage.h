@@ -73,7 +73,7 @@ public:
     int32_t CloudSync();
     void FindProvishionInfo(OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> bundleMgr,
         AppExecFwk::AppProvisionInfo appProvisionInfo, std::vector<AccountSA::OsAccountInfo> accounts,
-        uint32_t result, const std::string& bundleName);
+        int32_t result, const std::string& bundleName);
     void DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos);
     bool UpdatePublicRecords(const std::string &localUdid);
     bool DelDataOfLogoutDev(const std::string &udid, const std::string &uuid);
