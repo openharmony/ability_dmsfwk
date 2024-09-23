@@ -17,26 +17,33 @@
 
 #include <fstream>
 #include <iostream>
+#include "datashare_manager.h"
+#include "dtbschedmgr_log.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "uri.h"
 
-#include "dtbschedmgr_log.h"
-
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DMSSwitchStatusDep";
-const std::string SETTINGS_DATA_URI =
-    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=Continue_Switch_Status";
 }
+const std::string SwitchStatusDependency::SETTINGS_USER_SECURE_URI =
+    "datashare:///com.ohos.settingsdata/entry/settingsdata/USER_SETTINGSDATA_SECURE";
+const std::string SwitchStatusDependency::SETTINGS_DATA_FIELD_KEY = "KEYWORD";
+const std::string SwitchStatusDependency::SETTINGS_DATA_FIELD_VAL = "VALUE";
+const std::string SwitchStatusDependency::CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
+const std::string SwitchStatusDependency::CONTINUE_SWITCH_OFF = "0";
+const std::string SwitchStatusDependency::CONTINUE_SWITCH_ON = "1";
+
 SwitchStatusDependency &SwitchStatusDependency::GetInstance()
 {
     static SwitchStatusDependency instance;
     return instance;
 }
+
 bool SwitchStatusDependency::IsContinueSwitchOn()
 {
     HILOGD("IsContinueSwitchOn start");
@@ -54,7 +61,8 @@ std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, cons
         HILOGE("dataShareHelper is null, key is %{public}s", key.c_str());
         return defaultValue;
     }
-    Uri uri = Uri(SETTINGS_DATA_URI);
+    int32_t userId = DataShareManager::GetInstance().GetLocalAccountId();
+    Uri uri(DataShareManager::GetInstance().AssembleUserSecureUri(userId, key));
     DataShare::DataSharePredicates dataSharePredicates;
     std::vector<std::string> columns;
     dataSharePredicates.EqualTo(SETTINGS_DATA_FIELD_KEY, key);
@@ -86,7 +94,6 @@ std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, cons
     }
     resultSet->Close();
     dataShareHelper->Release();
-    HILOGD("get switch status, query end");
     HILOGI("GetStringValue, setting value is %{public}s with key is %{public}s", valueResult.c_str(), key.c_str());
     return valueResult;
 }
@@ -96,7 +103,7 @@ std::shared_ptr<DataShare::DataShareHelper> SwitchStatusDependency::GetDataShare
     HILOGD("create DataShareHelper instance");
     DataShare::CreateOptions options;
     options.isProxy_ = true;
-    return DataShare::DataShareHelper::Creator(SETTINGS_DATA_URI, options);
+    return DataShare::DataShareHelper::Creator(SETTINGS_USER_SECURE_URI, options);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
