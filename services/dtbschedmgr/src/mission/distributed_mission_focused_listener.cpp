@@ -35,7 +35,7 @@ void DistributedMissionFocusedListener::OnMissionDestroyed(int32_t missionId)
     HILOGD("OnMissionDestroyed, missionId = %{public}d", missionId);
     DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(missionId, UnfocusedReason::DESTORY);
     DSchedContinueManager::GetInstance().NotifyTerminateContinuation(missionId);
-    DMSContinueSendMgr::GetInstance().DeleteAliveMissionInfo(missionId);
+    DMSContinueSendMgr::GetInstance().DeleteContinueLaunchMissionInfo(missionId);
 }
 
 void DistributedMissionFocusedListener::OnMissionSnapshotChanged(int32_t missionId)
