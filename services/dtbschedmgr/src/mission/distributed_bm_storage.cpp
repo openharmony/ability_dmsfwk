@@ -442,6 +442,7 @@ bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
     if (reduRiskEntries.size() > 1) {
         HILOGE("Redundant data needs to be deleted.");
         DelReduData(networkId, reduRiskEntries);
+        distributeBundleInfo = DmsBundleInfo();
         return false;
     }
     if (reduRiskEntries.empty()) {
