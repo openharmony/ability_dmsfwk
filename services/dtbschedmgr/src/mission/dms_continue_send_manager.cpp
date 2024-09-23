@@ -477,6 +477,21 @@ int32_t DMSContinueSendMgr::GetBundleNameByMissionId(const int32_t missionId, st
     return INVALID_PARAMETERS_ERR;
 }
 
+int32_t DMSContinueSendMgr::GetBundleNameByScreenOffInfo(const int32_t missionId, std::string& bundleName)
+{
+    if (screenOffHandler_ != nullptr && missionId == screenOffHandler_->GetMissionId()) {
+        bundleName = screenOffHandler_->GetBundleName();
+        if (bundleName.empty()) {
+            HILOGE("get bundleName failed from screenOffHandler");
+            return INVALID_PARAMETERS_ERR;
+        }
+        HILOGI("get missionId end, bundleName: %{public}s", bundleName.c_str());
+        return ERR_OK;
+    }
+    HILOGE("get bundleName failed from screenOffHandler");
+    return INVALID_PARAMETERS_ERR;
+}
+
 int32_t DMSContinueSendMgr::GetAbilityNameByMissionId(const int32_t missionId, std::string& abilityName)
 {
     HILOGI("start, missionId: %{public}d", missionId);
@@ -577,8 +592,11 @@ int32_t DMSContinueSendMgr::GetBundleNameIdAndContinueTypeId(const int32_t missi
     std::string bundleName;
     int32_t ret = GetBundleNameByMissionId(missionId, bundleName);
     if (ret != ERR_OK) {
-        HILOGE("get bundleName failed, missionId: %{public}d, ret: %{public}d", missionId, ret);
-        return ret;
+        HILOGW("get iterItem failed from focusedMission, try screenOffHandler");
+        if (GetBundleNameByScreenOffInfo(missionId, bundleName) != ERR_OK) {
+            HILOGE("get bundleName failed, missionId: %{public}d, ret: %{public}d", missionId, ret);
+            return ret;
+        }
     }
     HILOGI("get bundleName success, missionId: %{public}d, bundleName: %{public}s", missionId, bundleName.c_str());
     if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(bundleName)) {
