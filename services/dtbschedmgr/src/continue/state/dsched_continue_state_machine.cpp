@@ -47,10 +47,12 @@ int32_t DSchedContinueStateMachine::Execute(const AppExecFwk::InnerEvent::Pointe
         HILOGE("DSchedContinueStateMachine excute failed, continue or currentState is null");
         return INVALID_PARAMETERS_ERR;
     }
-    int32_t ret = currentState_->Execute(dContinue, event);
+
+    auto state = currentState_;
+    int32_t ret = state->Execute(dContinue, event);
     if (ret != ERR_OK) {
         HILOGE("DSchedContinueStateMachine currentState: %{public}d excute event %{public}d failed, ret %{public}d",
-            currentState_->GetStateType(), event->GetInnerEventId(), ret);
+            state->GetStateType(), event->GetInnerEventId(), ret);
     }
     return ret;
 }
