@@ -567,7 +567,7 @@ void DMSContinueRecvMgr::NotifyPackageRemove(const std::string& sinkBundleName)
         HILOGE("NotifyPackageRemove sinkBundleName empty");
         return;
     }
-    if(iconInfo_.bundleName != sinkBundleName) {
+    if (iconInfo_.bundleName != sinkBundleName) {
         return;
     }
     HILOGI("NotifyPackageRemove begin. sinkBundleName: %{public}s.", sinkBundleName.c_str());
