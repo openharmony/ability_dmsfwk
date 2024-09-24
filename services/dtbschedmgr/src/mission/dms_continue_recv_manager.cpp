@@ -561,13 +561,15 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
     HILOGI("NotifyDeviceOffline end");
 }
 
-void DMSContinueRecvMgr::NotifyPackageRemove(const std::string& sinkBundleName)
+void DMSContinueRecvMgr::NotifyPackageRemoved(const std::string& sinkBundleName)
 {
     if (sinkBundleName.empty()) {
         HILOGE("NotifyPackageRemove sinkBundleName empty");
         return;
     }
     if (iconInfo_.bundleName != sinkBundleName) {
+        HILOGI("NotifyPackageRemove current sinkBundleName: %{public}s; removed package: %{public}s."
+            iconInfo_.bundleName.c_str(), sinkBundleName.c_str());
         return;
     }
     HILOGI("NotifyPackageRemove begin. sinkBundleName: %{public}s.", sinkBundleName.c_str());
