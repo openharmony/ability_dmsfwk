@@ -568,7 +568,7 @@ void DMSContinueRecvMgr::NotifyPackageRemoved(const std::string& sinkBundleName)
         return;
     }
     if (iconInfo_.bundleName != sinkBundleName) {
-        HILOGI("NotifyPackageRemoved current sinkBundleName: %{public}s; removed package: %{public}s."
+        HILOGI("NotifyPackageRemoved current sinkBundleName: %{public}s; removed package: %{public}s.",
             iconInfo_.bundleName.c_str(), sinkBundleName.c_str());
         return;
     }
