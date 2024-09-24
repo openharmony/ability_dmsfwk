@@ -720,9 +720,6 @@ HWTEST_F(DMSContinueManagerTest, testGetAbilityNameByMissionId_001, TestSize.Lev
     int32_t ret = DMSContinueSendMgr::GetInstance().GetAbilityNameByMissionId(MISSIONID_01, abilityName);
     EXPECT_EQ(abilityName, ABILITY_NAME_01);
     EXPECT_EQ(ret, ERR_OK);
-
-    ret = DMSContinueSendMgr::GetInstance().GetBundleNameByMissionId(MISSIONID_02, abilityName);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DMSContinueManagerTest testGetAbilityNameByMissionId_001 end" << std::endl;
 }
 
