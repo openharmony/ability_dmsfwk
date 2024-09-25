@@ -805,13 +805,10 @@ HWTEST_F(DistributedSchedPermissionTest, CheckBackgroundPermission_007, TestSize
     std::string deviceId = udid;
     AccessTokenKit::DeleteRemoteToken(deviceId, 0x20100000);
     HapTokenInfo baseInfo = {
-        .apl = APL_NORMAL,
         .ver = 1,
         .userID = 1,
         .bundleName = "com.ohos.dms_test",
         .instIndex = 1,
-        .appID = "dmstest",
-        .deviceID = udid,
         .tokenID = 0x20100000,
         .tokenAttr = 0
     };
@@ -982,13 +979,10 @@ HWTEST_F(DistributedSchedPermissionTest, CheckTargetAbilityVisible_004, TestSize
     std::string deviceId = udid;
     AccessTokenKit::DeleteRemoteToken(deviceId, 0x20100000);
     HapTokenInfo baseInfo = {
-        .apl = APL_NORMAL,
         .ver = 1,
         .userID = 1,
         .bundleName = "com.ohos.dms_test",
         .instIndex = 1,
-        .appID = "dmstest",
-        .deviceID = udid,
         .tokenID = 0x20100000,
         .tokenAttr = 0
     };
@@ -1037,13 +1031,10 @@ HWTEST_F(DistributedSchedPermissionTest, CheckTargetAbilityVisible_005, TestSize
     std::string deviceId = udid;
     AccessTokenKit::DeleteRemoteToken(deviceId, 0x20100000);
     HapTokenInfo baseInfo = {
-        .apl = APL_NORMAL,
         .ver = 1,
         .userID = 1,
         .bundleName = "com.ohos.dms_test",
         .instIndex = 1,
-        .appID = "dmstest",
-        .deviceID = udid,
         .tokenID = 0x20100000,
         .tokenAttr = 0
     };
