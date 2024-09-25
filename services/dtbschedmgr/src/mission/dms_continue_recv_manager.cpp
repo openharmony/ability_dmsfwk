@@ -561,6 +561,48 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
     HILOGI("NotifyDeviceOffline end");
 }
 
+void DMSContinueRecvMgr::NotifyPackageRemoved(const std::string& sinkBundleName)
+{
+    if (sinkBundleName.empty()) {
+        HILOGE("NotifyPackageRemoved sinkBundleName empty");
+        return;
+    }
+    if (iconInfo_.bundleName != sinkBundleName) {
+        HILOGI("NotifyPackageRemoved current sinkBundleName: %{public}s; removed package: %{public}s.",
+            iconInfo_.bundleName.c_str(), sinkBundleName.c_str());
+        return;
+    }
+    HILOGI("NotifyPackageRemoved begin. sinkBundleName: %{public}s.", sinkBundleName.c_str());
+    std::string senderNetworkId;
+    std::string bundleName;
+    std::string continueType;
+    {
+        std::lock_guard<std::mutex> currentIconLock(iconMutex_);
+        senderNetworkId = iconInfo_.senderNetworkId;
+        bundleName = iconInfo_.bundleName;
+        continueType = iconInfo_.continueType;
+        iconInfo_.senderNetworkId = "";
+        iconInfo_.bundleName = "";
+        iconInfo_.continueType = "";
+    }
+    HILOGI("Saved iconInfo cleared, sinkBundleName: %{public}s.",  bundleName.c_str());
+    {
+        std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
+        auto iterItem = registerOnListener_.find(onType_);
+        if (iterItem == registerOnListener_.end()) {
+            HILOGI("Get iterItem failed from registerOnListener_, nobody registed");
+            return;
+        }
+        std::vector<sptr<IRemoteObject>> objs = iterItem->second;
+        for (auto iter : objs) {
+            NotifyRecvBroadcast(iter,
+                currentIconInfo(senderNetworkId, iconInfo_.sourceBundleName, bundleName, continueType),
+                INACTIVE);
+        }
+    }
+    HILOGI("NotifyPackageRemoved end");
+}
+
 std::string DMSContinueRecvMgr::GetContinueType(const std::string& bundleName)
 {
     std::lock_guard<std::mutex> currentIconLock(iconMutex_);

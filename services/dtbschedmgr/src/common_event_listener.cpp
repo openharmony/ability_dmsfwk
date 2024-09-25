@@ -81,8 +81,9 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
             DmsBmStorage::GetInstance()->SaveStorageDistributeInfo(want.GetElement().GetBundleName(), true);
             break;
         case PACKAGE_REMOVED :
-            HILOGI("PACKAGE_REMOVED");
+            HILOGI("PACKAGE_REMOVED: %{public}s", want.GetElement().GetBundleName().c_str());
             DmsBmStorage::GetInstance()->DeleteStorageDistributeInfo(want.GetElement().GetBundleName());
+            DMSContinueRecvMgr::GetInstance().NotifyPackageRemoved(want.GetElement().GetBundleName());
             break;
         default:
             HILOGW("OnReceiveEvent undefined action");

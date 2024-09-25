@@ -84,6 +84,7 @@ public:
     int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj);
     void NotifyDied(const sptr<IRemoteObject>& obj);
     void NotifyDeviceOffline(const std::string& networkId);
+    void NotifyPackageRemoved(const std::string& sinkBundleName);
     void OnDeviceScreenOff();
     void OnContinueSwitchOff();
     std::string GetContinueType(const std::string& bundleName);
