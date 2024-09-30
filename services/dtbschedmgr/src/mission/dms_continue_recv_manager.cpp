@@ -317,6 +317,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     if (!DmsBmStorage::GetInstance()->GetDistributedBundleInfo(senderNetworkId, bundleNameId,
         distributedBundleInfo)) {
         HILOGW("get distributedBundleInfo failed, try = %{public}d", retry);
+        DmsKvSyncE2E::GetInstance()->PushAndPullData(senderNetworkId);
         return RetryPostBroadcast(senderNetworkId, bundleNameId, continueTypeId, state, retry);
     }
 
