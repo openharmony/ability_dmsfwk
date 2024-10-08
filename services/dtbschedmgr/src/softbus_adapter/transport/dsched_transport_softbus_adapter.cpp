@@ -73,7 +73,7 @@ DSchedTransportSoftbusAdapter::~DSchedTransportSoftbusAdapter()
 
 int32_t DSchedTransportSoftbusAdapter::InitChannel()
 {
-    HILOGI("start");
+    HILOGI("start init channel");
     int32_t ret = ERR_OK;
 #ifdef DMSFWK_ALL_CONNECT_MGR
     ret = DSchedAllConnectManager::GetInstance().InitAllConnectManager();
