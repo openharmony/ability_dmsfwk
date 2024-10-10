@@ -26,7 +26,6 @@ DmsSaClient &DmsSaClient::GetInstance()
 bool DmsSaClient::SubscribeDmsSA()
 {
     HILOGD("called.");
-    std::lock_guard<std::mutex> lock(saMgrMutex_);
     if (!saMgrProxy_) {
         HILOGE("saMgrProxy_ is null.");
         return false;
