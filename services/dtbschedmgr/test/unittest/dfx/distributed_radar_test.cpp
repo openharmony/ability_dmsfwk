@@ -656,5 +656,21 @@ HWTEST_F(DistributedRadarTest, SaveDataDmsRemoteWant_002, TestSize.Level3)
     EXPECT_EQ(ret, true);
     DTEST_LOG << "DistributedRadarTest SaveDataDmsRemoteWant_002 end" << std::endl;
 }
+
+/**
+ * @tc.name: NormalFocusedGetAccessTokenIdRes_001
+ * @tc.desc: check NormalFocusedGetAccessTokenIdRes
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedRadarTest, NormalFocusedGetAccessTokenIdRes_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedRadarTest NormalFocusedGetAccessTokenIdRes_001 begin" << std::endl;
+    bool ret = DmsRadar::GetInstance().NormalFocusedGetAccessTokenIdRes(FUNC, ERR_NO);
+    EXPECT_EQ(ret, true);
+    
+    ret = DmsRadar::GetInstance().NormalFocusedGetAccessTokenIdRes(FUNC, ERR_OK);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "DistributedRadarTest NormalFocusedGetAccessTokenIdRes_001 end" << std::endl;
+}
 }
 }

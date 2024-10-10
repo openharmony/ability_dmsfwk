@@ -244,6 +244,9 @@ HWTEST_F(DSchedSoftbusSessionTest, OnBytesReceived_001, TestSize.Level3)
     ASSERT_NE(buffer, nullptr);
     int32_t ret = softbusSessionTest_->OnBytesReceived(buffer);
     EXPECT_EQ(ret, ERR_OK);
+
+    ret = softbusSessionTest_->OnBytesReceived(nullptr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     softbusSessionTest_ = nullptr;
     DTEST_LOG << "DSchedSoftbusSessionTest OnBytesReceived_001 end" << std::endl;
 }
@@ -263,6 +266,9 @@ HWTEST_F(DSchedSoftbusSessionTest, SendData_001, TestSize.Level3)
     int32_t dataType = COUNT;
     int32_t ret = softbusSessionTest_->SendData(buffer, dataType);
     EXPECT_EQ(ret, ERR_OK);
+
+    ret = softbusSessionTest_->SendData(nullptr, dataType);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     softbusSessionTest_ = nullptr;
     DTEST_LOG << "DSchedSoftbusSessionTest SendData_001 end" << std::endl;
 }
@@ -486,8 +492,37 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, ReleaseChannel_001, TestSize.Level3)
     DSchedTransportSoftbusAdapter::GetInstance().NotifyListenersSessionShutdown(sessionId, isSelfcalled);
     DSchedTransportSoftbusAdapter::GetInstance().OnBytes(sessionId, nullptr, 0);
     int32_t ret = DSchedTransportSoftbusAdapter::GetInstance().ReleaseChannel();
-    EXPECT_EQ(ret, -ERR_OK);
+    EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest ReleaseChannel_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SendBytesBySoftbus_001
+ * @tc.desc: call SendBytesBySoftbus
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedTransportSoftbusAdapterTest, SendBytesBySoftbus_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest SendBytesBySoftbus_001 begin" << std::endl;
+    int32_t sessionId = 0;
+    int32_t ret = DSchedTransportSoftbusAdapter::GetInstance().SendBytesBySoftbus(sessionId, nullptr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest SendBytesBySoftbus_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: AddNewPeerSession_001
+ * @tc.desc: call AddNewPeerSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedTransportSoftbusAdapterTest, AddNewPeerSession_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest AddNewPeerSession_001 begin" << std::endl;
+    std::string peerDeviceId = "peerDeviceId";
+    int32_t sessionId = 0;
+    int32_t ret = DSchedTransportSoftbusAdapter::GetInstance().AddNewPeerSession(peerDeviceId, sessionId);
+    EXPECT_EQ(ret, REMOTE_DEVICE_BIND_ABILITY_ERR);
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest AddNewPeerSession_001 end" << std::endl;
 }
 }
 }

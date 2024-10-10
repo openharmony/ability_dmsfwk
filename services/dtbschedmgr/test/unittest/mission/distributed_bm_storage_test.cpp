@@ -101,7 +101,7 @@ HWTEST_F(DistributedBmStorageTest, DeleteStorageDistributeInfoTest_001, TestSize
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
         const std::string bundleName = "NonexistentName";
-        bool ret = dmsBmStorage_->GetInstance()->SaveStorageDistributeInfo(bundleName);
+        bool ret = dmsBmStorage_->GetInstance()->DeleteStorageDistributeInfo(bundleName);
         EXPECT_EQ(ret, false);
     }
     DTEST_LOG << "DistributedBmStorageTest DeleteStorageDistributeInfoTest_001 end" << std::endl;

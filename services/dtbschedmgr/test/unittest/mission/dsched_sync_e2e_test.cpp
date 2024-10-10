@@ -213,6 +213,33 @@ HWTEST_F(DmsKvSyncE2ETest, CheckCtrlRuleTest_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckCtrlRuleTest_002
+ * @tc.desc: test insert DmsKvSyncE2E
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsKvSyncE2ETest, CheckCtrlRuleTest_002, TestSize.Level1)
+{
+    DTEST_LOG << "DmsKvSyncE2ETest CheckCtrlRuleTest_002 start" << std::endl;
+    ASSERT_NE(dmsKvSyncE2E_, nullptr);
+    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
+    EXPECT_NE(dmsKvSyncE2E, nullptr);
+    if (dmsKvSyncE2E != nullptr) {
+        dmsKvSyncE2E_->GetInstance()->isForbidSendAndRecv_ = true;
+        bool ret = dmsKvSyncE2E_->GetInstance()->CheckCtrlRule();
+        EXPECT_EQ(ret, true);
+        
+        dmsKvSyncE2E_->GetInstance()->isCfgDevices_ = true;
+        ret = dmsKvSyncE2E_->GetInstance()->CheckCtrlRule();
+        EXPECT_EQ(ret, false);
+        
+        dmsKvSyncE2E_->GetInstance()->isForbidSendAndRecv_ = false;
+        ret = dmsKvSyncE2E_->GetInstance()->CheckCtrlRule();
+        EXPECT_EQ(ret, true);
+    }
+    DTEST_LOG << "DmsKvSyncE2ETest CheckCtrlRuleTest_002 end" << std::endl;
+}
+
+/**
  * @tc.name: CheckBundleContinueConfigTest_001
  * @tc.desc: test insert DmsKvSyncE2E
  * @tc.type: FUNC
@@ -225,11 +252,35 @@ HWTEST_F(DmsKvSyncE2ETest, CheckBundleContinueConfigTest_001, TestSize.Level1)
     EXPECT_NE(dmsKvSyncE2E, nullptr);
     if (dmsKvSyncE2E != nullptr) {
         const std::string bundleName = "123";
+        dmsKvSyncE2E_->GetInstance()->isCfgDevices_ = false;
         bool ret = dmsKvSyncE2E_->GetInstance()->CheckBundleContinueConfig(bundleName);
         EXPECT_EQ(ret, true);
     }
     DTEST_LOG << "DmsKvSyncE2ETest CheckBundleContinueConfigTest_001 end" << std::endl;
 }
 
+/**
+ * @tc.name: IsValidPath_001
+ * @tc.desc: test IsValidPath
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsKvSyncE2ETest, IsValidPath_001, TestSize.Level1)
+{
+    DTEST_LOG << "DmsKvSyncE2ETest CheckCtrlRuleTest_001 start" << std::endl;
+    ASSERT_NE(dmsKvSyncE2E_, nullptr);
+    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
+    EXPECT_NE(dmsKvSyncE2E, nullptr);
+    if (dmsKvSyncE2E != nullptr) {
+        std::string inFilePath = "";
+        std::string realFilePath;
+        bool ret = dmsKvSyncE2E_->GetInstance()->IsValidPath(inFilePath, realFilePath);
+        EXPECT_EQ(ret, false);
+
+        inFilePath = "inFilePath";
+        ret = dmsKvSyncE2E_->GetInstance()->IsValidPath(inFilePath, realFilePath);
+        EXPECT_EQ(ret, false);
+    }
+    DTEST_LOG << "DmsKvSyncE2ETest IsValidPath_001 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
