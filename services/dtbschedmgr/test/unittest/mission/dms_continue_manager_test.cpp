@@ -45,6 +45,7 @@ constexpr int32_t ACTIVE = 0;
 constexpr int32_t INACTIVE = 1;
 constexpr int32_t CANCEL_FOCUSED_DELAYED = 10000;
 constexpr int32_t DBMS_RETRY_MAX_TIME = 5;
+constexpr uint8_t DMS_FOCUSED_TYPE = 0x00;
 }
 
 void DMSContinueManagerTest::SetUpTestCase()
@@ -609,6 +610,21 @@ HWTEST_F(DMSContinueManagerTest, testDealSetMissionContinueStateBusiness001, Tes
     DTEST_LOG << "DMSContinueManagerTest testDealSetMissionContinueStateBusiness001 end" << std::endl;
 }
 
+/**
+ * @tc.name: testDealSetMissionContinueStateBusiness002
+ * @tc.desc: test DealSetMissionContinueStateBusiness.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testDealSetMissionContinueStateBusiness002, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest testDealSetMissionContinueStateBusiness002 start" << std::endl;
+    DMSContinueSendMgr::GetInstance().info_.currentIsContinuable = true;
+    OHOS::AAFwk::ContinueState state = OHOS::AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
+    int32_t ret = DMSContinueSendMgr::GetInstance().DealSetMissionContinueStateBusiness(MISSIONID_01, state);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DMSContinueManagerTest testDealSetMissionContinueStateBusiness002 end" << std::endl;
+}
+
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
 /**
  * @tc.name: testOnDeviceScreenOff001
@@ -953,6 +969,108 @@ HWTEST_F(DMSContinueManagerTest, testGetFinalBundleName_001, TestSize.Level1)
         localBundleInfo, continueType);
     EXPECT_EQ(ret, false);
     DTEST_LOG << "DMSContinueManagerTest testGetFinalBundleName_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetBundleNameByScreenOffInfo_001
+ * @tc.desc: test GetBundleNameByScreenOffInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, GetBundleNameByScreenOffInfo_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest GetBundleNameByScreenOffInfo_001 start" << std::endl;
+    DMSContinueSendMgr::GetInstance().screenOffHandler_ = nullptr;
+    int32_t missionId = 0;
+    std::string bundleName;
+    int32_t ret = DMSContinueSendMgr::GetInstance().GetBundleNameByScreenOffInfo(missionId, bundleName);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    DMSContinueSendMgr::GetInstance().screenOffHandler_ = std::make_shared<DMSContinueSendMgr::ScreenOffHandler>();
+    ret = DMSContinueSendMgr::GetInstance().GetBundleNameByScreenOffInfo(missionId, bundleName);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    DMSContinueSendMgr::GetInstance().screenOffHandler_->SetScreenOffInfo(0, "", 0, "");
+    ret = DMSContinueSendMgr::GetInstance().GetBundleNameByScreenOffInfo(missionId, bundleName);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    DMSContinueSendMgr::GetInstance().screenOffHandler_->SetScreenOffInfo(0, "bundleName", 0, "");
+    ret = DMSContinueSendMgr::GetInstance().GetBundleNameByScreenOffInfo(missionId, bundleName);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DMSContinueManagerTest GetBundleNameByScreenOffInfo_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SendScreenOffEvent_001
+ * @tc.desc: test SendScreenOffEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, SendScreenOffEvent_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest SendScreenOffEvent_001 start" << std::endl;
+    DMSContinueSendMgr::GetInstance().screenOffHandler_ = nullptr;
+    int32_t ret = DMSContinueSendMgr::GetInstance().SendScreenOffEvent(DMS_FOCUSED_TYPE);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    DMSContinueSendMgr::GetInstance().screenOffHandler_ = std::make_shared<DMSContinueSendMgr::ScreenOffHandler>();
+    ret = DMSContinueSendMgr::GetInstance().SendScreenOffEvent(DMS_FOCUSED_TYPE);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DMSContinueManagerTest SendScreenOffEvent_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DeleteContinueLaunchMissionInfo_001
+ * @tc.desc: test DeleteContinueLaunchMissionInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, DeleteContinueLaunchMissionInfo_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest DeleteContinueLaunchMissionInfo_001 start" << std::endl;
+    int32_t missionId = 0;
+    DMSContinueSendMgr::GetInstance().continueLaunchMission_.clear();
+    DMSContinueSendMgr::GetInstance().DeleteContinueLaunchMissionInfo(missionId);
+
+    ContinueLaunchMissionInfo info { "bundleName", "abilityName" };
+    DMSContinueSendMgr::GetInstance().continueLaunchMission_[info] = 0;
+    DMSContinueSendMgr::GetInstance().DeleteContinueLaunchMissionInfo(missionId);
+    EXPECT_EQ(DMSContinueSendMgr::GetInstance().continueLaunchMission_.empty(), true);
+    DTEST_LOG << "DMSContinueManagerTest DeleteContinueLaunchMissionInfo_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CheckContinueState_001
+ * @tc.desc: test CheckContinueState
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, CheckContinueState_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest CheckContinueState_001 start" << std::endl;
+    int32_t missionId = 0;
+    int32_t ret = DMSContinueSendMgr::GetInstance().CheckContinueState(missionId);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DMSContinueManagerTest CheckContinueState_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnContinueSwitchOff_001
+ * @tc.desc: test OnContinueSwitchOff
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, OnContinueSwitchOff_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest OnContinueSwitchOff_001 start" << std::endl;
+    DMSContinueRecvMgr::GetInstance().iconInfo_.senderNetworkId = "";
+    DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName = "";
+    DMSContinueRecvMgr::GetInstance().iconInfo_.continueType = "";
+    DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
+    EXPECT_EQ(DMSContinueRecvMgr::GetInstance().iconInfo_.isEmpty(), true);
+
+    DMSContinueRecvMgr::GetInstance().iconInfo_.senderNetworkId = "senderNetworkId";
+    DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName = "bundleName";
+    DMSContinueRecvMgr::GetInstance().iconInfo_.continueType = "continueType";
+    DMSContinueRecvMgr::GetInstance().registerOnListener_.clear();
+    DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
+    EXPECT_EQ(DMSContinueRecvMgr::GetInstance().registerOnListener_.empty(), true);
+    DTEST_LOG << "DMSContinueManagerTest OnContinueSwitchOff_001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
