@@ -37,6 +37,10 @@ IMPLEMENT_SINGLE_INSTANCE(MMIAdapter);
 void MMIAdapter::Init()
 {
     HILOGI("Init");
+    if (eventHandler_ != nullptr) {
+        HILOGI("Already inited, end.");
+        return;
+    }
     mmiCallback_ = std::make_shared<MMIAdapter::MMIEventCallback>();
     eventThread_ = std::thread(&MMIAdapter::StartEvent, this);
     std::unique_lock<std::mutex> lock(eventMutex_);

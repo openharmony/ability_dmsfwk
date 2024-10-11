@@ -103,9 +103,11 @@ private:
     std::map<DSchedContinueInfo, std::shared_ptr<DSchedContinue>> continues_;
     std::mutex continueMutex_;
 
+#ifdef DMSFWK_ALL_CONNECT_MGR
     std::mutex connectDecisionMutex_;
     std::condition_variable connectDecisionCond_;
     std::map<std::string, std::atomic<bool>> peerConnectDecision_;
+#endif
 
     std::atomic<int32_t> cntSink_ {0};
     std::atomic<int32_t> cntSource_ {0};

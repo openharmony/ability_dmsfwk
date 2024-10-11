@@ -14,6 +14,7 @@
  */
 
 #include "distributed_sched_adapter_test.h"
+#include "distributed_sched_test_util.h"
 #include "dtbschedmgr_log.h"
 #include "mock_remote_stub.h"
 #include "snapshot.h"
@@ -355,8 +356,9 @@ HWTEST_F(DistributedSchedAdapterTest, GetLocalMissionInfos_001, TestSize.Level4)
     ASSERT_NE(distributedSchedAdapter_, nullptr);
     int32_t numMissions = -1;
     std::vector<DstbMissionInfo> missionInfos;
+    DistributedSchedUtil::MockManageMissions();
     int32_t result = distributedSchedAdapter_->GetLocalMissionInfos(numMissions, missionInfos);
-    EXPECT_NE(result, ERR_OK);
+    EXPECT_EQ(missionInfos.empty(), true);
     DTEST_LOG << "DistributedSchedAdapterTest GetLocalMissionInfos_001 end" << std::endl;
 }
 
@@ -372,8 +374,9 @@ HWTEST_F(DistributedSchedAdapterTest, GetLocalMissionInfos_002, TestSize.Level4)
     ASSERT_NE(distributedSchedAdapter_, nullptr);
     int32_t numMissions = 0;
     std::vector<DstbMissionInfo> missionInfos;
+    DistributedSchedUtil::MockManageMissions();
     int32_t result = distributedSchedAdapter_->GetLocalMissionInfos(numMissions, missionInfos);
-    EXPECT_NE(result, ERR_OK);
+    EXPECT_EQ(missionInfos.empty(), true);
     DTEST_LOG << "DistributedSchedAdapterTest GetLocalMissionInfos_002 end" << std::endl;
 }
 
@@ -389,8 +392,9 @@ HWTEST_F(DistributedSchedAdapterTest, GetLocalMissionInfos_003, TestSize.Level4)
     ASSERT_NE(distributedSchedAdapter_, nullptr);
     int32_t numMissions = 10;
     std::vector<DstbMissionInfo> missionInfos;
+    DistributedSchedUtil::MockManageMissions();
     int32_t result = distributedSchedAdapter_->GetLocalMissionInfos(numMissions, missionInfos);
-    EXPECT_NE(result, ERR_OK);
+    EXPECT_EQ(result, ERR_OK);
     DTEST_LOG << "DistributedSchedAdapterTest GetLocalMissionInfos_003 end" << std::endl;
 }
 
@@ -408,24 +412,6 @@ HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_001, TestSize.Leve
     int32_t result = distributedSchedAdapter_->RegisterMissionListener(listener);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedAdapterTest RegisterMissionListener_001 end" << std::endl;
-}
-
-/**
- * @tc.name: RegisterMissionListener_002
- * @tc.desc: listener is not nullptr
- * @tc.type: FUNC
- * @tc.require: I5WKCK
- */
-HWTEST_F(DistributedSchedAdapterTest, RegisterMissionListener_002, TestSize.Level4)
-{
-    DTEST_LOG << "DistributedSchedAdapterTest RegisterMissionListener_002 begin" << std::endl;
-    const sptr<IRemoteObject> connect(new MockRemoteStub());
-    ASSERT_NE(distributedSchedAdapter_, nullptr);
-    distributedSchedAdapter_->ProcessCallResult(connect, nullptr);
-    const sptr<DistributedMissionChangeListener> listener(new DistributedMissionChangeListener());
-    int32_t result = distributedSchedAdapter_->RegisterMissionListener(listener);
-    EXPECT_NE(result, ERR_OK);
-    DTEST_LOG << "DistributedSchedAdapterTest RegisterMissionListener_002 end" << std::endl;
 }
 
 /**

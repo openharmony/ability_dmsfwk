@@ -39,7 +39,6 @@ constexpr int32_t SLEEP_TIME = 1000;
 void BundleManagerInternalTest::SetUpTestCase()
 {
     DTEST_LOG << "BundleManagerInternalTest::SetUpTestCase" << std::endl;
-    DistributedSchedUtil::InstallThirdPartyHap();
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
 }
 

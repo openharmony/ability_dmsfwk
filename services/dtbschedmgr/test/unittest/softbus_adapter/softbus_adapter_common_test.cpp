@@ -54,9 +54,9 @@ void SoftbusAdapterTest::SetUp()
 HWTEST_F(SoftbusAdapterTest, SendSoftbusEvent_001, TestSize.Level3)
 {
     DTEST_LOG << "SoftbusAdapterTest SendSoftbusEvent_001 begin" << std::endl;
-    uint8_t* sendData = nullptr;
     uint32_t sendDataLen = 1;
-    uint32_t result = SoftbusAdapter::GetInstance().SendSoftbusEvent(sendData, sendDataLen);
+    std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(sendDataLen);
+    uint32_t result = SoftbusAdapter::GetInstance().SendSoftbusEvent(buffer);
     EXPECT_EQ(result, SOFTBUS_OK);
     DTEST_LOG << "SoftbusAdapterTest SendSoftbusEvent_001 end" << std::endl;
 }

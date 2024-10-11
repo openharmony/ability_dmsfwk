@@ -98,6 +98,25 @@ HWTEST_F(DMSContinueManagerTest, testUnInit001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: testUnInit002
+ * @tc.desc: test UnInit
+ * @tc.type: FUNC
+ * @tc.require: I7F8KH
+ */
+HWTEST_F(DMSContinueManagerTest, testUnInit002, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest testUnInit002 begin" << std::endl;
+
+    DistributedSchedUtil::MockManageMissions();
+    DMSContinueSendMgr::GetInstance().Init();
+    EXPECT_NE(DMSContinueSendMgr::GetInstance().eventHandler_, nullptr);
+
+    DMSContinueSendMgr::GetInstance().UnInit();
+    EXPECT_EQ(DMSContinueSendMgr::GetInstance().eventHandler_, nullptr);
+    DTEST_LOG << "DMSContinueManagerTest testUnInit002 end" << std::endl;
+}
+
+/**
  * @tc.name: testPostUnfocusedTaskWithDelay001
  * @tc.desc: test PostUnfocusedTaskWithDelay
  * @tc.type: FUNC
@@ -276,7 +295,7 @@ HWTEST_F(DMSContinueManagerTest, testDealFocusedBusiness001, TestSize.Level3)
     /**
      * @tc.steps: step1. test DealFocusedBusiness when missionId is invalid;
      */
-    int32_t ret = DMSContinueSendMgr::GetInstance().DealFocusedBusiness(-1);
+    int32_t ret = DMSContinueSendMgr::GetInstance().DealFocusedBusiness(-1, FocusedReason::MIN);
     EXPECT_NE(ret, ERR_OK);
 
     DTEST_LOG << "DMSContinueManagerTest testDealFocusedBusiness001 end" << std::endl;
@@ -775,6 +794,45 @@ HWTEST_F(DMSContinueManagerTest, testGetContinueType_001, TestSize.Level1)
 
     EXPECT_FALSE(DMSContinueRecvMgr::GetInstance().GetContinueType(bundleName).empty());
     DTEST_LOG << "DMSContinueManagerTest testGetContinueType_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testSetScreenOffInfo_001
+ * @tc.desc: test SetScreenOffInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testSetScreenOffInfo_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testSetScreenOffInfo_001 start" << std::endl;
+    int32_t missionId = 0;
+    std::string bundleName = "bundleName";
+    uint16_t bundleNameId = 0;
+    std::string abilityName = "abilityName";
+    DMSContinueSendMgr::GetInstance().screenOffHandler_ = std::make_shared<DMSContinueSendMgr::ScreenOffHandler>();
+    DMSContinueSendMgr::GetInstance().screenOffHandler_->SetScreenOffInfo(missionId, bundleName,
+        bundleNameId, abilityName);
+    EXPECT_EQ(DMSContinueSendMgr::GetInstance().screenOffHandler_->unfoInfo_.abilityName.empty(), false);
+    
+    DMSContinueSendMgr::GetInstance().screenOffHandler_->ClearScreenOffInfo();
+    EXPECT_EQ(DMSContinueSendMgr::GetInstance().screenOffHandler_->unfoInfo_.abilityName.empty(), true);
+    DTEST_LOG << "DMSContinueManagerTest testSetScreenOffInfo_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testSetStateSendEvent_001
+ * @tc.desc: test SetStateSendEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testSetStateSendEvent_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testSetStateSendEvent_001 start" << std::endl;
+    int32_t ret = DMSContinueSendMgr::GetInstance().SetStateSendEvent(0, 0,
+        AAFwk::ContinueState::CONTINUESTATE_INACTIVE);
+    EXPECT_NE(ret, DMS_PERMISSION_DENIED);
+
+    ret = DMSContinueSendMgr::GetInstance().SetStateSendEvent(0, 0, AAFwk::ContinueState::CONTINUESTATE_ACTIVE);
+    EXPECT_NE(ret, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DMSContinueManagerTest testSetStateSendEvent_001 end" << std::endl;
 }
 
 /**

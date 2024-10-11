@@ -77,7 +77,6 @@ ohos_shared_library("distributedschedsvr") {
   if (!dmsfwk_softbus_adapter_common) {
     cflags = [
       "-DDMSFWK_SAME_ACCOUNT",
-      "-DDMSFWK_INTERACTIVE_ADAPTER",
       "-DDMSFWK_ALL_CONNECT_MGR",
     ]
   }

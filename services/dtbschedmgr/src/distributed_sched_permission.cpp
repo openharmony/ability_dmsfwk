@@ -173,7 +173,7 @@ int32_t DistributedSchedPermission::GetAccountInfo(const std::string& remoteNetw
     if (CheckAclList(remoteNetworkId, accountInfo, callerInfo)) {
         return ERR_OK;
     }
-    HILOGE("Check different account ACL by DM fail.");
+    HILOGE("Check different account ACL list by DM fail.");
     return  INVALID_PARAMETERS_ERR;
 }
 

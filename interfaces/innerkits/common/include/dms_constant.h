@@ -19,12 +19,6 @@
 namespace OHOS {
 namespace DistributedSchedule {
 namespace Constants {
-constexpr int32_t OH_OS_TYPE = 10;
-constexpr int32_t HO_OS_TYPE = 11;
-constexpr int32_t HO_OS_TYPE_EX = -1;
-
-constexpr const char* PARAM_KEY_OS_TYPE = "OS_TYPE";
-constexpr const char* PARAM_KEY_OS_VERSION = "OS_VERSION";
 constexpr const char* DMS_NAME = "dmsfwk";
 constexpr const char* DMS_VERSION = "5.0.0";
 constexpr const char* DMS_SERVICE_ID = "dmsfwk_svr_id";
