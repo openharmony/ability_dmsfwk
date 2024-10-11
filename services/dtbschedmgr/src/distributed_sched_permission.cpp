@@ -111,9 +111,10 @@ int32_t DistributedSchedPermission::CheckSendResultPermission(const AAFwk::Want&
     const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility)
 {
     // 1.check account access permission in no account networking environment.
-    if (!CheckAccountAccessPermission(callerInfo, accountInfo, targetAbility.bundleName)) {
+    int32_t ret = CheckAccountAccessPermission(callerInfo, accountInfo, targetAbility.bundleName);
+    if (ret != ERR_OK) {
         HILOGE("CheckAccountAccessPermission denied or failed!");
-        return DMS_ACCOUNT_ACCESS_PERMISSION_DENIED;
+        return ret;
     }
     // 2.check component access permission, when the ability is not visible.
     if (!CheckComponentAccessPermission(targetAbility, callerInfo, accountInfo, want)) {
@@ -128,9 +129,10 @@ int32_t DistributedSchedPermission::CheckStartPermission(const AAFwk::Want& want
     const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility, bool isSameBundle)
 {
     // 1.check account access permission in no account networking environment.
-    if (!CheckAccountAccessPermission(callerInfo, accountInfo, targetAbility.bundleName)) {
+    int32_t ret = CheckAccountAccessPermission(callerInfo, accountInfo, targetAbility.bundleName);
+    if (ret != ERR_OK) {
         HILOGE("CheckAccountAccessPermission denied or failed!");
-        return DMS_ACCOUNT_ACCESS_PERMISSION_DENIED;
+        return ret;
     }
     // 2.check start control permissions.
     if (!CheckStartControlPermission(targetAbility, callerInfo, want, isSameBundle)) {
@@ -339,9 +341,10 @@ int32_t DistributedSchedPermission::CheckGetCallerPermission(const AAFwk::Want& 
     const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility)
 {
     // 1.check account access permission in no account networking environment.
-    if (!CheckAccountAccessPermission(callerInfo, accountInfo, targetAbility.bundleName)) {
+    int32_t ret = CheckAccountAccessPermission(callerInfo, accountInfo, targetAbility.bundleName);
+    if (ret != ERR_OK) {
         HILOGE("CheckAccountAccessPermission denied or failed!");
-        return DMS_ACCOUNT_ACCESS_PERMISSION_DENIED;
+        return ret;
     }
     // 2. check call with same appid
     if (!BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
@@ -484,14 +487,14 @@ bool DistributedSchedPermission::VerifyPermission(uint32_t accessToken, const st
     return true;
 }
 
-bool DistributedSchedPermission::CheckAccountAccessPermission(const CallerInfo& callerInfo,
+int32_t DistributedSchedPermission::CheckAccountAccessPermission(const CallerInfo& callerInfo,
     const AccountInfo& accountInfo, const std::string& targetBundleName)
 {
     std::string udid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(callerInfo.sourceDeviceId);
     std::string dstNetworkId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(dstNetworkId)) {
         HILOGE("GetLocalDeviceId failed");
-        return false;
+        return GET_LOCAL_DEVICE_ERR;
     }
     DmAccessCaller dmSrcCaller = {
         .accountId = accountInfo.activeAccountId,
@@ -510,23 +513,24 @@ bool DistributedSchedPermission::CheckAccountAccessPermission(const CallerInfo& 
         dmSrcCaller.pkgName.c_str(), GetAnonymStr(dmDstCallee.networkId).c_str());
 
 #ifdef DMSFWK_SAME_ACCOUNT
-    if (DeviceManager::GetInstance().CheckIsSameAccount(dmSrcCaller, dmDstCallee)) {
-        return true;
+    if (!DeviceManager::GetInstance().CheckIsSameAccount(dmSrcCaller, dmDstCallee)) {
+        HILOGE("Check same account ACL by DM fail.");
+        return ACCOUNT_NOT_SAME_BY_DM;
     }
     HILOGI("check same account by DM fail, will try check access Group by hichain");
 #endif
 
-    if (DistributedSchedAdapter::GetInstance().CheckAccessToGroup(udid, targetBundleName)) {
-        return true;
+    if (!DistributedSchedAdapter::GetInstance().CheckAccessToGroup(udid, targetBundleName)) {
+        HILOGE("CheckAccessToGroup by HiChain failed.");
+        return CHECK_ACCESS_FAILED_BY_HICHAIN;
     }
 
     HILOGI("Check access Group by hichain fail, will try check different account ACL by DM.");
-    if (DeviceManager::GetInstance().CheckAccessControl(dmSrcCaller, dmDstCallee)) {
-        return true;
+    if (!DeviceManager::GetInstance().CheckAccessControl(dmSrcCaller, dmDstCallee)) {
+        HILOGE("Check different account ACL by DM failed, CheckAccessControl failed.");
+        return CHECK_ACCESS_FAILED_BY_DM;
     }
-
-    HILOGE("Check different account ACL by DM fail.");
-    return false;
+    return ERR_OK;
 }
 
 bool DistributedSchedPermission::CheckComponentAccessPermission(const AppExecFwk::AbilityInfo& targetAbility,

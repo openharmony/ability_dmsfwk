@@ -214,7 +214,7 @@ int32_t DMSContinueSendMgr::GetMissionIdByBundleName(const std::string& bundleNa
         HILOGI("get missionId end, missionId: %{public}d", missionId);
         return ERR_OK;
     }
-    return INVALID_PARAMETERS_ERR;
+    return MISSION_NOT_FOCUSED;
 }
 
 void DMSContinueSendMgr::StartEvent()
@@ -240,8 +240,9 @@ int32_t DMSContinueSendMgr::SendSoftbusEvent(uint16_t bundleNameId, uint8_t cont
     HILOGD("SendSoftbusEvent start, bundleNameId: %{public}u, continueTypeId: %{public}u",
         bundleNameId, continueTypeId);
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(DMS_SEND_LEN);
-    if (buffer->Data() == nullptr) {
-        HILOGE("Failed to initialize DSchedDataBuffer");
+    if (buffer->Data() == nullptr || buffer->Size()<DMS_SEND_LEN) {
+        HILOGE("Failed to initialize DSchedDataBuffer. Initialized size: %{public}zu,
+            Expected size: %{public}u", buffer->Size(), DMS_SEND_LEN);
         return INVALID_PARAMETERS_ERR;
     }
     buffer->Data()[0] = (type << CONTINUE_SHIFT_04) | DMS_DATA_LEN;
