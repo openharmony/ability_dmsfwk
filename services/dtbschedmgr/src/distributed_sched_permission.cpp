@@ -519,18 +519,22 @@ int32_t DistributedSchedPermission::CheckAccountAccessPermission(const CallerInf
     }
     HILOGI("check same account by DM fail, will try check access Group by hichain");
 #endif
-
+    int32_t result = ERR_OK;
     if (!DistributedSchedAdapter::GetInstance().CheckAccessToGroup(udid, targetBundleName)) {
         HILOGE("CheckAccessToGroup by HiChain failed.");
-        return CHECK_ACCESS_FAILED_BY_HICHAIN;
-    }
+        result = CHECK_ACCESS_FAILED_BY_HICHAIN;
 
-    HILOGI("Check access Group by hichain fail, will try check different account ACL by DM.");
-    if (!DeviceManager::GetInstance().CheckAccessControl(dmSrcCaller, dmDstCallee)) {
-        HILOGE("Check different account ACL by DM failed, CheckAccessControl failed.");
-        return CHECK_ACCESS_FAILED_BY_DM;
+        HILOGI("Check access Group by hichain fail, will try check different account ACL by DM.");
+        if (!DeviceManager::GetInstance().CheckAccessControl(dmSrcCaller, dmDstCallee)) {
+            HILOGE("Check different account ACL by DM failed, CheckAccessControl failed.");
+            result = CHECK_ACCESS_FAILED_BY_DM;
+        } else {
+            HILOGI("Check different account ACL by DM success");
+            result = ERR_OK;
+        }
     }
-    return ERR_OK;
+    HILOGI("CheckAccessToGroup by HiChain success.");
+    return result;
 }
 
 bool DistributedSchedPermission::CheckComponentAccessPermission(const AppExecFwk::AbilityInfo& targetAbility,
