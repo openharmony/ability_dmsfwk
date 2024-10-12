@@ -70,7 +70,7 @@ private:
         AccountInfo& accountInfo);
     bool ParseGroupInfos(const std::string& returnGroupStr, std::vector<GroupInfo>& groupInfos);
     bool VerifyPermission(uint32_t accessToken, const std::string& permissionName) const;
-    int32_t CheckAccountAccessPermission(const CallerInfo& callerInfo,
+    bool CheckAccountAccessPermission(const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, const std::string& targetBundleName);
     bool CheckComponentAccessPermission(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AccountInfo& accountInfo, const AAFwk::Want& want) const;
