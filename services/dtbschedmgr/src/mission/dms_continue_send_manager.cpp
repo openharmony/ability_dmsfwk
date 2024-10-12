@@ -240,7 +240,7 @@ int32_t DMSContinueSendMgr::SendSoftbusEvent(uint16_t bundleNameId, uint8_t cont
     HILOGD("SendSoftbusEvent start, bundleNameId: %{public}u, continueTypeId: %{public}u",
         bundleNameId, continueTypeId);
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(DMS_SEND_LEN);
-    if (buffer->Data() == nullptr || buffer->Size()<DMS_SEND_LEN) {
+    if (buffer->Data() == nullptr || buffer->Size() < DMS_SEND_LEN) {
         HILOGE("Failed to initialize DSchedDataBuffer.");
         return INVALID_PARAMETERS_ERR;
     }
