@@ -510,9 +510,8 @@ bool DistributedSchedPermission::CheckAccountAccessPermission(const CallerInfo& 
         dmSrcCaller.pkgName.c_str(), GetAnonymStr(dmDstCallee.networkId).c_str());
 
 #ifdef DMSFWK_SAME_ACCOUNT
-    if (!DeviceManager::GetInstance().CheckIsSameAccount(dmSrcCaller, dmDstCallee)) {
-        HILOGE("Check same account ACL by DM fail.");
-        return ACCOUNT_NOT_SAME_BY_DM;
+    if (DeviceManager::GetInstance().CheckIsSameAccount(dmSrcCaller, dmDstCallee)) {
+        return true;
     }
     HILOGI("check same account by DM fail, will try check access Group by hichain");
 #endif
