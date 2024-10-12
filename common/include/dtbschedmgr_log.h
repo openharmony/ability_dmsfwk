@@ -513,18 +513,6 @@ enum {
      * Result(29360234) for mission is not focused.
      */
     MISSION_NOT_FOCUSED = 29360234,
-    /**
-     * Result(29360235) for check access failed by DM, account is not same.
-     */
-    ACCOUNT_NOT_SAME_BY_DM = 29360235,
-    /**
-     * Result(29360236) for check access failed by HiChain.
-     */
-    CHECK_ACCESS_FAILED_BY_HICHAIN = 29360236,
-    /**
-     * Result(29360237) for check access failed by DM.
-     */
-    CHECK_ACCESS_FAILED_BY_DM = 29360237,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
