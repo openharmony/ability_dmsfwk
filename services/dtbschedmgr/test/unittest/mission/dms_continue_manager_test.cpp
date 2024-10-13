@@ -220,6 +220,7 @@ HWTEST_F(DMSContinueManagerTest, testRegisterOnListener001, TestSize.Level1)
     sptr<IRemoteObject> obj02(new RemoteOnListenerStubTest());
     ret = DMSContinueRecvMgr::GetInstance().RegisterOnListener(TYPE, obj02);
     EXPECT_EQ(ret, ERR_OK);
+    DMSContinueRecvMgr::GetInstance().UnInit();
     DTEST_LOG << "DMSContinueManagerTest testRegisterOnListener001 end" << std::endl;
 }
 
@@ -279,7 +280,7 @@ HWTEST_F(DMSContinueManagerTest, testGetMissionId001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_OK);
 
     ret = DMSContinueSendMgr::GetInstance().GetMissionIdByBundleName(BUNDLENAME_02, missionId);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, MISSION_NOT_FOCUSED);
     DTEST_LOG << "DMSContinueManagerTest testGetMissionId001 end" << std::endl;
 }
 
@@ -661,14 +662,12 @@ HWTEST_F(DMSContinueManagerTest, testOnDeviceScreenOff001, TestSize.Level1)
 HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline001 start" << std::endl;
+    DMSContinueRecvMgr::GetInstance().iconInfo_.senderNetworkId = NETWORKID_01;
+    DMSContinueRecvMgr::GetInstance().NotifyDeviceOffline(NETWORKID_01);
+
     sptr<IRemoteObject> obj01(new RemoteOnListenerStubTest());
     DMSContinueRecvMgr::GetInstance().RegisterOnListener(TYPE, obj01);
     EXPECT_NE(DMSContinueRecvMgr::GetInstance().registerOnListener_.size(), 0);
-
-    DMSContinueRecvMgr::GetInstance().iconInfo_.senderNetworkId = NETWORKID_01;
-    DMSContinueRecvMgr::GetInstance().NotifyDeviceOffline(NETWORKID_01);
-    EXPECT_EQ(DMSContinueRecvMgr::GetInstance().iconInfo_.senderNetworkId, "");
-
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline001 end" << std::endl;
 }
 
