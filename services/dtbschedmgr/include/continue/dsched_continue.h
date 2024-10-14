@@ -142,7 +142,7 @@ private:
 
     int32_t PostStartTask(const OHOS::AAFwk::WantParams& wantParams);
     int32_t PostReplyTask(std::shared_ptr<DSchedContinueReplyCmd> cmd);
-    int32_t PostCotinueAbilityTask(int32_t appVersion);
+    int32_t PostCotinueAbilityTask(uint32_t appVersion);
     int32_t PostContinueSendTask(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t status,
         uint32_t accessToken);
     int32_t PostContinueDataTask(std::shared_ptr<DSchedContinueDataCmd> cmd);
@@ -150,7 +150,7 @@ private:
     int32_t PostContinueEndTask(int32_t result);
 
     int32_t ExecuteContinueReq(std::shared_ptr<DistributedWantParams> wantParams);
-    int32_t ExecuteContinueAbility(int32_t appVersion);
+    int32_t ExecuteContinueAbility(uint32_t appVersion);
     int32_t ExecuteContinueReply();
     int32_t ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data);
     int32_t ExecuteContinueData(std::shared_ptr<DSchedContinueDataCmd> cmd);
@@ -159,7 +159,7 @@ private:
     int32_t ExecuteContinueError(int32_t result);
 
     int32_t OnContinueMission(const OHOS::AAFwk::WantParams& wantParams);
-    int32_t OnStartCmd(int32_t appVersion);
+    int32_t OnStartCmd(uint32_t appVersion);
     int32_t OnReplyCmd(std::shared_ptr<DSchedContinueReplyCmd> cmd);
     int32_t OnStartContinuation(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t status,
         uint32_t accessToken);
@@ -182,7 +182,7 @@ private:
         const AccountInfo& accountInfo);
     int32_t CheckStartPermission(std::shared_ptr<DSchedContinueDataCmd> cmd);
     int32_t PackEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd, int32_t result);
-    int32_t PackReplyCmd(std::shared_ptr<DSchedContinueReplyCmd> cmd, int32_t replyCmd, int32_t appVersion,
+    int32_t PackReplyCmd(std::shared_ptr<DSchedContinueReplyCmd> cmd, int32_t replyCmd, uint32_t appVersion,
         int32_t result, const std::string reason);
     int32_t SendCommand(std::shared_ptr<DSchedContinueCmdBase> cmd);
 

@@ -32,7 +32,7 @@ namespace DistributedSchedule {
 namespace {
 constexpr int32_t MAX_CONCURRENT_SINK = 1;
 constexpr int32_t MAX_CONCURRENT_SOURCE = 1;
-constexpr int32_t CONTINUE_TIMEOUT = 7000;
+constexpr int32_t CONTINUE_TIMEOUT = 10000;
 }
 class DSchedContinueManager {
 DECLARE_SINGLE_INSTANCE_BASE(DSchedContinueManager);
@@ -59,7 +59,7 @@ public:
     std::shared_ptr<DSchedContinue> GetDSchedContinueByWant(const OHOS::AAFwk::Want& want, int32_t missionId);
     std::shared_ptr<DSchedContinue> GetDSchedContinueByDevId(const std::u16string& devId, int32_t missionId);
     void NotifyTerminateContinuation(const int32_t missionId);
-    
+
 private:
     void StartEvent();
     void HandleContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId, int32_t missionId,

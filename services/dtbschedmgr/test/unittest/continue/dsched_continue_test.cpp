@@ -103,7 +103,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_002_1, TestSize.Level0)
     int32_t subType = CONTINUE_PULL;
     int32_t direction = CONTINUE_SINK;
     sptr<IRemoteObject> callback = nullptr;
-    int32_t appVersion = 0;
+    uint32_t appVersion = 0;
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
 
@@ -407,7 +407,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0010_1, TestSize.Level0)
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
 
-    int32_t appVersion = 0;
+    uint32_t appVersion = 0;
     int32_t ret = conti->ExecuteContinueAbility(appVersion);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0010_1 end ret:" << ret << std::endl;
@@ -644,7 +644,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0019_1, TestSize.Level0)
 
     auto cmd = std::make_shared<DSchedContinueReplyCmd>();
     int32_t replyCmd = 0;
-    int32_t appVersion = 0;
+    uint32_t appVersion = 0;
     int32_t result = 0;
 
     int32_t ret = conti->PackReplyCmd(cmd, replyCmd, appVersion, result, "");
