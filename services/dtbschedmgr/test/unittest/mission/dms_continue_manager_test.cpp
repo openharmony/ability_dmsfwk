@@ -259,7 +259,7 @@ HWTEST_F(DMSContinueManagerTest, testGetMissionId001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_OK);
 
     ret = DMSContinueSendMgr::GetInstance().GetMissionIdByBundleName(BUNDLENAME_02, missionId);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, MISSION_NOT_FOCUSED);
     DTEST_LOG << "DMSContinueManagerTest testGetMissionId001 end" << std::endl;
 }
 

@@ -470,6 +470,14 @@ enum {
      * Result(29360232) for all connect manager reject connect apply.
      */
     DMS_CONNECT_APPLY_TIMEOUT_FAILED = 29360232,
+    /**
+     * Result(29360233) for mission continue state is not active.
+     */
+    MISSION_NOT_CONTINUE_ACTIVE = 29360233,
+    /**
+     * Result(29360234) for mission is not focused.
+     */
+    MISSION_NOT_FOCUSED = 29360234,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

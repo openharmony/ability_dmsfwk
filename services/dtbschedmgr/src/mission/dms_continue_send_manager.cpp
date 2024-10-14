@@ -199,7 +199,7 @@ int32_t DMSContinueSendMgr::GetMissionIdByBundleName(const std::string& bundleNa
         HILOGI("get missionId end, missionId: %{public}d", missionId);
         return ERR_OK;
     }
-    return INVALID_PARAMETERS_ERR;
+    return MISSION_NOT_FOCUSED;
 }
 
 void DMSContinueSendMgr::StartEvent()
