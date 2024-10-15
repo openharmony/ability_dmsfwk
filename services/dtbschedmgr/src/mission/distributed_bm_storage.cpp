@@ -107,7 +107,21 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
         HILOGE("GetLocalUdid failed");
         return false;
     }
-    ret = InnerSaveStorageDistributeInfo(ConvertToDistributedBundleInfo(bundleInfo, isPackageChange), localUdid);
+
+    AppExecFwk::AppProvisionInfo appProvisionInfo;
+    std::vector<AccountSA::OsAccountInfo> accounts;
+    ErrCode result = AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
+    if (result == ERR_OK && !accounts.empty()) {
+        for (auto &account: accounts) {
+            result = bundleMgr->GetAppProvisionInfo(bundleName, account.GetLocalId(), appProvisionInfo);
+            if (result == ERR_OK && !appProvisionInfo.developerId.empty()) {
+                break;
+            }
+        }
+    }
+
+    ret = InnerSaveStorageDistributeInfo(
+        ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo), localUdid);
     if (!ret) {
         HILOGW("InnerSaveStorageDistributeInfo:%{public}s  failed", bundleName.c_str());
         return false;
@@ -389,6 +403,57 @@ bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, const 
     return true;
 }
 
+bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
+    const uint16_t &bundleNameId, DmsBundleInfo &distributeBundleInfo)
+{
+    HILOGI("networkId: %{public}s  bundleNameId: %{public}d", GetAnonymStr(networkId).c_str(), bundleNameId);
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return false;
+    }
+    std::string udid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(networkId);
+    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(networkId);
+    if (udid == "" || uuid == "") {
+        HILOGE("can not get udid or uuid");
+        return false;
+    }
+    HILOGI("uuid: %{public}s", GetAnonymStr(uuid).c_str());
+    std::vector<Entry> remoteEntries;
+    Status status = kvStorePtr_->GetDeviceEntries(uuid, remoteEntries);
+    if (remoteEntries.empty() || status != Status::SUCCESS) {
+        HILOGE("GetDeviceEntries error: %{public}d or remoteEntries is empty", status);
+        return false;
+    }
+
+    std::vector<Entry> reduRiskEntries;
+    std::string keyOfPublic = udid + AppExecFwk::Constants::FILE_UNDERLINE + PUBLIC_RECORDS;
+    for (auto entry: remoteEntries) {
+        std::string key = entry.key.ToString();
+        std::string value = entry.value.ToString();
+        if (key.find(keyOfPublic) != std::string::npos) {
+            continue;
+        }
+        DmsBundleInfo distributedBundleInfoTmp;
+        if (distributedBundleInfoTmp.FromJsonString(value)
+            && distributedBundleInfoTmp.bundleNameId == bundleNameId) {
+            distributeBundleInfo = distributedBundleInfoTmp;
+            reduRiskEntries.push_back(entry);
+        }
+    }
+    if (reduRiskEntries.size() > 1) {
+        HILOGE("Redundant data needs to be deleted.");
+        DelReduData(networkId, reduRiskEntries);
+        distributeBundleInfo = DmsBundleInfo();
+        return false;
+    }
+    if (reduRiskEntries.empty()) {
+        HILOGE("get distributedBundleInfo failed.");
+        return false;
+    }
+    HILOGI("end.");
+    return true;
+}
+
 Status DmsBmStorage::GetResultSatus(std::promise<OHOS::DistributedKv::Status> &resultStatusSignal)
 {
     auto future = resultStatusSignal.get_future();
@@ -610,7 +675,7 @@ bool DmsBmStorage::RebuildLocalData()
 }
 
 DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo,
-    bool isPackageChange)
+    AppExecFwk::AppProvisionInfo appProvisionInfo, bool isPackageChange)
 {
     DmsBundleInfo distributedBundleInfo;
     if (bundleInfo.name == "") {
@@ -627,6 +692,7 @@ DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::Bun
     distributedBundleInfo.enabled = bundleInfo.applicationInfo.enabled;
     distributedBundleInfo.bundleNameId = CreateBundleNameId(bundleInfo.name, isPackageChange);
     distributedBundleInfo.updateTime = bundleInfo.updateTime;
+    distributedBundleInfo.developerId = appProvisionInfo.developerId;
     uint8_t pos = 0;
     for (const auto &abilityInfo : bundleInfo.abilityInfos) {
         DmsAbilityInfo dmsAbilityInfo;
@@ -636,6 +702,7 @@ DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::Bun
             dmsAbilityInfo.continueTypeId.push_back(pos++);
         }
         dmsAbilityInfo.moduleName = abilityInfo.moduleName;
+        dmsAbilityInfo.continueBundleName = abilityInfo.continueBundleNames;
         distributedBundleInfo.dmsAbilityInfos.push_back(dmsAbilityInfo);
     }
     return distributedBundleInfo;
@@ -680,6 +747,20 @@ int32_t DmsBmStorage::CloudSync()
     return static_cast<int32_t>(status);
 }
 
+void DmsBmStorage::FindProvishionInfo(OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> bundleMgr,
+    AppExecFwk::AppProvisionInfo appProvisionInfo, std::vector<AccountSA::OsAccountInfo> accounts,
+    int32_t result, const std::string& bundleName)
+{
+    if (result == ERR_OK && !accounts.empty()) {
+        for (auto &account: accounts) {
+            result = bundleMgr->GetAppProvisionInfo(bundleName, account.GetLocalId(), appProvisionInfo);
+            if (result == ERR_OK && !appProvisionInfo.developerId.empty()) {
+                break;
+            }
+        }
+    }
+}
+
 void DmsBmStorage::UpdateDistributedData()
 {
     HILOGI("called.");
@@ -702,17 +783,22 @@ void DmsBmStorage::UpdateDistributedData()
     std::map<std::string, DmsBundleInfo> oldDistributedBundleInfos =
         GetAllOldDistributionBundleInfo(bundleNames);
 
+    AppExecFwk::AppProvisionInfo appProvisionInfo;
+    std::vector<AccountSA::OsAccountInfo> accounts;
+    int32_t result = AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
+
     std::vector<DmsBundleInfo> dmsBundleInfos;
-    for (const auto &bundleInfo : bundleInfos) {
+    for (const auto &bundleInfo: bundleInfos) {
+        FindProvishionInfo(bundleMgr, appProvisionInfo, accounts, result, bundleInfo.name);
         if (oldDistributedBundleInfos.find(bundleInfo.name) != oldDistributedBundleInfos.end()) {
             int64_t updateTime = oldDistributedBundleInfos[bundleInfo.name].updateTime;
             if (updateTime != bundleInfo.updateTime) {
-                DmsBundleInfo dmsBundleInfo = ConvertToDistributedBundleInfo(bundleInfo, true);
+                DmsBundleInfo dmsBundleInfo = ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo, true);
                 dmsBundleInfos.push_back(dmsBundleInfo);
             }
             continue;
         }
-        DmsBundleInfo dmsBundleInfo = ConvertToDistributedBundleInfo(bundleInfo);
+        DmsBundleInfo dmsBundleInfo = ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo);
         if (dmsBundleInfo.bundleName == "") {
             HILOGE("The package information is empty and does not need to be stored!");
             continue;
@@ -1043,6 +1129,7 @@ bool DmsBmStorage::GetContinueEventInfo(const std::string &networkId, const std:
             HILOGI("value: %{public}s", value.c_str());
             continueEventInfo.networkId = networkId;
             continueEventInfo.bundleName = bundleName;
+            continueEventInfo.developerId = distributedBundleInfo.developerId;
             continueEventInfo.abilityName = FindAbilityName(distributedBundleInfo, continueType);
             continueEventInfo.moduleName = FindModuleName(distributedBundleInfo, continueType);
             return true;

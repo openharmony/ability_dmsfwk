@@ -278,7 +278,7 @@ HWTEST_F(DMSContinueManagerTest, testGetMissionId001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_OK);
 
     ret = DMSContinueSendMgr::GetInstance().GetMissionIdByBundleName(BUNDLENAME_02, missionId);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, MISSION_NOT_FOCUSED);
     DTEST_LOG << "DMSContinueManagerTest testGetMissionId001 end" << std::endl;
 }
 
@@ -357,14 +357,16 @@ HWTEST_F(DMSContinueManagerTest, testVerifyBroadcastSource001, TestSize.Level3)
 
     int32_t state = ACTIVE;
     std::string networkId = "test networkId";
-    std::string bundleName = "test bundleName";
+    std::string sourceBundleName = "test sourceBundleName";
+    std::string sinkBundleName = "test sinkBundleName";
     std::string continueType = "test continueType";
     int32_t ret = DMSContinueRecvMgr::GetInstance().VerifyBroadcastSource(networkId,
-        bundleName, continueType, state);
+        sourceBundleName, sinkBundleName, continueType, state);
     EXPECT_EQ(ret, ERR_OK);
 
     state = INACTIVE;
-    ret = DMSContinueRecvMgr::GetInstance().VerifyBroadcastSource(networkId, bundleName, continueType, state);
+    ret = DMSContinueRecvMgr::GetInstance().VerifyBroadcastSource(
+        networkId, sourceBundleName, sinkBundleName, continueType, state);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -379,16 +381,17 @@ HWTEST_F(DMSContinueManagerTest, testVerifyBroadcastSource002, TestSize.Level3)
 
     int32_t state = ACTIVE;
     std::string networkId = "test networkId";
-    std::string bundleName = "test bundleName";
+    std::string sourceBundleName = "test sourceBundleName";
+    std::string sinkBundleName = "test sinkBundleName";
     std::string continueType = "test continueType";
     int32_t ret = DMSContinueRecvMgr::GetInstance().VerifyBroadcastSource(networkId,
-        bundleName, continueType, state);
+        sourceBundleName, sinkBundleName, continueType, state);
     EXPECT_EQ(ret, ERR_OK);
 
     state = INACTIVE;
     networkId = "invalid networkId";
     ret = DMSContinueRecvMgr::GetInstance().VerifyBroadcastSource(networkId,
-        bundleName, continueType, state);
+        sourceBundleName, sinkBundleName, continueType, state);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 }
 
@@ -403,16 +406,18 @@ HWTEST_F(DMSContinueManagerTest, testVerifyBroadcastSource003, TestSize.Level3)
 
     int32_t state = ACTIVE;
     std::string networkId = "test networkId";
-    std::string bundleName = "test bundleName";
+    std::string sourceBundleName = "test sourceBundleName";
+    std::string sinkBundleName = "test sinkBundleName";
     std::string continueType = "test continueType";
     int32_t ret = DMSContinueRecvMgr::GetInstance().VerifyBroadcastSource(networkId,
-        bundleName, continueType, state);
+        sourceBundleName, sinkBundleName, continueType, state);
     EXPECT_EQ(ret, ERR_OK);
 
     state = INACTIVE;
-    bundleName = "invalid bundleName";
+    sourceBundleName = "invalid sourceBundleName";
+    sinkBundleName = "invalid sinkBundleName";
     ret = DMSContinueRecvMgr::GetInstance().VerifyBroadcastSource(networkId,
-        bundleName, continueType, state);
+        sourceBundleName, sinkBundleName, continueType, state);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 }
 
@@ -449,15 +454,18 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
      */
     sptr<IRemoteObject> obj = nullptr;
     std::string networkId = "invalid networkId";
-    std::string bundleName = "invalid bundleName";
+    std::string sourceBundleName = "invalid sourceBundleName";
+    std::string sinkBundleName = "invalid sinkBundleName";
     std::string continueType = "invalid continueType";
-    DMSContinueRecvMgr::GetInstance().NotifyRecvBroadcast(obj, networkId, bundleName, state, continueType);
+    DMSContinueRecvMgr::GetInstance().NotifyRecvBroadcast(obj,
+        currentIconInfo(networkId, sourceBundleName, sinkBundleName, continueType), state);
 
     /**
      * @tc.steps: step3. test NotifyRecvBroadcast when missionId is invalid;
      */
     obj =  new RemoteOnListenerStubTest();
-    DMSContinueRecvMgr::GetInstance().NotifyRecvBroadcast(obj, networkId, bundleName, state, continueType);
+    DMSContinueRecvMgr::GetInstance().NotifyRecvBroadcast(obj,
+        currentIconInfo(networkId, sourceBundleName, sinkBundleName, continueType), state);
 
     DTEST_LOG << "DMSContinueManagerTest testDealOnBroadcastBusiness001 end" << std::endl;
 }
@@ -679,6 +687,55 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyPackageRemoved001
+ * @tc.desc: test NotifyPackageRemoved normal
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, notifyPackageRemoved001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved001 start" << std::endl;
+    sptr<IRemoteObject> obj01(new RemoteOnListenerStubTest());
+    DMSContinueRecvMgr::GetInstance().RegisterOnListener(TYPE, obj01);
+    EXPECT_NE(DMSContinueRecvMgr::GetInstance().registerOnListener_.size(), 0);
+
+    DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName = BUNDLENAME_01;
+    DMSContinueRecvMgr::GetInstance().NotifyPackageRemoved(BUNDLENAME_01);
+    EXPECT_EQ(DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName, "");
+
+    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyPackageRemoved002
+ * @tc.desc: test NotifyPackageRemoved bundleName empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, notifyPackageRemoved002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved002 start" << std::endl;
+    DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName = BUNDLENAME_01;
+    DMSContinueRecvMgr::GetInstance().NotifyPackageRemoved("");
+    EXPECT_EQ(DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName, BUNDLENAME_01);
+
+    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved002 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyPackageRemoved003
+ * @tc.desc: test NotifyPackageRemoved bundleName not match
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, notifyPackageRemoved003, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved003 start" << std::endl;
+    DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName = BUNDLENAME_01;
+    DMSContinueRecvMgr::GetInstance().NotifyPackageRemoved(BUNDLENAME_02);
+    EXPECT_EQ(DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName, BUNDLENAME_01);
+
+    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved003 end" << std::endl;
+}
+
+/**
  * @tc.name: testNotifyDataRecv001
  * @tc.desc: NotifyDataRecv
  * @tc.type: FUNC
@@ -786,13 +843,14 @@ HWTEST_F(DMSContinueManagerTest, testGetContinueType_001, TestSize.Level1)
     DTEST_LOG << "DMSContinueManagerTest testGetContinueType_001 start" << std::endl;
     int32_t state = ACTIVE;
     std::string networkId = "test networkId";
-    std::string bundleName = "test bundleName";
+    std::string sourceBundleName = "test sourceBundleName";
+    std::string sinkBundleName = "test sinkBundleName";
     std::string continueType = "test continueType";
     int32_t ret = DMSContinueRecvMgr::GetInstance().VerifyBroadcastSource(networkId,
-        bundleName, continueType, state);
+        sourceBundleName, sinkBundleName, continueType, state);
     EXPECT_EQ(ret, ERR_OK);
 
-    EXPECT_FALSE(DMSContinueRecvMgr::GetInstance().GetContinueType(bundleName).empty());
+    EXPECT_FALSE(DMSContinueRecvMgr::GetInstance().GetContinueType(sinkBundleName).empty());
     DTEST_LOG << "DMSContinueManagerTest testGetContinueType_001 end" << std::endl;
 }
 

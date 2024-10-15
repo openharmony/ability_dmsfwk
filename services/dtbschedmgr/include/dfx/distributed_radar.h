@@ -167,8 +167,8 @@ public:
     bool RecvUnfocused(const std::string& func);
     bool UnfocusedGetBundleName(const std::string& func, int32_t errCode);
     bool NotifyDockUnfocused(const std::string& func, int32_t errCode);
-    bool ClickIconDmsContinue(const std::string& func, int32_t errCode, std::string peerUdid,
-        const std::string& bundleName);
+    bool ClickIconDmsContinue(const std::string& func, int32_t errCode, std::string peerDeviceId,
+        const std::string& srcBundleName, const std::string& dstBundleName);
     bool ClickIconDmsStartAbility(const std::string& func, int32_t errCode);
     bool ClickIconDmsRecvOver(const std::string& func, int32_t errCode);
     bool SaveDataDmsContinue(const std::string& func, int32_t errCode);

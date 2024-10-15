@@ -38,6 +38,8 @@
 #include "mission/distributed_mission_info.h"
 #include "nocopyable.h"
 #endif
+#include "dsched_continue.h"
+#include "dsched_continue_event.h"
 #include "single_instance.h"
 #include "system_ability.h"
 
@@ -204,6 +206,8 @@ public:
     int32_t StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& remoteWant, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t extensionType) override;
     int32_t CheckTargetPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
+        const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
+    int32_t CheckTargetPermission4DiffBundle(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
     ErrCode QueryOsAccount(int32_t& activeAccountId);
 
