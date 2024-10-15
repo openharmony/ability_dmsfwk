@@ -126,18 +126,92 @@ distributed_event_sources = [
   "${dms_path}/interfaces/innerkits/distributed_event/src/dms_sa_client.cpp",
 ]
 
-ohos_unittest("distributedschedsvrtest") {
+ohos_unittest("distributedschedcallbacktest") {
+  module_out_path = module_output_path
+
+  sources = [
+    "unittest/dms_callback_task_test.cpp",
+    "unittest/dms_token_callback_test.cpp",
+    "unittest/mock_remote_stub.cpp",
+  ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+
+  if (dmsfwk_report_memmgr || dmsfwk_report_memmgr_plugins) {
+    defines = [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
+  }
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("distributedschedservicetest") {
+  module_out_path = module_output_path
+
+  sources = [
+    "unittest/distributed_sched_service_first_test.cpp",
+    "unittest/distributed_sched_service_second_test.cpp",
+    "unittest/mock_distributed_sched.cpp",
+  ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+
+  if (dmsfwk_report_memmgr || dmsfwk_report_memmgr_plugins) {
+    defines = [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
+  }
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("distributedschedstubtest") {
+  module_out_path = module_output_path
+
+  sources = [ "unittest/distributed_sched_stub_test.cpp" ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+
+  if (dmsfwk_report_memmgr || dmsfwk_report_memmgr_plugins) {
+    defines = [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
+  }
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("distributedschedadaptertest") {
   module_out_path = module_output_path
 
   sources = [
     "unittest/continue_scene_session_handler_test.cpp",
     "unittest/distributed_sched_adapter_test.cpp",
-    "unittest/distributed_sched_service_first_test.cpp",
-    "unittest/distributed_sched_service_second_test.cpp",
-    "unittest/distributed_sched_stub_test.cpp",
-    "unittest/dms_callback_task_test.cpp",
-    "unittest/dms_token_callback_test.cpp",
-    "unittest/mock_distributed_sched.cpp",
     "unittest/mock_remote_stub.cpp",
   ]
   sources += dtbschedmgr_sources
@@ -303,7 +377,7 @@ ohos_unittest("dschedpermissiontest") {
   subsystem_name = "ability"
 }
 
-ohos_unittest("dschedmissionmanagertest") {
+ohos_unittest("distributedmissionmanagertest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -313,14 +387,69 @@ ohos_unittest("dschedmissionmanagertest") {
   cflags = [ "-Dprivate=public" ]
   sources = [
     "unittest/mission/distributed_bm_storage_test.cpp",
-    "unittest/mission/distributed_data_storage_test.cpp",
     "unittest/mission/distributed_mission_info_test.cpp",
-    "unittest/mission/dms_continue_manager_test.cpp",
-    "unittest/mission/dms_mission_manager_test.cpp",
-    "unittest/mission/dsched_sync_e2e_test.cpp",
     "unittest/mission/mission_info_converter_test.cpp",
     "unittest/mission/snapshot_test.cpp",
     "unittest/mock_remote_stub.cpp",
+  ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    external_deps += [ "config_policy:configpolicy_util" ]
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("dmscontinuemanagertest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [
+    "unittest/mission/dms_continue_manager_test.cpp",
+    "unittest/mission/dsched_sync_e2e_test.cpp",
+  ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    external_deps += [ "config_policy:configpolicy_util" ]
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("dmsmissionmanagertest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [
+    "unittest/mission/distributed_data_storage_test.cpp",
+    "unittest/mission/dms_mission_manager_test.cpp",
+    "unittest/mission/mock_image_packer.cpp",
   ]
   sources += dtbschedmgr_sources
 
@@ -613,7 +742,10 @@ group("unittest") {
     ":distributedadaptertest",
     ":distributedcalltest",
     ":distributedeventtest",
-    ":distributedschedsvrtest",
+    ":distributedschedadaptertest",
+    ":distributedschedcallbacktest",
+    ":distributedschedservicetest",
+    ":distributedschedstubtest",
     ":distributeduidtest",
     ":distributedwanttest",
     ":dmsbasetest",
@@ -628,7 +760,9 @@ group("unittest") {
   ]
   if (dmsfwk_mission_manager) {
     deps += [
-      ":dschedmissionmanagertest",
+      ":distributedmissionmanagertest",
+      ":dmscontinuemanagertest",
+      ":dmsmissionmanagertest",
       ":dschedpermissiontest",
     ]
   }
