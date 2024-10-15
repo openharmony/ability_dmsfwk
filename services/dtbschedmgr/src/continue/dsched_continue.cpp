@@ -720,7 +720,7 @@ int32_t DSchedContinue::CheckContinueAbilityPermission()
     if (missionInfo.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
         HILOGE("Mission continue state set to INACTIVE. Can't continue. Mission id: %{public}d",
             continueInfo_.missionId_);
-        return INVALID_PARAMETERS_ERR;
+        return MISSION_NOT_CONTINUE_ACTIVE;
     }
     return ERR_OK;
 }

@@ -63,7 +63,7 @@ void DistributedAbilityManagerService::OnStart()
         std::lock_guard<std::mutex> tokenLock(tokenMutex_);
         std::string tokenStr = system::GetParameter(TOKEN_KEY, DEFAULT_TOKEN_VALUE);
         if (!tokenStr.empty()) {
-            token_.store(std::stoi(tokenStr));
+            token_.store(std::atoi(tokenStr.c_str()));
         }
     }
     notifierDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new NotifierDeathRecipient());
