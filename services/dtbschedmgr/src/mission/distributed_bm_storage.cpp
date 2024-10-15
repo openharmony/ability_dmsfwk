@@ -689,29 +689,28 @@ void DmsBmStorage::UpdateDistributedData()
         return;
     }
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
-    if (!bundleMgr->GetBundleInfos(FLAGS, bundleInfos, AppExecFwk::Constants::ALL_USERID)) {
+    if (!bundleMgr->GetBundleInfosForContinuation(FLAGS, bundleInfos, AppExecFwk::Constants::ALL_USERID)) {
         HILOGE("get bundleInfos failed");
         return;
     }
+    HILOGI("bundleInfos size: %{public}zu", bundleInfos.size());
+
     std::vector<std::string> bundleNames;
     for (const auto &bundleInfo : bundleInfos) {
-        if (IsContinuable(bundleInfo)) {
-            bundleNames.push_back(bundleInfo.name);
-        }
+        bundleNames.push_back(bundleInfo.name);
     }
     std::map<std::string, DmsBundleInfo> oldDistributedBundleInfos =
         GetAllOldDistributionBundleInfo(bundleNames);
 
     std::vector<DmsBundleInfo> dmsBundleInfos;
     for (const auto &bundleInfo : bundleInfos) {
-        if (bundleInfo.singleton || !IsContinuable(bundleInfo)) {
-            continue;
-        }
         if (oldDistributedBundleInfos.find(bundleInfo.name) != oldDistributedBundleInfos.end()) {
             int64_t updateTime = oldDistributedBundleInfos[bundleInfo.name].updateTime;
-            if (updateTime == bundleInfo.updateTime) {
-                continue;
+            if (updateTime != bundleInfo.updateTime) {
+                DmsBundleInfo dmsBundleInfo = ConvertToDistributedBundleInfo(bundleInfo, true);
+                dmsBundleInfos.push_back(dmsBundleInfo);
             }
+            continue;
         }
         DmsBundleInfo dmsBundleInfo = ConvertToDistributedBundleInfo(bundleInfo);
         if (dmsBundleInfo.bundleName == "") {
@@ -789,22 +788,24 @@ std::map<std::string, DmsBundleInfo> DmsBmStorage::GetAllOldDistributionBundleIn
         return oldDistributedBundleInfos;
     }
     std::string localUdid;
+    std::string localUuid;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(localUdid);
-    if (localUdid == "") {
-        HILOGE("GetLocalUdid failed");
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUuid(localUuid);
+    if (localUdid == "" || localUuid == "") {
+        HILOGE("can not get localUdid or localUuid");
         return oldDistributedBundleInfos;
     }
-    Key allEntryKeyPrefix("");
-    std::vector<Entry> allEntries;
-    Status status = kvStorePtr_->GetEntries(allEntryKeyPrefix, allEntries);
-    if (status != Status::SUCCESS) {
-        HILOGE("GetEntries error: %{public}d", status);
+    HILOGI("localUuid: %{public}s", GetAnonymStr(localUuid).c_str());
+    std::vector<Entry> localEntries;
+    Status status = kvStorePtr_->GetDeviceEntries(localUuid, localEntries);
+    if (localEntries.empty() || status != Status::SUCCESS) {
+        HILOGE("GetEntries error: %{public}d or localEntries is empty", status);
         return oldDistributedBundleInfos;
     }
     std::string keyOfPublic = localUdid + AppExecFwk::Constants::FILE_UNDERLINE + PUBLIC_RECORDS;
-    for (const auto &entry : allEntries) {
+    for (const auto &entry : localEntries) {
         std::string key = entry.key.ToString();
-        if (key.find(localUdid) == std::string::npos || key.find(keyOfPublic) != std::string::npos) {
+        if (key.find(keyOfPublic) != std::string::npos) {
             continue;
         }
         std::string value = entry.value.ToString();

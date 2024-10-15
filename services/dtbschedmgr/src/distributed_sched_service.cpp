@@ -17,7 +17,6 @@
 
 #include <algorithm>
 #include <cinttypes>
-#include <dlfcn.h>
 #include <unistd.h>
 
 #include "ability_manager_client.h"
@@ -177,15 +176,6 @@ void DistributedSchedService::OnStart(const SystemAbilityOnDemandReason &startRe
     dschedContinuation_->Init(continuationCallback);
     collaborateCbMgr_->Init();
     dmsCallbackTask_->Init(freeCallback);
-
-#ifdef DMSFWK_INTERACTIVE_ADAPTER
-    HILOGI("Get dms interactive adapter proxy enter.");
-    int32_t ret = GetDmsInteractiveAdapterProxy();
-    if (ret != ERR_OK) {
-        HILOGE("Get remote dms interactive adapter proxy fail, ret %{public}d.", ret);
-    }
-#endif
-
     HILOGI("OnStart dms service success.");
     Publish(this);
     HandleBootStart(startReason);
@@ -199,11 +189,6 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
     DMSContinueRecvMgr::GetInstance().UnInit();
     RemoveSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID);
     DistributedSchedAdapter::GetInstance().UnRegisterMissionListener(missionFocusedListener_);
-#endif
-
-#ifdef DMSFWK_INTERACTIVE_ADAPTER
-    dlclose(dllHandle_);
-    dllHandle_ = nullptr;
 #endif
     HILOGI("OnStop dms service end");
 }
@@ -290,18 +275,8 @@ bool DistributedSchedService::Init()
         HILOGW("DtbschedmgrDeviceInfoStorage init failed.");
     }
     InitDataShareManager();
+    InitMissionManager();
 
-#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    if (!AddSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID)) {
-        HILOGE("Add System Ability Listener failed!");
-    }
-    DistributedSchedMissionManager::GetInstance().Init();
-    DistributedSchedMissionManager::GetInstance().InitDataStorage();
-    InitCommonEventListener();
-    InitWifiStateListener();
-    DMSContinueSendMgr::GetInstance().Init();
-    DMSContinueRecvMgr::GetInstance().Init();
-#endif
     DistributedSchedAdapter::GetInstance().Init();
     if (SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
         DSchedContinueManager::GetInstance().Init();
@@ -315,6 +290,21 @@ bool DistributedSchedService::Init()
         componentChangeHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
     return true;
+}
+
+void DistributedSchedService::InitMissionManager()
+{
+#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
+    if (!AddSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID)) {
+        HILOGE("Add System Ability Listener failed!");
+    }
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().InitDataStorage();
+    InitCommonEventListener();
+    InitWifiStateListener();
+    DMSContinueSendMgr::GetInstance().Init();
+    DMSContinueRecvMgr::GetInstance().Init();
+#endif
 }
 
 void DistributedSchedService::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -403,224 +393,6 @@ void DistributedSchedService::DurationStart(const std::string srcDeviceId, const
     DmsContinueTime::GetInstance().SetNetWorkId(srcDeviceId, dstDeviceId);
 }
 
-#ifdef DMSFWK_INTERACTIVE_ADAPTER
-bool DistributedSchedService::CheckRemoteOsType(const std::string& netwokId)
-{
-    auto devInfo = DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(netwokId);
-    if (devInfo == nullptr) {
-        HILOGE("GetDeviceInfoById failed, netwokId: %{public}s.", GetAnonymStr(netwokId).c_str());
-        return false;
-    }
-
-    HILOGI("Remote device OsType %{public}d, netwokId: %{public}s.", devInfo->GetDeviceOSType(),
-        GetAnonymStr(netwokId).c_str());
-    return (devInfo->GetDeviceOSType() == Constants::HO_OS_TYPE_EX);
-}
-
-int32_t DistributedSchedService::GetDmsInteractiveAdapterProxy()
-{
-    HILOGI("Get remote dms interactive adapter proxy.");
-    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
-#if (defined(__aarch64__) || defined(__x86_64__))
-    char resolvedPath[100] = "/system/lib64/libdms_interactive_adapter.z.so";
-#else
-    char resolvedPath[100] = "/system/lib/libdms_interactive_adapter.z.so";
-#endif
-    int32_t (*GetDmsInteractiveAdapter)(const sptr<IRemoteObject> &callerToken,
-        IDmsInteractiveAdapter &dmsAdpHandle) = nullptr;
-
-    dllHandle_ = dlopen(resolvedPath, RTLD_LAZY);
-    if (dllHandle_ == nullptr) {
-        HILOGE("Open dms interactive adapter shared object fail, resolvedPath [%{public}s].", resolvedPath);
-        return NOT_FIND_SERVICE_REGISTRY;
-    }
-
-    int32_t ret = ERR_OK;
-    do {
-        GetDmsInteractiveAdapter = reinterpret_cast<int32_t (*)(const sptr<IRemoteObject> &callerToken,
-            IDmsInteractiveAdapter &dmsAdpHandle)>(dlsym(dllHandle_, "GetDmsInteractiveAdapter"));
-        if (GetDmsInteractiveAdapter == nullptr) {
-            HILOGE("Link the GetDmsInteractiveAdapter symbol in dms interactive adapter fail.");
-            ret = NOT_FIND_SERVICE_REGISTRY;
-            break;
-        }
-
-        int32_t ret = GetDmsInteractiveAdapter(this, dmsAdapetr_);
-        if (ret != ERR_OK) {
-            HILOGE("Init remote dms interactive adapter proxy fail, ret %{public}d.", ret);
-            ret = INVALID_PARAMETERS_ERR;
-            break;
-        }
-        HILOGI("Init remote dms interactive adapter proxy success.");
-        ret = ERR_OK;
-    } while (false);
-
-    if (ret != ERR_OK) {
-        HILOGE("Get remote dms interactive adapter proxy fail, dlclose handle.");
-        dlclose(dllHandle_);
-        dllHandle_ = nullptr;
-    }
-    return ret;
-}
-
-int32_t DistributedSchedService::StartRemoteAbilityAdapter(const OHOS::AAFwk::Want& want,
-    int32_t callerUid, int32_t requestCode, uint32_t accessToken)
-{
-    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
-    if (dmsAdapetr_.StartRemoteAbilityAdapter == nullptr) {
-        HILOGE("Dms interactive start remote ability adapter handle is null.");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    int32_t ret = dmsAdapetr_.StartRemoteAbilityAdapter(want, callerUid, requestCode, accessToken);
-    if (ret != ERR_OK) {
-        HILOGE("Dms interactive adapter start remote ability adapter fail, ret %{public}d.", ret);
-    }
-    return ret;
-}
-
-int32_t DistributedSchedService::ConnectRemoteAbilityAdapter(const OHOS::AAFwk::Want& want,
-    const sptr<IRemoteObject>& connect, int32_t callerUid, int32_t callerPid, uint32_t accessToken)
-{
-    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
-    if (dmsAdapetr_.ConnectRemoteAbilityAdapter == nullptr) {
-        HILOGE("Dms interactive connect remote ability adapter handle is null.");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    int32_t ret = dmsAdapetr_.ConnectRemoteAbilityAdapter(want, connect, callerUid, callerPid, accessToken);
-    if (ret != ERR_OK) {
-        HILOGE("Dms interactive adapter connect remote ability adapter fail, ret %{public}d.", ret);
-    }
-    return ret;
-}
-
-int32_t DistributedSchedService::DisconnectRemoteAbilityAdapter(const sptr<IRemoteObject>& connect, int32_t callerUid,
-    uint32_t accessToken)
-{
-    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
-    if (dmsAdapetr_.DisconnectRemoteAbilityAdapter == nullptr) {
-        HILOGE("Dms interactive disconnect remote ability adapter handle is null.");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    int32_t ret = dmsAdapetr_.DisconnectRemoteAbilityAdapter(connect, callerUid, accessToken);
-    if (ret != ERR_OK) {
-        HILOGE("Dms interactive adapter disconnect remote ability adapter fail, ret %{public}d.", ret);
-    }
-    return ret;
-}
-
-int32_t DistributedSchedService::StartAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply)
-{
-    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
-    if (dmsAdapetr_.StartAbilityFromRemoteAdapter == nullptr) {
-        HILOGE("Dms interactive start ability from remote adapter handle is null.");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    int32_t ret = dmsAdapetr_.StartAbilityFromRemoteAdapter(data, reply);
-    if (ret != ERR_OK) {
-        HILOGE("Dms interactive adapter start ability from remote adapter fail, ret %{public}d.", ret);
-    }
-    return ret;
-}
-
-int32_t DistributedSchedService::StopAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply)
-{
-    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
-    if (dmsAdapetr_.StopAbilityFromRemoteAdapter == nullptr) {
-        HILOGE("Dms interactive stop ability from remote adapter handle is null.");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    int32_t ret = dmsAdapetr_.StopAbilityFromRemoteAdapter(data, reply);
-    if (ret != ERR_OK) {
-        HILOGE("Dms interactive adapter stop ability from remote adapter fail, ret %{public}d.", ret);
-    }
-    return ret;
-}
-
-int32_t DistributedSchedService::ConnectAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply)
-{
-    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
-    if (dmsAdapetr_.ConnectAbilityFromRemoteAdapter == nullptr) {
-        HILOGE("Dms interactive connect ability from remote adapter handle is null.");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    int32_t ret = dmsAdapetr_.ConnectAbilityFromRemoteAdapter(data, reply);
-    if (ret != ERR_OK) {
-        HILOGE("Dms interactive adapter connect ability from remote adapter fail, ret %{public}d.", ret);
-    }
-    return ret;
-}
-
-int32_t DistributedSchedService::DisconnectAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply)
-{
-    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
-    if (dmsAdapetr_.DisconnectAbilityFromRemoteAdapter == nullptr) {
-        HILOGE("Dms interactive disconnect ability from remote adapter handle is null.");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    int32_t ret = dmsAdapetr_.DisconnectAbilityFromRemoteAdapter(data, reply);
-    if (ret != ERR_OK) {
-        HILOGE("Dms interactive adapter disconnect ability from remote adapter fail, ret %{public}d.", ret);
-    }
-    return ret;
-}
-
-int32_t DistributedSchedService::NotifyAbilityLifecycleChangedFromRemoteAdapter(MessageParcel& data,
-    MessageParcel& reply)
-{
-    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
-    if (dmsAdapetr_.NotifyAbilityLifecycleChangedFromRemoteAdapter == nullptr) {
-        HILOGE("Dms interactive disconnect ability from remote adapter handle is null.");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    int32_t ret = dmsAdapetr_.NotifyAbilityLifecycleChangedFromRemoteAdapter(data, reply);
-    if (ret != ERR_OK) {
-        HILOGE("Dms interactive adapter disconnect ability from remote adapter fail, ret %{public}d.", ret);
-    }
-    return ret;
-}
-
-void DistributedSchedService::OnDeviceOnlineEx(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
-{
-    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
-    if (dmsAdapetr_.OnDeviceOnlineEx == nullptr) {
-        HILOGE("Dms interactive on device online extention handle is null.");
-        return;
-    }
-
-    dmsAdapetr_.OnDeviceOnlineEx(deviceInfo);
-}
-
-void DistributedSchedService::OnDeviceOfflineEx(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
-{
-    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
-    if (dmsAdapetr_.OnDeviceOfflineEx == nullptr) {
-        HILOGE("Dms interactive on device online extention handle is null.");
-        return;
-    }
-
-    dmsAdapetr_.OnDeviceOfflineEx(deviceInfo);
-}
-
-void DistributedSchedService::OnDeviceInfoChangedEx(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo)
-{
-    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
-    if (dmsAdapetr_.OnDeviceInfoChangedEx == nullptr) {
-        HILOGE("Dms interactive on device online extention handle is null.");
-        return;
-    }
-
-    dmsAdapetr_.OnDeviceInfoChangedEx(deviceInfo);
-}
-#endif // DMSFWK_INTERACTIVE_ADAPTER
-
 int32_t DistributedSchedService::GetCallerInfo(const std::string &localDeviceId, int32_t callerUid,
     uint32_t accessToken, CallerInfo &callerInfo)
 {
@@ -648,12 +420,6 @@ int32_t DistributedSchedService::StartRemoteAbility(const OHOS::AAFwk::Want& wan
         HILOGE("check deviceId failed");
         return INVALID_PARAMETERS_ERR;
     }
-#ifdef DMSFWK_INTERACTIVE_ADAPTER
-    if (CheckRemoteOsType(deviceId)) {
-        return StartRemoteAbilityAdapter(want, callerUid, requestCode, accessToken);
-    }
-#endif // DMSFWK_INTERACTIVE_ADAPTER
-
     sptr<IDistributedSched> remoteDms = GetRemoteDms(deviceId);
     if (remoteDms == nullptr) {
         HILOGE("get remoteDms failed");
@@ -1135,6 +901,9 @@ int32_t DistributedSchedService::DealDSchedEventResult(const OHOS::AAFwk::Want& 
 
 bool DistributedSchedService::GetIsFreeInstall(int32_t missionId)
 {
+    if (dschedContinuation_ == nullptr) {
+        return false;
+    }
     return dschedContinuation_->IsFreeInstall(missionId);
 }
 
@@ -1534,13 +1303,6 @@ int32_t DistributedSchedService::ConnectRemoteAbility(const OHOS::AAFwk::Want& w
         HILOGE("ConnectRemoteAbility check deviceId failed");
         return INVALID_PARAMETERS_ERR;
     }
-
-#ifdef DMSFWK_INTERACTIVE_ADAPTER
-    if (CheckRemoteOsType(remoteDeviceId)) {
-        return ConnectRemoteAbilityAdapter(want, connect, callerUid, callerPid, accessToken);
-    }
-#endif // DMSFWK_INTERACTIVE_ADAPTER
-
     CallerInfo callerInfo = { callerUid, callerPid, CALLER_TYPE_HARMONY, localDeviceId };
     callerInfo.accessToken = accessToken;
     {
@@ -1857,7 +1619,7 @@ void DistributedSchedService::ProcessCalleeOffline(const std::string& deviceId)
                 }
                 ReportDistributedComponentChange(callerInfo, DISTRIBUTED_COMPONENT_REMOVE,
                     IDistributedSched::CALL, IDistributedSched::CALLER);
-                callerMap_.erase(iter++);
+                iter = callerMap_.erase(iter);
             } else {
                 iter++;
             }
@@ -2407,13 +2169,6 @@ int32_t DistributedSchedService::DisconnectRemoteAbility(const sptr<IRemoteObjec
         HILOGE("DisconnectRemoteAbility connect is null");
         return INVALID_PARAMETERS_ERR;
     }
-
-#ifdef DMSFWK_INTERACTIVE_ADAPTER
-    if (distributedConnectAbilityMap_.find(connect) == distributedConnectAbilityMap_.end()) {
-        return DisconnectRemoteAbilityAdapter(connect, callerUid, accessToken);
-    }
-#endif // DMSFWK_INTERACTIVE_ADAPTER
-
     std::list<ConnectAbilitySession> sessionsList;
     {
         std::lock_guard<std::mutex> autoLock(distributedLock_);
@@ -2503,7 +2258,7 @@ int32_t DistributedSchedService::NotifyProcessDiedFromRemote(const CallerInfo& c
                 }
                 ReportDistributedComponentChange(connectInfo, DISTRIBUTED_COMPONENT_REMOVE,
                     IDistributedSched::CONNECT, IDistributedSched::CALLEE);
-                connectAbilityMap_.erase(iter++);
+                iter = connectAbilityMap_.erase(iter);
             } else {
                 iter++;
             }
@@ -2536,7 +2291,7 @@ void DistributedSchedService::RemoveConnectAbilityInfo(const std::string& device
                 DecreaseConnectLocked(uid);
                 ReportDistributedComponentChange(callerInfo, DISTRIBUTED_COMPONENT_REMOVE,
                     IDistributedSched::CONNECT, IDistributedSched::CALLER);
-                distributedConnectAbilityMap_.erase(iter++);
+                iter = distributedConnectAbilityMap_.erase(iter);
             } else {
                 iter++;
             }
@@ -2667,7 +2422,7 @@ void DistributedSchedService::ProcessConnectDied(const sptr<IRemoteObject>& conn
                 }
                 ReportDistributedComponentChange(callerInfo, DISTRIBUTED_COMPONENT_REMOVE,
                     IDistributedSched::CONNECT, IDistributedSched::CALLER);
-                distributedConnectAbilityMap_.erase(iter++);
+                iter = distributedConnectAbilityMap_.erase(iter);
             } else {
                 iter++;
             }

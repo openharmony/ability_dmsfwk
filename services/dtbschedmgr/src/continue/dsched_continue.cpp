@@ -43,6 +43,7 @@
 #endif
 #include "scene_board_judgement.h"
 #include "softbus_adapter/transport/dsched_transport_softbus_adapter.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -77,6 +78,45 @@ constexpr int32_t CONTINUE_START_ABILITY_TIME = 6;
 constexpr int32_t GET_ABILITY_STATE_RETRY_TIMES = 40;
 constexpr int32_t GET_ABILITY_STATE_SLEEP_TIME = 50;
 }
+
+const std::map<int32_t, int32_t> DSchedContinue::DMS_CONVERT_TO_SDK_ERR_MAP = {
+    std::map<int32_t, int32_t>::value_type(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_AP_STA_CHIP_CONFLICT,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_HOTSPOT_ENABLE_STATE),
+    std::map<int32_t, int32_t>::value_type(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_AP_P2P_CHIP_CONFLICT,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_HOTSPOT_ENABLE_STATE),
+    std::map<int32_t, int32_t>::value_type(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_AP_HML_CHIP_CONFLICT,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_HOTSPOT_ENABLE_STATE),
+    std::map<int32_t, int32_t>::value_type(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_AP_STA_HML_CHIP_CONFLICT,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_HOTSPOT_ENABLE_STATE),
+    std::map<int32_t, int32_t>::value_type(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_AP_STA_P2P_CHIP_CONFLICT,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_HOTSPOT_ENABLE_STATE),
+    std::map<int32_t, int32_t>::value_type(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_AP_P2P_HML_CHIP_CONFLICT,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_HOTSPOT_ENABLE_STATE),
+    std::map<int32_t, int32_t>::value_type(ERROR_PEER_THREE_VAP_CONFLICT,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_HOTSPOT_ENABLE_STATE),
+
+    std::map<int32_t, int32_t>::value_type(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_HML_NUM_LIMITED_CONFLICT,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_IN_BUSY_LINK),
+    std::map<int32_t, int32_t>::value_type(SoftBusErrNo::SOFTBUS_CONN_PV1_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_IN_BUSY_LINK),
+    std::map<int32_t, int32_t>::value_type(SoftBusErrNo::SOFTBUS_CONN_PV2_PEER_GC_CONNECTED_TO_ANOTHER_DEVICE,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_IN_BUSY_LINK),
+    std::map<int32_t, int32_t>::value_type(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_STA_P2P_HML_55_CONFLICT,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_IN_BUSY_LINK),
+    std::map<int32_t, int32_t>::value_type(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_STA_P2P_HML_225_CONFLICT,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_IN_BUSY_LINK),
+    std::map<int32_t, int32_t>::value_type(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_STA_P2P_HML_255_CONFLICT,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_IN_BUSY_LINK),
+    std::map<int32_t, int32_t>::value_type(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_STA_P2P_HML_525_CONFLICT,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_IN_BUSY_LINK),
+    std::map<int32_t, int32_t>::value_type(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_STA_P2P_HML_555_CONFLICT,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_IN_BUSY_LINK),
+    std::map<int32_t, int32_t>::value_type(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_P2P_GO_GC_CONFLICT,
+        DmsInterfaceSdkErr::ERR_BIND_REMOTE_IN_BUSY_LINK),
+
+    std::map<int32_t, int32_t>::value_type(CONTINUE_ALREADY_IN_PROGRESS,
+        DmsInterfaceSdkErr::ERR_CONTINUE_ALREADY_IN_PROGRESS),
+};
 
 DSchedContinue::DSchedContinue(int32_t subServiceType, int32_t direction,  const sptr<IRemoteObject>& callback,
     const DSchedContinueInfo& continueInfo) : subServiceType_(subServiceType), direction_(direction),
@@ -158,6 +198,10 @@ void DSchedContinue::SetEventData()
 int32_t DSchedContinue::Init()
 {
     HILOGI("DSchedContinue init start");
+    if (eventHandler_ != nullptr) {
+        HILOGI("Already inited, end.");
+        return ERR_OK;
+    }
     auto dContinue = std::shared_ptr<DSchedContinue>(shared_from_this());
     stateMachine_ = std::make_shared<DSchedContinueStateMachine>(dContinue);
     if (direction_ == CONTINUE_SOURCE) {
@@ -1067,6 +1111,19 @@ int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
     return ERR_OK;
 }
 
+int32_t DSchedContinue::ConvertToDmsSdkErr(int32_t result)
+{
+    if (result == ERR_OK) {
+        return result;
+    }
+
+    auto it = DMS_CONVERT_TO_SDK_ERR_MAP.find(result);
+    if (it != DMS_CONVERT_TO_SDK_ERR_MAP.end()) {
+        return it->second;
+    }
+    return DmsInterfaceSdkErr::ERR_DMS_WORK_ABNORMALLY;
+}
+
 void DSchedContinue::NotifyContinuationCallbackResult(int32_t result)
 {
     HILOGD("continuation result is: %{public}d", result);
@@ -1080,7 +1137,7 @@ void DSchedContinue::NotifyContinuationCallbackResult(int32_t result)
         HILOGE("write token failed");
         return;
     }
-    PARCEL_WRITE_HELPER_NORET(data, Int32, (result == ERR_OK) ? 0 : NOTIFYCOMPLETECONTINUATION_FAILED);
+    PARCEL_WRITE_HELPER_NORET(data, Int32, ConvertToDmsSdkErr(result));
     MessageParcel reply;
     MessageOption option;
     int32_t ret = callback_->SendRequest(NOTIFY_MISSION_CALLBACK_RESULT, data, reply, option);

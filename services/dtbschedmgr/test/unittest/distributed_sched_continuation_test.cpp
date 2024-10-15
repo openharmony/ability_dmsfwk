@@ -51,7 +51,6 @@ void DSchedContinuationTest::SetUpTestCase()
     const std::string pkgName = "DBinderBus_" + std::to_string(getprocpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
-    DistributedSchedUtil::InstallThirdPartyHap();
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
 }
 

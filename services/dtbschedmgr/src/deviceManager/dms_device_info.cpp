@@ -43,24 +43,12 @@ int32_t DmsDeviceInfo::GetDeviceState() const
     return deviceState_;
 }
 
-int32_t DmsDeviceInfo::GetDeviceOSType() const
-{
-    return osType_;
-}
-
-const std::string& DmsDeviceInfo::GetGetDeviceOSVersion() const
-{
-    return osVersion_;
-}
-
 bool DmsDeviceInfo::Marshalling(Parcel& parcel) const
 {
     PARCEL_WRITE_HELPER_RET(parcel, String16, Str8ToStr16(networkId_), false);
     PARCEL_WRITE_HELPER_RET(parcel, String16, Str8ToStr16(deviceName_), false);
     PARCEL_WRITE_HELPER_RET(parcel, Int32, deviceType_, false);
     PARCEL_WRITE_HELPER_RET(parcel, Int32, deviceState_, false);
-    PARCEL_WRITE_HELPER_RET(parcel, Int32, osType_, false);
-    PARCEL_WRITE_HELPER_RET(parcel, String16, Str8ToStr16(osVersion_), false);
     return true;
 }
 } // namespace DistributedSchedule

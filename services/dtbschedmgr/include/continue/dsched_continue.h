@@ -187,6 +187,7 @@ private:
 
     int32_t SetWantForContinuation(AAFwk::Want& newWant);
     void SetCleanMissionFlag(const OHOS::AAFwk::Want& want);
+    int32_t ConvertToDmsSdkErr(int32_t result);
     void NotifyContinuationCallbackResult(int32_t result);
     bool GetLocalDeviceId(std::string& localDeviceId);
     bool CheckDeviceIdFromRemote(const std::string& localDevId, const std::string& destDevId,
@@ -210,6 +211,9 @@ private:
 
 private:
     static constexpr int32_t INVALID_SESSION_ID = -1;
+    static constexpr int32_t ERROR_BASE_DSOFTBUS_WIFI = -200000;
+    static constexpr int32_t ERROR_PEER_THREE_VAP_CONFLICT = ERROR_BASE_DSOFTBUS_WIFI - 6604;
+    static const std::map<int32_t, int32_t> DMS_CONVERT_TO_SDK_ERR_MAP;
 
     std::shared_ptr<DSchedContinueStateMachine> stateMachine_;
     std::shared_ptr<DSchedContinueEventHandler> eventHandler_;

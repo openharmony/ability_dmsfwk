@@ -17,6 +17,10 @@
 #define OHOS_SOFTBUS_ADAPTER_H
 
 #include <string>
+#include <thread>
+
+#include "dsched_data_buffer.h"
+#include "event_handler.h"
 #include "single_instance.h"
 #include "softbus_adapter_listener.h"
 
@@ -26,7 +30,9 @@ class SoftbusAdapter {
 public:
     DECLARE_SINGLE_INSTANCE_BASE(SoftbusAdapter);
 public:
-    int32_t SendSoftbusEvent(uint8_t* sendData, uint32_t sendDataLen);
+    void Init();
+    void UnInit();
+    int32_t SendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer);
     int32_t StopSoftbusEvent();
     int32_t RegisterSoftbusEventListener(const std::shared_ptr<SoftbusAdapterListener>& listener);
     int32_t UnregisterSoftbusEventListener(const std::shared_ptr<SoftbusAdapterListener>& listener);
@@ -34,8 +40,16 @@ public:
 
 private:
     SoftbusAdapter() {}
+    void StartEvent();
+    int32_t DealSendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer, const int32_t retry = 0);
+    int32_t RetrySendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer, const int32_t retry);
     std::shared_ptr<SoftbusAdapterListener> softbusAdapterListener_;
     std::string pkgName_ = "dms";
+    std::thread eventThread_;
+    std::condition_variable eventCon_;
+    std::mutex eventMutex_;
+    std::mutex softbusAdapterListenerMutex_;
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_ = nullptr;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

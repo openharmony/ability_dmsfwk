@@ -82,7 +82,8 @@ void DataShareManager::RegisterObserver(const std::string &key, SettingObserver:
         return;
     }
     Uri uri = AssembleUri(key);
-    observer = new SettingObserver();
+    sptr<SettingObserver> newObserver(new SettingObserver());
+    observer = newObserver;
     if (observer == nullptr) {
         HILOGE("Register observer failed, observer is null");
         return;
@@ -90,7 +91,7 @@ void DataShareManager::RegisterObserver(const std::string &key, SettingObserver:
     observer->SetObserverCallback(observerCallback);
     dataShareHelper->RegisterObserver(uri, observer);
     dataShareHelper->Release();
-    
+
     std::lock_guard<std::mutex> lockGuard(observerMapMutex_);
     settingObserverMap_[key] = observer;
     HILOGI("DataShareManager RegisterObserver success with key is %{public}s", key.c_str());
