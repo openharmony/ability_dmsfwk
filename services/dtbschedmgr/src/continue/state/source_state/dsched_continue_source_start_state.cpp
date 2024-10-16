@@ -86,7 +86,7 @@ int32_t DSchedContinueSourceStartState::DoContinueAbilityTask(std::shared_ptr<DS
         HILOGE("dContinue or event is null");
         return INVALID_PARAMETERS_ERR;
     }
-    auto syncContinueData = event->GetSharedObject<int32_t>();
+    auto syncContinueData = event->GetSharedObject<uint32_t>();
     int32_t ret = dContinue->ExecuteContinueAbility(*syncContinueData);
     if (ret != ERR_OK) {
         HILOGE("DSchedContinueSourceStartState ExecuteContinueAbility failed, ret: %{public}d", ret);

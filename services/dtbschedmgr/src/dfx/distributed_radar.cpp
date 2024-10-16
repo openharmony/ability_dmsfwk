@@ -15,6 +15,8 @@
 
 #include "dfx/distributed_radar.h"
 
+#include "bundle/bundle_manager_internal.h"
+#include "dtbschedmgr_device_info_storage.h"
 #include "hisysevent.h"
 
 namespace OHOS {
@@ -728,13 +730,17 @@ bool DmsRadar::NotifyDockUnfocused(const std::string& func, int32_t errCode)
     return true;
 }
 
-bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode, std::string peerUdid,
+bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode, std::string peerDeviceId,
     const std::string& srcBundleName, const std::string& dstBundleName)
 {
-    if (peerUdid.empty()) {
-        HILOGE("peerUdid is empty.");
-        return false;
-    }
+    std::string peerUdid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(peerDeviceId);
+
+    DmsBundleInfo srcBundleInfo;
+    DmsBmStorage::GetInstance()->GetStorageDistributeInfo(peerDeviceId, srcBundleName, srcBundleInfo);
+
+    AppExecFwk::BundleInfo dstBundleInfo;
+    BundleManagerInternal::GetLocalBundleInfoV9(dstBundleName, dstBundleInfo);
+
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
     if (stageRes == StageRes::STAGE_SUCC) {
@@ -749,7 +755,9 @@ bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode, st
             STAGE_RES, static_cast<int32_t>(StageRes::STAGE_SUCC),
             PEER_UDID, GetAnonyUdid(peerUdid),
             APP_CALLEE, srcBundleName,
-            APP_CALLER, dstBundleName);
+            APP_CALLER, dstBundleName,
+            LOCAL_APP_VERSION, srcBundleInfo.versionName,
+            PEER_APP_VERSION, dstBundleInfo.versionName);
     } else {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
@@ -763,6 +771,8 @@ bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode, st
             PEER_UDID, GetAnonyUdid(peerUdid),
             APP_CALLEE, srcBundleName,
             APP_CALLER, dstBundleName,
+            LOCAL_APP_VERSION, srcBundleInfo.versionName,
+            PEER_APP_VERSION, dstBundleInfo.versionName,
             ERROR_CODE, errCode);
     }
     if (res != ERR_OK) {

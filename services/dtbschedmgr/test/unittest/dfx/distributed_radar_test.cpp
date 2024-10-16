@@ -667,7 +667,7 @@ HWTEST_F(DistributedRadarTest, NormalFocusedGetAccessTokenIdRes_001, TestSize.Le
     DTEST_LOG << "DistributedRadarTest NormalFocusedGetAccessTokenIdRes_001 begin" << std::endl;
     bool ret = DmsRadar::GetInstance().NormalFocusedGetAccessTokenIdRes(FUNC, ERR_NO);
     EXPECT_EQ(ret, true);
-    
+
     ret = DmsRadar::GetInstance().NormalFocusedGetAccessTokenIdRes(FUNC, ERR_OK);
     EXPECT_EQ(ret, true);
     DTEST_LOG << "DistributedRadarTest NormalFocusedGetAccessTokenIdRes_001 end" << std::endl;
