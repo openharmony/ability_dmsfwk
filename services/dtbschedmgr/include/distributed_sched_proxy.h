@@ -62,8 +62,8 @@ public:
     int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
     int32_t RegisterDSchedEventListener(const DSchedEventType& type, const sptr<IRemoteObject>& obj) override;
     int32_t UnRegisterDSchedEventListener(const DSchedEventType& type, const sptr<IRemoteObject>& obj) override;
-    int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
-    int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
+    int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj, int32_t callingUid) override;
+    int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj, int32_t callingUid) override;
     int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
     int32_t GetMissionInfos(const std::string& deviceId, int32_t numMissions,
         std::vector<AAFwk::MissionInfo>& missionInfos) override;

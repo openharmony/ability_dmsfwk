@@ -561,7 +561,8 @@ int32_t DistributedSchedProxy::UnRegisterDSchedEventListener(const DSchedEventTy
         data, reply);
 }
 
-int32_t DistributedSchedProxy::RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj)
+int32_t DistributedSchedProxy::RegisterOnListener(const std::string& type,
+    const sptr<IRemoteObject>& obj, int32_t callingUid)
 {
     HILOGI("RegisterOnListener called");
     sptr<IRemoteObject> remote = Remote();
@@ -576,11 +577,13 @@ int32_t DistributedSchedProxy::RegisterOnListener(const std::string& type, const
     }
     PARCEL_WRITE_HELPER(data, String, type);
     PARCEL_WRITE_HELPER(data, RemoteObject, obj);
+    PARCEL_WRITE_HELPER(data, Int32, callingUid);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_ON_LISTENER),
         data, reply);
 }
 
-int32_t DistributedSchedProxy::RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj)
+int32_t DistributedSchedProxy::RegisterOffListener(const std::string& type,
+    const sptr<IRemoteObject>& obj, int32_t callingUid)
 {
     HILOGI("RegisterOffListener called");
     sptr<IRemoteObject> remote = Remote();
@@ -595,6 +598,7 @@ int32_t DistributedSchedProxy::RegisterOffListener(const std::string& type, cons
     }
     PARCEL_WRITE_HELPER(data, String, type);
     PARCEL_WRITE_HELPER(data, RemoteObject, obj);
+    PARCEL_WRITE_HELPER(data, Int32, callingUid);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_OFF_LISTENER),
         data, reply);
 }

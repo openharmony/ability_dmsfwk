@@ -1089,7 +1089,12 @@ int32_t DistributedSchedStub::RegisterOnListenerInner(MessageParcel& data, Messa
         HILOGW("read IRemoteObject failed!");
         return ERR_FLATTEN_OBJECT;
     }
-    int32_t result = RegisterOnListener(type, onListener);
+    int32_t callingUid = data.ReadInt32();
+    if (callingUid < 0) {
+        HILOGW("read callingUid failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = RegisterOnListener(type, onListener, callingUid);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 
@@ -1109,7 +1114,12 @@ int32_t DistributedSchedStub::RegisterOffListenerInner(MessageParcel& data, Mess
         HILOGW("read IRemoteObject failed!");
         return ERR_FLATTEN_OBJECT;
     }
-    int32_t result = RegisterOffListener(type, onListener);
+    int32_t callingUid = data.ReadInt32();
+    if (callingUid < 0) {
+        HILOGW("read callingUid failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = RegisterOffListener(type, onListener, callingUid);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 
