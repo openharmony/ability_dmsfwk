@@ -157,8 +157,8 @@ public:
     int32_t StopSyncRemoteMissions(const std::string& devId) override;
     int32_t StopSyncMissionsFromRemote(const CallerInfo& callerInfo) override;
     int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
-    int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
-    int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj) override;
+    int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj, int32_t callingUid) override;
+    int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj, int32_t callingUid) override;
     int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
     int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state) override;
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;

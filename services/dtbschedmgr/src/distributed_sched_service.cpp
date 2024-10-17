@@ -2845,13 +2845,13 @@ int32_t DistributedSchedService::RegisterMissionListener(const std::u16string& d
 }
 
 int32_t DistributedSchedService::RegisterOnListener(const std::string& type,
-    const sptr<IRemoteObject>& obj)
+    const sptr<IRemoteObject>& obj, int32_t callingUid)
 {
     return DMSContinueRecvMgr::GetInstance().RegisterOnListener(type, obj);
 }
 
 int32_t DistributedSchedService::RegisterOffListener(const std::string& type,
-    const sptr<IRemoteObject>& obj)
+    const sptr<IRemoteObject>& obj, int32_t callingUid)
 {
     return DMSContinueRecvMgr::GetInstance().RegisterOffListener(type, obj);
 }

@@ -121,11 +121,11 @@ public:
     virtual int32_t StopSyncRemoteMissions(const std::string& devId) = 0;
     virtual int32_t StopSyncMissionsFromRemote(const CallerInfo& callerInfo) = 0;
     virtual int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) = 0;
-    virtual int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj)
+    virtual int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj, int32_t callingUid)
     {
         return 0;
     }
-    virtual int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj)
+    virtual int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj, int32_t callingUid)
     {
         return 0;
     }
