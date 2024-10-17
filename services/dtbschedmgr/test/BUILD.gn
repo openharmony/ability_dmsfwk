@@ -439,16 +439,12 @@ ohos_unittest("dmscontinuemanagertest") {
 }
 
 ohos_unittest("dmsmissionmanagertest") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
   sources = [
     "unittest/mission/distributed_data_storage_test.cpp",
     "unittest/mission/dms_mission_manager_test.cpp",
+    "unittest/mission/mock_distributed_sched_adapter.cpp",
     "unittest/mission/mock_image_packer.cpp",
   ]
   sources += dtbschedmgr_sources
@@ -464,6 +460,8 @@ ohos_unittest("dmsmissionmanagertest") {
     external_deps += [ "config_policy:configpolicy_util" ]
     public_deps = dsched_public_deps
   }
+
+  external_deps += [ "googletest:gmock" ]
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -651,11 +649,6 @@ ohos_unittest("dschedswitchstatustest") {
 }
 
 ohos_unittest("dschedcontinuestatetest") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
   sources = [
@@ -663,6 +656,7 @@ ohos_unittest("dschedcontinuestatetest") {
     "unittest/continue/dsched_continue_manager_test.cpp",
     "unittest/continue/dsched_continue_state_test.cpp",
     "unittest/continue/dsched_continue_test.cpp",
+    "unittest/continue/mock_dtbschedmgr_device_info.cpp",
     "unittest/mock_distributed_sched.cpp",
   ]
   sources += dtbschedmgr_sources
@@ -676,6 +670,7 @@ ohos_unittest("dschedcontinuestatetest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
+  external_deps += [ "googletest:gmock" ]
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }

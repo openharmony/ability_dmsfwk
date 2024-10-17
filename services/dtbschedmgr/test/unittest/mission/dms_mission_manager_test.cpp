@@ -71,11 +71,15 @@ void DMSMissionManagerTest::SetUpTestCase()
     }
     const std::string pkgName = "DBinderBus_" + std::to_string(getprocpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
+    mockDmsAdapter = std::make_shared<MockAdapter>();
+    AdapterMock::dmsAdapter = mockDmsAdapter;
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
 }
 
 void DMSMissionManagerTest::TearDownTestCase()
 {
+    AdapterMock::dmsAdapter = nullptr;
+    mockDmsAdapter = nullptr;
 }
 
 void DMSMissionManagerTest::SetUp()
@@ -1379,6 +1383,7 @@ HWTEST_F(DMSMissionManagerTest, testMissionSnapshotChanged001, TestSize.Level3)
     DistributedSchedMissionManager::GetInstance().NotifyDmsProxyProcessDied();
     std::vector<DstbMissionInfo> missionInfos;
     DistributedSchedMissionManager::GetInstance().InitAllSnapshots(missionInfos);
+    EXPECT_CALL(*mockDmsAdapter, GetLocalMissionSnapshotInfo(_, _, _)).WillOnce(Return(true));
     auto ret = DistributedSchedMissionManager::GetInstance().MissionSnapshotChanged(NUM_MISSIONS);
     EXPECT_NE(ret, ERR_NONE);
     DTEST_LOG << "testMissionSnapshotChanged001 end" << std::endl;
