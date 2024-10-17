@@ -245,7 +245,7 @@ void DSchedContinueManager::HandleContinueMission(const DSchedContinueInfo& cont
         return;
     }
 
-    DSchedContinueInfo info = DSchedContinueInfo(srcDeviceId, bundleName, dstDeviceId, bundleName, continueType);
+    DSchedContinueInfo info = DSchedContinueInfo(srcDeviceId, srcBundleName, dstDeviceId, bundleName, continueType);
     HandleContinueMissionWithBundleName(info, callback, wantParams);
     return;
 }
@@ -286,7 +286,6 @@ void DSchedContinueManager::HandleContinueMissionWithBundleName(DSchedContinueIn
         HILOGE("CheckContinuationLimit failed, ret: %{public}d", ret);
         return;
     }
-
     int32_t subType = CONTINUE_PUSH;
     if (direction == CONTINUE_SOURCE) {
         cntSource_++;

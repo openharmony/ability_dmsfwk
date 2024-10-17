@@ -18,7 +18,6 @@
 #include "datetime_ex.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
-#include "os_account_manager.h"
 
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"

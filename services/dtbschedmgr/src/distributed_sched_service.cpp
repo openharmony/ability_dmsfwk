@@ -687,7 +687,7 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
     DmsUE::GetInstance().TriggerDmsContinue(bundleName, abilityName, srcDeviceId, ERR_OK);
 
     std::string peerUdid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(srcDeviceId);
-    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid, bundleName);
+    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid, bundleName, bundleName);
 
     int32_t result = remoteDms->ContinueMission(srcDeviceId, dstDeviceId, missionId, callback, wantParams);
     HILOGI("ContinueRemoteMission result: %{public}d!", result);

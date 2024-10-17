@@ -687,55 +687,6 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline003, TestSize.Level1)
 }
 
 /**
- * @tc.name: NotifyPackageRemoved001
- * @tc.desc: test NotifyPackageRemoved normal
- * @tc.type: FUNC
- */
-HWTEST_F(DMSContinueManagerTest, notifyPackageRemoved001, TestSize.Level1)
-{
-    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved001 start" << std::endl;
-    sptr<IRemoteObject> obj01(new RemoteOnListenerStubTest());
-    DMSContinueRecvMgr::GetInstance().RegisterOnListener(TYPE, obj01);
-    EXPECT_NE(DMSContinueRecvMgr::GetInstance().registerOnListener_.size(), 0);
-
-    DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName = BUNDLENAME_01;
-    DMSContinueRecvMgr::GetInstance().NotifyPackageRemoved(BUNDLENAME_01);
-    EXPECT_EQ(DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName, "");
-
-    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved001 end" << std::endl;
-}
-
-/**
- * @tc.name: NotifyPackageRemoved002
- * @tc.desc: test NotifyPackageRemoved bundleName empty
- * @tc.type: FUNC
- */
-HWTEST_F(DMSContinueManagerTest, notifyPackageRemoved002, TestSize.Level1)
-{
-    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved002 start" << std::endl;
-    DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName = BUNDLENAME_01;
-    DMSContinueRecvMgr::GetInstance().NotifyPackageRemoved("");
-    EXPECT_EQ(DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName, BUNDLENAME_01);
-
-    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved002 end" << std::endl;
-}
-
-/**
- * @tc.name: NotifyPackageRemoved003
- * @tc.desc: test NotifyPackageRemoved bundleName not match
- * @tc.type: FUNC
- */
-HWTEST_F(DMSContinueManagerTest, notifyPackageRemoved003, TestSize.Level1)
-{
-    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved003 start" << std::endl;
-    DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName = BUNDLENAME_01;
-    DMSContinueRecvMgr::GetInstance().NotifyPackageRemoved(BUNDLENAME_02);
-    EXPECT_EQ(DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName, BUNDLENAME_01);
-
-    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved003 end" << std::endl;
-}
-
-/**
  * @tc.name: testNotifyDataRecv001
  * @tc.desc: NotifyDataRecv
  * @tc.type: FUNC

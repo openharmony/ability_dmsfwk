@@ -26,6 +26,7 @@
 #include "distributed_sched_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "mission/dsched_sync_e2e.h"
 #include "mission/wifi_state_adapter.h"
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
@@ -317,7 +318,10 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         return RetryPostBroadcast(senderNetworkId, bundleNameId, continueTypeId, state, retry);
     }
 
-    std::string bundleName = distributedBundleInfo.bundleName;
+    if (!CheckBundleContinueConfig(bundleName)) {
+        HILOGI("App does not allow continue in config file, bundle name %{public}s", bundleName.c_str());
+        return REMOTE_DEVICE_BIND_ABILITY_ERR;
+    }
 
     HILOGI("get distributedBundleInfo success, bundleName: %{public}s", bundleName.c_str());
     std::string finalBundleName;
@@ -556,48 +560,6 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
         }
     }
     HILOGI("NotifyDeviceOffline end");
-}
-
-void DMSContinueRecvMgr::NotifyPackageRemoved(const std::string& sinkBundleName)
-{
-    if (sinkBundleName.empty()) {
-        HILOGE("NotifyPackageRemoved sinkBundleName empty");
-        return;
-    }
-    if (iconInfo_.bundleName != sinkBundleName) {
-        HILOGI("NotifyPackageRemoved current sinkBundleName: %{public}s; removed package: %{public}s.",
-            iconInfo_.bundleName.c_str(), sinkBundleName.c_str());
-        return;
-    }
-    HILOGI("NotifyPackageRemoved begin. sinkBundleName: %{public}s.", sinkBundleName.c_str());
-    std::string senderNetworkId;
-    std::string bundleName;
-    std::string continueType;
-    {
-        std::lock_guard<std::mutex> currentIconLock(iconMutex_);
-        senderNetworkId = iconInfo_.senderNetworkId;
-        bundleName = iconInfo_.bundleName;
-        continueType = iconInfo_.continueType;
-        iconInfo_.senderNetworkId = "";
-        iconInfo_.bundleName = "";
-        iconInfo_.continueType = "";
-    }
-    HILOGI("Saved iconInfo cleared, sinkBundleName: %{public}s.",  bundleName.c_str());
-    {
-        std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
-        auto iterItem = registerOnListener_.find(onType_);
-        if (iterItem == registerOnListener_.end()) {
-            HILOGI("Get iterItem failed from registerOnListener_, nobody registed");
-            return;
-        }
-        std::vector<sptr<IRemoteObject>> objs = iterItem->second;
-        for (auto iter : objs) {
-            NotifyRecvBroadcast(iter,
-                currentIconInfo(senderNetworkId, iconInfo_.sourceBundleName, bundleName, continueType),
-                INACTIVE);
-        }
-    }
-    HILOGI("NotifyPackageRemoved end");
 }
 
 std::string DMSContinueRecvMgr::GetContinueType(const std::string& bundleName)

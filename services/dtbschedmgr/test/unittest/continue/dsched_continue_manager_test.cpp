@@ -208,11 +208,6 @@ HWTEST_F(DSchedContinueManagerTest, HandleContinueMission_001, TestSize.Level3)
     DSchedContinueManager::GetInstance().HandleContinueMission(
         DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
         callback, wantParams);
-    DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, BUNDLE_NAME,
-        CONTINUETYPE, nullptr, wantParams);
-
-    DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, BUNDLE_NAME,
-        CONTINUETYPE, callback, wantParams);
     DTEST_LOG << "DSchedContinueManagerTest HandleContinueMission_001 end" << std::endl;
 }
 
