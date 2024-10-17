@@ -318,13 +318,16 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         return RetryPostBroadcast(senderNetworkId, bundleNameId, continueTypeId, state, retry);
     }
 
+    std::string bundleName = distributedBundleInfo.bundleName;
+
+    HILOGI("get distributedBundleInfo success, bundleName: %{public}s", bundleName.c_str());
+    std::string finalBundleName;
     if (!CheckBundleContinueConfig(bundleName)) {
         HILOGI("App does not allow continue in config file, bundle name %{public}s", bundleName.c_str());
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
 
-    HILOGI("get distributedBundleInfo success, bundleName: %{public}s", bundleName.c_str());
-    std::string finalBundleName;
+    HILOGI("get bundleName, bundleName: %{public}s", bundleName.c_str());
     AppExecFwk::BundleInfo localBundleInfo;
     std::string continueType;
     FindContinueType(distributedBundleInfo, continueTypeId, continueType);

@@ -728,7 +728,7 @@ bool DmsRadar::NotifyDockUnfocused(const std::string& func, int32_t errCode)
     return true;
 }
 
-bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode, std::string peerDeviceId,
+bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode, std::string peerUdid,
     const std::string& srcBundleName, const std::string& dstBundleName)
 {
     if (peerUdid.empty()) {
