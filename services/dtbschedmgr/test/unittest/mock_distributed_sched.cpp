@@ -234,5 +234,49 @@ int32_t MockDistributedSched::StopExtensionAbilityFromRemote(const OHOS::AAFwk::
 {
     return ERR_NONE;
 }
+
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+bool MockDistributedSched::CheckRemoteOsType(const std::string& netwokId)
+{
+    return true;
+}
+
+int32_t MockDistributedSched::StartRemoteAbilityAdapter(const OHOS::AAFwk::Want& want,
+    int32_t callerUid, int32_t requestCode, uint32_t accessToken)
+{
+    return ERR_NONE;
+}
+
+int32_t MockDistributedSched::ConnectRemoteAbilityAdapter(const OHOS::AAFwk::Want& want,
+    const sptr<IRemoteObject>& connect, int32_t callerUid, int32_t callerPid, uint32_t accessToken)
+{
+    return ERR_NONE;
+}
+
+int32_t MockDistributedSched::StartAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply)
+{
+    return ERR_NONE;
+}
+
+int32_t MockDistributedSched::StopAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply)
+{
+    return ERR_NONE;
+}
+
+int32_t MockDistributedSched::ConnectAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply)
+{
+    return ERR_NONE;
+}
+
+int32_t MockDistributedSched::DisconnectAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply)
+{
+    return ERR_NONE;
+}
+
+int32_t MockDistributedSched::NotifyAbilityLifecycleChangedFromRemoteAdapter(MessageParcel& data, MessageParcel& reply)
+{
+    return ERR_NONE;
+}
+#endif // DMSFWK_INTERACTIVE_ADAPTER
 } // namespace DistributedSchedule
 } // namespace OHOS

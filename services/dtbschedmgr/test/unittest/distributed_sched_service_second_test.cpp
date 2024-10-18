@@ -1486,5 +1486,134 @@ HWTEST_F(DistributedSchedServiceSecondTest, CheckTargetPermission4DiffBundle_001
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceSecondTest CheckTargetPermission4DiffBundle_001 end" << std::endl;
 }
+
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+/**
+ * @tc.name: StartRemoteAbilityAdapter_001
+ * @tc.desc: StartRemoteAbilityAdapter
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, StartRemoteAbilityAdapter_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest StartRemoteAbilityAdapter_001 start" << std::endl;
+    OHOS::AAFwk::Want want;
+    int32_t callerUid = 0;
+    int32_t requestCode = 0;
+    uint32_t accessToken = 0;
+    int32_t ret = DistributedSchedService::GetInstance().StartRemoteAbilityAdapter(want,
+        callerUid, requestCode, accessToken);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceSecondTest StartRemoteAbilityAdapter_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectRemoteAbilityAdapter_001
+ * @tc.desc: ConnectRemoteAbilityAdapter
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, ConnectRemoteAbilityAdapter_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest ConnectRemoteAbilityAdapter_001 start" << std::endl;
+    OHOS::AAFwk::Want want;
+    sptr<IRemoteObject> connect;
+    int32_t callerUid = 0;
+    int32_t callerPid = 0;
+    uint32_t accessToken = 0;
+    int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbilityAdapter(want,
+        connect, callerUid, callerPid, accessToken);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceSecondTest ConnectRemoteAbilityAdapter_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartAbilityFromRemoteAdapter_001
+ * @tc.desc: StartAbilityFromRemoteAdapter
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, StartAbilityFromRemoteAdapter_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest StartAbilityFromRemoteAdapter_001 start" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = DistributedSchedService::GetInstance().StartAbilityFromRemoteAdapter(data, reply);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceSecondTest StartAbilityFromRemoteAdapter_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StopAbilityFromRemoteAdapter_001
+ * @tc.desc: StopAbilityFromRemoteAdapter
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, StopAbilityFromRemoteAdapter_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest StopAbilityFromRemoteAdapter_001 start" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = DistributedSchedService::GetInstance().StopAbilityFromRemoteAdapter(data, reply);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceSecondTest StopAbilityFromRemoteAdapter_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectAbilityFromRemoteAdapter_001
+ * @tc.desc: ConnectAbilityFromRemoteAdapter
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, ConnectAbilityFromRemoteAdapter_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest ConnectAbilityFromRemoteAdapter_001 start" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemoteAdapter(data, reply);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceSecondTest ConnectAbilityFromRemoteAdapter_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectAbilityFromRemoteAdapter_001
+ * @tc.desc: DisconnectAbilityFromRemoteAdapter
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, DisconnectAbilityFromRemoteAdapter_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest DisconnectAbilityFromRemoteAdapter_001 start" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = DistributedSchedService::GetInstance().DisconnectAbilityFromRemoteAdapter(data, reply);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceSecondTest DisconnectAbilityFromRemoteAdapter_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyAbilityLifecycleChangedFromRemoteAdapter_001
+ * @tc.desc: NotifyAbilityLifecycleChangedFromRemoteAdapter
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, NotifyAbilityLifecycleChangedFromRemoteAdapter_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest NotifyAbilityLifecycleChangedFromRemoteAdapter_001 start" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = DistributedSchedService::GetInstance().NotifyAbilityLifecycleChangedFromRemoteAdapter(data, reply);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceSecondTest NotifyAbilityLifecycleChangedFromRemoteAdapter_001 end" << std::endl;
+}
+#endif // DMSFWK_INTERACTIVE_ADAPTER
+
+/**
+ * @tc.name: NotifyDSchedEventResultFromRemote_001
+ * @tc.desc: NotifyDSchedEventResultFromRemote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, NotifyDSchedEventResultFromRemote_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest NotifyDSchedEventResultFromRemote_001 start" << std::endl;
+    std::string type;
+    int32_t dSchedEventResult = 0;
+    int32_t ret = DistributedSchedService::GetInstance().NotifyDSchedEventResultFromRemote(type, dSchedEventResult);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceSecondTest NotifyDSchedEventResultFromRemote_001 end" << std::endl;
+}
 }
 }
