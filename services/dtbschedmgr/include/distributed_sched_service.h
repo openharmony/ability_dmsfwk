@@ -230,6 +230,7 @@ private:
     DistributedSchedService();
     bool Init();
     void InitDataShareManager();
+    void InitMissionManager();
     void InitCommonEventListener();
     int32_t GetCallerInfo(const std::string &localDeviceId, int32_t callerUid, uint32_t accessToken,
         CallerInfo &callerInfo);
@@ -293,6 +294,7 @@ private:
     void SetCleanMissionFlag(const OHOS::AAFwk::Want& want, int32_t missionId);
     void RemoveConnectAbilityInfo(const std::string& deviceId);
     void InitWifiStateListener();
+    void InitWifiSemiStateListener();
     void NotifyContinuateEventResult(int32_t resultCode, const EventNotify& event);
     void InitDeviceCfg();
     void NotifyCollaborateEventResult(int32_t resultCode, const EventNotify& event);

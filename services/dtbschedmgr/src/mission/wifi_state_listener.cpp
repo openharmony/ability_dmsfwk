@@ -30,16 +30,18 @@ const std::string TAG = "WifiStateListener";
 
 void WifiStateListener::OnReceiveEvent(const EventFwk::CommonEventData &data)
 {
+    HILOGI("receive event code = %{public}d", data.GetCode());
     switch (data.GetCode()) {
         case int32_t(OHOS::Wifi::WifiState::DISABLED): {
             HILOGI("on wifi disabled");
-            if (CheckWifiStateIsActived()) {
-                WifiStateAdapter::GetInstance().UpdateWifiState(true);
-                HILOGI("WifiState is STATE_SEMIACTIVE");
-                return;
-            }
             WifiStateAdapter::GetInstance().UpdateWifiState(false);
             DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
+            break;
+        }
+
+        case int32_t(Wifi::WifiDetailState::STATE_SEMI_ACTIVE): {
+            HILOGI("on wifi SEMI_ACTIVE");
+            WifiStateAdapter::GetInstance().UpdateWifiState(true);
             break;
         }
 
@@ -70,6 +72,7 @@ bool WifiStateListener::CheckWifiStateIsActived()
         return false;
     }
     
+    HILOGI("get wifi detail state is %{public}d", wifiDetailState);
     return (wifiDetailState == Wifi::WifiDetailState::STATE_SEMI_ACTIVE) ||
         (wifiDetailState == Wifi::WifiDetailState::STATE_ACTIVATED);
 }
