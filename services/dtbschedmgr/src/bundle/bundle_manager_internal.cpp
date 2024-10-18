@@ -184,6 +184,31 @@ bool BundleManagerInternal::IsSameAppId(const std::string& callerAppId, const st
     return callerAppId == calleeAppId;
 }
 
+bool BundleManagerInternal::IsSameDeveloperId(const std::string &bundleNameInCurrentSide,
+    const std::string &developerId4OtherSide)
+{
+    if (bundleNameInCurrentSide.empty() || developerId4OtherSide.empty()) {
+        HILOGE("bundleNameInCurrentSide: %{public}s or developerId4OtherSide: %{public}s is empty",
+            bundleNameInCurrentSide.c_str(), developerId4OtherSide.c_str());
+        return false;
+    }
+
+    auto bundleMgr = GetBundleManager();
+    if (bundleMgr == nullptr) {
+        HILOGE("get bundle manager failed");
+        return false;
+    }
+    AppExecFwk::AppProvisionInfo targetAppProvisionInfo;
+    std::vector<int32_t> ids;
+    ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (ret != ERR_OK || ids.empty()) {
+        HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
+        return false;
+    }
+    bundleMgr->GetAppProvisionInfo(bundleNameInCurrentSide, ids[0], targetAppProvisionInfo);
+    return developerId4OtherSide == targetAppProvisionInfo.developerId;
+}
+
 int32_t BundleManagerInternal::GetLocalBundleInfo(const std::string& bundleName,
     AppExecFwk::BundleInfo &localBundleInfo)
 {
@@ -227,6 +252,50 @@ int32_t BundleManagerInternal::GetLocalBundleInfoV9(const std::string& bundleNam
         HILOGE("get local bundle info failed, ret: %{public}d", ret);
     }
     return ret;
+}
+
+bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleName,
+    std::vector<std::string> &bundleNameList)
+{
+    auto bundleMgr = GetBundleManager();
+    if (bundleMgr == nullptr) {
+        HILOGE("get bundle manager failed");
+        return false;
+    }
+
+    int32_t activeAccountId = 0;
+    ErrCode ret = QueryOsAccount(activeAccountId);
+    if (ret != ERR_OK) {
+        HILOGE("get os account id failed");
+        return false;
+    }
+    ret = bundleMgr->GetContinueBundleNames(srcBundleName, bundleNameList, activeAccountId);
+    if (ret != ERR_OK || bundleNameList.empty()) {
+        HILOGW("No APP with specified bundle name(%{public}s) configured in continue Bundle; ret: %{public}d",
+            srcBundleName.c_str(), ret);
+        return false;
+    }
+    return true;
+}
+
+bool BundleManagerInternal::GetAppProvisionInfo4CurrentUser(const std::string &bundleName,
+    AppExecFwk::AppProvisionInfo &appProvisionInfo)
+{
+    sptr<AppExecFwk::IBundleMgr> bundleMgr = GetBundleManager();
+    if (bundleMgr == nullptr) {
+        HILOGE("get bundle manager failed");
+        return false;
+    }
+    std::vector<int32_t> ids;
+    ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (ret != ERR_OK || ids.empty()) {
+        HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
+        return false;
+    }
+    ErrCode result = bundleMgr->GetAppProvisionInfo(bundleName, ids[0], appProvisionInfo);
+    HILOGI("find dst bundle name for diff bundle continue. dst developer id: %{public}s; ",
+        GetAnonymStr(appProvisionInfo.developerId).c_str());
+    return result == ERR_OK;
 }
 
 int32_t BundleManagerInternal::CheckRemoteBundleInfoForContinuation(const std::string& dstDeviceId,

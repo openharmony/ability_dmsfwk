@@ -180,6 +180,7 @@ private:
     int32_t PackDataCmd(std::shared_ptr<DSchedContinueDataCmd>& cmd, const OHOS::AAFwk::Want& want,
         const AppExecFwk::AbilityInfo& abilityInfo, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo);
+    int32_t CheckStartPermission(std::shared_ptr<DSchedContinueDataCmd> cmd);
     int32_t PackEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd, int32_t result);
     int32_t PackReplyCmd(std::shared_ptr<DSchedContinueReplyCmd> cmd, int32_t replyCmd, int32_t appVersion,
         int32_t result, const std::string reason);

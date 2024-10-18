@@ -191,6 +191,7 @@ void DSchedContinue::SetEventData()
     eventData_.destBundleName_ = dstContinueInfo.bundleName;
     eventData_.destModuleName_ = dstContinueInfo.moduleName;
     eventData_.destAbilityName_ = dstContinueInfo.abilityName;
+    eventData_.developerId_ = srcContinueInfo.developerId;
     eventData_.dSchedEventType_ = DMS_CONTINUE;
     eventData_.state_ = DMS_DSCHED_EVENT_START;
 }
@@ -497,7 +498,8 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
         continueInfo_.sinkDeviceId_ : continueInfo_.sourceDeviceId_;
 
     std::string peerUdid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(peerDeviceId);
-    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid, continueInfo_.sinkBundleName_);
+    DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid,
+        continueInfo_.sourceBundleName_, continueInfo_.sinkBundleName_);
 
     DmsUE::GetInstance().TriggerDmsContinue(continueInfo_.sinkBundleName_, continueInfo_.sinkAbilityName_,
         continueInfo_.sourceDeviceId_, ERR_OK);
@@ -851,9 +853,9 @@ int32_t DSchedContinue::SetWantForContinuation(AAFwk::Want& newWant)
         DmsContinueTime::GetInstance().WriteDurationInfo(DmsContinueTime::GetInstance().GetSaveDataDuration());
     newWant.SetParam(DMSDURATION_SAVETIME, saveDataTime);
     if (subServiceType_ == CONTINUE_PUSH) {
-        DmsContinueTime::GetInstance().SetSrcBundleName(newWant.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetSrcBundleName(continueInfo_.sourceBundleName_);
         DmsContinueTime::GetInstance().SetSrcAbilityName(newWant.GetElement().GetAbilityName());
-        DmsContinueTime::GetInstance().SetDstBundleName(newWant.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetDstBundleName(continueInfo_.sinkBundleName_);
         DmsContinueTime::GetInstance().SetDstAbilityName(newWant.GetElement().GetAbilityName());
     }
     return ERR_OK;
@@ -887,7 +889,25 @@ int32_t DSchedContinue::PackDataCmd(std::shared_ptr<DSchedContinueDataCmd>& cmd,
     cmd->callerInfo_ = callerInfo;
     cmd->accountInfo_ = accountInfo;
     cmd->requestCode_ = DEFAULT_REQUEST_CODE;
+
+    AppExecFwk::AppProvisionInfo appProvisionInfo;
+    BundleManagerInternal::GetAppProvisionInfo4CurrentUser(cmd->srcBundleName_, appProvisionInfo);
+    cmd->srcDeveloperId_ = appProvisionInfo.developerId;
     return ERR_OK;
+}
+
+int32_t DSchedContinue::CheckStartPermission(std::shared_ptr<DSchedContinueDataCmd> cmd)
+{
+    if (cmd->srcBundleName_ == cmd->dstBundleName_) {
+        return DistributedSchedService::GetInstance().CheckTargetPermission4DiffBundle(cmd->want_, cmd->callerInfo_,
+            cmd->accountInfo_, START_PERMISSION, true);
+    } else {
+        if (!BundleManagerInternal::IsSameDeveloperId(cmd->dstBundleName_, cmd->srcDeveloperId_)) {
+            return INVALID_PARAMETERS_ERR;
+        }
+        return DistributedSchedService::GetInstance().CheckTargetPermission4DiffBundle(cmd->want_, cmd->callerInfo_,
+            cmd->accountInfo_, START_PERMISSION, true);
+    }
 }
 
 int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCmd> cmd)
@@ -907,9 +927,7 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
         HILOGE("check deviceId failed");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
-
-    int32_t ret = DistributedSchedService::GetInstance().CheckTargetPermission(cmd->want_, cmd->callerInfo_,
-        cmd->accountInfo_, START_PERMISSION, true);
+    int32_t ret = CheckStartPermission(cmd);
     if (ret != ERR_OK) {
         HILOGE("ExecuteContinueData CheckTargetPermission failed!");
         return ret;
@@ -962,9 +980,9 @@ void DSchedContinue::DurationDumperBeforeStartAbility(std::shared_ptr<DSchedCont
     if (subServiceType_ == CONTINUE_PULL && cmd != nullptr) {
         std::string timeInfo = cmd->want_.GetStringParam(DMSDURATION_SAVETIME);
         DmsContinueTime::GetInstance().ReadDurationInfo(timeInfo.c_str());
-        DmsContinueTime::GetInstance().SetSrcBundleName(cmd->want_.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetSrcBundleName(continueInfo_.sourceBundleName_);
         DmsContinueTime::GetInstance().SetSrcAbilityName(cmd->want_.GetElement().GetAbilityName());
-        DmsContinueTime::GetInstance().SetDstBundleName(cmd->want_.GetElement().GetBundleName());
+        DmsContinueTime::GetInstance().SetDstBundleName(continueInfo_.sinkBundleName_);
         DmsContinueTime::GetInstance().SetDstAbilityName(cmd->want_.GetElement().GetAbilityName());
     }
     DmsContinueTime::GetInstance().SetDurationBegin(CONTINUE_START_ABILITY_TIME, GetTickCount());
@@ -1311,6 +1329,7 @@ void DSchedContinue::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffe
                 HILOGE("Unmarshal data cmd failed, ret: %{public}d", ret);
                 return;
             }
+            dataCmd->want_.SetBundle(dataCmd->dstBundleName_);
             OnContinueDataCmd(dataCmd);
             break;
         }
@@ -1338,7 +1357,6 @@ void DSchedContinue::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffe
             HILOGW("Invalid command.");
             break;
     }
-    return;
 }
 
 void DSchedContinue::UpdateState(DSchedContinueStateType stateType)

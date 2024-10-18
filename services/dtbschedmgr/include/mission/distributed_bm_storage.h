@@ -30,6 +30,7 @@
 #include "distributed_sched_continuation.h"
 #include "mission/distributed_bundle_info.h"
 #include "kvstore_death_recipient.h"
+#include "os_account_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -45,6 +46,7 @@ struct ContinueEventInfo {
     std::string bundleName;
     std::string moduleName;
     std::string abilityName;
+    std::string developerId;
 };
 
 class DmsBmStorage {
@@ -59,6 +61,8 @@ public:
         DmsBundleInfo &info);
     bool GetDistributedBundleName(const std::string &networkId,  const uint16_t& bundleNameId,
         std::string& bundleName);
+    bool GetDistributedBundleInfo(const std::string &networkId, const uint16_t &bundleNameId,
+        DmsBundleInfo &distributeBundleInfo);
     bool GetBundleNameId(const std::string& bundleName, uint16_t &bundleNameId);
     std::string GetContinueType(const std::string &networkId, std::string &bundleName, uint8_t continueTypeId);
     std::string GetAbilityName(const std::string &networkId, std::string &bundleName, std::string &continueType);
@@ -67,6 +71,9 @@ public:
         const std::string& continueType, ContinueEventInfo &continueEventInfo);
     void UpdateDistributedData();
     int32_t CloudSync();
+    void FindProvishionInfo(OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> bundleMgr,
+        AppExecFwk::AppProvisionInfo appProvisionInfo, std::vector<AccountSA::OsAccountInfo> accounts,
+        int32_t result, const std::string& bundleName);
     void DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos);
     bool UpdatePublicRecords(const std::string &localUdid);
 
@@ -80,6 +87,7 @@ private:
     void AddBundleNameId(const uint16_t &bundleNameId, const std::string &bundleName);
     void DelBundleNameId(const std::string &bundleName);
     DmsBundleInfo ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo,
+        AppExecFwk::AppProvisionInfo appProvisionInfo,
         bool isPackageChange = false);
     bool InnerSaveStorageDistributeInfo(const DmsBundleInfo &distributedBundleInfo, const std::string &localUdid);
     std::map<std::string, DmsBundleInfo> GetAllOldDistributionBundleInfo(

@@ -35,6 +35,7 @@ const std::string JSON_KEY_APP_ID = "appId";
 const std::string JSON_KEY_ENABLED = "enabled";
 const std::string JSON_KEY_BUNDLE_NAME_ID = "bundleNameId";
 const std::string JSON_KEY_UPDATE_TIME = "updateTime";
+const std::string JSON_KEY_DEVELOPER_ID = "developerId";
 const std::string JSON_KEY_DMS_ABILITY_INFOS = "dmsAbilityInfos";
 const std::string JSON_KEY_DMS_ABILITY_NAME = "abilityName";
 const std::string JSON_KEY_DMS_CONTINUETYPE = "continueType";
@@ -224,6 +225,7 @@ bool DmsBundleInfo::ReadFromParcel(Parcel &parcel)
     enabled = parcel.ReadBool();
     bundleNameId = parcel.ReadUint16();
     updateTime = parcel.ReadInt64();
+    developerId = Str16ToStr8(parcel.ReadString16());
     uint32_t abilityInfosSize;
     READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Uint32, parcel, abilityInfosSize);
     CONTAINER_SECURITY_VERIFY(parcel, abilityInfosSize, &dmsAbilityInfos);
@@ -291,6 +293,7 @@ std::string DmsBundleInfo::ToString() const
     jsonObject[JSON_KEY_ENABLED] = enabled;
     jsonObject[JSON_KEY_BUNDLE_NAME_ID] = bundleNameId;
     jsonObject[JSON_KEY_UPDATE_TIME] = updateTime;
+    jsonObject[JSON_KEY_DEVELOPER_ID] = developerId;
     jsonObject[JSON_KEY_DMS_ABILITY_INFOS] = dmsAbilityInfos;
     jsonObject[JSON_KEY_DMS_USERID] = userIdArr;
     return jsonObject.dump();
@@ -327,6 +330,8 @@ bool DmsBundleInfo::FromJsonString(const std::string &jsonString)
         JsonType::NUMBER, false, parseResult, ArrayType::NOT_ARRAY);
     GetValueIfFindKey<int64_t>(jsonObject, jsonObjectEnd, JSON_KEY_UPDATE_TIME, updateTime,
         JsonType::NUMBER, false, parseResult, ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::string>(jsonObject, jsonObjectEnd, JSON_KEY_DEVELOPER_ID, developerId,
+        JsonType::STRING, false, parseResult, ArrayType::NOT_ARRAY);
     GetValueIfFindKey<std::vector<DmsAbilityInfo>>(jsonObject, jsonObjectEnd, JSON_KEY_DMS_ABILITY_INFOS,
         dmsAbilityInfos, JsonType::ARRAY, false, parseResult, ArrayType::OBJECT);
     GetValueIfFindKey<std::vector<uint8_t>>(jsonObject, jsonObjectEnd, JSON_KEY_DMS_USERID, userIdArr,
