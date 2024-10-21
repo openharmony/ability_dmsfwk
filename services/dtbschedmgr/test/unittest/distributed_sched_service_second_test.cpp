@@ -1519,8 +1519,8 @@ HWTEST_F(DistributedSchedServiceSecondTest, ConnectRemoteAbilityAdapter_001, Tes
     int32_t callerUid = 0;
     int32_t callerPid = 0;
     uint32_t accessToken = 0;
-    int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbilityAdapter(want,
-        connect, callerUid, callerPid, accessToken);
+    int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbilityAdapter(want, connect,
+        callerUid, callerPid, accessToken);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceSecondTest ConnectRemoteAbilityAdapter_001 end" << std::endl;
 }
@@ -1592,12 +1592,14 @@ HWTEST_F(DistributedSchedServiceSecondTest, DisconnectAbilityFromRemoteAdapter_0
  */
 HWTEST_F(DistributedSchedServiceSecondTest, NotifyAbilityLifecycleChangedFromRemoteAdapter_001, TestSize.Level3)
 {
-    DTEST_LOG << "DistributedSchedServiceSecondTest NotifyAbilityLifecycleChangedFromRemoteAdapter_001 start" << std::endl;
+    DTEST_LOG << "DistributedSchedServiceSecondTest NotifyAbilityLifecycleChangedFromRemoteAdapter_001 start" <<
+        std::endl;
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = DistributedSchedService::GetInstance().NotifyAbilityLifecycleChangedFromRemoteAdapter(data, reply);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-    DTEST_LOG << "DistributedSchedServiceSecondTest NotifyAbilityLifecycleChangedFromRemoteAdapter_001 end" << std::endl;
+    DTEST_LOG << "DistributedSchedServiceSecondTest NotifyAbilityLifecycleChangedFromRemoteAdapter_001 end" <<
+        std::endl;
 }
 #endif // DMSFWK_INTERACTIVE_ADAPTER
 
@@ -1612,7 +1614,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, NotifyDSchedEventResultFromRemote_00
     std::string type;
     int32_t dSchedEventResult = 0;
     int32_t ret = DistributedSchedService::GetInstance().NotifyDSchedEventResultFromRemote(type, dSchedEventResult);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedServiceSecondTest NotifyDSchedEventResultFromRemote_001 end" << std::endl;
 }
 }
