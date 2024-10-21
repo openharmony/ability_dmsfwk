@@ -92,6 +92,19 @@ public:
         const OHOS::AAFwk::Want& want, int32_t callerUid, uint32_t accessToken, int32_t extensionType) override;
     int32_t StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& want,
         const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t extensionType) override;
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    bool CheckRemoteOsType(const std::string& netwokId) override;
+    int32_t StartRemoteAbilityAdapter(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t requestCode,
+        uint32_t accessToken);
+    int32_t ConnectRemoteAbilityAdapter(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
+        int32_t callerUid, int32_t callerPid, uint32_t accessToken);
+    int32_t StartAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
+    int32_t StopAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
+    int32_t ConnectAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
+    int32_t DisconnectAbilityFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
+    int32_t NotifyAbilityLifecycleChangedFromRemoteAdapter(MessageParcel& data, MessageParcel& reply) override;
+#endif
+
 private:
     bool expectedTrue_ = false;
 };
