@@ -338,6 +338,10 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
         return INVALID_PARAMETERS_ERR;
     }
+    if (!IsBundleContinuable(localBundleInfo)) {
+        HILOGE("Bundle %{public}s is not continuable", finalBundleName.c_str());
+        return INVALID_PARAMETERS_ERR;
+    }
 
     int32_t ret = VerifyBroadcastSource(senderNetworkId, bundleName, finalBundleName, continueType, state);
     if (ret != ERR_OK) {
@@ -357,6 +361,16 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     }
     HILOGI("DealOnBroadcastBusiness end");
     return ERR_OK;
+}
+
+bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo)
+{
+    for (auto abilityInfo : bundleInfo.abilityInfos) {
+        if (abilityInfo.continuable) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
