@@ -174,12 +174,13 @@ ohos_unittest("distributedschedservicetest") {
     public_deps = dsched_public_deps
   }
 
-  if (!dmsfwk_softbus_adapter_common) {
-    defines = [ "DMSFWK_INTERACTIVE_ADAPTER" ]
+  defines = []
+  if (dmsfwk_report_memmgr || dmsfwk_report_memmgr_plugins) {
+    defines = [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
   }
 
-  if (dmsfwk_report_memmgr || dmsfwk_report_memmgr_plugins) {
-    defines += [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
+  if (!dmsfwk_softbus_adapter_common) {
+    defines += [ "DMSFWK_INTERACTIVE_ADAPTER" ]
   }
 
   part_name = "dmsfwk"
