@@ -1502,7 +1502,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, StartRemoteAbilityAdapter_001, TestS
     uint32_t accessToken = 0;
     int32_t ret = DistributedSchedService::GetInstance().StartRemoteAbilityAdapter(want,
         callerUid, requestCode, accessToken);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, NOT_FIND_SERVICE_REGISTRY);
     DTEST_LOG << "DistributedSchedServiceSecondTest StartRemoteAbilityAdapter_001 end" << std::endl;
 }
 
@@ -1521,7 +1521,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, ConnectRemoteAbilityAdapter_001, Tes
     uint32_t accessToken = 0;
     int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbilityAdapter(want, connect,
         callerUid, callerPid, accessToken);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, NOT_FIND_SERVICE_REGISTRY);
     DTEST_LOG << "DistributedSchedServiceSecondTest ConnectRemoteAbilityAdapter_001 end" << std::endl;
 }
 
@@ -1536,7 +1536,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, StartAbilityFromRemoteAdapter_001, T
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = DistributedSchedService::GetInstance().StartAbilityFromRemoteAdapter(data, reply);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, NOT_FIND_SERVICE_REGISTRY);
     DTEST_LOG << "DistributedSchedServiceSecondTest StartAbilityFromRemoteAdapter_001 end" << std::endl;
 }
 
@@ -1551,7 +1551,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, StopAbilityFromRemoteAdapter_001, Te
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = DistributedSchedService::GetInstance().StopAbilityFromRemoteAdapter(data, reply);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, NOT_FIND_SERVICE_REGISTRY);
     DTEST_LOG << "DistributedSchedServiceSecondTest StopAbilityFromRemoteAdapter_001 end" << std::endl;
 }
 
@@ -1566,7 +1566,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, ConnectAbilityFromRemoteAdapter_001,
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = DistributedSchedService::GetInstance().ConnectAbilityFromRemoteAdapter(data, reply);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, NOT_FIND_SERVICE_REGISTRY);
     DTEST_LOG << "DistributedSchedServiceSecondTest ConnectAbilityFromRemoteAdapter_001 end" << std::endl;
 }
 
@@ -1581,7 +1581,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, DisconnectAbilityFromRemoteAdapter_0
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = DistributedSchedService::GetInstance().DisconnectAbilityFromRemoteAdapter(data, reply);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, NOT_FIND_SERVICE_REGISTRY);
     DTEST_LOG << "DistributedSchedServiceSecondTest DisconnectAbilityFromRemoteAdapter_001 end" << std::endl;
 }
 
@@ -1597,7 +1597,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, NotifyAbilityLifecycleChangedFromRem
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = DistributedSchedService::GetInstance().NotifyAbilityLifecycleChangedFromRemoteAdapter(data, reply);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, NOT_FIND_SERVICE_REGISTRY);
     DTEST_LOG << "DistributedSchedServiceSecondTest NotifyAbilityLifecycleChangedFromRemoteAdapter_001 end" <<
         std::endl;
 }
