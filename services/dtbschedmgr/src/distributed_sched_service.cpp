@@ -114,6 +114,7 @@ const std::string DMS_CONTINUE_SESSION_ID = "ohos.dms.continueSessionId";
 const std::string DMS_PERSISTENT_ID = "ohos.dms.persistentId";
 const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getprocpid());
 const std::string BOOT_COMPLETED_EVENT = "usual.event.BOOT_COMPLETED";
+const std::string COMMON_EVENT_WIFI_SEMI_STATE = "usual.event.wifi.SEMI_STATE";
 constexpr int32_t DEFAULT_DMS_MISSION_ID = -1;
 constexpr int32_t DEFAULT_DMS_CONNECT_TOKEN = -1;
 constexpr int32_t BIND_CONNECT_RETRY_TIMES = 3;
@@ -139,6 +140,7 @@ constexpr int32_t DMSDURATION_SRCTODSTRPCTIME = 5;
 constexpr int32_t DMSDURATION_STARTABILITY = 6;
 constexpr int32_t HID_HAP = 10000; /* first hap user */
 constexpr int32_t WINDOW_MANAGER_SERVICE_ID = 4606;
+constexpr int32_t SEMI_WIFI_ID = 1010;
 static const std::string CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
 }
 
@@ -302,6 +304,7 @@ void DistributedSchedService::InitMissionManager()
     DistributedSchedMissionManager::GetInstance().InitDataStorage();
     InitCommonEventListener();
     InitWifiStateListener();
+    InitWifiSemiStateListener();
     DMSContinueSendMgr::GetInstance().Init();
     DMSContinueRecvMgr::GetInstance().Init();
 #endif
@@ -373,9 +376,21 @@ void DistributedSchedService::InitWifiStateListener()
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     auto wifiStateListener = std::make_shared<WifiStateListener>(subscribeInfo);
     wifiStateListener->InitWifiState();
-    bool ret = EventFwk::CommonEventManager::SubscribeCommonEvent(wifiStateListener);
-    if (!ret) {
+    if (!EventFwk::CommonEventManager::SubscribeCommonEvent(wifiStateListener)) {
         HILOGE("SubscribeCommonEvent wifiStateListener failed!");
+    }
+}
+
+void DistributedSchedService::InitWifiSemiStateListener()
+{
+    HILOGI("InitWifiSemiStateListener called");
+    EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(COMMON_EVENT_WIFI_SEMI_STATE);
+    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    subscribeInfo.SetPublisherUid(SEMI_WIFI_ID);
+    auto wifiStateListener = std::make_shared<WifiStateListener>(subscribeInfo);
+    if (!EventFwk::CommonEventManager::SubscribeCommonEvent(wifiStateListener)) {
+        HILOGE("SubscribeCommonEvent wifiSemiStateListener failed!");
     }
 }
 
