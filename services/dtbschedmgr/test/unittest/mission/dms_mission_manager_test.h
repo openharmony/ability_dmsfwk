@@ -22,6 +22,7 @@
 #include "remote_mission_listener_stub.h"
 
 #include "distributed_sched_interface.h"
+#include "mock_distributed_sched_adapter.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -40,6 +41,7 @@ protected:
     static bool isCaseDone_;
     static std::mutex caseDoneLock_;
     static std::condition_variable caseDoneCondition_;
+    static inline std::shared_ptr<MockAdapter> mockDmsAdapter = nullptr;
 
     class DeviceInitCallBack : public OHOS::DistributedHardware::DmInitCallback {
         void OnRemoteDied() override;

@@ -13,23 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef DSCHED_CONTINUE_TEST_H
-#define DSCHED_CONTINUE_TEST_H
+#ifndef MOCK_DTBSCHEDMGR_DEVICE_INFO_H
+#define MOCK_DTBSCHEDMGR_DEVICE_INFO_H
 
-#include "gtest/gtest.h"
-#include "mock_dtbschedmgr_device_info.h"
+#include <gmock/gmock.h>
+#include <string>
+
+#include "dtbschedmgr_device_info_storage.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
-
-class DSchedContinueTest : public testing::Test {
+class DmsMgrDeviceInfoStore {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
-    static inline std::shared_ptr<MockDmsMgrDeviceInfoStore> dmsStoreMock = nullptr;
+    virtual ~DmsMgrDeviceInfoStore() = default;
+public:
+    virtual bool GetLocalDeviceId(std::string& networkId) = 0;
+public:
+    static inline std::shared_ptr<DmsMgrDeviceInfoStore> dmsStore = nullptr;
 };
-} // namespace DistributedSchedule
-} // namespace OHOS
-#endif // DSCHED_CONTINUE_TEST_H
+
+class MockDmsMgrDeviceInfoStore : public DmsMgrDeviceInfoStore {
+public:
+    MOCK_METHOD(bool, GetLocalDeviceId, (std::string& networkId));
+};
+}
+}
+#endif //MOCK_DTBSCHEDMGR_DEVICE_INFO_H

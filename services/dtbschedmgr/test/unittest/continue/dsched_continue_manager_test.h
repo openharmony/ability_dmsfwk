@@ -20,6 +20,7 @@
 
 #include "device_manager.h"
 #include "dsched_continue_manager.h"
+#include "mock_dtbschedmgr_device_info.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -32,6 +33,7 @@ public:
     void TearDown();
     std::shared_ptr<DSchedContinue> CreateObject();
     sptr<IRemoteObject> GetDSchedService() const;
+    static inline std::shared_ptr<MockDmsMgrDeviceInfoStore> dmsStoreMock = nullptr;
 protected:
     class DeviceInitCallBack : public OHOS::DistributedHardware::DmInitCallback {
         void OnRemoteDied() override;

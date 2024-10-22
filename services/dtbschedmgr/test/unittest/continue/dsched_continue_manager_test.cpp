@@ -45,12 +45,16 @@ void DSchedContinueManagerTest::SetUpTestCase()
     const std::string pkgName = "DBinderBus_PermissionTest" + std::to_string(getprocpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
+    dmsStoreMock = std::make_shared<MockDmsMgrDeviceInfoStore>();
+    DmsMgrDeviceInfoStore::dmsStore = dmsStoreMock;
     DTEST_LOG << "DSchedContinueManagerTest::SetUpTestCase" << std::endl;
 }
 
 void DSchedContinueManagerTest::TearDownTestCase()
 {
     (void)remove(BASEDIR.c_str());
+    DmsMgrDeviceInfoStore::dmsStore = nullptr;
+    dmsStoreMock = nullptr;
     DTEST_LOG << "DSchedContinueManagerTest::TearDownTestCase" << std::endl;
 }
 
@@ -113,6 +117,7 @@ HWTEST_F(DSchedContinueManagerTest, ContinueMission_001, TestSize.Level3)
     DTEST_LOG << "DSchedContinueManagerTest ContinueMission_001 begin" << std::endl;
     auto callback = GetDSchedService();
     OHOS::AAFwk::WantParams wantParams;
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     int32_t ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, MISSION_ID,
         callback, wantParams);
     EXPECT_EQ(ret, OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET);
@@ -133,10 +138,26 @@ HWTEST_F(DSchedContinueManagerTest, ContinueMission_002, TestSize.Level3)
     DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, "", MISSION_ID, callback, wantParams);
     DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, MISSION_ID,
         nullptr, wantParams);
-
-    int32_t ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, MISSION_ID,
+    
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true)).WillOnce(Return(true));
+    DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, MISSION_ID,
         callback, wantParams);
-    EXPECT_EQ(ret, OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET);
+
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(false));
+    DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, MISSION_ID,
+        callback, wantParams);
+
+    int32_t ret = DSchedContinueManager::GetInstance().ContinueMission("", REMOTE_DEVICEID, MISSION_ID,
+        callback, wantParams);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, "", MISSION_ID,
+        nullptr, wantParams);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, MISSION_ID,
+        nullptr, wantParams);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueManagerTest ContinueMission_002 end" << std::endl;
 }
 
@@ -166,20 +187,21 @@ HWTEST_F(DSchedContinueManagerTest, ContinueMission_003, TestSize.Level3)
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     auto callback = GetDSchedService();
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     ret = DSchedContinueManager::GetInstance().ContinueMission(
         DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
         callback, wantParams);
     EXPECT_EQ(ret, OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET);
 
-    std::string locDevId;
-    EXPECT_EQ(true, DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(locDevId));
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(DoAll(SetArgReferee<0>(LOCAL_DEVICEID), Return(true)));
     ret = DSchedContinueManager::GetInstance().ContinueMission(
-        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, locDevId, BUNDLE_NAME, CONTINUETYPE),
+        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
         callback, wantParams);
     EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
 
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(DoAll(SetArgReferee<0>(REMOTE_DEVICEID), Return(true)));
     ret = DSchedContinueManager::GetInstance().ContinueMission(
-        DSchedContinueInfo(locDevId, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
+        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
         callback, wantParams);
     EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueManagerTest ContinueMission_003 end" << std::endl;
@@ -205,6 +227,7 @@ HWTEST_F(DSchedContinueManagerTest, HandleContinueMission_001, TestSize.Level3)
         DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
         nullptr, wantParams);
 
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     DSchedContinueManager::GetInstance().HandleContinueMission(
         DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
         callback, wantParams);
@@ -255,6 +278,7 @@ HWTEST_F(DSchedContinueManagerTest, CheckContinuationLimit_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinueManagerTest CheckContinuationLimit_001 begin" << std::endl;
     int32_t direction = 0;
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     int32_t ret = DSchedContinueManager::GetInstance().CheckContinuationLimit(LOCAL_DEVICEID, REMOTE_DEVICEID,
         direction);
     EXPECT_EQ(ret, OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET);
@@ -297,6 +321,11 @@ HWTEST_F(DSchedContinueManagerTest, GetContinueInfo_002, TestSize.Level3)
     DSchedContinueManager::GetInstance().continues_[info] = dContinue;
     int32_t ret = DSchedContinueManager::GetInstance().GetContinueInfo(localDeviceId, remoteDeviceId);
     EXPECT_EQ(ret, ERR_OK);
+
+    DSchedContinueManager::GetInstance().continues_.clear();
+    DSchedContinueManager::GetInstance().continues_[info] = nullptr;
+    ret = DSchedContinueManager::GetInstance().GetContinueInfo(localDeviceId, remoteDeviceId);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueManagerTest GetContinueInfo_002 end" << std::endl;
 }
 
@@ -384,6 +413,11 @@ HWTEST_F(DSchedContinueManagerTest, HandleContinueEnd_001, TestSize.Level3)
 
     std::shared_ptr<DSchedContinue> ptr = nullptr;
     DSchedContinueManager::GetInstance().continues_[info] = ptr;
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(false));
+    DSchedContinueManager::GetInstance().HandleContinueEnd(info);
+
+    DSchedContinueManager::GetInstance().continues_[info] = ptr;
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     DSchedContinueManager::GetInstance().HandleContinueEnd(info);
     EXPECT_EQ(DSchedContinueManager::GetInstance().cntSource_, 0);
     DTEST_LOG << "DSchedContinueManagerTest HandleContinueEnd_001 end" << std::endl;
@@ -400,6 +434,7 @@ HWTEST_F(DSchedContinueManagerTest, GetDSchedContinueByWant_001, TestSize.Level3
     OHOS::AAFwk::Want want;
     int32_t missionId = 0;
     DSchedContinueManager::GetInstance().continues_.clear();
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     auto ret = DSchedContinueManager::GetInstance().GetDSchedContinueByWant(want, missionId);
     EXPECT_EQ(ret, nullptr);
     DTEST_LOG << "DSchedContinueManagerTest GetDSchedContinueByWant_001 end" << std::endl;
@@ -420,6 +455,151 @@ HWTEST_F(DSchedContinueManagerTest, NotifyTerminateContinuation_001, TestSize.Le
     DSchedContinueManager::GetInstance().NotifyTerminateContinuation(missionId);
     EXPECT_EQ(DSchedContinueManager::GetInstance().continues_.empty(), true);
     DTEST_LOG << "DSchedContinueManagerTest NotifyTerminateContinuation_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetFirstBundleName_001
+ * @tc.desc: test GetFirstBundleName func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, GetFirstBundleName_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest GetFirstBundleName_001 begin" << std::endl;
+    DSchedContinueInfo info;
+    std::string firstBundleName;
+    std::string bundleName;
+    std::string deviceId;
+    bool ret = DSchedContinueManager::GetInstance().GetFirstBundleName(info, firstBundleName, bundleName, deviceId);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DSchedContinueManagerTest GetFirstBundleName_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinueMission_004
+ * @tc.desc: test ContinueMission func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, ContinueMission_004, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest ContinueMission_004 begin" << std::endl;
+    auto callback = GetDSchedService();
+    OHOS::AAFwk::WantParams wantParams;
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(false));
+    int32_t ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, MISSION_ID,
+        callback, wantParams);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(DoAll(SetArgReferee<0>(LOCAL_DEVICEID), Return(true)));
+    ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, MISSION_ID,
+        callback, wantParams);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
+
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(DoAll(SetArgReferee<0>(REMOTE_DEVICEID), Return(true)));
+    ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, MISSION_ID,
+        callback, wantParams);
+    EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedContinueManagerTest ContinueMission_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinueMission_005
+ * @tc.desc: test ContinueMission func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, ContinueMission_005, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest ContinueMission_005 begin" << std::endl;
+    auto callback = GetDSchedService();
+    OHOS::AAFwk::WantParams wantParams;
+    int32_t timeout = 0;
+    DSchedContinueManager::GetInstance().WaitAllConnectDecision(CONTINUE_SOURCE,
+        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE), timeout);
+
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(false));
+    int32_t ret = DSchedContinueManager::GetInstance().ContinueMission(
+        DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
+        callback, wantParams);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedContinueManagerTest ContinueMission_005 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetDSchedContinueByWant_002
+ * @tc.desc: test GetDSchedContinueByWant func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, GetDSchedContinueByWant_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest GetDSchedContinueByWant_002 begin" << std::endl;
+    OHOS::AAFwk::Want want;
+    int32_t missionId = 0;
+    int32_t callerUid = 0;
+    int32_t status = 0;
+    uint32_t accessToken = 0;
+    DSchedContinueInfo info(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE);
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
+    DSchedContinueManager::GetInstance().HandleStartContinuation(want, missionId, callerUid, status, accessToken);
+
+    DSchedContinueManager::GetInstance().continues_.clear();
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(false));
+    auto ret = DSchedContinueManager::GetInstance().GetDSchedContinueByWant(want, missionId);
+    EXPECT_EQ(ret, nullptr);
+
+    std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    DSchedContinueManager::GetInstance().continues_[info] = nullptr;
+    DSchedContinueManager::GetInstance().continues_[info] = dContinue;
+    
+    DSchedContinueManager::GetInstance().NotifyTerminateContinuation(missionId);
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
+    ret = DSchedContinueManager::GetInstance().GetDSchedContinueByWant(want, missionId);
+    EXPECT_NE(ret, nullptr);
+    DTEST_LOG << "DSchedContinueManagerTest GetDSchedContinueByWant_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: CheckContinuationLimit_002
+ * @tc.desc: test CheckContinuationLimit func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, CheckContinuationLimit_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest CheckContinuationLimit_002 begin" << std::endl;
+    int32_t direction = 0;
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(false));
+    int32_t ret = DSchedContinueManager::GetInstance().CheckContinuationLimit(LOCAL_DEVICEID, REMOTE_DEVICEID,
+        direction);
+    EXPECT_EQ(ret, GET_LOCAL_DEVICE_ERR);
+
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(DoAll(SetArgReferee<0>(LOCAL_DEVICEID), Return(true)));
+    DSchedContinueManager::GetInstance().cntSink_.store(MAX_CONCURRENT_SINK);
+    ret = DSchedContinueManager::GetInstance().CheckContinuationLimit(LOCAL_DEVICEID, REMOTE_DEVICEID,
+        direction);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(DoAll(SetArgReferee<0>(REMOTE_DEVICEID), Return(true)));
+    DSchedContinueManager::GetInstance().cntSink_.store(0);
+    ret = DSchedContinueManager::GetInstance().CheckContinuationLimit(LOCAL_DEVICEID, REMOTE_DEVICEID,
+        direction);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedContinueManagerTest CheckContinuationLimit_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyContinueDataRecv_001
+ * @tc.desc: test NotifyContinueDataRecv func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, NotifyContinueDataRecv_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest NotifyContinueDataRecv_001 begin" << std::endl;
+    int32_t sessionId = 0;
+    int32_t command = 0;
+    std::string jsonStr = "jsonStr";
+    std::shared_ptr<DSchedDataBuffer> dataBuffer = nullptr;
+    DSchedContinueManager::GetInstance().continues_.clear();
+    DSchedContinueManager::GetInstance().NotifyContinueDataRecv(sessionId, command, jsonStr, dataBuffer);
+    EXPECT_EQ(DSchedContinueManager::GetInstance().continues_.empty(), true);
+    DTEST_LOG << "DSchedContinueManagerTest NotifyContinueDataRecv_001 end" << std::endl;
 }
 }
 }

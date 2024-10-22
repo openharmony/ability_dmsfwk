@@ -36,6 +36,8 @@ namespace {
 void DSchedContinueTest::SetUpTestCase()
 {
     mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
+    dmsStoreMock = std::make_shared<MockDmsMgrDeviceInfoStore>();
+    DmsMgrDeviceInfoStore::dmsStore = dmsStoreMock;
     DTEST_LOG << "DSchedContinueTest::SetUpTestCase" << std::endl;
     DistributedSchedService::GetInstance().Init();
 }
@@ -43,6 +45,8 @@ void DSchedContinueTest::SetUpTestCase()
 void DSchedContinueTest::TearDownTestCase()
 {
     (void)remove(BASEDIR.c_str());
+    DmsMgrDeviceInfoStore::dmsStore = nullptr;
+    dmsStoreMock = nullptr;
     DTEST_LOG << "DSchedContinueTest::TearDownTestCase" << std::endl;
 }
 
@@ -587,6 +591,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_1, TestSize.Level0)
 
     auto cmd = std::make_shared<DSchedContinueDataCmd>();
 
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     int32_t ret = conti->ExecuteContinueData(cmd);
     EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
 
@@ -782,6 +787,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0024_1, TestSize.Level0)
     conti->Init();
 
     std::string localDeviceId;
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     bool ret = conti->GetLocalDeviceId(localDeviceId);
     EXPECT_EQ(ret, true);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0024_1 end ret:" << ret << std::endl;
