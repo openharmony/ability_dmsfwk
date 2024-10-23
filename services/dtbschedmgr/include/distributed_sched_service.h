@@ -101,6 +101,7 @@ public:
      * @param startReason, The reason why SA was pulled up.
      */
     void HandleBootStart(const SystemAbilityOnDemandReason &startReason);
+    bool DoStart();
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
     void DeviceOnlineNotify(const std::string& deviceId);
     void DeviceOfflineNotify(const std::string& deviceId);
