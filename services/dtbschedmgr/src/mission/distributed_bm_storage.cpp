@@ -256,16 +256,16 @@ bool DmsBmStorage::GetStorageDistributeInfo(const std::string &networkId,
     int64_t begin = GetTickCount();
     kvStorePtr_->Get(key, networkId,
         [&value, &resultStatusSignal](Status innerStatus, Value innerValue) {
-            HILOGI("The get, result = %{public}d", innerStatus);
+            HILOGD("The get, result = %{public}d", innerStatus);
             if (innerStatus == Status::SUCCESS) {
                 value = innerValue;
             }
             resultStatusSignal.set_value(innerStatus);
         });
     Status status = GetResultSatus(resultStatusSignal);
-    HILOGI("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
+    HILOGD("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
     if (status == Status::SUCCESS) {
-        HILOGI("Get result = ok");
+        HILOGD("Get result = ok");
         info.FromJsonString(value.ToString());
         return true;
     }
@@ -276,7 +276,7 @@ bool DmsBmStorage::GetStorageDistributeInfo(const std::string &networkId,
 bool DmsBmStorage::DealGetBundleName(const std::string &networkId, const uint16_t& bundleNameId,
     std::string &bundleName)
 {
-    HILOGI("networkId: %{public}s  bundleNameId: %{public}d", GetAnonymStr(networkId).c_str(), bundleNameId);
+    HILOGD("networkId: %{public}s  bundleNameId: %{public}d", GetAnonymStr(networkId).c_str(), bundleNameId);
     if (!CheckKvStore()) {
         HILOGE("kvStore is nullptr");
         return false;
@@ -365,7 +365,7 @@ bool DmsBmStorage::DelReduData(const std::string &networkId, const std::vector<D
 
 bool DmsBmStorage::CheckSyncData(const std::string &networkId)
 {
-    HILOGI("called");
+    HILOGD("called");
     std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(networkId);
     if (uuid == "") {
         HILOGE("can not get udid or uuid by networkId");
@@ -388,7 +388,7 @@ bool DmsBmStorage::CheckSyncData(const std::string &networkId)
 bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, const uint16_t& bundleNameId,
     std::string &bundleName)
 {
-    HILOGI("networkId: %{public}s  bundleNameId: %{public}d", GetAnonymStr(networkId).c_str(), bundleNameId);
+    HILOGD("networkId: %{public}s  bundleNameId: %{public}d", GetAnonymStr(networkId).c_str(), bundleNameId);
     if (!CheckSyncData(networkId)) {
         HILOGE("CheckSyncData fail");
         return false;
@@ -398,14 +398,14 @@ bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, const 
         HILOGE("get bundleName failed: %{public}d", ret);
         return false;
     }
-    HILOGI("end.");
+    HILOGD("end.");
     return true;
 }
 
 bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
     const uint16_t &bundleNameId, DmsBundleInfo &distributeBundleInfo)
 {
-    HILOGI("networkId: %{public}s  bundleNameId: %{public}d", GetAnonymStr(networkId).c_str(), bundleNameId);
+    HILOGD("networkId: %{public}s  bundleNameId: %{public}d", GetAnonymStr(networkId).c_str(), bundleNameId);
     if (!CheckKvStore()) {
         HILOGE("kvStore is nullptr");
         return false;
@@ -449,7 +449,7 @@ bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
         HILOGE("get distributedBundleInfo failed.");
         return false;
     }
-    HILOGI("end.");
+    HILOGD("end.");
     return true;
 }
 
@@ -466,20 +466,20 @@ Status DmsBmStorage::GetResultSatus(std::promise<OHOS::DistributedKv::Status> &r
 void DmsBmStorage::GetEntries(const std::string &networkId, const Key &allEntryKeyPrefix,
     std::promise<OHOS::DistributedKv::Status> &resultStatusSignal, std::vector<Entry> &allEntries)
 {
-    HILOGI("called.");
+    HILOGD("called.");
     if (kvStorePtr_ == nullptr) {
         HILOGE("kvstore is null");
         return;
     }
     kvStorePtr_->GetEntries(allEntryKeyPrefix, networkId,
         [&resultStatusSignal, &allEntries](Status innerStatus, std::vector<Entry> innerAllEntries) {
-            HILOGI("GetEntries, result = %{public}d", innerStatus);
+            HILOGD("GetEntries, result = %{public}d", innerStatus);
             if (innerStatus == Status::SUCCESS) {
                 std::copy(innerAllEntries.begin(), innerAllEntries.end(), std::back_inserter(allEntries));
             }
             resultStatusSignal.set_value(innerStatus);
         });
-    HILOGI("end.");
+    HILOGD("end.");
 }
 
 bool DmsBmStorage::GetBundleNameId(const std::string& bundleName, uint16_t &bundleNameId)
@@ -963,7 +963,7 @@ std::string FindContinueType(const DmsBundleInfo& distributedBundleInfo, uint8_t
 std::string DmsBmStorage::GetContinueType(const std::string &networkId, std::string &bundleName,
     uint8_t continueTypeId)
 {
-    HILOGI("called.");
+    HILOGD("called.");
     HILOGD("networkId: %{public}s,  bundleName: %{public}s,  continueTypeId: %{public}d",
         GetAnonymStr(networkId).c_str(), bundleName.c_str(), continueTypeId);
     if (!CheckKvStore()) {
@@ -981,7 +981,7 @@ std::string DmsBmStorage::GetContinueType(const std::string &networkId, std::str
     int64_t begin = GetTickCount();
     GetEntries(networkId, allEntryKeyPrefix, resultStatusSignal, allEntries);
     Status status = GetResultSatus(resultStatusSignal);
-    HILOGI("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
+    HILOGD("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
     if (status != Status::SUCCESS) {
         HILOGE("GetEntries error: %{public}d", status);
         return "";
@@ -1031,7 +1031,7 @@ std::string FindModuleName(const DmsBundleInfo& distributedBundleInfo, std::stri
 std::string DmsBmStorage::GetAbilityName(const std::string &networkId, std::string &bundleName,
     std::string &continueType)
 {
-    HILOGI("called.");
+    HILOGD("called.");
     HILOGD("networkId: %{public}s,  bundleName: %{public}s,  continueTypeId: %{public}s",
         GetAnonymStr(networkId).c_str(), bundleName.c_str(), continueType.c_str());
     if (!CheckKvStore()) {
@@ -1049,7 +1049,7 @@ std::string DmsBmStorage::GetAbilityName(const std::string &networkId, std::stri
     int64_t begin = GetTickCount();
     GetEntries(networkId, allEntryKeyPrefix, resultStatusSignal, allEntries);
     Status status = GetResultSatus(resultStatusSignal);
-    HILOGI("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
+    HILOGD("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
     if (status != Status::SUCCESS) {
         HILOGE("GetEntries error: %{public}d", status);
         return "";
@@ -1128,7 +1128,7 @@ bool DmsBmStorage::GetContinueTypeId(const std::string &bundleName, const std::s
 bool DmsBmStorage::GetContinueEventInfo(const std::string &networkId, const std::string &bundleName,
     const std::string& continueType, ContinueEventInfo &continueEventInfo)
 {
-    HILOGI("networkId: %{public}s,  bundleName: %{public}s",
+    HILOGD("networkId: %{public}s,  bundleName: %{public}s",
         GetAnonymStr(networkId).c_str(), bundleName.c_str());
     if (!CheckKvStore()) {
         HILOGE("kvStore is nullptr");
@@ -1145,7 +1145,7 @@ bool DmsBmStorage::GetContinueEventInfo(const std::string &networkId, const std:
     int64_t begin = GetTickCount();
     GetEntries(networkId, allEntryKeyPrefix, resultStatusSignal, allEntries);
     Status status = GetResultSatus(resultStatusSignal);
-    HILOGI("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
+    HILOGD("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
     if (status != Status::SUCCESS) {
         HILOGE("GetEntries error: %{public}d", status);
         return false;
@@ -1158,7 +1158,7 @@ bool DmsBmStorage::GetContinueEventInfo(const std::string &networkId, const std:
         }
         DmsBundleInfo distributedBundleInfo;
         if (distributedBundleInfo.FromJsonString(value) && distributedBundleInfo.bundleName == bundleName) {
-            HILOGI("value: %{public}s", value.c_str());
+            HILOGD("value: %{public}s", value.c_str());
             continueEventInfo.networkId = networkId;
             continueEventInfo.bundleName = bundleName;
             continueEventInfo.developerId = distributedBundleInfo.developerId;

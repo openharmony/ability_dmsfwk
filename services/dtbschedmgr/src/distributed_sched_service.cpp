@@ -644,7 +644,7 @@ void DistributedSchedService::OnDeviceOnlineEx(const OHOS::DistributedHardware::
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dllHandle_ == nullptr) {
         HILOGE("Open dms interactive adapter shared object failed");
-        return NOT_FIND_SERVICE_REGISTRY;
+        return;
     }
     if (dmsAdapetr_.OnDeviceOnlineEx == nullptr) {
         HILOGE("Dms interactive on device online extention handle is null.");
@@ -659,7 +659,7 @@ void DistributedSchedService::OnDeviceOfflineEx(const OHOS::DistributedHardware:
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dllHandle_ == nullptr) {
         HILOGE("Open dms interactive adapter shared object failed");
-        return NOT_FIND_SERVICE_REGISTRY;
+        return;
     }
     if (dmsAdapetr_.OnDeviceOfflineEx == nullptr) {
         HILOGE("Dms interactive on device online extention handle is null.");
@@ -674,7 +674,7 @@ void DistributedSchedService::OnDeviceInfoChangedEx(const OHOS::DistributedHardw
     std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
     if (dllHandle_ == nullptr) {
         HILOGE("Open dms interactive adapter shared object failed");
-        return NOT_FIND_SERVICE_REGISTRY;
+        return;
     }
     if (dmsAdapetr_.OnDeviceInfoChangedEx == nullptr) {
         HILOGE("Dms interactive on device online extention handle is null.");
