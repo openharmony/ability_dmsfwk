@@ -46,6 +46,7 @@ constexpr int32_t DBMS_RETRY_DELAY = 2000;
 const std::string TAG = "DMSContinueRecvMgr";
 const std::string DBMS_RETRY_TASK = "retry_on_boradcast_task";
 const std::u16string DESCRIPTOR = u"ohos.aafwk.RemoteOnListener";
+const std::string QUICK_START_CONFIGURATION = "_ContinueQuickStart";
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DMSContinueRecvMgr);
@@ -293,13 +294,14 @@ bool DMSContinueRecvMgr::GetFinalBundleName(DmsBundleInfo &distributedBundleInfo
 }
 
 void DMSContinueRecvMgr::FindContinueType(const DmsBundleInfo &distributedBundleInfo,
-    uint8_t &continueTypeId, std::string &continueType)
+    uint8_t &continueTypeId, std::string &continueType, DmsAbilityInfo &abilityInfo)
 {
     uint32_t pos = 0;
     for (auto dmsAbilityInfo: distributedBundleInfo.dmsAbilityInfos) {
         for (auto continueTypeElement: dmsAbilityInfo.continueType) {
             if (pos == continueTypeId) {
                 continueType = continueTypeElement;
+                abilityInfo = dmsAbilityInfo;
                 return;
             }
             ++pos;
@@ -327,7 +329,8 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     std::string finalBundleName;
     AppExecFwk::BundleInfo localBundleInfo;
     std::string continueType;
-    FindContinueType(distributedBundleInfo, continueTypeId, continueType);
+    DmsAbilityInfo abilityInfo;
+    FindContinueType(distributedBundleInfo, continueTypeId, continueType, abilityInfo);
     if (!GetFinalBundleName(distributedBundleInfo, finalBundleName, localBundleInfo, continueType)) {
         HILOGE("The app is not installed on the local device.");
         return INVALID_PARAMETERS_ERR;
@@ -338,7 +341,8 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
         return INVALID_PARAMETERS_ERR;
     }
-    if (!IsBundleContinuable(localBundleInfo)) {
+    bool isSameBundle = bundlename == finalBundleName ? true : false;
+    if (!IsBundleContinuable(localBundleInfo, abilityInfo.abilityName, continueType, isSameBundle)) {
         HILOGE("Bundle %{public}s is not continuable", finalBundleName.c_str());
         return INVALID_PARAMETERS_ERR;
     }
@@ -363,14 +367,40 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     return ERR_OK;
 }
 
-bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo)
+bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo, std::string &srcAbilityName,
+    std::string &srcContinueType, bool &isSameBundle)
 {
+    std::string formatSrcContinueType = ContinueTypeFormat(srcContinueType);
+    bool continuable = false;
+    bool isSameAbility = false;
     for (auto abilityInfo : bundleInfo.abilityInfos) {
-        if (abilityInfo.continuable) {
-            return true;
+        if (!abilityInfo.continuable) {
+            continue;
+        }
+        continuable = true;
+        isSameAbility = false;
+        for(const auto &continueTypeItem: abilityInfo.continueType){
+            if((srcContinueType == srcAbilityName || abilityInfo.name == continueTypeItem)
+                && abilityInfo.name == srcAbilityName){
+                isSameAbility = true;
+            }
+            if(continueTypeItem == srcContinueType || continueTypeItem == formatSrcContinueType){
+                return true;
+            }
         }
     }
-    return false;
+    return continuable && isSameBundle && isSameAbility;
+}
+
+std::string DMSContinueRecvMgr::ContinueTypeFormat(std::string &continueType)
+{
+    std::string suffix = QUICK_START_CONFIGURATION;
+    if (suffix.length() <= continueType.length() &&
+        continueType.rfind(suffix) == (continueType.length() - suffix.length())) {
+        return continueType.substr(0, continueType.rfind(QUICK_START_CONFIGURATION));
+    } else {
+        return continueType + QUICK_START_CONFIGURATION;
+    }
 }
 
 void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
