@@ -105,9 +105,9 @@ private:
     int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t retry = 0);
     void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const currentIconInfo& continueInfo, const int32_t state);
-    bool IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo, std::string &srcAbilityName,
-                             std::string &srcContinueType, bool &isSameBundle);
-    std::string ContinueTypeFormat(std::string &continueType);
+    bool IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo, const std::string &srcAbilityName,
+        const std::string &srcContinueType, bool isSameBundle);
+    std::string ContinueTypeFormat(const std::string &continueType);
 private:
     currentIconInfo iconInfo_;
     sptr<DistributedMissionDiedListener> missionDiedListener_;

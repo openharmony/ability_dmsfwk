@@ -341,7 +341,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
         return INVALID_PARAMETERS_ERR;
     }
-    bool isSameBundle = bundlename == finalBundleName ? true : false;
+    bool isSameBundle = bundleName == finalBundleName;
     if (!IsBundleContinuable(localBundleInfo, abilityInfo.abilityName, continueType, isSameBundle)) {
         HILOGE("Bundle %{public}s is not continuable", finalBundleName.c_str());
         return INVALID_PARAMETERS_ERR;
@@ -367,24 +367,24 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     return ERR_OK;
 }
 
-bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo, std::string &srcAbilityName,
-    std::string &srcContinueType, bool &isSameBundle)
+bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo, const std::string &srcAbilityName,
+    const std::string &srcContinueType, bool isSameBundle)
 {
     std::string formatSrcContinueType = ContinueTypeFormat(srcContinueType);
     bool continuable = false;
     bool isSameAbility = false;
-    for (auto abilityInfo : bundleInfo.abilityInfos) {
+    for (auto abilityInfo: bundleInfo.abilityInfos) {
         if (!abilityInfo.continuable) {
             continue;
         }
         continuable = true;
         isSameAbility = false;
-        for(const auto &continueTypeItem: abilityInfo.continueType){
-            if((srcContinueType == srcAbilityName || abilityInfo.name == continueTypeItem)
-                && abilityInfo.name == srcAbilityName){
+        for (const auto &continueTypeItem: abilityInfo.continueType) {
+            if ((srcContinueType == srcAbilityName || abilityInfo.name == continueTypeItem)
+                && abilityInfo.name == srcAbilityName) {
                 isSameAbility = true;
             }
-            if(continueTypeItem == srcContinueType || continueTypeItem == formatSrcContinueType){
+            if (continueTypeItem == srcContinueType || continueTypeItem == formatSrcContinueType) {
                 return true;
             }
         }
@@ -392,7 +392,7 @@ bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundl
     return continuable && isSameBundle && isSameAbility;
 }
 
-std::string DMSContinueRecvMgr::ContinueTypeFormat(std::string &continueType)
+std::string DMSContinueRecvMgr::ContinueTypeFormat(const std::string &continueType)
 {
     std::string suffix = QUICK_START_CONFIGURATION;
     if (suffix.length() <= continueType.length() &&
