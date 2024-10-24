@@ -71,12 +71,12 @@ std::shared_ptr<DmsKvSyncE2E> DmsKvSyncE2E::GetInstance()
 
 void DmsKvSyncE2E::SetDeviceCfg()
 {
-    HILOGI("called.");
+    HILOGD("called.");
     const char *syncType = "1";
     const int bufferLen = 10;
     char paramOutBuf[bufferLen] = {0};
     int ret = GetParameter(DETERMINE_DEVICE_TYPE_KEY, "", paramOutBuf, bufferLen);
-    HILOGI("paramOutBuf: %{public}s, ret: %{public}d", paramOutBuf, ret);
+    HILOGD("paramOutBuf: %{public}s, ret: %{public}d", paramOutBuf, ret);
     if (ret > 0 && strncmp(paramOutBuf, syncType, strlen(syncType)) == 0) {
         HILOGI("Determining the e2e device succeeded.");
         isCfgDevices_ = true;
@@ -97,15 +97,15 @@ void DmsKvSyncE2E::SetDeviceCfg()
 
 bool DmsKvSyncE2E::CheckDeviceCfg()
 {
-    HILOGI("called.");
+    HILOGD("called.");
     return isCfgDevices_;
 }
 
 bool DmsKvSyncE2E::CheckCtrlRule()
 {
-    HILOGI("called.");
+    HILOGD("called.");
     if (isCfgDevices_ && isForbidSendAndRecv_) {
-        HILOGI("The device is a special device and checkCtrlRule fail");
+        HILOGE("The device is a special device and checkCtrlRule fail");
         return false;
     }
     return true;
@@ -130,7 +130,7 @@ bool DmsKvSyncE2E::IsValidPath(const std::string &inFilePath, std::string &realF
         realFilePath = "";
         return false;
     }
-    HILOGI("The real file path %{public}s exist in the file system.", GetAnonymStr(realFilePath).c_str());
+    HILOGD("The real file path %{public}s exist in the file system.", GetAnonymStr(realFilePath).c_str());
     return true;
 }
 
@@ -176,19 +176,19 @@ bool DmsKvSyncE2E::UpdateWhiteList(const std::string &cfgJsonStr)
 
 int32_t DmsKvSyncE2E::LoadContinueConfig()
 {
-    HILOGI("Load continue config, continueCfgFullPath %{public}s.", GetAnonymStr(continueCfgFullPath_).c_str());
+    HILOGD("Load continue config, continueCfgFullPath %{public}s.", GetAnonymStr(continueCfgFullPath_).c_str());
     std::string tempPath = continueCfgFullPath_;
     if ((continueCfgFullPath_.empty() || !IsValidPath(tempPath, continueCfgFullPath_))) {
         char cfgPathBuf[MAX_CONFIG_PATH_LEN] = { 0 };
         char *filePath  = GetOneCfgFile(CONTINUE_CONFIG_RELATIVE_PATH.c_str(), cfgPathBuf, MAX_CONFIG_PATH_LEN);
         if (filePath == nullptr || filePath != cfgPathBuf) {
-            HILOGI("Not find continue config file, relative path %{public}s.",
+            HILOGE("Not find continue config file, relative path %{public}s.",
                 GetAnonymStr(CONTINUE_CONFIG_RELATIVE_PATH).c_str());
             continueCfgFullPath_ = "";
             return ERR_OK;
         }
         continueCfgFullPath_ = std::string(filePath);
-        HILOGI("Get Continue config file full path success, cfgFullPath %{public}s.",
+        HILOGD("Get Continue config file full path success, cfgFullPath %{public}s.",
             GetAnonymStr(continueCfgFullPath_).c_str());
     }
 
@@ -218,14 +218,14 @@ int32_t DmsKvSyncE2E::LoadContinueConfig()
             GetAnonymStr(continueCfgFullPath_).c_str());
         return DMS_PERMISSION_DENIED;
     }
-    HILOGI("Load continue config success, cfgFullPath %{public}s.", GetAnonymStr(continueCfgFullPath_).c_str());
+    HILOGD("Load continue config success, cfgFullPath %{public}s.", GetAnonymStr(continueCfgFullPath_).c_str());
     return ERR_OK;
 }
 
 bool DmsKvSyncE2E::CheckBundleContinueConfig(const std::string &bundleName)
 {
     if (!isCfgDevices_) {
-        HILOGI("The device is a normal device");
+        HILOGD("The device is a normal device");
         return true;
     }
 
@@ -237,7 +237,7 @@ bool DmsKvSyncE2E::CheckBundleContinueConfig(const std::string &bundleName)
         return false;
     }
 
-    HILOGI("Current app is allow to continue in config file, bundleName %{public}s, cfgPath %{public}s.",
+    HILOGD("Current app is allow to continue in config file, bundleName %{public}s, cfgPath %{public}s.",
         bundleName.c_str(), GetAnonymStr(continueCfgFullPath_).c_str());
     return true;
 }
@@ -340,7 +340,7 @@ bool DmsKvSyncE2E::CheckKvStore()
 
 Status DmsKvSyncE2E::GetKvStore()
 {
-    HILOGI("called.");
+    HILOGD("called.");
     Options options = {
         .createIfMissing = true,
         .encrypt = false,
@@ -358,12 +358,12 @@ Status DmsKvSyncE2E::GetKvStore()
     };
     Status status = dataManager_.GetSingleKvStore(options, appId_, storeId_, kvStorePtr_);
     if (status == Status::SUCCESS) {
-        HILOGI("get kvStore success");
+        HILOGD("get kvStore success");
     } else if (status == DistributedKv::Status::STORE_META_CHANGED) {
         HILOGE("This db meta changed, remove and rebuild it");
         dataManager_.DeleteKvStore(appId_, storeId_, BMS_KV_BASE_DIR + appId_.appId);
     }
-    HILOGI("end.");
+    HILOGD("end.");
     return status;
 }
 
