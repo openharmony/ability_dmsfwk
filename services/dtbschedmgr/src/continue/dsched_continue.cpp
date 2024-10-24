@@ -264,13 +264,13 @@ int32_t DSchedContinue::PostStartTask(const OHOS::AAFwk::WantParams& wantParams)
     return ERR_OK;
 }
 
-int32_t DSchedContinue::OnStartCmd(uint32_t appVersion)
+int32_t DSchedContinue::OnStartCmd(int32_t appVersion)
 {
     HILOGI("called");
     return PostCotinueAbilityTask(appVersion);
 }
 
-int32_t DSchedContinue::PostCotinueAbilityTask(uint32_t appVersion)
+int32_t DSchedContinue::PostCotinueAbilityTask(int32_t appVersion)
 {
     DSchedContinueEventType eventType = DSHCED_CONTINUE_ABILITY_EVENT;
     HILOGI("PostCotinueAbilityTask %{public}d, continueInfo %{public}s", eventType,
@@ -279,7 +279,7 @@ int32_t DSchedContinue::PostCotinueAbilityTask(uint32_t appVersion)
         HILOGE("PostCotinueAbilityTask eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
     }
-    auto data = std::make_shared<uint32_t>(appVersion);
+    auto data = std::make_shared<int32_t>(appVersion);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
         HILOGE("PostCotinueAbilityTask eventHandler send event type %{public}d fail", eventType);
@@ -652,15 +652,15 @@ int32_t DSchedContinue::PackStartCmd(std::shared_ptr<DSchedContinueStartCmd>& cm
             HILOGE("pack start cmd failed, the bundle is not installed on local device.");
             return ret;
         }
-        cmd->appVersion_ = localBundleInfo.versionCode;
+        cmd->appVersion_ = static_cast<int32_t>(localBundleInfo.versionCode);
     }
     cmd->wantParams_ = *wantParams;
     return ERR_OK;
 }
 
-int32_t DSchedContinue::ExecuteContinueAbility(uint32_t appVersion)
+int32_t DSchedContinue::ExecuteContinueAbility(int32_t appVersion)
 {
-    HILOGI("ExecuteContinueAbility start, appVersion: %{public}u", appVersion);
+    HILOGI("ExecuteContinueAbility start, appVersion: %{public}d", appVersion);
     DmsRadar::GetInstance().SaveDataDmsContinue("ContinueAbility", ERR_OK);
 
     int32_t result = GetMissionIdByBundleName();
@@ -1071,7 +1071,7 @@ int32_t DSchedContinue::ExecuteNotifyComplete(int32_t result)
     return ERR_OK;
 }
 
-int32_t DSchedContinue::PackReplyCmd(std::shared_ptr<DSchedContinueReplyCmd> cmd, int32_t replyCmd, uint32_t appVersion,
+int32_t DSchedContinue::PackReplyCmd(std::shared_ptr<DSchedContinueReplyCmd> cmd, int32_t replyCmd, int32_t appVersion,
     int32_t result, const std::string reason)
 {
     if (cmd == nullptr) {

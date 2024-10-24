@@ -78,7 +78,7 @@ public:
 
 public:
     int32_t direction_ = 0;
-    uint32_t appVersion_ = 0;
+    int32_t appVersion_ = 0;
     DistributedWantParams wantParams_;
 };
 
@@ -112,7 +112,7 @@ public:
 
 public:
     int32_t replyCmd_ = 0;
-    uint32_t appVersion_ = 0;
+    int32_t appVersion_ = 0;
     int32_t result_ = 0;
     std::string reason_;
 };
