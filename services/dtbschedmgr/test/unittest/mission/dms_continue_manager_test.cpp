@@ -971,6 +971,34 @@ HWTEST_F(DMSContinueManagerTest, testGetFinalBundleName_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testGetFinalBundleName_001
+ * @tc.desc: test GetFinalBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_001 start" << std::endl;
+    std::string srcAbilityName = "abilityName";
+    std::string srcContinueType = "continueType";
+
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::vector<AbilityInfo> abilityInfos;
+    AbilityInfo abilityInfo;
+    std::vector<std::string> continueTypes;
+    continueTypes.push_back(srcContinueType);
+    abilityInfo.continueType = continueTypes;
+    abilityInfo.continuable = true;
+    abilityInfo.name = srcAbilityName;
+    abilityInfos.push_back(abilityInfo);
+
+    localBundleInfo.abilityInfo = abilityInfos;
+    bool ret = DMSContinueRecvMgr::GetInstance().IsBundleContinuable(localBundleInfo, srcAbilityName,
+                                                                     srcContinueType, true);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_001 end" << std::endl;
+}
+
+/**
  * @tc.name: GetBundleNameByScreenOffInfo_001
  * @tc.desc: test GetBundleNameByScreenOffInfo
  * @tc.type: FUNC

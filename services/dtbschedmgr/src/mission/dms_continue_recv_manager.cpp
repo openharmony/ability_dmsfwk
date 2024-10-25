@@ -367,8 +367,8 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     return ERR_OK;
 }
 
-bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo, const std::string &srcAbilityName,
-    const std::string &srcContinueType, bool isSameBundle)
+bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo,
+    const std::string &srcAbilityName, const std::string &srcContinueType, bool isSameBundle)
 {
     std::string formatSrcContinueType = ContinueTypeFormat(srcContinueType);
     bool continuable = false;
