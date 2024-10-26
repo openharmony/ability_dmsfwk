@@ -373,23 +373,23 @@ bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundl
     std::string formatSrcContinueType = ContinueTypeFormat(srcContinueType);
     bool continuable = false;
     bool isSameAbility = false;
-    for (auto abilityInfo: bundleInfo.abilityInfos) {
+    for (auto &abilityInfo: bundleInfo.abilityInfos) {
         if (!abilityInfo.continuable) {
             continue;
         }
         continuable = true;
         isSameAbility = false;
         for (const auto &continueTypeItem: abilityInfo.continueType) {
-            if ((srcContinueType == srcAbilityName || abilityInfo.name == continueTypeItem)
-                && abilityInfo.name == srcAbilityName) {
-                isSameAbility = true;
-            }
             if (continueTypeItem == srcContinueType || continueTypeItem == formatSrcContinueType) {
+                return true;
+            }
+            if ((srcContinueType == srcAbilityName || abilityInfo.name == continueTypeItem)
+                && isSameBundle && abilityInfo.name == srcAbilityName) {
                 return true;
             }
         }
     }
-    return continuable && isSameBundle && isSameAbility;
+    return false;
 }
 
 std::string DMSContinueRecvMgr::ContinueTypeFormat(const std::string &continueType)
