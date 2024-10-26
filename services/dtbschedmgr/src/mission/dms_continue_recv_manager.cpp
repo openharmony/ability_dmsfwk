@@ -371,14 +371,10 @@ bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundl
     const std::string &srcAbilityName, const std::string &srcContinueType, bool isSameBundle)
 {
     std::string formatSrcContinueType = ContinueTypeFormat(srcContinueType);
-    bool continuable = false;
-    bool isSameAbility = false;
     for (auto &abilityInfo: bundleInfo.abilityInfos) {
         if (!abilityInfo.continuable) {
             continue;
         }
-        continuable = true;
-        isSameAbility = false;
         for (const auto &continueTypeItem: abilityInfo.continueType) {
             if (continueTypeItem == srcContinueType || continueTypeItem == formatSrcContinueType) {
                 return true;
