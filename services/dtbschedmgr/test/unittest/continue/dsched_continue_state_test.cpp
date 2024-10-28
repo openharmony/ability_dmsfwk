@@ -413,6 +413,9 @@ HWTEST_F(DSchedContinueDataStateTest, SinkExecuteTest001, TestSize.Level3)
     };
     int32_t ret = dataStateTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, CONTINUE_STATE_MACHINE_INVALID_STATE);
+
+    ret = dataStateTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueDataStateTest SinkExecuteTest001 end" << std::endl;
 }
 
@@ -471,6 +474,9 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueDataTask001, TestSize.Level3
     };
     int32_t ret = dataStateTest_->DoContinueDataTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_NE(ret, DSCHED_CONTINUE_DATA_STATE);
+
+    ret = dataStateTest_->DoContinueDataTask(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueDataStateTest SinkDoContinueDataTask001 end" << std::endl;
 }
 
@@ -493,6 +499,9 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueEndTask001, TestSize.Level3)
     };
     int32_t ret = dataStateTest_->DoContinueEndTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_NE(ret, ERR_OK);
+
+    ret = dataStateTest_->DoContinueEndTask(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueDataStateTest SinkDoContinueEndTask001 end" << std::endl;
 }
 
@@ -515,6 +524,9 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueErrorTask001, TestSize.Level
     };
     int32_t ret = dataStateTest_->DoContinueErrorTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_NE(ret, ERR_OK);
+
+    ret = dataStateTest_->DoContinueErrorTask(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueDataStateTest SinkDoContinueErrorTask001 end" << std::endl;
 }
 
@@ -766,6 +778,9 @@ HWTEST_F(DSchedContinueSinkWaitEndStateTest, SinkExecute001, TestSize.Level3)
     };
     int32_t ret = sinkWaitEndTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, CONTINUE_STATE_MACHINE_INVALID_STATE);
+
+    ret = sinkWaitEndTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSinkWaitEndStateTest SinkExecute001 end" << std::endl;
 }
 
@@ -826,6 +841,9 @@ HWTEST_F(DSchedContinueSinkWaitEndStateTest, SinkDoNotifyCompleteTask001, TestSi
     int32_t ret = sinkWaitEndTest_->DoNotifyCompleteTask(nullptr,
         AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = sinkWaitEndTest_->DoNotifyCompleteTask(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSinkWaitEndStateTest SinkDoNotifyCompleteTask001 end" << std::endl;
 }
 
@@ -849,6 +867,9 @@ HWTEST_F(DSchedContinueSinkWaitEndStateTest, SinkDoContinueEndTask001, TestSize.
     int32_t ret = sinkWaitEndTest_->DoContinueEndTask(nullptr,
         AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = sinkWaitEndTest_->DoContinueEndTask(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSinkWaitEndStateTest SinkDoContinueEndTask001 end" << std::endl;
 }
 
@@ -871,6 +892,9 @@ HWTEST_F(DSchedContinueAbilityStateTest, SrcExecuteTest001, TestSize.Level3)
     };
     int32_t ret = abilityStateTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, CONTINUE_STATE_MACHINE_INVALID_STATE);
+
+    ret = abilityStateTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueAbilityStateTest SrcExecuteTest001 end" << std::endl;
 }
 
@@ -929,6 +953,9 @@ HWTEST_F(DSchedContinueAbilityStateTest, SrcDoContinueSendTask001, TestSize.Leve
     };
     int32_t ret = abilityStateTest_->DoContinueSendTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = abilityStateTest_->DoContinueSendTask(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueAbilityStateTest SrcDoContinueSendTask001 end" << std::endl;
 }
 
@@ -950,6 +977,9 @@ HWTEST_F(DSchedContinueAbilityStateTest, SrcDoContinueEndTask001, TestSize.Level
         }
     };
     int32_t ret = abilityStateTest_->DoContinueEndTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = abilityStateTest_->DoContinueEndTask(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueAbilityStateTest SrcDoContinueEndTask001 end" << std::endl;
 }
@@ -973,6 +1003,9 @@ HWTEST_F(DSchedContinueAbilityStateTest, SrcDoContinueErrorTask001, TestSize.Lev
     };
     int32_t ret = abilityStateTest_->DoContinueErrorTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_NE(ret, ERR_OK);
+
+    ret = abilityStateTest_->DoContinueErrorTask(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueAbilityStateTest SrcDoContinueErrorTask001 end" << std::endl;
 }
 
@@ -995,6 +1028,9 @@ HWTEST_F(DSchedContinueEndStateTest, SrcExecuteTest001, TestSize.Level3)
     };
     int32_t ret = srcEndStateTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, CONTINUE_STATE_MACHINE_INVALID_STATE);
+
+    ret = srcEndStateTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueEndStateTest SrcExecuteTest001 end" << std::endl;
 }
 
@@ -1053,6 +1089,9 @@ HWTEST_F(DSchedContinueEndStateTest, SrcDoContinueEndTaskTest001, TestSize.Level
     };
     int32_t ret = srcEndStateTest_->DoContinueEndTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = srcEndStateTest_->DoContinueEndTask(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueEndStateTest SrcDoContinueEndTaskTest001 end" << std::endl;
 }
 
@@ -1075,6 +1114,9 @@ HWTEST_F(DSchedContinueSourceStartStateTest, SrcExecuteTest_001, TestSize.Level3
     };
     int32_t ret = srcStartStateTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, CONTINUE_STATE_MACHINE_INVALID_STATE);
+
+    ret = srcStartStateTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSourceStartStateTest SrcExecuteTest_001 end" << std::endl;
 }
 
@@ -1134,6 +1176,9 @@ HWTEST_F(DSchedContinueSourceStartStateTest, SrcDoContinuePushReqTaskTest_001, T
     int32_t ret = srcStartStateTest_->DoContinuePushReqTask(nullptr,
         AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = srcStartStateTest_->DoContinuePushReqTask(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSourceStartStateTest SrcDoContinuePushReqTaskTest_001 end" << std::endl;
 }
 
@@ -1156,6 +1201,9 @@ HWTEST_F(DSchedContinueSourceStartStateTest, SrcDoContinueAbilityTaskTest_001, T
     };
     int32_t ret = srcStartStateTest_->DoContinueAbilityTask(nullptr,
         AppExecFwk::InnerEvent::Pointer(event, destructor));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = srcStartStateTest_->DoContinueAbilityTask(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSourceStartStateTest SrcDoContinueAbilityTaskTest_001 end" << std::endl;
 }
@@ -1180,6 +1228,9 @@ HWTEST_F(DSchedContinueSourceStartStateTest, SrcDoContinueEndTaskTest_001, TestS
     int32_t ret = srcStartStateTest_->DoContinueEndTask(nullptr,
         AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = srcStartStateTest_->DoContinueEndTask(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSourceStartStateTest SrcDoContinueEndTaskTest_001 end" << std::endl;
 }
 
@@ -1202,6 +1253,9 @@ HWTEST_F(DSchedContinueSourceStartStateTest, SrcDoContinueErrorTask001, TestSize
     };
     int32_t ret = srcStartStateTest_->DoContinueErrorTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_NE(ret, ERR_OK);
+
+    ret = srcStartStateTest_->DoContinueEndTask(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSourceStartStateTest SrcDoContinueErrorTask001 end" << std::endl;
 }
 
@@ -1224,6 +1278,9 @@ HWTEST_F(DSchedContinueWaitEndStateTest, SrcExecute_001, TestSize.Level3)
     };
     int32_t ret = srcWaitEndTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, CONTINUE_STATE_MACHINE_INVALID_STATE);
+
+    ret = srcWaitEndTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueWaitEndStateTest SrcExecute_001 end" << std::endl;
 }
 
@@ -1283,6 +1340,9 @@ HWTEST_F(DSchedContinueWaitEndStateTest, SrcDoNotifyCompleteTask_001, TestSize.L
     int32_t ret = srcWaitEndTest_->DoNotifyCompleteTask(nullptr,
         AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = srcWaitEndTest_->DoNotifyCompleteTask(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueWaitEndStateTest SrcDoNotifyCompleteTask_001 end" << std::endl;
 }
 
@@ -1305,6 +1365,9 @@ HWTEST_F(DSchedContinueWaitEndStateTest, SrcDoContinueEndTask_001, TestSize.Leve
     };
     int32_t ret = srcWaitEndTest_->DoContinueEndTask(nullptr,
         AppExecFwk::InnerEvent::Pointer(event, destructor));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = srcWaitEndTest_->DoContinueEndTask(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueWaitEndStateTest SrcDoContinueEndTask_001 end" << std::endl;
 }
