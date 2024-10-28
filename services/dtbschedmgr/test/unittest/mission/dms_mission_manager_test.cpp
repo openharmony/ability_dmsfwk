@@ -2311,7 +2311,6 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncMissionsFromRemote002, TestSize.Lev
     DistributedSchedMissionManager::GetInstance().missonChangeListener_ = new DistributedMissionChangeListener();
     DistributedSchedMissionManager::GetInstance().GenerateCallerInfo(callerInfo);
     DistributedSchedMissionManager::GetInstance().isRegMissionChange_ = true;
-    EXPECT_CALL(*mockDmsAdapter, GetLocalMissionSnapshotInfo(_, _, _)).WillOnce(Return(true));
     auto ret = DistributedSchedMissionManager::GetInstance().StartSyncMissionsFromRemote(callerInfo, missionInfos);
     EXPECT_EQ(ret, ERR_NONE);
     DTEST_LOG << "testStartSyncMissionsFromRemote002 end" << std::endl;
