@@ -376,7 +376,7 @@ bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundl
             continue;
         }
         for (const auto &continueTypeItem: abilityInfo.continueType) {
-            HILOGE("IsBundleContinuable check: srcAbilityName:%{public}s; srcContinueType:%{public}s;"
+            HILOGI("IsBundleContinuable check: srcAbilityName:%{public}s; srcContinueType:%{public}s;"
                    " sinkAbilityName:%{public}s; sinkContinueType:%{public}s; isSameBundle: %{public}d",
                    srcAbilityName.c_str(), srcContinueType.c_str(), abilityInfo.name.c_str(),
                    continueTypeItem.c_str(), isSameBundle);
