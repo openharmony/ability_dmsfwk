@@ -406,6 +406,11 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, Unfoc
     }
     uint16_t bundleNameId = 0;
     uint8_t continueTypeId = 0;
+    ret = BundleManagerInternal::GetContinueTypeId(bundleName, abilityName, continueTypeId);
+    if (ret != ERR_OK) {
+        HILOGE("Get focused contineTypeId failed, contineTypeId: %{public}u, ret: %{public}d", continueTypeId, ret);
+        return ret;
+    }
     ret = GetAccessTokenIdSendEvent(bundleName, reason, bundleNameId, continueTypeId);
     if (ret != ERR_OK) {
         HILOGE("GetAccessTokenIdSendEvent failed");

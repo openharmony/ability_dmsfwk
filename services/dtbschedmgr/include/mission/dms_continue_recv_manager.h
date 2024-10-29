@@ -101,11 +101,13 @@ private:
     void PostOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t delay = 0, const int32_t retry = 0);
     void FindContinueType(const DmsBundleInfo &distributedBundleInfo, uint8_t &continueTypeId,
-        std::string &continueType);
+        std::string &continueType, DmsAbilityInfo &abilityInfo);
     int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t retry = 0);
     void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const currentIconInfo& continueInfo, const int32_t state);
-    bool IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo);
+    bool IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo, const std::string &srcAbilityName,
+        const std::string &srcContinueType, bool isSameBundle);
+    std::string ContinueTypeFormat(const std::string &continueType);
 private:
     currentIconInfo iconInfo_;
     sptr<DistributedMissionDiedListener> missionDiedListener_;

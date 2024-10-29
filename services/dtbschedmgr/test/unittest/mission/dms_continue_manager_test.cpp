@@ -971,6 +971,167 @@ HWTEST_F(DMSContinueManagerTest, testGetFinalBundleName_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testIsBundleContinuable_001
+ * @tc.desc: all continuable = false  => res = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_001 start" << std::endl;
+    std::string srcAbilityName = "abilityName";
+    std::string srcContinueType = "continueType";
+    bool isSameBundle = true;
+
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+    AppExecFwk::AbilityInfo abilityInfo;
+    std::vector<std::string> continueTypes;
+    continueTypes.push_back(srcContinueType);
+    abilityInfo.continueType = continueTypes;
+    abilityInfo.continuable = false;
+    abilityInfo.name = srcAbilityName;
+    abilityInfos.push_back(abilityInfo);
+
+    localBundleInfo.abilityInfos = abilityInfos;
+    bool ret = DMSContinueRecvMgr::GetInstance().IsBundleContinuable(localBundleInfo, srcAbilityName,
+                                                                     srcContinueType, isSameBundle);
+    EXPECT_EQ(ret, false);
+
+    isSameBundle = false;
+    ret = DMSContinueRecvMgr::GetInstance().IsBundleContinuable(localBundleInfo, srcAbilityName,
+                                                                     srcContinueType, isSameBundle);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testIsBundleContinuable_002
+ * @tc.desc: continuable = true; same continueType  => res = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_002 start" << std::endl;
+    std::string srcAbilityName = "abilityName";
+    std::string srcContinueType = "continueType";
+    bool isSameBundle = true;
+
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+    AppExecFwk::AbilityInfo abilityInfo;
+    std::vector<std::string> continueTypes;
+    continueTypes.push_back(srcContinueType + "_ContinueQuickStart");
+    abilityInfo.continueType = continueTypes;
+    abilityInfo.continuable = true;
+    abilityInfo.name = srcAbilityName;
+    abilityInfos.push_back(abilityInfo);
+
+    localBundleInfo.abilityInfos = abilityInfos;
+    bool ret = DMSContinueRecvMgr::GetInstance().IsBundleContinuable(localBundleInfo, srcAbilityName,
+                                                                     srcContinueType, isSameBundle);
+    EXPECT_EQ(ret, true);
+
+    isSameBundle = false;
+    ret = DMSContinueRecvMgr::GetInstance().IsBundleContinuable(localBundleInfo, srcAbilityName,
+                                                                srcContinueType, isSameBundle);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testIsBundleContinuable_003
+ * @tc.desc: continuable = true; diff continueType; diff BundleName  => res = false;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_003, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_003 start" << std::endl;
+    std::string srcAbilityName = "srcAbilityName";
+    std::string sinkAbilityName = "sinkAbilityName";
+    std::string srcContinueType = "srcContinueType";
+    std::string sinkContinueType = "sinkContinueType";
+    bool isSameBundle = false;
+
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+    AppExecFwk::AbilityInfo abilityInfo;
+    std::vector<std::string> continueTypes;
+    continueTypes.push_back(sinkContinueType + "_ContinueQuickStart");
+    abilityInfo.continueType = continueTypes;
+    abilityInfo.continuable = true;
+    abilityInfo.name = sinkAbilityName;
+    abilityInfos.push_back(abilityInfo);
+
+    localBundleInfo.abilityInfos = abilityInfos;
+    bool ret = DMSContinueRecvMgr::GetInstance().IsBundleContinuable(localBundleInfo, srcAbilityName,
+                                                                     srcContinueType, isSameBundle);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testIsBundleContinuable_004
+ * @tc.desc: continuable = true; diff continueType; same BundleName  => res = false;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_004, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_004 start" << std::endl;
+    std::string srcAbilityName = "srcAbilityName";
+    std::string sinkAbilityName = "sinkAbilityName";
+    std::string srcContinueType = srcAbilityName;
+    std::string sinkContinueType = "sinkContinueType";
+    bool isSameBundle = true;
+
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+    AppExecFwk::AbilityInfo abilityInfo;
+    std::vector<std::string> continueTypes;
+    continueTypes.push_back(sinkContinueType + "_ContinueQuickStart");
+    abilityInfo.continueType = continueTypes;
+    abilityInfo.continuable = true;
+    abilityInfo.name = sinkAbilityName;
+    abilityInfos.push_back(abilityInfo);
+
+    localBundleInfo.abilityInfos = abilityInfos;
+    bool ret = DMSContinueRecvMgr::GetInstance().IsBundleContinuable(localBundleInfo, srcAbilityName,
+                                                                     srcContinueType, isSameBundle);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: testIsBundleContinuable_005
+ * @tc.desc: continuable = true; no src continueType; same BundleName  => res = false;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_005, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_004 start" << std::endl;
+    std::string srcAbilityName = "srcAbilityName";
+    std::string sinkAbilityName = "sinkAbilityName";
+    std::string srcContinueType = srcAbilityName;
+    std::string sinkContinueType = "sinkContinueType";
+    bool isSameBundle = true;
+
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::vector<AppExecFwk::AbilityInfo> abilityInfos;
+    AppExecFwk::AbilityInfo abilityInfo;
+    std::vector<std::string> continueTypes;
+    continueTypes.push_back(sinkContinueType + "_ContinueQuickStart");
+    abilityInfo.continueType = continueTypes;
+    abilityInfo.continuable = true;
+    abilityInfo.name = srcAbilityName;
+    abilityInfos.push_back(abilityInfo);
+
+    localBundleInfo.abilityInfos = abilityInfos;
+    bool ret = DMSContinueRecvMgr::GetInstance().IsBundleContinuable(localBundleInfo, srcAbilityName,
+                                                                     srcContinueType, isSameBundle);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_005 end" << std::endl;
+}
+
+/**
  * @tc.name: GetBundleNameByScreenOffInfo_001
  * @tc.desc: test GetBundleNameByScreenOffInfo
  * @tc.type: FUNC
