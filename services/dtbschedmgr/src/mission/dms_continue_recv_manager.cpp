@@ -361,8 +361,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     std::vector<sptr<IRemoteObject>> objs = iterItem->second;
     for (auto iter : objs) {
         NotifyRecvBroadcast(iter,
-            currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType),
-            state);
+            currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType), state);
     }
     HILOGI("DealOnBroadcastBusiness end");
     return ERR_OK;
