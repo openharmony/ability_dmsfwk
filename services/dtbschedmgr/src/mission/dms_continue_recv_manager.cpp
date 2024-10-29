@@ -342,7 +342,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         return INVALID_PARAMETERS_ERR;
     }
     bool isSameBundle = (bundleName == finalBundleName);
-    if (state != INACTIVE
+    if (state == ACTIVE
         && !IsBundleContinuable(localBundleInfo, abilityInfo.abilityName, continueType, isSameBundle)) {
         HILOGE("Bundle %{public}s is not continuable", finalBundleName.c_str());
         return INVALID_PARAMETERS_ERR;
