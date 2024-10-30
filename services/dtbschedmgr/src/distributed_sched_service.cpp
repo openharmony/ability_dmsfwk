@@ -154,31 +154,10 @@ DistributedSchedService::DistributedSchedService() : SystemAbility(DISTRIBUTED_S
 void DistributedSchedService::OnStart(const SystemAbilityOnDemandReason &startReason)
 {
     HILOGI("OnStart reason %{public}s, reasonId_:%{public}d", startReason.GetName().c_str(), startReason.GetId());
-#ifdef DMS_SERVICE_DISABLE
-    HILOGI("DMS service disabled, exiting.");
-    _exit(0);
-#endif
-    HILOGI("Dms service OnStart enter.");
-    if (!Init()) {
-        HILOGE("failed to init DistributedSchedService");
+    if (!DoStart()) {
+        HILOGI("OnStart dms service failed.");
         return;
     }
-    FuncContinuationCallback continuationCallback = [this] (int32_t missionId) {
-        HILOGW("continuationCallback timeout.");
-        NotifyContinuationCallbackResult(missionId, CONTINUE_ABILITY_TIMEOUT_ERR);
-    };
-
-    DmsCallbackTaskInitCallbackFunc freeCallback = [this] (int64_t taskId) {
-        HILOGW("DmsCallbackTaskInitCallbackFunc timeout, taskId:%{public}" PRId64 ".", taskId);
-        NotifyCompleteFreeInstallFromRemote(taskId, AAFwk::FREE_INSTALL_TIMEOUT);
-    };
-    dschedContinuation_ = std::make_shared<DSchedContinuation>();
-    collaborateCbMgr_ = std::make_shared<DSchedCollaborationCallbackMgr>();
-    dmsCallbackTask_ = std::make_shared<DmsCallbackTask>();
-    dschedContinuation_->Init(continuationCallback);
-    collaborateCbMgr_->Init();
-    dmsCallbackTask_->Init(freeCallback);
-    HILOGI("OnStart dms service success.");
     Publish(this);
     HandleBootStart(startReason);
 }
@@ -198,7 +177,7 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
 void DistributedSchedService::OnActive(const SystemAbilityOnDemandReason &activeReason)
 {
     HILOGI("OnStart reason %{public}s, reasonId_:%{public}d", activeReason.GetName().c_str(), activeReason.GetId());
-    OnStart(activeReason);
+    DoStart();
 }
 
 void DistributedSchedService::HandleBootStart(const SystemAbilityOnDemandReason &startReason)
@@ -222,6 +201,44 @@ void DistributedSchedService::HandleBootStart(const SystemAbilityOnDemandReason 
         }
         HILOGI("UnloadSystemAbility dms ok");
     }
+}
+
+bool DistributedSchedService::DoStart()
+{
+#ifdef DMS_SERVICE_DISABLE
+    HILOGI("DMS service disabled, exiting.");
+    _exit(0);
+#endif
+    HILOGI("Dms service DoStart enter.");
+    if (!Init()) {
+        HILOGE("failed to init DistributedSchedService");
+        return false;
+    }
+    FuncContinuationCallback continuationCallback = [this] (int32_t missionId) {
+        HILOGW("continuationCallback timeout.");
+        NotifyContinuationCallbackResult(missionId, CONTINUE_ABILITY_TIMEOUT_ERR);
+    };
+
+    DmsCallbackTaskInitCallbackFunc freeCallback = [this] (int64_t taskId) {
+        HILOGW("DmsCallbackTaskInitCallbackFunc timeout, taskId:%{public}" PRId64 ".", taskId);
+        NotifyCompleteFreeInstallFromRemote(taskId, AAFwk::FREE_INSTALL_TIMEOUT);
+    };
+    dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    collaborateCbMgr_ = std::make_shared<DSchedCollaborationCallbackMgr>();
+    dmsCallbackTask_ = std::make_shared<DmsCallbackTask>();
+    dschedContinuation_->Init(continuationCallback);
+    collaborateCbMgr_->Init();
+    dmsCallbackTask_->Init(freeCallback);
+
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    HILOGI("Get dms interactive adapter proxy enter.");
+    int32_t ret = GetDmsInteractiveAdapterProxy();
+    if (ret != ERR_OK) {
+        HILOGE("Get remote dms interactive adapter proxy fail, ret %{public}d.", ret);
+    }
+#endif
+    HILOGI("OnStart dms service success.");
+    return true;
 }
 
 int32_t DistributedSchedService::Dump(int32_t fd, const std::vector<std::u16string>& args)
