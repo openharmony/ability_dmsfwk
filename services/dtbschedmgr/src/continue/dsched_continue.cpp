@@ -37,6 +37,7 @@
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_bm_storage.h"
 #include "mission/dsched_sync_e2e.h"
+#include "multi_user_manager.h"
 #include "ipc_skeleton.h"
 #include "parcel_helper.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
@@ -697,8 +698,12 @@ int32_t DSchedContinue::GetMissionIdByBundleName()
 {
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     if (continueInfo_.missionId_ == 0) {
-        return DMSContinueSendMgr::GetInstance().GetMissionIdByBundleName(continueInfo_.sourceBundleName_,
-            continueInfo_.missionId_);
+        auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+        if (sendMgr == nullptr) {
+            HILOGI("GetSendMgr failed.");
+            return DMS_NOT_GET_MANAGER;
+        }
+        return sendMgr->GetMissionIdByBundleName(continueInfo_.sourceBundleName_, continueInfo_.missionId_);
     }
 #endif
     return ERR_OK;

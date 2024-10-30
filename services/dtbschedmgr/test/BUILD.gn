@@ -211,6 +211,30 @@ ohos_unittest("distributedschedstubtest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("multiusermanagertest") {
+  module_out_path = module_output_path
+
+  sources = [ "unittest/multi_user_manager_test.cpp" ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+
+  if (dmsfwk_report_memmgr || dmsfwk_report_memmgr_plugins) {
+    defines = [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
+  }
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 ohos_unittest("distributedschedadaptertest") {
   module_out_path = module_output_path
 
@@ -779,6 +803,7 @@ group("unittest") {
     ":dschedcontinuetest",
     ":dschedswitchstatustest",
     ":hisyseventreporttest",
+    ":multiusermanagertest",
     ":softbusadaptertest",
     "${dms_path}/common/test/unittest:distributed_sched_utils_test",
   ]

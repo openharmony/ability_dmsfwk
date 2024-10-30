@@ -28,6 +28,7 @@
 #include "dtbschedmgr_log.h"
 #include "mission/dsched_sync_e2e.h"
 #include "mission/wifi_state_adapter.h"
+#include "multi_user_manager.h"
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
 #include "switch_status_dependency.h"
@@ -49,8 +50,6 @@ const std::u16string DESCRIPTOR = u"ohos.aafwk.RemoteOnListener";
 const std::string QUICK_START_CONFIGURATION = "_ContinueQuickStart";
 }
 
-IMPLEMENT_SINGLE_INSTANCE(DMSContinueRecvMgr);
-
 void DMSContinueRecvMgr::Init()
 {
     HILOGI("Init start");
@@ -59,13 +58,6 @@ void DMSContinueRecvMgr::Init()
         return;
     }
     {
-        std::shared_ptr<SoftbusAdapterListener> missionBroadcastListener =
-            std::make_shared<DistributedMissionBroadcastListener>();
-        int32_t ret = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(missionBroadcastListener);
-        if (ret != ERR_OK) {
-            HILOGE("get RegisterSoftbusEventListener failed, ret: %{public}d", ret);
-            return;
-        }
         hasRegSoftbusEventListener_ = true;
         missionDiedListener_ = new DistributedMissionDiedListener();
         eventThread_ = std::thread(&DMSContinueRecvMgr::StartEvent, this);

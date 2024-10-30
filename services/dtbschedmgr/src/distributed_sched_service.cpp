@@ -28,6 +28,7 @@
 #include "file_ex.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "multi_user_manager.h"
 #include "os_account_manager.h"
 #include "parameters.h"
 #include "string_ex.h"
@@ -167,8 +168,7 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
 {
     HILOGI("OnStart reason %{public}s, reasonId_:%{public}d", stopReason.GetName().c_str(), stopReason.GetId());
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    DMSContinueSendMgr::GetInstance().UnInit();
-    DMSContinueRecvMgr::GetInstance().UnInit();
+    MultiUserManager::GetInstance().UnInit();
     RemoveSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID);
     DistributedSchedAdapter::GetInstance().UnRegisterMissionListener(missionFocusedListener_);
 #endif
@@ -269,10 +269,15 @@ void DistributedSchedService::DeviceOnlineNotify(const std::string& networkId)
     DistributedSchedAdapter::GetInstance().DeviceOnline(networkId);
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     DistributedSchedMissionManager::GetInstance().DeviceOnlineNotify(networkId);
-    if (!DMSContinueRecvMgr::GetInstance().CheckRegSoftbusListener() &&
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    if (recvMgr == nullptr) {
+        HILOGI("GetRecvMgr failed.");
+        return;
+    }
+    if (!recvMgr->CheckRegSoftbusListener() &&
         DistributedHardware::DeviceManager::GetInstance().IsSameAccount(networkId)) {
         HILOGI("DMSContinueRecvMgr need init");
-        DMSContinueRecvMgr::GetInstance().Init();
+        recvMgr->Init();
     }
 #endif
 }
@@ -281,7 +286,12 @@ void DistributedSchedService::DeviceOfflineNotify(const std::string& networkId)
 {
     DistributedSchedAdapter::GetInstance().DeviceOffline(networkId);
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    DMSContinueRecvMgr::GetInstance().NotifyDeviceOffline(networkId);
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    if (recvMgr == nullptr) {
+        HILOGI("GetRecvMgr failed.");
+        return;
+    }
+    recvMgr->NotifyDeviceOffline(networkId);
     DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(networkId);
 #endif
 }
@@ -324,15 +334,17 @@ void DistributedSchedService::InitMissionManager()
     InitCommonEventListener();
     InitWifiStateListener();
     InitWifiSemiStateListener();
-    DMSContinueSendMgr::GetInstance().Init();
-    DMSContinueRecvMgr::GetInstance().Init();
+    MultiUserManager::GetInstance().Init();
 #endif
 }
 
 void DistributedSchedService::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
     HILOGI("OnAddSystemAbility systemAbilityId:%{public}d added!", systemAbilityId);
-    missionFocusedListener_ = sptr<DistributedMissionFocusedListener>(new DistributedMissionFocusedListener());
+    if (missionFocusedListener_ == nullptr) {
+        HILOGI("missionFocusedListener_ is nullptr.");
+        missionFocusedListener_ = sptr<DistributedMissionFocusedListener>(new DistributedMissionFocusedListener());
+    }
     int32_t ret = DistributedSchedAdapter::GetInstance().RegisterMissionListener(missionFocusedListener_);
     if (ret != ERR_OK) {
         HILOGE("get RegisterMissionListener failed, ret: %{public}d", ret);
@@ -351,11 +363,26 @@ void DistributedSchedService::InitDataShareManager()
         }
         DmsUE::GetInstance().ChangedSwitchState(dataShareManager.IsCurrentContinueSwitchOn(), ERR_OK);
         if (dataShareManager.IsCurrentContinueSwitchOn()) {
-            DMSContinueSendMgr::GetInstance().NotifyMissionFocused(missionId, FocusedReason::INIT);
+            auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+            if (sendMgr == nullptr) {
+                HILOGI("GetSendMgr failed.");
+                return;
+            }
+            sendMgr->NotifyMissionFocused(missionId, FocusedReason::INIT);
             DSchedContinueManager::GetInstance().Init();
         } else {
-            DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(missionId, UnfocusedReason::NORMAL);
-            DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
+            auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+            if (sendMgr == nullptr) {
+                HILOGI("GetSendMgr failed.");
+                return;
+            }
+            sendMgr->NotifyMissionUnfocused(missionId, UnfocusedReason::NORMAL);
+            auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+            if (recvMgr == nullptr) {
+                HILOGI("GetRecvMgr failed.");
+                return;
+            }
+            recvMgr->OnContinueSwitchOff();
             DSchedContinueManager::GetInstance().UnInit();
         };
     };
@@ -1084,7 +1111,12 @@ int32_t DistributedSchedService::ProcessContinueLocalMission(const std::string& 
 
     int32_t missionId = 1;
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    int32_t ret = DMSContinueSendMgr::GetInstance().GetMissionIdByBundleName(bundleName, missionId);
+    auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+    if (sendMgr == nullptr) {
+        HILOGI("GetSendMgr failed.");
+        return DMS_NOT_GET_MANAGER;
+    }
+    int32_t ret = sendMgr->GetMissionIdByBundleName(bundleName, missionId);
     if (ret != ERR_OK) {
         HILOGE("get missionId failed");
         return ret;
@@ -2875,13 +2907,13 @@ int32_t DistributedSchedService::RegisterMissionListener(const std::u16string& d
 int32_t DistributedSchedService::RegisterOnListener(const std::string& type,
     const sptr<IRemoteObject>& obj, int32_t callingUid)
 {
-    return DMSContinueRecvMgr::GetInstance().RegisterOnListener(type, obj);
+    return MultiUserManager::GetInstance().OnRegisterOnListener(type, obj, callingUid);
 }
 
 int32_t DistributedSchedService::RegisterOffListener(const std::string& type,
     const sptr<IRemoteObject>& obj, int32_t callingUid)
 {
-    return DMSContinueRecvMgr::GetInstance().RegisterOffListener(type, obj);
+    return MultiUserManager::GetInstance().OnRegisterOffListener(type, obj, callingUid);
 }
 
 int32_t DistributedSchedService::UnRegisterMissionListener(const std::u16string& devId,
@@ -2914,7 +2946,17 @@ int32_t DistributedSchedService::StopSyncMissionsFromRemote(const CallerInfo& ca
 
 int32_t DistributedSchedService::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
 {
-    return DMSContinueSendMgr::GetInstance().SetMissionContinueState(missionId, state);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
+        HILOGW("The current user is not foreground.");
+        return DMS_NOT_FOREGROUND_USER;
+    }
+    auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+    if (sendMgr == nullptr) {
+        HILOGI("GetSendMgr failed.");
+        return DMS_NOT_GET_MANAGER;
+    }
+    return sendMgr->SetMissionContinueState(missionId, state);
 }
 #endif
 

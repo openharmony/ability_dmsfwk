@@ -19,6 +19,7 @@
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/wifi_state_adapter.h"
+#include "multi_user_manager.h"
 #include "wifi_device.h"
 #include "wifi_msg.h"
 
@@ -35,7 +36,12 @@ void WifiStateListener::OnReceiveEvent(const EventFwk::CommonEventData &data)
         case int32_t(OHOS::Wifi::WifiState::DISABLED): {
             HILOGI("on wifi disabled");
             WifiStateAdapter::GetInstance().UpdateWifiState(false);
-            DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
+            auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+            if (recvMgr == nullptr) {
+                HILOGI("GetRecvMgr failed.");
+                return;
+            }
+            recvMgr->OnContinueSwitchOff();
             break;
         }
 

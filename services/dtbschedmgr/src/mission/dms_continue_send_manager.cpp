@@ -30,6 +30,7 @@
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/dsched_sync_e2e.h"
 #include "mission/wifi_state_adapter.h"
+#include "multi_user_manager.h"
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
 #include "switch_status_dependency.h"
@@ -47,8 +48,6 @@ const std::string TIMEOUT_UNFOCUSED_TASK = "timeout_unfocused_task";
 const std::string SCREEN_OFF_UNFOCUSED_TASK = "screen_off_unfocused_task";
 }
 
-IMPLEMENT_SINGLE_INSTANCE(DMSContinueSendMgr);
-
 void DMSContinueSendMgr::Init()
 {
     HILOGI("Init start");
@@ -57,9 +56,7 @@ void DMSContinueSendMgr::Init()
         return;
     }
     {
-        MMIAdapter::GetInstance().Init();
-        SoftbusAdapter::GetInstance().Init();
-        screenOffHandler_ = std::make_shared<ScreenOffHandler>();
+        screenOffHandler_ = std::make_shared<ScreenOffHandler>(shared_from_this());
 
         eventThread_ = std::thread(&DMSContinueSendMgr::StartEvent, this);
         std::unique_lock<std::mutex> lock(eventMutex_);
@@ -80,8 +77,6 @@ void DMSContinueSendMgr::Init()
 void DMSContinueSendMgr::UnInit()
 {
     HILOGI("UnInit start");
-    MMIAdapter::GetInstance().UnInit();
-    SoftbusAdapter::GetInstance().UnInit();
     if (eventHandler_ != nullptr && eventHandler_->GetEventRunner() != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
         eventThread_.join();
@@ -279,6 +274,13 @@ void DMSContinueSendMgr::RemoveMMIListener()
 
     mmiMonitorId_ = INVALID_MISSION_ID;
     return;
+}
+
+void DMSContinueSendMgr::UserSwitchedRemoveMMIListener()
+{
+    HILOGD("UserSwitched MMI listener remove start.");
+    RemoveMMIListener();
+    HILOGD("UserSwitched MMI listener remove end.");
 }
 
 int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId, FocusedReason reason)
@@ -633,7 +635,7 @@ int32_t DMSContinueSendMgr::GetBundleNameIdAndContinueTypeId(const int32_t missi
 
 void DMSContinueSendMgr::OnMMIEvent()
 {
-    DMSContinueSendMgr::GetInstance().NotifyMissionFocused(INVALID_MISSION_ID, FocusedReason::MMI);
+    NotifyMissionFocused(INVALID_MISSION_ID, FocusedReason::MMI);
 }
 
 int32_t DMSContinueSendMgr::NotifyDeviceOnline()
@@ -681,6 +683,11 @@ void DMSContinueSendMgr::OnDeviceScreenOn()
     eventHandler_->PostTask(feedfunc);
 }
 
+DMSContinueSendMgr::ScreenOffHandler::ScreenOffHandler(const std::shared_ptr<DMSContinueSendMgr>& dmsContinueSendMgr)
+    : dmsContinueSendMgr_(dmsContinueSendMgr)
+{
+}
+
 int32_t DMSContinueSendMgr::ScreenOffHandler::GetMissionId()
 {
     return unfoInfo_.missionId;
@@ -711,11 +718,16 @@ void DMSContinueSendMgr::ScreenOffHandler::OnDeviceScreenOff(int32_t missionId)
 {
     HILOGI("ScreenOffHandler::OnDeviceScreenOff called");
     isScreenOn_ = false;
+    std::shared_ptr<DMSContinueSendMgr> sendMgr = dmsContinueSendMgr_.lock();
+    if (sendMgr == nullptr) {
+        HILOGW("sendMgr is nullptr.");
+        return;
+    }
     if (unfoInfo_.missionId != INVALID_MISSION_ID && (GetTickCount()- unfoInfo_.unfoTime) < TIME_DELAYED) {
         // handle unfocus before screen off
-        DMSContinueSendMgr::GetInstance().SendScreenOffEvent(DMS_FOCUSED_TYPE);
+        sendMgr->SendScreenOffEvent(DMS_FOCUSED_TYPE);
     }
-    DMSContinueSendMgr::GetInstance().PostUnfocusedTaskWithDelay(missionId, UnfocusedReason::SCREENOFF);
+    sendMgr->PostUnfocusedTaskWithDelay(missionId, UnfocusedReason::SCREENOFF);
 }
 
 void DMSContinueSendMgr::ScreenOffHandler::OnDeviceScreenOn()

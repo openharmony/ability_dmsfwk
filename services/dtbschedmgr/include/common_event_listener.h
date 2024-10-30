@@ -32,8 +32,16 @@ public:
 
     void OnReceiveEvent(const EventFwk::CommonEventData &eventData);
     int32_t GetForegroundOsAccountLocalId();
-    AccountSA::OsAccountType GetOsAccountType(int32_t &accountId);
-    void OnUserSwitched();
+private:
+    void HandleScreenLocked();
+    void HandleScreenOff();
+    void HandleScreenUnLocked();
+    void HandleScreenOn();
+    void HandleUserSwitched(int32_t accountId);
+    void HandlePackageAdded(const std::string& bundleName);
+    void HandlePackageChange(const std::string& bundleName);
+    void HandlePackageRemoved(const std::string& bundleName);
+    void HandleUserRemoved(int32_t accountId);
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS

@@ -38,6 +38,7 @@
 #include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_log.h"
 #include "dtbschedmgr_device_info_storage.h"
+#include "multi_user_manager.h"
 #include "parcel_helper.h"
 
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
@@ -568,6 +569,16 @@ int32_t DistributedSchedStub::ContinueMissionInner(MessageParcel& data, MessageP
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 
+void SetContinueType(std::string& continueType, std::string& bundleName)
+{
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    if (recvMgr == nullptr) {
+        HILOGI("GetRecvMgr failed.");
+        return;
+    }
+    continueType = recvMgr->GetContinueType(bundleName);
+}
+
 int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& data, MessageParcel& reply)
 {
     bool isLocalCalling = IPCSkeleton::IsLocalCalling();
@@ -599,7 +610,7 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
     PARCEL_READ_HELPER_NORET(data, String, srcBundleName);
     PARCEL_READ_HELPER_NORET(data, String, continueType);
     if (continueType == "") {
-        continueType = DMSContinueRecvMgr::GetInstance().GetContinueType(bundleName);
+        SetContinueType(continueType, bundleName);
     }
 
     int32_t result = ERR_OK;

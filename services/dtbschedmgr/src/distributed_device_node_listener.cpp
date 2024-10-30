@@ -24,6 +24,7 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_send_manager.h"
+#include "multi_user_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -44,7 +45,12 @@ void DistributedDeviceNodeListener::OnDeviceOnline(const DistributedHardware::Dm
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     DistributedSchedService::GetInstance().OnDeviceOnlineEx(deviceInfo);
 #endif
-    DMSContinueSendMgr::GetInstance().NotifyDeviceOnline();
+    auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+    if (sendMgr == nullptr) {
+        HILOGI("GetSendMgr failed.");
+        return;
+    }
+    sendMgr->NotifyDeviceOnline();
 }
 
 void DistributedDeviceNodeListener::OnDeviceOffline(const DistributedHardware::DmDeviceInfo& deviceInfo)

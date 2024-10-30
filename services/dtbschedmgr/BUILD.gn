@@ -136,6 +136,7 @@ ohos_shared_library("distributedschedsvr") {
     "src/dms_token_callback.cpp",
     "src/dms_version_manager.cpp",
     "src/dtbschedmgr_device_info_storage.cpp",
+    "src/multi_user_manager.cpp",
     "src/softbus_adapter/allconnectmgr/dsched_all_connect_manager.cpp",
     "src/softbus_adapter/transport/dsched_data_buffer.cpp",
     "src/softbus_adapter/transport/dsched_softbus_session.cpp",

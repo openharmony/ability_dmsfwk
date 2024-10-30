@@ -17,6 +17,7 @@
 
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_recv_manager.h"
+#include "multi_user_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -26,7 +27,12 @@ const std::string TAG = "DistributedMissionDiedListener";
 void DistributedMissionDiedListener::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     HILOGD("called");
-    DMSContinueRecvMgr::GetInstance().NotifyDied(remote.promote());
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    if (recvMgr == nullptr) {
+        HILOGI("GetRecvMgr failed.");
+        return;
+    }
+    recvMgr->NotifyDied(remote.promote());
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

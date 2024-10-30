@@ -18,6 +18,7 @@
 #include <string>
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_recv_manager.h"
+#include "multi_user_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -27,7 +28,12 @@ const std::string TAG = "DistributedMissionBroadcastListener";
 void DistributedMissionBroadcastListener::OnDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen)
 {
     HILOGI("OnDataRecv, dataLen = %{public}u", dataLen);
-    DMSContinueRecvMgr::GetInstance().NotifyDataRecv(senderNetworkId, payload, dataLen);
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    if (recvMgr == nullptr) {
+        HILOGI("GetRecvMgr failed.");
+        return;
+    }
+    recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -21,6 +21,7 @@
 
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_send_manager.h"
+#include "multi_user_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -126,7 +127,12 @@ void MMIAdapter::HandleRawMMIEvent()
         return;
     }
     isMMIFreezed_ = true;
-    DMSContinueSendMgr::GetInstance().OnMMIEvent();
+    auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+    if (sendMgr == nullptr) {
+        HILOGI("GetSendMgr failed.");
+        return;
+    }
+    sendMgr->OnMMIEvent();
     PostUnfreezeMMIEvent();
 }
 
