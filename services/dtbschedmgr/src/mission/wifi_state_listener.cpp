@@ -34,11 +34,6 @@ void WifiStateListener::OnReceiveEvent(const EventFwk::CommonEventData &data)
     switch (data.GetCode()) {
         case int32_t(OHOS::Wifi::WifiState::DISABLED): {
             HILOGI("on wifi disabled");
-            if (CheckWifiStateIsActived()) {
-                WifiStateAdapter::GetInstance().UpdateWifiState(true);
-                HILOGI("WifiState is STATE_SEMIACTIVE");
-                return;
-            }
             WifiStateAdapter::GetInstance().UpdateWifiState(false);
             DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
             break;
