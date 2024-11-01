@@ -141,7 +141,7 @@ constexpr int32_t DMSDURATION_STARTABILITY = 6;
 constexpr int32_t HID_HAP = 10000; /* first hap user */
 constexpr int32_t WINDOW_MANAGER_SERVICE_ID = 4606;
 constexpr int32_t SEMI_WIFI_ID = 1010;
-static const std::string CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
+DataShareManager &dataShareManager = DataShareManager::GetInstance();
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedService);
@@ -171,6 +171,7 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
     RemoveSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID);
     DistributedSchedAdapter::GetInstance().UnRegisterMissionListener(missionFocusedListener_);
 #endif
+    dataShareManager.UnregisterObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY);
     HILOGI("OnStop dms service end");
 }
 
@@ -340,14 +341,15 @@ void DistributedSchedService::OnAddSystemAbility(int32_t systemAbilityId, const 
 void DistributedSchedService::InitDataShareManager()
 {
     DataShareManager::ObserverCallback observerCallback = [this]() {
-        bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
+        dataShareManager.SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
+        HILOGD("dsMgr IsCurrentContinueSwitchOn : %{public}d", dataShareManager.IsCurrentContinueSwitchOn());
         int32_t missionId = GetCurrentMissionId();
         if (missionId <= 0) {
             HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
             return;
         }
-        DmsUE::GetInstance().ChangedSwitchState(IsContinueSwitchOn, ERR_OK);
-        if (IsContinueSwitchOn) {
+        DmsUE::GetInstance().ChangedSwitchState(dataShareManager.IsCurrentContinueSwitchOn(), ERR_OK);
+        if (dataShareManager.IsCurrentContinueSwitchOn()) {
             DMSContinueSendMgr::GetInstance().NotifyMissionFocused(missionId, FocusedReason::INIT);
             DSchedContinueManager::GetInstance().Init();
         } else {
@@ -356,7 +358,10 @@ void DistributedSchedService::InitDataShareManager()
             DSchedContinueManager::GetInstance().UnInit();
         };
     };
-    dataShareManager_.RegisterObserver(CONTINUE_SWITCH_STATUS_KEY, observerCallback);
+    dataShareManager.SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
+    HILOGD("dsMgr IsCurrentContinueSwitchOn : %{public}d", dataShareManager.IsCurrentContinueSwitchOn());
+    dataShareManager.RegisterObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY,
+        observerCallback);
     DmsUE::GetInstance().OriginalSwitchState(SwitchStatusDependency::GetInstance().IsContinueSwitchOn(), ERR_OK);
     HILOGI("Init data share manager, register observer end.");
 }
@@ -620,8 +625,7 @@ int32_t DistributedSchedService::ContinueLocalMissionDealFreeInstall(OHOS::AAFwk
 int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDeviceId, int32_t missionId,
     const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
-    bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    if (!IsContinueSwitchOn) {
+    if (!dataShareManager.IsCurrentContinueSwitchOn()) {
         HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }
@@ -697,7 +701,7 @@ int32_t DistributedSchedService::ContinueAbilityWithTimeout(const std::string& d
 int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
     int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
-    if (!SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
+    if (!dataShareManager.IsCurrentContinueSwitchOn()) {
         HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }
@@ -2971,7 +2975,7 @@ int32_t DistributedSchedService::StartLocalAbility(const FreeInstallInfo& info, 
 
 int32_t DistributedSchedService::StartAbility(const OHOS::AAFwk::Want& want, int32_t requestCode)
 {
-    if (!SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
+    if (!dataShareManager.IsCurrentContinueSwitchOn()) {
         HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }

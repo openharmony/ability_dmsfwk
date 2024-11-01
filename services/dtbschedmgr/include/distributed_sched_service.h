@@ -328,7 +328,6 @@ private:
     std::mutex registerMutex_;
     std::atomic<int32_t> token_ {0};
     std::map<std::string, sptr<AppStateObserver>> bundleNameMap_;
-    DataShareManager dataShareManager_;
     sptr<DistributedMissionFocusedListener> missionFocusedListener_ = nullptr;
 };
 
