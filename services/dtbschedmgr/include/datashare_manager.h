@@ -20,11 +20,10 @@
 
 #include "datashare_helper.h"
 #include "data_ability_observer_stub.h"
+#include "single_instance.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
-const std::string SETTINGS_DATA_URI =
-    "datashare:///com.ohos.settingsdata/entry/settingsdata/SETTINGSDATA?Proxy=true&key=Continue_Switch_Status";
 
 class SettingObserver : public AAFwk::DataAbilityObserverStub {
 public:
@@ -39,15 +38,22 @@ private:
 };
 
 class DataShareManager {
+    DECLARE_SINGLE_INSTANCE(DataShareManager);
 public:
     void RegisterObserver(const std::string &key, SettingObserver::ObserverCallback &observerCallback);
     void UnregisterObserver(const std::string &key);
 
     using ObserverCallback = std::function<void()>;
+
+    int32_t GetLocalAccountId();
+    Uri AssembleUserSecureUri(int userId, const std::string& key);
+    void UpdateSwitchStatus(const std::string &key, const std::string &value);
+    std::atomic<bool> isCurrentContinueSwitchOn_ = true;
+    bool IsCurrentContinueSwitchOn();
+    void SetCurrentContinueSwitch(bool status);
     
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
-    Uri AssembleUri(const std::string &key);
     sptr<SettingObserver> GetSettingObserver(const std::string &key);
 
 private:

@@ -44,7 +44,6 @@ constexpr int64_t TIME_DELAYED = 500; // determines whether normal unfocused or 
 const std::string TAG = "DMSContinueSendMgr";
 const std::string TIMEOUT_UNFOCUSED_TASK = "timeout_unfocused_task";
 const std::string SCREEN_OFF_UNFOCUSED_TASK = "screen_off_unfocused_task";
-static const std::string CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DMSContinueSendMgr);
@@ -446,8 +445,7 @@ int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
 
-    bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    if (!IsContinueSwitchOn) {
+    if (!DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
         HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }
@@ -766,8 +764,7 @@ int32_t DMSContinueSendMgr::SetStateSendEvent(const uint16_t bundleNameId, const
         AddMMIListener();
     }
 
-    bool IsContinueSwitchOn = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-    if (!IsContinueSwitchOn) {
+    if (!DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
         HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }
