@@ -27,6 +27,7 @@
 #include "dsched_continue_source_start_state.h"
 #include "dsched_continue_source_wait_end_state.h"
 #include "dsched_continue_state_machine.h"
+#include "mock_dtbschedmgr_device_info.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -39,6 +40,7 @@ public:
     void TearDown();
     std::shared_ptr<DSchedContinue> CreateObject();
     std::shared_ptr<DSchedContinueDataState> dataStateTest_;
+    static inline std::shared_ptr<MockDmsMgrDeviceInfoStore> mockStateTest_ = nullptr;
 };
 
 class DSchedContinueSinkEndStateTest : public testing::Test {

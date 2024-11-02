@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#define private public
 #include "continue_scene_session_handler_test.h"
+#undef private
 
 #include "dtbschedmgr_log.h"
 #include "test_log.h"
@@ -88,6 +90,22 @@ HWTEST_F(ContinueSceneSessionHandlerTest, GetPersistentId_001, TestSize.Level3)
     int32_t err = ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId);
     EXPECT_EQ(static_cast<int32_t>(INVALID_PARAMETERS_ERR), err);
     DTEST_LOG << "ContinueSceneSessionHandlerTest GetPersistentId_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetPersistentId_002
+ * @tc.desc: get persistentId by continueSessionId
+ * @tc.type: FUNC
+ * @tc.require: SR20240116512594
+ */
+HWTEST_F(ContinueSceneSessionHandlerTest, GetPersistentId_002, TestSize.Level3)
+{
+    DTEST_LOG << "ContinueSceneSessionHandlerTest GetPersistentId_002 begin" << std::endl;
+    int32_t persistentId;
+    ContinueSceneSessionHandler::GetInstance().continueSessionId_.clear();
+    int32_t err = ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId);
+    EXPECT_EQ(INVALID_PARAMETERS_ERR, err);
+    DTEST_LOG << "ContinueSceneSessionHandlerTest GetPersistentId_002 end" << std::endl;
 }
 
 /**

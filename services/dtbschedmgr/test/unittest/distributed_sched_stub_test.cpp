@@ -2213,5 +2213,74 @@ HWTEST_F(DistributedSchedStubTest, StopRemoteExtensionAbilityInner_002, TestSize
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest StopRemoteExtensionAbilityInner_002 end" << std::endl;
 }
+
+/**
+ * @tc.name: IsRemoteInstall_001
+ * @tc.desc: check IsRemoteInstall
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, IsRemoteInstall_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest IsRemoteInstall_001 begin" << std::endl;
+    std::string networkId = "networkId";
+    std::string bundleName = "bundleName";
+    bool result = DistributedSchedService::GetInstance().IsRemoteInstall(networkId, bundleName);
+    EXPECT_EQ(result, false);
+    DTEST_LOG << "DistributedSchedStubTest IsRemoteInstall_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: RegisterOffListenerInner_001
+ * @tc.desc: check RegisterOffListenerInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, RegisterOffListenerInner_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest RegisterOffListenerInner_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = DistributedSchedService::GetInstance().RegisterOffListenerInner(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+
+    data.WriteString("type");
+    ret = DistributedSchedService::GetInstance().RegisterOffListenerInner(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+
+    data.WriteString("type");
+    sptr<IRemoteObject> onListener(new DistributedSchedService());
+    data.WriteRemoteObject(onListener);
+    ret = DistributedSchedService::GetInstance().RegisterOffListenerInner(data, reply);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedStubTest RegisterOffListenerInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: IsUsingQos_001
+ * @tc.desc: check IsUsingQos
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, IsUsingQos_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest IsUsingQos_001 begin" << std::endl;
+    std::string remoteDeviceId = "remoteDeviceId";
+    bool result = DistributedSchedService::GetInstance().IsUsingQos(remoteDeviceId);
+    EXPECT_EQ(result, true);
+    DTEST_LOG << "DistributedSchedStubTest IsUsingQos_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyDSchedEventResultFromRemoteInner_001
+ * @tc.desc: check NotifyDSchedEventResultFromRemoteInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, NotifyDSchedEventResultFromRemoteInner_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest NotifyDSchedEventResultFromRemoteInner_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = DistributedSchedService::GetInstance().NotifyDSchedEventResultFromRemoteInner(data, reply);
+    EXPECT_NE(result, ERR_NULL_OBJECT);
+    DTEST_LOG << "DistributedSchedStubTest NotifyDSchedEventResultFromRemoteInner_001 end" << std::endl;
+}
 }
 }
