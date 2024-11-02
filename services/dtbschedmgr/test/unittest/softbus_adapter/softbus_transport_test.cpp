@@ -29,6 +29,7 @@ constexpr uint16_t SIZE_4 = 4;
 constexpr uint32_t SIZE_6 = 6;
 constexpr size_t OFFSET_1 = 1;
 constexpr size_t OFFSET_2 = 2;
+constexpr size_t OFFSET_3 = 3;
 constexpr int32_t COUNT = 2;
 constexpr int32_t SESSIONID = 0;
 constexpr uint32_t SEQ_1 = 3;
@@ -207,9 +208,23 @@ HWTEST_F(DSchedDataBufferTest, SetRange_002, TestSize.Level3)
 {
     DTEST_LOG << "DSchedDataBufferTest SetRange_002 begin" << std::endl;
     ASSERT_NE(dataBufferTest_, nullptr);
-    int32_t ret = dataBufferTest_->SetRange(OFFSET_1, SIZE_2);
+    int32_t ret = dataBufferTest_->SetRange(OFFSET_3, SIZE_1);
     EXPECT_EQ(ret, -1);
     DTEST_LOG << "DSchedDataBufferTest SetRange_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetRange_003
+ * @tc.desc: call SetRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedDataBufferTest, SetRange_003, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedDataBufferTest SetRange_002 begin" << std::endl;
+    ASSERT_NE(dataBufferTest_, nullptr);
+    int32_t ret = dataBufferTest_->SetRange(OFFSET_2, 0);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DSchedDataBufferTest SetRange_003 end" << std::endl;
 }
 
 /**

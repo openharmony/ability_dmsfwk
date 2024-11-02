@@ -1384,7 +1384,7 @@ HWTEST_F(DMSMissionManagerTest, testMissionSnapshotChanged001, TestSize.Level3)
     DistributedSchedMissionManager::GetInstance().NotifyDmsProxyProcessDied();
     std::vector<DstbMissionInfo> missionInfos;
     DistributedSchedMissionManager::GetInstance().InitAllSnapshots(missionInfos);
-    EXPECT_CALL(*mockDmsAdapter, GetLocalMissionSnapshotInfo(_, _, _)).WillOnce(Return(true));
+    EXPECT_CALL(*mockDmsAdapter, GetLocalMissionSnapshotInfo(_, _, _)).WillOnce(Return(1)).WillOnce(Return(1));
     auto ret = DistributedSchedMissionManager::GetInstance().MissionSnapshotChanged(NUM_MISSIONS);
     EXPECT_NE(ret, ERR_NONE);
     DTEST_LOG << "testMissionSnapshotChanged001 end" << std::endl;

@@ -91,6 +91,22 @@ HWTEST_F(DistributedSchedUtilsTest, IsValidPath_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsValidPath_003
+ * @tc.desc: File path is invalid
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DistributedSchedUtilsTest, IsValidPath_003, TestSize.Level1)
+{
+    std::string inFilePath = "";
+    std::string realFilePath = "";
+    EXPECT_FALSE(IsValidPath(inFilePath, realFilePath));
+
+    inFilePath = "/data/123_test.json";
+    EXPECT_FALSE(IsValidPath(inFilePath, realFilePath));
+}
+
+/**
  * @tc.name: CheckBundleContinueConfig_001
  * @tc.desc: Check bundle continue config when existing config file
  * @tc.type: FUNC
