@@ -18,6 +18,7 @@
 #include "cJSON.h"
 #include "parcel.h"
 
+#include "distributedWant/distributed_want.h"
 #include "distributed_sched_utils.h"
 #include "dms_constant.h"
 #include "dtbschedmgr_log.h"
@@ -220,8 +221,9 @@ int32_t DSchedContinueDataCmd::Marshal(std::string &jsonStr)
 
     cJSON_AddStringToObject(rootValue, "BaseCmd", baseJsonStr.c_str());
 
+    DistributedWant dtbWant(want_);
     Parcel wantParcel;
-    if (!want_.Marshalling(wantParcel)) {
+    if (!dtbWant.Marshalling(wantParcel)) {
         cJSON_Delete(rootValue);
         return INVALID_PARAMETERS_ERR;
     }
@@ -418,20 +420,11 @@ int32_t DSchedContinueDataCmd::UnmarshalParcel(const std::string &jsonStr)
         HILOGE("Want term is null or not string.");
         return INVALID_PARAMETERS_ERR;
     }
-    Parcel wantParcel;
-    int32_t ret = Base64StrToParcel(wantStr->valuestring, wantParcel);
-    if (ret != ERR_OK) {
+    if (UnmarshalWantStr(wantStr->valuestring) != ERR_OK) {
         cJSON_Delete(rootValue);
-        HILOGE("Want parcel Base64Str unmarshal fail, ret %{public}d.", ret);
+        HILOGE("UnmarshalWantStr failed!");
         return INVALID_PARAMETERS_ERR;
-    }
-    auto wantPtr = AAFwk::Want::Unmarshalling(wantParcel);
-    if (wantPtr == nullptr) {
-        cJSON_Delete(rootValue);
-        HILOGE("AAFwk Want unmarshalling fail, check return null.");
-        return INVALID_PARAMETERS_ERR;
-    }
-    want_ = *wantPtr;
+    };
 
     cJSON *abilityInfoStr = cJSON_GetObjectItemCaseSensitive(rootValue, "AbilityInfo");
     if (abilityInfoStr == nullptr || !cJSON_IsString(abilityInfoStr) || (abilityInfoStr->valuestring == nullptr)) {
@@ -440,7 +433,7 @@ int32_t DSchedContinueDataCmd::UnmarshalParcel(const std::string &jsonStr)
         return INVALID_PARAMETERS_ERR;
     }
     Parcel abilityParcel;
-    ret = Base64StrToParcel(abilityInfoStr->valuestring, abilityParcel);
+    int32_t ret = Base64StrToParcel(abilityInfoStr->valuestring, abilityParcel);
     if (ret != ERR_OK) {
         cJSON_Delete(rootValue);
         HILOGE("AbilityInfo parcel Base64Str unmarshal fail, ret %{public}d.", ret);
@@ -458,7 +451,32 @@ int32_t DSchedContinueDataCmd::UnmarshalParcel(const std::string &jsonStr)
     return ERR_OK;
 }
 
-int32_t DSchedContinueDataCmd::UnmarshalCallerInfo(std::string &jsonStr)
+int32_t DSchedContinueDataCmd::UnmarshalWantStr(const std::string &jsonStr)
+{
+    Parcel wantParcel;
+    int32_t ret = Base64StrToParcel(jsonStr, wantParcel);
+    if (ret != ERR_OK) {
+        HILOGE("Want parcel Base64Str unmarshal fail, ret %{public}d.", ret);
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    auto dtbWantPtr = DistributedWant::Unmarshalling(wantParcel);
+    if (dtbWantPtr == nullptr) {
+        HILOGE("Distributed want unmarshalling fail, check return null.");
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    DistributedWant dtbWant = *dtbWantPtr;
+    auto wantPtr = dtbWant.ToWant();
+    if (wantPtr == nullptr) {
+        HILOGE("Convert distributedWant to want failed.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    want_ = *wantPtr;
+    return ERR_OK;
+}
+
+int32_t DSchedContinueDataCmd::UnmarshalCallerInfo(const std::string &jsonStr)
 {
     cJSON *rootValue = cJSON_Parse(jsonStr.c_str());
     if (rootValue == nullptr) {
@@ -510,7 +528,7 @@ int32_t DSchedContinueDataCmd::UnmarshalCallerInfo(std::string &jsonStr)
     return ERR_OK;
 }
 
-int32_t DSchedContinueDataCmd::UnmarshalCallerInfoExtra(std::string &jsonStr)
+int32_t DSchedContinueDataCmd::UnmarshalCallerInfoExtra(const std::string &jsonStr)
 {
     cJSON *rootValue = cJSON_Parse(jsonStr.c_str());
     if (rootValue == nullptr) {
@@ -558,7 +576,7 @@ int32_t DSchedContinueDataCmd::UnmarshalCallerInfoExtra(std::string &jsonStr)
     return ERR_OK;
 }
 
-int32_t DSchedContinueDataCmd::UnmarshalAccountInfo(std::string &jsonStr)
+int32_t DSchedContinueDataCmd::UnmarshalAccountInfo(const std::string &jsonStr)
 {
     cJSON *rootValue = cJSON_Parse(jsonStr.c_str());
     if (rootValue == nullptr) {
