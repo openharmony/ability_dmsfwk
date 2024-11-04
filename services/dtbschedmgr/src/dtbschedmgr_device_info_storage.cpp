@@ -29,6 +29,7 @@
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_recv_manager.h"
+#include "multi_user_manager.h"
 
 using namespace std;
 namespace OHOS {
@@ -402,10 +403,15 @@ void DtbschedmgrDeviceInfoStorage::DeviceOfflineNotify(const std::string& networ
 void DtbschedmgrDeviceInfoStorage::OnDeviceInfoChanged(const std::string& deviceId)
 {
     HILOGI("OnDeviceInfoChanged called");
-    if (!DMSContinueRecvMgr::GetInstance().CheckRegSoftbusListener() &&
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    if (recvMgr == nullptr) {
+        HILOGI("GetRecvMgr failed.");
+        return;
+    }
+    if (!recvMgr->CheckRegSoftbusListener() &&
         DistributedHardware::DeviceManager::GetInstance().IsSameAccount(deviceId)) {
         HILOGI("DMSContinueRecvMgr need init");
-        DMSContinueRecvMgr::GetInstance().Init();
+        recvMgr->Init();
     }
 }
 

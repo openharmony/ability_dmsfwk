@@ -87,9 +87,7 @@ enum class UnfocusedReason {
     MAX
 };
 
-class DMSContinueSendMgr {
-    DECLARE_SINGLE_INSTANCE(DMSContinueSendMgr);
-
+class DMSContinueSendMgr : public std::enable_shared_from_this<DMSContinueSendMgr> {
 public:
     constexpr static uint8_t DMS_DATA_LEN = 3; // Dms data Length
     constexpr static int32_t DMS_SEND_LEN = 4; // Maximum broadcast length
@@ -107,6 +105,7 @@ public:
     class ScreenOffHandler {
     public:
         ScreenOffHandler() = default;
+        explicit ScreenOffHandler(const std::shared_ptr<DMSContinueSendMgr>& dmsContinueSendMgr);
         virtual ~ScreenOffHandler() = default;
 
         int32_t GetMissionId();
@@ -123,6 +122,7 @@ public:
     private:
         bool isScreenOn_ = true;
         lastUnfoInfo unfoInfo_ = { INVALID_MISSION_ID, 0, "", 0 };
+        std::weak_ptr<DMSContinueSendMgr> dmsContinueSendMgr_;
     };
 
     void Init();
@@ -138,6 +138,7 @@ public:
     int32_t SendScreenOffEvent(uint8_t type);
     void DeleteContinueLaunchMissionInfo(const int32_t missionId);
     int32_t GetContinueLaunchMissionInfo(const int32_t missionId, ContinueLaunchMissionInfo& missionInfo);
+    void UserSwitchedRemoveMMIListener();
 
 private:
     int32_t GetCurrentMissionId();

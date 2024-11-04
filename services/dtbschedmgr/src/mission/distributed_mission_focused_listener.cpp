@@ -18,7 +18,9 @@
 #include "continue/dsched_continue_manager.h"
 #include "dfx/distributed_radar.h"
 #include "dtbschedmgr_log.h"
+#include "ipc_skeleton.h"
 #include "mission/dms_continue_send_manager.h"
+#include "multi_user_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -33,9 +35,20 @@ void DistributedMissionFocusedListener::OnMissionCreated(int32_t missionId)
 void DistributedMissionFocusedListener::OnMissionDestroyed(int32_t missionId)
 {
     HILOGD("OnMissionDestroyed, missionId = %{public}d", missionId);
-    DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(missionId, UnfocusedReason::DESTORY);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
+        HILOGW("Current process is not foreground. callingUid = %{public}d", callingUid);
+        return;
+    }
+
+    auto sendMgr = MultiUserManager::GetInstance().GetSendMgrByCallingUid(callingUid);
+    if (sendMgr == nullptr) {
+        HILOGI("GetSendMgr failed.");
+        return;
+    }
+    sendMgr->NotifyMissionUnfocused(missionId, UnfocusedReason::DESTORY);
     DSchedContinueManager::GetInstance().NotifyTerminateContinuation(missionId);
-    DMSContinueSendMgr::GetInstance().DeleteContinueLaunchMissionInfo(missionId);
+    sendMgr->DeleteContinueLaunchMissionInfo(missionId);
 }
 
 void DistributedMissionFocusedListener::OnMissionSnapshotChanged(int32_t missionId)
@@ -51,13 +64,35 @@ void DistributedMissionFocusedListener::OnMissionMovedToFront(int32_t missionId)
 void DistributedMissionFocusedListener::OnMissionFocused(int32_t missionId)
 {
     HILOGD("OnMissionFocused, missionId = %{public}d", missionId);
-    DMSContinueSendMgr::GetInstance().NotifyMissionFocused(missionId, FocusedReason::NORMAL);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
+        HILOGW("Current process is not foreground. callingUid = %{public}d", callingUid);
+        return;
+    }
+
+    auto sendMgr = MultiUserManager::GetInstance().GetSendMgrByCallingUid(callingUid);
+    if (sendMgr == nullptr) {
+        HILOGI("GetSendMgr failed.");
+        return;
+    }
+    sendMgr->NotifyMissionFocused(missionId, FocusedReason::NORMAL);
 }
 
 void DistributedMissionFocusedListener::OnMissionUnfocused(int32_t missionId)
 {
     HILOGD("OnMissionUnFocused, missionId = %{public}d", missionId);
-    DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(missionId, UnfocusedReason::NORMAL);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
+        HILOGW("Current process is not foreground. callingUid = %{public}d", callingUid);
+        return;
+    }
+
+    auto sendMgr = MultiUserManager::GetInstance().GetSendMgrByCallingUid(callingUid);
+    if (sendMgr == nullptr) {
+        HILOGI("GetSendMgr failed.");
+        return;
+    }
+    sendMgr->NotifyMissionUnfocused(missionId, UnfocusedReason::NORMAL);
 }
 
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
@@ -70,7 +105,18 @@ void DistributedMissionFocusedListener::OnMissionIconUpdated([[maybe_unused]]int
 void DistributedMissionFocusedListener::OnMissionClosed(int32_t missionId)
 {
     HILOGD("OnMissionClosed, missionId = %{public}d", missionId);
-    DMSContinueSendMgr::GetInstance().NotifyMissionUnfocused(missionId, UnfocusedReason::CLOSE);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
+        HILOGW("Current process is not foreground. callingUid = %{public}d", callingUid);
+        return;
+    }
+
+    auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+    if (sendMgr == nullptr) {
+        HILOGI("GetSendMgr failed.");
+        return;
+    }
+    sendMgr->NotifyMissionUnfocused(missionId, UnfocusedReason::CLOSE);
 }
 
 void DistributedMissionFocusedListener::OnMissionLabelUpdated([[maybe_unused]]int32_t missionId)

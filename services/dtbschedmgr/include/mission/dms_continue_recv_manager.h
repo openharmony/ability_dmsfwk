@@ -61,8 +61,6 @@ struct currentIconInfo {
 };
 
 class DMSContinueRecvMgr {
-    DECLARE_SINGLE_INSTANCE(DMSContinueRecvMgr);
-
 public:
     constexpr static uint8_t DMS_DATA_LEN = 3; // Dms data Length
     constexpr static int32_t DMS_SEND_LEN = 4; // Maximum Broadcast Length

@@ -29,6 +29,7 @@
 #include "mission/distributed_bm_storage.h"
 #include "mission/dms_continue_send_manager.h"
 #include "mission/dms_continue_recv_manager.h"
+#include "multi_user_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -208,8 +209,12 @@ int32_t DSchedContinueManager::ContinueMission(const DSchedContinueInfo& continu
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     if (localDevId == srcDeviceId) {
         int32_t missionId = -1;
-        int32_t ret = DMSContinueSendMgr::GetInstance().GetMissionIdByBundleName(
-            continueInfo.sinkBundleName_, missionId);
+        auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+        if (sendMgr == nullptr) {
+            HILOGI("GetSendMgr failed.");
+            return DMS_NOT_GET_MANAGER;
+        }
+        int32_t ret = sendMgr->GetMissionIdByBundleName(continueInfo.sinkBundleName_, missionId);
         if (ret != ERR_OK) {
             HILOGE("get missionId fail, ret %{public}d.", ret);
             return INVALID_PARAMETERS_ERR;
@@ -515,7 +520,12 @@ void DSchedContinueManager::NotifyTerminateContinuation(const int32_t missionId)
         }
 
         ContinueLaunchMissionInfo missionInfo;
-        int32_t ret = DMSContinueSendMgr::GetInstance().GetContinueLaunchMissionInfo(missionId, missionInfo);
+        auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+        if (sendMgr == nullptr) {
+            HILOGI("GetSendMgr failed.");
+            return;
+        }
+        int32_t ret = sendMgr->GetContinueLaunchMissionInfo(missionId, missionInfo);
         if (ret != ERR_OK) {
             HILOGE("get continueLaunchMissionInfo failed, missionId %{public}d", missionId);
             return;
