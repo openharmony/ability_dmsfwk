@@ -18,6 +18,7 @@
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "multi_user_manager.h"
 #include "system_ability_definition.h"
 
 #define private public
@@ -85,6 +86,13 @@ public:
     void AddConnectCount(int32_t uid) const;
     void DecreaseConnectCount(int32_t uid) const;
 };
+
+static bool g_isForeground = true;
+
+bool MultiUserManager::IsCallerForeground(int32_t callingUid)
+{
+    return g_isForeground;
+}
 
 void AbilityCallCallbackTest::OnAbilityConnectDone(const AppExecFwk::ElementName& element,
     const sptr<IRemoteObject>& remoteObject, int32_t resultCode)
@@ -652,6 +660,30 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_020, TestSize.Level1)
     EXPECT_EQ(result, INVALID_REMOTE_PARAMETERS_ERR_CODE);
 
     DTEST_LOG << "DistributedSchedServiceTest CallAbility_020 end " << std::endl;
+}
+
+/**
+ * @tc.name: CallAbility_021
+ * @tc.desc: user is not foreground
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedCallTest, CallAbility_021, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceTest CallAbility_021 start " << std::endl;
+    OHOS::AAFwk::Want want;
+    want.SetElementName(MOCK_DEVICE_ID, "ohos.demo.test", "abilityTest");
+    sptr<IRemoteObject> callback = new AbilityCallCallbackTest();
+    int32_t callerPid = MOCK_PID;
+    uint32_t accessToken = 0;
+
+    DTEST_LOG << "DistributedSchedServiceTest mock illegal uid " << std::endl;
+    int32_t illegalUid = -1;
+    g_isForeground = false;
+    int32_t result = DistributedSchedService::GetInstance().StartRemoteAbilityByCall(want,
+        callback, illegalUid, callerPid, accessToken);
+    EXPECT_EQ(result, DMS_NOT_FOREGROUND_USER);
+
+    DTEST_LOG << "DistributedSchedServiceTest CallAbility_021 end " << std::endl;
 }
 
 void DistributedSchedCallTest::AddSession(const sptr<IRemoteObject>& connect,

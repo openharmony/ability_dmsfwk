@@ -24,6 +24,7 @@
 #undef private
 #include "mock_distributed_sched.h"
 #include "mock_remote_stub.h"
+#include "multi_user_manager.h"
 #include "parcel_helper.h"
 #include "test_log.h"
 #include "token_setproc.h"
@@ -68,6 +69,13 @@ void DistributedSchedStubTest::SetUp()
 {
     DTEST_LOG << "DistributedSchedStubTest::SetUp" << std::endl;
     DistributedSchedUtil::MockProcessAndPermission(FOUNDATION_PROCESS_NAME, PERMS, 1);
+}
+
+static bool g_isForeground = true;
+
+bool MultiUserManager::IsCallerForeground(int32_t callingUid)
+{
+    return g_isForeground;
 }
 
 void DistributedSchedStubTest::WaitHandlerTaskDone(const std::shared_ptr<AppExecFwk::EventHandler> &handler)
@@ -1440,8 +1448,10 @@ HWTEST_F(DistributedSchedStubTest, SetMissionContinueStateInner_001, TestSize.Le
 
     int32_t missionId = 0;
     int32_t state = 0;
+    int32_t callingUid = 0;
     data.WriteInt32(missionId);
     data.WriteInt32(state);
+    data.WriteInt32(callingUid);
     int32_t result = DistributedSchedService::GetInstance().SetMissionContinueStateInner(data, reply);
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest SetMissionContinueStateInner_001 end" << std::endl;

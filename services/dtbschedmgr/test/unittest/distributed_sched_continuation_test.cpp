@@ -1040,7 +1040,8 @@ HWTEST_F(DSchedContinuationTest, ContinueMission_003, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinuationTest ContinueMission_003 start" << std::endl;
     WantParams wantParams;
-    int32_t ret = DistributedSchedService::GetInstance().ContinueMission("string", "string", 1, nullptr, wantParams);
+    int32_t ret = DistributedSchedService::GetInstance().ContinueMission("string", "string", 1,
+        nullptr, wantParams);
     EXPECT_TRUE(ret != ERR_OK);
     DTEST_LOG << "DSchedContinuationTest ContinueMission_003 end" << std::endl;
 }

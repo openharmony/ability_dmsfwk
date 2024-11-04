@@ -73,8 +73,8 @@ public:
         const AccountInfo& accountInfo) = 0;
     virtual int32_t SendResultFromRemote(OHOS::AAFwk::Want& want, int32_t requestCode,
         const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t resultCode) = 0;
-    virtual int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
-        int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams) = 0;
+    virtual int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId, int32_t missionId,
+        const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams) = 0;
     virtual int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
         const std::string& bundleName, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
     {
@@ -115,12 +115,14 @@ public:
         return 0;
     }
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    virtual int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) = 0;
+    virtual int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
+        int32_t callingUid) = 0;
     virtual int32_t StartSyncMissionsFromRemote(const CallerInfo& callerInfo,
         std::vector<DstbMissionInfo>& missionInfos) = 0;
-    virtual int32_t StopSyncRemoteMissions(const std::string& devId) = 0;
+    virtual int32_t StopSyncRemoteMissions(const std::string& devId, int32_t callingUid) = 0;
     virtual int32_t StopSyncMissionsFromRemote(const CallerInfo& callerInfo) = 0;
-    virtual int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) = 0;
+    virtual int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj,
+        int32_t callingUid) = 0;
     virtual int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj, int32_t callingUid)
     {
         return 0;
@@ -136,7 +138,7 @@ public:
         std::unique_ptr<AAFwk::MissionSnapshot>& missionSnapshot) = 0;
     virtual int32_t NotifyMissionsChangedFromRemote(const std::vector<DstbMissionInfo>& missionInfos,
          const CallerInfo& callerInfo) = 0;
-    virtual int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
+    virtual int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state, int32_t callingUid)
     {
         return 0;
     }

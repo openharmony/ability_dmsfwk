@@ -26,6 +26,7 @@
 #include "distributed_sched_test_util.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "multi_user_manager.h"
 #include "parcel_helper.h"
 #include "test_log.h"
 
@@ -98,6 +99,13 @@ public:
         void OnRemoteDied() override;
     };
 };
+
+static bool g_isForeground = true;
+
+bool MultiUserManager::IsCallerForeground(int32_t callingUid)
+{
+    return g_isForeground;
+}
 
 void AbilityConnectCallbackTest::OnAbilityConnectDone(const AppExecFwk::ElementName& element,
     const sptr<IRemoteObject>& remoteObject, int32_t resultCode)
@@ -727,6 +735,24 @@ HWTEST_F(DistributedSchedConnectTest, ConnectRemoteAbility002, TestSize.Level4)
 }
 
 /**
+ * @tc.name: ConnectRemoteAbility
+ * @tc.desc: user is not foreground
+ * @tc.type: FUNC
+ * @tc.require: I5OOKG
+ */
+HWTEST_F(DistributedSchedConnectTest, ConnectRemoteAbility006, TestSize.Level4)
+{
+    DTEST_LOG << "DistributedSchedServiceTest ConnectRemoteAbility006 start" << std::endl;
+    OHOS::AAFwk::Want want;
+    want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
+    sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
+    g_isForeground = false;
+    int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbility(want, connect, -1, -1, -1);
+    EXPECT_EQ(ret, DMS_NOT_FOREGROUND_USER);
+    DTEST_LOG << "DistributedSchedServiceTest ConnectRemoteAbility006 end" << std::endl;
+}
+
+/**
  * @tc.name: ConnectAbilityFromRemote
  * @tc.desc: connect remote ability whith fake deviceId.
  * @tc.type: FUNC
@@ -1218,6 +1244,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallConnectRemoteAbility001, TestSize
     DistributedSchedService::GetInstance().GetUidLocked(sessionsList);
     DTEST_LOG << "DistributedSchedConnectTest GetUidLocked001 end" << std::endl;
 
+    g_isForeground = true;
     int32_t ret = proxy->ConnectRemoteAbility(want, connect, 0, 0, 0);
     EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectRemoteAbility001 end" << std::endl;
@@ -1245,6 +1272,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallConnectRemoteAbility002, TestSize
     DistributedSchedService::GetInstance().DecreaseConnectLocked(uid);
     DTEST_LOG << "DistributedSchedConnectTest DecreaseConnectLocked002 end" << std::endl;
 
+    g_isForeground = true;
     int32_t ret = proxy->ConnectRemoteAbility(want, nullptr, 0, 0, 0);
     EXPECT_EQ(ret, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectRemoteAbility002 end" << std::endl;
@@ -1386,6 +1414,8 @@ HWTEST_F(DistributedSchedConnectTest, ConnectRemoteAbility003, TestSize.Level4)
     int32_t uid = IPCSkeleton::GetCallingUid();
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     int32_t accessToken = IPCSkeleton::GetCallingTokenID();
+
+    g_isForeground = true;
     int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbility(want, connect, uid, pid, accessToken);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest ConnectRemoteAbility003 end" << std::endl;

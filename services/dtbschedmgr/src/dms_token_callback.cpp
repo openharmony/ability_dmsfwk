@@ -24,6 +24,7 @@
 #include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "multi_user_manager.h"
 #include "parcel_helper.h"
 #include "system_ability.h"
 #include "system_ability_definition.h"
@@ -39,6 +40,10 @@ const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
 int32_t DmsTokenCallback::SendResult(OHOS::AAFwk::Want& want, int32_t callerUid,
     int32_t requestCode, uint32_t accessToken, int32_t resultCode)
 {
+    if (!MultiUserManager::GetInstance().IsCallerForeground(callerUid)) {
+        HILOGW("The current user is not foreground. callingUid: %{public}d .", callerUid);
+        return DMS_NOT_FOREGROUND_USER;
+    }
     AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t ret = AccessToken::AccessTokenKit::GetNativeTokenInfo(IPCSkeleton::GetCallingTokenID(),
         nativeTokenInfo);

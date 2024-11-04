@@ -409,7 +409,8 @@ int32_t DistributedSchedProxy::NotifyProcessDiedFromRemote(const CallerInfo& cal
 }
 
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-int32_t DistributedSchedProxy::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag)
+int32_t DistributedSchedProxy::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
+    int32_t callingUid)
 {
     HILOGI("called");
     sptr<IRemoteObject> remote = Remote();
@@ -426,6 +427,7 @@ int32_t DistributedSchedProxy::StartSyncRemoteMissions(const std::string& devId,
     PARCEL_WRITE_HELPER(data, String16, Str8ToStr16(devId));
     PARCEL_WRITE_HELPER(data, Bool, fixConflict);
     PARCEL_WRITE_HELPER(data, Int64, tag);
+    PARCEL_WRITE_HELPER(data, Int32, callingUid);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::START_SYNC_MISSIONS), data, reply);
 }
 
@@ -458,7 +460,7 @@ int32_t DistributedSchedProxy::StartSyncMissionsFromRemote(const CallerInfo& cal
     return DstbMissionInfo::ReadDstbMissionInfosFromParcel(reply, missionInfos) ? ERR_NONE : ERR_FLATTEN_OBJECT;
 }
 
-int32_t DistributedSchedProxy::StopSyncRemoteMissions(const std::string& devId)
+int32_t DistributedSchedProxy::StopSyncRemoteMissions(const std::string& devId, int32_t callingUid)
 {
     HILOGI("called");
     sptr<IRemoteObject> remote = Remote();
@@ -472,6 +474,7 @@ int32_t DistributedSchedProxy::StopSyncRemoteMissions(const std::string& devId)
         return ERR_FLATTEN_OBJECT;
     }
     PARCEL_WRITE_HELPER(data, String16, Str8ToStr16(devId));
+    PARCEL_WRITE_HELPER(data, Int32, callingUid);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::STOP_SYNC_MISSIONS), data, reply);
 }
 
@@ -502,7 +505,7 @@ int32_t DistributedSchedProxy::StopSyncMissionsFromRemote(const CallerInfo& call
 }
 
 int32_t DistributedSchedProxy::RegisterMissionListener(const std::u16string& devId,
-    const sptr<IRemoteObject>& obj)
+    const sptr<IRemoteObject>& obj, int32_t callingUid)
 {
     HILOGI("RegisterMissionListener called");
     sptr<IRemoteObject> remote = Remote();
@@ -517,6 +520,7 @@ int32_t DistributedSchedProxy::RegisterMissionListener(const std::u16string& dev
     }
     PARCEL_WRITE_HELPER(data, String16, devId);
     PARCEL_WRITE_HELPER(data, RemoteObject, obj);
+    PARCEL_WRITE_HELPER(data, Int32, callingUid);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::REGISTER_MISSION_LISTENER),
         data, reply);
 }
@@ -720,7 +724,8 @@ int32_t DistributedSchedProxy::GetRemoteMissionSnapshotInfo(const std::string& n
     return ERR_NONE;
 }
 
-int32_t DistributedSchedProxy::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
+int32_t DistributedSchedProxy::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state,
+    int32_t callingUid)
 {
     HILOGD("DistributedSchedProxy::SetMissionContinueState called");
     sptr<IRemoteObject> remote = Remote();
@@ -736,6 +741,7 @@ int32_t DistributedSchedProxy::SetMissionContinueState(int32_t missionId, const 
     }
     PARCEL_WRITE_HELPER(data, Int32, missionId);
     PARCEL_WRITE_HELPER(data, Int32, static_cast<int32_t>(state));
+    PARCEL_WRITE_HELPER(data, Int32, callingUid);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::SET_MISSION_CONTINUE_STATE),
         data, reply);
 }
