@@ -17,6 +17,7 @@
 
 #include "mock_softbus_adapter.h"
 #include "softbus_error_code.h"
+#include "dtbschedmgr_log.h"
 #include "test_log.h"
 
 using namespace testing;
@@ -26,6 +27,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string NETWORKID_01 = "networkId01";
+constexpr int32_t RETRY_SENT_EVENT_MAX_TIME = 3;
 }
 
 void SoftbusAdapterTest::SetUpTestCase()
@@ -56,13 +58,76 @@ void SoftbusAdapterTest::SetUp()
 HWTEST_F(SoftbusAdapterTest, SendSoftbusEvent_001, TestSize.Level3)
 {
     DTEST_LOG << "SoftbusAdapterTest SendSoftbusEvent_001 begin" << std::endl;
-    uint32_t sendDataLen = 1;
+    size_t sendDataLen = 1;
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(sendDataLen);
-    SoftbusMock sortbusMock;
-    EXPECT_CALL(sortbusMock, SendEvent(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    uint32_t result = SoftbusAdapter::GetInstance().SendSoftbusEvent(buffer);
+    SoftbusAdapter::GetInstance().eventHandler_ = nullptr;
+    int32_t result = SoftbusAdapter::GetInstance().SendSoftbusEvent(buffer);
     EXPECT_EQ(result, SOFTBUS_OK);
+
+    SoftbusMock sortbusMock;
+    SoftbusAdapter::GetInstance().Init();
+    result = SoftbusAdapter::GetInstance().SendSoftbusEvent(buffer);
+    EXPECT_EQ(result, SOFTBUS_OK);
+    SoftbusAdapter::GetInstance().UnInit();
     DTEST_LOG << "SoftbusAdapterTest SendSoftbusEvent_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DealSendSoftbusEvent_001
+ * @tc.desc: call DealSendSoftbusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftbusAdapterTest, DealSendSoftbusEvent_001, TestSize.Level3)
+{
+    DTEST_LOG << "SoftbusAdapterTest DealSendSoftbusEvent_001 begin" << std::endl;
+    size_t sendDataLen = 1;
+    int32_t retry = 0;
+    std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(sendDataLen);
+    SoftbusAdapter::GetInstance().eventHandler_ = nullptr;
+    int32_t result = SoftbusAdapter::GetInstance().DealSendSoftbusEvent(nullptr, retry);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+
+    SoftbusAdapter::GetInstance().Init();
+    result = SoftbusAdapter::GetInstance().DealSendSoftbusEvent(nullptr, retry);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+
+    SoftbusMock sortbusMock;
+    EXPECT_CALL(sortbusMock, SendEvent(_, _, _)).WillOnce(Return(SOFTBUS_OK));
+    result = SoftbusAdapter::GetInstance().DealSendSoftbusEvent(buffer, retry);
+    EXPECT_EQ(result, SOFTBUS_OK);
+
+    EXPECT_CALL(sortbusMock, SendEvent(_, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    result = SoftbusAdapter::GetInstance().DealSendSoftbusEvent(buffer, retry);
+    EXPECT_EQ(result, ERR_OK);
+    SoftbusAdapter::GetInstance().UnInit();
+    DTEST_LOG << "SoftbusAdapterTest DealSendSoftbusEvent_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: RetrySendSoftbusEvent_001
+ * @tc.desc: call RetrySendSoftbusEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SoftbusAdapterTest, RetrySendSoftbusEvent_001, TestSize.Level3)
+{
+    DTEST_LOG << "SoftbusAdapterTest RetrySendSoftbusEvent_001 begin" << std::endl;
+    size_t sendDataLen = 1;
+    int32_t retry = RETRY_SENT_EVENT_MAX_TIME;
+    std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(sendDataLen);
+    SoftbusAdapter::GetInstance().eventHandler_ = nullptr;
+    int32_t result = SoftbusAdapter::GetInstance().RetrySendSoftbusEvent(nullptr, retry);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+
+    retry = 0;
+    SoftbusAdapter::GetInstance().eventHandler_ = nullptr;
+    result = SoftbusAdapter::GetInstance().RetrySendSoftbusEvent(buffer, retry);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+
+    SoftbusAdapter::GetInstance().Init();
+    result = SoftbusAdapter::GetInstance().RetrySendSoftbusEvent(buffer, retry);
+    EXPECT_EQ(result, ERR_OK);
+    SoftbusAdapter::GetInstance().UnInit();
+    DTEST_LOG << "SoftbusAdapterTest RetrySendSoftbusEvent_001 end" << std::endl;
 }
 
 /**
@@ -74,9 +139,13 @@ HWTEST_F(SoftbusAdapterTest, StopSoftbusEvent_001, TestSize.Level3)
 {
     DTEST_LOG << "SoftbusAdapterTest StopSoftbusEvent_001 begin" << std::endl;
     SoftbusMock sortbusMock;
-    EXPECT_CALL(sortbusMock, StopEvent(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    uint32_t result = SoftbusAdapter::GetInstance().StopSoftbusEvent();
+    EXPECT_CALL(sortbusMock, StopEvent(_, _, _)).WillOnce(Return(SOFTBUS_OK));
+    int32_t result = SoftbusAdapter::GetInstance().StopSoftbusEvent();
     EXPECT_EQ(result, SOFTBUS_OK);
+
+    EXPECT_CALL(sortbusMock, StopEvent(_, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    result = SoftbusAdapter::GetInstance().StopSoftbusEvent();
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "SoftbusAdapterTest StopSoftbusEvent_001 end" << std::endl;
 }
 
@@ -97,8 +166,8 @@ HWTEST_F(SoftbusAdapterTest, RegisterSoftbusEventListener_001, TestSize.Level3)
     DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_001 begin" << std::endl;
     std::shared_ptr<SubSoftbusAdapterListener> listener = std::make_shared<SubSoftbusAdapterListener>();
     SoftbusMock sortbusMock;
-    EXPECT_CALL(sortbusMock, RegisterEventListener(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    uint32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
+    EXPECT_CALL(sortbusMock, RegisterEventListener(_, _)).WillOnce(Return(SOFTBUS_OK));
+    int32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
     EXPECT_EQ(result, SOFTBUS_OK);
     DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_001 end" << std::endl;
 }
@@ -113,8 +182,8 @@ HWTEST_F(SoftbusAdapterTest, UnregisterSoftbusEventListener_001, TestSize.Level3
     DTEST_LOG << "SoftbusAdapterTest UnregisterSoftbusEventListener_001 begin" << std::endl;
     std::shared_ptr<SubSoftbusAdapterListener> listener = std::make_shared<SubSoftbusAdapterListener>();
     SoftbusMock sortbusMock;
-    EXPECT_CALL(sortbusMock, UnregisterEventListener(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    uint32_t result = SoftbusAdapter::GetInstance().UnregisterSoftbusEventListener(listener);
+    EXPECT_CALL(sortbusMock, UnregisterEventListener(_, _)).WillOnce(Return(SOFTBUS_OK));
+    int32_t result = SoftbusAdapter::GetInstance().UnregisterSoftbusEventListener(listener);
     EXPECT_EQ(result, SOFTBUS_OK);
     DTEST_LOG << "SoftbusAdapterTest UnregisterSoftbusEventListener_001 end" << std::endl;
 }
@@ -128,25 +197,9 @@ HWTEST_F(SoftbusAdapterTest, RegisterSoftbusEventListener_002, TestSize.Level3)
 {
     DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_002 begin" << std::endl;
     std::shared_ptr<SubSoftbusAdapterListener> listener = nullptr;
-    uint32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
+    int32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
     EXPECT_EQ(result, SOFTBUS_INVALID_PARAM);
     DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_002 end" << std::endl;
-}
-
-/**
- * @tc.name: StopSoftbusEvent_002
- * @tc.desc: call StopSoftbusEvent from distributedsched
- * @tc.type: FUNC
- */
-HWTEST_F(SoftbusAdapterTest, StopSoftbusEvent_002, TestSize.Level3)
-{
-    DTEST_LOG << "SoftbusAdapterTest StopSoftbusEvent_002 begin" << std::endl;
-    SoftbusAdapter::GetInstance().pkgName_ = "oh";
-    SoftbusMock sortbusMock;
-    EXPECT_CALL(sortbusMock, SendEvent(_, _, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    uint32_t result = SoftbusAdapter::GetInstance().StopSoftbusEvent();
-    EXPECT_EQ(result, SOFTBUS_OK);
-    DTEST_LOG << "SoftbusAdapterTest StopSoftbusEvent_002 end" << std::endl;
 }
 
 /**
@@ -158,7 +211,7 @@ HWTEST_F(SoftbusAdapterTest, RegisterSoftbusEventListener_003, TestSize.Level3)
 {
     DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_003 begin" << std::endl;
     std::shared_ptr<SubSoftbusAdapterListener> listener;
-    uint32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
+    int32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
     EXPECT_EQ(result, SOFTBUS_INVALID_PARAM);
     DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_003 end" << std::endl;
 }
@@ -173,7 +226,7 @@ HWTEST_F(SoftbusAdapterTest, RegisterSoftbusEventListener_004, TestSize.Level3)
     DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_004 begin" << std::endl;
     std::shared_ptr<SubSoftbusAdapterListener> listener;
     SoftbusAdapter::GetInstance().pkgName_ = "oh";
-    uint32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
+    int32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
     EXPECT_EQ(result, SOFTBUS_INVALID_PARAM);
     DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_004 end" << std::endl;
 }
@@ -187,7 +240,7 @@ HWTEST_F(SoftbusAdapterTest, UnregisterSoftbusEventListener_002, TestSize.Level3
 {
     DTEST_LOG << "SoftbusAdapterTest UnregisterSoftbusEventListener_002 begin" << std::endl;
     std::shared_ptr<SubSoftbusAdapterListener> listener;
-    uint32_t result = SoftbusAdapter::GetInstance().UnregisterSoftbusEventListener(listener);
+    int32_t result = SoftbusAdapter::GetInstance().UnregisterSoftbusEventListener(listener);
     EXPECT_EQ(result, SOFTBUS_INVALID_PARAM);
     DTEST_LOG << "SoftbusAdapterTest UnregisterSoftbusEventListener_002 end" << std::endl;
 }
@@ -203,9 +256,9 @@ HWTEST_F(SoftbusAdapterTest, UnregisterSoftbusEventListener_003, TestSize.Level3
     std::shared_ptr<SubSoftbusAdapterListener> listener = std::make_shared<SubSoftbusAdapterListener>();
     SoftbusAdapter::GetInstance().pkgName_ = "oh";
     SoftbusMock sortbusMock;
-    EXPECT_CALL(sortbusMock, UnregisterEventListener(_, _)).WillRepeatedly(Return(SOFTBUS_OK));
-    uint32_t result = SoftbusAdapter::GetInstance().UnregisterSoftbusEventListener(listener);
-    EXPECT_EQ(result, SOFTBUS_OK);
+    EXPECT_CALL(sortbusMock, UnregisterEventListener(_, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    int32_t result = SoftbusAdapter::GetInstance().UnregisterSoftbusEventListener(listener);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "SoftbusAdapterTest UnregisterSoftbusEventListener_003 end" << std::endl;
 }
 }

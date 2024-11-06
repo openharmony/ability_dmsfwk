@@ -25,6 +25,7 @@
 
 #define private public
 #define protected public
+#include "distributed_sched_adapter.h"
 #include "distributed_sched_proxy.h"
 #include "distributed_sched_service.h"
 #include "distributed_sched_test_util.h"
@@ -64,6 +65,12 @@ bool DMSMissionManagerTest::isCaseDone_ = false;
 std::mutex DMSMissionManagerTest::caseDoneLock_;
 std::condition_variable DMSMissionManagerTest::caseDoneCondition_;
 
+int32_t DistributedSchedAdapter::GetLocalMissionSnapshotInfo(const std::string& networkId, int32_t missionId,
+    AAFwk::MissionSnapshot& missionSnapshot)
+{
+    return -1;
+}
+
 void DMSMissionManagerTest::SetUpTestCase()
 {
     if (!DistributedSchedUtil::LoadDistributedSchedService()) {
@@ -71,15 +78,11 @@ void DMSMissionManagerTest::SetUpTestCase()
     }
     const std::string pkgName = "DBinderBus_" + std::to_string(getprocpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
-    mockDmsAdapter = std::make_shared<MockAdapter>();
-    AdapterMock::dmsAdapter = mockDmsAdapter;
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
 }
 
 void DMSMissionManagerTest::TearDownTestCase()
 {
-    AdapterMock::dmsAdapter = nullptr;
-    mockDmsAdapter = nullptr;
 }
 
 void DMSMissionManagerTest::SetUp()
@@ -1287,7 +1290,6 @@ HWTEST_F(DMSMissionManagerTest, testNotifyMissionSnapshotChanged001, TestSize.Le
 {
     DTEST_LOG << "testNotifyMissionSnapshotChanged001 begin" << std::endl;
     DistributedSchedMissionManager::GetInstance().Init();
-    EXPECT_CALL(*mockDmsAdapter, GetLocalMissionSnapshotInfo(_, _, _)).WillOnce(Return(true));
     DistributedSchedMissionManager::GetInstance().NotifyMissionSnapshotChanged(1);
     EXPECT_NE(DistributedSchedMissionManager::GetInstance().missionChangeHandler_, nullptr);
     DTEST_LOG << "testNotifyMissionSnapshotChanged001 end" << std::endl;
@@ -1384,7 +1386,6 @@ HWTEST_F(DMSMissionManagerTest, testMissionSnapshotChanged001, TestSize.Level3)
     DistributedSchedMissionManager::GetInstance().NotifyDmsProxyProcessDied();
     std::vector<DstbMissionInfo> missionInfos;
     DistributedSchedMissionManager::GetInstance().InitAllSnapshots(missionInfos);
-    EXPECT_CALL(*mockDmsAdapter, GetLocalMissionSnapshotInfo(_, _, _)).WillOnce(Return(1)).WillOnce(Return(1));
     auto ret = DistributedSchedMissionManager::GetInstance().MissionSnapshotChanged(NUM_MISSIONS);
     EXPECT_NE(ret, ERR_NONE);
     DTEST_LOG << "testMissionSnapshotChanged001 end" << std::endl;
