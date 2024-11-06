@@ -127,6 +127,10 @@ void DnetworkAdapter::DmsDevTrustChangeCallback::OnDeviceTrustChange(const std::
         HILOGE("udid or uuid is empty!");
         return;
     }
+    if (DmsKvSyncE2E::GetInstance()->CheckDeviceCfg()) {
+        HILOGI("this device type is special");
+        return;
+    }
     if (authform != DmAuthForm::IDENTICAL_ACCOUNT) {
         HILOGE("peer is not same account");
         return;
