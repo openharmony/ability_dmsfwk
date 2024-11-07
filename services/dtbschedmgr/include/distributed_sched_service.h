@@ -114,8 +114,8 @@ public:
         const AccountInfo& accountInfo) override;
     int32_t SendResultFromRemote(OHOS::AAFwk::Want& want, int32_t requestCode,
         const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t resultCode) override;
-    int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
-        int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams) override;
+    int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId, int32_t missionId,
+        const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams) override;
     int32_t ProcessContinueLocalMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
         const std::string& bundleName, const sptr<IRemoteObject>& callback,
         const OHOS::AAFwk::WantParams& wantParams);
@@ -152,16 +152,18 @@ public:
         const CallerInfo& callerInfo) override;
     int32_t GetRemoteMissionSnapshotInfo(const std::string& networkId, int32_t missionId,
         std::unique_ptr<AAFwk::MissionSnapshot>& missionSnapshot) override;
-    int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;
+    int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
+        int32_t callingUid) override;
     int32_t StartSyncMissionsFromRemote(const CallerInfo& callerInfo,
         std::vector<DstbMissionInfo>& missionInfos) override;
-    int32_t StopSyncRemoteMissions(const std::string& devId) override;
+    int32_t StopSyncRemoteMissions(const std::string& devId, int32_t callingUid) override;
     int32_t StopSyncMissionsFromRemote(const CallerInfo& callerInfo) override;
-    int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
+    int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj,
+        int32_t callingUid) override;
     int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj, int32_t callingUid) override;
     int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj, int32_t callingUid) override;
     int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
-    int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state) override;
+    int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state, int32_t callingUid) override;
     void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
 #endif
     int32_t RegisterDSchedEventListener(const DSchedEventType& type, const sptr<IRemoteObject>& obj) override;

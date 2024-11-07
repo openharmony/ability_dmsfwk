@@ -35,8 +35,8 @@ public:
         const AccountInfo& accountInfo) override;
     int32_t SendResultFromRemote(OHOS::AAFwk::Want& want, int32_t requestCode, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t resultCode) override;
-    int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
-        int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams) override;
+    int32_t ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId, int32_t missionId,
+        const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams) override;
     int32_t StartContinuation(const OHOS::AAFwk::Want& want, int32_t missionId, int32_t callerUid,
         int32_t status, uint32_t accessToken) override;
     void NotifyCompleteContinuation(const std::u16string& devId, int32_t sessionId, bool isSuccess) override;
@@ -51,8 +51,10 @@ public:
         int32_t uid, const std::string& sourceDeviceId) override;
     int32_t NotifyProcessDiedFromRemote(const CallerInfo& callerInfo) override;
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag) override;
-    int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
+    int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
+        int32_t callingUid) override;
+    int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj,
+        int32_t callingUid) override;
     int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj) override;
     int32_t GetMissionInfos(const std::string& deviceId, int32_t numMissions,
         std::vector<AAFwk::MissionInfo>& missionInfos) override;
@@ -63,8 +65,9 @@ public:
     int32_t StartSyncMissionsFromRemote(const CallerInfo& callerInfo,
         std::vector<DstbMissionInfo>& missionInfos) override;
     int32_t StopSyncMissionsFromRemote(const CallerInfo& callerInfo) override;
-    int32_t StopSyncRemoteMissions(const std::string& devId) override;
-    int32_t SetMissionContinueState(const int32_t missionId, const OHOS::AAFwk::ContinueState &state) override;
+    int32_t StopSyncRemoteMissions(const std::string& devId, int32_t callingUid) override;
+    int32_t SetMissionContinueState(const int32_t missionId, const OHOS::AAFwk::ContinueState &state,
+        int32_t callingUid) override;
 #endif
     int32_t StartRemoteAbilityByCall(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
         int32_t callerUid, int32_t callerPid, uint32_t accessToken) override;

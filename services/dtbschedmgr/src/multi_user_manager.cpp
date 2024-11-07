@@ -16,8 +16,10 @@
 
 #include "adapter/mmi_adapter.h"
 #include "datashare_manager.h"
+#include "distributed_sched_service.h"
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_log.h"
+#include "mission/distributed_sched_mission_manager.h"
 #include "softbus_adapter/softbus_adapter.h"
 #include "os_account_manager.h"
 

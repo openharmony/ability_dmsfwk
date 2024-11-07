@@ -97,12 +97,14 @@ int32_t MockDistributedSched::NotifyProcessDiedFromRemote(const CallerInfo& call
 }
 
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-int32_t MockDistributedSched::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag)
+int32_t MockDistributedSched::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
+    int32_t callingUid)
 {
     return ERR_NONE;
 }
 
-int32_t MockDistributedSched::RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj)
+int32_t MockDistributedSched::RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj,
+    int32_t callingUid)
 {
     return ERR_NONE;
 }
@@ -143,12 +145,13 @@ int32_t MockDistributedSched::StopSyncMissionsFromRemote(const CallerInfo& calle
     return ERR_NONE;
 }
 
-int32_t MockDistributedSched::StopSyncRemoteMissions(const std::string& devId)
+int32_t MockDistributedSched::StopSyncRemoteMissions(const std::string& devId, int32_t callingUid)
 {
     return ERR_NONE;
 }
 
-int32_t MockDistributedSched::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
+int32_t MockDistributedSched::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state,
+    int32_t callingUid)
 {
     return ERR_NONE;
 }

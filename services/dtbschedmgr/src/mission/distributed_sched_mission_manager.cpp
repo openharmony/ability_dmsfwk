@@ -46,6 +46,7 @@ constexpr int32_t GET_FOREGROUND_SNAPSHOT_DELAY_TIME = 800; // ms
 const std::string DELETE_DATA_STORAGE = "DeleteDataStorage";
 constexpr int32_t DELETE_DATA_STORAGE_DELAYED = 60000; // ms
 const std::string INVAILD_LOCAL_DEVICE_ID = "-1";
+constexpr int32_t NET_STATE = 0;
 }
 namespace Mission {
 constexpr int32_t GET_MAX_MISSIONS = 20;
@@ -155,6 +156,26 @@ void DistributedSchedMissionManager::NotifyRemoteDied(const wptr<IRemoteObject>&
         return;
     }
     distributedDataStorage_->NotifyRemoteDied(remote);
+}
+
+void DistributedSchedMissionManager::NotifyNetDisconnectOffline()
+{
+    HILOGD("NotifyNetDisconnectOffline start.");
+    {
+        std::lock_guard<std::mutex> autoLock(listenDeviceLock_);
+        if (listenDeviceMap_.empty()) {
+            HILOGI("The connect is null!");
+            return;
+        }
+        for (auto& listenDevice : listenDeviceMap_) {
+            std::u16string devId = listenDevice.first;
+            std::set<sptr<IRemoteObject>> listenerSet = listenDevice.second.listenerSet;
+            for (auto connect : listenerSet) {
+                MissionChangedNotify::NotifyNetDisconnect(connect, devId, NET_STATE);
+            }
+        }
+    }
+    HILOGD("NotifyNetDisconnectOffline end.");
 }
 
 int32_t DistributedSchedMissionManager::InitDataStorage()

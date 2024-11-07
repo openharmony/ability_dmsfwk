@@ -114,6 +114,7 @@ const std::string DSCHED_EVENT_KEY = "IDSchedEventListener";
 const std::string DMSDURATION_SAVETIME = "ohos.dschedule.SaveDataTime";
 const std::string DMS_CONTINUE_SESSION_ID = "ohos.dms.continueSessionId";
 const std::string DMS_PERSISTENT_ID = "ohos.dms.persistentId";
+const std::string DMS_CALLING_UID = "ohos.dms.callingUid";
 const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getprocpid());
 const std::string BOOT_COMPLETED_EVENT = "usual.event.BOOT_COMPLETED";
 const std::string COMMON_EVENT_WIFI_SEMI_STATE = "usual.event.wifi.SEMI_STATE";
@@ -741,6 +742,10 @@ int32_t DistributedSchedService::GetCallerInfo(const std::string &localDeviceId,
 int32_t DistributedSchedService::StartRemoteAbility(const OHOS::AAFwk::Want& want,
     int32_t callerUid, int32_t requestCode, uint32_t accessToken)
 {
+    if (!MultiUserManager::GetInstance().IsCallerForeground(callerUid)) {
+        HILOGW("The current user is not foreground. callingUid: %{public}d .", callerUid);
+        return DMS_NOT_FOREGROUND_USER;
+    }
     std::string localDeviceId;
     std::string deviceId = want.GetElement().GetDeviceID();
     if (!GetLocalDeviceId(localDeviceId) || !CheckDeviceId(localDeviceId, deviceId)) {
@@ -1020,7 +1025,6 @@ int32_t DistributedSchedService::ContinueRemoteMission(const std::string& srcDev
 
     std::string peerUdid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(srcDeviceId);
     DmsRadar::GetInstance().ClickIconDmsContinue("ContinueMission", ERR_OK, peerUdid, bundleName, bundleName);
-
     int32_t result = remoteDms->ContinueMission(srcDeviceId, dstDeviceId, missionId, callback, wantParams);
     HILOGI("ContinueRemoteMission result: %{public}d!", result);
     return result;
@@ -1069,6 +1073,10 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
     int32_t missionId, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
     HILOGI("ContinueMission called");
+    OHOS::AAFwk::WantParams originWantParams = wantParams;
+    if (originWantParams.HasParam(DMS_CALLING_UID)) {
+        originWantParams.Remove(DMS_CALLING_UID);
+    }
     if (srcDeviceId.empty() || dstDeviceId.empty() || callback == nullptr) {
         HILOGE("srcDeviceId or dstDeviceId or callback is null!");
         return INVALID_PARAMETERS_ERR;
@@ -1085,14 +1093,14 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
             HILOGE("GetDeviceInfoById failed, dstDeviceId: %{public}s.", GetAnonymStr(dstDeviceId).c_str());
             return INVALID_REMOTE_PARAMETERS_ERR;
         }
-        return ContinueLocalMission(dstDeviceId, missionId, callback, wantParams);
+        return ContinueLocalMission(dstDeviceId, missionId, callback, originWantParams);
     } else if (dstDeviceId == localDevId) {
         DmsContinueTime::GetInstance().SetPull(true);
         if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(srcDeviceId) == nullptr) {
             HILOGE("GetDeviceInfoById failed, srcDeviceId: %{public}s.", GetAnonymStr(srcDeviceId).c_str());
             return INVALID_REMOTE_PARAMETERS_ERR;
         }
-        return ContinueRemoteMission(srcDeviceId, dstDeviceId, missionId, callback, wantParams);
+        return ContinueRemoteMission(srcDeviceId, dstDeviceId, missionId, callback, originWantParams);
     } else {
         HILOGE("source or target device must be local!");
         return OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET;
@@ -1154,6 +1162,10 @@ int32_t DistributedSchedService::ProcessContinueRemoteMission(const std::string&
 int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId,
     const std::string& bundleName, const sptr<IRemoteObject>& callback, const OHOS::AAFwk::WantParams& wantParams)
 {
+    OHOS::AAFwk::WantParams originWantParams = wantParams;
+    if (originWantParams.HasParam(DMS_CALLING_UID)) {
+        originWantParams.Remove(DMS_CALLING_UID);
+    }
     HILOGI("ContinueMission srcDeviceId: %{public}s. dstDeviceId: %{public}s. bundleName: %{public}s.",
         GetAnonymStr(srcDeviceId).c_str(), GetAnonymStr(dstDeviceId).c_str(), bundleName.c_str());
     if (srcDeviceId.empty() || dstDeviceId.empty() || callback == nullptr) {
@@ -1168,10 +1180,10 @@ int32_t DistributedSchedService::ContinueMission(const std::string& srcDeviceId,
     DurationStart(srcDeviceId, dstDeviceId);
 
     if (srcDeviceId == localDevId) {
-        return ProcessContinueLocalMission(srcDeviceId, dstDeviceId, bundleName, callback, wantParams);
+        return ProcessContinueLocalMission(srcDeviceId, dstDeviceId, bundleName, callback, originWantParams);
     } else if (dstDeviceId == localDevId) {
         DmsContinueTime::GetInstance().SetPull(true);
-        return ProcessContinueRemoteMission(srcDeviceId, dstDeviceId, bundleName, callback, wantParams);
+        return ProcessContinueRemoteMission(srcDeviceId, dstDeviceId, bundleName, callback, originWantParams);
     } else {
         HILOGE("source or target device must be local!");
         return OPERATION_DEVICE_NOT_INITIATOR_OR_TARGET;
@@ -1629,6 +1641,10 @@ int32_t DistributedSchedService::GetUidLocked(const std::list<ConnectAbilitySess
 int32_t DistributedSchedService::ConnectRemoteAbility(const OHOS::AAFwk::Want& want,
     const sptr<IRemoteObject>& connect, int32_t callerUid, int32_t callerPid, uint32_t accessToken)
 {
+    if (!MultiUserManager::GetInstance().IsCallerForeground(callerUid)) {
+        HILOGW("The current user is not foreground. callingUid: %{public}d .", callerUid);
+        return DMS_NOT_FOREGROUND_USER;
+    }
     std::string localDeviceId;
     std::string remoteDeviceId = want.GetElement().GetDeviceID();
     if (!GetLocalDeviceId(localDeviceId) || !CheckDeviceId(localDeviceId, remoteDeviceId)) {
@@ -1999,6 +2015,10 @@ int32_t DistributedSchedService::SaveConnectToken(const OHOS::AAFwk::Want& want,
 int32_t DistributedSchedService::StartRemoteAbilityByCall(const OHOS::AAFwk::Want& want,
     const sptr<IRemoteObject>& connect, int32_t callerUid, int32_t callerPid, uint32_t accessToken)
 {
+    if (!MultiUserManager::GetInstance().IsCallerForeground(callerUid)) {
+        HILOGW("The current user is not foreground. callingUid: %{public}d .", callerUid);
+        return DMS_NOT_FOREGROUND_USER;
+    }
     if (connect == nullptr) {
         HILOGE("StartRemoteAbilityByCall connect is null");
         return INVALID_PARAMETERS_ERR;
@@ -2681,6 +2701,7 @@ void DistributedSchedService::ProcessDeviceOffline(const std::string& deviceId)
         HILOGE("ProcessDeviceOffline check deviceId failed");
         return;
     }
+    DistributedSchedMissionManager::GetInstance().NotifyNetDisconnectOffline();
     RemoveConnectAbilityInfo(deviceId);
     ProcessCalleeOffline(deviceId);
     ProcessFreeInstallOffline(deviceId);
@@ -2899,8 +2920,12 @@ int32_t DistributedSchedService::GetRemoteMissionSnapshotInfo(const std::string&
 }
 
 int32_t DistributedSchedService::RegisterMissionListener(const std::u16string& devId,
-    const sptr<IRemoteObject>& obj)
+    const sptr<IRemoteObject>& obj, int32_t callingUid)
 {
+    if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
+        HILOGW("The current user is not foreground. callingUid: %{public}d.", callingUid);
+        return DMS_NOT_FOREGROUND_USER;
+    }
     return DistributedSchedMissionManager::GetInstance().RegisterMissionListener(devId, obj);
 }
 
@@ -2922,13 +2947,22 @@ int32_t DistributedSchedService::UnRegisterMissionListener(const std::u16string&
     return DistributedSchedMissionManager::GetInstance().UnRegisterMissionListener(devId, obj);
 }
 
-int32_t DistributedSchedService::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag)
+int32_t DistributedSchedService::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
+    int32_t callingUid)
 {
+    if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
+        HILOGW("The current user is not foreground. callingUid: %{public}d.", callingUid);
+        return DMS_NOT_FOREGROUND_USER;
+    }
     return DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(devId, fixConflict, tag);
 }
 
-int32_t DistributedSchedService::StopSyncRemoteMissions(const std::string& devId)
+int32_t DistributedSchedService::StopSyncRemoteMissions(const std::string& devId, int32_t callingUid)
 {
+    if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
+        HILOGW("The current user is not foreground. callingUid: %{public}d.", callingUid);
+        return DMS_NOT_FOREGROUND_USER;
+    }
     return DistributedSchedMissionManager::GetInstance().StopSyncRemoteMissions(devId, false, true);
 }
 
@@ -2944,11 +2978,11 @@ int32_t DistributedSchedService::StopSyncMissionsFromRemote(const CallerInfo& ca
     return ERR_NONE;
 }
 
-int32_t DistributedSchedService::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state)
+int32_t DistributedSchedService::SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state,
+    int32_t callingUid)
 {
-    int32_t callingUid = IPCSkeleton::GetCallingUid();
     if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
-        HILOGW("The current user is not foreground.");
+        HILOGW("The current user is not foreground. callingUid: %{public}d.", callingUid);
         return DMS_NOT_FOREGROUND_USER;
     }
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();

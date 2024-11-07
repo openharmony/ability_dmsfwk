@@ -18,6 +18,7 @@
 #include "distributed_sched_test_util.h"
 #include "dms_token_callback.h"
 #include "dtbschedmgr_log.h"
+#include "multi_user_manager.h"
 #include "test_log.h"
 
 using namespace testing;
@@ -51,6 +52,13 @@ void DmsTokenCallbackTest::SetUp()
     DTEST_LOG << "DmsTokenCallbackTest::SetUp" << std::endl;
     dmsTokenCallback_ = new DmsTokenCallback();
     DistributedSchedUtil::MockProcess(FOUNDATION_PROCESS_NAME);
+}
+
+static bool g_isForeground = true;
+
+bool MultiUserManager::IsCallerForeground(int32_t callingUid)
+{
+    return g_isForeground;
 }
 
 /**
@@ -158,6 +166,28 @@ HWTEST_F(DmsTokenCallbackTest, SendResultTest_005, TestSize.Level3)
     int32_t result = dmsTokenCallback_->SendResult(want, callerUid, requestCode, accessToken, resultCode);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DmsTokenCallbackTest SendResultTest_005 end" << std::endl;
+}
+
+/**
+ * @tc.name: SendResultTest_006
+ * @tc.desc: call SendResult with user is not foreground
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsTokenCallbackTest, SendResultTest_006, TestSize.Level3)
+{
+    DTEST_LOG << "DmsTokenCallbackTest SendResultTest_006 begin" << std::endl;
+    ASSERT_NE(dmsTokenCallback_, nullptr);
+    AAFwk::Want want;
+    string remoteDeviceId = "remoteDeviceId";
+    want.SetParam("dmsSrcNetworkId", remoteDeviceId);
+    int32_t callerUid = 0;
+    int32_t requestCode = 0;
+    uint32_t accessToken = 0;
+    int32_t resultCode = 0;
+    g_isForeground = false;
+    int32_t result = dmsTokenCallback_->SendResult(want, callerUid, requestCode, accessToken, resultCode);
+    EXPECT_EQ(result, DMS_NOT_FOREGROUND_USER);
+    DTEST_LOG << "DmsTokenCallbackTest SendResultTest_006 end" << std::endl;
 }
 
 /**

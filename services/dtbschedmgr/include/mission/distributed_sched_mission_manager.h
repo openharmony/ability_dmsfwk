@@ -105,6 +105,7 @@ public:
     void NotifyMissionSnapshotChanged(int32_t missionId);
     void NotifyMissionSnapshotDestroyed(int32_t missionId);
     void NotifyRemoteDied(const wptr<IRemoteObject>& remote);
+    void NotifyNetDisconnectOffline();
 
 private:
     std::map<std::string, std::shared_ptr<AppExecFwk::EventHandler>> deviceHandle_;
