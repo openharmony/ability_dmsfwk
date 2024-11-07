@@ -676,5 +676,27 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, AddNewPeerSession_001, TestSize.Leve
     EXPECT_EQ(ret, REMOTE_DEVICE_BIND_ABILITY_ERR);
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest AddNewPeerSession_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: ConnectDevice_001
+ * @tc.desc: call ConnectDevice
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedTransportSoftbusAdapterTest, ConnectDevice_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest ConnectDevice_001 begin" << std::endl;
+    std::string peerDeviceId = "peerDeviceId";
+    int32_t sessionId = 0;
+    SessionInfo info = {0, "deviceid", "peerDeviceId", "sessionName", false};
+    std::shared_ptr<DSchedSoftbusSession> ptr = std::make_shared<DSchedSoftbusSession>(info);
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_.clear();
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_[1] = nullptr;
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_[0] = ptr;
+    int32_t ret = DSchedTransportSoftbusAdapter::GetInstance().ConnectDevice("peer", sessionId);
+
+    ret = DSchedTransportSoftbusAdapter::GetInstance().ConnectDevice(peerDeviceId, sessionId);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest ConnectDevice_001 end" << std::endl;
+}
 }
 }

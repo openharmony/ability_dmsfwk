@@ -254,9 +254,7 @@ HWTEST_F(DistributedSchedUtilsTest, IsInt32_001, TestSize.Level1)
     EXPECT_FALSE(ret);
 
     cJSON *paramValue = cJSON_CreateObject();
-    if (paramValue == nullptr) {
-        return;
-    }
+    ASSERT_NE(paramValue, nullptr);
     int32_t data = MAX_TEST_PATH_LEN;
     cJSON_AddNumberToObject(paramValue, "data", data);
     ret = IsInt32(paramValue);
@@ -281,12 +279,8 @@ HWTEST_F(DistributedSchedUtilsTest, IsString_001, TestSize.Level1)
     bool ret = IsString(nullptr);
     EXPECT_FALSE(ret);
 
-    cJSON *paramValue = nullptr;
-    std::string str("string");
-    paramValue = cJSON_Parse(str.c_str());
-    if (paramValue == nullptr) {
-        return;
-    }
+    cJSON *paramValue = cJSON_CreateString("test string");
+    ASSERT_NE(paramValue, nullptr);
     ret = IsString(paramValue);
     EXPECT_TRUE(ret);
     if (paramValue != nullptr) {
@@ -304,9 +298,7 @@ HWTEST_F(DistributedSchedUtilsTest, IsString_001, TestSize.Level1)
 HWTEST_F(DistributedSchedUtilsTest, IsString_002, TestSize.Level1)
 {
     cJSON *paramValue = cJSON_CreateObject();
-    if (paramValue == nullptr) {
-        return;
-    }
+    ASSERT_NE(paramValue, nullptr);
     int32_t data = MAX_TEST_PATH_LEN;
     cJSON_AddNumberToObject(paramValue, "data", data);
     bool ret = IsString(paramValue);
@@ -327,6 +319,59 @@ HWTEST_F(DistributedSchedUtilsTest, CJsonParamCheck_001, TestSize.Level1)
 {
     bool ret = CJsonParamCheck(nullptr, {PARAM_KEY_OS_TYPE, PARAM_KEY_OS_VERSION});
     EXPECT_FALSE(ret);
+
+    cJSON *jsonObj = cJSON_CreateArray();
+    const std::initializer_list<std::string> keys = {"key1", "key2"};
+    ret = CJsonParamCheck(jsonObj, keys);
+    EXPECT_FALSE(ret);
+    cJSON_Delete(jsonObj);
+}
+
+/**
+ * @tc.name: CJsonParamCheck_002
+ * @tc.desc: CJsonParamCheck
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DistributedSchedUtilsTest, CJsonParamCheck_002, TestSize.Level1)
+{
+    cJSON *jsonObj = cJSON_CreateObject();
+    const std::initializer_list<std::string> keys = {"key1", "key2"};
+    bool ret = CJsonParamCheck(jsonObj, keys);
+    EXPECT_FALSE(ret);
+    cJSON_Delete(jsonObj);
+
+    cJSON *jsonObj1 = cJSON_CreateObject();
+    cJSON_AddItemToObject(jsonObj1, "key1", cJSON_CreateString("value1"));
+    const std::initializer_list<std::string> keys1 = {"key1", "key2"};
+    ret = CJsonParamCheck(jsonObj1, keys1);
+    EXPECT_FALSE(ret);
+    cJSON_Delete(jsonObj1);
+}
+
+/**
+ * @tc.name: CJsonParamCheck_003
+ * @tc.desc: CJsonParamCheck
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DistributedSchedUtilsTest, CJsonParamCheck_003, TestSize.Level1)
+{
+    cJSON *jsonObj = cJSON_CreateObject();
+    cJSON_AddItemToObject(jsonObj, PARAM_KEY_OS_TYPE, cJSON_CreateString("value1"));
+    cJSON_AddItemToObject(jsonObj, PARAM_KEY_OS_VERSION, cJSON_CreateString("value2"));
+    const std::initializer_list<std::string> keys = {PARAM_KEY_OS_TYPE, PARAM_KEY_OS_VERSION};
+    bool ret = CJsonParamCheck(jsonObj, keys);
+    EXPECT_FALSE(ret);
+    cJSON_Delete(jsonObj);
+
+    cJSON *jsonObj1 = cJSON_CreateObject();
+    cJSON_AddItemToObject(jsonObj1, PARAM_KEY_OS_TYPE, cJSON_CreateNumber(1));
+    cJSON_AddItemToObject(jsonObj1, PARAM_KEY_OS_VERSION, cJSON_CreateString("value2"));
+    const std::initializer_list<std::string> keys1 = {PARAM_KEY_OS_TYPE, PARAM_KEY_OS_VERSION};
+    ret = CJsonParamCheck(jsonObj1, keys1);
+    EXPECT_TRUE(ret);
+    cJSON_Delete(jsonObj1);
 }
 
 /**
@@ -338,6 +383,21 @@ HWTEST_F(DistributedSchedUtilsTest, CJsonParamCheck_001, TestSize.Level1)
 HWTEST_F(DistributedSchedUtilsTest, GetOsInfoFromDM_001, TestSize.Level1)
 {
     std::string dmInfoEx;
+    int32_t osType;
+    std::string osVersion;
+    bool ret = GetOsInfoFromDM(dmInfoEx, osType, osVersion);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: GetOsInfoFromDM_002
+ * @tc.desc: GetOsInfoFromDM
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DistributedSchedUtilsTest, GetOsInfoFromDM_002, TestSize.Level1)
+{
+    std::string dmInfoEx = "{\"osType\":\"1\",\"osVersion\":\"1.0\"}";
     int32_t osType;
     std::string osVersion;
     bool ret = GetOsInfoFromDM(dmInfoEx, osType, osVersion);

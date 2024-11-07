@@ -473,7 +473,6 @@ ohos_unittest("dmsmissionmanagertest") {
   sources = [
     "unittest/mission/distributed_data_storage_test.cpp",
     "unittest/mission/dms_mission_manager_test.cpp",
-    "unittest/mission/mock_distributed_sched_adapter.cpp",
     "unittest/mission/mock_image_packer.cpp",
   ]
   sources += dtbschedmgr_sources
