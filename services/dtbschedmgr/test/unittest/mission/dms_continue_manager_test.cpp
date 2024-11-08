@@ -1488,5 +1488,58 @@ HWTEST_F(DMSContinueManagerTest, OnContinueSwitchOff_001, TestSize.Level1)
     EXPECT_EQ(recvMgr->registerOnListener_.empty(), true);
     DTEST_LOG << "DMSContinueManagerTest OnContinueSwitchOff_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: OnUserSwitch_001
+ * @tc.desc: test OnUserSwitch
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, OnUserSwitch_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest OnUserSwitch_001 start" << std::endl;
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    if (recvMgr == nullptr) {
+        DTEST_LOG << "GetRecvMgr failed." << std::endl;
+        return;
+    }
+    recvMgr->iconInfo_.senderNetworkId = "";
+    recvMgr->iconInfo_.bundleName = "";
+    recvMgr->iconInfo_.continueType = "";
+    recvMgr->OnUserSwitch();
+    EXPECT_EQ(recvMgr->iconInfo_.isEmpty(), true);
+
+    recvMgr->iconInfo_.senderNetworkId = "senderNetworkId";
+    recvMgr->iconInfo_.bundleName = "bundleName";
+    recvMgr->iconInfo_.continueType = "continueType";
+    recvMgr->registerOnListener_.clear();
+    recvMgr->OnUserSwitch();
+    EXPECT_EQ(recvMgr->registerOnListener_.empty(), true);
+    DTEST_LOG << "DMSContinueManagerTest OnUserSwitch_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: FindToNotifyRecvBroadcast_001
+ * @tc.desc: test FindToNotifyRecvBroadcast
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, FindToNotifyRecvBroadcast_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest FindToNotifyRecvBroadcast_001 start" << std::endl;
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    if (recvMgr == nullptr) {
+        DTEST_LOG << "GetRecvMgr failed." << std::endl;
+        return;
+    }
+    std::string senderNetworkId = "senderNetworkId";
+    std::string bundleName = "bundleName";
+    std::string continueType = "senderNetworkId";
+    recvMgr->iconInfo_.senderNetworkId = senderNetworkId;
+    recvMgr->iconInfo_.bundleName = bundleName;
+    recvMgr->iconInfo_.continueType = continueType;
+    recvMgr->registerOnListener_.clear();
+    recvMgr->FindToNotifyRecvBroadcast(senderNetworkId, bundleName, continueType);
+    EXPECT_EQ(recvMgr->registerOnListener_.empty(), true);
+    DTEST_LOG << "DMSContinueManagerTest FindToNotifyRecvBroadcast_001 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS

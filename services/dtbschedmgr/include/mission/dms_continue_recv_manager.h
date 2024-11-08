@@ -85,6 +85,7 @@ public:
     void NotifyPackageRemoved(const std::string& sinkBundleName);
     void OnDeviceScreenOff();
     void OnContinueSwitchOff();
+    void OnUserSwitch();
     std::string GetContinueType(const std::string& bundleName);
     bool CheckRegSoftbusListener();
 
@@ -106,6 +107,8 @@ private:
     bool IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo, const std::string &srcAbilityName,
         const std::string &srcContinueType, bool isSameBundle);
     std::string ContinueTypeFormat(const std::string &continueType);
+    void FindToNotifyRecvBroadcast(const std::string& senderNetworkId, const std::string& bundleName,
+        const std::string& continueType);
 private:
     currentIconInfo iconInfo_;
     sptr<DistributedMissionDiedListener> missionDiedListener_;

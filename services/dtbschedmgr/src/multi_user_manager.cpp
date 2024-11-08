@@ -100,6 +100,12 @@ void MultiUserManager::UnInit()
 void MultiUserManager::OnUserSwitched(int32_t accountId)
 {
     HILOGI("UserSwitched start");
+    auto recvMgr = GetCurrentRecvMgr();
+    if (recvMgr == nullptr) {
+        HILOGI("GetRecvMgr failed.");
+        return;
+    }
+    recvMgr->OnUserSwitch();
     auto sendMgr = GetCurrentSendMgr();
     if (sendMgr == nullptr) {
         HILOGI("GetSendMgr failed.");
@@ -125,7 +131,7 @@ void MultiUserManager::OnUserSwitched(int32_t accountId)
         return;
     }
     sendMgr->Init();
-    auto recvMgr = GetCurrentRecvMgr();
+    recvMgr = GetCurrentRecvMgr();
     if (recvMgr == nullptr) {
         HILOGI("GetRecvMgr failed.");
         return;
