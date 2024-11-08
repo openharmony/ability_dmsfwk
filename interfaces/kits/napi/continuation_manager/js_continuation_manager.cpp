@@ -987,7 +987,7 @@ napi_value JsContinuationManagerInit(napi_env env, napi_value exportObj)
         return nullptr;
     }
 
-    JsContinuationManager *jsContinuationManager = new JsContinuationManager();
+    JsContinuationManager* jsContinuationManager = new JsContinuationManager();
     if (napi_wrap(env, exportObj, jsContinuationManager, JsContinuationManager::Finalizer, nullptr, nullptr)
         != napi_ok) {
         JsContinuationManager::Finalizer(env, jsContinuationManager, nullptr);
