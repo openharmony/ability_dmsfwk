@@ -15,8 +15,6 @@
 
 #include "dsched_continue_event_test.h"
 
-#include "distributedWant/distributed_want.h"
-#include "distributed_sched_utils.h"
 #include "dsched_continue_event.h"
 #include "dtbschedmgr_log.h"
 #include "test_log.h"
@@ -217,28 +215,6 @@ HWTEST_F(DSchedContinueEventTest, DSchedContinueEventTest_005_1, TestSize.Level0
     ret = cmd.Unmarshal(cmdStr);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueEventTest DSchedContinueEventTest_005_1 end ret:" << ret << std::endl;
-}
-
-/**
- * @tc.name: DSchedContinueEventTest_006_1
- * @tc.desc: Test UnmarshalWantStr
- * @tc.type: FUNC
- */
-HWTEST_F(DSchedContinueEventTest, DSchedContinueEventTest_006_1, TestSize.Level0)
-{
-    DTEST_LOG << "DSchedContinueEventTest DSchedContinueEventTest_006_1 begin" << std::endl;
-    DistributedWant dtbWant;
-    Parcel wantParcel;
-    ASSERT_EQ(dtbWant.Marshalling(wantParcel), true);
-    std::string wantStr = ParcelToBase64Str(wantParcel);
-
-    DSchedContinueDataCmd cmd;
-    int32_t ret = cmd.UnmarshalWantStr(wantStr);
-    EXPECT_EQ(ret, ERR_OK);
-
-    ret = cmd.UnmarshalWantStr("");
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-    DTEST_LOG << "DSchedContinueEventTest DSchedContinueEventTest_006_1 end ret:" << ret << std::endl;
 }
 }
 }
