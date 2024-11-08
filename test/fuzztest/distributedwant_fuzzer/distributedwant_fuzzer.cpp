@@ -44,30 +44,38 @@ uint32_t GetU32Data(const char* ptr)
     return (ptr[POS_0] << OFFSET_24) | (ptr[POS_1] << OFFSET_16) | (ptr[POS_2] << OFFSET_8) | ptr[POS_3];
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_001(const char* data, size_t size)
+bool DoSomethingInterestingWithMyAPI_DistributedWant_001(const uint8_t* data, size_t size)
 {
+    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+        return false;
+    }
+
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
-    unsigned int flags = static_cast<unsigned int>(GetU32Data(data));
+    unsigned int flags = static_cast<unsigned int>(GetU32Data(reinterpret_cast<const char*>(data)));
     want->SetFlags(flags);
     want->RemoveFlags(flags);
     want->AddFlags(flags);
-    std::string entity(data, size);
+    std::string entity(reinterpret_cast<const char*>(data), size);
     want->AddEntity(entity);
     want->HasEntity(entity);
     want->RemoveEntity(entity);
-    std::string bundleName(data, size);
+    std::string bundleName(reinterpret_cast<const char*>(data), size);
     want->SetBundle(bundleName);
-    std::string deviceId(data, size);
+    std::string deviceId(reinterpret_cast<const char*>(data), size);
     want->SetDeviceId(deviceId);
     want->SetElementName(bundleName, entity);
     want->SetElementName(deviceId, bundleName, entity);
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_002(const char* data, size_t size)
+bool DoSomethingInterestingWithMyAPI_DistributedWant_002(const uint8_t* data, size_t size)
 {
+    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+        return false;
+    }
+
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
-    std::string type(data, size);
+    std::string type(reinterpret_cast<const char*>(data), size);
     want->SetType(type);
     Uri uri(type);
     want->SetUri(uri);
@@ -78,28 +86,36 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_002(const char* data, size_
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_003(const char* data, size_t size)
+bool DoSomethingInterestingWithMyAPI_DistributedWant_003(const uint8_t* data, size_t size)
 {
+    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+        return false;
+    }
+
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
     want->CountEntities();
     want->GetScheme();
     DistributedOperation operation;
     want->SetOperation(operation);
-    std::string key(data, size);
+    std::string key(reinterpret_cast<const char*>(data), size);
     want->HasParameter(key);
-    std::string content(data, size);
-    std::string prop(data, size);
-    std::string value(data, size);
-    std::string str(data, size);
+    std::string content(reinterpret_cast<const char*>(data), size);
+    std::string prop(reinterpret_cast<const char*>(data), size);
+    std::string value(reinterpret_cast<const char*>(data), size);
+    std::string str(reinterpret_cast<const char*>(data), size);
     nlohmann::json wantJson;
     want->ReadFromJson(wantJson);
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_004(const char* data, size_t size)
+bool DoSomethingInterestingWithMyAPI_DistributedWant_004(const uint8_t* data, size_t size)
 {
+    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+        return false;
+    }
+
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
-    std::string key(data, size);
+    std::string key(reinterpret_cast<const char*>(data), size);
     sptr<IRemoteObject> remoteObject;
     want->SetParam(key, remoteObject);
     std::vector<bool> boolValue;
@@ -118,10 +134,14 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_004(const char* data, size_
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_005(const char* data, size_t size)
+bool DoSomethingInterestingWithMyAPI_DistributedWant_005(const uint8_t* data, size_t size)
 {
+    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+        return false;
+    }
+
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
-    std::string key(data, size);
+    std::string key(reinterpret_cast<const char*>(data), size);
     std::vector<zchar> charVector;
     want->SetParam(key, charVector);
     want->GetCharArrayParam(key);
@@ -143,10 +163,14 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_005(const char* data, size_
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_006(const char* data, size_t size)
+bool DoSomethingInterestingWithMyAPI_DistributedWant_006(const uint8_t* data, size_t size)
 {
+    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+        return false;
+    }
+
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
-    std::string key(data, size);
+    std::string key(reinterpret_cast<const char*>(data), size);
     std::vector<float> floatVector;
     want->SetParam(key, floatVector);
     want->GetFloatArrayParam(key);
@@ -162,7 +186,7 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_006(const char* data, size_
     std::vector<short> shortVector;
     want->SetParam(key, shortVector);
     want->GetShortArrayParam(key);
-    std::string stringValue(data, size);
+    std::string stringValue(reinterpret_cast<const char*>(data), size);
     want->SetParam(key, stringValue);
     want->GetStringParam(key);
     std::vector<std::string> stringVector;
@@ -185,38 +209,11 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_006(const char* data, size_
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    if (data == nullptr) {
-        std::cout << "invalid data" << std::endl;
-        return 0;
-    }
-
-    /* Validate the length of size */
-    if (size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
-        return 0;
-    }
-
-    char* ch = reinterpret_cast<char *>(malloc(size + 1));
-    if (ch == nullptr) {
-        std::cout << "malloc failed." << std::endl;
-        return 0;
-    }
-
-    (void)memset_s(ch, size + 1, 0x00, size + 1);
-    if (memcpy_s(ch, size + 1, data, size) != EOK) {
-        std::cout << "copy failed." << std::endl;
-        free(ch);
-        ch = nullptr;
-        return 0;
-    }
-
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_001(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_002(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_003(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_004(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_005(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_006(ch, size);
-    free(ch);
-    ch = nullptr;
+    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_001(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_002(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_003(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_004(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_005(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_006(data, size);
     return 0;
 }

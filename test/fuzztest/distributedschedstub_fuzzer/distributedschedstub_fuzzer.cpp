@@ -402,17 +402,23 @@ void ReleaseRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     DistributedSchedService::GetInstance().ProcessDeviceOffline(deviceId);
 }
 
-void GetDistributedComponentListInnerFuzzTest(const uint8_t* data, size_t size)
+int32_t GetDistributedComponentListInnerFuzzTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
-        return;
+        return INVALID_PARAMETERS_ERR;
     }
     FuzzUtil::MockPermission();
     MessageParcel dataParcel;
     MessageParcel reply;
-    MessageOption option;
+    std::vector<std::string> distributedComponents;
+    int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
+    std::string str(reinterpret_cast<const char*>(data), size);
+    distributedComponents.push_back(str);
+    PARCEL_WRITE_HELPER(reply, Int32, int32Data);
+    PARCEL_WRITE_HELPER(reply, StringVector, distributedComponents);
 
     DistributedSchedService::GetInstance().GetDistributedComponentListInner(dataParcel, reply);
+    return ERR_OK;
 }
 
 void StartRemoteFreeInstallInnerFuzzTest(const uint8_t* data, size_t size)

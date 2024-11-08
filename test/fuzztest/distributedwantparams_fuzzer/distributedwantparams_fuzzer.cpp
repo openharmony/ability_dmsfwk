@@ -54,10 +54,14 @@ uint32_t GetU32Data(const char* ptr)
     return (ptr[POS_0] << OFFSET_24) | (ptr[POS_1] << OFFSET_16) | (ptr[POS_2] << OFFSET_8) | ptr[POS_3];
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWantParams_001(const char* data, size_t size)
+bool DoSomethingInterestingWithMyAPI_DistributedWantParams_001(const uint8_t* data, size_t size)
 {
+    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+        return false;
+    }
+
     DistributedWantParams wantOther;
-    std::string key(data, size);
+    std::string key(reinterpret_cast<const char*>(data), size);
     std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
     sptr<AAFwk::IArray> array = new (std::nothrow) AAFwk::Array(0, DistributedSchedule::g_IID_IDistributedWantParams);
     wantParams->SetParam(key, array);
@@ -71,14 +75,15 @@ bool DoSomethingInterestingWithMyAPI_DistributedWantParams_001(const char* data,
     wantParams->HasParam(key);
     wantParams->IsEmpty();
     wantParams->GetParams();
-
-    Parcel parcel;
-
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWantParams_002(const char* data, size_t size)
+bool DoSomethingInterestingWithMyAPI_DistributedWantParams_002(const uint8_t* data, size_t size)
 {
+    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+        return false;
+    }
+
     DistributedWantParams wantOther;
     std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
     Parcel parcel;
@@ -92,10 +97,10 @@ bool DoSomethingInterestingWithMyAPI_DistributedWantParams_002(const char* data,
     wantParams->WriteArrayToParcelLong(parcel, ao);
     wantParams->WriteArrayToParcelFloat(parcel, ao);
     wantParams->WriteArrayToParcelDouble(parcel, ao);
-    long longValue = static_cast<long>(GetU32Data(data));
+    long longValue = static_cast<long>(GetU32Data(reinterpret_cast<const char*>(data)));
     sptr<IInterface> longIt = Long::Box(longValue);
     wantParams->WriteToParcelLong(parcel, longIt);
-    float floatValue = static_cast<float>(GetU32Data(data));
+    float floatValue = static_cast<float>(GetU32Data(reinterpret_cast<const char*>(data)));
     sptr<IInterface> floatIt = Float::Box(floatValue);
     wantParams->WriteToParcelFloat(parcel, floatIt);
 
@@ -109,44 +114,48 @@ bool DoSomethingInterestingWithMyAPI_DistributedWantParams_002(const char* data,
     wantParams->ReadFromParcelArrayLong(parcel, array);
     wantParams->ReadFromParcelArrayFloat(parcel, array);
     wantParams->ReadFromParcelArrayDouble(parcel, array);
-    std::string key(data, size);
+    std::string key(reinterpret_cast<const char*>(data), size);
     wantParams->ReadFromParcelLong(parcel, key);
     wantParams->ReadFromParcelFloat(parcel, key);
 
-    wantParams->ReadArrayToParcel(parcel, GetU32Data(data) % OFFSET_16, array);
+    wantParams->ReadArrayToParcel(parcel, GetU32Data(reinterpret_cast<const char*>(data)) % OFFSET_16, array);
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWantParams_003(const char* data, size_t size)
+bool DoSomethingInterestingWithMyAPI_DistributedWantParams_003(const uint8_t* data, size_t size)
 {
+    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+        return false;
+    }
+
     DistributedWantParams wantOther;
     std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
     Parcel parcel;
-    std::string key(data, size);
-    int8_t byteValue = static_cast<int8_t>(GetU32Data(data));
+    std::string key(reinterpret_cast<const char*>(data), size);
+    int8_t byteValue = static_cast<int8_t>(GetU32Data(reinterpret_cast<const char*>(data)));
     sptr<IInterface> byteIt = Byte::Box(byteValue);
     wantParams->WriteToParcelByte(parcel, byteIt);
     sptr<IInterface> stringIt = String::Box(key);
     wantParams->WriteToParcelString(parcel, stringIt);
-    bool boolValue = static_cast<bool>(GetU32Data(data) > FOO_MAX_LEN);
+    bool boolValue = static_cast<bool>(GetU32Data(reinterpret_cast<const char*>(data)) > FOO_MAX_LEN);
     sptr<IInterface> boolIt = Boolean::Box(boolValue);
     wantParams->WriteToParcelBool(parcel, boolIt);
     char charValue = *data;
     sptr<IInterface> charIt = Char::Box(charValue);
     wantParams->WriteToParcelChar(parcel, charIt);
-    short shortValue = static_cast<short>(GetU32Data(data));
+    short shortValue = static_cast<short>(GetU32Data(reinterpret_cast<const char*>(data)));
     sptr<IInterface> shortIt = Short::Box(shortValue);
     wantParams->WriteToParcelShort(parcel, shortIt);
-    double doubleValue = static_cast<double>(GetU32Data(data));
+    double doubleValue = static_cast<double>(GetU32Data(reinterpret_cast<const char*>(data)));
     sptr<IInterface> doubleIt = Double::Box(doubleValue);
     wantParams->WriteToParcelDouble(parcel, doubleIt);
-    int32_t intValue = static_cast<int32_t>(GetU32Data(data));
+    int32_t intValue = static_cast<int32_t>(GetU32Data(reinterpret_cast<const char*>(data)));
     sptr<IInterface> intIt = Integer::Box(intValue);
     wantParams->WriteToParcelInt(parcel, intIt);
     wantParams->WriteToParcelFD(parcel, wantOther);
     wantParams->WriteToParcelRemoteObject(parcel, wantOther);
 
-    int type = static_cast<int>(GetU32Data(data));
+    int type = static_cast<int>(GetU32Data(reinterpret_cast<const char*>(data)));
     wantParams->ReadFromParcelInt8(parcel, key);
     wantParams->ReadFromParcelString(parcel, key);
     wantParams->ReadFromParcelBool(parcel, key);
@@ -169,12 +178,16 @@ bool DoSomethingInterestingWithMyAPI_DistributedWantParams_003(const char* data,
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWantParams_004(const char* data, size_t size)
+bool DoSomethingInterestingWithMyAPI_DistributedWantParams_004(const uint8_t* data, size_t size)
 {
+    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+        return false;
+    }
+
     DistributedWantParams wantOther;
     std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
 
-    std::string value(data, size);
+    std::string value(reinterpret_cast<const char*>(data), size);
     sptr<IInterface> stringObj =
         DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_STRING, value);
     wantParams->CompareInterface(stringObj, stringObj, DistributedWantParams::VALUE_TYPE_STRING);
@@ -193,36 +206,9 @@ bool DoSomethingInterestingWithMyAPI_DistributedWantParams_004(const char* data,
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    if (data == nullptr) {
-        std::cout << "invalid data" << std::endl;
-        return 0;
-    }
-
-    /* Validate the length of size */
-    if (size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
-        return 0;
-    }
-
-    char* ch = (char *)malloc(size + 1);
-    if (ch == nullptr) {
-        std::cout << "malloc failed." << std::endl;
-        return 0;
-    }
-
-    (void)memset_s(ch, size + 1, 0x00, size + 1);
-    if (memcpy_s(ch, size + 1, data, size) != EOK) {
-        std::cout << "copy failed." << std::endl;
-        free(ch);
-        ch = nullptr;
-        return 0;
-    }
-
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_001(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_002(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_003(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_004(ch, size);
-    free(ch);
-    ch = nullptr;
+    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_001(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_002(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_003(data, size);
+    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_004(data, size);
     return 0;
 }
