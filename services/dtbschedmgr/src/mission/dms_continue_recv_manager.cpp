@@ -508,6 +508,23 @@ void DMSContinueRecvMgr::OnDeviceScreenOff()
 }
 #endif
 
+void DMSContinueRecvMgr::FindToNotifyRecvBroadcast(const std::string& senderNetworkId, const std::string& bundleName,
+    const std::string& continueType)
+{
+    std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
+    auto iterItem = registerOnListener_.find(onType_);
+    if (iterItem == registerOnListener_.end()) {
+        HILOGI("Get iterItem failed from registerOnListener_, nobody registed");
+        return;
+    }
+    std::vector<sptr<IRemoteObject>> objs = iterItem->second;
+    for (auto iter : objs) {
+        NotifyRecvBroadcast(iter,
+            currentIconInfo(senderNetworkId, iconInfo_.sourceBundleName, bundleName, continueType),
+            INACTIVE);
+    }
+}
+
 void DMSContinueRecvMgr::OnContinueSwitchOff()
 {
     auto func = [this]() {
@@ -529,26 +546,38 @@ void DMSContinueRecvMgr::OnContinueSwitchOff()
         }
         HILOGI("Saved iconInfo cleared, networkId: %{public}s, bundleName: %{public}s.",
             GetAnonymStr(senderNetworkId).c_str(), bundleName.c_str());
-        {
-            std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
-            auto iterItem = registerOnListener_.find(onType_);
-            if (iterItem == registerOnListener_.end()) {
-                HILOGI("Get iterItem failed from registerOnListener_, nobody registed");
-                return;
-            }
-            std::vector<sptr<IRemoteObject>> objs = iterItem->second;
-            for (auto iter : objs) {
-                NotifyRecvBroadcast(iter,
-                    currentIconInfo(senderNetworkId, iconInfo_.sourceBundleName, bundleName, continueType),
-                    INACTIVE);
-            }
-        }
+        FindToNotifyRecvBroadcast(senderNetworkId, bundleName, continueType);
     };
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler_ is nullptr");
         return;
     }
     eventHandler_->PostTask(func);
+}
+
+void DMSContinueRecvMgr::OnUserSwitch()
+{
+    HILOGI("OnUserSwitch start.");
+    std::string senderNetworkId;
+    std::string bundleName;
+    std::string continueType;
+    {
+        std::lock_guard<std::mutex> currentIconLock(iconMutex_);
+        if (iconInfo_.isEmpty()) {
+            HILOGW("Saved iconInfo has already been cleared, task abort.");
+            return;
+        }
+        senderNetworkId = iconInfo_.senderNetworkId;
+        bundleName = iconInfo_.bundleName;
+        continueType = iconInfo_.continueType;
+        iconInfo_.senderNetworkId = "";
+        iconInfo_.bundleName = "";
+        iconInfo_.continueType = "";
+    }
+    HILOGI("Saved iconInfo cleared, networkId: %{public}s, bundleName: %{public}s.",
+        GetAnonymStr(senderNetworkId).c_str(), bundleName.c_str());
+    FindToNotifyRecvBroadcast(senderNetworkId, bundleName, continueType);
+    HILOGI("OnUserSwitch end.");
 }
 
 void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
@@ -581,20 +610,7 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
     }
     HILOGI("Saved iconInfo cleared, networkId: %{public}s, bundleName: %{public}s.",
         GetAnonymStr(senderNetworkId).c_str(), bundleName.c_str());
-    {
-        std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
-        auto iterItem = registerOnListener_.find(onType_);
-        if (iterItem == registerOnListener_.end()) {
-            HILOGI("Get iterItem failed from registerOnListener_, nobody registed");
-            return;
-        }
-        std::vector<sptr<IRemoteObject>> objs = iterItem->second;
-        for (auto iter : objs) {
-            NotifyRecvBroadcast(iter,
-                currentIconInfo(senderNetworkId, iconInfo_.sourceBundleName, bundleName, continueType),
-                INACTIVE);
-        }
-    }
+    FindToNotifyRecvBroadcast(senderNetworkId, bundleName, continueType);
     HILOGI("NotifyDeviceOffline end");
 }
 
@@ -623,20 +639,7 @@ void DMSContinueRecvMgr::NotifyPackageRemoved(const std::string& sinkBundleName)
         iconInfo_.continueType = "";
     }
     HILOGI("Saved iconInfo cleared, sinkBundleName: %{public}s.",  bundleName.c_str());
-    {
-        std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
-        auto iterItem = registerOnListener_.find(onType_);
-        if (iterItem == registerOnListener_.end()) {
-            HILOGI("Get iterItem failed from registerOnListener_, nobody registed");
-            return;
-        }
-        std::vector<sptr<IRemoteObject>> objs = iterItem->second;
-        for (auto iter : objs) {
-            NotifyRecvBroadcast(iter,
-                currentIconInfo(senderNetworkId, iconInfo_.sourceBundleName, bundleName, continueType),
-                INACTIVE);
-        }
-    }
+    FindToNotifyRecvBroadcast(senderNetworkId, bundleName, continueType);
     HILOGI("NotifyPackageRemoved end");
 }
 
