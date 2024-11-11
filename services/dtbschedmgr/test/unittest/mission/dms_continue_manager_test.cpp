@@ -15,6 +15,10 @@
 
 #include "dms_continue_manager_test.h"
 
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+#include "broadcast.h"
+#endif
+
 #include "datetime_ex.h"
 #include "distributed_sched_test_util.h"
 #include "dtbschedmgr_log.h"
@@ -27,6 +31,13 @@
 
 using namespace testing;
 using namespace testing::ext;
+
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+int32_t SendEvent(const char* pkgName, BroadCastAddr target, EventData *event)
+{
+    return 1;
+}
+#endif
 
 namespace OHOS {
 namespace DistributedSchedule {
