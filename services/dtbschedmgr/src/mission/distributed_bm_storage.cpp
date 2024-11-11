@@ -453,7 +453,7 @@ bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
     return true;
 }
 
-bool GetDistributedBundleInfo(const std::string &networkId, const std::string &bundleName,
+bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId, const std::string &bundleName,
                               DmsBundleInfo &distributeBundleInfo){
     HILOGD("networkId: %{public}s  bundleNameId: %{public}s", GetAnonymStr(networkId).c_str(), bundleName.c_str());
     if (!CheckKvStore()) {

@@ -390,14 +390,30 @@ int32_t DSchedContinue::OnContinueDataCmd(std::shared_ptr<DSchedContinueDataCmd>
 int32_t DSchedContinue::PostContinueDataTask(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
     DSchedContinueEventType eventType = DSCHED_CONTINUE_DATA_EVENT;
-    cmd->want_.SetBundle(cmd->dstBundleName_);
-    std::string senderNetWorkId = cmd->callerInfo_.sourceDeviceId;
-    std::string continueType = cmd->continueType_;
-    std::string moduleName = cmd->want_.GetModuleName();
+    if (UpdateElementInfo(cmd) != ERR_OK) {
+        return INVALID_PARAMETERS_ERR;
+    }
+    HILOGI("PostContinueDataTask %{public}d, continueInfo %{public}s; ", eventType, continueInfo_.toString().c_str());
+    if (eventHandler_ == nullptr) {
+        HILOGE("PostContinueDataTask eventHandler is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, cmd, 0);
+    if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+        HILOGE("PostContinueDataTask eventHandler send event type %{public}d fail", eventType);
+        return CONTINUE_SEND_EVENT_FAILED;
+    }
+    return ERR_OK;
+}
+
+int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd> cmd)
+{
+    std::string moduleName = cmd->want_.GetStringParam(OHOS::AAFwk::Want::PARAM_MODULE_NAME);
     DmsBundleInfo distributedBundleInfo;
-    if (!DmsBmStorage::GetInstance()->GetDistributedBundleInfo(senderNetWorkId, cmd->dstBundleName_,
-        distributedBundleInfo)) {
-        HILOGE("PostContinueDataTask can not found bundle info for bundle name: %{public}s",
+    if (!DmsBmStorage::GetInstance()->GetDistributedBundleInfo(
+            cmd->dstDeviceId_, cmd->dstBundleName_, distributedBundleInfo)) {
+        HILOGE("UpdateElementInfo can not found bundle info for bundle name: %{public}s",
                cmd->dstBundleName_.c_str());
         return INVALID_PARAMETERS_ERR;
     }
@@ -409,7 +425,7 @@ int32_t DSchedContinue::PostContinueDataTask(std::shared_ptr<DSchedContinueDataC
     for (const auto &abilityInfoElement: dmsAbilityInfos) {
         std::vector<std::string> continueTypes = abilityInfoElement.continueType;
         for (const auto &continueTypeElement: continueTypes) {
-            if (continueTypeElement == continueType) {
+            if (continueTypeElement == cmd->continueType_) {
                 if (continueTypeElement == abilityInfoElement.abilityName &&
                     moduleName == abilityInfoElement.moduleName) {
                     sameAbilityGot = true;
@@ -431,28 +447,15 @@ int32_t DSchedContinue::PostContinueDataTask(std::shared_ptr<DSchedContinueDataC
             break;
         }
     }
-
     if (result.empty()) {
-        HILOGE("PostContinueDataTask can not found bundle info for bundle name: %{public}s",
+        HILOGE("UpdateElementInfo can not found bundle info for bundle name: %{public}s",
                cmd->dstBundleName_.c_str());
         return INVALID_PARAMETERS_ERR;
     }
-
     auto element = cmd->want_.GetElement();
-    cmd->want_.SetElementName(element.GetDeviceId(), element.GetBundleName(), element.GetAbilityName(),
-        result[0].moduleName);
-
-    HILOGI("PostContinueDataTask %{public}d, continueInfo %{public}s", eventType, continueInfo_.toString().c_str());
-    if (eventHandler_ == nullptr) {
-        HILOGE("PostContinueDataTask eventHandler is nullptr");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, cmd, 0);
-    if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
-        HILOGE("PostContinueDataTask eventHandler send event type %{public}d fail", eventType);
-        return CONTINUE_SEND_EVENT_FAILED;
-    }
+    DmsAbilityInfo finalAbility = result[0];
+    cmd->want_.SetElementName(element.GetDeviceID(), cmd->dstBundleName_, finalAbility.abilityName,
+                              finalAbility.moduleName);
     return ERR_OK;
 }
 
