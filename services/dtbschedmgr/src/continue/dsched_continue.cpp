@@ -390,6 +390,58 @@ int32_t DSchedContinue::OnContinueDataCmd(std::shared_ptr<DSchedContinueDataCmd>
 int32_t DSchedContinue::PostContinueDataTask(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
     DSchedContinueEventType eventType = DSCHED_CONTINUE_DATA_EVENT;
+    cmd->want_.SetBundle(cmd->dstBundleName_);
+    std::string senderNetWorkId = cmd->callerInfo_.sourceDeviceId;
+    std::string continueType = cmd->continueType_;
+    std::string moduleName = cmd->want_.GetModuleName();
+    DmsBundleInfo distributedBundleInfo;
+    if (!DmsBmStorage::GetInstance()->GetDistributedBundleInfo(senderNetWorkId, cmd->dstBundleName_,
+        distributedBundleInfo)) {
+        HILOGE("PostContinueDataTask can not found bundle info for bundle name: %{public}s",
+               cmd->dstBundleName_.c_str());
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    std::vector<DmsAbilityInfo> dmsAbilityInfos = distributedBundleInfo.dmsAbilityInfos;
+    std::vector<DmsAbilityInfo> result;
+    bool sameAbilityGot = false;
+    bool hasSameModule = false;
+    for (const auto &abilityInfoElement: dmsAbilityInfos) {
+        std::vector<std::string> continueTypes = abilityInfoElement.continueType;
+        for (const auto &continueTypeElement: continueTypes) {
+            if (continueTypeElement == continueType) {
+                if (continueTypeElement == abilityInfoElement.abilityName &&
+                    moduleName == abilityInfoElement.moduleName) {
+                    sameAbilityGot = true;
+                    result.push_back(abilityInfoElement);
+                    break;
+                } else if (continueTypeElement != abilityInfoElement.abilityName &&
+                           moduleName == abilityInfoElement.moduleName) {
+                    hasSameModule = true;
+                    result.clear();
+                    result.push_back(abilityInfoElement);
+                    break;
+                } else if (continueTypeElement != abilityInfoElement.abilityName) {
+                    result.push_back(abilityInfoElement);
+                    break;
+                }
+            }
+        }
+        if (sameAbilityGot || hasSameModule) {
+            break;
+        }
+    }
+
+    if (result.empty()) {
+        HILOGE("PostContinueDataTask can not found bundle info for bundle name: %{public}s",
+               cmd->dstBundleName_.c_str());
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    auto element = cmd->want_.GetElement();
+    cmd->want_.SetElementName(element.GetDeviceId(), element.GetBundleName(), element.GetAbilityName(),
+        result[0].moduleName);
+
     HILOGI("PostContinueDataTask %{public}d, continueInfo %{public}s", eventType, continueInfo_.toString().c_str());
     if (eventHandler_ == nullptr) {
         HILOGE("PostContinueDataTask eventHandler is nullptr");
