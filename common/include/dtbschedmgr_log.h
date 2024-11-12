@@ -525,6 +525,10 @@ enum {
      * Result(29360237) for not get mgr.
      */
     DMS_NOT_GET_MANAGER = 29360237,
+    /**
+     * Result(29360238) for BMS can not find the specified module.
+     */
+    CAN_NOT_FOUND_MODULE_ERR = 29360238,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

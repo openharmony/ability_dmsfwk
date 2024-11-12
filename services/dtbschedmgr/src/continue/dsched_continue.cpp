@@ -390,9 +390,6 @@ int32_t DSchedContinue::OnContinueDataCmd(std::shared_ptr<DSchedContinueDataCmd>
 int32_t DSchedContinue::PostContinueDataTask(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
     DSchedContinueEventType eventType = DSCHED_CONTINUE_DATA_EVENT;
-    if (UpdateElementInfo(cmd) != ERR_OK) {
-        return INVALID_PARAMETERS_ERR;
-    }
     HILOGI("PostContinueDataTask %{public}d, continueInfo %{public}s; ", eventType, continueInfo_.toString().c_str());
     if (eventHandler_ == nullptr) {
         HILOGE("PostContinueDataTask eventHandler is nullptr");
@@ -415,7 +412,7 @@ int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd>
         cmd->dstDeviceId_, cmd->dstBundleName_, distributedBundleInfo)) {
         HILOGE("UpdateElementInfo can not found bundle info for bundle name: %{public}s",
                cmd->dstBundleName_.c_str());
-        return INVALID_PARAMETERS_ERR;
+        return CAN_NOT_FOUND_MODULE_ERR;
     }
 
     std::vector<DmsAbilityInfo> dmsAbilityInfos = distributedBundleInfo.dmsAbilityInfos;
@@ -425,22 +422,23 @@ int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd>
     for (const auto &abilityInfoElement: dmsAbilityInfos) {
         std::vector<std::string> continueTypes = abilityInfoElement.continueType;
         for (const auto &continueTypeElement: continueTypes) {
-            if (continueTypeElement == cmd->continueType_) {
-                if (continueTypeElement == abilityInfoElement.abilityName &&
-                    moduleName == abilityInfoElement.moduleName) {
-                    sameAbilityGot = true;
-                    result.push_back(abilityInfoElement);
-                    break;
-                } else if (continueTypeElement != abilityInfoElement.abilityName &&
-                           moduleName == abilityInfoElement.moduleName) {
-                    hasSameModule = true;
-                    result.clear();
-                    result.push_back(abilityInfoElement);
-                    break;
-                } else if (continueTypeElement != abilityInfoElement.abilityName) {
-                    result.push_back(abilityInfoElement);
-                    break;
-                }
+            if (continueTypeElement != cmd->continueType_) {
+                continue;
+            }
+            if (continueTypeElement == abilityInfoElement.abilityName &&
+                moduleName == abilityInfoElement.moduleName) {
+                sameAbilityGot = true;
+                result.push_back(abilityInfoElement);
+                break;
+            } else if (continueTypeElement != abilityInfoElement.abilityName &&
+                       moduleName == abilityInfoElement.moduleName) {
+                hasSameModule = true;
+                result.clear();
+                result.push_back(abilityInfoElement);
+                break;
+            } else if (continueTypeElement != abilityInfoElement.abilityName) {
+                result.push_back(abilityInfoElement);
+                break;
             }
         }
         if (sameAbilityGot || hasSameModule) {
@@ -450,7 +448,7 @@ int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd>
     if (result.empty()) {
         HILOGE("UpdateElementInfo can not found bundle info for bundle name: %{public}s",
                cmd->dstBundleName_.c_str());
-        return INVALID_PARAMETERS_ERR;
+        return CAN_NOT_FOUND_MODULE_ERR;
     }
     auto element = cmd->want_.GetElement();
     DmsAbilityInfo finalAbility = result[0];
@@ -976,6 +974,10 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
     if (cmd == nullptr) {
         HILOGE("cmd is null");
         return INVALID_PARAMETERS_ERR;
+    }
+
+    if (UpdateElementInfo(cmd) != ERR_OK) {
+        return CAN_NOT_FOUND_MODULE_ERR;
     }
 
     DurationDumperBeforeStartAbility(cmd);
