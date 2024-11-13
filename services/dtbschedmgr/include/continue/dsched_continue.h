@@ -146,7 +146,6 @@ private:
     int32_t PostContinueSendTask(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t status,
         uint32_t accessToken);
     int32_t PostContinueDataTask(std::shared_ptr<DSchedContinueDataCmd> cmd);
-    int32_t UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd> cmd);
     int32_t PostNotifyCompleteTask(int32_t result);
     int32_t PostContinueEndTask(int32_t result);
 
@@ -166,6 +165,7 @@ private:
         uint32_t accessToken);
     int32_t OnContinueDataCmd(std::shared_ptr<DSchedContinueDataCmd> cmd);
     int32_t OnNotifyComplete(int32_t missionId, bool isSuccess);
+    int32_t UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd> cmd);
     int32_t OnContinueEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd);
     int32_t OnContinueEnd(int32_t result);
 

@@ -404,12 +404,29 @@ int32_t DSchedContinue::PostContinueDataTask(std::shared_ptr<DSchedContinueDataC
     return ERR_OK;
 }
 
+int32_t DSchedContinue::OnNotifyComplete(int32_t missionId, bool isSuccess)
+{
+    HILOGI("called");
+    if (!isSuccess) {
+        HILOGE("start ability not success");
+        PostNotifyCompleteTask(CONTINUE_CALL_START_ABILITY_FAILED);
+        return ERR_OK;
+    }
+    if (missionId <= 0) {
+        HILOGE("start ability returns invalid missionId");
+        PostNotifyCompleteTask(INVALID_PARAMETERS_ERR);
+        return ERR_OK;
+    }
+    PostNotifyCompleteTask(ERR_OK);
+    return ERR_OK;
+}
+
 int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
     std::string moduleName = cmd->want_.GetStringParam(OHOS::AAFwk::Want::PARAM_MODULE_NAME);
     DmsBundleInfo distributedBundleInfo;
     if (!DmsBmStorage::GetInstance()->GetDistributedBundleInfo(
-        cmd->dstDeviceId_, cmd->dstBundleName_, distributedBundleInfo)) {
+            cmd->dstDeviceId_, cmd->dstBundleName_, distributedBundleInfo)) {
         HILOGE("UpdateElementInfo can not found bundle info for bundle name: %{public}s",
                cmd->dstBundleName_.c_str());
         return CAN_NOT_FOUND_MODULE_ERR;
@@ -454,23 +471,6 @@ int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd>
     DmsAbilityInfo finalAbility = result[0];
     cmd->want_.SetElementName(element.GetDeviceID(), cmd->dstBundleName_, finalAbility.abilityName,
                               finalAbility.moduleName);
-    return ERR_OK;
-}
-
-int32_t DSchedContinue::OnNotifyComplete(int32_t missionId, bool isSuccess)
-{
-    HILOGI("called");
-    if (!isSuccess) {
-        HILOGE("start ability not success");
-        PostNotifyCompleteTask(CONTINUE_CALL_START_ABILITY_FAILED);
-        return ERR_OK;
-    }
-    if (missionId <= 0) {
-        HILOGE("start ability returns invalid missionId");
-        PostNotifyCompleteTask(INVALID_PARAMETERS_ERR);
-        return ERR_OK;
-    }
-    PostNotifyCompleteTask(ERR_OK);
     return ERR_OK;
 }
 
