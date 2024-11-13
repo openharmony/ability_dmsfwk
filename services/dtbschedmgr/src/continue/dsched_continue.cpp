@@ -390,7 +390,7 @@ int32_t DSchedContinue::OnContinueDataCmd(std::shared_ptr<DSchedContinueDataCmd>
 int32_t DSchedContinue::PostContinueDataTask(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
     DSchedContinueEventType eventType = DSCHED_CONTINUE_DATA_EVENT;
-    HILOGI("PostContinueDataTask %{public}d, continueInfo %{public}s; ", eventType, continueInfo_.toString().c_str());
+    HILOGI("PostContinueDataTask %{public}d, continueInfo %{public}s", eventType, continueInfo_.toString().c_str());
     if (eventHandler_ == nullptr) {
         HILOGE("PostContinueDataTask eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
