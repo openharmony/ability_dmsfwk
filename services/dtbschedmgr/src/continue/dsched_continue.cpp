@@ -424,6 +424,8 @@ int32_t DSchedContinue::OnNotifyComplete(int32_t missionId, bool isSuccess)
 int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
     std::string moduleName = cmd->want_.GetStringParam(OHOS::AAFwk::Want::PARAM_MODULE_NAME);
+    std::string continueType = cmd->continueType_;
+    std::string formatContinueType = ContinueTypeFormat(continueType);
     DmsBundleInfo distributedBundleInfo;
     if (!DmsBmStorage::GetInstance()->GetDistributedBundleInfo(
         cmd->dstDeviceId_, cmd->dstBundleName_, distributedBundleInfo)) {
@@ -439,7 +441,7 @@ int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd>
     for (const auto &abilityInfoElement: dmsAbilityInfos) {
         std::vector<std::string> continueTypes = abilityInfoElement.continueType;
         for (const auto &continueTypeElement: continueTypes) {
-            if (continueTypeElement != cmd->continueType_) {
+            if (continueTypeElement != continueType && continueTypeElement != formatContinueType) {
                 continue;
             }
             if (continueTypeElement == abilityInfoElement.abilityName &&
@@ -472,6 +474,17 @@ int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd>
     cmd->want_.SetElementName(element.GetDeviceID(), cmd->dstBundleName_, finalAbility.abilityName,
                               finalAbility.moduleName);
     return ERR_OK;
+}
+
+std::string DSchedContinue::ContinueTypeFormat(const std::string &continueType)
+{
+    std::string suffix = QUICK_START_CONFIGURATION;
+    if (suffix.length() <= continueType.length() &&
+        continueType.rfind(suffix) == (continueType.length() - suffix.length())) {
+        return continueType.substr(0, continueType.rfind(QUICK_START_CONFIGURATION));
+    } else {
+        return continueType + QUICK_START_CONFIGURATION;
+    }
 }
 
 int32_t DSchedContinue::OnContinueEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd)
