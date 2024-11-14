@@ -3758,5 +3758,176 @@ HWTEST_F(DistributedWantBaseTest, GetLowerCaseScheme_test_003, TestSize.Level3)
     EXPECT_FALSE(strUri.empty());
     GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_003 end";
 }
+
+/**
+ * @tc.number: GetLowerCaseScheme_test_004
+ * @tc.name: GetLowerCaseScheme
+ * @tc.desc: Test GetLowerCaseScheme.
+ */
+HWTEST_F(DistributedWantBaseTest, GetLowerCaseScheme_test_004, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_004 start";
+    DistributedWant want;
+    Uri lowerCaseUri("http://TEST.COM");
+    Uri result = want.GetLowerCaseScheme(lowerCaseUri);
+    EXPECT_EQ(result, lowerCaseUri);
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_004 end";
+}
+
+/**
+ * @tc.number: ReadUriFromParcel_test_001
+ * @tc.name: ReadUriFromParcel
+ * @tc.desc: Test ReadUriFromParcel.
+ */
+HWTEST_F(DistributedWantBaseTest, ReadUriFromParcel_test_001, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "ReadUriFromParcel_test_001 start";
+    DistributedWant want;
+    Parcel parcel;
+    parcel.WriteInt32(DistributedOperation::VALUE_OBJECT);
+    bool result = want.ReadUriFromParcel(parcel);
+    EXPECT_EQ(result, true);
+    GTEST_LOG_(INFO) << "ReadUriFromParcel_test_001 end";
+}
+
+/**
+ * @tc.number: CanReadFromJson_test_001
+ * @tc.name: CanReadFromJson
+ * @tc.desc: Test CanReadFromJson.
+ */
+HWTEST_F(DistributedWantBaseTest, CanReadFromJson_test_001, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "CanReadFromJson_test_001 start";
+    DistributedWant want;
+    nlohmann::json wantJson;
+    wantJson["deviceId"] = "device1";
+    wantJson["bundleName"] = "bundle1";
+    wantJson["abilityName"] = "ability1";
+    wantJson["uri"] = "uri1";
+    wantJson["type"] = "type1";
+    wantJson["flags"] = 1;
+    wantJson["action"] = "action1";
+    wantJson["parameters"] = "parameters1";
+    bool result = want.CanReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+
+    wantJson["deviceId"] = 1;
+    wantJson["entities"] = "entities1";
+    result = want.CanReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+
+    wantJson["deviceId"] = "device1";
+    wantJson["bundleName"] = 1;
+    result = want.CanReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+    GTEST_LOG_(INFO) << "CanReadFromJson_test_001 end";
+}
+
+/**
+ * @tc.number: CanReadFromJson_test_002
+ * @tc.name: CanReadFromJson
+ * @tc.desc: Test CanReadFromJson.
+ */
+HWTEST_F(DistributedWantBaseTest, CanReadFromJson_test_002, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "CanReadFromJson_test_002 start";
+    DistributedWant want;
+    nlohmann::json wantJson;
+    wantJson["deviceId"] = "device1";
+    wantJson["bundleName"] = "bundle1";
+    wantJson["abilityName"] = 1;
+    wantJson["uri"] = "uri1";
+    wantJson["type"] = "type1";
+    wantJson["flags"] = 1;
+    wantJson["action"] = "action1";
+    wantJson["parameters"] = "parameters1";
+    wantJson["entities"] = "entities1";
+    bool result = want.CanReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+
+    wantJson["abilityName"] = "ability1";
+    wantJson["uri"] = 1;
+    result = want.CanReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+
+    wantJson["uri"] = "uri1";
+    wantJson["type"] = 1;
+    result = want.CanReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+    GTEST_LOG_(INFO) << "CanReadFromJson_test_002 end";
+}
+
+/**
+ * @tc.number: CanReadFromJson_test_003
+ * @tc.name: CanReadFromJson
+ * @tc.desc: Test CanReadFromJson.
+ */
+HWTEST_F(DistributedWantBaseTest, CanReadFromJson_test_003, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "CanReadFromJson_test_003 start";
+    DistributedWant want;
+    nlohmann::json wantJson;
+    wantJson["deviceId"] = "device1";
+    wantJson["bundleName"] = "bundle1";
+    wantJson["abilityName"] = "ability1";
+    wantJson["uri"] = "uri1";
+    wantJson["type"] = "type1";
+    wantJson["flags"] = "flags1";
+    wantJson["action"] = "action1";
+    wantJson["parameters"] = "parameters1";
+    wantJson["entities"] = "entities1";
+    bool result = want.CanReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+
+    wantJson["flags"] = 1;
+    wantJson["action"] = 1;
+    result = want.CanReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+
+    
+    wantJson["action"] = "action1";
+    wantJson["parameters"] = 1;
+    result = want.CanReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+    GTEST_LOG_(INFO) << "CanReadFromJson_test_003 end";
+}
+
+/**
+ * @tc.number: ReadFromJson_test_001
+ * @tc.name: ReadFromJson
+ * @tc.desc: Test ReadFromJson.
+ */
+HWTEST_F(DistributedWantBaseTest, ReadFromJson_test_001, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "ReadFromJson_test_001 start";
+    DistributedWant want;
+    nlohmann::json wantJson;
+    wantJson["deviceId"] = "device1";
+    wantJson["bundleName"] = "bundle1";
+    wantJson["abilityName"] = "ability1";
+    wantJson["uri"] = "uri1";
+    wantJson["type"] = "type1";
+    wantJson["flags"] = 1;
+    wantJson["action"] = "action1";
+    wantJson["parameters"] = "parameters1";
+    wantJson["entities"] = "entities1";
+    bool result = want.ReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+    GTEST_LOG_(INFO) << "ReadFromJson_test_001 end";
+}
+
+/**
+ * @tc.number: ReadFromJson_test_002
+ * @tc.name: ReadFromJson
+ * @tc.desc: Test ReadFromJson.
+ */
+HWTEST_F(DistributedWantBaseTest, ReadFromJson_test_002, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "ReadFromJson_test_002 start";
+    DistributedWant want;
+    std::string str = "";
+    EXPECT_EQ(want.FromString(str), nullptr);
+    GTEST_LOG_(INFO) << "ReadFromJson_test_002 end";
+}
 }  // namespace DistributedSchedule
 }  // namespace OHOS

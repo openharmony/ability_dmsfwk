@@ -31,9 +31,36 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace DistributedSchedule {
+
+static std::string g_mockString = "";
+static bool g_mockBool = false;
+
 namespace {
 const string GROUP_ID = "TEST_GROUP_ID";
 constexpr int32_t SLEEP_TIME = 1000;
+}
+
+bool DmsBmStorage::GetBundleNameId(const std::string& bundleName, uint16_t &bundleNameId)
+{
+    return g_mockBool;
+}
+
+std::string DmsBmStorage::GetContinueType(const std::string &networkId, std::string &bundleName,
+    uint8_t continueTypeId)
+{
+    return g_mockString;
+}
+
+bool DmsBmStorage::GetContinueTypeId(const std::string &bundleName, const std::string &abilityName,
+    uint8_t &continueTypeId)
+{
+    return g_mockBool;
+}
+
+bool DmsBmStorage::GetDistributedBundleName(const std::string &networkId, const uint16_t& bundleNameId,
+    std::string &bundleName)
+{
+    return g_mockBool;
 }
 
 void BundleManagerInternalTest::SetUpTestCase()
@@ -645,6 +672,74 @@ HWTEST_F(BundleManagerInternalTest, GetBundleNameById_001, TestSize.Level3)
     int32_t ret = BundleManagerInternal::GetBundleNameById(networkId, bundleNameId, bundleName);
     EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
     DTEST_LOG << "BundleManagerInternalTest GetBundleNameById_001 end "<< std::endl;
+}
+
+
+/**
+ * @tc.name: GetBundleNameId_003
+ * @tc.desc: test get bundleNameId from bms
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, GetBundleNameId_003, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest GetBundleNameId_003 begin" << std::endl;
+    const std::string bundleName = "com.ohos.mms";
+    uint16_t bundleNameId = 0;
+    g_mockBool = true;
+    int32_t ret = BundleManagerInternal::GetBundleNameId(bundleName, bundleNameId);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "BundleManagerInternalTest GetBundleNameId_003 end "<< std::endl;
+}
+
+/**
+ * @tc.name: GetContinueType_002
+ * @tc.desc: GetContinueType
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, GetContinueType_002, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest GetContinueType_002 begin" << std::endl;
+    std::string networkId = "networkId";
+    std::string bundleName;
+    uint8_t continueTypeId = 0;
+    g_mockString = "continueType";
+    std::string str = BundleManagerInternal::GetContinueType(networkId, bundleName, continueTypeId);
+    EXPECT_NE(str, "");
+    DTEST_LOG << "BundleManagerInternalTest GetContinueType_002 end "<< std::endl;
+}
+
+/**
+ * @tc.name: GetContinueTypeId_002
+ * @tc.desc: GetContinueTypeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, GetContinueTypeId_002, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest GetContinueTypeId_002 begin" << std::endl;
+    std::string networkId = "networkId";
+    std::string abilityName;
+    uint8_t continueTypeId = 0;
+    g_mockBool = true;
+    int32_t ret = BundleManagerInternal::GetContinueTypeId(networkId, abilityName, continueTypeId);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "BundleManagerInternalTest GetContinueTypeId_002 end "<< std::endl;
+}
+
+/**
+ * @tc.name: GetBundleNameById_002
+ * @tc.desc: GetBundleNameById
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, GetBundleNameById_002, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest GetBundleNameById_002 begin" << std::endl;
+    std::string networkId = "networkId";
+    std::string bundleName;
+    uint16_t bundleNameId = 0;
+    g_mockBool = true;
+    int32_t ret = BundleManagerInternal::GetBundleNameById(networkId, bundleNameId, bundleName);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "BundleManagerInternalTest GetBundleNameById_002 end "<< std::endl;
 }
 }
 }
