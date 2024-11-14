@@ -179,11 +179,8 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_CreateNewSendMgr_001, TestSize.L
     /**
      * @tc.steps: step1. test OnUserRemoved with create current user sendMgr;
      */
-    MultiUserManager::GetInstance().Init();
-    int32_t ret = MultiUserManager::GetInstance().CreateNewSendMgr();
+    int32_t ret = MultiUserManager::GetInstance().CreateNewSendMgrLocked();
     EXPECT_EQ(ret, ERR_OK);
-
-    MultiUserManager::GetInstance().UnInit();
     DTEST_LOG << "MultiUserManager_CreateNewSendMgr_001 end" << std::endl;
 }
 
@@ -198,11 +195,8 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_CreateNewRecvMgr_001, TestSize.L
     /**
      * @tc.steps: step1. test OnUserRemoved with create current user recvMgr;
      */
-    MultiUserManager::GetInstance().Init();
-    int32_t ret = MultiUserManager::GetInstance().CreateNewRecvMgr();
+    int32_t ret = MultiUserManager::GetInstance().CreateNewRecvMgrLocked();
     EXPECT_EQ(ret, ERR_OK);
-
-    MultiUserManager::GetInstance().UnInit();
     DTEST_LOG << "MultiUserManager_CreateNewRecvMgr_001 end" << std::endl;
 }
 
@@ -246,7 +240,7 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_GetCurrentRecvMgr_001, TestSize.
     int32_t accountId = 100;
     MultiUserManager::GetInstance().Init();
     auto recvMgr = MultiUserManager::GetInstance().recvMgrMap_.find(accountId)->second;
-
+    MultiUserManager::GetInstance().hasRegSoftbusEventListener_ = true;
     auto ret = MultiUserManager::GetInstance().GetCurrentRecvMgr();
     EXPECT_EQ(ret, recvMgr);
 
@@ -257,6 +251,53 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_GetCurrentRecvMgr_001, TestSize.
 
     MultiUserManager::GetInstance().UnInit();
     DTEST_LOG << "MultiUserManager_GetCurrentRecvMgr_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: MultiUserManager_GetCurrentRecvMgr_002
+ * @tc.desc: test GetCurrentRecvMgr
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiUserManagerTest, MultiUserManager_GetCurrentRecvMgr_002, TestSize.Level3)
+{
+    DTEST_LOG << "MultiUserManager_GetCurrentRecvMgr_002 start" << std::endl;
+    /**
+     * @tc.steps: step1. test OnUserRemoved with create current user recvMgr;
+     */
+    int32_t accountId = 100;
+    MultiUserManager::GetInstance().Init();
+    auto recvMgr = MultiUserManager::GetInstance().recvMgrMap_.find(accountId)->second;
+    MultiUserManager::GetInstance().hasRegSoftbusEventListener_ = false;
+    auto ret = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    EXPECT_EQ(ret, recvMgr);
+    EXPECT_TRUE(MultiUserManager::GetInstance().hasRegSoftbusEventListener_);
+
+    MultiUserManager::GetInstance().recvMgrMap_.insert({accountId, nullptr});
+    ret = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    EXPECT_NE(ret, nullptr);
+
+
+    MultiUserManager::GetInstance().UnInit();
+    DTEST_LOG << "MultiUserManager_GetCurrentRecvMgr_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: MultiUserManager_CheckRegSoftbusListener_001
+ * @tc.desc: test CheckRegSoftbusListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiUserManagerTest, MultiUserManager_CheckRegSoftbusListener_001, TestSize.Level3)
+{
+    DTEST_LOG << "MultiUserManager_CheckRegSoftbusListener_001 start" << std::endl;
+    /**
+     * @tc.steps: step1. test OnUserRemoved with create current user recvMgr;
+     */
+    MultiUserManager::GetInstance().hasRegSoftbusEventListener_ = false;
+    EXPECT_FALSE(MultiUserManager::GetInstance().CheckRegSoftbusListener());
+    MultiUserManager::GetInstance().RegisterSoftbusListener();
+    EXPECT_TRUE(MultiUserManager::GetInstance().hasRegSoftbusEventListener_);
+    EXPECT_TRUE(MultiUserManager::GetInstance().CheckRegSoftbusListener());
+    DTEST_LOG << "MultiUserManager_CheckRegSoftbusListener_001 end" << std::endl;
 }
 
 /**

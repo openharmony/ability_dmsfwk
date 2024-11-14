@@ -44,18 +44,13 @@ void MultiUserManager::Init()
         HILOGI("GetSendMgr failed.");
         return;
     }
-    sendMgr->Init();
     auto recvMgr = GetCurrentRecvMgr();
     if (recvMgr == nullptr) {
         HILOGI("GetRecvMgr failed.");
         return;
     }
-    recvMgr->Init();
-    std::shared_ptr<SoftbusAdapterListener> missionBroadcastListener =
-        std::make_shared<DistributedMissionBroadcastListener>();
-    int32_t ret = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(missionBroadcastListener);
-    if (ret != ERR_OK) {
-        HILOGE("get RegisterSoftbusEventListener failed, ret: %{public}d", ret);
+    if (!CheckRegSoftbusListener()) {
+        RegisterSoftbusListener();
     }
     HILOGI("Init end.");
 }
@@ -130,14 +125,11 @@ void MultiUserManager::OnUserSwitched(int32_t accountId)
         HILOGI("GetSendMgr failed.");
         return;
     }
-    sendMgr->Init();
     recvMgr = GetCurrentRecvMgr();
     if (recvMgr == nullptr) {
         HILOGI("GetRecvMgr failed.");
         return;
     }
-    recvMgr->Init();
-
     if (!DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
         recvMgr->OnContinueSwitchOff();
         HILOGI("ICurrentContinueSwitch is off, %{public}d", DataShareManager::GetInstance()
@@ -214,19 +206,21 @@ AccountSA::OsAccountType MultiUserManager::GetOsAccountType(int32_t &accountId)
     return type;
 }
 
-int32_t MultiUserManager::CreateNewSendMgr()
+int32_t MultiUserManager::CreateNewSendMgrLocked()
 {
     HILOGI("CreateNewSendMgr begin. accountId: %{public}d.", currentUserId_);
     auto sendMgr = std::make_shared<DMSContinueSendMgr>();
+    sendMgr->Init();
     sendMgrMap_.emplace(currentUserId_, sendMgr);
     HILOGI("CreateNewSendMgr end.");
     return ERR_OK;
 }
 
-int32_t MultiUserManager::CreateNewRecvMgr()
+int32_t MultiUserManager::CreateNewRecvMgrLocked()
 {
     HILOGI("CreateNewRecvMgr begin. accountId: %{public}d.", currentUserId_);
     auto recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    recvMgr->Init();
     recvMgrMap_.emplace(currentUserId_, recvMgr);
     HILOGI("CreateNewRecvMgr end.");
     return ERR_OK;
@@ -238,7 +232,7 @@ std::shared_ptr<DMSContinueSendMgr> MultiUserManager::GetCurrentSendMgr()
     std::lock_guard<std::mutex> lock(sendMutex_);
     if (sendMgrMap_.empty() || sendMgrMap_.find(currentUserId_) == sendMgrMap_.end()) {
         HILOGI("sendMgr need to create.");
-        CreateNewSendMgr();
+        CreateNewSendMgrLocked();
     }
     auto cur = sendMgrMap_.find(currentUserId_);
     return cur->second;
@@ -250,7 +244,7 @@ std::shared_ptr<DMSContinueRecvMgr> MultiUserManager::GetCurrentRecvMgr()
     std::lock_guard<std::mutex> lock(recvMutex_);
     if (recvMgrMap_.empty() || recvMgrMap_.find(currentUserId_) == recvMgrMap_.end()) {
         HILOGI("recvMgr need to create.");
-        CreateNewRecvMgr();
+        CreateNewRecvMgrLocked();
     }
     auto cur = recvMgrMap_.find(currentUserId_);
     return cur->second;
@@ -260,11 +254,11 @@ std::shared_ptr<DMSContinueSendMgr> MultiUserManager::GetSendMgrByCallingUid(int
 {
     int32_t accountId = -1;
     OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, accountId);
-    HILOGI("GetRecvMgrByCallingUid. accountId: %{public}d , callingUid: %{public}d.", accountId, callingUid);
+    HILOGI("GetSendMgrByCallingUid. accountId: %{public}d , callingUid: %{public}d.", accountId, callingUid);
     std::lock_guard<std::mutex> lock(sendMutex_);
     if (sendMgrMap_.empty() || sendMgrMap_.find(accountId) == sendMgrMap_.end()) {
         HILOGI("sendMgr need to create.");
-        CreateNewSendMgr();
+        CreateNewSendMgrLocked();
     }
     auto cur = sendMgrMap_.find(accountId);
     return cur->second;
@@ -278,7 +272,7 @@ std::shared_ptr<DMSContinueRecvMgr> MultiUserManager::GetRecvMgrByCallingUid(int
     std::lock_guard<std::mutex> lock(recvMutex_);
     if (recvMgrMap_.empty() || recvMgrMap_.find(accountId) == recvMgrMap_.end()) {
         HILOGI("recvMgr need to create.");
-        CreateNewRecvMgr();
+        CreateNewRecvMgrLocked();
     }
     auto cur = recvMgrMap_.find(accountId);
     return cur->second;
@@ -360,6 +354,24 @@ bool MultiUserManager::IsCallerForeground(int32_t callingUid)
     int32_t accountId = -1;
     OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, accountId);
     return IsUserForeground(accountId);
+}
+
+void MultiUserManager::RegisterSoftbusListener()
+{
+    HILOGI("Register softbusListener start. accountId: %{public}d.", currentUserId_);
+    std::shared_ptr<SoftbusAdapterListener> missionBroadcastListener =
+        std::make_shared<DistributedMissionBroadcastListener>();
+    int32_t ret = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(missionBroadcastListener);
+    if (ret != ERR_OK) {
+        HILOGE("get RegisterSoftbusEventListener failed, ret: %{public}d", ret);
+    }
+    hasRegSoftbusEventListener_ = true;
+    HILOGI("Register softbusListener end.");
+}
+
+bool MultiUserManager::CheckRegSoftbusListener()
+{
+    return hasRegSoftbusEventListener_;
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

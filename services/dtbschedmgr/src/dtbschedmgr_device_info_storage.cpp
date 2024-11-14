@@ -403,15 +403,10 @@ void DtbschedmgrDeviceInfoStorage::DeviceOfflineNotify(const std::string& networ
 void DtbschedmgrDeviceInfoStorage::OnDeviceInfoChanged(const std::string& deviceId)
 {
     HILOGI("OnDeviceInfoChanged called");
-    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        HILOGI("GetRecvMgr failed.");
-        return;
-    }
-    if (!recvMgr->CheckRegSoftbusListener() &&
+    if (!MultiUserManager::GetInstance().CheckRegSoftbusListener() &&
         DistributedHardware::DeviceManager::GetInstance().IsSameAccount(deviceId)) {
         HILOGI("DMSContinueRecvMgr need init");
-        recvMgr->Init();
+        MultiUserManager::GetInstance().RegisterSoftbusListener();
     }
 }
 

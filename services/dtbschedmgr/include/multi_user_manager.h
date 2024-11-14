@@ -34,8 +34,8 @@ public:
     void OnUserSwitched(int32_t userId);
     void OnUserRemoved(int32_t userId);
     AccountSA::OsAccountType GetOsAccountType(int32_t &accountId);
-    int32_t CreateNewSendMgr();
-    int32_t CreateNewRecvMgr();
+    int32_t CreateNewSendMgrLocked();
+    int32_t CreateNewRecvMgrLocked();
     std::shared_ptr<DMSContinueSendMgr> GetCurrentSendMgr();
     std::shared_ptr<DMSContinueRecvMgr> GetCurrentRecvMgr();
     std::shared_ptr<DMSContinueSendMgr> GetSendMgrByCallingUid(int32_t callingUid);
@@ -45,6 +45,8 @@ public:
     int32_t GetForegroundUser();
     bool IsUserForeground(int32_t userId);
     bool IsCallerForeground(int32_t callingUid);
+    bool CheckRegSoftbusListener();
+    void RegisterSoftbusListener();
 
 private:
     void UserSwitchedOnRegisterListenerCache();
@@ -57,6 +59,7 @@ private:
     std::mutex sendMutex_;
     std::mutex recvMutex_;
     std::mutex listenerMutex_;
+    bool hasRegSoftbusEventListener_ = false;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS
