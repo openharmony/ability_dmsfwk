@@ -166,7 +166,9 @@ private:
     int32_t OnContinueDataCmd(std::shared_ptr<DSchedContinueDataCmd> cmd);
     int32_t OnNotifyComplete(int32_t missionId, bool isSuccess);
     int32_t UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd> cmd);
-    std::string ContinueTypeFormat(const std::string &continueType);
+    void FindSinkContinueAbilityInfo(const std::string &srcModuleName, const std::string &srcContinueType,
+        std::vector<DmsAbilityInfo> &dmsAbilityInfos, std::vector<DmsAbilityInfo> &result);
+    void ContinueTypeFormat(std::string &continueType);
     int32_t OnContinueEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd);
     int32_t OnContinueEnd(int32_t result);
 
