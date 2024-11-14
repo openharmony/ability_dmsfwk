@@ -483,6 +483,7 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueDataTask001, TestSize.Level3
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     ret = dataStateTest_->DoContinueDataTask(dContinue, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueDataStateTest SinkDoContinueDataTask001 end" << std::endl;
@@ -500,6 +501,7 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueDataTask002, TestSize.Level3
     auto data = std::make_shared<DSchedContinueDataCmd>();
     auto event = AppExecFwk::InnerEvent::Get(DSCHED_CONTINUE_DATA_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     EXPECT_CALL(*mockStateTest_, GetLocalDeviceId(_)).WillOnce(Return(true));
     int32_t ret = dataStateTest_->DoContinueDataTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
@@ -530,6 +532,7 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueEndTask001, TestSize.Level3)
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     ret = dataStateTest_->DoContinueEndTask(dContinue, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueDataStateTest SinkDoContinueEndTask001 end" << std::endl;
@@ -547,6 +550,7 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueEndTask002, TestSize.Level3)
     auto data = std::make_shared<int32_t>(1);
     auto event = AppExecFwk::InnerEvent::Get(DSCHED_CONTINUE_END_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = dataStateTest_->DoContinueEndTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueDataStateTest SinkDoContinueEndTask002 end" << std::endl;
@@ -576,6 +580,7 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueErrorTask001, TestSize.Level
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     ret = dataStateTest_->DoContinueErrorTask(dContinue, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueDataStateTest SinkDoContinueErrorTask001 end" << std::endl;
@@ -593,6 +598,7 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueErrorTask002, TestSize.Level
     auto data = std::make_shared<int32_t>(1);
     auto event = AppExecFwk::InnerEvent::Get(DSCHED_CONTINUE_COMPLETE_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = dataStateTest_->DoContinueErrorTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueDataStateTest SinkDoContinueErrorTask002 end" << std::endl;
@@ -683,6 +689,7 @@ HWTEST_F(DSchedContinueSinkEndStateTest, TestSinkDoContinueEndTask001, TestSize.
     EXPECT_NE(ret, ERR_OK);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     sinkEndStateTest_->DoContinueEndTask(dContinue, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueSinkEndStateTest TestSinkDoContinueEndTask001 end" << std::endl;
@@ -700,6 +707,7 @@ HWTEST_F(DSchedContinueSinkEndStateTest, TestSinkDoContinueEndTask002, TestSize.
     auto data = std::make_shared<int32_t>(1);
     auto event = AppExecFwk::InnerEvent::Get(DSCHED_CONTINUE_END_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = sinkEndStateTest_->DoContinueEndTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSinkEndStateTest TestSinkDoContinueEndTask002 end" << std::endl;
@@ -792,6 +800,7 @@ HWTEST_F(DSchedContinueSinkStartStateTest, SinkDoContinuePullReqTaskTest_001, Te
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     ret = sinkStartStateTest_->DoContinuePullReqTask(dContinue,
         AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -824,6 +833,7 @@ HWTEST_F(DSchedContinueSinkStartStateTest, SinkDoContinueAbilityTaskTest_001, Te
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     ret = sinkStartStateTest_->DoContinueAbilityTask(dContinue,
         AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -856,6 +866,7 @@ HWTEST_F(DSchedContinueSinkStartStateTest, SinkDoContinueEndTaskTest_001, TestSi
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     ret = sinkStartStateTest_->DoContinueEndTask(dContinue,
         AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -887,6 +898,7 @@ HWTEST_F(DSchedContinueSinkStartStateTest, SinkDoContinueErrorTask001, TestSize.
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     ret = sinkStartStateTest_->DoContinueErrorTask(dContinue,
         AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -980,6 +992,7 @@ HWTEST_F(DSchedContinueSinkWaitEndStateTest, SinkDoNotifyCompleteTask001, TestSi
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     ret = sinkWaitEndTest_->DoNotifyCompleteTask(dContinue, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSinkWaitEndStateTest SinkDoNotifyCompleteTask001 end" << std::endl;
@@ -997,6 +1010,7 @@ HWTEST_F(DSchedContinueSinkWaitEndStateTest, SinkDoNotifyCompleteTask002, TestSi
     auto data = std::make_shared<int32_t>(1);
     auto event = AppExecFwk::InnerEvent::Get(DSCHED_CONTINUE_COMPLETE_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = sinkWaitEndTest_->DoNotifyCompleteTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSinkWaitEndStateTest SinkDoNotifyCompleteTask002 end" << std::endl;
@@ -1027,6 +1041,7 @@ HWTEST_F(DSchedContinueSinkWaitEndStateTest, SinkDoContinueEndTask001, TestSize.
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     ret = sinkWaitEndTest_->DoContinueEndTask(dContinue, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSinkWaitEndStateTest SinkDoContinueEndTask001 end" << std::endl;
@@ -1044,6 +1059,7 @@ HWTEST_F(DSchedContinueSinkWaitEndStateTest, SinkDoContinueEndTask002, TestSize.
     auto data = std::make_shared<int32_t>(1);
     auto event = AppExecFwk::InnerEvent::Get(DSCHED_CONTINUE_END_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = sinkWaitEndTest_->DoContinueEndTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSinkWaitEndStateTest SinkDoContinueEndTask002 end" << std::endl;
@@ -1134,6 +1150,7 @@ HWTEST_F(DSchedContinueAbilityStateTest, SrcDoContinueSendTask001, TestSize.Leve
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     ret = abilityStateTest_->DoContinueSendTask(dContinue, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueAbilityStateTest SrcDoContinueSendTask001 end" << std::endl;
@@ -1151,6 +1168,7 @@ HWTEST_F(DSchedContinueAbilityStateTest, SrcDoContinueSendTask002, TestSize.Leve
     auto data = std::make_shared<ContinueAbilityData>();
     auto event = AppExecFwk::InnerEvent::Get(DSHCED_CONTINUE_SEND_DATA_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = abilityStateTest_->DoContinueSendTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueAbilityStateTest SrcDoContinueSendTask002 end" << std::endl;
@@ -1180,6 +1198,7 @@ HWTEST_F(DSchedContinueAbilityStateTest, SrcDoContinueEndTask001, TestSize.Level
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     ret = abilityStateTest_->DoContinueEndTask(dContinue, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueAbilityStateTest SrcDoContinueEndTask001 end" << std::endl;
@@ -1197,6 +1216,7 @@ HWTEST_F(DSchedContinueAbilityStateTest, SrcDoContinueErrorTask002, TestSize.Lev
     auto data = std::make_shared<int32_t>(1);
     auto event = AppExecFwk::InnerEvent::Get(DSCHED_CONTINUE_COMPLETE_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = abilityStateTest_->DoContinueErrorTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueAbilityStateTest SrcDoContinueErrorTask002 end" << std::endl;
@@ -1226,6 +1246,7 @@ HWTEST_F(DSchedContinueAbilityStateTest, SrcDoContinueErrorTask001, TestSize.Lev
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     ret = abilityStateTest_->DoContinueErrorTask(dContinue, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueAbilityStateTest SrcDoContinueErrorTask001 end" << std::endl;
@@ -1243,6 +1264,7 @@ HWTEST_F(DSchedContinueAbilityStateTest, SrcDoContinueEndTask002, TestSize.Level
     auto data = std::make_shared<int32_t>(1);
     auto event = AppExecFwk::InnerEvent::Get(DSCHED_CONTINUE_END_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = abilityStateTest_->DoContinueEndTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueAbilityStateTest SrcDoContinueEndTask002 end" << std::endl;
@@ -1333,6 +1355,7 @@ HWTEST_F(DSchedContinueEndStateTest, SrcDoContinueEndTaskTest001, TestSize.Level
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     ret = srcEndStateTest_->DoContinueEndTask(dContinue, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueEndStateTest SrcDoContinueEndTaskTest001 end" << std::endl;
@@ -1350,6 +1373,7 @@ HWTEST_F(DSchedContinueEndStateTest, SrcDoContinueEndTaskTest002, TestSize.Level
     auto data = std::make_shared<int32_t>(1);
     auto event = AppExecFwk::InnerEvent::Get(DSCHED_CONTINUE_END_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = srcEndStateTest_->DoContinueEndTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueEndStateTest SrcDoContinueEndTaskTest002 end" << std::endl;
@@ -1460,6 +1484,7 @@ HWTEST_F(DSchedContinueSourceStartStateTest, SrcDoContinuePushReqTaskTest_002, T
         }
     };
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = srcStartStateTest_->DoContinuePushReqTask(dContinue,
         AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -1491,6 +1516,7 @@ HWTEST_F(DSchedContinueSourceStartStateTest, SrcDoContinuePushReqTaskTest_003, T
     auto wantParamsPtr = std::make_shared<OHOS::AAFwk::WantParams>(wantParams);
     auto event = AppExecFwk::InnerEvent::Get(DSHCED_CONTINUE_REQ_PUSH_EVENT, wantParamsPtr, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = srcStartStateTest_->DoContinuePushReqTask(dContinue, event);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueSourceStartStateTest SrcDoContinuePushReqTaskTest_003 end" << std::endl;
@@ -1534,6 +1560,7 @@ HWTEST_F(DSchedContinueSourceStartStateTest, SrcDoContinueAbilityTaskTest_002, T
     auto data = std::make_shared<int32_t>(1);
     auto event = AppExecFwk::InnerEvent::Get(DSHCED_CONTINUE_ABILITY_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = srcStartStateTest_->DoContinueAbilityTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSourceStartStateTest SrcDoContinueAbilityTaskTest_002 end" << std::endl;
@@ -1577,6 +1604,7 @@ HWTEST_F(DSchedContinueSourceStartStateTest, SrcDoContinueEndTaskTest_002, TestS
     auto data = std::make_shared<int32_t>(1);
     auto event = AppExecFwk::InnerEvent::Get(DSCHED_CONTINUE_END_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = srcStartStateTest_->DoContinueEndTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSourceStartStateTest SrcDoContinueEndTaskTest_002 end" << std::endl;
@@ -1619,6 +1647,7 @@ HWTEST_F(DSchedContinueSourceStartStateTest, SrcDoContinueErrorTaskTest_002, Tes
     auto data = std::make_shared<int32_t>(1);
     auto event = AppExecFwk::InnerEvent::Get(DSCHED_CONTINUE_COMPLETE_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = srcStartStateTest_->DoContinueErrorTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueSourceStartStateTest SrcDoContinueErrorTaskTest_002 end" << std::endl;
@@ -1710,6 +1739,7 @@ HWTEST_F(DSchedContinueWaitEndStateTest, SrcDoNotifyCompleteTask_001, TestSize.L
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     ret = srcWaitEndTest_->DoNotifyCompleteTask(dContinue, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueWaitEndStateTest SrcDoNotifyCompleteTask_001 end" << std::endl;
@@ -1727,6 +1757,7 @@ HWTEST_F(DSchedContinueWaitEndStateTest, SrcDoNotifyCompleteTask_002, TestSize.L
     auto data = std::make_shared<int32_t>(1);
     auto event = AppExecFwk::InnerEvent::Get(DSCHED_CONTINUE_COMPLETE_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = srcWaitEndTest_->DoNotifyCompleteTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueWaitEndStateTest SrcDoNotifyCompleteTask_002 end" << std::endl;
@@ -1757,6 +1788,7 @@ HWTEST_F(DSchedContinueWaitEndStateTest, SrcDoContinueEndTask_001, TestSize.Leve
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     ret = srcWaitEndTest_->DoContinueEndTask(dContinue, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueWaitEndStateTest SrcDoContinueEndTask_001 end" << std::endl;
@@ -1774,6 +1806,7 @@ HWTEST_F(DSchedContinueWaitEndStateTest, SrcDoContinueEndTask_002, TestSize.Leve
     auto data = std::make_shared<int32_t>(1);
     auto event = AppExecFwk::InnerEvent::Get(DSCHED_CONTINUE_END_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     int32_t ret = srcWaitEndTest_->DoContinueEndTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueWaitEndStateTest SrcDoContinueEndTask_002 end" << std::endl;

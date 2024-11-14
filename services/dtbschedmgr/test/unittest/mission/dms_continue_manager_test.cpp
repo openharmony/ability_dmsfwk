@@ -15,10 +15,6 @@
 
 #include "dms_continue_manager_test.h"
 
-#ifdef DMSFWK_INTERACTIVE_ADAPTER
-#include "broadcast.h"
-#endif
-
 #include "datetime_ex.h"
 #include "distributed_sched_test_util.h"
 #include "dtbschedmgr_log.h"
@@ -31,13 +27,6 @@
 
 using namespace testing;
 using namespace testing::ext;
-
-#ifdef DMSFWK_INTERACTIVE_ADAPTER
-int32_t SendEvent(const char* pkgName, BroadCastAddr target, EventData *event)
-{
-    return 1;
-}
-#endif
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -70,6 +59,7 @@ void DMSContinueManagerTest::TearDownTestCase()
 
 void DMSContinueManagerTest::SetUp()
 {
+    MultiUserManager::GetInstance().Init();
 }
 
 void DMSContinueManagerTest::TearDown()
@@ -92,12 +82,8 @@ HWTEST_F(DMSContinueManagerTest, testUnInit001, TestSize.Level3)
     DTEST_LOG << "DMSContinueManagerTest testUnInit001 begin" << std::endl;
 
     DistributedSchedUtil::MockManageMissions();
-    MultiUserManager::GetInstance().Init();
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->Init();
     EXPECT_NE(sendMgr->eventHandler_, nullptr);
 
@@ -127,12 +113,8 @@ HWTEST_F(DMSContinueManagerTest, testUnInit002, TestSize.Level3)
     DTEST_LOG << "DMSContinueManagerTest testUnInit002 begin" << std::endl;
 
     DistributedSchedUtil::MockManageMissions();
-    MultiUserManager::GetInstance().Init();
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->Init();
     EXPECT_NE(sendMgr->eventHandler_, nullptr);
 
@@ -151,12 +133,8 @@ HWTEST_F(DMSContinueManagerTest, testPostUnfocusedTaskWithDelay001, TestSize.Lev
     DTEST_LOG << "DMSContinueManagerTest testPostUnfocusedTaskWithDelay001 begin" << std::endl;
 
     DistributedSchedUtil::MockManageMissions();
-    MultiUserManager::GetInstance().Init();
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->Init();
 
     /**
@@ -186,12 +164,8 @@ HWTEST_F(DMSContinueManagerTest, testNotifyMissionFocused001, TestSize.Level3)
     DTEST_LOG << "DMSContinueManagerTest testNotifyMissionFocused001 begin" << std::endl;
 
     DistributedSchedUtil::MockManageMissions();
-    MultiUserManager::GetInstance().Init();
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->Init();
 
     /**
@@ -221,12 +195,8 @@ HWTEST_F(DMSContinueManagerTest, testNotifyMissionUnfocused001, TestSize.Level3)
     DTEST_LOG << "DMSContinueManagerTest testNotifyMissionUnfocused001 begin" << std::endl;
 
     DistributedSchedUtil::MockManageMissions();
-    MultiUserManager::GetInstance().Init();
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->Init();
     /**
      * @tc.steps: step1. test NotifyMissionUnfocused when eventHandler is not nullptr;
@@ -252,10 +222,7 @@ HWTEST_F(DMSContinueManagerTest, testRegisterOnListener001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testRegisterOnListener001 start" << std::endl;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     recvMgr->Init();
     sptr<IRemoteObject> obj01(new RemoteOnListenerStubTest());
     int32_t ret = recvMgr->RegisterOnListener(TYPE, obj01);
@@ -281,10 +248,7 @@ HWTEST_F(DMSContinueManagerTest, testRegisterOffListener001, TestSize.Level1)
     DTEST_LOG << "DMSContinueManagerTest testRegisterOffListener001 start" << std::endl;
     sptr<IRemoteObject> obj01(new RemoteOnListenerStubTest());
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     int32_t ret = recvMgr->RegisterOnListener(TYPE, obj01);
     ret = recvMgr->RegisterOffListener(TYPE, obj01);
     EXPECT_EQ(ret, ERR_OK);
@@ -305,10 +269,7 @@ HWTEST_F(DMSContinueManagerTest, testRegisterOffListener002, TestSize.Level3)
     DTEST_LOG << "DMSContinueManagerTest testRegisterOffListener002 start" << std::endl;
     sptr<IRemoteObject> obj01(new RemoteOnListenerStubTest());
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     int32_t ret = recvMgr->RegisterOnListener(TYPE, obj01);
     EXPECT_EQ(ret, ERR_OK);
 
@@ -330,10 +291,7 @@ HWTEST_F(DMSContinueManagerTest, testGetMissionId001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testGetMissionId001 start" << std::endl;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->focusedMission_[BUNDLENAME_01] = MISSIONID_01;
     int32_t missionId;
     int32_t ret = sendMgr->GetMissionIdByBundleName(BUNDLENAME_01, missionId);
@@ -359,10 +317,7 @@ HWTEST_F(DMSContinueManagerTest, testDealFocusedBusiness001, TestSize.Level3)
      * @tc.steps: step1. test DealFocusedBusiness when missionId is invalid;
      */
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     int32_t ret = sendMgr->DealFocusedBusiness(-1, FocusedReason::MIN);
     EXPECT_NE(ret, ERR_OK);
 
@@ -383,10 +338,7 @@ HWTEST_F(DMSContinueManagerTest, testDealUnfocusedBusiness001, TestSize.Level3)
      * @tc.steps: step1. test DealUnfocusedBusiness when missionId is invalid;
      */
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     int32_t ret = sendMgr->DealUnfocusedBusiness(-1, UnfocusedReason::NORMAL);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
@@ -403,10 +355,7 @@ HWTEST_F(DMSContinueManagerTest, testDealUnfocusedBusiness001, TestSize.Level3)
      */
     sptr<IRemoteObject> obj01 = nullptr;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     recvMgr->NotifyDied(obj01);
 
     /**
@@ -438,10 +387,7 @@ HWTEST_F(DMSContinueManagerTest, testVerifyBroadcastSource001, TestSize.Level3)
     std::string sinkBundleName = "test sinkBundleName";
     std::string continueType = "test continueType";
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     int32_t ret = recvMgr->VerifyBroadcastSource(networkId,
         sourceBundleName, sinkBundleName, continueType, state);
     EXPECT_EQ(ret, ERR_OK);
@@ -466,10 +412,7 @@ HWTEST_F(DMSContinueManagerTest, testVerifyBroadcastSource002, TestSize.Level3)
     std::string sinkBundleName = "test sinkBundleName";
     std::string continueType = "test continueType";
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     int32_t ret = recvMgr->VerifyBroadcastSource(networkId, sourceBundleName, sinkBundleName, continueType, state);
     EXPECT_EQ(ret, ERR_OK);
 
@@ -494,10 +437,7 @@ HWTEST_F(DMSContinueManagerTest, testVerifyBroadcastSource003, TestSize.Level3)
     std::string sinkBundleName = "test sinkBundleName";
     std::string continueType = "test continueType";
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     int32_t ret = recvMgr->VerifyBroadcastSource(networkId, sourceBundleName, sinkBundleName, continueType, state);
     EXPECT_EQ(ret, ERR_OK);
 
@@ -527,10 +467,7 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
     int32_t state = 0;
 
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     recvMgr->PostOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state);
 
     int32_t ret = recvMgr->DealOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state, 0);
@@ -569,10 +506,7 @@ HWTEST_F(DMSContinueManagerTest, testGetBundleName001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testGetBundleName001 start" << std::endl;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->focusedMission_[BUNDLENAME_01] = MISSIONID_01;
     std::string bundleName;
     int32_t ret = sendMgr->GetBundleNameByMissionId(MISSIONID_01, bundleName);
@@ -593,10 +527,7 @@ HWTEST_F(DMSContinueManagerTest, testIsContinue001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testIsContinue001 start" << std::endl;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->focusedMission_[BUNDLENAME_02] = MISSIONID_02;
     sendMgr->info_.currentMissionId = MISSIONID_01;
     sendMgr->info_.currentIsContinuable = true;
@@ -622,10 +553,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDied001, TestSize.Level1)
     DTEST_LOG << "DMSContinueManagerTest testNotifyDied001 start" << std::endl;
     sptr<IRemoteObject> obj01(new RemoteOnListenerStubTest());
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     int32_t ret = recvMgr->RegisterOnListener(TYPE, obj01);
     EXPECT_EQ(false, recvMgr->registerOnListener_.empty());
     recvMgr->NotifyDied(obj01);
@@ -641,12 +569,8 @@ HWTEST_F(DMSContinueManagerTest, testSetMissionContinueState001, TestSize.Level3
 {
     DTEST_LOG << "DMSContinueManagerTest testSetMissionContinueState001 start" << std::endl;
     DistributedSchedUtil::MockManageMissions();
-    MultiUserManager::GetInstance().Init();
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->Init();
     OHOS::AAFwk::ContinueState state = OHOS::AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
 
@@ -674,12 +598,8 @@ HWTEST_F(DMSContinueManagerTest, testSetMissionContinueState002, TestSize.Level3
 {
     DTEST_LOG << "DMSContinueManagerTest testSetMissionContinueState002 start" << std::endl;
     DistributedSchedUtil::MockManageMissions();
-    MultiUserManager::GetInstance().Init();
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->Init();
     OHOS::AAFwk::ContinueState state = OHOS::AAFwk::ContinueState::CONTINUESTATE_INACTIVE;
 
@@ -708,10 +628,7 @@ HWTEST_F(DMSContinueManagerTest, testDealSetMissionContinueStateBusiness001, Tes
     DTEST_LOG << "DMSContinueManagerTest testDealSetMissionContinueStateBusiness001 start" << std::endl;
     OHOS::AAFwk::ContinueState state = OHOS::AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->info_.currentMissionId = MISSIONID_01;
 
     /**
@@ -739,10 +656,7 @@ HWTEST_F(DMSContinueManagerTest, testDealSetMissionContinueStateBusiness002, Tes
 {
     DTEST_LOG << "DMSContinueManagerTest testDealSetMissionContinueStateBusiness002 start" << std::endl;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->info_.currentIsContinuable = true;
     OHOS::AAFwk::ContinueState state = OHOS::AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
     int32_t ret = sendMgr->DealSetMissionContinueStateBusiness(MISSIONID_01, state);
@@ -764,12 +678,8 @@ HWTEST_F(DMSContinueManagerTest, testOnDeviceScreenOff001, TestSize.Level1)
      /**
      * @tc.steps: step1. test OnDeviceScreenOff when eventHandler is not nullptr;
      */
-    MultiUserManager::GetInstance().Init();
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->Init();
     sendMgr->OnDeviceScreenOff();
     EXPECT_NE(sendMgr->eventHandler_, nullptr);
@@ -793,10 +703,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline001 start" << std::endl;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     recvMgr->iconInfo_.senderNetworkId = NETWORKID_01;
     recvMgr->NotifyDeviceOffline(NETWORKID_01);
 
@@ -815,10 +722,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline002, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline002 start" << std::endl;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     recvMgr->iconInfo_.senderNetworkId = NETWORKID_01;
     recvMgr->NotifyDeviceOffline("");
     EXPECT_EQ(recvMgr->iconInfo_.senderNetworkId, NETWORKID_01);
@@ -835,10 +739,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline003, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline003 start" << std::endl;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     recvMgr->iconInfo_.senderNetworkId = NETWORKID_01;
     recvMgr->NotifyDeviceOffline(NETWORKID_02);
     EXPECT_EQ(recvMgr->iconInfo_.senderNetworkId, NETWORKID_01);
@@ -856,10 +757,7 @@ HWTEST_F(DMSContinueManagerTest, notifyPackageRemoved001, TestSize.Level1)
     DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved001 start" << std::endl;
     sptr<IRemoteObject> obj01(new RemoteOnListenerStubTest());
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     recvMgr->RegisterOnListener(TYPE, obj01);
     EXPECT_NE(recvMgr->registerOnListener_.size(), 0);
 
@@ -879,10 +777,7 @@ HWTEST_F(DMSContinueManagerTest, notifyPackageRemoved002, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved002 start" << std::endl;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     recvMgr->iconInfo_.bundleName = BUNDLENAME_01;
     recvMgr->NotifyPackageRemoved("");
     EXPECT_EQ(recvMgr->iconInfo_.bundleName, BUNDLENAME_01);
@@ -899,10 +794,7 @@ HWTEST_F(DMSContinueManagerTest, notifyPackageRemoved003, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved003 start" << std::endl;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     recvMgr->iconInfo_.bundleName = BUNDLENAME_01;
     recvMgr->NotifyPackageRemoved(BUNDLENAME_02);
     EXPECT_EQ(recvMgr->iconInfo_.bundleName, BUNDLENAME_01);
@@ -922,10 +814,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDataRecv001, TestSize.Level1)
     uint8_t payload[] = {0xf0};
     uint32_t dataLen1 = DMS_SEND_LEN - 1;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1);
 
     uint32_t dataLen2 = DMS_SEND_LEN;
@@ -946,10 +835,7 @@ HWTEST_F(DMSContinueManagerTest, testSendSoftbusEvent001, TestSize.Level1)
     uint8_t continueType = 1;
     uint8_t type = 0;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     bool ret = sendMgr->SendSoftbusEvent(bundleNameId, continueType, type);
     EXPECT_NE(ret, CAN_NOT_FOUND_ABILITY_ERR);
     DTEST_LOG << "DMSContinueManagerTest testSendSoftbusEvent001 end" << std::endl;
@@ -964,10 +850,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOnline001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOnline001 start" << std::endl;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     int32_t ret = sendMgr->NotifyDeviceOnline();
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOnline001 end" << std::endl;
@@ -982,10 +865,7 @@ HWTEST_F(DMSContinueManagerTest, testGetAbilityNameByMissionId_001, TestSize.Lev
 {
     DTEST_LOG << "DMSContinueManagerTest testGetAbilityNameByMissionId_001 start" << std::endl;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->focusedMissionAbility_[MISSIONID_01] = ABILITY_NAME_01;
     std::string abilityName;
     int32_t ret = sendMgr->GetAbilityNameByMissionId(MISSIONID_01, abilityName);
@@ -1003,10 +883,7 @@ HWTEST_F(DMSContinueManagerTest, testFocusedBusinessSendEvent_001, TestSize.Leve
 {
     DTEST_LOG << "DMSContinueManagerTest testFocusedBusinessSendEvent_001 start" << std::endl;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     int32_t ret = sendMgr->FocusedBusinessSendEvent(BUNDLENAME_01, ABILITY_NAME_01);
 
     EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
@@ -1022,10 +899,7 @@ HWTEST_F(DMSContinueManagerTest, testGetBundleNameIdAndContinueTypeId_001, TestS
 {
     DTEST_LOG << "DMSContinueManagerTest testGetBundleNameIdAndContinueTypeId_001 start" << std::endl;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->focusedMission_[BUNDLENAME_01] = MISSIONID_01;
     sendMgr->focusedMissionAbility_[MISSIONID_01] = ABILITY_NAME_01;
     uint16_t bundleNameId = 0;
@@ -1051,10 +925,7 @@ HWTEST_F(DMSContinueManagerTest, testGetContinueType_001, TestSize.Level1)
     std::string sinkBundleName = "test sinkBundleName";
     std::string continueType = "test continueType";
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     int32_t ret = recvMgr->VerifyBroadcastSource(networkId, sourceBundleName, sinkBundleName, continueType, state);
     EXPECT_EQ(ret, ERR_OK);
 
@@ -1075,10 +946,7 @@ HWTEST_F(DMSContinueManagerTest, testSetScreenOffInfo_001, TestSize.Level1)
     uint16_t bundleNameId = 0;
     std::string abilityName = "abilityName";
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->screenOffHandler_ =
         std::make_shared<DMSContinueSendMgr::ScreenOffHandler>();
     sendMgr->screenOffHandler_->SetScreenOffInfo(missionId, bundleName,
@@ -1099,10 +967,7 @@ HWTEST_F(DMSContinueManagerTest, testSetStateSendEvent_001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testSetStateSendEvent_001 start" << std::endl;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     int32_t ret = sendMgr->SetStateSendEvent(0, 0, AAFwk::ContinueState::CONTINUESTATE_INACTIVE);
     EXPECT_NE(ret, DMS_PERMISSION_DENIED);
 
@@ -1121,10 +986,7 @@ HWTEST_F(DMSContinueManagerTest, testGetContinueLaunchMissionInfo_001, TestSize.
     DTEST_LOG << "DMSContinueManagerTest testGetContinueLaunchMissionInfo_001 start" << std::endl;
     ContinueLaunchMissionInfo missionInfo = {"com.test.missionInfo", "MainAbility"};
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->continueLaunchMission_.clear();
     int32_t ret = sendMgr->GetContinueLaunchMissionInfo(MISSIONID_01, missionInfo);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -1151,10 +1013,7 @@ HWTEST_F(DMSContinueManagerTest, testUpdateContinueLaunchMission_001, TestSize.L
     info.id = MISSIONID_01;
     info.want = want;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     EXPECT_FALSE(sendMgr->UpdateContinueLaunchMission(info));
 
     info.want.SetFlags(AAFwk::Want::FLAG_ABILITY_CONTINUATION);
@@ -1178,10 +1037,7 @@ HWTEST_F(DMSContinueManagerTest, testGetFinalBundleName_001, TestSize.Level1)
     AppExecFwk::BundleInfo localBundleInfo;
     std::string continueType;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     bool ret = recvMgr->GetFinalBundleName(info, finalBundleName, localBundleInfo, continueType);
     EXPECT_EQ(ret, false);
     DTEST_LOG << "DMSContinueManagerTest testGetFinalBundleName_001 end" << std::endl;
@@ -1211,10 +1067,7 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_001, TestSize.Level1)
 
     localBundleInfo.abilityInfos = abilityInfos;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName,
                                                                      srcContinueType, isSameBundle);
     EXPECT_EQ(ret, false);
@@ -1250,10 +1103,7 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_002, TestSize.Level1)
 
     localBundleInfo.abilityInfos = abilityInfos;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName,
                                                                      srcContinueType, isSameBundle);
     EXPECT_EQ(ret, true);
@@ -1291,10 +1141,7 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_003, TestSize.Level1)
 
     localBundleInfo.abilityInfos = abilityInfos;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName,
                                                                      srcContinueType, isSameBundle);
     EXPECT_EQ(ret, false);
@@ -1327,10 +1174,7 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_004, TestSize.Level1)
 
     localBundleInfo.abilityInfos = abilityInfos;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName,
                                                                      srcContinueType, isSameBundle);
     EXPECT_EQ(ret, false);
@@ -1363,10 +1207,7 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_005, TestSize.Level1)
 
     localBundleInfo.abilityInfos = abilityInfos;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName,
                                             srcContinueType, isSameBundle);
     EXPECT_EQ(ret, true);
@@ -1382,10 +1223,7 @@ HWTEST_F(DMSContinueManagerTest, GetBundleNameByScreenOffInfo_001, TestSize.Leve
 {
     DTEST_LOG << "DMSContinueManagerTest GetBundleNameByScreenOffInfo_001 start" << std::endl;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->screenOffHandler_ = nullptr;
     int32_t missionId = 0;
     std::string bundleName;
@@ -1415,10 +1253,7 @@ HWTEST_F(DMSContinueManagerTest, SendScreenOffEvent_001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest SendScreenOffEvent_001 start" << std::endl;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->screenOffHandler_ = nullptr;
     int32_t ret = sendMgr->SendScreenOffEvent(DMS_FOCUSED_TYPE);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -1439,10 +1274,7 @@ HWTEST_F(DMSContinueManagerTest, DeleteContinueLaunchMissionInfo_001, TestSize.L
     DTEST_LOG << "DMSContinueManagerTest DeleteContinueLaunchMissionInfo_001 start" << std::endl;
     int32_t missionId = 0;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     sendMgr->continueLaunchMission_.clear();
     sendMgr->DeleteContinueLaunchMissionInfo(missionId);
 
@@ -1463,10 +1295,7 @@ HWTEST_F(DMSContinueManagerTest, CheckContinueState_001, TestSize.Level1)
     DTEST_LOG << "DMSContinueManagerTest CheckContinueState_001 start" << std::endl;
     int32_t missionId = 0;
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        DTEST_LOG << "GetSendMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, sendMgr);
     int32_t ret = sendMgr->CheckContinueState(missionId);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DMSContinueManagerTest CheckContinueState_001 end" << std::endl;
@@ -1481,10 +1310,7 @@ HWTEST_F(DMSContinueManagerTest, OnContinueSwitchOff_001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest OnContinueSwitchOff_001 start" << std::endl;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     recvMgr->iconInfo_.senderNetworkId = "";
     recvMgr->iconInfo_.bundleName = "";
     recvMgr->iconInfo_.continueType = "";
@@ -1509,10 +1335,7 @@ HWTEST_F(DMSContinueManagerTest, OnUserSwitch_001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest OnUserSwitch_001 start" << std::endl;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     recvMgr->iconInfo_.senderNetworkId = "";
     recvMgr->iconInfo_.bundleName = "";
     recvMgr->iconInfo_.continueType = "";
@@ -1537,10 +1360,7 @@ HWTEST_F(DMSContinueManagerTest, FindToNotifyRecvBroadcast_001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest FindToNotifyRecvBroadcast_001 start" << std::endl;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        DTEST_LOG << "GetRecvMgr failed." << std::endl;
-        return;
-    }
+    ASSERT_NE(nullptr, recvMgr);
     std::string senderNetworkId = "senderNetworkId";
     std::string bundleName = "bundleName";
     std::string continueType = "senderNetworkId";
