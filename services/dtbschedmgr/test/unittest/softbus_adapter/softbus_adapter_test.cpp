@@ -28,6 +28,7 @@ namespace DistributedSchedule {
 namespace {
 const std::string NETWORKID_01 = "networkId01";
 constexpr int32_t RETRY_SENT_EVENT_MAX_TIME = 3;
+const int32_t WAITTIME = 2000;
 }
 
 void SoftbusAdapterTest::SetUpTestCase()
@@ -64,8 +65,8 @@ HWTEST_F(SoftbusAdapterTest, SendSoftbusEvent_001, TestSize.Level3)
     int32_t result = SoftbusAdapter::GetInstance().SendSoftbusEvent(buffer);
     EXPECT_EQ(result, SOFTBUS_OK);
 
-    SoftbusMock sortbusMock;
     SoftbusAdapter::GetInstance().Init();
+    usleep(WAITTIME);
     result = SoftbusAdapter::GetInstance().SendSoftbusEvent(buffer);
     EXPECT_EQ(result, SOFTBUS_OK);
     SoftbusAdapter::GetInstance().UnInit();
@@ -88,6 +89,7 @@ HWTEST_F(SoftbusAdapterTest, DealSendSoftbusEvent_001, TestSize.Level3)
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
 
     SoftbusAdapter::GetInstance().Init();
+    usleep(WAITTIME);
     result = SoftbusAdapter::GetInstance().DealSendSoftbusEvent(nullptr, retry);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
 
@@ -124,6 +126,7 @@ HWTEST_F(SoftbusAdapterTest, RetrySendSoftbusEvent_001, TestSize.Level3)
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
 
     SoftbusAdapter::GetInstance().Init();
+    usleep(WAITTIME);
     result = SoftbusAdapter::GetInstance().RetrySendSoftbusEvent(buffer, retry);
     EXPECT_EQ(result, ERR_OK);
     SoftbusAdapter::GetInstance().UnInit();
