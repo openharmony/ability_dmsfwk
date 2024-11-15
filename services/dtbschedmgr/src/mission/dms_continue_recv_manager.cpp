@@ -326,7 +326,6 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
 
-    HILOGI("get bundleName, bundleName: %{public}s", bundleName.c_str());
     AppExecFwk::BundleInfo localBundleInfo;
     std::string continueType;
     FindContinueType(distributedBundleInfo, continueTypeId, continueType);
@@ -339,6 +338,10 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     if (localBundleInfo.applicationInfo.bundleType != AppExecFwk::BundleType::APP) {
         HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
         return INVALID_PARAMETERS_ERR;
+    }
+    if (!IsBundleContinuable(localBundleInfo)) {
+        HILOGE("Bundle %{public}s is not continuable", finalBundleName.c_str());
+        return BUNDLE_NOT_CONTINUABLE;
     }
 
     int32_t ret = VerifyBroadcastSource(senderNetworkId, bundleName, finalBundleName, continueType, state);
@@ -353,12 +356,20 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     }
     std::vector<sptr<IRemoteObject>> objs = iterItem->second;
     for (auto iter : objs) {
-        NotifyRecvBroadcast(iter,
-            currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType),
-            state);
+        NotifyRecvBroadcast(iter, currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType), state);
     }
     HILOGI("DealOnBroadcastBusiness end");
     return ERR_OK;
+}
+
+bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo)
+{
+    for (auto abilityInfo : bundleInfo.abilityInfos) {
+        if (abilityInfo.continuable) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
