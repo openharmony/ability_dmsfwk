@@ -326,7 +326,6 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
 
-    HILOGI("get bundleName, bundleName: %{public}s", bundleName.c_str());
     AppExecFwk::BundleInfo localBundleInfo;
     std::string continueType;
     FindContinueType(distributedBundleInfo, continueTypeId, continueType);
@@ -339,6 +338,10 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     if (localBundleInfo.applicationInfo.bundleType != AppExecFwk::BundleType::APP) {
         HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
         return INVALID_PARAMETERS_ERR;
+    }
+    if (!IsBundleContinuable(localBundleInfo)) {
+        HILOGE("Bundle %{public}s is not continuable", finalBundleName.c_str());
+        return BUNDLE_NOT_CONTINUABLE;
     }
 
     int32_t ret = VerifyBroadcastSource(senderNetworkId, bundleName, finalBundleName, continueType, state);
@@ -353,12 +356,20 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     }
     std::vector<sptr<IRemoteObject>> objs = iterItem->second;
     for (auto iter : objs) {
-        NotifyRecvBroadcast(iter,
-            currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType),
-            state);
+        NotifyRecvBroadcast(iter, currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType), state);
     }
     HILOGI("DealOnBroadcastBusiness end");
     return ERR_OK;
+}
+
+bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo)
+{
+    for (auto abilityInfo : bundleInfo.abilityInfos) {
+        if (abilityInfo.continuable) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
@@ -562,6 +573,46 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
         }
     }
     HILOGI("NotifyDeviceOffline end");
+}
+
+void DMSContinueRecvMgr::NotifyPackageRemove(const std::string& sinkBundleName)
+{
+    if (sinkBundleName.empty()) {
+        HILOGE("NotifyPackageRemove sinkBundleName empty");
+        return;
+    }
+    if(iconInfo_.bundleName != sinkBundleName) {
+        return;
+    }
+    HILOGI("NotifyPackageRemove begin. sinkBundleName: %{public}s.", sinkBundleName.c_str());
+    std::string senderNetworkId;
+    std::string bundleName;
+    std::string continueType;
+    {
+        std::lock_guard<std::mutex> currentIconLock(iconMutex_);
+        senderNetworkId = iconInfo_.senderNetworkId;
+        bundleName = iconInfo_.bundleName;
+        continueType = iconInfo_.continueType;
+        iconInfo_.senderNetworkId = "";
+        iconInfo_.bundleName = "";
+        iconInfo_.continueType = "";
+    }
+    HILOGI("Saved iconInfo cleared, sinkBundleName: %{public}s.",  bundleName.c_str());
+    {
+        std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
+        auto iterItem = registerOnListener_.find(onType_);
+        if (iterItem == registerOnListener_.end()) {
+            HILOGI("Get iterItem failed from registerOnListener_, nobody registed");
+            return;
+        }
+        std::vector<sptr<IRemoteObject>> objs = iterItem->second;
+        for (auto iter : objs) {
+            NotifyRecvBroadcast(iter,
+                currentIconInfo(senderNetworkId, iconInfo_.sourceBundleName, bundleName, continueType),
+                INACTIVE);
+        }
+    }
+    HILOGI("NotifyPackageRemove end");
 }
 
 std::string DMSContinueRecvMgr::GetContinueType(const std::string& bundleName)

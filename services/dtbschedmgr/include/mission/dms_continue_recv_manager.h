@@ -84,6 +84,7 @@ public:
     int32_t RegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj);
     void NotifyDied(const sptr<IRemoteObject>& obj);
     void NotifyDeviceOffline(const std::string& networkId);
+    void NotifyPackageRemove(const std::string& sinkBundleName);
     void OnDeviceScreenOff();
     void OnContinueSwitchOff();
     std::string GetContinueType(const std::string& bundleName);
@@ -104,6 +105,7 @@ private:
     int32_t DealOnBroadcastBusiness(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t retry = 0);
     void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const currentIconInfo& continueInfo, const int32_t state);
+    bool IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo);
 private:
     currentIconInfo iconInfo_;
     sptr<DistributedMissionDiedListener> missionDiedListener_;
