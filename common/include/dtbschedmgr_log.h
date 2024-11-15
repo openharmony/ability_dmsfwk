@@ -513,6 +513,10 @@ enum {
      * Result(29360234) for mission is not focused.
      */
     MISSION_NOT_FOCUSED = 29360234,
+    /**
+     * Result(29360235) for bundle is not continuable.
+     */
+    BUNDLE_NOT_CONTINUABLE = 29360235,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

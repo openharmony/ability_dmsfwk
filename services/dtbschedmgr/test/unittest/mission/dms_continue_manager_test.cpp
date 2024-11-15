@@ -278,7 +278,7 @@ HWTEST_F(DMSContinueManagerTest, testGetMissionId001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_OK);
 
     ret = DMSContinueSendMgr::GetInstance().GetMissionIdByBundleName(BUNDLENAME_02, missionId);
-    EXPECT_EQ(ret, MISSION_NOT_FOCUSED);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DMSContinueManagerTest testGetMissionId001 end" << std::endl;
 }
 
@@ -687,6 +687,55 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NotifyPackageRemoved001
+ * @tc.desc: test NotifyPackageRemoved normal
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, notifyPackageRemoved001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved001 start" << std::endl;
+    sptr<IRemoteObject> obj01(new RemoteOnListenerStubTest());
+    DMSContinueRecvMgr::GetInstance().RegisterOnListener(TYPE, obj01);
+    EXPECT_NE(DMSContinueRecvMgr::GetInstance().registerOnListener_.size(), 0);
+
+    DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName = BUNDLENAME_01;
+    DMSContinueRecvMgr::GetInstance().NotifyPackageRemoved(BUNDLENAME_01);
+    EXPECT_EQ(DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName, "");
+
+    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyPackageRemoved002
+ * @tc.desc: test NotifyPackageRemoved bundleName empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, notifyPackageRemoved002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved002 start" << std::endl;
+    DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName = BUNDLENAME_01;
+    DMSContinueRecvMgr::GetInstance().NotifyPackageRemoved("");
+    EXPECT_EQ(DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName, BUNDLENAME_01);
+
+    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved002 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyPackageRemoved003
+ * @tc.desc: test NotifyPackageRemoved bundleName not match
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, notifyPackageRemoved003, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved003 start" << std::endl;
+    DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName = BUNDLENAME_01;
+    DMSContinueRecvMgr::GetInstance().NotifyPackageRemoved(BUNDLENAME_02);
+    EXPECT_EQ(DMSContinueRecvMgr::GetInstance().iconInfo_.bundleName, BUNDLENAME_01);
+
+    DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved003 end" << std::endl;
+}
+
+/**
  * @tc.name: testNotifyDataRecv001
  * @tc.desc: NotifyDataRecv
  * @tc.type: FUNC
@@ -780,7 +829,7 @@ HWTEST_F(DMSContinueManagerTest, testGetBundleNameIdAndContinueTypeId_001, TestS
     int32_t ret = DMSContinueSendMgr::GetInstance().GetBundleNameIdAndContinueTypeId(MISSIONID_01, state,
         bundleNameId, continueTypeId);
 
-    EXPECT_EQ(ret, REMOTE_DEVICE_BIND_ABILITY_ERR);
+    EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
     DTEST_LOG << "DMSContinueManagerTest testGetBundleNameIdAndContinueTypeId_001 end" << std::endl;
 }
 
@@ -886,6 +935,24 @@ HWTEST_F(DMSContinueManagerTest, testUpdateContinueLaunchMission_001, TestSize.L
     info.id = MISSIONID_02;
     EXPECT_TRUE(DMSContinueSendMgr::GetInstance().UpdateContinueLaunchMission(info));
     DTEST_LOG << "DMSContinueManagerTest testUpdateContinueLaunchMission_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testGetFinalBundleName_001
+ * @tc.desc: test GetFinalBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, testGetFinalBundleName_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testGetFinalBundleName_001 start" << std::endl;
+    DmsBundleInfo info;
+    std::string finalBundleName;
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::string continueType;
+    bool ret = DMSContinueRecvMgr::GetInstance().GetFinalBundleName(info, finalBundleName,
+        localBundleInfo, continueType);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DMSContinueManagerTest testGetFinalBundleName_001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

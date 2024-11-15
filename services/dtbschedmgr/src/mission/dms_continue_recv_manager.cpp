@@ -94,6 +94,10 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
 {
     HILOGI("NotifyDataRecv start, senderNetworkId: %{public}s, dataLen: %{public}u.",
         GetAnonymStr(senderNetworkId).c_str(), dataLen);
+    if (!DmsKvSyncE2E::GetInstance()->CheckCtrlRule()) {
+        HILOGE("Forbid sending and receiving");
+        return;
+    }
     if (!DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
         HILOGE("ContinueSwitch status is off");
         return;
@@ -313,7 +317,6 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     if (!DmsBmStorage::GetInstance()->GetDistributedBundleInfo(senderNetworkId, bundleNameId,
         distributedBundleInfo)) {
         HILOGW("get distributedBundleInfo failed, try = %{public}d", retry);
-        DmsKvSyncE2E::GetInstance()->PushAndPullData(senderNetworkId);
         return RetryPostBroadcast(senderNetworkId, bundleNameId, continueTypeId, state, retry);
     }
 
@@ -321,12 +324,6 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
 
     HILOGI("get distributedBundleInfo success, bundleName: %{public}s", bundleName.c_str());
     std::string finalBundleName;
-    if (!CheckBundleContinueConfig(bundleName)) {
-        HILOGI("App does not allow continue in config file, bundle name %{public}s", bundleName.c_str());
-        return REMOTE_DEVICE_BIND_ABILITY_ERR;
-    }
-
-    HILOGI("get bundleName, bundleName: %{public}s", bundleName.c_str());
     AppExecFwk::BundleInfo localBundleInfo;
     std::string continueType;
     FindContinueType(distributedBundleInfo, continueTypeId, continueType);
@@ -562,6 +559,46 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
         }
     }
     HILOGI("NotifyDeviceOffline end");
+}
+
+void DMSContinueRecvMgr::NotifyPackageRemove(const std::string& sinkBundleName)
+{
+    if (sinkBundleName.empty()) {
+        HILOGE("NotifyPackageRemove sinkBundleName empty");
+        return;
+    }
+    if(iconInfo_.bundleName != sinkBundleName) {
+        return;
+    }
+    HILOGI("NotifyPackageRemove begin. sinkBundleName: %{public}s.", sinkBundleName.c_str());
+    std::string senderNetworkId;
+    std::string bundleName;
+    std::string continueType;
+    {
+        std::lock_guard<std::mutex> currentIconLock(iconMutex_);
+        senderNetworkId = iconInfo_.senderNetworkId;
+        bundleName = iconInfo_.bundleName;
+        continueType = iconInfo_.continueType;
+        iconInfo_.senderNetworkId = "";
+        iconInfo_.bundleName = "";
+        iconInfo_.continueType = "";
+    }
+    HILOGI("Saved iconInfo cleared, sinkBundleName: %{public}s.",  bundleName.c_str());
+    {
+        std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
+        auto iterItem = registerOnListener_.find(onType_);
+        if (iterItem == registerOnListener_.end()) {
+            HILOGI("Get iterItem failed from registerOnListener_, nobody registed");
+            return;
+        }
+        std::vector<sptr<IRemoteObject>> objs = iterItem->second;
+        for (auto iter : objs) {
+            NotifyRecvBroadcast(iter,
+                currentIconInfo(senderNetworkId, iconInfo_.sourceBundleName, bundleName, continueType),
+                INACTIVE);
+        }
+    }
+    HILOGI("NotifyPackageRemove end");
 }
 
 std::string DMSContinueRecvMgr::GetContinueType(const std::string& bundleName)
