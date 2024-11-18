@@ -31,7 +31,19 @@ namespace {
     const std::string TAG = "MultiUserManager";
 }
 
-IMPLEMENT_SINGLE_INSTANCE(MultiUserManager);
+MultiUserManager& MultiUserManager::GetInstance()
+{
+    static auto instance = new MultiUserManager();
+    return *instance;
+}
+
+MultiUserManager::MultiUserManager()
+{
+    HILOGI("Start.");
+    if (currentUserId_ <= 0) {
+        Init();
+    }
+}
 
 void MultiUserManager::Init()
 {

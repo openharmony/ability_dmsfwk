@@ -26,7 +26,15 @@
 namespace OHOS {
 namespace DistributedSchedule {
 class MultiUserManager {
-    DECLARE_SINGLE_INSTANCE(MultiUserManager);
+public:
+    static MultiUserManager& GetInstance();
+private:
+    MultiUserManager(const MultiUserManager&) = delete;
+    MultiUserManager& operator= (const MultiUserManager&) = delete;
+    MultiUserManager(MultiUserManager&&) = delete;
+    MultiUserManager& operator= (MultiUserManager&&) = delete;
+    MultiUserManager();
+    ~MultiUserManager() = default;
 
 public:
     void Init();
