@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "cJSON.h"
+
 #include "ability_info.h"
 #include "caller_info.h"
 #include "distributed_sched_interface.h"
@@ -88,9 +90,13 @@ public:
     int32_t Unmarshal(const std::string &jsonStr);
 
 private:
+    bool MarshalInner(cJSON* rootValue);
     int32_t MarshalCallerInfo(std::string &jsonStr);
     int32_t MarshalAccountInfo(std::string &jsonStr);
     int32_t UnmarshalParcel(const std::string &jsonStr);
+    bool UnmarshalWantParcel(cJSON* rootValue);
+    int32_t UnmarshalWantStr(const std::string &jsonStr);
+    int32_t UnmarshalDtbWantStr(const std::string &jsonStr);
     int32_t UnmarshalCallerInfo(const std::string &jsonStr);
     int32_t UnmarshalCallerInfoExtra(const std::string &jsonStr);
     int32_t UnmarshalAccountInfo(const std::string &jsonStr);
