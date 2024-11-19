@@ -434,7 +434,7 @@ int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd>
            srcContinueType.c_str());
     DmsBundleInfo distributedBundleInfo;
     if (!DmsBmStorage::GetInstance()->GetDistributedBundleInfo(
-            cmd->dstDeviceId_, cmd->dstBundleName_, distributedBundleInfo)) {
+        cmd->dstDeviceId_, cmd->dstBundleName_, distributedBundleInfo)) {
         HILOGE("UpdateElementInfo can not found bundle info for bundle name: %{public}s",
                cmd->dstBundleName_.c_str());
         return CAN_NOT_FOUND_MODULE_ERR;
@@ -1008,11 +1008,6 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
         return INVALID_PARAMETERS_ERR;
     }
 
-    if (UpdateElementInfo(cmd) != ERR_OK) {
-        HILOGE("ExecuteContinueData UpdateElementInfo failed.");
-        return CAN_NOT_FOUND_MODULE_ERR;
-    }
-
     DurationDumperBeforeStartAbility(cmd);
 
     std::string localDeviceId;
@@ -1021,6 +1016,10 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
         !CheckDeviceIdFromRemote(localDeviceId, deviceId, cmd->callerInfo_.sourceDeviceId)) {
         HILOGE("check deviceId failed");
         return INVALID_REMOTE_PARAMETERS_ERR;
+    }
+    if (UpdateElementInfo(cmd) != ERR_OK) {
+        HILOGE("ExecuteContinueData UpdateElementInfo failed.");
+        return CAN_NOT_FOUND_MODULE_ERR;
     }
     int32_t ret = CheckStartPermission(cmd);
     if (ret != ERR_OK) {
