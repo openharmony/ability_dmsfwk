@@ -430,7 +430,7 @@ int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd>
     }
     std::string srcContinueType = cmd->continueType_;
     ContinueTypeFormat(srcContinueType);
-    HILOGD("UpdateElementInfo srcModuleName: %{public}s; srcContinueType:%{}s", srcModuleName.c_str(),
+    HILOGD("UpdateElementInfo srcModuleName: %{public}s; srcContinueType:%{public}s", srcModuleName.c_str(),
            srcContinueType.c_str());
     DmsBundleInfo distributedBundleInfo;
     std::string localDeviceId;
