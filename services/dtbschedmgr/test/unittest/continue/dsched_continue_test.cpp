@@ -628,33 +628,38 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_2, TestSize.Level0)
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
     auto cmd = std::make_shared<DSchedContinueDataCmd>();
-    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     // no continueType, diff module
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     cmd->continueType_ = CONTINUE_TYPE1;
     cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_SAME_AS_CONTINUE_TYPE, MODULE_NAME2);
     int32_t ret = conti->UpdateElementInfo(cmd);
     EXPECT_EQ(ret, CAN_NOT_FOUND_MODULE_ERR);
     // no continueType, same module
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     cmd->continueType_ = CONTINUE_TYPE1;
     cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_SAME_AS_CONTINUE_TYPE, MODULE_NAME1);
     ret = conti->UpdateElementInfo(cmd);
     EXPECT_EQ(ret, ERR_OK);
     // no continueType with quick start, same module
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     cmd->continueType_ = CONTINUE_TYPE1_QUICK;
     cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_SAME_AS_CONTINUE_TYPE, MODULE_NAME1);
     ret = conti->UpdateElementInfo(cmd);
     EXPECT_EQ(ret, ERR_OK);
     // has continueType, same module
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     cmd->continueType_ = CONTINUE_TYPE2;
     cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_DIFF_AS_CONTINUE_TYPE, MODULE_NAME2);
     ret = conti->UpdateElementInfo(cmd);
     EXPECT_EQ(ret, ERR_OK);
     // has continueType, diff module
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     cmd->continueType_ = CONTINUE_TYPE2;
     cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_DIFF_AS_CONTINUE_TYPE, MODULE_NAME1);
     ret = conti->UpdateElementInfo(cmd);
     EXPECT_EQ(ret, ERR_OK);
     // has continueType, no module
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     cmd->continueType_ = CONTINUE_TYPE2;
     cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_DIFF_AS_CONTINUE_TYPE, MODULE_NAME3);
     ret = conti->UpdateElementInfo(cmd);
