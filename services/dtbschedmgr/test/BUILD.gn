@@ -34,7 +34,6 @@ config("test_config") {
     "${distributed_service}/dtbschedmgr/include/continue/state/sink_state",
     "${distributed_service}/dtbschedmgr/include/distributedWant",
     "${distributed_service}/dtbschedmgr/include/softbus_adapter/transport",
-    "${distributed_service}/dtbschedmgr/include/mission",
     "${distributed_service}/dtbschedmgr/test/unittest",
     "${dms_path}/common/include",
     "${dms_path}/interfaces/innerkits/distributed_event/include",

@@ -20,7 +20,7 @@
 #include "dtbschedmgr_log.h"
 #include "softbus_error_code.h"
 #include "test_log.h"
-#include "distributed_bm_storage.h"
+#include "mission/distributed_bm_storage.h"
 
 using namespace testing;
 using namespace testing::ext;

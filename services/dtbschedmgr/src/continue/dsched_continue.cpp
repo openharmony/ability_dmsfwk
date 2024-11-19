@@ -450,10 +450,9 @@ int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd>
     }
     auto element = cmd->want_.GetElement();
     DmsAbilityInfo finalAbility = result[0];
-    HILOGD("UpdateElementInfo final sink ability total:%{public}d; detail info: "
+    HILOGD("UpdateElementInfo final sink ability detail info: "
            "bundleName: %{public}s; abilityName: %{public}s; moduleName: %{public}s",
-           result.size(), cmd->dstBundleName_.c_str(),
-           finalAbility.abilityName.c_str(), finalAbility.moduleName.c_str());
+           cmd->dstBundleName_.c_str(), finalAbility.abilityName.c_str(), finalAbility.moduleName.c_str());
     cmd->want_.SetElementName(element.GetDeviceID(), cmd->dstBundleName_, finalAbility.abilityName,
                               finalAbility.moduleName);
     return ERR_OK;
