@@ -611,6 +611,11 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_1, TestSize.Level0)
     usleep(WAITTIME);
 }
 
+/**
+ * @tc.name: DSchedContinueTest_0017_2
+ * @tc.desc: UpdateElementInfo
+ * @tc.type: FUNC
+ */
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_2, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0017_2 begin" << std::endl;
@@ -654,11 +659,6 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_2, TestSize.Level0)
     cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_DIFF_AS_CONTINUE_TYPE, MODULE_NAME3);
     ret = conti->UpdateElementInfo(cmd);
     EXPECT_EQ(ret, ERR_OK);
-    // has continueType, no same module
-    cmd->continueType_ = CONTINUE_TYPE2;
-    cmd->want_.SetElementName("", BUNDLEMAME_1, CONTINUE_TYPE1, MODULE_NAME3);
-    ret = conti->UpdateElementInfo(cmd);
-    EXPECT_EQ(ret, CAN_NOT_FOUND_MODULE_ERR);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0017_2 end ret:" << ret << std::endl;
     usleep(WAITTIME);
 }

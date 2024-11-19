@@ -433,8 +433,9 @@ int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd>
     HILOGD("UpdateElementInfo srcModuleName: %{public}s; srcContinueType:%{}s", srcModuleName.c_str(),
            srcContinueType.c_str());
     DmsBundleInfo distributedBundleInfo;
-    if (!DmsBmStorage::GetInstance()->GetDistributedBundleInfo(
-        cmd->dstDeviceId_, cmd->dstBundleName_, distributedBundleInfo)) {
+    std::string localDeviceId;
+    if (!GetLocalDeviceId(localDeviceId) || !DmsBmStorage::GetInstance()->GetDistributedBundleInfo(
+        localDeviceId, cmd->dstBundleName_, distributedBundleInfo)) {
         HILOGE("UpdateElementInfo can not found bundle info for bundle name: %{public}s",
                cmd->dstBundleName_.c_str());
         return CAN_NOT_FOUND_MODULE_ERR;
