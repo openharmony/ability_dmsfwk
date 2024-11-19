@@ -870,7 +870,7 @@ HWTEST_F(DMSContinueManagerTest, testSetScreenOffInfo_001, TestSize.Level1)
     DMSContinueSendMgr::GetInstance().screenOffHandler_->SetScreenOffInfo(missionId, bundleName,
         bundleNameId, abilityName);
     EXPECT_EQ(DMSContinueSendMgr::GetInstance().screenOffHandler_->unfoInfo_.abilityName.empty(), false);
-
+    
     DMSContinueSendMgr::GetInstance().screenOffHandler_->ClearScreenOffInfo();
     EXPECT_EQ(DMSContinueSendMgr::GetInstance().screenOffHandler_->unfoInfo_.abilityName.empty(), true);
     DTEST_LOG << "DMSContinueManagerTest testSetScreenOffInfo_001 end" << std::endl;
