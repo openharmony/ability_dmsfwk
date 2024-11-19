@@ -575,16 +575,18 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
     HILOGI("NotifyDeviceOffline end");
 }
 
-void DMSContinueRecvMgr::NotifyPackageRemove(const std::string& sinkBundleName)
+void DMSContinueRecvMgr::NotifyPackageRemoved(const std::string& sinkBundleName)
 {
     if (sinkBundleName.empty()) {
-        HILOGE("NotifyPackageRemove sinkBundleName empty");
+        HILOGE("NotifyPackageRemoved sinkBundleName empty");
         return;
     }
-    if(iconInfo_.bundleName != sinkBundleName) {
+    if (iconInfo_.bundleName != sinkBundleName) {
+        HILOGI("NotifyPackageRemoved current sinkBundleName: %{public}s; removed package: %{public}s.",
+            iconInfo_.bundleName.c_str(), sinkBundleName.c_str());
         return;
     }
-    HILOGI("NotifyPackageRemove begin. sinkBundleName: %{public}s.", sinkBundleName.c_str());
+    HILOGI("NotifyPackageRemoved begin. sinkBundleName: %{public}s.", sinkBundleName.c_str());
     std::string senderNetworkId;
     std::string bundleName;
     std::string continueType;
@@ -612,7 +614,7 @@ void DMSContinueRecvMgr::NotifyPackageRemove(const std::string& sinkBundleName)
                 INACTIVE);
         }
     }
-    HILOGI("NotifyPackageRemove end");
+    HILOGI("NotifyPackageRemoved end");
 }
 
 std::string DMSContinueRecvMgr::GetContinueType(const std::string& bundleName)
