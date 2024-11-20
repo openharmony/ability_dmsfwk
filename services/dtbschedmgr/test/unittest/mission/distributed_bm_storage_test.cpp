@@ -43,7 +43,6 @@ constexpr uint16_t ONE = 1;
 bool DtbschedmgrDeviceInfoStorage::GetLocalUdid(std::string& udid)
 {
     udid = g_mockGetLocalUdid;
-    DTEST_LOG << "shihaojie GetLocalUdid" << std::endl;
     return true;
 }
 
