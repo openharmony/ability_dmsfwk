@@ -23,6 +23,7 @@
 #include "mission/dms_continue_recv_manager.h"
 #undef private
 #include "multi_user_manager.h"
+#include "softbus_adapter/softbus_adapter.h"
 #include "test_log.h"
 
 using namespace testing;
@@ -47,6 +48,11 @@ constexpr int32_t INACTIVE = 1;
 constexpr int32_t CANCEL_FOCUSED_DELAYED = 10000;
 constexpr int32_t DBMS_RETRY_MAX_TIME = 5;
 constexpr uint8_t DMS_FOCUSED_TYPE = 0x00;
+}
+
+int32_t SoftbusAdapter::SendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer)
+{
+    return CAN_NOT_FOUND_ABILITY_ERR;
 }
 
 void DMSContinueManagerTest::SetUpTestCase()
