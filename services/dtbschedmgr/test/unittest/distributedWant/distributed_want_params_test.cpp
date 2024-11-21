@@ -1155,3 +1155,29 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_ReadFromParcelPara
     EXPECT_TRUE(result);
     DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_ReadFromParcelParam_1000 end" << std::endl;
 }
+
+/**
+ * @tc.number: ReadFromParcelWantParamWrapper_1000
+ * @tc.name: ReadFromParcelWantParamWrapper
+ * @tc.desc: Test ReadFromParcelWantParamWrapper.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantParamsBaseTest, ReadFromParcelWantParamWrapper_1000, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest ReadFromParcelWantParamWrapper_1000 begin" << std::endl;
+    DistributedWantParams wantParams;
+    Parcel parcel;
+    std::string key = "this is key";
+    int type = DistributedWantParams::VALUE_TYPE_FD;
+    int bufferSize = 1;
+    parcel.WriteInt32(bufferSize);
+    parcel.WriteInt32(0);
+    bool result = wantParams.ReadFromParcelWantParamWrapper(parcel, key, type);
+    EXPECT_TRUE(result);
+
+    type = DistributedWantParams::VALUE_TYPE_REMOTE_OBJECT;
+    result = wantParams.ReadFromParcelWantParamWrapper(parcel, key, type);
+    EXPECT_TRUE(result);
+    DTEST_LOG << "DistributedWantParamsBaseTest ReadFromParcelWantParamWrapper_1000 end" << std::endl;
+}
+ 

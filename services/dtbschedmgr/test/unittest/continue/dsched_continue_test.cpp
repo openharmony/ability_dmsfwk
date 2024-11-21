@@ -98,6 +98,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_001_1, TestSize.Level0)
 
     // eventHandler_ not null
     conti->Init();
+    usleep(WAITTIME);
     ret = conti->PostStartTask(wantParams);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_001_1 end ret:" << ret << std::endl;
@@ -130,6 +131,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_002_1, TestSize.Level0)
 
     // eventHandler_ not null
     conti->Init();
+    usleep(WAITTIME);
     ret = conti->PostCotinueAbilityTask(appVersion);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_002_1 end ret:" << ret << std::endl;
@@ -163,6 +165,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_003_1, TestSize.Level0)
 
     // eventHandler_ not null
     conti->Init();
+    usleep(WAITTIME);
 
     cmd->replyCmd_ = DSCHED_CONTINUE_END_EVENT;
     ret = conti->OnReplyCmd(cmd);
@@ -212,6 +215,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_004_1, TestSize.Level0)
 
     // eventHandler_ not null
     conti->Init();
+    usleep(WAITTIME);
 
     ret = conti->OnStartContinuation(want, callerUid, status, accessToken);
     EXPECT_EQ(ret, ERR_OK);
@@ -252,6 +256,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_005_1, TestSize.Level0)
 
     // eventHandler_ not null
     conti->Init();
+    usleep(WAITTIME);
 
     ret = conti->OnContinueDataCmd(cmd);
     EXPECT_EQ(ret, ERR_OK);
@@ -302,6 +307,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_006_1, TestSize.Level0)
 
     // eventHandler_ not null
     conti->Init();
+    usleep(WAITTIME);
     ret = conti->PostNotifyCompleteTask(ERR_OK);
     EXPECT_EQ(ret, ERR_OK);
 
@@ -338,6 +344,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_007_1, TestSize.Level0)
 
     // eventHandler_ not null
     conti->Init();
+    usleep(WAITTIME);
     ret = conti->PostContinueEndTask(result);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_007_1 end ret:" << ret << std::endl;
@@ -360,6 +367,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_008_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     auto wantParams = std::make_shared<DistributedWantParams>();
     int32_t ret = conti->ExecuteContinueReq(wantParams);
@@ -385,6 +393,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_009_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     auto cmd = std::make_shared<DSchedContinueStartCmd>();
     auto wantParams = std::make_shared<DistributedWantParams>();
@@ -420,6 +429,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0010_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, deviceId, missionId);
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     int32_t appVersion = 0;
     int32_t ret = conti->ExecuteContinueAbility(appVersion);
@@ -444,6 +454,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0011_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, deviceId, missionId);
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     int32_t ret = conti->GetMissionIdByBundleName();
     EXPECT_EQ(ret, ERR_OK);
@@ -467,6 +478,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0012_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     int32_t ret = conti->CheckContinueAbilityPermission();
     EXPECT_EQ(ret, NO_MISSION_INFO_FOR_MISSION_ID);
@@ -490,6 +502,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0013_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     int32_t ret = conti->ExecuteContinueReply();
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -513,6 +526,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0014_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     auto data = std::make_shared<ContinueAbilityData>();
     int32_t ret = conti->ExecuteContinueSend(data);
@@ -541,6 +555,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0015_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     AAFwk::Want want;
     int32_t ret = conti->SetWantForContinuation(want);
@@ -565,6 +580,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0016_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     auto cmd = std::make_shared<DSchedContinueDataCmd>();
     OHOS::AAFwk::Want want;
@@ -598,6 +614,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     auto cmd = std::make_shared<DSchedContinueDataCmd>();
 
@@ -702,6 +719,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0018_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     int32_t result = ERR_OK;
     int32_t ret = conti->ExecuteNotifyComplete(result);
@@ -730,6 +748,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0019_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     auto cmd = std::make_shared<DSchedContinueReplyCmd>();
     int32_t replyCmd = 0;
@@ -762,6 +781,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0020_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     int32_t result = 0;
 
@@ -787,6 +807,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0021_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     int32_t result = 0;
     int32_t ret = conti->ExecuteContinueError(result);
@@ -815,6 +836,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0022_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     auto cmd = std::make_shared<DSchedContinueEndCmd>();
     int32_t result = 0;
@@ -845,6 +867,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0023_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     auto cmd = std::make_shared<DSchedContinueCmdBase>();
     int32_t ret = conti->SendCommand(cmd);
@@ -869,6 +892,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0024_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     std::string localDeviceId;
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
@@ -894,6 +918,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0025_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     bool ret = conti->CheckDeviceIdFromRemote("", "", "");
     EXPECT_FALSE(ret);
@@ -937,6 +962,7 @@ HWTEST_F(DSchedContinueTest, WaitAbilityStateInitialTest_0026_1, TestSize.Level0
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     int32_t persistentId = 100;
     bool ret = conti->WaitAbilityStateInitial(persistentId);
@@ -961,6 +987,7 @@ HWTEST_F(DSchedContinueTest, StartAbilityTest_0027_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     AAFwk::Want want;
     AppExecFwk::ElementName element("devicdId", "com.ohos.distributedmusicplayer",
@@ -989,6 +1016,7 @@ HWTEST_F(DSchedContinueTest, QuerySinkAbilityNameTest_0028_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, continueType);
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     std::string sinkBundleName = conti->QuerySinkAbilityName();
     EXPECT_TRUE(sinkBundleName.empty());
@@ -1012,6 +1040,7 @@ HWTEST_F(DSchedContinueTest, QuickStartAbilityTest_0029_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     int32_t ret = conti->QuickStartAbility();
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -1035,6 +1064,7 @@ HWTEST_F(DSchedContinueTest, UpdateWantForContinueTypeTest_0030_1, TestSize.Leve
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     AAFwk::Want want;
     AppExecFwk::ElementName element("devicdId", "com.ohos.distributedmusicplayer",
@@ -1062,6 +1092,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_031_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     AppExecFwk::InnerEvent *event = nullptr;
     auto destructor = [](AppExecFwk::InnerEvent *event) {
@@ -1095,6 +1126,7 @@ HWTEST_F(DSchedContinueTest, OnDataRecvTest_032_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     int32_t command = 0;
     std::shared_ptr<DSchedDataBuffer> dataBuffer = nullptr;
@@ -1136,6 +1168,7 @@ HWTEST_F(DSchedContinueTest, UpdateStateTest_033_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     DSchedContinueStateType stateType = DSCHED_CONTINUE_SINK_START_STATE;
     conti->UpdateState(stateType);
@@ -1163,6 +1196,7 @@ HWTEST_F(DSchedContinueTest, CheckStartPermission_034_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     int32_t ret = conti->CheckStartPermission(cmd);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -1192,6 +1226,7 @@ HWTEST_F(DSchedContinueTest, ConvertToDmsSdkErr_035_1, TestSize.Level0)
     auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
+    usleep(WAITTIME);
 
     int32_t ret = conti->ConvertToDmsSdkErr(0);
     EXPECT_EQ(ret, ERR_OK);

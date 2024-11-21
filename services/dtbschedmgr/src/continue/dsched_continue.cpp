@@ -139,7 +139,7 @@ DSchedContinue::DSchedContinue(std::shared_ptr<DSchedContinueStartCmd> startCmd,
         HILOGE("startCmd is null");
         return;
     }
-    version_ = startCmd->version_;
+    version_ = DSCHED_CONTINUE_PROTOCOL_VERSION;
     subServiceType_ = startCmd->subServiceType_;
     continueByType_ = startCmd->continueByType_;
     direction_ = (startCmd->direction_ == CONTINUE_SOURCE) ? CONTINUE_SINK : CONTINUE_SOURCE;

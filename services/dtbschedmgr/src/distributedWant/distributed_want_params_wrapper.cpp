@@ -143,6 +143,7 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
             strKey = "";
             typeId = 0;
             strnum = num + 1;
+            continue;
         } else if (str[strnum] != '"') {
             continue;
         }

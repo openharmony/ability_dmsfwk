@@ -316,6 +316,7 @@ HWTEST_F(DSchedContinueManagerTest, GetContinueInfo_002, TestSize.Level3)
 
     DSchedContinueInfo info;
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     std::string localDeviceId = "localdeviceid";
     std::string remoteDeviceId = "remotedeviceid";
     DSchedContinueManager::GetInstance().continues_[info] = dContinue;
@@ -546,6 +547,7 @@ HWTEST_F(DSchedContinueManagerTest, GetDSchedContinueByWant_002, TestSize.Level3
     EXPECT_EQ(ret, nullptr);
 
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    usleep(WAITTIME);
     DSchedContinueManager::GetInstance().continues_[info] = nullptr;
     DSchedContinueManager::GetInstance().continues_[info] = dContinue;
     
