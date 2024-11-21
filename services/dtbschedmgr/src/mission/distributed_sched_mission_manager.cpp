@@ -292,6 +292,9 @@ void DistributedSchedMissionManager::DeviceOfflineNotify(const std::string& netw
         std::lock_guard<std::mutex> autoLock(remoteDmsLock_);
         auto iter = remoteDmsMap_.find(networkId);
         if (iter != remoteDmsMap_.end()) {
+            if (iter->second == nullptr) {
+                return;
+            }
             iter->second->AsObject()->RemoveDeathRecipient(remoteDmsRecipient_);
             remoteDmsMap_.erase(iter);
         }

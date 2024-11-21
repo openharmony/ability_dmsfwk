@@ -73,7 +73,9 @@ void MMIAdapter::UnInit()
     HILOGI("UnInit start");
     if (eventHandler_ != nullptr && eventHandler_->GetEventRunner() != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
-        eventThread_.join();
+        if (eventThread_.joinable()) {
+            eventThread_.join();
+        }
         eventHandler_ = nullptr;
     } else {
         HILOGE("eventHandler_ or eventRunner is nullptr");
