@@ -421,82 +421,7 @@ int32_t DSchedContinue::OnNotifyComplete(int32_t missionId, bool isSuccess)
     return ERR_OK;
 }
 
-int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd> cmd)
-{
-    std::string srcModuleName = cmd->want_.GetModuleName();
-    if (srcModuleName.empty()) {
-        HILOGD("UpdateElementInfo srcModuleName from element is empty");
-        srcModuleName = cmd->want_.GetStringParam(OHOS::AAFwk::Want::PARAM_MODULE_NAME);
-    }
-    std::string srcContinueType = cmd->continueType_;
-    ContinueTypeFormat(srcContinueType);
-    HILOGD("UpdateElementInfo srcModuleName: %{public}s; srcContinueType:%{public}s", srcModuleName.c_str(),
-           srcContinueType.c_str());
-    DmsBundleInfo distributedBundleInfo;
-    std::string localDeviceId;
-    if (!GetLocalDeviceId(localDeviceId) || !DmsBmStorage::GetInstance()->GetDistributedBundleInfo(
-        localDeviceId, cmd->dstBundleName_, distributedBundleInfo)) {
-        HILOGE("UpdateElementInfo can not found bundle info for bundle name: %{public}s",
-               cmd->dstBundleName_.c_str());
-        return CAN_NOT_FOUND_MODULE_ERR;
-    }
 
-    std::vector<DmsAbilityInfo> dmsAbilityInfos = distributedBundleInfo.dmsAbilityInfos;
-    std::vector<DmsAbilityInfo> result;
-    FindSinkContinueAbilityInfo(srcModuleName, srcContinueType, dmsAbilityInfos, result);
-    if (result.empty()) {
-        HILOGE("UpdateElementInfo can not found bundle info for bundle name: %{public}s",
-               cmd->dstBundleName_.c_str());
-        return CAN_NOT_FOUND_MODULE_ERR;
-    }
-    auto element = cmd->want_.GetElement();
-    DmsAbilityInfo finalAbility = result[0];
-    HILOGD("UpdateElementInfo final sink ability detail info: "
-           "bundleName: %{public}s; abilityName: %{public}s; moduleName: %{public}s",
-           cmd->dstBundleName_.c_str(), finalAbility.abilityName.c_str(), finalAbility.moduleName.c_str());
-    cmd->want_.SetElementName(element.GetDeviceID(), cmd->dstBundleName_, finalAbility.abilityName,
-                              finalAbility.moduleName);
-    return ERR_OK;
-}
-
-void DSchedContinue::FindSinkContinueAbilityInfo(const std::string &srcModuleName, const std::string &srcContinueType,
-    std::vector<DmsAbilityInfo> &dmsAbilityInfos, std::vector<DmsAbilityInfo> &result)
-{
-    bool sameAbilityGot = false;
-    bool hasSameModule = false;
-    for (const auto &abilityInfoElement: dmsAbilityInfos) {
-        std::vector<std::string> continueTypes = abilityInfoElement.continueType;
-        for (std::string &continueTypeElement: continueTypes) {
-            ContinueTypeFormat(continueTypeElement);
-            HILOGD("UpdateElementInfo check sink continue ability, current: "
-                   "continueType: %{public}s; abilityName: %{public}s; moduleName: %{public}s",
-                   continueTypeElement.c_str(), abilityInfoElement.abilityName.c_str(),
-                   abilityInfoElement.moduleName.c_str());
-            if (continueTypeElement != srcContinueType) {
-                continue;
-            }
-            if (continueTypeElement == abilityInfoElement.abilityName &&
-                srcModuleName == abilityInfoElement.moduleName) {
-                sameAbilityGot = true;
-                result.clear();
-                result.push_back(abilityInfoElement);
-                break;
-            } else if (continueTypeElement != abilityInfoElement.abilityName &&
-                       srcModuleName == abilityInfoElement.moduleName) {
-                hasSameModule = true;
-                result.clear();
-                result.push_back(abilityInfoElement);
-                break;
-            } else if (continueTypeElement != abilityInfoElement.abilityName) {
-                result.push_back(abilityInfoElement);
-                break;
-            }
-        }
-        if (sameAbilityGot || hasSameModule) {
-            break;
-        }
-    }
-}
 
 void DSchedContinue::ContinueTypeFormat(std::string &continueType)
 {
@@ -1053,6 +978,75 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
         HILOGI("ExecuteContinueData end");
     }
     return ret;
+}
+
+int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd> cmd)
+{
+    std::string srcModuleName = cmd->want_.GetModuleName();
+    if (srcModuleName.empty()) {
+        HILOGD("UpdateElementInfo srcModuleName from element is empty");
+        srcModuleName = cmd->want_.GetStringParam(OHOS::AAFwk::Want::PARAM_MODULE_NAME);
+    }
+    std::string srcContinueType = cmd->continueType_;
+    ContinueTypeFormat(srcContinueType);
+    HILOGD("UpdateElementInfo srcModuleName: %{public}s; srcContinueType:%{public}s", srcModuleName.c_str(),
+           srcContinueType.c_str());
+    DmsBundleInfo distributedBundleInfo;
+    std::string localDeviceId;
+    if (!GetLocalDeviceId(localDeviceId) || !DmsBmStorage::GetInstance()->GetDistributedBundleInfo(
+            localDeviceId, cmd->dstBundleName_, distributedBundleInfo)) {
+        HILOGE("UpdateElementInfo can not found bundle info for bundle name: %{public}s",
+               cmd->dstBundleName_.c_str());
+        return CAN_NOT_FOUND_MODULE_ERR;
+    }
+
+    std::vector<DmsAbilityInfo> dmsAbilityInfos = distributedBundleInfo.dmsAbilityInfos;
+    std::vector<DmsAbilityInfo> result;
+    FindSinkContinueAbilityInfo(srcModuleName, srcContinueType, dmsAbilityInfos, result);
+    if (result.empty()) {
+        HILOGE("UpdateElementInfo can not found bundle info for bundle name: %{public}s",
+               cmd->dstBundleName_.c_str());
+        return CAN_NOT_FOUND_MODULE_ERR;
+    }
+    auto element = cmd->want_.GetElement();
+    DmsAbilityInfo finalAbility = result[0];
+    HILOGD("UpdateElementInfo final sink ability detail info: "
+           "bundleName: %{public}s; abilityName: %{public}s; moduleName: %{public}s",
+           cmd->dstBundleName_.c_str(), finalAbility.abilityName.c_str(), finalAbility.moduleName.c_str());
+    cmd->want_.SetElementName(element.GetDeviceID(), cmd->dstBundleName_, finalAbility.abilityName,
+                              finalAbility.moduleName);
+    return ERR_OK;
+}
+
+void DSchedContinue::FindSinkContinueAbilityInfo(const std::string &srcModuleName, const std::string &srcContinueType,
+                                                 std::vector<DmsAbilityInfo> &dmsAbilityInfos, std::vector<DmsAbilityInfo> &result)
+{
+    bool sameModuleGot = false;
+    for (const auto &abilityInfoElement: dmsAbilityInfos) {
+        std::vector<std::string> continueTypes = abilityInfoElement.continueType;
+        for (std::string &continueTypeElement: continueTypes) {
+            ContinueTypeFormat(continueTypeElement);
+            HILOGD("UpdateElementInfo check sink continue ability, current: "
+                   "continueType: %{public}s; abilityName: %{public}s; moduleName: %{public}s",
+                   continueTypeElement.c_str(), abilityInfoElement.abilityName.c_str(),
+                   abilityInfoElement.moduleName.c_str());
+            if (continueTypeElement != srcContinueType) {
+                continue;
+            }
+            if (srcModuleName == abilityInfoElement.moduleName) {
+                sameModuleGot = true;
+                result.clear();
+                result.push_back(abilityInfoElement);
+                break;
+            } else {
+                result.push_back(abilityInfoElement);
+                break;
+            }
+        }
+        if (sameModuleGot) {
+            break;
+        }
+    }
 }
 
 int32_t DSchedContinue::UpdateWantForContinueType(OHOS::AAFwk::Want& want)
