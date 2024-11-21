@@ -33,6 +33,7 @@ namespace {
     const std::string BUNDLEMAME_1 = "bundleName";
     const std::string CONTINUE_TYPE1 = "continueType1";
     const std::string CONTINUE_TYPE2 = "continueType2";
+    const std::string CONTINUE_TYPE3 = "continueType3";
     const std::string CONTINUE_TYPE1_QUICK = "continueType1_ContinueQuickStart";
     const std::string MODULE_NAME1 = "moduleName1";
     const std::string MODULE_NAME2 = "moduleName2";
@@ -628,9 +629,9 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_2, TestSize.Level0)
     auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
     conti->Init();
     auto cmd = std::make_shared<DSchedContinueDataCmd>();
-    // no continueType, diff module
+    // no same continueType, diff module
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
-    cmd->continueType_ = CONTINUE_TYPE1;
+    cmd->continueType_ = CONTINUE_TYPE3;
     cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_SAME_AS_CONTINUE_TYPE, MODULE_NAME2);
     int32_t ret = conti->UpdateElementInfo(cmd);
     EXPECT_EQ(ret, CAN_NOT_FOUND_MODULE_ERR);

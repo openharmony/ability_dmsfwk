@@ -421,17 +421,6 @@ int32_t DSchedContinue::OnNotifyComplete(int32_t missionId, bool isSuccess)
     return ERR_OK;
 }
 
-
-
-void DSchedContinue::ContinueTypeFormat(std::string &continueType)
-{
-    std::string suffix = QUICK_START_CONFIGURATION;
-    if (suffix.length() <= continueType.length() &&
-        continueType.rfind(suffix) == (continueType.length() - suffix.length())) {
-        continueType = continueType.substr(0, continueType.rfind(QUICK_START_CONFIGURATION));
-    }
-}
-
 int32_t DSchedContinue::OnContinueEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd)
 {
     HILOGI("called");
@@ -1019,7 +1008,7 @@ int32_t DSchedContinue::UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd>
 }
 
 void DSchedContinue::FindSinkContinueAbilityInfo(const std::string &srcModuleName, const std::string &srcContinueType,
-                                                 std::vector<DmsAbilityInfo> &dmsAbilityInfos, std::vector<DmsAbilityInfo> &result)
+    std::vector<DmsAbilityInfo> &dmsAbilityInfos, std::vector<DmsAbilityInfo> &result)
 {
     bool sameModuleGot = false;
     for (const auto &abilityInfoElement: dmsAbilityInfos) {
@@ -1046,6 +1035,15 @@ void DSchedContinue::FindSinkContinueAbilityInfo(const std::string &srcModuleNam
         if (sameModuleGot) {
             break;
         }
+    }
+}
+
+void DSchedContinue::ContinueTypeFormat(std::string &continueType)
+{
+    std::string suffix = QUICK_START_CONFIGURATION;
+    if (suffix.length() <= continueType.length() &&
+        continueType.rfind(suffix) == (continueType.length() - suffix.length())) {
+        continueType = continueType.substr(0, continueType.rfind(QUICK_START_CONFIGURATION));
     }
 }
 
