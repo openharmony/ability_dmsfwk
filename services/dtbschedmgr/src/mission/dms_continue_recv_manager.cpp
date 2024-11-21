@@ -333,9 +333,8 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
         return INVALID_PARAMETERS_ERR;
     }
-    bool isSameBundle = (bundleName == finalBundleName);
     if (state == ACTIVE
-        && !IsBundleContinuable(localBundleInfo, abilityInfo.abilityName, continueType, isSameBundle)) {
+        && !IsBundleContinuable(localBundleInfo, abilityInfo.abilityName, continueType)) {
         HILOGE("Bundle %{public}s is not continuable", finalBundleName.c_str());
         return BUNDLE_NOT_CONTINUABLE;
     }
