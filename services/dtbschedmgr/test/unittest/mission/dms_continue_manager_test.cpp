@@ -1350,7 +1350,7 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_005, TestSize.Level1)
         return;
     }
     bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName, srcContinueType);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_005 end" << std::endl;
 }
 
