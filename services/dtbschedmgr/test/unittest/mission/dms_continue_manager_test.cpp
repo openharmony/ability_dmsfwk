@@ -1283,7 +1283,7 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_003, TestSize.Level1)
     }
     bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName, srcContinueType);
     EXPECT_EQ(ret, false);
-    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_002 end" << std::endl;
+    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_003 end" << std::endl;
 }
 
 /**
@@ -1327,7 +1327,7 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_004, TestSize.Level1)
  */
 HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_005, TestSize.Level1)
 {
-    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_004 start" << std::endl;
+    DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_005 start" << std::endl;
     std::string srcAbilityName = "srcAbilityName";
     std::string sinkAbilityName = "sinkAbilityName";
     std::string srcContinueType = srcAbilityName;
