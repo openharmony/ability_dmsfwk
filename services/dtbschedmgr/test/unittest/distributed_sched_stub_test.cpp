@@ -2292,5 +2292,83 @@ HWTEST_F(DistributedSchedStubTest, NotifyDSchedEventResultFromRemoteInner_001, T
     EXPECT_NE(result, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedSchedStubTest NotifyDSchedEventResultFromRemoteInner_001 end" << std::endl;
 }
+
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+/**
+ * @tc.name: StartAbilityFromRemoteAdapterInner_001
+ * @tc.desc: check StartAbilityFromRemoteAdapterInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, StartAbilityFromRemoteAdapterInner_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest StartAbilityFromRemoteAdapterInner_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = DistributedSchedService::GetInstance().StartAbilityFromRemoteAdapterInner(data, reply);
+    EXPECT_NE(result, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedStubTest StartAbilityFromRemoteAdapterInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StopAbilityFromRemoteAdapterInner_001
+ * @tc.desc: check StopAbilityFromRemoteAdapterInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, StopAbilityFromRemoteAdapterInner_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest StopAbilityFromRemoteAdapterInner_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = DistributedSchedService::GetInstance().StopAbilityFromRemoteAdapterInner(data, reply);
+    EXPECT_NE(result, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedStubTest StopAbilityFromRemoteAdapterInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectAbilityFromRemoteAdapterInner_001
+ * @tc.desc: check ConnectAbilityFromRemoteAdapterInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, ConnectAbilityFromRemoteAdapterInner_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest ConnectAbilityFromRemoteAdapterInner_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = DistributedSchedService::GetInstance().ConnectAbilityFromRemoteAdapterInner(data, reply);
+    EXPECT_NE(result, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedStubTest ConnectAbilityFromRemoteAdapterInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectAbilityFromRemoteAdapterInner_001
+ * @tc.desc: check DisconnectAbilityFromRemoteAdapterInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, DisconnectAbilityFromRemoteAdapterInner_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest DisconnectAbilityFromRemoteAdapterInner_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = DistributedSchedService::GetInstance().DisconnectAbilityFromRemoteAdapterInner(data, reply);
+    EXPECT_NE(result, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedStubTest DisconnectAbilityFromRemoteAdapterInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyAbilityLifecycleChangedFromRemoteAdapterInner_001
+ * @tc.desc: check NotifyAbilityLifecycleChangedFromRemoteAdapterInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, NotifyAbilityLifecycleChangedFromRemoteAdapterInner_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest NotifyAbilityLifecycleChangedFromRemoteAdapterInner_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = DistributedSchedService::GetInstance().NotifyAbilityLifecycleChangedFromRemoteAdapterInner(
+        data, reply);
+    EXPECT_NE(result, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedStubTest NotifyAbilityLifecycleChangedFromRemoteAdapterInner_001 end" << std::endl;
+}
+#endif
 }
 }

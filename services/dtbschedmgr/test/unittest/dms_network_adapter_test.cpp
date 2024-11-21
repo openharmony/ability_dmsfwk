@@ -432,5 +432,34 @@ HWTEST_F(DMSNetworkAdapterTest, UpdateDeviceInfoStorage_001, TestSize.Level3)
     bool result = DnetworkAdapter::GetInstance()->UpdateDeviceInfoStorage();
     EXPECT_EQ(result, true);
 }
+
+/**
+ * @tc.name: OnDeviceTrustChange_001
+ * @tc.desc: test OnDeviceTrustChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSNetworkAdapterTest, OnDeviceTrustChange_001, TestSize.Level3)
+{
+    std::string udid = "";
+    std::string uuid = "";
+    DnetworkAdapter::GetInstance()->Init();
+    DnetworkAdapter::GetInstance()->devTrustChangeCallback_->OnDeviceTrustChange(
+        udid, uuid, DistributedHardware::DmAuthForm::IDENTICAL_ACCOUNT);
+
+    udid = "udid";
+    DnetworkAdapter::GetInstance()->devTrustChangeCallback_->OnDeviceTrustChange(
+        udid, uuid, DistributedHardware::DmAuthForm::IDENTICAL_ACCOUNT);
+
+    udid = "";
+    uuid = "uuid";
+    DnetworkAdapter::GetInstance()->devTrustChangeCallback_->OnDeviceTrustChange(
+        udid, uuid, DistributedHardware::DmAuthForm::IDENTICAL_ACCOUNT);
+
+    udid = "udid";
+    uuid = "uuid";
+    DnetworkAdapter::GetInstance()->devTrustChangeCallback_->OnDeviceTrustChange(
+        udid, uuid, DistributedHardware::DmAuthForm::IDENTICAL_ACCOUNT);
+    EXPECT_EQ(udid.empty(), false);
+}
 } // namespace DistributedSchedule
 } // namespace OHOS

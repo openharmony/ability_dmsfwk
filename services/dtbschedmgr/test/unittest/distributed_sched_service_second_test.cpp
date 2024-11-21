@@ -1617,5 +1617,104 @@ HWTEST_F(DistributedSchedServiceSecondTest, NotifyDSchedEventResultFromRemote_00
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedServiceSecondTest NotifyDSchedEventResultFromRemote_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: ContinueLocalMission_001
+ * @tc.desc: ContinueLocalMission
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, ContinueLocalMission_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest ContinueLocalMission_001 start" << std::endl;
+    std::string dstDeviceId;
+    int32_t missionId = 0;
+    OHOS::AAFwk::WantParams wantParams;
+    DistributedSchedService::GetInstance().dschedContinuation_ = nullptr;
+    int32_t ret = DistributedSchedService::GetInstance().ContinueLocalMission(
+        dstDeviceId, missionId, nullptr, wantParams);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = DistributedSchedService::GetInstance().ContinueAbilityWithTimeout(
+        dstDeviceId, missionId, nullptr, 0);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    DistributedSchedService::GetInstance().NotifyDSchedEventCallbackResult(FOREGROUND);
+
+    ret = DistributedSchedService::GetInstance().NotifyContinuationResultFromRemote(
+        FOREGROUND, true, dstDeviceId);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceSecondTest ContinueLocalMission_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetContinueInfo_001
+ * @tc.desc: GetContinueInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, GetContinueInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest GetContinueInfo_001 start" << std::endl;
+    std::string dstNetworkId;
+    std::string srcNetworkId;
+    DistributedSchedService::GetInstance().dschedContinuation_ = nullptr;
+    int32_t ret = DistributedSchedService::GetInstance().GetContinueInfo(dstNetworkId, srcNetworkId);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    ret = DistributedSchedService::GetInstance().GetContinueInfo(dstNetworkId, srcNetworkId);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceSecondTest GetContinueInfo_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetDSchedEventInfo_001
+ * @tc.desc: GetDSchedEventInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, GetDSchedEventInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest GetDSchedEventInfo_001 start" << std::endl;
+    std::vector<EventNotify> events;
+    int32_t ret = DistributedSchedService::GetInstance().GetDSchedEventInfo(DMS_CONTINUE, events);
+    EXPECT_EQ(ret, ERR_OK);
+
+    ret = DistributedSchedService::GetInstance().GetDSchedEventInfo(DMS_ALL, events);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceSecondTest GetDSchedEventInfo_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: RegisterDSchedEventListener_001
+ * @tc.desc: RegisterDSchedEventListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, RegisterDSchedEventListener_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest RegisterDSchedEventListener_001 start" << std::endl;
+    DistributedSchedService::GetInstance().dschedContinuation_ = nullptr;
+    DistributedSchedService::GetInstance().collaborateCbMgr_  = nullptr;
+    int32_t ret = DistributedSchedService::GetInstance().RegisterDSchedEventListener(DMS_CONTINUE, nullptr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = DistributedSchedService::GetInstance().UnRegisterDSchedEventListener(DMS_CONTINUE, nullptr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    ret = DistributedSchedService::GetInstance().RegisterDSchedEventListener(DMS_CONTINUE, nullptr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = DistributedSchedService::GetInstance().UnRegisterDSchedEventListener(DMS_CONTINUE, nullptr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    DistributedSchedService::GetInstance().collaborateCbMgr_ = std::make_shared<DSchedCollaborationCallbackMgr>();
+    DistributedSchedService::GetInstance().collaborateCbMgr_->Init();
+    auto callback = GetDSchedService();
+    ret = DistributedSchedService::GetInstance().RegisterDSchedEventListener(DMS_COLLABORATION, callback);
+    EXPECT_EQ(ret, ERR_OK);
+
+    ret = DistributedSchedService::GetInstance().UnRegisterDSchedEventListener(DMS_COLLABORATION, callback);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceSecondTest RegisterDSchedEventListener_001 end" << std::endl;
+}
 }
 }

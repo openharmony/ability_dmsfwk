@@ -162,6 +162,9 @@ ohos_unittest("distributedschedservicetest") {
     "unittest/distributed_sched_service_second_test.cpp",
     "unittest/mock_distributed_sched.cpp",
   ]
+  if (dmsfwk_ces_listener) {
+    sources += [ "unittest/common_event_listener_test.cpp" ]
+  }
   sources += dtbschedmgr_sources
 
   configs = [
@@ -203,8 +206,13 @@ ohos_unittest("distributedschedstubtest") {
     public_deps = dsched_public_deps
   }
 
+  defines = []
   if (dmsfwk_report_memmgr || dmsfwk_report_memmgr_plugins) {
-    defines = [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
+    defines += [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
+  }
+
+  if (!dmsfwk_softbus_adapter_common) {
+    defines += [ "DMSFWK_INTERACTIVE_ADAPTER" ]
   }
 
   part_name = "dmsfwk"

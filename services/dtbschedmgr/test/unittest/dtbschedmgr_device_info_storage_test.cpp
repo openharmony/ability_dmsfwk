@@ -444,12 +444,70 @@ HWTEST_F(DtbschedmgrDeviceInfoStorageTest, GetNetworkIdList_001, TestSize.Level3
     std::string netWorkId = "netWorkId";
     devices = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdList();
     EXPECT_EQ(devices.empty(), true);
-    
-    std::shared_ptr<DmsDeviceInfo> deviceInfo = std::make_shared<DmsDeviceInfo>("deviceName", 0, "netWorkId");
+
+    std::shared_ptr<DmsDeviceInfo> deviceInfo = nullptr;
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[netWorkId] = deviceInfo;
+    devices = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdList();
+    EXPECT_EQ(devices.empty(), true);
+
+    deviceInfo = std::make_shared<DmsDeviceInfo>("deviceName", 0, "netWorkId");
     DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[netWorkId] = deviceInfo;
     devices = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdList();
     EXPECT_EQ(devices.empty(), false);
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest GetNetworkIdList_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: InitNetworkIdManager_001
+ * @tc.desc: test InitNetworkIdManager
+ * @tc.type: FUNC
+ */
+HWTEST_F(DtbschedmgrDeviceInfoStorageTest, InitNetworkIdManager_001, TestSize.Level3)
+{
+    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest InitNetworkIdManager_001 start" << std::endl;
+    bool ret = DtbschedmgrDeviceInfoStorage::GetInstance().InitNetworkIdManager(nullptr);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest InitNetworkIdManager_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: RegisterUuidNetworkIdMap_001
+ * @tc.desc: test RegisterUuidNetworkIdMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(DtbschedmgrDeviceInfoStorageTest, RegisterUuidNetworkIdMap_001, TestSize.Level3)
+{
+    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest RegisterUuidNetworkIdMap_001 start" << std::endl;
+    std::string networkId = "networkId";
+    EXPECT_NO_FATAL_FAILURE(DtbschedmgrDeviceInfoStorage::GetInstance().RegisterUuidNetworkIdMap(networkId));
+    EXPECT_NO_FATAL_FAILURE(DtbschedmgrDeviceInfoStorage::GetInstance().UnregisterUuidNetworkIdMap(networkId));
+    EXPECT_NO_FATAL_FAILURE(DtbschedmgrDeviceInfoStorage::GetInstance().DeviceOnlineNotify(nullptr));
+    networkId = "";
+    EXPECT_NO_FATAL_FAILURE(DtbschedmgrDeviceInfoStorage::GetInstance().DeviceOfflineNotify(networkId));
+    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest RegisterUuidNetworkIdMap_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetDeviceName_002
+ * @tc.desc: test GetDeviceName
+ * @tc.type: FUNC
+ */
+HWTEST_F(DtbschedmgrDeviceInfoStorageTest, GetDeviceName_002, TestSize.Level3)
+{
+    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest GetDeviceName_002 start" << std::endl;
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_.clear();
+    std::string netWorkId = "netWorkId";
+    std::shared_ptr<DmsDeviceInfo> deviceInfo = nullptr;
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[netWorkId] = deviceInfo;
+    std::string str = DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceName(netWorkId);
+    EXPECT_EQ(str, "");
+
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_.clear();
+    deviceInfo = std::make_shared<DmsDeviceInfo>("deviceName", 0, "netWorkId");
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[netWorkId] = deviceInfo;
+    str = DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceName(netWorkId);
+    EXPECT_EQ(str, "deviceName");
+    DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest GetDeviceName_002 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
