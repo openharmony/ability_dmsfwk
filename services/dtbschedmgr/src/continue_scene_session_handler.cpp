@@ -26,7 +26,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string TAG = "ContinueSceneSessionHandler";
-constexpr int32_t RETRY_TIMES = 2;
+constexpr int32_t RETRY_TIMES = 60;
 constexpr int32_t SLEEP_TIME = 50;
 }
 

@@ -525,6 +525,10 @@ enum {
      * Result(29360237) for not get mgr.
      */
     DMS_NOT_GET_MANAGER = 29360237,
+    /**
+     * Result(29360238) for get window failed from scb.
+     */
+    DMS_GET_WINDOW_FAILED_FROM_SCB = 29360238,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
