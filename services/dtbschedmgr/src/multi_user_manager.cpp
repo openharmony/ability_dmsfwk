@@ -137,6 +137,7 @@ void MultiUserManager::OnUserSwitched(int32_t accountId)
         HILOGI("GetSendMgr failed.");
         return;
     }
+    sendMgr->NotifyDeviceOnline();
     recvMgr = GetCurrentRecvMgr();
     if (recvMgr == nullptr) {
         HILOGI("GetRecvMgr failed.");
