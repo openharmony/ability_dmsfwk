@@ -528,7 +528,7 @@ enum {
     /**
      * Result(29360238) for BMS can not find the specified module.
      */
-    CAN_NOT_FOUND_MODULE_ERR = 29360238,
+    CAN_NOT_FOUND_MODULE_ERR = 29360239,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
