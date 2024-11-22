@@ -526,6 +526,10 @@ enum {
      */
     DMS_NOT_GET_MANAGER = 29360237,
     /**
+     * Result(29360238) for get window failed from scb.
+     */
+    DMS_GET_WINDOW_FAILED_FROM_SCB = 29360238,
+    /**
      * Result(29360238) for BMS can not find the specified module.
      */
     CAN_NOT_FOUND_MODULE_ERR = 29360239,

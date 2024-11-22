@@ -949,15 +949,15 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
         int32_t persistentId;
         if (ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId) != ERR_OK) {
             HILOGE("get persistentId failed, stop start ability");
-            return OnContinueEnd(ERR_OK);
+            return OnContinueEnd(DMS_GET_WINDOW_FAILED_FROM_SCB);
         }
         HILOGI("get persistentId success, persistentId: %{public}d", persistentId);
         WaitAbilityStateInitial(persistentId);
         want.SetParam(DMS_PERSISTENT_ID, persistentId);
 
         if (ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId) != ERR_OK) {
-            HILOGE("get persistentId failed, stop start ability");
-            return OnContinueEnd(ERR_OK);
+            HILOGE("Second get persistentId failed, stop start ability");
+            return OnContinueEnd(DMS_GET_WINDOW_FAILED_FROM_SCB);
         }
     }
 
