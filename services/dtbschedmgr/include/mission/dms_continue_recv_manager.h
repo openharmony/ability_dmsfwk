@@ -104,7 +104,7 @@ private:
         const int32_t state, const int32_t retry = 0);
     void NotifyRecvBroadcast(const sptr<IRemoteObject>& obj, const currentIconInfo& continueInfo, const int32_t state);
     bool IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo, const std::string &srcAbilityName,
-        const std::string &srcContinueType, bool isSameBundle);
+        const std::string &srcContinueType);
     std::string ContinueTypeFormat(const std::string &continueType);
     void FindToNotifyRecvBroadcast(const std::string& senderNetworkId, const std::string& bundleName,
         const std::string& continueType);
