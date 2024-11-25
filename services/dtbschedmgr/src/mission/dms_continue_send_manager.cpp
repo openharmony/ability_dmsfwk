@@ -24,6 +24,7 @@
 #include "dfx/distributed_radar.h"
 #include "distributed_sched_adapter.h"
 #include "distributed_sched_utils.h"
+#include "distributed_sched_service.h"
 #include "dsched_data_buffer.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
@@ -64,13 +65,6 @@ void DMSContinueSendMgr::Init()
             return eventHandler_ != nullptr;
         });
     }
-
-    int32_t missionId = GetCurrentMissionId();
-    if (missionId <= 0) {
-        HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
-        return;
-    }
-    NotifyMissionFocused(missionId, FocusedReason::INIT);
     HILOGI("Init end");
 }
 
@@ -85,26 +79,6 @@ void DMSContinueSendMgr::UnInit()
         HILOGE("eventHandler_ is nullptr");
     }
     HILOGI("UnInit end");
-}
-
-int32_t DMSContinueSendMgr::GetCurrentMissionId()
-{
-    HILOGI("GetCurrentMission begin");
-    auto abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
-    if (abilityMgr == nullptr) {
-        HILOGE("abilityMgr is nullptr");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    sptr<IRemoteObject> token;
-    int ret = abilityMgr->GetTopAbility(token);
-    if (ret != ERR_OK || token == nullptr) {
-        HILOGE("GetTopAbility failed, ret: %{public}d", ret);
-        return INVALID_MISSION_ID;
-    }
-    int32_t missionId = INVALID_MISSION_ID;
-    abilityMgr->GetMissionIdByToken(token, missionId);
-    return missionId;
 }
 
 void DMSContinueSendMgr::PostUnfocusedTaskWithDelay(const int32_t missionId, UnfocusedReason reason)
@@ -641,7 +615,7 @@ void DMSContinueSendMgr::OnMMIEvent()
 int32_t DMSContinueSendMgr::NotifyDeviceOnline()
 {
     HILOGD("NotifyDeviceOnline called");
-    if (GetCurrentMissionId() <= 0) {
+    if (DistributedSchedService::GetInstance().GetCurrentMissionId() <= 0) {
         return INVALID_MISSION_ID;
     }
     NotifyMissionFocused(info_.currentMissionId, FocusedReason::ONLINE);

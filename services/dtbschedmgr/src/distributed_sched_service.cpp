@@ -347,8 +347,9 @@ void DistributedSchedService::OnAddSystemAbility(int32_t systemAbilityId, const 
     }
 }
 
-void DistributedSchedService::InitDataShareManager()
+void DistributedSchedService::RegisterDataShareObserver(const std::string& key)
 {
+    HILOGI("RegisterObserver start.");
     DataShareManager::ObserverCallback observerCallback = [this]() {
         dataShareManager.SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
         HILOGD("dsMgr IsCurrentContinueSwitchOn : %{public}d", dataShareManager.IsCurrentContinueSwitchOn());
@@ -382,10 +383,15 @@ void DistributedSchedService::InitDataShareManager()
             DSchedContinueManager::GetInstance().UnInit();
         };
     };
+    dataShareManager.RegisterObserver(key, observerCallback);
+    HILOGI("RegisterObserver end.");
+}
+
+void DistributedSchedService::InitDataShareManager()
+{
     dataShareManager.SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
     HILOGD("dsMgr IsCurrentContinueSwitchOn : %{public}d", dataShareManager.IsCurrentContinueSwitchOn());
-    dataShareManager.RegisterObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY,
-        observerCallback);
+    RegisterDataShareObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY);
     DmsUE::GetInstance().OriginalSwitchState(SwitchStatusDependency::GetInstance().IsContinueSwitchOn(), ERR_OK);
     HILOGI("Init data share manager, register observer end.");
 }
@@ -788,6 +794,26 @@ int32_t DistributedSchedService::StartRemoteAbility(const OHOS::AAFwk::Want& wan
     }
     HILOGI("[PerformanceTest] StartRemoteAbility transact end");
     return result;
+}
+
+int32_t DistributedSchedService::GetCurrentMissionId()
+{
+    HILOGI("GetCurrentMission begin");
+    auto abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
+    if (abilityMgr == nullptr) {
+        HILOGE("abilityMgr is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    sptr<IRemoteObject> token;
+    int ret = abilityMgr->GetTopAbility(token);
+    if (ret != ERR_OK || token == nullptr) {
+        HILOGE("GetTopAbility failed, ret: %{public}d", ret);
+        return INVALID_MISSION_ID;
+    }
+    int32_t missionId = INVALID_MISSION_ID;
+    abilityMgr->GetMissionIdByToken(token, missionId);
+    return missionId;
 }
 
 int32_t DistributedSchedService::StartAbilityFromRemote(const OHOS::AAFwk::Want& want,
