@@ -39,6 +39,7 @@ const std::string NETWORKID_01 = "networkId01";
 const std::string NETWORKID_02 = "networkId02";
 const std::string ABILITY_NAME_01 = "abilityName01";
 const std::string CANCEL_FOCUSED_TASK = "cancel_mission_focused_task";
+const int32_t WAITTIME = 2000;
 constexpr static int32_t DMS_SEND_LEN = 5;
 constexpr static uint8_t DMS_0X0F = 0x0f;
 constexpr int32_t MISSIONID_01 = 1;
@@ -96,6 +97,7 @@ HWTEST_F(DMSContinueManagerTest, testUnInit001, TestSize.Level3)
     /**
      * @tc.steps: step1. test UnInit when eventHandler is not nullptr;
      */
+    usleep(WAITTIME);
     sendMgr->UnInit();
     EXPECT_EQ(sendMgr->eventHandler_, nullptr);
 
@@ -124,6 +126,7 @@ HWTEST_F(DMSContinueManagerTest, testUnInit002, TestSize.Level3)
     sendMgr->Init();
     EXPECT_NE(sendMgr->eventHandler_, nullptr);
 
+    usleep(WAITTIME);
     sendMgr->UnInit();
     EXPECT_EQ(sendMgr->eventHandler_, nullptr);
     DTEST_LOG << "DMSContinueManagerTest testUnInit002 end" << std::endl;
@@ -153,6 +156,7 @@ HWTEST_F(DMSContinueManagerTest, testPostUnfocusedTaskWithDelay001, TestSize.Lev
     /**
      * @tc.steps: step2. test PostUnfocusedTaskWithDelay when eventHandler is nullptr;
      */
+    usleep(WAITTIME);
     sendMgr->UnInit();
     sendMgr->PostUnfocusedTaskWithDelay(0, UnfocusedReason::TIMEOUT);
     EXPECT_EQ(sendMgr->eventHandler_, nullptr);
@@ -184,6 +188,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyMissionFocused001, TestSize.Level3)
     /**
      * @tc.steps: step2. test NotifyMissionFocused when eventHandler is nullptr;
      */
+    usleep(WAITTIME);
     sendMgr->UnInit();
     sendMgr->NotifyMissionFocused(0, FocusedReason::NORMAL);
     EXPECT_EQ(sendMgr->eventHandler_, nullptr);
@@ -213,6 +218,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyMissionUnfocused001, TestSize.Level3)
     /**
      * @tc.steps: step2. test NotifyMissionUnfocused when eventHandler is nullptr;
      */
+    usleep(WAITTIME);
     sendMgr->UnInit();
     sendMgr->NotifyMissionUnfocused(0, UnfocusedReason::NORMAL);
     EXPECT_EQ(sendMgr->eventHandler_, nullptr);
@@ -589,6 +595,7 @@ HWTEST_F(DMSContinueManagerTest, testSetMissionContinueState001, TestSize.Level3
     /**
      * @tc.steps: step2. test SetMissionContinueState when eventHandler is nullptr;
      */
+    usleep(WAITTIME);
     sendMgr->UnInit();
     sendMgr->SetMissionContinueState(0, state);
     EXPECT_EQ(sendMgr->eventHandler_, nullptr);
@@ -618,6 +625,7 @@ HWTEST_F(DMSContinueManagerTest, testSetMissionContinueState002, TestSize.Level3
     /**
      * @tc.steps: step2. test SetMissionContinueState when eventHandler is nullptr;
      */
+    usleep(WAITTIME);
     sendMgr->UnInit();
     sendMgr->SetMissionContinueState(0, state);
     EXPECT_EQ(sendMgr->eventHandler_, nullptr);
@@ -693,6 +701,7 @@ HWTEST_F(DMSContinueManagerTest, testOnDeviceScreenOff001, TestSize.Level1)
     /**
      * @tc.steps: step2. test OnDeviceScreenOff when eventHandler is nullptr;
      */
+    usleep(WAITTIME);
     sendMgr->UnInit();
     sendMgr->OnDeviceScreenOff();
     EXPECT_EQ(sendMgr->eventHandler_, nullptr);

@@ -141,7 +141,6 @@ public:
     void UserSwitchedRemoveMMIListener();
 
 private:
-    int32_t GetCurrentMissionId();
     void PostUnfocusedTaskWithDelay(const int32_t missionId, UnfocusedReason reason);
     int32_t SendSoftbusEvent(uint16_t bundleNameId, uint8_t continueTypeId, uint8_t type);
     void StartEvent();

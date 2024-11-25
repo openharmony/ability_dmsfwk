@@ -132,6 +132,8 @@ void MultiUserManager::OnUserSwitched(int32_t accountId)
 
     DataShareManager::GetInstance().SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance()
         .IsContinueSwitchOn());
+    DistributedSchedService::GetInstance()
+        .RegisterDataShareObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY);
     sendMgr = GetCurrentSendMgr();
     if (sendMgr == nullptr) {
         HILOGI("GetSendMgr failed.");
@@ -242,12 +244,26 @@ int32_t MultiUserManager::CreateNewRecvMgrLocked()
 std::shared_ptr<DMSContinueSendMgr> MultiUserManager::GetCurrentSendMgr()
 {
     HILOGI("GetCurrentSendMgr. accountId: %{public}d.", currentUserId_);
-    std::lock_guard<std::mutex> lock(sendMutex_);
-    if (sendMgrMap_.empty() || sendMgrMap_.find(currentUserId_) == sendMgrMap_.end()) {
-        HILOGI("sendMgr need to create.");
-        CreateNewSendMgrLocked();
+    bool isCreate = false;
+    {
+        std::lock_guard<std::mutex> lock(sendMutex_);
+        if (sendMgrMap_.empty() || sendMgrMap_.find(currentUserId_) == sendMgrMap_.end()) {
+            HILOGI("sendMgr need to create.");
+            isCreate = true;
+            CreateNewSendMgrLocked();
+        }
     }
     auto cur = sendMgrMap_.find(currentUserId_);
+    if (isCreate) {
+        int32_t missionId = DistributedSchedService::GetInstance().GetCurrentMissionId();
+        if (missionId <= 0) {
+            HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
+            return cur->second;
+        }
+        if (cur != sendMgrMap_.end() && cur->second != nullptr) {
+            cur->second->NotifyMissionFocused(missionId, FocusedReason::INIT);
+        }
+    }
     return cur->second;
 }
 
@@ -268,12 +284,26 @@ std::shared_ptr<DMSContinueSendMgr> MultiUserManager::GetSendMgrByCallingUid(int
     int32_t accountId = -1;
     OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, accountId);
     HILOGI("GetSendMgrByCallingUid. accountId: %{public}d , callingUid: %{public}d.", accountId, callingUid);
-    std::lock_guard<std::mutex> lock(sendMutex_);
-    if (sendMgrMap_.empty() || sendMgrMap_.find(accountId) == sendMgrMap_.end()) {
-        HILOGI("sendMgr need to create.");
-        CreateNewSendMgrLocked();
+    bool isCreate = false;
+    {
+        std::lock_guard<std::mutex> lock(sendMutex_);
+        if (sendMgrMap_.empty() || sendMgrMap_.find(accountId) == sendMgrMap_.end()) {
+            HILOGI("sendMgr need to create.");
+            isCreate = true;
+            CreateNewSendMgrLocked();
+        }
     }
     auto cur = sendMgrMap_.find(accountId);
+    if (isCreate) {
+        int32_t missionId = DistributedSchedService::GetInstance().GetCurrentMissionId();
+        if (missionId <= 0) {
+            HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
+            return cur->second;
+        }
+        if (cur != sendMgrMap_.end() && cur->second != nullptr) {
+            cur->second->NotifyMissionFocused(missionId, FocusedReason::INIT);
+        }
+    }
     return cur->second;
 }
 
