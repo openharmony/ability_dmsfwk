@@ -44,6 +44,7 @@ constexpr int32_t INDEX_2 = 2;
 constexpr int32_t INDEX_3 = 3;
 constexpr int32_t DBMS_RETRY_MAX_TIME = 5;
 constexpr int32_t DBMS_RETRY_DELAY = 2000;
+constexpr int32_t REGIST_MAX_SIZE = 1000;
 const std::string TAG = "DMSContinueRecvMgr";
 const std::string DBMS_RETRY_TASK = "retry_on_boradcast_task";
 const std::u16string DESCRIPTOR = u"ohos.aafwk.RemoteOnListener";
@@ -73,7 +74,9 @@ void DMSContinueRecvMgr::UnInit()
     HILOGI("UnInit start");
     if (eventHandler_ != nullptr && eventHandler_->GetEventRunner() != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
-        eventThread_.join();
+        if (eventThread_.joinable()) {
+            eventThread_.join();
+        }
         eventHandler_ = nullptr;
     } else {
         HILOGE("eventHandler_ is nullptr");
@@ -129,7 +132,7 @@ int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sp
     onType_ = type;
     std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     auto iterItem = registerOnListener_.find(type);
-    if (iterItem == registerOnListener_.end()) {
+    if (iterItem == registerOnListener_.end() && registerOnListener_.size() < REGIST_MAX_SIZE) {
         HILOGD("The itemItem does not exist in the registerOnListener_, adding, type: %{public}s", type.c_str());
         std::vector<sptr<IRemoteObject>> objs;
         obj->AddDeathRecipient(missionDiedListener_);

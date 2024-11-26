@@ -73,7 +73,9 @@ void DMSContinueSendMgr::UnInit()
     HILOGI("UnInit start");
     if (eventHandler_ != nullptr && eventHandler_->GetEventRunner() != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
-        eventThread_.join();
+        if (eventThread_.joinable()) {
+            eventThread_.join();
+        }
         eventHandler_ = nullptr;
     } else {
         HILOGE("eventHandler_ is nullptr");
@@ -453,6 +455,7 @@ int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
 
 int32_t DMSContinueSendMgr::GetBundleNameByMissionId(const int32_t missionId, std::string& bundleName)
 {
+    std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
     for (auto iterItem = focusedMission_.begin(); iterItem != focusedMission_.end(); iterItem++) {
         if (iterItem->second == missionId) {
             bundleName = iterItem->first;
