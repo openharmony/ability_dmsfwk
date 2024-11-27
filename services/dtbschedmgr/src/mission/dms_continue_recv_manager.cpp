@@ -335,8 +335,9 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
         return INVALID_PARAMETERS_ERR;
     }
+    bool isSameBundle = (bundleName == finalBundleName);
     if (state == ACTIVE
-        && !IsBundleContinuable(localBundleInfo, abilityInfo.abilityName, continueType)) {
+        && !IsBundleContinuable(localBundleInfo, abilityInfo.abilityName, continueType, isSameBundle)) {
         HILOGE("Bundle %{public}s is not continuable", finalBundleName.c_str());
         return BUNDLE_NOT_CONTINUABLE;
     }
@@ -361,7 +362,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
 }
 
 bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo,
-    const std::string &srcAbilityName, const std::string &srcContinueType)
+    const std::string &srcAbilityName, const std::string &srcContinueType, bool isSameBundle)
 {
     std::string formatSrcContinueType = ContinueTypeFormat(srcContinueType);
     for (auto &abilityInfo: bundleInfo.abilityInfos) {
@@ -370,10 +371,14 @@ bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundl
         }
         for (const auto &continueTypeItem: abilityInfo.continueType) {
             HILOGI("IsBundleContinuable check: srcAbilityName:%{public}s; srcContinueType:%{public}s;"
-                   " sinkAbilityName:%{public}s; sinkContinueType:%{public}s; ",
+                   " sinkAbilityName:%{public}s; sinkContinueType:%{public}s; isSameBundle: %{public}d ",
                    srcAbilityName.c_str(), srcContinueType.c_str(), abilityInfo.name.c_str(),
-                   continueTypeItem.c_str());
+                   continueTypeItem.c_str(), isSameBundle);
             if (continueTypeItem == srcContinueType || continueTypeItem == formatSrcContinueType) {
+                return true;
+            }
+            if ((srcContinueType == srcAbilityName || abilityInfo.name == continueTypeItem)
+                && isSameBundle && abilityInfo.name == srcAbilityName) {
                 return true;
             }
         }
