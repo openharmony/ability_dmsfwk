@@ -453,57 +453,6 @@ bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
     return true;
 }
 
-bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId, const std::string &bundleName,
-    DmsBundleInfo &distributeBundleInfo)
-{
-    HILOGD("networkId: %{public}s  bundleNameId: %{public}s", GetAnonymStr(networkId).c_str(), bundleName.c_str());
-    if (!CheckKvStore()) {
-        HILOGE("kvStore is nullptr");
-        return false;
-    }
-    std::string udid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(networkId);
-    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(networkId);
-    if (udid == "" || uuid == "") {
-        HILOGE("can not get udid or uuid");
-        return false;
-    }
-    HILOGI("uuid: %{public}s", GetAnonymStr(uuid).c_str());
-    std::vector<Entry> remoteEntries;
-    Status status = kvStorePtr_->GetDeviceEntries(uuid, remoteEntries);
-    if (remoteEntries.empty() || status != Status::SUCCESS) {
-        HILOGE("GetDeviceEntries error: %{public}d or remoteEntries is empty", status);
-        return false;
-    }
-
-    std::vector<Entry> reduRiskEntries;
-    std::string keyOfPublic = udid + AppExecFwk::Constants::FILE_UNDERLINE + PUBLIC_RECORDS;
-    for (auto entry: remoteEntries) {
-        std::string key = entry.key.ToString();
-        std::string value = entry.value.ToString();
-        if (key.find(keyOfPublic) != std::string::npos) {
-            continue;
-        }
-        DmsBundleInfo distributedBundleInfoTmp;
-        if (distributedBundleInfoTmp.FromJsonString(value)
-            && distributedBundleInfoTmp.bundleName == bundleName) {
-            distributeBundleInfo = distributedBundleInfoTmp;
-            reduRiskEntries.push_back(entry);
-        }
-    }
-    if (reduRiskEntries.size() > 1) {
-        HILOGE("Redundant data needs to be deleted.");
-        DelReduData(networkId, reduRiskEntries);
-        distributeBundleInfo = DmsBundleInfo();
-        return false;
-    }
-    if (reduRiskEntries.empty()) {
-        HILOGE("get distributedBundleInfo failed.");
-        return false;
-    }
-    HILOGD("end.");
-    return true;
-}
-
 Status DmsBmStorage::GetResultSatus(std::promise<OHOS::DistributedKv::Status> &resultStatusSignal)
 {
     auto future = resultStatusSignal.get_future();

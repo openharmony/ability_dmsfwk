@@ -31,15 +31,6 @@ namespace DistributedSchedule {
 namespace {
     const std::string BASEDIR = "/data/service/el1/public/database/DistributedSchedule";
     const std::string BUNDLEMAME_1 = "bundleName";
-    const std::string CONTINUE_TYPE1 = "continueType1";
-    const std::string CONTINUE_TYPE2 = "continueType2";
-    const std::string CONTINUE_TYPE3 = "continueType3";
-    const std::string CONTINUE_TYPE1_QUICK = "continueType1_ContinueQuickStart";
-    const std::string MODULE_NAME1 = "moduleName1";
-    const std::string MODULE_NAME2 = "moduleName2";
-    const std::string MODULE_NAME3 = "moduleName3";
-    const std::string ABILITY_NAME_SAME_AS_CONTINUE_TYPE = CONTINUE_TYPE1;
-    const std::string ABILITY_NAME_DIFF_AS_CONTINUE_TYPE = "ability";
     const int32_t WAITTIME = 2000;
     const uint32_t DSCHED_BUFFER_SIZE = 1024;
 }
@@ -627,80 +618,6 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_1, TestSize.Level0)
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0017_1 end ret:" << ret << std::endl;
     usleep(WAITTIME);
-}
-
-/**
- * @tc.name: DSchedContinueTest_0017_2
- * @tc.desc: UpdateElementInfo
- * @tc.type: FUNC
- */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_2, TestSize.Level0)
-{
-    DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0017_2 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    auto cmd = std::make_shared<DSchedContinueDataCmd>();
-    // no same continueType, diff module
-    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
-    cmd->continueType_ = CONTINUE_TYPE3;
-    cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_SAME_AS_CONTINUE_TYPE, MODULE_NAME2);
-    int32_t ret = conti->UpdateElementInfo(cmd);
-    EXPECT_EQ(ret, CAN_NOT_FOUND_MODULE_ERR);
-    // no continueType, same module
-    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
-    cmd->continueType_ = CONTINUE_TYPE1;
-    cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_SAME_AS_CONTINUE_TYPE, MODULE_NAME1);
-    ret = conti->UpdateElementInfo(cmd);
-    EXPECT_EQ(ret, ERR_OK);
-    // no continueType with quick start, same module
-    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
-    cmd->continueType_ = CONTINUE_TYPE1_QUICK;
-    cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_SAME_AS_CONTINUE_TYPE, MODULE_NAME1);
-    ret = conti->UpdateElementInfo(cmd);
-    EXPECT_EQ(ret, ERR_OK);
-    // has continueType, same module
-    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
-    cmd->continueType_ = CONTINUE_TYPE2;
-    cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_DIFF_AS_CONTINUE_TYPE, MODULE_NAME2);
-    ret = conti->UpdateElementInfo(cmd);
-    EXPECT_EQ(ret, ERR_OK);
-    // has continueType, diff module
-    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
-    cmd->continueType_ = CONTINUE_TYPE2;
-    cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_DIFF_AS_CONTINUE_TYPE, MODULE_NAME1);
-    ret = conti->UpdateElementInfo(cmd);
-    EXPECT_EQ(ret, ERR_OK);
-    // has continueType, no module
-    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
-    cmd->continueType_ = CONTINUE_TYPE2;
-    cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_DIFF_AS_CONTINUE_TYPE, MODULE_NAME3);
-    ret = conti->UpdateElementInfo(cmd);
-    EXPECT_EQ(ret, ERR_OK);
-    DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0017_2 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
-}
-
-bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId, const std::string &bundleName,
-    DmsBundleInfo &distributeBundleInfo)
-{
-    DmsAbilityInfo info2;
-    info2.continueType = {CONTINUE_TYPE2};
-    info2.moduleName = MODULE_NAME2;
-    info2.abilityName = ABILITY_NAME_DIFF_AS_CONTINUE_TYPE;
-    distributeBundleInfo.dmsAbilityInfos.push_back(info2);
-
-    DmsAbilityInfo info1;
-    info1.continueType = {CONTINUE_TYPE1};
-    info1.moduleName = MODULE_NAME1;
-    info1.abilityName = ABILITY_NAME_SAME_AS_CONTINUE_TYPE;
-    distributeBundleInfo.dmsAbilityInfos.push_back(info1);
-    return true;
 }
 
 /**
