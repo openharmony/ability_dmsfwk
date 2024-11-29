@@ -1212,5 +1212,24 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleNotifierDied_002, TestSize.
     EXPECT_NE(dtbabilitymgrService_, nullptr);
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleNotifierDied_002 end" << std::endl;
 }
+
+/**
+ * @tc.name: HandleDeviceConnect_003
+ * @tc.desc: test HandleDeviceConnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, HandleDeviceConnect_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest HandleDeviceConnect_003 start" << std::endl;
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
+    std::vector<ContinuationResult> continuationResults;
+    dtbabilitymgrService_->OnStart();
+    int32_t ret = dtbabilitymgrService_->HandleDeviceConnect(nullptr, continuationResults);
+    EXPECT_EQ(ret, false);
+
+    ret = dtbabilitymgrService_->HandleDeviceDisconnect(nullptr, continuationResults);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest HandleDeviceConnect_003 end" << std::endl;
+}
 }
 }

@@ -210,6 +210,23 @@ HWTEST_F(DistributedSchedDumperTest, Dump_009, TestSize.Level3)
 }
 
 /**
+ * @tc.name: Dump_0010
+ * @tc.desc: dump info with 0 arg
+ * @tc.type: FUNC
+ * @tc.require: I6ONQ3
+ */
+HWTEST_F(DistributedSchedDumperTest, Dump_0010, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedDumperTest Dump_0010 begin" << std::endl;
+    DistributedSchedUtil::MockProcess(HIDUMPER_PROCESS_NAME);
+    const std::vector<std::string> args = { "-continueTime" };
+    std::string result = "";
+    bool res = DistributedSchedDumper::Dump(args, result);
+    EXPECT_TRUE(res);
+    DTEST_LOG << "DistributedSchedDumperTest Dump_0010 end" << std::endl;
+}
+
+/**
  * @tc.name: CanDump_001
  * @tc.desc: CanDump
  * @tc.type: FUNC
