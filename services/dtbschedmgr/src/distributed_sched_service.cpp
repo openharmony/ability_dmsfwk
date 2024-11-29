@@ -1697,12 +1697,12 @@ int32_t DistributedSchedService::ConnectRemoteAbility(const OHOS::AAFwk::Want& w
         return INVALID_PARAMETERS_ERR;
     }
     callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
-    HILOGD("[PerformanceTest] ConnectRemoteAbility begin");
+    HILOGI("[PerformanceTest] ConnectRemoteAbility begin");
     int32_t result = TryConnectRemoteAbility(want, connect, callerInfo);
     if (result != ERR_OK) {
         HILOGE("ConnectRemoteAbility result is %{public}d", result);
     }
-    HILOGD("[PerformanceTest] ConnectRemoteAbility end");
+    HILOGI("[PerformanceTest] ConnectRemoteAbility end");
     return result;
 }
 
@@ -1726,9 +1726,9 @@ int32_t DistributedSchedService::TryConnectRemoteAbility(const OHOS::AAFwk::Want
     int32_t result = REMOTE_DEVICE_BIND_ABILITY_ERR;
     while (retryTimes--) {
         int64_t start = GetTickCount();
-        HILOGD("[PerformanceTest] ConnectRemoteAbility begin");
+        HILOGI("[PerformanceTest] ConnectRemoteAbility begin");
         result = remoteDms->ConnectAbilityFromRemote(want, abilityInfo, connect, callerInfo, accountInfo);
-        HILOGD("[PerformanceTest] ConnectRemoteAbility end");
+        HILOGI("[PerformanceTest] ConnectRemoteAbility end");
         if (result == ERR_OK) {
             std::lock_guard<std::mutex> autoLock(distributedLock_);
             RemoteConnectAbilityMappingLocked(connect, callerInfo.sourceDeviceId, remoteDeviceId,
@@ -1873,14 +1873,14 @@ int32_t DistributedSchedService::TryStartRemoteAbilityByCall(const OHOS::AAFwk::
     const sptr<IRemoteObject>& connect, const CallerInfo& callerInfo)
 {
     std::string remoteDeviceId = want.GetElement().GetDeviceID();
-    HILOGD("[PerformanceTest] TryStartRemoteAbilityByCall get remote DMS");
+    HILOGI("[PerformanceTest] TryStartRemoteAbilityByCall get remote DMS");
     sptr<IDistributedSched> remoteDms = GetRemoteDms(remoteDeviceId);
     if (remoteDms == nullptr) {
         HILOGE("TryStartRemoteAbilityByCall get remote DMS failed, remoteDeviceId: %{public}s",
             GetAnonymStr(remoteDeviceId).c_str());
         return INVALID_PARAMETERS_ERR;
     }
-    HILOGD("[PerformanceTest] TryStartRemoteAbilityByCall RPC begin");
+    HILOGI("[PerformanceTest] TryStartRemoteAbilityByCall RPC begin");
     AccountInfo accountInfo;
     int32_t ret = DistributedSchedPermission::GetInstance().GetAccountInfo(remoteDeviceId, callerInfo, accountInfo);
     if (ret != ERR_OK) {
@@ -1890,9 +1890,9 @@ int32_t DistributedSchedService::TryStartRemoteAbilityByCall(const OHOS::AAFwk::
     AAFwk::Want remoteWant = want;
     int32_t connectToken = SaveConnectToken(want, connect);
     remoteWant.SetParam(DMS_CONNECT_TOKEN, connectToken);
-    HILOGD("connectToken is %{public}s", GetAnonymStr(std::to_string(connectToken)).c_str());
+    HILOGI("connectToken is %{public}s", GetAnonymStr(std::to_string(connectToken)).c_str());
     int32_t result = remoteDms->StartAbilityByCallFromRemote(remoteWant, connect, callerInfo, accountInfo);
-    HILOGD("[PerformanceTest] TryStartRemoteAbilityByCall RPC end");
+    HILOGI("[PerformanceTest] TryStartRemoteAbilityByCall RPC end");
     if (result == ERR_OK) {
         SaveCallerComponent(want, connect, callerInfo);
     } else {
@@ -2117,7 +2117,7 @@ int32_t DistributedSchedService::ReleaseRemoteAbility(const sptr<IRemoteObject>&
 int32_t DistributedSchedService::StartAbilityByCallFromRemote(const OHOS::AAFwk::Want& want,
     const sptr<IRemoteObject>& connect, const CallerInfo& callerInfo, const AccountInfo& accountInfo)
 {
-    HILOGD("[PerformanceTest] DistributedSchedService StartAbilityByCallFromRemote begin");
+    HILOGI("[PerformanceTest] DistributedSchedService StartAbilityByCallFromRemote begin");
     if (connect == nullptr) {
         HILOGE("StartAbilityByCallFromRemote connect is null");
         return INVALID_REMOTE_PARAMETERS_ERR;
@@ -2151,7 +2151,7 @@ int32_t DistributedSchedService::StartAbilityByCallFromRemote(const OHOS::AAFwk:
         }
     }
     int32_t errCode = DistributedSchedAdapter::GetInstance().StartAbilityByCall(want, callbackWrapper, this);
-    HILOGD("[PerformanceTest] StartAbilityByCallFromRemote end");
+    HILOGI("[PerformanceTest] StartAbilityByCallFromRemote end");
     if (errCode == ERR_OK) {
         {
             std::lock_guard<std::mutex> autoLock(calleeLock_);
@@ -2481,12 +2481,12 @@ int32_t DistributedSchedService::ConnectAbilityFromRemote(const OHOS::AAFwk::Wan
     const AppExecFwk::AbilityInfo& abilityInfo, const sptr<IRemoteObject>& connect,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo)
 {
-    HILOGD("[PerformanceTest] DistributedSchedService ConnectAbilityFromRemote begin");
+    HILOGI("[PerformanceTest] DistributedSchedService ConnectAbilityFromRemote begin");
     if (connect == nullptr) {
         HILOGE("ConnectAbilityFromRemote connect is null");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
-    HILOGD("ConnectAbilityFromRemote uid is %{public}d, pid is %{public}d, AccessTokenID is %{public}s",
+    HILOGI("ConnectAbilityFromRemote uid is %{public}d, pid is %{public}d, AccessTokenID is %{public}s",
         callerInfo.uid, callerInfo.pid, GetAnonymStr(std::to_string(callerInfo.accessToken)).c_str());
     std::string localDeviceId;
     std::string destinationDeviceId = want.GetElement().GetDeviceID();
@@ -2501,7 +2501,7 @@ int32_t DistributedSchedService::ConnectAbilityFromRemote(const OHOS::AAFwk::Wan
         return result;
     }
 
-    HILOGD("ConnectAbilityFromRemote callerType is %{public}d", callerInfo.callerType);
+    HILOGI("ConnectAbilityFromRemote callerType is %{public}d", callerInfo.callerType);
     sptr<IRemoteObject> callbackWrapper = connect;
     std::map<sptr<IRemoteObject>, ConnectInfo>::iterator itConnect;
     if (callerInfo.callerType == CALLER_TYPE_HARMONY) {
@@ -2514,7 +2514,7 @@ int32_t DistributedSchedService::ConnectAbilityFromRemote(const OHOS::AAFwk::Wan
         }
     }
     int32_t errCode = DistributedSchedAdapter::GetInstance().ConnectAbility(want, callbackWrapper, this);
-    HILOGD("[PerformanceTest] ConnectAbilityFromRemote end");
+    HILOGI("[PerformanceTest] ConnectAbilityFromRemote end");
     if (errCode == ERR_OK) {
         std::lock_guard<std::mutex> autoLock(connectLock_);
         if (itConnect == connectAbilityMap_.end()) {

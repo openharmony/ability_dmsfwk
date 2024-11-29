@@ -30,7 +30,7 @@ const std::string TAG = "AbilityConnectionWrapperProxy";
 void AbilityConnectionWrapperProxy::OnAbilityConnectDone(const AppExecFwk::ElementName& element,
     const sptr<IRemoteObject>& remoteObject, int32_t resultCode)
 {
-    HILOGD("AbilityConnectionWrapperProxy::OnAbilityConnectDone called");
+    HILOGI("AbilityConnectionWrapperProxy::OnAbilityConnectDone called");
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         return;
@@ -48,12 +48,12 @@ void AbilityConnectionWrapperProxy::OnAbilityConnectDone(const AppExecFwk::Eleme
         return;
     }
     int32_t errCode = remote->SendRequest(IAbilityConnection::ON_ABILITY_CONNECT_DONE, data, reply, option);
-    HILOGD("AbilityConnectionWrapperProxy::OnAbilityConnectDone result %{public}d", errCode);
+    HILOGI("AbilityConnectionWrapperProxy::OnAbilityConnectDone result %{public}d", errCode);
 }
 
 void AbilityConnectionWrapperProxy::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element, int32_t resultCode)
 {
-    HILOGD("AbilityConnectionWrapperProxy::OnAbilityDisconnectDone called");
+    HILOGI("AbilityConnectionWrapperProxy::OnAbilityDisconnectDone called");
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         return;
@@ -69,7 +69,7 @@ void AbilityConnectionWrapperProxy::OnAbilityDisconnectDone(const AppExecFwk::El
         return;
     }
     int32_t errCode = remote->SendRequest(IAbilityConnection::ON_ABILITY_DISCONNECT_DONE, data, reply, option);
-    HILOGD("AbilityConnectionWrapperProxy::OnAbilityDisconnectDone result %{public}d", errCode);
+    HILOGI("AbilityConnectionWrapperProxy::OnAbilityDisconnectDone result %{public}d", errCode);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
