@@ -43,7 +43,7 @@ AbilityConnectionWrapperStub::AbilityConnectionWrapperStub(sptr<IRemoteObject> c
 int32_t AbilityConnectionWrapperStub::OnRemoteRequest(uint32_t code, MessageParcel& data,
     MessageParcel& reply, MessageOption& option)
 {
-    HILOGD("AbilityConnectionWrapperStub::OnRemoteRequest code = %{public}u", code);
+    HILOGI("AbilityConnectionWrapperStub::OnRemoteRequest code = %{public}u", code);
     std::u16string descriptor = IAbilityConnection::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
@@ -84,7 +84,7 @@ void AbilityConnectionWrapperStub::OnAbilityConnectDone(const AppExecFwk::Elemen
 {
     auto proxy = std::make_unique<AbilityConnectionWrapperProxy>(distributedConnection_);
     if (isCall_) {
-        HILOGD("OnAbilityConnectDone get caller callback");
+        HILOGI("OnAbilityConnectDone get caller callback");
         AppExecFwk::ElementName elementWithDeviceId(localDeviceId_, element.GetBundleName(), element.GetAbilityName());
         DistributedSchedAdapter::GetInstance().ProcessCallResult(remoteObject, distributedConnection_);
         proxy->OnAbilityConnectDone(elementWithDeviceId, remoteObject, resultCode);
@@ -97,7 +97,7 @@ void AbilityConnectionWrapperStub::OnAbilityDisconnectDone(const AppExecFwk::Ele
     int32_t resultCode)
 {
     if (isCall_) {
-        HILOGD("OnAbilityDisconnectDone release caller");
+        HILOGI("OnAbilityDisconnectDone release caller");
         DistributedSchedAdapter::GetInstance().ProcessCalleeDied(distributedConnection_);
         return;
     }

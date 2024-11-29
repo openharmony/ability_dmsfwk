@@ -26,7 +26,6 @@
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
-#include "mission/distributed_bm_storage.h"
 #include "mission/dsched_sync_e2e.h"
 
 namespace OHOS {
@@ -57,7 +56,6 @@ void DnetworkAdapter::Init()
 {
     initCallback_ = std::make_shared<DeviceInitCallBack>();
     stateCallback_ = std::make_shared<DmsDeviceStateCallback>();
-    devTrustChangeCallback_ = std::make_shared<DmsDevTrustChangeCallback>();
     auto runner = AppExecFwk::EventRunner::Create("dmsDnetwork");
     dnetworkHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
 }
@@ -119,28 +117,6 @@ void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceReady(const DmDeviceInfo& 
     HILOGI("called");
 }
 
-void DnetworkAdapter::DmsDevTrustChangeCallback::OnDeviceTrustChange(const std::string &udid,
-    const std::string &uuid, const DmAuthForm authform)
-{
-    HILOGI("called");
-    if (udid.empty() || uuid.empty()) {
-        HILOGE("udid or uuid is empty!");
-        return;
-    }
-    if (DmsKvSyncE2E::GetInstance()->CheckDeviceCfg()) {
-        HILOGI("this device type is special");
-        return;
-    }
-    if (authform != DmAuthForm::IDENTICAL_ACCOUNT) {
-        HILOGE("peer is not same account");
-        return;
-    }
-    if (!DmsBmStorage::GetInstance()->DelDataOfLogoutDev(udid, uuid)) {
-        HILOGE("DelDataOfLogoutDev failed");
-    }
-    HILOGI("end");
-}
-
 bool DnetworkAdapter::AddDeviceChangeListener(const std::shared_ptr<DeviceListener>& listener)
 {
     HILOGD("AddDeviceChangeListener called");
@@ -176,8 +152,6 @@ bool DnetworkAdapter::AddDeviceChangeListener(const std::shared_ptr<DeviceListen
                 std::this_thread::sleep_for(std::chrono::milliseconds(RETRY_REGISTER_CALLBACK_DELAY_TIME));
                 continue;
             }
-            errCode = DeviceManager::GetInstance().RegDevTrustChangeCallback(PKG_NAME, devTrustChangeCallback_);
-            HILOGI("RegDevTrustChangeCallback errCode = %{public}d", errCode);
             if (UpdateDeviceInfoStorage()) {
                 break;
             }

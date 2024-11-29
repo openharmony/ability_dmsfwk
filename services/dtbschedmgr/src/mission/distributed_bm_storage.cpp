@@ -857,39 +857,6 @@ void DmsBmStorage::DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos)
     HILOGI("end.");
 }
 
-bool DmsBmStorage::DelDataOfLogoutDev(const std::string &udid, const std::string &uuid)
-{
-    if (!CheckKvStore()) {
-        HILOGE("kvStore is nullptr");
-        return false;
-    }
-    if (udid.empty() || uuid.empty()) {
-        HILOGE("udid or uuid is empty!");
-        return false;
-    }
-    Key remoteKeyPrefix(udid);
-    std::vector<Entry> remoteEntries;
-    Status status = kvStorePtr_->GetEntries(remoteKeyPrefix, remoteEntries);
-    if (status != Status::SUCCESS || remoteEntries.empty()) {
-        HILOGE("GetEntries error: %{public}d, or remoteEntries is empty", status);
-        return false;
-    }
-    std::vector<Key> remoteKeyArr;
-    for (auto remoteEntry : remoteEntries) {
-        remoteKeyArr.push_back(remoteEntry.key);
-    }
-    status = kvStorePtr_->DeleteBatch(remoteKeyArr);
-    if (status != Status::SUCCESS) {
-        HILOGE("DeleteBatch error: %{public}d", status);
-        return false;
-    }
-    if (kvStorePtr_->RemoveDeviceData(uuid) != Status::SUCCESS) {
-        HILOGE("RemoveDeviceData fail, uuid=%{public}s", GetAnonymStr(uuid).c_str());
-        return false;
-    }
-    return true;
-}
-
 void DmsBmStorage::AddBundleNameId(const uint16_t &bundleNameId, const std::string &bundleName)
 {
     std::lock_guard<std::mutex> lock_l(mutex_);
