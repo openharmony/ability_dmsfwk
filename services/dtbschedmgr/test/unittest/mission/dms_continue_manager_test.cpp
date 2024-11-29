@@ -1068,6 +1068,7 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_001, TestSize.Level1)
     DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_001 start" << std::endl;
     std::string srcAbilityName = "abilityName";
     std::string srcContinueType = "continueType";
+    bool isSameBundle = true;
 
     AppExecFwk::BundleInfo localBundleInfo;
     std::vector<AppExecFwk::AbilityInfo> abilityInfos;
@@ -1082,9 +1083,14 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_001, TestSize.Level1)
     localBundleInfo.abilityInfos = abilityInfos;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
     ASSERT_NE(nullptr, recvMgr);
-    bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName, srcContinueType);
+    bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName,
+                                            srcContinueType, isSameBundle);
     EXPECT_EQ(ret, false);
 
+    isSameBundle = false;
+    ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName,
+                                       srcContinueType, isSameBundle);
+    EXPECT_EQ(ret, false);
     DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_001 end" << std::endl;
 }
 
@@ -1098,6 +1104,7 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_002, TestSize.Level1)
     DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_002 start" << std::endl;
     std::string srcAbilityName = "abilityName";
     std::string srcContinueType = "continueType";
+    bool isSameBundle = true;
 
     AppExecFwk::BundleInfo localBundleInfo;
     std::vector<AppExecFwk::AbilityInfo> abilityInfos;
@@ -1112,7 +1119,13 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_002, TestSize.Level1)
     localBundleInfo.abilityInfos = abilityInfos;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
     ASSERT_NE(nullptr, recvMgr);
-    bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName, srcContinueType);
+    bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName,
+                                            srcContinueType, isSameBundle);
+    EXPECT_EQ(ret, true);
+
+    isSameBundle = false;
+    ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName,
+                                   srcContinueType, isSameBundle);
     EXPECT_EQ(ret, true);
     DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_002 end" << std::endl;
 }
@@ -1129,6 +1142,7 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_003, TestSize.Level1)
     std::string sinkAbilityName = "sinkAbilityName";
     std::string srcContinueType = "srcContinueType";
     std::string sinkContinueType = "sinkContinueType";
+    bool isSameBundle = false;
 
     AppExecFwk::BundleInfo localBundleInfo;
     std::vector<AppExecFwk::AbilityInfo> abilityInfos;
@@ -1143,7 +1157,8 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_003, TestSize.Level1)
     localBundleInfo.abilityInfos = abilityInfos;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
     ASSERT_NE(nullptr, recvMgr);
-    bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName, srcContinueType);
+    bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName,
+                                            srcContinueType, isSameBundle);
     EXPECT_EQ(ret, false);
     DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_003 end" << std::endl;
 }
@@ -1160,6 +1175,7 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_004, TestSize.Level1)
     std::string sinkAbilityName = "sinkAbilityName";
     std::string srcContinueType = srcAbilityName;
     std::string sinkContinueType = "sinkContinueType";
+    bool isSameBundle = true;
 
     AppExecFwk::BundleInfo localBundleInfo;
     std::vector<AppExecFwk::AbilityInfo> abilityInfos;
@@ -1174,7 +1190,8 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_004, TestSize.Level1)
     localBundleInfo.abilityInfos = abilityInfos;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
     ASSERT_NE(nullptr, recvMgr);
-    bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName, srcContinueType);
+    bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName,
+                                            srcContinueType, isSameBundle);
     EXPECT_EQ(ret, false);
     DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_004 end" << std::endl;
 }
@@ -1191,6 +1208,7 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_005, TestSize.Level1)
     std::string sinkAbilityName = "sinkAbilityName";
     std::string srcContinueType = srcAbilityName;
     std::string sinkContinueType = "sinkContinueType";
+    bool isSameBundle = true;
 
     AppExecFwk::BundleInfo localBundleInfo;
     std::vector<AppExecFwk::AbilityInfo> abilityInfos;
@@ -1205,8 +1223,9 @@ HWTEST_F(DMSContinueManagerTest, testIsBundleContinuable_005, TestSize.Level1)
     localBundleInfo.abilityInfos = abilityInfos;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
     ASSERT_NE(nullptr, recvMgr);
-    bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName, srcContinueType);
-    EXPECT_EQ(ret, false);
+    bool ret = recvMgr->IsBundleContinuable(localBundleInfo, srcAbilityName,
+                                            srcContinueType, isSameBundle);
+    EXPECT_EQ(ret, true);
     DTEST_LOG << "DMSContinueManagerTest testIsBundleContinuable_005 end" << std::endl;
 }
 
