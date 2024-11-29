@@ -87,7 +87,6 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_UnInit_001, TestSize.Level3)
     /**
      * @tc.steps: step1. test UnInit with delete sendMgr recvMgr;
      */
-    int32_t accountId = 100;
     MultiUserManager::GetInstance().Init();
     MultiUserManager::GetInstance().UnInit();
     
@@ -108,7 +107,6 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_OnUserSwitched_001, TestSize.Lev
     /**
      * @tc.steps: step1. test OnUserSwitched with no cache switched user;
      */
-    int32_t accountId = 100;
     int32_t switchedAccountId = 101;
     MultiUserManager::GetInstance().Init();
     MultiUserManager::GetInstance().OnUserSwitched(switchedAccountId);
@@ -128,8 +126,7 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_OnUserSwitched_002, TestSize.Lev
     /**
      * @tc.steps: step1. test OnUserSwitched with cache switched user;
      */
-    int32_t accountId = 100;
-    int32_t switchedAccountId = 101;
+    int32_t switchedAccountId = 100;
     MultiUserManager::GetInstance().Init();
 
     std::map<std::string, sptr<IRemoteObject>> param;

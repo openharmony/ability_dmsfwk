@@ -796,26 +796,6 @@ int32_t DistributedSchedService::StartRemoteAbility(const OHOS::AAFwk::Want& wan
     return result;
 }
 
-int32_t DistributedSchedService::GetCurrentMissionId()
-{
-    HILOGI("GetCurrentMission begin");
-    auto abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
-    if (abilityMgr == nullptr) {
-        HILOGE("abilityMgr is nullptr");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    sptr<IRemoteObject> token;
-    int ret = abilityMgr->GetTopAbility(token);
-    if (ret != ERR_OK || token == nullptr) {
-        HILOGE("GetTopAbility failed, ret: %{public}d", ret);
-        return INVALID_MISSION_ID;
-    }
-    int32_t missionId = INVALID_MISSION_ID;
-    abilityMgr->GetMissionIdByToken(token, missionId);
-    return missionId;
-}
-
 int32_t DistributedSchedService::StartAbilityFromRemote(const OHOS::AAFwk::Want& want,
     const OHOS::AppExecFwk::AbilityInfo& abilityInfo, int32_t requestCode,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo)

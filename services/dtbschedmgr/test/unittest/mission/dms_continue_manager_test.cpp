@@ -91,7 +91,8 @@ HWTEST_F(DMSContinueManagerTest, testUnInit001, TestSize.Level3)
     DistributedSchedUtil::MockManageMissions();
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
     ASSERT_NE(nullptr, sendMgr);
-    sendMgr->Init();
+    int32_t accountId = 100;
+    sendMgr->Init(accountId);
     EXPECT_NE(sendMgr->eventHandler_, nullptr);
 
     /**
@@ -123,7 +124,8 @@ HWTEST_F(DMSContinueManagerTest, testUnInit002, TestSize.Level3)
     DistributedSchedUtil::MockManageMissions();
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
     ASSERT_NE(nullptr, sendMgr);
-    sendMgr->Init();
+    int32_t accountId = 100;
+    sendMgr->Init(accountId);
     EXPECT_NE(sendMgr->eventHandler_, nullptr);
 
     usleep(WAITTIME);
@@ -144,7 +146,8 @@ HWTEST_F(DMSContinueManagerTest, testPostUnfocusedTaskWithDelay001, TestSize.Lev
     DistributedSchedUtil::MockManageMissions();
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
     ASSERT_NE(nullptr, sendMgr);
-    sendMgr->Init();
+    int32_t accountId = 100;
+    sendMgr->Init(accountId);
 
     /**
      * @tc.steps: step1. test PostUnfocusedTaskWithDelay when eventHandler is not nullptr;
@@ -176,7 +179,8 @@ HWTEST_F(DMSContinueManagerTest, testNotifyMissionFocused001, TestSize.Level3)
     DistributedSchedUtil::MockManageMissions();
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
     ASSERT_NE(nullptr, sendMgr);
-    sendMgr->Init();
+    int32_t accountId = 100;
+    sendMgr->Init(accountId);
 
     /**
      * @tc.steps: step1. test NotifyMissionFocused when eventHandler is not nullptr;
@@ -208,7 +212,8 @@ HWTEST_F(DMSContinueManagerTest, testNotifyMissionUnfocused001, TestSize.Level3)
     DistributedSchedUtil::MockManageMissions();
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
     ASSERT_NE(nullptr, sendMgr);
-    sendMgr->Init();
+    int32_t accountId = 100;
+    sendMgr->Init(accountId);
     /**
      * @tc.steps: step1. test NotifyMissionUnfocused when eventHandler is not nullptr;
      */
@@ -235,7 +240,8 @@ HWTEST_F(DMSContinueManagerTest, testRegisterOnListener001, TestSize.Level1)
     DTEST_LOG << "DMSContinueManagerTest testRegisterOnListener001 start" << std::endl;
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
     ASSERT_NE(nullptr, recvMgr);
-    recvMgr->Init();
+    int32_t accountId = 100;
+    recvMgr->Init(accountId);
     sptr<IRemoteObject> obj01(new RemoteOnListenerStubTest());
     int32_t ret = recvMgr->RegisterOnListener(TYPE, obj01);
     EXPECT_EQ(ret, ERR_OK);
@@ -583,7 +589,8 @@ HWTEST_F(DMSContinueManagerTest, testSetMissionContinueState001, TestSize.Level3
     DistributedSchedUtil::MockManageMissions();
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
     ASSERT_NE(nullptr, sendMgr);
-    sendMgr->Init();
+    int32_t accountId = 100;
+    sendMgr->Init(accountId);
     OHOS::AAFwk::ContinueState state = OHOS::AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
 
      /**
@@ -613,7 +620,8 @@ HWTEST_F(DMSContinueManagerTest, testSetMissionContinueState002, TestSize.Level3
     DistributedSchedUtil::MockManageMissions();
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
     ASSERT_NE(nullptr, sendMgr);
-    sendMgr->Init();
+    int32_t accountId = 100;
+    sendMgr->Init(accountId);
     OHOS::AAFwk::ContinueState state = OHOS::AAFwk::ContinueState::CONTINUESTATE_INACTIVE;
 
      /**
@@ -694,7 +702,8 @@ HWTEST_F(DMSContinueManagerTest, testOnDeviceScreenOff001, TestSize.Level1)
      */
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
     ASSERT_NE(nullptr, sendMgr);
-    sendMgr->Init();
+    int32_t accountId = 100;
+    sendMgr->Init(accountId);
     sendMgr->OnDeviceScreenOff();
     EXPECT_NE(sendMgr->eventHandler_, nullptr);
 

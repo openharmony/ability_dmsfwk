@@ -44,6 +44,8 @@ public:
     AccountSA::OsAccountType GetOsAccountType(int32_t &accountId);
     int32_t CreateNewSendMgrLocked();
     int32_t CreateNewRecvMgrLocked();
+    int32_t CreateNewSendMgrLocked(int32_t accountId);
+    int32_t CreateNewRecvMgrLocked(int32_t accountId);
     std::shared_ptr<DMSContinueSendMgr> GetCurrentSendMgr();
     std::shared_ptr<DMSContinueRecvMgr> GetCurrentRecvMgr();
     std::shared_ptr<DMSContinueSendMgr> GetSendMgrByCallingUid(int32_t callingUid);

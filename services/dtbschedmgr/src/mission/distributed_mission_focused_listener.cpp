@@ -111,7 +111,7 @@ void DistributedMissionFocusedListener::OnMissionClosed(int32_t missionId)
         return;
     }
 
-    auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+    auto sendMgr = MultiUserManager::GetInstance().GetSendMgrByCallingUid(callingUid);
     if (sendMgr == nullptr) {
         HILOGI("GetSendMgr failed.");
         return;

@@ -51,9 +51,16 @@ const std::u16string DESCRIPTOR = u"ohos.aafwk.RemoteOnListener";
 const std::string QUICK_START_CONFIGURATION = "_ContinueQuickStart";
 }
 
-void DMSContinueRecvMgr::Init()
+DMSContinueRecvMgr::~DMSContinueRecvMgr()
 {
-    HILOGI("Init start");
+    HILOGI("~DMSContinueRecvMgr. accountId: %{public}d.", accountId_);
+    UnInit();
+}
+
+void DMSContinueRecvMgr::Init(int32_t accountId)
+{
+    HILOGI("Init start. accountId: %{public}d.", accountId);
+    accountId_ = accountId;
     if (eventHandler_ != nullptr) {
         HILOGI("Already inited, end.");
         return;
@@ -71,7 +78,7 @@ void DMSContinueRecvMgr::Init()
 
 void DMSContinueRecvMgr::UnInit()
 {
-    HILOGI("UnInit start");
+    HILOGI("UnInit start. accountId: %{public}d.", accountId_);
     if (eventHandler_ != nullptr && eventHandler_->GetEventRunner() != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
         if (eventThread_.joinable()) {
@@ -87,8 +94,8 @@ void DMSContinueRecvMgr::UnInit()
 void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
     uint8_t* payload, uint32_t dataLen)
 {
-    HILOGI("NotifyDataRecv start, senderNetworkId: %{public}s, dataLen: %{public}u.",
-        GetAnonymStr(senderNetworkId).c_str(), dataLen);
+    HILOGI("NotifyDataRecv start, senderNetworkId: %{public}s, dataLen: %{public}u. accountId: %{public}d.",
+        GetAnonymStr(senderNetworkId).c_str(), dataLen, accountId_);
     if (!DmsKvSyncE2E::GetInstance()->CheckCtrlRule()) {
         HILOGE("Forbid sending and receiving");
         return;
@@ -124,7 +131,7 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
 
 int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj)
 {
-    HILOGI("RegisterOnListener start, type: %{public}s", type.c_str());
+    HILOGI("RegisterOnListener start, type: %{public}s. accountId: %{public}d.", type.c_str(), accountId_);
     if (obj == nullptr) {
         HILOGE("obj is null, type: %{public}s", type.c_str());
         return INVALID_PARAMETERS_ERR;
@@ -156,7 +163,7 @@ int32_t DMSContinueRecvMgr::RegisterOnListener(const std::string& type, const sp
 int32_t DMSContinueRecvMgr::RegisterOffListener(const std::string& type,
     const sptr<IRemoteObject>& obj)
 {
-    HILOGI("RegisterOffListener start, type: %{public}s", type.c_str());
+    HILOGI("RegisterOffListener start, type: %{public}s. accountId: %{public}d.", type.c_str(), accountId_);
     if (obj == nullptr) {
         HILOGE("obj is null, type: %{public}s", type.c_str());
         return INVALID_PARAMETERS_ERR;
@@ -204,6 +211,7 @@ void DMSContinueRecvMgr::StartEvent()
 int32_t DMSContinueRecvMgr::VerifyBroadcastSource(const std::string& senderNetworkId, const std::string& srcBundleName,
     const std::string& sinkBundleName, const std::string& continueType, const int32_t state)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     std::lock_guard<std::mutex> currentIconLock(iconMutex_);
     if (state == ACTIVE) {
         iconInfo_.senderNetworkId = senderNetworkId;
@@ -233,6 +241,7 @@ int32_t DMSContinueRecvMgr::VerifyBroadcastSource(const std::string& senderNetwo
 void DMSContinueRecvMgr::PostOnBroadcastBusiness(const std::string& senderNetworkId,
     uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state, const int32_t delay, const int32_t retry)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     auto feedfunc = [this, senderNetworkId, bundleNameId, continueTypeId, state, retry]() mutable {
         DealOnBroadcastBusiness(senderNetworkId, bundleNameId, continueTypeId, state, retry);
     };
@@ -247,7 +256,7 @@ void DMSContinueRecvMgr::PostOnBroadcastBusiness(const std::string& senderNetwor
 int32_t DMSContinueRecvMgr::RetryPostBroadcast(const std::string& senderNetworkId,
     uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state, const int32_t retry)
 {
-    HILOGI("Retry post broadcast, current retry times %{public}d", retry);
+    HILOGI("Retry post broadcast, current retry times %{public}d. accountId: %{public}d.", retry, accountId_);
     if (retry == DBMS_RETRY_MAX_TIME) {
         HILOGE("meet max retry time!");
         return INVALID_PARAMETERS_ERR;
@@ -259,6 +268,7 @@ int32_t DMSContinueRecvMgr::RetryPostBroadcast(const std::string& senderNetworkI
 bool DMSContinueRecvMgr::GetFinalBundleName(DmsBundleInfo &distributedBundleInfo, std::string &finalBundleName,
     AppExecFwk::BundleInfo &localBundleInfo, std::string &continueType)
 {
+    HILOGI("accountId: %{public}d", accountId_);
     std::string bundleName = distributedBundleInfo.bundleName;
     if (BundleManagerInternal::GetLocalBundleInfo(bundleName, localBundleInfo) == ERR_OK) {
         finalBundleName = bundleName;
@@ -290,6 +300,7 @@ bool DMSContinueRecvMgr::GetFinalBundleName(DmsBundleInfo &distributedBundleInfo
 void DMSContinueRecvMgr::FindContinueType(const DmsBundleInfo &distributedBundleInfo,
     uint8_t &continueTypeId, std::string &continueType, DmsAbilityInfo &abilityInfo)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     uint32_t pos = 0;
     for (auto dmsAbilityInfo: distributedBundleInfo.dmsAbilityInfos) {
         for (auto continueTypeElement: dmsAbilityInfo.continueType) {
@@ -307,8 +318,8 @@ void DMSContinueRecvMgr::FindContinueType(const DmsBundleInfo &distributedBundle
 int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNetworkId,
     uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state, const int32_t retry)
 {
-    HILOGI("DealOnBroadcastBusiness start, senderNetworkId: %{public}s, bundleNameId: %{public}u, state: %{public}d.",
-        GetAnonymStr(senderNetworkId).c_str(), bundleNameId, state);
+    HILOGI("start, senderNetworkId: %{public}s, bundleNameId: %{public}u, state: %{public}d. accountId: %{public}d.",
+        GetAnonymStr(senderNetworkId).c_str(), bundleNameId, state, accountId_);
     DmsBundleInfo distributedBundleInfo;
     if (!DmsBmStorage::GetInstance()->GetDistributedBundleInfo(senderNetworkId, bundleNameId,
         distributedBundleInfo)) {
@@ -364,6 +375,7 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
 bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundleInfo,
     const std::string &srcAbilityName, const std::string &srcContinueType, bool isSameBundle)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     std::string formatSrcContinueType = ContinueTypeFormat(srcContinueType);
     for (auto &abilityInfo: bundleInfo.abilityInfos) {
         if (!abilityInfo.continuable) {
@@ -388,6 +400,7 @@ bool DMSContinueRecvMgr::IsBundleContinuable(const AppExecFwk::BundleInfo& bundl
 
 std::string DMSContinueRecvMgr::ContinueTypeFormat(const std::string &continueType)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     std::string suffix = QUICK_START_CONFIGURATION;
     if (suffix.length() <= continueType.length() &&
         continueType.rfind(suffix) == (continueType.length() - suffix.length())) {
@@ -400,6 +413,7 @@ std::string DMSContinueRecvMgr::ContinueTypeFormat(const std::string &continueTy
 void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
     const currentIconInfo& continueInfo, const int32_t state)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     std::string networkId = continueInfo.senderNetworkId;
     std::string srcBundleName = continueInfo.sourceBundleName;
     std::string sinkBundleName = continueInfo.bundleName;
@@ -440,7 +454,7 @@ void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
 
 void DMSContinueRecvMgr::NotifyDied(const sptr<IRemoteObject>& obj)
 {
-    HILOGI("NotifyDied start");
+    HILOGI("NotifyDied start. accountId: %{public}d.", accountId_);
     if (obj == nullptr) {
         HILOGE("obj is null");
         return;
@@ -467,7 +481,7 @@ void DMSContinueRecvMgr::NotifyDied(const sptr<IRemoteObject>& obj)
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
 void DMSContinueRecvMgr::OnDeviceScreenOff()
 {
-    HILOGI("OnDeviceScreenOff called");
+    HILOGI("OnDeviceScreenOff called. accountId: %{public}d.", accountId_);
     auto func = [this]() {
         std::string senderNetworkId;
         std::string bundleName;
@@ -513,6 +527,7 @@ void DMSContinueRecvMgr::OnDeviceScreenOff()
 void DMSContinueRecvMgr::FindToNotifyRecvBroadcast(const std::string& senderNetworkId, const std::string& bundleName,
     const std::string& continueType)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     auto iterItem = registerOnListener_.find(onType_);
     if (iterItem == registerOnListener_.end()) {
@@ -529,6 +544,7 @@ void DMSContinueRecvMgr::FindToNotifyRecvBroadcast(const std::string& senderNetw
 
 void DMSContinueRecvMgr::OnContinueSwitchOff()
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     auto func = [this]() {
         std::string senderNetworkId;
         std::string bundleName;
@@ -559,7 +575,7 @@ void DMSContinueRecvMgr::OnContinueSwitchOff()
 
 void DMSContinueRecvMgr::OnUserSwitch()
 {
-    HILOGI("OnUserSwitch start.");
+    HILOGI("OnUserSwitch start. accountId: %{public}d.", accountId_);
     std::string senderNetworkId;
     std::string bundleName;
     std::string continueType;
@@ -584,6 +600,7 @@ void DMSContinueRecvMgr::OnUserSwitch()
 
 void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     if (networkId.empty()) {
         HILOGE("NotifyDeviceOffline networkId empty");
         return;
@@ -618,6 +635,7 @@ void DMSContinueRecvMgr::NotifyDeviceOffline(const std::string& networkId)
 
 void DMSContinueRecvMgr::NotifyPackageRemoved(const std::string& sinkBundleName)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     if (sinkBundleName.empty()) {
         HILOGE("NotifyPackageRemoved sinkBundleName empty");
         return;
@@ -647,6 +665,7 @@ void DMSContinueRecvMgr::NotifyPackageRemoved(const std::string& sinkBundleName)
 
 std::string DMSContinueRecvMgr::GetContinueType(const std::string& bundleName)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     std::lock_guard<std::mutex> currentIconLock(iconMutex_);
     if (iconInfo_.isEmpty()) {
         HILOGW("get continueType failed, Saved iconInfo has already been cleared.");

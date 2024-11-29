@@ -49,9 +49,16 @@ const std::string TIMEOUT_UNFOCUSED_TASK = "timeout_unfocused_task";
 const std::string SCREEN_OFF_UNFOCUSED_TASK = "screen_off_unfocused_task";
 }
 
-void DMSContinueSendMgr::Init()
+DMSContinueSendMgr::~DMSContinueSendMgr()
 {
-    HILOGI("Init start");
+    HILOGI("~DMSContinueSendMgr. accountId: %{public}d.", accountId_);
+    UnInit();
+}
+
+void DMSContinueSendMgr::Init(int32_t accountId)
+{
+    HILOGI("Init start. accountId: %{public}d.", accountId);
+    accountId_ = accountId;
     if (eventHandler_ != nullptr) {
         HILOGI("Already inited, end.");
         return;
@@ -70,7 +77,7 @@ void DMSContinueSendMgr::Init()
 
 void DMSContinueSendMgr::UnInit()
 {
-    HILOGI("UnInit start");
+    HILOGI("UnInit start. accountId: %{public}d.", accountId_);
     if (eventHandler_ != nullptr && eventHandler_->GetEventRunner() != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
         if (eventThread_.joinable()) {
@@ -85,7 +92,7 @@ void DMSContinueSendMgr::UnInit()
 
 void DMSContinueSendMgr::PostUnfocusedTaskWithDelay(const int32_t missionId, UnfocusedReason reason)
 {
-    HILOGI("called, missionId: %{public}d, reason: %{public}d", missionId, reason);
+    HILOGI("called, missionId: %{public}d, reason: %{public}d. accountId: %{public}d.", missionId, reason, accountId_);
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler_ is nullptr");
         return;
@@ -109,7 +116,8 @@ void DMSContinueSendMgr::PostUnfocusedTaskWithDelay(const int32_t missionId, Unf
 
 void DMSContinueSendMgr::NotifyMissionFocused(const int32_t missionId, FocusedReason reason)
 {
-    HILOGI("NotifyMissionFocused called, missionId: %{public}d, reason: %{public}d", missionId, reason);
+    HILOGI("NotifyMissionFocused called, missionId: %{public}d, reason: %{public}d. accountId: %{public}d.",
+        missionId, reason, accountId_);
     if (!DmsKvSyncE2E::GetInstance()->CheckCtrlRule()) {
         HILOGE("Forbid sending and receiving");
         return;
@@ -147,7 +155,8 @@ void DMSContinueSendMgr::NotifyMissionFocused(const int32_t missionId, FocusedRe
 
 void DMSContinueSendMgr::NotifyMissionUnfocused(const int32_t missionId, UnfocusedReason reason)
 {
-    HILOGI("NotifyMissionUnfocused start, missionId: %{public}d, reason: %{public}d", missionId, reason);
+    HILOGI("NotifyMissionUnfocused start, missionId: %{public}d, reason: %{public}d. accountId: %{public}d.",
+        missionId, reason, accountId_);
     if (reason <= UnfocusedReason::MIN || reason >= UnfocusedReason::MAX) {
         HILOGE("unknown unfocused reason!");
         return;
@@ -165,7 +174,7 @@ void DMSContinueSendMgr::NotifyMissionUnfocused(const int32_t missionId, Unfocus
 
 int32_t DMSContinueSendMgr::GetMissionIdByBundleName(const std::string& bundleName, int32_t& missionId)
 {
-    HILOGI("start, bundleName: %{public}s", bundleName.c_str());
+    HILOGI("start, bundleName: %{public}s. accountId: %{public}d.", bundleName.c_str(), accountId_);
     std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
     auto iterItem = focusedMission_.find(bundleName);
     if (iterItem != focusedMission_.end()) {
@@ -208,8 +217,8 @@ void DMSContinueSendMgr::StartEvent()
 
 int32_t DMSContinueSendMgr::SendSoftbusEvent(uint16_t bundleNameId, uint8_t continueTypeId, uint8_t type)
 {
-    HILOGD("SendSoftbusEvent start, bundleNameId: %{public}u, continueTypeId: %{public}u",
-        bundleNameId, continueTypeId);
+    HILOGD("SendSoftbusEvent start, bundleNameId: %{public}u, continueTypeId: %{public}u. accountId: %{public}d.",
+        bundleNameId, continueTypeId, accountId_);
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(DMS_SEND_LEN);
     if (buffer->Data() == nullptr || buffer->Size() < DMS_SEND_LEN) {
         HILOGE("Failed to initialize DSchedDataBuffer");
@@ -227,6 +236,7 @@ int32_t DMSContinueSendMgr::SendSoftbusEvent(uint16_t bundleNameId, uint8_t cont
 
 void DMSContinueSendMgr::AddMMIListener()
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     if (mmiMonitorId_ >= 0) {
         HILOGD("MMI listener already exist, monitor id: %{public}d", mmiMonitorId_);
         return;
@@ -241,6 +251,7 @@ void DMSContinueSendMgr::AddMMIListener()
 
 void DMSContinueSendMgr::RemoveMMIListener()
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     if (mmiMonitorId_ < 0) {
         HILOGI("No MMI listener to be removed, monitor id: %{public}d", mmiMonitorId_);
         return;
@@ -261,7 +272,7 @@ void DMSContinueSendMgr::UserSwitchedRemoveMMIListener()
 
 int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId, FocusedReason reason)
 {
-    HILOGI("DealFocusedBusiness start, missionId: %{public}d", missionId);
+    HILOGI("DealFocusedBusiness start, missionId: %{public}d. accountId: %{public}d.", missionId, accountId_);
     AAFwk::MissionInfo info;
     auto abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
     if (abilityMgr != nullptr) {
@@ -313,6 +324,7 @@ int32_t DMSContinueSendMgr::DealFocusedBusiness(const int32_t missionId, Focused
 
 int32_t DMSContinueSendMgr::FocusedBusinessSendEvent(std::string bundleName, const std::string& abilityName)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     uint16_t bundleNameId = 0;
     int32_t ret = BundleManagerInternal::GetBundleNameId(bundleName, bundleNameId);
     if (ret != ERR_OK) {
@@ -336,6 +348,7 @@ int32_t DMSContinueSendMgr::FocusedBusinessSendEvent(std::string bundleName, con
 
 int32_t DMSContinueSendMgr::CheckContinueState(const int32_t missionId)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     auto abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
     if (abilityMgr == nullptr) {
         HILOGE("abilityMgr is null");
@@ -357,7 +370,7 @@ int32_t DMSContinueSendMgr::CheckContinueState(const int32_t missionId)
 
 int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, UnfocusedReason reason)
 {
-    HILOGI("DealUnfocusedBusiness start, missionId: %{public}d", missionId);
+    HILOGI("DealUnfocusedBusiness start, missionId: %{public}d. accountId: %{public}d.", missionId, accountId_);
     std::string bundleName;
     int32_t ret = GetBundleNameByMissionId(missionId, bundleName);
     if (ret != ERR_OK) {
@@ -406,6 +419,7 @@ int32_t DMSContinueSendMgr::DealUnfocusedBusiness(const int32_t missionId, Unfoc
 void DMSContinueSendMgr::EraseFocusedMission(const std::string& bundleName, const int32_t& missionId,
     const UnfocusedReason& reason)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     if (reason != UnfocusedReason::TIMEOUT) {
         std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
         focusedMission_.erase(bundleName);
@@ -416,6 +430,7 @@ void DMSContinueSendMgr::EraseFocusedMission(const std::string& bundleName, cons
 
 int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     if (screenOffHandler_ == nullptr) {
         HILOGE("screenOffHandler_ is nullptr");
         return INVALID_PARAMETERS_ERR;
@@ -455,6 +470,7 @@ int32_t DMSContinueSendMgr::SendScreenOffEvent(uint8_t type)
 
 int32_t DMSContinueSendMgr::GetBundleNameByMissionId(const int32_t missionId, std::string& bundleName)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     std::lock_guard<std::mutex> focusedMissionMapLock(eventMutex_);
     for (auto iterItem = focusedMission_.begin(); iterItem != focusedMission_.end(); iterItem++) {
         if (iterItem->second == missionId) {
@@ -467,6 +483,7 @@ int32_t DMSContinueSendMgr::GetBundleNameByMissionId(const int32_t missionId, st
 
 int32_t DMSContinueSendMgr::GetBundleNameByScreenOffInfo(const int32_t missionId, std::string& bundleName)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     if (screenOffHandler_ != nullptr && missionId == screenOffHandler_->GetMissionId()) {
         bundleName = screenOffHandler_->GetBundleName();
         if (bundleName.empty()) {
@@ -482,7 +499,7 @@ int32_t DMSContinueSendMgr::GetBundleNameByScreenOffInfo(const int32_t missionId
 
 int32_t DMSContinueSendMgr::GetAbilityNameByMissionId(const int32_t missionId, std::string& abilityName)
 {
-    HILOGI("start, missionId: %{public}d", missionId);
+    HILOGI("start, missionId: %{public}d. accountId: %{public}d.", missionId, accountId_);
     std::lock_guard<std::mutex> focusedMissionAbilityMapLock(eventMutex_);
     auto iterItem = focusedMissionAbility_.find(missionId);
     if (iterItem != focusedMissionAbility_.end()) {
@@ -502,6 +519,7 @@ int32_t DMSContinueSendMgr::GetAbilityNameByMissionId(const int32_t missionId, s
 
 bool DMSContinueSendMgr::IsContinue(const int32_t& missionId, const std::string& bundleName)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     if (missionId != info_.currentMissionId && info_.currentIsContinuable) {
         /*missionId and currentMissionId are not equal but currentMission can change,
             continue to not send unfocus broadcast*/
@@ -519,7 +537,8 @@ bool DMSContinueSendMgr::IsContinue(const int32_t& missionId, const std::string&
 int32_t DMSContinueSendMgr::SetMissionContinueState(const int32_t missionId,
     const AAFwk::ContinueState &state)
 {
-    HILOGI("SetMissionContinueState start, missionId: %{public}d, state: %{public}d", missionId, state);
+    HILOGI("SetMissionContinueState start, missionId: %{public}d, state: %{public}d. accountId: %{public}d.",
+        missionId, state, accountId_);
     auto feedfunc = [this, missionId, state]() {
         DealSetMissionContinueStateBusiness(missionId, state);
         if (state == AAFwk::ContinueState::CONTINUESTATE_ACTIVE && missionId == info_.currentMissionId &&
@@ -541,7 +560,8 @@ int32_t DMSContinueSendMgr::SetMissionContinueState(const int32_t missionId,
 int32_t DMSContinueSendMgr::DealSetMissionContinueStateBusiness(const int32_t missionId,
     const AAFwk::ContinueState &state)
 {
-    HILOGI("DealSetMissionContinueStateBusiness start, missionId: %{public}d, state: %{public}d", missionId, state);
+    HILOGI("DealSetMissionContinueStateBusiness start,missionId: %{public}d,state: %{public}d.accountId: %{public}d.",
+        missionId, state, accountId_);
     if (info_.currentMissionId != missionId) {
         HILOGE("mission is not focused, broadcast task abort, missionId: %{public}d", missionId);
         return INVALID_PARAMETERS_ERR;
@@ -577,6 +597,7 @@ int32_t DMSContinueSendMgr::DealSetMissionContinueStateBusiness(const int32_t mi
 int32_t DMSContinueSendMgr::GetBundleNameIdAndContinueTypeId(const int32_t missionId, const AAFwk::ContinueState& state,
     uint16_t& bundleNameId, uint8_t& continueTypeId)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     std::string bundleName;
     int32_t ret = GetBundleNameByMissionId(missionId, bundleName);
     if (ret != ERR_OK) {
@@ -612,13 +633,15 @@ int32_t DMSContinueSendMgr::GetBundleNameIdAndContinueTypeId(const int32_t missi
 
 void DMSContinueSendMgr::OnMMIEvent()
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     NotifyMissionFocused(INVALID_MISSION_ID, FocusedReason::MMI);
 }
 
 int32_t DMSContinueSendMgr::NotifyDeviceOnline()
 {
     HILOGD("NotifyDeviceOnline called");
-    if (DistributedSchedService::GetInstance().GetCurrentMissionId() <= 0) {
+    HILOGI("accountId: %{public}d.", accountId_);
+    if (GetCurrentMissionId() <= 0) {
         return INVALID_MISSION_ID;
     }
     NotifyMissionFocused(info_.currentMissionId, FocusedReason::ONLINE);
@@ -627,7 +650,7 @@ int32_t DMSContinueSendMgr::NotifyDeviceOnline()
 
 void DMSContinueSendMgr::OnDeviceScreenOff()
 {
-    HILOGI("OnDeviceScreenOff called");
+    HILOGI("OnDeviceScreenOff called. accountId: %{public}d.", accountId_);
     int32_t missionId = info_.currentMissionId;
     if (!info_.currentIsContinuable || CheckContinueState(missionId) != ERR_OK) {
         HILOGW("current mission is not continuable, ignore");
@@ -647,7 +670,7 @@ void DMSContinueSendMgr::OnDeviceScreenOff()
 
 void DMSContinueSendMgr::OnDeviceScreenOn()
 {
-    HILOGI("OnDeviceScreenOn called");
+    HILOGI("OnDeviceScreenOn called. accountId: %{public}d.", accountId_);
     auto feedfunc = [this]() {
         if (screenOffHandler_ != nullptr) {
             screenOffHandler_->OnDeviceScreenOn();
@@ -738,6 +761,7 @@ void DMSContinueSendMgr::ScreenOffHandler::SetScreenOffInfo(int32_t missionId, s
 int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
     UnfocusedReason reason, uint16_t& bundleNameId, uint8_t& continueTypeId)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     int32_t ret = BundleManagerInternal::GetBundleNameId(bundleName, bundleNameId);
     if (ret != ERR_OK) {
         HILOGE("Get unfocused bundleNameId failed, bundleNameId: %{public}u, ret: %{public}d", bundleNameId, ret);
@@ -757,6 +781,7 @@ int32_t DMSContinueSendMgr::GetAccessTokenIdSendEvent(std::string bundleName,
 int32_t DMSContinueSendMgr::SetStateSendEvent(const uint16_t bundleNameId, const uint8_t& continueTypeId,
     const AAFwk::ContinueState &state)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     if (state == AAFwk::ContinueState::CONTINUESTATE_INACTIVE) {
         RemoveMMIListener();
     } else {
@@ -779,7 +804,7 @@ int32_t DMSContinueSendMgr::SetStateSendEvent(const uint16_t bundleNameId, const
 
 void DMSContinueSendMgr::DeleteContinueLaunchMissionInfo(const int32_t missionId)
 {
-    HILOGD("called");
+    HILOGI("accountId: %{public}d.", accountId_);
     std::lock_guard<std::mutex> continueLaunchMissionMapLock(eventMutex_);
     if (continueLaunchMission_.empty()) {
         return;
@@ -795,7 +820,7 @@ void DMSContinueSendMgr::DeleteContinueLaunchMissionInfo(const int32_t missionId
 int32_t DMSContinueSendMgr::GetContinueLaunchMissionInfo(const int32_t missionId,
     ContinueLaunchMissionInfo& missionInfo)
 {
-    HILOGD("start, missionId: %{public}d", missionId);
+    HILOGD("start, missionId: %{public}d. accountId: %{public}d.", missionId, accountId_);
     std::lock_guard<std::mutex> continueLaunchMissionMapLock(eventMutex_);
     for (auto iter = continueLaunchMission_.begin(); iter != continueLaunchMission_.end(); iter++) {
         if (iter->second == missionId) {
@@ -810,6 +835,7 @@ int32_t DMSContinueSendMgr::GetContinueLaunchMissionInfo(const int32_t missionId
 
 bool DMSContinueSendMgr::UpdateContinueLaunchMission(const AAFwk::MissionInfo& info)
 {
+    HILOGI("accountId: %{public}d.", accountId_);
     auto flag = info.want.GetFlags();
     if ((flag & AAFwk::Want::FLAG_ABILITY_CONTINUATION) != AAFwk::Want::FLAG_ABILITY_CONTINUATION &&
         (flag & AAFwk::Want::FLAG_ABILITY_PREPARE_CONTINUATION) != AAFwk::Want::FLAG_ABILITY_PREPARE_CONTINUATION) {
