@@ -924,6 +924,7 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
         HILOGE("cmd is null");
         return INVALID_PARAMETERS_ERR;
     }
+
     if (UpdateElementInfo(cmd) != ERR_OK) {
         HILOGE("ExecuteContinueData UpdateElementInfo failed.");
     }
