@@ -89,7 +89,7 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_UnInit_001, TestSize.Level3)
      */
     MultiUserManager::GetInstance().Init();
     MultiUserManager::GetInstance().UnInit();
-    
+
     EXPECT_TRUE(MultiUserManager::GetInstance().sendMgrMap_.empty());
     EXPECT_TRUE(MultiUserManager::GetInstance().recvMgrMap_.empty());
 
@@ -155,7 +155,7 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_OnUserRemoved_001, TestSize.Leve
     int32_t accountId = 100;
     MultiUserManager::GetInstance().Init();
     MultiUserManager::GetInstance().OnUserRemoved(accountId);
-    
+
     auto sendMgr = MultiUserManager::GetInstance().sendMgrMap_.find(accountId);
     EXPECT_TRUE(sendMgr == MultiUserManager::GetInstance().sendMgrMap_.end());
     auto recvMgr = MultiUserManager::GetInstance().recvMgrMap_.find(accountId);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,13 +21,13 @@
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_sched_mission_manager.h"
+#include "mission/dms_continue_condition_manager.h"
 #include "softbus_adapter/softbus_adapter.h"
 #include "os_account_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-    constexpr static uint8_t DMS_UNFOCUSED_TYPE = 0x01;
     constexpr static int32_t INVALID_ID = 0;
     const std::string TAG = "MultiUserManager";
 }
@@ -62,7 +62,7 @@ void MultiUserManager::Init()
     if (!CheckRegSoftbusListener()) {
         RegisterSoftbusListener();
     }
-    sendMgr->NotifyDeviceOnline();
+    sendMgr->OnDeviceOnline();
     HILOGI("Init end.");
 }
 
@@ -105,19 +105,18 @@ void MultiUserManager::OnUserSwitched(int32_t accountId)
 {
     HILOGI("UserSwitched start");
     SoftbusAdapter::GetInstance().ReRegister();
-    auto recvMgr = GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
+    auto oldRecvMgr = GetCurrentRecvMgr();
+    if (oldRecvMgr == nullptr) {
         HILOGI("GetRecvMgr failed.");
         return;
     }
-    recvMgr->OnUserSwitch();
-    auto sendMgr = GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
+    oldRecvMgr->OnUserSwitch();
+    auto oldSendMgr = GetCurrentSendMgr();
+    if (oldSendMgr == nullptr) {
         HILOGI("GetSendMgr failed.");
         return;
     }
-    sendMgr->SendScreenOffEvent(DMS_UNFOCUSED_TYPE);
-    sendMgr->UserSwitchedRemoveMMIListener();
+    oldSendMgr->OnUserSwitched();
     currentUserId_ = accountId;
 
     AccountSA::OsAccountType type = GetOsAccountType(currentUserId_);
@@ -132,26 +131,27 @@ void MultiUserManager::OnUserSwitched(int32_t accountId)
         .IsContinueSwitchOn());
     DistributedSchedService::GetInstance()
         .RegisterDataShareObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY);
-    sendMgr = GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
+    auto newSendMgr = GetCurrentSendMgr();
+    if (newSendMgr == nullptr) {
         HILOGI("GetSendMgr failed.");
         return;
     }
-    recvMgr = GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
+    auto newRecvMgr = GetCurrentRecvMgr();
+    if (newRecvMgr == nullptr) {
         HILOGI("GetRecvMgr failed.");
         return;
     }
     if (DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
-        sendMgr->NotifyDeviceOnline();
+        newSendMgr->OnDeviceOnline();
         DSchedContinueManager::GetInstance().Init();
     } else {
-        recvMgr->OnContinueSwitchOff();
+        newRecvMgr->OnContinueSwitchOff();
         HILOGI("ICurrentContinueSwitch is off, %{public}d", DataShareManager::GetInstance()
             .IsCurrentContinueSwitchOn());
         DSchedContinueManager::GetInstance().UnInit();
     };
     UserSwitchedOnRegisterListenerCache();
+    DmsContinueConditionMgr::GetInstance().OnUserSwitched(accountId);
     HILOGI("UserSwitched end");
 }
 
@@ -203,6 +203,7 @@ void MultiUserManager::OnUserRemoved(int32_t accountId)
             }
         }
     }
+    DmsContinueConditionMgr::GetInstance().OnUserRemoved(accountId);
     HILOGI("UserRemoved end");
 }
 

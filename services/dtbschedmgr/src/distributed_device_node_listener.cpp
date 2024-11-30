@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
-#include "mission/dms_continue_send_manager.h"
+#include "mission/notification/dms_continue_send_manager.h"
 #include "multi_user_manager.h"
 
 namespace OHOS {
@@ -50,7 +50,7 @@ void DistributedDeviceNodeListener::OnDeviceOnline(const DistributedHardware::Dm
         HILOGI("GetSendMgr failed.");
         return;
     }
-    sendMgr->NotifyDeviceOnline();
+    sendMgr->OnDeviceOnline();
 }
 
 void DistributedDeviceNodeListener::OnDeviceOffline(const DistributedHardware::DmDeviceInfo& deviceInfo)

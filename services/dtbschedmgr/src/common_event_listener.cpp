@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,7 @@
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_bm_storage.h"
 #include "mission/dms_continue_recv_manager.h"
-#include "mission/dms_continue_send_manager.h"
+#include "mission/notification/dms_continue_send_manager.h"
 #include "multi_user_manager.h"
 #include "os_account_manager.h"
 #include "switch_status_dependency.h"
@@ -93,12 +93,13 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
 void CommonEventListener::HandleScreenLocked()
 {
     HILOGI("SCREEN_LOCKED");
+    DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_SCREEN_LOCK, true);
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
     if (sendMgr == nullptr) {
         HILOGE("SendMgr is nullptr.");
         return;
     }
-    sendMgr->OnDeviceScreenOff();
+    sendMgr->OnDeviceScreenLocked();
 }
 
 void CommonEventListener::HandleScreenOff()
@@ -112,11 +113,12 @@ void CommonEventListener::HandleScreenOff()
     }
 
 #ifdef DMS_ICON_HOLD_ON
+    DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_SCREEN_LOCK, true);
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
     if (sendMgr == nullptr) {
         HILOGE("SendMgr is nullptr.");
     } else {
-        sendMgr->OnDeviceScreenOff();
+        sendMgr->OnDeviceScreenLocked();
     }
 #endif
 }
@@ -124,24 +126,20 @@ void CommonEventListener::HandleScreenOff()
 void CommonEventListener::HandleScreenUnLocked()
 {
     HILOGI("SCREEN_UNLOCKED");
-    auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        HILOGE("SendMgr is nullptr.");
-        return;
-    }
-    sendMgr->OnDeviceScreenOn();
+    DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_SCREEN_LOCK, false);
 }
 
 void CommonEventListener::HandleScreenOn()
 {
     HILOGI("SCREEN_ON");
 #ifdef DMS_ICON_HOLD_ON
+    DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_SCREEN_LOCK, false);
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
     if (sendMgr == nullptr) {
         HILOGE("SendMgr is nullptr.");
         return;
     }
-    sendMgr->OnDeviceScreenOn();
+    sendMgr->OnDeviceOnline();
 #endif
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,12 @@
 #ifndef OHOS_DISTRIBUTED_MISSION_FOCUSED_LISTENER_H
 #define OHOS_DISTRIBUTED_MISSION_FOCUSED_LISTENER_H
 
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <cstdint>
+
+#include "event_handler.h"
 #include "mission_listener_stub.h"
 
 namespace OHOS {
@@ -90,6 +96,16 @@ public:
      * @param missionId, mission Id.
      */
     virtual void OnMissionLabelUpdated(int32_t missionId) override;
+
+    void Init();
+    void UnInit();
+
+private:
+    void StartEvent();
+    std::thread eventThread_;
+    std::condition_variable eventCon_;
+    std::mutex eventMutex_;
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

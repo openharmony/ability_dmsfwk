@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "mission/dms_continue_condition_manager.h"
 #include "mission/wifi_state_adapter.h"
 #include "dtbschedmgr_log.h"
 
@@ -32,6 +33,7 @@ bool WifiStateAdapter::IsWifiActive()
 void WifiStateAdapter::UpdateWifiState(bool isWifiActive)
 {
     isWifiActive_ = isWifiActive;
+    DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_WIFI, isWifiActive_);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
