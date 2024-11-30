@@ -241,6 +241,9 @@ void DSchedContinueManager::HandleContinueMission(const DSchedContinueInfo& cont
     std::string srcDeviceId = continueInfo.sourceDeviceId_;
     std::string dstDeviceId = continueInfo.sinkDeviceId_;
     std::string srcBundleName = continueInfo.sourceBundleName_;
+    if (srcBundleName.empty()) {
+        srcBundleName = continueInfo.sinkBundleName_;
+    }
     std::string bundleName = continueInfo.sinkBundleName_;
     std::string continueType = continueInfo.continueType_;
     HILOGI("start, srcDeviceId: %{public}s. dstDeviceId: %{public}s. bundleName: %{public}s."
