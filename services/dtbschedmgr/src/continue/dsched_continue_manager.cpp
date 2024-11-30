@@ -27,8 +27,7 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_bm_storage.h"
-#include "mission/dms_continue_send_manager.h"
-#include "mission/dms_continue_recv_manager.h"
+#include "mission/dms_continue_condition_manager.h"
 #include "multi_user_manager.h"
 
 namespace OHOS {
@@ -209,15 +208,12 @@ int32_t DSchedContinueManager::ContinueMission(const DSchedContinueInfo& continu
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     if (localDevId == srcDeviceId) {
         int32_t missionId = -1;
-        auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-        if (sendMgr == nullptr) {
-            HILOGI("GetSendMgr failed.");
-            return DMS_NOT_GET_MANAGER;
-        }
-        int32_t ret = sendMgr->GetMissionIdByBundleName(continueInfo.sinkBundleName_, missionId);
+        int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
+        int32_t ret = DmsContinueConditionMgr::GetInstance().GetMissionIdByBundleName(
+            currentAccountId, continueInfo.sinkBundleName_, missionId);
         if (ret != ERR_OK) {
             HILOGE("get missionId fail, ret %{public}d.", ret);
-            return INVALID_PARAMETERS_ERR;
+            return ret;
         }
     }
 #endif
@@ -313,7 +309,8 @@ void DSchedContinueManager::HandleContinueMissionWithBundleName(DSchedContinueIn
             HILOGE("a same continue task is already in progress.");
             return;
         }
-        auto newContinue = std::make_shared<DSchedContinue>(subType, direction, callback, info);
+        int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
+        auto newContinue = std::make_shared<DSchedContinue>(subType, direction, callback, info, currentAccountId);
         newContinue->Init();
         continues_.insert(std::make_pair(info, newContinue));
 #ifdef DMSFWK_ALL_CONNECT_MGR
@@ -519,19 +516,21 @@ void DSchedContinueManager::NotifyTerminateContinuation(const int32_t missionId)
             return;
         }
 
-        ContinueLaunchMissionInfo missionInfo;
-        auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-        if (sendMgr == nullptr) {
-            HILOGI("GetSendMgr failed.");
-            return;
-        }
-        int32_t ret = sendMgr->GetContinueLaunchMissionInfo(missionId, missionInfo);
+        MissionStatus status;
+        int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
+        int32_t ret = DmsContinueConditionMgr::GetInstance().GetMissionStatus(currentAccountId, missionId, status);
         if (ret != ERR_OK) {
             HILOGE("get continueLaunchMissionInfo failed, missionId %{public}d", missionId);
             return;
         }
+        auto flag = status.launchFlag;
+        if ((flag & AAFwk::Want::FLAG_ABILITY_CONTINUATION) != AAFwk::Want::FLAG_ABILITY_CONTINUATION &&
+            (flag & AAFwk::Want::FLAG_ABILITY_PREPARE_CONTINUATION) != AAFwk::Want::FLAG_ABILITY_PREPARE_CONTINUATION) {
+            HILOGI("missionId %{public}d not start by continue, ignore", missionId);
+            return;
+        }
         HILOGI("alive missionInfo bundleName is %{public}s, abilityName is %{public}s",
-            missionInfo.bundleName.c_str(), missionInfo.abilityName.c_str());
+            status.bundleName.c_str(), status.abilityName.c_str());
         for (auto iter = continues_.begin(); iter != continues_.end(); iter++) {
             if (iter->second == nullptr) {
                 break;
@@ -540,9 +539,9 @@ void DSchedContinueManager::NotifyTerminateContinuation(const int32_t missionId)
             auto continueInfo = iter->second->GetContinueInfo();
             HILOGI("continueInfo bundleName is %{public}s, abilityName is %{public}s",
                 continueInfo.sinkBundleName_.c_str(), continueInfo.sinkAbilityName_.c_str());
-            if (missionInfo.bundleName == continueInfo.sinkBundleName_
-                && missionInfo.abilityName == continueInfo.sinkAbilityName_) {
-                HILOGE("Excute onContinueEnd");
+            if (status.bundleName == continueInfo.sinkBundleName_
+                && status.abilityName == continueInfo.sinkAbilityName_) {
+                HILOGE("Execute onContinueEnd");
                 iter->second->OnContinueEnd(CONTINUE_SINK_ABILITY_TERMINATED);
                 return;
             }
@@ -682,7 +681,8 @@ void DSchedContinueManager::NotifyContinueDataRecv(int32_t sessionId, int32_t co
             return;
         }
 
-        auto newContinue = std::make_shared<DSchedContinue>(startCmd, sessionId);
+        int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
+        auto newContinue = std::make_shared<DSchedContinue>(startCmd, sessionId, currentAccountId);
         newContinue->Init();
         continues_.insert(std::make_pair(newContinue->GetContinueInfo(), newContinue));
 

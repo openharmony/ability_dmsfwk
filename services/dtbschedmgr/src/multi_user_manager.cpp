@@ -16,39 +16,37 @@
 
 #include "adapter/mmi_adapter.h"
 #include "datashare_manager.h"
+#include "dsched_continue_manager.h"
 #include "distributed_sched_service.h"
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_sched_mission_manager.h"
+#include "mission/dms_continue_condition_manager.h"
 #include "softbus_adapter/softbus_adapter.h"
 #include "os_account_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-    constexpr static uint8_t DMS_UNFOCUSED_TYPE = 0x01;
     constexpr static int32_t INVALID_ID = 0;
     const std::string TAG = "MultiUserManager";
 }
 
 MultiUserManager& MultiUserManager::GetInstance()
 {
-    static auto instance = new MultiUserManager();
-    return *instance;
+    static MultiUserManager instance;
+    return instance;
 }
 
 MultiUserManager::MultiUserManager()
 {
     HILOGI("Start.");
-    if (currentUserId_ <= 0) {
-        Init();
-    }
+    currentUserId_ = GetForegroundUser();
 }
 
 void MultiUserManager::Init()
 {
     HILOGI("Init start.");
-    currentUserId_ = GetForegroundUser();
     MMIAdapter::GetInstance().Init();
     SoftbusAdapter::GetInstance().Init();
     auto sendMgr = GetCurrentSendMgr();
@@ -64,6 +62,7 @@ void MultiUserManager::Init()
     if (!CheckRegSoftbusListener()) {
         RegisterSoftbusListener();
     }
+    sendMgr->OnDeviceOnline();
     HILOGI("Init end.");
 }
 
@@ -82,7 +81,6 @@ void MultiUserManager::UnInit()
                     sendMgrMap_.erase(it++);
                     continue;
                 }
-                it->second->UnInit();
                 sendMgrMap_.erase(it++);
             }
         }
@@ -96,7 +94,6 @@ void MultiUserManager::UnInit()
                     recvMgrMap_.erase(it++);
                     continue;
                 }
-                it->second->UnInit();
                 recvMgrMap_.erase(it++);
             }
         }
@@ -107,19 +104,18 @@ void MultiUserManager::UnInit()
 void MultiUserManager::OnUserSwitched(int32_t accountId)
 {
     HILOGI("UserSwitched start");
-    auto recvMgr = GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
+    auto oldRecvMgr = GetCurrentRecvMgr();
+    if (oldRecvMgr == nullptr) {
         HILOGI("GetRecvMgr failed.");
         return;
     }
-    recvMgr->OnUserSwitch();
-    auto sendMgr = GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
+    oldRecvMgr->OnUserSwitch();
+    auto oldSendMgr = GetCurrentSendMgr();
+    if (oldSendMgr == nullptr) {
         HILOGI("GetSendMgr failed.");
         return;
     }
-    sendMgr->SendScreenOffEvent(DMS_UNFOCUSED_TYPE);
-    sendMgr->UserSwitchedRemoveMMIListener();
+    oldSendMgr->OnUserSwitched();
     currentUserId_ = accountId;
 
     AccountSA::OsAccountType type = GetOsAccountType(currentUserId_);
@@ -132,22 +128,29 @@ void MultiUserManager::OnUserSwitched(int32_t accountId)
 
     DataShareManager::GetInstance().SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance()
         .IsContinueSwitchOn());
-    sendMgr = GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
+    DistributedSchedService::GetInstance()
+        .RegisterDataShareObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY);
+    auto newSendMgr = GetCurrentSendMgr();
+    if (newSendMgr == nullptr) {
         HILOGI("GetSendMgr failed.");
         return;
     }
-    recvMgr = GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
+    auto newRecvMgr = GetCurrentRecvMgr();
+    if (newRecvMgr == nullptr) {
         HILOGI("GetRecvMgr failed.");
         return;
     }
-    if (!DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
-        recvMgr->OnContinueSwitchOff();
+    if (DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
+        newSendMgr->OnDeviceOnline();
+        DSchedContinueManager::GetInstance().Init();
+    } else {
+        newRecvMgr->OnContinueSwitchOff();
         HILOGI("ICurrentContinueSwitch is off, %{public}d", DataShareManager::GetInstance()
             .IsCurrentContinueSwitchOn());
+        DSchedContinueManager::GetInstance().UnInit();
     };
     UserSwitchedOnRegisterListenerCache();
+    DmsContinueConditionMgr::GetInstance().OnUserSwitched(accountId);
     HILOGI("UserSwitched end");
 }
 
@@ -186,9 +189,6 @@ void MultiUserManager::OnUserRemoved(int32_t accountId)
         if (!sendMgrMap_.empty()) {
             auto it = sendMgrMap_.find(accountId);
             if (it != sendMgrMap_.end()) {
-                if (it->second != nullptr) {
-                    it->second->UnInit();
-                }
                 sendMgrMap_.erase(it);
             }
         }
@@ -198,13 +198,11 @@ void MultiUserManager::OnUserRemoved(int32_t accountId)
         if (!recvMgrMap_.empty()) {
             auto it = recvMgrMap_.find(accountId);
             if (it != recvMgrMap_.end()) {
-                if (it->second != nullptr) {
-                    it->second->UnInit();
-                }
                 recvMgrMap_.erase(it);
             }
         }
     }
+    DmsContinueConditionMgr::GetInstance().OnUserRemoved(accountId);
     HILOGI("UserRemoved end");
 }
 
@@ -222,7 +220,7 @@ int32_t MultiUserManager::CreateNewSendMgrLocked()
 {
     HILOGI("CreateNewSendMgr begin. accountId: %{public}d.", currentUserId_);
     auto sendMgr = std::make_shared<DMSContinueSendMgr>();
-    sendMgr->Init();
+    sendMgr->Init(currentUserId_);
     sendMgrMap_.emplace(currentUserId_, sendMgr);
     HILOGI("CreateNewSendMgr end.");
     return ERR_OK;
@@ -232,9 +230,29 @@ int32_t MultiUserManager::CreateNewRecvMgrLocked()
 {
     HILOGI("CreateNewRecvMgr begin. accountId: %{public}d.", currentUserId_);
     auto recvMgr = std::make_shared<DMSContinueRecvMgr>();
-    recvMgr->Init();
+    recvMgr->Init(currentUserId_);
     recvMgrMap_.emplace(currentUserId_, recvMgr);
     HILOGI("CreateNewRecvMgr end.");
+    return ERR_OK;
+}
+
+int32_t MultiUserManager::CreateNewSendMgrLocked(int32_t accountId)
+{
+    HILOGI("CreateNewSendMgr by accountid begin. accountId: %{public}d.", accountId);
+    auto sendMgr = std::make_shared<DMSContinueSendMgr>();
+    sendMgr->Init(accountId);
+    sendMgrMap_.emplace(accountId, sendMgr);
+    HILOGI("CreateNewSendMgr by accountid end.");
+    return ERR_OK;
+}
+
+int32_t MultiUserManager::CreateNewRecvMgrLocked(int32_t accountId)
+{
+    HILOGI("CreateNewRecvMgr by accountid begin. accountId: %{public}d.", accountId);
+    auto recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    recvMgr->Init(accountId);
+    recvMgrMap_.emplace(accountId, recvMgr);
+    HILOGI("CreateNewRecvMgr by accountid end.");
     return ERR_OK;
 }
 
@@ -270,7 +288,7 @@ std::shared_ptr<DMSContinueSendMgr> MultiUserManager::GetSendMgrByCallingUid(int
     std::lock_guard<std::mutex> lock(sendMutex_);
     if (sendMgrMap_.empty() || sendMgrMap_.find(accountId) == sendMgrMap_.end()) {
         HILOGI("sendMgr need to create.");
-        CreateNewSendMgrLocked();
+        CreateNewSendMgrLocked(accountId);
     }
     auto cur = sendMgrMap_.find(accountId);
     return cur->second;
@@ -284,7 +302,7 @@ std::shared_ptr<DMSContinueRecvMgr> MultiUserManager::GetRecvMgrByCallingUid(int
     std::lock_guard<std::mutex> lock(recvMutex_);
     if (recvMgrMap_.empty() || recvMgrMap_.find(accountId) == recvMgrMap_.end()) {
         HILOGI("recvMgr need to create.");
-        CreateNewRecvMgrLocked();
+        CreateNewRecvMgrLocked(accountId);
     }
     auto cur = recvMgrMap_.find(accountId);
     return cur->second;

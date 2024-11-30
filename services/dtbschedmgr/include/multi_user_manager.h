@@ -19,7 +19,7 @@
 #include <map>
 
 #include "mission/dms_continue_recv_manager.h"
-#include "mission/dms_continue_send_manager.h"
+#include "mission/notification/dms_continue_send_manager.h"
 #include "switch_status_dependency.h"
 #include "single_instance.h"
 
@@ -44,6 +44,8 @@ public:
     AccountSA::OsAccountType GetOsAccountType(int32_t &accountId);
     int32_t CreateNewSendMgrLocked();
     int32_t CreateNewRecvMgrLocked();
+    int32_t CreateNewSendMgrLocked(int32_t accountId);
+    int32_t CreateNewRecvMgrLocked(int32_t accountId);
     std::shared_ptr<DMSContinueSendMgr> GetCurrentSendMgr();
     std::shared_ptr<DMSContinueRecvMgr> GetCurrentRecvMgr();
     std::shared_ptr<DMSContinueSendMgr> GetSendMgrByCallingUid(int32_t callingUid);

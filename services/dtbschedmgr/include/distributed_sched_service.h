@@ -215,6 +215,7 @@ public:
     int32_t CheckTargetPermission4DiffBundle(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
     ErrCode QueryOsAccount(int32_t& activeAccountId);
+    void RegisterDataShareObserver(const std::string& key);
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     bool CheckRemoteOsType(const std::string& netwokId) override;

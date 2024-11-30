@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "mission/dms_continue_condition_manager.h"
 #include "mission/wifi_state_adapter.h"
 #include "dtbschedmgr_log.h"
 
@@ -32,6 +33,7 @@ bool WifiStateAdapter::IsWifiActive()
 void WifiStateAdapter::UpdateWifiState(bool isWifiActive)
 {
     isWifiActive_ = isWifiActive;
+    DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_WIFI, isWifiActive_);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
