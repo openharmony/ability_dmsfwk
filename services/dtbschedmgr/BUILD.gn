@@ -34,6 +34,7 @@ config("distributed_sched_config") {
     "include/continue/state/source_state",
     "include/continue/state/sink_state",
     "include/distributedWant",
+    "include/distributedWantV2",
     "include/softbus_adapter/transport",
     "include/softbus_adapter/allconnectmgr",
   ]
@@ -121,6 +122,7 @@ ohos_shared_library("distributedschedsvr") {
     "src/distributedWant/distributed_want.cpp",
     "src/distributedWant/distributed_want_params.cpp",
     "src/distributedWant/distributed_want_params_wrapper.cpp",
+    "src/distributedWantV2/distributed_want_v2.cpp",
     "src/distributed_device_node_listener.cpp",
     "src/distributed_event_died_listener.cpp",
     "src/distributed_sched_adapter.cpp",
