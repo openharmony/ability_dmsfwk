@@ -154,6 +154,10 @@ private:
     int32_t ExecuteContinueReply();
     int32_t ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data);
     int32_t ExecuteContinueData(std::shared_ptr<DSchedContinueDataCmd> cmd);
+    int32_t UpdateElementInfo(std::shared_ptr<DSchedContinueDataCmd> cmd);
+    void FindSinkContinueAbilityInfo(const std::string &srcModuleName, const std::string &srcContinueType,
+        std::vector<DmsAbilityInfo> &dmsAbilityInfos, std::vector<DmsAbilityInfo> &result);
+    void ContinueTypeFormat(std::string &continueType);
     int32_t ExecuteNotifyComplete(int32_t result);
     int32_t ExecuteContinueEnd(int32_t result);
     int32_t ExecuteContinueError(int32_t result);
