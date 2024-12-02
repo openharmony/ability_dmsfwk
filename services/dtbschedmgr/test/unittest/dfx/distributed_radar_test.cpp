@@ -24,6 +24,7 @@ namespace DistributedSchedule {
 namespace {
     const std::string DEVICE_ID = "DeviceId";
     const std::string BUNDLE_NAME = "BundleName";
+    constexpr size_t SIZE = 12;
 }
 
 void DistributedRadarTest::SetUpTestCase()
@@ -671,6 +672,28 @@ HWTEST_F(DistributedRadarTest, NormalFocusedGetAccessTokenIdRes_001, TestSize.Le
     ret = DmsRadar::GetInstance().NormalFocusedGetAccessTokenIdRes(FUNC, ERR_OK);
     EXPECT_EQ(ret, true);
     DTEST_LOG << "DistributedRadarTest NormalFocusedGetAccessTokenIdRes_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetAnonyUdid_001
+ * @tc.desc: check GetAnonyUdid
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedRadarTest, GetAnonyUdid_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedRadarTest GetAnonyUdid_001 begin" << std::endl;
+    std::string udid;
+    std::string ret = DmsRadar::GetInstance().GetAnonyUdid(udid);
+    EXPECT_EQ(ret, "");
+
+    udid = "***";
+    ret = DmsRadar::GetInstance().GetAnonyUdid(udid);
+    EXPECT_EQ(ret, "");
+
+    std::string udid1(SIZE, '*');
+    ret = DmsRadar::GetInstance().GetAnonyUdid(udid1);
+    EXPECT_NE(ret, "");
+    DTEST_LOG << "DistributedRadarTest GetAnonyUdid_001 end" << std::endl;
 }
 }
 }
