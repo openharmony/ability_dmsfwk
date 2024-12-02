@@ -125,7 +125,8 @@ public:
         std::weak_ptr<DMSContinueSendMgr> dmsContinueSendMgr_;
     };
 
-    void Init();
+    ~DMSContinueSendMgr();
+    void Init(int32_t accountId);
     void UnInit();
     void NotifyMissionFocused(const int32_t missionId, FocusedReason reason);
     void NotifyMissionUnfocused(const int32_t missionId, UnfocusedReason reason);
@@ -181,6 +182,7 @@ private:
     std::map<ContinueLaunchMissionInfo, int32_t> continueLaunchMission_;
     // Record the missionId and bundle name of the previous focused application
     LastFocusedMissionInfo lastFocusedMissionInfo_ = { INVALID_MISSION_ID, "" };
+    int32_t accountId_ = -1;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

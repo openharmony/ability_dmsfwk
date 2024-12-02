@@ -16,6 +16,7 @@
 
 #include "adapter/mmi_adapter.h"
 #include "datashare_manager.h"
+#include "dsched_continue_manager.h"
 #include "distributed_sched_service.h"
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_log.h"
@@ -33,22 +34,19 @@ namespace {
 
 MultiUserManager& MultiUserManager::GetInstance()
 {
-    static auto instance = new MultiUserManager();
-    return *instance;
+    static MultiUserManager instance;
+    return instance;
 }
 
 MultiUserManager::MultiUserManager()
 {
     HILOGI("Start.");
-    if (currentUserId_ <= 0) {
-        Init();
-    }
+    currentUserId_ = GetForegroundUser();
 }
 
 void MultiUserManager::Init()
 {
     HILOGI("Init start.");
-    currentUserId_ = GetForegroundUser();
     MMIAdapter::GetInstance().Init();
     SoftbusAdapter::GetInstance().Init();
     auto sendMgr = GetCurrentSendMgr();
@@ -64,6 +62,7 @@ void MultiUserManager::Init()
     if (!CheckRegSoftbusListener()) {
         RegisterSoftbusListener();
     }
+    sendMgr->NotifyDeviceOnline();
     HILOGI("Init end.");
 }
 
@@ -82,7 +81,6 @@ void MultiUserManager::UnInit()
                     sendMgrMap_.erase(it++);
                     continue;
                 }
-                it->second->UnInit();
                 sendMgrMap_.erase(it++);
             }
         }
@@ -96,7 +94,6 @@ void MultiUserManager::UnInit()
                     recvMgrMap_.erase(it++);
                     continue;
                 }
-                it->second->UnInit();
                 recvMgrMap_.erase(it++);
             }
         }
@@ -139,16 +136,19 @@ void MultiUserManager::OnUserSwitched(int32_t accountId)
         HILOGI("GetSendMgr failed.");
         return;
     }
-    sendMgr->NotifyDeviceOnline();
     recvMgr = GetCurrentRecvMgr();
     if (recvMgr == nullptr) {
         HILOGI("GetRecvMgr failed.");
         return;
     }
-    if (!DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
+    if (DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
+        sendMgr->NotifyDeviceOnline();
+        DSchedContinueManager::GetInstance().Init();
+    } else {
         recvMgr->OnContinueSwitchOff();
         HILOGI("ICurrentContinueSwitch is off, %{public}d", DataShareManager::GetInstance()
             .IsCurrentContinueSwitchOn());
+        DSchedContinueManager::GetInstance().UnInit();
     };
     UserSwitchedOnRegisterListenerCache();
     HILOGI("UserSwitched end");
@@ -189,9 +189,6 @@ void MultiUserManager::OnUserRemoved(int32_t accountId)
         if (!sendMgrMap_.empty()) {
             auto it = sendMgrMap_.find(accountId);
             if (it != sendMgrMap_.end()) {
-                if (it->second != nullptr) {
-                    it->second->UnInit();
-                }
                 sendMgrMap_.erase(it);
             }
         }
@@ -201,9 +198,6 @@ void MultiUserManager::OnUserRemoved(int32_t accountId)
         if (!recvMgrMap_.empty()) {
             auto it = recvMgrMap_.find(accountId);
             if (it != recvMgrMap_.end()) {
-                if (it->second != nullptr) {
-                    it->second->UnInit();
-                }
                 recvMgrMap_.erase(it);
             }
         }
@@ -225,7 +219,7 @@ int32_t MultiUserManager::CreateNewSendMgrLocked()
 {
     HILOGI("CreateNewSendMgr begin. accountId: %{public}d.", currentUserId_);
     auto sendMgr = std::make_shared<DMSContinueSendMgr>();
-    sendMgr->Init();
+    sendMgr->Init(currentUserId_);
     sendMgrMap_.emplace(currentUserId_, sendMgr);
     HILOGI("CreateNewSendMgr end.");
     return ERR_OK;
@@ -235,35 +229,41 @@ int32_t MultiUserManager::CreateNewRecvMgrLocked()
 {
     HILOGI("CreateNewRecvMgr begin. accountId: %{public}d.", currentUserId_);
     auto recvMgr = std::make_shared<DMSContinueRecvMgr>();
-    recvMgr->Init();
+    recvMgr->Init(currentUserId_);
     recvMgrMap_.emplace(currentUserId_, recvMgr);
     HILOGI("CreateNewRecvMgr end.");
+    return ERR_OK;
+}
+
+int32_t MultiUserManager::CreateNewSendMgrLocked(int32_t accountId)
+{
+    HILOGI("CreateNewSendMgr by accountid begin. accountId: %{public}d.", accountId);
+    auto sendMgr = std::make_shared<DMSContinueSendMgr>();
+    sendMgr->Init(accountId);
+    sendMgrMap_.emplace(accountId, sendMgr);
+    HILOGI("CreateNewSendMgr by accountid end.");
+    return ERR_OK;
+}
+
+int32_t MultiUserManager::CreateNewRecvMgrLocked(int32_t accountId)
+{
+    HILOGI("CreateNewRecvMgr by accountid begin. accountId: %{public}d.", accountId);
+    auto recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    recvMgr->Init(accountId);
+    recvMgrMap_.emplace(accountId, recvMgr);
+    HILOGI("CreateNewRecvMgr by accountid end.");
     return ERR_OK;
 }
 
 std::shared_ptr<DMSContinueSendMgr> MultiUserManager::GetCurrentSendMgr()
 {
     HILOGI("GetCurrentSendMgr. accountId: %{public}d.", currentUserId_);
-    bool isCreate = false;
-    {
-        std::lock_guard<std::mutex> lock(sendMutex_);
-        if (sendMgrMap_.empty() || sendMgrMap_.find(currentUserId_) == sendMgrMap_.end()) {
-            HILOGI("sendMgr need to create.");
-            isCreate = true;
-            CreateNewSendMgrLocked();
-        }
+    std::lock_guard<std::mutex> lock(sendMutex_);
+    if (sendMgrMap_.empty() || sendMgrMap_.find(currentUserId_) == sendMgrMap_.end()) {
+        HILOGI("sendMgr need to create.");
+        CreateNewSendMgrLocked();
     }
     auto cur = sendMgrMap_.find(currentUserId_);
-    if (isCreate) {
-        int32_t missionId = DistributedSchedService::GetInstance().GetCurrentMissionId();
-        if (missionId <= 0) {
-            HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
-            return cur->second;
-        }
-        if (cur != sendMgrMap_.end() && cur->second != nullptr) {
-            cur->second->NotifyMissionFocused(missionId, FocusedReason::INIT);
-        }
-    }
     return cur->second;
 }
 
@@ -284,26 +284,12 @@ std::shared_ptr<DMSContinueSendMgr> MultiUserManager::GetSendMgrByCallingUid(int
     int32_t accountId = -1;
     OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, accountId);
     HILOGI("GetSendMgrByCallingUid. accountId: %{public}d , callingUid: %{public}d.", accountId, callingUid);
-    bool isCreate = false;
-    {
-        std::lock_guard<std::mutex> lock(sendMutex_);
-        if (sendMgrMap_.empty() || sendMgrMap_.find(accountId) == sendMgrMap_.end()) {
-            HILOGI("sendMgr need to create.");
-            isCreate = true;
-            CreateNewSendMgrLocked();
-        }
+    std::lock_guard<std::mutex> lock(sendMutex_);
+    if (sendMgrMap_.empty() || sendMgrMap_.find(accountId) == sendMgrMap_.end()) {
+        HILOGI("sendMgr need to create.");
+        CreateNewSendMgrLocked(accountId);
     }
     auto cur = sendMgrMap_.find(accountId);
-    if (isCreate) {
-        int32_t missionId = DistributedSchedService::GetInstance().GetCurrentMissionId();
-        if (missionId <= 0) {
-            HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
-            return cur->second;
-        }
-        if (cur != sendMgrMap_.end() && cur->second != nullptr) {
-            cur->second->NotifyMissionFocused(missionId, FocusedReason::INIT);
-        }
-    }
     return cur->second;
 }
 
@@ -315,7 +301,7 @@ std::shared_ptr<DMSContinueRecvMgr> MultiUserManager::GetRecvMgrByCallingUid(int
     std::lock_guard<std::mutex> lock(recvMutex_);
     if (recvMgrMap_.empty() || recvMgrMap_.find(accountId) == recvMgrMap_.end()) {
         HILOGI("recvMgr need to create.");
-        CreateNewRecvMgrLocked();
+        CreateNewRecvMgrLocked(accountId);
     }
     auto cur = recvMgrMap_.find(accountId);
     return cur->second;

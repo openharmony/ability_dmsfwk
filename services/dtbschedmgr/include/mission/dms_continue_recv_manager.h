@@ -75,7 +75,8 @@ public:
     constexpr static uint8_t CONTINUE_SHIFT_04 = 0x04;
     constexpr static int32_t INVALID_MISSION_ID = -1;
 
-    void Init();
+    ~DMSContinueRecvMgr();
+    void Init(int32_t accountId);
     void UnInit();
     void NotifyDataRecv(std::string& senderNetworkId, uint8_t* payload, uint32_t dataLen);
     int32_t RegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj);
@@ -118,6 +119,7 @@ private:
     std::mutex eventMutex_;
     std::mutex iconMutex_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
+    int32_t accountId_ = -1;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
