@@ -27,6 +27,7 @@ class DistributedOperationBuilder;
 class DistributedOperation : public Parcelable {
     friend class DistributedOperationBuilder;
     friend class DistributedWant;
+    friend class DistributedWantV2;
 
 public:
     DistributedOperation();
