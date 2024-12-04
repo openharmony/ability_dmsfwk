@@ -502,7 +502,7 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueDataTask002, TestSize.Level3
     auto event = AppExecFwk::InnerEvent::Get(DSCHED_CONTINUE_DATA_EVENT, data, 0);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
     usleep(WAITTIME);
-    EXPECT_CALL(*mockStateTest_, GetLocalDeviceId(_)).WillOnce(Return(true));
+    EXPECT_CALL(*mockStateTest_, GetLocalDeviceId(_)).WillOnce(Return(true)).WillOnce(Return(true));
     int32_t ret = dataStateTest_->DoContinueDataTask(dContinue, event);
     EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueDataStateTest SinkDoContinueDataTask002 end" << std::endl;
