@@ -618,7 +618,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_1, TestSize.Level0)
 
     auto cmd = std::make_shared<DSchedContinueDataCmd>();
 
-    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true)).WillOnce(Return(true));
     int32_t ret = conti->ExecuteContinueData(cmd);
     EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
 
