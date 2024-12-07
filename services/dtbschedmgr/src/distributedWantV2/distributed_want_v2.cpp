@@ -301,11 +301,12 @@ std::vector<bool> DistributedWantV2::GetBoolArrayParam(const std::string& key) c
     AAFwk::IArray* ao = AAFwk::IArray::Query(value);
     if (ao != nullptr && AAFwk::Array::IsBooleanArray(ao)) {
         auto func = [&](AAFwk::IInterface* object) {
-            if (object != nullptr) {
-                AAFwk::IBoolean* value = AAFwk::IBoolean::Query(object);
-                if (value != nullptr) {
-                    array.push_back(AAFwk::Boolean::Unbox(value));
-                }
+            if (object == nullptr) {
+                return;
+            }
+            AAFwk::IBoolean* value = AAFwk::IBoolean::Query(object);
+            if (value != nullptr) {
+                array.push_back(AAFwk::Boolean::Unbox(value));
             }
         };
         AAFwk::Array::ForEach(ao, func);
@@ -358,11 +359,12 @@ std::vector<AAFwk::byte> DistributedWantV2::GetByteArrayParam(const std::string&
     AAFwk::IArray* ao = AAFwk::IArray::Query(value);
     if (ao != nullptr && AAFwk::Array::IsByteArray(ao)) {
         auto func = [&](AAFwk::IInterface* object) {
-            if (object != nullptr) {
-                AAFwk::IByte* value = AAFwk::IByte::Query(object);
-                if (value != nullptr) {
-                    array.push_back(AAFwk::Byte::Unbox(value));
-                }
+            if (object == nullptr) {
+                return;
+            }
+            AAFwk::IByte* value = AAFwk::IByte::Query(object);
+            if (value != nullptr) {
+                array.push_back(AAFwk::Byte::Unbox(value));
             }
         };
         AAFwk::Array::ForEach(ao, func);
@@ -407,11 +409,12 @@ std::vector<AAFwk::zchar> DistributedWantV2::GetCharArrayParam(const std::string
     AAFwk::IArray* ao = AAFwk::IArray::Query(value);
     if (ao != nullptr && AAFwk::Array::IsCharArray(ao)) {
         auto func = [&](AAFwk::IInterface* object) {
-            if (object != nullptr) {
-                AAFwk::IChar* value = AAFwk::IChar::Query(object);
-                if (value != nullptr) {
-                    array.push_back(AAFwk::Char::Unbox(value));
-                }
+            if (object == nullptr) {
+                return;
+            }
+            AAFwk::IChar* value = AAFwk::IChar::Query(object);
+            if (value != nullptr) {
+                array.push_back(AAFwk::Char::Unbox(value));
             }
         };
         AAFwk::Array::ForEach(ao, func);
@@ -456,11 +459,12 @@ std::vector<int> DistributedWantV2::GetIntArrayParam(const std::string& key) con
     AAFwk::IArray* ao = AAFwk::IArray::Query(value);
     if (ao != nullptr && AAFwk::Array::IsIntegerArray(ao)) {
         auto func = [&](AAFwk::IInterface* object) {
-            if (object != nullptr) {
-                AAFwk::IInteger* value = AAFwk::IInteger::Query(object);
-                if (value != nullptr) {
-                    array.push_back(AAFwk::Integer::Unbox(value));
-                }
+            if (object == nullptr) {
+                return;
+            }
+            AAFwk::IInteger* value = AAFwk::IInteger::Query(object);
+            if (value != nullptr) {
+                array.push_back(AAFwk::Integer::Unbox(value));
             }
         };
         AAFwk::Array::ForEach(ao, func);
@@ -505,11 +509,12 @@ std::vector<double> DistributedWantV2::GetDoubleArrayParam(const std::string& ke
     AAFwk::IArray* ao = AAFwk::IArray::Query(value);
     if (ao != nullptr && AAFwk::Array::IsDoubleArray(ao)) {
         auto func = [&](AAFwk::IInterface* object) {
-            if (object != nullptr) {
-                AAFwk::IDouble* value = AAFwk::IDouble::Query(object);
-                if (value != nullptr) {
-                    array.push_back(AAFwk::Double::Unbox(value));
-                }
+            if (object == nullptr) {
+                return;
+            }
+            AAFwk::IDouble* value = AAFwk::IDouble::Query(object);
+            if (value != nullptr) {
+                array.push_back(AAFwk::Double::Unbox(value));
             }
         };
         AAFwk::Array::ForEach(ao, func);
@@ -554,11 +559,12 @@ std::vector<float> DistributedWantV2::GetFloatArrayParam(const std::string& key)
     AAFwk::IArray* ao = AAFwk::IArray::Query(value);
     if (ao != nullptr && AAFwk::Array::IsFloatArray(ao)) {
         auto func = [&](AAFwk::IInterface* object) {
-            if (object != nullptr) {
-                AAFwk::IFloat* value = AAFwk::IFloat::Query(object);
-                if (value != nullptr) {
-                    array.push_back(AAFwk::Float::Unbox(value));
-                }
+            if (object == nullptr) {
+                return;
+            }
+            AAFwk::IFloat* value = AAFwk::IFloat::Query(object);
+            if (value != nullptr) {
+                array.push_back(AAFwk::Float::Unbox(value));
             }
         };
         AAFwk::Array::ForEach(ao, func);
@@ -625,11 +631,12 @@ std::vector<long> DistributedWantV2::GetLongArrayParam(const std::string& key) c
     AAFwk::IArray* ao = AAFwk::IArray::Query(value);
     if (ao != nullptr && AAFwk::Array::IsLongArray(ao)) {
         auto func = [&](AAFwk::IInterface* object) {
-            if (object != nullptr) {
-                AAFwk::ILong* value = AAFwk::ILong::Query(object);
-                if (value != nullptr) {
-                    array.push_back(AAFwk::Long::Unbox(value));
-                }
+            if (object == nullptr) {
+                return;
+            }
+            AAFwk::ILong* value = AAFwk::ILong::Query(object);
+            if (value != nullptr) {
+                array.push_back(AAFwk::Long::Unbox(value));
             }
         };
         AAFwk::Array::ForEach(ao, func);
@@ -684,11 +691,12 @@ std::vector<short> DistributedWantV2::GetShortArrayParam(const std::string& key)
     AAFwk::IArray* ao = AAFwk::IArray::Query(value);
     if (ao != nullptr && AAFwk::Array::IsShortArray(ao)) {
         auto func = [&](AAFwk::IInterface* object) {
-            if (object != nullptr) {
-                AAFwk::IShort* value = AAFwk::IShort::Query(object);
-                if (value != nullptr) {
-                    array.push_back(AAFwk::Short::Unbox(value));
-                }
+            if (object == nullptr) {
+                return;
+            }
+            AAFwk::IShort* value = AAFwk::IShort::Query(object);
+            if (value != nullptr) {
+                array.push_back(AAFwk::Short::Unbox(value));
             }
         };
         AAFwk::Array::ForEach(ao, func);
@@ -733,11 +741,12 @@ std::vector<std::string> DistributedWantV2::GetStringArrayParam(const std::strin
     AAFwk::IArray* ao = AAFwk::IArray::Query(value);
     if (ao != nullptr && AAFwk::Array::IsStringArray(ao)) {
         auto func = [&](AAFwk::IInterface* object) {
-            if (object != nullptr) {
-                AAFwk::IString* value = AAFwk::IString::Query(object);
-                if (value != nullptr) {
-                    array.push_back(AAFwk::String::Unbox(value));
-                }
+            if (object == nullptr) {
+                return;
+            }
+            AAFwk::IString* value = AAFwk::IString::Query(object);
+            if (value != nullptr) {
+                array.push_back(AAFwk::String::Unbox(value));
             }
         };
         AAFwk::Array::ForEach(ao, func);
