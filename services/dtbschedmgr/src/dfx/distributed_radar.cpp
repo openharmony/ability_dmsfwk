@@ -821,7 +821,8 @@ bool DmsRadar::ClickIconDmsRecvOver(const std::string& func, int32_t errCode)
 {
     int32_t res = ERR_OK;
     StageRes stageRes = (errCode == ERR_OK || errCode == MISSION_NOT_FOCUSED ||
-        errCode == MISSION_NOT_CONTINUE_ACTIVE) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
+        errCode == MISSION_NOT_CONTINUE_ACTIVE || errCode == CONTINUE_ON_CONTINUE_FAILED ||
+        errCode == CONTINUE_REMOTE_VERSION_MISMATCH) ? StageRes::STAGE_SUCC : StageRes::STAGE_FAIL;
     if (stageRes == StageRes::STAGE_SUCC) {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,

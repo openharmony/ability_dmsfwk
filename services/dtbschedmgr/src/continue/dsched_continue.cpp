@@ -1096,8 +1096,9 @@ bool DSchedContinue::WaitAbilityStateInitial(int32_t persistentId)
     return false;
 }
 
-int32_t DSchedContinue::StartAbility(const OHOS::AAFwk::Want& want, int32_t requestCode)
+int32_t DSchedContinue::StartAbility(OHOS::AAFwk::Want& want, int32_t requestCode)
 {
+    want.SetParam(OHOS::AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0);
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->Connect();
     if (ret != ERR_OK) {
         HILOGE("connect ability server failed %{public}d", ret);
@@ -1188,7 +1189,7 @@ int32_t DSchedContinue::PackReplyCmd(std::shared_ptr<DSchedContinueReplyCmd> cmd
 
 int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
 {
-    HILOGI("ExecuteContinueEnd start, result %{public}d", result);
+    HILOGW("ExecuteContinueEnd start, result %{public}d", result);
 
     std::string peerDeviceId = (direction_ == CONTINUE_SOURCE) ?
         continueInfo_.sinkDeviceId_ : continueInfo_.sourceDeviceId_;
