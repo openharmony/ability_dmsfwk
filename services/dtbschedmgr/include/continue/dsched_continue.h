@@ -131,8 +131,9 @@ class DSchedContinue : public std::enable_shared_from_this<DSchedContinue> {
 
 public:
     DSchedContinue(int32_t subServiceType, int32_t direction,  const sptr<IRemoteObject>& callback,
-        const DSchedContinueInfo& continueInfo);
-    DSchedContinue(std::shared_ptr<DSchedContinueStartCmd> startCmd, int32_t sessionId);
+        const DSchedContinueInfo& continueInfo, int32_t accountId = INVALID_ACCOUNT_ID);
+    DSchedContinue(std::shared_ptr<DSchedContinueStartCmd> startCmd, int32_t sessionId,
+        int32_t accountId = INVALID_ACCOUNT_ID);
     ~DSchedContinue();
 
 private:
@@ -212,6 +213,7 @@ private:
 
 private:
     static constexpr int32_t INVALID_SESSION_ID = -1;
+    static constexpr int32_t INVALID_ACCOUNT_ID = -1;
     static constexpr int32_t ERROR_BASE_DSOFTBUS_WIFI = -200000;
     static constexpr int32_t ERROR_PEER_THREE_VAP_CONFLICT = ERROR_BASE_DSOFTBUS_WIFI - 6604;
     static const std::map<int32_t, int32_t> DMS_CONVERT_TO_SDK_ERR_MAP;
@@ -231,6 +233,7 @@ private:
     int32_t softbusSessionId_ = INVALID_SESSION_ID;
     sptr<IRemoteObject> callback_ = nullptr;
     EventNotify eventData_;
+    int32_t accountId_ = INVALID_ACCOUNT_ID;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS

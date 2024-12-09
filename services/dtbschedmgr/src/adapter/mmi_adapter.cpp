@@ -20,7 +20,6 @@
 #include <sys/prctl.h>
 
 #include "dtbschedmgr_log.h"
-#include "mission/dms_continue_send_manager.h"
 #include "multi_user_manager.h"
 
 namespace OHOS {

@@ -72,7 +72,8 @@
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission/distributed_bm_storage.h"
 #include "mission/distributed_mission_info.h"
-#include "mission/dms_continue_send_manager.h"
+#include "mission/dms_continue_condition_manager.h"
+#include "mission/notification/dms_continue_send_manager.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/distributed_sched_mission_manager.h"
 #include "mission/dsched_sync_e2e.h"
@@ -171,7 +172,9 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     MultiUserManager::GetInstance().UnInit();
     RemoveSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID);
+    missionFocusedListener_->UnInit();
     DistributedSchedAdapter::GetInstance().UnRegisterMissionListener(missionFocusedListener_);
+    DmsContinueConditionMgr::GetInstance().UnInit();
 #endif
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
@@ -322,6 +325,7 @@ bool DistributedSchedService::Init()
 void DistributedSchedService::InitMissionManager()
 {
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
+    DmsContinueConditionMgr::GetInstance().Init();
     if (!AddSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID)) {
         HILOGE("Add System Ability Listener failed!");
     }
@@ -340,6 +344,7 @@ void DistributedSchedService::OnAddSystemAbility(int32_t systemAbilityId, const 
     if (missionFocusedListener_ == nullptr) {
         HILOGI("missionFocusedListener_ is nullptr.");
         missionFocusedListener_ = sptr<DistributedMissionFocusedListener>(new DistributedMissionFocusedListener());
+        missionFocusedListener_->Init();
     }
     int32_t ret = DistributedSchedAdapter::GetInstance().RegisterMissionListener(missionFocusedListener_);
     if (ret != ERR_OK) {
@@ -347,15 +352,15 @@ void DistributedSchedService::OnAddSystemAbility(int32_t systemAbilityId, const 
     }
 }
 
-void DistributedSchedService::InitDataShareManager()
+void DistributedSchedService::RegisterDataShareObserver(const std::string& key)
 {
+    HILOGI("RegisterObserver start.");
     DataShareManager::ObserverCallback observerCallback = [this]() {
         dataShareManager.SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
         HILOGD("dsMgr IsCurrentContinueSwitchOn : %{public}d", dataShareManager.IsCurrentContinueSwitchOn());
         int32_t missionId = GetCurrentMissionId();
         if (missionId <= 0) {
             HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
-            return;
         }
         DmsUE::GetInstance().ChangedSwitchState(dataShareManager.IsCurrentContinueSwitchOn(), ERR_OK);
         if (dataShareManager.IsCurrentContinueSwitchOn()) {
@@ -364,7 +369,7 @@ void DistributedSchedService::InitDataShareManager()
                 HILOGI("GetSendMgr failed.");
                 return;
             }
-            sendMgr->NotifyMissionFocused(missionId, FocusedReason::INIT);
+            sendMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_FOCUSED);
             DSchedContinueManager::GetInstance().Init();
         } else {
             auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
@@ -372,7 +377,7 @@ void DistributedSchedService::InitDataShareManager()
                 HILOGI("GetSendMgr failed.");
                 return;
             }
-            sendMgr->NotifyMissionUnfocused(missionId, UnfocusedReason::NORMAL);
+            sendMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_UNFOCUSED);
             auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
             if (recvMgr == nullptr) {
                 HILOGI("GetRecvMgr failed.");
@@ -382,10 +387,15 @@ void DistributedSchedService::InitDataShareManager()
             DSchedContinueManager::GetInstance().UnInit();
         };
     };
+    dataShareManager.RegisterObserver(key, observerCallback);
+    HILOGI("RegisterObserver end.");
+}
+
+void DistributedSchedService::InitDataShareManager()
+{
     dataShareManager.SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
     HILOGD("dsMgr IsCurrentContinueSwitchOn : %{public}d", dataShareManager.IsCurrentContinueSwitchOn());
-    dataShareManager.RegisterObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY,
-        observerCallback);
+    RegisterDataShareObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY);
     DmsUE::GetInstance().OriginalSwitchState(SwitchStatusDependency::GetInstance().IsContinueSwitchOn(), ERR_OK);
     HILOGI("Init data share manager, register observer end.");
 }
@@ -1119,7 +1129,9 @@ int32_t DistributedSchedService::ProcessContinueLocalMission(const std::string& 
         HILOGI("GetSendMgr failed.");
         return DMS_NOT_GET_MANAGER;
     }
-    int32_t ret = sendMgr->GetMissionIdByBundleName(bundleName, missionId);
+    int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
+    int32_t ret =
+        DmsContinueConditionMgr::GetInstance().GetMissionIdByBundleName(currentAccountId, bundleName, missionId);
     if (ret != ERR_OK) {
         HILOGE("get missionId failed");
         return ret;
@@ -2980,12 +2992,19 @@ int32_t DistributedSchedService::SetMissionContinueState(int32_t missionId, cons
         HILOGW("The current user is not foreground. callingUid: %{public}d.", callingUid);
         return DMS_NOT_FOREGROUND_USER;
     }
+
+    auto event = (state == AAFwk::ContinueState::CONTINUESTATE_ACTIVE) ?
+        MISSION_EVENT_ACTIVE: MISSION_EVENT_INACTIVE;
+    int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
+    DmsContinueConditionMgr::GetInstance().UpdateMissionStatus(currentAccountId, missionId, event);
+
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
     if (sendMgr == nullptr) {
         HILOGI("GetSendMgr failed.");
         return DMS_NOT_GET_MANAGER;
     }
-    return sendMgr->SetMissionContinueState(missionId, state);
+    sendMgr->OnMissionStatusChanged(missionId, event);
+    return ERR_OK;
 }
 #endif
 

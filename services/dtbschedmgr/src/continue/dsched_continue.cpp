@@ -41,7 +41,7 @@
 #include "ipc_skeleton.h"
 #include "parcel_helper.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-#include "mission/dms_continue_send_manager.h"
+#include "mission/dms_continue_condition_manager.h"
 #endif
 #include "scene_board_judgement.h"
 #include "softbus_adapter/transport/dsched_transport_softbus_adapter.h"
@@ -121,8 +121,8 @@ const std::map<int32_t, int32_t> DSchedContinue::DMS_CONVERT_TO_SDK_ERR_MAP = {
 };
 
 DSchedContinue::DSchedContinue(int32_t subServiceType, int32_t direction,  const sptr<IRemoteObject>& callback,
-    const DSchedContinueInfo& continueInfo) : subServiceType_(subServiceType), direction_(direction),
-    continueInfo_(continueInfo), callback_(callback)
+    const DSchedContinueInfo& continueInfo, int32_t accountId) : subServiceType_(subServiceType), direction_(direction),
+    continueInfo_(continueInfo), callback_(callback), accountId_(accountId)
 {
     HILOGI("DSchedContinue create");
     version_ = DSCHED_CONTINUE_PROTOCOL_VERSION;
@@ -132,7 +132,7 @@ DSchedContinue::DSchedContinue(int32_t subServiceType, int32_t direction,  const
     NotifyDSchedEventResult(ERR_OK);
 }
 
-DSchedContinue::DSchedContinue(std::shared_ptr<DSchedContinueStartCmd> startCmd, int32_t sessionId)
+DSchedContinue::DSchedContinue(std::shared_ptr<DSchedContinueStartCmd> startCmd, int32_t sessionId, int32_t accountId)
 {
     HILOGI("DSchedContinue create by start command");
     if (startCmd == nullptr) {
@@ -162,6 +162,7 @@ DSchedContinue::DSchedContinue(std::shared_ptr<DSchedContinueStartCmd> startCmd,
         continueInfo_.sourceBundleName_ = missionInfo.want.GetBundle();
         continueInfo_.sinkBundleName_ = missionInfo.want.GetBundle();
     }
+    accountId_ = accountId;
 }
 
 DSchedContinue::~DSchedContinue()
@@ -698,12 +699,8 @@ int32_t DSchedContinue::GetMissionIdByBundleName()
 {
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     if (continueInfo_.missionId_ == 0) {
-        auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-        if (sendMgr == nullptr) {
-            HILOGI("GetSendMgr failed.");
-            return DMS_NOT_GET_MANAGER;
-        }
-        return sendMgr->GetMissionIdByBundleName(continueInfo_.sourceBundleName_, continueInfo_.missionId_);
+        return DmsContinueConditionMgr::GetInstance().GetMissionIdByBundleName(
+            accountId_, continueInfo_.sourceBundleName_, continueInfo_.missionId_);
     }
 #endif
     return ERR_OK;
@@ -1021,18 +1018,11 @@ int32_t DSchedContinue::StartAbility(const OHOS::AAFwk::Want& want, int32_t requ
         return ret;
     }
 
-    int32_t activeAccountId = 0;
-    ret = DistributedSchedService::GetInstance().QueryOsAccount(activeAccountId);
-    if (ret != ERR_OK) {
-        HILOGE("QueryOsAccount failed %{public}d", ret);
-        return ret;
-    }
-
     continueInfo_.sinkAbilityName_ = want.GetElement().GetAbilityName();
     DmsRadar::GetInstance().ClickIconDmsStartAbility("StartAbility", ret);
 
     HILOGI("call StartAbility start, flag is %{public}d", want.GetFlags());
-    ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, DEFAULT_REQUEST_CODE, activeAccountId);
+    ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, DEFAULT_REQUEST_CODE, accountId_);
     if (ret != ERR_OK) {
         HILOGE("failed %{public}d", ret);
         return ret;

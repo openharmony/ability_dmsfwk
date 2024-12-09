@@ -52,7 +52,7 @@ public:
     std::atomic<bool> isCurrentContinueSwitchOn_ = true;
     bool IsCurrentContinueSwitchOn();
     void SetCurrentContinueSwitch(bool status);
-    
+
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
     sptr<SettingObserver> GetSettingObserver(const std::string &key);
