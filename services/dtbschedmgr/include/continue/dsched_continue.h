@@ -205,7 +205,7 @@ private:
     void DurationDumperComplete(int32_t result);
     void NotifyDSchedEventResult(int32_t result);
     bool WaitAbilityStateInitial(int32_t persistentId);
-    int32_t StartAbility(const OHOS::AAFwk::Want& want, int32_t requestCode);
+    int32_t StartAbility(OHOS::AAFwk::Want& want, int32_t requestCode);
     std::string QuerySinkAbilityName();
     int32_t QuickStartAbility();
     int32_t UpdateWantForContinueType(OHOS::AAFwk::Want& want);
