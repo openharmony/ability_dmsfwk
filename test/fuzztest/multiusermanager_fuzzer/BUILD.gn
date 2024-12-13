@@ -16,22 +16,28 @@ import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 import("//foundation/ability/dmsfwk/dmsfwk.gni")
-ohos_fuzztest("SoftbusAdapterFuzzTest") {
+ohos_fuzztest("MultiUserManagerFuzzTest") {
   module_out_path = module_output_path
 
   visibility = [ ":*" ]
   include_dirs = [
-    "${dms_path}/common/include/",
-    "${dms_path}/interfaces/innerkits/common/include/",
-    "${dms_path}/services/dtbschedmgr/include/",
-    "${dms_path}/services/dtbschedmgr/include/collaborate/",
-    "${dms_path}/services/dtbschedmgr/include/mission",
-    "${dms_path}/services/dtbschedmgr/include/softbus_adapter",
+    "${dms_path}/services/dtbschedmgr/include",
+    "${dms_path}/services/dtbschedmgr/include/continue",
+    "${dms_path}/services/dtbschedmgr/include/deviceManager",
+    "${dms_path}/services/dtbschedmgr/include/continue/state",
+    "${dms_path}/services/dtbschedmgr/include/continue/state/source_state",
+    "${dms_path}/services/dtbschedmgr/include/continue/state/sink_state",
+    "${dms_path}/services/dtbschedmgr/include/distributedWant",
     "${dms_path}/services/dtbschedmgr/include/softbus_adapter/transport",
-    "${dms_path}/test/fuzztest/softbusadapter_fuzzer",
+    "${dms_path}/services/dtbschedmgr/test/unittest",
+    "${dms_path}/common/include",
+    "${dms_path}/interfaces/innerkits/distributed_event/include",
+    "${dms_path}/interfaces/innerkits/tests",
+    "${dms_path}/test/fuzztest/multiusermanager_fuzzer",
+    "${dms_path}/interfaces/innerkits/common/include",
   ]
 
-  fuzz_config_file = "${dms_path}/test/fuzztest/softbusadapter_fuzzer"
+  fuzz_config_file = "${dms_path}/test/fuzztest/multiusermanager_fuzzer"
 
   configs = [ "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags" ]
 
@@ -43,16 +49,12 @@ ohos_fuzztest("SoftbusAdapterFuzzTest") {
     "-Dprivate=public",
   ]
 
-  sources = [ "softbusadapter_fuzzer.cpp" ]
+  sources = [ "multiusermanager_fuzzer.cpp" ]
 
   deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
 
-  defines = []
-  if (dmsfwk_mission_manager) {
-    defines += [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
-  }
-  if (!dmsfwk_softbus_adapter_common) {
-    defines += [ "DMSFWK_INTERACTIVE_ADAPTER" ]
+  if (dmsfwk_report_memmgr || dmsfwk_report_memmgr_plugins) {
+    defines = [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
   }
 
   external_deps = [
@@ -64,7 +66,6 @@ ohos_fuzztest("SoftbusAdapterFuzzTest") {
     "ability_runtime:dataobs_manager",
     "ability_runtime:mission_info",
     "access_token:libaccesstoken_sdk",
-    "access_token:libnativetoken_shared",
     "access_token:libtokensetproc_shared",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
@@ -86,12 +87,48 @@ ohos_fuzztest("SoftbusAdapterFuzzTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
+    "os_account:libaccountkits",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "wifi:wifi_sdk",
+    "window_manager:libwsutils",
+    "window_manager:scene_session",
+    "window_manager:session_manager_lite",
   ]
+  if (os_account_part) {
+    external_deps += [ "os_account:os_account_innerkits" ]
+  }
+
+  if (dmsfwk_report_memmgr) {
+    external_deps += [ "memmgr:memmgrclient" ]
+  }
+
+  if (dmsfwk_report_memmgr_plugins) {
+    external_deps += [ "memmgr_override:memmgrclient" ]
+  }
+
+  if (dmsfwk_standard_form_share) {
+    external_deps += [ "form_fwk:form_manager" ]
+  }
+
+  if (dmsfwk_mission_manager) {
+    external_deps += [ "image_framework:image_native" ]
+  }
+
+  if (efficiency_manager_service_enable) {
+    external_deps += [ "resource_schedule_service:ressched_client" ]
+  }
+
+  if (dmsfwk_ces_listener) {
+    external_deps += [ "common_event_service:cesfwk_innerkits" ]
+  }
+
+  if (dmsfwk_mmi_listener) {
+    external_deps += [ "input:libmmi-client" ]
+  }
 }
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":SoftbusAdapterFuzzTest" ]
+  deps = [ ":MultiUserManagerFuzzTest" ]
 }

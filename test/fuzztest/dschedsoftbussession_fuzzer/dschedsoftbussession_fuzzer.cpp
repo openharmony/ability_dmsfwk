@@ -76,6 +76,24 @@ void FuzzOnBytesReceived(const uint8_t* data, size_t size)
     dschedSoftbusSession.SendData(buffer, dataType);
     dschedSoftbusSession.OnDisconnect();
 }
+
+void FuzzAssembleNoFrag(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < U32_AT_SIZE)) {
+        return;
+    }
+    size_t intParam = static_cast<size_t>(Get32Data(data, size));
+    if (intParam >= DSCHED_MAX_BUFFER_SIZE) {
+        return;
+    }
+    std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(intParam);
+    int32_t accountId = *(reinterpret_cast<const int32_t*>(data));
+    DSchedSoftbusSession dschedSoftbusSession;
+    dschedSoftbusSession.ResetAssembleFrag();
+
+    dschedSoftbusSession.UnPackSendData(buffer, accountId);
+    dschedSoftbusSession.UnPackStartEndData(buffer, accountId);
+}
 }
 }
 
@@ -83,5 +101,6 @@ void FuzzOnBytesReceived(const uint8_t* data, size_t size)
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     OHOS::DistributedSchedule::FuzzOnBytesReceived(data, size);
+    OHOS::DistributedSchedule::FuzzAssembleNoFrag(data, size);
     return 0;
 }
