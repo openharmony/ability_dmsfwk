@@ -43,6 +43,7 @@ class DataShareManager {
 public:
     void RegisterObserver(const std::string &key, SettingObserver::ObserverCallback &observerCallback);
     void UnregisterObserver(const std::string &key);
+    void UnInit();
 
     using ObserverCallback = std::function<void()>;
 
@@ -55,11 +56,11 @@ public:
     
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();
-    sptr<SettingObserver> GetSettingObserver(const std::string &key);
+    void RegisterObserver(SettingObserver::ObserverCallback &observerCallback);
 
 private:
-    std::map<std::string, sptr<SettingObserver>> settingObserverMap_;
-    std::mutex observerMapMutex_;
+    sptr<SettingObserver> observer_;
+    std::mutex observerMutex_;
     std::mutex datashareMutex_;
 };
 } // namespace DistributedSchedule

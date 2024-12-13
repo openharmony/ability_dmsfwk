@@ -178,7 +178,7 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
     dlclose(dllHandle_);
     dllHandle_ = nullptr;
 #endif
-    dataShareManager.UnregisterObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY);
+    dataShareManager.UnInit();
     HILOGI("OnStop dms service end");
 }
 

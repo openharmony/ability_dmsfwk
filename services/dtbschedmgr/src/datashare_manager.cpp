@@ -47,14 +47,20 @@ void SettingObserver::SetObserverCallback(ObserverCallback &observerCallback)
     observerCallback_ = observerCallback;
 }
 
-sptr<SettingObserver> DataShareManager::GetSettingObserver(const std::string &key)
+void DataShareManager::RegisterObserver(SettingObserver::ObserverCallback &observerCallback)
 {
-    HILOGI("GetSettingObserver with key is %{public}s", key.c_str());
-    std::lock_guard<std::mutex> lockGuard(observerMapMutex_);
-    if (settingObserverMap_.find(key) != settingObserverMap_.end()) {
-        return settingObserverMap_.find(key)->second;
+    std::lock_guard<std::mutex> lock(observerMutex_);
+    if (observer_ != nullptr) {
+        HILOGI("observer_ has been created.");
+        return;
     }
-    return nullptr;
+    observer_ = new SettingObserver();
+    if (observer_ == nullptr) {
+        HILOGE("Register observer failed, observer is null");
+        return;
+    }
+    observer_->SetObserverCallback(observerCallback);
+    HILOGI("observer_ create success.");
 }
 
 std::shared_ptr<DataShare::DataShareHelper> DataShareManager::CreateDataShareHelper()
@@ -68,8 +74,8 @@ std::shared_ptr<DataShare::DataShareHelper> DataShareManager::CreateDataShareHel
 void DataShareManager::RegisterObserver(const std::string &key, SettingObserver::ObserverCallback &observerCallback)
 {
     HILOGI("DataShareManager RegisterObserver start");
-    sptr<SettingObserver> observer = GetSettingObserver(key);
-    if (observer != nullptr) {
+    RegisterObserver(observerCallback);
+    if (observer_ != nullptr) {
         HILOGI("Observer is already registered with key is %{public}s", key.c_str());
         UnregisterObserver(key);
     }
@@ -80,26 +86,15 @@ void DataShareManager::RegisterObserver(const std::string &key, SettingObserver:
     }
     int32_t userId = GetLocalAccountId();
     Uri uri(AssembleUserSecureUri(userId, key));
-    sptr<SettingObserver> newObserver(new SettingObserver());
-    observer = newObserver;
-    if (observer == nullptr) {
-        HILOGE("Register observer failed, observer is null");
-        return;
-    }
-    observer->SetObserverCallback(observerCallback);
-    dataShareHelper->RegisterObserver(uri, observer);
+    dataShareHelper->RegisterObserver(uri, observer_);
     dataShareHelper->Release();
-
-    std::lock_guard<std::mutex> lockGuard(observerMapMutex_);
-    settingObserverMap_[key] = observer;
     HILOGI("DataShareManager RegisterObserver success with key is %{public}s", key.c_str());
 }
 
 void DataShareManager::UnregisterObserver(const std::string &key)
 {
     HILOGI("DataShareManager UnregisterObserver start");
-    sptr<SettingObserver> observer = GetSettingObserver(key);
-    if (observer == nullptr) {
+    if (observer_ == nullptr) {
         HILOGI("UnregisterObserver, observer is nullptr with key is %{public}s", key.c_str());
         return;
     }
@@ -110,12 +105,17 @@ void DataShareManager::UnregisterObserver(const std::string &key)
     }
     int32_t userId = GetLocalAccountId();
     Uri uri(AssembleUserSecureUri(userId, key));
-    dataShareHelper->UnregisterObserver(uri, observer);
+    dataShareHelper->UnregisterObserver(uri, observer_);
     dataShareHelper->Release();
-
-    std::lock_guard<std::mutex> lockGuard(observerMapMutex_);
-    settingObserverMap_.erase(key);
     HILOGI("DataShareManager UnregisterObserver success with key is %{public}s", key.c_str());
+}
+
+void DataShareManager::UnInit()
+{
+    HILOGI("DataShareManager UnInit start");
+    UnregisterObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY);
+    observer_ = nullptr;
+    HILOGI("DataShareManager UnInit end");
 }
 
 Uri DataShareManager::AssembleUserSecureUri(int userId, const std::string &key)
