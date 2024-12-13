@@ -25,6 +25,7 @@ group("fuzztest") {
     "dschedallconnectmanager_fuzzer:fuzztest",
     "dschedsoftbussession_fuzzer:fuzztest",
     "dschedtransportsoftbusadapter_fuzzer:fuzztest",
+    "multiusermanager_fuzzer:fuzztest",
     "softbusadapter_fuzzer:fuzztest",
   ]
 }

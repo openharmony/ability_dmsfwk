@@ -24,6 +24,12 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+namespace {
+    constexpr size_t CAPACITY = 10;
+}
+#endif
+
 void FuzzSendSoftbusEvent(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(uint32_t))) {
@@ -50,6 +56,25 @@ void FuzzOnBroadCastRecv(const uint8_t* data, size_t size)
     SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
     SoftbusAdapter::GetInstance().UnregisterSoftbusEventListener(listener);
 }
+
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+void FuzzDealSendSoftbusEvent(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(uint32_t))) {
+        return;
+    }
+    std::shared_ptr<DSchedDataBuffer> buffer = nullptr;
+    int32_t retry = *(reinterpret_cast<const int32_t*>(data));
+    SoftbusAdapter::GetInstance().Init();
+    SoftbusAdapter::GetInstance().DealSendSoftbusEvent(buffer, retry);
+    SoftbusAdapter::GetInstance().RetrySendSoftbusEvent(buffer, retry);
+
+    buffer = std::make_shared<DSchedDataBuffer>(CAPACITY);
+    SoftbusAdapter::GetInstance().DealSendSoftbusEvent(buffer, retry);
+    SoftbusAdapter::GetInstance().RetrySendSoftbusEvent(buffer, retry);
+    SoftbusAdapter::GetInstance().UnInit();
+}
+#endif
 }
 }
 
@@ -58,5 +83,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     OHOS::DistributedSchedule::FuzzSendSoftbusEvent(data, size);
     OHOS::DistributedSchedule::FuzzOnBroadCastRecv(data, size);
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    OHOS::DistributedSchedule::FuzzDealSendSoftbusEvent(data, size);
+#endif
     return 0;
 }
