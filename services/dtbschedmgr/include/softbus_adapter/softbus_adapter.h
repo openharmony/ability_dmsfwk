@@ -37,6 +37,7 @@ public:
     int32_t RegisterSoftbusEventListener(const std::shared_ptr<SoftbusAdapterListener>& listener);
     int32_t UnregisterSoftbusEventListener(const std::shared_ptr<SoftbusAdapterListener>& listener);
     void OnBroadCastRecv(std::string& networkId, uint8_t* data, uint32_t dataLen);
+    void ReRegister();
 
 private:
     SoftbusAdapter() {}

@@ -63,5 +63,11 @@ int32_t SoftbusAdapter::UnregisterSoftbusEventListener(const std::shared_ptr<Sof
     HILOGI("%{public}s common called. ", __func__);
     return 0;
 }
+
+void SoftbusAdapter::ReRegister()
+{
+    HILOGI("%{public}s common called. ", __func__);
+    return;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
