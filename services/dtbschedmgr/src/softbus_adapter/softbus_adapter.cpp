@@ -21,6 +21,7 @@
 #include "dfx/distributed_radar.h"
 #include "dtbschedmgr_log.h"
 #include "softbus_error_code.h"
+#include "mission/distributed_mission_broadcast_listener.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -220,6 +221,25 @@ int32_t SoftbusAdapter::UnregisterSoftbusEventListener(const std::shared_ptr<Sof
         return ret;
     }
     return SOFTBUS_OK;
+}
+
+void SoftbusAdapter::ReRegister()
+{
+    HILOGI("Re register softbus listener begin.");
+    StopSoftbusEvent();
+    int32_t ret = UnregisterSoftbusEventListener(softbusAdapterListener_);
+    if (ret != ERR_OK) {
+        HILOGE("UnregisterSoftbusEventListener failed, ret: %{public}d", ret);
+        return;
+    }
+    std::shared_ptr<SoftbusAdapterListener> missionBroadcastListener =
+        std::make_shared<DistributedMissionBroadcastListener>();
+    ret = RegisterSoftbusEventListener(missionBroadcastListener);
+    if (ret != ERR_OK) {
+        HILOGE("RegisterSoftbusEventListener failed, ret: %{public}d", ret);
+        return;
+    }
+    HILOGI("Re register softbus listener success.");
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

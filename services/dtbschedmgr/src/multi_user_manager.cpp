@@ -104,6 +104,7 @@ void MultiUserManager::UnInit()
 void MultiUserManager::OnUserSwitched(int32_t accountId)
 {
     HILOGI("UserSwitched start");
+    SoftbusAdapter::GetInstance().ReRegister();
     auto recvMgr = GetCurrentRecvMgr();
     if (recvMgr == nullptr) {
         HILOGI("GetRecvMgr failed.");
