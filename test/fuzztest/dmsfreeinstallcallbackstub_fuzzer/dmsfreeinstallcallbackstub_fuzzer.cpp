@@ -15,6 +15,8 @@
 
 #include "dmsfreeinstallcallbackstub_fuzzer.h"
 
+#include <fuzzer/FuzzedDataProvider.h>
+
 #include "dms_free_install_callback.h"
 #include "distributed_sched_interface.h"
 #include "mock_fuzz_util.h"
@@ -46,8 +48,9 @@ bool OnInstallFinishedInnerFuzzTest(const uint8_t* data, size_t size)
     freeInstall_->OnRemoteRequest(code, dataParcel, reply, option);
     
     code = static_cast<uint32_t>(IDRreeInstallCallbackInterfaceCode::ON_FREE_INSTALL_DONE);
-    int32_t resultCode = *(reinterpret_cast<const int32_t*>(data));
-    int32_t requestCode = *(reinterpret_cast<const int32_t*>(data));
+    FuzzedDataProvider fdp(data, size);
+    int32_t resultCode = fdp.ConsumeIntegral<int32_t>();
+    int32_t requestCode = fdp.ConsumeIntegral<int32_t>();
     dataParcel.WriteInt32(resultCode);
     dataParcel.WriteInt32(requestCode);
     freeInstall_->OnRemoteRequest(code, dataParcel, reply, option);

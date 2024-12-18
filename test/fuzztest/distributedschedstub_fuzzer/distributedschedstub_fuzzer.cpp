@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fuzzer/FuzzedDataProvider.h>
 #include <singleton.h>
 
 #include "distributed_sched_interface.h"
@@ -148,10 +149,11 @@ void StartContinuationInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     Want want;
-    int32_t missionId = *(reinterpret_cast<const int32_t*>(data));
-    int32_t callerUid = *(reinterpret_cast<const int32_t*>(data));
-    int32_t status = *(reinterpret_cast<const int32_t*>(data));
-    uint32_t accessToken = *(reinterpret_cast<const int32_t*>(data));
+    FuzzedDataProvider fdp(data, size);
+    int32_t missionId = fdp.ConsumeIntegral<int32_t>();
+    int32_t callerUid = fdp.ConsumeIntegral<int32_t>();
+    int32_t status = fdp.ConsumeIntegral<int32_t>();
+    uint32_t accessToken = fdp.ConsumeIntegral<uint32_t>();
 
     dataParcel.WriteParcelable(&want);
     dataParcel.WriteInt32(missionId);
@@ -472,9 +474,10 @@ void StopRemoteExtensionAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     Want want;
-    int32_t callerUid = *(reinterpret_cast<const int32_t*>(data));
-    int32_t serviceType = *(reinterpret_cast<const int32_t*>(data));
-    uint32_t accessToken = *(reinterpret_cast<const int32_t*>(data));
+    FuzzedDataProvider fdp(data, size);
+    int32_t callerUid = fdp.ConsumeIntegral<int32_t>();
+    int32_t serviceType = fdp.ConsumeIntegral<int32_t>();
+    uint32_t accessToken = fdp.ConsumeIntegral<uint32_t>();
     dataParcel.WriteParcelable(&want);
     dataParcel.WriteInt32(callerUid);
     dataParcel.WriteUint32(accessToken);
@@ -568,9 +571,10 @@ void SetMissionContinueStateInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    int32_t missionId = *(reinterpret_cast<const int32_t*>(data));
-    int32_t state = *(reinterpret_cast<const int32_t*>(data));
-    int32_t timeout = *(reinterpret_cast<const int32_t*>(data));
+    FuzzedDataProvider fdp(data, size);
+    int32_t missionId = fdp.ConsumeIntegral<int32_t>();
+    int32_t state = fdp.ConsumeIntegral<int32_t>();
+    int32_t timeout = fdp.ConsumeIntegral<int32_t>();
 
     dataParcel.WriteInt32(missionId);
     dataParcel.WriteInt32(state);

@@ -15,6 +15,8 @@
 
 #include "dschedtransportsoftbusadapter_fuzzer.h"
 
+#include <fuzzer/FuzzedDataProvider.h>
+
 #include "dsched_continue_manager.h"
 #include "dsched_data_buffer.h"
 #include "dsched_transport_softbus_adapter.h"
@@ -53,9 +55,10 @@ void FuzzOnBytes(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(size_t))) {
         return;
     }
-    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
     const void* newdata = reinterpret_cast<const void*>(data);
-    int32_t dataLen = *(reinterpret_cast<const int32_t*>(data));
+    FuzzedDataProvider fdp(data, size);
+    int32_t sessionId = fdp.ConsumeIntegral<int32_t>();
+    int32_t dataLen = fdp.ConsumeIntegral<int32_t>();
     DSchedTransportSoftbusAdapter dschedTransportSoftbusAdapter;
     dschedTransportSoftbusAdapter.OnBytes(sessionId, newdata, dataLen);
 }
@@ -65,12 +68,13 @@ void FuzzConnectDevice(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(size_t)) || size >= MAX_BUFFER_SIZE) {
         return;
     }
-    std::string peerDeviceId(reinterpret_cast<const char*>(data), size);
-    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
+    FuzzedDataProvider fdp(data, size);
+    int32_t sessionId = fdp.ConsumeIntegral<int32_t>();
+    int32_t dataType = fdp.ConsumeIntegral<int32_t>();
+    std::string peerDeviceId = fdp.ConsumeRandomLengthString();
 
     DSchedTransportSoftbusAdapter dschedTransportSoftbusAdapter;
     dschedTransportSoftbusAdapter.ConnectDevice(peerDeviceId, sessionId);
-    int32_t dataType = *(reinterpret_cast<const int32_t*>(data));
     std::shared_ptr<DSchedDataBuffer> dataBuffer = std::make_shared<DSchedDataBuffer>(size);
     dschedTransportSoftbusAdapter.SendData(sessionId, dataType, dataBuffer);
     dschedTransportSoftbusAdapter.SendBytesBySoftbus(sessionId, dataBuffer);
