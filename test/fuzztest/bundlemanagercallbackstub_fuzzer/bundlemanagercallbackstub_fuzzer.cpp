@@ -15,6 +15,8 @@
 
 #include "bundlemanagercallbackstub_fuzzer.h"
 
+#include <fuzzer/FuzzedDataProvider.h>
+
 #include "bundle/bundle_manager_callback_stub.h"
 #include "mock_fuzz_util.h"
 
@@ -40,9 +42,10 @@ bool OnQueryInstallationFinishedInnerFuzzTest(const uint8_t* data, size_t size)
     bundleManager_->OnRemoteRequest(code, dataParcel, reply, option);
 
     code = static_cast<uint32_t>(IDBundleManagerCallbackInterfaceCod::ON_QUERY_INSTALLATION_DONE);
-    int32_t resultCode = *(reinterpret_cast<const int32_t*>(data));
-    uint32_t versionCode = *(reinterpret_cast<const uint32_t*>(data));
-    int32_t missionId = *(reinterpret_cast<const int32_t*>(data));
+    FuzzedDataProvider fdp(data, size);
+    int32_t resultCode = fdp.ConsumeIntegral<int32_t>();
+    uint32_t versionCode = fdp.ConsumeIntegral<uint32_t>();
+    int32_t missionId = fdp.ConsumeIntegral<int32_t>();
     dataParcel.WriteInt32(resultCode);
     dataParcel.WriteUint32(versionCode);
     dataParcel.WriteInt32(missionId);
