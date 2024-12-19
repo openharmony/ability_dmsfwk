@@ -10,7 +10,6 @@
     },
     "dirs": {},
     "scripts": {},
-    "license": "Apache License 2.0",
     "component": {
       "name": "dmsfwk",
       "subsystem": "ability",
