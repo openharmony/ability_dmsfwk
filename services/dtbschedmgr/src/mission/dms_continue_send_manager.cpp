@@ -641,10 +641,12 @@ int32_t DMSContinueSendMgr::NotifyDeviceOnline()
 {
     HILOGD("NotifyDeviceOnline called");
     HILOGI("accountId: %{public}d.", accountId_);
-    if (GetCurrentMissionId() <= 0) {
+    int32_t missionId = GetCurrentMissionId();
+    if (missionId <= 0) {
+        HILOGW("GetCurrentMissionId failed, init end. ret: %{public}d", missionId);
         return INVALID_MISSION_ID;
     }
-    NotifyMissionFocused(info_.currentMissionId, FocusedReason::ONLINE);
+    NotifyMissionFocused(missionId, FocusedReason::ONLINE);
     return ERR_OK;
 }
 
