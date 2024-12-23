@@ -19,6 +19,7 @@
 
 #include "adapter/dnetwork_adapter.h"
 #include "adapter/mmi_adapter.h"
+#include "bluetooth_host.h"
 #include "datetime_ex.h"
 #include "datashare_manager.h"
 #include "dfx/distributed_radar.h"
@@ -32,7 +33,6 @@
 #include "mission/dsched_sync_e2e.h"
 #include "mission/wifi_state_adapter.h"
 #include "mission/bluetooth_state_adapter.h"
-#include "bluetooth_host.h"
 #include "multi_user_manager.h"
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"

@@ -453,7 +453,7 @@ void DistributedSchedService::InitBluetoothStateListener()
     HILOGI("InitBluetoothStateListener called");
     std::shared_ptr<BluetoothStateListener> bluetoothStateListener = BluetoothStateListener::GetInstance();
     bluetoothStateListener->InitBluetoothState();
-    Bluetooth::BlutoothHost::GetDefaultHost().RegisterObserver(bluetoothStateListener);
+    Bluetooth::BluetoothHost::GetDefaultHost().RegisterObserver(bluetoothStateListener);
 }
 
 void DistributedSchedService::InitDeviceCfg()
