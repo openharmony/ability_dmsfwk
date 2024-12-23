@@ -1143,8 +1143,11 @@ int32_t DSchedContinue::ExecuteNotifyComplete(int32_t result)
     if (direction_ == CONTINUE_SINK) {
         int32_t missionId;
         ContinueSceneSessionHandler::GetInstance().GetPersistentId(missionId, continueInfo_.continueSessionId_);
-        StateCallbackInfo stateCallbackInfo = StateCallbackInfo(missionId, continueInfo_.sinkBundleName_,eventData_.destModuleName_, continueInfo_.sinkAbilityName_);
-        DSchedContinueManager::GetInstance().NotifyQuickStartState(stateCallbackInfo, QUICK_START_SUCCESS, "quick start complete");
+        StateCallbackInfo stateCallbackInfo = StateCallbackInfo(
+            missionId, continueInfo_.sinkBundleName_,eventData_.destModuleName_,
+            continueInfo_.sinkAbilityName_);
+        DSchedContinueManager::GetInstance().NotifyQuickStartState(
+            stateCallbackInfo, QUICK_START_SUCCESS, "quick start complete");
         auto cmd = std::make_shared<DSchedContinueEndCmd>();
         PackEndCmd(cmd, result);
 
@@ -1225,7 +1228,9 @@ int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
         message += ", code is: " + std::to_string(result);
         int32_t missionId;
         ContinueSceneSessionHandler::GetInstance().GetPersistentId(missionId, continueInfo_.continueSessionId_);
-        StateCallbackInfo stateCallbackInfo = StateCallbackInfo(missionId, continueInfo_.sinkBundleName_,eventData_.destModuleName_, continueInfo_.sinkAbilityName_);
+        StateCallbackInfo stateCallbackInfo = StateCallbackInfo(
+            missionId, continueInfo_.sinkBundleName_,eventData_.destModuleName_,
+            continueInfo_.sinkAbilityName_);
         DSchedContinueManager::GetInstance().NotifyQuickStartState(stateCallbackInfo,
             result == ERR_OK ? QUICK_START_SUCCESS : QUICK_START_FAILED, message);
         DmsRadar::GetInstance().ClickIconDmsRecvOver("NotifyContinuationResultFromRemote", result);
@@ -1315,7 +1320,9 @@ int32_t DSchedContinue::ExecuteContinueError(int32_t result)
         UpdateState(DSCHED_CONTINUE_SINK_END_STATE);
         int32_t missionId;
         ContinueSceneSessionHandler::GetInstance().GetPersistentId(missionId, continueInfo_.continueSessionId_);
-        StateCallbackInfo stateCallbackInfo = StateCallbackInfo(missionId, continueInfo_.sinkBundleName_,eventData_.destModuleName_, continueInfo_.sinkAbilityName_);
+        StateCallbackInfo stateCallbackInfo = StateCallbackInfo(
+            missionId, continueInfo_.sinkBundleName_,eventData_.destModuleName_,
+            continueInfo_.sinkAbilityName_);
         DSchedContinueManager::GetInstance().NotifyQuickStartState(stateCallbackInfo, QUICK_START_FAILED,
             "quick start failed, error code is: " + std::to_string(result));
     }

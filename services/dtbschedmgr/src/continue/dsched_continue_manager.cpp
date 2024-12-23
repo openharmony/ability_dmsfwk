@@ -557,12 +557,13 @@ void DSchedContinueManager::NotifyTerminateContinuation(const int32_t missionId)
     HILOGW("doesn't match an existing continuation.");
 }
 
-int32_t DSchedContinueManager::ContinueStateCallbackRegister(StateCallbackInfo &stateCallbackInfo, sptr<IRemoteObject> callback)
+int32_t DSchedContinueManager::ContinueStateCallbackRegister(
+    StateCallbackInfo &stateCallbackInfo, sptr<IRemoteObject> callback)
 {
     auto lastResult = stateCallbackCache_.find(stateCallbackInfo);
-    if(lastResult == stateCallbackCache_.end()){
+    if (lastResult == stateCallbackCache_.end()) {
         StateCallbackData stateCallbackData;
-        sptr<StateCallbackIpcDiedListener> diedListener = new StateCallbackIpcDiedListener();
+        sptr <StateCallbackIpcDiedListener> diedListener = new StateCallbackIpcDiedListener();
         diedListener->stateCallbackInfo_ = stateCallbackInfo;
         stateCallbackData.diedListener = diedListener;
         callback->AddDeathRecipient(diedListener);
@@ -572,7 +573,7 @@ int32_t DSchedContinueManager::ContinueStateCallbackRegister(StateCallbackInfo &
     }
     StateCallbackData stateCallbackData = lastResult->second;
     stateCallbackData.remoteObject = callback;
-    if(stateCallbackData.state != -1){
+    if (stateCallbackData.state != -1) {
         return NotifyQuickStartState(stateCallbackInfo, stateCallbackData.state, stateCallbackData.message);
     }
     return ERR_OK;
@@ -584,7 +585,8 @@ int32_t DSchedContinueManager::ContinueStateCallbackUnRegister(StateCallbackInfo
     return ERR_OK;
 }
 
-int32_t DSchedContinueManager::NotifyQuickStartState(StateCallbackInfo &stateCallbackInfo, int32_t state, std::string message)
+int32_t DSchedContinueManager::NotifyQuickStartState(StateCallbackInfo &stateCallbackInfo,
+    int32_t state, std::string message)
 {
     HILOGI("NotifyQuickStartState called, state: %{public}d, message: %{public}s", state, message.c_str());
     auto remote = stateCallbackCache_.find(stateCallbackInfo);
@@ -614,7 +616,8 @@ int32_t DSchedContinueManager::NotifyQuickStartState(StateCallbackInfo &stateCal
 
     MessageParcel reply;
     MessageOption option;
-    stateCallbackData.remoteObject->SendRequest(static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_STATE_CALLBACK), data, reply, option);
+    stateCallbackData.remoteObject->SendRequest(
+        static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_STATE_CALLBACK), data, reply, option);
     stateCallbackData.state = -1;
     stateCallbackData.message = nullptr;
     return ERR_OK;

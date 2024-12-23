@@ -30,9 +30,11 @@ namespace {
     const int32_t ARG_INDEX_4_CALLBACK_FUNC = 2;
     const int32_t SUCCESS = 0;
     const int32_t FAILED = 1;
+    constexpr int32_t ARG_COUNT_THREE = 3;
 }
 
-std::map<std::string, sptr<DistributedSchedule::JsContinuationStateManagerStub>> JsContinuationStateManager::jsContinuationStateManagerStubCache_;
+std::map<std::string, sptr<DistributedSchedule::JsContinuationStateManagerStub>>
+    JsContinuationStateManager::jsContinuationStateManagerStubCache_;
 
 napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, napi_callback_info info)
 {
@@ -77,9 +79,13 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
 sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateManager::CreateStub(
     napi_env env, napi_callback_info info)
 {
-    size_t argc = 3;
-    napi_value args[3];
+    size_t argc = ARG_COUNT_THREE;
+    napi_value args[ARG_COUNT_THREE];
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, nullptr, nullptr));
+    if (argc != ARG_COUNT_THREE) {
+        HILOGE("Parameter error. The type of number of parameters must be 3");
+        return nullptr;
+    }
     // this.context is 2ed parameter
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
     GetAbilityContext(abilityContext, env, args[1]);
@@ -107,7 +113,7 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     auto cacheStubEntry = jsContinuationStateManagerStubCache_.find(key);
     if (cacheStubEntry == jsContinuationStateManagerStubCache_.end() || cacheStubEntry->second == nullptr) {
         sptr <DistributedSchedule::JsContinuationStateManagerStub> stub(
-                new DistributedSchedule::JsContinuationStateManagerStub());
+            new DistributedSchedule::JsContinuationStateManagerStub());
         DistributedSchedule::JsContinuationStateManagerStub::StateCallbackData callbackData;
         size_t stringSize = 0;
         std::string type;
@@ -130,6 +136,11 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
         jsContinuationStateManagerStubCache_[key]->callbackData_.callbackRef = callbackRef;
     }
     return jsContinuationStateManagerStubCache_[key];
+}
+
+void JsContinuationStateManager::GetNapiParams()
+{
+
 }
 
 void JsContinuationStateManager::GetAbilityContext(

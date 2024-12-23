@@ -130,14 +130,16 @@ struct StateCallbackInfo {
                       const std::string &abilityName) : missionId(missionId), bundleName(bundleName),
                                                         moduleName(moduleName), abilityName(abilityName) {}
 
-    bool operator==(const StateCallbackInfo &rhs) const {
+    bool operator==(const StateCallbackInfo &rhs) const
+    {
         return missionId == rhs.missionId &&
                bundleName == rhs.bundleName &&
                moduleName == rhs.moduleName &&
                abilityName == rhs.abilityName;
     }
 
-    friend bool operator<(const StateCallbackInfo &lhs, const StateCallbackInfo &rhs) {
+    friend bool operator<(const StateCallbackInfo &lhs, const StateCallbackInfo &rhs)
+    {
         if (lhs.missionId < rhs.missionId)
             return true;
         if (rhs.missionId < lhs.missionId)
