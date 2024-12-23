@@ -105,8 +105,8 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     std::string abilityName = abilityInfo->name;
     std::string key = std::to_string(missionId) + bundleName + moduleName + abilityName;
     auto cacheStubEntry = jsContinuationStateManagerStubCache_.find(key);
-    if(cacheStubEntry == jsContinuationStateManagerStubCache_.end() || cacheStubEntry->second == nullptr){
-        sptr<DistributedSchedule::JsContinuationStateManagerStub> stub(
+    if (cacheStubEntry == jsContinuationStateManagerStubCache_.end() || cacheStubEntry->second == nullptr) {
+        sptr <DistributedSchedule::JsContinuationStateManagerStub> stub(
                 new DistributedSchedule::JsContinuationStateManagerStub());
         DistributedSchedule::JsContinuationStateManagerStub::StateCallbackData callbackData;
         size_t stringSize = 0;
@@ -122,7 +122,7 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
         callbackData.env = env;
         stub->callbackData_ = callbackData;
         jsContinuationStateManagerStubCache_[key] = stub;
-    }else{
+    } else {
         napi_ref oldCallbackRef = jsContinuationStateManagerStubCache_[key]->callbackData_.callbackRef;
         if (oldCallbackRef != nullptr) {
             napi_delete_reference(env, oldCallbackRef);

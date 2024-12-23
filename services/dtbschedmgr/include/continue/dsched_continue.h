@@ -125,6 +125,7 @@ struct StateCallbackInfo {
     std::string abilityName;
 
     StateCallbackInfo() {};
+
     StateCallbackInfo(const int32_t &missionId, const std::string &bundleName, const std::string &moduleName,
                       const std::string &abilityName) : missionId(missionId), bundleName(bundleName),
                                                         moduleName(moduleName), abilityName(abilityName) {}
