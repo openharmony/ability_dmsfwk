@@ -59,7 +59,9 @@ public:
     std::shared_ptr<DSchedContinue> GetDSchedContinueByWant(const OHOS::AAFwk::Want& want, int32_t missionId);
     std::shared_ptr<DSchedContinue> GetDSchedContinueByDevId(const std::u16string& devId, int32_t missionId);
     void NotifyTerminateContinuation(const int32_t missionId);
-
+    int32_t ContinueStateCallbackRegister(StateCallbackInfo &stateCallbackInfo, sptr<IRemoteObject> callback);
+    int32_t ContinueStateCallbackUnRegister(StateCallbackInfo &stateCallbackInfo);
+    int32_t NotifyQuickStartState(StateCallbackInfo &stateCallbackInfo, int32_t state, std::string message);
 private:
     void StartEvent();
     void HandleContinueMission(const std::string& srcDeviceId, const std::string& dstDeviceId, int32_t missionId,
@@ -89,6 +91,8 @@ private:
         void OnDataRecv(int32_t socket, std::shared_ptr<DSchedDataBuffer> dataBuffer);
     };
 
+public:
+    std::map<StateCallbackInfo, StateCallbackData> stateCallbackCache_;
 private:
 #ifdef DMSFWK_ALL_CONNECT_MGR
     static constexpr int32_t CONNECT_DECISION_WAIT_S = 60;

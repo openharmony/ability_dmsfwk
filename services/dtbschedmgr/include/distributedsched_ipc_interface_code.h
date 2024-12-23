@@ -95,6 +95,11 @@ enum class IDSchedInterfaceCode : uint32_t {
 
     // request code for set continue state
     SET_MISSION_CONTINUE_STATE = 300,
+
+    // continue state notify callback
+    CONTINUE_STATE_CALLBACK = 301,
+    CONTINUE_STATE_CALLBACK_REGISTER = 302,
+    CONTINUE_STATE_CALLBACK_UNREGISTER = 303,
 };
 
 enum class IDRreeInstallCallbackInterfaceCode : uint32_t {

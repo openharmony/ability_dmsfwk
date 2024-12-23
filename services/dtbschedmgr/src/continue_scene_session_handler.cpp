@@ -89,5 +89,31 @@ int32_t ContinueSceneSessionHandler::GetPersistentId(int32_t& persistentId)
     
     return INVALID_PARAMETERS_ERR;
 }
+
+int32_t ContinueSceneSessionHandler::GetPersistentId(int32_t& persistentId, std::string &continueSessionId)
+{
+    HILOGI("%{public}s called", __func__);
+    auto sceneSessionManager = SessionManagerLite::GetInstance().GetSceneSessionManagerLiteProxy();
+    if (!sceneSessionManager) {
+        HILOGE("proxy is nullptr.");
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    int32_t retryTimeout = RETRY_TIMES;
+    AAFwk::MissionInfo missionInfo;
+    do {
+        auto err = sceneSessionManager->GetSessionInfoByContinueSessionId(continueSessionId, missionInfo);
+        if (err == WSError::WS_OK) {
+            persistentId = missionInfo.id;
+            return ERR_OK;
+        }
+        HILOGE("Get sessionInfo failed, continueSessionId: %{public}s, errorCode: %{public}d",
+               continueSessionId_.c_str(), err);
+        std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
+    } while (--retryTimeout >= 0);
+
+    return INVALID_PARAMETERS_ERR;
+}
+
 } // namespace DistributedSchedule
 } // namespace OHOS

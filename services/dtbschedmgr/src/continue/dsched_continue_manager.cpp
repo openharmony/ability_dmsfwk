@@ -37,6 +37,7 @@ namespace {
 const std::string TAG = "DSchedContinueManager";
 const std::string DSCHED_CONTINUE_MANAGER = "dsched_continue_manager";
 const std::string CONTINUE_TIMEOUT_TASK = "continue_timeout_task";
+const std::u16string CONNECTION_CALLBACK_INTERFACE_TOKEN = u"ohos.abilityshell.DistributedConnection";
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DSchedContinueManager);
@@ -554,6 +555,65 @@ void DSchedContinueManager::NotifyTerminateContinuation(const int32_t missionId)
         }
     }
     HILOGW("doesn't match an existing continuation.");
+}
+
+int32_t DSchedContinueManager::ContinueStateCallbackRegister(StateCallbackInfo &stateCallbackInfo, sptr<IRemoteObject> callback)
+{
+    auto lastResult = stateCallbackCache_.find(stateCallbackInfo);
+    if(lastResult == stateCallbackCache_.end()){
+        StateCallbackData stateCallbackData;
+        stateCallbackData.remoteObject = callback;
+        stateCallbackCache_[stateCallbackInfo] = stateCallbackData;
+        return ERR_OK;
+    }
+    StateCallbackData stateCallbackData = lastResult->second;
+    stateCallbackData.remoteObject = callback;
+    if(stateCallbackData.state != -1){
+        return NotifyQuickStartState(stateCallbackInfo, stateCallbackData.state, stateCallbackData.message);
+    }
+    return ERR_OK;
+}
+
+int32_t DSchedContinueManager::ContinueStateCallbackUnRegister(StateCallbackInfo &stateCallbackInfo)
+{
+    stateCallbackCache_.erase(stateCallbackInfo);
+    return ERR_OK;
+}
+
+int32_t DSchedContinueManager::NotifyQuickStartState(StateCallbackInfo &stateCallbackInfo, int32_t state, std::string message)
+{
+    HILOGI("NotifyQuickStartState called, state: %{public}d, message: %{public}s", state, message.c_str());
+    auto remote = stateCallbackCache_.find(stateCallbackInfo);
+    if (remote == stateCallbackCache_.end()) {
+        StateCallbackData nweStateCallbackData;
+        nweStateCallbackData.state = state;
+        nweStateCallbackData.message = message;
+        stateCallbackCache_[stateCallbackInfo] = nweStateCallbackData;
+        return ERR_OK;
+    }
+    StateCallbackData stateCallbackData = remote->second;
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
+        HILOGE("Write interface token failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteInt32(state)) {
+        HILOGE("Write state failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (!data.WriteString(message)) {
+        HILOGE("Write message failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    stateCallbackData.remoteObject->SendRequest(static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_STATE_CALLBACK), data, reply, option);
+    stateCallbackData.state = -1;
+    stateCallbackData.message = nullptr;
+    return ERR_OK;
 }
 
 int32_t DSchedContinueManager::OnContinueEnd(const DSchedContinueInfo& info)

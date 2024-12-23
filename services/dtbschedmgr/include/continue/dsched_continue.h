@@ -94,6 +94,7 @@ public:
     std::string continueType_;
     std::string sinkAbilityName_;
     int32_t missionId_ = 0;
+    std::string continueSessionId_;
 };
 
 typedef enum {
@@ -115,6 +116,47 @@ struct ContinueAbilityData {
 struct ContinueEventData {
     std::string moduleName;
     std::string abilityName;
+};
+
+struct StateCallbackInfo {
+    int32_t missionId;
+    std::string bundleName;
+    std::string moduleName;
+    std::string abilityName;
+
+    StateCallbackInfo() {};
+    StateCallbackInfo(const int32_t &missionId, const std::string &bundleName, const std::string &moduleName,
+                      const std::string &abilityName) : missionId(missionId), bundleName(bundleName),
+                                                        moduleName(moduleName), abilityName(abilityName) {}
+
+    bool operator==(const StateCallbackInfo &rhs) const {
+        return missionId == rhs.missionId &&
+               bundleName == rhs.bundleName &&
+               moduleName == rhs.moduleName &&
+               abilityName == rhs.abilityName;
+    }
+
+    friend bool operator<(const StateCallbackInfo &lhs, const StateCallbackInfo &rhs) {
+        if (lhs.missionId < rhs.missionId)
+            return true;
+        if (rhs.missionId < lhs.missionId)
+            return false;
+        if (lhs.bundleName < rhs.bundleName)
+            return true;
+        if (rhs.bundleName < lhs.bundleName)
+            return false;
+        if (lhs.moduleName < rhs.moduleName)
+            return true;
+        if (rhs.moduleName < lhs.moduleName)
+            return false;
+        return lhs.abilityName < rhs.abilityName;
+    }
+};
+
+struct StateCallbackData {
+    sptr<IRemoteObject> remoteObject;
+    int32_t state = -1;
+    std::string message;
 };
 
 class DSchedContinue : public std::enable_shared_from_this<DSchedContinue> {

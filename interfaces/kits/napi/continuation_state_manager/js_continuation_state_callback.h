@@ -13,9 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_SOFTBUSS_ADAPTER_FUZZER_H
-#define OHOS_SOFTBUSS_ADAPTER_FUZZER_H
+#ifndef ABILITY_DMSFWK_JS_CONTINUATION_STATE_CALLBACK_H
+#define ABILITY_DMSFWK_JS_CONTINUATION_STATE_CALLBACK_H
 
-#define FUZZ_PROJECT_NAME "multiusermanager_fuzzer"
+#include <memory>
+#include "iremote_broker.h"
 
-#endif
+namespace OHOS {
+namespace DistributedSchedule {
+class IJsContinuationCallback : public OHOS::IRemoteBroker {
+public:
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.distributedSchedule.continuationstatecallback");
+
+    virtual int32_t ContinueStateCallback(MessageParcel &data, MessageParcel &reply) = 0;
+};
+} // namespace DistributedSchedule
+} // namespace OHOS
+
+#endif //ABILITY_DMSFWK_JS_CONTINUATION_STATE_CALLBACK_H

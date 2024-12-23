@@ -1,0 +1,73 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
+
+config("continuemanager_napi_public_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "//foundation/ability/dmsfwk/interfaces/kits/napi/include/",
+    "//foundation/ability/dmsfwk/services/dtbabilitymgr/include/",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/include/",
+  ]
+
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+}
+
+ohos_shared_library("continuemanager_napi") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  sources = [
+    "js_continuation_state_client.cpp",
+    "js_continuation_state_manager.cpp",
+    "js_continuation_state_manager_stub.cpp",
+  ]
+
+  public_configs = [ ":continuemanager_napi_public_config" ]
+
+  deps = [
+    "${dms_path}/common:distributed_sched_utils",
+    "../../../innerkits/common:common_sdk",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:napi_base_context",
+    "ability_runtime:wantagent_innerkits",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "device_manager:devicemanagersdk",
+    "device_security_level:dslm_sdk",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+    "samgr:samgr_proxy",
+  ]
+
+  relative_install_dir = "module/app/ability"
+
+  subsystem_name = "ability"
+  part_name = "dmsfwk"
+}
+
