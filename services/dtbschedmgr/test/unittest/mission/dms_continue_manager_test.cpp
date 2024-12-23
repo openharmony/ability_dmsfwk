@@ -1387,5 +1387,60 @@ HWTEST_F(DMSContinueManagerTest, FindToNotifyRecvBroadcast_001, TestSize.Level1)
     EXPECT_EQ(recvMgr->registerOnListener_.empty(), true);
     DTEST_LOG << "DMSContinueManagerTest FindToNotifyRecvBroadcast_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: NotifyIconDisappear_001
+ * @tc.desc: test NotifyIconDisappear
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, NotifyIconDisappear_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest NotifyIconDisappear_001 start" << std::endl;
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+    std::string senderNetworkId = "senderNetworkId";
+    std::string bundleName = "bundleName";
+    std::string continueType = "senderNetworkId";
+    uint16_t bundleNameId = 0;
+    std::string finalBundleName = "finalBundleName";
+    int32_t state = 0;
+    recvMgr->iconInfo_.senderNetworkId = senderNetworkId;
+    recvMgr->registerOnListener_.clear();
+    recvMgr->NotifyIconDisappear(bundleNameId,
+        currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType), state);
+    EXPECT_EQ(recvMgr->registerOnListener_.empty(), true);
+    DTEST_LOG << "DMSContinueManagerTest NotifyIconDisappear_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyDockDisplay_001
+ * @tc.desc: test NotifyDockDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, NotifyDockDisplay_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest NotifyDockDisplay_001 start" << std::endl;
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+    std::string senderNetworkId = "senderNetworkId";
+    std::string bundleName = "bundleName";
+    std::string continueType = "senderNetworkId";
+    uint16_t bundleNameId = 0;
+    std::string finalBundleName = "finalBundleName";
+    int32_t state = 0;
+    recvMgr->registerOnListener_.clear();
+    int32_t ret = recvMgr->NotifyDockDisplay(bundleNameId,
+        currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType), state);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    std::vector<sptr<IRemoteObject>> objs;
+    {
+        std::lock_guard<std::mutex> registerOnListenerMapLock(recvMgr->eventMutex_);
+        recvMgr->registerOnListener_[TYPE] = objs;
+    }
+    ret = recvMgr->NotifyDockDisplay(bundleNameId,
+        currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType), state);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DMSContinueManagerTest NotifyDockDisplay_001 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
