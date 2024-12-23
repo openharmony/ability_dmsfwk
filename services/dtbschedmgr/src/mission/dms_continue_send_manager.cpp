@@ -129,7 +129,6 @@ void DMSContinueSendMgr::NotifyMissionFocused(const int32_t missionId, FocusedRe
         return;
     }
 
-
 #ifdef DMS_CHECK_WIFI
     if (!WifiStateAdapter::GetInstance().IsWifiActive()) {
         HILOGE("wifi is not activated");
