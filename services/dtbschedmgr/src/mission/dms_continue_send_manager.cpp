@@ -31,6 +31,8 @@
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/dsched_sync_e2e.h"
 #include "mission/wifi_state_adapter.h"
+#include "mission/bluetooth_state_adapter.h"
+#include "bluetooth_host.h"
 #include "multi_user_manager.h"
 #include "parcel_helper.h"
 #include "softbus_adapter/softbus_adapter.h"
@@ -126,10 +128,22 @@ void DMSContinueSendMgr::NotifyMissionFocused(const int32_t missionId, FocusedRe
         HILOGI("Unknown focusedReason, no need to deal NotifyMissionFocused");
         return;
     }
+
+
+#ifdef DMS_CHECK_WIFI
     if (!WifiStateAdapter::GetInstance().IsWifiActive()) {
         HILOGE("wifi is not activated");
         return;
     }
+#endif
+
+#ifdef DMS_CHECK_BLUETOOTH
+    if (!BluetoothStateAdapter::GetInstance().IsBluetoothActive()) {
+        HILOGE("bluetooth is not activated");
+        return;
+    }
+#endif
+
     auto feedfunc = [this, missionId, reason]() {
         int32_t newMissionId = missionId;
         if (reason == FocusedReason::MMI) {

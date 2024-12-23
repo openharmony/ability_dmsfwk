@@ -29,7 +29,7 @@ namespace {
 constexpr uint32_t INTERCEPT_STRING_LENGTH = 20;
 constexpr uint32_t DSCHED_MAX_RECV_DATA_LEN = 104857600;
 
-constexpr int32_t DSCHED_QOS_TYPE_MIN_BW = 40 * 1024 * 1024;
+constexpr int32_t DSCHED_QOS_TYPE_MIN_BW = 300 * 1024;
 constexpr int32_t DSCHED_QOS_TYPE_MAX_LATENCY = 6000;
 constexpr int32_t DSCHED_QOS_TYPE_MIN_LATENCY = 1000;
 
