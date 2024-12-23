@@ -562,10 +562,10 @@ int32_t DSchedContinueManager::ContinueStateCallbackRegister(StateCallbackInfo &
     auto lastResult = stateCallbackCache_.find(stateCallbackInfo);
     if(lastResult == stateCallbackCache_.end()){
         StateCallbackData stateCallbackData;
-        std::shared_ptr<StateCallbackIpcDiedListener> diedListener = std::make_shared<StateCallbackIpcDiedListener>();
+        sptr<StateCallbackIpcDiedListener> diedListener = new StateCallbackIpcDiedListener();
         diedListener->stateCallbackInfo_ = stateCallbackInfo;
         stateCallbackData.diedListener = diedListener;
-        callback.AddDeathRecipient(diedListener);
+        callback->AddDeathRecipient(diedListener);
         stateCallbackData.remoteObject = callback;
         stateCallbackCache_[stateCallbackInfo] = stateCallbackData;
         return ERR_OK;
