@@ -123,6 +123,12 @@ const std::map<int32_t, int32_t> DSchedContinue::DMS_CONVERT_TO_SDK_ERR_MAP = {
         DmsInterfaceSdkErr::ERR_CONTINUE_ALREADY_IN_PROGRESS),
 };
 
+void StateCallbackIpcDiedListener::OnRemoteDied(const wptr<IRemoteObject> &object)
+{
+    HILOGW("State call back remote object died, clean cache! ");
+    DSchedContinueManager::GetInstance().ContinueStateCallbackUnRegister(stateCallbackInfo_);
+}
+
 DSchedContinue::DSchedContinue(int32_t subServiceType, int32_t direction,  const sptr<IRemoteObject>& callback,
     const DSchedContinueInfo& continueInfo) : subServiceType_(subServiceType), direction_(direction),
     continueInfo_(continueInfo), callback_(callback)

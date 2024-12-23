@@ -154,8 +154,19 @@ struct StateCallbackInfo {
     }
 };
 
+class StateCallbackIpcDiedListener : public IRemoteObject::DeathRecipient {
+
+public:
+    void OnRemoteDied(const wptr<IRemoteObject> &object) override;
+
+public:
+    sptr<StateCallbackInfo> stateCallbackInfo_;
+
+};
+
 struct StateCallbackData {
     sptr<IRemoteObject> remoteObject;
+    sptr<StateCallbackIpcDiedListener> diedListener;
     int32_t state = -1;
     std::string message;
 };
