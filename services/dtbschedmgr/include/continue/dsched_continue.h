@@ -160,7 +160,7 @@ public:
     void OnRemoteDied(const wptr<IRemoteObject> &object) override;
 
 public:
-    sptr<StateCallbackInfo> stateCallbackInfo_;
+    StateCallbackInfo stateCallbackInfo_;
 
 };
 
