@@ -329,26 +329,32 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     }
 
     std::string bundleName = distributedBundleInfo.bundleName;
-
     HILOGI("get distributedBundleInfo success, bundleName: %{public}s", bundleName.c_str());
     std::string finalBundleName;
     AppExecFwk::BundleInfo localBundleInfo;
     std::string continueType;
     DmsAbilityInfo abilityInfo;
     FindContinueType(distributedBundleInfo, continueTypeId, continueType, abilityInfo);
+
     if (!GetFinalBundleName(distributedBundleInfo, finalBundleName, localBundleInfo, continueType)) {
         HILOGE("The app is not installed on the local device.");
+        NotifyIconDisappear(bundleNameId,
+            currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType), state);
         return INVALID_PARAMETERS_ERR;
     }
     HILOGI("got finalBundleName: %{public}s", finalBundleName.c_str());
 
     if (localBundleInfo.applicationInfo.bundleType != AppExecFwk::BundleType::APP) {
         HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
+        NotifyIconDisappear(bundleNameId,
+            currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType), state);
         return INVALID_PARAMETERS_ERR;
     }
     if (state == ACTIVE
         && !IsBundleContinuable(localBundleInfo, abilityInfo.abilityName, abilityInfo.moduleName, continueType)) {
         HILOGE("Bundle %{public}s is not continuable", finalBundleName.c_str());
+        NotifyIconDisappear(bundleNameId,
+            currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType), state);
         return BUNDLE_NOT_CONTINUABLE;
     }
 
@@ -356,6 +362,26 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     if (ret != ERR_OK) {
         return ret;
     }
+    ret = NotifyDockDisplay(bundleNameId, currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType),
+        state);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    HILOGI("DealOnBroadcastBusiness end");
+    return ERR_OK;
+}
+
+void DMSContinueRecvMgr::NotifyIconDisappear(uint16_t bundleNameId, const currentIconInfo& continueInfo,
+    const int32_t state)
+{
+    if (state == ACTIVE && continueInfo.senderNetworkId == iconInfo_.senderNetworkId) {
+        NotifyDockDisplay(bundleNameId, continueInfo, INACTIVE);
+    }
+}
+
+int32_t DMSContinueRecvMgr::NotifyDockDisplay(uint16_t bundleNameId, const currentIconInfo& continueInfo,
+    const int32_t state)
+{
     std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     auto iterItem = registerOnListener_.find(onType_);
     if (iterItem == registerOnListener_.end()) {
@@ -364,10 +390,8 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     }
     std::vector<sptr<IRemoteObject>> objs = iterItem->second;
     for (auto iter : objs) {
-        NotifyRecvBroadcast(iter,
-            currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType), state);
+        NotifyRecvBroadcast(iter, continueInfo, state);
     }
-    HILOGI("DealOnBroadcastBusiness end");
     return ERR_OK;
 }
 
