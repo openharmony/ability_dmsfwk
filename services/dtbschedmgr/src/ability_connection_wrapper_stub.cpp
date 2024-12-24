@@ -27,6 +27,10 @@ namespace {
 const std::string TAG = "AbilityConnectionWrapperStub";
 }
 
+AbilityConnectionWrapperStub::AbilityConnectionWrapperStub()
+{
+}
+
 AbilityConnectionWrapperStub::AbilityConnectionWrapperStub(sptr<IRemoteObject> connection)
 {
     distributedConnection_ = connection;
@@ -82,6 +86,10 @@ int32_t AbilityConnectionWrapperStub::OnRemoteRequest(uint32_t code, MessageParc
 void AbilityConnectionWrapperStub::OnAbilityConnectDone(const AppExecFwk::ElementName& element,
     const sptr<IRemoteObject>& remoteObject, int32_t resultCode)
 {
+    if (distributedConnection_ == nullptr) {
+        HILOGI("called by collab");
+        return;
+    }
     auto proxy = std::make_unique<AbilityConnectionWrapperProxy>(distributedConnection_);
     if (isCall_) {
         HILOGI("OnAbilityConnectDone get caller callback");
@@ -96,6 +104,10 @@ void AbilityConnectionWrapperStub::OnAbilityConnectDone(const AppExecFwk::Elemen
 void AbilityConnectionWrapperStub::OnAbilityDisconnectDone(const AppExecFwk::ElementName& element,
     int32_t resultCode)
 {
+    if (distributedConnection_ == nullptr) {
+        HILOGI("called by collab");
+        return;
+    }
     if (isCall_) {
         HILOGI("OnAbilityDisconnectDone release caller");
         DistributedSchedAdapter::GetInstance().ProcessCalleeDied(distributedConnection_);

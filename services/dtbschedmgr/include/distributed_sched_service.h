@@ -41,6 +41,7 @@
 #include "mission/distributed_mission_info.h"
 #include "nocopyable.h"
 #endif
+#include "dsched_collab.h"
 #include "dsched_continue.h"
 #include "dsched_continue_event.h"
 #include "single_instance.h"

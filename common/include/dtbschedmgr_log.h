@@ -533,6 +533,50 @@ enum {
      * Result(29360239) for BMS can not find the specified module.
      */
     CAN_NOT_FOUND_MODULE_ERR = 29360239,
+    /**
+     * Result(29360330) for sending event failed during collaboration.
+     */
+    COLLAB_SEND_EVENT_FAILED = 29360330,
+    /**
+     * Result(29360331) for the local collaboration task is already in progress.
+     */
+    COLLAB_ALREADY_IN_PROGRESS = 29360331,
+    /**
+     * Result(29360332) for the remote deviceId is not found.
+     */
+    FIND_REMOTE_DEVICEID_ERR = 29360332,
+    /**
+     * Result(29360333) for session shutdown during continuation.
+     */
+    COLLAB_SESSION_SHUTDOWN = 29360333,
+    /**
+     * Result(29360334) for get local deviceId failed.
+     */
+    FIND_LOCAL_DEVICEID_ERR = 29360334,
+    /**
+     * Result(29360335) for get caller appId fromBmslocal failed.
+     */
+    GET_APPID_ERR = 29360335,
+    /**
+     * Result(29360336) for get bundleNameList failed.
+     */
+    GET_BUNDLENAMELIST_ERR = 29360336,
+    /**
+     * Result(29360337) for get accountInfo failed.
+     */
+    GET_ACCOUNT_INFO_ERR = 29360337,
+    /**
+     * Result(29360338) for get userId from active Os AccountIds fail.
+     */
+    GET_USERID_INFO_ERR = 29360338,
+    /**
+     * Result(29360339) for state machine receving invalid state code.
+     */
+    COLLAB_STATE_MACHINE_INVALID_STATE = 29360339,
+    /**
+     * Result(29360340) for DistributedSched Service Continue Ability Timeout Error.
+     */
+    COLLAB_ABILITY_TIMEOUT_ERR = 29360340,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

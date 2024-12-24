@@ -95,6 +95,13 @@ enum class IDSchedInterfaceCode : uint32_t {
 
     // request code for set continue state
     SET_MISSION_CONTINUE_STATE = 300,
+
+    // request code for collab
+    COLLAB_MISSION = 330,
+    NOTIFY_COLLAB_PREPARE_RESULT = 331,
+    GET_SOURCE_SOCKET_NAME = 332,
+    NOTIFY_CLOSE_COLLAB_SESSION = 333,
+    NOTIFY_START_ABILITY_RESULT = 334,
 };
 
 enum class IDRreeInstallCallbackInterfaceCode : uint32_t {
