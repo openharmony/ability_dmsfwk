@@ -113,5 +113,7 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":DistributedSchedStubFuzzTest" ]
+  if (!dmsfwk_softbus_adapter_common) {
+    deps = [ ":DistributedSchedStubFuzzTest" ]
+  }
 }

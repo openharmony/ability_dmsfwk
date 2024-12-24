@@ -92,5 +92,7 @@ ohos_fuzztest("BundleManagerCallBackStubFuzzTest") {
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":BundleManagerCallBackStubFuzzTest" ]
+  if (!dmsfwk_softbus_adapter_common) {
+    deps = [ ":BundleManagerCallBackStubFuzzTest" ]
+  }
 }

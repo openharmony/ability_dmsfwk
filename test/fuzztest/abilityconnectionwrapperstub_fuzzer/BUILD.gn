@@ -94,5 +94,7 @@ ohos_fuzztest("AbilityConnectionWrapperStubFuzzTest") {
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":AbilityConnectionWrapperStubFuzzTest" ]
+  if (!dmsfwk_softbus_adapter_common) {
+    deps = [ ":AbilityConnectionWrapperStubFuzzTest" ]
+  }
 }
