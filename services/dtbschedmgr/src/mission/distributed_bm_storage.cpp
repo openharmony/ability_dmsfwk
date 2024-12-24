@@ -100,6 +100,9 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
         HILOGW("GetBundleInfo of %{public}s failed:%{public}d or cannot be continued", bundleName.c_str(), ret);
         return false;
     }
+#ifdef DMS_SYNC_DATA_ON_PACKAGE_EVENT
+    DmsKvSyncE2E::GetInstance()->PushAndPullData();
+#endif
     std::string localUdid;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(localUdid);
     if (localUdid == "") {
@@ -232,6 +235,9 @@ bool DmsBmStorage::DeleteStorageDistributeInfo(const std::string &bundleName)
         HILOGE("delete key error: %{public}d", status);
         return false;
     }
+#ifdef DMS_SYNC_DATA_ON_PACKAGE_EVENT
+    DmsKvSyncE2E::GetInstance()->PushAndPullData();
+#endif
     HILOGI("delete value to kvStore success");
     return true;
 }

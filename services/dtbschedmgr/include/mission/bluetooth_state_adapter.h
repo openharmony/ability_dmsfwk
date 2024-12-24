@@ -18,6 +18,7 @@
 
 #include <string>
 #include "single_instance.h"
+#include <atomic>
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -35,8 +36,8 @@ public:
 private:
     BluetoothStateAdapter() {}
 
-    bool isBTActive_ = false;
-    bool isBLEActive_ = false;
+    std::atomic<bool> isBTActive_;
+    std::atomic<bool> isBLEActive_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

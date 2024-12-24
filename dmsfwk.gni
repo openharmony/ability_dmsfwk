@@ -28,6 +28,7 @@ declare_args() {
   dmsfwk_check_wifi = true
   dmsfwk_recv_broadcast = true
   dmsfwk_use_screenlock_icon_holdon = true
+  dmsfwk_sync_data_on_package_event = false
   if (defined(global_parts_info)) {
     if (defined(global_parts_info.multimedia_image_framework)) {
       dmsfwk_mission_manager = true

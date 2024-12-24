@@ -28,19 +28,19 @@ bool BluetoothStateAdapter::IsBluetoothActive()
 {
     HILOGI("current BT state cache is: %{public}s; BLE state cache is: %{public}s", isBTActive_ ? "true" : "false",
            isBLEActive_ ? "true" : "false");
-    return isBTActive_ || isBLEActive_;
+    return isBTActive_.load() || isBLEActive_.load();
 }
 
 void BluetoothStateAdapter::UpdateBTState(bool isBTActive)
 {
     HILOGI("update BT state: %{public}s", isBTActive ? "true" : "false");
-    isBTActive_ = isBTActive;
+    isBTActive_.store(isBTActive);
 }
 
 void BluetoothStateAdapter::UpdateBLEState(bool isBLEActive)
 {
     HILOGI("update BLE state: %{public}s", isBLEActive ? "true" : "false");
-    isBLEActive_ = isBLEActive;
+    isBLEActive_.store(isBLEActive);
 }
 
 
