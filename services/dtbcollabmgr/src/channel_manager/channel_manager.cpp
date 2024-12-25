@@ -374,7 +374,8 @@ int32_t ChannelManager::CreateClientSocket(const std::string& channelName,
         HILOGE("channel name too long, %{public}s", channelName.c_str());
         return INVALID_CHANNEL_NAME;
     }
-    std::string name = SESSION_NAME_PREFIX + ownerName_ + SPLIT_FLAG + CHANNEL_DATATYPE_PREFIX_MAP[dataType] + SPLIT_FLAG + channelName;
+    std::string name = SESSION_NAME_PREFIX + ownerName_ +
+        SPLIT_FLAG + CHANNEL_DATATYPE_PREFIX_MAP[dataType] + SPLIT_FLAG + channelName;
     std::string peerSocketName = SESSION_NAME_PREFIX + peerName;
     HILOGI("self-name: %{public}s, peerName: %{public}s", name.c_str(), peerSocketName.c_str());
     SocketInfo socketInfo = {
@@ -414,7 +415,7 @@ int32_t ChannelManager::DeleteChannel(const int32_t channelId)
     return channelId;
 }
 
-inline void ChannelManager::ClearRegisterChannel(const int32_t channelId)
+void ChannelManager::ClearRegisterChannel(const int32_t channelId)
 {
     HILOGI("start clear channel info, channelId=%{public}d", channelId);
     std::unique_lock<std::shared_mutex> writeLock(channelMutex_);
@@ -431,14 +432,14 @@ inline void ChannelManager::ClearRegisterChannel(const int32_t channelId)
     }
 }
 
-inline void ChannelManager::ClearRegisterListener(const int32_t channelId)
+void ChannelManager::ClearRegisterListener(const int32_t channelId)
 {
     HILOGI("start release listener, channelId=%{public}d", channelId);
     std::unique_lock<std::shared_mutex> writeLock(listenerMutex_);
     listenersMap_.erase(channelId);
 }
 
-inline void ChannelManager::ClearRegisterSocket(const int32_t channelId)
+void ChannelManager::ClearRegisterSocket(const int32_t channelId)
 {
     HILOGI("start release socket, channelId=%{public}d", channelId);
     std::unique_lock<std::shared_mutex> writeLock(socketMutex_);
@@ -491,9 +492,9 @@ int32_t ChannelManager::RegisterChannelListener(const int32_t channelId,
 inline void ChannelManager::CleanInvalidListener(std::vector<std::weak_ptr<IChannelListener>>& listeners)
 {
     listeners.erase(std::remove_if(listeners.begin(), listeners.end(),
-                        [](const std::weak_ptr<IChannelListener> listener) {
-                            return listener.expired();
-                        }),
+        [](const std::weak_ptr<IChannelListener> listener) {
+            return listener.expired();
+        }),
         listeners.end());
 }
 
@@ -615,7 +616,8 @@ int32_t ChannelManager::UpdateChannelStatus(const int32_t channelId)
             break;
         }
     }
-    HILOGI("curStatus:%{public}d, newStatus:%{public}d", static_cast<int32_t>(curStatus), static_cast<int32_t>(newStatus));
+    HILOGI("curStatus:%{public}d, newStatus:%{public}d",
+        static_cast<int32_t>(curStatus), static_cast<int32_t>(newStatus));
     if (newStatus != curStatus) {
         return SetChannelStatus(channelId, newStatus);
     }

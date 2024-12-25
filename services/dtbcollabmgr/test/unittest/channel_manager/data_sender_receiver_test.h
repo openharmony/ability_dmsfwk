@@ -31,7 +31,6 @@ public:
     AVTransStreamDataExt ext { AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_SYNC_FRAME, 1, 12345, 67890, 123456, 7891011 };
     std::shared_ptr<AVTransStreamData> streamData = std::make_shared<AVTransStreamData>(buffer, ext);
     DataSenderReceiver dataSenderReceiver = DataSenderReceiver(socketId);
-    
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp();

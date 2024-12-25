@@ -27,10 +27,10 @@ public:
     SoftbusMock mockSoftbus;
     const std::string ownerName = "UnittestName";
 
-    static void SetUpTestCase(); 
-    static void TearDownTestCase(); 
+    static void SetUpTestCase();
+    static void TearDownTestCase();
 
-    void SetUp() override; 
+    void SetUp() override;
     void TearDown() override;
 };
 }

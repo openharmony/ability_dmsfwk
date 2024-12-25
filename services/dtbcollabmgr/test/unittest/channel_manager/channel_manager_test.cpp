@@ -103,7 +103,7 @@ HWTEST_F(ChannelManagerTest, TestInit_ListenFailure, TestSize.Level1)
  */
 HWTEST_F(ChannelManagerTest, CreateServerChannel_Success, TestSize.Level1)
 {
-    std::string channelName = "TestChannel"; 
+    std::string channelName = "TestChannel";
     ChannelDataType dataType = ChannelDataType::MESSAGE;
     ChannelPeerInfo peerInfo = { "peerName", "networkId" };
 
@@ -118,7 +118,7 @@ HWTEST_F(ChannelManagerTest, CreateServerChannel_Success, TestSize.Level1)
  */
 HWTEST_F(ChannelManagerTest, CreateServerChannel_ExceedMax_Failed, TestSize.Level1)
 {
-    std::string channelName = "TestChannel"; 
+    std::string channelName = "TestChannel";
     ChannelDataType dataType = ChannelDataType::MESSAGE;
     ChannelPeerInfo peerInfo = { "peerName", "networkId" };
 

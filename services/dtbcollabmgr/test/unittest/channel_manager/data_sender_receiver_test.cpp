@@ -81,7 +81,9 @@ HWTEST_F(DataSenderReceiverTest, SendStreamData_Failure, TestSize.Level1)
 HWTEST_F(DataSenderReceiverTest, SendStreamData_ParameterCheck, TestSize.Level1)
 {
     EXPECT_CALL(mockSoftbus, SendStream(socketId, testing::_, testing::_, testing::_))
-        .WillOnce(testing::Invoke([](int32_t socket, const StreamData* data, const StreamData* ext, const StreamFrameInfo* param) -> int32_t {
+        .WillOnce(testing::Invoke([](int32_t socket,
+            const StreamData* data, const StreamData* ext,
+            const StreamFrameInfo* param) -> int32_t {
             if (data == nullptr || ext == nullptr || param == nullptr) {
                 return -1;
             }
@@ -227,7 +229,8 @@ HWTEST_F(DataSenderReceiverTest, SendBytesData_ParameterCheck, TestSize.Level1)
 HWTEST_F(DataSenderReceiverTest, SendBytesData_MultiSendParameterCheck, TestSize.Level1)
 {
     EXPECT_CALL(mockSoftbus, GetSessionOption(socketId, testing::_, testing::_, sizeof(uint32_t)))
-        .WillRepeatedly(testing::Invoke([&](int sessionId, SessionOption option, void* optionValue, uint32_t valueSize) {
+        .WillRepeatedly(testing::Invoke([&](int sessionId,
+            SessionOption option, void* optionValue, uint32_t valueSize) {
             *reinterpret_cast<uint32_t*>(optionValue) = 100;
             return ERR_OK;
         }));
@@ -258,7 +261,8 @@ HWTEST_F(DataSenderReceiverTest, SendBytesData_MultiSendParameterCheck, TestSize
             return ERR_OK;
         }));
 
-    std::shared_ptr<AVTransDataBuffer> sendData = std::make_shared<AVTransDataBuffer>((100 - SessionDataHeader::HEADER_LEN) * 3);
+    std::shared_ptr<AVTransDataBuffer> sendData = std::make_shared<AVTransDataBuffer>(
+            (100 - SessionDataHeader::HEADER_LEN) * 3);
     int32_t result = dataSenderReceiver.SendBytesData(sendData);
 
     EXPECT_EQ(result, ERR_OK);
@@ -266,18 +270,22 @@ HWTEST_F(DataSenderReceiverTest, SendBytesData_MultiSendParameterCheck, TestSize
 
 /**
  * @tc.name: PackRecvPacketData_Success
- * @tc.desc: Test for PackRecvPacketData when it successfully processes the serialized header and data and decodes correctly
+ * @tc.desc: Test for PackRecvPacketData when it successfully decodes correctly
  * @tc.type: FUNC
  */
 HWTEST_F(DataSenderReceiverTest, PackRecvPacketData_Success, TestSize.Level1)
 {
     uint8_t data[100 - SessionDataHeader::HEADER_LEN];
     uint32_t dataLen = sizeof(data);
-    SessionDataHeader headerPara(1, FRAG_TYPE::FRAG_START_END, 0, 0, 100, 100, 100 - SessionDataHeader::HEADER_LEN, 0);
+    SessionDataHeader headerPara(
+        1,
+        FRAG_TYPE::FRAG_START_END, 0, 0, 100, 100,
+        100 - SessionDataHeader::HEADER_LEN, 0);
     auto serializedHeader = headerPara.Serialize();
-    
+
     std::vector<uint8_t> combinedData;
-    combinedData.insert(combinedData.end(), serializedHeader->Data(), serializedHeader->Data() + serializedHeader->Size());
+    combinedData.insert(combinedData.end(),
+        serializedHeader->Data(), serializedHeader->Data() + serializedHeader->Size());
     combinedData.insert(combinedData.end(), data, data + dataLen);
 
     int32_t result = dataSenderReceiver.PackRecvPacketData(combinedData.data(), combinedData.size());
@@ -297,22 +305,34 @@ HWTEST_F(DataSenderReceiverTest, PackRecvPacketData_MultiRecvSuccess, TestSize.L
 {
     uint8_t data[100 - SessionDataHeader::HEADER_LEN];
     uint32_t dataLen = sizeof(data);
-    SessionDataHeader headerPara1(1, FRAG_TYPE::FRAG_START, 0, 0, 3 * (100 - SessionDataHeader::HEADER_LEN), 100, 100 - SessionDataHeader::HEADER_LEN, 0);
+    SessionDataHeader headerPara1(1,
+        FRAG_TYPE::FRAG_START, 0, 0,
+        3 * (100 - SessionDataHeader::HEADER_LEN), 100,
+        100 - SessionDataHeader::HEADER_LEN, 0);
     auto serializedHeader1 = headerPara1.Serialize();
     std::vector<uint8_t> combinedData1;
-    combinedData1.insert(combinedData1.end(), serializedHeader1->Data(), serializedHeader1->Data() + serializedHeader1->Size());
+    combinedData1.insert(combinedData1.end(),
+        serializedHeader1->Data(), serializedHeader1->Data() + serializedHeader1->Size());
     combinedData1.insert(combinedData1.end(), data, data + dataLen);
 
-    SessionDataHeader headerPara2(1, FRAG_TYPE::FRAG_MID, 0, 0, 3 * (100 - SessionDataHeader::HEADER_LEN), 100, 100 - SessionDataHeader::HEADER_LEN, 1);
+    SessionDataHeader headerPara2(1,
+        FRAG_TYPE::FRAG_MID, 0, 0,
+        3 * (100 - SessionDataHeader::HEADER_LEN), 100,
+        100 - SessionDataHeader::HEADER_LEN, 1);
     auto serializedHeader2 = headerPara2.Serialize();
     std::vector<uint8_t> combinedData2;
-    combinedData2.insert(combinedData2.end(), serializedHeader2->Data(), serializedHeader2->Data() + serializedHeader2->Size());
+    combinedData2.insert(combinedData2.end(),
+        serializedHeader2->Data(), serializedHeader2->Data() + serializedHeader2->Size());
     combinedData2.insert(combinedData2.end(), data, data + dataLen);
 
-    SessionDataHeader headerPara3(1, FRAG_TYPE::FRAG_END, 0, 0, 3 * (100 - SessionDataHeader::HEADER_LEN), 100, 100 - SessionDataHeader::HEADER_LEN, 2);
+    SessionDataHeader headerPara3(1,
+        FRAG_TYPE::FRAG_END, 0, 0,
+        3 * (100 - SessionDataHeader::HEADER_LEN), 100,
+        100 - SessionDataHeader::HEADER_LEN, 2);
     auto serializedHeader3 = headerPara3.Serialize();
     std::vector<uint8_t> combinedData3;
-    combinedData3.insert(combinedData3.end(), serializedHeader3->Data(), serializedHeader3->Data() + serializedHeader3->Size());
+    combinedData3.insert(combinedData3.end(),
+        serializedHeader3->Data(), serializedHeader3->Data() + serializedHeader3->Size());
     combinedData3.insert(combinedData3.end(), data, data + dataLen);
 
     int32_t result1 = dataSenderReceiver.PackRecvPacketData(combinedData1.data(), combinedData1.size());
