@@ -813,13 +813,11 @@ HWTEST_F(DistributedSchedPermissionTest, CheckBackgroundPermission_007, TestSize
         .tokenAttr = 0
     };
 
-    PermissionStateFull infoManagerTestState = {
+    Security::AccessToken::PermissionStatus infoManagerTestState = {
         .permissionName = "ohos.permission.START_INVISIBLE_ABILITY",
-        .isGeneral = true,
-        .resDeviceID = {"local"},
-        .grantStatus = {PermissionState::PERMISSION_GRANTED}, // first grant
-        .grantFlags = {PermissionFlag::PERMISSION_SYSTEM_FIXED}};
-    std::vector<PermissionStateFull> permStateList;
+        .grantStatus = PermissionState::PERMISSION_GRANTED, // first grant
+        .grantFlag = PermissionFlag::PERMISSION_SYSTEM_FIXED};
+    std::vector<Security::AccessToken::PermissionStatus> permStateList;
     permStateList.emplace_back(infoManagerTestState);
 
     HapTokenInfoForSync remoteTokenInfo = {
@@ -987,13 +985,11 @@ HWTEST_F(DistributedSchedPermissionTest, CheckTargetAbilityVisible_004, TestSize
         .tokenAttr = 0
     };
 
-    PermissionStateFull infoManagerTestState = {
+    Security::AccessToken::PermissionStatus infoManagerTestState = {
         .permissionName = "ohos.permission.START_INVISIBLE_ABILITY",
-        .isGeneral = true,
-        .resDeviceID = {"local"},
-        .grantStatus = {PermissionState::PERMISSION_GRANTED}, // first grant
-        .grantFlags = {PermissionFlag::PERMISSION_SYSTEM_FIXED}};
-    std::vector<PermissionStateFull> permStateList;
+        .grantStatus = PermissionState::PERMISSION_GRANTED, // first grant
+        .grantFlag = PermissionFlag::PERMISSION_SYSTEM_FIXED};
+    std::vector<Security::AccessToken::PermissionStatus> permStateList;
     permStateList.emplace_back(infoManagerTestState);
 
     HapTokenInfoForSync remoteTokenInfo = {
@@ -1039,13 +1035,11 @@ HWTEST_F(DistributedSchedPermissionTest, CheckTargetAbilityVisible_005, TestSize
         .tokenAttr = 0
     };
 
-    PermissionStateFull infoManagerTestState = {
+    Security::AccessToken::PermissionStatus infoManagerTestState = {
         .permissionName = "ohos.permission.START_INVISIBLE_ABILITY",
-        .isGeneral = true,
-        .resDeviceID = {"local"},
-        .grantStatus = {PermissionState::PERMISSION_DENIED},
-        .grantFlags = {PermissionFlag::PERMISSION_SYSTEM_FIXED}};
-    std::vector<PermissionStateFull> permStateList;
+        .grantStatus = PermissionState::PERMISSION_DENIED,
+        .grantFlag = PermissionFlag::PERMISSION_SYSTEM_FIXED};
+    std::vector<Security::AccessToken::PermissionStatus> permStateList;
     permStateList.emplace_back(infoManagerTestState);
 
     HapTokenInfoForSync remoteTokenInfo = {
