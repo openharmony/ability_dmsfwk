@@ -18,12 +18,10 @@
 
 namespace OHOS {
 namespace DistributedCollab {
-    namespace 
-    {
+    namespace {
         static const std::string TAG = "DSchedCollabAVTransDataBuffer";
-    } 
+    }
     
-
     AVTransDataBuffer::AVTransDataBuffer(size_t capacity)
     {
         if (capacity != 0 && capacity < DSCHED_MAX_BUFFER_SIZE) {

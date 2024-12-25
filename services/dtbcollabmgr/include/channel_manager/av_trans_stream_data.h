@@ -71,8 +71,8 @@ namespace DistributedCollab {
         explicit AVTransStreamData(
             const std::shared_ptr<AVTransDataBuffer>& buffer,
             const AVTransStreamDataExt ext)
-            : data_(buffer)
-            , ext_(ext) {};
+            : data_(buffer),
+            ext_(ext) {};
         ~AVTransStreamData() = default;
 
         std::shared_ptr<AVTransDataBuffer> StreamData();

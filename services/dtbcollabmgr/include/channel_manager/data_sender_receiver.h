@@ -17,14 +17,14 @@
 #define OHOS_DSCHED_COLLAB_DATA_SENDER_RECEIVER_H
 
 #include "av_trans_data_buffer.h"
-#include "session_data_header.h"
 #include "av_trans_stream_data.h"
+#include "session_data_header.h"
 #include <atomic>
 #include <memory>
 
 namespace OHOS {
 namespace DistributedCollab {
- 
+
     class DataSenderReceiver {
     public:
         explicit DataSenderReceiver(const int32_t socketId)
@@ -44,11 +44,16 @@ namespace DistributedCollab {
         int32_t DoSendPacket(SessionDataHeader& headerPara, const uint8_t* dataHeader, const uint32_t dataLen);
 
         int32_t CheckRecvSessionHeader(const SessionDataHeader& headerPara);
-        int32_t ProcessAllPacketRecv(const uint8_t* data, const uint32_t dataLen, const SessionDataHeader& headerPara);
-        int32_t ProcessStartPacketRecv(const uint8_t* data, const uint32_t dataLen, const SessionDataHeader& headerPara);
-        int32_t ProcessMidPacketRecv(const uint8_t* data, const uint32_t dataLen, const SessionDataHeader& headerPara);
-        int32_t ProcessEndPacketRecv(const uint8_t* data, const uint32_t dataLen, const SessionDataHeader& headerPara);
-        int32_t WriteRecvBytesDataToBuffer(const uint8_t* data, const uint32_t dataLen, const SessionDataHeader& headerPara);
+        int32_t ProcessAllPacketRecv(const uint8_t* data, const uint32_t dataLen,
+            const SessionDataHeader& headerPara);
+        int32_t ProcessStartPacketRecv(const uint8_t* data, const uint32_t dataLen,
+            const SessionDataHeader& headerPara);
+        int32_t ProcessMidPacketRecv(const uint8_t* data, const uint32_t dataLen,
+            const SessionDataHeader& headerPara);
+        int32_t ProcessEndPacketRecv(const uint8_t* data, const uint32_t dataLen,
+            const SessionDataHeader& headerPara);
+        int32_t WriteRecvBytesDataToBuffer(const uint8_t* data, const uint32_t dataLen,
+            const SessionDataHeader& headerPara);
 
         bool isDataReady();
         int64_t GetNowTimeStampUs();

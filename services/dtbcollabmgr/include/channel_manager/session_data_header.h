@@ -52,7 +52,6 @@ namespace DistributedCollab {
     };
 
     class SessionDataHeader {
-
     public:
         static std::optional<SessionDataHeader> Deserialize(const uint8_t* buffer, const size_t bufLen);
 
@@ -67,14 +66,14 @@ namespace DistributedCollab {
             uint32_t packetLen,
             uint32_t payloadLen,
             uint16_t subSeq)
-            : version_(version)
-            , fragFlag_(fragFlag)
-            , dataType_(dataType)
-            , seqNum_(seqNum)
-            , totalLen_(totalLen)
-            , packetLen_(packetLen)
-            , payloadLen_(payloadLen)
-            , subSeq_(subSeq) {};
+            : version_(version),
+            fragFlag_(fragFlag),
+            dataType_(dataType),
+            seqNum_(seqNum),
+            totalLen_(totalLen),
+            packetLen_(packetLen),
+            payloadLen_(payloadLen),
+            subSeq_(subSeq) {};
         ~SessionDataHeader() = default;
         std::unique_ptr<AVTransDataBuffer> Serialize();
 
@@ -84,7 +83,10 @@ namespace DistributedCollab {
         static constexpr uint16_t HEADER_UINT8_NUM = 1;
         static constexpr uint16_t HEADER_UINT16_NUM = 2;
         static constexpr uint16_t HEADER_UINT32_NUM = 5;
-        static constexpr uint32_t HEADER_LEN = 2 * sizeof(uint16_t) * HEADER_TLV_NUM + sizeof(uint16_t) * HEADER_UINT16_NUM + sizeof(uint32_t) * HEADER_UINT32_NUM + sizeof(uint8_t) * HEADER_UINT8_NUM;
+        static constexpr uint32_t HEADER_LEN = 2 * sizeof(uint16_t) * HEADER_TLV_NUM
+            + sizeof(uint16_t) * HEADER_UINT16_NUM
+            + sizeof(uint32_t) * HEADER_UINT32_NUM
+            + sizeof(uint8_t) * HEADER_UINT8_NUM;
         static constexpr uint32_t BINARY_DATA_MAX_TOTAL_LEN = 100 * 1024 * 1024;
         static constexpr uint32_t BINARY_PAYLOAD_MAX_LEN = 4 * 1024 * 1024;
 
@@ -101,10 +103,14 @@ namespace DistributedCollab {
         uint16_t subSeq_;
 
     private:
-        static constexpr uint32_t BASE_HEADER_LEN = 2 * sizeof(uint16_t) * HEADER_TLV_NUM + sizeof(uint16_t) * HEADER_UINT16_NUM + sizeof(uint32_t) * HEADER_UINT32_NUM + sizeof(uint8_t) * HEADER_UINT8_NUM;
+        static constexpr uint32_t BASE_HEADER_LEN = 2 * sizeof(uint16_t) * HEADER_TLV_NUM 
+            + sizeof(uint16_t) * HEADER_UINT16_NUM 
+            + sizeof(uint32_t) * HEADER_UINT32_NUM 
+            + sizeof(uint8_t) * HEADER_UINT8_NUM;
 
     private:
-        int32_t WriteTlvItemToBuffer(const TlvItem& tlvItem, uint8_t* header, const uint32_t bufLen);
+        int32_t WriteTlvItemToBuffer(const TlvItem& tlvItem, uint8_t* header, 
+            const uint32_t bufLen);
         uint32_t WriteVersion(uint8_t* header, const uint32_t bufLen);
         uint32_t WriteFragFlag(uint8_t* header, const uint32_t bufLen);
         uint32_t WriteDataType(uint8_t* header, const uint32_t bufLen);
@@ -114,7 +120,8 @@ namespace DistributedCollab {
         uint32_t WritePayloadLen(uint8_t* header, const uint32_t bufLen);
         uint32_t WriteSubSeq(uint8_t* header, const uint32_t bufLen);
 
-        int32_t ReadTlvItemFromBuffer(TlvItem& tlvItem, SessionDataHeader& sessionHeader, const uint8_t* header, const uint8_t* end);
+        int32_t ReadTlvItemFromBuffer(TlvItem& tlvItem, SessionDataHeader& sessionHeader, 
+            const uint8_t* header, const uint8_t* end);
         uint16_t ReadUint16(const uint8_t* header);
         int32_t ReadVersionFromBuffer(SessionDataHeader&, const uint8_t* header, const uint32_t len);
         int32_t ReadFragFlagFromBuffer(SessionDataHeader&, const uint8_t* header, const uint32_t len);

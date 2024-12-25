@@ -38,21 +38,21 @@ namespace DistributedCollab {
         WriteExtFlagToJson(root);
         WriteExtIndexToJson(root);
         switch (ext_.flag_) {
-        case AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_PIXEL_MAP: {
-            WriteExtPixelMapPackOptionToJson(root);
-            return root;
-        }
-        case AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_SURFACE_PARAM: {
-            WriteExtSurfaceParamToJson(root);
-            return root;
-        }
-        default: {
-            WriteExtPtsToJson(root);
-            WriteExtStartEncodeTToJson(root);
-            WriteExtFinishEncodeTToJson(root);
-            WriteExtSendEncodeTToJson(root);
-            return root;
-        }
+            case AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_PIXEL_MAP: {
+                WriteExtPixelMapPackOptionToJson(root);
+                return root;
+            }
+            case AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_SURFACE_PARAM: {
+                WriteExtSurfaceParamToJson(root);
+                return root;
+            }
+            default: {
+                WriteExtPtsToJson(root);
+                WriteExtStartEncodeTToJson(root);
+                WriteExtFinishEncodeTToJson(root);
+                WriteExtSendEncodeTToJson(root);
+                return root;
+            }
         }
     }
 

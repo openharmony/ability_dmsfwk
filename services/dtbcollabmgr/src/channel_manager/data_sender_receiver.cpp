@@ -141,7 +141,16 @@ namespace DistributedCollab {
         uint16_t seqNum = 0;
 
         int32_t ret = ERR_OK;
-        SessionDataHeader headerPara(PROTOCOL_VERSION, FRAG_TYPE::FRAG_START_END, dataType, seqNum, totalLen, packetLen, payloadLen, subSeq);
+        SessionDataHeader headerPara(
+            PROTOCOL_VERSION,
+            FRAG_TYPE::FRAG_START_END,
+            dataType,
+            seqNum,
+            totalLen,
+            packetLen,
+            payloadLen,
+            subSeq
+        );
         ret = DoSendPacket(headerPara, current, payloadLen);
         if (ret != ERR_OK) {
             return ret;
@@ -159,13 +168,16 @@ namespace DistributedCollab {
 
         int32_t ret = ERR_OK;
         // copy header
-        ret = memcpy_s(header, sendBuffer->Size(), headerBuffer->Data(), SessionDataHeader::HEADER_LEN);
+        ret = memcpy_s(header, sendBuffer->Size(), 
+            headerBuffer->Data(), SessionDataHeader::HEADER_LEN);
         if (ret != ERR_OK) {
             HILOGE("Write header failed");
             return WRITE_SESSION_HEADER_FAILED;
         }
         // copy data
-        ret = memcpy_s(header + SessionDataHeader::HEADER_LEN, sendBuffer->Size() - SessionDataHeader::HEADER_LEN, dataHeader, dataLen);
+        ret = memcpy_s(header + SessionDataHeader::HEADER_LEN, 
+            sendBuffer->Size() - SessionDataHeader::HEADER_LEN, 
+                dataHeader, dataLen);
         if (ret != ERR_OK) {
             HILOGE("Write data failed");
             return WRITE_SEND_DATA_BUFFER_FAILED;
@@ -272,7 +284,8 @@ namespace DistributedCollab {
         return ERR_OK;
     }
 
-    int32_t DataSenderReceiver::ProcessMidPacketRecv(const uint8_t* data, const uint32_t dataLen, const SessionDataHeader& headerPara)
+    int32_t DataSenderReceiver::ProcessMidPacketRecv(const uint8_t* data,
+        const uint32_t dataLen, const SessionDataHeader& headerPara)
     {
         if (packBuffer_ == nullptr || !isWaiting_) {
             HILOGE("recv mid data packet but buffer empty or end waiting");
@@ -289,7 +302,8 @@ namespace DistributedCollab {
         return ERR_OK;
     }
 
-    int32_t DataSenderReceiver::ProcessEndPacketRecv(const uint8_t* data, const uint32_t dataLen, const SessionDataHeader& headerPara)
+    int32_t DataSenderReceiver::ProcessEndPacketRecv(const uint8_t* data, 
+        const uint32_t dataLen, const SessionDataHeader& headerPara)
     {
         if (packBuffer_ == nullptr || !isWaiting_) {
             HILOGE("recv end data packet but buffer empty or end waiting");
@@ -305,7 +319,8 @@ namespace DistributedCollab {
         return ret;
     }
 
-    inline int32_t DataSenderReceiver::WriteRecvBytesDataToBuffer(const uint8_t* data, const uint32_t dataLen, const SessionDataHeader& headerPara)
+    int32_t DataSenderReceiver::WriteRecvBytesDataToBuffer(const uint8_t* data, 
+        const uint32_t dataLen, const SessionDataHeader& headerPara)
     {
         uint8_t* header = const_cast<uint8_t*>(data);
         uint8_t* dataHeader = header + (headerPara.packetLen_ - headerPara.payloadLen_);
@@ -317,7 +332,8 @@ namespace DistributedCollab {
             return INVALID_SESSION_HEADER_TOTAL_LEN;
         }
 
-        int32_t ret = memcpy_s(currentPos, packBuffer_->Size() - (currentPos - packBuffer_->Data()),
+        int32_t ret = memcpy_s(currentPos, 
+            packBuffer_->Size() - (currentPos - packBuffer_->Data()),
             dataHeader, headerPara.payloadLen_);
         if (ret != ERR_OK) {
             HILOGE("write payload to buffer failed");
