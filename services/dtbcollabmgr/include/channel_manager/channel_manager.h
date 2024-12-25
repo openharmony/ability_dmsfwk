@@ -41,10 +41,13 @@ public:
     void DeInit();
 
     int32_t GetVersion();
-    int32_t CreateServerChannel(const std::string& channelName, const ChannelDataType dataType, const ChannelPeerInfo& peerInfo);
-    int32_t CreateClientChannel(const std::string& channelName, const ChannelDataType dataType, const ChannelPeerInfo& peerInfo);
+    int32_t CreateServerChannel(const std::string& channelName,
+        const ChannelDataType dataType, const ChannelPeerInfo& peerInfo);
+    int32_t CreateClientChannel(const std::string& channelName,
+        const ChannelDataType dataType, const ChannelPeerInfo& peerInfo);
     int32_t DeleteChannel(const int32_t channelId);
-    int32_t RegisterChannelListener(const int32_t channelId, const std::shared_ptr<IChannelListener> listener);
+    int32_t RegisterChannelListener(const int32_t channelId,
+        const std::shared_ptr<IChannelListener> listener);
     int32_t ConnectChannel(const int32_t channelId);
 
     int32_t SendBytes(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data);
@@ -56,7 +59,8 @@ public:
     void OnSocketClosed(const int32_t socketId, const ShutdownReason reason);
     void OnBytesReceived(const int32_t socketId, const void* data, const uint32_t dataLen);
     void OnMessageReceived(const int32_t socketId, const void* data, const uint32_t dataLen);
-    void OnStreamReceived(const int32_t socketId, const StreamData* data, const StreamData* ext, const StreamFrameInfo* param);
+    void OnStreamReceived(const int32_t socketId, const StreamData* data,
+        const StreamData* ext, const StreamFrameInfo* param);
 
 private:
     static constexpr int32_t VERSION_ = 0;
@@ -105,12 +109,15 @@ private:
     explicit ChannelManager() = default;
     ~ChannelManager();
 
-    int32_t PostTask(const AppExecFwk::InnerEvent::Callback& callback, const AppExecFwk::EventQueue::Priority priority);
+    int32_t PostTask(const AppExecFwk::InnerEvent::Callback& callback,
+        const AppExecFwk::EventQueue::Priority priority);
     void StartEvent();
 
     int32_t CreateServerSocket();
-    int32_t CreateClientSocket(const std::string& channelName, const std::string& peerName, const std::string& peerNetworkId, const ChannelDataType dataType);
-    std::optional<ChannelInfo> CreateBaseChannel(const std::string& channelName, const ChannelDataType dataType, const ChannelPeerInfo& peerInfo);
+    int32_t CreateClientSocket(const std::string& channelName,
+        const std::string& peerName, const std::string& peerNetworkId, const ChannelDataType dataType);
+    std::optional<ChannelInfo> CreateBaseChannel(const std::string& channelName,
+        const ChannelDataType dataType, const ChannelPeerInfo& peerInfo);
     int32_t GenerateNextId(const ChannelDataType dataType);
     bool isValidChannelId(const int32_t channelId);
     int32_t RegisterSocket(ChannelInfo& info, const ChannelDataType dataType);
@@ -138,14 +145,16 @@ private:
     ChannelStatus GetChannelStatus(const int32_t channelId);
 
     template <typename Func, typename... Args>
-    int32_t DoSendData(const int32_t channelId, Func doSendFunc, Args&&... args);
+    int32_t DoSendData(const int32_t channelId, Func doSendFunc, Args&&...args);
     template <typename Func, typename... Args>
-    void NotifyListeners(const int32_t channelId, Func listenerFunc, const AppExecFwk::EventQueue::Priority priority, Args&&... args);
+    void NotifyListeners(const int32_t channelId, Func listenerFunc,
+        const AppExecFwk::EventQueue::Priority priority, Args&&...args);
     int32_t GetValidSocket(const int32_t channelId);
     int32_t DoSendBytes(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data);
     int32_t DoSendMessage(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data);
     int32_t DoSendStream(const int32_t channelId, const std::shared_ptr<AVTransStreamData>& data);
-    std::shared_ptr<AVTransDataBuffer> ProcessRecvData(const int32_t channelId, const int32_t socketId, const void* data, const uint32_t dataLen);
+    std::shared_ptr<AVTransDataBuffer> ProcessRecvData(const int32_t channelId,
+        const int32_t socketId, const void* data, const uint32_t dataLen);
     void DoConnectCallback(const int32_t channelId);
     void DoDisConnectCallback(const int32_t channelId);
     void DoBytesReceiveCallback(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer);

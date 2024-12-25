@@ -285,7 +285,7 @@ HWTEST_F(DataSenderReceiverTest, PackRecvPacketData_Success, TestSize.Level1)
 
     std::vector<uint8_t> combinedData;
     combinedData.insert(combinedData.end(),
-        serializedHeader->Data(), serializedHeader->Data() + serializedHeader->Size());
+    serializedHeader->Data(), serializedHeader->Data() + serializedHeader->Size());
     combinedData.insert(combinedData.end(), data, data + dataLen);
 
     int32_t result = dataSenderReceiver.PackRecvPacketData(combinedData.data(), combinedData.size());
@@ -470,13 +470,18 @@ HWTEST_F(DataSenderReceiverTest, PackRecvPacketData_MultiRecvWithDiffTotalLen_00
 {
     uint8_t data[100 - SessionDataHeader::HEADER_LEN];
     uint32_t dataLen = sizeof(data);
-    SessionDataHeader headerPara1(1, FRAG_TYPE::FRAG_START, 0, 0, 3 * (100 - SessionDataHeader::HEADER_LEN), 100, 100 - SessionDataHeader::HEADER_LEN, 0);
+    SessionDataHeader headerPara1(1,
+        FRAG_TYPE::FRAG_START, 0, 0,
+        3 * (100 - SessionDataHeader::HEADER_LEN), 100,
+        100 - SessionDataHeader::HEADER_LEN, 0);
     auto serializedHeader1 = headerPara1.Serialize();
     std::vector<uint8_t> combinedData1;
     combinedData1.insert(combinedData1.end(), serializedHeader1->Data(), serializedHeader1->Data() + serializedHeader1->Size());
     combinedData1.insert(combinedData1.end(), data, data + dataLen);
 
-    SessionDataHeader headerPara2(1, FRAG_TYPE::FRAG_MID, 0, 0, 100, 100, 100 - SessionDataHeader::HEADER_LEN, 1);
+    SessionDataHeader headerPara2(1,
+        FRAG_TYPE::FRAG_MID, 0, 0, 100, 100,
+        100 - SessionDataHeader::HEADER_LEN, 1);
     auto serializedHeader2 = headerPara2.Serialize();
     std::vector<uint8_t> combinedData2;
     combinedData2.insert(combinedData2.end(), serializedHeader2->Data(), serializedHeader2->Data() + serializedHeader2->Size());
@@ -501,13 +506,18 @@ HWTEST_F(DataSenderReceiverTest, PackRecvPacketData_MultiRecvWithDiffTotalLen_00
 {
     uint8_t data[100 - SessionDataHeader::HEADER_LEN];
     uint32_t dataLen = sizeof(data);
-    SessionDataHeader headerPara1(1, FRAG_TYPE::FRAG_START, 0, 0, 3 * (100 - SessionDataHeader::HEADER_LEN), 100, 100 - SessionDataHeader::HEADER_LEN, 0);
+    SessionDataHeader headerPara1(1,
+        FRAG_TYPE::FRAG_START, 0, 0,
+        3 * (100 - SessionDataHeader::HEADER_LEN), 100,
+        100 - SessionDataHeader::HEADER_LEN, 0);
     auto serializedHeader1 = headerPara1.Serialize();
     std::vector<uint8_t> combinedData1;
     combinedData1.insert(combinedData1.end(), serializedHeader1->Data(), serializedHeader1->Data() + serializedHeader1->Size());
     combinedData1.insert(combinedData1.end(), data, data + dataLen);
 
-    SessionDataHeader headerPara3(1, FRAG_TYPE::FRAG_END, 0, 0, 100, 100, 100 - SessionDataHeader::HEADER_LEN, 1);
+    SessionDataHeader headerPara3(1,
+        FRAG_TYPE::FRAG_END, 0, 0, 100,
+        100, 100 - SessionDataHeader::HEADER_LEN, 1);
     auto serializedHeader3 = headerPara3.Serialize();
     std::vector<uint8_t> combinedData3;
     combinedData3.insert(combinedData3.end(), serializedHeader3->Data(), serializedHeader3->Data() + serializedHeader3->Size());

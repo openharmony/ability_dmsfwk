@@ -81,14 +81,14 @@ namespace {
         { QosSpeedType::LOW, g_low_qosInfo }
     };
 
-    static uint32_t g_low_QosTV_Param_Index = static_cast<uint32_t>(sizeof(g_low_qosInfo) / sizeof(QosTV));
-    static uint32_t g_high_QosTV_Param_Index = static_cast<uint32_t>(sizeof(g_high_qosInfo) / sizeof(QosTV));
+    static uint32_t g_lowQosTvParamIndex = static_cast<uint32_t>(sizeof(g_low_qosInfo) / sizeof(QosTV));
+    static uint32_t g_highQosTvParamIndex = static_cast<uint32_t>(sizeof(g_high_qosInfo) / sizeof(QosTV));
     static std::map<QosSpeedType, uint32_t> qos_speed_config = {
-        { QosSpeedType::HIGH, g_high_QosTV_Param_Index },
-        { QosSpeedType::LOW, g_low_QosTV_Param_Index }
+        { QosSpeedType::HIGH, g_highQosTvParamIndex },
+        { QosSpeedType::LOW, g_lowQosTvParamIndex }
     };
 
-#define CHECK_SOCKET_ID(socketId)                              \
+#define CHECK_SOCKET_ID(socketId)                          \
 do {                                                       \
     if ((socketId) <= 0) {                                 \
         HILOGE("invalid socket id, %{public}d", socketId); \
@@ -96,7 +96,7 @@ do {                                                       \
     }                                                      \
 } while (0)
 
-#define CHECK_CHANNEL_ID(socketId, channelId)                                     \
+#define CHECK_CHANNEL_ID(socketId, channelId)                                 \
 do {                                                                          \
     (channelId) = GetChannelId(socketId);                                     \
     if (!isValidChannelId(channelId)) {                                       \
@@ -105,7 +105,7 @@ do {                                                                          \
     }                                                                         \
 } while (0)
 
-#define CHECK_DATA_NULL(socketId, data, errorHandler)                          \
+#define CHECK_DATA_NULL(socketId, data, errorHandler)                      \
 do {                                                                       \
     if ((data) == nullptr) {                                               \
         HILOGE("receive empty bytes data, socketId=%{public}d", socketId); \
@@ -187,7 +187,7 @@ int32_t ChannelManager::Init(const std::string& ownerName)
     }
 
     ret = Listen(socketServerId, g_low_qosInfo,
-        g_low_QosTV_Param_Index, &channelManagerListener);
+        g_lowQosTvParamIndex, &channelManagerListener);
     if (ret != ERR_OK) {
         HILOGE("service listen failed, ret: %{public}d", ret);
         return LISTEN_SOCKET_FAILED;
@@ -655,7 +655,8 @@ void ChannelManager::OnSocketConnected(const int32_t socketId, const PeerSocketI
         return;
     }
     // remove datatype flag
-    channelName = channelName.substr(2);
+    constexpr int32_t namePrefix = 2;
+    channelName = channelName.substr(namePrefix);
     int32_t channelId = GetChannelId(channelName, *channelType);
     if (!isValidChannelId(channelId)) {
         HILOGE("invalid channelid=%{public}d with channelName %{public}s", channelId, channelName.c_str());
