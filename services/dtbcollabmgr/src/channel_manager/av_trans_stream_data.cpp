@@ -197,7 +197,7 @@ namespace DistributedCollab {
         }
     }
 
-    inline void AVTransStreamData::ReadExtSurfaceParamToJson(AVTransStreamDataExt& dataExt, const cJSON* root)
+    void AVTransStreamData::ReadExtSurfaceParamToJson(AVTransStreamDataExt& dataExt, const cJSON* root)
     {
         const cJSON* surfaceParamItem = cJSON_GetObjectItemCaseSensitive(root, "surface_param");
         if (surfaceParamItem != nullptr && cJSON_IsObject(surfaceParamItem)) {

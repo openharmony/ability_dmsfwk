@@ -90,7 +90,8 @@ namespace DistributedCollab {
         return SendUnpackData(sendData, dataType);
     }
 
-    int32_t DataSenderReceiver::SendUnpackData(const std::shared_ptr<AVTransDataBuffer>& sendData, const int32_t dataType)
+    int32_t DataSenderReceiver::SendUnpackData(const std::shared_ptr<AVTransDataBuffer>& sendData,
+        const int32_t dataType)
     {
         HILOGI("start to send bytes");
         uint32_t maxSendSize = 0;
@@ -107,7 +108,15 @@ namespace DistributedCollab {
         uint32_t payloadLen = packetLen - SessionDataHeader::HEADER_LEN;
         uint16_t seqNum = 0;
         uint16_t subSeq = 0;
-        SessionDataHeader headerPara(PROTOCOL_VERSION, FRAG_TYPE::FRAG_START, dataType, seqNum, totalLen, packetLen, payloadLen, subSeq);
+        SessionDataHeader headerPara(
+            PROTOCOL_VERSION,
+            FRAG_TYPE::FRAG_START,
+            dataType,
+            seqNum,
+            totalLen,
+            packetLen,
+            payloadLen,
+            subSeq);
 
         int32_t ret = DoSendPacket(headerPara, current, payloadLen);
         if (ret != ERR_OK) {
@@ -130,7 +139,8 @@ namespace DistributedCollab {
         return ERR_OK;
     }
 
-    int32_t DataSenderReceiver::SendAllPackets(const std::shared_ptr<AVTransDataBuffer> sendData, const int32_t dataType)
+    int32_t DataSenderReceiver::SendAllPackets(const std::shared_ptr<AVTransDataBuffer> sendData,
+        const int32_t dataType)
     {
         HILOGI("send all data");
         uint8_t* current = sendData->Data();
@@ -159,7 +169,8 @@ namespace DistributedCollab {
         return ERR_OK;
     }
 
-    int32_t DataSenderReceiver::DoSendPacket(SessionDataHeader& headerPara, const uint8_t* dataHeader, const uint32_t dataLen)
+    int32_t DataSenderReceiver::DoSendPacket(SessionDataHeader& headerPara,
+        const uint8_t* dataHeader, const uint32_t dataLen)
     {
         HILOGI("start to send packet by softbus");
         auto headerBuffer = headerPara.Serialize();
@@ -168,15 +179,15 @@ namespace DistributedCollab {
 
         int32_t ret = ERR_OK;
         // copy header
-        ret = memcpy_s(header, sendBuffer->Size(), 
+        ret = memcpy_s(header, sendBuffer->Size(),
             headerBuffer->Data(), SessionDataHeader::HEADER_LEN);
         if (ret != ERR_OK) {
             HILOGE("Write header failed");
             return WRITE_SESSION_HEADER_FAILED;
         }
         // copy data
-        ret = memcpy_s(header + SessionDataHeader::HEADER_LEN, 
-            sendBuffer->Size() - SessionDataHeader::HEADER_LEN, 
+        ret = memcpy_s(header + SessionDataHeader::HEADER_LEN,
+            sendBuffer->Size() - SessionDataHeader::HEADER_LEN,
                 dataHeader, dataLen);
         if (ret != ERR_OK) {
             HILOGE("Write data failed");
@@ -213,21 +224,21 @@ namespace DistributedCollab {
         // pack recv data
         uint8_t* dataHeader = const_cast<uint8_t*>(header);
         switch (sessionHeader.fragFlag_) {
-        case FRAG_TYPE::FRAG_START_END:
-            ret = ProcessAllPacketRecv(dataHeader, dataLen, sessionHeader);
-            break;
-        case FRAG_TYPE::FRAG_START:
-            ret = ProcessStartPacketRecv(dataHeader, dataLen, sessionHeader);
-            break;
-        case FRAG_TYPE::FRAG_MID:
-            ret = ProcessMidPacketRecv(dataHeader, dataLen, sessionHeader);
-            break;
-        case FRAG_TYPE::FRAG_END:
-            ret = ProcessEndPacketRecv(dataHeader, dataLen, sessionHeader);
-            break;
-        default:
-            HILOGE("invalid flag type, %{public}d", static_cast<uint32_t>(sessionHeader.fragFlag_));
-            return INVALID_SESSION_HEADER_FLAG_TYPE;
+            case FRAG_TYPE::FRAG_START_END:
+                ret = ProcessAllPacketRecv(dataHeader, dataLen, sessionHeader);
+                break;
+            case FRAG_TYPE::FRAG_START:
+                ret = ProcessStartPacketRecv(dataHeader, dataLen, sessionHeader);
+                break;
+            case FRAG_TYPE::FRAG_MID:
+                ret = ProcessMidPacketRecv(dataHeader, dataLen, sessionHeader);
+                break;
+            case FRAG_TYPE::FRAG_END:
+                ret = ProcessEndPacketRecv(dataHeader, dataLen, sessionHeader);
+                break;
+            default:
+                HILOGE("invalid flag type, %{public}d", static_cast<uint32_t>(sessionHeader.fragFlag_));
+                return INVALID_SESSION_HEADER_FLAG_TYPE;
         }
         return ret;
     }
@@ -250,7 +261,8 @@ namespace DistributedCollab {
         return ERR_OK;
     }
 
-    int32_t DataSenderReceiver::ProcessAllPacketRecv(const uint8_t* data, const uint32_t dataLen, const SessionDataHeader& headerPara)
+    int32_t DataSenderReceiver::ProcessAllPacketRecv(const uint8_t* data, const uint32_t dataLen,
+        const SessionDataHeader& headerPara)
     {
         if (packBuffer_ != nullptr || isWaiting_) {
             HILOGE("recv start data packet but buffer not empty or still waiting");
@@ -266,7 +278,8 @@ namespace DistributedCollab {
         return ERR_OK;
     }
 
-    int32_t DataSenderReceiver::ProcessStartPacketRecv(const uint8_t* data, const uint32_t dataLen, const SessionDataHeader& headerPara)
+    int32_t DataSenderReceiver::ProcessStartPacketRecv(const uint8_t* data, const uint32_t dataLen,
+        const SessionDataHeader& headerPara)
     {
         if (packBuffer_ != nullptr || isWaiting_) {
             HILOGE("recv start data packet but buffer not empty or still waiting");
@@ -302,7 +315,7 @@ namespace DistributedCollab {
         return ERR_OK;
     }
 
-    int32_t DataSenderReceiver::ProcessEndPacketRecv(const uint8_t* data, 
+    int32_t DataSenderReceiver::ProcessEndPacketRecv(const uint8_t* data,
         const uint32_t dataLen, const SessionDataHeader& headerPara)
     {
         if (packBuffer_ == nullptr || !isWaiting_) {
@@ -319,7 +332,7 @@ namespace DistributedCollab {
         return ret;
     }
 
-    int32_t DataSenderReceiver::WriteRecvBytesDataToBuffer(const uint8_t* data, 
+    int32_t DataSenderReceiver::WriteRecvBytesDataToBuffer(const uint8_t* data,
         const uint32_t dataLen, const SessionDataHeader& headerPara)
     {
         uint8_t* header = const_cast<uint8_t*>(data);
@@ -332,7 +345,7 @@ namespace DistributedCollab {
             return INVALID_SESSION_HEADER_TOTAL_LEN;
         }
 
-        int32_t ret = memcpy_s(currentPos, 
+        int32_t ret = memcpy_s(currentPos,
             packBuffer_->Size() - (currentPos - packBuffer_->Data()),
             dataHeader, headerPara.payloadLen_);
         if (ret != ERR_OK) {

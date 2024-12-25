@@ -103,9 +103,9 @@ namespace DistributedCollab {
         uint16_t subSeq_;
 
     private:
-        static constexpr uint32_t BASE_HEADER_LEN = 2 * sizeof(uint16_t) * HEADER_TLV_NUM 
-            + sizeof(uint16_t) * HEADER_UINT16_NUM 
-            + sizeof(uint32_t) * HEADER_UINT32_NUM 
+        static constexpr uint32_t BASE_HEADER_LEN = 2 * sizeof(uint16_t) * HEADER_TLV_NUM
+            + sizeof(uint16_t) * HEADER_UINT16_NUM
+            + sizeof(uint32_t) * HEADER_UINT32_NUM
             + sizeof(uint8_t) * HEADER_UINT8_NUM;
 
     private:
@@ -120,7 +120,7 @@ namespace DistributedCollab {
         uint32_t WritePayloadLen(uint8_t* header, const uint32_t bufLen);
         uint32_t WriteSubSeq(uint8_t* header, const uint32_t bufLen);
 
-        int32_t ReadTlvItemFromBuffer(TlvItem& tlvItem, SessionDataHeader& sessionHeader, 
+        int32_t ReadTlvItemFromBuffer(TlvItem& tlvItem, SessionDataHeader& sessionHeader,
             const uint8_t* header, const uint8_t* end);
         uint16_t ReadUint16(const uint8_t* header);
         int32_t ReadVersionFromBuffer(SessionDataHeader&, const uint8_t* header, const uint32_t len);

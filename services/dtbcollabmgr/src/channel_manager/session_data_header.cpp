@@ -124,7 +124,8 @@ namespace DistributedCollab {
         return TlvItem::HEADER_TYPE_BYTES + TlvItem::HEADER_LEN_BYTES + sizeof(packetLen_);
     }
 
-    inline int32_t SessionDataHeader::WriteTlvItemToBuffer(const TlvItem& tlvItem, uint8_t* header, const uint32_t bufLen)
+    int32_t SessionDataHeader::WriteTlvItemToBuffer(const TlvItem& tlvItem,
+        uint8_t* header, const uint32_t bufLen)
     {
         uint8_t* current = header;
         uint16_t typeInt = static_cast<uint16_t>(tlvItem.type);
@@ -133,7 +134,9 @@ namespace DistributedCollab {
         *current++ = tlvItem.len >> DSCHED_SHIFT_8;
         *current++ = tlvItem.len & UINT16_SHIFT_MASK_0;
 
-        int32_t ret = memcpy_s(current, bufLen - (current - header), &tlvItem.value, tlvItem.len);
+        int32_t ret = memcpy_s(current,
+            bufLen - (current - header),
+            &tlvItem.value, tlvItem.len);
         if (ret != ERR_OK) {
             HILOGE("copy tlv value failed!, ret %{public}d", ret);
             return WRITE_TLV_ITEM_TO_BUFFER_FAILED;
@@ -162,7 +165,7 @@ namespace DistributedCollab {
             current += (TlvItem::HEADER_LEN_BYTES + TlvItem::HEADER_TYPE_BYTES);
             current += item.len;
         }
-        if (sessionHeader.payloadLen_ > SessionDataHeader::BINARY_PAYLOAD_MAX_LEN 
+        if (sessionHeader.payloadLen_ > SessionDataHeader::BINARY_PAYLOAD_MAX_LEN
             || sessionHeader.packetLen_ > SessionDataHeader::BINARY_DATA_MAX_TOTAL_LEN) {
             HILOGE("invalid param");
             return std::nullopt;
@@ -190,7 +193,7 @@ namespace DistributedCollab {
         return sessionHeader;
     }
 
-    inline int32_t SessionDataHeader::ReadTlvItemFromBuffer(TlvItem& tlvItem, SessionDataHeader& sessionHeader,
+    int32_t SessionDataHeader::ReadTlvItemFromBuffer(TlvItem& tlvItem, SessionDataHeader& sessionHeader,
         const uint8_t* header, const uint8_t* end)
     {
         // assign item format
@@ -253,7 +256,7 @@ namespace DistributedCollab {
         return (header[0] << DSCHED_SHIFT_8) | header[1];
     }
 
-    inline int32_t SessionDataHeader::ReadVersionFromBuffer(SessionDataHeader& sessionHeader, 
+    inline int32_t SessionDataHeader::ReadVersionFromBuffer(SessionDataHeader& sessionHeader,
         const uint8_t* header, const uint32_t len)
     {
         int32_t ret = memcpy_s(&sessionHeader.version_, sizeof(sessionHeader.version_), header, len);
@@ -264,7 +267,7 @@ namespace DistributedCollab {
         return ERR_OK;
     }
 
-    inline int32_t SessionDataHeader::ReadFragFlagFromBuffer(SessionDataHeader& sessionHeader, 
+    inline int32_t SessionDataHeader::ReadFragFlagFromBuffer(SessionDataHeader& sessionHeader,
         const uint8_t* header, const uint32_t len)
     {
         int32_t ret = memcpy_s(&sessionHeader.fragFlag_, sizeof(sessionHeader.fragFlag_), header, len);
@@ -275,7 +278,7 @@ namespace DistributedCollab {
         return ERR_OK;
     }
 
-    inline int32_t SessionDataHeader::ReadDataTypeFromBuffer(SessionDataHeader& sessionHeader, 
+    inline int32_t SessionDataHeader::ReadDataTypeFromBuffer(SessionDataHeader& sessionHeader,
         const uint8_t* header, const uint32_t len)
     {
         int32_t ret = memcpy_s(&sessionHeader.dataType_, sizeof(sessionHeader.dataType_), header, len);
@@ -286,7 +289,7 @@ namespace DistributedCollab {
         return ERR_OK;
     }
 
-    inline int32_t SessionDataHeader::ReadSeqNumFromBuffer(SessionDataHeader& sessionHeader, 
+    inline int32_t SessionDataHeader::ReadSeqNumFromBuffer(SessionDataHeader& sessionHeader,
         const uint8_t* header, const uint32_t len)
     {
         int32_t ret = memcpy_s(&sessionHeader.seqNum_, sizeof(sessionHeader.seqNum_), header, len);
@@ -297,7 +300,7 @@ namespace DistributedCollab {
         return ERR_OK;
     }
 
-    inline int32_t SessionDataHeader::ReadTotalLenFromBuffer(SessionDataHeader& sessionHeader, 
+    inline int32_t SessionDataHeader::ReadTotalLenFromBuffer(SessionDataHeader& sessionHeader,
         const uint8_t* header, const uint32_t len)
     {
         int32_t ret = memcpy_s(&sessionHeader.totalLen_, sizeof(sessionHeader.totalLen_), header, len);
@@ -308,7 +311,7 @@ namespace DistributedCollab {
         return ERR_OK;
     }
 
-    inline int32_t SessionDataHeader::ReadSubSeqFromBuffer(SessionDataHeader& sessionHeader, 
+    inline int32_t SessionDataHeader::ReadSubSeqFromBuffer(SessionDataHeader& sessionHeader,
         const uint8_t* header, const uint32_t len)
     {
         int32_t ret = memcpy_s(&sessionHeader.subSeq_, sizeof(sessionHeader.subSeq_), header, len);
@@ -319,7 +322,7 @@ namespace DistributedCollab {
         return ERR_OK;
     }
 
-    inline int32_t SessionDataHeader::ReadPayloadLenFromBuffer(SessionDataHeader& sessionHeader, 
+    inline int32_t SessionDataHeader::ReadPayloadLenFromBuffer(SessionDataHeader& sessionHeader,
         const uint8_t* header, const uint32_t len)
     {
         int32_t ret = memcpy_s(&sessionHeader.payloadLen_, sizeof(sessionHeader.payloadLen_), header, len);
@@ -330,7 +333,7 @@ namespace DistributedCollab {
         return ERR_OK;
     }
 
-    inline int32_t SessionDataHeader::ReadPacketLenFromBuffer(SessionDataHeader& sessionHeader, 
+    inline int32_t SessionDataHeader::ReadPacketLenFromBuffer(SessionDataHeader& sessionHeader,
         const uint8_t* header, const uint32_t len)
     {
         int32_t ret = memcpy_s(&sessionHeader.packetLen_, sizeof(sessionHeader.packetLen_), header, len);
