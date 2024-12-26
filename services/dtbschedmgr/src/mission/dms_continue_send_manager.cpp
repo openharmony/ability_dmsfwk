@@ -19,6 +19,7 @@
 
 #include "adapter/dnetwork_adapter.h"
 #include "adapter/mmi_adapter.h"
+#include "bluetooth_host.h"
 #include "datetime_ex.h"
 #include "datashare_manager.h"
 #include "dfx/distributed_radar.h"
@@ -28,6 +29,7 @@
 #include "dsched_data_buffer.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "mission/bluetooth_state_adapter.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/dsched_sync_e2e.h"
 #include "mission/wifi_state_adapter.h"
@@ -126,10 +128,21 @@ void DMSContinueSendMgr::NotifyMissionFocused(const int32_t missionId, FocusedRe
         HILOGI("Unknown focusedReason, no need to deal NotifyMissionFocused");
         return;
     }
+
+#ifdef DMS_CHECK_WIFI
     if (!WifiStateAdapter::GetInstance().IsWifiActive()) {
         HILOGE("wifi is not activated");
         return;
     }
+#endif
+
+#ifdef DMS_CHECK_BLUETOOTH
+    if (!BluetoothStateAdapter::GetInstance().IsBluetoothActive()) {
+        HILOGE("bluetooth is not activated");
+        return;
+    }
+#endif
+
     auto feedfunc = [this, missionId, reason]() {
         int32_t newMissionId = missionId;
         if (reason == FocusedReason::MMI) {

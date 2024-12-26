@@ -388,6 +388,7 @@ bool MultiUserManager::IsCallerForeground(int32_t callingUid)
 
 void MultiUserManager::RegisterSoftbusListener()
 {
+#ifdef DMS_RECEIVE_BROADCAST
     HILOGI("Register softbusListener start. accountId: %{public}d.", currentUserId_);
     std::shared_ptr<SoftbusAdapterListener> missionBroadcastListener =
         std::make_shared<DistributedMissionBroadcastListener>();
@@ -397,6 +398,9 @@ void MultiUserManager::RegisterSoftbusListener()
     }
     hasRegSoftbusEventListener_ = true;
     HILOGI("Register softbusListener end.");
+#else
+    HILOGW("Register softbusListener Disabled! accountId: %{public}d.", currentUserId_);
+#endif
 }
 
 bool MultiUserManager::CheckRegSoftbusListener()

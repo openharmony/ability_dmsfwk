@@ -35,7 +35,6 @@ constexpr int32_t INVALID_SESSION_ID = -1;
 IMPLEMENT_SINGLE_INSTANCE(DSchedTransportSoftbusAdapter);
 
 static QosTV g_qosInfo[] = {
-    { .qos = QOS_TYPE_MIN_BW, .value = DSCHED_QOS_TYPE_MIN_BW },
     { .qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_QOS_TYPE_MAX_LATENCY },
     { .qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_QOS_TYPE_MIN_LATENCY }
 };
