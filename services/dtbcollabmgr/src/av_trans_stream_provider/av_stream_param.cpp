@@ -40,9 +40,10 @@ void VidEnc::ConfigureEncode(std::shared_ptr<Media::Meta>& meta) const
     switch (encFmt) {
         case VideoCodecFormat::VIDEO_DEFAULT:
         case VideoCodecFormat::H264: {
+            constexpr int32_t h264Level = 32;
             meta->Set<Media::Tag::MIME_TYPE>(Media::Plugins::MimeType::VIDEO_AVC);
             meta->Set<Media::Tag::VIDEO_H264_PROFILE>(Media::Plugins::VideoH264Profile::BASELINE);
-            meta->Set<Media::Tag::VIDEO_H264_LEVEL>(32);
+            meta->Set<Media::Tag::VIDEO_H264_LEVEL>(h264Level);
             break;
         }
         case VideoCodecFormat::MPEG4: {

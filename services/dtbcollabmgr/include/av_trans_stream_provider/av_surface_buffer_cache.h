@@ -48,8 +48,7 @@ private:
     public:
         SurfaceListener(const sptr<Surface>& surface,
             const std::shared_ptr<AVSurfaceBufferCache>& cache)
-            : surface_(surface)
-            , cache_(cache) {};
+            : surface_(surface), cache_(cache) {};
         void OnBufferAvailable() override;
 
     private:
