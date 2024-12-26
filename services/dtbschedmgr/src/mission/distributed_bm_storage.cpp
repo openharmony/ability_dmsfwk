@@ -914,7 +914,7 @@ void DmsBmStorage::DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos)
     HILOGI("end.");
 }
 
-void DmsBmStorage::SyncBundleInfoData(std::vector<DistributedKv::Entry &entries)
+void DmsBmStorage::SyncBundleInfoData(std::vector<DistributedKv::Entry> &entries)
 {
 #ifdef DMS_SYNC_DATA_ON_PACKAGE_EVENT
     if (!entries.empty()) {
