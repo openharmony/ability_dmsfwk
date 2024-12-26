@@ -472,28 +472,28 @@ void AVReceiverFilter::OnBytes(const std::shared_ptr<AVTransDataBuffer>& buffer)
     int32_t version;
     ret = memcpy_s(&version, sizeof(version),
         dataHeader + offset, sizeof(version));
-    if (ret != EOK) {                                                             
-        HILOGE("Failed to read version from buffer. Error code: %{public}d", ret); 
-        return;                                                                  
+    if (ret != EOK) {
+        HILOGE("Failed to read version from buffer. Error code: %{public}d", ret);
+        return;
     }
     offset += sizeof(version);
 
     int32_t type;
     ret = memcpy_s(&type, sizeof(type),
         dataHeader + offset, sizeof(type));
-    if (ret != EOK) {                                                             
-        HILOGE("Failed to read type from buffer. Error code: %{public}d", ret); 
-        return;                                                                  
+    if (ret != EOK) {
+        HILOGE("Failed to read type from buffer. Error code: %{public}d", ret);
+        return;
     }
     offset += sizeof(type);
 
     uint32_t headerLen;
     ret = memcpy_s(&headerLen, sizeof(headerLen),
         dataHeader + offset, sizeof(headerLen));
-    if (ret != EOK) {                                                             
-        HILOGE("Failed to read headerLen from buffer. Error code: %{public}d", ret); 
-        return;                                                                  
-    }   
+    if (ret != EOK) {
+        HILOGE("Failed to read headerLen from buffer. Error code: %{public}d", ret);
+        return;
+    }
     offset += sizeof(headerLen);
 
     if (buffer->Size() < offset + headerLen) {
