@@ -910,12 +910,17 @@ void DmsBmStorage::DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos)
         status = kvStorePtr_->PutBatch(entries);
         HILOGW("distribute database ipc error and try to call again, result = %{public}d", status);
     }
+    SyncBundleInfoData();
+    HILOGI("end.");
+}
+
+void DmsBmStorage::SyncBundleInfoData()
+{
 #ifdef DMS_SYNC_DATA_ON_PACKAGE_EVENT
     if (!entries.empty()) {
         DmsKvSyncE2E::GetInstance()->PushAndPullData();
     }
 #endif
-    HILOGI("end.");
 }
 
 void DmsBmStorage::AddBundleNameId(const uint16_t &bundleNameId, const std::string &bundleName)
