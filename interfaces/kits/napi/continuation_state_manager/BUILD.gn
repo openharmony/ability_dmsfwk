@@ -66,8 +66,6 @@ ohos_shared_library("continuemanager_napi") {
   ]
 
   relative_install_dir = "module/app/ability"
-
   subsystem_name = "ability"
   part_name = "dmsfwk"
 }
-
