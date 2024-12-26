@@ -135,6 +135,14 @@ void CommonEventListener::HandleScreenUnLocked()
 void CommonEventListener::HandleScreenOn()
 {
     HILOGI("SCREEN_ON");
+#ifdef DMS_ICON_HOLD_ON
+    auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+    if (sendMgr == nullptr) {
+        HILOGE("SendMgr is nullptr.");
+        return;
+    }
+    sendMgr->OnDeviceScreenOn();
+#endif
 }
 
 void CommonEventListener::HandleUserSwitched(int32_t accountId)
