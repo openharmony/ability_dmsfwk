@@ -66,7 +66,8 @@
           "resource_schedule_service",
           "safwk",
           "samgr",
-          "window_manager"
+          "window_manager",
+          "wifi"
         ],
         "third_party": []
       },
