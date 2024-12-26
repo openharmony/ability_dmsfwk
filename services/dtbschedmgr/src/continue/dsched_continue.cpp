@@ -252,7 +252,7 @@ int32_t DSchedContinue::PostStartTask(const OHOS::AAFwk::WantParams& wantParams)
 {
     DSchedContinueEventType eventType = (subServiceType_ == CONTINUE_PULL) ?
         DSCHED_CONTINUE_REQ_PULL_EVENT : DSHCED_CONTINUE_REQ_PUSH_EVENT;
-    HILOGI("PostStartTask %{public}d, continueInfo: %{public}s", eventType, continueInfo_.toString().c_str());
+    HILOGI("PostStartTask %{public}d, continueInfo: %{public}s", eventType, continueInfo_.ToString().c_str());
     if (eventHandler_ == nullptr) {
         HILOGE("PostStartTask eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
@@ -277,7 +277,7 @@ int32_t DSchedContinue::PostCotinueAbilityTask(int32_t appVersion)
 {
     DSchedContinueEventType eventType = DSHCED_CONTINUE_ABILITY_EVENT;
     HILOGI("PostCotinueAbilityTask %{public}d, continueInfo %{public}s", eventType,
-        continueInfo_.toString().c_str());
+        continueInfo_.ToString().c_str());
     if (eventHandler_ == nullptr) {
         HILOGE("PostCotinueAbilityTask eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
@@ -322,7 +322,7 @@ int32_t DSchedContinue::PostReplyTask(std::shared_ptr<DSchedContinueReplyCmd> cm
             return ERR_OK;
     }
 
-    HILOGI("PostReplyTask %{public}d, continueInfo %{public}s", eventType, continueInfo_.toString().c_str());
+    HILOGI("PostReplyTask %{public}d, continueInfo %{public}s", eventType, continueInfo_.ToString().c_str());
     if (eventHandler_ == nullptr) {
         HILOGE("PostReplyTask eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
@@ -365,7 +365,7 @@ int32_t DSchedContinue::PostContinueSendTask(const OHOS::AAFwk::Want& want, int3
         return ERR_OK;
     }
 
-    HILOGI("PostContinueSendTask %{public}d, continueInfo %{public}s", eventType, continueInfo_.toString().c_str());
+    HILOGI("PostContinueSendTask %{public}d, continueInfo %{public}s", eventType, continueInfo_.ToString().c_str());
     if (eventHandler_ == nullptr) {
         HILOGE("PostContinueSendTask eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
@@ -392,7 +392,7 @@ int32_t DSchedContinue::OnContinueDataCmd(std::shared_ptr<DSchedContinueDataCmd>
 int32_t DSchedContinue::PostContinueDataTask(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
     DSchedContinueEventType eventType = DSCHED_CONTINUE_DATA_EVENT;
-    HILOGI("PostContinueDataTask %{public}d, continueInfo %{public}s", eventType, continueInfo_.toString().c_str());
+    HILOGI("PostContinueDataTask %{public}d, continueInfo %{public}s", eventType, continueInfo_.ToString().c_str());
     if (eventHandler_ == nullptr) {
         HILOGE("PostContinueDataTask eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
@@ -437,7 +437,7 @@ int32_t DSchedContinue::PostNotifyCompleteTask(int32_t result)
 {
     DSchedContinueEventType eventType = DSCHED_CONTINUE_COMPLETE_EVENT;
     HILOGI("PostNotifyCompleteTask %{public}d, continueInfo %{public}s", eventType,
-        continueInfo_.toString().c_str());
+        continueInfo_.ToString().c_str());
 
     if (eventHandler_ == nullptr) {
         HILOGE("PostNotifyCompleteTask eventHandler is nullptr");
@@ -462,7 +462,7 @@ int32_t DSchedContinue::OnContinueEnd(int32_t result)
 int32_t DSchedContinue::PostContinueEndTask(int32_t result)
 {
     DSchedContinueEventType eventType = DSCHED_CONTINUE_END_EVENT;
-    HILOGI("PostContinueEndTask %{public}d, continueInfo %{public}s", eventType, continueInfo_.toString().c_str());
+    HILOGI("PostContinueEndTask %{public}d, continueInfo %{public}s", eventType, continueInfo_.ToString().c_str());
     if (eventHandler_ == nullptr) {
         HILOGE("PostContinueEndTask eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
@@ -495,7 +495,7 @@ void DSchedContinue::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
 
 int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams> wantParams)
 {
-    HILOGI("ExecuteContinueReq start, continueInfo: %{public}s", continueInfo_.toString().c_str());
+    HILOGI("ExecuteContinueReq start, continueInfo: %{public}s", continueInfo_.ToString().c_str());
     DurationDumperStart();
 
     std::string peerDeviceId = (direction_ == CONTINUE_SOURCE) ?
@@ -683,7 +683,7 @@ int32_t DSchedContinue::ExecuteContinueAbility(int32_t appVersion)
     DmsContinueTime::GetInstance().SetSaveDataDurationBegin(tick);
 
     HILOGI("ExecuteContinueAbility call continueAbility begin, continueInfo: %{public}s",
-        continueInfo_.toString().c_str());
+        continueInfo_.ToString().c_str());
     result = AbilityManagerClient::GetInstance()->ContinueAbility(continueInfo_.sinkDeviceId_,
         continueInfo_.missionId_, appVersion);
     HILOGI("ExecuteContinueAbility call continueAbility end, result: %{public}d.", result);
@@ -736,7 +736,7 @@ int32_t DSchedContinue::CheckContinueAbilityPermission()
 
 int32_t DSchedContinue::ExecuteContinueReply()
 {
-    HILOGI("ExecuteContinueReply start, continueInfo: %{public}s", continueInfo_.toString().c_str());
+    HILOGI("ExecuteContinueReply start, continueInfo: %{public}s", continueInfo_.ToString().c_str());
 
     AppExecFwk::BundleInfo bundleInfo;
     if (BundleManagerInternal::GetLocalBundleInfoV9(continueInfo_.sourceBundleName_, bundleInfo) != ERR_OK) {
@@ -762,7 +762,7 @@ int32_t DSchedContinue::ExecuteContinueReply()
 
 int32_t DSchedContinue::ExecuteContinueSend(std::shared_ptr<ContinueAbilityData> data)
 {
-    HILOGI("ExecuteContinueSend start, continueInfo: %{public}s", continueInfo_.toString().c_str());
+    HILOGI("ExecuteContinueSend start, continueInfo: %{public}s", continueInfo_.ToString().c_str());
     if (data == nullptr) {
         return INVALID_PARAMETERS_ERR;
     }
@@ -919,7 +919,7 @@ int32_t DSchedContinue::CheckStartPermission(std::shared_ptr<DSchedContinueDataC
 
 int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
-    HILOGI("ExecuteContinueData start, continueInfo: %{public}s", continueInfo_.toString().c_str());
+    HILOGI("ExecuteContinueData start, continueInfo: %{public}s", continueInfo_.ToString().c_str());
     if (cmd == nullptr) {
         HILOGE("cmd is null");
         return INVALID_PARAMETERS_ERR;

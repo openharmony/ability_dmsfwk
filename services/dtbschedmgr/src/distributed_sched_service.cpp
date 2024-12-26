@@ -58,6 +58,7 @@
 #include "dms_free_install_callback.h"
 #include "dms_token_callback.h"
 #include "dms_version_manager.h"
+#include "dsched_collab_manager.h"
 #include "dsched_continue_manager.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
@@ -304,7 +305,7 @@ bool DistributedSchedService::Init()
     }
     InitDataShareManager();
     InitMissionManager();
-
+    DSchedCollabManager::GetInstance().Init();
     DistributedSchedAdapter::GetInstance().Init();
     if (SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
         DSchedContinueManager::GetInstance().Init();

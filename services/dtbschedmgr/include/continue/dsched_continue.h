@@ -77,7 +77,7 @@ public:
             "ContiType: " + this->continueType_;
     }
 
-    std::string toString() const
+    std::string ToString() const
     {
         return "SrcDevId: " + GetAnonymStr(this->sourceDeviceId_) + " " +
             "SrcBundle: " + this->sourceBundleName_ + " " +

@@ -17,9 +17,11 @@
 
 #include "distributed_sched_utils.h"
 #include "dsched_all_connect_manager.h"
+#include "dsched_collab_manager.h"
 #include "dsched_continue_manager.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "mission/wifi_state_adapter.h"
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
@@ -78,6 +80,7 @@ int32_t DSchedTransportSoftbusAdapter::InitChannel()
     ret = DSchedAllConnectManager::GetInstance().InitAllConnectManager();
     if (ret != ERR_OK) {
         HILOGE("Init all connect manager fail, ret: %{public}d.", ret);
+        isAllConnectExist_ = false;
     }
 #endif
 
@@ -110,7 +113,8 @@ int32_t DSchedTransportSoftbusAdapter::CreateServerSocket()
     return socket;
 }
 
-int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDeviceId, int32_t &sessionId)
+int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDeviceId,
+    int32_t &sessionId, DSchedServiceType type)
 {
     HILOGI("try to connect peer: %{public}s.", GetAnonymStr(peerDeviceId).c_str());
     {
@@ -122,39 +126,69 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
                     iter->second->OnConnect();
                     sessionId = iter->first;
 #ifdef DMSFWK_ALL_CONNECT_MGR
-                    DSchedContinueManager::GetInstance().NotifyAllConnectDecision(peerDeviceId, true);
+                    NotifyConnectDecision(peerDeviceId, type);
 #endif
                     return ERR_OK;
                 }
             }
         }
     }
-
     int32_t ret = ERR_OK;
+    if (IsNeedAllConnect()) {
+        HILOGI("waiting all connect decision");
+        ret = DecisionByAllConnect(peerDeviceId, type);
+        if (ret != ERR_OK) {
+            HILOGE("decision fail, ret: %{public}d", ret);
+            return ret;
+        }
+    }
+    ret = AddNewPeerSession(peerDeviceId, sessionId);
+    if (ret != ERR_OK || sessionId <= 0) {
+        HILOGE("Add new peer connect session fail, ret: %{public}d, sessionId: %{public}d.", ret, sessionId);
+    }
+    return ret;
+}
+
+void DSchedTransportSoftbusAdapter::NotifyConnectDecision(const std::string &peerDeviceId, DSchedServiceType type)
+{
+    if (!IsNeedAllConnect()) {
+        HILOGW("don't need notify all connect decision");
+        return;
+    }
+    if (type == SERVICE_TYPE_CONTINUE) {
+        DSchedContinueManager::GetInstance().NotifyAllConnectDecision(peerDeviceId, true);
+    } else if (type == SERVICE_TYPE_COLLAB) {
+        DSchedCollabManager::GetInstance().NotifyAllConnectDecision(peerDeviceId, true);
+    }
+}
+
+int32_t DSchedTransportSoftbusAdapter::DecisionByAllConnect(const std::string &peerDeviceId, DSchedServiceType type)
+{
 #ifdef DMSFWK_ALL_CONNECT_MGR
     ServiceCollaborationManager_ResourceRequestInfoSets reqInfoSets;
     DSchedAllConnectManager::GetInstance().GetResourceRequest(reqInfoSets);
-    ret = DSchedAllConnectManager::GetInstance().ApplyAdvanceResource(peerDeviceId, reqInfoSets);
+    int32_t ret = DSchedAllConnectManager::GetInstance().ApplyAdvanceResource(peerDeviceId, reqInfoSets);
     if (ret != ERR_OK) {
         HILOGE("Apply advance resource fail, ret: %{public}d.", ret);
-        sessionId = INVALID_SESSION_ID;
-        DSchedContinueManager::GetInstance().NotifyAllConnectDecision(peerDeviceId, false);
+        NotifyConnectDecision(peerDeviceId, type);
         return ret;
     }
-    DSchedContinueManager::GetInstance().NotifyAllConnectDecision(peerDeviceId, true);
-
+    NotifyConnectDecision(peerDeviceId, type);
     ret = DSchedAllConnectManager::GetInstance().PublishServiceState(peerDeviceId, "", SCM_PREPARE);
     if (ret != ERR_OK) {
         HILOGE("Publish prepare state fail, ret %{public}d, peerDeviceId %{public}s.",
             ret, GetAnonymStr(peerDeviceId).c_str());
     }
 #endif
+    return ERR_OK;
+}
 
-    ret = AddNewPeerSession(peerDeviceId, sessionId);
-    if (ret != ERR_OK || sessionId <= 0) {
-        HILOGE("Add new peer connect session fail, ret: %{public}d, sessionId: %{public}d.", ret, sessionId);
-    }
-    return ret;
+
+bool DSchedTransportSoftbusAdapter::IsNeedAllConnect()
+{
+    bool result = isAllConnectExist_ && WifiStateAdapter::GetInstance().IsWifiActive();
+    HILOGI("called, result: %{public}d", result);
+    return result;
 }
 
 int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peerDeviceId, int32_t &sessionId)
