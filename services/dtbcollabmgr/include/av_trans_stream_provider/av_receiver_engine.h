@@ -78,7 +78,7 @@ namespace DistributedCollab {
 #ifdef ENABLE_SURFACE_BUFFER_CACHE
         std::shared_ptr<AVSurfaceBufferCache> bufferCache_ = nullptr;
 #endif
-        std::shared_ptr<Media::Pipeline::EventReceiver> engineEventReceiver_= nullptr;
+        std::shared_ptr<Media::Pipeline::EventReceiver> engineEventReceiver_ = nullptr;
         std::shared_ptr<Media::Pipeline::FilterCallback> engineFilterCallback_= nullptr;
         std::string engineId_;
 

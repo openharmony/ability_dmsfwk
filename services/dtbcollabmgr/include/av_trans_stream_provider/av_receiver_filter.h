@@ -37,7 +37,8 @@ class AVReceiverFilter : public Media::Pipeline::Filter, public std::enable_shar
 public:
     explicit AVReceiverFilter(std::string name, Media::Pipeline::FilterType type);
     ~AVReceiverFilter();
-    void Init(const std::shared_ptr<Media::Pipeline::EventReceiver>& receiver, const std::shared_ptr<Media::Pipeline::FilterCallback>& callback) override;
+    void Init(const std::shared_ptr<Media::Pipeline::EventReceiver>& receiver,
+        const std::shared_ptr<Media::Pipeline::FilterCallback>& callback) override;
     Media::Status DoPrepare() override;
     Media::Status DoStart() override;
     Media::Status DoPause() override;
@@ -47,15 +48,20 @@ public:
     Media::Status DoRelease() override;
     void SetParameter(const std::shared_ptr<Media::Meta>& parameter) override;
     void GetParameter(std::shared_ptr<Media::Meta>& parameter) override;
-    Media::Status LinkNext(const std::shared_ptr<Media::Pipeline::Filter>& nextFilter, Media::Pipeline::StreamType outType) override;
-    Media::Status UpdateNext(const std::shared_ptr<Media::Pipeline::Filter>& nextFilter, Media::Pipeline::StreamType outType) override;
-    Media::Status UnLinkNext(const std::shared_ptr<Media::Pipeline::Filter>& nextFilter, Media::Pipeline::StreamType outType) override;
+    Media::Status LinkNext(const std::shared_ptr<Media::Pipeline::Filter>& nextFilter,
+        Media::Pipeline::StreamType outType) override;
+    Media::Status UpdateNext(const std::shared_ptr<Media::Pipeline::Filter>& nextFilter,
+        Media::Pipeline::StreamType outType) override;
+    Media::Status UnLinkNext(const std::shared_ptr<Media::Pipeline::Filter>& nextFilter,
+        Media::Pipeline::StreamType outType) override;
     Media::Status OnLinked(Media::Pipeline::StreamType inType, const std::shared_ptr<Media::Meta>& meta,
         const std::shared_ptr<Media::Pipeline::FilterLinkCallback>& callback) override;
     Media::Status OnUpdated(Media::Pipeline::StreamType inType, const std::shared_ptr<Media::Meta>& meta,
         const std::shared_ptr<Media::Pipeline::FilterLinkCallback>& callback) override;
-    Media::Status OnUnLinked(Media::Pipeline::StreamType inType, const std::shared_ptr<Media::Pipeline::FilterLinkCallback>& callback) override;
-    void OnLinkedResult(const sptr<Media::AVBufferQueueProducer>& outputBufferQueue, std::shared_ptr<Media::Meta>& meta);
+    Media::Status OnUnLinked(Media::Pipeline::StreamType inType,
+        const std::shared_ptr<Media::Pipeline::FilterLinkCallback>& callback) override;
+    void OnLinkedResult(const sptr<Media::AVBufferQueueProducer>& outputBufferQueue,
+        std::shared_ptr<Media::Meta>& meta);
     void OnUpdatedResult(std::shared_ptr<Media::Meta>& meta);
     void OnUnlinkedResult(std::shared_ptr<Media::Meta>& meta);
     void OnStream(const std::shared_ptr<AVTransStreamData>& stream);
@@ -73,10 +79,13 @@ private:
     void AddStreamData(const std::shared_ptr<AVTransStreamData>& data);
     std::shared_ptr<AVTransStreamData> GetStreamData();
     int32_t RequestAndPushData(const std::shared_ptr<AVTransStreamData>& data);
-    std::shared_ptr<AVTransStreamData> ReadStreamDataFromBuffer(uint8_t* dataHeader, uint32_t headerLen, size_t totalLen);
+    std::shared_ptr<AVTransStreamData> ReadStreamDataFromBuffer(uint8_t* dataHeader,
+        uint32_t headerLen, size_t totalLen);
     std::shared_ptr<Media::PixelMap> GetPixelMap(const std::shared_ptr<AVTransStreamData>& data);
     void StartEvent();
     void DispatchProcessData(const std::shared_ptr<AVTransStreamData>& data);
+    void ProcessPixelMap(const std::shared_ptr<AVTransStreamData>& data);
+    void ProcessSurfaceParam(const std::shared_ptr<AVTransStreamData>& data);
 
 private:
     class BqProducerProxy : public Media::IProducerListener {

@@ -143,15 +143,18 @@ void AVReceiverEngine::SetVideoSource(const VideoSourceType source)
     sourceType_ = source;
     switch (sourceType_) {
         case VideoSourceType::NV12:
-            SetMetaData(*videoDecFormat_.get(), std::string(MDKey::MD_KEY_PIXEL_FORMAT), static_cast<int32_t>(Media::Plugins::VideoPixelFormat::NV12));
+            SetMetaData(*videoDecFormat_.get(), std::string(MDKey::MD_KEY_PIXEL_FORMAT),
+                static_cast<int32_t>(Media::Plugins::VideoPixelFormat::NV12));
             HILOGI("AVReceiverEngine SetVideoSource NV12");
             break;
         case VideoSourceType::NV21:
-            SetMetaData(*videoDecFormat_.get(), std::string(MDKey::MD_KEY_PIXEL_FORMAT), static_cast<int32_t>(Media::Plugins::VideoPixelFormat::NV21));
+            SetMetaData(*videoDecFormat_.get(), std::string(MDKey::MD_KEY_PIXEL_FORMAT),
+                static_cast<int32_t>(Media::Plugins::VideoPixelFormat::NV21));
             HILOGI("AVReceiverEngine SetVideoSource NV21");
             break;
         default:
-            SetMetaData(*videoDecFormat_.get(), std::string(MDKey::MD_KEY_PIXEL_FORMAT), static_cast<int32_t>(Media::Plugins::VideoPixelFormat::NV21));
+            SetMetaData(*videoDecFormat_.get(), std::string(MDKey::MD_KEY_PIXEL_FORMAT),
+                static_cast<int32_t>(Media::Plugins::VideoPixelFormat::NV21));
             HILOGI("AVReceiverEngine SetVideoSource default NV21");
             break;
     }
@@ -176,7 +179,7 @@ int32_t AVReceiverEngine::Configure(const StreamParam& recParam)
     return static_cast<int32_t>(Status::OK);
 }
 
-inline bool AVReceiverEngine::isVideoParam(const StreamParam& recParam)
+bool AVReceiverEngine::isVideoParam(const StreamParam& recParam)
 {
     switch (recParam.type_) {
         case StreamParamType::VID_CAPTURERATE:
@@ -260,34 +263,38 @@ Status AVReceiverEngine::OnCallback(const std::shared_ptr<Filter>& filter, Filte
     StreamType outType)
 {
     HILOGI("AVReceiverEngine OnCallback enter.");
-    if (cmd == FilterCallBackCommand::NEXT_FILTER_NEEDED) {
-        switch (outType) {
-            case StreamType::STREAMTYPE_ENCODED_VIDEO: {
-                if (videoDecoderFilter_ != nullptr) {
-                    return Status::OK;
-                }
-                videoDecoderFilter_ = std::make_shared<SurfaceDecoderFilter>(
-                    "builtin.dtbcollab.surfacedecoder", FilterType::FILTERTYPE_VDEC);
-                if (videoDecoderFilter_ == nullptr) {
-                    HILOGE("init decoder filter failed");
-                    return Status::ERROR_NULL_POINTER;
-                }
-                videoDecFormat_->SetData(
-                    std::string(MDKey::MD_KEY_VIDEO_ENCODE_BITRATE_MODE), Media::Plugins::VideoEncodeBitrateMode::VBR);
-                videoDecoderFilter_->Init(engineEventReceiver_, engineFilterCallback_);
-                pipeline_->LinkFilters(filter, { videoDecoderFilter_ }, outType);
-                if (surface_ != nullptr) {
-                    Status ret = videoDecoderFilter_->SetOutputSurface(surface_);
-                    if (ret != Status::OK) {
-                        HILOGE("set video surface failed");
-                        return ret;
-                    }
-                }
-                break;
+    if (cmd != FilterCallBackCommand::NEXT_FILTER_NEEDED) {
+        HILOGI("no need next filter");
+        return Status:OK;
+    }
+    switch (outType) {
+        case StreamType::STREAMTYPE_ENCODED_VIDEO: {
+            if (videoDecoderFilter_ != nullptr) {
+                return Status::OK;
             }
-            default:
-                break;
+            videoDecoderFilter_ = std::make_shared<SurfaceDecoderFilter>(
+                "builtin.dtbcollab.surfacedecoder", FilterType::FILTERTYPE_VDEC);
+            if (videoDecoderFilter_ == nullptr) {
+                HILOGE("init decoder filter failed");
+                return Status::ERROR_NULL_POINTER;
+            }
+            videoDecFormat_->SetData(
+                std::string(MDKey::MD_KEY_VIDEO_ENCODE_BITRATE_MODE), Media::Plugins::VideoEncodeBitrateMode::VBR);
+            videoDecoderFilter_->Init(engineEventReceiver_, engineFilterCallback_);
+            pipeline_->LinkFilters(filter, { videoDecoderFilter_ }, outType);
+            if (surface_ == nullptr) {
+                HILOGE("no valid surface");
+                return Status::ERROR_NULL_POINTER;
+            }
+            Status ret = videoDecoderFilter_->SetOutputSurface(surface_);
+            if (ret != Status::OK) {
+                HILOGE("set video surface failed");
+                return ret;
+            }
+            break;
         }
+        default:
+            break;
     }
     return Status::OK;
 }

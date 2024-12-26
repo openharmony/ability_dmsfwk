@@ -20,7 +20,8 @@
 
 namespace OHOS {
 namespace DistributedCollab {
-    class AVReceiverFilterListener : public IChannelListener, public std::enable_shared_from_this<AVReceiverFilterListener> {
+    class AVReceiverFilterListener : public IChannelListener,
+        public std::enable_shared_from_this<AVReceiverFilterListener> {
     public:
         AVReceiverFilterListener(const std::shared_ptr<AVReceiverFilter>& filter)
             : filter_(filter) {};

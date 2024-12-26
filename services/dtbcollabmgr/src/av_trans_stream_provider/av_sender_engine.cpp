@@ -145,7 +145,7 @@ int32_t AVSenderEngine::Configure(const StreamParam& recParam)
     return static_cast<int32_t>(Status::OK);
 }
 
-inline bool AVSenderEngine::isVideoParam(const StreamParam& recParam)
+bool AVSenderEngine::isVideoParam(const StreamParam& recParam)
 {
     switch (recParam.type_) {
         case StreamParamType::VID_CAPTURERATE:

@@ -21,7 +21,8 @@ namespace {
     static const std::string TAG = "AVReceiverFilterListener";
 }
 
-AVReceiverFilterListener::~AVReceiverFilterListener() {
+AVReceiverFilterListener::~AVReceiverFilterListener() 
+{
     HILOGI("AVReceiverFilterListener destroyed");
 }
 

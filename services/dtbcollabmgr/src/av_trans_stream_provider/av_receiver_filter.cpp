@@ -41,7 +41,7 @@ namespace {
     static const std::string TAG = "AVReceiverFilter";
     static constexpr int32_t decodePixelMapWidth = 256;
     static constexpr int32_t decodePixelMapHeight = 256;
-#define SAFE_MEMORY_READ_NO_RETRUN(dest, destSize, src, srcSize, headerJson)          \
+#define COPY_DATA_AND_CHECK(dest, destSize, src, srcSize, headerJson)      \
 do {                                                                              \
     int32_t ret = memcpy_s(dest, destSize, src, srcSize);                         \
     if (ret != EOK) {                                                             \
@@ -52,7 +52,8 @@ do {                                                                            
 } while (0)
 }
 
-static Media::Pipeline::AutoRegisterFilter<AVReceiverFilter> g_registerAVReceiverFilter("builtin.dtbcollab.receiver", FilterType::FILTERTYPE_VENC,
+static Media::Pipeline::AutoRegisterFilter<AVReceiverFilter> g_registerAVReceiverFilter("builtin.dtbcollab.receiver",
+    FilterType::FILTERTYPE_VENC,
     [](const std::string& name, const FilterType type) {
         return std::make_shared<AVReceiverFilter>(name, FilterType::FILTERTYPE_VENC);
     });
@@ -191,7 +192,7 @@ Status AVReceiverFilter::LinkNext(const std::shared_ptr<Filter>& nextFilter, Str
     HILOGI("LinkNext");
     nextFilter_ = nextFilter;
     nextFiltersMap_[outType].push_back(nextFilter_);
-    std::shared_ptr<FilterLinkCallback> filterLinkCallback = std::make_shared<AVReceiverFilterLinkCallback>(shared_from_this());
+    auto filterLinkCallback = std::make_shared<AVReceiverFilterLinkCallback>(shared_from_this());
     nextFilter->OnLinked(outType, meta_, filterLinkCallback);
     return Status::OK;
 }
@@ -215,7 +216,8 @@ Status AVReceiverFilter::OnLinked(StreamType inType, const std::shared_ptr<Meta>
     return Status::OK;
 }
 
-void AVReceiverFilter::OnLinkedResult(const sptr<Media::AVBufferQueueProducer>& outputBufferQueue, std::shared_ptr<Media::Meta>& meta)
+void AVReceiverFilter::OnLinkedResult(const sptr<Media::AVBufferQueueProducer>& outputBufferQueue,
+    std::shared_ptr<Media::Meta>& meta)
 {
     HILOGI("OnLinkedResult");
     bufferQProxy_ = sptr<BqProducerProxy>::MakeSptr(shared_from_this());
@@ -268,6 +270,13 @@ void AVReceiverFilter::SetChannelListener(int32_t channelId)
     listener_ = std::make_shared<AVReceiverFilterListener>(shared_from_this());
     channelId_ = channelId;
     ChannelManager::GetInstance().RegisterChannelListener(channelId_, listener_);
+}
+
+void AVReceiverFilter::SetEngineListener(const std::shared_ptr<IEngineListener>& listener)
+{
+    HILOGI("AVReceiverFilter::SetEngineListener enter");
+    std::lock_guard<std::mutex> lock(listenerMutex_);
+    engineListeners_.push_back(listener);
 }
 
 #ifdef DSCH_COLLAB_AV_TRANS_TEST_DEMO
@@ -333,45 +342,35 @@ void AVReceiverFilter::DispatchProcessData(const std::shared_ptr<AVTransStreamDa
         return;
     }
     switch (data->GetStreamDataExt().flag_) {
-    case AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_PIXEL_MAP: {
-        auto pixelMap = GetPixelMap(data);
-        std::lock_guard<std::mutex> lock(listenerMutex_);
-        for (const auto& listener : engineListeners_) {
-            if (auto ptr = listener.lock()) {
-                auto func = [ptr, pixelMap]() {
-                    ptr->OnRecvPixelMap(pixelMap);
-                };
-                eventHandler_->PostTask(func, AppExecFwk::EventHandler::Priority::LOW);
-            }
+        case AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_PIXEL_MAP: {
+            ProcessPixelMap(data);
+            break;
         }
-        break;
-    }
-    case AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_SURFACE_PARAM: {
-        auto& param = data->GetStreamDataExt().surfaceParam_;
-        std::lock_guard<std::mutex> lock(listenerMutex_);
-        for (const auto& listener : engineListeners_) {
-            if (auto ptr = listener.lock()) {
-                auto func = [ptr, param]() {
-                    ptr->OnRecvSurfaceParam(param);
-                };
-                eventHandler_->PostTask(func, AppExecFwk::EventHandler::Priority::HIGH);
-            }
+        case AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_SURFACE_PARAM: {
+            ProcessSurfaceParam(data);
+            break;
         }
-        break;
-    }
-    default: {
-        int32_t ret = RequestAndPushData(data);
-        HILOGD("process data ret = %{public}d", ret);
-        break;
-    }
+        default: {
+            int32_t ret = RequestAndPushData(data);
+            HILOGD("process data ret = %{public}d", ret);
+            break;
+        }
     }
 }
 
-void AVReceiverFilter::SetEngineListener(const std::shared_ptr<IEngineListener>& listener)
+void AVReceiverFilter::ProcessPixelMap(const std::shared_ptr<AVTransStreamData>& data) 
 {
-    HILOGI("AVReceiverFilter::SetEngineListener enter");
+    HILOGI("start to process pixel map");
+    auto pixelMap = GetPixelMap(data);
     std::lock_guard<std::mutex> lock(listenerMutex_);
-    engineListeners_.push_back(listener);
+    for (const auto& listener : engineListeners_) {
+        if (auto ptr = listener.lock()) {
+            auto func = [ptr, pixelMap]() {
+                ptr->OnRecvPixelMap(pixelMap);
+            };
+            eventHandler_->PostTask(func, AppExecFwk::EventHandler::Priority::LOW);
+        }
+    }
 }
 
 std::shared_ptr<Media::PixelMap> AVReceiverFilter::GetPixelMap(const std::shared_ptr<AVTransStreamData>& data)
@@ -381,7 +380,8 @@ std::shared_ptr<Media::PixelMap> AVReceiverFilter::GetPixelMap(const std::shared
     uint32_t dataSize = data->StreamData()->Size();
     Media::SourceOptions sourceOption;
     uint32_t err = ERR_OK;
-    std::unique_ptr<Media::ImageSource> imageSource = Media::ImageSource::CreateImageSource(header, dataSize, sourceOption, err);
+    std::unique_ptr<Media::ImageSource> imageSource = Media::ImageSource::CreateImageSource(header,
+        dataSize, sourceOption, err);
     if (err != ERR_OK) {
         HILOGE("create image source failed");
         return nullptr;
@@ -399,6 +399,21 @@ std::shared_ptr<Media::PixelMap> AVReceiverFilter::GetPixelMap(const std::shared
     return std::shared_ptr<Media::PixelMap>(std::move(pixelMap));
 }
 
+void AVReceiverFilter::ProcessSurfaceParam(const std::shared_ptr<AVTransStreamData>& data) 
+{
+    HILOGI("start to process surface param");
+    auto& param = data->GetStreamDataExt().surfaceParam_;
+    std::lock_guard<std::mutex> lock(listenerMutex_);
+    for (const auto& listener : engineListeners_) {
+        if (auto ptr = listener.lock()) {
+            auto func = [ptr, param]() {
+                ptr->OnRecvSurfaceParam(param);
+            };
+            eventHandler_->PostTask(func, AppExecFwk::EventHandler::Priority::HIGH);
+        }
+    }
+}
+
 int32_t AVReceiverFilter::RequestAndPushData(const std::shared_ptr<AVTransStreamData>& data)
 {
     std::shared_ptr<AVBuffer> outputBuffer = nullptr;
@@ -414,10 +429,12 @@ int32_t AVReceiverFilter::RequestAndPushData(const std::shared_ptr<AVTransStream
         return static_cast<int32_t>(ret);
     }
 
-    HILOGD("write data to buffer, id=%{public}lu, size=%{public}d", outputBuffer->GetUniqueId(), outputBuffer->GetConfig().size);
+    HILOGD("write data to buffer, id=%{public}lu, size=%{public}d",
+        outputBuffer->GetUniqueId(), outputBuffer->GetConfig().size);
     auto& memory = outputBuffer->memory_;
     memory->SetSize(avBufferConfig.size);
-    int32_t writeRet = memcpy_s(memory->GetAddr(), memory->GetSize(), data->StreamData()->Data(), data->StreamData()->Size());
+    int32_t writeRet = memcpy_s(memory->GetAddr(), memory->GetSize(),
+        data->StreamData()->Data(), data->StreamData()->Size());
     if (writeRet != ERR_OK) {
         HILOGE("write data to buffer failed, %{public}d", writeRet);
         bufferQProxy_->CancelBuffer(outputBuffer);
@@ -460,26 +477,28 @@ void AVReceiverFilter::OnBytes(const std::shared_ptr<AVTransDataBuffer>& buffer)
     size_t offset = 0;
 
     int32_t version;
-    SAFE_MEMORY_READ_NO_RETRUN(&version, sizeof(version), dataHeader + offset, sizeof(version), nullptr);
+    COPY_DATA_AND_CHECK(&version, sizeof(version), dataHeader + offset, sizeof(version), nullptr);
     offset += sizeof(version);
     int32_t type;
-    SAFE_MEMORY_READ_NO_RETRUN(&type, sizeof(type), dataHeader + offset, sizeof(type), nullptr);
+    COPY_DATA_AND_CHECK(&type, sizeof(type), dataHeader + offset, sizeof(type), nullptr);
     offset += sizeof(type);
     uint32_t headerLen;
-    SAFE_MEMORY_READ_NO_RETRUN(&headerLen, sizeof(headerLen), dataHeader + offset, sizeof(headerLen), nullptr);
+    COPY_DATA_AND_CHECK(&headerLen, sizeof(headerLen), dataHeader + offset, sizeof(headerLen), nullptr);
     offset += sizeof(headerLen);
 
     if (buffer->Size() < offset + headerLen) {
         HILOGE("Buffer size is smaller than expected header size");
         return;
     }
-    std::shared_ptr<AVTransStreamData> stream = ReadStreamDataFromBuffer(dataHeader + offset, headerLen, buffer->Size());
+    std::shared_ptr<AVTransStreamData> stream = ReadStreamDataFromBuffer(dataHeader + offset,
+        headerLen, buffer->Size());
     if (stream != nullptr) {
         AddStreamData(stream);
     }
 }
 
-std::shared_ptr<AVTransStreamData> AVReceiverFilter::ReadStreamDataFromBuffer(uint8_t* dataHeader, uint32_t headerLen, size_t totalLen)
+std::shared_ptr<AVTransStreamData> AVReceiverFilter::ReadStreamDataFromBuffer(uint8_t* dataHeader,
+    uint32_t headerLen, size_t totalLen)
 {
     size_t offset = 0;
     char* headerJsonStr = reinterpret_cast<char*>(dataHeader + offset);
@@ -507,7 +526,8 @@ std::shared_ptr<AVTransStreamData> AVReceiverFilter::ReadStreamDataFromBuffer(ui
     AVTransStreamDataExt ext;
     std::shared_ptr<AVTransStreamData> streamData = std::make_shared<AVTransStreamData>(buffer, ext);
     streamData->DeserializeExtFromJson(headerJson);
-    int32_t ret = memcpy_s(buffer->Data(), buffer->Size(), rawData, rawDataLen);
+    int32_t ret = memcpy_s(buffer->Data(), buffer->Size(),
+        rawData, rawDataLen);
     cJSON_Delete(headerJson);
     return ret == ERR_OK ? streamData : nullptr;
 }

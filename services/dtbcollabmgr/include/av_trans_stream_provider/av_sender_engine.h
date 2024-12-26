@@ -40,13 +40,13 @@ namespace DistributedCollab {
             const int32_t appPid,
             const std::string& bundleName,
             const uint64_t instanceId)
-            : appUid_(appUid)
-            , appPid_(appPid)
-            , bundleName_(bundleName)
-            , instanceId_(instanceId)
-        {
-            pipeline_ = std::make_shared<Media::Pipeline::Pipeline>();
-        };
+            : appUid_(appUid),
+            appPid_(appPid),
+            bundleName_(bundleName),
+            instanceId_(instanceId)
+            {
+                pipeline_ = std::make_shared<Media::Pipeline::Pipeline>();
+            };
         ~AVSenderEngine();
         void Init();
         void SetVideoSource(const VideoSourceType source);
