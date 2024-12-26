@@ -71,15 +71,19 @@ config("distributed_sched_config") {
 ohos_shared_library("distributedschedsvr") {
   branch_protector_ret = "pac_ret"
   sanitize = {
+    boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
     debug = false
+    integer_overflow = true
+    ubsan = true
   }
 
   install_enable = true
 
+  cflags = [ "-fpie" ]
   if (!dmsfwk_softbus_adapter_common) {
-    cflags = [
+    cflags += [
       "-DDMSFWK_SAME_ACCOUNT",
       "-DDMSFWK_INTERACTIVE_ADAPTER",
       "-DDMSFWK_ALL_CONNECT_MGR",
@@ -155,6 +159,11 @@ ohos_shared_library("distributedschedsvr") {
   configs = [
     ":distributed_sched_config",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+
+  ldflags = [
+    "-Wl,-z,relro",
+    "-Wl,-z,now",
   ]
 
   deps = [ "${dms_path}/common:distributed_sched_utils" ]

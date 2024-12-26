@@ -31,9 +31,12 @@ config("common_public_config") {
 ohos_shared_library("common_sdk") {
   branch_protector_ret = "pac_ret"
   sanitize = {
+    boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
     debug = false
+    integer_overflow = true
+    ubsan = true
   }
 
   sources = [
@@ -44,6 +47,12 @@ ohos_shared_library("common_sdk") {
   public_configs = [
     ":common_public_config",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+
+  ldflags = [
+    "-fpie",
+    "-Wl,-z,relro",
+    "-Wl,-z,now",
   ]
 
   deps = [ "../../innerkits/continuation_manager:continuation_manager" ]

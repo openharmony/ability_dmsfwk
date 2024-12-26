@@ -33,9 +33,12 @@ config("distributed_ability_manager_config") {
 ohos_shared_library("distributed_ability_manager_svr") {
   branch_protector_ret = "pac_ret"
   sanitize = {
+    boundary_sanitize = true
     cfi = true
     cfi_cross_dso = true
     debug = false
+    integer_overflow = true
+    ubsan = true
   }
 
   install_enable = true
@@ -59,7 +62,12 @@ ohos_shared_library("distributed_ability_manager_svr") {
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
   ]
 
-  ldflags = [ "-rdynamic" ]
+  ldflags = [
+    "-rdynamic",
+    "-fpie",
+    "-Wl,-z,relro",
+    "-Wl,-z,now",
+  ]
 
   deps = [
     "../../interfaces/innerkits/common:common_sdk",

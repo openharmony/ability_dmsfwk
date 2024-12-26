@@ -215,8 +215,12 @@ void DSchedSoftbusSession::AssembleNoFrag(std::shared_ptr<DSchedDataBuffer> buff
         return;
     }
     std::shared_ptr<DSchedDataBuffer> postData = std::make_shared<DSchedDataBuffer>(headerPara.dataLen);
-    int32_t ret = memcpy_s(postData->Data(), postData->Size(), buffer->Data() + BINARY_HEADER_FRAG_LEN,
-        buffer->Size() - BINARY_HEADER_FRAG_LEN);
+    if (buffer->Size() < BINARY_HEADER_FRAG_LEN) {
+        HILOGE("buffer size unusual, size = %{public}u", buffer->Size());
+        return;
+    }
+    uint32_t dataSize = static_cast<uint32_t>(buffer->Size() - BINARY_HEADER_FRAG_LEN);
+    int32_t ret = memcpy_s(postData->Data(), postData->Size(), buffer->Data() + BINARY_HEADER_FRAG_LEN, dataSize);
     if (ret != ERR_OK) {
         HILOGE("memcpy failed, ret: %{public}d, sessionId: %{public}d, peerNetworkId: %{public}s.",
             ret, sessionId_, GetAnonymStr(peerDeviceId_).c_str());
@@ -234,8 +238,13 @@ void DSchedSoftbusSession::AssembleFrag(std::shared_ptr<DSchedDataBuffer> buffer
         offset_ = 0;
         totalLen_ = headerPara.totalLen;
         packBuffer_ = std::make_shared<DSchedDataBuffer>(headerPara.totalLen);
+        if (buffer->Size() < BINARY_HEADER_FRAG_LEN) {
+            HILOGE("buffer size unusual, size = %{public}u", buffer->Size());
+            return;
+        }
+        uint32_t dataSize = static_cast<uint32_t>(buffer->Size() - BINARY_HEADER_FRAG_LEN);
         int32_t ret = memcpy_s(packBuffer_->Data(), packBuffer_->Size(), buffer->Data() + BINARY_HEADER_FRAG_LEN,
-            buffer->Size() - BINARY_HEADER_FRAG_LEN);
+            dataSize);
         if (ret != ERR_OK) {
             HILOGE("FRAG_START memcpy fail, ret: %{public}d, sessionId: %{public}d peerNetworkId: %{public}s.",
                 ret, sessionId_, GetAnonymStr(peerDeviceId_).c_str());
