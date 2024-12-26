@@ -910,11 +910,11 @@ void DmsBmStorage::DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos)
         status = kvStorePtr_->PutBatch(entries);
         HILOGW("distribute database ipc error and try to call again, result = %{public}d", status);
     }
-    SyncBundleInfoData();
+    SyncBundleInfoData(entries);
     HILOGI("end.");
 }
 
-void DmsBmStorage::SyncBundleInfoData()
+void DmsBmStorage::SyncBundleInfoData(std::vector<DistributedKv::Entry &entries)
 {
 #ifdef DMS_SYNC_DATA_ON_PACKAGE_EVENT
     if (!entries.empty()) {
