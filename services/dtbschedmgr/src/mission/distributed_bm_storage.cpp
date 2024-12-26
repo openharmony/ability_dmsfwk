@@ -100,9 +100,6 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
         HILOGW("GetBundleInfo of %{public}s failed:%{public}d or cannot be continued", bundleName.c_str(), ret);
         return false;
     }
-#ifdef DMS_SYNC_DATA_ON_PACKAGE_EVENT
-    DmsKvSyncE2E::GetInstance()->PushAndPullData();
-#endif
     std::string localUdid;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(localUdid);
     if (localUdid == "") {
@@ -128,6 +125,9 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
         HILOGW("InnerSaveStorageDistributeInfo:%{public}s  failed", bundleName.c_str());
         return false;
     }
+#ifdef DMS_SYNC_DATA_ON_PACKAGE_EVENT
+    DmsKvSyncE2E::GetInstance()->PushAndPullData();
+#endif
     HILOGI("end.");
     return true;
 }
@@ -911,6 +911,11 @@ void DmsBmStorage::DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos)
         status = kvStorePtr_->PutBatch(entries);
         HILOGW("distribute database ipc error and try to call again, result = %{public}d", status);
     }
+#ifdef DMS_SYNC_DATA_ON_PACKAGE_EVENT
+    if(!entries.empty()){
+        DmsKvSyncE2E::GetInstance()->PushAndPullData();
+    }
+#endif
     HILOGI("end.");
 }
 
