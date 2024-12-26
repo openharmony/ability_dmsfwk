@@ -55,8 +55,7 @@ struct StreamParam {
 
 struct VidEnc : public StreamParam {
     explicit VidEnc(VideoCodecFormat fmt)
-        : StreamParam(StreamParamType::VID_ENC_FMT)
-        , encFmt(fmt)
+        : StreamParam(StreamParamType::VID_ENC_FMT), encFmt(fmt)
     {
     }
 
@@ -71,9 +70,7 @@ private:
 
 struct VidRectangle : public StreamParam {
     VidRectangle(int32_t w, int32_t h)
-        : StreamParam(StreamParamType::VID_RECTANGLE)
-        , width(w)
-        , height(h)
+        : StreamParam(StreamParamType::VID_RECTANGLE), width(w), height(h)
     {
     }
 
@@ -89,8 +86,7 @@ private:
 
 struct VidBitRate : public StreamParam {
     explicit VidBitRate(int32_t br)
-        : StreamParam(StreamParamType::VID_BITRATE)
-        , bitRate(br)
+        : StreamParam(StreamParamType::VID_BITRATE), bitRate(br)
     {
     }
 
@@ -105,8 +101,7 @@ private:
 
 struct VidFrameRate : public StreamParam {
     explicit VidFrameRate(int32_t r)
-        : StreamParam(StreamParamType::VID_FRAMERATE)
-        , frameRate(r)
+        : StreamParam(StreamParamType::VID_FRAMERATE), frameRate(r)
     {
     }
 
@@ -121,8 +116,7 @@ private:
 
 struct VidIsHdr : public StreamParam {
     explicit VidIsHdr(bool r)
-        : StreamParam(StreamParamType::VID_IS_HDR)
-        , isHdr(r)
+        : StreamParam(StreamParamType::VID_IS_HDR), isHdr(r)
     {
     }
     bool isHdr;
@@ -135,8 +129,7 @@ private:
 
 struct VidEnableTemporalScale : public StreamParam {
     explicit VidEnableTemporalScale(bool r)
-        : StreamParam(StreamParamType::VID_ENABLE_TEMPORAL_SCALE)
-        , enableTemporalScale(r)
+        : StreamParam(StreamParamType::VID_ENABLE_TEMPORAL_SCALE), enableTemporalScale(r)
     {
     }
 
