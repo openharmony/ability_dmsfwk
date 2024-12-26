@@ -905,14 +905,13 @@ void DmsBmStorage::DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos)
     entrie.value = value;
     HILOGI("need be put: %{public}d", publicRecordsInfo.maxBundleNameId);
     entries.push_back(entrie);
-
     Status status = kvStorePtr_->PutBatch(entries);
     if (status == Status::IPC_ERROR) {
         status = kvStorePtr_->PutBatch(entries);
         HILOGW("distribute database ipc error and try to call again, result = %{public}d", status);
     }
 #ifdef DMS_SYNC_DATA_ON_PACKAGE_EVENT
-    if(!entries.empty()){
+    if (!entries.empty()) {
         DmsKvSyncE2E::GetInstance()->PushAndPullData();
     }
 #endif
