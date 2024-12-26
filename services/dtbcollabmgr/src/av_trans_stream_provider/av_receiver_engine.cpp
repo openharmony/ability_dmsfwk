@@ -265,7 +265,7 @@ Status AVReceiverEngine::OnCallback(const std::shared_ptr<Filter>& filter, Filte
     HILOGI("AVReceiverEngine OnCallback enter.");
     if (cmd != FilterCallBackCommand::NEXT_FILTER_NEEDED) {
         HILOGI("no need next filter");
-        return Status:OK;
+        return Status::OK;
     }
     switch (outType) {
         case StreamType::STREAMTYPE_ENCODED_VIDEO: {

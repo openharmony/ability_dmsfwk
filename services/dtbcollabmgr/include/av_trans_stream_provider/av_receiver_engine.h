@@ -79,7 +79,7 @@ namespace DistributedCollab {
         std::shared_ptr<AVSurfaceBufferCache> bufferCache_ = nullptr;
 #endif
         std::shared_ptr<Media::Pipeline::EventReceiver> engineEventReceiver_ = nullptr;
-        std::shared_ptr<Media::Pipeline::FilterCallback> engineFilterCallback_= nullptr;
+        std::shared_ptr<Media::Pipeline::FilterCallback> engineFilterCallback_ = nullptr;
         std::string engineId_;
 
         VideoSourceType sourceType_ = VideoSourceType::NV21;

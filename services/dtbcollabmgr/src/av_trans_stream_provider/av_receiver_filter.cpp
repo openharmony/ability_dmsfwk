@@ -41,15 +41,6 @@ namespace {
     static const std::string TAG = "AVReceiverFilter";
     static constexpr int32_t decodePixelMapWidth = 256;
     static constexpr int32_t decodePixelMapHeight = 256;
-#define COPY_DATA_AND_CHECK(dest, destSize, src, srcSize, headerJson)      \
-do {                                                                              \
-    int32_t ret = memcpy_s(dest, destSize, src, srcSize);                         \
-    if (ret != EOK) {                                                             \
-        HILOGE("Failed to read memory from buffer. Error code: %{public}d", ret); \
-        cJSON_Delete(headerJson);                                                 \
-        return;                                                                   \
-    }                                                                             \
-} while (0)
 }
 
 static Media::Pipeline::AutoRegisterFilter<AVReceiverFilter> g_registerAVReceiverFilter("builtin.dtbcollab.receiver",
@@ -358,7 +349,7 @@ void AVReceiverFilter::DispatchProcessData(const std::shared_ptr<AVTransStreamDa
     }
 }
 
-void AVReceiverFilter::ProcessPixelMap(const std::shared_ptr<AVTransStreamData>& data) 
+void AVReceiverFilter::ProcessPixelMap(const std::shared_ptr<AVTransStreamData>& data)
 {
     HILOGI("start to process pixel map");
     auto pixelMap = GetPixelMap(data);
@@ -399,7 +390,7 @@ std::shared_ptr<Media::PixelMap> AVReceiverFilter::GetPixelMap(const std::shared
     return std::shared_ptr<Media::PixelMap>(std::move(pixelMap));
 }
 
-void AVReceiverFilter::ProcessSurfaceParam(const std::shared_ptr<AVTransStreamData>& data) 
+void AVReceiverFilter::ProcessSurfaceParam(const std::shared_ptr<AVTransStreamData>& data)
 {
     HILOGI("start to process surface param");
     auto& param = data->GetStreamDataExt().surfaceParam_;
@@ -469,21 +460,40 @@ void AVReceiverFilter::OnStream(const std::shared_ptr<AVTransStreamData>& stream
 void AVReceiverFilter::OnBytes(const std::shared_ptr<AVTransDataBuffer>& buffer)
 {
     HILOGI("start to parse stream by Bytes");
-    if (buffer->Size() < sizeof(AVSenderFilter::version) + sizeof(AVSenderFilter::transType) + sizeof(uint32_t)) {
+    if (buffer == nullptr || buffer->Size() < sizeof(AVSenderFilter::version) +
+        sizeof(AVSenderFilter::transType) + sizeof(uint32_t)) {
         HILOGE("Invalid buffer or buffer size is too small");
         return;
     }
     uint8_t* dataHeader = buffer->Data();
     size_t offset = 0;
 
+    int32_t ret = ERR_OK;
     int32_t version;
-    COPY_DATA_AND_CHECK(&version, sizeof(version), dataHeader + offset, sizeof(version), nullptr);
+    ret = memcpy_s(&version, sizeof(version),
+        dataHeader + offset, sizeof(version));
+    if (ret != EOK) {                                                             
+        HILOGE("Failed to read version from buffer. Error code: %{public}d", ret); 
+        return;                                                                  
+    }
     offset += sizeof(version);
+
     int32_t type;
-    COPY_DATA_AND_CHECK(&type, sizeof(type), dataHeader + offset, sizeof(type), nullptr);
+    ret = memcpy_s(&type, sizeof(type),
+        dataHeader + offset, sizeof(type));
+    if (ret != EOK) {                                                             
+        HILOGE("Failed to read type from buffer. Error code: %{public}d", ret); 
+        return;                                                                  
+    }
     offset += sizeof(type);
+
     uint32_t headerLen;
-    COPY_DATA_AND_CHECK(&headerLen, sizeof(headerLen), dataHeader + offset, sizeof(headerLen), nullptr);
+    ret = memcpy_s(&headerLen, sizeof(headerLen),
+        dataHeader + offset, sizeof(headerLen));
+    if (ret != EOK) {                                                             
+        HILOGE("Failed to read headerLen from buffer. Error code: %{public}d", ret); 
+        return;                                                                  
+    }   
     offset += sizeof(headerLen);
 
     if (buffer->Size() < offset + headerLen) {
