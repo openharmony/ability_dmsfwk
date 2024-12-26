@@ -98,8 +98,9 @@ enum class IDSchedInterfaceCode : uint32_t {
 
     // continue state notify callback
     CONTINUE_STATE_CALLBACK = 301,
-    CONTINUE_STATE_CALLBACK_REGISTER = 302,
-    CONTINUE_STATE_CALLBACK_UNREGISTER = 303,
+    CONTINUE_STATE_UNREGISTER_CALLBACK = 302,
+    CONTINUE_STATE_CALLBACK_REGISTER = 303,
+    CONTINUE_STATE_CALLBACK_UNREGISTER = 304,
 };
 
 enum class IDRreeInstallCallbackInterfaceCode : uint32_t {
