@@ -125,13 +125,13 @@ void AVTransStreamData::DeserializeExtFromJson(const cJSON* root)
 {
     AVTransStreamDataExt& dataExt = ext_;
     ReadExtFlagFromJson(dataExt, root);
+    ReadExtIndexFromJson(dataExt, root);
     if (ext_.flag_ == AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_PIXEL_MAP) {
         return ReadExtPixelMapPackOptionToJson(dataExt, root);
     }
     if (ext_.flag_ == AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_SURFACE_PARAM) {
         return ReadExtSurfaceParamToJson(dataExt, root);
     }
-    ReadExtIndexFromJson(dataExt, root);
     ReadExtPtsFromJson(dataExt, root);
     ReadExtStartEncodeTFromJson(dataExt, root);
     ReadExtFinishEncodeTFromJson(dataExt, root);
