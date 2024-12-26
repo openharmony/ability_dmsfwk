@@ -41,8 +41,8 @@ namespace {
     using FilterCallBackCommand = Media::Pipeline::FilterCallBackCommand;
     using FilterType = Media::Pipeline::FilterType;
     static const std::string TAG = "AVSenderFilter";
-    static const std::string pixelMapFormat = "image/jpeg";
-    static constexpr int32_t pixelMapQuality = 50;
+    static const std::string PIXEL_MAP_FORMAT = "image/jpeg";
+    static constexpr int32_t PIXEL_MAP_QUALITY = 50;
 
 #ifdef DSCH_COLLAB_AV_TRANS_TEST_DEMO
     static const std::string encodeWriteFilePath = "/data/tmp/encode_output_h26x";
@@ -417,8 +417,8 @@ int32_t AVSenderFilter::PackPixelMap(const std::shared_ptr<Media::PixelMap>& pix
     std::shared_ptr<AVTransDataBuffer>& buffer)
 {
     Media::PackOption option = {
-        .format = pixelMapFormat,
-        .quality = pixelMapQuality,
+        .format = PIXEL_MAP_FORMAT,
+        .quality = PIXEL_MAP_QUALITY,
     };
     int32_t dataSize = pixelMap->GetByteCount();
     buffer = std::make_shared<AVTransDataBuffer>(dataSize);
@@ -444,14 +444,14 @@ int32_t AVSenderFilter::PackPixelMap(const std::shared_ptr<Media::PixelMap>& pix
 }
 
 std::shared_ptr<AVTransStreamData> AVSenderFilter::PackStreamDataForPixelMap(
-        const std::shared_ptr<AVTransDataBuffer>& dataBuffer)
+    const std::shared_ptr<AVTransDataBuffer>& dataBuffer)
 {
     AVTransStreamDataExt ext;
     ext.flag_ = AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_PIXEL_MAP;
     ext.index_ = lastIndex_.load();
     lastIndex_++;
     PixelMapPackOption option;
-    option.quality = pixelMapQuality;
+    option.quality = PIXEL_MAP_QUALITY;
     ext.pixelMapOption_ = option;
     return std::make_shared<AVTransStreamData>(dataBuffer, ext);
 }
