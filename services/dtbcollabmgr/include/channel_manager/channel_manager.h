@@ -145,10 +145,10 @@ private:
     ChannelStatus GetChannelStatus(const int32_t channelId);
 
     template <typename Func, typename... Args>
-    int32_t DoSendData(const int32_t channelId, Func doSendFunc, Args&&...args);
+    int32_t DoSendData(const int32_t channelId, Func doSendFunc, Args&& ...args);
     template <typename Func, typename... Args>
     void NotifyListeners(const int32_t channelId, Func listenerFunc,
-        const AppExecFwk::EventQueue::Priority priority, Args&&...args);
+        const AppExecFwk::EventQueue::Priority priority, Args&& ...args);
     int32_t GetValidSocket(const int32_t channelId);
     int32_t DoSendBytes(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data);
     int32_t DoSendMessage(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data);
