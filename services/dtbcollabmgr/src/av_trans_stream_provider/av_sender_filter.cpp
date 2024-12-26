@@ -324,7 +324,6 @@ int32_t AVSenderFilter::SendStreamDataByBytes(const std::shared_ptr<AVTransStrea
         HILOGE("serialize stream data failed");
         return GET_SERIALIZED_DATA_FAILED;
     }
-    const uint8_t* rawData = streamData->StreamData()->Data();
     size_t rawDataLen = streamData->StreamData()->Size();
     cJSON_AddNumberToObject(headerJson, "dataLen", rawDataLen);
 
@@ -333,11 +332,12 @@ int32_t AVSenderFilter::SendStreamDataByBytes(const std::shared_ptr<AVTransStrea
         FREE_CJSON(headerStr, headerJson);
         return GET_SERIALIZED_DATA_FAILED;
     }
-    size_t headerStrLen = strlen(headerStr);
-    uint32_t headerLen = static_cast<uint32_t>(headerStrLen);
-    size_t totalLen = sizeof(AVSenderFilter::version) + sizeof(AVSenderFilter::transType) +
-        sizeof(headerLen) + headerStrLen + rawDataLen;
-    std::shared_ptr<AVTransDataBuffer> buffer = std::make_shared<AVTransDataBuffer>(totalLen);
+    std::shared_ptr<AVTransDataBuffer> buffer = nullptr;
+    int32_t ret = WriteDataToBuffer(buffer, headerJson, headerStr, streamData);
+    if (ret != ERR_OK) {
+        HILOGE("write send data failed, %{public}d", ret);
+        return ret;
+    }
 #ifdef DSCH_COLLAB_AV_TRANS_TEST_DEMO
     if (auto ptr = listener_.lock()) {
         ptr->OnBytes(channelId_, buffer);
@@ -349,8 +349,15 @@ int32_t AVSenderFilter::SendStreamDataByBytes(const std::shared_ptr<AVTransStrea
 }
 
 int32_t AVSenderFilter::WriteDataToBuffer(const std::shared_ptr<AVTransDataBuffer>& buffer,
-    cJSON* headerJson, char* headerStr)
+    cJSON* headerJson, char* headerStr, const std::shared_ptr<AVTransStreamData>& streamData)
 {
+    const uint8_t* rawData = streamData->StreamData()->Data();
+    size_t rawDataLen = streamData->StreamData()->Size();
+    size_t headerStrLen = strlen(headerStr);
+    uint32_t headerLen = static_cast<uint32_t>(headerStrLen);
+    size_t totalLen = sizeof(AVSenderFilter::version) + sizeof(AVSenderFilter::transType) +
+        sizeof(headerLen) + headerStrLen + rawDataLen;
+    buffer = std::make_shared<AVTransDataBuffer>(totalLen);
     uint8_t* dataHeader = buffer->Data();
     size_t offset = 0;
     int32_t ret = memcpy_s(dataHeader + offset, buffer->Capacity() - offset,
@@ -360,7 +367,6 @@ int32_t AVSenderFilter::WriteDataToBuffer(const std::shared_ptr<AVTransDataBuffe
         return ret;
     }
     offset += sizeof(AVSenderFilter::version);
-
     ret = memcpy_s(dataHeader + offset, buffer->Capacity() - offset,
         &AVSenderFilter::transType, sizeof(AVSenderFilter::transType));
     if (ret != EOK) {
@@ -368,7 +374,6 @@ int32_t AVSenderFilter::WriteDataToBuffer(const std::shared_ptr<AVTransDataBuffe
         return ret;
     }
     offset += sizeof(AVSenderFilter::transType);
-
     ret = memcpy_s(dataHeader + offset, buffer->Capacity() - offset,
         &headerLen, sizeof(headerLen));
     if (ret != EOK) {
@@ -376,7 +381,6 @@ int32_t AVSenderFilter::WriteDataToBuffer(const std::shared_ptr<AVTransDataBuffe
         return ret;
     }
     offset += sizeof(headerLen);
-
     ret = memcpy_s(dataHeader + offset, buffer->Capacity() - offset,
         headerStr, headerStrLen);
     if (ret != EOK) {
@@ -384,13 +388,13 @@ int32_t AVSenderFilter::WriteDataToBuffer(const std::shared_ptr<AVTransDataBuffe
         return ret;
     }
     offset += headerStrLen;
-
     ret = memcpy_s(dataHeader + offset, buffer->Capacity() - offset,
         rawData, rawDataLen);
     if (ret != EOK) {
         FREE_CJSON(headerStr, headerJson);
         return ret;
     }
+    return ERR_OK;
 }
 
 int32_t AVSenderFilter::SendPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap)

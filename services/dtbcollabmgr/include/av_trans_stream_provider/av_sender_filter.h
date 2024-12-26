@@ -90,7 +90,7 @@ private:
     std::shared_ptr<AVTransStreamData> PackStreamDataForSurfaceParam(const SurfaceParam& param);
     void Process();
     int32_t WriteDataToBuffer(const std::shared_ptr<AVTransDataBuffer>& buffer,
-    cJSON* headerJson, char* headerStr)
+        cJSON* headerJson, char* headerStr, const std::shared_ptr<AVTransStreamData>& streamData);
 
 private:
     class BqConsumerProxy : public Media::IConsumerListener {
