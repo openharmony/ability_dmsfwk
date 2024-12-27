@@ -348,7 +348,7 @@ int32_t AVSenderFilter::SendStreamDataByBytes(const std::shared_ptr<AVTransStrea
     return ERR_OK;
 }
 
-int32_t AVSenderFilter::WriteDataToBuffer(const std::shared_ptr<AVTransDataBuffer>& buffer,
+int32_t AVSenderFilter::WriteDataToBuffer(std::shared_ptr<AVTransDataBuffer>& buffer,
     cJSON* headerJson, char* headerStr, const std::shared_ptr<AVTransStreamData>& streamData)
 {
     const uint8_t* rawData = streamData->StreamData()->Data();
