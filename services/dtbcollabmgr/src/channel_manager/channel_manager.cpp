@@ -56,19 +56,21 @@ namespace {
         { ChannelDataType::VIDEO_STREAM, "V" }
     };
 
-    static constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW = 0;
-    static constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MAX_LATENCY = 5000;
-    static constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MIN_LATENCY = 1000;
+    static constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW = 64 * 1024;
+    static constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MAX_LATENCY = 10000;
+    static constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MIN_LATENCY = 2000;
 
     static QosTV g_low_qosInfo[] = {
         { .qos = QOS_TYPE_MIN_BW, .value = DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW },
         { .qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_COLLAB_LOW_QOS_TYPE_MAX_LATENCY },
-        { .qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_COLLAB_LOW_QOS_TYPE_MIN_LATENCY }
+        { .qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_COLLAB_LOW_QOS_TYPE_MIN_LATENCY },
+        // only watch, need macro
+        { .qos = QOS_TYPE_TRANS_CONTINUOUS, .value = 1 }
     };
 
-    static constexpr int32_t DSCHED_COLLAB_HIGH_QOS_TYPE_MIN_BW = 0;
-    static constexpr int32_t DSCHED_COLLAB_HIGH_QOS_TYPE_MAX_LATENCY = 5000;
-    static constexpr int32_t DSCHED_COLLAB_HIGH_QOS_TYPE_MIN_LATENCY = 1000;
+    static constexpr int32_t DSCHED_COLLAB_HIGH_QOS_TYPE_MIN_BW = 4 * 1024 * 1024;
+    static constexpr int32_t DSCHED_COLLAB_HIGH_QOS_TYPE_MAX_LATENCY = 10000;
+    static constexpr int32_t DSCHED_COLLAB_HIGH_QOS_TYPE_MIN_LATENCY = 2000;
 
     static QosTV g_high_qosInfo[] = {
         { .qos = QOS_TYPE_MIN_BW, .value = DSCHED_COLLAB_HIGH_QOS_TYPE_MIN_BW },
@@ -374,7 +376,7 @@ int32_t ChannelManager::CreateClientSocket(const std::string& channelName,
     HILOGI("start");
     if (channelName.length() > MAX_CHANNEL_NAME_LENGTH) {
         HILOGE("channel name too long, %{public}s", channelName.c_str());
-        return INVALID_CHANNEL_NAME;
+        return -INVALID_CHANNEL_NAME;
     }
     std::string name = SESSION_NAME_PREFIX + ownerName_ +
         SPLIT_FLAG + CHANNEL_DATATYPE_PREFIX_MAP[dataType] + SPLIT_FLAG + channelName;
