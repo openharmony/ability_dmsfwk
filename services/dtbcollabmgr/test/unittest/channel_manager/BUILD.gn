@@ -18,8 +18,6 @@ import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
 module_output_path = "dmsfwk/distributedcollabtest"
 
-distributed_service = "//foundation/ability/dmsfwk/services"
-
 config("test_config") {
   visibility = [ ":*" ]
   include_dirs = [

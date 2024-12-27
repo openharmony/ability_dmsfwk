@@ -1,6 +1,6 @@
 /*
 * Copyright (c) 2024 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
+* Licensed under the Apache License, Version NUM_2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
 *
@@ -21,6 +21,7 @@ namespace {
     static const std::string TAG = "DSchedCollabSessionDataHeaderTest";
     using namespace testing;
     using namespace testing::ext;
+    static constexpr int32_t NUM_2 = 2;
     static constexpr int32_t NUM_3 = 3;
     static constexpr int32_t NUM_5 = 5;
     static constexpr int32_t NUM_10 = 10;
@@ -46,7 +47,7 @@ void SessionDataHeaderTest::SetUp()
     HILOGI("SessionDataHeaderTest::SetUp");
     version = 1;
     fragFlag = FRAG_TYPE::FRAG_START;
-    dataType = 2;
+    dataType = NUM_2;
     seqNum = NUM_100;
     totalLen = NUM_500;
     packetLen = NUM_128;
@@ -318,7 +319,7 @@ HWTEST_F(SessionDataHeaderTest, Deserialize_InvalidPayloadLength, TestSize.Level
     payloadLen = SessionDataHeader::BINARY_PAYLOAD_MAX_LEN + 1;
     version = 1;
     fragFlag = FRAG_TYPE::FRAG_START;
-    dataType = 2;
+    dataType = NUM_2;
     seqNum = NUM_100;
     totalLen = NUM_500;
     packetLen = NUM_128;
@@ -347,7 +348,7 @@ HWTEST_F(SessionDataHeaderTest, Deserialize_InvalidPacketLength, TestSize.Level1
     payloadLen = NUM_64;
     version = 1;
     fragFlag = FRAG_TYPE::FRAG_START;
-    dataType = 2;
+    dataType = NUM_2;
     seqNum = NUM_100;
     totalLen = NUM_500;
     packetLen = SessionDataHeader::BINARY_DATA_MAX_TOTAL_LEN + 1;
@@ -376,7 +377,7 @@ HWTEST_F(SessionDataHeaderTest, Deserialize_TotalLenTooSmall, TestSize.Level1)
     payloadLen = NUM_64;
     version = 1;
     fragFlag = FRAG_TYPE::FRAG_START;
-    dataType = 2;
+    dataType = NUM_2;
     seqNum = NUM_100;
     totalLen = NUM_10;
     packetLen = NUM_128;
@@ -403,9 +404,9 @@ HWTEST_F(SessionDataHeaderTest, Deserialize_TotalLenTooSmall, TestSize.Level1)
 HWTEST_F(SessionDataHeaderTest, Deserialize_UnmatchedVersion, TestSize.Level1)
 {
     payloadLen = NUM_64;
-    version = 2;
+    version = NUM_2;
     fragFlag = FRAG_TYPE::FRAG_START;
-    dataType = 2;
+    dataType = NUM_2;
     seqNum = NUM_100;
     totalLen = NUM_600;
     packetLen = NUM_100;

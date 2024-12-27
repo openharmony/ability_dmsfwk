@@ -13,6 +13,7 @@
 
 declare_args() {
   dms_path = "//foundation/ability/dmsfwk"
+  distributed_service = "//foundation/ability/dmsfwk/services"
   module_output_path = "dmsfwk/dmsfwk"
 
   dmsfwk_standard_form_share = true
