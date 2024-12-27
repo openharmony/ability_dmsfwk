@@ -463,17 +463,17 @@ namespace DistributedCollab {
     void SurfaceEncoderAdapter::ReleaseBuffer()
     {
         HILOGI("ReleaseBuffer");
-        while (true) {
-            if (isThreadExit_) {
-                HILOGI("Exit ReleaseBuffer thread.");
-                break;
-            }
+        while (!isThreadExit_) {
             std::vector<uint32_t> indexs;
             {
                 std::unique_lock<std::mutex> lock(releaseBufferMutex_);
                 releaseBufferCondition_.wait(lock, [this] {
                     return isThreadExit_ || !indexs_.empty();
                 });
+                if (isThreadExit_) {
+                    HILOGI("Exit ReleaseBuffer thread.");
+                    return;
+                }
                 indexs = indexs_;
                 indexs_.clear();
             }
