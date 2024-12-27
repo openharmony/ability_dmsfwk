@@ -106,7 +106,7 @@ enum DmsInterfaceSdkErr {
 enum {
     /**
      * @brief Result 29425664 for distribute collab error start
-     * 
+     *
      */
     INVALID_PARAMETERS_ERR = DMS_SERVICE_ERR_OFFSET,
 
