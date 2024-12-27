@@ -47,6 +47,7 @@ public:
     int32_t NotifyAbilityDied(const std::string &bundleName, const int32_t &pid);
     int32_t NotifySessionClose(const std::string &collabToken);
     int32_t CleanUpSession(const std::string &collabToken);
+    int32_t CheckCollabRelation(CollabInfo sourceInfo, CollabInfo sinkInfo);
     int32_t ReleaseAbilityLink(const std::string &bundleName, const int32_t &pid);
     int32_t CancleReleaseAbilityLink(const std::string &bundleName, const int32_t &pid);
     std::string GetSrcSocketName(const std::string& collabToken);

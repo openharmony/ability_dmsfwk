@@ -59,6 +59,15 @@ DSchedCollabManager::~DSchedCollabManager()
     UnInit();
 }
 
+static int32_t CheckSynergisticRelation(CollabInfo sourceInfo, CollabInfo sinkInfo)
+{
+    return DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo);
+}
+
+IFeatureAbilityRelationChecker iAbilityRelationChecker = {
+    .CheckCollabRelation = CheckSynergisticRelation
+};
+
 void DSchedCollabManager::Init()
 {
     HILOGI("Init DSchedCollabManager start");
@@ -69,12 +78,49 @@ void DSchedCollabManager::Init()
     DSchedTransportSoftbusAdapter::GetInstance().InitChannel();
     softbusListener_ = std::make_shared<DSchedCollabManager::SoftbusListener>();
     DSchedTransportSoftbusAdapter::GetInstance().RegisterListener(SERVICE_TYPE_COLLAB, softbusListener_);
+    int32_t ret =  RegisterRelationChecker(&iAbilityRelationChecker);
+    if (ret != ERR_OK) {
+        HILOGE("RegisterRelationChecker failed, ret: %{public}d", ret);
+        return;
+    }
     eventThread_ = std::thread(&DSchedCollabManager::StartEvent, this);
     std::unique_lock<std::mutex> lock(eventMutex_);
     eventCon_.wait(lock, [this] {
         return eventHandler_ != nullptr;
     });
     HILOGI("Init DSchedCollabManager end");
+}
+
+int32_t DSchedCollabManager::CheckCollabRelation(CollabInfo sourceInfo, CollabInfo sinkInfo)
+{
+    HILOGI("called");
+    if (collabs_.empty()) {
+        HILOGE("No collab in progress.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    DSchedCollabInfo collabInfo;
+    for (auto iter = collabs_.begin(); iter != collabs_.end(); iter++) {
+        if (iter->second == nullptr) {
+            HILOGE("collab is nullptr");
+            continue;
+        }
+        collabInfo = iter->second->GetCollabInfo();
+        if (std::string(sourceInfo.deviceId) == collabInfo.srcUdid_ &&
+            std::string(sinkInfo.deviceId) == collabInfo.sinkUdid_ &&
+            sourceInfo.pid == collabInfo.srcInfo_.pid_ && sinkInfo.pid == collabInfo.sinkInfo_.pid_ &&
+            static_cast<int32_t>(sourceInfo.tokenId) == collabInfo.srcInfo_.accessToken_ &&
+            static_cast<int32_t>(sinkInfo.tokenId) == collabInfo.sinkInfo_.accessToken_ &&
+            sourceInfo.userId == collabInfo.srcAccountInfo_.userId && sinkInfo.userId == collabInfo.sinkUserId_) {
+            HILOGI("find collab: %{public}s", collabInfo.ToString().c_str());
+            return ERR_OK;
+        } else {
+            HILOGI("collabInfo: %{public}s", collabInfo.ToString().c_str());
+            HILOGI("srcUdid: %{public}s", GetAnonymStr(collabInfo.srcUdid_).c_str());
+            HILOGI("sinkUdid: %{public}s", GetAnonymStr(collabInfo.sinkUdid_).c_str());
+        }
+    }
+    HILOGE("can not find collab");
+    return INVALID_PARAMETERS_ERR;
 }
 
 void DSchedCollabManager::StartEvent()
@@ -407,12 +453,14 @@ void DSchedCollabManager::HandleReleaseAbilityLink(const std::string &bundleName
         dSchedCollabInfo = iter->second->GetCollabInfo();
         if (bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.srcInfo_.pid_ &&
             CheckBackgroundPermissions() == true) {
-            HILOGI("source ability has retired, collabInfo: %{public}s", dSchedCollabInfo.ToString().c_str());
+            HILOGI("source ability been background, collabInfo: %{public}s", dSchedCollabInfo.ToString().c_str());
+            PrivilegeShutdown(static_cast<uint64_t>(dSchedCollabInfo.srcInfo_.accessToken_),
+                pid, dSchedCollabInfo.sinkInfo_.deviceId_.c_str());
             iter->second->PostEndTask();
         }
         if (bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.sinkInfo_.pid_ &&
             CheckBackgroundPermissions() == true) {
-            HILOGI("sink ability has retired, collabInfo: %{public}s", dSchedCollabInfo.ToString().c_str());
+            HILOGI("sink ability been background, collabInfo: %{public}s", dSchedCollabInfo.ToString().c_str());
             iter->second->PostEndTask();
         }
     }
