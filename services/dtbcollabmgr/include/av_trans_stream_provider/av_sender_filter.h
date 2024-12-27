@@ -89,7 +89,7 @@ private:
     std::shared_ptr<AVTransStreamData> PackStreamDataForPixelMap(const std::shared_ptr<AVTransDataBuffer>& dataBuffer);
     std::shared_ptr<AVTransStreamData> PackStreamDataForSurfaceParam(const SurfaceParam& param);
     void Process();
-    int32_t WriteDataToBuffer(const std::shared_ptr<AVTransDataBuffer>& buffer,
+    int32_t WriteDataToBuffer(std::shared_ptr<AVTransDataBuffer>& buffer,
         cJSON* headerJson, char* headerStr, const std::shared_ptr<AVTransStreamData>& streamData);
 
 private:

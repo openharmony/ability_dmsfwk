@@ -1,0 +1,161 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//build/ohos_var.gni")
+import("//build/test.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
+
+module_output_path = "dmsfwk/distributedcollabtest"
+
+config("test_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${dms_path}/services/dtbcollabmgr/include/channel_manager",
+    "${dms_path}/services/dtbcollabmgr/test/unittest/channel_manager",
+    "${dms_path}/common/include",
+  ]
+}
+
+ohos_unittest("ChannelManagerAVTransStreamDataTest") {
+  visibility = [ ":*" ]
+
+  module_out_path = module_output_path
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+
+  include_dirs = [ "${dms_path}/services/dtbcollabmgr/test/unittest" ]
+
+  sources = [ "av_trans_stream_data_test.cpp" ]
+
+  deps = [
+    "${dms_path}/common:distributed_sched_utils",
+    "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "hilog:libhilog",
+  ]
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("ChannelManagerSessionDataHeaderTest") {
+  visibility = [ ":*" ]
+
+  module_out_path = module_output_path
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+
+  include_dirs = [ "${dms_path}/services/dtbcollabmgr/test/unittest" ]
+
+  sources = [ "session_data_header_test.cpp" ]
+
+  deps = [
+    "${dms_path}/common:distributed_sched_utils",
+    "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "hilog:libhilog",
+  ]
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("ChannelManagerDataSenderReceiverTest") {
+  visibility = [ ":*" ]
+
+  module_out_path = module_output_path
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+
+  include_dirs = [ "${dms_path}/services/dtbcollabmgr/test/unittest" ]
+
+  sources = [
+    "data_sender_receiver_test.cpp",
+    "softbus_mock.cpp",
+  ]
+
+  deps = [
+    "${dms_path}/common:distributed_sched_utils",
+    "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "dsoftbus:softbus_client",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("ChannelManagerTest") {
+  visibility = [ ":*" ]
+
+  module_out_path = module_output_path
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+
+  include_dirs = [ "${dms_path}/services/dtbcollabmgr/test/unittest" ]
+
+  sources = [
+    "channel_manager_test.cpp",
+    "softbus_mock.cpp",
+  ]
+
+  deps = [
+    "${dms_path}/common:distributed_sched_utils",
+    "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+group("unittest") {
+  testonly = true
+  deps = [
+    ":ChannelManagerAVTransStreamDataTest",
+    ":ChannelManagerDataSenderReceiverTest",
+    ":ChannelManagerSessionDataHeaderTest",
+    ":ChannelManagerTest",
+  ]
+}
