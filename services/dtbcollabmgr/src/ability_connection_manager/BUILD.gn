@@ -1,0 +1,86 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//build/ohos_var.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
+
+config("distributed_collab_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${dms_path}/common/include",
+    "${dms_path}/interfaces/kits/napi/ability_connection_manager",
+    "${dms_path}/services/dtbcollabmgr/include/av_trans_stream_provider",
+    "${dms_path}/services/dtbcollabmgr/include/channel_manager",
+    "${dms_path}/services/dtbcollabmgr/include/ability_connection_manager",
+  ]
+}
+
+ohos_shared_library("distributed_ability_connection_manager") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  install_enable = true
+
+  sources = [
+    "${dms_path}/interfaces/kits/napi/ability_connection_manager/js_ability_connection_session_listener.cpp",
+    "ability_connection_info.cpp",
+    "ability_connection_manager.cpp",
+    "ability_connection_manager_listener.cpp",
+    "ability_connection_manager_stub.cpp",
+    "ability_connection_session.cpp",
+    "distributed_client.cpp",
+    "message_data_header.cpp",
+    "wifi_state_listener.cpp",
+  ]
+
+  configs = [ ":distributed_collab_config" ]
+
+  deps = [
+    "${dms_path}/common:distributed_sched_utils",
+    "${dms_path}/services/dtbcollabmgr/src/av_trans_stream_provider:dtbcollab_av_stream_trans_provider",
+    "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
+  ]
+
+  external_deps = [
+    "ability_runtime:ability_manager",
+    "ability_runtime:napi_common",
+    "ability_runtime:runtime",
+    "av_codec:av_codec_client",
+    "av_codec:av_codec_media_engine_filters",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
+    "graphic_surface:surface",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "image_framework:image",
+    "ipc:ipc_core",
+    "media_foundation:media_foundation",
+    "napi:ace_napi",
+    "openssl:libcrypto_shared",
+    "samgr:samgr_proxy",
+    "wifi:wifi_sdk",
+  ]
+
+  public_external_deps = [ "ability_runtime:ability_manager" ]
+  install_images = [ system_base_dir ]
+  relative_install_dir = "platformsdk"
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
