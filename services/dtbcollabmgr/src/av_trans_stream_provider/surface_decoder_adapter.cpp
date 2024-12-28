@@ -317,7 +317,8 @@ namespace DistributedCollab {
         }
         if (inputBufferQueueConsumer_->IsBufferInQueue(buffer)) {
             if (inputBufferQueueConsumer_->ReleaseBuffer(buffer) != Status::OK) {
-                HILOGE("InQueue RelBuf failed. index:%{public}u, bufferid:%{public}lu,pts:%{public}lld, flag:%{public}u",
+                HILOGE(
+                    "InQueue RelBuf failed.index:%{public}u, bufferid:%{public}lu,pts:%{public}lld, flag:%{public}u",
                     index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
             }
             return;
@@ -366,7 +367,8 @@ namespace DistributedCollab {
             HILOGE("QueueInputBuffer failed, index:%{public}u, bufferid:%{public}lu, pts:%{public}lld, flag:%{public}u",
                 index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
         } else {
-            HILOGD("QueueInputBuffer success, index:%{public}u, bufferid:%{public}lu, pts:%{public}lld, flag:%{public}u",
+            HILOGD(
+                "QueueInputBuffer success, index:%{public}u, bufferid:%{public}lu, pts:%{public}lld, flag:%{public}u",
                 index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
         }
     }
