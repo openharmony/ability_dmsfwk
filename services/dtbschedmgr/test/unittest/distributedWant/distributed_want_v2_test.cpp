@@ -1657,3 +1657,1047 @@ HWTEST_P(DistributedWantV2BoolArrayParamTest, DistributedScheduleWant_BoolArray_
     want_->SetParam(setKey, setValue);
     EXPECT_EQ(result, want_->GetBoolArrayParam(getKey));
 }
+
+INSTANTIATE_TEST_SUITE_P(WantBoolArrayParamTestCaseP, DistributedWantV2BoolArrayParamTest,
+    testing::Values(testBoolArrayType("", "aa", {true, false}, {}, {}),
+        testBoolArrayType("", "", {true, false}, {}, {true, false}),
+        testBoolArrayType("1*中_aR", "aa", {true, false}, {}, {}),
+        testBoolArrayType("1*中_aR", "1*中_aR", {false, true}, {}, {false, true})));
+
+using testCharArrayType =
+    std::tuple<std::string, std::string, std::vector<zchar>, std::vector<zchar>, std::vector<zchar>>;
+class DistributedWantV2CharArrayParamTest : public testing::TestWithParam<testCharArrayType> {
+public:
+    DistributedWantV2CharArrayParamTest()
+    {
+        want_ = nullptr;
+    }
+    ~DistributedWantV2CharArrayParamTest()
+    {
+        want_ = nullptr;
+    }
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
+    std::shared_ptr<DistributedWantV2> want_;
+};
+
+void DistributedWantV2CharArrayParamTest::SetUpTestCase(void)
+{}
+
+void DistributedWantV2CharArrayParamTest::TearDownTestCase(void)
+{}
+
+void DistributedWantV2CharArrayParamTest::SetUp(void)
+{
+    want_ = std::make_shared<DistributedWantV2>();
+}
+
+void DistributedWantV2CharArrayParamTest::TearDown(void)
+{}
+
+/**
+ * @tc.number:  DistributedScheduleWant_Parameters_CharArray_0100
+ * @tc.name: SetParam/GetCharArrayParam
+ * @tc.desc: Verify when parameter change.
+ */
+HWTEST_P(DistributedWantV2CharArrayParamTest, DistributedScheduleWant_Parameters_CharArray_0100,
+    Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string setKey = std::get<0>(GetParam());
+    std::string getKey = std::get<1>(GetParam());
+    std::vector<zchar> setValue = std::get<2>(GetParam());
+    std::vector<zchar> defaultValue = std::get<3>(GetParam());
+    std::vector<zchar> result = std::get<4>(GetParam());
+    want_->SetParam(setKey, setValue);
+    EXPECT_EQ(result, want_->GetCharArrayParam(getKey));
+}
+
+INSTANTIATE_TEST_SUITE_P(WantCharArrayParamTestCaseP, DistributedWantV2CharArrayParamTest,
+    testing::Values(testCharArrayType("", "aa", {U'中', U'文'}, {}, {}),
+        testCharArrayType("", "", {U'中', U'文'}, {}, {U'中', U'文'}),
+        testCharArrayType("1*中_aR", "aa", {U'中', U'文'}, {}, {}),
+        testCharArrayType("1*中_aR", "1*中_aR", {U'中', U'文'}, {}, {U'中', U'文'})));
+
+/**
+ * @tc.number:  DistributedScheduleWant_Parameters_CharArray_0200
+ * @tc.name:  GetCharArrayParam
+ * @tc.desc: Verify when the value is char array.
+ */
+HWTEST_F(DistributedWantV2CharArrayParamTest, DistributedScheduleWant_Parameters_CharArray_0200,
+    Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::vector<zchar> defaultValue;
+    std::string getKey("aa");
+    EXPECT_EQ(defaultValue, want_->GetCharArrayParam(getKey));
+}
+
+/**
+ * @tc.number:  DistributedScheduleWant_Parameters_CharArray_0300
+ * @tc.name:  SetParam/GetCharArrayParam
+ * @tc.desc: Verify when the value is char array.
+ */
+HWTEST_F(DistributedWantV2CharArrayParamTest, DistributedScheduleWant_Parameters_CharArray_0300,
+    Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string emptyStr("ff");
+    std::vector<zchar> firstValue({U'中', U'文'});
+    std::vector<zchar> secondValue({U'字', U'符'});
+    std::vector<zchar> thirdValue({U'集', U'英'});
+    std::string keyStr("aa");
+    want_->SetParam(emptyStr, firstValue);
+    want_->SetParam(emptyStr, firstValue);
+    want_->SetParam(emptyStr, secondValue);
+    std::vector<zchar> defaultValue;
+    EXPECT_EQ(defaultValue, want_->GetCharArrayParam(keyStr));
+    want_->SetParam(emptyStr, thirdValue);
+    EXPECT_EQ(thirdValue, want_->GetCharArrayParam(emptyStr));
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_Parameters_CharArray_0400
+ * @tc.name:  SetParam/GetCharArrayParam
+ * @tc.desc: Verify when the value is char array.
+ */
+HWTEST_F(DistributedWantV2CharArrayParamTest, DistributedScheduleWant_Parameters_CharArray_0400,
+    Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string firstKey("%1uH3");
+    std::vector<zchar> firstValue({U'中', U'文'});
+    std::vector<zchar> secondValue({U'字', U'符'});
+    std::vector<zchar> defaultValue;
+    std::string secondKey("aa");
+    want_->SetParam(firstKey, firstValue);
+    want_->SetParam(firstKey, firstValue);
+    want_->SetParam(firstKey, secondValue);
+    EXPECT_EQ(secondValue, want_->GetCharArrayParam(firstKey));
+    want_->SetParam(firstKey, firstValue);
+    EXPECT_EQ(defaultValue, want_->GetCharArrayParam(secondKey));
+}
+
+using testCharType = std::tuple<std::string, std::string, zchar, zchar, zchar>;
+class DistributedWantV2CharParamTest : public testing::TestWithParam<testCharType> {
+public:
+    DistributedWantV2CharParamTest()
+    {
+        want_ = nullptr;
+    }
+    ~DistributedWantV2CharParamTest()
+    {
+        want_ = nullptr;
+    }
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
+    std::shared_ptr<DistributedWantV2> want_;
+};
+
+void DistributedWantV2CharParamTest::SetUpTestCase(void)
+{}
+
+void DistributedWantV2CharParamTest::TearDownTestCase(void)
+{}
+
+void DistributedWantV2CharParamTest::SetUp(void)
+{
+    want_ = std::make_shared<DistributedWantV2>();
+}
+
+void DistributedWantV2CharParamTest::TearDown(void)
+{}
+
+/**
+ * @tc.number: DistributedScheduleWant_Parameters_Char_0100
+ * @tc.name:  SetParam/GetCharParam
+ * @tc.desc: Verify when the value is char array.
+ */
+HWTEST_P(DistributedWantV2CharParamTest, DistributedScheduleWant_Parameters_Char_0100, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string setKey = std::get<0>(GetParam());
+    std::string getKey = std::get<1>(GetParam());
+    zchar setValue = std::get<2>(GetParam());
+    zchar defaultValue = std::get<3>(GetParam());
+    zchar result = std::get<4>(GetParam());
+    want_->SetParam(setKey, setValue);
+    EXPECT_EQ(result, want_->GetCharParam(getKey, defaultValue));
+}
+
+INSTANTIATE_TEST_SUITE_P(WantParametersCharTestCaseP, DistributedWantV2CharParamTest,
+    testing::Values(testCharType("", "aa", U'#', U'中', U'中'), testCharType("", "", U'中', U'K', U'中'),
+        testCharType("1*中_aR", "aa", U'a', U'中', U'中'), testCharType("1*中_aR", "1*中_aR", U'中', U'z', U'中')));
+
+/**
+ * @tc.number: DistributedScheduleWant_Parameters_Char_0200
+ * @tc.name:  SetParam/GetCharParam
+ * @tc.desc: Verify when the value is char
+ */
+HWTEST_F(DistributedWantV2CharParamTest, DistributedScheduleWant_Parameters_Char_0200, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    zchar defaultValue = U'文';
+    std::string getKey("aa");
+    EXPECT_EQ(defaultValue, want_->GetCharParam(getKey, defaultValue));
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_Parameters_Char_0300
+ * @tc.name:  SetParam/GetCharParam
+ * @tc.desc: Verify when the value is char.
+ */
+HWTEST_F(DistributedWantV2CharParamTest, DistributedScheduleWant_Parameters_Char_0300, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string emptyStr("jj");
+    zchar firstValue = U'中';
+    zchar secondValue = U'文';
+    zchar thirdValue = U'字';
+    zchar firstDefaultValue = U'符';
+    zchar secondDefaultValue = U'集';
+    std::string keyStr("aa");
+    want_->SetParam(emptyStr, firstValue);
+    want_->SetParam(emptyStr, firstValue);
+    want_->SetParam(emptyStr, secondValue);
+    EXPECT_EQ(firstDefaultValue, want_->GetCharParam(keyStr, firstDefaultValue));
+    want_->SetParam(emptyStr, thirdValue);
+    EXPECT_EQ(thirdValue, want_->GetCharParam(emptyStr, secondDefaultValue));
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_Parameters_Char_0400
+ * @tc.name:  SetParam/GetCharParam
+ * @tc.desc: Verify when the value is char.
+ */
+HWTEST_F(DistributedWantV2CharParamTest, DistributedScheduleWant_Parameters_Char_0400, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string firstKey("%1uH3");
+    zchar firstValue = U'中';
+    zchar secondValue = U'文';
+    zchar firstDefaultValue = U'字';
+    zchar secondDefaultValue = U'符';
+    std::string secondKey("aa");
+    want_->SetParam(firstKey, firstValue);
+    want_->SetParam(firstKey, firstValue);
+    want_->SetParam(firstKey, secondValue);
+    EXPECT_EQ(secondValue, want_->GetCharParam(firstKey, firstDefaultValue));
+    want_->SetParam(firstKey, firstValue);
+    EXPECT_EQ(secondDefaultValue, want_->GetCharParam(secondKey, secondDefaultValue));
+}
+
+using testDoubleArrayType =
+    std::tuple<std::string, std::string, std::vector<double>, std::vector<double>, std::vector<double>>;
+class DistributedWantV2DoubleArrayParamTest : public testing::TestWithParam<testDoubleArrayType> {
+public:
+    DistributedWantV2DoubleArrayParamTest()
+    {
+        want_ = nullptr;
+    }
+    ~DistributedWantV2DoubleArrayParamTest()
+    {
+        want_ = nullptr;
+    }
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
+    std::shared_ptr<DistributedWantV2> want_;
+};
+
+void DistributedWantV2DoubleArrayParamTest::SetUpTestCase(void)
+{}
+
+void DistributedWantV2DoubleArrayParamTest::TearDownTestCase(void)
+{}
+
+void DistributedWantV2DoubleArrayParamTest::SetUp(void)
+{
+    want_ = std::make_shared<DistributedWantV2>();
+}
+
+void DistributedWantV2DoubleArrayParamTest::TearDown(void)
+{}
+
+/**
+ * @tc.number: DistributedScheduleWant_DoubleArray_0100
+ * @tc.name:  SetParam/GetDoubleArrayParam
+ * @tc.desc: Verify when parameter change.
+ */
+HWTEST_P(DistributedWantV2DoubleArrayParamTest,
+    DistributedScheduleWant_DoubleArray_0100, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string setKey = std::get<0>(GetParam());
+    std::string getKey = std::get<1>(GetParam());
+    std::vector<double> setValue = std::get<2>(GetParam());
+    std::vector<double> defaultValue = std::get<3>(GetParam());
+    std::vector<double> result = std::get<4>(GetParam());
+    want_->SetParam(setKey, setValue);
+    EXPECT_EQ(result, want_->GetDoubleArrayParam(getKey));
+}
+
+INSTANTIATE_TEST_SUITE_P(WantDoubleArrayParamTestCaseP, DistributedWantV2DoubleArrayParamTest,
+    testing::Values(testDoubleArrayType("", "aa", {-1.1, -2.1}, {}, {}),
+        testDoubleArrayType("", "", {-41.1, -42.1}, {}, {-41.1, -42.1}),
+        testDoubleArrayType("1*中_aR", "aa", {50.1, 51.1}, {}, {}),
+        testDoubleArrayType("1*中_aR", "1*中_aR", {5000.1, 5001.1}, {}, {5000.1, 5001.1})));
+
+/**
+ * @tc.number: DistributedScheduleWant_DoubleArray_0200
+ * @tc.name:  SetParam/GetDoubleArrayParam
+ * @tc.desc: Verify when parameter change.
+ */
+HWTEST_F(DistributedWantV2DoubleArrayParamTest,
+    DistributedScheduleWant_DoubleArray_0200, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::vector<double> defaultValue;
+    std::string key = "aa";
+    EXPECT_EQ(defaultValue, want_->GetDoubleArrayParam(key));
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_DoubleArray_0300
+ * @tc.name:  SetParam/GetDoubleArrayParam
+ * @tc.desc: set empty-string key repeatedly, but get param of another nonexistent key
+ */
+HWTEST_F(DistributedWantV2DoubleArrayParamTest,
+    DistributedScheduleWant_DoubleArray_0300, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::vector<double> defaultValue;
+    std::string setKey1 = "cc";
+    std::string setKey2 = "aa";
+    std::vector<double> setValue1 = {1.1, 2.1};
+    std::vector<double> setValue2 = {5.1, 6.1};
+    want_->SetParam(setKey1, setValue1);
+    want_->SetParam(setKey1, setValue1);
+    setValue1 = {2.1, 3.1};
+    want_->SetParam(setKey1, setValue1);
+    EXPECT_EQ(defaultValue, want_->GetDoubleArrayParam(setKey2));
+    setValue1 = {4.1, 5.1};
+    want_->SetParam(setKey1, setValue1);
+    EXPECT_EQ(setValue1, want_->GetDoubleArrayParam(setKey1));
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_DoubleArray_0400
+ * @tc.name:  SetParam/GetDoubleArrayParam
+ * @tc.desc: set empty-string key repeatedly, then get param of the key
+ */
+HWTEST_F(DistributedWantV2DoubleArrayParamTest,
+    DistributedScheduleWant_DoubleArray_0400, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::vector<double> defaultValue;
+    std::string setKey1 = "%1uH3";
+    std::string setKey2 = "aa";
+    std::vector<double> setValue1 = {-1.1, -2.1};
+    std::vector<double> setValue2 = {9.1, 10.1};
+    want_->SetParam(setKey1, setValue1);
+    want_->SetParam(setKey1, setValue1);
+    setValue1 = {0.1, 1.1};
+    want_->SetParam(setKey1, setValue1);
+    EXPECT_EQ(setValue1, want_->GetDoubleArrayParam(setKey1));
+    setValue1 = {4.1, 5.1};
+    want_->SetParam(setKey1, setValue1);
+    setValue1 = {-10.1, -11.1};
+    EXPECT_EQ(defaultValue, want_->GetDoubleArrayParam(setKey2));
+}
+
+using testFloatArrayType =
+    std::tuple<std::string, std::string, std::vector<float>, std::vector<float>, std::vector<float>>;
+class DistributedWantV2FloatArrayParamTest : public testing::TestWithParam<testFloatArrayType> {
+public:
+    DistributedWantV2FloatArrayParamTest()
+    {
+        want_ = nullptr;
+    }
+    ~DistributedWantV2FloatArrayParamTest()
+    {
+        want_ = nullptr;
+    }
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
+    std::shared_ptr<DistributedWantV2> want_;
+};
+
+void DistributedWantV2FloatArrayParamTest::SetUpTestCase(void)
+{}
+
+void DistributedWantV2FloatArrayParamTest::TearDownTestCase(void)
+{}
+
+void DistributedWantV2FloatArrayParamTest::SetUp(void)
+{
+    want_ = std::make_shared<DistributedWantV2>();
+}
+
+void DistributedWantV2FloatArrayParamTest::TearDown(void)
+{}
+
+/**
+ * @tc.number: DistributedScheduleWant_FloatArray_0100
+ * @tc.name:  SetParam/GetFloatArrayParam
+ * @tc.desc: Verify when parameter change.
+ */
+HWTEST_P(DistributedWantV2FloatArrayParamTest, DistributedScheduleWant_FloatArray_0100, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string setKey = std::get<0>(GetParam());
+    std::string getKey = std::get<1>(GetParam());
+    std::vector<float> setValue = std::get<2>(GetParam());
+    std::vector<float> defaultValue = std::get<3>(GetParam());
+    std::vector<float> result = std::get<4>(GetParam());
+    want_->SetParam(setKey, setValue);
+    EXPECT_EQ(result, want_->GetFloatArrayParam(getKey));
+}
+
+INSTANTIATE_TEST_SUITE_P(WantFloatArrayParamTestCaseP, DistributedWantV2FloatArrayParamTest,
+    testing::Values(testFloatArrayType("", "aa", {-1.1, -2.1}, {}, {}),
+        testFloatArrayType("", "", {-41.1, -42.1}, {}, {-41.1, -42.1}),
+        testFloatArrayType("1*中_aR", "aa", {50.1, 51.1}, {}, {}),
+        testFloatArrayType("1*中_aR", "1*中_aR", {5000.1, 5001.1}, {}, {5000.1, 5001.1})));
+
+/**
+ * @tc.number: DistributedScheduleWant_FloatArray_0200
+ * @tc.name:  SetParam/GetFloatArrayParam
+ * @tc.desc: get param when WantParam is empty
+ */
+HWTEST_F(DistributedWantV2FloatArrayParamTest, DistributedScheduleWant_FloatArray_0200, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::vector<float> defaultValue;
+    std::string key = "aa";
+    EXPECT_EQ(defaultValue, want_->GetFloatArrayParam(key));
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_FloatArray_0300
+ * @tc.name:  SetParam & GetFloatArrayParam
+ * @tc.desc: set empty-string key repeatedly, but get param of another nonexistent key
+ */
+HWTEST_F(DistributedWantV2FloatArrayParamTest, DistributedScheduleWant_FloatArray_0300, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::vector<float> defaultValue;
+    std::string setKey1 = "hh";
+    std::string setKey2 = "aa";
+    std::vector<float> setValue1 = {1.1, 2.1};
+    want_->SetParam(setKey1, setValue1);
+    want_->SetParam(setKey1, setValue1);
+    setValue1 = {2.1, 3.1};
+    want_->SetParam(setKey1, setValue1);
+    EXPECT_EQ(defaultValue, want_->GetFloatArrayParam(setKey2));
+    setValue1 = {4.1, 5.1};
+    want_->SetParam(setKey1, setValue1);
+    EXPECT_EQ(setValue1, want_->GetFloatArrayParam(setKey1));
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_FloatArray_0400
+ * @tc.name:  SetParam & GetFloatArrayParam
+ * @tc.desc: set empty-string key repeatedly, then get param of the key
+ */
+HWTEST_F(DistributedWantV2FloatArrayParamTest, DistributedScheduleWant_FloatArray_0400, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::vector<float> defaultValue;
+    std::string setKey1 = "%1uH3";
+    std::string setKey2 = "aa";
+    std::vector<float> setValue1 = {-1.1, -2.1};
+    std::vector<float> setValue2 = {9.1, 10.1};
+    want_->SetParam(setKey1, setValue1);
+    want_->SetParam(setKey1, setValue1);
+    setValue1 = {0.1, 1.1};
+    want_->SetParam(setKey1, setValue1);
+    EXPECT_EQ(setValue1, want_->GetFloatArrayParam(setKey1));
+    setValue1 = {4.1, 5.1};
+    want_->SetParam(setKey1, setValue1);
+    EXPECT_EQ(defaultValue, want_->GetFloatArrayParam(setKey2));
+}
+
+using testLongArrayType =
+    std::tuple<std::string, std::string, std::vector<long>, std::vector<long>, std::vector<long>>;
+class DistributedWantV2LongArrayParamTest : public testing::TestWithParam<testLongArrayType> {
+public:
+    DistributedWantV2LongArrayParamTest()
+    {
+        want_ = nullptr;
+    }
+    ~DistributedWantV2LongArrayParamTest()
+    {
+        want_ = nullptr;
+    }
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
+    std::shared_ptr<DistributedWantV2> want_;
+};
+
+void DistributedWantV2LongArrayParamTest::SetUpTestCase(void)
+{}
+
+void DistributedWantV2LongArrayParamTest::TearDownTestCase(void)
+{}
+
+void DistributedWantV2LongArrayParamTest::SetUp(void)
+{
+    want_ = std::make_shared<DistributedWantV2>();
+}
+
+void DistributedWantV2LongArrayParamTest::TearDown(void)
+{}
+
+/**
+ * @tc.number: DistributedScheduleWant_LongArray_0100
+ * @tc.name:  SetParam & GetLongArrayParam
+ * @tc.desc: Verify when parameter change.
+ */
+HWTEST_P(DistributedWantV2LongArrayParamTest, DistributedScheduleWant_LongArray_0100, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string setKey = std::get<0>(GetParam());
+    std::string getKey = std::get<1>(GetParam());
+    std::vector<long> setValue = std::get<2>(GetParam());
+    std::vector<long> defaultValue = std::get<3>(GetParam());
+    std::vector<long> result = std::get<4>(GetParam());
+    want_->SetParam(setKey, setValue);
+    EXPECT_EQ(result, want_->GetLongArrayParam(getKey));
+}
+
+INSTANTIATE_TEST_SUITE_P(WantLongArrayParamTestCaseP, DistributedWantV2LongArrayParamTest,
+    testing::Values(testLongArrayType("", "aa", {-1, 3, 25, -9}, {}, {}),
+        testLongArrayType("", "", {-41, 0, 0, 9}, {}, {-41, 0, 0, 9}),
+        testLongArrayType("1*中_aR", "aa", {50, 2, -9}, {}, {}),
+        testLongArrayType("1*中_aR", "1*中_aR", {-5000}, {}, {-5000})));
+
+/**
+ * @tc.number: DistributedScheduleWant_LongArray_0200
+ * @tc.name:  SetParam & GetLongArrayParam
+ * @tc.desc: get param when WantParam is empty
+ */
+HWTEST_F(DistributedWantV2LongArrayParamTest, DistributedScheduleWant_LongArray_0200, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::vector<long> defaultValue;
+    std::string key = "aa";
+    EXPECT_EQ(defaultValue, want_->GetLongArrayParam(key));
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_LongArray_0300
+ * @tc.name:  SetParam & GetLongArrayParam
+ * @tc.desc: set empty-string key repeatedly, but get param of another nonexistent key
+ */
+HWTEST_F(DistributedWantV2LongArrayParamTest, DistributedScheduleWant_LongArray_0300, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::vector<long> defaultValue;
+    std::string setKey1 = "bb";
+    std::string setKey2 = "aa";
+    std::vector<long> setValue1 = {1, 2};
+    want_->SetParam(setKey1, setValue1);
+    want_->SetParam(setKey1, setValue1);
+    setValue1 = {2, 3};
+    want_->SetParam(setKey1, setValue1);
+    EXPECT_EQ(defaultValue, want_->GetLongArrayParam(setKey2));
+    setValue1 = {4, 5};
+    want_->SetParam(setKey1, setValue1);
+    EXPECT_EQ(setValue1, want_->GetLongArrayParam(setKey1));
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_LongArray_0400
+ * @tc.name:  SetParam & GetLongArrayParam
+ * @tc.desc: set empty-string key repeatedly, then get param of the key
+ */
+HWTEST_F(DistributedWantV2LongArrayParamTest, DistributedScheduleWant_LongArray_0400, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::vector<long> defaultValue;
+    std::string setKey1 = "%1uH3";
+    std::string setKey2 = "aa";
+    std::vector<long> setValue1 = {-1, -2};
+    want_->SetParam(setKey1, setValue1);
+    want_->SetParam(setKey1, setValue1);
+    setValue1 = {0, 1};
+    want_->SetParam(setKey1, setValue1);
+    EXPECT_EQ(setValue1, want_->GetLongArrayParam(setKey1));
+    setValue1 = {4, 5};
+    want_->SetParam(setKey1, setValue1);
+    EXPECT_EQ(defaultValue, want_->GetLongArrayParam(setKey2));
+}
+
+using testShortArrayType =
+    std::tuple<std::string, std::string, std::vector<short>, std::vector<short>, std::vector<short>>;
+class DistributedWantV2ShortArrayParamTest : public testing::TestWithParam<testShortArrayType> {
+public:
+    DistributedWantV2ShortArrayParamTest()
+    {
+        want_ = nullptr;
+    }
+    ~DistributedWantV2ShortArrayParamTest()
+    {
+        want_ = nullptr;
+    }
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
+    std::shared_ptr<DistributedWantV2> want_;
+};
+
+void DistributedWantV2ShortArrayParamTest::SetUpTestCase(void)
+{}
+
+void DistributedWantV2ShortArrayParamTest::TearDownTestCase(void)
+{}
+
+void DistributedWantV2ShortArrayParamTest::SetUp(void)
+{
+    want_ = std::make_shared<DistributedWantV2>();
+}
+
+void DistributedWantV2ShortArrayParamTest::TearDown(void)
+{}
+
+/**
+ * @tc.number: DistributedScheduleWant_ShortArray_0100
+ * @tc.name:  SetParam/GetShortArrayParam
+ * @tc.desc: Verify when parameter change.
+ */
+HWTEST_P(DistributedWantV2ShortArrayParamTest, DistributedScheduleWant_ShortArray_0100, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string setKey = std::get<0>(GetParam());
+    std::string getKey = std::get<1>(GetParam());
+    std::vector<short> setValue = std::get<2>(GetParam());
+    std::vector<short> defaultValue = std::get<3>(GetParam());
+    std::vector<short> result = std::get<4>(GetParam());
+    want_->SetParam(setKey, setValue);
+    EXPECT_EQ(result, want_->GetShortArrayParam(getKey));
+}
+
+INSTANTIATE_TEST_SUITE_P(WantShortArrayParamTestCaseP, DistributedWantV2ShortArrayParamTest,
+    testing::Values(testShortArrayType("", "aa", {-1, 3, 25, -9}, {}, {}),
+        testShortArrayType("", "", {-41, 0, 0, 9}, {}, {-41, 0, 0, 9}),
+        testShortArrayType("1*中_aR", "aa", {50, 2, -9}, {}, {}),
+        testShortArrayType("1*中_aR", "1*中_aR", {-5000}, {}, {-5000})));
+
+/**
+ * @tc.number: DistributedScheduleWant_ShortArray_0200
+ * @tc.name:  SetParam/GetShortArrayParam
+ * @tc.desc: Verify when the value is short array
+ */
+HWTEST_F(DistributedWantV2ShortArrayParamTest, DistributedScheduleWant_ShortArray_0200, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::vector<short> defaultValue;
+    std::string getKey("aa");
+    EXPECT_EQ(defaultValue, want_->GetShortArrayParam(getKey));
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_ShortArray_0300
+ * @tc.name:  SetParam/GetShortArrayParam
+ * @tc.desc: Verify when the value is short array
+ */
+HWTEST_F(DistributedWantV2ShortArrayParamTest, DistributedScheduleWant_ShortArray_0300, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string emptyStr("hh");
+    std::vector<short> firstValue({1, 4, -9});
+    std::vector<short> secondValue({1, 8, -9});
+    std::vector<short> thirdValue({1, 4, 9});
+    std::string keyStr("aa");
+    want_->SetParam(emptyStr, firstValue);
+    want_->SetParam(emptyStr, firstValue);
+    want_->SetParam(emptyStr, secondValue);
+    std::vector<short> defaultValue;
+    EXPECT_EQ(defaultValue, want_->GetShortArrayParam(keyStr));
+    want_->SetParam(emptyStr, thirdValue);
+    EXPECT_EQ(thirdValue, want_->GetShortArrayParam(emptyStr));
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_ShortArray_0400
+ * @tc.name:  SetParam/GetShortArrayParam
+ * @tc.desc: Verify when the value is short array
+ */
+HWTEST_F(DistributedWantV2ShortArrayParamTest, DistributedScheduleWant_ShortArray_0400, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string firstKey("%1uH3");
+    std::vector<short> firstValue({-1, -2});
+    std::vector<short> secondValue({-1, -2, -1, -2, 0});
+    std::vector<short> thirdValue({-1, -2, 100});
+    std::string secondKey("aa");
+    want_->SetParam(firstKey, firstValue);
+    want_->SetParam(firstKey, firstValue);
+    want_->SetParam(firstKey, secondValue);
+    EXPECT_EQ(secondValue, want_->GetShortArrayParam(firstKey));
+    want_->SetParam(firstKey, thirdValue);
+    std::vector<short> defaultValue;
+    EXPECT_EQ(defaultValue, want_->GetShortArrayParam(secondKey));
+}
+
+using testShortType = std::tuple<std::string, std::string, short, short, short>;
+class DistributedWantV2ShortParamTest : public testing::TestWithParam<testShortType> {
+public:
+    DistributedWantV2ShortParamTest()
+    {
+        want_ = nullptr;
+    }
+    ~DistributedWantV2ShortParamTest()
+    {}
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
+    std::shared_ptr<DistributedWantV2> want_;
+};
+
+void DistributedWantV2ShortParamTest::SetUpTestCase(void)
+{}
+
+void DistributedWantV2ShortParamTest::TearDownTestCase(void)
+{}
+
+void DistributedWantV2ShortParamTest::SetUp(void)
+{
+    want_ = std::make_shared<DistributedWantV2>();
+}
+
+void DistributedWantV2ShortParamTest::TearDown(void)
+{}
+
+/**
+ * @tc.number: DistributedScheduleWant_Short_0100
+ * @tc.name:  SetParam/GetShortParam
+ * @tc.desc: Verify when parameter change.
+ */
+HWTEST_P(DistributedWantV2ShortParamTest, DistributedScheduleWant_Short_0100, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string setKey = std::get<0>(GetParam());
+    std::string getKey = std::get<1>(GetParam());
+    short setValue = std::get<2>(GetParam());
+    short defaultValue = std::get<3>(GetParam());
+    short result = std::get<4>(GetParam());
+    want_->SetParam(setKey, setValue);
+    EXPECT_EQ(result, want_->GetShortParam(getKey, defaultValue));
+}
+
+INSTANTIATE_TEST_SUITE_P(WantShortParamTestCaseP, DistributedWantV2ShortParamTest,
+    testing::Values(testShortType("", "aa", -1, 100, 100), testShortType("", "", -9, -41, -9),
+        testShortType("1*中_aR", "aa", 50, 5, 5), testShortType("1*中_aR", "1*中_aR", -5000, 5000, -5000)));
+
+/**
+ * @tc.number: DistributedScheduleWant_Short_0200
+ * @tc.name:  SetParam/GetShortParam
+ * @tc.desc: Verify when the value is short
+ */
+HWTEST_F(DistributedWantV2ShortParamTest, DistributedScheduleWant_Short_0200, Function | MediumTest | Level3)
+{
+    short defaultValue = 200;
+    std::string getKey("aa");
+    EXPECT_EQ(defaultValue, want_->GetShortParam(getKey, defaultValue));
+}
+/**
+ * @tc.number: DistributedScheduleWant_Short_0300
+ * @tc.name:  SetParam/GetShortParam
+ * @tc.desc: Verify when the value is short
+ */
+HWTEST_F(DistributedWantV2ShortParamTest, DistributedScheduleWant_Short_0300, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string emptyStr("bb");
+    short firstValue = 1;
+    short secondValue = 2;
+    short thirdValue = 4;
+    short firstDefaultValue = 3;
+    short secondDefaultValue = 5;
+    std::string keyStr("aa");
+    want_->SetParam(emptyStr, firstValue);
+    want_->SetParam(emptyStr, firstValue);
+    want_->SetParam(emptyStr, secondValue);
+    EXPECT_EQ(firstDefaultValue, want_->GetShortParam(keyStr, firstDefaultValue));
+    want_->SetParam(emptyStr, thirdValue);
+    EXPECT_EQ(thirdValue, want_->GetShortParam(emptyStr, secondDefaultValue));
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_Short_0400
+ * @tc.name:  SetParam/GetShortParam
+ * @tc.desc: Verify when the value is short
+ */
+HWTEST_F(DistributedWantV2ShortParamTest, DistributedScheduleWant_Short_0400, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string firstKey("%1uH3");
+    short firstValue = -1;
+    short secondValue = 0;
+    short thirdValue = 4;
+    short firstDefaultValue = 9;
+    short secondDefaultValue = -10;
+    std::string secondKey("aa");
+    want_->SetParam(firstKey, firstValue);
+    want_->SetParam(firstKey, firstValue);
+    want_->SetParam(firstKey, secondValue);
+    EXPECT_EQ(secondValue, want_->GetShortParam(firstKey, firstDefaultValue));
+    want_->SetParam(firstKey, thirdValue);
+    EXPECT_EQ(secondDefaultValue, want_->GetShortParam(secondKey, secondDefaultValue));
+}
+
+using testStrArrayType =
+    std::tuple<std::string, std::string, std::vector<std::string>, std::vector<std::string>, std::vector<std::string>>;
+class DistributedWantV2StringArrayParamTest : public testing::TestWithParam<testStrArrayType> {
+public:
+    DistributedWantV2StringArrayParamTest()
+    {
+        want_ = nullptr;
+    }
+    ~DistributedWantV2StringArrayParamTest()
+    {}
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
+    std::shared_ptr<DistributedWantV2> want_ = nullptr;
+};
+
+void DistributedWantV2StringArrayParamTest::SetUpTestCase(void)
+{}
+
+void DistributedWantV2StringArrayParamTest::TearDownTestCase(void)
+{}
+
+void DistributedWantV2StringArrayParamTest::SetUp(void)
+{
+    want_ = std::make_shared<DistributedWantV2>();
+}
+
+void DistributedWantV2StringArrayParamTest::TearDown(void)
+{}
+
+/**
+ * @tc.number: DistributedScheduleWant_StringArray_0100
+ * @tc.name:  SetParam/GetStringArrayParam
+ * @tc.desc: Verify when parameter change.
+ */
+HWTEST_P(DistributedWantV2StringArrayParamTest,
+    DistributedScheduleWant_StringArray_0100, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string setKey = std::get<0>(GetParam());
+    std::string getKey = std::get<1>(GetParam());
+    std::vector<std::string> setValue = std::get<2>(GetParam());
+    std::vector<std::string> defaultValue = std::get<3>(GetParam());
+    std::vector<std::string> result = std::get<4>(GetParam());
+    want_->SetParam(setKey, setValue);
+    EXPECT_EQ(result, want_->GetStringArrayParam(getKey));
+}
+
+INSTANTIATE_TEST_SUITE_P(WantStringArrayParamTestCaseP, DistributedWantV2StringArrayParamTest,
+    testing::Values(testStrArrayType("", "aa", {"1*中_aR", "dbdb"}, {}, {}),
+        testStrArrayType("", "", {"1*中_aR", "dbdb"}, {}, {"1*中_aR", "dbdb"}),
+        testStrArrayType("1*中_aR", "aa", {"1*中_aR", "dbdb"}, {}, {}),
+        testStrArrayType("1*中_aR", "1*中_aR", {"1*中_aR", "dbdb"}, {}, {"1*中_aR", "dbdb"})));
+
+/**
+ * @tc.number: DistributedScheduleWant_StringArray_0200
+ * @tc.name:  SetParam/GetStringArrayParam
+ * @tc.desc: get param when WantParam is empty
+ */
+HWTEST_F(DistributedWantV2StringArrayParamTest,
+    DistributedScheduleWant_StringArray_0200, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::vector<std::string> defaultValue;
+    std::string key = "aa";
+    std::vector<std::string> resultValue = want_->GetStringArrayParam(key);
+    EXPECT_EQ(defaultValue, resultValue);
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_StringArray_0300
+ * @tc.name:  SetParam/GetStringArrayParam
+ * @tc.desc: set empty-string key repeatedly, but get param of another nonexistent key
+ */
+HWTEST_F(DistributedWantV2StringArrayParamTest,
+    DistributedScheduleWant_StringArray_0300, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::vector<std::string> defaultValue;
+    std::vector<std::string> setValue1 = {"aaa", "2132"};
+    std::vector<std::string> setValue2 = {"1*中_aR", "dbdb"};
+    std::string key1 = "cc";
+    std::string key2 = "aa";
+    want_->SetParam(key1, setValue1);
+    want_->SetParam(key1, setValue1);
+    want_->SetParam(key1, setValue2);
+    std::vector<std::string> resultValue = want_->GetStringArrayParam(key2);
+    EXPECT_EQ(defaultValue, resultValue);
+
+    want_->SetParam(key1, setValue1);
+    resultValue = want_->GetStringArrayParam(key1);
+    EXPECT_EQ(setValue1, resultValue);
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_StringArray_0400
+ * @tc.name:  SetParam/GetStringArrayParam
+ * @tc.desc: set empty-string key repeatedly, then get param of the key
+ */
+HWTEST_F(DistributedWantV2StringArrayParamTest,
+    DistributedScheduleWant_StringArray_0400, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::vector<std::string> defaultValue;
+    std::vector<std::string> setValue = {"aaa", "2132"};
+    std::string key1 = "%1uH3";
+    std::string key2 = "aa";
+    want_->SetParam(key1, setValue);
+    want_->SetParam(key1, setValue);
+    setValue = {"1*中_aR", "3#$%"};
+    want_->SetParam(key1, setValue);
+    std::vector<std::string> resultValue = want_->GetStringArrayParam(key1);
+    EXPECT_EQ(setValue, resultValue);
+
+    setValue = {"aaa", "2132"};
+    want_->SetParam(key1, setValue);
+    resultValue = want_->GetStringArrayParam(key2);
+    EXPECT_EQ(defaultValue, resultValue);
+}
+
+using testStrType = std::tuple<std::string, std::string, std::string, std::string, std::string>;
+class DistributedWantV2StringParamTest : public testing::TestWithParam<testStrType> {
+public:
+    DistributedWantV2StringParamTest()
+    {
+        want_ = nullptr;
+    }
+    ~DistributedWantV2StringParamTest()
+    {}
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
+    std::shared_ptr<DistributedWantV2> want_;
+};
+
+void DistributedWantV2StringParamTest::SetUpTestCase(void)
+{}
+
+void DistributedWantV2StringParamTest::TearDownTestCase(void)
+{}
+
+void DistributedWantV2StringParamTest::SetUp(void)
+{
+    want_ = std::make_shared<DistributedWantV2>();
+}
+
+void DistributedWantV2StringParamTest::TearDown(void)
+{}
+
+/**
+ * @tc.number: DistributedScheduleWant_String_0100
+ * @tc.name:  SetParam/GetStringParam
+ * @tc.desc: Verify when parameter change.
+ */
+HWTEST_P(DistributedWantV2StringParamTest, DistributedScheduleWant_String_0100, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string setKey = std::get<0>(GetParam());
+    std::string getKey = std::get<1>(GetParam());
+    std::string setValue = std::get<2>(GetParam());
+    std::string defaultValue = std::get<3>(GetParam());
+    std::string result = std::get<4>(GetParam());
+    want_->SetParam(setKey, setValue);
+    EXPECT_EQ(result, want_->GetStringParam(getKey));
+}
+
+INSTANTIATE_TEST_SUITE_P(WantStringParamTestCaseP, DistributedWantV2StringParamTest,
+    testing::Values(testStrType("", "aa", "1*中_aR", "", ""), testStrType("", "", "1*中_aR", "", "1*中_aR"),
+        testStrType("1*中_aR", "aa", "aaa", "", ""), testStrType("1*中_aR", "1*中_aR", "aaa", "", "aaa")));
+
+/**
+ * @tc.number: DistributedScheduleWant_String_0200
+ * @tc.name:  SetParam/GetStringParam
+ * @tc.desc: get param when WantParam is empty.
+ */
+HWTEST_F(DistributedWantV2StringParamTest, DistributedScheduleWant_String_0200, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string defaultStrValue;
+    std::string key = "aa";
+    EXPECT_EQ(defaultStrValue, want_->GetStringParam(key));
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_String_0300
+ * @tc.name:  SetParam/GetStringParam
+ * @tc.desc: set empty-string key repeatedly, but get param of another nonexistent key.
+ */
+HWTEST_F(DistributedWantV2StringParamTest, DistributedScheduleWant_String_0300, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string defaultStrValue;
+    std::string setValue1 = "aaa";
+    std::string setValue2 = "1*中_aR";
+    std::string key1 = "dd";
+    std::string key2 = "aa";
+    want_->SetParam(key1, setValue1);
+    want_->SetParam(key1, setValue1);
+    want_->SetParam(key1, setValue2);
+    EXPECT_EQ(defaultStrValue, want_->GetStringParam(key2));
+    want_->SetParam(key1, setValue1);
+    EXPECT_EQ(setValue1, want_->GetStringParam(key1));
+}
+
+/**
+ * @tc.number: DistributedScheduleWant_String_0400
+ * @tc.name:  SetParam/GetStringParam
+ * @tc.desc: set empty-string key repeatedly, then get param of the key.
+ */
+HWTEST_F(DistributedWantV2StringParamTest, DistributedScheduleWant_String_0400, Function | MediumTest | Level3)
+{
+    ASSERT_NE(want_, nullptr);
+    std::string key1 = "%1uH3";
+    std::string defaultStrValue;
+    std::string setValue1 = "aaa";
+    std::string setValue2 = "1*中_aR";
+    std::string key2 = "aa";
+    want_->SetParam(key1, setValue1);
+    want_->SetParam(key1, setValue1);
+    want_->SetParam(key1, setValue2);
+    EXPECT_EQ("1*中_aR", want_->GetStringParam(key1));
+    want_->SetParam(key1, setValue1);
+    EXPECT_EQ(defaultStrValue, want_->GetStringParam(key2));
+}
+
+using testLongType = std::tuple<std::string, std::string, long, long, long>;
+class DistributedWantV2LongParamTest : public testing::TestWithParam<testLongType> {
+public:
+    DistributedWantV2LongParamTest()
+    {
+        want_ = nullptr;
+    }
+    ~DistributedWantV2LongParamTest()
+    {}
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
+    std::shared_ptr<DistributedWantV2> want_ = nullptr;
+};
