@@ -273,7 +273,6 @@ void AVSenderFilter::OnBufferAvailable(const std::shared_ptr<AVBuffer>& buffer)
     }
     cv_.notify_one();
     bufferQProxy_->ReleaseBuffer(buffer);
-    cv_.notify_one();
 #ifdef DSCH_COLLAB_AV_TRANS_TEST_DEMO
     WriteFile(transData);
 #endif
@@ -418,6 +417,7 @@ int32_t AVSenderFilter::SendPixelMap(const std::shared_ptr<Media::PixelMap>& pix
         auto ptr = PackStreamDataForPixelMap(buffer);
         sendDatas_.push(ptr);
     }
+    cv_.notify_one();
     return ERR_OK;
 }
 
