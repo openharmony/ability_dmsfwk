@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
 group("napi_packages") {
   deps = [

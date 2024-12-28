@@ -1,0 +1,88 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//build/ohos_var.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
+
+config("dtbcollab_av_trans_provider_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "${dms_path}/common/include",
+    "${dms_path}/services/dtbcollabmgr/include/av_trans_stream_provider",
+    "${dms_path}/services/dtbcollabmgr/include/channel_manager",
+  ]
+}
+
+ohos_shared_library("dtbcollab_av_stream_trans_provider") {
+  configs = [ ":dtbcollab_av_trans_provider_config" ]
+
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  deps = [
+    "${dms_path}/common:distributed_sched_utils",
+    "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
+  ]
+
+  sources = [
+    "av_receiver_engine.cpp",
+    "av_receiver_filter.cpp",
+    "av_receiver_filter_listener.cpp",
+    "av_sender_engine.cpp",
+    "av_sender_filter.cpp",
+    "av_stream_param.cpp",
+    "surface_decoder_adapter.cpp",
+    "surface_decoder_filter.cpp",
+    "surface_encoder_adapter.cpp",
+    "surface_encoder_filter.cpp",
+  ]
+
+  defines = []
+
+  if (dmsfwk_av_trans_stream_debug) {
+    defines += [ "DSCH_COLLAB_AV_TRANS_TEST_DEMO" ]
+  }
+
+  if (dmsfwk_av_trans_pixel_map_debug) {
+    defines += [ "DSCH_COLLAB_AV_TRANS_PICTURE_TEST_DEMO" ]
+  }
+
+  if (dmsfwk_av_enable_surface_cache) {
+    defines += [ "ENABLE_SURFACE_BUFFER_CACHE" ]
+    sources += [ "av_surface_buffer_cache.cpp" ]
+  }
+
+  external_deps = [
+    "av_codec:av_codec_client",
+    "av_codec:native_media_codecbase",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
+    "graphic_surface:surface",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "image_framework:image_native",
+    "media_foundation:media_foundation",
+  ]
+
+  install_images = [ system_base_dir ]
+  relative_install_dir = "platformsdk"
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}

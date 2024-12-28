@@ -58,6 +58,7 @@
 #include "dms_free_install_callback.h"
 #include "dms_token_callback.h"
 #include "dms_version_manager.h"
+#include "dsched_collab_manager.h"
 #include "dsched_continue_manager.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
@@ -77,6 +78,7 @@
 #include "mission/distributed_sched_mission_manager.h"
 #include "mission/dsched_sync_e2e.h"
 #include "mission/wifi_state_listener.h"
+#include "mission/bluetooth_state_listener.h"
 #endif
 
 namespace OHOS {
@@ -303,7 +305,7 @@ bool DistributedSchedService::Init()
     }
     InitDataShareManager();
     InitMissionManager();
-
+    DSchedCollabManager::GetInstance().Init();
     DistributedSchedAdapter::GetInstance().Init();
     if (SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
         DSchedContinueManager::GetInstance().Init();
@@ -330,6 +332,7 @@ void DistributedSchedService::InitMissionManager()
     InitCommonEventListener();
     InitWifiStateListener();
     InitWifiSemiStateListener();
+    InitBluetoothStateListener();
     MultiUserManager::GetInstance().Init();
 #endif
 }
@@ -483,6 +486,14 @@ void DistributedSchedService::InitWifiSemiStateListener()
     if (!EventFwk::CommonEventManager::SubscribeCommonEvent(wifiStateListener)) {
         HILOGE("SubscribeCommonEvent wifiSemiStateListener failed!");
     }
+}
+
+void DistributedSchedService::InitBluetoothStateListener()
+{
+    HILOGI("InitBluetoothStateListener called");
+    std::shared_ptr<BluetoothStateListener> bluetoothStateListener = BluetoothStateListener::GetInstance();
+    bluetoothStateListener->InitBluetoothState();
+    Bluetooth::BluetoothHost::GetDefaultHost().RegisterObserver(bluetoothStateListener);
 }
 
 void DistributedSchedService::InitDeviceCfg()

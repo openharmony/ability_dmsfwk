@@ -41,6 +41,7 @@
 #include "mission/distributed_mission_info.h"
 #include "nocopyable.h"
 #endif
+#include "dsched_collab.h"
 #include "dsched_continue.h"
 #include "dsched_continue_event.h"
 #include "single_instance.h"
@@ -303,6 +304,7 @@ private:
     void RemoveConnectAbilityInfo(const std::string& deviceId);
     void InitWifiStateListener();
     void InitWifiSemiStateListener();
+    void InitBluetoothStateListener();
     void NotifyContinuateEventResult(int32_t resultCode, const EventNotify& event);
     void InitDeviceCfg();
     void NotifyCollaborateEventResult(int32_t resultCode, const EventNotify& event);

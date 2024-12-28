@@ -335,7 +335,7 @@ void DSchedContinueManager::HandleContinueMissionWithBundleName(DSchedContinueIn
     }
     WaitAllConnectDecision(direction, info, CONTINUE_TIMEOUT);
     HILOGI("end, subType: %{public}d dirction: %{public}d, continue info: %{public}s",
-        subType, direction, info.toString().c_str());
+        subType, direction, info.ToString().c_str());
 }
 
 void DSchedContinueManager::WaitAllConnectDecision(int32_t direction, const DSchedContinueInfo &info, int32_t timeout)
@@ -374,7 +374,7 @@ void DSchedContinueManager::SetTimeOut(const DSchedContinueInfo &info, int32_t t
             HILOGE("continue not exist.");
             return;
         }
-        HILOGE("continue timeout! info: %{public}s", info.toString().c_str());
+        HILOGE("continue timeout! info: %{public}s", info.ToString().c_str());
         auto dsContinue = continues_[info];
         if (dsContinue != nullptr) {
             dsContinue->OnContinueEnd(CONTINUE_ABILITY_TIMEOUT_ERR);
@@ -440,7 +440,7 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
     std::string bundleName = want.GetElement().GetBundleName();
     auto info = DSchedContinueInfo(srcDeviceId, bundleName, dstDeviceId, bundleName, "");
 
-    HILOGI("continue info: %{public}s.", info.toString().c_str());
+    HILOGI("continue info: %{public}s.", info.ToString().c_str());
     {
         std::lock_guard<std::mutex> continueLock(continueMutex_);
         if (continues_.empty()) {
@@ -460,7 +460,7 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByWant(
         }
     }
     HILOGE("missionId doesn't match the existing continuation, continueInfo: %{public}s.",
-        info.toString().c_str());
+        info.ToString().c_str());
     return nullptr;
 }
 
@@ -489,7 +489,7 @@ void DSchedContinueManager::HandleNotifyCompleteContinuation(const std::u16strin
             return;
         }
         dContinue->OnNotifyComplete(missionId, isSuccess);
-        HILOGI("end, continue info: %{public}s.", dContinue->GetContinueInfo().toString().c_str());
+        HILOGI("end, continue info: %{public}s.", dContinue->GetContinueInfo().ToString().c_str());
     }
     return;
 }
@@ -637,7 +637,7 @@ int32_t DSchedContinueManager::OnContinueEnd(const DSchedContinueInfo& info)
 
 void DSchedContinueManager::HandleContinueEnd(const DSchedContinueInfo& info)
 {
-    HILOGI("begin, continue info: %{public}s.", info.toString().c_str());
+    HILOGI("begin, continue info: %{public}s.", info.ToString().c_str());
     std::lock_guard<std::mutex> continueLock(continueMutex_);
     if (continues_.empty() || continues_.find(info) == continues_.end()) {
         HILOGE("continue info doesn't match any existing continuation.");
@@ -781,7 +781,7 @@ void DSchedContinueManager::NotifyContinueDataRecv(int32_t sessionId, int32_t co
         continues_.insert(std::make_pair(newContinue->GetContinueInfo(), newContinue));
 
         newContinue->OnStartCmd(startCmd->appVersion_);
-        HILOGI("end, continue info: %{public}s.", newContinue->GetContinueInfo().toString().c_str());
+        HILOGI("end, continue info: %{public}s.", newContinue->GetContinueInfo().ToString().c_str());
         return;
     }
     HILOGE("No matching session to handle cmd! sessionId: %{public}d, recv cmd %{public}d.", sessionId, command);

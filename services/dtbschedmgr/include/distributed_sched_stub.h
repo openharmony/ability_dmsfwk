@@ -127,6 +127,13 @@ private:
         sptr<IRemoteObject>& connect, CallerInfo& callerInfo, AccountInfo& accountInfo);
     int32_t ContinueStateCallbackRegister(MessageParcel& data, MessageParcel& reply);
     int32_t ContinueStateCallbackUnRegister(MessageParcel& data, MessageParcel& reply);
+    int32_t CollabMissionInner(MessageParcel& data, MessageParcel& reply);
+    bool IsNewCollabVersion(const std::string& remoteDeviceId);
+    int32_t NotifyStartAbilityResultInner(MessageParcel& data, MessageParcel& reply);
+    int32_t NotifyCollabPrepareResultInner(MessageParcel& data, MessageParcel& reply);
+    int32_t NotifyCloseCollabSessionInner(MessageParcel& data, MessageParcel& reply);
+    int32_t GetSrcSocketNameInner(MessageParcel& data, MessageParcel& reply);
+
 private:
     using DistributedSchedFunc = int32_t(DistributedSchedStub::*)(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, DistributedSchedFunc> remoteFuncsMap_;

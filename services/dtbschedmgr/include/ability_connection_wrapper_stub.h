@@ -26,6 +26,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 class AbilityConnectionWrapperStub : public IRemoteStub<AAFwk::IAbilityConnection> {
 public:
+    explicit AbilityConnectionWrapperStub();
     explicit AbilityConnectionWrapperStub(sptr<IRemoteObject> connection);
     AbilityConnectionWrapperStub(sptr<IRemoteObject> connection, const std::string& localDeviceId);
     virtual ~AbilityConnectionWrapperStub() = default;

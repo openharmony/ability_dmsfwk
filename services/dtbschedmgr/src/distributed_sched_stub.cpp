@@ -34,6 +34,7 @@
 #include "distributed_sched_utils.h"
 #include "dms_constant.h"
 #include "dms_version_manager.h"
+#include "dsched_collab_manager.h"
 #include "dsched_continue_manager.h"
 #include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_log.h"
@@ -70,6 +71,7 @@ const std::string FEATURE_ABILITY_FLAG_KEY = "ohos.dms.faFlag";
 const std::string DMS_VERSION_ID = "dmsVersion";
 const std::string DMS_UID_SPEC_BUNDLE_NAME = "dmsCallerUidBundleName";
 constexpr int32_t QOS_THRESHOLD_VERSION = 5;
+constexpr int32_t NEW_COLLAB_THRESHOLD_VERSION = 5;
 const int DEFAULT_REQUEST_CODE = -1;
 }
 
@@ -135,6 +137,16 @@ void DistributedSchedStub::InitLocalFuncsInner()
         &DistributedSchedStub::StartRemoteFreeInstallInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::STOP_REMOTE_EXTERNSION_ABILITY)] =
         &DistributedSchedStub::StopRemoteExtensionAbilityInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::COLLAB_MISSION)] =
+        &DistributedSchedStub::CollabMissionInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_SOURCE_SOCKET_NAME)] =
+        &DistributedSchedStub::GetSrcSocketNameInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_START_ABILITY_RESULT)] =
+        &DistributedSchedStub::NotifyStartAbilityResultInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_COLLAB_PREPARE_RESULT)] =
+        &DistributedSchedStub::NotifyCollabPrepareResultInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_CLOSE_COLLAB_SESSION)] =
+        &DistributedSchedStub::NotifyCloseCollabSessionInner;
 }
 
 void DistributedSchedStub::InitLocalMissionManagerInner()
@@ -663,6 +675,140 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
     result = ContinueMission(srcDevId, dstDevId, bundleName, callback, *wantParams);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+
+int32_t DistributedSchedStub::CollabMissionInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("called");
+    if (!IPCSkeleton::IsLocalCalling()) {
+        HILOGE("check permission failed!");
+        return DMS_PERMISSION_DENIED;
+    }
+    int32_t collabSessionId;
+    PARCEL_READ_HELPER(data, Int32, collabSessionId);
+    std::string srcSocketName;
+    PARCEL_READ_HELPER(data, String, srcSocketName);
+    shared_ptr<CollabMessage> localInfo(data.ReadParcelable<CollabMessage>());
+    if (localInfo == nullptr) {
+        HILOGW("localInfo readParcelable failed!");
+        return ERR_NULL_OBJECT;
+    }
+    shared_ptr<CollabMessage> peerInfo(data.ReadParcelable<CollabMessage>());
+    if (peerInfo == nullptr) {
+        HILOGW("peerInfo readParcelable failed!");
+        return ERR_NULL_OBJECT;
+    }
+    shared_ptr<ConnectOpt> srcOpt_(data.ReadParcelable<ConnectOpt>());
+    if (srcOpt_ == nullptr) {
+        HILOGW("srcOpt_ readParcelable failed!");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<IRemoteObject> sourceClientCallback = data.ReadRemoteObject();
+    if (sourceClientCallback == nullptr) {
+        HILOGW("read callback failed!");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    int32_t callerPid = IPCSkeleton::GetCallingPid();
+    uint32_t callerAccessToken = IPCSkeleton::GetCallingTokenID();
+ 
+    DSchedCollabInfo dSchedCollabInfo;
+    dSchedCollabInfo.srcInfo_ = *localInfo;
+    dSchedCollabInfo.sinkInfo_ = *peerInfo;
+    dSchedCollabInfo.srcOpt_ = *srcOpt_;
+    dSchedCollabInfo.srcCollabSessionId_ = collabSessionId;
+    dSchedCollabInfo.srcInfo_.socketName_ = srcSocketName;
+    dSchedCollabInfo.srcClientCB_ = sourceClientCallback;
+    dSchedCollabInfo.srcInfo_.uid_ = callerUid;
+    dSchedCollabInfo.srcInfo_.pid_ = callerPid;
+    dSchedCollabInfo.srcInfo_.accessToken_ = callerAccessToken;
+ 
+    DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(callerAccessToken);
+    int32_t result = DSchedCollabManager::GetInstance().CollabMission(dSchedCollabInfo);
+    HILOGI("result = %{public}d", result);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+
+int32_t DistributedSchedStub::GetSrcSocketNameInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("called");
+    if (!IPCSkeleton::IsLocalCalling()) {
+        HILOGE("check permission failed!");
+        return DMS_PERMISSION_DENIED;
+    }
+    std::string collabToken = data.ReadString();
+    std::string srcSocketName = DSchedCollabManager::GetInstance().GetSrcSocketName(collabToken);
+    PARCEL_WRITE_REPLY_NOERROR(reply, String, srcSocketName);
+}
+ 
+int32_t DistributedSchedStub::NotifyStartAbilityResultInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("called");
+    if (!IPCSkeleton::IsLocalCalling()) {
+        HILOGE("check permission failed!");
+        return DMS_PERMISSION_DENIED;
+    }
+    std::string collabToken = data.ReadString();
+    int32_t ret = data.ReadInt32();
+    int32_t sinkPid = data.ReadInt32();
+    int32_t sinkUid = data.ReadInt32();
+    int32_t sinkAccessTokenId = data.ReadInt32();
+ 
+    int32_t result = DSchedCollabManager::GetInstance().NotifyStartAbilityResult(collabToken, ret,
+        sinkPid, sinkUid, sinkAccessTokenId);
+    HILOGI("result = %{public}d", result);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+ 
+int32_t DistributedSchedStub::NotifyCollabPrepareResultInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("called");
+    if (!IPCSkeleton::IsLocalCalling()) {
+        HILOGE("check permission failed!");
+        return DMS_PERMISSION_DENIED;
+    }
+    const std::string collabToken = data.ReadString();
+    int32_t ret = data.ReadInt32();
+    int32_t sinkCollabSessionId = data.ReadInt32();
+    const std::string sinkSocketName = data.ReadString();
+    sptr<IRemoteObject> sinkClientCallback = data.ReadRemoteObject();
+    if (sinkClientCallback == nullptr) {
+        HILOGW("read callback failed!");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t result = DSchedCollabManager::GetInstance().NotifySinkPrepareResult(collabToken, ret,
+        sinkCollabSessionId, sinkSocketName, sinkClientCallback);
+    HILOGI("result = %{public}d", result);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+
+int32_t DistributedSchedStub::NotifyCloseCollabSessionInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("called");
+    if (!IPCSkeleton::IsLocalCalling()) {
+        HILOGE("check permission failed!");
+        return DMS_PERMISSION_DENIED;
+    }
+    std::string tokenId = data.ReadString();
+    int32_t result = DSchedCollabManager::GetInstance().NotifySessionClose(tokenId);
+    HILOGI("result = %{public}d", result);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+
+bool DistributedSchedStub::IsNewCollabVersion(const std::string& remoteDeviceId)
+{
+    if (remoteDeviceId.empty()) {
+        HILOGW("remote deviceId empty, the default value is the new version.");
+        return false;
+    }
+ 
+    DmsVersion thresholdDmsVersion = {NEW_COLLAB_THRESHOLD_VERSION, 0, 0};
+    if (DmsVersionManager::IsRemoteDmsVersionLower(remoteDeviceId, thresholdDmsVersion)) {
+        HILOGW("remote dms not support new collaboration version");
+        return false;
+    }
+    HILOGI("remote device satisfied qos condition");
+    return true;
 }
 
 bool DistributedSchedStub::IsRemoteInstall(const std::string &networkId, const std::string &bundleName)

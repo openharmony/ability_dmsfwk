@@ -29,7 +29,7 @@ namespace {
 constexpr uint32_t INTERCEPT_STRING_LENGTH = 20;
 constexpr uint32_t DSCHED_MAX_RECV_DATA_LEN = 104857600;
 
-constexpr int32_t DSCHED_QOS_TYPE_MIN_BW = 40 * 1024 * 1024;
+constexpr int32_t DSCHED_QOS_TYPE_MIN_BW = 80 * 1024;
 constexpr int32_t DSCHED_QOS_TYPE_MAX_LATENCY = 6000;
 constexpr int32_t DSCHED_QOS_TYPE_MIN_LATENCY = 1000;
 
@@ -40,14 +40,15 @@ const std::string SOCKET_DMS_PKG_NAME = "dms";
 typedef enum {
     SERVICE_TYPE_INVALID = -1,
     SERVICE_TYPE_CONTINUE = 0,
-    SERVICE_TYPE_COLLABORATION = 1,
+    SERVICE_TYPE_COLLAB = 1,
 } DSchedServiceType;
 
 class DSchedTransportSoftbusAdapter {
 DECLARE_SINGLE_INSTANCE_BASE(DSchedTransportSoftbusAdapter);
 public:
     int32_t InitChannel();
-    int32_t ConnectDevice(const std::string &peerDeviceId, int32_t &sessionId);
+    int32_t ConnectDevice(const std::string &peerDeviceId, int32_t &sessionId,
+        DSchedServiceType type = SERVICE_TYPE_CONTINUE);
     void DisconnectDevice(const std::string &peerDeviceId);
     int32_t ReleaseChannel();
     int32_t SendData(int32_t sessionId, int32_t dataType, std::shared_ptr<DSchedDataBuffer> dataBuffer);
@@ -60,6 +61,7 @@ public:
     void UnregisterListener(int32_t serviceType, std::shared_ptr<IDataListener> listener);
     void SetCallingTokenId(int32_t callingTokenId);
     bool GetSessionIdByDeviceId(const std::string &peerDeviceId, int32_t &sessionId);
+    bool IsNeedAllConnect();
 
 private:
     DSchedTransportSoftbusAdapter();
@@ -70,6 +72,8 @@ private:
     int32_t AddNewPeerSession(const std::string &peerDeviceId, int32_t &sessionId);
     void ShutdownSession(const std::string &peerDeviceId, int32_t sessionId);
     void NotifyListenersSessionShutdown(int32_t sessionId, bool isSelfCalled);
+    int32_t DecisionByAllConnect(const std::string &peerDeviceId, DSchedServiceType type);
+    void NotifyConnectDecision(const std::string &peerDeviceId, DSchedServiceType type);
 
 private:
     std::map<int32_t, std::shared_ptr<DSchedSoftbusSession>> sessions_;
@@ -80,6 +84,7 @@ private:
     int32_t serverSocket_ = 0;
     std::string localSessionName_;
     int32_t callingTokenId_ = 0;
+    bool isAllConnectExist_ = true;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS

@@ -125,6 +125,9 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
         HILOGW("InnerSaveStorageDistributeInfo:%{public}s  failed", bundleName.c_str());
         return false;
     }
+#ifdef DMS_SYNC_DATA_ON_PACKAGE_EVENT
+    DmsKvSyncE2E::GetInstance()->PushAndPullData();
+#endif
     HILOGI("end.");
     return true;
 }
@@ -232,6 +235,9 @@ bool DmsBmStorage::DeleteStorageDistributeInfo(const std::string &bundleName)
         HILOGE("delete key error: %{public}d", status);
         return false;
     }
+#ifdef DMS_SYNC_DATA_ON_PACKAGE_EVENT
+    DmsKvSyncE2E::GetInstance()->PushAndPullData();
+#endif
     HILOGI("delete value to kvStore success");
     return true;
 }
@@ -899,13 +905,22 @@ void DmsBmStorage::DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos)
     entrie.value = value;
     HILOGI("need be put: %{public}d", publicRecordsInfo.maxBundleNameId);
     entries.push_back(entrie);
-
     Status status = kvStorePtr_->PutBatch(entries);
     if (status == Status::IPC_ERROR) {
         status = kvStorePtr_->PutBatch(entries);
         HILOGW("distribute database ipc error and try to call again, result = %{public}d", status);
     }
+    SyncBundleInfoData(entries);
     HILOGI("end.");
+}
+
+void DmsBmStorage::SyncBundleInfoData(std::vector<DistributedKv::Entry> &entries)
+{
+#ifdef DMS_SYNC_DATA_ON_PACKAGE_EVENT
+    if (!entries.empty()) {
+        DmsKvSyncE2E::GetInstance()->PushAndPullData();
+    }
+#endif
 }
 
 void DmsBmStorage::AddBundleNameId(const uint16_t &bundleNameId, const std::string &bundleName)

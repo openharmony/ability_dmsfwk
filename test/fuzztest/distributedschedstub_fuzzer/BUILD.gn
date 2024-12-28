@@ -30,6 +30,8 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
     "${dms_path}/services/dtbschedmgr/include/dfx/",
     "${dms_path}/services/dtbschedmgr/test/unittest",
     "${dms_path}/services/dtbschedmgr/include/softbus_adapter/transport/",
+    "${dms_path}/services/dtbschedmgr/include/collab/",
+    "${dms_path}/services/dtbschedmgr/include/collab/state/",
     "${dms_path}/services/dtbschedmgr/include/collaborate/",
     "${dms_path}/services/dtbschedmgr/include/continue/",
     "${dms_path}/services/dtbschedmgr/include/continue/state/",
@@ -113,5 +115,7 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":DistributedSchedStubFuzzTest" ]
+  if (!dmsfwk_softbus_adapter_common) {
+    deps = [ ":DistributedSchedStubFuzzTest" ]
+  }
 }

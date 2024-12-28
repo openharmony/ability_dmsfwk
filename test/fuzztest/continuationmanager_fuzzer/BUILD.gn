@@ -94,5 +94,7 @@ ohos_fuzztest("ContinuationManagerFuzzTest") {
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":ContinuationManagerFuzzTest" ]
+  if (!dmsfwk_softbus_adapter_common) {
+    deps = [ ":ContinuationManagerFuzzTest" ]
+  }
 }

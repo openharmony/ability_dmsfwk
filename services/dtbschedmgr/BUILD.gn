@@ -29,6 +29,10 @@ config("distributed_sched_config") {
     "${dms_path}/interfaces/kits/napi/include",
     "${dms_path}/interfaces/innerkits/common/include",
     "include/collaborate",
+    "include/collab",
+    "include/collab/state",
+    "include/collab/state/sink_state",
+    "include/collab/state/source_state",
     "include/continue",
     "include/continue/state",
     "include/continue/state/source_state",
@@ -66,6 +70,24 @@ config("distributed_sched_config") {
   if (use_libfuzzer || use_clang_coverage) {
     defines += [ "TEST_COVERAGE" ]
   }
+  if (dmsfwk_check_bt) {
+    defines += [ "DMS_CHECK_BLUETOOTH" ]
+  }
+  if (dmsfwk_check_wifi) {
+    defines += [ "DMS_CHECK_WIFI" ]
+  }
+  if (dmsfwk_recv_broadcast) {
+    defines += [ "DMS_RECEIVE_BROADCAST" ]
+  }
+  if (dmsfwk_use_screenlock_icon_holdon) {
+    defines += [ "DMS_ICON_HOLD_ON" ]
+  }
+  if (dmsfwk_sync_data_on_package_event) {
+    defines += [ "DMS_SYNC_DATA_ON_PACKAGE_EVENT" ]
+  }
+  if (dmsfwk_continuous_task_enable) {
+    defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
+  }
 }
 
 ohos_shared_library("distributedschedsvr") {
@@ -93,6 +115,18 @@ ohos_shared_library("distributedschedsvr") {
     "src/app_state_observer.cpp",
     "src/bundle/bundle_manager_callback_stub.cpp",
     "src/bundle/bundle_manager_internal.cpp",
+    "src/collab/ability_state_observer.cpp",
+    "src/collab/dsched_collab.cpp",
+    "src/collab/dsched_collab_event.cpp",
+    "src/collab/dsched_collab_event_handler.cpp",
+    "src/collab/dsched_collab_manager.cpp",
+    "src/collab/state/dsched_collab_state_machine.cpp",
+    "src/collab/state/sink_state/dsched_collab_sink_connect_state.cpp",
+    "src/collab/state/sink_state/dsched_collab_sink_start_state.cpp",
+    "src/collab/state/sink_state/dsched_collab_sink_wait_end_state.cpp",
+    "src/collab/state/source_state/dsched_collab_source_start_state.cpp",
+    "src/collab/state/source_state/dsched_collab_source_wait_end_state.cpp",
+    "src/collab/state/source_state/dsched_collab_source_wait_result_state.cpp",
     "src/collaborate/dsched_collaborate_callback_mgr.cpp",
     "src/connect_death_recipient.cpp",
     "src/continue/dsched_continue.cpp",
@@ -210,8 +244,14 @@ ohos_shared_library("distributedschedsvr") {
     sources += [ "src/form_mgr_death_recipient.cpp" ]
   }
 
+  if (dmsfwk_continuous_task_enable) {
+    external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
+  }
+
   if (dmsfwk_mission_manager) {
     sources += [
+      "src/mission/bluetooth_state_adapter.cpp",
+      "src/mission/bluetooth_state_listener.cpp",
       "src/mission/distributed_bm_storage.cpp",
       "src/mission/distributed_bundle_info.cpp",
       "src/mission/distributed_data_change_listener.cpp",
@@ -234,6 +274,7 @@ ohos_shared_library("distributedschedsvr") {
       "src/mission/wifi_state_listener.cpp",
     ]
     external_deps += [
+      "bluetooth:btframework",
       "config_policy:configpolicy_util",
       "image_framework:image_native",
     ]
