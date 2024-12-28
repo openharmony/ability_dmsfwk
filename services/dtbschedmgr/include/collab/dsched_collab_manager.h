@@ -75,7 +75,6 @@ private:
     void RemoveTimeout(const std::string &collabToken);
     bool  IsSessionExists(const DSchedCollabInfo &info);
     std::string GenerateCollabToken(const std::string &sourceDeviceId);
-    bool CheckBackgroundPermissions();
 
     class SoftbusListener : public IDataListener {
         void OnBind(int32_t socket, PeerSocketInfo info);

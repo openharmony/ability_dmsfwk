@@ -17,6 +17,9 @@
 #define OHOS_ABILITY_STATE_OBSERVER_H
 
 #include "application_state_observer_stub.h"
+#ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
+#include "background_task_mgr_helper.h"
+#endif
 
 namespace OHOS {
 namespace DistributedSchedule {

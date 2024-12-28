@@ -33,13 +33,32 @@ void AbilityLifecycleObserver::OnForegroundApplicationChanged(const AppExecFwk::
 void AbilityLifecycleObserver::OnAbilityStateChanged(const AppExecFwk::AbilityStateData& abilityStateData)
 {
     HILOGI("called, abilityState: %{public}d", abilityStateData.abilityState);
-    if (abilityStateData.abilityState == static_cast<int32_t>(SliteAbilityState::STATE_BACKGROUND)) {
+#ifdef BGTASKMGR_CONTINUOUS_TASK_ENABLE
+     if (abilityStateData.abilityState == static_cast<int32_t>(SliteAbilityState::STATE_BACKGROUND)) {
+        std::vector<std::shared_ptr<BackgroundTaskMgr::ContinuousTaskCallbackInfo>> continuousTasksInfos;
+        int32_t result = BackgroundTaskMgr::BackgroundTaskMgrHelper::GetContinuousTaskApps(continuousTasksInfos);
+        if (result != ERR_OK) {
+            HILOGE("failed to GetContinuousTaskApps, err: %{public}d", result);
+            return;
+        }
+        for (auto continuousTasksInfo : continuousTasksInfos) {
+            if (continuousTasksInfo == nullptr) {
+                continue;
+            }
+            if (continuousTasksInfo->GetCreatorPid() == abilityStateData.pid) {
+                HILOGW("called, find the pid in continuous tasks");
+                return;
+            }
+        }
+        HILOGW("called, can't find the pid in continuous tasks");
         DSchedCollabManager::GetInstance().ReleaseAbilityLink(abilityStateData.bundleName, abilityStateData.pid);
     } else if (abilityStateData.abilityState == static_cast<int32_t>(SliteAbilityState::STATE_FOREGROUND) ||
         abilityStateData.abilityState == static_cast<int32_t>(SliteAbilityState::STATE_INITIAL)) {
         DSchedCollabManager::GetInstance().CancleReleaseAbilityLink(abilityStateData.bundleName, abilityStateData.pid);
     }
-
+#else
+    HILOGE("failed to check continuousTaskApps");
+#endif
     HILOGI("end.");
 }
 
