@@ -30,7 +30,7 @@ namespace {
     static constexpr int32_t NUM_100 = 100;
     static constexpr int32_t NUM_128 = 128;
     static constexpr int32_t NUM_500 = 500;
-    static constexpr int32_t NUM_600 = 5;
+    static constexpr int32_t NUM_600 = 600;
 }
 
 void SessionDataHeaderTest::SetUpTestCase()
