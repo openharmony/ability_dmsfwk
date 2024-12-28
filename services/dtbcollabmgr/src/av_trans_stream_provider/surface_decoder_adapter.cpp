@@ -308,7 +308,7 @@ namespace DistributedCollab {
     {
         HILOGI("SurfaceDecoderAdapter::OnInputBufferAvailable enter");
         FALSE_RETURN_MSG(buffer != nullptr && buffer->meta_ != nullptr, "meta_ is nullptr.");
-        HILOGD("OnInputAvailable enter. index:%{public}u, bufferid:%{public}lu, pts:%{public}lld, flag:%{public}u",
+        HILOGD("OnInputAvailable enter. index:%{public}u, bufferid:%{public}llu, pts:%{public}lld, flag:%{public}u",
             index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
         buffer->meta_->SetData(Tag::REGULAR_TRACK_ID, index);
         if (inputBufferQueueConsumer_ == nullptr) {
@@ -318,13 +318,13 @@ namespace DistributedCollab {
         if (inputBufferQueueConsumer_->IsBufferInQueue(buffer)) {
             if (inputBufferQueueConsumer_->ReleaseBuffer(buffer) != Status::OK) {
                 HILOGE(
-                    "InQueue RelBuf failed.index:%{public}u, bufferid:%{public}lu,pts:%{public}lld, flag:%{public}u",
+                    "InQueue RelBuf failed.index:%{public}u, bufferid:%{public}llu,pts:%{public}lld, flag:%{public}u",
                     index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
             }
             return;
         }
         uint32_t size = inputBufferQueueConsumer_->GetQueueSize() + 1;
-        HILOGI("AttachBuffer enter. index:%{public}u,  size:%{public}u , bufferid:%{public}lu",
+        HILOGI("AttachBuffer enter. index:%{public}u,  size:%{public}u , bufferid:%{public}llu",
             index, size, buffer->GetUniqueId());
         inputBufferQueueConsumer_->SetQueueSize(size);
         inputBufferQueueConsumer_->AttachBuffer(buffer, false);
@@ -364,11 +364,11 @@ namespace DistributedCollab {
         FALSE_RETURN_MSG(buffer->meta_->GetData(Tag::REGULAR_TRACK_ID, index), "get index failed.");
         FALSE_RETURN_MSG(codecServer_ != nullptr, "codecServer_ is nullptr.");
         if (codecServer_->QueueInputBuffer(index) != ERR_OK) {
-            HILOGE("QueueInputBuffer failed, index:%{public}u, bufferid:%{public}lu, pts:%{public}lld, flag:%{public}u",
+            HILOGE("QueueInputBuffer failed, index:%{public}u, bufferid:%{public}llu, pts:%{public}lld, flag:%{public}u",
                 index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
         } else {
             HILOGD(
-                "QueueInputBuffer success, index:%{public}u, bufferid:%{public}lu, pts:%{public}lld, flag:%{public}u",
+                "QueueInputBuffer success, index:%{public}u, bufferid:%{public}llu, pts:%{public}lld, flag:%{public}u",
                 index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
         }
     }
