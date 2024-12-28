@@ -166,11 +166,14 @@ public:
 
 };
 
-struct StateCallbackData {
+class StateCallbackData {
+public:
     sptr<IRemoteObject> remoteObject;
     sptr<StateCallbackIpcDiedListener> diedListener;
     int32_t state = -1;
     std::string message;
+
+    StateCallbackData() {};
 };
 
 class DSchedContinue : public std::enable_shared_from_this<DSchedContinue> {

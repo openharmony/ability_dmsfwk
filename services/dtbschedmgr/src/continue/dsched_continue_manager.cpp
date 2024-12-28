@@ -560,7 +560,7 @@ void DSchedContinueManager::NotifyTerminateContinuation(const int32_t missionId)
 int32_t DSchedContinueManager::ContinueStateCallbackRegister(
     StateCallbackInfo &stateCallbackInfo, sptr<IRemoteObject> callback)
 {
-    sptr <StateCallbackData> stateCallbackDataExist = FindStateCallbackData(stateCallbackInfo);
+    std::shared_ptr<StateCallbackData> stateCallbackDataExist = FindStateCallbackData(stateCallbackInfo);
     if (stateCallbackDataExist == nullptr) {
         StateCallbackData stateCallbackData;
         sptr<StateCallbackIpcDiedListener> diedListener = new StateCallbackIpcDiedListener();
@@ -571,9 +571,9 @@ int32_t DSchedContinueManager::ContinueStateCallbackRegister(
         AddStateCallbackData(stateCallbackInfo, stateCallbackData);
         return ERR_OK;
     }
-    stateCallbackDataExist.remoteObject = callback;
-    if (stateCallbackDataExist.state != -1) {
-        return NotifyQuickStartState(stateCallbackInfo, stateCallbackDataExist.state, stateCallbackDataExist.message);
+    stateCallbackDataExist->remoteObject = callback;
+    if (stateCallbackDataExist->state != -1) {
+        return NotifyQuickStartState(stateCallbackInfo, stateCallbackDataExist->state, stateCallbackDataExist->message);
     }
     return ERR_OK;
 }
@@ -588,15 +588,14 @@ int32_t DSchedContinueManager::NotifyQuickStartState(StateCallbackInfo &stateCal
     int32_t state, std::string message)
 {
     HILOGI("NotifyQuickStartState called, state: %{public}d, message: %{public}s", state, message.c_str());
-    auto remote = stateCallbackCache_.find(stateCallbackInfo);
-    if (remote == stateCallbackCache_.end()) {
+    std::shared_ptr<StateCallbackData> stateCallbackDataExist = FindStateCallbackData(stateCallbackInfo);
+    if (stateCallbackDataExist == nullptr) {
         StateCallbackData nweStateCallbackData;
         nweStateCallbackData.state = state;
         nweStateCallbackData.message = message;
-        stateCallbackCache_[stateCallbackInfo] = nweStateCallbackData;
+        AddStateCallbackData(stateCallbackInfo, nweStateCallbackData);
         return ERR_OK;
     }
-    StateCallbackData stateCallbackData = remote->second;
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         HILOGE("Write interface token failed");
@@ -615,10 +614,10 @@ int32_t DSchedContinueManager::NotifyQuickStartState(StateCallbackInfo &stateCal
 
     MessageParcel reply;
     MessageOption option;
-    stateCallbackData.remoteObject->SendRequest(
+    stateCallbackDataExist->remoteObject->SendRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_STATE_CALLBACK), data, reply, option);
-    stateCallbackData.state = -1;
-    stateCallbackData.message = nullptr;
+    stateCallbackDataExist->state = -1;
+    stateCallbackDataExist->message = nullptr;
     return ERR_OK;
 }
 
@@ -670,14 +669,14 @@ void DSchedContinueManager::RemoveTimeout(const DSchedContinueInfo& info)
     eventHandler_->RemoveTask(info.ToStringIgnoreMissionId());
 }
 
-StateCallbackData DSchedContinueManager::FindStateCallbackData(StateCallbackInfo &stateCallbackInfo)
+std::shared_ptr<StateCallbackData> DSchedContinueManager::FindStateCallbackData(StateCallbackInfo &stateCallbackInfo)
 {
     std::lock_guard<std::mutex> autolock(callbackCacheMutex_);
     auto lastResult = stateCallbackCache_.find(stateCallbackInfo);
     if(lastResult == stateCallbackCache_.end()){
         return nullptr;
     }
-    return lastResult->second;
+    return std::make_shared<StateCallbackData>(lastResult->second);
 }
 
 void DSchedContinueManager::AddStateCallbackData(StateCallbackInfo &stateCallbackInfo, StateCallbackData &stateCallbackData)

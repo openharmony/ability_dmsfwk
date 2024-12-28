@@ -84,7 +84,7 @@ private:
     void WaitAllConnectDecision(int32_t direction, const DSchedContinueInfo &info, int32_t timeout);
     void SetTimeOut(const DSchedContinueInfo& info, int32_t timeout);
     void RemoveTimeout(const DSchedContinueInfo& info);
-    StateCallbackData FindStateCallbackData(StateCallbackInfo &stateCallbackInfo);
+    std::shared_ptr<StateCallbackData> FindStateCallbackData(StateCallbackInfo &stateCallbackInfo);
     void AddStateCallbackData(StateCallbackInfo &stateCallbackInfo, StateCallbackData &stateCallbackData);
     void RemoveStateCallbackData(StateCallbackInfo &stateCallbackInfo);
 

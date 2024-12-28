@@ -1316,7 +1316,7 @@ int32_t DSchedContinue::ExecuteQuickStartSuccess()
     StateCallbackInfo stateCallbackInfo = StateCallbackInfo(
             missionId, continueInfo_.sinkBundleName_,eventData_.destModuleName_,
             continueInfo_.sinkAbilityName_);
-    DSchedContinueManager::GetInstance().NotifyQuickStartState(stateCallbackInfo, QUICK_START_SUCCESS, QUICK_START_SUCCESS_MESSAGE);
+    return DSchedContinueManager::GetInstance().NotifyQuickStartState(stateCallbackInfo, QUICK_START_SUCCESS, QUICK_START_SUCCESS_MESSAGE);
 }
 
 int32_t DSchedContinue::ExecuteQuickStartFailed(int32_t result)
@@ -1327,7 +1327,7 @@ int32_t DSchedContinue::ExecuteQuickStartFailed(int32_t result)
             missionId, continueInfo_.sinkBundleName_,eventData_.destModuleName_,
             continueInfo_.sinkAbilityName_);
     std::string message = QUICK_START_FAILED_MESSAGE + std::to_string(result);
-    DSchedContinueManager::GetInstance().NotifyQuickStartState(stateCallbackInfo, QUICK_START_FAILED, message);
+    return DSchedContinueManager::GetInstance().NotifyQuickStartState(stateCallbackInfo, QUICK_START_FAILED, message);
 }
 
 int32_t DSchedContinue::PackEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd, int32_t result)
