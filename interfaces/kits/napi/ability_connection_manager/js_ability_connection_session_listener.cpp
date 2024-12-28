@@ -69,6 +69,11 @@ void JsAbilityConnectionSessionListener::CallJsMethod(const EventCallbackInfo& c
 
 void JsAbilityConnectionSessionListener::CallJsMethodInner(const EventCallbackInfo& callbackInfo)
 {
+    if (callbackRef_ == nullptr) {
+        HILOGE("callbackRef_ is nullptr");
+        return;
+    }
+
     napi_value method = callbackRef_->GetNapiValue();
     if (method == nullptr) {
         HILOGE("Failed to get method from object");
