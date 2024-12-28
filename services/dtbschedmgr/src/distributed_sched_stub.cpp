@@ -367,34 +367,28 @@ int32_t DistributedSchedStub::GetConnectAbilityFromRemoteExParam(MessageParcel& 
 
 int32_t DistributedSchedStub::ContinueStateCallbackRegister(MessageParcel &data, MessageParcel &reply)
 {
-    StateCallbackInfo stateCallbackInfo;
-    stateCallbackInfo.bundleName = data.ReadString();
-    stateCallbackInfo.missionId = data.ReadInt32();
-    stateCallbackInfo.moduleName = data.ReadString();
-    stateCallbackInfo.abilityName = data.ReadString();
+    std::string bundleName = data.ReadString();
+    int32_t missionId = data.ReadInt32();
+    std::string moduleName = data.ReadString();
+    std::string abilityName = data.ReadString();
 
     sptr<IRemoteObject> callback = data.ReadRemoteObject();
-    if (callback == nullptr) {
-        return ERR_NULL_OBJECT;
-    }
-    DSchedContinueManager::GetInstance().ContinueStateCallbackRegister(stateCallbackInfo, callback);
 
-    int32_t result = ERR_OK;
+    int32_t result = DistributedSchedService::GetInstance().ContinueStateCallbackRegister(
+        missionId, bundleName, moduleName, abilityName, callback);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
     return ERR_NONE;
 }
 
 int32_t DistributedSchedStub::ContinueStateCallbackUnRegister(MessageParcel &data, MessageParcel &reply)
 {
-    StateCallbackInfo stateCallbackInfo;
-    stateCallbackInfo.bundleName = data.ReadString();
-    stateCallbackInfo.missionId = data.ReadInt32();
-    stateCallbackInfo.moduleName = data.ReadString();
-    stateCallbackInfo.abilityName = data.ReadString();
+    std::string bundleName = data.ReadString();
+    int32_t missionId = data.ReadInt32();
+    std::string moduleName = data.ReadString();
+    std::string abilityName = data.ReadString();
 
-    DSchedContinueManager::GetInstance().ContinueStateCallbackUnRegister(stateCallbackInfo);
-
-    int32_t result = ERR_OK;
+    int32_t result = DistributedSchedService::GetInstance().ContinueStateCallbackUnRegister(
+        missionId, bundleName, moduleName, abilityName);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
     return ERR_NONE;
 }

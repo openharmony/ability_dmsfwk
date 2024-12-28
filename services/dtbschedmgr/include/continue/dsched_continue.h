@@ -217,6 +217,8 @@ private:
     int32_t ExecuteNotifyComplete(int32_t result);
     int32_t ExecuteContinueEnd(int32_t result);
     int32_t ExecuteContinueError(int32_t result);
+    int32_t ExecuteQuickStartSuccess();
+    int32_t ExecuteQuickStartFailed(int32_t result);
 
     int32_t OnContinueMission(const OHOS::AAFwk::WantParams& wantParams);
     int32_t OnStartCmd(int32_t appVersion);

@@ -101,6 +101,7 @@ int32_t DSchedContinueSinkStartState::DoContinueErrorTask(std::shared_ptr<DSched
     if (ret != ERR_OK) {
         HILOGE("DSchedContinueSinkStartState ExecuteContinueSend failed, ret: %{public}d", ret);
     }
+    dContinue->ExecuteQuickStartFailed(*syncContinueData);
     return ret;
 }
 

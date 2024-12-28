@@ -164,61 +164,6 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     return stub;
 }
 
-//sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateManager::CreateStub(
-//    napi_env env, napi_callback_info info)
-//{
-//    size_t argc = ARG_COUNT_THREE;
-//    napi_value args[ARG_COUNT_THREE];
-//    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, nullptr, nullptr));
-//    if (argc != ARG_COUNT_THREE) {
-//        HILOGE("Parameter error. The type of number of parameters must be 3");
-//        return nullptr;
-//    }
-//    // this.context is 2ed parameter
-//    std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
-//    GetAbilityContext(abilityContext, env, args[1]);
-//    if (abilityContext == nullptr) {
-//        HILOGE("get ability context failed");
-//        return nullptr;
-//    }
-//    std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = abilityContext->GetAbilityInfo();
-//    napi_valuetype valuetype;
-//    NAPI_CALL(env, napi_typeof(env, args[ARG_INDEX_4_CALLBACK_FUNC], &valuetype));
-//    if (valuetype != napi_function) {
-//        return nullptr;
-//    }
-//    napi_ref callbackRef = nullptr;
-//    napi_create_reference(env, args[ARG_INDEX_4_CALLBACK_FUNC], 1, &callbackRef);
-//    DistributedSchedule::JsContinuationStateManagerStub::StateCallbackData callbackData;
-//    size_t stringSize = 0;
-//    std::string type;
-//    napi_get_value_string_utf8(env, args[0], nullptr, 0, &stringSize);
-//    napi_get_value_string_utf8(env, args[0], &type[0], stringSize + 1, &stringSize);
-//    callbackData.bizType = type.c_str();
-//    callbackData.bundleName = abilityContext->GetBundleName();
-//    abilityContext->GetMissionId(callbackData.missionId);
-//    callbackData.moduleName = abilityInfo->moduleName;
-//    callbackData.abilityName = abilityInfo->name;
-//    callbackData.callbackRef = callbackRef;
-//    callbackData.env = env;
-//    // 如果缓存存在，更新回调函数，不存在则创建stub
-//    std::string key = std::to_string(callbackData.missionId) + callbackData.bundleName + callbackData.moduleName + callbackData.abilityName;
-//    auto cacheStubEntry = jsContinuationStateManagerStubCache_.find(key);
-//    if (cacheStubEntry == jsContinuationStateManagerStubCache_.end() || cacheStubEntry->second == nullptr) {
-//        sptr <DistributedSchedule::JsContinuationStateManagerStub> stub(
-//            new DistributedSchedule::JsContinuationStateManagerStub());
-//        stub->callbackData_ = callbackData;
-//        jsContinuationStateManagerStubCache_[key] = stub;
-//    } else {
-//        napi_ref oldCallbackRef = jsContinuationStateManagerStubCache_[key]->callbackData_.callbackRef;
-//        if (oldCallbackRef != nullptr) {
-//            napi_delete_reference(env, oldCallbackRef);
-//        }
-//        jsContinuationStateManagerStubCache_[key]->callbackData_.callbackRef = callbackRef;
-//    }
-//    return jsContinuationStateManagerStubCache_[key];
-//}
-
 void JsContinuationStateManager::GetAbilityContext(
     std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext, napi_env env, napi_value context)
 {

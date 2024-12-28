@@ -84,6 +84,9 @@ private:
     void WaitAllConnectDecision(int32_t direction, const DSchedContinueInfo &info, int32_t timeout);
     void SetTimeOut(const DSchedContinueInfo& info, int32_t timeout);
     void RemoveTimeout(const DSchedContinueInfo& info);
+    StateCallbackData FindStateCallbackData(StateCallbackInfo &stateCallbackInfo);
+    void AddStateCallbackData(StateCallbackInfo &stateCallbackInfo, StateCallbackData &stateCallbackData);
+    void RemoveStateCallbackData(StateCallbackInfo &stateCallbackInfo);
 
     class SoftbusListener : public IDataListener {
         void OnBind(int32_t socket, PeerSocketInfo info);
@@ -92,6 +95,7 @@ private:
     };
 
 public:
+    std::mutex callbackCacheMutex_;
     std::map<StateCallbackInfo, StateCallbackData> stateCallbackCache_;
 private:
 #ifdef DMSFWK_ALL_CONNECT_MGR

@@ -560,28 +560,27 @@ void DSchedContinueManager::NotifyTerminateContinuation(const int32_t missionId)
 int32_t DSchedContinueManager::ContinueStateCallbackRegister(
     StateCallbackInfo &stateCallbackInfo, sptr<IRemoteObject> callback)
 {
-    auto lastResult = stateCallbackCache_.find(stateCallbackInfo);
-    if (lastResult == stateCallbackCache_.end()) {
+    sptr <StateCallbackData> stateCallbackDataExist = FindStateCallbackData(stateCallbackInfo);
+    if (stateCallbackDataExist == nullptr) {
         StateCallbackData stateCallbackData;
-        sptr <StateCallbackIpcDiedListener> diedListener = new StateCallbackIpcDiedListener();
+        sptr<StateCallbackIpcDiedListener> diedListener = new StateCallbackIpcDiedListener();
         diedListener->stateCallbackInfo_ = stateCallbackInfo;
         stateCallbackData.diedListener = diedListener;
         callback->AddDeathRecipient(diedListener);
         stateCallbackData.remoteObject = callback;
-        stateCallbackCache_[stateCallbackInfo] = stateCallbackData;
+        AddStateCallbackData(stateCallbackInfo, stateCallbackData);
         return ERR_OK;
     }
-    StateCallbackData stateCallbackData = lastResult->second;
-    stateCallbackData.remoteObject = callback;
-    if (stateCallbackData.state != -1) {
-        return NotifyQuickStartState(stateCallbackInfo, stateCallbackData.state, stateCallbackData.message);
+    stateCallbackDataExist.remoteObject = callback;
+    if (stateCallbackDataExist.state != -1) {
+        return NotifyQuickStartState(stateCallbackInfo, stateCallbackDataExist.state, stateCallbackDataExist.message);
     }
     return ERR_OK;
 }
 
 int32_t DSchedContinueManager::ContinueStateCallbackUnRegister(StateCallbackInfo &stateCallbackInfo)
 {
-    stateCallbackCache_.erase(stateCallbackInfo);
+    RemoveStateCallbackData(stateCallbackInfo);
     return ERR_OK;
 }
 
@@ -669,6 +668,29 @@ void DSchedContinueManager::RemoveTimeout(const DSchedContinueInfo& info)
         return;
     }
     eventHandler_->RemoveTask(info.ToStringIgnoreMissionId());
+}
+
+StateCallbackData DSchedContinueManager::FindStateCallbackData(StateCallbackInfo &stateCallbackInfo)
+{
+    std::lock_guard<std::mutex> autolock(callbackCacheMutex_);
+    auto lastResult = stateCallbackCache_.find(stateCallbackInfo);
+    if(lastResult == stateCallbackCache_.end()){
+        return nullptr;
+    }
+    return lastResult->second;
+}
+
+void DSchedContinueManager::AddStateCallbackData(StateCallbackInfo &stateCallbackInfo, StateCallbackData &stateCallbackData)
+{
+    std::lock_guard<std::mutex> autolock(callbackCacheMutex_);
+    stateCallbackCache_.emplace(stateCallbackInfo, stateCallbackData);
+
+}
+
+void DSchedContinueManager::RemoveStateCallbackData(StateCallbackInfo &stateCallbackInfo)
+{
+    std::lock_guard<std::mutex> autolock(callbackCacheMutex_);
+    stateCallbackCache_.erase(stateCallbackInfo);
 }
 
 void DSchedContinueManager::OnDataRecv(int32_t sessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer)
