@@ -44,7 +44,7 @@ constexpr int32_t CHANNEL_NAME_LENGTH = 48;
 constexpr int32_t VIDEO_BIT_RATE = 640000;
 constexpr int32_t VIDEO_FRAME_RATE = 30;
 constexpr int32_t MIN_CHANNEL_ID = 1000;
-constexpr int32_t MAX_CHANNEL_ID = 30;
+constexpr int32_t MAX_CHANNEL_ID = 5000;
 constexpr int32_t DEFAULT_APP_UID = 0;
 constexpr int32_t DEFAULT_APP_PID = 0;
 constexpr int32_t DEFAULT_INSTANCE_ID = 0;
@@ -121,7 +121,9 @@ void AbilityConnectionSession::Release()
         }
         sessionStatus_ = SessionStatus::UNCONNECTED;
     }
-
+    senderEngine_ = nullptr;
+    recvEngine_ = nullptr;
+    
     std::unique_lock<std::shared_mutex> channelLock(transChannelMutex_);
     for (auto iter = transChannels_.begin(); iter != transChannels_.end(); iter++) {
         ChannelManager::GetInstance().DeleteChannel(iter->second.channelId);
