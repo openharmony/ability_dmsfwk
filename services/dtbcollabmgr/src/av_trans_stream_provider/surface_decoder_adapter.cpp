@@ -364,7 +364,8 @@ namespace DistributedCollab {
         FALSE_RETURN_MSG(buffer->meta_->GetData(Tag::REGULAR_TRACK_ID, index), "get index failed.");
         FALSE_RETURN_MSG(codecServer_ != nullptr, "codecServer_ is nullptr.");
         if (codecServer_->QueueInputBuffer(index) != ERR_OK) {
-            HILOGE("QueueInputBuffer failed, index:%{public}u, bufferid:%{public}llu, pts:%{public}lld, flag:%{public}u",
+            HILOGE(
+                "QueueInputBuffer failed, index:%{public}u, bufferid:%{public}llu, pts:%{public}lld, flag:%{public}u",
                 index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
         } else {
             HILOGD(
