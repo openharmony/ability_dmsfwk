@@ -451,25 +451,18 @@ void DSchedCollabManager::HandleReleaseAbilityLink(const std::string &bundleName
             continue;
         }
         dSchedCollabInfo = iter->second->GetCollabInfo();
-        if (bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.srcInfo_.pid_ &&
-            CheckBackgroundPermissions() == true) {
+        if (bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.srcInfo_.pid_) {
             HILOGI("source ability been background, collabInfo: %{public}s", dSchedCollabInfo.ToString().c_str());
             PrivilegeShutdown(static_cast<uint64_t>(dSchedCollabInfo.srcInfo_.accessToken_),
                 pid, dSchedCollabInfo.sinkInfo_.deviceId_.c_str());
             iter->second->PostEndTask();
         }
-        if (bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.sinkInfo_.pid_ &&
-            CheckBackgroundPermissions() == true) {
+        if (bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.sinkInfo_.pid_) {
             HILOGI("sink ability been background, collabInfo: %{public}s", dSchedCollabInfo.ToString().c_str());
             iter->second->PostEndTask();
         }
     }
     return;
-}
-
-bool DSchedCollabManager::CheckBackgroundPermissions()
-{
-    return false;
 }
 
 int32_t DSchedCollabManager::CancleReleaseAbilityLink(const std::string &bundleName, const int32_t &pid)

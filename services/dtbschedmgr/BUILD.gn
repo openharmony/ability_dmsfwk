@@ -85,6 +85,9 @@ config("distributed_sched_config") {
   if (dmsfwk_sync_data_on_package_event) {
     defines += [ "DMS_SYNC_DATA_ON_PACKAGE_EVENT" ]
   }
+  if (dmsfwk_continuous_task_enable) {
+    defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
+  }
 }
 
 ohos_shared_library("distributedschedsvr") {
@@ -239,6 +242,10 @@ ohos_shared_library("distributedschedsvr") {
   if (dmsfwk_standard_form_share) {
     external_deps += [ "form_fwk:form_manager" ]
     sources += [ "src/form_mgr_death_recipient.cpp" ]
+  }
+
+  if (dmsfwk_continuous_task_enable) {
+    external_deps += [ "background_task_mgr:bgtaskmgr_innerkits" ]
   }
 
   if (dmsfwk_mission_manager) {
