@@ -29,6 +29,12 @@ namespace DistributedCollab {
 using namespace OHOS::AbilityRuntime;
 using namespace OHOS::AppExecFwk;
 namespace {
+#define GET_PARAMS(env, info, num)    \
+    size_t argc = num;                \
+    napi_value argv[num] = {nullptr}; \
+    napi_value thisVar = nullptr;     \
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr))
+
 const std::string TAG = "JsAbilityConnectionManager";
 constexpr int32_t ARG_INDEX_ZERO = 0;
 constexpr int32_t ARG_INDEX_ONE = 1;
@@ -40,18 +46,16 @@ constexpr int32_t ARG_COUNT_THREE = 3;
 constexpr int32_t ARG_COUNT_FOUR = 4;
 constexpr int32_t NAPI_BUF_LENGTH = 256;
 
+constexpr const char* EVENT_CONNECT = "connect";
+constexpr const char* EVENT_DISCONNECT = "disconnect";
+constexpr const char* EVENT_RECEIVE_MESSAGE = "receiveMessage";
+constexpr const char* EVENT_RECEIVE_DATA = "receiveData";
+constexpr const char* EVENT_RECEIVE_IMAGE = "receiveImage";
+
 const std::string ERR_MESSAGE_NO_PERMISSION =
     "Permission verification failed. The application does not have the permission required to call the API.";
 const std::string ERR_MESSAGE_INVALID_PARAMS = "Parameter error.";
-const std::string ERR_MESSAGE_FAILED = "Failed to execute the function."
-}
-
-void JsAbilityConnectionManager::GetParams(const napi_env &env, const napi_callback_info &info, int32_t num)
-{
-    size_t argc = num;
-    napi_value argv[num] = {nullptr};
-    napi_value thisVar = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+const std::string ERR_MESSAGE_FAILED = "Failed to execute the function.";
 }
 
 bool JsAbilityConnectionManager::CheckArgsCount(const napi_env &env, bool assertion, const std::string &message)
@@ -231,7 +235,7 @@ void JsAbilityConnectionManager::CreateBusinessError(const napi_env &env, int32_
 napi_value JsAbilityConnectionManager::CreateAbilityConnectionSession(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_FOUR);
+    GET_PARAMS(env, info, ARG_COUNT_FOUR);
     napi_value result = nullptr;
     if (!CheckArgsCount(env, argc == ARG_COUNT_FOUR, "Wrong number of arguments, required 4")) {
         HILOGE("CheckArgsCount failed.");
@@ -384,21 +388,21 @@ bool JsAbilityConnectionManager::JSToConnectOption(const napi_env &env, const na
     return true;
 }
 
-void JsAbilityConnectionManager::UnwrapOptions(napi_env env, napi_value options, ConnectOption &connectOption)
+bool JsAbilityConnectionManager::UnwrapOptions(napi_env env, napi_value options, ConnectOption &connectOption)
 {
     if (options == nullptr) {
         HILOGI("options is nullptr");
-        return;
+        return false;
     }
 
     napi_valuetype argvType = napi_undefined;
     if (napi_typeof(env, options, &argvType) != napi_ok) {
-        return;
+        return false;
     }
 
     if (argvType != napi_object) {
         HILOGE("options verification failed.");
-        return;
+        return false;
     }
 
     napi_value jsProNameList = nullptr;
@@ -415,32 +419,35 @@ void JsAbilityConnectionManager::UnwrapOptions(napi_env env, napi_value options,
         std::string strProName;
         if (!JsToString(env, jsProName, "options key", strProName)) {
             HILOGE("options get key failed");
+            return false;
         }
 
         NAPI_CALL_BASE(env, napi_get_named_property(env, options, strProName.c_str(), &jsProValue), false);
         std::string natValue;
         if (!JsToString(env, jsProValue, "options value", natValue)) {
             HILOGE("options get value failed");
+            return false;
         }
         connectOption.options.SetParam(strProName, AAFwk::String::Box(natValue));
     }
+    return true;
 }
 
-void JsAbilityConnectionManager::UnwrapParameters(napi_env env, napi_value parameters, ConnectOption &option)
+bool JsAbilityConnectionManager::UnwrapParameters(napi_env env, napi_value parameters, ConnectOption &option)
 {
     if (parameters == nullptr) {
         HILOGI("parameters is nullptr");
-        return;
+        return false;
     }
 
     napi_valuetype argvType = napi_undefined;
     if (napi_typeof(env, parameters, &argvType) != napi_ok) {
-        return;
+        return false;
     }
 
     if (argvType != napi_object) {
         HILOGE("parameters verification failed.");
-        return;
+        return false;
     }
 
     napi_value jsProNameList = nullptr;
@@ -457,21 +464,24 @@ void JsAbilityConnectionManager::UnwrapParameters(napi_env env, napi_value param
         std::string strProName;
         if (!JsToString(env, jsProName, "parameters key", strProName)) {
             HILOGE("parameters get key failed");
+            return false;
         }
 
         NAPI_CALL_BASE(env, napi_get_named_property(env, parameters, strProName.c_str(), &jsProValue), false);
         std::string natValue;
         if (!JsToString(env, jsProValue, "parameters value", natValue)) {
             HILOGE("parameters get value failed");
+            return false;
         }
         option.parameters.SetParam(strProName, AAFwk::String::Box(natValue));
     }
+    return true;
 }
 
 napi_value JsAbilityConnectionManager::DestroyAbilityConnectionSession(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_ONE);
+    GET_PARAMS(env, info, ARG_COUNT_ONE);
     napi_value result = nullptr;
     if (!CheckArgsCount(env, argc == ARG_COUNT_ONE, "Wrong number of arguments, required 1")) {
         HILOGE("Params not match");
@@ -496,7 +506,7 @@ napi_value JsAbilityConnectionManager::DestroyAbilityConnectionSession(napi_env 
 napi_value JsAbilityConnectionManager::GetPeerInfoById(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_ONE);
+    GET_PARAMS(env, info, ARG_COUNT_ONE);
     napi_value result = nullptr;
     if (!CheckArgsCount(env, argc == ARG_COUNT_ONE, "Wrong number of arguments, required 1")) {
         HILOGE("Params not match");
@@ -561,7 +571,7 @@ bool JsAbilityConnectionManager::CheckEventType(const std::string& eventType)
 napi_value JsAbilityConnectionManager::RegisterAbilityConnectionSessionCallback(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_THREE);
+    GET_PARAMS(env, info, ARG_COUNT_THREE);
     napi_value result = nullptr;
     if (!CheckArgsCount(env, argc == ARG_COUNT_THREE, "Wrong number of arguments, required 3")) {
         HILOGE("Params not match");
@@ -617,7 +627,7 @@ napi_value JsAbilityConnectionManager::RegisterAbilityConnectionSessionCallback(
 napi_value JsAbilityConnectionManager::UnregisterAbilityConnectionSessionCallback(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_THREE);
+    GET_PARAMS(env, info, ARG_COUNT_THREE);
     napi_value result = nullptr;
     if (!CheckArgsCount(env, argc >= ARG_COUNT_TWO, "Wrong number of arguments, at least 2 parameters")) {
         HILOGE("Params not match");
@@ -654,7 +664,7 @@ napi_value JsAbilityConnectionManager::UnregisterAbilityConnectionSessionCallbac
 napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_ONE);
+    GET_PARAMS(env, info, ARG_COUNT_ONE);
     if (!CheckArgsCount(env, argc == ARG_COUNT_ONE, "Wrong number of arguments, required 1")) {
         HILOGE("Params not match");
         return nullptr;
@@ -683,14 +693,14 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
     if (status != napi_ok) {
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED);
+        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
         return nullptr;
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED);
+        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
         return nullptr;
     }
 
@@ -698,7 +708,7 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
     if (CreateConnectThreadsafeFunction(env, nullptr, &tsfn) != napi_ok) {
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED);
+        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
         return nullptr;
     }
 
@@ -765,7 +775,7 @@ napi_value JsAbilityConnectionManager::DisConnect(napi_env env, napi_callback_in
 {
     HILOGD("called.");
     napi_value result = nullptr;
-    GetParams(env, info, ARG_COUNT_ONE);
+    GET_PARAMS(env, info, ARG_COUNT_ONE);
     if (!CheckArgsCount(env, argc == ARG_COUNT_ONE, "Wrong number of arguments, required 1")) {
         HILOGE("Params not match");
         return result;
@@ -806,7 +816,7 @@ void JsAbilityConnectionManager::CompleteAsyncWork(napi_env env, napi_status sta
 napi_value JsAbilityConnectionManager::AcceptConnect(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_TWO);
+    GET_PARAMS(env, info, ARG_COUNT_TWO);
     if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
         HILOGE("parameters not match");
         return nullptr;
@@ -842,14 +852,14 @@ napi_value JsAbilityConnectionManager::AcceptConnect(napi_env env, napi_callback
     if (status != napi_ok) {
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED);
+        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
         return nullptr;
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED);
+        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
         return nullptr;
     }
     return promise;
@@ -869,7 +879,7 @@ void JsAbilityConnectionManager::ExecuteAcceptConnect(napi_env env, void *data)
 napi_value JsAbilityConnectionManager::Reject(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_TWO);
+    GET_PARAMS(env, info, ARG_COUNT_TWO);
     if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
         HILOGE("Params not match");
         return nullptr;
@@ -900,7 +910,7 @@ napi_value JsAbilityConnectionManager::Reject(napi_env env, napi_callback_info i
 napi_value JsAbilityConnectionManager::SendMessage(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_TWO);
+    GET_PARAMS(env, info, ARG_COUNT_TWO);
     if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
         HILOGE("Params not match");
         return nullptr;
@@ -938,14 +948,14 @@ napi_value JsAbilityConnectionManager::SendMessage(napi_env env, napi_callback_i
     if (status != napi_ok) {
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED);
+        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
         return nullptr;
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED);
+        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
         return nullptr;
     }
 
@@ -965,7 +975,7 @@ void JsAbilityConnectionManager::ExecuteSendMessage(napi_env env, void *data)
 napi_value JsAbilityConnectionManager::SendData(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_TWO);
+    GET_PARAMS(env, info, ARG_COUNT_TWO);
     if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
         HILOGE("Params not match");
         return nullptr;
@@ -980,14 +990,14 @@ napi_value JsAbilityConnectionManager::SendData(napi_env env, napi_callback_info
     size_t length;
     if (napi_get_arraybuffer_info(env, argv[ARG_INDEX_ONE], &data, &length) != napi_ok) {
         HILOGE("get arraybuffer info failed.");
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED);
+        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
         return nullptr;
     }
 
     std::shared_ptr<AVTransDataBuffer> buffer = std::make_shared<AVTransDataBuffer>(length);
     if (memcpy_s(buffer->Data(), buffer->Size(), data, length) != ERR_OK) {
         HILOGE("pack recv data failed");
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED);
+        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
         return nullptr;
     }
 
@@ -1009,14 +1019,14 @@ napi_value JsAbilityConnectionManager::SendData(napi_env env, napi_callback_info
     if (status != napi_ok) {
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED);
+        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
         return nullptr;
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED);
+        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
         return nullptr;
     }
 
@@ -1036,7 +1046,7 @@ void JsAbilityConnectionManager::ExecuteSendData(napi_env env, void *data)
 napi_value JsAbilityConnectionManager::SendImage(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_TWO);
+    GET_PARAMS(env, info, ARG_COUNT_TWO);
     if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
         HILOGE("Params not match");
         return nullptr;
@@ -1067,14 +1077,14 @@ napi_value JsAbilityConnectionManager::SendImage(napi_env env, napi_callback_inf
     if (status != napi_ok) {
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED);
+        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
         return nullptr;
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED);
+        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
         return nullptr;
     }
 
@@ -1094,7 +1104,7 @@ void JsAbilityConnectionManager::ExecuteSendImage(napi_env env, void *data)
 napi_value JsAbilityConnectionManager::CreateStream(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_TWO);
+    GET_PARAMS(env, info, ARG_COUNT_TWO);
     if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
         HILOGE("Params not match");
         return nullptr;
@@ -1132,14 +1142,14 @@ napi_value JsAbilityConnectionManager::CreateStream(napi_env env, napi_callback_
     if (status != napi_ok) {
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED);
+        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
         return nullptr;
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED);
+        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
         return nullptr;
     }
 
@@ -1209,7 +1219,7 @@ void JsAbilityConnectionManager::CompleteAsyncCreateStreamWork(napi_env env, nap
 napi_value JsAbilityConnectionManager::SetSurfaceId(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_THREE);
+    GET_PARAMS(env, info, ARG_COUNT_THREE);
     if (!CheckArgsCount(env, argc == ARG_COUNT_THREE, "Wrong number of arguments, required 3")) {
         HILOGE("Params not match");
         return nullptr;
@@ -1293,7 +1303,7 @@ bool JsAbilityConnectionManager::JsToSurfaceParam(const napi_env &env, const nap
 napi_value JsAbilityConnectionManager::GetSurfaceId(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_TWO);
+    GET_PARAMS(env, info, ARG_COUNT_TWO);
     if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
         HILOGE("Params not match");
         return nullptr;
@@ -1327,7 +1337,7 @@ napi_value JsAbilityConnectionManager::GetSurfaceId(napi_env env, napi_callback_
 napi_value JsAbilityConnectionManager::UpdateSurfaceParam(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_THREE);
+    GET_PARAMS(env, info, ARG_COUNT_THREE);
     napi_value result = nullptr;
     if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
         HILOGE("Params not match");
@@ -1347,7 +1357,7 @@ napi_value JsAbilityConnectionManager::UpdateSurfaceParam(napi_env env, napi_cal
         return result;
     }
 
-    int32_t ret = AbilityConnectionManager::GetInstance().updateSurfaceParam(streamId, surfaceParam);
+    int32_t ret = AbilityConnectionManager::GetInstance().UpdateSurfaceParam(streamId, surfaceParam);
     if (ret != ERR_OK) {
         HILOGE("SetSurfaceId failed.");
         return result;
@@ -1358,7 +1368,7 @@ napi_value JsAbilityConnectionManager::UpdateSurfaceParam(napi_env env, napi_cal
 napi_value JsAbilityConnectionManager::DestroyStream(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_ONE);
+    GET_PARAMS(env, info, ARG_COUNT_ONE);
     if (!CheckArgsCount(env, argc == ARG_COUNT_ONE, "Wrong number of arguments, required 1")) {
         HILOGE("Params not match");
         return nullptr;
@@ -1381,7 +1391,7 @@ napi_value JsAbilityConnectionManager::DestroyStream(napi_env env, napi_callback
 napi_value JsAbilityConnectionManager::StartStream(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_ONE);
+    GET_PARAMS(env, info, ARG_COUNT_ONE);
     if (!CheckArgsCount(env, argc == ARG_COUNT_ONE, "Wrong number of arguments, required 1")) {
         HILOGE("Params not match");
         return nullptr;
@@ -1404,7 +1414,7 @@ napi_value JsAbilityConnectionManager::StartStream(napi_env env, napi_callback_i
 napi_value JsAbilityConnectionManager::StopStream(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GetParams(env, info, ARG_COUNT_ONE);
+    GET_PARAMS(env, info, ARG_COUNT_ONE);
     if (!CheckArgsCount(env, argc == ARG_COUNT_ONE, "Wrong number of arguments, required 1")) {
         HILOGE("Params not match");
         return nullptr;

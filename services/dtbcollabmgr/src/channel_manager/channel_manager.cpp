@@ -19,6 +19,7 @@
 #include <chrono>
 #include <future>
 #include <sys/prctl.h>
+#include "securec.h"
 
 namespace OHOS {
 namespace DistributedCollab {

@@ -278,7 +278,7 @@ namespace DistributedCollab {
         HILOGI("Stop");
         GetCurrentTime(stopTime_);
         isStopKeyFramePts_ = true;
-        HILOGI("Stop time: %{public}ld", stopTime_);
+        HILOGI("Stop time: %{public}lld", stopTime_);
 
         if (isStart_ && !isTransCoderMode) {
             std::unique_lock<std::mutex> lock(stopMutex_);
@@ -309,7 +309,7 @@ namespace DistributedCollab {
         std::lock_guard<std::mutex> lock(checkFramesMutex_);
         int64_t pauseTime = 0;
         GetCurrentTime(pauseTime);
-        HILOGI("Pause time: %{public}ld", pauseTime);
+        HILOGI("Pause time: %{public}lld", pauseTime);
         if (pauseResumeQueue_.empty() || (pauseResumeQueue_.back().second == StateCode::RESUME &&
             pauseResumeQueue_.back().first <= pauseTime)) {
             pauseResumeQueue_.push_back({ pauseTime, StateCode::PAUSE });
@@ -330,7 +330,7 @@ namespace DistributedCollab {
         std::lock_guard<std::mutex> lock(checkFramesMutex_);
         int64_t resumeTime = 0;
         GetCurrentTime(resumeTime);
-        HILOGI("resume time: %{public}ld", resumeTime);
+        HILOGI("resume time: %{public}lld", resumeTime);
         if (pauseResumeQueue_.empty()) {
             HILOGI("Status Error, no pause before resume");
             return Status::ERROR_UNKNOWN;
@@ -387,7 +387,7 @@ namespace DistributedCollab {
             return Status::ERROR_UNKNOWN;
         }
         int32_t ret = 0;
-        HILOGI("lastBuffer PTS: %{public}ld, current PTS: %{public}ld", pts, currentPts_.load());
+        HILOGI("lastBuffer PTS: %{public}lld, current PTS: %{public}lld", pts, currentPts_.load());
         eosPts_ = pts;
         if (!isTransCoderMode || currentPts_.load() >= eosPts_.load()) {
             HILOGI("Notify encoder eos");
@@ -409,7 +409,7 @@ namespace DistributedCollab {
 
     void SurfaceEncoderAdapter::OnOutputBufferAvailable(uint32_t index, std::shared_ptr<AVBuffer> buffer)
     {
-        HILOGD("OnOutputBufferAvailable buffer->pts: %{public}ld", buffer->pts_);
+        HILOGD("OnOutputBufferAvailable buffer->pts: %{public}lld", buffer->pts_);
         currentPts_ = currentPts_.load() < buffer->pts_ ? buffer->pts_ : currentPts_.load();
         if (stopTime_ != -1 && buffer->pts_ > stopTime_) {
             HILOGI("buffer->pts > stopTime, ready to stop");
@@ -545,7 +545,7 @@ namespace DistributedCollab {
         std::lock_guard<std::mutex> lock(checkFramesMutex_);
         int64_t currentPts = 0;
         attribute->GetLongValue(Tag::MEDIA_TIME_STAMP, currentPts);
-        HILOGD("OnInputParameterWithAttrAvailable currentPts: %{public}ld", currentPts);
+        HILOGD("OnInputParameterWithAttrAvailable currentPts: %{public}lld", currentPts);
         int64_t checkFramesPauseTime = 0;
         bool isDroppedFrames = CheckFrames(currentPts, checkFramesPauseTime);
         {
@@ -571,7 +571,7 @@ namespace DistributedCollab {
             return false;
         }
         auto stateCode = pauseResumeQueue_[0].second;
-        HILOGD("CheckFrames stateCode: %{public}d, time: %{public}ld",
+        HILOGD("CheckFrames stateCode: %{public}d, time: %{public}lld",
             static_cast<int32_t>(stateCode), pauseResumeQueue_[0].first);
         // means not dropped frames when less than pause time
         if (stateCode == StateCode::PAUSE && currentPts < pauseResumeQueue_[0].first) {
@@ -631,7 +631,7 @@ namespace DistributedCollab {
             return false;
         }
         auto stateCode = pauseResumePts_[0].second;
-        HILOGD("CheckFrames stateCode: %{public}d, time: %{public}ld",
+        HILOGD("CheckFrames stateCode: %{public}d, time: %{public}lld",
             static_cast<int32_t>(stateCode), pauseResumePts_[0].first);
         // means not dropped frames when less than pause time
         if (stateCode == StateCode::PAUSE && currentPts < pauseResumePts_[0].first) {

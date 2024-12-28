@@ -52,6 +52,7 @@ ohos_shared_library("dtbcollab_channel_manager") {
 
   external_deps = [
     "cJSON:cjson",
+    "c_utils:utils",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "hilog:libhilog",

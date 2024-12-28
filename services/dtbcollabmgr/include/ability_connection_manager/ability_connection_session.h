@@ -64,7 +64,7 @@ struct TransChannelInfo {
     int32_t channelId;
     ChannelDataType channelType;
     TransChannelType transType;
-    bool isConnect;
+    bool isConnected;
 };
 
 class AbilityConnectionSession : public std::enable_shared_from_this<AbilityConnectionSession> {
@@ -164,7 +164,7 @@ private:
         explicit PixelMapListener(const std::shared_ptr<AbilityConnectionSession>& AbilityConnectionSession);
         virtual ~PixelMapListener() = default;
         void OnRecvPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap) override;
-        void OnRecvSurfaceParam(const TransSurfaceParam& param) override;
+        void OnRecvSurfaceParam(const SurfaceParam& param) override;
         
     private:
         std::weak_ptr<AbilityConnectionSession> abilityConnectionSession_;

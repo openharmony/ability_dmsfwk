@@ -15,6 +15,7 @@
 
 #include "av_trans_stream_data_test.h"
 #include "dtbcollabmgr_log.h"
+#include "securec.h"
 
 using namespace testing;
 using namespace testing::ext;

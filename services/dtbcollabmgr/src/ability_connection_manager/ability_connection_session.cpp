@@ -205,7 +205,7 @@ int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::
 {
     HILOGD("called.");
     if (result != ERR_OK) {
-        HILOGE("collab result is failed, ret = %{public}d", ret);
+        HILOGE("collab result is failed, ret = %{public}d", result);
         ExeuteConnectCallback(new ConnectResult(false));
         return INVALID_PARAMETERS_ERR;
     }
@@ -379,7 +379,7 @@ int32_t AbilityConnectionSession::DestroyStream(int32_t streamId)
 }
 
 template <typename T>
-int32_t AbilityConnectionSession::ConfigEngineParam(std::shared_ptr<T> &engine, const SurfaceParam& param)
+int32_t AbilityConnectionSession::ConfigEngineParam(std::shared_ptr<T> &engine, const SurfaceParams& param)
 {
     engine->SetVideoSource(static_cast<VideoSourceType>(param.format));
 
@@ -417,7 +417,7 @@ int32_t AbilityConnectionSession::ConfigEngineParam(std::shared_ptr<T> &engine, 
     return ERR_OK;
 }
 
-int32_t AbilityConnectionSession::GetSurfaceId(const SurfaceParam& param, std::string& surfaceId)
+int32_t AbilityConnectionSession::GetSurfaceId(const SurfaceParams& param, std::string& surfaceId)
 {
     HILOGD("called.");
     if (senderEngine_ == nullptr) {
@@ -450,7 +450,7 @@ int32_t AbilityConnectionSession::GetSurfaceId(const SurfaceParam& param, std::s
 }
 
 int32_t AbilityConnectionSession::SetSurfaceId(const std::string& surfaceId,
-    const SurfaceParam& param)
+    const SurfaceParams& param)
 {
     HILOGD("called.");
     if (recvEngine_ == nullptr) {
@@ -483,7 +483,7 @@ int32_t AbilityConnectionSession::SetSurfaceId(const std::string& surfaceId,
     return ERR_OK;
 }
 
-int32_t AbilityConnectionSession::UpdateSurfaceParam(const SurfaceParam& surfaceParam)
+int32_t AbilityConnectionSession::UpdateSurfaceParam(const SurfaceParams& surfaceParam)
 {
     HILOGD("called.");
     if (senderEngine_ == nullptr) {
@@ -491,7 +491,7 @@ int32_t AbilityConnectionSession::UpdateSurfaceParam(const SurfaceParam& surface
         return INVALID_PARAMETERS_ERR;
     }
 
-    TransSurfaceParam param;
+    SurfaceParam param;
     param.rotate = static_cast<SurfaceRotate>(surfaceParam.rotation);
     param.filp = static_cast<SurfaceFilp>(surfaceParam.flip);
 
@@ -503,13 +503,13 @@ int32_t AbilityConnectionSession::GetStreamTransChannel(TransChannelInfo& info)
 {
     std::shared_lock<std::shared_mutex> channelReadLock(transChannelMutex_);
     auto item = transChannels_.find(TransChannelType::STREAM_CHANNEL);
-    if (item != transChannels_.end() && item->second.isConnect) {
+    if (item != transChannels_.end() && item->second.isConnected) {
         info = item->second;
         return ERR_OK;
     }
     HILOGW("stream channel unconnected");
     item = transChannels_.find(TransChannelType::STREAM_CHANNEL_BYTES);
-    if (item != transChannels_.end() && item->second.isConnect) {
+    if (item != transChannels_.end() && item->second.isConnected) {
         info = item->second;
         return ERR_OK;
     }
@@ -638,7 +638,7 @@ int32_t AbilityConnectionSession::CreateChannel(const std::string& channelName, 
     int32_t channelId = (direction_ == CollabrateDirection::COLLABRATE_SOURCE) ?
         channelManager.CreateClientChannel(channelName, dataType, channelPeerInfo) :
         channelManager.CreateServerChannel(channelName, dataType, channelPeerInfo);
-    if (channelId < MIN_CHANNEL_ID || channelId > MAX_CHANNEL) {
+    if (channelId < MIN_CHANNEL_ID || channelId > MAX_CHANNEL_ID) {
         HILOGE("CreateChannel failed, channelId is %{public}d", channelId);
         return INVALID_PARAMETERS_ERR;
     }
@@ -683,7 +683,7 @@ int32_t AbilityConnectionSession::ConnectChannels()
             HILOGE("message channel bind failed, ret is %{public}d", ret);
             return ret;
         } else {
-            item->second.isConnect = true;
+            item->second.isConnected = true;
             HILOGI("message channel bind success");
         }
     }
@@ -695,7 +695,7 @@ int32_t AbilityConnectionSession::ConnectChannels()
             HILOGE("data channel bind failed, ret is %{public}d", ret);
             return ret;
         } else {
-            item->second.isConnect = true;
+            item->second.isConnected = true;
             HILOGI("data channel bind success");
         }
     }
@@ -706,7 +706,7 @@ int32_t AbilityConnectionSession::ConnectChannels()
         if (ret != ERR_OK) {
             HILOGE("stream channel bind failed, ret is %{public}d", ret);
         } else {
-            item->second.isConnect = true;
+            item->second.isConnected = true;
             HILOGI("stream channel bind success");
         }
     }
@@ -718,7 +718,7 @@ int32_t AbilityConnectionSession::ConnectChannels()
             HILOGE("bytes channel bind failed, ret is %{public}d", ret);
             return ret;
         } else {
-            item->second.isConnect = true;
+            item->second.isConnected = true;
             HILOGI("bytes channel bind success");
         }
     }
@@ -755,13 +755,13 @@ void AbilityConnectionSession::OnChannelConnect(int32_t channelId)
     }
 }
 
-void AbilityConnectionSession::UpdateTransChannelStatus(int32_t channelId, bool isConnect)
+void AbilityConnectionSession::UpdateTransChannelStatus(int32_t channelId, bool isConnected)
 {
     std::unique_lock<std::shared_mutex> channelWriteLock(transChannelMutex_);
     for (auto& iter : transChannels_) {
         if (iter.second.channelId == channelId) {
             HILOGI("transType is %{public}d.", static_cast<int32_t>(iter.second.transType));
-            iter.second.isConnect = isConnect;
+            iter.second.isConnected = isConnected;
         }
     }
 }
@@ -772,7 +772,7 @@ bool AbilityConnectionSession::IsAllChannelConnected()
     std::shared_lock<std::shared_mutex> channelReadLock(transChannelMutex_);
     for (auto& iter : transChannels_) {
         TransChannelInfo info = iter.second;
-        if (!info.isConnect && info.transType != TransChannelType::STREAM_CHANNEL) {
+        if (!info.isConnected && info.transType != TransChannelType::STREAM_CHANNEL) {
             HILOGI("transType is %{public}d.", static_cast<int32_t>(info.transType));
             return false;
         }
@@ -867,9 +867,9 @@ int32_t AbilityConnectionSession::CheckWifiState()
         return INVALID_PARAMETERS_ERR;
     }
 
-    TransChannelInfo transChannelInfo;
-    int32_t ret = GetTransChannelInfo(TransChannelType::STREAM_CHANNEL, transChannelInfo);
-    if (ret != ERR_OK || info.isConnect) {
+    TransChannelInfo info;
+    int32_t ret = GetTransChannelInfo(TransChannelType::STREAM_CHANNEL, info);
+    if (ret != ERR_OK || info.isConnected) {
         HILOGE("stream chennel has connected.");
         return INVALID_PARAMETERS_ERR;
     }
@@ -879,7 +879,7 @@ int32_t AbilityConnectionSession::CheckWifiState()
         return ERR_OK;
     }
 
-    int32_t ret = ChannelManager::GetInstance().ConnectChannel(info.channelId);
+    ret = ChannelManager::GetInstance().ConnectChannel(info.channelId);
     if (ret != ERR_OK) {
         HILOGE("stream channel bind failed, ret is %{public}d", ret);
         return ret;
@@ -905,8 +905,8 @@ void AbilityConnectionSession::UpdateEngineTransChannel()
         return;
     }
 
-    TransChannelInfo transChannelInfo;
-    int32_t ret = GetTransChannelInfo(TransChannelType::STREAM_CHANNEL, transChannelInfo);
+    TransChannelInfo info;
+    int32_t ret = GetTransChannelInfo(TransChannelType::STREAM_CHANNEL, info);
     if (ret != ERR_OK) {
         HILOGI("not find stream chennel.");
         return;
@@ -1103,7 +1103,7 @@ void AbilityConnectionSession::PixelMapListener::OnRecvPixelMap(const std::share
     abilityConnectionSession->OnRecvPixelMap(pixelMap);
 }
 
-void AbilityConnectionSession::PixelMapListener::OnRecvSurfaceParam(const TransSurfaceParam& param)
+void AbilityConnectionSession::PixelMapListener::OnRecvSurfaceParam(const SurfaceParam& param)
 {
     HILOGD("called.");
 }

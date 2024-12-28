@@ -21,6 +21,7 @@
 #include "filter/filter_factory.h"
 #include "image_source.h"
 #include "image_type.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace DistributedCollab {

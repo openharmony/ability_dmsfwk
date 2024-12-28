@@ -16,6 +16,7 @@
 #include "session_data_header.h"
 #include "dtbcollabmgr_log.h"
 #include <optional>
+#include "securec.h"
 
 namespace OHOS {
 namespace DistributedCollab {

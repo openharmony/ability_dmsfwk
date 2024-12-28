@@ -14,6 +14,7 @@
 */
 #include "data_sender_receiver_test.h"
 #include "dtbcollabmgr_log.h"
+#include "securec.h"
 #include "session_data_header.h"
 
 namespace OHOS {

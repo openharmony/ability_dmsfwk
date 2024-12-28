@@ -48,6 +48,7 @@ ohos_unittest("ChannelManagerAVTransStreamDataTest") {
 
   external_deps = [
     "cJSON:cjson",
+    "c_utils:utils",
     "hilog:libhilog",
   ]
 
@@ -76,6 +77,7 @@ ohos_unittest("ChannelManagerSessionDataHeaderTest") {
 
   external_deps = [
     "cJSON:cjson",
+    "c_utils:utils",
     "hilog:libhilog",
   ]
 
@@ -107,6 +109,7 @@ ohos_unittest("ChannelManagerDataSenderReceiverTest") {
 
   external_deps = [
     "cJSON:cjson",
+    "c_utils:utils",
     "dsoftbus:softbus_client",
     "googletest:gmock",
     "hilog:libhilog",
@@ -140,6 +143,7 @@ ohos_unittest("ChannelManagerTest") {
 
   external_deps = [
     "cJSON:cjson",
+    "c_utils:utils",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "googletest:gmock",

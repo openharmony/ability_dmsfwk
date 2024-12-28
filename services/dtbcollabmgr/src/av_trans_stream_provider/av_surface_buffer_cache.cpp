@@ -15,6 +15,7 @@
 #include "av_surface_buffer_cache.h"
 #include "buffer_extra_data.h"
 #include "dtbcollabmgr_log.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace DistributedCollab {

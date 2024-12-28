@@ -57,7 +57,7 @@ PeerInfo *PeerInfo::Unmarshalling(Parcel &parcel)
     return info;
 }
 
-ool ConnectOption::ReadFromParcel(Parcel &parcel)
+bool ConnectOption::ReadFromParcel(Parcel &parcel)
 {
     needSendBigData = parcel.ReadBool();
     needSendStream = parcel.ReadBool();

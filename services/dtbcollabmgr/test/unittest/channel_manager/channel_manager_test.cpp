@@ -14,6 +14,7 @@
 */
 #include "channel_manager_test.h"
 #include "channel_manager.h"
+#include "securec.h"
 #include "dtbcollabmgr_log.h"
 
 namespace OHOS {

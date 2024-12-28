@@ -23,6 +23,7 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include "securec.h"
 
 namespace OHOS {
 namespace DistributedCollab {
