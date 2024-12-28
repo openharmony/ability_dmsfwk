@@ -72,6 +72,7 @@ ohos_shared_library("dtbcollab_av_stream_trans_provider") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "graphic_surface:surface",
     "hilog:libhilog",

@@ -189,6 +189,8 @@ enum {
     READ_SURFACE_BUFFER_FAILED,
 
     CREATE_SURFACE_FAILED,
+
+    DMS_PERMISSION_DENIED,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -22,6 +22,7 @@
 #include <chrono>
 #include <map>
 #include <memory>
+#include "securec.h"
 #include "softbus_error_code.h"
 
 namespace OHOS {

@@ -41,6 +41,7 @@
           "ability_base",
           "ability_runtime",
           "access_token",
+          "av_codec",
           "bundle_framework",
           "cJSON",
           "c_utils",
@@ -54,9 +55,11 @@
           "dmsfwk",
           "dsoftbus",
           "data_share",
+          "drivers_peripheral_display",
           "eventhandler",
           "ffrt",
           "form_fwk",
+          "graphic_surface",
           "hisysevent",
           "hitrace",
           "hilog",
@@ -66,7 +69,9 @@
           "ipc",
           "kv_store",
           "memmgr",
+          "media_foundation",
           "napi",
+          "openssl",
           "os_account",
           "resource_schedule_service",
           "safwk",
@@ -91,7 +96,10 @@
             "//foundation/ability/dmsfwk/etc/profile:distributedsched_trust",
             "//foundation/ability/dmsfwk/sa_profile:dms_sa_profile",
             "//foundation/ability/dmsfwk/services/dtbabilitymgr:distributed_ability_manager_svr",
-            "//foundation/ability/dmsfwk/services/dtbschedmgr:distributedschedsvr"
+            "//foundation/ability/dmsfwk/services/dtbschedmgr:distributedschedsvr",
+            "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/ability_connection_manager:distributed_ability_connection_manager",
+            "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/av_trans_stream_provider:dtbcollab_av_stream_trans_provider",
+            "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager"
           ]
         },
         "inner_kits": [
@@ -140,6 +148,7 @@
           "//foundation/ability/dmsfwk/interfaces/innerkits/tests:dms_sdk_demo",
           "//foundation/ability/dmsfwk/services/dtbschedmgr:unittest",
           "//foundation/ability/dmsfwk/services/dtbabilitymgr:unittest",
+          "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/channel_manager:unittest",
           "//foundation/ability/dmsfwk/test/fuzztest:fuzztest"
         ]
       }

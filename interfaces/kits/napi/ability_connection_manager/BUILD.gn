@@ -57,6 +57,7 @@ ohos_shared_library("abilityconnectionmanager_napi") {
     "av_codec:av_codec_media_engine_filters",
     "cJSON:cjson",
     "c_utils:utils",
+    "dsoftbus:softbus_client",
     "graphic_surface:surface",
     "hilog:libhilog",
     "hisysevent:libhisysevent",

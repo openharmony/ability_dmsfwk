@@ -23,6 +23,7 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include "securec.h"
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -236,6 +237,8 @@ void AVSenderFilter::Process()
         }
         auto data = sendDatas_.front();
         if (data == nullptr) {
+            HILOGE("invalid data, empty");
+            sendDatas_.pop();
             continue;
         }
         SendStreamData(data);
@@ -268,8 +271,8 @@ void AVSenderFilter::OnBufferAvailable(const std::shared_ptr<AVBuffer>& buffer)
         auto ptr = PackStreamDataForAVBuffer(buffer, transData);
         sendDatas_.push(ptr);
     }
+    cv_.notify_one();
     bufferQProxy_->ReleaseBuffer(buffer);
-
 #ifdef DSCH_COLLAB_AV_TRANS_TEST_DEMO
     WriteFile(transData);
 #endif
@@ -414,6 +417,7 @@ int32_t AVSenderFilter::SendPixelMap(const std::shared_ptr<Media::PixelMap>& pix
         auto ptr = PackStreamDataForPixelMap(buffer);
         sendDatas_.push(ptr);
     }
+    cv_.notify_one();
     return ERR_OK;
 }
 
@@ -468,6 +472,7 @@ int32_t AVSenderFilter::SetSurfaceParam(const SurfaceParam& param)
         auto ptr = PackStreamDataForSurfaceParam(param);
         sendDatas_.push(ptr);
     }
+    cv_.notify_one();
     return ERR_OK;
 }
 

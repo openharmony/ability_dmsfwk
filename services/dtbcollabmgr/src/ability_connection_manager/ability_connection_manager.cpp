@@ -49,7 +49,6 @@ AbilityConnectionManager::AbilityConnectionManager()
 AbilityConnectionManager::~AbilityConnectionManager()
 {
     HILOGI("AbilityConnectionManager delete");
-    UnInit();
 }
 
 void AbilityConnectionManager::Init()
@@ -291,7 +290,7 @@ int32_t AbilityConnectionManager::CreateStream(int32_t sessionId, const StreamPa
 }
 
 int32_t AbilityConnectionManager::SetSurfaceId(int32_t streamId, const std::string& surfaceId,
-    const SurfaceParam& param)
+    const SurfaceParams& param)
 {
     HILOGD("called, streamId is %{public}d, surfaceId is %{public}s", streamId, surfaceId.c_str());
     auto connectionSesion = GetAbilityConnectionSessionByStreamId(streamId);
@@ -314,7 +313,7 @@ bool AbilityConnectionManager::CheckStreamIsRegistered(int32_t sessionId)
     return false;
 }
 
-int32_t AbilityConnectionManager::GetSurfaceId(int32_t streamId, const SurfaceParam& param, std::string& surfaceId)
+int32_t AbilityConnectionManager::GetSurfaceId(int32_t streamId, const SurfaceParams& param, std::string& surfaceId)
 {
     HILOGD("called, streamId is %{public}d", streamId);
     auto connectionSesion = GetAbilityConnectionSessionByStreamId(streamId);
@@ -326,7 +325,7 @@ int32_t AbilityConnectionManager::GetSurfaceId(int32_t streamId, const SurfacePa
     return connectionSesion->GetSurfaceId(param, surfaceId);
 }
 
-int32_t AbilityConnectionManager::UpdateSurfaceParam(int32_t streamId, SurfaceParam param)
+int32_t AbilityConnectionManager::UpdateSurfaceParam(int32_t streamId, const SurfaceParams& param)
 {
     HILOGD("called, streamId is %{public}d", streamId);
     auto connectionSesion = GetAbilityConnectionSessionByStreamId(streamId);

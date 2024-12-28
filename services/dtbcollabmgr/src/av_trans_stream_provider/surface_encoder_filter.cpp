@@ -291,7 +291,7 @@ namespace DistributedCollab {
         if (parameter->Find(Tag::MEDIA_END_OF_STREAM) != parameter->end() &&
             parameter->Get<Tag::MEDIA_END_OF_STREAM>(isEos) && parameter->Get<Tag::USER_FRAME_PTS>(eosPts)) {
             if (isEos) {
-                HILOGI("lastBuffer PTS: %{public}ld", eosPts);
+                HILOGI("lastBuffer PTS: %{public}lld", eosPts);
                 NotifyEos(eosPts);
                 return;
             }

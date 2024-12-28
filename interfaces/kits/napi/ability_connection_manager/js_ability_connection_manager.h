@@ -27,7 +27,7 @@
 namespace OHOS {
 namespace DistributedCollab {
 using JsAbilityConnectionSessionListenerPtr = std::shared_ptr<JsAbilityConnectionSessionListener>;
-struct AsyncCallbackInfo {
+struct AsyncConnectCallbackInfo {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_threadsafe_function tsfn = nullptr;
@@ -88,7 +88,6 @@ public:
     static napi_value OnCreateAbilityConnectionSession(napi_env env, napi_callback_info info);
 
 private:
-    void GetParams(const napi_env &env, const napi_callback_info &info, int32_t num);
     static bool JsToAbilityInfo(const napi_env &env, const napi_value &jsValue,
         std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo);
     static bool JsToPeerInfo(const napi_env &env, const napi_value &jsValue, PeerInfo &peerInfo);
@@ -127,8 +126,8 @@ private:
     static bool JsObjectToInt(const napi_env &env, const napi_value &object, const std::string &fieldStr,
         int32_t &fieldRef);
     static bool CheckEventType(const std::string& eventType);
-    static void UnwrapOptions(napi_env env, napi_value options, ConnectOption &option);
-    static void UnwrapParameters(napi_env env, napi_value parameters, ConnectOption &option);
+    static bool UnwrapOptions(napi_env env, napi_value options, ConnectOption &option);
+    static bool UnwrapParameters(napi_env env, napi_value parameters, ConnectOption &option);
     static bool IsTypeForNapiValue(napi_env env, napi_value param, napi_valuetype expectType);
 };
 

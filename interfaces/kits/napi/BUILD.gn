@@ -12,7 +12,11 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
 group("napi_packages") {
-  deps = [ "//foundation/ability/dmsfwk/interfaces/kits/napi/continuation_manager:continuationmanager_napi" ]
+  deps = [
+    "${dms_path}/interfaces/kits/napi/ability_connection_manager:abilityconnectionmanager_napi",
+    "${dms_path}/interfaces/kits/napi/continuation_manager:continuationmanager_napi",
+  ]
 }

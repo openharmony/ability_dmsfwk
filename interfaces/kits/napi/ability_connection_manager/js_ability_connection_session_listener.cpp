@@ -25,11 +25,6 @@ namespace DistributedCollab {
 using namespace OHOS::AbilityRuntime;
 namespace {
 const std::string TAG = "JsAbilityConnectionSessionListener";
-constexpr const char* EVENT_CONNECT = "connect";
-constexpr const char* EVENT_DISCONNECT = "disconnect";
-constexpr const char* EVENT_RECEIVE_MESSAGE = "receiveMessage";
-constexpr const char* EVENT_RECEIVE_DATA = "receiveData";
-constexpr const char* EVENT_RECEIVE_IMAGE = "receiveImage";
 }
 
 void JsAbilityConnectionSessionListener::SetCallback(const napi_value& jsListenerObj)

@@ -14,6 +14,7 @@
 */
 #include "channel_manager_test.h"
 #include "channel_manager.h"
+#include "securec.h"
 #include "dtbcollabmgr_log.h"
 
 namespace OHOS {
@@ -22,6 +23,10 @@ namespace {
     static const std::string TAG = "DSchedCollabChannelManagerTest";
     using namespace testing;
     using namespace testing::ext;
+    static constexpr int32_t NUM_1234 = 1234;
+    static constexpr int32_t NUM_MINUS_1 = -1;
+    static constexpr int32_t MESSAGE_START_ID = 1001;
+    static constexpr int32_t CHANNGE_GAP = 1000;
 }
 
 void ChannelManagerTest::SetUpTestCase()
@@ -53,7 +58,7 @@ void ChannelManagerTest::TearDown()
 HWTEST_F(ChannelManagerTest, TestInit_Success, TestSize.Level1)
 {
     EXPECT_CALL(mockSoftbus, Socket(testing::_))
-        .WillOnce(testing::Return(1234));
+        .WillOnce(testing::Return(NUM_1234));
 
     EXPECT_CALL(mockSoftbus, Listen(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(ERR_OK));
@@ -71,7 +76,7 @@ HWTEST_F(ChannelManagerTest, TestInit_Success, TestSize.Level1)
 HWTEST_F(ChannelManagerTest, TestInit_SocketFailure, TestSize.Level1)
 {
     EXPECT_CALL(mockSoftbus, Socket(testing::_))
-        .WillOnce(testing::Return(-1));
+        .WillOnce(testing::Return(NUM_MINUS_1));
 
     int32_t result = ChannelManager::GetInstance().Init(ownerName);
 
@@ -86,7 +91,7 @@ HWTEST_F(ChannelManagerTest, TestInit_SocketFailure, TestSize.Level1)
 HWTEST_F(ChannelManagerTest, TestInit_ListenFailure, TestSize.Level1)
 {
     EXPECT_CALL(mockSoftbus, Socket(testing::_))
-        .WillOnce(testing::Return(1234));
+        .WillOnce(testing::Return(NUM_1234));
 
     EXPECT_CALL(mockSoftbus, Listen(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(-2));
@@ -108,7 +113,7 @@ HWTEST_F(ChannelManagerTest, CreateServerChannel_Success, TestSize.Level1)
     ChannelPeerInfo peerInfo = { "peerName", "networkId" };
 
     int32_t channelId = ChannelManager::GetInstance().CreateServerChannel(channelName, dataType, peerInfo);
-    EXPECT_EQ(channelId, 1001);
+    EXPECT_EQ(channelId, MESSAGE_START_ID);
 }
 
 /**
@@ -123,11 +128,88 @@ HWTEST_F(ChannelManagerTest, CreateServerChannel_ExceedMax_Failed, TestSize.Leve
     ChannelPeerInfo peerInfo = { "peerName", "networkId" };
 
     int32_t channelId = 0;
-    for (int32_t i = 0; i < 1001; i++)
+    for (int32_t i = 0; i < CHANNGE_GAP + 1; i++)
     {
         channelId = ChannelManager::GetInstance().CreateServerChannel(channelName, dataType, peerInfo);
     }
     EXPECT_EQ(channelId, CREATE_SERVER_CHANNEL_FAILED);
+}
+
+/**
+ * @tc.name: CreateClientChannel_Success
+ * @tc.desc: Test for CreateClientChannel when CreateBaseChannel and RegisterSocket succeed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChannelManagerTest, CreateClientChannel_Success, TestSize.Level1)
+{
+    // Setup the test data
+    std::string channelName = "testClientChannel";
+    ChannelDataType dataType = ChannelDataType::MESSAGE;
+    ChannelPeerInfo peerInfo = { "peerName", "networkId" };
+
+    EXPECT_CALL(mockSoftbus, Socket(testing::_))
+        .WillOnce(testing::Return(NUM_1234));
+
+    // Call CreateClientChannel and check the result
+    int32_t result = ChannelManager::GetInstance().CreateClientChannel(channelName, dataType, peerInfo);
+    EXPECT_EQ(result, MESSAGE_START_ID);  // Should return valid channelId
+}
+
+/**
+ * @tc.name: CreateClientChannel_CreateSocket_Fail
+ * @tc.desc: Test for CreateClientChannel when CreateBaseChannel fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChannelManagerTest, CreateClientChannel_CreateSocket_Fail, TestSize.Level1)
+{
+    // Setup the test data
+    std::string channelName = "testClientChannel";
+    ChannelDataType dataType = ChannelDataType::MESSAGE;
+    ChannelPeerInfo peerInfo = { "peerName", "networkId" };
+
+    EXPECT_CALL(mockSoftbus, Socket(testing::_))
+        .WillOnce(testing::Return(NUM_MINUS_1));
+
+    // Call CreateClientChannel and check the result
+    int32_t result = ChannelManager::GetInstance().CreateClientChannel(channelName, dataType, peerInfo);
+    EXPECT_EQ(result, CREATE_SOCKET_FAILED);  // Should return valid channelId
+}
+
+/**
+ * @tc.name: CreateClientChannel_LoneName_Fail
+ * @tc.desc: Test for CreateClientChannel when RegisterSocket fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChannelManagerTest, CreateClientChannel_LoneName_Fail, TestSize.Level1)
+{
+    // Setup the test data
+    std::string channelName = "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss";
+    ChannelDataType dataType = ChannelDataType::MESSAGE;
+    ChannelPeerInfo peerInfo = { "peerName", "networkId" };
+   
+    // Call CreateClientChannel and check the result
+    int32_t result = ChannelManager::GetInstance().CreateClientChannel(channelName, dataType, peerInfo);
+    EXPECT_EQ(result, CREATE_SOCKET_FAILED);  // Should return valid channelId
+}
+
+/**
+ * @tc.name: CreateClientChannel_ExceedNum_Fail
+ * @tc.desc: Test for CreateClientChannel when RegisterSocket fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChannelManagerTest, CreateClientChannel_ExceedNum_Fail, TestSize.Level1)
+{
+    // Setup the test data
+    std::string channelName = "testClientChannel";
+    ChannelDataType dataType = ChannelDataType::MESSAGE;
+    ChannelPeerInfo peerInfo = { "peerName", "networkId" };
+   
+    int32_t channelId = 0;
+    for (int32_t i = 0; i < CHANNGE_GAP + 1; i++)
+    {
+        channelId = ChannelManager::GetInstance().CreateServerChannel(channelName, dataType, peerInfo);
+    }
+    EXPECT_EQ(channelId, CREATE_CLIENT_CHANNEL_FAILED);
 }
 } // namespace DistributedCollab
 } // namespace OHOS

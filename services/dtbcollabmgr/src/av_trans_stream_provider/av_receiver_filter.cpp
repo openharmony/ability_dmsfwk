@@ -21,6 +21,7 @@
 #include "filter/filter_factory.h"
 #include "image_source.h"
 #include "image_type.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -285,7 +286,7 @@ std::shared_ptr<AVTransStreamData> AVReceiverFilter::GetStreamData()
     auto topData = dataQueue_.top();
     uint32_t curIndex = topData->GetStreamDataExt().index_;
     while (lastIndex_ >= curIndex) {
-        HILOGE("invalid index=%{public}u, cur=%{public}ld", curIndex, lastIndex_);
+        HILOGE("invalid index=%{public}u, cur=%{public}lld", curIndex, lastIndex_);
         dataQueue_.pop();
         topData = dataQueue_.top();
         curIndex = topData->GetStreamDataExt().index_;
@@ -420,7 +421,7 @@ int32_t AVReceiverFilter::RequestAndPushData(const std::shared_ptr<AVTransStream
         return static_cast<int32_t>(ret);
     }
 
-    HILOGD("write data to buffer, id=%{public}lu, size=%{public}d",
+    HILOGD("write data to buffer, id=%{public}llu, size=%{public}d",
         outputBuffer->GetUniqueId(), outputBuffer->GetConfig().size);
     auto& memory = outputBuffer->memory_;
     memory->SetSize(avBufferConfig.size);
