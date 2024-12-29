@@ -135,6 +135,7 @@ private:
     int32_t ConfigEngineParam(std::shared_ptr<T> &engine, const SurfaceParams& param);
     void UpdateTransChannelStatus(int32_t channelId, bool isConnect);
     int32_t GetTransChannelInfo(const TransChannelType& type, TransChannelInfo& info);
+    bool IsStreamBytesChannel(const int32_t channelId);
 
     void ExeuteConnectCallback(const ConnectResult& result);
     int32_t ExeuteEventCallback(const std::string& eventType, const EventCallbackInfo& info);

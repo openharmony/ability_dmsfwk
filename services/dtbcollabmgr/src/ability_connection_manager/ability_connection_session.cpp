@@ -661,11 +661,9 @@ int32_t AbilityConnectionSession::CreateChannel(const std::string& channelName, 
         return INVALID_PARAMETERS_ERR;
     }
 
-    if (channelType != TransChannelType::STREAM_CHANNEL_BYTES) {
-        if (channelManager.RegisterChannelListener(channelId, channelListener_) != ERR_OK) {
-            HILOGE("register channel listener failed, channelId is %{public}d", channelId);
-            return INVALID_PARAMETERS_ERR;
-        }
+    if (channelManager.RegisterChannelListener(channelId, channelListener_) != ERR_OK) {
+        HILOGE("register channel listener failed, channelId is %{public}d", channelId);
+        return INVALID_PARAMETERS_ERR;
     }
     
     std::unique_lock<std::shared_mutex> channelWriteLock(transChannelMutex_);
@@ -961,11 +959,28 @@ void AbilityConnectionSession::OnBytesReceived(int32_t channelId, const std::sha
         return;
     }
 
+    if (IsStreamBytesChannel(channelId)) {
+        HILOGE("is stream bytes channel, no need to send.");
+        return;
+    }
+
     EventCallbackInfo callbackInfo;
     callbackInfo.sessionId = sessionId_;
     callbackInfo.data = dataBuffer;
 
     ExeuteEventCallback(EVENT_RECEIVE_DATA, callbackInfo);
+}
+
+bool AbilityConnectionSession::IsStreamBytesChannel(const int32_t channelId)
+{
+    TransChannelInfo transChannelInfo;
+    int32_t ret = GetTransChannelInfo(TransChannelType::STREAM_CHANNEL_BYTES, transChannelInfo);
+    if (ret != ERR_OK) {
+        HILOGE("stream bytes channel not exit!");
+        return false;
+    }
+
+    return transChannelInfo.channelId == channelId;
 }
 
 bool AbilityConnectionSession::IsVaildChannel(const int32_t channelId)
