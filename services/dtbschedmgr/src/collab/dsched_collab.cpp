@@ -562,6 +562,7 @@ int32_t DSchedCollab::ExeSrcClientNotify(const int32_t &result)
     PARCEL_WRITE_HELPER(data, Int32, collabInfo_.srcCollabSessionId_);
     PARCEL_WRITE_HELPER(data, Int32, result);
     PARCEL_WRITE_HELPER(data, String, collabInfo_.sinkInfo_.socketName_);
+    PARCEL_WRITE_HELPER(data, String, collabInfo_.collabToken_);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = collabInfo_.srcClientCB_->SendRequest(NOTIFY_COLLAB_PREPARE_RESULT, data, reply, option);

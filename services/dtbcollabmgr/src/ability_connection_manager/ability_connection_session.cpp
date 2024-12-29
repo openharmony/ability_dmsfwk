@@ -202,7 +202,8 @@ int32_t AbilityConnectionSession::AcceptConnect(const std::string& token)
     return ERR_OK;
 }
 
-int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::string& peerSocketName)
+int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::string& peerSocketName,
+    const std::string& dmsServerToken)
 {
     HILOGD("called.");
     if (result != ERR_OK) {
@@ -213,6 +214,7 @@ int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::
         return INVALID_PARAMETERS_ERR;
     }
 
+    dmsServerToken_ = dmsServerToken;
     peerSocketName_ = peerSocketName;
     if (InitChannels() != ERR_OK) {
         DistributedClient dmsClient;
