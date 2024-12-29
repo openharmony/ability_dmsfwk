@@ -146,7 +146,7 @@ int32_t AbilityConnectionManager::DestroySession(int32_t sessionId)
         return INVALID_PARAMETERS_ERR;
     }
 
-    connectionSesion->Release();
+    connectionSesion->Disconnect();
     connectionSesion->UnInit();
 
     std::unique_lock<std::shared_mutex> writeLock(sessionMutex_);
@@ -210,7 +210,7 @@ int32_t AbilityConnectionManager::Reject(const std::string& token, const std::st
 }
 
 int32_t AbilityConnectionManager::NotifyCollabResult(int32_t sessionId, int32_t result,
-    const std::string& peerServerName)
+    const std::string& peerServerName, const std::string& dmsServerToken)
 {
     HILOGD("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
@@ -219,7 +219,7 @@ int32_t AbilityConnectionManager::NotifyCollabResult(int32_t sessionId, int32_t 
         return INVALID_PARAMETERS_ERR;
     }
 
-    return connectionSesion->HandleCollabResult(result, peerServerName);
+    return connectionSesion->HandleCollabResult(result, peerServerName, dmsServerToken);
 }
 
 int32_t AbilityConnectionManager::NotifyDisconnect(int32_t sessionId)

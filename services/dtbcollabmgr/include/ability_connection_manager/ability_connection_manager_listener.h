@@ -26,7 +26,8 @@ public:
     AbilityConnectionManagerListener() = default;
     ~AbilityConnectionManagerListener() = default;
     
-    int32_t NotifyCollabResult(int32_t sessionId, int32_t result, const std::string& peerServerName) override;
+    int32_t NotifyCollabResult(int32_t sessionId, int32_t result, const std::string& peerServerName,
+        const std::string& dmsServerToken) override;
     int32_t NotifyDisconnect(int32_t sessionId) override;
 };
 } // namespace DistributedCollab

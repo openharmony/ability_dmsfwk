@@ -25,7 +25,8 @@ public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.DistributedCollab.IAbilityConnectionManager");
     virtual ~IAbilityConnectionManager() {};
 
-    virtual int32_t NotifyCollabResult(int32_t sessionId, int32_t result, const std::string& peerSocketName) = 0;
+    virtual int32_t NotifyCollabResult(int32_t sessionId, int32_t result, const std::string& peerSocketName,
+        const std::string& dmsServerToken) = 0;
     virtual int32_t NotifyDisconnect(int32_t sessionId) = 0;
 
     enum class Message {

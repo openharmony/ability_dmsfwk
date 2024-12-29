@@ -25,9 +25,10 @@ const std::string TAG = "AbilityConnectionManagerListener";
 }
 
 int32_t AbilityConnectionManagerListener::NotifyCollabResult(int32_t sessionId,
-    int32_t result, const std::string& peerServerName)
+    int32_t result, const std::string& peerServerName, const std::string& dmsServerToken)
 {
-    return AbilityConnectionManager::GetInstance().NotifyCollabResult(sessionId, result, peerServerName);
+    return AbilityConnectionManager::GetInstance().NotifyCollabResult(sessionId,
+        result, peerServerName, dmsServerToken);
 }
 
 int32_t AbilityConnectionManagerListener::NotifyDisconnect(int32_t sessionId)
