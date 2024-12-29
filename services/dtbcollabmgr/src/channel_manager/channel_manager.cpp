@@ -310,7 +310,8 @@ int32_t ChannelManager::CreateClientChannel(const std::string& channelName,
 std::optional<ChannelInfo> ChannelManager::CreateBaseChannel(const std::string& channelName,
     const ChannelDataType dataType, const ChannelPeerInfo& peerInfo)
 {
-    HILOGI("start create base channel, dataType=%{public}d", static_cast<int32_t>(dataType));
+    HILOGI("start create base channel, dataType=%{public}d, name=%{public}s",
+        static_cast<int32_t>(dataType), channelName.c_str());
     int32_t channelId = GenerateNextId(dataType);
     if (!isValidChannelId(channelId)) {
         HILOGE("Get channel id failed, id=%{public}d", channelId);
