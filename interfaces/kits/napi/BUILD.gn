@@ -16,7 +16,8 @@ import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
 group("napi_packages") {
   deps = [
-    "continuation_manager:continuationmanager_napi",
-    "continuation_state_manager:continuemanager_napi",
+    "${dms_path}/interfaces/kits/napi/ability_connection_manager:abilityconnectionmanager_napi",
+    "${dms_path}/interfaces/kits/napi/continuation_manager:continuationmanager_napi",
+    "${dms_path}/interfaces/kits/napi/continuation_state_manager:continuemanager_napi",
   ]
 }
