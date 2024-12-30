@@ -44,9 +44,9 @@ uint32_t GetU32Data(const char* ptr)
     return (ptr[POS_0] << OFFSET_24) | (ptr[POS_1] << OFFSET_16) | (ptr[POS_2] << OFFSET_8) | ptr[POS_3];
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_001(const uint8_t* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWant001(const uint8_t* data, size_t size)
 {
-    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+    if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
         return false;
     }
 
@@ -68,16 +68,16 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_001(const uint8_t* data, si
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_002(const uint8_t* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWant002(const uint8_t* data, size_t size)
 {
-    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+    if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
         return false;
     }
 
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
     std::string type(reinterpret_cast<const char*>(data), size);
     want->SetType(type);
-    Uri uri(type);
+Uri uri(type);
     want->SetUri(uri);
     want->SetUriAndType(uri, type);
     want->FormatUri(uri);
@@ -86,9 +86,9 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_002(const uint8_t* data, si
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_003(const uint8_t* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWant003(const uint8_t* data, size_t size)
 {
-    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+    if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
         return false;
     }
 
@@ -108,9 +108,9 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_003(const uint8_t* data, si
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_004(const uint8_t* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWant004(const uint8_t* data, size_t size)
 {
-    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+    if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
         return false;
     }
 
@@ -134,9 +134,9 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_004(const uint8_t* data, si
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_005(const uint8_t* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWant005(const uint8_t* data, size_t size)
 {
-    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+    if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
         return false;
     }
 
@@ -163,9 +163,9 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_005(const uint8_t* data, si
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_006(const uint8_t* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWant006(const uint8_t* data, size_t size)
 {
-    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+    if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
         return false;
     }
 
@@ -209,11 +209,11 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_006(const uint8_t* data, si
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_001(data, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_002(data, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_003(data, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_004(data, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_005(data, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_006(data, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWant001(data, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWant002(data, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWant003(data, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWant004(data, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWant005(data, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWant006(data, size);
     return 0;
 }

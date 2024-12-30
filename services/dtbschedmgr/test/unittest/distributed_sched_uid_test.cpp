@@ -34,7 +34,7 @@ namespace {
 const std::u16string DMS_STUB_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
 const std::u16string MOCK_INVALID_DESCRIPTOR = u"invalid descriptor";
 constexpr const char* FOUNDATION_PROCESS_NAME = "foundation";
-constexpr int32_t CAllING_UID = 10001;
+constexpr int32_t UID = 10001;
 const char *PERMS[] = {
     "ohos.permission.DISTRIBUTED_DATASYNC"
 };
@@ -43,7 +43,7 @@ const char *PERMS[] = {
 void DistributedSchedUidTest::SetUpTestCase()
 {
     DTEST_LOG << "DistributedSchedUidTest::SetUpTestCase" << std::endl;
-    setuid(CAllING_UID);
+    setuid(UID);
 }
 
 void DistributedSchedUidTest::TearDownTestCase()
