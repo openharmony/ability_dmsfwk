@@ -157,7 +157,6 @@ struct StateCallbackInfo {
 };
 
 class StateCallbackIpcDiedListener : public IRemoteObject::DeathRecipient {
-
 public:
     void OnRemoteDied(const wptr<IRemoteObject> &object) override;
 
