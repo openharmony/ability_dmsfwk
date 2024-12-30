@@ -89,7 +89,6 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     result = client.UnRegisterContinueStateCallback(stub);
     HILOGI("ContinueStateCallbackOff unregister callback result: %{public}d", result);
 
-
     std::string key = std::to_string(stub->callbackData_.missionId) + stub->callbackData_.bundleName +
                       stub->callbackData_.moduleName + stub->callbackData_.abilityName;
     if (result == ERR_OK) {
@@ -159,7 +158,7 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     abilityContext->GetMissionId(callbackData.missionId);
 
     sptr <DistributedSchedule::JsContinuationStateManagerStub> stub(
-            new DistributedSchedule::JsContinuationStateManagerStub());
+        new DistributedSchedule::JsContinuationStateManagerStub());
     stub->callbackData_ = callbackData;
     return stub;
 }

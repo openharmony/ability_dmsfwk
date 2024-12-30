@@ -163,7 +163,6 @@ public:
 
 public:
     StateCallbackInfo stateCallbackInfo_;
-
 };
 
 class StateCallbackData {

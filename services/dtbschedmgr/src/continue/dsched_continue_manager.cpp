@@ -673,17 +673,17 @@ std::shared_ptr<StateCallbackData> DSchedContinueManager::FindStateCallbackData(
 {
     std::lock_guard<std::mutex> autolock(callbackCacheMutex_);
     auto lastResult = stateCallbackCache_.find(stateCallbackInfo);
-    if(lastResult == stateCallbackCache_.end()){
+    if (lastResult == stateCallbackCache_.end()) {
         return nullptr;
     }
     return std::make_shared<StateCallbackData>(lastResult->second);
 }
 
-void DSchedContinueManager::AddStateCallbackData(StateCallbackInfo &stateCallbackInfo, StateCallbackData &stateCallbackData)
+void DSchedContinueManager::AddStateCallbackData(
+    StateCallbackInfo &stateCallbackInfo, StateCallbackData &stateCallbackData)
 {
     std::lock_guard<std::mutex> autolock(callbackCacheMutex_);
     stateCallbackCache_.emplace(stateCallbackInfo, stateCallbackData);
-
 }
 
 void DSchedContinueManager::RemoveStateCallbackData(StateCallbackInfo &stateCallbackInfo)
