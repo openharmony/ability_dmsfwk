@@ -109,6 +109,7 @@ private:
     explicit ChannelManager() = default;
     ~ChannelManager();
 
+    void Reset();
     int32_t PostTask(const AppExecFwk::InnerEvent::Callback& callback,
         const AppExecFwk::EventQueue::Priority priority);
     void StartEvent();
