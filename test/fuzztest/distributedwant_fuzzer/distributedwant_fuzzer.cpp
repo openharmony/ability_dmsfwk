@@ -77,7 +77,7 @@ bool DoSomethingInterestingWithMyApiDistributedWant002(const uint8_t* data, size
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
     std::string type(reinterpret_cast<const char*>(data), size);
     want->SetType(type);
-Uri uri(type);
+    Uri uri(type);
     want->SetUri(uri);
     want->SetUriAndType(uri, type);
     want->FormatUri(uri);
