@@ -106,6 +106,7 @@ int32_t DSchedContinueDataState::DoContinueEndTask(std::shared_ptr<DSchedContinu
     if (ret != ERR_OK) {
         HILOGE("DSchedContinueDataState ExecuteContinueSend failed, ret: %{public}d", ret);
     }
+    dContinue->ExecuteQuickStartFailed(*syncContinueData);
     return ret;
 }
 }  // namespace DistributedSchedule
