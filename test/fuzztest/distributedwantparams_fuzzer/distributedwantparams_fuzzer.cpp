@@ -54,9 +54,9 @@ uint32_t GetU32Data(const char* ptr)
     return (ptr[POS_0] << OFFSET_24) | (ptr[POS_1] << OFFSET_16) | (ptr[POS_2] << OFFSET_8) | ptr[POS_3];
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWantParams_001(const uint8_t* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWantParams001(const uint8_t* data, size_t size)
 {
-    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+    if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
         return false;
     }
 
@@ -78,9 +78,9 @@ bool DoSomethingInterestingWithMyAPI_DistributedWantParams_001(const uint8_t* da
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWantParams_002(const uint8_t* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWantParams002(const uint8_t* data, size_t size)
 {
-    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+    if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
         return false;
     }
 
@@ -122,9 +122,9 @@ bool DoSomethingInterestingWithMyAPI_DistributedWantParams_002(const uint8_t* da
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWantParams_003(const uint8_t* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWant003(const uint8_t* data, size_t size)
 {
-    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+    if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
         return false;
     }
 
@@ -178,9 +178,9 @@ bool DoSomethingInterestingWithMyAPI_DistributedWantParams_003(const uint8_t* da
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWantParams_004(const uint8_t* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWantParams004(const uint8_t* data, size_t size)
 {
-    if (data == nullptr ||size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+    if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
         return false;
     }
 
@@ -206,9 +206,9 @@ bool DoSomethingInterestingWithMyAPI_DistributedWantParams_004(const uint8_t* da
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_001(data, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_002(data, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_003(data, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_004(data, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWantParams001(data, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWantParams002(data, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWant003(data, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWantParams004(data, size);
     return 0;
 }

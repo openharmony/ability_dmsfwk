@@ -216,7 +216,7 @@ void DSchedSoftbusSession::AssembleNoFrag(std::shared_ptr<DSchedDataBuffer> buff
     }
     std::shared_ptr<DSchedDataBuffer> postData = std::make_shared<DSchedDataBuffer>(headerPara.dataLen);
     if (buffer->Size() < BINARY_HEADER_FRAG_LEN) {
-        HILOGE("buffer size unusual, size = %{public}u", buffer->Size());
+        HILOGE("buffer size unusual, size = %{public}zu", buffer->Size());
         return;
     }
     uint32_t dataSize = static_cast<uint32_t>(buffer->Size() - BINARY_HEADER_FRAG_LEN);
@@ -239,7 +239,7 @@ void DSchedSoftbusSession::AssembleFrag(std::shared_ptr<DSchedDataBuffer> buffer
         totalLen_ = headerPara.totalLen;
         packBuffer_ = std::make_shared<DSchedDataBuffer>(headerPara.totalLen);
         if (buffer->Size() < BINARY_HEADER_FRAG_LEN) {
-            HILOGE("buffer size unusual, size = %{public}u", buffer->Size());
+            HILOGE("buffer size unusual, size = %{public}zu", buffer->Size());
             return;
         }
         uint32_t dataSize = static_cast<uint32_t>(buffer->Size() - BINARY_HEADER_FRAG_LEN);
