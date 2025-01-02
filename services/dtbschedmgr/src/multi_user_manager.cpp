@@ -374,8 +374,9 @@ bool MultiUserManager::IsUserForeground(int32_t accountId)
     }
     if (!accounts.empty() && accounts[0].localId == accountId) {
         isForeground = true;
+        HILOGD("Current account. accounts[0].localId: %{public}d.", accounts[0].localId);
     }
-    HILOGD("Current account. accounts[0].localId: %{public}d, accountId: %{public}d.", accounts[0].localId, accountId);
+    HILOGD("Current account. accountId: %{public}d.", accountId);
     return isForeground;
 }
 

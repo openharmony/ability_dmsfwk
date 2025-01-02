@@ -33,6 +33,7 @@ declare_args() {
   dmsfwk_av_enable_surface_cache = false
   dmsfwk_av_trans_stream_debug = false
   dmsfwk_av_trans_pixel_map_debug = false
+  dmsfwk_continuous_task_enable = false
   if (defined(global_parts_info)) {
     if (defined(global_parts_info.multimedia_image_framework)) {
       dmsfwk_mission_manager = true
@@ -51,6 +52,9 @@ declare_args() {
     }
     if (defined(global_parts_info.multimodalinput_input)) {
       dmsfwk_mmi_listener = true
+    }
+    if (defined(global_parts_info.resourceschedule_background_task_mgr)) {
+      dmsfwk_continuous_task_enable = true
     }
   }
   if (!defined(global_parts_info) ||

@@ -84,7 +84,7 @@ public:
     int32_t Disconnect();
     int32_t AcceptConnect(const std::string& token);
 
-    int32_t HandleCollabResult(int32_t result, const std::string& peerSocketName);
+    int32_t HandleCollabResult(int32_t result, const std::string& peerSocketName, const std::string& dmsServerToken);
     int32_t HandleDisconnect();
 
     int32_t SendMessage(const std::string& msg, const MessageType& messageType = MessageType::MESSAGE_NORMAL);
@@ -135,6 +135,7 @@ private:
     int32_t ConfigEngineParam(std::shared_ptr<T> &engine, const SurfaceParams& param);
     void UpdateTransChannelStatus(int32_t channelId, bool isConnect);
     int32_t GetTransChannelInfo(const TransChannelType& type, TransChannelInfo& info);
+    bool IsStreamBytesChannel(const int32_t channelId);
 
     void ExeuteConnectCallback(const ConnectResult& result);
     int32_t ExeuteEventCallback(const std::string& eventType, const EventCallbackInfo& info);

@@ -79,7 +79,9 @@ int32_t AbilityConnectionManagerStub::NotifyCollabResultInner(MessageParcel& dat
     PARCEL_READ_HELPER(data, Bool, startResult);
     std::string peerSocketName = "";
     PARCEL_READ_HELPER(data, String, peerSocketName);
-    int32_t result = NotifyCollabResult(sessionId, startResult, peerSocketName);
+    std::string dmsServerToken = "";
+    PARCEL_READ_HELPER(data, String, dmsServerToken);
+    int32_t result = NotifyCollabResult(sessionId, startResult, peerSocketName, dmsServerToken);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_HELPER(reply, Int32, result);
     return ERR_NONE;

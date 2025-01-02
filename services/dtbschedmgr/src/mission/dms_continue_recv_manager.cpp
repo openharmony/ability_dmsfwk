@@ -338,23 +338,20 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
 
     if (!GetFinalBundleName(distributedBundleInfo, finalBundleName, localBundleInfo, continueType)) {
         HILOGE("The app is not installed on the local device.");
-        NotifyIconDisappear(bundleNameId,
-            currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType), state);
+        NotifyIconDisappear(bundleNameId, senderNetworkId, state);
         return INVALID_PARAMETERS_ERR;
     }
     HILOGI("got finalBundleName: %{public}s", finalBundleName.c_str());
 
     if (localBundleInfo.applicationInfo.bundleType != AppExecFwk::BundleType::APP) {
         HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
-        NotifyIconDisappear(bundleNameId,
-            currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType), state);
+        NotifyIconDisappear(bundleNameId, senderNetworkId, state);
         return INVALID_PARAMETERS_ERR;
     }
     if (state == ACTIVE
         && !IsBundleContinuable(localBundleInfo, abilityInfo.abilityName, abilityInfo.moduleName, continueType)) {
         HILOGE("Bundle %{public}s is not continuable", finalBundleName.c_str());
-        NotifyIconDisappear(bundleNameId,
-            currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType), state);
+        NotifyIconDisappear(bundleNameId, senderNetworkId, state);
         return BUNDLE_NOT_CONTINUABLE;
     }
 
@@ -371,11 +368,11 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     return ERR_OK;
 }
 
-void DMSContinueRecvMgr::NotifyIconDisappear(uint16_t bundleNameId, const currentIconInfo& continueInfo,
+void DMSContinueRecvMgr::NotifyIconDisappear(uint16_t bundleNameId, const std::string &senderNetworkId,
     const int32_t state)
 {
-    if (state == ACTIVE && continueInfo.senderNetworkId == iconInfo_.senderNetworkId) {
-        NotifyDockDisplay(bundleNameId, continueInfo, INACTIVE);
+    if (state == ACTIVE && senderNetworkId == iconInfo_.senderNetworkId) {
+        NotifyDockDisplay(bundleNameId, iconInfo_, INACTIVE);
     }
 }
 

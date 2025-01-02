@@ -39,7 +39,6 @@ constexpr const char* EVENT_RECEIVE_DATA = "receiveData";
 constexpr const char* EVENT_RECEIVE_IMAGE = "receiveImage";
 constexpr int32_t DSCHED_COLLAB_PROTOCOL_VERSION = 1;
 static constexpr uint16_t PROTOCOL_VERSION = 1;
-constexpr int32_t CONNECTION_TIMEOUT = 20000;
 constexpr int32_t CHANNEL_NAME_LENGTH = 48;
 constexpr int32_t VIDEO_BIT_RATE = 640000;
 constexpr int32_t VIDEO_FRAME_RATE = 30;
@@ -153,15 +152,15 @@ int32_t AbilityConnectionSession::Connect(ConnectCallback& callback)
         sessionStatus_ = SessionStatus::CONNECTING;
         connectCallback_ = callback;
     }
-
     direction_ = CollabrateDirection::COLLABRATE_SOURCE;
-    SetTimeOut(CONNECTION_TIMEOUT);
     
     DistributedClient dmsClient;
     int32_t ret = dmsClient.CollabMission(sessionId_, localSocketName_, localInfo_, peerInfo_, connectOption_);
     if (ret != ERR_OK) {
         HILOGE("collab mission start failed.");
-        ExeuteConnectCallback(new ConnectResult(false));
+        ConnectResult connectResult;
+        connectResult.isConnected = false;
+        ExeuteConnectCallback(connectResult);
     }
     return ret;
 }
@@ -203,39 +202,57 @@ int32_t AbilityConnectionSession::AcceptConnect(const std::string& token)
     return ERR_OK;
 }
 
-int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::string& peerSocketName)
+int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::string& peerSocketName,
+    const std::string& dmsServerToken)
 {
     HILOGD("called.");
     if (result != ERR_OK) {
         HILOGE("collab result is failed, ret = %{public}d", result);
-        ExeuteConnectCallback(new ConnectResult(false));
+        ConnectResult connectResult;
+        connectResult.isConnected = false;
+        ExeuteConnectCallback(connectResult);
         return INVALID_PARAMETERS_ERR;
     }
 
+    dmsServerToken_ = dmsServerToken;
     peerSocketName_ = peerSocketName;
     if (InitChannels() != ERR_OK) {
         DistributedClient dmsClient;
         dmsClient.NotifyCloseCollabSession(dmsServerToken_);
-        ExeuteConnectCallback(new ConnectResult(false));
+        ConnectResult connectResult;
+        connectResult.isConnected = false;
+        ExeuteConnectCallback(connectResult);
         return INVALID_PARAMETERS_ERR;
     }
 
     if (ConnectChannels() != ERR_OK) {
         DistributedClient dmsClient;
         dmsClient.NotifyCloseCollabSession(dmsServerToken_);
-        ExeuteConnectCallback(new ConnectResult(false));
+        ConnectResult connectResult;
+        connectResult.isConnected = false;
+        ExeuteConnectCallback(connectResult);
         return INVALID_PARAMETERS_ERR;
     }
 
     std::unique_lock<std::shared_mutex> sessionStatusWriteLock(sessionMutex_);
     sessionStatus_ = SessionStatus::CONNECTED;
-    ExeuteConnectCallback(new ConnectResult(true));
+    ConnectResult connectResult;
+    connectResult.isConnected = true;
+    ExeuteConnectCallback(connectResult);
     return ERR_OK;
 }
 
 int32_t AbilityConnectionSession::HandleDisconnect()
 {
     HILOGD("called.");
+    {
+        std::shared_lock<std::shared_mutex> sessionStatusReadLock(sessionMutex_);
+        if (sessionStatus_ == SessionStatus::UNCONNECTED) {
+            HILOGI("The session resource has been released.");
+            return ERR_OK;
+        }
+    }
+
     EventCallbackInfo callbackInfo;
     callbackInfo.sessionId = sessionId_;
     callbackInfo.reason = DisconnectReason::PEER_APP_EXIT;
@@ -617,13 +634,14 @@ int32_t AbilityConnectionSession::InitChannels()
         return ret;
     }
 
-    ret = CreateChannel(channelName, ChannelDataType::BYTES, TransChannelType::STREAM_CHANNEL_BYTES);
+    std::string streamChannelName = channelName + "stream";
+    ret = CreateChannel(streamChannelName, ChannelDataType::BYTES, TransChannelType::STREAM_CHANNEL_BYTES);
     if (ret != ERR_OK) {
         HILOGE("init bytes channel failed!");
         return INVALID_PARAMETERS_ERR;
     }
 
-    ret = CreateChannel(channelName, ChannelDataType::VIDEO_STREAM, TransChannelType::STREAM_CHANNEL);
+    ret = CreateChannel(streamChannelName, ChannelDataType::VIDEO_STREAM, TransChannelType::STREAM_CHANNEL);
     if (ret != ERR_OK) {
         HILOGE("init bytes channel failed!");
         return INVALID_PARAMETERS_ERR;
@@ -645,12 +663,11 @@ int32_t AbilityConnectionSession::CreateChannel(const std::string& channelName, 
         return INVALID_PARAMETERS_ERR;
     }
 
-    int32_t ret = channelManager.RegisterChannelListener(channelId, channelListener_);
-    if (ret != ERR_OK) {
+    if (channelManager.RegisterChannelListener(channelId, channelListener_) != ERR_OK) {
         HILOGE("register channel listener failed, channelId is %{public}d", channelId);
         return INVALID_PARAMETERS_ERR;
     }
-
+    
     std::unique_lock<std::shared_mutex> channelWriteLock(transChannelMutex_);
     TransChannelInfo channelInfo = {channelId, dataType, channelType, false};
     transChannels_.emplace(channelType, channelInfo);
@@ -944,11 +961,28 @@ void AbilityConnectionSession::OnBytesReceived(int32_t channelId, const std::sha
         return;
     }
 
+    if (IsStreamBytesChannel(channelId)) {
+        HILOGE("is stream bytes channel, no need to send.");
+        return;
+    }
+
     EventCallbackInfo callbackInfo;
     callbackInfo.sessionId = sessionId_;
     callbackInfo.data = dataBuffer;
 
     ExeuteEventCallback(EVENT_RECEIVE_DATA, callbackInfo);
+}
+
+bool AbilityConnectionSession::IsStreamBytesChannel(const int32_t channelId)
+{
+    TransChannelInfo transChannelInfo;
+    int32_t ret = GetTransChannelInfo(TransChannelType::STREAM_CHANNEL_BYTES, transChannelInfo);
+    if (ret != ERR_OK) {
+        HILOGE("stream bytes channel not exit!");
+        return false;
+    }
+
+    return transChannelInfo.channelId == channelId;
 }
 
 bool AbilityConnectionSession::IsVaildChannel(const int32_t channelId)

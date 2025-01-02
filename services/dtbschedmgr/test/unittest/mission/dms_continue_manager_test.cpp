@@ -1406,8 +1406,7 @@ HWTEST_F(DMSContinueManagerTest, NotifyIconDisappear_001, TestSize.Level1)
     int32_t state = 0;
     recvMgr->iconInfo_.senderNetworkId = senderNetworkId;
     recvMgr->registerOnListener_.clear();
-    recvMgr->NotifyIconDisappear(bundleNameId,
-        currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType), state);
+    recvMgr->NotifyIconDisappear(bundleNameId, senderNetworkId, state);
     EXPECT_EQ(recvMgr->registerOnListener_.empty(), true);
     DTEST_LOG << "DMSContinueManagerTest NotifyIconDisappear_001 end" << std::endl;
 }

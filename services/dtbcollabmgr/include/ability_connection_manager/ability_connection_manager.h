@@ -48,7 +48,8 @@ public:
     int32_t AcceptConnect(int32_t sessionId, const std::string& token);
     int32_t Reject(const std::string& token, const std::string& reason);
 
-    int32_t NotifyCollabResult(int32_t sessionId, int32_t result, const std::string& peerServerName);
+    int32_t NotifyCollabResult(int32_t sessionId, int32_t result, const std::string& peerServerName,
+        const std::string& dmsServerToken);
     int32_t NotifyDisconnect(int32_t sessionId);
 
     int32_t SendMessage(int32_t sessionId, const std::string& msg);
