@@ -217,6 +217,10 @@ public:
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
     ErrCode QueryOsAccount(int32_t& activeAccountId);
     void RegisterDataShareObserver(const std::string& key);
+    int32_t ContinueStateCallbackRegister(int32_t missionId, std::string bundleName, std::string moduleName,
+        std::string abilityName, sptr<IRemoteObject> callback);
+    int32_t ContinueStateCallbackUnRegister(int32_t missionId, std::string bundleName, std::string moduleName,
+        std::string abilityName);
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     bool CheckRemoteOsType(const std::string& netwokId) override;

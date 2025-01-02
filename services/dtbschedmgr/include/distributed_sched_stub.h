@@ -125,6 +125,8 @@ private:
         int32_t& requestCode, CallerInfo& callerInfo, AccountInfo& accountInfo);
     int32_t GetConnectAbilityFromRemoteExParam(MessageParcel& data, AppExecFwk::AbilityInfo& abilityInfo,
         sptr<IRemoteObject>& connect, CallerInfo& callerInfo, AccountInfo& accountInfo);
+    int32_t ContinueStateCallbackRegister(MessageParcel& data, MessageParcel& reply);
+    int32_t ContinueStateCallbackUnRegister(MessageParcel& data, MessageParcel& reply);
     int32_t CollabMissionInner(MessageParcel& data, MessageParcel& reply);
     bool IsNewCollabVersion(const std::string& remoteDeviceId);
     int32_t NotifyStartAbilityResultInner(MessageParcel& data, MessageParcel& reply);

@@ -18,5 +18,6 @@ group("napi_packages") {
   deps = [
     "${dms_path}/interfaces/kits/napi/ability_connection_manager:abilityconnectionmanager_napi",
     "${dms_path}/interfaces/kits/napi/continuation_manager:continuationmanager_napi",
+    "${dms_path}/interfaces/kits/napi/continuation_state_manager:continuemanager_napi",
   ]
 }

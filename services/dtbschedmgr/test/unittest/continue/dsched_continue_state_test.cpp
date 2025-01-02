@@ -398,6 +398,16 @@ std::shared_ptr<DSchedContinue> DSchedContinueStateMachineTest::CreateObject()
     return dContinue;
 }
 
+int32_t DSchedContinue::ExecuteQuickStartSuccess()
+{
+    return ERR_OK;
+}
+
+int32_t DSchedContinue::ExecuteQuickStartFailed(int32_t result)
+{
+    return ERR_OK;
+}
+
 /**
  * @tc.name: SinkExecuteTest001
  * @tc.desc: Execute

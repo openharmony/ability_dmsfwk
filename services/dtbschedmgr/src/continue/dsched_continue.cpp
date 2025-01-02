@@ -62,6 +62,8 @@ const std::string DMSDURATION_SAVETIME = "ohos.dschedule.SaveDataTime";
 const std::string DMS_PERSISTENT_ID = "ohos.dms.persistentId";
 const std::string DMS_CONTINUE_SESSION_ID = "ohos.dms.continueSessionId";
 const std::string QUICK_START_CONFIGURATION = "_ContinueQuickStart";
+const std::string QUICK_START_SUCCESS_MESSAGE = "quickstart success.";
+const std::string QUICK_START_FAILED_MESSAGE = "quickstart failed. error code: ";
 const std::u16string NAPI_MISSION_CALLBACK_INTERFACE_TOKEN = u"ohos.DistributedSchedule.IMissionCallback";
 
 constexpr int32_t DSCHED_CONTINUE_PROTOCOL_VERSION = 1;
@@ -79,6 +81,9 @@ constexpr int32_t CONTINUE_DATA_TRANS_TIME = 5;
 constexpr int32_t CONTINUE_START_ABILITY_TIME = 6;
 constexpr int32_t GET_ABILITY_STATE_RETRY_TIMES = 40;
 constexpr int32_t GET_ABILITY_STATE_SLEEP_TIME = 50;
+constexpr int32_t QUICK_START_SUCCESS = 0;
+constexpr int32_t QUICK_START_FAILED = 1;
+
 }
 
 const std::map<int32_t, int32_t> DSchedContinue::DMS_CONVERT_TO_SDK_ERR_MAP = {
@@ -119,6 +124,12 @@ const std::map<int32_t, int32_t> DSchedContinue::DMS_CONVERT_TO_SDK_ERR_MAP = {
     std::map<int32_t, int32_t>::value_type(CONTINUE_ALREADY_IN_PROGRESS,
         DmsInterfaceSdkErr::ERR_CONTINUE_ALREADY_IN_PROGRESS),
 };
+
+void StateCallbackIpcDiedListener::OnRemoteDied(const wptr<IRemoteObject> &object)
+{
+    HILOGW("State call back remote object died, clean cache! ");
+    DSchedContinueManager::GetInstance().ContinueStateCallbackUnRegister(stateCallbackInfo_);
+}
 
 DSchedContinue::DSchedContinue(int32_t subServiceType, int32_t direction,  const sptr<IRemoteObject>& callback,
     const DSchedContinueInfo& continueInfo) : subServiceType_(subServiceType), direction_(direction),
@@ -565,6 +576,7 @@ int32_t DSchedContinue::QuickStartAbility()
     }
     ContinueSceneSessionHandler::GetInstance().UpdateContinueSessionId(continueInfo_.sinkBundleName_, abilityName);
     std::string continueSessionId = ContinueSceneSessionHandler::GetInstance().GetContinueSessionId();
+    continueInfo_.continueSessionId_ = continueSessionId;
     HILOGI("continueSessionId is %{public}s", continueSessionId.c_str());
 
     AAFwk::Want want;
@@ -1295,6 +1307,29 @@ int32_t DSchedContinue::ExecuteContinueError(int32_t result)
     OnContinueEnd(result);
     HILOGI("ExecuteNotifyComplete end");
     return ERR_OK;
+}
+
+int32_t DSchedContinue::ExecuteQuickStartSuccess()
+{
+    int32_t missionId;
+    ContinueSceneSessionHandler::GetInstance().GetPersistentId(missionId, continueInfo_.continueSessionId_);
+    StateCallbackInfo stateCallbackInfo = StateCallbackInfo(
+        missionId, continueInfo_.sinkBundleName_, eventData_.destModuleName_,
+        continueInfo_.sinkAbilityName_);
+    return DSchedContinueManager::GetInstance().NotifyQuickStartState(
+        stateCallbackInfo, QUICK_START_SUCCESS, QUICK_START_SUCCESS_MESSAGE);
+}
+
+int32_t DSchedContinue::ExecuteQuickStartFailed(int32_t result)
+{
+    int32_t missionId;
+    ContinueSceneSessionHandler::GetInstance().GetPersistentId(missionId, continueInfo_.continueSessionId_);
+    StateCallbackInfo stateCallbackInfo = StateCallbackInfo(
+        missionId, continueInfo_.sinkBundleName_, eventData_.destModuleName_,
+        continueInfo_.sinkAbilityName_);
+    std::string message = QUICK_START_FAILED_MESSAGE + std::to_string(result);
+    return DSchedContinueManager::GetInstance().NotifyQuickStartState(
+        stateCallbackInfo, QUICK_START_FAILED, message);
 }
 
 int32_t DSchedContinue::PackEndCmd(std::shared_ptr<DSchedContinueEndCmd> cmd, int32_t result)

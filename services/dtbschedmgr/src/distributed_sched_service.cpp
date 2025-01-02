@@ -390,6 +390,45 @@ void DistributedSchedService::RegisterDataShareObserver(const std::string& key)
     HILOGI("RegisterObserver end.");
 }
 
+int32_t DistributedSchedService::ContinueStateCallbackRegister(
+    int32_t missionId, std::string bundleName, std::string moduleName,
+    std::string abilityName, sptr<IRemoteObject> callback)
+{
+    HILOGI("ContinueStateCallbackRegister start. missionId: %{public}d; "
+           "bundleName: %{public}s; moduleName: %{public}s; abilityname: %{public}s;",
+           missionId, bundleName.c_str(), moduleName.c_str(), abilityName.c_str());
+    StateCallbackInfo stateCallbackInfo;
+    stateCallbackInfo.missionId = missionId;
+    stateCallbackInfo.bundleName = bundleName;
+    stateCallbackInfo.moduleName = moduleName;
+    stateCallbackInfo.abilityName = abilityName;
+
+    if (callback == nullptr) {
+        return ERR_NULL_OBJECT;
+    }
+
+    int32_t result = DSchedContinueManager::GetInstance().ContinueStateCallbackRegister(stateCallbackInfo, callback);
+    HILOGI("ContinueStateCallbackRegister end, result: %{public}d", result);
+    return result;
+}
+int32_t DistributedSchedService::ContinueStateCallbackUnRegister(
+    int32_t missionId, std::string bundleName, std::string moduleName,
+    std::string abilityName)
+{
+    HILOGI("ContinueStateCallbackUnRegister start. missionId: %{public}d; "
+           "bundleName: %{public}s; moduleName: %{public}s; abilityname: %{public}s;",
+           missionId, bundleName.c_str(), moduleName.c_str(), abilityName.c_str());
+    StateCallbackInfo stateCallbackInfo;
+    stateCallbackInfo.missionId = missionId;
+    stateCallbackInfo.bundleName = bundleName;
+    stateCallbackInfo.moduleName = moduleName;
+    stateCallbackInfo.abilityName = abilityName;
+
+    int32_t result =  DSchedContinueManager::GetInstance().ContinueStateCallbackUnRegister(stateCallbackInfo);
+    HILOGI("ContinueStateCallbackUnRegister end, result: %{public}d", result);
+    return result;
+}
+
 void DistributedSchedService::InitDataShareManager()
 {
     dataShareManager.SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance().IsContinueSwitchOn());

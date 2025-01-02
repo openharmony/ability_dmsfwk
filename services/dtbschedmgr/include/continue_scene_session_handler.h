@@ -32,6 +32,7 @@ public:
     std::string GetContinueSessionId() const;
     void ClearContinueSessionId();
     int32_t GetPersistentId(int32_t& persistentId);
+    int32_t GetPersistentId(int32_t& persistentId, std::string &continueSessionId);
 private:
     std::string continueSessionId_;
 };

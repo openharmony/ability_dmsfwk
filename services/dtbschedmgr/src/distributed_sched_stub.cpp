@@ -169,6 +169,10 @@ void DistributedSchedStub::InitLocalMissionManagerInner()
         &DistributedSchedStub::StopSyncRemoteMissionsInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::SET_MISSION_CONTINUE_STATE)] =
         &DistributedSchedStub::SetMissionContinueStateInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_STATE_CALLBACK_REGISTER)] =
+        &DistributedSchedStub::ContinueStateCallbackRegister;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_STATE_CALLBACK_UNREGISTER)] =
+        &DistributedSchedStub::ContinueStateCallbackUnRegister;
 }
 
 void DistributedSchedStub::InitRemoteFuncsInner()
@@ -371,6 +375,34 @@ int32_t DistributedSchedStub::GetConnectAbilityFromRemoteExParam(MessageParcel& 
         HILOGD("parse extra info");
     }
     return ERR_OK;
+}
+
+int32_t DistributedSchedStub::ContinueStateCallbackRegister(MessageParcel &data, MessageParcel &reply)
+{
+    std::string bundleName = data.ReadString();
+    int32_t missionId = data.ReadInt32();
+    std::string moduleName = data.ReadString();
+    std::string abilityName = data.ReadString();
+
+    sptr<IRemoteObject> callback = data.ReadRemoteObject();
+
+    int32_t result = DistributedSchedService::GetInstance().ContinueStateCallbackRegister(
+        missionId, bundleName, moduleName, abilityName, callback);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+    return ERR_NONE;
+}
+
+int32_t DistributedSchedStub::ContinueStateCallbackUnRegister(MessageParcel &data, MessageParcel &reply)
+{
+    std::string bundleName = data.ReadString();
+    int32_t missionId = data.ReadInt32();
+    std::string moduleName = data.ReadString();
+    std::string abilityName = data.ReadString();
+
+    int32_t result = DistributedSchedService::GetInstance().ContinueStateCallbackUnRegister(
+        missionId, bundleName, moduleName, abilityName);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+    return ERR_NONE;
 }
 
 int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply)
