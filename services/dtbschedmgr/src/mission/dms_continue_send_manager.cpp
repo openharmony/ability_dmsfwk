@@ -108,14 +108,16 @@ void DMSContinueSendMgr::PostUnfocusedTaskWithDelay(const int32_t missionId, Unf
         eventHandler_->PostTask(funcOut, timeoutTaskName, CANCEL_FOCUSED_DELAYED);
     } else if (reason == UnfocusedReason::SCREENOFF) {
 #ifdef DMS_ICON_HOLD_ON
-        std::string bundleName;
-        int32_t bundleNameRet = GetBundleNameByMissionId(missionId, bundleName);
-        std::string abilityName;
-        int32_t abilityNameRet = GetAbilityNameByMissionId(missionId, abilityName);
-        uint16_t bundleNameId;
-        int32_t bundleNameIdRet = BundleManagerInternal::GetBundleNameId(bundleName, bundleNameId);
-        if (bundleNameRet == ERR_OK && abilityNameRet == ERR_OK && bundleNameIdRet == ERR_OK) {
-            screenOffHandler_->SetScreenOffInfo(missionId, bundleName, bundleNameId, abilityName);
+        if (screenOffHandler_->GetMissionId() == -1) {
+            std::string bundleName;
+            int32_t bundleNameRet = GetBundleNameByMissionId(missionId, bundleName);
+            std::string abilityName;
+            int32_t abilityNameRet = GetAbilityNameByMissionId(missionId, abilityName);
+            uint16_t bundleNameId;
+            int32_t bundleNameIdRet = BundleManagerInternal::GetBundleNameId(bundleName, bundleNameId);
+            if (bundleNameRet == ERR_OK && abilityNameRet == ERR_OK && bundleNameIdRet == ERR_OK) {
+                screenOffHandler_->SetScreenOffInfo(missionId, bundleName, bundleNameId, abilityName);
+            }
         }
 #endif
         auto funcOff = [this]() {
