@@ -14,8 +14,10 @@
 */
 #include "channel_manager_test.h"
 #include "channel_manager.h"
-#include "securec.h"
 #include "dtbcollabmgr_log.h"
+#include "securec.h"
+#include <chrono>
+#include <thread>
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -27,6 +29,7 @@ namespace {
     static constexpr int32_t NUM_MINUS_1 = -1;
     static constexpr int32_t MESSAGE_START_ID = 1001;
     static constexpr int32_t CHANNGE_GAP = 1000;
+    static constexpr int32_t SLEEP_FOR_INIT = 100;
 }
 
 void ChannelManagerTest::SetUpTestCase()
@@ -47,6 +50,7 @@ void ChannelManagerTest::SetUp()
 void ChannelManagerTest::TearDown()
 {
     HILOGI("ChannelManagerTest::TearDown");
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_INIT));
     ChannelManager::GetInstance().DeInit();
 }
 
@@ -207,7 +211,7 @@ HWTEST_F(ChannelManagerTest, CreateClientChannel_ExceedNum_Fail, TestSize.Level1
     int32_t channelId = 0;
     for (int32_t i = 0; i < CHANNGE_GAP + 1; i++)
     {
-        channelId = ChannelManager::GetInstance().CreateServerChannel(channelName, dataType, peerInfo);
+        channelId = ChannelManager::GetInstance().CreateClientChannel(channelName, dataType, peerInfo);
     }
     EXPECT_EQ(channelId, CREATE_CLIENT_CHANNEL_FAILED);
 }

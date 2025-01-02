@@ -20,6 +20,7 @@
 #include <future>
 #include <sys/prctl.h>
 #include "securec.h"
+#include "unordered_set"
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -260,16 +261,30 @@ void ChannelManager::DeInit()
     }
 
     // release channels
-    std::vector<int32_t> channelIds;
-    for (auto&& socket : socketChannelMap_) {
-        channelIds.push_back(socket.first);
+    std::unordered_set<int32_t> channelIds;
+    for (const auto& entry : channelIdMap_) {
+        for (int32_t id : entry.second) {
+            channelIds.insert(id);
+        }
     }
-    for (auto&& id : channelIds) {
+    for (const int32_t id : channelIds) {
         DeleteChannel(id);
-        Shutdown(serverSocketId_);
     }
-    serverSocketId_ = -1;
+    Shutdown(serverSocketId_);
+    Reset();
     HILOGI("end");
+}
+
+void ChannelManager::Reset()
+{
+    HILOGI("reset channel manager");
+    serverSocketId_ = -1;
+    ownerName_ = "";
+    nextIds_ = {
+        { ChannelDataType::MESSAGE, MESSAGE_START_ID },
+        { ChannelDataType::BYTES, BYTES_START_ID },
+        { ChannelDataType::VIDEO_STREAM, STREAM_START_ID }
+    };
 }
 
 int32_t ChannelManager::GetVersion()
@@ -450,19 +465,25 @@ void ChannelManager::ClearRegisterListener(const int32_t channelId)
 void ChannelManager::ClearRegisterSocket(const int32_t channelId)
 {
     HILOGI("start release socket, channelId=%{public}d", channelId);
-    std::unique_lock<std::shared_mutex> writeLock(socketMutex_);
     std::vector<int32_t> socketIds;
-    if (!socketChannelMap_.empty()) {
-        for (auto&& socket : socketChannelMap_) {
-            if (socket.second == channelId) {
-                socketIds.push_back(socket.first);
+    {
+        std::unique_lock<std::shared_mutex> writeLock(socketMutex_);
+        if (!socketChannelMap_.empty()) {
+            for (auto&& socket : socketChannelMap_) {
+                if (socket.second == channelId) {
+                    socketIds.push_back(socket.first);
+                }
             }
         }
+        for (const auto socketId : socketIds) {
+            HILOGI("start release socket, %{public}d", socketId);
+            socketChannelMap_.erase(socketId);
+            socketStatusMap_.erase(socketId);
+            Shutdown(socketId);
+        }
     }
-    for (const auto& socketId : socketIds) {
-        HILOGI("start release socket, %{public}d", socketId);
-        socketChannelMap_.erase(socketId);
-        socketStatusMap_.erase(socketId);
+    HILOGI("start to shutdown socket");
+    for (const auto socketId : socketIds) {
         Shutdown(socketId);
     }
 }
