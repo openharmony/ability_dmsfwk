@@ -107,6 +107,17 @@ void DMSContinueSendMgr::PostUnfocusedTaskWithDelay(const int32_t missionId, Unf
         eventHandler_->RemoveTask(timeoutTaskName);
         eventHandler_->PostTask(funcOut, timeoutTaskName, CANCEL_FOCUSED_DELAYED);
     } else if (reason == UnfocusedReason::SCREENOFF) {
+#ifdef DMS_ICON_HOLD_ON
+        std::string bundleName;
+        int32_t bundleNameRet = GetBundleNameByMissionId(missionId, bundleName);
+        std::string abilityName;
+        int32_t abilityNameRet = GetAbilityNameByMissionId(missionId, abilityName);
+        uint16_t bundleNameId;
+        int32_t bundleNameIdRet = BundleManagerInternal::GetBundleNameId(bundleName, bundleNameId);
+        if (bundleNameRet == ERR_OK && abilityNameRet == ERR_OK && bundleNameIdRet == ERR_OK) {
+            screenOffHandler_->SetScreenOffInfo(missionId, bundleName, bundleNameId, abilityName);
+        }
+#endif
         auto funcOff = [this]() {
             SendScreenOffEvent(DMS_UNFOCUSED_TYPE);
         };
@@ -690,6 +701,14 @@ void DMSContinueSendMgr::OnDeviceScreenOn()
         if (screenOffHandler_ != nullptr) {
             screenOffHandler_->OnDeviceScreenOn();
         }
+#ifdef DMS_ICON_HOLD_ON
+        int32_t missionId = info_.currentMissionId;
+        if (!info_.currentIsContinuable || CheckContinueState(missionId) != ERR_OK) {
+            HILOGW("current mission is not continuable, ignore");
+            return;
+        }
+        NotifyMissionFocused(missionId, FocusedReason::NORMAL);
+#endif
     };
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler_ is nullptr");
