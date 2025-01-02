@@ -54,7 +54,7 @@ uint32_t GetU32Data(const char* ptr)
     return (ptr[POS_0] << OFFSET_24) | (ptr[POS_1] << OFFSET_16) | (ptr[POS_2] << OFFSET_8) | ptr[POS_3];
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWantParams_001(const char* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWantParams001(const char* data, size_t size)
 {
     DistributedWantParams wantOther;
     std::string key(data, size);
@@ -77,7 +77,7 @@ bool DoSomethingInterestingWithMyAPI_DistributedWantParams_001(const char* data,
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWantParams_002(const char* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWantParams002(const char* data, size_t size)
 {
     DistributedWantParams wantOther;
     std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
@@ -117,7 +117,7 @@ bool DoSomethingInterestingWithMyAPI_DistributedWantParams_002(const char* data,
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWantParams_003(const char* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWantParams003(const char* data, size_t size)
 {
     DistributedWantParams wantOther;
     std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
@@ -169,7 +169,7 @@ bool DoSomethingInterestingWithMyAPI_DistributedWantParams_003(const char* data,
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWantParams_004(const char* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWantParams004(const char* data, size_t size)
 {
     DistributedWantParams wantOther;
     std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
@@ -218,10 +218,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         return 0;
     }
 
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_001(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_002(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_003(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWantParams_004(ch, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWantParams001(ch, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWantParams002(ch, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWantParams003(ch, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWantParams004(ch, size);
     free(ch);
     ch = nullptr;
     return 0;

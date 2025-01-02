@@ -44,7 +44,7 @@ uint32_t GetU32Data(const char* ptr)
     return (ptr[POS_0] << OFFSET_24) | (ptr[POS_1] << OFFSET_16) | (ptr[POS_2] << OFFSET_8) | ptr[POS_3];
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_001(const char* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWant001(const char* data, size_t size)
 {
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
     unsigned int flags = static_cast<unsigned int>(GetU32Data(data));
@@ -64,7 +64,7 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_001(const char* data, size_
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_002(const char* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWant002(const char* data, size_t size)
 {
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
     std::string type(data, size);
@@ -78,7 +78,7 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_002(const char* data, size_
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_003(const char* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWant003(const char* data, size_t size)
 {
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
     want->CountEntities();
@@ -96,7 +96,7 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_003(const char* data, size_
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_004(const char* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWant004(const char* data, size_t size)
 {
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
     std::string key(data, size);
@@ -118,7 +118,7 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_004(const char* data, size_
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_005(const char* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWant005(const char* data, size_t size)
 {
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
     std::string key(data, size);
@@ -143,7 +143,7 @@ bool DoSomethingInterestingWithMyAPI_DistributedWant_005(const char* data, size_
     return true;
 }
 
-bool DoSomethingInterestingWithMyAPI_DistributedWant_006(const char* data, size_t size)
+bool DoSomethingInterestingWithMyApiDistributedWant006(const char* data, size_t size)
 {
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
     std::string key(data, size);
@@ -210,12 +210,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         return 0;
     }
 
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_001(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_002(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_003(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_004(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_005(ch, size);
-    OHOS::DoSomethingInterestingWithMyAPI_DistributedWant_006(ch, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWant001(ch, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWant002(ch, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWant003(ch, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWant004(ch, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWant005(ch, size);
+    OHOS::DoSomethingInterestingWithMyApiDistributedWant006(ch, size);
     free(ch);
     ch = nullptr;
     return 0;
