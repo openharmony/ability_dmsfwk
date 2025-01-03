@@ -28,7 +28,7 @@ declare_args() {
   dmsfwk_check_bt = false
   dmsfwk_check_wifi = true
   dmsfwk_recv_broadcast = true
-  dmsfwk_use_screenlock_icon_holdon = true
+  dmsfwk_use_screenlock_icon_holdon = false
   dmsfwk_sync_data_on_package_event = false
   dmsfwk_av_enable_surface_cache = false
   dmsfwk_av_trans_stream_debug = false
