@@ -88,6 +88,9 @@ config("distributed_sched_config") {
   if (dmsfwk_continuous_task_enable) {
     defines += [ "BGTASKMGR_CONTINUOUS_TASK_ENABLE" ]
   }
+  if (dmsfwk_all_connect_decisions) {
+    defines += [ "COLLAB_ALL_CONNECT_DECISIONS" ]
+  }
 }
 
 ohos_shared_library("distributedschedsvr") {

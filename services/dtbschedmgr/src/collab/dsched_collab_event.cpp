@@ -51,9 +51,9 @@ int32_t BaseCmd::Marshal(std::string &jsonStr)
     cJSON_AddStringToObject(rootValue, "SinkModuleName", sinkModuleName_.c_str());
     cJSON_AddStringToObject(rootValue, "SinkServiceId", sinkServerId_.c_str());
 
-    cJSON_AddBoolToObject(rootValue, "NeedStream", needStream_);
-    cJSON_AddBoolToObject(rootValue, "NeedData", needData_);
-    cJSON_AddBoolToObject(rootValue, "NeedKeepLongAlive", needKeepLongAlive_);
+    cJSON_AddBoolToObject(rootValue, "NeedSendBigData", needSendBigData_);
+    cJSON_AddBoolToObject(rootValue, "NeedSendStream_", needSendStream_);
+    cJSON_AddBoolToObject(rootValue, "NeedRecvStream", needRecvStream_);
 
     char *data = cJSON_Print(rootValue);
     if (data == nullptr) {
@@ -103,8 +103,8 @@ int32_t BaseCmd::Unmarshal(const std::string &jsonStr)
         *strValues[i] = item->valuestring;
     }
 
-    const char *boolKeys[] = { "NeedStream", "NeedData", "NeedKeepLongAlive" };
-    bool *boolValues[] = { &needStream_, &needData_, &needKeepLongAlive_ };
+    const char *boolKeys[] = { "NeedSendBigData", "NeedSendStream_", "NeedRecvStream" };
+    bool *boolValues[] = { &needSendBigData_, &needSendStream_, &needRecvStream_ };
     int32_t boolLength = sizeof(boolKeys) / sizeof(boolKeys[0]);
     for (int32_t i = 0; i < boolLength; i++) {
         cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, boolKeys[i]);
@@ -535,6 +535,7 @@ int32_t NotifyResultCmd::Marshal(std::string &jsonStr)
     cJSON_AddNumberToObject(rootValue, "SinkCollabSessionId", sinkCollabSessionId_);
     cJSON_AddNumberToObject(rootValue, "Result", result_);
     cJSON_AddStringToObject(rootValue, "SinkSocketName", sinkSocketName_.c_str());
+    cJSON_AddStringToObject(rootValue, "AbilityRejectReason", abilityRejectReason_.c_str());
 
     char *data = cJSON_Print(rootValue);
     if (data == nullptr) {
@@ -571,14 +572,12 @@ int32_t NotifyResultCmd::Unmarshal(const std::string &jsonStr)
         return INVALID_PARAMETERS_ERR;
     }
     sinkCollabSessionId_ = sinkCollabSessionId->valueint;
-
     cJSON *result = cJSON_GetObjectItemCaseSensitive(rootValue, "Result");
     if (result == nullptr || !cJSON_IsNumber(result)) {
         cJSON_Delete(rootValue);
         return INVALID_PARAMETERS_ERR;
     }
     result_ = result->valueint;
-
     cJSON *sinkSocketName = cJSON_GetObjectItemCaseSensitive(rootValue, "SinkSocketName");
     if (sinkSocketName == nullptr || !cJSON_IsString(sinkSocketName)) {
         cJSON_Delete(rootValue);
@@ -586,6 +585,10 @@ int32_t NotifyResultCmd::Unmarshal(const std::string &jsonStr)
     }
     sinkSocketName_ = sinkSocketName->valuestring;
 
+    cJSON *abilityRejectReason = cJSON_GetObjectItemCaseSensitive(rootValue, "AbilityRejectReason");
+    if (abilityRejectReason != nullptr && cJSON_IsString(abilityRejectReason)) {
+        abilityRejectReason_ = abilityRejectReason->valuestring;
+    }
     cJSON_Delete(rootValue);
     HILOGD("end");
     return ERR_OK;

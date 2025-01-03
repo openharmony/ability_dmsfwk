@@ -130,7 +130,7 @@ private:
     int32_t NotifyStartAbilityResultInner(MessageParcel& data, MessageParcel& reply);
     int32_t NotifyCollabPrepareResultInner(MessageParcel& data, MessageParcel& reply);
     int32_t NotifyCloseCollabSessionInner(MessageParcel& data, MessageParcel& reply);
-    int32_t GetSrcSocketNameInner(MessageParcel& data, MessageParcel& reply);
+    int32_t NotifyRejectReason(MessageParcel& data, MessageParcel& reply);
 
 private:
     using DistributedSchedFunc = int32_t(DistributedSchedStub::*)(MessageParcel& data, MessageParcel& reply);

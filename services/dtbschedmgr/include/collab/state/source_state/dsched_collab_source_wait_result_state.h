@@ -32,6 +32,7 @@ public:
 
 private:
     int32_t DoSrcResultNotifyTask(std::shared_ptr<DSchedCollab> dCollab, const AppExecFwk::InnerEvent::Pointer &event);
+    int32_t DoAbilityRejectTask(std::shared_ptr<DSchedCollab> dCollab, const AppExecFwk::InnerEvent::Pointer &event);
     int32_t DoSrcWaitResultError(std::shared_ptr<DSchedCollab> dCollab, const AppExecFwk::InnerEvent::Pointer &event);
 
 private:

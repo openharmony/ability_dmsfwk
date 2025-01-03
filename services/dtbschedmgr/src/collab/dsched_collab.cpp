@@ -93,9 +93,9 @@ DSchedCollab::DSchedCollab(std::shared_ptr<SinkStartCmd> startCmd, const int32_t
     collabInfo_.srcCollabSessionId_ = startCmd->srcCollabSessionId_;
     collabInfo_.collabToken_ = startCmd->collabToken_;
     collabInfo_.srcCollabVersion_ = startCmd->collabVersion_;
-    collabInfo_.srcOpt_.needStream_ = startCmd->needStream_;
-    collabInfo_.srcOpt_.needData_ = startCmd->needData_;
-    collabInfo_.srcOpt_.needKeepLongAlive_ = startCmd->needKeepLongAlive_;
+    collabInfo_.srcOpt_.needSendBigData_ = startCmd->needSendBigData_;
+    collabInfo_.srcOpt_.needSendStream_ = startCmd->needSendStream_;
+    collabInfo_.srcOpt_.needRecvStream_ = startCmd->needRecvStream_;
     collabInfo_.srcOpt_.startParams_ = startCmd->startParams_;
     collabInfo_.srcOpt_.messageParams_ = startCmd->messageParams_;
     collabInfo_.srcInfo_.pid_ = startCmd->srcPid_;
@@ -240,6 +240,16 @@ int32_t DSchedCollab::PostSrcResultTask(std::shared_ptr<NotifyResultCmd> notifyR
         HILOGE("eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
     }
+    if (!notifyResultCmd->abilityRejectReason_.empty()) {
+        DSchedCollabEventType eventType = ABILITY_REJECT_EVENT;
+        auto data = std::make_shared<std::string>(notifyResultCmd->abilityRejectReason_);
+        auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
+        if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+            HILOGE("send event type %{public}s fail", EVENTDATA[eventType].c_str());
+            return COLLAB_SEND_EVENT_FAILED;
+        }
+        return ERR_OK;
+    }
     collabInfo_.sinkCollabSessionId_ = notifyResultCmd->sinkCollabSessionId_;
     collabInfo_.sinkInfo_.socketName_ = notifyResultCmd->sinkSocketName_;
     DSchedCollabEventType eventType = NOTIFY_RESULT_EVENT;
@@ -261,6 +271,23 @@ int32_t DSchedCollab::PostErrEndTask(const int32_t &result)
     }
     DSchedCollabEventType eventType = ERR_END_EVENT;
     auto data = std::make_shared<int32_t>(result);
+    auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
+    if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
+        HILOGE("send event type %{public}s fail", EVENTDATA[eventType].c_str());
+        return COLLAB_SEND_EVENT_FAILED;
+    }
+    return ERR_OK;
+}
+
+int32_t DSchedCollab::PostAbilityRejectTask(const std::string &reason)
+{
+    HILOGI("called, reason: %{public}s", reason.c_str());
+    if (eventHandler_ == nullptr) {
+        HILOGE("eventHandler is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
+    DSchedCollabEventType eventType = ABILITY_REJECT_EVENT;
+    auto data = std::make_shared<std::string>(reason);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
         HILOGE("send event type %{public}s fail", EVENTDATA[eventType].c_str());
@@ -357,9 +384,9 @@ int32_t DSchedCollab::PackStartCmd(std::shared_ptr<SinkStartCmd>& cmd)
     cmd->sinkAbilityName_ = collabInfo_.sinkInfo_.abilityName_;
     cmd->srcModuleName_ = collabInfo_.srcInfo_.moduleName_;
     cmd->sinkModuleName_ = collabInfo_.sinkInfo_.moduleName_;
-    cmd->needStream_ = collabInfo_.srcOpt_.needStream_;
-    cmd->needData_ = collabInfo_.srcOpt_.needData_;
-    cmd->needKeepLongAlive_ = collabInfo_.srcOpt_.needKeepLongAlive_;
+    cmd->needSendBigData_ = collabInfo_.srcOpt_.needSendBigData_;
+    cmd->needSendStream_ = collabInfo_.srcOpt_.needSendStream_;
+    cmd->needRecvStream_ = collabInfo_.srcOpt_.needRecvStream_;
     cmd->startParams_ = collabInfo_.srcOpt_.startParams_;
     cmd->messageParams_ = collabInfo_.srcOpt_.messageParams_;
     return PackPartCmd(cmd);
@@ -447,9 +474,9 @@ AAFwk::Want DSchedCollab::GenerateCollabWant()
     peerInfoParams.SetParam("serverId", AAFwk::String::Box(collabInfo_.srcInfo_.serverId_));
 
     AAFwk::WantParams optParams;
-    optParams.SetParam("isNeedSendBigData", AAFwk::Boolean::Box(collabInfo_.srcOpt_.needStream_));
-    optParams.SetParam("isNeedSendStream", AAFwk::Boolean::Box(collabInfo_.srcOpt_.needData_));
-    optParams.SetParam("isNeedReceiveStream", AAFwk::Boolean::Box(collabInfo_.srcOpt_.needKeepLongAlive_));
+    optParams.SetParam("isNeedSendBigData", AAFwk::Boolean::Box(collabInfo_.srcOpt_.needSendBigData_));
+    optParams.SetParam("isNeedSendStream", AAFwk::Boolean::Box(collabInfo_.srcOpt_.needSendStream_));
+    optParams.SetParam("isNeedReceiveStream", AAFwk::Boolean::Box(collabInfo_.srcOpt_.needRecvStream_));
     optParams.SetParam("parameters", AAFwk::WantParamWrapper::Box(collabInfo_.srcOpt_.messageParams_));
 
     AAFwk::WantParams collabParams;
@@ -486,10 +513,21 @@ int32_t DSchedCollab::SaveSinkAbilityData(const std::string& collabToken, const 
     return ERR_OK;
 }
 
+int32_t DSchedCollab::ExeAbilityRejectError(const std::string &reason)
+{
+    HILOGE("called");
+    auto cmd = std::make_shared<NotifyResultCmd>();
+    PackNotifyResultCmd(cmd, COLLAB_ABILITY_REJECT_ERR, reason);
+    SendCommand(cmd);
+    CleanUpSession();
+    HILOGI("end");
+    return ERR_OK;
+}
+
 int32_t DSchedCollab::ExeSinkPrepareResult(const int32_t &result)
 {
     HILOGI("called");
-    if (result != ERR_OK) {
+    if (result != ERR_OK && result != COLLAB_ABILITY_REJECT_ERR) {
         HILOGE("failed %{public}d", result);
         return PostErrEndTask(result);
     }
@@ -509,7 +547,8 @@ int32_t DSchedCollab::ExeSinkPrepareResult(const int32_t &result)
     return ERR_OK;
 }
 
-int32_t DSchedCollab::PackNotifyResultCmd(std::shared_ptr<NotifyResultCmd> cmd, int32_t result)
+int32_t DSchedCollab::PackNotifyResultCmd(std::shared_ptr<NotifyResultCmd> cmd, const int32_t &result,
+    const std::string &abilityRejectReason)
 {
     if (cmd == nullptr) {
         HILOGE("cmd is null");
@@ -517,15 +556,21 @@ int32_t DSchedCollab::PackNotifyResultCmd(std::shared_ptr<NotifyResultCmd> cmd, 
     }
     cmd->command_ = NOTIFY_RESULT_CMD;
     cmd->result_ = result;
+    cmd->collabToken_ = collabInfo_.collabToken_;
     cmd->sinkSocketName_ = collabInfo_.sinkInfo_.socketName_;
     cmd->sinkCollabSessionId_ = collabInfo_.sinkCollabSessionId_;
+    cmd->abilityRejectReason_ = abilityRejectReason;
     return ERR_OK;
 }
 
-int32_t DSchedCollab::ExeSrcCollabResult(const int32_t &result)
+int32_t DSchedCollab::ExeSrcCollabResult(const int32_t &result, const std::string reason)
 {
-    HILOGI("called, result: %{public}d, collabInfo: %{public}s", result, collabInfo_.ToString().c_str());
-    int32_t ret = ExeSrcClientNotify(result);
+    HILOGI("called, collabInfo: %{public}s", collabInfo_.ToString().c_str());
+    if (result != ERR_OK && result != COLLAB_ABILITY_REJECT_ERR) {
+        HILOGE("failed, result: %{public}d", result);
+        return PostErrEndTask(result);
+    }
+    int32_t ret = ExeSrcClientNotify(result, reason);
     if (ret != ERR_OK) {
         HILOGE("failed, ret: %{public}d", ret);
         return PostErrEndTask(result);
@@ -546,7 +591,7 @@ int32_t DSchedCollab::CleanUpSession()
     return DSchedCollabManager::GetInstance().CleanUpSession(collabInfo_.collabToken_);
 }
 
-int32_t DSchedCollab::ExeSrcClientNotify(const int32_t &result)
+int32_t DSchedCollab::ExeSrcClientNotify(const int32_t &result, const std::string reason)
 {
     HILOGI("called, result: %{public}d, collabInfo: %{public}s", result, collabInfo_.ToString().c_str());
     if (collabInfo_.srcClientCB_ == nullptr) {
@@ -563,6 +608,7 @@ int32_t DSchedCollab::ExeSrcClientNotify(const int32_t &result)
     PARCEL_WRITE_HELPER(data, Int32, result);
     PARCEL_WRITE_HELPER(data, String, collabInfo_.sinkInfo_.socketName_);
     PARCEL_WRITE_HELPER(data, String, collabInfo_.collabToken_);
+    PARCEL_WRITE_HELPER(data, String, reason);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = collabInfo_.srcClientCB_->SendRequest(NOTIFY_COLLAB_PREPARE_RESULT, data, reply, option);
@@ -683,6 +729,7 @@ int32_t DSchedCollab::PackDisconnectCmd(std::shared_ptr<DisconnectCmd> cmd)
         return INVALID_PARAMETERS_ERR;
     }
     cmd->command_ = DISCONNECT_CMD;
+    cmd->collabToken_ = collabInfo_.collabToken_;
     return ERR_OK;
 }
 
@@ -750,8 +797,8 @@ void DSchedCollab::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffer>
         case NOTIFY_RESULT_CMD: {
             auto notifyResultCmd = std::make_shared<NotifyResultCmd>();
             ret = notifyResultCmd->Unmarshal(jsonStr);
-            if (ret != ERR_OK || notifyResultCmd->result_ != ERR_OK) {
-                HILOGE("failed, ret: %{public}d", ret);
+            if (ret != ERR_OK) {
+                HILOGE("unmarshal cmd failed, ret: %{public}d", ret);
                 PostErrEndTask(ret);
                 return;
             }

@@ -33,6 +33,7 @@ typedef enum {
     NOTIFY_PREPARE_RESULT_EVENT = 3,
     ERR_END_EVENT = 4,
     END_EVENT = 5,
+    ABILITY_REJECT_EVENT = 6,
 } DSchedCollabEventType;
 
 typedef enum {
@@ -50,9 +51,9 @@ public:
     virtual int32_t Marshal(std::string &jsonStr);
     virtual int32_t Unmarshal(const std::string &jsonStr);
 public:
-    bool needStream_ = false;
-    bool needData_ = false;
-    bool needKeepLongAlive_ = false;
+    bool needSendBigData_ = false;
+    bool needSendStream_ = false;
+    bool needRecvStream_ = false;
     int32_t collabVersion_ = -1;
     int32_t dmsVersion_ = -1;
     int32_t command_ = -1;
@@ -106,6 +107,7 @@ public:
     int32_t result_ = -1;
     int32_t sinkCollabSessionId_ = -1;
     std::string sinkSocketName_;
+    std::string abilityRejectReason_;
 };
 
 class DisconnectCmd : public BaseCmd {

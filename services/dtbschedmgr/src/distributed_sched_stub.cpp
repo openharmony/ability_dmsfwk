@@ -139,8 +139,8 @@ void DistributedSchedStub::InitLocalFuncsInner()
         &DistributedSchedStub::StopRemoteExtensionAbilityInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::COLLAB_MISSION)] =
         &DistributedSchedStub::CollabMissionInner;
-    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_SOURCE_SOCKET_NAME)] =
-        &DistributedSchedStub::GetSrcSocketNameInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_REJECT_REASON)] =
+        &DistributedSchedStub::NotifyRejectReason;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_START_ABILITY_RESULT)] =
         &DistributedSchedStub::NotifyStartAbilityResultInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_COLLAB_PREPARE_RESULT)] =
@@ -697,16 +697,18 @@ int32_t DistributedSchedStub::CollabMissionInner(MessageParcel& data, MessagePar
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 
-int32_t DistributedSchedStub::GetSrcSocketNameInner(MessageParcel& data, MessageParcel& reply)
+int32_t DistributedSchedStub::NotifyRejectReason(MessageParcel& data, MessageParcel& reply)
 {
     HILOGI("called");
     if (!IPCSkeleton::IsLocalCalling()) {
         HILOGE("check permission failed!");
         return DMS_PERMISSION_DENIED;
     }
-    std::string collabToken = data.ReadString();
-    std::string srcSocketName = DSchedCollabManager::GetInstance().GetSrcSocketName(collabToken);
-    PARCEL_WRITE_REPLY_NOERROR(reply, String, srcSocketName);
+    std::string token = data.ReadString();
+    std::string reason = data.ReadString();
+    int32_t result = DSchedCollabManager::GetInstance().NotifySinkRejectReason(token, reason);
+    HILOGI("result = %{public}d", result);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
  
 int32_t DistributedSchedStub::NotifyStartAbilityResultInner(MessageParcel& data, MessageParcel& reply)

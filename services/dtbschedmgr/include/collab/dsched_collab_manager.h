@@ -44,13 +44,13 @@ public:
         const int32_t &sinkPid, const int32_t &sinkUid, const int32_t &sinkAccessTokenId);
     int32_t NotifySinkPrepareResult(const std::string &collabToken, const int32_t &result,
         const int32_t &collabSessionId, const std::string &socketName, const sptr<IRemoteObject> &clientCB);
+    int32_t NotifySinkRejectReason(const std::string& collabToken, const std::string& reason);
     int32_t NotifyAbilityDied(const std::string &bundleName, const int32_t &pid);
     int32_t NotifySessionClose(const std::string &collabToken);
     int32_t CleanUpSession(const std::string &collabToken);
     int32_t CheckCollabRelation(CollabInfo sourceInfo, CollabInfo sinkInfo);
     int32_t ReleaseAbilityLink(const std::string &bundleName, const int32_t &pid);
     int32_t CancleReleaseAbilityLink(const std::string &bundleName, const int32_t &pid);
-    std::string GetSrcSocketName(const std::string& collabToken);
 
     void Init();
     void UnInit();
@@ -69,7 +69,7 @@ private:
     void HandleReleaseAbilityLink(const std::string &bundleName, const int32_t &pid);
     void HandleDataRecv(const int32_t &softbusSessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer);
     void NotifyDataRecv(const int32_t &softbusSessionId, int32_t command, const std::string& jsonStr,
-        std::shared_ptr<DSchedDataBuffer> dataBuffer);
+        std::shared_ptr<DSchedDataBuffer> dataBuffer, const std::string& collabToken);
     void WaitAllConnectDecision(const std::string &peerDeviceId, const std::shared_ptr<DSchedCollab> &dCollab);
     void SetTimeOut(const std::string &collabToken, int32_t timeout);
     void RemoveTimeout(const std::string &collabToken);

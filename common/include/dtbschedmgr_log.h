@@ -574,9 +574,13 @@ enum {
      */
     COLLAB_STATE_MACHINE_INVALID_STATE = 29360339,
     /**
-     * Result(29360340) for DistributedSched Service Continue Ability Timeout Error.
+     * Result(29360340) for DistributedSched Service Collab Ability Timeout Error.
      */
     COLLAB_ABILITY_TIMEOUT_ERR = 29360340,
+    /**
+     * Result(29360341) for DistributedSched Service Collab Ability Reject Error.
+     */
+    COLLAB_ABILITY_REJECT_ERR = 29360341,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
