@@ -15,9 +15,6 @@
 
 #include "bluetooth_state_test.h"
 
-#define private public
-#include "mission/snapshot.h"
-#undef private
 #include "bluetooth_state_listener.h"
 #include "bluetooth_state_adapter.h"
 #include "test_log.h"
