@@ -35,12 +35,12 @@ const string TAG = "DistributedDataChangeListener";
 struct KeyInfo {
     string uuid;
     int32_t missionId = 0;
-    static constexpr int32_t MAX_SPLIT_VARS = 2;
+    static constexpr int32_t maxSplitVars = 2;
     static unique_ptr<KeyInfo> ParseInfo(const std::string& strKey)
     {
         vector<string> strVector;
         SplitStr(strKey, "_", strVector);
-        if (strVector.size() != MAX_SPLIT_VARS) {
+        if (strVector.size() != maxSplitVars) {
             HILOGI("ParseInfo key invalid!");
             return nullptr;
         }
