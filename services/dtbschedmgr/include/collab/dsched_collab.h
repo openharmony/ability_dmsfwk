@@ -75,17 +75,17 @@ struct CollabMessage : public Parcelable {
 };
 
 struct ConnectOpt : public Parcelable {
-    bool needStream_ = false;
-    bool needData_ = false;
-    bool needKeepLongAlive_ = false;
+    bool needSendBigData_ = false;
+    bool needSendStream_ = false;
+    bool needRecvStream_ = false;
     AAFwk::WantParams startParams_;
     AAFwk::WantParams messageParams_;
 
     bool ReadFromParcel(Parcel &parcel)
     {
-        needStream_ = parcel.ReadBool();
-        needData_ = parcel.ReadBool();
-        needKeepLongAlive_ = parcel.ReadBool();
+        needSendBigData_ = parcel.ReadBool();
+        needSendStream_ = parcel.ReadBool();
+        needRecvStream_ = parcel.ReadBool();
         std::shared_ptr<AAFwk::WantParams> startParamsPtr(parcel.ReadParcelable<AAFwk::WantParams>());
         if (startParamsPtr == nullptr) {
             return false;
@@ -136,9 +136,9 @@ public:
             "srcAppVersion: " + std::to_string(this->srcAppVersion_) + " " +
             "srcCollabSessionId: " + std::to_string(this->srcCollabSessionId_) + " " +
             "collabToken: " + GetAnonymStr(this->collabToken_) + " " +
-            "needStream: " + std::to_string(this->srcOpt_.needStream_) + " " +
-            "needData: " + std::to_string(this->srcOpt_.needData_) + " " +
-            "needKeepLongAlive: " + std::to_string(this->srcOpt_.needKeepLongAlive_) + " " +
+            "needSendBigData: " + std::to_string(this->srcOpt_.needSendBigData_) + " " +
+            "needSendStream: " + std::to_string(this->srcOpt_.needSendStream_) + " " +
+            "needRecvStream: " + std::to_string(this->srcOpt_.needRecvStream_) + " " +
             "srcDevId: " + GetAnonymStr(this->srcInfo_.deviceId_) + " " +
             "srcBundle: " + this->srcInfo_.bundleName_ + " " +
             "srcAbility: " + this->srcInfo_.abilityName_ + " " +
@@ -209,24 +209,27 @@ private:
         const std::string &socketName, const sptr<IRemoteObject> &clientCB);
     int32_t PostSrcResultTask(std::shared_ptr<NotifyResultCmd> replyCmd);
     int32_t PostErrEndTask(const int32_t &result);
+    int32_t PostAbilityRejectTask(const std::string &reason);
     int32_t PostEndTask();
 
     int32_t ExeSrcStart();
     int32_t ExeStartAbility();
+    int32_t ExeAbilityRejectError(const std::string &reason);
     int32_t ExeSinkPrepareResult(const int32_t &result);
-    int32_t ExeSrcCollabResult(const int32_t &result);
+    int32_t ExeSrcCollabResult(const int32_t &result, const std::string reason = "");
     int32_t ExeSrcStartError(const int32_t &result);
     int32_t ExeSrcWaitResultError(const int32_t &result);
     int32_t ExeSinkStartError(const int32_t &result);
     int32_t ExeSinkConnectError(const int32_t &result);
     int32_t ExeSinkError(const int32_t &result);
     int32_t ExeDisconnect();
-    int32_t ExeSrcClientNotify(const int32_t &result);
+    int32_t ExeSrcClientNotify(const int32_t &result, const std::string reason = "");
     int32_t ExeClientDisconnectNotify();
 
     int32_t PackStartCmd(std::shared_ptr<SinkStartCmd>& cmd);
     int32_t PackPartCmd(std::shared_ptr<SinkStartCmd>& cmd);
-    int32_t PackNotifyResultCmd(std::shared_ptr<NotifyResultCmd> cmd,  int32_t result);
+    int32_t PackNotifyResultCmd(std::shared_ptr<NotifyResultCmd> cmd, const int32_t &result,
+        const std::string &abilityRejectReason = "");
     int32_t PackDisconnectCmd(std::shared_ptr<DisconnectCmd> cmd);
     int32_t SendCommand(std::shared_ptr<BaseCmd> cmd);
 

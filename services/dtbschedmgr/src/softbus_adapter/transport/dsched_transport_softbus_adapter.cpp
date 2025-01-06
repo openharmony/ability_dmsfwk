@@ -134,7 +134,7 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
         }
     }
     int32_t ret = ERR_OK;
-    if (IsNeedAllConnect()) {
+    if (IsNeedAllConnect(type)) {
         HILOGI("waiting all connect decision");
         ret = DecisionByAllConnect(peerDeviceId, type);
         if (ret != ERR_OK) {
@@ -151,7 +151,7 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
 
 void DSchedTransportSoftbusAdapter::NotifyConnectDecision(const std::string &peerDeviceId, DSchedServiceType type)
 {
-    if (!IsNeedAllConnect()) {
+    if (!IsNeedAllConnect(type)) {
         HILOGW("don't need notify all connect decision");
         return;
     }
@@ -183,9 +183,14 @@ int32_t DSchedTransportSoftbusAdapter::DecisionByAllConnect(const std::string &p
     return ERR_OK;
 }
 
-
-bool DSchedTransportSoftbusAdapter::IsNeedAllConnect()
+bool DSchedTransportSoftbusAdapter::IsNeedAllConnect(DSchedServiceType type)
 {
+#ifndef COLLAB_ALL_CONNECT_DECISIONS
+    if (type == SERVICE_TYPE_COLLAB) {
+        HILOGI("called, don't need all connect, type: collab");
+        return false;
+    }
+#endif
     bool result = isAllConnectExist_ && WifiStateAdapter::GetInstance().IsWifiActive();
     HILOGI("called, result: %{public}d", result);
     return result;

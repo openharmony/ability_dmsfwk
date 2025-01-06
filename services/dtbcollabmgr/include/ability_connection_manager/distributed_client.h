@@ -34,15 +34,13 @@ public:
     int32_t NotifyPrepareResult(const std::string& token, int32_t result, int32_t sessionId,
         const std::string& serverSocketName);
     int32_t NotifyCloseCollabSession(const std::string& token);
-    int32_t GetPeerSocketName(const std::string& token, std::string& peerSocketName);
     int32_t NotifyRejectReason(const std::string& token, const std::string& reason);
     
     enum {
         COLLAB_MESSION = 330,
         NOTIFY_PREPARE_RESULT = 331,
-        GET_SOURCE_SOCKET_NAME = 332,
+        NOTIFY_REJECT_REASON = 332,
         BNOTIFY_CLOSE_COLLAB_SESSION = 333,
-        NOTIFY_REJECT_REASON = 335,
     };
 private:
     sptr<IRemoteObject> GetDmsProxy();

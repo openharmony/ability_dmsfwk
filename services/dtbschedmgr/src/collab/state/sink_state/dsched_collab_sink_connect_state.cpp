@@ -28,6 +28,7 @@ CollabSinkConnectState::CollabSinkConnectState(std::shared_ptr<DSchedCollabState
     : stateMachine_(stateMachine)
 {
     memberFuncMap_[NOTIFY_PREPARE_RESULT_EVENT] = &CollabSinkConnectState::DoSinkPrepareResult;
+    memberFuncMap_[ABILITY_REJECT_EVENT] = &CollabSinkConnectState::DoAbilityRejectError;
     memberFuncMap_[ERR_END_EVENT] = &CollabSinkConnectState::DoConnectError;
 }
 
@@ -70,6 +71,21 @@ int32_t CollabSinkConnectState::DoSinkPrepareResult(std::shared_ptr<DSchedCollab
     }
     auto syncCollabData = event->GetSharedObject<int32_t>();
     int32_t ret = dCollab->ExeSinkPrepareResult(*syncCollabData);
+    if (ret != ERR_OK) {
+        HILOGE("failed, ret: %{public}d", ret);
+    }
+    return ret;
+}
+
+int32_t CollabSinkConnectState::DoAbilityRejectError(std::shared_ptr<DSchedCollab> dCollab,
+    const AppExecFwk::InnerEvent::Pointer &event)
+{
+    if (dCollab == nullptr || event == nullptr) {
+        HILOGE("dCollab or event is null");
+        return INVALID_PARAMETERS_ERR;
+    }
+    auto syncCollabData = event->GetSharedObject<std::string>();
+    int32_t ret = dCollab->ExeAbilityRejectError(*syncCollabData);
     if (ret != ERR_OK) {
         HILOGE("failed, ret: %{public}d", ret);
     }

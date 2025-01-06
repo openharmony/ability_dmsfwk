@@ -34,6 +34,7 @@ declare_args() {
   dmsfwk_av_trans_stream_debug = false
   dmsfwk_av_trans_pixel_map_debug = false
   dmsfwk_continuous_task_enable = false
+  dmsfwk_all_connect_decisions = false
   if (defined(global_parts_info)) {
     if (defined(global_parts_info.multimedia_image_framework)) {
       dmsfwk_mission_manager = true

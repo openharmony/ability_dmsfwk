@@ -32,6 +32,7 @@ public:
 
 private:
     int32_t DoSinkPrepareResult(std::shared_ptr<DSchedCollab> dCollab, const AppExecFwk::InnerEvent::Pointer &event);
+    int32_t DoAbilityRejectError(std::shared_ptr<DSchedCollab> dCollab, const AppExecFwk::InnerEvent::Pointer &event);
     int32_t DoConnectError(std::shared_ptr<DSchedCollab> dCollab, const AppExecFwk::InnerEvent::Pointer &event);
 
 private:

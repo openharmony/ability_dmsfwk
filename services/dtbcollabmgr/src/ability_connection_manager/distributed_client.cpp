@@ -65,33 +65,6 @@ int32_t DistributedClient::CollabMission(int32_t sessionId, const std::string& s
     PARCEL_TRANSACT_SYNC_RET_INT(remote, COLLAB_MESSION, data, reply);
 }
 
-int32_t DistributedClient::GetPeerSocketName(const std::string& token, std::string& peerSocketName)
-{
-    HILOGD("called.");
-    sptr<IRemoteObject> remote = GetDmsProxy();
-    if (remote == nullptr) {
-        HILOGW("remote is nullptr");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
-        HILOGW("write token failed");
-        return ERR_FLATTEN_OBJECT;
-    }
-    
-    PARCEL_WRITE_HELPER(data, String, token);
-    MessageParcel reply;
-    MessageOption option;
-    int32_t ret = remote->SendRequest(GET_SOURCE_SOCKET_NAME, data, reply, option);
-    if (ret != ERR_NONE) {
-        HILOGW("error: %{public}d", ret);
-        return ret;
-    }
-    peerSocketName = reply.ReadString();
-    return ret;
-}
-
 int32_t DistributedClient::NotifyPrepareResult(const std::string& token, int32_t result,
     int32_t sessionId, const std::string& serverSocketName)
 {

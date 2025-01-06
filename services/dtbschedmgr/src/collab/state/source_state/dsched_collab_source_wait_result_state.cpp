@@ -28,6 +28,7 @@ CollabSrcWaitResultState::CollabSrcWaitResultState(std::shared_ptr<DSchedCollabS
     : stateMachine_(stateMachine)
 {
     memberFuncMap_[NOTIFY_RESULT_EVENT] = &CollabSrcWaitResultState::DoSrcResultNotifyTask;
+    memberFuncMap_[ABILITY_REJECT_EVENT] = &CollabSrcWaitResultState::DoAbilityRejectTask;
     memberFuncMap_[ERR_END_EVENT] = &CollabSrcWaitResultState::DoSrcWaitResultError;
 }
 
@@ -76,6 +77,21 @@ int32_t CollabSrcWaitResultState::DoSrcResultNotifyTask(std::shared_ptr<DSchedCo
     }
     return ret;
 }
+int32_t CollabSrcWaitResultState::DoAbilityRejectTask(std::shared_ptr<DSchedCollab> dCollab,
+    const AppExecFwk::InnerEvent::Pointer &event)
+{
+    if (dCollab == nullptr || event == nullptr) {
+        HILOGE("dCollab or event is null");
+        return INVALID_PARAMETERS_ERR;
+    }
+    auto syncCollabData = event->GetSharedObject<std::string>();
+    int32_t ret = dCollab->ExeSrcCollabResult(COLLAB_ABILITY_REJECT_ERR, *syncCollabData);
+    if (ret != ERR_OK) {
+        HILOGE("failed, ret: %{public}d", ret);
+    }
+    return ret;
+}
+
 
 int32_t CollabSrcWaitResultState::DoSrcWaitResultError(std::shared_ptr<DSchedCollab> dCollab,
     const AppExecFwk::InnerEvent::Pointer &event)
