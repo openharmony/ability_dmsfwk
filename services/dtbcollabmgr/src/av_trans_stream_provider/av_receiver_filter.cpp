@@ -42,6 +42,7 @@ namespace {
     static const std::string TAG = "AVReceiverFilter";
     static constexpr int32_t decodePixelMapWidth = 256;
     static constexpr int32_t decodePixelMapHeight = 256;
+    static constexpr int32_t requestBufferTimeout = 1000;
 }
 
 static Media::Pipeline::AutoRegisterFilter<AVReceiverFilter> g_registerAVReceiverFilter("builtin.dtbcollab.receiver",
@@ -316,6 +317,9 @@ void AVReceiverFilter::Process()
         });
         if (!isRunning_ || availableBuffers_ < 0) {
             HILOGI("exit running process thread");
+            while (!dataQueue_.empty()) {
+                dataQueue_.pop();
+            }
             return;
         }
         auto data = GetStreamData();
@@ -455,7 +459,9 @@ void AVReceiverFilter::GetParameter(std::shared_ptr<Media::Meta>& parameter)
 void AVReceiverFilter::OnStream(const std::shared_ptr<AVTransStreamData>& stream)
 {
     HILOGI("start to parse stream by Stream");
-    AddStreamData(stream);
+    if (isRunning_) {
+        AddStreamData(stream);
+    }
 }
 
 void AVReceiverFilter::OnBytes(const std::shared_ptr<AVTransDataBuffer>& buffer)
@@ -503,7 +509,7 @@ void AVReceiverFilter::OnBytes(const std::shared_ptr<AVTransDataBuffer>& buffer)
     }
     std::shared_ptr<AVTransStreamData> stream = ReadStreamDataFromBuffer(dataHeader + offset,
         headerLen, buffer->Size());
-    if (stream != nullptr) {
+    if (stream != nullptr && isRunning_) {
         AddStreamData(stream);
     }
 }
@@ -558,7 +564,7 @@ void AVReceiverFilter::BqProducerProxy::OnBufferAvailable()
 Status AVReceiverFilter::BqProducerProxy::RequestBuffer(std::shared_ptr<AVBuffer>& outBuffer,
     const Media::AVBufferConfig& config)
 {
-    return producer_->RequestBuffer(outBuffer, config, -1);
+    return producer_->RequestBuffer(outBuffer, config, requestBufferTimeout);
 }
 
 Status AVReceiverFilter::BqProducerProxy::PushBuffer(const std::shared_ptr<Media::AVBuffer>& inBuffer)

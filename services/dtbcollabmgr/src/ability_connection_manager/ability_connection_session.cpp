@@ -556,12 +556,12 @@ int32_t AbilityConnectionSession::StopStream(int32_t streamId)
     HILOGD("called.");
     if (connectOption_.needSendStream && senderEngine_ != nullptr) {
         HILOGI("senderEngine_ Stop.");
-        return senderEngine_->Stop(false);
+        return senderEngine_->Stop();
     }
 
     if (connectOption_.needReceiveStream && recvEngine_ != nullptr) {
         HILOGI("recvEngine_ Stop.");
-        return recvEngine_->Stop(false);
+        return recvEngine_->Stop();
     }
     return ERR_OK;
 }

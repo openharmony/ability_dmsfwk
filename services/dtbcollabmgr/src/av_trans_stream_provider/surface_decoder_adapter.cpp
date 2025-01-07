@@ -383,7 +383,7 @@ namespace DistributedCollab {
             {
                 std::unique_lock<std::mutex> lock(releaseBufferMutex_);
                 releaseBufferCondition_.wait(lock, [this] {
-                    return isThreadExit_ || !indexs_.empty();
+                    return isThreadExit_ || !indexs_.empty() || !dropIndexs_.empty();
                 });
                 indexs = indexs_;
                 indexs_.clear();

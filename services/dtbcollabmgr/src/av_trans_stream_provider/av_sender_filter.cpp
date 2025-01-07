@@ -269,7 +269,9 @@ void AVSenderFilter::OnBufferAvailable(const std::shared_ptr<AVBuffer>& buffer)
     {
         std::lock_guard<std::mutex> lock(queueMutex_);
         auto ptr = PackStreamDataForAVBuffer(buffer, transData);
-        sendDatas_.push(ptr);
+        if (isRunning_) {
+            sendDatas_.push(ptr);
+        }
     }
     cv_.notify_one();
     bufferQProxy_->ReleaseBuffer(buffer);
@@ -415,7 +417,9 @@ int32_t AVSenderFilter::SendPixelMap(const std::shared_ptr<Media::PixelMap>& pix
     {
         std::lock_guard<std::mutex> lock(queueMutex_);
         auto ptr = PackStreamDataForPixelMap(buffer);
-        sendDatas_.push(ptr);
+        if (isRunning_) {
+            sendDatas_.push(ptr);
+        }
     }
     cv_.notify_one();
     return ERR_OK;
@@ -470,7 +474,9 @@ int32_t AVSenderFilter::SetSurfaceParam(const SurfaceParam& param)
     {
         std::lock_guard<std::mutex> lock(queueMutex_);
         auto ptr = PackStreamDataForSurfaceParam(param);
-        sendDatas_.push(ptr);
+        if (isRunning_) {
+            sendDatas_.push(ptr);
+        }
     }
     cv_.notify_one();
     return ERR_OK;
