@@ -251,8 +251,7 @@ Media::Plugins::VideoOrientationType VidSurfaceParam::ConvertToVideoOrientation(
             default:
                 return Media::Plugins::VideoOrientationType::ROTATE_NONE;
         }
-    } 
-    else if (param.filp == SurfaceFilp::FLIP_H) {
+    } else if (param.filp == SurfaceFilp::FLIP_H) {
         switch (param.rotate) {
             case SurfaceRotate::ROTATE_NONE:
                 return Media::Plugins::VideoOrientationType::FLIP_H;
@@ -265,8 +264,7 @@ Media::Plugins::VideoOrientationType VidSurfaceParam::ConvertToVideoOrientation(
             default:
                 return Media::Plugins::VideoOrientationType::FLIP_H;
         }
-    } 
-    else if (param.filp == SurfaceFilp::FLIP_V) {
+    } else if (param.filp == SurfaceFilp::FLIP_V) {
         switch (param.rotate) {
             case SurfaceRotate::ROTATE_NONE:
                 return Media::Plugins::VideoOrientationType::FLIP_V;

@@ -192,7 +192,7 @@ HWTEST_F(ChannelManagerTest, CreateClientChannel_LoneName_Fail, TestSize.Level1)
     std::string channelName = "ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss";
     ChannelDataType dataType = ChannelDataType::MESSAGE;
     ChannelPeerInfo peerInfo = { "peerName", "networkId" };
-   
+  
     // Call CreateClientChannel and check the result
     int32_t result = ChannelManager::GetInstance().CreateClientChannel(channelName, dataType, peerInfo);
     EXPECT_EQ(result, CREATE_SOCKET_FAILED);  // Should return valid channelId
@@ -209,7 +209,7 @@ HWTEST_F(ChannelManagerTest, CreateClientChannel_ExceedNum_Fail, TestSize.Level1
     std::string channelName = "testClientChannel";
     ChannelDataType dataType = ChannelDataType::MESSAGE;
     ChannelPeerInfo peerInfo = { "peerName", "networkId" };
-   
+  
     int32_t channelId = 0;
     for (int32_t i = 0; i < CHANNGE_GAP + 1; i++)
     {
@@ -315,7 +315,7 @@ HWTEST_F(ChannelManagerTest, ConnectChannel_Success, TestSize.Level1)
 
     int32_t channelId = ChannelManager::GetInstance().CreateClientChannel(channelName, dataType, peerInfo);
     EXPECT_EQ(channelId, MESSAGE_START_ID);  // Should return valid channelId
-    
+   
     // Step 3: Mock Bind to succeed
     EXPECT_CALL(mockSoftbus, Bind(testing::_ , testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(ERR_OK)); // Mock Bind to succeed
@@ -348,7 +348,7 @@ HWTEST_F(ChannelManagerTest, ConnectChannel_BindFailed, TestSize.Level1)
 
     int32_t channelId = ChannelManager::GetInstance().CreateClientChannel(channelName, dataType, peerInfo);
     EXPECT_EQ(channelId, MESSAGE_START_ID);  // Should return valid channelId
-    
+   
     // Step 3: Mock Bind to succeed
     EXPECT_CALL(mockSoftbus, Bind(testing::_ , testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(NUM_MINUS_1)); // Mock Bind to succeed
@@ -368,7 +368,7 @@ HWTEST_F(ChannelManagerTest, ConnectChannel_InvalidChannelId, TestSize.Level1)
     // Simulate channelId not being in the channelInfoMap_
     int32_t invalidChannelId = INVALID_CHANNEL; // Invalid channel ID
     int32_t connectResult = ChannelManager::GetInstance().ConnectChannel(invalidChannelId);
-    
+   
     // Verify that ConnectChannel returns INVALID_CHANNEL_ID for an invalid channelId
     EXPECT_EQ(connectResult, INVALID_CHANNEL_ID);
 }
@@ -385,7 +385,7 @@ HWTEST_F(ChannelManagerTest, ConnectChannel_RepeatConnection, TestSize.Level1)
         .WillRepeatedly(testing::Return(NUM_1234));
     EXPECT_CALL(mockSoftbus, Listen(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(ERR_OK)); // Mock Listen to return success
-    
+   
     int32_t initResult = ChannelManager::GetInstance().Init(ownerName);
     EXPECT_EQ(initResult, ERR_OK); // Ensure Init was successful
 
@@ -413,7 +413,7 @@ HWTEST_F(ChannelManagerTest, ConnectChannel_RepeatConnection, TestSize.Level1)
 
 /**
  * @tc.name: OnSocketConnected_Success_WithCallback
- * @tc.desc: Test for OnSocketConnected when the socket is successfully connected and valid channel is found, 
+ * @tc.desc: Test for OnSocketConnected when the socket is successfully connected and valid channel is found,
  *           and callback methods are invoked correctly.
  * @tc.type: FUNC
  */
@@ -424,7 +424,7 @@ HWTEST_F(ChannelManagerTest, OnSocketConnected_Success_WithCallback, TestSize.Le
         .WillRepeatedly(testing::Return(NUM_1234));
     EXPECT_CALL(mockSoftbus, Listen(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(ERR_OK)); // Mock Listen to return success
-    
+   
     int32_t initResult = ChannelManager::GetInstance().Init(ownerName);
     EXPECT_EQ(initResult, ERR_OK); // Ensure Init was successful
 
@@ -536,7 +536,7 @@ HWTEST_F(ChannelManagerTest, OnSocketConnected_InvalidChannelType_WithCallback, 
 
 /**
  * @tc.name: OnSocketConnected_InvalidChannelName_WithCallback
- * @tc.desc: Test for OnSocketConnected when registering the socket fails, 
+ * @tc.desc: Test for OnSocketConnected when registering the socket fails,
  *           and verify if the OnError callback is triggered.
  * @tc.type: FUNC
  */

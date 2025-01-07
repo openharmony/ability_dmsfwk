@@ -437,11 +437,6 @@ void AVReceiverEngine::OnRecvSurfaceParam(const SurfaceParam& param)
     if (videoDecoderFilter_ != nullptr) {
         videoDecoderFilter_->SetParameter(parameter);
     }
-    // GraphicTransformType graphic = ConvertToGraphicTrans(param);
-    // if (surface_ != nullptr && graphic != GraphicTransformType::GRAPHIC_ROTATE_BUTT) {
-    //     HILOGI("set surface trans: %{public}d", static_cast<int32_t>(graphic));
-    //     surface_->SetTransform(graphic);
-    // }
 }
 
 void AVReceiverEngine::OnEvent(const Media::Event& event)

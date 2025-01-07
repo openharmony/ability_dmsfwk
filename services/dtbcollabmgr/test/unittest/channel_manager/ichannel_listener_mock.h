@@ -28,9 +28,12 @@ public:
 
     MOCK_METHOD(void, OnConnect, (const int32_t channelId), (const, override));
     MOCK_METHOD(void, OnDisConnect, (const int32_t channelId), (const, override));
-    MOCK_METHOD(void, OnStream, (const int32_t channelId, const std::shared_ptr<AVTransStreamData>& stream), (const, override));
-    MOCK_METHOD(void, OnBytes, (const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer), (const, override));
-    MOCK_METHOD(void, OnMessage, (const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer), (const, override));
+    MOCK_METHOD(void, OnStream, (const int32_t channelId, const std::shared_ptr<AVTransStreamData>& stream),
+        (const, override));
+    MOCK_METHOD(void, OnBytes, (const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer),
+        (const, override));
+    MOCK_METHOD(void, OnMessage, (const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer),
+        (const, override));
     MOCK_METHOD(void, OnError, (const int32_t channelId, const int32_t errorCode), (const, override));
 };
 
