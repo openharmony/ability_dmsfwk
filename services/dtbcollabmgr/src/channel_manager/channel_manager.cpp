@@ -314,7 +314,7 @@ int32_t ChannelManager::CreateClientChannel(const std::string& channelName,
     HILOGI("start to creat client channel to connect other");
     std::optional<ChannelInfo> info = CreateBaseChannel(channelName, dataType, peerInfo);
     if (!info) {
-        HILOGE("Create server channel failed");
+        HILOGE("Create client channel failed");
         return CREATE_CLIENT_CHANNEL_FAILED;
     }
     int32_t ret = RegisterSocket(*info, dataType);
@@ -346,21 +346,15 @@ int32_t ChannelManager::GenerateNextId(const ChannelDataType dataType)
     int32_t channelId = 0;
     // lock for each type
     std::lock_guard<std::mutex> typeLock(typeMutex_[dataType]);
-    auto idQueue = avaliableIds_[dataType];
-    if (idQueue.empty()) {
-        HILOGI("can't reuse id, increase");
-        channelId = nextIds_[dataType];
-        if (channelId - CHANNEL_ID_GAP * (static_cast<int32_t>(dataType) + 1)
-            >= CHANNEL_ID_GAP) {
-            HILOGE("type %{public}d exceed max channel",
-                static_cast<int32_t>(dataType));
-            return CHANNEL_NUM_EXCEED_LIMIT;
-        }
-        nextIds_[dataType]++;
-        return channelId;
+    HILOGI("can't reuse id, increase");
+    channelId = nextIds_[dataType];
+    if (channelId - CHANNEL_ID_GAP * (static_cast<int32_t>(dataType) + 1)
+        >= CHANNEL_ID_GAP) {
+        HILOGE("type %{public}d exceed max channel",
+            static_cast<int32_t>(dataType));
+        return CHANNEL_NUM_EXCEED_LIMIT;
     }
-    channelId = avaliableIds_[dataType].front();
-    avaliableIds_[dataType].pop();
+    nextIds_[dataType]++;
     return channelId;
 }
 
@@ -428,12 +422,6 @@ int32_t ChannelManager::DeleteChannel(const int32_t channelId)
     ClearRegisterListener(channelId);
     ClearRegisterChannel(channelId);
     ClearRegisterSocket(channelId);
-    // re-use channelId
-    {
-        ChannelDataType dataType = static_cast<ChannelDataType>(channelId / CHANNEL_ID_GAP);
-        std::lock_guard<std::mutex> lock(typeMutex_[dataType]);
-        avaliableIds_[dataType].push(channelId);
-    }
     HILOGI("end delete channel");
     return channelId;
 }
@@ -479,7 +467,6 @@ void ChannelManager::ClearRegisterSocket(const int32_t channelId)
             HILOGI("start release socket, %{public}d", socketId);
             socketChannelMap_.erase(socketId);
             socketStatusMap_.erase(socketId);
-            Shutdown(socketId);
         }
     }
     HILOGI("start to shutdown socket");
@@ -737,7 +724,7 @@ int32_t ChannelManager::GetChannelId(const std::string& channelName, const Chann
         HILOGE("no valid channel exist");
         return INVALID_CHANNEL_NAME;
     }
-    for (const auto& channelId : it->second) {
+    for (const auto channelId : it->second) {
         auto infoIt = channelInfoMap_.find(channelId);
         if (infoIt == channelInfoMap_.end()) {
             HILOGE("no valid channel exist");

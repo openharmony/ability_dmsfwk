@@ -107,7 +107,7 @@ AVReceiverEngine::AVReceiverEngine()
 AVReceiverEngine::~AVReceiverEngine()
 {
     HILOGI("recv engine destroy");
-    Stop(false);
+    Stop();
     Media::PipeLineThreadPool::GetInstance().DestroyThread(engineId_);
 }
 
@@ -168,6 +168,11 @@ void AVReceiverEngine::ChangeState(const EngineState state)
     curState_ = state;
 }
 
+EngineState AVReceiverEngine::GetState()
+{
+    return curState_;
+}
+
 int32_t AVReceiverEngine::Configure(const StreamParam& recParam)
 {
     HILOGI("AVReceiverEngine Configure param enter.");
@@ -175,7 +180,7 @@ int32_t AVReceiverEngine::Configure(const StreamParam& recParam)
         recParam.Configure(videoDecFormat_, ConfigureMode::Decode);
     }
     receiverFilter_->SetParameter(videoDecFormat_);
-    ChangeState(EngineState::SETTING_PARAM);
+    ChangeState(EngineState::SETTING);
     return static_cast<int32_t>(Status::OK);
 }
 
@@ -213,6 +218,7 @@ int32_t AVReceiverEngine::SetVideoSurface(uint64_t surfaceId)
     bufferCache_->Start();
 #endif
     surface_ = surface;
+    ChangeState(EngineState::SETTING);
     return ERR_OK;
 }
 
@@ -307,8 +313,8 @@ int32_t AVReceiverEngine::Prepare()
         return static_cast<int32_t>(Status::ERROR_NULL_POINTER);
     }
     receiverFilter_->Init(engineEventReceiver_, engineFilterCallback_);
-    std::shared_ptr<IEngineListener> listener = std::make_shared<RecvEngineListener>(shared_from_this());
-    receiverFilter_->SetEngineListener(listener);
+    engineListener_ = std::make_shared<RecvEngineListener>(shared_from_this());
+    receiverFilter_->SetEngineListener(engineListener_);
     Status ret = pipeline_->Prepare();
     if (ret != Status::OK) {
         HILOGE("prepare pipeline failed, %{public}s", engineId_.c_str());
@@ -325,48 +331,32 @@ int32_t AVReceiverEngine::Start()
         HILOGE("filter not init");
         return static_cast<int32_t>(Status::ERROR_NULL_POINTER);
     }
-    Status ret = Status::OK;
-    if (curState_ == EngineState::PAUSE) {
-        ret = pipeline_->Resume();
-    } else {
-        ret = pipeline_->Start();
+    if (curState_ == EngineState::START) {
+        HILOGI("start no need change state");
+        return static_cast<int32_t>(Status::OK);
     }
+    if (curState_ != EngineState::PREPARE && curState_ != EngineState::STOP) {
+        HILOGE("need prepare/stop state to start");
+        return static_cast<int32_t>(Status::ERROR_WRONG_STATE);
+    }
+    Status ret = Status::OK;
+    ret = pipeline_->Start();
     if (ret == Status::OK) {
-        ChangeState(EngineState::RUNNING);
+        ChangeState(EngineState::START);
     }
     return static_cast<int32_t>(ret);
 }
 
-int32_t AVReceiverEngine::Pause()
-{
-    HILOGI("Pause enter.");
-    Status ret = Status::OK;
-    if (curState_ != EngineState::READY) {
-        ret = pipeline_->Pause();
-    }
-    if (ret == Status::OK) {
-        ChangeState(EngineState::PAUSE);
-    }
-    return static_cast<int32_t>(ret);
-}
-
-int32_t AVReceiverEngine::Resume()
-{
-    HILOGI("Resume enter.");
-    Status ret = Status::OK;
-    ret = pipeline_->Resume();
-    if (ret == Status::OK) {
-        ChangeState(EngineState::RUNNING);
-    }
-    return static_cast<int32_t>(ret);
-}
-
-int32_t AVReceiverEngine::Stop(bool isDrainAll)
+int32_t AVReceiverEngine::Stop()
 {
     HILOGI("Stop enter.");
-    if (curState_ == EngineState::INIT) {
-        HILOGI("Stop exit.the reason is state = INIT");
+    if (curState_ == EngineState::INIT || curState_ == EngineState::STOP) {
+        HILOGI("Stop exit. no need change state");
         return static_cast<int32_t>(Status::OK);
+    }
+    if (curState_ != EngineState::START) {
+        HILOGE("need start state to stop");
+        return static_cast<int32_t>(Status::ERROR_WRONG_STATE);
     }
 #ifdef ENABLE_SURFACE_BUFFER_CACHE
     bufferCache_->Stop();
@@ -374,18 +364,12 @@ int32_t AVReceiverEngine::Stop(bool isDrainAll)
     Status ret = Status::OK;
     ret = pipeline_->Stop();
     if (ret == Status::OK) {
-        ChangeState(EngineState::INIT);
+        ChangeState(EngineState::START);
     }
     if (videoDecoderFilter_) {
         pipeline_->RemoveHeadFilter(videoDecoderFilter_);
     }
     return static_cast<int32_t>(ret);
-}
-
-int32_t AVReceiverEngine::Reset()
-{
-    HILOGI("Reset enter.");
-    return Stop(false);
 }
 
 void AVReceiverEngine::SetEngineListener(const std::shared_ptr<IEngineListener>& listener)
@@ -447,11 +431,17 @@ void AVReceiverEngine::OnRecvSurfaceParam(const SurfaceParam& param)
 {
     HILOGI("AVReceiverEngine::OnRecvSurfaceParam enter");
     surfaceParam_ = param;
-    GraphicTransformType graphic = ConvertToGraphicTrans(param);
-    if (surface_ != nullptr && graphic != GraphicTransformType::GRAPHIC_ROTATE_BUTT) {
-        HILOGI("set surface trans: %{public}d", static_cast<int32_t>(graphic));
-        surface_->SetTransform(graphic);
+    VidSurfaceParam surfaceParam(param);
+    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
+    surfaceParam.Configure(parameter, ConfigureMode::Decode);
+    if (videoDecoderFilter_ != nullptr) {
+        videoDecoderFilter_->SetParameter(parameter);
     }
+    // GraphicTransformType graphic = ConvertToGraphicTrans(param);
+    // if (surface_ != nullptr && graphic != GraphicTransformType::GRAPHIC_ROTATE_BUTT) {
+    //     HILOGI("set surface trans: %{public}d", static_cast<int32_t>(graphic));
+    //     surface_->SetTransform(graphic);
+    // }
 }
 
 void AVReceiverEngine::OnEvent(const Media::Event& event)
@@ -460,11 +450,11 @@ void AVReceiverEngine::OnEvent(const Media::Event& event)
         case Media::EventType::EVENT_ERROR: {
             HILOGI("EVENT_ERROR");
             ChangeState(EngineState::ERROR);
-            Stop(true);
+            Stop();
             break;
         }
         case Media::EventType::EVENT_READY: {
-            ChangeState(EngineState::READY);
+            ChangeState(EngineState::START);
             break;
         }
         case Media::EventType::EVENT_COMPLETE:

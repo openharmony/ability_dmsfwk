@@ -83,7 +83,8 @@ private:
 
 AVSenderEngine::~AVSenderEngine()
 {
-    Stop(false);
+    HILOGI("AVSenderEngine destory");
+    Stop();
     Media::PipeLineThreadPool::GetInstance().DestroyThread(engineId_);
 }
 
@@ -141,7 +142,7 @@ int32_t AVSenderEngine::Configure(const StreamParam& recParam)
     if (isVideoParam(recParam)) {
         recParam.Configure(videoEncFormat_, ConfigureMode::Encode);
     }
-    ChangeState(EngineState::SETTING_PARAM);
+    ChangeState(EngineState::SETTING);
     return static_cast<int32_t>(Status::OK);
 }
 
@@ -279,64 +280,42 @@ int32_t AVSenderEngine::Start()
         HILOGE("sender filter not init");
         return static_cast<int32_t>(Status::ERROR_NULL_POINTER);
     }
-    Status ret = Status::OK;
-    if (curState_ == EngineState::PAUSE) {
-        ret = pipeline_->Resume();
-    } else {
-        ret = pipeline_->Start();
+    if (curState_ == EngineState::START) {
+        HILOGI("start no need change state");
+        return static_cast<int32_t>(Status::OK);
     }
+    if (curState_ != EngineState::PREPARE && curState_ != EngineState::STOP) {
+        HILOGE("need prepare/stop state to start");
+        return static_cast<int32_t>(Status::ERROR_WRONG_STATE);
+    }
+    Status ret = Status::OK;
+    ret = pipeline_->Start();
     if (ret == Status::OK) {
-        ChangeState(EngineState::RUNNING);
+        ChangeState(EngineState::START);
     }
     return static_cast<int32_t>(ret);
 }
 
-int32_t AVSenderEngine::Pause()
-{
-    HILOGI("AVSenderEngine Pause enter.");
-    Status ret = Status::OK;
-    if (curState_ != EngineState::READY) {
-        ret = pipeline_->Pause();
-    }
-    if (ret == Status::OK) {
-        ChangeState(EngineState::PAUSE);
-    }
-    return static_cast<int32_t>(ret);
-}
-
-int32_t AVSenderEngine::Resume()
-{
-    HILOGI("AVSenderEngine Resume enter.");
-    Status ret = Status::OK;
-    ret = pipeline_->Resume();
-    if (ret == Status::OK) {
-        ChangeState(EngineState::RUNNING);
-    }
-    return static_cast<int32_t>(ret);
-}
-
-int32_t AVSenderEngine::Stop(bool isDrainAll)
+int32_t AVSenderEngine::Stop()
 {
     HILOGI("AVSenderEngine Stop enter.");
-    if (curState_ == EngineState::INIT) {
-        HILOGI("Stop exit.the reason is state = INIT");
+    if (curState_ == EngineState::INIT || curState_ == EngineState::STOP) {
+        HILOGI("Stop exit. no need change state");
         return static_cast<int32_t>(Status::OK);
+    }
+    if (curState_ != EngineState::START) {
+        HILOGE("need start state to stop");
+        return static_cast<int32_t>(Status::ERROR_WRONG_STATE);
     }
     Status ret = Status::OK;
     ret = pipeline_->Stop();
     if (ret == Status::OK) {
-        ChangeState(EngineState::INIT);
+        ChangeState(EngineState::STOP);
     }
     if (videoEncoderFilter_) {
         pipeline_->RemoveHeadFilter(videoEncoderFilter_);
     }
     return static_cast<int32_t>(ret);
-}
-
-int32_t AVSenderEngine::Reset()
-{
-    HILOGI("AVSenderEngine Reset enter.");
-    return Stop(false);
 }
 
 int32_t AVSenderEngine::SendPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap)
@@ -365,11 +344,11 @@ void AVSenderEngine::OnEvent(const Media::Event& event)
         case Media::EventType::EVENT_ERROR: {
             HILOGI("EVENT_ERROR");
             ChangeState(EngineState::ERROR);
-            Stop(true);
+            Stop();
             break;
         }
         case Media::EventType::EVENT_READY: {
-            ChangeState(EngineState::READY);
+            ChangeState(EngineState::START);
             break;
         }
         case Media::EventType::EVENT_COMPLETE:
@@ -383,6 +362,11 @@ void AVSenderEngine::ChangeState(const EngineState state)
     HILOGI("AVSenderEngine state: %{public}u->%{public}u",
         static_cast<uint32_t>(curState_), static_cast<uint32_t>(state));
     curState_ = state;
+}
+
+EngineState AVSenderEngine::GetState()
+{
+    return curState_;
 }
 } // namespace DistributedCollab
 } // namespace OHOS

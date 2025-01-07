@@ -19,8 +19,8 @@ namespace OHOS {
 namespace DistributedCollab {
 namespace {
     using MDKey = MediaAVCodec::MediaDescriptionKey;
-
 }
+
 void VidEnc::Configure(std::shared_ptr<Media::Meta> meta, const ConfigureMode mode) const
 {
     switch (mode) {
@@ -210,6 +210,77 @@ void VidEnableTemporalScale::ConfigureDecode(std::shared_ptr<Media::Meta>& meta)
         meta->SetData(std::string(MDKey::OH_MD_KEY_VIDEO_ENCODER_ENABLE_TEMPORAL_SCALABILITY),
             1);
     }
+}
+
+void VidSurfaceParam::Configure(std::shared_ptr<Media::Meta> meta, const ConfigureMode mode) const
+{
+    switch (mode) {
+        case ConfigureMode::Encode:
+            ConfigureEncode(meta);
+            break;
+        case ConfigureMode::Decode:
+            ConfigureDecode(meta);
+            break;
+        default:
+            break;
+    }
+}
+
+void VidSurfaceParam::ConfigureEncode(std::shared_ptr<Media::Meta>& meta) const
+{
+}
+
+void VidSurfaceParam::ConfigureDecode(std::shared_ptr<Media::Meta>& meta) const
+{
+    meta->SetData(Media::Tag::VIDEO_ORIENTATION_TYPE, static_cast<int32_t>(
+        ConvertToVideoOrientation(surfaceParam)));
+}
+
+Media::Plugins::VideoOrientationType VidSurfaceParam::ConvertToVideoOrientation(const SurfaceParam& param) const
+{
+    if (param.filp == SurfaceFilp::FLIP_NONE) {
+        switch (param.rotate) {
+            case SurfaceRotate::ROTATE_NONE:
+                return Media::Plugins::VideoOrientationType::ROTATE_NONE;
+            case SurfaceRotate::ROTATE_90:
+                return Media::Plugins::VideoOrientationType::ROTATE_90;
+            case SurfaceRotate::ROTATE_180:
+                return Media::Plugins::VideoOrientationType::ROTATE_180;
+            case SurfaceRotate::ROTATE_270:
+                return Media::Plugins::VideoOrientationType::ROTATE_270;
+            default:
+                return Media::Plugins::VideoOrientationType::ROTATE_NONE;
+        }
+    } 
+    else if (param.filp == SurfaceFilp::FLIP_H) {
+        switch (param.rotate) {
+            case SurfaceRotate::ROTATE_NONE:
+                return Media::Plugins::VideoOrientationType::FLIP_H;
+            case SurfaceRotate::ROTATE_90:
+                return Media::Plugins::VideoOrientationType::FLIP_H_ROT90;
+            case SurfaceRotate::ROTATE_180:
+                return Media::Plugins::VideoOrientationType::FLIP_H_ROT180;
+            case SurfaceRotate::ROTATE_270:
+                return Media::Plugins::VideoOrientationType::FLIP_H_ROT270;
+            default:
+                return Media::Plugins::VideoOrientationType::FLIP_H;
+        }
+    } 
+    else if (param.filp == SurfaceFilp::FLIP_V) {
+        switch (param.rotate) {
+            case SurfaceRotate::ROTATE_NONE:
+                return Media::Plugins::VideoOrientationType::FLIP_V;
+            case SurfaceRotate::ROTATE_90:
+                return Media::Plugins::VideoOrientationType::FLIP_V_ROT90;
+            case SurfaceRotate::ROTATE_180:
+                return Media::Plugins::VideoOrientationType::FLIP_V_ROT180;
+            case SurfaceRotate::ROTATE_270:
+                return Media::Plugins::VideoOrientationType::FLIP_V_ROT270;
+            default:
+                return Media::Plugins::VideoOrientationType::FLIP_V;
+        }
+    }
+    return Media::Plugins::VideoOrientationType::ROTATE_NONE;
 }
 }
 }

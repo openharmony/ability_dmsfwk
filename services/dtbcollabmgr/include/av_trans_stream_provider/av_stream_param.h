@@ -17,9 +17,12 @@
 #define OHOS_AV_TRANS_STREAM_STREAM_PARAM_H
 
 #include "av_stream_common.h"
+#include "av_trans_stream_data.h"
 #include "meta/meta.h"
 #include <memory>
 #include <string>
+#include "video_types.h"
+
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -31,8 +34,7 @@ enum class StreamParamType : uint32_t {
     VID_IS_HDR,
     VID_CAPTURERATE,
     VID_ENABLE_TEMPORAL_SCALE,
-    VID_PUBLIC_PARAM_END,
-    VID_ORIENTATION_HINT,
+    VID_SURFACE_PARAM,
 };
 
 enum class ConfigureMode {
@@ -140,6 +142,22 @@ struct VidEnableTemporalScale : public StreamParam {
 private:
     void ConfigureEncode(std::shared_ptr<Media::Meta>& meta) const;
     void ConfigureDecode(std::shared_ptr<Media::Meta>& meta) const;
+};
+
+struct VidSurfaceParam : public StreamParam {
+    explicit VidSurfaceParam(SurfaceParam r)
+        : StreamParam(StreamParamType::VID_SURFACE_PARAM), surfaceParam(r)
+    {
+    }
+
+    SurfaceParam surfaceParam;
+
+    void Configure(std::shared_ptr<Media::Meta> meta, const ConfigureMode mode) const override;
+
+private:
+    void ConfigureEncode(std::shared_ptr<Media::Meta>& meta) const;
+    void ConfigureDecode(std::shared_ptr<Media::Meta>& meta) const;
+    Media::Plugins::VideoOrientationType ConvertToVideoOrientation(const SurfaceParam& param) const;
 };
 }
 }

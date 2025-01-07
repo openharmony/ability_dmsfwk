@@ -56,10 +56,7 @@ namespace DistributedCollab {
         cJSON* GetVideoCodecAbility();
         int32_t Prepare();
         int32_t Start();
-        int32_t Pause();
-        int32_t Resume();
-        int32_t Stop(bool isDrainAll);
-        int32_t Reset();
+        int32_t Stop();
         Media::Status OnCallback(
             const std::shared_ptr<Media::Pipeline::Filter>& filter,
             Media::Pipeline::FilterCallBackCommand cmd,
@@ -67,6 +64,7 @@ namespace DistributedCollab {
         void OnEvent(const Media::Event& event);
         int32_t SendPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap);
         int32_t SetSurfaceParam(const SurfaceParam& param);
+        EngineState GetState();
 #ifdef DSCH_COLLAB_AV_TRANS_TEST_DEMO
         void SetChannelListener(const std::shared_ptr<IChannelListener>& listener);
 #endif

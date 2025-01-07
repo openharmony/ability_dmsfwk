@@ -25,7 +25,6 @@
 #include <memory>
 #include <mutex>
 #include <optional>
-#include <queue>
 #include <shared_mutex>
 #include <string>
 #include <vector>
@@ -45,6 +44,7 @@ public:
         const ChannelDataType dataType, const ChannelPeerInfo& peerInfo);
     int32_t CreateClientChannel(const std::string& channelName,
         const ChannelDataType dataType, const ChannelPeerInfo& peerInfo);
+    bool isValidChannelId(const int32_t channelId);
     int32_t DeleteChannel(const int32_t channelId);
     int32_t RegisterChannelListener(const int32_t channelId,
         const std::shared_ptr<IChannelListener> listener);
@@ -98,7 +98,6 @@ private:
         { ChannelDataType::BYTES, BYTES_START_ID },
         { ChannelDataType::VIDEO_STREAM, STREAM_START_ID }
     };
-    std::map<ChannelDataType, std::queue<int32_t>> avaliableIds_;
 
     std::mutex eventMutex_;
     std::thread eventThread_;
@@ -120,7 +119,6 @@ private:
     std::optional<ChannelInfo> CreateBaseChannel(const std::string& channelName,
         const ChannelDataType dataType, const ChannelPeerInfo& peerInfo);
     int32_t GenerateNextId(const ChannelDataType dataType);
-    bool isValidChannelId(const int32_t channelId);
     int32_t RegisterSocket(ChannelInfo& info, const ChannelDataType dataType);
 
     void ClearRegisterChannel(const int32_t channelId);

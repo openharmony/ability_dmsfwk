@@ -28,11 +28,10 @@ enum class VideoSourceType : uint32_t {
 enum class EngineState : uint32_t {
     EMPTY = 0,
     INIT,
-    SETTING_PARAM,
+    SETTING,
     PREPARE,
-    READY,
-    PAUSE,
-    RUNNING,
+    START,
+    STOP,
     ERROR,
 };
 
