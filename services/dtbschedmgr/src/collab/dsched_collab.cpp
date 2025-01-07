@@ -47,6 +47,7 @@ const std::string VALUE_START_OPTION_BACKGROUND = "ohos.collabrate.value.backgro
 constexpr int32_t DSCHED_COLLAB_PROTOCOL_VERSION = 1;
 constexpr int32_t NOTIFY_COLLAB_PREPARE_RESULT = 0;
 constexpr int32_t NOTIFY_COLLAB_DISCONNECT = 1;
+constexpr int32_t NOTIFY_WIFI_OPEN = 2;
 constexpr int32_t DMS_VERSION = 5;
 constexpr int32_t START_PERMISSION = 0;
 std::map<int32_t, std::string> CMDDATA = {
@@ -515,7 +516,7 @@ int32_t DSchedCollab::SaveSinkAbilityData(const std::string& collabToken, const 
 
 int32_t DSchedCollab::ExeAbilityRejectError(const std::string &reason)
 {
-    HILOGE("called");
+    HILOGI("called");
     auto cmd = std::make_shared<NotifyResultCmd>();
     PackNotifyResultCmd(cmd, COLLAB_ABILITY_REJECT_ERR, reason);
     SendCommand(cmd);
@@ -571,6 +572,10 @@ int32_t DSchedCollab::ExeSrcCollabResult(const int32_t &result, const std::strin
         return PostErrEndTask(result);
     }
     int32_t ret = ExeSrcClientNotify(result, reason);
+    if (!reason.empty()) {
+        HILOGE("reason: %{public}s", reason.c_str());
+        return CleanUpSession();
+    }
     if (ret != ERR_OK) {
         HILOGE("failed, ret: %{public}d", ret);
         return PostErrEndTask(result);
@@ -636,7 +641,7 @@ int32_t DSchedCollab::ExeClientDisconnectNotify()
             HILOGW("sinkClientCB object null.");
             return ERR_NULL_OBJECT;
         }
-        collabSessionId = collabInfo_.srcCollabSessionId_;
+        collabSessionId = collabInfo_.sinkCollabSessionId_;
         clientCB = collabInfo_.sinkClientCB_;
     }
 
@@ -649,6 +654,44 @@ int32_t DSchedCollab::ExeClientDisconnectNotify()
     MessageParcel reply;
     MessageOption option;
     int32_t ret = clientCB->SendRequest(NOTIFY_COLLAB_DISCONNECT, data, reply, option);
+    if (ret != ERR_OK) {
+        HILOGE("send request failed, ret: %{public}d", ret);
+        return SEND_REQUEST_DEF_FAIL;
+    }
+    HILOGI("end");
+    return ERR_OK;
+}
+
+int32_t DSchedCollab::NotifyWifiOpen()
+{
+    HILOGI("called");
+    int32_t collabSessionId;
+    sptr<IRemoteObject> clientCB;
+    if (collabInfo_.direction_ == COLLAB_SOURCE) {
+        if (collabInfo_.srcClientCB_ == nullptr) {
+            HILOGW("srcClientCB object null.");
+            return ERR_NULL_OBJECT;
+        }
+        collabSessionId = collabInfo_.srcCollabSessionId_;
+        clientCB = collabInfo_.srcClientCB_;
+    } else {
+        if (collabInfo_.sinkClientCB_ == nullptr) {
+            HILOGW("sinkClientCB object null.");
+            return ERR_NULL_OBJECT;
+        }
+        collabSessionId = collabInfo_.sinkCollabSessionId_;
+        clientCB = collabInfo_.sinkClientCB_;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(NAPI_COLLAB_CALLBACK_INTERFACE_TOKEN)) {
+        HILOGE("write token failed");
+        return SEND_REQUEST_DEF_FAIL;
+    }
+    PARCEL_WRITE_HELPER(data, Int32, collabInfo_.sinkCollabSessionId_);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = clientCB->SendRequest(NOTIFY_WIFI_OPEN, data, reply, option);
     if (ret != ERR_OK) {
         HILOGE("send request failed, ret: %{public}d", ret);
         return SEND_REQUEST_DEF_FAIL;

@@ -475,6 +475,15 @@ int32_t DSchedCollabManager::CancleReleaseAbilityLink(const std::string &bundleN
     return ERR_OK;
 }
 
+void DSchedCollabManager::NotifyWifiOpen()
+{
+    HILOGI("called");
+    for (auto iter = collabs_.begin(); iter != collabs_.end(); iter++) {
+        if (iter->second != nullptr) {
+            iter->second->NotifyWifiOpen();
+        }
+    }
+}
 int32_t DSchedCollabManager::NotifySessionClose(const std::string &collabToken)
 {
     HILOGI("called, collabToken: %{public}s", GetAnonymStr(collabToken).c_str());
