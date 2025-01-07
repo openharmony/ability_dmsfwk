@@ -232,7 +232,7 @@ void VidSurfaceParam::ConfigureEncode(std::shared_ptr<Media::Meta>& meta) const
 
 void VidSurfaceParam::ConfigureDecode(std::shared_ptr<Media::Meta>& meta) const
 {
-    meta->SetData(Media::Tag::VIDEO_ORIENTATION_TYPE, static_cast<int32_t>(
+    SetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, static_cast<int32_t>(
         ConvertToVideoOrientation(surfaceParam)));
 }
 
