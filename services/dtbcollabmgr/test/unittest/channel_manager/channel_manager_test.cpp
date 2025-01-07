@@ -317,7 +317,7 @@ HWTEST_F(ChannelManagerTest, ConnectChannel_Success, TestSize.Level1)
     EXPECT_EQ(channelId, MESSAGE_START_ID);  // Should return valid channelId
    
     // Step 3: Mock Bind to succeed
-    EXPECT_CALL(mockSoftbus, Bind(testing::_ , testing::_, testing::_, testing::_))
+    EXPECT_CALL(mockSoftbus, Bind(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(ERR_OK)); // Mock Bind to succeed
 
     // Call ConnectChannel and check the result
@@ -350,7 +350,7 @@ HWTEST_F(ChannelManagerTest, ConnectChannel_BindFailed, TestSize.Level1)
     EXPECT_EQ(channelId, MESSAGE_START_ID);  // Should return valid channelId
    
     // Step 3: Mock Bind to succeed
-    EXPECT_CALL(mockSoftbus, Bind(testing::_ , testing::_, testing::_, testing::_))
+    EXPECT_CALL(mockSoftbus, Bind(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(NUM_MINUS_1)); // Mock Bind to succeed
 
     // Call ConnectChannel and check the result
