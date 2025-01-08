@@ -517,6 +517,10 @@ enum {
      * Result(29360235) for bundle is not continuable.
      */
     BUNDLE_NOT_CONTINUABLE = 29360235,
+    /**
+     * Result(29360238) for get window failed from scb.
+     */
+    DMS_GET_WINDOW_FAILED_FROM_SCB = 29360238,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
