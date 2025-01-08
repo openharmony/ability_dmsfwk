@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -155,7 +155,7 @@ HWTEST_F(DSchedContinueManagerTest, ContinueMission_002, TestSize.Level3)
     DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, "", MISSION_ID, callback, wantParams);
     DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, MISSION_ID,
         nullptr, wantParams);
-    
+
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true)).WillOnce(Return(true));
     DSchedContinueManager::GetInstance().HandleContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, MISSION_ID,
         callback, wantParams);
@@ -567,7 +567,7 @@ HWTEST_F(DSchedContinueManagerTest, GetDSchedContinueByWant_002, TestSize.Level3
     usleep(WAITTIME);
     DSchedContinueManager::GetInstance().continues_[info] = nullptr;
     DSchedContinueManager::GetInstance().continues_[info] = dContinue;
-    
+
     DSchedContinueManager::GetInstance().NotifyTerminateContinuation(missionId);
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     ret = DSchedContinueManager::GetInstance().GetDSchedContinueByWant(want, missionId);

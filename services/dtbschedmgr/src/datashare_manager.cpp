@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,8 @@
 #include "distributed_sched_utils.h"
 #include "dsched_continue_manager.h"
 #include "dtbschedmgr_log.h"
-#include "mission/dms_continue_recv_manager.h"
-#include "mission/dms_continue_send_manager.h"
+#include "mission/dms_continue_condition_manager.h"
+#include "mission/notification/dms_continue_send_manager.h"
 #include "os_account_manager.h"
 #include "switch_status_dependency.h"
 
@@ -173,6 +173,7 @@ void DataShareManager::SetCurrentContinueSwitch(bool status)
 {
     HILOGD("SetCurrentContinueSwitch start, status : %{public}d", status);
     isCurrentContinueSwitchOn_.store(status);
+    DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_CONTINUE_SWITCH, status);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

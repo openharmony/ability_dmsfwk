@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -274,12 +274,14 @@ ohos_shared_library("distributedschedsvr") {
       "src/mission/distributed_mission_focused_listener.cpp",
       "src/mission/distributed_mission_info.cpp",
       "src/mission/distributed_sched_mission_manager.cpp",
+      "src/mission/dms_continue_condition_manager.cpp",
       "src/mission/dms_continue_recv_manager.cpp",
-      "src/mission/dms_continue_send_manager.cpp",
       "src/mission/dsched_sync_e2e.cpp",
       "src/mission/kvstore_death_recipient.cpp",
       "src/mission/mission_changed_notify.cpp",
       "src/mission/mission_info_converter.cpp",
+      "src/mission/notification/dms_continue_send_manager.cpp",
+      "src/mission/notification/dms_continue_send_strategy.cpp",
       "src/mission/snapshot.cpp",
       "src/mission/snapshot_converter.cpp",
       "src/mission/wifi_state_adapter.cpp",

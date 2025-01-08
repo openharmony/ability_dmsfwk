@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "mission/bluetooth_state_adapter.h"
+#include "mission/dms_continue_condition_manager.h"
 #include "dtbschedmgr_log.h"
 
 namespace OHOS {
@@ -35,12 +36,16 @@ void BluetoothStateAdapter::UpdateBTState(bool isBTActive)
 {
     HILOGI("update BT state: %{public}s", isBTActive ? "true" : "false");
     isBTActive_.store(isBTActive);
+    DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_BLUETOOTH,
+        isBTActive_.load() || isBLEActive_.load());
 }
 
 void BluetoothStateAdapter::UpdateBLEState(bool isBLEActive)
 {
     HILOGI("update BLE state: %{public}s", isBLEActive ? "true" : "false");
     isBLEActive_.store(isBLEActive);
+    DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_BLUETOOTH,
+        isBTActive_.load() || isBLEActive_.load());
 }
 
 

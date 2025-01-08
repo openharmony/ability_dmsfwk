@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,23 @@ namespace DistributedSchedule {
 #define HILOGW(fmt, ...) HILOG_WARN(LOG_CORE, "%{public}s::%{public}s " fmt, TAG.c_str(), __FUNCTION__, ##__VA_ARGS__)
 #define HILOGI(fmt, ...) HILOG_INFO(LOG_CORE, "%{public}s::%{public}s " fmt, TAG.c_str(), __FUNCTION__, ##__VA_ARGS__)
 #define HILOGD(fmt, ...) HILOG_DEBUG(LOG_CORE, "%{public}s::%{public}s " fmt, TAG.c_str(), __FUNCTION__, ##__VA_ARGS__)
+
+
+#define CHECK_POINTER_RETURN(object, log)                       \
+    do {                                                        \
+        if ((object) == nullptr) {                              \
+            HILOGE("%{public}s nullptr", (log));                \
+            return;                                             \
+        }                                                       \
+    } while (0)
+
+#define CHECK_POINTER_RETURN_VALUE(object, value, log)          \
+    do {                                                        \
+        if ((object) == nullptr) {                              \
+            HILOGE("%{public}s nullptr", (log));                \
+            return (value);                                     \
+        }                                                       \
+    } while (0)
 
 enum {
     /**
