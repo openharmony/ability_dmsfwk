@@ -17,6 +17,7 @@
 
 #include "datashare_manager.h"
 #include "dtbschedmgr_log.h"
+#include "dsched_continue_manager.h"
 #include "mission/distributed_bm_storage.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/dms_continue_send_manager.h"
@@ -101,7 +102,7 @@ int32_t CommonEventListener::GetForegroundOsAccountLocalId()
     HILOGD("GetForegroundOsAccountLocalId accountId is: %{public}d", accountId);
     return accountId;
 }
-
+ 
 AccountSA::OsAccountType CommonEventListener::GetOsAccountType(int32_t& accountId)
 {
     AccountSA::OsAccountType type;
@@ -111,7 +112,7 @@ AccountSA::OsAccountType CommonEventListener::GetOsAccountType(int32_t& accountI
     }
     return type;
 }
-
+ 
 void CommonEventListener::OnUserSwitched()
 {
     int32_t accountId = GetForegroundOsAccountLocalId();
@@ -122,10 +123,12 @@ void CommonEventListener::OnUserSwitched()
         DataShareManager::GetInstance().UpdateSwitchStatus(SwitchStatusDependency::GetInstance()
             .CONTINUE_SWITCH_STATUS_KEY, SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_OFF);
     }
-
+ 
     DataShareManager::GetInstance().SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance()
         .IsContinueSwitchOn());
-    if (!DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
+    if (DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
+        DSchedContinueManager::GetInstance().Init();
+    } else {
         DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
         HILOGI("ICurrentContinueSwitch is off, %{public}d", DataShareManager::GetInstance()
             .IsCurrentContinueSwitchOn());
