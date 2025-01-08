@@ -939,15 +939,15 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
         int32_t persistentId;
         if (ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId) != ERR_OK) {
             HILOGE("get persistentId failed, stop start ability");
-            return OnContinueEnd(ERR_OK);
+            return OnContinueEnd(DMS_GET_WINDOW_FAILED_FROM_SCB);
         }
         HILOGI("get persistentId success, persistentId: %{public}d", persistentId);
         WaitAbilityStateInitial(persistentId);
         want.SetParam(DMS_PERSISTENT_ID, persistentId);
 
         if (ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId) != ERR_OK) {
-            HILOGE("get persistentId failed, stop start ability");
-            return OnContinueEnd(ERR_OK);
+            HILOGE("Second get persistentId failed, stop start ability");
+            return OnContinueEnd(DMS_GET_WINDOW_FAILED_FROM_SCB);
         }
     }
 
@@ -1007,8 +1007,9 @@ bool DSchedContinue::WaitAbilityStateInitial(int32_t persistentId)
     return false;
 }
 
-int32_t DSchedContinue::StartAbility(const OHOS::AAFwk::Want& want, int32_t requestCode)
+int32_t DSchedContinue::StartAbility(OHOS::AAFwk::Want& want, int32_t requestCode)
 {
+    want.SetParam(OHOS::AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0);
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->Connect();
     if (ret != ERR_OK) {
         HILOGE("connect ability server failed %{public}d", ret);
@@ -1099,7 +1100,7 @@ int32_t DSchedContinue::PackReplyCmd(std::shared_ptr<DSchedContinueReplyCmd> cmd
 
 int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
 {
-    HILOGI("ExecuteContinueEnd start, result %{public}d", result);
+    HILOGW("ExecuteContinueEnd start, result %{public}d", result);
 
     std::string peerDeviceId = (direction_ == CONTINUE_SOURCE) ?
         continueInfo_.sinkDeviceId_ : continueInfo_.sourceDeviceId_;

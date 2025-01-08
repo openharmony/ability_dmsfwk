@@ -988,7 +988,13 @@ napi_value JsContinuationManagerInit(napi_env env, napi_value exportObj)
     }
 
     JsContinuationManager* jsContinuationManager = new JsContinuationManager();
-    napi_wrap(env, exportObj, jsContinuationManager, JsContinuationManager::Finalizer, nullptr, nullptr);
+    if (napi_wrap(env, exportObj, jsContinuationManager, JsContinuationManager::Finalizer, nullptr, nullptr)
+        != napi_ok) {
+        JsContinuationManager::Finalizer(env, jsContinuationManager, nullptr);
+        jsContinuationManager = nullptr;
+        return nullptr;
+    }
+
     const char *moduleName = "JsContinuationManager";
     BindNativeFunction(env, exportObj, "register", moduleName, JsContinuationManager::Register);
     BindNativeFunction(env, exportObj, "unregister", moduleName, JsContinuationManager::Unregister);
