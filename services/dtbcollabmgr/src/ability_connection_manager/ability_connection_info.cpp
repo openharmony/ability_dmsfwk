@@ -59,7 +59,7 @@ PeerInfo *PeerInfo::Unmarshalling(Parcel &parcel)
 
 bool ConnectOption::ReadFromParcel(Parcel &parcel)
 {
-    needSendBigData = parcel.ReadBool();
+    needSendData = parcel.ReadBool();
     needSendStream = parcel.ReadBool();
     needReceiveStream = parcel.ReadBool();
     auto optionsPtr = parcel.ReadParcelable<AAFwk::WantParams>();
@@ -75,7 +75,7 @@ bool ConnectOption::ReadFromParcel(Parcel &parcel)
 
 bool ConnectOption::Marshalling(Parcel &parcel) const
 {
-    parcel.WriteBool(needSendBigData);
+    parcel.WriteBool(needSendData);
     parcel.WriteBool(needSendStream);
     parcel.WriteBool(needReceiveStream);
     parcel.WriteParcelable(&options);

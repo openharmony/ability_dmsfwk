@@ -27,14 +27,11 @@
 #include "dtbcollabmgr_log.h"
 #include "openssl/sha.h"
 #include "single_instance.h"
-#include "wifi_state_listener.h"
 
 namespace OHOS {
 namespace DistributedCollab {
 namespace {
 const std::string TAG = "AbilityConnectionManager";
-const std::string COMMON_EVENT_WIFI_SEMI_STATE = "usual.event.wifi.SEMI_STATE";
-constexpr int32_t SEMI_WIFI_ID = 1010;
 constexpr int32_t SERVER_SOCKET_NAME_LENGTH = 64;
 constexpr int32_t HEX_WIDTH = 2;
 constexpr char FILL_CHAR = '0';
@@ -48,39 +45,6 @@ AbilityConnectionManager::AbilityConnectionManager()
 
 AbilityConnectionManager::~AbilityConnectionManager()
 {
-    HILOGI("AbilityConnectionManager delete");
-}
-
-void AbilityConnectionManager::Init()
-{
-    HILOGI("Init called");
-    InitWifiStateListener();
-    InitWifiSemiStateListener();
-}
-
-void AbilityConnectionManager::InitWifiStateListener()
-{
-    HILOGI("InitWifiStateListener called");
-    EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
-    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
-    auto wifiStateListener = std::make_shared<WifiStateListener>(subscribeInfo);
-    if (!EventFwk::CommonEventManager::SubscribeCommonEvent(wifiStateListener)) {
-        HILOGE("SubscribeCommonEvent wifiStateListener failed!");
-    }
-}
-
-void AbilityConnectionManager::InitWifiSemiStateListener()
-{
-    HILOGI("InitWifiSemiStateListener called");
-    EventFwk::MatchingSkills matchingSkills;
-    matchingSkills.AddEvent(COMMON_EVENT_WIFI_SEMI_STATE);
-    EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
-    subscribeInfo.SetPublisherUid(SEMI_WIFI_ID);
-    auto wifiStateListener = std::make_shared<WifiStateListener>(subscribeInfo);
-    if (!EventFwk::CommonEventManager::SubscribeCommonEvent(wifiStateListener)) {
-        HILOGE("SubscribeCommonEvent wifiSemiStateListener failed!");
-    }
 }
 
 int32_t AbilityConnectionManager::CreateSession(std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo,
@@ -210,7 +174,7 @@ int32_t AbilityConnectionManager::Reject(const std::string& token, const std::st
 }
 
 int32_t AbilityConnectionManager::NotifyCollabResult(int32_t sessionId, int32_t result,
-    const std::string& peerServerName, const std::string& dmsServerToken)
+    const std::string& peerServerName, const std::string& dmsServerToken, const std::string& reason)
 {
     HILOGD("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
@@ -219,7 +183,7 @@ int32_t AbilityConnectionManager::NotifyCollabResult(int32_t sessionId, int32_t 
         return INVALID_PARAMETERS_ERR;
     }
 
-    return connectionSesion->HandleCollabResult(result, peerServerName, dmsServerToken);
+    return connectionSesion->HandleCollabResult(result, peerServerName, dmsServerToken, reason);
 }
 
 int32_t AbilityConnectionManager::NotifyDisconnect(int32_t sessionId)
@@ -281,7 +245,7 @@ int32_t AbilityConnectionManager::CreateStream(int32_t sessionId, const StreamPa
     }
     int32_t ret = connectionSesion->CreateStream(streamId_, param);
     if (ret != ERR_OK) {
-        return INVALID_PARAMETERS_ERR;
+        return ret;
     }
     streamId = streamId_++;
     std::unique_lock<std::shared_mutex> writeLock(streamMutex_);
@@ -346,7 +310,13 @@ int32_t AbilityConnectionManager::DestroyStream(int32_t streamId)
         return INVALID_PARAMETERS_ERR;
     }
 
-    return connectionSesion->DestroyStream(streamId);
+    if (connectionSesion->DestroyStream() != ERR_OK) {
+        HILOGE("destroy stream failed.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    std::unique_lock<std::shared_mutex> writeLock(streamMutex_);
+    streamMap_.erase(streamId);
+    return ERR_OK;
 }
 
 int32_t AbilityConnectionManager::StartStream(int32_t streamId)
@@ -398,14 +368,15 @@ int32_t AbilityConnectionManager::UnregisterEventCallback(int32_t sessionId, con
     return connectionSesion->UnregisterEventCallback(eventType);
 }
 
-void AbilityConnectionManager::NotifyWifiOpen()
+int32_t AbilityConnectionManager::NotifyWifiOpen(int32_t sessionId)
 {
-    std::shared_lock<std::shared_mutex> readLock(sessionMutex_);
-    for (auto iter = sessionMap_.begin(); iter != sessionMap_.end(); iter++) {
-        if (iter->second) {
-            iter->second->NotifyRemoteWifiOpen();
-        }
+    HILOGI("called, sessionId is %{public}d", sessionId);
+    auto connectionSesion = GetAbilityConnectionSession(sessionId);
+    if (connectionSesion == nullptr) {
+        HILOGE("sessionId is invalid parameter");
+        return INVALID_PARAMETERS_ERR;
     }
+    return connectionSesion->ConnectStreamChannel();
 }
 
 bool AbilityConnectionManager::IsVaildPeerInfo(const PeerInfo& peerInfo)
@@ -466,7 +437,12 @@ std::shared_ptr<AbilityConnectionSession> AbilityConnectionManager::GetAbilityCo
     const int32_t streamId)
 {
     HILOGI("called. streamId is %{public}d", streamId);
-    return GetAbilityConnectionSession(streamMap_[streamId]);
+    int32_t sessionId = -1;
+    {
+        std::shared_lock<std::shared_mutex> readLock(streamMutex_);
+        sessionId = streamMap_[streamId];
+    }
+    return GetAbilityConnectionSession(sessionId);
 }
 }  // namespace DistributedCollab
 }  // namespace OHOS

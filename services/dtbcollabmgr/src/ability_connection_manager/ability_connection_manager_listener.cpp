@@ -24,11 +24,11 @@ namespace {
 const std::string TAG = "AbilityConnectionManagerListener";
 }
 
-int32_t AbilityConnectionManagerListener::NotifyCollabResult(int32_t sessionId,
-    int32_t result, const std::string& peerServerName, const std::string& dmsServerToken)
+int32_t AbilityConnectionManagerListener::NotifyCollabResult(int32_t sessionId, int32_t result,
+    const std::string& peerServerName, const std::string& dmsServerToken, const std::string& reason)
 {
     return AbilityConnectionManager::GetInstance().NotifyCollabResult(sessionId,
-        result, peerServerName, dmsServerToken);
+        result, peerServerName, dmsServerToken, reason);
 }
 
 int32_t AbilityConnectionManagerListener::NotifyDisconnect(int32_t sessionId)
@@ -36,5 +36,10 @@ int32_t AbilityConnectionManagerListener::NotifyDisconnect(int32_t sessionId)
     return AbilityConnectionManager::GetInstance().NotifyDisconnect(sessionId);
 }
 
+int32_t AbilityConnectionManagerListener::NotifyWifiOpen(int32_t sessionId)
+{
+    HILOGI("called.");
+    return AbilityConnectionManager::GetInstance().NotifyWifiOpen(sessionId);
+}
 }  // namespace DistributedCollab
 }  // namespace OHOS

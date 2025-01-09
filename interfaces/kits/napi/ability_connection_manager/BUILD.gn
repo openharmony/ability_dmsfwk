@@ -53,6 +53,7 @@ ohos_shared_library("abilityconnectionmanager_napi") {
     "ability_runtime:napi_base_context",
     "ability_runtime:napi_common",
     "ability_runtime:runtime",
+    "access_token:libtokenid_sdk",
     "av_codec:av_codec_client",
     "av_codec:av_codec_media_engine_filters",
     "cJSON:cjson",
@@ -62,6 +63,7 @@ ohos_shared_library("abilityconnectionmanager_napi") {
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "image_framework:image",
+    "ipc:ipc_core",
     "media_foundation:media_foundation",
     "napi:ace_napi",
   ]

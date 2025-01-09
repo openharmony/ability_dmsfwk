@@ -26,12 +26,14 @@ public:
     virtual ~IAbilityConnectionManager() {};
 
     virtual int32_t NotifyCollabResult(int32_t sessionId, int32_t result, const std::string& peerSocketName,
-        const std::string& dmsServerToken) = 0;
+        const std::string& dmsServerToken, const std::string& reason) = 0;
     virtual int32_t NotifyDisconnect(int32_t sessionId) = 0;
+    virtual int32_t NotifyWifiOpen(int32_t sessionId) = 0;
 
     enum class Message {
         NOTIFY_COLLAB_RESULT = 0,
         NOTIFY_DIS_CONNECT = 1,
+        NOTIFY_WIFI_OPEN = 2,
     };
 };
 } // namespace DistributedCollab

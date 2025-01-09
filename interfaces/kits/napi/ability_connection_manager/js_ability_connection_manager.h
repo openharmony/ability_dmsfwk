@@ -39,7 +39,7 @@ struct AsyncCallbackInfo {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_threadsafe_function tsfn;
-    bool result = false;
+    int32_t result;
     int32_t sessionId;
     std::string token;
     std::string msg;
@@ -91,7 +91,7 @@ private:
     static bool JsToAbilityInfo(const napi_env &env, const napi_value &jsValue,
         std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo);
     static bool JsToPeerInfo(const napi_env &env, const napi_value &jsValue, PeerInfo &peerInfo);
-    static bool JSToConnectOption(const napi_env &env, const napi_value &jsValue, ConnectOption &option);
+    static int32_t JSToConnectOption(const napi_env &env, const napi_value &jsValue, ConnectOption &option);
     static bool JsToStreamParam(const napi_env &env, const napi_value &jsValue, StreamParams &streamParam);
     static bool JsToSurfaceParam(const napi_env &env, const napi_value &jsValue, SurfaceParams &surfaceParam);
 
@@ -107,14 +107,10 @@ private:
     static void CompleteAsyncWork(napi_env env, napi_status status, void* data);
     static void ExecuteCreateStream(napi_env env, void *data);
     static void CompleteAsyncCreateStreamWork(napi_env env, napi_status status, void* data);
+    static void CreateSendDataAsyncWork(napi_env env, AsyncCallbackInfo* asyncCallbackInfo);
+    static void CreateStreamAsyncWork(napi_env env, AsyncCallbackInfo* asyncCallbackInfo);
 
-    static napi_value WrapPeerInfo(napi_env& env, const PeerInfo& peerInfo);
-
-    static void CreateErrorForCall(const napi_env &env, int32_t code, const std::string &errMsg);
-    static void CreateBusinessError(const napi_env &env, int32_t errCode, const std::string &errMsg);
-    static bool CheckArgsCount(const napi_env &env, bool assertion, const std::string &message);
-    static bool CheckArgsType(const napi_env &env, bool assertion,
-        const std::string &paramName, const std::string &type);
+    static bool IsSystemApp();
     static bool JsToInt32(const napi_env &env, const napi_value &value,
         const std::string &valueName, int32_t &strValue);
     static bool JsToString(const napi_env &env, const napi_value &value, const std::string &valueName,
@@ -125,10 +121,11 @@ private:
         bool &fieldRef);
     static bool JsObjectToInt(const napi_env &env, const napi_value &object, const std::string &fieldStr,
         int32_t &fieldRef);
-    static bool CheckEventType(const std::string& eventType);
+    static int32_t CheckEventType(const std::string& eventType);
     static bool UnwrapOptions(napi_env env, napi_value options, ConnectOption &option);
     static bool UnwrapParameters(napi_env env, napi_value parameters, ConnectOption &option);
     static bool IsTypeForNapiValue(napi_env env, napi_value param, napi_valuetype expectType);
+    static napi_value WrapPeerInfo(napi_env& env, const PeerInfo& peerInfo);
 };
 
 napi_value JsAbilityConnectionManagerInit(napi_env env, napi_value exportObj);

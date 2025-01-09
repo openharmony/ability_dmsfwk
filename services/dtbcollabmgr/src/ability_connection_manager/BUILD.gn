@@ -45,7 +45,6 @@ ohos_shared_library("distributed_ability_connection_manager") {
     "ability_connection_session.cpp",
     "distributed_client.cpp",
     "message_data_header.cpp",
-    "wifi_state_listener.cpp",
   ]
 
   configs = [ ":distributed_collab_config" ]

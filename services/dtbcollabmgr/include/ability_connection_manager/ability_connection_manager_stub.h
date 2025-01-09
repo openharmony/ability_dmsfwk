@@ -36,6 +36,7 @@ public:
 private:
     int32_t NotifyCollabResultInner(MessageParcel& data, MessageParcel& reply);
     int32_t NotifyDisconnectInner(MessageParcel& data, MessageParcel& reply);
+    int32_t NotifyWifiOpenInner(MessageParcel& data, MessageParcel& reply);
 
     using Func = int32_t(AbilityConnectionManagerStub::*)(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, Func> funcsMap_;

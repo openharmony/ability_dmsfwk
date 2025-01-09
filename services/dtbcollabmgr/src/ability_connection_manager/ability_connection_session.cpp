@@ -24,7 +24,6 @@
 #include "distributed_client.h"
 #include "openssl/sha.h"
 #include "message_data_header.h"
-#include "wifi_state_listener.h"
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -32,11 +31,11 @@ namespace {
 const std::string TAG = "AbilityConnectionSession";
 const std::string CONNECT_SESSION_TIMEOUT_END_TASK = "connect_session_timeout_end_task";
 const std::u16string DMS_PROXY_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
-constexpr const char* EVENT_CONNECT = "connect";
-constexpr const char* EVENT_DISCONNECT = "disconnect";
-constexpr const char* EVENT_RECEIVE_MESSAGE = "receiveMessage";
-constexpr const char* EVENT_RECEIVE_DATA = "receiveData";
-constexpr const char* EVENT_RECEIVE_IMAGE = "receiveImage";
+const std::string EVENT_CONNECT = "connect";
+const std::string EVENT_DISCONNECT = "disconnect";
+const std::string EVENT_RECEIVE_MESSAGE = "receiveMessage";
+const std::string EVENT_RECEIVE_DATA = "receiveData";
+const std::string EVENT_RECEIVE_IMAGE = "receiveImage";
 constexpr int32_t DSCHED_COLLAB_PROTOCOL_VERSION = 1;
 static constexpr uint16_t PROTOCOL_VERSION = 1;
 constexpr int32_t CHANNEL_NAME_LENGTH = 48;
@@ -120,8 +119,7 @@ void AbilityConnectionSession::Release()
         }
         sessionStatus_ = SessionStatus::UNCONNECTED;
     }
-    senderEngine_ = nullptr;
-    recvEngine_ = nullptr;
+    DestroyStream();
     
     std::unique_lock<std::shared_mutex> channelLock(transChannelMutex_);
     for (auto iter = transChannels_.begin(); iter != transChannels_.end(); iter++) {
@@ -203,40 +201,28 @@ int32_t AbilityConnectionSession::AcceptConnect(const std::string& token)
 }
 
 int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::string& peerSocketName,
-    const std::string& dmsServerToken)
+    const std::string& dmsServerToken, const std::string& reason)
 {
     HILOGD("called.");
+    ConnectResult connectResult;
     if (result != ERR_OK) {
-        HILOGE("collab result is failed, ret = %{public}d", result);
-        ConnectResult connectResult;
-        connectResult.isConnected = false;
+        HILOGE("collab result is failed, ret = %{public}d, reason = %{public}s", result, reason.c_str());
+        connectResult.reason = reason;
         ExeuteConnectCallback(connectResult);
         return INVALID_PARAMETERS_ERR;
     }
 
     dmsServerToken_ = dmsServerToken;
     peerSocketName_ = peerSocketName;
-    if (InitChannels() != ERR_OK) {
+    if (InitChannels() != ERR_OK || ConnectChannels() != ERR_OK) {
         DistributedClient dmsClient;
         dmsClient.NotifyCloseCollabSession(dmsServerToken_);
-        ConnectResult connectResult;
-        connectResult.isConnected = false;
-        ExeuteConnectCallback(connectResult);
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    if (ConnectChannels() != ERR_OK) {
-        DistributedClient dmsClient;
-        dmsClient.NotifyCloseCollabSession(dmsServerToken_);
-        ConnectResult connectResult;
-        connectResult.isConnected = false;
         ExeuteConnectCallback(connectResult);
         return INVALID_PARAMETERS_ERR;
     }
 
     std::unique_lock<std::shared_mutex> sessionStatusWriteLock(sessionMutex_);
     sessionStatus_ = SessionStatus::CONNECTED;
-    ConnectResult connectResult;
     connectResult.isConnected = true;
     ExeuteConnectCallback(connectResult);
     return ERR_OK;
@@ -366,7 +352,7 @@ int32_t AbilityConnectionSession::InitSenderEngine()
     std::unique_lock<std::shared_mutex> listenerWriteLock(engineMutex_);
     if (senderEngine_ != nullptr) {
         HILOGE("The stream sender engine has init.");
-        return INVALID_PARAMETERS_ERR;
+        return ONLY_SUPPORT_ONE_STREAM;
     }
     senderEngine_ = std::make_shared<AVSenderEngine>(DEFAULT_APP_UID, DEFAULT_APP_PID,
         localInfo_.bundleName, DEFAULT_INSTANCE_ID);
@@ -383,7 +369,7 @@ int32_t AbilityConnectionSession::InitRecvEngine()
     std::unique_lock<std::shared_mutex> listenerWriteLock(engineMutex_);
     if (recvEngine_ != nullptr) {
         HILOGE("The stream receive has init.");
-        return INVALID_PARAMETERS_ERR;
+        return ONLY_SUPPORT_ONE_STREAM;
     }
 
     recvEngine_ = std::make_shared<AVReceiverEngine>();
@@ -391,9 +377,12 @@ int32_t AbilityConnectionSession::InitRecvEngine()
     return ERR_OK;
 }
 
-int32_t AbilityConnectionSession::DestroyStream(int32_t streamId)
+int32_t AbilityConnectionSession::DestroyStream()
 {
     HILOGD("called.");
+    senderEngine_ = nullptr;
+    recvEngine_ = nullptr;
+    recvEngineState_ = EngineState::EMPTY;
     return ERR_OK;
 }
 
@@ -431,6 +420,11 @@ int32_t AbilityConnectionSession::ConfigEngineParam(std::shared_ptr<T> &engine, 
     ret = engine->Configure(VidEnableTemporalScale(false));
     if (ret != ERR_OK) {
         HILOGE("configure VidEnableTemporalScale failed");
+        return ret;
+    }
+    ret = engine->Configure(VidSurfaceParam(ConvertToSurfaceParam(param)));
+    if (ret != ERR_OK) {
+        HILOGE("configure VidSurfaceParam failed");
         return ret;
     }
     return ERR_OK;
@@ -504,18 +498,59 @@ int32_t AbilityConnectionSession::SetSurfaceId(const std::string& surfaceId,
 
 int32_t AbilityConnectionSession::UpdateSurfaceParam(const SurfaceParams& surfaceParam)
 {
-    HILOGD("called.");
-    if (senderEngine_ == nullptr) {
-        HILOGE("recvEngine_ Uninitialized.");
-        return INVALID_PARAMETERS_ERR;
+    SurfaceParam param = ConvertToSurfaceParam(surfaceParam);
+    HILOGI("SurfaceParam rotate is %{public}d, filp is %{public}d.",
+        static_cast<int32_t>(param.rotate), static_cast<int32_t>(param.filp));
+    if (senderEngine_ != nullptr) {
+        HILOGI("Update senderEngine_ SurfaceParam.");
+        senderEngine_->SetSurfaceParam(param);
+        return ERR_OK;
     }
 
-    SurfaceParam param;
-    param.rotate = static_cast<SurfaceRotate>(surfaceParam.rotation);
-    param.filp = static_cast<SurfaceFilp>(surfaceParam.flip);
+    if (recvEngine_ != nullptr) {
+        HILOGI("Update recvEngine_ SurfaceParam.");
+        recvEngine_ -> OnRecvSurfaceParam(param);
+        return ERR_OK;
+    }
 
-    senderEngine_->SetSurfaceParam(param);
-    return ERR_OK;
+    HILOGE("senderEngine_ and recvEngine_ is nullptr!");
+    return INVALID_PARAMETERS_ERR;
+}
+
+SurfaceParam AbilityConnectionSession::ConvertToSurfaceParam(const SurfaceParams& param)
+{
+    SurfaceParam surfaveParam;
+    switch (param.rotation) {
+        case SURFACE_ROTATE_NONE:
+            surfaveParam.rotate = SurfaceRotate::ROTATE_NONE;
+            break;
+        case SURFACE_ROTATE_90:
+            surfaveParam.rotate = SurfaceRotate::ROTATE_90;
+            break;
+        case SURFACE_ROTATE_180:
+            surfaveParam.rotate = SurfaceRotate::ROTATE_180;
+            break;
+        case SURFACE_ROTATE_270:
+            surfaveParam.rotate = SurfaceRotate::ROTATE_270;
+            break;
+        default:
+            surfaveParam.rotate = SurfaceRotate::ROTATE_NONE;
+            break;
+    }
+
+    switch (param.flip) {
+        case FlipOption::HORIZONTAL:
+            surfaveParam.filp = SurfaceFilp::FLIP_H;
+            break;
+        case FlipOption::VERTICAL:
+            surfaveParam.filp = SurfaceFilp::FLIP_V;
+            break;
+        default:
+            surfaveParam.filp = SurfaceFilp::FLIP_H;
+            break;
+    }
+
+    return surfaveParam;
 }
 
 int32_t AbilityConnectionSession::GetStreamTransChannel(TransChannelInfo& info)
@@ -540,15 +575,35 @@ int32_t AbilityConnectionSession::StartStream(int32_t streamId)
 {
     HILOGD("called.");
     if (connectOption_.needSendStream && senderEngine_ != nullptr) {
-        HILOGI("senderEngine_ Start.");
-        return senderEngine_->Start();
+        return StartSenderEngine();
     }
 
     if (connectOption_.needReceiveStream && recvEngine_ != nullptr) {
-        HILOGI("recvEngine_ Start.");
-        return recvEngine_->Start();
+        return StartRecvEngine();
     }
-    return ERR_OK;
+    HILOGE("not config stream option or engine is null.");
+    return INVALID_PARAMETERS_ERR;
+}
+
+int32_t AbilityConnectionSession::StartRecvEngine()
+{
+    HILOGI("recvEngine_ Start.");
+    int32_t ret = recvEngine_->Start();
+    if (ret != ERR_OK) {
+        HILOGE("recvEngine_ start failed.");
+        return ret;
+    }
+    return SendMessage("recvEngineStart", MessageType::RECEIVE_STREAM_START);
+}
+
+int32_t AbilityConnectionSession::StartSenderEngine()
+{
+    HILOGI("senderEngine_ Start.");
+    if (recvEngineState_ != EngineState::START) {
+        HILOGE("recvEngine_ not start.");
+        return RECEIVE_STREAM_NOT_START;
+    }
+    return senderEngine_->Start();
 }
 
 int32_t AbilityConnectionSession::StopStream(int32_t streamId)
@@ -585,7 +640,7 @@ int32_t AbilityConnectionSession::UnregisterEventCallback(const std::string& eve
 
 int32_t AbilityConnectionSession::ExeuteEventCallback(const std::string& eventType, const EventCallbackInfo& info)
 {
-    HILOGD("called.");
+    HILOGI("called, eventType is %{public}s", eventType.c_str());
     std::shared_lock<std::shared_mutex> listenerReadLock(listenerMutex_);
     if (listeners_.empty()) {
         HILOGE("listeners_ is empty");
@@ -621,7 +676,7 @@ int32_t AbilityConnectionSession::InitChannels()
         return INVALID_PARAMETERS_ERR;
     }
 
-    if (connectOption_.needSendBigData) {
+    if (connectOption_.needSendData) {
         ret = CreateChannel(channelName, ChannelDataType::BYTES, TransChannelType::DATA_CHANNEL);
         if (ret != ERR_OK) {
             HILOGE("init bytes channel failed!");
@@ -693,54 +748,94 @@ std::string AbilityConnectionSession::GetChannelName(const std::string& sourceMo
 
 int32_t AbilityConnectionSession::ConnectChannels()
 {
-    std::unique_lock<std::shared_mutex> channelWriteLock(transChannelMutex_);
-    int32_t ret;
-    auto item = transChannels_.find(TransChannelType::MESSAGE_CHANNEL);
-    if (item != transChannels_.end()) {
-        ret = ChannelManager::GetInstance().ConnectChannel(item->second.channelId);
-        if (ret != ERR_OK) {
-            HILOGE("message channel bind failed, ret is %{public}d", ret);
-            return ret;
-        } else {
-            item->second.isConnected = true;
-            HILOGI("message channel bind success");
-        }
-    }
-    
-    item = transChannels_.find(TransChannelType::DATA_CHANNEL);
-    if (item != transChannels_.end()) {
-        ret = ChannelManager::GetInstance().ConnectChannel(item->second.channelId);
-        if (ret != ERR_OK) {
-            HILOGE("data channel bind failed, ret is %{public}d", ret);
-            return ret;
-        } else {
-            item->second.isConnected = true;
-            HILOGI("data channel bind success");
-        }
+    if (ConnectTransChannel(TransChannelType::MESSAGE_CHANNEL) != ERR_OK) {
+        return CONNECT_MESSAGE_CHANNEL_FAILED;
     }
 
-    item = transChannels_.find(TransChannelType::STREAM_CHANNEL);
-    if (item != transChannels_.end()) {
-        ret = ChannelManager::GetInstance().ConnectChannel(item->second.channelId);
-        if (ret != ERR_OK) {
-            HILOGE("stream channel bind failed, ret is %{public}d", ret);
-        } else {
-            item->second.isConnected = true;
-            HILOGI("stream channel bind success");
-        }
+    if (connectOption_.needSendData && ConnectTransChannel(TransChannelType::DATA_CHANNEL) != ERR_OK) {
+        return CONNECT_DATA_CHANNEL_FAILED;
     }
 
-    item = transChannels_.find(TransChannelType::STREAM_CHANNEL_BYTES);
-    if (item != transChannels_.end()) {
-        ret = ChannelManager::GetInstance().ConnectChannel(item->second.channelId);
-        if (ret != ERR_OK) {
-            HILOGE("bytes channel bind failed, ret is %{public}d", ret);
-            return ret;
-        } else {
-            item->second.isConnected = true;
-            HILOGI("bytes channel bind success");
-        }
+    if (!connectOption_.needSendStream && !connectOption_.needReceiveStream) {
+        return ERR_OK;
     }
+
+    if (ConnectTransChannel(TransChannelType::STREAM_CHANNEL_BYTES) != ERR_OK) {
+        return CONNECT_STREAM_BYTES_CHANNEL_FAILED;
+    }
+    ConnectStreamChannel();
+    return ERR_OK;
+}
+
+int32_t AbilityConnectionSession::ConnectTransChannel(const TransChannelType channelType)
+{
+    TransChannelInfo info;
+    int32_t ret = GetTransChannelInfo(channelType, info);
+    if (ret != ERR_OK) {
+        HILOGE("stream channel not exits!");
+        return STREAM_CHANNEL_NOT_EXITS;
+    }
+
+    ret = ChannelManager::GetInstance().ConnectChannel(info.channelId);
+    if (ret != ERR_OK) {
+        HILOGE("connect channel failed. ret is %{public}d", ret);
+        return ret;
+    }
+    HILOGI("message channel bind success");
+    UpdateTransChannelStatus(info.channelId, true);
+    return ERR_OK;
+}
+
+int32_t AbilityConnectionSession::ConnectStreamChannel()
+{
+    HILOGI("called.");
+    if (!connectOption_.needSendStream && !connectOption_.needReceiveStream) {
+        HILOGI("Streaming is not required.");
+        return ERR_OK;
+    }
+
+    TransChannelInfo info;
+    int32_t ret = GetTransChannelInfo(TransChannelType::STREAM_CHANNEL, info);
+    if (ret != ERR_OK) {
+        HILOGE("stream channel not exits!");
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    if (info.isConnected) {
+        HILOGE("stream channel has connected.");
+        return ERR_OK;
+    }
+
+    if (direction_ != CollabrateDirection::COLLABRATE_SOURCE) {
+        HILOGI("notify source connect stream channel.");
+        SendMessage("WIFI_OPEN", MessageType::WIFI_OPEN);
+        return ERR_OK;
+    }
+
+    std::thread task([this, info]() {
+        DoConnectStreamChannel(info.channelId);
+    });
+    task.detach();
+    return ERR_OK;
+}
+
+int32_t AbilityConnectionSession::DoConnectStreamChannel(int32_t channelId)
+{
+    HILOGI("called.");
+    int32_t ret = ChannelManager::GetInstance().ConnectChannel(channelId);
+    if (ret != ERR_OK) {
+        HILOGE("stream channel bind failed, ret is %{public}d", ret);
+        return ret;
+    }
+    HILOGI("stream channel bind success");
+    UpdateTransChannelStatus(channelId, true);
+
+    if (recvEngine_ == nullptr) {
+        HILOGI("notify peer update recvEngine channel.");
+        SendMessage("updateRecvEngineTransChannel", MessageType::UPDATE_RECV_ENGINE_CHANNEL);
+        return ERR_OK;
+    }
+    UpdateRecvEngineTransChannel();
     return ERR_OK;
 }
 
@@ -833,94 +928,46 @@ void AbilityConnectionSession::OnMessageReceived(int32_t channelId, const std::s
     }
     HILOGI("headerPara type is %{public}d", headerPara->dataType_);
     switch (headerPara->dataType_) {
-        case uint32_t(MessageType::MESSAGE_NORMAL): {
-            HILOGI("on wifi SEMI_ACTIVE");
+        case uint32_t(MessageType::NORMAL): {
             std::string msg(reinterpret_cast<const char *>(data + MessageDataHeader::HEADER_LEN),
                 dataBuffer->Size() - MessageDataHeader::HEADER_LEN);
-            EventCallbackInfo callbackInfo;
-            callbackInfo.sessionId = sessionId_;
-            callbackInfo.msg = msg;
-            ExeuteEventCallback(EVENT_RECEIVE_MESSAGE, callbackInfo);
-            break;
+            return ExeuteMessageEventCallback(msg);
         }
-
-        case uint32_t(MessageType::MESSAGE_WIFI_STATUS): {
-            CheckWifiState();
-            break;
+        case uint32_t(MessageType::WIFI_OPEN): {
+            ConnectStreamChannel();
+            return;
         }
-
-        case uint32_t(MessageType::MESSAGE_UPDATE_STREAM_CHANNEL): {
-            UpdateEngineTransChannel();
-            break;
+        case uint32_t(MessageType::UPDATE_RECV_ENGINE_CHANNEL): {
+            return UpdateRecvEngineTransChannel();
         }
-
+        case uint32_t(MessageType::UPDATE_SENDER_ENGINE_CHANNEL): {
+            return UpdateSenderEngineTransChannel();
+        }
+        case uint32_t(MessageType::RECEIVE_STREAM_START): {
+            recvEngineState_ = EngineState::START;
+            return;
+        }
         default: {
-            HILOGI("unhandled code");
-            break;
+            HILOGE("unhandled code");
+            return;
         }
     }
 }
 
-int32_t AbilityConnectionSession::NotifyRemoteWifiOpen()
+void AbilityConnectionSession::ExeuteMessageEventCallback(const std::string msg)
 {
     HILOGD("called.");
-    if (!(connectOption_.needSendStream || connectOption_.needReceiveStream)) {
-        HILOGE("no stream option.");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    return SendMessage("WifiOpen", MessageType::MESSAGE_WIFI_STATUS);
+    EventCallbackInfo callbackInfo;
+    callbackInfo.sessionId = sessionId_;
+    callbackInfo.msg = msg;
+    ExeuteEventCallback(EVENT_RECEIVE_MESSAGE, callbackInfo);
 }
 
-int32_t AbilityConnectionSession::CheckWifiState()
+void AbilityConnectionSession::UpdateRecvEngineTransChannel()
 {
-    HILOGD("called.");
-    if (!(connectOption_.needSendStream || connectOption_.needReceiveStream)) {
-        HILOGE("no stream option.");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    WifiStateListener listener;
-    if (!listener.CheckWifiStateIsActived()) {
-        HILOGE("wifi close.");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    TransChannelInfo info;
-    int32_t ret = GetTransChannelInfo(TransChannelType::STREAM_CHANNEL, info);
-    if (ret != ERR_OK || info.isConnected) {
-        HILOGE("stream chennel has connected.");
-        return INVALID_PARAMETERS_ERR;
-    }
-
-    if (direction_ == CollabrateDirection::COLLABRATE_SINK) {
-        SendMessage("WifiOpen", MessageType::MESSAGE_WIFI_STATUS);
-        return ERR_OK;
-    }
-
-    ret = ChannelManager::GetInstance().ConnectChannel(info.channelId);
-    if (ret != ERR_OK) {
-        HILOGE("stream channel bind failed, ret is %{public}d", ret);
-        return ret;
-    } else {
-        UpdateTransChannelStatus(info.channelId, true);
-        HILOGI("message channel bind success");
-    }
-
-    if (recvEngine_) {
-        HILOGI("recvEngine update channel listener");
-        recvEngine_->SetChannelListener(info.channelId);
-    }
-
-    SendMessage("updateTransChannel", MessageType::MESSAGE_UPDATE_STREAM_CHANNEL);
-    return ERR_OK;
-}
-
-void AbilityConnectionSession::UpdateEngineTransChannel()
-{
-    HILOGD("called.");
-    if (senderEngine_ == nullptr || recvEngine_ == nullptr) {
-        HILOGE("engine_ is nullptr.");
+    HILOGI("called.");
+    if (recvEngine_ == nullptr) {
+        HILOGE("recvEngine_ is nullptr.");
         return;
     }
 
@@ -930,15 +977,27 @@ void AbilityConnectionSession::UpdateEngineTransChannel()
         HILOGI("not find stream chennel.");
         return;
     }
+    recvEngine_->SetChannelListener(info.channelId);
+    SendMessage("updateSenderEngineTransChannel", MessageType::UPDATE_SENDER_ENGINE_CHANNEL);
+}
 
-    if (senderEngine_) {
-        senderEngine_->SetTransChannel(info.channelId, info.channelType);
+void AbilityConnectionSession::UpdateSenderEngineTransChannel()
+{
+    HILOGI("called.");
+    if (senderEngine_ == nullptr) {
+        HILOGE("senderEngine_ is nullptr.");
+        return;
     }
 
-    if (recvEngine_) {
-        recvEngine_->SetChannelListener(info.channelId);
-        SendMessage("updateTransChannel", MessageType::MESSAGE_UPDATE_STREAM_CHANNEL);
+    TransChannelInfo info;
+    int32_t ret = GetTransChannelInfo(TransChannelType::STREAM_CHANNEL, info);
+    if (ret != ERR_OK) {
+        HILOGI("not find stream chennel.");
+        return;
     }
+    HILOGI("SetChannelListener channelId is %{public}d, channelType is %{public}d",
+        info.channelId, static_cast<int32_t>(info.channelType));
+    senderEngine_->SetTransChannel(info.channelId, info.channelType);
 }
 
 void AbilityConnectionSession::OnRecvPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap)
@@ -1040,7 +1099,7 @@ bool AbilityConnectionSession::IsConnected()
 
 void AbilityConnectionSession::ExeuteConnectCallback(const ConnectResult& result)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler_ is nullptr");
         return;
