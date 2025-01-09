@@ -474,9 +474,9 @@ AAFwk::Want DSchedCollab::GenerateCollabWant()
     peerInfoParams.SetParam("serverId", AAFwk::String::Box(collabInfo_.srcInfo_.serverId_));
 
     AAFwk::WantParams optParams;
-    optParams.SetParam("isNeedSendBigData", AAFwk::Boolean::Box(collabInfo_.srcOpt_.needSendBigData_));
-    optParams.SetParam("isNeedSendStream", AAFwk::Boolean::Box(collabInfo_.srcOpt_.needSendStream_));
-    optParams.SetParam("isNeedReceiveStream", AAFwk::Boolean::Box(collabInfo_.srcOpt_.needRecvStream_));
+    optParams.SetParam("needSendData", AAFwk::Boolean::Box(collabInfo_.srcOpt_.needSendBigData_));
+    optParams.SetParam("needSendStream", AAFwk::Boolean::Box(collabInfo_.srcOpt_.needSendStream_));
+    optParams.SetParam("needReceiveStream", AAFwk::Boolean::Box(collabInfo_.srcOpt_.needRecvStream_));
     optParams.SetParam("parameters", AAFwk::WantParamWrapper::Box(collabInfo_.srcOpt_.messageParams_));
 
     AAFwk::WantParams collabParams;

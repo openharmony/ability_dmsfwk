@@ -19,10 +19,12 @@
 
 #include "ability_connection_manager.h"
 #include "dtbcollabmgr_log.h"
+#include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
 #include "napi_common_util.h"
 #include "napi_base_context.h"
 #include "string_wrapper.h"
+#include "tokenid_kit.h"
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -45,40 +47,31 @@ constexpr int32_t ARG_COUNT_TWO = 2;
 constexpr int32_t ARG_COUNT_THREE = 3;
 constexpr int32_t ARG_COUNT_FOUR = 4;
 constexpr int32_t NAPI_BUF_LENGTH = 256;
+constexpr int32_t PEER_APP_EXIT = 0;
+constexpr int32_t NETWORK_DISCONNECTED = 1;
+constexpr int32_t HORIZONTAL = 0;
+constexpr int32_t VERTICAL = 1;
+constexpr int32_t SOURCE = 0;
+constexpr int32_t SINK = 1;
+constexpr int32_t UNKNOWN = -1;
+constexpr int32_t NV12 = 0;
+constexpr int32_t NV21 = 1;
 
-constexpr const char* EVENT_CONNECT = "connect";
-constexpr const char* EVENT_DISCONNECT = "disconnect";
-constexpr const char* EVENT_RECEIVE_MESSAGE = "receiveMessage";
-constexpr const char* EVENT_RECEIVE_DATA = "receiveData";
-constexpr const char* EVENT_RECEIVE_IMAGE = "receiveImage";
+const std::string EVENT_CONNECT = "connect";
+const std::string EVENT_DISCONNECT = "disconnect";
+const std::string EVENT_RECEIVE_MESSAGE = "receiveMessage";
+const std::string EVENT_RECEIVE_DATA = "receiveData";
+const std::string EVENT_RECEIVE_IMAGE = "receiveImage";
 
 const std::string ERR_MESSAGE_NO_PERMISSION =
     "Permission verification failed. The application does not have the permission required to call the API.";
 const std::string ERR_MESSAGE_INVALID_PARAMS = "Parameter error.";
 const std::string ERR_MESSAGE_FAILED = "Failed to execute the function.";
-}
-
-bool JsAbilityConnectionManager::CheckArgsCount(const napi_env &env, bool assertion, const std::string &message)
-{
-    if (!(assertion)) {
-        std::string errMsg = ERR_MESSAGE_INVALID_PARAMS + message;
-        napi_throw_error(env, std::to_string(ERR_INVALID_PARAMS).c_str(), errMsg.c_str());
-        return false;
-    }
-    return true;
-}
-
-bool JsAbilityConnectionManager::CheckArgsType(const napi_env &env, bool assertion,
-    const std::string &paramName, const std::string &type)
-{
-    if (!(assertion)) {
-        std::string errMsg = ERR_MESSAGE_INVALID_PARAMS + "The type of " + paramName +
-                " must be " + type;
-        napi_throw_error(env, std::to_string(
-            static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS)).c_str(), errMsg.c_str());
-        return false;
-    }
-    return true;
+const std::string ERR_MESSAGE_ONE_STREAM = "Only one stream can be created for the current session.";
+const std::string ERR_MESSAGE_RECEIVE_NOT_START = "The stream at the receive end is not started.";
+const std::string KEY_START_OPTION = "ohos.collabrate.key.start.option";
+const std::string VALUE_START_OPTION_FOREGROUND = "ohos.collabrate.value.forefround";
+const std::string VALUE_START_OPTION_BACKGROUND = "ohos.collabrate.value.background";
 }
 
 bool JsAbilityConnectionManager::JsToInt32(const napi_env &env, const napi_value &value,
@@ -91,7 +84,7 @@ bool JsAbilityConnectionManager::JsToInt32(const napi_env &env, const napi_value
         return false;
     }
 
-    if (!CheckArgsType(env, valueType == napi_number, valueName, "number")) {
+    if (valueType != napi_number) {
         HILOGE("Argument must be a number");
         return false;
     }
@@ -112,7 +105,7 @@ bool JsAbilityConnectionManager::JsToString(const napi_env &env, const napi_valu
         return false;
     }
     
-    if (!CheckArgsType(env, valueType == napi_string, valueName, "string")) {
+    if (valueType != napi_string) {
         HILOGE("Argument must be a string");
         return false;
     }
@@ -185,7 +178,7 @@ bool JsAbilityConnectionManager::JsObjectToBool(const napi_env &env, const napi_
         return false;
     }
 
-    if (!CheckArgsType(env, valueType == napi_boolean, fieldStr.c_str(), "bool")) {
+    if (valueType != napi_boolean) {
         return false;
     }
 
@@ -218,18 +211,69 @@ bool JsAbilityConnectionManager::JsObjectToInt(const napi_env &env, const napi_v
     return JsToInt32(env, field, fieldStr, fieldRef);
 }
 
-void JsAbilityConnectionManager::CreateBusinessError(const napi_env &env, int32_t errCode, const std::string &errMsg)
+bool JsAbilityConnectionManager::IsSystemApp()
 {
+    uint64_t tokenId = OHOS::IPCSkeleton::GetSelfTokenID();
+    return OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(tokenId);
+}
+
+napi_value GenerateBusinessError(napi_env env,
+    int32_t err, const std::string &msg)
+{
+    napi_value businessError = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &businessError));
+    napi_value errorCode = nullptr;
+    NAPI_CALL(env, napi_create_int32(env, err, &errorCode));
+    napi_value errorMessage = nullptr;
+    NAPI_CALL(env, napi_create_string_utf8(env, msg.c_str(), NAPI_AUTO_LENGTH, &errorMessage));
+    NAPI_CALL(env, napi_set_named_property(env, businessError, "code", errorCode));
+    NAPI_CALL(env, napi_set_named_property(env, businessError, "message", errorMessage));
+
+    return businessError;
+}
+
+napi_value CreateErrorForCall(napi_env env, int32_t code, const std::string &errMsg, bool isAsync = true)
+{
+    HILOGI("CreateErrorForCall code:%{public}d, message:%{public}s", code, errMsg.c_str());
+    napi_value error = nullptr;
+    if (isAsync) {
+        napi_throw_error(env, std::to_string(code).c_str(), errMsg.c_str());
+    } else {
+        error = GenerateBusinessError(env, code, errMsg);
+    }
+    return error;
+}
+
+napi_value CreateBusinessError(napi_env env, int32_t errCode, bool isAsync = true)
+{
+    napi_value error = nullptr;
     switch (errCode) {
-        case INVALID_PARAMETERS_ERR:
-            napi_throw_error(env, std::to_string(
-                static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS)).c_str(), errMsg.c_str());
+        case ERR_IS_NOT_SYSTEM_APP:
+            error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_NOT_SYSTEM_APP),
+                ERR_MESSAGE_NO_PERMISSION, isAsync);
+            break;
+        case ERR_INVALID_PARAMETERS:
+            error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
+                ERR_MESSAGE_INVALID_PARAMS, isAsync);
+            break;
+        case ONLY_SUPPORT_ONE_STREAM:
+            error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_ONLY_SUPPORT_ONE_STREAM),
+                ERR_MESSAGE_ONE_STREAM, isAsync);
+            break;
+        case RECEIVE_STREAM_NOT_START:
+            error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_RECEIVE_STREAM_NOT_START),
+                ERR_MESSAGE_RECEIVE_NOT_START, isAsync);
+            break;
+        case ERR_EXECUTE_FUNCTION:
+            error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
+                ERR_MESSAGE_FAILED, isAsync);
             break;
         default:
-            napi_throw_error(env, std::to_string(
-                static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS)).c_str(), errMsg.c_str());
+            error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
+                ERR_MESSAGE_FAILED, isAsync);
             break;
     }
+    return error;
 }
 
 napi_value JsAbilityConnectionManager::CreateAbilityConnectionSession(napi_env env, napi_callback_info info)
@@ -237,44 +281,46 @@ napi_value JsAbilityConnectionManager::CreateAbilityConnectionSession(napi_env e
     HILOGD("called.");
     GET_PARAMS(env, info, ARG_COUNT_FOUR);
     napi_value result = nullptr;
-    if (!CheckArgsCount(env, argc == ARG_COUNT_FOUR, "Wrong number of arguments, required 4")) {
+    if (argc != ARG_COUNT_FOUR) {
         HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return result;
     }
 
     std::string serverId;
     if (!JsToString(env, argv[ARG_INDEX_ZERO], "serverId", serverId)) {
         HILOGE("Failed to unwrap serverId.");
-        CreateBusinessError(env, INVALID_PARAMETERS_ERR, "serverId parameter check error.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return result;
     }
     std::shared_ptr<AbilityInfo> abilityInfo = nullptr;
     if (!JsToAbilityInfo(env, argv[ARG_INDEX_ONE], abilityInfo)) {
         HILOGE("Failed to unwrap abilityInfo.");
-        CreateBusinessError(env, INVALID_PARAMETERS_ERR, "Context parameter check error.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return result;
     }
 
     PeerInfo peerInfo;
     if (!JsToPeerInfo(env, argv[ARG_INDEX_TWO], peerInfo)) {
         HILOGE("Failed to unwrap PeerInfo.");
-        CreateBusinessError(env, INVALID_PARAMETERS_ERR, "PeerInfo parameter check error.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return result;
     }
 
     ConnectOption connectOption;
-    if (!JSToConnectOption(env, argv[ARG_INDEX_THREE], connectOption)) {
+    int32_t ret = JSToConnectOption(env, argv[ARG_INDEX_THREE], connectOption);
+    if (ret != ERR_OK) {
         HILOGE("Failed to unwrap ConnectOption.");
-        CreateBusinessError(env, INVALID_PARAMETERS_ERR, "ConnectOption parameter check error.");
+        CreateBusinessError(env, ret);
         return result;
     }
 
     int32_t sessionId = -1;
-    int32_t ret = AbilityConnectionManager::GetInstance().CreateSession(
+    ret = AbilityConnectionManager::GetInstance().CreateSession(
         abilityInfo, peerInfo, connectOption, sessionId);
     if (ret != ERR_OK) {
         HILOGE("create session failed!");
-        CreateBusinessError(env, ret, "create session failed!");
+        CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
         return result;
     }
     NAPI_CALL(env, napi_create_int32(env, sessionId, &result));
@@ -318,7 +364,7 @@ bool JsAbilityConnectionManager::JsToPeerInfo(const napi_env &env, const napi_va
 {
     napi_valuetype argvType = napi_undefined;
     NAPI_CALL_BASE(env, napi_typeof(env, jsValue, &argvType), false);
-    if (!CheckArgsType(env, argvType == napi_object, "PeerInfo", "object")) {
+    if (argvType != napi_object) {
         HILOGE("Parameter verification failed.");
         return false;
     }
@@ -350,34 +396,38 @@ bool JsAbilityConnectionManager::JsToPeerInfo(const napi_env &env, const napi_va
     return true;
 }
 
-bool JsAbilityConnectionManager::JSToConnectOption(const napi_env &env, const napi_value &jsValue,
+int32_t JsAbilityConnectionManager::JSToConnectOption(const napi_env &env, const napi_value &jsValue,
     ConnectOption &option)
 {
     napi_valuetype argvType = napi_undefined;
     NAPI_CALL_BASE(env, napi_typeof(env, jsValue, &argvType), false);
-    if (!CheckArgsType(env, argvType == napi_object, "ConnectOption", "object")) {
+    if (argvType != napi_object) {
         HILOGE("Parameter verification failed.");
-        return false;
+        return ERR_INVALID_PARAMETERS;
     }
 
-    if (!JsObjectToBool(env, jsValue, "needSendBigData", option.needSendBigData)) {
-        HILOGE("Failed to unwrap needSendBigData.");
-        return false;
+    if (!JsObjectToBool(env, jsValue, "needSendData", option.needSendData)) {
+        HILOGE("Failed to unwrap needSendData.");
+        return ERR_INVALID_PARAMETERS;
     }
 
     if (!JsObjectToBool(env, jsValue, "needSendStream", option.needSendStream)) {
         HILOGE("Failed to unwrap needSendStream.");
-        return false;
+        return ERR_INVALID_PARAMETERS;
     }
 
     if (!JsObjectToBool(env, jsValue, "needReceiveStream", option.needReceiveStream)) {
         HILOGE("Failed to unwrap needSendStream.");
-        return false;
+        return ERR_INVALID_PARAMETERS;
     }
 
     napi_value optionsVal;
     if (napi_get_named_property(env, jsValue, "options", &optionsVal) == napi_ok) {
         UnwrapOptions(env, optionsVal, option);
+        if (option.options.GetStringParam(KEY_START_OPTION) == VALUE_START_OPTION_BACKGROUND &&
+            !IsSystemApp()) {
+            return ERR_IS_NOT_SYSTEM_APP;
+        }
     }
 
     napi_value parametersVal;
@@ -385,7 +435,7 @@ bool JsAbilityConnectionManager::JSToConnectOption(const napi_env &env, const na
         UnwrapParameters(env, parametersVal, option);
     }
 
-    return true;
+    return ERR_OK;
 }
 
 bool JsAbilityConnectionManager::UnwrapOptions(napi_env env, napi_value options, ConnectOption &connectOption)
@@ -401,7 +451,7 @@ bool JsAbilityConnectionManager::UnwrapOptions(napi_env env, napi_value options,
     }
 
     if (argvType != napi_object) {
-        HILOGE("options verification failed.");
+        HILOGW("options verification failed.");
         return false;
     }
 
@@ -482,25 +532,24 @@ napi_value JsAbilityConnectionManager::DestroyAbilityConnectionSession(napi_env 
 {
     HILOGD("called.");
     GET_PARAMS(env, info, ARG_COUNT_ONE);
-    napi_value result = nullptr;
-    if (!CheckArgsCount(env, argc == ARG_COUNT_ONE, "Wrong number of arguments, required 1")) {
-        HILOGE("Params not match");
-        return result;
+    if (argc != ARG_COUNT_ONE) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return nullptr;
     }
 
     int32_t sessionId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
         HILOGE("Failed to unwrap sessionId.");
-        return result;
+        return nullptr;
     }
 
     int32_t ret = AbilityConnectionManager::GetInstance().DestroySession(sessionId);
     if (ret != ERR_OK) {
         HILOGE("destroy session failed!");
-        CreateBusinessError(env, ret, "destroy session failed.");
-        return result;
+        CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
     }
-    return result;
+    return nullptr;
 }
 
 napi_value JsAbilityConnectionManager::GetPeerInfoById(napi_env env, napi_callback_info info)
@@ -508,11 +557,11 @@ napi_value JsAbilityConnectionManager::GetPeerInfoById(napi_env env, napi_callba
     HILOGD("called.");
     GET_PARAMS(env, info, ARG_COUNT_ONE);
     napi_value result = nullptr;
-    if (!CheckArgsCount(env, argc == ARG_COUNT_ONE, "Wrong number of arguments, required 1")) {
-        HILOGE("Params not match");
+    if (argc != ARG_COUNT_ONE) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return result;
     }
-
     int32_t sessionId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
         HILOGE("Failed to unwrap sessionId.");
@@ -523,7 +572,7 @@ napi_value JsAbilityConnectionManager::GetPeerInfoById(napi_env env, napi_callba
     int32_t ret = AbilityConnectionManager::GetInstance().getPeerInfoBySessionId(sessionId, peerInfo);
     if (ret != ERR_OK) {
         HILOGE("get peerInfo failed!");
-        CreateBusinessError(env, ret, "get peerInfo failed.");
+        CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
         return result;
     }
 
@@ -559,120 +608,133 @@ napi_value JsAbilityConnectionManager::WrapPeerInfo(napi_env& env,
     return peerInfoObj;
 }
 
-bool JsAbilityConnectionManager::CheckEventType(const std::string& eventType)
+int32_t JsAbilityConnectionManager::CheckEventType(const std::string& eventType)
 {
-    return strcmp(eventType.c_str(), EVENT_CONNECT) == 0 ||
-        strcmp(eventType.c_str(), EVENT_DISCONNECT) == 0 ||
-        strcmp(eventType.c_str(), EVENT_RECEIVE_MESSAGE) == 0 ||
-        strcmp(eventType.c_str(), EVENT_RECEIVE_DATA) == 0 ||
-        strcmp(eventType.c_str(), EVENT_RECEIVE_IMAGE) == 0;
+    if (eventType != EVENT_CONNECT && eventType != EVENT_DISCONNECT &&
+        eventType != EVENT_RECEIVE_MESSAGE && eventType != EVENT_RECEIVE_DATA &&
+        eventType != EVENT_RECEIVE_IMAGE) {
+        return ERR_INVALID_PARAMETERS;
+    }
+
+    if ((eventType == EVENT_RECEIVE_DATA || eventType == EVENT_RECEIVE_IMAGE) &&
+        !IsSystemApp()) {
+        return ERR_IS_NOT_SYSTEM_APP;
+    }
+    return ERR_OK;
 }
 
 napi_value JsAbilityConnectionManager::RegisterAbilityConnectionSessionCallback(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
     GET_PARAMS(env, info, ARG_COUNT_THREE);
-    napi_value result = nullptr;
-    if (!CheckArgsCount(env, argc == ARG_COUNT_THREE, "Wrong number of arguments, required 3")) {
-        HILOGE("Params not match");
-        return result;
+    if (argc != ARG_COUNT_THREE) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return nullptr;
     }
 
     std::string eventType;
     if (!JsToString(env, argv[ARG_INDEX_ZERO], "eventType", eventType)) {
         HILOGE("Failed to unwrap type.");
-        return result;
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return nullptr;
     }
 
-    if (!CheckEventType(eventType)) {
+    int32_t ret = CheckEventType(eventType);
+    if (ret != ERR_OK) {
         HILOGE("The type error. eventType is %{public}s", eventType.c_str());
-        return result;
+        CreateBusinessError(env, ret);
+        return nullptr;
     }
 
     int32_t sessionId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ONE], "sessionId", sessionId)) {
         HILOGE("Failed to unwrap sessionId.");
-        return result;
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return nullptr;
     }
 
     napi_value listenerObj = argv[ARG_INDEX_TWO];
     if (listenerObj == nullptr) {
         HILOGE("listenerObj is nullptr");
-        return result;
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return nullptr;
     }
 
     bool isCallable = false;
-    NAPI_CALL(env, napi_is_callable(env, listenerObj, &isCallable));
-
-    if (!isCallable) {
+    napi_status status = napi_is_callable(env, listenerObj, &isCallable);
+    if (status != napi_ok || !isCallable) {
         HILOGE("Failed to check listenerObj is callable");
-        return result;
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return nullptr;
     }
 
     std::shared_ptr<JsAbilityConnectionSessionListener> listener =
         std::make_shared<JsAbilityConnectionSessionListener>(env);
 
     listener->SetCallback(listenerObj);
-    int32_t ret = AbilityConnectionManager::GetInstance().RegisterEventCallback(
+    ret = AbilityConnectionManager::GetInstance().RegisterEventCallback(
         sessionId, eventType, listener);
     if (ret != ERR_OK) {
         HILOGE("Register event callback failed!");
-        CreateBusinessError(env, ret, "Register event callback failed.");
-        return result;
+        CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
     }
-
-    return result;
+    return nullptr;
 }
 
 napi_value JsAbilityConnectionManager::UnregisterAbilityConnectionSessionCallback(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GET_PARAMS(env, info, ARG_COUNT_THREE);
-    napi_value result = nullptr;
-    if (!CheckArgsCount(env, argc >= ARG_COUNT_TWO, "Wrong number of arguments, at least 2 parameters")) {
-        HILOGE("Params not match");
-        return result;
+    GET_PARAMS(env, info, ARG_COUNT_TWO);
+    if (argc != ARG_COUNT_TWO) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return nullptr;
     }
 
     std::string eventType;
     if (!JsToString(env, argv[ARG_INDEX_ZERO], "eventType", eventType)) {
         HILOGE("Failed to unwrap type.");
-        return result;
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return nullptr;
     }
 
-    if (!CheckEventType(eventType)) {
+    int32_t ret = CheckEventType(eventType);
+    if (ret != ERR_OK) {
         HILOGE("The type error. eventType is %{public}s", eventType.c_str());
-        return result;
+        CreateBusinessError(env, ret);
+        return nullptr;
     }
 
     int32_t sessionId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ONE], "sessionId", sessionId)) {
         HILOGE("Failed to unwrap sessionId.");
-        return result;
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return nullptr;
     }
 
-    int32_t ret = AbilityConnectionManager::GetInstance().UnregisterEventCallback(sessionId, eventType);
+    ret = AbilityConnectionManager::GetInstance().UnregisterEventCallback(sessionId, eventType);
     if (ret != ERR_OK) {
         HILOGE("Unregister event callback failed!");
-        CreateBusinessError(env, ret, "Unregister event callback failed.");
-        return result;
+        CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
     }
-
-    return result;
+    return nullptr;
 }
 
 napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
     GET_PARAMS(env, info, ARG_COUNT_ONE);
-    if (!CheckArgsCount(env, argc == ARG_COUNT_ONE, "Wrong number of arguments, required 1")) {
-        HILOGE("Params not match");
+    if (argc != ARG_COUNT_ONE) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
     int32_t sessionId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
         HILOGE("Failed to unwrap sessionId.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
@@ -691,25 +753,28 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
         env, nullptr, asyncResourceName, ExecuteConnect, CompleteAsyncConnectWork,
         static_cast<void *>(asyncCallbackInfo), &asyncCallbackInfo->asyncWork);
     if (status != napi_ok) {
+        HILOGE("Failed to create async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
-        return nullptr;
+        napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        return promise;
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
+        HILOGE("Failed to queue async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
-        return nullptr;
+        napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        return promise;
     }
 
     napi_threadsafe_function tsfn;
     if (CreateConnectThreadsafeFunction(env, nullptr, &tsfn) != napi_ok) {
+        HILOGE("Failed to create connect function.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
-        return nullptr;
+        napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        return promise;
     }
 
     asyncCallbackInfo->tsfn = tsfn;
@@ -741,7 +806,7 @@ void JsAbilityConnectionManager::ConnectThreadsafeFunctionCallback(napi_env env,
     napi_get_boolean(env, asyncData->result.isConnected, &isConnected);
     napi_set_named_property(env, connectResultObj, "isConnected", isConnected);
 
-    if (asyncData->result.isConnected && !asyncData->result.reason.empty()) {
+    if (!asyncData->result.isConnected && !asyncData->result.reason.empty()) {
         napi_value reason;
         napi_create_string_utf8(env, asyncData->result.reason.c_str(), NAPI_AUTO_LENGTH, &reason);
         napi_set_named_property(env, connectResultObj, "reason", reason);
@@ -774,40 +839,38 @@ void JsAbilityConnectionManager::CompleteAsyncConnectWork(napi_env env, napi_sta
 napi_value JsAbilityConnectionManager::DisConnect(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    napi_value result = nullptr;
     GET_PARAMS(env, info, ARG_COUNT_ONE);
-    if (!CheckArgsCount(env, argc == ARG_COUNT_ONE, "Wrong number of arguments, required 1")) {
-        HILOGE("Params not match");
-        return result;
+    if (argc != ARG_COUNT_ONE) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return nullptr;
     }
 
     int32_t sessionId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
         HILOGE("Failed to unwrap sessionId.");
-        return result;
+        return nullptr;
     }
 
     int32_t ret = AbilityConnectionManager::GetInstance().DisconnectSession(sessionId);
     if (ret != ERR_OK) {
         HILOGE("disconnect session failed!");
-        CreateBusinessError(env, ret, "disconnect session failed.");
-        return result;
+        CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
     }
-    return CreateJsUndefined(env);
+    return nullptr;
 }
 
 void JsAbilityConnectionManager::CompleteAsyncWork(napi_env env, napi_status status, void* data)
 {
     HILOGD("called.");
     AsyncCallbackInfo* asyncData = static_cast<AsyncCallbackInfo*>(data);
-    if (asyncData->result) {
+    if (asyncData->result == ERR_OK) {
         napi_value result;
         napi_get_undefined(env, &result);
         napi_resolve_deferred(env, asyncData->deferred, result);
     } else {
-        napi_value error;
-        napi_create_string_utf8(env, ERR_MESSAGE_FAILED.c_str(), NAPI_AUTO_LENGTH, &error);
-        napi_reject_deferred(env, asyncData->deferred, error);
+        napi_reject_deferred(env, asyncData->deferred,
+            CreateBusinessError(env, asyncData->result, false));
     }
     napi_delete_async_work(env, asyncData->asyncWork);
     delete asyncData;
@@ -817,8 +880,9 @@ napi_value JsAbilityConnectionManager::AcceptConnect(napi_env env, napi_callback
 {
     HILOGD("called.");
     GET_PARAMS(env, info, ARG_COUNT_TWO);
-    if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
-        HILOGE("parameters not match");
+    if (argc != ARG_COUNT_TWO) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
@@ -850,17 +914,19 @@ napi_value JsAbilityConnectionManager::AcceptConnect(napi_env env, napi_callback
         env, nullptr, asyncResourceName, ExecuteAcceptConnect, CompleteAsyncWork,
         static_cast<void *>(asyncCallbackInfo), &asyncCallbackInfo->asyncWork);
     if (status != napi_ok) {
+        HILOGE("Failed to create async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
-        return nullptr;
+        napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        return promise;
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
+        HILOGE("Failed to queue async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
-        return nullptr;
+        napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        return promise;
     }
     return promise;
 }
@@ -868,20 +934,16 @@ napi_value JsAbilityConnectionManager::AcceptConnect(napi_env env, napi_callback
 void JsAbilityConnectionManager::ExecuteAcceptConnect(napi_env env, void *data)
 {
     AsyncCallbackInfo* asyncData = static_cast<AsyncCallbackInfo*>(data);
-    int32_t ret = AbilityConnectionManager::GetInstance().AcceptConnect(asyncData->sessionId, asyncData->token);
-    if (ret != ERR_OK) {
-        HILOGE("accept connect failed.");
-        asyncData->result = false;
-    }
-    asyncData->result = true;
+    asyncData->result = AbilityConnectionManager::GetInstance().AcceptConnect(asyncData->sessionId, asyncData->token);
 }
 
 napi_value JsAbilityConnectionManager::Reject(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
     GET_PARAMS(env, info, ARG_COUNT_TWO);
-    if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
-        HILOGE("Params not match");
+    if (argc != ARG_COUNT_TWO) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
@@ -897,42 +959,41 @@ napi_value JsAbilityConnectionManager::Reject(napi_env env, napi_callback_info i
         return nullptr;
     }
 
-    napi_value result = nullptr;
     int32_t ret = AbilityConnectionManager::GetInstance().Reject(token, reason);
     if (ret != ERR_OK) {
         HILOGE("Reject session failed!");
-        CreateBusinessError(env, ret, "Reject session failed.");
-        return result;
+        CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
     }
-    return result;
+    return nullptr;
 }
 
 napi_value JsAbilityConnectionManager::SendMessage(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
+    napi_deferred deferred;
+    napi_value promise = nullptr;
+    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
+
     GET_PARAMS(env, info, ARG_COUNT_TWO);
-    if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
-        HILOGE("Params not match");
-        return nullptr;
+    if (argc != ARG_COUNT_TWO) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return promise;
     }
 
     int32_t sessionId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
         HILOGE("Failed to unwrap sessionId.");
-        
-        return nullptr;
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return promise;
     }
 
     std::string msg;
     if (!JsToString(env, argv[ARG_INDEX_ONE], "msg", msg)) {
         HILOGE("Failed to unwrap msg.");
-        return nullptr;
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return promise;
     }
-
-    // 创建 Promise 和 deferred 对象
-    napi_deferred deferred;
-    napi_value promise = nullptr;
-    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
 
     AsyncCallbackInfo* asyncCallbackInfo = new AsyncCallbackInfo();
     asyncCallbackInfo->deferred = deferred;
@@ -946,17 +1007,19 @@ napi_value JsAbilityConnectionManager::SendMessage(napi_env env, napi_callback_i
         env, nullptr, asyncResourceName, ExecuteSendMessage, CompleteAsyncWork,
         static_cast<void *>(asyncCallbackInfo), &asyncCallbackInfo->asyncWork);
     if (status != napi_ok) {
+        HILOGE("Failed to create async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
-        return nullptr;
+        napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        return promise;
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
+        HILOGE("Failed to queue async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
-        return nullptr;
+        napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        return promise;
     }
 
     return promise;
@@ -965,25 +1028,33 @@ napi_value JsAbilityConnectionManager::SendMessage(napi_env env, napi_callback_i
 void JsAbilityConnectionManager::ExecuteSendMessage(napi_env env, void *data)
 {
     AsyncCallbackInfo* asyncData = static_cast<AsyncCallbackInfo*>(data);
-    int32_t ret = AbilityConnectionManager::GetInstance().SendMessage(asyncData->sessionId, asyncData->msg);
-    if (ret != ERR_OK) {
-        asyncData->result = false;
-    }
-    asyncData->result = true;
+    asyncData->result = AbilityConnectionManager::GetInstance().SendMessage(asyncData->sessionId, asyncData->msg);
 }
 
 napi_value JsAbilityConnectionManager::SendData(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
+    if (!IsSystemApp()) {
+        HILOGE("Permission verification failed.");
+        CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
+    }
+
+    napi_deferred deferred;
+    napi_value promise = nullptr;
+    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
+
     GET_PARAMS(env, info, ARG_COUNT_TWO);
-    if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
-        HILOGE("Params not match");
-        return nullptr;
+    if (argc != ARG_COUNT_TWO) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return promise;
     }
 
     int32_t sessionId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
-        return nullptr;
+        HILOGE("Failed to unwrap sessionId.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return promise;
     }
 
     void *data;
@@ -1001,72 +1072,73 @@ napi_value JsAbilityConnectionManager::SendData(napi_env env, napi_callback_info
         return nullptr;
     }
 
-    napi_deferred deferred;
-    napi_value promise = nullptr;
-    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
-
     AsyncCallbackInfo* asyncCallbackInfo = new AsyncCallbackInfo();
     asyncCallbackInfo->deferred = deferred;
     asyncCallbackInfo->sessionId = sessionId;
     asyncCallbackInfo->buffer = buffer;
+    CreateSendDataAsyncWork(env, asyncCallbackInfo);
+    return promise;
+}
 
+void JsAbilityConnectionManager::CreateSendDataAsyncWork(napi_env env, AsyncCallbackInfo* asyncCallbackInfo)
+{
     napi_value asyncResourceName;
-    NAPI_CALL(env, napi_create_string_utf8(env, "sendDataAsync", NAPI_AUTO_LENGTH, &asyncResourceName));
+    napi_create_string_utf8(env, "sendDataAsync", NAPI_AUTO_LENGTH, &asyncResourceName);
 
     napi_status status = napi_create_async_work(
         env, nullptr, asyncResourceName, ExecuteSendData, CompleteAsyncWork,
         static_cast<void *>(asyncCallbackInfo), &asyncCallbackInfo->asyncWork);
     if (status != napi_ok) {
+        HILOGE("Failed to create async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
-        return nullptr;
+        napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
+        HILOGE("Failed to queue async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
-        return nullptr;
+        napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
     }
-
-    return promise;
 }
 
 void JsAbilityConnectionManager::ExecuteSendData(napi_env env, void *data)
 {
     AsyncCallbackInfo* asyncData = static_cast<AsyncCallbackInfo*>(data);
-    int32_t ret = AbilityConnectionManager::GetInstance().SendData(asyncData->sessionId, asyncData->buffer);
-    if (ret != ERR_OK) {
-        asyncData->result = false;
-    }
-    asyncData->result = true;
+    asyncData->result = AbilityConnectionManager::GetInstance().SendData(asyncData->sessionId, asyncData->buffer);
 }
 
 napi_value JsAbilityConnectionManager::SendImage(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
+    if (!IsSystemApp()) {
+        HILOGE("Permission verification failed.");
+        CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
+    }
+
+    napi_deferred deferred;
+    napi_value promise = nullptr;
+    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
+
     GET_PARAMS(env, info, ARG_COUNT_TWO);
-    if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
-        HILOGE("Params not match");
-        return nullptr;
+    if (argc != ARG_COUNT_TWO) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return promise;
     }
 
     int32_t sessionId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
         HILOGE("Failed to unwrap sessionId.");
-        return nullptr;
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return promise;
     }
-
-    std::shared_ptr<Media::PixelMap> pixelMapPtr = Media::PixelMapNapi::GetPixelMap(env, argv[ARG_INDEX_ONE]);
-    napi_deferred deferred;
-    napi_value promise = nullptr;
-    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
 
     AsyncCallbackInfo* asyncCallbackInfo = new AsyncCallbackInfo();
     asyncCallbackInfo->deferred = deferred;
     asyncCallbackInfo->sessionId = sessionId;
-    asyncCallbackInfo->image = pixelMapPtr;
+    asyncCallbackInfo->image = Media::PixelMapNapi::GetPixelMap(env, argv[ARG_INDEX_ONE]);
 
     napi_value asyncResourceName;
     NAPI_CALL(env, napi_create_string_utf8(env, "sendImageAsync", NAPI_AUTO_LENGTH, &asyncResourceName));
@@ -1075,17 +1147,19 @@ napi_value JsAbilityConnectionManager::SendImage(napi_env env, napi_callback_inf
         env, nullptr, asyncResourceName, ExecuteSendImage, CompleteAsyncWork,
         static_cast<void *>(asyncCallbackInfo), &asyncCallbackInfo->asyncWork);
     if (status != napi_ok) {
+        HILOGE("Failed to create async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
-        return nullptr;
+        napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        return promise;
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
+        HILOGE("Failed to queue async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
-        return nullptr;
+        napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        return promise;
     }
 
     return promise;
@@ -1094,66 +1168,72 @@ napi_value JsAbilityConnectionManager::SendImage(napi_env env, napi_callback_inf
 void JsAbilityConnectionManager::ExecuteSendImage(napi_env env, void *data)
 {
     AsyncCallbackInfo* asyncData = static_cast<AsyncCallbackInfo*>(data);
-    int32_t ret = AbilityConnectionManager::GetInstance().SendImage(asyncData->sessionId, asyncData->image);
-    if (ret != ERR_OK) {
-        asyncData->result = false;
-    }
-    asyncData->result = true;
+    asyncData->result = AbilityConnectionManager::GetInstance().SendImage(asyncData->sessionId, asyncData->image);
 }
 
 napi_value JsAbilityConnectionManager::CreateStream(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
-    GET_PARAMS(env, info, ARG_COUNT_TWO);
-    if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
-        HILOGE("Params not match");
-        return nullptr;
-    }
-
-    int32_t sessionId = -1;
-    if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
-        HILOGE("Failed to unwrap sessionId.");
-        return nullptr;
-    }
-
-    HILOGI("StreamParam.");
-    StreamParams streamParam;
-    if (!JsToStreamParam(env, argv[ARG_INDEX_ONE], streamParam)) {
-        HILOGE("Failed to unwrap streamParam.");
-        CreateBusinessError(env, INVALID_PARAMETERS_ERR, "ConnectOption parameter check error.");
-        return nullptr;
+    if (!IsSystemApp()) {
+        HILOGE("Permission verification failed.");
+        CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
     }
 
     napi_deferred deferred;
     napi_value promise = nullptr;
     NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
 
+    GET_PARAMS(env, info, ARG_COUNT_TWO);
+    if (argc != ARG_COUNT_TWO) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return promise;
+    }
+
+    int32_t sessionId = -1;
+    if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return promise;
+    }
+
+    HILOGI("StreamParam.");
+    StreamParams streamParam;
+    if (!JsToStreamParam(env, argv[ARG_INDEX_ONE], streamParam)) {
+        HILOGE("Failed to unwrap streamParam.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return promise;
+    }
+
     AsyncCallbackInfo* asyncCallbackInfo = new AsyncCallbackInfo();
     asyncCallbackInfo->deferred = deferred;
     asyncCallbackInfo->sessionId = sessionId;
     asyncCallbackInfo->streamParam = streamParam;
+    CreateStreamAsyncWork(env, asyncCallbackInfo);
 
+    return promise;
+}
+
+void JsAbilityConnectionManager::CreateStreamAsyncWork(napi_env env, AsyncCallbackInfo* asyncCallbackInfo)
+{
     napi_value asyncResourceName;
-    NAPI_CALL(env, napi_create_string_utf8(env, "createStreamAsync", NAPI_AUTO_LENGTH, &asyncResourceName));
+    napi_create_string_utf8(env, "createStreamAsync", NAPI_AUTO_LENGTH, &asyncResourceName);
 
     napi_status status = napi_create_async_work(
         env, nullptr, asyncResourceName, ExecuteCreateStream, CompleteAsyncCreateStreamWork,
         static_cast<void *>(asyncCallbackInfo), &asyncCallbackInfo->asyncWork);
     if (status != napi_ok) {
+        HILOGE("Failed to create async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
-        return nullptr;
+        napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
+        HILOGE("Failed to queue async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_throw_error(env, nullptr, ERR_MESSAGE_FAILED.c_str());
-        return nullptr;
+        napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
     }
-
-    return promise;
 }
 
 bool JsAbilityConnectionManager::JsToStreamParam(const napi_env &env, const napi_value &jsValue,
@@ -1161,7 +1241,7 @@ bool JsAbilityConnectionManager::JsToStreamParam(const napi_env &env, const napi
 {
     napi_valuetype argvType = napi_undefined;
     NAPI_CALL_BASE(env, napi_typeof(env, jsValue, &argvType), false);
-    if (!CheckArgsType(env, argvType == napi_object, "StreamParam", "object")) {
+    if (argvType != napi_object) {
         HILOGE("Parameter verification failed.");
         return false;
     }
@@ -1191,26 +1271,21 @@ void JsAbilityConnectionManager::ExecuteCreateStream(napi_env env, void *data)
 {
     AsyncCallbackInfo* asyncData = static_cast<AsyncCallbackInfo*>(data);
 
-    int32_t ret = AbilityConnectionManager::GetInstance().CreateStream(asyncData->sessionId,
+    asyncData->result = AbilityConnectionManager::GetInstance().CreateStream(asyncData->sessionId,
         asyncData->streamParam, asyncData->streamId);
-    if (ret != ERR_OK) {
-        asyncData->result = false;
-    }
-    asyncData->result = true;
 }
 
 void JsAbilityConnectionManager::CompleteAsyncCreateStreamWork(napi_env env, napi_status status, void* data)
 {
     HILOGD("called.");
     AsyncCallbackInfo* asyncData = static_cast<AsyncCallbackInfo*>(data);
-    if (asyncData->result) {
+    if (asyncData->result == ERR_OK) {
         napi_value result;
         napi_create_int32(env, asyncData->streamId, &result);
         napi_resolve_deferred(env, asyncData->deferred, result);
     } else {
-        napi_value error;
-        napi_create_string_utf8(env, ERR_MESSAGE_FAILED.c_str(), NAPI_AUTO_LENGTH, &error);
-        napi_reject_deferred(env, asyncData->deferred, error);
+        napi_reject_deferred(env, asyncData->deferred,
+            CreateBusinessError(env, asyncData->result, false));
     }
     napi_delete_async_work(env, asyncData->asyncWork);
     delete asyncData;
@@ -1219,28 +1294,36 @@ void JsAbilityConnectionManager::CompleteAsyncCreateStreamWork(napi_env env, nap
 napi_value JsAbilityConnectionManager::SetSurfaceId(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
+    if (!IsSystemApp()) {
+        HILOGE("Permission verification failed.");
+        CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
+    }
+
     GET_PARAMS(env, info, ARG_COUNT_THREE);
-    if (!CheckArgsCount(env, argc == ARG_COUNT_THREE, "Wrong number of arguments, required 3")) {
-        HILOGE("Params not match");
+    if (argc != ARG_COUNT_THREE) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
     int32_t streamId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "streamId", streamId)) {
         HILOGE("Parameter parsing failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
     std::string surfaceId;
     if (!JsToString(env, argv[ARG_INDEX_ONE], "surfaceId", surfaceId)) {
         HILOGE("surfaceId parsing failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
     SurfaceParams surfaceParam;
     if (!JsToSurfaceParam(env, argv[ARG_INDEX_TWO], surfaceParam)) {
         HILOGE("Failed to unwrap surfaceParam.");
-        CreateBusinessError(env, INVALID_PARAMETERS_ERR, "ConnectOption parameter check error.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
@@ -1248,7 +1331,7 @@ napi_value JsAbilityConnectionManager::SetSurfaceId(napi_env env, napi_callback_
         surfaceId, surfaceParam);
     if (ret != ERR_OK) {
         HILOGE("SetSurfaceId failed.");
-        return nullptr;
+        CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
     }
     return nullptr;
 }
@@ -1258,7 +1341,7 @@ bool JsAbilityConnectionManager::JsToSurfaceParam(const napi_env &env, const nap
 {
     napi_valuetype argvType = napi_undefined;
     NAPI_CALL_BASE(env, napi_typeof(env, jsValue, &argvType), false);
-    if (!CheckArgsType(env, argvType == napi_object, "SurfaceParams", "object")) {
+    if (argvType != napi_object) {
         HILOGE("Parameter verification failed.");
         return false;
     }
@@ -1303,22 +1386,29 @@ bool JsAbilityConnectionManager::JsToSurfaceParam(const napi_env &env, const nap
 napi_value JsAbilityConnectionManager::GetSurfaceId(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
+    if (!IsSystemApp()) {
+        HILOGE("Permission verification failed.");
+        CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
+    }
+
     GET_PARAMS(env, info, ARG_COUNT_TWO);
-    if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
-        HILOGE("Params not match");
+    if (argc != ARG_COUNT_TWO) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
     int32_t streamId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "streamId", streamId)) {
         HILOGE("Parameter parsing failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
     SurfaceParams surfaceParam;
     if (!JsToSurfaceParam(env, argv[ARG_INDEX_ONE], surfaceParam)) {
         HILOGE("Failed to unwrap surfaceParam.");
-        CreateBusinessError(env, INVALID_PARAMETERS_ERR, "ConnectOption parameter check error.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
@@ -1326,6 +1416,7 @@ napi_value JsAbilityConnectionManager::GetSurfaceId(napi_env env, napi_callback_
     int32_t ret = AbilityConnectionManager::GetInstance().GetSurfaceId(streamId, surfaceParam, surfaceId);
     if (ret != ERR_OK) {
         HILOGE("SetSurfaceId failed.");
+        CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
         return nullptr;
     }
 
@@ -1337,53 +1428,66 @@ napi_value JsAbilityConnectionManager::GetSurfaceId(napi_env env, napi_callback_
 napi_value JsAbilityConnectionManager::UpdateSurfaceParam(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
+    if (!IsSystemApp()) {
+        HILOGE("Permission verification failed.");
+        CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
+    }
+
     GET_PARAMS(env, info, ARG_COUNT_THREE);
-    napi_value result = nullptr;
-    if (!CheckArgsCount(env, argc == ARG_COUNT_TWO, "Wrong number of arguments, required 2")) {
-        HILOGE("Params not match");
-        return result;
+    if (argc != ARG_COUNT_THREE) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return nullptr;
     }
 
     int32_t streamId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "streamId", streamId)) {
         HILOGE("streamId parsing failed.");
-        return result;
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return nullptr;
     }
 
     SurfaceParams surfaceParam;
     if (!JsToSurfaceParam(env, argv[ARG_INDEX_ONE], surfaceParam)) {
         HILOGE("Failed to unwrap surfaceParam.");
-        CreateBusinessError(env, INVALID_PARAMETERS_ERR, "ConnectOption parameter check error.");
-        return result;
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return nullptr;
     }
 
     int32_t ret = AbilityConnectionManager::GetInstance().UpdateSurfaceParam(streamId, surfaceParam);
     if (ret != ERR_OK) {
         HILOGE("SetSurfaceId failed.");
-        return result;
+        CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
     }
-    return result;
+    return nullptr;
 }
 
 napi_value JsAbilityConnectionManager::DestroyStream(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
+    if (!IsSystemApp()) {
+        HILOGE("Permission verification failed.");
+        CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
+    }
+
     GET_PARAMS(env, info, ARG_COUNT_ONE);
-    if (!CheckArgsCount(env, argc == ARG_COUNT_ONE, "Wrong number of arguments, required 1")) {
-        HILOGE("Params not match");
+    if (argc != ARG_COUNT_ONE) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
     int32_t streamId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "streamId", streamId)) {
         HILOGE("Parameter parsing failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
     int32_t ret = AbilityConnectionManager::GetInstance().DestroyStream(streamId);
     if (ret != ERR_OK) {
         HILOGE("DestroyStream failed.");
-        return nullptr;
+        CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
     }
     return nullptr;
 }
@@ -1391,22 +1495,29 @@ napi_value JsAbilityConnectionManager::DestroyStream(napi_env env, napi_callback
 napi_value JsAbilityConnectionManager::StartStream(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
+    if (!IsSystemApp()) {
+        HILOGE("Permission verification failed.");
+        CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
+    }
+
     GET_PARAMS(env, info, ARG_COUNT_ONE);
-    if (!CheckArgsCount(env, argc == ARG_COUNT_ONE, "Wrong number of arguments, required 1")) {
-        HILOGE("Params not match");
+    if (argc != ARG_COUNT_ONE) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
     int32_t streamId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "streamId", streamId)) {
         HILOGE("Parameter parsing failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
     int32_t ret = AbilityConnectionManager::GetInstance().StartStream(streamId);
     if (ret != ERR_OK) {
         HILOGE("StartStream failed.");
-        return nullptr;
+        CreateBusinessError(env, ret);
     }
     return nullptr;
 }
@@ -1414,33 +1525,133 @@ napi_value JsAbilityConnectionManager::StartStream(napi_env env, napi_callback_i
 napi_value JsAbilityConnectionManager::StopStream(napi_env env, napi_callback_info info)
 {
     HILOGD("called.");
+    if (!IsSystemApp()) {
+        HILOGE("Permission verification failed.");
+        CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
+    }
+
     GET_PARAMS(env, info, ARG_COUNT_ONE);
-    if (!CheckArgsCount(env, argc == ARG_COUNT_ONE, "Wrong number of arguments, required 1")) {
-        HILOGE("Params not match");
+    if (argc != ARG_COUNT_ONE) {
+        HILOGE("CheckArgsCount failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
     int32_t streamId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "streamId", streamId)) {
         HILOGE("Parameter parsing failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
     int32_t ret = AbilityConnectionManager::GetInstance().StopStream(streamId);
     if (ret != ERR_OK) {
         HILOGE("StopStream failed.");
-        return nullptr;
+        CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
     }
     return nullptr;
 }
 
-napi_value JsAbilityConnectionManagerInit(napi_env env, napi_value exports)
+void InitConnectOptionParams(napi_env& env, napi_value& exports)
 {
-    HILOGD("called.");
-    if (env == nullptr || exports == nullptr) {
-        HILOGE("Invalid input parameters");
-        return nullptr;
-    }
+    char propertyName[] = "ConnectOptionParams";
+    napi_value startOptionKey = nullptr;
+    napi_value startToForeground = nullptr;
+    napi_value startTobackground = nullptr;
+    napi_create_string_utf8(env, KEY_START_OPTION.c_str(), KEY_START_OPTION.size(), &startOptionKey);
+    napi_create_string_utf8(env, VALUE_START_OPTION_FOREGROUND.c_str(),
+        VALUE_START_OPTION_FOREGROUND.size(), &startToForeground);
+    napi_create_string_utf8(env, VALUE_START_OPTION_BACKGROUND.c_str(),
+        VALUE_START_OPTION_BACKGROUND.size(), &startTobackground);
+
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("KEY_START_OPTION", startOptionKey),
+        DECLARE_NAPI_STATIC_PROPERTY("VALUE_START_OPTION_FOREGROUND", startToForeground),
+        DECLARE_NAPI_STATIC_PROPERTY("VALUE_START_OPTION_BACKGROUND", startTobackground),
+    };
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    napi_set_named_property(env, exports, propertyName, obj);
+}
+
+void InitDisconnectReason(napi_env& env, napi_value& exports)
+{
+    char propertyName[] = "DisconnectReason";
+    napi_value peerAppExit = nullptr;
+    napi_value networkDisconnected = nullptr;
+    napi_create_int32(env, PEER_APP_EXIT, &peerAppExit);
+    napi_create_int32(env, NETWORK_DISCONNECTED, &networkDisconnected);
+
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("PEER_APP_EXIT", peerAppExit),
+        DECLARE_NAPI_STATIC_PROPERTY("NETWORK_DISCONNECTED", networkDisconnected),
+    };
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    napi_set_named_property(env, exports, propertyName, obj);
+}
+
+void InitFlipOption(napi_env& env, napi_value& exports)
+{
+    char propertyName[] = "FlipOption";
+    napi_value horizontal = nullptr;
+    napi_value vertical = nullptr;
+    napi_create_int32(env, HORIZONTAL, &horizontal);
+    napi_create_int32(env, VERTICAL, &vertical);
+
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("HORIZONTAL", horizontal),
+        DECLARE_NAPI_STATIC_PROPERTY("VERTICAL", vertical),
+    };
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    napi_set_named_property(env, exports, propertyName, obj);
+}
+
+void InitStreamRole(napi_env& env, napi_value& exports)
+{
+    char propertyName[] = "StreamRole";
+    napi_value source = nullptr;
+    napi_value sink = nullptr;
+    napi_create_int32(env, SOURCE, &source);
+    napi_create_int32(env, SINK, &sink);
+
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("SOURCE", source),
+        DECLARE_NAPI_STATIC_PROPERTY("SINK", sink),
+    };
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    napi_set_named_property(env, exports, propertyName, obj);
+}
+
+void InitVideoPixelFormat(napi_env& env, napi_value& exports)
+{
+    char propertyName[] = "VideoPixelFormat";
+    napi_value unknown = nullptr;
+    napi_value nv12 = nullptr;
+    napi_value nv21 = nullptr;
+    napi_create_int32(env, UNKNOWN, &unknown);
+    napi_create_int32(env, NV12, &nv12);
+    napi_create_int32(env, NV21, &nv21);
+
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("UNKNOWN", unknown),
+        DECLARE_NAPI_STATIC_PROPERTY("NV12", nv12),
+        DECLARE_NAPI_STATIC_PROPERTY("NV21", nv21),
+    };
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    napi_set_named_property(env, exports, propertyName, obj);
+}
+
+void InitFunction(napi_env env, napi_value exports)
+{
     static napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("createAbilityConnectionSession",
             JsAbilityConnectionManager::CreateAbilityConnectionSession),
@@ -1464,8 +1675,23 @@ napi_value JsAbilityConnectionManagerInit(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("startStream", JsAbilityConnectionManager::StartStream),
         DECLARE_NAPI_FUNCTION("stopStream", JsAbilityConnectionManager::StopStream),
     };
-    NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
-    AbilityConnectionManager::GetInstance().Init();
+    napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc);
+}
+
+napi_value JsAbilityConnectionManagerInit(napi_env env, napi_value exports)
+{
+    HILOGD("called.");
+    if (env == nullptr || exports == nullptr) {
+        HILOGE("Invalid input parameters");
+        return nullptr;
+    }
+    InitConnectOptionParams(env, exports);
+    InitDisconnectReason(env, exports);
+    InitFlipOption(env, exports);
+    InitStreamRole(env, exports);
+    InitVideoPixelFormat(env, exports);
+    InitFunction(env, exports);
+
     HILOGI("napi_define_properties end");
     return exports;
 }

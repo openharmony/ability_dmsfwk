@@ -35,6 +35,7 @@ enum class StreamRole : int32_t {
 };
 
 enum class FlipOption : int32_t {
+    UNKNOWN = -1,
     HORIZONTAL = 0,
     VERTICAL = 1,
 };
@@ -97,7 +98,7 @@ struct PeerInfo : public Parcelable {
 };
 
 struct ConnectOption : public Parcelable {
-    bool needSendBigData;
+    bool needSendData;
     bool needSendStream;
     bool needReceiveStream;
     AAFwk::WantParams options;
@@ -128,7 +129,7 @@ struct SurfaceParams {
     int32_t height;
     VideoPixelFormat format;
     int32_t rotation;
-    FlipOption flip;
+    FlipOption flip = FlipOption::UNKNOWN;
 };
 
 struct EventCallbackInfo {

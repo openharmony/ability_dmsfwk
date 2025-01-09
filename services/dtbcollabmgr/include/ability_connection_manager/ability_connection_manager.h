@@ -34,7 +34,6 @@ public:
     AbilityConnectionManager();
     ~AbilityConnectionManager();
     
-    void Init();
     int32_t CreateSession(std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo,
         PeerInfo& peerInfo, ConnectOption& opt, int32_t& sessionId);
     int32_t DestroySession(int32_t sessionId);
@@ -49,7 +48,7 @@ public:
     int32_t Reject(const std::string& token, const std::string& reason);
 
     int32_t NotifyCollabResult(int32_t sessionId, int32_t result, const std::string& peerServerName,
-        const std::string& dmsServerToken);
+        const std::string& dmsServerToken, const std::string& reason);
     int32_t NotifyDisconnect(int32_t sessionId);
 
     int32_t SendMessage(int32_t sessionId, const std::string& msg);
@@ -66,7 +65,7 @@ public:
     int32_t RegisterEventCallback(int32_t sessionId, const std::string& eventType,
         const std::shared_ptr<JsAbilityConnectionSessionListener>& listener);
     int32_t UnregisterEventCallback(int32_t sessionId, const std::string& eventType);
-    void NotifyWifiOpen();
+    int32_t NotifyWifiOpen(int32_t sessionId);
 
     private:
     std::shared_mutex sessionMutex_;
@@ -78,9 +77,6 @@ public:
     std::map<int32_t, int32_t> streamMap_;
 
 private:
-    void InitWifiStateListener();
-    void InitWifiSemiStateListener();
-    void StartEvent();
     bool IsVaildPeerInfo(const PeerInfo& peerInfo);
     bool IsVaildConnectOption(const ConnectOption& opt);
     std::string GetServerSocketName(int32_t userId, int32_t pid, const std::string& bundle);

@@ -40,7 +40,6 @@ enum class SessionStatus : int32_t {
 };
 
 enum class TransChannelType : int32_t {
-    CONTROL_CHANNEL,
     MESSAGE_CHANNEL,
     DATA_CHANNEL,
     STREAM_CHANNEL_BYTES,
@@ -53,12 +52,20 @@ enum class CollabrateDirection : int32_t {
 };
 
 enum class MessageType : uint32_t  {
-    MESSAGE_NORMAL,
-    MESSAGE_WIFI_STATUS,
-    MESSAGE_UPDATE_STREAM_CHANNEL,
-    MESSAGE_STREAM_STATUS,
-    MESSAGE_STREAM_ENCODING
+    NORMAL,
+    WIFI_OPEN,
+    UPDATE_RECV_ENGINE_CHANNEL,
+    UPDATE_SENDER_ENGINE_CHANNEL,
+    RECEIVE_STREAM_START,
+    STREAM_ENCODING
 };
+
+typedef enum {
+    SURFACE_ROTATE_NONE = 0,
+    SURFACE_ROTATE_90 = 90,
+    SURFACE_ROTATE_180 = 180,
+    SURFACE_ROTATE_270 = 270,
+} SurfaceRotateParams;
 
 struct TransChannelInfo {
     int32_t channelId;
@@ -84,15 +91,16 @@ public:
     int32_t Disconnect();
     int32_t AcceptConnect(const std::string& token);
 
-    int32_t HandleCollabResult(int32_t result, const std::string& peerSocketName, const std::string& dmsServerToken);
+    int32_t HandleCollabResult(int32_t result, const std::string& peerSocketName,
+        const std::string& dmsServerToken, const std::string& reason);
     int32_t HandleDisconnect();
 
-    int32_t SendMessage(const std::string& msg, const MessageType& messageType = MessageType::MESSAGE_NORMAL);
+    int32_t SendMessage(const std::string& msg, const MessageType& messageType = MessageType::NORMAL);
     int32_t SendData(const std::shared_ptr<AVTransDataBuffer>& buffer);
     int32_t SendImage(const std::shared_ptr<Media::PixelMap>& image);
 
     int32_t CreateStream(int32_t streamId, const StreamParams& param);
-    int32_t DestroyStream(int32_t streamId);
+    int32_t DestroyStream();
     int32_t SetSurfaceId(const std::string& surfaceId, const SurfaceParams& param);
     int32_t GetSurfaceId(const SurfaceParams& param, std::string& surfaceId);
     int32_t UpdateSurfaceParam(const SurfaceParams& param);
@@ -108,8 +116,7 @@ public:
     int32_t RegisterEventCallback(const std::string& eventType,
         const std::shared_ptr<JsAbilityConnectionSessionListener>& listener);
     int32_t UnregisterEventCallback(const std::string& eventType);
-    int32_t NotifyRemoteWifiOpen();
-    int32_t CheckWifiState();
+    int32_t ConnectStreamChannel();
     void UpdateEngineTransChannel();
     
 private:
@@ -139,6 +146,14 @@ private:
 
     void ExeuteConnectCallback(const ConnectResult& result);
     int32_t ExeuteEventCallback(const std::string& eventType, const EventCallbackInfo& info);
+    SurfaceParam ConvertToSurfaceParam(const SurfaceParams& param);
+    int32_t StartRecvEngine();
+    int32_t StartSenderEngine();
+    int32_t ConnectTransChannel(const TransChannelType channelType);
+    int32_t DoConnectStreamChannel(int32_t channelId);
+    void UpdateRecvEngineTransChannel();
+    void UpdateSenderEngineTransChannel();
+    void ExeuteMessageEventCallback(const std::string msg);
 
 private:
     class CollabChannelListener : public IChannelListener {
@@ -204,6 +219,7 @@ private:
     std::shared_ptr<AVSenderEngine> senderEngine_ = nullptr;
     std::shared_ptr<AVReceiverEngine> recvEngine_ = nullptr;
     std::shared_ptr<IEngineListener> pixelMapListener = nullptr;
+    EngineState recvEngineState_ = EngineState::EMPTY;
 };
 } // namespace DistributedCollab
 } // namespace OHOS

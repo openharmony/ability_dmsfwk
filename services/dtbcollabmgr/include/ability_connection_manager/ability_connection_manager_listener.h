@@ -27,8 +27,9 @@ public:
     ~AbilityConnectionManagerListener() = default;
     
     int32_t NotifyCollabResult(int32_t sessionId, int32_t result, const std::string& peerServerName,
-        const std::string& dmsServerToken) override;
+        const std::string& dmsServerToken, const std::string& reason) override;
     int32_t NotifyDisconnect(int32_t sessionId) override;
+    int32_t NotifyWifiOpen(int32_t sessionId) override;
 };
 } // namespace DistributedCollab
 } // namespace OHOS

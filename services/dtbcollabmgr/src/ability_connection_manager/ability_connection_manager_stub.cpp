@@ -37,6 +37,8 @@ AbilityConnectionManagerStub::AbilityConnectionManagerStub()
         &AbilityConnectionManagerStub::NotifyCollabResultInner;
     funcsMap_[static_cast<uint32_t>(IAbilityConnectionManager::Message::NOTIFY_DIS_CONNECT)] =
         &AbilityConnectionManagerStub::NotifyDisconnectInner;
+    funcsMap_[static_cast<uint32_t>(IAbilityConnectionManager::Message::NOTIFY_WIFI_OPEN)] =
+        &AbilityConnectionManagerStub::NotifyWifiOpenInner;
 }
 
 AbilityConnectionManagerStub::~AbilityConnectionManagerStub()
@@ -81,7 +83,9 @@ int32_t AbilityConnectionManagerStub::NotifyCollabResultInner(MessageParcel& dat
     PARCEL_READ_HELPER(data, String, peerSocketName);
     std::string dmsServerToken = "";
     PARCEL_READ_HELPER(data, String, dmsServerToken);
-    int32_t result = NotifyCollabResult(sessionId, startResult, peerSocketName, dmsServerToken);
+    std::string reason = "";
+    PARCEL_READ_HELPER(data, String, reason);
+    int32_t result = NotifyCollabResult(sessionId, startResult, peerSocketName, dmsServerToken, reason);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_HELPER(reply, Int32, result);
     return ERR_NONE;
@@ -93,6 +97,18 @@ int32_t AbilityConnectionManagerStub::NotifyDisconnectInner(MessageParcel& data,
     PARCEL_READ_HELPER(data, Int32, sessionId);
     
     int32_t result = NotifyDisconnect(sessionId);
+    HILOGI("result = %{public}d", result);
+    PARCEL_WRITE_HELPER(reply, Int32, result);
+    return ERR_NONE;
+}
+
+int32_t AbilityConnectionManagerStub::NotifyWifiOpenInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("called.");
+    int32_t sessionId = -1;
+    PARCEL_READ_HELPER(data, Int32, sessionId);
+    
+    int32_t result = NotifyWifiOpen(sessionId);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_HELPER(reply, Int32, result);
     return ERR_NONE;
