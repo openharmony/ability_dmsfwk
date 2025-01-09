@@ -132,6 +132,7 @@ void CommonEventListener::OnUserSwitched()
         DMSContinueRecvMgr::GetInstance().OnContinueSwitchOff();
         HILOGI("ICurrentContinueSwitch is off, %{public}d", DataShareManager::GetInstance()
             .IsCurrentContinueSwitchOn());
+        DSchedContinueManager::GetInstance().UnInit();
     };
 }
 } // namespace DistributedSchedule
