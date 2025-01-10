@@ -595,6 +595,14 @@ int32_t DSchedContinueManager::NotifyQuickStartState(StateCallbackInfo &stateCal
         AddStateCallbackData(stateCallbackInfo, nweStateCallbackData);
         return ERR_OK;
     }
+
+    if (stateCallbackDataExist->remoteObject == nullptr) {
+        stateCallbackDataExist->state = state;
+        stateCallbackDataExist->message = message;
+        StateCallbackData *stateCallbackData = stateCallbackDataExist.get();
+        AddStateCallbackData(stateCallbackInfo, *stateCallbackData);
+        HILOGW("IPC remote object for quick start callback is null, state saved.");
+    }
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         HILOGE("Write interface token failed");
