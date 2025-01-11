@@ -127,7 +127,10 @@ private:
         std::vector<std::shared_ptr<AVTransStreamData>>,
         CompareAVTransStreamData>
         dataQueue_;
-    std::shared_ptr<IChannelListener> listener_ = nullptr;
+
+    std::mutex channelMutex_;
+    std::vector<std::shared_ptr<IChannelListener>> listeners_;
+
     std::mutex queueMutex_;
     std::condition_variable cv_;
     std::atomic<bool> isRunning_ = false;

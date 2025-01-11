@@ -238,6 +238,7 @@ ohos_shared_library("distributedschedsvr") {
     "os_account:libaccountkits",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "screenlock_mgr:screenlock_client",
     "wifi:wifi_sdk",
     "window_manager:libwsutils",
     "window_manager:scene_session",

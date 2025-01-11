@@ -252,17 +252,21 @@ void AVReceiverFilter::OnBufferAvailable()
 void AVReceiverFilter::OnError(const int32_t errorCode)
 {
     HILOGE("AVReceiverFilter::OnError errcode: %{public}d", errorCode);
-    if (listener_) {
-        listener_->OnError(channelId_, errorCode);
+    std::lock_guard<std::mutex> lock(channelMutex_);
+    if (!listeners_.empty()) {
+        for (const auto& listener: listeners_)
+        listener->OnError(channelId_, errorCode);
     }
 }
 
 void AVReceiverFilter::SetChannelListener(int32_t channelId)
 {
     HILOGI("AVReceiverFilter::SetChannelListener enter");
-    listener_ = std::make_shared<AVReceiverFilterListener>(shared_from_this());
+    std::lock_guard<std::mutex> lock(channelMutex_);
+    std::shared_ptr<IChannelListener> listener = std::make_shared<AVReceiverFilterListener>(shared_from_this());
     channelId_ = channelId;
-    ChannelManager::GetInstance().RegisterChannelListener(channelId_, listener_);
+    ChannelManager::GetInstance().RegisterChannelListener(channelId_, listener);
+    listeners_.push_back(listener);
 }
 
 void AVReceiverFilter::SetEngineListener(const std::shared_ptr<IEngineListener>& listener)
