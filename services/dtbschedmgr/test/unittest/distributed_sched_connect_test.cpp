@@ -1051,7 +1051,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectAbilityFromRemote004, TestSize.L
 HWTEST_F(DistributedSchedConnectTest, ProcessDeviceOffline006, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedConnectTest ProcessDeviceOffline006 start" << std::endl;
-    DistributedSchedService::GetInstance().ProcessDeviceOffline("123_remote_device_id");
+    EXPECT_NO_FATAL_FAILURE(DistributedSchedService::GetInstance().ProcessDeviceOffline("123_remote_device_id"));
     DTEST_LOG << "DistributedSchedConnectTest ProcessDeviceOffline006 end" << std::endl;
 }
 
@@ -1064,7 +1064,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessDeviceOffline006, TestSize.Level3)
 HWTEST_F(DistributedSchedConnectTest, ProcessDeviceOffline007, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedConnectTest ProcessDeviceOffline007 start" << std::endl;
-    DistributedSchedService::GetInstance().ProcessDeviceOffline("");
+    EXPECT_NO_FATAL_FAILURE(DistributedSchedService::GetInstance().ProcessDeviceOffline(""));
     DTEST_LOG << "DistributedSchedConnectTest ProcessDeviceOffline007 end" << std::endl;
 }
 
@@ -1079,7 +1079,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessDeviceOffline008, TestSize.Level3)
     DTEST_LOG << "DistributedSchedConnectTest ProcessDeviceOffline008 start" << std::endl;
     std::string deviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(deviceId);
-    DistributedSchedService::GetInstance().ProcessDeviceOffline(deviceId);
+    EXPECT_NO_FATAL_FAILURE(DistributedSchedService::GetInstance().ProcessDeviceOffline(deviceId));
     DTEST_LOG << "DistributedSchedConnectTest ProcessDeviceOffline008 end" << std::endl;
 }
 
@@ -1143,7 +1143,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessConnectDied005, TestSize.Level4)
     DTEST_LOG << "DistributedSchedConnectTest ProcessConnectDied005 start" << std::endl;
     DistributedSchedService::GetInstance().ProcessConnectDied(nullptr);
     sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
-    DistributedSchedService::GetInstance().ProcessConnectDied(connect);
+    EXPECT_NO_FATAL_FAILURE(DistributedSchedService::GetInstance().ProcessConnectDied(connect));
     DTEST_LOG << "DistributedSchedConnectTest ProcessConnectDied005 end" << std::endl;
 }
 
@@ -1159,7 +1159,8 @@ HWTEST_F(DistributedSchedConnectTest, NotifyProcessDied001, TestSize.Level4)
     TargetComponent targetComponent {TargetComponent::HARMONY_COMPONENT};
     CallerInfo callerInfo;
     DistributedSchedService::GetInstance().NotifyProcessDied("", callerInfo, targetComponent);
-    DistributedSchedService::GetInstance().NotifyProcessDied("123_remote_device_id", callerInfo, targetComponent);
+    EXPECT_NO_FATAL_FAILURE(DistributedSchedService::GetInstance().NotifyProcessDied("123_remote_device_id",
+        callerInfo, targetComponent));
     DTEST_LOG << "DistributedSchedConnectTest NotifyProcessDied001 end" << std::endl;
 }
 
@@ -1448,7 +1449,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessCallerDied001, TestSize.Level4)
 {
     DTEST_LOG << "DistributedSchedServiceTest ProcessCallerDied001 start" << std::endl;
     int32_t deviceType = IDistributedSched::CALLER;
-    DistributedSchedService::GetInstance().ProcessCallerDied(nullptr, deviceType);
+    EXPECT_NO_FATAL_FAILURE(DistributedSchedService::GetInstance().ProcessCallerDied(nullptr, deviceType));
     DTEST_LOG << "DistributedSchedServiceTest ProcessCallerDied001 end" << std::endl;
 }
 
@@ -1462,7 +1463,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessCallerDied002, TestSize.Level4)
     DTEST_LOG << "DistributedSchedServiceTest ProcessCallerDied002 start" << std::endl;
     sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
     int32_t deviceType = IDistributedSched::CALLER;
-    DistributedSchedService::GetInstance().ProcessCallerDied(connect, deviceType);
+    EXPECT_NO_FATAL_FAILURE(DistributedSchedService::GetInstance().ProcessCallerDied(connect, deviceType));
     DTEST_LOG << "DistributedSchedServiceTest ProcessCallerDied002 end" << std::endl;
 }
 
@@ -1480,7 +1481,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessCallerDied003, TestSize.Level4)
     sptr<IRemoteObject> callbackWrapper(new AbilityConnectionWrapperStubTest(connect));
     ConnectInfo connectInfo {callerInfo, callbackWrapper};
     DistributedSchedService::GetInstance().calleeMap_.emplace(connect, connectInfo);
-    DistributedSchedService::GetInstance().ProcessCallerDied(connect, deviceType);
+    EXPECT_NO_FATAL_FAILURE(DistributedSchedService::GetInstance().ProcessCallerDied(connect, deviceType));
     DTEST_LOG << "DistributedSchedServiceTest ProcessCallerDied003 end" << std::endl;
 }
 

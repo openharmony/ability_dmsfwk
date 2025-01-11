@@ -236,7 +236,7 @@ HWTEST_F(DmsSaClientTest, DmsSAStatusChangeOnAddSystemAbility_001, TestSize.Leve
     //systemAbilityId not is DISTRIBUTED_SCHED_SA_ID
     dmsSystemAbilityStatusChange.OnAddSystemAbility(-1, DEVICE_ID);
     //systemAbilityId is DISTRIBUTED_SCHED_SA_ID
-    dmsSystemAbilityStatusChange.OnAddSystemAbility(DISTRIBUTED_SCHED_SA_ID, DEVICE_ID);
+    EXPECT_NO_FATAL_FAILURE(dmsSystemAbilityStatusChange.OnAddSystemAbility(DISTRIBUTED_SCHED_SA_ID, DEVICE_ID));
     DTEST_LOG << "DmsSaClientTest DmsSAStatusChangeOnAddSystemAbility_001 end" << std::endl;
 }
 
@@ -253,7 +253,7 @@ HWTEST_F(DmsSaClientTest, DmsSAStatusChangeOnRemoveSystemAbility_001, TestSize.L
     //systemAbilityId not is DISTRIBUTED_SCHED_SA_ID
     dmsSystemAbilityStatusChange.OnRemoveSystemAbility(-1, DEVICE_ID);
     //systemAbilityId is DISTRIBUTED_SCHED_SA_ID
-    dmsSystemAbilityStatusChange.OnRemoveSystemAbility(DISTRIBUTED_SCHED_SA_ID, DEVICE_ID);
+    EXPECT_NO_FATAL_FAILURE(dmsSystemAbilityStatusChange.OnRemoveSystemAbility(DISTRIBUTED_SCHED_SA_ID, DEVICE_ID));
     DTEST_LOG << "DmsSaClientTest DmsSAStatusChangeOnRemoveSystemAbility_001 end" << std::endl;
 }
 }

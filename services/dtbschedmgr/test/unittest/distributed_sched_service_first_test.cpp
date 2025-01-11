@@ -1265,7 +1265,8 @@ HWTEST_F(DistributedSchedServiceFirstTest, NotifyCompleteContinuation_001, TestS
 {
     DTEST_LOG << "DSchedContinuationTest NotifyCompleteContinuation_001 start" << std::endl;
     bool isSuccess = false;
-    DistributedSchedService::GetInstance().NotifyCompleteContinuation(DEVICE_ID, SESSION_ID, isSuccess);
+    EXPECT_NO_FATAL_FAILURE(DistributedSchedService::GetInstance().NotifyCompleteContinuation(DEVICE_ID,
+        SESSION_ID, isSuccess));
     DTEST_LOG << "DSchedContinuationTest NotifyCompleteContinuation_001 end" << std::endl;
 }
 

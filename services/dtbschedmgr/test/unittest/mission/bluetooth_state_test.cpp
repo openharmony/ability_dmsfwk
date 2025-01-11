@@ -55,7 +55,7 @@ HWTEST_F(BluetoothStateTest, testBluetoothStateInit001, TestSize.Level1)
 {
     DTEST_LOG << "BluetoothStateTest testBluetoothStateInit001 start" << std::endl;
     std::shared_ptr<BluetoothStateListener> bluetoothStateListener = BluetoothStateListener::GetInstance();
-    bluetoothStateListener->InitBluetoothState();
+    EXPECT_NO_FATAL_FAILURE(bluetoothStateListener->InitBluetoothState());
     DTEST_LOG << "luetoothStateTest testBluetoothStateInit001 end" << std::endl;
 }
 
