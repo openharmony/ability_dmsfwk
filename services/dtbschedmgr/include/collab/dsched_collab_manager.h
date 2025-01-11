@@ -31,7 +31,7 @@
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-constexpr int32_t COLLAB_TIMEOUT = 10000;
+constexpr int32_t COLLAB_TIMEOUT = 20000;
 constexpr int32_t BACKGROUND_TIMEOUT = 5000;
 }
 class DSchedCollabManager {
@@ -51,6 +51,7 @@ public:
     int32_t CheckCollabRelation(CollabInfo sourceInfo, CollabInfo sinkInfo);
     int32_t ReleaseAbilityLink(const std::string &bundleName, const int32_t &pid);
     int32_t CancleReleaseAbilityLink(const std::string &bundleName, const int32_t &pid);
+    void NotifyWifiOpen();
 
     void Init();
     void UnInit();

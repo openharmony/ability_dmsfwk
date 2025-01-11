@@ -16,6 +16,7 @@
 
 #include "mission/wifi_state_listener.h"
 
+#include "dsched_collab_manager.h"
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_recv_manager.h"
 #include "mission/wifi_state_adapter.h"
@@ -48,12 +49,14 @@ void WifiStateListener::OnReceiveEvent(const EventFwk::CommonEventData &data)
         case int32_t(Wifi::WifiDetailState::STATE_SEMI_ACTIVE): {
             HILOGI("on wifi SEMI_ACTIVE");
             WifiStateAdapter::GetInstance().UpdateWifiState(true);
+            DSchedCollabManager::GetInstance().NotifyWifiOpen();
             break;
         }
 
         case int32_t(OHOS::Wifi::WifiState::ENABLED): {
             HILOGI("on wifi enabled");
             WifiStateAdapter::GetInstance().UpdateWifiState(true);
+            DSchedCollabManager::GetInstance().NotifyWifiOpen();
             break;
         }
 

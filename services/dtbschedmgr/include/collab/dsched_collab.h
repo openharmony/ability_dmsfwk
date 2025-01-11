@@ -217,6 +217,7 @@ private:
     int32_t ExeAbilityRejectError(const std::string &reason);
     int32_t ExeSinkPrepareResult(const int32_t &result);
     int32_t ExeSrcCollabResult(const int32_t &result, const std::string reason = "");
+    int32_t NotifyWifiOpen();
     int32_t ExeSrcStartError(const int32_t &result);
     int32_t ExeSrcWaitResultError(const int32_t &result);
     int32_t ExeSinkStartError(const int32_t &result);
