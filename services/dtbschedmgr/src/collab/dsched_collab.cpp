@@ -30,6 +30,7 @@
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "parcel_helper.h"
+#include "screenlock_manager.h"
 #include "string_wrapper.h"
 #include "system_ability_definition.h"
 
@@ -486,10 +487,21 @@ AAFwk::Want DSchedCollab::GenerateCollabWant()
     collabParams.SetParam("ohos.dms.collabToken", AAFwk::String::Box(collabInfo_.collabToken_));
 
     AAFwk::WantParams wantParams;
+    SetScreenLockParameters(wantParams);
     wantParams.SetParam("ohos.extra.param.key.supportCollaborateIndex", AAFwk::WantParamWrapper::Box(collabParams));
     wantParams.SetParam("ohos.aafwk.param.callAbilityToForeground", AAFwk::Boolean::Box(IsStartForeground()));
     want.SetParams(wantParams);
     return want;
+}
+
+void DSchedCollab::SetScreenLockParameters(AAFwk::WantParams& wantParams)
+{
+    bool isSecureMode = OHOS::ScreenLock::ScreenLockManager::GetInstance()->GetSecure();
+    bool isLocked = false;
+    OHOS::ScreenLock::ScreenLockManager::GetInstance()->IsLocked(isLocked);
+    HILOGI("isSecureMode is %{public}d, isLocked is %{public}d", isSecureMode, isLocked);
+    wantParams.SetParam("isSecureMode", AAFwk::Boolean::Box(isSecureMode));
+    wantParams.SetParam("isFromScreenLock", AAFwk::Boolean::Box(isLocked));
 }
 
 bool DSchedCollab::IsStartForeground()

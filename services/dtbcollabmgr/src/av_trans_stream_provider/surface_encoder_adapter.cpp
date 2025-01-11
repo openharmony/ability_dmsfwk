@@ -418,25 +418,26 @@ namespace DistributedCollab {
         }
 
         int64_t mappingTime = -1;
+        HILOGI("now buffer flag_ : %{public}u, pts: %{public}lld", buffer->flag_, buffer->pts_);
+        // 计算sps pps
+        // 变分辨率、首帧不进这个分支
         if (!(buffer->flag_ & MediaAVCodec::AVCodecBufferFlag::AVCODEC_BUFFER_FLAG_CODEC_DATA)) {
             std::lock_guard<std::mutex> mappingLock(mappingPtsMutex_);
-            if (mappingTimeQueue_.empty() || mappingTimeQueue_.front().first != buffer->pts_) {
-                HILOGD("buffer->pts fail");
+            if (mappingTimeQueue_.empty()) {
+                mappingTime = buffer->pts_;
+            } else if (mappingTimeQueue_.front().first != buffer->pts_) {
+                // 由于有一帧未被送入，因此后续都会进入这个分支打印， first != pts, mapp始终未更新
+                while (!mappingTimeQueue_.empty() && mappingTimeQueue_.front().first != buffer->pts_) {
+                    HILOGD("buffer->pts fail, pts: %{public}lld", mappingTimeQueue_.front().second);
+                    mappingTimeQueue_.pop_front();
+                }
+                mappingTime = mappingTimeQueue_.front().second;
+                HILOGD("new mapping time pts: %{public}lld", mappingTimeQueue_.front().second);
+                mappingTimeQueue_.pop_front();
             } else {
                 mappingTime = mappingTimeQueue_.front().second;
                 mappingTimeQueue_.pop_front();
             }
-            if (startBufferTime_ == -1) {
-                startBufferTime_ = buffer->pts_;
-            }
-            // cache recent 2 pts
-            preKeyFramePts_ = currentKeyFramePts_;
-            currentKeyFramePts_ = buffer->pts_;
-            AddStartPts(buffer->pts_);
-            AddPauseResumePts(buffer->pts_);
-        } else {
-            HILOGD("OnOutputBufferAvailable buffer->flag_ %{public}u", buffer->flag_);
-            mappingTime = startBufferTime_ + buffer->pts_;
         }
         int32_t size = buffer->memory_->GetSize();
         std::shared_ptr<AVBuffer> emptyOutputBuffer;

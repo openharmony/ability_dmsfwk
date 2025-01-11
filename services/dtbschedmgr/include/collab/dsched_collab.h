@@ -250,6 +250,7 @@ private:
     void OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffer> dataBuffer);
     void OnShutDown();
     void OnBind();
+    void SetScreenLockParameters(AAFwk::WantParams& wantParams);
 
 private:
     static constexpr int32_t INVALID_SESSION_ID = -1;
