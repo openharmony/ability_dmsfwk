@@ -115,7 +115,7 @@ do {                                                                          \
 do {                                                                       \
     if ((data) == nullptr) {                                               \
         HILOGE("receive empty bytes data, socketId=%{public}d", socketId); \
-        (errorHandler)(channelId, RECV_DATA_EMPTY);                        \
+        (errorHandler)(socketId, RECV_DATA_EMPTY);                        \
         return;                                                            \
     }                                                                      \
 } while (0)
@@ -871,7 +871,7 @@ int32_t ChannelManager::SendBytes(const int32_t channelId, const std::shared_ptr
 template <typename Func, typename... Args>
 int32_t ChannelManager::DoSendData(const int32_t channelId, Func doSendFunc, Args&&... args)
 {
-    HILOGI("start to send data");
+    HILOGD("start to send data");
     int32_t socketId = GetValidSocket(channelId);
     if (socketId <= 0) {
         HILOGE("no avaliable sockets, %{public}d", channelId);
@@ -906,7 +906,7 @@ int32_t ChannelManager::DoSendData(const int32_t channelId, Func doSendFunc, Arg
 inline int32_t ChannelManager::DoSendBytes(const int32_t channelId,
     const std::shared_ptr<AVTransDataBuffer>& data)
 {
-    HILOGI("start to send bytes");
+    HILOGD("start to send bytes");
     return DoSendData(channelId, &DataSenderReceiver::SendBytesData, data);
 }
 
@@ -924,7 +924,7 @@ int32_t ChannelManager::GetValidSocket(const int32_t channelId)
             infoIt->second.clientSockets.begin(), infoIt->second.clientSockets.end());
     }
 
-    for (const auto& socketId : socketIds) {
+    for (const auto socketId : socketIds) {
         if (GetSocketStatus(socketId) == ChannelStatus::CONNECTED) {
             return socketId;
         }
@@ -940,7 +940,7 @@ int32_t ChannelManager::SendStream(const int32_t channelId,
         DoErrorCallback(channelId, INVALID_CHANNEL_ID);
         return INVALID_CHANNEL_ID;
     }
-    HILOGI("start to send stream");
+    HILOGD("start to send stream");
     auto func = [=]() {
         DoSendStream(channelId, data);
     };
@@ -949,13 +949,13 @@ int32_t ChannelManager::SendStream(const int32_t channelId,
         HILOGE("failed to add send stream task, ret=%{public}d", ret);
         return POST_TASK_FAILED;
     }
-    HILOGI("send stream task added to handler");
+    HILOGD("send stream task added to handler");
     return ERR_OK;
 }
 
 int32_t ChannelManager::DoSendStream(const int32_t channelId, const std::shared_ptr<AVTransStreamData>& data)
 {
-    HILOGI("start to send stream");
+    HILOGD("start to send stream");
     return DoSendData(channelId, &DataSenderReceiver::SendStreamData, data);
 }
 
@@ -966,7 +966,7 @@ int32_t ChannelManager::SendMessage(const int32_t channelId,
         HILOGE("invalid channel id. %{public}d", channelId);
         return INVALID_CHANNEL_ID;
     }
-    HILOGI("start to send message");
+    HILOGD("start to send message");
     auto func = [channelId, data, this]() {
         DoSendMessage(channelId, data);
     };
@@ -975,7 +975,7 @@ int32_t ChannelManager::SendMessage(const int32_t channelId,
         HILOGE("failed to add send bytes task, ret=%{public}d", ret);
         return ret;
     }
-    HILOGI("send bytes task added to handler");
+    HILOGD("send bytes task added to handler");
     return ERR_OK;
 }
 
@@ -993,7 +993,7 @@ void ChannelManager::OnBytesReceived(const int32_t socketId,
     CHECK_SOCKET_ID(socketId);
     CHECK_CHANNEL_ID(socketId, channelId);
     CHECK_DATA_NULL(socketId, data, OnError);
-    HILOGI("receive data: %{public}d, len=%{public}d", socketId, dataLen);
+    HILOGD("receive data: %{public}d, len=%{public}d", socketId, dataLen);
     std::shared_ptr<AVTransDataBuffer> packedData = ProcessRecvData(channelId, socketId, data, dataLen);
     if (!packedData) {
         return;
@@ -1065,6 +1065,7 @@ void ChannelManager::OnStreamReceived(const int32_t socketId, const StreamData* 
     int32_t ret = memcpy_s(buffer->Data(), buffer->Size(), data->buf, data->bufLen);
     if (ret != ERR_OK) {
         HILOGE("copy stream data failed, %{public}d", socketId);
+        DoErrorCallback(channelId, COPY_DATA_TO_BUFFER_FAILED);
         return;
     }
     AVTransStreamDataExt streamDataExt;
@@ -1072,6 +1073,7 @@ void ChannelManager::OnStreamReceived(const int32_t socketId, const StreamData* 
     ret = streamData->DeserializeStreamDataExt(ext->buf);
     if (ret != ERR_OK) {
         HILOGE("deserialize stream ext failed, %{public}d", socketId);
+        DoErrorCallback(channelId, PARSE_AV_TRANS_STREAM_EXT_FAILED);
         return;
     }
     DoStreamReceiveCallback(channelId, streamData);
