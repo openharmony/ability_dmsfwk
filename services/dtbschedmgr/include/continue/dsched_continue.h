@@ -95,6 +95,7 @@ public:
     std::string sinkAbilityName_;
     int32_t missionId_ = 0;
     std::string continueSessionId_;
+    int32_t sinkMissionId_ = 0;
 };
 
 typedef enum {
