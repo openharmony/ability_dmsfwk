@@ -36,8 +36,8 @@ public:
 private:
     BluetoothStateAdapter() {}
 
-    std::atomic<bool> isBTActive_;
-    std::atomic<bool> isBLEActive_;
+    std::atomic<bool> isBTActive_ = false;
+    std::atomic<bool> isBLEActive_ = false;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -602,6 +602,7 @@ int32_t DSchedContinueManager::NotifyQuickStartState(StateCallbackInfo &stateCal
         StateCallbackData *stateCallbackData = stateCallbackDataExist.get();
         AddStateCallbackData(stateCallbackInfo, *stateCallbackData);
         HILOGW("IPC remote object for quick start callback is null, state saved.");
+        return ERR_OK;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
@@ -624,7 +625,7 @@ int32_t DSchedContinueManager::NotifyQuickStartState(StateCallbackInfo &stateCal
     stateCallbackDataExist->remoteObject->SendRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_STATE_CALLBACK), data, reply, option);
     stateCallbackDataExist->state = -1;
-    stateCallbackDataExist->message = nullptr;
+    stateCallbackDataExist->message = "";
     return ERR_OK;
 }
 
