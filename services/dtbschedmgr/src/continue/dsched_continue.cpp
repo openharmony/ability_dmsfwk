@@ -1307,7 +1307,7 @@ int32_t DSchedContinue::ExecuteQuickStartSuccess()
         missionId = continueInfo_.sinkMissionId_;
     } else {
         int32_t ret = ContinueSceneSessionHandler::GetInstance().GetPersistentId(
-                missionId, continueInfo_.continueSessionId_);
+            missionId, continueInfo_.continueSessionId_);
         if (ret != ERR_OK) {
             HILOGE("Get mission id failed for quickstart callback.");
             return ret;
@@ -1328,7 +1328,7 @@ int32_t DSchedContinue::ExecuteQuickStartFailed(int32_t result)
         missionId = continueInfo_.sinkMissionId_;
     } else {
         int32_t ret = ContinueSceneSessionHandler::GetInstance().GetPersistentId(
-                missionId, continueInfo_.continueSessionId_);
+            missionId, continueInfo_.continueSessionId_);
         if (ret != ERR_OK) {
             HILOGE("Get mission id failed for quickstart callback.");
             return ret;
