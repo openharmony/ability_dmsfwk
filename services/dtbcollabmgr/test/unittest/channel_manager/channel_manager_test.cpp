@@ -1409,7 +1409,6 @@ HWTEST_F(ChannelManagerTest, OnBytesReceived_Success, TestSize.Level1)
     auto sendBuffer = std::make_unique<AVTransDataBuffer>(SessionDataHeader::HEADER_LEN + dataLen);
     uint8_t* header = sendBuffer->Data();
 
-    int32_t ret = ERR_OK;
     // copy header
     memcpy_s(header, sendBuffer->Size(),
         headerBuffer->Data(), SessionDataHeader::HEADER_LEN);
@@ -1517,7 +1516,6 @@ HWTEST_F(ChannelManagerTest, OnBytesReceived_Failure_PackRecvPacketDataFailed, T
     auto sendBuffer = std::make_unique<AVTransDataBuffer>(SessionDataHeader::HEADER_LEN + dataLen);
     uint8_t* header = sendBuffer->Data();
 
-    int32_t ret = ERR_OK;
     // copy header
     memcpy_s(header, sendBuffer->Size(),
         headerBuffer->Data(), SessionDataHeader::HEADER_LEN);
