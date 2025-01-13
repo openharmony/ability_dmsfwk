@@ -1302,7 +1302,17 @@ int32_t DSchedContinue::ExecuteContinueError(int32_t result)
 int32_t DSchedContinue::ExecuteQuickStartSuccess()
 {
     int32_t missionId;
-    ContinueSceneSessionHandler::GetInstance().GetPersistentId(missionId, continueInfo_.continueSessionId_);
+    if (continueInfo_.sinkMissionId_ != 0) {
+        missionId = continueInfo_.sinkMissionId_;
+    } else {
+        int32_t ret = ContinueSceneSessionHandler::GetInstance().GetPersistentId(
+            missionId, continueInfo_.continueSessionId_);
+        if (ret != ERR_OK) {
+            HILOGE("Get mission id failed for quickstart callback.");
+            return ret;
+        }
+    }
+
     StateCallbackInfo stateCallbackInfo = StateCallbackInfo(
         missionId, continueInfo_.sinkBundleName_, eventData_.destModuleName_,
         continueInfo_.sinkAbilityName_);
@@ -1313,7 +1323,16 @@ int32_t DSchedContinue::ExecuteQuickStartSuccess()
 int32_t DSchedContinue::ExecuteQuickStartFailed(int32_t result)
 {
     int32_t missionId;
-    ContinueSceneSessionHandler::GetInstance().GetPersistentId(missionId, continueInfo_.continueSessionId_);
+    if(continueInfo_.sinkMissionId_ != 0){
+        missionId = continueInfo_.sinkMissionId_;
+    }else{
+        int32_t ret = ContinueSceneSessionHandler::GetInstance().GetPersistentId(
+            missionId, continueInfo_.continueSessionId_);
+        if(ret != ERR_OK){
+            HILOGE("Get mission id failed for quickstart callback.");
+            return ret;
+        }
+    }
     StateCallbackInfo stateCallbackInfo = StateCallbackInfo(
         missionId, continueInfo_.sinkBundleName_, eventData_.destModuleName_,
         continueInfo_.sinkAbilityName_);
