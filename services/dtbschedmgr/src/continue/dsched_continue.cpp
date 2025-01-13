@@ -969,6 +969,7 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
             HILOGE("Second get persistentId failed, stop start ability");
             return OnContinueEnd(DMS_GET_WINDOW_FAILED_FROM_SCB);
         }
+        continueInfo_.sinkMissionId_ = persistentId;
     }
 
     ret = StartAbility(want, cmd->requestCode_);
