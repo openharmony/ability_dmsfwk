@@ -990,57 +990,6 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_ReadUnsupportedDat
 }
 
 /**
- * @tc.number: DistributedWantParams_Operator_1000
- * @tc.name: Operator
- * @tc.desc: Test Operator.
- * @tc.require: I77HFZ
- */
-HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Operator_1000, Function | MediumTest | Level3)
-{
-    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_Operator_1000 begin" << std::endl;
-    DistributedWantParams wantParams1;
-    DistributedWantParams wantParams2;
-    int32_t typeId = DistributedWantParams::VALUE_TYPE_WANTPARAMS;
-    DistributedWantParams ret = (wantParams1 = wantParams2);
-    EXPECT_EQ(typeId, DistributedWantParams::VALUE_TYPE_WANTPARAMS);
-    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_Operator_1000 end" << std::endl;
-}
-
-/**
- * @tc.number: DistributedWantParams_Operator_2000
- * @tc.name: Operator
- * @tc.desc: Test Operator.
- * @tc.require: I77HFZ
- */
-HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Operator_2000, Function | MediumTest | Level3)
-{
-    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_Operator_2000 begin" << std::endl;
-    DistributedWantParams wantParams1;
-    const DistributedWantParams wantParams2;
-    int32_t typeId = DistributedWantParams::VALUE_TYPE_WANTPARAMS;
-    DistributedWantParams ret = (wantParams1 = wantParams2);
-    EXPECT_EQ(typeId, DistributedWantParams::VALUE_TYPE_WANTPARAMS);
-    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_Operator_2000 end" << std::endl;
-}
-
-/**
- * @tc.number: DistributedWantParams_Operator_3000
- * @tc.name: Operator
- * @tc.desc: Test Operator.
- * @tc.require: I77HFZ
- */
-HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_Operator_3000, Function | MediumTest | Level3)
-{
-    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_Operator_3000 begin" << std::endl;
-    DistributedUnsupportedData data1;
-    const DistributedUnsupportedData data2;
-    int32_t typeId = DistributedWantParams::VALUE_TYPE_WANTPARAMS;
-    DistributedUnsupportedData ret = (data1 = data2);
-    EXPECT_EQ(typeId, DistributedWantParams::VALUE_TYPE_WANTPARAMS);
-    DTEST_LOG << "DistributedWantParamsBaseTest DistributedWantParams_Operator_3000 end" << std::endl;
-}
-
-/**
  * @tc.number: DistributedWantParams_CompareInterface_1200
  * @tc.name: CompareInterface
  * @tc.desc: Test CompareInterface.

@@ -1279,6 +1279,7 @@ HWTEST_F(DSchedContinuationTest, StartFreeInstallFromRemote_005, TestSize.Level1
         "com.ohos.distributedmusicplayer.MainAbilityService");
     want.SetElement(element2);
     int result2 = DistributedSchedService::GetInstance().StartFreeInstallFromRemote(info, 0);
+    EXPECT_EQ(result2, INVALID_REMOTE_PARAMETERS_ERR);
     DTEST_LOG << "result2:" << result2 << std::endl;
     DTEST_LOG << "DSchedContinuationTest StartFreeInstallFromRemote_005 end" << std::endl;
 }
@@ -1316,6 +1317,7 @@ HWTEST_F(DSchedContinuationTest, StartFreeInstallFromRemote_006, TestSize.Level1
         "com.ohos.distributedmusicplayer.MainAbilityService");
     want.SetElement(element2);
     int result2 = proxy->StartFreeInstallFromRemote(info, 0);
+    EXPECT_EQ(result2, REQUEST_CODE_ERR);
     DTEST_LOG << "result2:" << result2 << std::endl;
     DTEST_LOG << "DSchedContinuationTest StartFreeInstallFromRemote_006 end" << std::endl;
 }

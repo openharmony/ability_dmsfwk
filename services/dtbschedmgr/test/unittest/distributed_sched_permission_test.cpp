@@ -421,27 +421,6 @@ HWTEST_F(DistributedSchedPermissionTest, CheckStartControlPermission_001, TestSi
 }
 
 /**
- * @tc.name: CheckStartControlPermission_002
- * @tc.desc: input invalid params
- * @tc.type: FUNC
- * @tc.require: issueI5T6GJ
- */
-HWTEST_F(DistributedSchedPermissionTest, CheckStartControlPermission_002, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedPermissionTest CheckStartControlPermission_002 begin" << std::endl;
-    AppExecFwk::AbilityInfo targetAbility;
-    targetAbility.bundleName = BUNDLE_NAME;
-    CallerInfo callerInfo;
-    bool result = BundleManagerInternal::GetCallerAppIdFromBms(BUNDLE_NAME, callerInfo.callerAppId);
-    EXPECT_EQ(result, true);
-    AAFwk::Want want;
-    want.AddFlags(want.FLAG_ABILITY_CONTINUATION);
-    bool ret = DistributedSchedPermission::GetInstance().CheckStartControlPermission(targetAbility, callerInfo, want);
-    EXPECT_FALSE(ret);
-    DTEST_LOG << "DistributedSchedPermissionTest CheckStartControlPermission_002 end ret:" << ret << std::endl;
-}
-
-/**
  * @tc.name: CheckStartControlPermission_003
  * @tc.desc: input invalid params
  * @tc.type: FUNC

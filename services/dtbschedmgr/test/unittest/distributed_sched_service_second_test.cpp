@@ -1021,6 +1021,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, StartLocalAbility_003, TestSize.Leve
     DistributedSchedProxy::FreeInstallInfo info2 = {.want = want, .requestCode = 0, .callerInfo = callerInfo,
         .accountInfo = accountInfo};
     int result2 = DistributedSchedService::GetInstance().StartLocalAbility(info2, 0, 0);
+    EXPECT_EQ(result2, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "result2:" << result2 << std::endl;
     DTEST_LOG << "DistributedSchedServiceSecondTest StartLocalAbility_003 end" << std::endl;
 }
@@ -1056,6 +1057,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, StartLocalAbility_004, TestSize.Leve
     DistributedSchedProxy::FreeInstallInfo info2 = {.want = want, .requestCode = DEFAULT_REQUEST_CODE,
         .callerInfo = callerInfo, .accountInfo = accountInfo};
     int result2 = DistributedSchedService::GetInstance().StartLocalAbility(info2, 0, 0);
+    EXPECT_EQ(result2, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "result2:" << result2 << std::endl;
     DTEST_LOG << "DistributedSchedServiceSecondTest StartLocalAbility_004 end" << std::endl;
 }
