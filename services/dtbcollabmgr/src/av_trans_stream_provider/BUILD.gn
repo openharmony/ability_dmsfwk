@@ -15,6 +15,11 @@ import("//build/ohos.gni")
 import("//build/ohos_var.gni")
 import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
+group("unittest") {
+  testonly = true
+  deps = [ "${dms_path}/services/dtbcollabmgr/test/unittest/av_trans_stream_provider:unittest" ]
+}
+
 config("dtbcollab_av_trans_provider_config") {
   visibility = [ ":*" ]
   include_dirs = [
