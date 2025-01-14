@@ -22,6 +22,7 @@ config("test_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${dms_path}/services/dtbcollabmgr/include/av_trans_stream_provider",
+    "${dms_path}/services/dtbcollabmgr/include/channel_manager",
     "${dms_path}/services/dtbcollabmgr/test/unittest/av_trans_stream_provider",
     "${dms_path}/common/include",
   ]
