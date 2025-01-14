@@ -43,8 +43,8 @@ ohos_unittest("AVStreamParamTest") {
 
   deps = [
     "${dms_path}/common:distributed_sched_utils",
+    "${dms_path}/services/dtbcollabmgr/src/av_trans_stream_provider:dtbcollab_av_stream_trans_provider",
     "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
-    "${dms_path}/services/dtbcollabmgr/src/av_trans_stream_provider:dtbcollab_av_stream_trans_provider"
   ]
 
   external_deps = [
@@ -67,7 +67,5 @@ ohos_unittest("AVStreamParamTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":AVStreamParamTest",
-  ]
+  deps = [ ":AVStreamParamTest" ]
 }
