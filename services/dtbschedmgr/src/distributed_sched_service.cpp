@@ -174,7 +174,9 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     MultiUserManager::GetInstance().UnInit();
     RemoveSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID);
-    missionFocusedListener_->UnInit();
+    if (missionFocusedListener_ != nullptr) {
+        missionFocusedListener_->UnInit();
+    }
     DistributedSchedAdapter::GetInstance().UnRegisterMissionListener(missionFocusedListener_);
     DmsContinueConditionMgr::GetInstance().UnInit();
 #endif
