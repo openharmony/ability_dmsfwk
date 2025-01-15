@@ -138,7 +138,11 @@ DSchedCollab::~DSchedCollab()
     if ((eventHandler_ != nullptr) && (eventHandler_->GetEventRunner() != nullptr)) {
         eventHandler_->GetEventRunner()->Stop();
     }
-    eventThread_.join();
+
+    if (eventThread_.joinable()) {
+        eventThread_.join();
+    }
+    
     eventHandler_ = nullptr;
     HILOGI("delete end");
 }
@@ -790,11 +794,11 @@ int32_t DSchedCollab::PackDisconnectCmd(std::shared_ptr<DisconnectCmd> cmd)
 
 int32_t DSchedCollab::SendCommand(std::shared_ptr<BaseCmd> cmd)
 {
-    HILOGI("called, cmd %{public}s", CMDDATA[cmd->command_].c_str());
     if (cmd == nullptr) {
         HILOGE("cmd is null");
         return INVALID_PARAMETERS_ERR;
     }
+    HILOGI("called, cmd %{public}s", CMDDATA[cmd->command_].c_str());
     std::string jsonStr;
     int32_t ret = cmd->Marshal(jsonStr);
     if (ret != ERR_OK) {
