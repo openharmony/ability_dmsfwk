@@ -663,6 +663,45 @@ ohos_unittest("dmsbasetest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("dmscollabtest") {
+  sanitize = {
+    blocklist = "./cfi_blocklist.txt"
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+
+  sources = [
+    "${dms_path}/services/dtbschedmgr/src/collab/dsched_collab.cpp",
+    "unittest/collab/dsched_collab_test.cpp",
+    "unittest/mock/event_handler_mock.cpp",
+    "unittest/mock/message_parcel_mock.cpp",
+    "unittest/mock_distributed_sched.cpp",
+    "unittest/mock_remote_stub.cpp",
+  ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "./resource:coverage_flags",
+  ]
+  deps = []
+
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  external_deps += [
+    "googletest:gmock",
+    "screenlock_mgr:screenlock_client",
+  ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 ohos_unittest("dschedswitchstatustest") {
   sanitize = {
     cfi = true
@@ -806,6 +845,7 @@ group("unittest") {
     ":distributeduidtest",
     ":distributedwanttest",
     ":dmsbasetest",
+    ":dmscollabtest",
     ":dmsfreeinstallcbtest",
     ":dschedconnecttest",
     ":dschedcontinuemanagerstatetest",
