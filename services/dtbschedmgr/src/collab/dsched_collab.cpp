@@ -493,6 +493,7 @@ AAFwk::Want DSchedCollab::GenerateCollabWant()
     AAFwk::WantParams wantParams;
     SetScreenLockParameters(wantParams);
     wantParams.SetParam("ohos.extra.param.key.supportCollaborateIndex", AAFwk::WantParamWrapper::Box(collabParams));
+    HILOGI("ohos.aafwk.param.callAbilityToForeground is %{public}d", IsStartForeground());
     wantParams.SetParam("ohos.aafwk.param.callAbilityToForeground", AAFwk::Boolean::Box(IsStartForeground()));
     want.SetParams(wantParams);
     return want;
@@ -514,6 +515,7 @@ bool DSchedCollab::IsStartForeground()
     IString *ao = IString::Query(value);
     if (ao != nullptr) {
         std::string startOpt = AAFwk::String::Unbox(ao);
+        HILOGI("startOpt is: %{public}s", startOpt.c_str());
         return (startOpt == VALUE_START_OPTION_BACKGROUND) ? false : true;
     }
     return true;
