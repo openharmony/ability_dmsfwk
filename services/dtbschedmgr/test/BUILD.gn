@@ -28,6 +28,10 @@ config("test_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${distributed_service}/dtbschedmgr/include",
+    "${distributed_service}/dtbschedmgr/include/collab",
+    "${distributed_service}/dtbschedmgr/include/collab/state",
+    "${distributed_service}/dtbschedmgr/include/collab/state/source_state",
+    "${distributed_service}/dtbschedmgr/include/collab/state/sink_state",
     "${distributed_service}/dtbschedmgr/include/continue",
     "${distributed_service}/dtbschedmgr/include/continue/state",
     "${distributed_service}/dtbschedmgr/include/continue/state/source_state",
@@ -702,6 +706,76 @@ ohos_unittest("dmscollabtest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("dmscollabstatetest") {
+  sanitize = {
+    blocklist = "./cfi_blocklist.txt"
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+
+  sources = [
+    "${dms_path}/services/dtbschedmgr/src/collab/state/dsched_collab_state_machine.cpp",
+    "unittest/collab/state/dsched_collab_state_machine_test.cpp",
+  ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "./resource:coverage_flags",
+  ]
+  deps = []
+
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  external_deps += [
+    "googletest:gmock",
+    "screenlock_mgr:screenlock_client",
+  ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("dmscollabeventtest") {
+  sanitize = {
+    blocklist = "./cfi_blocklist.txt"
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+
+  sources = [
+    "${dms_path}/services/dtbschedmgr/src/collab/dsched_collab_event.cpp",
+    "unittest/collab/dsched_collab_event_test.cpp",
+  ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "./resource:coverage_flags",
+  ]
+  deps = []
+
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  external_deps += [
+    "googletest:gmock",
+    "screenlock_mgr:screenlock_client",
+  ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 ohos_unittest("dschedswitchstatustest") {
   sanitize = {
     cfi = true
@@ -845,6 +919,8 @@ group("unittest") {
     ":distributeduidtest",
     ":distributedwanttest",
     ":dmsbasetest",
+    ":dmscollabeventtest",
+    ":dmscollabstatetest",
     ":dmscollabtest",
     ":dmsfreeinstallcbtest",
     ":dschedconnecttest",
