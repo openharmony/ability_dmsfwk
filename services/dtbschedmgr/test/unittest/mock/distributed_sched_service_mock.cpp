@@ -26,5 +26,5 @@ int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& 
         return 0;
     }
     return IDistributedSchedService::dmsSrvMock->CheckTargetPermission(
-        want, callerInfo, accountInfo,flag, needQueryExtension);
+        want, callerInfo, accountInfo, flag, needQueryExtension);
 }
