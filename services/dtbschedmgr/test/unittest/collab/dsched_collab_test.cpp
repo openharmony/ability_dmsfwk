@@ -31,6 +31,14 @@ void DSchedCollabTest::SetUpTestCase()
     EventHandlerMock::handlerMock = handleMock_;
     messageParcelMock_ = std::make_shared<MessageParcelMock>();
     MessageParcelMock::messageParcel = messageParcelMock_;
+    adapterMock_ = std::make_shared<DSchedTransportSoftbusAdapterMock>();
+    DSchedTransportSoftbusAdapterMock::adapterMock = adapterMock_;
+    bundleMgrMock_ = std::make_shared<BundleManagerInternalMock>();
+    BundleManagerInternalMock::bundleMgrMock = bundleMgrMock_;
+    dmsPermMock_ = std::make_shared<DistributedSchedPermMock>();
+    DistributedSchedPermMock::dmsPermMock = dmsPermMock_;
+    dmsSrvMock_ = std::make_shared<DistributedSchedServiceMock>();
+    DistributedSchedServiceMock::dmsSrvMock = dmsSrvMock_;
     std::string collabToken;
     DSchedCollabInfo info;
     dSchedCollab_ = std::make_shared<DSchedCollab>(collabToken, info);
@@ -43,6 +51,14 @@ void DSchedCollabTest::TearDownTestCase()
     messageParcelMock_ = nullptr;
     EventHandlerMock::handlerMock = nullptr;
     handleMock_ = nullptr;
+    DSchedTransportSoftbusAdapterMock::adapterMock = nullptr;
+    adapterMock_ = nullptr;
+    BundleManagerInternalMock::bundleMgrMock = nullptr;
+    bundleMgrMock_ = nullptr;
+    DistributedSchedPermMock::dmsPermMock = nullptr;
+    dmsPermMock_ = nullptr;
+    DistributedSchedServiceMock::dmsSrvMock = nullptr;
+    dmsSrvMock_ = nullptr;
     dSchedCollab_ = nullptr;
 }
 
@@ -253,12 +269,12 @@ HWTEST_F(DSchedCollabTest, ExeSrcClientNotify_001, TestSize.Level3)
     EXPECT_CALL(*messageParcelMock_, WriteInterfaceToken(_)).WillOnce(Return(false));
     ret = dSchedCollab_->ExeSrcClientNotify(result, reason);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-    
+
     EXPECT_CALL(*messageParcelMock_, WriteInterfaceToken(_)).WillOnce(Return(true));
     EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillOnce(Return(false));
     ret = dSchedCollab_->ExeSrcClientNotify(result, reason);
     EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
-    
+
     EXPECT_CALL(*messageParcelMock_, WriteInterfaceToken(_)).WillOnce(Return(true));
     EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillOnce(Return(true)).WillOnce(Return(false));
     ret = dSchedCollab_->ExeSrcClientNotify(result, reason);
@@ -354,7 +370,7 @@ HWTEST_F(DSchedCollabTest, ExeClientDisconnectNotify_001, TestSize.Level3)
     EXPECT_CALL(*messageParcelMock_, WriteInterfaceToken(_)).WillOnce(Return(true));
     EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillOnce(Return(false));
     EXPECT_EQ(dSchedCollab_->ExeClientDisconnectNotify(), ERR_FLATTEN_OBJECT);
-    
+
     EXPECT_CALL(*messageParcelMock_, WriteInterfaceToken(_)).WillOnce(Return(true));
     EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillOnce(Return(true));
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(-1));
@@ -386,11 +402,11 @@ HWTEST_F(DSchedCollabTest, ExeClientDisconnectNotify_002, TestSize.Level3)
     dSchedCollab_->collabInfo_.sinkClientCB_ = mock_;
     EXPECT_CALL(*messageParcelMock_, WriteInterfaceToken(_)).WillOnce(Return(false));
     EXPECT_EQ(dSchedCollab_->ExeClientDisconnectNotify(), SEND_REQUEST_DEF_FAIL);
-    
+
     EXPECT_CALL(*messageParcelMock_, WriteInterfaceToken(_)).WillOnce(Return(true));
     EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillOnce(Return(false));
     EXPECT_EQ(dSchedCollab_->ExeClientDisconnectNotify(), ERR_FLATTEN_OBJECT);
-    
+
     EXPECT_CALL(*messageParcelMock_, WriteInterfaceToken(_)).WillOnce(Return(true));
     EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillOnce(Return(true));
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(-1));
@@ -426,7 +442,7 @@ HWTEST_F(DSchedCollabTest, NotifyWifiOpen_001, TestSize.Level3)
     EXPECT_CALL(*messageParcelMock_, WriteInterfaceToken(_)).WillOnce(Return(true));
     EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillOnce(Return(false));
     EXPECT_EQ(dSchedCollab_->NotifyWifiOpen(), ERR_FLATTEN_OBJECT);
-    
+
     EXPECT_CALL(*messageParcelMock_, WriteInterfaceToken(_)).WillOnce(Return(true));
     EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillOnce(Return(true));
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(-1));
@@ -462,7 +478,7 @@ HWTEST_F(DSchedCollabTest, NotifyWifiOpen_002, TestSize.Level3)
     EXPECT_CALL(*messageParcelMock_, WriteInterfaceToken(_)).WillOnce(Return(true));
     EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillOnce(Return(false));
     EXPECT_EQ(dSchedCollab_->NotifyWifiOpen(), ERR_FLATTEN_OBJECT);
-    
+
     EXPECT_CALL(*messageParcelMock_, WriteInterfaceToken(_)).WillOnce(Return(true));
     EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillOnce(Return(true));
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(-1));
@@ -546,7 +562,11 @@ HWTEST_F(DSchedCollabTest, SendCommand_001, TestSize.Level3)
     EXPECT_EQ(dSchedCollab_->SendCommand(cmd), INVALID_PARAMETERS_ERR);
 
     cmd = std::make_shared<DisconnectCmd>();
+    EXPECT_CALL(*adapterMock_, SendData(_, _, _)).WillOnce(Return(-1));
     EXPECT_EQ(dSchedCollab_->SendCommand(cmd), -1);
+
+    EXPECT_CALL(*adapterMock_, SendData(_, _, _)).WillOnce(Return(0));
+    EXPECT_EQ(dSchedCollab_->SendCommand(cmd), ERR_OK);
     DTEST_LOG << "DSchedCollabTest SendCommand_001 end" << std::endl;
 }
 
@@ -564,10 +584,15 @@ HWTEST_F(DSchedCollabTest, ExeSinkPrepareResult_001, TestSize.Level3)
     EXPECT_EQ(dSchedCollab_->ExeSinkPrepareResult(result), INVALID_PARAMETERS_ERR);
 
     result = ERR_OK;
+    EXPECT_CALL(*adapterMock_, SendData(_, _, _)).WillOnce(Return(-1));
     EXPECT_EQ(dSchedCollab_->ExeSinkPrepareResult(result), -1);
 
+    EXPECT_CALL(*adapterMock_, SendData(_, _, _)).WillOnce(Return(0));
+    EXPECT_EQ(dSchedCollab_->ExeSinkPrepareResult(result), ERR_OK);
+
     result = COLLAB_ABILITY_REJECT_ERR;
-    EXPECT_EQ(dSchedCollab_->ExeSinkPrepareResult(result), -1);
+    EXPECT_CALL(*adapterMock_, SendData(_, _, _)).WillOnce(Return(0));
+    EXPECT_EQ(dSchedCollab_->ExeSinkPrepareResult(result), ERR_OK);
     DTEST_LOG << "DSchedCollabTest ExeSinkPrepareResult_001 end" << std::endl;
 }
 
@@ -604,6 +629,138 @@ HWTEST_F(DSchedCollabTest, ExeSrcCollabResult_001, TestSize.Level3)
     reason = "test";
     EXPECT_NE(dSchedCollab_->ExeSrcCollabResult(result, reason), ERR_OK);
     DTEST_LOG << "DSchedCollabTest ExeSinkPrepareResult_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PackPartCmd_001
+ * @tc.desc: call PackPartCmd
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, PackPartCmd_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest PackPartCmd_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    auto cmd = std::make_shared<SinkStartCmd>();
+    EXPECT_CALL(*bundleMgrMock_, GetLocalBundleInfoV9(_, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    EXPECT_EQ(dSchedCollab_->PackPartCmd(cmd), INVALID_PARAMETERS_ERR);
+
+    EXPECT_CALL(*bundleMgrMock_, GetLocalBundleInfoV9(_, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*bundleMgrMock_, GetCallerAppIdFromBms(An<int32_t>(), _)).WillOnce(Return(false));
+    EXPECT_EQ(dSchedCollab_->PackPartCmd(cmd), GET_APPID_ERR);
+
+    EXPECT_CALL(*bundleMgrMock_, GetLocalBundleInfoV9(_, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*bundleMgrMock_, GetCallerAppIdFromBms(An<int32_t>(), _)).WillOnce(Return(true));
+    EXPECT_CALL(*bundleMgrMock_, GetBundleNameListFromBms(_, An<std::vector<std::string>&>()))
+        .WillOnce(Return(false));
+    EXPECT_EQ(dSchedCollab_->PackPartCmd(cmd), GET_BUNDLENAMELIST_ERR);
+
+    EXPECT_CALL(*bundleMgrMock_, GetLocalBundleInfoV9(_, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*bundleMgrMock_, GetCallerAppIdFromBms(An<int32_t>(), _)).WillOnce(Return(true));
+    EXPECT_CALL(*bundleMgrMock_, GetBundleNameListFromBms(_, An<std::vector<std::string>&>()))
+        .WillOnce(Return(true));
+    EXPECT_CALL(*dmsPermMock_, GetAccountInfo(_, _, _)).WillOnce(Return(ERR_NULL_OBJECT));
+    EXPECT_EQ(dSchedCollab_->PackPartCmd(cmd), GET_ACCOUNT_INFO_ERR);
+
+    EXPECT_CALL(*bundleMgrMock_, GetLocalBundleInfoV9(_, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*bundleMgrMock_, GetCallerAppIdFromBms(An<int32_t>(), _)).WillOnce(Return(true));
+    EXPECT_CALL(*bundleMgrMock_, GetBundleNameListFromBms(_, An<std::vector<std::string>&>()))
+        .WillOnce(Return(true));
+    EXPECT_CALL(*dmsPermMock_, GetAccountInfo(_, _, _)).WillOnce(Return(ERR_OK));
+    EXPECT_EQ(dSchedCollab_->PackPartCmd(cmd), ERR_OK);
+    DTEST_LOG << "DSchedCollabTest PackPartCmd_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PackStartCmd_001
+ * @tc.desc: call PackStartCmd
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, PackStartCmd_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest PackStartCmd_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    std::shared_ptr<SinkStartCmd> cmd = nullptr;
+    EXPECT_EQ(dSchedCollab_->PackStartCmd(cmd), INVALID_PARAMETERS_ERR);
+
+    cmd = std::make_shared<SinkStartCmd>();
+
+    EXPECT_CALL(*bundleMgrMock_, GetLocalBundleInfoV9(_, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*bundleMgrMock_, GetCallerAppIdFromBms(An<int32_t>(), _)).WillOnce(Return(false));
+    EXPECT_EQ(dSchedCollab_->PackStartCmd(cmd), GET_APPID_ERR);
+    DTEST_LOG << "DSchedCollabTest PackStartCmd_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ExeSrcStart_001
+ * @tc.desc: call ExeSrcStart
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, ExeSrcStart_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest ExeSrcStart_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    EXPECT_CALL(*adapterMock_, ConnectDevice(_, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    EXPECT_EQ(dSchedCollab_->ExeSrcStart(), INVALID_PARAMETERS_ERR);
+
+    EXPECT_CALL(*adapterMock_, ConnectDevice(_, _, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*bundleMgrMock_, GetLocalBundleInfoV9(_, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*bundleMgrMock_, GetCallerAppIdFromBms(An<int32_t>(), _)).WillOnce(Return(false));
+    EXPECT_EQ(dSchedCollab_->ExeSrcStart(), GET_APPID_ERR);
+
+    EXPECT_CALL(*adapterMock_, ConnectDevice(_, _, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*bundleMgrMock_, GetLocalBundleInfoV9(_, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*bundleMgrMock_, GetCallerAppIdFromBms(An<int32_t>(), _)).WillOnce(Return(true));
+    EXPECT_CALL(*bundleMgrMock_, GetBundleNameListFromBms(_, An<std::vector<std::string>&>()))
+        .WillOnce(Return(true));
+    EXPECT_CALL(*dmsPermMock_, GetAccountInfo(_, _, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillRepeatedly(Return(true));
+    EXPECT_CALL(*adapterMock_, SendData(_, _, _)).WillOnce(Return(-1));
+    EXPECT_EQ(dSchedCollab_->ExeSrcStart(), -1);
+    DTEST_LOG << "DSchedCollabTest ExeSrcStart_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ExeSrcStart_002
+ * @tc.desc: call ExeSrcStart
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, ExeSrcStart_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest ExeSrcStart_002 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    EXPECT_CALL(*adapterMock_, ConnectDevice(_, _, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*bundleMgrMock_, GetLocalBundleInfoV9(_, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*bundleMgrMock_, GetCallerAppIdFromBms(An<int32_t>(), _)).WillOnce(Return(true));
+    EXPECT_CALL(*bundleMgrMock_, GetBundleNameListFromBms(_, An<std::vector<std::string>&>()))
+        .WillOnce(Return(true));
+    EXPECT_CALL(*dmsPermMock_, GetAccountInfo(_, _, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillRepeatedly(Return(true));
+    EXPECT_CALL(*adapterMock_, SendData(_, _, _)).WillOnce(Return(ERR_OK));
+    EXPECT_EQ(dSchedCollab_->ExeSrcStart(), ERR_OK);
+    DTEST_LOG << "DSchedCollabTest ExeSrcStart_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ExeStartAbility_001
+ * @tc.desc: call ExeSrcStart
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, ExeStartAbility_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest ExeStartAbility_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillRepeatedly(Return(true));
+    EXPECT_CALL(*dmsSrvMock_, CheckTargetPermission(_, _, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    EXPECT_EQ(dSchedCollab_->ExeStartAbility(), INVALID_PARAMETERS_ERR);
+
+    EXPECT_CALL(*dmsSrvMock_, CheckTargetPermission(_, _, _, _, _)).WillOnce(Return(ERR_OK));
+    EXPECT_NE(dSchedCollab_->ExeStartAbility(), ERR_OK);
+    DTEST_LOG << "DSchedCollabTest ExeStartAbility_001 end" << std::endl;
 }
 }
 }

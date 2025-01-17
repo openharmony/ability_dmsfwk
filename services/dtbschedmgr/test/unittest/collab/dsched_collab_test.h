@@ -19,6 +19,10 @@
 
 #include "gtest/gtest.h"
 
+#include "mock/bundle_manager_internal_mock.h"
+#include "mock/distributed_sched_permission_mock.h"
+#include "mock/distributed_sched_service_mock.h"
+#include "mock/dsched_transport_softbus_adapter_mock.h"
 #include "mock/event_handler_mock.h"
 #include "mock/message_parcel_mock.h"
 
@@ -34,6 +38,10 @@ public:
 
     static inline std::shared_ptr<EventHandlerMock> handleMock_ = nullptr;
     static inline std::shared_ptr<MessageParcelMock> messageParcelMock_ = nullptr;
+    static inline std::shared_ptr<DSchedTransportSoftbusAdapterMock> adapterMock_ = nullptr;
+    static inline std::shared_ptr<BundleManagerInternalMock> bundleMgrMock_ = nullptr;
+    static inline std::shared_ptr<DistributedSchedPermMock> dmsPermMock_ = nullptr;
+    static inline std::shared_ptr<DistributedSchedServiceMock> dmsSrvMock_ = nullptr;
     static inline std::shared_ptr<DSchedCollab> dSchedCollab_;
 };
 } // namespace DistributedSchedule

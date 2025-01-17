@@ -142,7 +142,7 @@ DSchedCollab::~DSchedCollab()
     if (eventThread_.joinable()) {
         eventThread_.join();
     }
-    
+
     eventHandler_ = nullptr;
     HILOGI("delete end");
 }
