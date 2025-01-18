@@ -1302,7 +1302,7 @@ HWTEST_F(DSchedContinueTest, OnRemoteDied_038, TestSize.Level0)
     DTEST_LOG << "DSchedContinueTest OnRemoteDied_038 begin" << std::endl;
     sptr<StateCallbackIpcDiedListener> diedListener = new StateCallbackIpcDiedListener();
     EXPECT_NO_FATAL_FAILURE(diedListener->OnRemoteDied(nullptr));
-    DTEST_LOG << "DSchedContinueTest OnRemoteDied_038 end ret:" << ret << std::endl;
+    DTEST_LOG << "DSchedContinueTest OnRemoteDied_038 end ret:" << std::endl;
     usleep(WAITTIME);
 }
 }
