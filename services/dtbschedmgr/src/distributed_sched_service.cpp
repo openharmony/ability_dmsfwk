@@ -63,6 +63,7 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "parcel_helper.h"
+#include "string_wrapper.h"
 #include "switch_status_dependency.h"
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
 #include "common_event_listener.h"

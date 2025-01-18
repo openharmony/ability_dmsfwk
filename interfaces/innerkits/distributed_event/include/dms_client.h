@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,7 @@ public:
     int32_t UnRegisterDSchedEventListener(const DSchedEventType& type, const sptr<IDSchedEventListener>& obj);
     int32_t GetContinueInfo(ContinueInfo &continueInfo);
     int32_t GetDSchedEventInfo(const DSchedEventType &type, std::vector<EventNotify> &events);
+    int32_t ConnectDExtAbility(std::string& bundleName, std::string& abilityName, int32_t userId);
 
 private:
     sptr<IRemoteObject> GetDmsProxy();

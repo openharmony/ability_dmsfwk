@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,6 +92,7 @@ enum class IDSchedInterfaceCode : uint32_t {
     UNREGISTER_DSCHED_EVENT_LISTENER = 263,
     GET_CONTINUE_INFO = 264,
     GET_DSCHED_EVENT_INFO = 265,
+    DSCHED_START_DEXTENSION = 266,
 
     // request code for set continue state
     SET_MISSION_CONTINUE_STATE = 300,

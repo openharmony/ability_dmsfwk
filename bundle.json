@@ -14,6 +14,7 @@
       "name": "dmsfwk",
       "subsystem": "ability",
       "syscap": [
+        "SystemCapability.DistributedSched.AppCollaboration",
         "SystemCapability.Ability.DistributedAbilityManager"
       ],
       "adapted_system_type": [ "standard" ],
@@ -78,7 +79,8 @@
           "safwk",
           "samgr",
           "window_manager",
-          "wifi"
+          "wifi",
+          "storage_service"
         ],
         "third_party": []
       },
@@ -100,7 +102,8 @@
             "//foundation/ability/dmsfwk/services/dtbschedmgr:distributedschedsvr",
             "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/ability_connection_manager:distributed_ability_connection_manager",
             "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/av_trans_stream_provider:dtbcollab_av_stream_trans_provider",
-            "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager"
+            "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
+            "//foundation/ability/dmsfwk/frameworks:target_distributed_extension"
           ]
         },
         "inner_kits": [
