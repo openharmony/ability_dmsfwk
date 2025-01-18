@@ -49,7 +49,7 @@ int32_t JsContinuationStateManagerStub::ContinueStateCallback(MessageParcel &dat
     HILOGI("call");
     int32_t state = data.ReadInt32();
     std::string message = data.ReadString();
-    auto task = [this, state, message](){
+    auto task = [this, state, message]() {
         napi_env env = callbackData_.env;
         napi_value callback = nullptr;
         napi_get_reference_value(env, callbackData_.callbackRef, &callback);

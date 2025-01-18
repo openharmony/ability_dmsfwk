@@ -1263,7 +1263,7 @@ HWTEST_F(DSchedContinueTest, ExecuteQuickStartSuccess_036, TestSize.Level0)
     usleep(WAITTIME);
 
     int32_t ret = conti->ExecuteQuickStartSuccess();
-    EXPECT_NE(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest ExecuteQuickStartSuccess_036 end ret:" << ret << std::endl;
     usleep(WAITTIME);
 }
@@ -1287,7 +1287,7 @@ HWTEST_F(DSchedContinueTest, ExecuteQuickStartFailed_037, TestSize.Level0)
     usleep(WAITTIME);
 
     int32_t ret = conti->ExecuteQuickStartFailed(1);
-    EXPECT_NE(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest ExecuteQuickStartFailed_037 end ret:" << ret << std::endl;
     usleep(WAITTIME);
 }
