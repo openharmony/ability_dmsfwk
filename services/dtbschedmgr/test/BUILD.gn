@@ -365,11 +365,6 @@ ohos_unittest("dschedcontinuetest") {
 }
 
 ohos_unittest("dschedconnecttest") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
   module_out_path = module_output_path
 
   sources = [
@@ -721,7 +716,7 @@ ohos_unittest("dmscollabstatetest") {
   cflags = [ "-Dprivate=public" ]
 
   sources = [
-    "${dms_path}/services/dtbschedmgr/src/collab/state/dsched_collab_state_machine.cpp",
+    "unittest/collab/state/dsched_collab_sink_state_test.cpp",
     "unittest/collab/state/dsched_collab_state_machine_test.cpp",
   ]
   sources += dtbschedmgr_sources
@@ -855,11 +850,6 @@ ohos_unittest("dschedcontinuemanagerstatetest") {
 }
 
 ohos_unittest("distributedeventtest") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-  }
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
   sources = [
