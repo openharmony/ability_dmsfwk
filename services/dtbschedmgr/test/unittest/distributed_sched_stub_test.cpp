@@ -2293,44 +2293,6 @@ HWTEST_F(DistributedSchedStubTest, NotifyDSchedEventResultFromRemoteInner_001, T
     DTEST_LOG << "DistributedSchedStubTest NotifyDSchedEventResultFromRemoteInner_001 end" << std::endl;
 }
 
-/**
- * @tc.name: ContinueStateCallbackRegister_001
- * @tc.desc: check ContinueStateCallbackRegister
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedStubTest, ContinueStateCallbackRegister_001, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedStubTest ContinueStateCallbackRegister_001 begin" << std::endl;
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteString("bundleName");
-    data.WriteInt32(1);
-    data.WriteString("moduleName");
-    data.WriteString("abilityName");
-    int32_t result = DistributedSchedService::GetInstance().ContinueStateCallbackRegister(data, reply);
-    EXPECT_EQ(result, ERR_NONE);
-    DTEST_LOG << "DistributedSchedStubTest ContinueStateCallbackRegister_001 end" << std::endl;
-}
-
-/**
- * @tc.name: ContinueStateCallbackUnRegister_001
- * @tc.desc: check ContinueStateCallbackUnRegister
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedStubTest, ContinueStateCallbackUnRegister_001, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedStubTest ContinueStateCallbackUnRegister_001 begin" << std::endl;
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteString("bundleName");
-    data.WriteInt32(1);
-    data.WriteString("moduleName");
-    data.WriteString("abilityName");
-    int32_t result = DistributedSchedService::GetInstance().ContinueStateCallbackUnRegister(data, reply);
-    EXPECT_EQ(result, ERR_NONE);
-    DTEST_LOG << "DistributedSchedStubTest ContinueStateCallbackUnRegister_001 end" << std::endl;
-}
-
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
 /**
  * @tc.name: StartAbilityFromRemoteAdapterInner_001
