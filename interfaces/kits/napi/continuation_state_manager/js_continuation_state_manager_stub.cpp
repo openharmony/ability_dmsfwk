@@ -49,26 +49,28 @@ int32_t JsContinuationStateManagerStub::ContinueStateCallback(MessageParcel &dat
     HILOGI("call");
     int32_t state = data.ReadInt32();
     std::string message = data.ReadString();
-    napi_env env = callbackData_.env;
-    napi_value callback = nullptr;
-    napi_get_reference_value(env, callbackData_.callbackRef, &callback);
-    napi_value undefined = nullptr;
-    napi_get_undefined(env, &undefined);
+    auto task = [this, state, message](){
+        napi_env env = callbackData_.env;
+        napi_value callback = nullptr;
+        napi_get_reference_value(env, callbackData_.callbackRef, &callback);
+        napi_value undefined = nullptr;
+        napi_get_undefined(env, &undefined);
 
-    napi_value result;
-    napi_create_object(env, &result);
-    napi_value resultState;
-    napi_create_int32(env, state, &resultState);
-    napi_set_named_property(env, result, "resultState", resultState);
-    napi_value resultInfo;
-    napi_create_string_utf8(env, message.c_str(), NAPI_AUTO_LENGTH, &resultInfo);
-    napi_set_named_property(env, result, "resultInfo", resultInfo);
-    napi_value callbackResult[2] = {NULL, result};
+        napi_value result;
+        napi_create_object(env, &result);
+        napi_value resultState;
+        napi_create_int32(env, state, &resultState);
+        napi_set_named_property(env, result, "resultState", resultState);
+        napi_value resultInfo;
+        napi_create_string_utf8(env, message.c_str(), NAPI_AUTO_LENGTH, &resultInfo);
+        napi_set_named_property(env, result, "resultInfo", resultInfo);
+        napi_value callbackResult[2] = {NULL, result};
 
-    HILOGI("callback result: %{public}d", state);
-    napi_value callbackReturn = nullptr;
-    napi_call_function(env, undefined, callback, CALLBACK_PARAMS_NUM, callbackResult, &callbackReturn);
-
+        HILOGI("callback result: %{public}d", state);
+        napi_value callbackReturn = nullptr;
+        napi_call_function(env, undefined, callback, CALLBACK_PARAMS_NUM, callbackResult, &callbackReturn);
+    };
+    napi_send_event(callbackData_.env, task, napi_eprio_high);
     HILOGI("end");
     return ERR_OK;
 }

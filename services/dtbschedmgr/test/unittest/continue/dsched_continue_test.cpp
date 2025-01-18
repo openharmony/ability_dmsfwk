@@ -21,6 +21,7 @@
 #include "softbus_error_code.h"
 #include "test_log.h"
 #include "mission/distributed_bm_storage.h"
+#include "continue_scene_session_handler.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1235,6 +1236,74 @@ HWTEST_F(DSchedContinueTest, ConvertToDmsSdkErr_035_1, TestSize.Level0)
     ret = conti->ConvertToDmsSdkErr(-1);
     EXPECT_EQ(ret, DmsInterfaceSdkErr::ERR_DMS_WORK_ABNORMALLY);
     DTEST_LOG << "DSchedContinueTest ConvertToDmsSdkErr_035_1 end" << std::endl;
+}
+
+int32_t ContinueSceneSessionHandler::GetPersistentId(int32_t& persistentId, std::string &continueSessionId)
+{
+    persistentId = 1;
+    return ERR_OK;
+}
+
+/**
+ * @tc.name: ExecuteQuickStartSuccess_036
+ * @tc.desc: ExecuteQuickStartSuccess
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueTest, ExecuteQuickStartSuccess_036, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueTest ExecuteQuickStartSuccess_036 begin" << std::endl;
+    std::string deviceId = "123";
+    std::string bundleName = "test";
+    int32_t subType = CONTINUE_PULL;
+    int32_t direction = CONTINUE_SINK;
+    sptr<IRemoteObject> callback = nullptr;
+    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
+    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
+    conti->Init();
+    usleep(WAITTIME);
+
+    int32_t ret = conti->ExecuteQuickStartSuccess();
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DSchedContinueTest ExecuteQuickStartSuccess_036 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
+}
+
+/**
+ * @tc.name: ExecuteQuickStartFailed_037
+ * @tc.desc: ExecuteQuickStartFailed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueTest, ExecuteQuickStartFailed_037, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueTest ExecuteQuickStartFailed_037 begin" << std::endl;
+    std::string deviceId = "123";
+    std::string bundleName = "test";
+    int32_t subType = CONTINUE_PULL;
+    int32_t direction = CONTINUE_SINK;
+    sptr<IRemoteObject> callback = nullptr;
+    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
+    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
+    conti->Init();
+    usleep(WAITTIME);
+
+    int32_t ret = conti->ExecuteQuickStartFailed(1);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DSchedContinueTest ExecuteQuickStartFailed_037 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
+}
+
+/**
+ * @tc.name: ExecuteQuickStartFailed_037
+ * @tc.desc: ExecuteQuickStartFailed
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueTest, OnRemoteDied_038, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueTest OnRemoteDied_038 begin" << std::endl;
+    sptr<StateCallbackIpcDiedListener> diedListener = new StateCallbackIpcDiedListener();
+    EXPECT_NO_FATAL_FAILURE(diedListener->OnRemoteDied(nullptr));
+    DTEST_LOG << "DSchedContinueTest OnRemoteDied_038 end ret:" << ret << std::endl;
+    usleep(WAITTIME);
 }
 }
 }

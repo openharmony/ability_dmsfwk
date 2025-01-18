@@ -796,5 +796,84 @@ HWTEST_F(DSchedContinueManagerTest, GetFirstBundleName_002, TestSize.Level3)
     EXPECT_EQ(ret, false);
     DTEST_LOG << "DSchedContinueManagerTest GetFirstBundleName_002 end" << std::endl;
 }
+
+/**
+ * @tc.name: ContinueStateCallbackRegister_001
+ * @tc.desc: test ContinueStateCallbackRegister func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, ContinueStateCallbackRegister_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest ContinueStateCallbackRegister_001 begin" << std::endl;
+    StateCallbackInfo stateCallbackInfo;
+    stateCallbackInfo.missionId = 1;
+    stateCallbackInfo.bundleName = "bundleName";
+    stateCallbackInfo.moduleName = "moduleName";
+    stateCallbackInfo.abilityName = "abilityName";
+
+    auto callback = GetDSchedService();
+
+    int32_t ret = DSchedContinueManager::GetInstance().ContinueStateCallbackRegister(
+        stateCallbackInfo, callback);
+    EXPECT_EQ(ret, ERR_OK);
+
+    DSchedContinueManager::GetInstance().stateCallbackCache_[stateCallbackInfo].state = 1;
+    ret = DSchedContinueManager::GetInstance().ContinueStateCallbackRegister(
+        stateCallbackInfo, callback);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DSchedContinueManagerTest ContinueStateCallbackRegister_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinueStateCallbackUnRegister_001
+ * @tc.desc: test ContinueStateCallbackUnRegister func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, ContinueStateCallbackUnRegister_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest ContinueStateCallbackUnRegister_001 begin" << std::endl;
+    StateCallbackInfo stateCallbackInfo;
+    stateCallbackInfo.missionId = 1;
+    stateCallbackInfo.bundleName = "bundleName";
+    stateCallbackInfo.moduleName = "moduleName";
+    stateCallbackInfo.abilityName = "abilityName";
+
+    int32_t ret = DSchedContinueManager::GetInstance().ContinueStateCallbackUnRegister(
+        stateCallbackInfo);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DSchedContinueManagerTest ContinueStateCallbackUnRegister_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyQuickStartState_001
+ * @tc.desc: test NotifyQuickStartState func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, NotifyQuickStartState_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest NotifyQuickStartState_001 begin" << std::endl;
+    StateCallbackInfo stateCallbackInfo;
+    stateCallbackInfo.missionId = 2;
+    stateCallbackInfo.bundleName = "bundleName";
+    stateCallbackInfo.moduleName = "moduleName";
+    stateCallbackInfo.abilityName = "abilityName";
+
+    std::string testMessage = "testMessage";
+
+    int32_t ret = DSchedContinueManager::GetInstance().NotifyQuickStartState(
+        stateCallbackInfo, 0, testMessage);
+    EXPECT_EQ(ret, ERR_OK);
+
+    ret = DSchedContinueManager::GetInstance().NotifyQuickStartState(
+        stateCallbackInfo, 0, testMessage);
+    EXPECT_EQ(ret, ERR_OK);
+
+    DSchedContinueManager::GetInstance().stateCallbackCache_[stateCallbackInfo].remoteObject = GetDSchedService();
+    ret = DSchedContinueManager::GetInstance().NotifyQuickStartState(
+        stateCallbackInfo, 0, testMessage);
+    EXPECT_EQ(ret, ERR_OK);
+
+    DTEST_LOG << "DSchedContinueManagerTest NotifyQuickStartState_001 end" << std::endl;
+}
 }
 }

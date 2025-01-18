@@ -1718,5 +1718,49 @@ HWTEST_F(DistributedSchedServiceSecondTest, RegisterDSchedEventListener_001, Tes
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedServiceSecondTest RegisterDSchedEventListener_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: ContinueStateCallbackRegister_001
+ * @tc.desc: ContinueStateCallbackRegister
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, ContinueStateCallbackRegister_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest ContinueStateCallbackRegister_001 start" << std::endl;
+    int32_t missionId = 1;
+    std::string bundleName = "bundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    sptr<IRemoteObject> callback(new MockDistributedSched());
+
+    int32_t ret = DistributedSchedService::GetInstance().ContinueStateCallbackRegister(
+        missionId, bundleName, moduleName, abilityName, nullptr);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+
+    ret = DistributedSchedService::GetInstance().ContinueStateCallbackRegister(
+        missionId, bundleName, moduleName, abilityName, callback);
+    EXPECT_EQ(ret, ERR_OK);
+
+    DTEST_LOG << "DistributedSchedServiceSecondTest ContinueStateCallbackRegister_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinueStateCallbackUnRegister_001
+ * @tc.desc: ContinueStateCallbackUnRegister
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, ContinueStateCallbackUnRegister_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest ContinueStateCallbackUnRegister_001 start" << std::endl;
+    int32_t missionId = 1;
+    std::string bundleName = "bundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    int32_t ret = DistributedSchedService::GetInstance().ContinueStateCallbackUnRegister(
+        missionId, bundleName, moduleName, abilityName);
+
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceSecondTest ContinueStateCallbackUnRegister_001 end" << std::endl;
+}
 }
 }
