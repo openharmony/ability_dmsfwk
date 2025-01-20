@@ -242,10 +242,12 @@ std::string DSchedCollabManager::GenerateCollabToken(const std::string &srcDevic
     std::uniform_int_distribution<> dis(0, characters.size() - 1);
     std::string randomValue;
     randomValue.resize(RANDOM_STRING_LENGTH);
+    size_t index = 0;
     bool isUnique = false;
     while (!isUnique) {
         for (int32_t i = 0; i < RANDOM_STRING_LENGTH; ++i) {
-            randomValue[i] = characters[dis(gen)];
+            index = static_cast<size_t>(dis(gen));
+            randomValue[i] = characters[index];
         }
         randomValue = srcDeviceId + randomValue;
         if (collabs_.count(randomValue) == 0) {

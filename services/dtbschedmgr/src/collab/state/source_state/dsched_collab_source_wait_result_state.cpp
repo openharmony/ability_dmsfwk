@@ -71,6 +71,10 @@ int32_t CollabSrcWaitResultState::DoSrcResultNotifyTask(std::shared_ptr<DSchedCo
         return INVALID_PARAMETERS_ERR;
     }
     auto syncCollabData = event->GetSharedObject<int32_t>();
+    if (syncCollabData == nullptr) {
+        HILOGE("syncCollabData is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
     int32_t ret = dCollab->ExeSrcCollabResult(*syncCollabData);
     if (ret != ERR_OK) {
         HILOGE("failed, ret: %{public}d", ret);
@@ -85,6 +89,10 @@ int32_t CollabSrcWaitResultState::DoAbilityRejectTask(std::shared_ptr<DSchedColl
         return INVALID_PARAMETERS_ERR;
     }
     auto syncCollabData = event->GetSharedObject<std::string>();
+    if (syncCollabData == nullptr) {
+        HILOGE("syncCollabData is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
     int32_t ret = dCollab->ExeSrcCollabResult(COLLAB_ABILITY_REJECT_ERR, *syncCollabData);
     if (ret != ERR_OK) {
         HILOGE("failed, ret: %{public}d", ret);
@@ -101,6 +109,10 @@ int32_t CollabSrcWaitResultState::DoSrcWaitResultError(std::shared_ptr<DSchedCol
         return INVALID_PARAMETERS_ERR;
     }
     auto syncCollabData = event->GetSharedObject<int32_t>();
+    if (syncCollabData == nullptr) {
+        HILOGE("syncCollabData is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
     int32_t ret = dCollab->ExeSrcWaitResultError(*syncCollabData);
     if (ret != ERR_OK) {
         HILOGE("failed, ret: %{public}d", ret);

@@ -410,7 +410,7 @@ int32_t DSchedCollab::PackPartCmd(std::shared_ptr<SinkStartCmd>& cmd)
     CallerInfo callerInfo;
     callerInfo.sourceDeviceId = collabInfo_.srcInfo_.deviceId_;
     callerInfo.uid = collabInfo_.srcInfo_.uid_;
-    callerInfo.accessToken = collabInfo_.srcInfo_.accessToken_;
+    callerInfo.accessToken = static_cast<uint32_t>(collabInfo_.srcInfo_.accessToken_);
     if (!BundleManagerInternal::GetCallerAppIdFromBms(callerInfo.uid, callerInfo.callerAppId)) {
         HILOGE("GetCallerAppIdFromBms failed");
         return GET_APPID_ERR;
@@ -454,7 +454,8 @@ int32_t DSchedCollab::ExeStartAbility()
         iface_cast<AAFwk::IAbilityConnection>(callbackWrapper));
     if (ret != ERR_OK) {
         HILOGE("startAbilityByCall failed! ret: %{public}d", ret);
-        return PostErrEndTask(ret);
+        ret = PostErrEndTask(ret);
+        return ret;
     }
 
     UpdateState(SINK_CONNECT_STATE);
