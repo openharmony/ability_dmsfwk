@@ -27,6 +27,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 constexpr int32_t ENUM = 9;
+constexpr int32_t WAITTIME = 2000;
 }
 
 void DSchedCollabStateMachineTest::SetUpTestCase()
@@ -113,6 +114,7 @@ HWTEST_F(DSchedCollabStateMachineTest, Execute_001, TestSize.Level3)
     machinePtr2->currentState_ = nullptr;
     ret = machinePtr2->Execute(AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    usleep(WAITTIME);
     DTEST_LOG << "DSchedCollabStateMachineTest Execute_001 end" << std::endl;
 }
 }
