@@ -70,6 +70,10 @@ int32_t CollabSinkConnectState::DoSinkPrepareResult(std::shared_ptr<DSchedCollab
         return INVALID_PARAMETERS_ERR;
     }
     auto syncCollabData = event->GetSharedObject<int32_t>();
+    if (syncCollabData == nullptr) {
+        HILOGE("syncCollabData is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
     int32_t ret = dCollab->ExeSinkPrepareResult(*syncCollabData);
     if (ret != ERR_OK) {
         HILOGE("failed, ret: %{public}d", ret);
@@ -85,6 +89,10 @@ int32_t CollabSinkConnectState::DoAbilityRejectError(std::shared_ptr<DSchedColla
         return INVALID_PARAMETERS_ERR;
     }
     auto syncCollabData = event->GetSharedObject<std::string>();
+    if (syncCollabData == nullptr) {
+        HILOGE("syncCollabData is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
     int32_t ret = dCollab->ExeAbilityRejectError(*syncCollabData);
     if (ret != ERR_OK) {
         HILOGE("failed, ret: %{public}d", ret);
@@ -100,6 +108,10 @@ int32_t CollabSinkConnectState::DoConnectError(std::shared_ptr<DSchedCollab> dCo
         return INVALID_PARAMETERS_ERR;
     }
     auto syncCollabData = event->GetSharedObject<int32_t>();
+    if (syncCollabData == nullptr) {
+        HILOGE("syncCollabData is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
     int32_t ret = dCollab->ExeSinkConnectError(*syncCollabData);
     if (ret != ERR_OK) {
         HILOGE("failed, ret: %{public}d", ret);

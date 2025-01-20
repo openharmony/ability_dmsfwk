@@ -202,7 +202,9 @@ int32_t SinkStartCmd::Unmarshal(const std::string &jsonStr)
     }
 
     int32_t ret =  UnmarshalPartParcel(rootValue);
-    cJSON_Delete(rootValue);
+    if (rootValue != nullptr) {
+        cJSON_Delete(rootValue);
+    }
     return ret;
 }
 
