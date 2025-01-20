@@ -62,11 +62,11 @@ bool ConnectOption::ReadFromParcel(Parcel &parcel)
     needSendData = parcel.ReadBool();
     needSendStream = parcel.ReadBool();
     needReceiveStream = parcel.ReadBool();
-    auto optionsPtr = parcel.ReadParcelable<AAFwk::WantParams>();
+    std::shared_ptr<AAFwk::WantParams> optionsPtr(parcel.ReadParcelable<AAFwk::WantParams>());
     if (optionsPtr) {
         options = *optionsPtr;
     }
-    auto parametersPtr = parcel.ReadParcelable<AAFwk::WantParams>();
+    std::shared_ptr<AAFwk::WantParams> parametersPtr(parcel.ReadParcelable<AAFwk::WantParams>());
     if (parametersPtr) {
         parameters = *parametersPtr;
     }

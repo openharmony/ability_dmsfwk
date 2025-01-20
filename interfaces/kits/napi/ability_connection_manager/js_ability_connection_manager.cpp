@@ -1091,15 +1091,15 @@ void JsAbilityConnectionManager::CreateSendDataAsyncWork(napi_env env, AsyncCall
     if (status != napi_ok) {
         HILOGE("Failed to create async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
-        delete asyncCallbackInfo;
         napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        delete asyncCallbackInfo;
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
         HILOGE("Failed to queue async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
-        delete asyncCallbackInfo;
         napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        delete asyncCallbackInfo;
     }
 }
 
@@ -1224,15 +1224,15 @@ void JsAbilityConnectionManager::CreateStreamAsyncWork(napi_env env, AsyncCallba
     if (status != napi_ok) {
         HILOGE("Failed to create async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
-        delete asyncCallbackInfo;
         napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        delete asyncCallbackInfo;
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
         HILOGE("Failed to queue async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
-        delete asyncCallbackInfo;
         napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        delete asyncCallbackInfo;
     }
 }
 

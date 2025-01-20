@@ -229,6 +229,10 @@ bool Snapshot::WriteSnapshotInfo(MessageParcel& data) const
     PARCEL_WRITE_HELPER_RET(parcel, String16, sourceDeviceTips_, false); // for sourceDeviceTips
     size_t infoSize = parcel.GetReadableBytes();
     const uint8_t* infoBuffer = parcel.ReadBuffer(infoSize);
+    if (infoBuffer == nullptr) {
+        HILOGE("Failed to read buffer!");
+        return false;
+    }
     PARCEL_WRITE_HELPER_RET(data, Uint32, infoSize, false); // for snapshot info size
     bool ret = data.WriteBuffer(infoBuffer, infoSize); // for snapshot info buffer
     if (!ret) {

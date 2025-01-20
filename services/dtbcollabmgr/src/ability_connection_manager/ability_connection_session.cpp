@@ -546,7 +546,7 @@ SurfaceParam AbilityConnectionSession::ConvertToSurfaceParam(const SurfaceParams
             surfaveParam.filp = SurfaceFilp::FLIP_V;
             break;
         default:
-            surfaveParam.filp = SurfaceFilp::FLIP_H;
+            surfaveParam.filp = SurfaceFilp::FLIP_NONE;
             break;
     }
 

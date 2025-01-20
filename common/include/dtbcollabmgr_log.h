@@ -209,6 +209,8 @@ enum {
     CONNECT_DATA_CHANNEL_FAILED,
 
     CONNECT_STREAM_BYTES_CHANNEL_FAILED,
+
+    ERR_JSON_GENERATION_FAILED,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

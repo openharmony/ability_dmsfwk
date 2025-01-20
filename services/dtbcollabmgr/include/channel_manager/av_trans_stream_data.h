@@ -47,8 +47,8 @@ enum class SurfaceFilp : uint32_t {
 };
 
 struct SurfaceParam {
-    SurfaceRotate rotate;
-    SurfaceFilp filp;
+    SurfaceRotate rotate = SurfaceRotate::ROTATE_NONE;
+    SurfaceFilp filp = SurfaceFilp::FLIP_NONE;
 };
 
 struct PixelMapPackOption {

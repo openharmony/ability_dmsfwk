@@ -70,7 +70,7 @@ private:
     uint32_t nowSubSeq_ = 0;
     uint32_t nowTotalLen_ = 0;
     std::unique_ptr<AVTransDataBuffer> packBuffer_ = nullptr;
-    uint8_t* currentPos;
+    uint8_t* currentPos = nullptr;
 };
 } // namespace DistributedCollab
 } // namespace OHOS
