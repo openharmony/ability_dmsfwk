@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DSCHED_COLLAB_TEST
-#define DSCHED_COLLAB_TEST
+#ifndef DSCHED_COLLAB_SUP_TEST
+#define DSCHED_COLLAB_SUP_TEST
 #include "dsched_collab.h"
 
 #include "gtest/gtest.h"

@@ -62,6 +62,8 @@ void DSchedCollabSupTest::SetUp()
 HWTEST_F(DSchedCollabSupTest, PostSrcStartTask_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedCollabSupTest PostSrcStartTask_002 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
     EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(false));
     EXPECT_EQ(dSchedCollab_->PostSrcStartTask(), COLLAB_SEND_EVENT_FAILED);
 
@@ -79,6 +81,8 @@ HWTEST_F(DSchedCollabSupTest, PostSrcStartTask_001, TestSize.Level3)
 HWTEST_F(DSchedCollabSupTest, PostSinkStartTask_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedCollabSupTest PostSinkStartTask_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
     EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(false));
     EXPECT_EQ(dSchedCollab_->PostSinkStartTask(), COLLAB_SEND_EVENT_FAILED);
 
@@ -96,6 +100,8 @@ HWTEST_F(DSchedCollabSupTest, PostSinkStartTask_001, TestSize.Level3)
 HWTEST_F(DSchedCollabSupTest, PostSinkPrepareResultTask_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedCollabSupTest PostSinkPrepareResultTask_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
     int32_t result = 100;
     int32_t collabSessionId = 0;
     std::string socketName = "test";
@@ -119,6 +125,8 @@ HWTEST_F(DSchedCollabSupTest, PostSinkPrepareResultTask_001, TestSize.Level3)
 HWTEST_F(DSchedCollabSupTest, PostSrcResultTask_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedCollabSupTest PostSrcResultTask_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
     std::shared_ptr<NotifyResultCmd> cmd = std::make_shared<NotifyResultCmd>();
     EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(false));
     EXPECT_EQ(dSchedCollab_->PostSrcResultTask(cmd), COLLAB_SEND_EVENT_FAILED);
@@ -144,6 +152,8 @@ HWTEST_F(DSchedCollabSupTest, PostSrcResultTask_001, TestSize.Level3)
 HWTEST_F(DSchedCollabSupTest, PostErrEndTask_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedCollabSupTest PostErrEndTask_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
     int32_t result = 100;
     EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(false));
     EXPECT_EQ(dSchedCollab_->PostErrEndTask(result), COLLAB_SEND_EVENT_FAILED);
@@ -162,6 +172,8 @@ HWTEST_F(DSchedCollabSupTest, PostErrEndTask_001, TestSize.Level3)
 HWTEST_F(DSchedCollabSupTest, PostAbilityRejectTask_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedCollabSupTest PostAbilityRejectTask_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
     std::string reason = "test";
     EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(false));
     EXPECT_EQ(dSchedCollab_->PostAbilityRejectTask(reason), COLLAB_SEND_EVENT_FAILED);
@@ -180,6 +192,8 @@ HWTEST_F(DSchedCollabSupTest, PostAbilityRejectTask_001, TestSize.Level3)
 HWTEST_F(DSchedCollabSupTest, PostEndTask_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedCollabSupTest PostEndTask_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
     EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(false));
     EXPECT_EQ(dSchedCollab_->PostEndTask(), COLLAB_SEND_EVENT_FAILED);
 
@@ -197,6 +211,8 @@ HWTEST_F(DSchedCollabSupTest, PostEndTask_001, TestSize.Level3)
 HWTEST_F(DSchedCollabSupTest, OnDataRecv_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedCollabSupTest OnDataRecv_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
     dSchedCollab_->collabInfo_.direction_ = COLLAB_SINK;
     dSchedCollab_->collabInfo_.srcClientCB_ = nullptr;
     dSchedCollab_->collabInfo_.sinkClientCB_ = nullptr;
