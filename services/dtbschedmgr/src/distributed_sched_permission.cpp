@@ -552,11 +552,6 @@ bool DistributedSchedPermission::CheckMigrateStartCtrlPer(const AppExecFwk::Abil
 
     // check if continuation with same appid
     HILOGI("Check migration start control permission with same appid enter.");
-    if (!targetAbility.visible &&
-        !CheckDeviceSecurityLevel(callerInfo.sourceDeviceId, want.GetElement().GetDeviceID())) {
-        HILOGE("check device security level failed!");
-        return false;
-        }
     if (!isSameBundle) {
         return true;
     }
