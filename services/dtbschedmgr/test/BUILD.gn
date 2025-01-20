@@ -684,8 +684,45 @@ ohos_unittest("dmscollabtest") {
     "unittest/mock/distributed_sched_permission_mock.cpp",
     "unittest/mock/distributed_sched_service_mock.cpp",
     "unittest/mock/dsched_transport_softbus_adapter_mock.cpp",
-    "unittest/mock/event_handler_mock.cpp",
     "unittest/mock/message_parcel_mock.cpp",
+    "unittest/mock_distributed_sched.cpp",
+    "unittest/mock_remote_stub.cpp",
+  ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "./resource:coverage_flags",
+  ]
+  deps = []
+
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  external_deps += [
+    "googletest:gmock",
+    "screenlock_mgr:screenlock_client",
+  ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("dmscollabsuptest") {
+  sanitize = {
+    blocklist = "./cfi_blocklist.txt"
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+
+  sources = [
+    "${dms_path}/services/dtbschedmgr/src/collab/dsched_collab.cpp",
+    "unittest/collab/dsched_collab_sup_test.cpp",
+    "unittest/mock/event_handler_mock.cpp",
     "unittest/mock_distributed_sched.cpp",
     "unittest/mock_remote_stub.cpp",
   ]
@@ -925,6 +962,7 @@ group("unittest") {
     ":dmsbasetest",
     ":dmscollabeventtest",
     ":dmscollabstatetest",
+    ":dmscollabsuptest",
     ":dmscollabtest",
     ":dmsfreeinstallcbtest",
     ":dschedconnecttest",
