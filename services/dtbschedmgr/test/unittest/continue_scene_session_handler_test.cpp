@@ -109,6 +109,39 @@ HWTEST_F(ContinueSceneSessionHandlerTest, GetPersistentId_002, TestSize.Level3)
 }
 
 /**
+ * @tc.name: GetPersistentId_003
+ * @tc.desc: get persistentId by continueSessionId
+ * @tc.type: FUNC
+ * @tc.require: SR20240116512594
+ */
+HWTEST_F(ContinueSceneSessionHandlerTest, GetPersistentId_003, TestSize.Level3)
+{
+    DTEST_LOG << "ContinueSceneSessionHandlerTest GetPersistentId_003 begin" << std::endl;
+    int32_t persistentId;
+    std::string continueSessionId = "continueSessionId";
+    int32_t err = ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId, continueSessionId);
+    EXPECT_EQ(static_cast<int32_t>(INVALID_PARAMETERS_ERR), err);
+    DTEST_LOG << "ContinueSceneSessionHandlerTest GetPersistentId_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetPersistentId_004
+ * @tc.desc: get persistentId by continueSessionId
+ * @tc.type: FUNC
+ * @tc.require: SR20240116512594
+ */
+HWTEST_F(ContinueSceneSessionHandlerTest, GetPersistentId_004, TestSize.Level3)
+{
+    DTEST_LOG << "ContinueSceneSessionHandlerTest GetPersistentId_004 begin" << std::endl;
+    int32_t persistentId;
+    std::string continueSessionId = "continueSessionId";
+    ContinueSceneSessionHandler::GetInstance().continueSessionId_.clear();
+    int32_t err = ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId, continueSessionId);
+    EXPECT_EQ(INVALID_PARAMETERS_ERR, err);
+    DTEST_LOG << "ContinueSceneSessionHandlerTest GetPersistentId_004 end" << std::endl;
+}
+
+/**
  * @tc.name: ClearContinueSessionId_001
  * @tc.desc: clear continueSessionId test
  * @tc.type: FUNC
