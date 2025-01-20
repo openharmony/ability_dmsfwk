@@ -52,6 +52,10 @@ int32_t DataSenderReceiver::SendStreamData(const std::shared_ptr<AVTransStreamDa
     };
     cJSON* extInfo = sendData->SerializeStreamDataExt();
     char* jsonString = cJSON_PrintUnformatted(extInfo);
+    if (jsonString == nullptr) {
+        HILOGE("Failed to generate JSON string.");
+        return ERR_JSON_GENERATION_FAILED;
+    }
     const StreamData ext = {
         .buf = jsonString,
         .bufLen = strlen(jsonString)

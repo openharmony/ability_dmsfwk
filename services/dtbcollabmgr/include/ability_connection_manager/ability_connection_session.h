@@ -47,6 +47,7 @@ enum class TransChannelType : int32_t {
 };
 
 enum class CollabrateDirection : int32_t {
+    UNKNOWN = -1,
     COLLABRATE_SOURCE,
     COLLABRATE_SINK,
 };
@@ -196,7 +197,7 @@ private:
     PeerInfo localInfo_;
     PeerInfo peerInfo_;
     ConnectOption connectOption_;
-    CollabrateDirection direction_;
+    CollabrateDirection direction_ = CollabrateDirection::UNKNOWN;
     
     std::shared_ptr<CollabChannelListener> channelListener_ = nullptr;
 

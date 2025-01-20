@@ -418,8 +418,8 @@ int32_t AVReceiverFilter::RequestAndPushData(const std::shared_ptr<AVTransStream
 {
     std::shared_ptr<AVBuffer> outputBuffer = nullptr;
     Media::AVBufferConfig avBufferConfig;
-    avBufferConfig.size = data->StreamData()->Size();
-    HILOGD("recv raw stream data size = %{public}u", static_cast<uint32_t>(avBufferConfig.size));
+    avBufferConfig.size = static_cast<int32_t>(data->StreamData()->Size());
+    HILOGD("recv raw stream data size = %{public}d", avBufferConfig.size);
     avBufferConfig.memoryType = Media::MemoryType::HARDWARE_MEMORY;
     avBufferConfig.memoryFlag = Media::MemoryFlag::MEMORY_READ_WRITE;
     Status ret = bufferQProxy_->RequestBuffer(outputBuffer, avBufferConfig);
@@ -528,14 +528,22 @@ std::shared_ptr<AVTransStreamData> AVReceiverFilter::ReadStreamDataFromBuffer(ui
         HILOGE("Failed to parse header JSON");
         return nullptr;
     }
-    HILOGD("parse header = %{public}s", cJSON_PrintUnformatted(headerJson));
-    cJSON* dataLenItem = cJSON_GetObjectItem(headerJson, "dataLen");
-    if (dataLenItem == nullptr) {
+    char* headerStr = cJSON_PrintUnformatted(headerJson);
+    if (headerStr != nullptr) {
+        HILOGD("parse header = %{public}s", headerStr);
+        cJSON_free(headerStr);
+    } else {
+        HILOGE("Failed to print headerJson");
+        return nullptr;
+    }
+   
+    cJSON* dataLenItem = cJSON_GetObjectItemCaseSensitive(headerJson, "dataLen");
+    if (dataLenItem == nullptr || !cJSON_IsNumber(dataLenItem)) {
         HILOGE("Missing 'dataLen' in header JSON");
         cJSON_Delete(headerJson);
         return nullptr;
     }
-    size_t rawDataLen = dataLenItem->valueint;
+    size_t rawDataLen = static_cast<uint32_t>(dataLenItem->valueint);
     uint8_t* rawData = dataHeader + offset + headerLen;
     if (rawDataLen > totalLen - (offset + headerLen)) {
         HILOGE("Raw data length exceeds available buffer size");

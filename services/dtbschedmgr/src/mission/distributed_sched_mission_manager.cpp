@@ -1130,6 +1130,10 @@ int32_t DistributedSchedMissionManager::MissionSnapshotChanged(int32_t missionId
     }
     size_t len = data.GetReadableBytes();
     const uint8_t* byteStream = data.ReadBuffer(len);
+    if (byteStream == nullptr) {
+        HILOGE("Failed to read length.");
+        return INVALID_PARAMETERS_ERR;
+    }
     errCode = StoreSnapshotInfo(networkId, missionId, byteStream, len);
     return errCode;
 }

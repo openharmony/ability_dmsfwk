@@ -108,7 +108,7 @@ private:
 
 private:
     std::string name_;
-    int32_t channelId_;
+    int32_t channelId_ = -1;
     std::shared_ptr<Media::Pipeline::EventReceiver> eventReceiver_ = nullptr;
     std::shared_ptr<Media::Pipeline::FilterCallback> filterCallback_ = nullptr;
     std::shared_ptr<Media::Pipeline::Filter> nextFilter_ = nullptr;
