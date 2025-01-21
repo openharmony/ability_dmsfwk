@@ -812,6 +812,38 @@ ohos_unittest("dmscollabeventtest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("dmscollabsrcstattest") {
+  sanitize = {
+    blocklist = "./cfi_blocklist.txt"
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+
+  sources = [ "unittest/collab/state/dsched_collab_source_state_test.cpp" ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "./resource:coverage_flags",
+  ]
+  deps = []
+
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  external_deps += [
+    "googletest:gmock",
+    "screenlock_mgr:screenlock_client",
+  ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 ohos_unittest("dschedswitchstatustest") {
   sanitize = {
     cfi = true
@@ -951,6 +983,7 @@ group("unittest") {
     ":distributedwanttest",
     ":dmsbasetest",
     ":dmscollabeventtest",
+    ":dmscollabsrcstattest",
     ":dmscollabstatetest",
     ":dmscollabsuptest",
     ":dmscollabtest",
