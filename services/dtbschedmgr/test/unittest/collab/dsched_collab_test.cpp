@@ -24,6 +24,9 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+    const int32_t WAITTIME = 2000;
+}
 void DSchedCollabTest::SetUpTestCase()
 {
     DTEST_LOG << "DSchedCollabTest::SetUpTestCase" << std::endl;
@@ -40,6 +43,7 @@ void DSchedCollabTest::SetUpTestCase()
     std::string collabToken;
     DSchedCollabInfo info;
     dSchedCollab_ = std::make_shared<DSchedCollab>(collabToken, info);
+    usleep(WAITTIME);
 }
 
 void DSchedCollabTest::TearDownTestCase()
@@ -61,6 +65,7 @@ void DSchedCollabTest::TearDownTestCase()
 void DSchedCollabTest::TearDown()
 {
     DTEST_LOG << "DSchedCollabTest::TearDown" << std::endl;
+    usleep(WAITTIME);
 }
 
 void DSchedCollabTest::SetUp()
