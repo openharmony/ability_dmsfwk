@@ -117,7 +117,6 @@ void CollabSrcWaitResultStateTest::TearDown()
 
 void CollabSrcWaitResultStateTest::SetUp()
 {
-    
     DTEST_LOG << "CollabSrcWaitResultStateTest::SetUp" << std::endl;
 }
 
