@@ -216,7 +216,7 @@ int32_t DSchedContinueManager::ContinueMission(const DSchedContinueInfo& continu
             currentAccountId, continueInfo.sinkBundleName_, missionId);
         if (ret != ERR_OK) {
             HILOGE("get missionId fail, ret %{public}d.", ret);
-            return ret;
+            return INVALID_PARAMETERS_ERR;
         }
     }
 #endif
