@@ -74,6 +74,25 @@ void DSchedCollabTest::SetUp()
 }
 
 /**
+ * @tc.name: DSchedCollab_001
+ * @tc.desc: call DSchedCollab
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, DSchedCollab_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest DSchedCollab_001 begin" << std::endl;
+#ifdef OS_ACCOUNT_PART
+    EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillOnce(Return(true)).WillOnce(Return(true));
+#endif
+    int32_t softbusSessionId = 0;
+    auto startCmd = std::make_shared<SinkStartCmd>();
+    auto newCollab = std::make_shared<DSchedCollab>(startCmd, softbusSessionId);
+    EXPECT_EQ(newCollab->softbusSessionId_, softbusSessionId);
+    DTEST_LOG << "DSchedCollabTest DSchedCollab_001 end" << std::endl;
+}
+
+/**
  * @tc.name: PostSrcStartTask_001
  * @tc.desc: call PostSrcStartTask
  * @tc.type: FUNC
