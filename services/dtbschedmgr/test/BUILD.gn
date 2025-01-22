@@ -674,6 +674,7 @@ ohos_unittest("dmscollabtest") {
 
   sources = [
     "${dms_path}/services/dtbschedmgr/src/collab/dsched_collab.cpp",
+    "unittest/collab/dsched_collab_manager_test.cpp",
     "unittest/collab/dsched_collab_test.cpp",
     "unittest/mock/bundle_manager_internal_mock.cpp",
     "unittest/mock/distributed_sched_permission_mock.cpp",
