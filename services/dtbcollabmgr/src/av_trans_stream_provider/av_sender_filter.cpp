@@ -285,13 +285,13 @@ std::shared_ptr<AVTransStreamData> AVSenderFilter::PackStreamDataForAVBuffer(con
 {
     AVTransStreamDataExt ext;
     ext.flag_ = AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_CODEC_DATA;
-    ext.index_ = lastIndex_.load();
+    ext.index_ = static_cast<int32_t>(lastIndex_.load());
     lastIndex_++;
-    ext.pts_ = buffer->pts_;
+    ext.pts_ = static_cast<uint64_t>(buffer->pts_);
 #ifdef DSCH_COLLAB_AV_TRANS_TEST_DEMO
     ext.pts_ = GetEncoderTimeStamp();
 #endif
-    ext.startEncodeT_ = std::chrono::system_clock::now().time_since_epoch().count();
+    ext.startEncodeT_ = static_cast<uint64_t>(std::chrono::system_clock::now().time_since_epoch().count());
     ext.finishEncodeT_ = ext.startEncodeT_;
     ext.sendEncodeT_ = ext.startEncodeT_;
     return std::make_shared<AVTransStreamData>(dataBuffer, ext);
@@ -460,7 +460,7 @@ std::shared_ptr<AVTransStreamData> AVSenderFilter::PackStreamDataForPixelMap(
 {
     AVTransStreamDataExt ext;
     ext.flag_ = AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_PIXEL_MAP;
-    ext.index_ = lastIndex_.load();
+    ext.index_ = static_cast<uint32_t>(lastIndex_.load());
     lastIndex_++;
     PixelMapPackOption option;
     option.quality = PIXEL_MAP_QUALITY;
@@ -486,7 +486,7 @@ std::shared_ptr<AVTransStreamData> AVSenderFilter::PackStreamDataForSurfaceParam
 {
     AVTransStreamDataExt ext;
     ext.flag_ = AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_SURFACE_PARAM;
-    ext.index_ = lastIndex_.load();
+    ext.index_ = static_cast<uint32_t>(lastIndex_.load());
     lastIndex_++;
     ext.surfaceParam_ = param;
     std::shared_ptr<AVTransDataBuffer> dataBuffer = std::make_shared<AVTransDataBuffer>(1);

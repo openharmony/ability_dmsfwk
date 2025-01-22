@@ -49,22 +49,19 @@ void JsAbilityConnectionSessionListener::CallJsMethod(const EventCallbackInfo& c
         return;
     }
 
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
-        ([this, callbackInfo](napi_env env, NapiAsyncTask &task, int32_t status) {
-            napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(env, &scope);
-            if (scope == nullptr) {
-                return;
-            }
+    auto task = [this, callbackInfo]() {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(this->env_, &scope);
+        if (scope == nullptr) {
+            return;
+        }
 
-            CallJsMethodInner(callbackInfo);
-            napi_close_handle_scope(env, scope);
-        });
-
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsAbilityConnectionSessionListener::CallJsMethod",
-        env_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        CallJsMethodInner(callbackInfo);
+        napi_close_handle_scope(this->env_, scope);
+    };
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_high)) {
+        HILOGE("send event failed!");
+    }
 }
 
 void JsAbilityConnectionSessionListener::CallJsMethodInner(const EventCallbackInfo& callbackInfo)

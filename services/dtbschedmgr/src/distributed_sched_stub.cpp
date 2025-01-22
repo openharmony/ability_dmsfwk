@@ -721,7 +721,7 @@ int32_t DistributedSchedStub::CollabMissionInner(MessageParcel& data, MessagePar
     dSchedCollabInfo.srcClientCB_ = sourceClientCallback;
     dSchedCollabInfo.srcInfo_.uid_ = callerUid;
     dSchedCollabInfo.srcInfo_.pid_ = callerPid;
-    dSchedCollabInfo.srcInfo_.accessToken_ = callerAccessToken;
+    dSchedCollabInfo.srcInfo_.accessToken_ = static_cast<int32_t>(callerAccessToken);
  
     DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(callerAccessToken);
     int32_t result = DSchedCollabManager::GetInstance().CollabMission(dSchedCollabInfo);

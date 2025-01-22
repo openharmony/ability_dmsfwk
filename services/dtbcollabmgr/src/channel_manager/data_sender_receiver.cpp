@@ -194,7 +194,7 @@ int32_t DataSenderReceiver::DoSendPacket(SessionDataHeader& headerPara,
     // copy data
     ret = memcpy_s(header + SessionDataHeader::HEADER_LEN,
         sendBuffer->Size() - SessionDataHeader::HEADER_LEN,
-            dataHeader, dataLen);
+        dataHeader, dataLen);
     if (ret != EOK) {
         HILOGE("Write data failed");
         return WRITE_SEND_DATA_BUFFER_FAILED;
