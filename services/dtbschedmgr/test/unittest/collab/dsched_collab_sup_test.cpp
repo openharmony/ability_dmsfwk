@@ -15,6 +15,7 @@
 
 #include "dsched_collab_sup_test.h"
 
+#include "dsched_collab_source_start_state.h"
 #include "mock_distributed_sched.h"
 #include "mock_remote_sup_stub.h"
 #include "test_log.h"
@@ -26,7 +27,10 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
     const int32_t WAITTIME = 2000;
+    constexpr int32_t FOREGROUND = 2;
+    constexpr int32_t BACKGROUND = 4;
 }
+
 void DSchedCollabSupTest::SetUpTestCase()
 {
     DTEST_LOG << "DSchedCollabSupTest::SetUpTestCase" << std::endl;
@@ -239,6 +243,104 @@ HWTEST_F(DSchedCollabSupTest, OnDataRecv_001, TestSize.Level3)
     command = static_cast<int32_t>(DISCONNECT_CMD);
     dSchedCollab_->OnDataRecv(command, dataBuffer);
     DTEST_LOG << "DSchedCollabSupTest OnDataRecv_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ProcessEvent_001
+ * @tc.desc: call ProcessEvent
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabSupTest, ProcessEvent_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabSupTest ProcessEvent_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
+    dSchedCollab_->stateMachine_ = nullptr;
+    dSchedCollab_->ProcessEvent(AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+
+    DSchedCollabEventType eventType = ERR_END_EVENT;
+    auto data = std::make_shared<int32_t>(0);
+    auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
+    dSchedCollab_->ProcessEvent(msgEvent);
+
+    dSchedCollab_->stateMachine_ = std::make_shared<DSchedCollabStateMachine>(dSchedCollab_);
+    EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(false));
+    dSchedCollab_->ProcessEvent(msgEvent);
+
+    dSchedCollab_->stateMachine_->currentState_ =
+        std::make_shared<CollabSrcStartState>(dSchedCollab_->stateMachine_);
+    dSchedCollab_->ProcessEvent(msgEvent);
+    DTEST_LOG << "DSchedCollabSupTest ProcessEvent_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PackNotifyResultCmd_001
+ * @tc.desc: call PackNotifyResultCmd
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabSupTest, PackNotifyResultCmd_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabSupTest PackNotifyResultCmd_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
+    std::shared_ptr<NotifyResultCmd> cmd = nullptr;
+    int32_t result = 5;
+    std::string abilityRejectReason = "test";
+    EXPECT_EQ(dSchedCollab_->PackNotifyResultCmd(cmd, result, abilityRejectReason), INVALID_PARAMETERS_ERR);
+
+    cmd = std::make_shared<NotifyResultCmd>();
+    EXPECT_EQ(dSchedCollab_->PackNotifyResultCmd(cmd, result, abilityRejectReason), ERR_OK);
+    EXPECT_EQ(cmd->result_, result);
+    EXPECT_EQ(cmd->abilityRejectReason_, abilityRejectReason);
+    DTEST_LOG << "DSchedCollabSupTest PackNotifyResultCmd_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: RegisterAbilityLifecycleObserver_001
+ * @tc.desc: call RegisterAbilityLifecycleObserver
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabSupTest, RegisterAbilityLifecycleObserver_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabSupTest RegisterAbilityLifecycleObserver_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    std::string bundleName = "test";
+    EXPECT_EQ(dSchedCollab_->RegisterAbilityLifecycleObserver(bundleName), false);
+    EXPECT_NE(dSchedCollab_->appStateObserver_, nullptr);
+    AppExecFwk::AbilityStateData abilityStateData;
+    abilityStateData.abilityState = BACKGROUND;
+    dSchedCollab_->appStateObserver_->OnAbilityStateChanged(abilityStateData);
+
+    abilityStateData.abilityState = FOREGROUND;
+    dSchedCollab_->appStateObserver_->OnAbilityStateChanged(abilityStateData);
+    dSchedCollab_->UnregisterAbilityLifecycleObserver();
+    DTEST_LOG << "DSchedCollabSupTest RegisterAbilityLifecycleObserver_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DSchedCollabEventHandler_001
+ * @tc.desc: call DSchedCollabEventHandler
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabSupTest, DSchedCollabEventHandler_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabSupTest DSchedCollabEventHandler_001 begin" << std::endl;
+    auto runner = AppExecFwk::EventRunner::Create(false);
+    auto errHandler = std::make_shared<DSchedCollabEventHandler>(runner, nullptr);
+    errHandler->ProcessEvent(AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+
+    DSchedCollabEventType eventType = ERR_END_EVENT;
+    auto msgEvent = AppExecFwk::InnerEvent::Get(eventType);
+    errHandler->ProcessEvent(msgEvent);
+
+    auto handler = std::make_shared<DSchedCollabEventHandler>(runner, dSchedCollab_);
+    EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(true));
+    handler->ProcessEvent(msgEvent);
+    DTEST_LOG << "DSchedCollabSupTest DSchedCollabEventHandler_001 end" << std::endl;
 }
 }
 }
