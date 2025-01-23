@@ -119,14 +119,6 @@ void MultiUserManager::OnUserSwitched(int32_t accountId)
     oldSendMgr->OnUserSwitched();
     currentUserId_ = accountId;
 
-    AccountSA::OsAccountType type = GetOsAccountType(currentUserId_);
-    HILOGI("OnUserSwitched called, currentUserId = %{public}d, type = %{public}d", currentUserId_, type);
-    if (type == AccountSA::OsAccountType::PRIVATE) {
-        HILOGI("GetOsAccountType : OsAccountType is PRIVATE, type : %{public}d", type);
-        DataShareManager::GetInstance().UpdateSwitchStatus(SwitchStatusDependency::GetInstance()
-            .CONTINUE_SWITCH_STATUS_KEY, SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_OFF);
-    }
-
     DataShareManager::GetInstance().SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance()
         .IsContinueSwitchOn());
     DistributedSchedService::GetInstance()
@@ -205,16 +197,6 @@ void MultiUserManager::OnUserRemoved(int32_t accountId)
     }
     DmsContinueConditionMgr::GetInstance().OnUserRemoved(accountId);
     HILOGI("UserRemoved end");
-}
-
-AccountSA::OsAccountType MultiUserManager::GetOsAccountType(int32_t &accountId)
-{
-    AccountSA::OsAccountType type;
-    ErrCode err = AccountSA::OsAccountManager::GetOsAccountType(accountId, type);
-    if (err != ERR_OK) {
-        HILOGE("GetOsAccountType passing param invalid or return error!, err : %{public}d", err);
-    }
-    return type;
 }
 
 int32_t MultiUserManager::CreateNewSendMgrLocked()

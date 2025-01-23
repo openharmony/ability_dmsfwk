@@ -135,34 +135,6 @@ int32_t DataShareManager::GetLocalAccountId()
     return id;
 }
 
-void DataShareManager::UpdateSwitchStatus(const std::string &key, const std::string &value)
-{
-    HILOGI("Start UpdateSwitchStatus");
-    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = CreateDataShareHelper();
-    if (dataShareHelper == nullptr) {
-        HILOGE("dataShareHelper is null, key is %{public}s", key.c_str());
-        return;
-    }
-
-    HILOGD("UpdateSwitchStatus key = %{public}s", key.c_str());
-    int32_t userId = GetLocalAccountId();
-    Uri uri(AssembleUserSecureUri(userId, key));
-    DataShare::DataSharePredicates predicates;
-    predicates.EqualTo(SwitchStatusDependency::SETTINGS_DATA_FIELD_KEY, key);
-
-    DataShare::DataShareValuesBucket bucket;
-    bucket.Put(SwitchStatusDependency::SETTINGS_DATA_FIELD_KEY, key);
-    bucket.Put(SwitchStatusDependency::SETTINGS_DATA_FIELD_VAL, value);
-
-    auto result = dataShareHelper->UpdateEx(uri, predicates, bucket);
-    dataShareHelper->Release();
-    if (result.first != ERR_OK) {
-        HILOGE("Update status failed: %{public}d", result.first);
-    }
-    HILOGI("Finish UpdateSwitchStatus, Updata status success: %{public}d", result.first);
-    return;
-}
-
 bool DataShareManager::IsCurrentContinueSwitchOn()
 {
     HILOGD("IsCurrentContinueSwitchOn start");
