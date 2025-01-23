@@ -678,19 +678,29 @@ void ChannelManager::OnSocketConnected(const int32_t socketId, const PeerSocketI
         HILOGE("invalid channelid=%{public}d with channelName %{public}s", channelId, channelName.c_str());
         return;
     }
+    auto func = [socketId, channelId, this]() {
+        UpdateChannel(socketId, channelId);
+    };
+    PostTask(func, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    HILOGI("add update channel task into handler");
+}
+
+int32_t ChannelManager::UpdateChannel(const int32_t socketId, const int32_t channelId)
+{
     int32_t ret = RegisterSocket(socketId, channelId);
     if (ret != ERR_OK) {
         HILOGE("failed to save binded socket to matching channel");
         DoErrorCallback(channelId, ret);
-        return;
+        return ret;
     }
     ret = SetSocketStatus(socketId, ChannelStatus::CONNECTED);
     if (ret != ERR_OK) {
         HILOGE("failed to set socket status, %{public}d->%{public}d", channelId, ret);
         DoErrorCallback(channelId, ret);
-        return;
+        return ret;
     }
     DoConnectCallback(channelId);
+    return ret;
 }
 
 std::optional<std::string> ChannelManager::GetChannelNameFromSocket(const std::string& socketName)
