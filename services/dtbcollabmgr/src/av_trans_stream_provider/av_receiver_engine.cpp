@@ -194,6 +194,7 @@ bool AVReceiverEngine::isVideoParam(const StreamParam& recParam)
         case StreamParamType::VID_ENC_FMT:
         case StreamParamType::VID_IS_HDR:
         case StreamParamType::VID_ENABLE_TEMPORAL_SCALE:
+        case StreamParamType::VID_SURFACE_PARAM:
             return true;
         default:
             return false;

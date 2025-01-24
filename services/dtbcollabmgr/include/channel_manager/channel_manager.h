@@ -139,7 +139,7 @@ private:
     std::optional<ChannelDataType> GetChannelDataTypeFromName(const std::string& channelName);
     int32_t GetChannelId(const std::string& channelName, const ChannelDataType dataType);
     int32_t RegisterSocket(const int32_t socketId, const int32_t channelId);
-
+    int32_t UpdateChannel(const int32_t socketId, const int32_t channelId);
     int32_t GetChannelId(const int32_t socketId);
     ChannelStatus GetChannelStatus(const int32_t channelId);
 
