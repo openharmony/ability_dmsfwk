@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef DSCHED_COLLAB_EVENT_H
-#define DSCHED_COLLAB_EVENT_H
+#ifndef DSCHED_COLLAB_EVENT_TEST_H
+#define DSCHED_COLLAB_EVENT_TEST_H
 #include "dsched_collab_event.h"
 
 #include "gtest/gtest.h"
@@ -32,4 +32,4 @@ public:
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
-#endif // DSCHED_COLLAB_EVENT_H
+#endif // DSCHED_COLLAB_EVENT_TEST_H

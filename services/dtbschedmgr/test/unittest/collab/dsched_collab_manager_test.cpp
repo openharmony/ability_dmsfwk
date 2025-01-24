@@ -348,6 +348,7 @@ HWTEST_F(DSchedCollabManagerTest, OnDataRecv_002, TestSize.Level3)
     size_t sizeL = 20;
     std::shared_ptr<DSchedDataBuffer> dataBuffer = std::make_shared<DSchedDataBuffer>(sizeL);
     DSchedCollabManager::GetInstance().OnDataRecv(softbusSessionId, dataBuffer);
+    EXPECT_EQ(DSchedCollabManager::GetInstance().collabs_.empty(), true);
     DTEST_LOG << "DSchedCollabManagerTest OnDataRecv_002 end" << std::endl;
 }
 
