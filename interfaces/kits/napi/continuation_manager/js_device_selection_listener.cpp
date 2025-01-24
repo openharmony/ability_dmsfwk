@@ -73,23 +73,20 @@ void JsDeviceSelectionListener::CallJsMethod(const std::string& methodName,
         return;
     }
     // js callback should run in js thread
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
-        ([this, methodName, continuationResults]
-            (napi_env env, NapiAsyncTask &task, int32_t status) {
-            napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(env, &scope);
-            if (scope == nullptr) {
-                return;
-            }
+    auto task = [this, methodName, continuationResults] {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(this->engine_, &scope);
+        if (scope == nullptr) {
+            return;
+        }
 
-            CallJsMethodInner(methodName, continuationResults);
+        CallJsMethodInner(methodName, continuationResults);
 
-            napi_close_handle_scope(env, scope);
-        });
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsDeviceSelectionListener::OnDeviceConnect",
-        engine_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        napi_close_handle_scope(this->engine_, scope);
+    };
+    if (napi_status::napi_ok != napi_send_event(engine_, task, napi_eprio_high)) {
+        HILOGE("send event failed!");
+    }
 }
 
 void JsDeviceSelectionListener::CallJsMethodInner(const std::string& methodName,
@@ -118,22 +115,19 @@ void JsDeviceSelectionListener::CallJsMethod(const std::string& methodName, cons
         return;
     }
     // js callback should run in js thread
-    std::unique_ptr<NapiAsyncTask::CompleteCallback> complete = std::make_unique<NapiAsyncTask::CompleteCallback>
-        ([this, methodName, deviceIds]
-            (napi_env env, NapiAsyncTask &task, int32_t status) {
-            napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(env, &scope);
-            if (scope == nullptr) {
-                return;
-            }
-            CallJsMethodInner(methodName, deviceIds);
+    auto task = [this, methodName, deviceIds]() {
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(this->engine_, &scope);
+        if (scope == nullptr) {
+            return;
+        }
+        CallJsMethodInner(methodName, deviceIds);
 
-            napi_close_handle_scope(env, scope);
-        });
-    napi_ref callback = nullptr;
-    std::unique_ptr<NapiAsyncTask::ExecuteCallback> execute = nullptr;
-    NapiAsyncTask::Schedule("JsDeviceSelectionListener::OnDeviceDisconnect",
-        engine_, std::make_unique<NapiAsyncTask>(callback, std::move(execute), std::move(complete)));
+        napi_close_handle_scope(this->engine_, scope);
+    };
+    if (napi_status::napi_ok != napi_send_event(engine_, task, napi_eprio_high)) {
+        HILOGE("send event failed!");
+    }
 }
 
 void JsDeviceSelectionListener::CallJsMethodInner(const std::string& methodName,

@@ -534,6 +534,7 @@ std::shared_ptr<AVTransStreamData> AVReceiverFilter::ReadStreamDataFromBuffer(ui
         cJSON_free(headerStr);
     } else {
         HILOGE("Failed to print headerJson");
+        cJSON_Delete(headerJson);
         return nullptr;
     }
    
