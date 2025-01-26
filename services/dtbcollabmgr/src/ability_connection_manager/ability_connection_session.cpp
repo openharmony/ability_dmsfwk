@@ -110,7 +110,7 @@ void AbilityConnectionSession::UnInit()
 
 void AbilityConnectionSession::Release()
 {
-    HILOGD("called.");
+    HILOGI("called.");
     {
         std::unique_lock<std::shared_mutex> sessionStatusWriteLock(sessionMutex_);
         if (sessionStatus_ == SessionStatus::UNCONNECTED) {
@@ -165,9 +165,8 @@ int32_t AbilityConnectionSession::Connect(ConnectCallback& callback)
 
 int32_t AbilityConnectionSession::Disconnect()
 {
-    HILOGD("called.");
+    HILOGI("called.");
     Release();
-
     DistributedClient dmsClient;
     int32_t ret = dmsClient.NotifyCloseCollabSession(dmsServerToken_);
     HILOGI("Notify Server DisConnect result is %{public}d", ret);
@@ -230,7 +229,7 @@ int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::
 
 int32_t AbilityConnectionSession::HandleDisconnect()
 {
-    HILOGD("called.");
+    HILOGI("called.");
     {
         std::shared_lock<std::shared_mutex> sessionStatusReadLock(sessionMutex_);
         if (sessionStatus_ == SessionStatus::UNCONNECTED) {
@@ -903,15 +902,17 @@ void AbilityConnectionSession::OnChannelClosed(int32_t channelId)
         return;
     }
 
-    if (IsConnected()) {
-        HILOGI("notidy app disconnect");
-        EventCallbackInfo callbackInfo;
-        callbackInfo.sessionId = sessionId_;
-        callbackInfo.reason = DisconnectReason::PEER_APP_EXIT;
-        ExeuteEventCallback(EVENT_DISCONNECT, callbackInfo);
-
-        Release();
+    if (!IsConnected()) {
+        HILOGE("session is not connected.");
+        return;
     }
+
+    HILOGI("notidy app disconnect");
+    Disconnect();
+    EventCallbackInfo callbackInfo;
+    callbackInfo.sessionId = sessionId_;
+    callbackInfo.reason = DisconnectReason::PEER_APP_EXIT;
+    ExeuteEventCallback(EVENT_DISCONNECT, callbackInfo);
 }
 
 void AbilityConnectionSession::OnMessageReceived(int32_t channelId, const std::shared_ptr<AVTransDataBuffer> dataBuffer)
@@ -1106,9 +1107,12 @@ void AbilityConnectionSession::ExeuteConnectCallback(const ConnectResult& result
     }
 
     auto task = [this, result, connectCallback = connectCallback_]() {
-        if (connectCallback) {
-            connectCallback(result);
+        HILOGI("execute connect callback task.");
+        if (connectCallback == nullptr) {
+            HILOGE("connect callback is nullptr.");
+            return;
         }
+        connectCallback(result);
         if (!result.isConnected) {
             Release();
         }

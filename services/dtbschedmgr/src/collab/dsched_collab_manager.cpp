@@ -176,10 +176,6 @@ int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
         HILOGE("failed to find sinkDeviceId.");
         return FIND_REMOTE_DEVICEID_ERR;
     }
-    if (IsSessionExists(info)) {
-        HILOGE("a same collab session is already in progress.");
-        return COLLAB_ALREADY_IN_PROGRESS;
-    }
     auto func = [this, info]() {
         HandleCollabMission(info);
     };
