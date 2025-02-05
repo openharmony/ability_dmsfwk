@@ -53,15 +53,17 @@ struct SurfaceParam {
 
 struct PixelMapPackOption {
     uint8_t quality = 100;
+    uint32_t width = 0;
+    uint32_t height = 0;
 };
 
 struct AVTransStreamDataExt {
-    AvCodecBufferFlag flag_;
-    uint32_t index_;
-    uint64_t pts_;
-    uint64_t startEncodeT_;
-    uint64_t finishEncodeT_;
-    uint64_t sendEncodeT_;
+    AvCodecBufferFlag flag_ = AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_CODEC_DATA;
+    uint32_t index_ = 0;
+    uint64_t pts_ = 0;
+    uint64_t startEncodeT_ = 0;
+    uint64_t finishEncodeT_ = 0;
+    uint64_t sendEncodeT_ = 0;
     PixelMapPackOption pixelMapOption_;
     SurfaceParam surfaceParam_;
 };

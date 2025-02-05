@@ -86,7 +86,9 @@ private:
     int32_t SendStreamDataByBytes(const std::shared_ptr<AVTransStreamData>& streamData);
     int32_t PackPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
         std::shared_ptr<AVTransDataBuffer>& buffer);
-    std::shared_ptr<AVTransStreamData> PackStreamDataForPixelMap(const std::shared_ptr<AVTransDataBuffer>& dataBuffer);
+    std::shared_ptr<AVTransStreamData> PackStreamDataForPixelMap(
+        const std::shared_ptr<Media::PixelMap>& pixelMap,
+        const std::shared_ptr<AVTransDataBuffer>& dataBuffer);
     std::shared_ptr<AVTransStreamData> PackStreamDataForSurfaceParam(const SurfaceParam& param);
     void Process();
     int32_t WriteDataToBuffer(std::shared_ptr<AVTransDataBuffer>& buffer,
