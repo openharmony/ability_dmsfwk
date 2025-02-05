@@ -416,7 +416,7 @@ int32_t AVSenderFilter::SendPixelMap(const std::shared_ptr<Media::PixelMap>& pix
     }
     {
         std::lock_guard<std::mutex> lock(queueMutex_);
-        auto ptr = PackStreamDataForPixelMap(buffer);
+        auto ptr = PackStreamDataForPixelMap(pixelMap, buffer);
         if (isRunning_) {
             sendDatas_.push(ptr);
         }
@@ -456,6 +456,7 @@ int32_t AVSenderFilter::PackPixelMap(const std::shared_ptr<Media::PixelMap>& pix
 }
 
 std::shared_ptr<AVTransStreamData> AVSenderFilter::PackStreamDataForPixelMap(
+    const std::shared_ptr<Media::PixelMap>& pixelMap,
     const std::shared_ptr<AVTransDataBuffer>& dataBuffer)
 {
     AVTransStreamDataExt ext;
@@ -464,6 +465,8 @@ std::shared_ptr<AVTransStreamData> AVSenderFilter::PackStreamDataForPixelMap(
     lastIndex_++;
     PixelMapPackOption option;
     option.quality = PIXEL_MAP_QUALITY;
+    option.width = static_cast<uint32_t>(pixelMap->GetWidth());
+    option.height = static_cast<uint32_t>(pixelMap->GetHeight());
     ext.pixelMapOption_ = option;
     return std::make_shared<AVTransStreamData>(dataBuffer, ext);
 }

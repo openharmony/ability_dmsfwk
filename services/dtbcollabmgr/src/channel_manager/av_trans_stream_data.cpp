@@ -94,6 +94,8 @@ inline void AVTransStreamData::WriteExtPixelMapPackOptionToJson(cJSON* root) con
 {
     cJSON* pixelMapJson = cJSON_CreateObject();
     cJSON_AddNumberToObject(pixelMapJson, "quality", ext_.pixelMapOption_.quality);
+    cJSON_AddNumberToObject(pixelMapJson, "width", ext_.pixelMapOption_.width);
+    cJSON_AddNumberToObject(pixelMapJson, "height", ext_.pixelMapOption_.height);
     cJSON_AddItemToObject(root, "pixel_map", pixelMapJson);
 }
 
@@ -193,6 +195,14 @@ inline void AVTransStreamData::ReadExtPixelMapPackOptionToJson(AVTransStreamData
         const cJSON* qualityItem = cJSON_GetObjectItemCaseSensitive(pixelMapJson, "quality");
         if (cJSON_IsNumber(qualityItem)) {
             ext_.pixelMapOption_.quality = static_cast<uint8_t>(cJSON_GetNumberValue(qualityItem));
+        }
+        const cJSON* widthItem = cJSON_GetObjectItemCaseSensitive(pixelMapJson, "width");
+        if (cJSON_IsNumber(widthItem)) {
+            dataExt.pixelMapOption_.width = static_cast<uint32_t>(cJSON_GetNumberValue(widthItem));
+        }
+        const cJSON* heightItem = cJSON_GetObjectItemCaseSensitive(pixelMapJson, "height");
+        if (cJSON_IsNumber(heightItem)) {
+            dataExt.pixelMapOption_.height = static_cast<uint32_t>(cJSON_GetNumberValue(heightItem));
         }
     }
 }

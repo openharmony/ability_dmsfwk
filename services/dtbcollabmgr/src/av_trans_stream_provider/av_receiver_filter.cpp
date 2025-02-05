@@ -40,8 +40,6 @@ namespace {
     using FilterCallBackCommand = Media::Pipeline::FilterCallBackCommand;
     using FilterType = Media::Pipeline::FilterType;
     static const std::string TAG = "AVReceiverFilter";
-    static constexpr int32_t decodePixelMapWidth = 256;
-    static constexpr int32_t decodePixelMapHeight = 256;
     static constexpr int32_t requestBufferTimeout = 1000;
 }
 
@@ -387,6 +385,8 @@ std::shared_ptr<Media::PixelMap> AVReceiverFilter::GetPixelMap(const std::shared
         return nullptr;
     }
     Media::DecodeOptions decodeOptions;
+    uint32_t decodePixelMapWidth = data->GetStreamDataExt().pixelMapOption_.width;
+    uint32_t decodePixelMapHeight = data->GetStreamDataExt().pixelMapOption_.height;
     decodeOptions.desiredSize = {
         .width = decodePixelMapWidth,
         .height = decodePixelMapHeight,
@@ -534,7 +534,6 @@ std::shared_ptr<AVTransStreamData> AVReceiverFilter::ReadStreamDataFromBuffer(ui
         cJSON_free(headerStr);
     } else {
         HILOGE("Failed to print headerJson");
-        cJSON_Delete(headerJson);
         return nullptr;
     }
    
