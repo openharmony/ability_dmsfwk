@@ -188,7 +188,7 @@ inline void AVTransStreamData::ReadExtSendEncodeTFromJson(AVTransStreamDataExt& 
     }
 }
 
-inline void AVTransStreamData::ReadExtPixelMapPackOptionToJson(AVTransStreamDataExt& dataExt, const cJSON* root)
+void AVTransStreamData::ReadExtPixelMapPackOptionToJson(AVTransStreamDataExt& dataExt, const cJSON* root)
 {
     const cJSON* pixelMapJson = cJSON_GetObjectItemCaseSensitive(root, "pixel_map");
     if (pixelMapJson) {
