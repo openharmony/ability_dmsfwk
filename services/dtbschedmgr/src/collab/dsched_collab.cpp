@@ -436,8 +436,8 @@ int32_t DSchedCollab::ExeStartAbility()
 {
     HILOGI("called");
     AAFwk::Want want = GenerateCollabWant();
-    int32_t ret = DistributedSchedService::GetInstance().CheckTargetPermission(want, collabInfo_.callerInfo_,
-        collabInfo_.srcAccountInfo_, START_PERMISSION, true);
+    int32_t ret = DistributedSchedService::GetInstance().CheckCollabStartPermission(want, collabInfo_.callerInfo_,
+        collabInfo_.srcAccountInfo_, START_PERMISSION);
     if (ret != ERR_OK) {
         HILOGE("CheckTargetPermission failed!");
         return ret;

@@ -47,6 +47,8 @@ public:
         const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility);
     int32_t CheckStartPermission(const AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility, bool isSameBundle = true);
+    int32_t CheckCollabStartPermission(const AAFwk::Want& want, const CallerInfo& callerInfo,
+        const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility);
     int32_t CheckGetCallerPermission(const AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility);
     bool IsFoundationCall() const;
@@ -71,13 +73,15 @@ private:
     bool ParseGroupInfos(const std::string& returnGroupStr, std::vector<GroupInfo>& groupInfos);
     bool VerifyPermission(uint32_t accessToken, const std::string& permissionName) const;
     bool CheckAccountAccessPermission(const CallerInfo& callerInfo,
-        const AccountInfo& accountInfo, const std::string& targetBundleName);
+        const AccountInfo& accountInfo, const std::string& targetBundleName, bool isNewCollab = false);
     bool CheckComponentAccessPermission(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AccountInfo& accountInfo, const AAFwk::Want& want) const;
     bool CheckMigrateStartCtrlPer(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AAFwk::Want& want, bool isSameBundle = true);
     bool CheckCollaborateStartCtrlPer(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AAFwk::Want& want) const;
+    bool CheckCollabStartControlPermission(const AppExecFwk::AbilityInfo& targetAbility,
+        const CallerInfo& callerInfo, const AAFwk::Want& want);
     bool CheckStartControlPermission(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AAFwk::Want& want, bool isSameBundle = true);
     bool CheckBackgroundPermission(const AppExecFwk::AbilityInfo& targetAbility,
