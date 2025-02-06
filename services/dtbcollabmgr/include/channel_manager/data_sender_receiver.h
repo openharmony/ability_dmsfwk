@@ -37,6 +37,8 @@ public:
 
     int32_t SendStreamData(const std::shared_ptr<AVTransStreamData>& sendData);
     int32_t SendMessageData(const std::shared_ptr<AVTransDataBuffer>& sendData);
+    int32_t SendFileData(const std::vector<std::string>& sFiles,
+        const std::vector<std::string>& dFiles);
 
 private:
     int32_t SendUnpackData(const std::shared_ptr<AVTransDataBuffer>& sendData, const int32_t dataType);

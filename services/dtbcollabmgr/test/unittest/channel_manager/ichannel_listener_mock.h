@@ -35,6 +35,9 @@ public:
     MOCK_METHOD(void, OnMessage, (const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer),
         (const, override));
     MOCK_METHOD(void, OnError, (const int32_t channelId, const int32_t errorCode), (const, override));
+    MOCK_METHOD(void, OnSendFile, (const int32_t channelId, const FileInfo& info), (const, override));
+    MOCK_METHOD(void, OnRecvFile, (const int32_t channelId, const FileInfo& info), (const, override));
+    MOCK_METHOD(const char*, GetRecvPath, (const int32_t channelId), (const, override));
 };
 
 } // namespace DistributedCollab

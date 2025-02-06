@@ -56,5 +56,17 @@ void AVReceiverFilterListener::OnBytes(const int32_t channelId,
     }
 }
 
+void AVReceiverFilterListener::OnSendFile(const int32_t channelId, const FileInfo& info)
+{
+}
+
+void AVReceiverFilterListener::OnRecvFile(const int32_t channelId, const FileInfo& info)
+{
+}
+
+const char* AVReceiverFilterListener::GetRecvPath(const int32_t channelId)
+{
+    return nullptr;
+}
 } // namespace DistributedCollab
 } // namespace OHOS
