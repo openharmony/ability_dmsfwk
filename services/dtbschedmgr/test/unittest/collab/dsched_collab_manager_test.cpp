@@ -147,6 +147,45 @@ HWTEST_F(DSchedCollabManagerTest, CollabMission_002, TestSize.Level3)
 }
 
 /**
+ * @tc.name: CollabMission_003
+ * @tc.desc: test CollabMission func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerTest, CollabMission_003, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerTest CollabMission_003 begin" << std::endl;
+    DSchedCollabInfo info;
+    info.srcClientCB_ = sptr<DistributedSchedService>(new DistributedSchedService());
+    int32_t ret = DSchedCollabManager::GetInstance().CollabMission(info);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    info.srcInfo_.bundleName_ = "srcBundle";
+    ret = DSchedCollabManager::GetInstance().CollabMission(info);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    info.sinkInfo_.bundleName_ = "sinkBundle";
+    ret = DSchedCollabManager::GetInstance().CollabMission(info);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    info.srcInfo_.moduleName_ = "srcModule";
+    ret = DSchedCollabManager::GetInstance().CollabMission(info);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    info.sinkInfo_.moduleName_ = "sinkModule";
+    ret = DSchedCollabManager::GetInstance().CollabMission(info);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    info.srcInfo_.abilityName_ = "srcAbility";
+    ret = DSchedCollabManager::GetInstance().CollabMission(info);
+    EXPECT_EQ(ret, FIND_LOCAL_DEVICEID_ERR);
+
+    info.sinkInfo_.abilityName_ = "sinkAbility";
+    ret = DSchedCollabManager::GetInstance().CollabMission(info);
+    EXPECT_EQ(ret, FIND_LOCAL_DEVICEID_ERR);
+    DTEST_LOG << "DSchedCollabManagerTest CollabMission_003 end" << std::endl;
+}
+
+/**
  * @tc.name: HandleCollabMission_001
  * @tc.desc: test HandleCollabMission func
  * @tc.type: FUNC
@@ -177,6 +216,44 @@ HWTEST_F(DSchedCollabManagerTest, SetTimeOut_001, TestSize.Level3)
     DSchedCollabManager::GetInstance().SetTimeOut(collabToken, timeout);
     EXPECT_EQ(DSchedCollabManager::GetInstance().collabs_.empty(), true);
     DTEST_LOG << "DSchedCollabManagerTest SetTimeOut_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetTimeOut_002
+ * @tc.desc: test SetTimeOut func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerTest, SetTimeOut_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerTest SetTimeOut_002 begin" << std::endl;
+    const std::string collabToken = "testToken";
+    int32_t timeout = 10;
+    DSchedCollabManager::GetInstance().collabs_.clear();
+    DSchedCollabManager::GetInstance().collabs_.insert(std::make_pair(collabToken, nullptr));
+    DSchedCollabManager::GetInstance().SetTimeOut(collabToken, timeout);
+    EXPECT_NE(DSchedCollabManager::GetInstance().collabs_.empty(), true);
+    DSchedCollabManager::GetInstance().collabs_.clear();
+    DTEST_LOG << "DSchedCollabManagerTest SetTimeOut_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetTimeOut_003
+ * @tc.desc: test SetTimeOut func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerTest, SetTimeOut_003, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerTest SetTimeOut_003 begin" << std::endl;
+    const std::string collabToken = "testToken";
+    int32_t timeout = 10;
+    DSchedCollabInfo info;
+    info.srcInfo_.pid_ = 100;
+    info.srcCollabSessionId_ = 1;
+    auto collab = std::make_shared<DSchedCollab>("test1", info);
+    DSchedCollabManager::GetInstance().collabs_.insert(std::make_pair(collabToken, collab));
+    DSchedCollabManager::GetInstance().SetTimeOut(collabToken, timeout);
+    EXPECT_NE(DSchedCollabManager::GetInstance().collabs_.empty(), true);
+    DTEST_LOG << "DSchedCollabManagerTest SetTimeOut_003 end" << std::endl;
 }
 
 /**
@@ -376,7 +453,109 @@ HWTEST_F(DSchedCollabManagerTest, OnShutdown_001, TestSize.Level3)
     DSchedCollabManager::GetInstance().collabs_.insert(std::make_pair("test3", dCollab));
     DSchedCollabManager::GetInstance().OnShutdown(softbusSessionId, false);
     EXPECT_NE(DSchedCollabManager::GetInstance().collabs_.empty(), true);
+    DSchedCollabManager::GetInstance().collabs_.erase("test1");
+    DSchedCollabManager::GetInstance().collabs_.erase("test2");
+    DSchedCollabManager::GetInstance().collabs_.erase("test3");
+    EXPECT_EQ(DSchedCollabManager::GetInstance().collabs_.empty(), true);
+    DSchedCollabManager::GetInstance().collabs_.clear();
     DTEST_LOG << "DSchedCollabManagerTest OnShutdown_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CheckCollabRelation_001
+ * @tc.desc: test CheckCollabRelation func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerTest, CheckCollabRelation_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerTest CheckCollabRelation_001 begin" << std::endl;
+    DSchedCollabManager::GetInstance().collabs_.clear();
+    CollabInfo sourceInfo{.deviceId = "srcUdid", .pid = 100, .tokenId = 100, .userId = 100};
+    CollabInfo sinkInfo{.deviceId = "sinkUdid", .pid = 200, .tokenId = 200, .userId = 101};
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+
+    DSchedCollabManager::GetInstance().collabs_.insert(std::make_pair("test1", nullptr));
+    const std::string collabToken = "";
+    DSchedCollabInfo info;
+    info.srcUdid_ = sourceInfo.deviceId;
+    info.sinkUdid_ = sinkInfo.deviceId;
+    info.sinkUserId_ = sinkInfo.userId;
+    info.srcInfo_.pid_ = sourceInfo.pid;
+    info.srcInfo_.accessToken_ = sourceInfo.tokenId;
+    info.sinkInfo_.pid_ = sinkInfo.pid;
+    info.sinkInfo_.accessToken_ = sinkInfo.tokenId;
+    info.srcAccountInfo_.userId = sourceInfo.userId;
+    auto newCollab = std::make_shared<DSchedCollab>(collabToken, info);
+    DSchedCollabManager::GetInstance().collabs_.insert(std::make_pair("test2", newCollab));
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), ERR_OK);
+
+    sinkInfo.userId = info.sinkUserId_ + 1;
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    sinkInfo.userId = info.sinkUserId_;
+    sourceInfo.userId = info.srcAccountInfo_.userId + 1;
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    sourceInfo.userId = info.srcAccountInfo_.userId;
+    sinkInfo.tokenId = info.sinkInfo_.accessToken_ + 1;
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    sinkInfo.tokenId = info.sinkInfo_.accessToken_;
+    sourceInfo.tokenId = info.srcInfo_.accessToken_ + 1;
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    sourceInfo.tokenId = info.srcInfo_.accessToken_;
+    sinkInfo.pid = info.sinkInfo_.pid_ + 1;
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    sinkInfo.pid = info.sinkInfo_.pid_;
+    sourceInfo.pid = info.srcInfo_.pid_ + 1;
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    sourceInfo.pid = info.srcInfo_.pid_;
+    int len = sprintf_s(sinkInfo.deviceId, sizeof(sinkInfo.deviceId), "%s", "test");
+    ASSERT_GT(len, 0);
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    len = sprintf_s(sinkInfo.deviceId, sizeof(sinkInfo.deviceId), "%s", info.srcUdid_.c_str());
+    ASSERT_GT(len, 0);
+    len = sprintf_s(sourceInfo.deviceId, sizeof(sourceInfo.deviceId), "%s", "test");
+    ASSERT_GT(len, 0);
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    DSchedCollabManager::GetInstance().collabs_.clear();
+    DTEST_LOG << "DSchedCollabManagerTest CheckCollabRelation_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: IsSessionExists_001
+ * @tc.desc: test IsSessionExists func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerTest, IsSessionExists_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerTest IsSessionExists_001 begin" << std::endl;
+    DSchedCollabManager::GetInstance().collabs_.clear();
+    DSchedCollabManager::GetInstance().collabs_.insert(std::make_pair("test", nullptr));
+    DSchedCollabInfo info;
+    info.srcInfo_.pid_ = 100;
+    info.srcCollabSessionId_ = 1;
+
+    DSchedCollabInfo info2;
+    info2.srcInfo_.pid_ = 100;
+    info2.srcCollabSessionId_ = 2;
+    auto collab2 = std::make_shared<DSchedCollab>("test2", info2);
+    DSchedCollabManager::GetInstance().collabs_.insert(std::make_pair("test2", collab2));
+
+    DSchedCollabInfo info3;
+    info3.srcInfo_.pid_ = 101;
+    info3.srcCollabSessionId_ = 2;
+    auto collab3 = std::make_shared<DSchedCollab>("test3", info3);
+    DSchedCollabManager::GetInstance().collabs_.insert(std::make_pair("test3", collab3));
+
+    DSchedCollabInfo info4;
+    info4.srcInfo_.pid_ = 101;
+    info4.srcCollabSessionId_ = 1;
+    auto collab4 = std::make_shared<DSchedCollab>("test4", info4);
+    DSchedCollabManager::GetInstance().collabs_.insert(std::make_pair("test4", collab4));
+    EXPECT_FALSE(DSchedCollabManager::GetInstance().IsSessionExists(info));
+
+    auto collab = std::make_shared<DSchedCollab>("test1", info);
+    DSchedCollabManager::GetInstance().collabs_.insert(std::make_pair("test1", collab));
+    EXPECT_TRUE(DSchedCollabManager::GetInstance().IsSessionExists(info));
+    DTEST_LOG << "DSchedCollabManagerTest IsSessionExists_001 end" << std::endl;
 }
 }
 }
