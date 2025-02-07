@@ -48,7 +48,7 @@ namespace {
     static const std::string SPLIT_FLAG = "_";
 
     static const std::string COLLAB_PGK_NAME = "dms";
-    static const std::string SESSION_NAME_PREFIX = "ohos.distributedschedule.dms.";
+    static const std::string SESSION_NAME_PREFIX = "ohos.dtbcollab.dms";
     static const std::string BUNDLE_NAME = "com.";
     static const std::string APP_ID = "com.";
 
