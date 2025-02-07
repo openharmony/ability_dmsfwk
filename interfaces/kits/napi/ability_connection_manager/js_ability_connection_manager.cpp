@@ -1098,6 +1098,7 @@ void JsAbilityConnectionManager::CreateSendDataAsyncWork(napi_env env, AsyncCall
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
         delete asyncCallbackInfo;
+        return;
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
@@ -1105,6 +1106,7 @@ void JsAbilityConnectionManager::CreateSendDataAsyncWork(napi_env env, AsyncCall
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
         delete asyncCallbackInfo;
+        return;
     }
 }
 
@@ -1231,6 +1233,7 @@ void JsAbilityConnectionManager::CreateStreamAsyncWork(napi_env env, AsyncCallba
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
         delete asyncCallbackInfo;
+        return;
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
@@ -1238,6 +1241,7 @@ void JsAbilityConnectionManager::CreateStreamAsyncWork(napi_env env, AsyncCallba
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
         delete asyncCallbackInfo;
+        return;
     }
 }
 
