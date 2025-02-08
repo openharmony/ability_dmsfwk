@@ -613,6 +613,7 @@ ohos_unittest("distributedwanttest") {
     "unittest/distributedWant/distributed_want_params_test.cpp",
     "unittest/distributedWant/distributed_want_params_wrapper_test.cpp",
     "unittest/distributedWant/distributed_want_test.cpp",
+    "unittest/distributedWant/distributed_want_v2_test.cpp",
   ]
 
   configs = [
@@ -674,7 +675,6 @@ ohos_unittest("dmscollabtest") {
 
   sources = [
     "${dms_path}/services/dtbschedmgr/src/collab/dsched_collab.cpp",
-    "unittest/collab/dsched_collab_manager_test.cpp",
     "unittest/collab/dsched_collab_test.cpp",
     "unittest/mock/bundle_manager_internal_mock.cpp",
     "unittest/mock/distributed_sched_permission_mock.cpp",
@@ -683,6 +683,42 @@ ohos_unittest("dmscollabtest") {
     "unittest/mock/message_parcel_mock.cpp",
     "unittest/mock_distributed_sched.cpp",
     "unittest/mock_remote_stub.cpp",
+  ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "./resource:coverage_flags",
+  ]
+  deps = []
+
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  external_deps += [
+    "googletest:gmock",
+    "screenlock_mgr:screenlock_client",
+  ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("dmscollabmgrtest") {
+  sanitize = {
+    blocklist = "./cfi_blocklist.txt"
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+
+  sources = [
+    "unittest/collab/dsched_collab_manager_sup_test.cpp",
+    "unittest/collab/dsched_collab_manager_test.cpp",
+    "unittest/mock_distributed_sched.cpp",
   ]
   sources += dtbschedmgr_sources
 
@@ -984,6 +1020,7 @@ group("unittest") {
     ":distributedwanttest",
     ":dmsbasetest",
     ":dmscollabeventtest",
+    ":dmscollabmgrtest",
     ":dmscollabsrcstattest",
     ":dmscollabstatetest",
     ":dmscollabsuptest",

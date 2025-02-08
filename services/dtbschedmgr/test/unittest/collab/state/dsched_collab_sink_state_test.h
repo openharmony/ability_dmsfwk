@@ -32,7 +32,8 @@ public:
     void SetUp();
     void TearDown();
 
-    std::shared_ptr<CollabSinkConnectState> sinkConState_;
+    static inline std::shared_ptr<CollabSinkConnectState> sinkConState_;
+    static inline std::shared_ptr<DSchedCollab> dCollab_;
 };
 
 class CollabSinkStartStateTest : public testing::Test {
@@ -42,7 +43,8 @@ public:
     void SetUp();
     void TearDown();
 
-    std::shared_ptr<CollabSinkStartState> sinkStartState_;
+    static inline std::shared_ptr<CollabSinkStartState> sinkStartState_;
+    static inline std::shared_ptr<DSchedCollab> dCollab_;
 };
 
 class CollabSinkWaitEndStateTest : public testing::Test {
@@ -52,7 +54,8 @@ public:
     void SetUp();
     void TearDown();
 
-    std::shared_ptr<CollabSinkWaitEndState> sinkWaitState_;
+    static inline std::shared_ptr<CollabSinkWaitEndState> sinkWaitState_;
+    static inline std::shared_ptr<DSchedCollab> dCollab_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
