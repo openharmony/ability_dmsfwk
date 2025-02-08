@@ -78,6 +78,7 @@ public:
         int32_t result, const std::string& bundleName);
     void DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos);
     bool UpdatePublicRecords(const std::string &localUdid);
+    bool GetAvailableRecommendList(const std::string &bundleName, std::map<std::string, DmsBundleInfo>& availableList);
 
 private:
     std::string DeviceAndNameToKey(const std::string &udid, const std::string &bundleName) const;

@@ -18,7 +18,7 @@
 
 #include "dsched_collab_manager.h"
 #include "dtbschedmgr_log.h"
-#include "mission/dms_continue_recv_manager.h"
+#include "mission/notification/dms_continue_recv_manager.h"
 #include "mission/wifi_state_adapter.h"
 #include "multi_user_manager.h"
 #include "wifi_device.h"
@@ -80,7 +80,7 @@ bool WifiStateListener::CheckWifiStateIsActived()
         HILOGE("GetWifiDetailState failed, ret %{public}d", ret);
         return false;
     }
-    
+
     HILOGI("get wifi detail state is %{public}d", wifiDetailState);
     return (wifiDetailState == Wifi::WifiDetailState::STATE_SEMI_ACTIVE) ||
         (wifiDetailState == Wifi::WifiDetailState::STATE_ACTIVATED);

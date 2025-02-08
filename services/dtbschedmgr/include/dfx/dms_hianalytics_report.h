@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,19 @@
  * limitations under the License.
  */
 
-#include "mission/distributed_mission_died_listener.h"
+#ifndef OHOS_DISTRIBUTED_HIANALYTICS_REPORT_H
+#define OHOS_DISTRIBUTED_HIANALYTICS_REPORT_H
 
-#include "dtbschedmgr_log.h"
-#include "mission/notification/dms_continue_recv_manager.h"
-#include "multi_user_manager.h"
+#include <string>
+
+#include "mission/notification/dms_continue_recommend_info.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
-namespace {
-const std::string TAG = "DistributedMissionDiedListener";
-}
-void DistributedMissionDiedListener::OnRemoteDied(const wptr<IRemoteObject>& remote)
-{
-    HILOGD("called");
-    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        HILOGI("GetRecvMgr failed.");
-        return;
-    }
-    recvMgr->NotifyDied(remote.promote());
-}
+class DmsHiAnalyticsReport {
+public:
+    static int32_t PublishRecommendInfo(const ContinueRecommendInfo& info);
+};
 } // namespace DistributedSchedule
 } // namespace OHOS
+#endif /* OHOS_DISTRIBUTED_HIANALYTICS_REPORT_H */

@@ -18,7 +18,8 @@
 
 #include <map>
 
-#include "mission/dms_continue_recv_manager.h"
+#include "mission/notification/dms_continue_recommend_manager.h"
+#include "mission/notification/dms_continue_recv_manager.h"
 #include "mission/notification/dms_continue_send_manager.h"
 #include "switch_status_dependency.h"
 #include "single_instance.h"
@@ -44,12 +45,16 @@ public:
     AccountSA::OsAccountType GetOsAccountType(int32_t &accountId);
     int32_t CreateNewSendMgrLocked();
     int32_t CreateNewRecvMgrLocked();
+    int32_t CreateNewRecomMgrLocked();
     int32_t CreateNewSendMgrLocked(int32_t accountId);
     int32_t CreateNewRecvMgrLocked(int32_t accountId);
+    int32_t CreateNewRecomMgrLocked(int32_t accountId);
     std::shared_ptr<DMSContinueSendMgr> GetCurrentSendMgr();
     std::shared_ptr<DMSContinueRecvMgr> GetCurrentRecvMgr();
+    std::shared_ptr<DMSContinueRecomMgr> GetCurrentRecomMgr();
     std::shared_ptr<DMSContinueSendMgr> GetSendMgrByCallingUid(int32_t callingUid);
     std::shared_ptr<DMSContinueRecvMgr> GetRecvMgrByCallingUid(int32_t callingUid);
+    std::shared_ptr<DMSContinueRecomMgr> GetRecomMgrByCallingUid(int32_t callingUid);
     int32_t OnRegisterOnListener(const std::string& type, const sptr<IRemoteObject>& obj, int32_t callingUid);
     int32_t OnRegisterOffListener(const std::string& type, const sptr<IRemoteObject>& obj, int32_t callingUid);
     int32_t GetForegroundUser();
@@ -65,9 +70,11 @@ private:
     int32_t currentUserId_;
     std::map<int32_t, std::shared_ptr<DMSContinueSendMgr>> sendMgrMap_;
     std::map<int32_t, std::shared_ptr<DMSContinueRecvMgr>> recvMgrMap_;
+    std::map<int32_t, std::shared_ptr<DMSContinueRecomMgr>> recomMgrMap_;
     std::map<int32_t, std::map<std::string, sptr<IRemoteObject>>> listenerCache_;
     std::mutex sendMutex_;
     std::mutex recvMutex_;
+    std::mutex recomMutex_;
     std::mutex listenerMutex_;
     bool hasRegSoftbusEventListener_ = false;
 };

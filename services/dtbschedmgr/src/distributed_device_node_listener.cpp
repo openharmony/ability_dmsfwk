@@ -45,12 +45,6 @@ void DistributedDeviceNodeListener::OnDeviceOnline(const DistributedHardware::Dm
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     DistributedSchedService::GetInstance().OnDeviceOnlineEx(deviceInfo);
 #endif
-    auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        HILOGI("GetSendMgr failed.");
-        return;
-    }
-    sendMgr->OnDeviceOnline();
 }
 
 void DistributedDeviceNodeListener::OnDeviceOffline(const DistributedHardware::DmDeviceInfo& deviceInfo)

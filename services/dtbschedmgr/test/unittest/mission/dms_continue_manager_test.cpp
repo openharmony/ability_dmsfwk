@@ -19,8 +19,7 @@
 #include "distributed_sched_test_util.h"
 #include "dtbschedmgr_log.h"
 #define private public
-#include "mission/dms_continue_send_manager.h"
-#include "mission/dms_continue_recv_manager.h"
+#include "mission/notification/dms_continue_recv_manager.h"
 #undef private
 #include "multi_user_manager.h"
 #include "softbus_adapter/softbus_adapter.h"

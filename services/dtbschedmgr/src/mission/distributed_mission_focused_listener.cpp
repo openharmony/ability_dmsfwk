@@ -22,6 +22,7 @@
 #include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
 #include "mission/notification/dms_continue_send_manager.h"
+#include "mission/notification/dms_continue_recommend_manager.h"
 #include "multi_user_manager.h"
 
 namespace OHOS {
@@ -97,6 +98,10 @@ void DistributedMissionFocusedListener::OnMissionDestroyed(int32_t missionId)
         CHECK_POINTER_RETURN(sendMgr, "sendMgr");
         sendMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_DESTORYED);
 
+        auto recomMgr = MultiUserManager::GetInstance().GetRecomMgrByCallingUid(callingUid);
+        CHECK_POINTER_RETURN(recomMgr, "recomMgr");
+        recomMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_DESTORYED);
+
         int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
         DmsContinueConditionMgr::GetInstance().UpdateMissionStatus(
             currentAccountId, missionId, MISSION_EVENT_DESTORYED);
@@ -131,6 +136,10 @@ void DistributedMissionFocusedListener::OnMissionFocused(int32_t missionId)
         auto sendMgr = MultiUserManager::GetInstance().GetSendMgrByCallingUid(callingUid);
         CHECK_POINTER_RETURN(sendMgr, "sendMgr");
         sendMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_FOCUSED);
+
+        auto recomMgr = MultiUserManager::GetInstance().GetRecomMgrByCallingUid(callingUid);
+        CHECK_POINTER_RETURN(recomMgr, "recomMgr");
+        recomMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_FOCUSED);
     };
     CHECK_POINTER_RETURN(eventHandler_, "eventHandler_");
     eventHandler_->PostTask(feedfunc);
@@ -148,8 +157,12 @@ void DistributedMissionFocusedListener::OnMissionUnfocused(int32_t missionId)
     auto feedfunc = [this, missionId, callingUid]() {
         auto sendMgr = MultiUserManager::GetInstance().GetSendMgrByCallingUid(callingUid);
         CHECK_POINTER_RETURN(sendMgr, "sendMgr");
-
         sendMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_UNFOCUSED);
+
+        auto recomMgr = MultiUserManager::GetInstance().GetRecomMgrByCallingUid(callingUid);
+        CHECK_POINTER_RETURN(recomMgr, "recomMgr");
+        recomMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_UNFOCUSED);
+
         int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
         DmsContinueConditionMgr::GetInstance().UpdateMissionStatus(
             currentAccountId, missionId, MISSION_EVENT_UNFOCUSED);
@@ -175,10 +188,14 @@ void DistributedMissionFocusedListener::OnMissionClosed(int32_t missionId)
     }
 
     auto feedfunc = [this, missionId, callingUid]() {
-    auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+        auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
         CHECK_POINTER_RETURN(sendMgr, "sendMgr");
-
         sendMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_DESTORYED);
+
+        auto recomMgr = MultiUserManager::GetInstance().GetRecomMgrByCallingUid(callingUid);
+        CHECK_POINTER_RETURN(recomMgr, "recomMgr");
+        recomMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_DESTORYED);
+
         int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
         DmsContinueConditionMgr::GetInstance().UpdateMissionStatus(
             currentAccountId, missionId, MISSION_EVENT_DESTORYED);

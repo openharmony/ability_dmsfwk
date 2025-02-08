@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "mission/dms_continue_recv_manager.h"
+#include "mission/notification/dms_continue_recv_manager.h"
 
 #include <sys/prctl.h>
 

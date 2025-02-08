@@ -46,7 +46,7 @@
 #include "image_source.h"
 
 #include "mission/distributed_sched_mission_manager.h"
-#include "mission/dms_continue_recv_manager.h"
+#include "mission/notification/dms_continue_recv_manager.h"
 #include "mission/mission_info_converter.h"
 #include "mission/snapshot_converter.h"
 #include "napi_error_code.h"
@@ -711,7 +711,7 @@ int32_t DistributedSchedStub::CollabMissionInner(MessageParcel& data, MessagePar
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     int32_t callerPid = IPCSkeleton::GetCallingPid();
     uint32_t callerAccessToken = IPCSkeleton::GetCallingTokenID();
- 
+
     DSchedCollabInfo dSchedCollabInfo;
     dSchedCollabInfo.srcInfo_ = *localInfo;
     dSchedCollabInfo.sinkInfo_ = *peerInfo;
@@ -722,7 +722,7 @@ int32_t DistributedSchedStub::CollabMissionInner(MessageParcel& data, MessagePar
     dSchedCollabInfo.srcInfo_.uid_ = callerUid;
     dSchedCollabInfo.srcInfo_.pid_ = callerPid;
     dSchedCollabInfo.srcInfo_.accessToken_ = static_cast<int32_t>(callerAccessToken);
- 
+
     DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(callerAccessToken);
     int32_t result = DSchedCollabManager::GetInstance().CollabMission(dSchedCollabInfo);
     HILOGI("result = %{public}d", result);
@@ -742,7 +742,7 @@ int32_t DistributedSchedStub::NotifyRejectReason(MessageParcel& data, MessagePar
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
- 
+
 int32_t DistributedSchedStub::NotifyStartAbilityResultInner(MessageParcel& data, MessageParcel& reply)
 {
     HILOGI("called");
@@ -755,13 +755,13 @@ int32_t DistributedSchedStub::NotifyStartAbilityResultInner(MessageParcel& data,
     int32_t sinkPid = data.ReadInt32();
     int32_t sinkUid = data.ReadInt32();
     int32_t sinkAccessTokenId = data.ReadInt32();
- 
+
     int32_t result = DSchedCollabManager::GetInstance().NotifyStartAbilityResult(collabToken, ret,
         sinkPid, sinkUid, sinkAccessTokenId);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
- 
+
 int32_t DistributedSchedStub::NotifyCollabPrepareResultInner(MessageParcel& data, MessageParcel& reply)
 {
     HILOGI("called");
@@ -803,7 +803,7 @@ bool DistributedSchedStub::IsNewCollabVersion(const std::string& remoteDeviceId)
         HILOGW("remote deviceId empty, the default value is the new version.");
         return false;
     }
- 
+
     DmsVersion thresholdDmsVersion = {NEW_COLLAB_THRESHOLD_VERSION, 0, 0};
     if (DmsVersionManager::IsRemoteDmsVersionLower(remoteDeviceId, thresholdDmsVersion)) {
         HILOGW("remote dms not support new collaboration version");

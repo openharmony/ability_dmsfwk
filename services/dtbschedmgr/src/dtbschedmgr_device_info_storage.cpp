@@ -28,7 +28,7 @@
 #include "distributed_sched_service.h"
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_log.h"
-#include "mission/dms_continue_recv_manager.h"
+#include "mission/notification/dms_continue_recv_manager.h"
 #include "multi_user_manager.h"
 
 using namespace std;
