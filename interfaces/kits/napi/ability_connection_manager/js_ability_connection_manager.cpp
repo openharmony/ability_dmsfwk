@@ -530,7 +530,7 @@ bool JsAbilityConnectionManager::UnwrapParameters(napi_env env, napi_value param
 
 napi_value JsAbilityConnectionManager::DestroyAbilityConnectionSession(napi_env env, napi_callback_info info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     GET_PARAMS(env, info, ARG_COUNT_ONE);
     if (argc != ARG_COUNT_ONE) {
         HILOGE("CheckArgsCount failed.");
@@ -723,7 +723,7 @@ napi_value JsAbilityConnectionManager::UnregisterAbilityConnectionSessionCallbac
 
 napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     GET_PARAMS(env, info, ARG_COUNT_ONE);
     if (argc != ARG_COUNT_ONE) {
         HILOGE("CheckArgsCount failed.");
@@ -745,6 +745,15 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
     AsyncConnectCallbackInfo* asyncCallbackInfo = new AsyncConnectCallbackInfo();
     asyncCallbackInfo->deferred = deferred;
     asyncCallbackInfo->sessionId = sessionId;
+
+    napi_threadsafe_function tsfn;
+    if (CreateConnectThreadsafeFunction(env, nullptr, &tsfn) != napi_ok || tsfn == nullptr) {
+        HILOGE("Failed to create connect function.");
+        delete asyncCallbackInfo;
+        napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        return promise;
+    }
+    asyncCallbackInfo->tsfn = tsfn;
 
     napi_value asyncResourceName;
     NAPI_CALL(env, napi_create_string_utf8(env, "connectAsync", NAPI_AUTO_LENGTH, &asyncResourceName));
@@ -768,16 +777,6 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
         return promise;
     }
 
-    napi_threadsafe_function tsfn;
-    if (CreateConnectThreadsafeFunction(env, nullptr, &tsfn) != napi_ok) {
-        HILOGE("Failed to create connect function.");
-        napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
-        delete asyncCallbackInfo;
-        napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
-        return promise;
-    }
-
-    asyncCallbackInfo->tsfn = tsfn;
     return promise;
 }
 
@@ -821,6 +820,7 @@ void JsAbilityConnectionManager::ConnectThreadsafeFunctionCallback(napi_env env,
 
 void JsAbilityConnectionManager::ExecuteConnect(napi_env env, void *data)
 {
+    HILOGI("called.");
     AsyncConnectCallbackInfo* asyncData = static_cast<AsyncConnectCallbackInfo*>(data);
     AbilityConnectionManager::ConnectCallback connectCallback = [asyncData](ConnectResult result) {
         asyncData->result = result;
@@ -843,7 +843,7 @@ void JsAbilityConnectionManager::CompleteAsyncConnectWork(napi_env env, napi_sta
 
 napi_value JsAbilityConnectionManager::DisConnect(napi_env env, napi_callback_info info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     GET_PARAMS(env, info, ARG_COUNT_ONE);
     if (argc != ARG_COUNT_ONE) {
         HILOGE("CheckArgsCount failed.");
@@ -867,7 +867,7 @@ napi_value JsAbilityConnectionManager::DisConnect(napi_env env, napi_callback_in
 
 void JsAbilityConnectionManager::CompleteAsyncWork(napi_env env, napi_status status, void* data)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     AsyncCallbackInfo* asyncData = static_cast<AsyncCallbackInfo*>(data);
     if (asyncData->result == ERR_OK) {
         napi_value result;
@@ -883,7 +883,7 @@ void JsAbilityConnectionManager::CompleteAsyncWork(napi_env env, napi_status sta
 
 napi_value JsAbilityConnectionManager::AcceptConnect(napi_env env, napi_callback_info info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     GET_PARAMS(env, info, ARG_COUNT_TWO);
     if (argc != ARG_COUNT_TWO) {
         HILOGE("CheckArgsCount failed.");
@@ -938,13 +938,14 @@ napi_value JsAbilityConnectionManager::AcceptConnect(napi_env env, napi_callback
 
 void JsAbilityConnectionManager::ExecuteAcceptConnect(napi_env env, void *data)
 {
+    HILOGI("called.");
     AsyncCallbackInfo* asyncData = static_cast<AsyncCallbackInfo*>(data);
     asyncData->result = AbilityConnectionManager::GetInstance().AcceptConnect(asyncData->sessionId, asyncData->token);
 }
 
 napi_value JsAbilityConnectionManager::Reject(napi_env env, napi_callback_info info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     GET_PARAMS(env, info, ARG_COUNT_TWO);
     if (argc != ARG_COUNT_TWO) {
         HILOGE("CheckArgsCount failed.");
@@ -974,7 +975,7 @@ napi_value JsAbilityConnectionManager::Reject(napi_env env, napi_callback_info i
 
 napi_value JsAbilityConnectionManager::SendMessage(napi_env env, napi_callback_info info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     napi_deferred deferred;
     napi_value promise = nullptr;
     NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
@@ -1038,7 +1039,7 @@ void JsAbilityConnectionManager::ExecuteSendMessage(napi_env env, void *data)
 
 napi_value JsAbilityConnectionManager::SendData(napi_env env, napi_callback_info info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
         CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
@@ -1118,7 +1119,7 @@ void JsAbilityConnectionManager::ExecuteSendData(napi_env env, void *data)
 
 napi_value JsAbilityConnectionManager::SendImage(napi_env env, napi_callback_info info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
         CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
@@ -1286,7 +1287,7 @@ void JsAbilityConnectionManager::ExecuteCreateStream(napi_env env, void *data)
 
 void JsAbilityConnectionManager::CompleteAsyncCreateStreamWork(napi_env env, napi_status status, void* data)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     AsyncCallbackInfo* asyncData = static_cast<AsyncCallbackInfo*>(data);
     if (asyncData->result == ERR_OK) {
         napi_value result;
@@ -1302,7 +1303,7 @@ void JsAbilityConnectionManager::CompleteAsyncCreateStreamWork(napi_env env, nap
 
 napi_value JsAbilityConnectionManager::SetSurfaceId(napi_env env, napi_callback_info info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
         CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
@@ -1394,7 +1395,7 @@ bool JsAbilityConnectionManager::JsToSurfaceParam(const napi_env &env, const nap
 
 napi_value JsAbilityConnectionManager::GetSurfaceId(napi_env env, napi_callback_info info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
         CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
@@ -1436,7 +1437,7 @@ napi_value JsAbilityConnectionManager::GetSurfaceId(napi_env env, napi_callback_
 
 napi_value JsAbilityConnectionManager::UpdateSurfaceParam(napi_env env, napi_callback_info info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
         CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
@@ -1473,7 +1474,7 @@ napi_value JsAbilityConnectionManager::UpdateSurfaceParam(napi_env env, napi_cal
 
 napi_value JsAbilityConnectionManager::DestroyStream(napi_env env, napi_callback_info info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
         CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
@@ -1503,7 +1504,7 @@ napi_value JsAbilityConnectionManager::DestroyStream(napi_env env, napi_callback
 
 napi_value JsAbilityConnectionManager::StartStream(napi_env env, napi_callback_info info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
         CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
@@ -1533,7 +1534,7 @@ napi_value JsAbilityConnectionManager::StartStream(napi_env env, napi_callback_i
 
 napi_value JsAbilityConnectionManager::StopStream(napi_env env, napi_callback_info info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
         CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
