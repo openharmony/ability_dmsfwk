@@ -48,7 +48,7 @@ public:
     int32_t NotifyAbilityDied(const std::string &bundleName, const int32_t &pid);
     int32_t NotifySessionClose(const std::string &collabToken);
     int32_t CleanUpSession(const std::string &collabToken);
-    int32_t CheckCollabRelation(CollabInfo sourceInfo, CollabInfo sinkInfo);
+    int32_t CheckCollabRelation(const CollabInfo *sourceInfo, const CollabInfo *sinkInfo);
     int32_t ReleaseAbilityLink(const std::string &bundleName, const int32_t &pid);
     int32_t CancleReleaseAbilityLink(const std::string &bundleName, const int32_t &pid);
     void NotifyWifiOpen();
@@ -76,6 +76,8 @@ private:
     void RemoveTimeout(const std::string &collabToken);
     bool  IsSessionExists(const DSchedCollabInfo &info);
     std::string GenerateCollabToken(const std::string &sourceDeviceId);
+    int32_t CheckSrcCollabRelation(const CollabInfo *sourceInfo, const DSchedCollabInfo *collabInfo);
+    int32_t CheckSinkCollabRelation(const CollabInfo *sinkInfo, const DSchedCollabInfo *collabInfo);
 
     class SoftbusListener : public IDataListener {
         void OnBind(int32_t socket, PeerSocketInfo info);

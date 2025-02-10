@@ -472,7 +472,7 @@ HWTEST_F(DSchedCollabManagerTest, CheckCollabRelation_001, TestSize.Level3)
     DSchedCollabManager::GetInstance().collabs_.clear();
     CollabInfo sourceInfo{.deviceId = "srcUdid", .pid = 100, .tokenId = 100, .userId = 100};
     CollabInfo sinkInfo{.deviceId = "sinkUdid", .pid = 200, .tokenId = 200, .userId = 101};
-    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(&sourceInfo, &sinkInfo), INVALID_PARAMETERS_ERR);
 
     DSchedCollabManager::GetInstance().collabs_.insert(std::make_pair("test1", nullptr));
     const std::string collabToken = "";
@@ -487,34 +487,34 @@ HWTEST_F(DSchedCollabManagerTest, CheckCollabRelation_001, TestSize.Level3)
     info.srcAccountInfo_.userId = sourceInfo.userId;
     auto newCollab = std::make_shared<DSchedCollab>(collabToken, info);
     DSchedCollabManager::GetInstance().collabs_.insert(std::make_pair("test2", newCollab));
-    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), ERR_OK);
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(&sourceInfo, &sinkInfo), ERR_OK);
 
     sinkInfo.userId = info.sinkUserId_ + 1;
-    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(&sourceInfo, &sinkInfo), INVALID_PARAMETERS_ERR);
     sinkInfo.userId = info.sinkUserId_;
     sourceInfo.userId = info.srcAccountInfo_.userId + 1;
-    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(&sourceInfo, &sinkInfo), INVALID_PARAMETERS_ERR);
     sourceInfo.userId = info.srcAccountInfo_.userId;
     sinkInfo.tokenId = info.sinkInfo_.accessToken_ + 1;
-    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(&sourceInfo, &sinkInfo), INVALID_PARAMETERS_ERR);
     sinkInfo.tokenId = info.sinkInfo_.accessToken_;
     sourceInfo.tokenId = info.srcInfo_.accessToken_ + 1;
-    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(&sourceInfo, &sinkInfo), INVALID_PARAMETERS_ERR);
     sourceInfo.tokenId = info.srcInfo_.accessToken_;
     sinkInfo.pid = info.sinkInfo_.pid_ + 1;
-    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(&sourceInfo, &sinkInfo), INVALID_PARAMETERS_ERR);
     sinkInfo.pid = info.sinkInfo_.pid_;
     sourceInfo.pid = info.srcInfo_.pid_ + 1;
-    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(&sourceInfo, &sinkInfo), INVALID_PARAMETERS_ERR);
     sourceInfo.pid = info.srcInfo_.pid_;
     int len = sprintf_s(sinkInfo.deviceId, sizeof(sinkInfo.deviceId), "%s", "test");
     ASSERT_GT(len, 0);
-    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(&sourceInfo, &sinkInfo), INVALID_PARAMETERS_ERR);
     len = sprintf_s(sinkInfo.deviceId, sizeof(sinkInfo.deviceId), "%s", info.srcUdid_.c_str());
     ASSERT_GT(len, 0);
     len = sprintf_s(sourceInfo.deviceId, sizeof(sourceInfo.deviceId), "%s", "test");
     ASSERT_GT(len, 0);
-    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo), INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckCollabRelation(&sourceInfo, &sinkInfo), INVALID_PARAMETERS_ERR);
     DSchedCollabManager::GetInstance().collabs_.clear();
     DTEST_LOG << "DSchedCollabManagerTest CheckCollabRelation_001 end" << std::endl;
 }
