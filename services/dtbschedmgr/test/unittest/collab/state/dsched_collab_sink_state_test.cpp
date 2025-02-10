@@ -31,6 +31,13 @@ namespace {
 void CollabSinkConnectStateTest::SetUpTestCase()
 {
     DTEST_LOG << "CollabSinkConnectStateTest::SetUpTestCase" << std::endl;
+    std::string collabToken;
+    DSchedCollabInfo info;
+    dCollab_ = std::make_shared<DSchedCollab>(collabToken, info);
+    dCollab_->Init();
+    std::shared_ptr<DSchedCollabStateMachine> stateMachine = std::make_shared<DSchedCollabStateMachine>(dCollab_);
+    sinkConState_ = std::make_shared<CollabSinkConnectState>(stateMachine);
+    usleep(WAITTIME);
 }
 
 void CollabSinkConnectStateTest::TearDownTestCase()
@@ -46,13 +53,6 @@ void CollabSinkConnectStateTest::TearDown()
 
 void CollabSinkConnectStateTest::SetUp()
 {
-    std::string collabToken;
-    DSchedCollabInfo info;
-    std::shared_ptr<DSchedCollab> dCollab = std::make_shared<DSchedCollab>(collabToken, info);
-    dCollab->Init();
-    std::shared_ptr<DSchedCollabStateMachine> stateMachine = std::make_shared<DSchedCollabStateMachine>(dCollab);
-    sinkConState_ = std::make_shared<CollabSinkConnectState>(stateMachine);
-    usleep(WAITTIME);
     DTEST_LOG << "CollabSinkConnectStateTest::SetUp" << std::endl;
 }
 
@@ -60,6 +60,13 @@ void CollabSinkConnectStateTest::SetUp()
 void CollabSinkStartStateTest::SetUpTestCase()
 {
     DTEST_LOG << "CollabSinkStartStateTest::SetUpTestCase" << std::endl;
+    std::string collabToken;
+    DSchedCollabInfo info;
+    dCollab_ = std::make_shared<DSchedCollab>(collabToken, info);
+    dCollab_->Init();
+    std::shared_ptr<DSchedCollabStateMachine> stateMachine = std::make_shared<DSchedCollabStateMachine>(dCollab_);
+    sinkStartState_ = std::make_shared<CollabSinkStartState>(stateMachine);
+    usleep(WAITTIME);
 }
 
 void CollabSinkStartStateTest::TearDownTestCase()
@@ -75,13 +82,6 @@ void CollabSinkStartStateTest::TearDown()
 
 void CollabSinkStartStateTest::SetUp()
 {
-    std::string collabToken;
-    DSchedCollabInfo info;
-    std::shared_ptr<DSchedCollab> dCollab = std::make_shared<DSchedCollab>(collabToken, info);
-    dCollab->Init();
-    std::shared_ptr<DSchedCollabStateMachine> stateMachine = std::make_shared<DSchedCollabStateMachine>(dCollab);
-    sinkStartState_ = std::make_shared<CollabSinkStartState>(stateMachine);
-    usleep(WAITTIME);
     DTEST_LOG << "CollabSinkStartStateTest::SetUp" << std::endl;
 }
 
@@ -89,6 +89,13 @@ void CollabSinkStartStateTest::SetUp()
 void CollabSinkWaitEndStateTest::SetUpTestCase()
 {
     DTEST_LOG << "CollabSinkWaitEndStateTest::SetUpTestCase" << std::endl;
+    std::string collabToken;
+    DSchedCollabInfo info;
+    dCollab_ = std::make_shared<DSchedCollab>(collabToken, info);
+    dCollab_->Init();
+    std::shared_ptr<DSchedCollabStateMachine> stateMachine = std::make_shared<DSchedCollabStateMachine>(dCollab_);
+    sinkWaitState_ = std::make_shared<CollabSinkWaitEndState>(stateMachine);
+    usleep(WAITTIME);
 }
 
 void CollabSinkWaitEndStateTest::TearDownTestCase()
@@ -104,13 +111,6 @@ void CollabSinkWaitEndStateTest::TearDown()
 
 void CollabSinkWaitEndStateTest::SetUp()
 {
-    std::string collabToken;
-    DSchedCollabInfo info;
-    std::shared_ptr<DSchedCollab> dCollab = std::make_shared<DSchedCollab>(collabToken, info);
-    dCollab->Init();
-    std::shared_ptr<DSchedCollabStateMachine> stateMachine = std::make_shared<DSchedCollabStateMachine>(dCollab);
-    sinkWaitState_ = std::make_shared<CollabSinkWaitEndState>(stateMachine);
-    usleep(WAITTIME);
     DTEST_LOG << "CollabSinkWaitEndStateTest::SetUp" << std::endl;
 }
 
@@ -153,17 +153,13 @@ HWTEST_F(CollabSinkConnectStateTest, DoSinkPrepareResult_001, TestSize.Level3)
     int32_t ret = sinkConState_->DoSinkPrepareResult(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
-    std::string collabToken;
-    DSchedCollabInfo info;
-    std::shared_ptr<DSchedCollab> dCollab = std::make_shared<DSchedCollab>(collabToken, info);
-    dCollab->Init();
-    ret = sinkConState_->DoSinkPrepareResult(dCollab, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    ret = sinkConState_->DoSinkPrepareResult(dCollab_, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     DSchedCollabEventType eventType = ERR_END_EVENT;
     auto data = std::make_shared<int32_t>(COLLAB_ABILITY_REJECT_ERR);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
-    ret = sinkConState_->DoSinkPrepareResult(dCollab, msgEvent);
+    ret = sinkConState_->DoSinkPrepareResult(dCollab_, msgEvent);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "CollabSinkConnectStateTest DoSinkPrepareResult_001 end" << std::endl;
 }
@@ -180,18 +176,14 @@ HWTEST_F(CollabSinkConnectStateTest, DoAbilityRejectError_001, TestSize.Level3)
     int32_t ret = sinkConState_->DoAbilityRejectError(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
-    std::string collabToken;
-    DSchedCollabInfo info;
-    std::shared_ptr<DSchedCollab> dCollab = std::make_shared<DSchedCollab>(collabToken, info);
-    dCollab->Init();
-    ret = sinkConState_->DoAbilityRejectError(dCollab, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    ret = sinkConState_->DoAbilityRejectError(dCollab_, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     std::string reason = "reason";
     DSchedCollabEventType eventType = ERR_END_EVENT;
     auto data = std::make_shared<std::string>(reason);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
-    ret = sinkConState_->DoAbilityRejectError(dCollab, msgEvent);
+    ret = sinkConState_->DoAbilityRejectError(dCollab_, msgEvent);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "CollabSinkConnectStateTest DoAbilityRejectError_001 end" << std::endl;
 }
@@ -208,17 +200,13 @@ HWTEST_F(CollabSinkConnectStateTest, DoConnectError_001, TestSize.Level3)
     int32_t ret = sinkConState_->DoConnectError(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
-    std::string collabToken;
-    DSchedCollabInfo info;
-    std::shared_ptr<DSchedCollab> dCollab = std::make_shared<DSchedCollab>(collabToken, info);
-    dCollab->Init();
-    ret = sinkConState_->DoConnectError(dCollab, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    ret = sinkConState_->DoConnectError(dCollab_, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     DSchedCollabEventType eventType = ERR_END_EVENT;
     auto data = std::make_shared<int32_t>(COLLAB_ABILITY_REJECT_ERR);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
-    ret = sinkConState_->DoConnectError(dCollab, msgEvent);
+    ret = sinkConState_->DoConnectError(dCollab_, msgEvent);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "CollabSinkConnectStateTest DoConnectError_001 end" << std::endl;
 }
@@ -262,17 +250,13 @@ HWTEST_F(CollabSinkStartStateTest, DoStartAbility_001, TestSize.Level3)
     int32_t ret = sinkStartState_->DoStartAbility(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
-    std::string collabToken;
-    DSchedCollabInfo info;
-    std::shared_ptr<DSchedCollab> dCollab = std::make_shared<DSchedCollab>(collabToken, info);
-    dCollab->Init();
-    ret = sinkStartState_->DoStartAbility(dCollab, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    ret = sinkStartState_->DoStartAbility(dCollab_, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     DSchedCollabEventType eventType = ERR_END_EVENT;
     auto data = std::make_shared<int32_t>(COLLAB_ABILITY_REJECT_ERR);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
-    ret = sinkStartState_->DoStartAbility(dCollab, msgEvent);
+    ret = sinkStartState_->DoStartAbility(dCollab_, msgEvent);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "CollabSinkStartStateTest DoStartAbility_001 end" << std::endl;
 }
@@ -289,17 +273,13 @@ HWTEST_F(CollabSinkStartStateTest, DoSinkStartError_001, TestSize.Level3)
     int32_t ret = sinkStartState_->DoSinkStartError(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
-    std::string collabToken;
-    DSchedCollabInfo info;
-    std::shared_ptr<DSchedCollab> dCollab = std::make_shared<DSchedCollab>(collabToken, info);
-    dCollab->Init();
-    ret = sinkStartState_->DoSinkStartError(dCollab, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    ret = sinkStartState_->DoSinkStartError(dCollab_, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     DSchedCollabEventType eventType = ERR_END_EVENT;
     auto data = std::make_shared<int32_t>(COLLAB_ABILITY_REJECT_ERR);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
-    ret = sinkStartState_->DoSinkStartError(dCollab, msgEvent);
+    ret = sinkStartState_->DoSinkStartError(dCollab_, msgEvent);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "CollabSinkStartStateTest DoSinkStartError_001 end" << std::endl;
 }
@@ -343,17 +323,13 @@ HWTEST_F(CollabSinkWaitEndStateTest, DoStartAbility_001, TestSize.Level3)
     int32_t ret = sinkWaitState_->DoDisconnect(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
-    std::string collabToken;
-    DSchedCollabInfo info;
-    std::shared_ptr<DSchedCollab> dCollab = std::make_shared<DSchedCollab>(collabToken, info);
-    dCollab->Init();
-    ret = sinkWaitState_->DoDisconnect(dCollab, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    ret = sinkWaitState_->DoDisconnect(dCollab_, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     DSchedCollabEventType eventType = ERR_END_EVENT;
     auto data = std::make_shared<int32_t>(COLLAB_ABILITY_REJECT_ERR);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
-    ret = sinkWaitState_->DoDisconnect(dCollab, msgEvent);
+    ret = sinkWaitState_->DoDisconnect(dCollab_, msgEvent);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "CollabSinkWaitEndStateTest DoStartAbility_001 end" << std::endl;
 }

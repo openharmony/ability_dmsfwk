@@ -102,10 +102,15 @@ class NotifyResultCmd : public BaseCmd {
 public:
     int32_t Marshal(std::string &jsonStr);
     int32_t Unmarshal(const std::string &jsonStr);
+    int32_t UnmarshalSinkInfo(cJSON *rootValue);
 
 public:
     int32_t result_ = -1;
     int32_t sinkCollabSessionId_ = -1;
+    int32_t sinkPid_ = -1;
+    int32_t sinkAccessToken_ = -1;
+    int32_t sinkUserId_ = -1;
+    int32_t sinkAccountId_ = -1;
     std::string sinkSocketName_;
     std::string abilityRejectReason_;
 };

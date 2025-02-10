@@ -80,7 +80,7 @@ int32_t BaseCmd::Unmarshal(const std::string &jsonStr)
     int32_t numLength = sizeof(numKeys) / sizeof(numKeys[0]);
     for (int32_t i = 0; i < numLength; i++) {
         cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, numKeys[i]);
-        if (item == nullptr || !cJSON_IsNumber(item)) {
+        if (!cJSON_IsNumber(item)) {
             cJSON_Delete(rootValue);
             HILOGE("Dms collab cmd base %{public}s term is null or not number.", numKeys[i]);
             return INVALID_PARAMETERS_ERR;
@@ -95,7 +95,7 @@ int32_t BaseCmd::Unmarshal(const std::string &jsonStr)
     int32_t strLength = sizeof(strKeys) / sizeof(strKeys[0]);
     for (int32_t i = 0; i < strLength; i++) {
         cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, strKeys[i]);
-        if (item == nullptr || !cJSON_IsString(item) || (item->valuestring == nullptr)) {
+        if (!cJSON_IsString(item) || (item->valuestring == nullptr)) {
             cJSON_Delete(rootValue);
             HILOGE("Dms collab cmd base %{public}s term is null or not string.", strKeys[i]);
             return INVALID_PARAMETERS_ERR;
@@ -108,7 +108,7 @@ int32_t BaseCmd::Unmarshal(const std::string &jsonStr)
     int32_t boolLength = sizeof(boolKeys) / sizeof(boolKeys[0]);
     for (int32_t i = 0; i < boolLength; i++) {
         cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, boolKeys[i]);
-        if (item == nullptr || !cJSON_IsBool(item)) {
+        if (!cJSON_IsBool(item)) {
             cJSON_Delete(rootValue);
             HILOGE("Dms collab cmd base %{public}s term is null or not number.", boolKeys[i]);
             return INVALID_PARAMETERS_ERR;
@@ -193,7 +193,7 @@ int32_t SinkStartCmd::Unmarshal(const std::string &jsonStr)
     int32_t numLength = sizeof(numKeys) / sizeof(numKeys[0]);
     for (int32_t i = 0; i < numLength; i++) {
         cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, numKeys[i]);
-        if (item == nullptr || !cJSON_IsNumber(item)) {
+        if (!cJSON_IsNumber(item)) {
             cJSON_Delete(rootValue);
             HILOGE("%{public}s term is null or not number.", numKeys[i]);
             return INVALID_PARAMETERS_ERR;
@@ -388,7 +388,7 @@ int32_t SinkStartCmd::UnmarshalCallerInfo(std::string &jsonStr)
     int32_t strLength = sizeof(strKeys) / sizeof(strKeys[0]);
     for (int32_t i = 0; i < strLength; i++) {
         cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, strKeys[i]);
-        if (item == nullptr || !cJSON_IsString(item) || (item->valuestring == nullptr)) {
+        if (!cJSON_IsString(item) || (item->valuestring == nullptr)) {
             cJSON_Delete(rootValue);
             HILOGE("Caller info json %{public}s term is null or not string.", strKeys[i]);
             return INVALID_PARAMETERS_ERR;
@@ -403,7 +403,7 @@ int32_t SinkStartCmd::UnmarshalCallerInfo(std::string &jsonStr)
     int32_t numLength = sizeof(numKeys) / sizeof(numKeys[0]);
     for (int32_t i = 0; i < numLength; i++) {
         cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, numKeys[i]);
-        if (item == nullptr || !cJSON_IsNumber(item)) {
+        if (!cJSON_IsNumber(item)) {
             cJSON_Delete(rootValue);
             HILOGE("Caller info json %{public}s term is null or not number.", numKeys[i]);
             return INVALID_PARAMETERS_ERR;
@@ -538,6 +538,10 @@ int32_t NotifyResultCmd::Marshal(std::string &jsonStr)
     cJSON_AddNumberToObject(rootValue, "Result", result_);
     cJSON_AddStringToObject(rootValue, "SinkSocketName", sinkSocketName_.c_str());
     cJSON_AddStringToObject(rootValue, "AbilityRejectReason", abilityRejectReason_.c_str());
+    cJSON_AddNumberToObject(rootValue, "SinkPid", sinkPid_);
+    cJSON_AddNumberToObject(rootValue, "SinkUserId", sinkUserId_);
+    cJSON_AddNumberToObject(rootValue, "SinkAccessToken", sinkAccessToken_);
+    cJSON_AddNumberToObject(rootValue, "SinkAccountId", sinkAccountId_);
 
     char *data = cJSON_Print(rootValue);
     if (data == nullptr) {
@@ -586,13 +590,31 @@ int32_t NotifyResultCmd::Unmarshal(const std::string &jsonStr)
         return INVALID_PARAMETERS_ERR;
     }
     sinkSocketName_ = sinkSocketName->valuestring;
-
     cJSON *abilityRejectReason = cJSON_GetObjectItemCaseSensitive(rootValue, "AbilityRejectReason");
     if (abilityRejectReason != nullptr && cJSON_IsString(abilityRejectReason)) {
         abilityRejectReason_ = abilityRejectReason->valuestring;
     }
-    cJSON_Delete(rootValue);
+    UnmarshalSinkInfo(rootValue);
+    if (rootValue != nullptr) {
+        cJSON_Delete(rootValue);
+    }
     HILOGD("end");
+    return ERR_OK;
+}
+
+int32_t NotifyResultCmd::UnmarshalSinkInfo(cJSON *rootValue)
+{
+    const char *numKeys[] = { "SinkPid", "SinkUserId", "SinkAccessToken", "SinkAccountId" };
+    int32_t *numValues[] = { &sinkPid_, &sinkUserId_, &sinkAccessToken_, &sinkAccountId_ };
+    int32_t numLength = sizeof(numKeys) / sizeof(numKeys[0]);
+    for (int32_t i = 0; i < numLength; i++) {
+        cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, numKeys[i]);
+        if (!cJSON_IsNumber(item)) {
+            HILOGE("%{public}s term is null or not number.", numKeys[i]);
+            return INVALID_PARAMETERS_ERR;
+        }
+        *numValues[i] = item->valueint;
+    }
     return ERR_OK;
 }
 
