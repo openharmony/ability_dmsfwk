@@ -142,7 +142,7 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
             return ret;
         }
     }
-    ret = AddNewPeerSession(peerDeviceId, sessionId);
+    ret = AddNewPeerSession(peerDeviceId, sessionId, type);
     if (ret != ERR_OK || sessionId <= 0) {
         HILOGE("Add new peer connect session fail, ret: %{public}d, sessionId: %{public}d.", ret, sessionId);
     }
@@ -196,7 +196,8 @@ bool DSchedTransportSoftbusAdapter::IsNeedAllConnect(DSchedServiceType type)
     return result;
 }
 
-int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peerDeviceId, int32_t &sessionId)
+int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peerDeviceId, int32_t &sessionId,
+    DSchedServiceType type)
 {
     int32_t ret = ERR_OK;
     sessionId = CreateClientSocket(peerDeviceId);
@@ -226,7 +227,7 @@ int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peer
             break;
         }
 
-        ret = CreateSessionRecord(sessionId, peerDeviceId, false);
+        ret = CreateSessionRecord(sessionId, peerDeviceId, false, type);
         if (ret != ERR_OK) {
             HILOGE("Client create session record fail, ret %{public}d, peerDeviceId %{public}s, sessionId %{public}d.",
                 ret, GetAnonymStr(peerDeviceId).c_str(), sessionId);
@@ -257,7 +258,7 @@ int32_t DSchedTransportSoftbusAdapter::CreateClientSocket(const std::string &pee
 }
 
 int32_t DSchedTransportSoftbusAdapter::CreateSessionRecord(int32_t sessionId, const std::string &peerDeviceId,
-    bool isServer)
+    bool isServer, DSchedServiceType type)
 {
     std::string localDeviceId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
@@ -274,10 +275,12 @@ int32_t DSchedTransportSoftbusAdapter::CreateSessionRecord(int32_t sessionId, co
     }
 
 #ifdef DMSFWK_ALL_CONNECT_MGR
-    int32_t ret = DSchedAllConnectManager::GetInstance().PublishServiceState(peerDeviceId, "", SCM_CONNECTED);
-    if (ret != ERR_OK) {
-        HILOGE("Publish connected state fail, ret %{public}d, peerDeviceId %{public}s, sessionId %{public}d.",
-            ret, GetAnonymStr(peerDeviceId).c_str(), sessionId);
+    if (IsNeedAllConnect(type)) {
+        int32_t ret = DSchedAllConnectManager::GetInstance().PublishServiceState(peerDeviceId, "", SCM_CONNECTED);
+        if (ret != ERR_OK) {
+            HILOGE("Publish connected state fail, ret %{public}d, peerDeviceId %{public}s, sessionId %{public}d.",
+                ret, GetAnonymStr(peerDeviceId).c_str(), sessionId);
+        }
     }
 #endif
     return ERR_OK;
@@ -331,7 +334,7 @@ bool DSchedTransportSoftbusAdapter::GetSessionIdByDeviceId(const std::string &pe
 
 void DSchedTransportSoftbusAdapter::OnBind(int32_t sessionId, const std::string &peerDeviceId)
 {
-    int32_t ret = CreateSessionRecord(sessionId, peerDeviceId, true);
+    int32_t ret = CreateSessionRecord(sessionId, peerDeviceId, true, SERVICE_TYPE_CONTINUE);
     if (ret != ERR_OK) {
         HILOGE("Service create session record fail, ret %{public}d, peerDeviceId %{public}s, sessionId %{public}d.",
             ret, GetAnonymStr(peerDeviceId).c_str(), sessionId);
