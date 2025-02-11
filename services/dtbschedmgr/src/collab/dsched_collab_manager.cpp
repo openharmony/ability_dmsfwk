@@ -28,12 +28,14 @@
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_bm_storage.h"
 #include "mission/wifi_state_adapter.h"
+#include "multi_user_manager.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DSchedCollabManager";
 const std::string DSCHED_COLLAB_MANAGER = "dsched_collab_manager";
+constexpr static int32_t NO_NEED_TO_CHECK_ID = -1;
 const int32_t RANDOM_STRING_LENGTH = 20;
 std::map<int32_t, std::string> CMDDATA = {
     {MIN_CMD, "MIN_CMD"},
@@ -56,8 +58,12 @@ DSchedCollabManager::~DSchedCollabManager()
     UnInit();
 }
 
-static int32_t CheckSynergisticRelation(CollabInfo sourceInfo, CollabInfo sinkInfo)
+static int32_t CheckSynergisticRelation(const CollabInfo *sourceInfo, const CollabInfo *sinkInfo)
 {
+    if (sourceInfo == nullptr || sinkInfo == nullptr) {
+        HILOGE("Invalid parameters.");
+        return INVALID_PARAMETERS_ERR;
+    }
     return DSchedCollabManager::GetInstance().CheckCollabRelation(sourceInfo, sinkInfo);
 }
 
@@ -88,7 +94,7 @@ void DSchedCollabManager::Init()
     HILOGI("Init DSchedCollabManager end");
 }
 
-int32_t DSchedCollabManager::CheckCollabRelation(CollabInfo sourceInfo, CollabInfo sinkInfo)
+int32_t DSchedCollabManager::CheckCollabRelation(const CollabInfo *sourceInfo, const CollabInfo *sinkInfo)
 {
     HILOGI("called");
     if (collabs_.empty()) {
@@ -102,21 +108,62 @@ int32_t DSchedCollabManager::CheckCollabRelation(CollabInfo sourceInfo, CollabIn
             continue;
         }
         collabInfo = iter->second->GetCollabInfo();
-        if (std::string(sourceInfo.deviceId) == collabInfo.srcUdid_ &&
-            std::string(sinkInfo.deviceId) == collabInfo.sinkUdid_ &&
-            sourceInfo.pid == collabInfo.srcInfo_.pid_ && sinkInfo.pid == collabInfo.sinkInfo_.pid_ &&
-            static_cast<int32_t>(sourceInfo.tokenId) == collabInfo.srcInfo_.accessToken_ &&
-            static_cast<int32_t>(sinkInfo.tokenId) == collabInfo.sinkInfo_.accessToken_ &&
-            sourceInfo.userId == collabInfo.srcAccountInfo_.userId && sinkInfo.userId == collabInfo.sinkUserId_) {
-            HILOGI("find collab: %{public}s", collabInfo.ToString().c_str());
+        HILOGI("collabInfo: %{public}s", collabInfo.ToString().c_str());
+        if (CheckSrcCollabRelation(sourceInfo, &collabInfo) == ERR_OK &&
+            (sinkInfo->pid == NO_NEED_TO_CHECK_ID || CheckSinkCollabRelation(sinkInfo, &collabInfo) == ERR_OK)) {
+            HILOGI("the collaboration relationship is matched successfully.");
             return ERR_OK;
-        } else {
-            HILOGI("collabInfo: %{public}s", collabInfo.ToString().c_str());
-            HILOGI("srcUdid: %{public}s", GetAnonymStr(collabInfo.srcUdid_).c_str());
-            HILOGI("sinkUdid: %{public}s", GetAnonymStr(collabInfo.sinkUdid_).c_str());
         }
     }
-    HILOGE("can not find collab");
+    HILOGE("failed to match the collaboration relationship.");
+    return INVALID_PARAMETERS_ERR;
+}
+
+int32_t DSchedCollabManager::CheckSrcCollabRelation(const CollabInfo *sourceInfo, const DSchedCollabInfo *collabInfo)
+{
+    HILOGI("called");
+    if (sourceInfo == nullptr) {
+        HILOGE("Invalid sourceInfo.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    if (collabInfo == nullptr) {
+        HILOGE("collab is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
+    if (std::string(sourceInfo->deviceId) == collabInfo->srcUdid_ &&
+        sourceInfo->pid == collabInfo->srcInfo_.pid_ &&
+        static_cast<int32_t>(sourceInfo->tokenId) == collabInfo->srcInfo_.accessToken_ &&
+        sourceInfo->userId == collabInfo->srcAccountInfo_.userId) {
+        HILOGI("the collaboration relationship is matched successfully.");
+        return ERR_OK;
+    }
+    HILOGW("deviceId: %{public}s, pid: %{public}d, tokenId: %{public}d, userId: %{public}d, srcUdid: %{public}s",
+        std::string(sourceInfo->deviceId).c_str(), sourceInfo->pid, static_cast<int32_t>(sourceInfo->tokenId),
+        sourceInfo->userId, GetAnonymStr(collabInfo->srcUdid_).c_str());
+    return INVALID_PARAMETERS_ERR;
+}
+
+int32_t DSchedCollabManager::CheckSinkCollabRelation(const CollabInfo *sinkInfo, const DSchedCollabInfo *collabInfo)
+{
+    HILOGI("called");
+    if (sinkInfo == nullptr) {
+        HILOGE("Invalid sinkInfo.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    if (collabInfo == nullptr) {
+        HILOGE("collab is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
+    if (std::string(sinkInfo->deviceId) == collabInfo->sinkUdid_ &&
+        sinkInfo->pid == collabInfo->sinkInfo_.pid_ &&
+        static_cast<int32_t>(sinkInfo->tokenId) == collabInfo->sinkInfo_.accessToken_ &&
+        sinkInfo->userId == collabInfo->sinkUserId_) {
+        HILOGI("the collaboration relationship is matched successfully.");
+        return ERR_OK;
+    }
+    HILOGW("deviceId: %{public}s, pid: %{public}d, tokenId: %{public}d, userId: %{public}d, sinkUdid: %{public}s",
+        std::string(sinkInfo->deviceId).c_str(), sinkInfo->pid, static_cast<int32_t>(sinkInfo->tokenId),
+        sinkInfo->userId, GetAnonymStr(collabInfo->sinkUdid_).c_str());
     return INVALID_PARAMETERS_ERR;
 }
 
@@ -158,6 +205,10 @@ void DSchedCollabManager::UnInit()
 int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
 {
     HILOGI("called, collabInfo is: %{public}s", info.ToString().c_str());
+    if (!MultiUserManager::GetInstance().IsCallerForeground(info.srcInfo_.uid_)) {
+        HILOGW("The current user is not foreground. callingUid: %{public}d .", info.srcInfo_.uid_);
+        return DMS_NOT_FOREGROUND_USER;
+    }
     if (info.srcClientCB_ == nullptr) {
         HILOGE("clientCB is nullptr");
         return INVALID_PARAMETERS_ERR;

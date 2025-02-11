@@ -2701,3 +2701,5 @@ public:
     void TearDown();
     std::shared_ptr<DistributedWantV2> want_ = nullptr;
 };
+}
+}

@@ -258,6 +258,14 @@ int32_t DSchedCollab::PostSrcResultTask(std::shared_ptr<NotifyResultCmd> notifyR
     }
     collabInfo_.sinkCollabSessionId_ = notifyResultCmd->sinkCollabSessionId_;
     collabInfo_.sinkInfo_.socketName_ = notifyResultCmd->sinkSocketName_;
+    collabInfo_.sinkInfo_.pid_ = notifyResultCmd->sinkPid_;
+    collabInfo_.sinkInfo_.accessToken_ = notifyResultCmd->sinkAccessToken_;
+    collabInfo_.sinkUserId_ = notifyResultCmd->sinkUserId_;
+    collabInfo_.sinkAccountId_ = notifyResultCmd->sinkAccountId_;
+    collabInfo_.sinkUdid_ = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(
+        collabInfo_.sinkInfo_.deviceId_);
+    collabInfo_.srcUdid_ = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(
+        collabInfo_.srcInfo_.deviceId_);
     DSchedCollabEventType eventType = NOTIFY_RESULT_EVENT;
     auto data = std::make_shared<int32_t>(notifyResultCmd->result_);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
@@ -428,7 +436,9 @@ int32_t DSchedCollab::PackPartCmd(std::shared_ptr<SinkStartCmd>& cmd)
         return GET_ACCOUNT_INFO_ERR;
     }
     cmd->callerInfo_ = callerInfo;
+    collabInfo_.callerInfo_ = callerInfo;
     cmd->accountInfo_ = accountInfo;
+    collabInfo_.srcAccountInfo_ = accountInfo;
     return ERR_OK;
 }
 
@@ -580,6 +590,10 @@ int32_t DSchedCollab::PackNotifyResultCmd(std::shared_ptr<NotifyResultCmd> cmd, 
     cmd->sinkSocketName_ = collabInfo_.sinkInfo_.socketName_;
     cmd->sinkCollabSessionId_ = collabInfo_.sinkCollabSessionId_;
     cmd->abilityRejectReason_ = abilityRejectReason;
+    cmd->sinkPid_ = collabInfo_.sinkInfo_.pid_;
+    cmd->sinkAccessToken_ = collabInfo_.sinkInfo_.accessToken_;
+    cmd->sinkUserId_ = collabInfo_.sinkUserId_;
+    cmd->sinkAccountId_ = collabInfo_.sinkAccountId_;
     return ERR_OK;
 }
 
