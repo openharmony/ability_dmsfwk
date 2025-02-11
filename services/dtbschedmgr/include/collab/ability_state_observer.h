@@ -82,6 +82,9 @@ public:
      * @param processData Process data.
      */
     void OnProcessDied(const AppExecFwk::ProcessData& processData) override;
+
+    void ReportDistributedComponentChange(const AppExecFwk::AbilityStateData& abilityStateData,
+    int32_t changeType);
 private:
     std::mutex countLock_;
     std::map<sptr<IRemoteObject>, int32_t> connectAbilityMap_;
