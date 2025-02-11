@@ -122,6 +122,7 @@ private:
     std::mutex iconMutex_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     int32_t accountId_ = -1;
+    std::atomic<bool> isScreenOn = true;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
