@@ -285,7 +285,7 @@ std::shared_ptr<AVTransStreamData> AVSenderFilter::PackStreamDataForAVBuffer(con
 {
     AVTransStreamDataExt ext;
     ext.flag_ = AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_CODEC_DATA;
-    ext.index_ = static_cast<int32_t>(lastIndex_.load());
+    ext.index_ = static_cast<uint32_t>(lastIndex_.load());
     lastIndex_++;
     ext.pts_ = static_cast<uint64_t>(buffer->pts_);
 #ifdef DSCH_COLLAB_AV_TRANS_TEST_DEMO
