@@ -68,7 +68,6 @@ std::string ContinueRecommendInfo::MarshalCandidate(const ContinueCandidate& can
     }
     cJSON_AddStringToObject(rootValue, "DeviceId", candidate.deviceId_.c_str());
     cJSON_AddStringToObject(rootValue, "DstBundleName", candidate.dstBundleName_.c_str());
-    cJSON_AddNumberToObject(rootValue, "Token", candidate.token_);
 
     char *data = cJSON_Print(rootValue);
     if (data == nullptr) {
@@ -85,12 +84,14 @@ std::string ContinueRecommendInfo::MarshalCandidate(const ContinueCandidate& can
 std::string ContinueRecommendInfo::ToString() const
 {
     std::string str =
-        "State: " + std::to_string(state_) + " " + "SrcBundleName: " + srcBundleName_ + " " + "Candidates: ";
+        "State: " + std::to_string(state_) + ", " +
+        "SrcBundleName: " + srcBundleName_ + ", "+
+        "ContinueType: " + continueType_ + ", " +
+        "UserId: " + userId_ + ", " +
+        "Candidates: ";
     for (auto candidate: candidates_) {
-        str += "\n{ DeviceId: " + GetAnonymStr(candidate.deviceId_) + " " +
-            "DstBundleName: " + candidate.dstBundleName_ + " " +
-            "ContinueType: " + candidate.continueType_ + " " +
-            "Token: " + std::to_string(candidate.token_) + "}";
+        str += "\n{ DeviceId: " + GetAnonymStr(candidate.deviceId_) + ", " +
+            "DstBundleName: " + candidate.dstBundleName_ + " }";
     }
     return str;
 }

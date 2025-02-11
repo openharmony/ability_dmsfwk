@@ -20,12 +20,14 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+constexpr int32_t STATE_INVALID = -1;
+constexpr int32_t RECOMMEND_DEFAULT_USER_ID = 100;
+}
 
 struct ContinueCandidate {
-    std::string deviceId_;
-    std::string dstBundleName_;
-    std::string continueType_;
-    int32_t token_;
+    std::string deviceId_ = "";
+    std::string dstBundleName_ = "";
 };
 
 class ContinueRecommendInfo {
@@ -38,9 +40,11 @@ private:
     std::string MarshalCandidate(const ContinueCandidate& candidate) const;
 
 public:
-    int32_t state_;
-    std::string srcBundleName_;
-    std::vector<ContinueCandidate> candidates_;
+    int32_t state_ = STATE_INVALID;
+    std::string srcBundleName_ = "";
+    std::string continueType_ = "";
+    int32_t userId_ = RECOMMEND_DEFAULT_USER_ID;
+    std::vector<ContinueCandidate> candidates_ = {};
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

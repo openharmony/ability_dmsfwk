@@ -254,6 +254,24 @@ int32_t BundleManagerInternal::GetLocalBundleInfoV9(const std::string& bundleNam
     return ret;
 }
 
+int32_t BundleManagerInternal::GetLocalAbilityInfo(const std::string& bundleName,
+    const std::string& moduleName, const std::string& abilityName, AppExecFwk::AbilityInfo &abilityInfo)
+{
+    AppExecFwk::BundleInfo bundleInfo;
+    ErrCode ret = GetLocalBundleInfo(bundleName, bundleInfo);
+    if (ret != ERR_OK) {
+        HILOGE("get local bundle info failed");
+        return ret;
+    }
+    for (auto ability : bundleInfo.abilityInfos) {
+        if (ability.moduleName == moduleName && ability.name == abilityName) {
+            abilityInfo = ability;
+            break;
+        }
+    }
+    return ERR_OK;
+}
+
 bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleName,
     std::vector<std::string> &bundleNameList)
 {

@@ -91,6 +91,9 @@ config("distributed_sched_config") {
   if (dmsfwk_all_connect_decisions) {
     defines += [ "COLLAB_ALL_CONNECT_DECISIONS" ]
   }
+  if (dmsfwk_hianalytics_service) {
+    defines += [ "SUPPORT_HIANALYTICS_SERVICE" ]
+  }
 }
 
 ohos_shared_library("distributedschedsvr") {
@@ -229,7 +232,6 @@ ohos_shared_library("distributedschedsvr") {
     "distributed_bundle_framework:dbms_fwk",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
-    "hianalytics_service:ha_client_lite",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
@@ -317,6 +319,10 @@ ohos_shared_library("distributedschedsvr") {
     sources += [ "src/adapter/mmi_adapter.cpp" ]
   } else {
     sources += [ "src/adapter/mmi_adapter_common.cpp" ]
+  }
+
+  if (dmsfwk_hianalytics_service) {
+    external_deps += [ "hianalytics_service:ha_client_lite" ]
   }
 
   install_images = [ system_base_dir ]

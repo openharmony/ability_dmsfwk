@@ -46,8 +46,6 @@ private:
     void StartEvent();
     void PublishContinueRecommend(const MissionStatus& status, MissionEventType type);
     bool GetRecommendInfo(const MissionStatus& status, MissionEventType type, ContinueRecommendInfo& info);
-    void PackRecommendCandidates(const std::map<std::string, DmsBundleInfo>& availableList,
-        std::vector<ContinueCandidate>& candidates);
 private:
     int32_t accountId_ = DEFAULT_USER_ID;
     std::thread eventThread_;

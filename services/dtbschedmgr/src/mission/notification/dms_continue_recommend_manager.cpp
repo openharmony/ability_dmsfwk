@@ -17,6 +17,7 @@
 
 #include <sys/prctl.h>
 
+#include "bundle/bundle_manager_internal.h"
 #include "dfx/dms_hianalytics_report.h"
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_log.h"
@@ -140,33 +141,33 @@ bool DMSContinueRecomMgr::GetRecommendInfo(
     const MissionStatus& status, MissionEventType type, ContinueRecommendInfo& info)
 {
     HILOGD("start, missionId: %{public}d", status.missionId);
-    info.state_ =(type == MISSION_EVENT_FOCUSED || type == MISSION_EVENT_ACTIVE) ? STATE_ACTIVE : STATE_INACTIVE;
+    info.state_ = (type == MISSION_EVENT_FOCUSED || type == MISSION_EVENT_ACTIVE) ? STATE_ACTIVE : STATE_INACTIVE;
     info.srcBundleName_ = status.bundleName;
+    info.userId_ = accountId_;
+
+    AppExecFwk::AbilityInfo abilityInfo;
+    int32_t result = BundleManagerInternal::GetLocalAbilityInfo(
+        status.bundleName, status.moduleName, status.abilityName, abilityInfo);
+    if (result != ERR_OK) {
+        HILOGW("GetLocalAbilityInfo failed.");
+        return false;
+    }
+    if (!abilityInfo.continueType.empty()) {
+        info.continueType_ = abilityInfo.continueType[0];
+    }
 
     std::map<std::string, DmsBundleInfo> availableList;
     bool ret = DmsBmStorage::GetInstance()->GetAvailableRecommendList(status.bundleName, availableList);
-    if (!ret) {
-        HILOGW("GetAvailableRecommendList failed or empty.");
-        return false;
-    }
-    if (info.state_ == STATE_ACTIVE) {
-        PackRecommendCandidates(availableList, info.candidates_);
+    if (ret && info.state_ == STATE_ACTIVE) {
+        for (auto iter = availableList.begin(); iter != availableList.end(); iter++) {
+            ContinueCandidate candidate;
+            candidate.deviceId_ = iter->first;
+            candidate.dstBundleName_ = iter->second.bundleName;
+            info.candidates_.push_back(candidate);
+        }
     }
     HILOGD("end");
     return true;
-}
-
-void DMSContinueRecomMgr::PackRecommendCandidates(
-    const std::map<std::string, DmsBundleInfo>& availableList, std::vector<ContinueCandidate>& candidates)
-{
-    for (auto iter = availableList.begin(); iter != availableList.end(); iter++) {
-        ContinueCandidate candidate;
-        candidate.deviceId_ = iter->first;
-        candidate.dstBundleName_ = iter->second.bundleName;
-        candidate.token_ = 0;
-        candidates.push_back(candidate);
-    }
-    return;
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS
