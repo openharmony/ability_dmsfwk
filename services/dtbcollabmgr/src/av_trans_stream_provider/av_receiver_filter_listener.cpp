@@ -56,15 +56,16 @@ void AVReceiverFilterListener::OnBytes(const int32_t channelId,
     }
 }
 
-void AVReceiverFilterListener::OnSendFile(const int32_t channelId, const FileInfo& info)
+void AVReceiverFilterListener::OnSendFile(const int32_t channelId, const FileInfo& info) const
+
 {
 }
 
-void AVReceiverFilterListener::OnRecvFile(const int32_t channelId, const FileInfo& info)
+void AVReceiverFilterListener::OnRecvFile(const int32_t channelId, const FileInfo& info) const
 {
 }
 
-const char* AVReceiverFilterListener::GetRecvPath(const int32_t channelId)
+const char* AVReceiverFilterListener::GetRecvPath(const int32_t channelId) const
 {
     return nullptr;
 }

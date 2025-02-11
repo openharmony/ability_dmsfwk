@@ -29,6 +29,7 @@ public:
     int32_t Open(const char* filename, int32_t flag, int32_t mode);
     int32_t Close(int32_t fd);
     int32_t Remove(const char* filename);
+};
 }
 }
 #endif
