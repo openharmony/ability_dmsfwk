@@ -101,6 +101,8 @@ struct ConnectOption : public Parcelable {
     bool needSendData;
     bool needSendStream;
     bool needReceiveStream;
+    bool needSendFile;
+    bool needReceiveFile;
     AAFwk::WantParams options;
     AAFwk::WantParams parameters;
     bool ReadFromParcel(Parcel &parcel);

@@ -22,6 +22,7 @@
 #include <thread>
 
 #include "ability_connection_info.h"
+#include "ability_connection_session_listener.h"
 #include "av_receiver_engine.h"
 #include "av_sender_engine.h"
 #include "av_trans_data_buffer.h"
@@ -40,10 +41,12 @@ enum class SessionStatus : int32_t {
 };
 
 enum class TransChannelType : int32_t {
-    MESSAGE_CHANNEL,
-    DATA_CHANNEL,
-    STREAM_CHANNEL_BYTES,
-    STREAM_CHANNEL
+    MESSAGE,
+    DATA,
+    STREAM_BYTES,
+    STREAM,
+    SEND_FILE,
+    RECEIVE_FILE,
 };
 
 enum class CollabrateDirection : int32_t {
@@ -58,7 +61,10 @@ enum class MessageType : uint32_t  {
     UPDATE_RECV_ENGINE_CHANNEL,
     UPDATE_SENDER_ENGINE_CHANNEL,
     RECEIVE_STREAM_START,
-    STREAM_ENCODING
+    STREAM_ENCODING,
+    CONNECT_FILE_CHANNEL,
+    FILE_CHANNEL_CONNECT_SUCCESS,
+    FILE_CHANNEL_CONNECT_FAILED
 };
 
 typedef enum {
@@ -78,7 +84,7 @@ struct TransChannelInfo {
 class AbilityConnectionSession : public std::enable_shared_from_this<AbilityConnectionSession> {
 public:
     AbilityConnectionSession(int32_t sessionId, std::string serverSocketName, PeerInfo localInfo,
-         PeerInfo peerInfo, ConnectOption opt);
+        PeerInfo peerInfo, ConnectOption opt);
     ~AbilityConnectionSession();
 
     void Init();
@@ -99,6 +105,8 @@ public:
     int32_t SendMessage(const std::string& msg, const MessageType& messageType = MessageType::NORMAL);
     int32_t SendData(const std::shared_ptr<AVTransDataBuffer>& buffer);
     int32_t SendImage(const std::shared_ptr<Media::PixelMap>& image);
+    int32_t SendFile(const std::vector<std::string>& sFiles,
+        const std::vector<std::string>& dFiles);
 
     int32_t CreateStream(int32_t streamId, const StreamParams& param);
     int32_t DestroyStream();
@@ -113,18 +121,22 @@ public:
     void OnBytesReceived(int32_t channelId, const std::shared_ptr<AVTransDataBuffer> buffer);
     void OnMessageReceived(int32_t channelId, const std::shared_ptr<AVTransDataBuffer> buffer);
     void OnRecvPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap);
+    void OnSendFile(const int32_t channelId, const FileInfo& info);
+    void OnRecvFile(const int32_t channelId, const FileInfo& info);
+    const char* GetRecvPath(const int32_t channelId);
 
     int32_t RegisterEventCallback(const std::string& eventType,
         const std::shared_ptr<JsAbilityConnectionSessionListener>& listener);
     int32_t UnregisterEventCallback(const std::string& eventType);
     int32_t ConnectStreamChannel();
     void UpdateEngineTransChannel();
+    int32_t RegisterEventCallback(const std::shared_ptr<IAbilityConnectionSessionListener>& listener);
     
 private:
     void StartEvent();
     int32_t InitChannels();
     int32_t CreateChannel(const std::string& channelName, const ChannelDataType& dataType,
-        const TransChannelType& channelType);
+        const TransChannelType& channelType, bool isClientChannel);
     std::string GetChannelName(const std::string& sourceModule, const std::string& sourceAbility,
         const std::string& sinkModule, const std::string& sinkAbility);
     int32_t ConnectChannels();
@@ -155,6 +167,10 @@ private:
     void UpdateRecvEngineTransChannel();
     void UpdateSenderEngineTransChannel();
     void ExeuteMessageEventCallback(const std::string msg);
+    void NotifyAppConnectResult(bool isConnected, const std::string& reason = "");
+    int32_t CreateStreamChannel(const std::string& channelName, bool isClientChannel);
+    void ConnectFileChannel(const std::string& peerSocketName);
+    void HandleSessionConnect();
 
 private:
     class CollabChannelListener : public IChannelListener {
@@ -169,19 +185,10 @@ private:
         void OnBytes(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer) const override;
         void OnMessage(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer) const override;
         void OnError(const int32_t channelId, const int32_t errorCode) const override;
-        void OnSendFile(const int32_t channelId, const FileInfo& info) const override
-        {
-        }
+        void OnSendFile(const int32_t channelId, const FileInfo& info) const override;
+        void OnRecvFile(const int32_t channelId, const FileInfo& info) const override;
+        const char* GetRecvPath(const int32_t channelId) const override;
 
-        void OnRecvFile(const int32_t channelId, const FileInfo& info) const override
-        {
-        }
-
-        const char* GetRecvPath(const int32_t channelId) const override
-        {
-            return nullptr;
-        }
-        
     private:
         std::weak_ptr<AbilityConnectionSession> abilityConnectionSession_;
     };
@@ -206,6 +213,7 @@ private:
     std::string dmsServerToken_;
     std::string localSocketName_;
     std::string peerSocketName_;
+    std::string channelName_;
     PeerInfo localInfo_;
     PeerInfo peerInfo_;
     ConnectOption connectOption_;
@@ -233,6 +241,8 @@ private:
     std::shared_ptr<AVReceiverEngine> recvEngine_ = nullptr;
     std::shared_ptr<IEngineListener> pixelMapListener = nullptr;
     EngineState recvEngineState_ = EngineState::EMPTY;
+
+    std::shared_ptr<IAbilityConnectionSessionListener> sessionListener_ = nullptr;
 };
 } // namespace DistributedCollab
 } // namespace OHOS

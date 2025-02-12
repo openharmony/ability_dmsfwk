@@ -46,7 +46,7 @@ constexpr int32_t ARG_COUNT_ONE = 1;
 constexpr int32_t ARG_COUNT_TWO = 2;
 constexpr int32_t ARG_COUNT_THREE = 3;
 constexpr int32_t ARG_COUNT_FOUR = 4;
-constexpr int32_t NAPI_BUF_LENGTH = 256;
+constexpr int32_t NAPI_BUF_LENGTH = 1024;
 constexpr int32_t PEER_APP_EXIT = 0;
 constexpr int32_t NETWORK_DISCONNECTED = 1;
 constexpr int32_t HORIZONTAL = 0;
@@ -116,8 +116,8 @@ bool JsAbilityConnectionManager::JsToString(const napi_env &env, const napi_valu
         return false;
     }
 
-    if (valueLen == 0 && valueLen < NAPI_BUF_LENGTH) {
-        HILOGE("string length mast > 0, < %{public}d", NAPI_BUF_LENGTH);
+    if (valueLen >= NAPI_BUF_LENGTH) {
+        HILOGE("string length mast < %{public}d", NAPI_BUF_LENGTH);
         return false;
     }
 
