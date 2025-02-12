@@ -54,6 +54,10 @@ DSchedContinueManager::~DSchedContinueManager()
 void DSchedContinueManager::Init()
 {
     HILOGI("Init DSchedContinueManager start");
+    if(hasInit_.load()){
+        HILOGW("Init DSchedContinueManager has init");
+        return;
+    }
     if (eventHandler_ != nullptr) {
         HILOGI("DSchedContinueManager already inited, end.");
         return;
@@ -86,6 +90,7 @@ void DSchedContinueManager::StartEvent()
 void DSchedContinueManager::UnInit()
 {
     HILOGI("UnInit start");
+    hasInit_.store(false);
     DSchedTransportSoftbusAdapter::GetInstance().UnregisterListener(SERVICE_TYPE_CONTINUE, softbusListener_);
     DSchedTransportSoftbusAdapter::GetInstance().ReleaseChannel();
     continues_.clear();

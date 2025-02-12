@@ -93,6 +93,7 @@ private:
     std::shared_ptr<DSchedCollabManager::SoftbusListener> softbusListener_;
     std::map<std::string, std::shared_ptr<DSchedCollab>> collabs_;
     std::mutex collabMutex_;
+    std::atomic<bool> hasInit_ = false;
 
 #ifdef DMSFWK_ALL_CONNECT_MGR
     std::mutex connectDecisionMutex_;
