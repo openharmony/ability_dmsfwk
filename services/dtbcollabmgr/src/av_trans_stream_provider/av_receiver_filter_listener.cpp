@@ -57,7 +57,6 @@ void AVReceiverFilterListener::OnBytes(const int32_t channelId,
 }
 
 void AVReceiverFilterListener::OnSendFile(const int32_t channelId, const FileInfo& info) const
-
 {
 }
 
