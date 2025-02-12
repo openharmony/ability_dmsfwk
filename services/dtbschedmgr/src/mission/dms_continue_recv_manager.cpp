@@ -501,6 +501,7 @@ void DMSContinueRecvMgr::NotifyDied(const sptr<IRemoteObject>& obj)
 void DMSContinueRecvMgr::OnDeviceScreenOff()
 {
     HILOGI("OnDeviceScreenOff called. accountId: %{public}d.", accountId_);
+    isScreenOn.store(false);
     auto func = [this]() {
         std::string senderNetworkId;
         std::string bundleName;
@@ -540,6 +541,12 @@ void DMSContinueRecvMgr::OnDeviceScreenOff()
         return;
     }
     eventHandler_->PostTask(func);
+}
+
+void DMSContinueRecvMgr::OnDeviceScreenOn()
+{
+    HILOGI("OnDeviceScreenOn called. accountId: %{public}d.", accountId_);
+    isScreenOn.store(true);
 }
 #endif
 

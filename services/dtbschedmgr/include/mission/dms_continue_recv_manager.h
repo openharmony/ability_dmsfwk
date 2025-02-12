@@ -87,6 +87,7 @@ public:
     void NotifyIconDisappear(uint16_t bundleNameId, const std::string &senderNetworkId, const int32_t state);
     int32_t NotifyDockDisplay(uint16_t bundleNameId, const currentIconInfo& continueInfo, const int32_t state);
     void OnDeviceScreenOff();
+    void OnDeviceScreenOn();
     void OnContinueSwitchOff();
     void OnUserSwitch();
     std::string GetContinueType(const std::string& bundleName);

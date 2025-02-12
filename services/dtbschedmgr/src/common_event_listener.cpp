@@ -109,7 +109,7 @@ void CommonEventListener::HandleScreenOff()
     if (recvMgr == nullptr) {
         HILOGE("RecvMgr is nullptr.");
     } else {
-        recvMgr->isScreenOn.store(false);
+
         recvMgr->OnDeviceScreenOff();
     }
 
@@ -137,7 +137,7 @@ void CommonEventListener::HandleScreenOn()
     if (recvMgr == nullptr) {
         HILOGE("RecvMgr is nullptr.");
     } else {
-        recvMgr->isScreenOn.store(true);
+        recvMgr->OnDeviceScreenOn();
     }
 #ifdef DMS_ICON_HOLD_ON
     DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_SCREEN_LOCK, false);
