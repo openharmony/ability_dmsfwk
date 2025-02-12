@@ -1167,6 +1167,10 @@ void ChannelManager::OnFileEventReceived(int32_t socketId, FileEvent *event)
     int32_t channelId = 0;
     CHECK_SOCKET_ID(socketId);
     // update recv path before onbind
+    if (event == nullptr) {
+        HILOGE("socket %{public}d event empty", socketId);
+        return;
+    }
     if (event->type == FileEventType::FILE_EVENT_RECV_UPDATE_PATH) {
         HILOGI("start to set update path func, %{public}d", socketId);
         return DispatchProcessFileEvent(fileChannelId_.load(), event);
