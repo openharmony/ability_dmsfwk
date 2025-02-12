@@ -46,6 +46,12 @@ ohos_shared_library("dtbcollab_channel_manager") {
     "session_data_header.cpp",
   ]
 
+  if (dmsfwk_softbus_file_ability) {
+    sources += [ "softbus_file_adapter_inner.cpp" ]
+  } else {
+    sources += [ "softbus_file_adapter_common.cpp" ]
+  }
+
   configs = [ ":distributed_collab_config" ]
 
   deps = [ "${dms_path}/common:distributed_sched_utils" ]

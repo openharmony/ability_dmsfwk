@@ -90,6 +90,7 @@ AVReceiverFilter::AVReceiverFilter(std::string name, FilterType type)
 AVReceiverFilter::~AVReceiverFilter()
 {
     HILOGI("AVReceiverFilter destroy");
+    DoStop();
     if (eventHandler_ != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
         eventThread_.join();

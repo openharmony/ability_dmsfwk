@@ -32,7 +32,9 @@ namespace DistributedCollab {
         void OnBytes(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer) const override;
         void OnMessage(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer) const override;
         void OnError(const int32_t channelId, const int32_t errorCode) const override;
-
+        void OnSendFile(const int32_t channelId, const FileInfo& info) const override;
+        void OnRecvFile(const int32_t channelId, const FileInfo& info) const override;
+        const char* GetRecvPath(const int32_t channelId) const override;
     private:
         std::weak_ptr<AVReceiverFilter> filter_;
     };

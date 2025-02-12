@@ -211,6 +211,10 @@ enum {
     CONNECT_STREAM_BYTES_CHANNEL_FAILED,
 
     ERR_JSON_GENERATION_FAILED,
+
+    REGISTER_FILE_SCHEMA_FAILED,
+
+    INVALID_FILE_NAME,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
