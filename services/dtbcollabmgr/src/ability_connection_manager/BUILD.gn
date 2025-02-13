@@ -73,7 +73,6 @@ ohos_shared_library("distributed_ability_connection_manager") {
     "media_foundation:media_foundation",
     "napi:ace_napi",
     "openssl:libcrypto_shared",
-    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "wifi:wifi_sdk",
   ]

@@ -15,13 +15,14 @@
 
 #ifndef OHOS_DISTRIBUTED_ABILITY_CONNECTION_MANAGER_H
 #define OHOS_DISTRIBUTED_ABILITY_CONNECTION_MANAGER_H
- 
+
 #include <atomic>
 #include <map>
 #include <memory>
 
 #include "ability_connection_info.h"
 #include "ability_connection_session.h"
+#include "ability_connection_session_listener.h"
 #include "single_instance.h"
 #include "ability_info.h"
 #include "js_ability_connection_session_listener.h"
@@ -54,6 +55,8 @@ public:
     int32_t SendMessage(int32_t sessionId, const std::string& msg);
     int32_t SendData(int32_t sessionId, const std::shared_ptr<AVTransDataBuffer>& buffer);
     int32_t SendImage(int32_t sessionId, const std::shared_ptr<Media::PixelMap> &pixelMapPtr);
+    int32_t SendFile(int32_t sessionId, const std::vector<std::string>& sFiles,
+        const std::vector<std::string>& dFiles);
 
     int32_t CreateStream(int32_t sessionId, const StreamParams& param, int32_t& streamId);
     int32_t SetSurfaceId(int32_t streamId, const std::string& surfaceId, const SurfaceParams& param);
@@ -66,6 +69,8 @@ public:
         const std::shared_ptr<JsAbilityConnectionSessionListener>& listener);
     int32_t UnregisterEventCallback(int32_t sessionId, const std::string& eventType);
     int32_t NotifyWifiOpen(int32_t sessionId);
+    int32_t RegisterEventCallback(int32_t sessionId,
+        const std::shared_ptr<IAbilityConnectionSessionListener>& listener);
 
     private:
     std::shared_mutex sessionMutex_;
