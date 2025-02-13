@@ -74,7 +74,7 @@ IFeatureAbilityRelationChecker iAbilityRelationChecker = {
 void DSchedCollabManager::Init()
 {
     HILOGI("Init DSchedCollabManager start");
-    if(hasInit_.load()){
+    if (hasInit_.load()) {
         HILOGW("Init DSchedCollabManager has init");
         return;
     }

@@ -54,7 +54,7 @@ DSchedContinueManager::~DSchedContinueManager()
 void DSchedContinueManager::Init()
 {
     HILOGI("Init DSchedContinueManager start");
-    if(hasInit_.load()){
+    if (hasInit_.load()) {
         HILOGW("Init DSchedContinueManager has init");
         return;
     }
