@@ -109,7 +109,6 @@ void CommonEventListener::HandleScreenOff()
     if (recvMgr == nullptr) {
         HILOGE("RecvMgr is nullptr.");
     } else {
-
         recvMgr->OnDeviceScreenOff();
     }
 
