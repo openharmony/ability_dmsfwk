@@ -68,8 +68,9 @@ private:
     ~DSchedTransportSoftbusAdapter();
     int32_t CreateServerSocket();
     int32_t CreateClientSocket(const std::string &peerDeviceId);
-    int32_t CreateSessionRecord(int32_t sessionId, const std::string &peerDeviceId, bool isServer);
-    int32_t AddNewPeerSession(const std::string &peerDeviceId, int32_t &sessionId);
+    int32_t CreateSessionRecord(int32_t sessionId, const std::string &peerDeviceId, bool isServer,
+        DSchedServiceType type);
+    int32_t AddNewPeerSession(const std::string &peerDeviceId, int32_t &sessionId, DSchedServiceType type);
     void ShutdownSession(const std::string &peerDeviceId, int32_t sessionId);
     void NotifyListenersSessionShutdown(int32_t sessionId, bool isSelfCalled);
     int32_t DecisionByAllConnect(const std::string &peerDeviceId, DSchedServiceType type);

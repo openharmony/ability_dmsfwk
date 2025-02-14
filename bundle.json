@@ -30,7 +30,7 @@
         "dmsfwk_recv_broadcast",
         "dmsfwk_use_screenlock_icon_holdon",
         "dmsfwk_sync_data_on_package_event",
-        "dmsfwk_all_connect_decisions"
+        "dmsfwk_all_connect"
       ],
       "hisysevent_config": [
         "//foundation/ability/dmsfwk/hisysevent.yaml"

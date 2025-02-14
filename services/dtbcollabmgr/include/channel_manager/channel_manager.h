@@ -29,6 +29,7 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <atomic>
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -53,14 +54,18 @@ public:
     int32_t SendBytes(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data);
     int32_t SendStream(const int32_t channelId, const std::shared_ptr<AVTransStreamData>& data);
     int32_t SendMessage(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data);
+    int32_t SendFile(const int32_t channelId, const std::vector<std::string>& sFiles,
+        const std::vector<std::string>& dFiles);
 
-    void OnSocketError(const int32_t socketId, const int32_t errorCode);
-    void OnSocketConnected(const int32_t socketId, const PeerSocketInfo& info);
-    void OnSocketClosed(const int32_t socketId, const ShutdownReason reason);
-    void OnBytesReceived(const int32_t socketId, const void* data, const uint32_t dataLen);
-    void OnMessageReceived(const int32_t socketId, const void* data, const uint32_t dataLen);
-    void OnStreamReceived(const int32_t socketId, const StreamData* data,
+    void OnSocketError(int32_t socketId, const int32_t errorCode);
+    void OnSocketConnected(int32_t socketId, const PeerSocketInfo& info);
+    void OnSocketClosed(int32_t socketId, const ShutdownReason reason);
+    void OnBytesReceived(int32_t socketId, const void* data, const uint32_t dataLen);
+    void OnMessageReceived(int32_t socketId, const void* data, const uint32_t dataLen);
+    void OnStreamReceived(int32_t socketId, const StreamData* data,
         const StreamData* ext, const StreamFrameInfo* param);
+    void OnFileEventReceived(int32_t socketId, FileEvent *event);
+    const char* GetRecvPathFromUser();
 
 private:
     static constexpr int32_t VERSION_ = 0;
@@ -68,9 +73,11 @@ private:
     static constexpr int32_t MESSAGE_START_ID = 1001;
     static constexpr int32_t BYTES_START_ID = MESSAGE_START_ID + CHANNEL_ID_GAP;
     static constexpr int32_t STREAM_START_ID = BYTES_START_ID + CHANNEL_ID_GAP;
+    static constexpr int32_t FILE_START_ID = STREAM_START_ID + CHANNEL_ID_GAP;
     static constexpr int32_t MAX_CHANNEL_NAME_LENGTH = 64;
     static constexpr int32_t CHANNEL_NAME_PREFIX_LENGTH = 64;
     static constexpr int32_t RETRY_TIME_GAP = 1000;
+    static constexpr int32_t MAX_FILE_COUNT = 500;
 
 private:
     int32_t serverSocketId_ = -1;
@@ -82,6 +89,8 @@ private:
     std::map<std::string, std::vector<int32_t>> channelIdMap_;
     // id2info
     std::map<int32_t, ChannelInfo> channelInfoMap_;
+
+    std::atomic_uint32_t fileChannelId_;
 
     // for all socket res
     std::shared_mutex socketMutex_;
@@ -96,7 +105,8 @@ private:
     std::map<ChannelDataType, std::int32_t> nextIds_ = {
         { ChannelDataType::MESSAGE, MESSAGE_START_ID },
         { ChannelDataType::BYTES, BYTES_START_ID },
-        { ChannelDataType::VIDEO_STREAM, STREAM_START_ID }
+        { ChannelDataType::VIDEO_STREAM, STREAM_START_ID },
+        { ChannelDataType::FILE, FILE_START_ID }
     };
 
     std::mutex eventMutex_;
@@ -152,6 +162,8 @@ private:
     int32_t DoSendBytes(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data);
     int32_t DoSendMessage(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data);
     int32_t DoSendStream(const int32_t channelId, const std::shared_ptr<AVTransStreamData>& data);
+    int32_t DoSendFile(const int32_t channelId, const std::vector<std::string>& sFiles,
+        const std::vector<std::string>& dFiles);
     std::shared_ptr<AVTransDataBuffer> ProcessRecvData(const int32_t channelId,
         const int32_t socketId, const void* data, const uint32_t dataLen);
     void DoConnectCallback(const int32_t channelId);
@@ -159,6 +171,13 @@ private:
     void DoBytesReceiveCallback(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer);
     void DoMessageReceiveCallback(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer);
     void DoStreamReceiveCallback(const int32_t channelId, const std::shared_ptr<AVTransStreamData>& data);
+    void DispatchProcessFileEvent(int32_t channelId, FileEvent *event);
+    void DealFileSendEvent(int32_t channelId, FileEvent *event);
+    void DealFileRecvEvent(int32_t channelId, FileEvent *event);
+    void DealFileErrorEvent(int32_t channelId, FileEvent *event);
+    void DealFileUpdatePathEvent(int32_t channelId, FileEvent *event);
+    void DoFileRecvCallback(const int32_t channelId, const FileInfo& info);
+    void DoFileSendCallback(const int32_t channelId, const FileInfo& info);
 };
 }
 }

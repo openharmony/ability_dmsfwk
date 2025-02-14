@@ -57,6 +57,7 @@ public:
     constexpr static uint8_t CONTINUE_SHIFT_08 = 0x08;
     constexpr static uint8_t CONTINUE_SHIFT_04 = 0x04;
     constexpr static int32_t INVALID_ID = -1;
+    constexpr static int32_t INVALID_MISSION_ID = -1;
 
     ~DMSContinueSendMgr();
     void Init(int32_t currentUserId);
@@ -100,7 +101,7 @@ private:
         void SetScreenLockedInfo(LastUnfoInfo info);
 
     private:
-        LastUnfoInfo unfoInfo_;
+        LastUnfoInfo unfoInfo_ = { INVALID_MISSION_ID, 0, { INVALID_MISSION_ID, "", "", "", false, 0, false } };
         std::weak_ptr<DMSContinueSendMgr> dmsContinueSendMgr_;
     };
 

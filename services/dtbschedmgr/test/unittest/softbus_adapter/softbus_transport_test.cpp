@@ -660,7 +660,8 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, AddNewPeerSession_001, TestSize.Leve
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest AddNewPeerSession_001 begin" << std::endl;
     std::string peerDeviceId = "peerDeviceId";
     int32_t sessionId = 0;
-    int32_t ret = DSchedTransportSoftbusAdapter::GetInstance().AddNewPeerSession(peerDeviceId, sessionId);
+    int32_t ret = DSchedTransportSoftbusAdapter::GetInstance().AddNewPeerSession(peerDeviceId, sessionId,
+        SERVICE_TYPE_CONTINUE);
     EXPECT_EQ(ret, REMOTE_DEVICE_BIND_ABILITY_ERR);
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest AddNewPeerSession_001 end" << std::endl;
 }

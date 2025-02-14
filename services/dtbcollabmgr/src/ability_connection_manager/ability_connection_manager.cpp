@@ -235,6 +235,19 @@ int32_t AbilityConnectionManager::SendImage(int32_t sessionId, const std::shared
     return connectionSesion->SendImage(image);
 }
 
+int32_t AbilityConnectionManager::SendFile(int32_t sessionId, const std::vector<std::string>& sFiles,
+    const std::vector<std::string>& dFiles)
+{
+    HILOGD("called, sessionId is %{public}d", sessionId);
+    auto connectionSesion = GetAbilityConnectionSession(sessionId);
+    if (connectionSesion == nullptr) {
+        HILOGE("sessionId is invalid parameter");
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    return connectionSesion->SendFile(sFiles, dFiles);
+}
+
 int32_t AbilityConnectionManager::CreateStream(int32_t sessionId, const StreamParams& param, int32_t& streamId)
 {
     HILOGD("called, sessionId is %{public}d", sessionId);
@@ -366,6 +379,19 @@ int32_t AbilityConnectionManager::UnregisterEventCallback(int32_t sessionId, con
     }
     
     return connectionSesion->UnregisterEventCallback(eventType);
+}
+
+int32_t AbilityConnectionManager::RegisterEventCallback(int32_t sessionId,
+    const std::shared_ptr<IAbilityConnectionSessionListener>& listener)
+{
+    HILOGD("called, sessionId is %{public}d", sessionId);
+    auto connectionSesion = GetAbilityConnectionSession(sessionId);
+    if (connectionSesion == nullptr) {
+        HILOGE("sessionId is invalid parameter");
+        return INVALID_PARAMETERS_ERR;
+    }
+    
+    return connectionSesion->RegisterEventCallback(listener);
 }
 
 int32_t AbilityConnectionManager::NotifyWifiOpen(int32_t sessionId)

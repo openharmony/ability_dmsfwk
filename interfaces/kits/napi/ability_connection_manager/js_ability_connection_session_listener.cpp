@@ -29,7 +29,7 @@ const std::string TAG = "JsAbilityConnectionSessionListener";
 
 void JsAbilityConnectionSessionListener::SetCallback(const napi_value& jsListenerObj)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     napi_ref tempRef = nullptr;
     std::unique_ptr<NativeReference> callbackRef;
     if (env_ == nullptr) {
@@ -43,21 +43,25 @@ void JsAbilityConnectionSessionListener::SetCallback(const napi_value& jsListene
 
 void JsAbilityConnectionSessionListener::CallJsMethod(const EventCallbackInfo& callbackInfo)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (env_ == nullptr) {
         HILOGE("env_ is nullptr");
         return;
     }
-
     auto task = [this, callbackInfo]() {
+        std::mutex napi_mutex;
+        std::lock_guard<std::mutex> lock(napi_mutex);
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(this->env_, &scope);
-        if (scope == nullptr) {
+        napi_status result = napi_open_handle_scope(this->env_, &scope);
+        if (result != napi_ok || scope == nullptr) {
+            HILOGE("open handle scope failed!");
             return;
         }
-
         CallJsMethodInner(callbackInfo);
-        napi_close_handle_scope(this->env_, scope);
+        result = napi_close_handle_scope(this->env_, scope);
+        if (result != napi_ok) {
+            HILOGE("close handle scope failed!");
+        }
     };
     if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_high)) {
         HILOGE("send event failed!");

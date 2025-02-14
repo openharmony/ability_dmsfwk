@@ -90,6 +90,20 @@ int32_t DataSenderReceiver::SendMessageData(const std::shared_ptr<AVTransDataBuf
     return SendMessage(socketId_, sendData->Data(), sendData->Size());
 }
 
+int32_t DataSenderReceiver::SendFileData(const std::vector<std::string>& sFiles,
+    const std::vector<std::string>& dFiles)
+{
+    const char* sFileList[sFiles.size()];
+    for (size_t i = 0; i < sFiles.size(); ++i) {
+        sFileList[i] = sFiles[i].c_str();
+    }
+    const char* dFileList[dFiles.size()];
+    for (size_t i = 0; i < dFiles.size(); ++i) {
+        dFileList[i] = dFiles[i].c_str();
+    }
+    return SendFile(socketId_, sFileList, dFileList, static_cast<uint32_t>(sFiles.size()));
+}
+
 int32_t DataSenderReceiver::SendBytesData(const std::shared_ptr<AVTransDataBuffer>& sendData)
 {
     int32_t dataType = static_cast<int32_t>(ChannelDataType::BYTES);
@@ -194,7 +208,7 @@ int32_t DataSenderReceiver::DoSendPacket(SessionDataHeader& headerPara,
     // copy data
     ret = memcpy_s(header + SessionDataHeader::HEADER_LEN,
         sendBuffer->Size() - SessionDataHeader::HEADER_LEN,
-        dataHeader, dataLen);
+            dataHeader, dataLen);
     if (ret != EOK) {
         HILOGE("Write data failed");
         return WRITE_SEND_DATA_BUFFER_FAILED;

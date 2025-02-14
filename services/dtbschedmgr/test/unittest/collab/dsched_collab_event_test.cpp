@@ -15,7 +15,9 @@
 
 #include "dsched_collab_event_test.h"
 
+#include "dms_constant.h"
 #include "dsched_collab_state.h"
+#include "dtbschedmgr_log.h"
 #include "test_log.h"
 
 using namespace testing;
@@ -79,6 +81,134 @@ HWTEST_F(CollabEventTest, BaseCmd_Test_001, TestSize.Level3)
     DTEST_LOG << "BaseCmd BaseCmd_Test_001 end" << std::endl;
 }
 
+/**
+ * @tc.name: BaseCmd_Unmarshal_Test_001
+ * @tc.desc: call Unmarshal
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, BaseCmd_Unmarshal_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "BaseCmd BaseCmd_Unmarshal_Test_001 begin" << std::endl;
+    std::string jsonStr = "test";
+    BaseCmd cmd;
+    auto ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON_AddNumberToObject(rootValue, "Command", 0);
+    cJSON_AddNumberToObject(rootValue, "CollabVersion", 0);
+    cJSON_AddNumberToObject(rootValue, "DmsVersion", 0);
+    
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddStringToObject(rootValue, "CollabSessionId", "");
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_ReplaceItemInObject(rootValue, "CollabSessionId", cJSON_CreateString("test"));
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_Delete(rootValue);
+    cJSON_free(data);
+    DTEST_LOG << "BaseCmd BaseCmd_Unmarshal_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: BaseCmd_Unmarshal_Test_002
+ * @tc.desc: call Unmarshal
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, BaseCmd_Unmarshal_Test_002, TestSize.Level3)
+{
+    DTEST_LOG << "BaseCmd BaseCmd_Unmarshal_Test_002 begin" << std::endl;
+    std::string jsonStr;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON_AddNumberToObject(rootValue, "Command", 0);
+    cJSON_AddNumberToObject(rootValue, "CollabVersion", 0);
+    cJSON_AddNumberToObject(rootValue, "DmsVersion", 0);
+    cJSON_AddNumberToObject(rootValue, "CollabSessionId", 0);
+
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    BaseCmd cmd;
+    auto ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddNumberToObject(rootValue, "CollabToken", 0);
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_Delete(rootValue);
+    cJSON_free(data);
+    DTEST_LOG << "BaseCmd BaseCmd_Unmarshal_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: BaseCmd_Unmarshal_Test_003
+ * @tc.desc: call Unmarshal
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, BaseCmd_Unmarshal_Test_003, TestSize.Level3)
+{
+    DTEST_LOG << "BaseCmd BaseCmd_Unmarshal_Test_003 begin" << std::endl;
+    std::string jsonStr;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON_AddNumberToObject(rootValue, "Command", 0);
+    cJSON_AddNumberToObject(rootValue, "CollabVersion", 0);
+    cJSON_AddNumberToObject(rootValue, "DmsVersion", 0);
+    cJSON_AddNumberToObject(rootValue, "CollabSessionId", 0);
+    cJSON_AddStringToObject(rootValue, "CollabToken", "collabToken");
+    cJSON_AddStringToObject(rootValue, "SrcDeviceId", "srcDeviceId");
+    cJSON_AddStringToObject(rootValue, "SrcBundleName", "srcBundleName");
+    cJSON_AddStringToObject(rootValue, "SrcAbilityName", "srcAbilityName");
+    cJSON_AddStringToObject(rootValue, "SrcModuleName", "srcModuleName");
+    cJSON_AddStringToObject(rootValue, "SrcServiceId", "srcServerId");
+    cJSON_AddStringToObject(rootValue, "SinkDeviceId", "sinkDeviceId");
+    cJSON_AddStringToObject(rootValue, "SinkBundleName", "sinkBundleName");
+    cJSON_AddStringToObject(rootValue, "SinkAbilityName", "sinkAbilityName");
+    cJSON_AddStringToObject(rootValue, "SinkModuleName", "sinkModuleName");
+    cJSON_AddStringToObject(rootValue, "SinkServiceId", "sinkServerId");
+
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    BaseCmd cmd;
+    auto ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddStringToObject(rootValue, "NeedSendBigData", "test");
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_Delete(rootValue);
+    cJSON_free(data);
+    DTEST_LOG << "BaseCmd BaseCmd_Unmarshal_Test_003 end" << std::endl;
+}
 
 /**
  * @tc.name: SinkStartCmd_Test_001
@@ -125,6 +255,354 @@ HWTEST_F(CollabEventTest, SinkStartCmd_Test_001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: SinkStartCmd_Unmarshal_Test_001
+ * @tc.desc: call Unmarshal
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_Unmarshal_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_Unmarshal_Test_001 begin" << std::endl;
+    std::string jsonStr = "test";
+    SinkStartCmd cmd;
+    auto ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON_AddNumberToObject(rootValue, "AppVersion", 0);
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddNumberToObject(rootValue, "BaseCmd", 0);
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_DeleteItemFromObject(rootValue, "BaseCmd");
+    cJSON_AddStringToObject(rootValue, "BaseCmd", "test");
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_Delete(rootValue);
+    cJSON_free(data);
+    DTEST_LOG << "SinkStartCmd_Unmarshal_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SinkStartCmd_Unmarshal_Test_002
+ * @tc.desc: call Unmarshal
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_Unmarshal_Test_002, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_Unmarshal_Test_002 begin" << std::endl;
+    std::string jsonStr;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+
+    std::string baseJsonStr;
+    BaseCmd cmd;
+    if (cmd.Marshal(baseJsonStr) != ERR_OK) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    cJSON_AddStringToObject(rootValue, "BaseCmd", baseJsonStr.c_str());
+
+    jsonStr = std::string(cJSON_Print(rootValue));
+    SinkStartCmd sinkCmd;
+    auto ret = sinkCmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON_AddStringToObject(rootValue, "AppVersion", "test");
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = sinkCmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "SinkStartCmd_Unmarshal_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: SinkStartCmd_UnmarshalCallerInfo_Test_001
+ * @tc.desc: call UnmarshalCallerInfo
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalCallerInfo_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_UnmarshalCallerInfo_Test_001 begin" << std::endl;
+    std::string jsonStr = "test";
+    SinkStartCmd cmd;
+    auto ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON_AddNumberToObject(rootValue, "Uid", 0);
+    cJSON_AddNumberToObject(rootValue, "Pid", 0);
+
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddNumberToObject(rootValue, "SourceDeviceId", 0);
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_DeleteItemFromObject(rootValue, "SourceDeviceId");
+    cJSON_AddStringToObject(rootValue, "SourceDeviceId", "");
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_Delete(rootValue);
+    cJSON_free(data);
+    DTEST_LOG << "SinkStartCmd_UnmarshalCallerInfo_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SinkStartCmd_UnmarshalCallerInfo_Test_002
+ * @tc.desc: call UnmarshalCallerInfo
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalCallerInfo_Test_002, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_UnmarshalCallerInfo_Test_002 begin" << std::endl;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON_AddStringToObject(rootValue, "SourceDeviceId", "SourceDeviceId");
+    cJSON_AddNumberToObject(rootValue, "Duid", 0);
+    cJSON_AddStringToObject(rootValue, "CallerAppId", "CallerAppId");
+
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    std::string jsonStr = std::string(data);
+    SinkStartCmd cmd;
+    auto ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddStringToObject(rootValue, "Uid", "test");
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_DeleteItemFromObject(rootValue, "Uid");
+    cJSON_AddNumberToObject(rootValue, "Uid", 0);
+    cJSON_AddNumberToObject(rootValue, "Pid", 0);
+    cJSON_AddNumberToObject(rootValue, "CallerType", 0);
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_Delete(rootValue);
+    cJSON_free(data);
+    DTEST_LOG << "SinkStartCmd_UnmarshalCallerInfo_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: SinkStartCmd_UnmarshalCallerInfo_Test_003
+ * @tc.desc: call UnmarshalCallerInfo
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalCallerInfo_Test_003, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_UnmarshalCallerInfo_Test_003 begin" << std::endl;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON_AddStringToObject(rootValue, "SourceDeviceId", "SourceDeviceId");
+    cJSON_AddNumberToObject(rootValue, "Duid", 0);
+    cJSON_AddStringToObject(rootValue, "CallerAppId", "CallerAppId");
+
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    std::string jsonStr = std::string(data);
+    SinkStartCmd cmd;
+    auto ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddStringToObject(rootValue, "Uid", "test");
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_DeleteItemFromObject(rootValue, "Uid");
+    cJSON_AddNumberToObject(rootValue, "Uid", 0);
+    cJSON_AddNumberToObject(rootValue, "Pid", 0);
+    cJSON_AddNumberToObject(rootValue, "CallerType", 0);
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_Delete(rootValue);
+    cJSON_free(data);
+    DTEST_LOG << "SinkStartCmd_UnmarshalCallerInfo_Test_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: SinkStartCmd_UnmarshalAccountInfo_Test_001
+ * @tc.desc: call UnmarshalAccountInfo
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalAccountInfo_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_UnmarshalAccountInfo_Test_001 begin" << std::endl;
+    std::string jsonStr = "test";
+    SinkStartCmd cmd;
+    auto ret = cmd.UnmarshalAccountInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalAccountInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddStringToObject(rootValue, "AccountType", "test");
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "SinkStartCmd_UnmarshalAccountInfo_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SinkStartCmd_UnmarshalAccountInfo_Test_002
+ * @tc.desc: call UnmarshalAccountInfo
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalAccountInfo_Test_002, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_UnmarshalAccountInfo_Test_002 begin" << std::endl;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON_AddNumberToObject(rootValue, "AccountType", 0);
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    auto jsonStr = std::string(data);
+    SinkStartCmd cmd;
+    auto ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddNumberToObject(rootValue, Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID.c_str(), 0);
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "SinkStartCmd_UnmarshalAccountInfo_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: SinkStartCmd_UnmarshalAccountInfo_Test_003
+ * @tc.desc: call UnmarshalAccountInfo
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalAccountInfo_Test_003, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_UnmarshalAccountInfo_Test_003 begin" << std::endl;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON_AddNumberToObject(rootValue, "AccountType", 0);
+    cJSON_AddStringToObject(rootValue, Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID.c_str(),
+        "test");
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    auto jsonStr = std::string(data);
+    SinkStartCmd cmd;
+    auto ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddStringToObject(rootValue, Constants::EXTRO_INFO_JSON_KEY_USERID_ID.c_str(),
+        "test");
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "SinkStartCmd_UnmarshalAccountInfo_Test_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: SinkStartCmd_UnmarshalAccountInfo_Test_004
+ * @tc.desc: call UnmarshalAccountInfo
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalAccountInfo_Test_004, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_UnmarshalAccountInfo_Test_004 begin" << std::endl;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON_AddNumberToObject(rootValue, "AccountType", 0);
+    cJSON *groupIdList = cJSON_CreateArray();
+    if (groupIdList == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    cJSON *groupId = cJSON_CreateNumber(0);
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    auto jsonStr = std::string(data);
+    SinkStartCmd cmd;
+    auto ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    cJSON_Delete(groupIdList);
+    DTEST_LOG << "SinkStartCmd_UnmarshalAccountInfo_Test_004 end" << std::endl;
+}
+
+/**
  * @tc.name: NotifyResultCmd_Test_001
  * @tc.desc: call NotifyResultCmd
  * @tc.type: FUNC
@@ -164,6 +642,160 @@ HWTEST_F(CollabEventTest, NotifyResultCmd_Test_001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: NotifyResultCmd_Unmarshal_Test_001
+ * @tc.desc: call Unmarshal
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, NotifyResultCmd_Unmarshal_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "NotifyResultCmd_Unmarshal_Test_001 begin" << std::endl;
+    std::string jsonStr = "test";
+    NotifyResultCmd cmd;
+    auto ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddNumberToObject(rootValue, "BaseCmd", 0);
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_DeleteItemFromObject(rootValue, "BaseCmd");
+    cJSON_AddStringToObject(rootValue, "BaseCmd", "test");
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_Delete(rootValue);
+    cJSON_free(data);
+    DTEST_LOG << "NotifyResultCmd_Unmarshal_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyResultCmd_Unmarshal_Test_002
+ * @tc.desc: call Unmarshal
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, NotifyResultCmd_Unmarshal_Test_002, TestSize.Level3)
+{
+    DTEST_LOG << "NotifyResultCmd_Unmarshal_Test_002 begin" << std::endl;
+    std::string jsonStr;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+
+    std::string baseJsonStr;
+    BaseCmd cmd;
+    if (cmd.Marshal(baseJsonStr) != ERR_OK) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    cJSON_AddStringToObject(rootValue, "BaseCmd", baseJsonStr.c_str());
+
+    jsonStr = std::string(cJSON_Print(rootValue));
+    NotifyResultCmd notifyCmd;
+    auto ret = notifyCmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON_AddStringToObject(rootValue, "SinkCollabSessionId", "test");
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = notifyCmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_DeleteItemFromObject(rootValue, "SinkCollabSessionId");
+    cJSON_AddNumberToObject(rootValue, "SinkCollabSessionId", 0);
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = notifyCmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddStringToObject(rootValue, "Result", "test");
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = notifyCmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "NotifyResultCmd_Unmarshal_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyResultCmd_Unmarshal_Test_003
+ * @tc.desc: call Unmarshal
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, NotifyResultCmd_Unmarshal_Test_003, TestSize.Level3)
+{
+    DTEST_LOG << "NotifyResultCmd_Unmarshal_Test_003 begin" << std::endl;
+    std::string jsonStr;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+
+    std::string baseJsonStr;
+    BaseCmd cmd;
+    if (cmd.Marshal(baseJsonStr) != ERR_OK) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    cJSON_AddStringToObject(rootValue, "BaseCmd", baseJsonStr.c_str());
+    cJSON_AddNumberToObject(rootValue, "SinkCollabSessionId", 0);
+    cJSON_AddNumberToObject(rootValue, "Result", 0);
+
+    jsonStr = std::string(cJSON_Print(rootValue));
+    NotifyResultCmd notifyCmd;
+    auto ret = notifyCmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON_AddNumberToObject(rootValue, "SinkSocketName", 0);
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = notifyCmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_DeleteItemFromObject(rootValue, "SinkSocketName");
+    cJSON_AddStringToObject(rootValue, "SinkSocketName", "SinkSocketName");
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = notifyCmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, ERR_OK);
+    cJSON_free(data);
+
+    cJSON_AddNumberToObject(rootValue, "AbilityRejectReason", 0);
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = notifyCmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, ERR_OK);
+    cJSON_Delete(rootValue);
+    cJSON_free(data);
+    DTEST_LOG << "NotifyResultCmd_Unmarshal_Test_003 end" << std::endl;
+}
+
+/**
  * @tc.name: DisconnectCmd_Test_001
  * @tc.desc: call DisconnectCmd
  * @tc.type: FUNC
@@ -197,6 +829,48 @@ HWTEST_F(CollabEventTest, DisconnectCmd_Test_001, TestSize.Level3)
     ret = cmd.Unmarshal(jsonStr);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DisconnectCmdTest DisconnectCmd_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectCmd_Unmarshal_Test_001
+ * @tc.desc: call Unmarshal
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, DisconnectCmd_Unmarshal_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "DisconnectCmd_Unmarshal_Test_001 begin" << std::endl;
+    std::string jsonStr = "test";
+    DisconnectCmd cmd;
+    auto ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    char *data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddNumberToObject(rootValue, "BaseCmd", 0);
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_DeleteItemFromObject(rootValue, "BaseCmd");
+    cJSON_AddStringToObject(rootValue, "BaseCmd", "test");
+    data = cJSON_Print(rootValue);
+    ASSERT_NE(data, nullptr);
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_Delete(rootValue);
+    cJSON_free(data);
+    DTEST_LOG << "DisconnectCmd_Unmarshal_Test_001 end" << std::endl;
 }
 }
 }

@@ -15,12 +15,13 @@
 
 #include "channel_manager.h"
 #include "dtbcollabmgr_log.h"
+#include "softbus_file_adapter.h"
 #include <algorithm>
 #include <chrono>
 #include <future>
 #include <sys/prctl.h>
 #include "securec.h"
-#include "unordered_set"
+#include <unordered_set>
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -36,26 +37,26 @@ namespace {
     static std::map<ChannelDataType, TransDataType> CHANNEL_SOFTBUS_DATATYPE_MAP = {
         { ChannelDataType::MESSAGE, DATA_TYPE_MESSAGE },
         { ChannelDataType::BYTES, DATA_TYPE_BYTES },
-        { ChannelDataType::VIDEO_STREAM, DATA_TYPE_VIDEO_STREAM }
+        { ChannelDataType::VIDEO_STREAM, DATA_TYPE_VIDEO_STREAM },
+        { ChannelDataType::FILE, DATA_TYPE_FILE }
     };
 
     static std::map<ChannelDataType, QosSpeedType> CHANNEL_DATATYPE_SPEED_MAP = {
         { ChannelDataType::MESSAGE, QosSpeedType::LOW },
         { ChannelDataType::BYTES, QosSpeedType::LOW },
-        { ChannelDataType::VIDEO_STREAM, QosSpeedType::HIGH }
+        { ChannelDataType::VIDEO_STREAM, QosSpeedType::HIGH },
+        { ChannelDataType::FILE, QosSpeedType::HIGH }
     };
 
     static const std::string SPLIT_FLAG = "_";
-
     static const std::string COLLAB_PGK_NAME = "dms";
-    static const std::string SESSION_NAME_PREFIX = "ohos.distributedschedule.dms.";
-    static const std::string BUNDLE_NAME = "com.";
-    static const std::string APP_ID = "com.";
+    static const std::string SESSION_NAME_PREFIX = "ohos.dtbcollab.dms";
 
     static std::map<ChannelDataType, std::string> CHANNEL_DATATYPE_PREFIX_MAP = {
         { ChannelDataType::MESSAGE, "M" },
         { ChannelDataType::BYTES, "B" },
-        { ChannelDataType::VIDEO_STREAM, "V" }
+        { ChannelDataType::VIDEO_STREAM, "V" },
+        { ChannelDataType::FILE, "F" }
     };
 
     static constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW = 64 * 1024;
@@ -152,13 +153,24 @@ static void OnError(int32_t socket, int32_t errCode)
     ChannelManager::GetInstance().OnSocketError(socket, errCode);
 }
 
+static void OnFileEvent(int32_t socket, FileEvent *event)
+{
+    ChannelManager::GetInstance().OnFileEventReceived(socket, event);
+}
+
+static const char* GetRecvPath()
+{
+    return ChannelManager::GetInstance().GetRecvPathFromUser();
+}
+
 ISocketListener channelManagerListener = {
     .OnBind = OnSocketConnected,
     .OnShutdown = OnSocketClosed,
     .OnBytes = OnBytesRecv,
     .OnMessage = OnMessageRecv,
     .OnStream = OnStreamRecv,
-    .OnError = OnError
+    .OnFile = OnFileEvent,
+    .OnError = OnError,
 };
 
 ChannelManager::~ChannelManager()
@@ -283,7 +295,8 @@ void ChannelManager::Reset()
     nextIds_ = {
         { ChannelDataType::MESSAGE, MESSAGE_START_ID },
         { ChannelDataType::BYTES, BYTES_START_ID },
-        { ChannelDataType::VIDEO_STREAM, STREAM_START_ID }
+        { ChannelDataType::VIDEO_STREAM, STREAM_START_ID },
+        { ChannelDataType::FILE, FILE_START_ID }
     };
 }
 
@@ -304,6 +317,8 @@ int32_t ChannelManager::CreateServerChannel(const std::string& channelName,
     std::unique_lock<std::shared_mutex> writeLock(channelMutex_);
     channelIdMap_[channelName].push_back(info->channelId);
     channelInfoMap_.emplace(info->channelId, std::move(*info));
+    // save file channel
+    fileChannelId_.store(info->channelId);
     HILOGI("end");
     return info->channelId;
 }
@@ -346,7 +361,7 @@ int32_t ChannelManager::GenerateNextId(const ChannelDataType dataType)
     int32_t channelId = 0;
     // lock for each type
     std::lock_guard<std::mutex> typeLock(typeMutex_[dataType]);
-    HILOGI("can't reuse id, increase");
+    HILOGI("create socket for %{public}d", static_cast<int32_t>(dataType));
     channelId = nextIds_[dataType];
     if (channelId - CHANNEL_ID_GAP * (static_cast<int32_t>(dataType) + 1)
         >= CHANNEL_ID_GAP) {
@@ -391,6 +406,7 @@ int32_t ChannelManager::CreateClientSocket(const std::string& channelName,
         HILOGE("channel name too long, %{public}s", channelName.c_str());
         return -INVALID_CHANNEL_NAME;
     }
+    // ohos.dtbcollab.dms64_F_64
     std::string name = SESSION_NAME_PREFIX + ownerName_ +
         SPLIT_FLAG + CHANNEL_DATATYPE_PREFIX_MAP[dataType] + SPLIT_FLAG + channelName;
     std::string peerSocketName = SESSION_NAME_PREFIX + peerName;
@@ -409,7 +425,7 @@ int32_t ChannelManager::CreateClientSocket(const std::string& channelName,
 
 inline bool ChannelManager::isValidChannelId(const int32_t channelId)
 {
-    return channelId > CHANNEL_ID_GAP && channelId <= (STREAM_START_ID + CHANNEL_ID_GAP);
+    return channelId > CHANNEL_ID_GAP && channelId <= (FILE_START_ID + CHANNEL_ID_GAP);
 }
 
 int32_t ChannelManager::DeleteChannel(const int32_t channelId)
@@ -581,6 +597,13 @@ int32_t ChannelManager::BindSocket(const int32_t socketId, const ChannelDataType
         HILOGE("client bind failed, ret: %{public}d", ret);
         return BIND_SOCKET_FAILED;
     }
+    if (dataType == ChannelDataType::FILE) {
+        ret = SoftbusFileAdpater::GetInstance().SetFileSchema(socketId);
+    }
+    if (ret != ERR_OK) {
+        HILOGE("register %{public}d file schema failed", socketId);
+        return REGISTER_FILE_SCHEMA_FAILED;
+    }
     SetSocketStatus(socketId, ChannelStatus::CONNECTED);
     return ret;
 }
@@ -653,9 +676,10 @@ int32_t ChannelManager::SetChannelStatus(const int32_t channelId, const ChannelS
     return ERR_OK;
 }
 
-void ChannelManager::OnSocketConnected(const int32_t socketId, const PeerSocketInfo& info)
+void ChannelManager::OnSocketConnected(int32_t socketId, const PeerSocketInfo& info)
 {
     if (socketId <= 0) {
+        HILOGE("invalid socketId: %{public}d", socketId);
         return;
     }
     HILOGI("socket %{public}d binded", socketId);
@@ -753,6 +777,7 @@ int32_t ChannelManager::RegisterSocket(const int32_t socketId, const int32_t cha
 {
     // update channelInfo
     HILOGI("register socket with channel, channelId=%{public}d, socketId=%{public}d", channelId, socketId);
+    ChannelDataType dataType = ChannelDataType::BYTES;
     {
         std::unique_lock<std::shared_mutex> writeLock(channelMutex_);
         auto infoIt = channelInfoMap_.find(channelId);
@@ -760,6 +785,7 @@ int32_t ChannelManager::RegisterSocket(const int32_t socketId, const int32_t cha
             HILOGE("no valid channel");
             return INVALID_CHANNEL_ID;
         }
+        dataType = infoIt->second.dataType;
         infoIt->second.clientSockets.push_back(socketId);
         infoIt->second.dataSenderReceivers[socketId] = std::make_unique<DataSenderReceiver>(socketId);
     }
@@ -768,6 +794,14 @@ int32_t ChannelManager::RegisterSocket(const int32_t socketId, const int32_t cha
         std::unique_lock<std::shared_mutex> writeLock(socketMutex_);
         socketChannelMap_[socketId] = channelId;
         socketStatusMap_[socketId] = ChannelStatus::CONNECTED;
+    }
+    if (dataType == ChannelDataType::FILE) {
+        HILOGI("file socket, regist softbus file schema");
+        int32_t ret = SoftbusFileAdpater::GetInstance().SetFileSchema(socketId);
+        if (ret != ERR_OK) {
+            HILOGE("register %{public}d file schema failed", socketId);
+            return REGISTER_FILE_SCHEMA_FAILED;
+        }
     }
     return ERR_OK;
 }
@@ -793,7 +827,7 @@ void ChannelManager::NotifyListeners(const int32_t channelId, Func listenerFunc,
     }
 }
 
-void ChannelManager::OnSocketError(const int32_t socketId, const int32_t errorCode)
+void ChannelManager::OnSocketError(int32_t socketId, const int32_t errorCode)
 {
     int32_t channelId = 0;
     CHECK_SOCKET_ID(socketId);
@@ -813,7 +847,7 @@ void ChannelManager::DoConnectCallback(const int32_t channelId)
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-void ChannelManager::OnSocketClosed(const int32_t socketId, const ShutdownReason reason)
+void ChannelManager::OnSocketClosed(int32_t socketId, const ShutdownReason reason)
 {
     int32_t channelId = 0;
     CHECK_SOCKET_ID(socketId);
@@ -859,25 +893,6 @@ ChannelStatus ChannelManager::GetChannelStatus(const int32_t channelId)
     return ChannelStatus::UNCONNECTED;
 }
 
-int32_t ChannelManager::SendBytes(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data)
-{
-    if (!isValidChannelId(channelId) || data == nullptr) {
-        HILOGE("invalid channel id. %{public}d", channelId);
-        return INVALID_CHANNEL_ID;
-    }
-    HILOGI("start to send bytes");
-    auto func = [channelId, data, this]() {
-        DoSendBytes(channelId, data);
-    };
-    int32_t ret = PostTask(func, AppExecFwk::EventQueue::Priority::LOW);
-    if (ret != ERR_OK) {
-        HILOGE("failed to add send bytes task, ret=%{public}d", ret);
-        return ret;
-    }
-    HILOGI("send bytes task added to handler");
-    return ERR_OK;
-}
-
 template <typename Func, typename... Args>
 int32_t ChannelManager::DoSendData(const int32_t channelId, Func doSendFunc, Args&&... args)
 {
@@ -910,6 +925,25 @@ int32_t ChannelManager::DoSendData(const int32_t channelId, Func doSendFunc, Arg
         DoErrorCallback(channelId, ret);
         return ret;
     }
+    return ERR_OK;
+}
+
+int32_t ChannelManager::SendBytes(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data)
+{
+    if (!isValidChannelId(channelId) || data == nullptr) {
+        HILOGE("invalid channel id. %{public}d", channelId);
+        return INVALID_CHANNEL_ID;
+    }
+    HILOGI("start to send bytes");
+    auto func = [channelId, data, this]() {
+        DoSendBytes(channelId, data);
+    };
+    int32_t ret = PostTask(func, AppExecFwk::EventQueue::Priority::LOW);
+    if (ret != ERR_OK) {
+        HILOGE("failed to add send bytes task, ret=%{public}d", ret);
+        return ret;
+    }
+    HILOGI("send bytes task added to handler");
     return ERR_OK;
 }
 
@@ -996,14 +1030,47 @@ int32_t ChannelManager::DoSendMessage(const int32_t channelId,
     return DoSendData(channelId, &DataSenderReceiver::SendMessageData, data);
 }
 
-void ChannelManager::OnBytesReceived(const int32_t socketId,
+int32_t ChannelManager::SendFile(const int32_t channelId, const std::vector<std::string>& sFiles,
+    const std::vector<std::string>& dFiles)
+{
+    HILOGI("start to send files, %{public}d", channelId);
+    if (!isValidChannelId(channelId) || sFiles.empty() || dFiles.empty()) {
+        HILOGE("invalid channel id. %{public}d or empty sfiles", channelId);
+        return INVALID_PARAMETERS_ERR;
+    }
+    if (sFiles.size() != dFiles.size() || sFiles.size() > MAX_FILE_COUNT) {
+        HILOGE("src size:%{public}d, dst size:%{public}d illegal",
+            static_cast<int32_t>(sFiles.size()),
+            static_cast<int32_t>(dFiles.size()));
+    }
+    int32_t ret = ERR_OK;
+    auto func = [channelId, sFiles, dFiles, this]() {
+        DoSendFile(channelId, sFiles, dFiles);
+    };
+    ret = PostTask(func, AppExecFwk::EventQueue::Priority::LOW);
+    if (ret != ERR_OK) {
+        HILOGE("failed to add send bytes task, ret=%{public}d", ret);
+        return ret;
+    }
+    HILOGI("send files task added to handler");
+    return ERR_OK;
+}
+
+int32_t ChannelManager::DoSendFile(const int32_t channelId, const std::vector<std::string>& sFiles,
+    const std::vector<std::string>& dFiles)
+{
+    HILOGI("start to do send files");
+    return DoSendData(channelId, &DataSenderReceiver::SendFileData, sFiles, dFiles);
+}
+
+void ChannelManager::OnBytesReceived(int32_t socketId,
     const void* data, const uint32_t dataLen)
 {
     int32_t channelId = 0;
     CHECK_SOCKET_ID(socketId);
     CHECK_CHANNEL_ID(socketId, channelId);
     CHECK_DATA_NULL(socketId, data, OnError);
-    HILOGD("receive data: %{public}d, len=%{public}d", socketId, dataLen);
+    HILOGI("receive data: %{public}d, len=%{public}d", socketId, dataLen);
     std::shared_ptr<AVTransDataBuffer> packedData = ProcessRecvData(channelId, socketId, data, dataLen);
     if (!packedData) {
         return;
@@ -1038,7 +1105,7 @@ void ChannelManager::DoBytesReceiveCallback(const int32_t channelId,
         AppExecFwk::EventQueue::Priority::LOW, buffer);
 }
 
-void ChannelManager::OnMessageReceived(const int32_t socketId, const void* data, const uint32_t dataLen)
+void ChannelManager::OnMessageReceived(int32_t socketId, const void* data, const uint32_t dataLen)
 {
     int32_t channelId = 0;
     CHECK_SOCKET_ID(socketId);
@@ -1063,7 +1130,7 @@ void ChannelManager::DoMessageReceiveCallback(const int32_t channelId,
         AppExecFwk::EventQueue::Priority::HIGH, buffer);
 }
 
-void ChannelManager::OnStreamReceived(const int32_t socketId, const StreamData* data,
+void ChannelManager::OnStreamReceived(int32_t socketId, const StreamData* data,
     const StreamData* ext, const StreamFrameInfo* param)
 {
     int32_t channelId = 0;
@@ -1093,6 +1160,170 @@ void ChannelManager::DoStreamReceiveCallback(const int32_t channelId, const std:
 {
     NotifyListeners(channelId, &IChannelListener::OnStream,
         AppExecFwk::EventQueue::Priority::LOW, data);
+}
+
+void ChannelManager::OnFileEventReceived(int32_t socketId, FileEvent *event)
+{
+    int32_t channelId = 0;
+    CHECK_SOCKET_ID(socketId);
+    // update recv path before onbind
+    if (event == nullptr) {
+        HILOGE("socket %{public}d event empty", socketId);
+        return;
+    }
+    if (event->type == FileEventType::FILE_EVENT_RECV_UPDATE_PATH) {
+        HILOGI("start to set update path func, %{public}d", socketId);
+        return DispatchProcessFileEvent(fileChannelId_.load(), event);
+    }
+    CHECK_CHANNEL_ID(socketId, channelId);
+    CHECK_DATA_NULL(socketId, event, OnError);
+    HILOGI("start to dispatch file event, %{public}d", channelId);
+    DispatchProcessFileEvent(channelId, event);
+}
+
+void ChannelManager::DispatchProcessFileEvent(int32_t channelId, FileEvent *event)
+{
+    HILOGI("start to dispatch file event");
+    switch (event->type) {
+        case FileEventType::FILE_EVENT_SEND_PROCESS:
+        case FileEventType::FILE_EVENT_SEND_FINISH: {
+            DealFileSendEvent(channelId, event);
+            break;
+        }
+        case FileEventType::FILE_EVENT_RECV_START:
+        case FileEventType::FILE_EVENT_RECV_PROCESS:
+        case FileEventType::FILE_EVENT_RECV_FINISH: {
+            DealFileRecvEvent(channelId, event);
+            break;
+        }
+        case FileEventType::FILE_EVENT_BUTT:
+        case FileEventType::FILE_EVENT_SEND_ERROR:
+        case FileEventType::FILE_EVENT_RECV_ERROR: {
+            DealFileErrorEvent(channelId, event);
+            break;
+        }
+        case FileEventType::FILE_EVENT_RECV_UPDATE_PATH: {
+            DealFileUpdatePathEvent(channelId, event);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void ChannelManager::DealFileSendEvent(int32_t channelId, FileEvent *event)
+{
+    HILOGI("start to deal file send event, %{public}d", channelId);
+    FileInfo info;
+    if (event->type == FileEventType::FILE_EVENT_SEND_PROCESS) {
+        info.commonInfo.eventType = ChannnelFileEvent::SEND_PROCESS;
+    } else {
+        info.commonInfo.eventType = ChannnelFileEvent::SEND_FINISH;
+    }
+    info.commonInfo.fileCnt = event->fileCnt;
+    for (uint32_t i = 0; i < event->fileCnt; ++i) {
+        info.commonInfo.fileList.push_back(std::string(event->files[i]));
+    }
+
+    FileSendInfo sendInfo;
+    sendInfo.bytesProcessed = event->bytesProcessed;
+    sendInfo.bytesTotal = event->bytesTotal;
+    if (event->type == FileEventType::FILE_EVENT_SEND_PROCESS) {
+        sendInfo.rate = event->rate;
+    }
+    info.sendInfo = sendInfo;
+    DoFileSendCallback(channelId, info);
+    HILOGI("end");
+}
+
+void ChannelManager::DealFileRecvEvent(int32_t channelId, FileEvent *event)
+{
+    HILOGI("start to deal file recv event, %{public}d", channelId);
+    FileInfo info;
+    if (event->type == FileEventType::FILE_EVENT_RECV_START) {
+        info.commonInfo.eventType = ChannnelFileEvent::RECV_START;
+    } else if (event->type == FileEventType::FILE_EVENT_RECV_PROCESS) {
+        info.commonInfo.eventType = ChannnelFileEvent::RECV_PROCESS;
+    } else {
+        info.commonInfo.eventType = ChannnelFileEvent::RECV_FINISH;
+    }
+    info.commonInfo.fileCnt = event->fileCnt;
+    for (uint32_t i = 0; i < event->fileCnt; ++i) {
+        info.commonInfo.fileList.push_back(std::string(event->files[i]));
+    }
+
+    FileRecvInfo recvInfo;
+    recvInfo.bytesProcessed = event->bytesProcessed;
+    recvInfo.bytesTotal = event->bytesTotal;
+    if (event->type == FileEventType::FILE_EVENT_RECV_PROCESS) {
+        recvInfo.rate = event->rate;
+    }
+    info.recvInfo = recvInfo;
+    DoFileRecvCallback(channelId, info);
+    HILOGI("end");
+}
+
+void ChannelManager::DealFileErrorEvent(int32_t channelId, FileEvent *event)
+{
+    HILOGI("start to deal file error event, %{public}d", channelId);
+    FileInfo info;
+    if (event->type == FileEventType::FILE_EVENT_SEND_ERROR) {
+        info.commonInfo.eventType = ChannnelFileEvent::SEND_ERROR;
+    } else {
+        info.commonInfo.eventType = ChannnelFileEvent::RECV_ERROR;
+    }
+    info.commonInfo.fileCnt = event->fileCnt;
+    for (uint32_t i = 0; i < event->fileCnt; ++i) {
+        info.commonInfo.fileList.push_back(std::string(event->files[i]));
+    }
+
+    FileErrorInfo errorInfo;
+    errorInfo.errorCode = event->errorCode;
+    info.errorInfo = errorInfo;
+    if (info.commonInfo.eventType == ChannnelFileEvent::RECV_ERROR) {
+        DoFileRecvCallback(channelId, info);
+    } else {
+        DoFileSendCallback(channelId, info);
+    }
+    HILOGI("end");
+}
+
+void ChannelManager::DealFileUpdatePathEvent(int32_t channelId, FileEvent *event)
+{
+    HILOGI("start to deal file error event, %{public}d", channelId);
+    event->UpdateRecvPath = GetRecvPath;
+    HILOGI("end");
+}
+
+const char* ChannelManager::GetRecvPathFromUser()
+{
+    HILOGI("get recv path from user");
+    int32_t channelId = fileChannelId_.load();
+    std::shared_lock<std::shared_mutex> readLock(listenerMutex_);
+    auto it = listenersMap_.find(channelId);
+    if (it == listenersMap_.end() || it->second.empty()) {
+        HILOGE("no matching listener to %{public}d", channelId);
+        return nullptr;
+    }
+    auto& listeners = it->second;
+    for (const auto& listener : listeners) {
+        if (auto ptr = listener.lock()) {
+            return ptr->GetRecvPath(channelId);
+        }
+    }
+    return nullptr;
+}
+
+void ChannelManager::DoFileRecvCallback(const int32_t channelId, const FileInfo& info)
+{
+    NotifyListeners(channelId, &IChannelListener::OnRecvFile,
+        AppExecFwk::EventQueue::Priority::HIGH, info);
+}
+
+void ChannelManager::DoFileSendCallback(const int32_t channelId, const FileInfo& info)
+{
+    NotifyListeners(channelId, &IChannelListener::OnSendFile,
+        AppExecFwk::EventQueue::Priority::HIGH, info);
 }
 }
 }

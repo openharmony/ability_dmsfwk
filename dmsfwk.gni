@@ -36,6 +36,7 @@ declare_args() {
   dmsfwk_continuous_task_enable = false
   dmsfwk_all_connect_decisions = false
   dmsfwk_hianalytics_service = false
+  dmsfwk_softbus_file_ability = false
   if (defined(global_parts_info)) {
     if (defined(global_parts_info.multimedia_image_framework)) {
       dmsfwk_mission_manager = true

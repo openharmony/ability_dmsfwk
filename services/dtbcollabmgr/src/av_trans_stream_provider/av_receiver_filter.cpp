@@ -90,6 +90,7 @@ AVReceiverFilter::AVReceiverFilter(std::string name, FilterType type)
 AVReceiverFilter::~AVReceiverFilter()
 {
     HILOGI("AVReceiverFilter destroy");
+    DoStop();
     if (eventHandler_ != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
         eventThread_.join();
@@ -380,7 +381,7 @@ std::shared_ptr<Media::PixelMap> AVReceiverFilter::GetPixelMap(const std::shared
     uint32_t err = ERR_OK;
     std::unique_ptr<Media::ImageSource> imageSource = Media::ImageSource::CreateImageSource(header,
         dataSize, sourceOption, err);
-    if (err != ERR_OK) {
+    if (err != ERR_OK || imageSource == nullptr) {
         HILOGE("create image source failed");
         return nullptr;
     }
@@ -392,7 +393,7 @@ std::shared_ptr<Media::PixelMap> AVReceiverFilter::GetPixelMap(const std::shared
         .height = decodePixelMapHeight,
     };
     std::unique_ptr<Media::PixelMap> pixelMap = imageSource->CreatePixelMap(decodeOptions, err);
-    if (err != ERR_OK) {
+    if (err != ERR_OK || pixelMap == nullptr) {
         HILOGE("decode pixelmap failed");
         return nullptr;
     }
