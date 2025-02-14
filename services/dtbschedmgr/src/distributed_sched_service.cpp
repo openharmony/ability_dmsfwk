@@ -3737,6 +3737,25 @@ int32_t DistributedSchedService::CheckTargetPermission4DiffBundle(const OHOS::AA
     return DMS_PERMISSION_DENIED;
 }
 
+int32_t DistributedSchedService::CheckCollabStartPermission(const OHOS::AAFwk::Want& want,
+    const CallerInfo& callerInfo, const AccountInfo& accountInfo, bool needQueryExtension)
+{
+    DistributedSchedPermission& permissionInstance = DistributedSchedPermission::GetInstance();
+    AppExecFwk::AbilityInfo targetAbility;
+    bool result = permissionInstance.GetTargetAbility(want, targetAbility, needQueryExtension);
+    if (!result) {
+        HILOGE("GetTargetAbility can not find the target ability");
+        return INVALID_PARAMETERS_ERR;
+    }
+    HILOGD("target ability info bundleName:%{public}s abilityName:%{public}s visible:%{public}d",
+        targetAbility.bundleName.c_str(), targetAbility.name.c_str(), targetAbility.visible);
+    HILOGD("callerType:%{public}d accountType:%{public}d callerUid:%{public}d AccessTokenID:%{public}s",
+        callerInfo.callerType, accountInfo.accountType, callerInfo.uid,
+        GetAnonymStr(std::to_string(callerInfo.accessToken)).c_str());
+    HILOGD("start CheckStartPermission");
+    return permissionInstance.CheckCollabStartPermission(want, callerInfo, accountInfo, targetAbility);
+}
+
 int32_t DistributedSchedService::StopRemoteExtensionAbility(const OHOS::AAFwk::Want& want, int32_t callerUid,
     uint32_t accessToken, int32_t extensionType)
 {

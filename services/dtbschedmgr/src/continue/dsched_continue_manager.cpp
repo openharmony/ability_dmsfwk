@@ -87,7 +87,6 @@ void DSchedContinueManager::UnInit()
 {
     HILOGI("UnInit start");
     DSchedTransportSoftbusAdapter::GetInstance().UnregisterListener(SERVICE_TYPE_CONTINUE, softbusListener_);
-    DSchedTransportSoftbusAdapter::GetInstance().ReleaseChannel();
     continues_.clear();
     cntSink_ = 0;
     cntSource_ = 0;

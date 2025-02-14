@@ -215,6 +215,8 @@ public:
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
     int32_t CheckTargetPermission4DiffBundle(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
+    int32_t CheckCollabStartPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
+        const AccountInfo& accountInfo, bool needQueryExtension);
     ErrCode QueryOsAccount(int32_t& activeAccountId);
     void RegisterDataShareObserver(const std::string& key);
     int32_t ContinueStateCallbackRegister(int32_t missionId, std::string bundleName, std::string moduleName,
