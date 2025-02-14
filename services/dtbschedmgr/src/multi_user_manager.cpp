@@ -96,6 +96,19 @@ void MultiUserManager::UnInit()
             }
         }
     }
+    {
+        std::lock_guard<std::mutex> lock(recomMutex_);
+        if (!recomMgrMap_.empty()) {
+            auto it = recomMgrMap_.begin();
+            while (it != recomMgrMap_.end()) {
+                if (it->second == nullptr) {
+                    recomMgrMap_.erase(it++);
+                    continue;
+                }
+                recomMgrMap_.erase(it++);
+            }
+        }
+    }
     HILOGI("UnInit end");
 }
 

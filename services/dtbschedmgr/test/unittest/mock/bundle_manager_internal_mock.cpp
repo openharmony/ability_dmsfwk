@@ -123,6 +123,15 @@ int32_t BundleManagerInternal::GetLocalBundleInfoV9(const std::string& bundleNam
     return IBundleManagerInternal::bundleMgrMock->GetLocalBundleInfoV9(bundleName, bundleInfo);
 }
 
+int32_t BundleManagerInternal::GetLocalAbilityInfo(const std::string& bundleName,
+    const std::string& moduleName, const std::string& abilityName, AppExecFwk::AbilityInfo &abilityInfo)
+{
+    if (IBundleManagerInternal::bundleMgrMock == nullptr) {
+        return ERR_OK;
+    }
+    return IBundleManagerInternal::bundleMgrMock->GetLocalAbilityInfo(bundleName, moduleName, abilityName, abilityInfo);
+}
+
 bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleName,
     std::vector<std::string> &bundleNameList)
 {

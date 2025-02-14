@@ -87,7 +87,7 @@ std::string ContinueRecommendInfo::ToString() const
         "State: " + std::to_string(state_) + ", " +
         "SrcBundleName: " + srcBundleName_ + ", "+
         "ContinueType: " + continueType_ + ", " +
-        "UserId: " + userId_ + ", " +
+        "UserId: " + std::to_string(userId_) + ", " +
         "Candidates: ";
     for (auto candidate: candidates_) {
         str += "\n{ DeviceId: " + GetAnonymStr(candidate.deviceId_) + ", " +

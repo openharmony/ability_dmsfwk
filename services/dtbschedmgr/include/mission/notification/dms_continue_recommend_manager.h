@@ -52,6 +52,8 @@ private:
     std::condition_variable eventCon_;
     std::mutex eventMutex_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
+    std::mutex hasInitMutex_;
+    bool hasInit_ = false;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS

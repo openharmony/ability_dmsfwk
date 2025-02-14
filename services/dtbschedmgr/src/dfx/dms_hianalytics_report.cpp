@@ -17,14 +17,13 @@
 
 #include <string>
 
-#ifdef SUPPORT_HIANALYTICS_SERVICE
 #include "dtbschedmgr_log.h"
+#ifdef SUPPORT_HIANALYTICS_SERVICE
 #include "ha_client_lite_api.h"
 #endif
 
 namespace OHOS {
 namespace DistributedSchedule {
-using namespace OHOS::HiviewDFX;
 namespace {
 #ifdef SUPPORT_HIANALYTICS_SERVICE
 const std::string TAG = "DmsHiAnalyticsReport";
@@ -44,10 +43,10 @@ int32_t DmsHiAnalyticsReport::PublishRecommendInfo(const ContinueRecommendInfo& 
     int32_t result = ERR_OK;
 #ifdef SUPPORT_HIANALYTICS_SERVICE
     std::unordered_map<std::string, std::string> properties;
-    properties.emplace(HA_KEY_STATE, std::to_string(info.state_));
+    properties.emplace(HA_KEY_STATUS, std::to_string(info.state_));
     properties.emplace(HA_KEY_SOURCE_BUNDLE_NAME, info.srcBundleName_);
     properties.emplace(HA_KEY_CONTINUE_TYPE, info.continueType_);
-    properties.emplace(HA_KEY_USER_ID, info.userId_);
+    properties.emplace(HA_KEY_USER_ID, std::to_string(info.userId_));
     properties.emplace(HA_KEY_CANDIDATES, info.MarshalCandidates());
 
     OHOS::HaCloud::HaResponseLite rsp = OHOS::HaCloud::HaClientLiteApi::OnEvent(

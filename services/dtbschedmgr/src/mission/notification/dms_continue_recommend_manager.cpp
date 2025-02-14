@@ -34,6 +34,14 @@ constexpr int32_t STATE_INACTIVE = 1;
 void DMSContinueRecomMgr::Init(int32_t currentAccountId)
 {
     HILOGI("Init start");
+    {
+        std::unique_lock<std::mutex> lock(hasInitMutex_);
+        if (hasInit_) {
+            HILOGW("Init DMSContinueRecomMgr has init");
+            return;
+        }
+        hasInit_ = true;
+    }
     if (eventHandler_ != nullptr) {
         HILOGI("Already inited, end.");
         return;
@@ -73,6 +81,14 @@ DMSContinueRecomMgr::~DMSContinueRecomMgr()
 void DMSContinueRecomMgr::UnInit()
 {
     HILOGI("UnInit start");
+    {
+        std::unique_lock<std::mutex> lock(hasInitMutex_);
+        if (hasInit_) {
+            HILOGW("Init DMSContinueRecomMgr has init");
+            return;
+        }
+        hasInit_ = true;
+    }
     CHECK_POINTER_RETURN(eventHandler_, "eventHandler_");
     if (eventHandler_->GetEventRunner() != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
@@ -86,9 +102,10 @@ void DMSContinueRecomMgr::UnInit()
 
 void DMSContinueRecomMgr::OnDeviceChanged()
 {
-    HILOGI("");
+    HILOGI("OnDeviceChanged called");
     int32_t missionId = GetCurrentMissionId();
     if (missionId <= 0) {
+        HILOGW("GetCurrentMissionId failed, ret %{public}d", missionId);
         return;
     }
     OnMissionStatusChanged(missionId, MISSION_EVENT_FOCUSED);
