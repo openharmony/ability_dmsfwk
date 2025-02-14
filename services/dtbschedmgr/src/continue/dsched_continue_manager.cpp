@@ -58,6 +58,7 @@ void DSchedContinueManager::Init()
         HILOGW("Init DSchedContinueManager has init");
         return;
     }
+    hasInit_.store(true);
     if (eventHandler_ != nullptr) {
         HILOGI("DSchedContinueManager already inited, end.");
         return;
