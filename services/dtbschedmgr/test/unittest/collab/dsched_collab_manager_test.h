@@ -21,6 +21,7 @@
 #include "device_manager.h"
 #include "dsched_collab_manager.h"
 #include "continue/mock_dtbschedmgr_device_info.h"
+#include "mock/multi_user_manager_mock.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -34,6 +35,7 @@ public:
     std::shared_ptr<DSchedCollab> CreateObject();
     sptr<IRemoteObject> GetDSchedService() const;
     static inline std::shared_ptr<MockDmsMgrDeviceInfoStore> dmsStoreMock = nullptr;
+    static inline std::shared_ptr<MultiUserManagerMock> multiUserMgrNock_ = nullptr;
 protected:
     class DeviceInitCallBack : public OHOS::DistributedHardware::DmInitCallback {
         void OnRemoteDied() override;
