@@ -1008,6 +1008,30 @@ void StopExtensionAbilityFromRemoteInnerFuzzTest(const uint8_t* data, size_t siz
     PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
     DistributedSchedService::GetInstance().StopExtensionAbilityFromRemoteInner(dataParcel, reply);
 }
+
+void StopAbilityFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    FuzzUtil::MockPermission();
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
+    std::string str(reinterpret_cast<const char*>(data), size);
+    std::vector<std::string> strVector = {str};
+    DistributedWant dstbWant;
+
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &dstbWant);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, StringVector, strVector);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
+    DistributedSchedService::GetInstance().StopAbilityFromRemoteInner(dataParcel, reply);
+}
 }
 }
 
@@ -1057,5 +1081,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DistributedSchedule::StopSyncMissionsFromRemoteInnerFuzzTest(data, size);
     OHOS::DistributedSchedule::StartShareFormFromRemoteInnerFuzzTest(data, size);
     OHOS::DistributedSchedule::StopExtensionAbilityFromRemoteInnerFuzzTest(data, size);
+    OHOS::DistributedSchedule::StopAbilityFromRemoteInnerFuzzTest(data, size);
     return 0;
 }
