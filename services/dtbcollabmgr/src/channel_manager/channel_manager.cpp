@@ -1216,9 +1216,9 @@ void ChannelManager::DealFileSendEvent(int32_t channelId, FileEvent *event)
     HILOGI("start to deal file send event, %{public}d", channelId);
     FileInfo info;
     if (event->type == FileEventType::FILE_EVENT_SEND_PROCESS) {
-        info.commonInfo.eventType = ChannnelFileEvent::SEND_PROCESS;
+        info.commonInfo.eventType = ChannelFileEvent::SEND_PROCESS;
     } else {
-        info.commonInfo.eventType = ChannnelFileEvent::SEND_FINISH;
+        info.commonInfo.eventType = ChannelFileEvent::SEND_FINISH;
     }
     info.commonInfo.fileCnt = event->fileCnt;
     for (uint32_t i = 0; i < event->fileCnt; ++i) {
@@ -1241,11 +1241,11 @@ void ChannelManager::DealFileRecvEvent(int32_t channelId, FileEvent *event)
     HILOGI("start to deal file recv event, %{public}d", channelId);
     FileInfo info;
     if (event->type == FileEventType::FILE_EVENT_RECV_START) {
-        info.commonInfo.eventType = ChannnelFileEvent::RECV_START;
+        info.commonInfo.eventType = ChannelFileEvent::RECV_START;
     } else if (event->type == FileEventType::FILE_EVENT_RECV_PROCESS) {
-        info.commonInfo.eventType = ChannnelFileEvent::RECV_PROCESS;
+        info.commonInfo.eventType = ChannelFileEvent::RECV_PROCESS;
     } else {
-        info.commonInfo.eventType = ChannnelFileEvent::RECV_FINISH;
+        info.commonInfo.eventType = ChannelFileEvent::RECV_FINISH;
     }
     info.commonInfo.fileCnt = event->fileCnt;
     for (uint32_t i = 0; i < event->fileCnt; ++i) {
@@ -1268,9 +1268,9 @@ void ChannelManager::DealFileErrorEvent(int32_t channelId, FileEvent *event)
     HILOGI("start to deal file error event, %{public}d", channelId);
     FileInfo info;
     if (event->type == FileEventType::FILE_EVENT_SEND_ERROR) {
-        info.commonInfo.eventType = ChannnelFileEvent::SEND_ERROR;
+        info.commonInfo.eventType = ChannelFileEvent::SEND_ERROR;
     } else {
-        info.commonInfo.eventType = ChannnelFileEvent::RECV_ERROR;
+        info.commonInfo.eventType = ChannelFileEvent::RECV_ERROR;
     }
     info.commonInfo.fileCnt = event->fileCnt;
     for (uint32_t i = 0; i < event->fileCnt; ++i) {
@@ -1280,7 +1280,7 @@ void ChannelManager::DealFileErrorEvent(int32_t channelId, FileEvent *event)
     FileErrorInfo errorInfo;
     errorInfo.errorCode = event->errorCode;
     info.errorInfo = errorInfo;
-    if (info.commonInfo.eventType == ChannnelFileEvent::RECV_ERROR) {
+    if (info.commonInfo.eventType == ChannelFileEvent::RECV_ERROR) {
         DoFileRecvCallback(channelId, info);
     } else {
         DoFileSendCallback(channelId, info);
