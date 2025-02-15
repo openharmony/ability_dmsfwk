@@ -20,6 +20,7 @@
 #include <string>
 
 #include "ability_connection_info.h"
+#include "ability_connection_session.h"
 #include "iremote_broker.h"
 
 namespace OHOS {
@@ -29,8 +30,8 @@ public:
     DistributedClient() = default;
     virtual ~DistributedClient() = default;
     
-    int32_t CollabMission(int32_t sessionId, const std::string& serverSocketName, const PeerInfo& localInfo,
-        const PeerInfo& peerInfo, const ConnectOption& options);
+    int32_t CollabMission(int32_t sessionId, const std::string& serverSocketName,
+        const AbilityConnectionSessionInfo& sessionInfo, const ConnectOption& options, const std::string& token);
     int32_t NotifyPrepareResult(const std::string& token, int32_t result, int32_t sessionId,
         const std::string& serverSocketName);
     int32_t NotifyCloseCollabSession(const std::string& token);

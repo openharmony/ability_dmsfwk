@@ -257,7 +257,7 @@ bool DSchedCollabManager::IsSessionExists(const DSchedCollabInfo &info)
 void DSchedCollabManager::HandleCollabMission(const DSchedCollabInfo &info)
 {
     HILOGI("called");
-    const std::string collabToken = GenerateCollabToken(info.srcInfo_.deviceId_);
+    const std::string collabToken = info.collabToken_;
     auto newCollab = std::make_shared<DSchedCollab>(collabToken, info);
     newCollab->Init();
     newCollab->UpdateState(SOURCE_START_STATE);

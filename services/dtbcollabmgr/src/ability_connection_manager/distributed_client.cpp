@@ -40,7 +40,7 @@ sptr<IRemoteObject> DistributedClient::GetDmsProxy()
 }
 
 int32_t DistributedClient::CollabMission(int32_t sessionId, const std::string& serverSocketName,
-    const PeerInfo& localInfo, const PeerInfo& peerInfo, const ConnectOption& option)
+    const AbilityConnectionSessionInfo& sessionInfo, const ConnectOption& options, const std::string& token)
 {
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
@@ -57,9 +57,10 @@ int32_t DistributedClient::CollabMission(int32_t sessionId, const std::string& s
     
     PARCEL_WRITE_HELPER(data, Int32, sessionId);
     PARCEL_WRITE_HELPER(data, String, serverSocketName);
-    PARCEL_WRITE_HELPER(data, Parcelable, &localInfo);
-    PARCEL_WRITE_HELPER(data, Parcelable, &peerInfo);
-    PARCEL_WRITE_HELPER(data, Parcelable, &option);
+    PARCEL_WRITE_HELPER(data, Parcelable, &sessionInfo.localInfo_);
+    PARCEL_WRITE_HELPER(data, Parcelable, &sessionInfo.peerInfo_);
+    PARCEL_WRITE_HELPER(data, Parcelable, &options);
+    PARCEL_WRITE_HELPER(data, String, token);
     PARCEL_WRITE_HELPER(data, RemoteObject, listener->AsObject());
     MessageParcel reply;
     PARCEL_TRANSACT_SYNC_RET_INT(remote, COLLAB_MESSION, data, reply);
