@@ -131,6 +131,32 @@
           },
           {
             "header": {
+              "header_base": "//foundation/ability/dmsfwk/services/dtbcollabmgr/include/ability_connection_manager",
+              "header_files": [
+                "ability_connection_info.h",
+                "ability_connection_manager.h",
+                "ability_connection_manager_interface.h",
+                "ability_connection_manager_listener.h",
+                "ability_connection_manager_stub.h",
+                "ability_connection_session.h",
+                "ability_connection_session_listener.h",
+                "distributed_client.h",
+                "message_data_header.h"
+              ]
+            },
+            "name": "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/ability_connection_manager:distributed_ability_connection_manager"
+          },
+          {
+            "header": {
+              "header_base": "//foundation/ability/dmsfwk/services/dtbcollabmgr/include/channel_manager",
+              "header_files": [
+                "av_trans_data_buffer.h"
+              ]
+            },
+            "name": "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager"
+          },
+          {
+            "header": {
               "header_base": "//foundation/ability/dmsfwk/interfaces/innerkits",
               "header_files": [
                 "./common/include/distributed_sched_types.h",
