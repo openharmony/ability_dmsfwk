@@ -683,7 +683,7 @@ int32_t DSchedCollab::ExeClientDisconnectNotify()
         HILOGE("write token failed");
         return SEND_REQUEST_DEF_FAIL;
     }
-    PARCEL_WRITE_HELPER(data, Int32, collabInfo_.sinkCollabSessionId_);
+    PARCEL_WRITE_HELPER(data, Int32, collabSessionId);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = clientCB->SendRequest(NOTIFY_COLLAB_DISCONNECT, data, reply, option);

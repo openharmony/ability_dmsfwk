@@ -14,15 +14,18 @@
  */
 #include "ability_connection_session.h"
 
+#include <chrono>
 #include <map>
+#include <unistd.h>
 #include <sys/prctl.h>
 #include <sstream>
 #include <iomanip>
-
+ 
+#include "ability_connection_manager.h"
 #include "dtbcollabmgr_log.h"
 #include "distributed_client.h"
-#include "openssl/sha.h"
 #include "message_data_header.h"
+#include "openssl/sha.h"
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -49,13 +52,12 @@ constexpr int32_t HEX_WIDTH = 2;
 constexpr char FILL_CHAR = '0';
 }
 
-AbilityConnectionSession::AbilityConnectionSession(int32_t sessionId, std::string serverSocketName, PeerInfo localInfo,
-    PeerInfo peerInfo, ConnectOption opt)
+AbilityConnectionSession::AbilityConnectionSession(int32_t sessionId, std::string serverSocketName,
+    AbilityConnectionSessionInfo sessionInfo, ConnectOption opt)
 {
     sessionId_ = sessionId;
     localSocketName_ = serverSocketName;
-    localInfo_ = localInfo;
-    peerInfo_ = peerInfo;
+    sessionInfo_ = sessionInfo;
     connectOption_ = opt;
     version_ = DSCHED_COLLAB_PROTOCOL_VERSION;
 }
@@ -118,6 +120,7 @@ void AbilityConnectionSession::Release()
         }
         sessionStatus_ = SessionStatus::UNCONNECTED;
     }
+    AbilityConnectionManager::GetInstance().DeleteConnectSession(sessionInfo_, sessionId_);
     DestroyStream();
     
     std::unique_lock<std::shared_mutex> channelLock(transChannelMutex_);
@@ -129,17 +132,32 @@ void AbilityConnectionSession::Release()
 
 PeerInfo AbilityConnectionSession::GetPeerInfo()
 {
-    return peerInfo_;
+    return sessionInfo_.peerInfo_;
 }
-
+ 
 PeerInfo AbilityConnectionSession::GetLocalInfo()
 {
-    return localInfo_;
+    return sessionInfo_.localInfo_;
+}
+ 
+std::string AbilityConnectionSession::GetServerToken()
+{
+    return dmsServerToken_;
 }
 
 int32_t AbilityConnectionSession::Connect(ConnectCallback& callback)
 {
-    HILOGD("called.");
+    HILOGI("called.");
+    direction_ = CollabrateDirection::COLLABRATE_SOURCE;
+    dmsServerToken_ = CreateDmsServerToken();
+    int32_t ret = AbilityConnectionManager::GetInstance().UpdateClientSession(sessionInfo_, sessionId_);
+    if (ret != ERR_OK) {
+        ConnectResult connectResult;
+        connectResult.isConnected = false;
+        ExeuteConnectCallback(connectResult);
+        return ret;
+    }
+
     {
         std::unique_lock<std::shared_mutex> sessionStatusWriteLock(sessionMutex_);
         if (sessionStatus_ != SessionStatus::UNCONNECTED) {
@@ -149,10 +167,9 @@ int32_t AbilityConnectionSession::Connect(ConnectCallback& callback)
         sessionStatus_ = SessionStatus::CONNECTING;
         connectCallback_ = callback;
     }
-    direction_ = CollabrateDirection::COLLABRATE_SOURCE;
     
     DistributedClient dmsClient;
-    int32_t ret = dmsClient.CollabMission(sessionId_, localSocketName_, localInfo_, peerInfo_, connectOption_);
+    ret = dmsClient.CollabMission(sessionId_, localSocketName_, sessionInfo_, connectOption_, dmsServerToken_);
     if (ret != ERR_OK) {
         HILOGE("collab mission start failed.");
         ConnectResult connectResult;
@@ -160,6 +177,24 @@ int32_t AbilityConnectionSession::Connect(ConnectCallback& callback)
         ExeuteConnectCallback(connectResult);
     }
     return ret;
+}
+
+std::string AbilityConnectionSession::CreateDmsServerToken()
+{
+    auto pid = getprocpid();
+    auto now = std::chrono::system_clock::now();
+    auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    std::string input = std::to_string(pid) + std::to_string(sessionId_) + std::to_string(timestamp);
+ 
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256((const unsigned char*)input.c_str(), input.length(), hash);
+ 
+    std::stringstream hashStr;
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
+        hashStr << std::hex << std::setw(HEX_WIDTH) << std::setfill(FILL_CHAR) << (int)hash[i];
+    }
+ 
+    return hashStr.str().substr(0, CHANNEL_NAME_LENGTH);
 }
 
 int32_t AbilityConnectionSession::Disconnect()
@@ -174,7 +209,15 @@ int32_t AbilityConnectionSession::Disconnect()
 
 int32_t AbilityConnectionSession::AcceptConnect(const std::string& token)
 {
-    HILOGD("called.");
+    HILOGI("called.");
+    DistributedClient dmsClient;
+    dmsServerToken_ = token;
+    int32_t ret = AbilityConnectionManager::GetInstance().UpdateServerSession(sessionInfo_, sessionId_);
+    if (ret != ERR_OK) {
+        dmsClient.NotifyPrepareResult(token, ret, sessionId_, localSocketName_);
+        return INVALID_PARAMETERS_ERR;
+    }
+
     {
         std::unique_lock<std::shared_mutex> sessionStatusWriteLock(sessionMutex_);
         if (sessionStatus_ != SessionStatus::UNCONNECTED) {
@@ -184,11 +227,8 @@ int32_t AbilityConnectionSession::AcceptConnect(const std::string& token)
         sessionStatus_ = SessionStatus::CONNECTING;
     }
 
-    dmsServerToken_ = token;
     direction_ = CollabrateDirection::COLLABRATE_SINK;
-
-    DistributedClient dmsClient;
-    int32_t ret = InitChannels();
+    ret = InitChannels();
     if (ret != ERR_OK) {
         HILOGE("init sink client failed!");
         dmsClient.NotifyPrepareResult(token, ret, sessionId_, localSocketName_);
@@ -396,7 +436,7 @@ int32_t AbilityConnectionSession::InitSenderEngine()
         return ONLY_SUPPORT_ONE_STREAM;
     }
     senderEngine_ = std::make_shared<AVSenderEngine>(DEFAULT_APP_UID, DEFAULT_APP_PID,
-        localInfo_.bundleName, DEFAULT_INSTANCE_ID);
+        sessionInfo_.localInfo_.bundleName, DEFAULT_INSTANCE_ID);
     senderEngine_->Init();
     return ERR_OK;
 }
@@ -714,12 +754,9 @@ int32_t AbilityConnectionSession::ExeuteEventCallback(const std::string& eventTy
 int32_t AbilityConnectionSession::InitChannels()
 {
     HILOGD("called.");
-    bool isClientChannel = direction_ == CollabrateDirection::COLLABRATE_SOURCE;
-    channelName_ = isClientChannel ?
-        GetChannelName(localInfo_.moduleName, localInfo_.abilityName, peerInfo_.moduleName, peerInfo_.abilityName) :
-        GetChannelName(peerInfo_.moduleName, peerInfo_.abilityName, localInfo_.moduleName, localInfo_.abilityName);
-
+    channelName_ = GetChannelName(sessionInfo_);
     channelListener_ = std::make_shared<CollabChannelListener>(shared_from_this());
+    bool isClientChannel = direction_ == CollabrateDirection::COLLABRATE_SOURCE;
     int32_t ret = CreateChannel(channelName_, ChannelDataType::MESSAGE, TransChannelType::MESSAGE, isClientChannel);
     if (ret != ERR_OK) {
         HILOGE("create message channel failed!");
@@ -774,7 +811,7 @@ int32_t AbilityConnectionSession::CreateChannel(const std::string& channelName, 
     const TransChannelType& channelType, bool isClientChannel)
 {
     HILOGD("called.");
-    ChannelPeerInfo channelPeerInfo = { peerSocketName_, peerInfo_.deviceId };
+    ChannelPeerInfo channelPeerInfo = { peerSocketName_, sessionInfo_.peerInfo_.deviceId };
     ChannelManager &channelManager = ChannelManager::GetInstance();
     int32_t channelId = isClientChannel ?
         channelManager.CreateClientChannel(channelName, dataType, channelPeerInfo) :
@@ -795,10 +832,14 @@ int32_t AbilityConnectionSession::CreateChannel(const std::string& channelName, 
     return ERR_OK;
 }
 
-std::string AbilityConnectionSession::GetChannelName(const std::string& sourceModule, const std::string& sourceAbility,
-    const std::string& sinkModule, const std::string& sinkAbility)
+std::string AbilityConnectionSession::GetChannelName(const AbilityConnectionSessionInfo& sessionInfo)
 {
-    std::string input = sourceModule + sourceAbility + sinkModule + sinkAbility;
+    PeerInfo localInfo = sessionInfo.localInfo_;
+    PeerInfo peerInfo = sessionInfo.peerInfo_;
+    bool isClientChannel = direction_ == CollabrateDirection::COLLABRATE_SOURCE;
+    std::string input = isClientChannel ?
+        localInfo.moduleName + localInfo.abilityName + peerInfo.moduleName + peerInfo.abilityName :
+        peerInfo.moduleName + peerInfo.abilityName + localInfo.moduleName + localInfo.abilityName;
 
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256((const unsigned char*)input.c_str(), input.length(), hash);

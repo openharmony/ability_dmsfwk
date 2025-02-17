@@ -229,6 +229,8 @@ enum {
     CONNECT_STREAM_CHANNEL_FAILED,
 
     CONNECT_SEND_FILE_CHANNEL_FAILED,
+
+    SAME_SESSION_IS_CONNECTING,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
