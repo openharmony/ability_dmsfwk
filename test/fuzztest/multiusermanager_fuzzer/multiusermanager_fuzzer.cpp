@@ -33,7 +33,6 @@ void FuzzMultiUserManager(const uint8_t* data, size_t size)
     MultiUserManager::GetInstance().OnUserSwitched(accountId);
     MultiUserManager::GetInstance().UserSwitchedOnRegisterListenerCache();
     MultiUserManager::GetInstance().OnUserRemoved(accountId);
-    MultiUserManager::GetInstance().GetOsAccountType(accountId);
     MultiUserManager::GetInstance().CreateNewSendMgrLocked();
     MultiUserManager::GetInstance().CreateNewRecvMgrLocked();
     MultiUserManager::GetInstance().GetSendMgrByCallingUid(accountId);
