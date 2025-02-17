@@ -43,6 +43,7 @@
           "ability_runtime",
           "access_token",
           "av_codec",
+          "bluetooth",
           "bundle_framework",
           "cJSON",
           "c_utils",
@@ -77,6 +78,7 @@
           "resource_schedule_service",
           "safwk",
           "samgr",
+          "screenlock_mgr",
           "window_manager",
           "wifi"
         ],
