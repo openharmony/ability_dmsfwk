@@ -35,7 +35,7 @@ ohos_shared_library("distributed_ability_connection_manager") {
   }
 
   install_enable = true
-  
+
   public_configs = [ ":distributed_collab_config" ]
 
   sources = [
