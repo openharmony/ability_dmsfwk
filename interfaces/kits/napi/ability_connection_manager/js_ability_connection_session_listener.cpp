@@ -49,19 +49,20 @@ void JsAbilityConnectionSessionListener::CallJsMethod(const EventCallbackInfo& c
         return;
     }
     auto task = [this, callbackInfo]() {
-        std::mutex napi_mutex;
-        std::lock_guard<std::mutex> lock(napi_mutex);
+        HILOGI("called.");
         napi_handle_scope scope = nullptr;
-        napi_status result = napi_open_handle_scope(this->env_, &scope);
+        auto env = this->env_;
+        napi_status result = napi_open_handle_scope(env, &scope);
         if (result != napi_ok || scope == nullptr) {
             HILOGE("open handle scope failed!");
             return;
         }
         CallJsMethodInner(callbackInfo);
-        result = napi_close_handle_scope(this->env_, scope);
+        result = napi_close_handle_scope(env, scope);
         if (result != napi_ok) {
             HILOGE("close handle scope failed!");
         }
+        HILOGI("end.");
     };
     if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_high)) {
         HILOGE("send event failed!");
@@ -70,6 +71,7 @@ void JsAbilityConnectionSessionListener::CallJsMethod(const EventCallbackInfo& c
 
 void JsAbilityConnectionSessionListener::CallJsMethodInner(const EventCallbackInfo& callbackInfo)
 {
+    HILOGI("called.");
     if (callbackRef_ == nullptr) {
         HILOGE("callbackRef_ is nullptr");
         return;
@@ -82,6 +84,7 @@ void JsAbilityConnectionSessionListener::CallJsMethodInner(const EventCallbackIn
     }
     napi_value argv[] = { WrapEventCallbackInfo(env_, callbackInfo) };
     napi_call_function(env_, CreateJsUndefined(env_), method, ArraySize(argv), argv, nullptr);
+    HILOGI("end.");
 }
 
 napi_value JsAbilityConnectionSessionListener::WrapEventCallbackInfo(napi_env& env,
