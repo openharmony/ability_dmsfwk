@@ -633,6 +633,7 @@ ohos_unittest("distributedwanttest") {
     debug = false
   }
   module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
 
   sources = [
     "unittest/distributedWant/distributed_operation_test.cpp",

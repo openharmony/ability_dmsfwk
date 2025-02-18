@@ -40,7 +40,6 @@ void DmsContinueConditionMgrTest::SetUp()
 
 void DmsContinueConditionMgrTest::TearDown()
 {
-    
 }
 
 /**

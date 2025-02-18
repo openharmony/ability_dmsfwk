@@ -23,14 +23,10 @@
 #include "long_wrapper.h"
 #include "array_wrapper.h"
 
-#define private public
-#define protected public
 #include "distributed_operation.h"
 #include "distributed_want_v2.h"
 #include "want.h"
 #include "want_params.h"
-#undef private
-#undef protected
 
 using namespace testing::ext;
 using namespace OHOS::AAFwk;
@@ -162,7 +158,7 @@ HWTEST_F(DistributedWantV2SupTest, DistributedSchedule_DistributedWantV2_ReadFro
     ASSERT_NE(dwant, nullptr);
     nlohmann::json wantJson;
     EXPECT_FALSE(dwant->ReadFromJson(wantJson));
-    
+
     wantJson["deviceId"] = "deviceId";
     wantJson["bundleName"] = "bundleName";
     wantJson["abilityName"] = "abilityName";
@@ -174,7 +170,7 @@ HWTEST_F(DistributedWantV2SupTest, DistributedSchedule_DistributedWantV2_ReadFro
     nlohmann::json testJson;
     wantJson["entities"] = testJson;
     EXPECT_TRUE(dwant->ReadFromJson(wantJson));
-    
+
     wantJson["entities"].emplace_back("test");
     EXPECT_TRUE(dwant->ReadFromJson(wantJson));
 }
@@ -191,15 +187,15 @@ HWTEST_F(DistributedWantV2SupTest, DistributedSchedule_DistributedWantV2_FromStr
     ASSERT_NE(dwant, nullptr);
     std::string test;
     EXPECT_EQ(dwant->FromString(test), nullptr);
-    
+
     test = "test";
     EXPECT_EQ(dwant->FromString(test), nullptr);
-    
+
     nlohmann::json wantJson;
     wantJson["test"] = "test";
     test = wantJson.dump();
     EXPECT_EQ(dwant->FromString(test), nullptr);
-    
+
     wantJson.clear();
     wantJson["deviceId"] = "deviceId";
     wantJson["bundleName"] = "bundleName";
