@@ -186,8 +186,8 @@ int32_t DSchedTransportSoftbusAdapter::DecisionByAllConnect(const std::string &p
 bool DSchedTransportSoftbusAdapter::IsNeedAllConnect(DSchedServiceType type)
 {
 #ifndef COLLAB_ALL_CONNECT_DECISIONS
-    if (type == SERVICE_TYPE_COLLAB) {
-        HILOGI("called, don't need all connect, type: collab");
+    if (type == SERVICE_TYPE_COLLAB || type == SERVICE_TYPE_INVALID) {
+        HILOGI("called, don't need all connect, type: collab or invalid.");
         return false;
     }
 #endif
@@ -334,7 +334,7 @@ bool DSchedTransportSoftbusAdapter::GetSessionIdByDeviceId(const std::string &pe
 
 void DSchedTransportSoftbusAdapter::OnBind(int32_t sessionId, const std::string &peerDeviceId)
 {
-    int32_t ret = CreateSessionRecord(sessionId, peerDeviceId, true, SERVICE_TYPE_CONTINUE);
+    int32_t ret = CreateSessionRecord(sessionId, peerDeviceId, true, SERVICE_TYPE_INVALID);
     if (ret != ERR_OK) {
         HILOGE("Service create session record fail, ret %{public}d, peerDeviceId %{public}s, sessionId %{public}d.",
             ret, GetAnonymStr(peerDeviceId).c_str(), sessionId);
