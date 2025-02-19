@@ -181,7 +181,7 @@ ChannelManager::~ChannelManager()
 int32_t ChannelManager::Init(const std::string& ownerName)
 {
     HILOGI("start init channel manager");
-    if (eventHandler_ != nullptr) {
+    if (eventHandler_ != nullptr && callbackEventHandler_ != nullptr) {
         HILOGW("server channel already init");
         return ERR_OK;
     }
@@ -191,6 +191,12 @@ int32_t ChannelManager::Init(const std::string& ownerName)
     std::unique_lock<std::mutex> lock(eventMutex_);
     eventCon_.wait(lock, [this] {
         return eventHandler_ != nullptr;
+    });
+
+    callbackEventThread_ = std::thread(&ChannelManager::StartCallbackEvent, this);
+    std::unique_lock<std::mutex> callbackLock(callbackEventMutex_);
+    callbackEventCon_.wait(callbackLock, [this] {
+        return callbackEventHandler_ != nullptr;
     });
 
     if (serverSocketId_ > 0) {
@@ -229,6 +235,21 @@ void ChannelManager::StartEvent()
     HILOGI("StartEvent end");
 }
 
+void ChannelManager::StartCallbackEvent()
+{
+    HILOGI("Start callback event start");
+    std::string callbackName = ownerName_ + "callback";
+    prctl(PR_SET_NAME, callbackName.c_str());
+    auto runner = AppExecFwk::EventRunner::Create(false);
+    {
+        std::lock_guard<std::mutex> lock(callbackEventMutex_);
+        callbackEventHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
+    }
+    callbackEventCon_.notify_one();
+    runner->Run();
+    HILOGI("callback event end");
+}
+
 int32_t ChannelManager::PostTask(const AppExecFwk::InnerEvent::Callback& callback,
     const AppExecFwk::EventQueue::Priority priority)
 {
@@ -240,6 +261,20 @@ int32_t ChannelManager::PostTask(const AppExecFwk::InnerEvent::Callback& callbac
         return ERR_OK;
     }
     HILOGE("add task failed");
+    return POST_TASK_FAILED;
+}
+
+int32_t ChannelManager::PostCallbackTask(const AppExecFwk::InnerEvent::Callback& callback,
+    const AppExecFwk::EventQueue::Priority priority)
+{
+    if (callbackEventHandler_ == nullptr) {
+        HILOGE("callback event handler empty");
+        return NULL_EVENT_HANDLER;
+    }
+    if (callbackEventHandler_->PostTask(callback, priority)) {
+        return ERR_OK;
+    }
+    HILOGE("add callback task failed");
     return POST_TASK_FAILED;
 }
 
@@ -822,7 +857,7 @@ void ChannelManager::NotifyListeners(const int32_t channelId, Func listenerFunc,
             auto func = [ptr, listenerFunc, channelId, args...]() {
                 (ptr.get()->*listenerFunc)(channelId, std::forward<Args>(args)...);
             };
-            PostTask(func, priority);
+            PostCallbackTask(func, priority);
         }
     }
 }
