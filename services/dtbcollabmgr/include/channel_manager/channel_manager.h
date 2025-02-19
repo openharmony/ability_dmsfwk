@@ -114,6 +114,11 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     std::condition_variable eventCon_;
 
+    std::mutex callbackEventMutex_;
+    std::thread callbackEventThread_;
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> callbackEventHandler_;
+    std::condition_variable callbackEventCon_;
+
 private:
     explicit ChannelManager() = default;
     ~ChannelManager();
@@ -121,7 +126,10 @@ private:
     void Reset();
     int32_t PostTask(const AppExecFwk::InnerEvent::Callback& callback,
         const AppExecFwk::EventQueue::Priority priority);
+    int32_t PostCallbackTask(const AppExecFwk::InnerEvent::Callback& callback,
+            const AppExecFwk::EventQueue::Priority priority);
     void StartEvent();
+    void StartCallbackEvent();
 
     int32_t CreateServerSocket();
     int32_t CreateClientSocket(const std::string& channelName,
