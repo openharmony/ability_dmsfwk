@@ -553,11 +553,11 @@ int32_t DmsContinueConditionMgr::GetMissionIdByBundleName(
 
     missionId = GetCurrentFocusedMission(accountId);
     MissionStatus missionStatus = missionMap_[accountId][missionId];
-    if(missionStatus.bundleName == bundleName && missionStatus.isContinuable) {
+    if (missionStatus.bundleName == bundleName && missionStatus.isContinuable) {
         return ERR_OK;
     }
 
-    if(lastFocusMission_.second.bundleName == bundleName && lastFocusMission_.second.isContinuable){
+    if (lastFocusMission_.second.bundleName == bundleName && lastFocusMission_.second.isContinuable) {
         missionId = lastFocusMission_.second.missionId;
         return ERR_OK;
     }
