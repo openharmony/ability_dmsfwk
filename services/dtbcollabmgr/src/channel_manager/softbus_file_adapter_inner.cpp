@@ -73,9 +73,12 @@ int32_t SoftbusFileAdpater::Open(const char* filename, int32_t flag, int32_t mod
     }
     // stack, no need delete
     char realPath[PATH_MAX] = {0};
-    if (realpath(filename, realPath) == nullptr && errno != ENOENT) {
-        HILOGE("get real path failed, %{public}s, err=%{public}d", filename, errno);
-        return -INVALID_FILE_NAME;
+    if (realpath(filename, realPath) == nullptr) {
+        if (errno != ENOENT) {
+            HILOGE("get real path failed, %{public}s, err=%{public}d", filename, errno);
+            return -INVALID_FILE_NAME;
+        }
+        return open(filename, flag, mode);
     }
     return open(realPath, flag, mode);
 }
