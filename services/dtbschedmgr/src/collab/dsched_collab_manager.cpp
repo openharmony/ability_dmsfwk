@@ -193,6 +193,10 @@ void DSchedCollabManager::StartEvent()
 void DSchedCollabManager::UnInit()
 {
     HILOGI("UnInit start");
+    if (!hasInit_.load()) {
+        HILOGW("Init DSchedCollabManager has init");
+        return;
+    }
     hasInit_.store(false);
     DSchedTransportSoftbusAdapter::GetInstance().UnregisterListener(SERVICE_TYPE_COLLAB, softbusListener_);
     DSchedTransportSoftbusAdapter::GetInstance().ReleaseChannel();
