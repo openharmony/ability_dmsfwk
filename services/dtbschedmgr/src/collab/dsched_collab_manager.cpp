@@ -229,7 +229,9 @@ int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
         HILOGE("get local deviceId failed!");
         return FIND_LOCAL_DEVICEID_ERR;
     }
-    if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(info.sinkInfo_.deviceId_) == nullptr) {
+    if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(info.sinkInfo_.deviceId_) == nullptr &&
+        !DtbschedmgrDeviceInfoStorage::GetInstance().CheckNetworkIdByBundleName(info.sinkInfo_.bundleName_,
+        info.sinkInfo_.deviceId_)) {
         HILOGE("failed to find sinkDeviceId.");
         return FIND_REMOTE_DEVICEID_ERR;
     }
@@ -663,7 +665,9 @@ void DSchedCollabManager::NotifyDataRecv(const int32_t &softbusSessionId, int32_
             return;
         }
         if (startCmd->sinkDeviceId_ != localDevId ||
-            DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(startCmd->srcDeviceId_) == nullptr) {
+            (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(startCmd->srcDeviceId_) == nullptr &&
+            !DtbschedmgrDeviceInfoStorage::GetInstance().CheckNetworkIdByBundleName(startCmd->srcBundleName_,
+            startCmd->srcDeviceId_))) {
             HILOGE("Irrecognized deviceId! sinkDeviceId: %{public}s, srcDeviceId: %{public}s",
                 startCmd->sinkDeviceId_.c_str(), startCmd->srcDeviceId_.c_str());
             return;
