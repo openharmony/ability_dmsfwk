@@ -54,11 +54,15 @@ DSchedContinueManager::~DSchedContinueManager()
 void DSchedContinueManager::Init()
 {
     HILOGI("Init DSchedContinueManager start");
-    if (hasInit_.load()) {
-        HILOGW("Init DSchedContinueManager has init");
-        return;
+    {
+        std::unique_lock<std::mutex> lock(hasInitMutex_);
+        if (hasInit_.load()) {
+            HILOGW("Init DSchedContinueManager has init");
+            return;
+        }
+        hasInit_.store(true);
     }
-    hasInit_.store(true);
+
     if (eventHandler_ != nullptr) {
         HILOGI("DSchedContinueManager already inited, end.");
         return;
@@ -91,11 +95,15 @@ void DSchedContinueManager::StartEvent()
 void DSchedContinueManager::UnInit()
 {
     HILOGI("UnInit start");
-    if (!hasInit_.load()) {
-        HILOGW("Init DSchedContinueManager has uninit");
-        return;
+    {
+        std::unique_lock<std::mutex> lock(hasInitMutex_);
+        if (!hasInit_.load()) {
+            HILOGW("Init DSchedContinueManager has uninit");
+            return;
+        }
+        hasInit_.store(false);
     }
-    hasInit_.store(false);
+
     DSchedTransportSoftbusAdapter::GetInstance().UnregisterListener(SERVICE_TYPE_CONTINUE, softbusListener_);
     continues_.clear();
     cntSink_ = 0;
