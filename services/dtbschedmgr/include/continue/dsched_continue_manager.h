@@ -120,7 +120,7 @@ private:
     std::atomic<int32_t> cntSink_ {0};
     std::atomic<int32_t> cntSource_ {0};
     std::mutex hasInitMutex_;
-    std::atomic<bool> hasInit_ = false;
+    bool hasInit_ = false;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS
