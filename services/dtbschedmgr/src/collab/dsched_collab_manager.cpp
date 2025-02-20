@@ -74,11 +74,6 @@ IFeatureAbilityRelationChecker iAbilityRelationChecker = {
 void DSchedCollabManager::Init()
 {
     HILOGI("Init DSchedCollabManager start");
-    if (hasInit_.load()) {
-        HILOGW("Init DSchedCollabManager has init");
-        return;
-    }
-    hasInit_.store(true);
     if (eventHandler_ != nullptr) {
         HILOGI("DSchedCollabManager already inited, end.");
         return;
@@ -193,7 +188,6 @@ void DSchedCollabManager::StartEvent()
 void DSchedCollabManager::UnInit()
 {
     HILOGI("UnInit start");
-    hasInit_.store(false);
     DSchedTransportSoftbusAdapter::GetInstance().UnregisterListener(SERVICE_TYPE_COLLAB, softbusListener_);
     DSchedTransportSoftbusAdapter::GetInstance().ReleaseChannel();
     collabs_.clear();
