@@ -212,5 +212,76 @@ HWTEST_F(DistributedWantV2SupTest, DistributedSchedule_DistributedWantV2_FromStr
     test = wantJson.dump();
     EXPECT_NE(dwant->FromString(test), nullptr);
 }
+
+/**
+ * @tc.number: GetLowerCaseScheme_test_001
+ * @tc.name: GetLowerCaseScheme
+ * @tc.desc: Test GetLowerCaseScheme.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantV2SupTest, GetLowerCaseScheme_test_001, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_001 start";
+    std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
+    ASSERT_NE(dwant, nullptr);
+    std::string strUri = "";
+    Uri uri(strUri);
+    Want want;
+    auto rlt = dwant->GetLowerCaseScheme(uri);
+    EXPECT_EQ(rlt, uri);
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_001 end";
+}
+
+/**
+ * @tc.number: GetLowerCaseScheme_test_002
+ * @tc.name: GetLowerCaseScheme
+ * @tc.desc: Test GetLowerCaseScheme.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantV2SupTest, GetLowerCaseScheme_test_002, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_002 start";
+    std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
+    ASSERT_NE(dwant, nullptr);
+    std::string strUri = "?Test;action;end";
+    Uri uri(strUri);
+    Want want;
+    auto rlt = dwant->GetLowerCaseScheme(uri);
+    EXPECT_EQ(rlt, uri);
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_002 end";
+}
+
+/**
+ * @tc.number: GetLowerCaseScheme_test_004
+ * @tc.name: GetLowerCaseScheme
+ * @tc.desc: Test GetLowerCaseScheme.
+ */
+HWTEST_F(DistributedWantV2SupTest, GetLowerCaseScheme_test_004, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_004 start";
+    std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
+    ASSERT_NE(dwant, nullptr);
+    Uri lowerCaseUri("http://TEST.COM");
+    Uri result = dwant->GetLowerCaseScheme(lowerCaseUri);
+    EXPECT_EQ(result, lowerCaseUri);
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_004 end";
+}
+
+/**
+ * @tc.number: GetLowerCaseScheme_test_005
+ * @tc.name: GetLowerCaseScheme
+ * @tc.desc: Test GetLowerCaseScheme.
+ */
+HWTEST_F(DistributedWantV2SupTest, GetLowerCaseScheme_test_005, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_005 start";
+    std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
+    ASSERT_NE(dwant, nullptr);
+    Uri uri("HTTP://TEST.COM?Test");
+    Uri lowerCaseUri("http://TEST.COM?Test");
+    Uri result = dwant->GetLowerCaseScheme(uri);
+    EXPECT_EQ(result, lowerCaseUri);
+    GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_005 end";
+}
 }
 }
