@@ -92,7 +92,7 @@ void DSchedContinueManager::UnInit()
 {
     HILOGI("UnInit start");
     if (!hasInit_.load()) {
-        HILOGW("Init DSchedContinueManager has init");
+        HILOGW("Init DSchedContinueManager has uninit");
         return;
     }
     hasInit_.store(false);
