@@ -316,6 +316,8 @@ int32_t DmsContinueConditionMgr::OnMissionUnfocused(int32_t accountId, int32_t m
         return CONDITION_INVALID_MISSION_ID;
     }
     missionMap_[accountId][missionId].isFocused = false;
+    lastFocusMission_.first = accountId;
+    lastFocusMission_.second = missionMap_[accountId][missionId];
     HILOGI("missionMap update finished! status: %{public}s", missionMap_[accountId][missionId].ToString().c_str());
     return ERR_OK;
 }
@@ -549,11 +551,15 @@ int32_t DmsContinueConditionMgr::GetMissionIdByBundleName(
         return MISSION_NOT_FOCUSED;
     }
 
-    for (const auto& record : missionMap_[accountId]) {
-        if (record.second.bundleName == bundleName) {
-            missionId = record.first;
-            return ERR_OK;
-        }
+    missionId = GetCurrentFocusedMission(accountId);
+    MissionStatus missionStatus = missionMap_[accountId][missionId];
+    if(missionStatus.bundleName == bundleName && missionStatus.isContinuable) {
+        return ERR_OK;
+    }
+
+    if(lastFocusMission_.second.bundleName == bundleName && lastFocusMission_.second.isContinuable){
+        missionId = lastFocusMission_.second.missionId;
+        return ERR_OK;
     }
     return MISSION_NOT_FOCUSED;
 }
