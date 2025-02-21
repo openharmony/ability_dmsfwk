@@ -81,10 +81,37 @@ struct TransChannelInfo {
     bool isConnected;
 };
 
+struct AbilityConnectionSessionInfo {
+    std::string serverId_;
+    PeerInfo localInfo_;
+    PeerInfo peerInfo_;
+ 
+    AbilityConnectionSessionInfo() = default;
+    AbilityConnectionSessionInfo(const std::string& serverId, const PeerInfo& localInfo,
+        const PeerInfo& peerInfo) : serverId_(serverId), localInfo_(localInfo), peerInfo_(peerInfo) {}
+ 
+    bool operator == (const AbilityConnectionSessionInfo &index) const
+    {
+        return this->serverId_ == index.serverId_ && this->localInfo_ == index.localInfo_ &&
+            this->peerInfo_ == index.peerInfo_;
+    }
+ 
+    bool operator < (const AbilityConnectionSessionInfo &index) const
+    {
+        if (this->serverId_ != index.serverId_) {
+            return this->serverId_ < index.serverId_;
+        }
+        if (this->localInfo_ == index.localInfo_) {
+            return this->peerInfo_ < index.peerInfo_;
+        }
+        return this->localInfo_ < index.localInfo_;
+    }
+};
+
 class AbilityConnectionSession : public std::enable_shared_from_this<AbilityConnectionSession> {
 public:
-    AbilityConnectionSession(int32_t sessionId, std::string serverSocketName, PeerInfo localInfo,
-        PeerInfo peerInfo, ConnectOption opt);
+    AbilityConnectionSession(int32_t sessionId, std::string serverSocketName, AbilityConnectionSessionInfo sessionInfo,
+        ConnectOption opt);
     ~AbilityConnectionSession();
 
     void Init();
@@ -131,14 +158,14 @@ public:
     int32_t ConnectStreamChannel();
     void UpdateEngineTransChannel();
     int32_t RegisterEventCallback(const std::shared_ptr<IAbilityConnectionSessionListener>& listener);
+    std::string GetServerToken();
     
 private:
     void StartEvent();
     int32_t InitChannels();
     int32_t CreateChannel(const std::string& channelName, const ChannelDataType& dataType,
         const TransChannelType& channelType, bool isClientChannel);
-    std::string GetChannelName(const std::string& sourceModule, const std::string& sourceAbility,
-        const std::string& sinkModule, const std::string& sinkAbility);
+    std::string GetChannelName(const AbilityConnectionSessionInfo& sessionInfo);
     int32_t ConnectChannels();
     int32_t GetChannelByType(const TransChannelType& dataType, int32_t& channelId);
     bool IsAllChannelConnected();
@@ -171,6 +198,7 @@ private:
     int32_t CreateStreamChannel(const std::string& channelName, bool isClientChannel);
     void ConnectFileChannel(const std::string& peerSocketName);
     void HandleSessionConnect();
+    std::string CreateDmsServerToken();
 
 private:
     class CollabChannelListener : public IChannelListener {
@@ -214,8 +242,7 @@ private:
     std::string localSocketName_;
     std::string peerSocketName_;
     std::string channelName_;
-    PeerInfo localInfo_;
-    PeerInfo peerInfo_;
+    AbilityConnectionSessionInfo sessionInfo_;
     ConnectOption connectOption_;
     CollabrateDirection direction_ = CollabrateDirection::UNKNOWN;
     

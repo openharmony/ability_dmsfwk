@@ -703,6 +703,8 @@ int32_t DistributedSchedStub::CollabMissionInner(MessageParcel& data, MessagePar
         HILOGW("srcOpt_ readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
+    std::string collabToken;
+    PARCEL_READ_HELPER(data, String, collabToken);
     sptr<IRemoteObject> sourceClientCallback = data.ReadRemoteObject();
     if (sourceClientCallback == nullptr) {
         HILOGW("read callback failed!");
@@ -723,10 +725,9 @@ int32_t DistributedSchedStub::CollabMissionInner(MessageParcel& data, MessagePar
     dSchedCollabInfo.srcInfo_.pid_ = callerPid;
     dSchedCollabInfo.srcInfo_.accessToken_ = static_cast<int32_t>(callerAccessToken);
     dSchedCollabInfo.collabToken_ = collabToken;
-
+ 
     DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(callerAccessToken);
     int32_t result = DSchedCollabManager::GetInstance().CollabMission(dSchedCollabInfo);
-    HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 

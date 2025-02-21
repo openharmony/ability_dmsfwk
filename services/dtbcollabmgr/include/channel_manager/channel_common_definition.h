@@ -51,7 +51,7 @@ struct ChannelInfo {
     std::map<int32_t, std::unique_ptr<DataSenderReceiver>> dataSenderReceivers;
 };
 
-enum class ChannnelFileEvent : uint32_t {
+enum class ChannelFileEvent : uint32_t {
     SEND_PROCESS = 0,     /**< Sending file */
     SEND_FINISH,      /**< Send file end */
     SEND_ERROR,       /**< Send file failed */
@@ -78,7 +78,7 @@ struct FileErrorInfo {
 };
 
 struct FileCommonInfo {
-    ChannnelFileEvent eventType = ChannnelFileEvent::SEND_PROCESS;
+    ChannelFileEvent eventType = ChannelFileEvent::SEND_PROCESS;
     std::vector<std::string> fileList;
     uint32_t fileCnt = 0;
 };

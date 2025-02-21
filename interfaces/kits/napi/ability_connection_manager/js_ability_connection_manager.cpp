@@ -317,7 +317,7 @@ napi_value JsAbilityConnectionManager::CreateAbilityConnectionSession(napi_env e
 
     int32_t sessionId = -1;
     ret = AbilityConnectionManager::GetInstance().CreateSession(
-        abilityInfo, peerInfo, connectOption, sessionId);
+        serverId, abilityInfo, peerInfo, connectOption, sessionId);
     if (ret != ERR_OK) {
         HILOGE("create session failed!");
         CreateBusinessError(env, ERR_EXECUTE_FUNCTION);

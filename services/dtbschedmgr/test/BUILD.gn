@@ -445,6 +445,32 @@ ohos_unittest("distributedmissionmanagertest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("dmscontinueconditionmgrtest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [ "unittest/mission/dms_continue_condition_manager_test.cpp" ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    external_deps += [ "config_policy:configpolicy_util" ]
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 ohos_unittest("dmscontinuemanagertest") {
   sanitize = {
     cfi = true
@@ -608,12 +634,14 @@ ohos_unittest("distributedwanttest") {
     debug = false
   }
   module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
 
   sources = [
     "unittest/distributedWant/distributed_operation_test.cpp",
     "unittest/distributedWant/distributed_want_params_test.cpp",
     "unittest/distributedWant/distributed_want_params_wrapper_test.cpp",
     "unittest/distributedWant/distributed_want_test.cpp",
+    "unittest/distributedWant/distributed_want_v2_sup_test.cpp",
     "unittest/distributedWant/distributed_want_v2_test.cpp",
   ]
 
@@ -717,8 +745,10 @@ ohos_unittest("dmscollabmgrtest") {
   cflags = [ "-Dprivate=public" ]
 
   sources = [
+    "${dms_path}/services/dtbschedmgr/src/collab/dsched_collab_manager.cpp",
     "unittest/collab/dsched_collab_manager_sup_test.cpp",
     "unittest/collab/dsched_collab_manager_test.cpp",
+    "unittest/mock/multi_user_manager_mock.cpp",
     "unittest/mock_distributed_sched.cpp",
   ]
   sources += dtbschedmgr_sources
@@ -1040,6 +1070,7 @@ group("unittest") {
   if (dmsfwk_mission_manager) {
     deps += [
       ":distributedmissionmanagertest",
+      ":dmscontinueconditionmgrtest",
       ":dmscontinuemanagertest",
       ":dmsmissionmanagertest",
       ":dschedpermissiontest",

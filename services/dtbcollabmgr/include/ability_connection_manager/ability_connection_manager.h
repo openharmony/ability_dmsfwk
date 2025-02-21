@@ -35,7 +35,7 @@ public:
     AbilityConnectionManager();
     ~AbilityConnectionManager();
     
-    int32_t CreateSession(std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo,
+    int32_t CreateSession(const std::string& serverId, std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo,
         PeerInfo& peerInfo, ConnectOption& opt, int32_t& sessionId);
     int32_t DestroySession(int32_t sessionId);
 
@@ -71,8 +71,15 @@ public:
     int32_t NotifyWifiOpen(int32_t sessionId);
     int32_t RegisterEventCallback(int32_t sessionId,
         const std::shared_ptr<IAbilityConnectionSessionListener>& listener);
+    int32_t UpdateClientSession(const AbilityConnectionSessionInfo& sessionInfo,
+        const int32_t sessionId);
+    int32_t DeleteClientSession(const AbilityConnectionSessionInfo& sessionInfo);
+    int32_t UpdateServerSession(const AbilityConnectionSessionInfo& sessionInfo,
+        const int32_t sessionId);
+    int32_t DeleteConnectSession(const AbilityConnectionSessionInfo& sessionInfo, int32_t sessionId);
+    std::string GetSessionToken(int32_t sessionId);
 
-    private:
+private:
     std::shared_mutex sessionMutex_;
     std::map <int32_t, std::shared_ptr<AbilityConnectionSession>> sessionMap_;
     std::atomic<int32_t> sessionId_ = 100;
@@ -80,6 +87,12 @@ public:
 
     std::shared_mutex streamMutex_;
     std::map<int32_t, int32_t> streamMap_;
+
+    std::mutex connectSessionMutex_;
+    //Record the client session that invokes connect.
+    std::map<AbilityConnectionSessionInfo, int32_t> clientSessionMap_;
+    //Record the server session that invokes acceptConnect.
+    std::map<AbilityConnectionSessionInfo, int32_t> serverSessionMap_;
 
 private:
     bool IsVaildPeerInfo(const PeerInfo& peerInfo);

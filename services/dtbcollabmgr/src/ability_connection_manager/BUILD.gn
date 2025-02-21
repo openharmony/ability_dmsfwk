@@ -36,6 +36,8 @@ ohos_shared_library("distributed_ability_connection_manager") {
 
   install_enable = true
 
+  public_configs = [ ":distributed_collab_config" ]
+
   sources = [
     "${dms_path}/interfaces/kits/napi/ability_connection_manager/js_ability_connection_session_listener.cpp",
     "ability_connection_info.cpp",
@@ -73,6 +75,7 @@ ohos_shared_library("distributed_ability_connection_manager") {
     "media_foundation:media_foundation",
     "napi:ace_napi",
     "openssl:libcrypto_shared",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "wifi:wifi_sdk",
   ]

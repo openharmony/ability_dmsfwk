@@ -42,7 +42,6 @@ public:
     void UnInit();
     void OnUserSwitched(int32_t userId);
     void OnUserRemoved(int32_t userId);
-    AccountSA::OsAccountType GetOsAccountType(int32_t &accountId);
     int32_t CreateNewSendMgrLocked();
     int32_t CreateNewRecvMgrLocked();
     int32_t CreateNewRecomMgrLocked();

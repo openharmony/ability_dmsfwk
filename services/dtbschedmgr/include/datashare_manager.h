@@ -49,7 +49,6 @@ public:
 
     int32_t GetLocalAccountId();
     Uri AssembleUserSecureUri(int userId, const std::string& key);
-    void UpdateSwitchStatus(const std::string &key, const std::string &value);
     std::atomic<bool> isCurrentContinueSwitchOn_ = true;
     bool IsCurrentContinueSwitchOn();
     void SetCurrentContinueSwitch(bool status);

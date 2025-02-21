@@ -42,6 +42,7 @@ const std::u16string MOCK_INVALID_DESCRIPTOR = u"invalid descriptor";
 const std::string EXTRO_INFO_JSON_KEY_ACCESS_TOKEN = "accessTokenID";
 const std::string EXTRO_INFO_JSON_KEY_REQUEST_CODE = "requestCode";
 const std::string DMS_VERSION_ID = "dmsVersion";
+const std::string DMS_UID_SPEC_BUNDLE_NAME = "dmsCallerUidBundleName";
 const std::string CMPT_PARAM_FREEINSTALL_BUNDLENAMES = "ohos.extra.param.key.allowedBundles";
 constexpr const char* FOUNDATION_PROCESS_NAME = "foundation";
 constexpr int32_t MAX_WAIT_TIME = 5000;
@@ -2275,6 +2276,10 @@ HWTEST_F(DistributedSchedStubTest, IsUsingQos_001, TestSize.Level1)
     std::string remoteDeviceId = "remoteDeviceId";
     bool result = DistributedSchedService::GetInstance().IsUsingQos(remoteDeviceId);
     EXPECT_EQ(result, true);
+
+    remoteDeviceId = "";
+    result = DistributedSchedService::GetInstance().IsUsingQos(remoteDeviceId);
+    EXPECT_EQ(result, false);
     DTEST_LOG << "DistributedSchedStubTest IsUsingQos_001 end" << std::endl;
 }
 
@@ -2291,6 +2296,200 @@ HWTEST_F(DistributedSchedStubTest, NotifyDSchedEventResultFromRemoteInner_001, T
     int32_t result = DistributedSchedService::GetInstance().NotifyDSchedEventResultFromRemoteInner(data, reply);
     EXPECT_NE(result, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedSchedStubTest NotifyDSchedEventResultFromRemoteInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CollabMissionInner_001
+ * @tc.desc: check CollabMissionInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, CollabMissionInner_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest CollabMissionInner_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = DistributedSchedService::GetInstance().CollabMissionInner(data, reply);
+    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+
+    int32_t collabSessionId = 0;
+    data.WriteInt32(collabSessionId);
+    result = DistributedSchedService::GetInstance().CollabMissionInner(data, reply);
+    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+
+    std::string srcSocketName = "socketName";
+    data.WriteInt32(collabSessionId);
+    data.WriteString(srcSocketName);
+    result = DistributedSchedService::GetInstance().CollabMissionInner(data, reply);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+
+    data.WriteInt32(collabSessionId);
+    data.WriteString(srcSocketName);
+    CollabMessage msg;
+    data.WriteParcelable(&msg);
+    result = DistributedSchedService::GetInstance().CollabMissionInner(data, reply);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+
+    data.WriteInt32(collabSessionId);
+    data.WriteString(srcSocketName);
+    data.WriteParcelable(&msg);
+    CollabMessage msg1;
+    data.WriteParcelable(&msg1);
+    result = DistributedSchedService::GetInstance().CollabMissionInner(data, reply);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+    DTEST_LOG << "DistributedSchedStubTest CollabMissionInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyRejectReason_001
+ * @tc.desc: check NotifyRejectReason
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, NotifyRejectReason_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest NotifyRejectReason_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = DistributedSchedService::GetInstance().NotifyRejectReason(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedStubTest CollabMissionInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyStartAbilityResultInner_001
+ * @tc.desc: check NotifyStartAbilityResultInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, NotifyStartAbilityResultInner_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest NotifyStartAbilityResultInner_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = DistributedSchedService::GetInstance().NotifyStartAbilityResultInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedStubTest NotifyStartAbilityResultInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyCollabPrepareResultInner_001
+ * @tc.desc: check NotifyCollabPrepareResultInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, NotifyCollabPrepareResultInner_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest NotifyCollabPrepareResultInner_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = DistributedSchedService::GetInstance().NotifyCollabPrepareResultInner(data, reply);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+    DTEST_LOG << "DistributedSchedStubTest NotifyCollabPrepareResultInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyCloseCollabSessionInner_001
+ * @tc.desc: check NotifyCloseCollabSessionInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, NotifyCloseCollabSessionInner_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest NotifyCloseCollabSessionInner_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = DistributedSchedService::GetInstance().NotifyCloseCollabSessionInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    DTEST_LOG << "DistributedSchedStubTest NotifyCloseCollabSessionInner_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: IsNewCollabVersion_001
+ * @tc.desc: check IsNewCollabVersion
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, IsNewCollabVersion_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest IsNewCollabVersion_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    auto rlt = DistributedSchedService::GetInstance().IsNewCollabVersion("");
+    EXPECT_EQ(rlt, false);
+
+    std::string remoteDeviceId = "remoteDeviceId";
+    rlt = DistributedSchedService::GetInstance().IsNewCollabVersion(remoteDeviceId);
+    EXPECT_EQ(rlt, true);
+    DTEST_LOG << "DistributedSchedStubTest IsNewCollabVersion_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SaveExtraInfo_001
+ * @tc.desc: check SaveExtraInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, SaveExtraInfo_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest SaveExtraInfo_001 begin" << std::endl;
+    nlohmann::json extraInfoJson;
+    CallerInfo callerInfo;
+    AccountInfo accountInfo;
+    DistributedSchedService::GetInstance().SaveExtraInfo(extraInfoJson, callerInfo, accountInfo);
+    EXPECT_TRUE(accountInfo.activeAccountId.empty());
+
+    extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN] = "test";
+    extraInfoJson[DMS_VERSION_ID] = 1;
+    extraInfoJson[DMS_UID_SPEC_BUNDLE_NAME] = 1;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID] = 1;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID] = "test";
+    DistributedSchedService::GetInstance().SaveExtraInfo(extraInfoJson, callerInfo, accountInfo);
+    EXPECT_TRUE(accountInfo.activeAccountId.empty());
+
+    extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN] = 1u;
+    extraInfoJson[DMS_VERSION_ID] = "dmService";
+    extraInfoJson[DMS_UID_SPEC_BUNDLE_NAME] = "bundleName";
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID] = "test";
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID] = 999;
+    DistributedSchedService::GetInstance().SaveExtraInfo(extraInfoJson, callerInfo, accountInfo);
+    EXPECT_EQ(callerInfo.accessToken, 1u);
+    EXPECT_EQ(callerInfo.extraInfoJson[DMS_VERSION_ID], extraInfoJson[DMS_VERSION_ID]);
+    EXPECT_EQ(callerInfo.extraInfoJson[DMS_UID_SPEC_BUNDLE_NAME],
+        extraInfoJson[DMS_UID_SPEC_BUNDLE_NAME]);
+    EXPECT_EQ(accountInfo.activeAccountId, extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID]);
+    EXPECT_EQ(accountInfo.userId, extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID]);
+    DTEST_LOG << "DistributedSchedStubTest SaveExtraInfo_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SaveSendResultExtraInfo_001
+ * @tc.desc: check SaveSendResultExtraInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, SaveSendResultExtraInfo_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest SaveSendResultExtraInfo_001 begin" << std::endl;
+    nlohmann::json extraInfoJson;
+    CallerInfo callerInfo;
+    AccountInfo accountInfo;
+    DistributedSchedService::GetInstance().SaveSendResultExtraInfo(extraInfoJson, callerInfo, accountInfo);
+    EXPECT_TRUE(accountInfo.activeAccountId.empty());
+
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID] = 1;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID] = "test";
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_CALLER_INFO_EX] = 1;
+    DistributedSchedService::GetInstance().SaveSendResultExtraInfo(extraInfoJson, callerInfo, accountInfo);
+    EXPECT_TRUE(accountInfo.activeAccountId.empty());
+
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_CALLER_INFO_EX] = "";
+    DistributedSchedService::GetInstance().SaveSendResultExtraInfo(extraInfoJson, callerInfo, accountInfo);
+    EXPECT_TRUE(accountInfo.activeAccountId.empty());
+
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID] = "test";
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID] = 999;
+    nlohmann::json temp;
+    temp["name"] = "John Doe";
+    temp["age"] = 30;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_CALLER_INFO_EX] = temp.dump();
+    DistributedSchedService::GetInstance().SaveSendResultExtraInfo(extraInfoJson, callerInfo, accountInfo);
+    EXPECT_EQ(accountInfo.activeAccountId, "test");
+    EXPECT_EQ(accountInfo.userId, 999);
+    EXPECT_EQ(callerInfo.extraInfoJson, temp);
+    DTEST_LOG << "DistributedSchedStubTest SaveSendResultExtraInfo_001 end" << std::endl;
 }
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER

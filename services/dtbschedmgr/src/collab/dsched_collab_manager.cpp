@@ -213,9 +213,9 @@ int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
         HILOGE("clientCB is nullptr");
         return INVALID_PARAMETERS_ERR;
     }
-    if (info.srcInfo_.bundleName_.empty() || info.srcInfo_.bundleName_.empty() ||
-        info.srcInfo_.moduleName_.empty() || info.srcInfo_.moduleName_.empty() ||
-        info.srcInfo_.abilityName_.empty() || info.srcInfo_.abilityName_.empty()) {
+    if (info.srcInfo_.bundleName_.empty() || info.sinkInfo_.bundleName_.empty() ||
+        info.srcInfo_.moduleName_.empty() || info.sinkInfo_.moduleName_.empty() ||
+        info.srcInfo_.abilityName_.empty() || info.sinkInfo_.abilityName_.empty()) {
         HILOGE("input parameter validation error!");
         return INVALID_PARAMETERS_ERR;
     }
@@ -257,7 +257,7 @@ bool DSchedCollabManager::IsSessionExists(const DSchedCollabInfo &info)
 void DSchedCollabManager::HandleCollabMission(const DSchedCollabInfo &info)
 {
     HILOGI("called");
-    const std::string collabToken = GenerateCollabToken(info.srcInfo_.deviceId_);
+    const std::string collabToken = info.collabToken_;
     auto newCollab = std::make_shared<DSchedCollab>(collabToken, info);
     newCollab->Init();
     newCollab->UpdateState(SOURCE_START_STATE);

@@ -47,8 +47,9 @@ AbilityConnectionManager::~AbilityConnectionManager()
 {
 }
 
-int32_t AbilityConnectionManager::CreateSession(std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo,
-    PeerInfo& peerInfo, ConnectOption& options, int32_t& sessionId)
+int32_t AbilityConnectionManager::CreateSession(const std::string& serverId,
+    std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, PeerInfo& peerInfo,
+    ConnectOption& options, int32_t& sessionId)
 {
     HILOGI("called.");
     if (!IsVaildPeerInfo(peerInfo)) {
@@ -63,20 +64,15 @@ int32_t AbilityConnectionManager::CreateSession(std::shared_ptr<OHOS::AppExecFwk
     PeerInfo localInfo = {"", abilityInfo->bundleName, abilityInfo->moduleName,
         abilityInfo->name, peerInfo.serverId};
     
-    if (FindExistingSession(peerInfo, localInfo, sessionId)) {
-        HILOGI("The session with the same configuration already exists.");
-        return ERR_OK;
-    }
-
     std::string serverSocketName = GetServerSocketName(getprocpid(), abilityInfo->uid, abilityInfo->bundleName);
     if (ChannelManager::GetInstance().Init(serverSocketName) != ERR_OK) {
         HILOGE("ChannelManager init failed.");
         return INVALID_PARAMETERS_ERR;
     }
-
+    AbilityConnectionSessionInfo sessionInfo = { serverId, localInfo, peerInfo };
     sessionId = sessionId_++;
     auto connectionSesion = std::make_shared<AbilityConnectionSession>(sessionId, serverSocketName,
-        localInfo, peerInfo, options);
+        sessionInfo, options);
     connectionSesion->Init();
 
     std::unique_lock<std::shared_mutex> writeLock(sessionMutex_);
@@ -469,6 +465,77 @@ std::shared_ptr<AbilityConnectionSession> AbilityConnectionManager::GetAbilityCo
         sessionId = streamMap_[streamId];
     }
     return GetAbilityConnectionSession(sessionId);
+}
+
+int32_t AbilityConnectionManager::UpdateClientSession(const AbilityConnectionSessionInfo& sessionInfo,
+    const int32_t sessionId)
+{
+    std::lock_guard<std::mutex> lock(connectSessionMutex_);
+    if (clientSessionMap_.count(sessionInfo) > 0 || serverSessionMap_.count(sessionInfo) > 0) {
+        HILOGE("The same session is being connected. sessionId is %{public}d", sessionId);
+        return SAME_SESSION_IS_CONNECTING;
+    }
+    HILOGI("The current client session has not initiated a connection. sessionId is %{public}d", sessionId);
+    clientSessionMap_[sessionInfo] = sessionId;
+    return ERR_OK;
+}
+ 
+int32_t AbilityConnectionManager::UpdateServerSession(const AbilityConnectionSessionInfo& sessionInfo,
+    const int32_t sessionId)
+{
+    HILOGI("called. sessionId is %{public}d", sessionId);
+    std::lock_guard<std::mutex> lock(connectSessionMutex_);
+    if (serverSessionMap_.count(sessionInfo) > 0) {
+        HILOGE("The same server session is being connected.");
+        return SAME_SESSION_IS_CONNECTING;
+    }
+    auto iter = clientSessionMap_.find(sessionInfo);
+    if (iter == clientSessionMap_.end()) {
+        HILOGI("no same session is connecting.");
+        clientSessionMap_[sessionInfo] = sessionId;
+        return ERR_OK;
+    }
+ 
+    if (GetSessionToken(sessionId) > GetSessionToken(iter->second)) {
+        HILOGI("select client session continue to connect.");
+        return SAME_SESSION_IS_CONNECTING;
+    }
+    HILOGI("select server session continue to connect.");
+    serverSessionMap_[sessionInfo] = sessionId;
+    return ERR_OK;
+}
+ 
+int32_t AbilityConnectionManager::DeleteConnectSession(const AbilityConnectionSessionInfo& sessionInfo,
+    int32_t sessionId)
+{
+    HILOGI("called. sessionId is %{public}d", sessionId);
+    std::lock_guard<std::mutex> lock(connectSessionMutex_);
+    auto clientIt = clientSessionMap_.find(sessionInfo);
+    if (clientIt != clientSessionMap_.end() && clientIt->second == sessionId) {
+        HILOGI("session removed from clientSessionMap_");
+        clientSessionMap_.erase(clientIt);
+        return ERR_OK;
+    }
+    auto serverIt = serverSessionMap_.find(sessionInfo);
+    if (serverIt != serverSessionMap_.end() && serverIt->second == sessionId) {
+        HILOGI("session removed from serverSessionMap_");
+        serverSessionMap_.erase(serverIt);
+        return ERR_OK;
+    }
+    HILOGI("The current session has not initiated a connection.");
+    return ERR_OK;
+}
+ 
+std::string AbilityConnectionManager::GetSessionToken(int32_t sessionId)
+{
+    auto connectionSesion = GetAbilityConnectionSession(sessionId);
+    if (connectionSesion == nullptr) {
+        HILOGE("sessionId is invalid parameter");
+        return "";
+    }
+    std::string dmsServertoken = connectionSesion->GetServerToken();
+    HILOGI("sessionId is %{public}d, token is %{public}s", sessionId, dmsServertoken.c_str());
+    return dmsServertoken;
 }
 }  // namespace DistributedCollab
 }  // namespace OHOS

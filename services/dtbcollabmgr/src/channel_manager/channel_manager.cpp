@@ -181,7 +181,7 @@ ChannelManager::~ChannelManager()
 int32_t ChannelManager::Init(const std::string& ownerName)
 {
     HILOGI("start init channel manager");
-    if (eventHandler_ != nullptr) {
+    if (eventHandler_ != nullptr && callbackEventHandler_ != nullptr) {
         HILOGW("server channel already init");
         return ERR_OK;
     }
@@ -191,6 +191,12 @@ int32_t ChannelManager::Init(const std::string& ownerName)
     std::unique_lock<std::mutex> lock(eventMutex_);
     eventCon_.wait(lock, [this] {
         return eventHandler_ != nullptr;
+    });
+
+    callbackEventThread_ = std::thread(&ChannelManager::StartCallbackEvent, this);
+    std::unique_lock<std::mutex> callbackLock(callbackEventMutex_);
+    callbackEventCon_.wait(callbackLock, [this] {
+        return callbackEventHandler_ != nullptr;
     });
 
     if (serverSocketId_ > 0) {
@@ -229,6 +235,21 @@ void ChannelManager::StartEvent()
     HILOGI("StartEvent end");
 }
 
+void ChannelManager::StartCallbackEvent()
+{
+    HILOGI("Start callback event start");
+    std::string callbackName = ownerName_ + "callback";
+    prctl(PR_SET_NAME, callbackName.c_str());
+    auto runner = AppExecFwk::EventRunner::Create(false);
+    {
+        std::lock_guard<std::mutex> lock(callbackEventMutex_);
+        callbackEventHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
+    }
+    callbackEventCon_.notify_one();
+    runner->Run();
+    HILOGI("callback event end");
+}
+
 int32_t ChannelManager::PostTask(const AppExecFwk::InnerEvent::Callback& callback,
     const AppExecFwk::EventQueue::Priority priority)
 {
@@ -240,6 +261,20 @@ int32_t ChannelManager::PostTask(const AppExecFwk::InnerEvent::Callback& callbac
         return ERR_OK;
     }
     HILOGE("add task failed");
+    return POST_TASK_FAILED;
+}
+
+int32_t ChannelManager::PostCallbackTask(const AppExecFwk::InnerEvent::Callback& callback,
+    const AppExecFwk::EventQueue::Priority priority)
+{
+    if (callbackEventHandler_ == nullptr) {
+        HILOGE("callback event handler empty");
+        return NULL_EVENT_HANDLER;
+    }
+    if (callbackEventHandler_->PostTask(callback, priority)) {
+        return ERR_OK;
+    }
+    HILOGE("add callback task failed");
     return POST_TASK_FAILED;
 }
 
@@ -822,7 +857,7 @@ void ChannelManager::NotifyListeners(const int32_t channelId, Func listenerFunc,
             auto func = [ptr, listenerFunc, channelId, args...]() {
                 (ptr.get()->*listenerFunc)(channelId, std::forward<Args>(args)...);
             };
-            PostTask(func, priority);
+            PostCallbackTask(func, priority);
         }
     }
 }
@@ -1216,9 +1251,9 @@ void ChannelManager::DealFileSendEvent(int32_t channelId, FileEvent *event)
     HILOGI("start to deal file send event, %{public}d", channelId);
     FileInfo info;
     if (event->type == FileEventType::FILE_EVENT_SEND_PROCESS) {
-        info.commonInfo.eventType = ChannnelFileEvent::SEND_PROCESS;
+        info.commonInfo.eventType = ChannelFileEvent::SEND_PROCESS;
     } else {
-        info.commonInfo.eventType = ChannnelFileEvent::SEND_FINISH;
+        info.commonInfo.eventType = ChannelFileEvent::SEND_FINISH;
     }
     info.commonInfo.fileCnt = event->fileCnt;
     for (uint32_t i = 0; i < event->fileCnt; ++i) {
@@ -1241,11 +1276,11 @@ void ChannelManager::DealFileRecvEvent(int32_t channelId, FileEvent *event)
     HILOGI("start to deal file recv event, %{public}d", channelId);
     FileInfo info;
     if (event->type == FileEventType::FILE_EVENT_RECV_START) {
-        info.commonInfo.eventType = ChannnelFileEvent::RECV_START;
+        info.commonInfo.eventType = ChannelFileEvent::RECV_START;
     } else if (event->type == FileEventType::FILE_EVENT_RECV_PROCESS) {
-        info.commonInfo.eventType = ChannnelFileEvent::RECV_PROCESS;
+        info.commonInfo.eventType = ChannelFileEvent::RECV_PROCESS;
     } else {
-        info.commonInfo.eventType = ChannnelFileEvent::RECV_FINISH;
+        info.commonInfo.eventType = ChannelFileEvent::RECV_FINISH;
     }
     info.commonInfo.fileCnt = event->fileCnt;
     for (uint32_t i = 0; i < event->fileCnt; ++i) {
@@ -1268,9 +1303,9 @@ void ChannelManager::DealFileErrorEvent(int32_t channelId, FileEvent *event)
     HILOGI("start to deal file error event, %{public}d", channelId);
     FileInfo info;
     if (event->type == FileEventType::FILE_EVENT_SEND_ERROR) {
-        info.commonInfo.eventType = ChannnelFileEvent::SEND_ERROR;
+        info.commonInfo.eventType = ChannelFileEvent::SEND_ERROR;
     } else {
-        info.commonInfo.eventType = ChannnelFileEvent::RECV_ERROR;
+        info.commonInfo.eventType = ChannelFileEvent::RECV_ERROR;
     }
     info.commonInfo.fileCnt = event->fileCnt;
     for (uint32_t i = 0; i < event->fileCnt; ++i) {
@@ -1280,7 +1315,7 @@ void ChannelManager::DealFileErrorEvent(int32_t channelId, FileEvent *event)
     FileErrorInfo errorInfo;
     errorInfo.errorCode = event->errorCode;
     info.errorInfo = errorInfo;
-    if (info.commonInfo.eventType == ChannnelFileEvent::RECV_ERROR) {
+    if (info.commonInfo.eventType == ChannelFileEvent::RECV_ERROR) {
         DoFileRecvCallback(channelId, info);
     } else {
         DoFileSendCallback(channelId, info);

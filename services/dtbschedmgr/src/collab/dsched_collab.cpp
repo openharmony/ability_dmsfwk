@@ -446,8 +446,8 @@ int32_t DSchedCollab::ExeStartAbility()
 {
     HILOGI("called");
     AAFwk::Want want = GenerateCollabWant();
-    int32_t ret = DistributedSchedService::GetInstance().CheckTargetPermission(want, collabInfo_.callerInfo_,
-        collabInfo_.srcAccountInfo_, START_PERMISSION, true);
+    int32_t ret = DistributedSchedService::GetInstance().CheckCollabStartPermission(want, collabInfo_.callerInfo_,
+        collabInfo_.srcAccountInfo_, START_PERMISSION);
     if (ret != ERR_OK) {
         HILOGE("CheckTargetPermission failed!");
         return ret;
@@ -683,7 +683,7 @@ int32_t DSchedCollab::ExeClientDisconnectNotify()
         HILOGE("write token failed");
         return SEND_REQUEST_DEF_FAIL;
     }
-    PARCEL_WRITE_HELPER(data, Int32, collabInfo_.sinkCollabSessionId_);
+    PARCEL_WRITE_HELPER(data, Int32, collabSessionId);
     MessageParcel reply;
     MessageOption option;
     int32_t ret = clientCB->SendRequest(NOTIFY_COLLAB_DISCONNECT, data, reply, option);

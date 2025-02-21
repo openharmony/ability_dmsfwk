@@ -125,6 +125,31 @@ HWTEST_F(DSchedContinueManagerTest, Init_001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: Init_002
+ * @tc.desc: test Init func
+ * @tc.type: FUNC
+ */
+    HWTEST_F(DSchedContinueManagerTest, Init_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest Init_002 begin" << std::endl;
+    std::vector<std::thread> threads;
+    for (int i = 0; i < 10; ++i) {
+        threads.emplace_back(std::thread([]() {
+            DSchedContinueManager::GetInstance().Init();
+        }));
+    }
+    for (auto &item: threads) {
+        if (item.joinable()) {
+            item.join();
+        }
+    }
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler =
+            DSchedContinueManager::GetInstance().eventHandler_;
+    EXPECT_NE(eventHandler, nullptr);
+    DTEST_LOG << "DSchedContinueManagerTest Init_002 end" << std::endl;
+}
+
+/**
  * @tc.name: ContinueMission_001
  * @tc.desc: test ContinueMission func
  * @tc.type: FUNC
