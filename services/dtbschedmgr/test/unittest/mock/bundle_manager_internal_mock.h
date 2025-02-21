@@ -39,6 +39,8 @@ public:
         const std::string &developerId4OtherSide) = 0;
     virtual int32_t GetLocalBundleInfo(const std::string& bundleName, AppExecFwk::BundleInfo &localBundleInfo) = 0;
     virtual int32_t GetLocalBundleInfoV9(const std::string& bundleName, AppExecFwk::BundleInfo &bundleInfo) = 0;
+    virtual int32_t GetLocalAbilityInfo(const std::string& bundleName,
+        const std::string& moduleName, const std::string& abilityName, AppExecFwk::AbilityInfo &abilityInfo) = 0;
     virtual bool GetContinueBundle4Src(const std::string& srcBundleName,
         std::vector<std::string>& bundleNameList) = 0;
     virtual bool GetAppProvisionInfo4CurrentUser(const std::string& bundleName,
@@ -81,6 +83,8 @@ public:
         const std::string &developerId4OtherSide));
     MOCK_METHOD2(GetLocalBundleInfo, int32_t(const std::string& bundleName, AppExecFwk::BundleInfo &localBundleInfo));
     MOCK_METHOD2(GetLocalBundleInfoV9, int32_t(const std::string& bundleName, AppExecFwk::BundleInfo &bundleInfo));
+    MOCK_METHOD4(GetLocalAbilityInfo, int32_t(const std::string& bundleName,
+        const std::string& moduleName, const std::string& abilityName, AppExecFwk::AbilityInfo &abilityInfo));
     MOCK_METHOD2(GetContinueBundle4Src, bool(const std::string& srcBundleName,
         std::vector<std::string>& bundleNameList));
     MOCK_METHOD2(GetAppProvisionInfo4CurrentUser, bool(const std::string& bundleName,

@@ -26,11 +26,11 @@
 #include <vector>
 
 #include "bundle/bundle_manager_internal.h"
-#include "distributed_mission_broadcast_listener.h"
-#include "distributed_mission_died_listener.h"
-#include "distributed_mission_focused_listener.h"
 #include "event_handler.h"
 #include "mission_info.h"
+#include "mission/distributed_mission_broadcast_listener.h"
+#include "mission/distributed_mission_died_listener.h"
+#include "mission/distributed_mission_focused_listener.h"
 
 namespace OHOS {
 namespace DistributedSchedule {

@@ -18,7 +18,7 @@
 #include "datashare_manager.h"
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_bm_storage.h"
-#include "mission/dms_continue_recv_manager.h"
+#include "mission/notification/dms_continue_recv_manager.h"
 #include "mission/notification/dms_continue_send_manager.h"
 #include "multi_user_manager.h"
 #include "os_account_manager.h"

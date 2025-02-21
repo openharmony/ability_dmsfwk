@@ -50,19 +50,17 @@ void MultiUserManager::Init()
     MMIAdapter::GetInstance().Init();
     SoftbusAdapter::GetInstance().Init();
     auto sendMgr = GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        HILOGI("GetSendMgr failed.");
-        return;
-    }
+    CHECK_POINTER_RETURN(sendMgr, "sendMgr");
+    sendMgr->OnDeviceOnline();
+
     auto recvMgr = GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        HILOGI("GetRecvMgr failed.");
-        return;
-    }
+    CHECK_POINTER_RETURN(recvMgr, "recvMgr");
     if (!CheckRegSoftbusListener()) {
         RegisterSoftbusListener();
     }
-    sendMgr->OnDeviceOnline();
+
+    auto recomMgr = GetCurrentRecomMgr();
+    CHECK_POINTER_RETURN(recomMgr, "recomMgr");
     HILOGI("Init end.");
 }
 
@@ -95,6 +93,19 @@ void MultiUserManager::UnInit()
                     continue;
                 }
                 recvMgrMap_.erase(it++);
+            }
+        }
+    }
+    {
+        std::lock_guard<std::mutex> lock(recomMutex_);
+        if (!recomMgrMap_.empty()) {
+            auto it = recomMgrMap_.begin();
+            while (it != recomMgrMap_.end()) {
+                if (it->second == nullptr) {
+                    recomMgrMap_.erase(it++);
+                    continue;
+                }
+                recomMgrMap_.erase(it++);
             }
         }
     }
@@ -219,6 +230,16 @@ int32_t MultiUserManager::CreateNewRecvMgrLocked()
     return ERR_OK;
 }
 
+int32_t MultiUserManager::CreateNewRecomMgrLocked()
+{
+    HILOGI("CreateNewRecomMgr begin. accountId: %{public}d.", currentUserId_);
+    auto recomMgr = std::make_shared<DMSContinueRecomMgr>();
+    recomMgr->Init(currentUserId_);
+    recomMgrMap_.emplace(currentUserId_, recomMgr);
+    HILOGI("CreateNewRecomMgr end.");
+    return ERR_OK;
+}
+
 int32_t MultiUserManager::CreateNewSendMgrLocked(int32_t accountId)
 {
     HILOGI("CreateNewSendMgr by accountid begin. accountId: %{public}d.", accountId);
@@ -236,6 +257,16 @@ int32_t MultiUserManager::CreateNewRecvMgrLocked(int32_t accountId)
     recvMgr->Init(accountId);
     recvMgrMap_.emplace(accountId, recvMgr);
     HILOGI("CreateNewRecvMgr by accountid end.");
+    return ERR_OK;
+}
+
+int32_t MultiUserManager::CreateNewRecomMgrLocked(int32_t accountId)
+{
+    HILOGI("CreateNewRecomMgr by accountid begin. accountId: %{public}d.", accountId);
+    auto recomMgr = std::make_shared<DMSContinueRecomMgr>();
+    recomMgr->Init(accountId);
+    recomMgrMap_.emplace(accountId, recomMgr);
+    HILOGI("CreateNewRecomMgr by accountid end.");
     return ERR_OK;
 }
 
@@ -260,6 +291,18 @@ std::shared_ptr<DMSContinueRecvMgr> MultiUserManager::GetCurrentRecvMgr()
         CreateNewRecvMgrLocked();
     }
     auto cur = recvMgrMap_.find(currentUserId_);
+    return cur->second;
+}
+
+std::shared_ptr<DMSContinueRecomMgr> MultiUserManager::GetCurrentRecomMgr()
+{
+    HILOGI("GetCurrentRecomMgr. accountId: %{public}d.", currentUserId_);
+    std::lock_guard<std::mutex> lock(recomMutex_);
+    if (recomMgrMap_.empty() || recomMgrMap_.find(currentUserId_) == recomMgrMap_.end()) {
+        HILOGI("recomMgr need to create.");
+        CreateNewRecomMgrLocked();
+    }
+    auto cur = recomMgrMap_.find(currentUserId_);
     return cur->second;
 }
 
@@ -288,6 +331,20 @@ std::shared_ptr<DMSContinueRecvMgr> MultiUserManager::GetRecvMgrByCallingUid(int
         CreateNewRecvMgrLocked(accountId);
     }
     auto cur = recvMgrMap_.find(accountId);
+    return cur->second;
+}
+
+std::shared_ptr<DMSContinueRecomMgr> MultiUserManager::GetRecomMgrByCallingUid(int32_t callingUid)
+{
+    int32_t accountId = -1;
+    OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, accountId);
+    HILOGI("GetRecomMgrByCallingUid. userId: %{public}d , callingUid: %{public}d.", accountId, callingUid);
+    std::lock_guard<std::mutex> lock(recomMutex_);
+    if (recomMgrMap_.empty() || recomMgrMap_.find(accountId) == recomMgrMap_.end()) {
+        HILOGI("recomMgr need to create.");
+        CreateNewRecomMgrLocked(accountId);
+    }
+    auto cur = recomMgrMap_.find(accountId);
     return cur->second;
 }
 

@@ -47,6 +47,8 @@ public:
         const std::string &developerId4OtherSide);
     static int32_t GetLocalBundleInfo(const std::string& bundleName, AppExecFwk::BundleInfo &localBundleInfo);
     static int32_t GetLocalBundleInfoV9(const std::string& bundleName, AppExecFwk::BundleInfo &bundleInfo);
+    static int32_t GetLocalAbilityInfo(const std::string& bundleName,
+        const std::string& moduleName, const std::string& abilityName, AppExecFwk::AbilityInfo &abilityInfo);
     static bool GetContinueBundle4Src(const std::string& srcBundleName,
         std::vector<std::string>& bundleNameList);
     static bool GetAppProvisionInfo4CurrentUser(const std::string& bundleName,

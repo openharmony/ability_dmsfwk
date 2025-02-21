@@ -116,7 +116,7 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerInternalTest_002, TestSize.Leve
     vector<string> permissions;
     extensionInfo.permissions = permissions;
     extensionInfo.visible = true;
-    
+
     BundleManagerInternal::InitAbilityInfoFromExtension(extensionInfo, abilityInfo);
     EXPECT_TRUE(abilityInfo.bundleName.compare("bundleName") == 0);
     EXPECT_TRUE(abilityInfo.name.compare("name") == 0);
@@ -740,6 +740,23 @@ HWTEST_F(BundleManagerInternalTest, GetBundleNameById_002, TestSize.Level3)
     int32_t ret = BundleManagerInternal::GetBundleNameById(networkId, bundleNameId, bundleName);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "BundleManagerInternalTest GetBundleNameById_002 end "<< std::endl;
+}
+
+/**
+ * @tc.name: GetLocalAbilityInfo_001
+ * @tc.desc: GetLocalAbilityInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(BundleManagerInternalTest, GetLocalAbilityInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "BundleManagerInternalTest GetLocalAbilityInfo_001 begin" << std::endl;
+    std::string bundleName = "bundleName";
+    std::string moduleName = "moduleName";
+    std::string abilityName = "abilityName";
+    AppExecFwk::AbilityInfo abilityInfo;
+    int32_t ret = BundleManagerInternal::GetLocalAbilityInfo(bundleName, moduleName, abilityName, abilityInfo);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "BundleManagerInternalTest GetLocalAbilityInfo_001 end "<< std::endl;
 }
 }
 }

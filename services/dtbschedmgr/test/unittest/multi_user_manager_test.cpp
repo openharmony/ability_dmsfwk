@@ -198,6 +198,22 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_CreateNewRecvMgr_001, TestSize.L
 }
 
 /**
+ * @tc.name: MultiUserManager_CreateNewRecomMgr_001
+ * @tc.desc: test CreateNewRecomMgr
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiUserManagerTest, MultiUserManager_CreateNewRecomMgr_001, TestSize.Level3)
+{
+    DTEST_LOG << "MultiUserManager_CreateNewRecomMgr_001 start" << std::endl;
+    /**
+     * @tc.steps: step1. test OnUserRemoved with create current user recomMgr;
+     */
+    int32_t ret = MultiUserManager::GetInstance().CreateNewRecomMgrLocked();
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "MultiUserManager_CreateNewRecomMgr_001 end" << std::endl;
+}
+
+/**
  * @tc.name: MultiUserManager_GetCurrentSendMgr_001
  * @tc.desc: test GetCurrentSendMgr
  * @tc.type: FUNC
@@ -248,6 +264,33 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_GetCurrentRecvMgr_001, TestSize.
 
     MultiUserManager::GetInstance().UnInit();
     DTEST_LOG << "MultiUserManager_GetCurrentRecvMgr_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: MultiUserManager_GetCurrentRecomMgr_001
+ * @tc.desc: test GetCurrentRecomMgr
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiUserManagerTest, MultiUserManager_GetCurrentRecomMgr_001, TestSize.Level3)
+{
+    DTEST_LOG << "MultiUserManager_GetCurrentRecomMgr_001 start" << std::endl;
+    /**
+     * @tc.steps: step1. test OnUserRemoved with create current user recomMgr;
+     */
+    int32_t accountId = 100;
+    MultiUserManager::GetInstance().Init();
+    auto recomMgr = MultiUserManager::GetInstance().recomMgrMap_.find(accountId)->second;
+    MultiUserManager::GetInstance().hasRegSoftbusEventListener_ = true;
+    auto ret = MultiUserManager::GetInstance().GetCurrentRecomMgr();
+    EXPECT_EQ(ret, recomMgr);
+
+    MultiUserManager::GetInstance().recomMgrMap_.insert({accountId, nullptr});
+    ret = MultiUserManager::GetInstance().GetCurrentRecomMgr();
+    EXPECT_NE(ret, nullptr);
+
+
+    MultiUserManager::GetInstance().UnInit();
+    DTEST_LOG << "MultiUserManager_GetCurrentRecomMgr_001 end" << std::endl;
 }
 
 /**

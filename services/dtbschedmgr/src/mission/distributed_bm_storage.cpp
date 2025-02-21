@@ -1203,5 +1203,24 @@ bool DmsBmStorage::GetContinueEventInfo(const std::string &networkId, const std:
     HILOGE("Can't find ContinueInfo!");
     return false;
 }
+
+bool DmsBmStorage::GetAvailableRecommendList(const std::string &bundleName,
+    std::map<std::string, DmsBundleInfo>& availableList)
+{
+    HILOGD("called, bundleName: %{public}s,", bundleName.c_str());
+    std::vector<std::string> networkIdList = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdList();
+    for (const std::string networkId : networkIdList) {
+        DmsBundleInfo info;
+        if (!GetStorageDistributeInfo(networkId, bundleName, info)) {
+            HILOGE("GetStorageDistributeInfo failed, networkId %{public}s, bundleName %{public}s",
+                GetAnonymStr(networkId).c_str(), bundleName.c_str());
+            return false;
+        }
+        if (!info.bundleName.empty()) {
+            availableList[networkId] = info;
+        }
+    }
+    return true;
+}
 }  // namespace DistributedSchedule
 }  // namespace OHOS

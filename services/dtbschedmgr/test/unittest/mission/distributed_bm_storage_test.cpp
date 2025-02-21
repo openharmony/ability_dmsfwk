@@ -590,7 +590,7 @@ HWTEST_F(DistributedBmStorageTest, InnerSaveStorageDistributeInfoTest_001, TestS
         bundleInfo.bundleName = "";
         bool ret = dmsBmStorage_->InnerSaveStorageDistributeInfo(bundleInfo, udid);
         EXPECT_EQ(ret, false);
-        
+
         bundleInfo.bundleName = "bundleName";
         udid = "udid";
         dmsBmStorage_->InnerSaveStorageDistributeInfo(bundleInfo, udid);
@@ -653,12 +653,12 @@ HWTEST_F(DistributedBmStorageTest, DealGetBundleNameTest_002, TestSize.Level1)
         g_mockGetUuidByNetworkId = "uuid";
         bool ret = dmsBmStorage_->DealGetBundleName("", ONE, bundleName);
         EXPECT_EQ(ret, false);
-        
+
         g_mockGetUdidByNetworkId = "";
         g_mockGetUuidByNetworkId = "uuid";
         ret = dmsBmStorage_->DealGetBundleName("", ONE, bundleName);
         EXPECT_EQ(ret, false);
-        
+
         g_mockGetUdidByNetworkId = "udid";
         g_mockGetUuidByNetworkId = "";
         ret = dmsBmStorage_->DealGetBundleName("", ONE, bundleName);
@@ -701,13 +701,13 @@ HWTEST_F(DistributedBmStorageTest, DelReduDataTest_002, TestSize.Level1)
         g_mockGetUuidByNetworkId = "";
         bool ret = dmsBmStorage_->DelReduData("", reduRiskEntries);
         EXPECT_EQ(ret, false);
-        
+
         g_mockGetUdidByNetworkId = "";
         g_mockGetUuidByNetworkId = "uuid";
         ret = dmsBmStorage_->DelReduData("", reduRiskEntries);
         EXPECT_EQ(ret, false);
 
-        
+
         g_mockGetUdidByNetworkId = "udid";
         g_mockGetUuidByNetworkId = "uuid";
         ret = dmsBmStorage_->DelReduData("", reduRiskEntries);
@@ -844,6 +844,23 @@ HWTEST_F(DistributedBmStorageTest, GetLastBundleNameIdTest_001, TestSize.Level1)
         EXPECT_EQ(ret, true);
     }
     DTEST_LOG << "DistributedBmStorageTest GetLastBundleNameIdTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetAvailableRecommendListTest_001
+ * @tc.desc: test GetAvailableRecommendList
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, GetAvailableRecommendListTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest GetAvailableRecommendListTest_001 start" << std::endl;
+    auto distributedDataStorage = GetDmsBmStorage();
+    EXPECT_NE(distributedDataStorage, nullptr);
+    std::map<std::string, DmsBundleInfo> result;
+    std::string bundleName = "";
+    bool ret = dmsBmStorage_->GetAvailableRecommendList(bundleName, result);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "DistributedBmStorageTest GetAvailableRecommendListTest_001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

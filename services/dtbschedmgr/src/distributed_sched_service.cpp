@@ -75,7 +75,8 @@
 #include "mission/distributed_mission_info.h"
 #include "mission/dms_continue_condition_manager.h"
 #include "mission/notification/dms_continue_send_manager.h"
-#include "mission/dms_continue_recv_manager.h"
+#include "mission/notification/dms_continue_recommend_manager.h"
+#include "mission/notification/dms_continue_recv_manager.h"
 #include "mission/distributed_sched_mission_manager.h"
 #include "mission/dsched_sync_e2e.h"
 #include "mission/wifi_state_listener.h"
@@ -282,6 +283,13 @@ void DistributedSchedService::DeviceOnlineNotify(const std::string& networkId)
         HILOGI("DMSContinueRecvMgr need init");
         MultiUserManager::GetInstance().RegisterSoftbusListener();
     }
+    auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+    CHECK_POINTER_RETURN(sendMgr, "sendMgr");
+    sendMgr->OnDeviceOnline();
+
+    auto recomMgr = MultiUserManager::GetInstance().GetCurrentRecomMgr();
+    CHECK_POINTER_RETURN(recomMgr, "recomMgr");
+    recomMgr->OnDeviceChanged();
 #endif
 }
 
@@ -290,11 +298,13 @@ void DistributedSchedService::DeviceOfflineNotify(const std::string& networkId)
     DistributedSchedAdapter::GetInstance().DeviceOffline(networkId);
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
-    if (recvMgr == nullptr) {
-        HILOGI("GetRecvMgr failed.");
-        return;
-    }
+    CHECK_POINTER_RETURN(recvMgr, "recvMgr");
     recvMgr->NotifyDeviceOffline(networkId);
+
+    auto recomMgr = MultiUserManager::GetInstance().GetCurrentRecomMgr();
+    CHECK_POINTER_RETURN(recomMgr, "recomMgr");
+    recomMgr->OnDeviceChanged();
+
     DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(networkId);
 #endif
 }
@@ -3051,11 +3061,12 @@ int32_t DistributedSchedService::SetMissionContinueState(int32_t missionId, cons
     DmsContinueConditionMgr::GetInstance().UpdateMissionStatus(currentAccountId, missionId, event);
 
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
-    if (sendMgr == nullptr) {
-        HILOGI("GetSendMgr failed.");
-        return DMS_NOT_GET_MANAGER;
-    }
+    CHECK_POINTER_RETURN_VALUE(sendMgr, DMS_NOT_GET_MANAGER, "sendMgr");
     sendMgr->OnMissionStatusChanged(missionId, event);
+
+    auto recomMgr = MultiUserManager::GetInstance().GetCurrentRecomMgr();
+    CHECK_POINTER_RETURN_VALUE(recomMgr, DMS_NOT_GET_MANAGER, "recomMgr");
+    recomMgr->OnMissionStatusChanged(missionId, event);
     return ERR_OK;
 }
 #endif

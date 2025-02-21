@@ -17,7 +17,7 @@
 
 #include <string>
 #include "dtbschedmgr_log.h"
-#include "mission/dms_continue_recv_manager.h"
+#include "mission/notification/dms_continue_recv_manager.h"
 #include "multi_user_manager.h"
 
 namespace OHOS {
