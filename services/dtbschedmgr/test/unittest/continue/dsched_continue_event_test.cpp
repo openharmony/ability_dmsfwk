@@ -336,7 +336,7 @@ HWTEST_F(DSchedContinueEventTest, DSchedContinueEventTest_011_1, TestSize.Level0
     cJSON_DeleteItemFromObject(rootValue, "Want");
     cJSON_AddStringToObject(rootValue, "Want", "test");
     ret = cmd.UnmarshalWantParcel(rootValue);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 
     cJSON_DeleteItemFromObject(rootValue, "Want");
     Parcel wantParcel;
