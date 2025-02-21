@@ -15,6 +15,7 @@
 
 #include "dsched_continue_event_test.h"
 
+#include "distributed_sched_utils.h"
 #include "dsched_continue_event.h"
 #include "dtbschedmgr_log.h"
 #include "test_log.h"
@@ -215,6 +216,140 @@ HWTEST_F(DSchedContinueEventTest, DSchedContinueEventTest_005_1, TestSize.Level0
     ret = cmd.Unmarshal(cmdStr);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueEventTest DSchedContinueEventTest_005_1 end ret:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: DSchedContinueEventTest_006_1
+ * @tc.desc: DSchedContinueDataCmd Unmarshal
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueEventTest, DSchedContinueEventTest_006_1, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueEventTest DSchedContinueEventTest_006_1 begin" << std::endl;
+    DSchedContinueDataCmd cmd;
+    std::string cmdStr = "test";
+    auto ret = cmd.Unmarshal(cmdStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON_AddNumberToObject(rootValue, "BaseCmd", 0);
+    char *data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_FALSE(true);
+    }
+    cmdStr = std::string(data);
+    ret = cmd.Unmarshal(cmdStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_DeleteItemFromObject(rootValue, "BaseCmd");
+    cJSON_AddStringToObject(rootValue, "BaseCmd", "test");
+    data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_FALSE(true);
+    }
+    cmdStr = std::string(data);
+    ret = cmd.Unmarshal(cmdStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_Delete(rootValue);
+    cJSON_free(data);
+    DTEST_LOG << "DSchedContinueEventTest DSchedContinueEventTest_006_1 end ret:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: DSchedContinueEventTest_007_1
+ * @tc.desc: DSchedContinueDataCmd Unmarshal
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueEventTest, DSchedContinueEventTest_007_1, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueEventTest DSchedContinueEventTest_007_1 begin" << std::endl;
+    DSchedContinueDataCmd cmd;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    std::string baseJsonStr;
+    DSchedContinueCmdBase baseCmd;
+    if (baseCmd.Marshal(baseJsonStr) != ERR_OK) {
+        cJSON_Delete(rootValue);
+        ASSERT_FALSE(true);
+    }
+
+    cJSON_AddStringToObject(rootValue, "BaseCmd", baseJsonStr.c_str());
+    Parcel wantParcel;
+    OHOS::AAFwk::Want want;
+    if (!want.Marshalling(wantParcel)) {
+        cJSON_Delete(rootValue);
+        ASSERT_FALSE(true);
+    }
+    std::string wantStr = ParcelToBase64Str(wantParcel);
+    cJSON_AddStringToObject(rootValue, "Want", wantStr.c_str());
+    cJSON_AddNumberToObject(rootValue, "AbilityInfo", 0);
+    auto data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_FALSE(true);
+    }
+    auto cmdStr = std::string(data);
+    auto ret = cmd.Unmarshal(cmdStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_DeleteItemFromObject(rootValue, "AbilityInfo");
+    cJSON_AddStringToObject(rootValue, "AbilityInfo", "test");
+    data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_FALSE(true);
+    }
+    cmdStr = std::string(data);
+    ret = cmd.Unmarshal(cmdStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "DSchedContinueEventTest DSchedContinueEventTest_007_1 end ret:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: DSchedContinueEventTest_011_1
+ * @tc.desc: DSchedContinueDataCmd UnmarshalWantParcel
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueEventTest, DSchedContinueEventTest_011_1, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueEventTest DSchedContinueEventTest_011_1 begin" << std::endl;
+    cJSON *rootValue = nullptr;
+    DSchedContinueDataCmd cmd;
+    auto ret = cmd.UnmarshalWantParcel(rootValue);
+    EXPECT_FALSE(ret);
+
+    rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    ret = cmd.UnmarshalWantParcel(rootValue);
+    EXPECT_FALSE(ret);
+
+    cJSON_AddNumberToObject(rootValue, "Want", 0);
+    ret = cmd.UnmarshalWantParcel(rootValue);
+    EXPECT_FALSE(ret);
+
+    cJSON_DeleteItemFromObject(rootValue, "Want");
+    cJSON_AddStringToObject(rootValue, "Want", "test");
+    ret = cmd.UnmarshalWantParcel(rootValue);
+    EXPECT_FALSE(ret);
+
+    cJSON_DeleteItemFromObject(rootValue, "Want");
+    Parcel wantParcel;
+    if (!cmd.want_.Marshalling(wantParcel)) {
+        cJSON_Delete(rootValue);
+        ASSERT_FALSE(true);
+    }
+    std::string wantStr = ParcelToBase64Str(wantParcel);
+    cJSON_AddStringToObject(rootValue, "Want", wantStr.c_str());
+    ret = cmd.UnmarshalWantParcel(rootValue);
+    EXPECT_TRUE(ret);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "DSchedContinueEventTest DSchedContinueEventTest_008_1 end ret:" << ret << std::endl;
 }
 }
 }

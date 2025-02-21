@@ -15,8 +15,11 @@
 
 #include "dms_continue_condition_manager_test.h"
 
+#include "ability_manager_client.h"
+
 #include "dtbschedmgr_log.h"
 #include "mission/dms_continue_condition_manager.h"
+#include "mission/dsched_sync_e2e.h"
 #include "test_log.h"
 using namespace testing;
 using namespace testing::ext;
@@ -42,14 +45,9 @@ void DmsContinueConditionMgrTest::TearDown()
 {
 }
 
-/**
- * @tc.name: testUpdateMissionStatus001
- * @tc.desc: test UpdateMissionStatus
- * @tc.type: FUNC
- */
-HWTEST_F(DmsContinueConditionMgrTest, testUpdateMissionStatus001, TestSize.Level1)
+void DmsContinueConditionMgrTest::InitMissionMap()
 {
-    DTEST_LOG << "DMSContinueManagerTest testUpdateMissionStatus001 start" << std::endl;
+    DmsContinueConditionMgr::GetInstance().missionMap_.clear();
     int32_t missionId = 1;
     MissionStatus status {
         .missionId = missionId, .bundleName = "bundleName", .moduleName = "moduleName",
@@ -59,6 +57,19 @@ HWTEST_F(DmsContinueConditionMgrTest, testUpdateMissionStatus001, TestSize.Level
 
     int32_t accountId = 0;
     DmsContinueConditionMgr::GetInstance().missionMap_[accountId] = missionList;
+}
+
+/**
+ * @tc.name: testUpdateMissionStatus001
+ * @tc.desc: test UpdateMissionStatus
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, testUpdateMissionStatus001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testUpdateMissionStatus001 start" << std::endl;
+    InitMissionMap();
+    int32_t missionId = 1;
+    int32_t accountId = 0;
     MissionEventType type = MISSION_EVENT_UNFOCUSED;
     auto ret = DmsContinueConditionMgr::GetInstance().UpdateMissionStatus(accountId, missionId, type);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
@@ -86,15 +97,9 @@ HWTEST_F(DmsContinueConditionMgrTest, testUpdateMissionStatus001, TestSize.Level
 HWTEST_F(DmsContinueConditionMgrTest, testOnMissionDestory001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testOnMissionDestory001 start" << std::endl;
+    InitMissionMap();
     int32_t missionId = 1;
-    MissionStatus status {
-        .missionId = missionId, .bundleName = "bundleName", .moduleName = "moduleName",
-        .abilityName = "abilityName",  .isContinuable = true, };
-    std::map<int32_t, MissionStatus> missionList;
-    missionList[missionId] = status;
-
     int32_t accountId = 0;
-    DmsContinueConditionMgr::GetInstance().missionMap_[accountId] = missionList;
     auto ret = DmsContinueConditionMgr::GetInstance().OnMissionDestory(accountId, missionId);
     EXPECT_EQ(ret, ERR_OK);
 
@@ -119,14 +124,7 @@ HWTEST_F(DmsContinueConditionMgrTest, testOnMissionActive001, TestSize.Level1)
     auto ret = DmsContinueConditionMgr::GetInstance().OnMissionActive(accountId, missionId);
     EXPECT_EQ(ret, ERR_OK);
 
-    MissionStatus status {
-        .missionId = missionId, .bundleName = "bundleName", .moduleName = "moduleName",
-        .abilityName = "abilityName",  .isContinuable = true, };
-    std::map<int32_t, MissionStatus> missionList;
-    missionList[missionId] = status;
-
-    DmsContinueConditionMgr::GetInstance().missionMap_[accountId] = missionList;
-
+    InitMissionMap();
     ret = DmsContinueConditionMgr::GetInstance().OnMissionActive(accountId, missionId);
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(DmsContinueConditionMgr::GetInstance().missionMap_[accountId][missionId].continueState,
@@ -149,14 +147,7 @@ HWTEST_F(DmsContinueConditionMgrTest, testOnMissionInactive001, TestSize.Level1)
     auto ret = DmsContinueConditionMgr::GetInstance().OnMissionInactive(accountId, missionId);
     EXPECT_EQ(ret, ERR_OK);
 
-    MissionStatus status {
-        .missionId = missionId, .bundleName = "bundleName", .moduleName = "moduleName",
-        .abilityName = "abilityName",  .isContinuable = true, };
-    std::map<int32_t, MissionStatus> missionList;
-    missionList[missionId] = status;
-
-    DmsContinueConditionMgr::GetInstance().missionMap_[accountId] = missionList;
-
+    InitMissionMap();
     ret = DmsContinueConditionMgr::GetInstance().OnMissionInactive(accountId, missionId);
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(DmsContinueConditionMgr::GetInstance().missionMap_[accountId][missionId].continueState,
@@ -245,6 +236,177 @@ HWTEST_F(DmsContinueConditionMgrTest, testTypeEnumToString001, TestSize.Level1)
     ret = DmsContinueConditionMgr::GetInstance().TypeEnumToString(type);
     EXPECT_EQ(ret, "UNDEFINED");
     DTEST_LOG << "DMSContinueManagerTest testTypeEnumToString001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testCheckSendFocusedCondition001
+ * @tc.desc: test CheckSendFocusedCondition
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, testCheckSendFocusedCondition001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testCheckSendFocusedCondition001 start" << std::endl;
+    MissionStatus status;
+    status.isContinuable = false;
+    status.bundleName = "bundleName";
+    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
+    DmsKvSyncE2E::GetInstance()->isCfgDevices_ = true;
+    auto ret = DmsContinueConditionMgr::GetInstance().CheckSendFocusedCondition(status);
+    EXPECT_FALSE(ret);
+
+    status.isContinuable = true;
+    status.continueState = AAFwk::ContinueState::CONTINUESTATE_INACTIVE;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendFocusedCondition(status);
+    EXPECT_FALSE(ret);
+
+    status.continueState = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendFocusedCondition(status);
+    EXPECT_FALSE(ret);
+
+    DmsKvSyncE2E::GetInstance()->isCfgDevices_ = false;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendFocusedCondition(status);
+    EXPECT_TRUE(ret);
+    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
+    DTEST_LOG << "DMSContinueManagerTest testCheckSendFocusedCondition001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testCheckSendUnfocusedCondition001
+ * @tc.desc: test CheckSendUnfocusedCondition
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, testCheckSendUnfocusedCondition001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testCheckSendUnfocusedCondition001 start" << std::endl;
+    MissionStatus status;
+    status.isFocused = false;
+    status.bundleName = "bundleName";
+    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
+    DmsKvSyncE2E::GetInstance()->isCfgDevices_ = true;
+    auto ret = DmsContinueConditionMgr::GetInstance().CheckSendUnfocusedCondition(status);
+    EXPECT_FALSE(ret);
+
+    status.isFocused = true;
+    status.isContinuable = false;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendUnfocusedCondition(status);
+    EXPECT_FALSE(ret);
+
+    status.isContinuable = true;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendUnfocusedCondition(status);
+    EXPECT_FALSE(ret);
+
+    DmsKvSyncE2E::GetInstance()->isCfgDevices_ = false;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendUnfocusedCondition(status);
+    EXPECT_TRUE(ret);
+    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
+    DTEST_LOG << "DMSContinueManagerTest testCheckSendUnfocusedCondition001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testCheckSendActiveCondition001
+ * @tc.desc: test CheckSendActiveCondition
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, testCheckSendActiveCondition001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testCheckSendActiveCondition001 start" << std::endl;
+    MissionStatus status;
+    status.isFocused = false;
+    status.bundleName = "bundleName";
+    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
+    DmsKvSyncE2E::GetInstance()->isCfgDevices_ = true;
+    auto ret = DmsContinueConditionMgr::GetInstance().CheckSendActiveCondition(status);
+    EXPECT_FALSE(ret);
+
+    status.isFocused = true;
+    status.isContinuable = false;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendActiveCondition(status);
+    EXPECT_FALSE(ret);
+
+    status.isContinuable = true;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendActiveCondition(status);
+    EXPECT_FALSE(ret);
+
+    DmsKvSyncE2E::GetInstance()->isCfgDevices_ = false;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendActiveCondition(status);
+    EXPECT_TRUE(ret);
+    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
+    DTEST_LOG << "DMSContinueManagerTest testCheckSendActiveCondition001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testCheckSendInactiveCondition001
+ * @tc.desc: test CheckSendInactiveCondition
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, testCheckSendInactiveCondition001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testCheckSendInactiveCondition001 start" << std::endl;
+    MissionStatus status;
+    status.isContinuable = false;
+    status.bundleName = "bundleName";
+    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
+    DmsKvSyncE2E::GetInstance()->isCfgDevices_ = true;
+    auto ret = DmsContinueConditionMgr::GetInstance().CheckSendInactiveCondition(status);
+    EXPECT_FALSE(ret);
+
+    status.isContinuable = true;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendInactiveCondition(status);
+    EXPECT_FALSE(ret);
+
+    DmsKvSyncE2E::GetInstance()->isCfgDevices_ = false;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendInactiveCondition(status);
+    EXPECT_TRUE(ret);
+    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
+    DTEST_LOG << "DMSContinueManagerTest testCheckSendInactiveCondition001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testCheckMissionSendCondition001
+ * @tc.desc: test CheckMissionSendCondition
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, testCheckMissionSendCondition001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testCheckMissionSendCondition001 start" << std::endl;
+    DmsContinueConditionMgr::GetInstance().conditionFuncMap_.clear();
+    MissionStatus status;
+    MissionEventType type = MISSION_EVENT_FOCUSED;
+    auto ret = DmsContinueConditionMgr::GetInstance().CheckMissionSendCondition(status, type);
+    EXPECT_FALSE(ret);
+
+    DmsContinueConditionMgr::GetInstance().conditionFuncMap_[MISSION_EVENT_FOCUSED] =
+        &DmsContinueConditionMgr::CheckSendFocusedCondition;
+
+    ret = DmsContinueConditionMgr::GetInstance().CheckMissionSendCondition(status, type);
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "DMSContinueManagerTest testCheckMissionSendCondition001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testGetMissionIdByBundleName001
+ * @tc.desc: test GetMissionIdByBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, testGetMissionIdByBundleName001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testGetMissionIdByBundleName001 start" << std::endl;
+    int32_t accountId = 0;
+    std::string bundleName = "bundleName";
+    int32_t missionId = 1;
+    InitMissionMap();
+    auto ret = DmsContinueConditionMgr::GetInstance().GetMissionIdByBundleName(accountId, bundleName, missionId);
+    EXPECT_EQ(missionId, 1);
+    EXPECT_EQ(ret, ERR_OK);
+
+    bundleName = "bundleName2";
+    ret = DmsContinueConditionMgr::GetInstance().GetMissionIdByBundleName(accountId, bundleName, missionId);
+    EXPECT_EQ(ret, MISSION_NOT_FOCUSED);
+
+    accountId = 1;
+    ret = DmsContinueConditionMgr::GetInstance().GetMissionIdByBundleName(accountId, bundleName, missionId);
+    EXPECT_EQ(ret, MISSION_NOT_FOCUSED);
+    DTEST_LOG << "DMSContinueManagerTest testGetMissionIdByBundleName001 end" << std::endl;
 }
 }
 }

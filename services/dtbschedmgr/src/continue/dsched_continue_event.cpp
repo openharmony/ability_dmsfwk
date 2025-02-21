@@ -466,13 +466,13 @@ bool DSchedContinueDataCmd::UnmarshalWantParcel(cJSON* rootValue)
     int32_t ret = Base64StrToParcel(wantStr->valuestring, wantParcel);
     if (ret != ERR_OK) {
         HILOGE("Want parcel Base64Str unmarshal fail, ret %{public}d.", ret);
-        return INVALID_PARAMETERS_ERR;
+        return false;
     }
 
     auto wantPtr = AAFwk::Want::Unmarshalling(wantParcel);
     if (wantPtr == nullptr) {
         HILOGE("Want unmarshalling fail, check return null.");
-        return INVALID_PARAMETERS_ERR;
+        return false;
     }
     want_ = *wantPtr;
     return true;
