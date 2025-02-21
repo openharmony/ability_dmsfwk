@@ -101,6 +101,7 @@ int32_t SoftbusFileAdpater::CreateParentDirs(const char* filename)
         return -CREATE_DIR_FAILED;
     }
     int32_t ret = ERR_OK;
+    pos = 0;
     while ((pos = path.find_first_of('/', pos + 1)) != std::string::npos) {
         std::string dir = path.substr(0, pos);
         ret = CreateDir(dir);
