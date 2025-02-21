@@ -32,6 +32,8 @@ IMPLEMENT_SINGLE_INSTANCE(SoftbusFileAdpater);
 
 namespace {
     static const std::string TAG = "SoftbusFileAdpaterInner";
+    static constexpr int32_t SUCCESS_CODE = 0;
+    static constexpr int32_t TEMP_DIR_PERMISSION = 0700;
 }
 
 static int OpenFile(const char* filename, int32_t flag, int32_t mode)
@@ -78,9 +80,55 @@ int32_t SoftbusFileAdpater::Open(const char* filename, int32_t flag, int32_t mod
             HILOGE("get real path failed, %{public}s, err=%{public}d", filename, errno);
             return -INVALID_FILE_NAME;
         }
+        // not exist dir, create
+        int32_t ret = CreateParentDirs(filename);
+        if (ret != ERR_OK) {
+            return ret;
+        }
         return open(filename, flag, mode);
     }
     return open(realPath, flag, mode);
+}
+
+int32_t SoftbusFileAdpater::CreateParentDirs(const char* filename)
+{
+    HILOGI("create all parent dirs");
+    std::string path(filename);
+    size_t pos = 0;
+    // forbid contain relative
+    while ((pos = path.find("../", pos)) != std::string::npos) {
+        HILOGE("contain invalid relative path %{public}s", path.c_str());
+        return -CREATE_DIR_FAILED;
+    }
+    int32_t ret = ERR_OK;
+    pos = 0;
+    while ((pos = path.find_first_of('/', pos + 1)) != std::string::npos) {
+        std::string dir = path.substr(0, pos);
+        ret = CreateDir(dir);
+        if (ret != ERR_OK) {
+            return ret;
+        }
+    }
+    return ERR_OK;
+}
+
+int32_t SoftbusFileAdpater::CreateDir(const std::string& path)
+{
+    HILOGI("create dir");
+    char realPath[PATH_MAX] = {0};
+    if (realpath(path.c_str(), realPath) == nullptr) {
+        if (errno != ENOENT) {
+            HILOGE("get real path failed, %{public}s, err=%{public}d", path.c_str(), errno);
+            return -INVALID_FILE_NAME;
+        }
+        // valid path and not exist
+        int32_t ret = mkdir(path.c_str(), TEMP_DIR_PERMISSION);
+        if (ret != SUCCESS_CODE) {
+            HILOGE("create %{public}s failed, error=%{public}d", path.c_str(), ret);
+            return -CREATE_DIR_FAILED;
+        }
+    }
+    return ERR_OK;
 }
 
 int32_t SoftbusFileAdpater::Close(int32_t fd)
@@ -101,9 +149,13 @@ int32_t SoftbusFileAdpater::Remove(const char* filename)
         return -INVALID_FILE_NAME;
     }
     char realPath[PATH_MAX] = {0};
-    if (realpath(filename, realPath) == nullptr && errno != ENOENT) {
-        HILOGE("get real path failed, %{public}s, err=%{public}d", filename, errno);
-        return -INVALID_FILE_NAME;
+    if (realpath(filename, realPath) == nullptr) {
+        if (errno != ENOENT) {
+            HILOGE("get real path failed, %{public}s, err=%{public}d", filename, errno);
+            return -INVALID_FILE_NAME;
+        }
+        // file not exist
+        return ERR_OK;
     }
     return remove(filename);
 }
