@@ -20,7 +20,6 @@
 #include <map>
 #include <mutex>
 #include <string>
-#include <utility>
 
 #include "ability_manager_client.h"
 #include "single_instance.h"
