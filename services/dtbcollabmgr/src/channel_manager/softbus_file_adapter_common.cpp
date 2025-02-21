@@ -47,5 +47,17 @@ int32_t SoftbusFileAdpater::Remove(const char* filename)
     HILOGI("common empty SoftbusFileAdpater::Remove");
     return ERR_OK;
 }
+
+int32_t SoftbusFileAdpater::CreateParentDirs(const char* filename)
+{
+    HILOGI("create all parent dirs");
+    return ERR_OK;
+}
+
+int32_t SoftbusFileAdpater::CreateDir(const std::string& path)
+{
+    HILOGI("create dir");
+    return ERR_OK;
+}
 }
 }
