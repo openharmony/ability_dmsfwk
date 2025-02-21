@@ -299,6 +299,24 @@ std::shared_ptr<DmsDeviceInfo> DtbschedmgrDeviceInfoStorage::GetDeviceInfoById(c
     return devInfo;
 }
 
+bool DtbschedmgrDeviceInfoStorage::CheckNetworkIdByBundleName(const std::string& bundleName,
+    const std::string& networkId)
+{
+    HILOGI("called, bundleName: %{public}s", bundleName.c_str());
+    std::vector<DistributedHardware::DmDeviceInfo> dmDeviceInfoList;
+    int32_t errCode = DeviceManager::GetInstance().GetTrustedDeviceList(bundleName, "", dmDeviceInfoList);
+    if (errCode != ERR_OK || dmDeviceInfoList.empty()) {
+        HILOGE("Get device manager trusted device list fail, errCode %{public}d", errCode);
+        return false;
+    }
+    for (auto dmDeviceInfo : dmDeviceInfoList) {
+        if (dmDeviceInfo.networkId == networkId) {
+            return true;
+        }
+    }
+    return false;
+}
+
 std::string DtbschedmgrDeviceInfoStorage::GetUuidByNetworkId(const std::string& networkId)
 {
     if (networkId.empty()) {

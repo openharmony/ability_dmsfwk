@@ -60,6 +60,13 @@ public:
     std::shared_ptr<DmsDeviceInfo> GetDeviceInfoById(const std::string& networkId);
 
     /**
+     * @description: Check if there is an application level binding relationship between devices
+     * @param bundleName Indicates the bundle name to check
+     * @return Returns true if bound; returns false otherwise
+     */
+    bool CheckNetworkIdByBundleName(const std::string& bundleName, const std::string& networkId);
+
+    /**
      * get uuid by networkId
      *
      * @param networkId
