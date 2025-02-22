@@ -233,6 +233,8 @@ enum {
     CONNECT_SEND_FILE_CHANNEL_FAILED,
 
     SAME_SESSION_IS_CONNECTING,
+
+    INVALID_SESSION_ID,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

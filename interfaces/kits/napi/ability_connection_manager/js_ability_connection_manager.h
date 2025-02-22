@@ -32,6 +32,7 @@ struct AsyncConnectCallbackInfo {
     napi_deferred deferred = nullptr;
     napi_threadsafe_function tsfn = nullptr;
     int32_t sessionId;
+    int32_t funResult;
     ConnectResult result;
 };
 
