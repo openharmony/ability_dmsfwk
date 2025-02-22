@@ -64,7 +64,8 @@ enum class MessageType : uint32_t  {
     STREAM_ENCODING,
     CONNECT_FILE_CHANNEL,
     FILE_CHANNEL_CONNECT_SUCCESS,
-    FILE_CHANNEL_CONNECT_FAILED
+    FILE_CHANNEL_CONNECT_FAILED,
+    SESSION_CONNECT_SUCCESS,
 };
 
 typedef enum {
@@ -158,6 +159,7 @@ public:
     int32_t ConnectStreamChannel();
     void UpdateEngineTransChannel();
     int32_t RegisterEventCallback(const std::shared_ptr<IAbilityConnectionSessionListener>& listener);
+    int32_t UnregisterEventCallback();
     std::string GetServerToken();
     
 private:
@@ -199,6 +201,9 @@ private:
     void ConnectFileChannel(const std::string& peerSocketName);
     void HandleSessionConnect();
     std::string CreateDmsServerToken();
+    void InitMessageHandlerMap();
+    int32_t RequestReceiveFileChannelConnection();
+    void NotifyPeerSessionConnected();
 
 private:
     class CollabChannelListener : public IChannelListener {
@@ -269,7 +274,10 @@ private:
     std::shared_ptr<IEngineListener> pixelMapListener = nullptr;
     EngineState recvEngineState_ = EngineState::EMPTY;
 
+    std::shared_mutex sessionListenerMutex_;
     std::shared_ptr<IAbilityConnectionSessionListener> sessionListener_ = nullptr;
+
+    std::map<uint32_t, std::function<void(const std::string&)>> messageHandlerMap_;
 };
 } // namespace DistributedCollab
 } // namespace OHOS

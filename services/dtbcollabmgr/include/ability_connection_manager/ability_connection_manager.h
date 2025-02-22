@@ -71,6 +71,7 @@ public:
     int32_t NotifyWifiOpen(int32_t sessionId);
     int32_t RegisterEventCallback(int32_t sessionId,
         const std::shared_ptr<IAbilityConnectionSessionListener>& listener);
+    int32_t UnregisterEventCallback(int32_t sessionId);
     int32_t UpdateClientSession(const AbilityConnectionSessionInfo& sessionInfo,
         const int32_t sessionId);
     int32_t DeleteClientSession(const AbilityConnectionSessionInfo& sessionInfo);
