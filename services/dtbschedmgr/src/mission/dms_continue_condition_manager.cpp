@@ -316,6 +316,8 @@ int32_t DmsContinueConditionMgr::OnMissionUnfocused(int32_t accountId, int32_t m
         return CONDITION_INVALID_MISSION_ID;
     }
     missionMap_[accountId][missionId].isFocused = false;
+    lastFocusMission_.first = accountId;
+    lastFocusMission_.second = missionMap_[accountId][missionId];
     HILOGI("missionMap update finished! status: %{public}s", missionMap_[accountId][missionId].ToString().c_str());
     return ERR_OK;
 }
@@ -550,11 +552,30 @@ int32_t DmsContinueConditionMgr::GetMissionIdByBundleName(
     }
 
     for (const auto& record : missionMap_[accountId]) {
-        if (record.second.bundleName == bundleName) {
+        if (record.second.isFocused) {
             missionId = record.first;
-            return ERR_OK;
+            break;
         }
     }
+    HILOGI("GetMissionIdByBundleName current focused missionId: %{public}d", missionId);
+    MissionStatus missionStatus = missionMap_[accountId][missionId];
+    if (missionStatus.bundleName == bundleName && missionStatus.isContinuable) {
+        HILOGI("GetMissionIdByBundleName got missionId: %{public}d", missionId);
+        return ERR_OK;
+    }
+    HILOGW("GetMissionIdByBundleName current focused missionId(%{public}d) "
+        "is not belong to bundle: %{public}s; or it's isContinuable is %{public}s. "
+        "try to get last focused mission id",
+        missionId, bundleName.c_str(), missionStatus.isContinuable ? "true" : "false");
+
+    if (lastFocusMission_.second.bundleName == bundleName && lastFocusMission_.second.isContinuable) {
+        missionId = lastFocusMission_.second.missionId;
+        HILOGI("GetMissionIdByBundleName got missionId: %{public}d", missionId);
+        return ERR_OK;
+    }
+    HILOGE("GetMissionIdByBundleName last focused missionId(%{public}d) "
+           "is not belong to bundle: %{public}s; or it's isContinuable is %{public}s.",
+           missionId, bundleName.c_str(), lastFocusMission_.second.isContinuable ? "true" : "false");
     return MISSION_NOT_FOCUSED;
 }
 

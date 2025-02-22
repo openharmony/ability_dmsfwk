@@ -139,6 +139,7 @@ private:
 
     std::mutex missionMutex_;
     std::map<int32_t, std::map<int32_t, MissionStatus>> missionMap_;
+    std::pair<int32_t, MissionStatus> lastFocusMission_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
