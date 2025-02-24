@@ -828,6 +828,52 @@ HWTEST_F(DistributedBmStorageTest, GetDistributedBundleInfoTest_002, TestSize.Le
 }
 
 /**
+ * @tc.name: GetDistributeInfosByNetworkIdTest_001
+ * @tc.desc: test GetDistributeInfosByNetworkId
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, GetDistributeInfosByNetworkIdTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest GetDistributeInfosByNetworkIdTest_001 start" << std::endl;
+    auto distributedDataStorage = GetDmsBmStorage();
+    ASSERT_NE(distributedDataStorage, nullptr);
+    std::string networkId = "networkId";
+    std::vector<DmsBundleInfo> infos;
+    bool ret = dmsBmStorage_->GetDistributeInfosByNetworkId(networkId, infos);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedBmStorageTest GetDistributeInfosByNetworkIdTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetDistributeInfosByNetworkIdTest_002
+ * @tc.desc: test GetDistributeInfosByNetworkId
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, GetDistributeInfosByNetworkIdTest_002, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest GetDistributeInfosByNetworkIdTest_002 start" << std::endl;
+    auto distributedDataStorage = GetDmsBmStorage();
+    ASSERT_NE(distributedDataStorage, nullptr);
+    std::string networkId = "networkId";
+    std::vector<DmsBundleInfo> infos;
+    g_mockGetUdidByNetworkId = "udid";
+    g_mockGetUuidByNetworkId = "uuid";
+    bool ret = dmsBmStorage_->GetDistributeInfosByNetworkId(networkId, infos);
+    EXPECT_EQ(ret, false);
+
+    g_mockGetUdidByNetworkId = "";
+    g_mockGetUuidByNetworkId = "uuid";
+    ret = dmsBmStorage_->GetDistributeInfosByNetworkId(networkId, infos);
+    EXPECT_EQ(ret, false);
+
+    g_mockGetUdidByNetworkId = "udid";
+    g_mockGetUuidByNetworkId = "";
+    ret = dmsBmStorage_->GetDistributeInfosByNetworkId(networkId, infos);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedBmStorageTest GetDistributeInfosByNetworkIdTest_002 end" << std::endl;
+}
+
+/**
  * @tc.name: GetLastBundleNameIdTest_001
  * @tc.desc: test GetLastBundleNameId
  * @tc.type: FUNC
@@ -844,23 +890,6 @@ HWTEST_F(DistributedBmStorageTest, GetLastBundleNameIdTest_001, TestSize.Level1)
         EXPECT_EQ(ret, true);
     }
     DTEST_LOG << "DistributedBmStorageTest GetLastBundleNameIdTest_001 end" << std::endl;
-}
-
-/**
- * @tc.name: GetAvailableRecommendListTest_001
- * @tc.desc: test GetAvailableRecommendList
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedBmStorageTest, GetAvailableRecommendListTest_001, TestSize.Level1)
-{
-    DTEST_LOG << "DistributedBmStorageTest GetAvailableRecommendListTest_001 start" << std::endl;
-    auto distributedDataStorage = GetDmsBmStorage();
-    EXPECT_NE(distributedDataStorage, nullptr);
-    std::map<std::string, DmsBundleInfo> result;
-    std::string bundleName = "";
-    bool ret = dmsBmStorage_->GetAvailableRecommendList(bundleName, result);
-    EXPECT_EQ(ret, true);
-    DTEST_LOG << "DistributedBmStorageTest GetAvailableRecommendListTest_001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -42,6 +42,7 @@ const std::string JSON_KEY_DMS_CONTINUETYPE = "continueType";
 const std::string JSON_KEY_DMS_CONTINUETYPEID = "continueTypeId";
 const std::string JSON_KEY_DMS_USERID = "userIdArr";
 const std::string JSON_KEY_DMS_MODULENAME = "moduleName";
+const std::string JSON_KEY_DMS_CONTINUEBUNDLENAME = "continueBundleName";
 const std::string JSON_KEY_DMS_MAX_BUNDLENAME_ID = "maxBundleNameId";
 }
 
@@ -166,8 +167,9 @@ void to_json(nlohmann::json &jsonObject, const DmsAbilityInfo &dmsAbilityInfo)
     jsonObject = nlohmann::json {
         {JSON_KEY_DMS_ABILITY_NAME, dmsAbilityInfo.abilityName},
         {JSON_KEY_DMS_CONTINUETYPE, dmsAbilityInfo.continueType},
-         {JSON_KEY_DMS_CONTINUETYPEID, dmsAbilityInfo.continueTypeId},
-        {JSON_KEY_DMS_MODULENAME, dmsAbilityInfo.moduleName}
+        {JSON_KEY_DMS_CONTINUETYPEID, dmsAbilityInfo.continueTypeId},
+        {JSON_KEY_DMS_MODULENAME, dmsAbilityInfo.moduleName},
+        {JSON_KEY_DMS_CONTINUEBUNDLENAME, dmsAbilityInfo.continueBundleName}
     };
 }
 
@@ -207,6 +209,14 @@ void from_json(const nlohmann::json &jsonObject, DmsAbilityInfo &dmsAbilityInfo)
         false,
         parseResult,
         ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<std::string>>(jsonObject,
+        jsonObjectEnd,
+        JSON_KEY_DMS_CONTINUEBUNDLENAME,
+        dmsAbilityInfo.continueBundleName,
+        JsonType::ARRAY,
+        false,
+        parseResult,
+        ArrayType::STRING);
     if (parseResult != ERR_OK) {
         APP_LOGE("read module moduleInfo from jsonObject error, error code : %{public}d", parseResult);
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -510,6 +510,43 @@ bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId, const 
     return true;
 }
 
+bool DmsBmStorage::GetDistributeInfosByNetworkId(const std::string &networkId, std::vector<DmsBundleInfo> &infos)
+{
+    HILOGD("networkId: %{public}s", GetAnonymStr(networkId).c_str());
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return false;
+    }
+    std::string udid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(networkId);
+    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(networkId);
+    if (udid == "" || uuid == "") {
+        HILOGE("can not get udid or uuid");
+        return false;
+    }
+    HILOGI("uuid: %{public}s", GetAnonymStr(uuid).c_str());
+    std::vector<Entry> remoteEntries;
+    Status status = kvStorePtr_->GetDeviceEntries(uuid, remoteEntries);
+    if (remoteEntries.empty() || status != Status::SUCCESS) {
+        HILOGE("GetDeviceEntries error: %{public}d or remoteEntries is empty", status);
+        return false;
+    }
+
+    std::string keyOfPublic = udid + AppExecFwk::Constants::FILE_UNDERLINE + PUBLIC_RECORDS;
+    for (auto& entry: remoteEntries) {
+        std::string key = entry.key.ToString();
+        std::string value = entry.value.ToString();
+        if (key.find(keyOfPublic) != std::string::npos) {
+            continue;
+        }
+        DmsBundleInfo info;
+        if (info.FromJsonString(value)) {
+            infos.push_back(info);
+        }
+    }
+    HILOGD("end.");
+    return true;
+}
+
 Status DmsBmStorage::GetResultSatus(std::promise<OHOS::DistributedKv::Status> &resultStatusSignal)
 {
     auto future = resultStatusSignal.get_future();
@@ -758,7 +795,9 @@ DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::Bun
             dmsAbilityInfo.continueTypeId.push_back(pos++);
         }
         dmsAbilityInfo.moduleName = abilityInfo.moduleName;
-        dmsAbilityInfo.continueBundleName = abilityInfo.continueBundleNames;
+        for (const auto &item: abilityInfo.continueBundleNames) {
+            dmsAbilityInfo.continueBundleName.push_back(item);
+        }
         distributedBundleInfo.dmsAbilityInfos.push_back(dmsAbilityInfo);
     }
     return distributedBundleInfo;
@@ -1202,25 +1241,6 @@ bool DmsBmStorage::GetContinueEventInfo(const std::string &networkId, const std:
     }
     HILOGE("Can't find ContinueInfo!");
     return false;
-}
-
-bool DmsBmStorage::GetAvailableRecommendList(const std::string &bundleName,
-    std::map<std::string, DmsBundleInfo>& availableList)
-{
-    HILOGD("called, bundleName: %{public}s,", bundleName.c_str());
-    std::vector<std::string> networkIdList = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdList();
-    for (const std::string networkId : networkIdList) {
-        DmsBundleInfo info;
-        if (!GetStorageDistributeInfo(networkId, bundleName, info)) {
-            HILOGE("GetStorageDistributeInfo failed, networkId %{public}s, bundleName %{public}s",
-                GetAnonymStr(networkId).c_str(), bundleName.c_str());
-            return false;
-        }
-        if (!info.bundleName.empty()) {
-            availableList[networkId] = info;
-        }
-    }
-    return true;
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

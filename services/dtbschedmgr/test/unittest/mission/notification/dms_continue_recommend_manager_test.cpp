@@ -178,5 +178,49 @@ HWTEST_F(DMSContinueRecomMgrTest, testGetRecommendInfo001, TestSize.Level1)
     recomMgr->UnInit();
     DTEST_LOG << "DMSContinueRecomMgrTest testGetRecommendInfo001 end" << std::endl;
 }
+
+/**
+ * @tc.name: GetAvailableRecommendListTest_001
+ * @tc.desc: test GetAvailableRecommendList
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueRecomMgrTest, GetAvailableRecommendListTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecomMgrTest GetAvailableRecommendListTest_001 start" << std::endl;
+    auto recomMgr = MultiUserManager::GetInstance().GetCurrentRecomMgr();
+    ASSERT_NE(nullptr, recomMgr);
+    int32_t accountId = 100;
+    recomMgr->Init(accountId);
+    usleep(WAITTIME);
+
+    std::map<std::string, DmsBundleInfo> result;
+    std::string bundleName = "";
+    bool ret = recomMgr->GetAvailableRecommendList(bundleName, result);
+    EXPECT_EQ(ret, true);
+    recomMgr->UnInit();
+    DTEST_LOG << "DMSContinueRecomMgrTest GetAvailableRecommendListTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: IsContinuableWithDiffBundleTest_001
+ * @tc.desc: test IsContinuableWithDiffBundle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueRecomMgrTest, IsContinuableWithDiffBundleTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecomMgrTest IsContinuableWithDiffBundleTest_001 start" << std::endl;
+    auto recomMgr = MultiUserManager::GetInstance().GetCurrentRecomMgr();
+    ASSERT_NE(nullptr, recomMgr);
+    int32_t accountId = 100;
+    recomMgr->Init(accountId);
+    usleep(WAITTIME);
+
+    DmsBundleInfo info;
+    std::string bundleName = "";
+    bool ret = recomMgr->IsContinuableWithDiffBundle(bundleName, info);
+    EXPECT_EQ(ret, false);
+    recomMgr->UnInit();
+    DTEST_LOG << "DMSContinueRecomMgrTest IsContinuableWithDiffBundleTest_001 end" << std::endl;
+}
 } // DistributedSchedule
 } // namespace OHOS
