@@ -179,6 +179,12 @@ int32_t AVReceiverEngine::Configure(const StreamParam& recParam)
     if (isVideoParam(recParam)) {
         recParam.Configure(videoDecFormat_, ConfigureMode::Decode);
     }
+
+    if (receiverFilter_ == nullptr) {
+        HILOGE("filter not init");
+        return static_cast<int32_t>(Status::ERROR_NULL_POINTER);
+    }
+
     receiverFilter_->SetParameter(videoDecFormat_);
     ChangeState(EngineState::SETTING);
     return static_cast<int32_t>(Status::OK);

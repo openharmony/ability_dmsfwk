@@ -120,7 +120,7 @@ struct ContinueEventData {
 };
 
 struct StateCallbackInfo {
-    int32_t missionId;
+    int32_t missionId = -1;
     std::string bundleName;
     std::string moduleName;
     std::string abilityName;
