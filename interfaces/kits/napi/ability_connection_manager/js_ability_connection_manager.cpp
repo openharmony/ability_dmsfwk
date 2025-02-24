@@ -797,6 +797,11 @@ void JsAbilityConnectionManager::ConnectThreadsafeFunctionCallback(napi_env env,
     void* context, void* data)
 {
     HILOGI("called.");
+    if (data == nullptr) {
+        HILOGE("Async data is null");
+        return;
+    }
+
     AsyncConnectCallbackInfo* asyncData = static_cast<AsyncConnectCallbackInfo*>(data);
     napi_value connectResultObj;
     napi_create_object(env, &connectResultObj);
@@ -833,12 +838,30 @@ void JsAbilityConnectionManager::ExecuteConnect(napi_env env, void *data)
             HILOGE("Failed to create async work. status is %{public}d", static_cast<int32_t>(status));
         }
     };
-    AbilityConnectionManager::GetInstance().ConnectSession(asyncData->sessionId, connectCallback);
+    asyncData->funResult = AbilityConnectionManager::GetInstance().ConnectSession(
+        asyncData->sessionId, connectCallback);
 }
 
 void JsAbilityConnectionManager::CompleteAsyncConnectWork(napi_env env, napi_status status, void* data)
 {
-    HILOGD("called.");
+    HILOGI("called.");
+    if (data == nullptr) {
+        HILOGE("Async data is null");
+        return;
+    }
+
+    AsyncConnectCallbackInfo* asyncData = static_cast<AsyncConnectCallbackInfo*>(data);
+    HILOGI("start connect result is %{public}d", asyncData->funResult);
+    if (asyncData->funResult == INVALID_SESSION_ID) {
+        HILOGE("failed to start connect.");
+        napi_status status = napi_reject_deferred(env, asyncData->deferred,
+            CreateBusinessError(env, ERR_INVALID_PARAMETERS, false));
+        if (status != napi_ok) {
+            HILOGE("Failed to throw error. status is %{public}d", static_cast<int32_t>(status));
+        }
+        napi_delete_async_work(env, asyncData->asyncWork);
+        delete asyncData;
+    }
 }
 
 napi_value JsAbilityConnectionManager::DisConnect(napi_env env, napi_callback_info info)
@@ -868,6 +891,11 @@ napi_value JsAbilityConnectionManager::DisConnect(napi_env env, napi_callback_in
 void JsAbilityConnectionManager::CompleteAsyncWork(napi_env env, napi_status status, void* data)
 {
     HILOGI("called.");
+    if (data == nullptr) {
+        HILOGE("Async data is null");
+        return;
+    }
+
     AsyncCallbackInfo* asyncData = static_cast<AsyncCallbackInfo*>(data);
     if (asyncData->result == ERR_OK) {
         napi_value result;
@@ -1288,6 +1316,11 @@ void JsAbilityConnectionManager::ExecuteCreateStream(napi_env env, void *data)
 void JsAbilityConnectionManager::CompleteAsyncCreateStreamWork(napi_env env, napi_status status, void* data)
 {
     HILOGI("called.");
+    if (data == nullptr) {
+        HILOGE("Async data is null");
+        return;
+    }
+
     AsyncCallbackInfo* asyncData = static_cast<AsyncCallbackInfo*>(data);
     if (asyncData->result == ERR_OK) {
         napi_value result;
