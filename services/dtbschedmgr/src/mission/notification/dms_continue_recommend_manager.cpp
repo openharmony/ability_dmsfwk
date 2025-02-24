@@ -37,7 +37,7 @@ void DMSContinueRecomMgr::Init(int32_t currentAccountId)
     {
         std::unique_lock<std::mutex> lock(hasInitMutex_);
         if (hasInit_) {
-            HILOGW("Init DMSContinueRecomMgr has init");
+            HILOGW("DMSContinueRecomMgr has inited");
             return;
         }
         hasInit_ = true;
@@ -83,11 +83,11 @@ void DMSContinueRecomMgr::UnInit()
     HILOGI("UnInit start");
     {
         std::unique_lock<std::mutex> lock(hasInitMutex_);
-        if (hasInit_) {
-            HILOGW("Init DMSContinueRecomMgr has init");
+        if (!hasInit_) {
+            HILOGW("DMSContinueRecomMgr has uninited");
             return;
         }
-        hasInit_ = true;
+        hasInit_ = false;
     }
     CHECK_POINTER_RETURN(eventHandler_, "eventHandler_");
     if (eventHandler_->GetEventRunner() != nullptr) {
