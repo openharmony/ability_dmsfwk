@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -126,6 +126,30 @@ int32_t DistributedClient::NotifyRejectReason(const std::string& token, const st
     PARCEL_WRITE_HELPER(data, String, reason);
     MessageParcel reply;
     PARCEL_TRANSACT_SYNC_RET_INT(remote, NOTIFY_REJECT_REASON, data, reply);
+}
+
+int32_t DistributedClient::GetPeerVersion(int32_t sessionId, const std::string& peerDeviceId,
+    const std::string dmsServerToken)
+{
+    HILOGD("called.");
+    sptr<IRemoteObject> remote = GetDmsProxy();
+    if (remote == nullptr) {
+        HILOGW("remote is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        HILOGW("write token failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    
+    sptr<IAbilityConnectionManager> listener(new AbilityConnectionManagerListener);
+    PARCEL_WRITE_HELPER(data, Int32, sessionId);
+    PARCEL_WRITE_HELPER(data, String, peerDeviceId);
+    PARCEL_WRITE_HELPER(data, String, dmsServerToken);
+    PARCEL_WRITE_HELPER(data, RemoteObject, listener->AsObject());
+    MessageParcel reply;
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, GET_SINK_COLLAB_VERSION, data, reply);
 }
 }  // namespace AAFwk
 }  // namespace OHOS

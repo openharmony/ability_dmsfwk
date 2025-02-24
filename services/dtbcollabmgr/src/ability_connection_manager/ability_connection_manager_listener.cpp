@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,12 @@ int32_t AbilityConnectionManagerListener::NotifyWifiOpen(int32_t sessionId)
 {
     HILOGI("called.");
     return AbilityConnectionManager::GetInstance().NotifyWifiOpen(sessionId);
+}
+
+int32_t AbilityConnectionManagerListener::NotifyPeerVersion(int32_t sessionId, int32_t version)
+{
+    HILOGI("called.");
+    return AbilityConnectionManager::GetInstance().NotifyPeerVersion(sessionId, version);
 }
 }  // namespace DistributedCollab
 }  // namespace OHOS

@@ -86,8 +86,8 @@ HWTEST_F(DSchedCollabTest, DSchedCollab_001, TestSize.Level3)
     EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillOnce(Return(true)).WillOnce(Return(true));
 #endif
     int32_t softbusSessionId = 0;
-    auto startCmd = std::make_shared<SinkStartCmd>();
-    auto newCollab = std::make_shared<DSchedCollab>(startCmd, softbusSessionId);
+    auto getSinkCollabVersionCmd = std::make_shared<GetSinkCollabVersionCmd>();
+    auto newCollab = std::make_shared<DSchedCollab>(getSinkCollabVersionCmd, softbusSessionId);
     EXPECT_EQ(newCollab->softbusSessionId_, softbusSessionId);
     DTEST_LOG << "DSchedCollabTest DSchedCollab_001 end" << std::endl;
 }

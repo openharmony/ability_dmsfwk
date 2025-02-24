@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,12 +36,14 @@ public:
         const std::string& serverSocketName);
     int32_t NotifyCloseCollabSession(const std::string& token);
     int32_t NotifyRejectReason(const std::string& token, const std::string& reason);
+    int32_t GetPeerVersion(int32_t sessionId, const std::string& peerDeviceId, const std::string dmsServerToken);
     
     enum {
         COLLAB_MESSION = 330,
         NOTIFY_PREPARE_RESULT = 331,
         NOTIFY_REJECT_REASON = 332,
         BNOTIFY_CLOSE_COLLAB_SESSION = 333,
+        GET_SINK_COLLAB_VERSION = 335,
     };
 private:
     sptr<IRemoteObject> GetDmsProxy();
