@@ -108,6 +108,11 @@ struct ConnectOption : public Parcelable {
     bool ReadFromParcel(Parcel &parcel);
     bool Marshalling(Parcel &parcel) const override;
     static ConnectOption *Unmarshalling(Parcel &parcel);
+
+    bool HasFileTransfer() const
+    {
+        return needSendFile || needReceiveFile;
+    }
 };
 
 struct ConnectResult {

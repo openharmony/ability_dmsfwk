@@ -43,8 +43,6 @@ static constexpr uint16_t PROTOCOL_VERSION = 1;
 constexpr int32_t CHANNEL_NAME_LENGTH = 48;
 constexpr int32_t VIDEO_BIT_RATE = 640000;
 constexpr int32_t VIDEO_FRAME_RATE = 30;
-constexpr int32_t MIN_CHANNEL_ID = 1000;
-constexpr int32_t MAX_CHANNEL_ID = 5000;
 constexpr int32_t DEFAULT_APP_UID = 0;
 constexpr int32_t DEFAULT_APP_PID = 0;
 constexpr int32_t DEFAULT_INSTANCE_ID = 0;
@@ -60,10 +58,31 @@ AbilityConnectionSession::AbilityConnectionSession(int32_t sessionId, std::strin
     sessionInfo_ = sessionInfo;
     connectOption_ = opt;
     version_ = DSCHED_COLLAB_PROTOCOL_VERSION;
+    InitMessageHandlerMap();
 }
 
 AbilityConnectionSession::~AbilityConnectionSession()
 {
+}
+
+void AbilityConnectionSession::InitMessageHandlerMap()
+{
+    messageHandlerMap_[static_cast<uint32_t>(MessageType::NORMAL)] =
+        [this](const std::string& msg) { ExeuteMessageEventCallback(msg); };
+    messageHandlerMap_[static_cast<uint32_t>(MessageType::WIFI_OPEN)] =
+        [this](const std::string&) { ConnectStreamChannel(); };
+    messageHandlerMap_[static_cast<uint32_t>(MessageType::UPDATE_RECV_ENGINE_CHANNEL)] =
+        [this](const std::string&) { UpdateRecvEngineTransChannel(); };
+    messageHandlerMap_[static_cast<uint32_t>(MessageType::UPDATE_SENDER_ENGINE_CHANNEL)] =
+        [this](const std::string&) { UpdateSenderEngineTransChannel(); };
+    messageHandlerMap_[static_cast<uint32_t>(MessageType::CONNECT_FILE_CHANNEL)] =
+        [this](const std::string& msg) { ConnectFileChannel(msg); };
+    messageHandlerMap_[static_cast<uint32_t>(MessageType::FILE_CHANNEL_CONNECT_SUCCESS)] =
+        [this](const std::string&) { NotifyAppConnectResult(true); };
+    messageHandlerMap_[static_cast<uint32_t>(MessageType::FILE_CHANNEL_CONNECT_FAILED)] =
+        [this](const std::string&) { NotifyAppConnectResult(false); };
+    messageHandlerMap_[static_cast<uint32_t>(MessageType::SESSION_CONNECT_SUCCESS)] =
+        [this](const std::string&) { HandleSessionConnect(); };
 }
 
 void AbilityConnectionSession::Init()
@@ -254,23 +273,44 @@ int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::
         NotifyAppConnectResult(false, reason);
         return INVALID_PARAMETERS_ERR;
     }
-    
+
     if (InitChannels() != ERR_OK || ConnectChannels() != ERR_OK) {
         NotifyAppConnectResult(false);
         return INVALID_PARAMETERS_ERR;
     }
 
-    if (!connectOption_.needReceiveFile) {
-        NotifyAppConnectResult(true);
-        return ERR_OK;
+    if (connectOption_.needReceiveFile) {
+        return RequestReceiveFileChannelConnection();
+    }
+
+    NotifyPeerSessionConnected();
+    NotifyAppConnectResult(true);
+    return ERR_OK;
+}
+
+int32_t AbilityConnectionSession::RequestReceiveFileChannelConnection()
+{
+    HILOGI("notify the peer end bind file.");
+    int32_t ret = SendMessage(localSocketName_, MessageType::CONNECT_FILE_CHANNEL);
+    if (ret != ERR_OK) {
+        HILOGE("Failed to notify the file channel connection, ret = %{public}d", ret);
+        NotifyAppConnectResult(false);
+    }
+    return ret;
+}
+
+void AbilityConnectionSession::NotifyPeerSessionConnected()
+{
+    if (!connectOption_.HasFileTransfer()) {
+        HILOGI("No notification required.");
+        return;
     }
 
     HILOGI("notify the peer end bind file.");
-    if (SendMessage(localSocketName_, MessageType::CONNECT_FILE_CHANNEL) != ERR_OK) {
-        NotifyAppConnectResult(false);
-        return INVALID_PARAMETERS_ERR;
+    int32_t ret = SendMessage("SESSION_CONNECT_SUCCESS", MessageType::SESSION_CONNECT_SUCCESS);
+    if (ret != ERR_OK) {
+        HILOGE("Failed to notify the session connection result, ret = %{public}d", ret);
     }
-    return ERR_OK;
 }
 
 void AbilityConnectionSession::NotifyAppConnectResult(bool isConnected, const std::string& reason)
@@ -723,7 +763,19 @@ int32_t AbilityConnectionSession::UnregisterEventCallback(const std::string& eve
 int32_t AbilityConnectionSession::RegisterEventCallback(
     const std::shared_ptr<IAbilityConnectionSessionListener>& listener)
 {
+    if (listener == nullptr) {
+        HILOGE("listener empty");
+        return INVALID_LISTENER;
+    }
+    std::unique_lock<std::shared_mutex> lock(sessionListenerMutex_);
     sessionListener_ = listener;
+    return ERR_OK;
+}
+
+int32_t AbilityConnectionSession::UnregisterEventCallback()
+{
+    std::unique_lock<std::shared_mutex> lock(sessionListenerMutex_);
+    sessionListener_ = nullptr;
     return ERR_OK;
 }
 
@@ -816,7 +868,7 @@ int32_t AbilityConnectionSession::CreateChannel(const std::string& channelName, 
     int32_t channelId = isClientChannel ?
         channelManager.CreateClientChannel(channelName, dataType, channelPeerInfo) :
         channelManager.CreateServerChannel(channelName, dataType, channelPeerInfo);
-    if (channelId < MIN_CHANNEL_ID || channelId > MAX_CHANNEL_ID) {
+    if (!channelManager.isValidChannelId(channelId)) {
         HILOGE("CreateChannel failed, channelId is %{public}d", channelId);
         return INVALID_PARAMETERS_ERR;
     }
@@ -974,7 +1026,7 @@ void AbilityConnectionSession::OnChannelConnect(int32_t channelId)
     }
 
     UpdateTransChannelStatus(channelId, true);
-    if (IsAllChannelConnected() && !connectOption_.needSendFile) {
+    if (IsAllChannelConnected() && !connectOption_.HasFileTransfer()) {
         HandleSessionConnect();
     }
 }
@@ -988,10 +1040,15 @@ void AbilityConnectionSession::HandleSessionConnect()
         return;
     }
     sessionStatus_ = SessionStatus::CONNECTED;
-    
-    if (sessionListener_ != nullptr) {
+
+    std::shared_ptr<IAbilityConnectionSessionListener> listener;
+    {
+        std::shared_lock<std::shared_mutex> lock(sessionListenerMutex_);
+        listener = sessionListener_;
+    }
+    if (listener) {
         HILOGI("handler sessionListener");
-        sessionListener_->OnConnect(sessionId_);
+        listener->OnConnect(sessionId_);
     } else {
         EventCallbackInfo callbackInfo;
         callbackInfo.sessionId = sessionId_;
@@ -1041,9 +1098,14 @@ void AbilityConnectionSession::OnChannelClosed(int32_t channelId)
     HILOGI("notidy app disconnect");
     Disconnect();
 
-    if (sessionListener_ != nullptr) {
+    std::shared_ptr<IAbilityConnectionSessionListener> listener;
+    {
+        std::shared_lock<std::shared_mutex> lock(sessionListenerMutex_);
+        listener = sessionListener_;
+    }
+    if (listener) {
         HILOGI("handler sessionListener");
-        sessionListener_->OnDisConnect(sessionId_);
+        listener->OnDisConnect(sessionId_);
     } else {
         EventCallbackInfo callbackInfo;
         callbackInfo.sessionId = sessionId_;
@@ -1067,37 +1129,11 @@ void AbilityConnectionSession::OnMessageReceived(int32_t channelId, const std::s
     std::string msg(reinterpret_cast<const char *>(data + MessageDataHeader::HEADER_LEN),
         dataBuffer->Size() - MessageDataHeader::HEADER_LEN);
     HILOGI("headerPara type is %{public}d", headerPara->dataType_);
-    switch (headerPara->dataType_) {
-        case uint32_t(MessageType::NORMAL): {
-            return ExeuteMessageEventCallback(msg);
-        }
-        case uint32_t(MessageType::WIFI_OPEN): {
-            ConnectStreamChannel();
-            return;
-        }
-        case uint32_t(MessageType::UPDATE_RECV_ENGINE_CHANNEL): {
-            return UpdateRecvEngineTransChannel();
-        }
-        case uint32_t(MessageType::UPDATE_SENDER_ENGINE_CHANNEL): {
-            return UpdateSenderEngineTransChannel();
-        }
-        case uint32_t(MessageType::RECEIVE_STREAM_START): {
-            recvEngineState_ = EngineState::START;
-            return;
-        }
-        case uint32_t(MessageType::CONNECT_FILE_CHANNEL): {
-            return ConnectFileChannel(msg);
-        }
-        case uint32_t(MessageType::FILE_CHANNEL_CONNECT_SUCCESS): {
-            return NotifyAppConnectResult(true);
-        }
-        case uint32_t(MessageType::FILE_CHANNEL_CONNECT_FAILED): {
-            return NotifyAppConnectResult(false);
-        }
-        default: {
-            HILOGE("unhandled code");
-            return;
-        }
+    auto iter = messageHandlerMap_.find(headerPara->dataType_);
+    if (iter != messageHandlerMap_.end()) {
+        iter->second(msg);
+    } else {
+        HILOGE("unhandled code!");
     }
 }
 
@@ -1107,11 +1143,17 @@ void AbilityConnectionSession::OnSendFile(const int32_t channelId, const FileInf
     if (!IsVaildChannel(channelId)) {
         return;
     }
-    if (sessionListener_ == nullptr) {
-        HILOGE("sessionListener_ is nullptr");
+
+    std::shared_ptr<IAbilityConnectionSessionListener> listener;
+    {
+        std::shared_lock<std::shared_mutex> lock(sessionListenerMutex_);
+        listener = sessionListener_;
+    }
+    if (listener == nullptr) {
+        HILOGE("listener is nullptr");
         return;
     }
-    sessionListener_->OnSendFile(sessionId_, info);
+    listener->OnSendFile(sessionId_, info);
 }
 
 void AbilityConnectionSession::OnRecvFile(const int32_t channelId, const FileInfo& info)
@@ -1120,11 +1162,17 @@ void AbilityConnectionSession::OnRecvFile(const int32_t channelId, const FileInf
     if (!IsVaildChannel(channelId)) {
         return;
     }
-    if (sessionListener_ == nullptr) {
-        HILOGE("sessionListener_ is nullptr");
+
+    std::shared_ptr<IAbilityConnectionSessionListener> listener;
+    {
+        std::shared_lock<std::shared_mutex> lock(sessionListenerMutex_);
+        listener = sessionListener_;
+    }
+    if (listener == nullptr) {
+        HILOGE("listener is nullptr");
         return;
     }
-    sessionListener_->OnRecvFile(sessionId_, info);
+    listener->OnRecvFile(sessionId_, info);
 }
 
 const char* AbilityConnectionSession::GetRecvPath(const int32_t channelId)
@@ -1133,19 +1181,30 @@ const char* AbilityConnectionSession::GetRecvPath(const int32_t channelId)
     if (!IsVaildChannel(channelId)) {
         return nullptr;
     }
-    if (sessionListener_ == nullptr) {
-        HILOGE("sessionListener_ is nullptr");
+
+    std::shared_ptr<IAbilityConnectionSessionListener> listener;
+    {
+        std::shared_lock<std::shared_mutex> lock(sessionListenerMutex_);
+        listener = sessionListener_;
+    }
+    if (listener == nullptr) {
+        HILOGE("listener is nullptr");
         return nullptr;
     }
-    return sessionListener_->GetRecvPath(sessionId_);
+    return listener->GetRecvPath(sessionId_);
 }
 
 void AbilityConnectionSession::ExeuteMessageEventCallback(const std::string msg)
 {
     HILOGD("called.");
-    if (sessionListener_ != nullptr) {
+    std::shared_ptr<IAbilityConnectionSessionListener> listener;
+    {
+        std::shared_lock<std::shared_mutex> lock(sessionListenerMutex_);
+        listener = sessionListener_;
+    }
+    if (listener != nullptr) {
         HILOGI("handler sessionListener");
-        sessionListener_->OnMessage(sessionId_, msg);
+        listener->OnMessage(sessionId_, msg);
     } else {
         EventCallbackInfo callbackInfo;
         callbackInfo.sessionId = sessionId_;
@@ -1236,9 +1295,14 @@ void AbilityConnectionSession::OnBytesReceived(int32_t channelId, const std::sha
         return;
     }
 
-    if (sessionListener_ != nullptr) {
+    std::shared_ptr<IAbilityConnectionSessionListener> listener;
+    {
+        std::shared_lock<std::shared_mutex> lock(sessionListenerMutex_);
+        listener = sessionListener_;
+    }
+    if (listener != nullptr) {
         HILOGI("handler sessionListener");
-        sessionListener_->OnData(sessionId_, dataBuffer);
+        listener->OnData(sessionId_, dataBuffer);
     } else {
         EventCallbackInfo callbackInfo;
         callbackInfo.sessionId = sessionId_;

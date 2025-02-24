@@ -390,6 +390,18 @@ int32_t AbilityConnectionManager::RegisterEventCallback(int32_t sessionId,
     return connectionSesion->RegisterEventCallback(listener);
 }
 
+int32_t AbilityConnectionManager::UnregisterEventCallback(int32_t sessionId)
+{
+    HILOGD("called, sessionId is %{public}d", sessionId);
+    auto connectionSesion = GetAbilityConnectionSession(sessionId);
+    if (connectionSesion == nullptr) {
+        HILOGE("sessionId is invalid parameter");
+        return INVALID_PARAMETERS_ERR;
+    }
+    
+    return connectionSesion->UnregisterEventCallback();
+}
+
 int32_t AbilityConnectionManager::NotifyWifiOpen(int32_t sessionId)
 {
     HILOGI("called, sessionId is %{public}d", sessionId);
@@ -492,7 +504,7 @@ int32_t AbilityConnectionManager::UpdateServerSession(const AbilityConnectionSes
     auto iter = clientSessionMap_.find(sessionInfo);
     if (iter == clientSessionMap_.end()) {
         HILOGI("no same session is connecting.");
-        clientSessionMap_[sessionInfo] = sessionId;
+        serverSessionMap_[sessionInfo] = sessionId;
         return ERR_OK;
     }
  

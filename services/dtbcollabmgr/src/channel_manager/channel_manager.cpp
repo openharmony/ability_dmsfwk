@@ -458,7 +458,7 @@ int32_t ChannelManager::CreateClientSocket(const std::string& channelName,
     return sessionId;
 }
 
-inline bool ChannelManager::isValidChannelId(const int32_t channelId)
+bool ChannelManager::isValidChannelId(const int32_t channelId)
 {
     return channelId > CHANNEL_ID_GAP && channelId <= (FILE_START_ID + CHANNEL_ID_GAP);
 }
