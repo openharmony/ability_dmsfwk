@@ -522,16 +522,16 @@ HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalAccountInfo_Test_002, TestSize.L
     ASSERT_NE(data, nullptr);
     auto jsonStr = std::string(data);
     SinkStartCmd cmd;
-    auto ret = cmd.UnmarshalCallerInfo(jsonStr);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    auto ret = cmd.UnmarshalAccountInfo(jsonStr);
+    EXPECT_EQ(ret, ERR_OK);
     cJSON_free(data);
 
     cJSON_AddNumberToObject(rootValue, Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID.c_str(), 0);
     data = cJSON_Print(rootValue);
     ASSERT_NE(data, nullptr);
     jsonStr = std::string(data);
-    ret = cmd.UnmarshalCallerInfo(jsonStr);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    ret = cmd.UnmarshalAccountInfo(jsonStr);
+    EXPECT_EQ(ret, ERR_OK);
     cJSON_free(data);
     cJSON_Delete(rootValue);
     DTEST_LOG << "SinkStartCmd_UnmarshalAccountInfo_Test_002 end" << std::endl;
@@ -555,8 +555,8 @@ HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalAccountInfo_Test_003, TestSize.L
     ASSERT_NE(data, nullptr);
     auto jsonStr = std::string(data);
     SinkStartCmd cmd;
-    auto ret = cmd.UnmarshalCallerInfo(jsonStr);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    auto ret = cmd.UnmarshalAccountInfo(jsonStr);
+    EXPECT_EQ(ret, ERR_OK);
     cJSON_free(data);
 
     cJSON_AddStringToObject(rootValue, Constants::EXTRO_INFO_JSON_KEY_USERID_ID.c_str(),
@@ -564,8 +564,8 @@ HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalAccountInfo_Test_003, TestSize.L
     data = cJSON_Print(rootValue);
     ASSERT_NE(data, nullptr);
     jsonStr = std::string(data);
-    ret = cmd.UnmarshalCallerInfo(jsonStr);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    ret = cmd.UnmarshalAccountInfo(jsonStr);
+    EXPECT_EQ(ret, ERR_OK);
     cJSON_free(data);
     cJSON_Delete(rootValue);
     DTEST_LOG << "SinkStartCmd_UnmarshalAccountInfo_Test_003 end" << std::endl;
@@ -590,16 +590,198 @@ HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalAccountInfo_Test_004, TestSize.L
     }
 
     cJSON *groupId = cJSON_CreateNumber(0);
+    if (groupId == nullptr) {
+        cJSON_Delete(rootValue);
+        cJSON_Delete(groupIdList);
+        ASSERT_TRUE(false);
+    }
+    cJSON_AddItemToArray(groupIdList, groupId);
+    cJSON_AddItemToObject(rootValue, "groupIdList", groupIdList);
     char *data = cJSON_Print(rootValue);
     ASSERT_NE(data, nullptr);
     auto jsonStr = std::string(data);
     SinkStartCmd cmd;
-    auto ret = cmd.UnmarshalCallerInfo(jsonStr);
+    auto ret = cmd.UnmarshalAccountInfo(jsonStr);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     cJSON_free(data);
     cJSON_Delete(rootValue);
-    cJSON_Delete(groupIdList);
     DTEST_LOG << "SinkStartCmd_UnmarshalAccountInfo_Test_004 end" << std::endl;
+}
+
+void CreateNumberAry(cJSON **rootValue, int32_t size)
+{
+    if (rootValue == nullptr || *rootValue == nullptr) {
+        return;
+    }
+
+    cJSON *bundleNames = cJSON_CreateArray();
+    if (bundleNames == nullptr) {
+        return;
+    }
+    for (auto i = 0; i < size; i++) {
+        cJSON *bundleName = cJSON_CreateNumber(i);
+        if (bundleName == nullptr) {
+            cJSON_Delete(bundleNames);
+            return;
+        }
+        cJSON_AddItemToArray(bundleNames, bundleName);
+    }
+    cJSON_AddItemToObject(*rootValue, "BundleNames", bundleNames);
+}
+
+void CreateStringAry(cJSON **rootValue, int32_t size)
+{
+    if (rootValue == nullptr || *rootValue == nullptr) {
+        return;
+    }
+
+    cJSON *bundleNames = cJSON_CreateArray();
+    if (bundleNames == nullptr) {
+        return;
+    }
+    for (auto i = 0; i < size; i++) {
+        std::string test = "test" + std::to_string(i);
+        cJSON *bundleName = cJSON_CreateString(test.c_str());
+        if (bundleName == nullptr) {
+            cJSON_Delete(bundleNames);
+            return;
+        }
+        cJSON_AddItemToArray(bundleNames, bundleName);
+    }
+    cJSON_AddItemToObject(*rootValue, "BundleNames", bundleNames);
+}
+
+/**
+ * @tc.name: SinkStartCmd_UnmarshalCallerInfoExtra_Test_001
+ * @tc.desc: call UnmarshalCallerInfoExtra
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalCallerInfoExtra_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_UnmarshalCallerInfoExtra_Test_001 begin" << std::endl;
+    std::string jsonStr = "test";
+    SinkStartCmd cmd;
+    auto ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+
+    char *data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    int32_t size = 2;
+    CreateNumberAry(&rootValue, size);
+    data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "SinkStartCmd_UnmarshalCallerInfoExtra_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SinkStartCmd_UnmarshalCallerInfoExtra_Test_002
+ * @tc.desc: call UnmarshalCallerInfoExtra
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalCallerInfoExtra_Test_002, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_UnmarshalCallerInfoExtra_Test_002 begin" << std::endl;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    int32_t size = 2;
+    CreateStringAry(&rootValue, size);
+    auto data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    SinkStartCmd cmd;
+    auto jsonStr = std::string(data);
+    auto ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddNumberToObject(rootValue, "ExtraInfo", 0);
+    data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_DeleteItemFromObject(rootValue, "ExtraInfo");
+    cJSON_AddStringToObject(rootValue, "ExtraInfo", "test");
+    data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "SinkStartCmd_UnmarshalCallerInfoExtra_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: SinkStartCmd_UnmarshalCallerInfoExtra_Test_003
+ * @tc.desc: call UnmarshalCallerInfoExtra
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalCallerInfoExtra_Test_003, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_UnmarshalCallerInfoExtra_Test_003 begin" << std::endl;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    int32_t size = 2;
+    CreateStringAry(&rootValue, size);
+    auto data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+    
+    auto jsonStr = std::string(data);
+    cJSON_AddStringToObject(rootValue, "ExtraInfo", jsonStr.c_str());
+    cJSON_free(data);
+    data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    jsonStr = std::string(data);
+    SinkStartCmd cmd;
+    auto ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, ERR_OK);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "SinkStartCmd_UnmarshalCallerInfoExtra_Test_003 end" << std::endl;
 }
 
 /**
