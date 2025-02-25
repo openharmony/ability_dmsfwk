@@ -307,6 +307,17 @@ void ChannelManager::DeInit()
         HILOGE("eventHandler_ is nullptr");
     }
 
+    // stop callback task
+    if (callbackEventHandler_ != nullptr) {
+        callbackEventHandler_->GetEventRunner()->Stop();
+        if (callbackEventThread_.joinable()) {
+            callbackEventThread_.join();
+        }
+        callbackEventHandler_ = nullptr;
+    } else {
+        HILOGE("callbackEventHandler_ is nullptr");
+    }
+
     // release channels
     std::unordered_set<int32_t> channelIds;
     for (const auto& entry : channelIdMap_) {

@@ -516,6 +516,44 @@ HWTEST_F(DSchedCollabManagerTest, CheckCollabRelation_001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: CheckSrcCollabRelation_001
+ * @tc.desc: test CheckSrcCollabRelation func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerTest, CheckSrcCollabRelation_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerTest CheckSrcCollabRelation_001 begin" << std::endl;
+    CollabInfo *nullSourceInfo;
+    DSchedCollabInfo *collabInfo;
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckSrcCollabRelation(nullSourceInfo, collabInfo),
+        INVALID_PARAMETERS_ERR);
+
+    CollabInfo sourceInfo{.deviceId = "srcUdid", .pid = 100, .tokenId = 100, .userId = 100};
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckSrcCollabRelation(&sourceInfo, collabInfo),
+        INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedCollabManagerTest CheckSrcCollabRelation_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CheckSinkCollabRelation_001
+ * @tc.desc: test CheckSinkCollabRelation func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerTest, CheckSinkCollabRelation_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerTest CheckSinkCollabRelation_001 begin" << std::endl;
+    CollabInfo *nullSinkInfo;
+    DSchedCollabInfo *collabInfo;
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckSinkCollabRelation(nullSinkInfo, collabInfo),
+        INVALID_PARAMETERS_ERR);
+
+    CollabInfo sinkInfo{.deviceId = "sinkUdid", .pid = 200, .tokenId = 200, .userId = 101};
+    EXPECT_EQ(DSchedCollabManager::GetInstance().CheckSinkCollabRelation(&sinkInfo, collabInfo),
+        INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedCollabManagerTest CheckSinkCollabRelation_001 end" << std::endl;
+}
+
+/**
  * @tc.name: IsSessionExists_001
  * @tc.desc: test IsSessionExists func
  * @tc.type: FUNC

@@ -227,5 +227,21 @@ HWTEST_F(DSchedCollabManagerSupTest, OnShutdown_001, TestSize.Level3)
     DSchedCollabManager::GetInstance().collabs_.clear();
     DTEST_LOG << "DSchedCollabManagerSupTest OnShutdown_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: GenerateCollabToken_001
+ * @tc.desc: test GenerateCollabToken func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerSupTest, GenerateCollabToken_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerSupTest GenerateCollabToken_001 begin" << std::endl;
+    ASSERT_EQ(DSchedCollabManager::GetInstance().eventHandler_, nullptr);
+    string srcDeviceId = "test";
+    auto rlt = DSchedCollabManager::GetInstance().GenerateCollabToken(srcDeviceId);
+    EXPECT_FALSE(rlt.empty());
+    DSchedCollabManager::GetInstance().collabs_.clear();
+    DTEST_LOG << "DSchedCollabManagerSupTest GenerateCollabToken_001 end" << std::endl;
+}
 }
 }
