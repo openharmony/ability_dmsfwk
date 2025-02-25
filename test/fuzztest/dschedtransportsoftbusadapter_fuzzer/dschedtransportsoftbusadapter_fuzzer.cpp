@@ -82,9 +82,8 @@ void FuzzConnectDevice(const uint8_t* data, size_t size)
     dschedTransportSoftbusAdapter.CreateServerSocket();
     dschedTransportSoftbusAdapter.CreateClientSocket(peerDeviceId);
     bool isServer = sessionId % 2;
-    DSchedServiceType type = *(reinterpret_cast<DSchedServiceType*>(isServer));
-    dschedTransportSoftbusAdapter.CreateSessionRecord(sessionId, peerDeviceId, isServer, type);
-    dschedTransportSoftbusAdapter.AddNewPeerSession(peerDeviceId, sessionId, type);
+    dschedTransportSoftbusAdapter.CreateSessionRecord(sessionId, peerDeviceId, isServer, SERVICE_TYPE_CONTINUE);
+    dschedTransportSoftbusAdapter.AddNewPeerSession(peerDeviceId, sessionId, SERVICE_TYPE_CONTINUE);
     dschedTransportSoftbusAdapter.ShutdownSession(peerDeviceId, sessionId);
     bool isSelfCalled = sessionId % 2;
     dschedTransportSoftbusAdapter.NotifyListenersSessionShutdown(sessionId, isSelfCalled);

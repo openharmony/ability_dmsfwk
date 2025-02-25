@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -107,6 +107,7 @@ enum class IDSchedInterfaceCode : uint32_t {
     NOTIFY_REJECT_REASON = 332,
     NOTIFY_CLOSE_COLLAB_SESSION = 333,
     NOTIFY_START_ABILITY_RESULT = 334,
+    GET_SINK_COLLAB_VERSION = 335,
 };
 
 enum class IDRreeInstallCallbackInterfaceCode : uint32_t {

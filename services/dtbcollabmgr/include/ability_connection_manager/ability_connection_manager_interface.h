@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,11 +29,13 @@ public:
         const std::string& dmsServerToken, const std::string& reason) = 0;
     virtual int32_t NotifyDisconnect(int32_t sessionId) = 0;
     virtual int32_t NotifyWifiOpen(int32_t sessionId) = 0;
+    virtual int32_t NotifyPeerVersion(int32_t sessionId, int32_t version) = 0;
 
     enum class Message {
         NOTIFY_COLLAB_RESULT = 0,
         NOTIFY_DIS_CONNECT = 1,
         NOTIFY_WIFI_OPEN = 2,
+        NOTIFY_PEER_VERSION = 3,
     };
 };
 } // namespace DistributedCollab

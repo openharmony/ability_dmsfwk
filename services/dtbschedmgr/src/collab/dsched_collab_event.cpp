@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -116,6 +116,71 @@ int32_t BaseCmd::Unmarshal(const std::string &jsonStr)
         *boolValues[i] = item->valueint;
     }
     cJSON_Delete(rootValue);
+    return ERR_OK;
+}
+
+int32_t GetSinkCollabVersionCmd::Marshal(std::string &jsonStr)
+{
+    HILOGD("called");
+    cJSON *rootValue = cJSON_CreateObject();
+    if (rootValue == nullptr) {
+        return INVALID_PARAMETERS_ERR;
+    }
+ 
+    std::string baseJsonStr;
+    if (BaseCmd::Marshal(baseJsonStr) != ERR_OK) {
+        cJSON_Delete(rootValue);
+        return INVALID_PARAMETERS_ERR;
+    }
+    cJSON_AddStringToObject(rootValue, "BaseCmd", baseJsonStr.c_str());
+    cJSON_AddNumberToObject(rootValue, "SrcPid", srcPid_);
+    cJSON_AddNumberToObject(rootValue, "SrcUid", srcUid_);
+    cJSON_AddNumberToObject(rootValue, "SrcAccessToken", srcAccessToken_);
+    cJSON_AddNumberToObject(rootValue, "SinkCollabVersion", sinkCollabVersion_);
+ 
+    char *data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        return INVALID_PARAMETERS_ERR;
+    }
+    jsonStr = std::string(data);
+    cJSON_Delete(rootValue);
+    cJSON_free(data);
+    HILOGD("end");
+    return ERR_OK;
+}
+ 
+int32_t GetSinkCollabVersionCmd::Unmarshal(const std::string &jsonStr)
+{
+    HILOGD("called");
+    cJSON *rootValue = cJSON_Parse(jsonStr.c_str());
+    if (rootValue == nullptr) {
+        return INVALID_PARAMETERS_ERR;
+    }
+    cJSON *baseCmd = cJSON_GetObjectItemCaseSensitive(rootValue, "BaseCmd");
+    if (baseCmd == nullptr || !cJSON_IsString(baseCmd) || (baseCmd->valuestring == nullptr)) {
+        cJSON_Delete(rootValue);
+        return INVALID_PARAMETERS_ERR;
+    }
+    std::string baseCmdStr = baseCmd->valuestring;
+    if (BaseCmd::Unmarshal(baseCmdStr) != ERR_OK) {
+        cJSON_Delete(rootValue);
+        return INVALID_PARAMETERS_ERR;
+    }
+    const char *numKeys[] = { "SrcPid", "SrcUid", "SrcAccessToken", "SinkCollabVersion" };
+    int32_t *numValues[] = { &srcPid_, &srcUid_, &srcAccessToken_, &sinkCollabVersion_ };
+    int32_t numLength = sizeof(numKeys) / sizeof(numKeys[0]);
+    for (int32_t i = 0; i < numLength; i++) {
+        cJSON *item = cJSON_GetObjectItemCaseSensitive(rootValue, numKeys[i]);
+        if (item == nullptr || !cJSON_IsNumber(item)) {
+            cJSON_Delete(rootValue);
+            HILOGE("Dms collab cmd base %{public}s term is null or not number.", numKeys[i]);
+            return INVALID_PARAMETERS_ERR;
+        }
+        *numValues[i] = item->valueint;
+    }
+    cJSON_Delete(rootValue);
+    HILOGD("end");
     return ERR_OK;
 }
 
@@ -243,19 +308,16 @@ int32_t SinkStartCmd::UnmarshalOptParams(cJSON *rootValue)
     cJSON *startParamsJson = cJSON_GetObjectItemCaseSensitive(rootValue, "StartParams");
     if (startParamsJson == nullptr || !cJSON_IsString(startParamsJson) || (startParamsJson->valuestring == nullptr)) {
         HILOGE("get startParamsJson failed.");
-        cJSON_Delete(rootValue);
         return INVALID_PARAMETERS_ERR;
     }
     Parcel parcel;
     int32_t ret = Base64StrToParcel(startParamsJson->valuestring, parcel);
     if (ret != ERR_OK) {
-        cJSON_Delete(rootValue);
         HILOGE("base64StrToParcel failed.");
         return INVALID_PARAMETERS_ERR;
     }
     auto startParamsPtr = AAFwk::WantParams::Unmarshalling(parcel);
     if (startParamsPtr == nullptr) {
-        cJSON_Delete(rootValue);
         HILOGE("startParamsJson unmarshalling failed.");
         return INVALID_PARAMETERS_ERR;
     }
@@ -264,18 +326,15 @@ int32_t SinkStartCmd::UnmarshalOptParams(cJSON *rootValue)
     cJSON *wantParamsJson = cJSON_GetObjectItemCaseSensitive(rootValue, "WantParams");
     if (wantParamsJson == nullptr || !cJSON_IsString(wantParamsJson) || (wantParamsJson->valuestring == nullptr)) {
         HILOGE("get wantParamsJson failed.");
-        cJSON_Delete(rootValue);
         return INVALID_PARAMETERS_ERR;
     }
     ret = Base64StrToParcel(wantParamsJson->valuestring, parcel);
     if (ret != ERR_OK) {
-        cJSON_Delete(rootValue);
         HILOGE("base64StrToParcel failed.");
         return INVALID_PARAMETERS_ERR;
     }
     auto wantParamsPtr = AAFwk::WantParams::Unmarshalling(parcel);
     if (wantParamsPtr == nullptr) {
-        cJSON_Delete(rootValue);
         HILOGE("wantParamsJson unmarshalling failed.");
         return INVALID_PARAMETERS_ERR;
     }

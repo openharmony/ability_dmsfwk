@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,6 +164,20 @@ std::string AbilityConnectionSession::GetServerToken()
     return dmsServerToken_;
 }
 
+int32_t AbilityConnectionSession::HandlePeerVersion(int32_t version)
+{
+    HILOGI("called.");
+    DistributedClient dmsClient;
+    int32_t ret = dmsClient.CollabMission(sessionId_, localSocketName_, sessionInfo_, connectOption_, dmsServerToken_);
+    if (ret != ERR_OK) {
+        HILOGE("collab mission start failed.");
+        ConnectResult connectResult;
+        connectResult.isConnected = false;
+        ExeuteConnectCallback(connectResult);
+    }
+    return ret;
+}
+
 int32_t AbilityConnectionSession::Connect(ConnectCallback& callback)
 {
     HILOGI("called.");
@@ -188,7 +202,7 @@ int32_t AbilityConnectionSession::Connect(ConnectCallback& callback)
     }
     
     DistributedClient dmsClient;
-    ret = dmsClient.CollabMission(sessionId_, localSocketName_, sessionInfo_, connectOption_, dmsServerToken_);
+    ret = dmsClient.GetPeerVersion(sessionId_, sessionInfo_.peerInfo_.deviceId, dmsServerToken_);
     if (ret != ERR_OK) {
         HILOGE("collab mission start failed.");
         ConnectResult connectResult;

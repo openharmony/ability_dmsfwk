@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -167,6 +167,7 @@ public:
     int32_t sinkCollabSessionId_ = -1;
     int32_t sinkUserId_ = -1;
     int32_t srcCollabVersion_ = 0;
+    int32_t sinkCollabVersion_ = 0;
     int32_t srcAppVersion_ = 0;
     int32_t direction_ = COLLAB_SOURCE;
     std::string collabToken_;
@@ -185,9 +186,11 @@ public:
 class DSchedCollab : public std::enable_shared_from_this<DSchedCollab> {
     friend class DSchedCollabManager;
     friend class DSchedCollabEventHandler;
+    friend class CollabSrcGetPeerVersionState;
     friend class CollabSrcStartState;
     friend class CollabSrcWaitResultState;
     friend class CollabSrcWaitEndState;
+    friend class CollabSinkGetVersionState;
     friend class CollabSinkStartState;
     friend class CollabSinkConnectState;
     friend class CollabSinkWaitEndState;
@@ -195,7 +198,7 @@ class DSchedCollab : public std::enable_shared_from_this<DSchedCollab> {
 
 public:
     DSchedCollab(const std::string &collabToken, const DSchedCollabInfo &info);
-    DSchedCollab(std::shared_ptr<SinkStartCmd> startCmd, const int32_t &softbusSessionId);
+    DSchedCollab(std::shared_ptr<GetSinkCollabVersionCmd> startCmd, const int32_t &softbusSessionId);
     ~DSchedCollab();
 
 private:
@@ -203,6 +206,11 @@ private:
     void StartEventHandler();
     void ProcessEvent(const AppExecFwk::InnerEvent::Pointer& event);
 
+    void SetSrcCollabInfo(DSchedCollabInfo &info);
+    void SetSinkCollabInfo(std::shared_ptr<SinkStartCmd> startCmd);
+    int32_t PostSrcGetPeerVersionTask();
+    int32_t PostSrcGetVersionTask();
+    int32_t PostSinkGetVersionTask();
     int32_t PostSrcStartTask();
     int32_t PostSinkStartTask();
     int32_t PostSinkPrepareResultTask(const int32_t &result, const int32_t &collabSessionId,
@@ -212,21 +220,29 @@ private:
     int32_t PostAbilityRejectTask(const std::string &reason);
     int32_t PostEndTask();
 
+    int32_t ExeSrcGetPeerVersion();
+    int32_t ExeSrcGetVersion();
     int32_t ExeSrcStart();
     int32_t ExeStartAbility();
     int32_t ExeAbilityRejectError(const std::string &reason);
     int32_t ExeSinkPrepareResult(const int32_t &result);
     int32_t ExeSrcCollabResult(const int32_t &result, const std::string reason = "");
+    int32_t ExeSrcGetPeerVersionError(const int32_t &result);
     int32_t NotifyWifiOpen();
     int32_t ExeSrcStartError(const int32_t &result);
     int32_t ExeSrcWaitResultError(const int32_t &result);
     int32_t ExeSinkStartError(const int32_t &result);
     int32_t ExeSinkConnectError(const int32_t &result);
     int32_t ExeSinkError(const int32_t &result);
+    int32_t ExeSinkGetVersion();
+    int32_t ExeSinkGetVersionError(const int32_t &result);
     int32_t ExeDisconnect();
+    int32_t SrcPeerVersionNotify();
     int32_t ExeSrcClientNotify(const int32_t &result, const std::string reason = "");
     int32_t ExeClientDisconnectNotify();
 
+    int32_t PackGetPeerVersionCmd(std::shared_ptr<GetSinkCollabVersionCmd>& cmd);
+    int32_t PackSinkCollabVersionCmd(std::shared_ptr<GetSinkCollabVersionCmd>& cmd);
     int32_t PackStartCmd(std::shared_ptr<SinkStartCmd>& cmd);
     int32_t PackPartCmd(std::shared_ptr<SinkStartCmd>& cmd);
     int32_t PackNotifyResultCmd(std::shared_ptr<NotifyResultCmd> cmd, const int32_t &result,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,11 @@
 
 #include "dsched_collab.h"
 #include "dtbschedmgr_log.h"
+#include "sink_state/dsched_collab_sink_get_version_state.h"
 #include "sink_state/dsched_collab_sink_start_state.h"
 #include "sink_state/dsched_collab_sink_connect_state.h"
 #include "sink_state/dsched_collab_sink_wait_end_state.h"
+#include "source_state/dsched_collab_source_get_peer_version_state.h"
 #include "source_state/dsched_collab_source_start_state.h"
 #include "source_state/dsched_collab_source_wait_result_state.h"
 #include "source_state/dsched_collab_source_wait_end_state.h"
@@ -29,16 +31,20 @@ namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DSchedCollabStateMachine";
 std::map<int32_t, std::string> STATEDATA = {
+    {SOURCE_GET_PEER_VERSION_STATE, "SOURCE_GET_PEER_VERSION_STATE"},
     {SOURCE_START_STATE, "SOURCE_START_STATE"},
     {SOURCE_WAIT_RESULT_STATE, "SOURCE_WAIT_RESULT_STATE"},
     {SOURCE_WAIT_END_STATE, "SOURCE_WAIT_END_STATE"},
+    {SINK_GET_VERSION_STATE, "SINK_GET_VERSION_STATE"},
     {SINK_START_STATE, "SINK_START_STATE"},
     {SINK_CONNECT_STATE, "SINK_CONNECT_STATE"},
     {SINK_WAIT_END_STATE, "SINK_WAIT_END_STATE"},
 };
 std::map<int32_t, std::string> EVENTDATA = {
+    {SOURCE_GET_PEER_VERSION_EVENT, "SOURCE_GET_PEER_VERSION_EVENT"},
     {SOURCE_START_EVENT, "SOURCE_START_EVENT"},
     {NOTIFY_RESULT_EVENT, "NOTIFY_RESULT_EVENT"},
+    {GET_SINK_VERSION_EVENT, "GET_SINK_VERSION_EVENT"},
     {START_ABILITY_EVENT, "START_ABILITY_EVENT"},
     {NOTIFY_PREPARE_RESULT_EVENT, "NOTIFY_PREPARE_RESULT_EVENT"},
     {ERR_END_EVENT, "ERR_END_EVENT"},
@@ -73,13 +79,16 @@ int32_t DSchedCollabStateMachine::Execute(const AppExecFwk::InnerEvent::Pointer 
 
 void DSchedCollabStateMachine::UpdateState(CollabStateType stateType)
 {
-    if (stateType != SOURCE_START_STATE && stateType != SINK_START_STATE) {
+    HILOGI("called");
+    if (stateType != SOURCE_GET_PEER_VERSION_STATE && stateType != SINK_GET_VERSION_STATE) {
         HILOGI("update state from %{public}s to %{public}s",
             STATEDATA[currentState_->GetStateType()].c_str(), STATEDATA[stateType].c_str());
     } else {
+        HILOGI("called..");
         HILOGI("update state: %{public}s", STATEDATA[stateType].c_str());
     }
     currentState_ = CreateState(stateType);
+    HILOGI("end");
     return;
 }
 
@@ -88,6 +97,10 @@ std::shared_ptr<DSchedCollabState> DSchedCollabStateMachine::CreateState(CollabS
     std::shared_ptr<DSchedCollabState> state = nullptr;
     auto stateMachine = std::shared_ptr<DSchedCollabStateMachine>(shared_from_this());
     switch (stateType) {
+        case SOURCE_GET_PEER_VERSION_STATE: {
+            state = std::make_shared<CollabSrcGetPeerVersionState>(stateMachine);
+            break;
+        }
         case SOURCE_START_STATE: {
             state = std::make_shared<CollabSrcStartState>(stateMachine);
             break;
@@ -98,6 +111,10 @@ std::shared_ptr<DSchedCollabState> DSchedCollabStateMachine::CreateState(CollabS
         }
         case SOURCE_WAIT_END_STATE: {
             state = std::make_shared<CollabSrcWaitEndState>(stateMachine);
+            break;
+        }
+        case SINK_GET_VERSION_STATE: {
+            state = std::make_shared<CollabSinkGetVersionState>(stateMachine);
             break;
         }
         case SINK_START_STATE: {

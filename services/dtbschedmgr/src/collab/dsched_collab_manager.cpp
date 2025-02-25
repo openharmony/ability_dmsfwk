@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -202,17 +202,60 @@ void DSchedCollabManager::UnInit()
     HILOGI("UnInit end");
 }
 
+int32_t DSchedCollabManager::GetSinkCollabVersion(DSchedCollabInfo &info)
+{
+    HILOGI("called, sessionId is: %{public}s", info.ToString().c_str());
+    if (info.srcCollabSessionId_ < 0 || info.sinkInfo_.deviceId_.empty() || info.srcClientCB_ == nullptr) {
+        HILOGE("invalid parameters.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(info.srcInfo_.deviceId_)) {
+        HILOGE("get local deviceId failed!");
+        return FIND_LOCAL_DEVICEID_ERR;
+    }
+    if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(info.sinkInfo_.deviceId_) == nullptr) {
+        HILOGE("failed to find sinkDeviceId.");
+        return FIND_REMOTE_DEVICEID_ERR;
+    }
+    auto func = [this, info]() {
+        HandleGetSinkCollabVersion(info);
+    };
+    if (eventHandler_ == nullptr) {
+        HILOGE("eventHandler is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
+    eventHandler_->PostTask(func);
+    return ERR_OK;
+}
+ 
+void DSchedCollabManager::HandleGetSinkCollabVersion(const DSchedCollabInfo &info)
+{
+    HILOGI("called");
+    const std::string collabToken = info.collabToken_;
+    auto newCollab = std::make_shared<DSchedCollab>(collabToken, info);
+    newCollab->Init();
+    newCollab->UpdateState(SOURCE_GET_PEER_VERSION_STATE);
+    collabs_.insert(std::make_pair(collabToken, newCollab));
+    newCollab->PostSrcGetPeerVersionTask();
+    SetTimeOut(collabToken, COLLAB_TIMEOUT);
+ 
+#ifdef COLLAB_ALL_CONNECT_DECISIONS
+    if (!DSchedTransportSoftbusAdapter::GetInstance().IsNeedAllConnect(SERVICE_TYPE_COLLAB)) {
+        HILOGW("don't need wait all connect decision");
+        return;
+    }
+    const std::string sinkDeviceId = info.sinkInfo_.deviceId_;
+    if (peerConnectDecision_.find(sinkDeviceId) != peerConnectDecision_.end()) {
+        peerConnectDecision_.erase(sinkDeviceId);
+    }
+    WaitAllConnectDecision(sinkDeviceId, newCollab);
+#endif
+    HILOGI("end");
+}
+
 int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
 {
     HILOGI("called, collabInfo is: %{public}s", info.ToString().c_str());
-    if (!MultiUserManager::GetInstance().IsCallerForeground(info.srcInfo_.uid_)) {
-        HILOGW("The current user is not foreground. callingUid: %{public}d .", info.srcInfo_.uid_);
-        return DMS_NOT_FOREGROUND_USER;
-    }
-    if (info.srcClientCB_ == nullptr) {
-        HILOGE("clientCB is nullptr");
-        return INVALID_PARAMETERS_ERR;
-    }
     if (info.srcInfo_.bundleName_.empty() || info.sinkInfo_.bundleName_.empty() ||
         info.srcInfo_.moduleName_.empty() || info.sinkInfo_.moduleName_.empty() ||
         info.srcInfo_.abilityName_.empty() || info.sinkInfo_.abilityName_.empty()) {
@@ -229,14 +272,14 @@ int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
         HILOGE("failed to find sinkDeviceId.");
         return FIND_REMOTE_DEVICEID_ERR;
     }
-    auto func = [this, info]() {
-        HandleCollabMission(info);
-    };
-    if (eventHandler_ == nullptr) {
-        HILOGE("eventHandler is nullptr");
+    auto dCollab = GetDSchedCollabByTokenId(info.collabToken_);
+    if (dCollab == nullptr) {
+        HILOGE("can't find collab");
         return INVALID_PARAMETERS_ERR;
     }
-    eventHandler_->PostTask(func);
+    dCollab->SetSrcCollabInfo(info);
+    dCollab->UpdateState(SOURCE_START_STATE);
+    dCollab->PostSrcStartTask();
     return ERR_OK;
 }
 
@@ -259,25 +302,14 @@ bool DSchedCollabManager::IsSessionExists(const DSchedCollabInfo &info)
 void DSchedCollabManager::HandleCollabMission(const DSchedCollabInfo &info)
 {
     HILOGI("called");
-    const std::string collabToken = info.collabToken_;
-    auto newCollab = std::make_shared<DSchedCollab>(collabToken, info);
-    newCollab->Init();
-    newCollab->UpdateState(SOURCE_START_STATE);
-    collabs_.insert(std::make_pair(collabToken, newCollab));
-    newCollab->PostSrcStartTask();
-    SetTimeOut(collabToken, COLLAB_TIMEOUT);
-
-#ifdef COLLAB_ALL_CONNECT_DECISIONS
-    if (!DSchedTransportSoftbusAdapter::GetInstance().IsNeedAllConnect(SERVICE_TYPE_COLLAB)) {
-        HILOGW("don't need wait all connect decision");
+    auto dCollab = GetDSchedCollabByTokenId(info.collabToken_);
+    if (dCollab == nullptr) {
+        HILOGE("can't find collab");
+        dCollab->PostErrEndTask(INVALID_PARAMETERS_ERR);
         return;
     }
-    const std::string sinkDeviceId = info.sinkInfo_.deviceId_;
-    if (peerConnectDecision_.find(sinkDeviceId) != peerConnectDecision_.end()) {
-        peerConnectDecision_.erase(sinkDeviceId);
-    }
-    WaitAllConnectDecision(sinkDeviceId, newCollab);
-#endif
+    dCollab->UpdateState(SOURCE_START_STATE);
+    dCollab->PostSrcStartTask();
     HILOGI("end");
 }
 
@@ -646,11 +678,11 @@ void DSchedCollabManager::NotifyDataRecv(const int32_t &softbusSessionId, int32_
             return;
         }
     }
-    if (command == SINK_START_CMD) {
-        auto startCmd = std::make_shared<SinkStartCmd>();
-        int32_t ret = startCmd->Unmarshal(jsonStr);
+    if (command == SINK_GET_VERSION_CMD) {
+        auto getVersionCmd = std::make_shared<GetSinkCollabVersionCmd>();
+        int32_t ret = getVersionCmd->Unmarshal(jsonStr);
         if (ret != ERR_OK) {
-            HILOGE("Unmarshal start cmd failed, ret: %{public}d", ret);
+            HILOGE("Unmarshal cmd failed, ret: %{public}d", ret);
             return;
         }
         std::string localDevId;
@@ -658,25 +690,21 @@ void DSchedCollabManager::NotifyDataRecv(const int32_t &softbusSessionId, int32_
             HILOGE("get local deviceId failed!");
             return;
         }
-        if (startCmd->sinkDeviceId_ != localDevId ||
-            (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(startCmd->srcDeviceId_) == nullptr &&
-            !DtbschedmgrDeviceInfoStorage::GetInstance().CheckNetworkIdByBundleName(startCmd->srcBundleName_,
-            startCmd->srcDeviceId_))) {
+        if (getVersionCmd->sinkDeviceId_ != localDevId ||
+            DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(getVersionCmd->srcDeviceId_) == nullptr) {
             HILOGE("Irrecognized deviceId! sinkDeviceId: %{public}s, srcDeviceId: %{public}s",
-                startCmd->sinkDeviceId_.c_str(), startCmd->srcDeviceId_.c_str());
+                getVersionCmd->sinkDeviceId_.c_str(), getVersionCmd->srcDeviceId_.c_str());
             return;
         }
-        auto newCollab = std::make_shared<DSchedCollab>(startCmd, softbusSessionId);
+        auto newCollab = std::make_shared<DSchedCollab>(getVersionCmd, softbusSessionId);
         newCollab->Init();
-        newCollab->UpdateState(SINK_START_STATE);
-        collabs_.insert(std::make_pair(startCmd->collabToken_, newCollab));
-        newCollab->PostSinkStartTask();
-        SetTimeOut(startCmd->collabToken_, COLLAB_TIMEOUT);
+        newCollab->UpdateState(SINK_GET_VERSION_STATE);
+        collabs_.insert(std::make_pair(getVersionCmd->collabToken_, newCollab));
+        newCollab->PostSinkGetVersionTask();
+        SetTimeOut(getVersionCmd->collabToken_, COLLAB_TIMEOUT);
         HILOGI("end");
         return;
     }
-    HILOGE("No matching session to handle cmd!");
-    return;
 }
 
 void DSchedCollabManager::OnShutdown(int32_t socket, bool isSelfCalled)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,21 +27,26 @@
 namespace OHOS {
 namespace DistributedSchedule {
 typedef enum {
-    SOURCE_START_EVENT = 0,
-    NOTIFY_RESULT_EVENT = 1,
-    START_ABILITY_EVENT = 2,
-    NOTIFY_PREPARE_RESULT_EVENT = 3,
-    ERR_END_EVENT = 4,
-    END_EVENT = 5,
-    ABILITY_REJECT_EVENT = 6,
+    SOURCE_GET_PEER_VERSION_EVENT = 0,
+    SOURCE_GET_VERSION_EVENT,
+    SOURCE_START_EVENT,
+    NOTIFY_RESULT_EVENT,
+    GET_SINK_VERSION_EVENT,
+    START_ABILITY_EVENT,
+    NOTIFY_PREPARE_RESULT_EVENT,
+    ERR_END_EVENT,
+    END_EVENT,
+    ABILITY_REJECT_EVENT,
 } DSchedCollabEventType;
 
 typedef enum {
     MIN_CMD = 0,
-    SINK_START_CMD = 1,
-    NOTIFY_RESULT_CMD = 2,
-    DISCONNECT_CMD = 3,
-    MAX_CMD = 4,
+    SINK_GET_VERSION_CMD,
+    SOURCE_GET_VERSION_CMD,
+    SINK_START_CMD,
+    NOTIFY_RESULT_CMD,
+    DISCONNECT_CMD,
+    MAX_CMD,
 } DSchedCollabCommand;
 
 class BaseCmd {
@@ -70,6 +75,18 @@ public:
     std::string sinkAbilityName_;
     std::string sinkModuleName_;
     std::string sinkServerId_;
+};
+
+class GetSinkCollabVersionCmd : public BaseCmd {
+    public:
+        int32_t Marshal(std::string &jsonStr);
+        int32_t Unmarshal(const std::string &jsonStr);
+     
+    public:
+        int32_t srcPid_ = -1;
+        int32_t srcUid_ = -1;
+        int32_t srcAccessToken_ = -1;
+        int32_t sinkCollabVersion_ = -1;
 };
 
 class SinkStartCmd : public BaseCmd {

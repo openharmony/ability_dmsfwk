@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,12 +21,14 @@
 namespace OHOS {
 namespace DistributedSchedule {
 typedef enum {
-    SOURCE_START_STATE = 0,
-    SOURCE_WAIT_RESULT_STATE = 1,
-    SOURCE_WAIT_END_STATE = 2,
-    SINK_START_STATE = 4,
-    SINK_CONNECT_STATE = 5,
-    SINK_WAIT_END_STATE = 6,
+    SOURCE_GET_PEER_VERSION_STATE = 0,
+    SOURCE_START_STATE,
+    SOURCE_WAIT_RESULT_STATE,
+    SOURCE_WAIT_END_STATE,
+    SINK_GET_VERSION_STATE,
+    SINK_START_STATE,
+    SINK_CONNECT_STATE,
+    SINK_WAIT_END_STATE,
 } CollabStateType;
 
 class DSchedCollab;

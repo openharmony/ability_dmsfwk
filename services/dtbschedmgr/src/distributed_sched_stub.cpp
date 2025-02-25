@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -137,6 +137,8 @@ void DistributedSchedStub::InitLocalFuncsInner()
         &DistributedSchedStub::StartRemoteFreeInstallInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::STOP_REMOTE_EXTERNSION_ABILITY)] =
         &DistributedSchedStub::StopRemoteExtensionAbilityInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_SINK_COLLAB_VERSION)] =
+        &DistributedSchedStub::GetSinkCollabVersionInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::COLLAB_MISSION)] =
         &DistributedSchedStub::CollabMissionInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_REJECT_REASON)] =
@@ -677,6 +679,43 @@ int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& da
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 
+int32_t DistributedSchedStub::GetSinkCollabVersionInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("called");
+    if (!IPCSkeleton::IsLocalCalling()) {
+        HILOGE("check permission failed!");
+        return DMS_PERMISSION_DENIED;
+    }
+    int32_t collabSessionId;
+    PARCEL_READ_HELPER(data, Int32, collabSessionId);
+    std::string sinkDeviceId;
+    PARCEL_READ_HELPER(data, String, sinkDeviceId);
+    std::string collabToken;
+    PARCEL_READ_HELPER(data, String, collabToken);
+    sptr<IRemoteObject> sourceClientCallback = data.ReadRemoteObject();
+    if (sourceClientCallback == nullptr) {
+        HILOGW("read callback failed!");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    int32_t callerPid = IPCSkeleton::GetCallingPid();
+    uint32_t callerAccessToken = IPCSkeleton::GetCallingTokenID();
+ 
+    DSchedCollabInfo dSchedCollabInfo;
+    dSchedCollabInfo.srcCollabSessionId_ = collabSessionId;
+    dSchedCollabInfo.collabToken_ = collabToken;
+    dSchedCollabInfo.sinkInfo_.deviceId_ = sinkDeviceId;
+    dSchedCollabInfo.srcClientCB_ = sourceClientCallback;
+    dSchedCollabInfo.srcInfo_.uid_ = callerUid;
+    dSchedCollabInfo.srcInfo_.pid_ = callerPid;
+    dSchedCollabInfo.srcInfo_.accessToken_ = static_cast<int32_t>(callerAccessToken);
+ 
+    DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(callerAccessToken);
+    int32_t result = DSchedCollabManager::GetInstance().GetSinkCollabVersion(dSchedCollabInfo);
+    HILOGI("result = %{public}d", result);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+
 int32_t DistributedSchedStub::CollabMissionInner(MessageParcel& data, MessageParcel& reply)
 {
     HILOGI("called");
@@ -705,11 +744,6 @@ int32_t DistributedSchedStub::CollabMissionInner(MessageParcel& data, MessagePar
     }
     std::string collabToken;
     PARCEL_READ_HELPER(data, String, collabToken);
-    sptr<IRemoteObject> sourceClientCallback = data.ReadRemoteObject();
-    if (sourceClientCallback == nullptr) {
-        HILOGW("read callback failed!");
-        return ERR_NULL_OBJECT;
-    }
     int32_t callerUid = IPCSkeleton::GetCallingUid();
     int32_t callerPid = IPCSkeleton::GetCallingPid();
     uint32_t callerAccessToken = IPCSkeleton::GetCallingTokenID();
@@ -720,7 +754,6 @@ int32_t DistributedSchedStub::CollabMissionInner(MessageParcel& data, MessagePar
     dSchedCollabInfo.srcOpt_ = *srcOpt_;
     dSchedCollabInfo.srcCollabSessionId_ = collabSessionId;
     dSchedCollabInfo.srcInfo_.socketName_ = srcSocketName;
-    dSchedCollabInfo.srcClientCB_ = sourceClientCallback;
     dSchedCollabInfo.srcInfo_.uid_ = callerUid;
     dSchedCollabInfo.srcInfo_.pid_ = callerPid;
     dSchedCollabInfo.srcInfo_.accessToken_ = static_cast<int32_t>(callerAccessToken);
@@ -728,6 +761,7 @@ int32_t DistributedSchedStub::CollabMissionInner(MessageParcel& data, MessagePar
  
     DSchedTransportSoftbusAdapter::GetInstance().SetCallingTokenId(callerAccessToken);
     int32_t result = DSchedCollabManager::GetInstance().CollabMission(dSchedCollabInfo);
+    HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 

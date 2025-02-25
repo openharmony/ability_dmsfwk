@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,8 @@ AbilityConnectionManagerStub::AbilityConnectionManagerStub()
         &AbilityConnectionManagerStub::NotifyDisconnectInner;
     funcsMap_[static_cast<uint32_t>(IAbilityConnectionManager::Message::NOTIFY_WIFI_OPEN)] =
         &AbilityConnectionManagerStub::NotifyWifiOpenInner;
+    funcsMap_[static_cast<uint32_t>(IAbilityConnectionManager::Message::NOTIFY_PEER_VERSION)] =
+        &AbilityConnectionManagerStub::NotifyPeerVersionInner;
 }
 
 AbilityConnectionManagerStub::~AbilityConnectionManagerStub()
@@ -109,6 +111,20 @@ int32_t AbilityConnectionManagerStub::NotifyWifiOpenInner(MessageParcel& data, M
     PARCEL_READ_HELPER(data, Int32, sessionId);
     
     int32_t result = NotifyWifiOpen(sessionId);
+    HILOGI("result = %{public}d", result);
+    PARCEL_WRITE_HELPER(reply, Int32, result);
+    return ERR_NONE;
+}
+
+int32_t AbilityConnectionManagerStub::NotifyPeerVersionInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("called.");
+    int32_t sessionId = -1;
+    PARCEL_READ_HELPER(data, Int32, sessionId);
+    int32_t version = -1;
+    PARCEL_READ_HELPER(data, Int32, version);
+    
+    int32_t result = NotifyPeerVersion(sessionId, version);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_HELPER(reply, Int32, result);
     return ERR_NONE;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,6 +79,7 @@ public:
         const int32_t sessionId);
     int32_t DeleteConnectSession(const AbilityConnectionSessionInfo& sessionInfo, int32_t sessionId);
     std::string GetSessionToken(int32_t sessionId);
+    int32_t NotifyPeerVersion(int32_t sessionId, int32_t version);
 
 private:
     std::shared_mutex sessionMutex_;

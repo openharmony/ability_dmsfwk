@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -548,6 +548,18 @@ std::string AbilityConnectionManager::GetSessionToken(int32_t sessionId)
     std::string dmsServertoken = connectionSesion->GetServerToken();
     HILOGI("sessionId is %{public}d, token is %{public}s", sessionId, dmsServertoken.c_str());
     return dmsServertoken;
+}
+
+int32_t AbilityConnectionManager::NotifyPeerVersion(int32_t sessionId, int32_t version)
+{
+    HILOGI("called, sessionId is %{public}d, peer version is %{public}d", sessionId, version);
+    auto connectionSesion = GetAbilityConnectionSession(sessionId);
+    if (connectionSesion == nullptr) {
+        HILOGE("sessionId is invalid parameter");
+        return INVALID_PARAMETERS_ERR;
+    }
+    
+    return connectionSesion->HandlePeerVersion(version);
 }
 }  // namespace DistributedCollab
 }  // namespace OHOS
