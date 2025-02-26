@@ -22,13 +22,16 @@
 #include "ability_connection_info.h"
 #include "ability_connection_session.h"
 #include "iremote_broker.h"
+#include "if_system_ability_manager.h"
+#include <mutex>
+#include <condition_variable>
 
 namespace OHOS {
 namespace DistributedCollab {
 class DistributedClient {
 public:
     DistributedClient() = default;
-    virtual ~DistributedClient() = default;
+    ~DistributedClient();
     
     int32_t CollabMission(int32_t sessionId, const std::string& serverSocketName,
         const AbilityConnectionSessionInfo& sessionInfo, const ConnectOption& options, const std::string& token);
@@ -47,6 +50,21 @@ public:
     };
 private:
     sptr<IRemoteObject> GetDmsProxy();
+
+private:
+    std::mutex mtx_;
+    std::condition_variable cv_;
+    bool callbackReceived_ = false;
+    sptr<ISystemAbilityStatusChange> listener_ = nullptr;
+    class SystemAbilityStatusChangeListener : public ISystemAbilityStatusChange {
+    public:
+        explicit SystemAbilityStatusChangeListener(DistributedClient* client): client_(client) {}
+        void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+        void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+        sptr<IRemoteObject> AsObject() override;
+    private:
+        DistributedClient* client_ = nullptr;
+    };
 };
 }  // namespace AAFwk
 }  // namespace OHOS
