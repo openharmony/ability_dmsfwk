@@ -148,7 +148,7 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     }
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = abilityContext->GetAbilityInfo();
     napi_valuetype valuetype;
-    napi_typeof(env, args[ARG_INDEX_4_CALLBACK_FUNC], &valuetype)
+    napi_typeof(env, args[ARG_INDEX_4_CALLBACK_FUNC], &valuetype);
     if (valuetype != napi_function) {
         napi_throw(env, GenerateBusinessError(env, PARAMETER_CHECK_FAILED,
             "The third parameter must be an asynchronous function"));
