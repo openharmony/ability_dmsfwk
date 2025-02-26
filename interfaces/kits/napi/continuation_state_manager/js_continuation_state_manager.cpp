@@ -209,7 +209,8 @@ void JsContinuationStateManager::GetAbilityContext(
     }
 }
 
-napi_value JsContinuationStateManager::GenerateBusinessError(const napi_env &env, int32_t errCode, const std::string &errMsg)
+napi_value JsContinuationStateManager::GenerateBusinessError(
+    const napi_env &env, int32_t errCode, const std::string &errMsg)
 {
     napi_value code = nullptr;
     napi_create_int32(env, errCode, &code);
