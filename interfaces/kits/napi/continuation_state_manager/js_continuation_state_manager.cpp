@@ -27,9 +27,9 @@ using namespace OHOS::AppExecFwk;
 namespace {
     const std::string TAG = "JsContinuationStateManager";
     const std::string BIZTYPE_PREPARE_CONTINUE = "prepareContinue";
+    const std::string CODE_KEY_NAME = "code";
     const int32_t ARG_INDEX_4_CALLBACK_FUNC = 2;
     const int32_t SUCCESS = 0;
-    const int32_t FAILED = 1;
     constexpr int32_t ARG_COUNT_THREE = 3;
     const int32_t CALLBACK_PARAMS_NUM = 2;
 }
@@ -45,8 +45,8 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
     sptr<DistributedSchedule::JsContinuationStateManagerStub> stub = CreateStub(env, info);
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOn Unsupported business type: %{public}s; need: %{public}s",
-               stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
-        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, std::to_string(SYSTEM_WORK_ABNORMALLY));
+            stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
+        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, std::to_string(SYSTEM_WORK_ABNORMALLY)));
     }
 
     std::string key = std::to_string(stub->callbackData_.missionId) + stub->callbackData_.bundleName +
@@ -66,12 +66,11 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
     result = client.RegisterContinueStateCallback(stub);
     HILOGI("ContinueStateCallbackOn register callback result: %{public}d", result);
 
-    if (result == ERR_OK) {
-        napi_get_value_int32(env, ret, &result);
-        return ret;
-    } else {
-        napi_throw(env, GenerateBusinessError(env, result, std::to_string(result));
+    if (result != ERR_OK) {
+        napi_throw(env, GenerateBusinessError(env, result, std::to_string(result)));
     }
+    napi_get_value_int32(env, ret, &result);
+    return ret;
 }
 
 napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, napi_callback_info info)
@@ -82,8 +81,8 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     sptr<DistributedSchedule::JsContinuationStateManagerStub> stub = CreateStub(env, info);
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOff Unsupported business type: %{public}s; need: %{public}s",
-               stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
-        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, std::to_string(SYSTEM_WORK_ABNORMALLY));
+            stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
+        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, std::to_string(SYSTEM_WORK_ABNORMALLY)));
     }
 
     DistributedSchedule::ContinuationStateClient client;
@@ -111,12 +110,11 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     napi_value callbackResult[2] = {NULL, continueResultInfo};
     napi_call_function(env, undefined, callback, CALLBACK_PARAMS_NUM, callbackResult, nullptr);
 
-    if (result == ERR_OK) {
-        napi_get_value_int32(env, ret, &result);
-        return ret;
-    } else {
-        napi_throw(env, GenerateBusinessError(env, result, std::to_string(result));
+    if (result != ERR_OK) {
+        napi_throw(env, GenerateBusinessError(env, result, std::to_string(result)));
     }
+    napi_get_value_int32(env, ret, &result);
+    return ret;
 }
 
 sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateManager::CreateStub(
@@ -199,6 +197,18 @@ void JsContinuationStateManager::GetAbilityContext(
             return;
         }
     }
+}
+
+napi_value JsContinuationStateManager::GenerateBusinessError(const napi_env &env, int32_t errCode, const std::string &errMsg)
+{
+    napi_value code = nullptr;
+    napi_create_int32(env, errCode, &code);
+    napi_value message = nullptr;
+    napi_create_string_utf8(env, errMsg.c_str(), NAPI_AUTO_LENGTH, &message);
+    napi_value businessError = nullptr;
+    napi_create_error(env, nullptr, message, &businessError);
+    napi_set_named_property(env, businessError, CODE_KEY_NAME.c_str(), code);
+    return businessError;
 }
 
 napi_value JsContinueManagerInit(napi_env env, napi_value exportObj)

@@ -32,6 +32,7 @@ private:
     static sptr<DistributedSchedule::JsContinuationStateManagerStub> CreateStub(napi_env env, napi_callback_info info);
     static void GetAbilityContext(std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
         napi_env env, napi_value context);
+    static napi_value GenerateBusinessError(const napi_env &env, int32_t errCode, const std::string &errMsg);
 private:
     static std::map<std::string, sptr<DistributedSchedule::JsContinuationStateManagerStub>> callbackStubs_;
 };
