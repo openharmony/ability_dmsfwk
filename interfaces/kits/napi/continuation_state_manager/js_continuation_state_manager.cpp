@@ -46,9 +46,7 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOn Unsupported business type: %{public}s; need: %{public}s",
                stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
-        result = FAILED;
-        NAPI_CALL(env, napi_get_value_int32(env, ret, &result));
-        return ret;
+        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, std::to_string(SYSTEM_WORK_ABNORMALLY));
     }
 
     std::string key = std::to_string(stub->callbackData_.missionId) + stub->callbackData_.bundleName +
@@ -67,8 +65,13 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
     DistributedSchedule::ContinuationStateClient client;
     result = client.RegisterContinueStateCallback(stub);
     HILOGI("ContinueStateCallbackOn register callback result: %{public}d", result);
-    NAPI_CALL(env, napi_get_value_int32(env, ret, &result));
-    return ret;
+
+    if (result == ERR_OK) {
+        napi_get_value_int32(env, ret, &result);
+        return ret;
+    } else {
+        napi_throw(env, GenerateBusinessError(env, result, std::to_string(result));
+    }
 }
 
 napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, napi_callback_info info)
@@ -80,9 +83,7 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOff Unsupported business type: %{public}s; need: %{public}s",
                stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
-        result = FAILED;
-        NAPI_CALL(env, napi_get_value_int32(env, ret, &result));
-        return ret;
+        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, std::to_string(SYSTEM_WORK_ABNORMALLY));
     }
 
     DistributedSchedule::ContinuationStateClient client;
@@ -110,8 +111,12 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     napi_value callbackResult[2] = {NULL, continueResultInfo};
     napi_call_function(env, undefined, callback, CALLBACK_PARAMS_NUM, callbackResult, nullptr);
 
-    NAPI_CALL(env, napi_get_value_int32(env, ret, &result));
-    return ret;
+    if (result == ERR_OK) {
+        napi_get_value_int32(env, ret, &result);
+        return ret;
+    } else {
+        napi_throw(env, GenerateBusinessError(env, result, std::to_string(result));
+    }
 }
 
 sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateManager::CreateStub(
@@ -120,23 +125,26 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     // get and check all params
     size_t argc = ARG_COUNT_THREE;
     napi_value args[ARG_COUNT_THREE];
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, nullptr, nullptr));
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
     if (argc != ARG_COUNT_THREE) {
         HILOGE("Parameter error. The type of number of parameters must be 3");
-        return nullptr;
+        napi_throw(env, GenerateBusinessError(env, PARAMETER_CHECK_FAILED,
+                                              "Parameter error. The type of number of parameters must be 3"));
     }
     // this.context is 2nd parameter
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
     GetAbilityContext(abilityContext, env, args[1]);
     if (abilityContext == nullptr) {
         HILOGE("get ability context failed");
-        return nullptr;
+        napi_throw(env, GenerateBusinessError(env, PARAMETER_CHECK_FAILED,
+            "get ability context failed"));
     }
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = abilityContext->GetAbilityInfo();
     napi_valuetype valuetype;
-    NAPI_CALL(env, napi_typeof(env, args[ARG_INDEX_4_CALLBACK_FUNC], &valuetype));
+    napi_typeof(env, args[ARG_INDEX_4_CALLBACK_FUNC], &valuetype)
     if (valuetype != napi_function) {
-        return nullptr;
+        napi_throw(env, GenerateBusinessError(env, PARAMETER_CHECK_FAILED,
+            "The third parameter must be an asynchronous function"));
     }
 
     DistributedSchedule::JsContinuationStateManagerStub::StateCallbackData callbackData;
@@ -199,7 +207,7 @@ napi_value JsContinueManagerInit(napi_env env, napi_value exportObj)
         DECLARE_NAPI_FUNCTION("on", JsContinuationStateManager::ContinueStateCallbackOn),
         DECLARE_NAPI_FUNCTION("off", JsContinuationStateManager::ContinueStateCallbackOff),
     };
-    NAPI_CALL(env, napi_define_properties(env, exportObj, sizeof(desc) / sizeof(desc[0]), desc));
+    napi_define_properties(env, exportObj, sizeof(desc) / sizeof(desc[0]), desc);
     return exportObj;
 }
 
