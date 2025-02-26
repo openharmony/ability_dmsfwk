@@ -30,7 +30,7 @@ namespace {
     const std::string CODE_KEY_NAME = "code";
     const int32_t ARG_INDEX_4_CALLBACK_FUNC = 2;
     const int32_t SUCCESS = 0;
-    const int32_t FAILED = -1;
+    const int32_t FAILED = 1;
     constexpr int32_t ARG_COUNT_THREE = 3;
     const int32_t CALLBACK_PARAMS_NUM = 2;
 }
