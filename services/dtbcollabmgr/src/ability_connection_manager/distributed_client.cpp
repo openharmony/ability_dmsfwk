@@ -70,7 +70,7 @@ sptr<IRemoteObject> DistributedClient::GetDmsProxy()
     // waiting for service online
     std::unique_lock<std::mutex> lock(mtx_);
     if (!cv_.wait_for(lock, std::chrono::seconds(SA_TIMEOUT),
-    [this]() { return callbackReceived_; })) {
+        [this]() { return callbackReceived_; })) {
         HILOGE("wait for system ability timeout");
         return nullptr;
     }
