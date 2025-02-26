@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -323,8 +323,7 @@ int32_t DSchedSoftbusSession::UnPackSendData(std::shared_ptr<DSchedDataBuffer> b
     uint32_t maxSendSize = 0;
     int32_t ret = GetSessionOption(sessionId_, SESSION_OPTION_MAX_SENDBYTES_SIZE, &maxSendSize, sizeof(maxSendSize));
     if (ret != ERR_OK) {
-        HILOGE("GetSessionOption get max SendBytes size failed, ret: %{public}d, session: %{public}d",
-            ret, sessionId_);
+        HILOGE("GetSessionOption get maxSendSize failed, ret: %{public}d, session: %{public}d", ret, sessionId_);
         return ret;
     }
     HILOGD("GetSessionOption get max SendBytes size: %{public}u, session: %{public}d", maxSendSize, sessionId_);
@@ -340,6 +339,10 @@ int32_t DSchedSoftbusSession::UnPackSendData(std::shared_ptr<DSchedDataBuffer> b
     SessionDataHeader headPara = { PROTOCOL_VERSION, FRAG_START, dataType, 0, totalLen, subSeq };
 
     while (totalLen > offset) {
+        if (maxSendSize <= BINARY_DATA_PACKET_RESERVED_BUFFER) {
+            HILOGE("current maxSendSize %{public}u not enough.", maxSendSize);
+            return SOFTBUS_SERVICE_ERR;
+        }
         SetHeadParaDataLen(headPara, totalLen, offset, maxSendSize);
         bufferSize = static_cast<uint64_t>(buffer->Size());
         HILOGD("size: %" PRIu64", dataLen: %{public}d, totalLen: %{public}d, nowTime: %" PRId64" start:",
@@ -359,8 +362,6 @@ int32_t DSchedSoftbusSession::UnPackSendData(std::shared_ptr<DSchedDataBuffer> b
             HILOGE("sendData failed, ret: %{public}d, session: %{public}d", ret, sessionId_);
             return ret;
         }
-        HILOGD("size: %" PRIu64", dataLen: %{public}d, totalLen: %{public}d, nowTime: %" PRId64" end:",
-            bufferSize, headPara.dataLen, headPara.totalLen, GetNowTimeStampUs());
 
         headPara.subSeq++;
         headPara.fragFlag = FRAG_MID;
@@ -368,8 +369,7 @@ int32_t DSchedSoftbusSession::UnPackSendData(std::shared_ptr<DSchedDataBuffer> b
 
         ret = GetSessionOption(sessionId_, SESSION_OPTION_MAX_SENDBYTES_SIZE, &maxSendSize, sizeof(maxSendSize));
         if (ret != ERR_OK) {
-            HILOGE("GetSessionOption get max SendBytes size failed, ret: %{public}d, session: %{public}d",
-                ret, sessionId_);
+            HILOGE("GetSessionOption get maxSendSize failed, ret: %{public}d, session: %{public}d", ret, sessionId_);
             return ret;
         }
         HILOGD("GetSessionOption get next SendBytes size: %{public}u, session: %{public}d", maxSendSize, sessionId_);
@@ -380,20 +380,10 @@ int32_t DSchedSoftbusSession::UnPackSendData(std::shared_ptr<DSchedDataBuffer> b
 int32_t DSchedSoftbusSession::UnPackStartEndData(std::shared_ptr<DSchedDataBuffer> buffer, int32_t dataType)
 {
     SessionDataHeader headPara = { PROTOCOL_VERSION, FRAG_START_END, dataType, 0, buffer->Size(), 0 };
-
-    uint32_t maxSendSize = 0;
-    int32_t ret = GetSessionOption(sessionId_, SESSION_OPTION_MAX_SENDBYTES_SIZE, &maxSendSize, sizeof(maxSendSize));
-    if (ret != ERR_OK) {
-        HILOGE("GetSessionOption get max SendBytes size failed, ret: %{public}d, session: %{public}d",
-            ret, sessionId_);
-        return ret;
-    }
-    HILOGD("GetSessionOption get max SendBytes size: %{public}u, session: %{public}d", maxSendSize, sessionId_);
-
     headPara.dataLen = buffer->Size();
     auto unpackData = std::make_shared<DSchedDataBuffer>(buffer->Size() + BINARY_HEADER_FRAG_LEN);
     MakeFragDataHeader(headPara, unpackData->Data(), BINARY_HEADER_FRAG_LEN);
-    ret = memcpy_s(unpackData->Data() + BINARY_HEADER_FRAG_LEN, unpackData->Size() - BINARY_HEADER_FRAG_LEN,
+    int32_t ret = memcpy_s(unpackData->Data() + BINARY_HEADER_FRAG_LEN, unpackData->Size() - BINARY_HEADER_FRAG_LEN,
         buffer->Data(), buffer->Size());
     if (ret != ERR_OK) {
         HILOGE("START_END memcpy_s failed, ret: %{public}d, session: %{public}d", ret, sessionId_);

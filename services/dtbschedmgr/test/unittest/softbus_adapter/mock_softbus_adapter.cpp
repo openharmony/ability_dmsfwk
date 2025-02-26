@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,6 +55,12 @@ int32_t RegisterEventListener(const char* pkgName, EventListener *listener)
 int32_t UnregisterEventListener(const char* pkgName, EventListener *listener)
 {
     return SoftbusMock::GetMock().UnregisterEventListener(pkgName, listener);
+}
+
+int GetSessionOption(int sessionId, SessionOption option, void* optionValue, uint32_t valueSize)
+{
+    return SoftbusMock::GetMock().GetSessionOption(sessionId,
+        option, optionValue, valueSize);
 }
 }
 } // namespace DistributedSchedule
