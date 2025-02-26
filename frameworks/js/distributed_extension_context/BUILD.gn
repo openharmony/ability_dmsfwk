@@ -1,0 +1,80 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
+
+ohos_static_library("distributedextensioncontext_napi_fwk") {
+  branch_protector_ret = "pac_ret"
+
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  sources = [ "distributed_extension_context_module.cpp" ]
+
+  external_deps = [ "napi:ace_napi" ]
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+es2abc_gen_abc("gen_distributed_extension_context_abc") {
+  src_js = rebase_path("distributed_extension_context.js")
+  dst_file = rebase_path(target_out_dir + "/distributed_extension_context.abc")
+  in_puts = [ "distributed_extension_context.js" ]
+  out_puts = [ target_out_dir + "/distributed_extension_context.abc" ]
+  extra_args = [ "--module" ]
+}
+
+gen_js_obj("distributed_extension_context_js") {
+  input = "distributed_extension_context.js"
+  output = target_out_dir + "/distributed_extension_context.o"
+}
+
+gen_js_obj("distributed_extension_context_abc") {
+  input =
+      get_label_info(":gen_distributed_extension_context_abc",
+                     "target_out_dir") + "/distributed_extension_context.abc"
+  output = target_out_dir + "/distributed_extension_context_abc.o"
+  dep = ":gen_distributed_extension_context_abc"
+}
+
+ohos_shared_library("distributedextensioncontext") {
+  branch_protector_ret = "pac_ret"
+
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  deps = [
+    ":distributed_extension_context_abc",
+    ":distributed_extension_context_js",
+    "${dms_path}/frameworks/js/distributed_extension_context:distributedextensioncontext_napi_fwk",
+  ]
+
+  relative_install_dir = "module/application"
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}

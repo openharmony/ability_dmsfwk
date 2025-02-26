@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,6 +89,31 @@ int32_t DistributedClient::UnRegisterDSchedEventListener(const DSchedEventType& 
     PARCEL_WRITE_HELPER(data, RemoteObject, obj->AsObject());
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::UNREGISTER_DSCHED_EVENT_LISTENER),
         data, reply);
+}
+
+int32_t DistributedClient::ConnectDExtAbility(std::string& bundleName, std::string& abilityName, int32_t userId)
+{
+    HILOG_INFO("call begin.");
+    sptr<IRemoteObject> remote = GetDmsProxy();
+    if (remote == nullptr) {
+        HILOG_ERROR("remote system ablity is null");
+        return AAFwk::INVALID_PARAMETERS_ERR;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        HILOG_DEBUG("write interface token failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_WRITE_HELPER(data, String, bundleName);
+    PARCEL_WRITE_HELPER(data, String, abilityName);
+    PARCEL_WRITE_HELPER(data, Int32, userId);
+ 
+    MessageOption option;
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(IDSchedInterfaceCode::DSCHED_START_DEXTENSION),
+        data, reply, option);
+    HILOG_INFO("call end.");
+    return ret;
 }
 
 int32_t DistributedClient::GetContinueInfo(ContinueInfo &continueInfo)

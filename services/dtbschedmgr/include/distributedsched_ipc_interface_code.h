@@ -92,6 +92,7 @@ enum class IDSchedInterfaceCode : uint32_t {
     UNREGISTER_DSCHED_EVENT_LISTENER = 263,
     GET_CONTINUE_INFO = 264,
     GET_DSCHED_EVENT_INFO = 265,
+    DSCHED_START_DEXTENSION = 266,
 
     // request code for set continue state
     SET_MISSION_CONTINUE_STATE = 300,

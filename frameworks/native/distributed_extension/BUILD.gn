@@ -1,0 +1,125 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
+
+ohos_shared_library("distributed_extension_ability_native") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  sources = [
+    "src/distributed_extension.cpp",
+    "src/distributed_extension_context.cpp",
+    "src/distributed_extension_context_js.cpp",
+    "src/distributed_extension_js.cpp",
+    "src/distributed_extension_loader.cpp",
+    "src/distributed_extension_service.cpp",
+    "src/ipc/distributed_extension_stub.cpp"
+  ]
+
+  include_dirs = [
+    "include",
+    "include/ipc",
+    "${dms_path}/common/include",
+  ]
+
+  deps = []
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_context",
+    "ability_runtime:appkit_native",
+    "ability_runtime:extensionkit_native",
+    "ability_runtime:napi_common",
+    "ability_runtime:runtime",
+    "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+    "samgr:samgr_proxy",
+  ]
+
+  cflags_cc = []
+
+  use_exceptions = true
+  relative_install_dir = "extensionability"
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_shared_library("distributed_extension_sa") {
+  branch_protector_ret = "pac_ret"
+
+  sanitize = {
+    integer_overflow = true
+    ubsan = true
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  sources = [
+    "src/ipc/distributed_extension_proxy.cpp"
+  ]
+
+  include_dirs = [
+    "include",
+    "include/ipc",
+    "${dms_path}/common/include",
+  ]
+
+  deps = []
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_connect_callback_stub",
+    "ability_runtime:ability_manager",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "common_event_service:cesfwk_innerkits",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "storage_service:storage_manager_sa_proxy",
+  ]
+
+  cflags_cc = [
+    #"-fdata-sections",
+    #"-ffunction-sections",
+    #"-fno-unwind-tables",
+    #"-fno-asynchronous-unwind-tables",
+    #"-Os",
+  ]
+
+  use_exceptions = true
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
