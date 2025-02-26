@@ -30,6 +30,7 @@ namespace {
     const std::string CODE_KEY_NAME = "code";
     const int32_t ARG_INDEX_4_CALLBACK_FUNC = 2;
     const int32_t SUCCESS = 0;
+    const int32_t FAILED = -1;
     constexpr int32_t ARG_COUNT_THREE = 3;
     const int32_t CALLBACK_PARAMS_NUM = 2;
 }
@@ -47,6 +48,9 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
         HILOGE("ContinueStateCallbackOn Unsupported business type: %{public}s; need: %{public}s",
             stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
         napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, std::to_string(SYSTEM_WORK_ABNORMALLY)));
+        result = FAILED;
+        napi_get_value_int32(env, ret, &result);
+        return ret;
     }
 
     std::string key = std::to_string(stub->callbackData_.missionId) + stub->callbackData_.bundleName +
@@ -83,6 +87,9 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
         HILOGE("ContinueStateCallbackOff Unsupported business type: %{public}s; need: %{public}s",
             stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
         napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, std::to_string(SYSTEM_WORK_ABNORMALLY)));
+        result = FAILED;
+        napi_get_value_int32(env, ret, &result);
+        return ret;
     }
 
     DistributedSchedule::ContinuationStateClient client;
@@ -127,7 +134,8 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     if (argc != ARG_COUNT_THREE) {
         HILOGE("Parameter error. The type of number of parameters must be 3");
         napi_throw(env, GenerateBusinessError(env, PARAMETER_CHECK_FAILED,
-                                              "Parameter error. The type of number of parameters must be 3"));
+            "Parameter error. The type of number of parameters must be 3"));
+        return nullptr;
     }
     // this.context is 2nd parameter
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
@@ -136,6 +144,7 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
         HILOGE("get ability context failed");
         napi_throw(env, GenerateBusinessError(env, PARAMETER_CHECK_FAILED,
             "get ability context failed"));
+        return nullptr;
     }
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = abilityContext->GetAbilityInfo();
     napi_valuetype valuetype;
@@ -143,6 +152,7 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     if (valuetype != napi_function) {
         napi_throw(env, GenerateBusinessError(env, PARAMETER_CHECK_FAILED,
             "The third parameter must be an asynchronous function"));
+        return nullptr;
     }
 
     DistributedSchedule::JsContinuationStateManagerStub::StateCallbackData callbackData;
