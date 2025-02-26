@@ -15,6 +15,11 @@ import("//build/ohos.gni")
 import("//build/ohos_var.gni")
 import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
+group("unittest") {
+  testonly = true
+  deps = [ "${dms_path}/services/dtbcollabmgr/test/unittest/ability_connection_manager:unittest" ]
+}
+
 config("distributed_collab_config") {
   visibility = [ ":*" ]
   include_dirs = [
