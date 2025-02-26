@@ -347,12 +347,12 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     }
     if (state == ACTIVE
         && !IsBundleContinuable(localBundleInfo, abilityInfo.abilityName, abilityInfo.moduleName, continueType)) {
-        if (!isScreenOn.load()) {
-            HILOGW("current screen status is off, do not show icon!");
-            return BUNDLE_NOT_CONTINUABLE;
-        }
         HILOGE("Bundle %{public}s is not continuable", finalBundleName.c_str());
         NotifyIconDisappear(bundleNameId, senderNetworkId, state);
+        return BUNDLE_NOT_CONTINUABLE;
+    }
+    if (state == ACTIVE && !isScreenOn.load()) {
+        HILOGW("current screen status is off, do not show icon!");
         return BUNDLE_NOT_CONTINUABLE;
     }
     int32_t ret = VerifyBroadcastSource(senderNetworkId, bundleName, finalBundleName, continueType, state);
