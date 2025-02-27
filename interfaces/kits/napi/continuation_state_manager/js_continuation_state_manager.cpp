@@ -244,6 +244,7 @@ napi_status JsContinuationStateManager::MakeEnumItem(const napi_env &env, napi_v
 napi_value JsContinueManagerInit(napi_env env, napi_value exportObj)
 {
     napi_value continueStateCodeEnumObject = JsContinuationStateManager::MakeContinueStateCodeEnumObject(env);
+
     static napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("on", JsContinuationStateManager::ContinueStateCallbackOn),
         DECLARE_NAPI_FUNCTION("off", JsContinuationStateManager::ContinueStateCallbackOff),
