@@ -225,13 +225,14 @@ napi_value JsContinuationStateManager::GenerateBusinessError(
 napi_value JsContinuationStateManager::MakeContinueStateCodeEnumObject(napi_env env)
 {
     napi_value object;
-    env, napi_create_object(env, &object);
+    napi_create_object(env, &object);
     MakeEnumItem(env, object, "SUCCESS", SUCCESS);
     MakeEnumItem(env, object, "SYSTEM_ERROR", FAILED);
     return object;
 }
 
-napi_status JsContinuationStateManager::MakeEnumItem(const napi_env &env, napi_value object, const char* name, int32_t value)
+napi_status JsContinuationStateManager::MakeEnumItem(
+    const napi_env &env, napi_value object, const char* name, int32_t value)
 {
     napi_value itemName;
     napi_value itemValue;

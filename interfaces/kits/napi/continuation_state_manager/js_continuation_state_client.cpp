@@ -20,6 +20,7 @@
 #include "ipc_skeleton.h"
 #include "distributedsched_ipc_interface_code.h"
 #include "napi_error_code.h"
+#include "napi_error_code.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
