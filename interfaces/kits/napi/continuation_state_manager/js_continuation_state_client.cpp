@@ -19,6 +19,7 @@
 #include "iservice_registry.h"
 #include "ipc_skeleton.h"
 #include "distributedsched_ipc_interface_code.h"
+#include "napi_error_code.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -44,32 +45,32 @@ int32_t ContinuationStateClient::RegisterContinueStateCallback(const sptr<JsCont
     sptr <IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
         HILOGE("get dms proxy failed.");
-        return ERR_FLATTEN_OBJECT;
+        return SYSTEM_WORK_ABNORMALLY;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
         HILOGE("write token failed.");
-        return ERR_FLATTEN_OBJECT;
+        return SYSTEM_WORK_ABNORMALLY;
     }
     if (!data.WriteString(callbackData.bundleName)) {
         HILOGE("write bundleName failed.");
-        return ERR_FLATTEN_OBJECT;
+        return SYSTEM_WORK_ABNORMALLY;
     }
     if (!data.WriteInt32(callbackData.missionId)) {
         HILOGE("write missionId failed.");
-        return ERR_FLATTEN_OBJECT;
+        return SYSTEM_WORK_ABNORMALLY;
     }
     if (!data.WriteString(callbackData.moduleName)) {
         HILOGE("write moduleName failed.");
-        return ERR_FLATTEN_OBJECT;
+        return SYSTEM_WORK_ABNORMALLY;
     }
     if (!data.WriteString(callbackData.abilityName)) {
         HILOGE("write abilityName failed.");
-        return ERR_FLATTEN_OBJECT;
+        return SYSTEM_WORK_ABNORMALLY;
     }
     if (!data.WriteRemoteObject(stub)) {
         HILOGE("write stub failed.");
-        return ERR_FLATTEN_OBJECT;
+        return SYSTEM_WORK_ABNORMALLY;
     }
     MessageParcel reply;
     MessageOption option;
@@ -78,7 +79,7 @@ int32_t ContinuationStateClient::RegisterContinueStateCallback(const sptr<JsCont
         data, reply, option);
     if (error != ERR_NONE) {
         HILOGE("send register request failed.");
-        return error;
+        return SYSTEM_WORK_ABNORMALLY;
     }
     int32_t result = reply.ReadInt32();
     HILOGI("end, register result is: %{public}d", result);
@@ -93,30 +94,30 @@ int32_t ContinuationStateClient::UnRegisterContinueStateCallback(const sptr<JsCo
     sptr <IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
         HILOGE("get dms proxy failed.");
-        return ERR_FLATTEN_OBJECT;
+        return SYSTEM_WORK_ABNORMALLY;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
         HILOGE("write token failed.");
-        return ERR_FLATTEN_OBJECT;
+        return SYSTEM_WORK_ABNORMALLY;
     }
 
     if (!data.WriteString(callbackData.bundleName)) {
         HILOGE("write bundleName failed.");
-        return ERR_FLATTEN_OBJECT;
+        return SYSTEM_WORK_ABNORMALLY;
     }
     if (!data.WriteInt32(callbackData.missionId)) {
         HILOGE("write missionId failed.");
-        return ERR_FLATTEN_OBJECT;
+        return SYSTEM_WORK_ABNORMALLY;
     }
     if (!data.WriteString(callbackData.moduleName)) {
         HILOGE("write moduleName failed.");
-        return ERR_FLATTEN_OBJECT;
+        return SYSTEM_WORK_ABNORMALLY;
     }
     if (!data.WriteString(callbackData.abilityName)) {
         HILOGE("write abilityName failed.");
-        return ERR_FLATTEN_OBJECT;
+        return SYSTEM_WORK_ABNORMALLY;
     }
 
     MessageParcel reply;
@@ -126,7 +127,7 @@ int32_t ContinuationStateClient::UnRegisterContinueStateCallback(const sptr<JsCo
             data, reply, option);
     if (error != ERR_NONE) {
         HILOGE("send unregister request failed.");
-        return error;
+        return SYSTEM_WORK_ABNORMALLY;
     }
     int32_t result = reply.ReadInt32();
     HILOGI("end, register result is: %{public}d", result);

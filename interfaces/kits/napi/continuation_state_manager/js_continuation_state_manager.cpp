@@ -27,6 +27,7 @@ using namespace OHOS::AppExecFwk;
 namespace {
     const std::string TAG = "JsContinuationStateManager";
     const std::string BIZTYPE_PREPARE_CONTINUE = "prepareContinue";
+    const std::string CODE_KEY_NAME = "code";
     const int32_t ARG_INDEX_4_CALLBACK_FUNC = 2;
     const int32_t SUCCESS = 0;
     const int32_t FAILED = 1;
@@ -45,9 +46,10 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
     sptr<DistributedSchedule::JsContinuationStateManagerStub> stub = CreateStub(env, info);
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOn Unsupported business type: %{public}s; need: %{public}s",
-               stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
+            stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
+        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, std::to_string(SYSTEM_WORK_ABNORMALLY)));
         result = FAILED;
-        NAPI_CALL(env, napi_get_value_int32(env, ret, &result));
+        napi_get_value_int32(env, ret, &result);
         return ret;
     }
 
@@ -67,7 +69,11 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
     DistributedSchedule::ContinuationStateClient client;
     result = client.RegisterContinueStateCallback(stub);
     HILOGI("ContinueStateCallbackOn register callback result: %{public}d", result);
-    NAPI_CALL(env, napi_get_value_int32(env, ret, &result));
+
+    if (result != ERR_OK) {
+        napi_throw(env, GenerateBusinessError(env, result, std::to_string(result)));
+    }
+    napi_get_value_int32(env, ret, &result);
     return ret;
 }
 
@@ -79,9 +85,10 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     sptr<DistributedSchedule::JsContinuationStateManagerStub> stub = CreateStub(env, info);
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOff Unsupported business type: %{public}s; need: %{public}s",
-               stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
+            stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
+        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, std::to_string(SYSTEM_WORK_ABNORMALLY)));
         result = FAILED;
-        NAPI_CALL(env, napi_get_value_int32(env, ret, &result));
+        napi_get_value_int32(env, ret, &result);
         return ret;
     }
 
@@ -110,7 +117,10 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     napi_value callbackResult[2] = {NULL, continueResultInfo};
     napi_call_function(env, undefined, callback, CALLBACK_PARAMS_NUM, callbackResult, nullptr);
 
-    NAPI_CALL(env, napi_get_value_int32(env, ret, &result));
+    if (result != ERR_OK) {
+        napi_throw(env, GenerateBusinessError(env, result, std::to_string(result)));
+    }
+    napi_get_value_int32(env, ret, &result);
     return ret;
 }
 
@@ -120,9 +130,11 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     // get and check all params
     size_t argc = ARG_COUNT_THREE;
     napi_value args[ARG_COUNT_THREE];
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, args, nullptr, nullptr));
+    napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
     if (argc != ARG_COUNT_THREE) {
         HILOGE("Parameter error. The type of number of parameters must be 3");
+        napi_throw(env, GenerateBusinessError(env, PARAMETER_CHECK_FAILED,
+            "Parameter error. The type of number of parameters must be 3"));
         return nullptr;
     }
     // this.context is 2nd parameter
@@ -130,12 +142,16 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     GetAbilityContext(abilityContext, env, args[1]);
     if (abilityContext == nullptr) {
         HILOGE("get ability context failed");
+        napi_throw(env, GenerateBusinessError(env, PARAMETER_CHECK_FAILED,
+            "get ability context failed"));
         return nullptr;
     }
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = abilityContext->GetAbilityInfo();
     napi_valuetype valuetype;
-    NAPI_CALL(env, napi_typeof(env, args[ARG_INDEX_4_CALLBACK_FUNC], &valuetype));
+    napi_typeof(env, args[ARG_INDEX_4_CALLBACK_FUNC], &valuetype);
     if (valuetype != napi_function) {
+        napi_throw(env, GenerateBusinessError(env, PARAMETER_CHECK_FAILED,
+            "The third parameter must be an asynchronous function"));
         return nullptr;
     }
 
@@ -193,13 +209,49 @@ void JsContinuationStateManager::GetAbilityContext(
     }
 }
 
+napi_value JsContinuationStateManager::GenerateBusinessError(
+    const napi_env &env, int32_t errCode, const std::string &errMsg)
+{
+    napi_value code = nullptr;
+    napi_create_int32(env, errCode, &code);
+    napi_value message = nullptr;
+    napi_create_string_utf8(env, errMsg.c_str(), NAPI_AUTO_LENGTH, &message);
+    napi_value businessError = nullptr;
+    napi_create_error(env, nullptr, message, &businessError);
+    napi_set_named_property(env, businessError, CODE_KEY_NAME.c_str(), code);
+    return businessError;
+}
+
+napi_value JsContinuationStateManager::MakeContinueStateCodeEnumObject(napi_env env)
+{
+    napi_value object;
+    napi_create_object(env, &object);
+    MakeEnumItem(env, object, "SUCCESS", SUCCESS);
+    MakeEnumItem(env, object, "SYSTEM_ERROR", FAILED);
+    return object;
+}
+
+napi_status JsContinuationStateManager::MakeEnumItem(
+    const napi_env &env, napi_value object, const char* name, int32_t value)
+{
+    napi_value itemName;
+    napi_value itemValue;
+    napi_create_string_utf8(env, name, NAPI_AUTO_LENGTH, &itemName);
+    napi_create_int32(env, value, &itemValue);
+    napi_set_property(env, object, itemName, itemValue);
+    return napi_ok;
+}
+
 napi_value JsContinueManagerInit(napi_env env, napi_value exportObj)
 {
+    napi_value continueStateCodeEnumObject = JsContinuationStateManager::MakeContinueStateCodeEnumObject(env);
+
     static napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("on", JsContinuationStateManager::ContinueStateCallbackOn),
         DECLARE_NAPI_FUNCTION("off", JsContinuationStateManager::ContinueStateCallbackOff),
+        DECLARE_NAPI_PROPERTY("ContinueStateCode", continueStateCodeEnumObject),
     };
-    NAPI_CALL(env, napi_define_properties(env, exportObj, sizeof(desc) / sizeof(desc[0]), desc));
+    napi_define_properties(env, exportObj, sizeof(desc) / sizeof(desc[0]), desc);
     return exportObj;
 }
 
