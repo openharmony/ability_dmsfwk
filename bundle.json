@@ -181,6 +181,7 @@
           "//foundation/ability/dmsfwk/interfaces/innerkits/tests:dms_sdk_demo",
           "//foundation/ability/dmsfwk/services/dtbschedmgr:unittest",
           "//foundation/ability/dmsfwk/services/dtbabilitymgr:unittest",
+          "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/ability_connection_manager:unittest",
           "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/channel_manager:unittest",
           "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/av_trans_stream_provider:unittest",
           "//foundation/ability/dmsfwk/test/fuzztest:fuzztest"
