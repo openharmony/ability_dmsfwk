@@ -132,6 +132,12 @@ void CommonEventListener::HandleScreenUnLocked()
 void CommonEventListener::HandleScreenOn()
 {
     HILOGI("SCREEN_ON");
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    if (recvMgr == nullptr) {
+        HILOGE("RecvMgr is nullptr.");
+    } else {
+        recvMgr->OnDeviceScreenOn();
+    }
 #ifdef DMS_ICON_HOLD_ON
     DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_SCREEN_LOCK, false);
     auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();

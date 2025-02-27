@@ -327,7 +327,6 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         DmsKvSyncE2E::GetInstance()->PushAndPullData(senderNetworkId);
         return RetryPostBroadcast(senderNetworkId, bundleNameId, continueTypeId, state, retry);
     }
-
     std::string bundleName = distributedBundleInfo.bundleName;
     HILOGI("get distributedBundleInfo success, bundleName: %{public}s", bundleName.c_str());
     std::string finalBundleName;
@@ -335,14 +334,12 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     std::string continueType;
     DmsAbilityInfo abilityInfo;
     FindContinueType(distributedBundleInfo, continueTypeId, continueType, abilityInfo);
-
     if (!GetFinalBundleName(distributedBundleInfo, finalBundleName, localBundleInfo, continueType)) {
         HILOGE("The app is not installed on the local device.");
         NotifyIconDisappear(bundleNameId, senderNetworkId, state);
         return INVALID_PARAMETERS_ERR;
     }
     HILOGI("got finalBundleName: %{public}s", finalBundleName.c_str());
-
     if (localBundleInfo.applicationInfo.bundleType != AppExecFwk::BundleType::APP) {
         HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
         NotifyIconDisappear(bundleNameId, senderNetworkId, state);
@@ -354,7 +351,10 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         NotifyIconDisappear(bundleNameId, senderNetworkId, state);
         return BUNDLE_NOT_CONTINUABLE;
     }
-
+    if (state == ACTIVE && !isScreenOn.load()) {
+        HILOGW("current screen status is off, do not show icon!");
+        return BUNDLE_NOT_CONTINUABLE;
+    }
     int32_t ret = VerifyBroadcastSource(senderNetworkId, bundleName, finalBundleName, continueType, state);
     if (ret != ERR_OK) {
         return ret;
@@ -501,6 +501,7 @@ void DMSContinueRecvMgr::NotifyDied(const sptr<IRemoteObject>& obj)
 void DMSContinueRecvMgr::OnDeviceScreenOff()
 {
     HILOGI("OnDeviceScreenOff called. accountId: %{public}d.", accountId_);
+    isScreenOn.store(false);
     auto func = [this]() {
         std::string senderNetworkId;
         std::string bundleName;
@@ -540,6 +541,12 @@ void DMSContinueRecvMgr::OnDeviceScreenOff()
         return;
     }
     eventHandler_->PostTask(func);
+}
+
+void DMSContinueRecvMgr::OnDeviceScreenOn()
+{
+    HILOGI("OnDeviceScreenOn called. accountId: %{public}d.", accountId_);
+    isScreenOn.store(true);
 }
 #endif
 
