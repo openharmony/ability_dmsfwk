@@ -222,11 +222,32 @@ napi_value JsContinuationStateManager::GenerateBusinessError(
     return businessError;
 }
 
+napi_value JsContinuationStateManager::MakeContinueStateCodeEnumObject(napi_env env)
+{
+    napi_value object;
+    env, napi_create_object(env, &object);
+    MakeEnumItem(env, object, "SUCCESS", SUCCESS);
+    MakeEnumItem(env, object, "SYSTEM_ERROR", FAILED);
+    return object;
+}
+
+napi_status JsContinuationStateManager::MakeEnumItem(const napi_env &env, napi_value object, const char* name, int32_t value)
+{
+    napi_value itemName;
+    napi_value itemValue;
+    napi_create_string_utf8(env, name, NAPI_AUTO_LENGTH, &itemName);
+    napi_create_int32(env, value, &itemValue);
+    napi_set_property(env, object, itemName, itemValue);
+    return napi_ok;
+}
+
 napi_value JsContinueManagerInit(napi_env env, napi_value exportObj)
 {
+    napi_value continueStateCodeEnumObject = JsContinuationStateManager::MakeContinueStateCodeEnumObject(env);
     static napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("on", JsContinuationStateManager::ContinueStateCallbackOn),
         DECLARE_NAPI_FUNCTION("off", JsContinuationStateManager::ContinueStateCallbackOff),
+        DECLARE_NAPI_PROPERTY("ContinueStateCode", continueStateCodeEnumObject),
     };
     napi_define_properties(env, exportObj, sizeof(desc) / sizeof(desc[0]), desc);
     return exportObj;
