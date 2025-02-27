@@ -16,6 +16,7 @@
 #ifndef DSCHED_COLLAB_SINK_STATE_TEST_H
 #define DSCHED_COLLAB_SINK_STATE_TEST_H
 #include "dsched_collab_sink_connect_state.h"
+#include "dsched_collab_sink_get_version_state.h"
 #include "dsched_collab_sink_start_state.h"
 #include "dsched_collab_sink_wait_end_state.h"
 
@@ -24,6 +25,17 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
+
+class CollabSinkGetVersionStateTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+
+    static inline std::shared_ptr<CollabSinkGetVersionState> sinkGetVersionState_;
+    static inline std::shared_ptr<DSchedCollab> dCollab_;
+};
 
 class CollabSinkConnectStateTest : public testing::Test {
 public:

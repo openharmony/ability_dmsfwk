@@ -59,7 +59,8 @@ int32_t DSchedContinueStateMachine::Execute(const AppExecFwk::InnerEvent::Pointe
 
 void DSchedContinueStateMachine::UpdateState(DSchedContinueStateType stateType)
 {
-    if (stateType != DSCHED_CONTINUE_SOURCE_START_STATE && stateType != DSCHED_CONTINUE_SINK_START_STATE) {
+    if (stateType != DSCHED_CONTINUE_SOURCE_START_STATE && stateType != DSCHED_CONTINUE_SINK_START_STATE
+        && currentState_ != nullptr) {
         HILOGI("DSchedContinueStateMachine update state from %{public}d to %{public}d",
             currentState_->GetStateType(), stateType);
     } else {

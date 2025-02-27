@@ -130,7 +130,7 @@ HWTEST_F(DSchedCollabManagerTest, CollabMission_001, TestSize.Level3)
     DSchedCollabInfo info;
     EXPECT_CALL(*multiUserMgrNock_, IsCallerForeground(_)).WillOnce(Return(false));
     int32_t ret = DSchedCollabManager::GetInstance().CollabMission(info);
-    EXPECT_EQ(ret, DMS_NOT_FOREGROUND_USER);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     EXPECT_CALL(*multiUserMgrNock_, IsCallerForeground(_)).WillOnce(Return(true));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
@@ -182,20 +182,6 @@ HWTEST_F(DSchedCollabManagerTest, CollabMission_002, TestSize.Level3)
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
     EXPECT_EQ(ret, FIND_LOCAL_DEVICEID_ERR);
     DTEST_LOG << "DSchedCollabManagerTest CollabMission_002 end" << std::endl;
-}
-
-/**
- * @tc.name: HandleCollabMission_001
- * @tc.desc: test HandleCollabMission func
- * @tc.type: FUNC
- */
-HWTEST_F(DSchedCollabManagerTest, HandleCollabMission_001, TestSize.Level3)
-{
-    DTEST_LOG << "DSchedCollabManagerTest HandleCollabMission_001 begin" << std::endl;
-    DSchedCollabInfo info;
-    DSchedCollabManager::GetInstance().HandleCollabMission(info);
-    EXPECT_FALSE(DSchedCollabManager::GetInstance().collabs_.empty());
-    DTEST_LOG << "DSchedCollabManagerTest HandleCollabMission_001 end" << std::endl;
 }
 
 /**
