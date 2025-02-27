@@ -37,15 +37,20 @@ class DMSContinueRecomMgr {
 public:
     DMSContinueRecomMgr() = default;
     ~DMSContinueRecomMgr();
+
     void Init(int32_t currentAccountId);
     void UnInit();
 
     void OnDeviceChanged();
     void OnMissionStatusChanged(int32_t missionId, MissionEventType type);
+
 private:
     void StartEvent();
     void PublishContinueRecommend(const MissionStatus& status, MissionEventType type);
     bool GetRecommendInfo(const MissionStatus& status, MissionEventType type, ContinueRecommendInfo& info);
+    bool GetAvailableRecommendList(const std::string &bundleName, std::map<std::string, DmsBundleInfo>& availableList);
+    bool IsContinuableWithDiffBundle(const std::string& bundleName, const DmsBundleInfo& info);
+
 private:
     int32_t accountId_ = DEFAULT_USER_ID;
     std::thread eventThread_;

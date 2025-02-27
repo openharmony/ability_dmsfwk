@@ -20,6 +20,7 @@
 #include "bundle/bundle_manager_internal.h"
 #include "dfx/dms_hianalytics_report.h"
 #include "distributed_sched_utils.h"
+#include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_bm_storage.h"
 
@@ -174,7 +175,7 @@ bool DMSContinueRecomMgr::GetRecommendInfo(
     }
 
     std::map<std::string, DmsBundleInfo> availableList;
-    bool ret = DmsBmStorage::GetInstance()->GetAvailableRecommendList(status.bundleName, availableList);
+    bool ret = GetAvailableRecommendList(status.bundleName, availableList);
     if (ret && info.state_ == STATE_ACTIVE) {
         for (auto iter = availableList.begin(); iter != availableList.end(); iter++) {
             ContinueCandidate candidate;
@@ -185,6 +186,54 @@ bool DMSContinueRecomMgr::GetRecommendInfo(
     }
     HILOGD("end");
     return true;
+}
+
+bool DMSContinueRecomMgr::GetAvailableRecommendList(const std::string& bundleName,
+    std::map<std::string, DmsBundleInfo>& availableList)
+{
+    HILOGD("called, bundleName: %{public}s", bundleName.c_str());
+    std::vector<std::string> networkIdList = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdList();
+    for (const std::string& networkId : networkIdList) {
+        DmsBundleInfo sameBundleInfo;
+        if (DmsBmStorage::GetInstance()->GetDistributedBundleInfo(networkId, bundleName, sameBundleInfo) &&
+            sameBundleInfo.bundleName == bundleName) {
+            availableList[networkId] = sameBundleInfo;
+            continue;
+        }
+
+        HILOGW("get same bundle %{public}s on networkId %{public}s failed, try diff bundle.",
+            bundleName.c_str(), GetAnonymStr(networkId).c_str());
+
+        AppExecFwk::AppProvisionInfo appProvisionInfo;
+        std::string localDeveloperId;
+        if (BundleManagerInternal::GetAppProvisionInfo4CurrentUser(bundleName, appProvisionInfo)) {
+            localDeveloperId = appProvisionInfo.developerId;
+        }
+        std::vector<DmsBundleInfo> bundleInfoList;
+        if (!DmsBmStorage::GetInstance()->GetDistributeInfosByNetworkId(networkId, bundleInfoList)) {
+            HILOGW("get bundle list on networkId %{public}s failed.", GetAnonymStr(networkId).c_str());
+            continue;
+        }
+        for (const auto& diffBundleInfo : bundleInfoList) {
+            if (diffBundleInfo.developerId == localDeveloperId &&
+                IsContinuableWithDiffBundle(bundleName, diffBundleInfo)) {
+                availableList[networkId] = diffBundleInfo;
+                break;
+            }
+        }
+    }
+    return true;
+}
+
+bool DMSContinueRecomMgr::IsContinuableWithDiffBundle(const std::string& bundleName, const DmsBundleInfo& info)
+{
+    for (const auto& abilityInfo: info.dmsAbilityInfos) {
+        auto contiName = abilityInfo.continueBundleName;
+        if (std::find(contiName.begin(), contiName.end(), bundleName) != contiName.end()) {
+            return true;
+        }
+    }
+    return false;
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

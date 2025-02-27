@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "dsched_continue.h"
 #include "mission/notification/dms_continue_recommend_info.h"
 
 namespace OHOS {
@@ -25,6 +26,7 @@ namespace DistributedSchedule {
 class DmsHiAnalyticsReport {
 public:
     static int32_t PublishRecommendInfo(const ContinueRecommendInfo& info);
+    static int32_t PublishContinueEvent(const DSchedContinueInfo& info);
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

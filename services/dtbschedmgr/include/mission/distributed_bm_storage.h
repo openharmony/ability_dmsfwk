@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,6 +65,7 @@ public:
         DmsBundleInfo &distributeBundleInfo);
     bool GetDistributedBundleInfo(const std::string &networkId, const std::string &bundleName,
         DmsBundleInfo &distributeBundleInfo);
+    bool GetDistributeInfosByNetworkId(const std::string &networkId, std::vector<DmsBundleInfo> &infos);
     bool GetBundleNameId(const std::string& bundleName, uint16_t &bundleNameId);
     std::string GetContinueType(const std::string &networkId, std::string &bundleName, uint8_t continueTypeId);
     std::string GetAbilityName(const std::string &networkId, std::string &bundleName, std::string &continueType);
@@ -78,7 +79,6 @@ public:
         int32_t result, const std::string& bundleName);
     void DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos);
     bool UpdatePublicRecords(const std::string &localUdid);
-    bool GetAvailableRecommendList(const std::string &bundleName, std::map<std::string, DmsBundleInfo>& availableList);
 
 private:
     std::string DeviceAndNameToKey(const std::string &udid, const std::string &bundleName) const;

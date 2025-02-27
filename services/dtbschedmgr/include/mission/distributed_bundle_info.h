@@ -39,7 +39,7 @@ struct DmsAbilityInfo : public Parcelable {
     std::vector<std::string> continueType;
     std::vector<uint8_t> continueTypeId;
     std::string moduleName;
-    std::unordered_set<std::string> continueBundleName;
+    std::vector<std::string> continueBundleName;
 
     bool ReadFromParcel(Parcel &parcel);
     bool Marshalling(Parcel &parcel) const override;

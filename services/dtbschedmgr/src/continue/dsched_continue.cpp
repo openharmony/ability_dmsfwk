@@ -27,6 +27,7 @@
 #include "dfx/distributed_radar.h"
 #include "dfx/distributed_ue.h"
 #include "dfx/dms_continue_time_dumper.h"
+#include "dfx/dms_hianalytics_report.h"
 #include "distributed_sched_permission.h"
 #include "distributed_sched_service.h"
 #include "distributed_sched_utils.h"
@@ -1262,6 +1263,7 @@ void DSchedContinue::NotifyDSchedEventResult(int32_t result)
 {
     result = (result == ERR_OK) ? ERR_OK : NOTIFYCOMPLETECONTINUATION_FAILED;
     DistributedSchedService::GetInstance().NotifyDSchedEventCallbackResult(result, eventData_);
+    DmsHiAnalyticsReport::PublishContinueEvent(continueInfo_);
 }
 
 void DSchedContinue::DurationDumperComplete(int32_t result)

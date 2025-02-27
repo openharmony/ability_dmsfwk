@@ -311,7 +311,7 @@ bool BundleManagerInternal::GetAppProvisionInfo4CurrentUser(const std::string &b
         return false;
     }
     ErrCode result = bundleMgr->GetAppProvisionInfo(bundleName, ids[0], appProvisionInfo);
-    HILOGI("find dst bundle name for diff bundle continue. dst developer id: %{public}s; ",
+    HILOGI("find local bundle name for diff bundle continue. local developer id: %{public}s; ",
         GetAnonymStr(appProvisionInfo.developerId).c_str());
     return result == ERR_OK;
 }

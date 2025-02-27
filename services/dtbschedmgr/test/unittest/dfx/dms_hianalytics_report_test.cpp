@@ -14,6 +14,7 @@
  */
 
 #include "dms_hianalytics_report_test.h"
+#include "dsched_continue.h"
 #include "dtbschedmgr_log.h"
 #include "mission/notification/dms_continue_recommend_info.h"
 
@@ -60,6 +61,20 @@ HWTEST_F(DmsHiAnalyticsReportTest, PublishRecommendInfo_001, TestSize.Level3)
     int32_t ret = DmsHiAnalyticsReport::PublishRecommendInfo(info);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DmsHiAnalyticsReportTest PublishRecommendInfo_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PublishContinueEvent_001
+ * @tc.desc: check PublishContinueEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsHiAnalyticsReportTest, PublishContinueEvent_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsHiAnalyticsReportTest PublishContinueEvent_001 begin" << std::endl;
+    DSchedContinueInfo info;
+    int32_t ret = DmsHiAnalyticsReport::PublishContinueEvent(info);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DmsHiAnalyticsReportTest PublishContinueEvent_001 end" << std::endl;
 }
 }
 }
