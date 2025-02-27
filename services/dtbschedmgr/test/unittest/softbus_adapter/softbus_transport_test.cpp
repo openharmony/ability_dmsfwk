@@ -46,6 +46,7 @@ constexpr uint32_t HEADERLEN = 49;
 constexpr uint32_t SIZE_50 = 50;
 constexpr uint32_t MAXSENDSIZE = 513;
 constexpr uint32_t TOTALLEN = 600;
+constexpr int32_t INVALID_SESSION_ID = -1;
 }
 
 // DSchedDataBufferTest
@@ -619,6 +620,34 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, GetSessionIdByDeviceId_001, TestSize
 }
 
 /**
+ * @tc.name: GetSessionIdByDeviceId_002
+ * @tc.desc: call GetSessionIdByDeviceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedTransportSoftbusAdapterTest, GetSessionIdByDeviceId_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest GetSessionIdByDeviceId_002 begin" << std::endl;
+    std::string peerDeviceId = "peerDeviceId";
+    int32_t sessionId = 0;
+    int32_t rightSession = 2;
+    SessionInfo info = {0, "deviceid", "peerDeviceId", "sessionName", false};
+    std::shared_ptr<DSchedSoftbusSession> ptr = std::make_shared<DSchedSoftbusSession>(info);
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_.clear();
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_[1] = nullptr;
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_[rightSession] = ptr;
+
+    std::string peer = "peer";
+    auto ret = DSchedTransportSoftbusAdapter::GetInstance().GetSessionIdByDeviceId(peer, sessionId);
+    EXPECT_FALSE(ret);
+
+    ret = DSchedTransportSoftbusAdapter::GetInstance().GetSessionIdByDeviceId(peerDeviceId, sessionId);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(sessionId, rightSession);
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_.clear();
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest GetSessionIdByDeviceId_002 end" << std::endl;
+}
+
+/**
  * @tc.name: ReleaseChannel_001
  * @tc.desc: call ReleaseChannel
  * @tc.type: FUNC
@@ -649,6 +678,22 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, SendBytesBySoftbus_001, TestSize.Lev
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest SendBytesBySoftbus_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: SendBytesBySoftbus_002
+ * @tc.desc: call SendBytesBySoftbus
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedTransportSoftbusAdapterTest, SendBytesBySoftbus_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest SendBytesBySoftbus_002 begin" << std::endl;
+    int32_t sessionId = 0;
+    auto dataBuffer = std::make_shared<DSchedDataBuffer>(SIZE_2);
+    auto ret = DSchedTransportSoftbusAdapter::GetInstance().SendBytesBySoftbus(sessionId, dataBuffer);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest SendBytesBySoftbus_002 end" << std::endl;
+}
+
 
 /**
  * @tc.name: AddNewPeerSession_001
@@ -686,6 +731,125 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, ConnectDevice_001, TestSize.Level3)
     ret = DSchedTransportSoftbusAdapter::GetInstance().ConnectDevice(peerDeviceId, sessionId);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest ConnectDevice_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnShutdown_001
+ * @tc.desc: call OnShutdown
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedTransportSoftbusAdapterTest, OnShutdown_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest OnShutdown_001 begin" << std::endl;
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_.clear();
+    int32_t sessionId = 0;
+    DSchedTransportSoftbusAdapter::GetInstance().OnShutdown(sessionId, false);
+
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_[1] = nullptr;
+    DSchedTransportSoftbusAdapter::GetInstance().OnShutdown(sessionId, false);
+    EXPECT_FALSE(DSchedTransportSoftbusAdapter::GetInstance().sessions_.empty());
+
+
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_[0] = nullptr;
+    DSchedTransportSoftbusAdapter::GetInstance().OnShutdown(sessionId, false);
+    EXPECT_EQ(DSchedTransportSoftbusAdapter::GetInstance().sessions_.count(sessionId), 1);
+
+    std::string peerDeviceId = "peerDeviceId";
+    SessionInfo info = {0, "deviceid", "peerDeviceId", "sessionName", false};
+    std::shared_ptr<DSchedSoftbusSession> ptr = std::make_shared<DSchedSoftbusSession>(info);
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_.clear();
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_[0] = ptr;
+    DSchedTransportSoftbusAdapter::GetInstance().OnShutdown(sessionId, false);
+
+    EXPECT_EQ(DSchedTransportSoftbusAdapter::GetInstance().sessions_.count(sessionId), 0);
+    EXPECT_TRUE(DSchedTransportSoftbusAdapter::GetInstance().sessions_.empty());
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest OnShutdown_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SendData_001
+ * @tc.desc: call SendData
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedTransportSoftbusAdapterTest, SendData_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest SendData_001 begin" << std::endl;
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_.clear();
+    int32_t sessionId = 0;
+    auto dataBuffer = std::make_shared<DSchedDataBuffer>(SIZE_2);
+    int32_t dataType = 2;
+    auto ret = DSchedTransportSoftbusAdapter::GetInstance().SendData(sessionId, dataType, dataBuffer);
+    EXPECT_EQ(ret, INVALID_SESSION_ID);
+
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_[0] = nullptr;
+    ret = DSchedTransportSoftbusAdapter::GetInstance().SendData(sessionId, dataType, dataBuffer);
+    EXPECT_EQ(ret, INVALID_SESSION_ID);
+
+    std::string peerDeviceId = "peerDeviceId";
+    SessionInfo info = {0, "deviceid", "peerDeviceId", "sessionName", false};
+    std::shared_ptr<DSchedSoftbusSession> ptr = std::make_shared<DSchedSoftbusSession>(info);
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_.clear();
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_[0] = ptr;
+    ret = DSchedTransportSoftbusAdapter::GetInstance().SendData(sessionId, dataType, dataBuffer);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest SendData_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnBytes_001
+ * @tc.desc: call OnBytes
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedTransportSoftbusAdapterTest, OnBytes_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest OnBytes_001 begin" << std::endl;
+    int32_t sessionId = 0;
+    uint32_t dataLen = 0;
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_.clear();
+    EXPECT_NO_FATAL_FAILURE(DSchedTransportSoftbusAdapter::GetInstance().OnBytes(sessionId, nullptr, dataLen));
+
+    dataLen = DSCHED_MAX_RECV_DATA_LEN + 1;
+    EXPECT_NO_FATAL_FAILURE(DSchedTransportSoftbusAdapter::GetInstance().OnBytes(sessionId, nullptr, dataLen));
+
+    dataLen = 5;
+    EXPECT_NO_FATAL_FAILURE(DSchedTransportSoftbusAdapter::GetInstance().OnBytes(sessionId, nullptr, dataLen));
+    char data[] = "test";
+    EXPECT_NO_FATAL_FAILURE(DSchedTransportSoftbusAdapter::GetInstance().OnBytes(
+        sessionId, data, dataLen));
+
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_[sessionId] = nullptr;
+    EXPECT_NO_FATAL_FAILURE(DSchedTransportSoftbusAdapter::GetInstance().OnBytes(
+        sessionId, data, dataLen));
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_.clear();
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest OnBytes_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DisconnectDevice_001
+ * @tc.desc: call DisconnectDevice
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedTransportSoftbusAdapterTest, DisconnectDevice_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest DisconnectDevice_001 begin" << std::endl;
+    std::string peerDeviceId = "peerDeviceId";
+    int32_t sessionId = 0;
+    int32_t rightSession = 2;
+    SessionInfo info = {0, "deviceid", "peerDeviceId", "sessionName", false};
+    std::shared_ptr<DSchedSoftbusSession> ptr = std::make_shared<DSchedSoftbusSession>(info);
+    ptr->refCount_ = 2;
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_.clear();
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_[1] = nullptr;
+    DSchedTransportSoftbusAdapter::GetInstance().sessions_[rightSession] = ptr;
+
+    std::string peer = "peer";
+    EXPECT_NO_FATAL_FAILURE(DSchedTransportSoftbusAdapter::GetInstance().DisconnectDevice(peer));
+    EXPECT_NO_FATAL_FAILURE(DSchedTransportSoftbusAdapter::GetInstance().DisconnectDevice(peerDeviceId));
+    EXPECT_EQ(DSchedTransportSoftbusAdapter::GetInstance().sessions_.count(rightSession), 1);
+
+    EXPECT_NO_FATAL_FAILURE(DSchedTransportSoftbusAdapter::GetInstance().DisconnectDevice(peerDeviceId));
+    EXPECT_EQ(DSchedTransportSoftbusAdapter::GetInstance().sessions_.count(rightSession), 0);
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest DisconnectDevice_001 end" << std::endl;
 }
 }
 }
