@@ -16,7 +16,7 @@ import("//build/ohos_var.gni")
 import("//build/test.gni")
 import("../../../dmsfwk.gni")
 
-module_output_path = "dmsfwk/common"
+module_output_path = "dmsfwk/dmsfwk/common"
 
 ## UnitTest distributed_sched_utils_test
 ohos_unittest("DistributedSchedUtilsTest") {
