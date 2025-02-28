@@ -428,7 +428,7 @@ HWTEST_F(DistributedWantV2SupTest, MarshallingWriteUri_test_001, TestSize.Level3
     GTEST_LOG_(INFO) << "MarshallingWriteUri_test_001 start";
     std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
     ASSERT_NE(dwant, nullptr);
-    std::string uri = "file://huawei.com.a/test";
+    std::string uri = "file://test.com.a/test";
     dwant->SetUri(uri);
     Parcel parcel;
     EXPECT_TRUE(dwant->MarshallingWriteUri(parcel));
@@ -480,7 +480,7 @@ HWTEST_F(DistributedWantV2SupTest, ReadUriFromParcel_test_001, TestSize.Level3)
     EXPECT_TRUE(dwant->ReadUriFromParcel(parcel));
     EXPECT_EQ(dwant->GetUriString(), "");
     
-    std::string testUri = "file://huawei.com.a/test";
+    std::string testUri = "file://test.com.a/test";
     ASSERT_TRUE(parcel.WriteInt32(DistributedWantV2::VALUE_OBJECT));
     ASSERT_TRUE(parcel.WriteString16(Str8ToStr16(testUri)));
     EXPECT_TRUE(dwant->ReadUriFromParcel(parcel));
