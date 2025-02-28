@@ -39,6 +39,7 @@ ohos_unittest("ChannelManagerAVTransStreamDataTest") {
 
   include_dirs = [ "${dms_path}/services/dtbcollabmgr/test/unittest" ]
 
+  cflags = [ "-Dprivate=public" ]
   sources = [ "av_trans_stream_data_test.cpp" ]
 
   deps = [

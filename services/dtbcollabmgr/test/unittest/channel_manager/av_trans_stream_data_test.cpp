@@ -86,6 +86,15 @@ namespace DistributedCollab {
         EXPECT_EQ(indexVal, streamData_->GetStreamDataExt().index_);
         cJSON_Delete(jsonData);
         free(jsonString);
+        
+        jsonData = cJSON_CreateObject();
+        ASSERT_NE(jsonData, nullptr);
+
+        jsonString = cJSON_PrintUnformatted(jsonData);
+        result = streamData_->DeserializeStreamDataExt(jsonString);
+        EXPECT_EQ(result, ERR_OK);
+        cJSON_Delete(jsonData);
+        free(jsonString);
     }
 
     /**
@@ -97,6 +106,10 @@ namespace DistributedCollab {
     {
         int32_t result = streamData_->DeserializeStreamDataExt(nullptr);
         EXPECT_EQ(result, NULL_POINTER_ERROR);
+
+        std::string jsonString = "test";
+        result = streamData_->DeserializeStreamDataExt(jsonString.c_str());
+        EXPECT_EQ(result, PARSE_AV_TRANS_STREAM_EXT_FAILED);
     }
 
     /**
@@ -121,6 +134,21 @@ namespace DistributedCollab {
         int32_t result = streamData_->DeserializeStreamDataExt(jsonString);
         EXPECT_EQ(result, ERR_OK);
         EXPECT_EQ(option.quality, streamData_->GetStreamDataExt().pixelMapOption_.quality);
+        cJSON_Delete(jsonData);
+        free(jsonString);
+
+        jsonData = cJSON_CreateObject();
+        ASSERT_NE(jsonData, nullptr);
+
+        jsonString = cJSON_PrintUnformatted(jsonData);
+        result = streamData_->DeserializeStreamDataExt(jsonString);
+        EXPECT_EQ(result, ERR_OK);
+        free(jsonString);
+
+        cJSON_AddStringToObject(jsonData, "pixel_map", "pixel_map");
+        jsonString = cJSON_PrintUnformatted(jsonData);
+        result = streamData_->DeserializeStreamDataExt(jsonString);
+        EXPECT_EQ(result, ERR_OK);
         cJSON_Delete(jsonData);
         free(jsonString);
     }
@@ -150,6 +178,56 @@ namespace DistributedCollab {
         EXPECT_EQ(param.filp, streamData_->GetStreamDataExt().surfaceParam_.filp);
         cJSON_Delete(jsonData);
         free(jsonString);
+
+        jsonData = cJSON_CreateObject();
+        ASSERT_NE(jsonData, nullptr);
+
+        jsonString = cJSON_PrintUnformatted(jsonData);
+        result = streamData_->DeserializeStreamDataExt(jsonString);
+        EXPECT_EQ(result, ERR_OK);
+        free(jsonString);
+
+        cJSON_AddStringToObject(jsonData, "surface_param", "surface_param");
+        jsonString = cJSON_PrintUnformatted(jsonData);
+        result = streamData_->DeserializeStreamDataExt(jsonString);
+        EXPECT_EQ(result, ERR_OK);
+        cJSON_Delete(jsonData);
+        free(jsonString);
+    }
+
+    /**
+     * @tc.name: AVTransDataBuffer_Test
+     * @tc.desc: AVTransDataBuffer Test
+     * @tc.type: FUNC
+     */
+    HWTEST_F(AVTransStreamDataTest, AVTransDataBuffer_Test, TestSize.Level1)
+    {
+        size_t capacity = 0;
+        auto buffer = std::make_shared<AVTransDataBuffer>(capacity);
+        EXPECT_EQ(buffer->Data(), nullptr);
+
+        capacity = AVTransDataBuffer::DSCHED_MAX_BUFFER_SIZE;
+        auto bufferNull = std::make_shared<AVTransDataBuffer>(capacity);
+        EXPECT_EQ(bufferNull->Data(), nullptr);
+
+        capacity = 5;
+        auto bufferNotNull = std::make_shared<AVTransDataBuffer>(capacity);
+        EXPECT_NE(bufferNotNull->Data(), nullptr);
+        EXPECT_EQ(bufferNotNull->Capacity(), capacity);
+        EXPECT_EQ(bufferNotNull->Size(), capacity);
+        EXPECT_EQ(bufferNotNull->Offset(), 0);
+
+        size_t offset = 6;
+        size_t size = 6;
+        EXPECT_EQ(bufferNotNull->SetRange(offset, size), -1);
+
+        offset = 3;
+        EXPECT_EQ(bufferNotNull->SetRange(offset, size), -1);
+
+        size = 1;
+        EXPECT_EQ(bufferNotNull->SetRange(offset, size), 0);
+        EXPECT_EQ(bufferNotNull->Size(), size);
+        EXPECT_EQ(bufferNotNull->Offset(), offset);
     }
 } // namespace DistributedCollab
 }
