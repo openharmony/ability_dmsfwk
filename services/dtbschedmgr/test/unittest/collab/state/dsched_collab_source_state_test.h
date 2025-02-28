@@ -15,6 +15,7 @@
 
 #ifndef DSCHED_COLLAB_SOURCE_STATE_TEST_H
 #define DSCHED_COLLAB_SOURCE_STATE_TEST_H
+#include "dsched_collab_source_get_peer_version_state.h"
 #include "dsched_collab_source_start_state.h"
 #include "dsched_collab_source_wait_end_state.h"
 #include "dsched_collab_source_wait_result_state.h"
@@ -25,6 +26,17 @@
 namespace OHOS {
 namespace DistributedSchedule {
 
+
+class CollabSrcGetPeerVersionStateTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+
+    static inline std::shared_ptr<CollabSrcGetPeerVersionState> srcGetPeerVersionState_;
+    static inline std::shared_ptr<DSchedCollab> dCollab_;
+};
 class CollabSrcStartStateTest : public testing::Test {
 public:
     static void SetUpTestCase();

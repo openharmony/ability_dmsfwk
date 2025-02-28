@@ -80,7 +80,8 @@ int32_t DSchedCollabStateMachine::Execute(const AppExecFwk::InnerEvent::Pointer 
 void DSchedCollabStateMachine::UpdateState(CollabStateType stateType)
 {
     HILOGI("called");
-    if (stateType != SOURCE_GET_PEER_VERSION_STATE && stateType != SINK_GET_VERSION_STATE) {
+    if (stateType != SOURCE_GET_PEER_VERSION_STATE && stateType != SINK_GET_VERSION_STATE
+        && currentState_ != nullptr) {
         HILOGI("update state from %{public}s to %{public}s",
             STATEDATA[currentState_->GetStateType()].c_str(), STATEDATA[stateType].c_str());
     } else {

@@ -62,8 +62,12 @@ HWTEST_F(DSchedCollabStateMachineTest, GetStateType_001, TestSize.Level3)
     std::shared_ptr<DSchedCollabStateMachine> machinePtr = std::make_shared<DSchedCollabStateMachine>(nullptr);
 
     //currentState_ not is nullptr
-    machinePtr->UpdateState(SOURCE_START_STATE);
+    machinePtr->UpdateState(SOURCE_GET_PEER_VERSION_STATE);
     auto ret = machinePtr->GetStateType();
+    EXPECT_EQ(ret, SOURCE_GET_PEER_VERSION_STATE);
+
+    machinePtr->UpdateState(SOURCE_START_STATE);
+    ret = machinePtr->GetStateType();
     EXPECT_EQ(ret, SOURCE_START_STATE);
 
     machinePtr->UpdateState(SOURCE_WAIT_RESULT_STATE);
@@ -73,6 +77,10 @@ HWTEST_F(DSchedCollabStateMachineTest, GetStateType_001, TestSize.Level3)
     machinePtr->UpdateState(SOURCE_WAIT_END_STATE);
     ret = machinePtr->GetStateType();
     EXPECT_EQ(ret, SOURCE_WAIT_END_STATE);
+
+    machinePtr->UpdateState(SINK_GET_VERSION_STATE);
+    ret = machinePtr->GetStateType();
+    EXPECT_EQ(ret, SINK_GET_VERSION_STATE);
 
     machinePtr->UpdateState(SINK_START_STATE);
     ret = machinePtr->GetStateType();

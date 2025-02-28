@@ -27,6 +27,35 @@ namespace {
     const int32_t WAITTIME = 2000;
 }
 
+//CollabSrcGetPeerVersionStateTest
+void CollabSrcGetPeerVersionStateTest::SetUpTestCase()
+{
+    DTEST_LOG << "CollabSrcGetPeerVersionStateTest::SetUpTestCase" << std::endl;
+    std::string collabToken;
+    DSchedCollabInfo info;
+    dCollab_ = std::make_shared<DSchedCollab>(collabToken, info);
+    dCollab_->Init();
+    usleep(WAITTIME);
+}
+
+void CollabSrcGetPeerVersionStateTest::TearDownTestCase()
+{
+    DTEST_LOG << "CollabSrcGetPeerVersionStateTest::TearDownTestCase" << std::endl;
+    dCollab_ = nullptr;
+    srcGetPeerVersionState_ = nullptr;
+}
+
+void CollabSrcGetPeerVersionStateTest::TearDown()
+{
+    DTEST_LOG << "CollabSrcGetPeerVersionStateTest::TearDown" << std::endl;
+    usleep(WAITTIME);
+}
+
+void CollabSrcGetPeerVersionStateTest::SetUp()
+{
+    DTEST_LOG << "CollabSrcGetPeerVersionStateTest::SetUp" << std::endl;
+}
+
 //CollabSrcStartStateTest
 void CollabSrcStartStateTest::SetUpTestCase()
 {

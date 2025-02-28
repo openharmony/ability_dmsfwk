@@ -27,6 +27,32 @@ namespace {
     const int32_t WAITTIME = 2000;
 }
 
+//CollabSinkGetVersionStateTest
+void CollabSinkGetVersionStateTest::SetUpTestCase()
+{
+    DTEST_LOG << "CollabSinkGetVersionStateTest::SetUpTestCase" << std::endl;
+    std::string collabToken;
+    DSchedCollabInfo info;
+    dCollab_ = std::make_shared<DSchedCollab>(collabToken, info);
+    dCollab_->Init();
+    usleep(WAITTIME);
+}
+
+void CollabSinkGetVersionStateTest::TearDownTestCase()
+{
+    DTEST_LOG << "CollabSinkGetVersionStateTest::TearDownTestCase" << std::endl;
+}
+
+void CollabSinkGetVersionStateTest::TearDown()
+{
+    usleep(WAITTIME);
+    DTEST_LOG << "CollabSinkGetVersionStateTest::TearDown" << std::endl;
+}
+
+void CollabSinkGetVersionStateTest::SetUp()
+{
+    DTEST_LOG << "CollabSinkGetVersionStateTest::SetUp" << std::endl;
+}
 //CollabSinkConnectStateTest
 void CollabSinkConnectStateTest::SetUpTestCase()
 {
