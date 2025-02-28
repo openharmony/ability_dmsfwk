@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <gmock/gmock.h>
 
 #include "broadcast.h"
+#include "session.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -31,6 +32,7 @@ public:
     virtual int32_t StopEvent(const char* pkgName, BroadCastAddr target, EventType event) = 0;
     virtual int32_t RegisterEventListener(const char* pkgName, EventListener *listener) = 0;
     virtual int32_t UnregisterEventListener(const char* pkgName, EventListener *listener) = 0;
+    virtual int GetSessionOption(int sessionId, SessionOption option, void* optionValue, uint32_t valueSize) = 0;
 };
 
 class SoftbusMock : public MockInterface {
@@ -44,6 +46,8 @@ public:
     MOCK_METHOD(int32_t, StopEvent, (const char* pkgName, BroadCastAddr target, EventType event), (override));
     MOCK_METHOD(int32_t, RegisterEventListener, (const char* pkgName, EventListener *listener), (override));
     MOCK_METHOD(int32_t, UnregisterEventListener, (const char* pkgName, EventListener *listener), (override));
+    MOCK_METHOD(int, GetSessionOption, (int sessionId, SessionOption option, void* optionValue,
+        uint32_t valueSize), (override));
 
 private:
     static SoftbusMock *gMock;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,8 @@
  */
 
 #include "softbus_transport_test.h"
+
+#include "softbus_adapter/mock_softbus_adapter.h"
 #include "test_log.h"
 #include "dtbschedmgr_log.h"
 
@@ -284,6 +286,11 @@ HWTEST_F(DSchedSoftbusSessionTest, SendData_001, TestSize.Level3)
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(SIZE_1);
     ASSERT_NE(softbusSessionTest_, nullptr);
     ASSERT_NE(buffer, nullptr);
+    SoftbusMock mockSoftbus;
+    int32_t socketId = 0;
+    EXPECT_CALL(mockSoftbus, GetSessionOption(socketId, testing::_, testing::_, sizeof(uint32_t)))
+        .WillOnce(testing::Return(-1));
+
     int32_t dataType = COUNT;
     int32_t ret = softbusSessionTest_->SendData(buffer, dataType);
     EXPECT_EQ(ret, ERR_OK);
@@ -396,11 +403,44 @@ HWTEST_F(DSchedSoftbusSessionTest, UnPackSendData_001, TestSize.Level3)
     int32_t dataType = 0;
     softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
     ASSERT_NE(softbusSessionTest_, nullptr);
+    SoftbusMock mockSoftbus;
+    int32_t socketId = 0;
+    EXPECT_CALL(mockSoftbus, GetSessionOption(socketId, testing::_, testing::_, sizeof(uint32_t)))
+        .WillOnce(testing::Return(-1));
+
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(SIZE_1);
     int32_t ret = softbusSessionTest_->UnPackSendData(buffer, dataType);
     EXPECT_NE(ret, ERR_OK);
     softbusSessionTest_ = nullptr;
     DTEST_LOG << "DSchedSoftbusSessionTest UnPackSendData_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: UnPackSendData_002
+ * @tc.desc: call UnPackSendData
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedSoftbusSessionTest, UnPackSendData_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedSoftbusSessionTest UnPackSendData_002 begin" << std::endl;
+    int32_t dataType = 0;
+    softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
+    ASSERT_NE(softbusSessionTest_, nullptr);
+
+    SoftbusMock mockSoftbus;
+    int32_t socketId = 0;
+    EXPECT_CALL(mockSoftbus, GetSessionOption(socketId, testing::_, testing::_, sizeof(uint32_t)))
+        .WillOnce(testing::Invoke([&](int sessionId, SessionOption option,
+            void* optionValue, uint32_t valueSize) {
+            *reinterpret_cast<uint32_t*>(optionValue) = DSchedSoftbusSession::BINARY_DATA_PACKET_RESERVED_BUFFER - 1;
+            return ERR_OK;
+        }));
+    std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(
+            DSchedSoftbusSession::BINARY_DATA_PACKET_RESERVED_BUFFER + 1);
+    int32_t ret = softbusSessionTest_->UnPackSendData(buffer, dataType);
+    EXPECT_NE(ret, ERR_OK);
+    softbusSessionTest_ = nullptr;
+    DTEST_LOG << "DSchedSoftbusSessionTest UnPackSendData_002 end" << std::endl;
 }
 
 /**
@@ -487,7 +527,7 @@ HWTEST_F(DSchedSoftbusSessionTest, AssembleNoFrag_001, TestSize.Level3)
     softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
     ASSERT_NE(softbusSessionTest_, nullptr);
     softbusSessionTest_->AssembleNoFrag(buffer, headerPara);
-    
+
     headerPara.totalLen = TOTALLEN_1;
     EXPECT_NO_FATAL_FAILURE(softbusSessionTest_->AssembleNoFrag(buffer, headerPara));
     DTEST_LOG << "DSchedSoftbusSessionTest AssembleNoFrag_001 end" << std::endl;
