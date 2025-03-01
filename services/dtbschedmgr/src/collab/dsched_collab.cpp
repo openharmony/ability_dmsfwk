@@ -287,7 +287,6 @@ int32_t DSchedCollab::PostSinkStartTask()
         HILOGE("send event type %{public}s fail", EVENTDATA[eventType].c_str());
         return COLLAB_SEND_EVENT_FAILED;
     }
-    UpdateState(SINK_START_STATE);
     return ERR_OK;
 }
 
@@ -928,6 +927,7 @@ int32_t DSchedCollab::ExeSinkGetVersion()
     auto sinkCollabVersionCmd = std::make_shared<GetSinkCollabVersionCmd>();
     PackSinkCollabVersionCmd(sinkCollabVersionCmd);
     SendCommand(sinkCollabVersionCmd);
+    UpdateState(SINK_START_STATE);
     return ERR_OK;
 }
 

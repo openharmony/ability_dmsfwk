@@ -85,7 +85,6 @@ void DSchedCollabStateMachine::UpdateState(CollabStateType stateType)
         HILOGI("update state from %{public}s to %{public}s",
             STATEDATA[currentState_->GetStateType()].c_str(), STATEDATA[stateType].c_str());
     } else {
-        HILOGI("called..");
         HILOGI("update state: %{public}s", STATEDATA[stateType].c_str());
     }
     currentState_ = CreateState(stateType);
