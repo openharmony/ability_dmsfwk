@@ -17,7 +17,7 @@ import("//build/test.gni")
 import("//foundation/ability/dmsfwk/dmsfwk.gni")
 import("../../../dmsfwk.gni")
 
-module_output_path = "dmsfwk/distributedschedsvrtest"
+module_output_path = "dmsfwk/dmsfwk/distributedschedsvrtest"
 
 distributed_service = "//foundation/ability/dmsfwk/services"
 

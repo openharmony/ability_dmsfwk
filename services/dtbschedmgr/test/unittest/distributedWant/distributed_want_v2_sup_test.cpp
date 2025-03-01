@@ -283,5 +283,276 @@ HWTEST_F(DistributedWantV2SupTest, GetLowerCaseScheme_test_005, TestSize.Level3)
     EXPECT_EQ(result, lowerCaseUri);
     GTEST_LOG_(INFO) << "GetLowerCaseScheme_test_005 end";
 }
+
+/**
+ * @tc.number: GetParmFail_test_001
+ * @tc.name: GetParmFail
+ * @tc.desc: Test GetParmFail.
+ */
+HWTEST_F(DistributedWantV2SupTest, GetParmFail_test_001, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "GetParmFail_test_005 start";
+    std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
+    ASSERT_NE(dwant, nullptr);
+    auto str = dwant->GetType();
+    EXPECT_TRUE(str.empty());
+
+    bool defaultValue = false;
+    auto flag = dwant->GetBoolParam("test", defaultValue);
+    EXPECT_EQ(flag, defaultValue);
+    EXPECT_EQ(dwant->GetByteParam("test", 0), 0);
+    EXPECT_EQ(dwant->GetCharParam("test", 'a'), 'a');
+    EXPECT_EQ(dwant->GetIntParam("test", 10), 10);
+    EXPECT_EQ(dwant->GetDoubleParam("test", 20), 20);
+    EXPECT_EQ(dwant->GetFloatParam("test", 5.0), 5.0);
+    EXPECT_EQ(dwant->GetLongParam("test", 30), 30);
+    EXPECT_EQ(dwant->GetShortParam("test", 1), 1);
+    EXPECT_EQ(dwant->GetStringParam("test"), "");
+    GTEST_LOG_(INFO) << "GetParmFail_test_001 end";
+}
+
+/**
+ * @tc.number: GetParmFail_test_002
+ * @tc.name: GetParmFail
+ * @tc.desc: Test GetParmFail.
+ */
+HWTEST_F(DistributedWantV2SupTest, GetParmFail_test_002, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "GetParmFail_test_002 start";
+    std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
+    ASSERT_NE(dwant, nullptr);
+    auto flagArray = dwant->GetBoolArrayParam("test");
+    EXPECT_TRUE(flagArray.empty());
+    auto byteArray = dwant->GetByteArrayParam("test");
+    EXPECT_TRUE(byteArray.empty());
+    auto charArray = dwant->GetCharArrayParam("test");
+    EXPECT_TRUE(charArray.empty());
+    auto intArray = dwant->GetIntArrayParam("test");
+    EXPECT_TRUE(intArray.empty());
+    auto doubleArray = dwant->GetDoubleArrayParam("test");
+    EXPECT_TRUE(doubleArray.empty());
+    auto floatArray = dwant->GetFloatArrayParam("test");
+    EXPECT_TRUE(floatArray.empty());
+    auto longArray = dwant->GetLongArrayParam("test");
+    EXPECT_TRUE(longArray.empty());
+    auto shortArray = dwant->GetShortArrayParam("test");
+    EXPECT_TRUE(shortArray.empty());
+    auto strArray = dwant->GetStringArrayParam("test");
+    EXPECT_TRUE(strArray.empty());
+    GTEST_LOG_(INFO) << "GetParmFail_test_002 end";
+}
+
+/**
+ * @tc.number: GetParmFail_test_003
+ * @tc.name: GetParmFail
+ * @tc.desc: Test GetParmFail.
+ */
+HWTEST_F(DistributedWantV2SupTest, GetParmFail_test_003, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "GetParmFail_test_003 start";
+    std::vector<int> value{0, 1, 2, 3, 4, 5};
+    std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
+    ASSERT_NE(dwant, nullptr);
+    dwant->SetParam("test", value);
+    auto flagArray = dwant->GetBoolArrayParam("test");
+    EXPECT_TRUE(flagArray.empty());
+    auto byteArray = dwant->GetByteArrayParam("test");
+    EXPECT_TRUE(byteArray.empty());
+    auto charArray = dwant->GetCharArrayParam("test");
+    EXPECT_TRUE(charArray.empty());
+    auto intArray = dwant->GetIntArrayParam("test");
+    EXPECT_EQ(intArray, value);
+    auto doubleArray = dwant->GetDoubleArrayParam("test");
+    EXPECT_TRUE(doubleArray.empty());
+    auto floatArray = dwant->GetFloatArrayParam("test");
+    EXPECT_TRUE(floatArray.empty());
+    auto longArray = dwant->GetLongArrayParam("test");
+    EXPECT_TRUE(longArray.empty());
+    auto shortArray = dwant->GetShortArrayParam("test");
+    EXPECT_TRUE(shortArray.empty());
+    auto strArray = dwant->GetStringArrayParam("test");
+    EXPECT_TRUE(strArray.empty());
+    GTEST_LOG_(INFO) << "GetParmFail_test_003 end";
+}
+
+/**
+ * @tc.number: GetParmFail_test_004
+ * @tc.name: GetParmFail
+ * @tc.desc: Test GetParmFail.
+ */
+HWTEST_F(DistributedWantV2SupTest, GetParmFail_test_004, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "GetParmFail_test_004 start";
+    std::vector<std::string> value{"1000", "10001", "10002", "test", "10004x", "10005"};
+    std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
+    ASSERT_NE(dwant, nullptr);
+    dwant->SetParam("test", value);
+    auto intArray = dwant->GetIntArrayParam("test");
+    EXPECT_TRUE(intArray.empty());
+    std::vector<long> valueLong{1000, 10001, 10002, 10005};
+    auto longArray = dwant->GetLongArrayParam("test");
+    EXPECT_EQ(longArray, valueLong);
+    auto strArray = dwant->GetStringArrayParam("test");
+    EXPECT_EQ(strArray, value);
+    GTEST_LOG_(INFO) << "GetParmFail_test_004 end";
+}
+
+/**
+ * @tc.number: GetLongParam_test_001
+ * @tc.name: GetLongParam
+ * @tc.desc: Test GetLongParam.
+ */
+HWTEST_F(DistributedWantV2SupTest, GetLongParam_test_001, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "GetLongParam_test_001 start";
+    std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
+    ASSERT_NE(dwant, nullptr);
+    std::string value = "1000x";
+    dwant->SetParam("test", value);
+    value = "10004";
+    dwant->SetParam("test1", value);
+    auto rlt = dwant->GetLongParam("test", 2);
+    EXPECT_EQ(rlt, 2);
+    rlt = dwant->GetLongParam("test1", 2);
+    EXPECT_EQ(rlt, 10004);
+    GTEST_LOG_(INFO) << "GetLongParam_test_001 end";
+}
+
+/**
+ * @tc.number: MarshallingWriteUri_test_001
+ * @tc.name: MarshallingWriteUri
+ * @tc.desc: Test MarshallingWriteUri.
+ */
+HWTEST_F(DistributedWantV2SupTest, MarshallingWriteUri_test_001, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "MarshallingWriteUri_test_001 start";
+    std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
+    ASSERT_NE(dwant, nullptr);
+    std::string uri = "file://test.com.a/test";
+    dwant->SetUri(uri);
+    Parcel parcel;
+    EXPECT_TRUE(dwant->MarshallingWriteUri(parcel));
+    GTEST_LOG_(INFO) << "MarshallingWriteUri_test_001 end";
+}
+
+/**
+ * @tc.number: MarshallingWriteEntities_test_001
+ * @tc.name: MarshallingWriteEntities
+ * @tc.desc: Test MarshallingWriteEntities.
+ */
+HWTEST_F(DistributedWantV2SupTest, MarshallingWriteEntities_test_001, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "MarshallingWriteEntities_test_001 start";
+    std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
+    ASSERT_NE(dwant, nullptr);
+    Parcel parcel;
+    EXPECT_TRUE(dwant->MarshallingWriteEntities(parcel));
+    EXPECT_TRUE(dwant->MarshallingWriteElement(parcel));
+
+    std::string uri = "test";
+    std::string deviceId = "deviceId";
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    dwant->AddEntity(uri);
+    dwant->SetElementName(deviceId, bundleName, abilityName);
+    EXPECT_TRUE(dwant->MarshallingWriteEntities(parcel));
+    EXPECT_TRUE(dwant->MarshallingWriteElement(parcel));
+    GTEST_LOG_(INFO) << "MarshallingWriteUri_test_001 end";
+}
+
+/**
+ * @tc.number: ReadUriFromParcel_test_001
+ * @tc.name: ReadUriFromParcel
+ * @tc.desc: Test ReadUriFromParcel.
+ */
+HWTEST_F(DistributedWantV2SupTest, ReadUriFromParcel_test_001, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "ReadUriFromParcel_test_001 start";
+    std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
+    ASSERT_NE(dwant, nullptr);
+    Parcel parcel;
+    EXPECT_FALSE(dwant->ReadUriFromParcel(parcel));
+    
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    EXPECT_TRUE(dwant->ReadUriFromParcel(parcel));
+
+    ASSERT_TRUE(parcel.WriteInt32(DistributedWantV2::VALUE_OBJECT));
+    EXPECT_TRUE(dwant->ReadUriFromParcel(parcel));
+    EXPECT_EQ(dwant->GetUriString(), "");
+    
+    std::string testUri = "file://test.com.a/test";
+    ASSERT_TRUE(parcel.WriteInt32(DistributedWantV2::VALUE_OBJECT));
+    ASSERT_TRUE(parcel.WriteString16(Str8ToStr16(testUri)));
+    EXPECT_TRUE(dwant->ReadUriFromParcel(parcel));
+    EXPECT_EQ(dwant->GetUriString(), testUri);
+    GTEST_LOG_(INFO) << "ReadUriFromParcel_test_001 end";
+}
+
+/**
+ * @tc.number: ReadFromParcel_test_001
+ * @tc.name: ReadFromParcel
+ * @tc.desc: Test ReadFromParcel.
+ */
+HWTEST_F(DistributedWantV2SupTest, ReadFromParcel_test_001, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "ReadFromParcel_test_001 start";
+    std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
+    ASSERT_NE(dwant, nullptr);
+    Parcel parcel;
+    ASSERT_TRUE(parcel.WriteString16(Str8ToStr16("action")));
+    EXPECT_FALSE(dwant->ReadFromParcel(parcel));
+    
+    ASSERT_TRUE(parcel.WriteString16(Str8ToStr16("action")));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    EXPECT_FALSE(dwant->ReadFromParcel(parcel));
+
+    ASSERT_TRUE(parcel.WriteString16(Str8ToStr16("action")));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    EXPECT_FALSE(dwant->ReadFromParcel(parcel));
+
+    ASSERT_TRUE(parcel.WriteString16(Str8ToStr16("action")));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    ASSERT_TRUE(parcel.WriteUint32(100));
+    EXPECT_FALSE(dwant->ReadFromParcel(parcel));
+    GTEST_LOG_(INFO) << "ReadFromParcel_test_001 end";
+}
+
+/**
+ * @tc.number: ReadFromParcel_test_002
+ * @tc.name: ReadFromParcel
+ * @tc.desc: Test ReadFromParcel.
+ */
+HWTEST_F(DistributedWantV2SupTest, ReadFromParcel_test_002, TestSize.Level3)
+{
+    std::shared_ptr<DistributedWantV2> dwant = std::make_shared<DistributedWantV2>();
+    ASSERT_NE(dwant, nullptr);
+    Parcel parcel;
+    ASSERT_TRUE(parcel.WriteString16(Str8ToStr16("action")));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    ASSERT_TRUE(parcel.WriteUint32(100));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    EXPECT_FALSE(dwant->ReadFromParcel(parcel));
+
+    ASSERT_TRUE(parcel.WriteString16(Str8ToStr16("action")));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    ASSERT_TRUE(parcel.WriteUint32(100));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    EXPECT_TRUE(dwant->ReadFromParcel(parcel));
+
+    ASSERT_TRUE(parcel.WriteString16(Str8ToStr16("action")));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    ASSERT_TRUE(parcel.WriteUint32(100));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    ASSERT_TRUE(parcel.WriteInt32(0));
+    ASSERT_TRUE(parcel.WriteString16(Str8ToStr16("bundleName")));
+    EXPECT_TRUE(dwant->ReadFromParcel(parcel));
+    GTEST_LOG_(INFO) << "ReadFromParcel_test_002 end";
+}
 }
 }

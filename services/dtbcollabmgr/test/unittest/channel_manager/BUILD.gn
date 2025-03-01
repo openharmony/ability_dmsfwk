@@ -16,7 +16,7 @@ import("//build/ohos_var.gni")
 import("//build/test.gni")
 import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
-module_output_path = "dmsfwk/distributedcollabtest"
+module_output_path = "dmsfwk/dmsfwk/distributedcollabtest"
 
 config("test_config") {
   visibility = [ ":*" ]
