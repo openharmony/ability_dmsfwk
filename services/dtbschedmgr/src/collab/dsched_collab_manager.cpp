@@ -213,12 +213,6 @@ int32_t DSchedCollabManager::GetSinkCollabVersion(DSchedCollabInfo &info)
         HILOGE("get local deviceId failed!");
         return FIND_LOCAL_DEVICEID_ERR;
     }
-    if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(info.sinkInfo_.deviceId_) == nullptr &&
-        !DtbschedmgrDeviceInfoStorage::GetInstance().CheckNetworkIdByBundleName(info.sinkInfo_.bundleName_,
-        info.sinkInfo_.deviceId_)) {
-        HILOGE("failed to find sinkDeviceId.");
-        return FIND_REMOTE_DEVICEID_ERR;
-    }
     auto func = [this, info]() {
         HandleGetSinkCollabVersion(info);
     };

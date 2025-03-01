@@ -1029,33 +1029,20 @@ napi_value JsAbilityConnectionManager::SendMessage(napi_env env, napi_callback_i
         return promise;
     }
 
-    AsyncCallbackInfo* asyncCallbackInfo = new AsyncCallbackInfo();
-    asyncCallbackInfo->deferred = deferred;
-    asyncCallbackInfo->sessionId = sessionId;
-    asyncCallbackInfo->msg = msg;
-
-    napi_value asyncResourceName;
-    NAPI_CALL(env, napi_create_string_utf8(env, "sendMessageAsync", NAPI_AUTO_LENGTH, &asyncResourceName));
-
-    napi_status status = napi_create_async_work(
-        env, nullptr, asyncResourceName, ExecuteSendMessage, CompleteAsyncWork,
-        static_cast<void *>(asyncCallbackInfo), &asyncCallbackInfo->asyncWork);
-    if (status != napi_ok) {
-        HILOGE("Failed to create async work.");
-        napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
-        delete asyncCallbackInfo;
-        napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
-        return promise;
+    HILOGI("start send message.");
+    int32_t result = AbilityConnectionManager::GetInstance().SendMessage(sessionId, msg);
+    HILOGI("notify sendMessage event.");
+    if (result == ERR_OK) {
+        napi_value result;
+        napi_get_undefined(env, &result);
+        napi_resolve_deferred(env, deferred, result);
+    } else {
+        napi_reject_deferred(env, deferred,
+            CreateBusinessError(env, result, false));
     }
 
-    if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
-        HILOGE("Failed to queue async work.");
-        napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
-        delete asyncCallbackInfo;
-        napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
-        return promise;
-    }
-
+    HILOGI("end.");
+    
     return promise;
 }
 
