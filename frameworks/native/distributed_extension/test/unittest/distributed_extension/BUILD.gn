@@ -1,0 +1,365 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
+
+module_output_path = "dmsfwk/distributedextensiontest"
+
+ohos_unittest("distributed_extension_js_test") {
+  module_out_path = module_output_path
+
+  sources = [
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/distributed_extension/src/distributed_extension_mock.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/js_runtime/src/js_runtime_mock.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/napi/src/napi_mock.cpp",
+    "distributed_extension_js_test.cpp",
+  ]
+
+  include_dirs = [
+    "${dms_path}/frameworks/native/distributed_extension/include",
+    "${dms_path}/frameworks/native/distributed_extension/src",
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/distributed_extension/include",
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/js_runtime/include",
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/napi/include",
+  ]
+
+  deps = []
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_context",
+    "ability_runtime:appkit_native",
+    "ability_runtime:runtime",
+    "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "napi:ace_napi",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  cflags = [ "--coverage" ]
+  ldflags = [ "--coverage" ]
+  cflags_cc = [ "--coverage" ]
+
+  defines = [ "private=public" ]
+
+  use_exceptions = true
+}
+
+ohos_unittest("distributed_extension_stub_test") {
+  module_out_path = module_output_path
+
+  sources = [
+    "${dms_path}/frameworks/native/distributed_extension/src/ipc/distributed_extension_stub.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/distributed_extension/src/message_parcel_mock_for_stub.cpp",
+    "distributed_extension_stub_test.cpp",
+  ]
+
+  include_dirs = [
+    "${dms_path}/frameworks/native/distributed_extension/include",
+    "${dms_path}/frameworks/native/distributed_extension/include/ipc",
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/distributed_extension/include",
+    "${dms_path}/common/include/",
+  ]
+
+  deps = []
+
+  external_deps = [
+    "ability_base:base",
+    "ability_base:want",
+    "ability_base:zuri",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+  ]
+
+  cflags = [ "--coverage" ]
+  ldflags = [ "--coverage" ]
+  cflags_cc = [ "--coverage" ]
+
+  defines = [ "private=public" ]
+
+  use_exceptions = true
+}
+
+ohos_unittest("distributed_extension_proxy_test") {
+  module_out_path = module_output_path
+
+  sources = [
+    "${dms_path}/frameworks/native/distributed_extension/src/ipc/distributed_extension_proxy.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/distributed_extension/src/message_parcel_mock.cpp",
+    "distributed_extension_proxy_test.cpp",
+  ]
+
+  include_dirs = [
+    "${dms_path}/frameworks/native/distributed_extension/include",
+    "${dms_path}/frameworks/native/distributed_extension/include/ipc",
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/distributed_extension/include",
+    "${dms_path}/common/include/",
+  ]
+
+  deps = []
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_manager",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "storage_service:storage_manager_sa_proxy",
+  ]
+
+  sanitize = {
+    integer_overflow = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  defines = [ "private = public" ]
+
+  use_exceptions = true
+}
+
+ohos_unittest("distributed_extension_context_js_test") {
+  module_out_path = module_output_path
+
+  sources = [
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/napi/src/napi_mock.cpp",
+    "distributed_extension_context_js_test.cpp",
+  ]
+
+  include_dirs = [
+    "${dms_path}/frameworks/native/distributed_extension/include",
+    "${dms_path}/frameworks/native/distributed_extension/src",
+    "${dms_path}/common/include/",
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/distributed_extension/include",
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/napi/include",
+  ]
+
+  deps = []
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_context",
+    "ability_runtime:appkit_native",
+    "ability_runtime:runtime",
+    "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "napi:ace_napi",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  cflags = [ "--coverage" ]
+  ldflags = [ "--coverage" ]
+  cflags_cc = [ "--coverage" ]
+
+  defines = [ "private=public" ]
+
+  use_exceptions = true
+}
+
+ohos_unittest("distributed_extension_base_test") {
+  module_out_path = module_output_path
+
+  sources = [
+    "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_service.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/src/ipc/distributed_extension_stub.cpp",
+    "distributed_extension_test.cpp",
+  ]
+
+  include_dirs = [
+    "${dms_path}/frameworks/native/distributed_extension/include",
+    "${dms_path}/frameworks/native/distributed_extension/include/ipc",
+    "${dms_path}/frameworks/native/distributed_extension/src",
+    "${dms_path}/common/include/",
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/distributed_extension/include",
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/js_runtime/include",
+  ]
+
+  deps = []
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_context",
+    "ability_runtime:appkit_native",
+    "ability_runtime:runtime",
+    "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "napi:ace_napi",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  cflags = [ "--coverage" ]
+  ldflags = [ "--coverage" ]
+  cflags_cc = [ "--coverage" ]
+
+  defines = [ "private=public" ]
+
+  use_exceptions = true
+}
+
+ohos_unittest("distributed_connection_test") {
+  module_out_path = module_output_path
+
+  sources = [
+    "${dms_path}/frameworks/native/distributed_extension/src/ipc/distributed_extension_proxy.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/src/svc_distributed_connection.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/distributed_extension/src/message_parcel_mock.cpp",
+    "svc_distributed_connection_test.cpp",
+  ]
+
+  include_dirs = [
+    "${dms_path}/frameworks/native/distributed_extension/include",
+    "${dms_path}/frameworks/native/distributed_extension/include/ipc",
+    "${dms_path}/frameworks/native/distributed_extension/test/mock/distributed_extension/include",
+    "${dms_path}/common/include/",
+  ]
+
+  deps = []
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_manager",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "storage_service:storage_manager_sa_proxy",
+  ]
+
+  sanitize = {
+    integer_overflow = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
+  defines = [ "private = public" ]
+
+  use_exceptions = true
+}
+
+ohos_unittest("distributedextensionservicetest") {
+  module_out_path = module_output_path
+
+  sources = [
+    "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/src/ipc/distributed_extension_stub.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/test/unittest/distributed_extension/distributed_extension_service_test.cpp",
+  ]
+
+  include_dirs = [
+    "${dms_path}/frameworks/native/distributed_extension/test/unittest/distributed_extension",
+    "${dms_path}/frameworks/native/distributed_extension/include",
+    "${dms_path}/frameworks/native/distributed_extension/include/ipc",
+    "${dms_path}/common/include",
+    "${dms_path}/frameworks/native/distributed_extension/src",
+  ]
+
+  deps = []
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:app_context",
+    "ability_runtime:appkit_native",
+    "ability_runtime:runtime",
+    "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_core",
+    "c_utils:utils",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "napi:ace_napi",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+  ]
+
+  cflags = [ "--coverage" ]
+  ldflags = [ "--coverage" ]
+  cflags_cc = [ "--coverage" ]
+
+  defines = [
+    "LOG_TAG=\"app_file_service\"",
+    "LOG_DOMAIN=0xD004303",
+    "private=public",
+  ]
+
+  use_exceptions = true
+}
+
+group("distributed_extension_ability_test") {
+  testonly = true
+  if (!use_libfuzzer) {
+    deps = [
+      ":distributed_extension_base_test",
+      ":distributed_extension_context_js_test",
+      ":distributed_extension_js_test",
+      ":distributed_extension_proxy_test",
+      ":distributed_extension_stub_test",
+      ":distributedextensionservicetest",
+    ]
+  }
+}

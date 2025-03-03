@@ -16,7 +16,6 @@
 #include "distributed_extension_js.h"
 
 #include "distributed_extension_context_js.h"
-#include "dtbschedmgr_log.h"
 #include "napi_common_want.h"
 
 namespace OHOS {

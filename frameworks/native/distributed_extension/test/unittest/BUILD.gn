@@ -12,18 +12,10 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
-group("target_distributed_extension") {
-  deps = [
-    "js/distributed_extension:distributedextensionability",
-    "js/distributed_extension_context:distributedextensioncontext",
-    "native/distributed_extension:distributed_extension_ability_native",
-    "native/distributed_extension:distributed_extension_sa",
-  ]
-}
-
-group("target_distributed_tests") {
+group("unittest") {
   testonly = true
 
-  deps = [ "native/distributed_extension/test/unittest" ]
+  deps = [ "distributed_extension:distributed_extension_ability_test" ]
 }

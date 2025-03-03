@@ -41,7 +41,7 @@ int32_t DExtensionStub::OnRemoteRequest(uint32_t code,
     const std::u16string descriptor = DExtensionStub::GetDescriptor();
     const std::u16string remoteDescriptor = data.ReadInterfaceToken();
     if (descriptor != remoteDescriptor) {
-        return -1;
+        return ERR_FLATTEN_OBJECT;
     }
 
     HILOGI("Begin to call procedure indexed %{public}u", code);
@@ -52,7 +52,7 @@ int32_t DExtensionStub::OnRemoteRequest(uint32_t code,
     }
 
     (this->*(interfaceIndex->second))(data, reply);
-    return 0;
+    return ERR_NONE;
 }
 
 int32_t DExtensionStub::TriggerOnCreateInner(MessageParcel &data, MessageParcel &reply)
