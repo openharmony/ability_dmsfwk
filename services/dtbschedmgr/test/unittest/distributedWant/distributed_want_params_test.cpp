@@ -205,6 +205,10 @@ HWTEST_F(DistributedWantParamsBaseTest, DistributedWantParams_GetStringByType_02
     std::string stringVal =
         DistributedWantParams::GetStringByType(boolObj, DistributedWantParams::VALUE_TYPE_BOOLEAN);
     EXPECT_EQ(stringVal, "true");
+
+    stringVal =
+        DistributedWantParams::GetStringByType(boolObj, DistributedWantParams::VALUE_TYPE_NULL);
+    EXPECT_EQ(stringVal, "");
 }
 
 /**
@@ -950,6 +954,42 @@ void DistributedUnsupportedDataTest::TearDown(void)
 }
 
 /**
+ * @tc.number: DistributedUnsupportedData_Test
+ * @tc.name: DistributedUnsupportedData
+ * @tc.desc: Test DistributedUnsupportedData.
+ * @tc.require: issueI648W6
+ */
+HWTEST_F(DistributedUnsupportedDataTest, DistributedUnsupportedData_Test, Function | MediumTest | Level3)
+{
+    DistributedUnsupportedData data1;
+    data1.size = 5;
+    data1.buffer = new uint8_t[data1.size];
+    DistributedUnsupportedData data2(data1);
+    EXPECT_EQ(data2.size, data1.size);
+    EXPECT_NE(data2.buffer, nullptr);
+    EXPECT_NE(data1.buffer, nullptr);
+
+    DistributedUnsupportedData data3 = data1;
+    EXPECT_EQ(data3.size, data1.size);
+    EXPECT_NE(data3.buffer, nullptr);
+    EXPECT_NE(data3.buffer, nullptr);
+
+    DistributedUnsupportedData data4(std::move(data1));
+    EXPECT_EQ(data4.size, data3.size);
+    EXPECT_NE(data4.buffer, nullptr);
+    EXPECT_EQ(data1.buffer, nullptr);
+    EXPECT_EQ(data1.size, 0);
+
+    DistributedUnsupportedData data5 = std::move(data1);
+    EXPECT_EQ(data5.buffer, nullptr);
+    EXPECT_EQ(data1.buffer, nullptr);
+
+    DistributedUnsupportedData data6 = std::move(data2);
+    EXPECT_NE(data6.buffer, nullptr);
+    EXPECT_EQ(data2.buffer, nullptr);
+}
+
+/**
  * @tc.number: DistributedWantParams_ReadArrayToParcel_1000
  * @tc.name: ReadArrayToParcel
  * @tc.desc: Test ReadArrayToParcel.
@@ -1128,5 +1168,126 @@ HWTEST_F(DistributedWantParamsBaseTest, ReadFromParcelWantParamWrapper_1000, Fun
     result = wantParams.ReadFromParcelWantParamWrapper(parcel, key, type);
     EXPECT_TRUE(result);
     DTEST_LOG << "DistributedWantParamsBaseTest ReadFromParcelWantParamWrapper_1000 end" << std::endl;
+}
+
+/**
+ * @tc.number: WriteToParcelFD_1000
+ * @tc.name: WriteToParcelFD
+ * @tc.desc: Test WriteToParcelFD.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantParamsBaseTest, WriteToParcelFD_1000, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest WriteToParcelFD_1000 begin" << std::endl;
+    DistributedWantParams wantParams;
+    Parcel parcel;
+    bool result = wantParams.WriteToParcelFD(parcel, wantParams);
+    EXPECT_FALSE(result);
+
+    int valueInteger = 23;
+    std::string key = "value";
+    wantParams.SetParam(key, Integer::Box(valueInteger));
+    result = wantParams.WriteToParcelFD(parcel, wantParams);
+    EXPECT_FALSE(result);
+    DTEST_LOG << "DistributedWantParamsBaseTest WriteToParcelFD_1000 end" << std::endl;
+}
+
+/**
+ * @tc.number: ReadFromParce_failed_1000
+ * @tc.name: ReadFromParce
+ * @tc.desc: Test ReadFromParce.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantParamsBaseTest, ReadFromParce_1000, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest ReadFromParce_1000 begin" << std::endl;
+    DistributedWantParams wantParams;
+    Parcel parcel;
+    std::string key = "test";
+    bool result = wantParams.ReadFromParcelBool(parcel, key);
+    EXPECT_FALSE(result);
+
+    result = wantParams.ReadFromParcelInt8(parcel, key);
+    EXPECT_FALSE(result);
+
+    result = wantParams.ReadFromParcelChar(parcel, key);
+    EXPECT_FALSE(result);
+
+    result = wantParams.ReadFromParcelShort(parcel, key);
+    EXPECT_FALSE(result);
+
+    result = wantParams.ReadFromParcelLong(parcel, key);
+    EXPECT_FALSE(result);
+
+    result = wantParams.ReadFromParcelFloat(parcel, key);
+    EXPECT_FALSE(result);
+
+    result = wantParams.ReadFromParcelDouble(parcel, key);
+    EXPECT_FALSE(result);
+    DTEST_LOG << "DistributedWantParamsBaseTest ReadFromParce_1000 end" << std::endl;
+}
+
+/**
+ * @tc.number: ReadUnsupportedData_0001
+ * @tc.name: ReadUnsupportedData
+ * @tc.desc: Test ReadUnsupportedData.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantParamsBaseTest, ReadUnsupportedData_0001, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest ReadUnsupportedData_0001 begin" << std::endl;
+    DistributedWantParams wantParams;
+    Parcel parcel;
+    std::string key = "test";
+    int type = 5;
+    bool result = wantParams.ReadUnsupportedData(parcel, key, type);
+    EXPECT_FALSE(result);
+
+    int bufferSize = -1;
+    parcel.WriteInt32(bufferSize);
+    result = wantParams.ReadUnsupportedData(parcel, key, type);
+    EXPECT_FALSE(result);
+
+    bufferSize = 100 * 1024 * 1024 + 1;
+    parcel.WriteInt32(bufferSize);
+    result = wantParams.ReadUnsupportedData(parcel, key, type);
+    EXPECT_FALSE(result);
+
+    bufferSize = 5;
+    parcel.WriteInt32(bufferSize);
+    result = wantParams.ReadUnsupportedData(parcel, key, type);
+    EXPECT_FALSE(result);
+
+    int32_t length = 10;
+    parcel.WriteInt32(bufferSize);
+    parcel.WriteInt32(length);
+    result = wantParams.ReadUnsupportedData(parcel, key, type);
+    EXPECT_FALSE(result);
+    DTEST_LOG << "DistributedWantParamsBaseTest ReadUnsupportedData_0001 end" << std::endl;
+}
+
+/**
+ * @tc.number: ReadUnsupportedData_0002
+ * @tc.name: ReadUnsupportedData
+ * @tc.desc: Test ReadUnsupportedData.
+ * @tc.require: I77HFZ
+ */
+HWTEST_F(DistributedWantParamsBaseTest, ReadUnsupportedData_0002, Function | MediumTest | Level3)
+{
+    DTEST_LOG << "DistributedWantParamsBaseTest ReadUnsupportedData_0002 begin" << std::endl;
+    DistributedWantParams wantParams;
+    Parcel parcel;
+    std::string key = "test";
+    int bufferSize = 5;
+    int32_t length = 10;
+    int type = 5;
+    uint8_t* bufferP = new (std::nothrow) uint8_t[bufferSize];
+    parcel.WriteInt32(bufferSize);
+    parcel.WriteInt32(length);
+    parcel.WriteUnpadBuffer(bufferP, bufferSize);
+    auto result = wantParams.ReadUnsupportedData(parcel, key, type);
+    EXPECT_TRUE(result);
+    delete[] bufferP;
+    DTEST_LOG << "DistributedWantParamsBaseTest ReadUnsupportedData_0002 end" << std::endl;
 }
  

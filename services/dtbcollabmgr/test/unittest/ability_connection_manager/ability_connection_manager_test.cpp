@@ -558,6 +558,22 @@ HWTEST_F(AbilityConnectionMgrTest, GetSessionToken_Test_001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: Reject_Test_001
+ * @tc.desc: call Reject
+ * @tc.type: FUNC
+ * @tc.require: IBP3MC
+ */
+HWTEST_F(AbilityConnectionMgrTest, Reject_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionMgr Reject_Test_001 begin" << std::endl;
+    std::string token = "token";
+    std::string reason = "reason";
+    auto rlt = AbilityConnectionManager::GetInstance().Reject(token, reason);
+    EXPECT_NE(rlt, ERR_OK);
+    DTEST_LOG << "AbilityConnectionMgr Reject_Test_001 end" << std::endl;
+}
+
+/**
  * @tc.name: UpdateClientSession_Test_001
  * @tc.desc: call UpdateClientSession
  * @tc.type: FUNC

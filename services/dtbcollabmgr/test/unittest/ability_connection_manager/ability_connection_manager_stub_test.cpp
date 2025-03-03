@@ -87,6 +87,38 @@ HWTEST_F(AbilityConnectionMgrStubTest, AbilityConnectionMgrStubTest_OnRemoteRequ
 }
 
 /**
+ * @tc.name: AbilityConnectionMgrStubTest_OnRemoteRequest_003
+ * @tc.desc: Verify the OnRemoteRequest function success.
+ * @tc.type: FUNC
+ * @tc.require: IBP3MC
+ */
+HWTEST_F(AbilityConnectionMgrStubTest, AbilityConnectionMgrStubTest_OnRemoteRequest_003, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityConnectionMgrStubTest_OnRemoteRequest_003 start";
+
+    AbilityConnectionManagerStubMock mock;
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_SYNC);
+
+    bool bRet = data.WriteInterfaceToken(AbilityConnectionManagerStub::GetDescriptor());
+    ASSERT_TRUE(bRet);
+    data.WriteInt32(0);
+    data.WriteBool(true);
+    data.WriteString("peerSocketName");
+    data.WriteString("dmsServerToken");
+    data.WriteString("reason");
+
+    EXPECT_CALL(mock, NotifyCollabResult(testing::_, testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(testing::Return(ERR_FLATTEN_OBJECT));
+    int32_t ret = mock.OnRemoteRequest(static_cast<int32_t>(IAbilityConnectionManager::Message::NOTIFY_COLLAB_RESULT),
+        data, reply, option);
+    EXPECT_EQ(ret, ERR_NONE) << "request code error";
+    GTEST_LOG_(INFO) << "AbilityConnectionMgrStubTest_OnRemoteRequest_003 end";
+}
+
+/**
  * @tc.name: AbilityConnectionMgrStubTest_NotifyCollabResultInner_001
  * @tc.desc: Verify the OnRemoteRequest function.
  * @tc.type: FUNC
@@ -194,6 +226,34 @@ HWTEST_F(AbilityConnectionMgrStubTest, AbilityConnectionMgrStubTest_NotifyWifiOp
     data.WriteInt32(0);
     EXPECT_CALL(mock, NotifyWifiOpen(testing::_)).WillOnce(testing::Return(ERR_FLATTEN_OBJECT));
     ret = mock.NotifyWifiOpenInner(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+    GTEST_LOG_(INFO) << "AbilityConnectionMgrStubTest_NotifyDisconnectInner_001 end";
+}
+
+/**
+ * @tc.name: AbilityConnectionMgrStubTest_NotifyPeerVersionInner_001
+ * @tc.desc: Verify the NotifyPeerVersionInner function.
+ * @tc.type: FUNC
+ * @tc.require: IBP3MC
+ */
+HWTEST_F(AbilityConnectionMgrStubTest, AbilityConnectionMgrStubTest_NotifyPeerVersionInner_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "AbilityConnectionMgrStubTest_NotifyPeerVersionInner_001 start";
+    MessageParcel data;
+    MessageParcel reply;
+
+    AbilityConnectionManagerStubMock mock;
+    auto ret = mock.NotifyPeerVersionInner(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+
+    data.WriteInt32(0);
+    ret = mock.NotifyPeerVersionInner(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+
+    data.WriteInt32(0);
+    data.WriteInt32(0);
+    EXPECT_CALL(mock, NotifyPeerVersion(testing::_, testing::_)).WillOnce(testing::Return(ERR_FLATTEN_OBJECT));
+    ret = mock.NotifyPeerVersionInner(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
     GTEST_LOG_(INFO) << "AbilityConnectionMgrStubTest_NotifyDisconnectInner_001 end";
 }

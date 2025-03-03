@@ -60,6 +60,7 @@ ohos_unittest("AbilityConnectionMgrTest") {
     "c_utils:utils",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
+    "googletest:gmock",
     "hilog:libhilog",
     "media_foundation:media_foundation",
     "napi:ace_napi",
@@ -112,10 +113,142 @@ ohos_unittest("AbilityConnectionMgrStubTest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("DistributedClientTest") {
+  visibility = [ ":*" ]
+
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+
+  include_dirs = [
+    "${dms_path}/interfaces/kits/napi/ability_connection_manager",
+    "${dms_path}/services/dtbcollabmgr/include/av_trans_stream_provider",
+    "${dms_path}/services/dtbcollabmgr/test/unittest",
+  ]
+
+  sources = [ "distributed_client_test.cpp" ]
+
+  deps = [
+    "${dms_path}/common:distributed_sched_utils",
+    "${dms_path}/services/dtbcollabmgr/src/ability_connection_manager:distributed_ability_connection_manager",
+    "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
+  ]
+
+  external_deps = [
+    "av_codec:av_codec_client",
+    "av_codec:native_media_codecbase",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "media_foundation:media_foundation",
+    "napi:ace_napi",
+  ]
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("AbilityConnectionSessionTest") {
+  visibility = [ ":*" ]
+
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+
+  include_dirs = [
+    "${dms_path}/interfaces/kits/napi/ability_connection_manager",
+    "${dms_path}/services/dtbcollabmgr/include/av_trans_stream_provider",
+    "${dms_path}/services/dtbcollabmgr/test/unittest",
+  ]
+
+  sources = [ "ability_connection_session_test.cpp" ]
+
+  deps = [
+    "${dms_path}/common:distributed_sched_utils",
+    "${dms_path}/services/dtbcollabmgr/src/ability_connection_manager:distributed_ability_connection_manager",
+    "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
+  ]
+
+  external_deps = [
+    "av_codec:av_codec_client",
+    "av_codec:native_media_codecbase",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "media_foundation:media_foundation",
+    "napi:ace_napi",
+  ]
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("MessageDataHeaderTest") {
+  visibility = [ ":*" ]
+
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+
+  include_dirs = [
+    "${dms_path}/interfaces/kits/napi/ability_connection_manager",
+    "${dms_path}/services/dtbcollabmgr/include/av_trans_stream_provider",
+    "${dms_path}/services/dtbcollabmgr/test/unittest",
+  ]
+
+  sources = [ "message_data_header_test.cpp" ]
+
+  deps = [
+    "${dms_path}/common:distributed_sched_utils",
+    "${dms_path}/services/dtbcollabmgr/src/ability_connection_manager:distributed_ability_connection_manager",
+    "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
+  ]
+
+  external_deps = [
+    "av_codec:av_codec_client",
+    "av_codec:native_media_codecbase",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "media_foundation:media_foundation",
+    "napi:ace_napi",
+  ]
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 group("unittest") {
   testonly = true
   deps = [
     ":AbilityConnectionMgrStubTest",
     ":AbilityConnectionMgrTest",
+    ":AbilityConnectionSessionTest",
+    ":DistributedClientTest",
+    ":MessageDataHeaderTest",
   ]
 }
