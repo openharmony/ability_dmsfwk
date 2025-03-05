@@ -320,13 +320,16 @@ int32_t DSchedContinue::PostReplyTask(std::shared_ptr<DSchedContinueReplyCmd> cm
         cmd->result_, cmd->reason_.c_str());
 
     DSchedContinueEventType eventType = DSCHED_CONTINUE_INVALID_EVENT;
+    int32_t input = 0;
     switch (cmd->replyCmd_) {
         case DSCHED_CONTINUE_CMD_START: {
             eventType = DSHCED_CONTINUE_ABILITY_EVENT;
+            input = cmd->appVersion_;
             break;
         }
         case DSCHED_CONTINUE_CMD_END: {
             eventType = DSCHED_CONTINUE_END_EVENT;
+            input = cmd->result_;
             break;
         }
         default:
@@ -341,7 +344,7 @@ int32_t DSchedContinue::PostReplyTask(std::shared_ptr<DSchedContinueReplyCmd> cm
         return INVALID_PARAMETERS_ERR;
     }
 
-    auto result = std::make_shared<int32_t>(cmd->result_);
+    auto result = std::make_shared<int32_t>(input);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, result, 0);
     if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
         HILOGE("PostReplyTask eventHandler send event type %{public}d fail", eventType);
@@ -1216,6 +1219,7 @@ int32_t DSchedContinue::ExecuteContinueEnd(int32_t result)
     NotifyContinuationCallbackResult(result);
     NotifyDSchedEventResult(result);
     DurationDumperComplete(result);
+    DmsHiAnalyticsReport::PublishContinueEvent(continueInfo_);
 
     DSchedContinueManager::GetInstance().OnContinueEnd(continueInfo_);
     HILOGI("ExecuteContinueEnd end");
@@ -1263,7 +1267,6 @@ void DSchedContinue::NotifyDSchedEventResult(int32_t result)
 {
     result = (result == ERR_OK) ? ERR_OK : NOTIFYCOMPLETECONTINUATION_FAILED;
     DistributedSchedService::GetInstance().NotifyDSchedEventCallbackResult(result, eventData_);
-    DmsHiAnalyticsReport::PublishContinueEvent(continueInfo_);
 }
 
 void DSchedContinue::DurationDumperComplete(int32_t result)
