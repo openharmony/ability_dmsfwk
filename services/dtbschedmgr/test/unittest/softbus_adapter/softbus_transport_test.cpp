@@ -818,6 +818,11 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, SendData_001, TestSize.Level3)
     int32_t sessionId = 0;
     auto dataBuffer = std::make_shared<DSchedDataBuffer>(SIZE_2);
     int32_t dataType = 2;
+    
+    SoftbusMock mockSoftbus;
+    int32_t socketId = 0;
+    EXPECT_CALL(mockSoftbus, GetSessionOption(socketId, testing::_, testing::_, sizeof(uint32_t)))
+        .WillOnce(testing::Return(-1));
     auto ret = DSchedTransportSoftbusAdapter::GetInstance().SendData(sessionId, dataType, dataBuffer);
     EXPECT_EQ(ret, INVALID_SESSION_ID);
 
