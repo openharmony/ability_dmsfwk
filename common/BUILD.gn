@@ -38,6 +38,7 @@ ohos_shared_library("distributed_sched_utils") {
     "c_utils:utils",
     "config_policy:configpolicy_util",
     "hilog:libhilog",
+    "image_framework:image_native",
     "ipc:ipc_single",
   ]
 
