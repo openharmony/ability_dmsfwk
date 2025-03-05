@@ -26,6 +26,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 static const uint32_t DSCHED_MAX_BUFFER_SIZE = 80 * 1024 * 1024;
+static const uint16_t BINARY_HEADER_FRAG_LEN = 49;
 constexpr size_t FOO_MAX_LEN = 1024;
 constexpr size_t U32_AT_SIZE = 4;
 constexpr int32_t POS_0 = 0;
@@ -64,9 +65,8 @@ void FuzzOnBytesReceived(const uint8_t* data, size_t size)
         return;
     }
     size_t intParam = static_cast<size_t>(Get32Data(data, size));
-    if (intParam >= DSCHED_MAX_BUFFER_SIZE) {
-        return;
-    }
+    intParam = intParam % (DSCHED_MAX_BUFFER_SIZE - BINARY_HEADER_FRAG_LEN);
+
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(intParam);
     DSchedSoftbusSession dschedSoftbusSession;
     dschedSoftbusSession.OnBytesReceived(buffer);
@@ -83,9 +83,8 @@ void FuzzAssembleNoFrag(const uint8_t* data, size_t size)
         return;
     }
     size_t intParam = static_cast<size_t>(Get32Data(data, size));
-    if (intParam >= DSCHED_MAX_BUFFER_SIZE) {
-        return;
-    }
+    intParam = intParam % (DSCHED_MAX_BUFFER_SIZE - BINARY_HEADER_FRAG_LEN);
+
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(intParam);
     int32_t accountId = *(reinterpret_cast<const int32_t*>(data));
     DSchedSoftbusSession dschedSoftbusSession;

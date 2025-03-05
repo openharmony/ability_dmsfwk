@@ -27,6 +27,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DSchedSoftbusSession";
+constexpr int32_t INVALID_SESSION_ID = -1;
 }
 
 DSchedSoftbusSession::DSchedSoftbusSession()
@@ -102,6 +103,9 @@ std::string DSchedSoftbusSession::GetPeerDeviceId()
 
 void DSchedSoftbusSession::PackRecvData(std::shared_ptr<DSchedDataBuffer> buffer)
 {
+    if (buffer == nullptr) {
+        return;
+    }
     uint64_t bufferSize;
     if (buffer->Size() < BINARY_HEADER_FRAG_LEN) {
         bufferSize = static_cast<uint64_t>(buffer->Size());
@@ -209,6 +213,9 @@ uint16_t DSchedSoftbusSession::U16Get(const uint8_t *ptr)
 
 void DSchedSoftbusSession::AssembleNoFrag(std::shared_ptr<DSchedDataBuffer> buffer, SessionDataHeader& headerPara)
 {
+    if (buffer == nullptr) {
+        return;
+    }
     if (headerPara.dataLen != headerPara.totalLen) {
         HILOGE("header lenth error, dataLen: %{public}d, totalLen: %{public}d, sessionId: %{public}d, peerNetworkId: "
             "%{public}s.", headerPara.dataLen, headerPara.totalLen, sessionId_, GetAnonymStr(peerDeviceId_).c_str());
@@ -379,9 +386,15 @@ int32_t DSchedSoftbusSession::UnPackSendData(std::shared_ptr<DSchedDataBuffer> b
 
 int32_t DSchedSoftbusSession::UnPackStartEndData(std::shared_ptr<DSchedDataBuffer> buffer, int32_t dataType)
 {
+    if (buffer == nullptr) {
+        return INVALID_SESSION_ID;
+    }
     SessionDataHeader headPara = { PROTOCOL_VERSION, FRAG_START_END, dataType, 0, buffer->Size(), 0 };
     headPara.dataLen = buffer->Size();
     auto unpackData = std::make_shared<DSchedDataBuffer>(buffer->Size() + BINARY_HEADER_FRAG_LEN);
+    if (unpackData == nullptr || unpackData->Size() < BINARY_HEADER_FRAG_LEN) {
+        return INVALID_SESSION_ID;
+    }
     MakeFragDataHeader(headPara, unpackData->Data(), BINARY_HEADER_FRAG_LEN);
     int32_t ret = memcpy_s(unpackData->Data() + BINARY_HEADER_FRAG_LEN, unpackData->Size() - BINARY_HEADER_FRAG_LEN,
         buffer->Data(), buffer->Size());
@@ -412,6 +425,9 @@ int64_t DSchedSoftbusSession::GetNowTimeStampUs()
 
 void DSchedSoftbusSession::MakeFragDataHeader(const SessionDataHeader& headPara, uint8_t *header, uint32_t len)
 {
+    if (header == nullptr) {
+        return;
+    }
     uint32_t headerLen = (sizeof(uint16_t) + sizeof(uint16_t)) * HEADER_TLV_NUM  +
         sizeof(uint8_t) * HEADER_UINT8_NUM + sizeof(uint16_t) * HEADER_UINT16_NUM +
         sizeof(uint32_t) * HEADER_UINT32_NUM;
@@ -459,6 +475,9 @@ void DSchedSoftbusSession::MakeFragDataHeader(const SessionDataHeader& headPara,
 
 void DSchedSoftbusSession::WriteTlvToBuffer(const TlvItem& tlvItem, uint8_t *buffer,  uint32_t bufLen)
 {
+    if (buffer == nullptr) {
+        return;
+    }
     uint32_t tlvLen = TlvItem::HEADER_TYPE_BYTES + TlvItem::HEADER_LEN_BYTES + tlvItem.len;
     if (bufLen < tlvLen) {
         HILOGE("tlv len %{public}d over buffer len %{public}d", tlvLen, bufLen);
