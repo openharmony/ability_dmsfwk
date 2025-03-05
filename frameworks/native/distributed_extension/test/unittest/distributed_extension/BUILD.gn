@@ -14,7 +14,7 @@
 import("//build/test.gni")
 import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
-module_output_path = "dmsfwk/distributedextensiontest"
+module_output_path = "dmsfwk/dmsfwk/distributedextensiontest"
 
 ohos_unittest("distributed_extension_js_test") {
   module_out_path = module_output_path

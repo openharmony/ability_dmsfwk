@@ -35,6 +35,8 @@ void CollabSinkGetVersionStateTest::SetUpTestCase()
     DSchedCollabInfo info;
     dCollab_ = std::make_shared<DSchedCollab>(collabToken, info);
     dCollab_->Init();
+    std::shared_ptr<DSchedCollabStateMachine> stateMachine = std::make_shared<DSchedCollabStateMachine>(dCollab_);
+    sinkGetVersionState_ = std::make_shared<CollabSinkGetVersionState>(stateMachine);
     usleep(WAITTIME);
 }
 
@@ -183,6 +185,11 @@ HWTEST_F(CollabSinkConnectStateTest, DoSinkPrepareResult_001, TestSize.Level3)
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     DSchedCollabEventType eventType = ERR_END_EVENT;
+    auto msgEventNull = AppExecFwk::InnerEvent::Get(eventType);
+    ASSERT_NE(msgEventNull, nullptr);
+    ret = sinkConState_->DoSinkPrepareResult(dCollab_, msgEventNull);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
     auto data = std::make_shared<int32_t>(COLLAB_ABILITY_REJECT_ERR);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     ret = sinkConState_->DoSinkPrepareResult(dCollab_, msgEvent);
@@ -207,6 +214,11 @@ HWTEST_F(CollabSinkConnectStateTest, DoAbilityRejectError_001, TestSize.Level3)
 
     std::string reason = "reason";
     DSchedCollabEventType eventType = ERR_END_EVENT;
+    auto msgEventNull = AppExecFwk::InnerEvent::Get(eventType);
+    ASSERT_NE(msgEventNull, nullptr);
+    ret = sinkConState_->DoAbilityRejectError(dCollab_, msgEventNull);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
     auto data = std::make_shared<std::string>(reason);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     ret = sinkConState_->DoAbilityRejectError(dCollab_, msgEvent);
@@ -230,6 +242,11 @@ HWTEST_F(CollabSinkConnectStateTest, DoConnectError_001, TestSize.Level3)
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     DSchedCollabEventType eventType = ERR_END_EVENT;
+    auto msgEventNull = AppExecFwk::InnerEvent::Get(eventType);
+    ASSERT_NE(msgEventNull, nullptr);
+    ret = sinkConState_->DoConnectError(dCollab_, msgEventNull);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
     auto data = std::make_shared<int32_t>(COLLAB_ABILITY_REJECT_ERR);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     ret = sinkConState_->DoConnectError(dCollab_, msgEvent);
@@ -280,6 +297,11 @@ HWTEST_F(CollabSinkStartStateTest, DoStartAbility_001, TestSize.Level3)
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     DSchedCollabEventType eventType = ERR_END_EVENT;
+    auto msgEventNull = AppExecFwk::InnerEvent::Get(eventType);
+    ASSERT_NE(msgEventNull, nullptr);
+    ret = sinkStartState_->DoSinkStartError(dCollab_, msgEventNull);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
     auto data = std::make_shared<int32_t>(COLLAB_ABILITY_REJECT_ERR);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     ret = sinkStartState_->DoStartAbility(dCollab_, msgEvent);
@@ -303,6 +325,11 @@ HWTEST_F(CollabSinkStartStateTest, DoSinkStartError_001, TestSize.Level3)
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     DSchedCollabEventType eventType = ERR_END_EVENT;
+    auto msgEventNull = AppExecFwk::InnerEvent::Get(eventType);
+    ASSERT_NE(msgEventNull, nullptr);
+    ret = sinkStartState_->DoSinkStartError(dCollab_, msgEventNull);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
     auto data = std::make_shared<int32_t>(COLLAB_ABILITY_REJECT_ERR);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     ret = sinkStartState_->DoSinkStartError(dCollab_, msgEvent);
@@ -358,6 +385,66 @@ HWTEST_F(CollabSinkWaitEndStateTest, DoStartAbility_001, TestSize.Level3)
     ret = sinkWaitState_->DoDisconnect(dCollab_, msgEvent);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "CollabSinkWaitEndStateTest DoStartAbility_001 end" << std::endl;
+}
+
+//CollabSinkGetVersionStateTest
+/**
+ * @tc.name: ConnectExecute_001
+ * @tc.desc: Execute
+ * @tc.type: FUNC
+ */
+HWTEST_F(CollabSinkGetVersionStateTest, ConnectExecute_001, TestSize.Level3)
+{
+    DTEST_LOG << "CollabSinkGetVersionStateTest ConnectExecute_001 begin" << std::endl;
+    ASSERT_NE(sinkGetVersionState_, nullptr);
+    DSchedCollabEventType eventType = GET_SINK_VERSION_EVENT;
+    auto msgEvent = AppExecFwk::InnerEvent::Get(eventType);
+    ASSERT_NE(msgEvent, nullptr);
+    msgEvent->innerEventId_ = static_cast<uint32_t>(-1);
+
+    int32_t ret = sinkGetVersionState_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = sinkGetVersionState_->Execute(nullptr, msgEvent);
+    EXPECT_EQ(ret, COLLAB_STATE_MACHINE_INVALID_STATE);
+
+    msgEvent->innerEventId_ = static_cast<uint32_t>(GET_SINK_VERSION_EVENT);
+    ret = sinkGetVersionState_->Execute(nullptr, msgEvent);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = sinkGetVersionState_->Execute(dCollab_, msgEvent);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "CollabSinkGetVersionStateTest ConnectExecute_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DoSinkGetVersionError_001
+ * @tc.desc: DoSinkGetVersionError
+ * @tc.type: FUNC
+ */
+HWTEST_F(CollabSinkGetVersionStateTest, DoSinkGetVersionError_001, TestSize.Level3)
+{
+    DTEST_LOG << "CollabSinkGetVersionStateTest DoSinkGetVersionError_001 begin" << std::endl;
+    ASSERT_NE(sinkGetVersionState_, nullptr);
+    int32_t ret = sinkGetVersionState_->DoSinkGetVersionError(
+        nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ASSERT_NE(dCollab_, nullptr);
+    ret = sinkGetVersionState_->DoSinkGetVersionError(dCollab_, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    DSchedCollabEventType eventType = ERR_END_EVENT;
+    auto msgEvent = AppExecFwk::InnerEvent::Get(eventType);
+    ASSERT_NE(msgEvent, nullptr);
+    ret = sinkGetVersionState_->DoSinkGetVersionError(dCollab_, msgEvent);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    auto data = std::make_shared<int32_t>(0);
+    auto msgEvent2 = AppExecFwk::InnerEvent::Get(eventType, data, 0);
+    ret = sinkGetVersionState_->DoSinkGetVersionError(dCollab_, msgEvent2);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "CollabSinkGetVersionStateTest DoSinkGetVersionError_001 end" << std::endl;
 }
 }
 }
