@@ -197,6 +197,11 @@ HWTEST_F(CollabSrcStartStateTest, DoSrcStartError_001, TestSize.Level3)
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     DSchedCollabEventType eventType = ERR_END_EVENT;
+    auto msgEventNull = AppExecFwk::InnerEvent::Get(eventType);
+    ASSERT_NE(msgEventNull, nullptr);
+    ret = srcStateState_->DoSrcStartError(dCollab_, msgEventNull);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
     auto data = std::make_shared<int32_t>(0);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     ret = srcStateState_->DoSrcStartError(dCollab_, msgEvent);
@@ -310,6 +315,11 @@ HWTEST_F(CollabSrcWaitResultStateTest, DoSrcResultNotifyTask_001, TestSize.Level
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     DSchedCollabEventType eventType = NOTIFY_RESULT_EVENT;
+    auto msgEventNull = AppExecFwk::InnerEvent::Get(eventType);
+    ASSERT_NE(msgEventNull, nullptr);
+    ret = srcWaitRltState_->DoSrcResultNotifyTask(dCollab_, msgEventNull);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
     auto data = std::make_shared<int32_t>(0);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     ASSERT_NE(msgEvent, nullptr);
@@ -335,6 +345,11 @@ HWTEST_F(CollabSrcWaitResultStateTest, DoAbilityRejectTask_001, TestSize.Level3)
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     DSchedCollabEventType eventType = ABILITY_REJECT_EVENT;
+    auto msgEventNull = AppExecFwk::InnerEvent::Get(eventType);
+    ASSERT_NE(msgEventNull, nullptr);
+    ret = srcWaitRltState_->DoAbilityRejectTask(dCollab_, msgEventNull);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
     auto data = std::make_shared<std::string>("test");
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     ASSERT_NE(msgEvent, nullptr);
@@ -360,6 +375,11 @@ HWTEST_F(CollabSrcWaitResultStateTest, DoSrcWaitResultError_001, TestSize.Level3
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     DSchedCollabEventType eventType = ERR_END_EVENT;
+    auto msgEventNull = AppExecFwk::InnerEvent::Get(eventType);
+    ASSERT_NE(msgEventNull, nullptr);
+    ret = srcWaitRltState_->DoSrcWaitResultError(dCollab_, msgEventNull);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
     auto data = std::make_shared<int32_t>(0);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     ASSERT_NE(msgEvent, nullptr);

@@ -118,5 +118,24 @@ HWTEST_F(DistributedClientTest, GetDSchedEventInfo_001, TestSize.Level3)
     EXPECT_NE(result, ERR_NONE);
     DTEST_LOG << "DistributedClientTest GetDSchedEventInfo_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: DistributedClientTest_ConnectDExtAbility_001
+ * @tc.desc: Verify the ConnectDExtAbility.
+ * @tc.type: FUNC
+ * @tc.require: IBP3MC
+ */
+HWTEST_F(DistributedClientTest, DistributedClientTest_ConnectDExtAbility_001, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DistributedClientTest_ConnectDExtAbility_001 start";
+
+    DistributedClient dmsClt;
+    std::string bundleName = "bundleName";
+    std::string abilityName = "abilityName";
+    int32_t userId = 100;
+    auto rlt = dmsClt.ConnectDExtAbility(bundleName, abilityName, userId);
+    EXPECT_NE(rlt, ERR_NONE);
+    GTEST_LOG_(INFO) << "DistributedClientTest_ConnectDExtAbility_001 end";
+}
 }
 }
