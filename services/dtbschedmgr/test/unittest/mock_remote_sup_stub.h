@@ -16,6 +16,8 @@
 #ifndef MOCK_REMOTE_SUP_STUB_H
 #define MOCK_REMOTE_SUP_STUB_H
 
+#include <gmock/gmock.h>
+
 #include "mock_remote_stub.h"
 
 namespace OHOS {

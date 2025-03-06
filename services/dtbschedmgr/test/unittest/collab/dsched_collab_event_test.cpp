@@ -15,6 +15,7 @@
 
 #include "dsched_collab_event_test.h"
 
+#include "distributed_sched_utils.h"
 #include "dms_constant.h"
 #include "dsched_collab_state.h"
 #include "dtbschedmgr_log.h"
@@ -333,6 +334,170 @@ HWTEST_F(CollabEventTest, SinkStartCmd_Unmarshal_Test_002, TestSize.Level3)
     cJSON_free(data);
     cJSON_Delete(rootValue);
     DTEST_LOG << "SinkStartCmd_Unmarshal_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: SinkStartCmd_UnmarshalOptParams_Test_001
+ * @tc.desc: call UnmarshalOptParams
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalOptParams_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_Unmarshal_Test_002 begin" << std::endl;
+    std::string jsonStr;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    SinkStartCmd sinkCmd;
+    auto ret = sinkCmd.UnmarshalOptParams(rootValue);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON_AddNumberToObject(rootValue, "StartParams", 0);
+    ret = sinkCmd.UnmarshalOptParams(rootValue);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON_DeleteItemFromObject(rootValue, "StartParams");
+    cJSON_AddStringToObject(rootValue, "StartParams", "test");
+    ret = sinkCmd.UnmarshalOptParams(rootValue);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "SinkStartCmd_Unmarshal_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: SinkStartCmd_UnmarshalOptParams_Test_002
+ * @tc.desc: call UnmarshalOptParams
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalOptParams_Test_002, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_Unmarshal_Test_002 begin" << std::endl;
+    std::string jsonStr;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    SinkStartCmd sinkCmd;
+    Parcel parcel;
+    if (!sinkCmd.startParams_.Marshalling(parcel)) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+    std::string startParamsStr = ParcelToBase64Str(parcel);
+    cJSON_AddStringToObject(rootValue, "StartParams", startParamsStr.c_str());
+    if (!sinkCmd.messageParams_.Marshalling(parcel)) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    auto ret = sinkCmd.UnmarshalOptParams(rootValue);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON_AddNumberToObject(rootValue, "WantParams", 0);
+    ret = sinkCmd.UnmarshalOptParams(rootValue);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON_DeleteItemFromObject(rootValue, "WantParams");
+    cJSON_AddStringToObject(rootValue, "WantParams", "test");
+    ret = sinkCmd.UnmarshalOptParams(rootValue);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "SinkStartCmd_Unmarshal_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: SinkStartCmd_UnmarshalPartParcel_Test_002
+ * @tc.desc: call UnmarshalPartParcel
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalPartParcel_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_UnmarshalPartParcel_Test_001 begin" << std::endl;
+    std::string jsonStr;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    SinkStartCmd sinkCmd;
+    auto ret = sinkCmd.UnmarshalPartParcel(rootValue);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    Parcel parcel;
+    if (!sinkCmd.startParams_.Marshalling(parcel)) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+    std::string startParamsStr = ParcelToBase64Str(parcel);
+    cJSON_AddStringToObject(rootValue, "StartParams", startParamsStr.c_str());
+    if (!sinkCmd.messageParams_.Marshalling(parcel)) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    std::string wantParamsStr = ParcelToBase64Str(parcel);
+    cJSON_AddStringToObject(rootValue, "WantParams", wantParamsStr.c_str());
+    std::string callerInfoStr;
+    if (sinkCmd.MarshalCallerInfo(callerInfoStr) != ERR_OK) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    ret = sinkCmd.UnmarshalPartParcel(rootValue);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON_AddNumberToObject(rootValue, "CallerInfo", 0);
+    ret = sinkCmd.UnmarshalPartParcel(rootValue);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON_DeleteItemFromObject(rootValue, "CallerInfo");
+    cJSON_AddStringToObject(rootValue, "CallerInfo", "test");
+    ret = sinkCmd.UnmarshalPartParcel(rootValue);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "SinkStartCmd_UnmarshalPartParcel_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SinkStartCmd_UnmarshalPartParcel_Test_002
+ * @tc.desc: call UnmarshalPartParcel
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalPartParcel_Test_002, TestSize.Level3)
+{
+    DTEST_LOG << "SinkStartCmd_UnmarshalPartParcel_Test_002 begin" << std::endl;
+    std::string jsonStr;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    SinkStartCmd sinkCmd;
+    Parcel parcel;
+    if (!sinkCmd.startParams_.Marshalling(parcel)) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+    std::string startParamsStr = ParcelToBase64Str(parcel);
+    cJSON_AddStringToObject(rootValue, "StartParams", startParamsStr.c_str());
+    if (!sinkCmd.messageParams_.Marshalling(parcel)) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    std::string wantParamsStr = ParcelToBase64Str(parcel);
+    cJSON_AddStringToObject(rootValue, "WantParams", wantParamsStr.c_str());
+    std::string callerInfoStr;
+    if (sinkCmd.MarshalCallerInfo(callerInfoStr) != ERR_OK) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    cJSON_AddStringToObject(rootValue, "CallerInfo", callerInfoStr.c_str());
+    auto ret = sinkCmd.UnmarshalPartParcel(rootValue);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON_AddNumberToObject(rootValue, "AccountInfo", 0);
+    ret = sinkCmd.UnmarshalPartParcel(rootValue);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON_DeleteItemFromObject(rootValue, "AccountInfo");
+    cJSON_AddStringToObject(rootValue, "AccountInfo", "test");
+    ret = sinkCmd.UnmarshalPartParcel(rootValue);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "SinkStartCmd_UnmarshalPartParcel_Test_002 end" << std::endl;
 }
 
 /**
@@ -1053,6 +1218,120 @@ HWTEST_F(CollabEventTest, DisconnectCmd_Unmarshal_Test_001, TestSize.Level3)
     cJSON_Delete(rootValue);
     cJSON_free(data);
     DTEST_LOG << "DisconnectCmd_Unmarshal_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetSinkCollabVersionCmd_Marshal_Test_001
+ * @tc.desc: call Marshal
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, GetSinkCollabVersionCmd_Marshal_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "GetSinkCollabVersionCmd_Marshal_Test_001 begin" << std::endl;
+    std::string jsonStr;
+    GetSinkCollabVersionCmd cmd;
+    auto ret = cmd.Marshal(jsonStr);
+    EXPECT_EQ(ret, ERR_OK);
+
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "GetSinkCollabVersionCmd_Marshal_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetSinkCollabVersionCmd_Unmarshal_Test_001
+ * @tc.desc: call Unmarshal
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, GetSinkCollabVersionCmd_Unmarshal_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "GetSinkCollabVersionCmd_Unmarshal_Test_001 begin" << std::endl;
+    std::string jsonStr = "test";
+    GetSinkCollabVersionCmd cmd;
+    auto ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    char *data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddNumberToObject(rootValue, "BaseCmd", 0);
+    data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_DeleteItemFromObject(rootValue, "BaseCmd");
+    cJSON_AddStringToObject(rootValue, "BaseCmd", "test");
+    data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_Delete(rootValue);
+    cJSON_free(data);
+    DTEST_LOG << "GetSinkCollabVersionCmd_Unmarshal_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetSinkCollabVersionCmd_Unmarshal_Test_002
+ * @tc.desc: call Unmarshal
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(CollabEventTest, GetSinkCollabVersionCmd_Unmarshal_Test_002, TestSize.Level3)
+{
+    DTEST_LOG << "GetSinkCollabVersionCmd_Unmarshal_Test_002 begin" << std::endl;
+    cJSON *rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    std::string baseJsonStr;
+    BaseCmd baseCmd;
+    if (baseCmd.Marshal(baseJsonStr) != ERR_OK) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+    cJSON_AddStringToObject(rootValue, "BaseCmd", baseJsonStr.c_str());
+    auto data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+    auto jsonStr = std::string(data);
+    GetSinkCollabVersionCmd cmd;
+    auto ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddStringToObject(rootValue, "SrcPid", "SrcPid");
+    data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+    jsonStr = std::string(data);
+    ret = cmd.Unmarshal(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "GetSinkCollabVersionCmd_Unmarshal_Test_002 end" << std::endl;
 }
 }
 }
