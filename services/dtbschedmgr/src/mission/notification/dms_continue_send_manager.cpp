@@ -418,5 +418,11 @@ void DMSContinueSendMgr::ScreenLockedHandler::SetScreenLockedInfo(LastUnfoInfo i
     unfoInfo_.unfoTime = GetTickCount();
     unfoInfo_.status = info.status;
 }
+
+void DMSContinueSendMgr::ScreenLockedHandler::SetMissionContinueStateInfo(const MissionStatus& status)
+{
+    HILOGI("set last unfocused info, status: %{public}s", status.ToString().c_str());
+    unfoInfo_.status.continueState = status.continueState;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS

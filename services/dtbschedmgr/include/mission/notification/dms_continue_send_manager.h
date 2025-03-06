@@ -99,6 +99,7 @@ private:
         void OnDeviceScreenLocked();
         void ResetScreenLockedInfo();
         void SetScreenLockedInfo(LastUnfoInfo info);
+        void SetMissionContinueStateInfo(const MissionStatus& status);
 
     private:
         LastUnfoInfo unfoInfo_ = { INVALID_MISSION_ID, 0, { INVALID_MISSION_ID, "", "", "", false, 0, false } };
