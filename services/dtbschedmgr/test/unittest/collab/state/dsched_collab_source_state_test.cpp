@@ -16,6 +16,7 @@
 #include "dsched_collab_source_state_test.h"
 
 #include "dsched_collab.h"
+#include "mock_remote_sup_stub.h"
 #include "test_log.h"
 
 using namespace testing;
@@ -35,6 +36,8 @@ void CollabSrcGetPeerVersionStateTest::SetUpTestCase()
     DSchedCollabInfo info;
     dCollab_ = std::make_shared<DSchedCollab>(collabToken, info);
     dCollab_->Init();
+    std::shared_ptr<DSchedCollabStateMachine> stateMachine = std::make_shared<DSchedCollabStateMachine>(dCollab_);
+    srcGetPeerVersionState_ = std::make_shared<CollabSrcGetPeerVersionState>(stateMachine);
     usleep(WAITTIME);
 }
 
@@ -54,6 +57,99 @@ void CollabSrcGetPeerVersionStateTest::TearDown()
 void CollabSrcGetPeerVersionStateTest::SetUp()
 {
     DTEST_LOG << "CollabSrcGetPeerVersionStateTest::SetUp" << std::endl;
+}
+
+// CollabSrcGetPeerVersionStateTest
+/**
+ * @tc.name: StartExecute_001
+ * @tc.desc: Execute
+ * @tc.type: FUNC
+ */
+HWTEST_F(CollabSrcGetPeerVersionStateTest, StartExecute_001, TestSize.Level3)
+{
+    DTEST_LOG << "CollabSrcGetPeerVersionStateTest StartExecute_001 begin" << std::endl;
+    ASSERT_NE(srcGetPeerVersionState_, nullptr);
+    ASSERT_NE(dCollab_, nullptr);
+    DSchedCollabEventType eventType = SOURCE_GET_PEER_VERSION_EVENT;
+    auto msgEvent = AppExecFwk::InnerEvent::Get(eventType);
+    ASSERT_NE(msgEvent, nullptr);
+    msgEvent->innerEventId_ = static_cast<uint32_t>(-1);
+
+    int32_t ret = srcGetPeerVersionState_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = srcGetPeerVersionState_->Execute(nullptr, msgEvent);
+    EXPECT_EQ(ret, COLLAB_STATE_MACHINE_INVALID_STATE);
+
+    msgEvent->innerEventId_ = static_cast<uint32_t>(SOURCE_GET_PEER_VERSION_EVENT);
+    ret = srcGetPeerVersionState_->Execute(nullptr, msgEvent);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = srcGetPeerVersionState_->Execute(dCollab_, msgEvent);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "CollabSrcGetPeerVersionStateTest ConnectExecute_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DoSrcGetVersionTask_001
+ * @tc.desc: DoSrcGetVersionTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(CollabSrcGetPeerVersionStateTest, DoSrcGetVersionTask_001, TestSize.Level3)
+{
+    DTEST_LOG << "CollabSrcGetPeerVersionStateTest DoSrcGetVersionTask_001 begin" << std::endl;
+    ASSERT_NE(srcGetPeerVersionState_, nullptr);
+    int32_t ret = srcGetPeerVersionState_->DoSrcGetVersionTask(nullptr,
+        AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ASSERT_NE(dCollab_, nullptr);
+    auto mock = sptr<MockRemoteSupStub>(new MockRemoteSupStub());
+    dCollab_->collabInfo_.srcClientCB_ = mock;
+
+    EXPECT_CALL(*mock, SendRequest(_, _, _, _)).WillOnce(Return(ERR_OK));
+    DSchedCollabEventType eventType = SOURCE_GET_VERSION_EVENT;
+    auto msgEvent = AppExecFwk::InnerEvent::Get(eventType);
+    ASSERT_NE(msgEvent, nullptr);
+    ret = srcGetPeerVersionState_->DoSrcGetVersionTask(dCollab_, msgEvent);
+    EXPECT_EQ(ret, ERR_OK);
+
+    EXPECT_CALL(*mock, SendRequest(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    ret = srcGetPeerVersionState_->DoSrcGetVersionTask(dCollab_, msgEvent);
+    EXPECT_EQ(ret, ERR_OK);
+    dCollab_->collabInfo_.srcClientCB_  = nullptr;
+    DTEST_LOG << "CollabSrcGetPeerVersionStateTest DoSrcStartError_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DoSrcGetPeerVersionError_001
+ * @tc.desc: DoSrcGetPeerVersionError
+ * @tc.type: FUNC
+ */
+HWTEST_F(CollabSrcGetPeerVersionStateTest, DoSrcGetPeerVersionError_001, TestSize.Level3)
+{
+    DTEST_LOG << "CollabSrcGetPeerVersionStateTest DoSrcGetPeerVersionError_001 begin" << std::endl;
+    ASSERT_NE(srcGetPeerVersionState_, nullptr);
+    int32_t ret = srcGetPeerVersionState_->DoSrcGetPeerVersionError(
+        nullptr, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ASSERT_NE(dCollab_, nullptr);
+    ret = srcGetPeerVersionState_->DoSrcGetPeerVersionError(
+        dCollab_, AppExecFwk::InnerEvent::Pointer(nullptr, nullptr));
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    DSchedCollabEventType eventType = ERR_END_EVENT;
+    auto msgEventNull = AppExecFwk::InnerEvent::Get(eventType);
+    ASSERT_NE(msgEventNull, nullptr);
+    ret = srcGetPeerVersionState_->DoSrcGetPeerVersionError(dCollab_, msgEventNull);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    auto data = std::make_shared<int32_t>(0);
+    auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
+    ret = srcGetPeerVersionState_->DoSrcGetPeerVersionError(dCollab_, msgEvent);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "CollabSrcGetPeerVersionStateTest DoSrcStartError_001 end" << std::endl;
 }
 
 //CollabSrcStartStateTest

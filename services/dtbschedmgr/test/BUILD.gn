@@ -888,7 +888,10 @@ ohos_unittest("dmscollabsrcstattest") {
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
 
-  sources = [ "unittest/collab/state/dsched_collab_source_state_test.cpp" ]
+  sources = [
+    "unittest/collab/state/dsched_collab_source_state_test.cpp",
+    "unittest/mock_remote_stub.cpp",
+  ]
   sources += dtbschedmgr_sources
 
   configs = [
