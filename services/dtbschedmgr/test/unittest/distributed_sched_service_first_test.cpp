@@ -196,6 +196,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, Dump002, TestSize.Level3)
     int32_t ret = DistributedSchedService::GetInstance().Dump(fd, args);
     DistributedSchedService::GetInstance().DeviceOnlineNotify(deviceId);
     DistributedSchedService::GetInstance().DeviceOfflineNotify(deviceId);
+    DistributedSchedService::GetInstance().DeviceOfflineNotifyAfterDelete(deviceId);
     EXPECT_EQ(ret, DMS_WRITE_FILE_FAILED_ERR);
     DTEST_LOG << "DistributedSchedServiceFirstTest Dump002 end" << std::endl;
 }
