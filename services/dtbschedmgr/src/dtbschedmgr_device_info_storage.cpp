@@ -412,6 +412,7 @@ void DtbschedmgrDeviceInfoStorage::DeviceOfflineNotify(const std::string& networ
         UnregisterUuidNetworkIdMap(networkId);
         lock_guard<mutex> autoLock(deviceLock_);
         remoteDevices_.erase(networkId);
+        DistributedSchedService::GetInstance().DeviceOfflineNotifyAfterDelete(networkId);
     };
     if (!networkIdMgrHandler_->PostTask(nodeOffline)) {
         HILOGE("DeviceOfflineNotify handler postTask failed");

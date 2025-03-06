@@ -106,6 +106,7 @@ public:
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
     void DeviceOnlineNotify(const std::string& deviceId);
     void DeviceOfflineNotify(const std::string& deviceId);
+    void DeviceOfflineNotifyAfterDelete(const std::string& networkId);
     void DurationStart(const std::string srcDeviceId, const std::string dstDeviceId);
 
     int32_t StartRemoteAbility(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t requestCode,

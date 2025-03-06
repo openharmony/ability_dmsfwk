@@ -301,12 +301,16 @@ void DistributedSchedService::DeviceOfflineNotify(const std::string& networkId)
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
     CHECK_POINTER_RETURN(recvMgr, "recvMgr");
     recvMgr->NotifyDeviceOffline(networkId);
+    DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(networkId);
+#endif
+}
 
+void DistributedSchedService::DeviceOfflineNotifyAfterDelete(const std::string& networkId)
+{
+#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     auto recomMgr = MultiUserManager::GetInstance().GetCurrentRecomMgr();
     CHECK_POINTER_RETURN(recomMgr, "recomMgr");
     recomMgr->OnDeviceChanged();
-
-    DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(networkId);
 #endif
 }
 
