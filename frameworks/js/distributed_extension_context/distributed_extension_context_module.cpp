@@ -18,10 +18,10 @@
 #define EXTERN_C_VISIBILITY_DEFAULT extern "C" __attribute__((visibility("default")))
 #define EXTERN_C_CONSTRUCTOR extern "C" __attribute__((constructor))
 
-extern const char BINARY_DISTRIBUTED_EXTENSION_CONTEXT_JS_START[];
-extern const char BINARY_DISTRIBUTED_EXTENSION_ABILITY_JS_END[];
-extern const char BINARY_DISTRIBUTED_EXTENSION_CONTEXT_ABC_START[];
-extern const char BINARY_DISTRIBUTED_EXTENSION_CONTEXT_ABC_END[];
+extern const char _binary_distributed_extension_context_js_start[];
+extern const char _binary_distributed_extension_context_js_end[];
+extern const char _binary_distributed_extension_context_abc_start[];
+extern const char _binary_distributed_extension_context_abc_end[];
 
 static napi_module _module = {
     .nm_version = 0,
@@ -29,29 +29,29 @@ static napi_module _module = {
     .nm_modname = "application.DistributedExtensionContext",
 };
 
-EXTERN_C_CONSTRUCTOR void NapiApplicationDistributedExtensionContextAutoRegister()
+EXTERN_C_CONSTRUCTOR void NAPI_application_DistributedExtensionContext_AutoRegister()
 {
     napi_module_register(&_module);
 }
 
-EXTERN_C_VISIBILITY_DEFAULT void NapiApplicationDistributedExtensionContextGetJsCode(const char **buf, int *bufLen)
+EXTERN_C_VISIBILITY_DEFAULT void NAPI_application_DistributedExtensionContext_GetJSCode(const char **buf, int *bufLen)
 {
     if (buf != nullptr) {
-        *buf = BINARY_DISTRIBUTED_EXTENSION_CONTEXT_JS_START;
+        *buf = _binary_distributed_extension_context_js_start;
     }
-
+ 
     if (bufLen != nullptr) {
-        *bufLen = BINARY_DISTRIBUTED_EXTENSION_ABILITY_JS_END - BINARY_DISTRIBUTED_EXTENSION_CONTEXT_JS_START;
+        *bufLen = _binary_distributed_extension_context_js_end - _binary_distributed_extension_context_js_start;
     }
 }
 
 // extension_context JS register
-EXTERN_C_VISIBILITY_DEFAULT void NapiApplicationDistributedExtensionContextGetAbcCode(const char **buf, int *buflen)
+EXTERN_C_VISIBILITY_DEFAULT void NAPI_application_DistributedExtensionContext_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
-        *buf = BINARY_DISTRIBUTED_EXTENSION_CONTEXT_ABC_START;
+        *buf = _binary_distributed_extension_context_abc_start;
     }
     if (buflen != nullptr) {
-        *buflen = BINARY_DISTRIBUTED_EXTENSION_CONTEXT_ABC_END - BINARY_DISTRIBUTED_EXTENSION_CONTEXT_ABC_START;
+        *buflen = _binary_distributed_extension_context_abc_end - _binary_distributed_extension_context_abc_start;
     }
 }

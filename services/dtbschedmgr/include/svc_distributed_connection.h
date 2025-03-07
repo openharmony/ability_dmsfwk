@@ -33,8 +33,7 @@ public:
      * other value indicates a connection failure.
      */
     void OnAbilityConnectDone(const AppExecFwk::ElementName &element,
-        const sptr<IRemoteObject> &remoteObject,
-        int resultCode) override;
+        const sptr<IRemoteObject> &remoteObject, int resultCode) override;
 
     /**
      * @brief This method is called back to receive the disconnection result after the connected extension ability
@@ -71,11 +70,16 @@ public:
      */
     sptr<IDExtension> GetDistributedExtProxy();
 
+    /**
+     * @brief Set the Callback object
+     *
+     * @param callConnected
+     */
+    void SetCallback(std::function<void(const std::string &&)> callConnected);
+
 public:
-    SvcDistributedConnection(std::string bundleNameIndexInfo)
-        : bundleNameIndexInfo_(bundleNameIndexInfo)
-    {
-    }
+    SvcDistributedConnection(std::string bundleNameIndexInfo) : bundleNameIndexInfo_(bundleNameIndexInfo)
+    {}
     ~SvcDistributedConnection() override {};
 
 private:
@@ -86,6 +90,7 @@ private:
     std::atomic<bool> isConnectCalled_ = {false};
     sptr<IDExtension> distributedProxy_;
 
+    std::function<void(const std::string &&)> callConnected_;
     std::string bundleNameIndexInfo_;
 };
 }

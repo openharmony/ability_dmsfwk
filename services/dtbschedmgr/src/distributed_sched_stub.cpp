@@ -100,6 +100,8 @@ void DistributedSchedStub::InitExtendedLocalFuncsInner()
         &DistributedSchedStub::GetContinueInfoInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_DSCHED_EVENT_INFO)] =
         &DistributedSchedStub::GetDSchedEventInfoInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::DSCHED_START_DEXTENSION)] =
+        &DistributedSchedStub::ConnectDExtAbilityInner;
 #endif
 }
 
@@ -1266,6 +1268,28 @@ int32_t DistributedSchedStub::GetContinueInfoInner(MessageParcel& data, MessageP
     int32_t result = DSchedContinueManager::GetInstance().GetContinueInfo(dstNetworkId, srcNetworkId);
     PARCEL_WRITE_HELPER(reply, String, dstNetworkId);
     PARCEL_WRITE_HELPER(reply, String, srcNetworkId);
+    return result;
+}
+
+int32_t DistributedSchedStub::ConnectDExtAbilityInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("[PerformanceTest] called, IPC end = %{public}" PRId64, GetTickCount());
+    string bundleName = data.ReadString();
+    if (bundleName.empty()) {
+        HILOGW("read bundleName failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    string abilityName = data.ReadString();
+    if (abilityName.empty()) {
+        HILOGW("read abilityName failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t userId = data.ReadInt32();
+    if (userId < -1) {
+        HILOGW("read userId failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = ConnectDExtAbility(bundleName, abilityName, userId);
     return result;
 }
 
