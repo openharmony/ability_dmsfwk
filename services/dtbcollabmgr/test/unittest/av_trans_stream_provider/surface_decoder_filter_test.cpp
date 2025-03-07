@@ -40,7 +40,6 @@ void SurfaceDecoderFilterTest::SetUpTestCase()
     HILOGI("SurfaceDecoderFilterTest::SetUpTestCase");
     decodeFilter_ = std::make_shared<SurfaceDecoderFilter>(
         "builtin.dtbcollab.sender", FilterType::FILTERTYPE_SOURCE);
-    decodeFilter_->codecAdpater_ = std::make_shared<SurfaceDecoderAdapter>();
 }
 
 void SurfaceDecoderFilterTest::TearDownTestCase()
