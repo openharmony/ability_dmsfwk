@@ -37,6 +37,7 @@ declare_args() {
   dmsfwk_all_connect_decisions = false
   dmsfwk_hianalytics_service = false
   dmsfwk_softbus_file_ability = false
+  dmsfwk_check_screenlock = false
   if (defined(global_parts_info)) {
     if (defined(global_parts_info.multimedia_image_framework)) {
       dmsfwk_mission_manager = true
@@ -61,6 +62,9 @@ declare_args() {
     }
     if (defined(global_parts_info.cloud_hianalytics_service)) {
       dmsfwk_hianalytics_service = true
+    }
+    if (defined(global_parts_info.theme_screenlock_mgr)) {
+      dmsfwk_check_screenlock = true
     }
   }
   if (!defined(global_parts_info) ||
