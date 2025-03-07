@@ -96,6 +96,11 @@ int32_t SendStrategyInactive::ExecuteSendStrategy(const MissionStatus& status, u
 
     sendMgr->RemoveMMIListener();
     sendType = BROADCAST_TYPE_DISAPPEAR;
+    if (status.missionId != sendMgr->screenLockedHandler_->GetMissionId()) {
+        return DMS_PERMISSION_DENIED;
+    }
+    sendMgr->screenLockedHandler_->SetMissionContinueStateInfo(status);
+    HILOGW("ScreenLocked MissionContinueState already refreshed.");
     return ERR_OK;
 }
 
