@@ -31,6 +31,7 @@ namespace {
     static constexpr int32_t BITRATE = 5000000;
     static constexpr int32_t FRAME_RATE = 30;
     static constexpr int32_t NUM_1 = 1;
+    static constexpr int32_t INVALID_ENMU = 99999;
 }
 
 void SurfaceParamTest::SetUpTestCase()
@@ -51,6 +52,32 @@ void SurfaceParamTest::SetUp()
 void SurfaceParamTest::TearDown()
 {
     HILOGI("SurfaceParamTest::TearDown");
+}
+
+/**
+ * @tc.name: VidEnc_Configure_Failed
+ * @tc.desc: Test VidEnc::Configure failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceParamTest, VidEnc_Configure_Failed, TestSize.Level1)
+{
+    std::shared_ptr<Media::Meta> meta = std::make_shared<Media::Meta>();
+    VidEnc encoder(VideoCodecFormat::VIDEO_DEFAULT);
+
+    ConfigureMode mode = static_cast<ConfigureMode>(INVALID_ENMU);
+    encoder.Configure(meta, mode);
+    std::string mimeType;
+    meta->GetData(Media::Tag::MIME_TYPE, mimeType);
+    EXPECT_EQ(mimeType, "");
+
+    encoder.encFmt = static_cast<VideoCodecFormat>(INVALID_ENMU);
+    encoder.Configure(meta, ConfigureMode::Encode);
+    meta->GetData(Media::Tag::MIME_TYPE, mimeType);
+    EXPECT_EQ(mimeType, "");
+
+    encoder.Configure(meta, ConfigureMode::Decode);
+    meta->GetData(Media::Tag::MIME_TYPE, mimeType);
+    EXPECT_EQ(mimeType, "");
 }
 
 /**
@@ -124,6 +151,29 @@ HWTEST_F(SurfaceParamTest, VidEnc_Configure_Decode_Success, TestSize.Level1)
 }
 
 /**
+ * @tc.name: VidRectangle_Configure_Failed
+ * @tc.desc: Test VidRectangle::Configure failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceParamTest, VidRectangle_Configure_Failed, TestSize.Level1)
+{
+    std::shared_ptr<Media::Meta> meta = std::make_shared<Media::Meta>();
+    VidRectangle rect(NUM_1920, NUM_1080);  // Create VidRectangle with width = 1920 and height = 1080
+
+    ConfigureMode mode = static_cast<ConfigureMode>(INVALID_ENMU);
+    // Test Configure for Encode mode
+    rect.Configure(meta, mode);
+
+    int32_t width = 0;
+    int32_t height = 0;
+    meta->GetData(Media::Tag::VIDEO_WIDTH, width);
+    meta->GetData(Media::Tag::VIDEO_HEIGHT, height);
+  
+    EXPECT_EQ(width, 0);
+    EXPECT_EQ(height, 0);
+}
+
+/**
  * @tc.name: VidRectangle_Configure_Encode_Success
  * @tc.desc: Test VidRectangle::Configure in Encode mode, setting width and height in meta
  * @tc.type: FUNC
@@ -170,6 +220,26 @@ HWTEST_F(SurfaceParamTest, VidRectangle_Configure_Decode_Success, TestSize.Level
 }
 
 /**
+ * @tc.name: VidBitRate_Configure_Failed
+ * @tc.desc: Test VidBitRate::Configure failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceParamTest, VidBitRate_Configure_Failed, TestSize.Level1)
+{
+    std::shared_ptr<Media::Meta> meta = std::make_shared<Media::Meta>();
+    VidBitRate bitRateParam(BITRATE);  // Create VidBitRate with default bitrate
+
+    ConfigureMode mode = static_cast<ConfigureMode>(INVALID_ENMU);
+    // Test Configure for Encode mode
+    bitRateParam.Configure(meta, mode);
+
+    int64_t bitrate = 0;
+    meta->Get<Media::Tag::MEDIA_BITRATE>(bitrate);
+  
+    EXPECT_EQ(bitrate, 0);
+}
+
+/**
  * @tc.name: VidBitRate_Configure_Encode_Success
  * @tc.desc: Test VidBitRate::Configure in Encode mode, setting bitrate in meta
  * @tc.type: FUNC
@@ -210,6 +280,27 @@ HWTEST_F(SurfaceParamTest, VidBitRate_Configure_Decode_Success, TestSize.Level1)
 }
 
 /**
+ * @tc.name: VidFrameRate_Configure_Failed
+ * @tc.desc: Test VidFrameRate::Configure failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceParamTest, VidFrameRate_Configure_Failed, TestSize.Level1)
+{
+    std::shared_ptr<Media::Meta> meta = std::make_shared<Media::Meta>();
+    VidFrameRate frameRateParam(FRAME_RATE);  // Create VidFrameRate with default frame rate
+
+    ConfigureMode mode = static_cast<ConfigureMode>(INVALID_ENMU);
+    // Test Configure for Encode mode
+    frameRateParam.Configure(meta, mode);
+
+    // Verify that the frame rate is correctly set in the meta
+    double frameRate = 0.0;
+    meta->Get<Media::Tag::VIDEO_FRAME_RATE>(frameRate);
+
+    EXPECT_DOUBLE_EQ(frameRate, 0.0);
+}
+
+/**
  * @tc.name: VidFrameRate_Configure_Encode_Success
  * @tc.desc: Test VidFrameRate::Configure in Encode mode, setting frame rate in meta
  * @tc.type: FUNC
@@ -221,11 +312,11 @@ HWTEST_F(SurfaceParamTest, VidFrameRate_Configure_Encode_Success, TestSize.Level
 
     // Test Configure for Encode mode
     frameRateParam.Configure(meta, ConfigureMode::Encode);
-   
+
     // Verify that the frame rate is correctly set in the meta
     double frameRate = 0.0;
     meta->Get<Media::Tag::VIDEO_FRAME_RATE>(frameRate);
-   
+
     EXPECT_DOUBLE_EQ(frameRate, FRAME_RATE);
 }
 
@@ -241,12 +332,33 @@ HWTEST_F(SurfaceParamTest, VidFrameRate_Configure_Decode_Success, TestSize.Level
 
     // Test Configure for Decode mode
     frameRateParam.Configure(meta, ConfigureMode::Decode);
-   
+
     // Verify that the frame rate is correctly set in the meta
     int32_t frameRate = 0;
     meta->GetData(std::string(MDKey::MD_KEY_FRAME_RATE), frameRate);
-   
+
     EXPECT_EQ(frameRate, FRAME_RATE);
+}
+
+/**
+ * @tc.name: VidIsHdr_Configure_Failed
+ * @tc.desc: Test VidIsHdr::Configure failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceParamTest, VidIsHdr_Configure_Failed, TestSize.Level1)
+{
+    std::shared_ptr<Media::Meta> meta = std::make_shared<Media::Meta>();
+    VidIsHdr hdrParam(true);  // Create VidIsHdr with isHdr = true
+
+    ConfigureMode mode = static_cast<ConfigureMode>(INVALID_ENMU);
+    // Test Configure for Encode mode
+    hdrParam.Configure(meta, mode);
+
+    // Verify that the frame rate is correctly set in the meta
+    Media::Plugins::HEVCProfile profile;
+    meta->Get<Media::Tag::VIDEO_H265_PROFILE>(profile);
+
+    EXPECT_EQ(profile, 0);
 }
 
 /**
@@ -261,11 +373,11 @@ HWTEST_F(SurfaceParamTest, VidIsHdr_Configure_Encode_Hdr_Success, TestSize.Level
 
     // Test Configure for Encode mode when isHdr is true
     hdrParam.Configure(meta, ConfigureMode::Encode);
-   
+
     // Verify that the profile is set to HEVC_PROFILE_MAIN_10 in the meta
     Media::Plugins::HEVCProfile profile;
     meta->Get<Media::Tag::VIDEO_H265_PROFILE>(profile);
-   
+
     EXPECT_EQ(profile, Media::Plugins::HEVCProfile::HEVC_PROFILE_MAIN_10);
 }
 
@@ -281,7 +393,7 @@ HWTEST_F(SurfaceParamTest, VidIsHdr_Configure_Encode_NoHdr_Success, TestSize.Lev
 
     // Test Configure for Encode mode when isHdr is false
     hdrParam.Configure(meta, ConfigureMode::Encode);
-   
+
     // Verify that the profile is not set in the meta
     Media::Plugins::HEVCProfile profile;
     EXPECT_FALSE(meta->GetData(Media::Tag::VIDEO_H265_PROFILE, profile));  // Profile should not exist
@@ -299,11 +411,11 @@ HWTEST_F(SurfaceParamTest, VidIsHdr_Configure_Decode_Hdr_Success, TestSize.Level
 
     // Test Configure for Decode mode when isHdr is true
     hdrParam.Configure(meta, ConfigureMode::Decode);
-   
+
     // Verify that the profile is set to HEVC_PROFILE_MAIN_10 in the meta
     Media::Plugins::HEVCProfile profile;
     meta->GetData(std::string(MDKey::MD_KEY_PROFILE), profile);
-   
+
     EXPECT_EQ(profile, NUM_1);
 }
 
@@ -319,10 +431,30 @@ HWTEST_F(SurfaceParamTest, VidIsHdr_Configure_Decode_NoHdr_Success, TestSize.Lev
 
     // Test Configure for Decode mode when isHdr is false
     hdrParam.Configure(meta, ConfigureMode::Decode);
-   
+
     // Verify that the profile is not set in the meta
     Media::Plugins::HEVCProfile profile;
     EXPECT_FALSE(meta->GetData(std::string(MDKey::MD_KEY_PROFILE), profile));
+}
+
+/**
+ * @tc.name: VidEnableTemporalScale_Configure_Failed
+ * @tc.desc: Test VidEnableTemporalScale::Configure failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceParamTest, VidEnableTemporalScale_Configure_Failed, TestSize.Level1)
+{
+    std::shared_ptr<Media::Meta> meta = std::make_shared<Media::Meta>();
+    VidEnableTemporalScale temporalScaleParam(true);
+
+    ConfigureMode mode = static_cast<ConfigureMode>(INVALID_ENMU);
+    // Test Configure for Encode mode
+    temporalScaleParam.Configure(meta, mode);
+
+    // Verify that the frame rate is correctly set in the meta
+    bool enableTemporalScalability = false;
+    meta->GetData(Media::Tag::VIDEO_ENCODER_ENABLE_TEMPORAL_SCALABILITY, enableTemporalScalability);
+    EXPECT_FALSE(enableTemporalScalability);  // The tag should be set to true
 }
 
 /**
@@ -337,11 +469,11 @@ HWTEST_F(SurfaceParamTest, VidEnableTemporalScale_Configure_Encode_Enable_Succes
 
     // Test Configure for Encode mode when enableTemporalScale is true
     temporalScaleParam.Configure(meta, ConfigureMode::Encode);
-   
+
     // Verify that the encoder enable temporal scalability tag is set in the meta
     bool enableTemporalScalability;
     meta->GetData(Media::Tag::VIDEO_ENCODER_ENABLE_TEMPORAL_SCALABILITY, enableTemporalScalability);
-   
+
     EXPECT_TRUE(enableTemporalScalability);  // The tag should be set to true
 }
 
@@ -357,7 +489,7 @@ HWTEST_F(SurfaceParamTest, VidEnableTemporalScale_Configure_Encode_Disable_Succe
 
     // Test Configure for Encode mode when enableTemporalScale is false
     temporalScaleParam.Configure(meta, ConfigureMode::Encode);
-   
+
     // Verify that the encoder enable temporal scalability tag is not set in the meta
     bool enableTemporalScalability;
     EXPECT_FALSE(meta->GetData(Media::Tag::VIDEO_ENCODER_ENABLE_TEMPORAL_SCALABILITY, enableTemporalScalability));
@@ -380,7 +512,7 @@ HWTEST_F(SurfaceParamTest, VidEnableTemporalScale_Configure_Decode_Enable_Succes
     int enableTemporalScalability;
     meta->GetData(std::string(MDKey::OH_MD_KEY_VIDEO_ENCODER_ENABLE_TEMPORAL_SCALABILITY),
         enableTemporalScalability);
-   
+
     EXPECT_EQ(enableTemporalScalability, NUM_1);  // The tag should be set to 1
 }
 
@@ -401,6 +533,46 @@ HWTEST_F(SurfaceParamTest, VidEnableTemporalScale_Configure_Decode_Disable_Succe
     int enableTemporalScalability;
     EXPECT_FALSE(meta->GetData(std::string(MDKey::OH_MD_KEY_VIDEO_ENCODER_ENABLE_TEMPORAL_SCALABILITY),
         enableTemporalScalability));
+}
+
+/**
+ * @tc.name: VidSurfaceParam__Configure_Failed
+ * @tc.desc: Test VidSurfaceParam_::Configure failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceParamTest, VidSurfaceParam_Configure_Failed, TestSize.Level1)
+{
+    std::shared_ptr<Media::Meta> meta = std::make_shared<Media::Meta>();
+    SurfaceParam surfaceParam = {static_cast<SurfaceRotate>(INVALID_ENMU), static_cast<SurfaceFilp>(INVALID_ENMU)};
+    VidSurfaceParam vidSurfaceParam(surfaceParam);
+
+    ConfigureMode mode = static_cast<ConfigureMode>(INVALID_ENMU);
+    // Test Configure for Encode mode
+    vidSurfaceParam.Configure(meta, mode);
+
+    // Get the value as int32_t and compare with the expected value
+    int32_t orientation = 0;
+    GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation);
+    EXPECT_EQ(orientation, 0);
+
+    vidSurfaceParam.Configure(meta, ConfigureMode::Decode);
+    GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation);
+    EXPECT_EQ(orientation, Media::Plugins::VideoOrientationType::ROTATE_NONE);
+
+    surfaceParam.filp = SurfaceFilp::FLIP_NONE;
+    vidSurfaceParam.Configure(meta, ConfigureMode::Decode);
+    GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation);
+    EXPECT_EQ(orientation, Media::Plugins::VideoOrientationType::ROTATE_NONE);
+
+    surfaceParam.filp = SurfaceFilp::FLIP_H;
+    vidSurfaceParam.Configure(meta, ConfigureMode::Decode);
+    GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation);
+    EXPECT_EQ(orientation, Media::Plugins::VideoOrientationType::ROTATE_NONE);
+
+    surfaceParam.filp = SurfaceFilp::FLIP_V;
+    vidSurfaceParam.Configure(meta, ConfigureMode::Decode);
+    GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation);
+    EXPECT_EQ(orientation, Media::Plugins::VideoOrientationType::ROTATE_NONE);
 }
 
 /**

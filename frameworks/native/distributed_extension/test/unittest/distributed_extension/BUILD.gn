@@ -145,6 +145,7 @@ ohos_unittest("distributed_extension_proxy_test") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "${dms_path}/services/dtbschedmgr/test/cfi_blocklist.txt"
   }
 
   defines = [ "private = public" ]
