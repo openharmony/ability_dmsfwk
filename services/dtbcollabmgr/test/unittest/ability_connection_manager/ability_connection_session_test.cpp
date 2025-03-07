@@ -70,7 +70,7 @@ HWTEST_F(AbilityConnectionSessionTest, IsVaildChannel_Test_001, TestSize.Level3)
     int32_t channelId = 30;
     connectionSesion_->transChannels_.clear();
     EXPECT_FALSE(connectionSesion_->IsVaildChannel(channelId));
-    
+
     TransChannelInfo info;
     info.channelId = 31;
     connectionSesion_->transChannels_[TransChannelType::MESSAGE] = info;
@@ -97,7 +97,7 @@ HWTEST_F(AbilityConnectionSessionTest, GetStreamTransChannel_Test_001, TestSize.
     connectionSesion_->transChannels_.clear();
     auto rlt = connectionSesion_->GetStreamTransChannel(info);
     EXPECT_EQ(rlt, INVALID_PARAMETERS_ERR);
-    
+
     TransChannelInfo info1;
     info1.channelId = 31;
     connectionSesion_->transChannels_[TransChannelType::STREAM_BYTES] = info1;
@@ -110,7 +110,7 @@ HWTEST_F(AbilityConnectionSessionTest, GetStreamTransChannel_Test_001, TestSize.
     rlt = connectionSesion_->GetStreamTransChannel(info);
     EXPECT_EQ(rlt, ERR_OK);
     EXPECT_EQ(info.channelId, info1.channelId);
-    
+
     TransChannelInfo info2;
     info2.channelId = 30;
     connectionSesion_->transChannels_[TransChannelType::STREAM] = info2;
@@ -186,7 +186,7 @@ HWTEST_F(AbilityConnectionSessionTest, OnMessageReceived_Test_001, TestSize.Leve
     std::shared_ptr<AVTransDataBuffer> dataBuffer = std::make_shared<AVTransDataBuffer>(capacity);
     connectionSesion_->transChannels_.clear();
     EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnMessageReceived(channelId, dataBuffer));
-    
+
     TransChannelInfo info;
     info.channelId = channelId;
     connectionSesion_->transChannels_[TransChannelType::MESSAGE] = info;
@@ -197,6 +197,146 @@ HWTEST_F(AbilityConnectionSessionTest, OnMessageReceived_Test_001, TestSize.Leve
     EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnMessageReceived(channelId, dataBuffer));
     connectionSesion_->transChannels_.clear();
     DTEST_LOG << "AbilityConnectionSessionTest GetStreamTransChannel_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnSendFile_Test_001
+ * @tc.desc: call OnSendFile
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, OnSendFile_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest OnSendFileTest_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    int32_t channelId = 30;
+    FileInfo fileInfo;
+    connectionSesion_->transChannels_.clear();
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnSendFile(channelId, fileInfo));
+
+    TransChannelInfo info;
+    info.channelId = channelId;
+    connectionSesion_->transChannels_[TransChannelType::MESSAGE] = info;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnSendFile(channelId, fileInfo));
+    connectionSesion_->transChannels_.clear();
+    DTEST_LOG << "AbilityConnectionSessionTest OnSendFileTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnRecvFile_Test_001
+ * @tc.desc: call OnRecvFile
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, OnRecvFile_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest OnRecvFile_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    int32_t channelId = 30;
+    FileInfo fileInfo;
+    connectionSesion_->transChannels_.clear();
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnRecvFile(channelId, fileInfo));
+
+    TransChannelInfo info;
+    info.channelId = channelId;
+    connectionSesion_->transChannels_[TransChannelType::MESSAGE] = info;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnRecvFile(channelId, fileInfo));
+    connectionSesion_->transChannels_.clear();
+    DTEST_LOG << "AbilityConnectionSessionTest OnRecvFile_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetRecvPath_Test_001
+ * @tc.desc: call GetRecvPath
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, GetRecvPath_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest GetRecvPath_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    int32_t channelId = 30;
+    FileInfo fileInfo;
+    connectionSesion_->transChannels_.clear();
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->GetRecvPath(channelId));
+
+    TransChannelInfo info;
+    info.channelId = channelId;
+    connectionSesion_->transChannels_[TransChannelType::MESSAGE] = info;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->GetRecvPath(channelId));
+    connectionSesion_->transChannels_.clear();
+    DTEST_LOG << "AbilityConnectionSessionTest GetRecvPath_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ExeuteMessageEventCallback_Test_001
+ * @tc.desc: call ExeuteMessageEventCallback
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, ExeuteMessageEventCallback_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest ExeuteMessageEventCallback_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    std::string msg = "this is a test msg";
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->ExeuteMessageEventCallback(msg));
+    DTEST_LOG << "AbilityConnectionSessionTest GetRecvPath_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnChannelClosed_Test_001
+ * @tc.desc: call OnChannelClosed
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, OnChannelClosed_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest OnChannelClosed_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    int32_t channelId = 30;
+    FileInfo fileInfo;
+    connectionSesion_->transChannels_.clear();
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnChannelClosed(channelId));
+
+    connectionSesion_->sessionStatus_ = SessionStatus::CONNECTING;
+    TransChannelInfo info;
+    info.channelId = channelId;
+    connectionSesion_->transChannels_[TransChannelType::MESSAGE] = info;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnChannelClosed(channelId));
+
+    connectionSesion_->sessionStatus_ = SessionStatus::CONNECTED;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnChannelClosed(channelId));
+    connectionSesion_->transChannels_.clear();
+    DTEST_LOG << "AbilityConnectionSessionTest OnChannelClosed_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: IsAllChannelConnected_Test_001
+ * @tc.desc: call IsAllChannelConnected
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, IsAllChannelConnected_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest IsAllChannelConnected_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    int32_t channelId = 30;
+    connectionSesion_->transChannels_.clear();
+    TransChannelInfo info;
+    info.channelId = channelId;
+    info.isConnected = true;
+    connectionSesion_->transChannels_[TransChannelType::MESSAGE] = info;
+    EXPECT_TRUE(connectionSesion_->IsAllChannelConnected());
+
+    info.isConnected = false;
+    info.transType = TransChannelType::STREAM;
+    connectionSesion_->transChannels_[TransChannelType::MESSAGE] = info;
+    EXPECT_TRUE(connectionSesion_->IsAllChannelConnected());
+
+    info.transType = TransChannelType::DATA;
+    connectionSesion_->transChannels_[TransChannelType::MESSAGE] = info;
+    EXPECT_FALSE(connectionSesion_->IsAllChannelConnected());
+    DTEST_LOG << "AbilityConnectionSessionTest OnChannelClosed_Test_001 end" << std::endl;
 }
 }
 }
