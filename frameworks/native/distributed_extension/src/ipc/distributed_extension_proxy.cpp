@@ -24,6 +24,11 @@ const std::string TAG = "DExtensionProxy";
 int32_t DExtensionProxy::TriggerOnCreate(AAFwk::Want &want)
 {
     HILOGI("TriggerOnCreate");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("Register remote is null");
+        return ERR_NULL_OBJECT;
+    }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         HILOGE("DExtensionProxy::TriggerOnCreate Write interface token failed!");
@@ -38,7 +43,7 @@ int32_t DExtensionProxy::TriggerOnCreate(AAFwk::Want &want)
     MessageParcel reply;
     MessageOption option;
     int32_t ret =
-        Remote()->SendRequest(static_cast<uint32_t>(IDExtensionInterfaceCode::CMD_ON_CREATE), data, reply, option);
+        remote->SendRequest(static_cast<uint32_t>(IDExtensionInterfaceCode::CMD_ON_CREATE), data, reply, option);
     if (ret != NO_ERROR) {
         HILOGE("DExtensionProxy::TriggerOnCreate Transact ErrCode = %{public}d", ret);
         return ret;
@@ -51,6 +56,11 @@ int32_t DExtensionProxy::TriggerOnCreate(AAFwk::Want &want)
 int32_t DExtensionProxy::TriggerOnDestroy(void)
 {
     HILOGI("TriggerOnDestroy");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("Register remote is null");
+        return ERR_NULL_OBJECT;
+    }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         HILOGE("DExtensionProxy::TriggerOnDestroy Write interface token failed!");
@@ -60,7 +70,7 @@ int32_t DExtensionProxy::TriggerOnDestroy(void)
     MessageParcel reply;
     MessageOption option;
     int32_t ret =
-        Remote()->SendRequest(static_cast<uint32_t>(IDExtensionInterfaceCode::CMD_ON_DESTORY), data, reply, option);
+        remote->SendRequest(static_cast<uint32_t>(IDExtensionInterfaceCode::CMD_ON_DESTORY), data, reply, option);
     if (ret != NO_ERROR) {
         HILOGE("DExtensionProxy::TriggerOnDestroy Transact ErrCode = %{public}d", ret);
         return ret;
@@ -73,6 +83,11 @@ int32_t DExtensionProxy::TriggerOnDestroy(void)
 int32_t DExtensionProxy::TriggerOnCollaborate(AAFwk::WantParams &wantParam)
 {
     HILOGI("TriggerOnCollaborate");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("Register remote is null");
+        return ERR_NULL_OBJECT;
+    }
     MessageParcel data;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         HILOGE("DExtensionProxy::TriggerOnCollaborate Write interface token failed!");
@@ -86,7 +101,7 @@ int32_t DExtensionProxy::TriggerOnCollaborate(AAFwk::WantParams &wantParam)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t ret = Remote()->SendRequest(static_cast<uint32_t>(IDExtensionInterfaceCode::CMD_ON_COLLAB_REQUEST),
+    int32_t ret = remote->SendRequest(static_cast<uint32_t>(IDExtensionInterfaceCode::CMD_ON_COLLAB_REQUEST),
         data, reply, option);
     if (ret != NO_ERROR) {
         HILOGE("DExtensionProxy::TriggerOnCollaborate Transact ErrCode = %{public}d", ret);

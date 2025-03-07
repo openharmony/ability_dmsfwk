@@ -57,6 +57,7 @@ private:
     int32_t ConnectAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t DisconnectAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t NotifyProcessDiedFromRemoteInner(MessageParcel& data, MessageParcel& reply);
+    int32_t ConnectDExtAbilityInner(MessageParcel& data, MessageParcel& reply);
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     bool CheckDmsExtensionCallingUid();

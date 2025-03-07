@@ -26,6 +26,8 @@ config("distributed_sched_config") {
   include_dirs = [
     "include",
     "${dms_path}/common/include",
+    "${dms_path}/frameworks/native/distributed_extension/include",
+    "${dms_path}/frameworks/native/distributed_extension/include/ipc",
     "${dms_path}/interfaces/kits/napi/include",
     "${dms_path}/interfaces/innerkits/common/include",
     "include/collaborate",
@@ -190,6 +192,7 @@ ohos_shared_library("distributedschedsvr") {
     "src/softbus_adapter/transport/dsched_data_buffer.cpp",
     "src/softbus_adapter/transport/dsched_softbus_session.cpp",
     "src/softbus_adapter/transport/dsched_transport_softbus_adapter.cpp",
+    "src/svc_distributed_connection.cpp",
     "src/switch_status_dependency.cpp",
   ]
 
@@ -209,7 +212,10 @@ ohos_shared_library("distributedschedsvr") {
     "-Wl,-z,now",
   ]
 
-  deps = [ "${dms_path}/common:distributed_sched_utils" ]
+  deps = [
+    "${dms_path}/common:distributed_sched_utils",
+    "${dms_path}/frameworks/native/distributed_extension:distributed_extension_sa",
+  ]
 
   external_deps = [
     "ability_base:base",
@@ -219,6 +225,7 @@ ohos_shared_library("distributedschedsvr") {
     "ability_runtime:app_manager",
     "ability_runtime:dataobs_manager",
     "ability_runtime:mission_info",
+    "ability_runtime:wantagent_innerkits",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokensetproc_shared",
     "bundle_framework:appexecfwk_base",
