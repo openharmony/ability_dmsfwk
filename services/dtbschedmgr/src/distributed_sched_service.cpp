@@ -425,7 +425,7 @@ int32_t DistributedSchedService::ContinueStateCallbackRegister(
     stateCallbackInfo.abilityName = abilityName;
 
     if (callback == nullptr) {
-        return ERR_NULL_OBJECT;
+        return NO_CONNECT_CALLBACK_ERR;
     }
 
     int32_t result = DSchedContinueManager::GetInstance().ContinueStateCallbackRegister(stateCallbackInfo, callback);

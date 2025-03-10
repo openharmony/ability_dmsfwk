@@ -391,7 +391,7 @@ int32_t DistributedSchedStub::ContinueStateCallbackRegister(MessageParcel &data,
     int32_t result = DistributedSchedService::GetInstance().ContinueStateCallbackRegister(
         missionId, bundleName, moduleName, abilityName, callback);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
-    return ERR_NONE;
+    return ERR_OK;
 }
 
 int32_t DistributedSchedStub::ContinueStateCallbackUnRegister(MessageParcel &data, MessageParcel &reply)
@@ -404,7 +404,7 @@ int32_t DistributedSchedStub::ContinueStateCallbackUnRegister(MessageParcel &dat
     int32_t result = DistributedSchedService::GetInstance().ContinueStateCallbackUnRegister(
         missionId, bundleName, moduleName, abilityName);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
-    return ERR_NONE;
+    return ERR_OK;
 }
 
 int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply)
