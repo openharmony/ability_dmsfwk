@@ -109,6 +109,68 @@ HWTEST_F(AbilityConnectionMgrTest, IsVaildConnectOption_Test_001, TestSize.Level
 }
 
 /**
+ * @tc.name: FindExistingSession_Test_001
+ * @tc.desc: call FindExistingSession
+ * @tc.type: FUNC
+ * @tc.require: IBP3MC
+ */
+HWTEST_F(AbilityConnectionMgrTest, FindExistingSession_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionMgr FindExistingSession_Test_001 begin" << std::endl;
+    int32_t sessionId = 1;
+    AbilityConnectionManager::GetInstance().sessionMap_[sessionId] = nullptr;
+    
+    int32_t out = 0;
+    PeerInfo peerInfo = {"peerInfo", "bundleName", "moduleName", "abilityName", "serverId"};
+    PeerInfo localInfo = {"localInfo", "bundleName1", "moduleName1", "abilityName1", "serverId1"};
+    auto flag = AbilityConnectionManager::GetInstance().FindExistingSession(peerInfo, localInfo, out);
+    EXPECT_FALSE(flag);
+    EXPECT_EQ(out, 0);
+
+    AbilityConnectionManager::GetInstance().sessionMap_.clear();
+    ConnectOption options;
+    std::string serverId = "test";
+    AbilityConnectionSessionInfo info{serverId, localInfo, peerInfo};
+    auto connectionSesion = std::make_shared<AbilityConnectionSession>(1, "serverSocketName",
+        info, options);
+    AbilityConnectionManager::GetInstance().sessionMap_[sessionId] = connectionSesion;
+    flag = AbilityConnectionManager::GetInstance().FindExistingSession(peerInfo, localInfo, out);
+    EXPECT_TRUE(flag);
+    EXPECT_EQ(out, sessionId);
+
+    PeerInfo peerIn = {"peerInfoOther", "bundleName", "moduleName", "abilityName", "serverId"};
+    flag = AbilityConnectionManager::GetInstance().FindExistingSession(peerIn, localInfo, out);
+    EXPECT_FALSE(flag);
+
+    PeerInfo localIn = {"peerInfoOther", "bundleName1", "moduleName1", "abilityName1", "serverId1"};
+    flag = AbilityConnectionManager::GetInstance().FindExistingSession(peerInfo, localIn, out);
+    EXPECT_FALSE(flag);
+    DTEST_LOG << "AbilityConnectionMgr FindExistingSession_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CheckStreamIsRegistered_Test_001
+ * @tc.desc: call CheckStreamIsRegistered
+ * @tc.type: FUNC
+ * @tc.require: IBP3MC
+ */
+HWTEST_F(AbilityConnectionMgrTest, CheckStreamIsRegistered_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionMgr FindExistingSession_Test_001 begin" << std::endl;
+    int32_t sessionId = 1;
+    int32_t streamId = 1;
+    AbilityConnectionManager::GetInstance().streamMap_[streamId] = sessionId;
+    
+    int32_t out = 0;
+    auto flag = AbilityConnectionManager::GetInstance().CheckStreamIsRegistered(out);
+    EXPECT_FALSE(flag);
+
+    flag = AbilityConnectionManager::GetInstance().CheckStreamIsRegistered(sessionId);
+    EXPECT_TRUE(flag);
+    DTEST_LOG << "AbilityConnectionMgr FindExistingSession_Test_001 end" << std::endl;
+}
+
+/**
  * @tc.name: GetAbilityConnectionSession_Test_001
  * @tc.desc: call GetAbilityConnectionSession
  * @tc.type: FUNC
