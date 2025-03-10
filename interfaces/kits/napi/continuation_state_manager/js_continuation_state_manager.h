@@ -35,6 +35,7 @@ private:
         napi_env env, napi_value context);
     static napi_value GenerateBusinessError(const napi_env &env, int32_t errCode, const std::string &errMsg);
     static napi_status MakeEnumItem(const napi_env &env, napi_value object, const char* name, int32_t value);
+    static std::string ErrorMessageReturn(int32_t code);
 private:
     static std::map<std::string, sptr<DistributedSchedule::JsContinuationStateManagerStub>> callbackStubs_;
 };

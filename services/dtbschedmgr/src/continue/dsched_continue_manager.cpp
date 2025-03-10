@@ -578,6 +578,9 @@ int32_t DSchedContinueManager::ContinueStateCallbackRegister(
 {
     std::shared_ptr<StateCallbackData> stateCallbackDataExist = FindStateCallbackData(stateCallbackInfo);
     if (stateCallbackDataExist == nullptr) {
+        if (callback == nullptr) {
+            return NO_CONNECT_CALLBACK_ERR;
+        }
         StateCallbackData stateCallbackData;
         sptr<StateCallbackIpcDiedListener> diedListener = new StateCallbackIpcDiedListener();
         diedListener->stateCallbackInfo_ = stateCallbackInfo;
@@ -624,17 +627,17 @@ int32_t DSchedContinueManager::NotifyQuickStartState(StateCallbackInfo &stateCal
     MessageParcel data;
     if (!data.WriteInterfaceToken(CONNECTION_CALLBACK_INTERFACE_TOKEN)) {
         HILOGE("Write interface token failed");
-        return ERR_FLATTEN_OBJECT;
+        return IPC_CALL_NORESPONSE_ERR;
     }
 
     if (!data.WriteInt32(state)) {
         HILOGE("Write state failed");
-        return ERR_FLATTEN_OBJECT;
+        return IPC_CALL_NORESPONSE_ERR;
     }
 
     if (!data.WriteString(message)) {
         HILOGE("Write message failed");
-        return ERR_FLATTEN_OBJECT;
+        return IPC_CALL_NORESPONSE_ERR;
     }
 
     MessageParcel reply;

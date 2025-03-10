@@ -19,6 +19,7 @@
 #include "napi_error_code.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
+#include "dtbschedmgr_log.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -47,7 +48,7 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOn Unsupported business type: %{public}s; need: %{public}s",
             stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
-        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, std::to_string(SYSTEM_WORK_ABNORMALLY)));
+        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, ErrorMessageReturn(SYSTEM_WORK_ABNORMALLY)));
         result = FAILED;
         napi_get_value_int32(env, ret, &result);
         return ret;
@@ -71,7 +72,7 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
     HILOGI("ContinueStateCallbackOn register callback result: %{public}d", result);
 
     if (result != ERR_OK) {
-        napi_throw(env, GenerateBusinessError(env, result, std::to_string(result)));
+        napi_throw(env, GenerateBusinessError(env, result, ErrorMessageReturn(result)));
     }
     napi_get_value_int32(env, ret, &result);
     return ret;
@@ -86,7 +87,7 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOff Unsupported business type: %{public}s; need: %{public}s",
             stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
-        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, std::to_string(SYSTEM_WORK_ABNORMALLY)));
+        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, ErrorMessageReturn(SYSTEM_WORK_ABNORMALLY)));
         result = FAILED;
         napi_get_value_int32(env, ret, &result);
         return ret;
@@ -118,7 +119,7 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     napi_call_function(env, undefined, callback, CALLBACK_PARAMS_NUM, callbackResult, nullptr);
 
     if (result != ERR_OK) {
-        napi_throw(env, GenerateBusinessError(env, result, std::to_string(result)));
+        napi_throw(env, GenerateBusinessError(env, result, ErrorMessageReturn(result)));
     }
     napi_get_value_int32(env, ret, &result);
     return ret;
@@ -240,6 +241,30 @@ napi_status JsContinuationStateManager::MakeEnumItem(
     napi_create_int32(env, value, &itemValue);
     napi_set_property(env, object, itemName, itemValue);
     return napi_ok;
+}
+
+std::string JsContinuationStateManager::ErrorMessageReturn(int32_t code)
+{
+    switch (code) {
+        case ERR_OK:
+            return std::string();
+        case PARAMETER_CHECK_FAILED:
+            return std::string("parameter check failed.");
+        case SYSTEM_WORK_ABNORMALLY:
+            return std::string("the system ability work abnormally.");
+        case NO_CONNECT_CALLBACK_ERR:
+            return std::string("callback object is empty.");
+        case IPC_CALL_NORESPONSE_ERR:
+            return std::string("send callback data to application by ipc failed.");
+        case DMS_GET_SAMGR_EXCEPTION:
+            return std::string("check system ability failed.");
+        case SEND_REQUEST_DEF_FAIL:
+            return std::string("send application data to dms by ipc failed.");
+        case IPC_CALL_NORESPONSE_ERR:
+            return std::string("send callback data failed.");
+        default:
+            return std::string("the system ability work abnormally.");
+    };
 }
 
 napi_value JsContinueManagerInit(napi_env env, napi_value exportObj)
