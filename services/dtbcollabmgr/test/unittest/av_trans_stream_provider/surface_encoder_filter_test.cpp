@@ -35,6 +35,8 @@ namespace {
     static constexpr int32_t TEST_APPPID = 1234;
     static constexpr int32_t TEST_APPUID = 5678;
     static constexpr int32_t TEST_INSTANCEID = 12345678;
+    static const std::string TEST_ENCODER_FILTER_NAME = "EncoderFilter";
+    static const std::string BUNDLE_NAME = "com.ohos.testBundle";
 }
 
 void SurfaceEncoderFilterTest::SetUpTestCase()
@@ -67,7 +69,7 @@ HWTEST_F(SurfaceEncoderFilterTest, SetCodecFormat_001, TestSize.Level3)
     DTEST_LOG << "SurfaceEncoderFilterTest SetCodecFormat_001 begin" << std::endl;
     std::shared_ptr<Meta> format = std::make_shared<Meta>();
     format->Set<Tag::MIME_TYPE>("video/mp4");
-    std::string name = "EncoderFilter";
+    std::string name = TEST_ENCODER_FILTER_NAME;
     FilterType type  = FilterType::FILTERTYPE_VENC;
     std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
     EXPECT_EQ(videoEncoderFilter_->SetCodecFormat(format), Status::OK);
@@ -83,7 +85,7 @@ HWTEST_F(SurfaceEncoderFilterTest, SetCodecFormat_002, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderFilterTest SetCodecFormat_002 begin" << std::endl;
     std::shared_ptr<Meta> format = std::make_shared<Meta>();
-    std::string name = "EncoderFilter";
+    std::string name = TEST_ENCODER_FILTER_NAME;
     FilterType type  = FilterType::FILTERTYPE_VENC;
     std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
     EXPECT_EQ(videoEncoderFilter_->SetCodecFormat(format), Status::ERROR_INVALID_PARAMETER);
@@ -98,7 +100,7 @@ HWTEST_F(SurfaceEncoderFilterTest, SetCodecFormat_002, TestSize.Level3)
 HWTEST_F(SurfaceEncoderFilterTest, Configure_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderFilterTest Configure_001 begin" << std::endl;
-    std::string name = "EncoderFilter";
+    std::string name = TEST_ENCODER_FILTER_NAME;
     FilterType type  = FilterType::FILTERTYPE_VENC;
     std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
     std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
@@ -115,7 +117,7 @@ HWTEST_F(SurfaceEncoderFilterTest, Configure_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderFilterTest, GetInputSurface_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderFilterTest GetInputSurface_001 begin" << std::endl;
-    std::string name = "EncoderFilter";
+    std::string name = TEST_ENCODER_FILTER_NAME;
     FilterType type  = FilterType::FILTERTYPE_VENC;
     std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
     sptr<Surface> surface = nullptr;
@@ -131,7 +133,7 @@ HWTEST_F(SurfaceEncoderFilterTest, GetInputSurface_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderFilterTest, GetInputSurface_002, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderFilterTest GetInputSurface_002 begin" << std::endl;
-    std::string name = "EncoderFilter";
+    std::string name = TEST_ENCODER_FILTER_NAME;
     FilterType type  = FilterType::FILTERTYPE_VENC;
     std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
     sptr<Surface> surface = nullptr;
@@ -147,7 +149,7 @@ HWTEST_F(SurfaceEncoderFilterTest, GetInputSurface_002, TestSize.Level3)
 HWTEST_F(SurfaceEncoderFilterTest, GetInputSurface_003, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderFilterTest GetInputSurface_003 begin" << std::endl;
-    std::string name = "EncoderFilter";
+    std::string name = TEST_ENCODER_FILTER_NAME;
     FilterType type  = FilterType::FILTERTYPE_VENC;
     std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
     EXPECT_EQ(videoEncoderFilter_->GetInputSurface(), nullptr);
@@ -162,7 +164,7 @@ HWTEST_F(SurfaceEncoderFilterTest, GetInputSurface_003, TestSize.Level3)
 HWTEST_F(SurfaceEncoderFilterTest, DoStart_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderFilterTest DoStart_001 begin" << std::endl;
-    std::string name = "EncoderFilter";
+    std::string name = TEST_ENCODER_FILTER_NAME;
     FilterType type  = FilterType::FILTERTYPE_VENC;
     std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
     videoEncoderFilter_->codecAdapter_ = nullptr;
@@ -178,7 +180,7 @@ HWTEST_F(SurfaceEncoderFilterTest, DoStart_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderFilterTest, DoPause_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderFilterTest DoPause_001 begin" << std::endl;
-    std::string name = "EncoderFilter";
+    std::string name = TEST_ENCODER_FILTER_NAME;
     FilterType type  = FilterType::FILTERTYPE_VENC;
     std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
     videoEncoderFilter_->codecAdapter_ = nullptr;
@@ -194,7 +196,7 @@ HWTEST_F(SurfaceEncoderFilterTest, DoPause_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderFilterTest, DoResume_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderFilterTest DoResume_001 begin" << std::endl;
-    std::string name = "EncoderFilter";
+    std::string name = TEST_ENCODER_FILTER_NAME;
     FilterType type  = FilterType::FILTERTYPE_VENC;
     std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
     videoEncoderFilter_->codecAdapter_ = nullptr;
@@ -210,7 +212,7 @@ HWTEST_F(SurfaceEncoderFilterTest, DoResume_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderFilterTest, DoStop_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderFilterTest DoStop_001 begin" << std::endl;
-    std::string name = "EncoderFilter";
+    std::string name = TEST_ENCODER_FILTER_NAME;
     FilterType type  = FilterType::FILTERTYPE_VENC;
     std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
     videoEncoderFilter_->codecAdapter_ = nullptr;
@@ -226,7 +228,7 @@ HWTEST_F(SurfaceEncoderFilterTest, DoStop_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderFilterTest, Reset_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderFilterTest Reset_001 begin" << std::endl;
-    std::string name = "EncoderFilter";
+    std::string name = TEST_ENCODER_FILTER_NAME;
     FilterType type  = FilterType::FILTERTYPE_VENC;
     std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
     videoEncoderFilter_->codecAdapter_ = nullptr;
@@ -242,7 +244,7 @@ HWTEST_F(SurfaceEncoderFilterTest, Reset_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderFilterTest, DoRelease_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderFilterTest DoRelease_001 begin" << std::endl;
-    std::string name = "EncoderFilter";
+    std::string name = TEST_ENCODER_FILTER_NAME;
     FilterType type  = FilterType::FILTERTYPE_VENC;
     std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
     videoEncoderFilter_->codecAdapter_ = nullptr;
@@ -258,7 +260,7 @@ HWTEST_F(SurfaceEncoderFilterTest, DoRelease_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderFilterTest, SetParameter_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderFilterTest SetParameter_001 begin" << std::endl;
-    std::string name = "EncoderFilter";
+    std::string name = TEST_ENCODER_FILTER_NAME;
     FilterType type  = FilterType::FILTERTYPE_VENC;
     std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
     std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
@@ -275,12 +277,12 @@ HWTEST_F(SurfaceEncoderFilterTest, SetParameter_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderFilterTest, SetCallingInfo_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderFilterTest SetCallingInfo_001 begin" << std::endl;
-    std::string name = "EncoderFilter";
+    std::string name = TEST_ENCODER_FILTER_NAME;
     FilterType type  = FilterType::FILTERTYPE_VENC;
     std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
     int32_t appUid = TEST_APPUID;
     int32_t appPid = TEST_APPPID;
-    std::string bundleName = "com.ohos.testBundle";
+    std::string bundleName = BUNDLE_NAME;
     uint64_t instanceId = TEST_INSTANCEID;
 
     videoEncoderFilter_->SetCallingInfo(appUid, appPid, bundleName, instanceId);
@@ -300,12 +302,12 @@ HWTEST_F(SurfaceEncoderFilterTest, SetCallingInfo_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderFilterTest, SetCallingInfo_002, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderFilterTest SetCallingInfo_002 begin" << std::endl;
-    std::string name = "EncoderFilter";
+    std::string name = TEST_ENCODER_FILTER_NAME;
     FilterType type  = FilterType::FILTERTYPE_VENC;
     std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
     int32_t appUid = TEST_APPUID;
     int32_t appPid = TEST_APPPID;
-    std::string bundleName = "com.ohos.testBundle";
+    std::string bundleName = BUNDLE_NAME;
     uint64_t instanceId = TEST_INSTANCEID;
 
     videoEncoderFilter_->codecAdapter_ = nullptr;
