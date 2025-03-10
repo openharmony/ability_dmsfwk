@@ -125,6 +125,7 @@ ohos_unittest("ChannelManagerTest") {
 
   module_out_path = module_output_path
 
+  cflags = [ "-Dprivate=public" ]
   configs = [
     ":test_config",
     "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",

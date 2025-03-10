@@ -555,24 +555,28 @@ HWTEST_F(SurfaceParamTest, VidSurfaceParam_Configure_Failed, TestSize.Level1)
     GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation);
     EXPECT_EQ(orientation, 0);
 
+    vidSurfaceParam.Configure(meta, ConfigureMode::Encode);
+    GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation);
+    EXPECT_EQ(orientation, 0);
+
     vidSurfaceParam.Configure(meta, ConfigureMode::Decode);
     GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation);
     EXPECT_EQ(orientation, Media::Plugins::VideoOrientationType::ROTATE_NONE);
 
-    surfaceParam.filp = SurfaceFilp::FLIP_NONE;
+    vidSurfaceParam.surfaceParam.filp = SurfaceFilp::FLIP_NONE;
     vidSurfaceParam.Configure(meta, ConfigureMode::Decode);
     GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation);
     EXPECT_EQ(orientation, Media::Plugins::VideoOrientationType::ROTATE_NONE);
 
-    surfaceParam.filp = SurfaceFilp::FLIP_H;
+    vidSurfaceParam.surfaceParam.filp = SurfaceFilp::FLIP_H;
     vidSurfaceParam.Configure(meta, ConfigureMode::Decode);
     GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation);
-    EXPECT_EQ(orientation, Media::Plugins::VideoOrientationType::ROTATE_NONE);
+    EXPECT_EQ(orientation, Media::Plugins::VideoOrientationType::FLIP_H);
 
-    surfaceParam.filp = SurfaceFilp::FLIP_V;
+    vidSurfaceParam.surfaceParam.filp = SurfaceFilp::FLIP_V;
     vidSurfaceParam.Configure(meta, ConfigureMode::Decode);
     GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation);
-    EXPECT_EQ(orientation, Media::Plugins::VideoOrientationType::ROTATE_NONE);
+    EXPECT_EQ(orientation, Media::Plugins::VideoOrientationType::FLIP_V);
 }
 
 /**

@@ -1537,6 +1537,128 @@ HWTEST_F(ChannelManagerTest, OnBytesReceived_Failure_PackRecvPacketDataFailed, T
     ChannelManager::GetInstance().OnBytesReceived(socketId, header, dataLen);
 }
 
+/**
+ * @tc.name: SendFile_Failed_001
+ * @tc.desc: Test for SendBytes when both channel and connection are successfully established.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChannelManagerTest, SendFile_Failed_001, TestSize.Level1)
+{
+    int32_t channelId = ChannelManager::CHANNEL_ID_GAP;
+    std::vector<std::string> sFiles;
+    std::vector<std::string> dFiles;
 
+    auto ret = ChannelManager::GetInstance().SendFile(channelId, sFiles, dFiles);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    channelId = ChannelManager::FILE_START_ID + ChannelManager::CHANNEL_ID_GAP + 1;
+    ret = ChannelManager::GetInstance().SendFile(channelId, sFiles, dFiles);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    channelId = ChannelManager::CHANNEL_ID_GAP + 1;
+    ret = ChannelManager::GetInstance().SendFile(channelId, sFiles, dFiles);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    sFiles.push_back("test");
+    ret = ChannelManager::GetInstance().SendFile(channelId, sFiles, dFiles);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    dFiles.push_back("test");
+    ret = ChannelManager::GetInstance().SendFile(channelId, sFiles, dFiles);
+    EXPECT_NE(ret, ERR_OK);
+
+    std::vector<std::string> sFile(ChannelManager::MAX_FILE_COUNT + 1, "test");
+    std::vector<std::string> dFile(ChannelManager::MAX_FILE_COUNT + 1, "test");
+    ret = ChannelManager::GetInstance().SendFile(channelId, sFile, dFile);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: OnMessageReceived_Failed_001
+ * @tc.desc: Test for SendBytes when both channel and connection are successfully established.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChannelManagerTest, OnMessageReceived_Failed_001, TestSize.Level1)
+{
+    int32_t socketId = -1;
+    char *data = nullptr;
+    uint32_t dataLen = 0;
+
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().OnMessageReceived(socketId, data, dataLen));
+    socketId = 1;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().OnMessageReceived(socketId, data, dataLen));
+
+    SessionDataHeader sessionData;
+    auto avData = sessionData.Serialize();
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().OnMessageReceived(socketId, avData->Data(), dataLen));
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().OnMessageReceived(
+        socketId, avData->Data(), avData->Size()));
+}
+
+/**
+ * @tc.name: DispatchProcessFileEvent_001
+ * @tc.desc: Test for DispatchProcessFileEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChannelManagerTest, DispatchProcessFileEvent_001, TestSize.Level1)
+{
+    int32_t channelId = 30;
+    FileEvent event;
+    event.type = FileEventType::FILE_EVENT_SEND_PROCESS;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().DispatchProcessFileEvent(channelId, &event));
+
+    event.type = FileEventType::FILE_EVENT_SEND_FINISH;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().DispatchProcessFileEvent(channelId, &event));
+
+    event.type = FileEventType::FILE_EVENT_SEND_PROCESS;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().DispatchProcessFileEvent(channelId, &event));
+
+    event.type = FileEventType::FILE_EVENT_RECV_START;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().DispatchProcessFileEvent(channelId, &event));
+
+    event.type = FileEventType::FILE_EVENT_RECV_PROCESS;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().DispatchProcessFileEvent(channelId, &event));
+
+    event.type = FileEventType::FILE_EVENT_RECV_FINISH;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().DispatchProcessFileEvent(channelId, &event));
+
+    event.type = FileEventType::FILE_EVENT_BUTT;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().DispatchProcessFileEvent(channelId, &event));
+
+    event.type = FileEventType::FILE_EVENT_SEND_ERROR;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().DispatchProcessFileEvent(channelId, &event));
+
+    event.type = FileEventType::FILE_EVENT_RECV_ERROR;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().DispatchProcessFileEvent(channelId, &event));
+
+    event.type = FileEventType::FILE_EVENT_RECV_UPDATE_PATH;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().DispatchProcessFileEvent(channelId, &event));
+
+    int32_t validType = 999999;
+    event.type = static_cast<FileEventType>(validType);
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().DispatchProcessFileEvent(channelId, &event));
+}
+
+/**
+ * @tc.name: OnFileEventReceived_001
+ * @tc.desc: Test for OnFileEventReceived
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChannelManagerTest, OnFileEventReceived_001, TestSize.Level1)
+{
+    int32_t socketId = -1;
+    FileEvent *pEvent = nullptr;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().OnFileEventReceived(socketId, pEvent));
+
+    socketId = 1;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().OnFileEventReceived(socketId, pEvent));
+
+    FileEvent event;
+    event.type = FileEventType::FILE_EVENT_RECV_UPDATE_PATH;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().OnFileEventReceived(socketId, &event));
+
+    event.type = FileEventType::FILE_EVENT_SEND_PROCESS;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().OnFileEventReceived(socketId, &event));
+}
 } // namespace DistributedCollab
 } // namespace OHOS
