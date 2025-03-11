@@ -338,5 +338,125 @@ HWTEST_F(AbilityConnectionSessionTest, IsAllChannelConnected_Test_001, TestSize.
     EXPECT_FALSE(connectionSesion_->IsAllChannelConnected());
     DTEST_LOG << "AbilityConnectionSessionTest OnChannelClosed_Test_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: AcceptConnect_Test_001
+ * @tc.desc: call AcceptConnect
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, AcceptConnect_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest AcceptConnect_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    int32_t version = 0;
+    connectionSesion_->HandlePeerVersion(version);
+
+    std::string token = "token";
+    connectionSesion_->sessionStatus_ = SessionStatus::CONNECTED;
+    auto ret = connectionSesion_->AcceptConnect(token);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "AbilityConnectionSessionTest AcceptConnect_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: RequestReceiveFileChannelConnection_Test_001
+ * @tc.desc: call RequestReceiveFileChannelConnection
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, RequestReceiveFileChannelConnection_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest RequestReceiveFileChannelConnection_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    connectionSesion_->RequestReceiveFileChannelConnection();
+
+    connectionSesion_->connectOption_.needSendFile = true;
+    connectionSesion_->NotifyPeerSessionConnected();
+
+    connectionSesion_->connectOption_.needSendFile = false;
+    connectionSesion_->connectOption_.needReceiveFile = false;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->NotifyPeerSessionConnected());
+
+    bool isConnected = true;
+    std::string reason = "reason";
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->NotifyAppConnectResult(isConnected, reason));
+    
+    connectionSesion_->sessionStatus_ = SessionStatus::CONNECTING;
+    auto ret = connectionSesion_->HandleDisconnect();
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "AbilityConnectionSessionTest RequestReceiveFileChannelConnection_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CreateStream_Test_001
+ * @tc.desc: call CreateStream
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, CreateStream_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest CreateStream_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    StreamParams param;
+    param.role = StreamRole::SOURCE;
+    connectionSesion_->CreateStream(0, param);
+
+    param.role = StreamRole::SINK;
+    connectionSesion_->CreateStream(0, param);
+
+    param.role = static_cast<StreamRole>(-1);
+    auto ret = connectionSesion_->CreateStream(0, param);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "AbilityConnectionSessionTest CreateStream_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: InitSenderEngine_Test_001
+ * @tc.desc: call InitSenderEngine
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, InitSenderEngine_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest InitSenderEngine_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    connectionSesion_->connectOption_.needSendStream = false;
+    auto ret = connectionSesion_->InitSenderEngine();
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    connectionSesion_->connectOption_.needSendStream = true;
+    connectionSesion_->senderEngine_ = nullptr;
+    ret = connectionSesion_->InitSenderEngine();
+    EXPECT_EQ(ret, ERR_OK);
+
+    ret = connectionSesion_->InitSenderEngine();
+    EXPECT_EQ(ret, ONLY_SUPPORT_ONE_STREAM);
+    DTEST_LOG << "AbilityConnectionSessionTest InitSenderEngine_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: InitRecvEngine_Test_001
+ * @tc.desc: call InitRecvEngine
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, InitRecvEngine_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest InitRecvEngine_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    connectionSesion_->connectOption_.needReceiveStream = false;
+    auto ret = connectionSesion_->InitRecvEngine();
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    connectionSesion_->connectOption_.needReceiveStream = true;
+    connectionSesion_->recvEngine_ = nullptr;
+    ret = connectionSesion_->InitRecvEngine();
+    EXPECT_EQ(ret, ERR_OK);
+
+    ret = connectionSesion_->InitRecvEngine();
+    EXPECT_EQ(ret, ONLY_SUPPORT_ONE_STREAM);
+    DTEST_LOG << "AbilityConnectionSessionTest InitRecvEngine_Test_001 end" << std::endl;
+}
 }
 }
