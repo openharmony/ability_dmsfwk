@@ -354,6 +354,11 @@ int32_t DMSContinueSendMgr::SendScreenLockedEvent(uint8_t type)
         return DMS_PERMISSION_DENIED;
     }
 
+    if (status.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
+        HILOGE("check ContinueState send failed, ContinueState is not CONTINUESTATE_ACTIVE.");
+        return DMS_PERMISSION_DENIED;
+    }
+
     SendSoftbusEvent(bundleNameId, continueTypeId, type);
     HILOGI("end");
     return ERR_OK;
