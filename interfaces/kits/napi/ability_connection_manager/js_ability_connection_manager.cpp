@@ -37,14 +37,6 @@ namespace {
     napi_value thisVar = nullptr;     \
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr))
 
-#define DEFINE_NAPI_OBJECT(env, exports, propertyName, desc)                \
-do {                                                                        \
-    napi_value obj = nullptr;                                               \
-    napi_create_object(env, &obj);                                          \
-    napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc); \
-    napi_set_named_property(env, exports, propertyName, obj);               \
-} while (0)
-
 const std::string TAG = "JsAbilityConnectionManager";
 constexpr int32_t ARG_INDEX_ZERO = 0;
 constexpr int32_t ARG_INDEX_ONE = 1;
@@ -1716,6 +1708,7 @@ void InitDisconnectReason(napi_env& env, napi_value& exports)
 
 void InitFlipOptions(napi_env& env, napi_value& exports)
 {
+
     char propertyName[] = "FlipOptions";
     napi_value horizontal = nullptr;
     napi_value vertical = nullptr;
@@ -1726,7 +1719,10 @@ void InitFlipOptions(napi_env& env, napi_value& exports)
         DECLARE_NAPI_STATIC_PROPERTY("HORIZONTAL", horizontal),
         DECLARE_NAPI_STATIC_PROPERTY("VERTICAL", vertical),
     };
-    DEFINE_NAPI_OBJECT(env, exports, propertyName, desc);
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    napi_set_named_property(env, exports, propertyName, obj);
 }
 
 void InitStreamRole(napi_env& env, napi_value& exports)
@@ -1782,7 +1778,10 @@ void InitStartOptionParams(napi_env& env, napi_value& exports)
         DECLARE_NAPI_STATIC_PROPERTY("START_IN_FOREGROUND", startInForeground),
         DECLARE_NAPI_STATIC_PROPERTY("START_IN_BACKGROUND", startInBackground),
     };
-    DEFINE_NAPI_OBJECT(env, exports, propertyName, desc);
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    napi_set_named_property(env, exports, propertyName, obj);
 }
 
 void InitFunction(napi_env env, napi_value exports)
