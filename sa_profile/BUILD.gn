@@ -16,7 +16,7 @@ import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
 ohos_sa_profile("dms_sa_profile") {
   sources = [
-    "1401.json",
+    "1401.json"
   ]
   if (dmsfwk_feature_dams_enable) {
     sources += [
