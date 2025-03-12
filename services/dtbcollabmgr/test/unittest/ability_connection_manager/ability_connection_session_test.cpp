@@ -15,6 +15,7 @@
 
 #include "ability_connection_session_test.h"
 
+#include "ability_connection_session_listener.h"
 #include "dtbcollabmgr_log.h"
 #include "test_log.h"
 
@@ -457,6 +458,237 @@ HWTEST_F(AbilityConnectionSessionTest, InitRecvEngine_Test_001, TestSize.Level3)
     ret = connectionSesion_->InitRecvEngine();
     EXPECT_EQ(ret, ONLY_SUPPORT_ONE_STREAM);
     DTEST_LOG << "AbilityConnectionSessionTest InitRecvEngine_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetSurfaceId_Test_001
+ * @tc.desc: call GetSurfaceId
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, GetSurfaceId_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest GetSurfaceId_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    SurfaceParams param;
+    std::string surfaceId = "surfaceId";
+    connectionSesion_->senderEngine_ = nullptr;
+    connectionSesion_->GetSurfaceId(param, surfaceId);
+
+    connectionSesion_->connectOption_.needSendStream = true;
+    connectionSesion_->InitSenderEngine();
+    auto ret = connectionSesion_->GetSurfaceId(param, surfaceId);
+    EXPECT_NE(ret, ERR_OK);
+
+    ret = connectionSesion_->UpdateSurfaceParam(param);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "AbilityConnectionSessionTest GetSurfaceId_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetSurfaceId_Test_001
+ * @tc.desc: call SetSurfaceId
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, SetSurfaceId_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest SetSurfaceId_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    SurfaceParams param;
+    std::string surfaceId = "123";
+    connectionSesion_->recvEngine_ = nullptr;
+    connectionSesion_->SetSurfaceId(surfaceId, param);
+
+    connectionSesion_->connectOption_.needReceiveStream = true;
+    connectionSesion_->InitRecvEngine();
+    auto ret = connectionSesion_->SetSurfaceId(surfaceId, param);
+    EXPECT_NE(ret, ERR_OK);
+
+    connectionSesion_->senderEngine_ = nullptr;
+    ret = connectionSesion_->UpdateSurfaceParam(param);
+    EXPECT_EQ(ret, ERR_OK);
+
+    connectionSesion_->recvEngine_ = nullptr;
+    ret = connectionSesion_->UpdateSurfaceParam(param);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "AbilityConnectionSessionTest SetSurfaceId_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartStream_Test_001
+ * @tc.desc: call StartStream
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, StartStream_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest StartStream_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    int32_t streamId = 0;
+    connectionSesion_->connectOption_.needSendStream = true;
+    connectionSesion_->InitSenderEngine();
+    connectionSesion_->StartStream(streamId);
+
+    connectionSesion_->senderEngine_ = nullptr;
+    connectionSesion_->connectOption_.needReceiveStream = true;
+    connectionSesion_->InitRecvEngine();
+    connectionSesion_->StartStream(streamId);
+    
+    connectionSesion_->connectOption_.needSendStream = false;
+    connectionSesion_->recvEngine_ = nullptr;
+    connectionSesion_->StartStream(streamId);
+
+    connectionSesion_->connectOption_.needReceiveStream = false;
+    auto ret = connectionSesion_->StartStream(streamId);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "AbilityConnectionSessionTest StartStream_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: RegisterEventCallback_Test_001
+ * @tc.desc: call RegisterEventCallback
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, RegisterEventCallback_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest RegisterEventCallback_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    auto ret = connectionSesion_->RegisterEventCallback(nullptr);
+    EXPECT_EQ(ret, INVALID_LISTENER);
+
+    ret = connectionSesion_->CreateStreamChannel("channelName", false);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "AbilityConnectionSessionTest RegisterEventCallback_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectStreamChannel_Test_001
+ * @tc.desc: call ConnectStreamChannel
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, ConnectStreamChannel_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest ConnectStreamChannel_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    connectionSesion_->connectOption_.needSendStream = false;
+    connectionSesion_->connectOption_.needReceiveStream = false;
+    auto ret = connectionSesion_->ConnectStreamChannel();
+    EXPECT_EQ(ret, ERR_OK);
+
+    connectionSesion_->connectOption_.needReceiveStream = true;
+    connectionSesion_->transChannels_.clear();
+    ret = connectionSesion_->ConnectStreamChannel();
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    TransChannelInfo info;
+    info.isConnected = true;
+    connectionSesion_->connectOption_.needSendStream = true;
+    connectionSesion_->transChannels_[TransChannelType::STREAM] = info;
+    ret = connectionSesion_->ConnectStreamChannel();
+    EXPECT_EQ(ret, ERR_OK);
+
+    connectionSesion_->transChannels_.clear();
+    info.isConnected = false;
+    connectionSesion_->transChannels_[TransChannelType::STREAM] = info;
+    ret = connectionSesion_->ConnectStreamChannel();
+    EXPECT_EQ(ret, ERR_OK);
+
+    connectionSesion_->direction_ = CollabrateDirection::COLLABRATE_SOURCE;
+    ret = connectionSesion_->ConnectStreamChannel();
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "AbilityConnectionSessionTest ConnectStreamChannel_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DoConnectStreamChannel_Test_001
+ * @tc.desc: call DoConnectStreamChannel
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, DoConnectStreamChannel_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest DoConnectStreamChannel_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    int32_t channelId = 0;
+    auto ret = connectionSesion_->DoConnectStreamChannel(channelId);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "AbilityConnectionSessionTest DoConnectStreamChannel_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnChannelConnect_Test_001
+ * @tc.desc: call OnChannelConnect
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, OnChannelConnect_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest OnChannelConnect_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    int32_t channelId = 0;
+    connectionSesion_->transChannels_.clear();
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnChannelConnect(channelId));
+
+    TransChannelInfo info;
+    info.channelId = channelId;
+    connectionSesion_->connectOption_.needSendStream = true;
+    connectionSesion_->transChannels_[TransChannelType::STREAM] = info;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnChannelConnect(channelId));
+
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->UpdateTransChannelStatus(channelId, false));
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->UpdateTransChannelStatus(1, false));
+    DTEST_LOG << "AbilityConnectionSessionTest OnChannelConnect_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: UpdateRecvEngineTransChannel_Test_001
+ * @tc.desc: call UpdateRecvEngineTransChannel
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, UpdateRecvEngineTransChannel_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest UpdateRecvEngineTransChannel_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    connectionSesion_->recvEngine_ = nullptr;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->UpdateRecvEngineTransChannel());
+
+    connectionSesion_->transChannels_.clear();
+    connectionSesion_->InitRecvEngine();
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->UpdateRecvEngineTransChannel());
+
+    TransChannelInfo info;
+    connectionSesion_->connectOption_.needSendStream = true;
+    connectionSesion_->transChannels_[TransChannelType::STREAM] = info;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->UpdateRecvEngineTransChannel());
+    DTEST_LOG << "AbilityConnectionSessionTest UpdateRecvEngineTransChannel_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: UpdateSenderEngineTransChannel_Test_001
+ * @tc.desc: call UpdateSenderEngineTransChannel
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, UpdateSenderEngineTransChannel_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest UpdateSenderEngineTransChannel_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    connectionSesion_->senderEngine_ = nullptr;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->UpdateSenderEngineTransChannel());
+
+    connectionSesion_->transChannels_.clear();
+    connectionSesion_->InitSenderEngine();
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->UpdateSenderEngineTransChannel());
+
+    TransChannelInfo info;
+    connectionSesion_->connectOption_.needSendStream = true;
+    connectionSesion_->transChannels_[TransChannelType::STREAM] = info;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->UpdateSenderEngineTransChannel());
+    DTEST_LOG << "AbilityConnectionSessionTest UpdateSenderEngineTransChannel_Test_001 end" << std::endl;
 }
 }
 }
