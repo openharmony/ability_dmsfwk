@@ -18,20 +18,18 @@
 #include <string>
 
 #include "array_wrapper.h"
+#include "distributed_sched_service.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
-#ifdef SUPPORT_HIANALYTICS_SERVICE
-#include "ha_client_lite_api.h"
-#endif
 #include "string_wrapper.h"
 #include "want_params_wrapper.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-#ifdef SUPPORT_HIANALYTICS_SERVICE
 const std::string TAG = "DmsHiAnalyticsReport";
 
+constexpr int32_t HA_EVENT_TYPE_OPERATION = 0;
 const std::string HA_INSTANCE_TAG = "$SceneDataShare";
 const std::string HA_RECOMMEND_EVENT_ID = "$APP_RECOMMEND_CONTINUATION";
 const std::string HA_CONTINUATION_EVENT_ID = "$APP_CONTINUATION_EVENT";
@@ -43,13 +41,10 @@ const std::string HA_KEY_DST_DEVICE_ID = "$DstDeviceId";
 const std::string HA_KEY_CONTINUE_TYPE = "$ContinueType";
 const std::string HA_KEY_USER_ID = "$UserId";
 const std::string HA_KEY_CANDIDATES = "$Candidates";
-#endif
 }
 
 int32_t DmsHiAnalyticsReport::PublishRecommendInfo(const ContinueRecommendInfo& info)
 {
-    int32_t result = ERR_OK;
-#ifdef SUPPORT_HIANALYTICS_SERVICE
     std::string localNetworkId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localNetworkId)) {
         HILOGE("PublishRecommendInfo get local deviceId failed!");
@@ -75,21 +70,17 @@ int32_t DmsHiAnalyticsReport::PublishRecommendInfo(const ContinueRecommendInfo& 
     }
     properties.emplace(HA_KEY_CANDIDATES, candidateStr);
 
-    OHOS::HaCloud::HaResponseLite rsp = OHOS::HaCloud::HaClientLiteApi::OnEvent(
+    int32_t result = DistributedSchedService::GetInstance().OnHAEventAdapter(
         HA_INSTANCE_TAG,
-        OHOS::HaCloud::EventTypeLite::operation,
+        HA_EVENT_TYPE_OPERATION,
         HA_RECOMMEND_EVENT_ID,
         properties);
-    HILOGI("OnEvent rsp: code: %{public}d, msg: %{public}s", rsp.code, rsp.message.c_str());
-    result = rsp.code;
-#endif
+    HILOGI("OnEvent result: %{public}d", result);
     return result;
 }
 
 int32_t DmsHiAnalyticsReport::PublishContinueEvent(const DSchedContinueInfo& info)
 {
-    int32_t result = ERR_OK;
-#ifdef SUPPORT_HIANALYTICS_SERVICE
     std::unordered_map<std::string, std::string> properties;
     properties.emplace(HA_KEY_SRC_DEVICE_ID, info.sourceDeviceId_);
     properties.emplace(HA_KEY_DST_DEVICE_ID, info.sinkDeviceId_);
@@ -97,14 +88,12 @@ int32_t DmsHiAnalyticsReport::PublishContinueEvent(const DSchedContinueInfo& inf
     properties.emplace(HA_KEY_DST_BUNDLE_NAME, info.sinkBundleName_);
     properties.emplace(HA_KEY_CONTINUE_TYPE, info.continueType_);
 
-    OHOS::HaCloud::HaResponseLite rsp = OHOS::HaCloud::HaClientLiteApi::OnEvent(
+    int32_t result = DistributedSchedService::GetInstance().OnHAEventAdapter(
         HA_INSTANCE_TAG,
-        OHOS::HaCloud::EventTypeLite::operation,
+        HA_EVENT_TYPE_OPERATION,
         HA_CONTINUATION_EVENT_ID,
         properties);
-    HILOGI("OnEvent rsp: code: %{public}d, msg: %{public}s", rsp.code, rsp.message.c_str());
-    result = rsp.code;
-#endif
+    HILOGI("OnEvent result: %{public}d", result);
     return result;
 }
 }
