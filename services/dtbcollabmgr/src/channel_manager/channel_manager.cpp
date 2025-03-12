@@ -980,7 +980,7 @@ int32_t ChannelManager::SendBytes(const int32_t channelId, const std::shared_ptr
         HILOGE("invalid channel id. %{public}d", channelId);
         return INVALID_CHANNEL_ID;
     }
-    HILOGI("start to send bytes");
+    HILOGI("start to send bytes, %{public}u", static_cast<uint32_t>(data->Size()));
     auto func = [channelId, data, this]() {
         DoSendBytes(channelId, data);
     };
@@ -1056,7 +1056,7 @@ int32_t ChannelManager::SendMessage(const int32_t channelId,
         HILOGE("invalid channel id. %{public}d", channelId);
         return INVALID_CHANNEL_ID;
     }
-    HILOGD("start to send message");
+    HILOGD("start to send message, %{public}u", static_cast<uint32_t>(data->Size()));
     auto func = [channelId, data, this]() {
         DoSendMessage(channelId, data);
     };
@@ -1065,7 +1065,7 @@ int32_t ChannelManager::SendMessage(const int32_t channelId,
         HILOGE("failed to add send bytes task, ret=%{public}d", ret);
         return ret;
     }
-    HILOGD("send bytes task added to handler");
+    HILOGD("send message task added to handler");
     return ERR_OK;
 }
 
@@ -1336,7 +1336,7 @@ void ChannelManager::DealFileErrorEvent(int32_t channelId, FileEvent *event)
 
 void ChannelManager::DealFileUpdatePathEvent(int32_t channelId, FileEvent *event)
 {
-    HILOGI("start to deal file error event, %{public}d", channelId);
+    HILOGI("start to deal file update path event, %{public}d", channelId);
     event->UpdateRecvPath = GetRecvPath;
     HILOGI("end");
 }
