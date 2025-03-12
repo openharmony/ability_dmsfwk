@@ -75,7 +75,9 @@ void DmsContinueConditionMgr::InitSystemCondition()
     isCfgDevice_ = !DmsKvSyncE2E::GetInstance()->CheckCtrlRule();
     isSwitchOn_ = DataShareManager::GetInstance().IsCurrentContinueSwitchOn();
     isWifiActive_ = WifiStateAdapter::GetInstance().IsWifiActive();
+#ifdef DMS_CHECK_BLUETOOTH
     isBtActive_ = BluetoothStateAdapter::GetInstance().IsBluetoothActive();
+#endif
 
     HILOGI("end. cfg %{public}d, switch: %{public}d, wifi: %{public}d, bt: %{public}d",
         isCfgDevice_.load(), isSwitchOn_.load(), isWifiActive_.load(), isBtActive_.load());

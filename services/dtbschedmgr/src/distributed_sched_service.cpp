@@ -511,10 +511,12 @@ void DistributedSchedService::InitWifiSemiStateListener()
 
 void DistributedSchedService::InitBluetoothStateListener()
 {
+#ifdef DMS_CHECK_BLUETOOTH
     HILOGI("InitBluetoothStateListener called");
     std::shared_ptr<BluetoothStateListener> bluetoothStateListener = BluetoothStateListener::GetInstance();
     bluetoothStateListener->InitBluetoothState();
     Bluetooth::BluetoothHost::GetDefaultHost().RegisterObserver(bluetoothStateListener);
+#endif
 }
 
 void DistributedSchedService::InitDeviceCfg()
