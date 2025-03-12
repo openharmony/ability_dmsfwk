@@ -795,6 +795,26 @@ void DistributedSchedService::OnDeviceInfoChangedEx(const OHOS::DistributedHardw
 }
 #endif // DMSFWK_INTERACTIVE_ADAPTER
 
+int32_t DistributedSchedService::OnHAEventAdapter(const std::string& instanceTag, int32_t eventType,
+    const std::string& eventId, const std::unordered_map<std::string, std::string>& properties)
+{
+    int32_t result = ERR_OK;
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
+    if (dllHandle_ == nullptr) {
+        HILOGE("Open dms interactive adapter shared object failed");
+        return ERR_NULL_OBJECT;
+    }
+    if (dmsAdapetr_.OnHAEventAdapter == nullptr) {
+        HILOGE("Dms interactive on device online extention handle is null.");
+        return ERR_NULL_OBJECT;
+    }
+
+    result = dmsAdapetr_.OnHAEventAdapter(instanceTag, eventType, eventId, properties);
+#endif // DMSFWK_INTERACTIVE_ADAPTER
+    return result;
+}
+
 int32_t DistributedSchedService::GetCallerInfo(const std::string &localDeviceId, int32_t callerUid,
     uint32_t accessToken, CallerInfo &callerInfo)
 {

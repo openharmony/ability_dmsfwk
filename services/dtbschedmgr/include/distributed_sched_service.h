@@ -237,6 +237,8 @@ public:
     void OnDeviceOfflineEx(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
     void OnDeviceInfoChangedEx(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
 #endif
+    int32_t OnHAEventAdapter(const std::string& instanceTag, int32_t eventType,
+        const std::string& eventId, const std::unordered_map<std::string, std::string>& properties);
 
 private:
     DistributedSchedService();
@@ -382,6 +384,7 @@ private:
         .OnDeviceOnlineEx = nullptr,
         .OnDeviceOfflineEx = nullptr,
         .OnDeviceInfoChangedEx = nullptr,
+        .OnHAEventAdapter = nullptr,
     };
 #endif
 };
