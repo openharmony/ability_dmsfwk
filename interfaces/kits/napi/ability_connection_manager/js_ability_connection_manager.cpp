@@ -1708,7 +1708,6 @@ void InitDisconnectReason(napi_env& env, napi_value& exports)
 
 void InitFlipOptions(napi_env& env, napi_value& exports)
 {
-
     char propertyName[] = "FlipOptions";
     napi_value horizontal = nullptr;
     napi_value vertical = nullptr;
