@@ -34,7 +34,7 @@ enum class StreamRole : int32_t {
     SINK = 1,
 };
 
-enum class FlipOption : int32_t {
+enum class FlipOptions : int32_t {
     UNKNOWN = -1,
     HORIZONTAL = 0,
     VERTICAL = 1,
@@ -52,18 +52,25 @@ enum class DisconnectReason : int32_t {
     NETWORK_DISCONNECTED = 1,
 };
 
+enum class StartOptionParams : int32_t {
+    START_IN_FOREGROUND = 0,
+    START_IN_BACKGROUND
+};
+
 struct PeerInfo : public Parcelable {
     std::string deviceId;
     std::string bundleName;
     std::string moduleName;
     std::string abilityName;
     std::string serverId;
+    // keep compatibility, both serviceName
+    std::string serviceName;
 
     PeerInfo() = default;
     PeerInfo(const std::string& deviceId, const std::string& bundleName,
         const std::string& moduleName, const std::string& abilityName, const std::string& serverId)
         : deviceId(deviceId), bundleName(bundleName), moduleName(moduleName),
-        abilityName(abilityName), serverId(serverId) {}
+        abilityName(abilityName), serverId(serverId), serviceName(serverId) {}
 
     bool ReadFromParcel(Parcel &parcel);
     bool Marshalling(Parcel &parcel) const override;
@@ -98,11 +105,11 @@ struct PeerInfo : public Parcelable {
 };
 
 struct ConnectOption : public Parcelable {
-    bool needSendData;
-    bool needSendStream;
-    bool needReceiveStream;
-    bool needSendFile;
-    bool needReceiveFile;
+    bool needSendData = false;
+    bool needSendStream = false;
+    bool needReceiveStream = false;
+    bool needSendFile = false;
+    bool needReceiveFile = false;
     AAFwk::WantParams options;
     AAFwk::WantParams parameters;
     bool ReadFromParcel(Parcel &parcel);
@@ -136,7 +143,7 @@ struct SurfaceParams {
     int32_t height;
     VideoPixelFormat format;
     int32_t rotation;
-    FlipOption flip = FlipOption::UNKNOWN;
+    FlipOptions flip = FlipOptions::UNKNOWN;
 };
 
 struct EventCallbackInfo {
