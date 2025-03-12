@@ -30,7 +30,9 @@
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "parcel_helper.h"
+#ifdef DMS_CHECK_SCREENLOCK
 #include "screenlock_manager.h"
+#endif
 #include "string_wrapper.h"
 #include "system_ability_definition.h"
 
@@ -654,12 +656,14 @@ AAFwk::Want DSchedCollab::GenerateCollabWant()
 
 void DSchedCollab::SetScreenLockParameters(AAFwk::WantParams& wantParams)
 {
+#ifdef DMS_CHECK_SCREENLOCK
     bool isSecureMode = OHOS::ScreenLock::ScreenLockManager::GetInstance()->GetSecure();
     bool isLocked = false;
     OHOS::ScreenLock::ScreenLockManager::GetInstance()->IsLocked(isLocked);
     HILOGI("isSecureMode is %{public}d, isLocked is %{public}d", isSecureMode, isLocked);
     wantParams.SetParam("isSecureMode", AAFwk::Boolean::Box(isSecureMode));
     wantParams.SetParam("isFromScreenLock", AAFwk::Boolean::Box(isLocked));
+#endif
 }
 
 bool DSchedCollab::IsStartForeground()
