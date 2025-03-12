@@ -244,28 +244,6 @@ napi_status JsContinuationStateManager::MakeEnumItem(
     return napi_ok;
 }
 
-std::string JsContinuationStateManager::ErrorMessageReturn(int32_t code)
-{
-    switch (code) {
-        case ERR_OK:
-            return std::string();
-        case PARAMETER_CHECK_FAILED:
-            return std::string("parameter check failed.");
-        case SYSTEM_WORK_ABNORMALLY:
-            return std::string("the system ability work abnormally.");
-        case NO_CONNECT_CALLBACK_ERR:
-            return std::string("callback object is empty.");
-        case IPC_CALL_NORESPONSE_ERR:
-            return std::string("send callback data to application by ipc failed.");
-        case DMS_GET_SAMGR_EXCEPTION:
-            return std::string("check system ability failed.");
-        case SEND_REQUEST_DEF_FAIL:
-            return std::string("send application data to dms by ipc failed.");
-        default:
-            return std::string("the system ability work abnormally.");
-    };
-}
-
 napi_value JsContinueManagerInit(napi_env env, napi_value exportObj)
 {
     napi_value continueStateCodeEnumObject = JsContinuationStateManager::MakeContinueStateCodeEnumObject(env);
