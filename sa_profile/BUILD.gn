@@ -12,11 +12,16 @@
 # limitations under the License.
 
 import("//build/ohos/sa_profile/sa_profile.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
 ohos_sa_profile("dms_sa_profile") {
   sources = [
     "1401.json",
-    "1404.json",
   ]
+  if (dmsfwk_feature_dams_enable) {
+    sources += [
+      "1404.json"
+    ]
+  }
   part_name = "dmsfwk"
 }
