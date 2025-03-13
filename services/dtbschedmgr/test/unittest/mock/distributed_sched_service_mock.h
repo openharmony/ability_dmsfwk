@@ -28,6 +28,8 @@ public:
     virtual int32_t CheckTargetPermission(const OHOS::AAFwk::Want& want,
         const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t flag,
         bool needQueryExtension) = 0;
+    virtual int32_t CheckCollabStartPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
+        const AccountInfo& accountInfo, bool needQueryExtension) = 0;
 public:
     static inline std::shared_ptr<IDistributedSchedService> dmsSrvMock = nullptr;
 };
@@ -37,6 +39,8 @@ public:
     MOCK_METHOD5(CheckTargetPermission, int32_t(const OHOS::AAFwk::Want& want,
         const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t flag,
         bool needQueryExtension));
+    MOCK_METHOD4(CheckCollabStartPermission, int32_t(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
+        const AccountInfo& accountInfo, bool needQueryExtension));
 };
 }
 }
