@@ -342,5 +342,62 @@ HWTEST_F(DSchedCollabSupTest, DSchedCollabEventHandler_001, TestSize.Level3)
     handler->ProcessEvent(msgEvent);
     DTEST_LOG << "DSchedCollabSupTest DSchedCollabEventHandler_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: PostSinkGetVersionTask_001
+ * @tc.desc: call PostSinkGetVersionTask
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabSupTest, PostSinkGetVersionTask_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest PostSinkGetVersionTask_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
+    EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(false));
+    EXPECT_EQ(dSchedCollab_->PostSinkGetVersionTask(), COLLAB_SEND_EVENT_FAILED);
+
+    EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(true));
+    EXPECT_EQ(dSchedCollab_->PostSinkGetVersionTask(), ERR_OK);
+    DTEST_LOG << "DSchedCollabTest PostSinkGetVersionTask_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PostSrcGetVersionTask_001
+ * @tc.desc: call PostSrcGetVersionTask
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabSupTest, PostSrcGetVersionTask_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest PostSrcGetVersionTask_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
+    EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(false));
+    EXPECT_EQ(dSchedCollab_->PostSrcGetVersionTask(), COLLAB_SEND_EVENT_FAILED);
+
+    EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(true));
+    EXPECT_EQ(dSchedCollab_->PostSrcGetVersionTask(), ERR_OK);
+    DTEST_LOG << "DSchedCollabTest PostSrcGetVersionTask_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PostSrcGetPeerVersionTask_001
+ * @tc.desc: call PostSrcGetPeerVersionTask
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabSupTest, PostSrcGetPeerVersionTask_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest PostSrcGetPeerVersionTask_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
+    EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(false));
+    EXPECT_EQ(dSchedCollab_->PostSrcGetPeerVersionTask(), COLLAB_SEND_EVENT_FAILED);
+
+    EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(true));
+    EXPECT_EQ(dSchedCollab_->PostSrcGetPeerVersionTask(), ERR_OK);
+    DTEST_LOG << "DSchedCollabTest PPostSrcGetPeerVersionTask_001 end" << std::endl;
+}
 }
 }

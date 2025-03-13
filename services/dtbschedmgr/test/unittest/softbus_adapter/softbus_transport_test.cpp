@@ -457,6 +457,9 @@ HWTEST_F(DSchedSoftbusSessionTest, UnPackStartEndData_001, TestSize.Level3)
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(SIZE_1);
     int32_t ret = softbusSessionTest_->UnPackStartEndData(buffer, dataType);
     EXPECT_NE(ret, ERR_OK);
+
+    int32_t ret = softbusSessionTest_->UnPackStartEndData(nullptr, dataType);
+    EXPECT_NE(ret, INVALID_SESSION_ID);
     softbusSessionTest_ = nullptr;
     DTEST_LOG << "DSchedSoftbusSessionTest UnPackStartEndData_001 end" << std::endl;
 }
@@ -510,6 +513,9 @@ HWTEST_F(DSchedSoftbusSessionTest, PackRecvData_001, TestSize.Level3)
     softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
     ASSERT_NE(softbusSessionTest_, nullptr);
     EXPECT_NO_FATAL_FAILURE(softbusSessionTest_->PackRecvData(buffer));
+
+    std::shared_ptr<DSchedDataBuffer> bufferNull = nullptr;
+    EXPECT_NO_FATAL_FAILURE(softbusSessionTest_->PackRecvData(bufferNull));
     DTEST_LOG << "DSchedSoftbusSessionTest PackRecvData_001 end" << std::endl;
 }
 
@@ -530,6 +536,9 @@ HWTEST_F(DSchedSoftbusSessionTest, AssembleNoFrag_001, TestSize.Level3)
 
     headerPara.totalLen = TOTALLEN_1;
     EXPECT_NO_FATAL_FAILURE(softbusSessionTest_->AssembleNoFrag(buffer, headerPara));
+
+    std::shared_ptr<DSchedDataBuffer> bufferNull = nullptr;
+    EXPECT_NO_FATAL_FAILURE(softbusSessionTest_->AssembleNoFrag(bufferNull, headerPara));
     DTEST_LOG << "DSchedSoftbusSessionTest AssembleNoFrag_001 end" << std::endl;
 }
 
@@ -591,6 +600,9 @@ HWTEST_F(DSchedSoftbusSessionTest, MakeFragDataHeader_001, TestSize.Level3)
     softbusSessionTest_->MakeFragDataHeader(headerPara, header, len);
     uint8_t *header1 = new uint8_t[HEADERLEN] {0};
     EXPECT_NO_FATAL_FAILURE(softbusSessionTest_->MakeFragDataHeader(headerPara, header1, len));
+
+    EXPECT_NO_FATAL_FAILURE(softbusSessionTest_->MakeFragDataHeader(headerPara, nullptr, len));
+    EXPECT_NO_FATAL_FAILURE(softbusSessionTest_->MakeFragDataHeader(headerPara, header1, 0));
     delete[] header;
     delete[] header1;
     DTEST_LOG << "DSchedSoftbusSessionTest MakeFragDataHeader_001 end" << std::endl;
@@ -613,6 +625,9 @@ HWTEST_F(DSchedSoftbusSessionTest, WriteTlvToBuffer_001, TestSize.Level3)
     uint8_t * buffer1 = new uint8_t[SEQ_1] {0};
     uint32_t bufLen1 = SIZE_1;
     EXPECT_NO_FATAL_FAILURE(softbusSessionTest_->WriteTlvToBuffer(tlvItem, buffer1, bufLen1));
+
+    std::shared_ptr<DSchedDataBuffer> bufferNull = nullptr;
+    EXPECT_NO_FATAL_FAILURE(softbusSessionTest_->WriteTlvToBuffer(tlvItem, bufferNull, bufLen1));
     delete[] buffer;
     delete[] buffer1;
     DTEST_LOG << "DSchedSoftbusSessionTest WriteTlvToBuffer_001 end" << std::endl;
