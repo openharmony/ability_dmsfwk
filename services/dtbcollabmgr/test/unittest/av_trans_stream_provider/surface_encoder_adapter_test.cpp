@@ -51,6 +51,151 @@ void SurfaceEncoderAdapterTest::TearDown()
 }
 
 /**
+ * @tc.name: Init_001
+ * @tc.desc: SurfaceEncoderAdapter ConfigureGeneralFormat
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, Init_001, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest Init_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+    std::string mine = "test";
+    bool isEncode = false;
+    EXPECT_EQ(encodeAdapter_->Init(mine, isEncode), Status::ERROR_UNKNOWN);
+    EXPECT_EQ(encodeAdapter_->codecServer_, nullptr);
+    DTEST_LOG << "SurfaceEncoderAdapterTest Init_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_001
+ * @tc.desc: SurfaceEncoderAdapter Configure
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, Configure_001, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
+    EXPECT_EQ(encodeAdapter_->Configure(parameter), Status::ERROR_UNKNOWN);
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetInputSurface_001
+ * @tc.desc: SurfaceEncoderAdapter Configure
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, SetInputSurface_001, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest SetInputSurface_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+    sptr<Surface> surface = nullptr;
+    EXPECT_EQ(encodeAdapter_->SetInputSurface(surface), Status::ERROR_UNKNOWN);
+    DTEST_LOG << "SurfaceEncoderAdapterTest SetInputSurface_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: Start_001
+ * @tc.desc: Start
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, Start_001, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest Start_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+    EXPECT_EQ(encodeAdapter_->Start(), Status::ERROR_NULL_POINTER);
+    DTEST_LOG << "SurfaceEncoderAdapterTest Start_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: Stop_001
+ * @tc.desc: Stop
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, Stop_001, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest Start_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+    encodeAdapter_->isStart_ = false;
+    EXPECT_EQ(encodeAdapter_->Stop(), Status::OK);
+
+    encodeAdapter_->isStart_ = true;
+    encodeAdapter_->isTransCoderMode = true;
+    EXPECT_EQ(encodeAdapter_->Stop(), Status::OK);
+
+    encodeAdapter_->isTransCoderMode = false;
+    EXPECT_EQ(encodeAdapter_->Stop(), Status::OK);
+    DTEST_LOG << "SurfaceEncoderAdapterTest Start_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: Flush_001
+ * @tc.desc: Flush
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, Flush_001, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest Start_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+    EXPECT_EQ(encodeAdapter_->Flush(), Status::ERROR_UNKNOWN);
+    DTEST_LOG << "SurfaceEncoderAdapterTest Start_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: Reset_001
+ * @tc.desc: Reset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, Reset_001, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest Reset_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+    EXPECT_EQ(encodeAdapter_->Reset(), Status::OK);
+    DTEST_LOG << "SurfaceEncoderAdapterTest Reset_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: Release_001
+ * @tc.desc: Release
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, Release_001, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest Release_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+    EXPECT_EQ(encodeAdapter_->Release(), Status::OK);
+    DTEST_LOG << "SurfaceEncoderAdapterTest Release_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyEos_001
+ * @tc.desc: NotifyEos
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, NotifyEos_001, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest NotifyEos_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+    int64_t pts = 0;
+    EXPECT_EQ(encodeAdapter_->NotifyEos(pts), Status::ERROR_UNKNOWN);
+    DTEST_LOG << "SurfaceEncoderAdapterTest NotifyEos_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetParameter_001
+ * @tc.desc: SetParameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, SetParameter_001, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest SetParameter_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
+    EXPECT_EQ(encodeAdapter_->SetParameter(parameter), Status::ERROR_UNKNOWN);
+    DTEST_LOG << "SurfaceEncoderAdapterTest SetParameter_001 end" << std::endl;
+}
+
+/**
  * @tc.name: ConfigureGeneralFormat_001
  * @tc.desc: SurfaceEncoderAdapter ConfigureGeneralFormat
  * @tc.type: FUNC
@@ -58,6 +203,7 @@ void SurfaceEncoderAdapterTest::TearDown()
 HWTEST_F(SurfaceEncoderAdapterTest, ConfigureGeneralFormat_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderAdapterTest ConfigureGeneralFormat_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
     MediaAVCodec::Format format;
     std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
     EXPECT_NO_FATAL_FAILURE(encodeAdapter_->ConfigureGeneralFormat(format, parameter));
@@ -81,6 +227,7 @@ HWTEST_F(SurfaceEncoderAdapterTest, ConfigureGeneralFormat_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderAdapterTest, ConfigureAboutRGBA_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderAdapterTest ConfigureAboutRGBA_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
     MediaAVCodec::Format format;
     std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
     EXPECT_NO_FATAL_FAILURE(encodeAdapter_->ConfigureAboutRGBA(format, parameter));
@@ -99,6 +246,7 @@ HWTEST_F(SurfaceEncoderAdapterTest, ConfigureAboutRGBA_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderAdapterTest, ConfigureAboutEnableTemporalScale_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderAdapterTest ConfigureAboutEnableTemporalScale_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
     MediaAVCodec::Format format;
     std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
     EXPECT_NO_FATAL_FAILURE(encodeAdapter_->ConfigureAboutEnableTemporalScale(format, parameter));
@@ -121,6 +269,7 @@ HWTEST_F(SurfaceEncoderAdapterTest, ConfigureAboutEnableTemporalScale_001, TestS
 HWTEST_F(SurfaceEncoderAdapterTest, AddStartPts_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderAdapterTest AddStartPts_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
     encodeAdapter_->isStartKeyFramePts_ = true;
     encodeAdapter_->keyFramePts_ = "test";
     int64_t currentPts = NS_PER_US * 2;
@@ -142,6 +291,7 @@ HWTEST_F(SurfaceEncoderAdapterTest, AddStartPts_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderAdapterTest, AddStopPts_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderAdapterTest AddStopPts_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
     encodeAdapter_->isStopKeyFramePts_ = true;
     encodeAdapter_->currentKeyFramePts_ = NS_PER_US * 3;
     encodeAdapter_->stopTime_ = 0;
@@ -167,6 +317,7 @@ HWTEST_F(SurfaceEncoderAdapterTest, AddStopPts_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderAdapterTest, AddPauseResumePts_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderAdapterTest AddPauseResumePts_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
     encodeAdapter_->pauseResumePts_.clear();
     int64_t currentPts = 5;
     StateCode state = StateCode::PAUSE;
@@ -200,6 +351,7 @@ HWTEST_F(SurfaceEncoderAdapterTest, AddPauseResumePts_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderAdapterTest, CheckFrames_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderAdapterTest CheckFrames_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
     encodeAdapter_->pauseResumeQueue_.clear();
     encodeAdapter_->lastBufferTime_ = 0;
     int64_t currentPts = 5;
@@ -238,6 +390,7 @@ HWTEST_F(SurfaceEncoderAdapterTest, CheckFrames_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderAdapterTest, Pause_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderAdapterTest Pause_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
     encodeAdapter_->pauseResumeQueue_.clear();
     encodeAdapter_->pauseResumePts_.clear();
     encodeAdapter_->isTransCoderMode = true;
@@ -272,6 +425,7 @@ HWTEST_F(SurfaceEncoderAdapterTest, Pause_001, TestSize.Level3)
 HWTEST_F(SurfaceEncoderAdapterTest, Resume_001, TestSize.Level3)
 {
     DTEST_LOG << "SurfaceEncoderAdapterTest Resume_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
     encodeAdapter_->pauseResumeQueue_.clear();
     encodeAdapter_->pauseResumePts_.clear();
     encodeAdapter_->isTransCoderMode = true;

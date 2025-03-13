@@ -327,7 +327,7 @@ ohos_unittest("dmsfreeinstallcbtest") {
   subsystem_name = "ability"
 }
 
-ohos_unittest("dschedcontinuetest") {
+ohos_unittest("dschedcontinuationtest") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -479,9 +479,60 @@ ohos_unittest("dmscontinuemanagertest") {
   }
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
+  sources = [ "unittest/mission/dms_continue_manager_test.cpp" ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    external_deps += [ "config_policy:configpolicy_util" ]
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("dschedsynce2etest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [ "unittest/mission/dsched_sync_e2e_test.cpp" ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    external_deps += [ "config_policy:configpolicy_util" ]
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("dmscontinuerecommendmgrtest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "${dms_path}/services/dtbschedmgr/test/cfi_blocklist.txt"
+  }
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
   sources = [
-    "unittest/mission/dms_continue_manager_test.cpp",
-    "unittest/mission/dsched_sync_e2e_test.cpp",
     "unittest/mission/notification/dms_continue_recommend_manager_test.cpp",
   ]
   sources += dtbschedmgr_sources
@@ -937,14 +988,55 @@ ohos_unittest("dschedswitchstatustest") {
   subsystem_name = "ability"
 }
 
-ohos_unittest("dschedcontinuestatetest") {
+ohos_unittest("dschedcontinuetest") {
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
   sources = [
-    "unittest/continue/dsched_continue_state_test.cpp",
     "unittest/continue/dsched_continue_test.cpp",
     "unittest/continue/mock_dtbschedmgr_device_info.cpp",
-    "unittest/mock_distributed_sched.cpp",
+  ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = []
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  external_deps += [ "googletest:gmock" ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("dschedcontinuestatetest") {
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [ "unittest/continue/dsched_continue_state_test.cpp" ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = []
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  external_deps += [ "googletest:gmock" ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("dschedcontinuesinkstatetest") {
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [
+    "unittest/continue/dsched_continue_sink_state_test.cpp",
+    "unittest/continue/mock_dtbschedmgr_device_info.cpp",
   ]
   sources += dtbschedmgr_sources
   configs = [
@@ -1059,7 +1151,9 @@ group("unittest") {
     ":dmscollabtest",
     ":dmsfreeinstallcbtest",
     ":dschedconnecttest",
+    ":dschedcontinuationtest",
     ":dschedcontinuemanagerstatetest",
+    ":dschedcontinuesinkstatetest",
     ":dschedcontinuestatetest",
     ":dschedcontinuetest",
     ":dschedswitchstatustest",
@@ -1073,8 +1167,10 @@ group("unittest") {
       ":distributedmissionmanagertest",
       ":dmscontinueconditionmgrtest",
       ":dmscontinuemanagertest",
+      ":dmscontinuerecommendmgrtest",
       ":dmsmissionmanagertest",
       ":dschedpermissiontest",
+      ":dschedsynce2etest",
     ]
   }
 }
