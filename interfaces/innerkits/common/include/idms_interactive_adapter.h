@@ -45,6 +45,9 @@ typedef struct {
     void (*OnDeviceOnlineEx)(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
     void (*OnDeviceOfflineEx)(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
     void (*OnDeviceInfoChangedEx)(const OHOS::DistributedHardware::DmDeviceInfo& deviceInfo);
+
+    int32_t (*OnHAEventAdapter)(const std::string& instanceTag, int32_t eventType,
+        const std::string& eventId, const std::unordered_map<std::string, std::string>& properties);
 } IDmsInteractiveAdapter;
 } // namespace DistributedSchedule
 } // namespace OHOS

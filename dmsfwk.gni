@@ -35,7 +35,6 @@ declare_args() {
   dmsfwk_av_trans_pixel_map_debug = false
   dmsfwk_continuous_task_enable = false
   dmsfwk_all_connect_decisions = false
-  dmsfwk_hianalytics_service = false
   dmsfwk_softbus_file_ability = false
   dmsfwk_check_screenlock = false
   dmsfwk_feature_dams_enable = true
@@ -60,9 +59,6 @@ declare_args() {
     }
     if (defined(global_parts_info.resourceschedule_background_task_mgr)) {
       dmsfwk_continuous_task_enable = true
-    }
-    if (defined(global_parts_info.cloud_hianalytics_service)) {
-      dmsfwk_hianalytics_service = true
     }
     if (defined(global_parts_info.theme_screenlock_mgr)) {
       dmsfwk_check_screenlock = true
