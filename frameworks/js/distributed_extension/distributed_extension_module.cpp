@@ -17,38 +17,38 @@
 
 #define EXTERN_C_VISIBILITY_DEFAULT extern "C" __attribute__((visibility("default")))
 
-extern const char BINARY_DISTRIBUTED_EXTENSION_ABILITY_JS_START[];
-extern const char BINARY_DISTRIBUTED_EXTENSION_ABILITY_JS_END[];
-extern const char BINARY_DISTRIBUTED_EXTENSION_ABILITY_ABC_START[];
-extern const char BINARY_DISTRIBUTED_EXTENSION_ABILITY_ABC_END[];
+extern const char _binary_distributed_extension_ability_js_start[];
+extern const char _binary_distributed_extension_ability_js_end[];
+extern const char _binary_distributed_extension_ability_abc_start[];
+extern const char _binary_distributed_extension_ability_abc_end[];
 
 static napi_module _module = {
     .nm_filename = "application/libdistributedextensionability.so/distributed_extension_ability.js",
     .nm_modname = "application.DistributedExtensionAbility",
 };
 
-extern "C" __attribute__((constructor)) void NapiApplicationDistributedExtensionContextAutoRegister()
+extern "C" __attribute__((constructor)) void NAPI_application_DistributedExtensionAbility_AutoRegister()
 {
     napi_module_register(&_module);
 }
 
-EXTERN_C_VISIBILITY_DEFAULT void NapiApplicationDistributedExtensionAbilityGetJsCode(const char **buf, int *bufLen)
+EXTERN_C_VISIBILITY_DEFAULT void NAPI_application_DistributedExtensionAbility_GetJSCode(const char **buf, int *bufLen)
 {
     if (buf != nullptr) {
-        *buf = BINARY_DISTRIBUTED_EXTENSION_ABILITY_JS_START;
+        *buf = _binary_distributed_extension_ability_js_start;
     }
-
+ 
     if (bufLen != nullptr) {
-        *bufLen = BINARY_DISTRIBUTED_EXTENSION_ABILITY_JS_END - BINARY_DISTRIBUTED_EXTENSION_ABILITY_JS_START;
+        *bufLen = _binary_distributed_extension_ability_js_end - _binary_distributed_extension_ability_js_start;
     }
 }
 
-EXTERN_C_VISIBILITY_DEFAULT void NapiApplicationDistributedExtensionAbilityGetAbcCode(const char **buf, int *buflen)
+EXTERN_C_VISIBILITY_DEFAULT void NAPI_application_DistributedExtensionAbility_GetABCCode(const char **buf, int *buflen)
 {
     if (buf != nullptr) {
-        *buf = BINARY_DISTRIBUTED_EXTENSION_ABILITY_ABC_START;
+        *buf = _binary_distributed_extension_ability_abc_start;
     }
     if (buflen != nullptr) {
-        *buflen = BINARY_DISTRIBUTED_EXTENSION_ABILITY_ABC_END - BINARY_DISTRIBUTED_EXTENSION_ABILITY_ABC_START;
+        *buflen = _binary_distributed_extension_ability_abc_end - _binary_distributed_extension_ability_abc_start;
     }
 }
