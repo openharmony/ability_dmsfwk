@@ -458,8 +458,8 @@ HWTEST_F(DSchedSoftbusSessionTest, UnPackStartEndData_001, TestSize.Level3)
     int32_t ret = softbusSessionTest_->UnPackStartEndData(buffer, dataType);
     EXPECT_NE(ret, ERR_OK);
 
-    int32_t ret = softbusSessionTest_->UnPackStartEndData(nullptr, dataType);
-    EXPECT_NE(ret, INVALID_SESSION_ID);
+    ret = softbusSessionTest_->UnPackStartEndData(nullptr, dataType);
+    EXPECT_EQ(ret, INVALID_SESSION_ID);
     softbusSessionTest_ = nullptr;
     DTEST_LOG << "DSchedSoftbusSessionTest UnPackStartEndData_001 end" << std::endl;
 }
@@ -622,11 +622,11 @@ HWTEST_F(DSchedSoftbusSessionTest, WriteTlvToBuffer_001, TestSize.Level3)
     softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
     ASSERT_NE(softbusSessionTest_, nullptr);
     softbusSessionTest_->WriteTlvToBuffer(tlvItem, buffer, bufLen);
-    uint8_t * buffer1 = new uint8_t[SEQ_1] {0};
+    uint8_t *buffer1 = new uint8_t[SEQ_1] {0};
     uint32_t bufLen1 = SIZE_1;
     EXPECT_NO_FATAL_FAILURE(softbusSessionTest_->WriteTlvToBuffer(tlvItem, buffer1, bufLen1));
 
-    std::shared_ptr<DSchedDataBuffer> bufferNull = nullptr;
+    uint8_t *bufferNull = nullptr;
     EXPECT_NO_FATAL_FAILURE(softbusSessionTest_->WriteTlvToBuffer(tlvItem, bufferNull, bufLen1));
     delete[] buffer;
     delete[] buffer1;
