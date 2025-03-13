@@ -28,3 +28,13 @@ int32_t DistributedSchedService::CheckTargetPermission(const OHOS::AAFwk::Want& 
     return IDistributedSchedService::dmsSrvMock->CheckTargetPermission(
         want, callerInfo, accountInfo, flag, needQueryExtension);
 }
+
+int32_t DistributedSchedService::CheckCollabStartPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
+    const AccountInfo& accountInfo, bool needQueryExtension)
+{
+    if (IDistributedSchedService::dmsSrvMock == nullptr) {
+        return 0;
+    }
+    return IDistributedSchedService::dmsSrvMock->CheckCollabStartPermission(
+        want, callerInfo, accountInfo, needQueryExtension);
+}

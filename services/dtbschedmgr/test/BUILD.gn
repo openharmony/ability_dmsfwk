@@ -797,7 +797,6 @@ ohos_unittest("dmscollabmgrtest") {
     "${dms_path}/services/dtbschedmgr/src/collab/dsched_collab_manager.cpp",
     "unittest/collab/dsched_collab_manager_sup_test.cpp",
     "unittest/collab/dsched_collab_manager_test.cpp",
-    "unittest/mock/multi_user_manager_mock.cpp",
     "unittest/mock_distributed_sched.cpp",
   ]
   sources += dtbschedmgr_sources
@@ -1031,6 +1030,26 @@ ohos_unittest("dschedcontinuestatetest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("dschedcontinuesrcstatetest") {
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [ "unittest/continue/dsched_continue_src_state_test.cpp" ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = []
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  external_deps += [ "googletest:gmock" ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 ohos_unittest("dschedcontinuesinkstatetest") {
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
@@ -1154,6 +1173,7 @@ group("unittest") {
     ":dschedcontinuationtest",
     ":dschedcontinuemanagerstatetest",
     ":dschedcontinuesinkstatetest",
+    ":dschedcontinuesrcstatetest",
     ":dschedcontinuestatetest",
     ":dschedcontinuetest",
     ":dschedswitchstatustest",
