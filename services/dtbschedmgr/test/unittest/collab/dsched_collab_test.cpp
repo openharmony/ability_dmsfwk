@@ -82,9 +82,6 @@ void DSchedCollabTest::SetUp()
 HWTEST_F(DSchedCollabTest, DSchedCollab_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedCollabTest DSchedCollab_001 begin" << std::endl;
-#ifdef OS_ACCOUNT_PART
-    EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillOnce(Return(true)).WillOnce(Return(true));
-#endif
     int32_t softbusSessionId = 0;
     auto getSinkCollabVersionCmd = std::make_shared<GetSinkCollabVersionCmd>();
     auto newCollab = std::make_shared<DSchedCollab>(getSinkCollabVersionCmd, softbusSessionId);
@@ -591,12 +588,80 @@ HWTEST_F(DSchedCollabTest, ExeStartAbility_001, TestSize.Level3)
     DTEST_LOG << "DSchedCollabTest ExeStartAbility_001 begin" << std::endl;
     ASSERT_NE(dSchedCollab_, nullptr);
     EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillRepeatedly(Return(true));
-    EXPECT_CALL(*dmsSrvMock_, CheckTargetPermission(_, _, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    EXPECT_CALL(*dmsSrvMock_, CheckCollabStartPermission(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
     EXPECT_EQ(dSchedCollab_->ExeStartAbility(), INVALID_PARAMETERS_ERR);
 
-    EXPECT_CALL(*dmsSrvMock_, CheckTargetPermission(_, _, _, _, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*dmsSrvMock_, CheckCollabStartPermission(_, _, _, _)).WillOnce(Return(ERR_OK));
     EXPECT_NE(dSchedCollab_->ExeStartAbility(), ERR_OK);
     DTEST_LOG << "DSchedCollabTest ExeStartAbility_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ExeSrcGetPeerVersion_001
+ * @tc.desc: call ExeSrcGetPeerVersion
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, ExeSrcGetPeerVersion_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest ExeSrcGetPeerVersion_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    EXPECT_CALL(*adapterMock_, ConnectDevice(_, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    EXPECT_EQ(dSchedCollab_->ExeSrcGetPeerVersion(), INVALID_PARAMETERS_ERR);
+
+    EXPECT_CALL(*adapterMock_, ConnectDevice(_, _, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*adapterMock_, SendData(_, _, _)).WillOnce(Return(-1));
+    EXPECT_EQ(dSchedCollab_->ExeSrcGetPeerVersion(), -1);
+
+    EXPECT_CALL(*adapterMock_, ConnectDevice(_, _, _)).WillOnce(Return(ERR_OK));
+    EXPECT_CALL(*adapterMock_, SendData(_, _, _)).WillOnce(Return(0));
+    EXPECT_EQ(dSchedCollab_->ExeSrcGetPeerVersion(), ERR_OK);
+    DTEST_LOG << "DSchedCollabTest ExeSrcGetPeerVersion_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PostSinkGetVersionTask_001
+ * @tc.desc: call PostSinkGetVersionTask
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, PostSinkGetVersionTask_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest PostSinkGetVersionTask_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_EQ(dSchedCollab_->eventHandler_, nullptr);
+    EXPECT_EQ(dSchedCollab_->PostSinkGetVersionTask(), INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedCollabTest PostSinkGetVersionTask_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PostSrcGetVersionTask_001
+ * @tc.desc: call PostSrcGetVersionTask
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, PostSrcGetVersionTask_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest PostSrcGetVersionTask_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_EQ(dSchedCollab_->eventHandler_, nullptr);
+    EXPECT_EQ(dSchedCollab_->PostSrcGetVersionTask(), INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedCollabTest PostSrcGetVersionTask_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PostSrcGetPeerVersionTask_001
+ * @tc.desc: call PostSrcGetPeerVersionTask
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, PostSrcGetPeerVersionTask_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest PostSrcGetPeerVersionTask_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_EQ(dSchedCollab_->eventHandler_, nullptr);
+    EXPECT_EQ(dSchedCollab_->PostSrcGetPeerVersionTask(), INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedCollabTest PostSrcGetPeerVersionTask_001 end" << std::endl;
 }
 }
 }
