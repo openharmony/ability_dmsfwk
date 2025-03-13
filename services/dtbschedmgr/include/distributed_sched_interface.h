@@ -114,6 +114,10 @@ public:
     {
         return 0;
     }
+    virtual int32_t ConnectDExtAbility(std::string& bundleName, std::string& abilityName, int32_t userId)
+    {
+        return 0;
+    }
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     virtual int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
         int32_t callingUid) = 0;
