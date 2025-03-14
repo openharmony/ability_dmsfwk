@@ -20,6 +20,7 @@
 #include "test_log.h"
 
 #include "message_data_header.h"
+#include "pixel_map.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -689,6 +690,58 @@ HWTEST_F(AbilityConnectionSessionTest, UpdateSenderEngineTransChannel_Test_001, 
     connectionSesion_->transChannels_[TransChannelType::STREAM] = info;
     EXPECT_NO_FATAL_FAILURE(connectionSesion_->UpdateSenderEngineTransChannel());
     DTEST_LOG << "AbilityConnectionSessionTest UpdateSenderEngineTransChannel_Test_001 end" << std::endl;
+}
+/**
+ * @tc.name: ConnectFileChannel_Test_001
+ * @tc.desc: call ConnectFileChannel
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, ConnectFileChannel_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest ConnectFileChannel_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    std::string peerSocketName = "peerSocketName";
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->ConnectFileChannel(peerSocketName));
+
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnRecvPixelMap(nullptr));
+
+    int32_t channelId = 0;
+    size_t capacity = 20;
+    std::shared_ptr<AVTransDataBuffer> dataBuffer = std::make_shared<AVTransDataBuffer>(capacity);
+    connectionSesion_->transChannels_.clear();
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnBytesReceived(channelId, dataBuffer));
+
+    TransChannelInfo info;
+    info.channelId = channelId;
+    connectionSesion_->transChannels_[TransChannelType::STREAM] = info;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnBytesReceived(channelId, dataBuffer));
+
+    connectionSesion_->transChannels_.clear();
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnBytesReceived(channelId, dataBuffer));
+
+    connectionSesion_->transChannels_[TransChannelType::STREAM_BYTES] = info;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnBytesReceived(channelId, dataBuffer));
+
+    connectionSesion_->sessionListener_ = nullptr;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnBytesReceived(channelId, dataBuffer));
+    DTEST_LOG << "AbilityConnectionSessionTest ConnectFileChannel_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetTimeOut_Test_001
+ * @tc.desc: call SetTimeOut
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, SetTimeOut_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest SetTimeOut_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    connectionSesion_->eventHandler_ = nullptr;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->SetTimeOut(1));
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->RemoveTimeout());
+    DTEST_LOG << "AbilityConnectionSessionTest SetTimeOut_Test_001 end" << std::endl;
 }
 }
 }
