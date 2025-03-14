@@ -471,7 +471,7 @@ bool DSchedContinueDataCmd::UnmarshalWantParcel(cJSON* rootValue)
         return false;
     }
 
-    OHOS::AAFwk::Want wantPtr;
+    OHOS::AAFwk::Want* wantPtr;
     DistributedWantV2* dtbWant = DistributedSchedule::DistributedWantV2::Unmarshalling(wantParcel);
     if (dtbWant == nullptr) {
         wantPtr = AAFwk::Want::Unmarshalling(wantParcel);
