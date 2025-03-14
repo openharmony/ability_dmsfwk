@@ -534,6 +534,7 @@ ohos_unittest("dmscontinuerecommendmgrtest") {
   cflags = [ "-Dprivate=public" ]
   sources = [
     "unittest/mission/notification/dms_continue_recommend_manager_test.cpp",
+    "unittest/mission/notification/dms_continue_send_manager_test.cpp",
   ]
   sources += dtbschedmgr_sources
 
