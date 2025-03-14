@@ -18,7 +18,6 @@
 
 #include <memory>
 #include "js_continuation_state_callback.h"
-#include "base/continuationmgr_log.h"
 
 #include "ipc_skeleton.h"
 #include "iremote_stub.h"

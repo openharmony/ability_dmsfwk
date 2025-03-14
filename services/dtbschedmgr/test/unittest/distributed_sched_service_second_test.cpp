@@ -1735,7 +1735,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, ContinueStateCallbackRegister_001, T
 
     int32_t ret = DistributedSchedService::GetInstance().ContinueStateCallbackRegister(
         missionId, bundleName, moduleName, abilityName, nullptr);
-    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    EXPECT_EQ(ret, NO_CONNECT_CALLBACK_ERR);
 
     ret = DistributedSchedService::GetInstance().ContinueStateCallbackRegister(
         missionId, bundleName, moduleName, abilityName, callback);
