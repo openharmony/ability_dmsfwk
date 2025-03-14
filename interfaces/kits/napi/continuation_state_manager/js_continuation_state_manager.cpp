@@ -19,7 +19,6 @@
 #include "napi_error_code.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
-#include "dtbschedmgr_log.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
