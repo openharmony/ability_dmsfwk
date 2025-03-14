@@ -97,7 +97,6 @@ DistributedWantV2& DistributedWantV2::operator=(const DistributedWantV2& other)
 
 DistributedWantV2::DistributedWantV2(const AAFwk::Want& want)
 {
-
     HILOGD("Create DistributedWant by AMS want, ams want: %{public}s", want.ToString().c_str());
     DistributedOperationBuilder builder;
     builder.WithAbilityName(want.GetElement().GetAbilityName());
