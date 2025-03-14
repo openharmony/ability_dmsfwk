@@ -98,7 +98,7 @@ DistributedWantV2& DistributedWantV2::operator=(const DistributedWantV2& other)
 DistributedWantV2::DistributedWantV2(const AAFwk::Want& want)
 {
 
-    HILOGD("Create DistributedWant by AMS's want, ams want: %{public}s", want.ToString().c_str());
+    HILOGD("Create DistributedWant by AMS want, ams want: %{public}s", want.ToString().c_str());
     DistributedOperationBuilder builder;
     builder.WithAbilityName(want.GetElement().GetAbilityName());
     builder.WithBundleName(want.GetElement().GetBundleName());
@@ -110,12 +110,12 @@ DistributedWantV2::DistributedWantV2(const AAFwk::Want& want)
     std::shared_ptr<DistributedOperation> op = builder.build();
     operation_ = *op;
     parameters_ = want.GetParams();
-    HILOGD("Create DistributedWant by AMS's want, dtb want: %{public}s", ToString().c_str());
+    HILOGD("Create DistributedWant by AMS want, dtb want: %{public}s", ToString().c_str());
 }
 
 std::shared_ptr<AAFwk::Want> DistributedWantV2::ToWant()
 {
-    HILOGD("DistributedWant parse to AMS's want success. dtb want: %{public}s", ToString().c_str());
+    HILOGD("DistributedWant parse to AMS want success. dtb want: %{public}s", ToString().c_str());
     auto want = std::make_shared<AAFwk::Want>();
     want->SetFlags(GetFlags());
     want->SetElement(GetElement());
@@ -128,7 +128,7 @@ std::shared_ptr<AAFwk::Want> DistributedWantV2::ToWant()
         want->AddEntity(*it);
     }
     want->SetParams(parameters_);
-    HILOGD("DistributedWant parse to AMS's want success. AMS want: %{public}s", want.ToString().c_str());
+    HILOGD("DistributedWant parse to AMS want success. AMS want: %{public}s", want->ToString().c_str());
     return want;
 }
 
