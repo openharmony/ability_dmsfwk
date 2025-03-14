@@ -26,7 +26,7 @@ namespace DistributedCollab {
 #define LOG_DOMAIN 0xD004170
 
 #undef LOG_TAG
-#define LOG_TAG "DSched_Service"
+#define LOG_TAG "DSched_Collab"
 
 #ifdef HILOGD
 #undef HILOGD
