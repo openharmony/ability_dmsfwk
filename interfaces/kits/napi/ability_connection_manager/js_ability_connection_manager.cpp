@@ -1707,6 +1707,7 @@ void InitDisconnectReason(napi_env& env, napi_value& exports)
 void InitFlipOptions(napi_env& env, napi_value& exports)
 {
     char propertyName[] = "FlipOptions";
+    char propertyNameOld[] = "FlipOption";
     napi_value horizontal = nullptr;
     napi_value vertical = nullptr;
     napi_create_int32(env, static_cast<int32_t>(FlipOptions::HORIZONTAL), &horizontal);
@@ -1720,6 +1721,7 @@ void InitFlipOptions(napi_env& env, napi_value& exports)
     napi_create_object(env, &obj);
     napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
     napi_set_named_property(env, exports, propertyName, obj);
+    napi_set_named_property(env, exports, propertyNameOld, obj);
 }
 
 void InitStreamRole(napi_env& env, napi_value& exports)
