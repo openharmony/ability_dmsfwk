@@ -20,6 +20,8 @@
 #include <sys/prctl.h>
 #include <sstream>
 #include <iomanip>
+#include <future>
+#include <vector>
  
 #include "ability_connection_manager.h"
 #include "dtbcollabmgr_log.h"
@@ -48,6 +50,7 @@ constexpr int32_t DEFAULT_APP_PID = 0;
 constexpr int32_t DEFAULT_INSTANCE_ID = 0;
 constexpr int32_t HEX_WIDTH = 2;
 constexpr char FILL_CHAR = '0';
+constexpr int32_t WAIT_FOR_CONNECT = 11;
 }
 
 AbilityConnectionSession::AbilityConnectionSession(int32_t sessionId, std::string serverSocketName,
@@ -290,6 +293,7 @@ int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::
 
     if (InitChannels() != ERR_OK || ConnectChannels() != ERR_OK) {
         NotifyAppConnectResult(false);
+        connectionCondition_.notify_all();
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -299,6 +303,7 @@ int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::
 
     NotifyPeerSessionConnected();
     NotifyAppConnectResult(true);
+    connectionCondition_.notify_all();
     return ERR_OK;
 }
 
@@ -921,29 +926,49 @@ std::string AbilityConnectionSession::GetChannelName(const AbilityConnectionSess
 
 int32_t AbilityConnectionSession::ConnectChannels()
 {
-    if (ConnectTransChannel(TransChannelType::MESSAGE) != ERR_OK) {
-        HILOGE("connect message channel failed.");
-        return CONNECT_MESSAGE_CHANNEL_FAILED;
-    }
-
-    if (connectOption_.needSendData && ConnectTransChannel(TransChannelType::DATA) != ERR_OK) {
-        HILOGE("connect data channel failed.");
-        return CONNECT_DATA_CHANNEL_FAILED;
-    }
-
-    if ((connectOption_.needSendStream || connectOption_.needReceiveStream)) {
-        if (ConnectTransChannel(TransChannelType::STREAM_BYTES) != ERR_OK) {
-            HILOGE("connect stream channel failed.");
-            return CONNECT_STREAM_CHANNEL_FAILED;
+    HILOGI("parallel connect channels");
+    std::vector<std::future<int32_t>> futures;
+    // message
+    futures.emplace_back(std::async(std::launch::async, [this]() -> int32_t {
+        if (ConnectTransChannel(TransChannelType::MESSAGE) != ERR_OK) {
+            HILOGE("connect message channel failed.");
+            return CONNECT_MESSAGE_CHANNEL_FAILED;
         }
-        ConnectStreamChannel();
+        return ERR_OK;
+    }));
+    // data
+    if (connectOption_.needSendData) {
+        futures.emplace_back(std::async(std::launch::async, [this]() -> int32_t {
+            if (ConnectTransChannel(TransChannelType::DATA) != ERR_OK) {
+                HILOGE("connect data channel failed.");
+                return CONNECT_DATA_CHANNEL_FAILED;
+            }
+            return ERR_OK;
+        }));
     }
-
+    // stream
+    if (connectOption_.needSendStream || connectOption_.needReceiveStream) {
+        ConnectStreamChannel();
+        futures.emplace_back(std::async(std::launch::async, [this]() -> int32_t {
+            if (ConnectTransChannel(TransChannelType::STREAM_BYTES) != ERR_OK) {
+                HILOGE("connect stream channel failed.");
+                return CONNECT_STREAM_CHANNEL_FAILED;
+            }
+            return ERR_OK;
+        }));
+    }
+    // file
     if (connectOption_.needSendFile && ConnectTransChannel(TransChannelType::SEND_FILE) != ERR_OK) {
         HILOGE("connect send file channel failed.");
         return CONNECT_SEND_FILE_CHANNEL_FAILED;
     }
-
+    // wait for task
+    for (auto&& future : futures) {
+        int32_t result = future.get();
+        if (result != ERR_OK) {
+            return result;
+        }
+    }
     return ERR_OK;
 }
 
@@ -1216,6 +1241,19 @@ void AbilityConnectionSession::ExeuteMessageEventCallback(const std::string msg)
         std::shared_lock<std::shared_mutex> lock(sessionListenerMutex_);
         listener = sessionListener_;
     }
+    // bi-channel need wait
+    {
+        std::unique_lock<std::mutex> lock(connectionMutex_);
+        bool isConnected = connectionCondition_.wait_for(
+            lock, 
+            std::chrono::seconds(WAIT_FOR_CONNECT),
+            [this]() { return IsAllChannelConnected(); }
+        );
+        if (!isConnected) {
+            HILOGE("Wait for channel connection timed out after 5 seconds.");
+            return;
+        }
+    }
     if (listener != nullptr) {
         HILOGI("handler sessionListener");
         listener->OnMessage(sessionId_, msg);
@@ -1308,7 +1346,19 @@ void AbilityConnectionSession::OnBytesReceived(int32_t channelId, const std::sha
         HILOGE("is stream bytes channel, no need to send.");
         return;
     }
-
+    // bi-channel need wait
+    {
+        std::unique_lock<std::mutex> lock(connectionMutex_);
+        bool isConnected = connectionCondition_.wait_for(
+            lock, 
+            std::chrono::seconds(WAIT_FOR_CONNECT),
+            [this]() { return IsAllChannelConnected(); }
+        );
+        if (!isConnected) {
+            HILOGE("Wait for channel connection timed out.");
+            return;
+        }
+    }
     std::shared_ptr<IAbilityConnectionSessionListener> listener;
     {
         std::shared_lock<std::shared_mutex> lock(sessionListenerMutex_);
