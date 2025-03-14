@@ -1245,7 +1245,7 @@ void AbilityConnectionSession::ExeuteMessageEventCallback(const std::string msg)
     {
         std::unique_lock<std::mutex> lock(connectionMutex_);
         bool isConnected = connectionCondition_.wait_for(
-            lock, 
+            lock,
             std::chrono::seconds(WAIT_FOR_CONNECT),
             [this]() { return IsAllChannelConnected(); }
         );
@@ -1350,7 +1350,7 @@ void AbilityConnectionSession::OnBytesReceived(int32_t channelId, const std::sha
     {
         std::unique_lock<std::mutex> lock(connectionMutex_);
         bool isConnected = connectionCondition_.wait_for(
-            lock, 
+            lock,
             std::chrono::seconds(WAIT_FOR_CONNECT),
             [this]() { return IsAllChannelConnected(); }
         );
