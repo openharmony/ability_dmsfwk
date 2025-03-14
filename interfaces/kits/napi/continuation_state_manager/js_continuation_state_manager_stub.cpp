@@ -16,6 +16,7 @@
 #include "js_continuation_state_manager_stub.h"
 #include "napi_error_code.h"
 #include "distributedsched_ipc_interface_code.h"
+#include "base/continuationmgr_log.h"
 
 namespace OHOS {
 namespace DistributedSchedule {

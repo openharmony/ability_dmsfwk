@@ -20,6 +20,7 @@
 #include "ipc_skeleton.h"
 #include "distributedsched_ipc_interface_code.h"
 #include "napi_error_code.h"
+#include "dtbschedmgr_log.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -45,32 +46,32 @@ int32_t ContinuationStateClient::RegisterContinueStateCallback(const sptr<JsCont
     sptr <IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
         HILOGE("get dms proxy failed.");
-        return SYSTEM_WORK_ABNORMALLY;
+        return DMS_GET_SAMGR_EXCEPTION;
     }
     MessageParcel data;
     if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
         HILOGE("write token failed.");
-        return SYSTEM_WORK_ABNORMALLY;
+        return SEND_REQUEST_DEF_FAIL;
     }
     if (!data.WriteString(callbackData.bundleName)) {
         HILOGE("write bundleName failed.");
-        return SYSTEM_WORK_ABNORMALLY;
+        return SEND_REQUEST_DEF_FAIL;
     }
     if (!data.WriteInt32(callbackData.missionId)) {
         HILOGE("write missionId failed.");
-        return SYSTEM_WORK_ABNORMALLY;
+        return SEND_REQUEST_DEF_FAIL;
     }
     if (!data.WriteString(callbackData.moduleName)) {
         HILOGE("write moduleName failed.");
-        return SYSTEM_WORK_ABNORMALLY;
+        return SEND_REQUEST_DEF_FAIL;
     }
     if (!data.WriteString(callbackData.abilityName)) {
         HILOGE("write abilityName failed.");
-        return SYSTEM_WORK_ABNORMALLY;
+        return SEND_REQUEST_DEF_FAIL;
     }
     if (!data.WriteRemoteObject(stub)) {
         HILOGE("write stub failed.");
-        return SYSTEM_WORK_ABNORMALLY;
+        return SEND_REQUEST_DEF_FAIL;
     }
     MessageParcel reply;
     MessageOption option;
@@ -78,8 +79,8 @@ int32_t ContinuationStateClient::RegisterContinueStateCallback(const sptr<JsCont
         static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_STATE_CALLBACK_REGISTER),
         data, reply, option);
     if (error != ERR_NONE) {
-        HILOGE("send register request failed.");
-        return SYSTEM_WORK_ABNORMALLY;
+        HILOGE("send register request failed. error code is %{public}d", error);
+        return SEND_REQUEST_DEF_FAIL;
     }
     int32_t result = reply.ReadInt32();
     HILOGI("end, register result is: %{public}d", result);
@@ -94,30 +95,30 @@ int32_t ContinuationStateClient::UnRegisterContinueStateCallback(const sptr<JsCo
     sptr <IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
         HILOGE("get dms proxy failed.");
-        return SYSTEM_WORK_ABNORMALLY;
+        return DMS_GET_SAMGR_EXCEPTION;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
         HILOGE("write token failed.");
-        return SYSTEM_WORK_ABNORMALLY;
+        return SEND_REQUEST_DEF_FAIL;
     }
 
     if (!data.WriteString(callbackData.bundleName)) {
         HILOGE("write bundleName failed.");
-        return SYSTEM_WORK_ABNORMALLY;
+        return SEND_REQUEST_DEF_FAIL;
     }
     if (!data.WriteInt32(callbackData.missionId)) {
         HILOGE("write missionId failed.");
-        return SYSTEM_WORK_ABNORMALLY;
+        return SEND_REQUEST_DEF_FAIL;
     }
     if (!data.WriteString(callbackData.moduleName)) {
         HILOGE("write moduleName failed.");
-        return SYSTEM_WORK_ABNORMALLY;
+        return SEND_REQUEST_DEF_FAIL;
     }
     if (!data.WriteString(callbackData.abilityName)) {
         HILOGE("write abilityName failed.");
-        return SYSTEM_WORK_ABNORMALLY;
+        return SEND_REQUEST_DEF_FAIL;
     }
 
     MessageParcel reply;
@@ -126,8 +127,8 @@ int32_t ContinuationStateClient::UnRegisterContinueStateCallback(const sptr<JsCo
         static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_STATE_CALLBACK_UNREGISTER),
             data, reply, option);
     if (error != ERR_NONE) {
-        HILOGE("send unregister request failed.");
-        return SYSTEM_WORK_ABNORMALLY;
+        HILOGE("send register request failed. error code is %{public}d", error);
+        return SEND_REQUEST_DEF_FAIL;
     }
     int32_t result = reply.ReadInt32();
     HILOGI("end, register result is: %{public}d", result);
