@@ -120,7 +120,9 @@ void AbilityConnectionSession::UnInit()
     HILOGI("UnInit start");
     if (eventHandler_ != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
-        eventThread_.join();
+        if (eventThread_.joinable()) {
+            eventThread_.join();
+        }
         eventHandler_ = nullptr;
     } else {
         HILOGE("eventHandler_ is nullptr");

@@ -17,26 +17,91 @@
 #include "ability_connection_manager_listener.h"
 #include "parcel_helper.h"
 #include "ipc_skeleton.h"
-
+#include "dtbcollabmgr_log.h"
 #include "system_ability_definition.h"
 #include "iservice_registry.h"
-#include "if_system_ability_manager.h"
 #include "system_ability.h"
+#include <chrono>
 
 namespace OHOS {
 namespace DistributedCollab {
 namespace {
 const std::string TAG = "DistributedClient";
 const std::u16string DMS_PROXY_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
+static constexpr int32_t SA_TIMEOUT = 4;
 }
+
+DistributedClient::~DistributedClient()
+{
+    HILOGI("destroy DistributedClient");
+    std::lock_guard<std::mutex> lock(mtx_);
+    if (listener_) {
+        auto samgrProxy =
+            SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (samgrProxy != nullptr) {
+            HILOGI("unregister listener");
+            samgrProxy->UnSubscribeSystemAbility(DISTRIBUTED_SCHED_SA_ID, listener_);
+        }
+    }
+    listener_ = nullptr;
+}
+
 sptr<IRemoteObject> DistributedClient::GetDmsProxy()
 {
-    auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    auto samgrProxy =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (samgrProxy == nullptr) {
         HILOGE("fail to get samgr");
         return nullptr;
     }
-    return samgrProxy->CheckSystemAbility(DISTRIBUTED_SCHED_SA_ID);
+    sptr<IRemoteObject> dmsProxy = samgrProxy->CheckSystemAbility(DISTRIBUTED_SCHED_SA_ID);
+    if (dmsProxy != nullptr) {
+        return dmsProxy;
+    }
+    // not online, register listener and wait
+    if (listener_ == nullptr) {
+        listener_ = sptr<SystemAbilityStatusChangeListener>::MakeSptr(this);
+    }
+    int32_t ret = samgrProxy->SubscribeSystemAbility(DISTRIBUTED_SCHED_SA_ID, listener_);
+    if (ret != 0) {
+        HILOGE("fail to subscribe system ability");
+        return nullptr;
+    }
+    // waiting for service online
+    std::unique_lock<std::mutex> lock(mtx_);
+    if (!cv_.wait_for(lock, std::chrono::seconds(SA_TIMEOUT),
+        [this]() { return callbackReceived_; })) {
+        HILOGE("wait for system ability timeout");
+        return nullptr;
+    }
+    dmsProxy = samgrProxy->CheckSystemAbility(DISTRIBUTED_SCHED_SA_ID);
+    if (dmsProxy == nullptr) {
+        HILOGE("fail to get system ability after callback");
+        return nullptr;
+    }
+    return dmsProxy;
+}
+
+void DistributedClient::SystemAbilityStatusChangeListener::OnAddSystemAbility(
+    int32_t systemAbilityId, const std::string& deviceId)
+{
+    HILOGI("OnAddSystemAbility, %{public}d", systemAbilityId);
+    if (systemAbilityId == DISTRIBUTED_SCHED_SA_ID && client_ != nullptr) {
+        std::unique_lock<std::mutex> lock(client_->mtx_);
+        client_->callbackReceived_ = true;
+        client_->cv_.notify_all();
+    }
+}
+
+void DistributedClient::SystemAbilityStatusChangeListener::OnRemoveSystemAbility(int32_t systemAbilityId,
+    const std::string& deviceId)
+{
+    HILOGI("SystemAbility removed: %{public}d", systemAbilityId);
+}
+
+sptr<IRemoteObject> DistributedClient::SystemAbilityStatusChangeListener::AsObject()
+{
+    return nullptr;
 }
 
 int32_t DistributedClient::CollabMission(int32_t sessionId, const std::string& serverSocketName,
