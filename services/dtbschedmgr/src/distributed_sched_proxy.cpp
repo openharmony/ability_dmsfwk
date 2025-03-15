@@ -949,6 +949,8 @@ int32_t DistributedSchedProxy::StartFreeInstallFromRemote(const FreeInstallInfo&
     nlohmann::json extraInfoJson;
     extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN] = info.callerInfo.accessToken;
     extraInfoJson[EXTRO_INFO_JSON_KEY_REQUEST_CODE] = info.requestCode;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID] = info.accountInfo.activeAccountId;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID] = info.accountInfo.userId;
     if (info.callerInfo.extraInfoJson.find(DMS_VERSION_ID) != info.callerInfo.extraInfoJson.end()) {
         extraInfoJson[DMS_VERSION_ID] = info.callerInfo.extraInfoJson[DMS_VERSION_ID];
     }
