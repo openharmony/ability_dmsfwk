@@ -69,7 +69,12 @@ int32_t CollabSinkStartState::DoStartAbility(std::shared_ptr<DSchedCollab> dColl
         HILOGE("dCollab or event is null");
         return INVALID_PARAMETERS_ERR;
     }
-    int32_t ret = dCollab->ExeStartAbility();
+    auto syncCollabData = event->GetSharedObject<std::string>();
+    if (syncCollabData == nullptr) {
+        HILOGE("syncCollabData is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
+    int32_t ret = dCollab->ExeStartAbility(*syncCollabData);
     if (ret != ERR_OK) {
         HILOGE("failed, ret: %{public}d", ret);
     }
