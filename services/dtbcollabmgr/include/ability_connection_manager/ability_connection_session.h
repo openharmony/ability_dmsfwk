@@ -19,6 +19,8 @@
 #include <map>
 #include <string>
 #include <shared_mutex>
+#include <mutex>
+#include <condition_variable>
 #include <thread>
 
 #include "ability_connection_info.h"
@@ -279,6 +281,9 @@ private:
     std::shared_ptr<IAbilityConnectionSessionListener> sessionListener_ = nullptr;
 
     std::map<uint32_t, std::function<void(const std::string&)>> messageHandlerMap_;
+    // wait for connect state
+    std::mutex connectionMutex_;
+    std::condition_variable connectionCondition_;
 };
 } // namespace DistributedCollab
 } // namespace OHOS
