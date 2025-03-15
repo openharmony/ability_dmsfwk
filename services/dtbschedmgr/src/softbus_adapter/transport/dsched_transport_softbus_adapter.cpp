@@ -341,6 +341,17 @@ void DSchedTransportSoftbusAdapter::OnBind(int32_t sessionId, const std::string 
     }
 }
 
+std::string DSchedTransportSoftbusAdapter::GetPeerDeviceIdBySocket(const int32_t sessionId)
+{
+    std::lock_guard<std::mutex> sessionLock(sessionMutex_);
+    for (auto iter = sessions_.begin(); iter != sessions_.end(); iter++) {
+        if (iter->first == sessionId) {
+            return iter->second->GetPeerDeviceId();
+        }
+    }
+    return "";
+}
+
 void DSchedTransportSoftbusAdapter::OnShutdown(int32_t sessionId, bool isSelfcalled)
 {
     {

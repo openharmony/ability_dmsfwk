@@ -61,6 +61,7 @@ public:
     void UnregisterListener(int32_t serviceType, std::shared_ptr<IDataListener> listener);
     void SetCallingTokenId(int32_t callingTokenId);
     bool GetSessionIdByDeviceId(const std::string &peerDeviceId, int32_t &sessionId);
+    std::string GetPeerDeviceIdBySocket(const int32_t sessionId);
     bool IsNeedAllConnect(DSchedServiceType type);
 
 private:

@@ -252,6 +252,10 @@ void DSchedCollabManager::HandleGetSinkCollabVersion(const DSchedCollabInfo &inf
 int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
 {
     HILOGI("called, collabInfo is: %{public}s", info.ToString().c_str());
+    if (!MultiUserManager::GetInstance().IsCallerForeground(info.srcInfo_.uid_)) {
+        HILOGW("The current user is not foreground. callingUid: %{public}d .", info.srcInfo_.uid_);
+        return DMS_NOT_FOREGROUND_USER;
+    }
     if (info.srcInfo_.bundleName_.empty() || info.sinkInfo_.bundleName_.empty() ||
         info.srcInfo_.moduleName_.empty() || info.sinkInfo_.moduleName_.empty() ||
         info.srcInfo_.abilityName_.empty() || info.sinkInfo_.abilityName_.empty()) {
@@ -667,7 +671,9 @@ void DSchedCollabManager::NotifyDataRecv(const int32_t &softbusSessionId, int32_
         if (iter->second != nullptr && softbusSessionId == iter->second->GetSoftbusSessionId() &&
             collabToken == iter->second->GetCollabInfo().collabToken_) {
             HILOGI("softbusSessionId exist.");
-            iter->second->OnDataRecv(command, dataBuffer);
+            const std::string peerDeviceId =
+                DSchedTransportSoftbusAdapter::GetInstance().GetPeerDeviceIdBySocket(softbusSessionId);
+            iter->second->OnDataRecv(peerDeviceId, command, dataBuffer);
             if (command == NOTIFY_RESULT_CMD) {
                 RemoveTimeout(iter->first);
             }
