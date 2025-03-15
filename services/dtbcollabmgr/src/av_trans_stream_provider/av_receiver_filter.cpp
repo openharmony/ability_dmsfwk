@@ -285,12 +285,17 @@ std::shared_ptr<IChannelListener> AVReceiverFilter::GetChannelListener()
 std::shared_ptr<AVTransStreamData> AVReceiverFilter::GetStreamData()
 {
     if (dataQueue_.empty()) {
+        HILOGE("data queue empty");
         return nullptr;
     }
     auto topData = dataQueue_.top();
     uint32_t curIndex = topData->GetStreamDataExt().index_;
     while (lastIndex_ >= curIndex) {
         HILOGE("invalid index=%{public}u, cur=%{public}lld", curIndex, lastIndex_);
+        if (dataQueue_.empty()) {
+            HILOGE("invalid data pop till queue empty");
+            return nullptr;
+        }
         dataQueue_.pop();
         topData = dataQueue_.top();
         curIndex = topData->GetStreamDataExt().index_;
