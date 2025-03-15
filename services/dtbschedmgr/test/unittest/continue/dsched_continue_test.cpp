@@ -348,6 +348,15 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_007_1, TestSize.Level0)
     usleep(WAITTIME);
     ret = conti->PostContinueEndTask(result);
     EXPECT_EQ(ret, ERR_OK);
+
+    // result is CONTINUE_SINK_ABILITY_TERMINATED
+    result = CONTINUE_SINK_ABILITY_TERMINATED;
+    conti->UpdateState(DSCHED_CONTINUE_SINK_WAIT_END_STATE);
+    ret = conti->OnContinueEnd(result);
+    EXPECT_EQ(ret, ERR_OK);
+    conti->UpdateState(DSCHED_CONTINUE_SINK_END_STATE);
+    ret = conti->OnContinueEnd(result);
+    EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_007_1 end ret:" << ret << std::endl;
     usleep(WAITTIME);
 }

@@ -472,6 +472,12 @@ int32_t DSchedContinue::PostNotifyCompleteTask(int32_t result)
 int32_t DSchedContinue::OnContinueEnd(int32_t result)
 {
     HILOGI("called");
+    if (result == CONTINUE_SINK_ABILITY_TERMINATED &&
+        stateMachine_->GetStateType() >= DSCHED_CONTINUE_SINK_WAIT_END_STATE) {
+        HILOGI("OnContinueEnd result %{public}d, continueStateType %{public}d",
+            result, stateMachine_->GetStateType());
+        return ERR_OK;
+    }
     return PostContinueEndTask(result);
 }
 
