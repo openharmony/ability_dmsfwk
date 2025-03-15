@@ -115,7 +115,7 @@ HWTEST_F(DSchedCollabTest, PostSinkStartTask_001, TestSize.Level3)
     DTEST_LOG << "DSchedCollabTest PostSinkStartTask_001 begin" << std::endl;
     ASSERT_NE(dSchedCollab_, nullptr);
     ASSERT_EQ(dSchedCollab_->eventHandler_, nullptr);
-    EXPECT_EQ(dSchedCollab_->PostSinkStartTask(), INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(dSchedCollab_->PostSinkStartTask(""), INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedCollabTest PostSinkStartTask_001 end" << std::endl;
 }
 
@@ -589,10 +589,10 @@ HWTEST_F(DSchedCollabTest, ExeStartAbility_001, TestSize.Level3)
     ASSERT_NE(dSchedCollab_, nullptr);
     EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillRepeatedly(Return(true));
     EXPECT_CALL(*dmsSrvMock_, CheckCollabStartPermission(_, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
-    EXPECT_EQ(dSchedCollab_->ExeStartAbility(), INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(dSchedCollab_->ExeStartAbility(""), INVALID_PARAMETERS_ERR);
 
     EXPECT_CALL(*dmsSrvMock_, CheckCollabStartPermission(_, _, _, _)).WillOnce(Return(ERR_OK));
-    EXPECT_NE(dSchedCollab_->ExeStartAbility(), ERR_OK);
+    EXPECT_NE(dSchedCollab_->ExeStartAbility(""), ERR_OK);
     DTEST_LOG << "DSchedCollabTest ExeStartAbility_001 end" << std::endl;
 }
 
