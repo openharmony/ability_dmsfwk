@@ -464,17 +464,8 @@ int32_t DSchedCollab::ExeSrcGetVersion()
 int32_t DSchedCollab::ExeSrcStart()
 {
     HILOGI("called");
-    const std::string sinkDeviceId = collabInfo_.sinkInfo_.deviceId_;
-    int32_t ret = DSchedTransportSoftbusAdapter::GetInstance().ConnectDevice(sinkDeviceId,
-        softbusSessionId_, SERVICE_TYPE_COLLAB);
-    if (ret != ERR_OK) {
-        HILOGE("connect peer device failed, ret %{public}d", ret);
-        return ret;
-    }
-    HILOGI("this connection is successful, softbusSessionId %{public}d", softbusSessionId_);
-
     auto startCmd = std::make_shared<SinkStartCmd>();
-    ret = PackStartCmd(startCmd);
+    int32_t ret = PackStartCmd(startCmd);
     if (ret != ERR_OK) {
         HILOGE("pack startCmd failed, ret %{public}d", ret);
         return ret;
