@@ -299,20 +299,6 @@ bool DSchedCollabManager::IsSessionExists(const DSchedCollabInfo &info)
     return false;
 }
 
-void DSchedCollabManager::HandleCollabMission(const DSchedCollabInfo &info)
-{
-    HILOGI("called");
-    auto dCollab = GetDSchedCollabByTokenId(info.collabToken_);
-    if (dCollab == nullptr) {
-        HILOGE("can't find collab");
-        dCollab->PostErrEndTask(INVALID_PARAMETERS_ERR);
-        return;
-    }
-    dCollab->UpdateState(SOURCE_START_STATE);
-    dCollab->PostSrcStartTask();
-    HILOGI("end");
-}
-
 std::string DSchedCollabManager::GenerateCollabToken(const std::string &srcDeviceId)
 {
     HILOGI("called");
