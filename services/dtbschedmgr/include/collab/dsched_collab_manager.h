@@ -66,7 +66,6 @@ public:
 private:
     void StartEvent();
     void HandleGetSinkCollabVersion(const DSchedCollabInfo &info);
-    void HandleCollabMission(const DSchedCollabInfo &info);
     void HandleCollabPrepareResult(const std::string &collabToken, const int32_t &result,
         const int32_t &collabSessionId, const std::string &socketName, const sptr<IRemoteObject> &clientCB);
     int32_t HandleCloseSessions(const std::string &bundleName, const int32_t &pid);
