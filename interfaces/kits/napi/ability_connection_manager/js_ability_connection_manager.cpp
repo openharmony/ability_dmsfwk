@@ -49,8 +49,6 @@ constexpr int32_t ARG_COUNT_FOUR = 4;
 constexpr int32_t NAPI_BUF_LENGTH = 1024;
 constexpr int32_t PEER_APP_EXIT = 0;
 constexpr int32_t NETWORK_DISCONNECTED = 1;
-constexpr int32_t HORIZONTAL = 0;
-constexpr int32_t VERTICAL = 1;
 constexpr int32_t SOURCE = 0;
 constexpr int32_t SINK = 1;
 constexpr int32_t UNKNOWN = -1;
@@ -278,7 +276,7 @@ napi_value CreateBusinessError(napi_env env, int32_t errCode, bool isAsync = tru
 
 napi_value JsAbilityConnectionManager::CreateAbilityConnectionSession(napi_env env, napi_callback_info info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     GET_PARAMS(env, info, ARG_COUNT_FOUR);
     napi_value result = nullptr;
     if (argc != ARG_COUNT_FOUR) {
@@ -287,12 +285,13 @@ napi_value JsAbilityConnectionManager::CreateAbilityConnectionSession(napi_env e
         return result;
     }
 
-    std::string serverId;
-    if (!JsToString(env, argv[ARG_INDEX_ZERO], "serverId", serverId)) {
-        HILOGE("Failed to unwrap serverId.");
+    std::string serviceName = "";
+    if (!JsToServiceName(env, argv[ARG_INDEX_ZERO], serviceName)) {
+        HILOGE("Failed to unwrap service name/id");
         CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return result;
     }
+    
     std::shared_ptr<AbilityInfo> abilityInfo = nullptr;
     if (!JsToAbilityInfo(env, argv[ARG_INDEX_ONE], abilityInfo)) {
         HILOGE("Failed to unwrap abilityInfo.");
@@ -306,6 +305,10 @@ napi_value JsAbilityConnectionManager::CreateAbilityConnectionSession(napi_env e
         CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return result;
     }
+    if (peerInfo.serverId.empty()) {
+        peerInfo.serverId = serviceName;
+        peerInfo.serviceName = serviceName;
+    }
 
     ConnectOption connectOption;
     int32_t ret = JSToConnectOption(env, argv[ARG_INDEX_THREE], connectOption);
@@ -317,7 +320,7 @@ napi_value JsAbilityConnectionManager::CreateAbilityConnectionSession(napi_env e
 
     int32_t sessionId = -1;
     ret = AbilityConnectionManager::GetInstance().CreateSession(
-        serverId, abilityInfo, peerInfo, connectOption, sessionId);
+        serviceName, abilityInfo, peerInfo, connectOption, sessionId);
     if (ret != ERR_OK) {
         HILOGE("create session failed!");
         CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
@@ -327,9 +330,28 @@ napi_value JsAbilityConnectionManager::CreateAbilityConnectionSession(napi_env e
     return result;
 }
 
+bool JsAbilityConnectionManager::JsToServiceName(const napi_env &env, const napi_value &jsValue,
+    std::string& serviceName)
+{
+    HILOGI("parse serviceName");
+    // no serviceName
+    if (!JsToString(env, jsValue, "serviceName", serviceName)) {
+        HILOGW("Failed to unwrap serviceName.");
+    } else {
+        return true;
+    }
+    // neither exist
+    if (!JsToString(env, jsValue, "serverId", serviceName)) {
+        HILOGE("Failed to unwrap serverId and serviceName.");
+        return false;
+    }
+    return true;
+}
+
 bool JsAbilityConnectionManager::JsToAbilityInfo(const napi_env &env, const napi_value &jsValue,
     std::shared_ptr<AbilityInfo>& abilityInfo)
 {
+    HILOGI("parse abilityInfo");
     bool stageMode = false;
     napi_status status = OHOS::AbilityRuntime::IsStageContext(env, jsValue, stageMode);
     if (status != napi_ok || !stageMode) {
@@ -362,6 +384,7 @@ bool JsAbilityConnectionManager::JsToAbilityInfo(const napi_env &env, const napi
 
 bool JsAbilityConnectionManager::JsToPeerInfo(const napi_env &env, const napi_value &jsValue, PeerInfo &peerInfo)
 {
+    HILOGI("parse PeerInfo");
     napi_valuetype argvType = napi_undefined;
     NAPI_CALL_BASE(env, napi_typeof(env, jsValue, &argvType), false);
     if (argvType != napi_object) {
@@ -389,57 +412,95 @@ bool JsAbilityConnectionManager::JsToPeerInfo(const napi_env &env, const napi_va
         return false;
     }
 
-    if (!JsObjectToString(env, jsValue, "serverId", peerInfo.serverId)) {
-        HILOGE("Failed to unwrap serverId.");
-        return false;
+    if (!JsObjectToString(env, jsValue, "serviceName", peerInfo.serverId)) {
+        HILOGW("Failed to unwrap serviceName.");
     }
+    if (!JsObjectToString(env, jsValue, "serverId", peerInfo.serverId)) {
+        HILOGW("Failed to unwrap serverId.");
+    }
+    peerInfo.serviceName = peerInfo.serverId;
     return true;
 }
 
 int32_t JsAbilityConnectionManager::JSToConnectOption(const napi_env &env, const napi_value &jsValue,
     ConnectOption &option)
 {
+    HILOGI("parse ConnectOption");
     napi_valuetype argvType = napi_undefined;
     NAPI_CALL_BASE(env, napi_typeof(env, jsValue, &argvType), false);
     if (argvType != napi_object) {
         HILOGE("Parameter verification failed.");
         return ERR_INVALID_PARAMETERS;
     }
-
     if (!JsObjectToBool(env, jsValue, "needSendData", option.needSendData)) {
-        HILOGE("Failed to unwrap needSendData.");
-        return ERR_INVALID_PARAMETERS;
+        HILOGW("Failed to unwrap needSendData.");
     }
-
     if (!JsObjectToBool(env, jsValue, "needSendStream", option.needSendStream)) {
-        HILOGE("Failed to unwrap needSendStream.");
-        return ERR_INVALID_PARAMETERS;
+        HILOGW("Failed to unwrap needSendStream.");
     }
 
     if (!JsObjectToBool(env, jsValue, "needReceiveStream", option.needReceiveStream)) {
-        HILOGE("Failed to unwrap needSendStream.");
-        return ERR_INVALID_PARAMETERS;
+        HILOGW("Failed to unwrap needSendStream.");
     }
-
+    // check start option/options
+    napi_value startOptionsVal;
+    if (napi_get_named_property(env, jsValue, "startOptions", &startOptionsVal) == napi_ok) {
+        UnwrapStartOptions(env, startOptionsVal, option);
+    }
     napi_value optionsVal;
     if (napi_get_named_property(env, jsValue, "options", &optionsVal) == napi_ok) {
         UnwrapOptions(env, optionsVal, option);
-        if (option.options.GetStringParam(KEY_START_OPTION) == VALUE_START_OPTION_BACKGROUND &&
-            !IsSystemApp()) {
-            return ERR_IS_NOT_SYSTEM_APP;
-        }
+    }
+    // set default
+    if (option.options.IsEmpty()) {
+        option.options.SetParam(KEY_START_OPTION, AAFwk::String::Box(VALUE_START_OPTION_FOREGROUND));
     }
 
     napi_value parametersVal;
     if (napi_get_named_property(env, jsValue, "parameters", &parametersVal) == napi_ok) {
         UnwrapParameters(env, parametersVal, option);
     }
+    
+    return CheckConnectOption(option);
+}
 
-    return ERR_OK;
+bool JsAbilityConnectionManager::UnwrapStartOptions(napi_env env, napi_value startOptionsVal,
+    ConnectOption &connectOption)
+{
+    HILOGI("unwrap StartOptions");
+    if (startOptionsVal == nullptr) {
+        HILOGE("start options is nullptr");
+        return false;
+    }
+    napi_valuetype argvType = napi_undefined;
+    if (napi_typeof(env, startOptionsVal, &argvType) != napi_ok) {
+        return false;
+    }
+    if (argvType != napi_number) {
+        HILOGW("start options verification failed.");
+        return false;
+    }
+    int32_t startOption = 0;
+    napi_get_value_int32(env, startOptionsVal, &startOption);
+    if (startOption < static_cast<int32_t>(StartOptionParams::START_IN_FOREGROUND) ||
+            startOption > static_cast<int32_t>(StartOptionParams::START_IN_BACKGROUND)) {
+            HILOGE("invalid start option");
+            return false;
+    }
+    if (startOption == static_cast<int32_t>(StartOptionParams::START_IN_FOREGROUND)) {
+        connectOption.options.SetParam(KEY_START_OPTION, AAFwk::String::Box(VALUE_START_OPTION_FOREGROUND));
+    } else if (startOption == static_cast<int32_t>(StartOptionParams::START_IN_BACKGROUND)) {
+        connectOption.options.SetParam(KEY_START_OPTION, AAFwk::String::Box(VALUE_START_OPTION_BACKGROUND));
+    } else {
+        HILOGE("Invalid startOptions value.");
+        return false;
+    }
+    return true;
 }
 
 bool JsAbilityConnectionManager::UnwrapOptions(napi_env env, napi_value options, ConnectOption &connectOption)
 {
+    HILOGI("unwrap Options");
     if (options == nullptr) {
         HILOGI("options is nullptr");
         return false;
@@ -483,8 +544,28 @@ bool JsAbilityConnectionManager::UnwrapOptions(napi_env env, napi_value options,
     return true;
 }
 
+int32_t JsAbilityConnectionManager::CheckConnectOption(const ConnectOption &connectOption)
+{
+    // check background
+    if (connectOption.options.GetStringParam(KEY_START_OPTION) == VALUE_START_OPTION_BACKGROUND &&
+            !IsSystemApp()) {
+            HILOGE("normal app background denied");
+            return ERR_IS_NOT_SYSTEM_APP;
+    }
+    if (connectOption.needSendStream && !IsSystemApp()) {
+        HILOGE("normal app stream denied");
+        return ERR_IS_NOT_SYSTEM_APP;
+    }
+    if (connectOption.needReceiveStream && !IsSystemApp()) {
+        HILOGE("normal app stream denied");
+        return ERR_IS_NOT_SYSTEM_APP;
+    }
+    return ERR_OK;
+}
+
 bool JsAbilityConnectionManager::UnwrapParameters(napi_env env, napi_value parameters, ConnectOption &option)
 {
+    HILOGI("Unwrap Parameters");
     if (parameters == nullptr) {
         HILOGI("parameters is nullptr");
         return false;
@@ -601,9 +682,9 @@ napi_value JsAbilityConnectionManager::WrapPeerInfo(napi_env& env,
     napi_create_string_utf8(env, peerInfo.abilityName.c_str(), NAPI_AUTO_LENGTH, &abilityName);
     napi_set_named_property(env, peerInfoObj, "abilityName", abilityName);
 
-    napi_value serverId;
-    napi_create_string_utf8(env, peerInfo.serverId.c_str(), NAPI_AUTO_LENGTH, &serverId);
-    napi_set_named_property(env, peerInfoObj, "serverId", serverId);
+    napi_value serviceName;
+    napi_create_string_utf8(env, peerInfo.serverId.c_str(), NAPI_AUTO_LENGTH, &serviceName);
+    napi_set_named_property(env, peerInfoObj, "serviceName", serviceName);
 
     return peerInfoObj;
 }
@@ -682,7 +763,8 @@ napi_value JsAbilityConnectionManager::RegisterAbilityConnectionSessionCallback(
     return nullptr;
 }
 
-napi_value JsAbilityConnectionManager::UnregisterAbilityConnectionSessionCallback(napi_env env, napi_callback_info info)
+napi_value JsAbilityConnectionManager::UnregisterAbilityConnectionSessionCallback(napi_env env,
+    napi_callback_info info)
 {
     HILOGD("called.");
     GET_PARAMS(env, info, ARG_COUNT_TWO);
@@ -1042,7 +1124,6 @@ napi_value JsAbilityConnectionManager::SendMessage(napi_env env, napi_callback_i
     }
 
     HILOGI("end.");
-    
     return promise;
 }
 
@@ -1398,12 +1479,12 @@ bool JsAbilityConnectionManager::JsToSurfaceParam(const napi_env &env, const nap
 
     int32_t flip = -1;
     if (JsObjectToInt(env, jsValue, "flip", flip)) {
-        if (flip < static_cast<int32_t>(FlipOption::HORIZONTAL) ||
-            flip > static_cast<int32_t>(FlipOption::VERTICAL)) {
+        if (flip < static_cast<int32_t>(FlipOptions::HORIZONTAL) ||
+            flip > static_cast<int32_t>(FlipOptions::VERTICAL)) {
             HILOGE("Invalid flip value: %{public}d", flip);
             return false;
         }
-        surfaceParam.flip = static_cast<FlipOption>(flip);
+        surfaceParam.flip = static_cast<FlipOptions>(flip);
     }
 
     if (!JsObjectToInt(env, jsValue, "rotation", surfaceParam.rotation)) {
@@ -1623,13 +1704,14 @@ void InitDisconnectReason(napi_env& env, napi_value& exports)
     napi_set_named_property(env, exports, propertyName, obj);
 }
 
-void InitFlipOption(napi_env& env, napi_value& exports)
+void InitFlipOptions(napi_env& env, napi_value& exports)
 {
-    char propertyName[] = "FlipOption";
+    char propertyName[] = "FlipOptions";
+    char propertyNameOld[] = "FlipOption";
     napi_value horizontal = nullptr;
     napi_value vertical = nullptr;
-    napi_create_int32(env, HORIZONTAL, &horizontal);
-    napi_create_int32(env, VERTICAL, &vertical);
+    napi_create_int32(env, static_cast<int32_t>(FlipOptions::HORIZONTAL), &horizontal);
+    napi_create_int32(env, static_cast<int32_t>(FlipOptions::VERTICAL), &vertical);
 
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_STATIC_PROPERTY("HORIZONTAL", horizontal),
@@ -1639,6 +1721,7 @@ void InitFlipOption(napi_env& env, napi_value& exports)
     napi_create_object(env, &obj);
     napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
     napi_set_named_property(env, exports, propertyName, obj);
+    napi_set_named_property(env, exports, propertyNameOld, obj);
 }
 
 void InitStreamRole(napi_env& env, napi_value& exports)
@@ -1673,6 +1756,26 @@ void InitVideoPixelFormat(napi_env& env, napi_value& exports)
         DECLARE_NAPI_STATIC_PROPERTY("UNKNOWN", unknown),
         DECLARE_NAPI_STATIC_PROPERTY("NV12", nv12),
         DECLARE_NAPI_STATIC_PROPERTY("NV21", nv21),
+    };
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    napi_set_named_property(env, exports, propertyName, obj);
+}
+
+void InitStartOptionParams(napi_env& env, napi_value& exports)
+{
+    char propertyName[] = "StartOptionParams";
+    napi_value startInForeground = nullptr;
+    napi_value startInBackground = nullptr;
+    napi_create_int32(env, static_cast<int32_t>(StartOptionParams::START_IN_FOREGROUND),
+        &startInForeground);
+    napi_create_int32(env, static_cast<int32_t>(StartOptionParams::START_IN_BACKGROUND),
+        &startInBackground);
+
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("START_IN_FOREGROUND", startInForeground),
+        DECLARE_NAPI_STATIC_PROPERTY("START_IN_BACKGROUND", startInBackground),
     };
     napi_value obj = nullptr;
     napi_create_object(env, &obj);
@@ -1717,13 +1820,15 @@ napi_value JsAbilityConnectionManagerInit(napi_env env, napi_value exports)
     }
     InitConnectOptionParams(env, exports);
     InitDisconnectReason(env, exports);
-    InitFlipOption(env, exports);
+    InitFlipOptions(env, exports);
     InitStreamRole(env, exports);
+    InitVideoPixelFormat(env, exports);
+    InitStartOptionParams(env, exports);
     InitVideoPixelFormat(env, exports);
     InitFunction(env, exports);
 
     HILOGI("napi_define_properties end");
     return exports;
 }
-}  // namespace DistributedSchedule
+}  // namespace DistributedCollab
 }  // namespace OHOS
