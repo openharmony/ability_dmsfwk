@@ -107,6 +107,39 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_001_1, TestSize.Level0)
 }
 
 /**
+ * @tc.name: DSchedContinueTest_001_2
+ * @tc.desc: DSchedContinue Constructor
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_001_2, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueTest DSchedContinueTest_001_2 begin" << std::endl;
+    std::shared_ptr<DSchedContinueStartCmd> startCmd = nullptr;
+    int32_t sessionId = 1;
+    int32_t accountId = 1;
+
+    auto testInfo = std::make_shared<DSchedContinue>(startCmd, sessionId, accountId);
+    EXPECT_TRUE(testInfo->continueInfo_.sourceBundleName_.empty());
+
+    startCmd = std::make_shared<DSchedContinueStartCmd>();
+    auto testInfo2 = std::make_shared<DSchedContinue>(startCmd, sessionId, accountId);
+    EXPECT_EQ(testInfo2->accountId_, accountId);
+
+    startCmd->sourceMissionId_ = 1;
+    auto testInfo3 = std::make_shared<DSchedContinue>(startCmd, sessionId, accountId);
+    EXPECT_EQ(testInfo3->continueInfo_.missionId_, startCmd->sourceMissionId_);
+
+    startCmd->dstBundleName_ = "sinkBundleName";
+    auto testInfo4 = std::make_shared<DSchedContinue>(startCmd, sessionId, accountId);
+    EXPECT_EQ(testInfo4->continueInfo_.sinkBundleName_, startCmd->dstBundleName_);
+
+    startCmd->srcBundleName_ = "srcBundleName";
+    auto testInfo5 = std::make_shared<DSchedContinue>(startCmd, sessionId, accountId);
+    EXPECT_EQ(testInfo5->continueInfo_.sourceBundleName_, startCmd->srcBundleName_);
+    DTEST_LOG << "DSchedContinueTest DSchedContinueTest_001_2 end" << std::endl;
+}
+
+/**
  * @tc.name: DSchedContinueTest_002_1
  * @tc.desc: OnStartCmd and PostCotinueAbilityTask
  * @tc.type: FUNC

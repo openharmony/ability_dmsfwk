@@ -156,6 +156,43 @@ ohos_unittest("ChannelManagerTest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("SoftbusFileAdpaterTest") {
+  visibility = [ ":*" ]
+
+  module_out_path = module_output_path
+
+  cflags = [ "-Dprivate=public" ]
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+
+  include_dirs = [ "${dms_path}/services/dtbcollabmgr/test/unittest" ]
+
+  if (dmsfwk_softbus_file_ability) {
+    sources = [ "softbus_file_adapter_inner_test.cpp" ]
+  } else {
+    sources = [ "softbus_file_adapter_common_test.cpp" ]
+  }
+
+  deps = [
+    "${dms_path}/common:distributed_sched_utils",
+    "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
+    "googletest:gmock",
+    "hilog:libhilog",
+  ]
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -163,5 +200,6 @@ group("unittest") {
     ":ChannelManagerDataSenderReceiverTest",
     ":ChannelManagerSessionDataHeaderTest",
     ":ChannelManagerTest",
+    ":SoftbusFileAdpaterTest",
   ]
 }
