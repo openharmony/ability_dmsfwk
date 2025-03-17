@@ -142,31 +142,31 @@ HWTEST_F(AbilityConnectionSessionTest, ConvertToSurfaceParam_Test_001, TestSize.
     ASSERT_NE(connectionSesion_, nullptr);
     SurfaceParams param;
     param.rotation = SURFACE_ROTATE_NONE;
-    param.flip = FlipOption::HORIZONTAL;
+    param.flip = FlipOptions::HORIZONTAL;
     auto outParam = connectionSesion_->ConvertToSurfaceParam(param);
     EXPECT_EQ(outParam.rotate, SurfaceRotate::ROTATE_NONE);
     EXPECT_EQ(outParam.filp, SurfaceFilp::FLIP_H);
 
     param.rotation = SURFACE_ROTATE_90;
-    param.flip = FlipOption::VERTICAL;
+    param.flip = FlipOptions::VERTICAL;
     outParam = connectionSesion_->ConvertToSurfaceParam(param);
     EXPECT_EQ(outParam.rotate, SurfaceRotate::ROTATE_90);
     EXPECT_EQ(outParam.filp, SurfaceFilp::FLIP_V);
 
     param.rotation = SURFACE_ROTATE_180;
-    param.flip = FlipOption::UNKNOWN;
+    param.flip = FlipOptions::UNKNOWN;
     outParam = connectionSesion_->ConvertToSurfaceParam(param);
     EXPECT_EQ(outParam.rotate, SurfaceRotate::ROTATE_180);
     EXPECT_EQ(outParam.filp, SurfaceFilp::FLIP_NONE);
 
     param.rotation = SURFACE_ROTATE_270;
-    param.flip = FlipOption::HORIZONTAL;
+    param.flip = FlipOptions::HORIZONTAL;
     outParam = connectionSesion_->ConvertToSurfaceParam(param);
     EXPECT_EQ(outParam.rotate, SurfaceRotate::ROTATE_270);
     EXPECT_EQ(outParam.filp, SurfaceFilp::FLIP_H);
 
     param.rotation = static_cast<SurfaceRotateParams>(1);
-    param.flip = FlipOption::HORIZONTAL;
+    param.flip = FlipOptions::HORIZONTAL;
     outParam = connectionSesion_->ConvertToSurfaceParam(param);
     EXPECT_EQ(outParam.rotate, SurfaceRotate::ROTATE_NONE);
     EXPECT_EQ(outParam.filp, SurfaceFilp::FLIP_H);

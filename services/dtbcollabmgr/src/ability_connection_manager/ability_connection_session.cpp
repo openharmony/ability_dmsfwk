@@ -686,10 +686,10 @@ SurfaceParam AbilityConnectionSession::ConvertToSurfaceParam(const SurfaceParams
     }
 
     switch (param.flip) {
-        case FlipOption::HORIZONTAL:
+        case FlipOptions::HORIZONTAL:
             surfaveParam.filp = SurfaceFilp::FLIP_H;
             break;
-        case FlipOption::VERTICAL:
+        case FlipOptions::VERTICAL:
             surfaveParam.filp = SurfaceFilp::FLIP_V;
             break;
         default:
