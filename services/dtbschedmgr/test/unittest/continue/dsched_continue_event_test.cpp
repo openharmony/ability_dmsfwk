@@ -25,6 +25,8 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace DistributedSchedule {
+const char* EXTRO_INFO_JSON_KEY_ACCESS_TOKEN = "accessTokenID";
+const char* DMS_VERSION_ID = "dmsVersion";
 
 void DSchedContinueEventTest::SetUpTestCase()
 {
@@ -350,6 +352,347 @@ HWTEST_F(DSchedContinueEventTest, DSchedContinueEventTest_011_1, TestSize.Level0
     EXPECT_TRUE(ret);
     cJSON_Delete(rootValue);
     DTEST_LOG << "DSchedContinueEventTest DSchedContinueEventTest_008_1 end ret:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: UnmarshalCallerInfo_001
+ * @tc.desc: DSchedContinueDataCmd UnmarshalCallerInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueEventTest, UnmarshalCallerInfo_001, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfo_001 begin" << std::endl;
+    DSchedContinueDataCmd cmd;
+    std::string jsonStr = "test";
+    auto ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    auto rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON_AddStringToObject(rootValue, "Uid", "test");
+    char *data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    
+    cJSON_AddNumberToObject(rootValue, "SourceDeviceId", 0);
+    data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfo_001 end ret:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: UnmarshalCallerInfo_002
+ * @tc.desc: DSchedContinueDataCmd UnmarshalCallerInfo_002
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueEventTest, UnmarshalCallerInfo_002, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfo_002 begin" << std::endl;
+    DSchedContinueDataCmd cmd;
+    auto rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON_AddStringToObject(rootValue, "SourceDeviceId", "SourceDeviceId");
+    cJSON_AddStringToObject(rootValue, "CallerAppId", "CallerAppId");
+    char *data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    auto jsonStr = std::string(data);
+    auto ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_AddStringToObject(rootValue, "Uid", "Uid");
+    data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfo_002 end ret:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: UnmarshalCallerInfo_003
+ * @tc.desc: DSchedContinueDataCmd UnmarshalCallerInfo_003
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueEventTest, UnmarshalCallerInfo_003, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfo_003 begin" << std::endl;
+    DSchedContinueDataCmd cmd;
+    auto rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON_AddNumberToObject(rootValue, "Uid", 0);
+    cJSON_AddNumberToObject(rootValue, "Pid", 0);
+    cJSON_AddNumberToObject(rootValue, "CallerType", 0);
+    cJSON_AddStringToObject(rootValue, "SourceDeviceId", "SourceDeviceId");
+    cJSON_AddNumberToObject(rootValue, "Duid", 0);
+    cJSON_AddStringToObject(rootValue, "CallerAppId", "CallerAppId");
+    char *data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    auto jsonStr = std::string(data);
+    auto ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfo_003 end ret:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: UnmarshalCallerInfoExtra_001
+ * @tc.desc: DSchedContinueDataCmd UnmarshalCallerInfoExtra_001
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueEventTest, UnmarshalCallerInfoExtra_001, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfoExtra_001 begin" << std::endl;
+    std::string jsonStr = "test";
+    DSchedContinueDataCmd cmd;
+    auto ret = cmd.UnmarshalCallerInfo(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    auto rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON *bundleNames = cJSON_CreateArray();
+    if (bundleNames == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    cJSON *bundleName = cJSON_CreateNumber(0);
+    if (bundleName == nullptr) {
+        cJSON_Delete(rootValue);
+        cJSON_Delete(bundleNames);
+        ASSERT_TRUE(false);
+    }
+
+    cJSON_AddItemToArray(bundleNames, bundleName);
+    cJSON_AddItemToObject(rootValue, "BundleNames", bundleNames);
+    char *data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfoExtra_001 end ret:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: UnmarshalCallerInfoExtra_002
+ * @tc.desc: DSchedContinueDataCmd UnmarshalCallerInfoExtra_002
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueEventTest, UnmarshalCallerInfoExtra_002, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfoExtra_002 begin" << std::endl;
+    DSchedContinueDataCmd cmd;
+    auto rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+    cJSON *bundleNames = cJSON_CreateArray();
+    if (bundleNames == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    cJSON *bundleName = cJSON_CreateString("test");
+    if (bundleName == nullptr) {
+        cJSON_Delete(rootValue);
+        cJSON_Delete(bundleNames);
+        ASSERT_TRUE(false);
+    }
+
+    cJSON_AddItemToArray(bundleNames, bundleName);
+    cJSON_AddItemToObject(rootValue, "BundleNames", bundleNames);
+    char *data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    auto jsonStr = std::string(data);
+    auto ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfoExtra_002 end ret:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: UnmarshalCallerInfoExtra_003
+ * @tc.desc: DSchedContinueDataCmd UnmarshalCallerInfoExtra_003
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueEventTest, UnmarshalCallerInfoExtra_003, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfoExtra_003 begin" << std::endl;
+    DSchedContinueDataCmd cmd;
+    auto rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+
+    cJSON_AddNumberToObject(rootValue, "ExtraInfo", 0);
+    char *data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    auto jsonStr = std::string(data);
+    auto ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+
+    cJSON_DeleteItemFromObject(rootValue, "ExtraInfo");
+    cJSON_AddStringToObject(rootValue, "ExtraInfo", "test");
+    data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfoExtra_003 end ret:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: UnmarshalCallerInfoExtra_004
+ * @tc.desc: DSchedContinueDataCmd UnmarshalCallerInfoExtra_004
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueEventTest, UnmarshalCallerInfoExtra_004, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfoExtra_004 begin" << std::endl;
+    DSchedContinueDataCmd cmd;
+    auto rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+
+    nlohmann::json extraInfoJson;
+    extraInfoJson["test"] = "test";
+    std::string testStr = extraInfoJson.dump();
+    cJSON_AddStringToObject(rootValue, "ExtraInfo", testStr.c_str());
+    auto data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    auto jsonStr = std::string(data);
+    auto ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, ERR_OK);
+    cJSON_free(data);
+
+    extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN] = "test";
+    testStr = extraInfoJson.dump();
+    cJSON_DeleteItemFromObject(rootValue, "ExtraInfo");
+    cJSON_AddStringToObject(rootValue, "ExtraInfo", testStr.c_str());
+    data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, ERR_OK);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfoExtra_004 end ret:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: UnmarshalCallerInfoExtra_005
+ * @tc.desc: DSchedContinueDataCmd UnmarshalCallerInfoExtra_005
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueEventTest, UnmarshalCallerInfoExtra_005, TestSize.Level0)
+{
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfoExtra_005 begin" << std::endl;
+    DSchedContinueDataCmd cmd;
+    auto rootValue = cJSON_CreateObject();
+    ASSERT_NE(rootValue, nullptr);
+
+    nlohmann::json extraInfoJson;
+    extraInfoJson[EXTRO_INFO_JSON_KEY_ACCESS_TOKEN] = 1;
+    std::string testStr = extraInfoJson.dump();
+    cJSON_AddStringToObject(rootValue, "ExtraInfo", testStr.c_str());
+    auto data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    auto jsonStr = std::string(data);
+    auto ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, ERR_OK);
+    cJSON_free(data);
+
+    extraInfoJson[DMS_VERSION_ID] = 1;
+    testStr = extraInfoJson.dump();
+    cJSON_DeleteItemFromObject(rootValue, "ExtraInfo");
+    cJSON_AddStringToObject(rootValue, "ExtraInfo", testStr.c_str());
+    data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, ERR_OK);
+    cJSON_free(data);
+
+    extraInfoJson[DMS_VERSION_ID] = "test";
+    testStr = extraInfoJson.dump();
+    cJSON_DeleteItemFromObject(rootValue, "ExtraInfo");
+    cJSON_AddStringToObject(rootValue, "ExtraInfo", testStr.c_str());
+    data = cJSON_Print(rootValue);
+    if (data == nullptr) {
+        cJSON_Delete(rootValue);
+        ASSERT_TRUE(false);
+    }
+
+    jsonStr = std::string(data);
+    ret = cmd.UnmarshalCallerInfoExtra(jsonStr);
+    EXPECT_EQ(ret, ERR_OK);
+    cJSON_free(data);
+    cJSON_Delete(rootValue);
+    DTEST_LOG << "DSchedContinueEventTest UnmarshalCallerInfoExtra_005 end ret:" << ret << std::endl;
 }
 }
 }
