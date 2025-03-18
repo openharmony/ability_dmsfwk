@@ -474,8 +474,10 @@ bool DSchedContinueDataCmd::UnmarshalWantParcel(cJSON* rootValue)
     OHOS::AAFwk::Want* wantPtr;
     DistributedWantV2* dtbWant = DistributedSchedule::DistributedWantV2::Unmarshalling(wantParcel);
     if (dtbWant == nullptr) {
+        HILOGE("DistributedWantV2 Unmarshall failed, try to Unmarshall by amsWant");
         wantPtr = AAFwk::Want::Unmarshalling(wantParcel);
     } else {
+        HILOGE("DistributedWantV2 Unmarshall success");
         std::shared_ptr<AAFwk::Want> amsWant = dtbWant->ToWant();
         wantPtr = new(std::nothrow) AAFwk::Want();
         wantPtr->SetOperation(amsWant->GetOperation());
