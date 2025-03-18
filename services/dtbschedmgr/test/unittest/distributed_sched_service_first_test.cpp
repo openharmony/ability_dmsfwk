@@ -1670,5 +1670,35 @@ HWTEST_F(DistributedSchedServiceFirstTest, ReleaseAbilityFromRemote_002, TestSiz
     DistributedSchedService::GetInstance().ProcessConnectDied(connect);
     DTEST_LOG << "DistributedSchedServiceFirstTest ReleaseAbilityFromRemote_002 end" << std::endl;
 }
+
+/**
+ * @tc.name  : ConnectDExtAbility_Test01
+ * @tc.number: ConnectDExtAbility_001
+ * @tc.desc  : Test ConnectDExtAbility function when user is not foreground.
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtAbility_Test01, TestSize.Level0)
+{
+    std::string bundleName = "testBundle";
+    std::string abilityName = "testAbility";
+    int32_t userId = 1;
+    int32_t result = DistributedSchedService::GetInstance().ConnectDExtAbility(bundleName, abilityName, userId);
+    EXPECT_EQ(result, DMS_NOT_FOREGROUND_USER);
+    DTEST_LOG << "DistributedSchedServiceFirstTest ConnectDExtAbility_Test01 end" << std::endl;
+}
+
+/**
+ * @tc.name  : ConnectDExtAbility_Test02
+ * @tc.number: ConnectDExtAbility_002
+ * @tc.desc  : Test ConnectDExtAbility function when proxy is empty.
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtAbility_Test02, TestSize.Level0)
+{
+    std::string bundleName = "com.example.dms_extension";
+    std::string abilityName = "EntrydistributedAbility";
+    int32_t userId = 100;
+    int32_t result = DistributedSchedService::GetInstance().ConnectDExtAbility(bundleName, abilityName, userId);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceFirstTest ConnectDExtAbility_Test02 end" << std::endl;
+}
 }
 }
