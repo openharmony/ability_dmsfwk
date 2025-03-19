@@ -59,7 +59,7 @@ namespace {
         { ChannelDataType::FILE, "F" }
     };
 
-    static constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW = 64 * 1024;
+    static constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW = 4 * 1024 * 1024;
     static constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MAX_LATENCY = 10000;
     static constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MIN_LATENCY = 2000;
 
@@ -67,8 +67,6 @@ namespace {
         { .qos = QOS_TYPE_MIN_BW, .value = DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW },
         { .qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_COLLAB_LOW_QOS_TYPE_MAX_LATENCY },
         { .qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_COLLAB_LOW_QOS_TYPE_MIN_LATENCY },
-        // only watch, need macro
-        { .qos = QOS_TYPE_TRANS_CONTINUOUS, .value = 1 },
         { .qos = QOS_TYPE_MAX_IDLE_TIMEOUT, .value = 60 * 60 * 1000 }
     };
 
