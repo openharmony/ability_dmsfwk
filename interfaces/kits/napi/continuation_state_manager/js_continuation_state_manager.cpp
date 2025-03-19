@@ -17,6 +17,7 @@
 #include "js_continuation_state_client.h"
 
 #include "napi_error_code.h"
+#include "dtbcollabmgr_log.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
@@ -28,7 +29,7 @@ namespace {
     const std::string TAG = "JsContinuationStateManager";
     const std::string BIZTYPE_PREPARE_CONTINUE = "prepareContinue";
     const std::string CODE_KEY_NAME = "code";
-    const std::string SYSTEM_WORK_ABNORMALLY_ERR_MSG = "the system ability work abnormally.";
+    const std::string ERR_DMS_WORK_ABNORMALLY_ERR_MSG = "the system ability work abnormally.";
     const int32_t ARG_INDEX_4_CALLBACK_FUNC = 2;
     const int32_t SUCCESS = 0;
     const int32_t FAILED = 1;
@@ -48,7 +49,8 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOn Unsupported business type: %{public}s; need: %{public}s",
             stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
-        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, SYSTEM_WORK_ABNORMALLY_ERR_MSG));
+        napi_throw(env, GenerateBusinessError(
+            env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
         result = FAILED;
         napi_get_value_int32(env, ret, &result);
         return ret;
@@ -72,7 +74,8 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
     HILOGI("ContinueStateCallbackOn register callback result: %{public}d", result);
 
     if (result != ERR_OK) {
-        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, SYSTEM_WORK_ABNORMALLY_ERR_MSG));
+        napi_throw(env, GenerateBusinessError(
+            env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
     }
     napi_get_value_int32(env, ret, &result);
     return ret;
@@ -87,7 +90,8 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOff Unsupported business type: %{public}s; need: %{public}s",
             stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
-        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, SYSTEM_WORK_ABNORMALLY_ERR_MSG));
+        napi_throw(env, GenerateBusinessError(
+            env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
         result = FAILED;
         napi_get_value_int32(env, ret, &result);
         return ret;
@@ -119,7 +123,8 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     napi_call_function(env, undefined, callback, CALLBACK_PARAMS_NUM, callbackResult, nullptr);
 
     if (result != ERR_OK) {
-        napi_throw(env, GenerateBusinessError(env, SYSTEM_WORK_ABNORMALLY, SYSTEM_WORK_ABNORMALLY_ERR_MSG));
+        napi_throw(env, GenerateBusinessError(
+            env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
     }
     napi_get_value_int32(env, ret, &result);
     return ret;
