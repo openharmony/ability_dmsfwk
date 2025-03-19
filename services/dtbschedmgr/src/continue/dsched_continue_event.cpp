@@ -17,6 +17,7 @@
 
 #include "parcel.h"
 
+#include "distributed_want_v2.h"
 #include "distributed_sched_utils.h"
 #include "dms_constant.h"
 #include "dtbschedmgr_log.h"
@@ -241,12 +242,13 @@ bool DSchedContinueDataCmd::MarshalInner(cJSON* rootValue)
         return false;
     }
 
-    Parcel wantParcel;
-    if (!want_.Marshalling(wantParcel)) {
+    Parcel dtbWantParcel;
+    DistributedWantV2 dtbWant(want_);
+    if (!dtbWant.Marshalling(dtbWantParcel)) {
         return false;
     }
-    std::string wantStr = ParcelToBase64Str(wantParcel);
-    cJSON_AddStringToObject(rootValue, "Want", wantStr.c_str());
+    std::string dtbWantStr = ParcelToBase64Str(dtbWantParcel);
+    cJSON_AddStringToObject(rootValue, "Want", dtbWantStr.c_str());
 
     Parcel abilityParcel;
     if (!abilityInfo_.Marshalling(abilityParcel)) {
@@ -469,7 +471,18 @@ bool DSchedContinueDataCmd::UnmarshalWantParcel(cJSON* rootValue)
         return false;
     }
 
-    auto wantPtr = AAFwk::Want::Unmarshalling(wantParcel);
+    OHOS::AAFwk::Want* wantPtr;
+    DistributedWantV2* dtbWant = DistributedSchedule::DistributedWantV2::Unmarshalling(wantParcel);
+    if (dtbWant == nullptr) {
+        HILOGE("DistributedWantV2 Unmarshall failed, try to Unmarshall by amsWant");
+        wantPtr = AAFwk::Want::Unmarshalling(wantParcel);
+    } else {
+        HILOGI("DistributedWantV2 Unmarshall success");
+        std::shared_ptr<AAFwk::Want> amsWant = dtbWant->ToWant();
+        wantPtr = new(std::nothrow) AAFwk::Want();
+        wantPtr->SetOperation(amsWant->GetOperation());
+        wantPtr->SetParams(amsWant->GetParams());
+    }
     if (wantPtr == nullptr) {
         HILOGE("Want unmarshalling fail, check return null.");
         return false;
