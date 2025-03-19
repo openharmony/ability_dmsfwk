@@ -65,6 +65,8 @@ void SurfaceDecoderFilterTest::TearDown()
 HWTEST_F(SurfaceDecoderFilterTest, Configure_Test, TestSize.Level1)
 {
     DTEST_LOG << "SurfaceDecoderFilterTest Configure_Test begin" << std::endl;
+    ASSERT_NE(decodeFilter_, nullptr);
+    ASSERT_EQ(decodeFilter_->codecAdpater_, nullptr);
     std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
     auto ret = decodeFilter_->Configure(parameter);
     EXPECT_EQ(ret, Status::ERROR_NULL_POINTER);
@@ -79,6 +81,8 @@ HWTEST_F(SurfaceDecoderFilterTest, Configure_Test, TestSize.Level1)
 HWTEST_F(SurfaceDecoderFilterTest, DoStart_Test, TestSize.Level1)
 {
     DTEST_LOG << "SurfaceDecoderFilterTest DoStart_Test begin" << std::endl;
+    ASSERT_NE(decodeFilter_, nullptr);
+    ASSERT_EQ(decodeFilter_->codecAdpater_, nullptr);
     auto ret = decodeFilter_->DoStart();
     EXPECT_EQ(ret, Status::ERROR_UNKNOWN);
     DTEST_LOG << "SurfaceDecoderFilterTest DoStart_Test end" << std::endl;
@@ -92,6 +96,8 @@ HWTEST_F(SurfaceDecoderFilterTest, DoStart_Test, TestSize.Level1)
 HWTEST_F(SurfaceDecoderFilterTest, DoPause_Test, TestSize.Level1)
 {
     DTEST_LOG << "SurfaceDecoderFilterTest DoPause_Test begin" << std::endl;
+    ASSERT_NE(decodeFilter_, nullptr);
+    ASSERT_EQ(decodeFilter_->codecAdpater_, nullptr);
     auto ret = decodeFilter_->DoPause();
     EXPECT_EQ(ret, Status::ERROR_UNKNOWN);
     DTEST_LOG << "SurfaceDecoderFilterTest DoPause_Test end" << std::endl;
@@ -105,6 +111,8 @@ HWTEST_F(SurfaceDecoderFilterTest, DoPause_Test, TestSize.Level1)
 HWTEST_F(SurfaceDecoderFilterTest, DoResume_Test, TestSize.Level1)
 {
     DTEST_LOG << "SurfaceDecoderFilterTest DoResume_Test begin" << std::endl;
+    ASSERT_NE(decodeFilter_, nullptr);
+    ASSERT_EQ(decodeFilter_->codecAdpater_, nullptr);
     auto ret = decodeFilter_->DoResume();
     EXPECT_EQ(ret, Status::ERROR_UNKNOWN);
     DTEST_LOG << "SurfaceDecoderFilterTest DoResume_Test end" << std::endl;
@@ -118,6 +126,8 @@ HWTEST_F(SurfaceDecoderFilterTest, DoResume_Test, TestSize.Level1)
 HWTEST_F(SurfaceDecoderFilterTest, DoStop_Test, TestSize.Level1)
 {
     DTEST_LOG << "SurfaceDecoderFilterTest DoStop_Test begin" << std::endl;
+    ASSERT_NE(decodeFilter_, nullptr);
+    ASSERT_EQ(decodeFilter_->codecAdpater_, nullptr);
     auto ret = decodeFilter_->DoStop();
     EXPECT_EQ(ret, Status::OK);
     DTEST_LOG << "SurfaceDecoderFilterTest DoStop_Test end" << std::endl;
@@ -131,6 +141,8 @@ HWTEST_F(SurfaceDecoderFilterTest, DoStop_Test, TestSize.Level1)
 HWTEST_F(SurfaceDecoderFilterTest, SetParameter_Test, TestSize.Level1)
 {
     DTEST_LOG << "SurfaceDecoderFilterTest SetParameter_Test begin" << std::endl;
+    ASSERT_NE(decodeFilter_, nullptr);
+    ASSERT_EQ(decodeFilter_->codecAdpater_, nullptr);
     std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
     EXPECT_NO_FATAL_FAILURE(decodeFilter_->SetParameter(parameter));
     DTEST_LOG << "SurfaceDecoderFilterTest SetParameter_Test end" << std::endl;
@@ -144,11 +156,28 @@ HWTEST_F(SurfaceDecoderFilterTest, SetParameter_Test, TestSize.Level1)
 HWTEST_F(SurfaceDecoderFilterTest, OnLinkedResult_Test, TestSize.Level1)
 {
     DTEST_LOG << "SurfaceDecoderFilterTest OnLinkedResult_Test begin" << std::endl;
+    ASSERT_NE(decodeFilter_, nullptr);
+    ASSERT_EQ(decodeFilter_->codecAdpater_, nullptr);
     decodeFilter_->onLinkedResultCallback_ = nullptr;
     sptr<AVBufferQueueProducer> outputBufferQueue = nullptr;
     std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
     EXPECT_NO_FATAL_FAILURE(decodeFilter_->OnLinkedResult(nullptr, parameter));
     DTEST_LOG << "SurfaceDecoderFilterTest OnLinkedResult_Test end" << std::endl;
+}
+
+/**
+ * @tc.name: SetOutputSurface_001
+ * @tc.desc: SurfaceDecoderFilter SetOutputSurface
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDecoderFilterTest, SetOutputSurface_001, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceDecoderFilterTest SetOutputSurface_001 begin" << std::endl;
+    ASSERT_NE(decodeFilter_, nullptr);
+    ASSERT_EQ(decodeFilter_->codecAdpater_, nullptr);
+    sptr<Surface> surface = nullptr;
+    EXPECT_EQ(decodeFilter_->SetOutputSurface(surface), Status::ERROR_UNKNOWN);
+    DTEST_LOG << "SurfaceDecoderFilterTest SetOutputSurface_001 end" << std::endl;
 }
 }  // namespace DistributedCollab
 }  // namespace OHOS
