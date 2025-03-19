@@ -50,7 +50,7 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
         HILOGE("ContinueStateCallbackOn Unsupported business type: %{public}s; need: %{public}s",
             stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
         napi_throw(env, GenerateBusinessError(
-                env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
+            env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
         result = FAILED;
         napi_get_value_int32(env, ret, &result);
         return ret;
@@ -75,7 +75,7 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
 
     if (result != ERR_OK) {
         napi_throw(env, GenerateBusinessError(
-                env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
+            env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
     }
     napi_get_value_int32(env, ret, &result);
     return ret;
@@ -91,7 +91,7 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
         HILOGE("ContinueStateCallbackOff Unsupported business type: %{public}s; need: %{public}s",
             stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
         napi_throw(env, GenerateBusinessError(
-                env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
+            env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
         result = FAILED;
         napi_get_value_int32(env, ret, &result);
         return ret;
@@ -124,7 +124,7 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
 
     if (result != ERR_OK) {
         napi_throw(env, GenerateBusinessError(
-                env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
+            env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
     }
     napi_get_value_int32(env, ret, &result);
     return ret;
