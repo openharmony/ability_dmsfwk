@@ -477,7 +477,7 @@ bool DSchedContinueDataCmd::UnmarshalWantParcel(cJSON* rootValue)
         HILOGE("DistributedWantV2 Unmarshall failed, try to Unmarshall by amsWant");
         wantPtr = AAFwk::Want::Unmarshalling(wantParcel);
     } else {
-        HILOGE("DistributedWantV2 Unmarshall success");
+        HILOGI("DistributedWantV2 Unmarshall success");
         std::shared_ptr<AAFwk::Want> amsWant = dtbWant->ToWant();
         wantPtr = new(std::nothrow) AAFwk::Want();
         wantPtr->SetOperation(amsWant->GetOperation());
