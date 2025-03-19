@@ -40,6 +40,13 @@ static QosTV g_qosInfo[] = {
     { .qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_QOS_TYPE_MAX_LATENCY },
     { .qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_QOS_TYPE_MIN_LATENCY }
 };
+
+QosTV g_watch_collab_qosInfo[] = {
+    { .qos = QOS_TYPE_MIN_BW, .value = DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW },
+    { .qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_QOS_TYPE_MAX_LATENCY },
+    { .qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_QOS_TYPE_MIN_LATENCY }
+};
+
 static uint32_t g_QosTV_Param_Index = static_cast<uint32_t>(sizeof(g_qosInfo) / sizeof(QosTV));
 
 static void OnBind(int32_t socket, PeerSocketInfo info)
@@ -219,14 +226,11 @@ int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peer
     callingTokenId_ = 0;
 
     do {
-        HILOGI("bind begin");
-        ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
-        HILOGI("bind end");
+        ret = ServiceBind(sessionId, type);
         if (ret != ERR_OK) {
             HILOGE("client bind failed, ret: %{public}d", ret);
             break;
         }
-
         ret = CreateSessionRecord(sessionId, peerDeviceId, false, type);
         if (ret != ERR_OK) {
             HILOGE("Client create session record fail, ret %{public}d, peerDeviceId %{public}s, sessionId %{public}d.",
@@ -239,6 +243,23 @@ int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peer
         ShutdownSession(peerDeviceId, sessionId);
         sessionId = INVALID_SESSION_ID;
     }
+    return ret;
+}
+
+int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedServiceType type)
+{
+    HILOGI("begin");
+    int32_t ret = ERR_OK;
+#ifdef DMS_CHECK_BLUETOOTH
+    HILOGI("collab bind begin");
+    if (type == SERVICE_TYPE_COLLAB) {
+        ret = Bind(sessionId, g_watch_collab_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+        HILOGI("end");
+        return ret;
+    }
+#endif
+    ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+    HILOGI("end");
     return ret;
 }
 
