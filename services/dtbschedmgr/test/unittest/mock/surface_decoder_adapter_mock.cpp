@@ -78,7 +78,7 @@ Media::Status SurfaceDecoderAdapter::Stop()
 
 Media::Status SurfaceDecoderAdapter::Pause()
 {
-   if (ISurfaceDecoderApt::surfaceDecoderAptMock == nullptr) {
+    if (ISurfaceDecoderApt::surfaceDecoderAptMock == nullptr) {
         return Media::Status::ERROR_UNKNOWN;
     }
     return ISurfaceDecoderApt::surfaceDecoderAptMock->Pause();
