@@ -16,6 +16,7 @@
 #include "ability_connection_session_test.h"
 
 #include "ability_connection_session_listener.h"
+#include "av_sender_filter.h"
 #include "dtbcollabmgr_log.h"
 #include "test_log.h"
 
@@ -742,6 +743,132 @@ HWTEST_F(AbilityConnectionSessionTest, SetTimeOut_Test_001, TestSize.Level3)
     EXPECT_NO_FATAL_FAILURE(connectionSesion_->SetTimeOut(1));
     EXPECT_NO_FATAL_FAILURE(connectionSesion_->RemoveTimeout());
     DTEST_LOG << "AbilityConnectionSessionTest SetTimeOut_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SendData_Test_001
+ * @tc.desc: call SendData
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, SendData_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest SendData_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    size_t capacity = 20;
+    std::shared_ptr<AVTransDataBuffer> dataBuffer = std::make_shared<AVTransDataBuffer>(capacity);
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->SendData(dataBuffer));
+    DTEST_LOG << "AbilityConnectionSessionTest SendData_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SendImage_Test_001
+ * @tc.desc: call SendImage
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, SendImage_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest SendImage_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    connectionSesion_->InitSenderEngine();
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->SendImage(nullptr));
+    DTEST_LOG << "AbilityConnectionSessionTest SendImage_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StopStream_Test_001
+ * @tc.desc: call StopStream
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, StopStream_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest StopStream_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    connectionSesion_->connectOption_.needSendStream = true;
+    connectionSesion_->connectOption_.needReceiveStream = true;
+    connectionSesion_->senderEngine_ = nullptr;
+    connectionSesion_->recvEngine_ = nullptr;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->StopStream(0));
+
+    connectionSesion_->InitRecvEngine();
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->StopStream(0));
+
+    connectionSesion_->InitSenderEngine();
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->StopStream(0));
+    DTEST_LOG << "AbilityConnectionSessionTest StopStream_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ExeuteEventCallback_Test_001
+ * @tc.desc: call ExeuteEventCallback
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, ExeuteEventCallback_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest ExeuteEventCallback_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    connectionSesion_->listeners_["connect"] = nullptr;
+    EventCallbackInfo callbackInfo;
+    auto ret = connectionSesion_->ExeuteEventCallback("connect1", callbackInfo);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    ret = connectionSesion_->ExeuteEventCallback("connect", callbackInfo);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "AbilityConnectionSessionTest ExeuteEventCallback_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CollabChannelListener_Test_001
+ * @tc.desc: call CollabChannelListener
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, CollabChannelListener_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest CollabChannelListener_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    connectionSesion_->channelListener_ = std::make_shared<AbilityConnectionSession::CollabChannelListener>(nullptr);
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->channelListener_->OnConnect(0));
+
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->channelListener_->OnDisConnect(0));
+
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->channelListener_->OnMessage(0, nullptr));
+
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->channelListener_->OnBytes(0, nullptr));
+
+    FileInfo info;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->channelListener_->OnSendFile(0, info));
+
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->channelListener_->OnRecvFile(0, info));
+
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->channelListener_->GetRecvPath(0));
+
+    connectionSesion_->pixelMapListener = std::make_shared<AbilityConnectionSession::PixelMapListener>();
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->pixelMapListener->OnRecvPixelMap(nullptr));
+    DTEST_LOG << "AbilityConnectionSessionTest CollabChannelListener_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleSessionConnect_Test_001
+ * @tc.desc: call HandleSessionConnect
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, HandleSessionConnect_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest HandleSessionConnect_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    connectionSesion_->sessionStatus_ = SessionStatus::CONNECTED;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->HandleSessionConnect());
+
+    connectionSesion_->sessionListener_ = nullptr;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->HandleSessionConnect());
+
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnChannelClosed(30));
+    DTEST_LOG << "AbilityConnectionSessionTest HandleSessionConnect_Test_001 end" << std::endl;
 }
 }
 }

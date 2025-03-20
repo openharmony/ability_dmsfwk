@@ -16,6 +16,7 @@
 
 #include "dtbcollabmgr_log.h"
 #include "media_description.h"
+#include "surface_utils.h"
 #include "test_log.h"
 
 namespace OHOS {
@@ -24,6 +25,7 @@ namespace DistributedCollab {
 namespace {
     static const std::string TAG = "SurfaceDecoderFilterTest";
     using Status = Media::Status;
+    using FilterCallback = Media::Pipeline::FilterCallback;
     using FilterType = Media::Pipeline::FilterType;
     using FilterLinkCallback = Media::Pipeline::FilterLinkCallback;
     using AVBufferQueueProducer = Media::AVBufferQueueProducer;
@@ -178,6 +180,62 @@ HWTEST_F(SurfaceDecoderFilterTest, SetOutputSurface_001, TestSize.Level3)
     sptr<Surface> surface = nullptr;
     EXPECT_EQ(decodeFilter_->SetOutputSurface(surface), Status::ERROR_UNKNOWN);
     DTEST_LOG << "SurfaceDecoderFilterTest SetOutputSurface_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetOutputSurface_Test
+ * @tc.desc: Test SetOutputSurface
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDecoderFilterTest, SetOutputSurface_Test, TestSize.Level1)
+{
+    DTEST_LOG << "SurfaceDecoderFilterTest SetOutputSurface_Test begin" << std::endl;
+    SurfaceDecoderFilter filter("builtin.dtbcollab.surfacedecoder", FilterType::FILTERTYPE_VDEC);
+    auto ret = filter.SetOutputSurface(nullptr);
+    EXPECT_EQ(ret, Status::ERROR_UNKNOWN);
+
+    filter.codecAdpater_ = std::make_shared<SurfaceDecoderAdapter>();
+    sptr<Surface> surface = SurfaceUtils::GetInstance()->GetSurface(0);
+    ret = filter.SetOutputSurface(surface);
+    EXPECT_NE(ret, Status::OK);
+    DTEST_LOG << "SurfaceDecoderFilterTest SetOutputSurface_Test end" << std::endl;
+}
+
+/**
+ * @tc.name: DoPrepare_Test
+ * @tc.desc: Test DoPrepare
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDecoderFilterTest, DoPrepare_Test, TestSize.Level1)
+{
+    DTEST_LOG << "SurfaceDecoderFilterTest DoPrepare_Test begin" << std::endl;
+    SurfaceDecoderFilter filter("builtin.dtbcollab.surfacedecoder", FilterType::FILTERTYPE_VDEC);
+    filter.filterCallback_ = nullptr;
+    auto ret = filter.DoPrepare();
+    EXPECT_EQ(ret, Status::ERROR_UNKNOWN);
+    DTEST_LOG << "SurfaceDecoderFilterTest DoPrepare_Test end" << std::endl;
+}
+
+/**
+ * @tc.name: DoStart_Test_002
+ * @tc.desc: Test DoStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDecoderFilterTest, DoStart_Test_002, TestSize.Level1)
+{
+    DTEST_LOG << "SurfaceDecoderFilterTest DoStart_Test_002 begin" << std::endl;
+    SurfaceDecoderFilter filter("builtin.dtbcollab.surfacedecoder", FilterType::FILTERTYPE_VDEC);
+    filter.codecAdpater_ = std::make_shared<SurfaceDecoderAdapter>();
+    EXPECT_NO_FATAL_FAILURE(filter.DoStart());
+
+    EXPECT_NO_FATAL_FAILURE(filter.DoPause());
+
+    EXPECT_NO_FATAL_FAILURE(filter.DoResume());
+
+    EXPECT_NO_FATAL_FAILURE(filter.DoStop());
+
+    EXPECT_NO_FATAL_FAILURE(filter.SetParameter(nullptr));
+    DTEST_LOG << "SurfaceDecoderFilterTest DoStart_Test_002 end" << std::endl;
 }
 }  // namespace DistributedCollab
 }  // namespace OHOS
