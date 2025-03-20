@@ -67,7 +67,7 @@ private:
     bool CheckDstSameAccount(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
         const CallerInfo& callerInfo);
     bool CheckAclList(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
-        const CallerInfo& callerInfo);
+        const CallerInfo& callerInfo, const std::string& targetBundleName = "");
     bool GetRelatedGroups(const std::string& udid, const std::vector<std::string>& bundleNames,
         AccountInfo& accountInfo);
     bool ParseGroupInfos(const std::string& returnGroupStr, std::vector<GroupInfo>& groupInfos);

@@ -79,8 +79,10 @@ int32_t DmsTokenCallback::SendResult(OHOS::AAFwk::Want& want, int32_t callerUid,
         HILOGE("GetAccountInfo failed");
         return ret;
     }
+    AAFwk::Want newWant = want;
+    newWant.SetParam("callerbundleNames", callerInfo.bundleNames);
     HILOGI("[PerformanceTest] SendResult transact begin");
-    int32_t result = remoteDms->SendResultFromRemote(want, requestCode, callerInfo, accountInfo, resultCode);
+    int32_t result = remoteDms->SendResultFromRemote(newWant, requestCode, callerInfo, accountInfo, resultCode);
     HILOGI("[PerformanceTest] SendResult transact end");
     return result;
 }
