@@ -160,5 +160,22 @@ HWTEST_F(SurfaceDecoderAdapterTest, SetParameter_Test, TestSize.Level1)
     EXPECT_EQ(ret, Status::ERROR_UNKNOWN);
     DTEST_LOG << "SurfaceDecoderAdapterTest SetParameter_Test end" << std::endl;
 }
+
+/**
+ * @tc.name: SetOutputSurface_Test
+ * @tc.desc: Test SetOutputSurface
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDecoderAdapterTest, SetOutputSurface_Test, TestSize.Level1)
+{
+    DTEST_LOG << "SurfaceDecoderAdapterTest SetOutputSurface_Test begin" << std::endl;
+    MediaAVCodec::Format format;
+    auto ret = decodeAdapter_->SetParameter(format);
+    EXPECT_EQ(ret, Status::ERROR_UNKNOWN);
+
+    ret = decodeAdapter_->SetDecoderAdapterCallback(nullptr);
+    EXPECT_EQ(ret, Status::ERROR_UNKNOWN);
+    DTEST_LOG << "SurfaceDecoderAdapterTest SetOutputSurface_Test end" << std::endl;
+}
 }  // namespace DistributedCollab
 }  // namespace OHOS
