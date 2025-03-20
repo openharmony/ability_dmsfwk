@@ -62,6 +62,7 @@ namespace {
 constexpr int32_t HID_HAP = 10000; /* first hap user */
 const std::string TAG = "DistributedSchedStub";
 const std::u16string DMS_STUB_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
+const std::string DMS_SRC_BUNDLE_NAMES = "callerbundleNames";
 const std::string EXTRO_INFO_JSON_KEY_ACCESS_TOKEN = "accessTokenID";
 const std::string EXTRO_INFO_JSON_KEY_REQUEST_CODE = "requestCode";
 const std::string PARAM_FREEINSTALL_APPID = "ohos.freeinstall.params.callingAppId";
@@ -438,6 +439,7 @@ int32_t DistributedSchedStub::StartAbilityFromRemoteInner(MessageParcel& data, M
         HILOGE("Get start ability from remote exParam fail!");
         return INVALID_PARAMETERS_ERR;
     }
+    callerInfo.bundleNames = want->GetStringArrayParam(DMS_SRC_BUNDLE_NAMES);
     std::string package = abilityInfo.bundleName;
     std::string deviceId = abilityInfo.deviceId;
 
@@ -558,7 +560,7 @@ int32_t DistributedSchedStub::SendResultFromRemoteInner(MessageParcel& data, Mes
         SaveSendResultExtraInfo(extraInfoJson, callerInfo, accountInfo);
         HILOGD("parse extra info");
     }
-
+    callerInfo.bundleNames = want->GetStringArrayParam(DMS_SRC_BUNDLE_NAMES);
     int32_t result = SendResultFromRemote(*want, requestCode, callerInfo, accountInfo, resultCode);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_HELPER(reply, Int32, result);
@@ -1065,7 +1067,7 @@ int32_t DistributedSchedStub::ConnectAbilityFromRemoteInner(MessageParcel& data,
         HILOGE("Get connect ability from remote exParam fail!");
         return INVALID_PARAMETERS_ERR;
     }
-
+    callerInfo.bundleNames = want->GetStringArrayParam(DMS_SRC_BUNDLE_NAMES);
     std::string package = abilityInfo.bundleName;
     std::string deviceId = abilityInfo.deviceId;
     int64_t begin = GetTickCount();
@@ -1631,6 +1633,7 @@ int32_t DistributedSchedStub::StartAbilityByCallFromRemoteInner(MessageParcel& d
         HILOGW("want readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
+    callerInfo.bundleNames = want->GetStringArrayParam(DMS_SRC_BUNDLE_NAMES);
     DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(want);
     int32_t result = StartAbilityByCallFromRemote(*want, connect, callerInfo, accountInfo);
     BehaviorEventParam eventParam = { EventCallingType::REMOTE, BehaviorEvent::START_REMOTE_ABILITY_BYCALL, result,
@@ -1930,6 +1933,7 @@ int32_t DistributedSchedStub::StopExtensionAbilityFromRemoteInner(MessageParcel&
         callerInfo.accessToken = accessToken;
         HILOGD("parse extra info, accessTokenID = %{private}s", GetAnonymStr(std::to_string(accessToken)).c_str());
     }
+    callerInfo.bundleNames = want->GetStringArrayParam(DMS_SRC_BUNDLE_NAMES);
     auto result = StopExtensionAbilityFromRemote(*want, callerInfo, accountInfo, serviceType);
     HILOGD("result = %{public}d", result);
     PARCEL_WRITE_HELPER(reply, Int32, result);
