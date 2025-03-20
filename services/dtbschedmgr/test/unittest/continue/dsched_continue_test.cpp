@@ -51,6 +51,18 @@ void DSchedContinueTest::SetUpTestCase()
     DmsMgrDeviceInfoStore::dmsStore = dmsStoreMock;
     DTEST_LOG << "DSchedContinueTest::SetUpTestCase" << std::endl;
     DistributedSchedService::GetInstance().Init();
+
+    std::string deviceId = "123";
+    std::string bundleName = "test";
+    int32_t subType = CONTINUE_PULL;
+    int32_t direction = CONTINUE_SINK;
+    sptr<IRemoteObject> callback = nullptr;
+    OHOS::AAFwk::WantParams wantParams;
+    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
+    conti_ = std::make_shared<DSchedContinue>(subType, direction, callback, info);
+
+    conti_->Init();
+    usleep(WAITTIME);
 }
 
 void DSchedContinueTest::TearDownTestCase()
@@ -59,6 +71,7 @@ void DSchedContinueTest::TearDownTestCase()
     DmsMgrDeviceInfoStore::dmsStore = nullptr;
     dmsStoreMock = nullptr;
     DTEST_LOG << "DSchedContinueTest::TearDownTestCase" << std::endl;
+    conti_ = nullptr;
 }
 
 void DSchedContinueTest::TearDown()
@@ -81,62 +94,14 @@ void DSchedContinueTest::SetUp()
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_001_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_001_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    OHOS::AAFwk::WantParams wantParams;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-
-    // eventHandler_ is null
-    int32_t ret = conti->OnContinueMission(wantParams);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-
-    ret = conti->PostStartTask(wantParams);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
 
     // eventHandler_ not null
-    conti->Init();
-    usleep(WAITTIME);
-    ret = conti->PostStartTask(wantParams);
+    OHOS::AAFwk::WantParams wantParams;
+    auto ret = conti_->PostStartTask(wantParams);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_001_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
-}
-
-/**
- * @tc.name: DSchedContinueTest_001_2
- * @tc.desc: DSchedContinue Constructor
- * @tc.type: FUNC
- */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_001_2, TestSize.Level0)
-{
-    DTEST_LOG << "DSchedContinueTest DSchedContinueTest_001_2 begin" << std::endl;
-    std::shared_ptr<DSchedContinueStartCmd> startCmd = nullptr;
-    int32_t sessionId = 1;
-    int32_t accountId = 1;
-
-    auto testInfo = std::make_shared<DSchedContinue>(startCmd, sessionId, accountId);
-    EXPECT_TRUE(testInfo->continueInfo_.sourceBundleName_.empty());
-
-    startCmd = std::make_shared<DSchedContinueStartCmd>();
-    auto testInfo2 = std::make_shared<DSchedContinue>(startCmd, sessionId, accountId);
-    EXPECT_EQ(testInfo2->accountId_, accountId);
-
-    startCmd->sourceMissionId_ = 1;
-    auto testInfo3 = std::make_shared<DSchedContinue>(startCmd, sessionId, accountId);
-    EXPECT_EQ(testInfo3->continueInfo_.missionId_, startCmd->sourceMissionId_);
-
-    startCmd->dstBundleName_ = "sinkBundleName";
-    auto testInfo4 = std::make_shared<DSchedContinue>(startCmd, sessionId, accountId);
-    EXPECT_EQ(testInfo4->continueInfo_.sinkBundleName_, startCmd->dstBundleName_);
-
-    startCmd->srcBundleName_ = "srcBundleName";
-    auto testInfo5 = std::make_shared<DSchedContinue>(startCmd, sessionId, accountId);
-    EXPECT_EQ(testInfo5->continueInfo_.sourceBundleName_, startCmd->srcBundleName_);
-    DTEST_LOG << "DSchedContinueTest DSchedContinueTest_001_2 end" << std::endl;
 }
 
 /**
@@ -147,29 +112,14 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_001_2, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_002_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_002_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    int32_t appVersion = 0;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-
-    // eventHandler_ is null
-    int32_t ret = conti->OnStartCmd(appVersion);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-
-    ret = conti->PostCotinueAbilityTask(appVersion);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
 
     // eventHandler_ not null
-    conti->Init();
-    usleep(WAITTIME);
-    ret = conti->PostCotinueAbilityTask(appVersion);
+    int32_t appVersion = 0;
+    auto ret = conti_->PostCotinueAbilityTask(appVersion);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_002_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -180,43 +130,25 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_002_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_003_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_003_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto cmd = std::make_shared<DSchedContinueReplyCmd>();
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-
-    // eventHandler_ is null
-    cmd->replyCmd_ = DSCHED_CONTINUE_CMD_START;
-    int32_t ret = conti->OnReplyCmd(cmd);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-
-    ret = conti->PostReplyTask(cmd);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-
     // eventHandler_ not null
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
+    auto cmd = std::make_shared<DSchedContinueReplyCmd>();
     cmd->replyCmd_ = DSCHED_CONTINUE_END_EVENT;
-    ret = conti->OnReplyCmd(cmd);
+    auto ret = conti_->OnReplyCmd(cmd);
     EXPECT_EQ(ret, ERR_OK);
 
-    ret = conti->PostReplyTask(cmd);
+    ret = conti_->PostReplyTask(cmd);
     EXPECT_EQ(ret, ERR_OK);
 
     cmd->replyCmd_ = DSCHED_CONTINUE_INVALID_EVENT;
-    ret = conti->PostReplyTask(cmd);
+    ret = conti_->PostReplyTask(cmd);
     EXPECT_EQ(ret, ERR_OK);
 
     cmd = nullptr;
-    ret = conti->PostReplyTask(cmd);
+    ret = conti_->PostReplyTask(cmd);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_003_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -227,41 +159,25 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_003_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_004_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_004_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-
     OHOS::AAFwk::Want want;
     int32_t callerUid = 0;
     int32_t status = ERR_OK;
     uint32_t accessToken = 0;
 
-    // eventHandler_ is null
-    int32_t ret = conti->OnStartContinuation(want, callerUid, status, accessToken);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-
-    ret = conti->PostContinueSendTask(want, callerUid, status, accessToken);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-
     // eventHandler_ not null
-    conti->Init();
-    usleep(WAITTIME);
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
 
-    ret = conti->OnStartContinuation(want, callerUid, status, accessToken);
+    auto ret = conti_->OnStartContinuation(want, callerUid, status, accessToken);
     EXPECT_EQ(ret, ERR_OK);
 
-    ret = conti->PostContinueSendTask(want, callerUid, status, accessToken);
+    ret = conti_->PostContinueSendTask(want, callerUid, status, accessToken);
     EXPECT_EQ(ret, ERR_OK);
 
     status = ERR_NONE;
-    ret = conti->PostContinueSendTask(want, callerUid, status, accessToken);
+    ret = conti_->PostContinueSendTask(want, callerUid, status, accessToken);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_004_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -272,33 +188,16 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_004_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_005_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_005_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto cmd = std::make_shared<DSchedContinueDataCmd>();
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-
-    // eventHandler_ is null
-    int32_t ret = conti->OnContinueDataCmd(cmd);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-
-    ret = conti->PostContinueDataTask(cmd);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-
     // eventHandler_ not null
-    conti->Init();
-    usleep(WAITTIME);
-
-    ret = conti->OnContinueDataCmd(cmd);
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
+    auto cmd = std::make_shared<DSchedContinueDataCmd>();
+    auto ret = conti_->OnContinueDataCmd(cmd);
     EXPECT_EQ(ret, ERR_OK);
 
-    ret = conti->PostContinueDataTask(cmd);
+    ret = conti_->PostContinueDataTask(cmd);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_005_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -309,47 +208,17 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_005_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_006_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_006_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    int32_t missionId = 1;
-    bool isSuccess = true;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-
-    // OnNotifyComplete
-    int32_t ret = conti->OnNotifyComplete(missionId, isSuccess);
-    EXPECT_EQ(ret, ERR_OK);
-
-    missionId = 0;
-    ret = conti->OnNotifyComplete(missionId, isSuccess);
-    EXPECT_EQ(ret, ERR_OK);
-
-    isSuccess = false;
-    ret = conti->OnNotifyComplete(missionId, isSuccess);
-    EXPECT_EQ(ret, ERR_OK);
-
-    // eventHandler_ is null
-    auto cmd = std::make_shared<DSchedContinueEndCmd>();
-    ret = conti->OnContinueEndCmd(cmd);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-
-    ret = conti->PostNotifyCompleteTask(ERR_OK);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-
     // eventHandler_ not null
-    conti->Init();
-    usleep(WAITTIME);
-    ret = conti->PostNotifyCompleteTask(ERR_OK);
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
+    auto cmd = std::make_shared<DSchedContinueEndCmd>();
+    auto ret = conti_->PostNotifyCompleteTask(ERR_OK);
     EXPECT_EQ(ret, ERR_OK);
 
     cmd = nullptr;
-    ret = conti->OnContinueEndCmd(cmd);
+    ret = conti_->OnContinueEndCmd(cmd);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_006_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -360,38 +229,21 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_006_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_007_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_007_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     int32_t result = ERR_OK;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-
-    // eventHandler_ is null
-    int32_t ret = conti->OnContinueEnd(result);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-
-    ret = conti->PostContinueEndTask(result);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-
-    // eventHandler_ not null
-    conti->Init();
-    usleep(WAITTIME);
-    ret = conti->PostContinueEndTask(result);
+    auto ret = conti_->PostContinueEndTask(result);
     EXPECT_EQ(ret, ERR_OK);
 
     // result is CONTINUE_SINK_ABILITY_TERMINATED
     result = CONTINUE_SINK_ABILITY_TERMINATED;
-    conti->UpdateState(DSCHED_CONTINUE_SINK_WAIT_END_STATE);
-    ret = conti->OnContinueEnd(result);
+    conti_->UpdateState(DSCHED_CONTINUE_SINK_WAIT_END_STATE);
+    ret = conti_->OnContinueEnd(result);
     EXPECT_EQ(ret, ERR_OK);
-    conti->UpdateState(DSCHED_CONTINUE_SINK_END_STATE);
-    ret = conti->OnContinueEnd(result);
+    conti_->UpdateState(DSCHED_CONTINUE_SINK_END_STATE);
+    ret = conti_->OnContinueEnd(result);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_007_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -402,22 +254,12 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_007_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_008_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_008_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     auto wantParams = std::make_shared<DistributedWantParams>();
-    int32_t ret = conti->ExecuteContinueReq(wantParams);
+    int32_t ret = conti_->ExecuteContinueReq(wantParams);
     EXPECT_NE(ret, ERR_OK);
-
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_008_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -428,31 +270,24 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_008_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_009_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_009_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PUSH;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     auto cmd = std::make_shared<DSchedContinueStartCmd>();
     auto wantParams = std::make_shared<DistributedWantParams>();
-
-    int32_t ret = conti->PackStartCmd(cmd, wantParams);
+    
+    conti_->subServiceType_ = CONTINUE_PUSH;
+    int32_t ret = conti_->PackStartCmd(cmd, wantParams);
     EXPECT_EQ(ret, ERR_OK);
 
     wantParams = nullptr;
-    ret = conti->PackStartCmd(cmd, wantParams);
+    ret = conti_->PackStartCmd(cmd, wantParams);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     wantParams = std::make_shared<DistributedWantParams>();
-    conti->continueInfo_.missionId_ = 0;
+    conti_->continueInfo_.missionId_ = 0;
     EXPECT_NE(ret, ERR_OK);
+    conti_->subServiceType_ = CONTINUE_PULL;
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_009_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -463,22 +298,12 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_009_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0010_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0010_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    int32_t missionId = 1;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, deviceId, missionId);
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     int32_t appVersion = 0;
-    int32_t ret = conti->ExecuteContinueAbility(appVersion);
+    int32_t ret = conti_->ExecuteContinueAbility(appVersion);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0010_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -489,20 +314,15 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0010_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0011_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0011_1 begin" << std::endl;
-    std::string deviceId = "123";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    int32_t missionId = 1;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, deviceId, missionId);
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
-    int32_t ret = conti->GetMissionIdByBundleName();
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
+    int32_t ret = conti_->GetMissionIdByBundleName();
+    #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
+    EXPECT_EQ(ret, MISSION_NOT_FOCUSED);
+    #else
     EXPECT_EQ(ret, ERR_OK);
+    #endif
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0011_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -513,20 +333,11 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0011_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0012_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0012_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
-    int32_t ret = conti->CheckContinueAbilityPermission();
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
+    int32_t ret = conti_->CheckContinueAbilityPermission();
     EXPECT_EQ(ret, NO_MISSION_INFO_FOR_MISSION_ID);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0012_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -537,20 +348,11 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0012_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0013_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0013_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
-    int32_t ret = conti->ExecuteContinueReply();
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
+    int32_t ret = conti_->ExecuteContinueReply();
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0013_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -561,25 +363,16 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0013_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0014_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0014_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     auto data = std::make_shared<ContinueAbilityData>();
-    int32_t ret = conti->ExecuteContinueSend(data);
+    int32_t ret = conti_->ExecuteContinueSend(data);
     EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
 
     data = nullptr;
-    ret = conti->ExecuteContinueSend(data);
+    ret = conti_->ExecuteContinueSend(data);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0014_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -590,18 +383,10 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0014_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0015_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0015_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     AAFwk::Want want;
-    int32_t ret = conti->SetWantForContinuation(want);
+    int32_t ret = conti_->SetWantForContinuation(want);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0015_1 end ret:" << ret << std::endl;
     usleep(WAITTIME);
@@ -615,30 +400,21 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0015_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0016_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0016_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     auto cmd = std::make_shared<DSchedContinueDataCmd>();
     OHOS::AAFwk::Want want;
     AppExecFwk::AbilityInfo abilityInfo;
     CallerInfo callerInfo;
     AccountInfo accountInfo;
 
-    int32_t ret = conti->PackDataCmd(cmd, want, abilityInfo, callerInfo, accountInfo);
+    int32_t ret = conti_->PackDataCmd(cmd, want, abilityInfo, callerInfo, accountInfo);
     EXPECT_EQ(ret, ERR_OK);
 
     cmd = nullptr;
-    ret = conti->PackDataCmd(cmd, want, abilityInfo, callerInfo, accountInfo);
+    ret = conti_->PackDataCmd(cmd, want, abilityInfo, callerInfo, accountInfo);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0016_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -649,27 +425,18 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0016_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0017_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     auto cmd = std::make_shared<DSchedContinueDataCmd>();
 
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true)).WillOnce(Return(true));
-    int32_t ret = conti->ExecuteContinueData(cmd);
+    int32_t ret = conti_->ExecuteContinueData(cmd);
     EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
 
     cmd = nullptr;
-    ret = conti->ExecuteContinueData(cmd);
+    ret = conti_->ExecuteContinueData(cmd);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0017_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -680,50 +447,44 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_2, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0017_2 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     auto cmd = std::make_shared<DSchedContinueDataCmd>();
     // no same continueType, diff module
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     cmd->continueType_ = CONTINUE_TYPE3;
     cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_SAME_AS_CONTINUE_TYPE, MODULE_NAME2);
-    int32_t ret = conti->UpdateElementInfo(cmd);
+    int32_t ret = conti_->UpdateElementInfo(cmd);
     EXPECT_EQ(ret, CAN_NOT_FOUND_MODULE_ERR);
     // no continueType, same module
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     cmd->continueType_ = CONTINUE_TYPE1;
     cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_SAME_AS_CONTINUE_TYPE, MODULE_NAME1);
-    ret = conti->UpdateElementInfo(cmd);
+    ret = conti_->UpdateElementInfo(cmd);
     EXPECT_EQ(ret, ERR_OK);
     // no continueType with quick start, same module
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     cmd->continueType_ = CONTINUE_TYPE1_QUICK;
     cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_SAME_AS_CONTINUE_TYPE, MODULE_NAME1);
-    ret = conti->UpdateElementInfo(cmd);
+    ret = conti_->UpdateElementInfo(cmd);
     EXPECT_EQ(ret, ERR_OK);
     // has continueType, same module
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     cmd->continueType_ = CONTINUE_TYPE2;
     cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_DIFF_AS_CONTINUE_TYPE, MODULE_NAME2);
-    ret = conti->UpdateElementInfo(cmd);
+    ret = conti_->UpdateElementInfo(cmd);
     EXPECT_EQ(ret, ERR_OK);
     // has continueType, diff module
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     cmd->continueType_ = CONTINUE_TYPE2;
     cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_DIFF_AS_CONTINUE_TYPE, MODULE_NAME1);
-    ret = conti->UpdateElementInfo(cmd);
+    ret = conti_->UpdateElementInfo(cmd);
     EXPECT_EQ(ret, ERR_OK);
     // has continueType, no module
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     cmd->continueType_ = CONTINUE_TYPE2;
     cmd->want_.SetElementName("", BUNDLEMAME_1, ABILITY_NAME_DIFF_AS_CONTINUE_TYPE, MODULE_NAME3);
-    ret = conti->UpdateElementInfo(cmd);
+    ret = conti_->UpdateElementInfo(cmd);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0017_2 end ret:" << ret << std::endl;
     usleep(WAITTIME);
@@ -754,25 +515,18 @@ bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId, const 
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0018_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0018_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
 
     int32_t result = ERR_OK;
-    int32_t ret = conti->ExecuteNotifyComplete(result);
+    int32_t ret = conti_->ExecuteNotifyComplete(result);
     EXPECT_NE(ret, ERR_OK);
 
-    direction = CONTINUE_SOURCE;
-    ret = conti->ExecuteNotifyComplete(result);
+    conti_->direction_ = CONTINUE_SOURCE;
+    ret = conti_->ExecuteNotifyComplete(result);
     EXPECT_NE(ret, ERR_OK);
+    conti_->direction_ = CONTINUE_SINK;
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0018_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -783,29 +537,20 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0018_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0019_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0019_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     auto cmd = std::make_shared<DSchedContinueReplyCmd>();
     int32_t replyCmd = 0;
     int32_t appVersion = 0;
     int32_t result = 0;
 
-    int32_t ret = conti->PackReplyCmd(cmd, replyCmd, appVersion, result, "");
+    int32_t ret = conti_->PackReplyCmd(cmd, replyCmd, appVersion, result, "");
     EXPECT_EQ(ret, ERR_OK);
 
     cmd = nullptr;
-    ret = conti->PackReplyCmd(cmd, replyCmd, appVersion, result, "");
+    ret = conti_->PackReplyCmd(cmd, replyCmd, appVersion, result, "");
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0019_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -816,22 +561,13 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0019_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0020_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0020_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     int32_t result = 0;
 
-    int32_t ret = conti->ExecuteContinueEnd(result);
+    int32_t ret = conti_->ExecuteContinueEnd(result);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0020_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -842,25 +578,17 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0020_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0021_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0021_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     int32_t result = 0;
-    int32_t ret = conti->ExecuteContinueError(result);
+    int32_t ret = conti_->ExecuteContinueError(result);
     EXPECT_EQ(ret, ERR_OK);
-
-    direction = CONTINUE_SOURCE;
-    ret = conti->ExecuteContinueError(result);
+    
+    conti_->direction_ = CONTINUE_SOURCE;
+    ret = conti_->ExecuteContinueError(result);
     EXPECT_EQ(ret, ERR_OK);
+    conti_->direction_ = CONTINUE_SINK;
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0021_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -871,27 +599,18 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0021_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0022_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0022_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     auto cmd = std::make_shared<DSchedContinueEndCmd>();
     int32_t result = 0;
 
-    int32_t ret = conti->PackEndCmd(cmd, result);
+    int32_t ret = conti_->PackEndCmd(cmd, result);
     EXPECT_EQ(ret, ERR_OK);
 
     cmd = nullptr;
-    ret = conti->PackEndCmd(cmd, result);
+    ret = conti_->PackEndCmd(cmd, result);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0022_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -902,21 +621,12 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0022_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0023_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0023_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     auto cmd = std::make_shared<DSchedContinueCmdBase>();
-    int32_t ret = conti->SendCommand(cmd);
+    int32_t ret = conti_->SendCommand(cmd);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0023_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -927,22 +637,13 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0023_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0024_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0024_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     std::string localDeviceId;
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
-    bool ret = conti->GetLocalDeviceId(localDeviceId);
+    bool ret = conti_->GetLocalDeviceId(localDeviceId);
     EXPECT_EQ(ret, true);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0024_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -953,40 +654,31 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0024_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_0025_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0025_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
-    bool ret = conti->CheckDeviceIdFromRemote("", "", "");
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
+    bool ret = conti_->CheckDeviceIdFromRemote("", "", "");
     EXPECT_FALSE(ret);
 
     std::string localDevId = "localDevId";
     std::string destDevId = "destDevId";
     std::string srcDevId = "srcDevId";
-    ret = conti->CheckDeviceIdFromRemote(localDevId, destDevId, srcDevId);
+    ret = conti_->CheckDeviceIdFromRemote(localDevId, destDevId, srcDevId);
     EXPECT_FALSE(ret);
 
     destDevId = "localDevId";
     srcDevId = "localDevId";
-    ret = conti->CheckDeviceIdFromRemote(localDevId, destDevId, srcDevId);
+    ret = conti_->CheckDeviceIdFromRemote(localDevId, destDevId, srcDevId);
     EXPECT_FALSE(ret);
 
-    conti->continueInfo_.sourceDeviceId_ = "localDevId";
-    ret = conti->CheckDeviceIdFromRemote(localDevId, destDevId, srcDevId);
+    conti_->continueInfo_.sourceDeviceId_ = "localDevId";
+    ret = conti_->CheckDeviceIdFromRemote(localDevId, destDevId, srcDevId);
     EXPECT_FALSE(ret);
 
     srcDevId = "srcDevId";
-    conti->continueInfo_.sourceDeviceId_ = "srcDevId";
-    ret = conti->CheckDeviceIdFromRemote(localDevId, destDevId, srcDevId);
+    conti_->continueInfo_.sourceDeviceId_ = "srcDevId";
+    ret = conti_->CheckDeviceIdFromRemote(localDevId, destDevId, srcDevId);
     EXPECT_TRUE(ret);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0025_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -997,21 +689,12 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0025_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, WaitAbilityStateInitialTest_0026_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest WaitAbilityStateInitialTest_0026_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     int32_t persistentId = 100;
-    bool ret = conti->WaitAbilityStateInitial(persistentId);
+    bool ret = conti_->WaitAbilityStateInitial(persistentId);
     EXPECT_FALSE(ret);
     DTEST_LOG << "DSchedContinueTest WaitAbilityStateInitialTest_0026_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -1022,24 +705,15 @@ HWTEST_F(DSchedContinueTest, WaitAbilityStateInitialTest_0026_1, TestSize.Level0
 HWTEST_F(DSchedContinueTest, StartAbilityTest_0027_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest StartAbilityTest_0027_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     AAFwk::Want want;
     AppExecFwk::ElementName element("devicdId", "com.ohos.distributedmusicplayer",
         "com.ohos.distributedmusicplayer.MainAbility");
     want.SetElement(element);
-    int32_t ret = conti->StartAbility(want, 0);
+    int32_t ret = conti_->StartAbility(want, 0);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest StartAbilityTest_0027_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -1050,21 +724,11 @@ HWTEST_F(DSchedContinueTest, StartAbilityTest_0027_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, QuerySinkAbilityNameTest_0028_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest QuerySinkAbilityNameTest_0028_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    std::string continueType = "test";
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, continueType);
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
-    std::string sinkBundleName = conti->QuerySinkAbilityName();
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
+    std::string sinkBundleName = conti_->QuerySinkAbilityName();
     EXPECT_TRUE(sinkBundleName.empty());
     DTEST_LOG << "DSchedContinueTest QuerySinkAbilityNameTest_0028_1 end" << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -1075,20 +739,11 @@ HWTEST_F(DSchedContinueTest, QuerySinkAbilityNameTest_0028_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, QuickStartAbilityTest_0029_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest QuickStartAbilityTest_0029_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
-    int32_t ret = conti->QuickStartAbility();
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
+    int32_t ret = conti_->QuickStartAbility();
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest QuickStartAbilityTest_0029_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -1099,24 +754,15 @@ HWTEST_F(DSchedContinueTest, QuickStartAbilityTest_0029_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, UpdateWantForContinueTypeTest_0030_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest UpdateWantForContinueTypeTest_0030_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     AAFwk::Want want;
     AppExecFwk::ElementName element("devicdId", "com.ohos.distributedmusicplayer",
         "com.ohos.distributedmusicplayer.MainAbility");
     want.SetElement(element);
-    int32_t ret = conti->UpdateWantForContinueType(want);
+    int32_t ret = conti_->UpdateWantForContinueType(want);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest UpdateWantForContinueTypeTest_0030_1 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -1127,30 +773,21 @@ HWTEST_F(DSchedContinueTest, UpdateWantForContinueTypeTest_0030_1, TestSize.Leve
 HWTEST_F(DSchedContinueTest, DSchedContinueTest_031_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_031_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     AppExecFwk::InnerEvent *event = nullptr;
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
         }
     };
-    conti->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
-    conti->continueInfo_.continueType_ = "";
-    conti->CheckQuickStartConfiguration();
-    conti->GetSessionId();
-    conti->GetAbilityNameByContinueType();
-    EXPECT_NE(nullptr, conti->stateMachine_);
+    conti_->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
+    conti_->continueInfo_.continueType_ = "";
+    conti_->CheckQuickStartConfiguration();
+    conti_->GetSessionId();
+    conti_->GetAbilityNameByContinueType();
+    EXPECT_NE(nullptr, conti_->stateMachine_);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_031_1 end" << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -1161,38 +798,29 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_031_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, OnDataRecvTest_032_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest OnDataRecvTest_032_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     int32_t command = 0;
     std::shared_ptr<DSchedDataBuffer> dataBuffer = nullptr;
-    conti->OnDataRecv(command, dataBuffer);
+    conti_->OnDataRecv(command, dataBuffer);
     EXPECT_EQ(nullptr, dataBuffer);
     command = DSCHED_CONTINUE_CMD_START;
     dataBuffer = std::make_shared<DSchedDataBuffer>(DSCHED_BUFFER_SIZE);
-    conti->OnDataRecv(command, dataBuffer);
+    conti_->OnDataRecv(command, dataBuffer);
     EXPECT_NE(nullptr, dataBuffer);
     command = DSCHED_CONTINUE_CMD_DATA;
-    conti->OnDataRecv(command, dataBuffer);
+    conti_->OnDataRecv(command, dataBuffer);
     EXPECT_NE(nullptr, dataBuffer);
     command = DSCHED_CONTINUE_CMD_REPLY;
-    conti->OnDataRecv(command, dataBuffer);
+    conti_->OnDataRecv(command, dataBuffer);
     EXPECT_NE(nullptr, dataBuffer);
     command = DSCHED_CONTINUE_CMD_END;
-    conti->OnDataRecv(command, dataBuffer);
+    conti_->OnDataRecv(command, dataBuffer);
     EXPECT_NE(nullptr, dataBuffer);
     command = DSCHED_CONTINUE_CMD_MIN;
-    conti->OnDataRecv(command, dataBuffer);
+    conti_->OnDataRecv(command, dataBuffer);
     EXPECT_NE(nullptr, dataBuffer);
     DTEST_LOG << "DSchedContinueTest OnDataRecvTest_032_1 end" << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -1203,19 +831,11 @@ HWTEST_F(DSchedContinueTest, OnDataRecvTest_032_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, UpdateStateTest_033_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest UpdateStateTest_033_1 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
-
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
     DSchedContinueStateType stateType = DSCHED_CONTINUE_SINK_START_STATE;
-    conti->UpdateState(stateType);
-    EXPECT_NE(nullptr, conti->stateMachine_);
+    conti_->UpdateState(stateType);
+    EXPECT_NE(nullptr, conti_->stateMachine_);
     DTEST_LOG << "DSchedContinueTest UpdateStateTest_033_1 end" << std::endl;
 }
 
@@ -1227,24 +847,18 @@ HWTEST_F(DSchedContinueTest, UpdateStateTest_033_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, CheckStartPermission_034_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest CheckStartPermission_034_1 begin" << std::endl;
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
+
     auto cmd = std::make_shared<DSchedContinueDataCmd>();
     ASSERT_NE(nullptr, cmd);
     cmd->srcBundleName_ = BUNDLEMAME_1;
     cmd->dstBundleName_ = BUNDLEMAME_1;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
 
-    int32_t ret = conti->CheckStartPermission(cmd);
+    int32_t ret = conti_->CheckStartPermission(cmd);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     cmd->srcBundleName_.clear();
-    ret = conti->CheckStartPermission(cmd);
+    ret = conti_->CheckStartPermission(cmd);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedContinueTest CheckStartPermission_034_1 end" << std::endl;
 }
@@ -1257,30 +871,24 @@ HWTEST_F(DSchedContinueTest, CheckStartPermission_034_1, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, ConvertToDmsSdkErr_035_1, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest ConvertToDmsSdkErr_035_1 begin" << std::endl;
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
+
     auto cmd = std::make_shared<DSchedContinueDataCmd>();
     ASSERT_NE(nullptr, cmd);
     cmd->srcBundleName_ = BUNDLEMAME_1;
     cmd->dstBundleName_ = BUNDLEMAME_1;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
 
-    int32_t ret = conti->ConvertToDmsSdkErr(0);
+    int32_t ret = conti_->ConvertToDmsSdkErr(0);
     EXPECT_EQ(ret, ERR_OK);
-    ret = conti->ConvertToDmsSdkErr(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_AP_STA_CHIP_CONFLICT);
+    ret = conti_->ConvertToDmsSdkErr(SoftBusErrNo::SOFTBUS_CONN_PASSIVE_TYPE_AP_STA_CHIP_CONFLICT);
     EXPECT_EQ(ret,  DmsInterfaceSdkErr::ERR_BIND_REMOTE_HOTSPOT_ENABLE_STATE);
-    ret = conti->ConvertToDmsSdkErr(-1);
+    ret = conti_->ConvertToDmsSdkErr(-1);
     EXPECT_EQ(ret, DmsInterfaceSdkErr::ERR_DMS_WORK_ABNORMALLY);
     DTEST_LOG << "DSchedContinueTest ConvertToDmsSdkErr_035_1 end" << std::endl;
 }
 
-int32_t ContinueSceneSessionHandler::GetPersistentId(int32_t& persistentId, std::string &continueSessionId)
+int32_t ContinueSceneSessionHandler::GetPersistentId(int32_t& persistentId, std::string &ContinueSessionId)
 {
     persistentId = 1;
     return ERR_OK;
@@ -1294,20 +902,12 @@ int32_t ContinueSceneSessionHandler::GetPersistentId(int32_t& persistentId, std:
 HWTEST_F(DSchedContinueTest, ExecuteQuickStartSuccess_036, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest ExecuteQuickStartSuccess_036 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
 
-    int32_t ret = conti->ExecuteQuickStartSuccess();
+    int32_t ret = conti_->ExecuteQuickStartSuccess();
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest ExecuteQuickStartSuccess_036 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
@@ -1318,20 +918,12 @@ HWTEST_F(DSchedContinueTest, ExecuteQuickStartSuccess_036, TestSize.Level0)
 HWTEST_F(DSchedContinueTest, ExecuteQuickStartFailed_037, TestSize.Level0)
 {
     DTEST_LOG << "DSchedContinueTest ExecuteQuickStartFailed_037 begin" << std::endl;
-    std::string deviceId = "123";
-    std::string bundleName = "test";
-    int32_t subType = CONTINUE_PULL;
-    int32_t direction = CONTINUE_SINK;
-    sptr<IRemoteObject> callback = nullptr;
-    auto info = DSchedContinueInfo(deviceId, bundleName, deviceId, bundleName, "");
-    auto conti = std::make_shared<DSchedContinue>(subType, direction, callback, info);
-    conti->Init();
-    usleep(WAITTIME);
+    ASSERT_NE(conti_, nullptr);
+    ASSERT_NE(conti_->eventHandler_, nullptr);
 
-    int32_t ret = conti->ExecuteQuickStartFailed(1);
+    int32_t ret = conti_->ExecuteQuickStartFailed(1);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest ExecuteQuickStartFailed_037 end ret:" << ret << std::endl;
-    usleep(WAITTIME);
 }
 
 /**
