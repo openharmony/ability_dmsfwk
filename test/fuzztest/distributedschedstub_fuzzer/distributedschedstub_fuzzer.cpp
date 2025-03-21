@@ -1032,6 +1032,108 @@ void StopAbilityFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
     PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
     DistributedSchedService::GetInstance().StopAbilityFromRemoteInner(dataParcel, reply);
 }
+
+void CollabMissionInnerFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    FuzzUtil::MockPermission();
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    FuzzedDataProvider fdp(data, size);
+    CollabMessage massage;
+    ConnectOpt opt;
+    int32_t collabSessionId = fdp.ConsumeIntegral<int32_t>();
+    std::string srcSocketName = fdp.ConsumeRandomLengthString();
+    std::string collabToken = fdp.ConsumeRandomLengthString();
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, collabSessionId);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, srcSocketName);
+    dataParcel.WriteParcelable(&massage);
+    dataParcel.WriteParcelable(&massage);
+    dataParcel.WriteParcelable(&opt);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, collabToken);
+    DistributedSchedService::GetInstance().CollabMissionInner(dataParcel, reply);
+}
+
+void NotifyCloseCollabSessionInnerFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    FuzzUtil::MockPermission();
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    FuzzedDataProvider fdp(data, size);
+    std::string tokenId = fdp.ConsumeRandomLengthString();
+    dataParcel.WriteString(tokenId);
+    DistributedSchedService::GetInstance().NotifyCloseCollabSessionInner(dataParcel, reply);
+}
+
+void GetSinkCollabVersionInnerFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    FuzzUtil::MockPermission();
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    FuzzedDataProvider fdp(data, size);
+    int32_t collabSessionId = fdp.ConsumeIntegral<int32_t>();
+    std::string sinkDeviceId = fdp.ConsumeRandomLengthString();
+    std::string collabToken = fdp.ConsumeRandomLengthString();
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, collabSessionId);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, sinkDeviceId);
+    PARCEL_WRITE_HELPER_NORET(dataParcel, String, collabToken);
+    dataParcel.WriteRemoteObject(nullptr);
+    DistributedSchedService::GetInstance().GetSinkCollabVersionInner(dataParcel, reply);
+}
+
+void NotifyRejectReasonFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    FuzzUtil::MockPermission();
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    FuzzedDataProvider fdp(data, size);
+    std::string token = fdp.ConsumeRandomLengthString();
+    std::string reason = fdp.ConsumeRandomLengthString();
+    dataParcel.WriteString(token);
+    dataParcel.WriteString(reason);
+    DistributedSchedService::GetInstance().NotifyRejectReason(dataParcel, reply);
+}
+
+void NotifyCollabPrepareResultInnerFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    FuzzUtil::MockPermission();
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    FuzzedDataProvider fdp(data, size);
+    std::string collabToken = fdp.ConsumeRandomLengthString();
+    int32_t ret = fdp.ConsumeIntegral<int32_t>();
+    int32_t sinkCollabSessionId = fdp.ConsumeIntegral<int32_t>();
+    std::string sinkSocketName = fdp.ConsumeRandomLengthString();
+    dataParcel.WriteString(collabToken);
+    dataParcel.WriteInt32(ret);
+    dataParcel.WriteInt32(sinkCollabSessionId);
+    dataParcel.WriteString(sinkSocketName);
+    dataParcel.WriteRemoteObject(nullptr);
+    DistributedSchedService::GetInstance().NotifyCollabPrepareResultInner(dataParcel, reply);
+}
+
+void FuzzTest(const uint8_t* data, size_t size)
+{
+    CollabMissionInnerFuzzTest(data, size);
+    NotifyCloseCollabSessionInnerFuzzTest(data, size);
+    GetSinkCollabVersionInnerFuzzTest(data, size);
+    NotifyRejectReasonFuzzTest(data, size);
+    NotifyCollabPrepareResultInnerFuzzTest(data, size);
+}
 }
 }
 
@@ -1082,5 +1184,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DistributedSchedule::StartShareFormFromRemoteInnerFuzzTest(data, size);
     OHOS::DistributedSchedule::StopExtensionAbilityFromRemoteInnerFuzzTest(data, size);
     OHOS::DistributedSchedule::StopAbilityFromRemoteInnerFuzzTest(data, size);
+    OHOS::DistributedSchedule::FuzzTest(data, size);
     return 0;
 }
