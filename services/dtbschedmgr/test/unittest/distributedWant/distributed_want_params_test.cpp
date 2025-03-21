@@ -1184,7 +1184,7 @@ HWTEST_F(DistributedWantParamsBaseTest, WriteToParcelFD_1000, Function | MediumT
     bool result = wantParams.WriteToParcelFD(parcel, wantParams);
     EXPECT_FALSE(result);
 
-    int valueInteger = 23;
+    int valueInteger = -1;
     std::string key = "value";
     wantParams.SetParam(key, Integer::Box(valueInteger));
     result = wantParams.WriteToParcelFD(parcel, wantParams);
