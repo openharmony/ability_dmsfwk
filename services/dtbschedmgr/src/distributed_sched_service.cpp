@@ -156,7 +156,7 @@ DataShareManager &dataShareManager = DataShareManager::GetInstance();
 
 const std::string HMOS_HAP_CODE_PATH = "1";
 const std::string LINUX_HAP_CODE_PATH = "2";
-const int32_t CONNECT_WAIT_TIME_S = 2 * 1000 * 1000; /* 2 second */
+const int32_t CONNECT_WAIT_TIME_S = 2; /* 2 second */
 std::mutex getDistibutedProxyLock_;
 std::condition_variable getDistibutedProxyCondition_;
 }
