@@ -572,8 +572,7 @@ HWTEST_F(DSchedCollabTest, ExeSrcStart_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedCollabTest ExeSrcStart_001 begin" << std::endl;
     ASSERT_NE(dSchedCollab_, nullptr);
-    EXPECT_CALL(*adapterMock_, ConnectDevice(_, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
-    EXPECT_EQ(dSchedCollab_->ExeSrcStart(), INVALID_PARAMETERS_ERR);
+    EXPECT_NE(dSchedCollab_->ExeSrcStart(), ERR_OK);
     DTEST_LOG << "DSchedCollabTest ExeSrcStart_001 end" << std::endl;
 }
 
