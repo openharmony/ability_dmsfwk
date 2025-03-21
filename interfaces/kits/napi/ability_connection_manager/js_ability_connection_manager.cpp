@@ -47,8 +47,6 @@ constexpr int32_t ARG_COUNT_TWO = 2;
 constexpr int32_t ARG_COUNT_THREE = 3;
 constexpr int32_t ARG_COUNT_FOUR = 4;
 constexpr int32_t NAPI_BUF_LENGTH = 1024;
-constexpr int32_t PEER_APP_EXIT = 0;
-constexpr int32_t NETWORK_DISCONNECTED = 1;
 constexpr int32_t SOURCE = 0;
 constexpr int32_t SINK = 1;
 constexpr int32_t UNKNOWN = -1;
@@ -70,6 +68,11 @@ const std::string ERR_MESSAGE_RECEIVE_NOT_START = "The stream at the receive end
 const std::string KEY_START_OPTION = "ohos.collabrate.key.start.option";
 const std::string VALUE_START_OPTION_FOREGROUND = "ohos.collabrate.value.forefround";
 const std::string VALUE_START_OPTION_BACKGROUND = "ohos.collabrate.value.background";
+const std::string COLLABORATE_KEYS_PEER_INFO  = "ohos.collaboration.key.peerInfo";
+const std::string COLLABORATE_KEYS_CONNECT_OPTIONS = "ohos.collaboration.key.connectOptions";
+const std::string COLLABORATE_KEYS_COLLABORATE_TYPE = "ohos.collaboration.key.abilityCollaborateType";
+const std::string ABILITY_COLLABORATION_TYPE_DEFAULT  = "ohos.collaboration.value.abilityCollab";
+const std::string ABILITY_COLLABORATION_TYPE_CONNECT_PROXY = "ohos.collaboration.value.connectProxy";
 }
 
 bool JsAbilityConnectionManager::JsToInt32(const napi_env &env, const napi_value &value,
@@ -1690,11 +1693,17 @@ void InitDisconnectReason(napi_env& env, napi_value& exports)
 {
     char propertyName[] = "DisconnectReason";
     napi_value peerAppExit = nullptr;
+    napi_value peerAppCloseCollab = nullptr;
     napi_value networkDisconnected = nullptr;
-    napi_create_int32(env, PEER_APP_EXIT, &peerAppExit);
-    napi_create_int32(env, NETWORK_DISCONNECTED, &networkDisconnected);
+    napi_create_int32(env,
+        static_cast<int32_t>(DisconnectReason::PEER_APP_CLOSE_COLLABORATION), &peerAppCloseCollab);
+    napi_create_int32(env,
+        static_cast<int32_t>(DisconnectReason::PEER_APP_EXIT), &peerAppExit);
+    napi_create_int32(env,
+        static_cast<int32_t>(DisconnectReason::NETWORK_DISCONNECTED), &networkDisconnected);
 
     napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("PEER_APP_CLOSE_COLLABORATION", peerAppCloseCollab),
         DECLARE_NAPI_STATIC_PROPERTY("PEER_APP_EXIT", peerAppExit),
         DECLARE_NAPI_STATIC_PROPERTY("NETWORK_DISCONNECTED", networkDisconnected),
     };
@@ -1783,6 +1792,110 @@ void InitStartOptionParams(napi_env& env, napi_value& exports)
     napi_set_named_property(env, exports, propertyName, obj);
 }
 
+void InitCollaborateEventType(napi_env& env, napi_value& exports)
+{
+    char propertyName[] = "CollaborateEventType";
+    napi_value sendFailure = nullptr;
+    napi_value colorSpaceConversionFailure = nullptr;
+    napi_create_int32(env, static_cast<int32_t>(CollaborateEventType::SEND_FAILURE),
+        &sendFailure);
+    napi_create_int32(env, static_cast<int32_t>(CollaborateEventType::COLOR_SPACE_CONVERSION_FAILURE),
+        &colorSpaceConversionFailure);
+
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("SEND_FAILURE", sendFailure),
+        DECLARE_NAPI_STATIC_PROPERTY("COLOR_SPACE_CONVERSION_FAILURE", colorSpaceConversionFailure),
+    };
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    napi_set_named_property(env, exports, propertyName, obj);
+}
+
+void InitConnectErrorCode(napi_env env, napi_value exports)
+{
+    char propertyName[] = "ConnectErrorCode";
+    napi_value connectedSessionExists = nullptr;
+    napi_value peerAppRejected = nullptr;
+    napi_value localWifiNotOpen = nullptr;
+    napi_value peerWifiNotOpen = nullptr;
+    napi_value peerAbilityNoOncollaborate = nullptr;
+    napi_value systemInternalError = nullptr;
+
+    napi_create_int32(env,
+        static_cast<int32_t>(ConnectErrorCode::CONNECTED_SESSION_EXISTS), &connectedSessionExists);
+    napi_create_int32(env,
+        static_cast<int32_t>(ConnectErrorCode::PEER_APP_REJECTED), &peerAppRejected);
+    napi_create_int32(env,
+        static_cast<int32_t>(ConnectErrorCode::LOCAL_WIFI_NOT_OPEN), &localWifiNotOpen);
+    napi_create_int32(env,
+        static_cast<int32_t>(ConnectErrorCode::PEER_WIFI_NOT_OPEN), &peerWifiNotOpen);
+    napi_create_int32(env,
+        static_cast<int32_t>(ConnectErrorCode::PEER_ABILITY_NO_ONCOLLABORATE), &peerAbilityNoOncollaborate);
+    napi_create_int32(env,
+        static_cast<int32_t>(ConnectErrorCode::SYSTEM_INTERNAL_ERROR), &systemInternalError);
+
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("CONNECTED_SESSION_EXISTS", connectedSessionExists),
+        DECLARE_NAPI_STATIC_PROPERTY("PEER_APP_REJECTED", peerAppRejected),
+        DECLARE_NAPI_STATIC_PROPERTY("LOCAL_WIFI_NOT_OPEN", localWifiNotOpen),
+        DECLARE_NAPI_STATIC_PROPERTY("PEER_WIFI_NOT_OPEN", peerWifiNotOpen),
+        DECLARE_NAPI_STATIC_PROPERTY("PEER_ABILITY_NO_ONCOLLABORATE", peerAbilityNoOncollaborate),
+        DECLARE_NAPI_STATIC_PROPERTY("SYSTEM_INTERNAL_ERROR", systemInternalError),
+    };
+
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    napi_set_named_property(env, exports, propertyName, obj);
+}
+
+void InitCollaborationKeys(napi_env& env, napi_value& exports)
+{
+    char propertyName[] = "CollaborationKeys";
+    napi_value peerInfo = nullptr;
+    napi_value connectOptions = nullptr;
+    napi_value collaborateType = nullptr;
+
+    napi_create_string_utf8(env, COLLABORATE_KEYS_PEER_INFO.c_str(),
+        COLLABORATE_KEYS_PEER_INFO.size(), &peerInfo);
+    napi_create_string_utf8(env, COLLABORATE_KEYS_CONNECT_OPTIONS.c_str(),
+        COLLABORATE_KEYS_CONNECT_OPTIONS.size(), &connectOptions);
+    napi_create_string_utf8(env, COLLABORATE_KEYS_COLLABORATE_TYPE.c_str(),
+        COLLABORATE_KEYS_COLLABORATE_TYPE.size(), &collaborateType);
+
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("PEER_INFO", peerInfo),
+        DECLARE_NAPI_STATIC_PROPERTY("CONNECT_OPTIONS", connectOptions),
+        DECLARE_NAPI_STATIC_PROPERTY("COLLABORATE_TYPE", collaborateType),
+    };
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    napi_set_named_property(env, exports, propertyName, obj);
+}
+
+void InitCollaborationValues(napi_env& env, napi_value& exports)
+{
+    char propertyName[] = "CollaborationValues";
+    napi_value abilityCollab = nullptr;
+    napi_value connectProxy = nullptr;
+
+    napi_create_string_utf8(env, ABILITY_COLLABORATION_TYPE_DEFAULT.c_str(),
+        ABILITY_COLLABORATION_TYPE_DEFAULT.size(), &abilityCollab);
+    napi_create_string_utf8(env, ABILITY_COLLABORATION_TYPE_CONNECT_PROXY.c_str(),
+        ABILITY_COLLABORATION_TYPE_CONNECT_PROXY.size(), &connectProxy);
+
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_STATIC_PROPERTY("ABILITY_COLLABORATION_TYPE_DEFAULT", abilityCollab),
+        DECLARE_NAPI_STATIC_PROPERTY("ABILITY_COLLABORATION_TYPE_CONNECT_PROXY", connectProxy),
+    };
+    napi_value obj = nullptr;
+    napi_create_object(env, &obj);
+    napi_define_properties(env, obj, sizeof(desc) / sizeof(desc[0]), desc);
+    napi_set_named_property(env, exports, propertyName, obj);
+}
+
 void InitFunction(napi_env env, napi_value exports)
 {
     static napi_property_descriptor desc[] = {
@@ -1824,7 +1937,10 @@ napi_value JsAbilityConnectionManagerInit(napi_env env, napi_value exports)
     InitStreamRole(env, exports);
     InitVideoPixelFormat(env, exports);
     InitStartOptionParams(env, exports);
-    InitVideoPixelFormat(env, exports);
+    InitCollaborateEventType(env, exports);
+    InitConnectErrorCode(env, exports);
+    InitCollaborationKeys(env, exports);
+    InitCollaborationValues(env, exports);
     InitFunction(env, exports);
 
     HILOGI("napi_define_properties end");
