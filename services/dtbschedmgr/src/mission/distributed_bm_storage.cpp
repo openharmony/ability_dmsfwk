@@ -893,7 +893,7 @@ void DmsBmStorage::UpdateDistributedData()
                 dmsBundleInfos.push_back(dmsBundleInfo);
             }
             if (!localUdid.empty() && oldUdid != localUdid) {
-                HILOGW("Delete DistributedBundleInfo for old udid, bundleName: ", bundleInfos.size());
+                HILOGW("Delete DistributedBundleInfo for old udid, bundleName: %{public}s", bundleInfo.name.c_str());
                 Key key(keyOfKVStore);
                 kvStorePtr_->Delete(key);
             }
