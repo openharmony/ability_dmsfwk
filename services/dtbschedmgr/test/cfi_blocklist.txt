@@ -14,3 +14,8 @@
 [cfi]
 type:*testing::UnitTest*
 src:*third_party/googletest/*
+src:*dms_continue_recommend_info.cpp
+src:*dms_continue_recommend_manager.cpp
+src:*dms_continue_recv_manager.cpp
+src:*dms_continue_send_manager.cpp
+src:*dsched_collab_manager.cpp
