@@ -57,12 +57,16 @@ void DSchedCollabManagerTest::SetUpTestCase()
     DTEST_LOG << "DSchedCollabManagerTest::SetUpTestCase" << std::endl;
     mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
     DSchedCollabManager::GetInstance().Init();
+    multiUserMgrMock_ = std::make_shared<MultiUserManagerMock>();
+    MultiUserManagerMock::multiUserMgrMock = multiUserMgrMock_;
 }
 
 void DSchedCollabManagerTest::TearDownTestCase()
 {
     DTEST_LOG << "DSchedCollabManagerTest::TearDownTestCase" << std::endl;
     (void)remove(BASEDIR.c_str());
+    MultiUserManagerMock::multiUserMgrMock = nullptr;
+    multiUserMgrMock_ = nullptr;
 }
 
 void DSchedCollabManagerTest::TearDown()
@@ -124,9 +128,11 @@ HWTEST_F(DSchedCollabManagerTest, CollabMission_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedCollabManagerTest CollabMission_001 begin" << std::endl;
     DSchedCollabInfo info;
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(false));
     int32_t ret = DSchedCollabManager::GetInstance().CollabMission(info);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, DMS_NOT_FOREGROUND_USER);
 
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedCollabManagerTest CollabMission_001 end" << std::endl;
@@ -142,30 +148,37 @@ HWTEST_F(DSchedCollabManagerTest, CollabMission_002, TestSize.Level3)
     DTEST_LOG << "DSchedCollabManagerTest CollabMission_002 begin" << std::endl;
     DSchedCollabInfo info;
     info.srcClientCB_ = sptr<DistributedSchedService>(new DistributedSchedService());
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     int32_t ret = DSchedCollabManager::GetInstance().CollabMission(info);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     info.srcInfo_.bundleName_ = "srcBundle";
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     info.sinkInfo_.bundleName_ = "sinkBundle";
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     info.srcInfo_.moduleName_ = "srcModule";
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     info.sinkInfo_.moduleName_ = "sinkModule";
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     info.srcInfo_.abilityName_ = "srcAbility";
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     info.sinkInfo_.abilityName_ = "sinkAbility";
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
     EXPECT_EQ(ret, FIND_LOCAL_DEVICEID_ERR);
     DTEST_LOG << "DSchedCollabManagerTest CollabMission_002 end" << std::endl;
