@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <adoctint.h>
 #include "mission/distributed_bm_storage.h"
 
 #include "datetime_ex.h"
@@ -892,11 +893,7 @@ void DmsBmStorage::UpdateDistributedData()
                 DmsBundleInfo dmsBundleInfo = ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo, true);
                 dmsBundleInfos.push_back(dmsBundleInfo);
             }
-            if (!localUdid.empty() && oldUdid != localUdid) {
-                HILOGW("Delete DistributedBundleInfo for old udid, bundleName: %{public}s", bundleInfo.name.c_str());
-                Key key(keyOfKVStore);
-                kvStorePtr_->Delete(key);
-            }
+            CleanRedundancyBundleInfo(localUdid, bundleInfo, keyOfKVStore, oldUdid);
             continue;
         }
         DmsBundleInfo dmsBundleInfo = ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo);
@@ -909,6 +906,17 @@ void DmsBmStorage::UpdateDistributedData()
     DmsPutBatch(dmsBundleInfos);
     HILOGI("end.");
 }
+
+void DmsBmStorage::CleanRedundancyBundleInfo(const std::string &localUdid, AppExecFwk::BundleInfo &bundleInfo,
+    const std::string &keyOfKVStore, const std::string &oldUdid) const
+{
+    if (!localUdid.empty() && oldUdid != localUdid) {
+        HILOGW("Delete DistributedBundleInfo for old udid, bundleName: %{public}s", bundleInfo.name.c_str());
+        Key key(keyOfKVStore);
+        kvStorePtr_->Delete(key);
+    }
+}
+
 
 void DmsBmStorage::DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos)
 {
