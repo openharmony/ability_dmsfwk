@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include <adoctint.h>
 #include "mission/distributed_bm_storage.h"
 
 #include "datetime_ex.h"
