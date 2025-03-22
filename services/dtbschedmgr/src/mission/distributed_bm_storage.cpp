@@ -892,7 +892,7 @@ void DmsBmStorage::UpdateDistributedData()
                 DmsBundleInfo dmsBundleInfo = ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo, true);
                 dmsBundleInfos.push_back(dmsBundleInfo);
             }
-            CleanRedundancyBundleInfo(localUdid, bundleInfo, keyOfKVStore, oldUdid);
+            CleanRedundancyBundleInfo(localUdid, bundleInfo.name, keyOfKVStore, oldUdid);
             continue;
         }
         DmsBundleInfo dmsBundleInfo = ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo);
@@ -906,11 +906,11 @@ void DmsBmStorage::UpdateDistributedData()
     HILOGI("end.");
 }
 
-void DmsBmStorage::CleanRedundancyBundleInfo(const std::string &localUdid, AppExecFwk::BundleInfo &bundleInfo,
+void DmsBmStorage::CleanRedundancyBundleInfo(const std::string &localUdid, const std::string bundleName,
     const std::string &keyOfKVStore, const std::string &oldUdid) const
 {
     if (!localUdid.empty() && oldUdid != localUdid) {
-        HILOGW("Delete DistributedBundleInfo for old udid, bundleName: %{public}s", bundleInfo.name.c_str());
+        HILOGW("Delete DistributedBundleInfo for old udid, bundleName: %{public}s", bundleName.c_str());
         Key key(keyOfKVStore);
         kvStorePtr_->Delete(key);
     }

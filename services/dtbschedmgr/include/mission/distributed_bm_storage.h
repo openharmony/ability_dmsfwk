@@ -88,7 +88,7 @@ private:
     bool DealGetBundleName(const std::string &networkId, const uint16_t& bundleNameId, std::string &bundleName);
     uint16_t CreateBundleNameId(const std::string &bundleName, bool isPackageChange = false);
     void AddBundleNameId(const uint16_t &bundleNameId, const std::string &bundleName);
-    void CleanRedundancyBundleInfo(const std::string &localUdid, AppExecFwk::BundleInfo &bundleInfo,
+    void CleanRedundancyBundleInfo(const std::string &localUdid, const std::string bundleName,
         const std::string &keyOfKVStore, const std::string &oldUdid) const;
     void SyncBundleInfoData(std::vector<DistributedKv::Entry> &entries);
     void DelBundleNameId(const std::string &bundleName);
