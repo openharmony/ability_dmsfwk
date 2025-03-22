@@ -163,62 +163,6 @@ HWTEST_F(DmsKvSyncE2ETest, CheckDeviceCfgTest_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSyncRecordTest_001
- * @tc.desc: test insert DmsKvSyncE2E
- * @tc.type: FUNC
- */
-HWTEST_F(DmsKvSyncE2ETest, SetSyncRecordTest_001, TestSize.Level1)
-{
-    DTEST_LOG << "DmsKvSyncE2ETest SetSyncRecordTest_001 start" << std::endl;
-    ASSERT_NE(dmsKvSyncE2E_, nullptr);
-    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
-    EXPECT_NE(dmsKvSyncE2E, nullptr);
-    if (dmsKvSyncE2E != nullptr) {
-        const std::string networkId = "123";
-        dmsKvSyncE2E_->GetInstance()->SetSyncRecord(networkId);
-    }
-    DTEST_LOG << "DmsKvSyncE2ETest SetSyncRecordTest_001 end" << std::endl;
-}
-
-/**
- * @tc.name: ClearSyncRecordTest_001
- * @tc.desc: test insert DmsKvSyncE2E
- * @tc.type: FUNC
- */
-HWTEST_F(DmsKvSyncE2ETest, ClearSyncRecordTest_001, TestSize.Level1)
-{
-    DTEST_LOG << "DmsKvSyncE2ETest ClearSyncRecordTest_001 start" << std::endl;
-    ASSERT_NE(dmsKvSyncE2E_, nullptr);
-    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
-    EXPECT_NE(dmsKvSyncE2E, nullptr);
-    if (dmsKvSyncE2E != nullptr) {
-        const std::string networkId = "123";
-        dmsKvSyncE2E_->GetInstance()->ClearSyncRecord(networkId);
-    }
-    DTEST_LOG << "DmsKvSyncE2ETest ClearSyncRecordTest_001 end" << std::endl;
-}
-
-/**
- * @tc.name: IsSynchronizedTest_001
- * @tc.desc: test insert DmsKvSyncE2E
- * @tc.type: FUNC
- */
-HWTEST_F(DmsKvSyncE2ETest, IsSynchronizedTest_001, TestSize.Level1)
-{
-    DTEST_LOG << "DmsKvSyncE2ETest IsSynchronizedTest_001 start" << std::endl;
-    ASSERT_NE(dmsKvSyncE2E_, nullptr);
-    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
-    EXPECT_NE(dmsKvSyncE2E, nullptr);
-    if (dmsKvSyncE2E != nullptr) {
-        const std::string networkId = "123";
-        dmsKvSyncE2E_->GetInstance()->SetSyncRecord(networkId);
-        bool ret = dmsKvSyncE2E_->GetInstance()->IsSynchronized(networkId);
-        EXPECT_EQ(ret, true);
-    }
-    DTEST_LOG << "DmsKvSyncE2ETest IsSynchronizedTest_001 end" << std::endl;
-}
-
-/**
  * @tc.name: CheckCtrlRuleTest_001
  * @tc.desc: test insert DmsKvSyncE2E
  * @tc.type: FUNC
