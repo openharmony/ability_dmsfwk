@@ -47,6 +47,7 @@ public:
         const ChannelDataType dataType, const ChannelPeerInfo& peerInfo);
     bool isValidChannelId(const int32_t channelId);
     int32_t DeleteChannel(const int32_t channelId);
+    void ClearSendTask(int32_t channelId);
     int32_t RegisterChannelListener(const int32_t channelId,
         const std::shared_ptr<IChannelListener> listener);
     int32_t ConnectChannel(const int32_t channelId);
@@ -119,17 +120,24 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> callbackEventHandler_;
     std::condition_variable callbackEventCon_;
 
+    std::mutex msgEventMutex_;
+    std::thread msgEventThread_;
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> msgEventHandler_;
+    std::condition_variable msgEventCon_;
 private:
     explicit ChannelManager() = default;
     ~ChannelManager();
 
     void Reset();
     int32_t PostTask(const AppExecFwk::InnerEvent::Callback& callback,
-        const AppExecFwk::EventQueue::Priority priority);
+        const AppExecFwk::EventQueue::Priority priority, const std::string& name = "");
     int32_t PostCallbackTask(const AppExecFwk::InnerEvent::Callback& callback,
             const AppExecFwk::EventQueue::Priority priority);
+    int32_t PostMsgTask(const AppExecFwk::InnerEvent::Callback& callback,
+        const AppExecFwk::EventQueue::Priority priority);
     void StartEvent();
     void StartCallbackEvent();
+    void StartMsgEvent();
 
     int32_t CreateServerSocket();
     int32_t CreateClientSocket(const std::string& channelName,
