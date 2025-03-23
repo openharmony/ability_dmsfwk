@@ -21,8 +21,8 @@
 
 #include "ability_connection_info.h"
 #include "ability_connection_session.h"
-#include "iremote_broker.h"
-#include "if_system_ability_manager.h"
+#include "iremote_object.h"
+#include "system_ability_status_change_stub.h"
 #include <mutex>
 #include <condition_variable>
 
@@ -56,12 +56,11 @@ private:
     std::condition_variable cv_;
     bool callbackReceived_ = false;
     sptr<ISystemAbilityStatusChange> listener_ = nullptr;
-    class SystemAbilityStatusChangeListener : public ISystemAbilityStatusChange {
+    class SystemAbilityStatusChangeListener : public SystemAbilityStatusChangeStub {
     public:
         explicit SystemAbilityStatusChangeListener(DistributedClient* client): client_(client) {}
         void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
         void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
-        sptr<IRemoteObject> AsObject() override;
     private:
         DistributedClient* client_ = nullptr;
     };
