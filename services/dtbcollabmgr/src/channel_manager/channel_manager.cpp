@@ -23,9 +23,6 @@
 #include "securec.h"
 #include <unordered_set>
 
-// TODO: 改异步
-// TODO: 增加清理
-// TODO: msg发送链路独立
 namespace OHOS {
 namespace DistributedCollab {
 IMPLEMENT_SINGLE_INSTANCE(ChannelManager);
@@ -618,7 +615,7 @@ inline void ChannelManager::CleanInvalidListener(std::vector<std::weak_ptr<IChan
 
 int32_t ChannelManager::ConnectChannel(const int32_t channelId)
 {
-    HILOGI("start to connect channel, only allow client");
+    HILOGI("start to connect channel %{public}d, only allow client", channelId);
     std::vector<int32_t> socketIds;
     ChannelDataType dataType;
     {
