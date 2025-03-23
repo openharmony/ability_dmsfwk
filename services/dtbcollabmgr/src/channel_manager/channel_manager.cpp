@@ -274,7 +274,7 @@ int32_t ChannelManager::PostTask(const AppExecFwk::InnerEvent::Callback& callbac
         HILOGE("event handler empty");
         return NULL_EVENT_HANDLER;
     }
-    if (eventHandler_->PostTask(callback, name, priority)) {
+    if (eventHandler_->PostTask(callback, name, 0, priority)) {
         return ERR_OK;
     }
     HILOGE("add task failed");
@@ -347,6 +347,17 @@ void ChannelManager::DeInit()
         callbackEventHandler_ = nullptr;
     } else {
         HILOGE("callbackEventHandler_ is nullptr");
+    }
+
+    // stop msg task
+    if (msgEventHandler_ != nullptr) {
+        msgEventHandler_->GetEventRunner()->Stop();
+        if (msgEventThread_.joinable()) {
+            msgEventThread_.join();
+        }
+        msgEventHandler_ = nullptr;
+    } else {
+        HILOGE("msgEventHandler_ is nullptr");
     }
 
     // release channels
@@ -513,6 +524,7 @@ int32_t ChannelManager::DeleteChannel(const int32_t channelId)
         return INVALID_CHANNEL_ID;
     }
     ClearRegisterListener(channelId);
+    ClearSendTask(channelId);
     ClearRegisterChannel(channelId);
     ClearRegisterSocket(channelId);
     HILOGI("end delete channel");
@@ -712,7 +724,7 @@ int32_t ChannelManager::SetSocketStatus(const int32_t socketId, const ChannelSta
     }
     auto func = [channelId, this]() {
         UpdateChannelStatus(channelId);
-    }
+    };
     return PostCallbackTask(func, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
