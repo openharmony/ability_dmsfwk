@@ -99,11 +99,6 @@ void DistributedClient::SystemAbilityStatusChangeListener::OnRemoveSystemAbility
     HILOGI("SystemAbility removed: %{public}d", systemAbilityId);
 }
 
-sptr<IRemoteObject> DistributedClient::SystemAbilityStatusChangeListener::AsObject()
-{
-    return nullptr;
-}
-
 int32_t DistributedClient::CollabMission(int32_t sessionId, const std::string& serverSocketName,
     const AbilityConnectionSessionInfo& sessionInfo, const ConnectOption& options, const std::string& token)
 {
