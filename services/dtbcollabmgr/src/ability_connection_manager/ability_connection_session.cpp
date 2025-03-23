@@ -525,6 +525,20 @@ int32_t AbilityConnectionSession::DestroyStream()
     senderEngine_ = nullptr;
     recvEngine_ = nullptr;
     recvEngineState_ = EngineState::EMPTY;
+    TransChannelInfo info;
+    std::shared_lock<std::shared_mutex> channelReadLock(transChannelMutex_);
+    auto item = transChannels_.find(TransChannelType::STREAM);
+    if (item != transChannels_.end() && item->second.isConnected) {
+        info = item->second;
+    }
+    ChannelManager::GetInstance().ClearSendTask(info.channelId);
+    HILOGI("stream bytes channel clear task");
+    item = transChannels_.find(TransChannelType::STREAM_BYTES);
+    if (item != transChannels_.end() && item->second.isConnected) {
+        info = item->second;
+    }
+    ChannelManager::GetInstance().ClearSendTask(info.channelId);
+    HILOGI("stream bytes channel clear task");
     return ERR_OK;
 }
 
