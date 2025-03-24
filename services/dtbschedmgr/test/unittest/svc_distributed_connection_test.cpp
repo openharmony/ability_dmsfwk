@@ -54,14 +54,28 @@ HWTEST_F(SvcDistributedConnectionTest, OnAbilityConnectDone_001, TestSize.Level3
     DTEST_LOG << "SvcDistributedConnectionTest OnAbilityConnectDone_001 begin" << std::endl;
     int resultCode = 0;
     AppExecFwk::ElementName element;
-    EXPECT_TRUE(disconnectedCon_ != nullptr);
-    disconnectedCon_->OnAbilityConnectDone(element, nullptr, resultCode);
-    EXPECT_TRUE(true);
+    EXPECT_NO_FATAL_FAILURE(disconnectedCon_->OnAbilityConnectDone(element, nullptr, resultCode));
+    DTEST_LOG << "SvcDistributedConnectionTest OnAbilityConnectDone_001 remoteObject is nullptr " << std::endl;
+}
 
+/**
+ * @tc.name: OnAbilityConnectDone_002
+ * @tc.desc: OnAbilityConnectDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvcDistributedConnectionTest, OnAbilityConnectDone_002, TestSize.Level3)
+{
+    DTEST_LOG << "SvcDistributedConnectionTest OnAbilityConnectDone_001 begin" << std::endl;
+    int resultCode = 0;
+    AppExecFwk::ElementName element;
+    EXPECT_TRUE(disconnectedCon_ != nullptr);
     sptr<IRemoteObject> remoteObject;
+
+    string bundleName = "com.example.dms_extension";
+    element.SetBundleName(bundleName);
     disconnectedCon_->OnAbilityConnectDone(element, remoteObject, resultCode);
-    EXPECT_TRUE(true);
-    DTEST_LOG << "SvcDistributedConnectionTest OnAbilityConnectDone_001 end" << std::endl;
+    EXPECT_NO_FATAL_FAILURE(disconnectedCon_->OnAbilityConnectDone(element, remoteObject, resultCode));
+    DTEST_LOG << "SvcDistributedConnectionTest OnAbilityConnectDone_002 end" << std::endl;
 }
 
 /**
@@ -81,11 +95,15 @@ HWTEST_F(SvcDistributedConnectionTest, OnAbilityDisconnectDone_001, TestSize.Lev
     EXPECT_TRUE(disconnectedCon_ != nullptr);
     disconnectedCon_->isConnectCalled_ = false;
     disconnectedCon_->OnAbilityDisconnectDone(element, resultCode);
+    EXPECT_NO_FATAL_FAILURE(disconnectedCon_->OnAbilityDisconnectDone(element, resultCode));
     bool ret = disconnectedCon_->IsExtAbilityConnected();
     EXPECT_FALSE(ret);
 
     disconnectedCon_->isConnectCalled_ = true;
+    bundleName = "com.example.dms_extension";
+    element.SetBundleName(bundleName);
     disconnectedCon_->OnAbilityDisconnectDone(element, resultCode);
+    EXPECT_NO_FATAL_FAILURE(disconnectedCon_->OnAbilityDisconnectDone(element, resultCode));
     ret = disconnectedCon_->IsExtAbilityConnected();
     EXPECT_FALSE(ret);
 
@@ -106,4 +124,4 @@ HWTEST_F(SvcDistributedConnectionTest, GetDistributedExtProxy_001, TestSize.Leve
     DTEST_LOG << "SvcDistributedConnectionTest GetDistributedExtProxy_001 end" << std::endl;
 }
 }
-}
+}
