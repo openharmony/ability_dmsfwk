@@ -758,7 +758,7 @@ int32_t DSchedContinue::ExecuteContinueReply()
     HILOGI("ExecuteContinueReply start, continueInfo: %{public}s", continueInfo_.ToString().c_str());
 
     AppExecFwk::BundleInfo bundleInfo;
-    if (BundleManagerInternal::GetLocalBundleInfoV9(continueInfo_.sourceBundleName_, bundleInfo) != ERR_OK) {
+    if (BundleManagerInternal::GetLocalBundleInfoV9(continueInfo_.sinkBundleName_, bundleInfo) != ERR_OK) {
         HILOGE("ExecuteContinueReply get local bundleInfo failed, the bundle is not installed on local device.");
         return INVALID_PARAMETERS_ERR;
     }
