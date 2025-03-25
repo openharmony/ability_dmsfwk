@@ -916,7 +916,6 @@ void DmsBmStorage::CleanRedundancyBundleInfo(const std::string &localUdid, const
     }
 }
 
-
 void DmsBmStorage::DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos)
 {
     HILOGI("called.");
