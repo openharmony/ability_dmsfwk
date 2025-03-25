@@ -16,7 +16,6 @@
 #define ABILITY_DMSFWK_JS_CONTINUATION_STATE_MANAGER_H
 
 #include "js_continuation_state_manager_stub.h"
-#include "base/continuationmgr_log.h"
 #include "ability.h"
 
 #include "native_engine/native_engine.h"
