@@ -17,7 +17,7 @@
 #include "js_continuation_state_client.h"
 
 #include "napi_error_code.h"
-#include "dtbcollabmgr_log.h"
+#include "dtbschedmgr_log.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 
@@ -29,10 +29,11 @@ namespace {
     const std::string TAG = "JsContinuationStateManager";
     const std::string BIZTYPE_PREPARE_CONTINUE = "prepareContinue";
     const std::string CODE_KEY_NAME = "code";
-    const std::string ERR_DMS_WORK_ABNORMALLY_ERR_MSG = "the system ability work abnormally.";
+    const std::string ERR_DMS_WORK_ABNORMALLY_MSG = "the system ability work abnormally.";
     const int32_t ARG_INDEX_4_CALLBACK_FUNC = 2;
     const int32_t SUCCESS = 0;
     const int32_t FAILED = 1;
+    constexpr int32_t ARG_COUNT_TWO = 2;
     constexpr int32_t ARG_COUNT_THREE = 3;
     const int32_t CALLBACK_PARAMS_NUM = 2;
 }
@@ -45,12 +46,11 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
     HILOGI("ContinueStateCallbackOn call");
     napi_value ret = nullptr;
     int32_t result = SUCCESS;
-    sptr<DistributedSchedule::JsContinuationStateManagerStub> stub = CreateStub(env, info);
+    sptr<DistributedSchedule::JsContinuationStateManagerStub> stub = CreateStub(env, info, true);
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOn Unsupported business type: %{public}s; need: %{public}s",
-            stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
-        napi_throw(env, GenerateBusinessError(
-            env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
+               stub == nullptr ? "" : stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
+        napi_throw_error(env, std::to_string(ERR_DMS_WORK_ABNORMALLY).c_str(), ERR_DMS_WORK_ABNORMALLY_MSG.c_str());
         result = FAILED;
         napi_get_value_int32(env, ret, &result);
         return ret;
@@ -74,8 +74,7 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
     HILOGI("ContinueStateCallbackOn register callback result: %{public}d", result);
 
     if (result != ERR_OK) {
-        napi_throw(env, GenerateBusinessError(
-            env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
+        napi_throw_error(env, std::to_string(ERR_DMS_WORK_ABNORMALLY).c_str(), ERR_DMS_WORK_ABNORMALLY_MSG.c_str());
     }
     napi_get_value_int32(env, ret, &result);
     return ret;
@@ -86,12 +85,11 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     HILOGI("ContinueStateCallbackOff call");
     napi_value ret = nullptr;
     int32_t result = SUCCESS;
-    sptr<DistributedSchedule::JsContinuationStateManagerStub> stub = CreateStub(env, info);
+    sptr<DistributedSchedule::JsContinuationStateManagerStub> stub = CreateStub(env, info, false);
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOff Unsupported business type: %{public}s; need: %{public}s",
-            stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
-        napi_throw(env, GenerateBusinessError(
-            env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
+               stub == nullptr ? "" : stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
+        napi_throw_error(env, std::to_string(ERR_DMS_WORK_ABNORMALLY).c_str(), ERR_DMS_WORK_ABNORMALLY_MSG.c_str());
         result = FAILED;
         napi_get_value_int32(env, ret, &result);
         return ret;
@@ -106,41 +104,42 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     if (result == ERR_OK) {
         callbackStubs_.erase(key);
     }
-    int32_t state = result;
-    napi_value callback = nullptr;
-    napi_get_reference_value(env, stub->callbackData_.callbackRef, &callback);
-    napi_value undefined = nullptr;
-    napi_get_undefined(env, &undefined);
-    napi_value continueResultInfo;
-    napi_create_object(env, &continueResultInfo);
-    napi_value resultState;
-    napi_create_int32(env, state, &resultState);
-    napi_set_named_property(env, continueResultInfo, "resultState", resultState);
-    napi_value resultInfo;
-    napi_create_string_utf8(env, "", 0, &resultInfo);
-    napi_set_named_property(env, continueResultInfo, "resultInfo", resultInfo);
-    napi_value callbackResult[2] = {NULL, continueResultInfo};
-    napi_call_function(env, undefined, callback, CALLBACK_PARAMS_NUM, callbackResult, nullptr);
+    if (stub->callbackData_.callbackRef != nullptr) {
+        int32_t state = result;
+        napi_value callback = nullptr;
+        napi_get_reference_value(env, stub->callbackData_.callbackRef, &callback);
+        napi_value undefined = nullptr;
+        napi_get_undefined(env, &undefined);
+        napi_value continueResultInfo;
+        napi_create_object(env, &continueResultInfo);
+        napi_value resultState;
+        napi_create_int32(env, state, &resultState);
+        napi_set_named_property(env, continueResultInfo, "resultState", resultState);
+        napi_value resultInfo;
+        napi_create_string_utf8(env, "", 0, &resultInfo);
+        napi_set_named_property(env, continueResultInfo, "resultInfo", resultInfo);
+        napi_value callbackResult[2] = {NULL, continueResultInfo};
+        napi_call_function(env, undefined, callback, CALLBACK_PARAMS_NUM, callbackResult, nullptr);
+    }
 
     if (result != ERR_OK) {
-        napi_throw(env, GenerateBusinessError(
-            env, DistributedCollab::ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_ERR_MSG));
+        napi_throw_error(env, std::to_string(ERR_DMS_WORK_ABNORMALLY).c_str(), ERR_DMS_WORK_ABNORMALLY_MSG.c_str());
     }
     napi_get_value_int32(env, ret, &result);
     return ret;
 }
 
 sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateManager::CreateStub(
-    napi_env env, napi_callback_info info)
+    napi_env env, napi_callback_info info, const bool isRegisterOn)
 {
     // get and check all params
     size_t argc = ARG_COUNT_THREE;
     napi_value args[ARG_COUNT_THREE];
     napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
-    if (argc != ARG_COUNT_THREE) {
-        HILOGE("Parameter error. The type of number of parameters must be 3");
-        napi_throw(env, GenerateBusinessError(env, PARAMETER_CHECK_FAILED,
-            "Parameter error. The type of number of parameters must be 3"));
+    if ((argc != ARG_COUNT_THREE && isRegisterOn) || (argc < ARG_COUNT_TWO && !isRegisterOn)) {
+        HILOGE("Mandatory parameters are left unspecified");
+        napi_throw_error(env, std::to_string(PARAMETER_CHECK_FAILED).c_str(),
+            "Mandatory parameters are left unspecified.");
         return nullptr;
     }
     // this.context is 2nd parameter
@@ -148,38 +147,34 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     GetAbilityContext(abilityContext, env, args[1]);
     if (abilityContext == nullptr) {
         HILOGE("get ability context failed");
-        napi_throw(env, GenerateBusinessError(env, PARAMETER_CHECK_FAILED,
-            "get ability context failed"));
+        napi_throw_error(env, std::to_string(PARAMETER_CHECK_FAILED).c_str(), "get ability context failed");
         return nullptr;
     }
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = abilityContext->GetAbilityInfo();
-    napi_valuetype valuetype;
-    napi_typeof(env, args[ARG_INDEX_4_CALLBACK_FUNC], &valuetype);
-    if (valuetype != napi_function) {
-        napi_throw(env, GenerateBusinessError(env, PARAMETER_CHECK_FAILED,
-            "The third parameter must be an asynchronous function"));
-        return nullptr;
-    }
-
     DistributedSchedule::JsContinuationStateManagerStub::StateCallbackData callbackData;
     callbackData.env = env;
     callbackData.bundleName = abilityContext->GetBundleName();
     callbackData.moduleName = abilityInfo->moduleName;
     callbackData.abilityName = abilityInfo->name;
-
     size_t stringSize = 0;
     std::string type;
     napi_get_value_string_utf8(env, args[0], nullptr, 0, &stringSize);
     napi_get_value_string_utf8(env, args[0], &type[0], stringSize + 1, &stringSize);
     callbackData.bizType = type.c_str();
-
-    napi_ref callbackRef = nullptr;
-    napi_create_reference(env, args[ARG_INDEX_4_CALLBACK_FUNC], 1, &callbackRef);
-    callbackData.callbackRef = callbackRef;
-
+    if (argc == ARG_COUNT_THREE) {
+        napi_valuetype valuetype;
+        napi_typeof(env, args[ARG_INDEX_4_CALLBACK_FUNC], &valuetype);
+        if (valuetype != napi_function) {
+            napi_throw_error(env, std::to_string(PARAMETER_CHECK_FAILED).c_str(),
+                "The third parameter must be an asynchronous function");
+            return nullptr;
+        }
+        napi_ref callbackRef = nullptr;
+        napi_create_reference(env, args[ARG_INDEX_4_CALLBACK_FUNC], 1, &callbackRef);
+        callbackData.callbackRef = callbackRef;
+    }
     abilityContext->GetMissionId(callbackData.missionId);
-
-    sptr <DistributedSchedule::JsContinuationStateManagerStub> stub(
+    sptr<DistributedSchedule::JsContinuationStateManagerStub> stub(
         new DistributedSchedule::JsContinuationStateManagerStub());
     stub->callbackData_ = callbackData;
     return stub;
@@ -213,19 +208,6 @@ void JsContinuationStateManager::GetAbilityContext(
             return;
         }
     }
-}
-
-napi_value JsContinuationStateManager::GenerateBusinessError(
-    const napi_env &env, int32_t errCode, const std::string &errMsg)
-{
-    napi_value code = nullptr;
-    napi_create_int32(env, errCode, &code);
-    napi_value message = nullptr;
-    napi_create_string_utf8(env, errMsg.c_str(), NAPI_AUTO_LENGTH, &message);
-    napi_value businessError = nullptr;
-    napi_create_error(env, nullptr, message, &businessError);
-    napi_set_named_property(env, businessError, CODE_KEY_NAME.c_str(), code);
-    return businessError;
 }
 
 napi_value JsContinuationStateManager::MakeContinueStateCodeEnumObject(napi_env env)
