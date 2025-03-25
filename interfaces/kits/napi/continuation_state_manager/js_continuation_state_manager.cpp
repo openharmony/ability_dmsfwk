@@ -104,7 +104,7 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     if (result == ERR_OK) {
         callbackStubs_.erase(key);
     }
-    if(stub->callbackData_.callbackRef != nullptr){
+    if (stub->callbackData_.callbackRef != nullptr) {
         int32_t state = result;
         napi_value callback = nullptr;
         napi_get_reference_value(env, stub->callbackData_.callbackRef, &callback);
@@ -161,12 +161,12 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     napi_get_value_string_utf8(env, args[0], nullptr, 0, &stringSize);
     napi_get_value_string_utf8(env, args[0], &type[0], stringSize + 1, &stringSize);
     callbackData.bizType = type.c_str();
-    if(argc == ARG_COUNT_THREE){
+    if (argc == ARG_COUNT_THREE) {
         napi_valuetype valuetype;
         napi_typeof(env, args[ARG_INDEX_4_CALLBACK_FUNC], &valuetype);
         if (valuetype != napi_function) {
             napi_throw_error(env, std::to_string(PARAMETER_CHECK_FAILED).c_str(),
-                       "The third parameter must be an asynchronous function");
+                "The third parameter must be an asynchronous function");
             return nullptr;
         }
         napi_ref callbackRef = nullptr;
