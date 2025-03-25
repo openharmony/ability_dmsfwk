@@ -46,7 +46,7 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOn(napi_env env, nap
     HILOGI("ContinueStateCallbackOn call");
     napi_value ret = nullptr;
     int32_t result = SUCCESS;
-    sptr<DistributedSchedule::JsContinuationStateManagerStub> stub = CreateStub(env, info);
+    sptr<DistributedSchedule::JsContinuationStateManagerStub> stub = CreateStub(env, info, true);
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOn Unsupported business type: %{public}s; need: %{public}s",
                stub == nullptr ? "" : stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
@@ -85,10 +85,10 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     HILOGI("ContinueStateCallbackOff call");
     napi_value ret = nullptr;
     int32_t result = SUCCESS;
-    sptr<DistributedSchedule::JsContinuationStateManagerStub> stub = CreateStub(env, info);
+    sptr<DistributedSchedule::JsContinuationStateManagerStub> stub = CreateStub(env, info, false);
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOff Unsupported business type: %{public}s; need: %{public}s",
-            stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
+               stub == nullptr ? "" : stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
         napi_throw_error(env, std::to_string(ERR_DMS_WORK_ABNORMALLY).c_str(), ERR_DMS_WORK_ABNORMALLY_MSG.c_str());
         result = FAILED;
         napi_get_value_int32(env, ret, &result);
@@ -138,7 +138,7 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
     if ((argc != ARG_COUNT_THREE && isRegisterOn) || (argc < ARG_COUNT_TWO && !isRegisterOn)) {
         HILOGE("Mandatory parameters are left unspecified");
-        napi_throw(env, std::to_string(PARAMETER_CHECK_FAILED).c_str(),
+        napi_throw_error(env, std::to_string(PARAMETER_CHECK_FAILED).c_str(),
             "Mandatory parameters are left unspecified.");
         return nullptr;
     }
@@ -147,7 +147,7 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     GetAbilityContext(abilityContext, env, args[1]);
     if (abilityContext == nullptr) {
         HILOGE("get ability context failed");
-        napi_throw(env, std::to_string(PARAMETER_CHECK_FAILED).c_str(), "get ability context failed");
+        napi_throw_error(env, std::to_string(PARAMETER_CHECK_FAILED).c_str(), "get ability context failed");
         return nullptr;
     }
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = abilityContext->GetAbilityInfo();
@@ -165,7 +165,7 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
         napi_valuetype valuetype;
         napi_typeof(env, args[ARG_INDEX_4_CALLBACK_FUNC], &valuetype);
         if (valuetype != napi_function) {
-            napi_throw(env, std::to_string(PARAMETER_CHECK_FAILED).c_str(),
+            napi_throw_error(env, std::to_string(PARAMETER_CHECK_FAILED).c_str(),
                        "The third parameter must be an asynchronous function");
             return nullptr;
         }
