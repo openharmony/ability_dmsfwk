@@ -33,7 +33,7 @@ namespace {
     static constexpr int32_t STREAM_START_ID = 3001;
     static constexpr int32_t CHANNGE_GAP = 1000;
     static constexpr int32_t INVALID_CHANNEL = 9999;
-    static constexpr int32_t SLEEP_FOR_INIT = 200;
+    static constexpr int32_t SLEEP_FOR_INIT = 2000;
     static constexpr int32_t NUM_1024 = 1024;
     static constexpr int32_t NUM_1 = 1;
     static constexpr int32_t NUM_200 = 200;
