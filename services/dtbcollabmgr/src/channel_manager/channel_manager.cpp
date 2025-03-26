@@ -583,7 +583,9 @@ void ChannelManager::ClearRegisterSocket(const int32_t channelId)
 void ChannelManager::ClearSendTask(int32_t channelId)
 {
     HILOGI("clear send task for=%{public}d", channelId);
-    eventHandler_->RemoveTask(std::to_string(channelId));
+    if (eventHandler_ != nullptr) {
+        eventHandler_->RemoveTask(std::to_string(channelId));
+    }
 }
 
 int32_t ChannelManager::RegisterChannelListener(const int32_t channelId,
