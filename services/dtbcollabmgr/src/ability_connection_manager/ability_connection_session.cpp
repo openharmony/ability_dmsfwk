@@ -353,20 +353,21 @@ void AbilityConnectionSession::NotifyAppConnectResult(bool isConnected, const st
 int32_t AbilityConnectionSession::HandleDisconnect()
 {
     HILOGI("called.");
-    {
-        std::shared_lock<std::shared_mutex> sessionStatusReadLock(sessionMutex_);
-        if (sessionStatus_ == SessionStatus::UNCONNECTED) {
-            HILOGI("The session resource has been released.");
-            return ERR_OK;
-        }
-    }
-
-    EventCallbackInfo callbackInfo;
-    callbackInfo.sessionId = sessionId_;
-    callbackInfo.reason = DisconnectReason::PEER_APP_EXIT;
-
-    ExeuteEventCallback(EVENT_DISCONNECT, callbackInfo);
     Release();
+    std::shared_ptr<IAbilityConnectionSessionListener> listener;
+    {
+        std::shared_lock<std::shared_mutex> lock(sessionListenerMutex_);
+        listener = sessionListener_;
+    }
+    if (listener) {
+        HILOGI("handler sessionListener");
+        listener->OnDisConnect(sessionId_);
+    } else {
+        EventCallbackInfo callbackInfo;
+        callbackInfo.sessionId = sessionId_;
+        callbackInfo.reason = DisconnectReason::PEER_APP_EXIT;
+        ExeuteEventCallback(EVENT_DISCONNECT, callbackInfo);
+    }
     return ERR_OK;
 }
 
