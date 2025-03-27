@@ -41,9 +41,6 @@ public:
     bool PushAndPullData(const std::string &networkId);
     void SetDeviceCfg();
     bool CheckDeviceCfg();
-    void SetSyncRecord(const std::string &networkId);
-    void ClearSyncRecord(const std::string &networkId);
-    bool IsSynchronized(const std::string &networkId);
     bool CheckCtrlRule();
     bool CheckBundleContinueConfig(const std::string &bundleName);
 
