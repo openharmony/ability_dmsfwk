@@ -870,27 +870,29 @@ void DmsBmStorage::UpdateDistributedData()
         return;
     }
     HILOGI("bundleInfos size: %{public}zu", bundleInfos.size());
-
     std::vector<std::string> bundleNames;
     for (const auto &bundleInfo : bundleInfos) {
         bundleNames.push_back(bundleInfo.name);
     }
     std::map<std::string, DmsBundleInfo> oldDistributedBundleInfos =
         GetAllOldDistributionBundleInfo(bundleNames);
-
     AppExecFwk::AppProvisionInfo appProvisionInfo;
     std::vector<AccountSA::OsAccountInfo> accounts;
     int32_t result = AccountSA::OsAccountManager::QueryAllCreatedOsAccounts(accounts);
-
+    std::string localUdid;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(localUdid);
     std::vector<DmsBundleInfo> dmsBundleInfos;
     for (const auto &bundleInfo: bundleInfos) {
+        std::string keyOfKVStore = oldDistributedBundleInfos[bundleInfo.name].keyOfKVStore;
         FindProvishionInfo(bundleMgr, appProvisionInfo, accounts, result, bundleInfo.name);
         if (oldDistributedBundleInfos.find(bundleInfo.name) != oldDistributedBundleInfos.end()) {
             int64_t updateTime = oldDistributedBundleInfos[bundleInfo.name].updateTime;
-            if (updateTime != bundleInfo.updateTime) {
+            std::string oldUdid = keyOfKVStore.substr(0, localUdid.length());
+            if (updateTime != bundleInfo.updateTime || (!localUdid.empty() && oldUdid != localUdid)) {
                 DmsBundleInfo dmsBundleInfo = ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo, true);
                 dmsBundleInfos.push_back(dmsBundleInfo);
             }
+            CleanRedundancyBundleInfo(localUdid, bundleInfo.name, keyOfKVStore, oldUdid);
             continue;
         }
         DmsBundleInfo dmsBundleInfo = ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo);
@@ -902,6 +904,16 @@ void DmsBmStorage::UpdateDistributedData()
     }
     DmsPutBatch(dmsBundleInfos);
     HILOGI("end.");
+}
+
+void DmsBmStorage::CleanRedundancyBundleInfo(const std::string &localUdid, const std::string bundleName,
+    const std::string &keyOfKVStore, const std::string &oldUdid) const
+{
+    if (!localUdid.empty() && oldUdid != localUdid) {
+        HILOGW("Delete DistributedBundleInfo for old udid, bundleName: %{public}s", bundleName.c_str());
+        Key key(keyOfKVStore);
+        kvStorePtr_->Delete(key);
+    }
 }
 
 void DmsBmStorage::DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos)
@@ -995,7 +1007,7 @@ std::map<std::string, DmsBundleInfo> DmsBmStorage::GetAllOldDistributionBundleIn
     std::string keyOfPublic = localUdid + AppExecFwk::Constants::FILE_UNDERLINE + PUBLIC_RECORDS;
     for (const auto &entry : localEntries) {
         std::string key = entry.key.ToString();
-        if (key.find(keyOfPublic) != std::string::npos) {
+        if (key.empty() || key.find(keyOfPublic) != std::string::npos) {
             continue;
         }
         std::string value = entry.value.ToString();
@@ -1008,6 +1020,7 @@ std::map<std::string, DmsBundleInfo> DmsBmStorage::GetAllOldDistributionBundleIn
                 kvStorePtr_->Delete(entry.key);
                 continue;
             }
+            distributedBundleInfo.keyOfKVStore = key;
             oldDistributedBundleInfos.emplace(distributedBundleInfo.bundleName, distributedBundleInfo);
         } else {
             HILOGE("DistributionInfo FromJsonString key:%{public}s failed", key.c_str());
