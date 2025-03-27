@@ -147,7 +147,7 @@ void AbilityConnectionManager::FinishSessionConnect(int32_t sessionId)
         return;
     }
 
-    return connectionSesion->FinishSessionConnect(sessionId);
+    return connectionSesion->FinishSessionConnect();
 }
 
 int32_t AbilityConnectionManager::DisconnectSession(int32_t sessionId)
