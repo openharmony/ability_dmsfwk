@@ -164,7 +164,8 @@ public:
     int32_t UnregisterEventCallback();
     std::string GetServerToken();
     int32_t HandlePeerVersion(int32_t version);
-    
+    void FinishSessionConnect();
+
 private:
     void StartEvent();
     int32_t InitChannels();

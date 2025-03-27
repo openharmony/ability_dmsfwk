@@ -168,7 +168,7 @@ struct ConnectOption : public Parcelable {
 struct ConnectResult {
     bool isConnected;
     std::string reason;
-
+    int32_t sessionId = -1;
     ConnectResult() = default;
     ConnectResult(const bool isConnected) : isConnected(isConnected) {}
     

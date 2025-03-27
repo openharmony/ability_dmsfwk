@@ -905,6 +905,7 @@ void JsAbilityConnectionManager::ConnectThreadsafeFunctionCallback(napi_env env,
     napi_async_work asyncWork = asyncData->asyncWork;
     napi_release_threadsafe_function(asyncData->tsfn, napi_tsfn_release);
     napi_delete_async_work(env, asyncWork);
+    AbilityConnectionManager::GetInstance().FinishSessionConnect(asyncData->result.sessionId);
     delete asyncData;
 }
 

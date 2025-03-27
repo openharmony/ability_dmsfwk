@@ -80,7 +80,8 @@ public:
     int32_t DeleteConnectSession(const AbilityConnectionSessionInfo& sessionInfo, int32_t sessionId);
     std::string GetSessionToken(int32_t sessionId);
     int32_t NotifyPeerVersion(int32_t sessionId, int32_t version);
-
+    void FinishSessionConnect(int32_t sessionId);
+    
 private:
     std::shared_mutex sessionMutex_;
     std::map <int32_t, std::shared_ptr<AbilityConnectionSession>> sessionMap_;

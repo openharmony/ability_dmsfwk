@@ -178,6 +178,7 @@ int32_t AbilityConnectionSession::HandlePeerVersion(int32_t version)
         HILOGE("collab mission start failed.");
         ConnectResult connectResult;
         connectResult.isConnected = false;
+        connectResult.sessionId = sessionId_;
         ExeuteConnectCallback(connectResult);
     }
     return ret;
@@ -192,6 +193,7 @@ int32_t AbilityConnectionSession::Connect(ConnectCallback& callback)
     if (ret != ERR_OK) {
         ConnectResult connectResult;
         connectResult.isConnected = false;
+        connectResult.sessionId = sessionId_;
         ExeuteConnectCallback(connectResult);
         return ret;
     }
@@ -212,6 +214,7 @@ int32_t AbilityConnectionSession::Connect(ConnectCallback& callback)
         HILOGE("collab mission start failed.");
         ConnectResult connectResult;
         connectResult.isConnected = false;
+        connectResult.sessionId = sessionId_;
         ExeuteConnectCallback(connectResult);
     }
     return ret;
@@ -295,7 +298,6 @@ int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::
 
     if (InitChannels() != ERR_OK || ConnectChannels() != ERR_OK) {
         NotifyAppConnectResult(false);
-        connectionCondition_.notify_all();
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -305,7 +307,6 @@ int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::
 
     NotifyPeerSessionConnected();
     NotifyAppConnectResult(true);
-    connectionCondition_.notify_all();
     return ERR_OK;
 }
 
@@ -347,6 +348,7 @@ void AbilityConnectionSession::NotifyAppConnectResult(bool isConnected, const st
     ConnectResult connectResult;
     connectResult.isConnected = isConnected;
     connectResult.reason = reason;
+    connectResult.sessionId = sessionId_;
     ExeuteConnectCallback(connectResult);
 }
 
@@ -1263,21 +1265,28 @@ void AbilityConnectionSession::ExeuteMessageEventCallback(const std::string msg)
         bool isConnected = connectionCondition_.wait_for(
             lock,
             std::chrono::seconds(WAIT_FOR_CONNECT),
-            [this]() { return IsAllChannelConnected(); }
+            [this]() { return sessionStatus_ == SessionStatus::CONNECTED; }
         );
         if (!isConnected) {
-            HILOGE("Wait for channel connection timed out after 5 seconds.");
+            HILOGE("Wait for channel connection timed out after %{public}d seconds.", WAIT_FOR_CONNECT);
             return;
         }
     }
+    HILOGI("start to add msg callback to handler");
     if (listener != nullptr) {
         HILOGI("handler sessionListener");
-        listener->OnMessage(sessionId_, msg);
+        auto func = [listener, msg, this]() {
+            listener->OnMessage(sessionId_, msg);
+        };
+        eventHandler_->PostTask(func, AppExecFwk::EventQueue::Priority::LOW);
     } else {
         EventCallbackInfo callbackInfo;
         callbackInfo.sessionId = sessionId_;
         callbackInfo.msg = msg;
-        ExeuteEventCallback(EVENT_RECEIVE_MESSAGE, callbackInfo);
+        auto func = [callbackInfo, this]() {
+            ExeuteEventCallback(EVENT_RECEIVE_MESSAGE, callbackInfo);
+        };
+        eventHandler_->PostTask(func, AppExecFwk::EventQueue::Priority::LOW);
     }
 }
 
@@ -1456,6 +1465,14 @@ bool AbilityConnectionSession::IsConnected()
     return sessionStatus_ == SessionStatus::CONNECTED;
 }
 
+void AbilityConnectionSession::FinishSessionConnect()
+{
+    HILOGI("finish %{public}d connect callback", sessionId_);
+    std::lock_guard<std::shared_mutex> sessionStatusLock(sessionMutex_);
+    sessionStatus_ = SessionStatus::CONNECTED;
+    connectionCondition_.notify_all();
+}
+
 void AbilityConnectionSession::ExeuteConnectCallback(const ConnectResult& result)
 {
     HILOGI("called.");
@@ -1475,7 +1492,8 @@ void AbilityConnectionSession::ExeuteConnectCallback(const ConnectResult& result
             Release();
         }
     };
-    eventHandler_->PostTask(task, "ExeuteConnectCallback");
+    eventHandler_->PostTask(task,
+        "ExeuteConnectCallback", 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 AbilityConnectionSession::CollabChannelListener::CollabChannelListener(
