@@ -144,7 +144,7 @@ void AbilityConnectionManager::FinishSessionConnect(int32_t sessionId)
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
-        return INVALID_SESSION_ID;
+        return;
     }
 
     return connectionSesion->FinishSessionConnect(sessionId);
