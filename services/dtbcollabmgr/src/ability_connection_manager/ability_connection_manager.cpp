@@ -128,7 +128,7 @@ int32_t AbilityConnectionManager::getPeerInfoBySessionId(int32_t sessionId, Peer
 
 int32_t AbilityConnectionManager::ConnectSession(int32_t sessionId, ConnectCallback& callback)
 {
-    HILOGD("called, sessionId is %{public}d", sessionId);
+    HILOGI("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
@@ -136,6 +136,18 @@ int32_t AbilityConnectionManager::ConnectSession(int32_t sessionId, ConnectCallb
     }
 
     return connectionSesion->Connect(callback);
+}
+
+void AbilityConnectionManager::FinishSessionConnect(int32_t sessionId)
+{
+    HILOGI("called, sessionId is %{public}d", sessionId);
+    auto connectionSesion = GetAbilityConnectionSession(sessionId);
+    if (connectionSesion == nullptr) {
+        HILOGE("sessionId is invalid parameter");
+        return;
+    }
+
+    return connectionSesion->FinishSessionConnect();
 }
 
 int32_t AbilityConnectionManager::DisconnectSession(int32_t sessionId)
