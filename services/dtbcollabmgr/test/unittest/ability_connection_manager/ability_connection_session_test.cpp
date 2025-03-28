@@ -299,16 +299,19 @@ HWTEST_F(AbilityConnectionSessionTest, OnChannelClosed_Test_001, TestSize.Level3
     int32_t channelId = 30;
     FileInfo fileInfo;
     connectionSesion_->transChannels_.clear();
-    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnChannelClosed(channelId));
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnChannelClosed(channelId,
+        ShutdownReason::SHUTDOWN_REASON_LNN_OFFLINE));
 
     connectionSesion_->sessionStatus_ = SessionStatus::CONNECTING;
     TransChannelInfo info;
     info.channelId = channelId;
     connectionSesion_->transChannels_[TransChannelType::MESSAGE] = info;
-    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnChannelClosed(channelId));
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnChannelClosed(channelId,
+        ShutdownReason::SHUTDOWN_REASON_LNN_OFFLINE));
 
     connectionSesion_->sessionStatus_ = SessionStatus::CONNECTED;
-    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnChannelClosed(channelId));
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnChannelClosed(channelId,
+        ShutdownReason::SHUTDOWN_REASON_LNN_OFFLINE));
     connectionSesion_->transChannels_.clear();
     DTEST_LOG << "AbilityConnectionSessionTest OnChannelClosed_Test_001 end" << std::endl;
 }
@@ -382,8 +385,7 @@ HWTEST_F(AbilityConnectionSessionTest, RequestReceiveFileChannelConnection_Test_
     EXPECT_NO_FATAL_FAILURE(connectionSesion_->NotifyPeerSessionConnected());
 
     bool isConnected = true;
-    std::string reason = "reason";
-    EXPECT_NO_FATAL_FAILURE(connectionSesion_->NotifyAppConnectResult(isConnected, reason));
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->NotifyAppConnectResult(isConnected));
     
     connectionSesion_->sessionStatus_ = SessionStatus::CONNECTING;
     auto ret = connectionSesion_->HandleDisconnect();
@@ -772,7 +774,8 @@ HWTEST_F(AbilityConnectionSessionTest, SendImage_Test_001, TestSize.Level3)
     DTEST_LOG << "AbilityConnectionSessionTest SendImage_Test_001 begin" << std::endl;
     ASSERT_NE(connectionSesion_, nullptr);
     connectionSesion_->InitSenderEngine();
-    EXPECT_NO_FATAL_FAILURE(connectionSesion_->SendImage(nullptr));
+    int32_t imageQuality = 30;
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->SendImage(nullptr, imageQuality));
     DTEST_LOG << "AbilityConnectionSessionTest SendImage_Test_001 end" << std::endl;
 }
 
@@ -833,7 +836,8 @@ HWTEST_F(AbilityConnectionSessionTest, CollabChannelListener_Test_001, TestSize.
     connectionSesion_->channelListener_ = std::make_shared<AbilityConnectionSession::CollabChannelListener>(nullptr);
     EXPECT_NO_FATAL_FAILURE(connectionSesion_->channelListener_->OnConnect(0));
 
-    EXPECT_NO_FATAL_FAILURE(connectionSesion_->channelListener_->OnDisConnect(0));
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->channelListener_->OnDisConnect(0,
+        ShutdownReason::SHUTDOWN_REASON_UNKNOWN));
 
     EXPECT_NO_FATAL_FAILURE(connectionSesion_->channelListener_->OnMessage(0, nullptr));
 
@@ -867,7 +871,7 @@ HWTEST_F(AbilityConnectionSessionTest, HandleSessionConnect_Test_001, TestSize.L
     connectionSesion_->sessionListener_ = nullptr;
     EXPECT_NO_FATAL_FAILURE(connectionSesion_->HandleSessionConnect());
 
-    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnChannelClosed(30));
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnChannelClosed(30, ShutdownReason::SHUTDOWN_REASON_LNN_OFFLINE));
     DTEST_LOG << "AbilityConnectionSessionTest HandleSessionConnect_Test_001 end" << std::endl;
 }
 }

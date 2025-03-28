@@ -15,7 +15,10 @@
 
 #include "js_ability_connection_manager.h"
 
+#include <algorithm>
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "ability_connection_manager.h"
 #include "dtbcollabmgr_log.h"
@@ -23,13 +26,18 @@
 #include "js_runtime_utils.h"
 #include "napi_common_util.h"
 #include "napi_base_context.h"
+#include "native_avcapability.h"
+#include "native_avcodec_base.h"
+#include "native_avformat.h"
+#include "native_avcodec_videoencoder.h"
+#include "native_avcodec_videodecoder.h"
 #include "string_wrapper.h"
 #include "tokenid_kit.h"
-
 namespace OHOS {
 namespace DistributedCollab {
 using namespace OHOS::AbilityRuntime;
 using namespace OHOS::AppExecFwk;
+using namespace OHOS::MediaAVCodec;
 namespace {
 #define GET_PARAMS(env, info, num)    \
     size_t argc = num;                \
@@ -52,12 +60,21 @@ constexpr int32_t SINK = 1;
 constexpr int32_t UNKNOWN = -1;
 constexpr int32_t NV12 = 0;
 constexpr int32_t NV21 = 1;
+constexpr int32_t IMAGE_COMPRESSION_QUALITY = 30;
 
 const std::string EVENT_CONNECT = "connect";
 const std::string EVENT_DISCONNECT = "disconnect";
 const std::string EVENT_RECEIVE_MESSAGE = "receiveMessage";
 const std::string EVENT_RECEIVE_DATA = "receiveData";
 const std::string EVENT_RECEIVE_IMAGE = "receiveImage";
+const std::string EVENT_COLLABORATE = "collaborateEvent";
+const std::vector<std::string> REGISTER_EVENT_TYPES = {
+    EVENT_CONNECT, EVENT_DISCONNECT, EVENT_RECEIVE_MESSAGE, EVENT_RECEIVE_DATA,
+    EVENT_RECEIVE_IMAGE, EVENT_COLLABORATE
+};
+const std::vector<std::string> SYSTEM_APP_EVENT_TYPES = {
+    EVENT_RECEIVE_IMAGE, EVENT_COLLABORATE
+};
 
 const std::string ERR_MESSAGE_NO_PERMISSION =
     "Permission verification failed. The application does not have the permission required to call the API.";
@@ -214,8 +231,11 @@ bool JsAbilityConnectionManager::JsObjectToInt(const napi_env &env, const napi_v
 
 bool JsAbilityConnectionManager::IsSystemApp()
 {
-    uint64_t tokenId = OHOS::IPCSkeleton::GetSelfTokenID();
-    return OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(tokenId);
+    static bool isSystemApp = []() {
+        uint64_t tokenId = OHOS::IPCSkeleton::GetSelfTokenID();
+        return OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(tokenId);
+    }();
+    return isSystemApp;
 }
 
 napi_value GenerateBusinessError(napi_env env,
@@ -225,10 +245,10 @@ napi_value GenerateBusinessError(napi_env env,
     NAPI_CALL(env, napi_create_object(env, &businessError));
     napi_value errorCode = nullptr;
     NAPI_CALL(env, napi_create_int32(env, err, &errorCode));
-    napi_value errorMessage = nullptr;
-    NAPI_CALL(env, napi_create_string_utf8(env, msg.c_str(), NAPI_AUTO_LENGTH, &errorMessage));
+    napi_value errorMsg = nullptr;
+    NAPI_CALL(env, napi_create_string_utf8(env, msg.c_str(), NAPI_AUTO_LENGTH, &errorMsg));
     NAPI_CALL(env, napi_set_named_property(env, businessError, "code", errorCode));
-    NAPI_CALL(env, napi_set_named_property(env, businessError, "message", errorMessage));
+    NAPI_CALL(env, napi_set_named_property(env, businessError, "message", errorMsg));
 
     return businessError;
 }
@@ -268,6 +288,14 @@ napi_value CreateBusinessError(napi_env env, int32_t errCode, bool isAsync = tru
         case ERR_EXECUTE_FUNCTION:
             error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
                 ERR_MESSAGE_FAILED, isAsync);
+            break;
+        case COLLAB_PERMISSION_DENIED:
+            error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PERMISSION),
+                ERR_MESSAGE_NO_PERMISSION, isAsync);
+            break;
+        case INVALID_PARAMETERS_ERR:
+            error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
+                ERR_MESSAGE_INVALID_PARAMS, isAsync);
             break;
         default:
             error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
@@ -321,11 +349,23 @@ napi_value JsAbilityConnectionManager::CreateAbilityConnectionSession(napi_env e
         return result;
     }
 
+    return ExecuteCreateSession(serviceName, abilityInfo, peerInfo, connectOption, env);
+}
+
+napi_value JsAbilityConnectionManager::ExecuteCreateSession(
+    const std::string& serviceName, std::shared_ptr<AbilityInfo>& abilityInfo,
+    PeerInfo& peerInfo, ConnectOption& connectOption, const napi_env& env)
+{
+    napi_value result = nullptr;
     int32_t sessionId = -1;
-    ret = AbilityConnectionManager::GetInstance().CreateSession(
+    int32_t ret = AbilityConnectionManager::GetInstance().CreateSession(
         serviceName, abilityInfo, peerInfo, connectOption, sessionId);
-    if (ret != ERR_OK) {
-        HILOGE("create session failed!");
+    if (ret == COLLAB_PERMISSION_DENIED || ret == INVALID_PARAMETERS_ERR) {
+        HILOGE("create session failed due to param or permission valid");
+        CreateBusinessError(env, ret);
+        return result;
+    } else if (ret != ERR_OK) {
+        HILOGE("create session failed due to function err");
         CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
         return result;
     }
@@ -656,8 +696,9 @@ napi_value JsAbilityConnectionManager::GetPeerInfoById(napi_env env, napi_callba
     int32_t ret = AbilityConnectionManager::GetInstance().getPeerInfoBySessionId(sessionId, peerInfo);
     if (ret != ERR_OK) {
         HILOGE("get peerInfo failed!");
-        CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
-        return result;
+        napi_value undefinedValue;
+        napi_get_undefined(env, &undefinedValue);
+        return undefinedValue;
     }
 
     return WrapPeerInfo(env, peerInfo);
@@ -668,6 +709,13 @@ napi_value JsAbilityConnectionManager::WrapPeerInfo(napi_env& env,
 {
     napi_value peerInfoObj;
     napi_create_object(env, &peerInfoObj);
+
+    // empty peerInfo return undefined
+    if (peerInfo.deviceId.empty()) {
+        napi_value undefinedValue;
+        napi_get_undefined(env, &undefinedValue);
+        return undefinedValue;
+    }
 
     napi_value deviceId;
     napi_create_string_utf8(env, peerInfo.deviceId.c_str(), NAPI_AUTO_LENGTH, &deviceId);
@@ -694,14 +742,17 @@ napi_value JsAbilityConnectionManager::WrapPeerInfo(napi_env& env,
 
 int32_t JsAbilityConnectionManager::CheckEventType(const std::string& eventType)
 {
-    if (eventType != EVENT_CONNECT && eventType != EVENT_DISCONNECT &&
-        eventType != EVENT_RECEIVE_MESSAGE && eventType != EVENT_RECEIVE_DATA &&
-        eventType != EVENT_RECEIVE_IMAGE) {
+    bool isExist = (std::find(REGISTER_EVENT_TYPES.begin(),
+        REGISTER_EVENT_TYPES.end(), eventType) != REGISTER_EVENT_TYPES.end());
+    if (!isExist) {
+        HILOGE("invalid event type not exist: %{public}s", eventType.c_str());
         return ERR_INVALID_PARAMETERS;
     }
 
-    if ((eventType == EVENT_RECEIVE_DATA || eventType == EVENT_RECEIVE_IMAGE) &&
-        !IsSystemApp()) {
+    bool isCallSystemApi = (std::find(SYSTEM_APP_EVENT_TYPES.begin(),
+        SYSTEM_APP_EVENT_TYPES.end(), eventType) != SYSTEM_APP_EVENT_TYPES.end());
+    if (isCallSystemApi && !IsSystemApp()) {
+        HILOGE("event type %{public}s only allow system app", eventType.c_str());
         return ERR_IS_NOT_SYSTEM_APP;
     }
     return ERR_OK;
@@ -895,10 +946,14 @@ void JsAbilityConnectionManager::ConnectThreadsafeFunctionCallback(napi_env env,
     napi_get_boolean(env, asyncData->result.isConnected, &isConnected);
     napi_set_named_property(env, connectResultObj, "isConnected", isConnected);
 
-    if (!asyncData->result.isConnected && !asyncData->result.reason.empty()) {
-        napi_value reason;
-        napi_create_string_utf8(env, asyncData->result.reason.c_str(), NAPI_AUTO_LENGTH, &reason);
-        napi_set_named_property(env, connectResultObj, "reason", reason);
+    napi_value reason;
+    napi_create_string_utf8(env, asyncData->result.reason.c_str(), NAPI_AUTO_LENGTH, &reason);
+    napi_set_named_property(env, connectResultObj, "reason", reason);
+
+    if (!asyncData->result.isConnected) {
+        napi_value errorCode;
+        napi_create_int32(env, static_cast<int32_t>(asyncData->result.errorCode), &errorCode);
+        napi_set_named_property(env, connectResultObj, "errorCode", errorCode);
     }
     napi_resolve_deferred(env, asyncData->deferred, connectResultObj);
 
@@ -940,10 +995,10 @@ void JsAbilityConnectionManager::CompleteAsyncConnectWork(napi_env env, napi_sta
     HILOGI("start connect result is %{public}d", asyncData->funResult);
     if (asyncData->funResult == INVALID_SESSION_ID) {
         HILOGE("failed to start connect.");
-        napi_status status = napi_reject_deferred(env, asyncData->deferred,
+        napi_status ret = napi_reject_deferred(env, asyncData->deferred,
             CreateBusinessError(env, ERR_INVALID_PARAMETERS, false));
-        if (status != napi_ok) {
-            HILOGE("Failed to throw error. status is %{public}d", static_cast<int32_t>(status));
+        if (ret != napi_ok) {
+            HILOGE("Failed to throw error. status is %{public}d", static_cast<int32_t>(ret));
         }
         napi_delete_async_work(env, asyncData->asyncWork);
         delete asyncData;
@@ -1116,15 +1171,15 @@ napi_value JsAbilityConnectionManager::SendMessage(napi_env env, napi_callback_i
     }
 
     HILOGI("start send message.");
-    int32_t result = AbilityConnectionManager::GetInstance().SendMessage(sessionId, msg);
+    int32_t ret = AbilityConnectionManager::GetInstance().SendMessage(sessionId, msg);
     HILOGI("notify sendMessage event.");
-    if (result == ERR_OK) {
+    if (ret == ERR_OK) {
         napi_value result;
         napi_get_undefined(env, &result);
         napi_resolve_deferred(env, deferred, result);
     } else {
         napi_reject_deferred(env, deferred,
-            CreateBusinessError(env, result, false));
+            CreateBusinessError(env, ret, false));
     }
 
     HILOGI("end.");
@@ -1140,11 +1195,6 @@ void JsAbilityConnectionManager::ExecuteSendMessage(napi_env env, void *data)
 napi_value JsAbilityConnectionManager::SendData(napi_env env, napi_callback_info info)
 {
     HILOGI("called.");
-    if (!IsSystemApp()) {
-        HILOGE("Permission verification failed.");
-        CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
-    }
-
     napi_deferred deferred;
     napi_value promise = nullptr;
     NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
@@ -1188,6 +1238,9 @@ napi_value JsAbilityConnectionManager::SendData(napi_env env, napi_callback_info
 
 void JsAbilityConnectionManager::CreateSendDataAsyncWork(napi_env env, AsyncCallbackInfo* asyncCallbackInfo)
 {
+    if (asyncCallbackInfo == nullptr) {
+        return;
+    }
     napi_value asyncResourceName;
     napi_create_string_utf8(env, "sendDataAsync", NAPI_AUTO_LENGTH, &asyncResourceName);
 
@@ -1229,8 +1282,8 @@ napi_value JsAbilityConnectionManager::SendImage(napi_env env, napi_callback_inf
     napi_value promise = nullptr;
     NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
 
-    GET_PARAMS(env, info, ARG_COUNT_TWO);
-    if (argc != ARG_COUNT_TWO) {
+    GET_PARAMS(env, info, ARG_COUNT_THREE);
+    if (argc < ARG_COUNT_TWO || argc > ARG_COUNT_THREE) {
         HILOGE("CheckArgsCount failed.");
         CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return promise;
@@ -1247,7 +1300,30 @@ napi_value JsAbilityConnectionManager::SendImage(napi_env env, napi_callback_inf
     asyncCallbackInfo->deferred = deferred;
     asyncCallbackInfo->sessionId = sessionId;
     asyncCallbackInfo->image = Media::PixelMapNapi::GetPixelMap(env, argv[ARG_INDEX_ONE]);
+    if (!asyncCallbackInfo->image) {
+        HILOGE("Failed to unwrap image.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return promise;
+    }
 
+    int32_t quality = IMAGE_COMPRESSION_QUALITY;
+    if (argc == ARG_COUNT_THREE) {
+        if (!JsToInt32(env, argv[ARG_INDEX_TWO], "quality", quality)) {
+            HILOGE("Failed to unwrap quality.");
+            CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+            return promise;
+        }
+    }
+    asyncCallbackInfo->imageQuality = quality;
+    return CreateSendImageAsyncWork(env, asyncCallbackInfo);
+}
+
+napi_value JsAbilityConnectionManager::CreateSendImageAsyncWork(napi_env env, AsyncCallbackInfo* asyncCallbackInfo)
+{
+    napi_value promise = nullptr;
+    if (asyncCallbackInfo == nullptr) {
+        return promise;
+    }
     napi_value asyncResourceName;
     NAPI_CALL(env, napi_create_string_utf8(env, "sendImageAsync", NAPI_AUTO_LENGTH, &asyncResourceName));
 
@@ -1258,7 +1334,7 @@ napi_value JsAbilityConnectionManager::SendImage(napi_env env, napi_callback_inf
         HILOGE("Failed to create async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
         return promise;
     }
 
@@ -1266,7 +1342,7 @@ napi_value JsAbilityConnectionManager::SendImage(napi_env env, napi_callback_inf
         HILOGE("Failed to queue async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
-        napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
         return promise;
     }
 
@@ -1276,7 +1352,8 @@ napi_value JsAbilityConnectionManager::SendImage(napi_env env, napi_callback_inf
 void JsAbilityConnectionManager::ExecuteSendImage(napi_env env, void *data)
 {
     AsyncCallbackInfo* asyncData = static_cast<AsyncCallbackInfo*>(data);
-    asyncData->result = AbilityConnectionManager::GetInstance().SendImage(asyncData->sessionId, asyncData->image);
+    asyncData->result = AbilityConnectionManager::GetInstance().SendImage(asyncData->sessionId,
+        asyncData->image, asyncData->imageQuality);
 }
 
 napi_value JsAbilityConnectionManager::CreateStream(napi_env env, napi_callback_info info)
@@ -1373,7 +1450,43 @@ bool JsAbilityConnectionManager::JsToStreamParam(const napi_env &env, const napi
         return false;
     }
     streamParam.role = static_cast<StreamRole>(role);
-    
+    if (!GetStreamParamBitrate(env, jsValue, streamParam)) {
+        HILOGW("bitrate verification failed.");
+        return false;
+    }
+    return true;
+}
+
+bool JsAbilityConnectionManager::GetStreamParamBitrate(const napi_env &env, const napi_value &jsValue,
+    StreamParams &streamParam)
+{
+    int32_t bitrate = -1;
+    if (JsObjectToInt(env, jsValue, "bitrate", bitrate)) {
+        OH_BitrateMode bitrateMode = BITRATE_MODE_CBR;
+        OH_AVCapability *capability = OH_AVCodec_GetCapability(OH_AVCODEC_MIMETYPE_VIDEO_AVC, true);
+        if (capability == nullptr) {
+            HILOGE("GetCapability failed, it's nullptr");
+            return false;
+        }
+        bool isSupported = OH_AVCapability_IsEncoderBitrateModeSupported(capability, bitrateMode);
+        if (!isSupported) {
+            HILOGE("BITRATE_MODE_CBR is not support.");
+            return false;
+        }
+        OH_AVRange bitrateRange = {-1, -1};
+        int32_t ret = OH_AVCapability_GetEncoderBitrateRange(capability, &bitrateRange);
+        if (ret != AV_ERR_OK || bitrateRange.maxVal <= 0) {
+            HILOGE("bitrate range query failed. ret: %{public}d; maxVal: %{public}d;", ret, bitrateRange.maxVal);
+            return false;
+        }
+        if (bitrate < bitrateRange.minVal || bitrate > bitrateRange.maxVal) {
+            HILOGE("Bitrate is not supported, it should be between %{public}d and %{public}d", bitrateRange.minVal,
+                   bitrateRange.maxVal);
+            return false;
+        }
+        HILOGI("bitrate is %{public}d.", bitrate);
+        streamParam.bitrate = bitrate;
+    }
     return true;
 }
 

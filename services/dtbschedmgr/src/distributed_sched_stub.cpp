@@ -152,6 +152,8 @@ void DistributedSchedStub::InitLocalFuncsInner()
         &DistributedSchedStub::NotifyCollabPrepareResultInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::NOTIFY_CLOSE_COLLAB_SESSION)] =
         &DistributedSchedStub::NotifyCloseCollabSessionInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_WIFI_STATUS)] =
+        &DistributedSchedStub::GetWifiStatusInner;
 }
 
 void DistributedSchedStub::InitLocalMissionManagerInner()
@@ -835,6 +837,18 @@ int32_t DistributedSchedStub::NotifyCloseCollabSessionInner(MessageParcel& data,
     int32_t result = DSchedCollabManager::GetInstance().NotifySessionClose(tokenId);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+}
+
+int32_t DistributedSchedStub::GetWifiStatusInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("called");
+    if (!IPCSkeleton::IsLocalCalling()) {
+        HILOGE("check permission failed!");
+        return DMS_PERMISSION_DENIED;
+    }
+    bool isWifiActive = DSchedCollabManager::GetInstance().GetWifiStatus();
+    HILOGI("isWifiActive = %{public}d", isWifiActive);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Bool, isWifiActive);
 }
 
 bool DistributedSchedStub::IsNewCollabVersion(const std::string& remoteDeviceId)

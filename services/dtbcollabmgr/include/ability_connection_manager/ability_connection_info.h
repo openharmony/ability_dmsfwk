@@ -70,6 +70,7 @@ enum class ConnectErrorCode : int32_t {
 struct StreamParams {
     std::string name = "";
     StreamRole role = StreamRole::SOURCE;
+    int32_t bitrate = 80000;
 };
 
 struct SurfaceParams {
@@ -166,14 +167,15 @@ struct ConnectOption : public Parcelable {
 };
 
 struct ConnectResult {
-    bool isConnected;
-    std::string reason;
+    bool isConnected = false;
+    ConnectErrorCode errorCode = ConnectErrorCode::SYSTEM_INTERNAL_ERROR;
     int32_t sessionId = -1;
+    std::string reason = "";
+
     ConnectResult() = default;
     ConnectResult(const bool isConnected) : isConnected(isConnected) {}
-    
-    ConnectResult(const bool isConnected, const std::string& reason)
-        : isConnected(isConnected), reason(reason) {}
+    ConnectResult(bool isConnected, const ConnectErrorCode errorCode, const std::string& reason)
+        : isConnected(isConnected), errorCode(errorCode), reason(reason) {}
 };
 } // namespace DistributedCollab
 } // namespace OHOS

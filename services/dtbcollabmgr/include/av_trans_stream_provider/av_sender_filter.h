@@ -62,7 +62,7 @@ public:
     Media::Status OnUnLinked(Media::Pipeline::StreamType inType,
         const std::shared_ptr<Media::Pipeline::FilterLinkCallback>& callback) override;
     void SetTransChannel(int32_t channelId, const ChannelDataType type);
-    int32_t SendPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap);
+    int32_t SendPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, int32_t imageQuality);
     int32_t SetSurfaceParam(const SurfaceParam& param);
 #ifdef DSCH_COLLAB_AV_TRANS_TEST_DEMO
     void SetChannelListener(const std::shared_ptr<IChannelListener>& listener);
@@ -85,10 +85,10 @@ private:
     int32_t SendStreamDataByStream(const std::shared_ptr<AVTransStreamData>& streamData);
     int32_t SendStreamDataByBytes(const std::shared_ptr<AVTransStreamData>& streamData);
     int32_t PackPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
-        std::shared_ptr<AVTransDataBuffer>& buffer);
+        std::shared_ptr<AVTransDataBuffer>& buffer, int32_t imageQuality);
     std::shared_ptr<AVTransStreamData> PackStreamDataForPixelMap(
         const std::shared_ptr<Media::PixelMap>& pixelMap,
-        const std::shared_ptr<AVTransDataBuffer>& dataBuffer);
+        const std::shared_ptr<AVTransDataBuffer>& dataBuffer, int32_t imageQuality);
     std::shared_ptr<AVTransStreamData> PackStreamDataForSurfaceParam(const SurfaceParam& param);
     void Process();
     int32_t WriteDataToBuffer(std::shared_ptr<AVTransDataBuffer>& buffer,
