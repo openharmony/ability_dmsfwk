@@ -20,7 +20,7 @@
 
 #include "mock/bundle_manager_internal_mock.h"
 #include "mock/dms_continue_condition_manager_mock.h"
-
+#include "mock/dtbschedmgr_device_info_storage_mock.h"
 namespace OHOS {
 namespace DistributedSchedule {
 class ContinueRecommendInfoTest : public testing::Test {
@@ -37,6 +37,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    static inline std::shared_ptr<DtbschedmgrDeviceInfoStorageMock> storageMock_ = nullptr;
     static inline std::shared_ptr<BundleManagerInternalMock> bundleMgrMock_ = nullptr;
     static inline std::shared_ptr<DmsContinueConditionMgrMock> mgrMock_ = nullptr;
 };
