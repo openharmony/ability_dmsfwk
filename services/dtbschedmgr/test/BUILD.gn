@@ -560,6 +560,7 @@ ohos_unittest("dmscontinuerecommendmgrtest") {
     "unittest/mission/notification/dms_continue_recommend_manager_test.cpp",
     "unittest/mock/bundle_manager_internal_mock.cpp",
     "unittest/mock/dms_continue_condition_manager_mock.cpp",
+    "unittest/mock/dtbschedmgr_device_info_storage_mock.cpp",
   ]
   sources += dtbschedmgr_sources
 
