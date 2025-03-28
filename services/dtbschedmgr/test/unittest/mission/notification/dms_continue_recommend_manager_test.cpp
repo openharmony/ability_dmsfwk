@@ -122,6 +122,8 @@ void DMSContinueRecomMgrTest::SetUpTestCase()
     BundleManagerInternalMock::bundleMgrMock = bundleMgrMock_;
     mgrMock_ = std::make_shared<DmsContinueConditionMgrMock>();
     IDmsContinueConditionMgr::conditionMgrMock = mgrMock_;
+    storageMock_ = std::make_shared<DtbschedmgrDeviceInfoStorageMock>();
+    DtbschedmgrDeviceInfoStorageMock::storageMock = storageMock_;
 }
 
 void DMSContinueRecomMgrTest::TearDownTestCase()
@@ -130,6 +132,8 @@ void DMSContinueRecomMgrTest::TearDownTestCase()
     bundleMgrMock_ = nullptr;
     IDmsContinueConditionMgr::conditionMgrMock = nullptr;
     mgrMock_ = nullptr;
+    DtbschedmgrDeviceInfoStorageMock::storageMock = nullptr;
+    storageMock_ = nullptr;
 }
 
 void DMSContinueRecomMgrTest::SetUp()
@@ -222,6 +226,9 @@ HWTEST_F(DMSContinueRecomMgrTest, testPublishContinueRecommend001, TestSize.Leve
 
     EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillRepeatedly(Return(true));
     EXPECT_NO_FATAL_FAILURE(recomMgr->PublishContinueRecommend(status, type));
+
+    EXPECT_CALL(*bundleMgrMock_, GetLocalAbilityInfo(_, _, _, _)).WillOnce(Return(1));
+    EXPECT_NO_FATAL_FAILURE(recomMgr->PublishContinueRecommend(status, type));
     recomMgr->UnInit();
     DTEST_LOG << "DMSContinueRecomMgrTest testPublishContinueRecommend001 end" << std::endl;
 }
@@ -270,8 +277,15 @@ HWTEST_F(DMSContinueRecomMgrTest, GetAvailableRecommendListTest_001, TestSize.Le
     usleep(WAITTIME);
 
     std::map<std::string, DmsBundleInfo> result;
+    std::vector<std::string> networkIdList;
     std::string bundleName = "";
+    EXPECT_CALL(*storageMock_, GetNetworkIdList()).WillOnce(Return(networkIdList));
     bool ret = recomMgr->GetAvailableRecommendList(bundleName, result);
+    EXPECT_EQ(ret, true);
+
+    networkIdList.push_back("networkId");
+    EXPECT_CALL(*storageMock_, GetNetworkIdList()).WillOnce(Return(networkIdList));
+    ret = recomMgr->GetAvailableRecommendList(bundleName, result);
     EXPECT_EQ(ret, true);
     recomMgr->UnInit();
     DTEST_LOG << "DMSContinueRecomMgrTest GetAvailableRecommendListTest_001 end" << std::endl;
