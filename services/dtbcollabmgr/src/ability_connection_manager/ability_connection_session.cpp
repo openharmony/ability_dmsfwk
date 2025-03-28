@@ -43,7 +43,7 @@ const std::string EVENT_RECEIVE_IMAGE = "receiveImage";
 constexpr int32_t DSCHED_COLLAB_PROTOCOL_VERSION = 1;
 static constexpr uint16_t PROTOCOL_VERSION = 1;
 constexpr int32_t CHANNEL_NAME_LENGTH = 48;
-constexpr int32_t VIDEO_BIT_RATE = 640000;
+constexpr int32_t VIDEO_BIT_RATE = 80000;
 constexpr int32_t VIDEO_FRAME_RATE = 30;
 constexpr int32_t DEFAULT_APP_UID = 0;
 constexpr int32_t DEFAULT_APP_PID = 0;
@@ -375,7 +375,7 @@ int32_t AbilityConnectionSession::HandleDisconnect()
 
 int32_t AbilityConnectionSession::SendMessage(const std::string& msg, const MessageType& messageType)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     auto sendData = std::make_shared<AVTransDataBuffer>(msg.length() + 1);
     int32_t ret = memcpy_s(sendData->Data(), sendData->Capacity(), msg.c_str(), msg.length());
     if (ret != ERR_OK) {
@@ -420,7 +420,7 @@ int32_t AbilityConnectionSession::SendMessage(const std::string& msg, const Mess
 
 int32_t AbilityConnectionSession::SendData(const std::shared_ptr<AVTransDataBuffer>& buffer)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     TransChannelInfo transChannelInfo;
     int32_t ret = GetTransChannelInfo(TransChannelType::DATA, transChannelInfo);
     if (ret != ERR_OK) {
@@ -524,7 +524,7 @@ int32_t AbilityConnectionSession::InitRecvEngine()
 
 int32_t AbilityConnectionSession::DestroyStream()
 {
-    HILOGD("called.");
+    HILOGI("called.");
     senderEngine_ = nullptr;
     recvEngine_ = nullptr;
     recvEngineState_ = EngineState::EMPTY;
@@ -591,7 +591,7 @@ int32_t AbilityConnectionSession::ConfigEngineParam(std::shared_ptr<T> &engine, 
 
 int32_t AbilityConnectionSession::GetSurfaceId(const SurfaceParams& param, std::string& surfaceId)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (senderEngine_ == nullptr) {
         HILOGE("senderEngine_ Uninitialized.");
         return INVALID_PARAMETERS_ERR;
@@ -624,7 +624,7 @@ int32_t AbilityConnectionSession::GetSurfaceId(const SurfaceParams& param, std::
 int32_t AbilityConnectionSession::SetSurfaceId(const std::string& surfaceId,
     const SurfaceParams& param)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (recvEngine_ == nullptr) {
         HILOGE("recvEngine_ Uninitialized.");
         return INVALID_PARAMETERS_ERR;
@@ -737,7 +737,7 @@ int32_t AbilityConnectionSession::GetStreamTransChannel(TransChannelInfo& info)
 
 int32_t AbilityConnectionSession::StartStream(int32_t streamId)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (connectOption_.needSendStream && senderEngine_ != nullptr) {
         return StartSenderEngine();
     }
@@ -768,7 +768,7 @@ int32_t AbilityConnectionSession::StartSenderEngine()
 
 int32_t AbilityConnectionSession::StopStream(int32_t streamId)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (connectOption_.needSendStream && senderEngine_ != nullptr) {
         HILOGI("senderEngine_ Stop.");
         return senderEngine_->Stop();
@@ -792,7 +792,7 @@ int32_t AbilityConnectionSession::RegisterEventCallback(const std::string& event
 
 int32_t AbilityConnectionSession::UnregisterEventCallback(const std::string& eventType)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     std::unique_lock<std::shared_mutex> listenerWriteLock(listenerMutex_);
     listeners_.erase(eventType);
     return ERR_OK;
@@ -843,7 +843,7 @@ int32_t AbilityConnectionSession::ExeuteEventCallback(const std::string& eventTy
 
 int32_t AbilityConnectionSession::InitChannels()
 {
-    HILOGD("called.");
+    HILOGI("called.");
     channelName_ = GetChannelName(sessionInfo_);
     channelListener_ = std::make_shared<CollabChannelListener>(shared_from_this());
     bool isClientChannel = direction_ == CollabrateDirection::COLLABRATE_SOURCE;
@@ -900,7 +900,7 @@ int32_t AbilityConnectionSession::CreateStreamChannel(const std::string& channel
 int32_t AbilityConnectionSession::CreateChannel(const std::string& channelName, const ChannelDataType& dataType,
     const TransChannelType& channelType, bool isClientChannel)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     ChannelPeerInfo channelPeerInfo = { peerSocketName_, sessionInfo_.peerInfo_.deviceId };
     ChannelManager &channelManager = ChannelManager::GetInstance();
     int32_t channelId = isClientChannel ?
@@ -1065,7 +1065,7 @@ int32_t AbilityConnectionSession::DoConnectStreamChannel(int32_t channelId)
 
 int32_t AbilityConnectionSession::GetTransChannelInfo(const TransChannelType& type, TransChannelInfo& info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     std::shared_lock<std::shared_mutex> channelReadLock(transChannelMutex_);
     auto item = transChannels_.find(type);
     if (item == transChannels_.end()) {
@@ -1174,7 +1174,7 @@ void AbilityConnectionSession::OnChannelClosed(int32_t channelId)
 
 void AbilityConnectionSession::OnMessageReceived(int32_t channelId, const std::shared_ptr<AVTransDataBuffer> dataBuffer)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (!IsVaildChannel(channelId)) {
         return;
     }
@@ -1197,7 +1197,7 @@ void AbilityConnectionSession::OnMessageReceived(int32_t channelId, const std::s
 
 void AbilityConnectionSession::OnSendFile(const int32_t channelId, const FileInfo& info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (!IsVaildChannel(channelId)) {
         return;
     }
@@ -1216,7 +1216,7 @@ void AbilityConnectionSession::OnSendFile(const int32_t channelId, const FileInf
 
 void AbilityConnectionSession::OnRecvFile(const int32_t channelId, const FileInfo& info)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (!IsVaildChannel(channelId)) {
         return;
     }
@@ -1235,7 +1235,7 @@ void AbilityConnectionSession::OnRecvFile(const int32_t channelId, const FileInf
 
 const char* AbilityConnectionSession::GetRecvPath(const int32_t channelId)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (!IsVaildChannel(channelId)) {
         return nullptr;
     }
@@ -1254,7 +1254,7 @@ const char* AbilityConnectionSession::GetRecvPath(const int32_t channelId)
 
 void AbilityConnectionSession::ExeuteMessageEventCallback(const std::string msg)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     std::shared_ptr<IAbilityConnectionSessionListener> listener;
     {
         std::shared_lock<std::shared_mutex> lock(sessionListenerMutex_);
@@ -1350,7 +1350,7 @@ void AbilityConnectionSession::ConnectFileChannel(const std::string& peerSocketN
 
 void AbilityConnectionSession::OnRecvPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (pixelMap == nullptr) {
         HILOGE("pixelMap is nullptr.");
     }
@@ -1363,7 +1363,7 @@ void AbilityConnectionSession::OnRecvPixelMap(const std::shared_ptr<Media::Pixel
 
 void AbilityConnectionSession::OnBytesReceived(int32_t channelId, const std::shared_ptr<AVTransDataBuffer> dataBuffer)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (!IsVaildChannel(channelId)) {
         return;
     }
@@ -1505,7 +1505,7 @@ AbilityConnectionSession::CollabChannelListener::CollabChannelListener(
 
 void AbilityConnectionSession::CollabChannelListener::OnConnect(const int32_t channelId) const
 {
-    HILOGD("called.");
+    HILOGI("called.");
     std::shared_ptr<AbilityConnectionSession> abilityConnectionSession = abilityConnectionSession_.lock();
     if (abilityConnectionSession == nullptr) {
         HILOGE("abilityConnectionSession is null");
@@ -1517,7 +1517,7 @@ void AbilityConnectionSession::CollabChannelListener::OnConnect(const int32_t ch
 
 void AbilityConnectionSession::CollabChannelListener::OnDisConnect(const int32_t channelId) const
 {
-    HILOGD("called.");
+    HILOGI("called.");
     std::shared_ptr<AbilityConnectionSession> abilityConnectionSession = abilityConnectionSession_.lock();
     if (abilityConnectionSession == nullptr) {
         HILOGE("abilityConnectionSession is null");
@@ -1530,7 +1530,7 @@ void AbilityConnectionSession::CollabChannelListener::OnDisConnect(const int32_t
 void AbilityConnectionSession::CollabChannelListener::OnMessage(const int32_t channelId,
     const std::shared_ptr<AVTransDataBuffer>& buffer) const
 {
-    HILOGD("called.");
+    HILOGI("called.");
     std::shared_ptr<AbilityConnectionSession> abilityConnectionSession = abilityConnectionSession_.lock();
     if (abilityConnectionSession == nullptr) {
         HILOGE("abilityConnectionSession is null");
@@ -1543,7 +1543,7 @@ void AbilityConnectionSession::CollabChannelListener::OnMessage(const int32_t ch
 void AbilityConnectionSession::CollabChannelListener::OnBytes(const int32_t channelId,
     const std::shared_ptr<AVTransDataBuffer>& buffer) const
 {
-    HILOGD("called.");
+    HILOGI("called.");
     std::shared_ptr<AbilityConnectionSession> abilityConnectionSession = abilityConnectionSession_.lock();
     if (abilityConnectionSession == nullptr) {
         HILOGE("abilityConnectionSession is null");
@@ -1564,7 +1564,7 @@ void AbilityConnectionSession::CollabChannelListener::OnError(const int32_t chan
 
 void AbilityConnectionSession::CollabChannelListener::OnSendFile(const int32_t channelId, const FileInfo& info) const
 {
-    HILOGD("called.");
+    HILOGI("called.");
     std::shared_ptr<AbilityConnectionSession> abilityConnectionSession = abilityConnectionSession_.lock();
     if (abilityConnectionSession == nullptr) {
         HILOGE("abilityConnectionSession is null");
@@ -1576,7 +1576,7 @@ void AbilityConnectionSession::CollabChannelListener::OnSendFile(const int32_t c
 
 void AbilityConnectionSession::CollabChannelListener::OnRecvFile(const int32_t channelId, const FileInfo& info) const
 {
-    HILOGD("called.");
+    HILOGI("called.");
     std::shared_ptr<AbilityConnectionSession> abilityConnectionSession = abilityConnectionSession_.lock();
     if (abilityConnectionSession == nullptr) {
         HILOGE("abilityConnectionSession is null");
@@ -1588,7 +1588,7 @@ void AbilityConnectionSession::CollabChannelListener::OnRecvFile(const int32_t c
 
 const char* AbilityConnectionSession::CollabChannelListener::GetRecvPath(const int32_t channelId) const
 {
-    HILOGD("called.");
+    HILOGI("called.");
     std::shared_ptr<AbilityConnectionSession> abilityConnectionSession = abilityConnectionSession_.lock();
     if (abilityConnectionSession == nullptr) {
         HILOGE("abilityConnectionSession is null");
@@ -1605,7 +1605,7 @@ AbilityConnectionSession::PixelMapListener::PixelMapListener(
 
 void AbilityConnectionSession::PixelMapListener::OnRecvPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     std::shared_ptr<AbilityConnectionSession> abilityConnectionSession = abilityConnectionSession_.lock();
     if (abilityConnectionSession == nullptr) {
         HILOGE("abilityConnectionSession is null");
@@ -1617,7 +1617,7 @@ void AbilityConnectionSession::PixelMapListener::OnRecvPixelMap(const std::share
 
 void AbilityConnectionSession::PixelMapListener::OnRecvSurfaceParam(const SurfaceParam& param)
 {
-    HILOGD("called.");
+    HILOGI("called.");
 }
 }  // namespace DistributedCollab
 }  // namespace OHOS

@@ -1548,8 +1548,8 @@ napi_value JsAbilityConnectionManager::UpdateSurfaceParam(napi_env env, napi_cal
         CreateBusinessError(env, ERR_IS_NOT_SYSTEM_APP);
     }
 
-    GET_PARAMS(env, info, ARG_COUNT_THREE);
-    if (argc != ARG_COUNT_THREE) {
+    GET_PARAMS(env, info, ARG_COUNT_TWO);
+    if (argc != ARG_COUNT_TWO) {
         HILOGE("CheckArgsCount failed.");
         CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
