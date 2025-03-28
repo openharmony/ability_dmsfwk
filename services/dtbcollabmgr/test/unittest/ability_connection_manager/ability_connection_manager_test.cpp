@@ -390,12 +390,13 @@ HWTEST_F(AbilityConnectionMgrTest, SendImage_Test_001, TestSize.Level3)
 {
     DTEST_LOG << "AbilityConnectionMgr SendImage_Test_001 begin" << std::endl;
     int32_t sessionId = 1;
+    int32_t imageQuality = 30;
     std::shared_ptr<Media::PixelMap> image = nullptr;
-    auto rlt = AbilityConnectionManager::GetInstance().SendImage(sessionId, image);
+    auto rlt = AbilityConnectionManager::GetInstance().SendImage(sessionId, image, imageQuality);
     EXPECT_EQ(rlt, INVALID_PARAMETERS_ERR);
 
     CreateSessionMap(sessionId);
-    rlt = AbilityConnectionManager::GetInstance().SendImage(sessionId, image);
+    rlt = AbilityConnectionManager::GetInstance().SendImage(sessionId, image, imageQuality);
     EXPECT_NE(rlt, ERR_OK);
     DTEST_LOG << "AbilityConnectionMgr SendImage_Test_001 end" << std::endl;
 }

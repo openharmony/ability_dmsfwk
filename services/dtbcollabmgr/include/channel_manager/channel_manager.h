@@ -60,7 +60,7 @@ public:
 
     void OnSocketError(int32_t socketId, const int32_t errorCode);
     void OnSocketConnected(int32_t socketId, const PeerSocketInfo& info);
-    void OnSocketClosed(int32_t socketId, const ShutdownReason reason);
+    void OnSocketClosed(int32_t socketId, const ShutdownReason& reason);
     void OnBytesReceived(int32_t socketId, const void* data, const uint32_t dataLen);
     void OnMessageReceived(int32_t socketId, const void* data, const uint32_t dataLen);
     void OnStreamReceived(int32_t socketId, const StreamData* data,
@@ -183,7 +183,7 @@ private:
     std::shared_ptr<AVTransDataBuffer> ProcessRecvData(const int32_t channelId,
         const int32_t socketId, const void* data, const uint32_t dataLen);
     void DoConnectCallback(const int32_t channelId);
-    void DoDisConnectCallback(const int32_t channelId);
+    void DoDisConnectCallback(const int32_t channelId, const ShutdownReason& reason);
     void DoBytesReceiveCallback(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer);
     void DoMessageReceiveCallback(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer);
     void DoStreamReceiveCallback(const int32_t channelId, const std::shared_ptr<AVTransStreamData>& data);

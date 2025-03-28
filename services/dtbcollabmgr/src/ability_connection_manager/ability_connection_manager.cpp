@@ -23,10 +23,13 @@
 
 #include "ability_info.h"
 #include "ability_connection_session.h"
+#include "accesstoken_kit.h"
 #include "distributed_client.h"
 #include "dtbcollabmgr_log.h"
+#include "ipc_skeleton.h"
 #include "openssl/sha.h"
 #include "single_instance.h"
+#include "tokenid_kit.h"
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -35,6 +38,12 @@ const std::string TAG = "AbilityConnectionManager";
 constexpr int32_t SERVER_SOCKET_NAME_LENGTH = 64;
 constexpr int32_t HEX_WIDTH = 2;
 constexpr char FILL_CHAR = '0';
+static const std::vector<std::string> REQUIRED_PERMISSIONS = {
+    "ohos.permission.INTERNET",
+    "ohos.permission.GET_NETWORK_INFO",
+    "ohos.permission.SET_NETWORK_INFO",
+    "ohos.permission.DISTRIBUTED_DATASYNC"
+};
 }
 
 IMPLEMENT_SINGLE_INSTANCE(AbilityConnectionManager);
@@ -60,6 +69,10 @@ int32_t AbilityConnectionManager::CreateSession(const std::string& serverId,
         HILOGE("ConnectOption is invalid parameter");
         return INVALID_PARAMETERS_ERR;
     }
+    if (!CheckSessionPermission()) {
+        HILOGE("create session permission denied");
+        return COLLAB_PERMISSION_DENIED;
+    }
 
     PeerInfo localInfo = {"", abilityInfo->bundleName, abilityInfo->moduleName,
         abilityInfo->name, peerInfo.serverId};
@@ -78,6 +91,24 @@ int32_t AbilityConnectionManager::CreateSession(const std::string& serverId,
     std::unique_lock<std::shared_mutex> writeLock(sessionMutex_);
     sessionMap_.emplace(sessionId, connectionSesion);
     return ERR_OK;
+}
+
+bool AbilityConnectionManager::CheckSessionPermission()
+{
+    uint64_t tokenId = OHOS::IPCSkeleton::GetSelfTokenID();
+    if (OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(tokenId)) {
+        HILOGI("The current application is a system app.");
+        return true;
+    }
+    for (const auto& permission : REQUIRED_PERMISSIONS) {
+        int32_t result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenId, permission);
+        if (result == Security::AccessToken::PermissionState::PERMISSION_DENIED) {
+            HILOGE("permission denied, permissionName:%{public}s", permission.c_str());
+            return false;
+        }
+    }
+    HILOGI("All permissions matched.");
+    return true;
 }
 
 bool AbilityConnectionManager::FindExistingSession(const PeerInfo& peerInfo, const PeerInfo& localInfo,
@@ -152,7 +183,7 @@ void AbilityConnectionManager::FinishSessionConnect(int32_t sessionId)
 
 int32_t AbilityConnectionManager::DisconnectSession(int32_t sessionId)
 {
-    HILOGD("called, sessionId is %{public}d", sessionId);
+    HILOGI("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
@@ -164,7 +195,7 @@ int32_t AbilityConnectionManager::DisconnectSession(int32_t sessionId)
 
 int32_t AbilityConnectionManager::AcceptConnect(int32_t sessionId, const std::string& token)
 {
-    HILOGD("called, sessionId is %{public}d", sessionId);
+    HILOGI("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
@@ -176,7 +207,7 @@ int32_t AbilityConnectionManager::AcceptConnect(int32_t sessionId, const std::st
 
 int32_t AbilityConnectionManager::Reject(const std::string& token, const std::string& reason)
 {
-    HILOGD("called, token is %{public}s", token.c_str());
+    HILOGI("called, token is %{public}s", token.c_str());
     DistributedClient dmsClient;
     return dmsClient.NotifyRejectReason(token, reason);
 }
@@ -184,7 +215,7 @@ int32_t AbilityConnectionManager::Reject(const std::string& token, const std::st
 int32_t AbilityConnectionManager::NotifyCollabResult(int32_t sessionId, int32_t result,
     const std::string& peerServerName, const std::string& dmsServerToken, const std::string& reason)
 {
-    HILOGD("called, sessionId is %{public}d", sessionId);
+    HILOGI("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
@@ -196,7 +227,7 @@ int32_t AbilityConnectionManager::NotifyCollabResult(int32_t sessionId, int32_t 
 
 int32_t AbilityConnectionManager::NotifyDisconnect(int32_t sessionId)
 {
-    HILOGD("called, sessionId is %{public}d", sessionId);
+    HILOGI("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
@@ -209,7 +240,7 @@ int32_t AbilityConnectionManager::NotifyDisconnect(int32_t sessionId)
 
 int32_t AbilityConnectionManager::SendMessage(int32_t sessionId, const std::string& msg)
 {
-    HILOGD("called, sessionId is %{public}d", sessionId);
+    HILOGI("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
@@ -221,7 +252,7 @@ int32_t AbilityConnectionManager::SendMessage(int32_t sessionId, const std::stri
 
 int32_t AbilityConnectionManager::SendData(int32_t sessionId, const std::shared_ptr<AVTransDataBuffer>& buffer)
 {
-    HILOGD("called, sessionId is %{public}d", sessionId);
+    HILOGI("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
@@ -231,22 +262,23 @@ int32_t AbilityConnectionManager::SendData(int32_t sessionId, const std::shared_
     return connectionSesion->SendData(buffer);
 }
 
-int32_t AbilityConnectionManager::SendImage(int32_t sessionId, const std::shared_ptr<Media::PixelMap>& image)
+int32_t AbilityConnectionManager::SendImage(int32_t sessionId, const std::shared_ptr<Media::PixelMap>& image,
+    int32_t imageQuality)
 {
-    HILOGD("called, sessionId is %{public}d", sessionId);
+    HILOGI("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
         return INVALID_PARAMETERS_ERR;
     }
 
-    return connectionSesion->SendImage(image);
+    return connectionSesion->SendImage(image, imageQuality);
 }
 
 int32_t AbilityConnectionManager::SendFile(int32_t sessionId, const std::vector<std::string>& sFiles,
     const std::vector<std::string>& dFiles)
 {
-    HILOGD("called, sessionId is %{public}d", sessionId);
+    HILOGI("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
@@ -258,7 +290,7 @@ int32_t AbilityConnectionManager::SendFile(int32_t sessionId, const std::vector<
 
 int32_t AbilityConnectionManager::CreateStream(int32_t sessionId, const StreamParams& param, int32_t& streamId)
 {
-    HILOGD("called, sessionId is %{public}d", sessionId);
+    HILOGI("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
@@ -277,7 +309,7 @@ int32_t AbilityConnectionManager::CreateStream(int32_t sessionId, const StreamPa
 int32_t AbilityConnectionManager::SetSurfaceId(int32_t streamId, const std::string& surfaceId,
     const SurfaceParams& param)
 {
-    HILOGD("called, streamId is %{public}d, surfaceId is %{public}s", streamId, surfaceId.c_str());
+    HILOGI("called, streamId is %{public}d, surfaceId is %{public}s", streamId, surfaceId.c_str());
     auto connectionSesion = GetAbilityConnectionSessionByStreamId(streamId);
     if (connectionSesion == nullptr) {
         HILOGE("streamId is invalid parameter");
@@ -300,7 +332,7 @@ bool AbilityConnectionManager::CheckStreamIsRegistered(int32_t sessionId)
 
 int32_t AbilityConnectionManager::GetSurfaceId(int32_t streamId, const SurfaceParams& param, std::string& surfaceId)
 {
-    HILOGD("called, streamId is %{public}d", streamId);
+    HILOGI("called, streamId is %{public}d", streamId);
     auto connectionSesion = GetAbilityConnectionSessionByStreamId(streamId);
     if (connectionSesion == nullptr) {
         HILOGE("streamId is invalid parameter");
@@ -312,7 +344,7 @@ int32_t AbilityConnectionManager::GetSurfaceId(int32_t streamId, const SurfacePa
 
 int32_t AbilityConnectionManager::UpdateSurfaceParam(int32_t streamId, const SurfaceParams& param)
 {
-    HILOGD("called, streamId is %{public}d", streamId);
+    HILOGI("called, streamId is %{public}d", streamId);
     auto connectionSesion = GetAbilityConnectionSessionByStreamId(streamId);
     if (connectionSesion == nullptr) {
         HILOGE("streamId is invalid parameter");
@@ -324,7 +356,7 @@ int32_t AbilityConnectionManager::UpdateSurfaceParam(int32_t streamId, const Sur
 
 int32_t AbilityConnectionManager::DestroyStream(int32_t streamId)
 {
-    HILOGD("called, streamId is %{public}d", streamId);
+    HILOGI("called, streamId is %{public}d", streamId);
     auto connectionSesion = GetAbilityConnectionSessionByStreamId(streamId);
     if (connectionSesion == nullptr) {
         HILOGE("streamId is invalid parameter");
@@ -342,7 +374,7 @@ int32_t AbilityConnectionManager::DestroyStream(int32_t streamId)
 
 int32_t AbilityConnectionManager::StartStream(int32_t streamId)
 {
-    HILOGD("called, streamId is %{public}d", streamId);
+    HILOGI("called, streamId is %{public}d", streamId);
     auto connectionSesion = GetAbilityConnectionSessionByStreamId(streamId);
     if (connectionSesion == nullptr) {
         HILOGE("streamId is invalid parameter");
@@ -354,7 +386,7 @@ int32_t AbilityConnectionManager::StartStream(int32_t streamId)
 
 int32_t AbilityConnectionManager::StopStream(int32_t streamId)
 {
-    HILOGD("called, streamId is %{public}d", streamId);
+    HILOGI("called, streamId is %{public}d", streamId);
     auto connectionSesion = GetAbilityConnectionSessionByStreamId(streamId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
@@ -367,7 +399,7 @@ int32_t AbilityConnectionManager::StopStream(int32_t streamId)
 int32_t AbilityConnectionManager::RegisterEventCallback(int32_t sessionId, const std::string& eventType,
     const std::shared_ptr<JsAbilityConnectionSessionListener>& listener)
 {
-    HILOGD("called, sessionId is %{public}d", sessionId);
+    HILOGI("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
@@ -379,7 +411,7 @@ int32_t AbilityConnectionManager::RegisterEventCallback(int32_t sessionId, const
 
 int32_t AbilityConnectionManager::UnregisterEventCallback(int32_t sessionId, const std::string& eventType)
 {
-    HILOGD("called, sessionId is %{public}d", sessionId);
+    HILOGI("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
@@ -392,7 +424,7 @@ int32_t AbilityConnectionManager::UnregisterEventCallback(int32_t sessionId, con
 int32_t AbilityConnectionManager::RegisterEventCallback(int32_t sessionId,
     const std::shared_ptr<IAbilityConnectionSessionListener>& listener)
 {
-    HILOGD("called, sessionId is %{public}d", sessionId);
+    HILOGI("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
@@ -404,7 +436,7 @@ int32_t AbilityConnectionManager::RegisterEventCallback(int32_t sessionId,
 
 int32_t AbilityConnectionManager::UnregisterEventCallback(int32_t sessionId)
 {
-    HILOGD("called, sessionId is %{public}d", sessionId);
+    HILOGI("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");

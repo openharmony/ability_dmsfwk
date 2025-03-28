@@ -134,7 +134,7 @@ public:
 
     int32_t SendMessage(const std::string& msg, const MessageType& messageType = MessageType::NORMAL);
     int32_t SendData(const std::shared_ptr<AVTransDataBuffer>& buffer);
-    int32_t SendImage(const std::shared_ptr<Media::PixelMap>& image);
+    int32_t SendImage(const std::shared_ptr<Media::PixelMap>& image, int32_t imageQuality);
     int32_t SendFile(const std::vector<std::string>& sFiles,
         const std::vector<std::string>& dFiles);
 
@@ -147,10 +147,11 @@ public:
     int32_t StopStream(int32_t streamId);
 
     void OnChannelConnect(int32_t channelId);
-    void OnChannelClosed(int32_t channelId);
+    void OnChannelClosed(int32_t channelId, const ShutdownReason& reason);
     void OnBytesReceived(int32_t channelId, const std::shared_ptr<AVTransDataBuffer> buffer);
     void OnMessageReceived(int32_t channelId, const std::shared_ptr<AVTransDataBuffer> buffer);
     void OnRecvPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap);
+    void OnError(int32_t channelId, const int32_t errorCode);
     void OnSendFile(const int32_t channelId, const FileInfo& info);
     void OnRecvFile(const int32_t channelId, const FileInfo& info);
     const char* GetRecvPath(const int32_t channelId);
@@ -191,7 +192,11 @@ private:
     bool IsStreamBytesChannel(const int32_t channelId);
 
     void ExeuteConnectCallback(const ConnectResult& result);
-    int32_t ExeuteEventCallback(const std::string& eventType, const EventCallbackInfo& info);
+    int32_t ExeuteEventCallback(const std::string& eventType, EventCallbackInfo& info);
+    int32_t ExeuteEventCallback(const std::string& eventType, CollaborateEventInfo& info);
+    template <typename T>
+    int32_t ExeuteEventCallbackTemplate(const std::string& eventType, T& info);
+
     SurfaceParam ConvertToSurfaceParam(const SurfaceParams& param);
     int32_t StartRecvEngine();
     int32_t StartSenderEngine();
@@ -200,7 +205,9 @@ private:
     void UpdateRecvEngineTransChannel();
     void UpdateSenderEngineTransChannel();
     void ExeuteMessageEventCallback(const std::string msg);
-    void NotifyAppConnectResult(bool isConnected, const std::string& reason = "");
+    void NotifyAppConnectResult(bool isConnected,
+        const ConnectErrorCode errorCode = ConnectErrorCode::SYSTEM_INTERNAL_ERROR,
+        const std::string& reason = "");
     int32_t CreateStreamChannel(const std::string& channelName, bool isClientChannel);
     void ConnectFileChannel(const std::string& peerSocketName);
     void HandleSessionConnect();
@@ -208,6 +215,11 @@ private:
     void InitMessageHandlerMap();
     int32_t RequestReceiveFileChannelConnection();
     void NotifyPeerSessionConnected();
+    bool CheckConnectedSession();
+    bool CheckWifiStatus();
+    ConnectErrorCode ConvertToConnectErrorCode(int32_t collabResult);
+    void UpdateRecvEngineStatus();
+    DisconnectReason ConvertToDisconnectReason(const ShutdownReason& reason);
 
 private:
     class CollabChannelListener : public IChannelListener {
@@ -217,7 +229,7 @@ private:
         virtual ~CollabChannelListener() = default;
 
         void OnConnect(const int32_t channelId) const override;
-        void OnDisConnect(const int32_t channelId) const override;
+        void OnDisConnect(const int32_t channelId, const ShutdownReason& reason) const override;
         void OnStream(const int32_t channelId, const std::shared_ptr<AVTransStreamData>& sendData) const override;
         void OnBytes(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer) const override;
         void OnMessage(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer) const override;

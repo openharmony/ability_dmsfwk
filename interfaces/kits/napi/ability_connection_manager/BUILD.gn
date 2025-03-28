@@ -56,6 +56,7 @@ ohos_shared_library("abilityconnectionmanager_napi") {
     "access_token:libtokenid_sdk",
     "av_codec:av_codec_client",
     "av_codec:av_codec_media_engine_filters",
+    "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
     "dsoftbus:softbus_client",
