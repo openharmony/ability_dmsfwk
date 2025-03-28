@@ -253,8 +253,9 @@ void AVReceiverFilter::OnError(const int32_t errorCode)
     HILOGE("AVReceiverFilter::OnError errcode: %{public}d", errorCode);
     std::lock_guard<std::mutex> lock(channelMutex_);
     if (!listeners_.empty()) {
-        for (const auto& listener: listeners_)
-        listener->OnError(channelId_, errorCode);
+        for (const auto& listener: listeners_) {
+            listener->OnError(channelId_, errorCode);
+        }
     }
 }
 
