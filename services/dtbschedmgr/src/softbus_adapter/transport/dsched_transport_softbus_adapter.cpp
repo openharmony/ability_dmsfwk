@@ -32,6 +32,10 @@ namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DSchedTransportSoftbusAdapter";
 constexpr int32_t INVALID_SESSION_ID = -1;
+constexpr int32_t BIND_RETRY_INTERVAL = 500;
+constexpr int32_t MAX_BIND_RETRY_TIME = 4000;
+constexpr int32_t MAX_RETRY_TIMES = 8;
+constexpr int32_t MS_TO_US = 1000;
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DSchedTransportSoftbusAdapter);
@@ -250,16 +254,34 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
 {
     HILOGI("begin");
     int32_t ret = ERR_OK;
+    int retryCount = 0;
+    do {
 #ifdef DMS_CHECK_BLUETOOTH
-    HILOGI("collab bind begin");
-    if (type == SERVICE_TYPE_COLLAB) {
-        ret = Bind(sessionId, g_watch_collab_qosInfo, g_QosTV_Param_Index, &iSocketListener);
-        HILOGI("end");
-        return ret;
-    }
+        HILOGI("collab bind begin");
+        if (type == SERVICE_TYPE_COLLAB) {
+            ret = Bind(sessionId, g_watch_collab_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+            HILOGI("end bind high qos");
+        }
 #endif
-    ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
-    HILOGI("end");
+#ifndef DMS_CHECK_BLUETOOTH
+            ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+            HILOGI("end bind stardard qos");
+#endif
+        if (ret == ERR_OK) {
+            return ret;
+        }
+        HILOGE("bind failed, err=%{public}d", ret);
+        if (ret != SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED) {
+            return ret;
+        }
+        if (retryCount * BIND_RETRY_INTERVAL >= MAX_BIND_RETRY_TIME) {
+            HILOGE("bind failed after max retry time %{public}d ms", MAX_BIND_RETRY_TIME);
+            return ret;
+        }
+        HILOGI("bind failed, retrying after %{public}d ms, retry %{public}d", BIND_RETRY_INTERVAL, retryCount + 1);
+        usleep(BIND_RETRY_INTERVAL * MS_TO_US);
+        retryCount++;
+    } while (retryCount < MAX_RETRY_TIMES);
     return ret;
 }
 
