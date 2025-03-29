@@ -34,6 +34,7 @@ const std::string TAG = "DSchedTransportSoftbusAdapter";
 constexpr int32_t INVALID_SESSION_ID = -1;
 constexpr int32_t BIND_RETRY_INTERVAL = 500;
 constexpr int32_t MAX_BIND_RETRY_TIME = 4000;
+constexpr int32_t MAX_RETRY_TIMES = 8;
 constexpr int32_t MS_TO_US = 1000;
 }
 
@@ -277,11 +278,11 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
             HILOGE("bind failed after max retry time %{public}d ms", MAX_BIND_RETRY_TIME);
             return ret;
         }
-        HILOGI("bind failed, retrying after %{public}d ms... (retry %{public}d)", 
-            BIND_RETRY_INTERVAL, retryCount + 1);
+        HILOGI("bind failed, retrying after %{public}d ms, retry %{public}d", BIND_RETRY_INTERVAL, retryCount + 1);
         usleep(BIND_RETRY_INTERVAL * MS_TO_US);
         retryCount++;
-    } while (true);
+    } while (retryCount < MAX_RETRY_TIMES);
+    return ret;
 }
 
 int32_t DSchedTransportSoftbusAdapter::CreateClientSocket(const std::string &peerDeviceId)
