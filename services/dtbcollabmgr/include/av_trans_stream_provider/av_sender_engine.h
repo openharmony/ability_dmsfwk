@@ -62,7 +62,7 @@ namespace DistributedCollab {
             Media::Pipeline::FilterCallBackCommand cmd,
             Media::Pipeline::StreamType outType);
         void OnEvent(const Media::Event& event);
-        int32_t SendPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap);
+        int32_t SendPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, int32_t imageQuality);
         int32_t SetSurfaceParam(const SurfaceParam& param);
         EngineState GetState();
 #ifdef DSCH_COLLAB_AV_TRANS_TEST_DEMO

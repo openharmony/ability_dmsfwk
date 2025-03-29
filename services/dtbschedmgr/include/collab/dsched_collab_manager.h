@@ -34,6 +34,13 @@ namespace {
 constexpr int32_t COLLAB_TIMEOUT = 20000;
 constexpr int32_t BACKGROUND_TIMEOUT = 5000;
 }
+
+typedef enum {
+    ACCEPT = 0,
+    REJECT = 1,
+    ON_COLLABORATE_ERR = 10,
+} CollaborateResult;
+
 class DSchedCollabManager {
 DECLARE_SINGLE_INSTANCE_BASE(DSchedCollabManager);
 public:
@@ -54,6 +61,7 @@ public:
     int32_t ReleaseAbilityLink(const std::string &bundleName, const int32_t &pid);
     int32_t CancleReleaseAbilityLink(const std::string &bundleName, const int32_t &pid);
     void NotifyWifiOpen();
+    bool GetWifiStatus();
 
     void Init();
     void UnInit();
@@ -80,6 +88,7 @@ private:
     std::string GenerateCollabToken(const std::string &sourceDeviceId);
     int32_t CheckSrcCollabRelation(const CollabInfo *sourceInfo, const DSchedCollabInfo *collabInfo);
     int32_t CheckSinkCollabRelation(const CollabInfo *sinkInfo, const DSchedCollabInfo *collabInfo);
+    int32_t ConvertCollaborateResult(int32_t result);
 
     class SoftbusListener : public IDataListener {
         void OnBind(int32_t socket, PeerSocketInfo info);

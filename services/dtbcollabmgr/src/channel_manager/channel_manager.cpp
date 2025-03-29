@@ -947,7 +947,7 @@ void ChannelManager::DoConnectCallback(const int32_t channelId)
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-void ChannelManager::OnSocketClosed(int32_t socketId, const ShutdownReason reason)
+void ChannelManager::OnSocketClosed(int32_t socketId, const ShutdownReason& reason)
 {
     int32_t channelId = 0;
     CHECK_SOCKET_ID(socketId);
@@ -961,7 +961,7 @@ void ChannelManager::OnSocketClosed(int32_t socketId, const ShutdownReason reaso
     }
     // delete channel when all socket shutdown
     if (GetChannelStatus(channelId) == ChannelStatus::UNCONNECTED) {
-        DoDisConnectCallback(channelId);
+        DoDisConnectCallback(channelId, reason);
         DeleteChannel(channelId);
     }
 }
@@ -977,10 +977,10 @@ int32_t ChannelManager::GetChannelId(const int32_t socketId)
     return it->second;
 }
 
-void ChannelManager::DoDisConnectCallback(const int32_t channelId)
+void ChannelManager::DoDisConnectCallback(const int32_t channelId, const ShutdownReason& reason)
 {
     NotifyListeners(channelId, &IChannelListener::OnDisConnect,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        AppExecFwk::EventQueue::Priority::IMMEDIATE, reason);
 }
 
 ChannelStatus ChannelManager::GetChannelStatus(const int32_t channelId)

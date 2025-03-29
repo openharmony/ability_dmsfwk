@@ -28,7 +28,7 @@ AVReceiverFilterListener::~AVReceiverFilterListener()
 
 void AVReceiverFilterListener::OnConnect(const int32_t channelId) const { }
 
-void AVReceiverFilterListener::OnDisConnect(const int32_t channelId) const { }
+void AVReceiverFilterListener::OnDisConnect(const int32_t channelId, const ShutdownReason& reason) const { }
 
 void AVReceiverFilterListener::OnMessage(const int32_t channelId,
     const std::shared_ptr<AVTransDataBuffer>& buffer) const { }
