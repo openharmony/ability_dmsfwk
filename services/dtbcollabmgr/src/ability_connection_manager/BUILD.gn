@@ -66,6 +66,8 @@ ohos_shared_library("distributed_ability_connection_manager") {
     "ability_runtime:ability_manager",
     "ability_runtime:napi_common",
     "ability_runtime:runtime",
+    "access_token:libaccesstoken_sdk",
+    "access_token:libtokenid_sdk",
     "av_codec:av_codec_client",
     "av_codec:av_codec_media_engine_filters",
     "cJSON:cjson",

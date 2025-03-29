@@ -83,6 +83,7 @@ int32_t DataSenderReceiver::SendStreamData(const std::shared_ptr<AVTransStreamDa
 
 int32_t DataSenderReceiver::SendMessageData(const std::shared_ptr<AVTransDataBuffer>& sendData)
 {
+    HILOGI("start to send message, %{public}u", static_cast<uint32_t>(sendData->Size()));
     if (sendData->Size() > MAX_SEND_MESSAGE_SIZE) {
         HILOGE("too large send message");
         return DATA_SIZE_EXCEED_LIMIT;
@@ -93,6 +94,7 @@ int32_t DataSenderReceiver::SendMessageData(const std::shared_ptr<AVTransDataBuf
 int32_t DataSenderReceiver::SendFileData(const std::vector<std::string>& sFiles,
     const std::vector<std::string>& dFiles)
 {
+    HILOGI("start to send file");
     const char* sFileList[sFiles.size()];
     for (size_t i = 0; i < sFiles.size(); ++i) {
         sFileList[i] = sFiles[i].c_str();

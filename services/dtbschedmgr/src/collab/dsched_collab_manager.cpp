@@ -26,6 +26,7 @@
 #include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "dtbcollabmgr_log.h"
 #include "mission/distributed_bm_storage.h"
 #include "mission/wifi_state_adapter.h"
 #include "multi_user_manager.h"
@@ -411,13 +412,26 @@ int32_t DSchedCollabManager::NotifyStartAbilityResult(const std::string& collabT
         HILOGE("can't find collab");
         return INVALID_PARAMETERS_ERR;
     }
-    if (result != ERR_OK) {
+    if (result != ACCEPT) {
         HILOGE("start ability failed");
-        return dCollab->PostErrEndTask(result);
+        return dCollab->PostErrEndTask(ConvertCollaborateResult(result));
     }
     dCollab->SaveSinkAbilityData(collabToken, result, sinkPid, sinkUid, sinkAccessTokenId);
     HILOGI("end, info: %{public}s.", dCollab->GetCollabInfo().ToString().c_str());
     return ERR_OK;
+}
+
+int32_t DSchedCollabManager::ConvertCollaborateResult(int32_t result)
+{
+    HILOGI("collaborate result is %{public}d.", result);
+    switch (result) {
+        case REJECT:
+            return DistributedCollab::PEER_APP_REJECTED;
+        case ON_COLLABORATE_ERR:
+            return DistributedCollab::PEER_ABILITY_NO_ONCOLLABORATE;
+        default:
+            return INVALID_PARAMETERS_ERR;
+    }
 }
 
 int32_t DSchedCollabManager::NotifySinkPrepareResult(const std::string &collabToken, const int32_t &result,
@@ -553,6 +567,12 @@ void DSchedCollabManager::NotifyWifiOpen()
         }
     }
 }
+
+bool DSchedCollabManager::GetWifiStatus()
+{
+    return DistributedSchedule::WifiStateAdapter::GetInstance().IsWifiActive();
+}
+
 int32_t DSchedCollabManager::NotifySessionClose(const std::string &collabToken)
 {
     HILOGI("called, collabToken: %{public}s", GetAnonymStr(collabToken).c_str());

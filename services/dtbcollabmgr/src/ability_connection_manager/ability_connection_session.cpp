@@ -25,9 +25,12 @@
  
 #include "ability_connection_manager.h"
 #include "dtbcollabmgr_log.h"
+#include "dtbschedmgr_log.h"
 #include "distributed_client.h"
+#include "ipc_skeleton.h"
 #include "message_data_header.h"
 #include "openssl/sha.h"
+#include "tokenid_kit.h"
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -40,6 +43,7 @@ const std::string EVENT_DISCONNECT = "disconnect";
 const std::string EVENT_RECEIVE_MESSAGE = "receiveMessage";
 const std::string EVENT_RECEIVE_DATA = "receiveData";
 const std::string EVENT_RECEIVE_IMAGE = "receiveImage";
+const std::string EVENT_COLLABORATE = "collaborateEvent";
 constexpr int32_t DSCHED_COLLAB_PROTOCOL_VERSION = 1;
 static constexpr uint16_t PROTOCOL_VERSION = 1;
 constexpr int32_t CHANNEL_NAME_LENGTH = 48;
@@ -86,6 +90,8 @@ void AbilityConnectionSession::InitMessageHandlerMap()
         [this](const std::string&) { NotifyAppConnectResult(false); };
     messageHandlerMap_[static_cast<uint32_t>(MessageType::SESSION_CONNECT_SUCCESS)] =
         [this](const std::string&) { HandleSessionConnect(); };
+    messageHandlerMap_[static_cast<uint32_t>(MessageType::RECEIVE_STREAM_START)] =
+        [this](const std::string&) { UpdateRecvEngineStatus(); };
 }
 
 void AbilityConnectionSession::Init()
@@ -158,12 +164,12 @@ PeerInfo AbilityConnectionSession::GetPeerInfo()
 {
     return sessionInfo_.peerInfo_;
 }
- 
+
 PeerInfo AbilityConnectionSession::GetLocalInfo()
 {
     return sessionInfo_.localInfo_;
 }
- 
+
 std::string AbilityConnectionSession::GetServerToken()
 {
     return dmsServerToken_;
@@ -173,12 +179,12 @@ int32_t AbilityConnectionSession::HandlePeerVersion(int32_t version)
 {
     HILOGI("called.");
     DistributedClient dmsClient;
-    int32_t ret = dmsClient.CollabMission(sessionId_, localSocketName_, sessionInfo_, connectOption_, dmsServerToken_);
+    int32_t ret = dmsClient.CollabMission(sessionId_,
+        localSocketName_, sessionInfo_,
+        connectOption_, dmsServerToken_);
     if (ret != ERR_OK) {
         HILOGE("collab mission start failed.");
-        ConnectResult connectResult;
-        connectResult.isConnected = false;
-        connectResult.sessionId = sessionId_;
+        ConnectResult connectResult(false, ConnectErrorCode::SYSTEM_INTERNAL_ERROR, "");
         ExeuteConnectCallback(connectResult);
     }
     return ret;
@@ -187,15 +193,16 @@ int32_t AbilityConnectionSession::HandlePeerVersion(int32_t version)
 int32_t AbilityConnectionSession::Connect(ConnectCallback& callback)
 {
     HILOGI("called.");
-    direction_ = CollabrateDirection::COLLABRATE_SOURCE;
-    dmsServerToken_ = CreateDmsServerToken();
-    int32_t ret = AbilityConnectionManager::GetInstance().UpdateClientSession(sessionInfo_, sessionId_);
-    if (ret != ERR_OK) {
-        ConnectResult connectResult;
-        connectResult.isConnected = false;
-        connectResult.sessionId = sessionId_;
+    connectCallback_ = callback;
+    if (CheckConnectedSession()) {
+        HILOGE("connected session exists.");
+        return CONNECTED_SESSION_EXISTS;
+    }
+    if (!CheckWifiStatus()) {
+        HILOGI("Wi-Fi is not enabled.");
+        ConnectResult connectResult(false, ConnectErrorCode::LOCAL_WIFI_NOT_OPEN, "");
         ExeuteConnectCallback(connectResult);
-        return ret;
+        return LOCAL_WIFI_NOT_OPEN;
     }
 
     {
@@ -205,19 +212,48 @@ int32_t AbilityConnectionSession::Connect(ConnectCallback& callback)
             return INVALID_PARAMETERS_ERR;
         }
         sessionStatus_ = SessionStatus::CONNECTING;
-        connectCallback_ = callback;
     }
-    
+    direction_ = CollabrateDirection::COLLABRATE_SOURCE;
+    dmsServerToken_ = CreateDmsServerToken();
     DistributedClient dmsClient;
-    ret = dmsClient.GetPeerVersion(sessionId_, sessionInfo_.peerInfo_.deviceId, dmsServerToken_);
+    int32_t ret = dmsClient.GetPeerVersion(sessionId_, sessionInfo_.peerInfo_.deviceId, dmsServerToken_);
     if (ret != ERR_OK) {
         HILOGE("collab mission start failed.");
-        ConnectResult connectResult;
-        connectResult.isConnected = false;
-        connectResult.sessionId = sessionId_;
+        ConnectResult connectResult(false, ConnectErrorCode::SYSTEM_INTERNAL_ERROR, "");
         ExeuteConnectCallback(connectResult);
     }
     return ret;
+}
+
+bool AbilityConnectionSession::CheckConnectedSession()
+{
+    if (IsConnected()) {
+        HILOGE("session %{public}d connected", sessionId_);
+        ConnectResult connectResult(false, ConnectErrorCode::CONNECTED_SESSION_EXISTS, "");
+        ExeuteConnectCallback(connectResult);
+        return true;
+    }
+
+    int32_t ret = AbilityConnectionManager::GetInstance().UpdateClientSession(sessionInfo_, sessionId_);
+    if (ret != ERR_OK) {
+        HILOGE("connected session exists.");
+        ConnectResult connectResult(false, ConnectErrorCode::CONNECTED_SESSION_EXISTS, "");
+        ExeuteConnectCallback(connectResult);
+        return true;
+    }
+    return false;
+}
+
+bool AbilityConnectionSession::CheckWifiStatus()
+{
+    uint64_t tokenId = OHOS::IPCSkeleton::GetSelfTokenID();
+    if (OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(tokenId)) {
+        HILOGI("The current application is a system app.");
+        return true;
+    }
+
+    DistributedClient dmsClient;
+    return dmsClient.GetWifiStatus();
 }
 
 std::string AbilityConnectionSession::CreateDmsServerToken()
@@ -226,15 +262,12 @@ std::string AbilityConnectionSession::CreateDmsServerToken()
     auto now = std::chrono::system_clock::now();
     auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
     std::string input = std::to_string(pid) + std::to_string(sessionId_) + std::to_string(timestamp);
- 
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256((const unsigned char*)input.c_str(), input.length(), hash);
- 
     std::stringstream hashStr;
     for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
         hashStr << std::hex << std::setw(HEX_WIDTH) << std::setfill(FILL_CHAR) << (int)hash[i];
     }
- 
     return hashStr.str().substr(0, CHANNEL_NAME_LENGTH);
 }
 
@@ -252,13 +285,11 @@ int32_t AbilityConnectionSession::AcceptConnect(const std::string& token)
 {
     HILOGI("called.");
     DistributedClient dmsClient;
-    dmsServerToken_ = token;
-    int32_t ret = AbilityConnectionManager::GetInstance().UpdateServerSession(sessionInfo_, sessionId_);
-    if (ret != ERR_OK) {
-        dmsClient.NotifyPrepareResult(token, ret, sessionId_, localSocketName_);
-        return INVALID_PARAMETERS_ERR;
+    if (!CheckWifiStatus()) {
+        HILOGI("Wi-Fi is not enabled.");
+        dmsClient.NotifyPrepareResult(token, PEER_WIFI_NOT_OPEN, sessionId_, localSocketName_);
+        return PEER_WIFI_NOT_OPEN;
     }
-
     {
         std::unique_lock<std::shared_mutex> sessionStatusWriteLock(sessionMutex_);
         if (sessionStatus_ != SessionStatus::UNCONNECTED) {
@@ -266,6 +297,13 @@ int32_t AbilityConnectionSession::AcceptConnect(const std::string& token)
             return INVALID_PARAMETERS_ERR;
         }
         sessionStatus_ = SessionStatus::CONNECTING;
+    }
+    dmsServerToken_ = token;
+    int32_t ret = AbilityConnectionManager::GetInstance().UpdateServerSession(sessionInfo_, sessionId_);
+    if (ret != ERR_OK) {
+        dmsClient.NotifyPrepareResult(token, ret, sessionId_, localSocketName_);
+        Release();
+        return INVALID_PARAMETERS_ERR;
     }
 
     direction_ = CollabrateDirection::COLLABRATE_SINK;
@@ -292,7 +330,7 @@ int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::
     peerSocketName_ = peerSocketName;
     if (result != ERR_OK) {
         HILOGE("collab result is failed, ret = %{public}d, reason = %{public}s", result, reason.c_str());
-        NotifyAppConnectResult(false, reason);
+        NotifyAppConnectResult(false, ConvertToConnectErrorCode(result), reason);
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -308,6 +346,25 @@ int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::
     NotifyPeerSessionConnected();
     NotifyAppConnectResult(true);
     return ERR_OK;
+}
+
+ConnectErrorCode AbilityConnectionSession::ConvertToConnectErrorCode(int32_t collabResult)
+{
+    HILOGI("Collaboration failed code is %{public}d.", collabResult);
+    switch (collabResult) {
+        case CONNECTED_SESSION_EXISTS:
+            return ConnectErrorCode::CONNECTED_SESSION_EXISTS;
+        case SAME_SESSION_IS_CONNECTING:
+            return ConnectErrorCode::CONNECTED_SESSION_EXISTS;
+        case PEER_WIFI_NOT_OPEN:
+            return ConnectErrorCode::PEER_WIFI_NOT_OPEN;
+        case DistributedSchedule::COLLAB_ABILITY_REJECT_ERR:
+            return ConnectErrorCode::PEER_APP_REJECTED;
+        case PEER_ABILITY_NO_ONCOLLABORATE:
+            return ConnectErrorCode::PEER_ABILITY_NO_ONCOLLABORATE;
+        default:
+            return ConnectErrorCode::SYSTEM_INTERNAL_ERROR;
+    }
 }
 
 int32_t AbilityConnectionSession::RequestReceiveFileChannelConnection()
@@ -335,26 +392,32 @@ void AbilityConnectionSession::NotifyPeerSessionConnected()
     }
 }
 
-void AbilityConnectionSession::NotifyAppConnectResult(bool isConnected, const std::string& reason)
+void AbilityConnectionSession::NotifyAppConnectResult(bool isConnected,
+    const ConnectErrorCode errorCode, const std::string& reason)
 {
+    ConnectResult connectResult(isConnected, errorCode, reason);
     if (isConnected) {
         std::unique_lock<std::shared_mutex> sessionStatusWriteLock(sessionMutex_);
         sessionStatus_ = SessionStatus::CONNECTED;
+        connectResult.sessionId = sessionId_;
     } else {
         Release();
         DistributedClient dmsClient;
         dmsClient.NotifyCloseCollabSession(dmsServerToken_);
     }
-    ConnectResult connectResult;
-    connectResult.isConnected = isConnected;
-    connectResult.reason = reason;
-    connectResult.sessionId = sessionId_;
     ExeuteConnectCallback(connectResult);
 }
 
 int32_t AbilityConnectionSession::HandleDisconnect()
 {
     HILOGI("called.");
+    {
+        std::shared_lock<std::shared_mutex> sessionStatusReadLock(sessionMutex_);
+        if (sessionStatus_ == SessionStatus::UNCONNECTED) {
+            HILOGI("already disconnect");
+            return ERR_OK;
+        }
+    }
     Release();
     std::shared_ptr<IAbilityConnectionSessionListener> listener;
     {
@@ -437,14 +500,14 @@ int32_t AbilityConnectionSession::SendData(const std::shared_ptr<AVTransDataBuff
     return ERR_OK;
 }
 
-int32_t AbilityConnectionSession::SendImage(const std::shared_ptr<Media::PixelMap>& image)
+int32_t AbilityConnectionSession::SendImage(const std::shared_ptr<Media::PixelMap>& image, int32_t imageQuality)
 {
     HILOGI("called.");
     if (senderEngine_ == nullptr) {
         HILOGE("senderEngine_ is nullptr.");
         return INVALID_PARAMETERS_ERR;
     }
-    int32_t ret = senderEngine_->SendPixelMap(image);
+    int32_t ret = senderEngine_->SendPixelMap(image, imageQuality);
     if (ret != ERR_OK) {
         HILOGE("Send image failed, ret is %{public}d.", ret);
         return ret;
@@ -760,9 +823,14 @@ int32_t AbilityConnectionSession::StartRecvEngine()
     return SendMessage("recvEngineStart", MessageType::RECEIVE_STREAM_START);
 }
 
+void AbilityConnectionSession::UpdateRecvEngineStatus()
+{
+    recvEngineState_ = EngineState::START;
+}
+
 int32_t AbilityConnectionSession::StartSenderEngine()
 {
-    HILOGI("senderEngine_ Start.");
+    HILOGI("senderEngine_ Start. recvEngineState_ is %{public}d", static_cast<int32_t>(recvEngineState_));
     return senderEngine_->Start();
 }
 
@@ -817,7 +885,18 @@ int32_t AbilityConnectionSession::UnregisterEventCallback()
     return ERR_OK;
 }
 
-int32_t AbilityConnectionSession::ExeuteEventCallback(const std::string& eventType, const EventCallbackInfo& info)
+int32_t AbilityConnectionSession::ExeuteEventCallback(const std::string& eventType, EventCallbackInfo& info)
+{
+    return ExeuteEventCallbackTemplate(eventType, info);
+}
+
+int32_t AbilityConnectionSession::ExeuteEventCallback(const std::string& eventType, CollaborateEventInfo& info)
+{
+    return ExeuteEventCallbackTemplate(eventType, info);
+}
+
+template <typename T>
+int32_t AbilityConnectionSession::ExeuteEventCallbackTemplate(const std::string& eventType, T& info)
 {
     HILOGI("called, eventType is %{public}s", eventType.c_str());
     std::shared_lock<std::shared_mutex> listenerReadLock(listenerMutex_);
@@ -832,6 +911,9 @@ int32_t AbilityConnectionSession::ExeuteEventCallback(const std::string& eventTy
         return INVALID_PARAMETERS_ERR;
     }
 
+    if constexpr (std::is_same_v<T, EventCallbackInfo>) {
+        info.eventType = eventType;
+    }
     auto eventCallback = item->second;
     if (eventCallback == nullptr) {
         HILOGE("eventCallback is nullptr");
@@ -1140,7 +1222,7 @@ bool AbilityConnectionSession::IsAllChannelConnected()
     return true;
 }
 
-void AbilityConnectionSession::OnChannelClosed(int32_t channelId)
+void AbilityConnectionSession::OnChannelClosed(int32_t channelId, const ShutdownReason& reason)
 {
     HILOGI("called. channelId is %{public}d", channelId);
     if (!IsVaildChannel(channelId)) {
@@ -1167,8 +1249,19 @@ void AbilityConnectionSession::OnChannelClosed(int32_t channelId)
     } else {
         EventCallbackInfo callbackInfo;
         callbackInfo.sessionId = sessionId_;
-        callbackInfo.reason = DisconnectReason::PEER_APP_EXIT;
+        callbackInfo.reason = ConvertToDisconnectReason(reason);
         ExeuteEventCallback(EVENT_DISCONNECT, callbackInfo);
+    }
+}
+
+DisconnectReason AbilityConnectionSession::ConvertToDisconnectReason(const ShutdownReason& reason)
+{
+    HILOGI("Shutdown reason code is %{public}d.", static_cast<int32_t>(reason));
+    switch (reason) {
+        case ShutdownReason::SHUTDOWN_REASON_PEER:
+            return DisconnectReason::PEER_APP_EXIT;
+        default:
+            return DisconnectReason::NETWORK_DISCONNECTED;
     }
 }
 
@@ -1284,7 +1377,7 @@ void AbilityConnectionSession::ExeuteMessageEventCallback(const std::string msg)
         EventCallbackInfo callbackInfo;
         callbackInfo.sessionId = sessionId_;
         callbackInfo.msg = msg;
-        auto func = [callbackInfo, this]() {
+        auto func = [callbackInfo, this]() mutable {
             ExeuteEventCallback(EVENT_RECEIVE_MESSAGE, callbackInfo);
         };
         eventHandler_->PostTask(func, AppExecFwk::EventQueue::Priority::LOW);
@@ -1398,6 +1491,28 @@ void AbilityConnectionSession::OnBytesReceived(int32_t channelId, const std::sha
         callbackInfo.sessionId = sessionId_;
         callbackInfo.data = dataBuffer;
         ExeuteEventCallback(EVENT_RECEIVE_DATA, callbackInfo);
+    }
+}
+
+void AbilityConnectionSession::OnError(int32_t channelId, const int32_t errorCode)
+{
+    HILOGI("error receive");
+    if (!IsVaildChannel(channelId)) {
+        return;
+    }
+    std::shared_ptr<IAbilityConnectionSessionListener> listener;
+    {
+        std::shared_lock<std::shared_mutex> lock(sessionListenerMutex_);
+        listener = sessionListener_;
+    }
+    if (listener != nullptr) {
+        HILOGI("handler sessionListener");
+        listener->OnError(sessionId_, errorCode);
+    } else {
+        CollaborateEventInfo info;
+        info.eventType = CollaborateEventType::SEND_FAILURE;
+        info.sessionId = sessionId_;
+        ExeuteEventCallback(EVENT_COLLABORATE, info);
     }
 }
 
@@ -1515,7 +1630,8 @@ void AbilityConnectionSession::CollabChannelListener::OnConnect(const int32_t ch
     abilityConnectionSession->OnChannelConnect(channelId);
 }
 
-void AbilityConnectionSession::CollabChannelListener::OnDisConnect(const int32_t channelId) const
+void AbilityConnectionSession::CollabChannelListener::OnDisConnect(const int32_t channelId,
+    const ShutdownReason& reason) const
 {
     HILOGI("called.");
     std::shared_ptr<AbilityConnectionSession> abilityConnectionSession = abilityConnectionSession_.lock();
@@ -1524,7 +1640,7 @@ void AbilityConnectionSession::CollabChannelListener::OnDisConnect(const int32_t
         return;
     }
 
-    abilityConnectionSession->OnChannelClosed(channelId);
+    abilityConnectionSession->OnChannelClosed(channelId, reason);
 }
 
 void AbilityConnectionSession::CollabChannelListener::OnMessage(const int32_t channelId,
@@ -1560,6 +1676,10 @@ void AbilityConnectionSession::CollabChannelListener::OnStream(const int32_t cha
 
 void AbilityConnectionSession::CollabChannelListener::OnError(const int32_t channelId, const int32_t errorCode) const
 {
+    HILOGI("called.");
+    if (auto abilityConnectionSession = abilityConnectionSession_.lock()) {
+        abilityConnectionSession->OnError(channelId, errorCode);
+    }
 }
 
 void AbilityConnectionSession::CollabChannelListener::OnSendFile(const int32_t channelId, const FileInfo& info) const

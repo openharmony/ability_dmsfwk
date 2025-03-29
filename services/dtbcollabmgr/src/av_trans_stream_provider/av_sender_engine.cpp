@@ -318,14 +318,14 @@ int32_t AVSenderEngine::Stop()
     return static_cast<int32_t>(ret);
 }
 
-int32_t AVSenderEngine::SendPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap)
+int32_t AVSenderEngine::SendPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, int32_t imageQuality)
 {
     HILOGI("AVSenderEngine::SendPixelMap enter");
     if (senderFilter_ == nullptr) {
         HILOGE("senderFilter empty");
         return NULL_POINTER_ERROR;
     }
-    return senderFilter_->SendPixelMap(pixelMap);
+    return senderFilter_->SendPixelMap(pixelMap, imageQuality);
 }
 
 int32_t AVSenderEngine::SetSurfaceParam(const SurfaceParam& param)
