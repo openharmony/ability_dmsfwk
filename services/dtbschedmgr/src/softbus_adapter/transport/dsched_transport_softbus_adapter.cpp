@@ -32,6 +32,9 @@ namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DSchedTransportSoftbusAdapter";
 constexpr int32_t INVALID_SESSION_ID = -1;
+constexpr int32_t BIND_RETRY_INTERVAL = 500;
+constexpr int32_t MAX_BIND_RETRY_TIME = 4000;
+constexpr int32_t MS_TO_US = 1000;
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DSchedTransportSoftbusAdapter);
