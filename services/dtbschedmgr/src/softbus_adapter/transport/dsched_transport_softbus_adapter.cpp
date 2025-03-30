@@ -305,7 +305,6 @@ int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDevi
     qosRequestInfo.dataType = TransDataType::DATA_TYPE_BYTES;
     QosStatus qosStatus;
 
-    // 调用查询方法
     int32_t ret = SoftBusQueryValidQos(&qosRequestInfo, &qosStatus);
     if (ret != ERR_OK) {
         HILOGE("query Valid Qos failed, result: %{public}d", ret);
