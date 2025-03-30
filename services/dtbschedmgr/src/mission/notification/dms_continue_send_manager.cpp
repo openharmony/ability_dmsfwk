@@ -190,7 +190,12 @@ void DMSContinueSendMgr::SendContinueBroadcast(const MissionStatus& status, Miss
 {
     auto typeStr = DmsContinueConditionMgr::GetInstance().TypeEnumToString(type);
     HILOGI("start, missionId: %{public}d, type: %{public}s", status.missionId, typeStr.c_str());
-
+    // The interval between application exit and screen lock events is too short,
+    // which may result in abnormal re sending of focused broadcasts.
+    // This phenomenon is temporarily avoided here.
+    if (MissionEventType::MISSION_EVENT_DESTORYED == type) {
+        screenLockedHandler_->ResetScreenLockedInfo();
+    }
     if (!DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition() ||
         !DmsContinueConditionMgr::GetInstance().CheckMissionSendCondition(status, type)) {
         HILOGE("CheckBroadcastCondition %{public}s failed! status: %{public}s",
@@ -393,16 +398,6 @@ void DMSContinueSendMgr::ScreenLockedHandler::OnDeviceScreenLocked()
         sendMgr->PostScreenLockedEventAfterDelay(unfoInfo_.missionId, DMS_FOCUSED_TYPE, 0);
     }
 
-#ifdef DMS_ICON_HOLD_ON
-    int32_t missionId = DmsContinueConditionMgr::GetInstance().GetCurrentFocusedMission(sendMgr->accountId_);
-    MissionStatus status;
-    int32_t ret = DmsContinueConditionMgr::GetInstance().GetMissionStatus(sendMgr->accountId_, missionId, status);
-    if (ret != ERR_OK) {
-        HILOGE("GetMissionStatus failed, ret: %{public}d, missionId %{public}d", ret, missionId);
-        return;
-    }
-    SetScreenLockedInfo(LastUnfoInfo({missionId, 0, status}));
-#endif
     sendMgr->PostScreenLockedEventAfterDelay(
         unfoInfo_.missionId, DMS_UNFOCUSED_TYPE, SCREEN_LOCK_DELAY_TIME);
 }
