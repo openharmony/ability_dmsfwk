@@ -25,6 +25,7 @@
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
+#include "softbus_resource_query.h"
 #include "token_setproc.h"
 
 namespace OHOS {
@@ -250,7 +251,8 @@ int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peer
     return ret;
 }
 
-int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedServiceType type)
+int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedServiceType type,
+    const std::string &peerDeviceId)
 {
     HILOGI("begin");
     int32_t ret = ERR_OK;
@@ -264,7 +266,17 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
         }
 #endif
 #ifndef DMS_CHECK_BLUETOOTH
-            ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+            QosTV validQos;
+            if (QueryValidQos(peerDeviceId, validQos) == ERR_OK) {
+                QosTV qosInfoWithValidQos[] = {
+                    {.qos = QOS_TYPE_MIN_BW, .value = validQos.value},
+                    {.qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_QOS_TYPE_MAX_LATENCY},
+                    {.qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_QOS_TYPE_MIN_LATENCY}
+                };
+                ret = Bind(sessionId, qosInfoWithValidQos, g_QosTV_Param_Index, &iSocketListener);
+            } else {
+                ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+            }
             HILOGI("end bind stardard qos");
 #endif
         if (ret == ERR_OK) {
@@ -283,6 +295,56 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
         retryCount++;
     } while (retryCount < MAX_RETRY_TIMES);
     return ret;
+}
+
+int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDeviceId, QosTV &validQos)
+{
+    HILOGI("query Valid Qos start peerNetworkId: %{public}s", peerDeviceId.c_str());
+    QosRequestInfo qosRequestInfo;
+    std::strcpy(qosRequestInfo.peerNetworkId, peerDeviceId.c_str());
+    qosRequestInfo.dataType = TransDataType::DATA_TYPE_BYTES;
+    QosStatus qosStatus;
+
+    // 调用查询方法
+    int32_t ret = SoftBusQueryValidQos(&qosRequestInfo, &qosStatus);
+    if (ret != ERR_OK) {
+        HILOGE("query Valid Qos failed, result: %{public}d", ret);
+        return SOFT_BUS_QUERY_VALID_QOS_ERR;
+    }
+    HILOGI("query Valid Qos success, isLowPower: %{public}s; qos count: %{public}d",
+        qosStatus.isLowPower ? "true" : "false", qosStatus.qosCnt);
+    QosOption supportReuseQosMinBW = {true, 0};
+    QosOption maxQosMinBW = {false, 0};
+
+    for (int i = 0; i < qosStatus.qosCnt; i++) {
+        QosOption item = qosStatus.validQos[i];
+        HILOGD("check valid qos. current SupportReuse minBW: %{public}d; current unSupportReuse minBW: %{public}d",
+            supportReuseQosMinBW.minBW, maxQosMinBW.minBW);
+        HILOGD("check valid qos index: %{public}d; isSupportReuse: %{public}s; minBw: %{public}d",
+            i, item.isSupportReuse ? "true" : "false", item.minBW);
+        if (item.isSupportReuse && supportReuseQosMinBW.minBW < item.minBW) {
+            HILOGD("update supportReuseQosMinBW from: %{public}d to: %{public}d",
+                supportReuseQosMinBW.minBW, item.minBW);
+            supportReuseQosMinBW.minBW = item.minBW;
+            continue;
+        }
+        if (!item.isSupportReuse && maxQosMinBW.minBW < item.minBW) {
+            HILOGD("update maxQosMinBW from: %{public}d to: %{public}d", maxQosMinBW.minBW, item.minBW);
+            maxQosMinBW.minBW = item.minBW;
+        }
+    }
+    delete [] qosStatus.validQos;
+    if (qosStatus.isLowPower && supportReuseQosMinBW.minBW > 0) {
+        HILOGI("final valid qos: isSupportReuse: true; minBw: %{public}d", supportReuseQosMinBW.minBW);
+        validQos.value = supportReuseQosMinBW.minBW;
+    } else if (maxQosMinBW.minBW > 0) {
+        HILOGI("final valid qos: isSupportReuse: false; minBw: %{public}d", maxQosMinBW.minBW);
+        validQos.value = maxQosMinBW.minBW;
+    } else {
+        HILOGE("final valid qos: no Valid Qos!");
+        return SOFT_BUS_NO_USEFUL_QOS_ERR;
+    }
+    return ERR_OK;
 }
 
 int32_t DSchedTransportSoftbusAdapter::CreateClientSocket(const std::string &peerDeviceId)
