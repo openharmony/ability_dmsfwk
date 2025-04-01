@@ -25,7 +25,9 @@
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
 #include "softbus_resource_query.h"
+#endif
 #include "token_setproc.h"
 
 namespace OHOS {
@@ -304,7 +306,8 @@ int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDevi
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     HILOGI("query Valid Qos start peerNetworkId: %{public}s", peerDeviceId.c_str());
     QosRequestInfo qosRequestInfo;
-    std::strcpy(qosRequestInfo.peerNetworkId, peerDeviceId.c_str());
+    std::strncpy(qosRequestInfo.peerNetworkId, peerDeviceId.c_str(), sizeof(qosRequestInfo.peerNetworkId) - 1);
+    qosRequestInfo.peerNetworkId[sizeof(qosRequestInfo.peerNetworkId) - 1] = '\0';
     qosRequestInfo.dataType = TransDataType::DATA_TYPE_BYTES;
     QosStatus qosStatus;
 
