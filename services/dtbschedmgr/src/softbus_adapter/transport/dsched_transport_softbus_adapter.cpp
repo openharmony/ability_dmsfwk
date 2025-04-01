@@ -234,7 +234,7 @@ int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peer
     callingTokenId_ = 0;
 
     do {
-        ret = ServiceBind(sessionId, type);
+        ret = ServiceBind(sessionId, type, peerDeviceId);
         if (ret != ERR_OK) {
             HILOGE("client bind failed, ret: %{public}d", ret);
             break;
