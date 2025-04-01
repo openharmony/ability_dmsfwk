@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -269,18 +269,18 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
         }
 #endif
 #ifndef DMS_CHECK_BLUETOOTH
-            QosTV validQos;
-            if (QueryValidQos(peerDeviceId, validQos) == ERR_OK) {
-                QosTV qosInfoWithValidQos[] = {
-                    {.qos = QOS_TYPE_MIN_BW, .value = validQos.value},
-                    {.qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_QOS_TYPE_MAX_LATENCY},
-                    {.qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_QOS_TYPE_MIN_LATENCY}
-                };
-                ret = Bind(sessionId, qosInfoWithValidQos, g_QosTV_Param_Index, &iSocketListener);
-            } else {
-                ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
-            }
-            HILOGI("end bind stardard qos");
+        QosTV validQos;
+        if (QueryValidQos(peerDeviceId, validQos) == ERR_OK) {
+            QosTV qosInfoWithValidQos[] = {
+                {.qos = QOS_TYPE_MIN_BW, .value = validQos.value},
+                {.qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_QOS_TYPE_MAX_LATENCY},
+                {.qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_QOS_TYPE_MIN_LATENCY}
+            };
+            ret = Bind(sessionId, qosInfoWithValidQos, g_QosTV_Param_Index, &iSocketListener);
+        } else {
+            ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+        }
+        HILOGI("end bind stardard qos");
 #endif
         if (ret == ERR_OK) {
             return ret;
@@ -302,7 +302,7 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
 
 int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDeviceId, QosTV &validQos)
 {
-    int32_t ret = SOFT_BUS_QUERY_VALID_QOS_ERR;
+    int32_t ret = SOFTBUS_QUERY_VALID_QOS_ERR;
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     HILOGI("query Valid Qos start peerNetworkId: %{public}s", GetAnonymStr(peerDeviceId).c_str());
     QosRequestInfo qosRequestInfo;
@@ -312,7 +312,7 @@ int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDevi
     ret = SoftBusQueryValidQos(&qosRequestInfo, &qosStatus);
     if (ret != ERR_OK) {
         HILOGE("query Valid Qos failed, result: %{public}d", ret);
-        return SOFT_BUS_QUERY_VALID_QOS_ERR;
+        return SOFTBUS_QUERY_VALID_QOS_ERR;
     }
     HILOGI("query Valid Qos success, isLowPower: %{public}s; qos count: %{public}d",
         qosStatus.isLowPower ? "true" : "false", qosStatus.qosCnt);
@@ -345,7 +345,7 @@ int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDevi
         validQos.value = maxQosMinBW.minBW;
     } else {
         HILOGE("final valid qos: no Valid Qos!");
-        return SOFT_BUS_NO_USEFUL_QOS_ERR;
+        return SOFTBUS_NO_USEFUL_QOS_ERR;
     }
 #endif
     return ret;

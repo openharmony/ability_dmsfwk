@@ -601,11 +601,11 @@ enum {
     /**
      * Result(29360342) for SoftBus Query Valid Qos failed.
      */
-    SOFT_BUS_QUERY_VALID_QOS_ERR = 29360342,
+    SOFTBUS_QUERY_VALID_QOS_ERR = 29360342,
     /**
-     * Result(29360343) for SoftBus Query Valid Qos success but no useful qos.
+     * Result(29360343) for SoftBus Query Valid Qos success but no usable qos.
      */
-    SOFT_BUS_NO_USEFUL_QOS_ERR = 29360343,
+    SOFTBUS_NO_USEFUL_QOS_ERR = 29360343,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
