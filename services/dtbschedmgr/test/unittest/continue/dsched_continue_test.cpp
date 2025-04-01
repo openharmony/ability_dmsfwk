@@ -91,7 +91,7 @@ void DSchedContinueTest::SetUp()
  * @tc.desc: OnContinueMission and PostStartTask
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_001_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_001_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_001_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -109,7 +109,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_001_1, TestSize.Level0)
  * @tc.desc: OnStartCmd and PostCotinueAbilityTask
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_002_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_002_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_002_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -127,7 +127,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_002_1, TestSize.Level0)
  * @tc.desc: OnReplyCmd and PostReplyTask
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_003_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_003_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_003_1 begin" << std::endl;
     // eventHandler_ not null
@@ -156,7 +156,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_003_1, TestSize.Level0)
  * @tc.desc: OnStartContinuation and PostContinueSendTask
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_004_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_004_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_004_1 begin" << std::endl;
     OHOS::AAFwk::Want want;
@@ -185,7 +185,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_004_1, TestSize.Level0)
  * @tc.desc: OnContinueDataCmd and PostContinueDataTask
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_005_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_005_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_005_1 begin" << std::endl;
     // eventHandler_ not null
@@ -205,7 +205,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_005_1, TestSize.Level0)
  * @tc.desc: OnNotifyComplete, OnContinueEndCmd and PostNotifyCompleteTask
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_006_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_006_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_006_1 begin" << std::endl;
     // eventHandler_ not null
@@ -226,7 +226,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_006_1, TestSize.Level0)
  * @tc.desc: OnContinueEnd and PostContinueEndTask
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_007_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_007_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_007_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -251,7 +251,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_007_1, TestSize.Level0)
  * @tc.desc: ExecuteContinueReq
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_008_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_008_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_008_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -267,7 +267,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_008_1, TestSize.Level0)
  * @tc.desc: PackStartCmd
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_009_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_009_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_009_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -295,7 +295,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_009_1, TestSize.Level0)
  * @tc.desc: ExecuteContinueAbility
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0010_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0010_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0010_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -311,7 +311,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0010_1, TestSize.Level0)
  * @tc.desc: GetMissionIdByBundleName
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0011_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0011_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0011_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -330,7 +330,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0011_1, TestSize.Level0)
  * @tc.desc: CheckContinueAbilityPermission
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0012_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0012_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0012_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -345,7 +345,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0012_1, TestSize.Level0)
  * @tc.desc: ExecuteContinueReply
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0013_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0013_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0013_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -360,7 +360,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0013_1, TestSize.Level0)
  * @tc.desc: ExecuteContinueSend
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0014_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0014_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0014_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -380,7 +380,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0014_1, TestSize.Level0)
  * @tc.desc: SetWantForContinuation
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0015_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0015_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0015_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -397,7 +397,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0015_1, TestSize.Level0)
  * @tc.desc: PackDataCmd
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0016_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0016_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0016_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -422,7 +422,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0016_1, TestSize.Level0)
  * @tc.desc: ExecuteContinueData
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0017_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -444,7 +444,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_1, TestSize.Level0)
  * @tc.desc: UpdateElementInfo
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_2, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0017_2, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0017_2 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -512,7 +512,7 @@ bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId, const 
  * @tc.desc: ExecuteNotifyComplete
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0018_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0018_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0018_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -534,7 +534,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0018_1, TestSize.Level0)
  * @tc.desc: PackReplyCmd
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0019_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0019_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0019_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -558,7 +558,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0019_1, TestSize.Level0)
  * @tc.desc: ExecuteContinueEnd
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0020_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0020_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0020_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -575,7 +575,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0020_1, TestSize.Level0)
  * @tc.desc: ExecuteContinueError
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0021_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0021_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0021_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -596,7 +596,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0021_1, TestSize.Level0)
  * @tc.desc: PackEndCmd
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0022_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0022_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0022_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -618,7 +618,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0022_1, TestSize.Level0)
  * @tc.desc: SendCommand
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0023_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0023_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0023_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -634,7 +634,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0023_1, TestSize.Level0)
  * @tc.desc: GetLocalDeviceId
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0024_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0024_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0024_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -651,7 +651,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0024_1, TestSize.Level0)
  * @tc.desc: CheckDeviceIdFromRemote
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_0025_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_0025_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0025_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -686,7 +686,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0025_1, TestSize.Level0)
  * @tc.desc: WaitAbilityStateInitialTest
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, WaitAbilityStateInitialTest_0026_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, WaitAbilityStateInitialTest_0026_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest WaitAbilityStateInitialTest_0026_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -702,7 +702,7 @@ HWTEST_F(DSchedContinueTest, WaitAbilityStateInitialTest_0026_1, TestSize.Level0
  * @tc.desc: StartAbilityTest
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, StartAbilityTest_0027_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, StartAbilityTest_0027_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest StartAbilityTest_0027_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -721,7 +721,7 @@ HWTEST_F(DSchedContinueTest, StartAbilityTest_0027_1, TestSize.Level0)
  * @tc.desc: QuerySinkAbilityNameTest
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, QuerySinkAbilityNameTest_0028_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, QuerySinkAbilityNameTest_0028_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest QuerySinkAbilityNameTest_0028_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -736,7 +736,7 @@ HWTEST_F(DSchedContinueTest, QuerySinkAbilityNameTest_0028_1, TestSize.Level0)
  * @tc.desc: QuickStartAbilityTest
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, QuickStartAbilityTest_0029_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, QuickStartAbilityTest_0029_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest QuickStartAbilityTest_0029_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -751,7 +751,7 @@ HWTEST_F(DSchedContinueTest, QuickStartAbilityTest_0029_1, TestSize.Level0)
  * @tc.desc: UpdateWantForContinueTypeTest
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, UpdateWantForContinueTypeTest_0030_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, UpdateWantForContinueTypeTest_0030_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest UpdateWantForContinueTypeTest_0030_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -770,7 +770,7 @@ HWTEST_F(DSchedContinueTest, UpdateWantForContinueTypeTest_0030_1, TestSize.Leve
  * @tc.desc: DSchedContinue
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, DSchedContinueTest_031_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, DSchedContinueTest_031_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_031_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -795,7 +795,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_031_1, TestSize.Level0)
  * @tc.desc: OnDataRecv
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, OnDataRecvTest_032_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, OnDataRecvTest_032_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest OnDataRecvTest_032_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -828,7 +828,7 @@ HWTEST_F(DSchedContinueTest, OnDataRecvTest_032_1, TestSize.Level0)
  * @tc.desc: UpdateState
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, UpdateStateTest_033_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, UpdateStateTest_033_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest UpdateStateTest_033_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -844,7 +844,7 @@ HWTEST_F(DSchedContinueTest, UpdateStateTest_033_1, TestSize.Level0)
  * @tc.desc: CheckStartPermission
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, CheckStartPermission_034_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, CheckStartPermission_034_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest CheckStartPermission_034_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -868,7 +868,7 @@ HWTEST_F(DSchedContinueTest, CheckStartPermission_034_1, TestSize.Level0)
  * @tc.desc: ConvertToDmsSdkErr
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, ConvertToDmsSdkErr_035_1, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, ConvertToDmsSdkErr_035_1, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest ConvertToDmsSdkErr_035_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -899,7 +899,7 @@ int32_t ContinueSceneSessionHandler::GetPersistentId(int32_t& persistentId, std:
  * @tc.desc: ExecuteQuickStartSuccess
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, ExecuteQuickStartSuccess_036, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, ExecuteQuickStartSuccess_036, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest ExecuteQuickStartSuccess_036 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -915,7 +915,7 @@ HWTEST_F(DSchedContinueTest, ExecuteQuickStartSuccess_036, TestSize.Level0)
  * @tc.desc: ExecuteQuickStartFailed
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, ExecuteQuickStartFailed_037, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, ExecuteQuickStartFailed_037, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest ExecuteQuickStartFailed_037 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
@@ -931,7 +931,7 @@ HWTEST_F(DSchedContinueTest, ExecuteQuickStartFailed_037, TestSize.Level0)
  * @tc.desc: ExecuteQuickStartFailed
  * @tc.type: FUNC
  */
-HWTEST_F(DSchedContinueTest, OnRemoteDied_038, TestSize.Level0)
+HWTEST_F(DSchedContinueTest, OnRemoteDied_038, TestSize.Level1)
 {
     DTEST_LOG << "DSchedContinueTest OnRemoteDied_038 begin" << std::endl;
     sptr<StateCallbackIpcDiedListener> diedListener = new StateCallbackIpcDiedListener();

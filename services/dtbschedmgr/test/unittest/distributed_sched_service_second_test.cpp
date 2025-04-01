@@ -1609,7 +1609,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, NotifyAbilityLifecycleChangedFromRem
  * @tc.desc  : Test when dllHandle_ is nullptr then OnDeviceOnlineEx returns
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOnlineEx_Test_001, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOnlineEx_Test_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceOnlineEx_Test_001 start" << std::endl;
     OHOS::DistributedSchedule::DistributedSchedService service;
@@ -1625,7 +1625,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOnlineEx_Test_001, TestSize.
  * @tc.desc  : Test when dmsAdapetr_.OnDeviceOnlineEx is nullptr then OnDeviceOnlineEx returns
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOnlineEx_Test_002, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOnlineEx_Test_002, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceOnlineEx_Test_002 start" << std::endl;
     OHOS::DistributedSchedule::DistributedSchedService service;
@@ -1641,7 +1641,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOnlineEx_Test_002, TestSize.
  * @tc.desc  : Test when dllHandle_ is nullptr then OnDeviceOfflineEx returns
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOfflineEx_Test_001, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOfflineEx_Test_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceOfflineEx_Test_001 start" << std::endl;
     OHOS::DistributedSchedule::DistributedSchedService service;
@@ -1657,7 +1657,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOfflineEx_Test_001, TestSize
  * @tc.desc  : Test when dmsAdapetr_.OnDeviceOfflineEx is nullptr then OnDeviceOfflineEx returns
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOfflineEx_Test_002, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOfflineEx_Test_002, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceOfflineEx_Test_002 start" << std::endl;
     OHOS::DistributedSchedule::DistributedSchedService service;
@@ -1673,7 +1673,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOfflineEx_Test_002, TestSize
  * @tc.desc  : Test when dllHandle_ is nullptr then OnDeviceInfoChangedEx returns
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceInfoChangedEx_Test_001, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceInfoChangedEx_Test_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceInfoChangedEx_Test_001 start" << std::endl;
     OHOS::DistributedSchedule::DistributedSchedService service;
@@ -1689,7 +1689,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceInfoChangedEx_Test_001, Test
  * @tc.desc  : Test when dmsAdapetr_.OnDeviceInfoChangedEx is nullptr then OnDeviceInfoChangedEx returns
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceInfoChangedEx_Test_002, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceInfoChangedEx_Test_002, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceInfoChangedEx_Test_002 start" << std::endl;
     OHOS::DistributedSchedule::DistributedSchedService service;
@@ -1864,7 +1864,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, ContinueStateCallbackUnRegister_001,
  * @tc.desc  : Test when dschedContinuation_ is nullptr then SetCleanMissionFlag returns
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceSecondTest, SetCleanMissionFlag_Test_001, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceSecondTest, SetCleanMissionFlag_Test_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedServiceSecondTest SetCleanMissionFlag_Test_001 start" << std::endl;
     OHOS::AAFwk::Want want;
@@ -1880,7 +1880,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, SetCleanMissionFlag_Test_001, TestSi
  * @tc.desc  : Test when dschedContinuation_ is not nullptr then SetCleanMissionFlag sets the flag
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceSecondTest, SetCleanMissionFlag_Test_002, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceSecondTest, SetCleanMissionFlag_Test_002, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedServiceSecondTest SetCleanMissionFlag_Test_002 start" << std::endl;
     if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
@@ -1898,7 +1898,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, SetCleanMissionFlag_Test_002, TestSi
  * @tc.number: CheckCollabStartPermission_001
  * @tc.desc  : Test CheckCollabStartPermission function when GetTargetAbility return false.
  */
-HWTEST_F(DistributedSchedServiceSecondTest, CheckCollabStartPermission_Test001, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceSecondTest, CheckCollabStartPermission_Test001, TestSize.Level1)
 {
     OHOS::AAFwk::Want want;
     CallerInfo callerInfo;

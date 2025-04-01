@@ -238,7 +238,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility_001, TestSize.Leve
  * @tc.desc: call StartRemoteAbility with dms with wrong deviceId and local deviceId
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility_002, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility_002, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest StartRemoteAbility_002 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
@@ -270,7 +270,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility_002, TestSize.Leve
  * @tc.desc: call StartRemoteAbility with dms
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility_003, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility_003, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest StartRemoteAbility_003 start" << std::endl;
     /**
@@ -316,7 +316,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility_004, TestSize.Leve
  * @tc.desc: user is not foreground
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility_005, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility_005, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest StartRemoteAbility_005 start" << std::endl;
     /**
@@ -471,7 +471,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility007, TestSize.Level
  * @tc.desc: call StartAbilityFromRemote with illegal param
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceFirstTest, StartAbilityFromRemote_001, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceFirstTest, StartAbilityFromRemote_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest StartAbilityFromRemote_001 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
@@ -555,7 +555,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteShareForm_002, TestSize.Le
  * @tc.desc: call StartAbilityFromRemote with dms
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedServiceFirstTest, StartAbilityFromRemote_003, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceFirstTest, StartAbilityFromRemote_003, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedServiceFirstTest StartAbilityFromRemote_003 start" << std::endl;
     sptr<IDistributedSched> proxy = GetDms();
@@ -1676,7 +1676,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ReleaseAbilityFromRemote_002, TestSiz
  * @tc.number: ConnectDExtAbility_001
  * @tc.desc  : Test ConnectDExtAbility function when user is not foreground.
  */
-HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtAbility_Test01, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtAbility_Test01, TestSize.Level1)
 {
     std::string bundleName = "testBundle";
     std::string abilityName = "testAbility";
@@ -1691,7 +1691,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtAbility_Test01, TestSize.L
  * @tc.number: ConnectDExtAbility_002
  * @tc.desc  : Test ConnectDExtAbility function when proxy is empty.
  */
-HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtAbility_Test02, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtAbility_Test02, TestSize.Level1)
 {
     std::string bundleName = "com.example.dms_extension";
     std::string abilityName = "EntrydistributedAbility";
