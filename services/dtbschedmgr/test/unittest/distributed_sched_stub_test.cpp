@@ -2574,7 +2574,7 @@ HWTEST_F(DistributedSchedStubTest, NotifyAbilityLifecycleChangedFromRemoteAdapte
  * @tc.desc: check ConnectDExtAbilityInner
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedStubTest, ConnectDExtAbilityInner_001, TestSize.Level0)
+HWTEST_F(DistributedSchedStubTest, ConnectDExtAbilityInner_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedStubTest ConnectDExtAbilityInner_001 begin" << std::endl;
     MessageParcel data;
@@ -2598,7 +2598,7 @@ HWTEST_F(DistributedSchedStubTest, ConnectDExtAbilityInner_001, TestSize.Level0)
  * @tc.desc: check ConnectDExtAbilityInner
  * @tc.type: FUNC
  */
-HWTEST_F(DistributedSchedStubTest, ConnectDExtAbilityInner_002, TestSize.Level0)
+HWTEST_F(DistributedSchedStubTest, ConnectDExtAbilityInner_002, TestSize.Level1)
 {
     DTEST_LOG << "DistributedSchedStubTest ConnectDExtAbilityInner_002 begin" << std::endl;
     MessageParcel data;

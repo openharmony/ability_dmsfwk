@@ -44,8 +44,9 @@ void FuzzOnShutdown(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(size_t))) {
         return;
     }
-    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
-    bool isSelfcalled = *(reinterpret_cast<const bool*>(data));
+    FuzzedDataProvider fdp(data, size);
+    bool isSelfcalled = fdp.ConsumeBool();
+    int32_t sessionId = fdp.ConsumeIntegral<int32_t>();
     DSchedTransportSoftbusAdapter dschedTransportSoftbusAdapter;
     dschedTransportSoftbusAdapter.OnShutdown(sessionId, isSelfcalled);
 }
@@ -106,9 +107,10 @@ void FuzzOnDataReady(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(size_t)) || size >= MAX_BUFFER_SIZE) {
         return;
     }
-    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
+    FuzzedDataProvider fdp(data, size);
+    int32_t sessionId = fdp.ConsumeIntegral<int32_t>();
+    uint32_t dataType = fdp.ConsumeIntegral<uint32_t>();
     std::shared_ptr<DSchedDataBuffer> dataBuffer = std::make_shared<DSchedDataBuffer>(size);
-    uint32_t dataType = *(reinterpret_cast<const uint32_t*>(data));
     DSchedTransportSoftbusAdapter dschedTransportSoftbusAdapter;
     dschedTransportSoftbusAdapter.OnDataReady(sessionId, dataBuffer, dataType);
 }
