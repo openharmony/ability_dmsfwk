@@ -306,11 +306,9 @@ int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDevi
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     HILOGI("query Valid Qos start peerNetworkId: %{public}s", peerDeviceId.c_str());
     QosRequestInfo qosRequestInfo;
-    std::strncpy(qosRequestInfo.peerNetworkId, peerDeviceId.c_str(), sizeof(qosRequestInfo.peerNetworkId) - 1);
-    qosRequestInfo.peerNetworkId[sizeof(qosRequestInfo.peerNetworkId) - 1] = '\0';
+    strncpy_s(qosRequestInfo.peerNetworkId, NETWORK_ID_BUF_LENGTH, peerDeviceId.c_str(), peerDeviceId.size());
     qosRequestInfo.dataType = TransDataType::DATA_TYPE_BYTES;
     QosStatus qosStatus;
-
     ret = SoftBusQueryValidQos(&qosRequestInfo, &qosStatus);
     if (ret != ERR_OK) {
         HILOGE("query Valid Qos failed, result: %{public}d", ret);
