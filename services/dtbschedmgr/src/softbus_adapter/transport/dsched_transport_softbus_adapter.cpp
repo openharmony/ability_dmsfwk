@@ -42,6 +42,7 @@ constexpr int32_t MS_TO_US = 1000;
 IMPLEMENT_SINGLE_INSTANCE(DSchedTransportSoftbusAdapter);
 
 static QosTV g_qosInfo[] = {
+    { .qos = QOS_TYPE_MIN_BW, .value = DSCHED_QOS_TYPE_MIN_BW },
     { .qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_QOS_TYPE_MAX_LATENCY },
     { .qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_QOS_TYPE_MIN_LATENCY }
 };
@@ -299,13 +300,15 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
 
 int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDeviceId, QosTV &validQos)
 {
+    int32_t ret = SOFT_BUS_QUERY_VALID_QOS_ERR;
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
     HILOGI("query Valid Qos start peerNetworkId: %{public}s", peerDeviceId.c_str());
     QosRequestInfo qosRequestInfo;
     std::strcpy(qosRequestInfo.peerNetworkId, peerDeviceId.c_str());
     qosRequestInfo.dataType = TransDataType::DATA_TYPE_BYTES;
     QosStatus qosStatus;
 
-    int32_t ret = SoftBusQueryValidQos(&qosRequestInfo, &qosStatus);
+    ret = SoftBusQueryValidQos(&qosRequestInfo, &qosStatus);
     if (ret != ERR_OK) {
         HILOGE("query Valid Qos failed, result: %{public}d", ret);
         return SOFT_BUS_QUERY_VALID_QOS_ERR;
@@ -343,7 +346,8 @@ int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDevi
         HILOGE("final valid qos: no Valid Qos!");
         return SOFT_BUS_NO_USEFUL_QOS_ERR;
     }
-    return ERR_OK;
+#endif
+    return ret;
 }
 
 int32_t DSchedTransportSoftbusAdapter::CreateClientSocket(const std::string &peerDeviceId)
