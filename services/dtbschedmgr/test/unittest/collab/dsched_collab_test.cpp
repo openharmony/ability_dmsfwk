@@ -662,5 +662,52 @@ HWTEST_F(DSchedCollabTest, PostSrcGetPeerVersionTask_001, TestSize.Level3)
     EXPECT_EQ(dSchedCollab_->PostSrcGetPeerVersionTask(), INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedCollabTest PostSrcGetPeerVersionTask_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: PackGetPeerVersionCmd_001
+ * @tc.desc: call PackGetPeerVersionCmd
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, PackGetPeerVersionCmd_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest PackGetPeerVersionCmd_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_EQ(dSchedCollab_->eventHandler_, nullptr);
+    std::shared_ptr<GetSinkCollabVersionCmd> cmd = nullptr;
+    EXPECT_EQ(dSchedCollab_->PackGetPeerVersionCmd(cmd), INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedCollabTest PackGetPeerVersionCmd_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: PackSinkCollabVersionCmd_001
+ * @tc.desc: call PackSinkCollabVersionCmd
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, PackSinkCollabVersionCmd_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest PackSinkCollabVersionCmd_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_EQ(dSchedCollab_->eventHandler_, nullptr);
+    std::shared_ptr<GetSinkCollabVersionCmd> cmd = nullptr;
+    EXPECT_EQ(dSchedCollab_->PackSinkCollabVersionCmd(cmd), INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedCollabTest PackSinkCollabVersionCmd_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ExeStartAbility_002
+ * @tc.desc: call ExeStartAbility
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, ExeStartAbility_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest ExeStartAbility_002 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    dSchedCollab_->collabInfo_.callerInfo_.sourceDeviceId = "sourceDeviceId";
+    EXPECT_EQ(dSchedCollab_->ExeStartAbility(""), INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedCollabTest ExeStartAbility_002 end" << std::endl;
+}
 }
 }

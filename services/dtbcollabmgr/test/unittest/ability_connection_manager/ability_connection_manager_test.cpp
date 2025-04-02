@@ -17,9 +17,11 @@
 
 #include "dtbcollabmgr_log.h"
 #include "test_log.h"
+#include "tokenid_kit_mock.h"
 
 using namespace testing;
 using namespace testing::ext;
+
 
 namespace {
     const int32_t WAITTIME = 10000;
@@ -282,6 +284,7 @@ HWTEST_F(AbilityConnectionMgrTest, AcceptConnect_Test_001, TestSize.Level3)
     DTEST_LOG << "AbilityConnectionMgr AcceptConnect_Test_001 begin" << std::endl;
     int32_t sessionId = 1;
     std::string token = "token";
+    MockIsSystemAppByFullTokenID(true);
     auto rlt = AbilityConnectionManager::GetInstance().AcceptConnect(sessionId, token);
     EXPECT_EQ(rlt, INVALID_PARAMETERS_ERR);
 
