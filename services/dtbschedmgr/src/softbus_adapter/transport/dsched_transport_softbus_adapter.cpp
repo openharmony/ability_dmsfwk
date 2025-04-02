@@ -329,8 +329,6 @@ int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDevi
     QosOption maxQosMinBW = {false, 0};
     for (int i = 0; i < qosStatus.qosCnt; i++) {
         QosOption item = qosStatus.validQos[i];
-        HILOGI("check valid qos. current SupportReuse minBW: %{public}d; current unSupportReuse minBW: %{public}d",
-            supportReuseQosMinBW.minBW, maxQosMinBW.minBW);
         HILOGI("check valid qos index: %{public}d; isSupportReuse: %{public}s; minBw: %{public}d",
             i, item.isSupportReuse ? "true" : "false", item.minBW);
         if (item.isSupportReuse && supportReuseQosMinBW.minBW < item.minBW) {
