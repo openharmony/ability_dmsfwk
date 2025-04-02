@@ -685,14 +685,14 @@ HWTEST_F(DSchedCollabManagerTest, HandleReleaseAbilityLink_001, TestSize.Level3)
     std::string bundleName = "test";
     int32_t pid = 0;
     DSchedCollabManager::GetInstance().collabs_.insert(std::make_pair("test1", dCollab));
-    EXPECT_NO_FATAL_FAILURE(DSchedCollabManager::GetInstance().HandleReleaseAbilityLink(bundleName, pid));
+    EXPECT_NO_FATAL_FAILURE(DSchedCollabManager::GetInstance().HandleReleaseAbilityLink(bundleName, pid, ""));
 
     bundleName = info.srcInfo_.bundleName_;
     pid = info.srcInfo_.pid_;
-    EXPECT_NO_FATAL_FAILURE(DSchedCollabManager::GetInstance().HandleReleaseAbilityLink(bundleName, pid));
+    EXPECT_NO_FATAL_FAILURE(DSchedCollabManager::GetInstance().HandleReleaseAbilityLink(bundleName, pid, ""));
 
     pid = info.sinkInfo_.pid_;
-    EXPECT_NO_FATAL_FAILURE(DSchedCollabManager::GetInstance().HandleReleaseAbilityLink(bundleName, pid));
+    EXPECT_NO_FATAL_FAILURE(DSchedCollabManager::GetInstance().HandleReleaseAbilityLink(bundleName, pid, ""));
     DTEST_LOG << "DSchedCollabManagerTest HandleReleaseAbilityLink_001 end" << std::endl;
 }
 
