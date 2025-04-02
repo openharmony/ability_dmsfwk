@@ -261,6 +261,8 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
     int32_t ret = ERR_OK;
     int retryCount = 0;
     do {
+        /* The DMS-CHECK_SLUETOOTH macro is used to distinguish the binding logic on different devices,
+         * using dynamic QoS except for watches */
 #ifdef DMS_CHECK_BLUETOOTH
         HILOGI("collab bind begin");
         if (type == SERVICE_TYPE_COLLAB) {
@@ -270,7 +272,9 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
 #endif
 #ifndef DMS_CHECK_BLUETOOTH
         QosTV validQos;
-        if (QueryValidQos(peerDeviceId, validQos) == ERR_OK) {
+        ret = QueryValidQos(peerDeviceId, validQos);
+        if (ret == ERR_OK) {
+            HILOGI("SoftBus query valid qos success.");
             QosTV qosInfoWithValidQos[] = {
                 {.qos = QOS_TYPE_MIN_BW, .value = validQos.value},
                 {.qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_QOS_TYPE_MAX_LATENCY},
@@ -278,6 +282,7 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
             };
             ret = Bind(sessionId, qosInfoWithValidQos, g_QosTV_Param_Index, &iSocketListener);
         } else {
+            HILOGI("SoftBus query valid qos failed. use default minBW, ret: %{public}d", ret);
             ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
         }
         HILOGI("end bind stardard qos");
@@ -303,10 +308,14 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
 int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDeviceId, QosTV &validQos)
 {
     int32_t ret = SOFTBUS_QUERY_VALID_QOS_ERR;
-#ifdef DMSFWK_INTERACTIVE_ADAPTER
+#ifdef SOFTBUS_QUERY_VALID_QOS
     HILOGI("query Valid Qos start peerNetworkId: %{public}s", GetAnonymStr(peerDeviceId).c_str());
     QosRequestInfo qosRequestInfo;
-    strncpy_s(qosRequestInfo.peerNetworkId, NETWORK_ID_BUF_LENGTH, peerDeviceId.c_str(), peerDeviceId.size());
+    ret = memcpy_s(qosRequestInfo.peerNetworkId, NETWORK_ID_BUF_LENGTH, peerDeviceId.c_str(), peerDeviceId.size());
+    if (ret != ERR_OK) {
+        HILOGE("memcpy_s failed for peerNetworkId: %{public}s", GetAnonymStr(peerDeviceId).c_str());
+        return ret;
+    }
     qosRequestInfo.dataType = TransDataType::DATA_TYPE_BYTES;
     QosStatus qosStatus;
     ret = SoftBusQueryValidQos(&qosRequestInfo, &qosStatus);
@@ -318,21 +327,20 @@ int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDevi
         qosStatus.isLowPower ? "true" : "false", qosStatus.qosCnt);
     QosOption supportReuseQosMinBW = {true, 0};
     QosOption maxQosMinBW = {false, 0};
-
     for (int i = 0; i < qosStatus.qosCnt; i++) {
         QosOption item = qosStatus.validQos[i];
-        HILOGD("check valid qos. current SupportReuse minBW: %{public}d; current unSupportReuse minBW: %{public}d",
+        HILOGI("check valid qos. current SupportReuse minBW: %{public}d; current unSupportReuse minBW: %{public}d",
             supportReuseQosMinBW.minBW, maxQosMinBW.minBW);
-        HILOGD("check valid qos index: %{public}d; isSupportReuse: %{public}s; minBw: %{public}d",
+        HILOGI("check valid qos index: %{public}d; isSupportReuse: %{public}s; minBw: %{public}d",
             i, item.isSupportReuse ? "true" : "false", item.minBW);
         if (item.isSupportReuse && supportReuseQosMinBW.minBW < item.minBW) {
-            HILOGD("update supportReuseQosMinBW from: %{public}d to: %{public}d",
+            HILOGI("update supportReuseQosMinBW from: %{public}d to: %{public}d",
                 supportReuseQosMinBW.minBW, item.minBW);
             supportReuseQosMinBW.minBW = item.minBW;
             continue;
         }
         if (!item.isSupportReuse && maxQosMinBW.minBW < item.minBW) {
-            HILOGD("update maxQosMinBW from: %{public}d to: %{public}d", maxQosMinBW.minBW, item.minBW);
+            HILOGI("update maxQosMinBW from: %{public}d to: %{public}d", maxQosMinBW.minBW, item.minBW);
             maxQosMinBW.minBW = item.minBW;
         }
     }
