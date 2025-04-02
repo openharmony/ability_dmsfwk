@@ -77,7 +77,7 @@ private:
     void HandleCollabPrepareResult(const std::string &collabToken, const int32_t &result,
         const int32_t &collabSessionId, const std::string &socketName, const sptr<IRemoteObject> &clientCB);
     int32_t HandleCloseSessions(const std::string &bundleName, const int32_t &pid);
-    void HandleReleaseAbilityLink(const std::string &bundleName, const int32_t &pid);
+    void HandleReleaseAbilityLink(const std::string &bundleName, const int32_t &pid, const std::string &collabToken);
     void HandleDataRecv(const int32_t &softbusSessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer);
     void NotifyDataRecv(const int32_t &softbusSessionId, int32_t command, const std::string& jsonStr,
         std::shared_ptr<DSchedDataBuffer> dataBuffer, const std::string& collabToken);

@@ -40,6 +40,8 @@ constexpr static int32_t NO_NEED_TO_CHECK_ID = -1;
 const int32_t RANDOM_STRING_LENGTH = 20;
 std::map<int32_t, std::string> CMDDATA = {
     {MIN_CMD, "MIN_CMD"},
+    {SINK_GET_VERSION_CMD, "SINK_GET_VERSION_CMD"},
+    {SOURCE_GET_VERSION_CMD, "SOURCE_GET_VERSION_CMD"},
     {SINK_START_CMD, "SINK_START_CMD"},
     {NOTIFY_RESULT_CMD, "NOTIFY_RESULT_CMD"},
     {DISCONNECT_CMD, "DISCONNECT_CMD"},
@@ -139,7 +141,8 @@ int32_t DSchedCollabManager::CheckSrcCollabRelation(const CollabInfo *sourceInfo
         return ERR_OK;
     }
     HILOGW("deviceId: %{public}s, pid: %{public}d, tokenId: %{public}d, userId: %{public}d, srcUdid: %{public}s",
-        std::string(sourceInfo->deviceId).c_str(), sourceInfo->pid, static_cast<int32_t>(sourceInfo->tokenId),
+        GetAnonymStr(std::string(sourceInfo->deviceId)).c_str(),
+        sourceInfo->pid, static_cast<int32_t>(sourceInfo->tokenId),
         sourceInfo->userId, GetAnonymStr(collabInfo->srcUdid_).c_str());
     return INVALID_PARAMETERS_ERR;
 }
@@ -163,7 +166,8 @@ int32_t DSchedCollabManager::CheckSinkCollabRelation(const CollabInfo *sinkInfo,
         return ERR_OK;
     }
     HILOGW("deviceId: %{public}s, pid: %{public}d, tokenId: %{public}d, userId: %{public}d, sinkUdid: %{public}s",
-        std::string(sinkInfo->deviceId).c_str(), sinkInfo->pid, static_cast<int32_t>(sinkInfo->tokenId),
+        GetAnonymStr(std::string(sinkInfo->deviceId)).c_str(),
+        sinkInfo->pid, static_cast<int32_t>(sinkInfo->tokenId),
         sinkInfo->userId, GetAnonymStr(collabInfo->sinkUdid_).c_str());
     return INVALID_PARAMETERS_ERR;
 }
@@ -510,38 +514,49 @@ int32_t DSchedCollabManager::HandleCloseSessions(const std::string &bundleName, 
 
 int32_t DSchedCollabManager::ReleaseAbilityLink(const std::string &bundleName, const int32_t &pid)
 {
-    HILOGW("called, disconnect the existing link after 5S");
-    auto func = [this, bundleName, pid]() {
-        HandleReleaseAbilityLink(bundleName, pid);
-    };
-    if (eventHandler_ == nullptr) {
-        HILOGE("eventHandler is nullptr");
-        return INVALID_PARAMETERS_ERR;
-    }
-    const std::string taskName = bundleName + std::to_string(pid);
-    eventHandler_->PostTask(func, taskName, BACKGROUND_TIMEOUT);
-    return ERR_OK;
-}
-
-void DSchedCollabManager::HandleReleaseAbilityLink(const std::string &bundleName, const int32_t &pid)
-{
-    HILOGI("called");
+    HILOGW("called");
     DSchedCollabInfo dSchedCollabInfo;
+    std::string collabToken;
     for (auto iter = collabs_.begin(); iter != collabs_.end(); iter++) {
         if (iter->second == nullptr) {
             continue;
         }
         dSchedCollabInfo = iter->second->GetCollabInfo();
         if (bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.srcInfo_.pid_) {
-            HILOGI("source ability been background, collabInfo: %{public}s", dSchedCollabInfo.ToString().c_str());
-            PrivilegeShutdown(static_cast<uint64_t>(dSchedCollabInfo.srcInfo_.accessToken_),
-                pid, dSchedCollabInfo.sinkInfo_.deviceId_.c_str());
-            iter->second->PostEndTask();
+            collabToken = dSchedCollabInfo.collabToken_;
         }
         if (bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.sinkInfo_.pid_) {
-            HILOGI("sink ability been background, collabInfo: %{public}s", dSchedCollabInfo.ToString().c_str());
-            iter->second->PostEndTask();
+            collabToken = dSchedCollabInfo.collabToken_;
         }
+    }
+    auto func = [this, bundleName, pid, collabToken]() {
+        HandleReleaseAbilityLink(bundleName, pid, collabToken);
+    };
+    const std::string taskName = bundleName + std::to_string(pid);
+    HILOGW("disconnect the existing link after 5S");
+    eventHandler_->PostTask(func, taskName, BACKGROUND_TIMEOUT);
+    return ERR_OK;
+}
+
+void DSchedCollabManager::HandleReleaseAbilityLink(const std::string &bundleName, const int32_t &pid,
+    const std::string &collabToken)
+{
+    HILOGI("called");
+    auto dCollab = GetDSchedCollabByTokenId(collabToken);
+    if (dCollab == nullptr) {
+        HILOGE("can't find collab");
+        return;
+    }
+    DSchedCollabInfo dSchedCollabInfo = dCollab->GetCollabInfo();
+    if (pid == dSchedCollabInfo.srcInfo_.pid_) {
+        HILOGI("source ability been background, collabInfo: %{public}s", dSchedCollabInfo.ToString().c_str());
+        PrivilegeShutdown(static_cast<uint64_t>(dSchedCollabInfo.srcInfo_.accessToken_),
+            pid, dSchedCollabInfo.sinkInfo_.deviceId_.c_str());
+            dCollab->PostEndTask();
+    }
+    if (pid == dSchedCollabInfo.sinkInfo_.pid_) {
+        HILOGI("sink ability been background, collabInfo: %{public}s", dSchedCollabInfo.ToString().c_str());
+        dCollab->PostEndTask();
     }
     return;
 }
@@ -721,6 +736,7 @@ void DSchedCollabManager::OnShutdown(int32_t socket, bool isSelfCalled)
         return;
     }
     auto func = [this, socket]() {
+        std::lock_guard<std::mutex> collabLock(collabMutex_);
         if (collabs_.empty()) {
             return;
         }
