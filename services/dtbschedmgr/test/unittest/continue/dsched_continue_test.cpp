@@ -28,7 +28,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace DistributedSchedule {
-
+using namespace AAFwk;
 namespace {
     const std::string BASEDIR = "/data/service/el1/public/database/DistributedSchedule";
     const std::string BUNDLEMAME_1 = "bundleName";
@@ -49,6 +49,8 @@ void DSchedContinueTest::SetUpTestCase()
     mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
     dmsStoreMock = std::make_shared<MockDmsMgrDeviceInfoStore>();
     DmsMgrDeviceInfoStore::dmsStore = dmsStoreMock;
+    clientMock_ = std::make_shared<AbilityManagerClientMock>();
+    AbilityManagerClientMock::clientMock = clientMock_;
     DTEST_LOG << "DSchedContinueTest::SetUpTestCase" << std::endl;
     DistributedSchedService::GetInstance().Init();
 
@@ -70,6 +72,8 @@ void DSchedContinueTest::TearDownTestCase()
     (void)remove(BASEDIR.c_str());
     DmsMgrDeviceInfoStore::dmsStore = nullptr;
     dmsStoreMock = nullptr;
+    AbilityManagerClientMock::clientMock = nullptr;
+    clientMock_ = nullptr;
     DTEST_LOG << "DSchedContinueTest::TearDownTestCase" << std::endl;
     conti_ = nullptr;
 }
@@ -335,6 +339,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_0012_1, TestSize.Level1)
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0012_1 begin" << std::endl;
     ASSERT_NE(conti_, nullptr);
     ASSERT_NE(conti_->eventHandler_, nullptr);
+    EXPECT_CALL(*clientMock_, GetMissionInfo(_, _, _)).WillOnce(Return(1));
     int32_t ret = conti_->CheckContinueAbilityPermission();
     EXPECT_EQ(ret, NO_MISSION_INFO_FOR_MISSION_ID);
     DTEST_LOG << "DSchedContinueTest DSchedContinueTest_0012_1 end ret:" << ret << std::endl;
@@ -692,6 +697,7 @@ HWTEST_F(DSchedContinueTest, WaitAbilityStateInitialTest_0026_1, TestSize.Level1
     ASSERT_NE(conti_, nullptr);
     ASSERT_NE(conti_->eventHandler_, nullptr);
     int32_t persistentId = 100;
+    EXPECT_CALL(*clientMock_, GetAbilityStateByPersistentId(_, _)).WillRepeatedly(Return(0));
     bool ret = conti_->WaitAbilityStateInitial(persistentId);
     EXPECT_FALSE(ret);
     DTEST_LOG << "DSchedContinueTest WaitAbilityStateInitialTest_0026_1 end ret:" << ret << std::endl;
@@ -711,6 +717,8 @@ HWTEST_F(DSchedContinueTest, StartAbilityTest_0027_1, TestSize.Level1)
     AppExecFwk::ElementName element("devicdId", "com.ohos.distributedmusicplayer",
         "com.ohos.distributedmusicplayer.MainAbility");
     want.SetElement(element);
+    EXPECT_CALL(*clientMock_, Connect()).WillOnce(Return(0));
+    EXPECT_CALL(*clientMock_, StartAbility(_, _, _)).WillOnce(Return(1));
     int32_t ret = conti_->StartAbility(want, 0);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest StartAbilityTest_0027_1 end ret:" << ret << std::endl;

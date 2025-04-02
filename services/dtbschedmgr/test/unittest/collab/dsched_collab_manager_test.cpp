@@ -17,6 +17,7 @@
 
 #include "dtbschedmgr_device_info_storage.h"
 #include "distributed_sched_test_util.h"
+#include "dtbcollabmgr_log.h"
 #include "test_log.h"
 #include "mock_distributed_sched.h"
 
@@ -711,6 +712,28 @@ HWTEST_F(DSchedCollabManagerTest, NotifyWifiOpen_001, TestSize.Level3)
     auto dCollab = std::make_shared<DSchedCollab>(collabToken, info);
     EXPECT_NO_FATAL_FAILURE(DSchedCollabManager::GetInstance().NotifyWifiOpen());
     DTEST_LOG << "DSchedCollabManagerTest NotifyWifiOpen_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConvertCollaborateResult_001
+ * @tc.desc: test ConvertCollaborateResult func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerTest, ConvertCollaborateResult_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerTest ConvertCollaborateResult_001 begin" << std::endl;
+    int32_t result = REJECT;
+    int32_t ret = DSchedCollabManager::GetInstance().ConvertCollaborateResult(result);
+    EXPECT_EQ(ret, DistributedCollab::PEER_APP_REJECTED);
+
+    result = ON_COLLABORATE_ERR;
+    ret = DSchedCollabManager::GetInstance().ConvertCollaborateResult(result);
+    EXPECT_EQ(ret, DistributedCollab::PEER_ABILITY_NO_ONCOLLABORATE);
+
+    result = ACCEPT;
+    ret = DSchedCollabManager::GetInstance().ConvertCollaborateResult(result);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedCollabManagerTest ConvertCollaborateResult_001 end" << std::endl;
 }
 }
 }
