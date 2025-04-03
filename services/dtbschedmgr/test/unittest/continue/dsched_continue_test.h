@@ -20,9 +20,11 @@
 
 #include "dsched_continue.h"
 #include "mock_dtbschedmgr_device_info.h"
+#include "mock/ability_manager_client_mock.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
+using namespace AAFwk;
 
 class DSchedContinueTest : public testing::Test {
 public:
@@ -30,6 +32,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    static inline std::shared_ptr<AbilityManagerClientMock> clientMock_ = nullptr;
     static inline std::shared_ptr<MockDmsMgrDeviceInfoStore> dmsStoreMock = nullptr;
     static inline std::shared_ptr<DSchedContinue> conti_ = nullptr;
 };

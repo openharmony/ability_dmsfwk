@@ -19,6 +19,7 @@
 #include "av_sender_filter.h"
 #include "dtbcollabmgr_log.h"
 #include "test_log.h"
+#include "tokenid_kit_mock.h"
 
 #include "message_data_header.h"
 #include "pixel_map.h"
@@ -360,6 +361,7 @@ HWTEST_F(AbilityConnectionSessionTest, AcceptConnect_Test_001, TestSize.Level3)
 
     std::string token = "token";
     connectionSesion_->sessionStatus_ = SessionStatus::CONNECTED;
+    MockIsSystemAppByFullTokenID(true);
     auto ret = connectionSesion_->AcceptConnect(token);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "AbilityConnectionSessionTest AcceptConnect_Test_001 end" << std::endl;

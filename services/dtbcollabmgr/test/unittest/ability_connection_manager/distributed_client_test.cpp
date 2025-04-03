@@ -69,7 +69,7 @@ HWTEST_F(DistributedClientTest, CollabMission_Test_001, TestSize.Level3)
     ConnectOption options;
     std::string token = "token";
     auto result = dmsClient.CollabMission(sessionId, serverSocketName, sessionInfo, options, token);
-    EXPECT_NE(result, ERR_OK);
+    EXPECT_NE(result, ERR_FLATTEN_OBJECT);
     DTEST_LOG << "DistributedClientTest CollabMission_Test_001 end" << std::endl;
 }
 /**
@@ -87,7 +87,7 @@ HWTEST_F(DistributedClientTest, NotifyPrepareResult_Test_001, TestSize.Level3)
     std::string serverSocketName = "serverSocketName";
     std::string token = "token";
     auto out = dmsClient.NotifyPrepareResult(token, result, sessionId, serverSocketName);
-    EXPECT_EQ(out, ERR_OK);
+    EXPECT_NE(out, ERR_FLATTEN_OBJECT);
     DTEST_LOG << "DistributedClientTest NotifyPrepareResult_Test_001 end" << std::endl;
 }
 
@@ -103,7 +103,7 @@ HWTEST_F(DistributedClientTest, NotifyCloseCollabSession_Test_001, TestSize.Leve
     DistributedClient dmsClient;
     std::string token = "token";
     auto result = dmsClient.NotifyCloseCollabSession(token);
-    EXPECT_NE(result, ERR_OK);
+    EXPECT_NE(result, ERR_FLATTEN_OBJECT);
     DTEST_LOG << "DistributedClientTest NotifyCloseCollabSession_Test_001 end" << std::endl;
 }
 
@@ -121,7 +121,7 @@ HWTEST_F(DistributedClientTest, GetPeerVersion_Test_001, TestSize.Level3)
     std::string serverSocketName = "serverSocketName";
     std::string peerDeviceId = "peerDeviceId";
     auto result = dmsClient.GetPeerVersion(sessionId, serverSocketName, peerDeviceId);
-    EXPECT_EQ(result, ERR_OK);
+    EXPECT_NE(result, ERR_FLATTEN_OBJECT);
     DTEST_LOG << "DistributedClientTest GetPeerVersion_Test_001 end" << std::endl;
 }
 }

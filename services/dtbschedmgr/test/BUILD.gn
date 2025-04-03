@@ -1072,6 +1072,7 @@ ohos_unittest("dschedcontinuetest") {
   sources = [
     "unittest/continue/dsched_continue_test.cpp",
     "unittest/continue/mock_dtbschedmgr_device_info.cpp",
+    "unittest/mock/ability_manager_client_mock.cpp",
   ]
   sources += dtbschedmgr_sources
   configs = [
