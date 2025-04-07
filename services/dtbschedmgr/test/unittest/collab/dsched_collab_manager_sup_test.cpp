@@ -17,6 +17,7 @@
 
 #include "dtbschedmgr_device_info_storage.h"
 #include "distributed_sched_test_util.h"
+#include "dtbcollabmgr_log.h"
 #include "test_log.h"
 #include "mock_distributed_sched.h"
 
@@ -242,6 +243,82 @@ HWTEST_F(DSchedCollabManagerSupTest, GenerateCollabToken_001, TestSize.Level3)
     EXPECT_FALSE(rlt.empty());
     DSchedCollabManager::GetInstance().collabs_.clear();
     DTEST_LOG << "DSchedCollabManagerSupTest GenerateCollabToken_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetSinkCollabVersion_001
+ * @tc.desc: test GetSinkCollabVersion func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerSupTest, GetSinkCollabVersion_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerSupTest GetSinkCollabVersion_001 begin" << std::endl;
+    int32_t collabSessionId = -1;
+    CollabMessage localInfo;
+    CollabMessage peerInfo;
+    ConnectOpt opt;
+    sptr<IRemoteObject> clientCB = nullptr;
+    DSchedCollabInfo info(collabSessionId, localInfo, peerInfo, opt, clientCB);
+    auto ret = DSchedCollabManager::GetInstance().GetSinkCollabVersion(info);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    info.srcCollabSessionId_ = 1;
+    ret = DSchedCollabManager::GetInstance().GetSinkCollabVersion(info);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    info.sinkInfo_.deviceId_ = "deviceId";
+    ret = DSchedCollabManager::GetInstance().GetSinkCollabVersion(info);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    info.srcClientCB_ = sptr<DistributedSchedService>(new DistributedSchedService());
+    ret = DSchedCollabManager::GetInstance().GetSinkCollabVersion(info);
+    EXPECT_EQ(ret, FIND_LOCAL_DEVICEID_ERR);
+    DTEST_LOG << "DSchedCollabManagerSupTest GetSinkCollabVersion_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConvertCollaborateResult_001
+ * @tc.desc: test ConvertCollaborateResult func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerSupTest, ConvertCollaborateResult_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerSupTest ConvertCollaborateResult_001 begin" << std::endl;
+    int32_t result = REJECT;
+    auto ret = DSchedCollabManager::GetInstance().ConvertCollaborateResult(result);
+    EXPECT_EQ(ret, DistributedCollab::PEER_APP_REJECTED);
+
+    result = ON_COLLABORATE_ERR;
+    ret = DSchedCollabManager::GetInstance().ConvertCollaborateResult(result);
+    EXPECT_EQ(ret, DistributedCollab::PEER_ABILITY_NO_ONCOLLABORATE);
+
+    result = -1;
+    ret = DSchedCollabManager::GetInstance().ConvertCollaborateResult(result);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedCollabManagerSupTest ConvertCollaborateResult_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetDSchedCollabByTokenId_001
+ * @tc.desc: test GetDSchedCollabByTokenId func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerSupTest, GetDSchedCollabByTokenId_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerSupTest GetDSchedCollabByTokenId_001 begin" << std::endl;
+    DSchedCollabManager::GetInstance().collabs_.clear();
+    std::string tokenId = "";
+    auto ret = DSchedCollabManager::GetInstance().GetDSchedCollabByTokenId(tokenId);
+    EXPECT_EQ(ret, nullptr);
+
+    tokenId = "tokenId";
+    ret = DSchedCollabManager::GetInstance().GetDSchedCollabByTokenId(tokenId);
+    EXPECT_EQ(ret, nullptr);
+
+    DSchedCollabManager::GetInstance().collabs_[tokenId] = nullptr;
+    ret = DSchedCollabManager::GetInstance().GetDSchedCollabByTokenId(tokenId);
+    EXPECT_EQ(ret, nullptr);
+    DTEST_LOG << "DSchedCollabManagerSupTest GetDSchedCollabByTokenId_001 end" << std::endl;
 }
 }
 }
