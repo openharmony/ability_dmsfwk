@@ -910,7 +910,8 @@ void DmsBmStorage::CleanRedundancyBundleInfo(const std::string &localUdid, const
     const std::string &keyOfKVStore, const std::string &oldUdid) const
 {
     if (!localUdid.empty() && oldUdid != localUdid) {
-        HILOGW("Delete DistributedBundleInfo for old udid, bundleName: %{public}s", bundleName.c_str());
+        HILOGW("Delete DistributedBundleInfo for old udid: %{public}s, bundleName: %{public}s, new udid: %{public}s",
+            GetAnonymStr(oldUdid).c_str(), bundleName.c_str(), GetAnonymStr(localUdid).c_str());
         Key key(keyOfKVStore);
         kvStorePtr_->Delete(key);
     }
@@ -950,8 +951,8 @@ void DmsBmStorage::DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos)
     entrie.key = key;
     PublicRecordsInfo publicRecordsInfo;
     GetLastBundleNameId(publicRecordsInfo.maxBundleNameId);
-    publicRecordsInfo.maxBundleNameId =
-        std::max((bundleNameIdTables_.rbegin())->first, publicRecordsInfo.maxBundleNameId);
+    publicRecordsInfo.maxBundleNameId = bundleNameIdTables_.empty() ? publicRecordsInfo.maxBundleNameId : std::max(
+        (bundleNameIdTables_.rbegin())->first, publicRecordsInfo.maxBundleNameId);
     Value value(publicRecordsInfo.ToString());
     entrie.value = value;
     HILOGI("need be put: %{public}d", publicRecordsInfo.maxBundleNameId);
