@@ -130,7 +130,7 @@ bool AbilityConnectionManager::FindExistingSession(const PeerInfo& peerInfo, con
 
 int32_t AbilityConnectionManager::DestroySession(int32_t sessionId)
 {
-    HILOGI("called.");
+    HILOGI("called, sessionId is %{public}d", sessionId);
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
