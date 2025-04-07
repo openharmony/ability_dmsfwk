@@ -534,6 +534,10 @@ int32_t DSchedCollabManager::ReleaseAbilityLink(const std::string &bundleName, c
     };
     const std::string taskName = bundleName + std::to_string(pid);
     HILOGW("disconnect the existing link after 5S");
+    if (eventHandler_ == nullptr) {
+        HILOGE("eventHandler is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
     eventHandler_->PostTask(func, taskName, BACKGROUND_TIMEOUT);
     return ERR_OK;
 }
