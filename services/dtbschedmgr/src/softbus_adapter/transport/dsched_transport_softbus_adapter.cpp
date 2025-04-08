@@ -261,8 +261,7 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
     int32_t ret = ERR_OK;
     int retryCount = 0;
     do {
-        /* The DMS-CHECK_SLUETOOTH macro is used to distinguish the binding logic on different devices,
-         * using dynamic QoS except for watches */
+        // The DMS-CHECK_SLUETOOTH macro is used to distinguish the binding logic on different devices
 #ifdef DMS_CHECK_BLUETOOTH
         HILOGI("collab bind begin");
         if (type == SERVICE_TYPE_COLLAB) {
@@ -271,19 +270,21 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
         }
 #endif
 #ifndef DMS_CHECK_BLUETOOTH
-        QosTV validQos;
-        ret = QueryValidQos(peerDeviceId, validQos);
-        if (ret == ERR_OK) {
-            HILOGI("SoftBus query valid qos success.");
-            QosTV qosInfoWithValidQos[] = {
-                {.qos = QOS_TYPE_MIN_BW, .value = validQos.value},
-                {.qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_QOS_TYPE_MAX_LATENCY},
-                {.qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_QOS_TYPE_MIN_LATENCY}
-            };
-            ret = Bind(sessionId, qosInfoWithValidQos, g_QosTV_Param_Index, &iSocketListener);
-        } else {
-            HILOGI("SoftBus query valid qos failed. use default minBW, ret: %{public}d", ret);
-            ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+        int32_t validQosCase = -1;
+        ret = QueryValidQos(peerDeviceId, validQosCase);
+        HILOGI("SoftBus query valid qos result: %{public}d", ret);
+        // case 0 : [160Mbps, Max); case 1 : (30Mbps, 160Mbps); case 2 : (384Kbps, 30Mbps]; case 3 : (0, 384Kbps];
+        switch (validQosCase) {
+            case 0:
+            case 1:
+                ret = Bind(sessionId, g_watch_collab_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+                break;
+            case 2:
+            case 3:
+                ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+                break;
+            default:
+                ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
         }
         HILOGI("end bind stardard qos");
 #endif
@@ -305,7 +306,7 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
     return ret;
 }
 
-int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDeviceId, QosTV &validQos)
+int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDeviceId, int32_t &validQosCase)
 {
     int32_t ret = SOFTBUS_QUERY_VALID_QOS_ERR;
 #ifdef SOFTBUS_QUERY_VALID_QOS
@@ -323,36 +324,24 @@ int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDevi
         HILOGE("query Valid Qos failed, result: %{public}d", ret);
         return SOFTBUS_QUERY_VALID_QOS_ERR;
     }
-    HILOGI("query Valid Qos success, isLowPower: %{public}s; qos count: %{public}d",
-        qosStatus.isLowPower ? "true" : "false", qosStatus.qosCnt);
-    QosOption supportReuseQosMinBW = {true, 0};
-    QosOption maxQosMinBW = {false, 0};
+    if (qosStatus.qosCnt <= 0) {
+        HILOGE("valid qos count is: %{public}d", qosStatus.qosCnt);
+        return SOFTBUS_NO_USEFUL_QOS_ERR;
+    }
+    HILOGI("query Valid Qos success; qos count: %{public}d", qosStatus.qosCnt);
+    // case 0 : [160Mbps, Max); case 1 : (30Mbps, 160Mbps); case 2 : (384Kbps, 30Mbps]; case 3 : (0, 384Kbps];
+    validQosCase = SOFTBUS_MAX_VALID_QOS_CASE;
     for (int i = 0; i < qosStatus.qosCnt; i++) {
         QosOption item = qosStatus.validQos[i];
         HILOGI("check valid qos index: %{public}d; isSupportReuse: %{public}s; minBw: %{public}d",
             i, item.isSupportReuse ? "true" : "false", item.minBW);
-        if (item.isSupportReuse && supportReuseQosMinBW.minBW < item.minBW) {
-            HILOGI("update supportReuseQosMinBW from: %{public}d to: %{public}d",
-                supportReuseQosMinBW.minBW, item.minBW);
-            supportReuseQosMinBW.minBW = item.minBW;
-            continue;
-        }
-        if (!item.isSupportReuse && maxQosMinBW.minBW < item.minBW) {
-            HILOGI("update maxQosMinBW from: %{public}d to: %{public}d", maxQosMinBW.minBW, item.minBW);
-            maxQosMinBW.minBW = item.minBW;
+        if (validQosCase > item.minBW) {
+            HILOGI("update validQosCase from: %{public}d to: %{public}d", validQosCase, item.minBW);
+            validQosCase = item.minBW;
         }
     }
     delete [] qosStatus.validQos;
-    if (qosStatus.isLowPower && supportReuseQosMinBW.minBW > 0) {
-        HILOGI("final valid qos: isSupportReuse: true; minBw: %{public}d", supportReuseQosMinBW.minBW);
-        validQos.value = supportReuseQosMinBW.minBW;
-    } else if (maxQosMinBW.minBW > 0) {
-        HILOGI("final valid qos: isSupportReuse: false; minBw: %{public}d", maxQosMinBW.minBW);
-        validQos.value = maxQosMinBW.minBW;
-    } else {
-        HILOGE("final valid qos: no Valid Qos!");
-        return SOFTBUS_NO_USEFUL_QOS_ERR;
-    }
+    HILOGE("final validQosCase is: %{public}d", validQosCase);
 #endif
     return ret;
 }
