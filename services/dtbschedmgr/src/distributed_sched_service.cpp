@@ -322,8 +322,11 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
 #endif
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
-    dlclose(dllHandle_);
-    dllHandle_ = nullptr;
+    {
+        std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
+        dlclose(dllHandle_);
+        dllHandle_ = nullptr;
+    };
 #endif
     dataShareManager.UnInit();
     HILOGI("OnStop dms service end");
