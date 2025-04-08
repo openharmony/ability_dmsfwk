@@ -308,7 +308,9 @@ namespace DistributedCollab {
     {
         HILOGI("SurfaceDecoderAdapter::OnInputBufferAvailable enter");
         FALSE_RETURN_MSG(buffer != nullptr && buffer->meta_ != nullptr, "meta_ is nullptr.");
-        HILOGD("OnInputAvailable enter. index:%{public}u, bufferid:%{public}" PRIu64", pts:%{public}" PRId64", flag:%{public}u",
+        HILOGD(
+            "OnInputAvailable enter. index:%{public}u, "
+            "bufferid:%{public}" PRIu64", pts:%{public}" PRId64", flag:%{public}u",
             index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
         buffer->meta_->SetData(Tag::REGULAR_TRACK_ID, index);
         if (inputBufferQueueConsumer_ == nullptr) {
@@ -318,7 +320,8 @@ namespace DistributedCollab {
         if (inputBufferQueueConsumer_->IsBufferInQueue(buffer)) {
             if (inputBufferQueueConsumer_->ReleaseBuffer(buffer) != Status::OK) {
                 HILOGE(
-                    "InQueue RelBuf failed.index:%{public}u, bufferid:%{public}" PRIu64",pts:%{public}" PRId64", flag:%{public}u",
+                    "InQueue RelBuf failed.index:%{public}u, "
+                    "bufferid:%{public}" PRIu64",pts:%{public}" PRId64", flag:%{public}u",
                     index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
             }
             return;
@@ -365,11 +368,13 @@ namespace DistributedCollab {
         FALSE_RETURN_MSG(codecServer_ != nullptr, "codecServer_ is nullptr.");
         if (codecServer_->QueueInputBuffer(index) != ERR_OK) {
             HILOGE(
-                "QueueInputBuffer failed, index:%{public}u, bufferid:%{public}" PRIu64", pts:%{public}" PRId64", flag:%{public}u",
+                "QueueInputBuffer failed, index:%{public}u, "
+                "bufferid:%{public}" PRIu64", pts:%{public}" PRId64", flag:%{public}u",
                 index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
         } else {
             HILOGD(
-                "QueueInputBuffer success, index:%{public}u, bufferid:%{public}" PRIu64", pts:%{public}" PRId64", flag:%{public}u",
+                "QueueInputBuffer success, index:%{public}u, "
+                "bufferid:%{public}" PRIu64", pts:%{public}" PRId64", flag:%{public}u",
                 index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
         }
     }
