@@ -37,6 +37,7 @@ const std::string TAG = "DSchedContinueManager";
 const std::string DSCHED_CONTINUE_MANAGER = "dsched_continue_manager";
 const std::string CONTINUE_TIMEOUT_TASK = "continue_timeout_task";
 const std::u16string CONNECTION_CALLBACK_INTERFACE_TOKEN = u"ohos.abilityshell.DistributedConnection";
+constexpr int32_t TERMINATE_DELAY_TIME = 200; //ms
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DSchedContinueManager);
@@ -502,6 +503,7 @@ void DSchedContinueManager::HandleNotifyCompleteContinuation(const std::u16strin
             HILOGE("callerBundleName doesn't match the existing continuation");
             return;
         }
+        dContinue->hasResult_ = true;
         dContinue->OnNotifyComplete(missionId, isSuccess);
         HILOGI("end, continue info: %{public}s.", dContinue->GetContinueInfo().ToString().c_str());
     }
@@ -532,6 +534,20 @@ std::shared_ptr<DSchedContinue> DSchedContinueManager::GetDSchedContinueByDevId(
 void DSchedContinueManager::NotifyTerminateContinuation(const int32_t missionId)
 {
     HILOGI("begin, missionId %{public}d", missionId);
+    auto func = [this, missionId]() {
+        HandleNotifyTerminateContinuation(missionId);
+    };
+    if (eventHandler_ == nullptr) {
+        HILOGE("eventHandler_ is nullptr.");
+        return;
+    }
+    eventHandler_->PostTask(func, TERMINATE_DELAY_TIME);
+    HILOGW("doesn't match an existing continuation.");
+}
+
+void DSchedContinueManager::HandleNotifyTerminateContinuation(const int32_t missionId)
+{
+    HILOGI("HandleNotifyTerminateContinuation begin, missionId %{public}d", missionId);
     {
         std::lock_guard<std::mutex> continueLock(continueMutex_);
         if (continues_.empty()) {
@@ -564,13 +580,16 @@ void DSchedContinueManager::NotifyTerminateContinuation(const int32_t missionId)
                 continueInfo.sinkBundleName_.c_str(), continueInfo.sinkAbilityName_.c_str());
             if (status.bundleName == continueInfo.sinkBundleName_
                 && status.abilityName == continueInfo.sinkAbilityName_) {
-                HILOGE("Execute onContinueEnd");
+                if (iter->second->hasResult_) {
+                    HILOGI("hasResult_ %{public}d", iter->second->hasResult_);
+                    return;
+                }
                 iter->second->OnContinueEnd(CONTINUE_SINK_ABILITY_TERMINATED);
                 return;
             }
         }
     }
-    HILOGW("doesn't match an existing continuation.");
+    HILOGI("HandleNotifyTerminateContinuation end.");
 }
 
 int32_t DSchedContinueManager::ContinueStateCallbackRegister(
