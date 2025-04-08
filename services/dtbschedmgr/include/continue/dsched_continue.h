@@ -298,6 +298,7 @@ private:
     sptr<IRemoteObject> callback_ = nullptr;
     EventNotify eventData_;
     int32_t accountId_ = INVALID_ACCOUNT_ID;
+    bool hasResult_ = false;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS
