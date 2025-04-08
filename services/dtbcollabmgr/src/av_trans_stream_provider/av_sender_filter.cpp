@@ -287,7 +287,7 @@ std::shared_ptr<AVTransStreamData> AVSenderFilter::PackStreamDataForAVBuffer(con
     ext.index_ = static_cast<uint32_t>(lastIndex_.load());
     lastIndex_++;
     ext.pts_ = static_cast<uint64_t>(buffer->pts_);
-    HILOGD("send buffer pts: %{public}llu", ext.pts_);
+    HILOGD("send buffer pts: %{public}" PRIu64"", ext.pts_);
 #ifdef DSCH_COLLAB_AV_TRANS_TEST_DEMO
     ext.pts_ = GetEncoderTimeStamp();
 #endif
