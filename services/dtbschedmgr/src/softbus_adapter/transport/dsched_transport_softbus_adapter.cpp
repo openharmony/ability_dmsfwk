@@ -39,6 +39,10 @@ constexpr int32_t BIND_RETRY_INTERVAL = 500;
 constexpr int32_t MAX_BIND_RETRY_TIME = 4000;
 constexpr int32_t MAX_RETRY_TIMES = 8;
 constexpr int32_t MS_TO_US = 1000;
+constexpr int32_t SOFTBUS_QOS_CASE_HIGH = 0;
+constexpr int32_t SOFTBUS_QOS_CASE_MIDDLE_HIGH = 1;
+constexpr int32_t SOFTBUS_QOS_CASE_MIDDLE_LOW = 2;
+constexpr int32_t SOFTBUS_QOS_CASE_LOW = 3;
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DSchedTransportSoftbusAdapter);
@@ -275,12 +279,12 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
         HILOGI("SoftBus query valid qos result: %{public}d", ret);
         // case 0 : [160Mbps, Max); case 1 : (30Mbps, 160Mbps); case 2 : (384Kbps, 30Mbps]; case 3 : (0, 384Kbps];
         switch (validQosCase) {
-            case 0:
-            case 1:
+            case SOFTBUS_QOS_CASE_HIGH:
+            case SOFTBUS_QOS_CASE_MIDDLE_HIGH:
                 ret = Bind(sessionId, g_watch_collab_qosInfo, g_QosTV_Param_Index, &iSocketListener);
                 break;
-            case 2:
-            case 3:
+            case SOFTBUS_QOS_CASE_MIDDLE_LOW:
+            case SOFTBUS_QOS_CASE_LOW:
                 ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
                 break;
             default:
