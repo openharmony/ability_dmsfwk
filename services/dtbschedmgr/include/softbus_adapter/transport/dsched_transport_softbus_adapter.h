@@ -75,7 +75,7 @@ private:
         DSchedServiceType type);
     int32_t AddNewPeerSession(const std::string &peerDeviceId, int32_t &sessionId, DSchedServiceType type);
     int32_t ServiceBind(int32_t &sessionId, DSchedServiceType type, const std::string &peerDeviceId);
-    int32_t QueryValidQos(const std::string &peerDeviceId, int32_t &validQosCase);
+    int32_t QueryValidQos(const std::string &peerDeviceId, uint32_t &validQosCase);
     void ShutdownSession(const std::string &peerDeviceId, int32_t sessionId);
     void NotifyListenersSessionShutdown(int32_t sessionId, bool isSelfCalled);
     int32_t DecisionByAllConnect(const std::string &peerDeviceId, DSchedServiceType type);
