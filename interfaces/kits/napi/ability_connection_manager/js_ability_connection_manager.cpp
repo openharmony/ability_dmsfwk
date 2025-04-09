@@ -860,16 +860,10 @@ napi_value JsAbilityConnectionManager::UnregisterAbilityConnectionSessionCallbac
 napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info info)
 {
     HILOGI("called.");
-    GET_PARAMS(env, info, ARG_COUNT_ONE);
-    if (argc != ARG_COUNT_ONE) {
-        HILOGE("CheckArgsCount failed.");
-        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
-        return nullptr;
-    }
-
     int32_t sessionId = -1;
-    if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
-        HILOGE("Failed to unwrap sessionId.");
+    GET_PARAMS(env, info, ARG_COUNT_ONE);
+    if (argc != ARG_COUNT_ONE || !JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
+        HILOGE("CheckArgsCount failed or Failed to unwrap sessionId.");
         CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
@@ -886,6 +880,7 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
     if (CreateConnectThreadsafeFunction(env, nullptr, &tsfn) != napi_ok || tsfn == nullptr) {
         HILOGE("Failed to create connect function.");
         delete asyncCallbackInfo;
+        napi_release_threadsafe_function(tsfn, napi_tsfn_release);
         napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
         return promise;
     }
@@ -901,6 +896,7 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
         HILOGE("Failed to create async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
+        napi_release_threadsafe_function(tsfn, napi_tsfn_release);
         napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
         return promise;
     }
@@ -909,6 +905,7 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
         HILOGE("Failed to queue async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
+        napi_release_threadsafe_function(tsfn, napi_tsfn_release);
         napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
         return promise;
     }
@@ -1296,16 +1293,6 @@ napi_value JsAbilityConnectionManager::SendImage(napi_env env, napi_callback_inf
         return promise;
     }
 
-    AsyncCallbackInfo* asyncCallbackInfo = new AsyncCallbackInfo();
-    asyncCallbackInfo->deferred = deferred;
-    asyncCallbackInfo->sessionId = sessionId;
-    asyncCallbackInfo->image = Media::PixelMapNapi::GetPixelMap(env, argv[ARG_INDEX_ONE]);
-    if (!asyncCallbackInfo->image) {
-        HILOGE("Failed to unwrap image.");
-        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
-        return promise;
-    }
-
     int32_t quality = IMAGE_COMPRESSION_QUALITY;
     if (argc == ARG_COUNT_THREE) {
         if (!JsToInt32(env, argv[ARG_INDEX_TWO], "quality", quality)) {
@@ -1313,6 +1300,17 @@ napi_value JsAbilityConnectionManager::SendImage(napi_env env, napi_callback_inf
             CreateBusinessError(env, ERR_INVALID_PARAMETERS);
             return promise;
         }
+    }
+
+    AsyncCallbackInfo* asyncCallbackInfo = new AsyncCallbackInfo();
+    asyncCallbackInfo->deferred = deferred;
+    asyncCallbackInfo->sessionId = sessionId;
+    asyncCallbackInfo->image = Media::PixelMapNapi::GetPixelMap(env, argv[ARG_INDEX_ONE]);
+    if (!asyncCallbackInfo->image) {
+        HILOGE("Failed to unwrap image.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        delete asyncCallbackInfo;
+        return promise;
     }
     asyncCallbackInfo->imageQuality = quality;
     return CreateSendImageAsyncWork(env, asyncCallbackInfo);
@@ -1333,16 +1331,16 @@ napi_value JsAbilityConnectionManager::CreateSendImageAsyncWork(napi_env env, As
     if (status != napi_ok) {
         HILOGE("Failed to create async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
-        delete asyncCallbackInfo;
         napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        delete asyncCallbackInfo;
         return promise;
     }
 
     if (napi_queue_async_work(env, asyncCallbackInfo->asyncWork) != napi_ok) {
         HILOGE("Failed to queue async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
-        delete asyncCallbackInfo;
         napi_reject_deferred(env, asyncCallbackInfo->deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        delete asyncCallbackInfo;
         return promise;
     }
 
