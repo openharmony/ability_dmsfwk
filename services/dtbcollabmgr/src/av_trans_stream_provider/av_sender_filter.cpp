@@ -43,7 +43,6 @@ namespace {
     using FilterType = Media::Pipeline::FilterType;
     static const std::string TAG = "AVSenderFilter";
     static const std::string PIXEL_MAP_FORMAT = "image/jpeg";
-    static constexpr int32_t PIXEL_MAP_QUALITY = 50;
 
 #ifdef DSCH_COLLAB_AV_TRANS_TEST_DEMO
     static const std::string encodeWriteFilePath = "/data/tmp/encode_output_h26x";
@@ -403,21 +402,23 @@ int32_t AVSenderFilter::WriteDataToBuffer(std::shared_ptr<AVTransDataBuffer>& bu
     return ERR_OK;
 }
 
-int32_t AVSenderFilter::SendPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap)
+int32_t AVSenderFilter::SendPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, int32_t imageQuality)
 {
     HILOGI("AVSenderFilter::SendPixelMap enter");
     if (pixelMap == nullptr) {
         HILOGI("pixel map empty");
         return NULL_POINTER_ERROR;
     }
+    HILOGI("raw pixel map size=%{public}d*%{public}d", pixelMap->GetWidth(), pixelMap->GetHeight());
     std::shared_ptr<AVTransDataBuffer> buffer = nullptr;
-    int32_t ret = PackPixelMap(pixelMap, buffer);
+    int32_t ret = PackPixelMap(pixelMap, buffer, imageQuality);
     if (ret != ERR_OK) {
         return ret;
     }
     {
         std::lock_guard<std::mutex> lock(queueMutex_);
-        auto ptr = PackStreamDataForPixelMap(pixelMap, buffer);
+        auto ptr = PackStreamDataForPixelMap(pixelMap, buffer, imageQuality);
+        HILOGI("send pixel map size=%{public}zu", ptr->StreamData()->Size());
         if (isRunning_) {
             sendDatas_.push(ptr);
         }
@@ -427,11 +428,11 @@ int32_t AVSenderFilter::SendPixelMap(const std::shared_ptr<Media::PixelMap>& pix
 }
 
 int32_t AVSenderFilter::PackPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
-    std::shared_ptr<AVTransDataBuffer>& buffer)
+    std::shared_ptr<AVTransDataBuffer>& buffer, int32_t imageQuality)
 {
     Media::PackOption option = {
         .format = PIXEL_MAP_FORMAT,
-        .quality = PIXEL_MAP_QUALITY,
+        .quality = imageQuality,
     };
     int32_t dataSize = pixelMap->GetByteCount();
     buffer = std::make_shared<AVTransDataBuffer>(dataSize);
@@ -458,14 +459,14 @@ int32_t AVSenderFilter::PackPixelMap(const std::shared_ptr<Media::PixelMap>& pix
 
 std::shared_ptr<AVTransStreamData> AVSenderFilter::PackStreamDataForPixelMap(
     const std::shared_ptr<Media::PixelMap>& pixelMap,
-    const std::shared_ptr<AVTransDataBuffer>& dataBuffer)
+    const std::shared_ptr<AVTransDataBuffer>& dataBuffer, int32_t imageQuality)
 {
     AVTransStreamDataExt ext;
     ext.flag_ = AvCodecBufferFlag::AVCODEC_BUFFER_FLAG_PIXEL_MAP;
     ext.index_ = static_cast<uint32_t>(lastIndex_.load());
     lastIndex_++;
     PixelMapPackOption option;
-    option.quality = PIXEL_MAP_QUALITY;
+    option.quality = imageQuality;
     option.width = static_cast<uint32_t>(pixelMap->GetWidth());
     option.height = static_cast<uint32_t>(pixelMap->GetHeight());
     ext.pixelMapOption_ = option;

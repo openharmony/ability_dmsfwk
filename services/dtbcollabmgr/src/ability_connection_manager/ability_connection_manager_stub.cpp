@@ -79,8 +79,8 @@ int32_t AbilityConnectionManagerStub::NotifyCollabResultInner(MessageParcel& dat
 {
     int32_t sessionId = -1;
     PARCEL_READ_HELPER(data, Int32, sessionId);
-    bool startResult = false;
-    PARCEL_READ_HELPER(data, Bool, startResult);
+    int32_t startResult = -1;
+    PARCEL_READ_HELPER(data, Int32, startResult);
     std::string peerSocketName = "";
     PARCEL_READ_HELPER(data, String, peerSocketName);
     std::string dmsServerToken = "";

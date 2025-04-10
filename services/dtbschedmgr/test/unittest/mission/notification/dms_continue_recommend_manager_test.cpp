@@ -27,6 +27,7 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace DistributedSchedule {
+static int32_t g_missionId = 0;
 namespace {
 const std::string TAG = "DMSContinueRecomMgr";
 const int32_t WAITTIME = 2000;
@@ -63,6 +64,28 @@ HWTEST_F(ContinueRecommendInfoTest, testMarshalCandidates001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: testMarshalCandidates002
+ * @tc.desc: test MarshalCandidates
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(ContinueRecommendInfoTest, testMarshalCandidates002, TestSize.Level1)
+{
+    DTEST_LOG << "ContinueRecommendInfoTest testMarshalCandidates002 start" << std::endl;
+    ContinueRecommendInfo info;
+    ContinueCandidate date;
+    date.deviceId_ = "deviceId";
+    date.dstBundleName_ = "dstBundleName";
+    info.candidates_.push_back(date);
+    date.deviceId_ = "";
+    date.dstBundleName_ = "";
+    info.candidates_.push_back(date);
+    std::string ret = info.MarshalCandidates();
+    EXPECT_NE(ret, "");
+    DTEST_LOG << "ContinueRecommendInfoTest testMarshalCandidates002 end" << std::endl;
+}
+
+/**
  * @tc.name: testMarshalCandidate001
  * @tc.desc: test MarshalCandidate
  * @tc.type: FUNC
@@ -95,10 +118,22 @@ HWTEST_F(ContinueRecommendInfoTest, testToString001, TestSize.Level1)
 
 void DMSContinueRecomMgrTest::SetUpTestCase()
 {
+    bundleMgrMock_ = std::make_shared<BundleManagerInternalMock>();
+    BundleManagerInternalMock::bundleMgrMock = bundleMgrMock_;
+    mgrMock_ = std::make_shared<DmsContinueConditionMgrMock>();
+    IDmsContinueConditionMgr::conditionMgrMock = mgrMock_;
+    storageMock_ = std::make_shared<DtbschedmgrDeviceInfoStorageMock>();
+    DtbschedmgrDeviceInfoStorageMock::storageMock = storageMock_;
 }
 
 void DMSContinueRecomMgrTest::TearDownTestCase()
 {
+    BundleManagerInternalMock::bundleMgrMock = nullptr;
+    bundleMgrMock_ = nullptr;
+    IDmsContinueConditionMgr::conditionMgrMock = nullptr;
+    mgrMock_ = nullptr;
+    DtbschedmgrDeviceInfoStorageMock::storageMock = nullptr;
+    storageMock_ = nullptr;
 }
 
 void DMSContinueRecomMgrTest::SetUp()
@@ -108,6 +143,11 @@ void DMSContinueRecomMgrTest::SetUp()
 
 void DMSContinueRecomMgrTest::TearDown()
 {
+}
+
+int32_t GetCurrentMissionId()
+{
+    return g_missionId;
 }
 
 /**
@@ -121,16 +161,44 @@ HWTEST_F(DMSContinueRecomMgrTest, testDMSContinueRecomMgrInitUninit001, TestSize
     DTEST_LOG << "DMSContinueRecomMgrTest testDMSContinueRecomMgrInitUninit001 start" << std::endl;
     auto recomMgr = MultiUserManager::GetInstance().GetCurrentRecomMgr();
     ASSERT_NE(nullptr, recomMgr);
+    EXPECT_CALL(*mgrMock_, TypeEnumToString(_)).WillRepeatedly(Return("test"));
     int32_t accountId = 100;
     EXPECT_NO_FATAL_FAILURE(recomMgr->Init(accountId));
     usleep(WAITTIME);
+    recomMgr->hasInit_ = false;
+    EXPECT_NO_FATAL_FAILURE(recomMgr->Init(accountId));
 
+    g_missionId = 0;
+    EXPECT_NO_FATAL_FAILURE(recomMgr->OnDeviceChanged());
+
+    g_missionId = 1;
+    EXPECT_CALL(*mgrMock_, GetMissionStatus(_, _, _)).WillRepeatedly(Return(1));
     EXPECT_NO_FATAL_FAILURE(recomMgr->OnDeviceChanged());
     int32_t missionId = 0;
     MissionEventType type = MISSION_EVENT_INVALID;
     EXPECT_NO_FATAL_FAILURE(recomMgr->OnMissionStatusChanged(missionId, type));
     EXPECT_NO_FATAL_FAILURE(recomMgr->UnInit());
     DTEST_LOG << "DMSContinueRecomMgrTest testDMSContinueRecomMgrInitUninit001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testOnMissionStatusChanged001
+ * @tc.desc: test OnMissionStatusChanged
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueRecomMgrTest, testOnMissionStatusChanged001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecomMgrTest testOnMissionStatusChanged001 start" << std::endl;
+    auto recomMgr = MultiUserManager::GetInstance().GetCurrentRecomMgr();
+    ASSERT_NE(nullptr, recomMgr);
+    int32_t missionId = 0;
+    MissionEventType type = MISSION_EVENT_INVALID;
+    EXPECT_CALL(*mgrMock_, GetMissionStatus(_, _, _)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillRepeatedly(Return(false));
+    EXPECT_NO_FATAL_FAILURE(recomMgr->OnMissionStatusChanged(missionId, type));
+    EXPECT_NO_FATAL_FAILURE(recomMgr->UnInit());
+    DTEST_LOG << "DMSContinueRecomMgrTest testOnMissionStatusChanged001 end" << std::endl;
 }
 
 /**
@@ -150,6 +218,16 @@ HWTEST_F(DMSContinueRecomMgrTest, testPublishContinueRecommend001, TestSize.Leve
 
     MissionStatus status;
     MissionEventType type = MISSION_EVENT_INVALID;
+    EXPECT_NO_FATAL_FAILURE(recomMgr->PublishContinueRecommend(status, type));
+
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillRepeatedly(Return(false));
+    EXPECT_NO_FATAL_FAILURE(recomMgr->PublishContinueRecommend(status, type));
+
+    EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillRepeatedly(Return(true));
+    EXPECT_NO_FATAL_FAILURE(recomMgr->PublishContinueRecommend(status, type));
+
+    EXPECT_CALL(*bundleMgrMock_, GetLocalAbilityInfo(_, _, _, _)).WillOnce(Return(1));
     EXPECT_NO_FATAL_FAILURE(recomMgr->PublishContinueRecommend(status, type));
     recomMgr->UnInit();
     DTEST_LOG << "DMSContinueRecomMgrTest testPublishContinueRecommend001 end" << std::endl;
@@ -173,8 +251,13 @@ HWTEST_F(DMSContinueRecomMgrTest, testGetRecommendInfo001, TestSize.Level1)
     MissionStatus status;
     MissionEventType type = MISSION_EVENT_INVALID;
     ContinueRecommendInfo info;
+    EXPECT_CALL(*bundleMgrMock_, GetLocalAbilityInfo(_, _, _, _)).WillOnce(Return(1));
     bool ret = recomMgr->GetRecommendInfo(status, type, info);
     EXPECT_EQ(ret, false);
+
+    EXPECT_CALL(*bundleMgrMock_, GetLocalAbilityInfo(_, _, _, _)).WillOnce(Return(0));
+    ret = recomMgr->GetRecommendInfo(status, type, info);
+    EXPECT_EQ(ret, true);
     recomMgr->UnInit();
     DTEST_LOG << "DMSContinueRecomMgrTest testGetRecommendInfo001 end" << std::endl;
 }
@@ -194,8 +277,15 @@ HWTEST_F(DMSContinueRecomMgrTest, GetAvailableRecommendListTest_001, TestSize.Le
     usleep(WAITTIME);
 
     std::map<std::string, DmsBundleInfo> result;
+    std::vector<std::string> networkIdList;
     std::string bundleName = "";
+    EXPECT_CALL(*storageMock_, GetNetworkIdList()).WillOnce(Return(networkIdList));
     bool ret = recomMgr->GetAvailableRecommendList(bundleName, result);
+    EXPECT_EQ(ret, true);
+
+    networkIdList.push_back("networkId");
+    EXPECT_CALL(*storageMock_, GetNetworkIdList()).WillOnce(Return(networkIdList));
+    ret = recomMgr->GetAvailableRecommendList(bundleName, result);
     EXPECT_EQ(ret, true);
     recomMgr->UnInit();
     DTEST_LOG << "DMSContinueRecomMgrTest GetAvailableRecommendListTest_001 end" << std::endl;
@@ -215,10 +305,18 @@ HWTEST_F(DMSContinueRecomMgrTest, IsContinuableWithDiffBundleTest_001, TestSize.
     recomMgr->Init(accountId);
     usleep(WAITTIME);
 
+    DmsAbilityInfo abilityInfo;
     DmsBundleInfo info;
     std::string bundleName = "";
-    bool ret = recomMgr->IsContinuableWithDiffBundle(bundleName, info);
+    info.dmsAbilityInfos.push_back(abilityInfo);
+    bool ret = recomMgr->IsContinuableWithDiffBundle("bundleName", info);
     EXPECT_EQ(ret, false);
+
+    abilityInfo.continueBundleName.push_back("bundleName");
+    info.dmsAbilityInfos.clear();
+    info.dmsAbilityInfos.push_back(abilityInfo);
+    ret = recomMgr->IsContinuableWithDiffBundle("bundleName", info);
+    EXPECT_EQ(ret, true);
     recomMgr->UnInit();
     DTEST_LOG << "DMSContinueRecomMgrTest IsContinuableWithDiffBundleTest_001 end" << std::endl;
 }

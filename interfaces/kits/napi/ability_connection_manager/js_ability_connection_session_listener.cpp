@@ -41,15 +41,27 @@ void JsAbilityConnectionSessionListener::SetCallback(const napi_value& jsListene
     callbackRef_ = std::move(callbackRef);
 }
 
-void JsAbilityConnectionSessionListener::CallJsMethod(const EventCallbackInfo& callbackInfo)
+void JsAbilityConnectionSessionListener::CallJsMethod(const EventCallbackInfo& eventCallbackInfo)
+{
+    CallJsMethodTemplate(eventCallbackInfo);
+}
+
+void JsAbilityConnectionSessionListener::CallJsMethod(const CollaborateEventInfo& collaborateEventInfo)
+{
+    CallJsMethodTemplate(collaborateEventInfo);
+}
+
+template <typename T>
+void JsAbilityConnectionSessionListener::CallJsMethodTemplate(const T& callbackInfo)
 {
     HILOGI("called.");
     if (env_ == nullptr) {
         HILOGE("env_ is nullptr");
         return;
     }
+ 
     auto task = [this, callbackInfo]() {
-        HILOGI("called.");
+        HILOGI("called js method template.");
         napi_handle_scope scope = nullptr;
         auto env = this->env_;
         napi_status result = napi_open_handle_scope(env, &scope);
@@ -57,6 +69,7 @@ void JsAbilityConnectionSessionListener::CallJsMethod(const EventCallbackInfo& c
             HILOGE("open handle scope failed!");
             return;
         }
+ 
         CallJsMethodInner(callbackInfo);
         result = napi_close_handle_scope(env, scope);
         if (result != napi_ok) {
@@ -64,12 +77,23 @@ void JsAbilityConnectionSessionListener::CallJsMethod(const EventCallbackInfo& c
         }
         HILOGI("end.");
     };
-    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_high)) {
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_vip)) {
         HILOGE("send event failed!");
     }
 }
 
-void JsAbilityConnectionSessionListener::CallJsMethodInner(const EventCallbackInfo& callbackInfo)
+void JsAbilityConnectionSessionListener::CallJsMethodInner(const EventCallbackInfo& eventCallbackInfo)
+{
+    CallJsMethodInnerTemplate(eventCallbackInfo);
+}
+
+void JsAbilityConnectionSessionListener::CallJsMethodInner(const CollaborateEventInfo& collaborateEventInfo)
+{
+    CallJsMethodInnerTemplate(collaborateEventInfo);
+}
+
+template <typename T>
+void JsAbilityConnectionSessionListener::CallJsMethodInnerTemplate(const T& callbackInfo)
 {
     HILOGI("called.");
     if (callbackRef_ == nullptr) {
@@ -88,37 +112,62 @@ void JsAbilityConnectionSessionListener::CallJsMethodInner(const EventCallbackIn
 }
 
 napi_value JsAbilityConnectionSessionListener::WrapEventCallbackInfo(napi_env& env,
-    const EventCallbackInfo& callbackInfo)
+    const EventCallbackInfo& eventCallbackInfo)
 {
     napi_value jsObject;
     napi_create_object(env, &jsObject);
 
     napi_value jsSessionId;
-    napi_create_int32(env, callbackInfo.sessionId, &jsSessionId);
+    napi_create_int32(env, eventCallbackInfo.sessionId, &jsSessionId);
     napi_set_named_property(env, jsObject, "sessionId", jsSessionId);
 
-    if (callbackInfo.reason != DisconnectReason::UNKNOW) {
+    napi_value jsEventType;
+    napi_create_string_utf8(env, eventCallbackInfo.eventType.c_str(), NAPI_AUTO_LENGTH, &jsEventType);
+    napi_set_named_property(env, jsObject, "eventType", jsEventType);
+
+    if (eventCallbackInfo.reason != DisconnectReason::UNKNOW) {
         napi_value jsReason;
-        napi_create_int32(env, static_cast<int32_t>(callbackInfo.reason), &jsReason);
+        napi_create_int32(env, static_cast<int32_t>(eventCallbackInfo.reason), &jsReason);
         napi_set_named_property(env, jsObject, "reason", jsReason);
     }
     
-    if (!callbackInfo.msg.empty()) {
+    if (!eventCallbackInfo.msg.empty()) {
         napi_value jsMsg;
-        napi_create_string_utf8(env, callbackInfo.msg.c_str(), NAPI_AUTO_LENGTH, &jsMsg);
+        napi_create_string_utf8(env, eventCallbackInfo.msg.c_str(), NAPI_AUTO_LENGTH, &jsMsg);
         napi_set_named_property(env, jsObject, "msg", jsMsg);
     }
     
-    if (callbackInfo.data != nullptr) {
-        napi_value jsDataBuffer = WrapAVTransDataBuffer(env, callbackInfo.data);
+    if (eventCallbackInfo.data != nullptr) {
+        napi_value jsDataBuffer = WrapAVTransDataBuffer(env, eventCallbackInfo.data);
         napi_set_named_property(env, jsObject, "data", jsDataBuffer);
     }
 
-    if (callbackInfo.image != nullptr) {
-        napi_value jsPixelMap = Media::PixelMapNapi::CreatePixelMap(env, callbackInfo.image);
+    if (eventCallbackInfo.image != nullptr) {
+        napi_value jsPixelMap = Media::PixelMapNapi::CreatePixelMap(env, eventCallbackInfo.image);
         napi_set_named_property(env, jsObject, "image", jsPixelMap);
     }
     return jsObject;
+}
+
+napi_value JsAbilityConnectionSessionListener::WrapEventCallbackInfo(napi_env& env,
+    const CollaborateEventInfo& collaborateEventInfo)
+{
+    napi_value jsCallbackInfo;
+    napi_create_object(env, &jsCallbackInfo);
+
+    napi_value jsSessionId;
+    napi_create_int32(env, collaborateEventInfo.sessionId, &jsSessionId);
+    napi_set_named_property(env, jsCallbackInfo, "sessionId", jsSessionId);
+
+    napi_value jsEventType;
+    napi_create_int32(env, static_cast<int32_t>(collaborateEventInfo.eventType), &jsEventType);
+    napi_set_named_property(env, jsCallbackInfo, "eventType", jsEventType);
+
+    napi_value jsEventMsg;
+    napi_create_string_utf8(env, collaborateEventInfo.eventMsg.c_str(), NAPI_AUTO_LENGTH, &jsEventMsg);
+    napi_set_named_property(env, jsCallbackInfo, "eventMsg", jsEventMsg);
+
+    return jsCallbackInfo;
 }
 
 napi_value JsAbilityConnectionSessionListener::WrapAVTransDataBuffer(

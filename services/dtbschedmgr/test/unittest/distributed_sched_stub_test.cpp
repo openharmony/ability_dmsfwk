@@ -2568,6 +2568,54 @@ HWTEST_F(DistributedSchedStubTest, NotifyAbilityLifecycleChangedFromRemoteAdapte
     EXPECT_NE(result, DMS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedStubTest NotifyAbilityLifecycleChangedFromRemoteAdapterInner_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: ConnectDExtAbilityInner_001
+ * @tc.desc: check ConnectDExtAbilityInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, ConnectDExtAbilityInner_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest ConnectDExtAbilityInner_001 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = DistributedSchedService::GetInstance().ConnectDExtAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+    DTEST_LOG << "DistributedSchedStubTest ConnectDExtAbilityInner_001 begin" << std::endl;
+
+    /**
+     * @tc.steps: step1. test ConnectDExtAbilityInner when abilityName is empty;
+     */
+    std::string bundleName = "com.example.dms_extension";
+    data.WriteString(bundleName);
+    result = DistributedSchedService::GetInstance().ConnectDExtAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+    DTEST_LOG << "DistributedSchedStubTest ConnectDExtAbilityInner_001 begin" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectDExtAbilityInner_002
+ * @tc.desc: check ConnectDExtAbilityInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, ConnectDExtAbilityInner_002, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest ConnectDExtAbilityInner_002 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    std::string bundleName = "com.example.dms_extension";
+    std::string abilityName = "EntrydistributedAbility";
+    /**
+     * @tc.steps: step1. test ConnectDExtAbilityInner when userId is empty;
+     */
+    data.WriteString(bundleName);
+    data.WriteString(abilityName);
+    data.WriteInt32(-5);
+    int32_t result = DistributedSchedService::GetInstance().ConnectDExtAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+
+    DTEST_LOG << " DistributedSchedStubTest ConnectDExtAbilityInner_002 end" << std::endl;
+}
 #endif
 }
 }

@@ -34,7 +34,7 @@ enum class StreamRole : int32_t {
     SINK = 1,
 };
 
-enum class FlipOption : int32_t {
+enum class FlipOptions : int32_t {
     UNKNOWN = -1,
     HORIZONTAL = 0,
     VERTICAL = 1,
@@ -48,8 +48,57 @@ enum class VideoPixelFormat : int32_t {
 
 enum class DisconnectReason : int32_t {
     UNKNOW = -1,
-    PEER_APP_EXIT = 0,
-    NETWORK_DISCONNECTED = 1,
+    PEER_APP_CLOSE_COLLABORATION = 0,
+    PEER_APP_EXIT = 1,
+    NETWORK_DISCONNECTED = 2,
+};
+
+enum class StartOptionParams : int32_t {
+    START_IN_FOREGROUND = 0,
+    START_IN_BACKGROUND = 1,
+};
+
+enum class ConnectErrorCode : int32_t {
+    CONNECTED_SESSION_EXISTS = 0,
+    PEER_APP_REJECTED = 1,
+    LOCAL_WIFI_NOT_OPEN = 2,
+    PEER_WIFI_NOT_OPEN = 3,
+    PEER_ABILITY_NO_ONCOLLABORATE = 4,
+    SYSTEM_INTERNAL_ERROR = 5
+};
+
+struct StreamParams {
+    std::string name = "";
+    StreamRole role = StreamRole::SOURCE;
+    int32_t bitrate = 80000;
+};
+
+struct SurfaceParams {
+    int32_t width = 0;
+    int32_t height = 0;
+    VideoPixelFormat format = VideoPixelFormat::NV21;
+    int32_t rotation = 0;
+    FlipOptions flip = FlipOptions::UNKNOWN;
+};
+
+struct EventCallbackInfo {
+    int32_t sessionId = -1;
+    std::string eventType = "";
+    DisconnectReason reason = DisconnectReason::UNKNOW;
+    std::string msg = "";
+    std::shared_ptr<AVTransDataBuffer> data = nullptr;
+    std::shared_ptr<Media::PixelMap> image = nullptr;
+};
+
+enum class CollaborateEventType : int32_t {
+    SEND_FAILURE = 0,
+    COLOR_SPACE_CONVERSION_FAILURE = 1,
+};
+
+struct CollaborateEventInfo {
+    int32_t sessionId = -1;
+    CollaborateEventType eventType = CollaborateEventType::SEND_FAILURE;
+    std::string eventMsg = "";
 };
 
 struct PeerInfo : public Parcelable {
@@ -58,12 +107,14 @@ struct PeerInfo : public Parcelable {
     std::string moduleName;
     std::string abilityName;
     std::string serverId;
+    // keep compatibility, both serviceName
+    std::string serviceName;
 
     PeerInfo() = default;
     PeerInfo(const std::string& deviceId, const std::string& bundleName,
         const std::string& moduleName, const std::string& abilityName, const std::string& serverId)
         : deviceId(deviceId), bundleName(bundleName), moduleName(moduleName),
-        abilityName(abilityName), serverId(serverId) {}
+        abilityName(abilityName), serverId(serverId), serviceName(serverId) {}
 
     bool ReadFromParcel(Parcel &parcel);
     bool Marshalling(Parcel &parcel) const override;
@@ -98,11 +149,11 @@ struct PeerInfo : public Parcelable {
 };
 
 struct ConnectOption : public Parcelable {
-    bool needSendData;
-    bool needSendStream;
-    bool needReceiveStream;
-    bool needSendFile;
-    bool needReceiveFile;
+    bool needSendData = false;
+    bool needSendStream = false;
+    bool needReceiveStream = false;
+    bool needSendFile = false;
+    bool needReceiveFile = false;
     AAFwk::WantParams options;
     AAFwk::WantParams parameters;
     bool ReadFromParcel(Parcel &parcel);
@@ -116,35 +167,15 @@ struct ConnectOption : public Parcelable {
 };
 
 struct ConnectResult {
-    bool isConnected;
-    std::string reason;
+    bool isConnected = false;
+    ConnectErrorCode errorCode = ConnectErrorCode::SYSTEM_INTERNAL_ERROR;
+    int32_t sessionId = -1;
+    std::string reason = "";
 
     ConnectResult() = default;
     ConnectResult(const bool isConnected) : isConnected(isConnected) {}
-    
-    ConnectResult(const bool isConnected, const std::string& reason)
-        : isConnected(isConnected), reason(reason) {}
-};
-
-struct StreamParams {
-    std::string name;
-    StreamRole role;
-};
-
-struct SurfaceParams {
-    int32_t width;
-    int32_t height;
-    VideoPixelFormat format;
-    int32_t rotation;
-    FlipOption flip = FlipOption::UNKNOWN;
-};
-
-struct EventCallbackInfo {
-    int32_t sessionId;
-    DisconnectReason reason = DisconnectReason::UNKNOW;
-    std::string msg;
-    std::shared_ptr<AVTransDataBuffer> data = nullptr;
-    std::shared_ptr<Media::PixelMap> image = nullptr;
+    ConnectResult(bool isConnected, const ConnectErrorCode errorCode, const std::string& reason)
+        : isConnected(isConnected), errorCode(errorCode), reason(reason) {}
 };
 } // namespace DistributedCollab
 } // namespace OHOS

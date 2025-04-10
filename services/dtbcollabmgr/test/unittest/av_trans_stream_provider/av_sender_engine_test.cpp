@@ -300,13 +300,14 @@ HWTEST_F(AVSenderEngineTest, SendPixelMap_Test, TestSize.Level1)
 {
     DTEST_LOG << "AVSenderEngineTest SendPixelMap_Test begin" << std::endl;
     std::shared_ptr<Media::PixelMap> pixelMap = nullptr;
+    int32_t imageQuality = 30;
     senderEngine_->senderFilter_ = nullptr;
-    auto ret = senderEngine_->SendPixelMap(pixelMap);
+    auto ret = senderEngine_->SendPixelMap(pixelMap, imageQuality);
     EXPECT_EQ(ret, NULL_POINTER_ERROR);
 
     senderEngine_->senderFilter_ = std::make_shared<AVSenderFilter>(
         "builtin.dtbcollab.sender", FilterType::FILTERTYPE_SOURCE);
-    ret = senderEngine_->SendPixelMap(pixelMap);
+    ret = senderEngine_->SendPixelMap(pixelMap, imageQuality);
     EXPECT_EQ(ret, NULL_POINTER_ERROR);
     DTEST_LOG << "AVSenderEngineTest SendPixelMap_Test end" << std::endl;
 }

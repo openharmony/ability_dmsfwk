@@ -93,10 +93,10 @@ HWTEST_F(DSchedCollabSupTest, PostSinkStartTask_001, TestSize.Level3)
     ASSERT_NE(dSchedCollab_, nullptr);
     ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
     EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(false));
-    EXPECT_EQ(dSchedCollab_->PostSinkStartTask(), COLLAB_SEND_EVENT_FAILED);
+    EXPECT_EQ(dSchedCollab_->PostSinkStartTask(""), COLLAB_SEND_EVENT_FAILED);
 
     EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(true));
-    EXPECT_EQ(dSchedCollab_->PostSinkStartTask(), ERR_OK);
+    EXPECT_EQ(dSchedCollab_->PostSinkStartTask(""), ERR_OK);
     DTEST_LOG << "DSchedCollabSupTest PostSinkStartTask_001 end" << std::endl;
 }
 
@@ -227,21 +227,21 @@ HWTEST_F(DSchedCollabSupTest, OnDataRecv_001, TestSize.Level3)
     dSchedCollab_->collabInfo_.sinkClientCB_ = nullptr;
     std::shared_ptr<DSchedDataBuffer> dataBuffer = nullptr;
     int32_t command = static_cast<int32_t>(MAX_CMD);
-    dSchedCollab_->OnDataRecv(command, dataBuffer);
+    dSchedCollab_->OnDataRecv("", command, dataBuffer);
 
     dataBuffer = std::make_shared<DSchedDataBuffer>(20);
-    dSchedCollab_->OnDataRecv(command, dataBuffer);
+    dSchedCollab_->OnDataRecv("", command, dataBuffer);
 
     command = static_cast<int32_t>(SINK_START_CMD);
     EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(true));
-    dSchedCollab_->OnDataRecv(command, dataBuffer);
+    dSchedCollab_->OnDataRecv("", command, dataBuffer);
 
     command = static_cast<int32_t>(NOTIFY_RESULT_CMD);
     EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(true));
-    dSchedCollab_->OnDataRecv(command, dataBuffer);
+    dSchedCollab_->OnDataRecv("", command, dataBuffer);
 
     command = static_cast<int32_t>(DISCONNECT_CMD);
-    dSchedCollab_->OnDataRecv(command, dataBuffer);
+    dSchedCollab_->OnDataRecv("", command, dataBuffer);
     DTEST_LOG << "DSchedCollabSupTest OnDataRecv_001 end" << std::endl;
 }
 

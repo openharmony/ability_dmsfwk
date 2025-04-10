@@ -109,6 +109,7 @@ enum class IDSchedInterfaceCode : uint32_t {
     NOTIFY_CLOSE_COLLAB_SESSION = 333,
     NOTIFY_START_ABILITY_RESULT = 334,
     GET_SINK_COLLAB_VERSION = 335,
+    GET_WIFI_STATUS = 336,
 };
 
 enum class IDRreeInstallCallbackInterfaceCode : uint32_t {

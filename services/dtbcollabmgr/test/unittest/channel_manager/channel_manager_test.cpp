@@ -33,7 +33,7 @@ namespace {
     static constexpr int32_t STREAM_START_ID = 3001;
     static constexpr int32_t CHANNGE_GAP = 1000;
     static constexpr int32_t INVALID_CHANNEL = 9999;
-    static constexpr int32_t SLEEP_FOR_INIT = 200;
+    static constexpr int32_t SLEEP_FOR_INIT = 2000;
     static constexpr int32_t NUM_1024 = 1024;
     static constexpr int32_t NUM_1 = 1;
     static constexpr int32_t NUM_200 = 200;
@@ -605,7 +605,7 @@ HWTEST_F(ChannelManagerTest, OnSocketClosed_CallbackInvokedAndChannelDeleted, Te
     auto mockListener = std::make_shared<MockChannelListener>();
     int32_t result = ChannelManager::GetInstance().RegisterChannelListener(channelId, mockListener);
     EXPECT_EQ(result, ERR_OK);
-    EXPECT_CALL(*mockListener, OnDisConnect(channelId)).Times(1);
+    EXPECT_CALL(*mockListener, OnDisConnect(channelId, ShutdownReason::SHUTDOWN_REASON_UNKNOWN)).Times(1);
 
     // Step 3: Mock Bind to succeed
     EXPECT_CALL(mockSoftbus, Bind(testing::_, testing::_, testing::_, testing::_))
@@ -616,6 +616,7 @@ HWTEST_F(ChannelManagerTest, OnSocketClosed_CallbackInvokedAndChannelDeleted, Te
     EXPECT_EQ(result, ERR_OK);
 
     ChannelManager::GetInstance().OnSocketClosed(NUM_1234, ShutdownReason::SHUTDOWN_REASON_LNN_OFFLINE);
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_INIT));
 }
 
 /**
@@ -638,7 +639,7 @@ HWTEST_F(ChannelManagerTest, OnSocketClosed_WhenNoChannelID, TestSize.Level1)
     auto mockListener = std::make_shared<MockChannelListener>();
     int32_t result = ChannelManager::GetInstance().RegisterChannelListener(channelId, mockListener);
     EXPECT_EQ(result, ERR_OK);
-    EXPECT_CALL(*mockListener, OnDisConnect(channelId)).Times(0);
+    EXPECT_CALL(*mockListener, OnDisConnect(channelId, ShutdownReason::SHUTDOWN_REASON_UNKNOWN)).Times(0);
 
     ChannelManager::GetInstance().OnSocketClosed(INVALID_CHANNEL_ID, ShutdownReason::SHUTDOWN_REASON_LNN_OFFLINE);
 }
@@ -670,7 +671,7 @@ HWTEST_F(ChannelManagerTest, OnSocketClosed_InvalidSocketIdWithChannelId, TestSi
     auto mockListener = std::make_shared<MockChannelListener>();
     int32_t result = ChannelManager::GetInstance().RegisterChannelListener(channelId, mockListener);
     EXPECT_EQ(result, ERR_OK);
-    EXPECT_CALL(*mockListener, OnDisConnect(channelId)).Times(0);
+    EXPECT_CALL(*mockListener, OnDisConnect(channelId, ShutdownReason::SHUTDOWN_REASON_UNKNOWN)).Times(0);
 
     ChannelManager::GetInstance().OnSocketClosed(INVALID_CHANNEL_ID, ShutdownReason::SHUTDOWN_REASON_LNN_OFFLINE);
 }

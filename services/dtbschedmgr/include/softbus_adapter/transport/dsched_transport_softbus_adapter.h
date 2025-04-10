@@ -30,6 +30,7 @@ constexpr uint32_t INTERCEPT_STRING_LENGTH = 20;
 constexpr uint32_t DSCHED_MAX_RECV_DATA_LEN = 104857600;
 
 constexpr int32_t DSCHED_QOS_TYPE_MIN_BW = 80 * 1024;
+constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW = 40 * 1024 * 1024;
 constexpr int32_t DSCHED_QOS_TYPE_MAX_LATENCY = 6000;
 constexpr int32_t DSCHED_QOS_TYPE_MIN_LATENCY = 1000;
 
@@ -61,6 +62,7 @@ public:
     void UnregisterListener(int32_t serviceType, std::shared_ptr<IDataListener> listener);
     void SetCallingTokenId(int32_t callingTokenId);
     bool GetSessionIdByDeviceId(const std::string &peerDeviceId, int32_t &sessionId);
+    std::string GetPeerDeviceIdBySocket(const int32_t sessionId);
     bool IsNeedAllConnect(DSchedServiceType type);
 
 private:
@@ -71,6 +73,7 @@ private:
     int32_t CreateSessionRecord(int32_t sessionId, const std::string &peerDeviceId, bool isServer,
         DSchedServiceType type);
     int32_t AddNewPeerSession(const std::string &peerDeviceId, int32_t &sessionId, DSchedServiceType type);
+    int32_t ServiceBind(int32_t &sessionId, DSchedServiceType type);
     void ShutdownSession(const std::string &peerDeviceId, int32_t sessionId);
     void NotifyListenersSessionShutdown(int32_t sessionId, bool isSelfCalled);
     int32_t DecisionByAllConnect(const std::string &peerDeviceId, DSchedServiceType type);
