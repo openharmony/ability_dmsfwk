@@ -116,6 +116,7 @@ int32_t DSchedCollaborationCallbackMgr::NotifyDSchedEventForOneCB(const sptr<IRe
     PARCEL_WRITE_HELPER_RET(data, String, event.destBundleName_, SEND_REQUEST_DEF_FAIL);
     PARCEL_WRITE_HELPER_RET(data, String, event.destModuleName_, SEND_REQUEST_DEF_FAIL);
     PARCEL_WRITE_HELPER_RET(data, String, event.destAbilityName_, SEND_REQUEST_DEF_FAIL);
+    PARCEL_WRITE_HELPER_RET(data, String, event.developerId_, SEND_REQUEST_DEF_FAIL);
     PARCEL_WRITE_HELPER_RET(data, Int32, event.dSchedEventType_, SEND_REQUEST_DEF_FAIL);
     PARCEL_WRITE_HELPER_RET(data, Int32, event.state_, SEND_REQUEST_DEF_FAIL);
 
