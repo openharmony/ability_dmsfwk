@@ -190,8 +190,9 @@ void DMSContinueSendMgr::SendContinueBroadcast(const MissionStatus& status, Miss
 {
     auto typeStr = DmsContinueConditionMgr::GetInstance().TypeEnumToString(type);
     HILOGI("start, missionId: %{public}d, type: %{public}s", status.missionId, typeStr.c_str());
-    // The interval between application exit and screen lock events is too short, which may result in abnormal re sending
-    // of focused broadcasts. This phenomenon is temporarily avoided here.
+    // The interval between application exit and screen lock events is too short,
+    // which may result in abnormal re sending of focused broadcasts.
+    // This phenomenon is temporarily avoided here.
     if (MissionEventType::MISSION_EVENT_DESTORYED == type) {
         screenLockedHandler_->ResetScreenLockedInfo();
     }
