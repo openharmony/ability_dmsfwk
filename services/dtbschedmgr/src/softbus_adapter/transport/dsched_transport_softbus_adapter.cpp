@@ -330,6 +330,7 @@ int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDevi
     }
     if (qosStatus.qosCnt <= 0) {
         HILOGE("valid qos count is: %{public}d", qosStatus.qosCnt);
+        delete [] qosStatus.validQos;
         return SOFTBUS_NO_USEFUL_QOS_ERR;
     }
     HILOGI("query Valid Qos success; qos count: %{public}d", qosStatus.qosCnt);
