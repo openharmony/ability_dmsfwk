@@ -33,6 +33,8 @@
 #include "native_avcodec_videodecoder.h"
 #include "string_wrapper.h"
 #include "tokenid_kit.h"
+#include "ui_extension_context.h"
+
 namespace OHOS {
 namespace DistributedCollab {
 using namespace OHOS::AbilityRuntime;
@@ -416,11 +418,17 @@ bool JsAbilityConnectionManager::JsToAbilityInfo(const napi_env &env, const napi
             return false;
         }
         auto abilityContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::AbilityContext>(context);
-        if (!abilityContext) {
-            HILOGE("convertTo AbilityContext failed!");
-            return false;
+        if (abilityContext == nullptr) {
+            HILOGW("convertTo AbilityContext failed! try convertTo UIExtensionContext");
+            auto extensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(context);
+            if (extensionContext == nullptr) {
+                HILOGE("convertTo UIExtensionContext failed!");
+                return false;
+            }
+            abilityInfo = extensionContext->GetAbilityInfo();
+        } else {
+            abilityInfo = abilityContext->GetAbilityInfo();
         }
-        abilityInfo = abilityContext->GetAbilityInfo();
     }
     return true;
 }
