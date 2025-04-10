@@ -24,7 +24,6 @@
 #include "iremote_stub.h"
 #include "message_parcel.h"
 #include "refbase.h"
-#include "sam_log.h"
 
 namespace OHOS {
 namespace DistributedSchedule {

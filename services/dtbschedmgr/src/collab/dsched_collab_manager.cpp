@@ -26,6 +26,7 @@
 #include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "dtbcollabmgr_log.h"
 #include "mission/distributed_bm_storage.h"
 #include "mission/wifi_state_adapter.h"
 #include "multi_user_manager.h"
@@ -39,6 +40,8 @@ constexpr static int32_t NO_NEED_TO_CHECK_ID = -1;
 const int32_t RANDOM_STRING_LENGTH = 20;
 std::map<int32_t, std::string> CMDDATA = {
     {MIN_CMD, "MIN_CMD"},
+    {SINK_GET_VERSION_CMD, "SINK_GET_VERSION_CMD"},
+    {SOURCE_GET_VERSION_CMD, "SOURCE_GET_VERSION_CMD"},
     {SINK_START_CMD, "SINK_START_CMD"},
     {NOTIFY_RESULT_CMD, "NOTIFY_RESULT_CMD"},
     {DISCONNECT_CMD, "DISCONNECT_CMD"},
@@ -138,7 +141,8 @@ int32_t DSchedCollabManager::CheckSrcCollabRelation(const CollabInfo *sourceInfo
         return ERR_OK;
     }
     HILOGW("deviceId: %{public}s, pid: %{public}d, tokenId: %{public}d, userId: %{public}d, srcUdid: %{public}s",
-        std::string(sourceInfo->deviceId).c_str(), sourceInfo->pid, static_cast<int32_t>(sourceInfo->tokenId),
+        GetAnonymStr(std::string(sourceInfo->deviceId)).c_str(),
+        sourceInfo->pid, static_cast<int32_t>(sourceInfo->tokenId),
         sourceInfo->userId, GetAnonymStr(collabInfo->srcUdid_).c_str());
     return INVALID_PARAMETERS_ERR;
 }
@@ -162,7 +166,8 @@ int32_t DSchedCollabManager::CheckSinkCollabRelation(const CollabInfo *sinkInfo,
         return ERR_OK;
     }
     HILOGW("deviceId: %{public}s, pid: %{public}d, tokenId: %{public}d, userId: %{public}d, sinkUdid: %{public}s",
-        std::string(sinkInfo->deviceId).c_str(), sinkInfo->pid, static_cast<int32_t>(sinkInfo->tokenId),
+        GetAnonymStr(std::string(sinkInfo->deviceId)).c_str(),
+        sinkInfo->pid, static_cast<int32_t>(sinkInfo->tokenId),
         sinkInfo->userId, GetAnonymStr(collabInfo->sinkUdid_).c_str());
     return INVALID_PARAMETERS_ERR;
 }
@@ -252,6 +257,10 @@ void DSchedCollabManager::HandleGetSinkCollabVersion(const DSchedCollabInfo &inf
 int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
 {
     HILOGI("called, collabInfo is: %{public}s", info.ToString().c_str());
+    if (!MultiUserManager::GetInstance().IsCallerForeground(info.srcInfo_.uid_)) {
+        HILOGW("The current user is not foreground. callingUid: %{public}d .", info.srcInfo_.uid_);
+        return DMS_NOT_FOREGROUND_USER;
+    }
     if (info.srcInfo_.bundleName_.empty() || info.sinkInfo_.bundleName_.empty() ||
         info.srcInfo_.moduleName_.empty() || info.sinkInfo_.moduleName_.empty() ||
         info.srcInfo_.abilityName_.empty() || info.sinkInfo_.abilityName_.empty()) {
@@ -293,20 +302,6 @@ bool DSchedCollabManager::IsSessionExists(const DSchedCollabInfo &info)
         }
     }
     return false;
-}
-
-void DSchedCollabManager::HandleCollabMission(const DSchedCollabInfo &info)
-{
-    HILOGI("called");
-    auto dCollab = GetDSchedCollabByTokenId(info.collabToken_);
-    if (dCollab == nullptr) {
-        HILOGE("can't find collab");
-        dCollab->PostErrEndTask(INVALID_PARAMETERS_ERR);
-        return;
-    }
-    dCollab->UpdateState(SOURCE_START_STATE);
-    dCollab->PostSrcStartTask();
-    HILOGI("end");
 }
 
 std::string DSchedCollabManager::GenerateCollabToken(const std::string &srcDeviceId)
@@ -421,13 +416,26 @@ int32_t DSchedCollabManager::NotifyStartAbilityResult(const std::string& collabT
         HILOGE("can't find collab");
         return INVALID_PARAMETERS_ERR;
     }
-    if (result != ERR_OK) {
+    if (result != ACCEPT) {
         HILOGE("start ability failed");
-        return dCollab->PostErrEndTask(result);
+        return dCollab->PostErrEndTask(ConvertCollaborateResult(result));
     }
     dCollab->SaveSinkAbilityData(collabToken, result, sinkPid, sinkUid, sinkAccessTokenId);
     HILOGI("end, info: %{public}s.", dCollab->GetCollabInfo().ToString().c_str());
     return ERR_OK;
+}
+
+int32_t DSchedCollabManager::ConvertCollaborateResult(int32_t result)
+{
+    HILOGI("collaborate result is %{public}d.", result);
+    switch (result) {
+        case REJECT:
+            return DistributedCollab::PEER_APP_REJECTED;
+        case ON_COLLABORATE_ERR:
+            return DistributedCollab::PEER_ABILITY_NO_ONCOLLABORATE;
+        default:
+            return INVALID_PARAMETERS_ERR;
+    }
 }
 
 int32_t DSchedCollabManager::NotifySinkPrepareResult(const std::string &collabToken, const int32_t &result,
@@ -506,38 +514,53 @@ int32_t DSchedCollabManager::HandleCloseSessions(const std::string &bundleName, 
 
 int32_t DSchedCollabManager::ReleaseAbilityLink(const std::string &bundleName, const int32_t &pid)
 {
-    HILOGW("called, disconnect the existing link after 5S");
-    auto func = [this, bundleName, pid]() {
-        HandleReleaseAbilityLink(bundleName, pid);
-    };
-    if (eventHandler_ == nullptr) {
-        HILOGE("eventHandler is nullptr");
-        return INVALID_PARAMETERS_ERR;
-    }
-    const std::string taskName = bundleName + std::to_string(pid);
-    eventHandler_->PostTask(func, taskName, BACKGROUND_TIMEOUT);
-    return ERR_OK;
-}
-
-void DSchedCollabManager::HandleReleaseAbilityLink(const std::string &bundleName, const int32_t &pid)
-{
-    HILOGI("called");
+    HILOGW("called");
     DSchedCollabInfo dSchedCollabInfo;
+    std::string collabToken;
     for (auto iter = collabs_.begin(); iter != collabs_.end(); iter++) {
         if (iter->second == nullptr) {
             continue;
         }
         dSchedCollabInfo = iter->second->GetCollabInfo();
         if (bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.srcInfo_.pid_) {
-            HILOGI("source ability been background, collabInfo: %{public}s", dSchedCollabInfo.ToString().c_str());
-            PrivilegeShutdown(static_cast<uint64_t>(dSchedCollabInfo.srcInfo_.accessToken_),
-                pid, dSchedCollabInfo.sinkInfo_.deviceId_.c_str());
-            iter->second->PostEndTask();
+            collabToken = dSchedCollabInfo.collabToken_;
         }
         if (bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.sinkInfo_.pid_) {
-            HILOGI("sink ability been background, collabInfo: %{public}s", dSchedCollabInfo.ToString().c_str());
-            iter->second->PostEndTask();
+            collabToken = dSchedCollabInfo.collabToken_;
         }
+    }
+    auto func = [this, bundleName, pid, collabToken]() {
+        HandleReleaseAbilityLink(bundleName, pid, collabToken);
+    };
+    const std::string taskName = bundleName + std::to_string(pid);
+    HILOGW("disconnect the existing link after 5S");
+    if (eventHandler_ == nullptr) {
+        HILOGE("eventHandler is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
+    eventHandler_->PostTask(func, taskName, BACKGROUND_TIMEOUT);
+    return ERR_OK;
+}
+
+void DSchedCollabManager::HandleReleaseAbilityLink(const std::string &bundleName, const int32_t &pid,
+    const std::string &collabToken)
+{
+    HILOGI("called");
+    auto dCollab = GetDSchedCollabByTokenId(collabToken);
+    if (dCollab == nullptr) {
+        HILOGE("can't find collab");
+        return;
+    }
+    DSchedCollabInfo dSchedCollabInfo = dCollab->GetCollabInfo();
+    if (pid == dSchedCollabInfo.srcInfo_.pid_) {
+        HILOGI("source ability been background, collabInfo: %{public}s", dSchedCollabInfo.ToString().c_str());
+        PrivilegeShutdown(static_cast<uint64_t>(dSchedCollabInfo.srcInfo_.accessToken_),
+            pid, dSchedCollabInfo.sinkInfo_.deviceId_.c_str());
+            dCollab->PostEndTask();
+    }
+    if (pid == dSchedCollabInfo.sinkInfo_.pid_) {
+        HILOGI("sink ability been background, collabInfo: %{public}s", dSchedCollabInfo.ToString().c_str());
+        dCollab->PostEndTask();
     }
     return;
 }
@@ -563,6 +586,12 @@ void DSchedCollabManager::NotifyWifiOpen()
         }
     }
 }
+
+bool DSchedCollabManager::GetWifiStatus()
+{
+    return DistributedSchedule::WifiStateAdapter::GetInstance().IsWifiActive();
+}
+
 int32_t DSchedCollabManager::NotifySessionClose(const std::string &collabToken)
 {
     HILOGI("called, collabToken: %{public}s", GetAnonymStr(collabToken).c_str());
@@ -667,7 +696,9 @@ void DSchedCollabManager::NotifyDataRecv(const int32_t &softbusSessionId, int32_
         if (iter->second != nullptr && softbusSessionId == iter->second->GetSoftbusSessionId() &&
             collabToken == iter->second->GetCollabInfo().collabToken_) {
             HILOGI("softbusSessionId exist.");
-            iter->second->OnDataRecv(command, dataBuffer);
+            const std::string peerDeviceId =
+                DSchedTransportSoftbusAdapter::GetInstance().GetPeerDeviceIdBySocket(softbusSessionId);
+            iter->second->OnDataRecv(peerDeviceId, command, dataBuffer);
             if (command == NOTIFY_RESULT_CMD) {
                 RemoveTimeout(iter->first);
             }
@@ -709,6 +740,7 @@ void DSchedCollabManager::OnShutdown(int32_t socket, bool isSelfCalled)
         return;
     }
     auto func = [this, socket]() {
+        std::lock_guard<std::mutex> collabLock(collabMutex_);
         if (collabs_.empty()) {
             return;
         }

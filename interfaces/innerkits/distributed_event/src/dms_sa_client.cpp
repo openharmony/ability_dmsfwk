@@ -16,6 +16,10 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+    const std::string TAG = "DmsSaClient";
+}
+
 DmsSaClient &DmsSaClient::GetInstance()
 {
     HILOGD("called.");

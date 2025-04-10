@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,9 +48,12 @@ struct AsyncCallbackInfo {
     std::shared_ptr<Media::PixelMap> image = nullptr;
     int32_t streamId;
     StreamParams streamParam;
+    int32_t imageQuality = 30;
 };
 
 enum BussinessErrorCode {
+    // Permission verification failed.
+    ERR_INVALID_PERMISSION = 201,
     // The caller is not a system application.
     ERR_NOT_SYSTEM_APP = 202,
     // Input parameter error.
@@ -89,11 +92,14 @@ public:
     static napi_value OnCreateAbilityConnectionSession(napi_env env, napi_callback_info info);
 
 private:
+    static bool JsToServiceName(const napi_env &env, const napi_value &jsValue,
+        std::string& serviceName);
     static bool JsToAbilityInfo(const napi_env &env, const napi_value &jsValue,
         std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo);
     static bool JsToPeerInfo(const napi_env &env, const napi_value &jsValue, PeerInfo &peerInfo);
     static int32_t JSToConnectOption(const napi_env &env, const napi_value &jsValue, ConnectOption &option);
     static bool JsToStreamParam(const napi_env &env, const napi_value &jsValue, StreamParams &streamParam);
+    static bool GetStreamParamBitrate(const napi_env &env, const napi_value &jsValue, StreamParams &streamParam);
     static bool JsToSurfaceParam(const napi_env &env, const napi_value &jsValue, SurfaceParams &surfaceParam);
 
     static void ConnectThreadsafeFunctionCallback(napi_env env, napi_value js_callback, void* context, void* data);
@@ -110,6 +116,7 @@ private:
     static void CompleteAsyncCreateStreamWork(napi_env env, napi_status status, void* data);
     static void CreateSendDataAsyncWork(napi_env env, AsyncCallbackInfo* asyncCallbackInfo);
     static void CreateStreamAsyncWork(napi_env env, AsyncCallbackInfo* asyncCallbackInfo);
+    static napi_value CreateSendImageAsyncWork(napi_env env, AsyncCallbackInfo* asyncCallbackInfo);
 
     static bool IsSystemApp();
     static bool JsToInt32(const napi_env &env, const napi_value &value,
@@ -123,10 +130,15 @@ private:
     static bool JsObjectToInt(const napi_env &env, const napi_value &object, const std::string &fieldStr,
         int32_t &fieldRef);
     static int32_t CheckEventType(const std::string& eventType);
-    static bool UnwrapOptions(napi_env env, napi_value options, ConnectOption &option);
+    static bool UnwrapOptions(napi_env env, napi_value options, ConnectOption &connectOption);
+    static bool UnwrapStartOptions(napi_env env, napi_value startOptionsVal, ConnectOption &connectOption);
     static bool UnwrapParameters(napi_env env, napi_value parameters, ConnectOption &option);
     static bool IsTypeForNapiValue(napi_env env, napi_value param, napi_valuetype expectType);
     static napi_value WrapPeerInfo(napi_env& env, const PeerInfo& peerInfo);
+    static int32_t CheckConnectOption(const ConnectOption &connectOption);
+    static napi_value ExecuteCreateSession(const std::string& serviceName,
+        std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, PeerInfo& peerInfo,
+        ConnectOption& connectOption, const napi_env& env);
 };
 
 napi_value JsAbilityConnectionManagerInit(napi_env env, napi_value exportObj);

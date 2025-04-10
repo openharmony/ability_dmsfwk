@@ -20,7 +20,6 @@
 
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
-#include "sam_log.h"
 #include "system_ability_status_change_stub.h"
 #include "system_ability_definition.h"
 
@@ -28,6 +27,7 @@
 #include "distributed_sched_types.h"
 #include "dms_client.h"
 #include "dms_handler.h"
+#include "dtbschedmgr_log.h"
 
 namespace OHOS {
 namespace DistributedSchedule {

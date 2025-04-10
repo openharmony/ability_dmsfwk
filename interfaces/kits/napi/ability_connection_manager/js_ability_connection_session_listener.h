@@ -27,18 +27,28 @@ class JsAbilityConnectionSessionListener {
 public:
     explicit JsAbilityConnectionSessionListener(napi_env env) : env_(env) {}
     virtual ~JsAbilityConnectionSessionListener() = default;
-    void CallJsMethod(const EventCallbackInfo& callbackInfo);
+    void CallJsMethod(const EventCallbackInfo& eventCallbackInfo);
+    void CallJsMethod(const CollaborateEventInfo& collaborateEventInfo);
     void SetCallback(const napi_value& jsListenerObj);
 
 private:
-    void CallJsMethodInner(const EventCallbackInfo& callbackInfo);
-    napi_value WrapEventCallbackInfo(napi_env& env, const EventCallbackInfo& callbackInfo);
+    // EventCallbackInfo
+    void CallJsMethodInner(const EventCallbackInfo& eventCallbackInfo);
+    napi_value WrapEventCallbackInfo(napi_env& env, const EventCallbackInfo& eventCallbackInfo);
+    // CollaborateEventInfo
+    void CallJsMethodInner(const CollaborateEventInfo& collaborateEventInfo);
+    napi_value WrapEventCallbackInfo(napi_env& env, const CollaborateEventInfo& collaborateEventInfo);
+
+    template <typename T>
+    void CallJsMethodTemplate(const T& callbackInfo);
+    template <typename T>
+    void CallJsMethodInnerTemplate(const T& callbackInfo);
     napi_value WrapAVTransDataBuffer(napi_env& env, const std::shared_ptr<AVTransDataBuffer>& dataBuffer);
 
 private:
     napi_env env_ = nullptr;
     std::unique_ptr<NativeReference> callbackRef_ = nullptr;
 };
-} // namespace DistributedSchedule
+} // namespace DistributedCollab
 } // namespace OHOS
 #endif // OHOS_DISTRIBUTED_ABILITY_CONNECTION_MANAGER_JS_ABILITY_CONNECTION_SESSION_LISTENER_H

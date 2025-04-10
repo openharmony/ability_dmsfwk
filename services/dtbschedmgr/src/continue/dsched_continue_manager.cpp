@@ -231,7 +231,7 @@ int32_t DSchedContinueManager::ContinueMission(const DSchedContinueInfo& continu
         int32_t missionId = -1;
         int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
         int32_t ret = DmsContinueConditionMgr::GetInstance().GetMissionIdByBundleName(
-            currentAccountId, continueInfo.sinkBundleName_, missionId);
+            currentAccountId, continueInfo.sourceBundleName_, missionId);
         if (ret != ERR_OK) {
             HILOGE("get missionId fail, ret %{public}d.", ret);
             return INVALID_PARAMETERS_ERR;

@@ -27,7 +27,7 @@ namespace DistributedCollab {
             : filter_(filter) {};
         ~AVReceiverFilterListener();
         void OnConnect(const int32_t channelId) const override;
-        void OnDisConnect(const int32_t channelId) const override;
+        void OnDisConnect(const int32_t channelId, const ShutdownReason& reason) const override;
         void OnStream(const int32_t channelId, const std::shared_ptr<AVTransStreamData>& stream) const override;
         void OnBytes(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer) const override;
         void OnMessage(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer) const override;

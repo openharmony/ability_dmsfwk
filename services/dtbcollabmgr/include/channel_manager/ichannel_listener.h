@@ -17,6 +17,7 @@
 #define OHOS_DSCHED_COLLAB_CHANNEL_ILISTENER_H
 #include "av_trans_stream_data.h"
 #include "channel_common_definition.h"
+#include "socket.h"
 #include <memory>
 
 namespace OHOS {
@@ -26,7 +27,7 @@ public:
     IChannelListener() = default;
     virtual ~IChannelListener() = default;
     virtual void OnConnect(const int32_t channelId) const;
-    virtual void OnDisConnect(const int32_t channelId) const;
+    virtual void OnDisConnect(const int32_t channelId, const ShutdownReason& reason) const;
     virtual void OnStream(const int32_t channelId, const std::shared_ptr<AVTransStreamData>& stream) const;
     virtual void OnBytes(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer) const;
     virtual void OnMessage(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& buffer) const;

@@ -32,6 +32,10 @@ namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DSchedTransportSoftbusAdapter";
 constexpr int32_t INVALID_SESSION_ID = -1;
+constexpr int32_t BIND_RETRY_INTERVAL = 500;
+constexpr int32_t MAX_BIND_RETRY_TIME = 4000;
+constexpr int32_t MAX_RETRY_TIMES = 8;
+constexpr int32_t MS_TO_US = 1000;
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DSchedTransportSoftbusAdapter);
@@ -40,6 +44,13 @@ static QosTV g_qosInfo[] = {
     { .qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_QOS_TYPE_MAX_LATENCY },
     { .qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_QOS_TYPE_MIN_LATENCY }
 };
+
+QosTV g_watch_collab_qosInfo[] = {
+    { .qos = QOS_TYPE_MIN_BW, .value = DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW },
+    { .qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_QOS_TYPE_MAX_LATENCY },
+    { .qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_QOS_TYPE_MIN_LATENCY }
+};
+
 static uint32_t g_QosTV_Param_Index = static_cast<uint32_t>(sizeof(g_qosInfo) / sizeof(QosTV));
 
 static void OnBind(int32_t socket, PeerSocketInfo info)
@@ -219,14 +230,11 @@ int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peer
     callingTokenId_ = 0;
 
     do {
-        HILOGI("bind begin");
-        ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
-        HILOGI("bind end");
+        ret = ServiceBind(sessionId, type);
         if (ret != ERR_OK) {
             HILOGE("client bind failed, ret: %{public}d", ret);
             break;
         }
-
         ret = CreateSessionRecord(sessionId, peerDeviceId, false, type);
         if (ret != ERR_OK) {
             HILOGE("Client create session record fail, ret %{public}d, peerDeviceId %{public}s, sessionId %{public}d.",
@@ -239,6 +247,41 @@ int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peer
         ShutdownSession(peerDeviceId, sessionId);
         sessionId = INVALID_SESSION_ID;
     }
+    return ret;
+}
+
+int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedServiceType type)
+{
+    HILOGI("begin");
+    int32_t ret = ERR_OK;
+    int retryCount = 0;
+    do {
+#ifdef DMS_CHECK_BLUETOOTH
+        HILOGI("collab bind begin");
+        if (type == SERVICE_TYPE_COLLAB) {
+            ret = Bind(sessionId, g_watch_collab_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+            HILOGI("end bind high qos");
+        }
+#endif
+#ifndef DMS_CHECK_BLUETOOTH
+            ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+            HILOGI("end bind stardard qos");
+#endif
+        if (ret == ERR_OK) {
+            return ret;
+        }
+        HILOGE("bind failed, err=%{public}d", ret);
+        if (ret != SOFTBUS_TRANS_PEER_SESSION_NOT_CREATED) {
+            return ret;
+        }
+        if (retryCount * BIND_RETRY_INTERVAL >= MAX_BIND_RETRY_TIME) {
+            HILOGE("bind failed after max retry time %{public}d ms", MAX_BIND_RETRY_TIME);
+            return ret;
+        }
+        HILOGI("bind failed, retrying after %{public}d ms, retry %{public}d", BIND_RETRY_INTERVAL, retryCount + 1);
+        usleep(BIND_RETRY_INTERVAL * MS_TO_US);
+        retryCount++;
+    } while (retryCount < MAX_RETRY_TIMES);
     return ret;
 }
 
@@ -339,6 +382,17 @@ void DSchedTransportSoftbusAdapter::OnBind(int32_t sessionId, const std::string 
         HILOGE("Service create session record fail, ret %{public}d, peerDeviceId %{public}s, sessionId %{public}d.",
             ret, GetAnonymStr(peerDeviceId).c_str(), sessionId);
     }
+}
+
+std::string DSchedTransportSoftbusAdapter::GetPeerDeviceIdBySocket(const int32_t sessionId)
+{
+    std::lock_guard<std::mutex> sessionLock(sessionMutex_);
+    for (auto iter = sessions_.begin(); iter != sessions_.end(); iter++) {
+        if (iter->first == sessionId) {
+            return iter->second->GetPeerDeviceId();
+        }
+    }
+    return "";
 }
 
 void DSchedTransportSoftbusAdapter::OnShutdown(int32_t sessionId, bool isSelfcalled)

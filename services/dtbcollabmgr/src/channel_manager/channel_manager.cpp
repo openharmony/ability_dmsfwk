@@ -59,7 +59,7 @@ namespace {
         { ChannelDataType::FILE, "F" }
     };
 
-    static constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW = 64 * 1024;
+    static constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW = 4 * 1024 * 1024;
     static constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MAX_LATENCY = 10000;
     static constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MIN_LATENCY = 2000;
 
@@ -67,8 +67,6 @@ namespace {
         { .qos = QOS_TYPE_MIN_BW, .value = DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW },
         { .qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_COLLAB_LOW_QOS_TYPE_MAX_LATENCY },
         { .qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_COLLAB_LOW_QOS_TYPE_MIN_LATENCY },
-        // only watch, need macro
-        { .qos = QOS_TYPE_TRANS_CONTINUOUS, .value = 1 },
         { .qos = QOS_TYPE_MAX_IDLE_TIMEOUT, .value = 60 * 60 * 1000 }
     };
 
@@ -181,8 +179,12 @@ ChannelManager::~ChannelManager()
 int32_t ChannelManager::Init(const std::string& ownerName)
 {
     HILOGI("start init channel manager");
-    if (eventHandler_ != nullptr && callbackEventHandler_ != nullptr) {
+    if (eventHandler_ != nullptr && callbackEventHandler_ != nullptr && msgEventHandler_ != nullptr) {
         HILOGW("server channel already init");
+        return ERR_OK;
+    }
+    if (serverSocketId_ > 0) {
+        HILOGW("server socket already init");
         return ERR_OK;
     }
     ownerName_ = ownerName;
@@ -199,18 +201,18 @@ int32_t ChannelManager::Init(const std::string& ownerName)
         return callbackEventHandler_ != nullptr;
     });
 
-    if (serverSocketId_ > 0) {
-        HILOGW("server socket already init");
-        return ERR_OK;
-    }
+    msgEventThread_ = std::thread(&ChannelManager::StartMsgEvent, this);
+    std::unique_lock<std::mutex> msgLock(msgEventMutex_);
+    msgEventCon_.wait(msgLock, [this] {
+        return msgEventHandler_ != nullptr;
+    });
+    
     int32_t socketServerId = CreateServerSocket();
-    int32_t ret = ERR_OK;
     if (socketServerId <= 0) {
         HILOGE("create socket failed, ret: %{public}d", socketServerId);
         return CREATE_SOCKET_FAILED;
     }
-
-    ret = Listen(socketServerId, g_low_qosInfo,
+    int32_t ret = Listen(socketServerId, g_low_qosInfo,
         g_lowQosTvParamIndex, &channelManagerListener);
     if (ret != ERR_OK) {
         HILOGE("service listen failed, ret: %{public}d", ret);
@@ -250,14 +252,29 @@ void ChannelManager::StartCallbackEvent()
     HILOGI("callback event end");
 }
 
+void ChannelManager::StartMsgEvent()
+{
+    HILOGI("Start msg event start");
+    std::string msgName = ownerName_ + "msg";
+    prctl(PR_SET_NAME, msgName.c_str());
+    auto runner = AppExecFwk::EventRunner::Create(false);
+    {
+        std::lock_guard<std::mutex> lock(msgEventMutex_);
+        msgEventHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
+    }
+    msgEventCon_.notify_one();
+    runner->Run();
+    HILOGI("msg event end");
+}
+
 int32_t ChannelManager::PostTask(const AppExecFwk::InnerEvent::Callback& callback,
-    const AppExecFwk::EventQueue::Priority priority)
+    const AppExecFwk::EventQueue::Priority priority, const std::string& name)
 {
     if (eventHandler_ == nullptr) {
         HILOGE("event handler empty");
         return NULL_EVENT_HANDLER;
     }
-    if (eventHandler_->PostTask(callback, priority)) {
+    if (eventHandler_->PostTask(callback, name, 0, priority)) {
         return ERR_OK;
     }
     HILOGE("add task failed");
@@ -275,6 +292,20 @@ int32_t ChannelManager::PostCallbackTask(const AppExecFwk::InnerEvent::Callback&
         return ERR_OK;
     }
     HILOGE("add callback task failed");
+    return POST_TASK_FAILED;
+}
+
+int32_t ChannelManager::PostMsgTask(const AppExecFwk::InnerEvent::Callback& callback,
+    const AppExecFwk::EventQueue::Priority priority)
+{
+    if (msgEventHandler_ == nullptr) {
+        HILOGE("msg event handler empty");
+        return NULL_EVENT_HANDLER;
+    }
+    if (msgEventHandler_->PostTask(callback, priority)) {
+        return ERR_OK;
+    }
+    HILOGE("add msg task failed");
     return POST_TASK_FAILED;
 }
 
@@ -316,6 +347,17 @@ void ChannelManager::DeInit()
         callbackEventHandler_ = nullptr;
     } else {
         HILOGE("callbackEventHandler_ is nullptr");
+    }
+
+    // stop msg task
+    if (msgEventHandler_ != nullptr) {
+        msgEventHandler_->GetEventRunner()->Stop();
+        if (msgEventThread_.joinable()) {
+            msgEventThread_.join();
+        }
+        msgEventHandler_ = nullptr;
+    } else {
+        HILOGE("msgEventHandler_ is nullptr");
     }
 
     // release channels
@@ -482,6 +524,7 @@ int32_t ChannelManager::DeleteChannel(const int32_t channelId)
         return INVALID_CHANNEL_ID;
     }
     ClearRegisterListener(channelId);
+    ClearSendTask(channelId);
     ClearRegisterChannel(channelId);
     ClearRegisterSocket(channelId);
     HILOGI("end delete channel");
@@ -537,6 +580,14 @@ void ChannelManager::ClearRegisterSocket(const int32_t channelId)
     }
 }
 
+void ChannelManager::ClearSendTask(int32_t channelId)
+{
+    HILOGI("clear send task for=%{public}d", channelId);
+    if (eventHandler_ != nullptr) {
+        eventHandler_->RemoveTask(std::to_string(channelId));
+    }
+}
+
 int32_t ChannelManager::RegisterChannelListener(const int32_t channelId,
     const std::shared_ptr<IChannelListener> listener)
 {
@@ -578,7 +629,7 @@ inline void ChannelManager::CleanInvalidListener(std::vector<std::weak_ptr<IChan
 
 int32_t ChannelManager::ConnectChannel(const int32_t channelId)
 {
-    HILOGI("start to connect channel, only allow client");
+    HILOGI("start to connect channel %{public}d, only allow client", channelId);
     std::vector<int32_t> socketIds;
     ChannelDataType dataType;
     {
@@ -673,7 +724,10 @@ int32_t ChannelManager::SetSocketStatus(const int32_t socketId, const ChannelSta
         }
         channelId = channelIt->second;
     }
-    return UpdateChannelStatus(channelId);
+    auto func = [channelId, this]() {
+        UpdateChannelStatus(channelId);
+    };
+    return PostCallbackTask(func, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 int32_t ChannelManager::UpdateChannelStatus(const int32_t channelId)
@@ -893,7 +947,7 @@ void ChannelManager::DoConnectCallback(const int32_t channelId)
         AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
-void ChannelManager::OnSocketClosed(int32_t socketId, const ShutdownReason reason)
+void ChannelManager::OnSocketClosed(int32_t socketId, const ShutdownReason& reason)
 {
     int32_t channelId = 0;
     CHECK_SOCKET_ID(socketId);
@@ -907,7 +961,7 @@ void ChannelManager::OnSocketClosed(int32_t socketId, const ShutdownReason reaso
     }
     // delete channel when all socket shutdown
     if (GetChannelStatus(channelId) == ChannelStatus::UNCONNECTED) {
-        DoDisConnectCallback(channelId);
+        DoDisConnectCallback(channelId, reason);
         DeleteChannel(channelId);
     }
 }
@@ -923,10 +977,10 @@ int32_t ChannelManager::GetChannelId(const int32_t socketId)
     return it->second;
 }
 
-void ChannelManager::DoDisConnectCallback(const int32_t channelId)
+void ChannelManager::DoDisConnectCallback(const int32_t channelId, const ShutdownReason& reason)
 {
     NotifyListeners(channelId, &IChannelListener::OnDisConnect,
-        AppExecFwk::EventQueue::Priority::IMMEDIATE);
+        AppExecFwk::EventQueue::Priority::IMMEDIATE, reason);
 }
 
 ChannelStatus ChannelManager::GetChannelStatus(const int32_t channelId)
@@ -980,11 +1034,12 @@ int32_t ChannelManager::SendBytes(const int32_t channelId, const std::shared_ptr
         HILOGE("invalid channel id. %{public}d", channelId);
         return INVALID_CHANNEL_ID;
     }
-    HILOGI("start to send bytes");
+    HILOGI("start to send bytes, %{public}u", static_cast<uint32_t>(data->Size()));
     auto func = [channelId, data, this]() {
         DoSendBytes(channelId, data);
     };
-    int32_t ret = PostTask(func, AppExecFwk::EventQueue::Priority::LOW);
+    int32_t ret = PostTask(func, AppExecFwk::EventQueue::Priority::LOW,
+        std::to_string(channelId));
     if (ret != ERR_OK) {
         HILOGE("failed to add send bytes task, ret=%{public}d", ret);
         return ret;
@@ -1034,7 +1089,8 @@ int32_t ChannelManager::SendStream(const int32_t channelId,
     auto func = [=]() {
         DoSendStream(channelId, data);
     };
-    int32_t ret = PostTask(func, AppExecFwk::EventQueue::Priority::LOW);
+    int32_t ret = PostTask(func, AppExecFwk::EventQueue::Priority::LOW,
+        std::to_string(channelId));
     if (ret != ERR_OK) {
         HILOGE("failed to add send stream task, ret=%{public}d", ret);
         return POST_TASK_FAILED;
@@ -1056,16 +1112,16 @@ int32_t ChannelManager::SendMessage(const int32_t channelId,
         HILOGE("invalid channel id. %{public}d", channelId);
         return INVALID_CHANNEL_ID;
     }
-    HILOGD("start to send message");
+    HILOGD("start to send message, %{public}u", static_cast<uint32_t>(data->Size()));
     auto func = [channelId, data, this]() {
         DoSendMessage(channelId, data);
     };
-    int32_t ret = PostTask(func, AppExecFwk::EventQueue::Priority::HIGH);
+    int32_t ret = PostMsgTask(func, AppExecFwk::EventQueue::Priority::HIGH);
     if (ret != ERR_OK) {
         HILOGE("failed to add send bytes task, ret=%{public}d", ret);
         return ret;
     }
-    HILOGD("send bytes task added to handler");
+    HILOGD("send message task added to handler");
     return ERR_OK;
 }
 
@@ -1336,7 +1392,7 @@ void ChannelManager::DealFileErrorEvent(int32_t channelId, FileEvent *event)
 
 void ChannelManager::DealFileUpdatePathEvent(int32_t channelId, FileEvent *event)
 {
-    HILOGI("start to deal file error event, %{public}d", channelId);
+    HILOGI("start to deal file update path event, %{public}d", channelId);
     event->UpdateRecvPath = GetRecvPath;
     HILOGI("end");
 }
@@ -1344,7 +1400,7 @@ void ChannelManager::DealFileUpdatePathEvent(int32_t channelId, FileEvent *event
 const char* ChannelManager::GetRecvPathFromUser()
 {
     HILOGI("get recv path from user");
-    int32_t channelId = fileChannelId_.load();
+    int32_t channelId = static_cast<int32_t>(fileChannelId_.load());
     std::shared_lock<std::shared_mutex> readLock(listenerMutex_);
     auto it = listenersMap_.find(channelId);
     if (it == listenersMap_.end() || it->second.empty()) {

@@ -21,8 +21,8 @@
 
 #include "ability_connection_info.h"
 #include "ability_connection_session.h"
-#include "iremote_broker.h"
-#include "if_system_ability_manager.h"
+#include "iremote_object.h"
+#include "system_ability_status_change_stub.h"
 #include <mutex>
 #include <condition_variable>
 
@@ -40,6 +40,7 @@ public:
     int32_t NotifyCloseCollabSession(const std::string& token);
     int32_t NotifyRejectReason(const std::string& token, const std::string& reason);
     int32_t GetPeerVersion(int32_t sessionId, const std::string& peerDeviceId, const std::string dmsServerToken);
+    bool GetWifiStatus();
     
     enum {
         COLLAB_MESSION = 330,
@@ -47,6 +48,7 @@ public:
         NOTIFY_REJECT_REASON = 332,
         BNOTIFY_CLOSE_COLLAB_SESSION = 333,
         GET_SINK_COLLAB_VERSION = 335,
+        GET_WIFI_STATUS = 336,
     };
 private:
     sptr<IRemoteObject> GetDmsProxy();
@@ -56,12 +58,11 @@ private:
     std::condition_variable cv_;
     bool callbackReceived_ = false;
     sptr<ISystemAbilityStatusChange> listener_ = nullptr;
-    class SystemAbilityStatusChangeListener : public ISystemAbilityStatusChange {
+    class SystemAbilityStatusChangeListener : public SystemAbilityStatusChangeStub {
     public:
         explicit SystemAbilityStatusChangeListener(DistributedClient* client): client_(client) {}
         void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
         void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
-        sptr<IRemoteObject> AsObject() override;
     private:
         DistributedClient* client_ = nullptr;
     };
