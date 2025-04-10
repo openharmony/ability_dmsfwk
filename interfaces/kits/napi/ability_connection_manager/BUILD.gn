@@ -53,6 +53,7 @@ ohos_shared_library("abilityconnectionmanager_napi") {
     "ability_runtime:napi_base_context",
     "ability_runtime:napi_common",
     "ability_runtime:runtime",
+    "ability_runtime:ui_extension",
     "access_token:libtokenid_sdk",
     "av_codec:av_codec_client",
     "av_codec:av_codec_media_engine_filters",
