@@ -190,7 +190,7 @@ void DMSContinueSendMgr::SendContinueBroadcast(const MissionStatus& status, Miss
 {
     auto typeStr = DmsContinueConditionMgr::GetInstance().TypeEnumToString(type);
     HILOGI("start, missionId: %{public}d, type: %{public}s", status.missionId, typeStr.c_str());
-    if(MissionEventType::MISSION_EVENT_DESTORYED == type){
+    if (MissionEventType::MISSION_EVENT_DESTORYED == type) {
         screenLockedHandler_->ResetScreenLockedInfo();
     }
     if (!DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition() ||
