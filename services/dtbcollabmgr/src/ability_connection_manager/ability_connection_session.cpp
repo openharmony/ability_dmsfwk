@@ -14,6 +14,7 @@
  */
 #include "ability_connection_session.h"
 
+#include <charconv>
 #include <chrono>
 #include <map>
 #include <unistd.h>
@@ -613,7 +614,13 @@ int32_t AbilityConnectionSession::SetSurfaceId(const std::string& surfaceId,
         return ret;
     }
 
-    ret = recvEngine_->SetVideoSurface(std::stoull(surfaceId));
+    uint64_t value = 0;
+    auto result = std::from_chars(surfaceId.data(), surfaceId.data() + surfaceId.size(), value);
+    if (result.ec != std::errc()) {
+        HILOGE("Get value failed");
+        return INVALID_PARAMETERS_ERR;
+    }
+    ret = recvEngine_->SetVideoSurface(value);
     if (ret != ERR_OK) {
         HILOGE("error set video surface!");
         return ret;
