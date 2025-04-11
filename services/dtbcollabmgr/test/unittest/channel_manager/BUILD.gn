@@ -112,6 +112,7 @@ ohos_unittest("ChannelManagerDataSenderReceiverTest") {
     "cJSON:cjson",
     "c_utils:utils",
     "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
     "googletest:gmock",
     "hilog:libhilog",
   ]
