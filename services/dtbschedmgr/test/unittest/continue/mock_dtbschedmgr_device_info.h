@@ -28,6 +28,8 @@ public:
     virtual ~DmsMgrDeviceInfoStore() = default;
 public:
     virtual bool GetLocalDeviceId(std::string& networkId) = 0;
+    virtual std::shared_ptr<DmsDeviceInfo> GetDeviceInfoById(const std::string& networkId) = 0;
+    virtual bool CheckNetworkIdByBundleName(const std::string& bundleName, const std::string& networkId) = 0;
 public:
     static inline std::shared_ptr<DmsMgrDeviceInfoStore> dmsStore = nullptr;
 };
@@ -35,6 +37,8 @@ public:
 class MockDmsMgrDeviceInfoStore : public DmsMgrDeviceInfoStore {
 public:
     MOCK_METHOD(bool, GetLocalDeviceId, (std::string& networkId));
+    MOCK_METHOD(std::shared_ptr<DmsDeviceInfo>, GetDeviceInfoById, (const std::string& networkId));
+    MOCK_METHOD(bool, CheckNetworkIdByBundleName, (const std::string& bundleName, const std::string& networkId));
 };
 }
 }

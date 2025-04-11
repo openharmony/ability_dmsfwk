@@ -28,7 +28,6 @@ using namespace OHOS::DistributedHardware;
 namespace OHOS {
 namespace DistributedSchedule {
 
-static std::shared_ptr<DmsDeviceInfo> g_mockDeviceInfoPtr = nullptr;
 static bool g_mockDbs = false;
 
 namespace {
@@ -42,11 +41,6 @@ namespace {
     const std::string BUNDLE_NAME = "com.ohos.permissionmanager";
 }
 
-std::shared_ptr<DmsDeviceInfo> DtbschedmgrDeviceInfoStorage::GetDeviceInfoById(const std::string& networkId)
-{
-    return g_mockDeviceInfoPtr;
-}
-
 bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
     const uint16_t &bundleNameId, DmsBundleInfo &distributeBundleInfo)
 {
@@ -58,6 +52,8 @@ void DSchedCollabManagerTest::SetUpTestCase()
     DTEST_LOG << "DSchedCollabManagerTest::SetUpTestCase" << std::endl;
     mkdir(BASEDIR.c_str(), (S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH));
     DSchedCollabManager::GetInstance().Init();
+    dmsStoreMock = std::make_shared<MockDmsMgrDeviceInfoStore>();
+    MockDmsMgrDeviceInfoStore::dmsStore = dmsStoreMock;
     multiUserMgrMock_ = std::make_shared<MultiUserManagerMock>();
     MultiUserManagerMock::multiUserMgrMock = multiUserMgrMock_;
 }
@@ -66,6 +62,8 @@ void DSchedCollabManagerTest::TearDownTestCase()
 {
     DTEST_LOG << "DSchedCollabManagerTest::TearDownTestCase" << std::endl;
     (void)remove(BASEDIR.c_str());
+    MockDmsMgrDeviceInfoStore::dmsStore = nullptr;
+    dmsStoreMock = nullptr;
     MultiUserManagerMock::multiUserMgrMock = nullptr;
     multiUserMgrMock_ = nullptr;
 }
@@ -74,7 +72,6 @@ void DSchedCollabManagerTest::TearDown()
 {
     DTEST_LOG << "DSchedCollabManagerTest::TearDown" << std::endl;
     usleep(WAITTIME);
-    g_mockDeviceInfoPtr = nullptr;
     g_mockDbs = false;
     DSchedCollabManager::GetInstance().collabs_.clear();
 }
@@ -180,9 +177,40 @@ HWTEST_F(DSchedCollabManagerTest, CollabMission_002, TestSize.Level3)
 
     info.sinkInfo_.abilityName_ = "sinkAbility";
     EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(false));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
     EXPECT_EQ(ret, FIND_LOCAL_DEVICEID_ERR);
     DTEST_LOG << "DSchedCollabManagerTest CollabMission_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: CollabMission_003
+ * @tc.desc: test CollabMission func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerTest, CollabMission_003, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerTest CollabMission_003 begin" << std::endl;
+    DSchedCollabInfo info;
+    info.srcInfo_.bundleName_ = "srcBundle";
+    info.sinkInfo_.bundleName_ = "sinkBundle";
+    info.srcInfo_.moduleName_ = "srcModule";
+    info.sinkInfo_.moduleName_ = "sinkModule";
+    info.srcInfo_.abilityName_ = "srcAbility";
+    info.sinkInfo_.abilityName_ = "sinkAbility";
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
+    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(nullptr));
+    int32_t ret = DSchedCollabManager::GetInstance().CollabMission(info);
+    EXPECT_EQ(ret, FIND_REMOTE_DEVICEID_ERR);
+
+    std::shared_ptr<DmsDeviceInfo> ptr = std::make_shared<DmsDeviceInfo>("", 0, "");
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
+    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(ptr));
+    ret = DSchedCollabManager::GetInstance().CollabMission(info);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DSchedCollabManagerTest CollabMission_003 end" << std::endl;
 }
 
 /**
@@ -734,6 +762,87 @@ HWTEST_F(DSchedCollabManagerTest, ConvertCollaborateResult_001, TestSize.Level3)
     ret = DSchedCollabManager::GetInstance().ConvertCollaborateResult(result);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedCollabManagerTest ConvertCollaborateResult_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleCollabPrepareResult_001
+ * @tc.desc: test HandleCollabPrepareResult func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerTest, HandleCollabPrepareResult_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerTest HandleCollabPrepareResult_001 begin" << std::endl;
+    std::string collabToken = "collabToken";
+    DSchedCollabInfo info;
+    std::shared_ptr<DSchedCollab> ptr = std::make_shared<DSchedCollab>(collabToken, info);
+    DSchedCollabManager::GetInstance().collabs_["collabToken"] = ptr;
+
+    EXPECT_NO_FATAL_FAILURE(DSchedCollabManager::GetInstance().HandleCollabPrepareResult(
+        "collabToken", 0, 0, "socketName", nullptr));
+
+    EXPECT_NO_FATAL_FAILURE(DSchedCollabManager::GetInstance().NotifySinkRejectReason(
+        "collabToken", "reason"));
+    
+    EXPECT_NO_FATAL_FAILURE(DSchedCollabManager::GetInstance().HandleReleaseAbilityLink(
+        "collabToken", 0, "token"));
+    DTEST_LOG << "DSchedCollabManagerTest HandleCollabPrepareResult_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleCloseSessions_001
+ * @tc.desc: test HandleCloseSessions func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerTest, HandleCloseSessions_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerTest HandleCloseSessions_001 begin" << std::endl;
+    std::string collabToken = "collabToken";
+    DSchedCollabInfo info;
+    DSchedCollabInfo collabInfo;
+    std::shared_ptr<DSchedCollab> ptr = std::make_shared<DSchedCollab>(collabToken, info);
+    ptr->collabInfo_ = collabInfo;
+    DSchedCollabManager::GetInstance().collabs_.clear();
+    DSchedCollabManager::GetInstance().collabs_["token"] = nullptr;
+    DSchedCollabManager::GetInstance().collabs_["collabToken"] = ptr;
+
+    std::string bundleName = "bundleName";
+    int32_t pid = 0;
+    int32_t ret = DSchedCollabManager::GetInstance().HandleCloseSessions(bundleName, pid);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DSchedCollabManagerTest HandleCloseSessions_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleCloseSessions_002
+ * @tc.desc: test HandleCloseSessions func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerTest, HandleCloseSessions_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerTest HandleCloseSessions_002 begin" << std::endl;
+    std::string collabToken = "collabToken";
+    DSchedCollabInfo info;
+    DSchedCollabInfo collabInfo;
+    collabInfo.srcInfo_.bundleName_ = "bundleName";
+    collabInfo.sinkInfo_.pid_ = 0;
+    std::shared_ptr<DSchedCollab> ptr = std::make_shared<DSchedCollab>(collabToken, info);
+    ptr->collabInfo_ = collabInfo;
+    DSchedCollabManager::GetInstance().collabs_.clear();
+    DSchedCollabManager::GetInstance().collabs_["collabToken"] = ptr;
+
+    std::string bundleName = "bundleName";
+    int32_t pid = 0;
+    int32_t ret = DSchedCollabManager::GetInstance().HandleCloseSessions(bundleName, pid);
+    EXPECT_NE(ret, ERR_OK);
+
+    collabInfo.srcInfo_.pid_ = 0;
+    std::shared_ptr<DSchedCollab> ptr1 = std::make_shared<DSchedCollab>(collabToken, info);
+    ptr1->collabInfo_ = collabInfo;
+    DSchedCollabManager::GetInstance().collabs_.clear();
+    DSchedCollabManager::GetInstance().collabs_["collabToken"] = ptr1;
+    ret = DSchedCollabManager::GetInstance().HandleCloseSessions(bundleName, pid);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DSchedCollabManagerTest HandleCloseSessions_002 end" << std::endl;
 }
 }
 }

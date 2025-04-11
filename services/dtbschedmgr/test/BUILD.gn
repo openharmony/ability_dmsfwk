@@ -196,6 +196,7 @@ ohos_unittest("distributedschedservicetest") {
 
 ohos_unittest("svcdistributedconnectiontest") {
   sanitize = {
+    blocklist = "./cfi_blocklist.txt"
     cfi = true
     cfi_cross_dso = true
     debug = false
@@ -353,6 +354,7 @@ ohos_unittest("dmsfreeinstallcbtest") {
 
 ohos_unittest("dschedcontinuationtest") {
   sanitize = {
+    blocklist = "./cfi_blocklist.txt"
     cfi = true
     cfi_cross_dso = true
     debug = false
@@ -360,10 +362,42 @@ ohos_unittest("dschedcontinuationtest") {
   module_out_path = module_output_path
   sources = [
     "unittest/distributed_sched_continuation_test.cpp",
-    "unittest/dms_version_manager_test.cpp",
     "unittest/mock_distributed_sched.cpp",
     "unittest/mock_remote_stub.cpp",
   ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+
+  if (dmsfwk_mission_manager) {
+    defines = [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
+  }
+
+  if (dmsfwk_standard_form_share) {
+    defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
+  }
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("dmsversionmanagertest") {
+  sanitize = {
+    blocklist = "./cfi_blocklist.txt"
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+  sources = [ "unittest/dms_version_manager_test.cpp" ]
   sources += dtbschedmgr_sources
 
   configs = [
@@ -855,6 +889,7 @@ ohos_unittest("dmscollabmgrtest") {
     "${dms_path}/services/dtbschedmgr/src/collab/dsched_collab_manager.cpp",
     "unittest/collab/dsched_collab_manager_sup_test.cpp",
     "unittest/collab/dsched_collab_manager_test.cpp",
+    "unittest/continue/mock_dtbschedmgr_device_info.cpp",
     "unittest/mock/multi_user_manager_mock.cpp",
     "unittest/mock_distributed_sched.cpp",
   ]
@@ -1249,6 +1284,7 @@ group("unittest") {
     ":dmscollabsuptest",
     ":dmscollabtest",
     ":dmsfreeinstallcbtest",
+    ":dmsversionmanagertest",
     ":dschedconnecttest",
     ":dschedcontinuationtest",
     ":dschedcontinuemanagerstatetest",
