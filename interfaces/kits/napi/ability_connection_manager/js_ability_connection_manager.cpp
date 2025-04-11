@@ -724,16 +724,10 @@ napi_value JsAbilityConnectionManager::UnregisterAbilityConnectionSessionCallbac
 napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info info)
 {
     HILOGI("called.");
-    GET_PARAMS(env, info, ARG_COUNT_ONE);
-    if (argc != ARG_COUNT_ONE) {
-        HILOGE("CheckArgsCount failed.");
-        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
-        return nullptr;
-    }
-
     int32_t sessionId = -1;
-    if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
-        HILOGE("Failed to unwrap sessionId.");
+    GET_PARAMS(env, info, ARG_COUNT_ONE);
+    if (argc != ARG_COUNT_ONE || !JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
+        HILOGE("CheckArgsCount failed or Failed to unwrap sessionId.");
         CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
@@ -750,6 +744,7 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
     if (CreateConnectThreadsafeFunction(env, nullptr, &tsfn) != napi_ok || tsfn == nullptr) {
         HILOGE("Failed to create connect function.");
         delete asyncCallbackInfo;
+        napi_release_threadsafe_function(tsfn, napi_tsfn_release);
         napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
         return promise;
     }
@@ -765,6 +760,7 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
         HILOGE("Failed to create async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
+        napi_release_threadsafe_function(tsfn, napi_tsfn_release);
         napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
         return promise;
     }
@@ -773,6 +769,7 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
         HILOGE("Failed to queue async work.");
         napi_delete_async_work(env, asyncCallbackInfo->asyncWork);
         delete asyncCallbackInfo;
+        napi_release_threadsafe_function(tsfn, napi_tsfn_release);
         napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
         return promise;
     }
