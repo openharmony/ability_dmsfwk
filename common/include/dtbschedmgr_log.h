@@ -598,6 +598,14 @@ enum {
      * Result(29360341) for DistributedSched Service Collab Ability Reject Error.
      */
     COLLAB_ABILITY_REJECT_ERR = 29360341,
+    /**
+     * Result(29360342) for SoftBus Query Valid Qos failed.
+     */
+    SOFTBUS_QUERY_VALID_QOS_ERR = 29360342,
+    /**
+     * Result(29360343) for SoftBus Query Valid Qos success but no usable qos.
+     */
+    SOFTBUS_NO_USEFUL_QOS_ERR = 29360343,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
