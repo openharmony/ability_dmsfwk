@@ -29,7 +29,6 @@ using namespace OHOS::DistributedHardware;
 namespace OHOS {
 namespace DistributedSchedule {
 
-static std::shared_ptr<DmsDeviceInfo> g_mockDeviceInfoPtr = nullptr;
 static bool g_mockDbs = false;
 
 namespace {
@@ -41,11 +40,6 @@ namespace {
     constexpr size_t SIZE = 10;
     const int32_t WAITTIME = 2000;
     const std::string BUNDLE_NAME = "com.ohos.permissionmanager";
-}
-
-std::shared_ptr<DmsDeviceInfo> DtbschedmgrDeviceInfoStorage::GetDeviceInfoById(const std::string& networkId)
-{
-    return g_mockDeviceInfoPtr;
 }
 
 bool DmsBmStorage::GetDistributedBundleInfo(const std::string &networkId,
@@ -82,7 +76,6 @@ void DSchedContinueManagerTest::TearDown()
 void DSchedContinueManagerTest::SetUp()
 {
     usleep(WAITTIME);
-    g_mockDeviceInfoPtr = nullptr;
     g_mockDbs = false;
     DTEST_LOG << "DSchedContinueManagerTest::SetUp" << std::endl;
 }
@@ -657,14 +650,15 @@ HWTEST_F(DSchedContinueManagerTest, ContinueMission_006, TestSize.Level3)
     DSchedContinueManager::GetInstance(). eventHandler_ = nullptr;
     auto callback = GetDSchedService();
     OHOS::AAFwk::WantParams wantParams;
-    g_mockDeviceInfoPtr = std::make_shared<DmsDeviceInfo>("", 0, "");
+    std::shared_ptr<DmsDeviceInfo> ptr = std::make_shared<DmsDeviceInfo>("", 0, "");
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(DoAll(SetArgReferee<0>(REMOTE_DEVICEID), Return(true)));
+    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(ptr));
     int32_t ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, MISSION_ID,
         callback, wantParams);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
-    g_mockDeviceInfoPtr = std::make_shared<DmsDeviceInfo>("", 0, "");
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(DoAll(SetArgReferee<0>(REMOTE_DEVICEID), Return(true)));
+    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(ptr));
     ret = DSchedContinueManager::GetInstance().ContinueMission(
         DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
         callback, wantParams);
@@ -684,14 +678,15 @@ HWTEST_F(DSchedContinueManagerTest, ContinueMission_007, TestSize.Level3)
     DSchedContinueManager::GetInstance().eventHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
     auto callback = GetDSchedService();
     OHOS::AAFwk::WantParams wantParams;
-    g_mockDeviceInfoPtr = std::make_shared<DmsDeviceInfo>("", 0, "");
+    std::shared_ptr<DmsDeviceInfo> ptr = std::make_shared<DmsDeviceInfo>("", 0, "");
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(DoAll(SetArgReferee<0>(REMOTE_DEVICEID), Return(true)));
+    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(ptr));
     int32_t ret = DSchedContinueManager::GetInstance().ContinueMission(LOCAL_DEVICEID, REMOTE_DEVICEID, MISSION_ID,
         callback, wantParams);
     EXPECT_EQ(ret, ERR_OK);
 
-    g_mockDeviceInfoPtr = std::make_shared<DmsDeviceInfo>("", 0, "");
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(DoAll(SetArgReferee<0>(REMOTE_DEVICEID), Return(true)));
+    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(ptr));
     ret = DSchedContinueManager::GetInstance().ContinueMission(
         DSchedContinueInfo(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE),
         callback, wantParams);
@@ -714,8 +709,9 @@ HWTEST_F(DSchedContinueManagerTest, StartContinuation_002, TestSize.Level3)
     uint32_t accessToken = 0;
     DSchedContinueInfo info(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE);
     std::shared_ptr<DSchedContinue> dContinue = CreateObject();
-    g_mockDeviceInfoPtr = std::make_shared<DmsDeviceInfo>("", 0, "");
+    std::shared_ptr<DmsDeviceInfo> ptr = std::make_shared<DmsDeviceInfo>("", 0, "");
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(false));
+    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(ptr));
     int32_t ret = DSchedContinueManager::GetInstance().StartContinuation(want, missionId,
         callerUid, status, accessToken);
     EXPECT_EQ(ret, INVALID_REMOTE_PARAMETERS_ERR);
@@ -768,14 +764,16 @@ HWTEST_F(DSchedContinueManagerTest, CheckContinuationLimit_003, TestSize.Level3)
 {
     DTEST_LOG << "DSchedContinueManagerTest CheckContinuationLimit_003 begin" << std::endl;
     int32_t direction = 0;
-    g_mockDeviceInfoPtr = std::make_shared<DmsDeviceInfo>("", 0, "");
+    std::shared_ptr<DmsDeviceInfo> ptr = std::make_shared<DmsDeviceInfo>("", 0, "");
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(DoAll(SetArgReferee<0>(LOCAL_DEVICEID), Return(true)));
+    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(ptr));
     DSchedContinueManager::GetInstance().cntSink_.store(MAX_CONCURRENT_SINK);
     int32_t ret = DSchedContinueManager::GetInstance().CheckContinuationLimit(LOCAL_DEVICEID, REMOTE_DEVICEID,
         direction);
     EXPECT_EQ(ret, ERR_OK);
 
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(DoAll(SetArgReferee<0>(REMOTE_DEVICEID), Return(true)));
+    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(ptr));
     DSchedContinueManager::GetInstance().cntSink_.store(0);
     ret = DSchedContinueManager::GetInstance().CheckContinuationLimit(LOCAL_DEVICEID, REMOTE_DEVICEID,
         direction);

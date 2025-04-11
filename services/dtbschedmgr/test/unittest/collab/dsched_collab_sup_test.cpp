@@ -399,5 +399,20 @@ HWTEST_F(DSchedCollabSupTest, PostSrcGetPeerVersionTask_001, TestSize.Level3)
     EXPECT_EQ(dSchedCollab_->PostSrcGetPeerVersionTask(), ERR_OK);
     DTEST_LOG << "DSchedCollabTest PPostSrcGetPeerVersionTask_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: SetSinkCollabInfo_001
+ * @tc.desc: call SetSinkCollabInfo
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabSupTest, SetSinkCollabInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest SetSinkCollabInfo_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+    ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
+    EXPECT_NO_FATAL_FAILURE(dSchedCollab_->SetSinkCollabInfo(nullptr));
+    DTEST_LOG << "DSchedCollabTest SetSinkCollabInfo_001 end" << std::endl;
+}
 }
 }
