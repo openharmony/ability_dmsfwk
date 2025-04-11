@@ -31,6 +31,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    static inline std::shared_ptr<MockDmsMgrDeviceInfoStore> dmsStoreMock = nullptr;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

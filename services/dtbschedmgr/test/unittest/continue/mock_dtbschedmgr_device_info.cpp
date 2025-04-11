@@ -21,5 +21,17 @@ bool DtbschedmgrDeviceInfoStorage::GetLocalDeviceId(std::string& networkId)
 {
     return OHOS::DistributedSchedule::DmsMgrDeviceInfoStore::dmsStore->GetLocalDeviceId(networkId);
 }
+
+std::shared_ptr<DmsDeviceInfo> DtbschedmgrDeviceInfoStorage::GetDeviceInfoById(const std::string& networkId)
+{
+    return OHOS::DistributedSchedule::DmsMgrDeviceInfoStore::dmsStore->GetDeviceInfoById(networkId);
+}
+
+bool DtbschedmgrDeviceInfoStorage::CheckNetworkIdByBundleName(const std::string& bundleName,
+    const std::string& networkId)
+{
+    return OHOS::DistributedSchedule::DmsMgrDeviceInfoStore::dmsStore->CheckNetworkIdByBundleName(
+        bundleName, networkId);
+}
 }
 }
