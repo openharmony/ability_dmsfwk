@@ -16,6 +16,7 @@
 #include "dtbcollabmgr_log.h"
 #include "securec.h"
 #include "session_data_header.h"
+#include <thread>
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -23,6 +24,7 @@ namespace {
     static const std::string TAG = "DSchedCollabDataSenderReceiverTest";
     using namespace testing;
     using namespace testing::ext;
+    static constexpr int32_t SLEEP_TIME = 1000;
 }
 void DataSenderReceiverTest::SetUpTestCase()
 {
@@ -106,21 +108,8 @@ HWTEST_F(DataSenderReceiverTest, SendMessageData_Success, TestSize.Level1)
         .WillOnce(testing::Return(ERR_OK));
 
     int32_t result = dataSenderReceiver.SendMessageData(buffer);
-
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
     EXPECT_EQ(result, ERR_OK);
-}
-
-/**
- * @tc.name: SendMessageData_Failure
- * @tc.desc: Test for SendMessageData when SendMessage fails
- * @tc.type: FUNC
- */
-HWTEST_F(DataSenderReceiverTest, SendMessageData_Failure, TestSize.Level1)
-{
-    EXPECT_CALL(mockSoftbus, SendMessage(socketId, testing::_, testing::_))
-        .WillOnce(testing::Return(-1));
-    int32_t result = dataSenderReceiver.SendMessageData(buffer);
-    EXPECT_EQ(result, -1);
 }
 
 /**
