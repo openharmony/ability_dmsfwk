@@ -15,8 +15,10 @@
 
 #include "ability_connection_session_test.h"
 
+#include "ability_connection_info.h"
 #include "ability_connection_session_listener.h"
 #include "av_sender_filter.h"
+#include "dtbschedmgr_log.h"
 #include "dtbcollabmgr_log.h"
 #include "test_log.h"
 #include "tokenid_kit_mock.h"
@@ -874,7 +876,57 @@ HWTEST_F(AbilityConnectionSessionTest, HandleSessionConnect_Test_001, TestSize.L
     EXPECT_NO_FATAL_FAILURE(connectionSesion_->HandleSessionConnect());
 
     EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnChannelClosed(30, ShutdownReason::SHUTDOWN_REASON_LNN_OFFLINE));
+
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->OnError(0, 0));
     DTEST_LOG << "AbilityConnectionSessionTest HandleSessionConnect_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConvertToConnectErrorCode_Test_001
+ * @tc.desc: call ConvertToConnectErrorCode
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, ConvertToConnectErrorCode_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest ConvertToConnectErrorCode_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    int32_t collabResult = CONNECTED_SESSION_EXISTS;
+    auto ret = connectionSesion_->ConvertToConnectErrorCode(collabResult);
+    EXPECT_EQ(ret, ConnectErrorCode::CONNECTED_SESSION_EXISTS);
+
+    collabResult = SAME_SESSION_IS_CONNECTING;
+    ret = connectionSesion_->ConvertToConnectErrorCode(collabResult);
+    EXPECT_EQ(ret, ConnectErrorCode::CONNECTED_SESSION_EXISTS);
+
+    collabResult = PEER_WIFI_NOT_OPEN;
+    ret = connectionSesion_->ConvertToConnectErrorCode(collabResult);
+    EXPECT_EQ(ret, ConnectErrorCode::PEER_WIFI_NOT_OPEN);
+
+    collabResult = DistributedSchedule::COLLAB_ABILITY_REJECT_ERR;
+    ret = connectionSesion_->ConvertToConnectErrorCode(collabResult);
+    EXPECT_EQ(ret, ConnectErrorCode::PEER_APP_REJECTED);
+
+    collabResult = PEER_ABILITY_NO_ONCOLLABORATE;
+    ret = connectionSesion_->ConvertToConnectErrorCode(collabResult);
+    EXPECT_EQ(ret, ConnectErrorCode::PEER_ABILITY_NO_ONCOLLABORATE);
+    DTEST_LOG << "AbilityConnectionSessionTest ConvertToConnectErrorCode_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConvertToDisconnectReason_Test_001
+ * @tc.desc: call ConvertToDisconnectReason
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, ConvertToDisconnectReason_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest ConvertToDisconnectReason_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    ShutdownReason reason = ShutdownReason::SHUTDOWN_REASON_PEER;
+    auto ret = connectionSesion_->ConvertToDisconnectReason(reason);
+    EXPECT_EQ(ret, DisconnectReason::PEER_APP_EXIT);
+    DTEST_LOG << "AbilityConnectionSessionTest ConvertToDisconnectReason_Test_001 end" << std::endl;
 }
 }
 }
