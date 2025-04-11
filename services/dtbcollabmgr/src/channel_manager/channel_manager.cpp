@@ -1344,7 +1344,7 @@ void ChannelManager::DealFileUpdatePathEvent(int32_t channelId, FileEvent *event
 const char* ChannelManager::GetRecvPathFromUser()
 {
     HILOGI("get recv path from user");
-    int32_t channelId = fileChannelId_.load();
+    int32_t channelId = static_cast<int32_t>(fileChannelId_.load());
     std::shared_lock<std::shared_mutex> readLock(listenerMutex_);
     auto it = listenersMap_.find(channelId);
     if (it == listenersMap_.end() || it->second.empty()) {
