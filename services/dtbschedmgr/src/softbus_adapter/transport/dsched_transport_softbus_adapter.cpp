@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,9 @@
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+#include "softbus_resource_query.h"
+#endif
 #include "token_setproc.h"
 
 namespace OHOS {
@@ -36,11 +39,16 @@ constexpr int32_t BIND_RETRY_INTERVAL = 500;
 constexpr int32_t MAX_BIND_RETRY_TIME = 4000;
 constexpr int32_t MAX_RETRY_TIMES = 8;
 constexpr int32_t MS_TO_US = 1000;
+constexpr int32_t SOFTBUS_QOS_CASE_HIGH = 0;
+constexpr int32_t SOFTBUS_QOS_CASE_MIDDLE_HIGH = 1;
+constexpr int32_t SOFTBUS_QOS_CASE_MIDDLE_LOW = 2;
+constexpr int32_t SOFTBUS_QOS_CASE_LOW = 3;
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DSchedTransportSoftbusAdapter);
 
 static QosTV g_qosInfo[] = {
+    { .qos = QOS_TYPE_MIN_BW, .value = DSCHED_QOS_TYPE_MIN_BW },
     { .qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_QOS_TYPE_MAX_LATENCY },
     { .qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_QOS_TYPE_MIN_LATENCY }
 };
@@ -230,7 +238,7 @@ int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peer
     callingTokenId_ = 0;
 
     do {
-        ret = ServiceBind(sessionId, type);
+        ret = ServiceBind(sessionId, type, peerDeviceId);
         if (ret != ERR_OK) {
             HILOGE("client bind failed, ret: %{public}d", ret);
             break;
@@ -250,12 +258,14 @@ int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peer
     return ret;
 }
 
-int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedServiceType type)
+int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedServiceType type,
+    const std::string &peerDeviceId)
 {
     HILOGI("begin");
     int32_t ret = ERR_OK;
     int retryCount = 0;
     do {
+        // The DMS-CHECK_SLUETOOTH macro is used to distinguish the binding logic on different devices
 #ifdef DMS_CHECK_BLUETOOTH
         HILOGI("collab bind begin");
         if (type == SERVICE_TYPE_COLLAB) {
@@ -264,8 +274,23 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
         }
 #endif
 #ifndef DMS_CHECK_BLUETOOTH
-            ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
-            HILOGI("end bind stardard qos");
+        uint32_t validQosCase = SOFTBUS_MAX_VALID_QOS_CASE;
+        ret = QueryValidQos(peerDeviceId, validQosCase);
+        HILOGI("SoftBus query valid qos result: %{public}d", ret);
+        // case 0 : [160Mbps, Max); case 1 : (30Mbps, 160Mbps); case 2 : (384Kbps, 30Mbps]; case 3 : (0, 384Kbps];
+        switch (validQosCase) {
+            case SOFTBUS_QOS_CASE_HIGH:
+            case SOFTBUS_QOS_CASE_MIDDLE_HIGH:
+                ret = Bind(sessionId, g_watch_collab_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+                break;
+            case SOFTBUS_QOS_CASE_MIDDLE_LOW:
+            case SOFTBUS_QOS_CASE_LOW:
+                ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+                break;
+            default:
+                ret = Bind(sessionId, g_qosInfo, g_QosTV_Param_Index, &iSocketListener);
+        }
+        HILOGI("end bind stardard qos");
 #endif
         if (ret == ERR_OK) {
             return ret;
@@ -282,6 +307,47 @@ int32_t DSchedTransportSoftbusAdapter::ServiceBind(int32_t &sessionId, DSchedSer
         usleep(BIND_RETRY_INTERVAL * MS_TO_US);
         retryCount++;
     } while (retryCount < MAX_RETRY_TIMES);
+    return ret;
+}
+
+int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDeviceId, uint32_t &validQosCase)
+{
+    int32_t ret = SOFTBUS_QUERY_VALID_QOS_ERR;
+#ifdef SOFTBUS_QUERY_VALID_QOS
+    HILOGI("query Valid Qos start peerNetworkId: %{public}s", GetAnonymStr(peerDeviceId).c_str());
+    QosRequestInfo qosRequestInfo;
+    ret = memcpy_s(qosRequestInfo.peerNetworkId, NETWORK_ID_BUF_LEN, peerDeviceId.c_str(), peerDeviceId.size());
+    if (ret != ERR_OK) {
+        HILOGE("memcpy_s failed for peerNetworkId: %{public}s", GetAnonymStr(peerDeviceId).c_str());
+        return ret;
+    }
+    qosRequestInfo.dataType = TransDataType::DATA_TYPE_BYTES;
+    QosStatus qosStatus;
+    ret = SoftBusQueryValidQos(&qosRequestInfo, &qosStatus);
+    if (ret != ERR_OK) {
+        HILOGE("query Valid Qos failed, result: %{public}d", ret);
+        return SOFTBUS_QUERY_VALID_QOS_ERR;
+    }
+    if (qosStatus.qosCnt <= 0) {
+        HILOGE("valid qos count is: %{public}d", qosStatus.qosCnt);
+        delete [] qosStatus.validQos;
+        return SOFTBUS_NO_USEFUL_QOS_ERR;
+    }
+    HILOGI("query Valid Qos success; qos count: %{public}d", qosStatus.qosCnt);
+    // case 0 : [160Mbps, Max); case 1 : (30Mbps, 160Mbps); case 2 : (384Kbps, 30Mbps]; case 3 : (0, 384Kbps];
+    validQosCase = SOFTBUS_MAX_VALID_QOS_CASE;
+    for (int i = 0; i < qosStatus.qosCnt; i++) {
+        QosOption item = qosStatus.validQos[i];
+        HILOGI("check valid qos index: %{public}d; isSupportReuse: %{public}s; minBw: %{public}d",
+            i, item.isSupportReuse ? "true" : "false", item.minBw);
+        if (validQosCase > item.minBw) {
+            HILOGI("update validQosCase from: %{public}d to: %{public}d", validQosCase, item.minBw);
+            validQosCase = item.minBw;
+        }
+    }
+    delete [] qosStatus.validQos;
+    HILOGE("final validQosCase is: %{public}d", validQosCase);
+#endif
     return ret;
 }
 

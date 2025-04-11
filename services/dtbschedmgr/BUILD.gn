@@ -117,6 +117,7 @@ ohos_shared_library("distributedschedsvr") {
       "-DDMSFWK_SAME_ACCOUNT",
       "-DDMSFWK_INTERACTIVE_ADAPTER",
       "-DDMSFWK_ALL_CONNECT_MGR",
+      "-DSOFTBUS_QUERY_VALID_QOS",
     ]
   }
 

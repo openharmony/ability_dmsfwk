@@ -29,6 +29,7 @@ namespace {
 constexpr uint32_t INTERCEPT_STRING_LENGTH = 20;
 constexpr uint32_t DSCHED_MAX_RECV_DATA_LEN = 104857600;
 
+constexpr int32_t SOFTBUS_MAX_VALID_QOS_CASE = 3;
 constexpr int32_t DSCHED_QOS_TYPE_MIN_BW = 80 * 1024;
 constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW = 40 * 1024 * 1024;
 constexpr int32_t DSCHED_QOS_TYPE_MAX_LATENCY = 6000;
@@ -73,7 +74,8 @@ private:
     int32_t CreateSessionRecord(int32_t sessionId, const std::string &peerDeviceId, bool isServer,
         DSchedServiceType type);
     int32_t AddNewPeerSession(const std::string &peerDeviceId, int32_t &sessionId, DSchedServiceType type);
-    int32_t ServiceBind(int32_t &sessionId, DSchedServiceType type);
+    int32_t ServiceBind(int32_t &sessionId, DSchedServiceType type, const std::string &peerDeviceId);
+    int32_t QueryValidQos(const std::string &peerDeviceId, uint32_t &validQosCase);
     void ShutdownSession(const std::string &peerDeviceId, int32_t sessionId);
     void NotifyListenersSessionShutdown(int32_t sessionId, bool isSelfCalled);
     int32_t DecisionByAllConnect(const std::string &peerDeviceId, DSchedServiceType type);
