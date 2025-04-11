@@ -44,6 +44,52 @@ do {                                                                            
 
 }
 
+DataSenderReceiver::~DataSenderReceiver()
+{
+    HILOGI("destory data sender receiver for %{public}d", socketId_);
+    DeInit();
+}
+
+void DataSenderReceiver::Init()
+{
+    std::call_once(initFlag_, [this] {
+        HILOGI("start init data sender receiver for %{public}d", socketId_);
+        eventThread_ = std::thread(&DataSenderReceiver::StartEvent, this);
+        std::unique_lock<std::mutex> lock(eventMutex_);
+        eventCon_.wait(lock, [this] { return eventHandler_ != nullptr; });
+    });
+}
+
+void DataSenderReceiver::StartEvent()
+{
+    HILOGI("StartEvent start");
+    prctl(PR_SET_NAME, ownerName_.c_str());
+    auto runner = AppExecFwk::EventRunner::Create(false);
+    {
+        std::lock_guard<std::mutex> lock(eventMutex_);
+        eventHandler_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
+    }
+    eventCon_.notify_one();
+    runner->Run();
+    HILOGI("StartEvent end");
+}
+
+void DataSenderReceiver::DeInit()
+{
+    HILOGI("start deinit data sender receiver for %{public}d", socketId_);
+    // stop all task
+    if (eventHandler_ != nullptr) {
+        eventHandler_->GetEventRunner()->Stop();
+        if (eventThread_.joinable()) {
+            eventThread_.join();
+        }
+        eventHandler_ = nullptr;
+    } else {
+        HILOGE("eventHandler_ is nullptr");
+    }
+    HILOGI("end");
+}
+
 int32_t DataSenderReceiver::SendStreamData(const std::shared_ptr<AVTransStreamData>& sendData)
 {
     const StreamData data = {
@@ -84,11 +130,19 @@ int32_t DataSenderReceiver::SendStreamData(const std::shared_ptr<AVTransStreamDa
 int32_t DataSenderReceiver::SendMessageData(const std::shared_ptr<AVTransDataBuffer>& sendData)
 {
     HILOGI("start to send message, %{public}u", static_cast<uint32_t>(sendData->Size()));
+    Init();
+    if (eventHandler_ == nullptr) {
+        HILOGE("init eventhandler failed");
+        return NULL_EVENT_HANDLER;
+    }
     if (sendData->Size() > MAX_SEND_MESSAGE_SIZE) {
         HILOGE("too large send message");
         return DATA_SIZE_EXCEED_LIMIT;
     }
-    return SendMessage(socketId_, sendData->Data(), sendData->Size());
+    auto func = [socketId_, sendData]() {
+        SendMessage(socketId_, sendData->Data(), sendData->Size());
+    }
+    return eventHandler_->PostTask(func, AppExecFwk::EventQueue::Priority::HIGH);
 }
 
 int32_t DataSenderReceiver::SendFileData(const std::vector<std::string>& sFiles,
