@@ -22,6 +22,7 @@
 #include "session_data_header.h"
 #include <memory>
 #include <functional>
+#include <thread>
 
 namespace OHOS {
 namespace DistributedCollab {

@@ -63,7 +63,6 @@ void DataSenderReceiver::Init()
 void DataSenderReceiver::StartEvent()
 {
     HILOGI("StartEvent start");
-    prctl(PR_SET_NAME, ownerName_.c_str());
     auto runner = AppExecFwk::EventRunner::Create(false);
     {
         std::lock_guard<std::mutex> lock(eventMutex_);
@@ -139,10 +138,14 @@ int32_t DataSenderReceiver::SendMessageData(const std::shared_ptr<AVTransDataBuf
         HILOGE("too large send message");
         return DATA_SIZE_EXCEED_LIMIT;
     }
-    auto func = [socketId_, sendData]() {
-        SendMessage(socketId_, sendData->Data(), sendData->Size());
+    int32_t socketId = socketId_;
+    auto func = [this, socketId, sendData]() {
+        SendMessage(socketId, sendData->Data(), sendData->Size());
+    };
+    if (eventHandler_->PostTask(func, AppExecFwk::EventQueue::Priority::HIGH)) {
+        return ERR_OK;
     }
-    return eventHandler_->PostTask(func, AppExecFwk::EventQueue::Priority::HIGH);
+    return POST_TASK_FAILED;
 }
 
 int32_t DataSenderReceiver::SendFileData(const std::vector<std::string>& sFiles,
