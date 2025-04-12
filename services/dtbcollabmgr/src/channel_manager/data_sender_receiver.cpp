@@ -140,11 +140,16 @@ int32_t DataSenderReceiver::SendMessageData(const std::shared_ptr<AVTransDataBuf
     }
     int32_t socketId = socketId_;
     auto func = [this, socketId, sendData]() {
-        SendMessage(socketId, sendData->Data(), sendData->Size());
+        uint32_t dataSize = static_cast<uint32_t>(sendData->Size());
+        HILOGI("begin to send msg by softbus %{public}d:%{public}u", socketId, dataSize);
+        int32_t ret = SendMessage(socketId, sendData->Data(), sendData->Size());
+        HILOGI("finish send msg by softbus %{public}d:%{public}u, ret=%{public}d", socketId, dataSize, ret);
     };
     if (eventHandler_->PostTask(func, AppExecFwk::EventQueue::Priority::HIGH)) {
         return ERR_OK;
     }
+    HILOGI("finish send msg to task queue for %{public}d:%{public}u", socketId,
+        static_cast<uint32_t>(sendData->Size()));
     return POST_TASK_FAILED;
 }
 
