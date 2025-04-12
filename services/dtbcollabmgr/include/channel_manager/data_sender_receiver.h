@@ -18,9 +18,11 @@
 
 #include "av_trans_data_buffer.h"
 #include "av_trans_stream_data.h"
+#include "event_handler.h"
 #include "session_data_header.h"
-#include <atomic>
 #include <memory>
+#include <functional>
+#include <thread>
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -29,7 +31,7 @@ class DataSenderReceiver {
 public:
     explicit DataSenderReceiver(const int32_t socketId)
         : socketId_(socketId) {};
-    ~DataSenderReceiver() = default;
+    ~DataSenderReceiver();
 
     int32_t SendBytesData(const std::shared_ptr<AVTransDataBuffer>& sendData);
     int32_t PackRecvPacketData(const uint8_t* header, const uint32_t dataLen);
@@ -61,6 +63,10 @@ private:
     int64_t GetNowTimeStampUs();
     void ResetFlag();
 
+    void Init();
+    void DeInit();
+    void StartEvent();
+
 private:
     static constexpr uint32_t MAX_SEND_MESSAGE_SIZE = 4 * 1024;
 
@@ -73,6 +79,12 @@ private:
     uint32_t nowTotalLen_ = 0;
     std::unique_ptr<AVTransDataBuffer> packBuffer_ = nullptr;
     uint8_t* currentPos = nullptr;
+
+    std::mutex eventMutex_;
+    std::thread eventThread_;
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
+    std::condition_variable eventCon_;
+    std::once_flag initFlag_;
 };
 } // namespace DistributedCollab
 } // namespace OHOS
