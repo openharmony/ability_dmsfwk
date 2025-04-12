@@ -18,7 +18,6 @@
 #include "ichannel_listener.h"
 #include "channel_common_definition.h"
 #include "data_sender_receiver.h"
-#include "event_handler.h"
 #include "single_instance.h"
 #include "socket.h"
 #include <map>
