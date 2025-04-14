@@ -63,6 +63,7 @@ struct DmsBundleInfo : public Parcelable {
     std::string developerId;
     std::vector<DmsAbilityInfo> dmsAbilityInfos;
     std::vector<uint8_t> userIdArr;
+    std::string keyOfKVStore;
 
     bool ReadFromParcel(Parcel &parcel);
     bool Marshalling(Parcel &parcel) const override;

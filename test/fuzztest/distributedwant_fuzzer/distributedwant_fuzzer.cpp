@@ -40,7 +40,7 @@ constexpr int32_t OFFSET_8 = 8;
 }
 uint32_t GetU32Data(const char* ptr)
 {
-    // convert fuzz input data to an integer
+    // convert fuzz input data to an integer.
     return (ptr[POS_0] << OFFSET_24) | (ptr[POS_1] << OFFSET_16) | (ptr[POS_2] << OFFSET_8) | ptr[POS_3];
 }
 

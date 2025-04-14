@@ -268,17 +268,12 @@ bool DmsKvSyncE2E::PushAndPullData()
 bool DmsKvSyncE2E::PushAndPullData(const std::string &networkId)
 {
     HILOGI("called.");
-    if (!CheckDeviceCfg() && IsSynchronized(networkId)) {
-        HILOGW("The normal device been synchronized : %{public}s", GetAnonymStr(networkId).c_str());
-        return false;
-    }
     std::vector<std::string> networkIdList = {networkId};
     if (!CheckKvStore()) {
         HILOGE("kvStore is nullptr");
         return false;
     }
 
-    SetSyncRecord(networkId);
     DistributedKv::DataQuery dataQuery;
     std::shared_ptr<DmsKvSyncCB> syncCallback = std::make_shared<DmsKvSyncCB>();
     Status status = kvStorePtr_->Sync(networkIdList, DistributedKv::SyncMode::PUSH_PULL, dataQuery, syncCallback);
@@ -288,33 +283,6 @@ bool DmsKvSyncE2E::PushAndPullData(const std::string &networkId)
     }
     HILOGI("Synchronizing");
     return true;
-}
-
-void DmsKvSyncE2E::SetSyncRecord(const std::string &networkId)
-{
-    std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
-    deviceSyncRecord_.insert(std::make_pair(networkId, true));
-}
-
-void DmsKvSyncE2E::ClearSyncRecord(const std::string &networkId)
-{
-    std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
-    auto it = deviceSyncRecord_.find(networkId);
-    if (it != deviceSyncRecord_.end()) {
-        deviceSyncRecord_.erase(it);
-        HILOGI("Successfully cleared synchronization records for: %{public}s", GetAnonymStr(networkId).c_str());
-    } else {
-        HILOGI("No need to clean up for: %{public}s", GetAnonymStr(networkId).c_str());
-    }
-}
-
-bool DmsKvSyncE2E::IsSynchronized(const std::string &networkId)
-{
-    std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
-    if (deviceSyncRecord_.find(networkId) != deviceSyncRecord_.end() && deviceSyncRecord_[networkId]) {
-        return true;
-    }
-    return false;
 }
 
 bool DmsKvSyncE2E::CheckKvStore()

@@ -72,7 +72,6 @@ void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOnline(const DmDeviceInfo&
     if (DmsKvSyncE2E::GetInstance()->CheckDeviceCfg()) {
         DmsKvSyncE2E::GetInstance()->PushAndPullData(deviceInfo.networkId);
     }
-    DmsKvSyncE2E::GetInstance()->ClearSyncRecord(deviceInfo.networkId);
 
     auto onlineNotifyTask = [deviceInfo]() {
         std::lock_guard<std::mutex> autoLock(listenerSetMutex_);
@@ -91,7 +90,6 @@ void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOnline(const DmDeviceInfo&
 void DnetworkAdapter::DmsDeviceStateCallback::OnDeviceOffline(const DmDeviceInfo& deviceInfo)
 {
     HILOGI("OnNodeOffline networkId: %{public}s.", GetAnonymStr(deviceInfo.networkId).c_str());
-    DmsKvSyncE2E::GetInstance()->ClearSyncRecord(deviceInfo.networkId);
     auto offlineNotifyTask = [deviceInfo]() {
         std::lock_guard<std::mutex> autoLock(listenerSetMutex_);
         for (auto& listener : listenerSet_) {

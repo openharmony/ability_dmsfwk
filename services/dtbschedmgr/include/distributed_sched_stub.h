@@ -135,6 +135,7 @@ private:
     int32_t NotifyCollabPrepareResultInner(MessageParcel& data, MessageParcel& reply);
     int32_t NotifyCloseCollabSessionInner(MessageParcel& data, MessageParcel& reply);
     int32_t NotifyRejectReason(MessageParcel& data, MessageParcel& reply);
+    int32_t GetWifiStatusInner(MessageParcel& data, MessageParcel& reply);
 
 private:
     using DistributedSchedFunc = int32_t(DistributedSchedStub::*)(MessageParcel& data, MessageParcel& reply);

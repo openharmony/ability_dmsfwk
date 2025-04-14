@@ -253,8 +253,9 @@ void AVReceiverFilter::OnError(const int32_t errorCode)
     HILOGE("AVReceiverFilter::OnError errcode: %{public}d", errorCode);
     std::lock_guard<std::mutex> lock(channelMutex_);
     if (!listeners_.empty()) {
-        for (const auto& listener: listeners_)
-        listener->OnError(channelId_, errorCode);
+        for (const auto& listener: listeners_) {
+            listener->OnError(channelId_, errorCode);
+        }
     }
 }
 
@@ -285,12 +286,17 @@ std::shared_ptr<IChannelListener> AVReceiverFilter::GetChannelListener()
 std::shared_ptr<AVTransStreamData> AVReceiverFilter::GetStreamData()
 {
     if (dataQueue_.empty()) {
+        HILOGE("data queue empty");
         return nullptr;
     }
     auto topData = dataQueue_.top();
     uint32_t curIndex = topData->GetStreamDataExt().index_;
     while (lastIndex_ >= curIndex) {
         HILOGE("invalid index=%{public}u, cur=%{public}lld", curIndex, lastIndex_);
+        if (dataQueue_.empty()) {
+            HILOGE("invalid data pop till queue empty");
+            return nullptr;
+        }
         dataQueue_.pop();
         topData = dataQueue_.top();
         curIndex = topData->GetStreamDataExt().index_;

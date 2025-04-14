@@ -1603,6 +1603,102 @@ HWTEST_F(DistributedSchedServiceSecondTest, NotifyAbilityLifecycleChangedFromRem
     DTEST_LOG << "DistributedSchedServiceSecondTest NotifyAbilityLifecycleChangedFromRemoteAdapter_001 end" <<
         std::endl;
 }
+
+/**
+ * @tc.name  : OnDeviceOnlineEx_Test_001
+ * @tc.desc  : Test when dllHandle_ is nullptr then OnDeviceOnlineEx returns
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOnlineEx_Test_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceOnlineEx_Test_001 start" << std::endl;
+    OHOS::DistributedSchedule::DistributedSchedService service;
+    OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
+    service.dllHandle_ = nullptr;
+    service.OnDeviceOnlineEx(deviceInfo);
+    ASSERT_EQ(service.dllHandle_, nullptr);
+    DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceOnlineEx_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name  : OnDeviceOnlineEx_Test_002
+ * @tc.desc  : Test when dmsAdapetr_.OnDeviceOnlineEx is nullptr then OnDeviceOnlineEx returns
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOnlineEx_Test_002, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceOnlineEx_Test_002 start" << std::endl;
+    OHOS::DistributedSchedule::DistributedSchedService service;
+    OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
+    service.dmsAdapetr_.OnDeviceOnlineEx = nullptr;
+    service.OnDeviceOnlineEx(deviceInfo);
+    ASSERT_EQ(service.dmsAdapetr_.OnDeviceOnlineEx, nullptr);
+    DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceOnlineEx_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name  : OnDeviceOfflineEx_Test_001
+ * @tc.desc  : Test when dllHandle_ is nullptr then OnDeviceOfflineEx returns
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOfflineEx_Test_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceOfflineEx_Test_001 start" << std::endl;
+    OHOS::DistributedSchedule::DistributedSchedService service;
+    OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
+    service.dllHandle_ = nullptr;
+    service.OnDeviceOfflineEx(deviceInfo);
+    ASSERT_EQ(service.dllHandle_, nullptr);
+    DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceOfflineEx_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name  : OnDeviceOfflineEx_Test_002
+ * @tc.desc  : Test when dmsAdapetr_.OnDeviceOfflineEx is nullptr then OnDeviceOfflineEx returns
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceOfflineEx_Test_002, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceOfflineEx_Test_002 start" << std::endl;
+    OHOS::DistributedSchedule::DistributedSchedService service;
+    OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
+    service.dmsAdapetr_.OnDeviceOfflineEx = nullptr;
+    service.OnDeviceOfflineEx(deviceInfo);
+    ASSERT_EQ(service.dmsAdapetr_.OnDeviceOfflineEx, nullptr);
+    DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceOfflineEx_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name  : OnDeviceInfoChangedEx_Test_001
+ * @tc.desc  : Test when dllHandle_ is nullptr then OnDeviceInfoChangedEx returns
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceInfoChangedEx_Test_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceInfoChangedEx_Test_001 start" << std::endl;
+    OHOS::DistributedSchedule::DistributedSchedService service;
+    OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
+    service.dllHandle_ = nullptr;
+    service.OnDeviceInfoChangedEx(deviceInfo);
+    ASSERT_EQ(service.dllHandle_, nullptr);
+    DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceInfoChangedEx_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name  : OnDeviceInfoChangedEx_Test_002
+ * @tc.desc  : Test when dmsAdapetr_.OnDeviceInfoChangedEx is nullptr then OnDeviceInfoChangedEx returns
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, OnDeviceInfoChangedEx_Test_002, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceInfoChangedEx_Test_002 start" << std::endl;
+    OHOS::DistributedSchedule::DistributedSchedService service;
+    OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
+    service.dmsAdapetr_.OnDeviceInfoChangedEx = nullptr;
+    service.OnDeviceInfoChangedEx(deviceInfo);
+    ASSERT_EQ(service.dmsAdapetr_.OnDeviceInfoChangedEx, nullptr);
+    DTEST_LOG << "DistributedSchedServiceSecondTest OnDeviceInfoChangedEx_Test_002 end" << std::endl;
+}
 #endif // DMSFWK_INTERACTIVE_ADAPTER
 
 /**
@@ -1761,6 +1857,56 @@ HWTEST_F(DistributedSchedServiceSecondTest, ContinueStateCallbackUnRegister_001,
 
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedServiceSecondTest ContinueStateCallbackUnRegister_001 end" << std::endl;
+}
+
+/**
+ * @tc.name  : SetCleanMissionFlag_Test_001
+ * @tc.desc  : Test when dschedContinuation_ is nullptr then SetCleanMissionFlag returns
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, SetCleanMissionFlag_Test_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest SetCleanMissionFlag_Test_001 start" << std::endl;
+    OHOS::AAFwk::Want want;
+    int32_t missionId = 1;
+    DistributedSchedService::GetInstance().dschedContinuation_ = nullptr;
+    DistributedSchedService::GetInstance().SetCleanMissionFlag(want, missionId);
+    ASSERT_EQ(DistributedSchedService::GetInstance().dschedContinuation_, nullptr);
+    DTEST_LOG << "DistributedSchedServiceSecondTest SetCleanMissionFlag_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name  : SetCleanMissionFlag_Test_002
+ * @tc.desc  : Test when dschedContinuation_ is not nullptr then SetCleanMissionFlag sets the flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, SetCleanMissionFlag_Test_002, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest SetCleanMissionFlag_Test_002 start" << std::endl;
+    if (DistributedSchedService::GetInstance().dschedContinuation_ == nullptr) {
+        DistributedSchedService::GetInstance().dschedContinuation_ = std::make_shared<DSchedContinuation>();
+    }
+    OHOS::AAFwk::Want want;
+    int32_t missionId = 1;
+    DistributedSchedService::GetInstance().SetCleanMissionFlag(want, missionId);
+    ASSERT_NE(DistributedSchedService::GetInstance().dschedContinuation_, nullptr);
+    DTEST_LOG << "DistributedSchedServiceSecondTest SetCleanMissionFlag_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name  : CheckCollabStartPermission_Test001
+ * @tc.number: CheckCollabStartPermission_001
+ * @tc.desc  : Test CheckCollabStartPermission function when GetTargetAbility return false.
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, CheckCollabStartPermission_Test001, TestSize.Level1)
+{
+    OHOS::AAFwk::Want want;
+    CallerInfo callerInfo;
+    IDistributedSched::AccountInfo accountInfo;
+    bool needQueryExtension = false;
+    int32_t ret = DistributedSchedService::GetInstance().CheckCollabStartPermission(want,
+        callerInfo, accountInfo, needQueryExtension);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 }
 }
 }

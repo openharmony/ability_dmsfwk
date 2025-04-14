@@ -472,6 +472,12 @@ int32_t DSchedContinue::PostNotifyCompleteTask(int32_t result)
 int32_t DSchedContinue::OnContinueEnd(int32_t result)
 {
     HILOGI("called");
+    if (result == CONTINUE_SINK_ABILITY_TERMINATED &&
+        stateMachine_->GetStateType() >= DSCHED_CONTINUE_SINK_WAIT_END_STATE) {
+        HILOGI("OnContinueEnd result %{public}d, continueStateType %{public}d",
+            result, stateMachine_->GetStateType());
+        return ERR_OK;
+    }
     return PostContinueEndTask(result);
 }
 
@@ -523,7 +529,7 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
     DmsUE::GetInstance().TriggerDmsContinue(continueInfo_.sinkBundleName_, continueInfo_.sinkAbilityName_,
         continueInfo_.sourceDeviceId_, ERR_OK);
 
-    if (subServiceType_ == CONTINUE_PULL && CheckQuickStartConfiguration()) {
+    if (CheckQuickStartConfiguration()) {
         QuickStartAbility();
     }
 
@@ -752,7 +758,7 @@ int32_t DSchedContinue::ExecuteContinueReply()
     HILOGI("ExecuteContinueReply start, continueInfo: %{public}s", continueInfo_.ToString().c_str());
 
     AppExecFwk::BundleInfo bundleInfo;
-    if (BundleManagerInternal::GetLocalBundleInfoV9(continueInfo_.sourceBundleName_, bundleInfo) != ERR_OK) {
+    if (BundleManagerInternal::GetLocalBundleInfoV9(continueInfo_.sinkBundleName_, bundleInfo) != ERR_OK) {
         HILOGE("ExecuteContinueReply get local bundleInfo failed, the bundle is not installed on local device.");
         return INVALID_PARAMETERS_ERR;
     }

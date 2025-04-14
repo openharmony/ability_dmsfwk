@@ -114,12 +114,13 @@ HWTEST_F(AVSenderFilterTest, SendPixelMap_Test_001, TestSize.Level1)
 {
     HILOGI("AVSenderFilterTest::SendPixelMap_Test_001 begin");
     std::string name = "test";
+    int32_t imageQuality = 30;
     AVSenderFilter filter(name, FilterType::FILTERTYPE_VIDEODEC);
-    auto ret = filter.SendPixelMap(nullptr);
+    auto ret = filter.SendPixelMap(nullptr, imageQuality);
     EXPECT_EQ(ret, NULL_POINTER_ERROR);
 
     std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
-    ret = filter.SendPixelMap(pixelMap);
+    ret = filter.SendPixelMap(pixelMap, imageQuality);
     EXPECT_NE(ret, NULL_POINTER_ERROR);
     HILOGI("AVSenderFilterTest::SendPixelMap_Test_001 end");
 }

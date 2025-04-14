@@ -96,6 +96,7 @@ using namespace DistributedHardware;
 namespace {
 const std::string TAG = "DistributedSchedService";
 const std::string DMS_SRC_NETWORK_ID = "dmsSrcNetworkId";
+const std::string DMS_SRC_BUNDLE_NAMES = "callerbundleNames";
 const int DEFAULT_REQUEST_CODE = -1;
 const std::u16string CONNECTION_CALLBACK_INTERFACE_TOKEN = u"ohos.abilityshell.DistributedConnection";
 const std::u16string COMPONENT_CHANGE_INTERFACE_TOKEN = u"ohos.rms.DistributedComponent";
@@ -156,7 +157,7 @@ DataShareManager &dataShareManager = DataShareManager::GetInstance();
 
 const std::string HMOS_HAP_CODE_PATH = "1";
 const std::string LINUX_HAP_CODE_PATH = "2";
-const int32_t CONNECT_WAIT_TIME_S = 2; /* 2 second */
+const int32_t CONNECT_WAIT_TIME_S = 2 * 1000 * 1000; /* 2 second */
 std::mutex getDistibutedProxyLock_;
 std::condition_variable getDistibutedProxyCondition_;
 }
@@ -321,8 +322,11 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
 #endif
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
-    dlclose(dllHandle_);
-    dllHandle_ = nullptr;
+    {
+        std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
+        dlclose(dllHandle_);
+        dllHandle_ = nullptr;
+    };
 #endif
     dataShareManager.UnInit();
     HILOGI("OnStop dms service end");
@@ -998,19 +1002,17 @@ int32_t DistributedSchedService::StartRemoteAbility(const OHOS::AAFwk::Want& wan
     CallerInfo callerInfo;
     int32_t ret = GetCallerInfo(localDeviceId, callerUid, accessToken, callerInfo);
     if (ret != ERR_OK) {
-        HILOGE("Get local device caller info fail, ret: %{public}d.", ret);
         return ret;
     }
     AccountInfo accountInfo;
     ret = DistributedSchedPermission::GetInstance().GetAccountInfo(deviceId, callerInfo, accountInfo);
     if (ret != ERR_OK) {
-        HILOGE("GetAccountInfo fail, ret: %{public}d.", ret);
         return ret;
     }
     AAFwk::Want* newWant = const_cast<Want*>(&want);
     newWant->SetParam(DMS_SRC_NETWORK_ID, localDeviceId);
+    newWant->SetParam(DMS_SRC_BUNDLE_NAMES, callerInfo.bundleNames);
     AppExecFwk::AbilityInfo abilityInfo;
-
     HILOGI("[PerformanceTest] StartRemoteAbility transact begin");
     if (!DmsContinueTime::GetInstance().GetPull()) {
         int64_t begin = GetTickCount();
@@ -1909,8 +1911,10 @@ int32_t DistributedSchedService::ConnectRemoteAbility(const OHOS::AAFwk::Want& w
         return INVALID_PARAMETERS_ERR;
     }
     callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
+    AAFwk::Want newWant = Want(want);
+    newWant.SetParam(DMS_SRC_BUNDLE_NAMES, callerInfo.bundleNames);
     HILOGI("[PerformanceTest] ConnectRemoteAbility begin");
-    int32_t result = TryConnectRemoteAbility(want, connect, callerInfo);
+    int32_t result = TryConnectRemoteAbility(newWant, connect, callerInfo);
     if (result != ERR_OK) {
         HILOGE("ConnectRemoteAbility result is %{public}d", result);
     }
@@ -2283,8 +2287,9 @@ int32_t DistributedSchedService::StartRemoteAbilityByCall(const OHOS::AAFwk::Wan
     EventNotify tempEvent;
     GetCurSrcCollaborateEvent(callerInfo, want.GetElement(), DMS_DSCHED_EVENT_START, ERR_OK, tempEvent);
     NotifyDSchedEventCallbackResult(ERR_OK, tempEvent);
-
-    int32_t ret = TryStartRemoteAbilityByCall(want, connect, callerInfo);
+    AAFwk::Want newWant = Want(want);
+    newWant.SetParam(DMS_SRC_BUNDLE_NAMES, callerInfo.bundleNames);
+    int32_t ret = TryStartRemoteAbilityByCall(newWant, connect, callerInfo);
     if (ret != ERR_OK) {
         {
             std::lock_guard<std::mutex> autoLock(callLock_);
@@ -3491,6 +3496,7 @@ int32_t DistributedSchedService::StartRemoteFreeInstall(const OHOS::AAFwk::Want&
     }
     AAFwk::Want* newWant = const_cast<Want*>(&want);
     newWant->SetParam(DMS_SRC_NETWORK_ID, localDeviceId);
+    newWant->SetParam(DMS_SRC_BUNDLE_NAMES, callerInfo.bundleNames);
     FreeInstallInfo info = {*newWant, requestCode, callerInfo, accountInfo};
     int32_t result = remoteDms->StartFreeInstallFromRemote(info, taskId);
     if (result != ERR_OK) {
@@ -3568,7 +3574,8 @@ int32_t DistributedSchedService::StartLocalAbility(const FreeInstallInfo& info, 
 
 int32_t DistributedSchedService::StartAbility(const OHOS::AAFwk::Want& want, int32_t requestCode)
 {
-    if (!dataShareManager.IsCurrentContinueSwitchOn()) {
+    if ((want.GetFlags() & AAFwk::Want::FLAG_ABILITY_CONTINUATION) != 0 &&
+        !dataShareManager.IsCurrentContinueSwitchOn()) {
         HILOGE("ContinueSwitch status is off");
         return DMS_PERMISSION_DENIED;
     }
@@ -3968,6 +3975,7 @@ int32_t DistributedSchedService::StopRemoteExtensionAbility(const OHOS::AAFwk::W
         return INVALID_PARAMETERS_ERR;
     }
     AAFwk::Want remoteWant = want;
+    remoteWant.SetParam(DMS_SRC_BUNDLE_NAMES, callerInfo.bundleNames);
     remoteWant.SetParam(DMS_SRC_NETWORK_ID, localDeviceId);
     return remoteDms->StopExtensionAbilityFromRemote(remoteWant, callerInfo, accountInfo, extensionType);
 }

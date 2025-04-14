@@ -276,7 +276,7 @@ int32_t DSchedCollab::PostSinkGetVersionTask()
     return ERR_OK;
 }
 
-int32_t DSchedCollab::PostSinkStartTask()
+int32_t DSchedCollab::PostSinkStartTask(const std::string &peerDeviceId)
 {
     HILOGI("called");
     if (eventHandler_ == nullptr) {
@@ -284,7 +284,8 @@ int32_t DSchedCollab::PostSinkStartTask()
         return INVALID_PARAMETERS_ERR;
     }
     DSchedCollabEventType eventType = START_ABILITY_EVENT;
-    auto msgEvent = AppExecFwk::InnerEvent::Get(eventType);
+    auto data = std::make_shared<std::string>(peerDeviceId);
+    auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
         HILOGE("send event type %{public}s fail", EVENTDATA[eventType].c_str());
         return COLLAB_SEND_EVENT_FAILED;
@@ -463,17 +464,8 @@ int32_t DSchedCollab::ExeSrcGetVersion()
 int32_t DSchedCollab::ExeSrcStart()
 {
     HILOGI("called");
-    const std::string sinkDeviceId = collabInfo_.sinkInfo_.deviceId_;
-    int32_t ret = DSchedTransportSoftbusAdapter::GetInstance().ConnectDevice(sinkDeviceId,
-        softbusSessionId_, SERVICE_TYPE_COLLAB);
-    if (ret != ERR_OK) {
-        HILOGE("connect peer device failed, ret %{public}d", ret);
-        return ret;
-    }
-    HILOGI("this connection is successful, softbusSessionId %{public}d", softbusSessionId_);
-
     auto startCmd = std::make_shared<SinkStartCmd>();
-    ret = PackStartCmd(startCmd);
+    int32_t ret = PackStartCmd(startCmd);
     if (ret != ERR_OK) {
         HILOGE("pack startCmd failed, ret %{public}d", ret);
         return ret;
@@ -586,9 +578,13 @@ int32_t DSchedCollab::PackPartCmd(std::shared_ptr<SinkStartCmd>& cmd)
     return ERR_OK;
 }
 
-int32_t DSchedCollab::ExeStartAbility()
+int32_t DSchedCollab::ExeStartAbility(const std::string &peerDeviceId)
 {
-    HILOGI("called");
+    HILOGI("called, peerDeviceId: %{public}s", GetAnonymStr(peerDeviceId).c_str());
+    if (collabInfo_.callerInfo_.sourceDeviceId != peerDeviceId) {
+        HILOGE("Irrecognized srcDeviceId!");
+        return INVALID_PARAMETERS_ERR;
+    }
     AAFwk::Want want = GenerateCollabWant();
     int32_t ret = DistributedSchedService::GetInstance().CheckCollabStartPermission(want, collabInfo_.callerInfo_,
         collabInfo_.srcAccountInfo_, START_PERMISSION);
@@ -1039,7 +1035,8 @@ DSchedCollabInfo DSchedCollab::GetCollabInfo()
     return collabInfo_;
 }
 
-void DSchedCollab::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffer> dataBuffer)
+void DSchedCollab::OnDataRecv(const std::string &peerDeviceId, int32_t command,
+    std::shared_ptr<DSchedDataBuffer> dataBuffer)
 {
     if (dataBuffer == nullptr) {
         HILOGE("dataBuffer is null");
@@ -1068,7 +1065,7 @@ void DSchedCollab::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffer>
                 return;
             }
             SetSinkCollabInfo(startCmd);
-            PostSinkStartTask();
+            PostSinkStartTask(peerDeviceId);
             break;
         }
         case NOTIFY_RESULT_CMD: {
@@ -1086,7 +1083,6 @@ void DSchedCollab::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffer>
             break;
         }
         default:
-            HILOGW("Invalid command.");
             break;
     }
 }

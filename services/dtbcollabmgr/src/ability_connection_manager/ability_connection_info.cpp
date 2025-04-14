@@ -33,6 +33,7 @@ bool PeerInfo::ReadFromParcel(Parcel &parcel)
     moduleName = Str16ToStr8(parcel.ReadString16());
     abilityName = Str16ToStr8(parcel.ReadString16());
     serverId = Str16ToStr8(parcel.ReadString16());
+    serviceName = serverId;
     return true;
 }
 
