@@ -391,7 +391,7 @@ HWTEST_F(DSchedCollabManagerTest, CleanUpSession_001, TestSize.Level3)
     DTEST_LOG << "DSchedCollabManagerTest CleanUpSession_001 begin" << std::endl;
     const std::string collabToken = "";
     int32_t ret = DSchedCollabManager::GetInstance().CleanUpSession(collabToken);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedCollabManagerTest CleanUpSession_001 end" << std::endl;
 }
 

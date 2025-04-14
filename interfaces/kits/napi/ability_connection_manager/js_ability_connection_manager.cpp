@@ -973,7 +973,15 @@ void JsAbilityConnectionManager::ExecuteConnect(napi_env env, void *data)
 {
     HILOGI("called.");
     AsyncConnectCallbackInfo* asyncData = static_cast<AsyncConnectCallbackInfo*>(data);
+    if (asyncData == nullptr) {
+        HILOGE("asyncData is nullptr");
+        return;
+    }
     AbilityConnectionManager::ConnectCallback connectCallback = [asyncData](ConnectResult result) {
+        if (asyncData == nullptr) {
+            HILOGE("asyncData is nullptr");
+            return;
+        }
         asyncData->result = result;
         napi_threadsafe_function tsfn = asyncData->tsfn;
         if (tsfn == nullptr) {
