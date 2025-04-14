@@ -608,13 +608,24 @@ int32_t DSchedCollabManager::NotifySessionClose(const std::string &collabToken)
 int32_t DSchedCollabManager::CleanUpSession(const std::string &collabToken)
 {
     HILOGI("called, collabToken: %{public}s", GetAnonymStr(collabToken).c_str());
-    auto dCollab = GetDSchedCollabByTokenId(collabToken);
-    if (dCollab == nullptr) {
-        HILOGE("can't find collab");
+    auto func = [this, collabToken]() {
+        HILOGI("called, collabToken: %{public}s", GetAnonymStr(collabToken).c_str());
+        auto dCollab = GetDSchedCollabByTokenId(collabToken);
+        if (dCollab == nullptr) {
+            HILOGE("can't find collab");
+            return;
+        }
+        RemoveTimeout(collabToken);
+        {
+            std::lock_guard<std::mutex> collabLock(collabMutex_);
+            collabs_.erase(collabToken);
+        }
+    };
+    if (eventHandler_ == nullptr) {
+        HILOGE("eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
     }
-    RemoveTimeout(collabToken);
-    collabs_.erase(collabToken);
+    eventHandler_->PostTask(func);
     HILOGI("end.");
     return ERR_OK;
 }
