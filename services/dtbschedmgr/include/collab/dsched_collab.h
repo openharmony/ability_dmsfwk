@@ -212,7 +212,7 @@ private:
     int32_t PostSrcGetVersionTask();
     int32_t PostSinkGetVersionTask();
     int32_t PostSrcStartTask();
-    int32_t PostSinkStartTask();
+    int32_t PostSinkStartTask(const std::string &peerDeviceId);
     int32_t PostSinkPrepareResultTask(const int32_t &result, const int32_t &collabSessionId,
         const std::string &socketName, const sptr<IRemoteObject> &clientCB);
     int32_t PostSrcResultTask(std::shared_ptr<NotifyResultCmd> replyCmd);
@@ -223,7 +223,7 @@ private:
     int32_t ExeSrcGetPeerVersion();
     int32_t ExeSrcGetVersion();
     int32_t ExeSrcStart();
-    int32_t ExeStartAbility();
+    int32_t ExeStartAbility(const std::string &peerDeviceId);
     int32_t ExeAbilityRejectError(const std::string &reason);
     int32_t ExeSinkPrepareResult(const int32_t &result);
     int32_t ExeSrcCollabResult(const int32_t &result, const std::string reason = "");
@@ -263,7 +263,7 @@ private:
     bool RegisterAbilityLifecycleObserver(const std::string &bundleName);
     void UnregisterAbilityLifecycleObserver();
 
-    void OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffer> dataBuffer);
+    void OnDataRecv(const std::string &peerDeviceId, int32_t command, std::shared_ptr<DSchedDataBuffer> dataBuffer);
     void OnShutDown();
     void OnBind();
     void SetScreenLockParameters(AAFwk::WantParams& wantParams);

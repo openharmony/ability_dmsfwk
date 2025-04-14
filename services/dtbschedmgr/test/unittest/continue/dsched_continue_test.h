@@ -13,14 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef DSCHED_CONTINUE_TEST_H
-#define DSCHED_CONTINUE_TEST_H
+#ifndef DSCHED_CONTINUE_SUP_TEST_H
+#define DSCHED_CONTINUE_SUP_TEST_H
 
 #include "gtest/gtest.h"
+
+#include "dsched_continue.h"
 #include "mock_dtbschedmgr_device_info.h"
+#include "mock/ability_manager_client_mock.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
+using namespace AAFwk;
 
 class DSchedContinueTest : public testing::Test {
 public:
@@ -28,7 +32,9 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    static inline std::shared_ptr<AbilityManagerClientMock> clientMock_ = nullptr;
     static inline std::shared_ptr<MockDmsMgrDeviceInfoStore> dmsStoreMock = nullptr;
+    static inline std::shared_ptr<DSchedContinue> conti_ = nullptr;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

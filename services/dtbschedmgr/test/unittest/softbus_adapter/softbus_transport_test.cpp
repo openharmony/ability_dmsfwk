@@ -502,6 +502,271 @@ HWTEST_F(DSchedSoftbusSessionTest, GetFragDataHeader_001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: ReadTlvToHeader_001
+ * @tc.desc: call ReadTlvToHeader
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedSoftbusSessionTest, ReadTlvToHeader_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedSoftbusSessionTest ReadTlvToHeader_001 begin" << std::endl;
+    int32_t dataType = 0;
+    softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
+    ASSERT_NE(softbusSessionTest_, nullptr);
+
+    std::shared_ptr<DSchedDataBuffer> buffer =
+        std::make_shared<DSchedDataBuffer>(static_cast<size_t>(DSchedSoftbusSession::BINARY_HEADER_FRAG_LEN));
+
+    auto ptr = buffer->Data();
+    ASSERT_NE(ptr, nullptr);
+    uint32_t i = 0;
+    ptr[i++] = DSchedSoftbusSession::TLV_TYPE_VERSION >> SHIFT_8;
+    ptr[i++] = DSchedSoftbusSession::TLV_TYPE_VERSION & UINT16_SHIFT_MASK_TEST;
+    ptr[i++] = SIZE_4 >> SHIFT_8;
+    ptr[i++] = SIZE_4 & UINT16_SHIFT_MASK_TEST;
+    ptr[i++] = 1;
+    ptr[i++] = 0;
+    ptr[i++] = 0;
+    ptr[i++] = 0;
+
+    uint16_t index = 0;
+    DSchedSoftbusSession::SessionDataHeader headerPara;
+    int32_t ret = softbusSessionTest_->ReadTlvToHeader(ptr, headerPara, index, i);
+    EXPECT_NE(ret, ERR_OK);
+
+    softbusSessionTest_ = nullptr;
+    DTEST_LOG << "DSchedSoftbusSessionTest ReadTlvToHeader_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReadTlvToHeader_002
+ * @tc.desc: call ReadTlvToHeader
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedSoftbusSessionTest, ReadTlvToHeader_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedSoftbusSessionTest ReadTlvToHeader_002 begin" << std::endl;
+    int32_t dataType = 0;
+    softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
+    ASSERT_NE(softbusSessionTest_, nullptr);
+
+    std::shared_ptr<DSchedDataBuffer> buffer =
+        std::make_shared<DSchedDataBuffer>(static_cast<size_t>(DSchedSoftbusSession::BINARY_HEADER_FRAG_LEN));
+
+    auto ptr = buffer->Data();
+    ASSERT_NE(ptr, nullptr);
+    uint32_t i = 0;
+    ptr[i++] = DSchedSoftbusSession::TLV_TYPE_FRAG_FLAG >> SHIFT_8;
+    ptr[i++] = DSchedSoftbusSession::TLV_TYPE_FRAG_FLAG & UINT16_SHIFT_MASK_TEST;
+    ptr[i++] = SIZE_4 >> SHIFT_8;
+    ptr[i++] = SIZE_4 & UINT16_SHIFT_MASK_TEST;
+    ptr[i++] = 1;
+    ptr[i++] = 0;
+    ptr[i++] = 0;
+    ptr[i++] = 0;
+
+    uint16_t index = 0;
+    DSchedSoftbusSession::SessionDataHeader headerPara;
+    int32_t ret = softbusSessionTest_->ReadTlvToHeader(ptr, headerPara, index, i);
+    EXPECT_NE(ret, ERR_OK);
+
+    softbusSessionTest_ = nullptr;
+    DTEST_LOG << "DSchedSoftbusSessionTest ReadTlvToHeader_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReadTlvToHeader_003
+ * @tc.desc: call ReadTlvToHeader
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedSoftbusSessionTest, ReadTlvToHeader_003, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedSoftbusSessionTest ReadTlvToHeader_003 begin" << std::endl;
+    int32_t dataType = 0;
+    softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
+    ASSERT_NE(softbusSessionTest_, nullptr);
+
+    std::shared_ptr<DSchedDataBuffer> buffer =
+        std::make_shared<DSchedDataBuffer>(static_cast<size_t>(DSchedSoftbusSession::BINARY_HEADER_FRAG_LEN));
+
+    auto ptr = buffer->Data();
+    ASSERT_NE(ptr, nullptr);
+    uint32_t i = 0;
+    ptr[i++] = DSchedSoftbusSession::TLV_TYPE_DATA_TYPE >> SHIFT_8;
+    ptr[i++] = DSchedSoftbusSession::TLV_TYPE_DATA_TYPE & UINT16_SHIFT_MASK_TEST;
+    ptr[i++] = SIZE_4 >> SHIFT_8;
+    ptr[i++] = SIZE_4 & UINT16_SHIFT_MASK_TEST;
+    ptr[i++] = 1;
+    ptr[i++] = 0;
+    ptr[i++] = 0;
+    ptr[i++] = 0;
+
+    uint16_t index = 0;
+    DSchedSoftbusSession::SessionDataHeader headerPara;
+    int32_t ret = softbusSessionTest_->ReadTlvToHeader(ptr, headerPara, index, i);
+    EXPECT_EQ(ret, ERR_OK);
+
+    softbusSessionTest_ = nullptr;
+    DTEST_LOG << "DSchedSoftbusSessionTest ReadTlvToHeader_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReadTlvToHeader_004
+ * @tc.desc: call ReadTlvToHeader
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedSoftbusSessionTest, ReadTlvToHeader_004, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedSoftbusSessionTest ReadTlvToHeader_004 begin" << std::endl;
+    int32_t dataType = 0;
+    softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
+    ASSERT_NE(softbusSessionTest_, nullptr);
+
+    std::shared_ptr<DSchedDataBuffer> buffer =
+        std::make_shared<DSchedDataBuffer>(static_cast<size_t>(DSchedSoftbusSession::BINARY_HEADER_FRAG_LEN));
+
+    auto ptr = buffer->Data();
+    ASSERT_NE(ptr, nullptr);
+    uint32_t i = 0;
+    ptr[i++] = DSchedSoftbusSession::TLV_TYPE_TOTAL_LEN >> SHIFT_8;
+    ptr[i++] = DSchedSoftbusSession::TLV_TYPE_TOTAL_LEN & UINT16_SHIFT_MASK_TEST;
+    ptr[i++] = SIZE_4 >> SHIFT_8;
+    ptr[i++] = SIZE_4 & UINT16_SHIFT_MASK_TEST;
+    ptr[i++] = 1;
+    ptr[i++] = 0;
+    ptr[i++] = 0;
+    ptr[i++] = 0;
+
+    uint16_t index = 0;
+    DSchedSoftbusSession::SessionDataHeader headerPara;
+    int32_t ret = softbusSessionTest_->ReadTlvToHeader(ptr, headerPara, index, i);
+    EXPECT_EQ(ret, ERR_OK);
+
+    softbusSessionTest_ = nullptr;
+    DTEST_LOG << "DSchedSoftbusSessionTest ReadTlvToHeader_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReadTlvToHeader_005
+ * @tc.desc: call ReadTlvToHeader
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedSoftbusSessionTest, ReadTlvToHeader_005, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedSoftbusSessionTest ReadTlvToHeader_005 begin" << std::endl;
+    int32_t dataType = 0;
+    softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
+    ASSERT_NE(softbusSessionTest_, nullptr);
+
+    std::shared_ptr<DSchedDataBuffer> buffer =
+        std::make_shared<DSchedDataBuffer>(static_cast<size_t>(DSchedSoftbusSession::BINARY_HEADER_FRAG_LEN));
+
+    auto ptr = buffer->Data();
+    ASSERT_NE(ptr, nullptr);
+    uint32_t i = 0;
+    ptr[i++] = DSchedSoftbusSession::TLV_TYPE_SUB_SEQ >> SHIFT_8;
+    ptr[i++] = DSchedSoftbusSession::TLV_TYPE_SUB_SEQ & UINT16_SHIFT_MASK_TEST;
+    ptr[i++] = SIZE_4 >> SHIFT_8;
+    ptr[i++] = SIZE_4 & UINT16_SHIFT_MASK_TEST;
+    ptr[i++] = 1;
+    ptr[i++] = 0;
+    ptr[i++] = 0;
+    ptr[i++] = 0;
+
+    uint16_t index = 0;
+    DSchedSoftbusSession::SessionDataHeader headerPara;
+    int32_t ret = softbusSessionTest_->ReadTlvToHeader(ptr, headerPara, index, i);
+    EXPECT_NE(ret, ERR_OK);
+
+    softbusSessionTest_ = nullptr;
+    DTEST_LOG << "DSchedSoftbusSessionTest ReadTlvToHeader_005 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReadTlvToHeader_006
+ * @tc.desc: call ReadTlvToHeader
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedSoftbusSessionTest, ReadTlvToHeader_006, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedSoftbusSessionTest ReadTlvToHeader_006 begin" << std::endl;
+    int32_t dataType = 0;
+    softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
+    ASSERT_NE(softbusSessionTest_, nullptr);
+
+    std::shared_ptr<DSchedDataBuffer> buffer =
+        std::make_shared<DSchedDataBuffer>(static_cast<size_t>(DSchedSoftbusSession::BINARY_HEADER_FRAG_LEN));
+
+    auto ptr = buffer->Data();
+    ASSERT_NE(ptr, nullptr);
+    uint32_t i = 0;
+    ptr[i++] = DSchedSoftbusSession::TLV_TYPE_DATA_LEN >> SHIFT_8;
+    ptr[i++] = DSchedSoftbusSession::TLV_TYPE_DATA_LEN & UINT16_SHIFT_MASK_TEST;
+    ptr[i++] = SIZE_4 >> SHIFT_8;
+    ptr[i++] = SIZE_4 & UINT16_SHIFT_MASK_TEST;
+    ptr[i++] = 1;
+    ptr[i++] = 0;
+    ptr[i++] = 0;
+    ptr[i++] = 0;
+
+    uint16_t index = 0;
+    DSchedSoftbusSession::SessionDataHeader headerPara;
+    int32_t ret = softbusSessionTest_->ReadTlvToHeader(ptr, headerPara, index, i);
+    EXPECT_EQ(ret, ERR_OK);
+
+    softbusSessionTest_ = nullptr;
+    DTEST_LOG << "DSchedSoftbusSessionTest ReadTlvToHeader_006 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReadTlvToHeader_007
+ * @tc.desc: call ReadTlvToHeader
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedSoftbusSessionTest, ReadTlvToHeader_007, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedSoftbusSessionTest ReadTlvToHeader_007 begin" << std::endl;
+    softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
+    ASSERT_NE(softbusSessionTest_, nullptr);
+
+    uint8_t *ptr = nullptr;
+    uint16_t i = 0;
+
+    uint16_t index = 0;
+    DSchedSoftbusSession::SessionDataHeader headerPara;
+    int32_t ret = softbusSessionTest_->ReadTlvToHeader(ptr, headerPara, index, i);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    uint8_t ptr1[] = {1, 2};
+    ret = softbusSessionTest_->ReadTlvToHeader(ptr1, headerPara, index, i);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    i = 2;
+    ret = softbusSessionTest_->ReadTlvToHeader(ptr1, headerPara, index, i);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    uint8_t high = SIZE_4 >> SHIFT_8;
+    uint8_t low = SIZE_4 & UINT16_SHIFT_MASK_TEST;
+    uint8_t ptr2[] = {1, 2, high, low};
+    ret = softbusSessionTest_->ReadTlvToHeader(ptr2, headerPara, index, i);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    i = 4;
+    ret = softbusSessionTest_->ReadTlvToHeader(ptr2, headerPara, index, i);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    uint8_t ptr3[] = {1, 2, high, low, 5, 6};
+    ret = softbusSessionTest_->ReadTlvToHeader(ptr3, headerPara, index, i);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    i = 6;
+    ret = softbusSessionTest_->ReadTlvToHeader(ptr3, headerPara, index, i);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    softbusSessionTest_ = nullptr;
+    DTEST_LOG << "DSchedSoftbusSessionTest ReadTlvToHeader_007 end" << std::endl;
+}
+
+/**
  * @tc.name: PackRecvData_001
  * @tc.desc: call PackRecvData
  * @tc.type: FUNC
@@ -804,7 +1069,6 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, OnShutdown_001, TestSize.Level3)
     DSchedTransportSoftbusAdapter::GetInstance().OnShutdown(sessionId, false);
     EXPECT_FALSE(DSchedTransportSoftbusAdapter::GetInstance().sessions_.empty());
 
-
     DSchedTransportSoftbusAdapter::GetInstance().sessions_[0] = nullptr;
     DSchedTransportSoftbusAdapter::GetInstance().OnShutdown(sessionId, false);
     EXPECT_EQ(DSchedTransportSoftbusAdapter::GetInstance().sessions_.count(sessionId), 1);
@@ -833,7 +1097,7 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, SendData_001, TestSize.Level3)
     int32_t sessionId = 0;
     auto dataBuffer = std::make_shared<DSchedDataBuffer>(SIZE_2);
     int32_t dataType = 2;
-    
+
     SoftbusMock mockSoftbus;
     int32_t socketId = 0;
     EXPECT_CALL(mockSoftbus, GetSessionOption(socketId, testing::_, testing::_, sizeof(uint32_t)))

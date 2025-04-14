@@ -194,6 +194,30 @@ ohos_unittest("distributedschedservicetest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("svcdistributedconnectiontest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  module_out_path = module_output_path
+
+  sources = [ "unittest/svc_distributed_connection_test.cpp" ]
+
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = []
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 ohos_unittest("distributedschedstubtest") {
   module_out_path = module_output_path
 
@@ -534,7 +558,9 @@ ohos_unittest("dmscontinuerecommendmgrtest") {
   cflags = [ "-Dprivate=public" ]
   sources = [
     "unittest/mission/notification/dms_continue_recommend_manager_test.cpp",
-    "unittest/mission/notification/dms_continue_send_manager_test.cpp",
+    "unittest/mock/bundle_manager_internal_mock.cpp",
+    "unittest/mock/dms_continue_condition_manager_mock.cpp",
+    "unittest/mock/dtbschedmgr_device_info_storage_mock.cpp",
   ]
   sources += dtbschedmgr_sources
 
@@ -549,6 +575,37 @@ ohos_unittest("dmscontinuerecommendmgrtest") {
     external_deps += [ "config_policy:configpolicy_util" ]
     public_deps = dsched_public_deps
   }
+
+  external_deps += [ "googletest:gmock" ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("dmscontinuemgrtest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "${dms_path}/services/dtbschedmgr/test/cfi_blocklist.txt"
+  }
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources =
+      [ "unittest/mission/notification/dms_continue_send_manager_test.cpp" ]
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    external_deps += [ "config_policy:configpolicy_util" ]
+    public_deps = dsched_public_deps
+  }
+
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -989,12 +1046,33 @@ ohos_unittest("dschedswitchstatustest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("dschedcontinuesuptest") {
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [ "unittest/continue/dsched_continue_sup_test.cpp" ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = []
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+  external_deps += [ "googletest:gmock" ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 ohos_unittest("dschedcontinuetest") {
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
   sources = [
     "unittest/continue/dsched_continue_test.cpp",
     "unittest/continue/mock_dtbschedmgr_device_info.cpp",
+    "unittest/mock/ability_manager_client_mock.cpp",
   ]
   sources += dtbschedmgr_sources
   configs = [
@@ -1177,6 +1255,7 @@ group("unittest") {
     ":dschedcontinuesinkstatetest",
     ":dschedcontinuesrcstatetest",
     ":dschedcontinuestatetest",
+    ":dschedcontinuesuptest",
     ":dschedcontinuetest",
     ":dschedswitchstatustest",
     ":hisyseventreporttest",
@@ -1189,10 +1268,12 @@ group("unittest") {
       ":distributedmissionmanagertest",
       ":dmscontinueconditionmgrtest",
       ":dmscontinuemanagertest",
+      ":dmscontinuemgrtest",
       ":dmscontinuerecommendmgrtest",
       ":dmsmissionmanagertest",
       ":dschedpermissiontest",
       ":dschedsynce2etest",
+      ":svcdistributedconnectiontest",
     ]
   }
 }
