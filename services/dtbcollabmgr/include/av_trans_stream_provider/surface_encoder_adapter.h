@@ -75,6 +75,7 @@ public:
     Media::Status NotifyEos(int64_t pts);
     Media::Status SetParameter(const std::shared_ptr<Media::Meta>& parameter);
     void OnOutputBufferAvailable(uint32_t index, std::shared_ptr<Media::AVBuffer> buffer);
+    void OnError(MediaAVCodec::AVCodecErrorType errorType, int32_t errorCode);
     void SetCallingInfo(int32_t appUid, int32_t appPid, const std::string& bundleName, uint64_t instanceId);
     void OnInputParameterWithAttrAvailable(uint32_t index, std::shared_ptr<MediaAVCodec::Format>& attribute,
         std::shared_ptr<MediaAVCodec::Format>& parameter);
