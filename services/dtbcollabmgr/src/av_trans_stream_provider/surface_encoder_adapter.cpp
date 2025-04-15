@@ -52,9 +52,9 @@ namespace DistributedCollab {
     } while (0)
     }
 
-    class SurfaceEncoderAdapterCallback : public MediaAVCodec::MediaCodecCallback {
+    class CodecEncoderAdapterCallback : public MediaAVCodec::MediaCodecCallback {
     public:
-        explicit SurfaceEncoderAdapterCallback(std::shared_ptr<SurfaceEncoderAdapter> adapter)
+        explicit CodecEncoderAdapterCallback(std::shared_ptr<SurfaceEncoderAdapter> adapter)
             : surfaceEncoderAdapter_(std::move(adapter))
         {
         }
@@ -62,7 +62,7 @@ namespace DistributedCollab {
         void OnError(MediaAVCodec::AVCodecErrorType errorType, int32_t errorCode) override
         {
             if (auto ptr = surfaceEncoderAdapter_.lock()) {
-                ptr->encoderAdapterCallback_->OnError(errorType, errorCode);
+                ptr->OnError(errorType, errorCode);
             }
         }
 
@@ -112,10 +112,12 @@ namespace DistributedCollab {
     SurfaceEncoderAdapter::~SurfaceEncoderAdapter()
     {
         HILOGI("encoder adapter destroy");
-        if (codecServer_) {
-            codecServer_->Release();
-        }
-        codecServer_ = nullptr;
+        Flush();
+        HILOGI("finish encoder receive callback");
+        encoderAdapterCallback_ = nullptr;
+        encoderAdapterKeyFramePtsCallback_ = nullptr;
+        Release();
+        HILOGI("release encoder codec");
     }
 
     Status SurfaceEncoderAdapter::Init(const std::string& mime, bool isEncoder)
@@ -223,7 +225,7 @@ namespace DistributedCollab {
     {
         HILOGI("SetEncoderAdapterCallback");
         std::shared_ptr<MediaAVCodec::MediaCodecCallback> surfaceEncoderAdapterCallback =
-            std::make_shared<SurfaceEncoderAdapterCallback>(shared_from_this());
+            std::make_shared<CodecEncoderAdapterCallback>(shared_from_this());
         encoderAdapterCallback_ = encoderAdapterCallback;
         if (!codecServer_) {
             return Status::ERROR_UNKNOWN;
@@ -377,6 +379,7 @@ namespace DistributedCollab {
             return Status::OK;
         }
         int32_t ret = codecServer_->Release();
+        codecServer_ = nullptr;
         return ret == ERR_OK ? Status::OK : Status::ERROR_UNKNOWN;
     }
 
@@ -459,6 +462,14 @@ namespace DistributedCollab {
             indexs_.push_back(index);
         }
         releaseBufferCondition_.notify_all();
+    }
+
+    void SurfaceEncoderAdapter::OnError(MediaAVCodec::AVCodecErrorType errorType, int32_t errorCode)
+    {
+        HILOGE("codec encoder error %{public}d:%{public}d", static_cast<int32_t>(errorType), errorCode);
+        if (encoderAdapterCallback_) {
+            encoderAdapterCallback_->OnError(errorType, errorCode);
+        }
     }
 
     void SurfaceEncoderAdapter::ReleaseBuffer()
