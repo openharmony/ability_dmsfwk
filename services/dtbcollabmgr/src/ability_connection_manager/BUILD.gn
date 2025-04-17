@@ -70,6 +70,7 @@ ohos_shared_library("distributed_ability_connection_manager") {
     "access_token:libtokenid_sdk",
     "av_codec:av_codec_client",
     "av_codec:av_codec_media_engine_filters",
+    "bundle_framework:libappexecfwk_common",
     "cJSON:cjson",
     "c_utils:utils",
     "dsoftbus:softbus_client",
