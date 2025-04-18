@@ -23,7 +23,7 @@ config("dms_sdk_public_config") {
     "${dms_path}/services/dtbabilitymgr/include/",
     "${dms_path}/services/dtbschedmgr/include/",
     "${dms_path}/frameworks/native/distributed_extension/include",
-    "${dms_path}/frameworks/native/distributed_extension/include/ipc"
+    "${dms_path}/frameworks/native/distributed_extension/include/ipc",
   ]
 
   cflags = []

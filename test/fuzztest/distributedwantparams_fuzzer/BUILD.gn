@@ -40,6 +40,7 @@ ohos_fuzztest("DistributedWantParamsFuzzTest") {
     "ability_base:want",
     "ability_base:zuri",
     "c_utils:utils",
+    "ipc:ipc_core",
   ]
 }
 
