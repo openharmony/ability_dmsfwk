@@ -292,7 +292,7 @@ std::shared_ptr<AVTransStreamData> AVReceiverFilter::GetStreamData()
     auto topData = dataQueue_.top();
     uint32_t curIndex = topData->GetStreamDataExt().index_;
     while (lastIndex_ >= curIndex) {
-        HILOGE("invalid index=%{public}u, cur=%{public}lld", curIndex, lastIndex_);
+        HILOGE("invalid index=%{public}u, cur=%{public}" PRId64, curIndex, lastIndex_);
         if (dataQueue_.empty()) {
             HILOGE("invalid data pop till queue empty");
             return nullptr;
@@ -436,7 +436,7 @@ int32_t AVReceiverFilter::RequestAndPushData(const std::shared_ptr<AVTransStream
         return static_cast<int32_t>(ret);
     }
 
-    HILOGD("write data to buffer, id=%{public}llu, size=%{public}d",
+    HILOGD("write data to buffer, id=%{public}" PRIu64 ", size=%{public}d",
         outputBuffer->GetUniqueId(), outputBuffer->GetConfig().size);
     auto& memory = outputBuffer->memory_;
     memory->SetSize(avBufferConfig.size);

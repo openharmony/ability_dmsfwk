@@ -278,7 +278,7 @@ namespace DistributedCollab {
         HILOGI("Stop");
         GetCurrentTime(stopTime_);
         isStopKeyFramePts_ = true;
-        HILOGI("Stop time: %{public}lld", stopTime_);
+        HILOGI("Stop time: %{public}" PRId64, stopTime_);
 
         if (isStart_ && !isTransCoderMode) {
             std::unique_lock<std::mutex> lock(stopMutex_);
@@ -309,7 +309,7 @@ namespace DistributedCollab {
         std::lock_guard<std::mutex> lock(checkFramesMutex_);
         int64_t pauseTime = 0;
         GetCurrentTime(pauseTime);
-        HILOGI("Pause time: %{public}lld", pauseTime);
+        HILOGI("Pause time: %{public}" PRId64, pauseTime);
         if (pauseResumeQueue_.empty() || (pauseResumeQueue_.back().second == StateCode::RESUME &&
             pauseResumeQueue_.back().first <= pauseTime)) {
             pauseResumeQueue_.push_back({ pauseTime, StateCode::PAUSE });
@@ -330,7 +330,7 @@ namespace DistributedCollab {
         std::lock_guard<std::mutex> lock(checkFramesMutex_);
         int64_t resumeTime = 0;
         GetCurrentTime(resumeTime);
-        HILOGI("resume time: %{public}lld", resumeTime);
+        HILOGI("resume time: %{public}" PRId64, resumeTime);
         if (pauseResumeQueue_.empty()) {
             HILOGI("Status Error, no pause before resume");
             return Status::ERROR_UNKNOWN;
@@ -387,7 +387,7 @@ namespace DistributedCollab {
             return Status::ERROR_UNKNOWN;
         }
         int32_t ret = 0;
-        HILOGI("lastBuffer PTS: %{public}lld, current PTS: %{public}lld", pts, currentPts_.load());
+        HILOGI("lastBuffer PTS: %{public}" PRId64 ", current PTS: %{public}" PRId64, pts, currentPts_.load());
         eosPts_ = pts;
         if (!isTransCoderMode || currentPts_.load() >= eosPts_.load()) {
             HILOGI("Notify encoder eos");
@@ -409,7 +409,7 @@ namespace DistributedCollab {
 
     void SurfaceEncoderAdapter::OnOutputBufferAvailable(uint32_t index, std::shared_ptr<AVBuffer> buffer)
     {
-        HILOGD("OnOutputBufferAvailable buffer->pts: %{public}lld", buffer->pts_);
+        HILOGD("OnOutputBufferAvailable buffer->pts: %{public}" PRId64, buffer->pts_);
         currentPts_ = currentPts_.load() < buffer->pts_ ? buffer->pts_ : currentPts_.load();
         if (stopTime_ != -1 && buffer->pts_ > stopTime_) {
             HILOGI("buffer->pts > stopTime, ready to stop");
@@ -418,7 +418,7 @@ namespace DistributedCollab {
         }
 
         int64_t mappingTime = -1;
-        HILOGI("now buffer flag_ : %{public}u, pts: %{public}lld", buffer->flag_, buffer->pts_);
+        HILOGI("now buffer flag_ : %{public}u, pts: %{public}" PRId64, buffer->flag_, buffer->pts_);
         // 计算sps pps
         // 变分辨率、首帧不进这个分支
         if (!(buffer->flag_ & MediaAVCodec::AVCodecBufferFlag::AVCODEC_BUFFER_FLAG_CODEC_DATA)) {
@@ -428,11 +428,11 @@ namespace DistributedCollab {
             } else if (mappingTimeQueue_.front().first != buffer->pts_) {
                 // 由于有一帧未被送入，因此后续都会进入这个分支打印， first != pts, mapp始终未更新
                 while (!mappingTimeQueue_.empty() && mappingTimeQueue_.front().first != buffer->pts_) {
-                    HILOGD("buffer->pts fail, pts: %{public}lld", mappingTimeQueue_.front().second);
+                    HILOGD("buffer->pts fail, pts: %{public}" PRId64, mappingTimeQueue_.front().second);
                     mappingTimeQueue_.pop_front();
                 }
                 mappingTime = mappingTimeQueue_.front().second;
-                HILOGD("new mapping time pts: %{public}lld", mappingTimeQueue_.front().second);
+                HILOGD("new mapping time pts: %{public}" PRId64, mappingTimeQueue_.front().second);
                 mappingTimeQueue_.pop_front();
             } else {
                 mappingTime = mappingTimeQueue_.front().second;
@@ -546,7 +546,7 @@ namespace DistributedCollab {
         std::lock_guard<std::mutex> lock(checkFramesMutex_);
         int64_t currentPts = 0;
         attribute->GetLongValue(Tag::MEDIA_TIME_STAMP, currentPts);
-        HILOGD("OnInputParameterWithAttrAvailable currentPts: %{public}lld", currentPts);
+        HILOGD("OnInputParameterWithAttrAvailable currentPts: %{public}" PRId64, currentPts);
         int64_t checkFramesPauseTime = 0;
         bool isDroppedFrames = CheckFrames(currentPts, checkFramesPauseTime);
         {
@@ -572,7 +572,7 @@ namespace DistributedCollab {
             return false;
         }
         auto stateCode = pauseResumeQueue_[0].second;
-        HILOGD("CheckFrames stateCode: %{public}d, time: %{public}lld",
+        HILOGD("CheckFrames stateCode: %{public}d, time: %{public}" PRId64,
             static_cast<int32_t>(stateCode), pauseResumeQueue_[0].first);
         // means not dropped frames when less than pause time
         if (stateCode == StateCode::PAUSE && currentPts < pauseResumeQueue_[0].first) {
@@ -632,7 +632,7 @@ namespace DistributedCollab {
             return false;
         }
         auto stateCode = pauseResumePts_[0].second;
-        HILOGD("CheckFrames stateCode: %{public}d, time: %{public}lld",
+        HILOGD("CheckFrames stateCode: %{public}d, time: %{public}" PRId64,
             static_cast<int32_t>(stateCode), pauseResumePts_[0].first);
         // means not dropped frames when less than pause time
         if (stateCode == StateCode::PAUSE && currentPts < pauseResumePts_[0].first) {

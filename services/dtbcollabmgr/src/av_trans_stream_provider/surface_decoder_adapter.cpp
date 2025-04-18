@@ -81,7 +81,7 @@ namespace DistributedCollab {
                 if (buffer->flag_ == 1) {
                     int64_t lastBufferPts = ptr->lastBufferPts_.load();
                     int64_t frameNum = ptr->frameNum_.load();
-                    HILOGI("lastBuffer PTS:%{public}lld, frameNum:%{public}lld", lastBufferPts, frameNum);
+                    HILOGI("lastBuffer PTS:%{public}" PRId64 ", frameNum:%{public}" PRId64, lastBufferPts, frameNum);
                 }
             }
         }
@@ -308,8 +308,8 @@ namespace DistributedCollab {
     {
         HILOGI("SurfaceDecoderAdapter::OnInputBufferAvailable enter");
         FALSE_RETURN_MSG(buffer != nullptr && buffer->meta_ != nullptr, "meta_ is nullptr.");
-        HILOGD("OnInputAvailable enter. index:%{public}u, bufferid:%{public}llu, pts:%{public}lld, flag:%{public}u",
-            index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
+        HILOGD("OnInputAvailable enter. index:%{public}u, bufferid:%{public}" PRIu64 ", pts:%{public}" PRId64
+            ", flag:%{public}u", index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
         buffer->meta_->SetData(Tag::REGULAR_TRACK_ID, index);
         if (inputBufferQueueConsumer_ == nullptr) {
             HILOGE("inputBufferQueueConsumer_ is null");
@@ -318,13 +318,13 @@ namespace DistributedCollab {
         if (inputBufferQueueConsumer_->IsBufferInQueue(buffer)) {
             if (inputBufferQueueConsumer_->ReleaseBuffer(buffer) != Status::OK) {
                 HILOGE(
-                    "InQueue RelBuf failed.index:%{public}u, bufferid:%{public}llu,pts:%{public}lld, flag:%{public}u",
-                    index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
+                    "InQueue RelBuf failed.index:%{public}u, bufferid:%{public}" PRIu64 ",pts:%{public}" PRId64
+                    ", flag:%{public}u", index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
             }
             return;
         }
         uint32_t size = inputBufferQueueConsumer_->GetQueueSize() + 1;
-        HILOGI("AttachBuffer enter. index:%{public}u,  size:%{public}u , bufferid:%{public}llu",
+        HILOGI("AttachBuffer enter. index:%{public}u,  size:%{public}u , bufferid:%{public}" PRIu64,
             index, size, buffer->GetUniqueId());
         inputBufferQueueConsumer_->SetQueueSize(size);
         inputBufferQueueConsumer_->AttachBuffer(buffer, false);
@@ -365,12 +365,12 @@ namespace DistributedCollab {
         FALSE_RETURN_MSG(codecServer_ != nullptr, "codecServer_ is nullptr.");
         if (codecServer_->QueueInputBuffer(index) != ERR_OK) {
             HILOGE(
-                "QueueInputBuffer failed, index:%{public}u, bufferid:%{public}llu, pts:%{public}lld, flag:%{public}u",
-                index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
+                "QueueInputBuffer failed, index:%{public}u, bufferid:%{public}" PRIu64 ", pts:%{public}" PRId64
+                ", flag:%{public}u", index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
         } else {
             HILOGD(
-                "QueueInputBuffer success, index:%{public}u, bufferid:%{public}llu, pts:%{public}lld, flag:%{public}u",
-                index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
+                "QueueInputBuffer success, index:%{public}u, bufferid:%{public}" PRIu64 ", pts:%{public}" PRId64
+                ", flag:%{public}u", index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
         }
     }
 
