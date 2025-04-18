@@ -231,6 +231,7 @@ ohos_shared_library("distributedschedsvr") {
     "access_token:libtokensetproc_shared",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "bundle_framework:libappexecfwk_common",
     "cJSON:cjson",
     "c_utils:utils",
     "data_share:datashare_consumer",
