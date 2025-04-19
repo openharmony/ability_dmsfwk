@@ -994,7 +994,7 @@ void JsAbilityConnectionManager::ExecuteConnect(napi_env env, void *data)
         if (tsfn == nullptr) {
             HILOGE("tsfn is nullptr");
         }
-        napi_status status = napi_call_threadsafe_function(tsfn, asyncData, napi_tsfn_blocking);
+        napi_status status = napi_call_threadsafe_function(tsfn, asyncData, napi_tsfn_nonblocking);
         if (status != napi_ok) {
             HILOGE("Failed to create async work. status is %{public}d", static_cast<int32_t>(status));
         }
