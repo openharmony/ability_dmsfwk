@@ -208,6 +208,9 @@ private:
     void NotifyAppConnectResult(bool isConnected,
         const ConnectErrorCode errorCode = ConnectErrorCode::SYSTEM_INTERNAL_ERROR,
         const std::string& reason = "");
+    void NotifyCollabErrorResultFromSa(bool isConnected,
+        const ConnectErrorCode errorCode = ConnectErrorCode::SYSTEM_INTERNAL_ERROR,
+        const std::string& reason = "");
     int32_t CreateStreamChannel(const std::string& channelName, bool isClientChannel);
     void ConnectFileChannel(const std::string& peerSocketName);
     void HandleSessionConnect();
