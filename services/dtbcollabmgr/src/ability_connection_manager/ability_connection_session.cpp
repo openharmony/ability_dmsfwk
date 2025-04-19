@@ -196,7 +196,7 @@ int32_t AbilityConnectionSession::Connect(ConnectCallback& callback)
     HILOGI("called.");
     connectCallback_ = callback;
     if (CheckConnectedSession()) {
-        HILOGE("connected session exists.");
+        HILOGE("connected session %{public}d exists.", sessionId_);
         return CONNECTED_SESSION_EXISTS;
     }
     if (!CheckWifiStatus()) {
@@ -210,7 +210,9 @@ int32_t AbilityConnectionSession::Connect(ConnectCallback& callback)
         std::unique_lock<std::shared_mutex> sessionStatusWriteLock(sessionMutex_);
         if (sessionStatus_ != SessionStatus::UNCONNECTED) {
             HILOGE("session has start to connect, sessionStatus is %{public}d", sessionStatus_);
-            return INVALID_PARAMETERS_ERR;
+            ConnectResult connectResult(false, ConnectErrorCode::CONNECTED_SESSION_EXISTS, "");
+            ExeuteConnectCallback(connectResult);
+            return CONNECTED_SESSION_EXISTS;
         }
         sessionStatus_ = SessionStatus::CONNECTING;
     }
@@ -331,7 +333,7 @@ int32_t AbilityConnectionSession::HandleCollabResult(int32_t result, const std::
     peerSocketName_ = peerSocketName;
     if (result != ERR_OK) {
         HILOGE("collab result is failed, ret = %{public}d, reason = %{public}s", result, reason.c_str());
-        NotifyAppConnectResult(false, ConvertToConnectErrorCode(result), reason);
+        NotifyCollabErrorResultFromSa(false, ConvertToConnectErrorCode(result), reason);
         return INVALID_PARAMETERS_ERR;
     }
 
@@ -396,6 +398,7 @@ void AbilityConnectionSession::NotifyPeerSessionConnected()
 void AbilityConnectionSession::NotifyAppConnectResult(bool isConnected,
     const ConnectErrorCode errorCode, const std::string& reason)
 {
+    HILOGE("notify result from self %{public}d", sessionId_);
     ConnectResult connectResult(isConnected, errorCode, reason);
     if (isConnected) {
         std::unique_lock<std::shared_mutex> sessionStatusWriteLock(sessionMutex_);
@@ -406,6 +409,16 @@ void AbilityConnectionSession::NotifyAppConnectResult(bool isConnected,
         DistributedClient dmsClient;
         dmsClient.NotifyCloseCollabSession(dmsServerToken_);
     }
+    ExeuteConnectCallback(connectResult);
+}
+
+void AbilityConnectionSession::NotifyCollabErrorResultFromSa(bool isConnected,
+    const ConnectErrorCode errorCode, const std::string& reason)
+{
+    HILOGE("notify result from sa %{public}d", sessionId_);
+    ConnectResult connectResult(isConnected, errorCode, reason);
+    connectResult.sessionId = sessionId_;
+    Release();
     ExeuteConnectCallback(connectResult);
 }
 
@@ -1604,13 +1617,15 @@ void AbilityConnectionSession::ExeuteConnectCallback(const ConnectResult& result
         return;
     }
 
-    auto task = [this, result, connectCallback = connectCallback_]() {
+    auto task = [this, result]() {
         HILOGI("execute connect callback task.");
-        if (connectCallback == nullptr) {
+        if (connectCallback_ == nullptr) {
             HILOGE("connect callback is nullptr.");
             return;
         }
-        connectCallback(result);
+        auto callback = std::move(connectCallback_);
+        connectCallback_ = nullptr;
+        callback(result);
         if (!result.isConnected) {
             Release();
         }
