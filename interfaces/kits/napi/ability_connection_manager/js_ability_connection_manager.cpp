@@ -962,11 +962,7 @@ void JsAbilityConnectionManager::ConnectThreadsafeFunctionCallback(napi_env env,
     }
     napi_resolve_deferred(env, asyncData->deferred, connectResultObj);
 
-    napi_async_work asyncWork = asyncData->asyncWork;
-    napi_release_threadsafe_function(asyncData->tsfn, napi_tsfn_release);
-    napi_delete_async_work(env, asyncWork);
     AbilityConnectionManager::GetInstance().FinishSessionConnect(asyncData->result.sessionId);
-    delete asyncData;
 }
 
 void JsAbilityConnectionManager::ExecuteConnect(napi_env env, void *data)
@@ -977,9 +973,9 @@ void JsAbilityConnectionManager::ExecuteConnect(napi_env env, void *data)
         HILOGE("asyncData is nullptr");
         return;
     }
-    AbilityConnectionManager::ConnectCallback connectCallback = [asyncData](ConnectResult result) {
-        if (asyncData == nullptr) {
-            HILOGE("asyncData is nullptr");
+    AbilityConnectionManager::ConnectCallback connectCallback = [env, asyncData](ConnectResult result) {
+        if (asyncData == nullptr || env == nullptr) {
+            HILOGE("asyncData or env is nullptr");
             return;
         }
         asyncData->result = result;
@@ -987,10 +983,14 @@ void JsAbilityConnectionManager::ExecuteConnect(napi_env env, void *data)
         if (tsfn == nullptr) {
             HILOGE("tsfn is nullptr");
         }
-        napi_status status = napi_call_threadsafe_function(tsfn, asyncData, napi_tsfn_nonblocking);
+        napi_status status = napi_call_threadsafe_function(tsfn, asyncData, napi_tsfn_blocking);
         if (status != napi_ok) {
             HILOGE("Failed to create async work. status is %{public}d", static_cast<int32_t>(status));
         }
+        napi_release_threadsafe_function(asyncData->tsfn, napi_tsfn_release);
+        HILOGI("release tsfn");
+        delete asyncData;
+        HILOGI("release async data");
     };
     asyncData->funResult = AbilityConnectionManager::GetInstance().ConnectSession(
         asyncData->sessionId, connectCallback);
@@ -1006,6 +1006,7 @@ void JsAbilityConnectionManager::CompleteAsyncConnectWork(napi_env env, napi_sta
 
     AsyncConnectCallbackInfo* asyncData = static_cast<AsyncConnectCallbackInfo*>(data);
     HILOGI("start connect result is %{public}d", asyncData->funResult);
+    napi_delete_async_work(env, asyncData->asyncWork);
     if (asyncData->funResult == INVALID_SESSION_ID) {
         HILOGE("failed to start connect.");
         napi_status ret = napi_reject_deferred(env, asyncData->deferred,
@@ -1013,8 +1014,10 @@ void JsAbilityConnectionManager::CompleteAsyncConnectWork(napi_env env, napi_sta
         if (ret != napi_ok) {
             HILOGE("Failed to throw error. status is %{public}d", static_cast<int32_t>(ret));
         }
-        napi_delete_async_work(env, asyncData->asyncWork);
+        napi_release_threadsafe_function(asyncData->tsfn, napi_tsfn_release);
+        HILOGI("release tsfn");
         delete asyncData;
+        HILOGI("release async data");
     }
 }
 
