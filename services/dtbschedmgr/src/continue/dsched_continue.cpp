@@ -529,7 +529,7 @@ int32_t DSchedContinue::ExecuteContinueReq(std::shared_ptr<DistributedWantParams
     DmsUE::GetInstance().TriggerDmsContinue(continueInfo_.sinkBundleName_, continueInfo_.sinkAbilityName_,
         continueInfo_.sourceDeviceId_, ERR_OK);
 
-    if (CheckQuickStartConfiguration()) {
+    if (subServiceType_ == CONTINUE_PULL && CheckQuickStartConfiguration()) {
         QuickStartAbility();
     }
 
@@ -757,6 +757,10 @@ int32_t DSchedContinue::ExecuteContinueReply()
 {
     HILOGI("ExecuteContinueReply start, continueInfo: %{public}s", continueInfo_.ToString().c_str());
 
+    if (subServiceType_ == CONTINUE_PUSH && CheckQuickStartConfiguration()) {
+        QuickStartAbility();
+    }
+
     AppExecFwk::BundleInfo bundleInfo;
     if (BundleManagerInternal::GetLocalBundleInfoV9(continueInfo_.sinkBundleName_, bundleInfo) != ERR_OK) {
         HILOGE("ExecuteContinueReply get local bundleInfo failed, the bundle is not installed on local device.");
@@ -964,8 +968,7 @@ int32_t DSchedContinue::ExecuteContinueData(std::shared_ptr<DSchedContinueDataCm
 
     OHOS::AAFwk::Want want = cmd->want_;
     UpdateWantForContinueType(want);
-    if (subServiceType_ == CONTINUE_PULL &&
-        !ContinueSceneSessionHandler::GetInstance().GetContinueSessionId().empty()) {
+    if (!ContinueSceneSessionHandler::GetInstance().GetContinueSessionId().empty()) {
         int32_t persistentId;
         if (ContinueSceneSessionHandler::GetInstance().GetPersistentId(persistentId) != ERR_OK) {
             HILOGE("get persistentId failed, stop start ability");
