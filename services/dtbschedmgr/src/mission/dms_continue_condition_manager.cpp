@@ -336,6 +336,7 @@ int32_t DmsContinueConditionMgr::OnMissionDestory(int32_t accountId, int32_t mis
         return ERR_OK;
     }
     missionMap_[accountId].erase(missionId);
+    hasMissionFocus_.store(false);
     HILOGI("missionMap update finished!");
     return ERR_OK;
 }
