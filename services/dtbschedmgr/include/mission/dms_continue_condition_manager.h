@@ -129,6 +129,7 @@ private:
     std::atomic<bool> isWifiActive_ = false;
     std::atomic<bool> isBtActive_ = false;
     std::atomic<bool> isScreenLocked_ = false;
+    std::atomic<bool> hasMissionFocus_ = false;
 
     using DSchedSysEventFunc = int32_t (DmsContinueConditionMgr::*)(bool value);
     std::map<SysEventType, DSchedSysEventFunc> sysFuncMap_;
