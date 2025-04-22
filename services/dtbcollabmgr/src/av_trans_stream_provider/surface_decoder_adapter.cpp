@@ -46,9 +46,9 @@ namespace DistributedCollab {
     } while (0)
     }
 
-    class SurfaceDecoderAdapterCallback : public MediaAVCodec::MediaCodecCallback {
+    class CodecDecoderAdapterCallback : public MediaAVCodec::MediaCodecCallback {
     public:
-        explicit SurfaceDecoderAdapterCallback(std::shared_ptr<SurfaceDecoderAdapter> adapter)
+        explicit CodecDecoderAdapterCallback(std::shared_ptr<SurfaceDecoderAdapter> adapter)
             : surfaceDecoderAdapter_(std::move(adapter))
         {
         }
@@ -56,7 +56,7 @@ namespace DistributedCollab {
         void OnError(MediaAVCodec::AVCodecErrorType errorType, int32_t errorCode) override
         {
             if (auto ptr = surfaceDecoderAdapter_.lock()) {
-                ptr->decoderAdapterCallback_->OnError(errorType, errorCode);
+                ptr->OnError(errorType, errorCode);
             } else {
                 HILOGI("invalid surfaceEncoderAdapter");
             }
@@ -116,10 +116,11 @@ namespace DistributedCollab {
     SurfaceDecoderAdapter::~SurfaceDecoderAdapter()
     {
         HILOGI("encoder adapter destroy");
-        if (codecServer_) {
-            codecServer_->Release();
-        }
-        codecServer_ = nullptr;
+        Flush();
+        HILOGI("finish decoder receive callback");
+        decoderAdapterCallback_ = nullptr;
+        Release();
+        HILOGI("release decoder codec");
     }
 
     Status SurfaceDecoderAdapter::Init(const std::string& mime)
@@ -188,7 +189,7 @@ namespace DistributedCollab {
     {
         HILOGI("SetDecoderAdapterCallback");
         std::shared_ptr<MediaAVCodec::MediaCodecCallback> surfaceDecoderAdapterCallback =
-            std::make_shared<SurfaceDecoderAdapterCallback>(shared_from_this());
+            std::make_shared<CodecDecoderAdapterCallback>(shared_from_this());
         decoderAdapterCallback_ = decoderAdapterCallback;
         if (!codecServer_) {
             return Status::ERROR_UNKNOWN;
@@ -283,6 +284,7 @@ namespace DistributedCollab {
             return Status::OK;
         }
         int32_t ret = codecServer_->Release();
+        codecServer_ = nullptr;
         if (ret == ERR_OK) {
             return Status::OK;
         } else {
@@ -331,6 +333,14 @@ namespace DistributedCollab {
             index, size, buffer->GetUniqueId());
         inputBufferQueueConsumer_->SetQueueSize(size);
         inputBufferQueueConsumer_->AttachBuffer(buffer, false);
+    }
+
+    void SurfaceDecoderAdapter::OnError(MediaAVCodec::AVCodecErrorType errorType, int32_t errorCode)
+    {
+        HILOGE("codec decoder error %{public}d:%{public}d", static_cast<int32_t>(errorType), errorCode);
+        if (decoderAdapterCallback_) {
+            decoderAdapterCallback_->OnError(errorType, errorCode);
+        }
     }
 
     void SurfaceDecoderAdapter::OnOutputBufferAvailable(uint32_t index, std::shared_ptr<AVBuffer> buffer)
