@@ -72,6 +72,11 @@ typedef enum {
     SYS_EVENT_MAX,
 } SysEventType;
 
+struct CurrentFocusMissionInfo {
+    int32_t currentMissionId;
+    bool isContinuable;
+};
+
 class DmsContinueConditionMgr {
 DECLARE_SINGLE_INSTANCE_BASE(DmsContinueConditionMgr);
 
@@ -129,7 +134,6 @@ private:
     std::atomic<bool> isWifiActive_ = false;
     std::atomic<bool> isBtActive_ = false;
     std::atomic<bool> isScreenLocked_ = false;
-    std::atomic<bool> hasMissionFocus_ = false;
 
     using DSchedSysEventFunc = int32_t (DmsContinueConditionMgr::*)(bool value);
     std::map<SysEventType, DSchedSysEventFunc> sysFuncMap_;
@@ -141,6 +145,7 @@ private:
     std::mutex missionMutex_;
     std::map<int32_t, std::map<int32_t, MissionStatus>> missionMap_;
     std::pair<int32_t, MissionStatus> lastFocusMission_;
+    CurrentFocusMissionInfo currentFocusMissionInfo_ = { -1, false};
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
