@@ -249,7 +249,8 @@ int32_t DmsContinueConditionMgr::OnMissionFocused(int32_t accountId, int32_t mis
             HILOGI("found mission %{public}d, update status: isFocused", missionId);
             CleanLastFocusedFlagLocked(accountId, missionId);
             missionMap_[accountId][missionId].isFocused = true;
-            hasMissionFocus_.store(true);
+            currentFocusMissionInfo_.currentMissionId = missionId;
+            currentFocusMissionInfo_.isContinuable = info.continuable;
             return ERR_OK;
         }
 
@@ -263,7 +264,8 @@ int32_t DmsContinueConditionMgr::OnMissionFocused(int32_t accountId, int32_t mis
         ConvertToMissionStatus(info, status);
         CleanLastFocusedFlagLocked(accountId, missionId);
         status.isFocused = true;
-        hasMissionFocus_.store(true);
+        currentFocusMissionInfo_.currentMissionId = missionId;
+        currentFocusMissionInfo_.isContinuable = info.continuable;
         HILOGD("mission %{public}d status: %{public}s", missionId, status.ToString().c_str());
         missionMap_[accountId][missionId] = status;
     }
@@ -319,7 +321,6 @@ int32_t DmsContinueConditionMgr::OnMissionUnfocused(int32_t accountId, int32_t m
         return CONDITION_INVALID_MISSION_ID;
     }
     missionMap_[accountId][missionId].isFocused = false;
-    hasMissionFocus_.store(false);
     lastFocusMission_.first = accountId;
     lastFocusMission_.second = missionMap_[accountId][missionId];
     HILOGI("missionMap update finished! status: %{public}s", missionMap_[accountId][missionId].ToString().c_str());
@@ -336,7 +337,6 @@ int32_t DmsContinueConditionMgr::OnMissionDestory(int32_t accountId, int32_t mis
         return ERR_OK;
     }
     missionMap_[accountId].erase(missionId);
-    hasMissionFocus_.store(false);
     HILOGI("missionMap update finished!");
     return ERR_OK;
 }
@@ -506,7 +506,7 @@ bool DmsContinueConditionMgr::CheckSendInactiveCondition(const MissionStatus& st
 
     std::string reason = "";
     do {
-        if (hasMissionFocus_.load() && !status.isFocused) {
+        if (currentFocusMissionInfo_.isContinuable && currentFocusMissionInfo_.currentMissionId != status.missionId) {
             reason = "OTHER_MISSION_FOCUSED";
             break;
         }
