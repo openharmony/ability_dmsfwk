@@ -504,7 +504,7 @@ bool DmsContinueConditionMgr::CheckSendInactiveCondition(const MissionStatus& st
     std::string reason = "";
     do {
         int32_t currentFocusedMissionId = GetCurrentMissionId();
-        if(currentFocusedMissionId != INVALID_MISSION_ID && currentFocusedMissionId != status.missionId){
+        if (currentFocusedMissionId != INVALID_MISSION_ID && currentFocusedMissionId != status.missionId) {
             reason = "OTHER_MISSION_FOCUSED";
             break;
         }
