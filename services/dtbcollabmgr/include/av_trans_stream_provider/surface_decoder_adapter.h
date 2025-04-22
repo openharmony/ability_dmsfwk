@@ -60,6 +60,7 @@ public:
     Media::Status SetParameter(const MediaAVCodec::Format& format);
     void OnInputBufferAvailable(uint32_t index, std::shared_ptr<Media::AVBuffer> buffer);
     void OnOutputBufferAvailable(uint32_t index, std::shared_ptr<Media::AVBuffer> buffer);
+    void OnError(MediaAVCodec::AVCodecErrorType errorType, int32_t errorCode);
     void AcquireAvailableInputBuffer();
 
     std::shared_ptr<DecoderAdapterCallback> decoderAdapterCallback_;
