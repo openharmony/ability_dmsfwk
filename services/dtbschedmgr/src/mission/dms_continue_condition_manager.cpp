@@ -249,8 +249,6 @@ int32_t DmsContinueConditionMgr::OnMissionFocused(int32_t accountId, int32_t mis
             HILOGI("found mission %{public}d, update status: isFocused", missionId);
             CleanLastFocusedFlagLocked(accountId, missionId);
             missionMap_[accountId][missionId].isFocused = true;
-            currentFocusMissionInfo_.currentMissionId = missionId;
-            currentFocusMissionInfo_.isContinuable = info.continuable;
             return ERR_OK;
         }
 
@@ -264,8 +262,6 @@ int32_t DmsContinueConditionMgr::OnMissionFocused(int32_t accountId, int32_t mis
         ConvertToMissionStatus(info, status);
         CleanLastFocusedFlagLocked(accountId, missionId);
         status.isFocused = true;
-        currentFocusMissionInfo_.currentMissionId = missionId;
-        currentFocusMissionInfo_.isContinuable = info.continuable;
         HILOGD("mission %{public}d status: %{public}s", missionId, status.ToString().c_str());
         missionMap_[accountId][missionId] = status;
     }
@@ -506,7 +502,11 @@ bool DmsContinueConditionMgr::CheckSendInactiveCondition(const MissionStatus& st
 
     std::string reason = "";
     do {
-        if (currentFocusMissionInfo_.isContinuable && currentFocusMissionInfo_.currentMissionId != status.missionId) {
+        MissionStatus currenFocusedMission;
+        GetCurrentFocusedMission(status.missionId, currenFocusedMission);
+        if (currenFocusedMission.missionId != CONDITION_INVALID_MISSION_ID && currenFocusedMission.isContinuable
+            && currenFocusedMission.missionId != status.missionId) {
+            HILOGE("Current focused mission id: %{public}d", currenFocusedMission.missionId);
             reason = "OTHER_MISSION_FOCUSED";
             break;
         }
@@ -600,6 +600,27 @@ int32_t DmsContinueConditionMgr::GetCurrentFocusedMission(int32_t accountId)
         for (const auto& record : missionMap_[accountId]) {
             if (record.second.isFocused) {
                 missionId = record.first;
+                break;
+            }
+        }
+    }
+    return missionId;
+}
+
+int32_t DmsContinueConditionMgr::GetCurrentFocusedMission(int32_t accountId, MissionStatus &missionStatus)
+{
+    int32_t missionId = CONDITION_INVALID_MISSION_ID;
+    missionStatus.missionId = CONDITION_INVALID_MISSION_ID;
+    {
+        std::lock_guard<std::mutex> missionlock(missionMutex_);
+        if (missionMap_.count(accountId) == 0) {
+            HILOGE("user %{public}d not exist!", accountId);
+            return missionId;
+        }
+        for (const auto& record : missionMap_[accountId]) {
+            if (record.second.isFocused) {
+                missionId = record.first;
+                missionStatus = record.second;
                 break;
             }
         }
