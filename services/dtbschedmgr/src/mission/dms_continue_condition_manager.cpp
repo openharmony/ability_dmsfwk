@@ -207,7 +207,8 @@ void DmsContinueConditionMgr::InitMissionStatus(int32_t accountId)
         std::map<int32_t, MissionStatus> missionList;
         for (auto mission : missions) {
             MissionStatus status;
-            ConvertToMissionStatus(mission, status);
+            ConvertToMissionStatus(mission, accountId, status);
+            status.accountId = accountId;
             HILOGD("mission %{public}d status: %{public}s", mission.id, status.ToString().c_str());
             missionList[mission.id] = status;
         }
@@ -259,7 +260,7 @@ int32_t DmsContinueConditionMgr::OnMissionFocused(int32_t accountId, int32_t mis
 
         HILOGI("new mission %{public}d focused, add record", missionId);
         MissionStatus status;
-        ConvertToMissionStatus(info, status);
+        ConvertToMissionStatus(info, accountId, status);
         CleanLastFocusedFlagLocked(accountId, missionId);
         status.isFocused = true;
         HILOGD("mission %{public}d status: %{public}s", missionId, status.ToString().c_str());
@@ -284,8 +285,9 @@ int32_t DmsContinueConditionMgr::GetMissionInfo(int32_t missionId, AAFwk::Missio
 }
 
 void DmsContinueConditionMgr::ConvertToMissionStatus(const AAFwk::MissionInfo& missionInfo,
-    MissionStatus& status)
+    int32_t accountId, MissionStatus& status)
 {
+    status.accountId = accountId;
     status.missionId = missionInfo.id;
     status.bundleName = missionInfo.want.GetElement().GetBundleName();
     status.moduleName = missionInfo.want.GetElement().GetModuleName();
