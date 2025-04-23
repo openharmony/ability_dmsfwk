@@ -208,7 +208,6 @@ void DmsContinueConditionMgr::InitMissionStatus(int32_t accountId)
         for (auto mission : missions) {
             MissionStatus status;
             ConvertToMissionStatus(mission, accountId, status);
-            status.accountId = accountId;
             HILOGD("mission %{public}d status: %{public}s", mission.id, status.ToString().c_str());
             missionList[mission.id] = status;
         }
@@ -505,7 +504,7 @@ bool DmsContinueConditionMgr::CheckSendInactiveCondition(const MissionStatus& st
     std::string reason = "";
     do {
         MissionStatus currenFocusedMission;
-        GetCurrentFocusedMission(status.missionId, currenFocusedMission);
+        GetCurrentFocusedMission(status.accountId, currenFocusedMission);
         if (currenFocusedMission.missionId != CONDITION_INVALID_MISSION_ID && currenFocusedMission.isContinuable
             && currenFocusedMission.missionId != status.missionId) {
             HILOGE("Current focused mission id: %{public}d", currenFocusedMission.missionId);
