@@ -28,6 +28,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 
 struct MissionStatus {
+    int32_t accountId;
     int32_t missionId;
     std::string bundleName;
     std::string moduleName;
@@ -72,11 +73,6 @@ typedef enum {
     SYS_EVENT_MAX,
 } SysEventType;
 
-struct CurrentFocusMissionInfo {
-    int32_t currentMissionId;
-    bool isContinuable;
-};
-
 class DmsContinueConditionMgr {
 DECLARE_SINGLE_INSTANCE_BASE(DmsContinueConditionMgr);
 
@@ -97,6 +93,7 @@ public:
     bool CheckMissionSendCondition(const MissionStatus& status, MissionEventType type);
     bool IsScreenLocked();
     int32_t GetCurrentFocusedMission(int32_t accountId);
+    int32_t GetCurrentFocusedMission(int32_t accountId, MissionStatus &missionStatus);
     int32_t GetMissionStatus(int32_t accountId, int32_t missionId, MissionStatus& status);
     int32_t GetMissionIdByBundleName(int32_t accountId, const std::string& bundleName, int32_t& missionId);
     std::string TypeEnumToString(MissionEventType type);
@@ -145,7 +142,6 @@ private:
     std::mutex missionMutex_;
     std::map<int32_t, std::map<int32_t, MissionStatus>> missionMap_;
     std::pair<int32_t, MissionStatus> lastFocusMission_;
-    CurrentFocusMissionInfo currentFocusMissionInfo_ = { -1, false};
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
