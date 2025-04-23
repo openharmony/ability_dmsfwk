@@ -122,7 +122,8 @@ private:
     int32_t GetMissionInfo(int32_t missionId, AAFwk::MissionInfo& info);
     int32_t GetMissionInfos(std::vector<AAFwk::MissionInfo>& missions);
 
-    void ConvertToMissionStatus(const AAFwk::MissionInfo& missionInfo, MissionStatus& status);
+    void ConvertToMissionStatus(const AAFwk::MissionInfo& missionInfo,
+        int32_t accountId, MissionStatus& status);
     void CleanLastFocusedFlagLocked(int32_t accountId, int32_t missionId);
     bool IsMissionStatusExistLocked(int32_t accountId, int32_t missionId);
 
