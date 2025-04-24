@@ -98,6 +98,13 @@ config("distributed_sched_config") {
   }
 }
 
+ohos_prebuilt_etc("dextension_prebuilt_config") {
+  source = "resources"
+  relative_install_dir = "dmsfwk"
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 ohos_shared_library("distributedschedsvr") {
   branch_protector_ret = "pac_ret"
   sanitize = {
@@ -214,6 +221,7 @@ ohos_shared_library("distributedschedsvr") {
   ]
 
   deps = [
+    ":dextension_prebuilt_config",
     "${dms_path}/common:distributed_sched_utils",
     "${dms_path}/frameworks/native/distributed_extension:distributed_extension_sa",
   ]
@@ -241,12 +249,14 @@ ohos_shared_library("distributedschedsvr") {
     "device_manager:devicemanagersdk",
     "device_security_level:dslm_sdk",
     "distributed_bundle_framework:dbms_fwk",
+    "distributed_notification_service:ans_innerkits",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
+    "i18n:intl_util",
     "init:libbegetutil",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",

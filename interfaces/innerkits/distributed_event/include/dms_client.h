@@ -21,6 +21,7 @@
 #include "iremote_broker.h"
 
 #include "ability_manager_errors.h"
+#include "distributed_extension_types.h"
 #include "distributed_event_listener.h"
 #include "distributed_sched_types.h"
 
@@ -32,7 +33,8 @@ public:
     int32_t UnRegisterDSchedEventListener(const DSchedEventType& type, const sptr<IDSchedEventListener>& obj);
     int32_t GetContinueInfo(ContinueInfo &continueInfo);
     int32_t GetDSchedEventInfo(const DSchedEventType &type, std::vector<EventNotify> &events);
-    int32_t ConnectDExtAbility(std::string& bundleName, std::string& abilityName, int32_t userId);
+    int32_t ConnectDExtensionFromRemote(const DExtConnectInfo& connectInfo,
+        std::function<void(DExtConnectResultInfo)> callback);
 
 private:
     sptr<IRemoteObject> GetDmsProxy();
