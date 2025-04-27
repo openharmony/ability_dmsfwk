@@ -76,6 +76,7 @@ void DataSenderReceiver::StartEvent()
 void DataSenderReceiver::DeInit()
 {
     HILOGI("start deinit data sender receiver for %{public}d", socketId_);
+    Shutdown(socketId_);
     // stop all task
     if (eventHandler_ != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
