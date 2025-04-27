@@ -28,6 +28,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 
 struct MissionStatus {
+    int32_t accountId;
     int32_t missionId;
     std::string bundleName;
     std::string moduleName;
@@ -92,6 +93,7 @@ public:
     bool CheckMissionSendCondition(const MissionStatus& status, MissionEventType type);
     bool IsScreenLocked();
     int32_t GetCurrentFocusedMission(int32_t accountId);
+    int32_t GetCurrentFocusedMission(int32_t accountId, MissionStatus &missionStatus);
     int32_t GetMissionStatus(int32_t accountId, int32_t missionId, MissionStatus& status);
     int32_t GetMissionIdByBundleName(int32_t accountId, const std::string& bundleName, int32_t& missionId);
     std::string TypeEnumToString(MissionEventType type);
@@ -120,7 +122,8 @@ private:
     int32_t GetMissionInfo(int32_t missionId, AAFwk::MissionInfo& info);
     int32_t GetMissionInfos(std::vector<AAFwk::MissionInfo>& missions);
 
-    void ConvertToMissionStatus(const AAFwk::MissionInfo& missionInfo, MissionStatus& status);
+    void ConvertToMissionStatus(const AAFwk::MissionInfo& missionInfo,
+        int32_t accountId, MissionStatus& status);
     void CleanLastFocusedFlagLocked(int32_t accountId, int32_t missionId);
     bool IsMissionStatusExistLocked(int32_t accountId, int32_t missionId);
 
