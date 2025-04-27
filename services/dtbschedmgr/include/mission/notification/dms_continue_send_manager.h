@@ -102,7 +102,7 @@ private:
         void SetMissionContinueStateInfo(const MissionStatus& status);
 
     private:
-        LastUnfoInfo unfoInfo_ = { INVALID_MISSION_ID, 0, { INVALID_MISSION_ID, "", "", "", false, 0, false } };
+        LastUnfoInfo unfoInfo_ = { INVALID_MISSION_ID, 0, { -1, INVALID_MISSION_ID, "", "", "", false, 0, false } };
         std::weak_ptr<DMSContinueSendMgr> dmsContinueSendMgr_;
     };
 
