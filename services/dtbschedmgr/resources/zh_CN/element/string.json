@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"Using",
+            "value":"正在使用",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"BackgroundService",
+            "value":"后台服务",
+            "attr":{
+                "priority":"translate"
+            }
+        },
+        {
+            "name":"EOS",
+            "value":"停止服务",
+            "attr":{
+                "priority":"translate"
+            }
+        }
+    ]
+}

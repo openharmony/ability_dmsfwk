@@ -22,6 +22,7 @@
 
 #include "ability_manager_client.h"
 #include "ability_manager_errors.h"
+#include "accesstoken_kit.h"
 #include "bool_wrapper.h"
 #include "datetime_ex.h"
 #include "element_name.h"
@@ -65,7 +66,6 @@
 #include "parcel_helper.h"
 #include "string_wrapper.h"
 #include "switch_status_dependency.h"
-#include "svc_distributed_connection.h"
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
 #include "common_event_listener.h"
 #endif
@@ -126,7 +126,8 @@ const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getprocpid());
 const std::string BOOT_COMPLETED_EVENT = "usual.event.BOOT_COMPLETED";
 const std::string COMMON_EVENT_WIFI_SEMI_STATE = "usual.event.wifi.SEMI_STATE";
 const std::string COLLABRATION_TYPE = "CollabrationType";
-const std::string SYSCAP = "SystemCapability.DistributedSched.AppCollaboration";
+const std::string SOURCE_DELEGATEE = "SourceDelegatee";
+const std::string CONNECT_RPOXY = "VALUE_ABILITY_COLLAB_TYPE_CONNECT_PROXY";
 constexpr int32_t DEFAULT_DMS_MISSION_ID = -1;
 constexpr int32_t DEFAULT_DMS_CONNECT_TOKEN = -1;
 constexpr int32_t BIND_CONNECT_RETRY_TIMES = 3;
@@ -153,6 +154,8 @@ constexpr int32_t DMSDURATION_STARTABILITY = 6;
 constexpr int32_t HID_HAP = 10000; /* first hap user */
 constexpr int32_t WINDOW_MANAGER_SERVICE_ID = 4606;
 constexpr int32_t SEMI_WIFI_ID = 1010;
+constexpr int32_t DSOFTBUS_UID = 1024;
+constexpr int32_t WEARENGINE_UID = 1001;
 DataShareManager &dataShareManager = DataShareManager::GetInstance();
 
 const std::string HMOS_HAP_CODE_PATH = "1";
@@ -184,6 +187,25 @@ static sptr<AppExecFwk::IBundleMgr> GetBundleManager()
     }
 
     return iface_cast<AppExecFwk::IBundleMgr>(bundleObj);
+}
+
+static int32_t GetBundleResourceInfo(std::string &bundleName, AppExecFwk::BundleResourceInfo &bundleResourceInfo)
+{
+    auto bms = GetBundleManager();
+    if (bms == nullptr) {
+        HILOGE("Failed to get bundle manager");
+        return INVALID_PARAMETERS_ERR;
+    }
+    std::string identity = IPCSkeleton::ResetCallingIdentity();
+    sptr<AppExecFwk::IBundleResource> bundleResourceProxy = bms->GetBundleResourceProxy();
+    IPCSkeleton::SetCallingIdentity(identity);
+    if (bundleResourceProxy == nullptr) {
+        HILOGE("Failed to get bundle resource proxy");
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    int32_t flag = static_cast<int32_t>(AppExecFwk::ResourceFlag::GET_RESOURCE_INFO_WITH_LABEL);
+    return bundleResourceProxy->GetBundleResourceInfo(bundleName, flag, bundleResourceInfo);
 }
 
 std::string GetDExtensionName(std::string bundleName, int32_t userId)
@@ -262,38 +284,104 @@ std::function<void(const std::string &&)> GetDistributedConnectDone(std::string 
     };
 }
 
-int32_t DistributedSchedService::ConnectDExtAbility(std::string &bundleName, std::string &abilityName,
-    int32_t userId)
+static int32_t CheckCallingPermission(DExtConnectResultInfo& resultInfo)
 {
-    HILOGI("DistributedSchedService::ConnectDExtensionAbility start.");
+    Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
+    HILOGI("DistributedSchedService::tokenId: %{public}d.", tokenId);
+    Security::AccessToken::ATokenTypeEnum tokenType =
+        Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    if (tokenType != Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        HILOGE("Wrong tokenType");
+        resultInfo.result = DExtConnectResult::PERMISSION_DENIED;
+        return DMS_PERMISSION_DENIED;
+    }
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    HILOGI("DistributedSchedService::callingUid: %{public}d.", callingUid);
+    if (callingUid != DSOFTBUS_UID && callingUid != WEARENGINE_UID) {
+        HILOGE("Wrong uid");
+        resultInfo.result = DExtConnectResult::PERMISSION_DENIED;
+        return DMS_PERMISSION_DENIED;
+    }
+
+    return ERR_OK;
+}
+
+static int32_t ValidateAndPrepareConnection(const DExtConnectInfo& connectInfo, DExtConnectResultInfo& resultInfo)
+{
+    if (connectInfo.sinkInfo.IsEmpty()) {
+        return INVALID_PARAMETERS_ERR;
+    }
+    
+    int32_t ret = CheckCallingPermission(resultInfo);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    resultInfo.connectInfo = connectInfo;
+
+    int32_t userId = connectInfo.sinkInfo.userId;
     if (!MultiUserManager::GetInstance().IsUserForeground(userId)) {
         HILOGW("The current user is not foreground. userId: %{public}d.", userId);
         return DMS_NOT_FOREGROUND_USER;
     }
-    sptr<SvcDistributedConnection> svcDConn(new SvcDistributedConnection(bundleName));
+    return ERR_OK;
+}
+
+int32_t DistributedSchedService::ConnectDExtensionFromRemote(const DExtConnectInfo& connectInfo,
+    DExtConnectResultInfo& resultInfo)
+{
+    HILOGI("DistributedSchedService::ConnectDExtensionFromRemote called.");
+    int32_t ret = ValidateAndPrepareConnection(connectInfo, resultInfo);
+    if (ret!= ERR_OK) {
+        HILOGE("Validate and prepare connection failed, ret: %{public}d", ret);
+        resultInfo.errCode = ret;
+        return ret;
+    }
+    int32_t userId = connectInfo.sinkInfo.userId;
+    std::string bundleName = connectInfo.sinkInfo.bundleName;
+    std::string abilityName = connectInfo.sinkInfo.abilityName;
+
+    if (svcDConn_ == nullptr) {
+        svcDConn_ = sptr<SvcDistributedConnection>(new SvcDistributedConnection(bundleName));
+        svcDConn_->RegisterEventListener();
+    }
     auto callConnected = GetDistributedConnectDone(bundleName);
-    svcDConn->SetCallback(callConnected);
+    svcDConn_->SetCallback(callConnected);
     bool isCleanCalled = false;
     AAFwk::Want want;
     want.SetElementName(bundleName, abilityName);
-    int32_t result = svcDConn->ConnectDExtAbility(want, userId, isCleanCalled);
+    ret = svcDConn_->ConnectDExtAbility(want, userId, isCleanCalled);
+    if (ret != ERR_OK) {
+        HILOGE("Connect distributed extension ability failed");
+        resultInfo.errCode = ret;
+        return ret;
+    }
+    resultInfo.errCode = ret;
 
     std::unique_lock<std::mutex> lock(getDistibutedProxyLock_);
     getDistibutedProxyCondition_.wait_for(lock, std::chrono::seconds(CONNECT_WAIT_TIME_S));
 
-    auto proxy = svcDConn->GetDistributedExtProxy();
+    auto proxy = svcDConn_->GetDistributedExtProxy();
     if (proxy == nullptr) {
         HILOGE("Extension distribute proxy is empty");
         return INVALID_PARAMETERS_ERR;
     }
 
+    AppExecFwk::BundleResourceInfo bundleResourceInfo;
+    ret = GetBundleResourceInfo(bundleName, bundleResourceInfo);
+    if (ret != ERR_OK) {
+        HILOGE("Get bundle resource info failed, ret: %{public}d", ret);
+        return ret;
+    }
+    svcDConn_->PublishDExtensionNotification(connectInfo.sourceInfo.deviceId, bundleName, userId,
+        connectInfo.sourceInfo.networkId, bundleResourceInfo);
     proxy->TriggerOnCreate(want);
 
     AAFwk::WantParams wantParam;
-    wantParam.SetParam(COLLABRATION_TYPE, String::Box(SYSCAP));
+    wantParam.SetParam(COLLABRATION_TYPE, String::Box(CONNECT_RPOXY));
+    wantParam.SetParam(SOURCE_DELEGATEE, String::Box(connectInfo.delegatee));
     proxy->TriggerOnCollaborate(wantParam);
-    HILOGI("DistributedSchedService::ConnectDExtensionAbility end.");
-    return result;
+    resultInfo.result = DExtConnectResult::SUCCESS;
+    return ret;
 }
 
 void DistributedSchedService::OnStart(const SystemAbilityOnDemandReason &startReason)
