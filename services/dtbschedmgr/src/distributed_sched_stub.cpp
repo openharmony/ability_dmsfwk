@@ -27,6 +27,7 @@
 #include "dfx/dms_hisysevent_report.h"
 #include "dfx/dms_hitrace_chain.h"
 #include "dfx/dms_hitrace_constants.h"
+#include "distributed_extension_types.h"
 #include "distributed_want.h"
 #include "distributed_sched_permission.h"
 #include "distributed_sched_service.h"
@@ -102,7 +103,7 @@ void DistributedSchedStub::InitExtendedLocalFuncsInner()
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_DSCHED_EVENT_INFO)] =
         &DistributedSchedStub::GetDSchedEventInfoInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::DSCHED_START_DEXTENSION)] =
-        &DistributedSchedStub::ConnectDExtAbilityInner;
+        &DistributedSchedStub::ConnectDExtensionFromRemoteInner;
 #endif
 }
 
@@ -1287,26 +1288,32 @@ int32_t DistributedSchedStub::GetContinueInfoInner(MessageParcel& data, MessageP
     return result;
 }
 
-int32_t DistributedSchedStub::ConnectDExtAbilityInner(MessageParcel& data, MessageParcel& reply)
+int32_t DistributedSchedStub::ConnectDExtensionFromRemoteInner(MessageParcel& data, MessageParcel& reply)
 {
     HILOGI("[PerformanceTest] called, IPC end = %{public}" PRId64, GetTickCount());
-    string bundleName = data.ReadString();
-    if (bundleName.empty()) {
-        HILOGW("read bundleName failed!");
-        return ERR_FLATTEN_OBJECT;
+    std::unique_ptr<DExtConnectInfo> connectInfo(data.ReadParcelable<DExtConnectInfo>());
+    if (connectInfo == nullptr) {
+        HILOGE("Failed to read connect info.");
+        return ERR_INVALID_DATA;
     }
-    string abilityName = data.ReadString();
-    if (abilityName.empty()) {
-        HILOGW("read abilityName failed!");
-        return ERR_FLATTEN_OBJECT;
+
+    DExtConnectResultInfo resultInfo;
+    int32_t ret = ConnectDExtensionFromRemote(*connectInfo, resultInfo);
+    if (ret != ERR_OK) {
+        HILOGE("Connect dextension failed, error: %{public}d", ret);
+        return ret;
     }
-    int32_t userId = data.ReadInt32();
-    if (userId < -1) {
-        HILOGW("read userId failed!");
-        return ERR_FLATTEN_OBJECT;
+    if (!reply.WriteInt32(ret)) {
+        HILOGE("Write ret failed!");
+        return ERR_INVALID_DATA;
     }
-    int32_t result = ConnectDExtAbility(bundleName, abilityName, userId);
-    return result;
+
+    if (!reply.WriteParcelable(&resultInfo)) {
+        HILOGE("Write result info failed!");
+        return ERR_INVALID_DATA;
+    }
+
+    return ERR_OK;
 }
 
 int32_t DistributedSchedStub::GetEncodeDSchedEventNotify(const EventNotify& event, MessageParcel& reply)
