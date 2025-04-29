@@ -697,6 +697,7 @@ napi_value JsAbilityConnectionManager::GetPeerInfoById(napi_env env, napi_callba
     int32_t sessionId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
         HILOGE("Failed to unwrap sessionId.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return result;
     }
 
