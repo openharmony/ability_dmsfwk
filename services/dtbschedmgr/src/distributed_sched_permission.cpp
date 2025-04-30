@@ -187,7 +187,7 @@ int32_t DistributedSchedPermission::GetAccountInfo(const std::string& remoteNetw
     }
 
 #ifdef DMSFWK_SAME_ACCOUNT
-    if (CheckDstSameAccount(remoteNetworkId, accountInfo, callerInfo)) {
+    if (CheckDstSameAccount(remoteNetworkId, accountInfo, callerInfo, true)) {
         return ERR_OK;
     }
     HILOGI("check same account by DM fail, will try check access Group by hichain");
@@ -230,7 +230,7 @@ bool DistributedSchedPermission::GetOsAccountData(AccountInfo& dmsAccountInfo)
 }
 
 bool DistributedSchedPermission::CheckDstSameAccount(const std::string& dstNetworkId,
-    const AccountInfo& dmsAccountInfo, const CallerInfo& callerInfo)
+    const AccountInfo& dmsAccountInfo, const CallerInfo& callerInfo, bool isCallerOrigin)
 {
 #ifdef DMSFWK_SAME_ACCOUNT
     DmAccessCaller dmSrcCaller = {
@@ -252,13 +252,27 @@ bool DistributedSchedPermission::CheckDstSameAccount(const std::string& dstNetwo
         if (!DeviceManager::GetInstance().CheckIsSameAccount(dmSrcCaller, dmDstCallee)) {
             continue;
         }
-        return true;
+        return isCallerOrigin ? true : CheckIsSameAccountId(dmsAccountInfo.activeAccountId);
     }
     return false;
 #else // DMSFWK_SAME_ACCOUNT
     HILOGI("Not support remote same account check.");
     return false;
 #endif // DMSFWK_SAME_ACCOUNT
+}
+
+bool DistributedSchedPermission::CheckIsSameAccountId(const std::string& srcAccountId)
+{
+    AccountSA::OhosAccountInfo osAccountInfo;
+    int32_t ret = AccountSA::OhosAccountKits::GetInstance().GetOhosAccountInfo(osAccountInfo);
+    if (ret != 0) {
+        HILOGE("Get accountId from Ohos account info fail, ret: %{public}d.", ret);
+        return false;
+    }
+
+    HILOGI("srcAccountId: %{public}s, dstAccountId: %{public}s.",
+        GetAnonymStr(srcAccountId).c_str(), GetAnonymStr(osAccountInfo.uid_).c_str());
+    return osAccountInfo.uid_ == srcAccountId;
 }
 
 bool DistributedSchedPermission::CheckAclList(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
@@ -546,7 +560,7 @@ bool DistributedSchedPermission::CheckAccountAccessPermission(const CallerInfo& 
     }
 
 #ifdef DMSFWK_SAME_ACCOUNT
-    if (CheckDstSameAccount(dstNetworkId, accountInfo, callerInfo)) {
+    if (CheckDstSameAccount(dstNetworkId, accountInfo, callerInfo, false)) {
         return true;
     }
     if (isNewCollab && !BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetBundleName)) {

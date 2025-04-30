@@ -1742,7 +1742,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckAclList_001, TestSize.Level3)
     IDistributedSched::AccountInfo dmsAccountInfo;
     CallerInfo callerInfo;
     DistributedSchedPermission::GetInstance().GetOsAccountData(dmsAccountInfo);
-    DistributedSchedPermission::GetInstance().CheckDstSameAccount(dstNetworkId, dmsAccountInfo, callerInfo);
+    DistributedSchedPermission::GetInstance().CheckDstSameAccount(dstNetworkId, dmsAccountInfo, callerInfo, true);
     bool ret = DistributedSchedPermission::GetInstance().CheckAclList(dstNetworkId, dmsAccountInfo, callerInfo);
     EXPECT_EQ(ret, false);
     DTEST_LOG << "DistributedSchedPermissionTest CheckAclList_001 end result:" << ret << std::endl;

@@ -65,7 +65,8 @@ public:
 private:
     bool GetOsAccountData(AccountInfo& dmsAccountInfo);
     bool CheckDstSameAccount(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
-        const CallerInfo& callerInfo);
+        const CallerInfo& callerInfo, bool isCallerOrigin);
+    bool CheckIsSameAccountId(const std::string& srcAccountId);
     bool CheckAclList(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
         const CallerInfo& callerInfo, const std::string& targetBundleName = "");
     bool GetRelatedGroups(const std::string& udid, const std::vector<std::string>& bundleNames,
