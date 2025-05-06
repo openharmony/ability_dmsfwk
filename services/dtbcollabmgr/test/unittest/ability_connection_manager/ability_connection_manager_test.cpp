@@ -740,5 +740,61 @@ HWTEST_F(AbilityConnectionMgrTest, DeleteConnectSession_Test_001, TestSize.Level
     AbilityConnectionManager::GetInstance().serverSessionMap_.clear();
     DTEST_LOG << "AbilityConnectionMgr DeleteConnectSession_Test_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: CreateSession_Test_001
+ * @tc.desc: call CreateSession
+ * @tc.type: FUNC
+ * @tc.require: IBP3MC
+ */
+HWTEST_F(AbilityConnectionMgrTest, CreateSession_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionMgr CreateSession_Test_001 begin" << std::endl;
+    ConnectOption options;
+    int32_t sessionId = 0;
+    PeerInfo peerInfo = {"", "bundleName", "moduleName", "abilityName", "serverId"};
+    int32_t ret = AbilityConnectionManager::GetInstance().CreateSession("", nullptr, peerInfo, options, sessionId);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    peerInfo.deviceId = "deviceId";
+    options.needSendStream = true;
+    options.needReceiveStream = true;
+    ret = AbilityConnectionManager::GetInstance().CreateSession("", nullptr, peerInfo, options, sessionId);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    options.needSendStream = false;
+    options.needReceiveStream = false;
+    std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo =
+        std::make_shared<OHOS::AppExecFwk::AbilityInfo>();
+    abilityInfo->bundleName = "bundleName";
+    abilityInfo->moduleName = "moduleName";
+    abilityInfo->name = "name";
+    ret = AbilityConnectionManager::GetInstance().CreateSession("", abilityInfo, peerInfo, options, sessionId);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "AbilityConnectionMgr CreateSession_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: FinishSessionConnect_Test_001
+ * @tc.desc: call FinishSessionConnect
+ * @tc.type: FUNC
+ * @tc.require: IBP3MC
+ */
+HWTEST_F(AbilityConnectionMgrTest, FinishSessionConnect_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionMgr FinishSessionConnect_Test_001 begin" << std::endl;
+    EXPECT_NO_FATAL_FAILURE(AbilityConnectionManager::GetInstance().CheckSessionPermission());
+
+    EXPECT_NO_FATAL_FAILURE(AbilityConnectionManager::GetInstance().FinishSessionConnect(0));
+
+    EXPECT_NO_FATAL_FAILURE(AbilityConnectionManager::GetInstance().RegisterEventCallback(0, nullptr));
+
+    EXPECT_NO_FATAL_FAILURE(AbilityConnectionManager::GetInstance().UnregisterEventCallback(0));
+
+    EXPECT_NO_FATAL_FAILURE(AbilityConnectionManager::GetInstance().NotifyWifiOpen(0));
+
+    EXPECT_NO_FATAL_FAILURE(AbilityConnectionManager::GetInstance().NotifyPeerVersion(0, 0));
+    DTEST_LOG << "AbilityConnectionMgr FinishSessionConnect_Test_001 end" << std::endl;
+}
 }
 }
