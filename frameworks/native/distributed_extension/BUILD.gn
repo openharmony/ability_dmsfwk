@@ -41,20 +41,26 @@ ohos_shared_library("distributed_extension_ability_native") {
   deps = []
 
   external_deps = [
+    "ability_base:configuration",
     "ability_base:want",
     "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:ability_start_options",
     "ability_runtime:abilitykit_native",
     "ability_runtime:app_context",
-    "ability_runtime:appkit_native",
     "ability_runtime:extensionkit_native",
     "ability_runtime:napi_common",
     "ability_runtime:runtime",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_core",
     "c_utils:utils",
+    "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
+    "i18n:intl_util",
     "ipc:ipc_core",
+    "ipc:ipc_napi",
+    "ipc:ipc_single",
     "napi:ace_napi",
     "samgr:samgr_proxy",
   ]
