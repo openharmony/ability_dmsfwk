@@ -120,22 +120,26 @@ HWTEST_F(DistributedClientTest, GetDSchedEventInfo_001, TestSize.Level3)
 }
 
 /**
- * @tc.name: DistributedClientTest_ConnectDExtAbility_001
- * @tc.desc: Verify the ConnectDExtAbility.
+ * @tc.name: DistributedClientTest_ConnectDExtensionFromRemote_001
+ * @tc.desc: Verify the ConnectDExtensionFromRemote.
  * @tc.type: FUNC
  * @tc.require: IBP3MC
  */
-HWTEST_F(DistributedClientTest, DistributedClientTest_ConnectDExtAbility_001, TestSize.Level1)
+HWTEST_F(DistributedClientTest, DistributedClientTest_ConnectDExtensionFromRemote_001, TestSize.Level1)
 {
-    GTEST_LOG_(INFO) << "DistributedClientTest_ConnectDExtAbility_001 start";
+    GTEST_LOG_(INFO) << "DistributedClientTest_ConnectDExtensionFromRemote_001 start";
 
     DistributedClient dmsClt;
-    std::string bundleName = "bundleName";
-    std::string abilityName = "abilityName";
-    int32_t userId = 100;
-    auto rlt = dmsClt.ConnectDExtAbility(bundleName, abilityName, userId);
+    DExtSourceInfo sourceInfo("device123", "network123", "bundleName", "moduleName", "abilityName");
+    DExtSinkInfo sinkInfo(1001, 1234, "bundleName", "moduleName", "abilityName", "serviceName");
+    DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "validToken", "delegatee");
+    DExtConnectResultInfo resultInfo;
+
+    auto callback = [](const DExtConnectResultInfo& result) {};
+
+    int32_t rlt = dmsClt.ConnectDExtensionFromRemote(connectInfo, callback);
     EXPECT_NE(rlt, ERR_NONE);
-    GTEST_LOG_(INFO) << "DistributedClientTest_ConnectDExtAbility_001 end";
+    GTEST_LOG_(INFO) << "DistributedClientTest_ConnectDExtensionFromRemote_001 end";
 }
 }
 }

@@ -84,7 +84,9 @@
           "screenlock_mgr",
           "window_manager",
           "wifi",
-          "storage_service"
+          "storage_service",
+          "distributed_notification_service",
+          "i18n"
         ],
         "third_party": []
       },

@@ -1,0 +1,16 @@
+{
+    "dms_language_map": [
+        {
+            "system_language": "en-Latn-US",
+            "file_path": "base"
+        },
+        {
+            "system_language": "en",
+            "file_path": "base"
+        },
+        {
+            "system_language": "zh-Hans",
+            "file_path": "zh_CN"
+        }
+    ]
+}

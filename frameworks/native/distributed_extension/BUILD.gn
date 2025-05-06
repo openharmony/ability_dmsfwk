@@ -29,7 +29,7 @@ ohos_shared_library("distributed_extension_ability_native") {
     "src/distributed_extension_js.cpp",
     "src/distributed_extension_loader.cpp",
     "src/distributed_extension_service.cpp",
-    "src/ipc/distributed_extension_stub.cpp"
+    "src/ipc/distributed_extension_stub.cpp",
   ]
 
   include_dirs = [
@@ -79,9 +79,7 @@ ohos_shared_library("distributed_extension_sa") {
     debug = false
   }
 
-  sources = [
-    "src/ipc/distributed_extension_proxy.cpp"
-  ]
+  sources = [ "src/ipc/distributed_extension_proxy.cpp" ]
 
   include_dirs = [
     "include",

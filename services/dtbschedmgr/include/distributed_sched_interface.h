@@ -20,6 +20,7 @@
 #include "ability_info.h"
 #include "ability_manager_interface.h"
 #include "caller_info.h"
+#include "distributed_extension_types.h"
 #include "distributed_sched_types.h"
 #include "distributedsched_ipc_interface_code.h"
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
@@ -114,7 +115,7 @@ public:
     {
         return 0;
     }
-    virtual int32_t ConnectDExtAbility(std::string& bundleName, std::string& abilityName, int32_t userId)
+    virtual int32_t ConnectDExtensionFromRemote(const DExtConnectInfo& connectInfo, DExtConnectResultInfo& resultInfo)
     {
         return 0;
     }
