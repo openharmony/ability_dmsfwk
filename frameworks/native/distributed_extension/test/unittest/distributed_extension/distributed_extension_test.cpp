@@ -20,7 +20,6 @@
 #include "distributed_extension.h"
 #include "ohos_application.h"
 #include "ability_handler.h"
-#include "distributed_extension_js.cpp"
 
 namespace OHOS::DistributedSchedule {
 using namespace std;
@@ -37,22 +36,13 @@ public:
     static void TearDownTestCase();
     void SetUp() override {};
     void TearDown() override {};
-public:
-    static inline shared_ptr<DistributedExtension> dExt = nullptr;
-    static inline shared_ptr<DExtensionMock> dExtensionMock = nullptr;
 };
 
 void DExtensionTest::SetUpTestCase()
 {
-    dExt = make_shared<DistributedExtension>();
-    dExtensionMock = make_shared<DExtensionMock>();
-    DExtensionMock::tDExtension = dExtensionMock;
 }
 void DExtensionTest::TearDownTestCase()
 {
-    dExt = nullptr;
-    DExtensionMock::tDExtension = nullptr;
-    dExtensionMock = nullptr;
 }
 
 /**
@@ -67,15 +57,34 @@ HWTEST_F(DExtensionTest, DistributedExtension_Create_0100, testing::ext::TestSiz
         std::unique_ptr<AbilityRuntime::Runtime> runtime;
         auto dExtension = DistributedExtension::Create(runtime);
         EXPECT_TRUE(dExtension != nullptr);
-
-        AbilityRuntime::Runtime::Options options;
-        runtime = AbilityRuntime::Runtime::Create(options);
-        dExtension = DistributedExtension::Create(runtime);
-        EXPECT_TRUE(dExtension != nullptr);
     } catch (...) {
         EXPECT_TRUE(false);
     }
     GTEST_LOG_(INFO) << "DExtensionTest DistributedExtension_Create_0100 end";
+}
+
+/**
+ * @tc.number: DistributedExtension_Create_0200
+ * @tc.name: DistributedExtension_Create_0200
+ * @tc.desc: Test the function of invoking the Create interface.
+ */
+HWTEST_F(DExtensionTest, DistributedExtension_Create_0200, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DExtensionTest DistributedExtension_Create_0200 begin";
+    try {
+        std::unique_ptr<AbilityRuntime::Runtime> runtime = std::make_unique<AbilityRuntime::JsRuntime>();
+        if (runtime->GetLanguage() == AbilityRuntime::Runtime::Language::JS) {
+            GTEST_LOG_(INFO) << "DExtensionTest DistributedExtension_Create_0200 begin language is ok";
+        } else {
+            GTEST_LOG_(INFO) << "DExtensionTest DistributedExtension_Create_0200 begin language is error";
+        }
+        auto dExtension = DistributedExtension::Create(runtime);
+        EXPECT_TRUE(dExtension != nullptr);
+        delete dExtension;
+    } catch (...) {
+        EXPECT_TRUE(false);
+    }
+    GTEST_LOG_(INFO) << "DExtensionTest DistributedExtension_Create_0200 end";
 }
 
 /**
@@ -87,8 +96,7 @@ HWTEST_F(DExtensionTest, DistributedExtension_OnConnect_0100, testing::ext::Test
 {
     GTEST_LOG_(INFO) << "DExtensionTest DistributedExtension_OnConnect_0100 begin";
     try {
-        AbilityRuntime::Runtime::Options options;
-        std::unique_ptr<AbilityRuntime::Runtime> runtime = AbilityRuntime::Runtime::Create(options);
+        std::unique_ptr<AbilityRuntime::Runtime> runtime = std::make_unique<AbilityRuntime::JsRuntime>();
         auto dExtension = DistributedExtension::Create(runtime);
         dExtension->abilityInfo_ = std::make_shared<AppExecFwk::AbilityInfo>();
 
@@ -110,8 +118,7 @@ HWTEST_F(DExtensionTest, DistributedExtension_OnDisconnect_0100, testing::ext::T
 {
     GTEST_LOG_(INFO) << "DExtensionTest DistributedExtension_OnDisconnect_0100 begin";
     try {
-        AbilityRuntime::Runtime::Options options;
-        std::unique_ptr<AbilityRuntime::Runtime> runtime = AbilityRuntime::Runtime::Create(options);
+        std::unique_ptr<AbilityRuntime::Runtime> runtime = std::make_unique<AbilityRuntime::JsRuntime>();
         auto dExtension = DistributedExtension::Create(runtime);
         dExtension->abilityInfo_ = std::make_shared<AppExecFwk::AbilityInfo>();
 

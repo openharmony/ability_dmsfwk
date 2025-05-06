@@ -1672,33 +1672,22 @@ HWTEST_F(DistributedSchedServiceFirstTest, ReleaseAbilityFromRemote_002, TestSiz
 }
 
 /**
- * @tc.name  : ConnectDExtAbility_Test01
- * @tc.number: ConnectDExtAbility_001
- * @tc.desc  : Test ConnectDExtAbility function when user is not foreground.
+ * @tc.name  : ConnectDExtensionFromRemote_Test01
+ * @tc.number: ConnectDExtensionFromRemote_001
+ * @tc.desc  : Test ConnectDExtensionFromRemote function when user is not foreground.
  */
-HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtAbility_Test01, TestSize.Level0)
+HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test01, TestSize.Level1)
 {
-    std::string bundleName = "testBundle";
-    std::string abilityName = "testAbility";
-    int32_t userId = 1;
-    int32_t result = DistributedSchedService::GetInstance().ConnectDExtAbility(bundleName, abilityName, userId);
-    EXPECT_EQ(result, DMS_NOT_FOREGROUND_USER);
-    DTEST_LOG << "DistributedSchedServiceFirstTest ConnectDExtAbility_Test01 end" << std::endl;
-}
+    DExtSourceInfo sourceInfo("device123", "network123", "testBundle", "testModule", "testAbility");
+    DExtSinkInfo sinkInfo(1001, 1234, "testBundle", "testModule", "testAbility", "testService");
+    DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "validToken", "delegatee");
+    DExtConnectResultInfo resultInfo;
 
-/**
- * @tc.name  : ConnectDExtAbility_Test02
- * @tc.number: ConnectDExtAbility_002
- * @tc.desc  : Test ConnectDExtAbility function when proxy is empty.
- */
-HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtAbility_Test02, TestSize.Level0)
-{
-    std::string bundleName = "com.example.dms_extension";
-    std::string abilityName = "EntrydistributedAbility";
-    int32_t userId = 100;
-    int32_t result = DistributedSchedService::GetInstance().ConnectDExtAbility(bundleName, abilityName, userId);
-    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
-    DTEST_LOG << "DistributedSchedServiceFirstTest ConnectDExtAbility_Test02 end" << std::endl;
+    int32_t result = DistributedSchedService::GetInstance().ConnectDExtensionFromRemote(connectInfo, resultInfo);
+    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(resultInfo.result, DExtConnectResult::PERMISSION_DENIED);
+
+    DTEST_LOG << "DistributedSchedServiceFirstTest ConnectDExtensionFromRemote_Test01 end" << std::endl;
 }
 }
 }
