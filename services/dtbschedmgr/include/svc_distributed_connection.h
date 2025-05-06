@@ -17,6 +17,10 @@
 #define OHOS_SVC_DISTRIBUTED_CONNECTION_H
 
 #include "ability_connect_callback_stub.h"
+#include "bundle/bundle_manager_internal.h"
+#include "common_event_manager.h"
+#include "common_event_subscribe_info.h"
+#include "common_event_subscriber.h"
 #include "i_distributed_extension.h"
 
 namespace OHOS {
@@ -77,6 +81,22 @@ public:
      */
     void SetCallback(std::function<void(const std::string &&)> callConnected);
 
+    /**
+     * @brief publish a dextension notification.
+     */
+    void PublishDExtensionNotification(const std::string &deviceId, const std::string &bundleName,
+        const int32_t userId, const std::string &networkId, AppExecFwk::BundleResourceInfo &bundleResourceInfo);
+
+    /**
+     * @brief Terminate the current DExtension.
+     */
+    void EndTaskFunction();
+
+    /**
+     * @brief Register an event listener for receiving common events.
+     */
+    void RegisterEventListener();
+
 public:
     SvcDistributedConnection(std::string bundleNameIndexInfo) : bundleNameIndexInfo_(bundleNameIndexInfo)
     {}
@@ -92,6 +112,26 @@ private:
 
     std::function<void(const std::string &&)> callConnected_;
     std::string bundleNameIndexInfo_;
+};
+
+class EndTaskEventSubscriber : public EventFwk::CommonEventSubscriber {
+public:
+    explicit EndTaskEventSubscriber(const EventFwk::CommonEventSubscribeInfo &subscribeInfo,
+        SvcDistributedConnection *connection)
+        : EventFwk::CommonEventSubscriber(subscribeInfo), distributedConnection_(connection) {}
+
+    void OnReceiveEvent(const EventFwk::CommonEventData &data) override
+    {
+        std::string action = data.GetWant().GetAction();
+        if (action == "DMS_ACTION_END_TASK") {
+            if (distributedConnection_ != nullptr) {
+                distributedConnection_->EndTaskFunction();
+            }
+        }
+    }
+
+private:
+    SvcDistributedConnection *distributedConnection_;
 };
 }
 }
