@@ -18,6 +18,8 @@
 
 #include "gtest/gtest.h"
 
+#include "mock/dms_continue_condition_manager_mock.h"
+
 namespace OHOS {
 namespace DistributedSchedule {
 class DMSContinueSendMgrTest : public testing::Test {
@@ -26,6 +28,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    static inline std::shared_ptr<DmsContinueConditionMgrMock> mgrMock_ = nullptr;
 };
 
 class DMSContinueRecvMgrTest : public testing::Test {
