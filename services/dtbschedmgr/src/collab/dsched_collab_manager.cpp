@@ -517,18 +517,26 @@ int32_t DSchedCollabManager::ReleaseAbilityLink(const std::string &bundleName, c
     HILOGW("called");
     DSchedCollabInfo dSchedCollabInfo;
     std::string collabToken;
-    for (auto iter = collabs_.begin(); iter != collabs_.end(); iter++) {
-        if (iter->second == nullptr) {
-            continue;
-        }
-        dSchedCollabInfo = iter->second->GetCollabInfo();
-        if (bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.srcInfo_.pid_) {
-            collabToken = dSchedCollabInfo.collabToken_;
-        }
-        if (bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.sinkInfo_.pid_) {
-            collabToken = dSchedCollabInfo.collabToken_;
+    {
+        std::shared_lock<std::shared_mutex> readLock(collabReadMutex_);
+        for (auto iter = collabs_.begin(); iter != collabs_.end(); iter++) {
+            if (iter->second == nullptr) {
+                continue;
+            }
+            dSchedCollabInfo = iter->second->GetCollabInfo();
+            if (bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.srcInfo_.pid_) {
+                collabToken = dSchedCollabInfo.collabToken_;
+            }
+            if (bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.sinkInfo_.pid_) {
+                collabToken = dSchedCollabInfo.collabToken_;
+            }
         }
     }
+    if (collabToken.empty()) {
+        HILOGE("can't find collab");
+        return INVALID_PARAMETERS_ERR;
+    }
+
     auto func = [this, bundleName, pid, collabToken]() {
         HandleReleaseAbilityLink(bundleName, pid, collabToken);
     };
