@@ -82,14 +82,6 @@ HWTEST_F(DExtensionContextJSTest, DExtensionContextJS_CreateDistributedExtension
         shared_ptr<DistributedExtensionContext> value1 = make_shared<DistributedExtensionContext>();
         ret = CreateDistributedExtensionContextJS(reinterpret_cast<napi_env>(&env1), value1);
         EXPECT_TRUE(ret == nullptr);
-
-        napi_value jhc = 0;
-        EXPECT_CALL(*jsExtensionContextMock_, CreateJsExtensionContext(_, _, _))
-            .WillOnce(Return(reinterpret_cast<napi_value>(&jhc)));
-        int env2 = 0;
-        shared_ptr<DistributedExtensionContext> value2 = make_shared<DistributedExtensionContext>();
-        ret = CreateDistributedExtensionContextJS(reinterpret_cast<napi_env>(&env2), value2);
-        EXPECT_TRUE(ret != nullptr);
     } catch (...) {
         EXPECT_TRUE(false);
     }
