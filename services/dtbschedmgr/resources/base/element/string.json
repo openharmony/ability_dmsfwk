@@ -1,0 +1,25 @@
+{
+    "string":[
+        {
+            "name":"Using",
+            "value":" is using ",
+            "attr":{
+                "priority":"LT"
+            }
+        },
+        {
+            "name":"BackgroundService",
+            "value":" background service",
+            "attr":{
+                "priority":"LT"
+            }
+        },
+        {
+            "name":"EOS",
+            "value":"Stop the service",
+            "attr":{
+                "priority":"LT"
+            }
+        }
+    ]
+}

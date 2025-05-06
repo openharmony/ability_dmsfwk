@@ -91,12 +91,13 @@ int32_t DistributedClient::UnRegisterDSchedEventListener(const DSchedEventType& 
         data, reply);
 }
 
-int32_t DistributedClient::ConnectDExtAbility(std::string& bundleName, std::string& abilityName, int32_t userId)
+int32_t DistributedClient::ConnectDExtensionFromRemote(const DExtConnectInfo& connectInfo,
+    std::function<void(DExtConnectResultInfo)> callback)
 {
-    HILOG_INFO("call begin.");
+    HILOG_INFO("ConnectDExtensionFromRemote called");
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
-        HILOG_ERROR("remote system ablity is null");
+        HILOG_ERROR("Remote system ablity is null");
         return AAFwk::INVALID_PARAMETERS_ERR;
     }
     MessageParcel data;
@@ -105,15 +106,32 @@ int32_t DistributedClient::ConnectDExtAbility(std::string& bundleName, std::stri
         HILOG_DEBUG("write interface token failed.");
         return ERR_FLATTEN_OBJECT;
     }
-    PARCEL_WRITE_HELPER(data, String, bundleName);
-    PARCEL_WRITE_HELPER(data, String, abilityName);
-    PARCEL_WRITE_HELPER(data, Int32, userId);
+    if (!data.WriteParcelable(&connectInfo)) {
+        HILOG_ERROR("Write connect info failed!");
+        return ERR_INVALID_DATA;
+    }
  
     MessageOption option;
     int32_t ret = remote->SendRequest(static_cast<uint32_t>(IDSchedInterfaceCode::DSCHED_START_DEXTENSION),
         data, reply, option);
-    HILOG_INFO("call end.");
-    return ret;
+    if (ret != ERR_NONE) {
+        HILOG_ERROR("Send request fail, error: %{public}d", ret);
+        return ret;
+    }
+    int32_t resultCode = reply.ReadInt32();
+    std::unique_ptr<DExtConnectResultInfo> resultInfo(reply.ReadParcelable<DExtConnectResultInfo>());
+    if (resultInfo == nullptr) {
+        HILOG_ERROR("ReadParcelable failed.");
+        return ERR_INVALID_DATA;
+    }
+
+    if (callback == nullptr) {
+        HILOG_ERROR("Callback is nullptr.");
+        return ERR_INVALID_DATA;
+    }
+    callback(*resultInfo);
+
+    return resultCode;
 }
 
 int32_t DistributedClient::GetContinueInfo(ContinueInfo &continueInfo)

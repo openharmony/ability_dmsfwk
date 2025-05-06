@@ -36,6 +36,7 @@
 #include "dms_callback_task.h"
 #include "dsched_collaborate_callback_mgr.h"
 #include "idms_interactive_adapter.h"
+#include "svc_distributed_connection.h"
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission/distributed_mission_focused_listener.h"
 #include "mission/distributed_mission_info.h"
@@ -147,7 +148,7 @@ public:
     int32_t DisconnectAbilityFromRemote(const sptr<IRemoteObject>& connect,
         int32_t uid, const std::string& sourceDeviceId) override;
     int32_t NotifyProcessDiedFromRemote(const CallerInfo& callerInfo) override;
-    int32_t ConnectDExtAbility(std::string& bundleName, std::string& abilityName, int32_t userId) override;
+    int32_t ConnectDExtensionFromRemote(const DExtConnectInfo& connectInfo, DExtConnectResultInfo& resultInfo) override;
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     int32_t GetMissionInfos(const std::string& deviceId, int32_t numMissions,
         std::vector<AAFwk::MissionInfo>& missionInfos) override;
@@ -347,6 +348,7 @@ private:
     std::mutex distributedLock_;
     std::mutex connectLock_;
     sptr<IRemoteObject::DeathRecipient> connectDeathRecipient_;
+    sptr<SvcDistributedConnection> svcDConn_;
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
     sptr<IRemoteObject::DeathRecipient> formMgrDeathRecipient_;
     sptr<AppExecFwk::IFormMgr> formMgrProxy_;

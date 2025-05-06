@@ -23,6 +23,7 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
   include_dirs = [
     "${dms_path}/common/include/",
     "${dms_path}/common/include/continue/",
+    "${dms_path}/frameworks/native/distributed_extension/include/ipc/",
     "${dms_path}/interfaces/innerkits/common/include/",
     "${dms_path}/interfaces/kits/napi/include/",
     "${dms_path}/services/dtbschedmgr/include/",

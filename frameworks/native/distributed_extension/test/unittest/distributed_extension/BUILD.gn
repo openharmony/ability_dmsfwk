@@ -206,6 +206,7 @@ ohos_unittest("distributed_extension_base_test") {
 
   sources = [
     "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_js.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_service.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/ipc/distributed_extension_stub.cpp",
     "distributed_extension_test.cpp",
