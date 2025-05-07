@@ -344,3 +344,25 @@ HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_180
 
     EXPECT_EQ(wantParams_ == wantParams, true);
 }
+
+/**
+ * @tc.number: Distributed_Want_Param_Wrapper_1900
+ * @tc.name: FindMatchingBrace
+ * @tc.desc: Verify the "FindMatchingBrace" function.
+ */
+HWTEST_F(DistributedWantParamWrapperBaseTest, Distributed_Want_Param_Wrapper_1900, Function | MediumTest | Level3)
+{
+    DistributedWantParams wantParams = {};
+    wantParams.SetParam(STRING_WANT_PARAMS_KEY_02, String::Box(STRING_WANT_PARAMS_VALUE_02));
+    wantParams.SetParam(STRING_WANT_PARAMS_KEY_01, DistributedWantParamWrapper::Box(wantParams));
+    DistributedWantParamWrapper wantParamWrapper(wantParams);
+
+    std::string str = "123456";
+    size_t strnum = 0;
+    auto ret = wantParamWrapper.FindMatchingBrace(str, strnum);
+    EXPECT_EQ(ret, 0);
+
+    str = "{}";
+    ret = wantParamWrapper.FindMatchingBrace(str, strnum);
+    EXPECT_EQ(ret, 1);
+}

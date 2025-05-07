@@ -30,10 +30,14 @@ const std::string TAG = "DMSContinueMgrTest";
 //DMSContinueSendMgrTest
 void DMSContinueSendMgrTest::SetUpTestCase()
 {
+    mgrMock_ = std::make_shared<DmsContinueConditionMgrMock>();
+    IDmsContinueConditionMgr::conditionMgrMock = mgrMock_;
 }
 
 void DMSContinueSendMgrTest::TearDownTestCase()
 {
+    IDmsContinueConditionMgr::conditionMgrMock = nullptr;
+    mgrMock_ = nullptr;
 }
 
 void DMSContinueSendMgrTest::SetUp()
@@ -73,7 +77,23 @@ HWTEST_F(DMSContinueSendMgrTest, ExecuteSendStrategy_Test_001, TestSize.Level1)
     std::shared_ptr<DMSContinueSendMgr> sendMgr = std::make_shared<DMSContinueSendMgr>();
     MissionStatus status;
     uint8_t sendType = 0;
-    sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_FOCUSED);
+    int32_t missionId = 0;
+    EXPECT_CALL(*mgrMock_, GetMissionStatus(_, _, _)).WillOnce(Return(0));
+    sendMgr->SendContinueBroadcast(missionId, MissionEventType::MISSION_EVENT_FOCUSED);
+
+    EXPECT_CALL(*mgrMock_, GetMissionStatus(_, _, _)).WillRepeatedly(Return(1));
+    sendMgr->SendContinueBroadcast(missionId, MissionEventType::MISSION_EVENT_FOCUSED);
+
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(false));
+    EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_FOCUSED));
+
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(true));
+    EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillOnce(Return(false));
+    EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_FOCUSED));
+
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(true));
+    EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillOnce(Return(true));
+    EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_FOCUSED));
 
     sendMgr->strategyMap_.clear();
     auto ret = sendMgr->ExecuteSendStrategy(MissionEventType::MISSION_EVENT_FOCUSED, status, sendType);

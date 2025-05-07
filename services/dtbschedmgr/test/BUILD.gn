@@ -624,8 +624,10 @@ ohos_unittest("dmscontinuemgrtest") {
   }
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
-  sources =
-      [ "unittest/mission/notification/dms_continue_send_manager_test.cpp" ]
+  sources = [
+    "unittest/mission/notification/dms_continue_send_manager_test.cpp",
+    "unittest/mock/dms_continue_condition_manager_mock.cpp",
+  ]
   sources += dtbschedmgr_sources
 
   configs = [
@@ -640,6 +642,7 @@ ohos_unittest("dmscontinuemgrtest") {
     public_deps = dsched_public_deps
   }
 
+  external_deps += [ "googletest:gmock" ]
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
