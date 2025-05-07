@@ -576,6 +576,7 @@ HWTEST_F(ChannelManagerTest, OnSocketConnected_InvalidChannelName_WithCallback, 
     EXPECT_EQ(result, ERR_OK);
 
     ChannelManager::GetInstance().OnSocketConnected(socketId, info);
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().OnSocketConnected(-1, info));
 }
 
 /**

@@ -928,5 +928,47 @@ HWTEST_F(AbilityConnectionSessionTest, ConvertToDisconnectReason_Test_001, TestS
     EXPECT_EQ(ret, DisconnectReason::PEER_APP_EXIT);
     DTEST_LOG << "AbilityConnectionSessionTest ConvertToDisconnectReason_Test_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: CheckConnectedSession_Test_001
+ * @tc.desc: call CheckConnectedSession
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, CheckConnectedSession_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest CheckConnectedSession_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    AbilityConnectionSession::ConnectCallback callback = nullptr;
+    connectionSesion_->sessionStatus_ = SessionStatus::CONNECTED;
+    auto result = connectionSesion_->Connect(callback);
+    EXPECT_EQ(result, CONNECTED_SESSION_EXISTS);
+
+    auto ret = connectionSesion_->CheckConnectedSession();
+    EXPECT_EQ(ret, true);
+
+    connectionSesion_->sessionStatus_ = SessionStatus::CONNECTING;
+    ret = connectionSesion_->CheckConnectedSession();
+    EXPECT_EQ(ret, false);
+
+    EXPECT_NO_FATAL_FAILURE(connectionSesion_->Connect(callback));
+    DTEST_LOG << "AbilityConnectionSessionTest CheckConnectedSession_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectTransChannel_Test_001
+ * @tc.desc: call ConnectTransChannel
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, ConnectTransChannel_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest ConnectTransChannel_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    connectionSesion_->transChannels_.clear();
+    auto result = connectionSesion_->ConnectTransChannel(TransChannelType::MESSAGE);
+    EXPECT_EQ(result, STREAM_CHANNEL_NOT_EXITS);
+    DTEST_LOG << "AbilityConnectionSessionTest ConnectTransChannel_Test_001 end" << std::endl;
+}
 }
 }
