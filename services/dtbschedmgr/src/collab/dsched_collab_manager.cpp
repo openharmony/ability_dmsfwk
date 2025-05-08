@@ -140,6 +140,14 @@ int32_t DSchedCollabManager::CheckSrcCollabRelation(const CollabInfo *sourceInfo
         HILOGI("the collaboration relationship is matched successfully.");
         return ERR_OK;
     }
+    HILOGI("Try to verify the info on the other side.");
+    if (std::string(sourceInfo->deviceId) == collabInfo->sinkUdid_ &&
+        sourceInfo->pid == collabInfo->sinkInfo_.pid_ &&
+        static_cast<int32_t>(sourceInfo->tokenId) == collabInfo->sinkInfo_.accessToken_ &&
+        sourceInfo->userId == collabInfo->sinkUserId_) {
+        HILOGI("the collaboration relationship is matched successfully.");
+        return ERR_OK;
+    }
     HILOGW("deviceId: %{public}s, pid: %{public}d, tokenId: %{public}d, userId: %{public}d, srcUdid: %{public}s",
         GetAnonymStr(std::string(sourceInfo->deviceId)).c_str(),
         sourceInfo->pid, static_cast<int32_t>(sourceInfo->tokenId),
@@ -162,6 +170,14 @@ int32_t DSchedCollabManager::CheckSinkCollabRelation(const CollabInfo *sinkInfo,
         sinkInfo->pid == collabInfo->sinkInfo_.pid_ &&
         static_cast<int32_t>(sinkInfo->tokenId) == collabInfo->sinkInfo_.accessToken_ &&
         sinkInfo->userId == collabInfo->sinkUserId_) {
+        HILOGI("the collaboration relationship is matched successfully.");
+        return ERR_OK;
+    }
+    HILOGI("Try to verify the info on the other side.");
+    if (std::string(sinkInfo->deviceId) == collabInfo->srcUdid_ &&
+        sinkInfo->pid == collabInfo->srcInfo_.pid_ &&
+        static_cast<int32_t>(sinkInfo->tokenId) == collabInfo->srcInfo_.accessToken_ &&
+        sinkInfo->userId == collabInfo->srcAccountInfo_.userId) {
         HILOGI("the collaboration relationship is matched successfully.");
         return ERR_OK;
     }
@@ -438,13 +454,11 @@ int32_t DSchedCollabManager::ConvertCollaborateResult(int32_t result)
     }
 }
 
-int32_t DSchedCollabManager::NotifySinkPrepareResult(const std::string &collabToken, const int32_t &result,
-    const int32_t &collabSessionId, const std::string &socketName, const sptr<IRemoteObject> &clientCB)
+int32_t DSchedCollabManager::NotifySinkPrepareResult(const DSchedCollabInfo &dSchedCollabInfo, const int32_t &result)
 {
-    HILOGI("called, collabToken: %{public}s, collabSessionId: %{public}d, result: %{public}d, socketName: %{public}s",
-        GetAnonymStr(collabToken).c_str(), collabSessionId, result, socketName.c_str());
-    auto func = [this, collabToken, result, collabSessionId, socketName, clientCB]() {
-        HandleCollabPrepareResult(collabToken, result, collabSessionId, socketName, clientCB);
+    HILOGI("end, dSchedCollabInfo: %{public}s.", dSchedCollabInfo.ToString().c_str());
+    auto func = [this, dSchedCollabInfo, result]() {
+        HandleCollabPrepareResult(dSchedCollabInfo, result);
     };
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler is nullptr");
@@ -454,17 +468,16 @@ int32_t DSchedCollabManager::NotifySinkPrepareResult(const std::string &collabTo
     return ERR_OK;
 }
 
-void DSchedCollabManager::HandleCollabPrepareResult(const std::string &collabToken, const int32_t &result,
-    const int32_t &collabSessionId, const std::string &socketName, const sptr<IRemoteObject> &clientCB)
+void DSchedCollabManager::HandleCollabPrepareResult(const DSchedCollabInfo &dSchedCollabInfo, const int32_t &result)
 {
     HILOGI("called");
-    auto dCollab = GetDSchedCollabByTokenId(collabToken);
+    auto dCollab = GetDSchedCollabByTokenId(dSchedCollabInfo.collabToken_);
     if (dCollab == nullptr) {
         HILOGE("not find dCollab");
         return;
     }
-    dCollab->PostSinkPrepareResultTask(result, collabSessionId, socketName, clientCB);
-    RemoveTimeout(collabToken);
+    dCollab->PostSinkPrepareResultTask(result, dSchedCollabInfo);
+    RemoveTimeout(dSchedCollabInfo.collabToken_);
     HILOGI("end, info: %{public}s.", dCollab->GetCollabInfo().ToString().c_str());
     return;
 }

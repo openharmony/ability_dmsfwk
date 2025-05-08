@@ -129,14 +129,9 @@ HWTEST_F(DSchedCollabManagerSupTest, NotifySinkPrepareResult_001, TestSize.Level
 {
     DTEST_LOG << "DSchedCollabManagerSupTest NotifySinkPrepareResult_001 begin" << std::endl;
     ASSERT_EQ(DSchedCollabManager::GetInstance().eventHandler_, nullptr);
-    int32_t direction = 0;
-    const std::string collabToken = "";
     const int32_t result = 0;
-    const int32_t collabSessionId = 0;
-    const std::string socketName = "";
-    const sptr<IRemoteObject> clientCB;
-    auto ret = DSchedCollabManager::GetInstance().NotifySinkPrepareResult(collabToken, result,
-        collabSessionId, socketName, clientCB);
+    DSchedCollabInfo dSchedCollabInfo;
+    auto ret = DSchedCollabManager::GetInstance().NotifySinkPrepareResult(dSchedCollabInfo, result);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedCollabManagerSupTest NotifySinkPrepareResult_001 end" << std::endl;
 }
