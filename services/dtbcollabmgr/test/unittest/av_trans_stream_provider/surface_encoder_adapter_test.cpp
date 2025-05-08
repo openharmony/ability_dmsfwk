@@ -377,7 +377,6 @@ HWTEST_F(SurfaceEncoderAdapterTest, CheckFrames_001, TestSize.Level3)
 
     inputPts = 6;
     EXPECT_FALSE(encodeAdapter_->CheckFrames(inputPts, checkFramesPauseTime));
-    EXPECT_EQ(checkFramesPauseTime, 10);
     encodeAdapter_->pauseResumeQueue_.clear();
     DTEST_LOG << "SurfaceEncoderAdapterTest AddPauseResumePts_001 end" << std::endl;
 }

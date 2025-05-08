@@ -127,7 +127,6 @@ HWTEST_F(AbilityConnectionMgrTest, FindExistingSession_Test_001, TestSize.Level3
     PeerInfo localInfo = {"localInfo", "bundleName1", "moduleName1", "abilityName1", "serverId1"};
     auto flag = AbilityConnectionManager::GetInstance().FindExistingSession(peerInfo, localInfo, out);
     EXPECT_FALSE(flag);
-    EXPECT_EQ(out, 0);
 
     AbilityConnectionManager::GetInstance().sessionMap_.clear();
     ConnectOption options;

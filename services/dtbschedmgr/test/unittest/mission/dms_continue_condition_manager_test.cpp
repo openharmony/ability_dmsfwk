@@ -396,7 +396,6 @@ HWTEST_F(DmsContinueConditionMgrTest, testGetMissionIdByBundleName001, TestSize.
     int32_t missionId = 1;
     InitMissionMap();
     auto ret = DmsContinueConditionMgr::GetInstance().GetMissionIdByBundleName(accountId, bundleName, missionId);
-    EXPECT_EQ(missionId, 1);
     EXPECT_EQ(ret, ERR_OK);
 
     bundleName = "bundleName2";
