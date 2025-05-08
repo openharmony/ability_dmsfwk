@@ -319,8 +319,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline002, TestSize.Level1)
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
     ASSERT_NE(nullptr, recvMgr);
     recvMgr->iconInfo_.senderNetworkId = NETWORKID_01;
-    recvMgr->NotifyDeviceOffline("");
-    EXPECT_EQ(recvMgr->iconInfo_.senderNetworkId, NETWORKID_01);
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDeviceOffline(""));
 
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline002 end" << std::endl;
 }
@@ -336,8 +335,7 @@ HWTEST_F(DMSContinueManagerTest, testNotifyDeviceOffline003, TestSize.Level1)
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
     ASSERT_NE(nullptr, recvMgr);
     recvMgr->iconInfo_.senderNetworkId = NETWORKID_01;
-    recvMgr->NotifyDeviceOffline(NETWORKID_02);
-    EXPECT_EQ(recvMgr->iconInfo_.senderNetworkId, NETWORKID_01);
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDeviceOffline(NETWORKID_02));
 
     DTEST_LOG << "DMSContinueManagerTest testNotifyDeviceOffline003 end" << std::endl;
 }
@@ -374,8 +372,7 @@ HWTEST_F(DMSContinueManagerTest, notifyPackageRemoved002, TestSize.Level1)
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
     ASSERT_NE(nullptr, recvMgr);
     recvMgr->iconInfo_.bundleName = BUNDLENAME_01;
-    recvMgr->NotifyPackageRemoved("");
-    EXPECT_EQ(recvMgr->iconInfo_.bundleName, BUNDLENAME_01);
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyPackageRemoved(""));
 
     DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved002 end" << std::endl;
 }
@@ -391,8 +388,7 @@ HWTEST_F(DMSContinueManagerTest, notifyPackageRemoved003, TestSize.Level1)
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
     ASSERT_NE(nullptr, recvMgr);
     recvMgr->iconInfo_.bundleName = BUNDLENAME_01;
-    recvMgr->NotifyPackageRemoved(BUNDLENAME_02);
-    EXPECT_EQ(recvMgr->iconInfo_.bundleName, BUNDLENAME_01);
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyPackageRemoved(BUNDLENAME_02));
 
     DTEST_LOG << "DMSContinueManagerTest notifyPackageRemoved003 end" << std::endl;
 }

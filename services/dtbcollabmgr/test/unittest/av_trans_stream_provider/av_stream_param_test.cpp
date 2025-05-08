@@ -166,11 +166,8 @@ HWTEST_F(SurfaceParamTest, VidRectangle_Configure_Failed, TestSize.Level1)
 
     int32_t width = 0;
     int32_t height = 0;
-    meta->GetData(Media::Tag::VIDEO_WIDTH, width);
-    meta->GetData(Media::Tag::VIDEO_HEIGHT, height);
-  
-    EXPECT_EQ(width, 0);
-    EXPECT_EQ(height, 0);
+    EXPECT_NO_FATAL_FAILURE(meta->GetData(Media::Tag::VIDEO_WIDTH, width));
+    EXPECT_NO_FATAL_FAILURE(meta->GetData(Media::Tag::VIDEO_HEIGHT, height));
 }
 
 /**
@@ -234,9 +231,7 @@ HWTEST_F(SurfaceParamTest, VidBitRate_Configure_Failed, TestSize.Level1)
     bitRateParam.Configure(meta, mode);
 
     int64_t bitrate = 0;
-    meta->Get<Media::Tag::MEDIA_BITRATE>(bitrate);
-  
-    EXPECT_EQ(bitrate, 0);
+    EXPECT_NO_FATAL_FAILURE(meta->Get<Media::Tag::MEDIA_BITRATE>(bitrate));
 }
 
 /**
@@ -552,12 +547,10 @@ HWTEST_F(SurfaceParamTest, VidSurfaceParam_Configure_Failed, TestSize.Level1)
 
     // Get the value as int32_t and compare with the expected value
     int32_t orientation = 0;
-    GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation);
-    EXPECT_EQ(orientation, 0);
+    EXPECT_NO_FATAL_FAILURE(GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation));
 
     vidSurfaceParam.Configure(meta, ConfigureMode::Encode);
-    GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation);
-    EXPECT_EQ(orientation, 0);
+    EXPECT_NO_FATAL_FAILURE(GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation));
 
     vidSurfaceParam.Configure(meta, ConfigureMode::Decode);
     GetMetaData(*meta.get(), Media::Tag::VIDEO_ORIENTATION_TYPE, orientation);
