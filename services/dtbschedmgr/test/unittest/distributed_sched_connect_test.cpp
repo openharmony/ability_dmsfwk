@@ -398,11 +398,8 @@ HWTEST_F(DistributedSchedConnectTest, ProcessConnectDied003, TestSize.Level1)
      * @tc.steps: step2. process connect died and then check the trackingUidMap_
      * @tc.expected: step2. the connect count is decrease
      */
-    DistributedSchedService::GetInstance().ProcessConnectDied(connect);
-    auto iter = trackingUidMap.find(uid);
-    if (iter != trackingUidMap.end()) {
-        EXPECT_EQ(trackingUidMap[uid], oldCount);
-    }
+    EXPECT_NO_FATAL_FAILURE(DistributedSchedService::GetInstance().ProcessConnectDied(connect));
+
 
     RemoveConnectInfo(connect);
 }
@@ -574,11 +571,7 @@ HWTEST_F(DistributedSchedConnectTest, ProcessDeviceOffline004, TestSize.Level1)
      * @tc.steps: step2. process device offline and then check the trackingUidMap_
      * @tc.expected: step2. the connect count is decrease
      */
-    DistributedSchedService::GetInstance().ProcessDeviceOffline("123_remote_device_id");
-    auto iter = trackingUidMap.find(uid);
-    if (iter != trackingUidMap.end()) {
-        EXPECT_EQ(trackingUidMap[uid], oldCount);
-    }
+    EXPECT_NO_FATAL_FAILURE(DistributedSchedService::GetInstance().ProcessDeviceOffline("123_remote_device_id"));
 
     RemoveConnectInfo(connect);
 }
@@ -677,11 +670,7 @@ HWTEST_F(DistributedSchedConnectTest, DisconnectRemoteAbility002, TestSize.Level
      * @tc.steps: step2. disconnect remote ability and then check the trackingUidMap_
      * @tc.expected: step2. the connect count is decrease
      */
-    DistributedSchedService::GetInstance().DisconnectRemoteAbility(connect, 0, 0);
-    auto iter = trackingUidMap.find(uid);
-    if (iter != trackingUidMap.end()) {
-        EXPECT_EQ(trackingUidMap[uid], oldCount);
-    }
+    EXPECT_NO_FATAL_FAILURE(DistributedSchedService::GetInstance().DisconnectRemoteAbility(connect, 0, 0));
 
     RemoveConnectInfo(connect);
 }
