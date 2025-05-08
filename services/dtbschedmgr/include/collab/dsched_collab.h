@@ -213,8 +213,7 @@ private:
     int32_t PostSinkGetVersionTask();
     int32_t PostSrcStartTask();
     int32_t PostSinkStartTask(const std::string &peerDeviceId);
-    int32_t PostSinkPrepareResultTask(const int32_t &result, const int32_t &collabSessionId,
-        const std::string &socketName, const sptr<IRemoteObject> &clientCB);
+    int32_t PostSinkPrepareResultTask(const int32_t &result, const DSchedCollabInfo &dSchedCollabInfo);
     int32_t PostSrcResultTask(std::shared_ptr<NotifyResultCmd> replyCmd);
     int32_t PostErrEndTask(const int32_t &result);
     int32_t PostAbilityRejectTask(const std::string &reason);

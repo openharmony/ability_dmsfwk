@@ -112,16 +112,14 @@ HWTEST_F(DSchedCollabSupTest, PostSinkPrepareResultTask_001, TestSize.Level3)
     ASSERT_NE(dSchedCollab_, nullptr);
     ASSERT_NE(dSchedCollab_->eventHandler_, nullptr);
     int32_t result = 100;
-    int32_t collabSessionId = 0;
-    std::string socketName = "test";
-    sptr<IRemoteObject> clientCB = sptr<DistributedSchedService>(new DistributedSchedService());
+    DSchedCollabInfo dSchedCollabInfo;
     EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(false));
     EXPECT_EQ(dSchedCollab_->PostSinkPrepareResultTask(
-        result, collabSessionId, socketName, clientCB), COLLAB_SEND_EVENT_FAILED);
+        result, dSchedCollabInfo), COLLAB_SEND_EVENT_FAILED);
 
     EXPECT_CALL(*handleMock_, SendEvent(_, _, _)).WillOnce(Return(true));
     EXPECT_EQ(dSchedCollab_->PostSinkPrepareResultTask(
-        result, collabSessionId, socketName, clientCB), ERR_OK);
+        result, dSchedCollabInfo), ERR_OK);
     DTEST_LOG << "DSchedCollabSupTest PostSinkPrepareResultTask_001 end" << std::endl;
 }
 

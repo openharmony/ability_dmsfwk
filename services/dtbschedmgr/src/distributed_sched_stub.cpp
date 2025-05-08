@@ -821,8 +821,20 @@ int32_t DistributedSchedStub::NotifyCollabPrepareResultInner(MessageParcel& data
         HILOGW("read callback failed!");
         return ERR_NULL_OBJECT;
     }
-    int32_t result = DSchedCollabManager::GetInstance().NotifySinkPrepareResult(collabToken, ret,
-        sinkCollabSessionId, sinkSocketName, sinkClientCallback);
+    int32_t callerUid = IPCSkeleton::GetCallingUid();
+    int32_t callerPid = IPCSkeleton::GetCallingPid();
+    uint32_t callerAccessToken = IPCSkeleton::GetCallingTokenID();
+
+    DSchedCollabInfo dSchedCollabInfo;
+    dSchedCollabInfo.collabToken_ = collabToken;
+    dSchedCollabInfo.sinkCollabSessionId_ = sinkCollabSessionId;
+    dSchedCollabInfo.sinkInfo_.socketName_ = sinkSocketName;
+    dSchedCollabInfo.sinkClientCB_ = sinkClientCallback;
+    dSchedCollabInfo.sinkInfo_.uid_ = callerUid;
+    dSchedCollabInfo.sinkInfo_.pid_ = callerPid;
+    dSchedCollabInfo.sinkInfo_.accessToken_ = static_cast<int32_t>(callerAccessToken);
+
+    int32_t result = DSchedCollabManager::GetInstance().NotifySinkPrepareResult(dSchedCollabInfo, ret);
     HILOGI("result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }

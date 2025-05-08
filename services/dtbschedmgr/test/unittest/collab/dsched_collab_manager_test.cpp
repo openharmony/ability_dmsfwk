@@ -309,14 +309,9 @@ HWTEST_F(DSchedCollabManagerTest, NotifyStartAbilityResult_001, TestSize.Level3)
 HWTEST_F(DSchedCollabManagerTest, NotifySinkPrepareResult_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedCollabManagerTest NotifySinkPrepareResult_001 begin" << std::endl;
-    int32_t direction = 0;
-    const std::string collabToken = "";
     const int32_t result = 0;
-    const int32_t collabSessionId = 0;
-    const std::string socketName = "";
-    const sptr<IRemoteObject> clientCB;
-    int32_t ret = DSchedCollabManager::GetInstance().NotifySinkPrepareResult(collabToken, result,
-        collabSessionId, socketName, clientCB);
+    DSchedCollabInfo dSchedCollabInfo;
+    int32_t ret = DSchedCollabManager::GetInstance().NotifySinkPrepareResult(dSchedCollabInfo, result);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DSchedCollabManagerTest NotifySinkPrepareResult_001 end" << std::endl;
 }
@@ -778,7 +773,7 @@ HWTEST_F(DSchedCollabManagerTest, HandleCollabPrepareResult_001, TestSize.Level3
     DSchedCollabManager::GetInstance().collabs_["collabToken"] = ptr;
 
     EXPECT_NO_FATAL_FAILURE(DSchedCollabManager::GetInstance().HandleCollabPrepareResult(
-        "collabToken", 0, 0, "socketName", nullptr));
+        info, 0));
 
     EXPECT_NO_FATAL_FAILURE(DSchedCollabManager::GetInstance().NotifySinkRejectReason(
         "collabToken", "reason"));
