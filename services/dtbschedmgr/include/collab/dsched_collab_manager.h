@@ -51,8 +51,7 @@ public:
     int32_t CollabMission(DSchedCollabInfo &info);
     int32_t NotifyStartAbilityResult(const std::string& collabToken, const int32_t &result,
         const int32_t &sinkPid, const int32_t &sinkUid, const int32_t &sinkAccessTokenId);
-    int32_t NotifySinkPrepareResult(const std::string &collabToken, const int32_t &result,
-        const int32_t &collabSessionId, const std::string &socketName, const sptr<IRemoteObject> &clientCB);
+    int32_t NotifySinkPrepareResult(const DSchedCollabInfo &dSchedCollabInfo, const int32_t &result);
     int32_t NotifySinkRejectReason(const std::string& collabToken, const std::string& reason);
     int32_t NotifyAbilityDied(const std::string &bundleName, const int32_t &pid);
     int32_t NotifySessionClose(const std::string &collabToken);
@@ -74,8 +73,7 @@ public:
 private:
     void StartEvent();
     void HandleGetSinkCollabVersion(const DSchedCollabInfo &info);
-    void HandleCollabPrepareResult(const std::string &collabToken, const int32_t &result,
-        const int32_t &collabSessionId, const std::string &socketName, const sptr<IRemoteObject> &clientCB);
+    void HandleCollabPrepareResult(const DSchedCollabInfo &dSchedCollabInfo, const int32_t &result);
     int32_t HandleCloseSessions(const std::string &bundleName, const int32_t &pid);
     void HandleReleaseAbilityLink(const std::string &bundleName, const int32_t &pid, const std::string &collabToken);
     void HandleDataRecv(const int32_t &softbusSessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer);

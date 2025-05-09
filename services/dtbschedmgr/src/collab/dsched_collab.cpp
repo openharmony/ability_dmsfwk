@@ -293,18 +293,19 @@ int32_t DSchedCollab::PostSinkStartTask(const std::string &peerDeviceId)
     return ERR_OK;
 }
 
-int32_t DSchedCollab::PostSinkPrepareResultTask(const int32_t &result, const int32_t &collabSessionId,
-    const std::string &socketName, const sptr<IRemoteObject> &clientCB)
+int32_t DSchedCollab::PostSinkPrepareResultTask(const int32_t &result, const DSchedCollabInfo &dSchedCollabInfo)
 {
-    HILOGI("called, collabSessionId: %{public}d, result: %{public}d, socketName: %{public}s",
-        collabSessionId, result, socketName.c_str());
+    HILOGI("called");
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
     }
-    collabInfo_.sinkCollabSessionId_ = collabSessionId;
-    collabInfo_.sinkInfo_.socketName_ = socketName;
-    collabInfo_.sinkClientCB_ = clientCB;
+    collabInfo_.sinkCollabSessionId_ = dSchedCollabInfo.sinkCollabSessionId_;
+    collabInfo_.sinkInfo_.socketName_ = dSchedCollabInfo.sinkInfo_.socketName_;
+    collabInfo_.sinkClientCB_ = dSchedCollabInfo.sinkClientCB_;
+    collabInfo_.sinkInfo_.uid_ = dSchedCollabInfo.sinkInfo_.uid_;
+    collabInfo_.sinkInfo_.pid_ = dSchedCollabInfo.sinkInfo_.pid_;
+    collabInfo_.sinkInfo_.accessToken_ = dSchedCollabInfo.sinkInfo_.accessToken_;
     auto data = std::make_shared<int32_t>(result);
     DSchedCollabEventType eventType = NOTIFY_PREPARE_RESULT_EVENT;
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
