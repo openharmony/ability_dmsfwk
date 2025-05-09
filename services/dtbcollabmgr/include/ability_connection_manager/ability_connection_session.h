@@ -269,6 +269,7 @@ private:
     AbilityConnectionSessionInfo sessionInfo_;
     ConnectOption connectOption_;
     CollabrateDirection direction_ = CollabrateDirection::UNKNOWN;
+    StreamParams streamParam_;
     
     std::shared_ptr<CollabChannelListener> channelListener_ = nullptr;
 
