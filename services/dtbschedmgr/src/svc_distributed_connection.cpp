@@ -163,6 +163,10 @@ ErrCode SvcDistributedConnection::DisconnectDistributedExtAbility()
     HILOGI("called begin");
     std::unique_lock<std::mutex> lock(mutex_);
     isConnectCalled_.store(false);
+    if (distributedProxy_ == nullptr) {
+        HILOGE("distributedProxy is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
     int32_t res = distributedProxy_->TriggerOnDestroy();
     if (res != ERR_OK) {
         HILOGE("destroy connect failed");
