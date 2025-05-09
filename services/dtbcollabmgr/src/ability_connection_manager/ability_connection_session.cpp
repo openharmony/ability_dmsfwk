@@ -1311,9 +1311,14 @@ void AbilityConnectionSession::OnMessageReceived(int32_t channelId, const std::s
     };
 
     if (headerPara->dataType_ == static_cast<uint32_t>(MessageType::CONNECT_FILE_CHANNEL)) {
-        std::thread(handler, headerPara->dataType_).detach();  // file async
+        TransChannelInfo info;
+        int32_t ret = GetTransChannelInfo(TransChannelType::SEND_FILE, info);
+        if (ret != ERR_OK) {
+            HILOGI("send file channel now not exists!");
+            std::thread(handler, headerPara->dataType_).detach();  // only connect file need async
+        }
     } else {
-        handler(headerPara->dataType_);  // keep
+        handler(headerPara->dataType_);  // keep sync
     }
 }
 
