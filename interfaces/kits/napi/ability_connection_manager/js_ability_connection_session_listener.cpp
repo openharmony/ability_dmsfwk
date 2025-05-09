@@ -27,18 +27,53 @@ namespace {
 const std::string TAG = "JsAbilityConnectionSessionListener";
 }
 
+JsAbilityConnectionSessionListener::JsAbilityConnectionSessionListener()
+{
+    HILOGI("called.");
+}
+
+JsAbilityConnectionSessionListener::JsAbilityConnectionSessionListener(napi_env env)
+{
+    HILOGI("called.");
+    env_ = env;
+}
+
+JsAbilityConnectionSessionListener::~JsAbilityConnectionSessionListener()
+{
+    HILOGI("called.");
+    if (callbackRef_ && env_) {
+        auto task = [env = env_, ref = callbackRef_]() {
+            HILOGI("called.");
+            if (env == nullptr || ref == nullptr) {
+                HILOGE("Invalid env_ or callbackRef_");
+                return;
+            }
+            napi_delete_reference(env, ref);
+        };
+        if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_vip)) {
+            HILOGE("send event failed!");
+        }
+    }
+}
+
 void JsAbilityConnectionSessionListener::SetCallback(const napi_value& jsListenerObj)
 {
     HILOGI("called.");
-    napi_ref tempRef = nullptr;
-    std::unique_ptr<NativeReference> callbackRef;
     if (env_ == nullptr) {
         HILOGE("env_ is nullptr");
         return;
     }
-    napi_create_reference(env_, jsListenerObj, 1, &tempRef);
-    callbackRef.reset(reinterpret_cast<NativeReference *>(tempRef));
-    callbackRef_ = std::move(callbackRef);
+    
+    if (callbackRef_) {
+        HILOGE("the callbackRef has been set.");
+        return;
+    }
+    
+    napi_status status = napi_create_reference(env_, jsListenerObj, 1, &callbackRef_);
+    if (status != napi_ok || callbackRef_ == nullptr) {
+        HILOGE("Failed to create reference, status is %{public}d", static_cast<int32_t>(status));
+        return;
+    }
 }
 
 void JsAbilityConnectionSessionListener::CallJsMethod(const EventCallbackInfo& eventCallbackInfo)
@@ -60,17 +95,22 @@ void JsAbilityConnectionSessionListener::CallJsMethodTemplate(const T& callbackI
         return;
     }
  
-    auto task = [this, callbackInfo]() {
+    auto self = shared_from_this();
+    auto task = [self, callbackInfo]() {
         HILOGI("called js method template.");
+        if (!self) {
+            HILOGI("self is nullptr.");
+            return;
+        }
         napi_handle_scope scope = nullptr;
-        auto env = this->env_;
+        auto env = self->env_;
         napi_status result = napi_open_handle_scope(env, &scope);
         if (result != napi_ok || scope == nullptr) {
             HILOGE("open handle scope failed!");
             return;
         }
  
-        CallJsMethodInner(callbackInfo);
+        self->CallJsMethodInner(callbackInfo);
         result = napi_close_handle_scope(env, scope);
         if (result != napi_ok) {
             HILOGE("close handle scope failed!");
@@ -96,18 +136,23 @@ template <typename T>
 void JsAbilityConnectionSessionListener::CallJsMethodInnerTemplate(const T& callbackInfo)
 {
     HILOGI("called.");
-    if (callbackRef_ == nullptr) {
-        HILOGE("callbackRef_ is nullptr");
+    if (env_ == nullptr || callbackRef_ == nullptr) {
+        HILOGE("Invalid env_ or callbackRef_");
         return;
     }
 
-    napi_value method = callbackRef_->GetNapiValue();
-    if (method == nullptr) {
-        HILOGE("Failed to get method from object");
+    napi_value callback = nullptr;
+    napi_status status = napi_get_reference_value(env_, callbackRef_, &callback);
+    if (status != napi_ok || callback == nullptr) {
+        HILOGE("Failed to get callback from reference, status is %{public}d", static_cast<int32_t>(status));
         return;
     }
+
     napi_value argv[] = { WrapEventCallbackInfo(env_, callbackInfo) };
-    napi_call_function(env_, CreateJsUndefined(env_), method, ArraySize(argv), argv, nullptr);
+    status = napi_call_function(env_, CreateJsUndefined(env_), callback, ArraySize(argv), argv, nullptr);
+    if (status != napi_ok) {
+        HILOGE("Failed to call JS function, status is %{public}d", static_cast<int32_t>(status));
+    }
     HILOGI("end.");
 }
 
