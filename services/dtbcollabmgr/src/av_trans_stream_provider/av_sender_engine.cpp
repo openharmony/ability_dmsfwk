@@ -344,7 +344,6 @@ void AVSenderEngine::OnEvent(const Media::Event& event)
         case Media::EventType::EVENT_ERROR: {
             HILOGI("EVENT_ERROR");
             ChangeState(EngineState::ERROR);
-            Stop();
             break;
         }
         case Media::EventType::EVENT_READY: {

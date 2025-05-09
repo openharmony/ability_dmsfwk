@@ -451,7 +451,6 @@ void AVReceiverEngine::OnEvent(const Media::Event& event)
     switch (event.type) {
         case Media::EventType::EVENT_ERROR: {
             HILOGI("EVENT_ERROR");
-            Stop();
             ChangeState(EngineState::ERROR);
             break;
         }

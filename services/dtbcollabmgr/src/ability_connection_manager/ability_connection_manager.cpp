@@ -163,9 +163,10 @@ int32_t AbilityConnectionManager::ConnectSession(int32_t sessionId, ConnectCallb
     auto connectionSesion = GetAbilityConnectionSession(sessionId);
     if (connectionSesion == nullptr) {
         HILOGE("sessionId is invalid parameter");
+        ConnectResult connectResult(false, ConnectErrorCode::INVALID_SESSION_ID, "");
+        callback(connectResult);
         return INVALID_SESSION_ID;
     }
-
     return connectionSesion->Connect(callback);
 }
 
