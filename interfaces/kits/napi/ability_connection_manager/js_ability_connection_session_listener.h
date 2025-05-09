@@ -23,10 +23,12 @@
 
 namespace OHOS {
 namespace DistributedCollab {
-class JsAbilityConnectionSessionListener {
+class JsAbilityConnectionSessionListener :
+    public std::enable_shared_from_this<JsAbilityConnectionSessionListener> {
 public:
-    explicit JsAbilityConnectionSessionListener(napi_env env) : env_(env) {}
-    virtual ~JsAbilityConnectionSessionListener() = default;
+    explicit JsAbilityConnectionSessionListener(napi_env env);
+    JsAbilityConnectionSessionListener();
+    ~JsAbilityConnectionSessionListener();
     void CallJsMethod(const EventCallbackInfo& eventCallbackInfo);
     void CallJsMethod(const CollaborateEventInfo& collaborateEventInfo);
     void SetCallback(const napi_value& jsListenerObj);
@@ -47,7 +49,7 @@ private:
 
 private:
     napi_env env_ = nullptr;
-    std::unique_ptr<NativeReference> callbackRef_ = nullptr;
+    napi_ref callbackRef_ = nullptr;
 };
 } // namespace DistributedCollab
 } // namespace OHOS
