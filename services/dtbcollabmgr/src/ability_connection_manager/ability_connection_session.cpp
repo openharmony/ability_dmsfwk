@@ -1300,11 +1300,20 @@ void AbilityConnectionSession::OnMessageReceived(int32_t channelId, const std::s
     std::string msg(reinterpret_cast<const char *>(data + MessageDataHeader::HEADER_LEN),
         dataBuffer->Size() - MessageDataHeader::HEADER_LEN);
     HILOGI("headerPara type is %{public}d", headerPara->dataType_);
-    auto iter = messageHandlerMap_.find(headerPara->dataType_);
-    if (iter != messageHandlerMap_.end()) {
-        iter->second(msg);
+    // common handler
+    auto handler = [this, msg](uint32_t dataType) {
+        auto iter = messageHandlerMap_.find(dataType);
+        if (iter != messageHandlerMap_.end()) {
+            iter->second(msg);
+        } else {
+            HILOGE("unhandled code!");
+        }
+    };
+
+    if (headerPara->dataType_ == static_cast<uint32_t>(MessageType::CONNECT_FILE_CHANNEL)) {
+        std::thread(handler, headerPara->dataType_).detach();  // file async
     } else {
-        HILOGE("unhandled code!");
+        handler(headerPara->dataType_);  // keep
     }
 }
 
