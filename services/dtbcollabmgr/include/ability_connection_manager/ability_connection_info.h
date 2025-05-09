@@ -59,6 +59,7 @@ enum class StartOptionParams : int32_t {
 };
 
 enum class ConnectErrorCode : int32_t {
+    INVALID_SESSION_ID = -1,
     CONNECTED_SESSION_EXISTS = 0,
     PEER_APP_REJECTED = 1,
     LOCAL_WIFI_NOT_OPEN = 2,
