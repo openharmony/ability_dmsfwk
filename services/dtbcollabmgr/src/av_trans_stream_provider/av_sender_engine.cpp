@@ -303,7 +303,7 @@ int32_t AVSenderEngine::Stop()
         HILOGI("Stop exit. no need change state");
         return static_cast<int32_t>(Status::OK);
     }
-    if (curState_ != EngineState::START) {
+    if (curState_ != EngineState::START && curState_ != EngineState::ERROR) {
         HILOGE("need start state to stop");
         return static_cast<int32_t>(Status::ERROR_WRONG_STATE);
     }
