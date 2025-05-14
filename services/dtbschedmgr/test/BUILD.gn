@@ -164,6 +164,7 @@ ohos_unittest("distributedschedservicetest") {
   sources = [
     "unittest/distributed_sched_service_first_test.cpp",
     "unittest/distributed_sched_service_second_test.cpp",
+    "unittest/mock/svc_distributed_connection_mock.cpp",
     "unittest/mock_distributed_sched.cpp",
   ]
   if (dmsfwk_ces_listener) {
@@ -181,6 +182,11 @@ ohos_unittest("distributedschedservicetest") {
     public_deps = dsched_public_deps
   }
 
+  external_deps += [
+    "ability_base:want",
+    "googletest:gmock",
+  ]
+
   defines = []
   if (dmsfwk_report_memmgr || dmsfwk_report_memmgr_plugins) {
     defines = [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
@@ -196,11 +202,14 @@ ohos_unittest("distributedschedservicetest") {
 
 ohos_unittest("svcdistributedconnectiontest") {
   sanitize = {
+    blocklist = "./cfi_blocklist.txt"
     cfi = true
     cfi_cross_dso = true
     debug = false
   }
   module_out_path = module_output_path
+
+  include_dirs = [ "${dms_path}/services/dtbschedmgr/src" ]
 
   sources = [ "unittest/svc_distributed_connection_test.cpp" ]
 
@@ -209,11 +218,15 @@ ohos_unittest("svcdistributedconnectiontest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
   ]
   configs += dsched_configs
-  deps = []
+  deps = [ "${dms_path}/frameworks/native/distributed_extension:distributed_extension_sa" ]
   if (is_standard_system) {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
+  external_deps += [
+    "distributed_notification_service:ans_innerkits",
+    "i18n:intl_util",
+  ]
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
