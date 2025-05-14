@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,25 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef SVC_DISTRIBUTED_CONNECTION_TEST_H
-#define SVC_DISTRIBUTED_CONNECTION_TEST_H
-
-#include <gtest/gtest.h>
-
-#define private public
-#include "svc_distributed_connection.cpp"
-#undef private
+#include "svc_distributed_connection_mock.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
-class SvcDistributedConnectionTest : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
-    static inline sptr<SvcDistributedConnection> disconnectedCon_ = nullptr;
-};
-} // namespace DistributedSchedule
-} // namespace OHOS
-#endif // SVC_DISTRIBUTED_CONNECTION_TEST_H
+ErrCode SvcDistributedConnection::ConnectDExtAbility(AAFwk::Want &want, int32_t userId, bool isCleanCalled)
+{
+    return ISvcDistributedConnection::connMock->ConnectDExtAbility(want, userId, isCleanCalled);
+}
+
+sptr<IDExtension> SvcDistributedConnection::GetDistributedExtProxy()
+{
+    return ISvcDistributedConnection::connMock->GetDistributedExtProxy();
+}
+}
+}
