@@ -246,7 +246,11 @@ enum {
 
     PEER_WIFI_NOT_OPEN,
 
-    PEER_ABILITY_NO_ONCOLLABORATE
+    PEER_ABILITY_NO_ONCOLLABORATE,
+
+    NOT_SUPPORTED_BITATE,
+
+    NOT_SUPPORTED_COLOR_SPACE,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

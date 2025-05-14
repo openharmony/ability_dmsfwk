@@ -48,7 +48,6 @@ const std::string EVENT_COLLABORATE = "collaborateEvent";
 constexpr int32_t DSCHED_COLLAB_PROTOCOL_VERSION = 1;
 static constexpr uint16_t PROTOCOL_VERSION = 1;
 constexpr int32_t CHANNEL_NAME_LENGTH = 48;
-constexpr int32_t VIDEO_BIT_RATE = 80000;
 constexpr int32_t VIDEO_FRAME_RATE = 30;
 constexpr int32_t DEFAULT_APP_UID = 0;
 constexpr int32_t DEFAULT_APP_PID = 0;
@@ -552,6 +551,7 @@ int32_t AbilityConnectionSession::SendFile(const std::vector<std::string>& sFile
 int32_t AbilityConnectionSession::CreateStream(int32_t streamId, const StreamParams& param)
 {
     HILOGI("called. StreamParams role is %{public}d", static_cast<int32_t>(param.role));
+    streamParam_ = param;
     switch (param.role) {
         case StreamRole::SOURCE:
             streamId_ = streamId;
@@ -638,7 +638,7 @@ int32_t AbilityConnectionSession::ConfigEngineParam(std::shared_ptr<T> &engine, 
         HILOGE("configure VidRectangle failed");
         return ret;
     }
-    ret = engine->Configure(VidBitRate(VIDEO_BIT_RATE));
+    ret = engine->Configure(VidBitRate(streamParam_.bitrate));
     if (ret != ERR_OK) {
         HILOGE("configure VidBitRate failed");
         return ret;
@@ -851,6 +851,10 @@ void AbilityConnectionSession::UpdateRecvEngineStatus()
 int32_t AbilityConnectionSession::StartSenderEngine()
 {
     HILOGI("senderEngine_ Start. recvEngineState_ is %{public}d", static_cast<int32_t>(recvEngineState_));
+    if (recvEngineState_ != EngineState::START) {
+        HILOGE("recvEngine not start");
+        return RECEIVE_STREAM_NOT_START;
+    }
     return senderEngine_->Start();
 }
 
