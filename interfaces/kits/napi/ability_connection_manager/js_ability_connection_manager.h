@@ -59,9 +59,13 @@ enum BussinessErrorCode {
     // Input parameter error.
     ERR_INVALID_PARAMS = 401,
     // Multiple streams can not be created.
-    ERR_ONLY_SUPPORT_ONE_STREAM = 29425664,
+    ERR_ONLY_SUPPORT_ONE_STREAM = 32300001,
     // The stream at the receive end is not started.
-    ERR_RECEIVE_STREAM_NOT_START = 29425665,
+    ERR_RECEIVE_STREAM_NOT_START = 32300002,
+    // Multiple streams can not be created.
+    ERR_BITATE_NOT_SUPPORTED = 32300003,
+    // The stream at the receive end is not started.
+    ERR_COLOR_SPACE_NOT_SUPPORTED = 32300004,
 };
 
 class JsAbilityConnectionManager final {
@@ -139,6 +143,9 @@ private:
     static napi_value ExecuteCreateSession(const std::string& serviceName,
         std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, PeerInfo& peerInfo,
         ConnectOption& connectOption, const napi_env& env);
+    static bool IsVaildBitrate(int32_t bitrate);
+    static bool UnwrapColorSpace(const napi_env &env, const napi_value &jsValue,
+        StreamParams &streamParam);
 };
 
 napi_value JsAbilityConnectionManagerInit(napi_env env, napi_value exportObj);
