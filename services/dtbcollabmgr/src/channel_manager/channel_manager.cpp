@@ -960,10 +960,13 @@ void ChannelManager::OnSocketClosed(int32_t socketId, const ShutdownReason& reas
         return;
     }
     // delete channel when all socket shutdown
-    if (GetChannelStatus(channelId) == ChannelStatus::UNCONNECTED) {
-        DoDisConnectCallback(channelId, reason);
-        DeleteChannel(channelId);
-    }
+    auto func = [channelId, reason, this]() {
+        if (GetChannelStatus(channelId) == ChannelStatus::UNCONNECTED) {
+            DoDisConnectCallback(channelId, reason);
+            DeleteChannel(channelId);
+        }
+    };
+    PostCallbackTask(func, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 int32_t ChannelManager::GetChannelId(const int32_t socketId)

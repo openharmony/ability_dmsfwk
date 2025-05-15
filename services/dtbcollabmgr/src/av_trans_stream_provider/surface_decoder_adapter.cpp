@@ -118,6 +118,8 @@ namespace DistributedCollab {
         HILOGI("encoder adapter destroy");
         Flush();
         HILOGI("finish decoder receive callback");
+        Stop();
+        HILOGI("stop decoder task");
         decoderAdapterCallback_ = nullptr;
         Release();
         HILOGI("release decoder codec");

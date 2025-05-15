@@ -287,6 +287,14 @@ napi_value CreateBusinessError(napi_env env, int32_t errCode, bool isAsync = tru
             error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_RECEIVE_STREAM_NOT_START),
                 ERR_MESSAGE_RECEIVE_NOT_START, isAsync);
             break;
+        case NOT_SUPPORTED_BITATE:
+            error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_BITATE_NOT_SUPPORTED),
+                ERR_MESSAGE_NO_PERMISSION, isAsync);
+            break;
+        case NOT_SUPPORTED_COLOR_SPACE:
+            error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_COLOR_SPACE_NOT_SUPPORTED),
+                ERR_MESSAGE_INVALID_PARAMS, isAsync);
+            break;
         case ERR_EXECUTE_FUNCTION:
             error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
                 ERR_MESSAGE_FAILED, isAsync);
@@ -673,6 +681,7 @@ napi_value JsAbilityConnectionManager::DestroyAbilityConnectionSession(napi_env 
     int32_t sessionId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
         HILOGE("Failed to unwrap sessionId.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
@@ -1066,6 +1075,7 @@ napi_value JsAbilityConnectionManager::DisConnect(napi_env env, napi_callback_in
     int32_t sessionId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
         HILOGE("Failed to unwrap sessionId.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
@@ -1111,6 +1121,7 @@ napi_value JsAbilityConnectionManager::AcceptConnect(napi_env env, napi_callback
     int32_t sessionId = -1;
     if (!JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
         HILOGE("Failed to unwrap sessionId.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return nullptr;
     }
 
@@ -1434,7 +1445,6 @@ napi_value JsAbilityConnectionManager::CreateStream(napi_env env, napi_callback_
     StreamParams streamParam;
     if (!JsToStreamParam(env, argv[ARG_INDEX_ONE], streamParam)) {
         HILOGE("Failed to unwrap streamParam.");
-        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return promise;
     }
 
@@ -1479,28 +1489,34 @@ bool JsAbilityConnectionManager::JsToStreamParam(const napi_env &env, const napi
     NAPI_CALL_BASE(env, napi_typeof(env, jsValue, &argvType), false);
     if (argvType != napi_object) {
         HILOGE("Parameter verification failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return false;
     }
 
     if (!JsObjectToString(env, jsValue, "name", streamParam.name)) {
         HILOGE("name parameter parsing failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return false;
     }
 
     int32_t role = -1;
     if (!JsObjectToInt(env, jsValue, "role", role)) {
         HILOGE("role verification failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return false;
     }
 
     if (role < static_cast<int32_t>(StreamRole::SOURCE) ||
         role > static_cast<int32_t>(StreamRole::SINK)) {
         HILOGE("Invalid role value: %{public}d", role);
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return false;
     }
     streamParam.role = static_cast<StreamRole>(role);
     if (!GetStreamParamBitrate(env, jsValue, streamParam)) {
-        HILOGW("bitrate verification failed.");
+        return false;
+    }
+    if (!UnwrapColorSpace(env, jsValue, streamParam)) {
         return false;
     }
     return true;
@@ -1509,33 +1525,79 @@ bool JsAbilityConnectionManager::JsToStreamParam(const napi_env &env, const napi
 bool JsAbilityConnectionManager::GetStreamParamBitrate(const napi_env &env, const napi_value &jsValue,
     StreamParams &streamParam)
 {
-    int32_t bitrate = -1;
-    if (JsObjectToInt(env, jsValue, "bitrate", bitrate)) {
-        OH_BitrateMode bitrateMode = BITRATE_MODE_CBR;
-        OH_AVCapability *capability = OH_AVCodec_GetCapability(OH_AVCODEC_MIMETYPE_VIDEO_AVC, true);
-        if (capability == nullptr) {
-            HILOGE("GetCapability failed, it's nullptr");
-            return false;
-        }
-        bool isSupported = OH_AVCapability_IsEncoderBitrateModeSupported(capability, bitrateMode);
-        if (!isSupported) {
-            HILOGE("BITRATE_MODE_CBR is not support.");
-            return false;
-        }
-        OH_AVRange bitrateRange = {-1, -1};
-        int32_t ret = OH_AVCapability_GetEncoderBitrateRange(capability, &bitrateRange);
-        if (ret != AV_ERR_OK || bitrateRange.maxVal <= 0) {
-            HILOGE("bitrate range query failed. ret: %{public}d; maxVal: %{public}d;", ret, bitrateRange.maxVal);
-            return false;
-        }
-        if (bitrate < bitrateRange.minVal || bitrate > bitrateRange.maxVal) {
-            HILOGE("Bitrate is not supported, it should be between %{public}d and %{public}d", bitrateRange.minVal,
-                   bitrateRange.maxVal);
-            return false;
-        }
-        HILOGI("bitrate is %{public}d.", bitrate);
-        streamParam.bitrate = bitrate;
+    bool hasProperty = false;
+    if (napi_has_named_property(env, jsValue, "bitrate", &hasProperty) != napi_ok || !hasProperty) {
+        HILOGW("no bitrate propertys");
+        return true;
     }
+
+    int32_t bitrate = -1;
+    if (!JsObjectToInt(env, jsValue, "bitrate", bitrate)) {
+        HILOGE("bitrate verification failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return false;
+    }
+
+    if (!IsVaildBitrate(bitrate)) {
+        HILOGE("not support bitrate: %{public}d.", bitrate);
+        CreateBusinessError(env, NOT_SUPPORTED_BITATE);
+        return false;
+    }
+    HILOGI("bitrate is %{public}d.", bitrate);
+    streamParam.bitrate = bitrate;
+    return true;
+}
+
+bool JsAbilityConnectionManager::IsVaildBitrate(int32_t bitrate)
+{
+    OH_BitrateMode bitrateMode = BITRATE_MODE_CBR;
+    OH_AVCapability *capability = OH_AVCodec_GetCapability(OH_AVCODEC_MIMETYPE_VIDEO_AVC, true);
+    if (capability == nullptr) {
+        HILOGE("GetCapability failed, it's nullptr");
+        return false;
+    }
+    bool isSupported = OH_AVCapability_IsEncoderBitrateModeSupported(capability, bitrateMode);
+    if (!isSupported) {
+        HILOGE("BITRATE_MODE_CBR is not support.");
+        return false;
+    }
+    OH_AVRange bitrateRange = {-1, -1};
+    int32_t ret = OH_AVCapability_GetEncoderBitrateRange(capability, &bitrateRange);
+    if (ret != AV_ERR_OK || bitrateRange.maxVal <= 0) {
+        HILOGE("bitrate range query failed. ret: %{public}d; maxVal: %{public}d;", ret, bitrateRange.maxVal);
+        return false;
+    }
+    if (bitrate < bitrateRange.minVal || bitrate > bitrateRange.maxVal) {
+        HILOGE("Bitrate is not supported, it should be between %{public}d and %{public}d", bitrateRange.minVal,
+            bitrateRange.maxVal);
+        return false;
+    }
+    return true;
+}
+
+bool JsAbilityConnectionManager::UnwrapColorSpace(const napi_env &env, const napi_value &jsValue,
+    StreamParams &streamParam)
+{
+    bool hasProperty = false;
+    if (napi_has_named_property(env, jsValue, "colorSpaceConversionTarget", &hasProperty) != napi_ok || !hasProperty) {
+        HILOGW("no colorSpaceConversionTarget propertys");
+        return true;
+    }
+
+    int32_t colorSpace = -1;
+    if (!JsObjectToInt(env, jsValue, "colorSpaceConversionTarget", colorSpace)) {
+        HILOGE("colorSpace verification failed.");
+        CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        return false;
+    }
+
+    // only BT709_LIMIT is supported
+    if (colorSpace != static_cast<int32_t>(ColorSpace::BT709_LIMIT)) {
+        HILOGE("colorSpace not BT709_LIMIT.");
+        CreateBusinessError(env, NOT_SUPPORTED_COLOR_SPACE);
+        return false;
+    }
+    streamParam.colorSpace = static_cast<ColorSpace>(colorSpace);
     return true;
 }
 

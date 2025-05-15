@@ -68,10 +68,16 @@ enum class ConnectErrorCode : int32_t {
     SYSTEM_INTERNAL_ERROR = 5
 };
 
+enum class ColorSpace : int32_t {
+    UNKNOWN = 0,
+    BT709_LIMIT = 16,
+};
+
 struct StreamParams {
     std::string name = "";
     StreamRole role = StreamRole::SOURCE;
     int32_t bitrate = 80000;
+    ColorSpace colorSpace = ColorSpace::UNKNOWN;
 };
 
 struct SurfaceParams {

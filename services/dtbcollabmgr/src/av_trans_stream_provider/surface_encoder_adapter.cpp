@@ -114,6 +114,8 @@ namespace DistributedCollab {
         HILOGI("encoder adapter destroy");
         Flush();
         HILOGI("finish encoder receive callback");
+        Stop();
+        HILOGI("stop encoder task");
         encoderAdapterCallback_ = nullptr;
         encoderAdapterKeyFramePtsCallback_ = nullptr;
         Release();
