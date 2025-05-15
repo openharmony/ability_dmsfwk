@@ -19,6 +19,7 @@
 #include "gtest/gtest.h"
 
 #include "ability_connection_wrapper_stub.h"
+#include "accesstoken_kit.h"
 #include "bundle/bundle_manager_internal.h"
 #include "device_manager.h"
 #include "distributed_sched_permission.h"
@@ -35,8 +36,11 @@
 #include "mock_form_mgr_service.h"
 #include "mock_distributed_sched.h"
 #include "multi_user_manager.h"
+#include "nativetoken_kit.h"
+#include "mock/svc_distributed_connection_mock.h"
 #include "system_ability_definition.h"
 #include "test_log.h"
+#include "token_setproc.h"
 #include "thread_pool.h"
 #undef private
 #undef protected
@@ -53,6 +57,7 @@ using namespace AppExecFwk;
 using namespace DistributedHardware;
 using namespace Constants;
 namespace {
+    const std::string TAG = "DistributedSchedService";
     const string LOCAL_DEVICEID = "192.168.43.100";
     const string REMOTE_DEVICEID = "255.255.255.255";
     const std::u16string DEVICE_ID = u"192.168.43.100";
@@ -66,6 +71,35 @@ namespace {
     const string DMS_IS_CALLER_BACKGROUND = "dmsIsCallerBackGround";
     const string DMS_VERSION_ID = "dmsVersion";
     constexpr int32_t SLEEP_TIME = 1000;
+    constexpr int32_t WEARENGINE_UID = 1001;
+}
+
+void SetNativeToken()
+{
+    uint64_t tokenId;
+    const char *perms[] = {
+        "ohos.permission.GET_BUNDLE_RESOURCES",
+        "ohos.permission.GET_BUNDLE_INFO_PRIVILEGED"
+    };
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 2,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = perms,
+        .acls = nullptr,
+        .processName = "foundation",
+        .aplStr = "system_core",
+    };
+
+    tokenId = GetAccessTokenId(&infoInstance);
+    if (tokenId == 0) {
+        HILOGE("Failed to get valid Token ID.");
+        return;
+    }
+    SetSelfTokenID(tokenId);
+    setuid(WEARENGINE_UID);
+    OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
 }
 
 class DistributedSchedServiceFirstTest : public testing::Test {
@@ -77,6 +111,7 @@ public:
     sptr<IDistributedSched> GetDms();
     int32_t InstallBundle(const std::string &bundlePath) const;
     sptr<IDistributedSched> proxy_;
+    static inline std::shared_ptr<SvcDistributedConnectionMock> svcDConnMock = nullptr;
 
 protected:
     enum class LoopTime : int32_t {
@@ -98,6 +133,8 @@ void DistributedSchedServiceFirstTest::SetUpTestCase()
     if (!DistributedSchedUtil::LoadDistributedSchedService()) {
         DTEST_LOG << "DistributedSchedServiceFirstTest::SetUpTestCase LoadDistributedSchedService failed" << std::endl;
     }
+    svcDConnMock = std::make_shared<SvcDistributedConnectionMock>();
+    SvcDistributedConnectionMock::connMock = svcDConnMock;
     const std::string pkgName = "DBinderBus_" + std::to_string(getprocpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
@@ -105,7 +142,10 @@ void DistributedSchedServiceFirstTest::SetUpTestCase()
 }
 
 void DistributedSchedServiceFirstTest::TearDownTestCase()
-{}
+{
+    SvcDistributedConnectionMock::connMock = nullptr;
+    svcDConnMock = nullptr;
+}
 
 void DistributedSchedServiceFirstTest::SetUp()
 {
@@ -1674,7 +1714,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ReleaseAbilityFromRemote_002, TestSiz
 /**
  * @tc.name  : ConnectDExtensionFromRemote_Test01
  * @tc.number: ConnectDExtensionFromRemote_001
- * @tc.desc  : Test ConnectDExtensionFromRemote function when user is not foreground.
+ * @tc.desc  : Test ConnectDExtensionFromRemote function when check permission failed.
  */
 HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test01, TestSize.Level1)
 {
@@ -1688,6 +1728,66 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test01, T
     EXPECT_EQ(resultInfo.result, DExtConnectResult::PERMISSION_DENIED);
 
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectDExtensionFromRemote_Test01 end" << std::endl;
+}
+
+/**
+ * @tc.name  : ConnectDExtensionFromRemote_Test02
+ * @tc.number: ConnectDExtensionFromRemote_002
+ * @tc.desc  : Test ConnectDExtensionFromRemote function when parameter is nullptr.
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test02, TestSize.Level1)
+{
+    DExtSourceInfo sourceInfo("", "", "", "", "");
+    DExtSinkInfo sinkInfo(0, 0, "", "", "", "");
+    DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "validToken", "delegatee");
+    DExtConnectResultInfo resultInfo;
+
+    int32_t result = DistributedSchedService::GetInstance().ConnectDExtensionFromRemote(connectInfo, resultInfo);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(resultInfo.result, DExtConnectResult::FAILED);
+
+    DTEST_LOG << "DistributedSchedServiceFirstTest ConnectDExtensionFromRemote_Test02 end" << std::endl;
+}
+
+/**
+ * @tc.name  : ConnectDExtensionFromRemote_Test03
+ * @tc.number: ConnectDExtensionFromRemote_003
+ * @tc.desc  : Test ConnectDExtensionFromRemote function when user is not foreground.
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test03, TestSize.Level1)
+{
+    SetNativeToken();
+    DExtSourceInfo sourceInfo("device123", "network123", "testBundle", "testModule", "testAbility");
+    DExtSinkInfo sinkInfo(-1, 1234, "testBundle", "testModule", "testAbility", "testService");
+    DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "validToken", "delegatee");
+    DExtConnectResultInfo resultInfo;
+
+    int32_t result = DistributedSchedService::GetInstance().ConnectDExtensionFromRemote(connectInfo, resultInfo);
+    EXPECT_EQ(result, DMS_NOT_FOREGROUND_USER);
+    EXPECT_EQ(resultInfo.result, DExtConnectResult::FAILED);
+
+    DTEST_LOG << "DistributedSchedServiceFirstTest ConnectDExtensionFromRemote_Test03 end" << std::endl;
+}
+
+/**
+ * @tc.name  : ConnectDExtensionFromRemote_Test04
+ * @tc.number: ConnectDExtensionFromRemote_004
+ * @tc.desc  : Test ConnectDExtensionFromRemote function when ConnectDExtAbility failed.
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test04, TestSize.Level1)
+{
+    SetNativeToken();
+    DExtSourceInfo sourceInfo("device123", "network123", "testBundle", "testModule", "testAbility");
+    DExtSinkInfo sinkInfo(100, 0, "com.it.welink", "dms", "AttendanceDistributedAbility", "WeLink");
+    DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "ohos.permission.dms_extension", "delegatee");
+    DExtConnectResultInfo resultInfo;
+
+    EXPECT_CALL(*svcDConnMock, ConnectDExtAbility(_, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    int32_t result = DistributedSchedService::GetInstance().ConnectDExtensionFromRemote(connectInfo, resultInfo);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(resultInfo.result, DExtConnectResult::FAILED);
+
+    DTEST_LOG << "DistributedSchedServiceFirstTest ConnectDExtensionFromRemote_Test04 end" << std::endl;
 }
 }
 }
