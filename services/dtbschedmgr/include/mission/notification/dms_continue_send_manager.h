@@ -16,6 +16,7 @@
 #ifndef DMS_CONTINUE_SEND_MANAGER_H
 #define DMS_CONTINUE_SEND_MANAGER_H
 
+#include <atomic>
 #include <mutex>
 #include <queue>
 #include <string>
@@ -118,6 +119,7 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     std::shared_ptr<ScreenLockedHandler> screenLockedHandler_;
     std::map<MissionEventType, std::shared_ptr<ContinueSendStrategy>> strategyMap_;
+    std::atomic<bool> initFlag_ = false;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
