@@ -32,8 +32,11 @@ struct AsyncConnectCallbackInfo {
     napi_deferred deferred = nullptr;
     napi_threadsafe_function tsfn = nullptr;
     int32_t sessionId;
-    int32_t funResult;
     ConnectResult result;
+    // Indicates whether ConnectThreadsafeFunctionCallback has been executed.
+    bool connectCallbackExecuted = false;
+    // Marks whether CompleteAsyncConnectWork has been executed
+    bool completeAsyncworkExecuted = false;
 };
 
 struct AsyncCallbackInfo {
@@ -143,6 +146,8 @@ private:
     static napi_value ExecuteCreateSession(const std::string& serviceName,
         std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, PeerInfo& peerInfo,
         ConnectOption& connectOption, const napi_env& env);
+    static void CleanupConnectionResources(napi_env env, AsyncConnectCallbackInfo* asyncData,
+        napi_threadsafe_function tsfn);
     static bool IsVaildBitrate(int32_t bitrate);
     static bool UnwrapColorSpace(const napi_env &env, const napi_value &jsValue,
         StreamParams &streamParam);
