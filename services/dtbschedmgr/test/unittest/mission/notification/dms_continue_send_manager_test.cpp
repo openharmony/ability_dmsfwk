@@ -16,7 +16,9 @@
 #include "mission/notification/dms_continue_send_manager.h"
 #include "mission/notification/dms_continue_recv_manager.h"
 
+#include "datashare_manager.h"
 #include "dtbschedmgr_log.h"
+#include "mission/wifi_state_adapter.h"
 #include "test_log.h"
 
 using namespace testing;
@@ -24,18 +26,26 @@ using namespace testing::ext;
 
 namespace OHOS {
 namespace DistributedSchedule {
+
+static bool g_mockBool = false;
+static bool g_mockWifiBool = false;
+
 namespace {
 const std::string TAG = "DMSContinueMgrTest";
 }
 //DMSContinueSendMgrTest
 void DMSContinueSendMgrTest::SetUpTestCase()
 {
+    bundleMgrMock_ = std::make_shared<BundleManagerInternalMock>();
+    BundleManagerInternalMock::bundleMgrMock = bundleMgrMock_;
     mgrMock_ = std::make_shared<DmsContinueConditionMgrMock>();
     IDmsContinueConditionMgr::conditionMgrMock = mgrMock_;
 }
 
 void DMSContinueSendMgrTest::TearDownTestCase()
 {
+    BundleManagerInternalMock::bundleMgrMock = nullptr;
+    bundleMgrMock_ = nullptr;
     IDmsContinueConditionMgr::conditionMgrMock = nullptr;
     mgrMock_ = nullptr;
 }
@@ -51,10 +61,18 @@ void DMSContinueSendMgrTest::TearDown()
 //DMSContinueRecvMgrTest
 void DMSContinueRecvMgrTest::SetUpTestCase()
 {
+    bundleMgrMock_ = std::make_shared<BundleManagerInternalMock>();
+    BundleManagerInternalMock::bundleMgrMock = bundleMgrMock_;
+    dmsKvMock_ = std::make_shared<DmsKvSyncE2EMock>();
+    DmsKvSyncE2EMock::dmsKvMock = dmsKvMock_;
 }
 
 void DMSContinueRecvMgrTest::TearDownTestCase()
 {
+    BundleManagerInternalMock::bundleMgrMock = nullptr;
+    bundleMgrMock_ = nullptr;
+    DmsKvSyncE2EMock::dmsKvMock = nullptr;
+    dmsKvMock_ = nullptr;
 }
 
 void DMSContinueRecvMgrTest::SetUp()
@@ -122,9 +140,54 @@ HWTEST_F(DMSContinueSendMgrTest, QueryBroadcastInfo_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     status.abilityName = "abilityName";
+    EXPECT_CALL(*bundleMgrMock_, GetBundleNameId(_, _)).WillOnce(Return(1));
     ret = sendMgr->QueryBroadcastInfo(status, bundleNameId, continueTypeId);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DMSContinueSendMgrTest QueryBroadcastInfo_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: QueryBroadcastInfo_Test_002
+ * @tc.desc: test QueryBroadcastInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueSendMgrTest, QueryBroadcastInfo_Test_002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueSendMgrTest QueryBroadcastInfo_Test_002 start" << std::endl;
+    std::shared_ptr<DMSContinueSendMgr> sendMgr = std::make_shared<DMSContinueSendMgr>();
+    MissionStatus status;
+    uint16_t bundleNameId = 0;
+    uint8_t continueTypeId = 0;
+    status.bundleName = "bundleName";
+    status.abilityName = "abilityName";
+    EXPECT_CALL(*bundleMgrMock_, GetBundleNameId(_, _)).WillOnce(Return(0));
+    EXPECT_CALL(*bundleMgrMock_, GetContinueTypeId(_, _, _)).WillOnce(Return(1));
+    auto ret = sendMgr->QueryBroadcastInfo(status, bundleNameId, continueTypeId);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DMSContinueSendMgrTest QueryBroadcastInfo_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: QueryBroadcastInfo_Test_003
+ * @tc.desc: test QueryBroadcastInfo
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueSendMgrTest, QueryBroadcastInfo_Test_003, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueSendMgrTest QueryBroadcastInfo_Test_003 start" << std::endl;
+    std::shared_ptr<DMSContinueSendMgr> sendMgr = std::make_shared<DMSContinueSendMgr>();
+    MissionStatus status;
+    uint16_t bundleNameId = 0;
+    uint8_t continueTypeId = 0;
+    status.bundleName = "bundleName";
+    status.abilityName = "abilityName";
+    EXPECT_CALL(*bundleMgrMock_, GetBundleNameId(_, _)).WillOnce(Return(0));
+    EXPECT_CALL(*bundleMgrMock_, GetContinueTypeId(_, _, _)).WillOnce(Return(0));
+    auto ret = sendMgr->QueryBroadcastInfo(status, bundleNameId, continueTypeId);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DMSContinueSendMgrTest QueryBroadcastInfo_Test_003 end" << std::endl;
 }
 
 /**
@@ -145,6 +208,16 @@ HWTEST_F(DMSContinueSendMgrTest, AddMMIListener_Test_001, TestSize.Level1)
     sendMgr->AddMMIListener();
     EXPECT_NO_FATAL_FAILURE(sendMgr->RemoveMMIListener());
     DTEST_LOG << "DMSContinueSendMgrTest AddMMIListener_Test_001 end" << std::endl;
+}
+
+bool DataShareManager::IsCurrentContinueSwitchOn()
+{
+    return g_mockBool;
+}
+
+bool WifiStateAdapter::IsWifiActive()
+{
+    return g_mockWifiBool;
 }
 
 /**
@@ -226,6 +299,124 @@ HWTEST_F(DMSContinueRecvMgrTest, GetContinueType_Test_001, TestSize.Level1)
     ret = recvMgr->GetContinueType("bundleName");
     EXPECT_EQ(ret, "");
     DTEST_LOG << "DMSContinueRecvMgrTest GetContinueType_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyDataRecv_Test_001
+ * @tc.desc: test NotifyDataRecv
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_Test_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_001 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    std::string senderNetworkId = "NetworkId";
+    uint8_t payload[] = {0xf0};
+    uint32_t dataLen1 = 1;
+    EXPECT_CALL(*dmsKvMock_, CheckCtrlRule()).WillOnce(Return(false));
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1));
+    DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyDataRecv_Test_002
+ * @tc.desc: test NotifyDataRecv
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_Test_002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_002 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    std::string senderNetworkId = "NetworkId";
+    uint8_t payload[] = {0xf0};
+    uint32_t dataLen1 = 1;
+    EXPECT_CALL(*dmsKvMock_, CheckCtrlRule()).WillOnce(Return(true));
+    g_mockBool = false;
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1));
+    DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyDataRecv_Test_003
+ * @tc.desc: test NotifyDataRecv
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_Test_003, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_003 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    std::string senderNetworkId = "NetworkId";
+    uint8_t payload[] = {0xf0};
+    uint32_t dataLen1 = 1;
+    EXPECT_CALL(*dmsKvMock_, CheckCtrlRule()).WillOnce(Return(true));
+    g_mockBool = true;
+    g_mockWifiBool = false;
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1));
+    DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyDataRecv_Test_004
+ * @tc.desc: test NotifyDataRecv
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_Test_004, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_004 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    std::string senderNetworkId = "NetworkId";
+    uint8_t payload[] = {0xf0};
+    uint32_t dataLen1 = 1;
+    EXPECT_CALL(*dmsKvMock_, CheckCtrlRule()).WillOnce(Return(true));
+    g_mockBool = true;
+    g_mockWifiBool = true;
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1));
+    DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetFinalBundleName_Test_001
+ * @tc.desc: test GetFinalBundleName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueRecvMgrTest, GetFinalBundleName_Test_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecvMgrTest GetFinalBundleName_Test_001 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    DmsBundleInfo distributedBundleInfo;
+    std::string finalBundleName = "finalBundleName";
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::string continueType = "continueType";
+    EXPECT_CALL(*bundleMgrMock_, GetLocalBundleInfo(_, _)).WillOnce(Return(0));
+    bool ret = recvMgr->GetFinalBundleName(distributedBundleInfo, finalBundleName, localBundleInfo, continueType);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "DMSContinueRecvMgrTest GetFinalBundleName_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetFinalBundleName_Test_002
+ * @tc.desc: test GetFinalBundleName
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueRecvMgrTest, GetFinalBundleName_Test_002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecvMgrTest GetFinalBundleName_Test_002 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    DmsBundleInfo distributedBundleInfo;
+    std::string finalBundleName = "finalBundleName";
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::string continueType = "continueType";
+    EXPECT_CALL(*bundleMgrMock_, GetLocalBundleInfo(_, _)).WillOnce(Return(1));
+    EXPECT_CALL(*bundleMgrMock_, GetContinueBundle4Src(_, _)).WillOnce(Return(false));
+    bool ret = recvMgr->GetFinalBundleName(distributedBundleInfo, finalBundleName, localBundleInfo, continueType);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DMSContinueRecvMgrTest GetFinalBundleName_Test_002 end" << std::endl;
 }
 }
 }
