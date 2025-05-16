@@ -228,3 +228,11 @@ ErrCode BundleManagerInternal::QueryOsAccount(int32_t& activeAccountId)
     }
     return IBundleManagerInternal::bundleMgrMock->QueryOsAccount(activeAccountId);
 }
+
+int32_t BundleManagerInternal::GetBundleNameId(const std::string& bundleName, uint16_t& bundleNameId)
+{
+    if (IBundleManagerInternal::bundleMgrMock == nullptr) {
+        return ERR_OK;
+    }
+    return IBundleManagerInternal::bundleMgrMock->GetBundleNameId(bundleName, bundleNameId);
+}
