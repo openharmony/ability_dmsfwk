@@ -243,7 +243,9 @@ HWTEST_F(AbilityConnectionMgrTest, ConnectSession_Test_001, TestSize.Level3)
 {
     DTEST_LOG << "AbilityConnectionMgr ConnectSession_Test_001 begin" << std::endl;
     int32_t sessionId = 1;
-    std::function<void(const ConnectResult& result)> callback;
+    AbilityConnectionManager::ConnectCallback callback = [](ConnectResult result) {
+        DTEST_LOG << "AbilityConnectionMgr ConnectSession_Test_001" << std::endl;
+    };
     auto rlt = AbilityConnectionManager::GetInstance().ConnectSession(sessionId, callback);
     EXPECT_EQ(rlt, INVALID_SESSION_ID);
 
