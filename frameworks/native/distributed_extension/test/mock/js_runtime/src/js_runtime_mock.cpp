@@ -27,4 +27,18 @@ napi_env JsRuntime::GetNapiEnv() const
 {
     return OHOS::DistributedSchedule::TDExtension::tDExtension->GetNapiEnv();
 }
+
+std::unique_ptr<NativeReference> LoadModule(const std::string& moduleName, const std::string& modulePath,
+        const std::string& hapPath, bool esmodule = false, bool useCommonChunk = false,
+        const std::string& srcEntrance = "")
+{
+    return OHOS::DistributedSchedule::TDExtension::tDExtension->LoadModule(moduleName, modulePath, hapPath,
+        esmodule, useCommonChunk, srcEntrance);
+}
+
+std::unique_ptr<NativeReference> LoadSystemModule(
+    const std::string& moduleName, const napi_value* argv, size_t argc)
+{
+    return OHOS::DistributedSchedule::TDExtension::tDExtension->LoadSystemModule(moduleName, argv, argc);
+}
 } // namespace OHOS::AbilityRuntime

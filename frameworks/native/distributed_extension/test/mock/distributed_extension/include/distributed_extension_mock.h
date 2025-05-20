@@ -39,6 +39,12 @@ public:
         size_t) = 0;
     virtual napi_env GetNapiEnv() const = 0;
     virtual napi_value CreateDistributedExtensionContextJS(napi_env, std::shared_ptr<DistributedExtensionContext>) = 0;
+    virtual std::shared_ptr<DistributedExtensionContext> GetContext() = 0;
+    virtual std::unique_ptr<NativeReference> LoadModule(const std::string& moduleName, const std::string& modulePath,
+        const std::string& hapPath, bool esmodule = false, bool useCommonChunk = false,
+        const std::string& srcEntrance = "") = 0;
+    virtual std::unique_ptr<NativeReference> LoadSystemModule(
+    const std::string& moduleName, const napi_value* argv, size_t argc) = 0;
 public:
     TDExtension() = default;
     virtual ~TDExtension() = default;
@@ -65,6 +71,10 @@ public:
     MOCK_METHOD((std::unique_ptr<NativeReference>), LoadSystemModuleByEngine, (napi_env, const std::string&,
         const napi_value*, size_t));
     MOCK_METHOD(napi_env, GetNapiEnv, (), (const));
+    MOCK_METHOD(std::shared_ptr<DistributedExtensionContext>, GetContext, ());
+    MOCK_METHOD(std::unique_ptr<NativeReference>, LoadModule, (const std::string&, const std::string&,
+        const std::string&, bool, bool, const std::string&));
+    MOCK_METHOD(std::unique_ptr<NativeReference>, LoadSystemModule, (const std::string&, const napi_value*, size_t));
 };
 } // namespace OHOS::DistributedSchedule
 #endif // OHOS_DISTRIBUTED_EXTENSION_MOCK_H
