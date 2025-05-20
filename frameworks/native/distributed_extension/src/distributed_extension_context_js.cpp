@@ -91,6 +91,13 @@ private:
         } else {
             serialNumber_ = 0;
         }
+
+        return StartConnectAsyncTask(env, connectId, want, connection);
+    }
+
+    napi_value StartConnectAsyncTask(napi_env env, int64_t connectId, const AAFwk::Want &want,
+        const sptr<DistributedExtensionContextJSConnection> &connection)
+    {
         napi_value result = nullptr;
         napi_value lastParam = nullptr;
         napi_value connectResult = nullptr;
@@ -145,6 +152,12 @@ private:
             }
         }
         napi_value lastParam = argc == ARGC_ONE ? nullptr : argv[INDEX_ONE];
+        return StartDisconnectAsyncTask(env, want, connection, lastParam);
+    }
+
+    napi_value StartDisconnectAsyncTask(napi_env env, const AAFwk::Want &want,
+        const sptr<DistributedExtensionContextJSConnection> &connection, napi_value lastParam)
+    {
         napi_value result = nullptr;
         std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
         auto asyncTask = [weak = context, want, connection, env, task = napiAsyncTask.get()]() {
@@ -335,7 +348,8 @@ void DistributedExtensionContextJSConnection::HandleOnAbilityConnectDone(const A
     HILOGI("OnAbilityConnectDone end.");
 }
 
-void DistributedExtensionContextJSConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int32_t resultCode)
+void DistributedExtensionContextJSConnection::OnAbilityDisconnectDone(const AppExecFwk::ElementName &element,
+    int32_t resultCode)
 {
     HILOGI("OnAbilityDisconnectDone start, resultCode: %{public}d.", resultCode);
     if (handler_ == nullptr) {
