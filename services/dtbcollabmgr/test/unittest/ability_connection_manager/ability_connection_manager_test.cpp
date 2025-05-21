@@ -687,6 +687,7 @@ HWTEST_F(AbilityConnectionMgrTest, UpdateServerSession_Test_001, TestSize.Level3
     auto rlt = AbilityConnectionManager::GetInstance().UpdateServerSession(info, sessionId);
     EXPECT_EQ(rlt, ERR_OK);
 
+    AbilityConnectionManager::GetInstance().serverSessionMap_[info] = sessionId;
     rlt = AbilityConnectionManager::GetInstance().UpdateServerSession(info, sessionId);
     EXPECT_EQ(rlt, SAME_SESSION_IS_CONNECTING);
 

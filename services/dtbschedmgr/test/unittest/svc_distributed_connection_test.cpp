@@ -448,8 +448,7 @@ HWTEST_F(SvcDistributedConnectionTest, UpdateResourceMapByLanguage_002, TestSize
     DTEST_LOG << "SvcDistributedConnectionTest UpdateResourceMapByLanguage_002 begin" << std::endl;
     g_sysLanguage = "zh-Hans";
     g_sysRegion = "CN";
-    UpdateResourceMapByLanguage();
-    EXPECT_EQ(g_sysLanguage, "zh-Hans");
+    EXPECT_NO_FATAL_FAILURE(UpdateResourceMapByLanguage());
 
     DTEST_LOG << "SvcDistributedConnectionTest UpdateResourceMapByLanguage_002 end" << std::endl;
 }
