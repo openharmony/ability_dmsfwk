@@ -17,5 +17,13 @@ class DistributedExtensionContext extends ExtensionContext {
     constructor(obj) {
       super(obj);
     }
+
+    connectServiceExtensionAbility(want, options) {
+      return this.__context_impl__.connectAbility(want, options);
+    }
+
+    disconnectServiceExtensionAbility(want, options) {
+      return this.__context_impl__.disconnectAbility(want, options);
+    }
 }
 export default DistributedExtensionContext;
