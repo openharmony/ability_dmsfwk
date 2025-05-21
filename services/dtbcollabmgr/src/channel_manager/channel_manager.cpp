@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2024 Huawei Device Co., Ltd.
+* Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -583,7 +583,9 @@ void ChannelManager::ClearRegisterSocket(const int32_t channelId)
 void ChannelManager::ClearSendTask(int32_t channelId)
 {
     HILOGI("clear send task for=%{public}d", channelId);
-    eventHandler_->RemoveTask(std::to_string(channelId));
+    if (eventHandler_ != nullptr) {
+        eventHandler_->RemoveTask(std::to_string(channelId));
+    }
 }
 
 int32_t ChannelManager::RegisterChannelListener(const int32_t channelId,
