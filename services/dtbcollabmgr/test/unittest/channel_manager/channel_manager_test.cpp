@@ -616,6 +616,7 @@ HWTEST_F(ChannelManagerTest, OnSocketClosed_CallbackInvokedAndChannelDeleted, Te
     EXPECT_EQ(result, ERR_OK);
 
     ChannelManager::GetInstance().OnSocketClosed(NUM_1234, ShutdownReason::SHUTDOWN_REASON_LNN_OFFLINE);
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_INIT));
 }
 
 /**
