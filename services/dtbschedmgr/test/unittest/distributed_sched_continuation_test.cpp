@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -423,6 +423,7 @@ HWTEST_F(DSchedContinuationTest, ContinueLocalMission_002, TestSize.Level1)
     ASSERT_NE(nullptr, DistributedSchedService::GetInstance().dschedContinuation_);
     ASSERT_NE(DistributedSchedService::GetInstance().dschedContinuation_, nullptr);
     DistributedSchedService::GetInstance().dschedContinuation_->PushCallback(missionId, callback, deviceId, false);
+    DataShareManager::GetInstance().SetCurrentContinueSwitch(true);
     int32_t ret = DistributedSchedService::GetInstance().ContinueLocalMission(
         deviceId, missionId, callback, wantParams);
     EXPECT_EQ(CONTINUE_ALREADY_IN_PROGRESS, ret);
@@ -534,6 +535,7 @@ HWTEST_F(DSchedContinuationTest, ContinueRemoteMission_001, TestSize.Level1)
     int32_t missionId = 0;
     auto callback = GetDSchedService();
     WantParams wantParams;
+    DataShareManager::GetInstance().SetCurrentContinueSwitch(true);
     int32_t ret = DistributedSchedService::GetInstance().ContinueRemoteMission(
         srcDeviceId, dstDeviceid, missionId, callback, wantParams);
     EXPECT_TRUE(INVALID_REMOTE_PARAMETERS_ERR == ret);
