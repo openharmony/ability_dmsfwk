@@ -82,7 +82,7 @@ struct DExtSourceInfo : public Parcelable {
 };
 
 struct DExtSinkInfo : public Parcelable {
-    int32_t userId = -1;
+    int32_t userId = 100;
     int32_t pid = -1;
     std::string bundleName;
     std::string moduleName;
@@ -97,7 +97,7 @@ struct DExtSinkInfo : public Parcelable {
     
     bool IsEmpty() const
     {
-        return bundleName.empty() && moduleName.empty() && abilityName.empty() && serviceName.empty();
+        return bundleName.empty() && moduleName.empty() && abilityName.empty();
     }
     bool ReadFromParcel(Parcel &parcel)
     {
