@@ -155,7 +155,7 @@ constexpr int32_t HID_HAP = 10000; /* first hap user */
 constexpr int32_t WINDOW_MANAGER_SERVICE_ID = 4606;
 constexpr int32_t SEMI_WIFI_ID = 1010;
 constexpr int32_t DSOFTBUS_UID = 1024;
-constexpr int32_t WEARENGINE_UID = 1001;
+constexpr int32_t WEARENGINE_UID = 7259;
 DataShareManager &dataShareManager = DataShareManager::GetInstance();
 
 const std::string HMOS_HAP_CODE_PATH = "1";
