@@ -295,6 +295,7 @@ HWTEST_F(DExtensionJsTest, DistributedExtensionJs_ExportJsContext_0100, testing:
         EXPECT_CALL(*dExtensionMock, GetNapiEnv()).WillOnce(Return(reinterpret_cast<napi_env>(1)));
         EXPECT_CALL(*dExtensionMock, GetContext()).WillOnce(Return(contextMock));
         EXPECT_CALL(*dExtensionMock, CreateDistributedExtensionContextJS(_, _)).WillOnce(Return(nullptr));
+        EXPECT_CALL(*refMock, GetNapiValue()).WillOnce(Return(reinterpret_cast<napi_value>(&value)));
         dExtensionJs->ExportJsContext();
         EXPECT_TRUE(dExtensionJs->jsObj_ != nullptr);
         GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_ExportJsContext_0200 case2 finished";
@@ -304,6 +305,7 @@ HWTEST_F(DExtensionJsTest, DistributedExtensionJs_ExportJsContext_0100, testing:
         EXPECT_CALL(*dExtensionMock, GetContext()).WillOnce(Return(contextMock));
         EXPECT_CALL(*dExtensionMock, CreateDistributedExtensionContextJS(_, _)).WillOnce(Return(fakeContextObj));
         EXPECT_CALL(*dExtensionMock, LoadSystemModule(_, _, _)).WillOnce(Return(nullptr));
+        EXPECT_CALL(*refMock, GetNapiValue()).WillOnce(Return(reinterpret_cast<napi_value>(&value)));
         dExtensionJs->ExportJsContext();
         EXPECT_TRUE(dExtensionJs->jsObj_ != nullptr);
         GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_ExportJsContext_0200 case3 finished";
@@ -314,6 +316,7 @@ HWTEST_F(DExtensionJsTest, DistributedExtensionJs_ExportJsContext_0100, testing:
         EXPECT_CALL(*dExtensionMock, CreateDistributedExtensionContextJS(_, _)).WillOnce(Return(fakeContextObj));
         EXPECT_CALL(*dExtensionMock, LoadSystemModule(_, _, _)).WillOnce(Return(std::move(contextRefMock)));
         EXPECT_CALL(*napiMock, napi_wrap(_, _, _, _, _, _)).WillOnce(Return(napi_invalid_arg));
+        EXPECT_CALL(*refMock, GetNapiValue()).WillOnce(Return(reinterpret_cast<napi_value>(&value)));
         dExtensionJs->ExportJsContext();
         EXPECT_TRUE(dExtensionJs->jsObj_ != nullptr);
         GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_ExportJsContext_0200 case4 finished";
