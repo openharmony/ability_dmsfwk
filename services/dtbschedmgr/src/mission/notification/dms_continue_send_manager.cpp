@@ -67,6 +67,7 @@ void DMSContinueSendMgr::Init(int32_t currentUserId)
             return eventHandler_ != nullptr;
         });
     }
+    initFlag_.store(true);
     HILOGI("Init end");
 }
 
@@ -94,6 +95,7 @@ DMSContinueSendMgr::~DMSContinueSendMgr()
 void DMSContinueSendMgr::UnInit()
 {
     HILOGI("UnInit start");
+    initFlag_.store(false);
     CHECK_POINTER_RETURN(eventHandler_, "eventHandler_");
     if (eventHandler_->GetEventRunner() != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
@@ -119,6 +121,10 @@ void DMSContinueSendMgr::OnMissionStatusChanged(int32_t missionId, MissionEventT
         SendContinueBroadcast(status, type);
     };
     CHECK_POINTER_RETURN(eventHandler_, "eventHandler_");
+    if (!initFlag_.load()) {
+        HILOGE("initFlag_ %{public}d.", initFlag_.load());
+        return;
+    }
     eventHandler_->RemoveTask(TIMEOUT_UNFOCUSED_TASK + std::to_string(missionId));
     eventHandler_->PostTask(feedfunc);
 }
