@@ -48,22 +48,19 @@ ohos_shared_library("dtbcollab_channel_manager") {
 
   if (dmsfwk_softbus_file_ability) {
     sources += [ "softbus_file_adapter_inner.cpp" ]
-    external_deps = [
-      "dsoftbus:softbus_utils",
-    ]
   } else {
     sources += [ "softbus_file_adapter_common.cpp" ]
-    external_deps = []
   }
 
   configs = [ ":distributed_collab_config" ]
 
   deps = [ "${dms_path}/common:distributed_sched_utils" ]
 
-  external_deps += [
+  external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
     "dsoftbus:softbus_client",
+    "dsoftbus:softbus_utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
   ]
