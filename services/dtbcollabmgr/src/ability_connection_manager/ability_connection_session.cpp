@@ -399,11 +399,7 @@ void AbilityConnectionSession::NotifyAppConnectResult(bool isConnected,
 {
     HILOGE("notify result from self %{public}d", sessionId_);
     ConnectResult connectResult(isConnected, errorCode, reason);
-    if (isConnected) {
-        std::unique_lock<std::shared_mutex> sessionStatusWriteLock(sessionMutex_);
-        sessionStatus_ = SessionStatus::CONNECTED;
-        connectResult.sessionId = sessionId_;
-    } else {
+    if (!isConnected) {
         Release();
         DistributedClient dmsClient;
         dmsClient.NotifyCloseCollabSession(dmsServerToken_);
@@ -1509,10 +1505,10 @@ void AbilityConnectionSession::OnBytesReceived(int32_t channelId, const std::sha
         bool isConnected = connectionCondition_.wait_for(
             lock,
             std::chrono::seconds(WAIT_FOR_CONNECT),
-            [this]() { return IsAllChannelConnected(); }
+            [this]() { return sessionStatus_ == SessionStatus::CONNECTED; }
         );
         if (!isConnected) {
-            HILOGE("Wait for channel connection timed out.");
+            HILOGE("Wait for channel connection timed out after %{public}d seconds.", WAIT_FOR_CONNECT);
             return;
         }
     }
