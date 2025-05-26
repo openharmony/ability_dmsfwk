@@ -18,6 +18,7 @@
 #include "ichannel_listener.h"
 #include "channel_common_definition.h"
 #include "data_sender_receiver.h"
+#include "dms_interface_structure.h"
 #include "single_instance.h"
 #include "socket.h"
 #include <map>
@@ -123,6 +124,12 @@ private:
     std::thread msgEventThread_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> msgEventHandler_;
     std::condition_variable msgEventCon_;
+
+    std::mutex dmsAdapetrLock_;
+    void *dllHandle_ = nullptr;
+    ISoftbusFileAdpater dmsFileAdapetr_ = {
+        .SetFileSchema = nullptr,
+    };
 private:
     explicit ChannelManager() = default;
     ~ChannelManager();
@@ -193,6 +200,7 @@ private:
     void DealFileUpdatePathEvent(int32_t channelId, FileEvent *event);
     void DoFileRecvCallback(const int32_t channelId, const FileInfo& info);
     void DoFileSendCallback(const int32_t channelId, const FileInfo& info);
+    int32_t GetDmsInteractiveAdapterProxy();
 };
 }
 }

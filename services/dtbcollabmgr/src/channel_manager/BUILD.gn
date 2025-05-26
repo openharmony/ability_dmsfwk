@@ -26,6 +26,7 @@ config("distributed_collab_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${dms_path}/common/include",
+    "${dms_path}/interfaces/innerkits/common/include",
     "${dms_path}/services/dtbcollabmgr/include/channel_manager",
   ]
 }
@@ -45,12 +46,6 @@ ohos_shared_library("dtbcollab_channel_manager") {
     "data_sender_receiver.cpp",
     "session_data_header.cpp",
   ]
-
-  if (dmsfwk_softbus_file_ability) {
-    sources += [ "softbus_file_adapter_inner.cpp" ]
-  } else {
-    sources += [ "softbus_file_adapter_common.cpp" ]
-  }
 
   configs = [ ":distributed_collab_config" ]
 

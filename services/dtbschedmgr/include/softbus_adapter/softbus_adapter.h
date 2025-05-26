@@ -22,6 +22,9 @@
 #include "dsched_data_buffer.h"
 #include "event_handler.h"
 #include "single_instance.h"
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+#include "dms_softbus_structure.h"
+#endif
 #include "softbus_adapter_listener.h"
 
 namespace OHOS {
@@ -38,6 +41,15 @@ public:
     int32_t UnregisterSoftbusEventListener(const std::shared_ptr<SoftbusAdapterListener>& listener);
     void OnBroadCastRecv(std::string& networkId, uint8_t* data, uint32_t dataLen);
     void ReRegister();
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    IDmsBroadcastAdapter dmsAdapetr_ = {
+        .SendSoftbusEvent = nullptr,
+        .StopSoftbusEvent = nullptr,
+        .RegisterSoftbusEventListener = nullptr,
+        .UnregisterSoftbusEventListener = nullptr,
+        .QueryValidQos = nullptr,
+    };
+#endif
 
 private:
     SoftbusAdapter() {}
