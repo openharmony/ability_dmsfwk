@@ -21,6 +21,7 @@ module_output_path = "dmsfwk/dmsfwk/distributedcollabtest"
 config("test_config") {
   visibility = [ ":*" ]
   include_dirs = [
+    "${dms_path}/interfaces/innerkits/common/include",
     "${dms_path}/services/dtbcollabmgr/include/channel_manager",
     "${dms_path}/services/dtbcollabmgr/test/unittest/channel_manager",
     "${dms_path}/common/include",
@@ -122,6 +123,12 @@ ohos_unittest("ChannelManagerDataSenderReceiverTest") {
 }
 
 ohos_unittest("ChannelManagerTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    blocklist = "${dms_path}/services/dtbschedmgr/test/cfi_blocklist.txt"
+  }
   visibility = [ ":*" ]
 
   module_out_path = module_output_path
@@ -136,45 +143,9 @@ ohos_unittest("ChannelManagerTest") {
 
   sources = [
     "channel_manager_test.cpp",
+    "dlopen_mock.cpp",
     "softbus_mock.cpp",
   ]
-
-  deps = [
-    "${dms_path}/common:distributed_sched_utils",
-    "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
-  ]
-
-  external_deps = [
-    "cJSON:cjson",
-    "c_utils:utils",
-    "dsoftbus:softbus_client",
-    "eventhandler:libeventhandler",
-    "googletest:gmock",
-    "hilog:libhilog",
-  ]
-
-  part_name = "dmsfwk"
-  subsystem_name = "ability"
-}
-
-ohos_unittest("SoftbusFileAdpaterTest") {
-  visibility = [ ":*" ]
-
-  module_out_path = module_output_path
-
-  cflags = [ "-Dprivate=public" ]
-  configs = [
-    ":test_config",
-    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
-  ]
-
-  include_dirs = [ "${dms_path}/services/dtbcollabmgr/test/unittest" ]
-
-  if (dmsfwk_softbus_file_ability) {
-    sources = [ "softbus_file_adapter_inner_test.cpp" ]
-  } else {
-    sources = [ "softbus_file_adapter_common_test.cpp" ]
-  }
 
   deps = [
     "${dms_path}/common:distributed_sched_utils",
@@ -201,6 +172,5 @@ group("unittest") {
     ":ChannelManagerDataSenderReceiverTest",
     ":ChannelManagerSessionDataHeaderTest",
     ":ChannelManagerTest",
-    ":SoftbusFileAdpaterTest",
   ]
 }
