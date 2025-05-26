@@ -399,7 +399,9 @@ void AbilityConnectionSession::NotifyAppConnectResult(bool isConnected,
 {
     HILOGE("notify result from self %{public}d", sessionId_);
     ConnectResult connectResult(isConnected, errorCode, reason);
-    if (!isConnected) {
+    if (isConnected) {
+        connectResult.sessionId = sessionId_;
+    } else {
         Release();
         DistributedClient dmsClient;
         dmsClient.NotifyCloseCollabSession(dmsServerToken_);
