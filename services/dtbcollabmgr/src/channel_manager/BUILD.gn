@@ -60,6 +60,7 @@ ohos_shared_library("dtbcollab_channel_manager") {
     "cJSON:cjson",
     "c_utils:utils",
     "dsoftbus:softbus_client",
+    "dsoftbus:softbus_utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
   ]
