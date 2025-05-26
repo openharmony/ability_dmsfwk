@@ -128,11 +128,134 @@ HWTEST_F(DExtensionJsTest, DistributedExtensionJs_AttachDistributedExtensionCont
         ret = AttachDistributedExtensionContext(reinterpret_cast<napi_env>(&env), value.get(), nullptr);
         EXPECT_TRUE(ret == nullptr);
         GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_AttachDistributedExtensionContext_0100 finished";
+
+        auto mockContext = make_shared<DistributedExtensionContext>();
+        auto weakContext = std::weak_ptr<DistributedExtensionContext>(mockContext);
+        void* valuePtr = reinterpret_cast<void*>(&weakContext);
+        EXPECT_CALL(*dExtensionMock, CreateDistributedExtensionContextJS(_, _)).WillOnce(Return(nullptr));
+        ret = AttachDistributedExtensionContext(reinterpret_cast<napi_env>(&env), valuePtr, nullptr);
+        EXPECT_TRUE(ret == nullptr);
+        GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_AttachDistributedExtensionContext_0100 finished";
+
+        EXPECT_CALL(*dExtensionMock, CreateDistributedExtensionContextJS(_, _)).WillOnce(Return(reinterpret_cast<napi_value>(&env)));
+        EXPECT_CALL(*dExtensionMock, LoadSystemModuleByEngine(_, _, _, _)).WillOnce(Return(nullptr));
+        ret = AttachDistributedExtensionContext(reinterpret_cast<napi_env>(&env), valuePtr, nullptr);
+        EXPECT_TRUE(ret == nullptr);
+        GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_AttachDistributedExtensionContext_0100 finished";
+
+        EXPECT_CALL(*dExtensionMock, CreateDistributedExtensionContextJS(_, _)).WillOnce(Return(reinterpret_cast<napi_value>(&env)));
+        EXPECT_CALL(*dExtensionMock, LoadSystemModuleByEngine(_, _, _, _)).WillOnce(Return(std::make_unique<NativeReferenceMock>()));
+        ret = AttachDistributedExtensionContext(reinterpret_cast<napi_env>(&env), valuePtr, nullptr);
+        EXPECT_TRUE(ret == nullptr);
+        GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_AttachDistributedExtensionContext_0100 finished";
+
+        EXPECT_CALL(*dExtensionMock, CreateDistributedExtensionContextJS(_, _)).WillOnce(Return(reinterpret_cast<napi_value>(&env)));
+        EXPECT_CALL(*dExtensionMock, LoadSystemModuleByEngine(_, _, _, _)).WillOnce(Return(std::make_unique<NativeReferenceMock>()));
+        EXPECT_CALL(*napiMock, napi_wrap(_, _, _, _, _, _)).WillOnce(Return(napi_invalid_arg));
+        ret = AttachDistributedExtensionContext(reinterpret_cast<napi_env>(&env), valuePtr, nullptr);
+        EXPECT_TRUE(ret == nullptr);
+        GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_AttachDistributedExtensionContext_0100 finished";
+
+        EXPECT_CALL(*dExtensionMock, CreateDistributedExtensionContextJS(_, _)).WillOnce(Return(reinterpret_cast<napi_value>(&env)));
+        EXPECT_CALL(*dExtensionMock, LoadSystemModuleByEngine(_, _, _, _)).WillOnce(Return(std::make_unique<NativeReferenceMock>()));
+        EXPECT_CALL(*napiMock, napi_wrap(_, _, _, _, _, _)).WillOnce(Return(napi_ok));
+        ret = AttachDistributedExtensionContext(reinterpret_cast<napi_env>(&env), valuePtr, nullptr);
+        EXPECT_TRUE(ret == nullptr);
+        GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_AttachDistributedExtensionContext_0100 finished";
     } catch (...) {
         EXPECT_TRUE(false);
         GTEST_LOG_(INFO) << "DExtensionJsTest an exception occurred by AttachBackupExtensionContext.";
     }
     GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_AttachDistributedExtensionContext_0100 end";
+}
+
+/**
+ * @tc.number: DistributedExtensionJs_Init_0100
+ * @tc.name: DistributedExtensionJs_Init_0100
+ * @tc.desc: Test the Init method when abilityInfo_ is null.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(DExtensionJsTest, DistributedExtensionJs_Init_0100, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_Init_0100 begin";
+    try {
+        dExtensionJs->abilityInfo_ = nullptr;
+        EXPECT_CALL(*dExtensionMock, Init(_, _, _, _)).Times(1);
+        shared_ptr<AppExecFwk::AbilityHandler> handler = nullptr;
+        dExtensionJs->Init(nullptr, nullptr, handler, nullptr);
+        GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_Init_0100 finished";
+    } catch (...) {
+        EXPECT_TRUE(false);
+        GTEST_LOG_(INFO) << "DExtensionJsTest an exception occurred in Init.";
+    }
+    GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_Init_0100 end";
+}
+
+/**
+ * @tc.number: DistributedExtensionJs_Init_0200
+ * @tc.name: DistributedExtensionJs_Init_0200
+ * @tc.desc: Test the Init method when LoadModule fails.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(DExtensionJsTest, DistributedExtensionJs_Init_0200, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_Init_0200 begin";
+    try {
+        auto abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+        abilityInfo->bundleName = "testBundle";
+        abilityInfo->moduleName = "testModule";
+        abilityInfo->name = "testName";
+        abilityInfo->type = AppExecFwk::AbilityType::PAGE;
+        abilityInfo->srcEntrance = "testSrc";
+        dExtensionJs->abilityInfo_ = abilityInfo;
+        shared_ptr<AppExecFwk::AbilityHandler> handler = nullptr;
+
+        EXPECT_CALL(*dExtensionMock, Init(_, _, _, _)).Times(1);
+        dExtensionJs->Init(nullptr, nullptr, handler, nullptr);
+        EXPECT_TRUE(dExtensionJs->jsObj_ == nullptr);
+        GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_Init_0200 finished";
+    } catch (...) {
+        EXPECT_TRUE(false);
+        GTEST_LOG_(INFO) << "DExtensionJsTest an exception occurred in Init.";
+    }
+    GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_Init_0200 end";
+}
+
+/**
+ * @tc.number: DistributedExtensionJs_Init_0300
+ * @tc.name: DistributedExtensionJs_Init_0300
+ * @tc.desc: Test the Init method when LoadModule succeeds.
+ * @tc.size: MEDIUM
+ * @tc.type: FUNC
+ * @tc.level Level 1
+ */
+HWTEST_F(DExtensionJsTest, DistributedExtensionJs_Init_0300, testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_Init_0300 begin";
+    try {
+        auto abilityInfo = std::make_shared<AppExecFwk::AbilityInfo>();
+        abilityInfo->bundleName = "testBundle";
+        abilityInfo->moduleName = "testModule";
+        abilityInfo->name = "testName";
+        abilityInfo->type = AppExecFwk::AbilityType::PAGE;
+        abilityInfo->srcEntrance = "testSrc";
+        dExtensionJs->abilityInfo_ = abilityInfo;
+
+        shared_ptr<AppExecFwk::AbilityHandler> handler = nullptr;
+        EXPECT_CALL(*dExtensionMock, Init(_, _, _, _)).Times(1);
+        EXPECT_CALL(*dExtensionMock, LoadModule(_, _, _, _, _, _)).WillOnce(Return(std::make_unique<NativeReferenceMock>()));
+        dExtensionJs->Init(nullptr, nullptr, handler, nullptr);
+        EXPECT_TRUE(dExtensionJs->jsObj_ == nullptr);
+        GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_Init_0300 finished";
+    } catch (...) {
+        EXPECT_TRUE(false);
+        GTEST_LOG_(INFO) << "DExtensionJsTest an exception occurred in Init.";
+    }
+    GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_Init_0300 end";
 }
 
 /**
@@ -167,6 +290,36 @@ HWTEST_F(DExtensionJsTest, DistributedExtensionJs_ExportJsContext_0100, testing:
         dExtensionJs->ExportJsContext();
         EXPECT_TRUE(dExtensionJs->jsObj_ != nullptr);
         GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_ExportJsContext_0100 case3 finished";
+
+        auto contextMock = std::make_shared<DistributedExtensionContext>();
+        EXPECT_CALL(*dExtensionMock, GetNapiEnv()).WillOnce(Return(reinterpret_cast<napi_env>(1)));
+        EXPECT_CALL(*dExtensionMock, GetContext()).WillOnce(Return(contextMock));
+        EXPECT_CALL(*dExtensionMock, CreateDistributedExtensionContextJS(_, _)).WillOnce(Return(nullptr));
+        EXPECT_CALL(*refMock, GetNapiValue()).WillOnce(Return(reinterpret_cast<napi_value>(&value)));
+        dExtensionJs->ExportJsContext();
+        EXPECT_TRUE(dExtensionJs->jsObj_ != nullptr);
+        GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_ExportJsContext_0200 case2 finished";
+
+        napi_value fakeContextObj = reinterpret_cast<napi_value>(1);
+        EXPECT_CALL(*dExtensionMock, GetNapiEnv()).WillOnce(Return(reinterpret_cast<napi_env>(1)));
+        EXPECT_CALL(*dExtensionMock, GetContext()).WillOnce(Return(contextMock));
+        EXPECT_CALL(*dExtensionMock, CreateDistributedExtensionContextJS(_, _)).WillOnce(Return(fakeContextObj));
+        EXPECT_CALL(*dExtensionMock, LoadSystemModule(_, _, _)).WillOnce(Return(nullptr));
+        EXPECT_CALL(*refMock, GetNapiValue()).WillOnce(Return(reinterpret_cast<napi_value>(&value)));
+        dExtensionJs->ExportJsContext();
+        EXPECT_TRUE(dExtensionJs->jsObj_ != nullptr);
+        GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_ExportJsContext_0200 case3 finished";
+
+        auto contextRefMock = std::make_unique<NativeReferenceMock>();
+        EXPECT_CALL(*dExtensionMock, GetNapiEnv()).WillOnce(Return(reinterpret_cast<napi_env>(1)));
+        EXPECT_CALL(*dExtensionMock, GetContext()).WillOnce(Return(contextMock));
+        EXPECT_CALL(*dExtensionMock, CreateDistributedExtensionContextJS(_, _)).WillOnce(Return(fakeContextObj));
+        EXPECT_CALL(*dExtensionMock, LoadSystemModule(_, _, _)).WillOnce(Return(std::move(contextRefMock)));
+        EXPECT_CALL(*napiMock, napi_wrap(_, _, _, _, _, _)).WillOnce(Return(napi_invalid_arg));
+        EXPECT_CALL(*refMock, GetNapiValue()).WillOnce(Return(reinterpret_cast<napi_value>(&value)));
+        dExtensionJs->ExportJsContext();
+        EXPECT_TRUE(dExtensionJs->jsObj_ != nullptr);
+        GTEST_LOG_(INFO) << "DExtensionJsTest DistributedExtensionJs_ExportJsContext_0200 case4 finished";
     } catch (...) {
         EXPECT_TRUE(false);
         GTEST_LOG_(INFO) << "DExtensionJsTest an exception occurred by ExportJsContext.";

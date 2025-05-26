@@ -181,6 +181,90 @@ HWTEST_F(SnapshotTest, testCreate001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: testCreate002
+ * @tc.desc: test Create
+ * @tc.type: FUNC
+ * @tc.require: I5Y2VH
+ */
+HWTEST_F(SnapshotTest, testCreate002, TestSize.Level3)
+{
+    DTEST_LOG << "SnapshotTest testCreate002 start" << std::endl;
+    Snapshot snapshot;
+    std::vector<uint8_t> data(sizeof(uint32_t), 0);
+    uint32_t msgSzie = 10;
+    memcpy(data.data(), &msgSzie, sizeof(uint32_t));
+
+    std::unique_ptr<Snapshot> ret = snapshot.Create(data);
+    EXPECT_EQ(nullptr, ret);
+    data.emplace_back(1);
+    EXPECT_EQ(nullptr, ret);
+    DTEST_LOG << "SnapshotTest testCreate002 end" << std::endl;
+}
+
+/**
+ * @tc.name: testCreate003
+ * @tc.desc: test Create
+ * @tc.type: FUNC
+ * @tc.require: I5Y2VH
+ */
+HWTEST_F(SnapshotTest, testCreate003, TestSize.Level3)
+{
+    DTEST_LOG << "SnapshotTest testCreate003 start" << std::endl;
+    Snapshot snapshot;
+    std::vector<uint8_t> data(12, 0); // totalSize = 12
+    uint32_t msgSize = 8; // msgSize + sizeof(uint32_t) = 8 + 4 = 12
+    memcpy(data.data(), &msgSize, sizeof(uint32_t));
+
+    std::unique_ptr<Snapshot> ret = snapshot.Create(data);
+    EXPECT_EQ(nullptr, ret);
+    data.emplace_back(1);
+    EXPECT_EQ(nullptr, ret);
+    DTEST_LOG << "SnapshotTest testCreate003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testCreate004
+ * @tc.desc: test Create
+ * @tc.type: FUNC
+ * @tc.require: I5Y2VH
+ */
+HWTEST_F(SnapshotTest, testCreate004, TestSize.Level3)
+{
+    DTEST_LOG << "SnapshotTest testCreate004 start" << std::endl;
+    Snapshot snapshot;
+    std::vector<uint8_t> data(20, 0); // totalSize = 20
+    uint32_t msgSize = 10; // msgSize + sizeof(uint32_t) = 10 + 4 = 14 < 20
+    memcpy(data.data(), &msgSize, sizeof(uint32_t));
+
+    std::unique_ptr<Snapshot> ret = snapshot.Create(data);
+    EXPECT_EQ(nullptr, ret);
+    data.emplace_back(1);
+    EXPECT_EQ(nullptr, ret);
+    DTEST_LOG << "SnapshotTest testCreate004 end" << std::endl;
+}
+
+/**
+ * @tc.name: testCreate005
+ * @tc.desc: test Create
+ * @tc.type: FUNC
+ * @tc.require: I5Y2VH
+ */
+HWTEST_F(SnapshotTest, testCreate005, TestSize.Level3)
+{
+    DTEST_LOG << "SnapshotTest testCreate005 start" << std::endl;
+    Snapshot snapshot;
+    std::vector<uint8_t> data(12, 0); // totalSize = 12
+    uint32_t msgSize = 6; // msgSize + sizeof(uint32_t) = 6 + 4 = 10 < totalSize (12)
+    memcpy(data.data(), &msgSize, sizeof(uint32_t));
+
+    std::unique_ptr<Snapshot> ret = snapshot.Create(data);
+    EXPECT_EQ(nullptr, ret);
+    data.emplace_back(1);
+    EXPECT_EQ(nullptr, ret);
+    DTEST_LOG << "SnapshotTest testCreate005 end" << std::endl;
+}
+
+/**
  * @tc.name: testGetCreatedTime001
  * @tc.desc: test GetCreatedTime
  * @tc.type: FUNC
@@ -223,6 +307,22 @@ HWTEST_F(SnapshotTest, testUpdateLastAccessTime001, TestSize.Level3)
     snapshot.UpdateLastAccessTime(TEST_PARCEL_WRITE_VALUE);
     EXPECT_EQ((int64_t)TEST_PARCEL_WRITE_VALUE, snapshot.lastAccessTime_);
     DTEST_LOG << "SnapshotTest testUpdateLastAccessTime001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testWritePixelMap001
+ * @tc.desc: test WritePixelMap
+ * @tc.type: FUNC
+ * @tc.require: I5Y2VH
+ */
+HWTEST_F(SnapshotTest, testWritePixelMap001, TestSize.Level3)
+{
+    DTEST_LOG << "SnapshotTest testWritePixelMap001 start" << std::endl;
+    Snapshot snapshot;
+    MessageParcel data;
+    auto ret = snapshot.WritePixelMap(data);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "SnapshotTest testWritePixelMap001 end" << std::endl;
 }
 } // DistributedSchedule
 } // namespace OHOS
