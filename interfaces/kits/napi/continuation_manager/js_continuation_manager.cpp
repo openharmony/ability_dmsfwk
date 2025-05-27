@@ -665,7 +665,7 @@ napi_value JsContinuationManager::OnStartDeviceManager(napi_env env, napi_callba
             return;
         }
         int32_t ret = (unwrapArgc == ARG_COUNT_ONE) ?
-            DistributedAbilityManagerClient::GetInstance().StartDeviceManager(token) :
+            DistributedAbilityManagerClient::GetInstance().StartDeviceManager(token, nullptr) :
             DistributedAbilityManagerClient::GetInstance().StartDeviceManager(token, continuationExtraParams);
         if (ret == ERR_OK) {
             task.Resolve(env, CreateJsUndefined(env));
@@ -741,7 +741,7 @@ napi_value JsContinuationManager::OnStartContinuationDeviceManager(napi_env env,
             return;
         }
         int32_t errCode = (unwrapArgc == ARG_COUNT_ONE) ?
-            DistributedAbilityManagerClient::GetInstance().StartDeviceManager(token) :
+            DistributedAbilityManagerClient::GetInstance().StartDeviceManager(token, nullptr) :
             DistributedAbilityManagerClient::GetInstance().StartDeviceManager(token, continuationExtraParams);
         if (errCode == ERR_OK) {
             task->Resolve(env, CreateJsNull(env));

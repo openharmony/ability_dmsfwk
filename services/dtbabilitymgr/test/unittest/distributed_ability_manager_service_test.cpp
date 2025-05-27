@@ -245,7 +245,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, Register_001, TestSize.Level3)
      * @tc.steps: step2. test Register when register max num.
      */
     int32_t token = 0;
-    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    ContinuationExtraParams continuationExtraParams{};
     for (int32_t i = 0; i < MAX_REGISTER_NUM; i++) {
         dtbabilitymgrService_->Register(continuationExtraParams, token);
     }
@@ -281,7 +281,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, Unregister_001, TestSize.Level3)
         dtbabilitymgrService_->callbackMap_.clear();
     }
     int32_t token = 0;
-    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    ContinuationExtraParams continuationExtraParams{};
     ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(ret, ERR_OK);
     ret = dtbabilitymgrService_->Unregister(token);
@@ -320,7 +320,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, Unregister_002, TestSize.Level3)
      */
     int32_t token = 0;
     int32_t tokenBackup = 0;
-    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    ContinuationExtraParams continuationExtraParams{};
     int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(ret, ERR_OK);
     ret = dtbabilitymgrService_->Register(continuationExtraParams, tokenBackup);
@@ -360,7 +360,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_0
      * @tc.steps: step2. test RegisterDeviceSelectionCallback when cbType has registered.
      */
     int32_t token = 0;
-    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    ContinuationExtraParams continuationExtraParams{};
     ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(ret, ERR_OK);
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
@@ -368,7 +368,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_0
     EXPECT_EQ(ret, ERR_OK);
     ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_CONNECT, notifier);
     EXPECT_EQ(ret, CALLBACK_HAS_REGISTERED);
-    
+
     ret = dtbabilitymgrService_->UnregisterDeviceSelectionCallback(token, EVENT_CONNECT);
     EXPECT_EQ(ret, ERR_OK);
     ret = dtbabilitymgrService_->Unregister(token);
@@ -390,7 +390,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_0
      * @tc.steps: step1. test RegisterDeviceSelectionCallback when iter->second != nullptr.
      */
     int32_t token = 0;
-    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    ContinuationExtraParams continuationExtraParams{};
     int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(ret, ERR_OK);
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
@@ -398,7 +398,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_0
     EXPECT_EQ(ret, ERR_OK);
     ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_DISCONNECT, notifier);
     EXPECT_EQ(ret, ERR_OK);
-    
+
     ret = dtbabilitymgrService_->UnregisterDeviceSelectionCallback(token, EVENT_CONNECT);
     ret = dtbabilitymgrService_->UnregisterDeviceSelectionCallback(token, EVENT_DISCONNECT);
     EXPECT_EQ(ret, ERR_OK);
@@ -421,7 +421,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_0
      * @tc.steps: step1. test RegisterDeviceSelectionCallback when iter->second != nullptr.
      */
     int32_t token = 0;
-    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    ContinuationExtraParams continuationExtraParams{};
     int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(ret, ERR_OK);
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
@@ -491,7 +491,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UnregisterDeviceSelectionCallback
      * @tc.steps: step4. test UnregisterDeviceSelectionCallback when token is registered.
      */
     int32_t token = 0;
-    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    ContinuationExtraParams continuationExtraParams{};
     ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(ret, ERR_OK);
     ret = dtbabilitymgrService_->UnregisterDeviceSelectionCallback(token, EVENT_CONNECT);
@@ -524,7 +524,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UnregisterDeviceSelectionCallback
      * @tc.steps: step1. test UnregisterDeviceSelectionCallback when callback is registered.
      */
     int32_t token = 0;
-    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    ContinuationExtraParams continuationExtraParams{};
     int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(ret, ERR_OK);
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
@@ -566,7 +566,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UpdateConnectStatus_001, TestSize
      * @tc.steps: step3. test UpdateConnectStatus when callback is not registered.
      */
     int32_t token = 0;
-    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    ContinuationExtraParams continuationExtraParams{};
     ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(ret, ERR_OK);
     ret = dtbabilitymgrService_->UpdateConnectStatus(token, DEVICE_ID, DeviceConnectStatus::IDLE);
@@ -634,7 +634,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnDeviceDisconnect_001, TestSize.
      * @tc.steps: step2. test OnDeviceDisconnect when callback has registered.
      */
     int32_t token = 0;
-    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    ContinuationExtraParams continuationExtraParams{};
     ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(ret, ERR_OK);
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
@@ -845,7 +845,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleNotifierDied_001, TestSize.
      * @tc.steps: step2. test HandleNotifierDied when IsNotifierRegistered returns true.
      */
     int32_t token = 0;
-    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    ContinuationExtraParams continuationExtraParams{};
     int32_t res = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(res, ERR_OK);
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
@@ -940,7 +940,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, Register_002, TestSize.Level3)
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     ContinuationMode continuationMode = static_cast<ContinuationMode>(-1);
     continuationExtraParams->SetContinuationMode(continuationMode);
-    int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
+    int32_t ret = dtbabilitymgrService_->Register(*continuationExtraParams, token);
     EXPECT_EQ(ret, INVALID_CONTINUATION_MODE);
     {
         std::lock_guard<std::mutex> tokenLock(dtbabilitymgrService_->tokenMutex_);
@@ -979,7 +979,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UpdateConnectStatus_003, TestSize
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = 0;
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
-    int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
+    int32_t ret = dtbabilitymgrService_->Register(*continuationExtraParams, token);
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_CONNECT, notifier);
     EXPECT_EQ(ret, ERR_OK);
@@ -1008,7 +1008,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, StartDeviceManager_001, TestSize.
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     ContinuationMode continuationMode = static_cast<ContinuationMode>(-1);
     continuationExtraParams->SetContinuationMode(continuationMode);
-    int32_t ret = dtbabilitymgrService_->StartDeviceManager(token, continuationExtraParams);
+    int32_t ret = dtbabilitymgrService_->StartDeviceManager(token, *continuationExtraParams);
     EXPECT_EQ(ret, INVALID_CONTINUATION_MODE);
     DTEST_LOG << "DistributedAbilityManagerServiceTest StartDeviceManager_001 end" << std::endl;
 }
@@ -1025,7 +1025,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, StartDeviceManager_002, TestSize.
     ASSERT_NE(nullptr, dtbabilitymgrService_);
 
     int32_t token = 0;
-    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    ContinuationExtraParams continuationExtraParams{};
     int32_t ret = dtbabilitymgrService_->StartDeviceManager(token, continuationExtraParams);
     EXPECT_EQ(ret, TOKEN_HAS_NOT_REGISTERED);
     DTEST_LOG << "DistributedAbilityManagerServiceTest StartDeviceManager_002 end" << std::endl;
@@ -1043,7 +1043,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, StartDeviceManager_003, TestSize.
     ASSERT_NE(nullptr, dtbabilitymgrService_);
 
     int32_t token = 0;
-    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    ContinuationExtraParams continuationExtraParams{};
     int32_t res = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(res, ERR_OK);
 

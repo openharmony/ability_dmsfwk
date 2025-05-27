@@ -53,7 +53,7 @@ int32_t DistributedAbilityManagerClient::Register(
         HILOGE("continuationMgrProxy is nullptr");
         return ERR_NULL_OBJECT;
     }
-    return continuationMgrProxy->Register(continuationExtraParams, token);
+    return continuationMgrProxy->Register(*continuationExtraParams, token);
 }
 
 int32_t DistributedAbilityManagerClient::Unregister(int32_t token)
@@ -111,7 +111,7 @@ int32_t DistributedAbilityManagerClient::StartDeviceManager(
         HILOGE("continuationMgrProxy is nullptr");
         return ERR_NULL_OBJECT;
     }
-    return continuationMgrProxy->StartDeviceManager(token, continuationExtraParams);
+    return continuationMgrProxy->StartDeviceManager(token, *continuationExtraParams);
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

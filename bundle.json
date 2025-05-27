@@ -120,7 +120,6 @@
                 "continuation_extra_params.h",
                 "continuation_mode.h",
                 "continuation_result.h",
-                "device_connect_status.h",
                 "device_selection_notifier_stub.h",
                 "idevice_selection_notifier.h"
               ]
@@ -132,7 +131,6 @@
               "header_base": "//foundation/ability/dmsfwk/interfaces/innerkits/common/include",
               "header_files": [
                 "distributed_ability_manager_client.h",
-                "distributed_ability_manager_proxy.h",
                 "dms_constant.h"
               ]
             },

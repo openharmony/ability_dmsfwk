@@ -76,9 +76,7 @@ dtbabilitymgr_sources = [
   "${distributed_service}/dtbabilitymgr/src/continuation_manager/notifier_info.cpp",
   "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_client.cpp",
   "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_dumper.cpp",
-  "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_proxy.cpp",
   "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_service.cpp",
-  "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_stub.cpp",
 ]
 
 ohos_unittest("continuationmanagertest") {

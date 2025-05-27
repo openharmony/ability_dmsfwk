@@ -1,0 +1,22 @@
+package OHOS.DistributedSchedule;
+enum DeviceConnectStatus {
+    /**
+     * Device initial status.
+     */
+    IDLE = 0,
+
+    /**
+     * Device connecting status.
+     */
+    CONNECTING = 1,
+
+    /**
+     * Device connected status.
+     */
+    CONNECTED = 2,
+
+    /**
+     * Device disconnected status.
+     */
+    DISCONNECTING = 3,
+};

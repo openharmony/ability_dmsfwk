@@ -1,0 +1,17 @@
+import DeviceConnectStatus;
+sequenceable OHOS.IRemoteObject;
+sequenceable OHOS.DistributedSchedule.ContinuationExtraParams;
+sequenceable ContinuationResult..OHOS.DistributedSchedule.ContinuationResult;
+
+interface OHOS.DistributedSchedule.IDistributedAbilityManager{
+    [ipccode 500] void Register(
+        [in] ContinuationExtraParams continuationExtraParams, [out] int token);
+    void Unregister([in] int token);
+    void RegisterDeviceSelectionCallback(
+        [in] int token, [in] String cbType, [in] IRemoteObject notifier);
+    void UnregisterDeviceSelectionCallback([in] int token, [in] String cbType);
+    void UpdateConnectStatus([in] int token, [in] String deviceId,
+        [in] DeviceConnectStatus deviceConnectStatus);
+    void StartDeviceManager(
+        [in] int token, [in] ContinuationExtraParams continuationExtraParams /*= nullptr*/);
+}

@@ -47,6 +47,8 @@ constexpr int32_t MAX_TOKEN_NUM = 100000000;
 constexpr int32_t MAX_REGISTER_NUM = 600;
 constexpr int32_t START_DEVICE_MANAGER_CODE = 1;
 constexpr int32_t UPDATE_CONNECT_STATUS_CODE = 2;
+constexpr int32_t VALUE_NULL = -1; // no object in parcel
+constexpr int32_t VALUE_OBJECT = 1; // object exist in parcel
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DistributedAbilityManagerService);
@@ -142,14 +144,12 @@ void DistributedAbilityManagerService::DumpNotifierLocked(const std::vector<int3
 }
 
 int32_t DistributedAbilityManagerService::Register(
-    const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams, int32_t& token)
+    const ContinuationExtraParams& continuationExtraParams, int32_t& token)
 {
     HILOGD("called");
-    if (continuationExtraParams != nullptr) {
-        ContinuationMode continuationMode = continuationExtraParams->GetContinuationMode();
-        if (!IsContinuationModeValid(continuationMode)) {
-            return INVALID_CONTINUATION_MODE;
-        }
+    ContinuationMode continuationMode = continuationExtraParams.GetContinuationMode();
+    if (!IsContinuationModeValid(continuationMode)) {
+        return INVALID_CONTINUATION_MODE;
     }
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     if (IsExceededRegisterMaxNum(accessToken)) {
@@ -273,7 +273,7 @@ int32_t DistributedAbilityManagerService::UnregisterDeviceSelectionCallback(int3
 }
 
 int32_t DistributedAbilityManagerService::UpdateConnectStatus(int32_t token, const std::string& deviceId,
-    const DeviceConnectStatus& deviceConnectStatus)
+    DeviceConnectStatus deviceConnectStatus)
 {
     HILOGD("called");
     if (deviceId.empty()) {
@@ -307,11 +307,13 @@ int32_t DistributedAbilityManagerService::UpdateConnectStatus(int32_t token, con
 }
 
 int32_t DistributedAbilityManagerService::StartDeviceManager(
-    int32_t token, const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams)
+    int32_t token, const ContinuationExtraParams& continuationExtraParams)
 {
     HILOGD("called");
-    if (continuationExtraParams != nullptr) {
-        ContinuationMode continuationMode = continuationExtraParams->GetContinuationMode();
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParamsPtr =
+                std::make_shared<ContinuationExtraParams>(continuationExtraParams);
+    if (continuationExtraParamsPtr != nullptr) {
+        ContinuationMode continuationMode = continuationExtraParamsPtr->GetContinuationMode();
         if (!IsContinuationModeValid(continuationMode)) {
             return INVALID_CONTINUATION_MODE;
         }
@@ -330,11 +332,11 @@ int32_t DistributedAbilityManagerService::StartDeviceManager(
     {
         std::lock_guard<std::mutex> appProxyLock(appProxyMutex_);
         if (appProxy_ != nullptr) {
-            HandleStartDeviceManager(token, continuationExtraParams);
+            HandleStartDeviceManager(token, continuationExtraParamsPtr);
             return ERR_OK;
         }
     }
-    int32_t errCode = ConnectAbility(token, continuationExtraParams);
+    int32_t errCode = ConnectAbility(token, continuationExtraParamsPtr);
     if (errCode != ERR_OK) {
         HILOGE("token connect to app failed");
         return CONNECT_ABILITY_FAILED;

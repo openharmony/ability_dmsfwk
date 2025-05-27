@@ -25,6 +25,8 @@ namespace DistributedSchedule {
 namespace {
 constexpr int32_t REQUEST_CODE_ERR = 305;
 constexpr int32_t INVALID_CODE = 123456;
+constexpr int32_t VALUE_NULL = -1; // no object in parcel
+constexpr int32_t VALUE_OBJECT = 1; // object exist in parcel
 const std::u16string DMS_PROXY_INTERFACE_TOKEN = u"OHOS.DistributedSchedule.IDistributedAbilityManager";
 }
 
@@ -63,7 +65,6 @@ HWTEST_F(DistributedAbilityManagerStubTest, OnRemoteRequest_001, TestSize.Level3
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    dtbabilitymgrStub_->funcsMap_[INVALID_CODE] = nullptr;
     data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN);
     int32_t result = dtbabilitymgrStub_->OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
@@ -101,8 +102,10 @@ HWTEST_F(DistributedAbilityManagerStubTest, RegisterInner_001, TestSize.Level3)
     ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
     data.WriteInt32(VALUE_OBJECT);
-    int32_t result = dtbabilitymgrStub_->RegisterInner(data, reply);
+    int32_t result = dtbabilitymgrStub_->OnRemoteRequest(
+        static_cast<uint32_t>(IDistributedAbilityManagerIpcCode::COMMAND_REGISTER), data, reply, option);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedAbilityManagerStubTest RegisterInner_001 end" << std::endl;
 }
@@ -119,8 +122,10 @@ HWTEST_F(DistributedAbilityManagerStubTest, RegisterInner_002, TestSize.Level3)
     ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
     data.WriteInt32(VALUE_NULL);
-    int32_t result = dtbabilitymgrStub_->RegisterInner(data, reply);
+    int32_t result = dtbabilitymgrStub_->OnRemoteRequest(
+        static_cast<uint32_t>(IDistributedAbilityManagerIpcCode::COMMAND_REGISTER), data, reply, option);
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedAbilityManagerStubTest RegisterInner_002 end" << std::endl;
 }
@@ -137,11 +142,13 @@ HWTEST_F(DistributedAbilityManagerStubTest, RegisterDeviceSelectionCallbackInner
     ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
     int32_t token = 0;
     data.WriteInt32(token);
     std::string cbType = "";
     data.WriteString(cbType);
-    int32_t result = dtbabilitymgrStub_->RegisterDeviceSelectionCallbackInner(data, reply);
+    int32_t result = dtbabilitymgrStub_->OnRemoteRequest(
+        static_cast<uint32_t>(IDistributedAbilityManagerIpcCode::COMMAND_REGISTER_DEVICE_SELECTION_CALLBACK), data, reply, option);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedAbilityManagerStubTest RegisterDeviceSelectionCallbackInner_001 end" << std::endl;
 }
@@ -158,11 +165,13 @@ HWTEST_F(DistributedAbilityManagerStubTest, RegisterDeviceSelectionCallbackInner
     ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
     int32_t token = 0;
     data.WriteInt32(token);
     std::string cbType = "mockType";
     data.WriteString(cbType);
-    int32_t result = dtbabilitymgrStub_->RegisterDeviceSelectionCallbackInner(data, reply);
+    int32_t result = dtbabilitymgrStub_->OnRemoteRequest(
+        static_cast<uint32_t>(IDistributedAbilityManagerIpcCode::COMMAND_REGISTER_DEVICE_SELECTION_CALLBACK), data, reply, option);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedAbilityManagerStubTest RegisterDeviceSelectionCallbackInner_002 end" << std::endl;
 }
@@ -179,11 +188,13 @@ HWTEST_F(DistributedAbilityManagerStubTest, UnregisterDeviceSelectionCallbackInn
     ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
     int32_t token = 0;
     data.WriteInt32(token);
     std::string cbType = "";
     data.WriteString(cbType);
-    int32_t result = dtbabilitymgrStub_->UnregisterDeviceSelectionCallbackInner(data, reply);
+    int32_t result = dtbabilitymgrStub_->OnRemoteRequest(
+        static_cast<uint32_t>(IDistributedAbilityManagerIpcCode::COMMAND_UNREGISTER_DEVICE_SELECTION_CALLBACK), data, reply, option);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedAbilityManagerStubTest UnregisterDeviceSelectionCallbackInner_001 end" << std::endl;
 }
@@ -200,11 +211,13 @@ HWTEST_F(DistributedAbilityManagerStubTest, UnregisterDeviceSelectionCallbackInn
     ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
     int32_t token = 0;
     data.WriteInt32(token);
     std::string cbType = "12345";
     data.WriteString(cbType);
-    int32_t result = dtbabilitymgrStub_->UnregisterDeviceSelectionCallbackInner(data, reply);
+    int32_t result = dtbabilitymgrStub_->OnRemoteRequest(
+        static_cast<uint32_t>(IDistributedAbilityManagerIpcCode::COMMAND_UNREGISTER_DEVICE_SELECTION_CALLBACK), data, reply, option);
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedAbilityManagerStubTest UnregisterDeviceSelectionCallbackInner_002 end" << std::endl;
 }
@@ -221,11 +234,13 @@ HWTEST_F(DistributedAbilityManagerStubTest, StartDeviceManagerInner_001, TestSiz
     ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
     int32_t token = 0;
     data.WriteInt32(token);
     int32_t flag = VALUE_OBJECT;
     data.WriteInt32(flag);
-    int32_t result = dtbabilitymgrStub_->StartDeviceManagerInner(data, reply);
+    int32_t result = dtbabilitymgrStub_->OnRemoteRequest(
+        static_cast<uint32_t>(IDistributedAbilityManagerIpcCode::COMMAND_START_DEVICE_MANAGER), data, reply, option);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedAbilityManagerStubTest StartDeviceManagerInner_001 end" << std::endl;
 }
@@ -242,11 +257,13 @@ HWTEST_F(DistributedAbilityManagerStubTest, StartDeviceManagerInner_002, TestSiz
     ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
     int32_t token = 0;
     data.WriteInt32(token);
     int32_t flag = VALUE_NULL;
     data.WriteInt32(flag);
-    int32_t result = dtbabilitymgrStub_->StartDeviceManagerInner(data, reply);
+    int32_t result = dtbabilitymgrStub_->OnRemoteRequest(
+        static_cast<uint32_t>(IDistributedAbilityManagerIpcCode::COMMAND_START_DEVICE_MANAGER), data, reply, option);
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedAbilityManagerStubTest StartDeviceManagerInner_002 end" << std::endl;
 }
@@ -263,8 +280,10 @@ HWTEST_F(DistributedAbilityManagerStubTest, UnregisterInner_001, TestSize.Level3
     ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
     data.WriteInt32(VALUE_OBJECT);
-    int32_t result = dtbabilitymgrStub_->UnregisterInner(data, reply);
+    int32_t result = dtbabilitymgrStub_->OnRemoteRequest(
+        static_cast<uint32_t>(IDistributedAbilityManagerIpcCode::COMMAND_UNREGISTER), data, reply, option);
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedAbilityManagerStubTest UnregisterInner_001 end" << std::endl;
 }
@@ -281,10 +300,12 @@ HWTEST_F(DistributedAbilityManagerStubTest, UpdateConnectStatusInner_001, TestSi
     ASSERT_NE(nullptr, dtbabilitymgrStub_);
     MessageParcel data;
     MessageParcel reply;
+    MessageOption option;
     std::string deviceId = "12345";
     data.WriteInt32(VALUE_OBJECT);
     data.WriteString(deviceId);
-    int32_t result = dtbabilitymgrStub_->UpdateConnectStatusInner(data, reply);
+    int32_t result = dtbabilitymgrStub_->OnRemoteRequest(
+        static_cast<uint32_t>(IDistributedAbilityManagerIpcCode::COMMAND_UPDATE_CONNECT_STATUS), data, reply, option);
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedAbilityManagerStubTest UpdateConnectStatusInner_001 end" << std::endl;
 }
