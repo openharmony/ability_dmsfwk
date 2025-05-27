@@ -61,6 +61,8 @@ const std::u16string TEST_INVALID_REMOTEDESCRIPTOR = u"invalid remoteDescriptor"
 const std::string TEST_INPUT3 = "test input1";
 const std::string TEST_INPUT4 = "test input2";
 const std::uint32_t INVALID_EVENT_DEVICE_CODE = 0;
+constexpr int32_t VALUE_NULL = -1; // no object in parcel
+constexpr int32_t VALUE_OBJECT = 1; // object exist in parcel
 }
 
 void DeviceSelectionNotifierTest::OnDeviceConnect(const std::vector<ContinuationResult>& continuationResults)
@@ -267,7 +269,8 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_004, TestS
     DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_004 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = -1;
-    int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
+    ContinuationExtraParams extraParams{};
+    int32_t result1 = dtbabilitymgrService_->Register(extraParams, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
@@ -302,7 +305,8 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_005, TestS
     DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_005 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = -1;
-    int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
+    ContinuationExtraParams extraParams{};
+    int32_t result1 = dtbabilitymgrService_->Register(extraParams, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
@@ -337,7 +341,8 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_006, TestS
     DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_006 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = -1;
-    int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
+    ContinuationExtraParams extraParams{};
+    int32_t result1 = dtbabilitymgrService_->Register(extraParams, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
@@ -372,7 +377,8 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_007, TestS
     DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_007 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = -1;
-    int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
+    ContinuationExtraParams extraParams{};
+    int32_t result1 = dtbabilitymgrService_->Register(extraParams, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
@@ -407,7 +413,8 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_008, TestS
     DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_008 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = -1;
-    int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
+    ContinuationExtraParams extraParams{};
+    int32_t result1 = dtbabilitymgrService_->Register(extraParams, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
     std::vector<ContinuationResult> continuationResults;
     ContinuationResult continuationResult1;
@@ -622,9 +629,10 @@ HWTEST_F(ContinuationManagerTest, StartDeviceManagerTest_001, TestSize.Level1)
     DTEST_LOG << "ContinuationManagerTest StartDeviceManagerTest_001 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = -1;
-    int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
+    ContinuationExtraParams extraParams{};
+    int32_t result1 = dtbabilitymgrService_->Register(extraParams, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
-    int32_t result2 = dtbabilitymgrService_->StartDeviceManager(token);
+    int32_t result2 = dtbabilitymgrService_->StartDeviceManager(token, extraParams);
     DTEST_LOG << "result2:" << result2 << std::endl;
     EXPECT_EQ(ERR_OK, result1);
     EXPECT_EQ(CALLBACK_HAS_NOT_REGISTERED, result2);
@@ -641,12 +649,11 @@ HWTEST_F(ContinuationManagerTest, StartDeviceManagerTest_002, TestSize.Level1)
     DTEST_LOG << "ContinuationManagerTest StartDeviceManagerTest_002 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = -1;
-    int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
+    ContinuationExtraParams extraParams{};
+    int32_t result1 = dtbabilitymgrService_->Register(extraParams, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
-    std::shared_ptr<ContinuationExtraParams> continuationExtraParams =
-        std::make_shared<ContinuationExtraParams>();
     int32_t result2 = dtbabilitymgrService_->StartDeviceManager(
-        token, continuationExtraParams);
+        token, extraParams);
     DTEST_LOG << "result2:" << result2 << std::endl;
     EXPECT_EQ(ERR_OK, result1);
     EXPECT_EQ(CALLBACK_HAS_NOT_REGISTERED, result2);
@@ -1096,12 +1103,12 @@ HWTEST_F(ContinuationManagerTest, GetSetDeviceInfo_001, TestSize.Level3)
 HWTEST_F(ContinuationManagerTest, MarshallingUnmarshalling_001, TestSize.Level3)
 {
     DTEST_LOG << "ContinuationManagerTest MarshallingUnmarshalling_001 start" << std::endl;
-    
+
     ContinuationResult continuationResult1;
     continuationResult1.SetDeviceId(SELECTED_DEVICE_ID1);
     continuationResult1.SetDeviceType(SELECTED_DEVICE_TYPE1);
     continuationResult1.SetDeviceName(SELECTED_DEVICE_NAME1);
-    
+
     Parcel parcel;
     bool result1 = continuationResult1.Marshalling(parcel);
     ASSERT_NE(false, result1);
@@ -1134,7 +1141,7 @@ HWTEST_F(ContinuationManagerTest, ReadFromParcel_001, TestSize.Level3)
     continuationResult.SetDeviceId(SELECTED_DEVICE_ID1);
     continuationResult.SetDeviceType(SELECTED_DEVICE_TYPE1);
     continuationResult.SetDeviceName(SELECTED_DEVICE_NAME1);
-    
+
     Parcel parcel;
     bool result1 = continuationResult.Marshalling(parcel);
     ASSERT_NE(false, result1);
@@ -1326,7 +1333,7 @@ HWTEST_F(ContinuationManagerTest, WriteContinuationResultsToParcel_001, TestSize
 HWTEST_F(ContinuationManagerTest, Str16VecToStr8Vec_001, TestSize.Level3)
 {
     DTEST_LOG << "ContinuationManagerTest Str16VecToStr8Vec_001 start" << std::endl;
-    
+
     std::vector<std::u16string> input1;
     input1.emplace_back(TEST_INPUT1);
     input1.emplace_back(TEST_INPUT2);
@@ -1335,7 +1342,7 @@ HWTEST_F(ContinuationManagerTest, Str16VecToStr8Vec_001, TestSize.Level3)
     input2.emplace_back(TEST_INPUT4);
 
     std::vector<std::string> input3 = ContinationManagerUtils::Str16VecToStr8Vec(input1);
-    
+
     size_t size1 = input2.size();
     size_t size2 = input3.size();
     ASSERT_EQ(size1, size2);
@@ -1356,7 +1363,7 @@ HWTEST_F(ContinuationManagerTest, SetFunction_001, TestSize.Level3)
 {
     DTEST_LOG << "ContinuationManagerTest SetFunction_001 start" << std::endl;
     ContinuationExtraParams continuationExtraParams;
-    
+
     std::vector<std::string> deviceTypeVec1;
     deviceTypeVec1.emplace_back(SELECTED_DEVICE_TYPE1);
     deviceTypeVec1.emplace_back(SELECTED_DEVICE_TYPE2);
@@ -1407,7 +1414,7 @@ HWTEST_F(ContinuationManagerTest, ReadFromParcel_002, TestSize.Level3)
     continuationExtraParams.SetFilter(TEST_FILTER);
     continuationExtraParams.SetContinuationMode(continuationMode);
     continuationExtraParams.SetAuthInfo(TEST_AUTHINFO);
-    
+
     Parcel parcel;
     bool result1 = continuationExtraParams.Marshalling(parcel);
     ASSERT_NE(false, result1);

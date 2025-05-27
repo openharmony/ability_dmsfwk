@@ -45,6 +45,7 @@ ohos_shared_library("continuationmanager_napi") {
   ]
 
   public_configs = [
+    "//foundation/ability/dmsfwk/interfaces/innerkits/common:dmsfwk_idl_config",
     ":continuationmanager_napi_public_config",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
   ]

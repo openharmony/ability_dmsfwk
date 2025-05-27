@@ -17,7 +17,7 @@
 #define OHOS_DISTRIBUTED_ABILITY_MANAGER_CLIENT_H
 
 #include "device_selection_notifier_stub.h"
-#include "distributed_ability_manager_interface.h"
+#include "idistributed_ability_manager.h"
 #include "iremote_broker.h"
 #include "single_instance.h"
 

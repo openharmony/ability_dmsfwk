@@ -54,7 +54,6 @@ ohos_shared_library("distributed_ability_manager_svr") {
     "src/continuation_manager/notifier_info.cpp",
     "src/distributed_ability_manager_dumper.cpp",
     "src/distributed_ability_manager_service.cpp",
-    "src/distributed_ability_manager_stub.cpp",
   ]
 
   configs = [
@@ -72,6 +71,7 @@ ohos_shared_library("distributed_ability_manager_svr") {
   deps = [
     "../../interfaces/innerkits/common:common_sdk",
     "../../interfaces/innerkits/continuation_manager:continuation_manager",
+    "//foundation/ability/dmsfwk/interfaces/innerkits/common:dmsfwk_idl_source",
   ]
 
   external_deps = [
@@ -93,6 +93,8 @@ ohos_shared_library("distributed_ability_manager_svr") {
   if (os_account_part) {
     external_deps += [ "os_account:os_account_innerkits" ]
   }
+
+  public_configs = [ "//foundation/ability/dmsfwk/interfaces/innerkits/common:dmsfwk_idl_config" ]
 
   part_name = "dmsfwk"
   subsystem_name = "ability"

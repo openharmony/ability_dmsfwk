@@ -38,15 +38,15 @@ public:
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
 
     int32_t Register(
-        const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams, int32_t& token) override;
+        const ContinuationExtraParams& continuationExtraParams, int32_t& token) override;
     int32_t Unregister(int32_t token) override;
     int32_t RegisterDeviceSelectionCallback(
         int32_t token, const std::string& cbType, const sptr<IRemoteObject>& notifier) override;
     int32_t UnregisterDeviceSelectionCallback(int32_t token, const std::string& cbType) override;
     int32_t UpdateConnectStatus(int32_t token, const std::string& deviceId,
-        const DeviceConnectStatus& deviceConnectStatus) override;
+        DeviceConnectStatus deviceConnectStatus) override;
     int32_t StartDeviceManager(
-        int32_t token, const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams = nullptr) override;
+        int32_t token, const ContinuationExtraParams& continuationExtraParam) override;
 
     void ProcessNotifierDied(const sptr<IRemoteObject>& notifier);
     void ScheduleStartDeviceManager(const sptr<IRemoteObject>& appProxy, int32_t token,
