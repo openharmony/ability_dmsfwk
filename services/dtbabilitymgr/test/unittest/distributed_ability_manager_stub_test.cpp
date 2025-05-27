@@ -171,7 +171,8 @@ HWTEST_F(DistributedAbilityManagerStubTest, RegisterDeviceSelectionCallbackInner
     std::string cbType = "mockType";
     data.WriteString(cbType);
     int32_t result = dtbabilitymgrStub_->OnRemoteRequest(
-        static_cast<uint32_t>(IDistributedAbilityManagerIpcCode::COMMAND_REGISTER_DEVICE_SELECTION_CALLBACK), data, reply, option);
+        static_cast<uint32_t>(IDistributedAbilityManagerIpcCode::COMMAND_REGISTER_DEVICE_SELECTION_CALLBACK),
+        data, reply, option);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedAbilityManagerStubTest RegisterDeviceSelectionCallbackInner_002 end" << std::endl;
 }
@@ -217,7 +218,8 @@ HWTEST_F(DistributedAbilityManagerStubTest, UnregisterDeviceSelectionCallbackInn
     std::string cbType = "12345";
     data.WriteString(cbType);
     int32_t result = dtbabilitymgrStub_->OnRemoteRequest(
-        static_cast<uint32_t>(IDistributedAbilityManagerIpcCode::COMMAND_UNREGISTER_DEVICE_SELECTION_CALLBACK), data, reply, option);
+        static_cast<uint32_t>(IDistributedAbilityManagerIpcCode::COMMAND_UNREGISTER_DEVICE_SELECTION_CALLBACK),
+        data, reply, option);
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedAbilityManagerStubTest UnregisterDeviceSelectionCallbackInner_002 end" << std::endl;
 }
