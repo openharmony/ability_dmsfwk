@@ -198,7 +198,7 @@ int32_t DistributedSchedPermission::GetAccountInfo(const std::string& remoteNetw
     }
 
     HILOGI("Check access Group by hichain fail, will try check different account ACL by DM.");
-    if (CheckAclList(remoteNetworkId, accountInfo, callerInfo)) {
+    if (CheckAclList(remoteNetworkId, accountInfo, callerInfo, true)) {
         return ERR_OK;
     }
     HILOGE("Check different account ACL by DM fail.");
@@ -230,7 +230,7 @@ bool DistributedSchedPermission::GetOsAccountData(AccountInfo& dmsAccountInfo)
 }
 
 bool DistributedSchedPermission::CheckDstSameAccount(const std::string& dstNetworkId,
-    const AccountInfo& dmsAccountInfo, const CallerInfo& callerInfo, bool isCallerOrigin)
+    const AccountInfo& dmsAccountInfo, const CallerInfo& callerInfo, bool isSrc)
 {
 #ifdef DMSFWK_SAME_ACCOUNT
     DmAccessCaller dmSrcCaller = {
@@ -243,40 +243,43 @@ bool DistributedSchedPermission::CheckDstSameAccount(const std::string& dstNetwo
         .networkId = dstNetworkId,
         .peerId = "",
     };
-    for (const auto& bundleName : callerInfo.bundleNames) {
-        dmSrcCaller.pkgName = bundleName;
-        HILOGI("dmSrcCaller networkId %{public}s, accountId %{public}s, userId %{public}s, pkgName %{public}s; "
-            "dmDstCallee networkId %{public}s.", GetAnonymStr(dmSrcCaller.networkId).c_str(),
-            GetAnonymStr(dmSrcCaller.accountId).c_str(), GetAnonymInt32(dmSrcCaller.userId).c_str(),
-            dmSrcCaller.pkgName.c_str(), GetAnonymStr(dmDstCallee.networkId).c_str());
-        if (!DeviceManager::GetInstance().CheckIsSameAccount(dmSrcCaller, dmDstCallee)) {
-            continue;
+    auto checkIsSameAccountLambda = [&](bool isSink) -> bool {
+        for (const auto& bundleName : callerInfo.bundleNames) {
+            dmSrcCaller.pkgName = bundleName;
+            HILOGI("dmSrcCaller networkId %{public}s, accountId %{public}s, userId %{public}s, pkgName %{public}s; "
+                "dmDstCallee networkId %{public}s.", GetAnonymStr(dmSrcCaller.networkId).c_str(),
+                GetAnonymStr(dmSrcCaller.accountId).c_str(), GetAnonymInt32(dmSrcCaller.userId).c_str(),
+                dmSrcCaller.pkgName.c_str(), GetAnonymStr(dmDstCallee.networkId).c_str());
+            if (isSink ? DeviceManager::GetInstance().CheckSinkIsSameAccount(dmSrcCaller, dmDstCallee)
+                       : DeviceManager::GetInstance().CheckSrcIsSameAccount(dmSrcCaller, dmDstCallee)) {
+                return true;
+            }
         }
-        return isCallerOrigin ? true : CheckIsSameAccountId(dmsAccountInfo.activeAccountId);
+        return false;
+    };
+#ifdef OS_ACCOUNT_PART
+    if (!isSrc) {
+        AccountInfo dstAccountInfo;
+        if (!GetOsAccountData(dstAccountInfo)) {
+            HILOGE("Get Os accountId and userId fail.");
+            return false;
+        }
+        dmDstCallee.accountId = dstAccountInfo.activeAccountId;
+        dmDstCallee.userId = dstAccountInfo.userId;
+        HILOGI("calleeAccountId: %{public}s, callerUserId: %{public}d",
+            GetAnonymStr(dmDstCallee.accountId).c_str(), dmDstCallee.userId);
+        return checkIsSameAccountLambda(true);
     }
-    return false;
+#endif
+    return checkIsSameAccountLambda(isSrc);
 #else // DMSFWK_SAME_ACCOUNT
     HILOGI("Not support remote same account check.");
     return false;
 #endif // DMSFWK_SAME_ACCOUNT
 }
 
-bool DistributedSchedPermission::CheckIsSameAccountId(const std::string& srcAccountId)
-{
-    AccountSA::OhosAccountInfo osAccountInfo;
-    int32_t ret = AccountSA::OhosAccountKits::GetInstance().GetOhosAccountInfo(osAccountInfo);
-    if (ret != 0) {
-        HILOGE("Get accountId from Ohos account info fail, ret: %{public}d.", ret);
-        return false;
-    }
-
-    HILOGI("srcAccountId: %{public}s, dstAccountId: %{public}s.",
-        GetAnonymStr(srcAccountId).c_str(), GetAnonymStr(osAccountInfo.uid_).c_str());
-    return osAccountInfo.uid_ == srcAccountId;
-}
-
 bool DistributedSchedPermission::CheckAclList(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
-    const CallerInfo& callerInfo, const std::string& targetBundleName)
+    const CallerInfo& callerInfo, bool isSrc, const std::string& targetBundleName)
 {
     DmAccessCaller dmSrcCaller = {
         .accountId = dmsAccountInfo.activeAccountId,
@@ -288,41 +291,41 @@ bool DistributedSchedPermission::CheckAclList(const std::string& dstNetworkId, c
         .networkId = dstNetworkId,
         .peerId = "",
     };
-    std::string localNetworkId;
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localNetworkId)) {
-        HILOGE("GetLocalDeviceId failed");
-        return false;
-    }
+    auto checkAccessControlLambda = [&](bool isSink) -> bool {
+        HILOGI("dmSrcCaller networkId %{public}s, accountId %{public}s, userId %{public}s",
+            GetAnonymStr(dmSrcCaller.networkId).c_str(), GetAnonymStr(dmSrcCaller.accountId).c_str(),
+            GetAnonymInt32(dmSrcCaller.userId).c_str());
+        for (const auto& bundleName : callerInfo.bundleNames) {
+            dmSrcCaller.pkgName = bundleName;
+            HILOGI("pkgName: %{public}s.", dmSrcCaller.pkgName.c_str());
+            if (isSink ? DeviceManager::GetInstance().CheckSinkAccessControl(dmSrcCaller, dmDstCallee)
+                       : DeviceManager::GetInstance().CheckSrcAccessControl(dmSrcCaller, dmDstCallee)) {
+                return true;
+            }
+        }
+        dmSrcCaller.pkgName = targetBundleName;
+        HILOGI("targetBundleName: %{public}s.", dmSrcCaller.pkgName.c_str());
+        return isSink ? DeviceManager::GetInstance().CheckSinkAccessControl(dmSrcCaller, dmDstCallee)
+                    : DeviceManager::GetInstance().CheckSrcAccessControl(dmSrcCaller, dmDstCallee);
+    };
 #ifdef OS_ACCOUNT_PART
-    if (dstNetworkId == localNetworkId) {
+    if (!isSrc) {
         AccountInfo dstAccountInfo;
         if (!GetOsAccountData(dstAccountInfo)) {
             HILOGE("Get Os accountId and userId fail.");
+            return false;
         }
         dmDstCallee.accountId = dstAccountInfo.activeAccountId;
         dmDstCallee.userId = dstAccountInfo.userId;
         dmDstCallee.tokenId = AccessToken::AccessTokenKit::GetHapTokenID(dmDstCallee.userId, targetBundleName, 0);
+        dmDstCallee.networkId = dstNetworkId;
+        dmDstCallee.pkgName = targetBundleName;
         HILOGI("calleeAccountId: %{public}s, callerUserId: %{public}d",
             GetAnonymStr(dmDstCallee.accountId).c_str(), dmDstCallee.userId);
+        return checkAccessControlLambda(true);
     }
 #endif
-    HILOGI("dmSrcCaller networkId %{public}s, accountId %{public}s, userId %{public}s",
-        GetAnonymStr(dmSrcCaller.networkId).c_str(), GetAnonymStr(dmSrcCaller.accountId).c_str(),
-        GetAnonymInt32(dmSrcCaller.userId).c_str());
-    for (const auto& bundleName : callerInfo.bundleNames) {
-        dmSrcCaller.pkgName = bundleName;
-        HILOGI("pkgName: %{public}s.", dmSrcCaller.pkgName.c_str());
-        if (!DeviceManager::GetInstance().CheckAccessControl(dmSrcCaller, dmDstCallee)) {
-            continue;
-        }
-        return true;
-    }
-    dmSrcCaller.pkgName = targetBundleName;
-    HILOGI("targetBundleName: %{public}s.", dmSrcCaller.pkgName.c_str());
-    if (DeviceManager::GetInstance().CheckAccessControl(dmSrcCaller, dmDstCallee)) {
-        return true;
-    }
-    return false;
+    return checkAccessControlLambda(!isSrc);
 }
 
 bool DistributedSchedPermission::GetRelatedGroups(const std::string& udid,
@@ -575,7 +578,7 @@ bool DistributedSchedPermission::CheckAccountAccessPermission(const CallerInfo& 
     }
 
     HILOGI("Check access Group by hichain fail, will try check different account ACL by DM.");
-    if (CheckAclList(dstNetworkId, accountInfo, callerInfo, targetBundleName)) {
+    if (CheckAclList(dstNetworkId, accountInfo, callerInfo, false, targetBundleName)) {
         return true;
     }
 
