@@ -243,21 +243,14 @@ int32_t DmsContinueConditionMgr::OnMissionFocused(int32_t accountId, int32_t mis
 
     AAFwk::MissionInfo info;
     int32_t ret = GetMissionInfo(missionId, info);
+    if (ret != ERR_OK) {
+        HILOGE("GetMissionInfo failed, missionId %{public}d, ret %{public}d", missionId, ret);
+        return ret;
+    }
+
     {
-        std::lock_guard<std::mutex> missionlock(missionMutex_);
-        if (IsMissionStatusExistLocked(accountId, missionId)) {
-            HILOGI("found mission %{public}d, update status: isFocused", missionId);
-            CleanLastFocusedFlagLocked(accountId, missionId);
-            missionMap_[accountId][missionId].isFocused = true;
-            return ERR_OK;
-        }
-
-        if (ret != ERR_OK) {
-            HILOGE("GetMissionInfo failed, missionId %{public}d, ret %{public}d", missionId, ret);
-            return ret;
-        }
-
         HILOGI("new mission %{public}d focused, add record", missionId);
+        std::lock_guard<std::mutex> missionlock(missionMutex_);
         MissionStatus status;
         ConvertToMissionStatus(info, accountId, status);
         CleanLastFocusedFlagLocked(accountId, missionId);
