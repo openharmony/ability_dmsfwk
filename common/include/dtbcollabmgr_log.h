@@ -251,6 +251,11 @@ enum {
     NOT_SUPPORTED_BITATE,
 
     NOT_SUPPORTED_COLOR_SPACE,
+
+    /**
+     * Result(29360161) for can not service registry.
+     */
+    NOT_FIND_SERVICE_REGISTRY = 29360161,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

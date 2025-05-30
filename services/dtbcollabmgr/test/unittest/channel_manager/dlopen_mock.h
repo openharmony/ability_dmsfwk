@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2024 Huawei Device Co., Ltd.
+* Copyright (c) 2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -12,29 +12,33 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef DISTRIBUTED_COLLAB_CHANNEL_MANAGER_TEST_H
-#define DISTRIBUTED_COLLAB_CHANNEL_MANAGER_TEST_H
+#ifndef DLOPEN_MOCK_H
+#define DLOPEN_MOCK_H
 
-#include "channel_manager.h"
-#include "dlopen_mock.h"
-#include "softbus_mock.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include <dlfcn.h>
+#include <gmock/gmock.h>
 
 namespace OHOS {
 namespace DistributedCollab {
-class ChannelManagerTest : public testing::Test {
+class MockDlfcn {
 public:
-    DlfcnMock mockDlfcn;
-    SoftbusMock mockSoftbus;
-    const std::string ownerName = "UnittestName";
+    MockDlfcn() {};
+    virtual ~MockDlfcn() {};
 
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-
-    void SetUp() override;
-    void TearDown() override;
+    virtual void *dlopen (const char *file, int mode) = 0;
 };
-}
-}
+
+class DlfcnMock : public MockDlfcn {
+public:
+    DlfcnMock();
+    ~DlfcnMock() override;
+
+    static DlfcnMock& GetMock();
+
+    MOCK_METHOD(void *, dlopen, (const char *file, int mode), (override));
+private:
+    static DlfcnMock *gMock;
+};
+}  // namespace DistributedCollab
+}  // namespace OHOS
 #endif
