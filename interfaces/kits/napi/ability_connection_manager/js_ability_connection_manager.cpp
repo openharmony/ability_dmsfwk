@@ -84,6 +84,8 @@ const std::string ERR_MESSAGE_INVALID_PARAMS = "Parameter error.";
 const std::string ERR_MESSAGE_FAILED = "Failed to execute the function.";
 const std::string ERR_MESSAGE_ONE_STREAM = "Only one stream can be created for the current session.";
 const std::string ERR_MESSAGE_RECEIVE_NOT_START = "The stream at the receive end is not started.";
+const std::string ERR_MESSAGE_NOT_SUPPORTED_BITATE = "Bitrate not supported.";
+const std::string ERR_MESSAGE_NOT_SUPPORTED_COLOR_SPACE = "Color space not supported.";
 const std::string KEY_START_OPTION = "ohos.collabrate.key.start.option";
 const std::string VALUE_START_OPTION_FOREGROUND = "ohos.collabrate.value.forefround";
 const std::string VALUE_START_OPTION_BACKGROUND = "ohos.collabrate.value.background";
@@ -289,11 +291,11 @@ napi_value CreateBusinessError(napi_env env, int32_t errCode, bool isAsync = tru
             break;
         case NOT_SUPPORTED_BITATE:
             error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_BITATE_NOT_SUPPORTED),
-                ERR_MESSAGE_NO_PERMISSION, isAsync);
+                ERR_MESSAGE_NOT_SUPPORTED_BITATE, isAsync);
             break;
         case NOT_SUPPORTED_COLOR_SPACE:
             error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_COLOR_SPACE_NOT_SUPPORTED),
-                ERR_MESSAGE_INVALID_PARAMS, isAsync);
+                ERR_MESSAGE_NOT_SUPPORTED_COLOR_SPACE, isAsync);
             break;
         case ERR_EXECUTE_FUNCTION:
             error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
@@ -1004,12 +1006,12 @@ void JsAbilityConnectionManager::CleanupConnectionResources(napi_env env, AsyncC
         napi_release_threadsafe_function(asyncData->tsfn, napi_tsfn_release);
         HILOGI("release tsfn");
     }
+    asyncData->connectCallbackExecuted = true;
     // The later of ConnectThreadsafeFunctionCallback/CompleteAsyncConnectWork frees asyncData
     if (asyncData->completeAsyncworkExecuted) {
         delete asyncData;
         HILOGI("release async data");
     }
-    asyncData->connectCallbackExecuted = true;
 }
 
 void JsAbilityConnectionManager::ExecuteConnect(napi_env env, void *data)
@@ -1054,12 +1056,12 @@ void JsAbilityConnectionManager::CompleteAsyncConnectWork(napi_env env, napi_sta
         napi_delete_async_work(env, asyncWork);
         HILOGI("release asyncWork");
     }
+    asyncData->completeAsyncworkExecuted = true;
     // The later of ConnectThreadsafeFunctionCallback/CompleteAsyncConnectWork frees asyncData
     if (asyncData->connectCallbackExecuted) {
         delete asyncData;
         HILOGI("release async data");
     }
-    asyncData->completeAsyncworkExecuted = true;
 }
 
 napi_value JsAbilityConnectionManager::DisConnect(napi_env env, napi_callback_info info)
