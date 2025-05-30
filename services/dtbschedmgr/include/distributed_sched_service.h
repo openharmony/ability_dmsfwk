@@ -37,6 +37,9 @@
 #include "dsched_collaborate_callback_mgr.h"
 #include "idms_interactive_adapter.h"
 #include "svc_distributed_connection.h"
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+#include "softbus_adapter/softbus_adapter.h"
+#endif
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission/distributed_mission_focused_listener.h"
 #include "mission/distributed_mission_info.h"
