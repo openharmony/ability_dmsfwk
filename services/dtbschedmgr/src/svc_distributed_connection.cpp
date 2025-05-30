@@ -151,9 +151,11 @@ ErrCode SvcDistributedConnection::ConnectDExtAbility(AAFwk::Want &want, int32_t 
         return INVALID_CONNECT_STATUS;
     }
     isCleanCalled_.store(isCleanCalled);
-    isConnectCalled_.store(true);
     std::unique_lock<std::mutex> lock(mutex_);
     ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, userId);
+    if (ret == ERR_OK) {
+        isConnectCalled_.store(true);
+    }
     HILOGI("Called end, ret=%{public}d, userId=%{public}d.", ret, userId);
     return ret;
 }
