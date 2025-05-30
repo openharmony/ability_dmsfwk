@@ -157,8 +157,8 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     callbackData.moduleName = abilityInfo->moduleName;
     callbackData.abilityName = abilityInfo->name;
     size_t stringSize = 0;
-    std::string type;
     napi_get_value_string_utf8(env, args[0], nullptr, 0, &stringSize);
+    std::string type(stringSize, '\0');
     napi_get_value_string_utf8(env, args[0], &type[0], stringSize + 1, &stringSize);
     callbackData.bizType = type.c_str();
     if (argc == ARG_COUNT_THREE) {
