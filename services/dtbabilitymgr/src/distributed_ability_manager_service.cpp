@@ -144,7 +144,7 @@ void DistributedAbilityManagerService::DumpNotifierLocked(const std::vector<int3
 }
 
 int32_t DistributedAbilityManagerService::Register(
-    const ContinuationExtraParams& continuationExtraParams, int32_t& token)
+    const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams, int32_t& token)
 {
     HILOGD("called");
     if (continuationExtraParams != nullptr) {
@@ -289,13 +289,11 @@ int32_t DistributedAbilityManagerService::UpdateConnectStatus(int32_t token, con
 }
 
 int32_t DistributedAbilityManagerService::StartDeviceManager(
-    int32_t token, const ContinuationExtraParams& continuationExtraParams)
+    int32_t token, const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams)
 {
     HILOGD("called");
-    std::shared_ptr<ContinuationExtraParams> continuationExtraParamsPtr =
-                std::make_shared<ContinuationExtraParams>(continuationExtraParams);
-    if (continuationExtraParamsPtr != nullptr) {
-        ContinuationMode continuationMode = continuationExtraParamsPtr->GetContinuationMode();
+    if (continuationExtraParams != nullptr) {
+        ContinuationMode continuationMode = continuationExtraParams->GetContinuationMode();
         if (!IsContinuationModeValid(continuationMode)) {
             return INVALID_CONTINUATION_MODE;
         }
@@ -318,7 +316,7 @@ int32_t DistributedAbilityManagerService::StartDeviceManager(
             return ERR_OK;
         }
     }
-    int32_t errCode = ConnectAbility(token, nullptr);
+    int32_t errCode = ConnectAbility(token, continuationExtraParams);
     if (errCode != ERR_OK) {
         HILOGE("token connect to app failed");
         return CONNECT_ABILITY_FAILED;
