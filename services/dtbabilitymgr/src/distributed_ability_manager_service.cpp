@@ -147,9 +147,11 @@ int32_t DistributedAbilityManagerService::Register(
     const ContinuationExtraParams& continuationExtraParams, int32_t& token)
 {
     HILOGD("called");
-    ContinuationMode continuationMode = continuationExtraParams.GetContinuationMode();
-    if (!IsContinuationModeValid(continuationMode)) {
-        return INVALID_CONTINUATION_MODE;
+    if (continuationExtraParams != nullptr) {
+        ContinuationMode continuationMode = continuationExtraParams->GetContinuationMode();
+        if (!IsContinuationModeValid(continuationMode)) {
+            return INVALID_CONTINUATION_MODE;
+        }
     }
     int32_t ret = RegisterWithoutExtraParam(token);
     return ret;
@@ -312,11 +314,11 @@ int32_t DistributedAbilityManagerService::StartDeviceManager(
     {
         std::lock_guard<std::mutex> appProxyLock(appProxyMutex_);
         if (appProxy_ != nullptr) {
-            HandleStartDeviceManager(token, continuationExtraParamsPtr);
+            HandleStartDeviceManager(token, continuationExtraParams);
             return ERR_OK;
         }
     }
-    int32_t errCode = ConnectAbility(token, continuationExtraParamsPtr);
+    int32_t errCode = ConnectAbility(token, nullptr);
     if (errCode != ERR_OK) {
         HILOGE("token connect to app failed");
         return CONNECT_ABILITY_FAILED;
