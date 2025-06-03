@@ -151,28 +151,8 @@ int32_t DistributedAbilityManagerService::Register(
     if (!IsContinuationModeValid(continuationMode)) {
         return INVALID_CONTINUATION_MODE;
     }
-    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
-    if (IsExceededRegisterMaxNum(accessToken)) {
-        return REGISTER_EXCEED_MAX_TIMES;
-    }
-    int32_t tToken = -1;
-    {
-        std::lock_guard<std::mutex> tokenLock(tokenMutex_);
-        tToken = token_.load();
-        if (++tToken > MAX_TOKEN_NUM) {
-            tToken = 1;
-        }
-        token_.store(tToken);
-        // save at parameters
-        system::SetParameter(TOKEN_KEY, std::to_string(tToken));
-    }
-    // update tokenMap_
-    {
-        std::lock_guard<std::mutex> tokenMapLock(tokenMapMutex_);
-        tokenMap_[accessToken].emplace_back(tToken);
-    }
-    token = tToken;
-    return ERR_OK;
+    int32_t ret = RegisterWithoutExtraParam(token);
+    return ret;
 }
 
 int32_t DistributedAbilityManagerService::Unregister(int32_t token)
@@ -337,6 +317,61 @@ int32_t DistributedAbilityManagerService::StartDeviceManager(
         }
     }
     int32_t errCode = ConnectAbility(token, continuationExtraParamsPtr);
+    if (errCode != ERR_OK) {
+        HILOGE("token connect to app failed");
+        return CONNECT_ABILITY_FAILED;
+    }
+    // 2. sendRequest data(token, filter, dmsStub, connectStatusInfo) to app by app proxy when connect callback.
+    return ERR_OK;
+}
+
+int32_t DistributedAbilityManagerService::RegisterWithoutExtraParam(int32_t& token)
+{
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    if (IsExceededRegisterMaxNum(accessToken)) {
+        return REGISTER_EXCEED_MAX_TIMES;
+    }
+    int32_t tToken = -1;
+    {
+        std::lock_guard<std::mutex> tokenLock(tokenMutex_);
+        tToken = token_.load();
+        if (++tToken > MAX_TOKEN_NUM) {
+            tToken = 1;
+        }
+        token_.store(tToken);
+        // save at parameters
+        system::SetParameter(TOKEN_KEY, std::to_string(tToken));
+    }
+    // update tokenMap_
+    {
+        std::lock_guard<std::mutex> tokenMapLock(tokenMapMutex_);
+        tokenMap_[accessToken].emplace_back(tToken);
+    }
+    token = tToken;
+    return ERR_OK;
+}
+
+int32_t DistributedAbilityManagerService::StartDeviceManagerWithoutExtraParam(int32_t token)
+{
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    if (!IsTokenRegistered(accessToken, token)) {
+        return TOKEN_HAS_NOT_REGISTERED;
+    }
+    {
+        std::lock_guard<std::mutex> callbackMapLock(callbackMapMutex_);
+        if (!IsNotifierRegistered(token)) {
+            return CALLBACK_HAS_NOT_REGISTERED;
+        }
+    }
+    // 1. connect to app and get the app proxy if appProxy_ is null, otherwise start device manager directly.
+    {
+        std::lock_guard<std::mutex> appProxyLock(appProxyMutex_);
+        if (appProxy_ != nullptr) {
+            HandleStartDeviceManager(token, nullptr);
+            return ERR_OK;
+        }
+    }
+    int32_t errCode = ConnectAbility(token, nullptr);
     if (errCode != ERR_OK) {
         HILOGE("token connect to app failed");
         return CONNECT_ABILITY_FAILED;
