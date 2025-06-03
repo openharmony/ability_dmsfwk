@@ -139,7 +139,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_001, TestSize.Lev
     MessageOption option;
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     int32_t result = dtbabilitymgrService_->OnRemoteRequest(REGISTER, data, reply, option);
-    EXPECT_EQ(DMS_PERMISSION_DENIED, result);
+    EXPECT_EQ(ERR_INVALID_DATA, result);
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_001 end" << std::endl;
 }
 
@@ -176,7 +176,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_003, TestSize.Lev
     MessageParcel reply;
     MessageOption option;
     int32_t result = dtbabilitymgrService_->OnRemoteRequest(UPDATE_CONNECT_STATUS, data, reply, option);
-    EXPECT_EQ(DMS_PERMISSION_DENIED, result);
+    EXPECT_EQ(ERR_TRANSACTION_FAILED, result);
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_003 end" << std::endl;
 }
 
@@ -195,7 +195,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, OnRemoteRequest_004, TestSize.Lev
     MessageOption option;
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     int32_t result = dtbabilitymgrService_->OnRemoteRequest(UPDATE_CONNECT_STATUS, data, reply, option);
-    EXPECT_EQ(DMS_PERMISSION_DENIED, result);
+    EXPECT_EQ(ERR_INVALID_DATA, result);
     DTEST_LOG << "DistributedAbilityManagerServiceTest OnRemoteRequest_004 end" << std::endl;
 }
 

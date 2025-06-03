@@ -108,7 +108,6 @@ ohos_unittest("distributedabilitymanagerservicetest") {
     "${distributed_service}/dtbschedmgr/test/unittest/distributed_sched_test_util.cpp",
     "unittest/distributed_ability_manager_dumper_test.cpp",
     "unittest/distributed_ability_manager_service_test.cpp",
-    "unittest/distributed_ability_manager_stub_test.cpp",
   ]
   sources += dtbabilitymgr_sources
   configs = [

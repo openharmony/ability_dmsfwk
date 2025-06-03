@@ -53,7 +53,10 @@ int32_t DistributedAbilityManagerClient::Register(
         HILOGE("continuationMgrProxy is nullptr");
         return ERR_NULL_OBJECT;
     }
-    return continuationMgrProxy->Register(*continuationExtraParams, token);
+    if (continuationExtraParams == nullptr) {
+        return continuationMgrProxy->RegisterWithoutExtraParam(token);
+    }
+    return continuationMgrProxy->Register(continuationExtraParams, token);
 }
 
 int32_t DistributedAbilityManagerClient::Unregister(int32_t token)
@@ -76,6 +79,14 @@ int32_t DistributedAbilityManagerClient::RegisterDeviceSelectionCallback(int32_t
         HILOGE("continuationMgrProxy is nullptr");
         return ERR_NULL_OBJECT;
     }
+    if (cbType.empty()) {
+        HILOGE("RegisterDeviceSelectionCallback cbType is empty");
+        return ERR_NULL_OBJECT;
+    }
+    if (notifier == nullptr) {
+        HILOGE("RegisterDeviceSelectionCallback notifier is nullptr");
+        return ERR_NULL_OBJECT;
+    }
     return continuationMgrProxy->RegisterDeviceSelectionCallback(token, cbType, notifier);
 }
 
@@ -85,6 +96,10 @@ int32_t DistributedAbilityManagerClient::UnregisterDeviceSelectionCallback(int32
     sptr<IDistributedAbilityManager> continuationMgrProxy = GetContinuationMgrService();
     if (continuationMgrProxy == nullptr) {
         HILOGE("continuationMgrProxy is nullptr");
+        return ERR_NULL_OBJECT;
+    }
+    if (cbType.empty()) {
+        HILOGE("UnregisterDeviceSelectionCallback cbType is empty");
         return ERR_NULL_OBJECT;
     }
     return continuationMgrProxy->UnregisterDeviceSelectionCallback(token, cbType);
@@ -111,7 +126,10 @@ int32_t DistributedAbilityManagerClient::StartDeviceManager(
         HILOGE("continuationMgrProxy is nullptr");
         return ERR_NULL_OBJECT;
     }
-    return continuationMgrProxy->StartDeviceManager(token, *continuationExtraParams);
+    if (continuationExtraParams == nullptr) {
+        return continuationMgrProxy->StartDeviceManagerWithoutExtraParam(token);
+    }
+    return continuationMgrProxy->StartDeviceManager(token, continuationExtraParams);
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

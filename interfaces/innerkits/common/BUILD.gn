@@ -24,7 +24,6 @@ idl_gen_interface("dmsfwk_idl") {
 }
 
 config("dmsfwk_idl_config") {
-  #visibility = [ ":*" ]
   include_dirs = [
     "include/",
     "${dms_path}/common/include",
