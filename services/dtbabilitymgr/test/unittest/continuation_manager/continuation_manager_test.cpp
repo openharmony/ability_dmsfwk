@@ -269,8 +269,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_004, TestS
     DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_004 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = -1;
-    ContinuationExtraParams extraParams{};
-    int32_t result1 = dtbabilitymgrService_->Register(extraParams, token);
+    int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
@@ -305,8 +304,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_005, TestS
     DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_005 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = -1;
-    ContinuationExtraParams extraParams{};
-    int32_t result1 = dtbabilitymgrService_->Register(extraParams, token);
+    int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
@@ -341,8 +339,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_006, TestS
     DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_006 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = -1;
-    ContinuationExtraParams extraParams{};
-    int32_t result1 = dtbabilitymgrService_->Register(extraParams, token);
+    int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
@@ -377,8 +374,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_007, TestS
     DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_007 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = -1;
-    ContinuationExtraParams extraParams{};
-    int32_t result1 = dtbabilitymgrService_->Register(extraParams, token);
+    int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     int32_t result2 = dtbabilitymgrService_->RegisterDeviceSelectionCallback(
@@ -413,8 +409,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_008, TestS
     DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_008 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = -1;
-    ContinuationExtraParams extraParams{};
-    int32_t result1 = dtbabilitymgrService_->Register(extraParams, token);
+    int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
     std::vector<ContinuationResult> continuationResults;
     ContinuationResult continuationResult1;
@@ -629,10 +624,9 @@ HWTEST_F(ContinuationManagerTest, StartDeviceManagerTest_001, TestSize.Level1)
     DTEST_LOG << "ContinuationManagerTest StartDeviceManagerTest_001 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = -1;
-    ContinuationExtraParams extraParams{};
-    int32_t result1 = dtbabilitymgrService_->Register(extraParams, token);
+    int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
-    int32_t result2 = dtbabilitymgrService_->StartDeviceManager(token, extraParams);
+    int32_t result2 = dtbabilitymgrService_->StartDeviceManager(token);
     DTEST_LOG << "result2:" << result2 << std::endl;
     EXPECT_EQ(ERR_OK, result1);
     EXPECT_EQ(CALLBACK_HAS_NOT_REGISTERED, result2);
@@ -649,11 +643,12 @@ HWTEST_F(ContinuationManagerTest, StartDeviceManagerTest_002, TestSize.Level1)
     DTEST_LOG << "ContinuationManagerTest StartDeviceManagerTest_002 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     int32_t token = -1;
-    ContinuationExtraParams extraParams{};
-    int32_t result1 = dtbabilitymgrService_->Register(extraParams, token);
+    int32_t result1 = dtbabilitymgrService_->Register(nullptr, token);
     DTEST_LOG << "result1:" << result1 << std::endl;
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParams =
+        std::make_shared<ContinuationExtraParams>();
     int32_t result2 = dtbabilitymgrService_->StartDeviceManager(
-        token, extraParams);
+        token, continuationExtraParams);
     DTEST_LOG << "result2:" << result2 << std::endl;
     EXPECT_EQ(ERR_OK, result1);
     EXPECT_EQ(CALLBACK_HAS_NOT_REGISTERED, result2);
