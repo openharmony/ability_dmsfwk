@@ -271,7 +271,7 @@ bool DistributedSchedPermission::CheckDstSameAccount(const std::string& dstNetwo
         return checkIsSameAccountLambda(true);
     }
 #endif
-    return checkIsSameAccountLambda(isSrc);
+    return checkIsSameAccountLambda(!isSrc);
 #else // DMSFWK_SAME_ACCOUNT
     HILOGI("Not support remote same account check.");
     return false;

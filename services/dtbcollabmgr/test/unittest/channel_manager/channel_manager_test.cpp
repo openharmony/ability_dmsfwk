@@ -844,7 +844,7 @@ HWTEST_F(ChannelManagerTest, SendStream_Success, TestSize.Level1)
 
     // Step 6: Call SendStream
     EXPECT_CALL(mockSoftbus, SendStream(NUM_1234, testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(ERR_OK));
+        .WillRepeatedly(testing::Return(ERR_OK));
     result = ChannelManager::GetInstance().SendStream(channelId, streamData);
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_INIT));
     // Validate the result - it should return ERR_OK as everything is valid

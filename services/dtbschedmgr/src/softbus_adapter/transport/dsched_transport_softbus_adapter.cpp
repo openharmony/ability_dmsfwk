@@ -26,7 +26,7 @@
 #include "softbus_common.h"
 #include "softbus_error_code.h"
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
-#include "softbus_resource_query.h"
+#include "softbus_adapter/softbus_adapter.h"
 #endif
 #include "token_setproc.h"
 
@@ -314,39 +314,13 @@ int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDevi
 {
     int32_t ret = SOFTBUS_QUERY_VALID_QOS_ERR;
 #ifdef SOFTBUS_QUERY_VALID_QOS
-    HILOGI("query Valid Qos start peerNetworkId: %{public}s", GetAnonymStr(peerDeviceId).c_str());
-    QosRequestInfo qosRequestInfo;
-    ret = memcpy_s(qosRequestInfo.peerNetworkId, NETWORK_ID_BUF_LEN, peerDeviceId.c_str(), peerDeviceId.size());
-    if (ret != ERR_OK) {
-        HILOGE("memcpy_s failed for peerNetworkId: %{public}s", GetAnonymStr(peerDeviceId).c_str());
-        return ret;
+   if (SoftbusAdapter::GetInstance().dmsAdapetr_.QueryValidQos == nullptr) {
+        return INVALID_PARAMETERS_ERR;
     }
-    qosRequestInfo.dataType = TransDataType::DATA_TYPE_BYTES;
-    QosStatus qosStatus;
-    ret = SoftBusQueryValidQos(&qosRequestInfo, &qosStatus);
+    ret = SoftbusAdapter::GetInstance().dmsAdapetr_.QueryValidQos(peerDeviceId, validQosCase);
     if (ret != ERR_OK) {
         HILOGE("query Valid Qos failed, result: %{public}d", ret);
-        return SOFTBUS_QUERY_VALID_QOS_ERR;
     }
-    if (qosStatus.qosCnt <= 0) {
-        HILOGE("valid qos count is: %{public}d", qosStatus.qosCnt);
-        delete [] qosStatus.validQos;
-        return SOFTBUS_NO_USEFUL_QOS_ERR;
-    }
-    HILOGI("query Valid Qos success; qos count: %{public}d", qosStatus.qosCnt);
-    // case 0 : [160Mbps, Max); case 1 : (30Mbps, 160Mbps); case 2 : (384Kbps, 30Mbps]; case 3 : (0, 384Kbps];
-    validQosCase = SOFTBUS_MAX_VALID_QOS_CASE;
-    for (int i = 0; i < qosStatus.qosCnt; i++) {
-        QosOption item = qosStatus.validQos[i];
-        HILOGI("check valid qos index: %{public}d; isSupportReuse: %{public}s; minBw: %{public}d",
-            i, item.isSupportReuse ? "true" : "false", item.minBw);
-        if (validQosCase > item.minBw) {
-            HILOGI("update validQosCase from: %{public}d to: %{public}d", validQosCase, item.minBw);
-            validQosCase = item.minBw;
-        }
-    }
-    delete [] qosStatus.validQos;
-    HILOGE("final validQosCase is: %{public}d", validQosCase);
 #endif
     return ret;
 }

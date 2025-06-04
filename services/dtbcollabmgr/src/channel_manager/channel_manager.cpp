@@ -15,9 +15,9 @@
 
 #include "channel_manager.h"
 #include "dtbcollabmgr_log.h"
-#include "softbus_file_adapter.h"
 #include <algorithm>
 #include <chrono>
+#include <dlfcn.h>
 #include <future>
 #include <sys/prctl.h>
 #include "securec.h"
@@ -219,6 +219,10 @@ int32_t ChannelManager::Init(const std::string& ownerName)
         return LISTEN_SOCKET_FAILED;
     }
     serverSocketId_ = socketServerId;
+    int32_t result = GetDmsInteractiveAdapterProxy();
+    if (result != ERR_OK) {
+        HILOGE("Get remote dms interactive adapter proxy fail, ret %{public}d.", ret);
+    }
     HILOGI("end");
     return ERR_OK;
 }
@@ -370,9 +374,55 @@ void ChannelManager::DeInit()
     for (const int32_t id : channelIds) {
         DeleteChannel(id);
     }
+    dlclose(dllHandle_);
+    dllHandle_ = nullptr;
+    dmsFileAdapetr_.SetFileSchema = nullptr;
     Shutdown(serverSocketId_);
     Reset();
     HILOGI("end");
+}
+
+int32_t ChannelManager::GetDmsInteractiveAdapterProxy()
+{
+    HILOGI("Get remote dms interactive adapter proxy.");
+    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
+#if (defined(__aarch64__) || defined(__x86_64__))
+    char resolvedPath[100] = "/system/lib64/libdms_interactive_adapter.z.so";
+#else
+    char resolvedPath[100] = "/system/lib/libdms_interactive_adapter.z.so";
+#endif
+    int32_t (*GetSoftbusFile)(ISoftbusFileAdpater &dmsFileHandle) = nullptr;
+
+    dllHandle_ = dlopen(resolvedPath, RTLD_LAZY);
+    if (dllHandle_ == nullptr) {
+        HILOGE("Open dms interactive adapter shared object fail, resolvedPath [%{public}s].", resolvedPath);
+        return NOT_FIND_SERVICE_REGISTRY;
+    }
+
+    int32_t ret = ERR_OK;
+    do {
+        GetSoftbusFile = reinterpret_cast<int32_t (*)(ISoftbusFileAdpater &dmsFileHandle)>(
+            dlsym(dllHandle_, "GetSoftbusFile"));
+        if (GetSoftbusFile == nullptr) {
+            HILOGE("Link the GetDmsInteractiveAdapter symbol in dms interactive adapter fail.");
+            ret = NOT_FIND_SERVICE_REGISTRY;
+            break;
+        }
+
+        if (GetSoftbusFile(dmsFileAdapetr_)) {
+            HILOGE("Init remote dms interactive adapter proxy fail, ret %{public}d.", ret);
+            ret = INVALID_PARAMETERS_ERR;
+            break;
+        }
+        ret = ERR_OK;
+    } while (false);
+
+    if (ret != ERR_OK) {
+        HILOGE("Get remote dms interactive adapter proxy fail, dlclose handle.");
+        dlclose(dllHandle_);
+        dllHandle_ = nullptr;
+    }
+    return ret;
 }
 
 void ChannelManager::Reset()
@@ -695,7 +745,11 @@ int32_t ChannelManager::BindSocket(const int32_t socketId, const ChannelDataType
         return BIND_SOCKET_FAILED;
     }
     if (dataType == ChannelDataType::FILE) {
-        ret = SoftbusFileAdpater::GetInstance().SetFileSchema(socketId);
+        if (dmsFileAdapetr_.SetFileSchema == nullptr) {
+            HILOGE("SetFileSchema is null.");
+            return INVALID_PARAMETERS_ERR;
+        }
+        ret = dmsFileAdapetr_.SetFileSchema(socketId);
     }
     if (ret != ERR_OK) {
         HILOGE("register %{public}d file schema failed", socketId);
@@ -897,7 +951,11 @@ int32_t ChannelManager::RegisterSocket(const int32_t socketId, const int32_t cha
     }
     if (dataType == ChannelDataType::FILE) {
         HILOGI("file socket, regist softbus file schema");
-        int32_t ret = SoftbusFileAdpater::GetInstance().SetFileSchema(socketId);
+        if (dmsFileAdapetr_.SetFileSchema == nullptr) {
+            HILOGE("SetFileSchema is null.");
+            return INVALID_PARAMETERS_ERR;
+        }
+        int32_t ret = dmsFileAdapetr_.SetFileSchema(socketId);
         if (ret != ERR_OK) {
             HILOGE("register %{public}d file schema failed", socketId);
             return REGISTER_FILE_SCHEMA_FAILED;
