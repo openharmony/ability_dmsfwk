@@ -75,7 +75,7 @@ public:
     void UpdateDistributedData();
     int32_t CloudSync();
     void FindProvishionInfo(OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> bundleMgr,
-        AppExecFwk::AppProvisionInfo appProvisionInfo, std::vector<AccountSA::OsAccountInfo> accounts,
+        AppExecFwk::AppProvisionInfo &appProvisionInfo, std::vector<AccountSA::OsAccountInfo> accounts,
         int32_t result, const std::string& bundleName);
     void DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos);
     bool UpdatePublicRecords(const std::string &localUdid);
