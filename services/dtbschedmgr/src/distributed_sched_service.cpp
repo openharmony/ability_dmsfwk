@@ -455,6 +455,15 @@ bool DistributedSchedService::DoStart()
     HILOGI("DMS service disabled, exiting.");
     _exit(0);
 #endif
+
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    HILOGI("Get dms interactive adapter proxy enter.");
+    int32_t ret = GetDmsInteractiveAdapterProxy();
+    if (ret != ERR_OK) {
+        HILOGE("Get remote dms interactive adapter proxy fail, ret %{public}d.", ret);
+    }
+#endif
+
     HILOGI("Dms service DoStart enter.");
     if (!Init()) {
         HILOGE("failed to init DistributedSchedService");
@@ -476,13 +485,6 @@ bool DistributedSchedService::DoStart()
     collaborateCbMgr_->Init();
     dmsCallbackTask_->Init(freeCallback);
 
-#ifdef DMSFWK_INTERACTIVE_ADAPTER
-    HILOGI("Get dms interactive adapter proxy enter.");
-    int32_t ret = GetDmsInteractiveAdapterProxy();
-    if (ret != ERR_OK) {
-        HILOGE("Get remote dms interactive adapter proxy fail, ret %{public}d.", ret);
-    }
-#endif
     HILOGI("OnStart dms service success.");
     return true;
 }
@@ -787,6 +789,7 @@ int32_t DistributedSchedService::GetDmsInteractiveAdapterProxy()
 #endif
     int32_t (*GetDmsInteractiveAdapter)(const sptr<IRemoteObject> &callerToken,
         IDmsInteractiveAdapter &dmsAdpHandle) = nullptr;
+    int32_t (*GetDmsBroadcast)(IDmsBroadcastAdapter &dmsBcHandle) = nullptr;
 
     dllHandle_ = dlopen(resolvedPath, RTLD_LAZY);
     if (dllHandle_ == nullptr) {
@@ -798,14 +801,16 @@ int32_t DistributedSchedService::GetDmsInteractiveAdapterProxy()
     do {
         GetDmsInteractiveAdapter = reinterpret_cast<int32_t (*)(const sptr<IRemoteObject> &callerToken,
             IDmsInteractiveAdapter &dmsAdpHandle)>(dlsym(dllHandle_, "GetDmsInteractiveAdapter"));
-        if (GetDmsInteractiveAdapter == nullptr) {
+        GetDmsBroadcast = reinterpret_cast<int32_t (*)(IDmsBroadcastAdapter &dmsBcHandle)>(
+            dlsym(dllHandle_, "GetDmsBroadcast"));
+        if (GetDmsInteractiveAdapter == nullptr || GetDmsBroadcast == nullptr) {
             HILOGE("Link the GetDmsInteractiveAdapter symbol in dms interactive adapter fail.");
             ret = NOT_FIND_SERVICE_REGISTRY;
             break;
         }
 
-        int32_t ret = GetDmsInteractiveAdapter(this, dmsAdapetr_);
-        if (ret != ERR_OK) {
+        if (GetDmsInteractiveAdapter(this, dmsAdapetr_) || GetDmsBroadcast(
+            SoftbusAdapter::GetInstance().dmsAdapetr_)) {
             HILOGE("Init remote dms interactive adapter proxy fail, ret %{public}d.", ret);
             ret = INVALID_PARAMETERS_ERR;
             break;

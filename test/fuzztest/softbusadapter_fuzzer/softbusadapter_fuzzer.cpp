@@ -18,6 +18,7 @@
 #include <cstddef>
 #include "securec.h"
 #include <cstdint>
+#include <unistd.h>
 
 #include "distributed_mission_broadcast_listener.h"
 #include "softbus_adapter/softbus_adapter.h"
@@ -27,6 +28,7 @@ namespace DistributedSchedule {
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
 namespace {
     constexpr size_t CAPACITY = 10;
+    const int32_t WAITTIME = 10000;
 }
 #endif
 
@@ -72,6 +74,7 @@ void FuzzDealSendSoftbusEvent(const uint8_t* data, size_t size)
     buffer = std::make_shared<DSchedDataBuffer>(CAPACITY);
     SoftbusAdapter::GetInstance().DealSendSoftbusEvent(buffer, retry);
     SoftbusAdapter::GetInstance().RetrySendSoftbusEvent(buffer, retry);
+    usleep(WAITTIME);
     SoftbusAdapter::GetInstance().UnInit();
 }
 #endif

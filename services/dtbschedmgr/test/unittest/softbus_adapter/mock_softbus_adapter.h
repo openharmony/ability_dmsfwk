@@ -18,7 +18,7 @@
 
 #include <gmock/gmock.h>
 
-#include "broadcast.h"
+#include "broadcast_struct.h"
 #include "session.h"
 
 namespace OHOS {
@@ -28,10 +28,6 @@ public:
     MockInterface() {};
     virtual ~MockInterface() {};
 
-    virtual int32_t SendEvent(const char* pkgName, BroadCastAddr target, EventData *event) = 0;
-    virtual int32_t StopEvent(const char* pkgName, BroadCastAddr target, EventType event) = 0;
-    virtual int32_t RegisterEventListener(const char* pkgName, EventListener *listener) = 0;
-    virtual int32_t UnregisterEventListener(const char* pkgName, EventListener *listener) = 0;
     virtual int GetSessionOption(int sessionId, SessionOption option, void* optionValue, uint32_t valueSize) = 0;
 };
 
@@ -42,10 +38,6 @@ public:
 
     static SoftbusMock& GetMock();
 
-    MOCK_METHOD(int32_t, SendEvent, (const char* pkgName, BroadCastAddr target, EventData *event), (override));
-    MOCK_METHOD(int32_t, StopEvent, (const char* pkgName, BroadCastAddr target, EventType event), (override));
-    MOCK_METHOD(int32_t, RegisterEventListener, (const char* pkgName, EventListener *listener), (override));
-    MOCK_METHOD(int32_t, UnregisterEventListener, (const char* pkgName, EventListener *listener), (override));
     MOCK_METHOD(int, GetSessionOption, (int sessionId, SessionOption option, void* optionValue,
         uint32_t valueSize), (override));
 

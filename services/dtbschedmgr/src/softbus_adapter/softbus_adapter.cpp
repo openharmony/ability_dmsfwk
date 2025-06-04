@@ -17,7 +17,7 @@
 
 #include <sys/prctl.h>
 
-#include "broadcast.h"
+#include "broadcast_struct.h"
 #include "dfx/distributed_radar.h"
 #include "dtbschedmgr_log.h"
 #include "softbus_error_code.h"
@@ -115,7 +115,11 @@ int32_t SoftbusAdapter::DealSendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> b
     eventData.data = buffer->Data();
     eventData.dataLen = buffer->Capacity();
     eventData.screenOff = true;
-    int32_t ret = SendEvent(pkgName_.c_str(), BROADCAST_TARGET_AREA, &eventData);
+    if (dmsAdapetr_.SendSoftbusEvent == nullptr) {
+        HILOGE("Dms interactive SendSoftbusEvent is null.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    int32_t ret = dmsAdapetr_.SendSoftbusEvent(eventData);
     if (ret != SOFTBUS_OK) {
         HILOGW("SendEvent failed, ret:%{public}d.", ret);
         return RetrySendSoftbusEvent(buffer, retry);
@@ -146,7 +150,11 @@ int32_t SoftbusAdapter::RetrySendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> 
 int32_t SoftbusAdapter::StopSoftbusEvent()
 {
     HILOGI("StopSoftbusEvent pkgName: %{public}s.", pkgName_.c_str());
-    int32_t ret = StopEvent(pkgName_.c_str(), BROADCAST_TARGET_AREA, FOREGROUND_APP);
+    if (dmsAdapetr_.StopSoftbusEvent == nullptr) {
+        HILOGE("Dms interactive StopSoftbusEvent is null.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    int32_t ret = dmsAdapetr_.StopSoftbusEvent();
     if (ret != SOFTBUS_OK) {
         HILOGE("StopEvent failed, ret:%{public}d.", ret);
         return ret;
@@ -190,7 +198,11 @@ int32_t SoftbusAdapter::RegisterSoftbusEventListener(const std::shared_ptr<Softb
     eventListener.deduplicate = true;
     eventListener.OnEventReceived = EventListenerReceived;
     HILOGI("RegisterSoftbusEventListener pkgName: %s.", pkgName_.c_str());
-    int32_t ret = RegisterEventListener(pkgName_.c_str(), &eventListener);
+    if (dmsAdapetr_.RegisterSoftbusEventListener == nullptr) {
+        HILOGE("Dms interactive RegisterSoftbusEventListener is null.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    int32_t ret = dmsAdapetr_.RegisterSoftbusEventListener(eventListener);
     DmsRadar::GetInstance().RegisterSoftbusCallbackRes("RegisterSoftbusEventListener", ret);
     if (ret != SOFTBUS_OK) {
         HILOGE("RegisterSoftbusEventListener failed, ret: %{public}d.", ret);
@@ -215,7 +227,11 @@ int32_t SoftbusAdapter::UnregisterSoftbusEventListener(const std::shared_ptr<Sof
     eventListener.deduplicate = true;
     eventListener.OnEventReceived = EventListenerReceived;
     HILOGI("UnregisterSoftbusEventListener pkgName: %s.", pkgName_.c_str());
-    int32_t ret = UnregisterEventListener(pkgName_.c_str(), &eventListener);
+    if (dmsAdapetr_.UnregisterSoftbusEventListener == nullptr) {
+        HILOGE("Dms interactive UnregisterSoftbusEventListener is null.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    int32_t ret = dmsAdapetr_.UnregisterSoftbusEventListener(eventListener);
     if (ret != SOFTBUS_OK) {
         HILOGE("UnregisterSoftbusEventListener failed, ret: %{public}d.", ret);
         return ret;
