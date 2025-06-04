@@ -1742,10 +1742,66 @@ HWTEST_F(DistributedSchedPermissionTest, CheckAclList_001, TestSize.Level3)
     IDistributedSched::AccountInfo dmsAccountInfo;
     CallerInfo callerInfo;
     DistributedSchedPermission::GetInstance().GetOsAccountData(dmsAccountInfo);
-    DistributedSchedPermission::GetInstance().CheckDstSameAccount(dstNetworkId, dmsAccountInfo, callerInfo, true);
-    bool ret = DistributedSchedPermission::GetInstance().CheckAclList(dstNetworkId, dmsAccountInfo, callerInfo);
+    bool ret = DistributedSchedPermission::GetInstance().CheckAclList(dstNetworkId, dmsAccountInfo, callerInfo, true);
     EXPECT_EQ(ret, false);
     DTEST_LOG << "DistributedSchedPermissionTest CheckAclList_001 end result:" << ret << std::endl;
 }
+
+/**
+ * @tc.name: CheckAclList_002
+ * @tc.desc: call CheckAclList
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckAclList_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckAclList_002 begin" << std::endl;
+    std::string dstNetworkId;
+    IDistributedSched::AccountInfo dmsAccountInfo;
+    CallerInfo callerInfo;
+    DistributedSchedPermission::GetInstance().GetOsAccountData(dmsAccountInfo);
+    bool ret = DistributedSchedPermission::GetInstance().CheckAclList(dstNetworkId, dmsAccountInfo, callerInfo, false);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckAclList_002 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: CheckDstSameAccount_001
+ * @tc.desc: call CheckDstSameAccount
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckDstSameAccount_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckDstSameAccount_001 begin" << std::endl;
+    std::string dstNetworkId;
+    IDistributedSched::AccountInfo dmsAccountInfo;
+    CallerInfo callerInfo;
+    DistributedSchedPermission::GetInstance().GetOsAccountData(dmsAccountInfo);
+    bool ret = DistributedSchedPermission::GetInstance().CheckDstSameAccount(dstNetworkId,
+        dmsAccountInfo, callerInfo, true);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckDstSameAccount_001 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: CheckDstSameAccount_002
+ * @tc.desc: call CheckDstSameAccount
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckDstSameAccount_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckDstSameAccount_002 begin" << std::endl;
+    std::string dstNetworkId;
+    IDistributedSched::AccountInfo dmsAccountInfo;
+    CallerInfo callerInfo;
+    DistributedSchedPermission::GetInstance().GetOsAccountData(dmsAccountInfo);
+    bool ret = DistributedSchedPermission::GetInstance().CheckDstSameAccount(dstNetworkId,
+        dmsAccountInfo, callerInfo, false);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckDstSameAccount_002 end result:" << ret << std::endl;
+}
+
 } // namespace DistributedSchedule
 } // namespace OHOS
