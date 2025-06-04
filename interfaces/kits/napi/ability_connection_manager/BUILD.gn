@@ -62,6 +62,7 @@ ohos_shared_library("abilityconnectionmanager_napi") {
     "c_utils:utils",
     "dsoftbus:softbus_client",
     "graphic_surface:surface",
+    "hiappevent:hiappevent_innerapi",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "image_framework:image",
