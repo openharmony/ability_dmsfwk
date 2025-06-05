@@ -21,6 +21,8 @@
 #include <vector>
 
 #include "ability_connection_manager.h"
+#include "app_event.h"
+#include "app_event_processor_mgr.h"
 #include "dtbcollabmgr_log.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
@@ -40,6 +42,7 @@ namespace DistributedCollab {
 using namespace OHOS::AbilityRuntime;
 using namespace OHOS::AppExecFwk;
 using namespace OHOS::MediaAVCodec;
+using namespace OHOS::HiviewDFX;
 namespace {
 #define GET_PARAMS(env, info, num)    \
     size_t argc = num;                \
@@ -63,6 +66,10 @@ constexpr int32_t UNKNOWN = -1;
 constexpr int32_t NV12 = 0;
 constexpr int32_t NV21 = 1;
 constexpr int32_t IMAGE_COMPRESSION_QUALITY = 30;
+constexpr int32_t TRIGGER_COND_TIMEOUT = 90;
+constexpr int32_t TRIGGER_COND_ROW = 30;
+constexpr int32_t EVENT_RESULT_SUCCESS = 0;
+constexpr int32_t EVENT_RESULT_FAIL = 1;
 
 const std::string EVENT_CONNECT = "connect";
 const std::string EVENT_DISCONNECT = "disconnect";
@@ -877,17 +884,77 @@ napi_value JsAbilityConnectionManager::UnregisterAbilityConnectionSessionCallbac
     return nullptr;
 }
 
+static int64_t AddProcessor()
+{
+    HiAppEvent::ReportConfig config;
+    config.name = "ha_app_event";
+    config.appId = "com_hmos_sdk_ocg";
+    config.routeInfo = "AUTO";
+    config.triggerCond.timeout = TRIGGER_COND_TIMEOUT;
+    config.triggerCond.row = TRIGGER_COND_ROW;
+    config.eventConfigs.clear();
+    {
+        HiAppEvent::EventConfig event1;
+        event1.domain = "api_diagnostic";
+        event1.name = "api_exec_end";
+        event1.isRealTime = false;
+        config.eventConfigs.push_back(event1);
+    }
+    {
+        HiAppEvent::EventConfig event2;
+        event2.domain = "api_diagnostic";
+        event2.name = "api_called_stat";
+        event2.isRealTime = true;
+        config.eventConfigs.push_back(event2);
+    }
+    {
+        HiAppEvent::EventConfig event3;
+        event3.domain = "api_diagnostic";
+        event3.name = "api_called_stat_cnt";
+        event3.isRealTime = true;
+        config.eventConfigs.push_back(event3);
+    }
+    return HiAppEvent::AppEventProcessorMgr::AddProcessor(config);
+}
+
+static void WriteEndEvent(const std::string& transId, const int result, const int errCode, const time_t beginTime)
+{
+    HiAppEvent::Event event("api_diagnostic", "api_exec_end", HiAppEvent::BEHAVIOR);
+    event.AddParam("transId", transId);
+    event.AddParam("result", result);
+    event.AddParam("error_code", errCode);
+    event.AddParam("api_name", std::string("connect"));
+    event.AddParam("sdk_name", std::string("DistributedServiceKit"));
+    event.AddParam("begin_time", beginTime);
+    event.AddParam("end_time", time(nullptr));
+    Write(event);
+}
+
 napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info info)
 {
     HILOGI("called.");
+    int64_t processorId = -1;
+    processorId = AddProcessor();
+    if (processorId <= 0) {
+        HILOGE("Add processor fail.Error code is %{public}lld", processorId);
+        return nullptr;
+    }
+    time_t beginTime = time(nullptr);
+    std::string transId = std::string("transId_") + std::to_string(std::rand());
     int32_t sessionId = -1;
     GET_PARAMS(env, info, ARG_COUNT_ONE);
     if (argc != ARG_COUNT_ONE || !JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
         HILOGE("CheckArgsCount failed or Failed to unwrap sessionId.");
         CreateBusinessError(env, ERR_INVALID_PARAMETERS);
+        WriteEndEvent(transId, EVENT_RESULT_FAIL, ERR_INVALID_PARAMETERS, beginTime);
         return nullptr;
     }
+    return ConnectInner(env, sessionId, transId, beginTime);
+}
 
+napi_value JsAbilityConnectionManager::ConnectInner(
+    napi_env env, int32_t sessionId, const std::string &transId, time_t beginTime)
+{
     napi_deferred deferred;
     napi_value promise = nullptr;
     NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
@@ -902,6 +969,7 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
         delete asyncCallbackInfo;
         napi_release_threadsafe_function(tsfn, napi_tsfn_release);
         napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        WriteEndEvent(transId, EVENT_RESULT_FAIL, ERR_EXECUTE_FUNCTION, beginTime);
         return promise;
     }
     asyncCallbackInfo->tsfn = tsfn;
@@ -918,6 +986,7 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
         delete asyncCallbackInfo;
         napi_release_threadsafe_function(tsfn, napi_tsfn_release);
         napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        WriteEndEvent(transId, EVENT_RESULT_FAIL, ERR_EXECUTE_FUNCTION, beginTime);
         return promise;
     }
 
@@ -927,9 +996,11 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
         delete asyncCallbackInfo;
         napi_release_threadsafe_function(tsfn, napi_tsfn_release);
         napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
+        WriteEndEvent(transId, EVENT_RESULT_FAIL, ERR_EXECUTE_FUNCTION, beginTime);
         return promise;
     }
 
+    WriteEndEvent(transId, EVENT_RESULT_SUCCESS, EVENT_RESULT_SUCCESS, beginTime);
     return promise;
 }
 
