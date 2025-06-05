@@ -70,7 +70,7 @@ namespace {
         { .qos = QOS_TYPE_MAX_IDLE_TIMEOUT, .value = 60 * 60 * 1000 }
     };
 
-    static constexpr int32_t DSCHED_COLLAB_HIGH_QOS_TYPE_MIN_BW = 4 * 1024 * 1024;
+    static constexpr int32_t DSCHED_COLLAB_HIGH_QOS_TYPE_MIN_BW = 80 * 1024 * 1024;
     static constexpr int32_t DSCHED_COLLAB_HIGH_QOS_TYPE_MAX_LATENCY = 10000;
     static constexpr int32_t DSCHED_COLLAB_HIGH_QOS_TYPE_MIN_LATENCY = 2000;
 
