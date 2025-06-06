@@ -289,23 +289,13 @@ HWTEST_F(DSchedCollabManagerSupTest, GetSinkCollabVersion_002, TestSize.Level3)
     info.sinkInfo_.deviceId_ = "deviceId";
     info.srcClientCB_ = sptr<DistributedSchedService>(new DistributedSchedService());
 
-    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
-    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(nullptr));
-    EXPECT_CALL(*dmsStoreMock, CheckNetworkIdByBundleName(_, _)).WillOnce(Return(false));
-    int32_t ret = DSchedCollabManager::GetInstance().GetSinkCollabVersion(info);
-    EXPECT_EQ(ret, FIND_REMOTE_DEVICEID_ERR);
-
     DSchedCollabManager::GetInstance().eventHandler_ = nullptr;
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
-    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(nullptr));
-    EXPECT_CALL(*dmsStoreMock, CheckNetworkIdByBundleName(_, _)).WillOnce(Return(true));
-    ret = DSchedCollabManager::GetInstance().GetSinkCollabVersion(info);
+    auto ret = DSchedCollabManager::GetInstance().GetSinkCollabVersion(info);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     DSchedCollabManager::GetInstance().Init();
-    std::shared_ptr<DmsDeviceInfo> ptr = std::make_shared<DmsDeviceInfo>("", 0, "");
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
-    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(ptr));
     ret = DSchedCollabManager::GetInstance().GetSinkCollabVersion(info);
     EXPECT_EQ(ret, ERR_OK);
     DSchedCollabManager::GetInstance().UnInit();

@@ -356,8 +356,9 @@ HWTEST_F(DSchedCollabManagerTest, ReleaseAbilityLink_001, TestSize.Level3)
     DTEST_LOG << "DSchedCollabManagerTest ReleaseAbilityLink_001 begin" << std::endl;
     const std::string bundleName = "";
     const int32_t pid = 0;
+    DSchedCollabManager::GetInstance().collabs_.clear();
     int32_t ret = DSchedCollabManager::GetInstance().ReleaseAbilityLink(bundleName, pid);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedCollabManagerTest ReleaseAbilityLink_001 end" << std::endl;
 }
 

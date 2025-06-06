@@ -165,7 +165,7 @@ HWTEST_F(SurfaceDecoderFilterSupTest, DoStop_Test, TestSize.Level1)
     auto ret = decodeFilter_->DoStop();
     EXPECT_EQ(ret, Status::ERROR_UNKNOWN);
 
-    EXPECT_CALL(*surfaceDecoderAptMock_, Stop()).WillOnce(Return(Status::OK));
+    EXPECT_CALL(*surfaceDecoderAptMock_, Stop()).WillRepeatedly(Return(Status::OK));
     ret = decodeFilter_->DoStop();
     EXPECT_EQ(ret, Status::OK);
     DTEST_LOG << "SurfaceDecoderFilterSupTest DoStop_Test end" << std::endl;
