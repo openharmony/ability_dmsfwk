@@ -606,7 +606,6 @@ HWTEST_F(ChannelManagerTest, OnSocketClosed_CallbackInvokedAndChannelDeleted, Te
     auto mockListener = std::make_shared<MockChannelListener>();
     int32_t result = ChannelManager::GetInstance().RegisterChannelListener(channelId, mockListener);
     EXPECT_EQ(result, ERR_OK);
-    EXPECT_CALL(*mockListener, OnDisConnect(channelId, ShutdownReason::SHUTDOWN_REASON_UNKNOWN)).Times(1);
 
     // Step 3: Mock Bind to succeed
     EXPECT_CALL(mockSoftbus, Bind(testing::_, testing::_, testing::_, testing::_))

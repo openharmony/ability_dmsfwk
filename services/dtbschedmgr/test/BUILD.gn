@@ -163,8 +163,47 @@ ohos_unittest("distributedschedservicetest") {
 
   sources = [
     "unittest/distributed_sched_service_first_test.cpp",
-    "unittest/distributed_sched_service_second_test.cpp",
     "unittest/mock/svc_distributed_connection_mock.cpp",
+    "unittest/mock_distributed_sched.cpp",
+  ]
+  if (dmsfwk_ces_listener) {
+    sources += [ "unittest/common_event_listener_test.cpp" ]
+  }
+  sources += dtbschedmgr_sources
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    public_deps = dsched_public_deps
+  }
+
+  external_deps += [
+    "ability_base:want",
+    "googletest:gmock",
+  ]
+
+  defines = []
+  if (dmsfwk_report_memmgr || dmsfwk_report_memmgr_plugins) {
+    defines = [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
+  }
+
+  if (!dmsfwk_softbus_adapter_common) {
+    defines += [ "DMSFWK_INTERACTIVE_ADAPTER" ]
+  }
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("distributedschedservicesecondtest") {
+  module_out_path = module_output_path
+
+  sources = [
+    "unittest/distributed_sched_service_second_test.cpp",
     "unittest/mock_distributed_sched.cpp",
   ]
   if (dmsfwk_ces_listener) {
@@ -547,6 +586,7 @@ ohos_unittest("dmscontinuemanagertest") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "${dms_path}/services/dtbschedmgr/test/cfi_blocklist.txt"
   }
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
@@ -1291,6 +1331,7 @@ group("unittest") {
     ":distributedschedadaptertest",
     ":distributedschedcallbacktest",
     ":distributedschedservicetest",
+    ":distributedschedservicesecondtest",
     ":distributedschedstubtest",
     ":distributeduidtest",
     ":distributedwanttest",
