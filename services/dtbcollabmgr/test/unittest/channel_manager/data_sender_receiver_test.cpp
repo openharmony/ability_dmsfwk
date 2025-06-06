@@ -121,6 +121,7 @@ HWTEST_F(DataSenderReceiverTest, SendMessageData_ParameterCheck, TestSize.Level1
 {
     std::shared_ptr<AVTransDataBuffer> sendData = std::make_shared<AVTransDataBuffer>(4 * 1024 + 1);
     int32_t result = dataSenderReceiver.SendMessageData(sendData);
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
     EXPECT_EQ(result, DATA_SIZE_EXCEED_LIMIT);
 }
 
