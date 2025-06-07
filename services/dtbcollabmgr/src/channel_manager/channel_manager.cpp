@@ -179,7 +179,8 @@ ChannelManager::~ChannelManager()
 int32_t ChannelManager::Init(const std::string& ownerName)
 {
     HILOGI("start init channel manager");
-    if (eventHandler_ != nullptr && callbackEventHandler_ != nullptr && msgEventHandler_ != nullptr) {
+    if (eventHandler_ != nullptr && callbackEventHandler_ != nullptr && msgEventHandler_ != nullptr &&
+        callbackEventHandlerNew_ != nullptr) {
         HILOGW("server channel already init");
         return ERR_OK;
     }
@@ -206,14 +207,19 @@ int32_t ChannelManager::Init(const std::string& ownerName)
     msgEventCon_.wait(msgLock, [this] {
         return msgEventHandler_ != nullptr;
     });
+
+    callbackEventNewThread_ = std::thread(&ChannelManager::StartCallbackEventNew, this);
+    std::unique_lock<std::mutex> callbackNewLock(callbackEventNewMutex_);
+    callbackEventNewCon_.wait(callbackNewLock, [this] {
+        return callbackEventHandlerNew_ != nullptr;
+    });
     
     int32_t socketServerId = CreateServerSocket();
     if (socketServerId <= 0) {
         HILOGE("create socket failed, ret: %{public}d", socketServerId);
         return CREATE_SOCKET_FAILED;
     }
-    int32_t ret = Listen(socketServerId, g_low_qosInfo,
-        g_lowQosTvParamIndex, &channelManagerListener);
+    int32_t ret = Listen(socketServerId, g_low_qosInfo, g_lowQosTvParamIndex, &channelManagerListener);
     if (ret != ERR_OK) {
         HILOGE("service listen failed, ret: %{public}d", ret);
         return LISTEN_SOCKET_FAILED;
@@ -256,6 +262,21 @@ void ChannelManager::StartCallbackEvent()
     HILOGI("callback event end");
 }
 
+void ChannelManager::StartCallbackEventNew()
+{
+    HILOGI("Start new callback event start");
+    std::string callbackName = ownerName_ + "callbackNew";
+    prctl(PR_SET_NAME, callbackName.c_str());
+    auto runner = AppExecFwk::EventRunner::Create(false);
+    {
+        std::lock_guard<std::mutex> lock(callbackEventNewMutex_);
+        callbackEventHandlerNew_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
+    }
+    callbackEventNewCon_.notify_one();
+    runner->Run();
+    HILOGI("new callback event end");
+}
+
 void ChannelManager::StartMsgEvent()
 {
     HILOGI("Start msg event start");
@@ -296,6 +317,20 @@ int32_t ChannelManager::PostCallbackTask(const AppExecFwk::InnerEvent::Callback&
         return ERR_OK;
     }
     HILOGE("add callback task failed");
+    return POST_TASK_FAILED;
+}
+
+int32_t ChannelManager::PostCallbackTaskNew(const AppExecFwk::InnerEvent::Callback& callback,
+    const AppExecFwk::EventQueue::Priority priority)
+{
+    if (callbackEventHandlerNew_ == nullptr) {
+        HILOGE("new callback event handler empty");
+        return NULL_EVENT_HANDLER;
+    }
+    if (callbackEventHandlerNew_->PostTask(callback, priority)) {
+        return ERR_OK;
+    }
+    HILOGE("add new callback task failed");
     return POST_TASK_FAILED;
 }
 
@@ -360,8 +395,15 @@ void ChannelManager::DeInit()
             msgEventThread_.join();
         }
         msgEventHandler_ = nullptr;
-    } else {
-        HILOGE("msgEventHandler_ is nullptr");
+    }
+
+    // stop new callback task
+    if (callbackEventHandlerNew_ != nullptr) {
+        callbackEventHandlerNew_->GetEventRunner()->Stop();
+        if (callbackEventNewThread_.joinable()) {
+            callbackEventNewThread_.join();
+        }
+        callbackEventHandlerNew_ = nullptr;
     }
 
     // release channels
@@ -985,6 +1027,27 @@ void ChannelManager::NotifyListeners(const int32_t channelId, Func listenerFunc,
     }
 }
 
+template <typename Func, typename... Args>
+void ChannelManager::NotifyListenersNew(const int32_t channelId, Func listenerFunc,
+    const AppExecFwk::EventQueue::Priority priority, Args&&... args)
+{
+    std::shared_lock<std::shared_mutex> readLock(listenerMutex_);
+    auto it = listenersMap_.find(channelId);
+    if (it == listenersMap_.end() || it->second.empty()) {
+        HILOGE("no matching listener to %{public}d", channelId);
+        return;
+    }
+    auto& listeners = it->second;
+    for (const auto& listener : listeners) {
+        if (auto ptr = listener.lock()) {
+            auto func = [ptr, listenerFunc, channelId, args...]() {
+                (ptr.get()->*listenerFunc)(channelId, std::forward<Args>(args)...);
+            };
+            PostCallbackTaskNew(func, priority);
+        }
+    }
+}
+
 void ChannelManager::OnSocketError(int32_t socketId, const int32_t errorCode)
 {
     int32_t channelId = 0;
@@ -1289,7 +1352,7 @@ void ChannelManager::OnMessageReceived(int32_t socketId, const void* data, const
 void ChannelManager::DoMessageReceiveCallback(const int32_t channelId,
     const std::shared_ptr<AVTransDataBuffer>& buffer)
 {
-    NotifyListeners(channelId, &IChannelListener::OnMessage,
+    NotifyListenersNew(channelId, &IChannelListener::OnMessage,
         AppExecFwk::EventQueue::Priority::HIGH, buffer);
 }
 

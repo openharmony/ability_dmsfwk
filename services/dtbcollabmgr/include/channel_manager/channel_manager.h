@@ -120,6 +120,11 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> callbackEventHandler_;
     std::condition_variable callbackEventCon_;
 
+    std::thread callbackEventNewThread_;
+    std::condition_variable callbackEventNewCon_;
+    std::mutex callbackEventNewMutex_;
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> callbackEventHandlerNew_ = nullptr;
+
     std::mutex msgEventMutex_;
     std::thread msgEventThread_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> msgEventHandler_;
@@ -139,10 +144,13 @@ private:
         const AppExecFwk::EventQueue::Priority priority, const std::string& name = "");
     int32_t PostCallbackTask(const AppExecFwk::InnerEvent::Callback& callback,
             const AppExecFwk::EventQueue::Priority priority);
+    int32_t PostCallbackTaskNew(const AppExecFwk::InnerEvent::Callback& callback,
+            const AppExecFwk::EventQueue::Priority priority);
     int32_t PostMsgTask(const AppExecFwk::InnerEvent::Callback& callback,
         const AppExecFwk::EventQueue::Priority priority);
     void StartEvent();
     void StartCallbackEvent();
+    void StartCallbackEventNew();
     void StartMsgEvent();
 
     int32_t CreateServerSocket();
@@ -179,6 +187,9 @@ private:
     int32_t DoSendData(const int32_t channelId, Func doSendFunc, Args&& ...args);
     template <typename Func, typename... Args>
     void NotifyListeners(const int32_t channelId, Func listenerFunc,
+        const AppExecFwk::EventQueue::Priority priority, Args&& ...args);
+    template <typename Func, typename... Args>
+    void NotifyListenersNew(const int32_t channelId, Func listenerFunc,
         const AppExecFwk::EventQueue::Priority priority, Args&& ...args);
     int32_t GetValidSocket(const int32_t channelId);
     int32_t DoSendBytes(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data);
