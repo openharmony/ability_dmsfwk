@@ -71,7 +71,7 @@ namespace {
     const string DMS_IS_CALLER_BACKGROUND = "dmsIsCallerBackGround";
     const string DMS_VERSION_ID = "dmsVersion";
     constexpr int32_t SLEEP_TIME = 1000;
-    constexpr int32_t WEARENGINE_UID = 7259;
+    constexpr int32_t WEARLINK_UID = 7259;
 }
 
 void SetNativeToken()
@@ -98,7 +98,7 @@ void SetNativeToken()
         return;
     }
     SetSelfTokenID(tokenId);
-    setuid(WEARENGINE_UID);
+    setuid(WEARLINK_UID);
     OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
 }
 

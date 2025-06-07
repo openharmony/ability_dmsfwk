@@ -155,7 +155,7 @@ constexpr int32_t HID_HAP = 10000; /* first hap user */
 constexpr int32_t WINDOW_MANAGER_SERVICE_ID = 4606;
 constexpr int32_t SEMI_WIFI_ID = 1010;
 constexpr int32_t DSOFTBUS_UID = 1024;
-constexpr int32_t WEARENGINE_UID = 7259;
+constexpr int32_t WEARLINK_UID = 7259;
 DataShareManager &dataShareManager = DataShareManager::GetInstance();
 
 const std::string HMOS_HAP_CODE_PATH = "1";
@@ -297,7 +297,7 @@ static int32_t CheckCallingPermission(DExtConnectResultInfo& resultInfo)
     }
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     HILOGI("DistributedSchedService::callingUid: %{public}d.", callingUid);
-    if (callingUid != DSOFTBUS_UID && callingUid != WEARENGINE_UID) {
+    if (callingUid != DSOFTBUS_UID && callingUid != WEARLINK_UID) {
         HILOGE("Wrong uid");
         resultInfo.result = DExtConnectResult::PERMISSION_DENIED;
         return DMS_PERMISSION_DENIED;
