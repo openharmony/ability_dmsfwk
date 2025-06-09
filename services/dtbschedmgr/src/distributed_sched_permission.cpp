@@ -251,7 +251,7 @@ bool DistributedSchedPermission::CheckDstSameAccount(const std::string& dstNetwo
                 GetAnonymStr(dmSrcCaller.accountId).c_str(), GetAnonymInt32(dmSrcCaller.userId).c_str(),
                 dmSrcCaller.pkgName.c_str(), GetAnonymStr(dmDstCallee.networkId).c_str());
             if (isSink ? DeviceManager::GetInstance().CheckSinkIsSameAccount(dmSrcCaller, dmDstCallee)
-                       : DeviceManager::GetInstance().CheckSrcIsSameAccount(dmSrcCaller, dmDstCallee))
+                       : DeviceManager::GetInstance().CheckSrcIsSameAccount(dmSrcCaller, dmDstCallee)) {
                 return true;
             }
         }
@@ -271,7 +271,7 @@ bool DistributedSchedPermission::CheckDstSameAccount(const std::string& dstNetwo
         return checkIsSameAccountLambda(true);
     }
 #endif
-    return checkIsSameAccountLambda(isSrc);
+    return checkIsSameAccountLambda(!isSrc);
 #else // DMSFWK_SAME_ACCOUNT
     HILOGI("Not support remote same account check.");
     return false;
