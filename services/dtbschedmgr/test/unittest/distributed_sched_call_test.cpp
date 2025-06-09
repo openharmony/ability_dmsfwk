@@ -20,6 +20,7 @@
 #include "iservice_registry.h"
 #include "multi_user_manager.h"
 #include "system_ability_definition.h"
+#include "mock/multi_user_manager_mock.h"
 
 #define private public
 #define protected public
@@ -74,6 +75,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    static inline std::shared_ptr<MultiUserManagerMock> multiUserMgrMock_ = nullptr;
 
     void AddSession(const sptr<IRemoteObject>& connect, const std::string& localDeviceId,
         const std::string& remoteDeviceId, const AAFwk::Want& want) const;
@@ -86,13 +88,6 @@ public:
     void AddConnectCount(int32_t uid) const;
     void DecreaseConnectCount(int32_t uid) const;
 };
-
-static bool g_isForeground = true;
-
-bool MultiUserManager::IsCallerForeground(int32_t callingUid)
-{
-    return g_isForeground;
-}
 
 void AbilityCallCallbackTest::OnAbilityConnectDone(const AppExecFwk::ElementName& element,
     const sptr<IRemoteObject>& remoteObject, int32_t resultCode)
@@ -121,11 +116,15 @@ void AbilityCallWrapperStubTest::OnAbilityDisconnectDone(const AppExecFwk::Eleme
 void DistributedSchedCallTest::SetUpTestCase()
 {
     DTEST_LOG << "DistributedSchedServiceTest call SetUpTestCase " << std::endl;
+    multiUserMgrMock_ = std::make_shared<MultiUserManagerMock>();
+    MultiUserManagerMock::multiUserMgrMock = multiUserMgrMock_;
 }
 
 void DistributedSchedCallTest::TearDownTestCase()
 {
     DTEST_LOG << "DistributedSchedServiceTest call TearDownTestCase " << std::endl;
+    MultiUserManagerMock::multiUserMgrMock = nullptr;
+    multiUserMgrMock_ = nullptr;
 }
 
 void DistributedSchedCallTest::SetUp()
@@ -156,6 +155,7 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_001, TestSize.Level1)
     DTEST_LOG << "DistributedSchedServiceTest mock illegal want " << std::endl;
     OHOS::AAFwk::Want illegalWant;
     illegalWant.SetElementName("", "ohos.demo.test", "abilityTest");
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillRepeatedly(Return(true));
     int32_t result = DistributedSchedService::GetInstance().StartRemoteAbilityByCall(illegalWant,
         callback, callerUid, callerPid, accessToken);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR_CODE);
@@ -678,7 +678,7 @@ HWTEST_F(DistributedSchedCallTest, CallAbility_021, TestSize.Level1)
 
     DTEST_LOG << "DistributedSchedServiceTest mock illegal uid " << std::endl;
     int32_t illegalUid = -1;
-    g_isForeground = false;
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(false));
     int32_t result = DistributedSchedService::GetInstance().StartRemoteAbilityByCall(want,
         callback, illegalUid, callerPid, accessToken);
     EXPECT_EQ(result, DMS_NOT_FOREGROUND_USER);

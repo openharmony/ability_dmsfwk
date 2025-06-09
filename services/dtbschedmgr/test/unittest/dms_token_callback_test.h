@@ -18,6 +18,8 @@
 
 #include "gtest/gtest.h"
 
+#include "mock/multi_user_manager_mock.h"
+
 #define private public
 #include "dms_token_callback.h"
 #undef private
@@ -32,6 +34,7 @@ public:
     void TearDown();
 
     sptr<DmsTokenCallback> dmsTokenCallback_;
+    static inline std::shared_ptr<MultiUserManagerMock> multiUserMgrMock_ = nullptr;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
