@@ -437,6 +437,7 @@ void DnetServiceDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 
 std::string DtbschedmgrDeviceInfoStorage::GetDeviceName(std::string netWorkId)
 {
+    lock_guard<mutex> autoLock(deviceLock_);
     for (auto device = remoteDevices_.begin(); device != remoteDevices_.end(); ++device) {
         if (device->second != nullptr && device->second->GetNetworkId() == netWorkId) {
             HILOGI("deviceName = %{public}s", device->second->GetDeviceName().c_str());
@@ -449,6 +450,7 @@ std::string DtbschedmgrDeviceInfoStorage::GetDeviceName(std::string netWorkId)
 std::vector<std::string> DtbschedmgrDeviceInfoStorage::GetNetworkIdList()
 {
     std::vector<std::string> devices;
+    lock_guard<mutex> autoLock(deviceLock_);
     for (auto device = remoteDevices_.begin(); device != remoteDevices_.end(); ++device) {
         if (device->second != nullptr) {
             HILOGI("NetworkId: %{public}s", GetAnonymStr(device->second->GetNetworkId()).c_str());

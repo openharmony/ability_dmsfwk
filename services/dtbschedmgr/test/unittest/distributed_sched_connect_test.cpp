@@ -29,6 +29,7 @@
 #include "multi_user_manager.h"
 #include "parcel_helper.h"
 #include "test_log.h"
+#include "mock/multi_user_manager_mock.h"
 
 #define private public
 #define protected public
@@ -94,18 +95,11 @@ public:
     void AddConnectCount(int32_t uid) const;
     void DecreaseConnectCount(int32_t uid) const;
     sptr<IDistributedSched> GetDms();
-
+    static inline std::shared_ptr<MultiUserManagerMock> multiUserMgrMock_ = nullptr;
     class DeviceInitCallBack : public DmInitCallback {
         void OnRemoteDied() override;
     };
 };
-
-static bool g_isForeground = true;
-
-bool MultiUserManager::IsCallerForeground(int32_t callingUid)
-{
-    return g_isForeground;
-}
 
 void AbilityConnectCallbackTest::OnAbilityConnectDone(const AppExecFwk::ElementName& element,
     const sptr<IRemoteObject>& remoteObject, int32_t resultCode)
@@ -135,10 +129,14 @@ void DistributedSchedConnectTest::SetUpTestCase()
     const std::string pkgName = "DBinderBus_" + std::to_string(getprocpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
+    multiUserMgrMock_ = std::make_shared<MultiUserManagerMock>();
+    MultiUserManagerMock::multiUserMgrMock = multiUserMgrMock_;
 }
 
 void DistributedSchedConnectTest::TearDownTestCase()
 {
+    MultiUserManagerMock::multiUserMgrMock = nullptr;
+    multiUserMgrMock_ = nullptr;
 }
 
 void DistributedSchedConnectTest::SetUp()
@@ -701,6 +699,7 @@ HWTEST_F(DistributedSchedConnectTest, ConnectRemoteAbility001, TestSize.Level4)
     OHOS::AAFwk::Want want;
     want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
     sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillRepeatedly(Return(true));
     int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbility(want, connect, -1, -1, -1);
     EXPECT_EQ(ret, BIND_ABILITY_UID_INVALID_ERR);
     DTEST_LOG << "DistributedSchedServiceTest ConnectRemoteAbility001 end" << std::endl;
@@ -735,7 +734,7 @@ HWTEST_F(DistributedSchedConnectTest, ConnectRemoteAbility006, TestSize.Level4)
     OHOS::AAFwk::Want want;
     want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
     sptr<AbilityConnectCallbackTest> connect(new AbilityConnectCallbackTest());
-    g_isForeground = false;
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(false));
     int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbility(want, connect, -1, -1, -1);
     EXPECT_EQ(ret, DMS_NOT_FOREGROUND_USER);
     DTEST_LOG << "DistributedSchedServiceTest ConnectRemoteAbility006 end" << std::endl;
@@ -1234,7 +1233,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallConnectRemoteAbility001, TestSize
     DistributedSchedService::GetInstance().GetUidLocked(sessionsList);
     DTEST_LOG << "DistributedSchedConnectTest GetUidLocked001 end" << std::endl;
 
-    g_isForeground = true;
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillRepeatedly(Return(true));
     int32_t ret = proxy->ConnectRemoteAbility(want, connect, 0, 0, 0);
     EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectRemoteAbility001 end" << std::endl;
@@ -1262,7 +1261,7 @@ HWTEST_F(DistributedSchedConnectTest, ProxyCallConnectRemoteAbility002, TestSize
     DistributedSchedService::GetInstance().DecreaseConnectLocked(uid);
     DTEST_LOG << "DistributedSchedConnectTest DecreaseConnectLocked002 end" << std::endl;
 
-    g_isForeground = true;
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillRepeatedly(Return(true));
     int32_t ret = proxy->ConnectRemoteAbility(want, nullptr, 0, 0, 0);
     EXPECT_EQ(ret, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedSchedServiceTest ProxyCallConnectRemoteAbility002 end" << std::endl;
@@ -1405,7 +1404,7 @@ HWTEST_F(DistributedSchedConnectTest, ConnectRemoteAbility003, TestSize.Level4)
     int32_t pid = IPCSkeleton::GetCallingRealPid();
     int32_t accessToken = IPCSkeleton::GetCallingTokenID();
 
-    g_isForeground = true;
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillRepeatedly(Return(true));
     int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbility(want, connect, uid, pid, accessToken);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceTest ConnectRemoteAbility003 end" << std::endl;
