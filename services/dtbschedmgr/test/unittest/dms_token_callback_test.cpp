@@ -35,11 +35,15 @@ const char* INVALID_PROCESS_NAME = "invalid_process";
 void DmsTokenCallbackTest::SetUpTestCase()
 {
     DTEST_LOG << "DmsTokenCallbackTest::SetUpTestCase" << std::endl;
+    multiUserMgrMock_ = std::make_shared<MultiUserManagerMock>();
+    MultiUserManagerMock::multiUserMgrMock = multiUserMgrMock_;
 }
 
 void DmsTokenCallbackTest::TearDownTestCase()
 {
     DTEST_LOG << "DmsTokenCallbackTest::TearDownTestCase" << std::endl;
+    MultiUserManagerMock::multiUserMgrMock = nullptr;
+    multiUserMgrMock_ = nullptr;
 }
 
 void DmsTokenCallbackTest::TearDown()
@@ -52,13 +56,6 @@ void DmsTokenCallbackTest::SetUp()
     DTEST_LOG << "DmsTokenCallbackTest::SetUp" << std::endl;
     dmsTokenCallback_ = new DmsTokenCallback();
     DistributedSchedUtil::MockProcess(FOUNDATION_PROCESS_NAME);
-}
-
-static bool g_isForeground = true;
-
-bool MultiUserManager::IsCallerForeground(int32_t callingUid)
-{
-    return g_isForeground;
 }
 
 /**
@@ -77,6 +74,7 @@ HWTEST_F(DmsTokenCallbackTest, SendResultTest_001, TestSize.Level3)
     uint32_t accessToken = 0;
     int32_t resultCode = 0;
     DistributedSchedUtil::MockProcess(DISTSCHED_PROCESS_NAME);
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillRepeatedly(Return(true));
     int32_t result = dmsTokenCallback_->SendResult(want, callerUid, requestCode, accessToken, resultCode);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DmsTokenCallbackTest SendResultTest_001 end" << std::endl;
@@ -184,7 +182,7 @@ HWTEST_F(DmsTokenCallbackTest, SendResultTest_006, TestSize.Level3)
     int32_t requestCode = 0;
     uint32_t accessToken = 0;
     int32_t resultCode = 0;
-    g_isForeground = false;
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(false));
     int32_t result = dmsTokenCallback_->SendResult(want, callerUid, requestCode, accessToken, resultCode);
     EXPECT_EQ(result, DMS_NOT_FOREGROUND_USER);
     DTEST_LOG << "DmsTokenCallbackTest SendResultTest_006 end" << std::endl;
