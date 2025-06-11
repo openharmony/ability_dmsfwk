@@ -183,7 +183,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, StartRemoteShareForm_002, TestSize.L
     const OHOS::AppExecFwk::FormShareInfo formShareInfo {};
     auto result = proxy->StartRemoteShareForm(remoteDeviceId, formShareInfo);
     DTEST_LOG << "result:" << result << std::endl;
-    EXPECT_EQ(static_cast<int>(DMS_PERMISSION_DENIED), result);
+    EXPECT_EQ(GET_REMOTE_DMS_FAIL, result);
     DTEST_LOG << "DistributedSchedServiceSecondTest StartRemoteShareForm_002 end" << std::endl;
 }
 
@@ -615,7 +615,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, StopRemoteExtensionAbility_003, Test
     want.SetElement(element);
     int32_t extensionType = 3;
     int result = proxy->StopRemoteExtensionAbility(want, 0, 0, extensionType);
-    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceSecondTest StopRemoteExtensionAbility_003 end" << std::endl;
 }
 
