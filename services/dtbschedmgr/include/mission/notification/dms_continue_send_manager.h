@@ -40,6 +40,7 @@ class DMSContinueSendMgr : public std::enable_shared_from_this<DMSContinueSendMg
 friend class SendStrategyFocused;
 friend class SendStrategyUnfocused;
 friend class SendStrategyDestoryed;
+friend class SendStrategyBackground;
 friend class SendStrategyActive;
 friend class SendStrategyInactive;
 friend class SendStrategyTimeout;
