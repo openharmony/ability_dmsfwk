@@ -90,6 +90,36 @@ HWTEST_F(DmsContinueConditionMgrTest, testUpdateMissionStatus001, TestSize.Level
 }
 
 /**
+ * @tc.name: testOnMissionBackground001
+ * @tc.desc: test OnMissionBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, testOnMissionBackground001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testOnMissionBackground001 start" << std::endl;
+    InitMissionMap();
+    int32_t missionId = 1;
+    int32_t accountId = 0;
+    MissionEventType type = MISSION_EVENT_BACKGROUND;
+    auto ret = DmsContinueConditionMgr::GetInstance().UpdateMissionStatus(accountId, missionId, type);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    DmsContinueConditionMgr::GetInstance().missionFuncMap_[MISSION_EVENT_BACKGROUND] =
+        &DmsContinueConditionMgr::OnMissionBackground;
+    ret = DmsContinueConditionMgr::GetInstance().UpdateMissionStatus(accountId, missionId, type);
+    EXPECT_EQ(ret, ERR_OK);
+
+    missionId = 2;
+    ret = DmsContinueConditionMgr::GetInstance().UpdateMissionStatus(accountId, missionId, type);
+    EXPECT_EQ(ret, CONDITION_INVALID_MISSION_ID);
+    EXPECT_EQ(DmsContinueConditionMgr::GetInstance().missionMap_[accountId][missionId].isFocused,
+        false);
+    DmsContinueConditionMgr::GetInstance().UnInit();
+    DmsContinueConditionMgr::GetInstance().missionFuncMap_.clear();
+    DTEST_LOG << "DMSContinueManagerTest testOnMissionBackground001 end" << std::endl;
+}
+
+/**
  * @tc.name: testOnMissionDestory001
  * @tc.desc: test OnMissionDestory
  * @tc.type: FUNC
