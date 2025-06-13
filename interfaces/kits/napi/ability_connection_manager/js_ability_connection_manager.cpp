@@ -917,7 +917,8 @@ static int64_t AddProcessor()
     return HiAppEvent::AppEventProcessorMgr::AddProcessor(config);
 }
 
-static void WriteEndEvent(const std::string& transId, const int result, const int errCode, const time_t beginTime)
+static void WriteEndEvent(const std::string& transId, const int result, const int errCode, const time_t beginTime,
+    int64_t processorId)
 {
     HiAppEvent::Event event("api_diagnostic", "api_exec_end", HiAppEvent::BEHAVIOR);
     event.AddParam("transId", transId);
@@ -927,7 +928,9 @@ static void WriteEndEvent(const std::string& transId, const int result, const in
     event.AddParam("sdk_name", std::string("DistributedServiceKit"));
     event.AddParam("begin_time", beginTime);
     event.AddParam("end_time", time(nullptr));
-    Write(event);
+    if (processorId > 0) {
+        Write(event);
+    }
 }
 
 napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info info)
@@ -937,7 +940,6 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
     processorId = AddProcessor();
     if (processorId <= 0) {
         HILOGE("Add processor fail.Error code is %{public}lld", processorId);
-        return nullptr;
     }
     time_t beginTime = time(nullptr);
     std::string transId = std::string("transId_") + std::to_string(std::rand());
@@ -946,14 +948,14 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
     if (argc != ARG_COUNT_ONE || !JsToInt32(env, argv[ARG_INDEX_ZERO], "sessionId", sessionId)) {
         HILOGE("CheckArgsCount failed or Failed to unwrap sessionId.");
         CreateBusinessError(env, ERR_INVALID_PARAMETERS);
-        WriteEndEvent(transId, EVENT_RESULT_FAIL, ERR_INVALID_PARAMETERS, beginTime);
+        WriteEndEvent(transId, EVENT_RESULT_FAIL, ERR_INVALID_PARAMETERS, beginTime, processorId);
         return nullptr;
     }
-    return ConnectInner(env, sessionId, transId, beginTime);
+    return ConnectInner(env, sessionId, transId, beginTime, processorId);
 }
 
 napi_value JsAbilityConnectionManager::ConnectInner(
-    napi_env env, int32_t sessionId, const std::string &transId, time_t beginTime)
+    napi_env env, int32_t sessionId, const std::string &transId, time_t beginTime, int64_t processorId)
 {
     napi_deferred deferred;
     napi_value promise = nullptr;
@@ -969,7 +971,7 @@ napi_value JsAbilityConnectionManager::ConnectInner(
         delete asyncCallbackInfo;
         napi_release_threadsafe_function(tsfn, napi_tsfn_release);
         napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
-        WriteEndEvent(transId, EVENT_RESULT_FAIL, ERR_EXECUTE_FUNCTION, beginTime);
+        WriteEndEvent(transId, EVENT_RESULT_FAIL, ERR_EXECUTE_FUNCTION, beginTime, processorId);
         return promise;
     }
     asyncCallbackInfo->tsfn = tsfn;
@@ -986,7 +988,7 @@ napi_value JsAbilityConnectionManager::ConnectInner(
         delete asyncCallbackInfo;
         napi_release_threadsafe_function(tsfn, napi_tsfn_release);
         napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
-        WriteEndEvent(transId, EVENT_RESULT_FAIL, ERR_EXECUTE_FUNCTION, beginTime);
+        WriteEndEvent(transId, EVENT_RESULT_FAIL, ERR_EXECUTE_FUNCTION, beginTime, processorId);
         return promise;
     }
 
@@ -996,11 +998,11 @@ napi_value JsAbilityConnectionManager::ConnectInner(
         delete asyncCallbackInfo;
         napi_release_threadsafe_function(tsfn, napi_tsfn_release);
         napi_reject_deferred(env, deferred, CreateBusinessError(env, ERR_EXECUTE_FUNCTION, false));
-        WriteEndEvent(transId, EVENT_RESULT_FAIL, ERR_EXECUTE_FUNCTION, beginTime);
+        WriteEndEvent(transId, EVENT_RESULT_FAIL, ERR_EXECUTE_FUNCTION, beginTime, processorId);
         return promise;
     }
 
-    WriteEndEvent(transId, EVENT_RESULT_SUCCESS, EVENT_RESULT_SUCCESS, beginTime);
+    WriteEndEvent(transId, EVENT_RESULT_SUCCESS, EVENT_RESULT_SUCCESS, beginTime, processorId);
     return promise;
 }
 
