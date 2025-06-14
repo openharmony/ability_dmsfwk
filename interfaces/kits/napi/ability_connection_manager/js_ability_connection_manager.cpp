@@ -1071,12 +1071,13 @@ void JsAbilityConnectionManager::ConnectThreadsafeFunctionCallback(napi_env env,
 void JsAbilityConnectionManager::CleanupConnectionResources(napi_env env, AsyncConnectCallbackInfo* asyncData,
     napi_threadsafe_function tsfn)
 {
+    HILOGI("called.");
     if (env == nullptr) {
         HILOGE("env is nullptr");
         return;
     }
     if (tsfn != nullptr) {
-        napi_release_threadsafe_function(asyncData->tsfn, napi_tsfn_release);
+        napi_release_threadsafe_function(tsfn, napi_tsfn_release);
         HILOGI("release tsfn");
     }
     asyncData->connectCallbackExecuted = true;
@@ -1095,7 +1096,8 @@ void JsAbilityConnectionManager::ExecuteConnect(napi_env env, void *data)
         HILOGE("asyncData is nullptr");
         return;
     }
-    AbilityConnectionManager::ConnectCallback connectCallback = [env, asyncData](ConnectResult result) {
+    AbilityConnectionManager::ConnectCallback connectCallback = [env, asyncData](ConnectResult result) mutable {
+        HILOGI("called.");
         if (asyncData == nullptr || env == nullptr) {
             HILOGE("asyncData or env is nullptr");
             return;
@@ -1104,11 +1106,14 @@ void JsAbilityConnectionManager::ExecuteConnect(napi_env env, void *data)
         napi_threadsafe_function tsfn = asyncData->tsfn;
         if (tsfn == nullptr) {
             HILOGE("tsfn is nullptr");
+            return;
         }
         napi_status status = napi_call_threadsafe_function(tsfn, asyncData, napi_tsfn_nonblocking);
         if (status != napi_ok) {
             HILOGE("Failed to create async work. status is %{public}d", static_cast<int32_t>(status));
         }
+        HILOGI("clear asyncData to prevent secondary calls.");
+        asyncData = nullptr;
     };
     AbilityConnectionManager::GetInstance().ConnectSession(asyncData->sessionId, connectCallback);
 }
