@@ -19,7 +19,6 @@
 #include <string>
 #include <mutex>
 #include <vector>
-#include "json/json.h"
 #include "datashare_helper.h"
 
 namespace OHOS {
