@@ -58,15 +58,17 @@ void DmsContinueConditionMgr::InitConditionFuncs()
     missionFuncMap_[MISSION_EVENT_FOCUSED] = &DmsContinueConditionMgr::OnMissionFocused;
     missionFuncMap_[MISSION_EVENT_UNFOCUSED] = &DmsContinueConditionMgr::OnMissionUnfocused;
     missionFuncMap_[MISSION_EVENT_DESTORYED] = &DmsContinueConditionMgr::OnMissionDestory;
+    missionFuncMap_[MISSION_EVENT_BACKGROUND] = &DmsContinueConditionMgr::OnMissionBackground;
     missionFuncMap_[MISSION_EVENT_ACTIVE] = &DmsContinueConditionMgr::OnMissionActive;
     missionFuncMap_[MISSION_EVENT_INACTIVE] = &DmsContinueConditionMgr::OnMissionInactive;
 
     conditionFuncMap_[MISSION_EVENT_FOCUSED] = &DmsContinueConditionMgr::CheckSendFocusedCondition;
     conditionFuncMap_[MISSION_EVENT_UNFOCUSED] = &DmsContinueConditionMgr::CheckSendUnfocusedCondition;
-    conditionFuncMap_[MISSION_EVENT_DESTORYED] = &DmsContinueConditionMgr::CheckSendUnfocusedCondition;
+    conditionFuncMap_[MISSION_EVENT_DESTORYED] = &DmsContinueConditionMgr::CheckSendBackgroundCondition;
+    conditionFuncMap_[MISSION_EVENT_BACKGROUND] = &DmsContinueConditionMgr::CheckSendBackgroundCondition;
     conditionFuncMap_[MISSION_EVENT_ACTIVE] = &DmsContinueConditionMgr::CheckSendActiveCondition;
     conditionFuncMap_[MISSION_EVENT_INACTIVE] = &DmsContinueConditionMgr::CheckSendInactiveCondition;
-    conditionFuncMap_[MISSION_EVENT_TIMEOUT] = &DmsContinueConditionMgr::CheckSendUnfocusedCondition;
+    conditionFuncMap_[MISSION_EVENT_TIMEOUT] = &DmsContinueConditionMgr::CheckSendBackgroundCondition;
     conditionFuncMap_[MISSION_EVENT_MMI] = &DmsContinueConditionMgr::CheckSendFocusedCondition;
 }
 
@@ -317,6 +319,20 @@ int32_t DmsContinueConditionMgr::OnMissionUnfocused(int32_t accountId, int32_t m
     return ERR_OK;
 }
 
+int32_t DmsContinueConditionMgr::OnMissionBackground(int32_t accountId, int32_t missionId)
+{
+    HILOGI("accountId %{public}d, missionId %{public}d", accountId, missionId);
+
+    std::lock_guard<std::mutex> missionlock(missionMutex_);
+    if (!IsMissionStatusExistLocked(accountId, missionId)) {
+        HILOGW("mission %{public}d under user %{public}d not exist", missionId, accountId);
+        return CONDITION_INVALID_MISSION_ID;
+    }
+    missionMap_[accountId][missionId].isFocused = false;
+    HILOGI("missionMap update finished! status: %{public}s", missionMap_[accountId][missionId].ToString().c_str());
+    return ERR_OK;
+}
+
 int32_t DmsContinueConditionMgr::OnMissionDestory(int32_t accountId, int32_t missionId)
 {
     HILOGI("accountId %{public}d, missionId %{public}d", accountId, missionId);
@@ -444,6 +460,32 @@ bool DmsContinueConditionMgr::CheckSendUnfocusedCondition(const MissionStatus& s
             reason = "NOT_FOCUSED";
             break;
         }
+        if (!status.isContinuable) {
+            reason = "NOT_CONTINUABLE";
+            break;
+        }
+        if (status.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
+            reason = "CONTINUE_STATE_INACTIVE";
+            break;
+        }
+        if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(status.bundleName)) {
+            reason = "BUNDLE_NOT_ALLOWED_IN_CFG";
+            break;
+        }
+        HILOGI("PASS");
+        return true;
+    } while (0);
+
+    HILOGE("FAILED, Reason: %{public}s", reason.c_str());
+    return false;
+}
+
+bool DmsContinueConditionMgr::CheckSendBackgroundCondition(const MissionStatus& status)
+{
+    HILOGI("missionId %{public}d", status.missionId);
+
+    std::string reason = "";
+    do {
         if (!status.isContinuable) {
             reason = "NOT_CONTINUABLE";
             break;
@@ -639,6 +681,8 @@ std::string DmsContinueConditionMgr::TypeEnumToString(MissionEventType type)
             return "TIMEOUT";
         case MISSION_EVENT_MMI:
             return "MMI";
+        case MISSION_EVENT_BACKGROUND:
+            return "BACKGROUND";
         default:
             return "UNDEFINED";
     }

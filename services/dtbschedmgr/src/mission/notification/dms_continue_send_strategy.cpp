@@ -56,6 +56,15 @@ int32_t SendStrategyUnfocused::ExecuteSendStrategy(const MissionStatus& status, 
     CHECK_POINTER_RETURN_VALUE(sendMgr, ERR_NULL_OBJECT, "dmsContinueSendMgr_");
 
     sendMgr->RemoveMMIListener();
+    HILOGD("Skip unfocused event.");
+    return SKIP_UNFOCUSED_TYPE;
+}
+
+int32_t SendStrategyBackground::ExecuteSendStrategy(const MissionStatus& status, uint8_t &sendType) const
+{
+    std::shared_ptr<DMSContinueSendMgr> sendMgr = dmsContinueSendMgr_.lock();
+    CHECK_POINTER_RETURN_VALUE(sendMgr, ERR_NULL_OBJECT, "dmsContinueSendMgr_");
+
     sendType = BROADCAST_TYPE_DISAPPEAR;
 
     DMSContinueSendMgr::ScreenLockedHandler::LastUnfoInfo info = { status.missionId, GetTickCount(), status };
