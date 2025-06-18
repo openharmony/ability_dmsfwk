@@ -57,6 +57,7 @@ typedef enum {
     MISSION_EVENT_FOCUSED = 0,
     MISSION_EVENT_UNFOCUSED = 1,
     MISSION_EVENT_DESTORYED = 2,
+    MISSION_EVENT_BACKGROUND = 3,
     MISSION_EVENT_ACTIVE = 4,
     MISSION_EVENT_INACTIVE = 5,
     MISSION_EVENT_TIMEOUT = 6,
@@ -111,11 +112,13 @@ private:
     int32_t OnMissionFocused(int32_t accountId, int32_t missionId);
     int32_t OnMissionUnfocused(int32_t accountId, int32_t missionId);
     int32_t OnMissionDestory(int32_t accountId, int32_t missionId);
+    int32_t OnMissionBackground(int32_t accountId, int32_t missionId);
     int32_t OnMissionActive(int32_t accountId, int32_t missionId);
     int32_t OnMissionInactive(int32_t accountId, int32_t missionId);
 
     bool CheckSendFocusedCondition(const MissionStatus& status);
     bool CheckSendUnfocusedCondition(const MissionStatus& status);
+    bool CheckSendBackgroundCondition(const MissionStatus& status);
     bool CheckSendActiveCondition(const MissionStatus& status);
     bool CheckSendInactiveCondition(const MissionStatus& status);
 

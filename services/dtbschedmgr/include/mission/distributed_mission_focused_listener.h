@@ -73,6 +73,13 @@ public:
      */
     void OnMissionUnfocused(int32_t missionId) override;
 
+    /**
+     * @brief When a mission moved to background, AbilityMs notifies the listener of the mission id
+     *
+     * @param missionId, mission Id.
+     */
+    void OnMissionMovedToBackground(int32_t missionId) override;
+
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     /**
      * @brief Called when a mission has changed it's icon.
