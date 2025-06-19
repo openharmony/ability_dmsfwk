@@ -62,6 +62,7 @@ DSchedCollabStateMachine::~DSchedCollabStateMachine()
 
 int32_t DSchedCollabStateMachine::Execute(const AppExecFwk::InnerEvent::Pointer &event)
 {
+    HILOGI("called");
     std::shared_ptr<DSchedCollab> dCollab = dCollab_.lock();
     if (dCollab == nullptr || currentState_ == nullptr) {
         HILOGE("excute failed, collab or currentState is null");
@@ -74,6 +75,7 @@ int32_t DSchedCollabStateMachine::Execute(const AppExecFwk::InnerEvent::Pointer 
         HILOGE("currentState: %{public}s, excute event: %{public}s failed, ret %{public}d",
             STATEDATA[state->GetStateType()].c_str(), EVENTDATA[event->GetInnerEventId()].c_str(), ret);
     }
+    HILOGI("end");
     return ret;
 }
 
