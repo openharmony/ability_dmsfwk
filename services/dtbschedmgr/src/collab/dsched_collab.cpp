@@ -145,6 +145,7 @@ void DSchedCollab::SetSinkCollabInfo(std::shared_ptr<SinkStartCmd> startCmd)
     collabInfo_.sinkInfo_.abilityName_ = startCmd->sinkAbilityName_;
     collabInfo_.srcAppVersion_ = startCmd->appVersion_;
     collabInfo_.callerInfo_ = startCmd->callerInfo_;
+    collabInfo_.callerInfo_.accessToken = collabInfo_.srcInfo_.accessToken_;
     collabInfo_.srcAccountInfo_ = startCmd->accountInfo_;
 
 #ifdef OS_ACCOUNT_PART
@@ -163,15 +164,6 @@ DSchedCollab::~DSchedCollab()
 {
     HILOGI("delete enter");
     UnregisterAbilityLifecycleObserver();
-    if ((eventHandler_ != nullptr) && (eventHandler_->GetEventRunner() != nullptr)) {
-        eventHandler_->GetEventRunner()->Stop();
-    }
-
-    if (eventThread_.joinable()) {
-        eventThread_.join();
-    }
-
-    eventHandler_ = nullptr;
     HILOGI("delete end");
 }
 
@@ -190,6 +182,22 @@ int32_t DSchedCollab::Init()
     eventCon_.wait(lock, [this] {
         return eventHandler_ != nullptr;
     });
+    HILOGI("end");
+    return ERR_OK;
+}
+
+int32_t DSchedCollab::UnInit()
+{
+    HILOGI("called");
+    if ((eventHandler_ != nullptr) && (eventHandler_->GetEventRunner() != nullptr)) {
+        eventHandler_->GetEventRunner()->Stop();
+    }
+    if (eventThread_.joinable()) {
+        HILOGI("start calling join");
+        eventThread_.join();
+        HILOGI("call join completed");
+    }
+    eventHandler_ = nullptr;
     HILOGI("end");
     return ERR_OK;
 }
@@ -407,6 +415,7 @@ int32_t DSchedCollab::PostEndTask()
 
 void DSchedCollab::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
 {
+    HILOGI("called");
     if (event == nullptr || stateMachine_ == nullptr) {
         HILOGE("event or state machine is null");
         return;
@@ -419,6 +428,7 @@ void DSchedCollab::ProcessEvent(const AppExecFwk::InnerEvent::Pointer &event)
         HILOGE("event %{public}s execute failed, ret %{public}d", EVENTDATA[eventId].c_str(), ret);
         PostErrEndTask(ret);
     }
+    HILOGI("end");
     return;
 }
 
