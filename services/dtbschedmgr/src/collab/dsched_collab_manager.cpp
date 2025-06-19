@@ -234,6 +234,9 @@ int32_t DSchedCollabManager::GetSinkCollabVersion(DSchedCollabInfo &info)
         HILOGE("get local deviceId failed!");
         return FIND_LOCAL_DEVICEID_ERR;
     }
+    if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(info.sinkInfo_.deviceId_) == nullptr) {
+        HILOGW("subsequent queries on application level binding relationships");
+    }
     auto func = [this, info]() {
         HandleGetSinkCollabVersion(info);
     };
@@ -636,6 +639,7 @@ int32_t DSchedCollabManager::CleanUpSession(const std::string &collabToken)
             HILOGE("can't find collab");
             return;
         }
+        dCollab->UnInit();
         RemoveTimeout(collabToken);
         {
             std::lock_guard<std::mutex> collabLock(collabMutex_);
