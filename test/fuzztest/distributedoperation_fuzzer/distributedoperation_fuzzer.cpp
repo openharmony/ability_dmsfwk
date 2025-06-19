@@ -41,7 +41,8 @@ void FuzzDistributedOperation(const uint8_t* data, size_t size)
 
     Parcel parcel;
     operation.Marshalling(parcel);
-    DistributedSchedule::DistributedOperation* unmarshalledOperation = DistributedSchedule::DistributedOperation::Unmarshalling(parcel);
+    DistributedSchedule::DistributedOperation* unmarshalledOperation =
+        DistributedSchedule::DistributedOperation::Unmarshalling(parcel);
     if (unmarshalledOperation != nullptr) {
         delete unmarshalledOperation;
         unmarshalledOperation = nullptr;
