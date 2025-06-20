@@ -19,7 +19,6 @@ group("fuzztest") {
     "bundlemanagercallbackstub_fuzzer:fuzztest",
     "continuationmanager_fuzzer:fuzztest",
     "distributedschedstub_fuzzer:fuzztest",
-    "distributedoperation_fuzzer:fuzztest",
     "distributedwant_fuzzer:fuzztest",
     "distributedwantparams_fuzzer:fuzztest",
     "dmsfreeinstallcallbackstub_fuzzer:fuzztest",
