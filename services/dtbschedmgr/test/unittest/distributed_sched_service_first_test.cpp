@@ -1777,7 +1777,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test04, T
     DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "ohos.permission.dms_extension", "delegatee");
     DExtConnectResultInfo resultInfo;
 
-    EXPECT_CALL(*svcDConnMock, ConnectDExtAbility(_, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    EXPECT_CALL(*svcDConnMock, ConnectDExtAbility(_, _, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
     int32_t result = DistributedSchedService::GetInstance().ConnectDExtensionFromRemote(connectInfo, resultInfo);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     EXPECT_EQ(resultInfo.result, DExtConnectResult::FAILED);
