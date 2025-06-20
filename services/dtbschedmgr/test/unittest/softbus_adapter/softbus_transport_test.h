@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 
+#include "mock_softbus_adapter.h"
 #include "softbus_adapter/transport/dsched_data_buffer.h"
 #include "softbus_adapter/transport/dsched_softbus_session.h"
 #include "softbus_adapter/transport/dsched_transport_softbus_adapter.h"
@@ -39,6 +40,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    SoftbusMock mockSoftbus;
     std::shared_ptr<DSchedSoftbusSession> softbusSessionTest_;
 };
 
@@ -48,6 +50,8 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+
+    SoftbusMock mockSoftbus;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

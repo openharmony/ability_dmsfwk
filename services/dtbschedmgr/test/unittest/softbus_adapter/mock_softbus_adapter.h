@@ -19,6 +19,7 @@
 #include <gmock/gmock.h>
 
 #include "broadcast_struct.h"
+#include "socket.h"
 #include "session.h"
 
 namespace OHOS {
@@ -28,6 +29,11 @@ public:
     MockInterface() {};
     virtual ~MockInterface() {};
 
+    virtual int32_t Socket(SocketInfo info) = 0;
+    virtual int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener* listener) = 0;
+    virtual int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener* listener) = 0;
+    virtual int32_t SendBytes(int32_t socket, const void* data, uint32_t len) = 0;
+    virtual void Shutdown(int32_t socket) = 0;
     virtual int GetSessionOption(int sessionId, SessionOption option, void* optionValue, uint32_t valueSize) = 0;
 };
 
@@ -38,6 +44,13 @@ public:
 
     static SoftbusMock& GetMock();
 
+    MOCK_METHOD(int32_t, Socket, (SocketInfo info), (override));
+    MOCK_METHOD(int32_t, Listen, (int32_t socket, const QosTV qos[], uint32_t qosCount,
+        const ISocketListener* listener), (override));
+    MOCK_METHOD(int32_t, Bind, (int32_t socket, const QosTV qos[], uint32_t qosCount,
+        const ISocketListener* listener), (override));
+    MOCK_METHOD(int32_t, SendBytes, (int32_t socket, const void* data, uint32_t len), (override));
+    MOCK_METHOD(void, Shutdown, (int32_t socket), (override));
     MOCK_METHOD(int, GetSessionOption, (int sessionId, SessionOption option, void* optionValue,
         uint32_t valueSize), (override));
 
