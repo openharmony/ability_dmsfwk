@@ -21,6 +21,7 @@
 #include "dsched_continue_manager.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "distributed_sched_service.h"
 #include "mission/wifi_state_adapter.h"
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
@@ -237,6 +238,12 @@ int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peer
         GetAnonymStr(std::to_string(callingTokenId_)).c_str(), ret);
     callingTokenId_ = 0;
 
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    if (DistributedSchedService::GetInstance().CheckRemoteOsType(peerDeviceId)) {
+        HILOGE("peer device is not a OH");
+        return DMS_PERMISSION_DENIED;
+    }
+#endif
     do {
         ret = ServiceBind(sessionId, type, peerDeviceId);
         if (ret != ERR_OK) {
@@ -417,6 +424,12 @@ bool DSchedTransportSoftbusAdapter::GetSessionIdByDeviceId(const std::string &pe
 
 void DSchedTransportSoftbusAdapter::OnBind(int32_t sessionId, const std::string &peerDeviceId)
 {
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    if (DistributedSchedService::GetInstance().CheckRemoteOsType(peerDeviceId)) {
+        HILOGE("peer device is not a OH");
+        return;
+    }
+#endif
     int32_t ret = CreateSessionRecord(sessionId, peerDeviceId, true, SERVICE_TYPE_INVALID);
     if (ret != ERR_OK) {
         HILOGE("Service create session record fail, ret %{public}d, peerDeviceId %{public}s, sessionId %{public}d.",
