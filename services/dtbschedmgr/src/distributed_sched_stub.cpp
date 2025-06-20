@@ -575,12 +575,9 @@ int32_t DistributedSchedStub::SendResultFromRemoteInner(MessageParcel& data, Mes
 int32_t DistributedSchedStub::ContinueMissionInner(MessageParcel& data, MessageParcel& reply)
 {
     bool isLocalCalling = IPCSkeleton::IsLocalCalling();
-    if ((isLocalCalling && !DistributedSchedPermission::GetInstance().IsFoundationCall()) ||
-        (!isLocalCalling && !CheckCallingUid())) {
-        HILOGE("check permission failed!");
+    if (!CheckPermission(isLocalCalling)) {
         return DMS_PERMISSION_DENIED;
     }
-
     std::string srcDevId;
     std::string dstDevId;
     PARCEL_READ_HELPER(data, String, srcDevId);
@@ -634,9 +631,7 @@ void SetContinueType(std::string& continueType, std::string& bundleName)
 int32_t DistributedSchedStub::ContinueMissionOfBundleNameInner(MessageParcel& data, MessageParcel& reply)
 {
     bool isLocalCalling = IPCSkeleton::IsLocalCalling();
-    if ((isLocalCalling && !DistributedSchedPermission::GetInstance().IsFoundationCall()) ||
-        (!isLocalCalling && !CheckCallingUid())) {
-        HILOGE("check permission failed!");
+    if (!CheckPermission(isLocalCalling)) {
         return DMS_PERMISSION_DENIED;
     }
 
@@ -1164,6 +1159,22 @@ bool DistributedSchedStub::CheckCallingUid()
     // never allow non-system uid for distributed request
     auto callingUid = IPCSkeleton::GetCallingUid();
     return callingUid < HID_HAP;
+}
+
+bool DistributedSchedStub::CheckPermission(bool isLocalCalling)
+{
+    if ((isLocalCalling && !DistributedSchedPermission::GetInstance().IsFoundationCall()) ||
+        (!isLocalCalling && !CheckCallingUid())) {
+        HILOGE("check permission failed!");
+        return false;
+    }
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    if (CheckRemoteOsType(IPCSkeleton::GetCallingDeviceID())) {
+        HILOGE("peer device is not a OH");
+        return false;
+    }
+#endif
+    return true;
 }
 
 bool DistributedSchedStub::EnforceInterfaceToken(MessageParcel& data)

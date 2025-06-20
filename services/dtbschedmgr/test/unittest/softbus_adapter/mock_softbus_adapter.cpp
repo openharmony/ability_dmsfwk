@@ -37,6 +37,30 @@ SoftbusMock& SoftbusMock::GetMock()
 }
 
 extern "C" {
+int32_t Socket(SocketInfo info)
+{
+    return SoftbusMock::GetMock().Socket(info);
+}
+
+int32_t Listen(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener* listener)
+{
+    return SoftbusMock::GetMock().Listen(socket, qos, qosCount, listener);
+}
+
+int32_t Bind(int32_t socket, const QosTV qos[], uint32_t qosCount, const ISocketListener* listener)
+{
+    return SoftbusMock::GetMock().Bind(socket, qos, qosCount, listener);
+}
+
+int32_t SendBytes(int32_t socket, const void* data, uint32_t len)
+{
+    return SoftbusMock::GetMock().SendBytes(socket, data, len);
+}
+
+void Shutdown(int32_t socket)
+{
+    SoftbusMock::GetMock().Shutdown(socket);
+}
 int GetSessionOption(int sessionId, SessionOption option, void* optionValue, uint32_t valueSize)
 {
     return SoftbusMock::GetMock().GetSessionOption(sessionId,

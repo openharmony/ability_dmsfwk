@@ -105,6 +105,7 @@ private:
     void ReportEvent(const OHOS::AAFwk::Want& want, const std::string& eventName, int32_t result, int32_t callerUid);
     bool CheckDmsRequestPermission();
     bool CheckCallingUid();
+    bool CheckPermission(bool isLocalCalling);
     bool EnforceInterfaceToken(MessageParcel& data);
     bool CallerInfoUnmarshalling(CallerInfo& callerInfo, MessageParcel& data);
     bool IsUsingQos(const std::string& remoteDeviceId);
