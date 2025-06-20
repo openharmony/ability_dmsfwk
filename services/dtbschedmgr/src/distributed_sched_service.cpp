@@ -326,6 +326,21 @@ static int32_t ValidateAndPrepareConnection(const DExtConnectInfo& connectInfo, 
     return ERR_OK;
 }
 
+static void TriggerProxyCallbacks(AAFwk::Want& want, const DExtConnectInfo& connectInfo,
+    DExtConnectResultInfo& resultInfo, const sptr<IDExtension>& proxy)
+{
+    if (proxy == nullptr) {
+        resultInfo.result = DExtConnectResult::FAILED;
+        HILOGE("Extension distribute proxy is empty");
+        return;
+    }
+    proxy->TriggerOnCreate(want);
+    AAFwk::WantParams wantParam;
+    wantParam.SetParam(COLLABRATION_TYPE, String::Box(CONNECT_RPOXY));
+    wantParam.SetParam(SOURCE_DELEGATEE, String::Box(connectInfo.delegatee));
+    proxy->TriggerOnCollaborate(wantParam);
+}
+
 int32_t DistributedSchedService::ConnectDExtensionFromRemote(const DExtConnectInfo& connectInfo,
     DExtConnectResultInfo& resultInfo)
 {
@@ -349,23 +364,20 @@ int32_t DistributedSchedService::ConnectDExtensionFromRemote(const DExtConnectIn
     bool isCleanCalled = false;
     AAFwk::Want want;
     want.SetElementName(bundleName, abilityName);
-    ret = svcDConn_->ConnectDExtAbility(want, userId, isCleanCalled);
+    bool isDelay = false;
+    ret = svcDConn_->ConnectDExtAbility(want, userId, isCleanCalled, connectInfo.delegatee, isDelay);
     if (ret != ERR_OK) {
-        HILOGE("Connect distributed extension ability failed");
         resultInfo.errCode = ret;
         return ret;
     }
     resultInfo.errCode = ret;
-
     std::unique_lock<std::mutex> lock(getDistibutedProxyLock_);
     getDistibutedProxyCondition_.wait_for(lock, std::chrono::seconds(CONNECT_WAIT_TIME_S));
-
     auto proxy = svcDConn_->GetDistributedExtProxy();
     if (proxy == nullptr) {
         HILOGE("Extension distribute proxy is empty");
         return INVALID_PARAMETERS_ERR;
     }
-
     AppExecFwk::BundleResourceInfo bundleResourceInfo;
     ret = GetBundleResourceInfo(bundleName, bundleResourceInfo);
     if (ret != ERR_OK) {
@@ -374,12 +386,12 @@ int32_t DistributedSchedService::ConnectDExtensionFromRemote(const DExtConnectIn
     }
     svcDConn_->PublishDExtensionNotification(connectInfo.sourceInfo.deviceId, bundleName, userId,
         connectInfo.sourceInfo.networkId, bundleResourceInfo);
-    proxy->TriggerOnCreate(want);
 
-    AAFwk::WantParams wantParam;
-    wantParam.SetParam(COLLABRATION_TYPE, String::Box(CONNECT_RPOXY));
-    wantParam.SetParam(SOURCE_DELEGATEE, String::Box(connectInfo.delegatee));
-    proxy->TriggerOnCollaborate(wantParam);
+    if (isDelay) {
+        HILOGI("Connect ability again.");
+        return ret;
+    }
+    TriggerProxyCallbacks(want, connectInfo, resultInfo, proxy);
     resultInfo.result = DExtConnectResult::SUCCESS;
     return ret;
 }
