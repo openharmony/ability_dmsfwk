@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fuzzer/FuzzedDataProvider.h>
 #include <iostream>
 
 #include "bool_wrapper.h"
@@ -204,6 +205,228 @@ bool DoSomethingInterestingWithMyApiDistributedWant006(const uint8_t* data, size
     want->ClearWant(&dWant);
     return true;
 }
+
+void FuzzDistributedWantGetIntParam(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    DistributedWant want;
+
+    std::string key = fdp.ConsumeRandomLengthString();
+    int defaultValue = fdp.ConsumeIntegral<int>();
+
+    if (fdp.ConsumeBool()) {
+        int value = fdp.ConsumeIntegral<int>();
+        want.SetParam(key, value);
+    } else {
+        std::string value = fdp.ConsumeRandomLengthString();
+        want.SetParam(key, value);
+    }
+    want.GetIntParam(key, defaultValue);
+}
+
+void FuzzDistributedWantSetParamInt(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    DistributedWant want;
+
+    std::string key = fdp.ConsumeRandomLengthString();
+    int value = fdp.ConsumeIntegral<int>();
+    want.SetParam(key, value);
+    int defaultValue = 0;
+    want.GetIntParam(key, defaultValue);
+}
+
+void FuzzDistributedWantGetLongParam(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    DistributedWant want;
+
+    std::string key = fdp.ConsumeRandomLengthString();
+    long defaultValue = fdp.ConsumeIntegral<long>();
+
+    if (fdp.ConsumeBool()) {
+        long value = fdp.ConsumeIntegral<long>();
+        want.SetParam(key, value);
+    } else {
+        std::string value = fdp.ConsumeRandomLengthString();
+        want.SetParam(key, value);
+    }
+    want.GetLongParam(key, defaultValue);
+}
+
+void FuzzDistributedWantSetParamLongLong(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    DistributedWant want;
+
+    std::string key = fdp.ConsumeRandomLengthString();
+    long long value = fdp.ConsumeIntegral<long long>();
+    want.SetParam(key, value);
+
+    long long defaultValue = 0;
+    want.GetLongParam(key, defaultValue);
+}
+
+void FuzzDistributedWantGetOperation(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    DistributedWant want;
+
+    std::string deviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    want.SetElementName(deviceId, bundleName, abilityName);
+
+    std::string action = fdp.ConsumeRandomLengthString();
+    want.SetAction(action);
+
+    unsigned int flags = fdp.ConsumeIntegral<unsigned int>();
+    want.SetFlags(flags);
+    want.GetOperation();
+}
+
+void FuzzDistributedWantOperationEquals(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    DistributedWant want1;
+    DistributedWant want2;
+
+    std::string deviceId1 = fdp.ConsumeRandomLengthString();
+    std::string bundleName1 = fdp.ConsumeRandomLengthString();
+    std::string abilityName1 = fdp.ConsumeRandomLengthString();
+    want1.SetElementName(deviceId1, bundleName1, abilityName1);
+
+    std::string deviceId2 = fdp.ConsumeRandomLengthString();
+    std::string bundleName2 = fdp.ConsumeRandomLengthString();
+    std::string abilityName2 = fdp.ConsumeRandomLengthString();
+    want2.SetElementName(deviceId2, bundleName2, abilityName2);
+
+    unsigned int flags1 = fdp.ConsumeIntegral<unsigned int>();
+    unsigned int flags2 = fdp.ConsumeIntegral<unsigned int>();
+    want1.SetFlags(flags1);
+    want2.SetFlags(flags2);
+
+    std::string action1 = fdp.ConsumeRandomLengthString();
+    std::string action2 = fdp.ConsumeRandomLengthString();
+    want1.SetAction(action1);
+    want2.SetAction(action2);
+    want1.OperationEquals(want2);
+}
+
+void FuzzDistributedWantSetUri(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    DistributedWant want;
+
+    std::string uri = fdp.ConsumeRandomLengthString();
+    want.SetUri(uri);
+}
+
+bool FuzzDistributedWantToJson(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+        return false;
+    }
+
+    std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
+
+    std::string deviceId(reinterpret_cast<const char*>(data), size);
+    std::string bundleName(reinterpret_cast<const char*>(data), size);
+    std::string abilityName(reinterpret_cast<const char*>(data), size);
+    want->SetElementName(deviceId, bundleName, abilityName);
+
+    std::string action(reinterpret_cast<const char*>(data), size);
+    want->SetAction(action);
+
+    unsigned int flags = static_cast<unsigned int>(data[0]);
+    want->SetFlags(flags);
+
+    std::string type(reinterpret_cast<const char*>(data), size);
+    want->SetType(type);
+
+    std::string uri(reinterpret_cast<const char*>(data), size);
+    want->SetUri(uri);
+
+    std::vector<std::string> entities = { "entity1", "entity2", "entity3" };
+    for (const auto& entity : entities) {
+        want->AddEntity(entity);
+    }
+
+    want->ToJson();
+    return true;
+}
+
+bool FuzzDistributedWantToString(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+        return false;
+    }
+
+    std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
+
+    std::string deviceId(reinterpret_cast<const char*>(data), size);
+    std::string bundleName(reinterpret_cast<const char*>(data), size);
+    std::string abilityName(reinterpret_cast<const char*>(data), size);
+    want->SetElementName(deviceId, bundleName, abilityName);
+
+    std::string action(reinterpret_cast<const char*>(data), size);
+    want->SetAction(action);
+
+    unsigned int flags = static_cast<unsigned int>(data[0]);
+    want->SetFlags(flags);
+
+    std::string type(reinterpret_cast<const char*>(data), size);
+    want->SetType(type);
+
+    std::string uri(reinterpret_cast<const char*>(data), size);
+    want->SetUri(uri);
+
+    std::vector<std::string> entities = { "entity1", "entity2", "entity3" };
+    for (const auto& entity : entities) {
+        want->AddEntity(entity);
+    }
+
+    std::string result = want->ToString();
+    return true;
+}
+
+bool FuzzDistributedWantFromString(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
+        return false;
+    }
+    std::string inputString(reinterpret_cast<const char*>(data), size);
+    std::shared_ptr<DistributedWant> want(DistributedWant::FromString(inputString));
+    return true;
+}
 }
 
 /* Fuzzer entry point */
@@ -215,5 +438,15 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DoSomethingInterestingWithMyApiDistributedWant004(data, size);
     OHOS::DoSomethingInterestingWithMyApiDistributedWant005(data, size);
     OHOS::DoSomethingInterestingWithMyApiDistributedWant006(data, size);
+    OHOS::FuzzDistributedWantGetIntParam(data, size);
+    OHOS::FuzzDistributedWantSetParamInt(data, size);
+    OHOS::FuzzDistributedWantGetLongParam(data, size);
+    OHOS::FuzzDistributedWantSetParamLongLong(data, size);
+    OHOS::FuzzDistributedWantGetOperation(data, size);
+    OHOS::FuzzDistributedWantOperationEquals(data, size);
+    OHOS::FuzzDistributedWantSetUri(data, size);
+    OHOS::FuzzDistributedWantToJson(data, size);
+    OHOS::FuzzDistributedWantToString(data, size);
+    OHOS::FuzzDistributedWantFromString(data, size);
     return 0;
 }
