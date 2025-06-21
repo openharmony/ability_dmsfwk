@@ -196,6 +196,7 @@ ohos_unittest("AbilityConnectionSessionTest") {
     "eventhandler:libeventhandler",
     "googletest:gmock",
     "hilog:libhilog",
+    "image_framework:pixelconvertadapter",
     "ipc:ipc_core",
     "media_foundation:media_foundation",
     "napi:ace_napi",
