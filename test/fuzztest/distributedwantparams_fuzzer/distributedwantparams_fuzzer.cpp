@@ -47,10 +47,11 @@ constexpr int32_t POS_3 = 3;
 constexpr int32_t OFFSET_24 = 24;
 constexpr int32_t OFFSET_16 = 16;
 constexpr int32_t OFFSET_8 = 8;
+constexpr int32_t MID_HALF = 2;
 
 inline size_t CalculateMid(size_t size)
 {
-    return size / 2;
+    return size / MID_HALF;
 }
 }
 uint32_t GetU32Data(const char* ptr)
@@ -262,11 +263,9 @@ bool DistributedWantParamWrapperBoxFuzzTest(const uint8_t* data, size_t size)
     DistributedWantParams wantParams;
     wantParams.SetParam(key, String::Box(value));
     auto boxedObject = DistributedWantParamWrapper::Box(std::move(wantParams));
-
     if (boxedObject == nullptr) {
         return false;
     }
-
     return true;
 }
 
