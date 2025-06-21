@@ -1156,6 +1156,53 @@ void NotifyCollabPrepareResultInnerFuzzTest(const uint8_t* data, size_t size)
     DistributedSchedService::GetInstance().NotifyCollabPrepareResultInner(dataParcel, reply);
 }
 
+void NotifyStartAbilityResultInnerFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    FuzzUtil::MockPermission();
+    FuzzedDataProvider fdp(data, size);
+    std::string collabToken = fdp.ConsumeRandomLengthString();
+    int32_t ret = fdp.ConsumeIntegral<int32_t>();
+    int32_t sinkPid = fdp.ConsumeIntegral<int32_t>();
+    int32_t sinkUid = fdp.ConsumeIntegral<int32_t>();
+    int32_t sinkAccessTokenId = fdp.ConsumeIntegral<int32_t>();
+
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    dataParcel.WriteString(collabToken);
+    dataParcel.WriteInt32(ret);
+    dataParcel.WriteInt32(sinkPid);
+    dataParcel.WriteInt32(sinkUid);
+    dataParcel.WriteInt32(sinkAccessTokenId);
+    DistributedSchedService::GetInstance().NotifyStartAbilityResultInner(dataParcel, reply);
+}
+
+void GetWifiStatusInnerFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    FuzzUtil::MockPermission();
+    MessageParcel dataParcel;
+    MessageParcel reply;
+
+    FuzzedDataProvider fdp(data, size);
+    DistributedSchedService::GetInstance().GetWifiStatusInner(dataParcel, reply);
+}
+
+void IsNewCollabVersionFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    FuzzUtil::MockPermission();
+    FuzzedDataProvider fdp(data, size);
+    std::string remoteDeviceId = fdp.ConsumeRandomLengthString();
+    DistributedSchedService::GetInstance().IsNewCollabVersion(remoteDeviceId);
+}
+
 void FuzzTest(const uint8_t* data, size_t size)
 {
     CollabMissionInnerFuzzTest(data, size);
@@ -1163,6 +1210,9 @@ void FuzzTest(const uint8_t* data, size_t size)
     GetSinkCollabVersionInnerFuzzTest(data, size);
     NotifyRejectReasonFuzzTest(data, size);
     NotifyCollabPrepareResultInnerFuzzTest(data, size);
+    NotifyStartAbilityResultInnerFuzzTest(data, size);
+    GetWifiStatusInnerFuzzTest(data, size);
+    IsNewCollabVersionFuzzTest(data, size);
 }
 }
 }

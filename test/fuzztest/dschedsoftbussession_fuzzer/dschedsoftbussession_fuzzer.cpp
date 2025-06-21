@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fuzzer/FuzzedDataProvider.h>
 #include <securec.h>
 
 #include "dsched_data_buffer.h"
@@ -36,6 +37,21 @@ constexpr int32_t POS_3 = 3;
 constexpr int32_t OFFSET_24 = 24;
 constexpr int32_t OFFSET_16 = 16;
 constexpr int32_t OFFSET_8 = 8;
+
+inline uint32_t ConsumeDataLen(FuzzedDataProvider& fdp)
+{
+    return fdp.ConsumeIntegralInRange<uint32_t>(1, 1024);
+}
+
+inline uint32_t ConsumeTotalLen(FuzzedDataProvider& fdp, uint32_t dataLen)
+{
+    return fdp.ConsumeIntegralInRange<uint32_t>(dataLen, 2048);
+}
+
+inline uint32_t ConsumeSessionTotalLen(FuzzedDataProvider& fdp, uint32_t dataLen)
+{
+    return fdp.ConsumeIntegralInRange<uint32_t>(dataLen, 2048);
+}
 }
 
 int32_t Get32Data(const uint8_t* ptr, size_t size)
@@ -93,6 +109,58 @@ void FuzzAssembleNoFrag(const uint8_t* data, size_t size)
     dschedSoftbusSession.UnPackSendData(buffer, accountId);
     dschedSoftbusSession.UnPackStartEndData(buffer, accountId);
 }
+
+void FuzzDSchedSoftbusSessionConstructor(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < U32_AT_SIZE)) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    SessionInfo sessionInfo;
+    sessionInfo.sessionId = fdp.ConsumeIntegral<int32_t>();
+    sessionInfo.myDeviceId = fdp.ConsumeRandomLengthString();
+    sessionInfo.peerDeviceId = fdp.ConsumeRandomLengthString();
+    sessionInfo.sessionName = fdp.ConsumeRandomLengthString();
+    sessionInfo.isServer = fdp.ConsumeBool();
+
+    DSchedSoftbusSession dschedSoftbusSession(sessionInfo);
+    dschedSoftbusSession.OnConnect();
+    dschedSoftbusSession.OnDisconnect();
+    dschedSoftbusSession.GetPeerDeviceId();
+}
+
+void FuzzCheckUnPackBuffer(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < U32_AT_SIZE)) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    DSchedSoftbusSession::SessionDataHeader headerPara;
+    headerPara.seqNum = fdp.ConsumeIntegral<uint32_t>();
+    headerPara.subSeq = fdp.ConsumeIntegral<uint16_t>();
+    headerPara.dataLen = ConsumeDataLen(fdp);
+    headerPara.totalLen = ConsumeTotalLen(fdp, headerPara.dataLen); 
+
+    DSchedSoftbusSession dschedSoftbusSession;
+
+    dschedSoftbusSession.isWaiting_ = fdp.ConsumeBool();
+    dschedSoftbusSession.nowSeq_ = fdp.ConsumeIntegral<uint32_t>();
+    dschedSoftbusSession.nowSubSeq_ = fdp.ConsumeIntegral<uint16_t>();
+    dschedSoftbusSession.totalLen_ = ConsumeSessionTotalLen(fdp, headerPara.dataLen);
+    dschedSoftbusSession.offset_ = fdp.ConsumeIntegralInRange<uint32_t>(0, dschedSoftbusSession.totalLen_);
+
+    dschedSoftbusSession.CheckUnPackBuffer(headerPara);
+}
+
+void FuzzGetNowTimeStampUs(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < U32_AT_SIZE)) {
+        return;
+    }
+    DSchedSoftbusSession dschedSoftbusSession;
+    dschedSoftbusSession.GetNowTimeStampUs();
+}
 }
 }
 
@@ -101,5 +169,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     OHOS::DistributedSchedule::FuzzOnBytesReceived(data, size);
     OHOS::DistributedSchedule::FuzzAssembleNoFrag(data, size);
+    OHOS::DistributedSchedule::FuzzDSchedSoftbusSessionConstructor(data, size);
+    OHOS::DistributedSchedule::FuzzCheckUnPackBuffer(data, size);
+    OHOS::DistributedSchedule::FuzzGetNowTimeStampUs(data, size);
     return 0;
 }
