@@ -37,20 +37,23 @@ constexpr int32_t POS_3 = 3;
 constexpr int32_t OFFSET_24 = 24;
 constexpr int32_t OFFSET_16 = 16;
 constexpr int32_t OFFSET_8 = 8;
+constexpr int32_t MAX_DATALEN = 2048;
+constexpr int32_t MAX_FDP_RANGE = 1024;
+
 
 inline uint32_t ConsumeDataLen(FuzzedDataProvider& fdp)
 {
-    return fdp.ConsumeIntegralInRange<uint32_t>(1, 1024);
+    return fdp.ConsumeIntegralInRange<uint32_t>(1, MAX_FDP_RANGE);
 }
 
 inline uint32_t ConsumeTotalLen(FuzzedDataProvider& fdp, uint32_t dataLen)
 {
-    return fdp.ConsumeIntegralInRange<uint32_t>(dataLen, 2048);
+    return fdp.ConsumeIntegralInRange<uint32_t>(dataLen, MAX_DATALEN);
 }
 
 inline uint32_t ConsumeSessionTotalLen(FuzzedDataProvider& fdp, uint32_t dataLen)
 {
-    return fdp.ConsumeIntegralInRange<uint32_t>(dataLen, 2048);
+    return fdp.ConsumeIntegralInRange<uint32_t>(dataLen, MAX_DATALEN);
 }
 }
 
@@ -140,7 +143,7 @@ void FuzzCheckUnPackBuffer(const uint8_t* data, size_t size)
     headerPara.seqNum = fdp.ConsumeIntegral<uint32_t>();
     headerPara.subSeq = fdp.ConsumeIntegral<uint16_t>();
     headerPara.dataLen = ConsumeDataLen(fdp);
-    headerPara.totalLen = ConsumeTotalLen(fdp, headerPara.dataLen); 
+    headerPara.totalLen = ConsumeTotalLen(fdp, headerPara.dataLen);
 
     DSchedSoftbusSession dschedSoftbusSession;
 
