@@ -53,7 +53,8 @@ public:
     /**
      * @brief connect remote ability of ExtBackup.
      */
-    ErrCode ConnectDExtAbility(AAFwk::Want &want, int32_t userId, bool isCleanCalled);
+    ErrCode ConnectDExtAbility(AAFwk::Want &want, int32_t userId, bool isCleanCalled, const std::string& delegatee,
+        bool &isDelay);
 
     /**
      * @brief disconnect remote ability of ExtBackup.
@@ -108,6 +109,7 @@ private:
     std::atomic<bool> isConnected_ = {false};
     std::atomic<bool> isCleanCalled_ = {false};
     std::atomic<bool> isConnectCalled_ = {false};
+    std::atomic<bool> isDelay_ = {false};
     sptr<IDExtension> distributedProxy_;
 
     std::function<void(const std::string &&)> callConnected_;

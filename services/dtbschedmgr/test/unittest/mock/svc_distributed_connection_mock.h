@@ -25,7 +25,8 @@ namespace DistributedSchedule {
 class ISvcDistributedConnection {
 public:
     virtual ~ISvcDistributedConnection() = default;
-    virtual ErrCode ConnectDExtAbility(AAFwk::Want &want, int32_t userId, bool isCleanCalled) = 0;
+    virtual ErrCode ConnectDExtAbility(AAFwk::Want &want, int32_t userId, bool isCleanCalled,
+        const std::string& delegatee, bool &isDelay) = 0;
     virtual sptr<IDExtension> GetDistributedExtProxy() = 0;
 public:
     static inline std::shared_ptr<ISvcDistributedConnection> connMock = nullptr;
@@ -33,7 +34,8 @@ public:
 
 class SvcDistributedConnectionMock : public ISvcDistributedConnection {
 public:
-    MOCK_METHOD3(ConnectDExtAbility, ErrCode(AAFwk::Want &want, int32_t userId, bool isCleanCalled));
+    MOCK_METHOD5(ConnectDExtAbility, ErrCode(AAFwk::Want &want, int32_t userId, bool isCleanCalled,
+        const std::string& delegatee, bool &isDelay));
     MOCK_METHOD0(GetDistributedExtProxy, sptr<IDExtension>());
 };
 }
