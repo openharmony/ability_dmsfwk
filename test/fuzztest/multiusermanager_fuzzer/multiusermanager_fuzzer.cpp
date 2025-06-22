@@ -37,8 +37,6 @@ void FuzzMultiUserManager(const uint8_t* data, size_t size)
     MultiUserManager::GetInstance().CreateNewRecvMgrLocked();
     MultiUserManager::GetInstance().GetSendMgrByCallingUid(accountId);
     MultiUserManager::GetInstance().GetRecvMgrByCallingUid(accountId);
-    MultiUserManager::GetInstance().CreateNewRecomMgrLocked();
-    MultiUserManager::GetInstance().GetRecomMgrByCallingUid(accountId);
     MultiUserManager::GetInstance().UnInit();
 }
 }
