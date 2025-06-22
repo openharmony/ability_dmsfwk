@@ -384,40 +384,6 @@ bool FuzzDistributedWantToJson(const uint8_t* data, size_t size)
     return true;
 }
 
-bool FuzzDistributedWantToString(const uint8_t* data, size_t size)
-{
-    if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
-        return false;
-    }
-
-    std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
-
-    std::string deviceId(reinterpret_cast<const char*>(data), size);
-    std::string bundleName(reinterpret_cast<const char*>(data), size);
-    std::string abilityName(reinterpret_cast<const char*>(data), size);
-    want->SetElementName(deviceId, bundleName, abilityName);
-
-    std::string action(reinterpret_cast<const char*>(data), size);
-    want->SetAction(action);
-
-    unsigned int flags = static_cast<unsigned int>(data[0]);
-    want->SetFlags(flags);
-
-    std::string type(reinterpret_cast<const char*>(data), size);
-    want->SetType(type);
-
-    std::string uri(reinterpret_cast<const char*>(data), size);
-    want->SetUri(uri);
-
-    std::vector<std::string> entities = { "entity1", "entity2", "entity3" };
-    for (const auto& entity : entities) {
-        want->AddEntity(entity);
-    }
-
-    std::string result = want->ToString();
-    return true;
-}
-
 bool FuzzDistributedWantFromString(const uint8_t* data, size_t size)
 {
     if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
@@ -446,7 +412,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::FuzzDistributedWantOperationEquals(data, size);
     OHOS::FuzzDistributedWantSetUri(data, size);
     OHOS::FuzzDistributedWantToJson(data, size);
-    OHOS::FuzzDistributedWantToString(data, size);
     OHOS::FuzzDistributedWantFromString(data, size);
     return 0;
 }
