@@ -164,6 +164,7 @@ DSchedCollab::~DSchedCollab()
 {
     HILOGI("delete enter");
     UnregisterAbilityLifecycleObserver();
+    UnInit();
     HILOGI("delete end");
 }
 
