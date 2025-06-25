@@ -18,7 +18,6 @@
 
 #include <gmock/gmock.h>
 
-#include "broadcast_struct.h"
 #include "socket.h"
 #include "session.h"
 

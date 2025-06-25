@@ -53,7 +53,7 @@ void SoftbusAdapterTest::SetUp()
     DTEST_LOG << "SoftbusAdapterTest::SetUp" << std::endl;
 }
 
-static int32_t SendEvent(EventData& eventData)
+static int32_t SendEvent(bool screenOff, uint8_t *data, size_t dataLen)
 {
     return g_mockRet;
 }
@@ -63,12 +63,11 @@ static int32_t StopEvent()
     return g_mockRet;
 }
 
-static int32_t RegisterEventListener(EventListener& eventListener)
+static int32_t RegisterEventListener(bool deduplicate, void *onBroadCastRecvFunc)
 {
     return g_mockRet;
 }
-
-static int32_t UnregisterEventListener(EventListener& eventListener)
+static int32_t UnregisterEventListener(bool deduplicate, void *onBroadCastRecvFunc)
 {
     return g_mockRet;
 }
@@ -175,7 +174,7 @@ HWTEST_F(SoftbusAdapterTest, RegisterSoftbusEventListener_001, TestSize.Level3)
     uint32_t sendDataLen = 1;
     SoftbusAdapter::GetInstance().OnBroadCastRecv(networkId, sendData, sendDataLen);
     DTEST_LOG << "SoftbusAdapterTest OnBroadCastRecv_001 end" << std::endl;
-    
+
     DTEST_LOG << "SoftbusAdapterTest RegisterSoftbusEventListener_001 begin" << std::endl;
     std::shared_ptr<SubSoftbusAdapterListener> listener = std::make_shared<SubSoftbusAdapterListener>();
     int32_t result = SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
