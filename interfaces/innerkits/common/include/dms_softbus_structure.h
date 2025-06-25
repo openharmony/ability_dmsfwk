@@ -16,15 +16,17 @@
 #ifndef OHOS_DMS_SOFTBUS_STRUCTURE_H
 #define OHOS_DMS_SOFTBUS_STRUCTURE_H
 
-#include "broadcast_struct.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include "softbus_common.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 typedef struct {
-    int32_t (*SendSoftbusEvent)(EventData& eventData);
+    int32_t (*SendSoftbusEvent)(bool screenOff, uint8_t *data, size_t dataLen);
     int32_t (*StopSoftbusEvent)();
-    int32_t (*RegisterSoftbusEventListener)(EventListener& eventListener);
-    int32_t (*UnregisterSoftbusEventListener)(EventListener& eventListener);
+    int32_t (*RegisterSoftbusEventListener)(bool deduplicate, void *onBroadCastRecvFunc);
+    int32_t (*UnregisterSoftbusEventListener)(bool deduplicate, void *onBroadCastRecvFunc);
     int32_t (*QueryValidQos)(const std::string &peerDeviceId, uint32_t &validQosCase);
 } IDmsBroadcastAdapter;
 } // namespace DistributedSchedule
