@@ -2421,6 +2421,20 @@ HWTEST_F(DMSMissionManagerTest, testNeedSyncDevice003, TestSize.Level3)
 }
 
 /**
+ * @tc.name: testNeedSyncDevice004
+ * @tc.desc: need sync device
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNeedSyncDevice004, TestSize.Level3)
+{
+    DTEST_LOG << "testNeedSyncDevice004 begin" << std::endl;
+    std::string deviceId;
+    bool ret = DistributedSchedMissionManager::GetInstance().NeedSyncDevice(deviceId);
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "testNeedSyncDevice004 end" << std::endl;
+}
+
+/**
  * @tc.name: testHasSyncListener002
  * @tc.desc: need sync device
  * @tc.type: FUNC
