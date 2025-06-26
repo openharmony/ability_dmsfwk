@@ -47,8 +47,7 @@ void OnStopFuzzTest(const uint8_t* data, size_t size)
     int32_t extraDataId = fdp.ConsumeIntegral<int32_t>();
     SystemAbilityOnDemandReason reason(reasonId, reasonName, reasonValue, extraDataId);
 
-    DistributedSchedService service;
-    service.OnStop(reason);
+    DistributedSchedService::GetInstance().OnStop(reason);
 }
 
 void OnActiveFuzzTest(const uint8_t* data, size_t size)
@@ -67,8 +66,7 @@ void OnActiveFuzzTest(const uint8_t* data, size_t size)
 
     SystemAbilityOnDemandReason reason(reasonId, reasonName, reasonValue, extraDataId);
 
-    DistributedSchedService service;
-    service.OnActive(reason);
+    DistributedSchedService::GetInstance().OnActive(reason);
 }
 
 void HandleBootStartFuzzTest(const uint8_t* data, size_t size)
@@ -87,8 +85,7 @@ void HandleBootStartFuzzTest(const uint8_t* data, size_t size)
 
     SystemAbilityOnDemandReason reason(reasonId, reasonName, reasonValue, extraDataId);
 
-    DistributedSchedService service;
-    service.HandleBootStart(reason);
+    DistributedSchedService::GetInstance().HandleBootStart(reason);
 }
 
 void DoStartFuzzTest(const uint8_t* data, size_t size)
@@ -97,8 +94,7 @@ void DoStartFuzzTest(const uint8_t* data, size_t size)
         return;
     }
 
-    DistributedSchedService service;
-    service.DoStart();
+    DistributedSchedService::GetInstance().DoStart();
 }
 
 void DeviceOnlineNotifyFuzzTest(const uint8_t* data, size_t size)
@@ -109,8 +105,7 @@ void DeviceOnlineNotifyFuzzTest(const uint8_t* data, size_t size)
 
     std::string networkId(reinterpret_cast<const char*>(data), size / 2);
 
-    DistributedSchedService service;
-    service.DeviceOnlineNotify(networkId);
+    DistributedSchedService::GetInstance().DeviceOnlineNotify(networkId);
 }
 
 void DeviceOfflineNotifyFuzzTest(const uint8_t* data, size_t size)
@@ -121,8 +116,7 @@ void DeviceOfflineNotifyFuzzTest(const uint8_t* data, size_t size)
 
     std::string networkId(reinterpret_cast<const char*>(data), size / 2);
 
-    DistributedSchedService service;
-    service.DeviceOfflineNotify(networkId);
+    DistributedSchedService::GetInstance().DeviceOfflineNotify(networkId);
 }
 
 void DeviceOfflineNotifyAfterDeleteFuzzTest(const uint8_t* data, size_t size)
@@ -133,8 +127,7 @@ void DeviceOfflineNotifyAfterDeleteFuzzTest(const uint8_t* data, size_t size)
 
     std::string networkId(reinterpret_cast<const char*>(data), size / 2);
 
-    DistributedSchedService service;
-    service.DeviceOfflineNotifyAfterDelete(networkId);
+    DistributedSchedService::GetInstance().DeviceOfflineNotifyAfterDelete(networkId);
 }
 
 void InitFuzzTest(const uint8_t* data, size_t size)
@@ -143,8 +136,7 @@ void InitFuzzTest(const uint8_t* data, size_t size)
         return;
     }
 
-    DistributedSchedService service;
-    service.Init();
+    DistributedSchedService::GetInstance().Init();
 }
 
 void InitMissionManagerFuzzTest(const uint8_t* data, size_t size)
@@ -153,8 +145,7 @@ void InitMissionManagerFuzzTest(const uint8_t* data, size_t size)
         return;
     }
 
-    DistributedSchedService service;
-    service.InitMissionManager();
+    DistributedSchedService::GetInstance().InitMissionManager();
 }
 
 void InitWifiStateListenerFuzzTest(const uint8_t* data, size_t size)
@@ -163,8 +154,7 @@ void InitWifiStateListenerFuzzTest(const uint8_t* data, size_t size)
         return;
     }
 
-    DistributedSchedService service;
-    service.InitWifiStateListener();
+    DistributedSchedService::GetInstance().InitWifiStateListener();
 }
 
 void InitBluetoothStateListenerFuzzTest(const uint8_t* data, size_t size)
@@ -173,8 +163,7 @@ void InitBluetoothStateListenerFuzzTest(const uint8_t* data, size_t size)
         return;
     }
 
-    DistributedSchedService service;
-    service.InitBluetoothStateListener();
+    DistributedSchedService::GetInstance().InitBluetoothStateListener();
 }
 
 void InitDeviceCfgFuzzTest(const uint8_t* data, size_t size)
@@ -183,8 +172,7 @@ void InitDeviceCfgFuzzTest(const uint8_t* data, size_t size)
         return;
     }
 
-    DistributedSchedService service;
-    service.InitDeviceCfg();
+    DistributedSchedService::GetInstance().InitDeviceCfg();
 }
 }
 }
