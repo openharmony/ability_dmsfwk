@@ -121,7 +121,7 @@ public:
     }
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     virtual int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
-        int32_t callingUid) = 0;
+        int32_t callingUid, uint32_t callingTokenId = 0) = 0;
     virtual int32_t StartSyncMissionsFromRemote(const CallerInfo& callerInfo,
         std::vector<DstbMissionInfo>& missionInfos) = 0;
     virtual int32_t StopSyncRemoteMissions(const std::string& devId, int32_t callingUid) = 0;

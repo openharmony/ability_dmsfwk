@@ -1533,7 +1533,8 @@ int32_t DistributedSchedStub::StartSyncRemoteMissionsInner(MessageParcel& data, 
         HILOGW("read callingUid failed!");
         return ERR_FLATTEN_OBJECT;
     }
-    int32_t result = StartSyncRemoteMissions(deviceId, fixConflict, tag, callingUid);
+    uint32_t callingTokenId = data.ReadUint32();
+    int32_t result = StartSyncRemoteMissions(deviceId, fixConflict, tag, callingUid, callingTokenId);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
 }
 
@@ -1581,6 +1582,19 @@ bool DistributedSchedStub::CallerInfoUnmarshalling(CallerInfo& callerInfo, Messa
     callerInfo.duid = duid;
     callerInfo.callerAppId = callerAppId;
     callerInfo.dmsVersion = version;
+    std::string extraInfo = data.ReadString();
+    if (extraInfo.empty()) {
+        HILOGW("read extraInfo failed!");
+    } else {
+        nlohmann::json extraInfoJson = nlohmann::json::parse(extraInfo, nullptr, false);
+        if (!extraInfoJson.is_discarded()) {
+            if (extraInfoJson.find("accessToken") != extraInfoJson.end() &&
+                extraInfoJson["accessToken"].is_number()) {
+                callerInfo.accessToken = extraInfoJson["accessToken"];
+            }
+            callerInfo.extraInfoJson = extraInfoJson;
+        }
+    }
     return true;
 }
 
