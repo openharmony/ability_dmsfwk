@@ -290,6 +290,21 @@ HWTEST_F(DistributedSchedServiceSecondTest, StartRemoteFreeInstall_001, TestSize
 }
 
 /**
+ * @tc.name: CheckSinkAccessControlUser_001
+ * @tc.desc: check access control
+ * @tc.type: FUNC
+ * @tc.require: I76THI
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, CheckSinkAccessControlUser_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest CheckSinkAccessControlUser_001 start" << std::endl;
+    IDistributedSched::FreeInstallInfo info;
+    int32_t result = DistributedSchedService::GetInstance().CheckSinkAccessControlUser(info);
+    EXPECT_EQ(result, false);
+    DTEST_LOG << "DistributedSchedServiceSecondTest CheckSinkAccessControlUser_001 end" << std::endl;
+}
+
+/**
  * @tc.name: NotifyCompleteFreeInstall_001
  * @tc.desc: call NotifyCompleteFreeInstall
  * @tc.type: FUNC

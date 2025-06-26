@@ -84,6 +84,9 @@
 #include "mission/wifi_state_listener.h"
 #include "mission/bluetooth_state_listener.h"
 #endif
+#include "caller_info.h"
+#include "os_account_manager.h"
+#include "ohos_account_kits.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -3279,13 +3282,14 @@ int32_t DistributedSchedService::UnRegisterMissionListener(const std::u16string&
 }
 
 int32_t DistributedSchedService::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
-    int32_t callingUid)
+    int32_t callingUid, uint32_t callingTokenId)
 {
     if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
         HILOGW("The current user is not foreground. callingUid: %{public}d.", callingUid);
         return DMS_NOT_FOREGROUND_USER;
     }
-    return DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(devId, fixConflict, tag);
+    return DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(devId, fixConflict,
+        tag, callingTokenId);
 }
 
 int32_t DistributedSchedService::StopSyncRemoteMissions(const std::string& devId, int32_t callingUid)
@@ -3610,7 +3614,11 @@ int32_t DistributedSchedService::StartFreeInstallFromRemote(const FreeInstallInf
         HILOGE("check deviceId failed");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
-
+    bool result = CheckSinkAccessControlUser(info);
+    if (!result) {
+        HILOGE("Check sink access control failed.");
+        return INVALID_PARAMETERS_ERR;
+    }
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->Connect();
     if (err != ERR_OK) {
         HILOGE("connect ability server failed %{public}d", err);
@@ -3629,6 +3637,32 @@ int32_t DistributedSchedService::StartFreeInstallFromRemote(const FreeInstallInf
         HILOGE("FreeInstallAbilityFromRemote failed %{public}d", err);
     }
     return err;
+}
+
+bool DistributedSchedService::CheckSinkAccessControlUser(const FreeInstallInfo& info)
+{
+    DmAccessCaller dmSrcCaller = {
+        .accountId = info.accountInfo.activeAccountId,
+        .networkId = info.callerInfo.sourceDeviceId,
+        .userId = info.accountInfo.userId,
+    };
+    AccountInfo dstAccountInfo;
+    if (!DistributedSchedMissionManager::GetInstance().GetOsAccountData(dstAccountInfo)) {
+        HILOGE("Get Os accountId and userId fail.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    std::string dstNetworkId;
+    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(dstNetworkId)) {
+        HILOGE("GetLocalDeviceId failed");
+        return INVALID_REMOTE_PARAMETERS_ERR;
+    }
+
+    DmAccessCallee dmDstCallee = {
+        .accountId = dstAccountInfo.activeAccountId,
+        .networkId = dstNetworkId,
+        .userId = dstAccountInfo.userId,
+    };
+    return DeviceManager::GetInstance().CheckSinkAccessControl(dmSrcCaller, dmDstCallee);
 }
 
 int32_t DistributedSchedService::NotifyCompleteFreeInstall(
