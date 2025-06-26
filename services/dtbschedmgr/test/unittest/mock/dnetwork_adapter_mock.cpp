@@ -12,22 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-
-#include "dtbschedmgr_device_info_storage_mock.h"
-
+ 
+#include "dnetwork_adapter_mock.h"
+ 
 namespace OHOS {
 namespace DistributedSchedule {
-
-IMPLEMENT_SINGLE_INSTANCE(DtbschedmgrDeviceInfoStorage);
-
-std::vector<std::string> DtbschedmgrDeviceInfoStorage::GetNetworkIdList()
+ 
+std::string DnetworkAdapter::GetUdidByNetworkId(const std::string& networkId)
 {
-    return IDtbschedmgrDeviceInfoStorage::storageMock->GetNetworkIdList();
-}
-
-bool DtbschedmgrDeviceInfoStorage::GetLocalDeviceId(std::string& networkId)
-{
-    return IDtbschedmgrDeviceInfoStorage::storageMock->GetLocalDeviceId(networkId);
+    if (IDnetworkAdapter::netAdapter == nullptr) {
+        return false;
+    }
+    return IDnetworkAdapter::netAdapter->GetUdidByNetworkId(networkId);
 }
 }
 }

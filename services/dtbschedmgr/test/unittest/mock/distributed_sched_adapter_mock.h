@@ -12,30 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef DTBSCHEDMGR_DEVICE_INFO_STORAGE_MOCK_H
-#define DTBSCHEDMGR_DEVICE_INFO_STORAGE_MOCK_H
+#ifndef DISTRIBUTED_SCHED_ADAPTER_MOCK_H
+#define DISTRIBUTED_SCHED_ADAPTER_MOCK_H
 
 #include <gmock/gmock.h>
 
-#include "dtbschedmgr_device_info_storage.h"
-
-#include "ability_info.h"
+#include "distributed_sched_adapter.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
-class IDtbschedmgrDeviceInfoStorage {
+class IDistributedSchedAdapter {
 public:
-    virtual ~IDtbschedmgrDeviceInfoStorage() = default;
-    virtual std::vector<std::string> GetNetworkIdList() = 0;
-    virtual bool GetLocalDeviceId(std::string& networkId) = 0;
+    virtual ~IDistributedSchedAdapter() = default;
+    virtual bool CheckAccessToGroup(const std::string& groupId, const std::string& targetBundleName) = 0;
 public:
-    static inline std::shared_ptr<IDtbschedmgrDeviceInfoStorage> storageMock = nullptr;
+    static inline std::shared_ptr<IDistributedSchedAdapter> adapter = nullptr;
 };
 
-class DtbschedmgrDeviceInfoStorageMock : public IDtbschedmgrDeviceInfoStorage {
+class DistributedSchedAdapterMock : public IDistributedSchedAdapter {
 public:
-    MOCK_METHOD0(GetNetworkIdList, std::vector<std::string>());
-    MOCK_METHOD1(GetLocalDeviceId, bool(std::string& networkId));
+    MOCK_METHOD2(CheckAccessToGroup, bool(const std::string& groupId, const std::string& targetBundleName));
 };
 }
 }

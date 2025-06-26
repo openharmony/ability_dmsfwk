@@ -485,7 +485,12 @@ ohos_unittest("dschedpermissiontest") {
   }
   module_out_path = module_output_path
 
-  sources = [ "unittest/distributed_sched_permission_test.cpp" ]
+  sources = [
+    "unittest/distributed_sched_permission_test.cpp",
+    "unittest/mock/bundle_manager_internal_mock.cpp",
+    "unittest/mock/dtbschedmgr_device_info_storage_mock.cpp",
+    "unittest/mock/distributed_sched_adapter_mock.cpp",
+  ]
   sources += dtbschedmgr_sources
 
   configs = [
@@ -497,6 +502,7 @@ ohos_unittest("dschedpermissiontest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
+  external_deps += [ "googletest:gmock" ]
   if (token_sync_enable) {
     cflags_cc = [ "-DTOKEN_SYNC_ENABLE" ]
   }
