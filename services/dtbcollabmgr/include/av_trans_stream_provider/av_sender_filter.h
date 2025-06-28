@@ -124,6 +124,7 @@ private:
     std::shared_ptr<Media::Meta> meta_ = nullptr;
 
     std::mutex queueMutex_;
+    std::mutex threadMutex_;
     std::queue<std::shared_ptr<AVTransStreamData>> sendDatas_;
     
     std::condition_variable cv_;

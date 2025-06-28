@@ -754,7 +754,7 @@ void DSchedCollabManager::NotifyDataRecv(const int32_t &softbusSessionId, int32_
             return;
         }
         if (getVersionCmd->sinkDeviceId_ != localDevId) {
-            HILOGE("Irrecognized deviceId! sinkDeviceId: %{public}s", getVersionCmd->sinkDeviceId_.c_str());
+            HILOGE("Irrecognized deviceId: %{public}s", GetAnonymStr(getVersionCmd->sinkDeviceId_).c_str());
             return;
         }
         auto newCollab = std::make_shared<DSchedCollab>(getVersionCmd, softbusSessionId);
