@@ -640,6 +640,9 @@ void DistributedSchedService::RegisterDataShareObserver(const std::string& key)
                 HILOGI("GetSendMgr failed.");
                 return;
             }
+            int32_t lastContinuableMissionId = DmsContinueConditionMgr::GetInstance().GetLastContinuableMissionId();
+            HILOGI("lastContinuableMissionId: %{public}d.", lastContinuableMissionId);
+            sendMgr->OnSwitchOffIconDisappear(lastContinuableMissionId);
             sendMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_UNFOCUSED);
             auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
             if (recvMgr == nullptr) {

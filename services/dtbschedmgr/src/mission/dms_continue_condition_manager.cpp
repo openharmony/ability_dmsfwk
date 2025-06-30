@@ -153,6 +153,7 @@ void DmsContinueConditionMgr::OnUserRemoved(int32_t accountId)
     if (it != missionMap_.end()) {
         missionMap_.erase(it);
     }
+    lastContinuableMissionId_ = 0;
     return;
 }
 
@@ -220,6 +221,7 @@ void DmsContinueConditionMgr::InitMissionStatus(int32_t accountId)
         missionMap_[accountId] = missionList;
     }
 
+    lastContinuableMissionId_ = 0;
     HILOGI("InitMissionStatus for user %{public}d end", accountId);
     return;
 }
@@ -442,6 +444,7 @@ bool DmsContinueConditionMgr::CheckSendFocusedCondition(const MissionStatus& sta
             reason = "BUNDLE_NOT_ALLOWED_IN_CFG";
             break;
         }
+        lastContinuableMissionId_ = status.missionId;
         HILOGI("PASS");
         return true;
     } while (0);
@@ -524,6 +527,7 @@ bool DmsContinueConditionMgr::CheckSendActiveCondition(const MissionStatus& stat
             reason = "BUNDLE_NOT_ALLOWED_IN_CFG";
             break;
         }
+        lastContinuableMissionId_ = status.missionId;
         HILOGI("PASS");
         return true;
     } while (0);
@@ -686,6 +690,11 @@ std::string DmsContinueConditionMgr::TypeEnumToString(MissionEventType type)
         default:
             return "UNDEFINED";
     }
+}
+
+int32_t DmsContinueConditionMgr::GetLastContinuableMissionId()
+{
+    return lastContinuableMissionId_;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
