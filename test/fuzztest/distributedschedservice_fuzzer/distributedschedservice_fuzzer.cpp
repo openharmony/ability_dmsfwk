@@ -36,7 +36,6 @@ namespace OHOS {
 namespace DistributedSchedule {
 constexpr int32_t ON_DEMAND_REASON_ID_COUNT = 7;
 constexpr int32_t GET_DEXTENSION_PROCESS_PARAM_COUNT = 6;
-constexpr size_t DUMP_ARGS_MAX_COUNT = 10;
 constexpr int SESSION_COUNT_MAX = 10;
 constexpr int32_t ON_DEMAND_REASON_ID_COUNT_FOUR = 4;
 
