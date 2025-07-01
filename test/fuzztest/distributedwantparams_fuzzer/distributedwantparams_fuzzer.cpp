@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fuzzer/FuzzedDataProvider.h>
 #include <iostream>
 
 #include "array_wrapper.h"
@@ -48,6 +49,7 @@ constexpr int32_t OFFSET_24 = 24;
 constexpr int32_t OFFSET_16 = 16;
 constexpr int32_t OFFSET_8 = 8;
 constexpr int32_t MID_HALF = 2;
+constexpr size_t MAX_TEST_STRING_LEN = 32;
 
 inline size_t CalculateMid(size_t size)
 {
@@ -299,6 +301,89 @@ bool DistributedWantParamWrapperParseWantParamsFuzzTest(const uint8_t* data, siz
 
     return result.Size() >= 0;
 }
+
+void DistributedWantParamQueryFuzzTest(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    size_t testSize = (size < MAX_TEST_STRING_LEN) ? size : MAX_TEST_STRING_LEN;
+    std::string testStr(reinterpret_cast<const char*>(data), testSize);
+    sptr<AAFwk::IInterface> iIt = String::Box(testStr);
+
+    DistributedWantParams::ArrayQueryToStr(iIt);
+    DistributedWantParams::DistributedWantParamsQueryToStr(iIt);
+    DistributedWantParams::BooleanQueryEquals(iIt);
+    DistributedWantParams::ByteQueryEquals(iIt);
+    DistributedWantParams::CharQueryEquals(iIt);
+    DistributedWantParams::ArrayQueryEquals(iIt);
+    DistributedWantParams::DistributedWantParamsQueryEquals(iIt);
+    DistributedWantParams::ShortQueryEquals(iIt);
+    DistributedWantParams::IntegerQueryEquals(iIt);
+    DistributedWantParams::LongQueryEquals(iIt);
+    DistributedWantParams::FloatQueryEquals(iIt);
+    DistributedWantParams::DoubleQueryEquals(iIt);
+    DistributedWantParams::GetNumberDataType(iIt);
+    DistributedWantParams::BooleanQueryToStr(iIt);
+    DistributedWantParams::ByteQueryToStr(iIt);
+    DistributedWantParams::CharQueryToStr(iIt);
+    DistributedWantParams::ShortQueryToStr(iIt);
+    DistributedWantParams::IntegerQueryToStr(iIt);
+    DistributedWantParams::LongQueryToStr(iIt);
+    DistributedWantParams::FloatQueryToStr(iIt);
+    DistributedWantParams::DoubleQueryToStr(iIt);
+}
+
+void DistributedUnsupportedDataCopyAssignFuzzTest(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < U32_AT_SIZE) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    DistributedUnsupportedData lhs;
+    DistributedUnsupportedData rhs;
+
+    std::string keyStr = fdp.ConsumeRandomLengthString();
+    rhs.key = std::u16string(keyStr.begin(), keyStr.end());
+    rhs.type = fdp.ConsumeIntegral<int>();
+    rhs.size = fdp.ConsumeIntegralInRange<int>(POS_1, FOO_MAX_LEN);
+    rhs.buffer = new uint8_t[rhs.size];
+    std::vector<uint8_t> buf = fdp.ConsumeBytes<uint8_t>(rhs.size);
+    if (memcpy_s(rhs.buffer, rhs.size, buf.data(), buf.size()) != 0) {
+        delete[] rhs.buffer;
+        rhs.buffer = nullptr;
+        return;
+    }
+
+    lhs = rhs;
+}
+
+void DistributedUnsupportedDataMoveAssignFuzzTest(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < U32_AT_SIZE) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    DistributedUnsupportedData lhs;
+    DistributedUnsupportedData rhs;
+
+    std::string keyStr = fdp.ConsumeRandomLengthString();
+    rhs.key = std::u16string(keyStr.begin(), keyStr.end());
+    rhs.type = fdp.ConsumeIntegral<int>();
+    rhs.size = fdp.ConsumeIntegralInRange<int>(POS_1, FOO_MAX_LEN);
+    rhs.buffer = new uint8_t[rhs.size];
+    std::vector<uint8_t> buf = fdp.ConsumeBytes<uint8_t>(rhs.size);
+    if (memcpy_s(rhs.buffer, rhs.size, buf.data(), buf.size()) != 0) {
+        delete[] rhs.buffer;
+        rhs.buffer = nullptr;
+        return;
+    }
+
+    lhs = std::move(rhs);
+}
+
 }
 
 /* Fuzzer entry point */
@@ -313,5 +398,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DistributedWantParamWrapperBoxFuzzTest(data, size);
     OHOS::DistributedWantParamWrapperGerTypedIdFuzzTest(data, size);
     OHOS::DistributedWantParamWrapperParseWantParamsFuzzTest(data, size);
+    OHOS::DistributedWantParamQueryFuzzTest(data, size);
+    OHOS::DistributedUnsupportedDataCopyAssignFuzzTest(data, size);
+    OHOS::DistributedUnsupportedDataMoveAssignFuzzTest(data, size);
     return 0;
 }

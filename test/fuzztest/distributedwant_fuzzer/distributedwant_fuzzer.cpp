@@ -393,6 +393,68 @@ bool FuzzDistributedWantFromString(const uint8_t* data, size_t size)
     std::shared_ptr<DistributedWant> want(DistributedWant::FromString(inputString));
     return true;
 }
+
+void DistributedWantCopyCtorFuzzTest(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    Want want;
+    want.SetAction(fdp.ConsumeRandomLengthString());
+    want.SetBundle(fdp.ConsumeRandomLengthString());
+    want.SetElement(AppExecFwk::ElementName(
+        fdp.ConsumeRandomLengthString(),
+        fdp.ConsumeRandomLengthString(),
+        fdp.ConsumeRandomLengthString()
+    ));
+
+    DistributedWant original(want);
+
+    DistributedWant copy(original);
+}
+
+void DistributedWantAssignOperatorFuzzTest(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    Want want;
+    want.SetAction(fdp.ConsumeRandomLengthString());
+    want.SetBundle(fdp.ConsumeRandomLengthString());
+    want.SetElement(AppExecFwk::ElementName(
+        fdp.ConsumeRandomLengthString(),
+        fdp.ConsumeRandomLengthString(),
+        fdp.ConsumeRandomLengthString()
+    ));
+
+    DistributedWant lhs(want);
+    DistributedWant rhs(want);
+
+    lhs = rhs;
+}
+
+void DistributedWantFromWantFuzzTest(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    Want want;
+    want.SetAction(fdp.ConsumeRandomLengthString());
+    want.SetBundle(fdp.ConsumeRandomLengthString());
+    want.SetElement(AppExecFwk::ElementName(
+        fdp.ConsumeRandomLengthString(),
+        fdp.ConsumeRandomLengthString(),
+        fdp.ConsumeRandomLengthString()
+    ));
+
+    DistributedWant distributedWant(want);
+}
 }
 
 /* Fuzzer entry point */
@@ -413,5 +475,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::FuzzDistributedWantSetUri(data, size);
     OHOS::FuzzDistributedWantToJson(data, size);
     OHOS::FuzzDistributedWantFromString(data, size);
+    OHOS::DistributedWantCopyCtorFuzzTest(data, size);
+    OHOS::DistributedWantAssignOperatorFuzzTest(data, size);
+    OHOS::DistributedWantFromWantFuzzTest(data, size);
     return 0;
 }
