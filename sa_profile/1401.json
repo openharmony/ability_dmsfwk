@@ -27,6 +27,12 @@
                         "name": "deviceonline",
                         "value": "off"
                     }
+                ],
+                "param": [
+                    {
+                        "name": "resourceschedule.memmgr.low.memory.prepare",
+                        "value": "true"
+                    }
                 ]
             }
         }
