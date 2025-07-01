@@ -38,6 +38,7 @@ constexpr int32_t ON_DEMAND_REASON_ID_COUNT = 7;
 constexpr int32_t GET_DEXTENSION_PROCESS_PARAM_COUNT = 6;
 constexpr size_t DUMP_ARGS_MAX_COUNT = 10;
 constexpr int SESSION_COUNT_MAX = 10;
+constexpr int32_t ON_DEMAND_REASON_ID_COUNT_FOUR = 4;
 
 std::string GetDExtensionName(std::string bundleName, int32_t userId);
 std::string GetDExtensionProcess(std::string bundleName, int32_t userId);
@@ -200,7 +201,7 @@ void GetDExtensionProcessFuzzTest(const uint8_t* data, size_t size)
 
 void ConnectDExtensionFromRemoteFuzzTest(const uint8_t* data, size_t size)
 {
-    if ((data == nullptr) || (size < 4 * sizeof(int32_t))) {
+    if ((data == nullptr) || (size < ON_DEMAND_REASON_ID_COUNT_FOUR * sizeof(int32_t))) {
         return;
     }
 
@@ -534,7 +535,7 @@ void RemoveContinuationTimeoutFuzzTest(const uint8_t* data, size_t size)
 
 void SetContinuationTimeoutFuzzTest(const uint8_t* data, size_t size)
 {
-    if (data == nullptr || size < sizeof(int32_t) * 2) {
+    if (data == nullptr || size < sizeof(int32_t) + sizeof(int32_t)) {
         return;
     }
 
