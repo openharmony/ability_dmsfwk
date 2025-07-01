@@ -246,6 +246,49 @@ HWTEST_F(DMSContinueSendMgrTest, AddMMIListener_Test_001, TestSize.Level1)
     DTEST_LOG << "DMSContinueSendMgrTest AddMMIListener_Test_001 end" << std::endl;
 }
 
+/**
+ * @tc.name: OnSwitchOffIconDisappear_001
+ * @tc.desc: test OnSwitchOffIconDisappear
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueSendMgrTest, OnSwitchOffIconDisappear_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueSendMgrTest OnSwitchOffIconDisappear_001 start" << std::endl;
+    std::shared_ptr<DMSContinueSendMgr> sendMgr = std::make_shared<DMSContinueSendMgr>();
+    MissionStatus status;
+    uint8_t sendType = 0;
+    int32_t missionId = 0;
+    EXPECT_CALL(*mgrMock_, GetMissionStatus(_, _, _)).WillOnce(Return(0));
+    EXPECT_NO_FATAL_FAILURE(sendMgr->OnSwitchOffIconDisappear(missionId));
+    EXPECT_CALL(*mgrMock_, GetMissionStatus(_, _, _)).WillRepeatedly(Return(1));
+    EXPECT_NO_FATAL_FAILURE(sendMgr->OnSwitchOffIconDisappear(missionId));
+    DTEST_LOG << "DMSContinueSendMgrTest OnSwitchOffIconDisappear_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SendContinueSwitchOffBroadcast_001
+ * @tc.desc: test SendContinueSwitchOffBroadcast
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueSendMgrTest, SendContinueSwitchOffBroadcast_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueSendMgrTest OnSwitchOffIconDisappear_001 start" << std::endl;
+    std::shared_ptr<DMSContinueSendMgr> sendMgr = std::make_shared<DMSContinueSendMgr>();
+    MissionStatus status;
+    uint16_t bundleNameId = 0;
+    uint8_t continueTypeId = 0;
+    status.bundleName = "";
+    status.abilityName = "abilityName";
+    EXPECT_CALL(*bundleMgrMock_, GetBundleNameId(_, _)).WillOnce(Return(0));
+    EXPECT_CALL(*bundleMgrMock_, GetContinueTypeId(_, _, _)).WillOnce(Return(0));
+    EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueSwitchOffBroadcast(status));
+    status.bundleName = "bundleName";
+    EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueSwitchOffBroadcast(status));
+    DTEST_LOG << "DMSContinueSendMgrTest OnSwitchOffIconDisappear_001 end" << std::endl;
+}
+
 bool DataShareManager::IsCurrentContinueSwitchOn()
 {
     return g_mockBool;

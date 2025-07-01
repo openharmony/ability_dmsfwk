@@ -71,6 +71,8 @@ public:
     void OnDeviceScreenLocked();
     void OnDeviceScreenOn();
     void OnUserSwitched();
+    void OnSwitchOffIconDisappear(int32_t missionId);
+    void SendContinueSwitchOffBroadcast(const MissionStatus& status);
 
 private:
     void StartEvent();

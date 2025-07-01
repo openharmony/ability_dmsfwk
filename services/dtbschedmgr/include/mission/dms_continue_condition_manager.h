@@ -98,6 +98,7 @@ public:
     int32_t GetMissionStatus(int32_t accountId, int32_t missionId, MissionStatus& status);
     int32_t GetMissionIdByBundleName(int32_t accountId, const std::string& bundleName, int32_t& missionId);
     std::string TypeEnumToString(MissionEventType type);
+    int32_t GetLastContinuableMissionId();
 
 private:
     void InitConditionFuncs();
@@ -146,6 +147,7 @@ private:
     std::mutex missionMutex_;
     std::map<int32_t, std::map<int32_t, MissionStatus>> missionMap_;
     std::pair<int32_t, MissionStatus> lastFocusMission_;
+    int32_t lastContinuableMissionId_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
