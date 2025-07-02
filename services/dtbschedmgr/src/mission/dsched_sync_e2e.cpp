@@ -39,6 +39,7 @@ const std::string PARAM_DISTRIBUTED_DATAFILES_TRANS_CTRL = "persist.distributed_
 const std::string CONTINUE_CONFIG_RELATIVE_PATH = "etc/distributedhardware/dms/continue_config.json";
 const std::string ALLOW_APP_LIST_KEY = "allow_applist";
 constexpr int32_t MAX_CONFIG_PATH_LEN = 1024;
+const std::string CONSTRAINT = "constraint.distributed.transmission.outgoing";
 }  // namespace
 
 std::shared_ptr<DmsKvSyncE2E> DmsKvSyncE2E::instance_ = nullptr;
@@ -99,6 +100,16 @@ bool DmsKvSyncE2E::CheckDeviceCfg()
 {
     HILOGD("called.");
     return isCfgDevices_;
+}
+
+bool DmsKvSyncE2E::CheckMDMCtrlRule(const std::string &bundleName)
+{
+    HILOGD("called.");
+    if (isMDMControl_ && (!CheckBundleContinueConfig(bundleName))) {
+        HILOGI("CheckMDMCtrlRule is true.");
+        return true;
+    }
+    return false;
 }
 
 bool DmsKvSyncE2E::CheckCtrlRule()
@@ -362,6 +373,28 @@ void DmsKvSyncCB::SyncCompleted(const std::map<std::string, DistributedKv::Statu
     for (auto ele : result) {
         HILOGI("uuid: %{public}s , result: %{public}d", GetAnonymStr(ele.first).c_str(), ele.second);
     }
+}
+
+bool DmsKvSyncE2E::QueryMDMControl()
+{
+#ifdef OS_ACCOUNT_PART
+    HILOGI("QueryMDMControl called, isMDMControl_: %{public}d", isMDMControl_);
+    int32_t activeAccountId = 0;
+    std::vector<int32_t> ids;
+    ErrCode err = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (err != ERR_OK || ids.empty()) {
+        HILOGE("QueryActiveOsAccountIds passing param invalid or return error!, err : %{public}d", err);
+        return false;
+    }
+    activeAccountId = ids[0];
+    err = AccountSA::OsAccountManager::CheckOsAccountConstraintEnabled(activeAccountId,  CONSTRAINT, isMDMControl_);
+        if (err != ERR_OK || ids.empty()) {
+        HILOGE("QueryActiveOsAccountIds passing param invalid or return error!, err : %{public}d", err);
+        return false;
+    }
+#endif
+    HILOGI("QueryMDMControl end, isMDMControl_: %{public}d.", isMDMControl_);
+    return isMDMControl_;
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

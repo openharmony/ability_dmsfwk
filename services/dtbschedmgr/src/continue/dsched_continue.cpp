@@ -270,7 +270,6 @@ int32_t DSchedContinue::PostStartTask(const OHOS::AAFwk::WantParams& wantParams)
         HILOGE("PostStartTask eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
     }
-
     auto wantParamsPtr = std::make_shared<OHOS::AAFwk::WantParams>(wantParams);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, wantParamsPtr, 0);
     if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
@@ -732,12 +731,6 @@ int32_t DSchedContinue::GetMissionIdByBundleName()
 
 int32_t DSchedContinue::CheckContinueAbilityPermission()
 {
-    if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(continueInfo_.sourceBundleName_)) {
-        HILOGI("App does not allow continue in config file, bundle name %{public}s",
-            continueInfo_.sourceBundleName_.c_str());
-        return REMOTE_DEVICE_BIND_ABILITY_ERR;
-    }
-
     MissionInfo missionInfo;
     int32_t result = AbilityManagerClient::GetInstance()->GetMissionInfo("", continueInfo_.missionId_, missionInfo);
     if (result != ERR_OK) {

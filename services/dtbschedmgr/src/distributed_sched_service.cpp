@@ -768,6 +768,7 @@ void DistributedSchedService::InitBluetoothStateListener()
 void DistributedSchedService::InitDeviceCfg()
 {
     HILOGI("called");
+    DmsKvSyncE2E::GetInstance()->QueryMDMControl();
     DmsKvSyncE2E::GetInstance()->SetDeviceCfg();
 }
 
@@ -1296,9 +1297,8 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
         return INVALID_PARAMETERS_ERR;
     }
     std::string bundleName = missionInfo.want.GetBundle();
-    if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(bundleName)) {
-        HILOGI("App does not allow continue in config file, bundle name %{public}s, missionId: %{public}d",
-            bundleName.c_str(), missionId);
+    if (DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(bundleName)) {
+        HILOGI("Current user is under MDM control.");
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
     missionInfo.want.SetParams(wantParams);

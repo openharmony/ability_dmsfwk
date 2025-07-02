@@ -74,15 +74,14 @@ void DmsContinueConditionMgr::InitConditionFuncs()
 
 void DmsContinueConditionMgr::InitSystemCondition()
 {
-    isCfgDevice_ = !DmsKvSyncE2E::GetInstance()->CheckCtrlRule();
     isSwitchOn_ = DataShareManager::GetInstance().IsCurrentContinueSwitchOn();
     isWifiActive_ = WifiStateAdapter::GetInstance().IsWifiActive();
 #ifdef DMS_CHECK_BLUETOOTH
     isBtActive_ = BluetoothStateAdapter::GetInstance().IsBluetoothActive();
 #endif
 
-    HILOGI("end. cfg %{public}d, switch: %{public}d, wifi: %{public}d, bt: %{public}d",
-        isCfgDevice_.load(), isSwitchOn_.load(), isWifiActive_.load(), isBtActive_.load());
+    HILOGI("end. switch: %{public}d, wifi: %{public}d, bt: %{public}d",
+        isSwitchOn_.load(), isWifiActive_.load(), isBtActive_.load());
 }
 
 void DmsContinueConditionMgr::InitMissionCondition()
@@ -379,15 +378,11 @@ int32_t DmsContinueConditionMgr::OnMissionInactive(int32_t accountId, int32_t mi
 
 bool DmsContinueConditionMgr::CheckSystemSendCondition()
 {
-    HILOGI("CheckSystemSendCondition start. cfg %{public}d, switch: %{public}d, wifi: %{public}d, bt: %{public}d",
-        isCfgDevice_.load(), isSwitchOn_.load(), isWifiActive_.load(), isBtActive_.load());
+    HILOGI("CheckSystemSendCondition start. switch: %{public}d, wifi: %{public}d, bt: %{public}d",
+        isSwitchOn_.load(), isWifiActive_.load(), isBtActive_.load());
 
     std::string reason = "";
     do {
-        if (isCfgDevice_) {
-            reason = "CFG_DEVICE";
-            break;
-        }
         if (!isSwitchOn_) {
             reason = "CONTINUE_SWITCH_OFF";
             break;
@@ -415,7 +410,6 @@ bool DmsContinueConditionMgr::CheckSystemSendCondition()
 bool DmsContinueConditionMgr::CheckMissionSendCondition(const MissionStatus& status, MissionEventType type)
 {
     HILOGI("missionId %{public}d, type %{public}s", status.missionId, TypeEnumToString(type).c_str());
-
     auto iterFunc = conditionFuncMap_.find(type);
     if (iterFunc == conditionFuncMap_.end()) {
         HILOGE("invalid system status %{public}d", type);
@@ -432,16 +426,16 @@ bool DmsContinueConditionMgr::CheckSendFocusedCondition(const MissionStatus& sta
 
     std::string reason = "";
     do {
+        if (DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(status.bundleName)) {
+            HILOGI("MDM_CONTROL.");
+            break;
+        }
         if (!status.isContinuable) {
             reason = "NOT_CONTINUABLE";
             break;
         }
         if (status.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
             reason = "CONTINUE_STATE_INACTIVE";
-            break;
-        }
-        if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(status.bundleName)) {
-            reason = "BUNDLE_NOT_ALLOWED_IN_CFG";
             break;
         }
         lastContinuableMissionId_ = status.missionId;
@@ -459,6 +453,10 @@ bool DmsContinueConditionMgr::CheckSendUnfocusedCondition(const MissionStatus& s
 
     std::string reason = "";
     do {
+        if (DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(status.bundleName)) {
+            HILOGI("MDM_CONTROL.");
+            break;
+        }
         if (!status.isFocused) {
             reason = "NOT_FOCUSED";
             break;
@@ -469,10 +467,6 @@ bool DmsContinueConditionMgr::CheckSendUnfocusedCondition(const MissionStatus& s
         }
         if (status.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
             reason = "CONTINUE_STATE_INACTIVE";
-            break;
-        }
-        if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(status.bundleName)) {
-            reason = "BUNDLE_NOT_ALLOWED_IN_CFG";
             break;
         }
         HILOGI("PASS");
@@ -489,16 +483,16 @@ bool DmsContinueConditionMgr::CheckSendBackgroundCondition(const MissionStatus& 
 
     std::string reason = "";
     do {
+        if (DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(status.bundleName)) {
+            HILOGI("MDM_CONTROL.");
+            break;
+        }
         if (!status.isContinuable) {
             reason = "NOT_CONTINUABLE";
             break;
         }
         if (status.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
             reason = "CONTINUE_STATE_INACTIVE";
-            break;
-        }
-        if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(status.bundleName)) {
-            reason = "BUNDLE_NOT_ALLOWED_IN_CFG";
             break;
         }
         HILOGI("PASS");
@@ -515,16 +509,16 @@ bool DmsContinueConditionMgr::CheckSendActiveCondition(const MissionStatus& stat
 
     std::string reason = "";
     do {
+        if (DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(status.bundleName)) {
+            HILOGI("MDM_CONTROL.");
+            break;
+        }
         if (!status.isFocused) {
             reason = "NOT_FOCUSED";
             break;
         }
         if (!status.isContinuable) {
             reason = "NOT_CONTINUABLE";
-            break;
-        }
-        if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(status.bundleName)) {
-            reason = "BUNDLE_NOT_ALLOWED_IN_CFG";
             break;
         }
         lastContinuableMissionId_ = status.missionId;
@@ -542,6 +536,10 @@ bool DmsContinueConditionMgr::CheckSendInactiveCondition(const MissionStatus& st
 
     std::string reason = "";
     do {
+        if (DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(status.bundleName)) {
+            HILOGI("MDM_CONTROL.");
+            break;
+        }
         MissionStatus currenFocusedMission;
         GetCurrentFocusedMission(status.accountId, currenFocusedMission);
         if (currenFocusedMission.missionId != CONDITION_INVALID_MISSION_ID && currenFocusedMission.isContinuable
@@ -552,10 +550,6 @@ bool DmsContinueConditionMgr::CheckSendInactiveCondition(const MissionStatus& st
         }
         if (!status.isContinuable) {
             reason = "NOT_CONTINUABLE";
-            break;
-        }
-        if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(status.bundleName)) {
-            reason = "BUNDLE_NOT_ALLOWED_IN_CFG";
             break;
         }
         HILOGI("PASS");
