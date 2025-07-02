@@ -58,7 +58,7 @@ public:
     int32_t NotifyProcessDiedFromRemote(const CallerInfo& callerInfo) override;
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
     int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
-        int32_t callingUid) override;
+        int32_t callingUid, uint32_t callingTokenId) override;
     int32_t StopSyncRemoteMissions(const std::string& devId, int32_t callingUid) override;
     int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj,
         int32_t callingUid) override;

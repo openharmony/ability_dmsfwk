@@ -410,7 +410,7 @@ int32_t DistributedSchedProxy::NotifyProcessDiedFromRemote(const CallerInfo& cal
 
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 int32_t DistributedSchedProxy::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
-    int32_t callingUid)
+    int32_t callingUid, uint32_t callingTokenId)
 {
     HILOGI("called");
     sptr<IRemoteObject> remote = Remote();
@@ -428,6 +428,7 @@ int32_t DistributedSchedProxy::StartSyncRemoteMissions(const std::string& devId,
     PARCEL_WRITE_HELPER(data, Bool, fixConflict);
     PARCEL_WRITE_HELPER(data, Int64, tag);
     PARCEL_WRITE_HELPER(data, Int32, callingUid);
+    PARCEL_WRITE_HELPER(data, Uint32, callingTokenId);
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::START_SYNC_MISSIONS), data, reply);
 }
 
@@ -756,6 +757,8 @@ bool DistributedSchedProxy::CallerInfoMarshalling(const CallerInfo& callerInfo, 
     PARCEL_WRITE_HELPER_RET(data, Int32, callerInfo.duid, false);
     PARCEL_WRITE_HELPER_RET(data, String, callerInfo.callerAppId, false);
     PARCEL_WRITE_HELPER_RET(data, Int32, callerInfo.dmsVersion, false);
+    std::string extraInfo = callerInfo.extraInfoJson.dump();
+    PARCEL_WRITE_HELPER(data, String, extraInfo);
     return true;
 }
 
