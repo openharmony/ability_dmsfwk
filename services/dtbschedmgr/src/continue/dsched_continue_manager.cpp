@@ -28,6 +28,7 @@
 #include "dtbschedmgr_log.h"
 #include "mission/distributed_bm_storage.h"
 #include "mission/dms_continue_condition_manager.h"
+#include "mission/dsched_sync_e2e.h"
 #include "multi_user_manager.h"
 
 namespace OHOS {
@@ -193,7 +194,6 @@ void DSchedContinueManager::HandleContinueMission(const std::string& srcDeviceId
         info.sourceBundleName_ = missionInfo.want.GetBundle();
         info.sinkBundleName_ = missionInfo.want.GetBundle();
     }
-
     HandleContinueMissionWithBundleName(info, callback, wantParams);
     return;
 }
@@ -305,10 +305,11 @@ bool DSchedContinueManager::GetFirstBundleName(DSchedContinueInfo &info, std::st
 void DSchedContinueManager::HandleContinueMissionWithBundleName(DSchedContinueInfo &info,
     const sptr<IRemoteObject> &callback, const OHOS::AAFwk::WantParams &wantParams)
 {
+    bool control = DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(info.sourceBundleName_);
     int32_t direction = CONTINUE_SINK;
     int32_t ret = CheckContinuationLimit(info.sourceDeviceId_, info.sinkDeviceId_, direction);
-    if (ret != ERR_OK) {
-        HILOGE("CheckContinuationLimit failed, ret: %{public}d", ret);
+    if (ret != ERR_OK || control) {
+        HILOGE("CheckContinuationLimit failed or MDMcontrol, ret: %{public}d, MDMcontrol: %{public}d", ret,  control);
         return;
     }
     int32_t subType = CONTINUE_PUSH;
@@ -827,6 +828,10 @@ void DSchedContinueManager::NotifyContinueDataRecv(int32_t sessionId, int32_t co
         newContinue->Init();
         continues_.insert(std::make_pair(newContinue->GetContinueInfo(), newContinue));
 
+        if (DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(newContinue->GetContinueInfo().sourceBundleName_)) {
+            HILOGI("Current user is under MDM control.");
+            return;
+        }
         newContinue->OnStartCmd(startCmd->appVersion_);
         HILOGI("end, continue info: %{public}s.", newContinue->GetContinueInfo().ToString().c_str());
         return;
