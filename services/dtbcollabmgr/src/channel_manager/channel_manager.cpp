@@ -120,6 +120,10 @@ do {                                                                       \
 } while (0)
 }
 
+namespace {
+    constexpr int32_t MAX_LEN = 10 * 1024;
+}
+
 static void OnSocketConnected(int32_t socket, PeerSocketInfo info)
 {
     ChannelManager::GetInstance().OnSocketConnected(socket, info);
@@ -1333,6 +1337,11 @@ void ChannelManager::DoBytesReceiveCallback(const int32_t channelId,
 
 void ChannelManager::OnMessageReceived(int32_t socketId, const void* data, const uint32_t dataLen)
 {
+    HILOGI("data len = %{public}d", dataLen);
+    if (dataLen > MAX_LEN) {
+        HILOGE("dataLen is too long");
+        return;
+    }
     int32_t channelId = 0;
     CHECK_SOCKET_ID(socketId);
     CHECK_CHANNEL_ID(socketId, channelId);
