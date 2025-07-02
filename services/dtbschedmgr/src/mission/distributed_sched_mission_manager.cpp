@@ -34,6 +34,9 @@
 #include "mission/mission_constant.h"
 #include "mission/mission_info_converter.h"
 #include "mission/snapshot_converter.h"
+#include "caller_info.h"
+#include "os_account_manager.h"
+#include "ohos_account_kits.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -54,6 +57,8 @@ constexpr int32_t GET_MAX_MISSIONS = 20;
 using namespace std::chrono;
 using namespace Constants::Mission;
 using namespace OHOS::DistributedKv;
+using namespace DistributedHardware;
+using AccountInfo = IDistributedSched::AccountInfo;
 
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedMissionManager);
 
@@ -176,6 +181,28 @@ void DistributedSchedMissionManager::NotifyNetDisconnectOffline()
         }
     }
     HILOGD("NotifyNetDisconnectOffline end.");
+}
+
+bool DistributedSchedMissionManager::GetOsAccountData(AccountInfo& dmsAccountInfo)
+{
+#ifdef OS_ACCOUNT_PART
+    std::vector<int32_t> ids;
+    ErrCode ret = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (ret != ERR_OK || ids.empty()) {
+        HILOGE("Get userId from active Os AccountIds fail, ret : %{public}d", ret);
+        return false;
+    }
+    dmsAccountInfo.userId = ids[0];
+
+    AccountSA::OhosAccountInfo osAccountInfo;
+    ret = AccountSA::OhosAccountKits::GetInstance().GetOhosAccountInfo(osAccountInfo);
+    if (ret != 0 || osAccountInfo.uid_ == "") {
+        HILOGE("Get accountId from Ohos account info fail, ret: %{public}d.", ret);
+        return false;
+    }
+    dmsAccountInfo.activeAccountId = osAccountInfo.uid_;
+#endif
+    return true;
 }
 
 int32_t DistributedSchedMissionManager::InitDataStorage()
@@ -372,7 +399,7 @@ int32_t DistributedSchedMissionManager::RegisterMissionListener(const std::u16st
 }
 
 int32_t DistributedSchedMissionManager::StartSyncRemoteMissions(const std::string& dstDevId,
-    const std::string& localDevId)
+    const std::string& localDevId, uint32_t callingTokenId)
 {
     std::u16string devId = Str8ToStr16(dstDevId);
     {
@@ -393,7 +420,7 @@ int32_t DistributedSchedMissionManager::StartSyncRemoteMissions(const std::strin
         RetryStartSyncRemoteMissions(dstDevId, localDevId, 0);
         return GET_REMOTE_DMS_FAIL;
     }
-    int32_t ret = StartSyncRemoteMissions(dstDevId, remoteDms);
+    int32_t ret = StartSyncRemoteMissions(dstDevId, remoteDms, callingTokenId);
     if (ret == ERR_NONE) {
         std::lock_guard<std::mutex> autoLock(listenDeviceLock_);
         auto iterItem = listenDeviceMap_.find(devId);
@@ -405,7 +432,7 @@ int32_t DistributedSchedMissionManager::StartSyncRemoteMissions(const std::strin
 }
 
 int32_t DistributedSchedMissionManager::StartSyncRemoteMissions(const std::string& dstDevId,
-    const sptr<IDistributedSched>& remoteDms)
+    const sptr<IDistributedSched>& remoteDms, uint32_t callingTokenId)
 {
     if (remoteDms == nullptr) {
         HILOGE("remoteDms is null");
@@ -416,6 +443,18 @@ int32_t DistributedSchedMissionManager::StartSyncRemoteMissions(const std::strin
     if (!GenerateCallerInfo(callerInfo)) {
         return GET_LOCAL_DEVICE_ERR;
     }
+
+    AccountInfo callerAccountInfo;
+    if (!GetOsAccountData(callerAccountInfo)) {
+        HILOGE("Get Os accountId and userId fail.");
+        return GET_LOCAL_DEVICE_ERR;
+    }
+    callerInfo.accessToken = callingTokenId;
+    nlohmann::json extraInfoJson;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID] = callerAccountInfo.activeAccountId;
+    extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID] = callerAccountInfo.userId;
+    extraInfoJson["accessToken"] = callerInfo.accessToken;
+    callerInfo.extraInfoJson = extraInfoJson;
     int64_t begin = GetTickCount();
     int32_t ret = remoteDms->StartSyncMissionsFromRemote(callerInfo, missionInfos);
     HILOGI("[PerformanceTest] StartSyncMissionsFromRemote ret:%{public}d, spend %{public}" PRId64 " ms",
@@ -509,7 +548,7 @@ int32_t DistributedSchedMissionManager::StopSyncRemoteMissions(const std::string
 }
 
 int32_t DistributedSchedMissionManager::StartSyncRemoteMissions(const std::string& dstDevId, bool fixConflict,
-    int64_t tag)
+    int64_t tag, uint32_t callingTokenId)
 {
     std::string localDeviceId;
     if (!IsDeviceIdValidated(dstDevId)) {
@@ -522,7 +561,7 @@ int32_t DistributedSchedMissionManager::StartSyncRemoteMissions(const std::strin
     }
     HILOGI("begin, dstDevId is %{public}s, local deviceId is %{public}s",
         GetAnonymStr(dstDevId).c_str(), GetAnonymStr(localDeviceId).c_str());
-    auto ret = StartSyncRemoteMissions(dstDevId, localDeviceId);
+    auto ret = StartSyncRemoteMissions(dstDevId, localDeviceId, callingTokenId);
     if (ret != ERR_NONE) {
         HILOGE("StartSyncRemoteMissions failed, %{public}d", ret);
         return ret;
@@ -539,6 +578,19 @@ int32_t DistributedSchedMissionManager::StartSyncMissionsFromRemote(const Caller
         std::lock_guard<std::mutex> autoLock(remoteSyncDeviceLock_);
         remoteSyncDeviceSet_.emplace(deviceId);
     }
+
+    nlohmann::json extraInfoJson = callerInfo.extraInfoJson;
+    if (extraInfoJson.find(Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID) == extraInfoJson.end() &&
+        extraInfoJson.find(Constants::EXTRO_INFO_JSON_KEY_USERID_ID) == extraInfoJson.end()) {
+        HILOGW("older version does not need check access control.");
+    } else {
+        bool res = CheckAccessControlForMissions(callerInfo);
+        if (!res) {
+            HILOGE("check access control failed");
+            return INVALID_PARAMETERS_ERR;
+        }
+    }
+
     int32_t result = DistributedSchedAdapter::GetInstance().GetLocalMissionInfos(Mission::GET_MAX_MISSIONS,
         missionInfoSet);
     auto func = [this, missionInfoSet]() {
@@ -555,6 +607,42 @@ int32_t DistributedSchedMissionManager::StartSyncMissionsFromRemote(const Caller
         HILOGE("post RegisterMissionListener and InitAllSnapshots Task failed");
     }
     return result;
+}
+
+bool DistributedSchedMissionManager::CheckAccessControlForMissions(const CallerInfo& callerInfo)
+{
+    AccountInfo accountInfo;
+    nlohmann::json extraInfoJson = callerInfo.extraInfoJson;
+    if (!extraInfoJson.is_discarded()) {
+        if (extraInfoJson.find(Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID) != extraInfoJson.end() &&
+            extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID].is_string()) {
+            accountInfo.activeAccountId = extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID];
+        }
+        if (extraInfoJson.find(Constants::EXTRO_INFO_JSON_KEY_USERID_ID) != extraInfoJson.end() &&
+            extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID].is_number()) {
+            accountInfo.userId = extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID];
+        }
+    }
+    DmAccessCaller dmSrcCaller = {
+        .accountId = accountInfo.activeAccountId,
+        .networkId = callerInfo.sourceDeviceId,
+        .userId = accountInfo.userId,
+    };
+    std::string localDeviceId;
+    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
+        HILOGE("GetLocalDeviceId failed");
+    }
+    AccountInfo dstAccountInfo;
+    if (!GetOsAccountData(dstAccountInfo)) {
+        HILOGE("Get Os accountId and userId fail.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    DmAccessCallee dmDstCallee = {
+        .accountId = dstAccountInfo.activeAccountId,
+        .networkId = localDeviceId,
+        .userId = dstAccountInfo.userId,
+    };
+    return DeviceManager::GetInstance().CheckSinkAccessControl(dmSrcCaller, dmDstCallee);
 }
 
 void DistributedSchedMissionManager::StopSyncMissionsFromRemote(const std::string& networkId)
