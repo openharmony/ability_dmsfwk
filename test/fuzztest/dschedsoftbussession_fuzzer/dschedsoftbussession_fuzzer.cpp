@@ -39,6 +39,16 @@ constexpr int32_t OFFSET_16 = 16;
 constexpr int32_t OFFSET_8 = 8;
 constexpr int32_t MAX_DATALEN = 2048;
 constexpr int32_t MAX_FDP_RANGE = 1024;
+constexpr size_t MIN_FRAG_BUFFER_SIZE = 16;
+constexpr size_t MIN_NO_FRAG_BUFFER_SIZE = 8;
+constexpr size_t MIN_NO_FRAG_BUF_SIZE = 8;
+constexpr size_t MAX_NO_FRAG_BUF_SIZE = 256;
+constexpr size_t MIN_FRAG_BUF_SIZE = 16;
+constexpr size_t MAX_FRAG_BUF_SIZE = 512;
+constexpr uint8_t MIN_FRAG_FLAG = 0;
+constexpr uint8_t MAX_FRAG_FLAG = 3;
+constexpr uint32_t MIN_DATA_LEN = 0;
+constexpr int32_t TOTAL_LEN_MULTIPLIER = 2;
 
 
 inline uint32_t ConsumeDataLen(FuzzedDataProvider& fdp)
@@ -164,6 +174,54 @@ void FuzzGetNowTimeStampUs(const uint8_t* data, size_t size)
     DSchedSoftbusSession dschedSoftbusSession;
     dschedSoftbusSession.GetNowTimeStampUs();
 }
+
+void AssembleNoFragFuzzTest(const uint8_t* data, size_t size)
+{
+    if (!data || size < MIN_NO_FRAG_BUFFER_SIZE) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    size_t bufSize = fdp.ConsumeIntegralInRange<size_t>(MIN_NO_FRAG_BUF_SIZE, MAX_NO_FRAG_BUF_SIZE);
+    std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(bufSize);
+    std::vector<uint8_t> bufContent = fdp.ConsumeBytes<uint8_t>(bufSize);
+    if (memcpy_s(buffer->Data(), bufSize, bufContent.data(), bufContent.size()) != EOK) {
+        return;
+    }
+
+    DSchedSoftbusSession::SessionDataHeader headerPara;
+    headerPara.dataLen = fdp.ConsumeIntegralInRange<uint32_t>(MIN_DATA_LEN, bufSize);
+    headerPara.totalLen = headerPara.dataLen;
+    headerPara.dataType = fdp.ConsumeIntegral<uint32_t>();
+
+    DSchedSoftbusSession session;
+    session.AssembleNoFrag(buffer, headerPara);
+}
+
+void AssembleFragFuzzTest(const uint8_t* data, size_t size)
+{
+    if (!data || size < MIN_FRAG_BUFFER_SIZE) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    size_t bufSize = fdp.ConsumeIntegralInRange<size_t>(MIN_FRAG_BUF_SIZE, MAX_FRAG_BUF_SIZE);
+    std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(bufSize);
+    std::vector<uint8_t> bufContent = fdp.ConsumeBytes<uint8_t>(bufSize);
+    if (memcpy_s(buffer->Data(), bufSize, bufContent.data(), bufContent.size()) != EOK) {
+        return;
+    }
+    DSchedSoftbusSession::SessionDataHeader headerPara;
+    headerPara.fragFlag = fdp.ConsumeIntegralInRange<uint8_t>(MIN_FRAG_FLAG, MAX_FRAG_FLAG);
+    headerPara.seqNum = fdp.ConsumeIntegral<uint32_t>();
+    headerPara.subSeq = fdp.ConsumeIntegral<uint16_t>();
+    headerPara.dataLen = fdp.ConsumeIntegralInRange<uint32_t>(MIN_DATA_LEN, bufSize);
+    headerPara.totalLen = fdp.ConsumeIntegralInRange<uint32_t>(headerPara.dataLen, bufSize * TOTAL_LEN_MULTIPLIER);
+    headerPara.dataType = fdp.ConsumeIntegral<uint32_t>();
+
+    DSchedSoftbusSession session;
+    session.AssembleFrag(buffer, headerPara);
+}
 }
 }
 
@@ -175,5 +233,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DistributedSchedule::FuzzDSchedSoftbusSessionConstructor(data, size);
     OHOS::DistributedSchedule::FuzzCheckUnPackBuffer(data, size);
     OHOS::DistributedSchedule::FuzzGetNowTimeStampUs(data, size);
+    OHOS::DistributedSchedule::AssembleNoFragFuzzTest(data, size);
+    OHOS::DistributedSchedule::AssembleFragFuzzTest(data, size);
     return 0;
 }
