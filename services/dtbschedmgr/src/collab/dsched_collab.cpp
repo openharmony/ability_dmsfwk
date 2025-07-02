@@ -145,7 +145,7 @@ void DSchedCollab::SetSinkCollabInfo(std::shared_ptr<SinkStartCmd> startCmd)
     collabInfo_.sinkInfo_.abilityName_ = startCmd->sinkAbilityName_;
     collabInfo_.srcAppVersion_ = startCmd->appVersion_;
     collabInfo_.callerInfo_ = startCmd->callerInfo_;
-    collabInfo_.callerInfo_.accessToken = collabInfo_.srcInfo_.accessToken_;
+    collabInfo_.callerInfo_.accessToken = static_cast<uint32_t>(collabInfo_.srcInfo_.accessToken_);
     collabInfo_.srcAccountInfo_ = startCmd->accountInfo_;
 
 #ifdef OS_ACCOUNT_PART

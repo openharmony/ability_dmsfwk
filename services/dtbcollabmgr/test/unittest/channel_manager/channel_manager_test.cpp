@@ -37,6 +37,7 @@ namespace {
     static constexpr int32_t NUM_1024 = 1024;
     static constexpr int32_t NUM_1 = 1;
     static constexpr int32_t NUM_200 = 200;
+    constexpr int32_t MAX_LEN = 10 * 1024;
 }
 
 void ChannelManagerTest::SetUpTestCase()
@@ -1595,6 +1596,8 @@ HWTEST_F(ChannelManagerTest, OnMessageReceived_Failed_001, TestSize.Level1)
     EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().OnMessageReceived(socketId, avData->Data(), dataLen));
     EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().OnMessageReceived(
         socketId, avData->Data(), avData->Size()));
+    dataLen = MAX_LEN + 1;
+    EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().OnMessageReceived(socketId, avData->Data(), dataLen));
 }
 
 /**
