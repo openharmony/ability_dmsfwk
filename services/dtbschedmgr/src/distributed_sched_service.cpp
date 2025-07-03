@@ -159,6 +159,8 @@ constexpr int32_t WINDOW_MANAGER_SERVICE_ID = 4606;
 constexpr int32_t SEMI_WIFI_ID = 1010;
 constexpr int32_t DSOFTBUS_UID = 1024;
 constexpr int32_t WEARLINK_UID = 7259;
+constexpr int32_t SA_READY_TO_UNLOAD = 0;
+constexpr int32_t SA_REFUSE_TO_UNLOAD = -1;
 DataShareManager &dataShareManager = DataShareManager::GetInstance();
 
 const std::string HMOS_HAP_CODE_PATH = "1";
@@ -433,6 +435,19 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
 #endif
     dataShareManager.UnInit();
     HILOGI("OnStop dms service end");
+}
+
+int32_t DistributedSchedService::OnIdle(const SystemAbilityOnDemandReason& idleReason)
+{
+    bool isIdle = false;
+    std::vector<DistributedHardware::DmDeviceInfo> dmDeviceInfoList;
+    int32_t errCode = DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", dmDeviceInfoList);
+    if (errCode == ERR_OK && dmDeviceInfoList.empty()) {
+        isIdle = true;
+    }
+    HILOGI("OnIdle, idleReason name %{public}s, id %{public}d, value %{public}s, is ready to unload %{public}d",
+        idleReason.GetName().c_str(), idleReason.GetId(), idleReason.GetValue().c_str(), isIdle);
+    return isIdle ? SA_READY_TO_UNLOAD : SA_REFUSE_TO_UNLOAD;
 }
 
 void DistributedSchedService::OnActive(const SystemAbilityOnDemandReason &activeReason)
