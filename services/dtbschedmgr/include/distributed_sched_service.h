@@ -98,6 +98,7 @@ public:
     ~DistributedSchedService() = default;
     void OnStart(const SystemAbilityOnDemandReason &startReason) override;
     void OnStop(const SystemAbilityOnDemandReason &stopReason) override;
+    int32_t OnIdle(const SystemAbilityOnDemandReason& idleReason) override;
     void OnActive(const SystemAbilityOnDemandReason &activeReason) override;
 
     /**
