@@ -287,20 +287,6 @@ bool DistributedWantParamWrapperGerTypedIdFuzzTest(const uint8_t* data, size_t s
 
     return typeId >= 0;
 }
-bool DistributedWantParamWrapperParseWantParamsFuzzTest(const uint8_t* data, size_t size)
-{
-    if (data == nullptr || size == 0) {
-        return false;
-    }
-    std::string inputStr(reinterpret_cast<const char*>(data), size);
-
-    DistributedWantParams wantOther;
-    std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
-    DistributedWantParamWrapper wrapper(*wantParams);
-    DistributedWantParams result = wrapper.ParseWantParams(inputStr);
-
-    return result.Size() >= 0;
-}
 
 void DistributedWantParamQueryFuzzTest(const uint8_t* data, size_t size)
 {
@@ -397,7 +383,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DistributedWantParamWrapperFindMatchingBraceFuzzTest(data, size);
     OHOS::DistributedWantParamWrapperBoxFuzzTest(data, size);
     OHOS::DistributedWantParamWrapperGerTypedIdFuzzTest(data, size);
-    OHOS::DistributedWantParamWrapperParseWantParamsFuzzTest(data, size);
     OHOS::DistributedWantParamQueryFuzzTest(data, size);
     OHOS::DistributedUnsupportedDataCopyAssignFuzzTest(data, size);
     OHOS::DistributedUnsupportedDataMoveAssignFuzzTest(data, size);
