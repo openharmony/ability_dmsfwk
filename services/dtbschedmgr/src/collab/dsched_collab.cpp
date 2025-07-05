@@ -52,7 +52,7 @@ constexpr int32_t NOTIFY_COLLAB_PREPARE_RESULT = 0;
 constexpr int32_t NOTIFY_COLLAB_DISCONNECT = 1;
 constexpr int32_t NOTIFY_WIFI_OPEN = 2;
 constexpr int32_t NOTIFY_PEER_COLLAB_VERSION = 3;
-constexpr int32_t DMS_VERSION = 5;
+constexpr int32_t DMS_VERSION = 6;
 constexpr int32_t START_PERMISSION = 0;
 std::map<int32_t, std::string> CMDDATA = {
     {MIN_CMD, "MIN_CMD"},
