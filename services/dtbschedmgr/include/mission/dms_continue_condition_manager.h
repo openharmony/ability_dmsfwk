@@ -131,11 +131,11 @@ private:
     void CleanLastFocusedFlagLocked(int32_t accountId, int32_t missionId);
     bool IsMissionStatusExistLocked(int32_t accountId, int32_t missionId);
 
-    std::atomic<bool> isCfgDevice_ = false;
     std::atomic<bool> isSwitchOn_ = false;
     std::atomic<bool> isWifiActive_ = false;
     std::atomic<bool> isBtActive_ = false;
     std::atomic<bool> isScreenLocked_ = false;
+    std::atomic<bool> isCfgMDMControl_ = false;
 
     using DSchedSysEventFunc = int32_t (DmsContinueConditionMgr::*)(bool value);
     std::map<SysEventType, DSchedSysEventFunc> sysFuncMap_;
