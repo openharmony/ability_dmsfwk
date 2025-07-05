@@ -19,6 +19,7 @@
 
 #include "dtbschedmgr_device_info_storage.h"
 #include "distributed_sched_test_util.h"
+#include "mission/dsched_sync_e2e.h"
 #include "test_log.h"
 #include "mock_distributed_sched.h"
 
@@ -753,6 +754,33 @@ HWTEST_F(DSchedContinueManagerTest, NotifyContinueDataRecv_002, TestSize.Level3)
 
     EXPECT_NO_FATAL_FAILURE(DSchedContinueManager::GetInstance().OnShutdown(1, false));
     DTEST_LOG << "DSchedContinueManagerTest NotifyContinueDataRecv_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyContinueDataRecv_003
+ * @tc.desc: test NotifyContinueDataRecv func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedContinueManagerTest, NotifyContinueDataRecv_003, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedContinueManagerTest NotifyContinueDataRecv_003 begin" << std::endl;
+    int32_t sessionId = -1;
+    int32_t command = DSCHED_CONTINUE_CMD_START;
+    DmsKvSyncE2E::GetInstance()->isMDMControl_ = false;
+    std::string jsonStr = "jsonStr";
+    DSchedContinueInfo info(LOCAL_DEVICEID, BUNDLE_NAME, REMOTE_DEVICEID, BUNDLE_NAME, CONTINUETYPE);
+    std::shared_ptr<DSchedContinue> dContinue = CreateObject();
+    DSchedContinueManager::GetInstance().continues_.clear();
+    DSchedContinueManager::GetInstance().continues_[info] = nullptr;
+    DSchedContinueManager::GetInstance().continues_[info] = dContinue;
+    std::shared_ptr<DSchedDataBuffer> dataBuffer = nullptr;
+    DSchedContinueManager::GetInstance().NotifyContinueDataRecv(sessionId, command, jsonStr, dataBuffer);
+    EXPECT_NE(DSchedContinueManager::GetInstance().continues_.empty(), true);
+    DmsKvSyncE2E::GetInstance()->isMDMControl_ = true;
+    DSchedContinueManager::GetInstance().NotifyContinueDataRecv(sessionId, command, jsonStr, dataBuffer);
+    EXPECT_NE(DSchedContinueManager::GetInstance().continues_.empty(), true);
+    EXPECT_NO_FATAL_FAILURE(DSchedContinueManager::GetInstance().OnShutdown(1, false));
+    DTEST_LOG << "DSchedContinueManagerTest NotifyContinueDataRecv_003 end" << std::endl;
 }
 
 /**
