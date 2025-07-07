@@ -71,7 +71,7 @@ constexpr int32_t DSCHED_CONTINUE_PROTOCOL_VERSION = 1;
 constexpr uint32_t MAX_MODULENAME_LEN = 2048;
 constexpr int32_t DEFAULT_REQUEST_CODE = -1;
 constexpr int32_t NOTIFY_MISSION_CALLBACK_RESULT = 4;
-constexpr int32_t DMS_VERSION = 5;
+constexpr int32_t DMS_VERSION = 6;
 constexpr int32_t START_PERMISSION = 0;
 
 constexpr int32_t CONTINUE_BEGIN_TIME = 0;
