@@ -64,9 +64,18 @@ public:
 
 private:
     bool GetOsAccountData(AccountInfo& dmsAccountInfo);
+    bool CheckSameAccount(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
+        const CallerInfo& callerInfo, bool isSrc);
+    bool IsHigherAclVersion(const CallerInfo& callerInfo);
     bool CheckDstSameAccount(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
         const CallerInfo& callerInfo, bool isSrc);
+    bool CheckLowVersionSameAccount(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
+        const CallerInfo& callerInfo, bool isSrc);
     bool CheckAclList(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
+        const CallerInfo& callerInfo, bool isSrc, const std::string& targetBundleName = "");
+    bool CheckNewAclList(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
+        const CallerInfo& callerInfo, bool isSrc, const std::string& targetBundleName = "");
+    bool CheckLowVersionAclList(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
         const CallerInfo& callerInfo, bool isSrc, const std::string& targetBundleName = "");
     bool GetRelatedGroups(const std::string& udid, const std::vector<std::string>& bundleNames,
         AccountInfo& accountInfo);
