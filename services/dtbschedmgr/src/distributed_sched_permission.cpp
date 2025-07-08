@@ -58,7 +58,7 @@ const int DEFAULT_DMS_MISSION_ID = -1;
 const int FA_MODULE_ALLOW_MIN_API_VERSION = 8;
 const int DEFAULT_DEVICE_SECURITY_LEVEL = -1;
 const int HIGH_CONTINUE_ACL_VERSION = 6;
-const std::string HIGH_COLLAB_ACL_VERSION = "6.0.0";
+const int NUMBER_OF_VERSION_TRUNCATION = 3;
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedPermission);
@@ -249,10 +249,20 @@ bool DistributedSchedPermission::IsHigherAclVersion(const CallerInfo& callerInfo
         HILOGW("get dmsVersion failed");
         return false;
     }
-    if (extraInfoJson[DMS_VERSION_ID].is_string() && extraInfoJson[DMS_VERSION_ID] < HIGH_COLLAB_ACL_VERSION) {
+    if (extraInfoJson[DMS_VERSION_ID].is_string()) {
         std::string dmsVersion = extraInfoJson[DMS_VERSION_ID];
-        HILOGW("dmsVersion is %{public}s", dmsVersion.c_str());
-        return false;
+        int32_t major = 0;
+        int32_t minor = 0;
+        int32_t patch = 0;
+        if (sscanf_s(dmsVersion.c_str(), "%d.%d.%d", &major, &minor, &patch) != NUMBER_OF_VERSION_TRUNCATION) {
+            HILOGW("get dmsVersion failed");
+            return false;
+        }
+        HILOGI("major is %{public}d", major);
+        if (major < HIGH_CONTINUE_ACL_VERSION) {
+            HILOGW("dmsVersion is %{public}s", dmsVersion.c_str());
+            return false;
+        }
     }
     if (extraInfoJson[DMS_VERSION_ID].is_number() &&
         extraInfoJson[DMS_VERSION_ID].get<int>() < HIGH_CONTINUE_ACL_VERSION) {
