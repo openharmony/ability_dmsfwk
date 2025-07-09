@@ -61,12 +61,12 @@ public:
         bool needQueryExtension = false) const;
     void MarkUriPermission(OHOS::AAFwk::Want& want, uint32_t accessToken);
     void RemoveRemoteObjectFromWant(std::shared_ptr<AAFwk::Want> want) const;
+    bool IsHigherAclVersion(const CallerInfo& callerInfo);
 
 private:
     bool GetOsAccountData(AccountInfo& dmsAccountInfo);
     bool CheckSameAccount(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
         const CallerInfo& callerInfo, bool isSrc);
-    bool IsHigherAclVersion(const CallerInfo& callerInfo);
     bool CheckDstSameAccount(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
         const CallerInfo& callerInfo, bool isSrc);
     bool CheckLowVersionSameAccount(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
