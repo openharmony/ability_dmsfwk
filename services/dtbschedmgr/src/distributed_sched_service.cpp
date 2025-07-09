@@ -87,6 +87,7 @@
 #include "caller_info.h"
 #include "os_account_manager.h"
 #include "ohos_account_kits.h"
+#include "distributed_sched_permission.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -3644,10 +3645,12 @@ int32_t DistributedSchedService::StartFreeInstallFromRemote(const FreeInstallInf
         HILOGE("check deviceId failed");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
-    bool result = CheckSinkAccessControlUser(info);
-    if (!result) {
-        HILOGE("Check sink access control failed.");
-        return INVALID_PARAMETERS_ERR;
+    if (DistributedSchedPermission::GetInstance().IsHigherAclVersion(info.callerInfo)) {
+        bool result = CheckSinkAccessControlUser(info);
+        if (!result) {
+            HILOGE("Check sink access control failed.");
+            return INVALID_PARAMETERS_ERR;
+        }
     }
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->Connect();
     if (err != ERR_OK) {
