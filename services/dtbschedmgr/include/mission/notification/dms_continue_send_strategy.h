@@ -114,6 +114,15 @@ public:
 private:
     std::weak_ptr<DMSContinueSendMgr> dmsContinueSendMgr_;
 };
+
+class SendStrategyContinueSwitchOff : public ContinueSendStrategy {
+public:
+    explicit SendStrategyContinueSwitchOff(const std::shared_ptr<DMSContinueSendMgr>& dmsContinueSendMgr)
+        : dmsContinueSendMgr_(dmsContinueSendMgr) {};
+    int32_t ExecuteSendStrategy(const MissionStatus& status, uint8_t &sendType) const override;
+private:
+    std::weak_ptr<DMSContinueSendMgr> dmsContinueSendMgr_;
+};
 }  // namespace DistributedSchedule
 }  // namespace OHOS
 #endif  // OHOS_DMS_CONTINUE_SEND_STRATEGY_H

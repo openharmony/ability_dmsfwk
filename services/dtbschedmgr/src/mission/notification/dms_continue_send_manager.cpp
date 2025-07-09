@@ -61,6 +61,8 @@ void DMSContinueSendMgr::Init(int32_t currentUserId)
         strategyMap_[MISSION_EVENT_INACTIVE] = std::make_shared<SendStrategyInactive>(shared_from_this());
         strategyMap_[MISSION_EVENT_TIMEOUT] = std::make_shared<SendStrategyTimeout>(shared_from_this());
         strategyMap_[MISSION_EVENT_MMI] = std::make_shared<SendStrategyMMI>(shared_from_this());
+        strategyMap_[MISSION_EVENT_CONTINUE_SWITCH_OFF] =
+            std::make_shared<SendStrategyContinueSwitchOff>(shared_from_this());
 
         eventThread_ = std::thread(&DMSContinueSendMgr::StartEvent, this);
         std::unique_lock<std::mutex> lock(eventMutex_);
@@ -435,41 +437,5 @@ void DMSContinueSendMgr::ScreenLockedHandler::SetMissionContinueStateInfo(const 
     HILOGI("set last unfocused info, status: %{public}s", status.ToString().c_str());
     unfoInfo_.status.continueState = status.continueState;
 }
-
-void DMSContinueSendMgr::OnSwitchOffIconDisappear(int32_t missionId)
-{
-    MissionStatus status;
-    int32_t ret = DmsContinueConditionMgr::GetInstance().GetMissionStatus(accountId_, missionId, status);
-    if (ret != ERR_OK) {
-        HILOGE("GetMissionStatus failed, ret: %{public}d, missionId %{public}d.", ret, missionId);
-        return;
-    }
-
-    auto feedfunc = [this, status]() {
-        SendContinueSwitchOffBroadcast(status);
-    };
-    CHECK_POINTER_RETURN(eventHandler_, "eventHandler_");
-    if (!initFlag_.load()) {
-        HILOGE("initFlag_ %{public}d.", initFlag_.load());
-        return;
-    }
-    eventHandler_->PostTask(feedfunc);
-}
-
-void DMSContinueSendMgr::SendContinueSwitchOffBroadcast(const MissionStatus& status)
-{
-    HILOGI("SendContinueSwitchOffBroadcast status: %{public}s", status.ToString().c_str());
-    uint8_t sendType = MissionEventType::MISSION_EVENT_UNFOCUSED;
-    uint16_t bundleNameId = 0;
-    uint8_t continueTypeId = 0;
-    int32_t ret = QueryBroadcastInfo(status, bundleNameId, continueTypeId);
-    if (ret != ERR_OK) {
-        HILOGE("QueryBroadcastInfo failed! status: %{public}s", status.ToString().c_str());
-        return;
-    }
-    SendSoftbusEvent(bundleNameId, continueTypeId, sendType);
-    HILOGI("end");
-}
-
 } // namespace DistributedSchedule
 } // namespace OHOS
