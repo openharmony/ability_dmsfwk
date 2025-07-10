@@ -127,5 +127,11 @@ int32_t SendStrategyMMI::ExecuteSendStrategy(const MissionStatus& status, uint8_
     sendMgr->SendContinueBroadcastAfterDelay(status.missionId);
     return ERR_OK;
 }
+
+int32_t SendStrategyContinueSwitchOff::ExecuteSendStrategy(const MissionStatus& status, uint8_t &sendType) const
+{
+    sendType = BROADCAST_TYPE_DISAPPEAR;
+    return ERR_OK;
+}
 }  // namespace DistributedSchedule
 }  // namespace OHOS
