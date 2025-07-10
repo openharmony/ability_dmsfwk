@@ -638,6 +638,13 @@ void DistributedSchedService::RegisterDataShareObserver(const std::string& key)
 {
     HILOGI("RegisterObserver start.");
     DataShareManager::ObserverCallback observerCallback = [this]() {
+        auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+        bool continueSwitch = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
+        int32_t lastContinuableMissionId = DmsContinueConditionMgr::GetInstance().GetLastContinuableMissionId();
+        if (!continueSwitch) {
+            sendMgr->OnMissionStatusChanged(lastContinuableMissionId, MISSION_EVENT_CONTINUE_SWITCH_OFF);
+        }
+
         dataShareManager.SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
         HILOGD("dsMgr IsCurrentContinueSwitchOn : %{public}d", dataShareManager.IsCurrentContinueSwitchOn());
         int32_t missionId = GetCurrentMissionId();
@@ -646,7 +653,6 @@ void DistributedSchedService::RegisterDataShareObserver(const std::string& key)
         }
         DmsUE::GetInstance().ChangedSwitchState(dataShareManager.IsCurrentContinueSwitchOn(), ERR_OK);
         if (dataShareManager.IsCurrentContinueSwitchOn()) {
-            auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
             if (sendMgr == nullptr) {
                 HILOGI("GetSendMgr failed.");
                 return;
@@ -654,14 +660,10 @@ void DistributedSchedService::RegisterDataShareObserver(const std::string& key)
             sendMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_FOCUSED);
             DSchedContinueManager::GetInstance().Init();
         } else {
-            auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
             if (sendMgr == nullptr) {
                 HILOGI("GetSendMgr failed.");
                 return;
             }
-            int32_t lastContinuableMissionId = DmsContinueConditionMgr::GetInstance().GetLastContinuableMissionId();
-            HILOGI("lastContinuableMissionId: %{public}d.", lastContinuableMissionId);
-            sendMgr->OnSwitchOffIconDisappear(lastContinuableMissionId);
             sendMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_UNFOCUSED);
             auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
             if (recvMgr == nullptr) {

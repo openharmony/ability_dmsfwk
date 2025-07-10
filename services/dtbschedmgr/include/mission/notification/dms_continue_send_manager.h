@@ -45,6 +45,7 @@ friend class SendStrategyActive;
 friend class SendStrategyInactive;
 friend class SendStrategyTimeout;
 friend class SendStrategyMMI;
+friend class SendStrategyContinueSwitchOff;
 
 public:
     constexpr static uint8_t DMS_DATA_LEN = 3; // Dms data Length
@@ -71,8 +72,6 @@ public:
     void OnDeviceScreenLocked();
     void OnDeviceScreenOn();
     void OnUserSwitched();
-    void OnSwitchOffIconDisappear(int32_t missionId);
-    void SendContinueSwitchOffBroadcast(const MissionStatus& status);
 
 private:
     void StartEvent();

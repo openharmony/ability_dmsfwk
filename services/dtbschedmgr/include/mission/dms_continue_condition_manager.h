@@ -62,6 +62,7 @@ typedef enum {
     MISSION_EVENT_INACTIVE = 5,
     MISSION_EVENT_TIMEOUT = 6,
     MISSION_EVENT_MMI = 7,
+    MISSION_EVENT_CONTINUE_SWITCH_OFF = 8,
     MISSION_EVENT_MAX,
 } MissionEventType;
 
@@ -122,6 +123,7 @@ private:
     bool CheckSendBackgroundCondition(const MissionStatus& status);
     bool CheckSendActiveCondition(const MissionStatus& status);
     bool CheckSendInactiveCondition(const MissionStatus& status);
+    bool CheckSendContinueSwitchOffCondition(const MissionStatus& status);
 
     int32_t GetMissionInfo(int32_t missionId, AAFwk::MissionInfo& info);
     int32_t GetMissionInfos(std::vector<AAFwk::MissionInfo>& missions);
@@ -146,7 +148,6 @@ private:
 
     std::mutex missionMutex_;
     std::map<int32_t, std::map<int32_t, MissionStatus>> missionMap_;
-    std::pair<int32_t, MissionStatus> lastFocusMission_;
     int32_t lastContinuableMissionId_;
 };
 } // namespace DistributedSchedule
