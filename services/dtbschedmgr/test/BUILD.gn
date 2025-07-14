@@ -919,10 +919,10 @@ ohos_unittest("dmscollabtest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
-  external_deps += [
-    "googletest:gmock",
-    "screenlock_mgr:screenlock_client",
-  ]
+  external_deps += [ "googletest:gmock" ]
+  if (dmsfwk_check_screenlock) {
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
+  }
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -958,10 +958,10 @@ ohos_unittest("dmscollabmgrtest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
-  external_deps += [
-    "googletest:gmock",
-    "screenlock_mgr:screenlock_client",
-  ]
+  external_deps += [ "googletest:gmock" ]
+  if (dmsfwk_check_screenlock) {
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
+  }
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -996,10 +996,10 @@ ohos_unittest("dmscollabsuptest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
-  external_deps += [
-    "googletest:gmock",
-    "screenlock_mgr:screenlock_client",
-  ]
+  external_deps += [ "googletest:gmock" ]
+  if (dmsfwk_check_screenlock) {
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
+  }
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -1031,10 +1031,10 @@ ohos_unittest("dmscollabstatetest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
-  external_deps += [
-    "googletest:gmock",
-    "screenlock_mgr:screenlock_client",
-  ]
+  external_deps += [ "googletest:gmock" ]
+  if (dmsfwk_check_screenlock) {
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
+  }
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -1066,10 +1066,10 @@ ohos_unittest("dmscollabeventtest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
-  external_deps += [
-    "googletest:gmock",
-    "screenlock_mgr:screenlock_client",
-  ]
+  external_deps += [ "googletest:gmock" ]
+  if (dmsfwk_check_screenlock) {
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
+  }
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -1101,10 +1101,10 @@ ohos_unittest("dmscollabsrcstattest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
-  external_deps += [
-    "googletest:gmock",
-    "screenlock_mgr:screenlock_client",
-  ]
+  external_deps += [ "googletest:gmock" ]
+  if (dmsfwk_check_screenlock) {
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
+  }
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
