@@ -381,7 +381,8 @@ void DtbschedmgrDeviceInfoStorage::DeviceOnlineNotify(const std::shared_ptr<DmsD
         std::string uuid = GetUuidByNetworkId(networkId);
         HILOGI("networkId: %{public}s, uuid: %{public}s, deviceName: %{public}s, osType: %{public}d, "
             "osVersion: %{public}s.", GetAnonymStr(networkId).c_str(), GetAnonymStr(uuid).c_str(),
-            devInfo->GetDeviceName().c_str(), devInfo->GetDeviceOSType(), devInfo->GetGetDeviceOSVersion().c_str());
+            GetAnonymStr(devInfo->GetDeviceName()).c_str(), devInfo->GetDeviceOSType(),
+            devInfo->GetGetDeviceOSVersion().c_str());
         {
             lock_guard<mutex> autoLock(deviceLock_);
             remoteDevices_[networkId] = devInfo;
@@ -440,7 +441,7 @@ std::string DtbschedmgrDeviceInfoStorage::GetDeviceName(std::string netWorkId)
     lock_guard<mutex> autoLock(deviceLock_);
     for (auto device = remoteDevices_.begin(); device != remoteDevices_.end(); ++device) {
         if (device->second != nullptr && device->second->GetNetworkId() == netWorkId) {
-            HILOGI("deviceName = %{public}s", device->second->GetDeviceName().c_str());
+            HILOGI("deviceName = %{public}s", GetAnonymStr(device->second->GetDeviceName()).c_str());
             return device->second->GetDeviceName();
         }
     }
