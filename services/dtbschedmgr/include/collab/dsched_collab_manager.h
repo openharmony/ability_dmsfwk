@@ -26,6 +26,7 @@
 #include "inner_socket.h"
 #include "iremote_object.h"
 #include "single_instance.h"
+#include "tokenid_kit.h"
 #include "want.h"
 
 namespace OHOS {
