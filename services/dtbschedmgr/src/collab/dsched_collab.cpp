@@ -43,9 +43,6 @@ namespace {
 const std::string TAG = "DSchedCollab";
 const std::string DMS_VERSION_ID = "dmsVersion";
 const std::u16string NAPI_COLLAB_CALLBACK_INTERFACE_TOKEN = u"OHOS.DistributedCollab.IAbilityConnectionManager";
-const std::string KEY_START_OPTION = "ohos.collabrate.key.start.option";
-const std::string VALUE_START_OPTION_FOREGROUND = "ohos.collabrate.value.foreground";
-const std::string VALUE_START_OPTION_BACKGROUND = "ohos.collabrate.value.background";
 
 constexpr int32_t DSCHED_COLLAB_PROTOCOL_VERSION = 1;
 constexpr int32_t NOTIFY_COLLAB_PREPARE_RESULT = 0;
@@ -550,6 +547,8 @@ int32_t DSchedCollab::PackStartCmd(std::shared_ptr<SinkStartCmd>& cmd)
     cmd->needSendStream_ = collabInfo_.srcOpt_.needSendStream_;
     cmd->needRecvStream_ = collabInfo_.srcOpt_.needRecvStream_;
     cmd->startParams_ = collabInfo_.srcOpt_.startParams_;
+    cmd->startParams_.SetParam(DMS_IS_CALLER_FOREGROUND, AAFwk::Boolean::Box(
+        DistributedSchedPermission::GetInstance().IsAbilityForeground(collabInfo_.srcInfo_.accessToken_)));
     cmd->messageParams_ = collabInfo_.srcOpt_.messageParams_;
     return PackPartCmd(cmd);
 }
@@ -583,6 +582,10 @@ int32_t DSchedCollab::PackPartCmd(std::shared_ptr<SinkStartCmd>& cmd)
         HILOGE("get or check accountInfo failed");
         return GET_ACCOUNT_INFO_ERR;
     }
+    if (!DistributedSchedPermission::GetInstance().CheckSrcBackgroundPermission(collabInfo_.srcInfo_.accessToken_)) {
+        HILOGE("check source backgroundPermission failed");
+        return DMS_START_CONTROL_PERMISSION_DENIED;
+    }
     cmd->callerInfo_ = callerInfo;
     collabInfo_.callerInfo_ = callerInfo;
     cmd->accountInfo_ = accountInfo;
@@ -600,6 +603,7 @@ int32_t DSchedCollab::ExeStartAbility(const std::string &peerDeviceId)
     AAFwk::Want want = GenerateCollabWant();
     int32_t ret = DistributedSchedService::GetInstance().CheckCollabStartPermission(want, collabInfo_.callerInfo_,
         collabInfo_.srcAccountInfo_, START_PERMISSION);
+    want.RemoveParam(DMS_IS_CALLER_FOREGROUND);
     if (ret != ERR_OK) {
         HILOGE("CheckTargetPermission failed!");
         return ret;
@@ -658,6 +662,8 @@ AAFwk::Want DSchedCollab::GenerateCollabWant()
     wantParams.SetParam("ohos.extra.param.key.supportCollaborateIndex", AAFwk::WantParamWrapper::Box(collabParams));
     HILOGI("ohos.aafwk.param.callAbilityToForeground is %{public}d", IsStartForeground());
     wantParams.SetParam("ohos.aafwk.param.callAbilityToForeground", AAFwk::Boolean::Box(IsStartForeground()));
+    bool isCallerForeground = collabInfo_.srcOpt_.startParams_.GetParam(DMS_IS_CALLER_FOREGROUND);
+    want.SetParam(DMS_IS_CALLER_FOREGROUND, isCallerForeground);
     want.SetParams(wantParams);
     return want;
 }
@@ -924,8 +930,8 @@ int32_t DSchedCollab::ExeSrcStartError(const int32_t &result)
 int32_t DSchedCollab::ExeSrcWaitResultError(const int32_t &result)
 {
     HILOGE("called, reason: %{public}d", result);
-    auto cmd = std::make_shared<NotifyResultCmd>();
-    PackNotifyResultCmd(cmd, result);
+    auto cmd = std::make_shared<DisconnectCmd>();
+    PackDisconnectCmd(cmd);
     SendCommand(cmd);
     ExeSrcClientNotify(result);
     CleanUpSession();

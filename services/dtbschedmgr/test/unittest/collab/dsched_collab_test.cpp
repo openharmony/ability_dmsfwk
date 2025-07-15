@@ -533,7 +533,7 @@ HWTEST_F(DSchedCollabTest, ExeSrcCollabResult_001, TestSize.Level3)
     auto mock_ = sptr<MockRemoteSupStub>(new MockRemoteSupStub());
     dSchedCollab_->collabInfo_.srcClientCB_ = mock_;
     EXPECT_CALL(*messageParcelMock_, WriteInterfaceToken(_)).WillOnce(Return(true));
-    EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillOnce(Return(true)).WillOnce(Return(true));
+    EXPECT_CALL(*messageParcelMock_, WriteInt32(_)).WillRepeatedly(Return(true));
     EXPECT_CALL(*messageParcelMock_, WriteString(_)).WillOnce(Return(true))
         .WillOnce(Return(true)).WillOnce(Return(true));
     EXPECT_CALL(*mock_, SendRequest(_, _, _, _)).WillOnce(Return(ERR_OK));
