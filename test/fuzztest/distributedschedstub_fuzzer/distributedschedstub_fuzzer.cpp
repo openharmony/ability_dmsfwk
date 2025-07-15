@@ -76,6 +76,12 @@ bool StartRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     FuzzedDataProvider fdp(data, size);
     int32_t int32Data = fdp.ConsumeIntegral<int32_t>();
     uint32_t uint32Data = fdp.ConsumeIntegral<uint32_t>();
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    
+    want.SetDeviceId(dstDeviceId);
+    want.SetElementName(bundleName, abilityName);
 
     PARCEL_WRITE_HELPER(dataParcel, Parcelable, &want);
     PARCEL_WRITE_HELPER(dataParcel, Int32, int32Data);
@@ -101,6 +107,12 @@ void ConnectRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     FuzzedDataProvider fdp(data, size);
     int32_t int32Data = fdp.ConsumeIntegral<int32_t>();
     uint32_t uint32Data = fdp.ConsumeIntegral<uint32_t>();
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    
+    want.SetDeviceId(dstDeviceId);
+    want.SetElementName(bundleName, abilityName);
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &want);
     PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, connect);
@@ -157,6 +169,12 @@ void StartContinuationInnerFuzzTest(const uint8_t* data, size_t size)
     int32_t callerUid = fdp.ConsumeIntegral<int32_t>();
     int32_t status = fdp.ConsumeIntegral<int32_t>();
     uint32_t accessToken = fdp.ConsumeIntegral<uint32_t>();
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    
+    want.SetDeviceId(dstDeviceId);
+    want.SetElementName(bundleName, abilityName);
 
     dataParcel.WriteParcelable(&want);
     dataParcel.WriteInt32(missionId);
@@ -279,6 +297,9 @@ void RegisterMissionListenerInnerFuzzTest(const uint8_t* data, size_t size)
     uint32_t uint32Data = fdp.ConsumeIntegral<uint32_t>();
     std::string str = fdp.ConsumeRandomLengthString();
     sptr<IRemoteObject> obj(new MockDistributedSched());
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    
+    want.SetDeviceId(dstDeviceId);
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, String16, Str8ToStr16(str));
     PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, obj);
@@ -340,6 +361,10 @@ void StopSyncRemoteMissionsInnerFuzzTest(const uint8_t* data, size_t size)
     DistributedSchedService::GetInstance().StopSyncRemoteMissionsInner(dataParcel, reply);
 
     Want want;
+    FuzzedDataProvider fdp(data, size);
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    
+    want.SetDeviceId(dstDeviceId);
     CallerInfo callerInfo;
     IDistributedSched::AccountInfo accountInfo;
     int32_t flag = *(reinterpret_cast<const int32_t*>(data));
@@ -379,6 +404,9 @@ void StartRemoteAbilityByCallInnerFuzzTest(const uint8_t* data, size_t size)
     FuzzedDataProvider fdp(data, size);
     int32_t int32Data = fdp.ConsumeIntegral<int32_t>();
     uint32_t uint32Data = fdp.ConsumeIntegral<uint32_t>();
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    
+    want.SetDeviceId(dstDeviceId);
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &want);
     PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, obj);
@@ -399,7 +427,6 @@ void ReleaseRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> connect(new MockDistributedSched());
-    Want want;
     AppExecFwk::ElementName element;
     CallerInfo callerInfo;
     std::string deviceId(reinterpret_cast<const char*>(data), size);
@@ -450,7 +477,10 @@ void StartRemoteFreeInstallInnerFuzzTest(const uint8_t* data, size_t size)
     uint32_t uint32Data = fdp.ConsumeIntegral<uint32_t>();
     sptr<IRemoteObject> obj(new MockDistributedSched());
     Want want;
-
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    
+    want.SetDeviceId(dstDeviceId);
+    dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &want);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
@@ -472,6 +502,10 @@ void StartRemoteShareFormInnerFuzzTest(const uint8_t* data, size_t size)
     MessageOption option;
     std::string str(reinterpret_cast<const char*>(data), size);
     Want want;
+    FuzzedDataProvider fdp(data, size);
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    
+    want.SetDeviceId(dstDeviceId);
     dataParcel.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
     PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &want);
@@ -492,6 +526,12 @@ void StopRemoteExtensionAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     int32_t callerUid = fdp.ConsumeIntegral<int32_t>();
     int32_t serviceType = fdp.ConsumeIntegral<int32_t>();
     uint32_t accessToken = fdp.ConsumeIntegral<uint32_t>();
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    
+    want.SetDeviceId(dstDeviceId);
+    want.SetElementName(bundleName, abilityName);
     dataParcel.WriteParcelable(&want);
     dataParcel.WriteInt32(callerUid);
     dataParcel.WriteUint32(accessToken);
@@ -613,6 +653,12 @@ void StartAbilityFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
     int32_t int32Data = fdp.ConsumeIntegral<int32_t>();
     std::string str = fdp.ConsumeRandomLengthString();
     std::vector<std::string> strVector = {str};
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    
+    dstbWant.SetDeviceId(dstDeviceId);
+    dstbWant.SetElementName(bundleName, abilityName);
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &dstbWant);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &compatibleAbilityInfo);
@@ -640,6 +686,12 @@ void SendResultFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
     std::string str = fdp.ConsumeRandomLengthString();
     std::vector<std::string> strVector = {str};
     DistributedWant dstbWant;
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    
+    dstbWant.SetDeviceId(dstDeviceId);
+    dstbWant.SetElementName(bundleName, abilityName);
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &dstbWant);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
@@ -707,6 +759,12 @@ void ConnectAbilityFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
     std::string str = fdp.ConsumeRandomLengthString();
     std::vector<std::string> strVector = {str};
     DistributedWant dstbWant;
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    
+    dstbWant.SetDeviceId(dstDeviceId);
+    dstbWant.SetElementName(bundleName, abilityName);
     const sptr<IRemoteObject> connect(new MockDistributedSched());
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &dstbWant);
@@ -795,6 +853,12 @@ void NotifyMissionsChangedFromRemoteInnerFuzzTest(const uint8_t* data, size_t si
     std::vector<DstbMissionInfo> missionInfos;
     CallerInfo callerInfo;
     DistributedWant dstbWant;
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    
+    dstbWant.SetDeviceId(dstDeviceId);
+    dstbWant.SetElementName(bundleName, abilityName);
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &dstbWant);
     if (!DstbMissionInfo::WriteDstbMissionInfosToParcel(dataParcel, missionInfos)) {
@@ -824,6 +888,12 @@ void ReleaseAbilityFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
     FuzzedDataProvider fdp(data, size);
     int32_t int32Data = fdp.ConsumeIntegral<int32_t>();
     std::string str = fdp.ConsumeRandomLengthString();
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    
+    want.SetDeviceId(dstDeviceId);
+    want.SetElementName(bundleName, abilityName);
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, connect);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &element);
@@ -874,6 +944,12 @@ void StartFreeInstallFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
     int64_t int64Data = static_cast<int64_t>(GetU32Data(data, size));
     std::vector<std::string> strVector = {str};
     DistributedWant dstbWant;
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    
+    dstbWant.SetDeviceId(dstDeviceId);
+    dstbWant.SetElementName(bundleName, abilityName);
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &dstbWant);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
@@ -934,6 +1010,12 @@ void StartAbilityByCallFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
     std::string str = fdp.ConsumeRandomLengthString();
     std::vector<std::string> strVector = {str};
     DistributedWant dstbWant;
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    
+    dstbWant.SetDeviceId(dstDeviceId);
+    dstbWant.SetElementName(bundleName, abilityName);
     sptr<IRemoteObject> connect(new MockDistributedSched());
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, connect);
@@ -1007,6 +1089,13 @@ void StartShareFormFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
     std::string str(reinterpret_cast<const char*>(data), size);
     DistributedWant dstbWant;
+    FuzzedDataProvider fdp(data, size);
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    
+    dstbWant.SetDeviceId(dstDeviceId);
+    dstbWant.SetElementName(bundleName, abilityName);
     PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &dstbWant);
     DistributedSchedService::GetInstance().StartShareFormFromRemoteInner(dataParcel, reply);
@@ -1026,6 +1115,12 @@ void StopExtensionAbilityFromRemoteInnerFuzzTest(const uint8_t* data, size_t siz
     std::string str = fdp.ConsumeRandomLengthString();
     std::vector<std::string> strVector = {str};
     DistributedWant dstbWant;
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    
+    dstbWant.SetDeviceId(dstDeviceId);
+    dstbWant.SetElementName(bundleName, abilityName);
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &dstbWant);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
@@ -1051,6 +1146,12 @@ void StopAbilityFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
     std::string str = fdp.ConsumeRandomLengthString();
     std::vector<std::string> strVector = {str};
     DistributedWant dstbWant;
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    
+    dstbWant.SetDeviceId(dstDeviceId);
+    dstbWant.SetElementName(bundleName, abilityName);
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &dstbWant);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
@@ -1112,10 +1213,11 @@ void GetSinkCollabVersionInnerFuzzTest(const uint8_t* data, size_t size)
     int32_t collabSessionId = fdp.ConsumeIntegral<int32_t>();
     std::string sinkDeviceId = fdp.ConsumeRandomLengthString();
     std::string collabToken = fdp.ConsumeRandomLengthString();
+    sptr<IRemoteObject> connect(new MockDistributedSched());
     PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, collabSessionId);
     PARCEL_WRITE_HELPER_NORET(dataParcel, String, sinkDeviceId);
     PARCEL_WRITE_HELPER_NORET(dataParcel, String, collabToken);
-    dataParcel.WriteRemoteObject(nullptr);
+    dataParcel.WriteRemoteObject(connect);
     DistributedSchedService::GetInstance().GetSinkCollabVersionInner(dataParcel, reply);
 }
 
@@ -1148,11 +1250,12 @@ void NotifyCollabPrepareResultInnerFuzzTest(const uint8_t* data, size_t size)
     int32_t ret = fdp.ConsumeIntegral<int32_t>();
     int32_t sinkCollabSessionId = fdp.ConsumeIntegral<int32_t>();
     std::string sinkSocketName = fdp.ConsumeRandomLengthString();
+    sptr<IRemoteObject> connect(new MockDistributedSched());
     dataParcel.WriteString(collabToken);
     dataParcel.WriteInt32(ret);
     dataParcel.WriteInt32(sinkCollabSessionId);
     dataParcel.WriteString(sinkSocketName);
-    dataParcel.WriteRemoteObject(nullptr);
+    dataParcel.WriteRemoteObject(connect);
     DistributedSchedService::GetInstance().NotifyCollabPrepareResultInner(dataParcel, reply);
 }
 
