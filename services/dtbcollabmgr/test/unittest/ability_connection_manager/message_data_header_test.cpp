@@ -67,6 +67,8 @@ HWTEST_F(MessageDataHeaderTest, MessageDataHeader_Test_001, TestSize.Level3)
 
     buffer = new (std::nothrow) uint8_t[MessageDataHeader::HEADER_LEN];
     EXPECT_EQ(data.Deserialize(buffer, MessageDataHeader::HEADER_LEN), std::nullopt);
+    delete[] buffer;
+    buffer = nullptr;
     DTEST_LOG << "MessageDataHeaderTest MessageDataHeader_Test_001 end" << std::endl;
 }
 }

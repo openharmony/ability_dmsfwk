@@ -26,6 +26,7 @@
 #include "cJSON.h"
 #include "device_manager.h"
 #include "distributed_extension_proxy.h"
+#include "distributed_sched_utils.h"
 #include "dtbschedmgr_log.h"
 #include "file_ex.h"
 #include "hisysevent.h"
@@ -300,7 +301,7 @@ static std::string GetLanguageFilePath(const std::string &sysLanguage, const std
         break;
     }
     cJSON_Delete(json);
-    HILOGI("file path %{public}s", filePath.c_str());
+    HILOGI("file path %{public}s", GetAnonymStr(filePath).c_str());
     return filePath;
 }
 

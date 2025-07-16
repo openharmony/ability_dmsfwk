@@ -117,6 +117,7 @@ bool ContinuationResult::ReadContinuationResultsFromParcel(Parcel& parcel,
             }
             continuationResults.emplace_back(*continuationResult);
             delete continuationResult;
+            continuationResult = nullptr;
         }
     }
     return true;

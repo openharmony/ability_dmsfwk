@@ -144,6 +144,7 @@ HWTEST_F(AVSenderFilterTest, WriteDataToBuffer_Test_001, TestSize.Level1)
     cJSON_Delete(headerJson);
     EXPECT_EQ(ret, ERR_OK);
     delete headerStr;
+    headerStr = nullptr;
     HILOGI("AVSenderFilterTest::WriteDataToBuffer_Test_001 end");
 }
 }
