@@ -38,6 +38,7 @@
 #include "multi_user_manager.h"
 #include "nativetoken_kit.h"
 #include "mock/svc_distributed_connection_mock.h"
+#include "mock/multi_user_manager_mock.h"
 #include "system_ability_definition.h"
 #include "test_log.h"
 #include "token_setproc.h"
@@ -71,7 +72,7 @@ namespace {
     const string DMS_IS_CALLER_BACKGROUND = "dmsIsCallerBackGround";
     const string DMS_VERSION_ID = "dmsVersion";
     constexpr int32_t SLEEP_TIME = 1000;
-    constexpr int32_t WEARENGINE_UID = 1001;
+    constexpr int32_t WEARLINK_UID = 7259;
 }
 
 void SetNativeToken()
@@ -98,7 +99,7 @@ void SetNativeToken()
         return;
     }
     SetSelfTokenID(tokenId);
-    setuid(WEARENGINE_UID);
+    setuid(WEARLINK_UID);
     OHOS::Security::AccessToken::AccessTokenKit::ReloadNativeTokenInfo();
 }
 
@@ -112,6 +113,7 @@ public:
     int32_t InstallBundle(const std::string &bundlePath) const;
     sptr<IDistributedSched> proxy_;
     static inline std::shared_ptr<SvcDistributedConnectionMock> svcDConnMock = nullptr;
+    static inline std::shared_ptr<MultiUserManagerMock> multiUserMgrMock_ = nullptr;
 
 protected:
     enum class LoopTime : int32_t {
@@ -135,6 +137,8 @@ void DistributedSchedServiceFirstTest::SetUpTestCase()
     }
     svcDConnMock = std::make_shared<SvcDistributedConnectionMock>();
     SvcDistributedConnectionMock::connMock = svcDConnMock;
+    multiUserMgrMock_ = std::make_shared<MultiUserManagerMock>();
+    MultiUserManagerMock::multiUserMgrMock = multiUserMgrMock_;
     const std::string pkgName = "DBinderBus_" + std::to_string(getprocpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
@@ -145,6 +149,8 @@ void DistributedSchedServiceFirstTest::TearDownTestCase()
 {
     SvcDistributedConnectionMock::connMock = nullptr;
     svcDConnMock = nullptr;
+    MultiUserManagerMock::multiUserMgrMock = nullptr;
+    multiUserMgrMock_ = nullptr;
 }
 
 void DistributedSchedServiceFirstTest::SetUp()
@@ -157,13 +163,6 @@ void DistributedSchedServiceFirstTest::TearDown()
 
 void DistributedSchedServiceFirstTest::DeviceInitCallBack::OnRemoteDied()
 {}
-
-static bool g_isForeground = true;
-
-bool MultiUserManager::IsCallerForeground(int32_t callingUid)
-{
-    return g_isForeground;
-}
 
 sptr<IDistributedSched> DistributedSchedServiceFirstTest::GetDms()
 {
@@ -291,6 +290,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility_002, TestSize.Leve
     AppExecFwk::ElementName element("123456", "com.ohos.distributedmusicplayer",
         "com.ohos.distributedmusicplayer.MainAbility");
     want.SetElement(element);
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillRepeatedly(Return(true));
     int result1 = DistributedSchedService::GetInstance().StartRemoteAbility(want, 0, 0, 0);
     DTEST_LOG << "result:" << result1 << std::endl;
     std::string deviceId;
@@ -367,7 +367,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility_005, TestSize.Leve
     AppExecFwk::ElementName element("123456", "com.ohos.distributedmusicplayer",
         "com.ohos.distributedmusicplayer.MainAbility");
     want.SetElement(element);
-    g_isForeground = false;
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(false));
     int result = DistributedSchedService::GetInstance().StartRemoteAbility(want, 0, 0, 0);
     DTEST_LOG << "result:" << result << std::endl;
     EXPECT_EQ(static_cast<int>(DMS_NOT_FOREGROUND_USER), result);
@@ -387,7 +387,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility001, TestSize.Level
     int32_t callerUid = 0;
     int32_t requestCode = 0;
     uint32_t accessToken = 0;
-    g_isForeground = true;
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillRepeatedly(Return(true));
     int32_t ret = DistributedSchedService::GetInstance().StartRemoteAbility(want, callerUid, requestCode, accessToken);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceFirstTest StartRemoteAbility001 end" << std::endl;
@@ -406,7 +406,6 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility002, TestSize.Level
     int32_t callerUid = 1;
     int32_t requestCode = 0;
     uint32_t accessToken = 0;
-    g_isForeground = true;
     int32_t ret = DistributedSchedService::GetInstance().StartRemoteAbility(want, callerUid, requestCode, accessToken);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceFirstTest StartRemoteAbility002 end" << std::endl;
@@ -425,7 +424,6 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility003, TestSize.Level
     int32_t callerUid = 0;
     int32_t requestCode = 1;
     uint32_t accessToken = 0;
-    g_isForeground = true;
     int32_t ret = DistributedSchedService::GetInstance().StartRemoteAbility(want, callerUid, requestCode, accessToken);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceFirstTest StartRemoteAbility003 end" << std::endl;
@@ -444,7 +442,6 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility004, TestSize.Level
     int32_t callerUid = 0;
     int32_t requestCode = 0;
     uint32_t accessToken = 1;
-    g_isForeground = true;
     int32_t ret = DistributedSchedService::GetInstance().StartRemoteAbility(want, callerUid, requestCode, accessToken);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceFirstTest StartRemoteAbility004 end" << std::endl;
@@ -463,7 +460,6 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility005, TestSize.Level
     int32_t callerUid = 1;
     int32_t requestCode = 1;
     uint32_t accessToken = 0;
-    g_isForeground = true;
     int32_t ret = DistributedSchedService::GetInstance().StartRemoteAbility(want, callerUid, requestCode, accessToken);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceFirstTest StartRemoteAbility005 end" << std::endl;
@@ -482,7 +478,6 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility006, TestSize.Level
     int32_t callerUid = 1;
     int32_t requestCode = 1;
     uint32_t accessToken = 1;
-    g_isForeground = true;
     int32_t ret = DistributedSchedService::GetInstance().StartRemoteAbility(want, callerUid, requestCode, accessToken);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceFirstTest StartRemoteAbility006 end" << std::endl;
@@ -500,7 +495,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility007, TestSize.Level
     int32_t callerUid = 0;
     int32_t requestCode = 0;
     uint32_t accessToken = 0;
-    g_isForeground = false;
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(false));
     int32_t ret = DistributedSchedService::GetInstance().StartRemoteAbility(want, callerUid, requestCode, accessToken);
     EXPECT_EQ(ret, DMS_NOT_FOREGROUND_USER);
     DTEST_LOG << "DistributedSchedServiceFirstTest StartRemoteAbility007 end" << std::endl;
@@ -1323,7 +1318,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectRemoteAbility001, TestSize.Lev
     OHOS::AAFwk::Want want;
     want.SetElementName("123_remote_device_id", "ohos.demo.bundleName", "abilityName");
     const sptr<IRemoteObject> connect = nullptr;
-    g_isForeground = true;
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillRepeatedly(Return(true));
     int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbility(want, connect, 1, 1, 1);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectRemoteAbility001 end" << std::endl;
@@ -1341,7 +1336,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectRemoteAbility002, TestSize.Lev
     OHOS::AAFwk::Want want;
     want.SetElementName("", "ohos.demo.bundleName", "abilityName");
     const sptr<IRemoteObject> connect = nullptr;
-    g_isForeground = true;
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillRepeatedly(Return(true));
     int32_t ret = DistributedSchedService::GetInstance().ConnectRemoteAbility(want, connect, 1, 1, 1);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectRemoteAbility002 end" << std::endl;
@@ -1622,7 +1617,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbilityByCall_001, TestSiz
         "com.ohos.distributedmusicplayer.MainAbility");
     want.SetElement(element);
     sptr<IRemoteObject> connect(new MockDistributedSched());
-    g_isForeground = true;
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillRepeatedly(Return(true));
     int32_t result = DistributedSchedService::GetInstance().StartRemoteAbilityByCall(want,
         connect, callerUid, callerPid, accessToken);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
@@ -1782,7 +1777,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test04, T
     DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "ohos.permission.dms_extension", "delegatee");
     DExtConnectResultInfo resultInfo;
 
-    EXPECT_CALL(*svcDConnMock, ConnectDExtAbility(_, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    EXPECT_CALL(*svcDConnMock, ConnectDExtAbility(_, _, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
     int32_t result = DistributedSchedService::GetInstance().ConnectDExtensionFromRemote(connectInfo, resultInfo);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     EXPECT_EQ(resultInfo.result, DExtConnectResult::FAILED);

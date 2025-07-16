@@ -16,6 +16,8 @@
 #include "softbus_transport_test.h"
 
 #include "softbus_adapter/mock_softbus_adapter.h"
+#include "dtbschedmgr_device_info_storage.h"
+#include "dsched_transport_softbus_adapter.h"
 #include "test_log.h"
 #include "dtbschedmgr_log.h"
 
@@ -454,6 +456,7 @@ HWTEST_F(DSchedSoftbusSessionTest, UnPackStartEndData_001, TestSize.Level3)
     int32_t dataType = 0;
     softbusSessionTest_ = std::make_shared<DSchedSoftbusSession>();
     ASSERT_NE(softbusSessionTest_, nullptr);
+    EXPECT_CALL(mockSoftbus, SendBytes(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
     std::shared_ptr<DSchedDataBuffer> buffer = std::make_shared<DSchedDataBuffer>(SIZE_1);
     int32_t ret = softbusSessionTest_->UnPackStartEndData(buffer, dataType);
     EXPECT_NE(ret, ERR_OK);
@@ -907,6 +910,7 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, InitChannel_001, TestSize.Level3)
 {
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest InitChannel_001 begin" << std::endl;
     DSchedTransportSoftbusAdapter::GetInstance().serverSocket_ = COUNT;
+    EXPECT_CALL(mockSoftbus, Socket(testing::_)).WillOnce(testing::Return(-1));
     int32_t ret = DSchedTransportSoftbusAdapter::GetInstance().InitChannel();
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest InitChannel_001 end" << std::endl;
@@ -1009,6 +1013,7 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, SendBytesBySoftbus_002, TestSize.Lev
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest SendBytesBySoftbus_002 begin" << std::endl;
     int32_t sessionId = 0;
     auto dataBuffer = std::make_shared<DSchedDataBuffer>(SIZE_2);
+    EXPECT_CALL(mockSoftbus, SendBytes(testing::_, testing::_, testing::_)).WillOnce(testing::Return(-1));
     auto ret = DSchedTransportSoftbusAdapter::GetInstance().SendBytesBySoftbus(sessionId, dataBuffer);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest SendBytesBySoftbus_002 end" << std::endl;
@@ -1025,6 +1030,7 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, AddNewPeerSession_001, TestSize.Leve
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest AddNewPeerSession_001 begin" << std::endl;
     std::string peerDeviceId = "peerDeviceId";
     int32_t sessionId = 0;
+    EXPECT_CALL(mockSoftbus, Socket(testing::_)).WillOnce(testing::Return(-1));
     int32_t ret = DSchedTransportSoftbusAdapter::GetInstance().AddNewPeerSession(peerDeviceId, sessionId,
         SERVICE_TYPE_CONTINUE);
     EXPECT_EQ(ret, REMOTE_DEVICE_BIND_ABILITY_ERR);
@@ -1174,6 +1180,59 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, DisconnectDevice_001, TestSize.Level
     EXPECT_NO_FATAL_FAILURE(DSchedTransportSoftbusAdapter::GetInstance().DisconnectDevice(peerDeviceId));
     EXPECT_EQ(DSchedTransportSoftbusAdapter::GetInstance().sessions_.count(rightSession), 0);
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest DisconnectDevice_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: AddNewPeerSession_002
+ * @tc.desc: call AddNewPeerSession
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedTransportSoftbusAdapterTest, AddNewPeerSession_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest AddNewPeerSession_002 begin" << std::endl;
+    int32_t sessionId = 0;
+    DSchedServiceType type = SERVICE_TYPE_COLLAB;
+    std::string peerDeviceId = "peerDeviceId";
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_.clear();
+    std::shared_ptr<DmsDeviceInfo> info = std::make_shared<DmsDeviceInfo>("", 0, "");
+    info->osType_ = Constants::HO_OS_TYPE_EX;
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[peerDeviceId] = info;
+    EXPECT_CALL(mockSoftbus, Socket(testing::_)).WillOnce(testing::Return(1));
+    int32_t ret = DSchedTransportSoftbusAdapter::GetInstance().AddNewPeerSession(peerDeviceId, sessionId,
+        SERVICE_TYPE_CONTINUE);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+
+    peerDeviceId = "peerDeviceId1";
+    std::shared_ptr<DmsDeviceInfo> info1 = std::make_shared<DmsDeviceInfo>("", 0, "");
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[peerDeviceId] = info1;
+    EXPECT_CALL(mockSoftbus, Socket(testing::_)).WillOnce(testing::Return(1));
+    ret = DSchedTransportSoftbusAdapter::GetInstance().AddNewPeerSession(peerDeviceId, sessionId,
+        SERVICE_TYPE_CONTINUE);
+    EXPECT_NE(ret, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest AddNewPeerSession_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnBind_001
+ * @tc.desc: call OnBind
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedTransportSoftbusAdapterTest, OnBind_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest OnBind_001 begin" << std::endl;
+    int32_t sessionId = 0;
+    std::string peerDeviceId = "peerDeviceId";
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_.clear();
+    std::shared_ptr<DmsDeviceInfo> info = std::make_shared<DmsDeviceInfo>("", 0, "");
+    info->osType_ = Constants::HO_OS_TYPE_EX;
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[peerDeviceId] = info;
+    EXPECT_NO_FATAL_FAILURE(DSchedTransportSoftbusAdapter::GetInstance().OnBind(sessionId, peerDeviceId));
+
+    peerDeviceId = "peerDeviceId1";
+    std::shared_ptr<DmsDeviceInfo> info1 = std::make_shared<DmsDeviceInfo>("", 0, "");
+    DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[peerDeviceId] = info1;
+    EXPECT_NO_FATAL_FAILURE(DSchedTransportSoftbusAdapter::GetInstance().OnBind(sessionId, peerDeviceId));
+    DTEST_LOG << "DSchedTransportSoftbusAdapterTest OnBind_001 end" << std::endl;
 }
 }
 }

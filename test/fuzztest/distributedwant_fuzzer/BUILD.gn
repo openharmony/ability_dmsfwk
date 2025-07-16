@@ -41,6 +41,7 @@ ohos_fuzztest("DistributedWantFuzzTest") {
     "ability_base:zuri",
     "c_utils:utils",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
   ]
 }
 

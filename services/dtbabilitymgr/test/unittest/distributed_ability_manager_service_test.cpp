@@ -269,12 +269,19 @@ HWTEST_F(DistributedAbilityManagerServiceTest, Unregister_001, TestSize.Level3)
     DTEST_LOG << "DistributedAbilityManagerServiceTest Unregister_001 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
-     * @tc.steps: step1. test Unregister when token is not registered.
+     * @tc.steps: step1. test Unregister when permission check failed.
      */
+    DistributedSchedUtil::MockBundlePermission();
     int32_t ret = dtbabilitymgrService_->Unregister(INVALID_CODE);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    /**
+     * @tc.steps: step2. test Unregister when token is not registered.
+     */
+    DistributedSchedUtil::MockPermission();
+    ret = dtbabilitymgrService_->Unregister(INVALID_CODE);
     EXPECT_EQ(ret, TOKEN_HAS_NOT_REGISTERED);
     /**
-     * @tc.steps: step2. test Unregister when notifier is not registered.
+     * @tc.steps: step3. test Unregister when notifier is not registered.
      */
     {
         std::lock_guard<std::mutex> callbackMapLock(dtbabilitymgrService_->callbackMapMutex_);
@@ -287,7 +294,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, Unregister_001, TestSize.Level3)
     ret = dtbabilitymgrService_->Unregister(token);
     EXPECT_EQ(ret, ERR_OK);
     /**
-     * @tc.steps: step3. test Unregister when notifier is registered.
+     * @tc.steps: step4. test Unregister when notifier is registered.
      */
     ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
     EXPECT_EQ(ret, ERR_OK);
@@ -352,12 +359,19 @@ HWTEST_F(DistributedAbilityManagerServiceTest, RegisterDeviceSelectionCallback_0
     DTEST_LOG << "DistributedAbilityManagerServiceTest RegisterDeviceSelectionCallback_001 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
-     * @tc.steps: step1. test RegisterDeviceSelectionCallback when cbType is invalid.
+     * @tc.steps: step1. test RegisterDeviceSelectionCallback when permission check failed.
      */
+    DistributedSchedUtil::MockBundlePermission();
     int32_t ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(INVALID_CODE, "", nullptr);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    /**
+     * @tc.steps: step2. test RegisterDeviceSelectionCallback when cbType is invalid.
+     */
+    DistributedSchedUtil::MockPermission();
+    ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(INVALID_CODE, "", nullptr);
     EXPECT_EQ(ret, UNKNOWN_CALLBACK_TYPE);
     /**
-     * @tc.steps: step2. test RegisterDeviceSelectionCallback when cbType has registered.
+     * @tc.steps: step3. test RegisterDeviceSelectionCallback when cbType has registered.
      */
     int32_t token = 0;
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
@@ -553,17 +567,24 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UpdateConnectStatus_001, TestSize
     DTEST_LOG << "DistributedAbilityManagerServiceTest UpdateConnectStatus_001 start" << std::endl;
     ASSERT_NE(nullptr, dtbabilitymgrService_);
     /**
-     * @tc.steps: step1. test UpdateConnectStatus when deviceId is empty.
+     * @tc.steps: step1. test UpdateConnectStatus when permission check failed.
      */
+    DistributedSchedUtil::MockBundlePermission();
     int32_t ret = dtbabilitymgrService_->UpdateConnectStatus(INVALID_CODE, "", DeviceConnectStatus::IDLE);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    /**
+     * @tc.steps: step2. test UpdateConnectStatus when deviceId is empty.
+     */
+    DistributedSchedUtil::MockPermission();
+    ret = dtbabilitymgrService_->UpdateConnectStatus(INVALID_CODE, "", DeviceConnectStatus::IDLE);
     EXPECT_EQ(ret, ERR_NULL_OBJECT);
     /**
-     * @tc.steps: step2. test UpdateConnectStatus when token is not registered.
+     * @tc.steps: step3. test UpdateConnectStatus when token is not registered.
      */
     ret = dtbabilitymgrService_->UpdateConnectStatus(INVALID_CODE, DEVICE_ID, DeviceConnectStatus::IDLE);
     EXPECT_EQ(ret, TOKEN_HAS_NOT_REGISTERED);
     /**
-     * @tc.steps: step3. test UpdateConnectStatus when callback is not registered.
+     * @tc.steps: step4. test UpdateConnectStatus when callback is not registered.
      */
     int32_t token = 0;
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
@@ -572,7 +593,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UpdateConnectStatus_001, TestSize
     ret = dtbabilitymgrService_->UpdateConnectStatus(token, DEVICE_ID, DeviceConnectStatus::IDLE);
     EXPECT_EQ(ret, CALLBACK_HAS_NOT_REGISTERED);
     /**
-     * @tc.steps: step4. test UpdateConnectStatus when callback is registered.
+     * @tc.steps: step5. test UpdateConnectStatus when callback is registered.
      */
     sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
     ret = dtbabilitymgrService_->RegisterDeviceSelectionCallback(token, EVENT_CONNECT, notifier);
@@ -580,7 +601,7 @@ HWTEST_F(DistributedAbilityManagerServiceTest, UpdateConnectStatus_001, TestSize
     ret = dtbabilitymgrService_->UpdateConnectStatus(token, DEVICE_ID, DeviceConnectStatus::IDLE);
     EXPECT_EQ(ret, ERR_OK);
     /**
-     * @tc.steps: step5. test UpdateConnectStatus when appProxy_ is nullptr.
+     * @tc.steps: step6. test UpdateConnectStatus when appProxy_ is nullptr.
      */
     {
         std::lock_guard<std::mutex> appProxyLock(dtbabilitymgrService_->appProxyMutex_);
@@ -1026,7 +1047,11 @@ HWTEST_F(DistributedAbilityManagerServiceTest, StartDeviceManager_002, TestSize.
 
     int32_t token = 0;
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    DistributedSchedUtil::MockBundlePermission();
     int32_t ret = dtbabilitymgrService_->StartDeviceManager(token, continuationExtraParams);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    DistributedSchedUtil::MockPermission();
+    ret = dtbabilitymgrService_->StartDeviceManager(token, continuationExtraParams);
     EXPECT_EQ(ret, TOKEN_HAS_NOT_REGISTERED);
     DTEST_LOG << "DistributedAbilityManagerServiceTest StartDeviceManager_002 end" << std::endl;
 }
@@ -1211,6 +1236,84 @@ HWTEST_F(DistributedAbilityManagerServiceTest, HandleNotifierDied_002, TestSize.
     }
     EXPECT_NE(dtbabilitymgrService_, nullptr);
     DTEST_LOG << "DistributedAbilityManagerServiceTest HandleNotifierDied_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: RegisterWithoutExtraParam_001
+ * @tc.desc: test RegisterWithoutExtraParam when callback is registered.
+ * @tc.type: FUNC
+ * @tc.require: I5NOA1
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, RegisterWithoutExtraParam_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest RegisterWithoutExtraParam_001 start" << std::endl;
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
+
+    int32_t token = 0;
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
+    std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
+    notifierInfo->SetNotifier(EVENT_CONNECT, notifier);
+    {
+        std::lock_guard<std::mutex> callbackMapLock(dtbabilitymgrService_->callbackMapMutex_);
+        dtbabilitymgrService_->callbackMap_.clear();
+        dtbabilitymgrService_->callbackMap_[token] = std::move(notifierInfo);
+    }
+    int32_t ret = dtbabilitymgrService_->Register(continuationExtraParams, token);
+    EXPECT_EQ(ret, ERR_OK);
+
+    ret = dtbabilitymgrService_->RegisterWithoutExtraParam(token);
+    EXPECT_EQ(ret, ERR_OK);
+
+    {
+        std::lock_guard<std::mutex> callbackMapLock(dtbabilitymgrService_->callbackMapMutex_);
+        dtbabilitymgrService_->callbackMap_[token] = nullptr;
+    }
+    ret = dtbabilitymgrService_->RegisterWithoutExtraParam(token);
+    {
+        std::lock_guard<std::mutex> autoLock(dtbabilitymgrService_->callbackMapMutex_);
+        dtbabilitymgrService_->callbackMap_.clear();
+    }
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest RegisterWithoutExtraParam_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartDeviceManagerWithoutExtraParam_001
+ * @tc.desc: test StartDeviceManagerWithoutExtraParam when callback is registered.
+ * @tc.type: FUNC
+ * @tc.require: I5NOA1
+ */
+HWTEST_F(DistributedAbilityManagerServiceTest, StartDeviceManagerWithoutExtraParam_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedAbilityManagerServiceTest StartDeviceManagerWithoutExtraParam_001 start" << std::endl;
+    ASSERT_NE(nullptr, dtbabilitymgrService_);
+
+    int32_t token = 0;
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
+    std::unique_ptr<NotifierInfo> notifierInfo = std::make_unique<NotifierInfo>();
+    notifierInfo->SetNotifier(EVENT_CONNECT, notifier);
+    DistributedSchedUtil::MockBundlePermission();
+    int32_t ret = dtbabilitymgrService_->StartDeviceManagerWithoutExtraParam(token);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    DistributedSchedUtil::MockPermission();
+    ret = dtbabilitymgrService_->StartDeviceManagerWithoutExtraParam(token);
+    EXPECT_EQ(ret, TOKEN_HAS_NOT_REGISTERED);
+
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
+    int32_t res = dtbabilitymgrService_->Register(continuationExtraParams, token);
+    EXPECT_EQ(res, ERR_OK);
+    ret = dtbabilitymgrService_->StartDeviceManagerWithoutExtraParam(token);
+    EXPECT_EQ(ret, CALLBACK_HAS_NOT_REGISTERED);
+
+    {
+        std::lock_guard<std::mutex> callbackMapLock(dtbabilitymgrService_->callbackMapMutex_);
+        dtbabilitymgrService_->callbackMap_.clear();
+        dtbabilitymgrService_->callbackMap_[token] = std::move(notifierInfo);
+    }
+    ret = dtbabilitymgrService_->StartDeviceManagerWithoutExtraParam(token);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedAbilityManagerServiceTest StartDeviceManagerWithoutExtraParam_001 end" << std::endl;
 }
 }
 }

@@ -56,6 +56,7 @@ dsched_external_deps = [
   "access_token:libaccesstoken_sdk",
   "access_token:libnativetoken_shared",
   "access_token:libtokensetproc_shared",
+  "bluetooth:btframework",
   "bundle_framework:appexecfwk_base",
   "bundle_framework:appexecfwk_core",
   "cJSON:cjson",
@@ -78,6 +79,7 @@ dsched_external_deps = [
   "init:libbegetutil",
   "ipc:ipc_core",
   "kv_store:distributeddata_inner",
+  "os_account:libaccountkits",
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
   "window_manager:libwsutils",
@@ -134,9 +136,11 @@ ohos_unittest("distributedschedcallbacktest") {
   module_out_path = module_output_path
 
   sources = [
+    "${dms_path}/services/dtbschedmgr/src/dms_token_callback.cpp",
     "unittest/dms_callback_task_test.cpp",
     "unittest/dms_token_callback_test.cpp",
     "unittest/mock_remote_stub.cpp",
+    "unittest/mock/multi_user_manager_mock.cpp",
   ]
   sources += dtbschedmgr_sources
 
@@ -154,6 +158,9 @@ ohos_unittest("distributedschedcallbacktest") {
     defines = [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
   }
 
+  external_deps += [
+    "googletest:gmock",
+  ]
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -162,8 +169,10 @@ ohos_unittest("distributedschedservicetest") {
   module_out_path = module_output_path
 
   sources = [
+    "${dms_path}/services/dtbschedmgr/src/distributed_sched_service.cpp",
     "unittest/distributed_sched_service_first_test.cpp",
     "unittest/distributed_sched_service_second_test.cpp",
+    "unittest/mock/multi_user_manager_mock.cpp",
     "unittest/mock/svc_distributed_connection_mock.cpp",
     "unittest/mock_distributed_sched.cpp",
   ]
@@ -317,12 +326,15 @@ ohos_unittest("distributedcalltest") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./cfi_blocklist.txt"
   }
   module_out_path = module_output_path
 
   sources = [
+    "${dms_path}/services/dtbschedmgr/src/distributed_sched_service.cpp",
     "unittest/app_state_observer_test.cpp",
     "unittest/distributed_sched_call_test.cpp",
+    "unittest/mock/multi_user_manager_mock.cpp",
   ]
 
   configs = [
@@ -334,6 +346,9 @@ ohos_unittest("distributedcalltest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
+  external_deps += [
+    "googletest:gmock",
+  ]
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -343,6 +358,7 @@ ohos_unittest("dmsfreeinstallcbtest") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./cfi_blocklist.txt"
   }
   module_out_path = module_output_path
 
@@ -438,8 +454,10 @@ ohos_unittest("dschedconnecttest") {
   module_out_path = module_output_path
 
   sources = [
+    "${dms_path}/services/dtbschedmgr/src/distributed_sched_service.cpp",
     "unittest/distributed_sched_connect_test.cpp",
     "unittest/mock_remote_stub.cpp",
+    "unittest/mock/multi_user_manager_mock.cpp",
   ]
   sources += dtbschedmgr_sources
 
@@ -452,6 +470,9 @@ ohos_unittest("dschedconnecttest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
+  external_deps += [
+    "googletest:gmock",
+  ]
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -461,10 +482,16 @@ ohos_unittest("dschedpermissiontest") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./cfi_blocklist.txt"
   }
   module_out_path = module_output_path
 
-  sources = [ "unittest/distributed_sched_permission_test.cpp" ]
+  sources = [
+    "unittest/distributed_sched_permission_test.cpp",
+    "unittest/mock/bundle_manager_internal_mock.cpp",
+    "unittest/mock/dtbschedmgr_device_info_storage_mock.cpp",
+    "unittest/mock/distributed_sched_adapter_mock.cpp",
+  ]
   sources += dtbschedmgr_sources
 
   configs = [
@@ -476,6 +503,7 @@ ohos_unittest("dschedpermissiontest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
+  external_deps += [ "googletest:gmock" ]
   if (token_sync_enable) {
     cflags_cc = [ "-DTOKEN_SYNC_ENABLE" ]
   }
@@ -488,6 +516,7 @@ ohos_unittest("distributedmissionmanagertest") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./cfi_blocklist.txt"
   }
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
@@ -547,6 +576,7 @@ ohos_unittest("dmscontinuemanagertest") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./cfi_blocklist.txt"
   }
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
@@ -573,6 +603,7 @@ ohos_unittest("dschedsynce2etest") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./cfi_blocklist.txt"
   }
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
@@ -694,6 +725,7 @@ ohos_unittest("bundlemanagerinternaltest") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./cfi_blocklist.txt"
   }
   module_out_path = module_output_path
   sources = [ "unittest/bundle_manager_internal_test.cpp" ]
@@ -748,6 +780,7 @@ ohos_unittest("hisyseventreporttest") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./cfi_blocklist.txt"
   }
   module_out_path = module_output_path
   sources = [ "unittest/dms_hisysevent_report_test.cpp" ]
@@ -822,6 +855,7 @@ ohos_unittest("dmsbasetest") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./cfi_blocklist.txt"
   }
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
@@ -885,10 +919,10 @@ ohos_unittest("dmscollabtest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
-  external_deps += [
-    "googletest:gmock",
-    "screenlock_mgr:screenlock_client",
-  ]
+  external_deps += [ "googletest:gmock" ]
+  if (dmsfwk_check_screenlock) {
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
+  }
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -924,10 +958,10 @@ ohos_unittest("dmscollabmgrtest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
-  external_deps += [
-    "googletest:gmock",
-    "screenlock_mgr:screenlock_client",
-  ]
+  external_deps += [ "googletest:gmock" ]
+  if (dmsfwk_check_screenlock) {
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
+  }
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -962,10 +996,10 @@ ohos_unittest("dmscollabsuptest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
-  external_deps += [
-    "googletest:gmock",
-    "screenlock_mgr:screenlock_client",
-  ]
+  external_deps += [ "googletest:gmock" ]
+  if (dmsfwk_check_screenlock) {
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
+  }
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -997,10 +1031,10 @@ ohos_unittest("dmscollabstatetest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
-  external_deps += [
-    "googletest:gmock",
-    "screenlock_mgr:screenlock_client",
-  ]
+  external_deps += [ "googletest:gmock" ]
+  if (dmsfwk_check_screenlock) {
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
+  }
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -1032,10 +1066,10 @@ ohos_unittest("dmscollabeventtest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
-  external_deps += [
-    "googletest:gmock",
-    "screenlock_mgr:screenlock_client",
-  ]
+  external_deps += [ "googletest:gmock" ]
+  if (dmsfwk_check_screenlock) {
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
+  }
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -1067,10 +1101,10 @@ ohos_unittest("dmscollabsrcstattest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
-  external_deps += [
-    "googletest:gmock",
-    "screenlock_mgr:screenlock_client",
-  ]
+  external_deps += [ "googletest:gmock" ]
+  if (dmsfwk_check_screenlock) {
+    external_deps += [ "screenlock_mgr:screenlock_client" ]
+  }
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -1080,6 +1114,7 @@ ohos_unittest("dschedswitchstatustest") {
     cfi = true
     cfi_cross_dso = true
     debug = false
+    blocklist = "./cfi_blocklist.txt"
   }
   module_out_path = module_output_path
 

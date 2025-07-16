@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_DSCHED_COLLAB_SOFTBUS_FILE_ADAPTER_H
-#define OHOS_DSCHED_COLLAB_SOFTBUS_FILE_ADAPTER_H
+#ifndef OHOS_DMS_INTERFACE_STRUCTURE_H
+#define OHOS_DMS_INTERFACE_STRUCTURE_H
 
-#include "single_instance.h"
-#include <stdint.h>
 #include <string>
 
 namespace OHOS {
 namespace DistributedCollab {
-class SoftbusFileAdpater {
-    DECLARE_SINGLE_INSTANCE(SoftbusFileAdpater);
+typedef struct {
+    int32_t (*SetFileSchema)(int32_t socketId);
+} ISoftbusFileAdpater;
+} // namespace DistributedCollab
+} // namespace OHOS
+#endif // OHOS_DMS_INTERFACE_STRUCTURE_H
 
-public:
-    int32_t SetFileSchema(int32_t socketId);
-    int32_t Open(const char* filename, int32_t flag, int32_t mode);
-    int32_t Close(int32_t fd);
-    int32_t Remove(const char* filename);
-
-private:
-    int32_t CreateDir(const std::string& path);
-    int32_t CreateParentDirs(const char* filename);
-};
-}
-}
-#endif

@@ -19,6 +19,7 @@
 #include <thread>
 
 #include "ability_manager_client.h"
+#include "accesstoken_kit.h"
 #include "base/continuationmgr_log.h"
 #include "base/parcel_helper.h"
 #include "bundlemgr/bundle_mgr_interface.h"
@@ -43,6 +44,7 @@ const std::u16string HIPLAY_PANEL_INTERFACE_TOKEN = u"ohos.hiplay.panel";
 const std::string TOKEN_KEY = "distributedsched.continuationmanager.token";
 const std::string DEFAULT_TOKEN_VALUE = "0";
 const std::string DMS_HIPLAY_ACTION = "ohos.ability.action.deviceSelect";
+const std::string PERMISSION_DISTRIBUTED_DATASYNC = "ohos.permission.DISTRIBUTED_DATASYNC";
 constexpr int32_t MAX_TOKEN_NUM = 100000000;
 constexpr int32_t MAX_REGISTER_NUM = 600;
 constexpr int32_t START_DEVICE_MANAGER_CODE = 1;
@@ -143,10 +145,26 @@ void DistributedAbilityManagerService::DumpNotifierLocked(const std::vector<int3
     }
 }
 
+bool DistributedAbilityManagerService::VerifyPermission(uint32_t accessToken, const std::string& permissionName) const
+{
+    int32_t result = Security::AccessToken::AccessTokenKit::VerifyAccessToken(accessToken, permissionName);
+    if (result == Security::AccessToken::PermissionState::PERMISSION_DENIED) {
+        HILOGE("permission denied, permissionName:%{public}s", permissionName.c_str());
+        return false;
+    }
+    HILOGD("permission matched.");
+    return true;
+}
+
 int32_t DistributedAbilityManagerService::Register(
     const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams, int32_t& token)
 {
     HILOGD("called");
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    if (!VerifyPermission(accessToken, PERMISSION_DISTRIBUTED_DATASYNC)) {
+        HILOGE("DISTRIBUTED_DATASYNC permission check failed!");
+        return DMS_PERMISSION_DENIED;
+    }
     if (continuationExtraParams != nullptr) {
         ContinuationMode continuationMode = continuationExtraParams->GetContinuationMode();
         if (!IsContinuationModeValid(continuationMode)) {
@@ -161,6 +179,10 @@ int32_t DistributedAbilityManagerService::Unregister(int32_t token)
 {
     HILOGD("called");
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    if (!VerifyPermission(accessToken, PERMISSION_DISTRIBUTED_DATASYNC)) {
+        HILOGE("DISTRIBUTED_DATASYNC permission check failed!");
+        return DMS_PERMISSION_DENIED;
+    }
     if (!IsTokenRegistered(accessToken, token)) {
         return TOKEN_HAS_NOT_REGISTERED;
     }
@@ -195,11 +217,15 @@ int32_t DistributedAbilityManagerService::RegisterDeviceSelectionCallback(
     int32_t token, const std::string& cbType, const sptr<IRemoteObject>& notifier)
 {
     HILOGD("called");
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    if (!VerifyPermission(accessToken, PERMISSION_DISTRIBUTED_DATASYNC)) {
+        HILOGE("DISTRIBUTED_DATASYNC permission check failed!");
+        return DMS_PERMISSION_DENIED;
+    }
     if (cbType != EVENT_CONNECT && cbType != EVENT_DISCONNECT) {
         HILOGE("type: %{public}s not support!", cbType.c_str());
         return UNKNOWN_CALLBACK_TYPE;
     }
-    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     if (!IsTokenRegistered(accessToken, token)) {
         return TOKEN_HAS_NOT_REGISTERED;
     }
@@ -228,11 +254,15 @@ int32_t DistributedAbilityManagerService::RegisterDeviceSelectionCallback(
 int32_t DistributedAbilityManagerService::UnregisterDeviceSelectionCallback(int32_t token, const std::string& cbType)
 {
     HILOGD("called");
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    if (!VerifyPermission(accessToken, PERMISSION_DISTRIBUTED_DATASYNC)) {
+        HILOGE("DISTRIBUTED_DATASYNC permission check failed!");
+        return DMS_PERMISSION_DENIED;
+    }
     if (cbType != EVENT_CONNECT && cbType != EVENT_DISCONNECT) {
         HILOGE("type: %{public}s not support!", cbType.c_str());
         return UNKNOWN_CALLBACK_TYPE;
     }
-    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     if (!IsTokenRegistered(accessToken, token)) {
         return TOKEN_HAS_NOT_REGISTERED;
     }
@@ -258,6 +288,11 @@ int32_t DistributedAbilityManagerService::UpdateConnectStatus(int32_t token, con
     DeviceConnectStatus deviceConnectStatus)
 {
     HILOGD("called");
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    if (!VerifyPermission(accessToken, PERMISSION_DISTRIBUTED_DATASYNC)) {
+        HILOGE("DISTRIBUTED_DATASYNC permission check failed!");
+        return DMS_PERMISSION_DENIED;
+    }
     if (deviceId.empty()) {
         HILOGE("deviceId is empty");
         return ERR_NULL_OBJECT;
@@ -265,7 +300,6 @@ int32_t DistributedAbilityManagerService::UpdateConnectStatus(int32_t token, con
     if (!IsConnectStatusValid(deviceConnectStatus)) {
         return INVALID_CONNECT_STATUS;
     }
-    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     if (!IsTokenRegistered(accessToken, token)) {
         return TOKEN_HAS_NOT_REGISTERED;
     }
@@ -292,13 +326,17 @@ int32_t DistributedAbilityManagerService::StartDeviceManager(
     int32_t token, const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams)
 {
     HILOGD("called");
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    if (!VerifyPermission(accessToken, PERMISSION_DISTRIBUTED_DATASYNC)) {
+        HILOGE("DISTRIBUTED_DATASYNC permission check failed!");
+        return DMS_PERMISSION_DENIED;
+    }
     if (continuationExtraParams != nullptr) {
         ContinuationMode continuationMode = continuationExtraParams->GetContinuationMode();
         if (!IsContinuationModeValid(continuationMode)) {
             return INVALID_CONTINUATION_MODE;
         }
     }
-    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     if (!IsTokenRegistered(accessToken, token)) {
         return TOKEN_HAS_NOT_REGISTERED;
     }
@@ -328,6 +366,10 @@ int32_t DistributedAbilityManagerService::StartDeviceManager(
 int32_t DistributedAbilityManagerService::RegisterWithoutExtraParam(int32_t& token)
 {
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    if (!VerifyPermission(accessToken, PERMISSION_DISTRIBUTED_DATASYNC)) {
+        HILOGE("DISTRIBUTED_DATASYNC permission check failed!");
+        return DMS_PERMISSION_DENIED;
+    }
     if (IsExceededRegisterMaxNum(accessToken)) {
         return REGISTER_EXCEED_MAX_TIMES;
     }
@@ -354,6 +396,10 @@ int32_t DistributedAbilityManagerService::RegisterWithoutExtraParam(int32_t& tok
 int32_t DistributedAbilityManagerService::StartDeviceManagerWithoutExtraParam(int32_t token)
 {
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    if (!VerifyPermission(accessToken, PERMISSION_DISTRIBUTED_DATASYNC)) {
+        HILOGE("DISTRIBUTED_DATASYNC permission check failed!");
+        return DMS_PERMISSION_DENIED;
+    }
     if (!IsTokenRegistered(accessToken, token)) {
         return TOKEN_HAS_NOT_REGISTERED;
     }

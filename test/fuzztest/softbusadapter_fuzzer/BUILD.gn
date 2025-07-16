@@ -78,6 +78,7 @@ ohos_fuzztest("SoftbusAdapterFuzzTest") {
     "device_security_level:dslm_sdk",
     "distributed_bundle_framework:dbms_fwk",
     "dsoftbus:softbus_client",
+    "dsoftbus:softbus_utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hisysevent:libhisysevent",

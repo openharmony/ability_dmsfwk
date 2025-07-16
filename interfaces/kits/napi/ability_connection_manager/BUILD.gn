@@ -18,6 +18,7 @@ config("abilityconnectionmanager_napi_public_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${dms_path}/common/include",
+    "${dms_path}/interfaces/innerkits/common/include",
     "${dms_path}/interfaces/kits/napi/ability_connection_manager",
     "${dms_path}/services/dtbcollabmgr/include/ability_connection_manager",
     "${dms_path}/services/dtbcollabmgr/include/av_trans_stream_provider",
@@ -62,6 +63,7 @@ ohos_shared_library("abilityconnectionmanager_napi") {
     "c_utils:utils",
     "dsoftbus:softbus_client",
     "graphic_surface:surface",
+    "hiappevent:hiappevent_innerapi",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "image_framework:image",

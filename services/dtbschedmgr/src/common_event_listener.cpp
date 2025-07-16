@@ -17,6 +17,7 @@
 
 #include "datashare_manager.h"
 #include "dtbschedmgr_log.h"
+#include "mission/dsched_sync_e2e.h"
 #include "mission/distributed_bm_storage.h"
 #include "mission/notification/dms_continue_recv_manager.h"
 #include "mission/notification/dms_continue_send_manager.h"
@@ -153,6 +154,7 @@ void CommonEventListener::HandleUserSwitched(int32_t accountId)
 {
     HILOGI("USER_SWITCHED");
     MultiUserManager::GetInstance().OnUserSwitched(accountId);
+    DmsKvSyncE2E::GetInstance()->QueryMDMControl();
 }
 
 void CommonEventListener::HandlePackageAdded(const std::string& bundleName)

@@ -14,6 +14,7 @@
  */
 
 #include "continuationmanager_fuzzer.h"
+#include "distributed_ability_manager_service.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -52,17 +53,7 @@ void FuzzUnregister(const uint8_t* rawData, size_t size)
     data.RewindRead(0);
     MessageParcel reply;
     MessageOption option;
-    auto systemAbilityMgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (systemAbilityMgr == nullptr) {
-        HILOGE("system ability manager is nullptr.");
-        return;
-    }
-    auto remoteObj = systemAbilityMgr->GetSystemAbility(CONTINUATION_MANAGER_SA_ID);
-    if (remoteObj == nullptr) {
-        HILOGE("failed to get form manager service");
-        return;
-    }
-    remoteObj->SendRequest(code % MAX_CALL_TRANSACTION, data, reply, option);
+    DistributedAbilityManagerService::GetInstance().OnRemoteRequest(code % MAX_CALL_TRANSACTION, data, reply, option);
 }
 }
 }

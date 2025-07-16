@@ -37,6 +37,9 @@
 #include "dsched_collaborate_callback_mgr.h"
 #include "idms_interactive_adapter.h"
 #include "svc_distributed_connection.h"
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+#include "softbus_adapter/softbus_adapter.h"
+#endif
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission/distributed_mission_focused_listener.h"
 #include "mission/distributed_mission_info.h"
@@ -95,6 +98,7 @@ public:
     ~DistributedSchedService() = default;
     void OnStart(const SystemAbilityOnDemandReason &startReason) override;
     void OnStop(const SystemAbilityOnDemandReason &stopReason) override;
+    int32_t OnIdle(const SystemAbilityOnDemandReason& idleReason) override;
     void OnActive(const SystemAbilityOnDemandReason &activeReason) override;
 
     /**
@@ -157,7 +161,7 @@ public:
     int32_t GetRemoteMissionSnapshotInfo(const std::string& networkId, int32_t missionId,
         std::unique_ptr<AAFwk::MissionSnapshot>& missionSnapshot) override;
     int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
-        int32_t callingUid) override;
+        int32_t callingUid, uint32_t callingTokenId) override;
     int32_t StartSyncMissionsFromRemote(const CallerInfo& callerInfo,
         std::vector<DstbMissionInfo>& missionInfos) override;
     int32_t StopSyncRemoteMissions(const std::string& devId, int32_t callingUid) override;
@@ -200,6 +204,7 @@ public:
     int32_t StartRemoteFreeInstall(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t requestCode,
         uint32_t accessToken, const sptr<IRemoteObject>& callback) override;
     int32_t StartFreeInstallFromRemote(const FreeInstallInfo& info, int64_t taskId) override;
+    bool CheckSinkAccessControlUser(const FreeInstallInfo& info);
     int32_t NotifyCompleteFreeInstallFromRemote(int64_t taskId, int32_t resultCode) override;
     int32_t NotifyCompleteFreeInstall(const FreeInstallInfo& info, int64_t taskId, int32_t resultCode);
     int32_t GetDistributedComponentList(std::vector<std::string>& distributedComponents) override;

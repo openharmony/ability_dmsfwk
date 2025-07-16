@@ -183,7 +183,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, StartRemoteShareForm_002, TestSize.L
     const OHOS::AppExecFwk::FormShareInfo formShareInfo {};
     auto result = proxy->StartRemoteShareForm(remoteDeviceId, formShareInfo);
     DTEST_LOG << "result:" << result << std::endl;
-    EXPECT_EQ(static_cast<int>(DMS_PERMISSION_DENIED), result);
+    EXPECT_EQ(GET_REMOTE_DMS_FAIL, result);
     DTEST_LOG << "DistributedSchedServiceSecondTest StartRemoteShareForm_002 end" << std::endl;
 }
 
@@ -287,6 +287,21 @@ HWTEST_F(DistributedSchedServiceSecondTest, StartRemoteFreeInstall_001, TestSize
     int32_t result = DistributedSchedService::GetInstance().StartRemoteFreeInstall(want, 0, 0, 0, callback);
     EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceSecondTest StartRemoteFreeInstall_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CheckSinkAccessControlUser_001
+ * @tc.desc: check access control
+ * @tc.type: FUNC
+ * @tc.require: I76THI
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, CheckSinkAccessControlUser_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest CheckSinkAccessControlUser_001 start" << std::endl;
+    IDistributedSched::FreeInstallInfo info;
+    int32_t result = DistributedSchedService::GetInstance().CheckSinkAccessControlUser(info);
+    EXPECT_EQ(result, false);
+    DTEST_LOG << "DistributedSchedServiceSecondTest CheckSinkAccessControlUser_001 end" << std::endl;
 }
 
 /**
@@ -615,7 +630,7 @@ HWTEST_F(DistributedSchedServiceSecondTest, StopRemoteExtensionAbility_003, Test
     want.SetElement(element);
     int32_t extensionType = 3;
     int result = proxy->StopRemoteExtensionAbility(want, 0, 0, extensionType);
-    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceSecondTest StopRemoteExtensionAbility_003 end" << std::endl;
 }
 

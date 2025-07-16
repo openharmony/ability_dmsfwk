@@ -27,6 +27,7 @@ class IDtbschedmgrDeviceInfoStorage {
 public:
     virtual ~IDtbschedmgrDeviceInfoStorage() = default;
     virtual std::vector<std::string> GetNetworkIdList() = 0;
+    virtual bool GetLocalDeviceId(std::string& networkId) = 0;
 public:
     static inline std::shared_ptr<IDtbschedmgrDeviceInfoStorage> storageMock = nullptr;
 };
@@ -34,6 +35,7 @@ public:
 class DtbschedmgrDeviceInfoStorageMock : public IDtbschedmgrDeviceInfoStorage {
 public:
     MOCK_METHOD0(GetNetworkIdList, std::vector<std::string>());
+    MOCK_METHOD1(GetLocalDeviceId, bool(std::string& networkId));
 };
 }
 }

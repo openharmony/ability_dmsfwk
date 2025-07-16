@@ -57,10 +57,12 @@ typedef enum {
     MISSION_EVENT_FOCUSED = 0,
     MISSION_EVENT_UNFOCUSED = 1,
     MISSION_EVENT_DESTORYED = 2,
+    MISSION_EVENT_BACKGROUND = 3,
     MISSION_EVENT_ACTIVE = 4,
     MISSION_EVENT_INACTIVE = 5,
     MISSION_EVENT_TIMEOUT = 6,
     MISSION_EVENT_MMI = 7,
+    MISSION_EVENT_CONTINUE_SWITCH_OFF = 8,
     MISSION_EVENT_MAX,
 } MissionEventType;
 
@@ -97,6 +99,7 @@ public:
     int32_t GetMissionStatus(int32_t accountId, int32_t missionId, MissionStatus& status);
     int32_t GetMissionIdByBundleName(int32_t accountId, const std::string& bundleName, int32_t& missionId);
     std::string TypeEnumToString(MissionEventType type);
+    int32_t GetLastContinuableMissionId();
 
 private:
     void InitConditionFuncs();
@@ -111,13 +114,16 @@ private:
     int32_t OnMissionFocused(int32_t accountId, int32_t missionId);
     int32_t OnMissionUnfocused(int32_t accountId, int32_t missionId);
     int32_t OnMissionDestory(int32_t accountId, int32_t missionId);
+    int32_t OnMissionBackground(int32_t accountId, int32_t missionId);
     int32_t OnMissionActive(int32_t accountId, int32_t missionId);
     int32_t OnMissionInactive(int32_t accountId, int32_t missionId);
 
     bool CheckSendFocusedCondition(const MissionStatus& status);
     bool CheckSendUnfocusedCondition(const MissionStatus& status);
+    bool CheckSendBackgroundCondition(const MissionStatus& status);
     bool CheckSendActiveCondition(const MissionStatus& status);
     bool CheckSendInactiveCondition(const MissionStatus& status);
+    bool CheckSendContinueSwitchOffCondition(const MissionStatus& status);
 
     int32_t GetMissionInfo(int32_t missionId, AAFwk::MissionInfo& info);
     int32_t GetMissionInfos(std::vector<AAFwk::MissionInfo>& missions);
@@ -127,11 +133,11 @@ private:
     void CleanLastFocusedFlagLocked(int32_t accountId, int32_t missionId);
     bool IsMissionStatusExistLocked(int32_t accountId, int32_t missionId);
 
-    std::atomic<bool> isCfgDevice_ = false;
     std::atomic<bool> isSwitchOn_ = false;
     std::atomic<bool> isWifiActive_ = false;
     std::atomic<bool> isBtActive_ = false;
     std::atomic<bool> isScreenLocked_ = false;
+    std::atomic<bool> isCfgMDMControl_ = false;
 
     using DSchedSysEventFunc = int32_t (DmsContinueConditionMgr::*)(bool value);
     std::map<SysEventType, DSchedSysEventFunc> sysFuncMap_;
@@ -142,7 +148,7 @@ private:
 
     std::mutex missionMutex_;
     std::map<int32_t, std::map<int32_t, MissionStatus>> missionMap_;
-    std::pair<int32_t, MissionStatus> lastFocusMission_;
+    int32_t lastContinuableMissionId_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
