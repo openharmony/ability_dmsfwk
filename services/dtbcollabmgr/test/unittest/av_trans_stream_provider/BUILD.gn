@@ -208,6 +208,7 @@ ohos_unittest("SurfaceDecoderFilterSupTest") {
   ]
 
   sources = [
+    "${dms_path}/services/dtbcollabmgr/src/av_trans_stream_provider/surface_decoder_filter.cpp",
     "${dms_path}/services/dtbschedmgr/test/unittest/mock/surface_decoder_adapter_mock.cpp",
     "surface_decoder_filter_sup_test.cpp",
   ]

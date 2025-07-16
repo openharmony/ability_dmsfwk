@@ -17,9 +17,10 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
-ErrCode SvcDistributedConnection::ConnectDExtAbility(AAFwk::Want &want, int32_t userId, bool isCleanCalled)
+ErrCode SvcDistributedConnection::ConnectDExtAbility(AAFwk::Want &want, int32_t userId, bool isCleanCalled,
+    const std::string& delegatee, bool &isDelay)
 {
-    return ISvcDistributedConnection::connMock->ConnectDExtAbility(want, userId, isCleanCalled);
+    return ISvcDistributedConnection::connMock->ConnectDExtAbility(want, userId, isCleanCalled, delegatee, isDelay);
 }
 
 sptr<IDExtension> SvcDistributedConnection::GetDistributedExtProxy()

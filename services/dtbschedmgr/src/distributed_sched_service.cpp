@@ -84,6 +84,10 @@
 #include "mission/wifi_state_listener.h"
 #include "mission/bluetooth_state_listener.h"
 #endif
+#include "caller_info.h"
+#include "os_account_manager.h"
+#include "ohos_account_kits.h"
+#include "distributed_sched_permission.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -155,7 +159,9 @@ constexpr int32_t HID_HAP = 10000; /* first hap user */
 constexpr int32_t WINDOW_MANAGER_SERVICE_ID = 4606;
 constexpr int32_t SEMI_WIFI_ID = 1010;
 constexpr int32_t DSOFTBUS_UID = 1024;
-constexpr int32_t WEARENGINE_UID = 7259;
+constexpr int32_t WEARLINK_UID = 7259;
+constexpr int32_t SA_READY_TO_UNLOAD = 0;
+constexpr int32_t SA_REFUSE_TO_UNLOAD = -1;
 DataShareManager &dataShareManager = DataShareManager::GetInstance();
 
 const std::string HMOS_HAP_CODE_PATH = "1";
@@ -297,7 +303,7 @@ static int32_t CheckCallingPermission(DExtConnectResultInfo& resultInfo)
     }
     int32_t callingUid = IPCSkeleton::GetCallingUid();
     HILOGI("DistributedSchedService::callingUid: %{public}d.", callingUid);
-    if (callingUid != DSOFTBUS_UID && callingUid != WEARENGINE_UID) {
+    if (callingUid != DSOFTBUS_UID && callingUid != WEARLINK_UID) {
         HILOGE("Wrong uid");
         resultInfo.result = DExtConnectResult::PERMISSION_DENIED;
         return DMS_PERMISSION_DENIED;
@@ -326,6 +332,21 @@ static int32_t ValidateAndPrepareConnection(const DExtConnectInfo& connectInfo, 
     return ERR_OK;
 }
 
+static void TriggerProxyCallbacks(AAFwk::Want& want, const DExtConnectInfo& connectInfo,
+    DExtConnectResultInfo& resultInfo, const sptr<IDExtension>& proxy)
+{
+    if (proxy == nullptr) {
+        resultInfo.result = DExtConnectResult::FAILED;
+        HILOGE("Extension distribute proxy is empty");
+        return;
+    }
+    proxy->TriggerOnCreate(want);
+    AAFwk::WantParams wantParam;
+    wantParam.SetParam(COLLABRATION_TYPE, String::Box(CONNECT_RPOXY));
+    wantParam.SetParam(SOURCE_DELEGATEE, String::Box(connectInfo.delegatee));
+    proxy->TriggerOnCollaborate(wantParam);
+}
+
 int32_t DistributedSchedService::ConnectDExtensionFromRemote(const DExtConnectInfo& connectInfo,
     DExtConnectResultInfo& resultInfo)
 {
@@ -349,23 +370,20 @@ int32_t DistributedSchedService::ConnectDExtensionFromRemote(const DExtConnectIn
     bool isCleanCalled = false;
     AAFwk::Want want;
     want.SetElementName(bundleName, abilityName);
-    ret = svcDConn_->ConnectDExtAbility(want, userId, isCleanCalled);
+    bool isDelay = false;
+    ret = svcDConn_->ConnectDExtAbility(want, userId, isCleanCalled, connectInfo.delegatee, isDelay);
     if (ret != ERR_OK) {
-        HILOGE("Connect distributed extension ability failed");
         resultInfo.errCode = ret;
         return ret;
     }
     resultInfo.errCode = ret;
-
     std::unique_lock<std::mutex> lock(getDistibutedProxyLock_);
     getDistibutedProxyCondition_.wait_for(lock, std::chrono::seconds(CONNECT_WAIT_TIME_S));
-
     auto proxy = svcDConn_->GetDistributedExtProxy();
     if (proxy == nullptr) {
         HILOGE("Extension distribute proxy is empty");
         return INVALID_PARAMETERS_ERR;
     }
-
     AppExecFwk::BundleResourceInfo bundleResourceInfo;
     ret = GetBundleResourceInfo(bundleName, bundleResourceInfo);
     if (ret != ERR_OK) {
@@ -374,12 +392,12 @@ int32_t DistributedSchedService::ConnectDExtensionFromRemote(const DExtConnectIn
     }
     svcDConn_->PublishDExtensionNotification(connectInfo.sourceInfo.deviceId, bundleName, userId,
         connectInfo.sourceInfo.networkId, bundleResourceInfo);
-    proxy->TriggerOnCreate(want);
 
-    AAFwk::WantParams wantParam;
-    wantParam.SetParam(COLLABRATION_TYPE, String::Box(CONNECT_RPOXY));
-    wantParam.SetParam(SOURCE_DELEGATEE, String::Box(connectInfo.delegatee));
-    proxy->TriggerOnCollaborate(wantParam);
+    if (isDelay) {
+        HILOGI("Connect ability again.");
+        return ret;
+    }
+    TriggerProxyCallbacks(want, connectInfo, resultInfo, proxy);
     resultInfo.result = DExtConnectResult::SUCCESS;
     return ret;
 }
@@ -420,6 +438,19 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
     HILOGI("OnStop dms service end");
 }
 
+int32_t DistributedSchedService::OnIdle(const SystemAbilityOnDemandReason& idleReason)
+{
+    bool isIdle = false;
+    std::vector<DistributedHardware::DmDeviceInfo> dmDeviceInfoList;
+    int32_t errCode = DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", dmDeviceInfoList);
+    if (errCode == ERR_OK && dmDeviceInfoList.empty()) {
+        isIdle = true;
+    }
+    HILOGI("OnIdle, idleReason name %{public}s, id %{public}d, value %{public}s, is ready to unload %{public}d",
+        idleReason.GetName().c_str(), idleReason.GetId(), idleReason.GetValue().c_str(), isIdle);
+    return isIdle ? SA_READY_TO_UNLOAD : SA_REFUSE_TO_UNLOAD;
+}
+
 void DistributedSchedService::OnActive(const SystemAbilityOnDemandReason &activeReason)
 {
     HILOGI("OnStart reason %{public}s, reasonId_:%{public}d", activeReason.GetName().c_str(), activeReason.GetId());
@@ -455,6 +486,15 @@ bool DistributedSchedService::DoStart()
     HILOGI("DMS service disabled, exiting.");
     _exit(0);
 #endif
+
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    HILOGI("Get dms interactive adapter proxy enter.");
+    int32_t ret = GetDmsInteractiveAdapterProxy();
+    if (ret != ERR_OK) {
+        HILOGE("Get remote dms interactive adapter proxy fail, ret %{public}d.", ret);
+    }
+#endif
+
     HILOGI("Dms service DoStart enter.");
     if (!Init()) {
         HILOGE("failed to init DistributedSchedService");
@@ -476,13 +516,6 @@ bool DistributedSchedService::DoStart()
     collaborateCbMgr_->Init();
     dmsCallbackTask_->Init(freeCallback);
 
-#ifdef DMSFWK_INTERACTIVE_ADAPTER
-    HILOGI("Get dms interactive adapter proxy enter.");
-    int32_t ret = GetDmsInteractiveAdapterProxy();
-    if (ret != ERR_OK) {
-        HILOGE("Get remote dms interactive adapter proxy fail, ret %{public}d.", ret);
-    }
-#endif
     HILOGI("OnStart dms service success.");
     return true;
 }
@@ -605,6 +638,13 @@ void DistributedSchedService::RegisterDataShareObserver(const std::string& key)
 {
     HILOGI("RegisterObserver start.");
     DataShareManager::ObserverCallback observerCallback = [this]() {
+        auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+        bool continueSwitch = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
+        int32_t lastContinuableMissionId = DmsContinueConditionMgr::GetInstance().GetLastContinuableMissionId();
+        if (!continueSwitch) {
+            sendMgr->OnMissionStatusChanged(lastContinuableMissionId, MISSION_EVENT_CONTINUE_SWITCH_OFF);
+        }
+
         dataShareManager.SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
         HILOGD("dsMgr IsCurrentContinueSwitchOn : %{public}d", dataShareManager.IsCurrentContinueSwitchOn());
         int32_t missionId = GetCurrentMissionId();
@@ -613,7 +653,6 @@ void DistributedSchedService::RegisterDataShareObserver(const std::string& key)
         }
         DmsUE::GetInstance().ChangedSwitchState(dataShareManager.IsCurrentContinueSwitchOn(), ERR_OK);
         if (dataShareManager.IsCurrentContinueSwitchOn()) {
-            auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
             if (sendMgr == nullptr) {
                 HILOGI("GetSendMgr failed.");
                 return;
@@ -621,7 +660,6 @@ void DistributedSchedService::RegisterDataShareObserver(const std::string& key)
             sendMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_FOCUSED);
             DSchedContinueManager::GetInstance().Init();
         } else {
-            auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
             if (sendMgr == nullptr) {
                 HILOGI("GetSendMgr failed.");
                 return;
@@ -751,6 +789,7 @@ void DistributedSchedService::InitBluetoothStateListener()
 void DistributedSchedService::InitDeviceCfg()
 {
     HILOGI("called");
+    DmsKvSyncE2E::GetInstance()->QueryMDMControl();
     DmsKvSyncE2E::GetInstance()->SetDeviceCfg();
 }
 
@@ -787,6 +826,7 @@ int32_t DistributedSchedService::GetDmsInteractiveAdapterProxy()
 #endif
     int32_t (*GetDmsInteractiveAdapter)(const sptr<IRemoteObject> &callerToken,
         IDmsInteractiveAdapter &dmsAdpHandle) = nullptr;
+    int32_t (*GetDmsBroadcast)(IDmsBroadcastAdapter &dmsBcHandle) = nullptr;
 
     dllHandle_ = dlopen(resolvedPath, RTLD_LAZY);
     if (dllHandle_ == nullptr) {
@@ -798,14 +838,16 @@ int32_t DistributedSchedService::GetDmsInteractiveAdapterProxy()
     do {
         GetDmsInteractiveAdapter = reinterpret_cast<int32_t (*)(const sptr<IRemoteObject> &callerToken,
             IDmsInteractiveAdapter &dmsAdpHandle)>(dlsym(dllHandle_, "GetDmsInteractiveAdapter"));
-        if (GetDmsInteractiveAdapter == nullptr) {
+        GetDmsBroadcast = reinterpret_cast<int32_t (*)(IDmsBroadcastAdapter &dmsBcHandle)>(
+            dlsym(dllHandle_, "GetDmsBroadcast"));
+        if (GetDmsInteractiveAdapter == nullptr || GetDmsBroadcast == nullptr) {
             HILOGE("Link the GetDmsInteractiveAdapter symbol in dms interactive adapter fail.");
             ret = NOT_FIND_SERVICE_REGISTRY;
             break;
         }
 
-        int32_t ret = GetDmsInteractiveAdapter(this, dmsAdapetr_);
-        if (ret != ERR_OK) {
+        if (GetDmsInteractiveAdapter(this, dmsAdapetr_) || GetDmsBroadcast(
+            SoftbusAdapter::GetInstance().dmsAdapetr_)) {
             HILOGE("Init remote dms interactive adapter proxy fail, ret %{public}d.", ret);
             ret = INVALID_PARAMETERS_ERR;
             break;
@@ -1276,9 +1318,8 @@ int32_t DistributedSchedService::ContinueLocalMission(const std::string& dstDevi
         return INVALID_PARAMETERS_ERR;
     }
     std::string bundleName = missionInfo.want.GetBundle();
-    if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(bundleName)) {
-        HILOGI("App does not allow continue in config file, bundle name %{public}s, missionId: %{public}d",
-            bundleName.c_str(), missionId);
+    if (DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(bundleName)) {
+        HILOGI("Current user is under MDM control.");
         return REMOTE_DEVICE_BIND_ABILITY_ERR;
     }
     missionInfo.want.SetParams(wantParams);
@@ -3274,13 +3315,14 @@ int32_t DistributedSchedService::UnRegisterMissionListener(const std::u16string&
 }
 
 int32_t DistributedSchedService::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
-    int32_t callingUid)
+    int32_t callingUid, uint32_t callingTokenId)
 {
     if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
         HILOGW("The current user is not foreground. callingUid: %{public}d.", callingUid);
         return DMS_NOT_FOREGROUND_USER;
     }
-    return DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(devId, fixConflict, tag);
+    return DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(devId, fixConflict,
+        tag, callingTokenId);
 }
 
 int32_t DistributedSchedService::StopSyncRemoteMissions(const std::string& devId, int32_t callingUid)
@@ -3605,7 +3647,13 @@ int32_t DistributedSchedService::StartFreeInstallFromRemote(const FreeInstallInf
         HILOGE("check deviceId failed");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
-
+    if (DistributedSchedPermission::GetInstance().IsHigherAclVersion(info.callerInfo)) {
+        bool result = CheckSinkAccessControlUser(info);
+        if (!result) {
+            HILOGE("Check sink access control failed.");
+            return INVALID_PARAMETERS_ERR;
+        }
+    }
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->Connect();
     if (err != ERR_OK) {
         HILOGE("connect ability server failed %{public}d", err);
@@ -3624,6 +3672,32 @@ int32_t DistributedSchedService::StartFreeInstallFromRemote(const FreeInstallInf
         HILOGE("FreeInstallAbilityFromRemote failed %{public}d", err);
     }
     return err;
+}
+
+bool DistributedSchedService::CheckSinkAccessControlUser(const FreeInstallInfo& info)
+{
+    DmAccessCaller dmSrcCaller = {
+        .accountId = info.accountInfo.activeAccountId,
+        .networkId = info.callerInfo.sourceDeviceId,
+        .userId = info.accountInfo.userId,
+    };
+    AccountInfo dstAccountInfo;
+    if (!DistributedSchedMissionManager::GetInstance().GetOsAccountData(dstAccountInfo)) {
+        HILOGE("Get Os accountId and userId fail.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    std::string dstNetworkId;
+    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(dstNetworkId)) {
+        HILOGE("GetLocalDeviceId failed");
+        return INVALID_REMOTE_PARAMETERS_ERR;
+    }
+
+    DmAccessCallee dmDstCallee = {
+        .accountId = dstAccountInfo.activeAccountId,
+        .networkId = dstNetworkId,
+        .userId = dstAccountInfo.userId,
+    };
+    return DeviceManager::GetInstance().CheckSinkAccessControl(dmSrcCaller, dmDstCallee);
 }
 
 int32_t DistributedSchedService::NotifyCompleteFreeInstall(

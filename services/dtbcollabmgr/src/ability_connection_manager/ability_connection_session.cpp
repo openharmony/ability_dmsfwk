@@ -127,6 +127,7 @@ void AbilityConnectionSession::StartEvent()
 void AbilityConnectionSession::UnInit()
 {
     HILOGI("UnInit start");
+    std::unique_lock<std::mutex> lock(eventMutex_);
     if (eventHandler_ != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
         if (eventThread_.joinable()) {

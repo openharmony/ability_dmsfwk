@@ -171,6 +171,28 @@ void DistributedMissionFocusedListener::OnMissionUnfocused(int32_t missionId)
     eventHandler_->PostTask(feedfunc);
 }
 
+void DistributedMissionFocusedListener::OnMissionMovedToBackground(int32_t missionId)
+{
+    HILOGD("OnMissionBackground, missionId = %{public}d", missionId);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
+        HILOGW("Current process is not foreground. callingUid = %{public}d", callingUid);
+        return;
+    }
+
+    auto feedfunc = [this, missionId, callingUid]() {
+        auto sendMgr = MultiUserManager::GetInstance().GetSendMgrByCallingUid(callingUid);
+        CHECK_POINTER_RETURN(sendMgr, "sendMgr");
+        sendMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_BACKGROUND);
+
+        int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
+        DmsContinueConditionMgr::GetInstance().UpdateMissionStatus(
+            currentAccountId, missionId, MISSION_EVENT_BACKGROUND);
+    };
+    CHECK_POINTER_RETURN(eventHandler_, "eventHandler_");
+    eventHandler_->PostTask(feedfunc);
+}
+
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 void DistributedMissionFocusedListener::OnMissionIconUpdated([[maybe_unused]]int32_t missionId,
     [[maybe_unused]]const std::shared_ptr<OHOS::Media::PixelMap> &icon)

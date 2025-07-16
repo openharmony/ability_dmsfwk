@@ -27,9 +27,11 @@
 #include "event_handler.h"
 #include "single_instance.h"
 #include "snapshot.h"
+#include "distributed_sched_interface.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
+using AccountInfo = IDistributedSched::AccountInfo;
 struct ListenerInfo {
     bool called = false;
     std::set<sptr<IRemoteObject>> listenerSet;
@@ -83,8 +85,10 @@ public:
     void DeleteDataStorage(const std::string& deviceId, bool isDelayed);
     int32_t RegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj);
     int32_t UnRegisterMissionListener(const std::u16string& devId, const sptr<IRemoteObject>& obj);
-    int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag);
+    int32_t StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
+        uint32_t callingTokenId = 0);
     int32_t StartSyncMissionsFromRemote(const CallerInfo& callerInfo, std::vector<DstbMissionInfo>& missionInfoSet);
+    bool CheckAccessControlForMissions(const CallerInfo& callerInfo);
     int32_t StopSyncRemoteMissions(const std::string& dstDevId, bool offline, bool exit = false);
     void StopSyncMissionsFromRemote(const std::string& deviceId);
     bool NeedSyncDevice(const std::string& deviceId);
@@ -106,7 +110,7 @@ public:
     void NotifyMissionSnapshotDestroyed(int32_t missionId);
     void NotifyRemoteDied(const wptr<IRemoteObject>& remote);
     void NotifyNetDisconnectOffline();
-
+    bool GetOsAccountData(AccountInfo& dmsAccountInfo);
 private:
     std::map<std::string, std::shared_ptr<AppExecFwk::EventHandler>> deviceHandle_;
     mutable std::mutex remoteMissionInfosLock_;
@@ -121,8 +125,10 @@ private:
     {
         return devId + "_" + std::to_string(missionId);
     }
-    int32_t StartSyncRemoteMissions(const std::string& dstDevId, const std::string& localDevId);
-    int32_t StartSyncRemoteMissions(const std::string& dstDevId, const sptr<IDistributedSched>& remoteDms);
+    int32_t StartSyncRemoteMissions(const std::string& dstDevId, const std::string& localDevId,
+        uint32_t callingTokenId = 0);
+    int32_t StartSyncRemoteMissions(const std::string& dstDevId, const sptr<IDistributedSched>& remoteDms,
+        uint32_t callingTokenId = 0);
     void CleanMissionResources(const std::string& dstDevId);
     void RetryStartSyncRemoteMissions(const std::string& dstDeviceId, const std::string& localDevId,
         int32_t retryTimes);

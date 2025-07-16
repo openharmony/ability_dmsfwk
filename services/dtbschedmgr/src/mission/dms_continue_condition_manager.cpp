@@ -58,29 +58,32 @@ void DmsContinueConditionMgr::InitConditionFuncs()
     missionFuncMap_[MISSION_EVENT_FOCUSED] = &DmsContinueConditionMgr::OnMissionFocused;
     missionFuncMap_[MISSION_EVENT_UNFOCUSED] = &DmsContinueConditionMgr::OnMissionUnfocused;
     missionFuncMap_[MISSION_EVENT_DESTORYED] = &DmsContinueConditionMgr::OnMissionDestory;
+    missionFuncMap_[MISSION_EVENT_BACKGROUND] = &DmsContinueConditionMgr::OnMissionBackground;
     missionFuncMap_[MISSION_EVENT_ACTIVE] = &DmsContinueConditionMgr::OnMissionActive;
     missionFuncMap_[MISSION_EVENT_INACTIVE] = &DmsContinueConditionMgr::OnMissionInactive;
 
     conditionFuncMap_[MISSION_EVENT_FOCUSED] = &DmsContinueConditionMgr::CheckSendFocusedCondition;
     conditionFuncMap_[MISSION_EVENT_UNFOCUSED] = &DmsContinueConditionMgr::CheckSendUnfocusedCondition;
-    conditionFuncMap_[MISSION_EVENT_DESTORYED] = &DmsContinueConditionMgr::CheckSendUnfocusedCondition;
+    conditionFuncMap_[MISSION_EVENT_DESTORYED] = &DmsContinueConditionMgr::CheckSendBackgroundCondition;
+    conditionFuncMap_[MISSION_EVENT_BACKGROUND] = &DmsContinueConditionMgr::CheckSendBackgroundCondition;
     conditionFuncMap_[MISSION_EVENT_ACTIVE] = &DmsContinueConditionMgr::CheckSendActiveCondition;
     conditionFuncMap_[MISSION_EVENT_INACTIVE] = &DmsContinueConditionMgr::CheckSendInactiveCondition;
-    conditionFuncMap_[MISSION_EVENT_TIMEOUT] = &DmsContinueConditionMgr::CheckSendUnfocusedCondition;
+    conditionFuncMap_[MISSION_EVENT_TIMEOUT] = &DmsContinueConditionMgr::CheckSendBackgroundCondition;
     conditionFuncMap_[MISSION_EVENT_MMI] = &DmsContinueConditionMgr::CheckSendFocusedCondition;
+    conditionFuncMap_[MISSION_EVENT_CONTINUE_SWITCH_OFF] =
+        &DmsContinueConditionMgr::CheckSendContinueSwitchOffCondition;
 }
 
 void DmsContinueConditionMgr::InitSystemCondition()
 {
-    isCfgDevice_ = !DmsKvSyncE2E::GetInstance()->CheckCtrlRule();
     isSwitchOn_ = DataShareManager::GetInstance().IsCurrentContinueSwitchOn();
     isWifiActive_ = WifiStateAdapter::GetInstance().IsWifiActive();
 #ifdef DMS_CHECK_BLUETOOTH
     isBtActive_ = BluetoothStateAdapter::GetInstance().IsBluetoothActive();
 #endif
 
-    HILOGI("end. cfg %{public}d, switch: %{public}d, wifi: %{public}d, bt: %{public}d",
-        isCfgDevice_.load(), isSwitchOn_.load(), isWifiActive_.load(), isBtActive_.load());
+    HILOGI("end. switch: %{public}d, wifi: %{public}d, bt: %{public}d",
+        isSwitchOn_.load(), isWifiActive_.load(), isBtActive_.load());
 }
 
 void DmsContinueConditionMgr::InitMissionCondition()
@@ -151,6 +154,7 @@ void DmsContinueConditionMgr::OnUserRemoved(int32_t accountId)
     if (it != missionMap_.end()) {
         missionMap_.erase(it);
     }
+    lastContinuableMissionId_ = 0;
     return;
 }
 
@@ -218,6 +222,7 @@ void DmsContinueConditionMgr::InitMissionStatus(int32_t accountId)
         missionMap_[accountId] = missionList;
     }
 
+    lastContinuableMissionId_ = 0;
     HILOGI("InitMissionStatus for user %{public}d end", accountId);
     return;
 }
@@ -243,21 +248,14 @@ int32_t DmsContinueConditionMgr::OnMissionFocused(int32_t accountId, int32_t mis
 
     AAFwk::MissionInfo info;
     int32_t ret = GetMissionInfo(missionId, info);
+    if (ret != ERR_OK) {
+        HILOGE("GetMissionInfo failed, missionId %{public}d, ret %{public}d", missionId, ret);
+        return ret;
+    }
+
     {
-        std::lock_guard<std::mutex> missionlock(missionMutex_);
-        if (IsMissionStatusExistLocked(accountId, missionId)) {
-            HILOGI("found mission %{public}d, update status: isFocused", missionId);
-            CleanLastFocusedFlagLocked(accountId, missionId);
-            missionMap_[accountId][missionId].isFocused = true;
-            return ERR_OK;
-        }
-
-        if (ret != ERR_OK) {
-            HILOGE("GetMissionInfo failed, missionId %{public}d, ret %{public}d", missionId, ret);
-            return ret;
-        }
-
         HILOGI("new mission %{public}d focused, add record", missionId);
+        std::lock_guard<std::mutex> missionlock(missionMutex_);
         MissionStatus status;
         ConvertToMissionStatus(info, accountId, status);
         CleanLastFocusedFlagLocked(accountId, missionId);
@@ -318,8 +316,20 @@ int32_t DmsContinueConditionMgr::OnMissionUnfocused(int32_t accountId, int32_t m
         return CONDITION_INVALID_MISSION_ID;
     }
     missionMap_[accountId][missionId].isFocused = false;
-    lastFocusMission_.first = accountId;
-    lastFocusMission_.second = missionMap_[accountId][missionId];
+    HILOGI("missionMap update finished! status: %{public}s", missionMap_[accountId][missionId].ToString().c_str());
+    return ERR_OK;
+}
+
+int32_t DmsContinueConditionMgr::OnMissionBackground(int32_t accountId, int32_t missionId)
+{
+    HILOGI("accountId %{public}d, missionId %{public}d", accountId, missionId);
+
+    std::lock_guard<std::mutex> missionlock(missionMutex_);
+    if (!IsMissionStatusExistLocked(accountId, missionId)) {
+        HILOGW("mission %{public}d under user %{public}d not exist", missionId, accountId);
+        return CONDITION_INVALID_MISSION_ID;
+    }
+    missionMap_[accountId][missionId].isFocused = false;
     HILOGI("missionMap update finished! status: %{public}s", missionMap_[accountId][missionId].ToString().c_str());
     return ERR_OK;
 }
@@ -368,15 +378,11 @@ int32_t DmsContinueConditionMgr::OnMissionInactive(int32_t accountId, int32_t mi
 
 bool DmsContinueConditionMgr::CheckSystemSendCondition()
 {
-    HILOGI("CheckSystemSendCondition start. cfg %{public}d, switch: %{public}d, wifi: %{public}d, bt: %{public}d",
-        isCfgDevice_.load(), isSwitchOn_.load(), isWifiActive_.load(), isBtActive_.load());
+    HILOGI("CheckSystemSendCondition start. switch: %{public}d, wifi: %{public}d, bt: %{public}d",
+        isSwitchOn_.load(), isWifiActive_.load(), isBtActive_.load());
 
     std::string reason = "";
     do {
-        if (isCfgDevice_) {
-            reason = "CFG_DEVICE";
-            break;
-        }
         if (!isSwitchOn_) {
             reason = "CONTINUE_SWITCH_OFF";
             break;
@@ -404,7 +410,6 @@ bool DmsContinueConditionMgr::CheckSystemSendCondition()
 bool DmsContinueConditionMgr::CheckMissionSendCondition(const MissionStatus& status, MissionEventType type)
 {
     HILOGI("missionId %{public}d, type %{public}s", status.missionId, TypeEnumToString(type).c_str());
-
     auto iterFunc = conditionFuncMap_.find(type);
     if (iterFunc == conditionFuncMap_.end()) {
         HILOGE("invalid system status %{public}d", type);
@@ -429,10 +434,11 @@ bool DmsContinueConditionMgr::CheckSendFocusedCondition(const MissionStatus& sta
             reason = "CONTINUE_STATE_INACTIVE";
             break;
         }
-        if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(status.bundleName)) {
-            reason = "BUNDLE_NOT_ALLOWED_IN_CFG";
+        if (DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(status.bundleName)) {
+            reason = "MDM_CONTROL";
             break;
         }
+        lastContinuableMissionId_ = status.missionId;
         HILOGI("PASS");
         return true;
     } while (0);
@@ -459,8 +465,34 @@ bool DmsContinueConditionMgr::CheckSendUnfocusedCondition(const MissionStatus& s
             reason = "CONTINUE_STATE_INACTIVE";
             break;
         }
-        if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(status.bundleName)) {
-            reason = "BUNDLE_NOT_ALLOWED_IN_CFG";
+        if (DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(status.bundleName)) {
+            reason = "MDM_CONTROL";
+            break;
+        }
+        HILOGI("PASS");
+        return true;
+    } while (0);
+
+    HILOGE("FAILED, Reason: %{public}s", reason.c_str());
+    return false;
+}
+
+bool DmsContinueConditionMgr::CheckSendBackgroundCondition(const MissionStatus& status)
+{
+    HILOGI("missionId %{public}d", status.missionId);
+
+    std::string reason = "";
+    do {
+        if (!status.isContinuable) {
+            reason = "NOT_CONTINUABLE";
+            break;
+        }
+        if (status.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
+            reason = "CONTINUE_STATE_INACTIVE";
+            break;
+        }
+        if (DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(status.bundleName)) {
+            reason = "MDM_CONTROL";
             break;
         }
         HILOGI("PASS");
@@ -485,10 +517,11 @@ bool DmsContinueConditionMgr::CheckSendActiveCondition(const MissionStatus& stat
             reason = "NOT_CONTINUABLE";
             break;
         }
-        if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(status.bundleName)) {
-            reason = "BUNDLE_NOT_ALLOWED_IN_CFG";
+        if (DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(status.bundleName)) {
+            reason = "MDM_CONTROL";
             break;
         }
+        lastContinuableMissionId_ = status.missionId;
         HILOGI("PASS");
         return true;
     } while (0);
@@ -515,8 +548,34 @@ bool DmsContinueConditionMgr::CheckSendInactiveCondition(const MissionStatus& st
             reason = "NOT_CONTINUABLE";
             break;
         }
-        if (!DmsKvSyncE2E::GetInstance()->CheckBundleContinueConfig(status.bundleName)) {
-            reason = "BUNDLE_NOT_ALLOWED_IN_CFG";
+        if (DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(status.bundleName)) {
+            reason = "MDM_CONTROL";
+            break;
+        }
+        HILOGI("PASS");
+        return true;
+    } while (0);
+
+    HILOGE("FAILED, Reason: %{public}s", reason.c_str());
+    return false;
+}
+
+bool DmsContinueConditionMgr::CheckSendContinueSwitchOffCondition(const MissionStatus& status)
+{
+    HILOGI("missionId %{public}d", status.missionId);
+
+    std::string reason = "";
+    do {
+        if (!status.isContinuable) {
+            reason = "NOT_CONTINUABLE";
+            break;
+        }
+        if (status.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
+            reason = "CONTINUE_STATE_INACTIVE";
+            break;
+        }
+        if (DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(status.bundleName)) {
+            reason = "MDM_CONTROL";
             break;
         }
         HILOGI("PASS");
@@ -574,18 +633,24 @@ int32_t DmsContinueConditionMgr::GetMissionIdByBundleName(
         return ERR_OK;
     }
     HILOGW("GetMissionIdByBundleName current focused missionId(%{public}d) "
-        "is not belong to bundle: %{public}s; or it's isContinuable is %{public}s. "
-        "try to get last focused mission id",
+           "is not belong to bundle: %{public}s; or it's isContinuable is %{public}s. "
+           "try to get last focused mission id",
         missionId, bundleName.c_str(), missionStatus.isContinuable ? "true" : "false");
-
-    if (lastFocusMission_.second.bundleName == bundleName && lastFocusMission_.second.isContinuable) {
-        missionId = lastFocusMission_.second.missionId;
-        HILOGI("GetMissionIdByBundleName got missionId: %{public}d", missionId);
-        return ERR_OK;
+    auto iter = missionMap_[accountId].find(lastContinuableMissionId_);
+    if (iter != missionMap_[accountId].end()) {
+        if (lastContinuableMissionId_ != 0 &&
+            missionMap_[accountId][lastContinuableMissionId_].bundleName == bundleName) {
+            missionId = lastContinuableMissionId_;
+            HILOGI("GetMissionIdByBundleName got lastContinuableMissionId: %{public}d, "
+                   "lastContinuableBundleName: %{public}s",
+                missionId, missionMap_[accountId][lastContinuableMissionId_].bundleName.c_str());
+            return ERR_OK;
+        }
     }
-    HILOGE("GetMissionIdByBundleName last focused missionId(%{public}d) "
-           "is not belong to bundle: %{public}s; or it's isContinuable is %{public}s.",
-           missionId, bundleName.c_str(), lastFocusMission_.second.isContinuable ? "true" : "false");
+
+    HILOGE("GetMissionIdByBundleName lastContinuableMissionId(%{public}d) "
+           "is not belong to bundle: %{public}s.",
+           missionId, bundleName.c_str());
     return MISSION_NOT_FOCUSED;
 }
 
@@ -646,9 +711,18 @@ std::string DmsContinueConditionMgr::TypeEnumToString(MissionEventType type)
             return "TIMEOUT";
         case MISSION_EVENT_MMI:
             return "MMI";
+        case MISSION_EVENT_BACKGROUND:
+            return "BACKGROUND";
+        case MISSION_EVENT_CONTINUE_SWITCH_OFF:
+            return "CONTINUE_SWITCH_OFF";
         default:
             return "UNDEFINED";
     }
+}
+
+int32_t DmsContinueConditionMgr::GetLastContinuableMissionId()
+{
+    return lastContinuableMissionId_;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fuzzer/FuzzedDataProvider.h>
 #include <iostream>
 
 #include "array_wrapper.h"
@@ -47,6 +48,13 @@ constexpr int32_t POS_3 = 3;
 constexpr int32_t OFFSET_24 = 24;
 constexpr int32_t OFFSET_16 = 16;
 constexpr int32_t OFFSET_8 = 8;
+constexpr int32_t MID_HALF = 2;
+constexpr size_t MAX_TEST_STRING_LEN = 32;
+
+inline size_t CalculateMid(size_t size)
+{
+    return size / MID_HALF;
+}
 }
 uint32_t GetU32Data(const char* ptr)
 {
@@ -201,6 +209,167 @@ bool DoSomethingInterestingWithMyApiDistributedWantParams004(const uint8_t* data
     wantParams->ToWantParams();
     return true;
 }
+
+bool DistributedWantParamWrapperEqualsFuzzTest(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return false;
+    }
+    size_t mid = CalculateMid(size);
+
+    DistributedWantParams wantOther;
+    std::shared_ptr<DistributedWantParams> wantParams1 = std::make_shared<DistributedWantParams>(wantOther);
+    std::string key1(reinterpret_cast<const char*>(data), mid);
+    std::string value1(reinterpret_cast<const char*>(data + mid), size - mid);
+    wantParams1->SetParam(key1, String::Box(value1));
+
+    std::shared_ptr<DistributedWantParams> wantParams2 = std::make_shared<DistributedWantParams>(wantOther);
+    std::string key2(reinterpret_cast<const char*>(data + mid), size - mid);
+    std::string value2(reinterpret_cast<const char*>(data), mid);
+    wantParams2->SetParam(key2, String::Box(value2));
+
+    DistributedWantParamWrapper wrapper1(*wantParams1);
+    DistributedWantParamWrapper wrapper2(*wantParams2);
+
+    bool result = wrapper1.Equals(wrapper2);
+
+    return result;
+}
+
+bool DistributedWantParamWrapperFindMatchingBraceFuzzTest(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return false;
+    }
+    std::string inputStr(reinterpret_cast<const char*>(data), size);
+
+    size_t startPos = size > 0 ? data[0] % size : 0;
+
+    DistributedWantParams wantOther;
+    std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
+    DistributedWantParamWrapper wrapper(*wantParams);
+    size_t result = wrapper.FindMatchingBrace(inputStr, startPos);
+
+    return result >= startPos && result <= inputStr.size();
+}
+
+bool DistributedWantParamWrapperBoxFuzzTest(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return false;
+    }
+    size_t mid = CalculateMid(size);
+    std::string key(reinterpret_cast<const char*>(data), mid);
+    std::string value(reinterpret_cast<const char*>(data + mid), size - mid);
+
+    DistributedWantParams wantParams;
+    wantParams.SetParam(key, String::Box(value));
+    auto boxedObject = DistributedWantParamWrapper::Box(std::move(wantParams));
+    if (boxedObject == nullptr) {
+        return false;
+    }
+    return true;
+}
+
+bool DistributedWantParamWrapperGerTypedIdFuzzTest(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return false;
+    }
+    std::string inputStr(reinterpret_cast<const char*>(data), size);
+
+    size_t startPos = size > 0 ? data[0] % size : 0;
+
+    DistributedWantParams wantOther;
+    std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
+    DistributedWantParamWrapper wrapper(*wantParams);
+    int typeId = wrapper.GerTypedId(inputStr, startPos);
+
+    return typeId >= 0;
+}
+
+void DistributedWantParamQueryFuzzTest(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size == 0) {
+        return;
+    }
+    size_t testSize = (size < MAX_TEST_STRING_LEN) ? size : MAX_TEST_STRING_LEN;
+    std::string testStr(reinterpret_cast<const char*>(data), testSize);
+    sptr<AAFwk::IInterface> iIt = String::Box(testStr);
+
+    DistributedWantParams::ArrayQueryToStr(iIt);
+    DistributedWantParams::DistributedWantParamsQueryToStr(iIt);
+    DistributedWantParams::BooleanQueryEquals(iIt);
+    DistributedWantParams::ByteQueryEquals(iIt);
+    DistributedWantParams::CharQueryEquals(iIt);
+    DistributedWantParams::ArrayQueryEquals(iIt);
+    DistributedWantParams::DistributedWantParamsQueryEquals(iIt);
+    DistributedWantParams::ShortQueryEquals(iIt);
+    DistributedWantParams::IntegerQueryEquals(iIt);
+    DistributedWantParams::LongQueryEquals(iIt);
+    DistributedWantParams::FloatQueryEquals(iIt);
+    DistributedWantParams::DoubleQueryEquals(iIt);
+    DistributedWantParams::GetNumberDataType(iIt);
+    DistributedWantParams::BooleanQueryToStr(iIt);
+    DistributedWantParams::ByteQueryToStr(iIt);
+    DistributedWantParams::CharQueryToStr(iIt);
+    DistributedWantParams::ShortQueryToStr(iIt);
+    DistributedWantParams::IntegerQueryToStr(iIt);
+    DistributedWantParams::LongQueryToStr(iIt);
+    DistributedWantParams::FloatQueryToStr(iIt);
+    DistributedWantParams::DoubleQueryToStr(iIt);
+}
+
+void DistributedUnsupportedDataCopyAssignFuzzTest(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < U32_AT_SIZE) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    DistributedUnsupportedData lhs;
+    DistributedUnsupportedData rhs;
+
+    std::string keyStr = fdp.ConsumeRandomLengthString();
+    rhs.key = std::u16string(keyStr.begin(), keyStr.end());
+    rhs.type = fdp.ConsumeIntegral<int>();
+    rhs.size = fdp.ConsumeIntegralInRange<int>(POS_1, FOO_MAX_LEN);
+    rhs.buffer = new uint8_t[rhs.size];
+    std::vector<uint8_t> buf = fdp.ConsumeBytes<uint8_t>(rhs.size);
+    if (memcpy_s(rhs.buffer, rhs.size, buf.data(), buf.size()) != 0) {
+        delete[] rhs.buffer;
+        rhs.buffer = nullptr;
+        return;
+    }
+
+    lhs = rhs;
+}
+
+void DistributedUnsupportedDataMoveAssignFuzzTest(const uint8_t* data, size_t size)
+{
+    if (data == nullptr || size < U32_AT_SIZE) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+
+    DistributedUnsupportedData lhs;
+    DistributedUnsupportedData rhs;
+
+    std::string keyStr = fdp.ConsumeRandomLengthString();
+    rhs.key = std::u16string(keyStr.begin(), keyStr.end());
+    rhs.type = fdp.ConsumeIntegral<int>();
+    rhs.size = fdp.ConsumeIntegralInRange<int>(POS_1, FOO_MAX_LEN);
+    rhs.buffer = new uint8_t[rhs.size];
+    std::vector<uint8_t> buf = fdp.ConsumeBytes<uint8_t>(rhs.size);
+    if (memcpy_s(rhs.buffer, rhs.size, buf.data(), buf.size()) != 0) {
+        delete[] rhs.buffer;
+        rhs.buffer = nullptr;
+        return;
+    }
+
+    lhs = std::move(rhs);
+}
+
 }
 
 /* Fuzzer entry point */
@@ -210,5 +379,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DoSomethingInterestingWithMyApiDistributedWantParams002(data, size);
     OHOS::DoSomethingInterestingWithMyApiDistributedWant003(data, size);
     OHOS::DoSomethingInterestingWithMyApiDistributedWantParams004(data, size);
+    OHOS::DistributedWantParamWrapperEqualsFuzzTest(data, size);
+    OHOS::DistributedWantParamWrapperFindMatchingBraceFuzzTest(data, size);
+    OHOS::DistributedWantParamWrapperBoxFuzzTest(data, size);
+    OHOS::DistributedWantParamWrapperGerTypedIdFuzzTest(data, size);
+    OHOS::DistributedWantParamQueryFuzzTest(data, size);
+    OHOS::DistributedUnsupportedDataCopyAssignFuzzTest(data, size);
+    OHOS::DistributedUnsupportedDataMoveAssignFuzzTest(data, size);
     return 0;
 }

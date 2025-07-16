@@ -98,7 +98,7 @@ int32_t MockDistributedSched::NotifyProcessDiedFromRemote(const CallerInfo& call
 
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 int32_t MockDistributedSched::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
-    int32_t callingUid)
+    int32_t callingUid, uint32_t callingTokenId)
 {
     return ERR_NONE;
 }
