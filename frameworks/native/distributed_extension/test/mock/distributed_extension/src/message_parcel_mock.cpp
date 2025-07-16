@@ -42,21 +42,33 @@ sptr<IRemoteBroker> BrokerRegistration::NewInstance(const std::u16string &descri
 
 bool MessageParcel::WriteInterfaceToken(std::u16string name)
 {
+    if (DistributedMessageParcel::messageParcel == nullptr) {
+        return false;
+    }
     return DistributedMessageParcel::messageParcel->WriteInterfaceToken(name);
 }
 
 std::u16string MessageParcel::ReadInterfaceToken()
 {
+    if (DistributedMessageParcel::messageParcel == nullptr) {
+        return u"";
+    }
     return DistributedMessageParcel::messageParcel->ReadInterfaceToken();
 }
 
 bool Parcel::WriteParcelable(const Parcelable *object)
 {
+    if (DistributedMessageParcel::messageParcel == nullptr) {
+        return false;
+    }
     return DistributedMessageParcel::messageParcel->WriteParcelable(object);
 }
 
 bool Parcel::WriteInt32(int32_t value)
 {
+    if (DistributedMessageParcel::messageParcel == nullptr) {
+        return false;
+    }
     return DistributedMessageParcel::messageParcel->WriteInt32(value);
 }
 } // namespace OHOS

@@ -27,6 +27,7 @@ ohos_unittest("distributed_extension_js_test") {
   ]
 
   include_dirs = [
+    "${dms_path}/common/include",
     "${dms_path}/frameworks/native/distributed_extension/include",
     "${dms_path}/frameworks/native/distributed_extension/src",
     "${dms_path}/frameworks/native/distributed_extension/test/mock/distributed_extension/include",
@@ -34,7 +35,7 @@ ohos_unittest("distributed_extension_js_test") {
     "${dms_path}/frameworks/native/distributed_extension/test/mock/napi/include",
   ]
 
-  deps = []
+  deps = [ "${dms_path}/common:distributed_sched_utils" ]
 
   external_deps = [
     "ability_base:want",
@@ -46,6 +47,7 @@ ohos_unittest("distributed_extension_js_test") {
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",
     "hilog:libhilog",
@@ -229,7 +231,7 @@ ohos_unittest("distributed_extension_base_test") {
     "${dms_path}/frameworks/native/distributed_extension/test/mock/js_runtime/include",
   ]
 
-  deps = []
+  deps = [ "${dms_path}/common:distributed_sched_utils" ]
 
   external_deps = [
     "ability_base:want",
@@ -241,6 +243,7 @@ ohos_unittest("distributed_extension_base_test") {
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
     "c_utils:utils",
     "googletest:gmock_main",
     "hilog:libhilog",

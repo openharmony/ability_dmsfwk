@@ -26,6 +26,9 @@ sptr<IRemoteBroker> BrokerRegistration::NewInstance(const std::u16string &descri
 
 std::u16string MessageParcel::ReadInterfaceToken()
 {
+    if (DistributedMessageParcelForStub::messageParcel == nullptr) {
+        return u"";
+    }
     return DistributedMessageParcelForStub::messageParcel->ReadInterfaceToken();
 }
 } // namespace OHOS

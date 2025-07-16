@@ -72,6 +72,10 @@ sptr<IRemoteObject> DistributedExtension::OnConnect(const AAFwk::Want &want)
         auto remoteObject = sptr<DistributedExtensionService>(
             new DistributedExtensionService(std::static_pointer_cast<DistributedExtension>(shared_from_this()),
             want.GetBundle()));
+        if (remoteObject == nullptr) {
+            HILOG_ERROR("remoteObject is null");
+            return nullptr;
+        }
         return remoteObject->AsObject();
     } catch (const exception &e) {
         HILOG_ERROR("%{public}s", e.what());

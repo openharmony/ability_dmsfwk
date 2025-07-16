@@ -43,7 +43,12 @@ void DeviceSelectionNotifierProxy::OnDeviceConnect(const std::vector<Continuatio
     if (!ContinuationResult::WriteContinuationResultsToParcel(data, continuationResults)) {
         return;
     }
-    int32_t errCode = Remote()->SendRequest(static_cast<uint32_t>
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("Register remote is null");
+        return;
+    }
+    int32_t errCode = remote->SendRequest(static_cast<uint32_t>
         (IDRequestInterfaceCode::EVENT_DEVICE_CONNECT), data, reply, option);
     HILOGD("result = %{public}d", errCode);
 }
@@ -60,7 +65,12 @@ void DeviceSelectionNotifierProxy::OnDeviceDisconnect(const std::vector<Continua
     if (!ContinuationResult::WriteContinuationResultsToParcel(data, continuationResults)) {
         return;
     }
-    int32_t errCode = Remote()->SendRequest(static_cast<uint32_t>
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("Register remote is null");
+        return;
+    }
+    int32_t errCode = remote->SendRequest(static_cast<uint32_t>
         (IDRequestInterfaceCode::EVENT_DEVICE_DISCONNECT), data, reply, option);
     HILOGD("result = %{public}d", errCode);
 }
