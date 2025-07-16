@@ -84,6 +84,7 @@ HWTEST_F(DSchedContinueStateMachineTest, Execute_001, TestSize.Level3)
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     stateMachineTest_->currentState_ = nullptr;

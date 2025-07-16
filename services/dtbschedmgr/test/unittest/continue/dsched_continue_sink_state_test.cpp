@@ -88,6 +88,7 @@ HWTEST_F(DSchedContinueDataStateTest, SinkExecuteTest001, TestSize.Level3)
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = dataStateTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
@@ -113,6 +114,7 @@ HWTEST_F(DSchedContinueDataStateTest, SinkExecuteTest002, TestSize.Level3)
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = dataStateTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
@@ -149,6 +151,7 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueDataTask001, TestSize.Level3
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = dataStateTest_->DoContinueDataTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
@@ -195,6 +198,7 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueEndTask001, TestSize.Level3)
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = dataStateTest_->DoContinueEndTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
@@ -240,6 +244,7 @@ HWTEST_F(DSchedContinueDataStateTest, SinkDoContinueErrorTask001, TestSize.Level
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = dataStateTest_->DoContinueErrorTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
@@ -393,6 +398,7 @@ HWTEST_F(DSchedContinueSinkEndStateTest, TestSinkExecute001, TestSize.Level3)
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = sinkEndStateTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
@@ -415,6 +421,7 @@ HWTEST_F(DSchedContinueSinkEndStateTest, TestSinkExecute002, TestSize.Level3)
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = sinkEndStateTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
@@ -454,6 +461,7 @@ HWTEST_F(DSchedContinueSinkEndStateTest, TestSinkDoContinueEndTask001, TestSize.
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = sinkEndStateTest_->DoContinueEndTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
@@ -499,6 +507,7 @@ HWTEST_F(DSchedContinueSinkStartStateTest, SinkExecuteTest_001, TestSize.Level3)
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = sinkStartStateTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
@@ -524,6 +533,7 @@ HWTEST_F(DSchedContinueSinkStartStateTest, SinkExecuteTest_002, TestSize.Level3)
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = sinkStartStateTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
@@ -560,6 +570,7 @@ HWTEST_F(DSchedContinueSinkStartStateTest, SinkDoContinuePullReqTaskTest_001, Te
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = sinkStartStateTest_->DoContinuePullReqTask(nullptr,
@@ -591,6 +602,7 @@ HWTEST_F(DSchedContinueSinkStartStateTest, SinkDoContinueAbilityTaskTest_001, Te
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = sinkStartStateTest_->DoContinueAbilityTask(nullptr,
@@ -622,6 +634,7 @@ HWTEST_F(DSchedContinueSinkStartStateTest, SinkDoContinueEndTaskTest_001, TestSi
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = sinkStartStateTest_->DoContinueEndTask(nullptr,
@@ -653,6 +666,7 @@ HWTEST_F(DSchedContinueSinkStartStateTest, SinkDoContinueErrorTask001, TestSize.
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = sinkStartStateTest_->DoContinueErrorTask(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
@@ -683,6 +697,7 @@ HWTEST_F(DSchedContinueSinkWaitEndStateTest, SinkExecute001, TestSize.Level3)
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = sinkWaitEndTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
@@ -708,6 +723,7 @@ HWTEST_F(DSchedContinueSinkWaitEndStateTest, SinkExecute002, TestSize.Level3)
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = sinkWaitEndTest_->Execute(nullptr, AppExecFwk::InnerEvent::Pointer(event, destructor));
@@ -745,6 +761,7 @@ HWTEST_F(DSchedContinueSinkWaitEndStateTest, SinkDoNotifyCompleteTask001, TestSi
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = sinkWaitEndTest_->DoNotifyCompleteTask(nullptr,
@@ -791,6 +808,7 @@ HWTEST_F(DSchedContinueSinkWaitEndStateTest, SinkDoContinueEndTask001, TestSize.
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     int32_t ret = sinkWaitEndTest_->DoContinueEndTask(nullptr,

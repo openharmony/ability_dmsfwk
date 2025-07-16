@@ -380,6 +380,8 @@ HWTEST_F(BundleManagerInternalTest, BundleManagerCallBackTest_003, TestSize.Leve
     ASSERT_NE(callback, nullptr);
     int32_t ret = callback->OnRemoteRequest(-1, data, reply, option);
     EXPECT_TRUE(ERR_OK != ret);
+    delete callback;
+    callback = nullptr;
     DTEST_LOG << "BundleManagerCallBackTest BundleManagerCallBackTest_003 end "<< std::endl;
 }
 
