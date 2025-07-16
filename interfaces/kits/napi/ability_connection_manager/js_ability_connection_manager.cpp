@@ -939,7 +939,7 @@ napi_value JsAbilityConnectionManager::Connect(napi_env env, napi_callback_info 
     int64_t processorId = -1;
     processorId = AddProcessor();
     if (processorId <= 0) {
-        HILOGE("Add processor fail.Error code is %{public}lld", processorId);
+        HILOGE("Add processor fail.Error code is %{public}" PRId64, processorId);
     }
     time_t beginTime = time(nullptr);
     std::string transId = std::string("transId_") + std::to_string(std::rand());
