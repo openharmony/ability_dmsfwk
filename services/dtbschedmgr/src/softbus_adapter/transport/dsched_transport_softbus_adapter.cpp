@@ -326,7 +326,7 @@ int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDevi
     }
     ret = SoftbusAdapter::GetInstance().dmsAdapetr_.QueryValidQos(peerDeviceId, validQosCase);
     if (ret != ERR_OK) {
-        HILOGE("query Valid Qos failed, result: %{public}d", ret);
+        HILOGW("query Valid Qos failed, result: %{public}d", ret);
     }
 #endif
     return ret;

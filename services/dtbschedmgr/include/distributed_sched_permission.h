@@ -23,8 +23,19 @@
 #include "nlohmann/json.hpp"
 #include "single_instance.h"
 
+#include "app_mgr_interface.h"
+#include "app_mgr_proxy.h"
+#include "if_system_ability_manager.h"
+#include "iservice_registry.h"
+#include "system_ability.h"
+#include "system_ability_definition.h"
+
 namespace OHOS {
 namespace DistributedSchedule {
+namespace {
+const std::string DMS_IS_CALLER_FOREGROUND = "dmsIsCallerForeGround";
+}
+
 struct GroupInfo {
     std::string groupName;
     std::string groupId;
@@ -62,6 +73,8 @@ public:
     void MarkUriPermission(OHOS::AAFwk::Want& want, uint32_t accessToken);
     void RemoveRemoteObjectFromWant(std::shared_ptr<AAFwk::Want> want) const;
     bool IsHigherAclVersion(const CallerInfo& callerInfo);
+    bool CheckSrcBackgroundPermission(uint32_t accessTokenId);
+    bool IsAbilityForeground(uint32_t accessTokenId);
 
 private:
     bool GetOsAccountData(AccountInfo& dmsAccountInfo);
@@ -89,10 +102,11 @@ private:
         const CallerInfo& callerInfo, const AAFwk::Want& want, bool isSameBundle = true);
     bool CheckCollaborateStartCtrlPer(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AAFwk::Want& want) const;
-    bool CheckCollabStartControlPermission(const AppExecFwk::AbilityInfo& targetAbility,
+    bool CheckNewCollabStartControlPermission(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AAFwk::Want& want);
     bool CheckStartControlPermission(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AAFwk::Want& want, bool isSameBundle = true);
+    bool CheckNewCollabBackgroundPermission(const CallerInfo& callerInfo, const AAFwk::Want& want);
     bool CheckBackgroundPermission(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AAFwk::Want& want, bool needCheckApiVersion) const;
     bool CheckMinApiVersion(const AppExecFwk::AbilityInfo& targetAbility, int32_t apiVersion) const;
@@ -100,6 +114,7 @@ private:
     int32_t GetDeviceSecurityLevel(const std::string& udid) const;
     bool CheckTargetAbilityVisible(const AppExecFwk::AbilityInfo& targetAbility, const CallerInfo& callerInfo) const;
     bool IsDistributedFile(const std::string& path) const;
+    sptr<AppExecFwk::IAppMgr> GetAppManager() const;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

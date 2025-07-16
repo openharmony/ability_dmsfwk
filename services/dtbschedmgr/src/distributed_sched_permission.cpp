@@ -162,8 +162,8 @@ int32_t DistributedSchedPermission::CheckCollabStartPermission(const AAFwk::Want
         return DMS_ACCOUNT_ACCESS_PERMISSION_DENIED;
     }
     // 2.check start control permissions.
-    if (!CheckCollabStartControlPermission(targetAbility, callerInfo, want)) {
-        HILOGE("CheckCollabStartControlPermission denied or failed! the callee component do not have permission");
+    if (!CheckNewCollabStartControlPermission(targetAbility, callerInfo, want)) {
+        HILOGE("CheckNewCollabStartControlPermission denied or failed! the callee component do not have permission");
         return DMS_START_CONTROL_PERMISSION_DENIED;
     }
     HILOGI("CheckDistributedPermission success!");
@@ -784,12 +784,12 @@ bool DistributedSchedPermission::CheckCollaborateStartCtrlPer(const AppExecFwk::
     return true;
 }
 
-bool DistributedSchedPermission::CheckCollabStartControlPermission(const AppExecFwk::AbilityInfo& targetAbility,
+bool DistributedSchedPermission::CheckNewCollabStartControlPermission(const AppExecFwk::AbilityInfo& targetAbility,
     const CallerInfo& callerInfo, const AAFwk::Want& want)
 {
     HILOGI("Check new collaboration start control permission enter.");
     // 1. check background permission
-    if (!CheckBackgroundPermission(targetAbility, callerInfo, want, true)) {
+    if (!CheckNewCollabBackgroundPermission(callerInfo, want)) {
         HILOGE("Check background permission failed!");
         return false;
     }
@@ -817,6 +817,84 @@ bool DistributedSchedPermission::CheckCollabStartControlPermission(const AppExec
     }
     HILOGD("Check collaboration start control permission success");
     return true;
+}
+
+bool DistributedSchedPermission::CheckNewCollabBackgroundPermission(const CallerInfo& callerInfo,
+    const AAFwk::Want& want)
+{
+    bool isCallerForeGround = want.GetBoolParam(DMS_IS_CALLER_FOREGROUND, true);
+    if (isCallerForeGround) {
+        HILOGI("non-background invocation, no need to verify this permission.");
+        return true;
+    }
+    uint32_t dAccessToken = AccessToken::AccessTokenKit::AllocLocalTokenID(callerInfo.sourceDeviceId,
+        callerInfo.accessToken);
+    if (dAccessToken == 0) {
+        HILOGE("dAccessTokenID is invalid!");
+        return false;
+    }
+    // check if background's ability has PERMISSION_START_ABILITIES_FROM_BACKGROUND
+    if (CheckPermission(dAccessToken, PERMISSION_START_ABILITIES_FROM_BACKGROUND) == ERR_OK ||
+        CheckPermission(dAccessToken, PERMISSION_START_ABILIIES_FROM_BACKGROUND) == ERR_OK) {
+        HILOGD("the app has PERMISSION_START_ABILITIES_FROM_BACKGROUND");
+        return true;
+    }
+    HILOGE("CheckBackgroundPermission failed!");
+    return false;
+}
+
+bool DistributedSchedPermission::CheckSrcBackgroundPermission(uint32_t accessTokenId)
+{
+    HILOGI("called");
+    if (IsAbilityForeground(accessTokenId)) {
+        return true;
+    }
+    // check if background's ability has PERMISSION_START_ABILITIES_FROM_BACKGROUND
+    if (CheckPermission(accessTokenId, PERMISSION_START_ABILITIES_FROM_BACKGROUND) == ERR_OK ||
+        CheckPermission(accessTokenId, PERMISSION_START_ABILIIES_FROM_BACKGROUND) == ERR_OK) {
+        HILOGD("the app has PERMISSION_START_ABILITIES_FROM_BACKGROUND");
+        return true;
+    }
+    HILOGE("CheckBackgroundPermission failed!");
+    return DMS_START_CONTROL_PERMISSION_DENIED;
+}
+
+bool DistributedSchedPermission::IsAbilityForeground(uint32_t accessTokenId)
+{
+    HILOGI("called");
+    sptr<AppExecFwk::IAppMgr> appMgr = GetAppManager();
+    if (appMgr == nullptr) {
+        HILOGE("failed to get app manager service");
+        return false;
+    }
+    std::vector<AppExecFwk::AppStateData> list;
+    int32_t ret = appMgr->GetForegroundApplications(list);
+    if (ret != ERR_OK) {
+        HILOGE("error:%{public}d", ret);
+        return false;
+    }
+    for (auto appStateData : list) {
+        if (appStateData.accessTokenId == accessTokenId) {
+            HILOGI("the ability is foreground, bundleName : %{public}s", appStateData.bundleName.c_str());
+            return true;
+        }
+    }
+    HILOGI("the ability is background");
+    return false;
+}
+sptr<AppExecFwk::IAppMgr> DistributedSchedPermission::GetAppManager() const
+{
+    auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgr == nullptr) {
+        HILOGE("system ability manager is nullptr.");
+        return nullptr;
+    }
+    sptr<AppExecFwk::IAppMgr> appObject = iface_cast<AppExecFwk::IAppMgr>(samgr->GetSystemAbility(APP_MGR_SERVICE_ID));
+    if (appObject == nullptr) {
+        HILOGE("failed to get app manager service");
+        return nullptr;
+    }
+    return appObject;
 }
 
 bool DistributedSchedPermission::CheckBackgroundPermission(const AppExecFwk::AbilityInfo& targetAbility,
