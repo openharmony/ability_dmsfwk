@@ -27,6 +27,7 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "dtbcollabmgr_log.h"
+#include "ipc_skeleton.h"
 #include "mission/distributed_bm_storage.h"
 #include "mission/wifi_state_adapter.h"
 #include "multi_user_manager.h"
@@ -280,6 +281,11 @@ int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
         HILOGW("The current user is not foreground. callingUid: %{public}d .", info.srcInfo_.uid_);
         return DMS_NOT_FOREGROUND_USER;
     }
+    if (!info.srcOpt_.startParams_.GetParam(KEY_START_OPTION) &&
+        !Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetSelfTokenID())) {
+        HILOGW("Non-system applications are prohibited from launching peer ability to the background.");
+        return DMS_START_CONTROL_PERMISSION_DENIED;
+    }
     if (info.srcInfo_.bundleName_.empty() || info.sinkInfo_.bundleName_.empty() ||
         info.srcInfo_.moduleName_.empty() || info.sinkInfo_.moduleName_.empty() ||
         info.srcInfo_.abilityName_.empty() || info.sinkInfo_.abilityName_.empty()) {
@@ -460,6 +466,10 @@ int32_t DSchedCollabManager::ConvertCollaborateResult(int32_t result)
 int32_t DSchedCollabManager::NotifySinkPrepareResult(const DSchedCollabInfo &dSchedCollabInfo, const int32_t &result)
 {
     HILOGI("end, dSchedCollabInfo: %{public}s.", dSchedCollabInfo.ToString().c_str());
+    if (GetDSchedCollabByTokenId(dSchedCollabInfo.collabToken_) == nullptr) {
+        HILOGE("not find dCollab");
+        return INVALID_PARAMETERS_ERR;
+    }
     auto func = [this, dSchedCollabInfo, result]() {
         HandleCollabPrepareResult(dSchedCollabInfo, result);
     };
@@ -658,6 +668,7 @@ int32_t DSchedCollabManager::CleanUpSession(const std::string &collabToken)
 std::shared_ptr<DSchedCollab> DSchedCollabManager::GetDSchedCollabByTokenId(const std::string &tokenId)
 {
     HILOGI("called, tokenId: %{public}s", tokenId.c_str());
+    std::lock_guard<std::mutex> collabLock(collabMutex_);
     if (tokenId.empty() || collabs_.count(tokenId) == 0) {
         HILOGE("no such collaboration in progress.");
         return nullptr;

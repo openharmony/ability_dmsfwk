@@ -522,8 +522,9 @@ int32_t SinkStartCmd::UnmarshalCallerInfoExtra(std::string &jsonStr)
     }
 
     cJSON *dmsVersion = cJSON_GetObjectItemCaseSensitive(extraInfoValue, DMS_VERSION_ID);
-    if (dmsVersion != nullptr && !cJSON_IsString(dmsVersion) && (dmsVersion->valuestring != nullptr)) {
-        callerInfo_.extraInfoJson[DMS_VERSION_ID] = dmsVersion->valuestring;
+    if (dmsVersion != nullptr && cJSON_IsNumber(dmsVersion)) {
+        HILOGI("get dmsVersion information: %{public}d", dmsVersion->valueint);
+        callerInfo_.extraInfoJson[DMS_VERSION_ID] = dmsVersion->valueint;
     }
     cJSON_Delete(extraInfoValue);
     cJSON_Delete(rootValue);
