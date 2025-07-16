@@ -77,6 +77,9 @@ private:
         HILOGI("%{public}s bundleName: %{public}s abilityName: %{public}s", __func__, want.GetBundle().c_str(),
             want.GetElement().GetAbilityName().c_str());
         sptr<DistributedExtensionContextJSConnection> connection = new DistributedExtensionContextJSConnection(env);
+        if (connection == nullptr) {
+            return nullptr;
+        }
         connection->SetJsConnectionObject(argv[1]);
         int64_t connectId = serialNumber_;
         ConnectionKey key;

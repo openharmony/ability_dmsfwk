@@ -20,11 +20,17 @@ namespace OHOS::AbilityRuntime {
 std::unique_ptr<NativeReference> JsRuntime::LoadSystemModuleByEngine(napi_env env,
     const std::string& moduleName, const napi_value* argv, size_t argc)
 {
+    if (OHOS::DistributedSchedule::TDExtension::tDExtension == nullptr) {
+        return nullptr;
+    }
     return OHOS::DistributedSchedule::TDExtension::tDExtension->LoadSystemModuleByEngine(env, moduleName, argv, argc);
 }
 
 napi_env JsRuntime::GetNapiEnv() const
 {
+    if (OHOS::DistributedSchedule::TDExtension::tDExtension == nullptr) {
+        return 0;
+    }
     return OHOS::DistributedSchedule::TDExtension::tDExtension->GetNapiEnv();
 }
 
@@ -32,6 +38,9 @@ std::unique_ptr<NativeReference> LoadModule(const std::string& moduleName, const
         const std::string& hapPath, bool esmodule = false, bool useCommonChunk = false,
         const std::string& srcEntrance = "")
 {
+    if (OHOS::DistributedSchedule::TDExtension::tDExtension == nullptr) {
+        return 0;
+    }
     return OHOS::DistributedSchedule::TDExtension::tDExtension->LoadModule(moduleName, modulePath, hapPath,
         esmodule, useCommonChunk, srcEntrance);
 }
@@ -39,6 +48,9 @@ std::unique_ptr<NativeReference> LoadModule(const std::string& moduleName, const
 std::unique_ptr<NativeReference> LoadSystemModule(
     const std::string& moduleName, const napi_value* argv, size_t argc)
 {
+    if (OHOS::DistributedSchedule::TDExtension::tDExtension == nullptr) {
+        return 0;
+    }
     return OHOS::DistributedSchedule::TDExtension::tDExtension->LoadSystemModule(moduleName, argv, argc);
 }
 } // namespace OHOS::AbilityRuntime
