@@ -21,12 +21,13 @@
 #include "dsched_continue_manager.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "distributed_sched_service.h"
 #include "mission/wifi_state_adapter.h"
 #include "softbus_bus_center.h"
 #include "softbus_common.h"
 #include "softbus_error_code.h"
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
-#include "softbus_resource_query.h"
+#include "softbus_adapter/softbus_adapter.h"
 #endif
 #include "token_setproc.h"
 
@@ -237,6 +238,12 @@ int32_t DSchedTransportSoftbusAdapter::AddNewPeerSession(const std::string &peer
         GetAnonymStr(std::to_string(callingTokenId_)).c_str(), ret);
     callingTokenId_ = 0;
 
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    if (DistributedSchedService::GetInstance().CheckRemoteOsType(peerDeviceId)) {
+        HILOGE("peer device is not a OH");
+        return DMS_PERMISSION_DENIED;
+    }
+#endif
     do {
         ret = ServiceBind(sessionId, type, peerDeviceId);
         if (ret != ERR_OK) {
@@ -314,39 +321,13 @@ int32_t DSchedTransportSoftbusAdapter::QueryValidQos(const std::string &peerDevi
 {
     int32_t ret = SOFTBUS_QUERY_VALID_QOS_ERR;
 #ifdef SOFTBUS_QUERY_VALID_QOS
-    HILOGI("query Valid Qos start peerNetworkId: %{public}s", GetAnonymStr(peerDeviceId).c_str());
-    QosRequestInfo qosRequestInfo;
-    ret = memcpy_s(qosRequestInfo.peerNetworkId, NETWORK_ID_BUF_LEN, peerDeviceId.c_str(), peerDeviceId.size());
-    if (ret != ERR_OK) {
-        HILOGE("memcpy_s failed for peerNetworkId: %{public}s", GetAnonymStr(peerDeviceId).c_str());
-        return ret;
+   if (SoftbusAdapter::GetInstance().dmsAdapetr_.QueryValidQos == nullptr) {
+        return INVALID_PARAMETERS_ERR;
     }
-    qosRequestInfo.dataType = TransDataType::DATA_TYPE_BYTES;
-    QosStatus qosStatus;
-    ret = SoftBusQueryValidQos(&qosRequestInfo, &qosStatus);
+    ret = SoftbusAdapter::GetInstance().dmsAdapetr_.QueryValidQos(peerDeviceId, validQosCase);
     if (ret != ERR_OK) {
         HILOGE("query Valid Qos failed, result: %{public}d", ret);
-        return SOFTBUS_QUERY_VALID_QOS_ERR;
     }
-    if (qosStatus.qosCnt <= 0) {
-        HILOGE("valid qos count is: %{public}d", qosStatus.qosCnt);
-        delete [] qosStatus.validQos;
-        return SOFTBUS_NO_USEFUL_QOS_ERR;
-    }
-    HILOGI("query Valid Qos success; qos count: %{public}d", qosStatus.qosCnt);
-    // case 0 : [160Mbps, Max); case 1 : (30Mbps, 160Mbps); case 2 : (384Kbps, 30Mbps]; case 3 : (0, 384Kbps];
-    validQosCase = SOFTBUS_MAX_VALID_QOS_CASE;
-    for (int i = 0; i < qosStatus.qosCnt; i++) {
-        QosOption item = qosStatus.validQos[i];
-        HILOGI("check valid qos index: %{public}d; isSupportReuse: %{public}s; minBw: %{public}d",
-            i, item.isSupportReuse ? "true" : "false", item.minBw);
-        if (validQosCase > item.minBw) {
-            HILOGI("update validQosCase from: %{public}d to: %{public}d", validQosCase, item.minBw);
-            validQosCase = item.minBw;
-        }
-    }
-    delete [] qosStatus.validQos;
-    HILOGE("final validQosCase is: %{public}d", validQosCase);
 #endif
     return ret;
 }
@@ -443,6 +424,12 @@ bool DSchedTransportSoftbusAdapter::GetSessionIdByDeviceId(const std::string &pe
 
 void DSchedTransportSoftbusAdapter::OnBind(int32_t sessionId, const std::string &peerDeviceId)
 {
+#ifdef DMSFWK_INTERACTIVE_ADAPTER
+    if (DistributedSchedService::GetInstance().CheckRemoteOsType(peerDeviceId)) {
+        HILOGE("peer device is not a OH");
+        return;
+    }
+#endif
     int32_t ret = CreateSessionRecord(sessionId, peerDeviceId, true, SERVICE_TYPE_INVALID);
     if (ret != ERR_OK) {
         HILOGE("Service create session record fail, ret %{public}d, peerDeviceId %{public}s, sessionId %{public}d.",

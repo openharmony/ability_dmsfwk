@@ -81,7 +81,7 @@ int32_t DistributedAbilityManagerClient::RegisterDeviceSelectionCallback(int32_t
     }
     if (cbType.empty()) {
         HILOGE("RegisterDeviceSelectionCallback cbType is empty");
-        return ERR_NULL_OBJECT;
+        return INVALID_PARAMETERS_ERR;
     }
     if (notifier == nullptr) {
         HILOGE("RegisterDeviceSelectionCallback notifier is nullptr");
@@ -100,7 +100,7 @@ int32_t DistributedAbilityManagerClient::UnregisterDeviceSelectionCallback(int32
     }
     if (cbType.empty()) {
         HILOGE("UnregisterDeviceSelectionCallback cbType is empty");
-        return ERR_NULL_OBJECT;
+        return INVALID_PARAMETERS_ERR;
     }
     return continuationMgrProxy->UnregisterDeviceSelectionCallback(token, cbType);
 }

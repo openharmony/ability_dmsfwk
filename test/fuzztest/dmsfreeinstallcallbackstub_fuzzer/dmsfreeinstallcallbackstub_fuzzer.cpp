@@ -58,6 +58,7 @@ bool OnInstallFinishedInnerFuzzTest(const uint8_t* data, size_t size)
     AAFwk::Want want;
     dataParcel.WriteParcelable(&want);
     freeInstall_->OnRemoteRequest(code, dataParcel, reply, option);
+    freeInstall_->OnInstallFinishedInner(dataParcel, reply);
     return true;
 }
 }

@@ -37,14 +37,14 @@
 #include "notification_request.h"
 #include "want_agent_helper.h"
 #include "want_agent_info.h"
+#include "string_wrapper.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 const std::string TAG = "SvcDistributedConnection";
 constexpr int WAIT_TIME = 3;
-constexpr int32_t INDEX = 3;
-constexpr int32_t MS_1000 = 1000;
 constexpr int32_t TIME_OUT_CLOSE = 10 * 1000 * 1000;  // 10s;
+constexpr int32_t TIME_OUT_NOTIFICATION = 10 * 1000;
 
 constexpr const char* DMS_LANGUAGE_MAP_PATH = "system/etc/dmsfwk/resources/base/profile/dms_language_map.json";
 constexpr const char* DMS_DEFAULT_LANGUAGE_FILE_PATH = "zh_CN";
@@ -65,7 +65,6 @@ constexpr const char* KEY_TAG_BGS = "BackgroundService";
 constexpr const char* KEY_TAG_EOS = "EOS";
 
 const int MAX_RES_VEC_LEN = 100;
-const std::string FILE_BACKUP_EVENTS = "FILE_BACKUP_EVENTS";
 const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getprocpid());
 const uint32_t DMS_UID = 5522;
 const int32_t NOTIFICATION_BANNER_FLAG = 1 << 9;
@@ -73,7 +72,12 @@ static std::string g_sysLanguage = "";
 static std::string g_sysRegion = "";
 static std::mutex g_resourceMutex;
 static std::map<std::string, std::string> g_resourceMap;
+
+const std::string CONNECT_PROXY = "VALUE_ABILITY_COLLAB_TYPE_CONNECT_PROXY";
+const std::string COLLABRATION_TYPE = "CollabrationType";
+const std::string SOURCE_DELEGATEE = "SourceDelegatee";
 using namespace std;
+using namespace AAFwk;
 
 void SvcDistributedConnection::OnAbilityConnectDone(const AppExecFwk::ElementName &element,
     const sptr<IRemoteObject> &remoteObject, int resultCode)
@@ -86,6 +90,10 @@ void SvcDistributedConnection::OnAbilityConnectDone(const AppExecFwk::ElementNam
     auto func = [this]() {
         HILOGI("close begin");
         usleep(TIME_OUT_CLOSE);
+        while (isDelay_.load()) {
+            isDelay_.store(false);
+            usleep(TIME_OUT_CLOSE);
+        }
         this->DisconnectDistributedExtAbility();
         HILOGI("close end");
     };
@@ -100,23 +108,6 @@ void SvcDistributedConnection::OnAbilityConnectDone(const AppExecFwk::ElementNam
     string bundleName = element.GetBundleName();
     HILOGI("bundleName:%{public}s, OnAbilityConnectDone, bundleNameIndexInfo:%{public}s", bundleName.c_str(),
         bundleNameIndexInfo_.c_str());
-    
-    auto now = std::chrono::system_clock::now();
-    auto time = std::chrono::system_clock::to_time_t(now);
-    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
-    std::stringstream strTime;
-    strTime << (std::put_time(std::localtime(&time), "%Y-%m-%d %H:%M:%S:")) << (std::setfill('0'))
-        << (std::setw(INDEX)) << (ms.count() % MS_1000);
-    HiSysEventWrite(
-        OHOS::HiviewDFX::HiSysEvent::Domain::FILEMANAGEMENT,
-        FILE_BACKUP_EVENTS,
-        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
-        "PROC_NAME", "ohos.appfileservice",
-        "BUNDLENAME", bundleName,
-        "PID", getpid(),
-        "TIME", strTime.str()
-    );
-
     if (bundleNameIndexInfo_.find(bundleName) == string::npos) {
         HILOGE("Current bundle name is wrong, bundleNameIndexInfo:%{public}s, bundleName:%{public}s",
             bundleNameIndexInfo_.c_str(), bundleName.c_str());
@@ -143,17 +134,32 @@ void SvcDistributedConnection::OnAbilityDisconnectDone(const AppExecFwk::Element
     HILOGI("called end, name: %{public}s", bundleNameIndexInfo_.c_str());
 }
 
-ErrCode SvcDistributedConnection::ConnectDExtAbility(AAFwk::Want &want, int32_t userId, bool isCleanCalled)
+ErrCode SvcDistributedConnection::ConnectDExtAbility(AAFwk::Want &want, int32_t userId, bool isCleanCalled,
+    const std::string& delegatee, bool &isDelay)
 {
     HILOGI("SvcDistributedConnection::ConnectDExtAbility Called begin");
     if (isConnectCalled_.load()) {
-        HILOGE("Connect distributed extension called before");
-        return INVALID_CONNECT_STATUS;
+        HILOGI("Connect distributed extension called before");
+        isDelay_.store(true);
+        HILOGI("Connect ability again, isDelay:%{public}d", isDelay_.load());
+        auto proxy = GetDistributedExtProxy();
+        if (proxy == nullptr) {
+            HILOGE("Extension distribute proxy is empty");
+            return INVALID_PARAMETERS_ERR;
+        }
+        AAFwk::WantParams wantParam;
+        wantParam.SetParam(COLLABRATION_TYPE, String::Box(CONNECT_PROXY));
+        wantParam.SetParam(SOURCE_DELEGATEE, String::Box(delegatee));
+        proxy->TriggerOnCollaborate(wantParam);
+        isDelay = true;
+        return ERR_OK;
     }
     isCleanCalled_.store(isCleanCalled);
-    isConnectCalled_.store(true);
     std::unique_lock<std::mutex> lock(mutex_);
     ErrCode ret = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want, this, userId);
+    if (ret == ERR_OK) {
+        isConnectCalled_.store(true);
+    }
     HILOGI("Called end, ret=%{public}d, userId=%{public}d.", ret, userId);
     return ret;
 }
@@ -339,7 +345,7 @@ static void SetBasicOptions(Notification::NotificationRequest &request, AppExecF
     request.SetCreatorUid(DMS_UID);
     request.SetOwnerUid(appInfo.uid);
     request.SetDeliveryTime(GetDeliveryTime());
-    request.SetAutoDeletedTime(GetDeliveryTime() + TIME_OUT_CLOSE);
+    request.SetAutoDeletedTime(GetDeliveryTime() + TIME_OUT_NOTIFICATION);
     request.SetTapDismissed(true);
     request.SetSlotType(OHOS::Notification::NotificationConstant::SlotType::SOCIAL_COMMUNICATION);
     request.SetNotificationControlFlags(NOTIFICATION_BANNER_FLAG);

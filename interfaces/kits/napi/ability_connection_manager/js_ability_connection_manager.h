@@ -82,6 +82,8 @@ public:
     static napi_value RegisterAbilityConnectionSessionCallback(napi_env env, napi_callback_info info);
     static napi_value UnregisterAbilityConnectionSessionCallback(napi_env env, napi_callback_info info);
     static napi_value Connect(napi_env env, napi_callback_info info);
+    static napi_value ConnectInner(napi_env env, int32_t sessionId, const std::string &transId, time_t beginTime,
+        int64_t processorId);
     static napi_value DisConnect(napi_env env, napi_callback_info info);
     static napi_value AcceptConnect(napi_env env, napi_callback_info info);
     static napi_value Reject(napi_env env, napi_callback_info info);

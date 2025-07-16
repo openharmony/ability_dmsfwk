@@ -124,6 +124,7 @@ Status AVSenderFilter::DoStop()
     HILOGI("AVSenderFilter Stop");
     isRunning_ = false;
     cv_.notify_all();
+    std::unique_lock<std::mutex> lock(threadMutex_);
     if (processingThread_.joinable()) {
         processingThread_.join();
     }

@@ -61,14 +61,22 @@ public:
         bool needQueryExtension = false) const;
     void MarkUriPermission(OHOS::AAFwk::Want& want, uint32_t accessToken);
     void RemoveRemoteObjectFromWant(std::shared_ptr<AAFwk::Want> want) const;
+    bool IsHigherAclVersion(const CallerInfo& callerInfo);
 
 private:
     bool GetOsAccountData(AccountInfo& dmsAccountInfo);
+    bool CheckSameAccount(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
+        const CallerInfo& callerInfo, bool isSrc);
     bool CheckDstSameAccount(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
-        const CallerInfo& callerInfo, bool isCallerOrigin);
-    bool CheckIsSameAccountId(const std::string& srcAccountId);
+        const CallerInfo& callerInfo, bool isSrc);
+    bool CheckLowVersionSameAccount(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
+        const CallerInfo& callerInfo, bool isSrc);
     bool CheckAclList(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
-        const CallerInfo& callerInfo, const std::string& targetBundleName = "");
+        const CallerInfo& callerInfo, bool isSrc, const std::string& targetBundleName = "");
+    bool CheckNewAclList(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
+        const CallerInfo& callerInfo, bool isSrc, const std::string& targetBundleName = "");
+    bool CheckLowVersionAclList(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
+        const CallerInfo& callerInfo, bool isSrc, const std::string& targetBundleName = "");
     bool GetRelatedGroups(const std::string& udid, const std::vector<std::string>& bundleNames,
         AccountInfo& accountInfo);
     bool ParseGroupInfos(const std::string& returnGroupStr, std::vector<GroupInfo>& groupInfos);

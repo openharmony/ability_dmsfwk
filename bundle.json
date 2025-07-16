@@ -86,7 +86,8 @@
           "wifi",
           "storage_service",
           "distributed_notification_service",
-          "i18n"
+          "i18n",
+          "hiappevent"
         ],
         "third_party": []
       },

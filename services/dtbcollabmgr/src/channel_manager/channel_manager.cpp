@@ -15,9 +15,9 @@
 
 #include "channel_manager.h"
 #include "dtbcollabmgr_log.h"
-#include "softbus_file_adapter.h"
 #include <algorithm>
 #include <chrono>
+#include <dlfcn.h>
 #include <future>
 #include <sys/prctl.h>
 #include "securec.h"
@@ -70,7 +70,7 @@ namespace {
         { .qos = QOS_TYPE_MAX_IDLE_TIMEOUT, .value = 60 * 60 * 1000 }
     };
 
-    static constexpr int32_t DSCHED_COLLAB_HIGH_QOS_TYPE_MIN_BW = 4 * 1024 * 1024;
+    static constexpr int32_t DSCHED_COLLAB_HIGH_QOS_TYPE_MIN_BW = 80 * 1024 * 1024;
     static constexpr int32_t DSCHED_COLLAB_HIGH_QOS_TYPE_MAX_LATENCY = 10000;
     static constexpr int32_t DSCHED_COLLAB_HIGH_QOS_TYPE_MIN_LATENCY = 2000;
 
@@ -118,6 +118,10 @@ do {                                                                       \
         return;                                                            \
     }                                                                      \
 } while (0)
+}
+
+namespace {
+    constexpr int32_t MAX_LEN = 10 * 1024;
 }
 
 static void OnSocketConnected(int32_t socket, PeerSocketInfo info)
@@ -179,7 +183,8 @@ ChannelManager::~ChannelManager()
 int32_t ChannelManager::Init(const std::string& ownerName)
 {
     HILOGI("start init channel manager");
-    if (eventHandler_ != nullptr && callbackEventHandler_ != nullptr && msgEventHandler_ != nullptr) {
+    if (eventHandler_ != nullptr && callbackEventHandler_ != nullptr && msgEventHandler_ != nullptr &&
+        callbackEventHandlerNew_ != nullptr) {
         HILOGW("server channel already init");
         return ERR_OK;
     }
@@ -206,19 +211,28 @@ int32_t ChannelManager::Init(const std::string& ownerName)
     msgEventCon_.wait(msgLock, [this] {
         return msgEventHandler_ != nullptr;
     });
+
+    callbackEventNewThread_ = std::thread(&ChannelManager::StartCallbackEventNew, this);
+    std::unique_lock<std::mutex> callbackNewLock(callbackEventNewMutex_);
+    callbackEventNewCon_.wait(callbackNewLock, [this] {
+        return callbackEventHandlerNew_ != nullptr;
+    });
     
     int32_t socketServerId = CreateServerSocket();
     if (socketServerId <= 0) {
         HILOGE("create socket failed, ret: %{public}d", socketServerId);
         return CREATE_SOCKET_FAILED;
     }
-    int32_t ret = Listen(socketServerId, g_low_qosInfo,
-        g_lowQosTvParamIndex, &channelManagerListener);
+    int32_t ret = Listen(socketServerId, g_low_qosInfo, g_lowQosTvParamIndex, &channelManagerListener);
     if (ret != ERR_OK) {
         HILOGE("service listen failed, ret: %{public}d", ret);
         return LISTEN_SOCKET_FAILED;
     }
     serverSocketId_ = socketServerId;
+    int32_t result = GetDmsInteractiveAdapterProxy();
+    if (result != ERR_OK) {
+        HILOGE("Get remote dms interactive adapter proxy fail, ret %{public}d.", ret);
+    }
     HILOGI("end");
     return ERR_OK;
 }
@@ -250,6 +264,21 @@ void ChannelManager::StartCallbackEvent()
     callbackEventCon_.notify_one();
     runner->Run();
     HILOGI("callback event end");
+}
+
+void ChannelManager::StartCallbackEventNew()
+{
+    HILOGI("Start new callback event start");
+    std::string callbackName = ownerName_ + "callbackNew";
+    prctl(PR_SET_NAME, callbackName.c_str());
+    auto runner = AppExecFwk::EventRunner::Create(false);
+    {
+        std::lock_guard<std::mutex> lock(callbackEventNewMutex_);
+        callbackEventHandlerNew_ = std::make_shared<OHOS::AppExecFwk::EventHandler>(runner);
+    }
+    callbackEventNewCon_.notify_one();
+    runner->Run();
+    HILOGI("new callback event end");
 }
 
 void ChannelManager::StartMsgEvent()
@@ -292,6 +321,20 @@ int32_t ChannelManager::PostCallbackTask(const AppExecFwk::InnerEvent::Callback&
         return ERR_OK;
     }
     HILOGE("add callback task failed");
+    return POST_TASK_FAILED;
+}
+
+int32_t ChannelManager::PostCallbackTaskNew(const AppExecFwk::InnerEvent::Callback& callback,
+    const AppExecFwk::EventQueue::Priority priority)
+{
+    if (callbackEventHandlerNew_ == nullptr) {
+        HILOGE("new callback event handler empty");
+        return NULL_EVENT_HANDLER;
+    }
+    if (callbackEventHandlerNew_->PostTask(callback, priority)) {
+        return ERR_OK;
+    }
+    HILOGE("add new callback task failed");
     return POST_TASK_FAILED;
 }
 
@@ -356,8 +399,15 @@ void ChannelManager::DeInit()
             msgEventThread_.join();
         }
         msgEventHandler_ = nullptr;
-    } else {
-        HILOGE("msgEventHandler_ is nullptr");
+    }
+
+    // stop new callback task
+    if (callbackEventHandlerNew_ != nullptr) {
+        callbackEventHandlerNew_->GetEventRunner()->Stop();
+        if (callbackEventNewThread_.joinable()) {
+            callbackEventNewThread_.join();
+        }
+        callbackEventHandlerNew_ = nullptr;
     }
 
     // release channels
@@ -370,9 +420,55 @@ void ChannelManager::DeInit()
     for (const int32_t id : channelIds) {
         DeleteChannel(id);
     }
+    dlclose(dllHandle_);
+    dllHandle_ = nullptr;
+    dmsFileAdapetr_.SetFileSchema = nullptr;
     Shutdown(serverSocketId_);
     Reset();
     HILOGI("end");
+}
+
+int32_t ChannelManager::GetDmsInteractiveAdapterProxy()
+{
+    HILOGI("Get remote dms interactive adapter proxy.");
+    std::lock_guard<std::mutex> autoLock(dmsAdapetrLock_);
+#if (defined(__aarch64__) || defined(__x86_64__))
+    char resolvedPath[100] = "/system/lib64/libdms_interactive_adapter.z.so";
+#else
+    char resolvedPath[100] = "/system/lib/libdms_interactive_adapter.z.so";
+#endif
+    int32_t (*GetSoftbusFile)(ISoftbusFileAdpater &dmsFileHandle) = nullptr;
+
+    dllHandle_ = dlopen(resolvedPath, RTLD_LAZY);
+    if (dllHandle_ == nullptr) {
+        HILOGE("Open dms interactive adapter shared object fail, resolvedPath [%{public}s].", resolvedPath);
+        return NOT_FIND_SERVICE_REGISTRY;
+    }
+
+    int32_t ret = ERR_OK;
+    do {
+        GetSoftbusFile = reinterpret_cast<int32_t (*)(ISoftbusFileAdpater &dmsFileHandle)>(
+            dlsym(dllHandle_, "GetSoftbusFile"));
+        if (GetSoftbusFile == nullptr) {
+            HILOGE("Link the GetDmsInteractiveAdapter symbol in dms interactive adapter fail.");
+            ret = NOT_FIND_SERVICE_REGISTRY;
+            break;
+        }
+
+        if (GetSoftbusFile(dmsFileAdapetr_)) {
+            HILOGE("Init remote dms interactive adapter proxy fail, ret %{public}d.", ret);
+            ret = INVALID_PARAMETERS_ERR;
+            break;
+        }
+        ret = ERR_OK;
+    } while (false);
+
+    if (ret != ERR_OK) {
+        HILOGE("Get remote dms interactive adapter proxy fail, dlclose handle.");
+        dlclose(dllHandle_);
+        dllHandle_ = nullptr;
+    }
+    return ret;
 }
 
 void ChannelManager::Reset()
@@ -695,7 +791,11 @@ int32_t ChannelManager::BindSocket(const int32_t socketId, const ChannelDataType
         return BIND_SOCKET_FAILED;
     }
     if (dataType == ChannelDataType::FILE) {
-        ret = SoftbusFileAdpater::GetInstance().SetFileSchema(socketId);
+        if (dmsFileAdapetr_.SetFileSchema == nullptr) {
+            HILOGE("SetFileSchema is null.");
+            return INVALID_PARAMETERS_ERR;
+        }
+        ret = dmsFileAdapetr_.SetFileSchema(socketId);
     }
     if (ret != ERR_OK) {
         HILOGE("register %{public}d file schema failed", socketId);
@@ -897,7 +997,11 @@ int32_t ChannelManager::RegisterSocket(const int32_t socketId, const int32_t cha
     }
     if (dataType == ChannelDataType::FILE) {
         HILOGI("file socket, regist softbus file schema");
-        int32_t ret = SoftbusFileAdpater::GetInstance().SetFileSchema(socketId);
+        if (dmsFileAdapetr_.SetFileSchema == nullptr) {
+            HILOGE("SetFileSchema is null.");
+            return INVALID_PARAMETERS_ERR;
+        }
+        int32_t ret = dmsFileAdapetr_.SetFileSchema(socketId);
         if (ret != ERR_OK) {
             HILOGE("register %{public}d file schema failed", socketId);
             return REGISTER_FILE_SCHEMA_FAILED;
@@ -923,6 +1027,27 @@ void ChannelManager::NotifyListeners(const int32_t channelId, Func listenerFunc,
                 (ptr.get()->*listenerFunc)(channelId, std::forward<Args>(args)...);
             };
             PostCallbackTask(func, priority);
+        }
+    }
+}
+
+template <typename Func, typename... Args>
+void ChannelManager::NotifyListenersNew(const int32_t channelId, Func listenerFunc,
+    const AppExecFwk::EventQueue::Priority priority, Args&&... args)
+{
+    std::shared_lock<std::shared_mutex> readLock(listenerMutex_);
+    auto it = listenersMap_.find(channelId);
+    if (it == listenersMap_.end() || it->second.empty()) {
+        HILOGE("no matching listener to %{public}d", channelId);
+        return;
+    }
+    auto& listeners = it->second;
+    for (const auto& listener : listeners) {
+        if (auto ptr = listener.lock()) {
+            auto func = [ptr, listenerFunc, channelId, args...]() {
+                (ptr.get()->*listenerFunc)(channelId, std::forward<Args>(args)...);
+            };
+            PostCallbackTaskNew(func, priority);
         }
     }
 }
@@ -1212,6 +1337,11 @@ void ChannelManager::DoBytesReceiveCallback(const int32_t channelId,
 
 void ChannelManager::OnMessageReceived(int32_t socketId, const void* data, const uint32_t dataLen)
 {
+    HILOGI("data len = %{public}d", dataLen);
+    if (dataLen > MAX_LEN) {
+        HILOGE("dataLen is too long");
+        return;
+    }
     int32_t channelId = 0;
     CHECK_SOCKET_ID(socketId);
     CHECK_CHANNEL_ID(socketId, channelId);
@@ -1231,7 +1361,7 @@ void ChannelManager::OnMessageReceived(int32_t socketId, const void* data, const
 void ChannelManager::DoMessageReceiveCallback(const int32_t channelId,
     const std::shared_ptr<AVTransDataBuffer>& buffer)
 {
-    NotifyListeners(channelId, &IChannelListener::OnMessage,
+    NotifyListenersNew(channelId, &IChannelListener::OnMessage,
         AppExecFwk::EventQueue::Priority::HIGH, buffer);
 }
 

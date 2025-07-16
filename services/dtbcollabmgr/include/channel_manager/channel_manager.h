@@ -18,6 +18,7 @@
 #include "ichannel_listener.h"
 #include "channel_common_definition.h"
 #include "data_sender_receiver.h"
+#include "dms_interface_structure.h"
 #include "single_instance.h"
 #include "socket.h"
 #include <map>
@@ -119,10 +120,21 @@ private:
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> callbackEventHandler_;
     std::condition_variable callbackEventCon_;
 
+    std::thread callbackEventNewThread_;
+    std::condition_variable callbackEventNewCon_;
+    std::mutex callbackEventNewMutex_;
+    std::shared_ptr<OHOS::AppExecFwk::EventHandler> callbackEventHandlerNew_ = nullptr;
+
     std::mutex msgEventMutex_;
     std::thread msgEventThread_;
     std::shared_ptr<OHOS::AppExecFwk::EventHandler> msgEventHandler_;
     std::condition_variable msgEventCon_;
+
+    std::mutex dmsAdapetrLock_;
+    void *dllHandle_ = nullptr;
+    ISoftbusFileAdpater dmsFileAdapetr_ = {
+        .SetFileSchema = nullptr,
+    };
 private:
     explicit ChannelManager() = default;
     ~ChannelManager();
@@ -132,10 +144,13 @@ private:
         const AppExecFwk::EventQueue::Priority priority, const std::string& name = "");
     int32_t PostCallbackTask(const AppExecFwk::InnerEvent::Callback& callback,
             const AppExecFwk::EventQueue::Priority priority);
+    int32_t PostCallbackTaskNew(const AppExecFwk::InnerEvent::Callback& callback,
+            const AppExecFwk::EventQueue::Priority priority);
     int32_t PostMsgTask(const AppExecFwk::InnerEvent::Callback& callback,
         const AppExecFwk::EventQueue::Priority priority);
     void StartEvent();
     void StartCallbackEvent();
+    void StartCallbackEventNew();
     void StartMsgEvent();
 
     int32_t CreateServerSocket();
@@ -173,6 +188,9 @@ private:
     template <typename Func, typename... Args>
     void NotifyListeners(const int32_t channelId, Func listenerFunc,
         const AppExecFwk::EventQueue::Priority priority, Args&& ...args);
+    template <typename Func, typename... Args>
+    void NotifyListenersNew(const int32_t channelId, Func listenerFunc,
+        const AppExecFwk::EventQueue::Priority priority, Args&& ...args);
     int32_t GetValidSocket(const int32_t channelId);
     int32_t DoSendBytes(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data);
     int32_t DoSendMessage(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data);
@@ -193,6 +211,7 @@ private:
     void DealFileUpdatePathEvent(int32_t channelId, FileEvent *event);
     void DoFileRecvCallback(const int32_t channelId, const FileInfo& info);
     void DoFileSendCallback(const int32_t channelId, const FileInfo& info);
+    int32_t GetDmsInteractiveAdapterProxy();
 };
 }
 }

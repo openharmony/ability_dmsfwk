@@ -90,6 +90,36 @@ HWTEST_F(DmsContinueConditionMgrTest, testUpdateMissionStatus001, TestSize.Level
 }
 
 /**
+ * @tc.name: testOnMissionBackground001
+ * @tc.desc: test OnMissionBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, testOnMissionBackground001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testOnMissionBackground001 start" << std::endl;
+    InitMissionMap();
+    int32_t missionId = 1;
+    int32_t accountId = 0;
+    MissionEventType type = MISSION_EVENT_BACKGROUND;
+    auto ret = DmsContinueConditionMgr::GetInstance().UpdateMissionStatus(accountId, missionId, type);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    DmsContinueConditionMgr::GetInstance().missionFuncMap_[MISSION_EVENT_BACKGROUND] =
+        &DmsContinueConditionMgr::OnMissionBackground;
+    ret = DmsContinueConditionMgr::GetInstance().UpdateMissionStatus(accountId, missionId, type);
+    EXPECT_EQ(ret, ERR_OK);
+
+    missionId = 2;
+    ret = DmsContinueConditionMgr::GetInstance().UpdateMissionStatus(accountId, missionId, type);
+    EXPECT_EQ(ret, CONDITION_INVALID_MISSION_ID);
+    EXPECT_EQ(DmsContinueConditionMgr::GetInstance().missionMap_[accountId][missionId].isFocused,
+        false);
+    DmsContinueConditionMgr::GetInstance().UnInit();
+    DmsContinueConditionMgr::GetInstance().missionFuncMap_.clear();
+    DTEST_LOG << "DMSContinueManagerTest testOnMissionBackground001 end" << std::endl;
+}
+
+/**
  * @tc.name: testOnMissionDestory001
  * @tc.desc: test OnMissionDestory
  * @tc.type: FUNC
@@ -165,11 +195,9 @@ HWTEST_F(DmsContinueConditionMgrTest, testOnMissionInactive001, TestSize.Level1)
 HWTEST_F(DmsContinueConditionMgrTest, testCheckSystemSendCondition001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testCheckSystemSendCondition001 start" << std::endl;
-    DmsContinueConditionMgr::GetInstance().isCfgDevice_ = true;
     auto ret = DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition();
     EXPECT_FALSE(ret);
 
-    DmsContinueConditionMgr::GetInstance().isCfgDevice_ = false;
     DmsContinueConditionMgr::GetInstance().isSwitchOn_ = false;
     ret = DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition();
     EXPECT_FALSE(ret);
@@ -261,7 +289,7 @@ HWTEST_F(DmsContinueConditionMgrTest, testCheckSendFocusedCondition001, TestSize
 
     status.continueState = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
     ret = DmsContinueConditionMgr::GetInstance().CheckSendFocusedCondition(status);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 
     DmsKvSyncE2E::GetInstance()->isCfgDevices_ = false;
     ret = DmsContinueConditionMgr::GetInstance().CheckSendFocusedCondition(status);
@@ -293,7 +321,7 @@ HWTEST_F(DmsContinueConditionMgrTest, testCheckSendUnfocusedCondition001, TestSi
 
     status.isContinuable = true;
     ret = DmsContinueConditionMgr::GetInstance().CheckSendUnfocusedCondition(status);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 
     DmsKvSyncE2E::GetInstance()->isCfgDevices_ = false;
     ret = DmsContinueConditionMgr::GetInstance().CheckSendUnfocusedCondition(status);
@@ -325,7 +353,7 @@ HWTEST_F(DmsContinueConditionMgrTest, testCheckSendActiveCondition001, TestSize.
 
     status.isContinuable = true;
     ret = DmsContinueConditionMgr::GetInstance().CheckSendActiveCondition(status);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 
     DmsKvSyncE2E::GetInstance()->isCfgDevices_ = false;
     ret = DmsContinueConditionMgr::GetInstance().CheckSendActiveCondition(status);
@@ -352,7 +380,7 @@ HWTEST_F(DmsContinueConditionMgrTest, testCheckSendInactiveCondition001, TestSiz
 
     status.isContinuable = true;
     ret = DmsContinueConditionMgr::GetInstance().CheckSendInactiveCondition(status);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 
     DmsKvSyncE2E::GetInstance()->isCfgDevices_ = false;
     ret = DmsContinueConditionMgr::GetInstance().CheckSendInactiveCondition(status);

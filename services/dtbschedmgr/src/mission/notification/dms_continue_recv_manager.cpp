@@ -96,10 +96,6 @@ void DMSContinueRecvMgr::NotifyDataRecv(std::string& senderNetworkId,
 {
     HILOGI("NotifyDataRecv start, senderNetworkId: %{public}s, dataLen: %{public}u. accountId: %{public}d.",
         GetAnonymStr(senderNetworkId).c_str(), dataLen, accountId_);
-    if (!DmsKvSyncE2E::GetInstance()->CheckCtrlRule()) {
-        HILOGE("Forbid sending and receiving");
-        return;
-    }
     if (!DataShareManager::GetInstance().IsCurrentContinueSwitchOn()) {
         HILOGE("ContinueSwitch status is off");
         return;

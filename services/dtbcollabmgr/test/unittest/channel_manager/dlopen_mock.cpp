@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2024 Huawei Device Co., Ltd.
+* Copyright (c) 2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -12,23 +12,31 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef OHOS_DSCHED_COLLAB_SOFTBUS_FILE_ADAPTER_TEST_H
-#define OHOS_DSCHED_COLLAB_SOFTBUS_FILE_ADAPTER_TEST_H
+#include "dlopen_mock.h"
 
-#include "softbus_file_adapter.h"
-
-#include "gtest/gtest.h"
+void *dlopen(const char *file, int mode)
+{
+    return nullptr;
+}
 
 namespace OHOS {
 namespace DistributedCollab {
-class SoftbusFileAdpaterTest : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
 
-    void SetUp() override;
-    void TearDown() override;
-};
+DlfcnMock* DlfcnMock::gMock;
+
+DlfcnMock::DlfcnMock()
+{
+    gMock = this;
 }
+
+DlfcnMock::~DlfcnMock()
+{
+    gMock = nullptr;
 }
-#endif
+
+DlfcnMock& DlfcnMock::GetMock()
+{
+    return *gMock;
+}
+}  // namespace DistributedCollab
+}  // namespace OHOS

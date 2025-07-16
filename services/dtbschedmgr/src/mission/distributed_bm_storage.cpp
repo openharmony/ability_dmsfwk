@@ -843,7 +843,7 @@ int32_t DmsBmStorage::CloudSync()
 }
 
 void DmsBmStorage::FindProvishionInfo(OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> bundleMgr,
-    AppExecFwk::AppProvisionInfo appProvisionInfo, std::vector<AccountSA::OsAccountInfo> accounts,
+    AppExecFwk::AppProvisionInfo &appProvisionInfo, std::vector<AccountSA::OsAccountInfo> accounts,
     int32_t result, const std::string& bundleName)
 {
     if (result == ERR_OK && !accounts.empty()) {
@@ -888,7 +888,8 @@ void DmsBmStorage::UpdateDistributedData()
         if (oldDistributedBundleInfos.find(bundleInfo.name) != oldDistributedBundleInfos.end()) {
             int64_t updateTime = oldDistributedBundleInfos[bundleInfo.name].updateTime;
             std::string oldUdid = keyOfKVStore.substr(0, localUdid.length());
-            if (updateTime != bundleInfo.updateTime || (!localUdid.empty() && oldUdid != localUdid)) {
+            if (updateTime != bundleInfo.updateTime || (!localUdid.empty() && oldUdid != localUdid)
+            || oldDistributedBundleInfos[bundleInfo.name].developerId.empty()) {
                 DmsBundleInfo dmsBundleInfo = ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo, true);
                 dmsBundleInfos.push_back(dmsBundleInfo);
             }
@@ -942,7 +943,8 @@ void DmsBmStorage::DmsPutBatch(const std::vector<DmsBundleInfo> &dmsBundleInfos)
         entrie.key = key;
         Value value(dmsBundleInfo.ToString());
         entrie.value = value;
-        HILOGI("need be put: %{public}s", dmsBundleInfo.bundleName.c_str());
+        HILOGI("need be put: %{public}s, developer id: %{public}s", dmsBundleInfo.bundleName.c_str(),
+            GetAnonymStr(dmsBundleInfo.developerId).c_str());
         entries.push_back(entrie);
     }
     Entry entrie;

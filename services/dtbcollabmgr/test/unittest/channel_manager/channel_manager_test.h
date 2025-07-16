@@ -16,6 +16,7 @@
 #define DISTRIBUTED_COLLAB_CHANNEL_MANAGER_TEST_H
 
 #include "channel_manager.h"
+#include "dlopen_mock.h"
 #include "softbus_mock.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -24,6 +25,7 @@ namespace OHOS {
 namespace DistributedCollab {
 class ChannelManagerTest : public testing::Test {
 public:
+    DlfcnMock mockDlfcn;
     SoftbusMock mockSoftbus;
     const std::string ownerName = "UnittestName";
 

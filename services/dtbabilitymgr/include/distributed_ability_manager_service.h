@@ -75,6 +75,7 @@ private:
     bool QueryExtensionAbilityInfo(const int32_t& activeAccountId, const AAFwk::Want& want,
         AppExecFwk::ExtensionAbilityInfo& extensionInfo);
     bool HandleDisconnectAbility();
+    bool VerifyPermission(uint32_t accessToken, const std::string& permissionName) const;
     void HandleNotifierDied(const sptr<IRemoteObject>& notifier);
     void HandleStartDeviceManager(int32_t token,
         const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams = nullptr);

@@ -556,6 +556,19 @@ HWTEST_F(DistributedSchedStubTest, ContinueMissionInner_002, TestSize.Level3)
 }
 
 /**
+ * @tc.name: CheckPermission_001
+ * @tc.desc: check CheckPermission
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, CheckPermission_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedStubTest CheckPermission_001 begin" << std::endl;
+    auto result = DistributedSchedService::GetInstance().CheckPermission(true);
+    EXPECT_EQ(result, true);
+    DTEST_LOG << "DistributedSchedStubTest CheckPermission_001 end" << std::endl;
+}
+
+/**
  * @tc.name:ContinueMissionOfBundleNameInner_003
  * @tc.desc: call ContinueMissionOfBundleNameInner
  * @tc.type: FUNC

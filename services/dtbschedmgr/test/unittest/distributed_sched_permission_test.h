@@ -18,6 +18,9 @@
 
 #include "device_manager.h"
 #include "gtest/gtest.h"
+#include "mock/bundle_manager_internal_mock.h"
+#include "mock/dtbschedmgr_device_info_storage_mock.h"
+#include "mock/distributed_sched_adapter_mock.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -29,6 +32,9 @@ public:
     void TearDown();
 
     std::string deviceId_;
+    static inline std::shared_ptr<BundleManagerInternalMock> bundleMgrMock_ = nullptr;
+    static inline std::shared_ptr<DtbschedmgrDeviceInfoStorageMock> storageMock_ = nullptr;
+    static inline std::shared_ptr<DistributedSchedAdapterMock> adapter_ = nullptr;
 
 protected:
     class DeviceInitCallBack : public OHOS::DistributedHardware::DmInitCallback {

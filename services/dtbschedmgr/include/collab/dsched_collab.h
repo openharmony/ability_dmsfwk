@@ -203,6 +203,7 @@ public:
 
 private:
     int32_t Init();
+    int32_t UnInit();
     void StartEventHandler();
     void ProcessEvent(const AppExecFwk::InnerEvent::Pointer& event);
 

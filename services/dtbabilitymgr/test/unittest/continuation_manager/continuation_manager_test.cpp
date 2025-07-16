@@ -37,6 +37,7 @@ constexpr uint32_t SELECTED_DEVICE_SIZE = 2;
 constexpr uint32_t UNSELECTED_DEVICE_SIZE = 2;
 const std::string TEST_DEVICE_ID = "test deviceId";
 const std::string EMPTY_DEVICE_ID = "";
+const std::string CALLBACK_TYPE_NULL = "";
 const std::string CALLBACK_TYPE1 = "deviceSelected";
 const std::string CALLBACK_TYPE2 = "deviceUnselected";
 const std::string INVALID_CALLBACK_TYPE = "deviceCancel";
@@ -254,7 +255,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_003, TestS
     DTEST_LOG << "result4:" << result4 << std::endl;
     EXPECT_EQ(ERR_OK, result1);
     EXPECT_EQ(UNKNOWN_CALLBACK_TYPE, result2);
-    EXPECT_EQ(ERR_NULL_OBJECT, result3);
+    EXPECT_EQ(INVALID_PARAMETERS_ERR, result3);
     EXPECT_EQ(ERR_NULL_OBJECT, result4);
     DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_003 end" << std::endl;
 }
@@ -502,6 +503,31 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_010, TestS
 }
 
 /**
+ * @tc.name: RegisterDeviceSelectionCallbackTest_011
+ * @tc.desc: test dms callback called when cbType and notifier is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_011, TestSize.Level1)
+{
+    DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_011 start" << std::endl;
+    int32_t token = -1;
+    int32_t result1 = DistributedAbilityManagerClient::GetInstance().Register(nullptr, token);
+    DTEST_LOG << "result1:" << result1 << std::endl;
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
+    sptr<DeviceSelectionNotifierTest> notifierNull = nullptr;
+    int32_t result2 = DistributedAbilityManagerClient::GetInstance().RegisterDeviceSelectionCallback(
+        token, CALLBACK_TYPE_NULL, notifier);
+    DTEST_LOG << "result2:" << result2 << std::endl;
+    int32_t result3 = DistributedAbilityManagerClient::GetInstance().RegisterDeviceSelectionCallback(
+        token, CALLBACK_TYPE1, notifierNull);
+    DTEST_LOG << "result3:" << result3 << std::endl;
+    EXPECT_EQ(ERR_OK, result1);
+    EXPECT_EQ(INVALID_PARAMETERS_ERR, result2);
+    EXPECT_EQ(ERR_NULL_OBJECT, result3);
+    DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_011 end" << std::endl;
+}
+
+/**
  * @tc.name: UnregisterDeviceSelectionCallbackTest_001
  * @tc.desc: test unregister device selection callback
  * @tc.type: FUNC
@@ -609,7 +635,7 @@ HWTEST_F(ContinuationManagerTest, UnregisterDeviceSelectionCallbackTest_005, Tes
         token, "");
     DTEST_LOG << "result2:" << result2 << std::endl;
     EXPECT_EQ(ERR_OK, result1);
-    EXPECT_EQ(ERR_NULL_OBJECT, result2);
+    EXPECT_EQ(INVALID_PARAMETERS_ERR, result2);
     DTEST_LOG << "ContinuationManagerTest UnregisterDeviceSelectionCallbackTest_005 end" << std::endl;
 }
 
@@ -670,8 +696,13 @@ HWTEST_F(ContinuationManagerTest, StartDeviceManagerTest_003, TestSize.Level1)
     int32_t result2 = DistributedAbilityManagerClient::GetInstance().StartDeviceManager(
         UNREGISTER_TOKEN, continuationExtraParams);
     DTEST_LOG << "result2:" << result2 << std::endl;
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParamsNull = nullptr;
+    int32_t result3 = DistributedAbilityManagerClient::GetInstance().StartDeviceManager(
+        UNREGISTER_TOKEN, continuationExtraParamsNull);
+    DTEST_LOG << "result3:" << result3 << std::endl;
     EXPECT_EQ(TOKEN_HAS_NOT_REGISTERED, result1);
     EXPECT_EQ(TOKEN_HAS_NOT_REGISTERED, result2);
+    EXPECT_EQ(TOKEN_HAS_NOT_REGISTERED, result3);
     DTEST_LOG << "ContinuationManagerTest StartDeviceManagerTest_003 end" << std::endl;
 }
 
