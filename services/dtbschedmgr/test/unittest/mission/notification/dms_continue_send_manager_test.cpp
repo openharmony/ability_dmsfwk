@@ -120,6 +120,42 @@ HWTEST_F(DMSContinueSendMgrTest, ExecuteSendStrategy_Test_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ExecuteSendStrategy_Test_002
+ * @tc.desc: test ExecuteSendStrategy
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueSendMgrTest, ExecuteSendStrategy_Test_002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueSendMgrTest ExecuteSendStrategy_Test_002 start" << std::endl;
+    std::shared_ptr<DMSContinueSendMgr> sendMgr = std::make_shared<DMSContinueSendMgr>();
+    MissionStatus status;
+    uint8_t sendType = 0;
+    int32_t missionId = 0;
+    EXPECT_CALL(*mgrMock_, GetMissionStatus(_, _, _)).WillOnce(Return(true));
+    sendMgr->SendContinueBroadcast(missionId, MissionEventType::MISSION_EVENT_BACKGROUND);
+
+    EXPECT_CALL(*mgrMock_, GetMissionStatus(_, _, _)).WillRepeatedly(Return(true));
+    sendMgr->SendContinueBroadcast(missionId, MissionEventType::MISSION_EVENT_BACKGROUND);
+
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(false));
+    EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_BACKGROUND));
+
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(false));
+    EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillOnce(Return(false));
+    EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_BACKGROUND));
+
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(false));
+    EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillOnce(Return(false));
+    EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_BACKGROUND));
+
+    sendMgr->strategyMap_.clear();
+    auto ret = sendMgr->ExecuteSendStrategy(MissionEventType::MISSION_EVENT_BACKGROUND, status, sendType);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DMSContinueSendMgrTest ExecuteSendStrategy_Test_002 end" << std::endl;
+}
+
+/**
  * @tc.name: QueryBroadcastInfo_Test_001
  * @tc.desc: test QueryBroadcastInfo
  * @tc.type: FUNC

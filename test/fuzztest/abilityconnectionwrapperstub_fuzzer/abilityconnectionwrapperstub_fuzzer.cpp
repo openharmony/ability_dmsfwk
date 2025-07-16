@@ -30,6 +30,8 @@ bool OnAbilityConnectDoneFuzzTest(const uint8_t* data, size_t size)
         return false;
     }
     FuzzUtil::MockPermission();
+    std::shared_ptr<AbilityConnectionWrapperStub> abilityConnection =
+        std::make_shared<AbilityConnectionWrapperStub>();
     sptr<IRemoteObject> connection(new MockDistributedSched());
     std::string localDeviceId(reinterpret_cast<const char*>(data), size);
     std::shared_ptr<AbilityConnectionWrapperStub> abilityConnection_ =

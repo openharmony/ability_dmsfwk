@@ -57,12 +57,22 @@ public:
         : dmsContinueSendMgr_(dmsContinueSendMgr) {};
     int32_t ExecuteSendStrategy(const MissionStatus& status, uint8_t &sendType) const override;
 private:
+    constexpr static int32_t SKIP_UNFOCUSED_TYPE = -1;
     std::weak_ptr<DMSContinueSendMgr> dmsContinueSendMgr_;
 };
 
 class SendStrategyDestoryed : public ContinueSendStrategy {
 public:
     explicit SendStrategyDestoryed(const std::shared_ptr<DMSContinueSendMgr>& dmsContinueSendMgr)
+        : dmsContinueSendMgr_(dmsContinueSendMgr) {};
+    int32_t ExecuteSendStrategy(const MissionStatus& status, uint8_t &sendType) const override;
+private:
+    std::weak_ptr<DMSContinueSendMgr> dmsContinueSendMgr_;
+};
+
+class SendStrategyBackground : public ContinueSendStrategy {
+public:
+    explicit SendStrategyBackground(const std::shared_ptr<DMSContinueSendMgr>& dmsContinueSendMgr)
         : dmsContinueSendMgr_(dmsContinueSendMgr) {};
     int32_t ExecuteSendStrategy(const MissionStatus& status, uint8_t &sendType) const override;
 private:
@@ -99,6 +109,15 @@ private:
 class SendStrategyMMI : public ContinueSendStrategy {
 public:
     explicit SendStrategyMMI(const std::shared_ptr<DMSContinueSendMgr>& dmsContinueSendMgr)
+        : dmsContinueSendMgr_(dmsContinueSendMgr) {};
+    int32_t ExecuteSendStrategy(const MissionStatus& status, uint8_t &sendType) const override;
+private:
+    std::weak_ptr<DMSContinueSendMgr> dmsContinueSendMgr_;
+};
+
+class SendStrategyContinueSwitchOff : public ContinueSendStrategy {
+public:
+    explicit SendStrategyContinueSwitchOff(const std::shared_ptr<DMSContinueSendMgr>& dmsContinueSendMgr)
         : dmsContinueSendMgr_(dmsContinueSendMgr) {};
     int32_t ExecuteSendStrategy(const MissionStatus& status, uint8_t &sendType) const override;
 private:

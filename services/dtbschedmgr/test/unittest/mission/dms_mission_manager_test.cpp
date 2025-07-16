@@ -1200,6 +1200,43 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncMissionsFromRemote001, TestSize.Lev
 }
 
 /**
+ * @tc.name: testStartSyncMissionsFromRemote001
+ * @tc.desc: check access control
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testCheckAccessControlForMissions001, TestSize.Level3)
+{
+    DTEST_LOG << "testCheckAccessControlForMissions001 begin" << std::endl;
+    DistributedSchedUtil::MockManageMissions();
+    std::vector<DstbMissionInfo> missionInfos;
+    CallerInfo callerInfo;
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().GenerateCallerInfo(callerInfo);
+    auto ret = DistributedSchedMissionManager::GetInstance().CheckAccessControlForMissions(callerInfo);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "testCheckAccessControlForMissions001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testSGetOsAccountData001
+ * @tc.desc: get os account data
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testGetOsAccountData001, TestSize.Level3)
+{
+    DTEST_LOG << "testGetOsAccountData001 begin" << std::endl;
+    DistributedSchedUtil::MockManageMissions();
+    std::vector<DstbMissionInfo> missionInfos;
+    CallerInfo callerInfo;
+    DistributedSchedMissionManager::GetInstance().Init();
+    DistributedSchedMissionManager::GetInstance().GenerateCallerInfo(callerInfo);
+    AccountInfo dstAccountInfo;
+    auto ret = DistributedSchedMissionManager::GetInstance().GetOsAccountData(dstAccountInfo);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "testGetOsAccountData001 end" << std::endl;
+}
+
+/**
  * @tc.name: testStopSyncMissionsFromRemote001
  * @tc.desc: stop sync missions from remote
  * @tc.type: FUNC
@@ -2418,6 +2455,20 @@ HWTEST_F(DMSMissionManagerTest, testNeedSyncDevice003, TestSize.Level3)
     bool ret = DistributedSchedMissionManager::GetInstance().NeedSyncDevice(DEVICE_ID);
     EXPECT_TRUE(ret);
     DTEST_LOG << "testNeedSyncDevice003 end" << std::endl;
+}
+
+/**
+ * @tc.name: testNeedSyncDevice004
+ * @tc.desc: need sync device
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testNeedSyncDevice004, TestSize.Level3)
+{
+    DTEST_LOG << "testNeedSyncDevice004 begin" << std::endl;
+    std::string deviceId;
+    bool ret = DistributedSchedMissionManager::GetInstance().NeedSyncDevice(deviceId);
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "testNeedSyncDevice004 end" << std::endl;
 }
 
 /**

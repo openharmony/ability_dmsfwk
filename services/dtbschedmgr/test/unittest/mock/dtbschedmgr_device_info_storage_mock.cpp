@@ -24,5 +24,10 @@ std::vector<std::string> DtbschedmgrDeviceInfoStorage::GetNetworkIdList()
 {
     return IDtbschedmgrDeviceInfoStorage::storageMock->GetNetworkIdList();
 }
+
+bool DtbschedmgrDeviceInfoStorage::GetLocalDeviceId(std::string& networkId)
+{
+    return IDtbschedmgrDeviceInfoStorage::storageMock->GetLocalDeviceId(networkId);
+}
 }
 }

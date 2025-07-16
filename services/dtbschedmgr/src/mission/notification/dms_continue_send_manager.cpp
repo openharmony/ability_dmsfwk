@@ -56,10 +56,13 @@ void DMSContinueSendMgr::Init(int32_t currentUserId)
         strategyMap_[MISSION_EVENT_FOCUSED] = std::make_shared<SendStrategyFocused>(shared_from_this());
         strategyMap_[MISSION_EVENT_UNFOCUSED] = std::make_shared<SendStrategyUnfocused>(shared_from_this());
         strategyMap_[MISSION_EVENT_DESTORYED] = std::make_shared<SendStrategyDestoryed>(shared_from_this());
+        strategyMap_[MISSION_EVENT_BACKGROUND] = std::make_shared<SendStrategyBackground>(shared_from_this());
         strategyMap_[MISSION_EVENT_ACTIVE] = std::make_shared<SendStrategyActive>(shared_from_this());
         strategyMap_[MISSION_EVENT_INACTIVE] = std::make_shared<SendStrategyInactive>(shared_from_this());
         strategyMap_[MISSION_EVENT_TIMEOUT] = std::make_shared<SendStrategyTimeout>(shared_from_this());
         strategyMap_[MISSION_EVENT_MMI] = std::make_shared<SendStrategyMMI>(shared_from_this());
+        strategyMap_[MISSION_EVENT_CONTINUE_SWITCH_OFF] =
+            std::make_shared<SendStrategyContinueSwitchOff>(shared_from_this());
 
         eventThread_ = std::thread(&DMSContinueSendMgr::StartEvent, this);
         std::unique_lock<std::mutex> lock(eventMutex_);
@@ -125,7 +128,11 @@ void DMSContinueSendMgr::OnMissionStatusChanged(int32_t missionId, MissionEventT
         HILOGE("initFlag_ %{public}d.", initFlag_.load());
         return;
     }
-    eventHandler_->RemoveTask(TIMEOUT_UNFOCUSED_TASK + std::to_string(missionId));
+    if (type != MissionEventType::MISSION_EVENT_UNFOCUSED) {
+        eventHandler_->RemoveTask(TIMEOUT_UNFOCUSED_TASK + std::to_string(missionId));
+    } else {
+        HILOGI("Skip delayed tasks for unfocused events");
+    }
     eventHandler_->PostTask(feedfunc);
 }
 

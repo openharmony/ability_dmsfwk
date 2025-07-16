@@ -315,5 +315,29 @@ HWTEST_F(DmsKvSyncE2ETest, CheckKvStoreTest_001, TestSize.Level1)
     }
     DTEST_LOG << "DmsKvSyncE2ETest CheckKvStoreTest_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: CheckMDMCtrlRuleTest_001
+ * @tc.desc: test insert CheckMDMCtrlRule
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsKvSyncE2ETest, CheckMDMCtrlRuleTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DmsKvSyncE2ETest CheckMDMCtrlRuleTest_001 start" << std::endl;
+    ASSERT_NE(dmsKvSyncE2E_, nullptr);
+    std::string bundleName = "bundleName";
+    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
+    EXPECT_NE(dmsKvSyncE2E, nullptr);
+    if (dmsKvSyncE2E != nullptr) {
+        dmsKvSyncE2E_->GetInstance()->isMDMControl_ = true;
+        bool ret = dmsKvSyncE2E_->GetInstance()->CheckMDMCtrlRule(bundleName);
+        EXPECT_EQ(ret, true);
+
+        dmsKvSyncE2E_->GetInstance()->isMDMControl_ = false;
+        ret = dmsKvSyncE2E_->GetInstance()->CheckMDMCtrlRule(bundleName);
+        EXPECT_EQ(ret, false);
+    }
+    DTEST_LOG << "DmsKvSyncE2ETest CheckMDMCtrlRuleTest_001 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
