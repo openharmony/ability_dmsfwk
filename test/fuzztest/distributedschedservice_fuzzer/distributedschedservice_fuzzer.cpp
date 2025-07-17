@@ -74,6 +74,7 @@ void OnActiveFuzzTest(const uint8_t* data, size_t size)
     SystemAbilityOnDemandReason reason(reasonId, reasonName, reasonValue, extraDataId);
 
     DistributedSchedService::GetInstance().OnActive(reason);
+    DistributedSchedService::GetInstance().OnIdle(reason);
 }
 
 void HandleBootStartFuzzTest(const uint8_t* data, size_t size)
