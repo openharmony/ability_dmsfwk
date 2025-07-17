@@ -704,6 +704,10 @@ void DistributedAbilityManagerService::HandleUpdateConnectStatus(int32_t token, 
         PARCEL_WRITE_HELPER_NORET(data, Int32, static_cast<int32_t>(deviceConnectStatus));
         MessageParcel reply;
         MessageOption option;
+        if (appProxy == nullptr) {
+            HILOGE("appProxy is nullptr");
+            return;
+        }
         int32_t result = appProxy->SendRequest(UPDATE_CONNECT_STATUS_CODE, data, reply, option);
         HILOGD("result is %{public}d", result);
     };
