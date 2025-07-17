@@ -174,6 +174,7 @@ ohos_unittest("distributedschedservicetest") {
     "unittest/distributed_sched_service_first_test.cpp",
     "unittest/distributed_sched_service_second_test.cpp",
     "unittest/mock/multi_user_manager_mock.cpp",
+    "unittest/mock/mock_device_manager.cpp",
     "unittest/mock/svc_distributed_connection_mock.cpp",
     "unittest/mock_distributed_sched.cpp",
   ]
