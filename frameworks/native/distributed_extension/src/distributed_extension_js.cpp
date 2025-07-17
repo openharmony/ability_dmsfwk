@@ -15,6 +15,7 @@
 
 #include "distributed_extension_js.h"
 
+#include "distributed_sched_utils.h"
 #include "distributed_extension_context_js.h"
 #include "napi_common_want.h"
 
@@ -102,7 +103,7 @@ void DistributedExtensionJs::Init(const shared_ptr<AppExecFwk::AbilityLocalRecor
         string modulePath = GetSrcPath(info);
         int moduleType = static_cast<int>(info.type);
         HILOG_INFO("Try to load %{public}s's %{public}s(type %{public}d) from %{public}s", bundleName.c_str(),
-            moduleName.c_str(), moduleType, modulePath.c_str());
+            moduleName.c_str(), moduleType, GetAnonymStr(modulePath).c_str());
 
         AbilityRuntime::HandleScope handleScope(jsRuntime_);
         jsObj_ = jsRuntime_.LoadModule(moduleName, modulePath, info.hapPath,

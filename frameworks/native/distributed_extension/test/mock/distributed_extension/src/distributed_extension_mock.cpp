@@ -22,41 +22,65 @@ void DistributedExtension::Init(const shared_ptr<AbilityRuntime::AbilityLocalRec
     const shared_ptr<AbilityRuntime::OHOSApplication> &application,
     shared_ptr<AbilityRuntime::AbilityHandler> &handler, const sptr<IRemoteObject> &token)
 {
+    if (TDExtension::tDExtension == nullptr) {
+        return;
+    }
     TDExtension::tDExtension->Init(record, application, handler, token);
 }
 
 void DistributedExtension::OnStart(const AAFwk::Want &want)
 {
+    if (TDExtension::tDExtension == nullptr) {
+        return;
+    }
     TDExtension::tDExtension->OnStart(want);
 }
 
 void DistributedExtension::OnCommand(const AAFwk::Want &want, bool restart, int startId)
 {
+    if (TDExtension::tDExtension == nullptr) {
+        return;
+    }
     TDExtension::tDExtension->OnCommand(want, restart, startId);
 }
 
 sptr<IRemoteObject> DistributedExtension::OnConnect(const AAFwk::Want &want)
 {
+    if (TDExtension::tDExtension == nullptr) {
+        return nullptr;
+    }
     return TDExtension::tDExtension->OnConnect(want);
 }
 
 void DistributedExtension::OnDisconnect(const AAFwk::Want &want)
 {
+    if (TDExtension::tDExtension == nullptr) {
+        return;
+    }
     TDExtension::tDExtension->OnDisconnect(want);
 }
 
 int32_t DistributedExtension::TriggerOnCreate(AAFwk::Want& want)
 {
+    if (TDExtension::tDExtension == nullptr) {
+        return 0;
+    }
     return TDExtension::tDExtension->OnCreate(want);
 }
 
 int32_t DistributedExtension::TriggerOnDestroy()
 {
+    if (TDExtension::tDExtension == nullptr) {
+        return 0;
+    }
     return TDExtension::tDExtension->OnDestroy();
 }
 
 int32_t DistributedExtension::TriggerOnCollaborate(AAFwk::WantParams &wantParam)
 {
+    if (TDExtension::tDExtension == nullptr) {
+        return 0;
+    }
     return TDExtension::tDExtension->OnCollabRequest(wantParam);
 }
 } // namespace OHOS::DistributedSchedule

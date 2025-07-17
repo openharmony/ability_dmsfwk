@@ -38,7 +38,7 @@ ohos_shared_library("distributed_extension_ability_native") {
     "${dms_path}/common/include",
   ]
 
-  deps = []
+  deps = [ "${dms_path}/common:distributed_sched_utils" ]
 
   external_deps = [
     "ability_base:configuration",
@@ -53,6 +53,7 @@ ohos_shared_library("distributed_extension_ability_native") {
     "ability_runtime:runtime",
     "access_token:libaccesstoken_sdk",
     "bundle_framework:appexecfwk_core",
+    "cJSON:cjson",
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
