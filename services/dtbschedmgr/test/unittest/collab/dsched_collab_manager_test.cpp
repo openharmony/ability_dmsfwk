@@ -18,6 +18,7 @@
 #include "dtbschedmgr_device_info_storage.h"
 #include "distributed_sched_test_util.h"
 #include "dtbcollabmgr_log.h"
+#include "string_wrapper.h"
 #include "test_log.h"
 #include "mock_distributed_sched.h"
 
@@ -132,7 +133,7 @@ HWTEST_F(DSchedCollabManagerTest, CollabMission_001, TestSize.Level3)
 
     EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
-    EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedCollabManagerTest CollabMission_001 end" << std::endl;
 }
 
@@ -148,38 +149,38 @@ HWTEST_F(DSchedCollabManagerTest, CollabMission_002, TestSize.Level3)
     info.srcClientCB_ = sptr<DistributedSchedService>(new DistributedSchedService());
     EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     int32_t ret = DSchedCollabManager::GetInstance().CollabMission(info);
-    EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     info.srcInfo_.bundleName_ = "srcBundle";
     EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
-    EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     info.sinkInfo_.bundleName_ = "sinkBundle";
     EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
-    EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     info.srcInfo_.moduleName_ = "srcModule";
     EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
-    EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     info.sinkInfo_.moduleName_ = "sinkModule";
     EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
-    EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     info.srcInfo_.abilityName_ = "srcAbility";
     EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
-    EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 
     info.sinkInfo_.abilityName_ = "sinkAbility";
     EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(false));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
-    EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
+    EXPECT_EQ(ret, FIND_LOCAL_DEVICEID_ERR);
     DTEST_LOG << "DSchedCollabManagerTest CollabMission_002 end" << std::endl;
 }
 
@@ -202,7 +203,38 @@ HWTEST_F(DSchedCollabManagerTest, CollabMission_003, TestSize.Level3)
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(nullptr));
     int32_t ret = DSchedCollabManager::GetInstance().CollabMission(info);
+    EXPECT_EQ(ret, FIND_REMOTE_DEVICEID_ERR);
+
+    std::shared_ptr<DmsDeviceInfo> ptr = std::make_shared<DmsDeviceInfo>("", 0, "");
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
+    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(ptr));
+    ret = DSchedCollabManager::GetInstance().CollabMission(info);
     EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
+    DTEST_LOG << "DSchedCollabManagerTest CollabMission_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: CollabMission_004
+ * @tc.desc: test CollabMission func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DSchedCollabManagerTest, CollabMission_004, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabManagerTest CollabMission_004 begin" << std::endl;
+    DSchedCollabInfo info;
+    info.srcInfo_.bundleName_ = "srcBundle";
+    info.sinkInfo_.bundleName_ = "sinkBundle";
+    info.srcInfo_.moduleName_ = "srcModule";
+    info.sinkInfo_.moduleName_ = "sinkModule";
+    info.srcInfo_.abilityName_ = "srcAbility";
+    info.sinkInfo_.abilityName_ = "sinkAbility";
+    info.srcOpt_.startParams_.SetParam(KEY_START_OPTION, AAFwk::String::Box(VALUE_START_OPTION_FOREGROUND));
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
+    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
+    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(nullptr));
+    int32_t ret = DSchedCollabManager::GetInstance().CollabMission(info);
+    EXPECT_EQ(ret, FIND_REMOTE_DEVICEID_ERR);
 
     std::shared_ptr<DmsDeviceInfo> ptr = std::make_shared<DmsDeviceInfo>("", 0, "");
     EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(true));
@@ -210,7 +242,7 @@ HWTEST_F(DSchedCollabManagerTest, CollabMission_003, TestSize.Level3)
     EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(ptr));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-    DTEST_LOG << "DSchedCollabManagerTest CollabMission_003 end" << std::endl;
+    DTEST_LOG << "DSchedCollabManagerTest CollabMission_004 end" << std::endl;
 }
 
 /**
