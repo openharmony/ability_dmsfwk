@@ -39,6 +39,7 @@
 #include "nativetoken_kit.h"
 #include "mock/svc_distributed_connection_mock.h"
 #include "mock/multi_user_manager_mock.h"
+#include "mock/mock_device_manager.h"
 #include "system_ability_definition.h"
 #include "test_log.h"
 #include "token_setproc.h"
@@ -113,6 +114,7 @@ public:
     int32_t InstallBundle(const std::string &bundlePath) const;
     sptr<IDistributedSched> proxy_;
     static inline std::shared_ptr<SvcDistributedConnectionMock> svcDConnMock = nullptr;
+    static inline std::shared_ptr<DeviceManagerMock> deviceMgrMock_ = nullptr;
     static inline std::shared_ptr<MultiUserManagerMock> multiUserMgrMock_ = nullptr;
 
 protected:
@@ -139,6 +141,8 @@ void DistributedSchedServiceFirstTest::SetUpTestCase()
     SvcDistributedConnectionMock::connMock = svcDConnMock;
     multiUserMgrMock_ = std::make_shared<MultiUserManagerMock>();
     MultiUserManagerMock::multiUserMgrMock = multiUserMgrMock_;
+    deviceMgrMock_ = std::make_shared<DeviceManagerMock>();
+    DeviceManagerMock::deviceMgrMock = deviceMgrMock_;
     const std::string pkgName = "DBinderBus_" + std::to_string(getprocpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
@@ -151,6 +155,8 @@ void DistributedSchedServiceFirstTest::TearDownTestCase()
     svcDConnMock = nullptr;
     MultiUserManagerMock::multiUserMgrMock = nullptr;
     multiUserMgrMock_ = nullptr;
+    DeviceManagerMock::deviceMgrMock = nullptr;
+    deviceMgrMock_ = nullptr;
 }
 
 void DistributedSchedServiceFirstTest::SetUp()
@@ -1783,6 +1789,28 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test04, T
     EXPECT_EQ(resultInfo.result, DExtConnectResult::FAILED);
 
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectDExtensionFromRemote_Test04 end" << std::endl;
+}
+
+/**
+ * @tc.name  : OnIdleTest_001
+ * @tc.number: OnIdleTest_001
+ * @tc.desc  : Test OnIdle
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, OnIdleTest_001, TestSize.Level1)
+{
+    SystemAbilityOnDemandReason idleReason;
+    std::vector<DmDeviceInfo> deviceList;
+    //true
+    EXPECT_CALL(*deviceMgrMock_, GetTrustedDeviceList(_, _, _)).WillOnce(DoAll(SetArgReferee<2>(deviceList),
+        Return(0)));
+    int32_t ret = DistributedSchedService::GetInstance().OnIdle(idleReason);
+    EXPECT_EQ(ret, 0);
+
+    //false
+    EXPECT_CALL(*deviceMgrMock_, GetTrustedDeviceList(_, _, _)).WillOnce(DoAll(SetArgReferee<2>(deviceList),
+        Return(1)));
+    ret = DistributedSchedService::GetInstance().OnIdle(idleReason);
+    EXPECT_EQ(ret, -1);
 }
 }
 }
