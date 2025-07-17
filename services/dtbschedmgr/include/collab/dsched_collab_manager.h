@@ -88,6 +88,7 @@ private:
     int32_t CheckSrcCollabRelation(const CollabInfo *sourceInfo, const DSchedCollabInfo *collabInfo);
     int32_t CheckSinkCollabRelation(const CollabInfo *sinkInfo, const DSchedCollabInfo *collabInfo);
     int32_t ConvertCollaborateResult(int32_t result);
+    bool IsStartForeground(DSchedCollabInfo &info);
 
     class SoftbusListener : public IDataListener {
         void OnBind(int32_t socket, PeerSocketInfo info);

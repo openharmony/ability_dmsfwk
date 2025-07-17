@@ -31,6 +31,7 @@
 #include "mission/distributed_bm_storage.h"
 #include "mission/wifi_state_adapter.h"
 #include "multi_user_manager.h"
+#include "string_wrapper.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -149,9 +150,9 @@ int32_t DSchedCollabManager::CheckSrcCollabRelation(const CollabInfo *sourceInfo
         HILOGI("the collaboration relationship is matched successfully.");
         return ERR_OK;
     }
-    HILOGW("deviceId: %{public}s, pid: %{public}d, tokenId: %{public}d, userId: %{public}d, srcUdid: %{public}s",
+    HILOGW("deviceId: %{public}s, pid: %{public}d, tokenId: %{public}s, userId: %{public}d, srcUdid: %{public}s",
         GetAnonymStr(std::string(sourceInfo->deviceId)).c_str(),
-        sourceInfo->pid, static_cast<int32_t>(sourceInfo->tokenId),
+        sourceInfo->pid, GetAnonymStr(std::to_string(sourceInfo->tokenId)).c_str(),
         sourceInfo->userId, GetAnonymStr(collabInfo->srcUdid_).c_str());
     return INVALID_PARAMETERS_ERR;
 }
@@ -182,9 +183,9 @@ int32_t DSchedCollabManager::CheckSinkCollabRelation(const CollabInfo *sinkInfo,
         HILOGI("the collaboration relationship is matched successfully.");
         return ERR_OK;
     }
-    HILOGW("deviceId: %{public}s, pid: %{public}d, tokenId: %{public}d, userId: %{public}d, sinkUdid: %{public}s",
+    HILOGW("deviceId: %{public}s, pid: %{public}d, tokenId: %{public}s, userId: %{public}d, sinkUdid: %{public}s",
         GetAnonymStr(std::string(sinkInfo->deviceId)).c_str(),
-        sinkInfo->pid, static_cast<int32_t>(sinkInfo->tokenId),
+        sinkInfo->pid, GetAnonymStr(std::to_string(sinkInfo->tokenId)).c_str(),
         sinkInfo->userId, GetAnonymStr(collabInfo->sinkUdid_).c_str());
     return INVALID_PARAMETERS_ERR;
 }
@@ -278,12 +279,12 @@ int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
 {
     HILOGI("called, collabInfo is: %{public}s", info.ToString().c_str());
     if (!MultiUserManager::GetInstance().IsCallerForeground(info.srcInfo_.uid_)) {
-        HILOGW("The current user is not foreground. callingUid: %{public}d .", info.srcInfo_.uid_);
+        HILOGE("The current user is not foreground. callingUid: %{public}d .", info.srcInfo_.uid_);
         return DMS_NOT_FOREGROUND_USER;
     }
-    if (!info.srcOpt_.startParams_.GetParam(KEY_START_OPTION) &&
+    if (!IsStartForeground(info) &&
         !Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetSelfTokenID())) {
-        HILOGW("Non-system applications are prohibited from launching peer ability to the background.");
+        HILOGE("Non-system applications are prohibited from launching peer ability to the background.");
         return DMS_START_CONTROL_PERMISSION_DENIED;
     }
     if (info.srcInfo_.bundleName_.empty() || info.sinkInfo_.bundleName_.empty() ||
@@ -311,6 +312,18 @@ int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
     dCollab->UpdateState(SOURCE_START_STATE);
     dCollab->PostSrcStartTask();
     return ERR_OK;
+}
+
+bool DSchedCollabManager::IsStartForeground(DSchedCollabInfo &info)
+{
+    auto value = info.srcOpt_.startParams_.GetParam(KEY_START_OPTION);
+    AAFwk::IString *ao = AAFwk::IString::Query(value);
+    if (ao != nullptr) {
+        std::string startOpt = AAFwk::String::Unbox(ao);
+        HILOGI("startOpt is: %{public}s", startOpt.c_str());
+        return (startOpt == VALUE_START_OPTION_BACKGROUND) ? false : true;
+    }
+    return true;
 }
 
 bool DSchedCollabManager::IsSessionExists(const DSchedCollabInfo &info)

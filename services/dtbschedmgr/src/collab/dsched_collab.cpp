@@ -50,7 +50,6 @@ constexpr int32_t NOTIFY_COLLAB_DISCONNECT = 1;
 constexpr int32_t NOTIFY_WIFI_OPEN = 2;
 constexpr int32_t NOTIFY_PEER_COLLAB_VERSION = 3;
 constexpr int32_t DMS_VERSION = 6;
-constexpr int32_t START_PERMISSION = 0;
 std::map<int32_t, std::string> CMDDATA = {
     {MIN_CMD, "MIN_CMD"},
     {SINK_GET_VERSION_CMD, "SINK_GET_VERSION_CMD"},
@@ -118,7 +117,7 @@ void DSchedCollab::SetSrcCollabInfo(DSchedCollabInfo &info)
  
 void DSchedCollab::SetSinkCollabInfo(std::shared_ptr<SinkStartCmd> startCmd)
 {
-    HILOGI("create by recvCmd");
+    HILOGI("called");
     if (startCmd == nullptr) {
         HILOGE("startCmd is null");
         return;
@@ -602,7 +601,7 @@ int32_t DSchedCollab::ExeStartAbility(const std::string &peerDeviceId)
     }
     AAFwk::Want want = GenerateCollabWant();
     int32_t ret = DistributedSchedService::GetInstance().CheckCollabStartPermission(want, collabInfo_.callerInfo_,
-        collabInfo_.srcAccountInfo_, START_PERMISSION);
+        collabInfo_.srcAccountInfo_, false);
     want.RemoveParam(DMS_IS_CALLER_FOREGROUND);
     if (ret != ERR_OK) {
         HILOGE("CheckTargetPermission failed!");

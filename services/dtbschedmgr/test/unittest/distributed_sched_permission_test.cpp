@@ -1285,6 +1285,85 @@ HWTEST_F(DistributedSchedPermissionTest, GetDeviceSecurityLevel_001, TestSize.Le
 }
 
 /**
+ * @tc.name: IsHigherAclVersion_001
+ * @tc.desc: call IsHigherAclVersion
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, IsHigherAclVersion_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest IsHigherAclVersion_001 begin" << std::endl;
+    CallerInfo callerInfo;
+    bool ret = DistributedSchedPermission::GetInstance().IsHigherAclVersion(callerInfo);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest IsHigherAclVersion_001 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: IsHigherAclVersion_002
+ * @tc.desc: call IsHigherAclVersion
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, IsHigherAclVersion_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest IsHigherAclVersion_002 begin" << std::endl;
+    CallerInfo callerInfo;
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = DMS_VERSION;
+    bool ret = DistributedSchedPermission::GetInstance().IsHigherAclVersion(callerInfo);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "DistributedSchedPermissionTest IsHigherAclVersion_002 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: IsHigherAclVersion_003
+ * @tc.desc: call IsHigherAclVersion
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, IsHigherAclVersion_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest IsHigherAclVersion_003 begin" << std::endl;
+    CallerInfo callerInfo;
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = "500";
+    bool ret = DistributedSchedPermission::GetInstance().IsHigherAclVersion(callerInfo);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest IsHigherAclVersion_003 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: IsHigherAclVersion_004
+ * @tc.desc: call IsHigherAclVersion
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, IsHigherAclVersion_004, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest IsHigherAclVersion_004 begin" << std::endl;
+    CallerInfo callerInfo;
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = "5.1.0";
+    bool ret = DistributedSchedPermission::GetInstance().IsHigherAclVersion(callerInfo);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest IsHigherAclVersion_004 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: IsHigherAclVersion_005
+ * @tc.desc: call IsHigherAclVersion
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, IsHigherAclVersion_005, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest IsHigherAclVersion_005 begin" << std::endl;
+    CallerInfo callerInfo;
+    callerInfo.extraInfoJson[DMS_VERSION_ID] = 0;
+    bool ret = DistributedSchedPermission::GetInstance().IsHigherAclVersion(callerInfo);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest IsHigherAclVersion_005 end result:" << ret << std::endl;
+}
+
+/**
  * @tc.name: CheckNewAclList_001
  * @tc.desc: call CheckNewAclList
  * @tc.type: FUNC
