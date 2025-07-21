@@ -488,6 +488,8 @@ bool DSchedContinueDataCmd::UnmarshalWantParcel(cJSON* rootValue)
         return false;
     }
     want_ = *wantPtr;
+    delete wantPtr;
+    wantPtr = nullptr;
     return true;
 }
 

@@ -787,6 +787,7 @@ HWTEST_F(DSchedContinueTest, DSchedContinueTest_031_1, TestSize.Level1)
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
+            event = nullptr;
         }
     };
     conti_->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));

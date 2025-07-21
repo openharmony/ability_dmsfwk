@@ -67,7 +67,8 @@ void DistributedDataChangeListener::OnChange(const ChangeNotification &changeNot
         unique_ptr<KeyInfo> keyInfo = KeyInfo::ParseInfo(entry.key.ToString());
         if (keyInfo != nullptr) {
             string keyStr = GetAnonymStr(keyInfo->uuid) + "_" + to_string(keyInfo->missionId);
-            HILOGI("insertEntries Key:%{public}s, Value:%{public}s", keyStr.c_str(), entry.value.ToString().c_str());
+            HILOGI("insertEntries Key:%{public}s, Value:%{public}s", keyStr.c_str(),
+                GetAnonymStr(entry.value.ToString()).c_str());
             string networkId = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdByUuid(keyInfo->uuid);
             if (networkId.empty()) {
                 HILOGI("networkId is empty!");
@@ -82,7 +83,8 @@ void DistributedDataChangeListener::OnChange(const ChangeNotification &changeNot
         unique_ptr<KeyInfo> keyInfo = KeyInfo::ParseInfo(entry.key.ToString());
         if (keyInfo != nullptr) {
             string keyStr = GetAnonymStr(keyInfo->uuid) + "_" + to_string(keyInfo->missionId);
-            HILOGI("deleteEntries Key:%{public}s, Value:%{public}s", keyStr.c_str(), entry.value.ToString().c_str());
+            HILOGI("deleteEntries Key:%{public}s, Value:%{public}s", keyStr.c_str(),
+                GetAnonymStr(entry.value.ToString()).c_str());
             (void)DistributedSchedMissionManager::GetInstance().DequeueCachedSnapshotInfo(keyInfo->uuid,
                 keyInfo->missionId);
         }
@@ -93,7 +95,8 @@ void DistributedDataChangeListener::OnChange(const ChangeNotification &changeNot
         unique_ptr<KeyInfo> keyInfo = KeyInfo::ParseInfo(entry.key.ToString());
         if (keyInfo != nullptr) {
             string keyStr = GetAnonymStr(keyInfo->uuid) + "_" + to_string(keyInfo->missionId);
-            HILOGI("updateEntries Key:%{public}s, Value:%{public}s", keyStr.c_str(), entry.value.ToString().c_str());
+            HILOGI("updateEntries Key:%{public}s, Value:%{public}s", keyStr.c_str(),
+                GetAnonymStr(entry.value.ToString()).c_str());
             string networkId = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdByUuid(keyInfo->uuid);
             if (networkId.empty()) {
                 HILOGI("networkId is empty!");

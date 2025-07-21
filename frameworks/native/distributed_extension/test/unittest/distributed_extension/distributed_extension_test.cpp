@@ -81,6 +81,7 @@ HWTEST_F(DExtensionTest, DistributedExtension_Create_0200, testing::ext::TestSiz
         auto dExtension = DistributedExtension::Create(runtime);
         EXPECT_TRUE(dExtension != nullptr);
         delete dExtension;
+        dExtension = nullptr;
     } catch (...) {
         EXPECT_TRUE(false);
     }
