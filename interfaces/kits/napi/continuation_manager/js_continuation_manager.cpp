@@ -315,7 +315,6 @@ napi_value JsContinuationManager::OnUnregisterContinuation(napi_env env, napi_ca
         napi_throw(env, GenerateBusinessError(env, PARAMETER_CHECK_FAILED, errInfo));
         return CreateJsUndefined(env);
     }
-
     napi_value lastParam = (argc == ARG_COUNT_ONE) ? nullptr : argv[ARG_COUNT_ONE];
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
@@ -336,7 +335,6 @@ napi_value JsContinuationManager::OnUnregisterContinuation(napi_env env, napi_ca
             errCode = ErrorCodeReturn(errCode);
             task->Reject(env, CreateJsError(env, errCode, ErrorMessageReturn(errCode)));
         }
-
         napi_close_handle_scope(env, scope);
         delete task;
     };

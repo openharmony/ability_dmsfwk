@@ -1040,6 +1040,7 @@ bool DistributedWant::ReadElementFromParcel(Parcel& parcel)
         if (element != nullptr) {
             SetElement(*element);
             delete element;
+            element = nullptr;
         } else {
             return false;
         }

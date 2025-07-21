@@ -1572,6 +1572,8 @@ HWTEST_F(DMSMissionManagerTest, testDeleteDataStorage005, TestSize.Level3)
     DistributedSchedMissionManager::GetInstance().missionHandler_ = nullptr;
     DistributedSchedMissionManager::GetInstance().DeleteDataStorage(localDeviceId_, false);
     DistributedSchedMissionManager::GetInstance().distributedDataStorage_->Stop();
+    delete[] byteStream;
+    byteStream = nullptr;
     DTEST_LOG << "testDeleteDataStorage005 end" << std::endl;
 }
 
@@ -1618,6 +1620,8 @@ HWTEST_F(DMSMissionManagerTest, testDeleteDataStorage006, TestSize.Level3)
     DistributedSchedMissionManager::GetInstance().missionHandler_ = nullptr;
     DistributedSchedMissionManager::GetInstance().DeleteDataStorage(localDeviceId_, true);
     DistributedSchedMissionManager::GetInstance().distributedDataStorage_->Stop();
+    delete[] byteStream;
+    byteStream = nullptr;
     DTEST_LOG << "testDeleteDataStorage006 end" << std::endl;
 }
 
@@ -1897,6 +1901,8 @@ HWTEST_F(DMSMissionManagerTest, testStoreSnapshotInfo003, TestSize.Level3)
     ret = DistributedSchedMissionManager::GetInstance().RemoveSnapshotInfo(localDeviceId_, TASK_ID);
     EXPECT_EQ(ret, ERR_NONE);
     DistributedSchedMissionManager::GetInstance().distributedDataStorage_->Stop();
+    delete[] byteStream;
+    byteStream = nullptr;
     DTEST_LOG << "testStoreSnapshotInfo003 end" << std::endl;
 }
 
@@ -2003,6 +2009,8 @@ HWTEST_F(DMSMissionManagerTest, testGetRemoteMissionSnapshotInfo005, TestSize.Le
         TASK_ID, missionSnapshot);
     EXPECT_EQ(ret, ERR_NULL_OBJECT);
     DistributedSchedMissionManager::GetInstance().distributedDataStorage_->Stop();
+    delete[] byteStream;
+    byteStream = nullptr;
     DTEST_LOG << "testGetRemoteMissionSnapshotInfo005 end" << std::endl;
 }
 

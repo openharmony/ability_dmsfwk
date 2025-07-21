@@ -116,6 +116,8 @@ HWTEST_F(SessionDataHeaderTest, DeserializeInvalidData_whenHeaderLenTooSmall, Te
     const uint8_t* header = new uint8_t[1] { 1 };
     auto deserializedHeader = SessionDataHeader::Deserialize(header, 0);
     ASSERT_FALSE(deserializedHeader.has_value());
+    delete[] header;
+    header = nullptr;
 }
 
 /**
