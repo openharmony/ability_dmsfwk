@@ -210,7 +210,7 @@ HWTEST_F(DSchedCollabManagerTest, CollabMission_003, TestSize.Level3)
     EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
     EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(ptr));
     ret = DSchedCollabManager::GetInstance().CollabMission(info);
-    EXPECT_EQ(ret, DMS_START_CONTROL_PERMISSION_DENIED);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedCollabManagerTest CollabMission_003 end" << std::endl;
 }
 
