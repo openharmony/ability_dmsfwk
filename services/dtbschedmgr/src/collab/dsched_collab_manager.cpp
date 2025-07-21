@@ -283,7 +283,7 @@ int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
         return DMS_NOT_FOREGROUND_USER;
     }
     if (!IsStartForeground(info) &&
-        !Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetSelfTokenID())) {
+        !Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetCallingFullTokenID())) {
         HILOGE("Non-system applications are prohibited from launching peer ability to the background.");
         return DMS_START_CONTROL_PERMISSION_DENIED;
     }
