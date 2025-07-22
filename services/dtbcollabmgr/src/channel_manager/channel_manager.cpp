@@ -14,21 +14,28 @@
 */
 
 #include "channel_manager.h"
-#include "dtbcollabmgr_log.h"
+
 #include <algorithm>
 #include <chrono>
 #include <dlfcn.h>
 #include <future>
 #include <sys/prctl.h>
-#include "securec.h"
+#include <unistd.h>
 #include <unordered_set>
+
+#include "dtbcollabmgr_log.h"
+#include "securec.h"
+#include "softbus_error_code.h"
 
 namespace OHOS {
 namespace DistributedCollab {
 IMPLEMENT_SINGLE_INSTANCE(ChannelManager);
 namespace {
     static const std::string TAG = "DSchedCollabChannelManager";
-
+    constexpr int32_t BIND_RETRY_INTERVAL = 500;
+    constexpr int32_t MAX_BIND_RETRY_TIME = 1500;
+    constexpr int32_t MAX_RETRY_TIMES = 3;
+    constexpr int32_t MS_TO_US = 1000;
     enum class QosSpeedType {
         HIGH,
         LOW
@@ -783,8 +790,26 @@ int32_t ChannelManager::BindSocket(const int32_t socketId, const ChannelDataType
     QosSpeedType speedType = CHANNEL_DATATYPE_SPEED_MAP[dataType];
     const QosTV* qos = qos_config[speedType];
     const uint32_t qosCount = qos_speed_config[speedType];
+    int32_t ret = ERR_OK;
+    int retryCount = 0;
     HILOGI("start to bind socket, id:%{public}d, speed:%{public}d", socketId, speedType);
-    int32_t ret = Bind(socketId, qos, qosCount, &channelManagerListener);
+    do {
+        int32_t ret = Bind(socketId, qos, qosCount, &channelManagerListener);
+        if (ret == ERR_OK) {
+            break;
+        }
+        if (ret != SOFTBUS_LANE_WIFI_NOT_ONLINE) {
+            HILOGE("bind failed, err=%{public}d", ret);
+            return ret;
+        }
+        if (retryCount * BIND_RETRY_INTERVAL >= MAX_BIND_RETRY_TIME) {
+            HILOGE("bind failed after max retry time %{public}d ms", MAX_BIND_RETRY_TIME);
+            return ret;
+        }
+        HILOGI("bind failed, retrying after %{public}d ms, retry %{public}d", BIND_RETRY_INTERVAL, retryCount + 1);
+        usleep(BIND_RETRY_INTERVAL * MS_TO_US);
+        retryCount++;
+    } while (retryCount < MAX_RETRY_TIMES);
     HILOGI("bind end");
     if (ret != ERR_OK) {
         HILOGE("client bind failed, ret: %{public}d", ret);
