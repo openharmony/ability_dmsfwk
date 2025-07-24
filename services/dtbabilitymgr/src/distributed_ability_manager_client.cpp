@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,9 @@ int32_t DistributedAbilityManagerClient::Register(
         HILOGE("continuationMgrProxy is nullptr");
         return ERR_NULL_OBJECT;
     }
+    if (continuationExtraParams == nullptr) {
+        return continuationMgrProxy->RegisterWithoutExtraParam(token);
+    }
     return continuationMgrProxy->Register(continuationExtraParams, token);
 }
 
@@ -76,6 +79,14 @@ int32_t DistributedAbilityManagerClient::RegisterDeviceSelectionCallback(int32_t
         HILOGE("continuationMgrProxy is nullptr");
         return ERR_NULL_OBJECT;
     }
+    if (cbType.empty()) {
+        HILOGE("RegisterDeviceSelectionCallback cbType is empty");
+        return INVALID_PARAMETERS_ERR;
+    }
+    if (notifier == nullptr) {
+        HILOGE("RegisterDeviceSelectionCallback notifier is nullptr");
+        return ERR_NULL_OBJECT;
+    }
     return continuationMgrProxy->RegisterDeviceSelectionCallback(token, cbType, notifier);
 }
 
@@ -86,6 +97,10 @@ int32_t DistributedAbilityManagerClient::UnregisterDeviceSelectionCallback(int32
     if (continuationMgrProxy == nullptr) {
         HILOGE("continuationMgrProxy is nullptr");
         return ERR_NULL_OBJECT;
+    }
+    if (cbType.empty()) {
+        HILOGE("UnregisterDeviceSelectionCallback cbType is empty");
+        return INVALID_PARAMETERS_ERR;
     }
     return continuationMgrProxy->UnregisterDeviceSelectionCallback(token, cbType);
 }
@@ -110,6 +125,9 @@ int32_t DistributedAbilityManagerClient::StartDeviceManager(
     if (continuationMgrProxy == nullptr) {
         HILOGE("continuationMgrProxy is nullptr");
         return ERR_NULL_OBJECT;
+    }
+    if (continuationExtraParams == nullptr) {
+        return continuationMgrProxy->StartDeviceManagerWithoutExtraParam(token);
     }
     return continuationMgrProxy->StartDeviceManager(token, continuationExtraParams);
 }

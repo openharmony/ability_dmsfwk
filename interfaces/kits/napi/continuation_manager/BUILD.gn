@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -45,6 +45,7 @@ ohos_shared_library("continuationmanager_napi") {
   ]
 
   public_configs = [
+    "//foundation/ability/dmsfwk/interfaces/innerkits/common:dmsfwk_idl_config",
     ":continuationmanager_napi_public_config",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
   ]

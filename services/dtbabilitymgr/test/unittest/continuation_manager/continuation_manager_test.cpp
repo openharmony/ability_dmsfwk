@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,7 @@ constexpr uint32_t SELECTED_DEVICE_SIZE = 2;
 constexpr uint32_t UNSELECTED_DEVICE_SIZE = 2;
 const std::string TEST_DEVICE_ID = "test deviceId";
 const std::string EMPTY_DEVICE_ID = "";
+const std::string CALLBACK_TYPE_NULL = "";
 const std::string CALLBACK_TYPE1 = "deviceSelected";
 const std::string CALLBACK_TYPE2 = "deviceUnselected";
 const std::string INVALID_CALLBACK_TYPE = "deviceCancel";
@@ -61,6 +62,8 @@ const std::u16string TEST_INVALID_REMOTEDESCRIPTOR = u"invalid remoteDescriptor"
 const std::string TEST_INPUT3 = "test input1";
 const std::string TEST_INPUT4 = "test input2";
 const std::uint32_t INVALID_EVENT_DEVICE_CODE = 0;
+constexpr int32_t VALUE_NULL = -1; // no object in parcel
+constexpr int32_t VALUE_OBJECT = 1; // object exist in parcel
 }
 
 void DeviceSelectionNotifierTest::OnDeviceConnect(const std::vector<ContinuationResult>& continuationResults)
@@ -252,7 +255,7 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_003, TestS
     DTEST_LOG << "result4:" << result4 << std::endl;
     EXPECT_EQ(ERR_OK, result1);
     EXPECT_EQ(UNKNOWN_CALLBACK_TYPE, result2);
-    EXPECT_EQ(ERR_NULL_OBJECT, result3);
+    EXPECT_EQ(INVALID_PARAMETERS_ERR, result3);
     EXPECT_EQ(ERR_NULL_OBJECT, result4);
     DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_003 end" << std::endl;
 }
@@ -500,6 +503,31 @@ HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_010, TestS
 }
 
 /**
+ * @tc.name: RegisterDeviceSelectionCallbackTest_011
+ * @tc.desc: test dms callback called when cbType and notifier is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContinuationManagerTest, RegisterDeviceSelectionCallbackTest_011, TestSize.Level1)
+{
+    DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_011 start" << std::endl;
+    int32_t token = -1;
+    int32_t result1 = DistributedAbilityManagerClient::GetInstance().Register(nullptr, token);
+    DTEST_LOG << "result1:" << result1 << std::endl;
+    sptr<DeviceSelectionNotifierTest> notifier(new DeviceSelectionNotifierTest());
+    sptr<DeviceSelectionNotifierTest> notifierNull = nullptr;
+    int32_t result2 = DistributedAbilityManagerClient::GetInstance().RegisterDeviceSelectionCallback(
+        token, CALLBACK_TYPE_NULL, notifier);
+    DTEST_LOG << "result2:" << result2 << std::endl;
+    int32_t result3 = DistributedAbilityManagerClient::GetInstance().RegisterDeviceSelectionCallback(
+        token, CALLBACK_TYPE1, notifierNull);
+    DTEST_LOG << "result3:" << result3 << std::endl;
+    EXPECT_EQ(ERR_OK, result1);
+    EXPECT_EQ(INVALID_PARAMETERS_ERR, result2);
+    EXPECT_EQ(ERR_NULL_OBJECT, result3);
+    DTEST_LOG << "ContinuationManagerTest RegisterDeviceSelectionCallbackTest_011 end" << std::endl;
+}
+
+/**
  * @tc.name: UnregisterDeviceSelectionCallbackTest_001
  * @tc.desc: test unregister device selection callback
  * @tc.type: FUNC
@@ -607,7 +635,7 @@ HWTEST_F(ContinuationManagerTest, UnregisterDeviceSelectionCallbackTest_005, Tes
         token, "");
     DTEST_LOG << "result2:" << result2 << std::endl;
     EXPECT_EQ(ERR_OK, result1);
-    EXPECT_EQ(ERR_NULL_OBJECT, result2);
+    EXPECT_EQ(INVALID_PARAMETERS_ERR, result2);
     DTEST_LOG << "ContinuationManagerTest UnregisterDeviceSelectionCallbackTest_005 end" << std::endl;
 }
 
@@ -668,8 +696,13 @@ HWTEST_F(ContinuationManagerTest, StartDeviceManagerTest_003, TestSize.Level1)
     int32_t result2 = DistributedAbilityManagerClient::GetInstance().StartDeviceManager(
         UNREGISTER_TOKEN, continuationExtraParams);
     DTEST_LOG << "result2:" << result2 << std::endl;
+    std::shared_ptr<ContinuationExtraParams> continuationExtraParamsNull = nullptr;
+    int32_t result3 = DistributedAbilityManagerClient::GetInstance().StartDeviceManager(
+        UNREGISTER_TOKEN, continuationExtraParamsNull);
+    DTEST_LOG << "result3:" << result3 << std::endl;
     EXPECT_EQ(TOKEN_HAS_NOT_REGISTERED, result1);
     EXPECT_EQ(TOKEN_HAS_NOT_REGISTERED, result2);
+    EXPECT_EQ(TOKEN_HAS_NOT_REGISTERED, result3);
     DTEST_LOG << "ContinuationManagerTest StartDeviceManagerTest_003 end" << std::endl;
 }
 
@@ -1096,12 +1129,12 @@ HWTEST_F(ContinuationManagerTest, GetSetDeviceInfo_001, TestSize.Level3)
 HWTEST_F(ContinuationManagerTest, MarshallingUnmarshalling_001, TestSize.Level3)
 {
     DTEST_LOG << "ContinuationManagerTest MarshallingUnmarshalling_001 start" << std::endl;
-    
+
     ContinuationResult continuationResult1;
     continuationResult1.SetDeviceId(SELECTED_DEVICE_ID1);
     continuationResult1.SetDeviceType(SELECTED_DEVICE_TYPE1);
     continuationResult1.SetDeviceName(SELECTED_DEVICE_NAME1);
-    
+
     Parcel parcel;
     bool result1 = continuationResult1.Marshalling(parcel);
     ASSERT_NE(false, result1);
@@ -1134,7 +1167,7 @@ HWTEST_F(ContinuationManagerTest, ReadFromParcel_001, TestSize.Level3)
     continuationResult.SetDeviceId(SELECTED_DEVICE_ID1);
     continuationResult.SetDeviceType(SELECTED_DEVICE_TYPE1);
     continuationResult.SetDeviceName(SELECTED_DEVICE_NAME1);
-    
+
     Parcel parcel;
     bool result1 = continuationResult.Marshalling(parcel);
     ASSERT_NE(false, result1);
@@ -1326,7 +1359,7 @@ HWTEST_F(ContinuationManagerTest, WriteContinuationResultsToParcel_001, TestSize
 HWTEST_F(ContinuationManagerTest, Str16VecToStr8Vec_001, TestSize.Level3)
 {
     DTEST_LOG << "ContinuationManagerTest Str16VecToStr8Vec_001 start" << std::endl;
-    
+
     std::vector<std::u16string> input1;
     input1.emplace_back(TEST_INPUT1);
     input1.emplace_back(TEST_INPUT2);
@@ -1335,7 +1368,7 @@ HWTEST_F(ContinuationManagerTest, Str16VecToStr8Vec_001, TestSize.Level3)
     input2.emplace_back(TEST_INPUT4);
 
     std::vector<std::string> input3 = ContinationManagerUtils::Str16VecToStr8Vec(input1);
-    
+
     size_t size1 = input2.size();
     size_t size2 = input3.size();
     ASSERT_EQ(size1, size2);
@@ -1356,7 +1389,7 @@ HWTEST_F(ContinuationManagerTest, SetFunction_001, TestSize.Level3)
 {
     DTEST_LOG << "ContinuationManagerTest SetFunction_001 start" << std::endl;
     ContinuationExtraParams continuationExtraParams;
-    
+
     std::vector<std::string> deviceTypeVec1;
     deviceTypeVec1.emplace_back(SELECTED_DEVICE_TYPE1);
     deviceTypeVec1.emplace_back(SELECTED_DEVICE_TYPE2);
@@ -1407,7 +1440,7 @@ HWTEST_F(ContinuationManagerTest, ReadFromParcel_002, TestSize.Level3)
     continuationExtraParams.SetFilter(TEST_FILTER);
     continuationExtraParams.SetContinuationMode(continuationMode);
     continuationExtraParams.SetAuthInfo(TEST_AUTHINFO);
-    
+
     Parcel parcel;
     bool result1 = continuationExtraParams.Marshalling(parcel);
     ASSERT_NE(false, result1);
