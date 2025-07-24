@@ -543,7 +543,7 @@ int32_t DSchedCollabManager::HandleCloseSessions(const std::string &bundleName, 
         }
         dSchedCollabInfo = iter->second->GetCollabInfo();
         if ((bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.srcInfo_.pid_) ||
-            (bundleName == dSchedCollabInfo.srcInfo_.bundleName_ && pid == dSchedCollabInfo.sinkInfo_.pid_)) {
+            (bundleName == dSchedCollabInfo.sinkInfo_.bundleName_ && pid == dSchedCollabInfo.sinkInfo_.pid_)) {
             HILOGI("find collab, need be clear, collabInfo: %{public}s", dSchedCollabInfo.ToString().c_str());
             return iter->second->PostEndTask();
         }
