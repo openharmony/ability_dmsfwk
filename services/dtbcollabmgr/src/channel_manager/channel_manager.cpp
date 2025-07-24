@@ -794,7 +794,7 @@ int32_t ChannelManager::BindSocket(const int32_t socketId, const ChannelDataType
     int retryCount = 0;
     HILOGI("start to bind socket, id:%{public}d, speed:%{public}d", socketId, speedType);
     do {
-        int32_t ret = Bind(socketId, qos, qosCount, &channelManagerListener);
+        ret = Bind(socketId, qos, qosCount, &channelManagerListener);
         if (ret == ERR_OK) {
             break;
         }
