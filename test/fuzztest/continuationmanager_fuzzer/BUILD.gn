@@ -38,7 +38,6 @@ dtbabilitymgr_sources = [
   "${distributed_service}/dtbabilitymgr/src/continuation_manager/notifier_info.cpp",
   "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_dumper.cpp",
   "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_service.cpp",
-  "${distributed_service}/dtbabilitymgr/src/distributed_ability_manager_stub.cpp",
 ]
 
 dtbabilitymgr_external_deps = [
@@ -86,6 +85,8 @@ ohos_fuzztest("ContinuationManagerFuzzTest") {
     "continuationmanager_fuzzer.cpp",
     "fuzz_util.cpp",
   ]
+
+  deps = [ "//foundation/ability/dmsfwk/interfaces/innerkits/common:dmsfwk_idl_source" ]
 
   sources += dtbabilitymgr_sources
 

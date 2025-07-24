@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,21 +11,79 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/components/idl_tool/idl.gni")
 import("//build/ohos.gni")
 import("//foundation/ability/dmsfwk/dmsfwk.gni")
 
 config("common_public_config") {
   visibility = [ ":*" ]
-  include_dirs = [
-    "include/",
-    "${dms_path}/common/include",
-    "//foundation/ability/dmsfwk/services/dtbabilitymgr/include/",
-  ]
 
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
+}
+
+idl_gen_interface("dmsfwk_idl") {
+  sources = [
+    "IDistributedAbilityManager.idl",
+  ]
+  log_domainid ="0xD004170"
+  log_tag ="dmsfwk"
+}
+
+config("dmsfwk_idl_config") {
+  include_dirs = [
+    "include/",
+    "${dms_path}/common/include",
+    "//foundation/ability/dmsfwk/services/dtbabilitymgr/include/",
+    "${target_gen_dir}/",
+    "//foundation/ability/dmsfwk/interfaces/innerkits/continuation_manager/include/",
+  ]
+}
+
+ohos_source_set("dmsfwk_idl_source") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":dmsfwk_idl_config" ]
+  output_values = get_target_outputs(":dmsfwk_idl")
+  sources = filter_include(output_values, [ "*.cpp" ])
+  deps = [ ":dmsfwk_idl" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+
+  subsystem_name = "ability"
+
+  part_name = "dmsfwk"
+}
+
+ohos_source_set("dmsfwk_idl_head") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+  public_configs = [ ":dmsfwk_idl_config" ]
+  deps = [ ":dmsfwk_idl" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "samgr:samgr_proxy",
+  ]
+
+  subsystem_name = "ability"
+
+  part_name = "dmsfwk"
 }
 
 ohos_shared_library("common_sdk") {
@@ -41,11 +99,11 @@ ohos_shared_library("common_sdk") {
 
   sources = [
     "//foundation/ability/dmsfwk/services/dtbabilitymgr/src/distributed_ability_manager_client.cpp",
-    "//foundation/ability/dmsfwk/services/dtbabilitymgr/src/distributed_ability_manager_proxy.cpp",
   ]
 
   public_configs = [
     ":common_public_config",
+    ":dmsfwk_idl_config",
     "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
   ]
 
@@ -55,7 +113,10 @@ ohos_shared_library("common_sdk") {
     "-Wl,-z,now",
   ]
 
-  deps = [ "../../innerkits/continuation_manager:continuation_manager" ]
+  deps = [
+    ":dmsfwk_idl_source",
+    "../../innerkits/continuation_manager:continuation_manager" ,
+  ]
 
   external_deps = [
     "c_utils:utils",

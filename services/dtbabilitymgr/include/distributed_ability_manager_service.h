@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,9 +44,11 @@ public:
         int32_t token, const std::string& cbType, const sptr<IRemoteObject>& notifier) override;
     int32_t UnregisterDeviceSelectionCallback(int32_t token, const std::string& cbType) override;
     int32_t UpdateConnectStatus(int32_t token, const std::string& deviceId,
-        const DeviceConnectStatus& deviceConnectStatus) override;
+        DeviceConnectStatus deviceConnectStatus) override;
     int32_t StartDeviceManager(
         int32_t token, const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams = nullptr) override;
+    int32_t RegisterWithoutExtraParam(int32_t& token) override;
+    int32_t StartDeviceManagerWithoutExtraParam(int32_t token) override;
 
     void ProcessNotifierDied(const sptr<IRemoteObject>& notifier);
     void ScheduleStartDeviceManager(const sptr<IRemoteObject>& appProxy, int32_t token,
@@ -73,6 +75,7 @@ private:
     bool QueryExtensionAbilityInfo(const int32_t& activeAccountId, const AAFwk::Want& want,
         AppExecFwk::ExtensionAbilityInfo& extensionInfo);
     bool HandleDisconnectAbility();
+    bool VerifyPermission(uint32_t accessToken, const std::string& permissionName) const;
     void HandleNotifierDied(const sptr<IRemoteObject>& notifier);
     void HandleStartDeviceManager(int32_t token,
         const std::shared_ptr<ContinuationExtraParams>& continuationExtraParams = nullptr);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -663,7 +663,7 @@ napi_value JsContinuationManager::OnStartDeviceManager(napi_env env, napi_callba
             return;
         }
         int32_t ret = (unwrapArgc == ARG_COUNT_ONE) ?
-            DistributedAbilityManagerClient::GetInstance().StartDeviceManager(token) :
+            DistributedAbilityManagerClient::GetInstance().StartDeviceManager(token, nullptr) :
             DistributedAbilityManagerClient::GetInstance().StartDeviceManager(token, continuationExtraParams);
         if (ret == ERR_OK) {
             task.Resolve(env, CreateJsUndefined(env));
@@ -739,7 +739,7 @@ napi_value JsContinuationManager::OnStartContinuationDeviceManager(napi_env env,
             return;
         }
         int32_t errCode = (unwrapArgc == ARG_COUNT_ONE) ?
-            DistributedAbilityManagerClient::GetInstance().StartDeviceManager(token) :
+            DistributedAbilityManagerClient::GetInstance().StartDeviceManager(token, nullptr) :
             DistributedAbilityManagerClient::GetInstance().StartDeviceManager(token, continuationExtraParams);
         if (errCode == ERR_OK) {
             task->Resolve(env, CreateJsNull(env));

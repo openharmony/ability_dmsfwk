@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,7 @@
 #define OHOS_DISTRIBUTED_ABILITY_MANAGER_CLIENT_H
 
 #include "device_selection_notifier_stub.h"
-#include "distributed_ability_manager_interface.h"
+#include "idistributed_ability_manager.h"
 #include "iremote_broker.h"
 #include "single_instance.h"
 
