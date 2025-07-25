@@ -37,6 +37,7 @@ namespace {
 const std::string TAG = "DSchedContinueManager";
 const std::string DSCHED_CONTINUE_MANAGER = "dsched_continue_manager";
 const std::string CONTINUE_TIMEOUT_TASK = "continue_timeout_task";
+const std::string MDM_CONTROL = "current user is MDM_CONTROL";
 const std::u16string CONNECTION_CALLBACK_INTERFACE_TOKEN = u"ohos.abilityshell.DistributedConnection";
 constexpr int32_t TERMINATE_DELAY_TIME = 200; //ms
 }
@@ -308,12 +309,13 @@ void DSchedContinueManager::HandleContinueMissionWithBundleName(DSchedContinueIn
     bool control = DmsKvSyncE2E::GetInstance()->CheckMDMCtrlRule(info.sourceBundleName_);
     int32_t direction = CONTINUE_SINK;
     int32_t ret = CheckContinuationLimit(info.sourceDeviceId_, info.sinkDeviceId_, direction);
-    if (ret != ERR_OK || control) {
-        HILOGE("CheckContinuationLimit failed or MDMcontrol, ret: %{public}d, MDMcontrol: %{public}d", ret,  control);
+    if (ret != ERR_OK) {
+        HILOGE("CheckContinuationLimit failed, ret: %{public}d.", ret);
         return;
     }
     int32_t subType = CONTINUE_PUSH;
     if (direction == CONTINUE_SOURCE) {
+        CHECK_BOOL_VALUE_RETURN(control, MDM_CONTROL.c_str());
         cntSource_++;
     } else {
         cntSink_++;
