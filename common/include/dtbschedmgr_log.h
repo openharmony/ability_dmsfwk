@@ -71,6 +71,14 @@ namespace DistributedSchedule {
         }                                                       \
     } while (0)
 
+#define CHECK_BOOL_VALUE_RETURN(object, log)                    \
+    do {                                                        \
+        if ((object) == true) {                                 \
+            HILOGE("%{public}s", (log));                        \
+            return;                                             \
+        }                                                       \
+    } while (0)
+
 enum {
     /**
      * Module type: Distributed schedule Service side
