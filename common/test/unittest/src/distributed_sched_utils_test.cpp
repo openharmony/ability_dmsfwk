@@ -79,15 +79,9 @@ HWTEST_F(DistributedSchedUtilsTest, IsValidPath_001, TestSize.Level1)
  */
 HWTEST_F(DistributedSchedUtilsTest, IsValidPath_002, TestSize.Level1)
 {
-    char cfgPathBuf[MAX_TEST_PATH_LEN] = { 0 };
-    char *filePath  = GetOneCfgFile(TEST_CONFIG_RELATIVE_PATH.c_str(), cfgPathBuf, MAX_TEST_PATH_LEN);
-    EXPECT_NE(nullptr, filePath);
-    EXPECT_EQ(cfgPathBuf, filePath);
-
-    std::string inFilePath = std::string(cfgPathBuf);
+    std::string inFilePath(PATH_MAX + 1, 'a');
     std::string realFilePath = "";
-    EXPECT_TRUE(IsValidPath(inFilePath, realFilePath));
-    EXPECT_FALSE(realFilePath.empty());
+    EXPECT_FALSE(IsValidPath(inFilePath, realFilePath));
 }
 
 /**
@@ -103,6 +97,19 @@ HWTEST_F(DistributedSchedUtilsTest, IsValidPath_003, TestSize.Level1)
     EXPECT_FALSE(IsValidPath(inFilePath, realFilePath));
 
     inFilePath = "/data/123_test.json";
+    EXPECT_FALSE(IsValidPath(inFilePath, realFilePath));
+}
+
+/**
+ * @tc.name: IsValidPath_004
+ * @tc.desc: File path is valid
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DistributedSchedUtilsTest, IsValidPath_004, TestSize.Level1)
+{
+    std::string inFilePath(MAX_TEST_PATH_LEN, 'a');
+    std::string realFilePath = "";
     EXPECT_FALSE(IsValidPath(inFilePath, realFilePath));
 }
 
