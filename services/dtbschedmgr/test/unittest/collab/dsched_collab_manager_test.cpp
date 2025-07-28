@@ -388,8 +388,9 @@ HWTEST_F(DSchedCollabManagerTest, ReleaseAbilityLink_001, TestSize.Level3)
     DTEST_LOG << "DSchedCollabManagerTest ReleaseAbilityLink_001 begin" << std::endl;
     const std::string bundleName = "";
     const int32_t pid = 0;
+    DSchedCollabManager::GetInstance().collabs_.clear();
     int32_t ret = DSchedCollabManager::GetInstance().ReleaseAbilityLink(bundleName, pid);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedCollabManagerTest ReleaseAbilityLink_001 end" << std::endl;
 }
 
@@ -851,7 +852,7 @@ HWTEST_F(DSchedCollabManagerTest, HandleCloseSessions_002, TestSize.Level3)
     DSchedCollabInfo info;
     DSchedCollabInfo collabInfo;
     collabInfo.srcInfo_.bundleName_ = "bundleName";
-    collabInfo.sinkInfo_.pid_ = 0;
+    collabInfo.srcInfo_.pid_ = 0;
     std::shared_ptr<DSchedCollab> ptr = std::make_shared<DSchedCollab>(collabToken, info);
     ptr->collabInfo_ = collabInfo;
     DSchedCollabManager::GetInstance().collabs_.clear();
@@ -862,7 +863,9 @@ HWTEST_F(DSchedCollabManagerTest, HandleCloseSessions_002, TestSize.Level3)
     int32_t ret = DSchedCollabManager::GetInstance().HandleCloseSessions(bundleName, pid);
     EXPECT_NE(ret, ERR_OK);
 
-    collabInfo.srcInfo_.pid_ = 0;
+    collabInfo.srcInfo_.pid_ = 1;
+    collabInfo.sinkInfo_.bundleName_ = "bundleName";
+    collabInfo.sinkInfo_.pid_ = 0;
     std::shared_ptr<DSchedCollab> ptr1 = std::make_shared<DSchedCollab>(collabToken, info);
     ptr1->collabInfo_ = collabInfo;
     DSchedCollabManager::GetInstance().collabs_.clear();
