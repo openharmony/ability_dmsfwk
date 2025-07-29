@@ -1298,6 +1298,8 @@ HWTEST_F(DistributedSchedServiceSecondTest, RegisterAppStateObserver_001, TestSi
     CallerInfo callerInfo;
     callerInfo.uid = 0;
     callerInfo.sourceDeviceId = localDeviceId;
+    sptr<AppStateObserver> appStateObserver = sptr<AppStateObserver>(new (std::nothrow) AppStateObserver());
+    DistributedSchedService::GetInstance().bundleNameMap_[BUNDLE_NAME] = appStateObserver;
     bool ret = DistributedSchedService::GetInstance().RegisterAppStateObserver(want, callerInfo, nullptr, connect);
     DistributedSchedService::GetInstance().UnregisterAppStateObserver(connect);
     EXPECT_TRUE(ret);
@@ -1339,6 +1341,8 @@ HWTEST_F(DistributedSchedServiceSecondTest, UnregisterAppStateObserver_002, Test
     CallerInfo callerInfo;
     callerInfo.uid = 0;
     callerInfo.sourceDeviceId = localDeviceId;
+    sptr<AppStateObserver> appStateObserver = sptr<AppStateObserver>(new (std::nothrow) AppStateObserver());
+    DistributedSchedService::GetInstance().bundleNameMap_[BUNDLE_NAME] = appStateObserver;
     bool ret = DistributedSchedService::GetInstance().RegisterAppStateObserver(want, callerInfo, nullptr, connect);
     EXPECT_TRUE(ret);
     sptr<IRemoteObject> connect1(new MockDistributedSched());
