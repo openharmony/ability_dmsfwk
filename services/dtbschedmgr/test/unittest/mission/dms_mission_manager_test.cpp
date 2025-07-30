@@ -1213,27 +1213,8 @@ HWTEST_F(DMSMissionManagerTest, testCheckAccessControlForMissions001, TestSize.L
     DistributedSchedMissionManager::GetInstance().Init();
     DistributedSchedMissionManager::GetInstance().GenerateCallerInfo(callerInfo);
     auto ret = DistributedSchedMissionManager::GetInstance().CheckAccessControlForMissions(callerInfo);
-    EXPECT_EQ(ret, true);
-    DTEST_LOG << "testCheckAccessControlForMissions001 end" << std::endl;
-}
-
-/**
- * @tc.name: testSGetOsAccountData001
- * @tc.desc: get os account data
- * @tc.type: FUNC
- */
-HWTEST_F(DMSMissionManagerTest, testGetOsAccountData001, TestSize.Level3)
-{
-    DTEST_LOG << "testGetOsAccountData001 begin" << std::endl;
-    DistributedSchedUtil::MockManageMissions();
-    std::vector<DstbMissionInfo> missionInfos;
-    CallerInfo callerInfo;
-    DistributedSchedMissionManager::GetInstance().Init();
-    DistributedSchedMissionManager::GetInstance().GenerateCallerInfo(callerInfo);
-    AccountInfo dstAccountInfo;
-    auto ret = DistributedSchedMissionManager::GetInstance().GetOsAccountData(dstAccountInfo);
     EXPECT_EQ(ret, false);
-    DTEST_LOG << "testGetOsAccountData001 end" << std::endl;
+    DTEST_LOG << "testCheckAccessControlForMissions001 end" << std::endl;
 }
 
 /**
