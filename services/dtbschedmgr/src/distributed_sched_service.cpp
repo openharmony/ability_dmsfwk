@@ -164,7 +164,7 @@ constexpr int32_t SA_READY_TO_UNLOAD = 0;
 constexpr int32_t SA_REFUSE_TO_UNLOAD = -1;
 DataShareManager &dataShareManager = DataShareManager::GetInstance();
 
-const std::string HMOS_HAP_CODE_PATH = "1";
+const std::string DEFAULT_HAP_CODE_PATH = "1";
 const std::string LINUX_HAP_CODE_PATH = "2";
 const int32_t CONNECT_WAIT_TIME_S = 2 * 1000 * 1000; /* 2 second */
 std::mutex getDistibutedProxyLock_;
@@ -224,7 +224,7 @@ std::string GetDExtensionName(std::string bundleName, int32_t userId)
     }
 
     for (const auto &installedBundle : installedBundles) {
-        if (installedBundle.applicationInfo.codePath == HMOS_HAP_CODE_PATH ||
+        if (installedBundle.applicationInfo.codePath == DEFAULT_HAP_CODE_PATH ||
             installedBundle.applicationInfo.codePath == LINUX_HAP_CODE_PATH) {
             HILOGI("Unsupported applications, name : %{public}s", installedBundle.name.data());
             continue;
@@ -258,7 +258,7 @@ std::string GetDExtensionProcess(std::string bundleName, int32_t userId)
     }
 
     for (const auto &installedBundle : installedBundles) {
-        if (installedBundle.applicationInfo.codePath == HMOS_HAP_CODE_PATH ||
+        if (installedBundle.applicationInfo.codePath == DEFAULT_HAP_CODE_PATH ||
             installedBundle.applicationInfo.codePath == LINUX_HAP_CODE_PATH) {
             HILOGI("Unsupported applications, name : %{public}s", installedBundle.name.data());
             continue;

@@ -66,8 +66,6 @@ constexpr int32_t UNKNOWN = -1;
 constexpr int32_t NV12 = 0;
 constexpr int32_t NV21 = 1;
 constexpr int32_t IMAGE_COMPRESSION_QUALITY = 30;
-constexpr int32_t TRIGGER_COND_TIMEOUT = 90;
-constexpr int32_t TRIGGER_COND_ROW = 30;
 constexpr int32_t EVENT_RESULT_SUCCESS = 0;
 constexpr int32_t EVENT_RESULT_FAIL = 1;
 
@@ -888,32 +886,7 @@ static int64_t AddProcessor()
 {
     HiAppEvent::ReportConfig config;
     config.name = "ha_app_event";
-    config.appId = "com_hmos_sdk_ocg";
-    config.routeInfo = "AUTO";
-    config.triggerCond.timeout = TRIGGER_COND_TIMEOUT;
-    config.triggerCond.row = TRIGGER_COND_ROW;
-    config.eventConfigs.clear();
-    {
-        HiAppEvent::EventConfig event1;
-        event1.domain = "api_diagnostic";
-        event1.name = "api_exec_end";
-        event1.isRealTime = false;
-        config.eventConfigs.push_back(event1);
-    }
-    {
-        HiAppEvent::EventConfig event2;
-        event2.domain = "api_diagnostic";
-        event2.name = "api_called_stat";
-        event2.isRealTime = true;
-        config.eventConfigs.push_back(event2);
-    }
-    {
-        HiAppEvent::EventConfig event3;
-        event3.domain = "api_diagnostic";
-        event3.name = "api_called_stat_cnt";
-        event3.isRealTime = true;
-        config.eventConfigs.push_back(event3);
-    }
+    config.configName = "SDK_OCG";
     return HiAppEvent::AppEventProcessorMgr::AddProcessor(config);
 }
 
