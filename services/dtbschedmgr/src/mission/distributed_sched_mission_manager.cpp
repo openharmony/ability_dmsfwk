@@ -631,11 +631,12 @@ bool DistributedSchedMissionManager::CheckAccessControlForMissions(const CallerI
     std::string localDeviceId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
         HILOGE("GetLocalDeviceId failed");
+        return false;
     }
     AccountInfo dstAccountInfo;
     if (!GetOsAccountData(dstAccountInfo)) {
         HILOGE("Get Os accountId and userId fail.");
-        return INVALID_PARAMETERS_ERR;
+        return false;
     }
     DmAccessCallee dmDstCallee = {
         .accountId = dstAccountInfo.activeAccountId,

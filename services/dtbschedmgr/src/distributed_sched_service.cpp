@@ -3684,12 +3684,12 @@ bool DistributedSchedService::CheckSinkAccessControlUser(const FreeInstallInfo& 
     AccountInfo dstAccountInfo;
     if (!DistributedSchedMissionManager::GetInstance().GetOsAccountData(dstAccountInfo)) {
         HILOGE("Get Os accountId and userId fail.");
-        return INVALID_PARAMETERS_ERR;
+        return false;
     }
     std::string dstNetworkId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(dstNetworkId)) {
         HILOGE("GetLocalDeviceId failed");
-        return INVALID_REMOTE_PARAMETERS_ERR;
+        return false;
     }
 
     DmAccessCallee dmDstCallee = {
