@@ -72,9 +72,7 @@ HWTEST_F(DExtensionContextJSTest, DExtensionContextJS_CreateDistributedExtension
     GTEST_LOG_(INFO) << "DExtensionContextJSTest DExtensionContextJS_CreateDistributedExtensionContextJS_0100 begin";
     try {
         int env = 0;
-        auto value = make_shared<DistributedExtensionContext>();
-        auto ptr = reinterpret_cast<std::weak_ptr<DistributedExtensionContext> *>(value.get())->lock();
-        auto ret = CreateDistributedExtensionContextJS(reinterpret_cast<napi_env>(&env), ptr);
+        auto ret = CreateDistributedExtensionContextJS(reinterpret_cast<napi_env>(&env), nullptr);
         EXPECT_TRUE(ret == nullptr);
 
         EXPECT_CALL(*jsExtensionContextMock_, CreateJsExtensionContext(_, _, _)).WillOnce(Return(nullptr));
