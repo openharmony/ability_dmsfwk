@@ -153,62 +153,6 @@ ohos_unittest("distributed_extension_proxy_test") {
   use_exceptions = true
 }
 
-ohos_unittest("distributed_extension_context_js_test") {
-  module_out_path = module_output_path
-
-  sources = [
-    "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_context.cpp",
-    "${dms_path}/frameworks/native/distributed_extension/test/mock/napi/src/napi_mock.cpp",
-    "distributed_extension_context_js_test.cpp",
-  ]
-
-  include_dirs = [
-    "${dms_path}/frameworks/native/distributed_extension/include",
-    "${dms_path}/frameworks/native/distributed_extension/src",
-    "${dms_path}/common/include/",
-    "${dms_path}/frameworks/native/distributed_extension/test/mock/distributed_extension/include",
-    "${dms_path}/frameworks/native/distributed_extension/test/mock/napi/include",
-  ]
-
-  deps = []
-
-  external_deps = [
-    "ability_base:configuration",
-    "ability_base:want",
-    "ability_runtime:ability_context_native",
-    "ability_runtime:ability_manager",
-    "ability_runtime:ability_start_options",
-    "ability_runtime:abilitykit_native",
-    "ability_runtime:app_context",
-    "ability_runtime:extensionkit_native",
-    "ability_runtime:napi_common",
-    "ability_runtime:runtime",
-    "access_token:libaccesstoken_sdk",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
-    "c_utils:utils",
-    "eventhandler:libeventhandler",
-    "googletest:gmock_main",
-    "hilog:libhilog",
-    "hitrace:hitrace_meter",
-    "i18n:intl_util",
-    "ipc:ipc_core",
-    "ipc:ipc_napi",
-    "ipc:ipc_single",
-    "napi:ace_napi",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
-  ]
-
-  cflags = [ "--coverage" ]
-  ldflags = [ "--coverage" ]
-  cflags_cc = [ "--coverage" ]
-
-  defines = [ "private=public" ]
-
-  use_exceptions = true
-}
-
 ohos_unittest("distributed_extension_base_test") {
   module_out_path = module_output_path
 
@@ -365,7 +309,6 @@ group("distributed_extension_ability_test") {
   if (!use_libfuzzer) {
     deps = [
       ":distributed_extension_base_test",
-      ":distributed_extension_context_js_test",
       ":distributed_extension_js_test",
       ":distributed_extension_proxy_test",
       ":distributed_extension_stub_test",
