@@ -113,6 +113,7 @@ int32_t SoftbusAdapter::DealSendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> b
         HILOGE("buffer is nullptr");
         return INVALID_PARAMETERS_ERR;
     }
+
     if (dmsAdapetr_.SendSoftbusEvent == nullptr) {
         HILOGE("Dms interactive SendSoftbusEvent is null.");
         return INVALID_PARAMETERS_ERR;

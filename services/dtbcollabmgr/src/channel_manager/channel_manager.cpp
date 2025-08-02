@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2024 Huawei Device Co., Ltd.
+* Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
 * You may obtain a copy of the License at
@@ -121,7 +121,7 @@ do {                                                                          \
 do {                                                                       \
     if ((data) == nullptr) {                                               \
         HILOGE("receive empty bytes data, socketId=%{public}d", socketId); \
-        (errorHandler)(socketId, RECV_DATA_EMPTY);                        \
+        (errorHandler)(channelId, RECV_DATA_EMPTY);                        \
         return;                                                            \
     }                                                                      \
 } while (0)
@@ -224,7 +224,7 @@ int32_t ChannelManager::Init(const std::string& ownerName)
     callbackEventNewCon_.wait(callbackNewLock, [this] {
         return callbackEventHandlerNew_ != nullptr;
     });
-    
+
     int32_t socketServerId = CreateServerSocket();
     if (socketServerId <= 0) {
         HILOGE("create socket failed, ret: %{public}d", socketServerId);
@@ -677,7 +677,7 @@ void ChannelManager::ClearRegisterSocket(const int32_t channelId)
             socketStatusMap_.erase(socketId);
         }
     }
-    HILOGI("start to shutdown socket");
+    HILOGI("start to clear socket");
     for (const auto socketId : socketIds) {
         Shutdown(socketId);
     }
@@ -930,7 +930,7 @@ void ChannelManager::OnSocketConnected(int32_t socketId, const PeerSocketInfo& i
     auto func = [socketId, channelId, this]() {
         UpdateChannel(socketId, channelId);
     };
-    PostTask(func, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    PostCallbackTask(func, AppExecFwk::EventQueue::Priority::IMMEDIATE);
     HILOGI("add update channel task into handler");
 }
 
@@ -1149,7 +1149,7 @@ ChannelStatus ChannelManager::GetChannelStatus(const int32_t channelId)
 template <typename Func, typename... Args>
 int32_t ChannelManager::DoSendData(const int32_t channelId, Func doSendFunc, Args&&... args)
 {
-    HILOGD("start to send data");
+    HILOGI("start to send data");
     int32_t socketId = GetValidSocket(channelId);
     if (socketId <= 0) {
         HILOGE("no avaliable sockets, %{public}d", channelId);
@@ -1204,7 +1204,7 @@ int32_t ChannelManager::SendBytes(const int32_t channelId, const std::shared_ptr
 inline int32_t ChannelManager::DoSendBytes(const int32_t channelId,
     const std::shared_ptr<AVTransDataBuffer>& data)
 {
-    HILOGD("start to send bytes");
+    HILOGI("start to send bytes");
     return DoSendData(channelId, &DataSenderReceiver::SendBytesData, data);
 }
 
@@ -1238,7 +1238,7 @@ int32_t ChannelManager::SendStream(const int32_t channelId,
         DoErrorCallback(channelId, INVALID_CHANNEL_ID);
         return INVALID_CHANNEL_ID;
     }
-    HILOGD("start to send stream");
+    HILOGI("start to send stream");
     auto func = [=]() {
         DoSendStream(channelId, data);
     };
@@ -1248,13 +1248,13 @@ int32_t ChannelManager::SendStream(const int32_t channelId,
         HILOGE("failed to add send stream task, ret=%{public}d", ret);
         return POST_TASK_FAILED;
     }
-    HILOGD("send stream task added to handler");
+    HILOGI("send stream task added to handler");
     return ERR_OK;
 }
 
 int32_t ChannelManager::DoSendStream(const int32_t channelId, const std::shared_ptr<AVTransStreamData>& data)
 {
-    HILOGD("start to send stream");
+    HILOGI("start to send stream");
     return DoSendData(channelId, &DataSenderReceiver::SendStreamData, data);
 }
 
@@ -1265,7 +1265,7 @@ int32_t ChannelManager::SendMessage(const int32_t channelId,
         HILOGE("invalid channel id. %{public}d", channelId);
         return INVALID_CHANNEL_ID;
     }
-    HILOGD("start to send message, %{public}u", static_cast<uint32_t>(data->Size()));
+    HILOGI("start to send message, %{public}u", static_cast<uint32_t>(data->Size()));
     auto func = [channelId, data, this]() {
         DoSendMessage(channelId, data);
     };

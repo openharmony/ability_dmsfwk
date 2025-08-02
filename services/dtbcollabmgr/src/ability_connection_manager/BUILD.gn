@@ -29,6 +29,7 @@ config("distributed_collab_config") {
     "${dms_path}/services/dtbcollabmgr/include/av_trans_stream_provider",
     "${dms_path}/services/dtbcollabmgr/include/channel_manager",
     "${dms_path}/services/dtbcollabmgr/include/ability_connection_manager",
+    "${dms_path}/services/dtbschedmgr/include",
   ]
 }
 

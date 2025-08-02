@@ -756,8 +756,8 @@ bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode, st
             PEER_UDID, GetAnonyUdid(peerUdid),
             APP_CALLEE, srcBundleName,
             APP_CALLER, dstBundleName,
-            LOCAL_APP_VERSION, srcBundleInfo.versionName,
-            PEER_APP_VERSION, dstBundleInfo.versionName);
+            LOCAL_APP_VERSION, dstBundleInfo.versionName,
+            PEER_APP_VERSION, srcBundleInfo.versionName);
     } else {
         res = HiSysEventWrite(
             APP_CONTINUE_DOMAIN,
@@ -771,8 +771,8 @@ bool DmsRadar::ClickIconDmsContinue(const std::string& func, int32_t errCode, st
             PEER_UDID, GetAnonyUdid(peerUdid),
             APP_CALLEE, srcBundleName,
             APP_CALLER, dstBundleName,
-            LOCAL_APP_VERSION, srcBundleInfo.versionName,
-            PEER_APP_VERSION, dstBundleInfo.versionName,
+            LOCAL_APP_VERSION, dstBundleInfo.versionName,
+            PEER_APP_VERSION, srcBundleInfo.versionName,
             ERROR_CODE, errCode);
     }
     if (res != ERR_OK) {

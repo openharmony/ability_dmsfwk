@@ -113,9 +113,9 @@ public:
     sptr<IDistributedSched> GetDms();
     int32_t InstallBundle(const std::string &bundlePath) const;
     sptr<IDistributedSched> proxy_;
-    static inline std::shared_ptr<SvcDistributedConnectionMock> svcDConnMock = nullptr;
-    static inline std::shared_ptr<DeviceManagerMock> deviceMgrMock_ = nullptr;
     static inline std::shared_ptr<MultiUserManagerMock> multiUserMgrMock_ = nullptr;
+    static inline std::shared_ptr<DeviceManagerMock> deviceMgrMock_ = nullptr;
+    static inline std::shared_ptr<SvcDistributedConnectionMock> svcDConnMock = nullptr;
 
 protected:
     enum class LoopTime : int32_t {
@@ -137,10 +137,10 @@ void DistributedSchedServiceFirstTest::SetUpTestCase()
     if (!DistributedSchedUtil::LoadDistributedSchedService()) {
         DTEST_LOG << "DistributedSchedServiceFirstTest::SetUpTestCase LoadDistributedSchedService failed" << std::endl;
     }
-    svcDConnMock = std::make_shared<SvcDistributedConnectionMock>();
-    SvcDistributedConnectionMock::connMock = svcDConnMock;
     multiUserMgrMock_ = std::make_shared<MultiUserManagerMock>();
     MultiUserManagerMock::multiUserMgrMock = multiUserMgrMock_;
+    svcDConnMock = std::make_shared<SvcDistributedConnectionMock>();
+    SvcDistributedConnectionMock::connMock = svcDConnMock;
     deviceMgrMock_ = std::make_shared<DeviceManagerMock>();
     DeviceManagerMock::deviceMgrMock = deviceMgrMock_;
     const std::string pkgName = "DBinderBus_" + std::to_string(getprocpid());
@@ -151,10 +151,10 @@ void DistributedSchedServiceFirstTest::SetUpTestCase()
 
 void DistributedSchedServiceFirstTest::TearDownTestCase()
 {
-    SvcDistributedConnectionMock::connMock = nullptr;
-    svcDConnMock = nullptr;
     MultiUserManagerMock::multiUserMgrMock = nullptr;
     multiUserMgrMock_ = nullptr;
+    SvcDistributedConnectionMock::connMock = nullptr;
+    svcDConnMock = nullptr;
     DeviceManagerMock::deviceMgrMock = nullptr;
     deviceMgrMock_ = nullptr;
 }

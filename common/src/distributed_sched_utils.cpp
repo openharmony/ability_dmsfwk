@@ -231,10 +231,12 @@ int32_t Base64StrToParcel(const std::string& rawStr, Parcel& parcel)
     std::string str = Base64Decode(rawStr);
     auto parcelSize = str.size();
     if (!parcel.SetDataCapacity(parcelSize)) {
+        HILOGE("Base64 string parcel set data capacity %{public}zu fail.", parcelSize);
         return INVALID_PARAMETERS_ERR;
     }
     auto ret = memcpy_s((void *)parcel.GetData(), parcel.GetMaxCapacity(), &str[0], parcelSize);
     if (ret != ERR_OK || !parcel.SetDataSize(parcelSize)) {
+        HILOGE("Base64 string parcel memcpy raw string data fail.");
         return INVALID_PARAMETERS_ERR;
     }
     return ERR_OK;

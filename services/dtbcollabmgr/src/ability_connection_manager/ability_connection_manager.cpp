@@ -431,7 +431,7 @@ int32_t AbilityConnectionManager::RegisterEventCallback(int32_t sessionId,
         HILOGE("sessionId is invalid parameter");
         return INVALID_PARAMETERS_ERR;
     }
-    
+
     return connectionSesion->RegisterEventCallback(listener);
 }
 
@@ -443,7 +443,7 @@ int32_t AbilityConnectionManager::UnregisterEventCallback(int32_t sessionId)
         HILOGE("sessionId is invalid parameter");
         return INVALID_PARAMETERS_ERR;
     }
-    
+
     return connectionSesion->UnregisterEventCallback();
 }
 
