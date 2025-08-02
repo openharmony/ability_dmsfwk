@@ -25,6 +25,7 @@
 #include "ability_connection_session.h"
 #include "accesstoken_kit.h"
 #include "distributed_client.h"
+#include "distributed_sched_utils.h"
 #include "dtbcollabmgr_log.h"
 #include "ipc_skeleton.h"
 #include "openssl/sha.h"
@@ -33,6 +34,7 @@
 
 namespace OHOS {
 namespace DistributedCollab {
+using namespace OHOS::DistributedSchedule;
 namespace {
 const std::string TAG = "AbilityConnectionManager";
 constexpr int32_t SERVER_SOCKET_NAME_LENGTH = 64;
@@ -208,7 +210,7 @@ int32_t AbilityConnectionManager::AcceptConnect(int32_t sessionId, const std::st
 
 int32_t AbilityConnectionManager::Reject(const std::string& token, const std::string& reason)
 {
-    HILOGI("called, token is %{public}s", token.c_str());
+    HILOGI("called, token is %{public}s", GetAnonymStr(token).c_str());
     DistributedClient dmsClient;
     return dmsClient.NotifyRejectReason(token, reason);
 }
@@ -591,7 +593,7 @@ std::string AbilityConnectionManager::GetSessionToken(int32_t sessionId)
         return "";
     }
     std::string dmsServertoken = connectionSesion->GetServerToken();
-    HILOGI("sessionId is %{public}d, token is %{public}s", sessionId, dmsServertoken.c_str());
+    HILOGI("sessionId is %{public}d, token is %{public}s", sessionId, GetAnonymStr(dmsServertoken).c_str());
     return dmsServertoken;
 }
 
