@@ -494,6 +494,7 @@ ohos_unittest("dschedpermissiontest") {
     "unittest/mock/bundle_manager_internal_mock.cpp",
     "unittest/mock/dtbschedmgr_device_info_storage_mock.cpp",
     "unittest/mock/distributed_sched_adapter_mock.cpp",
+    "unittest/mock/dnetwork_adapter_mock.cpp",
   ]
   sources += dtbschedmgr_sources
 
