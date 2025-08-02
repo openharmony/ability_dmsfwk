@@ -90,6 +90,23 @@ HWTEST_F(DSchedCollabTest, DSchedCollab_001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: DSchedCollab_002
+ * @tc.desc: call DSchedCollab
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, DSchedCollab_002, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest DSchedCollab_002 begin" << std::endl;
+    int32_t softbusSessionId = 0;
+    auto getSinkCollabVersionCmd = std::make_shared<GetSinkCollabVersionCmd>();
+    auto newCollab = std::make_shared<DSchedCollab>(getSinkCollabVersionCmd, softbusSessionId);
+    EXPECT_EQ(newCollab->softbusSessionId_, softbusSessionId);
+    newCollab->UnInit();
+    DTEST_LOG << "DSchedCollabTest DSchedCollab_002 end" << std::endl;
+}
+
+/**
  * @tc.name: PostSrcStartTask_001
  * @tc.desc: call PostSrcStartTask
  * @tc.type: FUNC

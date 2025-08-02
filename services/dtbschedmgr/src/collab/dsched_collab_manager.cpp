@@ -249,7 +249,7 @@ int32_t DSchedCollabManager::GetSinkCollabVersion(DSchedCollabInfo &info)
     eventHandler_->PostTask(func);
     return ERR_OK;
 }
- 
+
 void DSchedCollabManager::HandleGetSinkCollabVersion(const DSchedCollabInfo &info)
 {
     HILOGI("called");
@@ -260,7 +260,7 @@ void DSchedCollabManager::HandleGetSinkCollabVersion(const DSchedCollabInfo &inf
     collabs_.insert(std::make_pair(collabToken, newCollab));
     newCollab->PostSrcGetPeerVersionTask();
     SetTimeOut(collabToken, COLLAB_TIMEOUT);
- 
+
 #ifdef COLLAB_ALL_CONNECT_DECISIONS
     if (!DSchedTransportSoftbusAdapter::GetInstance().IsNeedAllConnect(SERVICE_TYPE_COLLAB)) {
         HILOGW("don't need wait all connect decision");
@@ -316,11 +316,12 @@ int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
 
 bool DSchedCollabManager::IsStartForeground(DSchedCollabInfo &info)
 {
+    HILOGI("called");
     auto value = info.srcOpt_.startParams_.GetParam(KEY_START_OPTION);
     AAFwk::IString *ao = AAFwk::IString::Query(value);
     if (ao != nullptr) {
         std::string startOpt = AAFwk::String::Unbox(ao);
-        HILOGI("startOpt is: %{public}s", startOpt.c_str());
+        HILOGI("startOpt : %{public}s", startOpt.c_str());
         return (startOpt == VALUE_START_OPTION_BACKGROUND) ? false : true;
     }
     return true;
@@ -790,6 +791,8 @@ void DSchedCollabManager::NotifyDataRecv(const int32_t &softbusSessionId, int32_
         HILOGI("end");
         return;
     }
+    HILOGE("No matching session to handle cmd!");
+    return;
 }
 
 void DSchedCollabManager::OnShutdown(int32_t socket, bool isSelfCalled)

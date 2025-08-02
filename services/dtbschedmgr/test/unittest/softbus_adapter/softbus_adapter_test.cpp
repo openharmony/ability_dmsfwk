@@ -67,6 +67,7 @@ static int32_t RegisterEventListener(bool deduplicate, void *onBroadCastRecvFunc
 {
     return g_mockRet;
 }
+
 static int32_t UnregisterEventListener(bool deduplicate, void *onBroadCastRecvFunc)
 {
     return g_mockRet;

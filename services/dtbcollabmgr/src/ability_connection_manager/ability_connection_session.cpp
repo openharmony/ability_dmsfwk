@@ -23,7 +23,7 @@
 #include <iomanip>
 #include <future>
 #include <vector>
- 
+
 #include "ability_connection_manager.h"
 #include "dtbcollabmgr_log.h"
 #include "dtbschedmgr_log.h"
@@ -537,7 +537,7 @@ int32_t AbilityConnectionSession::SendFile(const std::vector<std::string>& sFile
         HILOGE("data channel not exit");
         return ret;
     }
-    
+
     int32_t channelId = transChannelInfo.channelId;
     ret = ChannelManager::GetInstance().SendFile(channelId, sFiles, dFiles);
     if (ret != ERR_OK) {
@@ -1170,7 +1170,7 @@ int32_t AbilityConnectionSession::DoConnectStreamChannel(int32_t channelId)
 
 int32_t AbilityConnectionSession::GetTransChannelInfo(const TransChannelType& type, TransChannelInfo& info)
 {
-    HILOGI("called.");
+    HILOGD("called.");
     std::shared_lock<std::shared_mutex> channelReadLock(transChannelMutex_);
     auto item = transChannels_.find(type);
     if (item == transChannels_.end()) {
@@ -1406,6 +1406,7 @@ void AbilityConnectionSession::ExeuteMessageEventCallback(const std::string msg)
     HILOGI("start to add msg callback to handler");
     if (listener != nullptr) {
         HILOGI("handler sessionListener");
+        listener->OnMessage(sessionId_, msg);
         auto func = [listener, msg, this]() {
             listener->OnMessage(sessionId_, msg);
         };
@@ -1533,7 +1534,7 @@ void AbilityConnectionSession::OnBytesReceived(int32_t channelId, const std::sha
 
 void AbilityConnectionSession::OnError(int32_t channelId, const int32_t errorCode)
 {
-    HILOGI("error receive");
+    HILOGI("error receive, channelId is %{public}d, errorCode is %{public}d", channelId, errorCode);
     if (!IsVaildChannel(channelId)) {
         return;
     }
@@ -1585,7 +1586,7 @@ bool AbilityConnectionSession::IsVaildChannel(const int32_t channelId)
 
 void AbilityConnectionSession::SetTimeOut(int32_t time)
 {
-    HILOGD("called.");
+    HILOGI("called.");
     auto func = [this]() {
         Release();
     };
@@ -1598,7 +1599,7 @@ void AbilityConnectionSession::SetTimeOut(int32_t time)
 
 void AbilityConnectionSession::RemoveTimeout()
 {
-    HILOGD("called.");
+    HILOGI("called.");
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler_ is nullptr");
         return;
@@ -1640,6 +1641,7 @@ void AbilityConnectionSession::ExeuteConnectCallback(const ConnectResult& result
             HILOGE("connect callback is nullptr.");
             return;
         }
+        // move ownership and set nullptr
         auto callback = std::move(connectCallback_);
         connectCallback_ = nullptr;
         callback(result);

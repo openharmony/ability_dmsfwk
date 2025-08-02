@@ -40,10 +40,12 @@ constexpr int32_t BIND_RETRY_INTERVAL = 500;
 constexpr int32_t MAX_BIND_RETRY_TIME = 4000;
 constexpr int32_t MAX_RETRY_TIMES = 8;
 constexpr int32_t MS_TO_US = 1000;
+#ifndef DMS_CHECK_BLUETOOTH
 constexpr int32_t SOFTBUS_QOS_CASE_HIGH = 0;
 constexpr int32_t SOFTBUS_QOS_CASE_MIDDLE_HIGH = 1;
 constexpr int32_t SOFTBUS_QOS_CASE_MIDDLE_LOW = 2;
 constexpr int32_t SOFTBUS_QOS_CASE_LOW = 3;
+#endif
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DSchedTransportSoftbusAdapter);

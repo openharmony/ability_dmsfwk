@@ -252,6 +252,7 @@ ohos_shared_library("distributedschedsvr") {
     "distributed_bundle_framework:dbms_fwk",
     "distributed_notification_service:ans_innerkits",
     "dsoftbus:softbus_client",
+    "dsoftbus:softbus_utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hisysevent:libhisysevent",

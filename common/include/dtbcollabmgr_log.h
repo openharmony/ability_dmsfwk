@@ -235,7 +235,7 @@ enum {
     SAME_SESSION_IS_CONNECTING,
 
     INVALID_SESSION_ID,
-    
+
     COLLAB_PERMISSION_DENIED,
 
     CONNECTED_SESSION_EXISTS,
@@ -257,6 +257,6 @@ enum {
      */
     NOT_FIND_SERVICE_REGISTRY = 29360161,
 };
-} // namespace DistributedSchedule
+} // namespace DistributedCollab
 } // namespace OHOS
 #endif

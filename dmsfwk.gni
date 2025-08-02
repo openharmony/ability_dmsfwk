@@ -38,6 +38,7 @@ declare_args() {
   dmsfwk_softbus_file_ability = false
   dmsfwk_check_screenlock = false
   dmsfwk_feature_dams_enable = true
+  dmsfwk_check_screenlock = false
   if (defined(global_parts_info)) {
     if (defined(global_parts_info.multimedia_image_framework)) {
       dmsfwk_mission_manager = true

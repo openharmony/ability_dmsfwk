@@ -71,6 +71,7 @@ dsched_external_deps = [
   "distributed_bundle_framework:dbms_fwk",
   "dmsfwk:continuation_manager",
   "dsoftbus:softbus_client",
+  "dsoftbus:softbus_utils",
   "eventhandler:libeventhandler",
   "ffrt:libffrt",
   "hilog:libhilog",
@@ -979,6 +980,7 @@ ohos_unittest("dmscollabsuptest") {
   cflags = [ "-Dprivate=public" ]
 
   sources = [
+    "unittest/collab/state/dsched_collab_sink_state_test.cpp",
     "${dms_path}/services/dtbschedmgr/src/collab/dsched_collab.cpp",
     "unittest/collab/dsched_collab_sup_test.cpp",
     "unittest/mock/event_handler_mock.cpp",
@@ -1017,7 +1019,7 @@ ohos_unittest("dmscollabstatetest") {
   cflags = [ "-Dprivate=public" ]
 
   sources = [
-    "unittest/collab/state/dsched_collab_sink_state_test.cpp",
+    "${dms_path}/services/dtbschedmgr/src/collab/state/dsched_collab_state_machine.cpp",
     "unittest/collab/state/dsched_collab_state_machine_test.cpp",
   ]
   sources += dtbschedmgr_sources

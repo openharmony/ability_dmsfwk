@@ -286,7 +286,7 @@ std::shared_ptr<IChannelListener> AVReceiverFilter::GetChannelListener()
 std::shared_ptr<AVTransStreamData> AVReceiverFilter::GetStreamData()
 {
     if (dataQueue_.empty()) {
-        HILOGE("data queue empty");
+        HILOGD("data queue empty");
         return nullptr;
     }
     auto topData = dataQueue_.top();
