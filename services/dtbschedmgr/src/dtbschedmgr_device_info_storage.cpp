@@ -195,7 +195,8 @@ bool DtbschedmgrDeviceInfoStorage::UpdateDeviceInfoStorage()
         int32_t osType = Constants::OH_OS_TYPE;
         std::string osVersion = "";
         if (!GetOsInfoFromDM(dmDeviceInfo.extraData, osType, osVersion)) {
-            HILOGE("Get Os info from DM device info fail, extraData %{public}s.", dmDeviceInfo.extraData.c_str());
+            HILOGE("Get Os info from DM device info fail, extraData %{public}s.",
+                GetAnonymStr(dmDeviceInfo.extraData).c_str());
         }
         auto deviceInfo = std::make_shared<DmsDeviceInfo>(dmDeviceInfo.deviceName, dmDeviceInfo.deviceTypeId,
             dmDeviceInfo.networkId, ONLINE, osType, osVersion);
@@ -413,6 +414,7 @@ void DtbschedmgrDeviceInfoStorage::DeviceOfflineNotify(const std::string& networ
         UnregisterUuidNetworkIdMap(networkId);
         lock_guard<mutex> autoLock(deviceLock_);
         remoteDevices_.erase(networkId);
+        // Continue recommendation needs updatated device list
         DistributedSchedService::GetInstance().DeviceOfflineNotifyAfterDelete(networkId);
     };
     if (!networkIdMgrHandler_->PostTask(nodeOffline)) {

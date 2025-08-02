@@ -54,7 +54,8 @@ public:
 
     int32_t SendMessage(int32_t sessionId, const std::string& msg);
     int32_t SendData(int32_t sessionId, const std::shared_ptr<AVTransDataBuffer>& buffer);
-    int32_t SendImage(int32_t sessionId, const std::shared_ptr<Media::PixelMap> &pixelMapPtr, int32_t imageQuality);
+    int32_t SendImage(int32_t sessionId, const std::shared_ptr<Media::PixelMap> &pixelMapPtr,
+        int32_t imageQuality);
     int32_t SendFile(int32_t sessionId, const std::vector<std::string>& sFiles,
         const std::vector<std::string>& dFiles);
 

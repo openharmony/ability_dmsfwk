@@ -88,17 +88,17 @@ struct AbilityConnectionSessionInfo {
     std::string serverId_;
     PeerInfo localInfo_;
     PeerInfo peerInfo_;
- 
+
     AbilityConnectionSessionInfo() = default;
     AbilityConnectionSessionInfo(const std::string& serverId, const PeerInfo& localInfo,
         const PeerInfo& peerInfo) : serverId_(serverId), localInfo_(localInfo), peerInfo_(peerInfo) {}
- 
+
     bool operator == (const AbilityConnectionSessionInfo &index) const
     {
         return this->serverId_ == index.serverId_ && this->localInfo_ == index.localInfo_ &&
             this->peerInfo_ == index.peerInfo_;
     }
- 
+
     bool operator < (const AbilityConnectionSessionInfo &index) const
     {
         if (this->serverId_ != index.serverId_) {

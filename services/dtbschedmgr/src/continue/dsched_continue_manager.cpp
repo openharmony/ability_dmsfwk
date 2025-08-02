@@ -39,7 +39,7 @@ const std::string DSCHED_CONTINUE_MANAGER = "dsched_continue_manager";
 const std::string CONTINUE_TIMEOUT_TASK = "continue_timeout_task";
 const std::string MDM_CONTROL = "current user is MDM_CONTROL";
 const std::u16string CONNECTION_CALLBACK_INTERFACE_TOKEN = u"ohos.abilityshell.DistributedConnection";
-constexpr int32_t TERMINATE_DELAY_TIME = 200; //ms
+constexpr int32_t TERMINATE_DELAY_TIME = 200; // ms
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DSchedContinueManager);

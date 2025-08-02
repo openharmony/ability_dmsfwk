@@ -202,7 +202,7 @@ int32_t DistributedSchedPermission::GetAccountInfo(const std::string& remoteNetw
     if (CheckAclList(remoteNetworkId, accountInfo, callerInfo, true)) {
         return ERR_OK;
     }
-    HILOGE("Check different account ACL by DM fail.");
+    HILOGE("Check different account ACL list by DM fail.");
     return  INVALID_PARAMETERS_ERR;
 }
 
@@ -258,7 +258,7 @@ bool DistributedSchedPermission::IsHigherAclVersion(const CallerInfo& callerInfo
             HILOGW("get dmsVersion failed");
             return false;
         }
-        HILOGI("major is %{public}d", major);
+        HILOGW("major is %{public}d", major);
         if (major < HIGH_CONTINUE_ACL_VERSION) {
             HILOGW("dmsVersion is %{public}s", dmsVersion.c_str());
             return false;
@@ -873,7 +873,7 @@ bool DistributedSchedPermission::IsAbilityForeground(uint32_t accessTokenId)
         HILOGE("error:%{public}d", ret);
         return false;
     }
-    for (auto appStateData : list) {
+    for (auto& appStateData : list) {
         if (appStateData.accessTokenId == accessTokenId) {
             HILOGI("the ability is foreground, bundleName : %{public}s", appStateData.bundleName.c_str());
             return true;
