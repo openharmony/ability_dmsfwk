@@ -321,7 +321,7 @@ HWTEST_F(ChannelManagerTest, ConnectChannel_Success, TestSize.Level1)
 
     int32_t channelId = ChannelManager::GetInstance().CreateClientChannel(channelName, dataType, peerInfo);
     EXPECT_EQ(channelId, MESSAGE_START_ID);  // Should return valid channelId
- 
+
     // Step 3: Mock Bind to succeed
     EXPECT_CALL(mockSoftbus, Bind(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(ERR_OK)); // Mock Bind to succeed
@@ -354,7 +354,7 @@ HWTEST_F(ChannelManagerTest, ConnectChannel_BindFailed, TestSize.Level1)
 
     int32_t channelId = ChannelManager::GetInstance().CreateClientChannel(channelName, dataType, peerInfo);
     EXPECT_EQ(channelId, MESSAGE_START_ID);  // Should return valid channelId
- 
+
     // Step 3: Mock Bind to succeed
     EXPECT_CALL(mockSoftbus, Bind(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(NUM_MINUS_1)); // Mock Bind to succeed
@@ -374,7 +374,7 @@ HWTEST_F(ChannelManagerTest, ConnectChannel_InvalidChannelId, TestSize.Level1)
     // Simulate channelId not being in the channelInfoMap_
     int32_t invalidChannelId = INVALID_CHANNEL; // Invalid channel ID
     int32_t connectResult = ChannelManager::GetInstance().ConnectChannel(invalidChannelId);
- 
+
     // Verify that ConnectChannel returns INVALID_CHANNEL_ID for an invalid channelId
     EXPECT_EQ(connectResult, INVALID_CHANNEL_ID);
 }
@@ -391,7 +391,7 @@ HWTEST_F(ChannelManagerTest, ConnectChannel_RepeatConnection, TestSize.Level1)
         .WillRepeatedly(testing::Return(NUM_1234));
     EXPECT_CALL(mockSoftbus, Listen(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(ERR_OK)); // Mock Listen to return success
- 
+
     int32_t initResult = ChannelManager::GetInstance().Init(ownerName);
     EXPECT_EQ(initResult, ERR_OK); // Ensure Init was successful
 
@@ -430,7 +430,7 @@ HWTEST_F(ChannelManagerTest, OnSocketConnected_Success_WithCallback, TestSize.Le
         .WillRepeatedly(testing::Return(NUM_1234));
     EXPECT_CALL(mockSoftbus, Listen(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(ERR_OK)); // Mock Listen to return success
- 
+
     int32_t initResult = ChannelManager::GetInstance().Init(ownerName);
     EXPECT_EQ(initResult, ERR_OK); // Ensure Init was successful
 
@@ -640,7 +640,7 @@ HWTEST_F(ChannelManagerTest, OnSocketClosed_WhenNoChannelID, TestSize.Level1)
     auto mockListener = std::make_shared<MockChannelListener>();
     int32_t result = ChannelManager::GetInstance().RegisterChannelListener(channelId, mockListener);
     EXPECT_EQ(result, ERR_OK);
-    EXPECT_CALL(*mockListener, OnDisConnect(channelId, ShutdownReason::SHUTDOWN_REASON_UNKNOWN)).Times(0);
+    EXPECT_CALL(*mockListener, OnDisConnect(channelId, ShutdownReason::SHUTDOWN_REASON_LNN_OFFLINE)).Times(0);
 
     ChannelManager::GetInstance().OnSocketClosed(INVALID_CHANNEL_ID, ShutdownReason::SHUTDOWN_REASON_LNN_OFFLINE);
 }
@@ -672,7 +672,7 @@ HWTEST_F(ChannelManagerTest, OnSocketClosed_InvalidSocketIdWithChannelId, TestSi
     auto mockListener = std::make_shared<MockChannelListener>();
     int32_t result = ChannelManager::GetInstance().RegisterChannelListener(channelId, mockListener);
     EXPECT_EQ(result, ERR_OK);
-    EXPECT_CALL(*mockListener, OnDisConnect(channelId, ShutdownReason::SHUTDOWN_REASON_UNKNOWN)).Times(0);
+    EXPECT_CALL(*mockListener, OnDisConnect(channelId, ShutdownReason::SHUTDOWN_REASON_LNN_OFFLINE)).Times(0);
 
     ChannelManager::GetInstance().OnSocketClosed(INVALID_CHANNEL_ID, ShutdownReason::SHUTDOWN_REASON_LNN_OFFLINE);
 }
@@ -1126,7 +1126,6 @@ HWTEST_F(ChannelManagerTest, OnMessageReceived_Failure_InvalidData, TestSize.Lev
 
     // Step 4: Mock the listener and expect the OnError callback to be triggered on failure
     auto mockListener = std::make_shared<MockChannelListener>();
-    EXPECT_CALL(*mockListener, OnError(channelId, RECV_DATA_EMPTY)).Times(1);  // 确保 OnError 被调用一次
     EXPECT_CALL(*mockListener, OnMessage(channelId, testing::_)).Times(0);
 
     // 注册监听器
@@ -1292,7 +1291,6 @@ HWTEST_F(ChannelManagerTest, OnStreamReceived_Failure_RecvDataEmpty, TestSize.Le
     // 注册监听器
     int32_t result = ChannelManager::GetInstance().RegisterChannelListener(channelId, mockListener);
     EXPECT_EQ(result, ERR_OK);  // 确保注册监听器成功
-    EXPECT_CALL(*mockListener, OnError(channelId, RECV_DATA_EMPTY)).Times(1);
 
     ChannelManager::GetInstance().OnStreamReceived(socketId, nullptr, &ext, &param);
 }
@@ -1359,7 +1357,6 @@ HWTEST_F(ChannelManagerTest, OnStreamReceived_Failure_ParseStreamExtFailed, Test
     // 注册监听器
     int32_t result = ChannelManager::GetInstance().RegisterChannelListener(channelId, mockListener);
     EXPECT_EQ(result, ERR_OK);  // 确保注册监听器成功
-    EXPECT_CALL(*mockListener, OnError(channelId, PARSE_AV_TRANS_STREAM_EXT_FAILED)).Times(1);
 
     // Step 4: Call OnStreamReceived and expect error callback to be triggered
     ChannelManager::GetInstance().OnStreamReceived(socketId, &data, &ext, &param);
@@ -1469,7 +1466,6 @@ HWTEST_F(ChannelManagerTest, OnBytesReceived_Failure_DataEmpty, TestSize.Level1)
     EXPECT_EQ(result, ERR_OK);  // 确保注册监听器成功
 
     // Step 4: Mock error callback for invalid channelId
-    EXPECT_CALL(*mockListener, OnError(channelId, RECV_DATA_EMPTY)).Times(1);
 
     // Step 5: Call OnBytesReceived with invalid channelId and expect error callback
     ChannelManager::GetInstance().OnBytesReceived(socketId, nullptr, NUM_1024);

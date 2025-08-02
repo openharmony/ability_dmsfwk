@@ -32,7 +32,7 @@
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-constexpr int32_t COLLAB_TIMEOUT = 20000;
+constexpr int32_t COLLAB_TIMEOUT = 10000;
 constexpr int32_t BACKGROUND_TIMEOUT = 5000;
 }
 

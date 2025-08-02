@@ -36,7 +36,8 @@ void DistributedDeviceNodeListener::OnDeviceOnline(const DistributedHardware::Dm
     int32_t osType = Constants::OH_OS_TYPE;
     std::string osVersion = "";
     if (!GetOsInfoFromDM(deviceInfo.extraData, osType, osVersion)) {
-        HILOGE("Get Os info from DM device info fail, extraData %{public}s.", deviceInfo.extraData.c_str());
+        HILOGE("Get Os info from DM device info fail, extraData %{public}s.",
+            GetAnonymStr(deviceInfo.extraData).c_str());
     }
 
     auto dmsDeviceInfo = std::make_shared<DmsDeviceInfo>(deviceInfo.deviceName, deviceInfo.deviceTypeId,

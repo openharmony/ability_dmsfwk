@@ -431,7 +431,7 @@ namespace DistributedCollab {
             if (mappingTimeQueue_.empty()) {
                 mappingTime = buffer->pts_;
             } else if (mappingTimeQueue_.front().first != buffer->pts_) {
-                // 由于有一帧未被送入，因此后续都会进入这个分支打印， first != pts, mapp始终未更新
+                // 由于有一帧未被送入，因此后续都会进入这个分支打印，first != pts, mapp始终未更新
                 while (!mappingTimeQueue_.empty() && mappingTimeQueue_.front().first != buffer->pts_) {
                     HILOGD("buffer->pts fail, pts: %{public}" PRId64"", mappingTimeQueue_.front().second);
                     mappingTimeQueue_.pop_front();
