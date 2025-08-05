@@ -244,13 +244,13 @@ int32_t DMSContinueSendMgr::ExecuteSendStrategy(MissionEventType type, const Mis
         DmsContinueConditionMgr::GetInstance().TypeEnumToString(type).c_str());
 
     if (strategyMap_.count(type) == 0) {
-        HILOGE("Invalid type %{public}d!", type);
+        HILOGE("Invalid type");
         return INVALID_PARAMETERS_ERR;
     }
     ContinueSendContext context;
     context.SetStrategy(strategyMap_[type]);
     int32_t ret = context.ExecuteSendStrategy(status, sendType);
-    HILOGI("end, ExecuteSendStrategy ret: %{public}d", ret);
+    HILOGI("ret: %{public}d", ret);
     return ret;
 }
 

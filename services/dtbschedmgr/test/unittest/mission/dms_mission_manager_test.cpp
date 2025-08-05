@@ -385,6 +385,20 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions014, TestSize.Level3)
 }
 
 /**
+ * @tc.name: testStartSyncRemoteMissions017
+ * @tc.desc: prepare and sync missions from remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions017, TestSize.Level3)
+{
+    DTEST_LOG << "testStartSyncRemoteMissions017 begin" << std::endl;
+    auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(DEVICE_ID,
+        sptr<IDistributedSched>(nullptr), 0);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "testStartSyncRemoteMissions017 end" << std::endl;
+}
+
+/**
  * @tc.name: testNeedSyncDevice001
  * @tc.desc: need sync device
  * @tc.type: FUNC

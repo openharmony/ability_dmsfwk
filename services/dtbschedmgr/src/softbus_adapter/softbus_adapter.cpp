@@ -87,7 +87,7 @@ void SoftbusAdapter::UnInit()
 
 int32_t SoftbusAdapter::SendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> buffer)
 {
-    HILOGI("SendSoftbusEvent pkgName: %{public}s.", pkgName_.c_str());
+    HILOGI("pkgName: %{public}s.", pkgName_.c_str());
     auto feedfunc = [this, buffer]() {
         DealSendSoftbusEvent(buffer);
     };
