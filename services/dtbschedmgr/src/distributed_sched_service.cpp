@@ -3626,7 +3626,6 @@ int32_t DistributedSchedService::StartRemoteFreeInstall(const OHOS::AAFwk::Want&
     }
     AAFwk::Want* newWant = const_cast<Want*>(&want);
     newWant->SetParam(DMS_SRC_NETWORK_ID, localDeviceId);
-    newWant->SetParam(DMS_SRC_BUNDLE_NAMES, callerInfo.bundleNames);
     FreeInstallInfo info = {*newWant, requestCode, callerInfo, accountInfo};
     int32_t result = remoteDms->StartFreeInstallFromRemote(info, taskId);
     if (result != ERR_OK) {

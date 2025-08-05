@@ -21,7 +21,7 @@ namespace DistributedSchedule {
 std::string DnetworkAdapter::GetUdidByNetworkId(const std::string& networkId)
 {
     if (IDnetworkAdapter::netAdapter == nullptr) {
-        return false;
+        return "";
     }
     return IDnetworkAdapter::netAdapter->GetUdidByNetworkId(networkId);
 }
