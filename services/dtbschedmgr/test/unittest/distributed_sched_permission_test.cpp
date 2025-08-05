@@ -88,6 +88,8 @@ void DistributedSchedPermissionTest::SetUpTestCase()
     DtbschedmgrDeviceInfoStorageMock::storageMock = storageMock_;
     adapter_ = std::make_shared<DistributedSchedAdapterMock>();
     DistributedSchedAdapterMock::adapter = adapter_;
+    netAdapter_ = std::make_shared<DnetworkAdapterMock>();
+    DnetworkAdapterMock::netAdapter = netAdapter_;
 }
 
 void DistributedSchedPermissionTest::TearDownTestCase()
@@ -99,6 +101,8 @@ void DistributedSchedPermissionTest::TearDownTestCase()
     storageMock_ = nullptr;
     DistributedSchedAdapterMock::adapter = nullptr;
     adapter_ = nullptr;
+    DnetworkAdapterMock::netAdapter = nullptr;
+    netAdapter_ = nullptr;
 }
 
 void DistributedSchedPermissionTest::TearDown()
@@ -626,10 +630,84 @@ HWTEST_F(DistributedSchedPermissionTest, GetAccountInfo_002, TestSize.Level3)
     std::string remoteNetworkId = "0";
     CallerInfo callerInfo;
     IDistributedSched::AccountInfo accountInfo;
+    EXPECT_CALL(*netAdapter_, GetUdidByNetworkId(_)).WillOnce(Return(""));
     int32_t ret = DistributedSchedPermission::GetInstance().GetAccountInfo(
         remoteNetworkId, callerInfo, accountInfo);
     EXPECT_EQ(ret, ERR_NULL_OBJECT);
     DTEST_LOG << "DistributedSchedPermissionTest GetAccountInfo_002 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: GetAccountInfo_003
+ * @tc.desc: call GetAccountInfo with invalid networkId
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, GetAccountInfo_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest GetAccountInfo_003 begin" << std::endl;
+    std::string remoteNetworkId = "0";
+    CallerInfo callerInfo;
+    IDistributedSched::AccountInfo accountInfo;
+    EXPECT_CALL(*netAdapter_, GetUdidByNetworkId(_)).WillOnce(Return("udid"));
+    int32_t ret = DistributedSchedPermission::GetInstance().GetAccountInfo(
+        remoteNetworkId, callerInfo, accountInfo);
+    EXPECT_NE(ret, ERR_NULL_OBJECT);
+    DTEST_LOG << "DistributedSchedPermissionTest GetAccountInfo_003 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: CheckDeviceSecurityLevel_001
+ * @tc.desc: call CheckDeviceSecurityLevel
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckDeviceSecurityLevel_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckDeviceSecurityLevel_001 begin" << std::endl;
+    std::string srcDeviceId;
+    std::string dstDeviceId;
+    EXPECT_CALL(*netAdapter_, GetUdidByNetworkId(_)).WillOnce(Return(""));
+    bool ret = DistributedSchedPermission::GetInstance().CheckDeviceSecurityLevel(
+        srcDeviceId, dstDeviceId);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckDeviceSecurityLevel_001 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: CheckDeviceSecurityLevel_002
+ * @tc.desc: call CheckDeviceSecurityLevel
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckDeviceSecurityLevel_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckDeviceSecurityLevel_002 begin" << std::endl;
+    std::string srcDeviceId;
+    std::string dstDeviceId;
+    EXPECT_CALL(*netAdapter_, GetUdidByNetworkId(_)).WillOnce(Return("srcudid")).WillOnce(Return(""));
+    bool ret = DistributedSchedPermission::GetInstance().CheckDeviceSecurityLevel(
+        srcDeviceId, dstDeviceId);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckDeviceSecurityLevel_002 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: CheckDeviceSecurityLevel_003
+ * @tc.desc: call CheckDeviceSecurityLevel
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckDeviceSecurityLevel_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckDeviceSecurityLevel_003 begin" << std::endl;
+    std::string srcDeviceId;
+    std::string dstDeviceId;
+    EXPECT_CALL(*netAdapter_, GetUdidByNetworkId(_)).WillOnce(Return("srcudid")).WillRepeatedly(Return("dstUdid"));
+    bool ret = DistributedSchedPermission::GetInstance().CheckDeviceSecurityLevel(
+        srcDeviceId, dstDeviceId);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckDeviceSecurityLevel_003 end result:" << ret << std::endl;
 }
 
 /**
@@ -1589,6 +1667,53 @@ HWTEST_F(DistributedSchedPermissionTest, CheckSameAccount_002, TestSize.Level3)
         dmsAccountInfo, callerInfo, false);
     EXPECT_EQ(ret, false);
     DTEST_LOG << "DistributedSchedPermissionTest CheckSameAccount_002 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: RemoveRemoteObjectFromWant_001
+ * @tc.desc: call RemoveRemoteObjectFromWant
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, RemoveRemoteObjectFromWant_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest RemoveRemoteObjectFromWant_001 begin" << std::endl;
+    EXPECT_NO_FATAL_FAILURE(DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(nullptr));
+    DTEST_LOG << "DistributedSchedPermissionTest RemoveRemoteObjectFromWant_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CheckPermissionAll_001
+ * @tc.desc: call CheckPermissionAll_001
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckPermissionAll_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckPermissionAll_001 begin" << std::endl;
+    uint32_t accessToken = 0;
+    std::string permissionName;
+    int32_t ret = DistributedSchedPermission::GetInstance().CheckPermissionAll(accessToken, permissionName);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckPermissionAll_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CheckCollaborateStartCtrlPer_001
+ * @tc.desc: call CheckCollaborateStartCtrlPer
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckCollaborateStartCtrlPer_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckCollaborateStartCtrlPer_001 begin" << std::endl;
+    AppExecFwk::AbilityInfo targetAbility;
+    CallerInfo callerInfo;
+    AAFwk::Want want;
+    bool ret = DistributedSchedPermission::GetInstance().CheckCollaborateStartCtrlPer(targetAbility,
+        callerInfo, want);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckCollaborateStartCtrlPer_001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
