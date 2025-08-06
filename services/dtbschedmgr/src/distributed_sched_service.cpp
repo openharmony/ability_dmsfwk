@@ -218,6 +218,11 @@ std::string GetDExtensionName(std::string bundleName, int32_t userId)
 {
     std::vector<AppExecFwk::BundleInfo> installedBundles;
     auto bms = GetBundleManager();
+    if (bms == nullptr) {
+        HILOGE("Failed to get bundle manager");
+        return "";
+    }
+
     if (!bms->GetBundleInfos(AppExecFwk::GET_BUNDLE_WITH_EXTENSION_INFO, installedBundles, userId)) {
         HILOGE("Failed to get bundle infos");
         return "";
@@ -252,6 +257,11 @@ std::string GetDExtensionProcess(std::string bundleName, int32_t userId)
 {
     std::vector<AppExecFwk::BundleInfo> installedBundles;
     auto bms = GetBundleManager();
+    if (bms == nullptr) {
+        HILOGE("Failed to get bundle manager");
+        return "";
+    }
+
     if (!bms->GetBundleInfos(AppExecFwk::GET_BUNDLE_WITH_EXTENSION_INFO, installedBundles, userId)) {
         HILOGE("Failed to get bundle infos");
         return "";
