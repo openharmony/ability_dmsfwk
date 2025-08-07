@@ -378,7 +378,7 @@ int32_t DmsContinueConditionMgr::OnMissionInactive(int32_t accountId, int32_t mi
 
 bool DmsContinueConditionMgr::CheckSystemSendCondition()
 {
-    HILOGI("CheckSystemSendCondition start. switch: %{public}d, wifi: %{public}d, bt: %{public}d",
+    HILOGI("switch: %{public}d, wifi: %{public}d, bt: %{public}d",
         isSwitchOn_.load(), isWifiActive_.load(), isBtActive_.load());
 
     std::string reason = "";
@@ -412,7 +412,7 @@ bool DmsContinueConditionMgr::CheckMissionSendCondition(const MissionStatus& sta
     HILOGI("missionId %{public}d, type %{public}s", status.missionId, TypeEnumToString(type).c_str());
     auto iterFunc = conditionFuncMap_.find(type);
     if (iterFunc == conditionFuncMap_.end()) {
-        HILOGE("invalid system status %{public}d", type);
+        HILOGE("invalid system status");
         return false;
     }
 

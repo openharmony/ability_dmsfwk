@@ -272,7 +272,7 @@ int32_t MultiUserManager::CreateNewRecomMgrLocked(int32_t accountId)
 
 std::shared_ptr<DMSContinueSendMgr> MultiUserManager::GetCurrentSendMgr()
 {
-    HILOGI("GetCurrentSendMgr. accountId: %{public}d.", currentUserId_);
+    HILOGI("accountId: %{public}d.", currentUserId_);
     std::lock_guard<std::mutex> lock(sendMutex_);
     if (sendMgrMap_.empty() || sendMgrMap_.find(currentUserId_) == sendMgrMap_.end()) {
         HILOGI("sendMgr need to create.");
@@ -296,7 +296,7 @@ std::shared_ptr<DMSContinueRecvMgr> MultiUserManager::GetCurrentRecvMgr()
 
 std::shared_ptr<DMSContinueRecomMgr> MultiUserManager::GetCurrentRecomMgr()
 {
-    HILOGI("GetCurrentRecomMgr. accountId: %{public}d.", currentUserId_);
+    HILOGI("accountId: %{public}d.", currentUserId_);
     std::lock_guard<std::mutex> lock(recomMutex_);
     if (recomMgrMap_.empty() || recomMgrMap_.find(currentUserId_) == recomMgrMap_.end()) {
         HILOGI("recomMgr need to create.");
