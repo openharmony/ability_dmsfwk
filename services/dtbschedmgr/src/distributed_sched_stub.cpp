@@ -242,7 +242,7 @@ int32_t DistributedSchedStub::OnRemoteRequest(uint32_t code,
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     bool IsLocalCalling = IPCSkeleton::IsLocalCalling();
-    HILOGI("OnRemoteRequest, code = %{public}u, flags = %{public}d, IsLocalCalling = %{public}d.",
+    HILOGI("code = %{public}u, flags = %{public}d, IsLocalCalling = %{public}d.",
         code, option.GetFlags(), IsLocalCalling);
 
     const auto& funcsMap = IsLocalCalling ? localFuncsMap_ : remoteFuncsMap_;
