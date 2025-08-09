@@ -321,6 +321,7 @@ int32_t AbilityConnectionSession::AcceptConnect(const std::string& token)
     if (ret != ERR_OK) {
         HILOGE("notify prepare result failed!");
         Release();
+        return ret;
     }
     return ERR_OK;
 }
