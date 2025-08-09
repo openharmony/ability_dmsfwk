@@ -347,10 +347,6 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         NotifyIconDisappear(bundleNameId, senderNetworkId, state);
         return BUNDLE_NOT_CONTINUABLE;
     }
-    if (state == ACTIVE && !isScreenOn.load()) {
-        HILOGW("current screen status is off, do not show icon!");
-        return BUNDLE_NOT_CONTINUABLE;
-    }
     int32_t ret = VerifyBroadcastSource(senderNetworkId, bundleName, finalBundleName, continueType, state);
     if (ret != ERR_OK) {
         return ret;
@@ -497,7 +493,6 @@ void DMSContinueRecvMgr::NotifyDied(const sptr<IRemoteObject>& obj)
 void DMSContinueRecvMgr::OnDeviceScreenOff()
 {
     HILOGI("OnDeviceScreenOff called. accountId: %{public}d.", accountId_);
-    isScreenOn.store(false);
     auto func = [this]() {
         std::string senderNetworkId;
         std::string bundleName;
@@ -537,12 +532,6 @@ void DMSContinueRecvMgr::OnDeviceScreenOff()
         return;
     }
     eventHandler_->PostTask(func);
-}
-
-void DMSContinueRecvMgr::OnDeviceScreenOn()
-{
-    HILOGI("OnDeviceScreenOn called. accountId: %{public}d.", accountId_);
-    isScreenOn.store(true);
 }
 #endif
 
