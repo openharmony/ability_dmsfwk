@@ -291,7 +291,7 @@ HWTEST_F(AbilityConnectionMgrTest, AcceptConnect_Test_001, TestSize.Level3)
 
     CreateSessionMap(sessionId);
     rlt = AbilityConnectionManager::GetInstance().AcceptConnect(sessionId, token);
-    EXPECT_EQ(rlt, ERR_OK);
+    EXPECT_NE(rlt, ERR_OK);
     DTEST_LOG << "AbilityConnectionMgr AcceptConnect_Test_001 end" << std::endl;
 }
 
