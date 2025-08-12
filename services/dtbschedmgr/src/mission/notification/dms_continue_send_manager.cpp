@@ -240,17 +240,16 @@ void DMSContinueSendMgr::SendContinueBroadcast(const MissionStatus& status, Miss
 
 int32_t DMSContinueSendMgr::ExecuteSendStrategy(MissionEventType type, const MissionStatus& status, uint8_t &sendType)
 {
-    HILOGI("start, missionId: %{public}d, type: %{public}s", status.missionId,
-        DmsContinueConditionMgr::GetInstance().TypeEnumToString(type).c_str());
-
     if (strategyMap_.count(type) == 0) {
-        HILOGE("Invalid type");
+        HILOGI("missionId: %{public}d, invalid type: %{public}s", status.missionId,
+            DmsContinueConditionMgr::GetInstance().TypeEnumToString(type).c_str());
         return INVALID_PARAMETERS_ERR;
     }
     ContinueSendContext context;
     context.SetStrategy(strategyMap_[type]);
     int32_t ret = context.ExecuteSendStrategy(status, sendType);
-    HILOGI("ret: %{public}d", ret);
+    HILOGI("missionId: %{public}d, type: %{public}s, ret: %{public}d", status.missionId,
+        DmsContinueConditionMgr::GetInstance().TypeEnumToString(type).c_str(), ret);
     return ret;
 }
 
