@@ -120,6 +120,7 @@ HWTEST_F(DtbschedmgrDeviceInfoStorageTest, InitNetworkIdManagerTest_001, TestSiz
     bool result = DtbschedmgrDeviceInfoStorage::GetInstance().InitNetworkIdManager(nullptr);
     EXPECT_FALSE(result);
     std::shared_ptr<DnetworkAdapter> dnetworkAdapter = DnetworkAdapter::GetInstance();
+    dnetworkAdapter->Init();
     DtbschedmgrDeviceInfoStorage::GetInstance().networkIdMgrHandler_ = nullptr;
     /**
      * @tc.steps: step1. test InitNetworkIdManager when networkIdMgrHandler_ is nullptr;

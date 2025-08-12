@@ -172,15 +172,6 @@ void FuzzCheckUnPackBuffer(const uint8_t* data, size_t size)
     dschedSoftbusSession.CheckUnPackBuffer(headerPara);
 }
 
-void FuzzGetNowTimeStampUs(const uint8_t* data, size_t size)
-{
-    if ((data == nullptr) || (size < U32_AT_SIZE)) {
-        return;
-    }
-    DSchedSoftbusSession dschedSoftbusSession;
-    dschedSoftbusSession.GetNowTimeStampUs();
-}
-
 void AssembleNoFragFuzzTest(const uint8_t* data, size_t size)
 {
     if (!data || size < MIN_NO_FRAG_BUFFER_SIZE) {
@@ -238,7 +229,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DistributedSchedule::FuzzAssembleNoFrag(data, size);
     OHOS::DistributedSchedule::FuzzDSchedSoftbusSessionConstructor(data, size);
     OHOS::DistributedSchedule::FuzzCheckUnPackBuffer(data, size);
-    OHOS::DistributedSchedule::FuzzGetNowTimeStampUs(data, size);
     OHOS::DistributedSchedule::AssembleNoFragFuzzTest(data, size);
     OHOS::DistributedSchedule::AssembleFragFuzzTest(data, size);
     return 0;
