@@ -237,12 +237,10 @@ HWTEST_F(DMSNetworkAdapterTest, OnDeviceOffline_002, TestSize.Level3)
  */
 HWTEST_F(DMSNetworkAdapterTest, AddDeviceChangeListener_001, TestSize.Level3)
 {
-    DnetworkAdapter::listenerSet_.clear();
-    std::shared_ptr<AppExecFwk::EventHandler> dnetworkHandler = DnetworkAdapter::GetInstance()->dnetworkHandler_;
     DnetworkAdapter::GetInstance()->dnetworkHandler_ = nullptr;
     std::shared_ptr<DeviceListener> deviceNodeListener = std::make_shared<MockDeviceListener>();
     bool res = DnetworkAdapter::GetInstance()->AddDeviceChangeListener(deviceNodeListener);
-    DnetworkAdapter::GetInstance()->dnetworkHandler_ = dnetworkHandler;
+    DnetworkAdapter::GetInstance()->Init();
     EXPECT_EQ(res, false);
 }
 

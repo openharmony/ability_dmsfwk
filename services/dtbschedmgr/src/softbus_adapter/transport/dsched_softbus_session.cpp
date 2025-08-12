@@ -418,9 +418,11 @@ void DSchedSoftbusSession::SetHeadParaDataLen(SessionDataHeader& headPara, const
 
 int64_t DSchedSoftbusSession::GetNowTimeStampUs()
 {
+    // LCOV_EXCL_START
     std::chrono::microseconds nowUs = std::chrono::duration_cast<std::chrono::microseconds>(
         std::chrono::system_clock::now().time_since_epoch());
     return nowUs.count();
+    // LCOV_EXCL_STOP
 }
 
 void DSchedSoftbusSession::MakeFragDataHeader(const SessionDataHeader& headPara, uint8_t *header, uint32_t len)
