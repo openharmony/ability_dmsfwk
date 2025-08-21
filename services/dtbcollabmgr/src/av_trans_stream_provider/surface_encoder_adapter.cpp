@@ -16,7 +16,6 @@
 #include "surface_encoder_adapter.h"
 #include "avcodec_common.h"
 #include "avcodec_info.h"
-#include "codec_server.h"
 #include "dtbcollabmgr_log.h"
 #include "media_description.h"
 #include "meta/format.h"
@@ -233,17 +232,6 @@ namespace DistributedCollab {
             return Status::ERROR_UNKNOWN;
         }
         int32_t ret = codecServer_->SetCallback(surfaceEncoderAdapterCallback);
-        return ret == ERR_OK ? Status::OK : Status::ERROR_UNKNOWN;
-    }
-
-    Status SurfaceEncoderAdapter::SetInputSurface(sptr<Surface> surface)
-    {
-        HILOGI("GetInputSurface");
-        if (!codecServer_) {
-            return Status::ERROR_UNKNOWN;
-        }
-        MediaAVCodec::CodecServer* codecServerPtr = (MediaAVCodec::CodecServer*)(codecServer_.get());
-        int32_t ret = codecServerPtr->SetInputSurface(surface);
         return ret == ERR_OK ? Status::OK : Status::ERROR_UNKNOWN;
     }
 
