@@ -865,6 +865,7 @@ int32_t DistributedSchedService::GetDmsInteractiveAdapterProxy()
         HILOGI("Init remote dms interactive adapter proxy success.");
         ret = ERR_OK;
     } while (false);
+    dmsAdapetr_.GetAppListKey(BundleManagerInternal::GetInstance().appListStr_);
 
     if (ret != ERR_OK) {
         HILOGE("Get remote dms interactive adapter proxy fail, dlclose handle.");

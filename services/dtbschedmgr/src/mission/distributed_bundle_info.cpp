@@ -44,6 +44,8 @@ const std::string JSON_KEY_DMS_USERID = "userIdArr";
 const std::string JSON_KEY_DMS_MODULENAME = "moduleName";
 const std::string JSON_KEY_DMS_CONTINUEBUNDLENAME = "continueBundleName";
 const std::string JSON_KEY_DMS_MAX_BUNDLENAME_ID = "maxBundleNameId";
+const std::string JSON_KEY_APP_IDENTIFIER = "appIdentifier";
+const std::string JSON_KEY_APP_IDENTIFIER_ARR = "appIdentifierVec";
 }
 
 bool PublicRecordsInfo::ReadFromParcel(Parcel &parcel)
@@ -254,6 +256,14 @@ bool DmsBundleInfo::ReadFromParcel(Parcel &parcel)
         uint8_t userId = parcel.ReadUint8();
         userIdArr.emplace_back(userId);
     }
+    appIdentifier = Str16ToStr8(parcel.ReadString16());
+    uint32_t appIdentifierVecSize;
+    READ_PARCEL_AND_RETURN_FALSE_IF_FAIL(Uint32, parcel, appIdentifierVecSize);
+    CONTAINER_SECURITY_VERIFY(parcel, appIdentifierVecSize, &appIdentifierVec);
+    for (uint32_t i = 0; i < appIdentifierVecSize; i++) {
+        std::string  appIdentifier = Str16ToStr8(parcel.ReadString16());
+        appIdentifierVec.emplace_back(appIdentifier);
+    }
     return true;
 }
 
@@ -270,11 +280,16 @@ bool DmsBundleInfo::Marshalling(Parcel &parcel) const
     parcel.WriteBool(enabled);
     parcel.WriteUint16(bundleNameId);
     parcel.WriteInt64(updateTime);
+    parcel.WriteString16(Str8ToStr16(developerId));
     for (auto &dmsAbilityInfo : dmsAbilityInfos) {
         (parcel).WriteParcelable(&dmsAbilityInfo);
     }
     for (auto userId : userIdArr) {
         (parcel).WriteUint8(userId);
+    }
+    parcel.WriteString16(Str8ToStr16(appIdentifier));
+    for (auto appIdentifierItem : appIdentifierVec) {
+        (parcel).WriteString16(Str8ToStr16(appIdentifierItem));
     }
     return true;
 }
@@ -306,6 +321,8 @@ std::string DmsBundleInfo::ToString() const
     jsonObject[JSON_KEY_DEVELOPER_ID] = developerId;
     jsonObject[JSON_KEY_DMS_ABILITY_INFOS] = dmsAbilityInfos;
     jsonObject[JSON_KEY_DMS_USERID] = userIdArr;
+    jsonObject[JSON_KEY_APP_IDENTIFIER] = appIdentifier;
+    jsonObject[JSON_KEY_APP_IDENTIFIER_ARR] = appIdentifierVec;
     return jsonObject.dump();
 }
 
@@ -346,6 +363,10 @@ bool DmsBundleInfo::FromJsonString(const std::string &jsonString)
         dmsAbilityInfos, JsonType::ARRAY, false, parseResult, ArrayType::OBJECT);
     GetValueIfFindKey<std::vector<uint8_t>>(jsonObject, jsonObjectEnd, JSON_KEY_DMS_USERID, userIdArr,
         JsonType::ARRAY, false, parseResult, ArrayType::NUMBER);
+    GetValueIfFindKey<std::string>(jsonObject, jsonObjectEnd, JSON_KEY_APP_IDENTIFIER, appIdentifier,
+        JsonType::STRING, false, parseResult, ArrayType::NOT_ARRAY);
+    GetValueIfFindKey<std::vector<std::string>>(jsonObject, jsonObjectEnd, JSON_KEY_APP_IDENTIFIER_ARR,
+        appIdentifierVec, JsonType::ARRAY, false, parseResult, ArrayType::STRING);
     return parseResult == ERR_OK;
 }
 }  // namespace DistributedSchedule

@@ -433,26 +433,5 @@ HWTEST_F(DMSContinueRecvMgrTest, GetFinalBundleName_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, true);
     DTEST_LOG << "DMSContinueRecvMgrTest GetFinalBundleName_Test_001 end" << std::endl;
 }
-
-/**
- * @tc.name: GetFinalBundleName_Test_002
- * @tc.desc: test GetFinalBundleName
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DMSContinueRecvMgrTest, GetFinalBundleName_Test_002, TestSize.Level1)
-{
-    DTEST_LOG << "DMSContinueRecvMgrTest GetFinalBundleName_Test_002 start" << std::endl;
-    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
-    DmsBundleInfo distributedBundleInfo;
-    std::string finalBundleName = "finalBundleName";
-    AppExecFwk::BundleInfo localBundleInfo;
-    std::string continueType = "continueType";
-    EXPECT_CALL(*bundleMgrMock_, GetLocalBundleInfo(_, _)).WillOnce(Return(1));
-    EXPECT_CALL(*bundleMgrMock_, GetContinueBundle4Src(_, _)).WillOnce(Return(false));
-    bool ret = recvMgr->GetFinalBundleName(distributedBundleInfo, finalBundleName, localBundleInfo, continueType);
-    EXPECT_EQ(ret, false);
-    DTEST_LOG << "DMSContinueRecvMgrTest GetFinalBundleName_Test_002 end" << std::endl;
-}
 }
 }

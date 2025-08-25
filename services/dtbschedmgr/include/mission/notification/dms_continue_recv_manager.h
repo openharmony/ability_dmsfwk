@@ -16,6 +16,7 @@
 #ifndef DMS_CONTINUE_RECV_MANAGER_H
 #define DMS_CONTINUE_RECV_MANAGER_H
 
+#include <algorithm>
 #include <deque>
 #include <map>
 #include <mutex>
@@ -95,6 +96,8 @@ private:
     void StartEvent();
     int32_t RetryPostBroadcast(const std::string& senderNetworkId, uint16_t bundleNameId, uint8_t continueTypeId,
         const int32_t state, const int32_t retry);
+    bool GetFinalBundleNameInternal(DmsBundleInfo& distributedBundleInfo,  std::string &finalBundleName,
+        AppExecFwk::BundleInfo& localBundleInfo, std::string& continueType);
     bool GetFinalBundleName(DmsBundleInfo& distributedBundleInfo,  std::string &finalBundleName,
         AppExecFwk::BundleInfo& localBundleInfo, std::string& continueType);
     int32_t VerifyBroadcastSource(const std::string& senderNetworkId, const std::string& srcBundleName,

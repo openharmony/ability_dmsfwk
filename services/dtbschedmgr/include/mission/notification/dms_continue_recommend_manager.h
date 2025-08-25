@@ -16,12 +16,14 @@
 #ifndef OHOS_DMS_CONTINUE_RECOMMEND_MGR_H
 #define OHOS_DMS_CONTINUE_RECOMMEND_MGR_H
 
+#include <map>
 #include <mutex>
 #include <queue>
 #include <string>
 #include <thread>
 #include <cstdint>
 
+#include "bundle/bundle_manager_internal.h"
 #include "event_handler.h"
 #include "mission/distributed_bundle_info.h"
 #include "mission/dms_continue_condition_manager.h"
@@ -48,6 +50,8 @@ private:
     void StartEvent();
     void PublishContinueRecommend(const MissionStatus& status, MissionEventType type);
     bool GetRecommendInfo(const MissionStatus& status, MissionEventType type, ContinueRecommendInfo& info);
+    bool GetAvailableRecommendListInternal(const std::string &bundleName, std::map<std::string,
+        DmsBundleInfo>& availableList, const AppExecFwk::AppProvisionInfo appProvisionInfo);
     bool GetAvailableRecommendList(const std::string &bundleName, std::map<std::string, DmsBundleInfo>& availableList);
     bool IsContinuableWithDiffBundle(const std::string& bundleName, const DmsBundleInfo& info);
 

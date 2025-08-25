@@ -518,5 +518,52 @@ ErrCode BundleManagerInternal::QueryOsAccount(int32_t& activeAccountId)
 #endif
     return ERR_OK;
 }
+
+bool BundleManagerInternal::GetSrcAppIdentifierVec(std::string appServiceCapabilities,
+    std::vector<std::string>& srcAppIdentifierVec)
+{
+    cJSON* json = cJSON_Parse(appServiceCapabilities.c_str());
+    if (json == nullptr) {
+        HILOGE("Failed to parse header JSON.");
+        return false;
+    }
+    cJSON* appList = cJSON_GetObjectItem(json, BundleManagerInternal::GetInstance().appListStr_.c_str());
+    if (appList == nullptr || !cJSON_IsObject(appList)) {
+        HILOGE("appList is nullptr or not object.");
+        cJSON_Delete(json);
+        return false;
+    }
+    cJSON* targetAppids = cJSON_GetObjectItem(appList, "target_appids");
+    if (targetAppids == nullptr || !cJSON_IsString(targetAppids) ||
+        targetAppids->valuestring == nullptr) {
+        HILOGE("targetAppids is nullptr or not string.");
+        cJSON_Delete(json);
+        return false;
+    }
+    std::string appidString = std::string(targetAppids->valuestring);
+    if (appidString.size() == 0) {
+        HILOGE("appidString is empty.");
+        cJSON_Delete(json);
+        return false;
+    }
+    if (appidString.find(',') != std::string::npos) {
+        srcAppIdentifierVec = SplitString(appidString, ',');
+    } else {
+        srcAppIdentifierVec.push_back(appidString);
+    }
+    cJSON_Delete(json);
+    return true;
+}
+
+std::vector<std::string> BundleManagerInternal::SplitString(const std::string& s, char delimiter)
+{
+    std::vector<std::string> tokens;
+    std::stringstream ss(s);
+    std::string token;
+    while (std::getline(ss, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS

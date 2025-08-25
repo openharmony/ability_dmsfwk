@@ -393,6 +393,7 @@ private:
         .OnDeviceOfflineEx = nullptr,
         .OnDeviceInfoChangedEx = nullptr,
         .OnHAEventAdapter = nullptr,
+        .GetAppListKey = nullptr,
     };
 #endif
 };
