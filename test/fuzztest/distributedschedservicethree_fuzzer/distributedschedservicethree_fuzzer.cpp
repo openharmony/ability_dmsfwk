@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "distributedschedservice_fuzzer.h"
+#include "distributedschedservicethree_fuzzer.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -38,7 +38,8 @@ constexpr int32_t ON_DEMAND_REASON_ID_COUNT = 7;
 
 std::string GetDExtensionName(std::string bundleName, int32_t userId);
 std::string GetDExtensionProcess(std::string bundleName, int32_t userId);
-void OnStopFuzzTest(const uint8_t* data, size_t size)
+
+void OnStartFuzzTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t) + sizeof(int32_t))) {
         return;
@@ -50,66 +51,66 @@ void OnStopFuzzTest(const uint8_t* data, size_t size)
     OnDemandReasonId reasonId = static_cast<OnDemandReasonId>(enumIdx);
     int32_t extraDataId = fdp.ConsumeIntegral<int32_t>();
     SystemAbilityOnDemandReason reason(reasonId, reasonName, reasonValue, extraDataId);
-    DistributedSchedService::GetInstance().OnStop(reason);
+    DistributedSchedService::GetInstance().OnStart(reason);
 }
 
-void OnActiveFuzzTest(const uint8_t* data, size_t size)
-{
-    if ((data == nullptr) || (size < sizeof(int32_t) + sizeof(int32_t))) {
-        return;
-    }
-    FuzzedDataProvider fdp(data, size);
-    std::string reasonName = fdp.ConsumeRandomLengthString();
-    std::string reasonValue = fdp.ConsumeRandomLengthString();
-    int32_t enumIdx = fdp.ConsumeIntegral<int32_t>() % ON_DEMAND_REASON_ID_COUNT;
-    OnDemandReasonId reasonId = static_cast<OnDemandReasonId>(enumIdx);
-    int32_t extraDataId = fdp.ConsumeIntegral<int32_t>();
-    SystemAbilityOnDemandReason reason(reasonId, reasonName, reasonValue, extraDataId);
-    DistributedSchedService::GetInstance().OnActive(reason);
-    DistributedSchedService::GetInstance().OnIdle(reason);
-}
-
-void HandleBootStartFuzzTest(const uint8_t* data, size_t size)
-{
-    if ((data == nullptr) || (size < sizeof(int32_t) + sizeof(int32_t))) {
-        return;
-    }
-    FuzzedDataProvider fdp(data, size);
-    std::string reasonName = fdp.ConsumeRandomLengthString();
-    std::string reasonValue = fdp.ConsumeRandomLengthString();
-
-    int32_t enumIdx = fdp.ConsumeIntegral<int32_t>() % ON_DEMAND_REASON_ID_COUNT;
-    OnDemandReasonId reasonId = static_cast<OnDemandReasonId>(enumIdx);
-    int32_t extraDataId = fdp.ConsumeIntegral<int32_t>();
-    SystemAbilityOnDemandReason reason(reasonId, reasonName, reasonValue, extraDataId);
-    DistributedSchedService::GetInstance().HandleBootStart(reason);
-}
-
-void DoStartFuzzTest(const uint8_t* data, size_t size)
-{
-    (void)data;
-    (void)size;
-    DistributedSchedService::GetInstance().DoStart();
-}
-
-void DeviceOnlineNotifyFuzzTest(const uint8_t* data, size_t size)
+void OnAddSystemAbilityFuzzTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
+    FuzzedDataProvider fdp(data, size);
+    int32_t systemAbilityId = fdp.ConsumeIntegral<int32_t>();
+    std::string deviceId = fdp.ConsumeRandomLengthString();
+    DistributedSchedService::GetInstance().OnAddSystemAbility(systemAbilityId, deviceId);
+}
 
-    std::string networkId(reinterpret_cast<const char*>(data), size / 2);
-    DistributedSchedService::GetInstance().DeviceOnlineNotify(networkId);
+void ContinueStateCallbackUnRegisterFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    int32_t missionId = fdp.ConsumeIntegral<int32_t>();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string moduleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
+    DistributedSchedService::GetInstance().ContinueStateCallbackUnRegister(missionId, bundleName,
+        moduleName, abilityName);
+}
+
+void ProcessFormMgrDiedFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    wptr<IRemoteObject> remote = nullptr;
+    DistributedSchedService::GetInstance().ProcessFormMgrDied(remote);
+}
+
+void ContinueMissionFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    std::string srcDeviceId = fdp.ConsumeRandomLengthString();
+    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
+    int32_t missionId = fdp.ConsumeIntegral<int32_t>();
+    sptr<IRemoteObject> callback = nullptr;
+    OHOS::AAFwk::WantParams wantParams;
+    DistributedSchedService::GetInstance().ContinueMission(srcDeviceId, dstDeviceId, missionId, callback, wantParams);
 }
 }
 }
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DistributedSchedule::OnStopFuzzTest(data, size);
-    OHOS::DistributedSchedule::OnActiveFuzzTest(data, size);
-    OHOS::DistributedSchedule::HandleBootStartFuzzTest(data, size);
-    OHOS::DistributedSchedule::DoStartFuzzTest(data, size);
-    OHOS::DistributedSchedule::DeviceOnlineNotifyFuzzTest(data, size);
+    OHOS::DistributedSchedule::OnStartFuzzTest(data, size);
+    OHOS::DistributedSchedule::OnAddSystemAbilityFuzzTest(data, size);
+    OHOS::DistributedSchedule::ContinueStateCallbackUnRegisterFuzzTest(data, size);
+    OHOS::DistributedSchedule::ProcessFormMgrDiedFuzzTest(data, size);
+    OHOS::DistributedSchedule::ContinueMissionFuzzTest(data, size);
     return 0;
 }
