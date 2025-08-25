@@ -15,6 +15,7 @@
 
 #include "dsched_continue.h"
 
+#include <algorithm>
 #include <chrono>
 #include <sys/prctl.h>
 #include <thread>
@@ -915,15 +916,45 @@ int32_t DSchedContinue::PackDataCmd(std::shared_ptr<DSchedContinueDataCmd>& cmd,
 
 int32_t DSchedContinue::CheckStartPermission(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
-    if (cmd->srcBundleName_ == cmd->dstBundleName_) {
-        return DistributedSchedService::GetInstance().CheckTargetPermission(cmd->want_, cmd->callerInfo_,
-            cmd->accountInfo_, START_PERMISSION, true);
-    } else {
-        if (!BundleManagerInternal::IsSameDeveloperId(cmd->dstBundleName_, cmd->srcDeveloperId_)) {
+    bool hasIdentifierFlag = false;
+    AppExecFwk::AppProvisionInfo appProvisionInfoSrc;
+    AppExecFwk::AppProvisionInfo appProvisionInfoSink;
+    std::vector<std::string> srcAppIdentifierVec;
+    std::string appIdentifierSink;
+    AppExecFwk::BundleInfo localBundleInfo;
+    if (BundleManagerInternal::GetAppProvisionInfo4CurrentUser(cmd->srcBundleName_, appProvisionInfoSrc)) {
+        if (BundleManagerInternal::GetSrcAppIdentifierVec(appProvisionInfoSrc.appServiceCapabilities,
+            srcAppIdentifierVec)) {
+            hasIdentifierFlag = true;
+            HILOGI("srcAppIdentifierVec size : %{public}zu.", srcAppIdentifierVec.size());
+        }
+    }
+
+    if (BundleManagerInternal::GetAppProvisionInfo4CurrentUser(cmd->dstBundleName_, appProvisionInfoSink) &&
+        BundleManagerInternal::GetLocalBundleInfo(cmd->dstBundleName_, localBundleInfo) == ERR_OK) {
+        appIdentifierSink = appProvisionInfoSink.appIdentifier;
+        HILOGI("Get appIdentifierSink : %{public}s; ", appIdentifierSink.c_str());
+    }
+    if (hasIdentifierFlag) {
+        if (std::find(srcAppIdentifierVec.begin(), srcAppIdentifierVec.end(), appIdentifierSink) ==
+            srcAppIdentifierVec.end()) {
+            HILOGE("appIdentifierSink not in  srcAppIdentifierVec.");
             return INVALID_PARAMETERS_ERR;
         }
         return DistributedSchedService::GetInstance().CheckTargetPermission4DiffBundle(cmd->want_, cmd->callerInfo_,
             cmd->accountInfo_, START_PERMISSION, true);
+    } else {
+        if (cmd->srcBundleName_ == cmd->dstBundleName_) {
+            return DistributedSchedService::GetInstance().CheckTargetPermission(cmd->want_, cmd->callerInfo_,
+                cmd->accountInfo_, START_PERMISSION, true);
+        } else {
+            if (!BundleManagerInternal::IsSameDeveloperId(cmd->dstBundleName_, cmd->srcDeveloperId_)) {
+                HILOGE("DeveloperId is not same.");
+                return INVALID_PARAMETERS_ERR;
+            }
+            return DistributedSchedService::GetInstance().CheckTargetPermission4DiffBundle(cmd->want_, cmd->callerInfo_,
+                cmd->accountInfo_, START_PERMISSION, true);
+        }
     }
 }
 

@@ -33,6 +33,8 @@ static std::string g_mockGetUdidByNetworkId = "";
 static std::string g_mockGetUuidByNetworkId = "";
 namespace {
 const std::string BASEDIR = "/data/service/el1/public/database/DistributedSchedule";
+const std::string SRCAPPIDENTIFIER_TEST1 = "6917581767076492611";
+const std::string SRCAPPIDENTIFIER_TEST2 = "6917581767076492612";
 constexpr int32_t TASK_ID_1 = 11;
 constexpr int32_t TASK_ID_2 = 12;
 constexpr size_t BYTESTREAM_LENGTH = 100;
@@ -765,11 +767,14 @@ HWTEST_F(DistributedBmStorageTest, ConvertToDistributedBundleInfoTest_001, TestS
         DmsBundleInfo distributedBundleInfo;
         AppExecFwk::BundleInfo bundleInfo;
         AppExecFwk::AppProvisionInfo appProvisionInfo;
-        distributedBundleInfo = dmsBmStorage_->ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo, true);
+        std::vector<std::string> srcAppIdentifierVec = {SRCAPPIDENTIFIER_TEST1, SRCAPPIDENTIFIER_TEST2};
+        distributedBundleInfo = dmsBmStorage_->ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo,
+            srcAppIdentifierVec, true);
         EXPECT_EQ(distributedBundleInfo.bundleName.empty(), true);
 
         bundleInfo.name = "bundleName";
-        distributedBundleInfo = dmsBmStorage_->ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo, false);
+        distributedBundleInfo = dmsBmStorage_->ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo,
+            srcAppIdentifierVec, false);
         EXPECT_EQ(distributedBundleInfo.bundleName.empty(), false);
     }
     DTEST_LOG << "DistributedBmStorageTest ConvertToDistributedBundleInfoTest_001 end" << std::endl;
