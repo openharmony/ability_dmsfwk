@@ -36,6 +36,26 @@ config("test_config") {
     "${dms_path}/services/dtbschedmgr/include/continue/state/",
     "${dms_path}/services/dtbschedmgr/include/continue/state/transport/",
     "${dms_path}/test/fuzztest/distributedschedstub_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedstubone_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedstubtwo_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedstubthree_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedstubfour_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedstubfive_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedstubsix_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedstubseven_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedstubeight_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedstubnine_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedstubten_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedservice_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedserviceone_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedservicetwo_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedservicethree_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedservicefour_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedservicefive_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedservicesix_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedserviceseven_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedserviceeight_fuzzer",
+    "${dms_path}/test/fuzztest/distributedschedservicenine_fuzzer",
     "${dms_path}/test/fuzztest/util",
   ]
 }
@@ -89,6 +109,7 @@ ohos_fuzztest("DistributedSchedStubFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedstub_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -124,6 +145,7 @@ ohos_fuzztest("DistributedSchedStubOneFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedstubone_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -159,6 +181,7 @@ ohos_fuzztest("DistributedSchedStubTwoFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedstubtwo_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -194,6 +217,7 @@ ohos_fuzztest("DistributedSchedStubThreeFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedstubthree_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -229,6 +253,7 @@ ohos_fuzztest("DistributedSchedStubFourFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedstubfour_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -264,6 +289,7 @@ ohos_fuzztest("DistributedSchedStubFiveFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedstubfive_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -299,6 +325,7 @@ ohos_fuzztest("DistributedSchedStubSixFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedstubsix_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -334,6 +361,7 @@ ohos_fuzztest("DistributedSchedStubSevenFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedstubseven_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -369,6 +397,7 @@ ohos_fuzztest("DistributedSchedStubEightFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedstubeight_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -404,6 +433,7 @@ ohos_fuzztest("DistributedSchedStubNineFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedstubnine_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -439,6 +469,7 @@ ohos_fuzztest("DistributedSchedStubTenFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedstubten_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -474,6 +505,7 @@ ohos_fuzztest("DistributedSchedServiceFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedservice_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -505,6 +537,7 @@ ohos_fuzztest("DistributedSchedServiceOneFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedserviceone_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -536,6 +569,7 @@ ohos_fuzztest("DistributedSchedServiceTwoFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedservicetwo_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -567,6 +601,7 @@ ohos_fuzztest("DistributedSchedServiceThreeFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedservicethree_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -598,6 +633,7 @@ ohos_fuzztest("DistributedSchedServiceFourFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedservicefour_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -629,6 +665,7 @@ ohos_fuzztest("DistributedSchedServiceFiveFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedservicefive_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -660,6 +697,7 @@ ohos_fuzztest("DistributedSchedServiceSixFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedservicesix_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -691,6 +729,7 @@ ohos_fuzztest("DistributedSchedServiceSevenFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedserviceseven_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -722,6 +761,7 @@ ohos_fuzztest("DistributedSchedServiceEightFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedserviceeight_fuzzer"
   cflags = [
     "-g",
     "-O0",
@@ -753,6 +793,7 @@ ohos_fuzztest("DistributedSchedServiceNineFuzzTest") {
     "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
   ]
   external_deps = dsched_external_deps
+  fuzz_config_file = "${dms_path}/test/fuzztest/distributedschedservicenine_fuzzer"
   cflags = [
     "-g",
     "-O0",
