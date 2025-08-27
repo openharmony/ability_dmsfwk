@@ -15,6 +15,7 @@
 
 #include "dms_token_callback_test.h"
 
+#include "distributed_sched_interface.h"
 #include "distributed_sched_test_util.h"
 #include "dms_token_callback.h"
 #include "dtbschedmgr_log.h"
@@ -269,6 +270,24 @@ HWTEST_F(DmsTokenCallbackTest, GetRemoteDmsTest_002, TestSize.Level3)
     sptr<IDistributedSched> result = dmsTokenCallback_->GetRemoteDms(remoteDeviceId);
     EXPECT_EQ(result, nullptr);
     DTEST_LOG << "DmsTokenCallbackTest GetRemoteDmsTest_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetAccountInfoWrapperTest_001
+ * @tc.desc: call GetAccountInfoWrapper with invalid deviceId
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DmsTokenCallbackTest, GetAccountInfoWrapperTest_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsTokenCallbackTest GetAccountInfoWrapperTest_001 begin" << std::endl;
+    ASSERT_NE(dmsTokenCallback_, nullptr);
+    std::string deviceId = "1";
+    CallerInfo callerInfo;
+    IDistributedSched::AccountInfo accountInfo;
+    int32_t result = dmsTokenCallback_->GetAccountInfoWrapper(deviceId, callerInfo, accountInfo);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+    DTEST_LOG << "DmsTokenCallbackTest GetAccountInfoWrapperTest_001 end" << std::endl;
 }
 }
 }
