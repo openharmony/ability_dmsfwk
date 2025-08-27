@@ -24,6 +24,7 @@
 #include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
+#include "mission/distributed_sched_mission_manager.h"
 #include "multi_user_manager.h"
 #include "parcel_helper.h"
 #include "system_ability.h"
@@ -65,16 +66,8 @@ int32_t DmsTokenCallback::SendResult(OHOS::AAFwk::Want& want, int32_t callerUid,
     nlohmann::json extraInfoJson;
     CallerInfo callerInfo = {.uid = callerUid, .sourceDeviceId = localDeviceId, .accessToken = accessToken,
         .extraInfoJson = extraInfoJson};
-    if (!BundleManagerInternal::GetCallerAppIdFromBms(callerInfo.uid, callerInfo.callerAppId)) {
-        HILOGE("GetCallerAppIdFromBms failed");
-        return INVALID_PARAMETERS_ERR;
-    }
-    if (!BundleManagerInternal::GetBundleNameListFromBms(callerInfo.uid, callerInfo.bundleNames)) {
-        HILOGE("GetBundleNameListFromBms failed");
-        return INVALID_PARAMETERS_ERR;
-    }
     AccountInfo accountInfo;
-    ret = DistributedSchedPermission::GetInstance().GetAccountInfo(deviceId, callerInfo, accountInfo);
+    ret = GetAccountInfoWrapper(deviceId, callerInfo, accountInfo);
     if (ret != ERR_OK) {
         HILOGE("GetAccountInfo failed");
         return ret;
@@ -85,6 +78,20 @@ int32_t DmsTokenCallback::SendResult(OHOS::AAFwk::Want& want, int32_t callerUid,
     int32_t result = remoteDms->SendResultFromRemote(newWant, requestCode, callerInfo, accountInfo, resultCode);
     HILOGI("[PerformanceTest] SendResult transact end");
     return result;
+}
+
+int32_t DmsTokenCallback::GetAccountInfoWrapper(const std::string& deviceId, CallerInfo& callerInfo,
+    AccountInfo& accountInfo)
+{
+    if (!DistributedSchedMissionManager::GetInstance().GetOsAccountData(accountInfo)) {
+        HILOGE("Get Os accountId and userId fail.");
+        return INVALID_PARAMETERS_ERR;
+    }
+    callerInfo.bundleNames.clear();
+    callerInfo.bundleNames.push_back(this->bundleName_);
+    callerInfo.accessToken = AccessToken::AccessTokenKit::GetHapTokenID(accountInfo.userId,
+        callerInfo.bundleNames[0], 0);
+    return DistributedSchedPermission::GetInstance().GetAccountInfo(deviceId, callerInfo, accountInfo);
 }
 
 bool DmsTokenCallback::GetLocalDeviceId(std::string& localDeviceId)
