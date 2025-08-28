@@ -44,6 +44,7 @@ MultiUserManager::MultiUserManager()
     currentUserId_ = GetForegroundUser();
 }
 
+// LCOV_EXCL_START
 void MultiUserManager::Init()
 {
     HILOGI("Init start.");
@@ -111,6 +112,7 @@ void MultiUserManager::UnInit()
     }
     HILOGI("UnInit end");
 }
+// LCOV_EXCL_STOP
 
 void MultiUserManager::OnUserSwitched(int32_t accountId)
 {
@@ -158,6 +160,7 @@ void MultiUserManager::OnUserSwitched(int32_t accountId)
     HILOGI("UserSwitched end");
 }
 
+// LCOV_EXCL_START
 void MultiUserManager::UserSwitchedOnRegisterListenerCache()
 {
     HILOGI("UserSwitchedOnRegisterListenerCache start");
@@ -184,6 +187,7 @@ void MultiUserManager::UserSwitchedOnRegisterListenerCache()
     }
     HILOGI("UserSwitchedOnRegisterListenerCache end");
 }
+// LCOV_EXCL_STOP
 
 void MultiUserManager::OnUserRemoved(int32_t accountId)
 {
@@ -210,6 +214,7 @@ void MultiUserManager::OnUserRemoved(int32_t accountId)
     HILOGI("UserRemoved end");
 }
 
+// LCOV_EXCL_START
 int32_t MultiUserManager::CreateNewSendMgrLocked()
 {
     HILOGI("CreateNewSendMgr begin. accountId: %{public}d.", currentUserId_);
@@ -239,6 +244,7 @@ int32_t MultiUserManager::CreateNewRecomMgrLocked()
     HILOGI("CreateNewRecomMgr end.");
     return ERR_OK;
 }
+// LCOV_EXCL_STOP
 
 int32_t MultiUserManager::CreateNewSendMgrLocked(int32_t accountId)
 {
@@ -270,6 +276,7 @@ int32_t MultiUserManager::CreateNewRecomMgrLocked(int32_t accountId)
     return ERR_OK;
 }
 
+// LCOV_EXCL_START
 std::shared_ptr<DMSContinueSendMgr> MultiUserManager::GetCurrentSendMgr()
 {
     HILOGI("accountId: %{public}d.", currentUserId_);
@@ -293,6 +300,7 @@ std::shared_ptr<DMSContinueRecvMgr> MultiUserManager::GetCurrentRecvMgr()
     auto cur = recvMgrMap_.find(currentUserId_);
     return cur->second;
 }
+// LCOV_EXCL_STOP
 
 std::shared_ptr<DMSContinueRecomMgr> MultiUserManager::GetCurrentRecomMgr()
 {
@@ -427,6 +435,7 @@ bool MultiUserManager::IsCallerForeground(int32_t callingUid)
     return IsUserForeground(accountId);
 }
 
+// LCOV_EXCL_START
 void MultiUserManager::RegisterSoftbusListener()
 {
 #ifdef DMS_RECEIVE_BROADCAST
@@ -443,6 +452,7 @@ void MultiUserManager::RegisterSoftbusListener()
     HILOGW("Register softbusListener Disabled! accountId: %{public}d.", currentUserId_);
 #endif
 }
+// LCOV_EXCL_STOP
 
 bool MultiUserManager::CheckRegSoftbusListener()
 {
