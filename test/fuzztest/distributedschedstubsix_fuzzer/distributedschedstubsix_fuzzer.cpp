@@ -112,8 +112,9 @@ void NotifyDSchedEventResultFromRemoteInnerFuzzTest(const uint8_t* data, size_t 
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    int32_t int32Data = *(reinterpret_cast<const int32_t*>(data));
-    std::string str(reinterpret_cast<const char*>(data), size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t int32Data = fdp.ConsumeIntegral<int32_t>();
+    std::string str = fdp.ConsumeRandomLengthString();
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);

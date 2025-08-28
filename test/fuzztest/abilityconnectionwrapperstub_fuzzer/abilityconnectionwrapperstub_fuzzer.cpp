@@ -15,6 +15,8 @@
 
 #include "abilityconnectionwrapperstub_fuzzer.h"
 
+#include <fuzzer/FuzzedDataProvider.h>
+
 #include "ability_connection_wrapper_stub.h"
 #include "mock_distributed_sched.h"
 #include "mock_fuzz_util.h"
@@ -30,14 +32,15 @@ bool OnAbilityConnectDoneFuzzTest(const uint8_t* data, size_t size)
         return false;
     }
     FuzzUtil::MockPermission();
+    FuzzedDataProvider fdp(data, size);
     std::shared_ptr<AbilityConnectionWrapperStub> abilityConnection =
         std::make_shared<AbilityConnectionWrapperStub>();
     sptr<IRemoteObject> connection(new MockDistributedSched());
-    std::string localDeviceId(reinterpret_cast<const char*>(data), size);
+    std::string localDeviceId = fdp.ConsumeRandomLengthString();
     std::shared_ptr<AbilityConnectionWrapperStub> abilityConnection_ =
         std::make_shared<AbilityConnectionWrapperStub>(connection, localDeviceId);
     uint32_t code = IAbilityConnection::ON_ABILITY_CONNECT_DONE;
-    int32_t resultCode = *(reinterpret_cast<const int32_t*>(data));
+    int32_t resultCode = fdp.ConsumeIntegral<int32_t>();
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
@@ -47,9 +50,9 @@ bool OnAbilityConnectDoneFuzzTest(const uint8_t* data, size_t size)
     dataParcel.WriteInterfaceToken(descriptor);
     abilityConnection_->OnRemoteRequest(code, dataParcel, reply, option);
     
-    std::string str1(reinterpret_cast<const char*>(data), size);
-    std::string str2(reinterpret_cast<const char*>(data), size);
-    std::string str3(reinterpret_cast<const char*>(data), size);
+    std::string str1 = fdp.ConsumeRandomLengthString();
+    std::string str2 = fdp.ConsumeRandomLengthString();
+    std::string str3 = fdp.ConsumeRandomLengthString();
     AppExecFwk::ElementName element(str1, str2, str3);
     dataParcel.WriteParcelable(&element);
     abilityConnection_->OnRemoteRequest(code, dataParcel, reply, option);
@@ -67,17 +70,18 @@ bool OnAbilityDisconnectDoneFuzzTest(const uint8_t* data, size_t size)
         return false;
     }
     FuzzUtil::MockPermission();
+    FuzzedDataProvider fdp(data, size);
     sptr<IRemoteObject> connection(new MockDistributedSched());
     std::shared_ptr<AbilityConnectionWrapperStub> abilityConnection_ =
         std::make_shared<AbilityConnectionWrapperStub>(connection);
     uint32_t code = IAbilityConnection::ON_ABILITY_DISCONNECT_DONE;
-    int32_t resultCode = *(reinterpret_cast<const int32_t*>(data));
+    int32_t resultCode = fdp.ConsumeIntegral<int32_t>();
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    std::string str1(reinterpret_cast<const char*>(data), size);
-    std::string str2(reinterpret_cast<const char*>(data), size);
-    std::string str3(reinterpret_cast<const char*>(data), size);
+    std::string str1 = fdp.ConsumeRandomLengthString();
+    std::string str2 = fdp.ConsumeRandomLengthString();
+    std::string str3 = fdp.ConsumeRandomLengthString();
     std::u16string descriptor = IAbilityConnection::GetDescriptor();
     dataParcel.WriteInterfaceToken(descriptor);
     AppExecFwk::ElementName element(str1, str2, str3);

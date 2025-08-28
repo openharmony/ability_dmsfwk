@@ -118,11 +118,7 @@ void ConnectRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Uint32, uint32Data);
     DistributedSchedService::GetInstance().ConnectRemoteAbilityInner(dataParcel, reply);
-    std::string devId(reinterpret_cast<const char*>(data), size);
-    DistributedSchedService::GetInstance().InitDataShareManager();
-    DistributedSchedService::GetInstance().InitCommonEventListener();
-    DistributedSchedService::GetInstance().InitWifiStateListener();
-    DistributedSchedService::GetInstance().GetFormMgrProxy();
+    std::string devId = fdp.ConsumeRandomLengthString();
     DistributedSchedService::GetInstance().ProcessFreeInstallOffline(devId);
     DistributedSchedService::GetInstance().ProcessCalleeOffline(devId);
 }
@@ -146,8 +142,8 @@ void DisconnectRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     PARCEL_WRITE_HELPER_NORET(dataParcel, Uint32, uint32Data);
     DistributedSchedService::GetInstance().DisconnectRemoteAbilityInner(dataParcel, reply);
     
-    std::string networkId(reinterpret_cast<const char*>(data), size);
-    std::string bundleName(reinterpret_cast<const char*>(data), size);
+    std::string networkId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
     DistributedSchedService::GetInstance().IsRemoteInstall(networkId, bundleName);
     DistributedSchedService::GetInstance().GetContinueInfo(networkId, networkId);
 }
@@ -181,7 +177,6 @@ void StartContinuationInnerFuzzTest(const uint8_t* data, size_t size)
     dataParcel.WriteUint32(accessToken);
     DistributedSchedService::GetInstance().StartContinuationInner(dataParcel, reply);
     DistributedSchedService::GetInstance().StartAbility(want, callerUid);
-    DistributedSchedService::GetInstance().GetAppManager();
 }
 
 void NotifyCompleteFreeInstallFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)

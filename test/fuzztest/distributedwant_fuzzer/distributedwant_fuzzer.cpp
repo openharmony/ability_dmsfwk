@@ -51,18 +51,19 @@ bool DoSomethingInterestingWithMyApiDistributedWant001(const uint8_t* data, size
         return false;
     }
 
+    FuzzedDataProvider fdp(data, size);
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
     unsigned int flags = static_cast<unsigned int>(GetU32Data(reinterpret_cast<const char*>(data)));
     want->SetFlags(flags);
     want->RemoveFlags(flags);
     want->AddFlags(flags);
-    std::string entity(reinterpret_cast<const char*>(data), size);
+    std::string entity = fdp.ConsumeRandomLengthString();
     want->AddEntity(entity);
     want->HasEntity(entity);
     want->RemoveEntity(entity);
-    std::string bundleName(reinterpret_cast<const char*>(data), size);
+    std::string bundleName = fdp.ConsumeRandomLengthString();
     want->SetBundle(bundleName);
-    std::string deviceId(reinterpret_cast<const char*>(data), size);
+    std::string deviceId = fdp.ConsumeRandomLengthString();
     want->SetDeviceId(deviceId);
     want->SetElementName(bundleName, entity);
     want->SetElementName(deviceId, bundleName, entity);
@@ -75,8 +76,9 @@ bool DoSomethingInterestingWithMyApiDistributedWant002(const uint8_t* data, size
         return false;
     }
 
+    FuzzedDataProvider fdp(data, size);
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
-    std::string type(reinterpret_cast<const char*>(data), size);
+    std::string type = fdp.ConsumeRandomLengthString();
     want->SetType(type);
     Uri uri(type);
     want->SetUri(uri);
@@ -93,17 +95,18 @@ bool DoSomethingInterestingWithMyApiDistributedWant003(const uint8_t* data, size
         return false;
     }
 
+    FuzzedDataProvider fdp(data, size);
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
     want->CountEntities();
     want->GetScheme();
     DistributedOperation operation;
     want->SetOperation(operation);
-    std::string key(reinterpret_cast<const char*>(data), size);
+    std::string key = fdp.ConsumeRandomLengthString();
     want->HasParameter(key);
-    std::string content(reinterpret_cast<const char*>(data), size);
-    std::string prop(reinterpret_cast<const char*>(data), size);
-    std::string value(reinterpret_cast<const char*>(data), size);
-    std::string str(reinterpret_cast<const char*>(data), size);
+    std::string content = fdp.ConsumeRandomLengthString();
+    std::string prop = fdp.ConsumeRandomLengthString();
+    std::string value = fdp.ConsumeRandomLengthString();
+    std::string str = fdp.ConsumeRandomLengthString();
     nlohmann::json wantJson;
     want->ReadFromJson(wantJson);
     return true;
@@ -115,8 +118,9 @@ bool DoSomethingInterestingWithMyApiDistributedWant004(const uint8_t* data, size
         return false;
     }
 
+    FuzzedDataProvider fdp(data, size);
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
-    std::string key(reinterpret_cast<const char*>(data), size);
+    std::string key = fdp.ConsumeRandomLengthString();
     sptr<IRemoteObject> remoteObject;
     want->SetParam(key, remoteObject);
     std::vector<bool> boolValue;
@@ -141,8 +145,9 @@ bool DoSomethingInterestingWithMyApiDistributedWant005(const uint8_t* data, size
         return false;
     }
 
+    FuzzedDataProvider fdp(data, size);
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
-    std::string key(reinterpret_cast<const char*>(data), size);
+    std::string key = fdp.ConsumeRandomLengthString();
     std::vector<zchar> charVector;
     want->SetParam(key, charVector);
     want->GetCharArrayParam(key);
@@ -170,8 +175,9 @@ bool DoSomethingInterestingWithMyApiDistributedWant006(const uint8_t* data, size
         return false;
     }
 
+    FuzzedDataProvider fdp(data, size);
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
-    std::string key(reinterpret_cast<const char*>(data), size);
+    std::string key = fdp.ConsumeRandomLengthString();
     std::vector<float> floatVector;
     want->SetParam(key, floatVector);
     want->GetFloatArrayParam(key);
@@ -187,7 +193,7 @@ bool DoSomethingInterestingWithMyApiDistributedWant006(const uint8_t* data, size
     std::vector<short> shortVector;
     want->SetParam(key, shortVector);
     want->GetShortArrayParam(key);
-    std::string stringValue(reinterpret_cast<const char*>(data), size);
+    std::string stringValue = fdp.ConsumeRandomLengthString();
     want->SetParam(key, stringValue);
     want->GetStringParam(key);
     std::vector<std::string> stringVector;
@@ -357,22 +363,23 @@ bool FuzzDistributedWantToJson(const uint8_t* data, size_t size)
     }
 
     std::shared_ptr<DistributedWant> want = std::make_shared<DistributedWant>();
+    FuzzedDataProvider fdp(data, size);
 
-    std::string deviceId(reinterpret_cast<const char*>(data), size);
-    std::string bundleName(reinterpret_cast<const char*>(data), size);
-    std::string abilityName(reinterpret_cast<const char*>(data), size);
+    std::string deviceId = fdp.ConsumeRandomLengthString();
+    std::string bundleName = fdp.ConsumeRandomLengthString();
+    std::string abilityName = fdp.ConsumeRandomLengthString();
     want->SetElementName(deviceId, bundleName, abilityName);
 
-    std::string action(reinterpret_cast<const char*>(data), size);
+    std::string action = fdp.ConsumeRandomLengthString();
     want->SetAction(action);
 
     unsigned int flags = static_cast<unsigned int>(data[0]);
     want->SetFlags(flags);
 
-    std::string type(reinterpret_cast<const char*>(data), size);
+    std::string type = fdp.ConsumeRandomLengthString();
     want->SetType(type);
 
-    std::string uri(reinterpret_cast<const char*>(data), size);
+    std::string uri = fdp.ConsumeRandomLengthString();
     want->SetUri(uri);
 
     std::vector<std::string> entities = { "entity1", "entity2", "entity3" };
@@ -389,7 +396,8 @@ bool FuzzDistributedWantFromString(const uint8_t* data, size_t size)
     if (data == nullptr || size > OHOS::FOO_MAX_LEN || size < OHOS::U32_AT_SIZE) {
         return false;
     }
-    std::string inputString(reinterpret_cast<const char*>(data), size);
+    FuzzedDataProvider fdp(data, size);
+    std::string inputString = fdp.ConsumeRandomLengthString();
     std::shared_ptr<DistributedWant> want(DistributedWant::FromString(inputString));
     return true;
 }

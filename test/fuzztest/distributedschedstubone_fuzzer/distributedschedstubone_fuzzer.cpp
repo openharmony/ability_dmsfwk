@@ -141,7 +141,8 @@ void GetDSchedEventInfoInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    int32_t int32Data = *(reinterpret_cast<const int32_t*>(data)) % DMS_ALL;
+    FuzzedDataProvider fdp(data, size);
+    int32_t int32Data = fdp.ConsumeIntegral<int32_t>() % DMS_ALL;
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
     DistributedSchedService::GetInstance().GetDSchedEventInfoInner(dataParcel, reply);

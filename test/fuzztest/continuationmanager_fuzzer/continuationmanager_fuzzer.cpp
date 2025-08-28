@@ -18,6 +18,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <fuzzer/FuzzedDataProvider.h>
 
 #include "base/continuationmgr_log.h"
 #include "fuzz_util.h"
@@ -47,9 +48,11 @@ void FuzzUnregister(const uint8_t* rawData, size_t size)
     uint32_t code = Convert2Uint32(rawData);
     rawData = rawData + OFFSET;
     size = size - OFFSET;
+    FuzzedDataProvider fdp(rawData, size);
+    std::string str = fdp.ConsumeRandomLengthString();
     MessageParcel data;
     data.WriteInterfaceToken(DMS_INTERFACE_TOKEN);
-    data.WriteBuffer(rawData, size);
+    data.WriteBuffer(str.c_str(), str.size());
     data.RewindRead(0);
     MessageParcel reply;
     MessageOption option;

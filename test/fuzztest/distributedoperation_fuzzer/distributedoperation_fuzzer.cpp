@@ -20,6 +20,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fuzzer/FuzzedDataProvider.h>
 
 #include "distributed_operation.h"
 
@@ -35,7 +36,8 @@ void FuzzDistributedOperation(const uint8_t* data, size_t size)
 
     operation.GetUri();
 
-    std::string moduleName(reinterpret_cast<const char*>(data), size);
+    FuzzedDataProvider fdp(data, size);
+    std::string moduleName = fdp.ConsumeRandomLengthString();
     operation.SetModuleName(moduleName);
     operation.GetModuleName();
 
@@ -48,8 +50,9 @@ void FuzzDistributedOperation(const uint8_t* data, size_t size)
         unmarshalledOperation = nullptr;
     }
 
+    std::string str = fdp.ConsumeRandomLengthString();
     Parcel parcel_2;
-    parcel_2.WriteBuffer(data, size);
+    parcel_2.WriteBuffer(str.c_str(), str.size());
     parcel_2.RewindRead(0);
     operation.ReadFromParcel(parcel_2);
 
