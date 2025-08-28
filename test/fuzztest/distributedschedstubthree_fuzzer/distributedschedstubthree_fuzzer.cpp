@@ -91,13 +91,14 @@ void ReleaseRemoteAbilityInnerFuzzTest(const uint8_t* data, size_t size)
         return;
     }
     FuzzUtil::MockPermission();
+    FuzzedDataProvider fdp(data, size);
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
     sptr<IRemoteObject> connect(new MockDistributedSched());
     AppExecFwk::ElementName element;
     CallerInfo callerInfo;
-    std::string deviceId(reinterpret_cast<const char*>(data), size);
+    std::string deviceId = fdp.ConsumeRandomLengthString();
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, connect);
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &element);

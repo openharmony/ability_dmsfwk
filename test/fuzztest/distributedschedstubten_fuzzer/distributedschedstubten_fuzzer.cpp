@@ -46,6 +46,12 @@ void GetWifiStatusInnerFuzzTest(const uint8_t* data, size_t size)
     MessageParcel reply;
 
     FuzzedDataProvider fdp(data, size);
+    bool isSuccess = fdp.ConsumeBool();
+    int32_t sessionId = fdp.ConsumeIntegral<int32_t>();
+    std::string devId = fdp.ConsumeRandomLengthString();
+    dataParcel.WriteString16(Str8ToStr16(devId));
+    dataParcel.WriteInt32(sessionId);
+    dataParcel.WriteBool(isSuccess);
     DistributedSchedService::GetInstance().GetWifiStatusInner(dataParcel, reply);
 }
 

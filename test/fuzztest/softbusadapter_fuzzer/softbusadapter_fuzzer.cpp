@@ -19,6 +19,7 @@
 #include "securec.h"
 #include <cstdint>
 #include <unistd.h>
+#include <fuzzer/FuzzedDataProvider.h>
 
 #include "distributed_mission_broadcast_listener.h"
 #include "softbus_adapter/softbus_adapter.h"
@@ -50,9 +51,10 @@ void FuzzOnBroadCastRecv(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(uint32_t))) {
         return;
     }
-    std::string networkId(reinterpret_cast<const char*>(data), size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t dataLen = fdp.ConsumeIntegral<uint32_t>();
+    std::string networkId = fdp.ConsumeRandomLengthString();
     uint8_t* newdata = const_cast<uint8_t*>(data);
-    uint32_t dataLen = *(reinterpret_cast<const uint32_t*>(data));
     SoftbusAdapter::GetInstance().OnBroadCastRecv(networkId, newdata, dataLen);
     std::shared_ptr<SoftbusAdapterListener> listener = std::make_shared<DistributedMissionBroadcastListener>();
     SoftbusAdapter::GetInstance().RegisterSoftbusEventListener(listener);
@@ -65,8 +67,9 @@ void FuzzDealSendSoftbusEvent(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(uint32_t))) {
         return;
     }
+    FuzzedDataProvider fdp(data, size);
     std::shared_ptr<DSchedDataBuffer> buffer = nullptr;
-    int32_t retry = *(reinterpret_cast<const int32_t*>(data));
+    int32_t retry = fdp.ConsumeIntegral<int32_t>();
     SoftbusAdapter::GetInstance().Init();
     SoftbusAdapter::GetInstance().DealSendSoftbusEvent(buffer, retry);
     SoftbusAdapter::GetInstance().RetrySendSoftbusEvent(buffer, retry);

@@ -133,16 +133,16 @@ void StopSyncRemoteMissionsInnerFuzzTest(const uint8_t* data, size_t size)
         return;
     }
     FuzzUtil::MockPermission();
+    FuzzedDataProvider fdp(data, size);
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    std::string str(reinterpret_cast<const char*>(data), size);
+    std::string str = fdp.ConsumeRandomLengthString();
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, String16, Str8ToStr16(str));
     DistributedSchedService::GetInstance().StopSyncRemoteMissionsInner(dataParcel, reply);
 
     Want want;
-    FuzzedDataProvider fdp(data, size);
     std::string dstDeviceId = fdp.ConsumeRandomLengthString();
     
     want.SetDeviceId(dstDeviceId);
