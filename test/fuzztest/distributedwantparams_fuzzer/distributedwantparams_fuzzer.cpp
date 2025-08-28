@@ -69,7 +69,8 @@ bool DoSomethingInterestingWithMyApiDistributedWantParams001(const uint8_t* data
     }
 
     DistributedWantParams wantOther;
-    std::string key(reinterpret_cast<const char*>(data), size);
+    FuzzedDataProvider fdp(data, size);
+    std::string key = fdp.ConsumeRandomLengthString();
     std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
     sptr<AAFwk::IArray> array = new (std::nothrow) AAFwk::Array(0, DistributedSchedule::g_IID_IDistributedWantParams);
     wantParams->SetParam(key, array);
@@ -93,6 +94,7 @@ bool DoSomethingInterestingWithMyApiDistributedWantParams002(const uint8_t* data
     }
 
     DistributedWantParams wantOther;
+    FuzzedDataProvider fdp(data, size);
     std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
     Parcel parcel;
     IArray* ao = nullptr;
@@ -122,7 +124,7 @@ bool DoSomethingInterestingWithMyApiDistributedWantParams002(const uint8_t* data
     wantParams->ReadFromParcelArrayLong(parcel, array);
     wantParams->ReadFromParcelArrayFloat(parcel, array);
     wantParams->ReadFromParcelArrayDouble(parcel, array);
-    std::string key(reinterpret_cast<const char*>(data), size);
+    std::string key = fdp.ConsumeRandomLengthString();
     wantParams->ReadFromParcelLong(parcel, key);
     wantParams->ReadFromParcelFloat(parcel, key);
 
@@ -137,9 +139,10 @@ bool DoSomethingInterestingWithMyApiDistributedWant003(const uint8_t* data, size
     }
 
     DistributedWantParams wantOther;
+    FuzzedDataProvider fdp(data, size);
     std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
     Parcel parcel;
-    std::string key(reinterpret_cast<const char*>(data), size);
+    std::string key = fdp.ConsumeRandomLengthString();
     int8_t byteValue = static_cast<int8_t>(GetU32Data(reinterpret_cast<const char*>(data)));
     sptr<IInterface> byteIt = Byte::Box(byteValue);
     wantParams->WriteToParcelByte(parcel, byteIt);
@@ -179,7 +182,6 @@ bool DoSomethingInterestingWithMyApiDistributedWant003(const uint8_t* data, size
     wantParams->ReadFromParcel(parcel);
 
     DistributedUnsupportedData uData;
-    std::shared_ptr<DistributedUnsupportedData> unsupportedData = std::make_shared<DistributedUnsupportedData>(uData);
     wantParams->cachedUnsupportedData_.emplace_back(std::move(uData));
     wantParams->DoMarshalling(parcel);
     wantParams->cachedUnsupportedData_.clear();
@@ -193,9 +195,10 @@ bool DoSomethingInterestingWithMyApiDistributedWantParams004(const uint8_t* data
     }
 
     DistributedWantParams wantOther;
+    FuzzedDataProvider fdp(data, size);
     std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
 
-    std::string value(reinterpret_cast<const char*>(data), size);
+    std::string value = fdp.ConsumeRandomLengthString();
     sptr<IInterface> stringObj =
         DistributedWantParams::GetInterfaceByType(DistributedWantParams::VALUE_TYPE_STRING, value);
     wantParams->CompareInterface(stringObj, stringObj, DistributedWantParams::VALUE_TYPE_STRING);
@@ -241,7 +244,8 @@ bool DistributedWantParamWrapperFindMatchingBraceFuzzTest(const uint8_t* data, s
     if (data == nullptr || size == 0) {
         return false;
     }
-    std::string inputStr(reinterpret_cast<const char*>(data), size);
+    FuzzedDataProvider fdp(data, size);
+    std::string inputStr = fdp.ConsumeRandomLengthString();
 
     size_t startPos = size > 0 ? data[0] % size : 0;
 
@@ -276,9 +280,10 @@ bool DistributedWantParamWrapperGerTypedIdFuzzTest(const uint8_t* data, size_t s
     if (data == nullptr || size == 0) {
         return false;
     }
-    std::string inputStr(reinterpret_cast<const char*>(data), size);
+    FuzzedDataProvider fdp(data, size);
+    std::string inputStr = fdp.ConsumeRandomLengthString();
 
-    size_t startPos = size > 0 ? data[0] % size : 0;
+    size_t startPos = 0;
 
     DistributedWantParams wantOther;
     std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
