@@ -98,6 +98,8 @@ private:
         const AccountInfo& accountInfo, const std::string& targetBundleName, bool isNewCollab = false);
     bool CheckComponentAccessPermission(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AccountInfo& accountInfo, const AAFwk::Want& want) const;
+    bool CheckCustomPermission(const AppExecFwk::AbilityInfo& targetAbility,
+        const CallerInfo& callerInfo) const;
     bool CheckMigrateStartCtrlPer(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AAFwk::Want& want, bool isSameBundle = true);
     bool CheckCollaborateStartCtrlPer(const AppExecFwk::AbilityInfo& targetAbility,

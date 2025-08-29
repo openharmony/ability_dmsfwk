@@ -188,6 +188,105 @@ HWTEST_F(DistributedSchedPermissionTest, CheckSendResultPermission_003, TestSize
     DTEST_LOG << "DistributedSchedPermissionTest CheckSendResultPermission_003 end ret:" << ret << std::endl;
 }
 
+/**
+ * @tc.name: CheckCustomPermission_001
+ * @tc.desc: call CheckCustomPermission with no permissions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckCustomPermission_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_001 begin" << std::endl;
+    AppExecFwk::AbilityInfo targetAbility;
+    CallerInfo callerInfo;
+    callerInfo.accessToken = ACCESS_TOKEN;
+    bool ret = DistributedSchedPermission::GetInstance().CheckCustomPermission(targetAbility, callerInfo);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_001 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: CheckCustomPermission_002
+ * @tc.desc: call CheckCustomPermission with no permissions and invalid accessToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckCustomPermission_002, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_002 begin" << std::endl;
+    AppExecFwk::AbilityInfo targetAbility;
+    CallerInfo callerInfo;
+    callerInfo.accessToken = INVALID_ACCESS_TOKEN;
+    bool ret = DistributedSchedPermission::GetInstance().CheckCustomPermission(targetAbility, callerInfo);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_002 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: CheckCustomPermission_003
+ * @tc.desc: call CheckCustomPermission with invalid permissions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckCustomPermission_003, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_003 begin" << std::endl;
+    AppExecFwk::AbilityInfo targetAbility;
+    targetAbility.permissions.emplace_back(INVALID_PERMISSION_NAME);
+    CallerInfo callerInfo;
+    callerInfo.accessToken = ACCESS_TOKEN;
+    bool ret = DistributedSchedPermission::GetInstance().CheckCustomPermission(targetAbility, callerInfo);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_003 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: CheckCustomPermission_004
+ * @tc.desc: call CheckCustomPermission with invalid permissions and invalid accessToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckCustomPermission_004, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_004 begin" << std::endl;
+    AppExecFwk::AbilityInfo targetAbility;
+    targetAbility.permissions.emplace_back(INVALID_PERMISSION_NAME);
+    CallerInfo callerInfo;
+    callerInfo.accessToken = INVALID_ACCESS_TOKEN;
+    bool ret = DistributedSchedPermission::GetInstance().CheckCustomPermission(targetAbility, callerInfo);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_004 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: CheckCustomPermission_005
+ * @tc.desc: call CheckCustomPermission with correct permissions
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckCustomPermission_005, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_005 begin" << std::endl;
+    AppExecFwk::AbilityInfo targetAbility;
+    targetAbility.permissions.emplace_back(PERMISSION_NAME);
+    CallerInfo callerInfo;
+    callerInfo.accessToken = ACCESS_TOKEN;
+    bool ret = DistributedSchedPermission::GetInstance().CheckCustomPermission(targetAbility, callerInfo);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_005 end result:" << ret << std::endl;
+}
+
+/**
+ * @tc.name: CheckCustomPermission_006
+ * @tc.desc: call CheckCustomPermission with correct permissions and invalid accessToken
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckCustomPermission_006, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_006 begin" << std::endl;
+    AppExecFwk::AbilityInfo targetAbility;
+    targetAbility.permissions.emplace_back(PERMISSION_NAME);
+    CallerInfo callerInfo;
+    callerInfo.accessToken = INVALID_ACCESS_TOKEN;
+    bool ret = DistributedSchedPermission::GetInstance().CheckCustomPermission(targetAbility, callerInfo);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_006 end result:" << ret << std::endl;
+}
 
 /**
  * @tc.name: CheckStartPermission_001
