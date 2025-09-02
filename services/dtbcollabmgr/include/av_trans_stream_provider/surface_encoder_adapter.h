@@ -62,7 +62,6 @@ public:
     Media::Status Configure(const std::shared_ptr<Media::Meta>& meta);
     Media::Status SetOutputBufferQueue(const sptr<Media::AVBufferQueueProducer>& bufferQueueProducer);
     Media::Status SetEncoderAdapterCallback(const std::shared_ptr<EncoderAdapterCallback>& encoderAdapterCallback);
-    Media::Status SetInputSurface(sptr<Surface> surface);
     Media::Status SetTransCoderMode();
     sptr<Surface> GetInputSurface();
     Media::Status Start();
