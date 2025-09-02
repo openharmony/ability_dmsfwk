@@ -40,7 +40,6 @@ public:
     void Init(const std::shared_ptr<Media::Pipeline::EventReceiver>& receiver,
         const std::shared_ptr<Media::Pipeline::FilterCallback>& callback) override;
     Media::Status Configure(const std::shared_ptr<Media::Meta>& parameter);
-    Media::Status SetInputSurface(sptr<Surface> surface);
     Media::Status SetTransCoderMode();
     sptr<Surface> GetInputSurface();
     Media::Status DoPrepare() override;
