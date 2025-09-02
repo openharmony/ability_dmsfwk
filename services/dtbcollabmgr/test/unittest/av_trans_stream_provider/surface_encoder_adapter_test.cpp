@@ -81,20 +81,6 @@ HWTEST_F(SurfaceEncoderAdapterTest, Configure_001, TestSize.Level3)
 }
 
 /**
- * @tc.name: SetInputSurface_001
- * @tc.desc: SurfaceEncoderAdapter Configure
- * @tc.type: FUNC
- */
-HWTEST_F(SurfaceEncoderAdapterTest, SetInputSurface_001, TestSize.Level3)
-{
-    DTEST_LOG << "SurfaceEncoderAdapterTest SetInputSurface_001 begin" << std::endl;
-    ASSERT_NE(encodeAdapter_, nullptr);
-    sptr<Surface> surface = nullptr;
-    EXPECT_EQ(encodeAdapter_->SetInputSurface(surface), Status::ERROR_UNKNOWN);
-    DTEST_LOG << "SurfaceEncoderAdapterTest SetInputSurface_001 end" << std::endl;
-}
-
-/**
  * @tc.name: Start_001
  * @tc.desc: Start
  * @tc.type: FUNC

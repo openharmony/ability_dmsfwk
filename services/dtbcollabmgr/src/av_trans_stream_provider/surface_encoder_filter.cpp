@@ -178,13 +178,6 @@ namespace DistributedCollab {
         return codecAdapter_->Configure(parameter);
     }
 
-    Status SurfaceEncoderFilter::SetInputSurface(sptr<Surface> surface)
-    {
-        HILOGI("SetInputSurface");
-        codecAdapter_->SetInputSurface(surface);
-        return Status::OK;
-    }
-
     Status SurfaceEncoderFilter::SetTransCoderMode()
     {
         HILOGI("SetTransCoderMode");
