@@ -140,7 +140,7 @@ int32_t DistributedSchedPermission::CheckStartPermission(const AAFwk::Want& want
         return DMS_START_CONTROL_PERMISSION_DENIED;
     }
     // 3.check application custom permissions
-    if (!CheckCustomPermission(targetAbility, callerInfo)) {
+    if (!CheckCustomPermission(want, targetAbility, callerInfo)) {
         HILOGE("CheckCustomPermission denied or failed! the caller component do not have permission");
         return DMS_COMPONENT_ACCESS_PERMISSION_DENIED;
     }
@@ -175,9 +175,17 @@ int32_t DistributedSchedPermission::CheckCollabStartPermission(const AAFwk::Want
     return ERR_OK;
 }
 
-bool DistributedSchedPermission::CheckCustomPermission(const AppExecFwk::AbilityInfo& targetAbility,
-    const CallerInfo& callerInfo) const
+bool DistributedSchedPermission::CheckCustomPermission(const AAFwk::Want& want,
+    const AppExecFwk::AbilityInfo& targetAbility, const CallerInfo& callerInfo) const
 {
+    if (BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
+        HILOGI("is same appId, no need to check custom permissions");
+        return true;
+    }
+    if ((want.GetFlags() & AAFwk::Want::FLAG_ABILITY_CONTINUATION) != 0) {
+        HILOGI("ability continuation, no need to check custom permissions");
+        return true;
+    }
     const auto& permissions = targetAbility.permissions;
     if (permissions.empty()) {
         HILOGD("no need any permission, so granted!");
@@ -598,11 +606,6 @@ int32_t DistributedSchedPermission::CheckGetCallerPermission(const AAFwk::Want& 
         !CheckDeviceSecurityLevel(callerInfo.sourceDeviceId, want.GetElement().GetDeviceID())) {
         HILOGE("check device security level failed!");
         return CALL_PERMISSION_DENIED;
-    }
-    // 5.check application custom permissions
-    if (!CheckCustomPermission(targetAbility, callerInfo)) {
-        HILOGE("CheckCustomPermission denied or failed! the caller component do not have permission");
-        return DMS_COMPONENT_ACCESS_PERMISSION_DENIED;
     }
     HILOGI("CheckGetCallerPermission success!!");
     return ERR_OK;
