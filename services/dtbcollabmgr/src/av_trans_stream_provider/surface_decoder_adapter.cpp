@@ -16,7 +16,6 @@
 #include "surface_decoder_adapter.h"
 #include "avcodec_common.h"
 #include "avcodec_info.h"
-#include "codec_server.h"
 #include "dtbcollabmgr_log.h"
 #include "media_description.h"
 #include "meta/format.h"
