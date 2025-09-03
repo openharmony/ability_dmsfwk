@@ -257,6 +257,216 @@ ohos_fuzztest("DistributedSchedStubFourFuzzTest") {
   }
 }
 
+ohos_fuzztest("DistributedSchedStubFiveFuzzTest") {
+  module_out_path = module_output_path
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
+  ]
+  external_deps = dsched_external_deps
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-Dprivate=public",
+  ]
+
+  sources = [
+    "${dms_path}/services/dtbschedmgr/test/unittest/mock_distributed_sched.cpp",
+    "${dms_path}/test/fuzztest/util/mock_fuzz_util.cpp",
+    "distributedschedstubfive_fuzzer/distributedschedstubfive_fuzzer.cpp",
+  ]
+
+  deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
+
+  defines = []
+  if (dmsfwk_mission_manager) {
+    defines += [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
+  }
+  if (dmsfwk_standard_form_share) {
+    defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
+  }
+  if (os_account_part) {
+    defines += [ "OS_ACCOUNT_PART" ]
+  }
+}
+
+ohos_fuzztest("DistributedSchedStubSixFuzzTest") {
+  module_out_path = module_output_path
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
+  ]
+  external_deps = dsched_external_deps
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-Dprivate=public",
+  ]
+
+  sources = [
+    "${dms_path}/services/dtbschedmgr/test/unittest/mock_distributed_sched.cpp",
+    "${dms_path}/test/fuzztest/util/mock_fuzz_util.cpp",
+    "distributedschedstubsix_fuzzer/distributedschedstubsix_fuzzer.cpp",
+  ]
+
+  deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
+
+  defines = []
+  if (dmsfwk_mission_manager) {
+    defines += [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
+  }
+  if (dmsfwk_standard_form_share) {
+    defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
+  }
+  if (os_account_part) {
+    defines += [ "OS_ACCOUNT_PART" ]
+  }
+}
+
+ohos_fuzztest("DistributedSchedStubSevenFuzzTest") {
+  module_out_path = module_output_path
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
+  ]
+  external_deps = dsched_external_deps
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-Dprivate=public",
+  ]
+
+  sources = [
+    "${dms_path}/services/dtbschedmgr/test/unittest/mock_distributed_sched.cpp",
+    "${dms_path}/test/fuzztest/util/mock_fuzz_util.cpp",
+    "distributedschedstubseven_fuzzer/distributedschedstubseven_fuzzer.cpp",
+  ]
+
+  deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
+
+  defines = []
+  if (dmsfwk_mission_manager) {
+    defines += [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
+  }
+  if (dmsfwk_standard_form_share) {
+    defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
+  }
+  if (os_account_part) {
+    defines += [ "OS_ACCOUNT_PART" ]
+  }
+}
+
+ohos_fuzztest("DistributedSchedStubEightFuzzTest") {
+  module_out_path = module_output_path
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
+  ]
+  external_deps = dsched_external_deps
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-Dprivate=public",
+  ]
+
+  sources = [
+    "${dms_path}/services/dtbschedmgr/test/unittest/mock_distributed_sched.cpp",
+    "${dms_path}/test/fuzztest/util/mock_fuzz_util.cpp",
+    "distributedschedstubeight_fuzzer/distributedschedstubeight_fuzzer.cpp",
+  ]
+
+  deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
+
+  defines = []
+  if (dmsfwk_mission_manager) {
+    defines += [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
+  }
+  if (dmsfwk_standard_form_share) {
+    defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
+  }
+  if (os_account_part) {
+    defines += [ "OS_ACCOUNT_PART" ]
+  }
+}
+
+ohos_fuzztest("DistributedSchedStubNineFuzzTest") {
+  module_out_path = module_output_path
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
+  ]
+  external_deps = dsched_external_deps
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-Dprivate=public",
+  ]
+
+  sources = [
+    "${dms_path}/services/dtbschedmgr/test/unittest/mock_distributed_sched.cpp",
+    "${dms_path}/test/fuzztest/util/mock_fuzz_util.cpp",
+    "distributedschedstubnine_fuzzer/distributedschedstubnine_fuzzer.cpp",
+  ]
+
+  deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
+
+  defines = []
+  if (dmsfwk_mission_manager) {
+    defines += [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
+  }
+  if (dmsfwk_standard_form_share) {
+    defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
+  }
+  if (os_account_part) {
+    defines += [ "OS_ACCOUNT_PART" ]
+  }
+}
+
+ohos_fuzztest("DistributedSchedStubTenFuzzTest") {
+  module_out_path = module_output_path
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags"
+  ]
+  external_deps = dsched_external_deps
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+    "-Dprivate=public",
+  ]
+
+  sources = [
+    "${dms_path}/services/dtbschedmgr/test/unittest/mock_distributed_sched.cpp",
+    "${dms_path}/test/fuzztest/util/mock_fuzz_util.cpp",
+    "distributedschedstubten_fuzzer/distributedschedstubten_fuzzer.cpp",
+  ]
+
+  deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
+
+  defines = []
+  if (dmsfwk_mission_manager) {
+    defines += [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
+  }
+  if (dmsfwk_standard_form_share) {
+    defines += [ "SUPPORT_DISTRIBUTED_FORM_SHARE" ]
+  }
+  if (os_account_part) {
+    defines += [ "OS_ACCOUNT_PART" ]
+  }
+}
+
 group("fuzztest") {
   testonly = true
   deps = [
@@ -282,6 +492,12 @@ group("fuzztest") {
       ":DistributedSchedStubTwoFuzzTest",
       ":DistributedSchedStubThreeFuzzTest",
       ":DistributedSchedStubFourFuzzTest",
+      ":DistributedSchedStubFiveFuzzTest",
+      ":DistributedSchedStubSixFuzzTest",
+      ":DistributedSchedStubSevenFuzzTest",
+      ":DistributedSchedStubEightFuzzTest",
+      ":DistributedSchedStubNineFuzzTest",
+      ":DistributedSchedStubTenFuzzTest",
     ]
   }
 }
