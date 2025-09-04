@@ -458,18 +458,9 @@ bool GetOsInfoFromDM(const std::string &dmInfoEx, int32_t &osType, std::string &
             HILOGE("Check OS type and version from device extra data json fail.");
             break;
         }
-        auto osTypeObj = cJSON_GetObjectItemCaseSensitive(dataJson, PARAM_KEY_OS_TYPE);
-        if (osTypeObj == nullptr) {
-            HILOGE("Get osTypeObj fail.");
-            break;
-        }
-        osType = osTypeObj->valueint;
-        auto osVersionObj = cJSON_GetObjectItemCaseSensitive(dataJson, PARAM_KEY_OS_VERSION);
-        if (osVersionObj == nullptr) {
-            HILOGE("Get osVersionObj fail.");
-            break;
-        }
-        osVersion = std::string(osVersionObj->valuestring);
+
+        osType = cJSON_GetObjectItemCaseSensitive(dataJson, PARAM_KEY_OS_TYPE)->valueint;
+        osVersion = std::string(cJSON_GetObjectItemCaseSensitive(dataJson, PARAM_KEY_OS_VERSION)->valuestring);
         isSuccess = true;
     } while (false);
 

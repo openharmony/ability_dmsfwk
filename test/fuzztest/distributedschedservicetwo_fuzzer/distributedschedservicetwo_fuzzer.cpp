@@ -40,20 +40,6 @@ constexpr int32_t ON_DEMAND_REASON_ID_COUNT_FOUR = 4;
 std::string GetDExtensionName(std::string bundleName, int32_t userId);
 std::string GetDExtensionProcess(std::string bundleName, int32_t userId);
 
-void InitBluetoothStateListenerFuzzTest(const uint8_t* data, size_t size)
-{
-    (void)data;
-    (void)size;
-    DistributedSchedService::GetInstance().InitBluetoothStateListener();
-}
-
-void InitDeviceCfgFuzzTest(const uint8_t* data, size_t size)
-{
-    (void)data;
-    (void)size;
-    DistributedSchedService::GetInstance().InitDeviceCfg();
-}
-
 void GetDExtensionNameFuzzTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
@@ -114,8 +100,6 @@ void ConnectDExtensionFromRemoteFuzzTest(const uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DistributedSchedule::InitBluetoothStateListenerFuzzTest(data, size);
-    OHOS::DistributedSchedule::InitDeviceCfgFuzzTest(data, size);
     OHOS::DistributedSchedule::GetDExtensionNameFuzzTest(data, size);
     OHOS::DistributedSchedule::GetDExtensionProcessFuzzTest(data, size);
     OHOS::DistributedSchedule::ConnectDExtensionFromRemoteFuzzTest(data, size);

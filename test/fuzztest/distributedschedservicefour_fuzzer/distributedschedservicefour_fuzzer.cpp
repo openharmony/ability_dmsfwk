@@ -47,6 +47,10 @@ void CheckCollabStartPermissionFuzzTest(const uint8_t* data, size_t size)
     AAFwk::Want want;
     CallerInfo callerInfo;
     AccountInfo accountInfo;
+    callerInfo.sourceDeviceId = fdp.ConsumeRandomLengthString();
+    callerInfo.uid = fdp.ConsumeIntegral<int32_t>();
+    callerInfo.pid = fdp.ConsumeIntegral<int32_t>();
+    callerInfo.callerType = fdp.ConsumeIntegral<int32_t>();
     bool needQueryExtension = fdp.ConsumeBool();
     DistributedSchedService::GetInstance().CheckCollabStartPermission(want,
         callerInfo, accountInfo, needQueryExtension);
@@ -60,6 +64,10 @@ void CheckTargetPermission4DiffBundleFuzzTest(const uint8_t* data, size_t size)
     FuzzedDataProvider fdp(data, size);
     AAFwk::Want want;
     CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = fdp.ConsumeRandomLengthString();
+    callerInfo.uid = fdp.ConsumeIntegral<int32_t>();
+    callerInfo.pid = fdp.ConsumeIntegral<int32_t>();
+    callerInfo.callerType = fdp.ConsumeIntegral<int32_t>();
     AccountInfo accountInfo;
     int32_t flag = fdp.ConsumeIntegral<int32_t>();
     bool needQueryExtension = fdp.ConsumeBool();
@@ -75,6 +83,10 @@ void RegisterAppStateObserverFuzzTest(const uint8_t* data, size_t size)
     FuzzedDataProvider fdp(data, size);
     AAFwk::Want want;
     CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = fdp.ConsumeRandomLengthString();
+    callerInfo.uid = fdp.ConsumeIntegral<int32_t>();
+    callerInfo.pid = fdp.ConsumeIntegral<int32_t>();
+    callerInfo.callerType = fdp.ConsumeIntegral<int32_t>();
     sptr<IRemoteObject> srcConnect = nullptr;
     sptr<IRemoteObject> callbackWrapper = nullptr;
     DistributedSchedService::GetInstance().RegisterAppStateObserver(want, callerInfo, srcConnect, callbackWrapper);

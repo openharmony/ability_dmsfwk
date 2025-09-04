@@ -79,16 +79,6 @@ void ContinueStateCallbackUnRegisterFuzzTest(const uint8_t* data, size_t size)
         moduleName, abilityName);
 }
 
-void ProcessFormMgrDiedFuzzTest(const uint8_t* data, size_t size)
-{
-    if ((data == nullptr) || (size < sizeof(int32_t))) {
-        return;
-    }
-    FuzzedDataProvider fdp(data, size);
-    wptr<IRemoteObject> remote = nullptr;
-    DistributedSchedService::GetInstance().ProcessFormMgrDied(remote);
-}
-
 void ContinueMissionFuzzTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
@@ -110,7 +100,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DistributedSchedule::OnStartFuzzTest(data, size);
     OHOS::DistributedSchedule::OnAddSystemAbilityFuzzTest(data, size);
     OHOS::DistributedSchedule::ContinueStateCallbackUnRegisterFuzzTest(data, size);
-    OHOS::DistributedSchedule::ProcessFormMgrDiedFuzzTest(data, size);
     OHOS::DistributedSchedule::ContinueMissionFuzzTest(data, size);
     return 0;
 }

@@ -85,20 +85,14 @@ void HandleBootStartFuzzTest(const uint8_t* data, size_t size)
     DistributedSchedService::GetInstance().HandleBootStart(reason);
 }
 
-void DoStartFuzzTest(const uint8_t* data, size_t size)
-{
-    (void)data;
-    (void)size;
-    DistributedSchedService::GetInstance().DoStart();
-}
-
 void DeviceOnlineNotifyFuzzTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
 
-    std::string networkId(reinterpret_cast<const char*>(data), size / 2);
+    FuzzedDataProvider fdp(data, size);
+    std::string networkId = fdp.ConsumeRandomLengthString();
     DistributedSchedService::GetInstance().DeviceOnlineNotify(networkId);
 }
 }
@@ -109,7 +103,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DistributedSchedule::OnStopFuzzTest(data, size);
     OHOS::DistributedSchedule::OnActiveFuzzTest(data, size);
     OHOS::DistributedSchedule::HandleBootStartFuzzTest(data, size);
-    OHOS::DistributedSchedule::DoStartFuzzTest(data, size);
     OHOS::DistributedSchedule::DeviceOnlineNotifyFuzzTest(data, size);
     return 0;
 }

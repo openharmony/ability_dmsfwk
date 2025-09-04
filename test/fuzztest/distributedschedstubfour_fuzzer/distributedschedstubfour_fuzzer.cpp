@@ -73,12 +73,12 @@ void StartRemoteShareFormInnerFuzzTest(const uint8_t* data, size_t size)
     }
     FuzzUtil::MockPermission();
     int32_t code = static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_SHARE_FORM);
+    FuzzedDataProvider fdp(data, size);
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    std::string str(reinterpret_cast<const char*>(data), size);
+    std::string str = fdp.ConsumeRandomLengthString();
     Want want;
-    FuzzedDataProvider fdp(data, size);
     std::string dstDeviceId = fdp.ConsumeRandomLengthString();
     
     want.SetDeviceId(dstDeviceId);
@@ -115,7 +115,7 @@ void StopRemoteExtensionAbilityInnerFuzzTest(const uint8_t* data, size_t size)
     DistributedSchedService::GetInstance().StopRemoteExtensionAbilityInner(dataParcel, reply);
 
     CallerInfo callerInfo;
-    std::string localDeviceId(reinterpret_cast<const char*>(data), size);
+    std::string localDeviceId = fdp.ConsumeRandomLengthString();
     DistributedSchedService::GetInstance().GetCallerInfo(localDeviceId, callerUid, accessToken, callerInfo);
     DistributedSchedService::GetInstance().CheckDeviceIdFromRemote(localDeviceId, localDeviceId, localDeviceId);
 }
@@ -125,11 +125,12 @@ void RegisterOnListenerInnerFuzzTest(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(int32_t))) {
         return;
     }
+    FuzzedDataProvider fdp(data, size);
     FuzzUtil::MockPermission();
     MessageParcel dataParcel;
     MessageParcel reply;
     MessageOption option;
-    std::string str(reinterpret_cast<const char*>(data), size);
+    std::string str = fdp.ConsumeRandomLengthString();
     sptr<IRemoteObject> obj(new MockDistributedSched());
 
     PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
