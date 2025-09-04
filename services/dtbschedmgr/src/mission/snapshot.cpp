@@ -255,6 +255,10 @@ bool Snapshot::WritePixelMap(MessageParcel& data) const
     imagePacker.AddImage(*pixelMap_);
     imagePacker.FinalizePacking();
     std::istream inputStream(outputStream.rdbuf());
+    if (!inputStream.seekg(0, inputStream.end)) {
+        HILOGE("Failed to seek to end of stream.");
+        return false;
+    }
     inputStream.seekg(0, inputStream.end);
     size_t len = inputStream.tellg();
     inputStream.seekg(0);
