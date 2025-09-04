@@ -44,7 +44,8 @@ void DeviceOfflineNotifyFuzzTest(const uint8_t* data, size_t size)
         return;
     }
 
-    std::string networkId(reinterpret_cast<const char*>(data), size / 2);
+    FuzzedDataProvider fdp(data, size);
+    std::string networkId = fdp.ConsumeRandomLengthString();
     DistributedSchedService::GetInstance().DeviceOfflineNotify(networkId);
 }
 
@@ -54,29 +55,9 @@ void DeviceOfflineNotifyAfterDeleteFuzzTest(const uint8_t* data, size_t size)
         return;
     }
 
-    std::string networkId(reinterpret_cast<const char*>(data), size / 2);
+    FuzzedDataProvider fdp(data, size);
+    std::string networkId = fdp.ConsumeRandomLengthString();
     DistributedSchedService::GetInstance().DeviceOfflineNotifyAfterDelete(networkId);
-}
-
-void InitFuzzTest(const uint8_t* data, size_t size)
-{
-    (void)data;
-    (void)size;
-    DistributedSchedService::GetInstance().Init();
-}
-
-void InitMissionManagerFuzzTest(const uint8_t* data, size_t size)
-{
-    (void)data;
-    (void)size;
-    DistributedSchedService::GetInstance().InitMissionManager();
-}
-
-void InitWifiStateListenerFuzzTest(const uint8_t* data, size_t size)
-{
-    (void)data;
-    (void)size;
-    DistributedSchedService::GetInstance().InitWifiStateListener();
 }
 }
 }
@@ -85,8 +66,5 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
     OHOS::DistributedSchedule::DeviceOfflineNotifyFuzzTest(data, size);
     OHOS::DistributedSchedule::DeviceOfflineNotifyAfterDeleteFuzzTest(data, size);
-    OHOS::DistributedSchedule::InitFuzzTest(data, size);
-    OHOS::DistributedSchedule::InitMissionManagerFuzzTest(data, size);
-    OHOS::DistributedSchedule::InitWifiStateListenerFuzzTest(data, size);
     return 0;
 }

@@ -72,6 +72,10 @@ void TryConnectRemoteAbilityFuzzTest(const uint8_t* data, size_t size)
     AAFwk::Want want;
     sptr<IRemoteObject> connect = nullptr;
     CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = fdp.ConsumeRandomLengthString();
+    callerInfo.uid = fdp.ConsumeIntegral<int32_t>();
+    callerInfo.pid = fdp.ConsumeIntegral<int32_t>();
+    callerInfo.callerType = fdp.ConsumeIntegral<int32_t>();
     DistributedSchedService::GetInstance().TryConnectRemoteAbility(want, connect, callerInfo);
 }
 

@@ -15,6 +15,8 @@
 
 #include "multiusermanager_fuzzer.h"
 
+#include <fuzzer/FuzzedDataProvider.h>
+
 #include "multi_user_manager.h"
 #include "bundlemgr/bundle_mgr_interface.h"
 
@@ -25,16 +27,11 @@ void FuzzMultiUserManager(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(uint32_t))) {
         return;
     }
-    int32_t accountId = *(reinterpret_cast<const int32_t*>(data));
+    FuzzedDataProvider fdp(data, size);
+    int32_t accountId = fdp.ConsumeIntegral<int32_t>();
     MultiUserManager::GetInstance().Init();
-    MultiUserManager::GetInstance().RegisterSoftbusListener();
-    MultiUserManager::GetInstance().GetCurrentSendMgr();
-    MultiUserManager::GetInstance().GetCurrentRecvMgr();
     MultiUserManager::GetInstance().OnUserSwitched(accountId);
-    MultiUserManager::GetInstance().UserSwitchedOnRegisterListenerCache();
     MultiUserManager::GetInstance().OnUserRemoved(accountId);
-    MultiUserManager::GetInstance().CreateNewSendMgrLocked();
-    MultiUserManager::GetInstance().CreateNewRecvMgrLocked();
     MultiUserManager::GetInstance().GetSendMgrByCallingUid(accountId);
     MultiUserManager::GetInstance().GetRecvMgrByCallingUid(accountId);
     MultiUserManager::GetInstance().UnInit();

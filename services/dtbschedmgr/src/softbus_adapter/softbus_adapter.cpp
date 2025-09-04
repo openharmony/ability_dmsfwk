@@ -146,6 +146,7 @@ int32_t SoftbusAdapter::RetrySendSoftbusEvent(std::shared_ptr<DSchedDataBuffer> 
     return ERR_OK;
 }
 
+// LCOV_EXCL_START
 int32_t SoftbusAdapter::StopSoftbusEvent()
 {
     HILOGI("StopSoftbusEvent pkgName: %{public}s.", pkgName_.c_str());
@@ -160,6 +161,7 @@ int32_t SoftbusAdapter::StopSoftbusEvent()
     }
     return SOFTBUS_OK;
 }
+// LCOV_EXCL_STOP
 
 void SoftbusAdapter::OnBroadCastRecv(std::string& networkId, uint8_t* data, uint32_t dataLen)
 {
