@@ -121,7 +121,7 @@ void FuzzAssembleNoFrag(const uint8_t* data, size_t size)
     if (memcpy_s(buffer->Data(), bufSize, bufContent.data(), bufContent.size()) != EOK) {
         return;
     }
-    int32_t accountId = *(reinterpret_cast<const int32_t*>(data));
+    int32_t accountId = fdp.ConsumeIntegral<int32_t>();
     DSchedSoftbusSession dschedSoftbusSession;
     dschedSoftbusSession.ResetAssembleFrag();
 

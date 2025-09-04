@@ -33,8 +33,9 @@ void FuzzOnBind(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(size_t))) {
         return;
     }
-    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
-    std::string peerDeviceId(reinterpret_cast<const char*>(data), size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t sessionId = fdp.ConsumeIntegral<int32_t>();
+    std::string peerDeviceId = fdp.ConsumeRandomLengthString();
     DSchedTransportSoftbusAdapter dschedTransportSoftbusAdapter;
     dschedTransportSoftbusAdapter.OnBind(sessionId, peerDeviceId);
 }
@@ -96,7 +97,8 @@ void FuzzDisconnectDevice(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(size_t))) {
         return;
     }
-    std::string peerDeviceId(reinterpret_cast<const char*>(data), size);
+    FuzzedDataProvider fdp(data, size);
+    std::string peerDeviceId = fdp.ConsumeRandomLengthString();
     DSchedTransportSoftbusAdapter dschedTransportSoftbusAdapter;
     dschedTransportSoftbusAdapter.DisconnectDevice(peerDeviceId);
 }
@@ -120,7 +122,8 @@ void FuzzRegisterListener(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(size_t))) {
         return;
     }
-    int32_t serviceType = *(reinterpret_cast<const int32_t*>(data));
+    FuzzedDataProvider fdp(data, size);
+    int32_t serviceType = fdp.ConsumeIntegral<int32_t>();
     std::shared_ptr<DSchedContinueManager::SoftbusListener> listener =
         std::make_shared<DSchedContinueManager::SoftbusListener>();
     DSchedTransportSoftbusAdapter dschedTransportSoftbusAdapter;
@@ -132,7 +135,8 @@ void FuzzUnregisterListener(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(size_t))) {
         return;
     }
-    int32_t serviceType = *(reinterpret_cast<const int32_t*>(data));
+    FuzzedDataProvider fdp(data, size);
+    int32_t serviceType = fdp.ConsumeIntegral<int32_t>();
     std::shared_ptr<DSchedContinueManager::SoftbusListener> listener =
         std::make_shared<DSchedContinueManager::SoftbusListener>();
     DSchedTransportSoftbusAdapter dschedTransportSoftbusAdapter;
@@ -144,7 +148,8 @@ void FuzzSetCallingTokenId(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(size_t))) {
         return;
     }
-    int32_t callingTokenId = *(reinterpret_cast<const int32_t*>(data));
+    FuzzedDataProvider fdp(data, size);
+    int32_t callingTokenId = fdp.ConsumeIntegral<int32_t>();
     DSchedTransportSoftbusAdapter dschedTransportSoftbusAdapter;
     dschedTransportSoftbusAdapter.SetCallingTokenId(callingTokenId);
 }
@@ -154,8 +159,9 @@ void FuzzGetSessionIdByDeviceId(const uint8_t* data, size_t size)
     if ((data == nullptr) || (size < sizeof(size_t))) {
         return;
     }
-    int32_t sessionId = *(reinterpret_cast<const int32_t*>(data));
-    std::string peerDeviceId(reinterpret_cast<const char*>(data), size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t sessionId = fdp.ConsumeIntegral<int32_t>();
+    std::string peerDeviceId = fdp.ConsumeRandomLengthString();
     DSchedTransportSoftbusAdapter dschedTransportSoftbusAdapter;
     dschedTransportSoftbusAdapter.GetSessionIdByDeviceId(peerDeviceId, sessionId);
 }

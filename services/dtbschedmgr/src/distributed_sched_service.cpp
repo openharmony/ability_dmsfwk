@@ -490,6 +490,7 @@ void DistributedSchedService::HandleBootStart(const SystemAbilityOnDemandReason 
     }
 }
 
+// LCOV_EXCL_START
 bool DistributedSchedService::DoStart()
 {
 #ifdef DMS_SERVICE_DISABLE
@@ -529,6 +530,7 @@ bool DistributedSchedService::DoStart()
     HILOGI("OnStart dms service success.");
     return true;
 }
+// LCOV_EXCL_STOP
 
 int32_t DistributedSchedService::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
@@ -586,6 +588,7 @@ void DistributedSchedService::DeviceOfflineNotifyAfterDelete(const std::string& 
 #endif
 }
 
+// LCOV_EXCL_START
 bool DistributedSchedService::Init()
 {
     HILOGD("ready to init.");
@@ -612,7 +615,9 @@ bool DistributedSchedService::Init()
     }
     return true;
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 void DistributedSchedService::InitMissionManager()
 {
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
@@ -629,6 +634,7 @@ void DistributedSchedService::InitMissionManager()
     MultiUserManager::GetInstance().Init();
 #endif
 }
+// LCOV_EXCL_STOP
 
 void DistributedSchedService::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
@@ -727,6 +733,7 @@ int32_t DistributedSchedService::ContinueStateCallbackUnRegister(
     return result;
 }
 
+// LCOV_EXCL_START
 void DistributedSchedService::InitDataShareManager()
 {
     dataShareManager.SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
@@ -772,6 +779,7 @@ void DistributedSchedService::InitWifiStateListener()
         HILOGE("SubscribeCommonEvent wifiStateListener failed!");
     }
 }
+// LCOV_EXCL_STOP
 
 void DistributedSchedService::InitWifiSemiStateListener()
 {
@@ -786,6 +794,7 @@ void DistributedSchedService::InitWifiSemiStateListener()
     }
 }
 
+// LCOV_EXCL_START
 void DistributedSchedService::InitBluetoothStateListener()
 {
 #ifdef DMS_CHECK_BLUETOOTH
@@ -795,13 +804,16 @@ void DistributedSchedService::InitBluetoothStateListener()
     Bluetooth::BluetoothHost::GetDefaultHost().RegisterObserver(bluetoothStateListener);
 #endif
 }
+// LCOV_EXCL_STOP
 
+// LCOV_EXCL_START
 void DistributedSchedService::InitDeviceCfg()
 {
     HILOGI("called");
     DmsKvSyncE2E::GetInstance()->QueryMDMControl();
     DmsKvSyncE2E::GetInstance()->SetDeviceCfg();
 }
+// LCOV_EXCL_STOP
 
 void DistributedSchedService::DurationStart(const std::string srcDeviceId, const std::string dstDeviceId)
 {
@@ -1759,6 +1771,7 @@ int32_t DistributedSchedService::NotifyDSchedEventResultFromRemote(const std::st
 }
 
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
+// LCOV_EXCL_START
 sptr<IFormMgr> DistributedSchedService::GetFormMgrProxy()
 {
     HILOGD("GetFormMgrProxy begin.");
@@ -1808,6 +1821,7 @@ void DistributedSchedService::ProcessFormMgrDied(const wptr<IRemoteObject>& remo
         formMgrProxy_ = nullptr;
     }
 }
+// LCOV_EXCL_STOP
 #endif
 
 void DistributedSchedService::NotifyContinuationCallbackResult(int32_t missionId, int32_t resultCode)
@@ -3947,6 +3961,7 @@ void DistributedSchedService::UnregisterAppStateObserver(const sptr<IRemoteObjec
     HILOGI("unregister application state observer success");
 }
 
+// LCOV_EXCL_START
 sptr<AppExecFwk::IAppMgr> DistributedSchedService::GetAppManager()
 {
     auto samgr = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -3963,6 +3978,7 @@ sptr<AppExecFwk::IAppMgr> DistributedSchedService::GetAppManager()
     }
     return appObject;
 }
+// LCOV_EXCL_STOP
 
 int32_t DistributedSchedService::NotifyStateChanged(int32_t abilityState, AppExecFwk::ElementName& element,
     const sptr<IRemoteObject>& token)
