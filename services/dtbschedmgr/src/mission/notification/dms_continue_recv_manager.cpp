@@ -346,7 +346,7 @@ bool DMSContinueRecvMgr::GetFinalBundleName(DmsBundleInfo &distributedBundleInfo
             BundleManagerInternal::GetLocalBundleInfo(bundleNameItem, localBundleInfo) == ERR_OK) {
             identToBmMap.insert(std::pair<std::string, std::string>(appProvisionInfo.appIdentifier, bundleNameItem));
             HILOGI("appProvisionInfo.appIdentifier: %{public}s, bundleNameItem: %{public}s; ",
-                appProvisionInfo.appIdentifier.c_str(), bundleNameItem.c_str());
+                GetAnonymStr(appProvisionInfo.appIdentifier).c_str(), bundleNameItem.c_str());
         }
     }
     HILOGI("identToBmMap.size: %{public}zu.", identToBmMap.size());
