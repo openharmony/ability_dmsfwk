@@ -16,6 +16,8 @@
 #ifndef BUNDLE_MANAGER_INTERNAL_TEST_H
 #define BUNDLE_MANAGER_INTERNAL_TEST_H
 
+#include <string>
+
 #include "gtest/gtest.h"
 
 namespace OHOS {
@@ -26,6 +28,8 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+public:
+    std::string appListString_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

@@ -93,7 +93,7 @@ private:
     void SyncBundleInfoData(std::vector<DistributedKv::Entry> &entries);
     void DelBundleNameId(const std::string &bundleName);
     DmsBundleInfo ConvertToDistributedBundleInfo(const AppExecFwk::BundleInfo &bundleInfo,
-        AppExecFwk::AppProvisionInfo appProvisionInfo,
+        AppExecFwk::AppProvisionInfo appProvisionInfo, std::vector<std::string>& srcAppIdentifierVec,
         bool isPackageChange = false);
     bool InnerSaveStorageDistributeInfo(const DmsBundleInfo &distributedBundleInfo, const std::string &localUdid);
     std::map<std::string, DmsBundleInfo> GetAllOldDistributionBundleInfo(
@@ -106,6 +106,8 @@ private:
     bool CheckSyncData(const std::string &networkId);
     bool RebuildLocalData();
     bool GetLastBundleNameId(uint16_t &bundleNameId);
+    bool UpdateDistributedDataInternal(OHOS::sptr<OHOS::AppExecFwk::IBundleMgr>& bundleMgr,
+        std::vector<AppExecFwk::BundleInfo>& bundleInfos, std::vector<std::string>& bundleNames);
 
 private:
     static std::mutex mutex_;

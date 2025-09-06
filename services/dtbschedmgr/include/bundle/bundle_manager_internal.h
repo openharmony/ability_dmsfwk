@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,10 @@
 #ifndef OHOS_DISTRIBUTED_BUNDLE_MANANGER_INTERNAL_H
 #define OHOS_DISTRIBUTED_BUNDLE_MANANGER_INTERNAL_H
 
+#include <sstream>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "bundlemgr/bundle_mgr_proxy.h"
@@ -70,6 +72,12 @@ public:
     static int32_t GetApplicationInfoFromBms(const std::string& bundleName, const AppExecFwk::BundleFlag flag,
         const int32_t userId, AppExecFwk::ApplicationInfo &appInfo);
     static ErrCode QueryOsAccount(int32_t& activeAccountId);
+    static bool GetSrcAppIdentifierVec(std::string appServiceCapabilities,
+        std::vector<std::string>& srcAppIdentifierVec);
+private:
+    static std::vector<std::string> SplitString(const std::string& s, char delimiter);
+public:
+    std::string appListStr_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

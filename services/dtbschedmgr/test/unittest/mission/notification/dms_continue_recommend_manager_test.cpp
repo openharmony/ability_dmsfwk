@@ -263,13 +263,13 @@ HWTEST_F(DMSContinueRecomMgrTest, testGetRecommendInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetAvailableRecommendListTest_001
- * @tc.desc: test GetAvailableRecommendList
+ * @tc.name: GetAvailableRecommendListInternalTest_001
+ * @tc.desc: test GetAvailableRecommendListInternal
  * @tc.type: FUNC
  */
-HWTEST_F(DMSContinueRecomMgrTest, GetAvailableRecommendListTest_001, TestSize.Level1)
+HWTEST_F(DMSContinueRecomMgrTest, GetAvailableRecommendListInternalTest_001, TestSize.Level1)
 {
-    DTEST_LOG << "DMSContinueRecomMgrTest GetAvailableRecommendListTest_001 start" << std::endl;
+    DTEST_LOG << "DMSContinueRecomMgrTest GetAvailableRecommendListInternalTest_001 start" << std::endl;
     auto recomMgr = MultiUserManager::GetInstance().GetCurrentRecomMgr();
     ASSERT_NE(nullptr, recomMgr);
     int32_t accountId = 100;
@@ -279,16 +279,18 @@ HWTEST_F(DMSContinueRecomMgrTest, GetAvailableRecommendListTest_001, TestSize.Le
     std::map<std::string, DmsBundleInfo> result;
     std::vector<std::string> networkIdList;
     std::string bundleName = "";
+    AppExecFwk::AppProvisionInfo appProvisionInfo;
+    appProvisionInfo.developerId = "0";
     EXPECT_CALL(*storageMock_, GetNetworkIdList()).WillOnce(Return(networkIdList));
-    bool ret = recomMgr->GetAvailableRecommendList(bundleName, result);
+    bool ret = recomMgr->GetAvailableRecommendListInternal(bundleName, result, appProvisionInfo);
     EXPECT_EQ(ret, true);
 
     networkIdList.push_back("networkId");
     EXPECT_CALL(*storageMock_, GetNetworkIdList()).WillOnce(Return(networkIdList));
-    ret = recomMgr->GetAvailableRecommendList(bundleName, result);
+    ret = recomMgr->GetAvailableRecommendListInternal(bundleName, result, appProvisionInfo);
     EXPECT_EQ(ret, true);
     recomMgr->UnInit();
-    DTEST_LOG << "DMSContinueRecomMgrTest GetAvailableRecommendListTest_001 end" << std::endl;
+    DTEST_LOG << "DMSContinueRecomMgrTest GetAvailableRecommendListInternalTest_001 end" << std::endl;
 }
 
 /**
@@ -319,6 +321,39 @@ HWTEST_F(DMSContinueRecomMgrTest, IsContinuableWithDiffBundleTest_001, TestSize.
     EXPECT_EQ(ret, true);
     recomMgr->UnInit();
     DTEST_LOG << "DMSContinueRecomMgrTest IsContinuableWithDiffBundleTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetAvailableRecommendListTest_001
+ * @tc.desc: test GetAvailableRecommendList
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueRecomMgrTest, GetAvailableRecommendListTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecomMgrTest GetAvailableRecommendListTest_001 start" << std::endl;
+    auto recomMgr = MultiUserManager::GetInstance().GetCurrentRecomMgr();
+    ASSERT_NE(nullptr, recomMgr);
+    int32_t accountId = 100;
+    recomMgr->Init(accountId);
+    usleep(WAITTIME);
+
+    std::map<std::string, DmsBundleInfo> result;
+    std::vector<std::string> networkIdList;
+    std::string bundleName = "";
+    AppExecFwk::AppProvisionInfo appProvisionInfo;
+    EXPECT_CALL(*storageMock_, GetNetworkIdList()).WillOnce(Return(networkIdList));
+    EXPECT_CALL(*bundleMgrMock_, GetAppProvisionInfo4CurrentUser(_, _)).WillOnce(Return(false));
+    bool ret = recomMgr->GetAvailableRecommendList(bundleName, result);
+    EXPECT_EQ(ret, false);
+
+    networkIdList.push_back("networkId");
+    bundleName = "bundleName";
+    EXPECT_CALL(*storageMock_, GetNetworkIdList()).WillOnce(Return(networkIdList));
+    EXPECT_CALL(*bundleMgrMock_, GetAppProvisionInfo4CurrentUser(_, _)).WillOnce(Return(true));
+    ret = recomMgr->GetAvailableRecommendList(bundleName, result);
+    EXPECT_EQ(ret, true);
+    recomMgr->UnInit();
+    DTEST_LOG << "DMSContinueRecomMgrTest GetAvailableRecommendListTest_001 end" << std::endl;
 }
 } // DistributedSchedule
 } // namespace OHOS

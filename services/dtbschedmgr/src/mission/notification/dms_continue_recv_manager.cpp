@@ -26,6 +26,7 @@
 #include "distributed_sched_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
+#include "mission/distributed_bm_storage.h"
 #include "mission/dsched_sync_e2e.h"
 #include "mission/wifi_state_adapter.h"
 #include "multi_user_manager.h"
@@ -261,7 +262,7 @@ int32_t DMSContinueRecvMgr::RetryPostBroadcast(const std::string& senderNetworkI
     return ERR_OK;
 }
 
-bool DMSContinueRecvMgr::GetFinalBundleName(DmsBundleInfo &distributedBundleInfo, std::string &finalBundleName,
+bool DMSContinueRecvMgr::GetFinalBundleNameInternal(DmsBundleInfo &distributedBundleInfo, std::string &finalBundleName,
     AppExecFwk::BundleInfo &localBundleInfo, std::string &continueType)
 {
     HILOGI("accountId: %{public}d", accountId_);
@@ -273,6 +274,12 @@ bool DMSContinueRecvMgr::GetFinalBundleName(DmsBundleInfo &distributedBundleInfo
     std::vector<std::string> bundleNameList;
     bool continueBundleGot = BundleManagerInternal::GetContinueBundle4Src(bundleName, bundleNameList);
     if (!continueBundleGot) {
+        HILOGE("Get bundleNameList failed, bundle name: %{public}s", bundleName.c_str());
+    }
+    if (BundleManagerInternal::GetLocalBundleInfo(bundleName, localBundleInfo) == ERR_OK) {
+        bundleNameList.push_back(bundleName);
+    }
+    if (bundleNameList.size() == 0) {
         HILOGE("can not get local bundle info or continue bundle for bundle name: %{public}s", bundleName.c_str());
         return false;
     }
@@ -309,6 +316,53 @@ void DMSContinueRecvMgr::FindContinueType(const DmsBundleInfo &distributedBundle
         }
     }
     continueType = "";
+}
+
+bool DMSContinueRecvMgr::GetFinalBundleName(DmsBundleInfo &distributedBundleInfo, std::string &finalBundleName,
+    AppExecFwk::BundleInfo &localBundleInfo, std::string &continueType)
+{
+    std::string bundleName = distributedBundleInfo.bundleName;
+    std::vector<std::string> srcAppIdentifierVec;
+    if (distributedBundleInfo.appIdentifierVec.size() == 0) {
+        HILOGI("appIdentifierVec is empty.");
+        return GetFinalBundleNameInternal(distributedBundleInfo, finalBundleName, localBundleInfo, continueType);
+    }
+    std::vector<std::string> sinkBundleNameVec;
+    bool continueBundleGot = BundleManagerInternal::GetContinueBundle4Src(bundleName, sinkBundleNameVec);
+    if (!continueBundleGot) {
+        HILOGE("GetContinueBundle4Src sinkBundleNameVec is empty,bundle name: %{public}s", bundleName.c_str());
+    }
+    if (BundleManagerInternal::GetLocalBundleInfo(bundleName, localBundleInfo) == ERR_OK) {
+        sinkBundleNameVec.push_back(bundleName);
+    }
+    if (sinkBundleNameVec.size() == 0) {
+        HILOGE("can not get local bundle info or continue bundle for bundle name: %{public}s", bundleName.c_str());
+        return false;
+    }
+    AppExecFwk::AppProvisionInfo appProvisionInfo;
+    std::map<std::string, std::string> identToBmMap;
+    for (const auto& bundleNameItem : sinkBundleNameVec) {
+        if (BundleManagerInternal::GetAppProvisionInfo4CurrentUser(bundleNameItem, appProvisionInfo) &&
+            BundleManagerInternal::GetLocalBundleInfo(bundleNameItem, localBundleInfo) == ERR_OK) {
+            identToBmMap.insert(std::pair<std::string, std::string>(appProvisionInfo.appIdentifier, bundleNameItem));
+            HILOGI("appProvisionInfo.appIdentifier: %{public}s, bundleNameItem: %{public}s; ",
+                appProvisionInfo.appIdentifier.c_str(), bundleNameItem.c_str());
+        }
+    }
+    HILOGI("identToBmMap.size: %{public}zu.", identToBmMap.size());
+    for (const auto& srcAppIdentifierItem : distributedBundleInfo.appIdentifierVec) {
+        auto sinkIdentToBundleIt = identToBmMap.find(srcAppIdentifierItem);
+        if (sinkIdentToBundleIt != identToBmMap.end() &&
+            BundleManagerInternal::GetLocalBundleInfo(sinkIdentToBundleIt->second, localBundleInfo) == ERR_OK) {
+            finalBundleName = sinkIdentToBundleIt->second;
+            HILOGI("find dst bundle name for diff developer diff bundle continue. finalBundleName: %{public}s; ",
+                finalBundleName.c_str());
+            return true;
+        }
+    }
+    HILOGE("can not get local bundle info and continue nundle for "
+        "bundle name: %{public}s", bundleName.c_str());
+    return false;
 }
 
 int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNetworkId,

@@ -188,8 +188,8 @@ bool DMSContinueRecomMgr::GetRecommendInfo(
     return true;
 }
 
-bool DMSContinueRecomMgr::GetAvailableRecommendList(const std::string& bundleName,
-    std::map<std::string, DmsBundleInfo>& availableList)
+bool DMSContinueRecomMgr::GetAvailableRecommendListInternal(const std::string& bundleName,
+    std::map<std::string, DmsBundleInfo>& availableList, const AppExecFwk::AppProvisionInfo appProvisionInfo)
 {
     HILOGD("called, bundleName: %{public}s", bundleName.c_str());
     std::vector<std::string> networkIdList = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdList();
@@ -203,12 +203,7 @@ bool DMSContinueRecomMgr::GetAvailableRecommendList(const std::string& bundleNam
 
         HILOGW("get same bundle %{public}s on networkId %{public}s failed, try diff bundle.",
             bundleName.c_str(), GetAnonymStr(networkId).c_str());
-
-        AppExecFwk::AppProvisionInfo appProvisionInfo;
-        std::string localDeveloperId;
-        if (BundleManagerInternal::GetAppProvisionInfo4CurrentUser(bundleName, appProvisionInfo)) {
-            localDeveloperId = appProvisionInfo.developerId;
-        }
+        std::string localDeveloperId = appProvisionInfo.developerId;
         std::vector<DmsBundleInfo> bundleInfoList;
         if (!DmsBmStorage::GetInstance()->GetDistributeInfosByNetworkId(networkId, bundleInfoList)) {
             HILOGW("get bundle list on networkId %{public}s failed.", GetAnonymStr(networkId).c_str());
@@ -218,6 +213,56 @@ bool DMSContinueRecomMgr::GetAvailableRecommendList(const std::string& bundleNam
             if (diffBundleInfo.developerId == localDeveloperId &&
                 IsContinuableWithDiffBundle(bundleName, diffBundleInfo)) {
                 availableList[networkId] = diffBundleInfo;
+                break;
+            }
+        }
+    }
+    return true;
+}
+
+bool DMSContinueRecomMgr::GetAvailableRecommendList(const std::string& bundleName,
+    std::map<std::string, DmsBundleInfo>& availableList)
+{
+    HILOGD("called, bundleName: %{public}s", bundleName.c_str());
+    std::vector<std::string> srcAppIdentifierVec;
+    AppExecFwk::AppProvisionInfo appProvisionInfo;
+    if (!BundleManagerInternal::GetAppProvisionInfo4CurrentUser(bundleName, appProvisionInfo)) {
+        HILOGE("Get AppProvisionInfo failed.");
+        return false;
+    }
+    bool judgeAppIdExist =
+        BundleManagerInternal::GetSrcAppIdentifierVec(appProvisionInfo.appServiceCapabilities, srcAppIdentifierVec);
+    if (!judgeAppIdExist) {
+        HILOGE("Get srcAppIdentifierVec failed.");
+        return GetAvailableRecommendListInternal(bundleName, availableList, appProvisionInfo);
+    }
+    std::vector<std::string> networkIdList = DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdList();
+    for (const std::string& networkId : networkIdList) {
+        std::vector<DmsBundleInfo> sinkBundleInfoList;
+        if (!DmsBmStorage::GetInstance()->GetDistributeInfosByNetworkId(networkId, sinkBundleInfoList)) {
+            HILOGW("get bundle list on networkId %{public}s failed.", GetAnonymStr(networkId).c_str());
+            continue;
+        }
+        std::map<std::string, DmsBundleInfo> identToBmMap;
+        for (DmsBundleInfo& bundleInfoItem : sinkBundleInfoList) {
+            identToBmMap.insert(std::make_pair(bundleInfoItem.appIdentifier, bundleInfoItem));
+        }
+        DmsBundleInfo distributedBundleInfo;
+        DmsBmStorage::GetInstance()->GetDistributedBundleInfo(networkId, bundleName, distributedBundleInfo);
+        identToBmMap.insert(std::make_pair(distributedBundleInfo.appIdentifier,
+            distributedBundleInfo));
+        HILOGI("identToBmMap.size: %{public}zu.", identToBmMap.size());
+        for (const auto& srcAppIdentifierItem : srcAppIdentifierVec) {
+            auto identToBmMapIt = identToBmMap.find(srcAppIdentifierItem);
+            if (identToBmMapIt == identToBmMap.end()) {
+                HILOGE("srcAppIdentifierItem not in identToBmMap.");
+                continue;
+            }
+            if (bundleName == identToBmMapIt->second.bundleName ||
+                IsContinuableWithDiffBundle(bundleName, identToBmMapIt->second)) {
+                availableList[networkId] = identToBmMapIt->second;
+                HILOGI("find dst bundle identToBmMapIt->second.bundleName: %{public}s; ",
+                    identToBmMapIt->second.bundleName.c_str());
                 break;
             }
         }
