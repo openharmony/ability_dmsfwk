@@ -933,7 +933,7 @@ int32_t DSchedContinue::CheckStartPermission(std::shared_ptr<DSchedContinueDataC
     if (BundleManagerInternal::GetAppProvisionInfo4CurrentUser(cmd->dstBundleName_, appProvisionInfoSink) &&
         BundleManagerInternal::GetLocalBundleInfo(cmd->dstBundleName_, localBundleInfo) == ERR_OK) {
         appIdentifierSink = appProvisionInfoSink.appIdentifier;
-        HILOGI("Get appIdentifierSink : %{public}s; ", appIdentifierSink.c_str());
+        HILOGI("Get appIdentifierSink : %{public}s.", GetAnonymStr(appIdentifierSink).c_str());
     }
     if (hasIdentifierFlag) {
         if (std::find(srcAppIdentifierVec.begin(), srcAppIdentifierVec.end(), appIdentifierSink) ==
