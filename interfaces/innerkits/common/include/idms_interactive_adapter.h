@@ -48,6 +48,7 @@ typedef struct {
 
     int32_t (*OnHAEventAdapter)(const std::string& instanceTag, int32_t eventType,
         const std::string& eventId, const std::unordered_map<std::string, std::string>& properties);
+    void (*GetAppListKey)(std::string& appList);
 } IDmsInteractiveAdapter;
 } // namespace DistributedSchedule
 } // namespace OHOS

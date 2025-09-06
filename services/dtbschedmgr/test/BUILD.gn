@@ -745,6 +745,7 @@ ohos_unittest("bundlemanagerinternaltest") {
     external_deps = dsched_external_deps
     public_deps = dsched_public_deps
   }
+  defines = [ "private = public" ]
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
