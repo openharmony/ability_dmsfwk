@@ -872,6 +872,7 @@ void DmsBmStorage::UpdateDistributedData()
     std::vector<AppExecFwk::BundleInfo> bundleInfos;
     std::vector<std::string> bundleNames;
     if (!UpdateDistributedDataInternal(bundleMgr, bundleInfos, bundleNames)) {
+        HILOGE("UpdateDistributedDataInternal failed.");
         return;
     }
     std::map<std::string, DmsBundleInfo> oldDistributedBundleInfos =

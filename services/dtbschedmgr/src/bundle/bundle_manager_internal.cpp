@@ -547,7 +547,12 @@ bool BundleManagerInternal::GetSrcAppIdentifierVec(std::string appServiceCapabil
         return false;
     }
     if (appidString.find(',') != std::string::npos) {
-        srcAppIdentifierVec = SplitString(appidString, ',');
+        std::vector<std::string> tempVec = SplitString(appidString, ',');
+        for (const auto& appid : tempVec) {
+            if (!appid.empty()) {
+                srcAppIdentifierVec.push_back(appid);
+            }
+        }
     } else {
         srcAppIdentifierVec.push_back(appidString);
     }
