@@ -248,9 +248,10 @@ bool DMSContinueRecomMgr::GetAvailableRecommendList(const std::string& bundleNam
             identToBmMap.insert(std::make_pair(bundleInfoItem.appIdentifier, bundleInfoItem));
         }
         DmsBundleInfo distributedBundleInfo;
-        DmsBmStorage::GetInstance()->GetDistributedBundleInfo(networkId, bundleName, distributedBundleInfo);
-        identToBmMap.insert(std::make_pair(distributedBundleInfo.appIdentifier,
-            distributedBundleInfo));
+        if (DmsBmStorage::GetInstance()->GetDistributedBundleInfo(networkId, bundleName, distributedBundleInfo)) {
+            identToBmMap.insert(std::make_pair(distributedBundleInfo.appIdentifier,
+                distributedBundleInfo));
+        }
         HILOGI("identToBmMap.size: %{public}zu.", identToBmMap.size());
         for (const auto& srcAppIdentifierItem : srcAppIdentifierVec) {
             auto identToBmMapIt = identToBmMap.find(srcAppIdentifierItem);
