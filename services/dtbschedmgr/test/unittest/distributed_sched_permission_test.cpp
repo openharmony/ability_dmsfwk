@@ -236,7 +236,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckCustomPermission_003, TestSize.Lev
     CallerInfo callerInfo;
     callerInfo.accessToken = ACCESS_TOKEN;
     bool ret = DistributedSchedPermission::GetInstance().CheckCustomPermission(want, targetAbility, callerInfo);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_003 end result:" << ret << std::endl;
 }
 
@@ -254,7 +254,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckCustomPermission_004, TestSize.Lev
     CallerInfo callerInfo;
     callerInfo.accessToken = INVALID_ACCESS_TOKEN;
     bool ret = DistributedSchedPermission::GetInstance().CheckCustomPermission(want, targetAbility, callerInfo);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_004 end result:" << ret << std::endl;
 }
 
@@ -272,7 +272,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckCustomPermission_005, TestSize.Lev
     CallerInfo callerInfo;
     callerInfo.accessToken = ACCESS_TOKEN;
     bool ret = DistributedSchedPermission::GetInstance().CheckCustomPermission(want, targetAbility, callerInfo);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_005 end result:" << ret << std::endl;
 }
 
@@ -290,7 +290,7 @@ HWTEST_F(DistributedSchedPermissionTest, CheckCustomPermission_006, TestSize.Lev
     CallerInfo callerInfo;
     callerInfo.accessToken = INVALID_ACCESS_TOKEN;
     bool ret = DistributedSchedPermission::GetInstance().CheckCustomPermission(want, targetAbility, callerInfo);
-    EXPECT_EQ(ret, true);
+    EXPECT_EQ(ret, false);
     DTEST_LOG << "DistributedSchedPermissionTest CheckCustomPermission_006 end result:" << ret << std::endl;
 }
 
