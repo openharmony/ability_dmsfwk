@@ -24,7 +24,7 @@ using namespace OHOS::AppExecFwk;
 namespace OHOS {
 namespace DistributedSchedule {
 int32_t MockDistributedSched::StartRemoteAbility(const OHOS::AAFwk::Want& want,
-    int32_t callerUid, int32_t requestCode, uint32_t accessToken)
+    int32_t callerUid, int32_t requestCode, uint32_t accessToken, uint32_t specifyTokenId)
 {
     return 0;
 }

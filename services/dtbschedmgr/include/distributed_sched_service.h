@@ -115,7 +115,7 @@ public:
     void DurationStart(const std::string srcDeviceId, const std::string dstDeviceId);
 
     int32_t StartRemoteAbility(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t requestCode,
-        uint32_t accessToken) override;
+        uint32_t accessToken, uint32_t specifyTokenId = 0) override;
     int32_t StartAbilityFromRemote(const OHOS::AAFwk::Want& want,
         const OHOS::AppExecFwk::AbilityInfo& abilityInfo, int32_t requestCode, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo) override;
@@ -231,6 +231,9 @@ public:
         std::string abilityName, sptr<IRemoteObject> callback);
     int32_t ContinueStateCallbackUnRegister(int32_t missionId, std::string bundleName, std::string moduleName,
         std::string abilityName);
+    void SetCallerExtraInfo(CallerInfo &callerInfo, uint32_t accessToken, uint32_t specifyTokenId);
+    int32_t CheckCallerIdentity(const OHOS::AAFwk::Want &want, const CallerInfo& callerInfo);
+    bool IsTargetPermission(const OHOS::AAFwk::Want &want);
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     bool CheckRemoteOsType(const std::string& netwokId) override;
