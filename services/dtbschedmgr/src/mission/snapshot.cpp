@@ -254,11 +254,11 @@ bool Snapshot::WritePixelMap(MessageParcel& data) const
     imagePacker.StartPacking(outputStream, option);
     imagePacker.AddImage(*pixelMap_);
     imagePacker.FinalizePacking();
-    std::istream inputStream(outputStream.rdbuf());
-    if (!inputStream.seekg(0, inputStream.end)) {
-        HILOGE("Failed to seek to end of stream.");
+    if (outputStream.rdbuf() == nullptr) {
+        HILOGE("rdbuf returned nullptr.");
         return false;
     }
+    std::istream inputStream(outputStream.rdbuf());
     inputStream.seekg(0, inputStream.end);
     size_t len = inputStream.tellg();
     inputStream.seekg(0);
