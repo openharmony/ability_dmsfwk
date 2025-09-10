@@ -50,6 +50,8 @@ const std::string TAG = "DMSContinueRecvMgr";
 const std::string DBMS_RETRY_TASK = "retry_on_boradcast_task";
 const std::u16string DESCRIPTOR = u"ohos.aafwk.RemoteOnListener";
 const std::string QUICK_START_CONFIGURATION = "_ContinueQuickStart";
+const std::string ICON_TIMEOUT_TASK = "icon_timeout_task";
+constexpr int32_t TIMEOUT_SENT_EVENT_DELAY = 60000;
 }
 
 DMSContinueRecvMgr::~DMSContinueRecvMgr()
@@ -401,16 +403,44 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         NotifyIconDisappear(bundleNameId, senderNetworkId, state);
         return BUNDLE_NOT_CONTINUABLE;
     }
-    int32_t ret = VerifyBroadcastSource(senderNetworkId, bundleName, finalBundleName, continueType, state);
+    currentIconInfo info(senderNetworkId, bundleName, finalBundleName, continueType);
+    int32_t ret = DealDockDisplayBusiness(bundleNameId, info, state);
     if (ret != ERR_OK) {
-        return ret;
-    }
-    ret = NotifyDockDisplay(bundleNameId, currentIconInfo(senderNetworkId, bundleName, finalBundleName, continueType),
-        state);
-    if (ret != ERR_OK) {
+        HILOGE("DealDockDisplayBusiness failed!");
         return ret;
     }
     HILOGI("DealOnBroadcastBusiness end");
+    return ERR_OK;
+}
+
+int32_t DMSContinueRecvMgr::DealDockDisplayBusiness(uint16_t bundleNameId, const currentIconInfo info,
+    const int32_t state)
+{
+    HILOGI("DealDockDisplayBusiness start");
+    int32_t ret = VerifyBroadcastSource(info.senderNetworkId, info.bundleName, info.sourceBundleName,
+        info.continueType, state);
+    if (ret != ERR_OK) {
+        HILOGE("VerifyBroadcastSource failed!");
+        return ret;
+    }
+    if (eventHandler_ == nullptr) {
+        HILOGE("eventHandler_ is nullptr");
+        return INVALID_PARAMETERS_ERR;
+    }
+    eventHandler_->RemoveTask(ICON_TIMEOUT_TASK);
+    ret = NotifyDockDisplay(bundleNameId, info, state);
+    if (ret != ERR_OK) {
+        HILOGE("NotifyDockDisplay failed!");
+        return ret;
+    }
+    auto feedfunc = [this, bundleNameId, info, state]() mutable {
+        HILOGI("icon timeout");
+        NotifyDockDisplay(bundleNameId, info, INACTIVE);
+    };
+    if (state == ACTIVE) {
+        eventHandler_->PostTask(feedfunc, ICON_TIMEOUT_TASK, TIMEOUT_SENT_EVENT_DELAY);
+    }
+    HILOGI("DealDockDisplayBusiness end");
     return ERR_OK;
 }
 

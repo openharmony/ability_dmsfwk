@@ -86,6 +86,7 @@ public:
     void NotifyDeviceOffline(const std::string& networkId);
     void NotifyPackageRemoved(const std::string& sinkBundleName);
     void NotifyIconDisappear(uint16_t bundleNameId, const std::string &senderNetworkId, const int32_t state);
+    int32_t DealDockDisplayBusiness(uint16_t bundleNameId, const currentIconInfo info, const int32_t state);
     int32_t NotifyDockDisplay(uint16_t bundleNameId, const currentIconInfo& continueInfo, const int32_t state);
     void OnDeviceScreenOff();
     void OnContinueSwitchOff();
