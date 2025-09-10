@@ -393,7 +393,7 @@ int32_t DMSContinueSendMgr::ScreenLockedHandler::GetMissionId()
 
 MissionStatus DMSContinueSendMgr::ScreenLockedHandler::GetMissionStatus()
 {
-    return unfoInfo_.status;
+    return DmsContinueConditionMgr::GetInstance().GetLastContinuableMissionStatus();
 }
 
 void DMSContinueSendMgr::ScreenLockedHandler::OnDeviceScreenLocked()
@@ -404,14 +404,16 @@ void DMSContinueSendMgr::ScreenLockedHandler::OnDeviceScreenLocked()
         HILOGW("sendMgr is nullptr.");
         return;
     }
-    if (unfoInfo_.missionId != INVALID_MISSION_ID
+    MissionStatus lastContinuableMissionStatus =
+        DmsContinueConditionMgr::GetInstance().GetLastContinuableMissionStatus();
+    if (lastContinuableMissionStatus.missionId != INVALID_MISSION_ID
         && (GetTickCount()- unfoInfo_.unfoTime) < SCREEN_LOCK_EVENT_INTERVAL) {
         // handle unfocus before screen locked
-        sendMgr->PostScreenLockedEventAfterDelay(unfoInfo_.missionId, DMS_FOCUSED_TYPE, 0);
+        sendMgr->PostScreenLockedEventAfterDelay(lastContinuableMissionStatus.missionId, DMS_FOCUSED_TYPE, 0);
     }
 
     sendMgr->PostScreenLockedEventAfterDelay(
-        unfoInfo_.missionId, DMS_UNFOCUSED_TYPE, SCREEN_LOCK_DELAY_TIME);
+        lastContinuableMissionStatus.missionId, DMS_UNFOCUSED_TYPE, SCREEN_LOCK_DELAY_TIME);
 }
 
 void DMSContinueSendMgr::ScreenLockedHandler::ResetScreenLockedInfo()

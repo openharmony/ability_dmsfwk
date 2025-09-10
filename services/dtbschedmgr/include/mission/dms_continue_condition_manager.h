@@ -99,7 +99,7 @@ public:
     int32_t GetMissionStatus(int32_t accountId, int32_t missionId, MissionStatus& status);
     int32_t GetMissionIdByBundleName(int32_t accountId, const std::string& bundleName, int32_t& missionId);
     std::string TypeEnumToString(MissionEventType type);
-    int32_t GetLastContinuableMissionId();
+    MissionStatus GetLastContinuableMissionStatus();
 
 private:
     void InitConditionFuncs();
@@ -132,6 +132,7 @@ private:
         int32_t accountId, MissionStatus& status);
     void CleanLastFocusedFlagLocked(int32_t accountId, int32_t missionId);
     bool IsMissionStatusExistLocked(int32_t accountId, int32_t missionId);
+    void SetMissionStatus(MissionStatus& missionStatus);
 
     std::atomic<bool> isSwitchOn_ = false;
     std::atomic<bool> isWifiActive_ = false;
@@ -148,7 +149,7 @@ private:
 
     std::mutex missionMutex_;
     std::map<int32_t, std::map<int32_t, MissionStatus>> missionMap_;
-    int32_t lastContinuableMissionId_;
+    MissionStatus lastContinuableMissionStatus_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
