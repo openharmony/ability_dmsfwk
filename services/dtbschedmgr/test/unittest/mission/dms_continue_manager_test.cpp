@@ -273,6 +273,42 @@ HWTEST_F(DMSContinueManagerTest, testDealOnBroadcastBusiness001, TestSize.Level3
 }
 
 /**
+ * @tc.name: testDealDockDisplayBusiness001
+ * @tc.desc: test testDealDockDisplayBusiness001.
+ * @tc.type: FUNC
+ * @tc.require: I7F8KH
+ */
+HWTEST_F(DMSContinueManagerTest, testDealDockDisplayBusiness001, TestSize.Level3)
+{
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+    uint16_t bundleNameId = 0;
+    currentIconInfo info("networkid", "bundlename1", "bundlename2", "continueType");
+    int32_t state = 1;
+    recvMgr->iconInfo_.senderNetworkId = "networkid1";
+    int32_t ret = recvMgr->DealDockDisplayBusiness(bundleNameId, info, state);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+}
+
+/**
+ * @tc.name: testDealDockDisplayBusiness002
+ * @tc.desc: test testDealDockDisplayBusiness002.
+ * @tc.type: FUNC
+ * @tc.require: I7F8KH
+ */
+HWTEST_F(DMSContinueManagerTest, testDealDockDisplayBusiness002, TestSize.Level3)
+{
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+    uint16_t bundleNameId = 0;
+    currentIconInfo info("networkid", "bundlename1", "bundlename2", "continueType");
+    int32_t state = 0;
+    recvMgr->iconInfo_.senderNetworkId = "networkid";
+    int32_t ret = recvMgr->DealDockDisplayBusiness(bundleNameId, info, state);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+}
+
+/**
  * @tc.name: testNotifyDied001
  * @tc.desc: test NotifyDied
  * @tc.type: FUNC
