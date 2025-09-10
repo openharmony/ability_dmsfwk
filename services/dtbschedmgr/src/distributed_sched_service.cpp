@@ -656,9 +656,11 @@ void DistributedSchedService::RegisterDataShareObserver(const std::string& key)
     DataShareManager::ObserverCallback observerCallback = [this]() {
         auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
         bool continueSwitch = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
-        int32_t lastContinuableMissionId = DmsContinueConditionMgr::GetInstance().GetLastContinuableMissionId();
+        MissionStatus lastContinuableMissionStatus =
+            DmsContinueConditionMgr::GetInstance().GetLastContinuableMissionStatus();
         if (!continueSwitch) {
-            sendMgr->OnMissionStatusChanged(lastContinuableMissionId, MISSION_EVENT_CONTINUE_SWITCH_OFF);
+            sendMgr->OnMissionStatusChanged(lastContinuableMissionStatus.missionId,
+                MISSION_EVENT_CONTINUE_SWITCH_OFF);
         }
 
         dataShareManager.SetCurrentContinueSwitch(SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
