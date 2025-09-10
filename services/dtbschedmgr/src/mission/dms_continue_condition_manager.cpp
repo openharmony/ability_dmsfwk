@@ -154,8 +154,21 @@ void DmsContinueConditionMgr::OnUserRemoved(int32_t accountId)
     if (it != missionMap_.end()) {
         missionMap_.erase(it);
     }
-    lastContinuableMissionId_ = 0;
+    SetMissionStatus(lastContinuableMissionStatus_);
     return;
+}
+
+void DmsContinueConditionMgr::SetMissionStatus(MissionStatus& missionStatus)
+{
+    missionStatus.accountId = 0;
+    missionStatus.missionId = 0;
+    missionStatus.bundleName = "";
+    missionStatus.moduleName = "";
+    missionStatus.abilityName = "";
+    missionStatus.isContinuable = false;
+    missionStatus.launchFlag = 0;
+    missionStatus.isFocused = false;
+    missionStatus.continueState = AAFwk::ContinueState::CONTINUESTATE_UNKNOWN;
 }
 
 int32_t DmsContinueConditionMgr::UpdateMissionStatus(int32_t accountId, int32_t missionId, MissionEventType type)
@@ -222,7 +235,7 @@ void DmsContinueConditionMgr::InitMissionStatus(int32_t accountId)
         missionMap_[accountId] = missionList;
     }
 
-    lastContinuableMissionId_ = 0;
+    SetMissionStatus(lastContinuableMissionStatus_);
     HILOGI("InitMissionStatus for user %{public}d end", accountId);
     return;
 }
@@ -438,7 +451,7 @@ bool DmsContinueConditionMgr::CheckSendFocusedCondition(const MissionStatus& sta
             reason = "MDM_CONTROL";
             break;
         }
-        lastContinuableMissionId_ = status.missionId;
+        lastContinuableMissionStatus_ = status;
         HILOGI("PASS");
         return true;
     } while (0);
@@ -521,7 +534,7 @@ bool DmsContinueConditionMgr::CheckSendActiveCondition(const MissionStatus& stat
             reason = "MDM_CONTROL";
             break;
         }
-        lastContinuableMissionId_ = status.missionId;
+        lastContinuableMissionStatus_ = status;
         HILOGI("PASS");
         return true;
     } while (0);
@@ -636,14 +649,14 @@ int32_t DmsContinueConditionMgr::GetMissionIdByBundleName(
            "is not belong to bundle: %{public}s; or it's isContinuable is %{public}s. "
            "try to get last focused mission id",
         missionId, bundleName.c_str(), missionStatus.isContinuable ? "true" : "false");
-    auto iter = missionMap_[accountId].find(lastContinuableMissionId_);
+    auto iter = missionMap_[accountId].find(lastContinuableMissionStatus_.missionId);
     if (iter != missionMap_[accountId].end()) {
-        if (lastContinuableMissionId_ != 0 &&
-            missionMap_[accountId][lastContinuableMissionId_].bundleName == bundleName) {
-            missionId = lastContinuableMissionId_;
+        if (lastContinuableMissionStatus_.missionId != 0 &&
+            missionMap_[accountId][lastContinuableMissionStatus_.missionId].bundleName == bundleName) {
+            missionId = lastContinuableMissionStatus_.missionId;
             HILOGI("GetMissionIdByBundleName got lastContinuableMissionId: %{public}d, "
                    "lastContinuableBundleName: %{public}s",
-                missionId, missionMap_[accountId][lastContinuableMissionId_].bundleName.c_str());
+                missionId, missionMap_[accountId][lastContinuableMissionStatus_.missionId].bundleName.c_str());
             return ERR_OK;
         }
     }
@@ -720,9 +733,9 @@ std::string DmsContinueConditionMgr::TypeEnumToString(MissionEventType type)
     }
 }
 
-int32_t DmsContinueConditionMgr::GetLastContinuableMissionId()
+MissionStatus DmsContinueConditionMgr::GetLastContinuableMissionStatus()
 {
-    return lastContinuableMissionId_;
+    return lastContinuableMissionStatus_;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
