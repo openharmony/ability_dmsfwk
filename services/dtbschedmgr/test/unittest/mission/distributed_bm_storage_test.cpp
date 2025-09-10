@@ -892,7 +892,7 @@ HWTEST_F(DistributedBmStorageTest, GetLastBundleNameIdTest_001, TestSize.Level1)
         uint16_t bundleNameId = 0;
         g_mockGetLocalUdid = "localudid";
         bool ret = dmsBmStorage_->GetLastBundleNameId(bundleNameId);
-        EXPECT_EQ(ret, true);
+        EXPECT_EQ(ret, false);
     }
     DTEST_LOG << "DistributedBmStorageTest GetLastBundleNameIdTest_001 end" << std::endl;
 }

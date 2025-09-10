@@ -254,6 +254,10 @@ bool Snapshot::WritePixelMap(MessageParcel& data) const
     imagePacker.StartPacking(outputStream, option);
     imagePacker.AddImage(*pixelMap_);
     imagePacker.FinalizePacking();
+    if (outputStream.rdbuf() == nullptr) {
+        HILOGE("rdbuf returned nullptr.");
+        return false;
+    }
     std::istream inputStream(outputStream.rdbuf());
     inputStream.seekg(0, inputStream.end);
     size_t len = inputStream.tellg();
