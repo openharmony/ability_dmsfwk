@@ -917,19 +917,19 @@ int32_t DSchedContinue::PackDataCmd(std::shared_ptr<DSchedContinueDataCmd>& cmd,
 int32_t DSchedContinue::CheckStartPermission(std::shared_ptr<DSchedContinueDataCmd> cmd)
 {
     bool hasIdentifierFlag = false;
-    AppExecFwk::AppProvisionInfo appProvisionInfoSrc;
-    AppExecFwk::AppProvisionInfo appProvisionInfoSink;
     std::vector<std::string> srcAppIdentifierVec;
-    std::string appIdentifierSink;
-    AppExecFwk::BundleInfo localBundleInfo;
-    if (BundleManagerInternal::GetAppProvisionInfo4CurrentUser(cmd->srcBundleName_, appProvisionInfoSrc)) {
-        if (BundleManagerInternal::GetSrcAppIdentifierVec(appProvisionInfoSrc.appServiceCapabilities,
-            srcAppIdentifierVec)) {
+    DmsBundleInfo distributedBundleInfo;
+    if (DmsBmStorage::GetInstance()->GetDistributedBundleInfo(
+        continueInfo_.sourceDeviceId_, cmd->srcBundleName_, distributedBundleInfo)) {
+        if (distributedBundleInfo.appIdentifierVec.size() != 0) {
             hasIdentifierFlag = true;
-            HILOGI("srcAppIdentifierVec size : %{public}zu.", srcAppIdentifierVec.size());
+            srcAppIdentifierVec = distributedBundleInfo.appIdentifierVec;
+            HILOGI("srcAppIdentifierVec.size : %{public}zu", srcAppIdentifierVec.size());
         }
     }
-
+    AppExecFwk::AppProvisionInfo appProvisionInfoSink;
+    std::string appIdentifierSink;
+    AppExecFwk::BundleInfo localBundleInfo;
     if (BundleManagerInternal::GetAppProvisionInfo4CurrentUser(cmd->dstBundleName_, appProvisionInfoSink) &&
         BundleManagerInternal::GetLocalBundleInfo(cmd->dstBundleName_, localBundleInfo) == ERR_OK) {
         appIdentifierSink = appProvisionInfoSink.appIdentifier;
