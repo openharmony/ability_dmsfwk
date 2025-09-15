@@ -103,6 +103,7 @@ Status AVSenderFilter::DoStart()
 {
     HILOGI("AVSenderFilter Start");
     isRunning_ = true;
+    std::unique_lock<std::mutex> lock(threadMutex_);
     processingThread_ = std::thread(&AVSenderFilter::Process, this);
     return Status::OK;
 }
