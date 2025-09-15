@@ -816,19 +816,11 @@ OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> DmsBmStorage::GetBundleMgr()
 {
     HILOGD("called.");
     if (bundleMgr_ == nullptr) {
-        if (bundleMgr_ == nullptr) {
-            auto systemAbilityManager = OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-            if (systemAbilityManager == nullptr) {
-                HILOGE("GetBundleMgr GetSystemAbilityManager is null");
-                return nullptr;
-            }
-            auto bundleMgrSa = systemAbilityManager->GetSystemAbility(OHOS::BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-            if (bundleMgrSa == nullptr) {
-                HILOGE("GetBundleMgr GetSystemAbility is null");
-                return nullptr;
-            }
-            bundleMgr_ = OHOS::iface_cast<AppExecFwk::IBundleMgr>(bundleMgrSa);
-        }
+        auto systemAbilityManager = OHOS::SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        CHECK_POINTER_RETURN_VALUE(systemAbilityManager, nullptr, "GetBundleMgr GetSystemAbilityManager is null");
+        auto bundleMgrSa = systemAbilityManager->GetSystemAbility(OHOS::BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
+        CHECK_POINTER_RETURN_VALUE(bundleMgrSa, nullptr, "GetBundleMgr GetSystemAbility is null");
+        bundleMgr_ = OHOS::iface_cast<AppExecFwk::IBundleMgr>(bundleMgrSa);
     }
     HILOGD("end.");
     return bundleMgr_;

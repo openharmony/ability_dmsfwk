@@ -655,6 +655,7 @@ void DistributedSchedService::RegisterDataShareObserver(const std::string& key)
     HILOGI("RegisterObserver start.");
     DataShareManager::ObserverCallback observerCallback = [this]() {
         auto sendMgr = MultiUserManager::GetInstance().GetCurrentSendMgr();
+        CHECK_POINTER_RETURN(sendMgr, "sendMgr");
         bool continueSwitch = SwitchStatusDependency::GetInstance().IsContinueSwitchOn();
         MissionStatus lastContinuableMissionStatus =
             DmsContinueConditionMgr::GetInstance().GetLastContinuableMissionStatus();
@@ -671,17 +672,9 @@ void DistributedSchedService::RegisterDataShareObserver(const std::string& key)
         }
         DmsUE::GetInstance().ChangedSwitchState(dataShareManager.IsCurrentContinueSwitchOn(), ERR_OK);
         if (dataShareManager.IsCurrentContinueSwitchOn()) {
-            if (sendMgr == nullptr) {
-                HILOGI("GetSendMgr failed.");
-                return;
-            }
             sendMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_FOCUSED);
             DSchedContinueManager::GetInstance().Init();
         } else {
-            if (sendMgr == nullptr) {
-                HILOGI("GetSendMgr failed.");
-                return;
-            }
             sendMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_UNFOCUSED);
             auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
             if (recvMgr == nullptr) {
@@ -3596,7 +3589,7 @@ void DistributedSchedService::GetContinueEventInfo(int32_t callingUid, std::vect
         events.emplace_back(dschedContinuation_->continueEvent_);
         return;
     }
-
+    CHECK_POINTER_RETURN(dschedContinuation_, "dschedContinuation_");
     std::vector<std::string> bundleNames;
     if (!BundleManagerInternal::GetBundleNameListFromBms(callingUid, bundleNames)) {
         HILOGE("Get bundle name from Bms failed");
