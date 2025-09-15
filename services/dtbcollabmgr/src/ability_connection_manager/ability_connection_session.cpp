@@ -551,6 +551,7 @@ int32_t AbilityConnectionSession::SendFile(const std::vector<std::string>& sFile
 int32_t AbilityConnectionSession::CreateStream(int32_t streamId, const StreamParams& param)
 {
     HILOGI("called. StreamParams role is %{public}d", static_cast<int32_t>(param.role));
+    std::unique_lock<std::shared_mutex> streamLock(streamMutex_);
     streamParam_ = param;
     switch (param.role) {
         case StreamRole::SOURCE:
@@ -602,8 +603,11 @@ int32_t AbilityConnectionSession::InitRecvEngine()
 int32_t AbilityConnectionSession::DestroyStream()
 {
     HILOGI("called.");
-    senderEngine_ = nullptr;
-    recvEngine_ = nullptr;
+    {
+        std::unique_lock<std::shared_mutex> streamLock(streamMutex_);
+        senderEngine_ = nullptr;
+        recvEngine_ = nullptr;
+    }
     recvEngineState_ = EngineState::EMPTY;
     TransChannelInfo info;
     std::shared_lock<std::shared_mutex> channelReadLock(transChannelMutex_);
@@ -821,6 +825,7 @@ int32_t AbilityConnectionSession::GetStreamTransChannel(TransChannelInfo& info)
 int32_t AbilityConnectionSession::StartStream(int32_t streamId)
 {
     HILOGI("called.");
+    std::unique_lock<std::shared_mutex> streamLock(streamMutex_);
     if (connectOption_.needSendStream && senderEngine_ != nullptr) {
         return StartSenderEngine();
     }
@@ -861,6 +866,7 @@ int32_t AbilityConnectionSession::StartSenderEngine()
 int32_t AbilityConnectionSession::StopStream(int32_t streamId)
 {
     HILOGI("called.");
+    std::unique_lock<std::shared_mutex> streamLock(streamMutex_);
     if (connectOption_.needSendStream && senderEngine_ != nullptr) {
         HILOGI("senderEngine_ Stop.");
         return senderEngine_->Stop();
