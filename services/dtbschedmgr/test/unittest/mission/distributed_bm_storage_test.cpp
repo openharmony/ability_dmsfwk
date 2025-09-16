@@ -514,7 +514,7 @@ HWTEST_F(DistributedBmStorageTest, GetContinueEventInfoTest_002, TestSize.Level1
         std::string bundleName;
         std::string continueType;
         ContinueEventInfo continueEventInfo;
-        g_mockGetUdidByNetworkId = "udid";
+        g_mockGetUdidByNetworkId = "mockudid";
         bool ret = dmsBmStorage_->GetInstance()->GetContinueEventInfo(networkId, bundleName,
             continueType, continueEventInfo);
         EXPECT_EQ(ret, false);
@@ -890,7 +890,7 @@ HWTEST_F(DistributedBmStorageTest, GetLastBundleNameIdTest_001, TestSize.Level1)
     EXPECT_NE(distributedDataStorage, nullptr);
     if (distributedDataStorage != nullptr) {
         uint16_t bundleNameId = 0;
-        g_mockGetLocalUdid = "localudid";
+        g_mockGetLocalUdid = "mockudid";
         bool ret = dmsBmStorage_->GetLastBundleNameId(bundleNameId);
         EXPECT_EQ(ret, false);
     }
