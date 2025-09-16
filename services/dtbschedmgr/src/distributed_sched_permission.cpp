@@ -547,6 +547,10 @@ bool DistributedSchedPermission::ParseGroupInfos(const std::string& returnGroupS
         HILOGE("returnGroupStr parse failed");
         return false;
     }
+    if (!groupInfoJson.is_array()) {
+        HILOGE("groupInfoJson is not array");
+        return false;
+    }
     HILOGD("groupInfoJson:%{public}s", groupInfoJson.dump().c_str());
     groupInfos = groupInfoJson.get<std::vector<GroupInfo>>();
     if (groupInfos.empty()) {
