@@ -146,11 +146,11 @@ napi_value JsContinuationManager::OnRegister(napi_env env, napi_callback_info in
     NapiAsyncTask::CompleteCallback complete =
         [continuationExtraParams, unwrapArgc, errCode](napi_env env, NapiAsyncTask &task, int32_t status) {
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
-        if (scope == nullptr) {
+        napi_status result = napi_open_handle_scope(env, &scope);
+        if (result != napi_ok || scope == nullptr) {
+            HILOGE("open handle scope failed!");
             return;
         }
-
         if (errCode != 0) {
             task.Reject(env, CreateJsError(env, errCode, "Invalidate params."));
             napi_close_handle_scope(env, scope);
@@ -221,8 +221,9 @@ napi_value JsContinuationManager::OnRegisterContinuation(napi_env env, napi_call
             return;
         }
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
-        if (scope == nullptr) {
+        napi_status result = napi_open_handle_scope(env, &scope);
+        if (result != napi_ok || scope == nullptr) {
+            HILOGE("open handle scope failed!");
             delete task;
             return;
         }
@@ -267,8 +268,9 @@ napi_value JsContinuationManager::OnUnregister(napi_env env, napi_callback_info 
     NapiAsyncTask::CompleteCallback complete =
         [token, errCode](napi_env env, NapiAsyncTask &task, int32_t status) {
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
-        if (scope == nullptr) {
+        napi_status result = napi_open_handle_scope(env, &scope);
+        if (result != napi_ok || scope == nullptr) {
+            HILOGE("open handle scope failed!");
             return;
         }
 
@@ -323,8 +325,8 @@ napi_value JsContinuationManager::OnUnregisterContinuation(napi_env env, napi_ca
             return;
         }
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
-        if (scope == nullptr) {
+        napi_status result = napi_open_handle_scope(env, &scope);
+        if (result != napi_ok || scope == nullptr) {
             delete task;
             return;
         }
@@ -509,8 +511,9 @@ napi_value JsContinuationManager::OnUpdateConnectStatus(napi_env env, napi_callb
     NapiAsyncTask::CompleteCallback complete =
         [token, deviceId, deviceConnectStatus, errCode](napi_env env, NapiAsyncTask &task, int32_t status) {
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
-        if (scope == nullptr) {
+        napi_status result = napi_open_handle_scope(env, &scope);
+        if (result != napi_ok || scope == nullptr) {
+            HILOGE("open handle scope failed!");
             return;
         }
 
@@ -588,8 +591,9 @@ napi_value JsContinuationManager::OnUpdateContinuationState(napi_env env, napi_c
             return;
         }
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
-        if (scope == nullptr) {
+        napi_status result = napi_open_handle_scope(env, &scope);
+        if (result != napi_ok || scope == nullptr) {
+            HILOGE("open handle scope failed!");
             delete task;
             return;
         }
@@ -652,8 +656,9 @@ napi_value JsContinuationManager::OnStartDeviceManager(napi_env env, napi_callba
     NapiAsyncTask::CompleteCallback complete =
         [token, continuationExtraParams, unwrapArgc, errCode](napi_env env, NapiAsyncTask &task, int32_t status) {
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
-        if (scope == nullptr) {
+        napi_status result = napi_open_handle_scope(env, &scope);
+        if (result != napi_ok || scope == nullptr) {
+            HILOGE("open handle scope failed!");
             return;
         }
 
@@ -733,8 +738,9 @@ napi_value JsContinuationManager::OnStartContinuationDeviceManager(napi_env env,
             return;
         }
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
-        if (scope == nullptr) {
+        napi_status result = napi_open_handle_scope(env, &scope);
+        if (result != napi_ok || scope == nullptr) {
+            HILOGE("open handle scope failed!");
             delete task;
             return;
         }
