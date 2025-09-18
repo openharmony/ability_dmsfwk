@@ -1859,6 +1859,8 @@ HWTEST_F(DistributedSchedServiceFirstTest, OnIdleTest_001, TestSize.Level1)
     EXPECT_EQ(ret, 0);
 
     //false
+    OHOS::DistributedHardware::DmDeviceInfo deviceInfo;
+    deviceList.push_back(deviceInfo);
     EXPECT_CALL(*deviceMgrMock_, GetTrustedDeviceList(_, _, _)).WillOnce(DoAll(SetArgReferee<2>(deviceList),
         Return(1)));
     ret = DistributedSchedService::GetInstance().OnIdle(idleReason);
