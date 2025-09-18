@@ -452,8 +452,8 @@ int32_t DistributedSchedService::OnIdle(const SystemAbilityOnDemandReason& idleR
 {
     bool isIdle = false;
     std::vector<DistributedHardware::DmDeviceInfo> dmDeviceInfoList;
-    int32_t errCode = DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", dmDeviceInfoList);
-    if (errCode == ERR_OK && dmDeviceInfoList.empty()) {
+    DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", dmDeviceInfoList);
+    if (dmDeviceInfoList.empty()) {
         isIdle = true;
     }
     HILOGI("OnIdle, idleReason name %{public}s, id %{public}d, value %{public}s, is ready to unload %{public}d",

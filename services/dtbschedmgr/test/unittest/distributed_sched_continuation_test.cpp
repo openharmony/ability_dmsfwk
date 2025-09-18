@@ -41,6 +41,7 @@ const string DMS_VERSION_ID = "dmsVersion";
 constexpr int32_t SLEEP_TIME = 1000;
 constexpr int64_t FREE_INSTALL_TIMEOUT = 50000;
 constexpr int32_t REQUEST_CODE_ERR = 305;
+const int32_t WAITTIME = 2000;
 }
 
 void DSchedContinuationTest::SetUpTestCase()
@@ -67,6 +68,7 @@ void DSchedContinuationTest::SetUp()
 void DSchedContinuationTest::TearDown()
 {
     dschedContinuation_ = nullptr;
+    usleep(WAITTIME);
 }
 
 void DSchedContinuationTest::DeviceInitCallBack::OnRemoteDied()

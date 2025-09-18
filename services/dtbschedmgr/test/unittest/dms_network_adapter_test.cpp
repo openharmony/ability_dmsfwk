@@ -32,6 +32,7 @@ namespace {
 const std::string NETWORKID = "1234567";
 constexpr int32_t SLEEP_TIME = 2000;
 constexpr int32_t MAX_WAIT_TIME = 10000;
+const int32_t WAITTIME = 2000;
 }
 
 namespace OHOS {
@@ -88,6 +89,7 @@ void DMSNetworkAdapterTest::SetUp()
 
 void DMSNetworkAdapterTest::TearDown()
 {
+    usleep(WAITTIME);
 }
 
 /**
