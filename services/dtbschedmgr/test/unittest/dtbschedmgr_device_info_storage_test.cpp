@@ -27,6 +27,7 @@ using namespace testing;
 using namespace testing::ext;
 namespace {
 constexpr int32_t MAX_WAIT_TIME = 10000;
+const int32_t WAITTIME = 2000;
 }
 
 int32_t DtbschedmgrDeviceInfoStorageTest::startTaskNum_ = 2;
@@ -68,6 +69,7 @@ void DtbschedmgrDeviceInfoStorageTest::SetUp()
 
 void DtbschedmgrDeviceInfoStorageTest::TearDown()
 {
+    usleep(WAITTIME);
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest::TearDown" << std::endl;
 }
 
