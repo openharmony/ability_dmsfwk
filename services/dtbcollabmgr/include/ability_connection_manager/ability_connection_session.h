@@ -288,6 +288,7 @@ private:
     std::shared_mutex listenerMutex_;
     std::map<std::string, std::shared_ptr<JsAbilityConnectionSessionListener>> listeners_;
 
+    std::shared_mutex streamMutex_;
     std::shared_mutex engineMutex_;
     std::shared_ptr<AVSenderEngine> senderEngine_ = nullptr;
     std::shared_ptr<AVReceiverEngine> recvEngine_ = nullptr;
