@@ -177,7 +177,7 @@ public:
     std::string collabToken_;
     std::string srcUdid_;
     std::string sinkUdid_;
-    int32_t sinkAccountId_;
+    int32_t sinkAccountId_ = -1;
     CallerInfo callerInfo_;
     AccountInfo srcAccountInfo_;
     CollabMessage srcInfo_;
