@@ -885,8 +885,9 @@ void DmsBmStorage::UpdateDistributedData()
         if (oldDistributedBundleInfos.find(bundleInfo.name) != oldDistributedBundleInfos.end()) {
             int64_t updateTime = oldDistributedBundleInfos[bundleInfo.name].updateTime;
             std::string oldUdid = keyOfKVStore.substr(0, localUdid.length());
-            if (updateTime != bundleInfo.updateTime || (!localUdid.empty() && oldUdid != localUdid)
-            || oldDistributedBundleInfos[bundleInfo.name].developerId.empty() || judgeAppIdExist == true) {
+            if (updateTime != bundleInfo.updateTime || (!localUdid.empty() && oldUdid != localUdid) ||
+                oldDistributedBundleInfos[bundleInfo.name].developerId.empty() || judgeAppIdExist == true ||
+                oldDistributedBundleInfos[bundleInfo.name].appIdentifier.empty()) {
                 DmsBundleInfo dmsBundleInfo =
                     ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo, srcAppIdentifierVec, true);
                 dmsBundleInfos.push_back(dmsBundleInfo);
