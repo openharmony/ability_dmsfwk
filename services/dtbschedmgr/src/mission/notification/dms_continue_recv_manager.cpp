@@ -167,10 +167,10 @@ int32_t DMSContinueRecvMgr::RegisterOffListener(const std::string& type,
         HILOGE("obj is null, type: %{public}s", type.c_str());
         return INVALID_PARAMETERS_ERR;
     }
+    std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     for (auto iterItem = registerOnListener_.begin(); iterItem != registerOnListener_.end();) {
         for (auto iter = iterItem->second.begin(); iter != iterItem->second.end();) {
             if (*iter == obj) {
-                std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
                 iter = iterItem->second.erase(iter);
                 obj->RemoveDeathRecipient(missionDiedListener_);
                 break;
@@ -179,7 +179,6 @@ int32_t DMSContinueRecvMgr::RegisterOffListener(const std::string& type,
             }
         }
         if (iterItem->second.empty()) {
-            std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
             iterItem = registerOnListener_.erase(iterItem);
         } else {
             iterItem++;
@@ -554,6 +553,7 @@ void DMSContinueRecvMgr::NotifyDied(const sptr<IRemoteObject>& obj)
         HILOGE("obj is null");
         return;
     }
+    std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
     for (auto iterItem = registerOnListener_.begin(); iterItem != registerOnListener_.end();) {
         for (auto iter = iterItem->second.begin(); iter != iterItem->second.end();) {
             if (*iter == obj) {
@@ -564,7 +564,6 @@ void DMSContinueRecvMgr::NotifyDied(const sptr<IRemoteObject>& obj)
             }
         }
         if (iterItem->second.empty()) {
-            std::lock_guard<std::mutex> registerOnListenerMapLock(eventMutex_);
             iterItem = registerOnListener_.erase(iterItem);
         } else {
             iterItem++;
