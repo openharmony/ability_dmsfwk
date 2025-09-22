@@ -330,6 +330,13 @@ void DMSContinueSendMgr::RemoveMMIListener()
         HILOGI("No MMI listener to be removed, monitor id: %{public}d", mmiMonitorId_);
         return;
     }
+    MissionStatus missionStatus;
+    int32_t missionId = DmsContinueConditionMgr::GetInstance().GetCurrentFocusedMission(accountId_, missionStatus);
+    if (missionId >= 0 && missionStatus.isContinuable == true &&
+        missionStatus.continueState == AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
+        HILOGI("Focused and active mission exist missionId: %{public}d", missionId);
+        return;
+    }
     MMIAdapter::GetInstance().RemoveMMIListener(mmiMonitorId_);
     HILOGI("MMI listener has been removed, monitor id: %{public}d", mmiMonitorId_);
 
