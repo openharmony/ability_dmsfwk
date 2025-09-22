@@ -45,6 +45,7 @@
           "ability_runtime",
           "access_token",
           "av_codec",
+          "background_task_mgr",
           "bluetooth",
           "bundle_framework",
           "cJSON",
