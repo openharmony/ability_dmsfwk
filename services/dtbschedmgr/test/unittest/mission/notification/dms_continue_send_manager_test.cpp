@@ -141,12 +141,12 @@ HWTEST_F(DMSContinueSendMgrTest, ExecuteSendStrategy_Test_002, TestSize.Level1)
     EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(false));
     EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_BACKGROUND));
 
-    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(false));
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(true));
     EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillOnce(Return(false));
     EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_BACKGROUND));
 
-    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(false));
-    EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillOnce(Return(false));
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(true));
+    EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillOnce(Return(true));
     EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_BACKGROUND));
 
     sendMgr->strategyMap_.clear();
@@ -244,6 +244,43 @@ HWTEST_F(DMSContinueSendMgrTest, AddMMIListener_Test_001, TestSize.Level1)
     sendMgr->AddMMIListener();
     EXPECT_NO_FATAL_FAILURE(sendMgr->RemoveMMIListener());
     DTEST_LOG << "DMSContinueSendMgrTest AddMMIListener_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: AddMMIListener_Test_002
+ * @tc.desc: test AddMMIListener
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueSendMgrTest, AddMMIListener_Test_002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueSendMgrTest AddMMIListener_Test_002 start" << std::endl;
+    std::shared_ptr<DMSContinueSendMgr> sendMgr = std::make_shared<DMSContinueSendMgr>();
+    sendMgr->mmiMonitorId_ = 1;
+    DmsContinueConditionMgr::GetInstance().missionMap_.clear();
+    sendMgr->RemoveMMIListener();
+
+    MissionStatus missionStatus;
+    std::map<int32_t, MissionStatus> missionList;
+    missionStatus.isContinuable = false;
+    missionList[1] = missionStatus;
+    DmsContinueConditionMgr::GetInstance().missionMap_[1] = missionList;
+    sendMgr->RemoveMMIListener();
+
+    DmsContinueConditionMgr::GetInstance().missionMap_.clear();
+    missionStatus.isContinuable = true;
+    missionStatus.continueState = AAFwk::ContinueState::CONTINUESTATE_INACTIVE;
+    missionList[1] = missionStatus;
+    DmsContinueConditionMgr::GetInstance().missionMap_[1] = missionList;
+    sendMgr->RemoveMMIListener();
+
+    DmsContinueConditionMgr::GetInstance().missionMap_.clear();
+    missionStatus.isContinuable = true;
+    missionStatus.continueState = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
+    missionList[1] = missionStatus;
+    DmsContinueConditionMgr::GetInstance().missionMap_[1] = missionList;
+    EXPECT_NO_FATAL_FAILURE(sendMgr->RemoveMMIListener());
+    DTEST_LOG << "DMSContinueSendMgrTest AddMMIListener_Test_002 end" << std::endl;
 }
 
 bool DataShareManager::IsCurrentContinueSwitchOn()
@@ -350,7 +387,6 @@ HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_Test_001, TestSize.Level1)
     std::string senderNetworkId = "NetworkId";
     uint8_t payload[] = {0xf0};
     uint32_t dataLen1 = 1;
-    EXPECT_CALL(*dmsKvMock_, CheckCtrlRule()).WillOnce(Return(false));
     EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1));
     DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_001 end" << std::endl;
 }
@@ -368,7 +404,6 @@ HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_Test_002, TestSize.Level1)
     std::string senderNetworkId = "NetworkId";
     uint8_t payload[] = {0xf0};
     uint32_t dataLen1 = 1;
-    EXPECT_CALL(*dmsKvMock_, CheckCtrlRule()).WillOnce(Return(true));
     g_mockBool = false;
     EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1));
     DTEST_LOG << "DMSContinueRecvMgrTest NotifyDataRecv_Test_002 end" << std::endl;
@@ -387,7 +422,6 @@ HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_Test_003, TestSize.Level1)
     std::string senderNetworkId = "NetworkId";
     uint8_t payload[] = {0xf0};
     uint32_t dataLen1 = 1;
-    EXPECT_CALL(*dmsKvMock_, CheckCtrlRule()).WillOnce(Return(true));
     g_mockBool = true;
     g_mockWifiBool = false;
     EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1));
@@ -407,7 +441,6 @@ HWTEST_F(DMSContinueRecvMgrTest, NotifyDataRecv_Test_004, TestSize.Level1)
     std::string senderNetworkId = "NetworkId";
     uint8_t payload[] = {0xf0};
     uint32_t dataLen1 = 1;
-    EXPECT_CALL(*dmsKvMock_, CheckCtrlRule()).WillOnce(Return(true));
     g_mockBool = true;
     g_mockWifiBool = true;
     EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyDataRecv(senderNetworkId, payload, dataLen1));
