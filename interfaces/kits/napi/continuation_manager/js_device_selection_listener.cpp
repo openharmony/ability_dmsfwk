@@ -75,8 +75,9 @@ void JsDeviceSelectionListener::CallJsMethod(const std::string& methodName,
     // js callback should run in js thread
     auto task = [this, methodName, continuationResults] {
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(this->engine_, &scope);
-        if (scope == nullptr) {
+        napi_status result = napi_open_handle_scope(this->engine_, &scope);
+        if (result != napi_ok || scope == nullptr) {
+            HILOGE("open handle scope failed!");
             return;
         }
 
@@ -117,8 +118,9 @@ void JsDeviceSelectionListener::CallJsMethod(const std::string& methodName, cons
     // js callback should run in js thread
     auto task = [this, methodName, deviceIds]() {
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(this->engine_, &scope);
-        if (scope == nullptr) {
+        napi_status result = napi_open_handle_scope(this->engine_, &scope);
+        if (result != napi_ok || scope == nullptr) {
+            HILOGE("open handle scope failed!");
             return;
         }
         CallJsMethodInner(methodName, deviceIds);
