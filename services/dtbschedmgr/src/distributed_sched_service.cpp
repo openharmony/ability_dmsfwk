@@ -3776,7 +3776,8 @@ int32_t DistributedSchedService::StartAbility(const OHOS::AAFwk::Want& want, int
     }
     if (want.GetBoolParam(Want::PARAM_RESV_FOR_RESULT, false)) {
         HILOGI("StartAbilityForResult start, flag is %{public}d", want.GetFlags());
-        sptr<IRemoteObject> dmsTokenCallback(new DmsTokenCallback());
+        auto bundleName = want.GetElement().GetBundleName();
+        sptr<IRemoteObject> dmsTokenCallback(new DmsTokenCallback(bundleName));
         err = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, dmsTokenCallback, requestCode,
             activeAccountId);
     } else {
