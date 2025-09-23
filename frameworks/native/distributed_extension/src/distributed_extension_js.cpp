@@ -337,9 +337,9 @@ static int DoCallJsMethod(CallJsParam *param)
     AbilityRuntime::HandleEscape handleEscape(*jsRuntime);
     auto env = jsRuntime->GetNapiEnv();
     napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
-        HILOG_ERROR("scope is nullptr");
+    napi_status result = napi_open_handle_scope(env, &scope);
+    if (result != napi_ok || scope == nullptr) {
+        HILOG_ERROR("open handle scope failed!");
         return EINVAL;
     }
     vector<napi_value> argv = {};
