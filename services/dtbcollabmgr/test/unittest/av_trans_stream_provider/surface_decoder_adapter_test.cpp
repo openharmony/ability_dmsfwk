@@ -141,6 +141,12 @@ HWTEST_F(SurfaceDecoderAdapterTest, Release_Test, TestSize.Level1)
 {
     DTEST_LOG << "SurfaceDecoderAdapterTest Release_Test begin" << std::endl;
     std::string mime = "test";
+    decodeAdapter_->inputBufferQueue_ = nullptr;
+    decodeAdapter_->GetInputBufferQueue();
+    decodeAdapter_->DetachAllInputBuffer();
+    auto testBuffer = std::make_shared<Media::AVBuffer>();
+    decodeAdapter_->inputDataBufferQueue_.push(testBuffer);
+    decodeAdapter_->DetachAllInputBuffer();
     auto ret = decodeAdapter_->Release();
     EXPECT_EQ(ret, Status::OK);
     DTEST_LOG << "SurfaceDecoderAdapterTest Release_Test end" << std::endl;
