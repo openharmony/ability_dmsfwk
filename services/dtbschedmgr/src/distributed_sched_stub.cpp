@@ -58,6 +58,7 @@ namespace DistributedSchedule {
 using namespace std;
 using namespace AAFwk;
 using namespace AppExecFwk;
+using namespace Constants;
 
 namespace {
 constexpr int32_t HID_HAP = 10000; /* first hap user */
@@ -281,10 +282,12 @@ int32_t DistributedSchedStub::StartRemoteAbilityInner(MessageParcel& data, Messa
     PARCEL_READ_HELPER(data, Int32, requestCode);
     uint32_t accessToken = 0;
     PARCEL_READ_HELPER(data, Uint32, accessToken);
+    uint32_t specifyTokenId = 0;
+    PARCEL_READ_HELPER(data, Uint32, specifyTokenId);
     HILOGD("get callerUid = %{public}d, AccessTokenID = %{private}s", callerUid,
         GetAnonymStr(std::to_string(accessToken)).c_str());
     DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
-    int32_t result = StartRemoteAbility(*want, callerUid, requestCode, accessToken);
+    int32_t result = StartRemoteAbility(*want, callerUid, requestCode, accessToken, specifyTokenId);
     ReportEvent(*want, BehaviorEvent::START_REMOTE_ABILITY, result, callerUid);
     HILOGI("StartRemoteAbilityInner result = %{public}d", result);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
@@ -493,6 +496,9 @@ void DistributedSchedStub::SaveExtraInfo(const nlohmann::json& extraInfoJson, Ca
     if (extraInfoJson.find(Constants::EXTRO_INFO_JSON_KEY_USERID_ID) != extraInfoJson.end() &&
         extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID].is_number()) {
         accountInfo.userId = extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID];
+    }
+    if (extraInfoJson.find(IS_CALLER_SYSAPP) != extraInfoJson.end() && extraInfoJson[IS_CALLER_SYSAPP].is_boolean()) {
+        callerInfo.extraInfoJson[IS_CALLER_SYSAPP] = extraInfoJson[IS_CALLER_SYSAPP];
     }
     HILOGD("save dms version");
 }

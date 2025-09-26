@@ -30,6 +30,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 using namespace std;
 using namespace AAFwk;
+using namespace Constants;
 
 namespace {
 const std::string TAG = "DistributedSchedProxy";
@@ -45,7 +46,7 @@ constexpr int32_t WAIT_TIME = 15;
 }
 
 int32_t DistributedSchedProxy::StartRemoteAbility(const OHOS::AAFwk::Want& want,
-    int32_t callerUid, int32_t requestCode, uint32_t accessToken)
+    int32_t callerUid, int32_t requestCode, uint32_t accessToken, uint32_t specifyTokenId)
 {
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -59,6 +60,7 @@ int32_t DistributedSchedProxy::StartRemoteAbility(const OHOS::AAFwk::Want& want,
     PARCEL_WRITE_HELPER(data, Int32, callerUid);
     PARCEL_WRITE_HELPER(data, Int32, requestCode);
     PARCEL_WRITE_HELPER(data, Uint32, accessToken);
+    PARCEL_WRITE_HELPER(data, Uint32, specifyTokenId);
     MessageParcel msgReply;
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_ABILITY),
         data, msgReply);
@@ -94,6 +96,9 @@ int32_t DistributedSchedProxy::StartAbilityFromRemote(const OHOS::AAFwk::Want& w
     extraInfoJson[Constants::EXTRO_INFO_JSON_KEY_USERID_ID] = accountInfo.userId;
     if (callerInfo.extraInfoJson.find(DMS_VERSION_ID) != callerInfo.extraInfoJson.end()) {
         extraInfoJson[DMS_VERSION_ID] = callerInfo.extraInfoJson[DMS_VERSION_ID];
+    }
+    if (callerInfo.extraInfoJson.find(IS_CALLER_SYSAPP) != callerInfo.extraInfoJson.end()) {
+        extraInfoJson[IS_CALLER_SYSAPP] = callerInfo.extraInfoJson[IS_CALLER_SYSAPP];
     }
     std::string extraInfo = extraInfoJson.dump();
     PARCEL_WRITE_HELPER(data, String, extraInfo);
