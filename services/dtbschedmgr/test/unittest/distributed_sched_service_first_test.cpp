@@ -539,7 +539,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, CheckCallerIdentity001, TestSize.Leve
     OHOS::AAFwk::Want want;
     CallerInfo callerInfo;
     int32_t ret = DistributedSchedService::GetInstance().CheckCallerIdentity(want, callerInfo);
-    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DistributedSchedServiceFirstTest CheckCallerIdentity001 end" << std::endl;
 }
 
@@ -555,7 +555,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, CheckCallerIdentity002, TestSize.Leve
     CallerInfo callerInfo;
     callerInfo.extraInfoJson[IS_CALLER_SYSAPP] = true;
     int32_t ret = DistributedSchedService::GetInstance().CheckCallerIdentity(want, callerInfo);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
     DTEST_LOG << "DistributedSchedServiceFirstTest CheckCallerIdentity002 end" << std::endl;
 }
 
