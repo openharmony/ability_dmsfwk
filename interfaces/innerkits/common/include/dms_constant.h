@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,6 +22,7 @@ namespace Constants {
 constexpr int32_t OH_OS_TYPE = 10;
 constexpr int32_t HO_OS_TYPE = 11;
 constexpr int32_t HO_OS_TYPE_EX = -1;
+constexpr uint32_t TOKEN_ID_BIT_SIZE = 32;
 
 constexpr const char* PARAM_KEY_OS_TYPE = "OS_TYPE";
 constexpr const char* PARAM_KEY_OS_VERSION = "OS_VERSION";
@@ -32,10 +33,13 @@ constexpr const char* DMS_CHAR_ID = "static_capability";
 constexpr const char* PACKAGE_NAMES = "packageNames";
 constexpr const char* VERSIONS = "versions";
 constexpr const char* DMS_SERVICE_TYPE = "appInfo";
+constexpr const char* PERMISSIONMGR_BUNDLE_NAME = "com.ohos.permissionmanager";
+constexpr const char* PERMISSIONMGR_ABILITY_NAME = "com.ohos.permissionmanager.GrantAbility";
 
 const std::string EXTRO_INFO_JSON_KEY_ACCOUNT_ID = "accountId";
 const std::string EXTRO_INFO_JSON_KEY_USERID_ID = "userId";
 const std::string EXTRO_INFO_JSON_KEY_CALLER_INFO_EX = "callerInfo_ExtraInfoJson";
+const std::string IS_CALLER_SYSAPP = "IsCallerSysApp";
 } // Constants
 } // DistributedSchedule
 } // OHOS

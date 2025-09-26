@@ -1127,7 +1127,7 @@ int32_t DistributedSchedService::GetCallerInfo(const std::string &localDeviceId,
 }
 
 int32_t DistributedSchedService::StartRemoteAbility(const OHOS::AAFwk::Want& want,
-    int32_t callerUid, int32_t requestCode, uint32_t accessToken)
+    int32_t callerUid, int32_t requestCode, uint32_t accessToken, uint32_t specifyTokenId)
 {
     if (!MultiUserManager::GetInstance().IsCallerForeground(callerUid)) {
         HILOGW("The current user is not foreground. callingUid: %{public}d .", callerUid);
@@ -1144,14 +1144,12 @@ int32_t DistributedSchedService::StartRemoteAbility(const OHOS::AAFwk::Want& wan
         return StartRemoteAbilityAdapter(want, callerUid, requestCode, accessToken);
     }
 #endif // DMSFWK_INTERACTIVE_ADAPTER
-
     sptr<IDistributedSched> remoteDms = GetRemoteDms(deviceId);
     if (remoteDms == nullptr) {
-        HILOGE("get remoteDms failed");
         return INVALID_PARAMETERS_ERR;
     }
-
     CallerInfo callerInfo;
+    SetCallerExtraInfo(callerInfo, accessToken, specifyTokenId);
     int32_t ret = GetCallerInfo(localDeviceId, callerUid, accessToken, callerInfo);
     if (ret != ERR_OK) {
         return ret;
@@ -1180,6 +1178,31 @@ int32_t DistributedSchedService::StartRemoteAbility(const OHOS::AAFwk::Want& wan
     return result;
 }
 
+void DistributedSchedService::SetCallerExtraInfo(CallerInfo &callerInfo, uint32_t accessToken, uint32_t specifyTokenId)
+{
+    HILOGI("called");
+    if (specifyTokenId != 0) {
+        accessToken = specifyTokenId;
+        callerInfo.accessToken = specifyTokenId;
+    }
+    callerInfo.extraInfoJson[IS_CALLER_SYSAPP] = false;
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(accessToken);
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
+        Security::AccessToken::HapTokenInfo hapInfo;
+        auto ret = Security::AccessToken::AccessTokenKit::GetHapTokenInfo(accessToken, hapInfo);
+        if (ret != Security::AccessToken::AccessTokenKitRet::RET_SUCCESS) {
+            HILOGI("get hap tokenInfo failed, ret: %{public}d", ret);
+            return;
+        }
+        callerInfo.bundleNames.clear();
+        callerInfo.bundleNames.push_back(hapInfo.bundleName);
+        uint64_t fullTokenId = (static_cast<uint64_t>(hapInfo.tokenAttr) << TOKEN_ID_BIT_SIZE) + accessToken;
+        bool isSysApp = Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(fullTokenId);
+        callerInfo.extraInfoJson[IS_CALLER_SYSAPP] = isSysApp;
+        HILOGI("bundleName: %{public}s, isSysApp: %{public}d", hapInfo.bundleName.c_str(), isSysApp);
+    }
+}
+
 int32_t DistributedSchedService::StartAbilityFromRemote(const OHOS::AAFwk::Want& want,
     const OHOS::AppExecFwk::AbilityInfo& abilityInfo, int32_t requestCode,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo)
@@ -1198,13 +1221,77 @@ int32_t DistributedSchedService::StartAbilityFromRemote(const OHOS::AAFwk::Want&
         DmsContinueTime::GetInstance().SetSrcBundleName(want.GetElement().GetBundleName());
         DmsContinueTime::GetInstance().SetSrcAbilityName(want.GetElement().GetAbilityName());
     }
+    AppExecFwk::AbilityInfo targetAbility;
+    AppExecFwk::ExtensionAbilityInfo extensionAbility;
+    if (BundleManagerInternal::QueryExtensionAbilityInfo(want, extensionAbility)) {
+        if (CheckCallerIdentity(want, callerInfo) != ERR_OK) {
+            HILOGE("check failed, type: %{public}d", extensionAbility.type);
+            return DMS_PERMISSION_DENIED;
+        }
+    }
     int32_t result = CheckTargetPermission(want, callerInfo, accountInfo, START_PERMISSION, true);
     if (result != ERR_OK) {
         HILOGE("CheckTargetPermission failed!!");
         return result;
     }
-
     return StartAbility(want, requestCode);
+}
+
+int32_t DistributedSchedService::CheckCallerIdentity(const OHOS::AAFwk::Want &want, const CallerInfo& callerInfo)
+{
+    HILOGI("called");
+    auto isSACall = false;
+    auto isShellCall = false;
+    auto isSystemAppCall = false;
+    auto extraInfoJson = callerInfo.extraInfoJson;
+    if (extraInfoJson.find(IS_CALLER_SYSAPP) != extraInfoJson.end() && extraInfoJson[IS_CALLER_SYSAPP].is_boolean()) {
+        isSystemAppCall = extraInfoJson[IS_CALLER_SYSAPP];
+    } else {
+        HILOGW("low peerVersion");
+        return ERR_OK;
+    }
+    uint32_t dAccessToken = Security::AccessToken::AccessTokenKit::AllocLocalTokenID(callerInfo.sourceDeviceId,
+        callerInfo.accessToken);
+    if (dAccessToken == 0) {
+        HILOGE("dAccessTokenID is invalid!");
+        return DMS_PERMISSION_DENIED;
+    }
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(dAccessToken);
+    HILOGI("tokenType: %{public}d, dAccessToken: %{public}s", tokenType,
+        GetAnonymStr(std::to_string(dAccessToken)).c_str());
+    switch (tokenType) {
+        case Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE:
+            isSACall = true;
+            break;
+        case Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL:
+            isShellCall = true;
+            break;
+        default:
+            break;
+    }
+    auto isToPermissionMgr = IsTargetPermission(want);
+    if (!isSACall && !isSystemAppCall && !isShellCall && !isToPermissionMgr) {
+        HILOGE("cannot start, use startServiceExtensionAbility");
+        return DMS_PERMISSION_DENIED;
+    }
+    return ERR_OK;
+}
+
+bool DistributedSchedService::IsTargetPermission(const OHOS::AAFwk::Want &want)
+{
+    std::string bundleName = PERMISSIONMGR_BUNDLE_NAME;
+    std::string abilityName = PERMISSIONMGR_ABILITY_NAME;
+    Security::AccessToken::PermissionGrantInfo info;
+    Security::AccessToken::AccessTokenKit::GetPermissionManagerInfo(info);
+    if (!info.grantBundleName.empty() && !info.grantServiceAbilityName.empty()) {
+        bundleName = info.grantBundleName;
+        abilityName = info.grantServiceAbilityName;
+    }
+    if (want.GetElement().GetBundleName() == bundleName &&
+        want.GetElement().GetAbilityName() == abilityName) {
+        return true;
+    }
+    return false;
 }
 
 int32_t DistributedSchedService::SendResultFromRemote(OHOS::AAFwk::Want& want, int32_t requestCode,
