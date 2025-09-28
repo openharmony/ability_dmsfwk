@@ -28,6 +28,7 @@
 #include "osal/task/task.h"
 #include "surface.h"
 #include <cstring>
+#include <queue>
 #include <shared_mutex>
 
 namespace OHOS {
@@ -69,6 +70,8 @@ public:
 
 private:
     void ReleaseBuffer();
+    void PushInputBuffer(std::shared_ptr<Media::AVBuffer> buffer);
+    void DetachAllInputBuffer();
 
     std::shared_ptr<MediaAVCodec::AVCodecVideoDecoder> codecServer_;
     std::shared_ptr<Media::AVBufferQueue> inputBufferQueue_;
@@ -81,6 +84,8 @@ private:
     std::vector<uint32_t> indexs_;
     std::vector<uint32_t> dropIndexs_;
     std::atomic<bool> isThreadExit_ = true;
+    std::mutex mtxData_;
+    std::queue<std::shared_ptr<Media::AVBuffer>> inputDataBufferQueue_;
 };
 } // namespace MediaAVCodec
 } // namespace OHOS

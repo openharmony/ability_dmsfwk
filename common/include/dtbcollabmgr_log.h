@@ -257,6 +257,38 @@ enum {
      */
     NOT_FIND_SERVICE_REGISTRY = 29360161,
 };
+
+#define CHECK_NULL_VOID(ptr)                    \
+    do {                                        \
+        if ((ptr) == nullptr) {                 \
+            HILOGE("Address pointer is null");  \
+            return;                             \
+        }                                       \
+    } while (0)
+
+#define CHECK_NULL_RETURN(ptr, ret)             \
+    do {                                        \
+        if ((ptr) == nullptr) {                 \
+            HILOGE("Address pointer is null");  \
+            return (ret);                       \
+        }                                       \
+    } while (0)
+
+#define CHECK_AND_RETURN_LOG(cond, fmt, ...)   \
+    do {                                       \
+        if ((cond)) {                          \
+            HILOGE(fmt, ##__VA_ARGS__);        \
+            return;                            \
+        }                                      \
+    } while (0)    
+
+#define CHECK_AND_RETURN_RET_LOG(cond, ret, fmt, ...)   \
+    do {                                                \
+        if ((cond)) {                                   \
+            HILOGE(fmt, ##__VA_ARGS__);                 \
+            return (ret);                               \
+        }                                               \
+    } while (0)
 } // namespace DistributedCollab
 } // namespace OHOS
 #endif
