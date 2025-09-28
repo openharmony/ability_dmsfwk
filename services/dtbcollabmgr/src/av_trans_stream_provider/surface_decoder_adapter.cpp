@@ -281,16 +281,14 @@ namespace DistributedCollab {
     Status SurfaceDecoderAdapter::Release()
     {
         HILOGI("Release");
+        DetachAllInputBuffer();
         if (!codecServer_) {
             return Status::OK;
         }
         int32_t ret = codecServer_->Release();
+        CHECK_AND_RETURN_RET_LOG(ret != ERR_OK, Status::ERROR_UNKNOWN, "Release fail");
         codecServer_ = nullptr;
-        if (ret == ERR_OK) {
-            return Status::OK;
-        } else {
-            return Status::ERROR_UNKNOWN;
-        }
+        return Status::OK;
     }
 
     Status SurfaceDecoderAdapter::SetParameter(const MediaAVCodec::Format& format)
@@ -305,6 +303,27 @@ namespace DistributedCollab {
         } else {
             return Status::ERROR_UNKNOWN;
         }
+    }
+
+    void SurfaceDecoderAdapter::DetachAllInputBuffer()
+    {
+        HILOGI("DetachAllInputBuffer");
+        CHECK_NULL_VOID(inputBufferQueueConsumer_);
+        std::lock_guard<std::mutex> lock(mtxData_);
+        while (!inputDataBufferQueue_.empty()) {
+            auto buffer = inputDataBufferQueue_.front();
+            inputBufferQueueConsumer_->DetachBuffer(buffer);
+            inputDataBufferQueue_.pop();
+        }
+        inputBufferQueueConsumer_->SetQueueSize(0);
+        HILOGI("DetachAllInputBuffer end.");
+    }
+
+    void SurfaceDecoderAdapter::PushInputBuffer(std::shared_ptr<Media::AVBuffer> buffer)
+    {
+        HILOGI("PushInputBuffer");
+        std::lock_guard<std::mutex> lock(mtxData_);
+        inputDataBufferQueue_.push(buffer);
     }
 
     void SurfaceDecoderAdapter::OnInputBufferAvailable(uint32_t index, std::shared_ptr<AVBuffer> buffer)
@@ -334,6 +353,7 @@ namespace DistributedCollab {
             index, size, buffer->GetUniqueId());
         inputBufferQueueConsumer_->SetQueueSize(size);
         inputBufferQueueConsumer_->AttachBuffer(buffer, false);
+        PushInputBuffer(buffer);
     }
 
     void SurfaceDecoderAdapter::OnError(MediaAVCodec::AVCodecErrorType errorType, int32_t errorCode)
