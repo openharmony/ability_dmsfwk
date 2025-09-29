@@ -197,6 +197,8 @@ HWTEST_F(DistributedSchedStubTest, StartRemoteAbilityInner_002, TestSize.Level3)
     data.WriteInt32(requestCode);
     uint32_t accessToken = 0;
     data.WriteUint32(accessToken);
+    uint32_t specifyTokenId = 0;
+    data.WriteUint32(specifyTokenId);
     result = DistributedSchedService::GetInstance().OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest StartRemoteAbilityInner_002 end" << std::endl;
@@ -224,6 +226,8 @@ HWTEST_F(DistributedSchedStubTest, StartRemoteAbilityInner_003, TestSize.Level3)
     data.WriteInt32(requestCode);
     uint32_t accessToken = GetSelfTokenID();
     data.WriteUint32(accessToken);
+    uint32_t specifyTokenId = 0;
+    data.WriteUint32(specifyTokenId);
     int32_t result = DistributedSchedService::GetInstance().OnRemoteRequest(code, data, reply, option);
     EXPECT_EQ(result, ERR_NONE);
     DTEST_LOG << "DistributedSchedStubTest StartRemoteAbilityInner_003 end" << std::endl;

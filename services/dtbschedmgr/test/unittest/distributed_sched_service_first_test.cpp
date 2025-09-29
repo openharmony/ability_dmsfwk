@@ -508,6 +508,58 @@ HWTEST_F(DistributedSchedServiceFirstTest, StartRemoteAbility007, TestSize.Level
 }
 
 /**
+ * @tc.name: SetCallerExtraInfo001
+ * @tc.desc: user is not foreground
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, SetCallerExtraInfo001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceFirstTest SetCallerExtraInfo001 start" << std::endl;
+    AAFwk::Want want;
+    CallerInfo callerInfo;
+    uint32_t accessToken = 0;
+    uint32_t specifyTokenId = 0;
+    DistributedSchedService::GetInstance().SetCallerExtraInfo(callerInfo, accessToken, specifyTokenId);
+    int32_t callerUid = 0;
+    int32_t requestCode = 0;
+    EXPECT_CALL(*multiUserMgrMock_, IsCallerForeground(_)).WillOnce(Return(false));
+    int32_t ret = DistributedSchedService::GetInstance().StartRemoteAbility(want, callerUid, requestCode, accessToken);
+    EXPECT_EQ(ret, DMS_NOT_FOREGROUND_USER);
+    DTEST_LOG << "DistributedSchedServiceFirstTest SetCallerExtraInfo001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CheckCallerIdentity001
+ * @tc.desc: user is not foreground
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, CheckCallerIdentity001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceFirstTest CheckCallerIdentity001 start" << std::endl;
+    OHOS::AAFwk::Want want;
+    CallerInfo callerInfo;
+    int32_t ret = DistributedSchedService::GetInstance().CheckCallerIdentity(want, callerInfo);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceFirstTest CheckCallerIdentity001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CheckCallerIdentity002
+ * @tc.desc: user is not foreground
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, CheckCallerIdentity002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceFirstTest CheckCallerIdentity002 start" << std::endl;
+    OHOS::AAFwk::Want want;
+    CallerInfo callerInfo;
+    callerInfo.extraInfoJson[IS_CALLER_SYSAPP] = true;
+    int32_t ret = DistributedSchedService::GetInstance().CheckCallerIdentity(want, callerInfo);
+    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    DTEST_LOG << "DistributedSchedServiceFirstTest CheckCallerIdentity002 end" << std::endl;
+}
+
+/**
  * @tc.name: StartAbilityFromRemote_001
  * @tc.desc: call StartAbilityFromRemote with illegal param
  * @tc.type: FUNC

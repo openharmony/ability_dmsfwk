@@ -139,6 +139,11 @@ int32_t DistributedSchedPermission::CheckStartPermission(const AAFwk::Want& want
         HILOGE("CheckStartControlPermission denied or failed! the callee component do not have permission");
         return DMS_START_CONTROL_PERMISSION_DENIED;
     }
+    // 3.check application custom permissions
+    if (!CheckCustomPermission(want, targetAbility, callerInfo)) {
+        HILOGE("CheckCustomPermission denied or failed! the caller component do not have permission");
+        return DMS_COMPONENT_ACCESS_PERMISSION_DENIED;
+    }
     HILOGI("CheckDistributedPermission success!");
     return ERR_OK;
 }
@@ -170,6 +175,47 @@ int32_t DistributedSchedPermission::CheckCollabStartPermission(const AAFwk::Want
     return ERR_OK;
 }
 
+bool DistributedSchedPermission::CheckCustomPermission(const AAFwk::Want& want,
+    const AppExecFwk::AbilityInfo& targetAbility, const CallerInfo& callerInfo) const
+{
+    if (BundleManagerInternal::IsSameAppId(callerInfo.callerAppId, targetAbility.bundleName)) {
+        HILOGI("is same appId, no need to check custom permissions");
+        return true;
+    }
+    if ((want.GetFlags() & AAFwk::Want::FLAG_ABILITY_CONTINUATION) != 0) {
+        HILOGI("ability continuation, no need to check custom permissions");
+        return true;
+    }
+    const auto& permissions = targetAbility.permissions;
+    if (permissions.empty()) {
+        HILOGD("no need any permission, so granted!");
+        return true;
+    }
+    if (callerInfo.accessToken == 0) {
+        HILOGW("kernel is not support or field is not parsed, so denied!");
+        return false;
+    }
+    int64_t begin = GetTickCount();
+    uint32_t dAccessToken = AccessToken::AccessTokenKit::AllocLocalTokenID(callerInfo.sourceDeviceId,
+        callerInfo.accessToken);
+    HILOGI("[PerformanceTest] AllocLocalTokenID spend %{public}" PRId64 " ms", GetTickCount() - begin);
+    if (dAccessToken == 0) {
+        HILOGE("dAccessTokenID is invalid!");
+        return false;
+    }
+    for (const auto& permission : permissions) {
+        if (permission.empty()) {
+            continue;
+        }
+        int32_t result = AccessToken::AccessTokenKit::VerifyAccessToken(dAccessToken, permission);
+        if (result == AccessToken::PermissionState::PERMISSION_DENIED) {
+            HILOGD("dAccessTokenID:%{public}u, permission:%{public}s denied!", dAccessToken, permission.c_str());
+            return false;
+        }
+        HILOGD("dAccessTokenID:%{public}u, permission:%{public}s matched!", dAccessToken, permission.c_str());
+    }
+    return true;
+}
 
 int32_t DistributedSchedPermission::GetAccountInfo(const std::string& remoteNetworkId,
     const CallerInfo& callerInfo, AccountInfo& accountInfo)
