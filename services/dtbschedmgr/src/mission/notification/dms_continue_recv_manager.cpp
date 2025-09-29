@@ -416,7 +416,7 @@ int32_t DMSContinueRecvMgr::DealDockDisplayBusiness(uint16_t bundleNameId, const
     const int32_t state)
 {
     HILOGI("DealDockDisplayBusiness start");
-    int32_t ret = VerifyBroadcastSource(info.senderNetworkId, info.bundleName, info.sourceBundleName,
+    int32_t ret = VerifyBroadcastSource(info.senderNetworkId, info.sourceBundleName, info.bundleName,
         info.continueType, state);
     if (ret != ERR_OK) {
         HILOGE("VerifyBroadcastSource failed!");
