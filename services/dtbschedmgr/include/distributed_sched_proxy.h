@@ -31,7 +31,7 @@ public:
         : IRemoteProxy<IDistributedSched>(impl) {}
     ~DistributedSchedProxy() {}
     int32_t StartRemoteAbility(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t requestCode,
-        uint32_t accessToken) override;
+        uint32_t accessToken, uint32_t specifyTokenId = 0) override;
     int32_t StartAbilityFromRemote(const OHOS::AAFwk::Want& want,
         const OHOS::AppExecFwk::AbilityInfo& abilityInfo, int32_t requestCode, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo) override;
