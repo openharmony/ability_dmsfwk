@@ -906,7 +906,7 @@ bool DistributedSchedPermission::CheckSrcBackgroundPermission(uint32_t accessTok
         return true;
     }
     HILOGE("CheckBackgroundPermission failed!");
-    return DMS_START_CONTROL_PERMISSION_DENIED;
+    return false;
 }
 
 bool DistributedSchedPermission::IsAbilityForeground(uint32_t accessTokenId)
