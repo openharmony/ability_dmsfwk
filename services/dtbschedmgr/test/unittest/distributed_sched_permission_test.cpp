@@ -1775,6 +1775,21 @@ HWTEST_F(DistributedSchedPermissionTest, CheckSameAccount_002, TestSize.Level3)
 }
 
 /**
+ * @tc.name: CheckSrcBackgroundPermission_001
+ * @tc.desc: call CheckSrcBackgroundPermission
+ * @tc.type: FUNC
+ * @tc.require: I5RWIV
+ */
+HWTEST_F(DistributedSchedPermissionTest, CheckSrcBackgroundPermission_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedPermissionTest CheckSrcBackgroundPermission_001 begin" << std::endl;
+    uint32_t accessTokenId = 0;
+    bool ret = DistributedSchedPermission::GetInstance().CheckSrcBackgroundPermission(accessTokenId);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedSchedPermissionTest CheckSrcBackgroundPermission_001 end result:" << ret << std::endl;
+}
+
+/**
  * @tc.name: RemoveRemoteObjectFromWant_001
  * @tc.desc: call RemoveRemoteObjectFromWant
  * @tc.type: FUNC
