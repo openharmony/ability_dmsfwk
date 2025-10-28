@@ -308,8 +308,8 @@ namespace DistributedCollab {
     void SurfaceDecoderAdapter::DetachAllInputBuffer()
     {
         HILOGI("DetachAllInputBuffer");
-        CHECK_NULL_VOID(inputBufferQueueConsumer_);
         std::lock_guard<std::mutex> lock(mtxData_);
+        CHECK_NULL_VOID(inputBufferQueueConsumer_);
         while (!inputDataBufferQueue_.empty()) {
             auto buffer = inputDataBufferQueue_.front();
             inputBufferQueueConsumer_->DetachBuffer(buffer);
