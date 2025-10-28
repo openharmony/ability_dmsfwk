@@ -1022,7 +1022,6 @@ int32_t AbilityConnectionSession::CreateChannel(const std::string& channelName, 
         HILOGE("CreateChannel failed, channelId is %{public}d", channelId);
         return INVALID_PARAMETERS_ERR;
     }
-
     if (channelManager.RegisterChannelListener(channelId, channelListener_) != ERR_OK) {
         HILOGE("register channel listener failed, channelId is %{public}d", channelId);
         return INVALID_PARAMETERS_ERR;

@@ -270,7 +270,7 @@ private:
     ConnectOption connectOption_;
     CollabrateDirection direction_ = CollabrateDirection::UNKNOWN;
     StreamParams streamParam_;
-    
+
     std::shared_ptr<CollabChannelListener> channelListener_ = nullptr;
 
     std::shared_mutex transChannelMutex_;

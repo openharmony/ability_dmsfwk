@@ -78,6 +78,7 @@ void DataSenderReceiver::DeInit()
     HILOGI("start deinit data sender receiver for %{public}d", socketId_);
     Shutdown(socketId_);
     // stop all task
+    std::lock_guard<std::mutex> lock(eventMutex_);
     if (eventHandler_ != nullptr) {
         eventHandler_->GetEventRunner()->Stop();
         if (eventThread_.joinable()) {
