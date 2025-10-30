@@ -208,7 +208,6 @@ napi_value CreateDistributedExtensionContextJS(napi_env env, std::shared_ptr<Dis
     std::unique_ptr<DistributedExtensionContextJS> jsContext =
         std::make_unique<DistributedExtensionContextJS>(context);
     napi_wrap(env, object, jsContext.release(), DistributedExtensionContextJS::Finalizer, nullptr, nullptr);
-
     const char *moduleName = "DistributedExtensionContextJS";
     BindNativeFunction(env, object, "connectAbility", moduleName, DistributedExtensionContextJS::ConnectAbility);
     BindNativeFunction(env, object, "disconnectAbility", moduleName,
