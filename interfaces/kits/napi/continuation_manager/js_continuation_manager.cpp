@@ -179,16 +179,16 @@ std::string JsContinuationManager::GetErrorInforForRegisterContination(napi_env 
     size_t &unwrapArgc, std::shared_ptr<ContinuationExtraParams> &continuationExtraParams)
 {
     size_t argc = ARG_COUNT_TWO;
-    napi_value argv[ARG_COUNT_TWO] = { 0 };
+    napi_value argv[ARG_COUNT_TWO] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc > ARG_COUNT_TWO) {
         return "Parameter error. The type of \"number of parameters\" must be less than 3";
     }
     napi_valuetype valuetype = napi_valuetype::napi_undefined;
-    if (argc > 0) {
+    if (argc > 0 && argv[0] != nullptr) {
         NAPI_CALL(env, napi_typeof(env, argv[0], &valuetype));
     }
-    if (valuetype == napi_valuetype::napi_object) {
+    if (argc > 0 && valuetype == napi_valuetype::napi_object) {
         HILOGI("register options is used.");
         continuationExtraParams = std::make_shared<ContinuationExtraParams>();
         if (!UnWrapContinuationExtraParams(env, argv[0], continuationExtraParams)) {
@@ -352,10 +352,16 @@ std::string JsContinuationManager::OnRegisterDeviceSelectionCallbackParameterChe
     napi_callback_info info, std::string &cbType, int32_t &token, napi_value *jsListenerObj)
 {
     size_t argc = ARG_COUNT_THREE;
-    napi_value argv[ARG_COUNT_THREE] = { 0 };
+    napi_value argv[ARG_COUNT_THREE] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc != ARG_COUNT_THREE) {
         return "Parameter error. The type of \"number of parameters\" must be 3";
+    }
+    if (argv[0] == nullptr || argv[ARG_COUNT_ONE] == nullptr || argv[ARG_COUNT_TWO] == nullptr) {
+        return "Parameter error. All parameters must be valid";
+    }
+    if (jsListenerObj == nullptr) {
+        return "Internal error. Output parameter is null";
     }
     if (!ConvertFromJsValue(env, argv[0], cbType)) {
         return "Parameter error. The type of \"type\" must be string";
@@ -544,11 +550,14 @@ std::string JsContinuationManager::GetErrorInfo(napi_env env, napi_callback_info
 {
     size_t argc = ARG_COUNT_FOUR;
     napi_value argv[ARG_COUNT_FOUR] = { nullptr };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr));
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc != ARG_COUNT_THREE && argc != ARG_COUNT_FOUR) {
         return "Parameter error. The type of \"number of parameters\" must be 3 or 4";
     }
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    if (argc < ARG_COUNT_THREE || argv[0] == nullptr || argv[ARG_COUNT_ONE] == nullptr
+        || argv[ARG_COUNT_TWO] == nullptr) {
+        return "Parameter error. Missing required parameters";
+    }
     if (!ConvertFromJsValue(env, argv[0], token)) {
         return "Parameter error. The type of \"token\" must be number";
     }
@@ -690,26 +699,31 @@ std::string JsContinuationManager::GetErrorForStartContinuation(napi_env env, na
     int32_t &token, int32_t &unwrapArgc, std::shared_ptr<ContinuationExtraParams> &continuationExtraParams)
 {
     size_t argc = ARG_COUNT_THREE;
-    napi_value argv[ARG_COUNT_THREE] = { 0 };
+    napi_value argv[ARG_COUNT_THREE] = { nullptr };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc < ARG_COUNT_ONE || argc > ARG_COUNT_THREE) {
         return "Parameter error. The type of \"number of parameters\" must be greater than 1 and less than 3";
+    }
+    if (argv[0] == nullptr) {
+        return "Parameter error. First parameter is null";
     }
     if (!ConvertFromJsValue(env, argv[0], token)) {
         return "Parameter error. The type of \"token\" must be number";
     }
     continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     napi_valuetype valuetype = napi_valuetype::napi_undefined;
-    if (argc > ARG_COUNT_ONE) {
+    if (argc > ARG_COUNT_ONE && argv[ARG_COUNT_ONE] != nullptr) {
         NAPI_CALL(env, napi_typeof(env, argv[ARG_COUNT_ONE], &valuetype));
-    }
-    if (valuetype == napi_valuetype::napi_object) {
-        HILOGI("StartContinuationDeviceManager options is used.");
-        if (!UnWrapContinuationExtraParams(env, argv[ARG_COUNT_ONE], continuationExtraParams)) {
-            return "Parameter error. The type of \"options\" must be ContinuationExtraParams";
+        
+        if (valuetype == napi_valuetype::napi_object) {
+            HILOGI("StartContinuationDeviceManager options is used.");
+            if (!UnWrapContinuationExtraParams(env, argv[ARG_COUNT_ONE], continuationExtraParams)) {
+                return "Parameter error. The type of \"options\" must be ContinuationExtraParams";
+            }
+            unwrapArgc++;
         }
-        unwrapArgc++;
     }
+    
     return std::string();
 }
 

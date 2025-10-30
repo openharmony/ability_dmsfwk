@@ -710,6 +710,10 @@ void DSchedCollabManager::HandleDataRecv(const int32_t &softbusSessionId, std::s
         return;
     }
     uint8_t *data = dataBuffer->Data();
+    if (data == nullptr) {
+        HILOGE("data is null.");
+        return;
+    }
     std::string jsonStr(reinterpret_cast<const char *>(data), dataBuffer->Capacity());
     cJSON *rootValue = cJSON_Parse(jsonStr.c_str());
     if (rootValue == nullptr) {
