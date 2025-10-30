@@ -27,6 +27,7 @@
 #include "dsched_collab_manager.h"
 #include "dsched_transport_softbus_adapter.h"
 #include "dtbschedmgr_device_info_storage.h"
+#include "dtbcollabmgr_log.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "parcel_helper.h"
@@ -1055,12 +1056,10 @@ DSchedCollabInfo DSchedCollab::GetCollabInfo()
 void DSchedCollab::OnDataRecv(const std::string &peerDeviceId, int32_t command,
     std::shared_ptr<DSchedDataBuffer> dataBuffer)
 {
-    if (dataBuffer == nullptr) {
-        HILOGE("dataBuffer is null");
-        return;
-    }
+    CHECK_AND_RETURN_LOG(dataBuffer == nullptr, "dataBuffer is null");
     int32_t ret = 0;
     uint8_t *data = dataBuffer->Data();
+    CHECK_AND_RETURN_LOG(data == nullptr, "data is null");
     std::string jsonStr(reinterpret_cast<const char *>(data), dataBuffer->Capacity());
     switch (command) {
         case SOURCE_GET_VERSION_CMD: {

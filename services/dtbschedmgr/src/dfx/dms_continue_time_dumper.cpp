@@ -243,7 +243,13 @@ std::string DmsContinueTime::WriteDurationInfo(DmsDuration duration)
     cJSON_AddNumberToObject(durationInfo, "beginTime", duration.GetBeginTime());
     cJSON_AddNumberToObject(durationInfo, "endTime", duration.GetEndTime());
     char* cjson_str = cJSON_PrintUnformatted(durationInfo);
-    std::string message(cjson_str);
+    std::string message;
+    
+    if (cjson_str != nullptr) {
+        message = cjson_str;
+    } else {
+        HILOGW("cJSON_PrintUnformatted failed!");
+    }
     if (message.empty()) {
         HILOGW("Write Info failed!");
     }
@@ -286,7 +292,12 @@ std::string DmsContinueTime::WriteDstInfo(const std::string bundleName, const st
     cJSON_AddStringToObject(info, "DstBundleName", bundleName.c_str());
     cJSON_AddStringToObject(info, "DstAbilityName", abilityName.c_str());
     char* cjson_str = cJSON_PrintUnformatted(info);
-    std::string message(cjson_str);
+    std::string message;
+    if (cjson_str != nullptr) {
+        message = cjson_str;
+    } else {
+        HILOGW("cJSON_PrintUnformatted failed!");
+    }
     if (message.empty()) {
         HILOGW("Write info failed!");
     }
