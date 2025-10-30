@@ -1475,12 +1475,10 @@ bool DSchedContinue::CheckDeviceIdFromRemote(const std::string& localDevId, cons
 void DSchedContinue::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffer> dataBuffer)
 {
     HILOGI("called, command %{public}d", command);
-    if (dataBuffer == nullptr) {
-        HILOGE("dataBuffer is null");
-        return;
-    }
+    CHECK_BOOL_VALUE_RETURN(dataBuffer == nullptr, "dataBuffer is null");
     int32_t ret = 0;
     uint8_t *data = dataBuffer->Data();
+    CHECK_BOOL_VALUE_RETURN(data == nullptr, "data is null");
     std::string jsonStr(reinterpret_cast<const char *>(data), dataBuffer->Capacity());
 
     switch (command) {
