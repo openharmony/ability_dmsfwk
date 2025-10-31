@@ -41,17 +41,12 @@ void MMIAdapter::Init()
         HILOGI("Already inited, end.");
         return;
     }
-    try {
-        mmiCallback_ = std::make_shared<MMIAdapter::MMIEventCallback>();
-        eventThread_ = std::thread(&MMIAdapter::StartEvent, this);
-        std::unique_lock<std::mutex> lock(eventMutex_);
-        eventCon_.wait(lock, [this] {
-            return eventHandler_ != nullptr;
-        });
-    } catch (const std::system_error& e) {
-        HILOGE("Init failed, exception: %{public}s", e.what());
-        return;
-    }
+    mmiCallback_ = std::make_shared<MMIAdapter::MMIEventCallback>();
+    eventThread_ = std::thread(&MMIAdapter::StartEvent, this);
+    std::unique_lock<std::mutex> lock(eventMutex_);
+    eventCon_.wait(lock, [this] {
+        return eventHandler_ != nullptr;
+    });
 }
 
 void MMIAdapter::StartEvent()
