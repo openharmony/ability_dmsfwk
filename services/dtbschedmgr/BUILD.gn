@@ -119,6 +119,7 @@ ohos_shared_library("distributedschedsvr") {
   install_enable = true
 
   cflags = [ "-fpie" ]
+  cflags_cc = [ "-fvisibility-inlines-hidden" ]
   if (!dmsfwk_softbus_adapter_common) {
     cflags += [
       "-DDMSFWK_SAME_ACCOUNT",
@@ -352,7 +353,6 @@ ohos_shared_library("distributedschedsvr") {
   } else {
     sources += [ "src/adapter/mmi_adapter_common.cpp" ]
   }
-  use_exceptions = true
   install_images = [ system_base_dir ]
   relative_install_dir = "platformsdk"
   part_name = "dmsfwk"
