@@ -177,9 +177,9 @@ public:
     {
         return ERR_OK;
     };
-    bool CheckFMSReady() override
+    int32_t CheckFMSReady() override
     {
-        return false;
+        return ERR_OK;
     };
     int32_t SetBackgroundFunction(const std::string method, const std::string params) override
     {
