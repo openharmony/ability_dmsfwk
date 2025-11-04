@@ -119,7 +119,7 @@ ohos_shared_library("distributedschedsvr") {
   install_enable = true
 
   cflags = [ "-fpie" ]
-  cflags_cc = [ "-fvisibility-inlines-hidden" ]
+  cflags_cc = [ "-Os" ]
   if (!dmsfwk_softbus_adapter_common) {
     cflags += [
       "-DDMSFWK_SAME_ACCOUNT",
