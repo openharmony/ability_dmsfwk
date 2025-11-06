@@ -628,7 +628,8 @@ bool DistributedSchedService::Init()
             SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY,
             SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_OFF);
         DataShareManager::GetInstance().SetCurrentContinueSwitch(false);
-        HILOGI("Update close end. IsContinueSwitchOn: %{public}d", SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
+        HILOGI("Update close end. IsContinueSwitchOn: %{public}d",
+            SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
     }
     return true;
 }
