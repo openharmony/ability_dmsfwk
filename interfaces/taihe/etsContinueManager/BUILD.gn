@@ -1,0 +1,120 @@
+# Copyright (C) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
+import("//build/ohos/taihe_idl/taihe.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
+
+config("taihe_config") {
+  include_dirs = [
+    "include",
+    "${dms_path}/interfaces/kits/napi/continuation_state_manager",
+    "${dms_path}/services/dtbschedmgr/include",
+    "${dms_path}/common/include",
+  ]
+}
+
+subsystem_name = "ability"
+part_name = "dmsfwk"
+taihe_generated_file_path =
+    "$taihe_file_path/out/$subsystem_name/$part_name/etsContinueManager"
+
+copy_taihe_idl("copy_continueManager") {
+  sources = [ "idl/ohos.app.ability.continueManager.taihe" ]
+}
+
+ohos_taihe("run_continueManager_taihe") {
+  taihe_generated_file_path = "$taihe_generated_file_path"
+  deps = [ ":copy_continueManager" ]
+  outputs = [
+    "$taihe_generated_file_path/src/ohos.app.ability.continueManager.ani.cpp",
+    "$taihe_generated_file_path/src/ohos.app.ability.continueManager.abi.c",
+  ]
+}
+
+taihe_shared_library("continueManager_so") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+  taihe_generated_file_path = "$taihe_generated_file_path"
+  part_name = "$part_name"
+  subsystem_name = "$subsystem_name"
+  sources = get_target_outputs(":run_continueManager_taihe")
+  public_configs = [ ":taihe_config" ]
+  sources += [
+    "src/ani_constructor.cpp",
+    "src/ani_continue_client.cpp",
+    "src/ani_continue_manager.cpp",
+    "src/ani_continue_manager_stub.cpp",
+    "src/ohos.app.ability.continueManager.impl.cpp",
+  ]
+  deps = [
+    ":run_continueManager_taihe",
+    "${dms_path}/common:distributed_sched_utils",
+    "${dms_path}/interfaces/innerkits/common:common_sdk",
+    "${dms_path}/interfaces/innerkits/continuation_manager:continuation_manager",
+    "${dms_path}/interfaces/kits/napi/continuation_manager:continuationmanager_napi",
+    "${dms_path}/services/dtbcollabmgr/src/ability_connection_manager:distributed_ability_connection_manager",
+    "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
+  ]
+  external_deps = [
+    "ability_runtime:ability_context_native",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:ani_base_context",
+    "ability_runtime:ani_common",
+    "ability_runtime:app_context",
+    "ability_runtime:runtime",
+    "ability_runtime:ui_extension",
+    "access_token:libtokenid_sdk",
+    "av_codec:av_codec_client",
+    "av_codec:av_codec_media_engine_filters",
+    "av_codec:native_media_codecbase",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_taihe",
+    "ipc:ipc_core",
+  ]
+}
+
+generate_static_abc("continueManager_taihe_abc") {
+  base_url = "$taihe_generated_file_path"
+  files = [ "$taihe_generated_file_path/@ohos.app.ability.continueManager.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/continueManager_taihe_abc.abc"
+  dependencies = [ ":run_continueManager_taihe" ]
+}
+
+ohos_prebuilt_etc("continueManager_etc") {
+  source = "$target_out_dir/continueManager_taihe_abc.abc"
+  module_install_dir = "framework"
+  subsystem_name = "$subsystem_name"
+  part_name = "$part_name"
+  deps = [ ":continueManager_taihe_abc" ]
+}
+
+group("continueManager_ani") {
+  deps = [
+    ":continueManager_etc",
+    ":continueManager_so",
+  ]
+}
