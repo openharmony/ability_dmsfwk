@@ -169,6 +169,7 @@ const std::string LINUX_HAP_CODE_PATH = "2";
 const int32_t CONNECT_WAIT_TIME_S = 2; /* 2 second */
 std::mutex getDistibutedProxyLock_;
 std::condition_variable getDistibutedProxyCondition_;
+const std::string DISABLE_CONTINUATION_SERVICE = "const.continuation.disable_application_continuation";
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedService);
@@ -588,6 +589,14 @@ void DistributedSchedService::DeviceOfflineNotifyAfterDelete(const std::string& 
 #endif
 }
 
+bool DistributedSchedService::IsDisableContinuationService()
+{
+    HILOGI("start");
+    bool isDisableContinue = system::GetBoolParameter(DISABLE_CONTINUATION_SERVICE, false);
+    HILOGI("isDisableContinue: %{public}d", isDisableContinue);
+    return isDisableContinue;
+}
+
 // LCOV_EXCL_START
 bool DistributedSchedService::Init()
 {
@@ -612,6 +621,14 @@ bool DistributedSchedService::Init()
     if (componentChangeHandler_ == nullptr) {
         auto runner = AppExecFwk::EventRunner::Create("DmsComponentChange");
         componentChangeHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    }
+    if (IsDisableContinuationService() && SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
+        HILOGI("disableContinuation & last switch is open, Update close start.");
+        DataShareManager::GetInstance().UpdateSwitchStatus(
+            SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY,
+            SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_OFF);
+        DataShareManager::GetInstance().SetCurrentContinueSwitch(false);
+        HILOGI("Update close end. IsContinueSwitchOn: %{public}d", SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
     }
     return true;
 }
