@@ -336,7 +336,6 @@ private:
     void NotifyCollaborateEventWithSessions(const std::list<ConnectAbilitySession> &sessionsList,
         DSchedEventState state, int32_t ret);
     bool CheckCallingUid();
-    bool IsDisableContinuationService();
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     int32_t GetDmsInteractiveAdapterProxy();

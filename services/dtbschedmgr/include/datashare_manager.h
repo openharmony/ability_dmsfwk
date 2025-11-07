@@ -53,6 +53,7 @@ public:
     bool IsCurrentContinueSwitchOn();
     void SetCurrentContinueSwitch(bool status);
     void UpdateSwitchStatus(const std::string &key, const std::string &value);
+    bool CheckAndHandleContinueSwitch();
 
 private:
     std::shared_ptr<DataShare::DataShareHelper> CreateDataShareHelper();

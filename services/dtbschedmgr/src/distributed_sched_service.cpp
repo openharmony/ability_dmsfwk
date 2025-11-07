@@ -622,15 +622,7 @@ bool DistributedSchedService::Init()
         auto runner = AppExecFwk::EventRunner::Create("DmsComponentChange");
         componentChangeHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
-    if (IsDisableContinuationService() && SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
-        HILOGI("disableContinuation & last switch is open, Update close start.");
-        DataShareManager::GetInstance().UpdateSwitchStatus(
-            SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY,
-            SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_OFF);
-        DataShareManager::GetInstance().SetCurrentContinueSwitch(false);
-        HILOGI("Update close end. IsContinueSwitchOn: %{public}d",
-            SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
-    }
+    DataShareManager::GetInstance().CheckAndHandleContinueSwitch();
     return true;
 }
 // LCOV_EXCL_STOP

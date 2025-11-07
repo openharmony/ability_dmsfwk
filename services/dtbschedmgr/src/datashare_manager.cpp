@@ -175,5 +175,26 @@ void DataShareManager::UpdateSwitchStatus(const std::string &key, const std::str
     HILOGI("Finish UpdateSwitchStatus, Updata status success: %{public}d", result.first);
     return;
 }
+
+bool DataShareManager::CheckAndHandleContinueSwitch()
+{
+    HILOGI("start");
+    bool isDisableContinue = system::GetBoolParameter(DISABLE_CONTINUATION_SERVICE, false);
+    HILOGI("isDisableContinue: %{public}d", isDisableContinue);
+    
+    if (isDisableContinue && SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
+        HILOGI("disableContinuation & last switch is open, Update close start.");
+        DataShareManager::GetInstance().UpdateSwitchStatus(
+            SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY,
+            SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_OFF);
+        DataShareManager::GetInstance().SetCurrentContinueSwitch(false);
+        HILOGI("Update close end. IsContinueSwitchOn: %{public}d",
+            SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
+        return true;
+    } else {
+        HILOGI("continue switch status remains unchanged.");
+        return false;
+    }
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
