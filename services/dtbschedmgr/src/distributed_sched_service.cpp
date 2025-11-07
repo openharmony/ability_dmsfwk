@@ -613,6 +613,7 @@ bool DistributedSchedService::Init()
         auto runner = AppExecFwk::EventRunner::Create("DmsComponentChange");
         componentChangeHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
+    DataShareManager::GetInstance().CheckAndHandleContinueSwitch();
     return true;
 }
 // LCOV_EXCL_STOP

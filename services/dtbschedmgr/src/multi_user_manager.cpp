@@ -157,6 +157,7 @@ void MultiUserManager::OnUserSwitched(int32_t accountId)
     };
     UserSwitchedOnRegisterListenerCache();
     DmsContinueConditionMgr::GetInstance().OnUserSwitched(accountId);
+    DataShareManager::GetInstance().CheckAndHandleContinueSwitch();
     HILOGI("UserSwitched end");
 }
 
