@@ -100,7 +100,7 @@ void SvcDistributedConnection::OnAbilityConnectDone(const AppExecFwk::ElementNam
     };
     std::thread task(func);
     task.detach();
-    distributedProxy_ = iface_cast<DExtensionProxy>(remoteObject);
+    distributedProxy_ = iface_cast<IDExtension>(remoteObject);
     if (distributedProxy_ == nullptr) {
         HILOGE("Failed to ability connect done, distributedProxy_ is nullptr");
         return;

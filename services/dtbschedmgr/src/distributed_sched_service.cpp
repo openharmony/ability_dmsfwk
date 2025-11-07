@@ -360,20 +360,20 @@ static void TriggerProxyCallbacks(AAFwk::Want& want, const DExtConnectInfo& conn
 int32_t DistributedSchedService::ConnectDExtensionFromRemote(const DExtConnectInfo& connectInfo,
     DExtConnectResultInfo& resultInfo)
 {
-    HILOGI("DistributedSchedService::ConnectDExtensionFromRemote called.");
     int32_t ret = ValidateAndPrepareConnection(connectInfo, resultInfo);
     if (ret!= ERR_OK) {
-        HILOGE("Validate and prepare connection failed, ret: %{public}d", ret);
         resultInfo.errCode = ret;
         return ret;
     }
     int32_t userId = connectInfo.sinkInfo.userId;
     std::string bundleName = connectInfo.sinkInfo.bundleName;
     std::string abilityName = connectInfo.sinkInfo.abilityName;
-
-    if (svcDConn_ == nullptr) {
-        svcDConn_ = sptr<SvcDistributedConnection>(new SvcDistributedConnection(bundleName));
-        svcDConn_->RegisterEventListener();
+    {
+        std::lock_guard<std::mutex> autoLock(svcDConnectLock_);
+        if (svcDConn_ == nullptr) {
+            svcDConn_ = sptr<SvcDistributedConnection>(new SvcDistributedConnection(bundleName));
+            svcDConn_->RegisterEventListener();
+        }
     }
     auto callConnected = GetDistributedConnectDone(bundleName);
     svcDConn_->SetCallback(callConnected);
@@ -397,7 +397,6 @@ int32_t DistributedSchedService::ConnectDExtensionFromRemote(const DExtConnectIn
     AppExecFwk::BundleResourceInfo bundleResourceInfo;
     ret = GetBundleResourceInfo(bundleName, bundleResourceInfo);
     if (ret != ERR_OK) {
-        HILOGE("Get bundle resource info failed, ret: %{public}d", ret);
         return ret;
     }
     svcDConn_->PublishDExtensionNotification(connectInfo.sourceInfo.deviceId, bundleName, userId,

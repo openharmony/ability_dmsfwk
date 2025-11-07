@@ -355,6 +355,7 @@ private:
     std::unordered_map<int32_t, uint32_t> trackingUidMap_;
     std::mutex distributedLock_;
     std::mutex connectLock_;
+    std::mutex svcDConnectLock_;
     sptr<IRemoteObject::DeathRecipient> connectDeathRecipient_;
     sptr<SvcDistributedConnection> svcDConn_;
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
