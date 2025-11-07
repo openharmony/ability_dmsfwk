@@ -589,14 +589,6 @@ void DistributedSchedService::DeviceOfflineNotifyAfterDelete(const std::string& 
 #endif
 }
 
-bool DistributedSchedService::IsDisableContinuationService()
-{
-    HILOGI("start");
-    bool isDisableContinue = system::GetBoolParameter(DISABLE_CONTINUATION_SERVICE, false);
-    HILOGI("isDisableContinue: %{public}d", isDisableContinue);
-    return isDisableContinue;
-}
-
 // LCOV_EXCL_START
 bool DistributedSchedService::Init()
 {
