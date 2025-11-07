@@ -169,7 +169,6 @@ const std::string LINUX_HAP_CODE_PATH = "2";
 const int32_t CONNECT_WAIT_TIME_S = 2; /* 2 second */
 std::mutex getDistibutedProxyLock_;
 std::condition_variable getDistibutedProxyCondition_;
-const std::string DISABLE_CONTINUATION_SERVICE = "const.continuation.disable_application_continuation";
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DistributedSchedService);
