@@ -21,6 +21,7 @@
 #include "mission/dms_continue_condition_manager.h"
 #include "mission/notification/dms_continue_send_manager.h"
 #include "os_account_manager.h"
+#include "parameters.h"
 #include "switch_status_dependency.h"
 
 namespace OHOS {
@@ -29,6 +30,7 @@ IMPLEMENT_SINGLE_INSTANCE(DataShareManager);
 namespace {
 const std::string TAG = "DMSDataShareManager";
 constexpr static int32_t INVALID_ACCOUNT_ID = -1;
+const std::string DISABLE_CONTINUATION_SERVICE = "const.continuation.disable_application_continuation";
 }
 SettingObserver::SettingObserver() = default;
 SettingObserver::~SettingObserver() = default;
