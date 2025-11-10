@@ -286,7 +286,7 @@ HWTEST_F(DmsTokenCallbackTest, GetAccountInfoWrapperTest_001, TestSize.Level3)
     CallerInfo callerInfo;
     IDistributedSched::AccountInfo accountInfo;
     int32_t result = dmsTokenCallback_->GetAccountInfoWrapper(deviceId, callerInfo, accountInfo);
-    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
     DTEST_LOG << "DmsTokenCallbackTest GetAccountInfoWrapperTest_001 end" << std::endl;
 }
 }
