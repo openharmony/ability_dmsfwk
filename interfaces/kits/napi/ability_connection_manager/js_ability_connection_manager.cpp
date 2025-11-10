@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "dtbcollabmgr_log.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
+#include "napi_ability_connection_session_listener.h"
 #include "napi_common_util.h"
 #include "napi_base_context.h"
 #include "native_avcapability.h"
@@ -829,8 +830,8 @@ napi_value JsAbilityConnectionManager::RegisterAbilityConnectionSessionCallback(
         return nullptr;
     }
 
-    std::shared_ptr<JsAbilityConnectionSessionListener> listener =
-        std::make_shared<JsAbilityConnectionSessionListener>(env);
+    std::shared_ptr<NapiAbilityConnectionSessionListener> listener =
+        std::make_shared<NapiAbilityConnectionSessionListener>(env);
 
     listener->SetCallback(listenerObj);
     ret = AbilityConnectionManager::GetInstance().RegisterEventCallback(
