@@ -4,7 +4,7 @@
         {
             "name": 1404,
             "libpath": "libdistributed_ability_manager_svr.z.so",
-            "run-on-create": true,
+            "run-on-create": false,
             "distributed": false
         }
     ]
