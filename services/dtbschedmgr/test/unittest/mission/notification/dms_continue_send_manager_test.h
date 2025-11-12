@@ -18,6 +18,7 @@
 
 #include "gtest/gtest.h"
 
+#include "mock/ability_manager_client_mock.h"
 #include "mock/bundle_manager_internal_mock.h"
 #include "mock/dms_continue_condition_manager_mock.h"
 #include "mock/dsched_sync_e2e_mock.h"
@@ -30,6 +31,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    static inline std::shared_ptr<AbilityManagerClientMock> clientMock_ = nullptr;
     static inline std::shared_ptr<BundleManagerInternalMock> bundleMgrMock_ = nullptr;
     static inline std::shared_ptr<DmsContinueConditionMgrMock> mgrMock_ = nullptr;
 };

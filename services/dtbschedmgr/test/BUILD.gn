@@ -694,6 +694,7 @@ ohos_unittest("dmscontinuemgrtest") {
   }
 
   external_deps += [ "googletest:gmock" ]
+  defines = [ "private = public" ]
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
