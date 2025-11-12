@@ -367,7 +367,12 @@ int32_t DMSContinueSendMgr::SendScreenLockedEvent(uint8_t type)
     uint16_t bundleNameId = 0;
     uint8_t continueTypeId = 0;
     MissionStatus status = screenLockedHandler_->GetMissionStatus();
-    int32_t ret = QueryBroadcastInfo(status, bundleNameId, continueTypeId);
+    int32_t ret = CheckContinueState(status.missionId);
+    if (ret != ERR_OK) {
+        HILOGE("CheckContinueState failed, ret: %{public}d, status: %{public}s", ret, status.ToString().c_str());
+        return ret;
+    }
+    ret = QueryBroadcastInfo(status, bundleNameId, continueTypeId);
     if (ret != ERR_OK) {
         HILOGE("QueryBroadcastInfo failed, ret: %{public}d, status: %{public}s", ret, status.ToString().c_str());
         return ret;
@@ -385,6 +390,28 @@ int32_t DMSContinueSendMgr::SendScreenLockedEvent(uint8_t type)
 
     SendSoftbusEvent(bundleNameId, continueTypeId, type);
     HILOGI("end");
+    return ERR_OK;
+}
+
+int32_t DMSContinueSendMgr::CheckContinueState(const int32_t missionId)
+{
+    HILOGI("accountId: %{public}d.", accountId_);
+    auto abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
+    if (abilityMgr == nullptr) {
+        HILOGE("abilityMgr is null");
+        return INVALID_PARAMETERS_ERR;
+    }
+
+    AAFwk::MissionInfo info;
+    int32_t ret = abilityMgr->GetMissionInfo("", missionId, info);
+    if (ret != ERR_OK) {
+        HILOGE("get missionInfo failed, missionId: %{public}d, ret: %{public}d", missionId, ret);
+        return INVALID_PARAMETERS_ERR;
+    }
+    if (info.continueState != AAFwk::ContinueState::CONTINUESTATE_ACTIVE) {
+        HILOGE("Mission continue state set to INACTIVE. Broadcast task abort.");
+        return INVALID_PARAMETERS_ERR;
+    }
     return ERR_OK;
 }
 
