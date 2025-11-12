@@ -47,6 +47,7 @@
 #include "image_source.h"
 
 #include "mission/distributed_sched_mission_manager.h"
+#include "mission/dsched_sync_e2e.h"
 #include "mission/notification/dms_continue_recv_manager.h"
 #include "mission/mission_info_converter.h"
 #include "mission/snapshot_converter.h"
@@ -156,6 +157,8 @@ void DistributedSchedStub::InitLocalFuncsInner()
         &DistributedSchedStub::NotifyCloseCollabSessionInner;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::GET_WIFI_STATUS)] =
         &DistributedSchedStub::GetWifiStatusInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::IS_MDM_CONTROL)] =
+        &DistributedSchedStub::IsMDMControlInner;
 }
 
 void DistributedSchedStub::InitLocalMissionManagerInner()
@@ -854,6 +857,18 @@ int32_t DistributedSchedStub::GetWifiStatusInner(MessageParcel& data, MessagePar
     bool isWifiActive = DSchedCollabManager::GetInstance().GetWifiStatus();
     HILOGI("isWifiActive = %{public}d", isWifiActive);
     PARCEL_WRITE_REPLY_NOERROR(reply, Bool, isWifiActive);
+}
+
+int32_t DistributedSchedStub::IsMDMControlInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("called");
+    if (!IPCSkeleton::IsLocalCalling()) {
+        HILOGE("check permission failed!");
+        return DMS_PERMISSION_DENIED;
+    }
+    bool isMDMControl = DmsKvSyncE2E::GetInstance()->IsMDMControl();
+    HILOGI("isMDMControl = %{public}d", isMDMControl);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Bool, isMDMControl);
 }
 
 bool DistributedSchedStub::IsNewCollabVersion(const std::string& remoteDeviceId)
