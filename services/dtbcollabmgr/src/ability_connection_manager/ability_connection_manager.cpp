@@ -608,5 +608,12 @@ int32_t AbilityConnectionManager::NotifyPeerVersion(int32_t sessionId, int32_t v
     
     return connectionSesion->HandlePeerVersion(version);
 }
+
+bool AbilityConnectionManager::IsMDMControl()
+{
+    HILOGI("called.");
+    DistributedClient dmsClient;
+    return dmsClient.IsMDMControl();
+}
 }  // namespace DistributedCollab
 }  // namespace OHOS

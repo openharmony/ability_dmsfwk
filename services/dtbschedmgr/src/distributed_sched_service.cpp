@@ -1125,6 +1125,7 @@ int32_t DistributedSchedService::GetCallerInfo(const std::string &localDeviceId,
 int32_t DistributedSchedService::StartRemoteAbility(const OHOS::AAFwk::Want& want,
     int32_t callerUid, int32_t requestCode, uint32_t accessToken, uint32_t specifyTokenId)
 {
+    CHECK_MDM_CONTROL(DmsKvSyncE2E::GetInstance()->IsMDMControl());
     if (!MultiUserManager::GetInstance().IsCallerForeground(callerUid)) {
         HILOGW("The current user is not foreground. callingUid: %{public}d .", callerUid);
         return DMS_NOT_FOREGROUND_USER;
@@ -1203,6 +1204,7 @@ int32_t DistributedSchedService::StartAbilityFromRemote(const OHOS::AAFwk::Want&
     const OHOS::AppExecFwk::AbilityInfo& abilityInfo, int32_t requestCode,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo)
 {
+    CHECK_MDM_CONTROL(DmsKvSyncE2E::GetInstance()->IsMDMControl());
     std::string localDeviceId;
     std::string timeInfo;
     std::string deviceId = want.GetElement().GetDeviceID();
@@ -2112,6 +2114,7 @@ int32_t DistributedSchedService::GetUidLocked(const std::list<ConnectAbilitySess
 int32_t DistributedSchedService::ConnectRemoteAbility(const OHOS::AAFwk::Want& want,
     const sptr<IRemoteObject>& connect, int32_t callerUid, int32_t callerPid, uint32_t accessToken)
 {
+    CHECK_MDM_CONTROL(DmsKvSyncE2E::GetInstance()->IsMDMControl());
     if (!MultiUserManager::GetInstance().IsCallerForeground(callerUid)) {
         HILOGW("The current user is not foreground. callingUid: %{public}d .", callerUid);
         return DMS_NOT_FOREGROUND_USER;
@@ -2488,6 +2491,7 @@ int32_t DistributedSchedService::SaveConnectToken(const OHOS::AAFwk::Want& want,
 int32_t DistributedSchedService::StartRemoteAbilityByCall(const OHOS::AAFwk::Want& want,
     const sptr<IRemoteObject>& connect, int32_t callerUid, int32_t callerPid, uint32_t accessToken)
 {
+    CHECK_MDM_CONTROL(DmsKvSyncE2E::GetInstance()->IsMDMControl());
     if (!MultiUserManager::GetInstance().IsCallerForeground(callerUid)) {
         HILOGW("The current user is not foreground. callingUid: %{public}d .", callerUid);
         return DMS_NOT_FOREGROUND_USER;
@@ -2539,6 +2543,7 @@ int32_t DistributedSchedService::StartRemoteAbilityByCall(const OHOS::AAFwk::Wan
 int32_t DistributedSchedService::ReleaseRemoteAbility(const sptr<IRemoteObject>& connect,
     const AppExecFwk::ElementName &element)
 {
+    CHECK_MDM_CONTROL(DmsKvSyncE2E::GetInstance()->IsMDMControl());
     if (connect == nullptr) {
         HILOGE("ReleaseRemoteAbility connect is null");
         return INVALID_PARAMETERS_ERR;
@@ -2571,15 +2576,14 @@ int32_t DistributedSchedService::StartAbilityByCallFromRemote(const OHOS::AAFwk:
     const sptr<IRemoteObject>& connect, const CallerInfo& callerInfo, const AccountInfo& accountInfo)
 {
     HILOGI("[PerformanceTest] DistributedSchedService StartAbilityByCallFromRemote begin");
+    CHECK_MDM_CONTROL(DmsKvSyncE2E::GetInstance()->IsMDMControl());
     if (connect == nullptr) {
         HILOGE("StartAbilityByCallFromRemote connect is null");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
-
     EventNotify tempEvent;
     GetCurDestCollaborateEvent(callerInfo, want.GetElement(), DMS_DSCHED_EVENT_START, ERR_OK, tempEvent);
     NotifyDSchedEventCallbackResult(ERR_OK, tempEvent);
-
     std::string localDeviceId;
     std::string destinationDeviceId = want.GetElement().GetDeviceID();
     if (!GetLocalDeviceId(localDeviceId) ||
@@ -2589,7 +2593,6 @@ int32_t DistributedSchedService::StartAbilityByCallFromRemote(const OHOS::AAFwk:
     }
     int32_t result = CheckTargetPermission(want, callerInfo, accountInfo, CALL_PERMISSION, false);
     if (result != ERR_OK) {
-        HILOGE("CheckTargetPermission failed!!");
         return result;
     }
 
@@ -2939,6 +2942,7 @@ int32_t DistributedSchedService::ConnectAbilityFromRemote(const OHOS::AAFwk::Wan
         HILOGE("ConnectAbilityFromRemote connect is null");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
+    CHECK_MDM_CONTROL(DmsKvSyncE2E::GetInstance()->IsMDMControl());
     HILOGI("ConnectAbilityFromRemote uid is %{public}d, pid is %{public}d, AccessTokenID is %{public}s",
         callerInfo.uid, callerInfo.pid, GetAnonymStr(std::to_string(callerInfo.accessToken)).c_str());
     std::string localDeviceId;
@@ -2998,6 +3002,7 @@ int32_t DistributedSchedService::DisconnectEachRemoteAbilityLocked(const std::st
 int32_t DistributedSchedService::DisconnectRemoteAbility(const sptr<IRemoteObject>& connect, int32_t callerUid,
     uint32_t accessToken)
 {
+    CHECK_MDM_CONTROL(DmsKvSyncE2E::GetInstance()->IsMDMControl());
     if (connect == nullptr) {
         HILOGE("DisconnectRemoteAbility connect is null");
         return INVALID_PARAMETERS_ERR;
@@ -3692,6 +3697,7 @@ int32_t DistributedSchedService::SetCallerInfo(
 int32_t DistributedSchedService::StartRemoteFreeInstall(const OHOS::AAFwk::Want& want, int32_t callerUid,
     int32_t requestCode, uint32_t accessToken, const sptr<IRemoteObject>& callback)
 {
+    CHECK_MDM_CONTROL(DmsKvSyncE2E::GetInstance()->IsMDMControl());
     HILOGI("called");
     std::string localDeviceId;
     std::string deviceId = want.GetElement().GetDeviceID();
@@ -3701,7 +3707,6 @@ int32_t DistributedSchedService::StartRemoteFreeInstall(const OHOS::AAFwk::Want&
     }
     sptr<IDistributedSched> remoteDms = GetRemoteDms(deviceId);
     if (remoteDms == nullptr) {
-        HILOGE("get remoteDms failed");
         return INVALID_PARAMETERS_ERR;
     }
     if (dmsCallbackTask_ == nullptr) {
@@ -4217,6 +4222,7 @@ int32_t DistributedSchedService::CheckCollabStartPermission(const OHOS::AAFwk::W
 int32_t DistributedSchedService::StopRemoteExtensionAbility(const OHOS::AAFwk::Want& want, int32_t callerUid,
     uint32_t accessToken, int32_t extensionType)
 {
+    CHECK_MDM_CONTROL(DmsKvSyncE2E::GetInstance()->IsMDMControl());
     std::string localDeviceId;
     std::string deviceId = want.GetDeviceId();
     if (!GetLocalDeviceId(localDeviceId) || !CheckDeviceId(localDeviceId, deviceId)) {

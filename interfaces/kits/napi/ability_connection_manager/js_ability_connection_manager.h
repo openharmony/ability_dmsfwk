@@ -61,6 +61,8 @@ enum BussinessErrorCode {
     ERR_NOT_SYSTEM_APP = 202,
     // Input parameter error.
     ERR_INVALID_PARAMS = 401,
+    // Capability not support.
+    ERR_CAPABILITY_NOT_SUPPORT = 801,
     // Multiple streams can not be created.
     ERR_ONLY_SUPPORT_ONE_STREAM = 32300001,
     // The stream at the receive end is not started.
