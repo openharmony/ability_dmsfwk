@@ -5,7 +5,8 @@
             "name": 1404,
             "libpath": "libdistributed_ability_manager_svr.z.so",
             "run-on-create": false,
-            "distributed": false
+            "distributed": false,
+            "min_hdi_proxy_version": []
         }
     ]
 }
