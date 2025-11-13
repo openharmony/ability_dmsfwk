@@ -88,6 +88,7 @@ ohos_shared_library("distributed_ability_connection_manager") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "wifi:wifi_sdk",
+    "window_manager:libwm",
   ]
 
   public_external_deps = [ "ability_runtime:ability_manager" ]
