@@ -31,6 +31,7 @@
 #include "ipc_skeleton.h"
 #include "message_data_header.h"
 #include "openssl/sha.h"
+#include "softbus_error_code.h"
 #include "tokenid_kit.h"
 
 namespace OHOS {
@@ -360,6 +361,11 @@ ConnectErrorCode AbilityConnectionSession::ConvertToConnectErrorCode(int32_t col
             return ConnectErrorCode::CONNECTED_SESSION_EXISTS;
         case SAME_SESSION_IS_CONNECTING:
             return ConnectErrorCode::CONNECTED_SESSION_EXISTS;
+        case SOFTBUS_CONN_PASSIVE_TYPE_AP_P2P_CHIP_CONFLICT:
+        case SOFTBUS_CONN_PASSIVE_TYPE_AP_STA_P2P_CHIP_CONFLICT:
+        case SOFTBUS_CONN_PASSIVE_TYPE_AP_STA_CHIP_CONFLICT:
+        case SOFTBUS_CONN_PASSIVE_TYPE_AP_HML_CHIP_CONFLICT:
+        case SOFTBUS_CONN_PASSIVE_TYPE_AP_STA_HML_CHIP_CONFLICT:
         case PEER_WIFI_NOT_OPEN:
             return ConnectErrorCode::PEER_WIFI_NOT_OPEN;
         case DistributedSchedule::COLLAB_ABILITY_REJECT_ERR:
@@ -414,7 +420,7 @@ void AbilityConnectionSession::NotifyAppConnectResult(bool isConnected,
 void AbilityConnectionSession::NotifyCollabErrorResultFromSa(bool isConnected,
     const ConnectErrorCode errorCode, const std::string& reason)
 {
-    HILOGE("notify result from sa %{public}d", sessionId_);
+    HILOGE("notify result from sa sessionId: %{public}d, errorCode: %{public}d", sessionId_, errorCode);
     ConnectResult connectResult(isConnected, errorCode, reason);
     connectResult.sessionId = sessionId_;
     Release();
