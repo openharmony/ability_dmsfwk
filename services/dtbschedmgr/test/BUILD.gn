@@ -1126,7 +1126,10 @@ ohos_unittest("dschedswitchstatustest") {
   }
   module_out_path = module_output_path
 
-  sources = [ "unittest/switch_status_dependency_test.cpp" ]
+  sources = [
+    "unittest/switch_status_dependency_test.cpp",
+    "unittest/datashare_manager_test.cpp",
+  ]
 
   configs = [
     ":test_config",
