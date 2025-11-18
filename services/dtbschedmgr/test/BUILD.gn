@@ -1125,8 +1125,12 @@ ohos_unittest("dschedswitchstatustest") {
     blocklist = "./cfi_blocklist.txt"
   }
   module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
 
-  sources = [ "unittest/switch_status_dependency_test.cpp" ]
+  sources = [
+    "unittest/switch_status_dependency_test.cpp",
+    "unittest/datashare_manager_test.cpp",
+  ]
 
   configs = [
     ":test_config",
