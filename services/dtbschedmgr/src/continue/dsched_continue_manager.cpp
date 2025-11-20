@@ -598,21 +598,25 @@ void DSchedContinueManager::HandleNotifyTerminateContinuation(const int32_t miss
 int32_t DSchedContinueManager::ContinueStateCallbackRegister(
     StateCallbackInfo &stateCallbackInfo, sptr<IRemoteObject> callback)
 {
-    std::shared_ptr<StateCallbackData> stateCallbackDataExist = FindStateCallbackData(stateCallbackInfo);
-    if (stateCallbackDataExist == nullptr) {
-        if (callback == nullptr) {
-            return NO_CONNECT_CALLBACK_ERR;
+    std::shared_ptr<StateCallbackData> stateCallbackDataExist = nullptr;
+    {
+        std::lock_guard<std::mutex> autolock(callbackCacheMutex_);
+        stateCallbackDataExist = FindStateCallbackData(stateCallbackInfo);
+        if (stateCallbackDataExist == nullptr) {
+            if (callback == nullptr) {
+                return NO_CONNECT_CALLBACK_ERR;
+            }
+            StateCallbackData stateCallbackData;
+            sptr<StateCallbackIpcDiedListener> diedListener = new StateCallbackIpcDiedListener();
+            diedListener->stateCallbackInfo_ = stateCallbackInfo;
+            stateCallbackData.diedListener = diedListener;
+            callback->AddDeathRecipient(diedListener);
+            stateCallbackData.remoteObject = callback;
+            AddStateCallbackData(stateCallbackInfo, stateCallbackData);
+            return ERR_OK;
         }
-        StateCallbackData stateCallbackData;
-        sptr<StateCallbackIpcDiedListener> diedListener = new StateCallbackIpcDiedListener();
-        diedListener->stateCallbackInfo_ = stateCallbackInfo;
-        stateCallbackData.diedListener = diedListener;
-        callback->AddDeathRecipient(diedListener);
-        stateCallbackData.remoteObject = callback;
-        AddStateCallbackData(stateCallbackInfo, stateCallbackData);
-        return ERR_OK;
+        stateCallbackDataExist->remoteObject = callback;
     }
-    stateCallbackDataExist->remoteObject = callback;
     if (stateCallbackDataExist->state != -1) {
         return NotifyQuickStartState(stateCallbackInfo, stateCallbackDataExist->state, stateCallbackDataExist->message);
     }
@@ -621,6 +625,7 @@ int32_t DSchedContinueManager::ContinueStateCallbackRegister(
 
 int32_t DSchedContinueManager::ContinueStateCallbackUnRegister(StateCallbackInfo &stateCallbackInfo)
 {
+    std::lock_guard<std::mutex> autolock(callbackCacheMutex_);
     RemoveStateCallbackData(stateCallbackInfo);
     return ERR_OK;
 }
@@ -629,12 +634,13 @@ int32_t DSchedContinueManager::NotifyQuickStartState(StateCallbackInfo &stateCal
     int32_t state, std::string message)
 {
     HILOGI("NotifyQuickStartState called, state: %{public}d, message: %{public}s", state, message.c_str());
+    std::lock_guard<std::mutex> autolock(callbackCacheMutex_);
     std::shared_ptr<StateCallbackData> stateCallbackDataExist = FindStateCallbackData(stateCallbackInfo);
     if (stateCallbackDataExist == nullptr) {
-        StateCallbackData nweStateCallbackData;
-        nweStateCallbackData.state = state;
-        nweStateCallbackData.message = message;
-        AddStateCallbackData(stateCallbackInfo, nweStateCallbackData);
+        StateCallbackData newStateCallbackData;
+        newStateCallbackData.state = state;
+        newStateCallbackData.message = message;
+        AddStateCallbackData(stateCallbackInfo, newStateCallbackData);
         return ERR_OK;
     }
 
@@ -721,7 +727,6 @@ void DSchedContinueManager::RemoveTimeout(const DSchedContinueInfo& info)
 
 std::shared_ptr<StateCallbackData> DSchedContinueManager::FindStateCallbackData(StateCallbackInfo &stateCallbackInfo)
 {
-    std::lock_guard<std::mutex> autolock(callbackCacheMutex_);
     auto lastResult = stateCallbackCache_.find(stateCallbackInfo);
     if (lastResult == stateCallbackCache_.end()) {
         return nullptr;
@@ -732,13 +737,11 @@ std::shared_ptr<StateCallbackData> DSchedContinueManager::FindStateCallbackData(
 void DSchedContinueManager::AddStateCallbackData(
     StateCallbackInfo &stateCallbackInfo, StateCallbackData &stateCallbackData)
 {
-    std::lock_guard<std::mutex> autolock(callbackCacheMutex_);
     stateCallbackCache_.emplace(stateCallbackInfo, stateCallbackData);
 }
 
 void DSchedContinueManager::RemoveStateCallbackData(StateCallbackInfo &stateCallbackInfo)
 {
-    std::lock_guard<std::mutex> autolock(callbackCacheMutex_);
     stateCallbackCache_.erase(stateCallbackInfo);
 }
 
