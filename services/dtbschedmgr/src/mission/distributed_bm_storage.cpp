@@ -877,12 +877,12 @@ void DmsBmStorage::UpdateDistributedData()
     std::vector<DmsBundleInfo> dmsBundleInfos;
     std::vector<std::string> srcAppIdentifierVec;
     for (const auto &bundleInfo : bundleInfos) {
-        std::string keyOfKVStore = oldDistributedBundleInfos[bundleInfo.name].keyOfKVStore;
         FindProvishionInfo(bundleMgr, appProvisionInfo, accounts, result, bundleInfo.name);
         bool judgeAppIdExist =
             BundleManagerInternal::GetSrcAppIdentifierVec(appProvisionInfo.appServiceCapabilities,
             srcAppIdentifierVec);
         if (oldDistributedBundleInfos.find(bundleInfo.name) != oldDistributedBundleInfos.end()) {
+            std::string keyOfKVStore = oldDistributedBundleInfos[bundleInfo.name].keyOfKVStore;
             int64_t updateTime = oldDistributedBundleInfos[bundleInfo.name].updateTime;
             std::string oldUdid = keyOfKVStore.substr(0, localUdid.length());
             if (updateTime != bundleInfo.updateTime || (!localUdid.empty() && oldUdid != localUdid) ||
