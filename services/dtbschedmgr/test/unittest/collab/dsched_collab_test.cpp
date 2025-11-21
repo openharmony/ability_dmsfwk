@@ -30,25 +30,16 @@ namespace {
 void DSchedCollabTest::SetUpTestCase()
 {
     DTEST_LOG << "DSchedCollabTest::SetUpTestCase" << std::endl;
-    messageParcelMock_ = std::make_shared<MessageParcelMock>();
-    MessageParcelMock::messageParcel = messageParcelMock_;
-    adapterMock_ = std::make_shared<DSchedTransportSoftbusAdapterMock>();
-    DSchedTransportSoftbusAdapterMock::adapterMock = adapterMock_;
-    bundleMgrMock_ = std::make_shared<BundleManagerInternalMock>();
-    BundleManagerInternalMock::bundleMgrMock = bundleMgrMock_;
-    dmsPermMock_ = std::make_shared<DistributedSchedPermMock>();
-    DistributedSchedPermMock::dmsPermMock = dmsPermMock_;
-    dmsSrvMock_ = std::make_shared<DistributedSchedServiceMock>();
-    DistributedSchedServiceMock::dmsSrvMock = dmsSrvMock_;
-    std::string collabToken;
-    DSchedCollabInfo info;
-    dSchedCollab_ = std::make_shared<DSchedCollab>(collabToken, info);
-    usleep(WAITTIME);
 }
 
 void DSchedCollabTest::TearDownTestCase()
 {
     DTEST_LOG << "DSchedCollabTest::TearDownTestCase" << std::endl;
+}
+
+void DSchedCollabTest::TearDown()
+{
+    DTEST_LOG << "DSchedCollabTest::TearDown" << std::endl;
     MessageParcelMock::messageParcel = nullptr;
     messageParcelMock_ = nullptr;
     DSchedTransportSoftbusAdapterMock::adapterMock = nullptr;
@@ -62,15 +53,22 @@ void DSchedCollabTest::TearDownTestCase()
     dSchedCollab_ = nullptr;
 }
 
-void DSchedCollabTest::TearDown()
-{
-    DTEST_LOG << "DSchedCollabTest::TearDown" << std::endl;
-    usleep(WAITTIME);
-}
-
 void DSchedCollabTest::SetUp()
 {
     DTEST_LOG << "DSchedCollabTest::SetUp" << std::endl;
+    messageParcelMock_ = std::make_shared<MessageParcelMock>();
+    MessageParcelMock::messageParcel = messageParcelMock_;
+    adapterMock_ = std::make_shared<DSchedTransportSoftbusAdapterMock>();
+    DSchedTransportSoftbusAdapterMock::adapterMock = adapterMock_;
+    bundleMgrMock_ = std::make_shared<BundleManagerInternalMock>();
+    BundleManagerInternalMock::bundleMgrMock = bundleMgrMock_;
+    dmsPermMock_ = std::make_shared<DistributedSchedPermMock>();
+    DistributedSchedPermMock::dmsPermMock = dmsPermMock_;
+    dmsSrvMock_ = std::make_shared<DistributedSchedServiceMock>();
+    DistributedSchedServiceMock::dmsSrvMock = dmsSrvMock_;
+    std::string collabToken;
+    DSchedCollabInfo info;
+    dSchedCollab_ = std::make_shared<DSchedCollab>(collabToken, info);
 }
 
 /**
