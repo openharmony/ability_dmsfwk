@@ -398,13 +398,11 @@ bool JsAbilityConnectionManager::JsToServiceName(const napi_env &env, const napi
     // no serviceName
     if (!JsToString(env, jsValue, "serviceName", serviceName)) {
         HILOGW("Failed to unwrap serviceName.");
-    } else {
-        return true;
-    }
-    // neither exist
-    if (!JsToString(env, jsValue, "serverId", serviceName)) {
-        HILOGE("Failed to unwrap serverId and serviceName.");
-        return false;
+        // compatible with API16
+        if (!JsToString(env, jsValue, "serverId", serviceName)) {
+            HILOGE("Failed to unwrap serverId.");
+            return false;
+        }
     }
     return true;
 }
@@ -481,9 +479,10 @@ bool JsAbilityConnectionManager::JsToPeerInfo(const napi_env &env, const napi_va
 
     if (!JsObjectToString(env, jsValue, "serviceName", peerInfo.serverId)) {
         HILOGW("Failed to unwrap serviceName.");
-    }
-    if (!JsObjectToString(env, jsValue, "serverId", peerInfo.serverId)) {
-        HILOGW("Failed to unwrap serverId.");
+        if (!JsObjectToString(env, jsValue, "serverId", peerInfo.serverId)) {
+            HILOGW("Failed to unwrap serverId.");
+            return false;
+        }
     }
     peerInfo.serviceName = peerInfo.serverId;
     return true;
