@@ -79,11 +79,26 @@ namespace DistributedSchedule {
         }                                                       \
     } while (0)
 
+#define CHECK_MDM_CONTROL(object)                               \
+    do {                                                        \
+        if ((object) == true) {                                 \
+            HILOGE("Current user is under MDM control.");       \
+            return ERR_CAPABILITY_NOT_SUPPORT;                  \
+        }                                                       \
+    } while (0)
+
 enum {
     /**
      * Module type: Distributed schedule Service side
      */
     DMS_MODULE_TYPE_SERVICE = 0,
+};
+
+enum {
+    /**
+     * Result(2097230) for capability not support.
+     */
+    ERR_CAPABILITY_NOT_SUPPORT = 16300509,
 };
 
 // offset of dms error, only be used in this file.
