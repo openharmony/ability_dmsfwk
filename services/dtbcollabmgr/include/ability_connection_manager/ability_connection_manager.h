@@ -82,6 +82,7 @@ public:
     std::string GetSessionToken(int32_t sessionId);
     int32_t NotifyPeerVersion(int32_t sessionId, int32_t version);
     void FinishSessionConnect(int32_t sessionId);
+    bool IsMDMControl();
     
 private:
     std::shared_mutex sessionMutex_;

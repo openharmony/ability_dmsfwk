@@ -202,7 +202,7 @@ int32_t DistributedClient::GetPeerVersion(int32_t sessionId, const std::string& 
         HILOGW("write token failed");
         return ERR_FLATTEN_OBJECT;
     }
-    
+
     sptr<IAbilityConnectionManager> listener(new AbilityConnectionManagerListener);
     PARCEL_WRITE_HELPER(data, Int32, sessionId);
     PARCEL_WRITE_HELPER(data, String, peerDeviceId);
@@ -225,10 +225,34 @@ bool DistributedClient::GetWifiStatus()
         HILOGW("write token failed");
         return false;
     }
-    
+
     MessageParcel reply;
     MessageOption option;
     int32_t ret = remote->SendRequest(GET_WIFI_STATUS, data, reply, option);
+    if (ret != ERR_NONE) {
+        HILOGE("SendRequest transact failed");
+        return false;
+    }
+    return reply.ReadBool();
+}
+
+bool DistributedClient::IsMDMControl()
+{
+    HILOGD("called.");
+    sptr<IRemoteObject> remote = GetDmsProxy();
+    if (remote == nullptr) {
+        HILOGW("remote is nullptr");
+        return false;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        HILOGW("write token failed");
+        return false;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = remote->SendRequest(IS_MDM_CONTROL, data, reply, option);
     if (ret != ERR_NONE) {
         HILOGE("SendRequest transact failed");
         return false;
