@@ -45,6 +45,7 @@ public:
     bool CheckBundleContinueConfig(const std::string &bundleName);
     bool CheckMDMCtrlRule(const std::string &bundleName);
     bool QueryMDMControl();
+    bool IsMDMControl();
 
 private:
     void TryTwice(const std::function<DistributedKv::Status()> &func) const;
@@ -66,7 +67,7 @@ private:
     std::atomic<bool> isForbidSendAndRecv_ = false;
     std::string continueCfgFullPath_ = "";
     std::vector<std::string> whiteList_;
-    bool isMDMControl_ = false;
+    std::atomic<bool> isMDMControl_ = false;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS

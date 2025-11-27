@@ -100,6 +100,7 @@ const std::string COLLABORATE_KEYS_CONNECT_OPTIONS = "ohos.collaboration.key.con
 const std::string COLLABORATE_KEYS_COLLABORATE_TYPE = "ohos.collaboration.key.abilityCollaborateType";
 const std::string ABILITY_COLLABORATION_TYPE_DEFAULT  = "ohos.collaboration.value.abilityCollab";
 const std::string ABILITY_COLLABORATION_TYPE_CONNECT_PROXY = "ohos.collaboration.value.connectProxy";
+const std::string CAPABILITY_NOT_SUPPORT = "Capability not support";
 }
 
 bool JsAbilityConnectionManager::JsToInt32(const napi_env &env, const napi_value &value,
@@ -315,6 +316,10 @@ napi_value CreateBusinessError(napi_env env, int32_t errCode, bool isAsync = tru
             error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
                 ERR_MESSAGE_INVALID_PARAMS, isAsync);
             break;
+        case CAPABILITY_NOT_SUPPORT_ERR:
+            error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_CAPABILITY_NOT_SUPPORT),
+                CAPABILITY_NOT_SUPPORT, isAsync);
+            break;
         default:
             error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
                 ERR_MESSAGE_FAILED, isAsync);
@@ -328,12 +333,16 @@ napi_value JsAbilityConnectionManager::CreateAbilityConnectionSession(napi_env e
     HILOGI("called.");
     GET_PARAMS(env, info, ARG_COUNT_FOUR);
     napi_value result = nullptr;
+    if (AbilityConnectionManager::GetInstance().IsMDMControl()) {
+        HILOGE("Current user is under MDM control.");
+        CreateBusinessError(env, CAPABILITY_NOT_SUPPORT_ERR);
+        return result;
+    }
     if (argc != ARG_COUNT_FOUR) {
         HILOGE("CheckArgsCount failed.");
         CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return result;
     }
-
     std::string serviceName = "";
     if (!JsToServiceName(env, argv[ARG_INDEX_ZERO], serviceName)) {
         HILOGE("Failed to unwrap service name/id");
@@ -398,13 +407,11 @@ bool JsAbilityConnectionManager::JsToServiceName(const napi_env &env, const napi
     // no serviceName
     if (!JsToString(env, jsValue, "serviceName", serviceName)) {
         HILOGW("Failed to unwrap serviceName.");
-    } else {
-        return true;
-    }
-    // neither exist
-    if (!JsToString(env, jsValue, "serverId", serviceName)) {
-        HILOGE("Failed to unwrap serverId and serviceName.");
-        return false;
+        // compatible with API16
+        if (!JsToString(env, jsValue, "serverId", serviceName)) {
+            HILOGE("Failed to unwrap serverId.");
+            return false;
+        }
     }
     return true;
 }
@@ -481,9 +488,10 @@ bool JsAbilityConnectionManager::JsToPeerInfo(const napi_env &env, const napi_va
 
     if (!JsObjectToString(env, jsValue, "serviceName", peerInfo.serverId)) {
         HILOGW("Failed to unwrap serviceName.");
-    }
-    if (!JsObjectToString(env, jsValue, "serverId", peerInfo.serverId)) {
-        HILOGW("Failed to unwrap serverId.");
+        if (!JsObjectToString(env, jsValue, "serverId", peerInfo.serverId)) {
+            HILOGW("Failed to unwrap serverId.");
+            return false;
+        }
     }
     peerInfo.serviceName = peerInfo.serverId;
     return true;
