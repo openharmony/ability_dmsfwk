@@ -177,6 +177,7 @@
           "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/ability_connection_manager:unittest",
           "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/channel_manager:unittest",
           "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/av_trans_stream_provider:unittest",
+          "//foundation/ability/dmsfwk/services/dtbschedmgr/test/dExtensionDemo:dExtensionDemo",
           "//foundation/ability/dmsfwk/test:fuzztest",
           "//foundation/ability/dmsfwk/frameworks:target_distributed_tests"
         ]
