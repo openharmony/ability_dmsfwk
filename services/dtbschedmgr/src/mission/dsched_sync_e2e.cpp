@@ -105,9 +105,11 @@ bool DmsKvSyncE2E::CheckDeviceCfg()
 bool DmsKvSyncE2E::CheckMDMCtrlRule(const std::string &bundleName)
 {
     HILOGD("called.");
-    if (isMDMControl_.load() && (!CheckBundleContinueConfig(bundleName))) {
-        HILOGI("CheckMDMCtrlRule is true.");
-        return true;
+    if (isMDMControl_.load()) {
+        if (!CheckBundleContinueConfig(bundleName)) {
+            HILOGI("CheckMDMCtrlRule is true.");
+            return true;
+        }
     }
     return false;
 }
@@ -235,11 +237,6 @@ int32_t DmsKvSyncE2E::LoadContinueConfig()
 
 bool DmsKvSyncE2E::CheckBundleContinueConfig(const std::string &bundleName)
 {
-    if (!isCfgDevices_) {
-        HILOGD("The device is a normal device");
-        return true;
-    }
-
     std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
     auto it = std::find(whiteList_.begin(), whiteList_.end(), bundleName);
     if (it == whiteList_.end()) {
