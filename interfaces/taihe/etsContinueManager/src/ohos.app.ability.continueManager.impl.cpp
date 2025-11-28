@@ -24,13 +24,11 @@ namespace {
 using namespace OHOS::DistributedSchedule;
 void OnPrepareContinueInner(uintptr_t context, uintptr_t opq)
 {
-    TH_THROW(std::runtime_error, "OnPrepareContinueInner not implemented");
     AniContinueManager::GetInstance()->OnContinueStateCallback(context, opq);
 }
 
 void OffPrepareContinueInner(uintptr_t context, ::taihe::optional_view<uintptr_t> opq)
 {
-    TH_THROW(std::runtime_error, "OffPrepareContinueInner not implemented");
     AniContinueManager::GetInstance()->OffContinueStateCallback(context, opq);
 }
 }  // namespace
