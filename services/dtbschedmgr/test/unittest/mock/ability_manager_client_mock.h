@@ -31,7 +31,9 @@ public:
     virtual int32_t GetAbilityStateByPersistentId(int32_t persistentId, bool &state) = 0;
     virtual ErrCode CleanMission(int32_t missionId) = 0;
     virtual ErrCode StartAbility(const Want &want, int requestCode = DEFAULT_INVAL_VALUE,
-        int32_t userId = DEFAULT_INVAL_VALUE) = 0;
+        int32_t userId = DEFAULT_INVAL_VALUE, uint64_t specifiedFullTokenId = 0) = 0;
+    virtual ErrCode GetMissionInfos(const std::string& deviceId, int32_t numMax,
+        std::vector<MissionInfo> &missionInfos) = 0;
 public:
     static inline std::shared_ptr<IAbilityManagerClient> clientMock = nullptr;
 };
@@ -43,7 +45,10 @@ public:
     MOCK_METHOD3(ContinueAbility, ErrCode(const std::string &deviceId, int32_t missionId, uint32_t versionCode));
     MOCK_METHOD2(GetAbilityStateByPersistentId, int32_t(int32_t persistentId, bool &state));
     MOCK_METHOD1(CleanMission, ErrCode(int32_t missionId));
-    MOCK_METHOD3(StartAbility, ErrCode(const Want &want, int requestCode, int32_t userId));
+    MOCK_METHOD4(StartAbility, ErrCode(const Want &want, int requestCode, int32_t userId,
+        uint64_t specifiedFullTokenId));
+    MOCK_METHOD3(GetMissionInfos, ErrCode(const std::string& deviceId, int32_t numMax,
+        std::vector<MissionInfo> &missionInfos));
 };
 }
 }
