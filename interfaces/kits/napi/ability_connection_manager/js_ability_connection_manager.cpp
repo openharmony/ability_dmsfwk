@@ -100,7 +100,8 @@ const std::string COLLABORATE_KEYS_CONNECT_OPTIONS = "ohos.collaboration.key.con
 const std::string COLLABORATE_KEYS_COLLABORATE_TYPE = "ohos.collaboration.key.abilityCollaborateType";
 const std::string ABILITY_COLLABORATION_TYPE_DEFAULT  = "ohos.collaboration.value.abilityCollab";
 const std::string ABILITY_COLLABORATION_TYPE_CONNECT_PROXY = "ohos.collaboration.value.connectProxy";
-const std::string CAPABILITY_NOT_SUPPORT = "Capability not support";
+const std::string CAPABILITY_NOT_SUPPORT =
+    "Capability not supported.Failed to call the API due to limited device capabilities.";
 }
 
 bool JsAbilityConnectionManager::JsToInt32(const napi_env &env, const napi_value &value,

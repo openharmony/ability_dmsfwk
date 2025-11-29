@@ -41,6 +41,7 @@ void DMSContinueSendMgrTest::SetUpTestCase()
     mgrMock_ = std::make_shared<DmsContinueConditionMgrMock>();
     IDmsContinueConditionMgr::conditionMgrMock = mgrMock_;
     clientMock_ = std::make_shared<AbilityManagerClientMock>();
+    AbilityManagerClientMock::clientMock = clientMock_;
 }
 
 void DMSContinueSendMgrTest::TearDownTestCase()
@@ -50,6 +51,7 @@ void DMSContinueSendMgrTest::TearDownTestCase()
     IDmsContinueConditionMgr::conditionMgrMock = nullptr;
     mgrMock_ = nullptr;
     clientMock_ = nullptr;
+    AbilityManagerClientMock::clientMock = nullptr;
 }
 
 void DMSContinueSendMgrTest::SetUp()
