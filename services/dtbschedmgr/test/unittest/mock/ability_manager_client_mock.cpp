@@ -43,9 +43,16 @@ ErrCode AbilityManagerClient::CleanMission(int32_t missionId)
     return IAbilityManagerClient::clientMock->CleanMission(missionId);
 }
 
-ErrCode AbilityManagerClient::StartAbility(const Want &want, int requestCode, int32_t userId)
+ErrCode AbilityManagerClient::StartAbility(const Want &want, int requestCode, int32_t userId,
+    uint64_t specifiedFullTokenId)
 {
-    return IAbilityManagerClient::clientMock->StartAbility(want, requestCode, userId);
+    return IAbilityManagerClient::clientMock->StartAbility(want, requestCode, userId, specifiedFullTokenId);
+}
+
+ErrCode AbilityManagerClient::GetMissionInfos(const std::string& deviceId, int32_t numMax,
+    std::vector<MissionInfo> &missionInfos)
+{
+    return IAbilityManagerClient::clientMock->GetMissionInfos(deviceId, numMax, missionInfos);
 }
 }
 }

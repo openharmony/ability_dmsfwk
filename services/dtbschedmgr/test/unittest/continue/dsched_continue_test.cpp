@@ -718,7 +718,7 @@ HWTEST_F(DSchedContinueTest, StartAbilityTest_0027_1, TestSize.Level1)
         "com.ohos.distributedmusicplayer.MainAbility");
     want.SetElement(element);
     EXPECT_CALL(*clientMock_, Connect()).WillOnce(Return(0));
-    EXPECT_CALL(*clientMock_, StartAbility(_, _, _)).WillOnce(Return(1));
+    EXPECT_CALL(*clientMock_, StartAbility(_, An<int>(), _, _)).WillOnce(Return(1));
     int32_t ret = conti_->StartAbility(want, 0);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "DSchedContinueTest StartAbilityTest_0027_1 end ret:" << ret << std::endl;
