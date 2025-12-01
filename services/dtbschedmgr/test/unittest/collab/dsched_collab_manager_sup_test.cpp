@@ -305,6 +305,7 @@ HWTEST_F(DSchedCollabManagerSupTest, GetSinkCollabVersion_002, TestSize.Level3)
     EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(ptr));
     ret = DSchedCollabManager::GetInstance().GetSinkCollabVersion(info);
     EXPECT_EQ(ret, ERR_OK);
+    info.srcClientCB_ = nullptr;
     DSchedCollabManager::GetInstance().UnInit();
     DTEST_LOG << "DSchedCollabManagerSupTest GetSinkCollabVersion_002 end" << std::endl;
 }
