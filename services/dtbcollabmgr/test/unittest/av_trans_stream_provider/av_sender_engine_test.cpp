@@ -91,11 +91,11 @@ HWTEST_F(AVSenderEngineTest, SetVideoSource_Test, TestSize.Level1)
 }
 
 /**
- * @tc.name: Configure_Test
+ * @tc.name: Configure_Test_001
  * @tc.desc: Test Configure
  * @tc.type: FUNC
  */
-HWTEST_F(AVSenderEngineTest, Configure_Test, TestSize.Level1)
+HWTEST_F(AVSenderEngineTest, Configure_Test_001, TestSize.Level1)
 {
     DTEST_LOG << "AVSenderEngineTest Configure_Test begin" << std::endl;
     VidEnc recParam(VideoCodecFormat::VIDEO_DEFAULT);
@@ -106,6 +106,124 @@ HWTEST_F(AVSenderEngineTest, Configure_Test, TestSize.Level1)
     recParam.type_ = StreamParamType::VID_CAPTURERATE;
     EXPECT_EQ(senderEngine_->Configure(recParam), static_cast<int32_t>(Status::OK));
     DTEST_LOG << "AVSenderEngineTest Configure_Test end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_Test_002
+ * @tc.desc: Test Configure with VID_ENC_FMT parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSenderEngineTest, Configure_Test_002, TestSize.Level1)
+{
+    DTEST_LOG << "AVSenderEngineTest Configure_Test_002 begin" << std::endl;
+    VidEnc encParam(VideoCodecFormat::H264);
+    EXPECT_EQ(senderEngine_->Configure(encParam), static_cast<int32_t>(Status::OK));
+
+    VidEnc encParam2(VideoCodecFormat::H265);
+    EXPECT_EQ(senderEngine_->Configure(encParam2), static_cast<int32_t>(Status::OK));
+    DTEST_LOG << "AVSenderEngineTest Configure_Test_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_Test_003
+ * @tc.desc: Test Configure with VID_RECTANGLE parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSenderEngineTest, Configure_Test_003, TestSize.Level1)
+{
+    DTEST_LOG << "AVSenderEngineTest Configure_Test_003 begin" << std::endl;
+    VidRectangle rectParam(1920, 1080);
+    EXPECT_EQ(senderEngine_->Configure(rectParam), static_cast<int32_t>(Status::OK));
+
+    VidRectangle rectParam2(1280, 720);
+    EXPECT_EQ(senderEngine_->Configure(rectParam2), static_cast<int32_t>(Status::OK));
+    DTEST_LOG << "AVSenderEngineTest Configure_Test_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_Test_004
+ * @tc.desc: Test Configure with VID_BITRATE parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSenderEngineTest, Configure_Test_004, TestSize.Level1)
+{
+    DTEST_LOG << "AVSenderEngineTest Configure_Test_004 begin" << std::endl;
+    VidBitRate bitrateParam(8000000); // 8Mbps
+    EXPECT_EQ(senderEngine_->Configure(bitrateParam), static_cast<int32_t>(Status::OK));
+
+    VidBitRate bitrateParam2(4000000); // 4Mbps
+    EXPECT_EQ(senderEngine_->Configure(bitrateParam2), static_cast<int32_t>(Status::OK));
+    DTEST_LOG << "AVSenderEngineTest Configure_Test_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_Test_005
+ * @tc.desc: Test Configure with VID_FRAMERATE parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSenderEngineTest, Configure_Test_005, TestSize.Level1)
+{
+    DTEST_LOG << "AVSenderEngineTest Configure_Test_005 begin" << std::endl;
+    VidFrameRate framerateParam(30); // 30fps
+    EXPECT_EQ(senderEngine_->Configure(framerateParam), static_cast<int32_t>(Status::OK));
+
+    VidFrameRate framerateParam2(60); // 60fps
+    EXPECT_EQ(senderEngine_->Configure(framerateParam2), static_cast<int32_t>(Status::OK));
+    DTEST_LOG << "AVSenderEngineTest Configure_Test_005 end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_Test_006
+ * @tc.desc: Test Configure with VID_IS_HDR parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSenderEngineTest, Configure_Test_006, TestSize.Level1)
+{
+    DTEST_LOG << "AVSenderEngineTest Configure_Test_006 begin" << std::endl;
+    VidIsHdr hdrParam(true);
+    EXPECT_EQ(senderEngine_->Configure(hdrParam), static_cast<int32_t>(Status::OK));
+
+    VidIsHdr hdrParam2(false);
+    EXPECT_EQ(senderEngine_->Configure(hdrParam2), static_cast<int32_t>(Status::OK));
+    DTEST_LOG << "AVSenderEngineTest Configure_Test_006 end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_Test_007
+ * @tc.desc: Test Configure with VID_ENABLE_TEMPORAL_SCALE parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSenderEngineTest, Configure_Test_007, TestSize.Level1)
+{
+    DTEST_LOG << "AVSenderEngineTest Configure_Test_008 begin" << std::endl;
+    VidEnableTemporalScale temporalScaleParam(true);
+    EXPECT_EQ(senderEngine_->Configure(temporalScaleParam), static_cast<int32_t>(Status::OK));
+
+    VidEnableTemporalScale temporalScaleParam2(false);
+    EXPECT_EQ(senderEngine_->Configure(temporalScaleParam2), static_cast<int32_t>(Status::OK));
+    DTEST_LOG << "AVSenderEngineTest Configure_Test_008 end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_Test_008
+ * @tc.desc: Test Configure with VID_SURFACE_PARAM parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSenderEngineTest, Configure_Test_008, TestSize.Level1)
+{
+    DTEST_LOG << "AVSenderEngineTest Configure_Test_009 begin" << std::endl;
+    SurfaceParam surfaceParam;
+    surfaceParam.filp = SurfaceFilp::FLIP_NONE;
+    surfaceParam.rotate = SurfaceRotate::ROTATE_NONE;
+    VidSurfaceParam surfaceParamObj(surfaceParam);
+    EXPECT_EQ(senderEngine_->Configure(surfaceParamObj), static_cast<int32_t>(Status::OK));
+
+    SurfaceParam surfaceParam2;
+    surfaceParam2.filp = SurfaceFilp::FLIP_H;
+    surfaceParam2.rotate = SurfaceRotate::ROTATE_90;
+    VidSurfaceParam surfaceParamObj2(surfaceParam2);
+    EXPECT_EQ(senderEngine_->Configure(surfaceParamObj2), static_cast<int32_t>(Status::OK));
+    DTEST_LOG << "AVSenderEngineTest Configure_Test_009 end" << std::endl;
 }
 
 /**

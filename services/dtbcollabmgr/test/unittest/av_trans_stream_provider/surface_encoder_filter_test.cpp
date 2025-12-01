@@ -270,6 +270,131 @@ HWTEST_F(SurfaceEncoderFilterTest, SetParameter_001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: SetParameter_002
+ * @tc.desc: SurfaceEncoderFilter SetParameter with valid codec parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderFilterTest, SetParameter_002, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderFilterTest SetParameter_002 begin" << std::endl;
+    std::string name = TEST_ENCODER_FILTER_NAME;
+    FilterType type  = FilterType::FILTERTYPE_VENC;
+    std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
+    
+    // Create parameter with valid codec settings
+    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
+    parameter->Set<Tag::VIDEO_WIDTH>(1920);
+    parameter->Set<Tag::VIDEO_HEIGHT>(1080);
+    parameter->Set<Tag::VIDEO_FRAME_RATE>(30);
+    parameter->Set<Tag::MIME_TYPE>("video/avc");
+    
+    // Call SetParameter
+    videoEncoderFilter_->SetParameter(parameter);
+    
+    // Verify codecAdapter_ remains nullptr (expected behavior)
+    EXPECT_EQ(videoEncoderFilter_->codecAdapter_, nullptr);
+    DTEST_LOG << "SurfaceEncoderFilterTest SetParameter_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetParameter_003
+ * @tc.desc: SurfaceEncoderFilter SetParameter with null parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderFilterTest, SetParameter_003, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderFilterTest SetParameter_003 begin" << std::endl;
+    std::string name = TEST_ENCODER_FILTER_NAME;
+    FilterType type  = FilterType::FILTERTYPE_VENC;
+    std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
+    
+    // Call SetParameter with nullptr
+    videoEncoderFilter_->SetParameter(nullptr);
+    
+    // Verify codecAdapter_ remains nullptr
+    EXPECT_EQ(videoEncoderFilter_->codecAdapter_, nullptr);
+    DTEST_LOG << "SurfaceEncoderFilterTest SetParameter_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetParameter_004
+ * @tc.desc: SurfaceEncoderFilter SetParameter with empty parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderFilterTest, SetParameter_004, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderFilterTest SetParameter_004 begin" << std::endl;
+    std::string name = TEST_ENCODER_FILTER_NAME;
+    FilterType type  = FilterType::FILTERTYPE_VENC;
+    std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
+    
+    // Create empty parameter
+    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
+    
+    // Call SetParameter
+    videoEncoderFilter_->SetParameter(parameter);
+    
+    // Verify codecAdapter_ remains nullptr
+    EXPECT_EQ(videoEncoderFilter_->codecAdapter_, nullptr);
+    DTEST_LOG << "SurfaceEncoderFilterTest SetParameter_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetParameter_005
+ * @tc.desc: SurfaceEncoderFilter SetParameter with audio codec parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderFilterTest, SetParameter_005, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderFilterTest SetParameter_005 begin" << std::endl;
+    std::string name = TEST_ENCODER_FILTER_NAME;
+    FilterType type  = FilterType::FILTERTYPE_VENC;
+    std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
+    
+    // Create parameter with audio codec settings
+    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
+    parameter->Set<Tag::MIME_TYPE>("audio/mp4a-latm");
+    parameter->Set<Tag::AUDIO_SAMPLE_RATE>(48000);
+    parameter->Set<Tag::AUDIO_CHANNEL_COUNT>(2);
+    
+    // Call SetParameter
+    videoEncoderFilter_->SetParameter(parameter);
+    
+    // Verify codecAdapter_ remains nullptr
+    EXPECT_EQ(videoEncoderFilter_->codecAdapter_, nullptr);
+    DTEST_LOG << "SurfaceEncoderFilterTest SetParameter_005 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetParameter_006
+ * @tc.desc: SurfaceEncoderFilter SetParameter with mixed video and audio parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderFilterTest, SetParameter_006, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderFilterTest SetParameter_006 begin" << std::endl;
+    std::string name = TEST_ENCODER_FILTER_NAME;
+    FilterType type  = FilterType::FILTERTYPE_VENC;
+    std::shared_ptr<SurfaceEncoderFilter> videoEncoderFilter_ = std::make_shared<SurfaceEncoderFilter>(name, type);
+    
+    // Create parameter with mixed video and audio settings
+    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
+    parameter->Set<Tag::VIDEO_WIDTH>(1280);
+    parameter->Set<Tag::VIDEO_HEIGHT>(720);
+    parameter->Set<Tag::VIDEO_FRAME_RATE>(60);
+    parameter->Set<Tag::MIME_TYPE>("video/hevc");
+    parameter->Set<Tag::AUDIO_SAMPLE_RATE>(44100);
+    parameter->Set<Tag::AUDIO_CHANNEL_COUNT>(6);
+    
+    // Call SetParameter
+    videoEncoderFilter_->SetParameter(parameter);
+    
+    // Verify codecAdapter_ remains nullptr
+    EXPECT_EQ(videoEncoderFilter_->codecAdapter_, nullptr);
+    DTEST_LOG << "SurfaceEncoderFilterTest SetParameter_006 end" << std::endl;
+}
+
+/**
  * @tc.name: SetCallingInfo_001
  * @tc.desc: SurfaceEncoderFilter SetCallingInfo with valid parameters
  * @tc.type: FUNC
