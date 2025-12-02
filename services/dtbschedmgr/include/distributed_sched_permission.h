@@ -64,8 +64,8 @@ public:
         const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility);
     bool IsFoundationCall() const;
     bool IsSceneBoardCall() const;
-    int32_t CheckPermission(uint32_t accessToken, const std::string& permissionName) const;
-    int32_t CheckPermissionAll(uint32_t accessToken, const std::string& permissionName) const;
+    int32_t CheckPermission(uint64_t accessToken, const std::string& permissionName) const;
+    int32_t CheckPermissionAll(uint64_t accessToken, const std::string& permissionName) const;
     int32_t GetAccountInfo(const std::string& remoteNetworkId, const CallerInfo& callerInfo,
         AccountInfo& accountInfo);
     bool GetTargetAbility(const AAFwk::Want& want, AppExecFwk::AbilityInfo& targetAbility,
@@ -93,7 +93,7 @@ private:
     bool GetRelatedGroups(const std::string& udid, const std::vector<std::string>& bundleNames,
         AccountInfo& accountInfo);
     bool ParseGroupInfos(const std::string& returnGroupStr, std::vector<GroupInfo>& groupInfos);
-    bool VerifyPermission(uint32_t accessToken, const std::string& permissionName) const;
+    bool VerifyPermission(uint64_t accessToken, const std::string& permissionName) const;
     bool CheckAccountAccessPermission(const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, const std::string& targetBundleName, bool isNewCollab = false);
     bool CheckComponentAccessPermission(const AppExecFwk::AbilityInfo& targetAbility,

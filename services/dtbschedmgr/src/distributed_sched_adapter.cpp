@@ -15,6 +15,7 @@
 
 #include "distributed_sched_adapter.h"
 
+#include "accesstoken_kit.h"
 #include "datetime_ex.h"
 #include "dfx/dms_hisysevent_report.h"
 #include "distributed_sched_service.h"
@@ -63,8 +64,8 @@ void DistributedSchedAdapter::UnInit()
     dmsAdapterHandler_ = nullptr;
 }
 
-int32_t DistributedSchedAdapter::ConnectAbility(const OHOS::AAFwk::Want& want,
-    const sptr<IRemoteObject>& connect, const sptr<IRemoteObject>& callerToken)
+int32_t DistributedSchedAdapter::ConnectAbility(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
+    const sptr<IRemoteObject>& callerToken, const CallerInfo& callerInfo)
 {
     HILOGI("ConnectAbility");
     ErrCode errCode = AAFwk::AbilityManagerClient::GetInstance()->Connect();
@@ -73,6 +74,13 @@ int32_t DistributedSchedAdapter::ConnectAbility(const OHOS::AAFwk::Want& want,
         DmsHiSysEventReport::ReportFaultEvent(FaultEvent::CONNECT_REMOTE_ABILITY,
             EventErrorType::GET_ABILITY_MGR_FAILED);
         return errCode;
+    }
+    uint64_t dAccessToken = Security::AccessToken::AccessTokenKit::AllocLocalTokenID(callerInfo.sourceDeviceId,
+        callerInfo.accessToken);
+    HILOGI("dAccessToken: %{public}s", std::to_string(dAccessToken).c_str());
+    if (dAccessToken == 0) {
+        HILOGE("Get TokenId failed!!");
+        return INVALID_PARAMETERS_ERR;
     }
     int32_t activeAccountId = -1;
 #ifdef OS_ACCOUNT_PART
@@ -84,7 +92,7 @@ int32_t DistributedSchedAdapter::ConnectAbility(const OHOS::AAFwk::Want& want,
     activeAccountId = ids[0];
 #endif
     errCode = AAFwk::AbilityManagerClient::GetInstance()->ConnectAbility(want,
-        iface_cast<AAFwk::IAbilityConnection>(connect), callerToken, activeAccountId);
+        iface_cast<AAFwk::IAbilityConnection>(connect), callerToken, activeAccountId, dAccessToken);
     return errCode;
 }
 

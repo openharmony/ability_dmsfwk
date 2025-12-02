@@ -175,6 +175,9 @@ ohos_unittest("distributedschedservicetest") {
     "${dms_path}/services/dtbschedmgr/src/distributed_sched_service.cpp",
     "unittest/distributed_sched_service_first_test.cpp",
     "unittest/distributed_sched_service_second_test.cpp",
+    "unittest/mock/ability_manager_client_mock.cpp",
+    "unittest/mock/accesstoken_kit_mock.cpp",
+    "unittest/mock/distributed_sched_permission_mock.cpp",
     "unittest/mock/multi_user_manager_mock.cpp",
     "unittest/mock/mock_device_manager.cpp",
     "unittest/mock/svc_distributed_connection_mock.cpp",
@@ -304,6 +307,8 @@ ohos_unittest("distributedschedadaptertest") {
     "unittest/continue_scene_session_handler_test.cpp",
     "unittest/distributed_sched_adapter_test.cpp",
     "unittest/mock_remote_stub.cpp",
+    "unittest/mock/ability_manager_client_mock.cpp",
+    "unittest/mock/accesstoken_kit_mock.cpp",
   ]
   sources += dtbschedmgr_sources
 
@@ -321,6 +326,7 @@ ohos_unittest("distributedschedadaptertest") {
     defines = [ "SUPPORT_DISTRIBUTEDCOMPONENT_TO_MEMMGR" ]
   }
 
+  external_deps += [ "googletest:gmock" ]
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
