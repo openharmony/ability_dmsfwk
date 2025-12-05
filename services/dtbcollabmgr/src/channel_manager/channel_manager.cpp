@@ -909,6 +909,10 @@ void ChannelManager::OnSocketConnected(int32_t socketId, const PeerSocketInfo& i
         return;
     }
     HILOGI("socket %{public}d binded", socketId);
+    if (info.name == nullptr) {
+        HILOGE("perr socket name is null");
+        return;
+    }
     std::optional<std::string> channelNameOpt = GetChannelNameFromSocket(info.name);
     if (!channelNameOpt) {
         HILOGE("error socket name, %{public}s", info.name);
