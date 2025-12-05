@@ -232,7 +232,6 @@ public:
     int32_t ContinueStateCallbackUnRegister(int32_t missionId, std::string bundleName, std::string moduleName,
         std::string abilityName);
     void SetCallerExtraInfo(CallerInfo &callerInfo, uint32_t accessToken, uint32_t specifyTokenId);
-    int32_t CheckCallerIdentity(const OHOS::AAFwk::Want &want, const CallerInfo& callerInfo);
     bool IsTargetPermission(const OHOS::AAFwk::Want &want);
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
@@ -296,7 +295,7 @@ private:
     int32_t TryStartRemoteAbilityByCall(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
         const CallerInfo& callerInfo);
     int32_t StartLocalAbility(const FreeInstallInfo& info, int64_t taskId, int32_t resultCode);
-    int32_t StartAbility(const OHOS::AAFwk::Want& want, int32_t requestCode);
+    int32_t StartAbility(const OHOS::AAFwk::Want& want, int32_t requestCode, const CallerInfo& callerInfo);
     int32_t HandleRemoteNotify(const FreeInstallInfo& info, int64_t taskId, int32_t resultCode);
     void ReportDistributedComponentChange(const CallerInfo& callerInfo, int32_t changeType,
         int32_t componentType, int32_t deviceType);

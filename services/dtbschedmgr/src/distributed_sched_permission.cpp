@@ -653,7 +653,7 @@ bool DistributedSchedPermission::IsSceneBoardCall() const
     return true;
 }
 
-int32_t DistributedSchedPermission::CheckPermission(uint32_t accessToken, const std::string& permissionName) const
+int32_t DistributedSchedPermission::CheckPermission(uint64_t accessToken, const std::string& permissionName) const
 {
     HILOGI("CheckPermission called.");
     if (VerifyPermission(accessToken, permissionName)) {
@@ -662,7 +662,7 @@ int32_t DistributedSchedPermission::CheckPermission(uint32_t accessToken, const 
     return DMS_PERMISSION_DENIED;
 }
 
-int32_t DistributedSchedPermission::CheckPermissionAll(uint32_t accessToken, const std::string& permissionName) const
+int32_t DistributedSchedPermission::CheckPermissionAll(uint64_t accessToken, const std::string& permissionName) const
 {
     HILOGI("CheckPermissionAll called.");
     if (VerifyPermission(accessToken, permissionName)) {
@@ -725,9 +725,11 @@ bool DistributedSchedPermission::IsDistributedFile(const std::string& path) cons
     return false;
 }
 
-bool DistributedSchedPermission::VerifyPermission(uint32_t accessToken, const std::string& permissionName) const
+bool DistributedSchedPermission::VerifyPermission(uint64_t accessToken, const std::string& permissionName) const
 {
-    int32_t result = AccessToken::AccessTokenKit::VerifyAccessToken(accessToken, permissionName);
+    Security::AccessToken::AccessTokenIDEx idEx = {0};
+    idEx.tokenIDEx = accessToken;
+    int32_t result = AccessToken::AccessTokenKit::VerifyAccessToken(idEx.tokenIdExStruct.tokenID, permissionName);
     if (result == AccessToken::PermissionState::PERMISSION_DENIED) {
         HILOGE("permission denied, permissionName:%{public}s", permissionName.c_str());
         return false;
@@ -877,7 +879,7 @@ bool DistributedSchedPermission::CheckNewCollabBackgroundPermission(const Caller
         HILOGI("non-background invocation, no need to verify this permission.");
         return true;
     }
-    uint32_t dAccessToken = AccessToken::AccessTokenKit::AllocLocalTokenID(callerInfo.sourceDeviceId,
+    uint64_t dAccessToken = AccessToken::AccessTokenKit::AllocLocalTokenID(callerInfo.sourceDeviceId,
         callerInfo.accessToken);
     if (dAccessToken == 0) {
         HILOGE("dAccessTokenID is invalid!");
@@ -969,7 +971,7 @@ bool DistributedSchedPermission::CheckBackgroundPermission(const AppExecFwk::Abi
         HILOGD("the app is service ability of fa mode and is under api 8");
         return true;
     }
-    uint32_t dAccessToken = AccessToken::AccessTokenKit::AllocLocalTokenID(callerInfo.sourceDeviceId,
+    uint64_t dAccessToken = AccessToken::AccessTokenKit::AllocLocalTokenID(callerInfo.sourceDeviceId,
         callerInfo.accessToken);
     if (dAccessToken == 0) {
         HILOGE("dAccessTokenID is invalid!");
@@ -1055,7 +1057,7 @@ bool DistributedSchedPermission::CheckTargetAbilityVisible(const AppExecFwk::Abi
         HILOGD("Target ability is visible.");
         return true;
     }
-    uint32_t dAccessToken = AccessToken::AccessTokenKit::AllocLocalTokenID(callerInfo.sourceDeviceId,
+    uint64_t dAccessToken = AccessToken::AccessTokenKit::AllocLocalTokenID(callerInfo.sourceDeviceId,
         callerInfo.accessToken);
     if (dAccessToken == 0) {
         HILOGE("dAccessTokenID is invalid!");
