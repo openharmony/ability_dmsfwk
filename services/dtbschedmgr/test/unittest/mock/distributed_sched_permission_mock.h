@@ -24,9 +24,16 @@ namespace DistributedSchedule {
 using namespace OHOS::AppExecFwk;
 class IDistributedSchedPerm {
 public:
+    using AccountInfo = IDistributedSched::AccountInfo;
+
     virtual ~IDistributedSchedPerm() = default;
     virtual int32_t GetAccountInfo(const std::string& remoteNetworkId, const CallerInfo& callerInfo,
         IDistributedSched::AccountInfo& accountInfo) = 0;
+    virtual bool GetTargetAbility(const AAFwk::Want& want,
+        AppExecFwk::AbilityInfo& targetAbility, bool needQueryExtension) = 0;
+    virtual int32_t CheckStartPermission(const AAFwk::Want& want, const CallerInfo& callerInfo,
+    const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility, bool isSameBundle) = 0;
+
 public:
     static inline std::shared_ptr<IDistributedSchedPerm> dmsPermMock = nullptr;
 };
@@ -35,6 +42,10 @@ class DistributedSchedPermMock : public IDistributedSchedPerm {
 public:
     MOCK_METHOD3(GetAccountInfo, int32_t(const std::string& remoteNetworkId, const CallerInfo& callerInfo,
         IDistributedSched::AccountInfo& accountInfo));
+    MOCK_METHOD3(GetTargetAbility, bool(const AAFwk::Want& want,
+        AppExecFwk::AbilityInfo& targetAbility, bool needQueryExtension));
+    MOCK_METHOD5(CheckStartPermission, int32_t(const AAFwk::Want& want, const CallerInfo& callerInfo,
+    const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility, bool isSameBundle));
 };
 }
 }

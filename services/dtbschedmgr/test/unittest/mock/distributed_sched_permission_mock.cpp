@@ -26,3 +26,22 @@ int32_t DistributedSchedPermission::GetAccountInfo(const std::string& remoteNetw
     }
     return IDistributedSchedPerm::dmsPermMock->GetAccountInfo(remoteNetworkId, callerInfo, accountInfo);
 }
+
+bool DistributedSchedPermission::GetTargetAbility(const AAFwk::Want& want,
+    AppExecFwk::AbilityInfo& targetAbility, bool needQueryExtension) const
+{
+    if (IDistributedSchedPerm::dmsPermMock == nullptr) {
+        return 0;
+    }
+    return IDistributedSchedPerm::dmsPermMock->GetTargetAbility(want, targetAbility, needQueryExtension);
+}
+
+int32_t DistributedSchedPermission::CheckStartPermission(const AAFwk::Want& want, const CallerInfo& callerInfo,
+    const AccountInfo& accountInfo, AppExecFwk::AbilityInfo& targetAbility, bool isSameBundle)
+{
+    if (IDistributedSchedPerm::dmsPermMock == nullptr) {
+        return 0;
+    }
+    return IDistributedSchedPerm::dmsPermMock->CheckStartPermission(want, callerInfo, accountInfo, targetAbility,
+        isSameBundle);
+}
