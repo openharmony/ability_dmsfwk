@@ -50,7 +50,8 @@ NapiAbilityConnectionSessionListener::~NapiAbilityConnectionSessionListener()
             }
             napi_delete_reference(env, ref);
         };
-        if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_vip)) {
+        if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_vip,
+            "distributedsched:~NapiAbilityConnectionSessionListener")) {
             HILOGE("send event failed!");
         }
     }
@@ -117,7 +118,7 @@ void NapiAbilityConnectionSessionListener::CallJsMethodTemplate(const T& callbac
         }
         HILOGI("end.");
     };
-    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_vip)) {
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_vip, "distributedsched:CallJsMethodTemplate")) {
         HILOGE("send event failed!");
     }
 }
