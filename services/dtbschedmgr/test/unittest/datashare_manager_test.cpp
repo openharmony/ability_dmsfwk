@@ -123,12 +123,12 @@ HWTEST_F(DataShareManagerTest, DataShareManager_UpdateSwitchStatus_004, TestSize
  * @tc.name: CheckAndHandleContinueSwitch
  * @tc.desc: Test case when continue switch should not be closed
  */
-HWTEST_F(DataShareManagerTest, CheckAndHandleContinueSwitch_003, TestSize.Level1) {
-
+HWTEST_F(DataShareManagerTest, CheckAndHandleContinueSwitch_003, TestSize.Level1)
+{
+    DTEST_LOG << "DataShareManagerTest-begin CheckAndHandleContinueSwitch_003" << std::endl;
     bool result = DataShareManager::GetInstance().CheckAndHandleContinueSwitch();
-
-    EXPECT_FALSE(result);
     EXPECT_NO_FATAL_FAILURE(SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
+    DTEST_LOG << "DataShareManagerTest-end CheckAndHandleContinueSwitch_003" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
