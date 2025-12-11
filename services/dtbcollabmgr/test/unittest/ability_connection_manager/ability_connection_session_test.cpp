@@ -20,6 +20,7 @@
 #include "av_sender_filter.h"
 #include "dtbschedmgr_log.h"
 #include "dtbcollabmgr_log.h"
+#include "softbus_error_code.h"
 #include "test_log.h"
 #include "tokenid_kit_mock.h"
 
@@ -900,6 +901,26 @@ HWTEST_F(AbilityConnectionSessionTest, ConvertToConnectErrorCode_Test_001, TestS
     EXPECT_EQ(ret, ConnectErrorCode::CONNECTED_SESSION_EXISTS);
 
     collabResult = PEER_WIFI_NOT_OPEN;
+    ret = connectionSesion_->ConvertToConnectErrorCode(collabResult);
+    EXPECT_EQ(ret, ConnectErrorCode::PEER_WIFI_NOT_OPEN);
+
+    collabResult = SOFTBUS_CONN_PASSIVE_TYPE_AP_P2P_CHIP_CONFLICT;
+    ret = connectionSesion_->ConvertToConnectErrorCode(collabResult);
+    EXPECT_EQ(ret, ConnectErrorCode::PEER_WIFI_NOT_OPEN);
+
+    collabResult = SOFTBUS_CONN_PASSIVE_TYPE_AP_STA_P2P_CHIP_CONFLICT;
+    ret = connectionSesion_->ConvertToConnectErrorCode(collabResult);
+    EXPECT_EQ(ret, ConnectErrorCode::PEER_WIFI_NOT_OPEN);
+
+    collabResult = SOFTBUS_CONN_PASSIVE_TYPE_AP_STA_CHIP_CONFLICT;
+    ret = connectionSesion_->ConvertToConnectErrorCode(collabResult);
+    EXPECT_EQ(ret, ConnectErrorCode::PEER_WIFI_NOT_OPEN);
+
+    collabResult = SOFTBUS_CONN_PASSIVE_TYPE_AP_HML_CHIP_CONFLICT;
+    ret = connectionSesion_->ConvertToConnectErrorCode(collabResult);
+    EXPECT_EQ(ret, ConnectErrorCode::PEER_WIFI_NOT_OPEN);
+
+    collabResult = SOFTBUS_CONN_PASSIVE_TYPE_AP_STA_HML_CHIP_CONFLICT;
     ret = connectionSesion_->ConvertToConnectErrorCode(collabResult);
     EXPECT_EQ(ret, ConnectErrorCode::PEER_WIFI_NOT_OPEN);
 
