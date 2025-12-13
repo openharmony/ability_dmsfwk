@@ -341,7 +341,6 @@ HWTEST_F(DMSContinueRecomMgrTest, GetAvailableRecommendListTest_001, TestSize.Le
     std::vector<std::string> networkIdList;
     std::string bundleName = "";
     AppExecFwk::AppProvisionInfo appProvisionInfo;
-    EXPECT_CALL(*storageMock_, GetNetworkIdList()).WillOnce(Return(networkIdList));
     EXPECT_CALL(*bundleMgrMock_, GetAppProvisionInfo4CurrentUser(_, _)).WillOnce(Return(false));
     bool ret = recomMgr->GetAvailableRecommendList(bundleName, result);
     EXPECT_EQ(ret, false);
