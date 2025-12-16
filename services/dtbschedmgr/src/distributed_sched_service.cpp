@@ -132,6 +132,7 @@ const std::string COMMON_EVENT_WIFI_SEMI_STATE = "usual.event.wifi.SEMI_STATE";
 const std::string COLLABRATION_TYPE = "CollabrationType";
 const std::string SOURCE_DELEGATEE = "SourceDelegatee";
 const std::string CONNECT_RPOXY = "VALUE_ABILITY_COLLAB_TYPE_CONNECT_PROXY";
+const std::string DISABLE_CONTINUATION_SERVICE = "const.continuation.disable_application_continuation";
 constexpr int32_t DEFAULT_DMS_MISSION_ID = -1;
 constexpr int32_t DEFAULT_DMS_CONNECT_TOKEN = -1;
 constexpr int32_t BIND_CONNECT_RETRY_TIMES = 3;
@@ -598,7 +599,12 @@ bool DistributedSchedService::Init()
         HILOGW("DtbschedmgrDeviceInfoStorage init failed.");
     }
     InitDataShareManager();
-    InitMissionManager();
+    DataShareManager::GetInstance().CheckAndHandleContinueSwitch();
+    bool isDisableContinue = system::GetBoolParameter(DISABLE_CONTINUATION_SERVICE, false);
+    HILOGI("isDisableContinue: %{public}d", isDisableContinue);
+    if (!isDisableContinue) {
+        InitMissionManager();
+    }
     DSchedCollabManager::GetInstance().Init();
     DistributedSchedAdapter::GetInstance().Init();
     if (SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
@@ -612,7 +618,6 @@ bool DistributedSchedService::Init()
         auto runner = AppExecFwk::EventRunner::Create("DmsComponentChange");
         componentChangeHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
-    DataShareManager::GetInstance().CheckAndHandleContinueSwitch();
     return true;
 }
 // LCOV_EXCL_STOP
