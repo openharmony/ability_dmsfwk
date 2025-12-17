@@ -217,6 +217,7 @@ ohos_unittest("distributed_extension_base_test") {
   module_out_path = module_output_path
 
   sources = [
+    "${dms_path}/frameworks/native/distributed_extension/ani/src/distributed_extension_ets_loader.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_js.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_service.cpp",
@@ -225,6 +226,7 @@ ohos_unittest("distributed_extension_base_test") {
   ]
 
   include_dirs = [
+    "${dms_path}/frameworks/native/distributed_extension/ani/include",
     "${dms_path}/frameworks/native/distributed_extension/include",
     "${dms_path}/frameworks/native/distributed_extension/include/ipc",
     "${dms_path}/frameworks/native/distributed_extension/src",
@@ -319,12 +321,14 @@ ohos_unittest("distributedextensionservicetest") {
   module_out_path = module_output_path
 
   sources = [
+    "${dms_path}/frameworks/native/distributed_extension/ani/src/distributed_extension_ets_loader.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/ipc/distributed_extension_stub.cpp",
     "${dms_path}/frameworks/native/distributed_extension/test/unittest/distributed_extension/distributed_extension_service_test.cpp",
   ]
 
   include_dirs = [
+    "${dms_path}/frameworks/native/distributed_extension/ani/include",
     "${dms_path}/frameworks/native/distributed_extension/test/unittest/distributed_extension",
     "${dms_path}/frameworks/native/distributed_extension/include",
     "${dms_path}/frameworks/native/distributed_extension/include/ipc",
