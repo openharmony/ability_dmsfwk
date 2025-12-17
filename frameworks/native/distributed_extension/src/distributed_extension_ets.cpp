@@ -205,7 +205,7 @@ int32_t DistributedExtensionETS::TriggerOnCreate(AAFwk::Want& want)
             HILOG_ERROR("Object_CallMethod_Void status : %{public}d", status);
             break;
         }
-    } while(false);
+    } while (false);
     AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
     if (status != ANI_OK) {
         return EINVAL;
@@ -240,7 +240,7 @@ int32_t DistributedExtensionETS::TriggerOnDestroy()
             HILOG_ERROR("Object_CallMethod_Void status : %{public}d", status);
             break;
         }
-    } while(false);
+    } while (false);
     AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
     if (status != ANI_OK) {
         return EINVAL;
@@ -282,7 +282,7 @@ int32_t DistributedExtensionETS::TriggerOnCollaborate(AAFwk::WantParams &wantPar
             HILOG_ERROR("CallMethod status: %{public}d, or null result", status);
             break;
         }
-    } while(false);
+    } while (false);
     AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
     if (status != ANI_OK) {
         return EINVAL;
