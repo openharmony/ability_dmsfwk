@@ -87,7 +87,8 @@
           "storage_service",
           "distributed_notification_service",
           "i18n",
-          "hiappevent"
+          "hiappevent",
+          "runtime_core"
         ],
         "third_party": []
       },
@@ -110,7 +111,8 @@
             "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/ability_connection_manager:distributed_ability_connection_manager",
             "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/av_trans_stream_provider:dtbcollab_av_stream_trans_provider",
             "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
-            "//foundation/ability/dmsfwk/frameworks:target_distributed_extension"
+            "//foundation/ability/dmsfwk/frameworks:target_distributed_extension",
+            "//foundation/ability/dmsfwk/frameworks/native/distributed_extension/ets:distributed_extension_ability_etc"
           ]
         },
         "inner_kits": [
