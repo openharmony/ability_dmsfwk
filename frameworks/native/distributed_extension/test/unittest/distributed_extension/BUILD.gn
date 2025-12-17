@@ -217,8 +217,10 @@ ohos_unittest("distributed_extension_base_test") {
   module_out_path = module_output_path
 
   sources = [
-    "${dms_path}/frameworks/native/distributed_extension/ani/src/distributed_extension_ets_loader.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_context_ets.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_ets.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_ets_loader.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_js.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_service.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/ipc/distributed_extension_stub.cpp",
@@ -226,7 +228,6 @@ ohos_unittest("distributed_extension_base_test") {
   ]
 
   include_dirs = [
-    "${dms_path}/frameworks/native/distributed_extension/ani/include",
     "${dms_path}/frameworks/native/distributed_extension/include",
     "${dms_path}/frameworks/native/distributed_extension/include/ipc",
     "${dms_path}/frameworks/native/distributed_extension/src",
@@ -241,6 +242,7 @@ ohos_unittest("distributed_extension_base_test") {
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:abilitykit_native",
+    "ability_runtime:ani_common",
     "ability_runtime:app_context",
     "ability_runtime:appkit_native",
     "ability_runtime:extensionkit_native",
@@ -257,6 +259,7 @@ ohos_unittest("distributed_extension_base_test") {
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "napi:ace_napi",
+    "runtime_core:ani",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
@@ -321,14 +324,12 @@ ohos_unittest("distributedextensionservicetest") {
   module_out_path = module_output_path
 
   sources = [
-    "${dms_path}/frameworks/native/distributed_extension/ani/src/distributed_extension_ets_loader.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/ipc/distributed_extension_stub.cpp",
     "${dms_path}/frameworks/native/distributed_extension/test/unittest/distributed_extension/distributed_extension_service_test.cpp",
   ]
 
   include_dirs = [
-    "${dms_path}/frameworks/native/distributed_extension/ani/include",
     "${dms_path}/frameworks/native/distributed_extension/test/unittest/distributed_extension",
     "${dms_path}/frameworks/native/distributed_extension/include",
     "${dms_path}/frameworks/native/distributed_extension/include/ipc",
