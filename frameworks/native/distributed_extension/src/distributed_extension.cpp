@@ -18,6 +18,7 @@
 #include "distributed_extension_js.h"
 #include "distributed_extension_service.h"
 #include "dtbschedmgr_log.h"
+#include "distributed_extension_ets_loader.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -45,6 +46,8 @@ DistributedExtension *DistributedExtension::Create(const unique_ptr<AbilityRunti
         case AbilityRuntime::Runtime::Language::JS:
             HILOG_INFO("Create as DistributedExtensionAbility(JS)");
             return DistributedExtensionJs::Create(runtime);
+        case AbilityRuntime::Runtime::Language::ETS:
+            return CreateDistributedExtensionETS(runtime);
 
         default:
             HILOG_INFO("Create as DistributedExtensionAbility(base)");
