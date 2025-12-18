@@ -140,6 +140,7 @@ private:
         bool &fieldRef);
     static bool JsObjectToInt(const napi_env &env, const napi_value &object, const std::string &fieldStr,
         int32_t &fieldRef);
+    static bool ParsePeerServiceName(const napi_env &env, const napi_value &object, std::string& fieldRef);
     static int32_t CheckEventType(const std::string& eventType);
     static bool UnwrapOptions(napi_env env, napi_value options, ConnectOption &connectOption);
     static bool UnwrapStartOptions(napi_env env, napi_value startOptionsVal, ConnectOption &connectOption);
