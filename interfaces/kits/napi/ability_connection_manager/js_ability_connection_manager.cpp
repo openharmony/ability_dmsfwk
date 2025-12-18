@@ -160,6 +160,32 @@ bool JsAbilityConnectionManager::JsToString(const napi_env &env, const napi_valu
     return true;
 }
 
+bool JsAbilityConnectionManager::ParsePeerServiceName(const napi_env &env, const napi_value &object,
+    std::string& fieldRef)
+{
+    bool hasProperty = false;
+    std::string fieldStr = "serviceName";
+    if (napi_has_named_property(env, object, fieldStr.c_str(), &hasProperty) != napi_ok) {
+        HILOGE("check object has serviceName property failed.");
+        return false;
+    }
+    if (!hasProperty) {
+        HILOGW("check object has serviceName property failed.");
+        // compatible with API 16
+        fieldStr = "serviceId";
+        if (napi_has_named_property(env, object, fieldStr.c_str(), &hasProperty) == napi_ok && !hasProperty) {
+            HILOGW("check object has serviceName or serverId property failed.");
+            return true;
+        }
+    }
+    napi_value field = nullptr;
+    if (napi_get_named_property(env, object, fieldStr.c_str(), &field) != napi_ok) {
+        HILOGE("get property failed, property is %{public}s.", fieldStr.c_str());
+        return false;
+    }
+    return JsToString(env, field, fieldStr, fieldRef);
+}
+
 bool JsAbilityConnectionManager::JsObjectToString(const napi_env &env, const napi_value &object,
     const std::string &fieldStr, std::string& fieldRef)
 {
@@ -407,12 +433,8 @@ bool JsAbilityConnectionManager::JsToServiceName(const napi_env &env, const napi
     HILOGI("parse serviceName");
     // no serviceName
     if (!JsToString(env, jsValue, "serviceName", serviceName)) {
-        HILOGW("Failed to unwrap serviceName.");
-        // compatible with API16
-        if (!JsToString(env, jsValue, "serverId", serviceName)) {
-            HILOGE("Failed to unwrap serverId.");
-            return false;
-        }
+        HILOGE("Failed to unwrap serviceName.");
+        return false;
     }
     return true;
 }
@@ -487,12 +509,9 @@ bool JsAbilityConnectionManager::JsToPeerInfo(const napi_env &env, const napi_va
         return false;
     }
 
-    if (!JsObjectToString(env, jsValue, "serviceName", peerInfo.serverId)) {
-        HILOGW("Failed to unwrap serviceName.");
-        if (!JsObjectToString(env, jsValue, "serverId", peerInfo.serverId)) {
-            HILOGW("Failed to unwrap serverId.");
-            return false;
-        }
+    if (!ParsePeerServiceName(env, jsValue, peerInfo.serverId)) {
+        HILOGE("Failed to unwrap peer serviceName.");
+        return false;
     }
     peerInfo.serviceName = peerInfo.serverId;
     return true;
