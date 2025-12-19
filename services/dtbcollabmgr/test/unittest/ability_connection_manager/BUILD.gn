@@ -69,6 +69,10 @@ ohos_unittest("AbilityConnectionMgrTest") {
     "napi:ace_napi",
   ]
 
+  if (dmsfwk_vpe_enable) {
+    external_deps += [ "video_processing_engine:video_processing" ]
+  }
+
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -111,6 +115,10 @@ ohos_unittest("AbilityConnectionMgrStubTest") {
     "media_foundation:media_foundation",
     "napi:ace_napi",
   ]
+
+  if (dmsfwk_vpe_enable) {
+    external_deps += [ "video_processing_engine:video_processing" ]
+  }
 
   part_name = "dmsfwk"
   subsystem_name = "ability"
@@ -155,6 +163,10 @@ ohos_unittest("DistributedClientTest") {
     "media_foundation:media_foundation",
     "napi:ace_napi",
   ]
+
+  if (dmsfwk_vpe_enable) {
+    external_deps += [ "video_processing_engine:video_processing" ]
+  }
 
   part_name = "dmsfwk"
   subsystem_name = "ability"
@@ -202,6 +214,10 @@ ohos_unittest("AbilityConnectionSessionTest") {
     "napi:ace_napi",
   ]
 
+  if (dmsfwk_vpe_enable) {
+    external_deps += [ "video_processing_engine:video_processing" ]
+  }
+
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }
@@ -244,6 +260,10 @@ ohos_unittest("MessageDataHeaderTest") {
     "media_foundation:media_foundation",
     "napi:ace_napi",
   ]
+
+  if (dmsfwk_vpe_enable) {
+    external_deps += [ "video_processing_engine:video_processing" ]
+  }
 
   part_name = "dmsfwk"
   subsystem_name = "ability"

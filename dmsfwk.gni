@@ -39,6 +39,7 @@ declare_args() {
   dmsfwk_check_screenlock = false
   dmsfwk_feature_dams_enable = true
   dmsfwk_check_screenlock = false
+  dmsfwk_vpe_enable = false
   if (defined(global_parts_info)) {
     if (defined(global_parts_info.multimedia_image_framework)) {
       dmsfwk_mission_manager = true
@@ -63,6 +64,9 @@ declare_args() {
     }
     if (defined(global_parts_info.theme_screenlock_mgr)) {
       dmsfwk_check_screenlock = true
+    }
+    if (defined(global_parts_info.multimedia_video_processing_engine)) {
+      dmsfwk_vpe_enable = true
     }
   }
   if (!defined(global_parts_info) ||

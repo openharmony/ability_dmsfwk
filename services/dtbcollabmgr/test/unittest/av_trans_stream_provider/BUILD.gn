@@ -101,6 +101,10 @@ ohos_unittest("AVSenderEngineTest") {
     "media_foundation:media_foundation",
   ]
 
+  if (dmsfwk_vpe_enable) {
+    external_deps += [ "video_processing_engine:video_processing" ]
+  }
+
   part_name = "dmsfwk"
   subsystem_name = "ability"
 }

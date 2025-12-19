@@ -82,6 +82,7 @@
           "safwk",
           "samgr",
           "screenlock_mgr",
+          "video_processing_engine",
           "window_manager",
           "wifi",
           "storage_service",
