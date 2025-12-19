@@ -187,6 +187,7 @@ int32_t DSchedCollab::Init()
 int32_t DSchedCollab::UnInit()
 {
     HILOGI("called");
+    std::lock_guard<std::mutex> lock(eventMutex_);
     if ((eventHandler_ != nullptr) && (eventHandler_->GetEventRunner() != nullptr)) {
         eventHandler_->GetEventRunner()->Stop();
     }
@@ -363,13 +364,15 @@ int32_t DSchedCollab::PostSrcResultTask(std::shared_ptr<NotifyResultCmd> notifyR
 int32_t DSchedCollab::PostErrEndTask(const int32_t &result)
 {
     HILOGI("called, collabInfo %{public}s", collabInfo_.ToString().c_str());
+    DSchedCollabEventType eventType = ERR_END_EVENT;
+    auto data = std::make_shared<int32_t>(result);
+    auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
+
+    std::lock_guard<std::mutex> lock(eventMutex_);
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
     }
-    DSchedCollabEventType eventType = ERR_END_EVENT;
-    auto data = std::make_shared<int32_t>(result);
-    auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
     if (!eventHandler_->SendEvent(msgEvent, 0, AppExecFwk::EventQueue::Priority::IMMEDIATE)) {
         HILOGE("send event type %{public}s fail", EVENTDATA[eventType].c_str());
         return COLLAB_SEND_EVENT_FAILED;
@@ -397,6 +400,7 @@ int32_t DSchedCollab::PostAbilityRejectTask(const std::string &reason)
 int32_t DSchedCollab::PostEndTask()
 {
     HILOGI("called, collabInfo %{public}s", collabInfo_.ToString().c_str());
+    std::lock_guard<std::mutex> lock(eventMutex_);
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler is nullptr");
         return INVALID_PARAMETERS_ERR;
