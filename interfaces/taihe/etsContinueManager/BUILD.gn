@@ -93,6 +93,7 @@ taihe_shared_library("continueManager_so") {
     "image_framework:image",
     "image_framework:image_taihe",
     "ipc:ipc_core",
+    "samgr:samgr_proxy",
   ]
 }
 
