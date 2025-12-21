@@ -22,16 +22,25 @@
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::AAFwk;
 
 namespace OHOS {
 namespace DistributedSchedule {
 void DistributedSchedAdapterTest::SetUpTestCase()
 {
+    clientMock_ = std::make_shared<AbilityManagerClientMock>();
+    AbilityManagerClientMock::clientMock = clientMock_;
+    tokenMock_ = std::make_shared<AccesstokenMock>();
+    AccesstokenMock::accesstokenMock_ = tokenMock_;
     DTEST_LOG << "DistributedSchedAdapterTest::SetUpTestCase" << std::endl;
 }
 
 void DistributedSchedAdapterTest::TearDownTestCase()
 {
+    AbilityManagerClientMock::clientMock = nullptr;
+    clientMock_ = nullptr;
+    AccesstokenMock::accesstokenMock_ = nullptr;
+    tokenMock_ = nullptr;
     DTEST_LOG << "DistributedSchedAdapterTest::TearDownTestCase" << std::endl;
 }
 
@@ -75,9 +84,52 @@ HWTEST_F(DistributedSchedAdapterTest, ConnectAbility_001, TestSize.Level3)
     const OHOS::AAFwk::Want want;
     const sptr<IRemoteObject> connect = nullptr;
     const sptr<IRemoteObject> callerToken = nullptr;
-    int32_t result = distributedSchedAdapter_->ConnectAbility(want, connect, callerToken);
+    CallerInfo callerInfo;
+    EXPECT_CALL(*clientMock_, Connect()).WillOnce(Return(1));
+    int32_t result = distributedSchedAdapter_->ConnectAbility(want, connect, callerToken, callerInfo);
     EXPECT_NE(result, ERR_OK);
     DTEST_LOG << "DistributedSchedAdapterTest ConnectAbility_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectAbility_002
+ * @tc.desc: invalid params
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DistributedSchedAdapterTest, ConnectAbility_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedAdapterTest ConnectAbility_002 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
+    const OHOS::AAFwk::Want want;
+    const sptr<IRemoteObject> connect = nullptr;
+    const sptr<IRemoteObject> callerToken = nullptr;
+    CallerInfo callerInfo;
+    EXPECT_CALL(*clientMock_, Connect()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*tokenMock_, AllocLocalTokenID(_, _)).WillOnce(Return(0));
+    int32_t result = distributedSchedAdapter_->ConnectAbility(want, connect, callerToken, callerInfo);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedAdapterTest ConnectAbility_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectAbility_003
+ * @tc.desc: invalid params
+ * @tc.type: FUNC
+ * @tc.require: I5WKCK
+ */
+HWTEST_F(DistributedSchedAdapterTest, ConnectAbility_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedAdapterTest ConnectAbility_003 begin" << std::endl;
+    ASSERT_NE(distributedSchedAdapter_, nullptr);
+    const OHOS::AAFwk::Want want;
+    const sptr<IRemoteObject> connect = nullptr;
+    const sptr<IRemoteObject> callerToken = nullptr;
+    CallerInfo callerInfo;
+    EXPECT_CALL(*tokenMock_, AllocLocalTokenID(_, _)).WillOnce(Return(1));
+    int32_t result = distributedSchedAdapter_->ConnectAbility(want, connect, callerToken, callerInfo);
+    EXPECT_NE(result, ERR_OK);
+    DTEST_LOG << "DistributedSchedAdapterTest ConnectAbility_003 end" << std::endl;
 }
 
 /**
@@ -91,6 +143,10 @@ HWTEST_F(DistributedSchedAdapterTest, DisconnectAbility_001, TestSize.Level3)
     DTEST_LOG << "DistributedSchedAdapterTest DisconnectAbility_001 begin" << std::endl;
     ASSERT_NE(distributedSchedAdapter_, nullptr);
     const sptr<IRemoteObject> connect = nullptr;
+    EXPECT_CALL(*clientMock_, Connect()).WillRepeatedly(Return(1));
+    distributedSchedAdapter_->DisconnectAbility(connect);
+
+    EXPECT_CALL(*clientMock_, Connect()).WillRepeatedly(Return(0));
     int32_t result = distributedSchedAdapter_->DisconnectAbility(connect);
     EXPECT_NE(result, ERR_OK);
     DTEST_LOG << "DistributedSchedAdapterTest DisconnectAbility_001 end" << std::endl;

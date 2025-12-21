@@ -60,7 +60,6 @@
           "dmsfwk",
           "dsoftbus",
           "data_share",
-          "drivers_peripheral_display",
           "eventhandler",
           "ffrt",
           "form_fwk",
@@ -89,7 +88,8 @@
           "storage_service",
           "distributed_notification_service",
           "i18n",
-          "hiappevent"
+          "hiappevent",
+          "runtime_core"
         ],
         "third_party": []
       },
@@ -101,7 +101,8 @@
             "//foundation/ability/dmsfwk/interfaces/innerkits/continuation_manager:continuation_manager",
             "//foundation/ability/dmsfwk/interfaces/innerkits/distributed_event:distributed_sdk",
             "//foundation/ability/dmsfwk/interfaces/taihe/etsContinueManager:continueManager_so",
-            "//foundation/ability/dmsfwk/interfaces/kits/napi:napi_packages"
+            "//foundation/ability/dmsfwk/interfaces/kits/napi:napi_packages",
+            "//foundation/ability/dmsfwk/interfaces/taihe:dmsfwk_taihe"
           ],
           "service_group": [
             "//foundation/ability/dmsfwk/common:distributed_sched_utils",
@@ -113,7 +114,8 @@
             "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/ability_connection_manager:distributed_ability_connection_manager",
             "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/av_trans_stream_provider:dtbcollab_av_stream_trans_provider",
             "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
-            "//foundation/ability/dmsfwk/frameworks:target_distributed_extension"
+            "//foundation/ability/dmsfwk/frameworks:target_distributed_extension",
+            "//foundation/ability/dmsfwk/frameworks/native/distributed_extension/ets:distributed_extension_ability_etc"
           ]
         },
         "inner_kits": [
@@ -189,6 +191,7 @@
           "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/ability_connection_manager:unittest",
           "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/channel_manager:unittest",
           "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/av_trans_stream_provider:unittest",
+          "//foundation/ability/dmsfwk/services/dtbschedmgr/test/dExtensionDemo:dExtensionDemo",
           "//foundation/ability/dmsfwk/test:fuzztest",
           "//foundation/ability/dmsfwk/frameworks:target_distributed_tests"
         ]

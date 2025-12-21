@@ -379,7 +379,7 @@ int32_t DistributedExtensionJs::CallJsMethod(const std::string &funcName, Abilit
     }
 
     work->data = reinterpret_cast<void *>(param.get());
-    int ret = uv_queue_work(
+    int ret = uv_queue_work_internal(
         loop, work.get(), [](uv_work_t *work) {
             HILOG_INFO("Enter, %{public}zu", (size_t)work);
         },
@@ -400,9 +400,9 @@ int32_t DistributedExtensionJs::CallJsMethod(const std::string &funcName, Abilit
             std::unique_lock<std::mutex> lock(param->distributedOperateMutex);
             param->isReady.store(true);
             param->distributedOperateCondition.notify_all();
-        });
+        }, "distributedsched:DistributedExtensionJs::CallJsMethod");
     if (ret != 0) {
-        HILOG_ERROR("failed to exec uv_queue_work.");
+        HILOG_ERROR("failed to exec uv_queue_work_internal.");
         return EINVAL;
     }
     std::unique_lock<std::mutex> lock(param->distributedOperateMutex);

@@ -79,6 +79,189 @@ HWTEST_F(AVReceiverEngineTest, Configure_Test_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Configure_Test_002
+ * @tc.desc: Configure with VID_ENC_FMT parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVReceiverEngineTest, Configure_Test_002, TestSize.Level1)
+{
+    HILOGI("AVReceiverEngineTest::Configure_Test_002 begin");
+    AVReceiverEngine engine;
+    engine.receiverFilter_ = std::make_shared<AVReceiverFilter>(
+        "builtin.dtbcollab.receiver", Media::Pipeline::FilterType::FILTERTYPE_VENC);
+
+    VidEnc encParam(VideoCodecFormat::H264);
+    auto ret = engine.Configure(encParam);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::OK));
+    HILOGI("AVReceiverEngineTest::Configure_Test_002 end");
+}
+
+/**
+ * @tc.name: Configure_Test_003
+ * @tc.desc: Configure with VID_RECTANGLE parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVReceiverEngineTest, Configure_Test_003, TestSize.Level1)
+{
+    HILOGI("AVReceiverEngineTest::Configure_Test_003 begin");
+    AVReceiverEngine engine;
+    engine.receiverFilter_ = std::make_shared<AVReceiverFilter>(
+        "builtin.dtbcollab.receiver", Media::Pipeline::FilterType::FILTERTYPE_VENC);
+
+    VidRectangle rectParam(1920, 1080);
+    auto ret = engine.Configure(rectParam);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::OK));
+    HILOGI("AVReceiverEngineTest::Configure_Test_003 end");
+}
+
+/**
+ * @tc.name: Configure_Test_004
+ * @tc.desc: Configure with VID_BITRATE parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVReceiverEngineTest, Configure_Test_004, TestSize.Level1)
+{
+    HILOGI("AVReceiverEngineTest::Configure_Test_004 begin");
+    AVReceiverEngine engine;
+    engine.receiverFilter_ = std::make_shared<AVReceiverFilter>(
+        "builtin.dtbcollab.receiver", Media::Pipeline::FilterType::FILTERTYPE_VENC);
+
+    VidBitRate bitrateParam(8000000); // 8Mbps
+    auto ret = engine.Configure(bitrateParam);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::OK));
+    HILOGI("AVReceiverEngineTest::Configure_Test_004 end");
+}
+
+/**
+ * @tc.name: Configure_Test_005
+ * @tc.desc: Configure with VID_FRAMERATE parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVReceiverEngineTest, Configure_Test_005, TestSize.Level1)
+{
+    HILOGI("AVReceiverEngineTest::Configure_Test_005 begin");
+    AVReceiverEngine engine;
+    engine.receiverFilter_ = std::make_shared<AVReceiverFilter>(
+        "builtin.dtbcollab.receiver", Media::Pipeline::FilterType::FILTERTYPE_VENC);
+
+    VidFrameRate framerateParam(30); // 30fps
+    auto ret = engine.Configure(framerateParam);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::OK));
+    HILOGI("AVReceiverEngineTest::Configure_Test_005 end");
+}
+
+/**
+ * @tc.name: Configure_Test_006
+ * @tc.desc: Configure with VID_IS_HDR parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVReceiverEngineTest, Configure_Test_006, TestSize.Level1)
+{
+    HILOGI("AVReceiverEngineTest::Configure_Test_006 begin");
+    AVReceiverEngine engine;
+    engine.receiverFilter_ = std::make_shared<AVReceiverFilter>(
+        "builtin.dtbcollab.receiver", Media::Pipeline::FilterType::FILTERTYPE_VENC);
+
+    VidIsHdr hdrParam(true);
+    auto ret = engine.Configure(hdrParam);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::OK));
+
+    VidIsHdr hdrParam2(false);
+    ret = engine.Configure(hdrParam2);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::OK));
+    HILOGI("AVReceiverEngineTest::Configure_Test_006 end");
+}
+
+/**
+ * @tc.name: Configure_Test_007
+ * @tc.desc: Configure with VID_ENABLE_TEMPORAL_SCALE parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVReceiverEngineTest, Configure_Test_007, TestSize.Level1)
+{
+    HILOGI("AVReceiverEngineTest::Configure_Test_007 begin");
+    AVReceiverEngine engine;
+    engine.receiverFilter_ = std::make_shared<AVReceiverFilter>(
+        "builtin.dtbcollab.receiver", Media::Pipeline::FilterType::FILTERTYPE_VENC);
+
+    VidEnableTemporalScale temporalScaleParam(true);
+    auto ret = engine.Configure(temporalScaleParam);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::OK));
+
+    VidEnableTemporalScale temporalScaleParam2(false);
+    ret = engine.Configure(temporalScaleParam2);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::OK));
+    HILOGI("AVReceiverEngineTest::Configure_Test_007 end");
+}
+
+/**
+ * @tc.name: Configure_Test_008
+ * @tc.desc: Configure with VID_SURFACE_PARAM parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVReceiverEngineTest, Configure_Test_008, TestSize.Level1)
+{
+    HILOGI("AVReceiverEngineTest::Configure_Test_008 begin");
+    AVReceiverEngine engine;
+    engine.receiverFilter_ = std::make_shared<AVReceiverFilter>(
+        "builtin.dtbcollab.receiver", Media::Pipeline::FilterType::FILTERTYPE_VENC);
+
+    SurfaceParam surfaceParam;
+    surfaceParam.filp = SurfaceFilp::FLIP_NONE;
+    surfaceParam.rotate = SurfaceRotate::ROTATE_NONE;
+    VidSurfaceParam surfaceParamObj(surfaceParam);
+    auto ret = engine.Configure(surfaceParamObj);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::OK));
+    HILOGI("AVReceiverEngineTest::Configure_Test_008 end");
+}
+
+/**
+ * @tc.name: Configure_Test_009
+ * @tc.desc: Configure with nullptr receiverFilter_ and various video parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVReceiverEngineTest, Configure_Test_009, TestSize.Level1)
+{
+    HILOGI("AVReceiverEngineTest::Configure_Test_009 begin");
+    AVReceiverEngine engine;
+    engine.receiverFilter_ = nullptr;
+
+    // Test all video parameter types with nullptr receiverFilter_
+    VidEnc encParam(VideoCodecFormat::H264);
+    auto ret = engine.Configure(encParam);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::ERROR_NULL_POINTER));
+
+    VidRectangle rectParam(1920, 1080);
+    ret = engine.Configure(rectParam);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::ERROR_NULL_POINTER));
+
+    VidBitRate bitrateParam(8000000);
+    ret = engine.Configure(bitrateParam);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::ERROR_NULL_POINTER));
+
+    VidFrameRate framerateParam(30);
+    ret = engine.Configure(framerateParam);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::ERROR_NULL_POINTER));
+
+    VidIsHdr hdrParam(true);
+    ret = engine.Configure(hdrParam);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::ERROR_NULL_POINTER));
+
+    VidEnableTemporalScale temporalScaleParam(true);
+    ret = engine.Configure(temporalScaleParam);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::ERROR_NULL_POINTER));
+
+    SurfaceParam surfaceParam;
+    surfaceParam.filp = SurfaceFilp::FLIP_NONE;
+    surfaceParam.rotate = SurfaceRotate::ROTATE_NONE;
+    VidSurfaceParam surfaceParamObj(surfaceParam);
+
+    ret = engine.Configure(surfaceParamObj);
+    EXPECT_EQ(ret, static_cast<int32_t>(Media::Status::ERROR_NULL_POINTER));
+    HILOGI("AVReceiverEngineTest::Configure_Test_009 end");
+}
+
+/**
  * @tc.name: SetVideoSurface_Test_001
  * @tc.desc: SetVideoSurface
  * @tc.type: FUNC

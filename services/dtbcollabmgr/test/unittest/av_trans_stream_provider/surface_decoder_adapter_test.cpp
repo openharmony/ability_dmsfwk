@@ -183,5 +183,113 @@ HWTEST_F(SurfaceDecoderAdapterTest, SetOutputSurface_Test, TestSize.Level1)
     EXPECT_EQ(ret, Status::ERROR_UNKNOWN);
     DTEST_LOG << "SurfaceDecoderAdapterTest SetOutputSurface_Test end" << std::endl;
 }
+
+/**
+ * @tc.name: OnOutputBufferAvailable_001
+ * @tc.desc: Test OnOutputBufferAvailable with flag 1 (drop buffer)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDecoderAdapterTest, OnOutputBufferAvailable_001, TestSize.Level1)
+{
+    DTEST_LOG << "SurfaceDecoderAdapterTest OnOutputBufferAvailable_001 begin" << std::endl;
+    uint32_t index = 1;
+    auto buffer = std::make_shared<Media::AVBuffer>();
+    buffer->flag_ = 1;
+    buffer->pts_ = 1000;
+    
+    decodeAdapter_->OnOutputBufferAvailable(index, buffer);
+    
+    EXPECT_EQ(decodeAdapter_->dropIndexs_.size(), 1);
+    EXPECT_EQ(decodeAdapter_->dropIndexs_[0], index);
+    EXPECT_EQ(decodeAdapter_->indexs_.size(), 0);
+    DTEST_LOG << "SurfaceDecoderAdapterTest OnOutputBufferAvailable_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnOutputBufferAvailable_002
+ * @tc.desc: Test OnOutputBufferAvailable with valid PTS (greater than lastBufferPts)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDecoderAdapterTest, OnOutputBufferAvailable_002, TestSize.Level1)
+{
+    DTEST_LOG << "SurfaceDecoderAdapterTest OnOutputBufferAvailable_002 begin" << std::endl;
+    uint32_t index = 2;
+    auto buffer = std::make_shared<Media::AVBuffer>();
+    buffer->flag_ = 0;
+    buffer->pts_ = 2000;
+    
+    decodeAdapter_->lastBufferPts_ = 1000;
+    decodeAdapter_->frameNum_ = 5;
+
+    decodeAdapter_->indexs_.clear();
+    decodeAdapter_->dropIndexs_.clear();
+
+    decodeAdapter_->OnOutputBufferAvailable(index, buffer);
+    
+    EXPECT_EQ(decodeAdapter_->lastBufferPts_, 2000);
+    EXPECT_EQ(decodeAdapter_->frameNum_, 6);
+    EXPECT_EQ(decodeAdapter_->indexs_.size(), 1);
+    EXPECT_EQ(decodeAdapter_->indexs_[0], index);
+    EXPECT_EQ(decodeAdapter_->dropIndexs_.size(), 0);
+    DTEST_LOG << "SurfaceDecoderAdapterTest OnOutputBufferAvailable_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnOutputBufferAvailable_003
+ * @tc.desc: Test OnOutputBufferAvailable with invalid PTS (less than or equal to lastBufferPts)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDecoderAdapterTest, OnOutputBufferAvailable_003, TestSize.Level1)
+{
+    DTEST_LOG << "SurfaceDecoderAdapterTest OnOutputBufferAvailable_003 begin" << std::endl;
+    uint32_t index = 3;
+    auto buffer = std::make_shared<Media::AVBuffer>();
+    buffer->flag_ = 0;
+    buffer->pts_ = 1000;
+    
+    decodeAdapter_->lastBufferPts_ = 1500;
+    decodeAdapter_->frameNum_ = 3;
+
+    decodeAdapter_->indexs_.clear();
+    decodeAdapter_->dropIndexs_.clear();
+
+    decodeAdapter_->OnOutputBufferAvailable(index, buffer);
+    
+    EXPECT_EQ(decodeAdapter_->lastBufferPts_, 1500);
+    EXPECT_EQ(decodeAdapter_->frameNum_, 3);
+    EXPECT_EQ(decodeAdapter_->dropIndexs_.size(), 1);
+    EXPECT_EQ(decodeAdapter_->dropIndexs_[0], index);
+    EXPECT_EQ(decodeAdapter_->indexs_.size(), 0);
+    DTEST_LOG << "SurfaceDecoderAdapterTest OnOutputBufferAvailable_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: OnOutputBufferAvailable_004
+ * @tc.desc: Test OnOutputBufferAvailable with zero PTS (initial state)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceDecoderAdapterTest, OnOutputBufferAvailable_004, TestSize.Level1)
+{
+    DTEST_LOG << "SurfaceDecoderAdapterTest OnOutputBufferAvailable_004 begin" << std::endl;
+    uint32_t index = 4;
+    auto buffer = std::make_shared<Media::AVBuffer>();
+    buffer->flag_ = 0;
+    buffer->pts_ = 0;
+    
+    decodeAdapter_->lastBufferPts_ = -1;
+    decodeAdapter_->frameNum_ = 0;
+    
+    decodeAdapter_->indexs_.clear();
+    decodeAdapter_->dropIndexs_.clear();
+
+    decodeAdapter_->OnOutputBufferAvailable(index, buffer);
+    
+    EXPECT_EQ(decodeAdapter_->lastBufferPts_, 0);
+    EXPECT_EQ(decodeAdapter_->frameNum_, 1);
+    EXPECT_EQ(decodeAdapter_->indexs_.size(), 1);
+    EXPECT_EQ(decodeAdapter_->indexs_[0], index);
+    EXPECT_EQ(decodeAdapter_->dropIndexs_.size(), 0);
+    DTEST_LOG << "SurfaceDecoderAdapterTest OnOutputBufferAvailable_005 end" << std::endl;
+}
 }  // namespace DistributedCollab
 }  // namespace OHOS

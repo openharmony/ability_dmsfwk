@@ -29,6 +29,7 @@
 #include "dtbcollabmgr_log.h"
 #include "ipc_skeleton.h"
 #include "mission/distributed_bm_storage.h"
+#include "mission/dsched_sync_e2e.h"
 #include "mission/wifi_state_adapter.h"
 #include "multi_user_manager.h"
 #include "string_wrapper.h"
@@ -228,6 +229,7 @@ void DSchedCollabManager::UnInit()
 int32_t DSchedCollabManager::GetSinkCollabVersion(DSchedCollabInfo &info)
 {
     HILOGI("called, sessionId is: %{public}s", info.ToString().c_str());
+    CHECK_MDM_CONTROL(DmsKvSyncE2E::GetInstance()->IsMDMControl());
     if (info.srcCollabSessionId_ < 0 || info.sinkInfo_.deviceId_.empty() || info.srcClientCB_ == nullptr) {
         HILOGE("invalid parameters.");
         return INVALID_PARAMETERS_ERR;
@@ -278,6 +280,7 @@ void DSchedCollabManager::HandleGetSinkCollabVersion(const DSchedCollabInfo &inf
 int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
 {
     HILOGI("called, collabInfo is: %{public}s", info.ToString().c_str());
+    CHECK_MDM_CONTROL(DmsKvSyncE2E::GetInstance()->IsMDMControl());
     if (!MultiUserManager::GetInstance().IsCallerForeground(info.srcInfo_.uid_)) {
         HILOGE("The current user is not foreground. callingUid: %{public}d .", info.srcInfo_.uid_);
         return DMS_NOT_FOREGROUND_USER;
@@ -837,6 +840,10 @@ void DSchedCollabManager::SoftbusListener::OnShutdown(int32_t socket, bool isSel
 
 void DSchedCollabManager::SoftbusListener::OnDataRecv(int32_t socket, std::shared_ptr<DSchedDataBuffer> dataBuffer)
 {
+    if (DmsKvSyncE2E::GetInstance()->IsMDMControl()) {
+        HILOGE("Current user is under MDM control.");
+        return;
+    }
     DSchedCollabManager::GetInstance().OnDataRecv(socket, dataBuffer);
 }
 }  // namespace DistributedSchedule

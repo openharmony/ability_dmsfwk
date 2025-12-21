@@ -42,7 +42,7 @@ public:
     void UnInit();
 
     int32_t ConnectAbility(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
-        const sptr<IRemoteObject>& callerToken);
+        const sptr<IRemoteObject>& callerToken, const CallerInfo& callerInfo);
     int32_t DisconnectAbility(const sptr<IRemoteObject>& connect);
     void DeviceOnline(const std::string& deviceId);
     void DeviceOffline(const std::string& deviceId);

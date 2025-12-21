@@ -21,6 +21,8 @@
 #define private public
 #include "distributed_sched_adapter.h"
 #undef private
+#include "mock/ability_manager_client_mock.h"
+#include "mock/accesstoken_kit_mock.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -31,6 +33,8 @@ public:
     void SetUp();
     void TearDown();
     std::shared_ptr<DistributedSchedAdapter> distributedSchedAdapter_;
+    static inline std::shared_ptr<AAFwk::AbilityManagerClientMock> clientMock_ = nullptr;
+    static inline std::shared_ptr<AccesstokenMock> tokenMock_ = nullptr;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

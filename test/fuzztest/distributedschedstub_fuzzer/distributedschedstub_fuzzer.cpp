@@ -175,8 +175,11 @@ void StartContinuationInnerFuzzTest(const uint8_t* data, size_t size)
     dataParcel.WriteInt32(callerUid);
     dataParcel.WriteInt32(status);
     dataParcel.WriteUint32(accessToken);
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = fdp.ConsumeRandomLengthString();
+    callerInfo.accessToken = accessToken;
     DistributedSchedService::GetInstance().StartContinuationInner(dataParcel, reply);
-    DistributedSchedService::GetInstance().StartAbility(want, callerUid);
+    DistributedSchedService::GetInstance().StartAbility(want, callerUid, callerInfo);
 }
 
 void NotifyCompleteFreeInstallFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)

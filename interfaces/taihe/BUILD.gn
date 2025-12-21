@@ -1,0 +1,121 @@
+# Copyright (C) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//build/ohos.gni")
+import("//build/ohos/taihe_idl/taihe.gni")
+import("//foundation/ability/dmsfwk/dmsfwk.gni")
+
+config("taihe_config") {
+  include_dirs = [
+    "include",
+    "${dms_path}/common/include",
+    "${dms_path}/interfaces/innerkits/common/include",
+    "${dms_path}/interfaces/innerkits/continuation_manager/include",
+    "${dms_path}/services/dtbabilitymgr/include/",
+    "${dms_path}/services/dtbcollabmgr/include/ability_connection_manager",
+    "${dms_path}/services/dtbcollabmgr/include/av_trans_stream_provider",
+    "${dms_path}/services/dtbcollabmgr/include/channel_manager",
+  ]
+}
+
+subsystem_name = "ability"
+part_name = "dmsfwk"
+taihe_generated_file_path = "$taihe_file_path/out/$subsystem_name/$part_name"
+
+copy_taihe_idl("copy_dmsfwk") {
+  sources = [ "idl/ohos.distributedsched.abilityConnectionManager.taihe" ]
+}
+
+ohos_taihe("run_dmsfwk_taihe") {
+  taihe_generated_file_path = "$taihe_generated_file_path"
+  deps = [ ":copy_dmsfwk" ]
+  outputs = [
+    "$taihe_generated_file_path/src/ohos.distributedsched.abilityConnectionManager.ani.cpp",
+    "$taihe_generated_file_path/src/ohos.distributedsched.abilityConnectionManager.abi.c",
+  ]
+}
+
+taihe_shared_library("dmsfwk_taihe_native") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+  taihe_generated_file_path = "$taihe_generated_file_path"
+  part_name = "$part_name"
+  subsystem_name = "$subsystem_name"
+  sources = get_target_outputs(":run_dmsfwk_taihe")
+  public_configs = [ ":taihe_config" ]
+  sources += [
+    "src/ani_constructor.cpp",
+    "src/dmsfwk_taihe_utils.cpp",
+    "src/ohos.distributedsched.abilityConnectionManager.impl.cpp",
+  ]
+  deps = [
+    ":run_dmsfwk_taihe",
+    "${dms_path}/common:distributed_sched_utils",
+    "${dms_path}/interfaces/innerkits/common:common_sdk",
+    "${dms_path}/interfaces/innerkits/continuation_manager:continuation_manager",
+    "${dms_path}/services/dtbcollabmgr/src/ability_connection_manager:distributed_ability_connection_manager",
+    "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
+  ]
+  external_deps = [
+    "ability_runtime:ability_context_native",
+    "ability_runtime:abilitykit_native",
+    "ability_runtime:ani_base_context",
+    "ability_runtime:ani_common",
+    "ability_runtime:app_context",
+    "ability_runtime:extensionkit_native",
+    "ability_runtime:runtime",
+    "ability_runtime:ui_extension",
+    "access_token:libtokenid_sdk",
+    "av_codec:av_codec_client",
+    "av_codec:av_codec_media_engine_filters",
+    "av_codec:native_media_codecbase",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_native",
+    "image_framework:image_taihe",
+  ]
+}
+
+generate_static_abc("dmsfwk_taihe_ani") {
+  base_url = "$taihe_generated_file_path"
+  files = [ "$taihe_generated_file_path/@ohos.distributedsched.abilityConnectionManager.ets" ]
+  is_boot_abc = "True"
+  device_dst_file = "/system/framework/dmsfwk_taihe_ani.abc"
+  dependencies = [ ":run_dmsfwk_taihe" ]
+}
+
+ohos_prebuilt_etc("dmsfwk_abc_etc") {
+  source = "$target_out_dir/dmsfwk_taihe_ani.abc"
+  module_install_dir = "framework"
+  subsystem_name = "$subsystem_name"
+  part_name = "$part_name"
+  deps = [ ":dmsfwk_taihe_ani" ]
+}
+
+group("dmsfwk_taihe") {
+  deps = [
+    ":dmsfwk_abc_etc",
+    ":dmsfwk_taihe_native",
+  ]
+}

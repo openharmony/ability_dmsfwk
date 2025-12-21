@@ -105,9 +105,11 @@ bool DmsKvSyncE2E::CheckDeviceCfg()
 bool DmsKvSyncE2E::CheckMDMCtrlRule(const std::string &bundleName)
 {
     HILOGD("called.");
-    if (isMDMControl_ && (!CheckBundleContinueConfig(bundleName))) {
-        HILOGI("CheckMDMCtrlRule is true.");
-        return true;
+    if (isMDMControl_.load()) {
+        if (!CheckBundleContinueConfig(bundleName)) {
+            HILOGI("CheckMDMCtrlRule is true.");
+            return true;
+        }
     }
     return false;
 }
@@ -235,11 +237,6 @@ int32_t DmsKvSyncE2E::LoadContinueConfig()
 
 bool DmsKvSyncE2E::CheckBundleContinueConfig(const std::string &bundleName)
 {
-    if (!isCfgDevices_) {
-        HILOGD("The device is a normal device");
-        return true;
-    }
-
     std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
     auto it = std::find(whiteList_.begin(), whiteList_.end(), bundleName);
     if (it == whiteList_.end()) {
@@ -378,7 +375,7 @@ void DmsKvSyncCB::SyncCompleted(const std::map<std::string, DistributedKv::Statu
 bool DmsKvSyncE2E::QueryMDMControl()
 {
 #ifdef OS_ACCOUNT_PART
-    HILOGI("QueryMDMControl called, isMDMControl_: %{public}d", isMDMControl_);
+    HILOGI("QueryMDMControl called, isMDMControl: %{public}d", isMDMControl_.load());
     int32_t activeAccountId = 0;
     std::vector<int32_t> ids;
     ErrCode err = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
@@ -387,14 +384,22 @@ bool DmsKvSyncE2E::QueryMDMControl()
         return false;
     }
     activeAccountId = ids[0];
-    err = AccountSA::OsAccountManager::CheckOsAccountConstraintEnabled(activeAccountId,  CONSTRAINT, isMDMControl_);
-        if (err != ERR_OK || ids.empty()) {
+    bool isMDMControl = false;
+    err = AccountSA::OsAccountManager::CheckOsAccountConstraintEnabled(activeAccountId,  CONSTRAINT, isMDMControl);
+    if (err != ERR_OK || ids.empty()) {
         HILOGE("QueryActiveOsAccountIds passing param invalid or return error!, err : %{public}d", err);
         return false;
     }
+    isMDMControl_.store(isMDMControl);
 #endif
-    HILOGI("QueryMDMControl end, isMDMControl_: %{public}d.", isMDMControl_);
-    return isMDMControl_;
+    HILOGI("QueryMDMControl end, isMDMControl: %{public}d.", isMDMControl_.load());
+    return isMDMControl_.load();
+}
+
+bool DmsKvSyncE2E::IsMDMControl()
+{
+    HILOGI("isMDMControl: %{public}d.", isMDMControl_.load());
+    return isMDMControl_.load();
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

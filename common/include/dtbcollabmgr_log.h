@@ -61,6 +61,13 @@ enum {
     DMS_COLLAB_MODULE_TYPE_SERVICE = 1,
 };
 
+enum {
+    /**
+     * Result(801) for capability not support.
+     */
+    CAPABILITY_NOT_SUPPORT_ERR = 801,
+};
+
 // offset of dms error, only be used in this file.
 constexpr ErrCode DMS_SERVICE_ERR_OFFSET = ErrCodeOffset(SUBSYS_DISTRIBUTEDSCHEDULE, DMS_COLLAB_MODULE_TYPE_SERVICE);
 
