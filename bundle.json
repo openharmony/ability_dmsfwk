@@ -79,6 +79,7 @@
           "os_account",
           "resource_management",
           "resource_schedule_service",
+          "runtime_core",
           "safwk",
           "samgr",
           "screenlock_mgr",
@@ -99,7 +100,8 @@
             "//foundation/ability/dmsfwk/interfaces/innerkits/common:common_sdk",
             "//foundation/ability/dmsfwk/interfaces/innerkits/continuation_manager:continuation_manager",
             "//foundation/ability/dmsfwk/interfaces/innerkits/distributed_event:distributed_sdk",
-            "//foundation/ability/dmsfwk/interfaces/kits/napi:napi_packages"
+            "//foundation/ability/dmsfwk/interfaces/kits/napi:napi_packages",
+            "//foundation/ability/dmsfwk/interfaces/taihe:dmsfwk_taihe"
           ],
           "service_group": [
             "//foundation/ability/dmsfwk/common:distributed_sched_utils",
