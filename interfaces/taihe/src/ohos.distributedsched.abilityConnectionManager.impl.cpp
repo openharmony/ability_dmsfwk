@@ -224,17 +224,21 @@ ohos::distributedsched::abilityConnectionManager::ConnectResult ConnectSync(int3
 {
     std::mutex lock;
     std::condition_variable condition;
+    bool callbackExecuted = false;
     abilityConnectionManagerTaihe::ConnectResult taiheResult;
     AbilityConnectionManager::ConnectCallback connectCallback
-        = [&taiheResult, &lock, &condition](ConnectResult result) mutable {
+        = [&taiheResult, &lock, &condition, &callbackExecuted](ConnectResult result) mutable {
         HILOGI("called.");
         taiheResult = ConnectResultAdapter::ConvertToTaihe(result);
         std::unique_lock<std::mutex> locker(lock);
+        callbackExecuted = true;
         condition.notify_one();
     };
     AbilityConnectionManager::GetInstance().ConnectSession(sessionId, connectCallback);
     std::unique_lock<std::mutex> locker(lock);
-    condition.wait(locker);
+    condition.wait(locker, [&callbackExecuted] {
+        return callbackExecuted;
+    });
     return taiheResult;
 }
 
