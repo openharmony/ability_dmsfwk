@@ -126,11 +126,11 @@ int32_t AniContinuationStateClient::UnRegisterContinueStateCallback(const sptr<A
         static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_STATE_CALLBACK_UNREGISTER),
             data, reply, option);
     if (error != ERR_NONE) {
-        HILOGE("send register request failed. error code is %{public}d", error);
+        HILOGE("send unregister request failed. error code is %{public}d", error);
         return SEND_REQUEST_DEF_FAIL;
     }
     int32_t result = reply.ReadInt32();
-    HILOGI("end, register result is: %{public}d", result);
+    HILOGI("end, unregister result is: %{public}d", result);
     return result;
 }
 } // namespace DistributedSchedule
