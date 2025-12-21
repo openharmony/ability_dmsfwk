@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "dtbschedmgr_log.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
