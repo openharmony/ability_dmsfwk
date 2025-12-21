@@ -21,7 +21,6 @@
 #include "taihe/optional.hpp"
 namespace OHOS {
 namespace DistributedSchedule {
-// using namespace OHOS::AbilityRuntime;
 class AniContinueManager {
 public:
     int32_t OnContinueStateCallback(uintptr_t context, uintptr_t opq);
