@@ -25,9 +25,12 @@ ohos_shared_library("distributed_extension_ability_native") {
   sources = [
     "src/distributed_extension.cpp",
     "src/distributed_extension_context.cpp",
+    "src/distributed_extension_context_ets.cpp",
     "src/distributed_extension_context_js.cpp",
+    "src/distributed_extension_ets.cpp",
     "src/distributed_extension_js.cpp",
     "src/distributed_extension_loader.cpp",
+    "src/distributed_extension_ets_loader.cpp",
     "src/distributed_extension_service.cpp",
     "src/ipc/distributed_extension_stub.cpp",
   ]
@@ -39,7 +42,6 @@ ohos_shared_library("distributed_extension_ability_native") {
   ]
 
   deps = [ "${dms_path}/common:distributed_sched_utils" ]
-
   external_deps = [
     "ability_base:configuration",
     "ability_base:want",
@@ -50,6 +52,7 @@ ohos_shared_library("distributed_extension_ability_native") {
     "ability_runtime:abilitykit_utils",
     "ability_runtime:app_context",
     "ability_runtime:extensionkit_native",
+    "ability_runtime:ani_common",
     "ability_runtime:napi_common",
     "ability_runtime:runtime",
     "access_token:libaccesstoken_sdk",
@@ -64,6 +67,7 @@ ohos_shared_library("distributed_extension_ability_native") {
     "ipc:ipc_napi",
     "ipc:ipc_single",
     "napi:ace_napi",
+    "runtime_core:ani",
     "samgr:samgr_proxy",
   ]
 

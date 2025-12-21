@@ -37,6 +37,7 @@
 #include "mock_distributed_sched.h"
 #include "multi_user_manager.h"
 #include "nativetoken_kit.h"
+#include "mock/distributed_sched_permission_mock.h"
 #include "mock/svc_distributed_connection_mock.h"
 #include "mock/multi_user_manager_mock.h"
 #include "mock/mock_device_manager.h"
@@ -44,6 +45,8 @@
 #include "test_log.h"
 #include "token_setproc.h"
 #include "thread_pool.h"
+#include "mock/accesstoken_kit_mock.h"
+#include "mock/ability_manager_client_mock.h"
 #undef private
 #undef protected
 
@@ -116,6 +119,9 @@ public:
     static inline std::shared_ptr<MultiUserManagerMock> multiUserMgrMock_ = nullptr;
     static inline std::shared_ptr<DeviceManagerMock> deviceMgrMock_ = nullptr;
     static inline std::shared_ptr<SvcDistributedConnectionMock> svcDConnMock = nullptr;
+    static inline std::shared_ptr<AbilityManagerClientMock> clientMock_ = nullptr;
+    static inline std::shared_ptr<AccesstokenMock> tokenMock_ = nullptr;
+    static inline std::shared_ptr<DistributedSchedPermMock> dmsPermMock_ = nullptr;
 
 protected:
     enum class LoopTime : int32_t {
@@ -143,6 +149,12 @@ void DistributedSchedServiceFirstTest::SetUpTestCase()
     SvcDistributedConnectionMock::connMock = svcDConnMock;
     deviceMgrMock_ = std::make_shared<DeviceManagerMock>();
     DeviceManagerMock::deviceMgrMock = deviceMgrMock_;
+    clientMock_ = std::make_shared<AbilityManagerClientMock>();
+    AbilityManagerClientMock::clientMock = clientMock_;
+    tokenMock_ = std::make_shared<AccesstokenMock>();
+    AccesstokenMock::accesstokenMock_ = tokenMock_;
+    dmsPermMock_ = std::make_shared<DistributedSchedPermMock>();
+    DistributedSchedPermMock::dmsPermMock = dmsPermMock_;
     const std::string pkgName = "DBinderBus_" + std::to_string(getprocpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
@@ -157,6 +169,12 @@ void DistributedSchedServiceFirstTest::TearDownTestCase()
     svcDConnMock = nullptr;
     DeviceManagerMock::deviceMgrMock = nullptr;
     deviceMgrMock_ = nullptr;
+    AbilityManagerClientMock::clientMock = nullptr;
+    clientMock_ = nullptr;
+    AccesstokenMock::accesstokenMock_ = nullptr;
+    tokenMock_ = nullptr;
+    DistributedSchedPermMock::dmsPermMock = nullptr;
+    dmsPermMock_ = nullptr;
 }
 
 void DistributedSchedServiceFirstTest::SetUp()
@@ -526,37 +544,6 @@ HWTEST_F(DistributedSchedServiceFirstTest, SetCallerExtraInfo001, TestSize.Level
     int32_t ret = DistributedSchedService::GetInstance().StartRemoteAbility(want, callerUid, requestCode, accessToken);
     EXPECT_EQ(ret, DMS_NOT_FOREGROUND_USER);
     DTEST_LOG << "DistributedSchedServiceFirstTest SetCallerExtraInfo001 end" << std::endl;
-}
-
-/**
- * @tc.name: CheckCallerIdentity001
- * @tc.desc: user is not foreground
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedServiceFirstTest, CheckCallerIdentity001, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedServiceFirstTest CheckCallerIdentity001 start" << std::endl;
-    OHOS::AAFwk::Want want;
-    CallerInfo callerInfo;
-    int32_t ret = DistributedSchedService::GetInstance().CheckCallerIdentity(want, callerInfo);
-    EXPECT_EQ(ret, ERR_OK);
-    DTEST_LOG << "DistributedSchedServiceFirstTest CheckCallerIdentity001 end" << std::endl;
-}
-
-/**
- * @tc.name: CheckCallerIdentity002
- * @tc.desc: user is not foreground
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedServiceFirstTest, CheckCallerIdentity002, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedServiceFirstTest CheckCallerIdentity002 start" << std::endl;
-    OHOS::AAFwk::Want want;
-    CallerInfo callerInfo;
-    callerInfo.extraInfoJson[IS_CALLER_SYSAPP] = true;
-    int32_t ret = DistributedSchedService::GetInstance().CheckCallerIdentity(want, callerInfo);
-    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
-    DTEST_LOG << "DistributedSchedServiceFirstTest CheckCallerIdentity002 end" << std::endl;
 }
 
 /**

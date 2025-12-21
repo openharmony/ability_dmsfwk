@@ -41,6 +41,7 @@ public:
     int32_t NotifyRejectReason(const std::string& token, const std::string& reason);
     int32_t GetPeerVersion(int32_t sessionId, const std::string& peerDeviceId, const std::string dmsServerToken);
     bool GetWifiStatus();
+    bool IsMDMControl();
     
     enum {
         COLLAB_MESSION = 330,
@@ -49,6 +50,7 @@ public:
         BNOTIFY_CLOSE_COLLAB_SESSION = 333,
         GET_SINK_COLLAB_VERSION = 335,
         GET_WIFI_STATUS = 336,
+        IS_MDM_CONTROL = 337,
     };
 private:
     sptr<IRemoteObject> GetDmsProxy();

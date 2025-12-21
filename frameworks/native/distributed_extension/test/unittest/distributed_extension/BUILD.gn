@@ -218,6 +218,9 @@ ohos_unittest("distributed_extension_base_test") {
 
   sources = [
     "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_context_ets.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_ets.cpp",
+    "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_ets_loader.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_js.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/distributed_extension_service.cpp",
     "${dms_path}/frameworks/native/distributed_extension/src/ipc/distributed_extension_stub.cpp",
@@ -239,6 +242,7 @@ ohos_unittest("distributed_extension_base_test") {
     "ability_base:want",
     "ability_runtime:ability_context_native",
     "ability_runtime:abilitykit_native",
+    "ability_runtime:ani_common",
     "ability_runtime:app_context",
     "ability_runtime:appkit_native",
     "ability_runtime:extensionkit_native",
@@ -255,6 +259,7 @@ ohos_unittest("distributed_extension_base_test") {
     "ipc:ipc_core",
     "ipc:ipc_napi",
     "napi:ace_napi",
+    "runtime_core:ani",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]

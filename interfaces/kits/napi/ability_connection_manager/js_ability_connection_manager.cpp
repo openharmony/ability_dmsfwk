@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,6 +26,7 @@
 #include "dtbcollabmgr_log.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
+#include "napi_ability_connection_session_listener.h"
 #include "napi_common_util.h"
 #include "napi_base_context.h"
 #include "native_avcapability.h"
@@ -99,6 +100,8 @@ const std::string COLLABORATE_KEYS_CONNECT_OPTIONS = "ohos.collaboration.key.con
 const std::string COLLABORATE_KEYS_COLLABORATE_TYPE = "ohos.collaboration.key.abilityCollaborateType";
 const std::string ABILITY_COLLABORATION_TYPE_DEFAULT  = "ohos.collaboration.value.abilityCollab";
 const std::string ABILITY_COLLABORATION_TYPE_CONNECT_PROXY = "ohos.collaboration.value.connectProxy";
+const std::string CAPABILITY_NOT_SUPPORT =
+    "Capability not supported.Failed to call the API due to limited device capabilities.";
 }
 
 bool JsAbilityConnectionManager::JsToInt32(const napi_env &env, const napi_value &value,
@@ -155,6 +158,32 @@ bool JsAbilityConnectionManager::JsToString(const napi_env &env, const napi_valu
     }
     strValue.assign(buf.begin(), buf.begin() + valueLen);
     return true;
+}
+
+bool JsAbilityConnectionManager::ParsePeerServiceName(const napi_env &env, const napi_value &object,
+    std::string& fieldRef)
+{
+    bool hasProperty = false;
+    std::string fieldStr = "serviceName";
+    if (napi_has_named_property(env, object, fieldStr.c_str(), &hasProperty) != napi_ok) {
+        HILOGE("check object has serviceName property failed.");
+        return false;
+    }
+    if (!hasProperty) {
+        HILOGW("check object has serviceName property failed.");
+        // compatible with API 16
+        fieldStr = "serviceId";
+        if (napi_has_named_property(env, object, fieldStr.c_str(), &hasProperty) == napi_ok && !hasProperty) {
+            HILOGW("check object has serviceName or serverId property failed.");
+            return true;
+        }
+    }
+    napi_value field = nullptr;
+    if (napi_get_named_property(env, object, fieldStr.c_str(), &field) != napi_ok) {
+        HILOGE("get property failed, property is %{public}s.", fieldStr.c_str());
+        return false;
+    }
+    return JsToString(env, field, fieldStr, fieldRef);
 }
 
 bool JsAbilityConnectionManager::JsObjectToString(const napi_env &env, const napi_value &object,
@@ -314,6 +343,10 @@ napi_value CreateBusinessError(napi_env env, int32_t errCode, bool isAsync = tru
             error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
                 ERR_MESSAGE_INVALID_PARAMS, isAsync);
             break;
+        case CAPABILITY_NOT_SUPPORT_ERR:
+            error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_CAPABILITY_NOT_SUPPORT),
+                CAPABILITY_NOT_SUPPORT, isAsync);
+            break;
         default:
             error = CreateErrorForCall(env, static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
                 ERR_MESSAGE_FAILED, isAsync);
@@ -327,12 +360,16 @@ napi_value JsAbilityConnectionManager::CreateAbilityConnectionSession(napi_env e
     HILOGI("called.");
     GET_PARAMS(env, info, ARG_COUNT_FOUR);
     napi_value result = nullptr;
+    if (AbilityConnectionManager::GetInstance().IsMDMControl()) {
+        HILOGE("Current user is under MDM control.");
+        CreateBusinessError(env, CAPABILITY_NOT_SUPPORT_ERR);
+        return result;
+    }
     if (argc != ARG_COUNT_FOUR) {
         HILOGE("CheckArgsCount failed.");
         CreateBusinessError(env, ERR_INVALID_PARAMETERS);
         return result;
     }
-
     std::string serviceName = "";
     if (!JsToServiceName(env, argv[ARG_INDEX_ZERO], serviceName)) {
         HILOGE("Failed to unwrap service name/id");
@@ -396,13 +433,7 @@ bool JsAbilityConnectionManager::JsToServiceName(const napi_env &env, const napi
     HILOGI("parse serviceName");
     // no serviceName
     if (!JsToString(env, jsValue, "serviceName", serviceName)) {
-        HILOGW("Failed to unwrap serviceName.");
-    } else {
-        return true;
-    }
-    // neither exist
-    if (!JsToString(env, jsValue, "serverId", serviceName)) {
-        HILOGE("Failed to unwrap serverId and serviceName.");
+        HILOGE("Failed to unwrap serviceName.");
         return false;
     }
     return true;
@@ -478,11 +509,9 @@ bool JsAbilityConnectionManager::JsToPeerInfo(const napi_env &env, const napi_va
         return false;
     }
 
-    if (!JsObjectToString(env, jsValue, "serviceName", peerInfo.serverId)) {
-        HILOGW("Failed to unwrap serviceName.");
-    }
-    if (!JsObjectToString(env, jsValue, "serverId", peerInfo.serverId)) {
-        HILOGW("Failed to unwrap serverId.");
+    if (!ParsePeerServiceName(env, jsValue, peerInfo.serverId)) {
+        HILOGE("Failed to unwrap peer serviceName.");
+        return false;
     }
     peerInfo.serviceName = peerInfo.serverId;
     return true;
@@ -829,8 +858,8 @@ napi_value JsAbilityConnectionManager::RegisterAbilityConnectionSessionCallback(
         return nullptr;
     }
 
-    std::shared_ptr<JsAbilityConnectionSessionListener> listener =
-        std::make_shared<JsAbilityConnectionSessionListener>(env);
+    std::shared_ptr<NapiAbilityConnectionSessionListener> listener =
+        std::make_shared<NapiAbilityConnectionSessionListener>(env);
 
     listener->SetCallback(listenerObj);
     ret = AbilityConnectionManager::GetInstance().RegisterEventCallback(

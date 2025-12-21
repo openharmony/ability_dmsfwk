@@ -121,7 +121,8 @@ private:
             task->Resolve(env, CreateJsUndefined(env));
             delete task;
         };
-        if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        if (napi_send_event(env, asyncTask, napi_eprio_high, "distributedsched:OnConnectAbility") !=
+            napi_status::napi_ok) {
             napiAsyncTask->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "send event failed"));
         } else {
             napiAsyncTask.release();
@@ -184,7 +185,8 @@ private:
                          : task->Reject(env, CreateJsError(env, errcode, "Disconnect Ability failed."));
             delete task;
         };
-        if (napi_send_event(env, asyncTask, napi_eprio_high) != napi_status::napi_ok) {
+        if (napi_send_event(env, asyncTask, napi_eprio_high, "distributedsched:OnDisconnectAbility") !=
+            napi_status::napi_ok) {
             napiAsyncTask->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "send event failed"));
         } else {
             napiAsyncTask.release();

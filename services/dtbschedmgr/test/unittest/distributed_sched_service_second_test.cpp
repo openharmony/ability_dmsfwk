@@ -34,9 +34,12 @@
 #include "iservice_registry.h"
 #include "mock_form_mgr_service.h"
 #include "mock_distributed_sched.h"
+#include "mock/distributed_sched_permission_mock.h"
 #include "system_ability_definition.h"
 #include "test_log.h"
 #include "thread_pool.h"
+#include "mock/accesstoken_kit_mock.h"
+#include "mock/ability_manager_client_mock.h"
 #undef private
 #undef protected
 
@@ -46,6 +49,11 @@ using namespace testing::ext;
 using namespace OHOS;
 
 namespace OHOS {
+static std::string g_mockString = "";
+std::string IPCSkeleton::GetCallingDeviceID()
+{
+    return g_mockString;
+}
 namespace DistributedSchedule {
 using namespace AAFwk;
 using namespace AppExecFwk;
@@ -74,6 +82,9 @@ public:
     void TearDown();
     sptr<IDistributedSched> GetDms();
     int32_t InstallBundle(const std::string &bundlePath) const;
+    static inline std::shared_ptr<AbilityManagerClientMock> clientMock_ = nullptr;
+    static inline std::shared_ptr<AccesstokenMock> tokenMock_ = nullptr;
+    static inline std::shared_ptr<DistributedSchedPermMock> dmsPermMock_ = nullptr;
     sptr<IDistributedSched> proxy_;
 
 protected:
@@ -99,11 +110,24 @@ void DistributedSchedServiceSecondTest::SetUpTestCase()
     const std::string pkgName = "DBinderBus_" + std::to_string(getprocpid());
     std::shared_ptr<DmInitCallback> initCallback_ = std::make_shared<DeviceInitCallBack>();
     DeviceManager::GetInstance().InitDeviceManager(pkgName, initCallback_);
+    clientMock_ = std::make_shared<AbilityManagerClientMock>();
+    AbilityManagerClientMock::clientMock = clientMock_;
+    tokenMock_ = std::make_shared<AccesstokenMock>();
+    AccesstokenMock::accesstokenMock_ = tokenMock_;
+    dmsPermMock_ = std::make_shared<DistributedSchedPermMock>();
+    DistributedSchedPermMock::dmsPermMock = dmsPermMock_;
     std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_TIME));
 }
 
 void DistributedSchedServiceSecondTest::TearDownTestCase()
-{}
+{
+    AbilityManagerClientMock::clientMock = nullptr;
+    clientMock_ = nullptr;
+    AccesstokenMock::accesstokenMock_ = nullptr;
+    tokenMock_ = nullptr;
+    DistributedSchedPermMock::dmsPermMock = nullptr;
+    dmsPermMock_ = nullptr;
+}
 
 void DistributedSchedServiceSecondTest::SetUp()
 {
@@ -1485,9 +1509,50 @@ HWTEST_F(DistributedSchedServiceSecondTest, StartAbility_001, TestSize.Level3)
     DTEST_LOG << "DistributedSchedServiceSecondTest StartAbility_001 start" << std::endl;
     Want want;
     int32_t requestCode = 0;
-    int32_t ret = DistributedSchedService::GetInstance().StartAbility(want, requestCode);
-    EXPECT_NE(ret, ERR_OK);
+    CallerInfo callerInfo;
+    DataShareManager::GetInstance().SetCurrentContinueSwitch(true);
+    EXPECT_CALL(*clientMock_, Connect()).WillOnce(Return(0));
+    EXPECT_CALL(*tokenMock_, AllocLocalTokenID(_, _)).WillOnce(Return(0));
+    int32_t ret = DistributedSchedService::GetInstance().StartAbility(want, requestCode, callerInfo);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DistributedSchedServiceSecondTest StartAbility_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartAbility_002
+ * @tc.desc: StartAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, StartAbility_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest StartAbility_002 start" << std::endl;
+    Want want;
+    int32_t requestCode = 0;
+    CallerInfo callerInfo;
+    DataShareManager::GetInstance().SetCurrentContinueSwitch(true);
+    EXPECT_CALL(*clientMock_, Connect()).WillOnce(Return(0));
+    EXPECT_CALL(*tokenMock_, AllocLocalTokenID(_, _)).WillOnce(Return(1));
+    int32_t ret = DistributedSchedService::GetInstance().StartAbility(want, requestCode, callerInfo);
+    EXPECT_NE(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceSecondTest StartAbility_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: StartAbility_003
+ * @tc.desc: StartAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, StartAbility_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest StartAbility_003 start" << std::endl;
+    Want want;
+    int32_t requestCode = 0;
+    CallerInfo callerInfo;
+    DataShareManager::GetInstance().SetCurrentContinueSwitch(true);
+    EXPECT_CALL(*clientMock_, Connect()).WillOnce(Return(1));
+    int32_t ret = DistributedSchedService::GetInstance().StartAbility(want, requestCode, callerInfo);
+    EXPECT_NE(ret, ERR_OK);
+    DTEST_LOG << "DistributedSchedServiceSecondTest StartAbility_003 end" << std::endl;
 }
 
 /**
@@ -1926,6 +1991,41 @@ HWTEST_F(DistributedSchedServiceSecondTest, CheckCollabStartPermission_Test001, 
     int32_t ret = DistributedSchedService::GetInstance().CheckCollabStartPermission(want,
         callerInfo, accountInfo, needQueryExtension);
     EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+}
+
+/**
+ * @tc.name: StartShareFormFromRemote_004
+ * @tc.desc: call StartAbilityFromRemote with dms
+ * @tc.type: StartShareFormFromRemote
+ * @tc.require: issueI5M62D
+ */
+HWTEST_F(DistributedSchedServiceSecondTest, StartShareFormFromRemote_004, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedServiceSecondTest StartShareFormFromRemote_004 start" << std::endl;
+    g_mockString = "sourceDeviceId";
+    OHOS::AAFwk::Want want;
+    OHOS::AppExecFwk::AbilityInfo abilityInfo;
+    int32_t requestCode = 0;
+    CallerInfo callerInfo;
+    AccountInfo accountInfo;
+    std::string deviceId;
+    DistributedSchedService::GetInstance().GetLocalDeviceId(deviceId);
+    AppExecFwk::ElementName element("", "com.ohos.distributedmusicplayer",
+        "com.ohos.distributedmusicplayer.MainAbility");
+    element.SetDeviceID(deviceId);
+    want.SetElement(element);
+    callerInfo.sourceDeviceId = "sourceDeviceId";
+    AppExecFwk::AbilityInfo targetAbility;
+    targetAbility.type = AppExecFwk::AbilityType::UNKNOWN;
+    EXPECT_CALL(*dmsPermMock_, GetTargetAbility(_, _, _)).WillRepeatedly(
+        DoAll(SetArgReferee<1>(targetAbility), Return(true)));
+    EXPECT_CALL(*dmsPermMock_, CheckStartPermission(_, _, _, _, _)).WillRepeatedly(Return(ERR_OK));
+    EXPECT_CALL(*clientMock_, Connect()).WillOnce(Return(0));
+    EXPECT_CALL(*tokenMock_, AllocLocalTokenID(_, _)).WillOnce(Return(0));
+    int32_t ret = DistributedSchedService::GetInstance().StartAbilityFromRemote(want,
+        abilityInfo, requestCode, callerInfo, accountInfo);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DistributedSchedServiceSecondTest StartShareFormFromRemote_004 end" << std::endl;
 }
 }
 }

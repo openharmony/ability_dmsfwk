@@ -46,7 +46,7 @@ ohos_shared_library("distributed_ability_connection_manager") {
   public_configs = [ ":distributed_collab_config" ]
 
   sources = [
-    "${dms_path}/interfaces/kits/napi/ability_connection_manager/js_ability_connection_session_listener.cpp",
+    "${dms_path}/interfaces/kits/napi/ability_connection_manager/napi_ability_connection_session_listener.cpp",
     "ability_connection_info.cpp",
     "ability_connection_manager.cpp",
     "ability_connection_manager_listener.cpp",
@@ -88,6 +88,7 @@ ohos_shared_library("distributed_ability_connection_manager") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
     "wifi:wifi_sdk",
+    "window_manager:libwm",
   ]
 
   public_external_deps = [ "ability_runtime:ability_manager" ]

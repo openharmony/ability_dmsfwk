@@ -83,6 +83,7 @@ private:
     void SendSoftbusEvent(uint16_t& bundleNameId, uint8_t& continueTypeId, uint8_t type);
     void AddMMIListener();
     void RemoveMMIListener();
+    int32_t CheckContinueState(const int32_t missionId);
 
 private:
     class ScreenLockedHandler {

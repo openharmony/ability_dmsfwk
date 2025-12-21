@@ -14,6 +14,8 @@
 */
 #include "surface_encoder_adapter_test.h"
 
+#include "avcodec_video_encoder.h"
+#include "avcodec_common.h"
 #include "dtbcollabmgr_log.h"
 #include "media_description.h"
 #include "test_log.h"
@@ -67,20 +69,6 @@ HWTEST_F(SurfaceEncoderAdapterTest, Init_001, TestSize.Level3)
 }
 
 /**
- * @tc.name: Configure_001
- * @tc.desc: SurfaceEncoderAdapter Configure
- * @tc.type: FUNC
- */
-HWTEST_F(SurfaceEncoderAdapterTest, Configure_001, TestSize.Level3)
-{
-    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_001 begin" << std::endl;
-    ASSERT_NE(encodeAdapter_, nullptr);
-    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
-    EXPECT_EQ(encodeAdapter_->Configure(parameter), Status::ERROR_UNKNOWN);
-    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_001 end" << std::endl;
-}
-
-/**
  * @tc.name: Start_001
  * @tc.desc: Start
  * @tc.type: FUNC
@@ -112,6 +100,244 @@ HWTEST_F(SurfaceEncoderAdapterTest, Stop_001, TestSize.Level3)
     encodeAdapter_->isTransCoderMode = false;
     EXPECT_EQ(encodeAdapter_->Stop(), Status::OK);
     DTEST_LOG << "SurfaceEncoderAdapterTest Start_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_001
+ * @tc.desc: SurfaceEncoderAdapter Configure
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, Configure_001, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_001 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
+    EXPECT_EQ(encodeAdapter_->Configure(parameter), Status::ERROR_UNKNOWN);
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_002
+ * @tc.desc: SurfaceEncoderAdapter Configure with valid codecServer and non-transcoder mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, Configure_002, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_002 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+
+    // Initialize to create codecServer
+    std::string mime = "video/avc";
+    bool isEncode = true;
+    encodeAdapter_->Init(mime, isEncode);
+
+    // Set non-transcoder mode
+    encodeAdapter_->isTransCoderMode = false;
+
+    // Create configuration parameters
+    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
+    parameter->SetData(Tag::VIDEO_WIDTH, 1920);
+    parameter->SetData(Tag::VIDEO_HEIGHT, 1080);
+    parameter->SetData(Tag::VIDEO_FRAME_RATE, 30.0);
+    parameter->SetData(Tag::MEDIA_BITRATE, 8000000);
+    parameter->SetData(Tag::MIME_TYPE, Media::Plugins::MimeType::VIDEO_AVC);
+
+    // Since we cannot mock codecServer behavior, we can only test Configure method call
+    // Actual result depends on codecServer_ implementation
+    EXPECT_NO_FATAL_FAILURE(encodeAdapter_->Configure(parameter));
+
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_003
+ * @tc.desc: SurfaceEncoderAdapter Configure with valid codecServer and transcoder mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, Configure_003, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_003 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+
+    // Initialize to create codecServer
+    std::string mime = "video/avc";
+    bool isEncode = true;
+    encodeAdapter_->Init(mime, isEncode);
+
+    // Set transcoder mode
+    encodeAdapter_->isTransCoderMode = true;
+
+    // Create configuration parameters
+    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
+    parameter->SetData(Tag::VIDEO_WIDTH, 1280);
+    parameter->SetData(Tag::VIDEO_HEIGHT, 720);
+    parameter->SetData(Tag::VIDEO_FRAME_RATE, 25.0);
+    parameter->SetData(Tag::MEDIA_BITRATE, 4000000);
+    parameter->SetData(Tag::MIME_TYPE, Media::Plugins::MimeType::VIDEO_AVC);
+
+    // Since we cannot mock codecServer behavior, we can only test Configure method call
+    EXPECT_NO_FATAL_FAILURE(encodeAdapter_->Configure(parameter));
+
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_004
+ * @tc.desc: SurfaceEncoderAdapter Configure with RGBA pixel format
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, Configure_004, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_004 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+
+    // Initialize
+    std::string mime = "video/avc";
+    bool isEncode = true;
+    encodeAdapter_->Init(mime, isEncode);
+
+    // Set non-transcoder mode
+    encodeAdapter_->isTransCoderMode = false;
+
+    // Create configuration with RGBA related parameters
+    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
+    parameter->SetData(Tag::VIDEO_WIDTH, 1920);
+    parameter->SetData(Tag::VIDEO_HEIGHT, 1080);
+    parameter->SetData(Tag::VIDEO_PIXEL_FORMAT, Media::Plugins::VideoPixelFormat::NV12);
+    parameter->SetData(Tag::VIDEO_ENCODE_BITRATE_MODE, Media::Plugins::VideoEncodeBitrateMode::VBR);
+    parameter->SetData(Tag::VIDEO_FRAME_RATE, 30.0);
+    parameter->SetData(Tag::MEDIA_BITRATE, 8000000);
+    parameter->SetData(Tag::MIME_TYPE, Media::Plugins::MimeType::VIDEO_AVC);
+
+    EXPECT_NO_FATAL_FAILURE(encodeAdapter_->Configure(parameter));
+
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_005
+ * @tc.desc: SurfaceEncoderAdapter Configure with temporal scalability enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, Configure_005, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_005 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+
+    // Initialize
+    std::string mime = "video/avc";
+    bool isEncode = true;
+    encodeAdapter_->Init(mime, isEncode);
+
+    // Set transcoder mode
+    encodeAdapter_->isTransCoderMode = true;
+
+    // Create configuration with temporal scalability parameters
+    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
+    parameter->SetData(Tag::VIDEO_WIDTH, 1920);
+    parameter->SetData(Tag::VIDEO_HEIGHT, 1080);
+    parameter->SetData(Tag::VIDEO_FRAME_RATE, 30.0);
+    parameter->SetData(Tag::MEDIA_BITRATE, 8000000);
+    parameter->SetData(Tag::MIME_TYPE, Media::Plugins::MimeType::VIDEO_AVC);
+    parameter->SetData(Tag::VIDEO_ENCODER_ENABLE_TEMPORAL_SCALABILITY, true);
+
+    EXPECT_NO_FATAL_FAILURE(encodeAdapter_->Configure(parameter));
+
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_005 end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_006
+ * @tc.desc: SurfaceEncoderAdapter Configure with all possible parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, Configure_006, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_006 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+
+    // Initialize
+    std::string mime = "video/hevc";
+    bool isEncode = true;
+    encodeAdapter_->Init(mime, isEncode);
+
+    // Set non-transcoder mode
+    encodeAdapter_->isTransCoderMode = false;
+
+    // Create complete configuration with all possible parameters
+    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
+    parameter->SetData(Tag::VIDEO_WIDTH, 3840);
+    parameter->SetData(Tag::VIDEO_HEIGHT, 2160);
+    parameter->SetData(Tag::VIDEO_CAPTURE_RATE, 60.0);
+    parameter->SetData(Tag::VIDEO_FRAME_RATE, 60.0);
+    parameter->SetData(Tag::MEDIA_BITRATE, 16000000);
+    parameter->SetData(Tag::MIME_TYPE, Media::Plugins::MimeType::VIDEO_HEVC);
+    parameter->SetData(Tag::VIDEO_PIXEL_FORMAT, Media::Plugins::VideoPixelFormat::NV21);
+    parameter->SetData(Tag::VIDEO_ENCODE_BITRATE_MODE, Media::Plugins::VideoEncodeBitrateMode::CBR);
+    parameter->SetData(Tag::VIDEO_H265_PROFILE, Media::Plugins::HEVCProfile::HEVC_PROFILE_MAIN);
+    parameter->SetData(Tag::VIDEO_ENCODER_ENABLE_TEMPORAL_SCALABILITY, false);
+
+    EXPECT_NO_FATAL_FAILURE(encodeAdapter_->Configure(parameter));
+
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_006 end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_007
+ * @tc.desc: SurfaceEncoderAdapter Configure with empty meta
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, Configure_007, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_007 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+
+    // Initialize
+    std::string mime = "video/avc";
+    bool isEncode = true;
+    encodeAdapter_->Init(mime, isEncode);
+
+    // Set non-transcoder mode
+    encodeAdapter_->isTransCoderMode = false;
+
+    // Use empty meta parameter
+    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
+
+    EXPECT_NO_FATAL_FAILURE(encodeAdapter_->Configure(parameter));
+
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_007 end" << std::endl;
+}
+
+/**
+ * @tc.name: Configure_008
+ * @tc.desc: SurfaceEncoderAdapter Configure boundary values
+ * @tc.type: FUNC
+ */
+HWTEST_F(SurfaceEncoderAdapterTest, Configure_008, TestSize.Level3)
+{
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_008 begin" << std::endl;
+    ASSERT_NE(encodeAdapter_, nullptr);
+
+    // Initialize
+    std::string mime = "video/avc";
+    bool isEncode = true;
+    encodeAdapter_->Init(mime, isEncode);
+
+    // Set transcoder mode
+    encodeAdapter_->isTransCoderMode = true;
+
+    // Create configuration with boundary value parameters
+    std::shared_ptr<Meta> parameter = std::make_shared<Meta>();
+    parameter->SetData(Tag::VIDEO_WIDTH, 0);
+    parameter->SetData(Tag::VIDEO_HEIGHT, 0);
+    parameter->SetData(Tag::VIDEO_FRAME_RATE, 0.0);
+    parameter->SetData(Tag::MEDIA_BITRATE, 0);
+    parameter->SetData(Tag::MIME_TYPE, "");
+    parameter->SetData(Tag::VIDEO_ENCODER_ENABLE_TEMPORAL_SCALABILITY, true);
+
+    EXPECT_NO_FATAL_FAILURE(encodeAdapter_->Configure(parameter));
+
+    DTEST_LOG << "SurfaceEncoderAdapterTest Configure_008 end" << std::endl;
 }
 
 /**

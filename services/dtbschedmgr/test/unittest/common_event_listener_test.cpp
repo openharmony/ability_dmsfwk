@@ -17,9 +17,13 @@
 
 #include "gtest/gtest.h"
 #include "test_log.h"
+#include "mock/accesstoken_kit_mock.h"
+#include "mock/ability_manager_client_mock.h"
 
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS;
+using namespace AAFwk;
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -30,14 +34,24 @@ public:
     void SetUp();
     void TearDown();
     std::shared_ptr<CommonEventListener> applyMonitor = nullptr;
+    static inline std::shared_ptr<AbilityManagerClientMock> clientMock_ = nullptr;
+    static inline std::shared_ptr<AccesstokenMock> tokenMock_ = nullptr;
 };
 
 void CommonEventListenerTest::SetUpTestCase()
 {
+    clientMock_ = std::make_shared<AbilityManagerClientMock>();
+    AbilityManagerClientMock::clientMock = clientMock_;
+    tokenMock_ = std::make_shared<AccesstokenMock>();
+    AccesstokenMock::accesstokenMock_ = tokenMock_;
 }
 
 void CommonEventListenerTest::TearDownTestCase()
 {
+    AbilityManagerClientMock::clientMock = nullptr;
+    clientMock_ = nullptr;
+    AccesstokenMock::accesstokenMock_ = nullptr;
+    tokenMock_ = nullptr;
 }
 
 void CommonEventListenerTest::SetUp()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "js_ability_connection_session_listener.h"
+#include "napi_ability_connection_session_listener.h"
 
 #include "dtbcollabmgr_log.h"
 #include "js_runtime_utils.h"
@@ -24,21 +24,21 @@ namespace OHOS {
 namespace DistributedCollab {
 using namespace OHOS::AbilityRuntime;
 namespace {
-const std::string TAG = "JsAbilityConnectionSessionListener";
+const std::string TAG = "NapiAbilityConnectionSessionListener";
 }
 
-JsAbilityConnectionSessionListener::JsAbilityConnectionSessionListener()
+NapiAbilityConnectionSessionListener::NapiAbilityConnectionSessionListener()
 {
     HILOGI("called.");
 }
 
-JsAbilityConnectionSessionListener::JsAbilityConnectionSessionListener(napi_env env)
+NapiAbilityConnectionSessionListener::NapiAbilityConnectionSessionListener(napi_env env)
 {
     HILOGI("called.");
     env_ = env;
 }
 
-JsAbilityConnectionSessionListener::~JsAbilityConnectionSessionListener()
+NapiAbilityConnectionSessionListener::~NapiAbilityConnectionSessionListener()
 {
     HILOGI("called.");
     if (callbackRef_ && env_) {
@@ -50,13 +50,14 @@ JsAbilityConnectionSessionListener::~JsAbilityConnectionSessionListener()
             }
             napi_delete_reference(env, ref);
         };
-        if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_vip)) {
+        if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_vip,
+            "distributedsched:~NapiAbilityConnectionSessionListener")) {
             HILOGE("send event failed!");
         }
     }
 }
 
-void JsAbilityConnectionSessionListener::SetCallback(const napi_value& jsListenerObj)
+void NapiAbilityConnectionSessionListener::SetCallback(const napi_value& jsListenerObj)
 {
     HILOGI("called.");
     if (env_ == nullptr) {
@@ -76,18 +77,18 @@ void JsAbilityConnectionSessionListener::SetCallback(const napi_value& jsListene
     }
 }
 
-void JsAbilityConnectionSessionListener::CallJsMethod(const EventCallbackInfo& eventCallbackInfo)
+void NapiAbilityConnectionSessionListener::CallJsMethod(const EventCallbackInfo& eventCallbackInfo)
 {
     CallJsMethodTemplate(eventCallbackInfo);
 }
 
-void JsAbilityConnectionSessionListener::CallJsMethod(const CollaborateEventInfo& collaborateEventInfo)
+void NapiAbilityConnectionSessionListener::CallJsMethod(const CollaborateEventInfo& collaborateEventInfo)
 {
     CallJsMethodTemplate(collaborateEventInfo);
 }
 
 template <typename T>
-void JsAbilityConnectionSessionListener::CallJsMethodTemplate(const T& callbackInfo)
+void NapiAbilityConnectionSessionListener::CallJsMethodTemplate(const T& callbackInfo)
 {
     HILOGI("called.");
     if (env_ == nullptr) {
@@ -117,23 +118,23 @@ void JsAbilityConnectionSessionListener::CallJsMethodTemplate(const T& callbackI
         }
         HILOGI("end.");
     };
-    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_vip)) {
+    if (napi_status::napi_ok != napi_send_event(env_, task, napi_eprio_vip, "distributedsched:CallJsMethodTemplate")) {
         HILOGE("send event failed!");
     }
 }
 
-void JsAbilityConnectionSessionListener::CallJsMethodInner(const EventCallbackInfo& eventCallbackInfo)
+void NapiAbilityConnectionSessionListener::CallJsMethodInner(const EventCallbackInfo& eventCallbackInfo)
 {
     CallJsMethodInnerTemplate(eventCallbackInfo);
 }
 
-void JsAbilityConnectionSessionListener::CallJsMethodInner(const CollaborateEventInfo& collaborateEventInfo)
+void NapiAbilityConnectionSessionListener::CallJsMethodInner(const CollaborateEventInfo& collaborateEventInfo)
 {
     CallJsMethodInnerTemplate(collaborateEventInfo);
 }
 
 template <typename T>
-void JsAbilityConnectionSessionListener::CallJsMethodInnerTemplate(const T& callbackInfo)
+void NapiAbilityConnectionSessionListener::CallJsMethodInnerTemplate(const T& callbackInfo)
 {
     HILOGI("called.");
     if (env_ == nullptr || callbackRef_ == nullptr) {
@@ -156,7 +157,7 @@ void JsAbilityConnectionSessionListener::CallJsMethodInnerTemplate(const T& call
     HILOGI("end.");
 }
 
-napi_value JsAbilityConnectionSessionListener::WrapEventCallbackInfo(napi_env& env,
+napi_value NapiAbilityConnectionSessionListener::WrapEventCallbackInfo(napi_env& env,
     const EventCallbackInfo& eventCallbackInfo)
 {
     napi_value jsObject;
@@ -194,7 +195,7 @@ napi_value JsAbilityConnectionSessionListener::WrapEventCallbackInfo(napi_env& e
     return jsObject;
 }
 
-napi_value JsAbilityConnectionSessionListener::WrapEventCallbackInfo(napi_env& env,
+napi_value NapiAbilityConnectionSessionListener::WrapEventCallbackInfo(napi_env& env,
     const CollaborateEventInfo& collaborateEventInfo)
 {
     napi_value jsCallbackInfo;
@@ -215,7 +216,7 @@ napi_value JsAbilityConnectionSessionListener::WrapEventCallbackInfo(napi_env& e
     return jsCallbackInfo;
 }
 
-napi_value JsAbilityConnectionSessionListener::WrapAVTransDataBuffer(
+napi_value NapiAbilityConnectionSessionListener::WrapAVTransDataBuffer(
     napi_env& env, const std::shared_ptr<AVTransDataBuffer>& dataBuffer)
 {
     size_t dataSize = dataBuffer->Size();

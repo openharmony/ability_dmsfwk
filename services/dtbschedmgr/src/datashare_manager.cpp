@@ -21,6 +21,7 @@
 #include "mission/dms_continue_condition_manager.h"
 #include "mission/notification/dms_continue_send_manager.h"
 #include "os_account_manager.h"
+#include "parameters.h"
 #include "switch_status_dependency.h"
 
 namespace OHOS {
@@ -29,6 +30,7 @@ IMPLEMENT_SINGLE_INSTANCE(DataShareManager);
 namespace {
 const std::string TAG = "DMSDataShareManager";
 constexpr static int32_t INVALID_ACCOUNT_ID = -1;
+const std::string DISABLE_CONTINUATION_SERVICE = "const.continuation.disable_application_continuation";
 }
 SettingObserver::SettingObserver() = default;
 SettingObserver::~SettingObserver() = default;
@@ -146,6 +148,55 @@ void DataShareManager::SetCurrentContinueSwitch(bool status)
     HILOGD("SetCurrentContinueSwitch start, status : %{public}d", status);
     isCurrentContinueSwitchOn_.store(status);
     DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_CONTINUE_SWITCH, status);
+}
+
+void DataShareManager::UpdateSwitchStatus(const std::string &key, const std::string &value)
+{
+    HILOGI("Start UpdateSwitchStatus");
+    std::shared_ptr<DataShare::DataShareHelper> dataShareHelper = CreateDataShareHelper();
+    if (dataShareHelper == nullptr) {
+        HILOGE("dataShareHelper is null, key is %{public}s", key.c_str());
+        return;
+    }
+ 
+    HILOGD("UpdateSwitchStatus key = %{public}s", key.c_str());
+    int32_t userId = GetLocalAccountId();
+    Uri uri(AssembleUserSecureUri(userId, key));
+    DataShare::DataSharePredicates predicates;
+    predicates.EqualTo(SwitchStatusDependency::SETTINGS_DATA_FIELD_KEY, key);
+ 
+    DataShare::DataShareValuesBucket bucket;
+    bucket.Put(SwitchStatusDependency::SETTINGS_DATA_FIELD_KEY, key);
+    bucket.Put(SwitchStatusDependency::SETTINGS_DATA_FIELD_VAL, value);
+ 
+    auto result = dataShareHelper->UpdateEx(uri, predicates, bucket);
+    dataShareHelper->Release();
+    if (result.first != ERR_OK) {
+        HILOGE("Update status failed: %{public}d", result.first);
+    }
+    HILOGI("Finish UpdateSwitchStatus, Updata status success: %{public}d", result.first);
+    return;
+}
+
+bool DataShareManager::CheckAndHandleContinueSwitch()
+{
+    HILOGI("start");
+    bool isDisableContinue = system::GetBoolParameter(DISABLE_CONTINUATION_SERVICE, false);
+    HILOGI("isDisableContinue: %{public}d", isDisableContinue);
+    
+    if (isDisableContinue && SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
+        HILOGI("disableContinuation & last switch is open, Update close start.");
+        DataShareManager::GetInstance().UpdateSwitchStatus(
+            SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY,
+            SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_OFF);
+        DataShareManager::GetInstance().SetCurrentContinueSwitch(false);
+        HILOGI("Update close end. IsContinueSwitchOn: %{public}d",
+            SwitchStatusDependency::GetInstance().IsContinueSwitchOn());
+        return true;
+    } else {
+        HILOGI("continue switch status remains unchanged.");
+        return false;
+    }
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

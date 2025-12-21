@@ -68,7 +68,7 @@ constexpr const char* KEY_TAG_EOS = "EOS";
 const int MAX_RES_VEC_LEN = 100;
 const std::string PKG_NAME = "DBinderBus_Dms_" + std::to_string(getprocpid());
 const uint32_t DMS_UID = 5522;
-const int32_t NOTIFICATION_BANNER_FLAG = 1 << 9;
+const int32_t NOTIFICATION_BANNER_FLAG = 1 << 0 | 1 << 4;
 static std::string g_sysLanguage = "";
 static std::string g_sysRegion = "";
 static std::mutex g_resourceMutex;
@@ -100,7 +100,7 @@ void SvcDistributedConnection::OnAbilityConnectDone(const AppExecFwk::ElementNam
     };
     std::thread task(func);
     task.detach();
-    distributedProxy_ = iface_cast<DExtensionProxy>(remoteObject);
+    distributedProxy_ = iface_cast<IDExtension>(remoteObject);
     if (distributedProxy_ == nullptr) {
         HILOGE("Failed to ability connect done, distributedProxy_ is nullptr");
         return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,37 +19,15 @@
 #include <map>
 
 #include "ability_connection_info.h"
-#include "native_engine/native_engine.h"
 
 namespace OHOS {
 namespace DistributedCollab {
-class JsAbilityConnectionSessionListener :
-    public std::enable_shared_from_this<JsAbilityConnectionSessionListener> {
+class JsAbilityConnectionSessionListener {
 public:
-    explicit JsAbilityConnectionSessionListener(napi_env env);
-    JsAbilityConnectionSessionListener();
-    ~JsAbilityConnectionSessionListener();
-    void CallJsMethod(const EventCallbackInfo& eventCallbackInfo);
-    void CallJsMethod(const CollaborateEventInfo& collaborateEventInfo);
-    void SetCallback(const napi_value& jsListenerObj);
-
-private:
-    // EventCallbackInfo
-    void CallJsMethodInner(const EventCallbackInfo& eventCallbackInfo);
-    napi_value WrapEventCallbackInfo(napi_env& env, const EventCallbackInfo& eventCallbackInfo);
-    // CollaborateEventInfo
-    void CallJsMethodInner(const CollaborateEventInfo& collaborateEventInfo);
-    napi_value WrapEventCallbackInfo(napi_env& env, const CollaborateEventInfo& collaborateEventInfo);
-
-    template <typename T>
-    void CallJsMethodTemplate(const T& callbackInfo);
-    template <typename T>
-    void CallJsMethodInnerTemplate(const T& callbackInfo);
-    napi_value WrapAVTransDataBuffer(napi_env& env, const std::shared_ptr<AVTransDataBuffer>& dataBuffer);
-
-private:
-    napi_env env_ = nullptr;
-    napi_ref callbackRef_ = nullptr;
+    JsAbilityConnectionSessionListener() = default;
+    virtual ~JsAbilityConnectionSessionListener() = default;
+    virtual void CallJsMethod(const EventCallbackInfo& eventCallbackInfo) = 0;
+    virtual void CallJsMethod(const CollaborateEventInfo& collaborateEventInfo) = 0;
 };
 } // namespace DistributedCollab
 } // namespace OHOS
