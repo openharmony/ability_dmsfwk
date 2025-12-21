@@ -98,10 +98,6 @@ int32_t AniContinueManager::OffContinueStateCallback(uintptr_t context, ::taihe:
     }
 
     if (stub->callbackData_.callbackRef != nullptr) {
-        if (stub->callbackData_.env == nullptr) {
-            HILOGE("env is nullptr");
-            return ANI_ERROR;
-        }
         std::vector<ani_ref> args;
         ani_string msgIdArgs;
         stub->callbackData_.env.String_NewUTF8("", 0, &msgIdArgs);
