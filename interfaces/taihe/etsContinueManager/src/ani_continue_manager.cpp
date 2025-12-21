@@ -98,6 +98,10 @@ int32_t AniContinueManager::OffContinueStateCallback(uintptr_t context, ::taihe:
     }
 
     if (stub->callbackData_.callbackRef != nullptr) {
+        if (stub->callbackData_.env == nullptr) {
+            HILOGE("env is nullptr");
+            return ANI_ERROR;
+        }
         std::vector<ani_ref> args;
         ani_string msgIdArgs;
         stub->callbackData_.env.String_NewUTF8("", 0, &msgIdArgs);
@@ -114,8 +118,9 @@ int32_t AniContinueManager::OffContinueStateCallback(uintptr_t context, ::taihe:
     if (result != ANI_OK) {
         HILOGE("UnRegisterContinueStateCallback fail {%{public}s} {%{public}s}",
             std::to_string(ERR_DMS_WORK_ABNORMALLY).c_str(), ERR_DMS_WORK_ABNORMALLY_MSG.c_str());
+        return result;
     }
-    return ERR_DMS_WORK_ABNORMALLY;
+    return ANI_OK;
 }
 
 sptr<AniContinuationStateManagerStub> AniContinueManager::CreateStub(uintptr_t context, uintptr_t opq, bool flag)
