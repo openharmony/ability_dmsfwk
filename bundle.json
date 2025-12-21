@@ -100,6 +100,7 @@
             "//foundation/ability/dmsfwk/interfaces/innerkits/common:common_sdk",
             "//foundation/ability/dmsfwk/interfaces/innerkits/continuation_manager:continuation_manager",
             "//foundation/ability/dmsfwk/interfaces/innerkits/distributed_event:distributed_sdk",
+            "//foundation/ability/dmsfwk/interfaces/taihe/etsContinueManager:continueManager_so",
             "//foundation/ability/dmsfwk/interfaces/kits/napi:napi_packages",
             "//foundation/ability/dmsfwk/interfaces/taihe:dmsfwk_taihe"
           ],
@@ -118,6 +119,16 @@
           ]
         },
         "inner_kits": [
+          {
+            "header": {
+              "header_base": "//foundation/ability/dmsfwk/interfaces/taihe/etsContinueManager/include",
+              "header_files": [
+                "ani_continue_manager_stub.h",
+                "ani_continue_manager.h"
+              ]
+            },
+            "name": "//foundation/ability/dmsfwk/interfaces/taihe/etsContinueManager:continueManager_ani"
+          },
           {
             "header": {
               "header_base": "//foundation/ability/dmsfwk/interfaces/innerkits/continuation_manager/include",
