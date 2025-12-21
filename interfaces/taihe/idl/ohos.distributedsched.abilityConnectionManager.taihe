@@ -1,0 +1,527 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@!namespace("@ohos.distributedsched.abilityConnectionManager", "abilityConnectionManager")
+
+@!sts_inject("""
+static { loadLibraryWithPermissionCheck("dmsfwk_taihe_native.z", "@ohos.distributedsched.abilityConnectionManager") }
+""")
+
+@!sts_inject_into_module("import { Callback } from '@ohos.base';")
+@!sts_inject_into_module("import Context from 'application.Context';")
+@!sts_inject_into_module("import image from '@ohos.multimedia.image';")
+@!sts_inject_into_module("import colorSpaceManager from '@ohos.graphics.colorSpaceManager';")
+
+struct PeerInfo {
+    deviceId: String;
+    bundleName: String;
+    moduleName: String;
+    abilityName: String;
+    serviceName: Optional<String>;
+}
+
+struct ConnectOptions {
+    needSendData: Optional<bool>;
+    needSendStream: Optional<bool>;
+    needReceiveStream: Optional<bool>;
+    startOptions: Optional<StartOptionParams>;
+    parameters: Optional<@record Map<String, String>>;
+}
+
+struct ConnectResult {
+    isConnected: bool;
+    errorCode: Optional<ConnectErrorCode>;
+    reason: Optional<String>;
+}
+
+enum ConnectErrorCode: i32 {
+    CONNECTED_SESSION_EXISTS = 0,
+    PEER_APP_REJECTED = 1,
+    LOCAL_WIFI_NOT_OPEN = 2,
+    PEER_WIFI_NOT_OPEN = 3,
+    PEER_ABILITY_NO_ONCOLLABORATE = 4,
+    SYSTEM_INTERNAL_ERROR = 5,
+}
+
+enum StartOptionParams: i32 {
+    START_IN_FOREGROUND = 0,
+    START_IN_BACKGROUND = 1,
+}
+
+struct EventCallbackInfo {
+    sessionId: i32;
+    reason: Optional<DisconnectReason>;
+    msg: Optional<String>;
+    data: Optional<@arraybuffer Array<u8>>;
+    image: Optional<@sts_type("image.PixelMap") Opaque>;
+}
+
+struct CollaborateEventInfo {
+    eventType: CollaborateEventType;
+    eventMsg: Optional<String>;
+}
+
+enum CollaborateEventType: i32 {
+    SEND_FAILURE = 0,
+    COLOR_SPACE_CONVERSION_FAILURE = 1,
+}
+
+enum DisconnectReason: i32 {
+    PEER_APP_CLOSE_COLLABORATION = 0,
+    PEER_APP_EXIT = 1,
+    NETWORK_DISCONNECTED = 2,
+}
+
+function OnConnect(sessionId: i32, f: (info: EventCallbackInfo) => void, @sts_last opq: Opaque);
+function OffConnect(sessionId: i32, opq: Optional<@sts_type("Function1<EventCallbackInfo, void>") Opaque>);
+
+function OnDisconnect(sessionId: i32, f: (info: EventCallbackInfo) => void, @sts_last opq: Opaque);
+function OffDisconnect(sessionId: i32, opq: Optional<@sts_type("Function1<EventCallbackInfo, void>") Opaque>);
+
+function OnReceiveMessage(sessionId: i32, f: (info: EventCallbackInfo) => void, @sts_last opq: Opaque);
+function OffReceiveMessage(sessionId: i32, opq: Optional<@sts_type("Function1<EventCallbackInfo, void>") Opaque>);
+
+function OnReceiveData(sessionId: i32, f: (info: EventCallbackInfo) => void, @sts_last opq: Opaque);
+function OffReceiveData(sessionId: i32, opq: Optional<@sts_type("Function1<EventCallbackInfo, void>") Opaque>);
+
+function OnReceiveImage(sessionId: i32, f: (info: EventCallbackInfo) => void, @sts_last opq: Opaque);
+function OffReceiveImage(sessionId: i32, opq: Optional<@sts_type("Function1<EventCallbackInfo, void>") Opaque>);
+
+function OnCollaborateEvent(sessionId: i32, f: (info: CollaborateEventInfo) => void, @sts_last opq: Opaque);
+function OffCollaborateEvent(sessionId: i32, opq: Optional<@sts_type("Function1<EventCallbackInfo, void>") Opaque>);
+
+/**
+ * Create the Ability connection Session.
+ *
+ * @permission ohos.permission.INTERNET and ohos.permission.GET_NETWORK_INFO and ohos.permission.SET_NETWORK_INFO and ohos.permission.DISTRIBUTED_DATASYNC
+ * @param { String } serviceName - Service name, which must be consistent at both ends.
+ * @param { Context } context - The context of an ability.
+ * @param { PeerInfo } peerInfo - Collaborative application information at the sink end.
+ * @param { ConnectOptions } connectOptions - Connection options for Ability connection sessions.
+ * @returns { i32}  Returns the Ability connection Session id.
+ * @throws { BusinessError } 201 - Permission denied.
+ * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2. Incorrect parameter types.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @since 22 static
+ */
+function CreateAbilityConnectionSession(serviceName: String, context: @sts_type("Context") Opaque, peerInfo: PeerInfo,
+    connectOptions: ConnectOptions): i32;
+/**
+ * Destroy the ability connection session
+ *
+ * @param { i32 } sessionId - Ability connection Session id.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @since 22 static
+ */
+function DestroyAbilityConnectionSession(sessionId: i32): void;
+
+/**
+ * Get the application information in the ability connection session
+ *
+ * @param { i32 } sessionId - Ability connection Session id.
+ * @returns { PeerInfo | undefined } Returns the collaborative application information at the sink end.
+ * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2. Incorrect parameter types.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @since 22 static
+ */
+function GetPeerInfoById(sessionId: i32): Optional<PeerInfo>;
+
+/**
+ * Initiate an ability session connection.
+ *
+ * @param { i32 } sessionId - Ability connection Session id.
+ * @returns { Promise<ConnectResult> } The promise returned by the function.
+ * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2. Incorrect parameter types.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @since 22 static
+ */
+@gen_promise("connect")
+function ConnectSync(sessionId: i32): ConnectResult;
+/**
+ * Disconnect a Ability connection Session.
+ *
+ * @param { i32 } sessionId - Ability connection Session id.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @since 22 static
+ */
+function Disconnect(sessionId: i32): void;
+/**
+ * Accept connection request and prepare the connection environment.
+ *
+ * @param { i32 } sessionId - Ability connection Session id.
+ * @param { String } token - Token for collaborative service management
+ * @returns { Promise<void> } The promise returned by the function.
+ * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2. Incorrect parameter types.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @since 22 static
+ */
+@gen_promise("acceptConnect")
+function AcceptConnectSync(sessionId: i32, token: String): void;
+/**
+ * Notify the peer end of the reason why the connection is rejected.
+ *
+ * @param { String } token - Token for collaborative service management.
+ * @param { String } reason - Reason for connection rejection.
+ * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2. Incorrect parameter types.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @since 22 static
+ */
+function Reject(token: String, reason: String): void;
+/**
+ * Send message data.
+ *
+ * @param { i32 } sessionId - Ability connection Session id.
+ * @param { String } msg - Message data to be sent.
+ * @returns { Promise<void> } The promise returned by the function.
+ * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2. Incorrect parameter types.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @since 22 static
+ */
+@gen_promise("sendMessage")
+function SendMessageSync(sessionId: i32, msg: String): void;
+/**
+ * Send data.
+ *
+ * @param { i32 } sessionId - Ability connection Session id.
+ * @param { ArrayBuffer } data - Data to be sent.
+ * @returns { Promise<void> } The promise returned by the function.
+ * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2. Incorrect parameter types.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @since 22 static
+ */
+@gen_promise("sendData")
+function SendDataSync(sessionId: i32, data: @arraybuffer Array<u8>): void;
+
+/**
+ * Send image data.
+ *
+ * @param { i32 } sessionId - Ability connection Session id.
+ * @param { image.PixelMap } image - image data to be sent.
+ * @param { i32 } [quality] - image compression quality, range 0~100, default 30.
+ * @returns { Promise<void> } The promise returned by the function.
+ * @throws { BusinessError } 202 - Not system App.
+ * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2. Incorrect parameter types.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @systemapi
+ * @since 22 static
+ */
+@gen_promise("sendImage")
+function SendImageSync(sessionId: i32, image: @sts_type("image.PixelMap") Opaque, quality: Optional<i32>): void;
+
+/**
+ * Creating a Stream.
+ *
+ * @param { i32 } sessionId - Ability connection Session id.
+ * @param { StreamParam } param - Transport Stream Parameters
+ * @returns {Promise<i32>}  The promise returned by the function, contain the ID of a transport stream.
+ * @throws { BusinessError } 202 - Not system App.
+ * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2. Incorrect parameter types.
+ * @throws { BusinessError } 32300001 - Only one stream can be created for the current session.
+ * @throws { BusinessError } 32300003 - Bitrate not supported.
+ * @throws { BusinessError } 32300004 - Color space not supported.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @systemapi
+ * @since 22 static
+ */
+@gen_promise("createStream")
+function CreateStreamSync(sessionId: i32, param: StreamParam): i32;
+/**
+ * Sets the transmission surface.
+ *
+ * @param { i32 } streamId - Indicates the ID of a transport stream.
+ * @param { String } surfaceId - Surface ID.
+ * @param { SurfaceParam } param - Surface Parameters
+ * @throws { BusinessError } 202 - Not system App.
+ * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2. Incorrect parameter types.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @systemapi
+ * @since 22 static
+ */
+function SetSurfaceId(streamId: i32, surfaceId: String, param: SurfaceParam): void;
+/**
+ * Obtains the transmission surface.
+ *
+ * @param { i32 } streamId - Indicates the ID of a transport stream.
+ * @param { SurfaceParam } param - Surface Parameters
+ * @returns {String}  Returns the ID of a surface.
+ * @throws { BusinessError } 202 - Not system App.
+ * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2. Incorrect parameter types.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @systemapi
+ * @since 22 static
+ */
+function GetSurfaceId(streamId: i32, param: SurfaceParam): String;
+/**
+ * Update surface parameters.
+ *
+ * @param { i32 } streamId - Stream ID.
+ * @param { SurfaceParam } param - Surface Parameters
+ * @throws { BusinessError } 202 - Not system App.
+ * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2. Incorrect parameter types.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @systemapi
+ * @since 22 static
+ */
+function UpdateSurfaceParam(streamId: i32, param: SurfaceParam): void;
+/**
+ * Destroy the Stream.
+ *
+ * @param { i32 } streamId - Indicates the ID of a transport stream.
+ * @throws { BusinessError } 202 - Not system App.
+ * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2. Incorrect parameter types.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @systemapi
+ * @since 22 static
+ */
+function DestroyStream(streamId: i32): void;
+/**
+ * Start Streaming
+ *
+ * @param { i32 } streamId - Indicates the ID of a transport stream.
+ * @throws { BusinessError } 202 - Not system App.
+ * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2. Incorrect parameter types.
+ * @throws { BusinessError } 32300002 - The stream at the receive end is not started.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @systemapi
+ * @since 22 static
+ */
+function StartStream(streamId: i32): void;
+/**
+ * Stop Streaming
+ *
+ * @param { i32 } streamId - Indicates the ID of a transport stream.
+ * @throws { BusinessError } 202 - Not system App.
+ * @throws { BusinessError } 401 - Parameter error. Possible causes: 1. Mandatory parameters are left unspecified. 2. Incorrect parameter types.
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @systemapi
+ * @since 22 static
+ */
+function StopStream(streamId: i32): void;
+
+/**
+ * Streaming configuration parameters.
+ * @interface StreamParam
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @systemapi
+ * @since 22 static
+ */
+struct StreamParam {
+    /**
+     * Stream name, the receive end must be consistent with the transmit end.
+     * @type { String }
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    name: String;
+    /**
+     * Stream transmission role, which can be a receive stream or a transmit stream.
+     * @type { StreamRole }
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    role: StreamRole;
+    /**
+     * This value indicates video bitrate, default 80(kbps). Only valid on the sender side.
+     * @type { ?i32 }
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    bitrate: Optional<i32>;
+    /**
+     * The target color space for conversion. Currently, only BT709_LIMIT is supported.
+     * If the video format on the sender side is HDR and needs to be converted to SDR during transmission, this parameter should be set.
+     * @type { ?colorSpaceManager.ColorSpace }
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    colorSpaceConversionTarget: Optional<@sts_type("colorSpaceManager.ColorSpace") Opaque>;
+}
+/**
+ * Surface configuration parameters.
+ * @struct SurfaceParam
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @systemapi
+ * @since 22 static
+ */
+struct SurfaceParam {
+    /**
+     * Encoding width. Must be set before stream starts and cannot update once set.
+     * @type { i32 }
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    width: i32;
+    /**
+     * Encoding length. Must be set before stream starts and cannot update once set.
+     * @type { i32 }
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    height: i32;
+    /**
+     * Video PixelFormat, this option must be configured on the sender.
+     * Must be set before stream starts and cannot update once set.
+     * @type { ?VideoPixelFormat }
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    format: Optional<VideoPixelFormat>;
+    /**
+     * This value identifies the rotation angle of the video.
+     * the range of rotation angle should be {0, 90, 180, 270}, default is 0
+     * @type { ?i32 }
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    rotation: Optional<i32>;
+    /**
+     * This value indicates whether the video is reversed.
+     * @type { ?FlipOptions }
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    flip: Optional<FlipOptions>;
+}
+/**
+ * Flip option.
+ * @enum { i32 }
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @systemapi
+ * @since 22 static
+ */
+enum FlipOptions: i32 {
+    /**
+     * Horizontal Flip
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    HORIZONTAL = 0,
+    /**
+     * Vertical Flip
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    VERTICAL = 1,
+}
+/**
+ * Stream transmission role.
+ * @enum { i32 }
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @systemapi
+ * @since 22 static
+ */
+enum StreamRole: i32 {
+    /**
+     * This status indicates the stream is a send stream.
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    SOURCE = 0,
+    /**
+     * This status indicates the stream is a receive stream.
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    SINK = 1,
+}
+/**
+ * Video pixelFormat Configuration Options.
+ * @enum { i32 }
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @systemapi
+ * @since 22 static
+ */
+enum VideoPixelFormat: i32 {
+    /**
+     * Unknown.
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    UNKNOWN = -1,
+    /**
+     * NV12. yuv 420 semiplanar.
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    NV12 = 0,
+    /**
+     * NV21. yvu 420 semiplanar.
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @systemapi
+     * @since 22 static
+     */
+    NV21 = 1,
+}
+/**
+ * The keys for ability onCollaborate parameters.
+ * @enum { String }
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @since 22 static
+ */
+enum CollaborationKeys: String {
+    /**
+     * The key of peerinfo
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @since 22 static
+     */
+    PEER_INFO = "ohos.collaboration.key.peerInfo",
+    /**
+     * The key of connect options
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @since 22 static
+     */
+    CONNECT_OPTIONS = "ohos.collaboration.key.connectOptions",
+    /**
+     * The key of collaboration type
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @since 22 static
+     */
+    COLLABORATE_TYPE = "ohos.collaboration.key.abilityCollaborateType",
+}
+/**
+ * Ability collaboration values.
+ * @enum { String }
+ * @syscap SystemCapability.DistributedSched.AppCollaboration
+ * @since 22 static
+ */
+enum CollaborationValues: String {
+    /**
+     * Default collaboration type
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @since 22 static
+     */
+    ABILITY_COLLABORATION_TYPE_DEFAULT = "ohos.collaboration.value.abilityCollab",
+    /**
+     * Collaboration type of connect proxy
+     * @syscap SystemCapability.DistributedSched.AppCollaboration
+     * @since 22 static
+     */
+    ABILITY_COLLABORATION_TYPE_CONNECT_PROXY = "ohos.collaboration.value.connectProxy",
+}
