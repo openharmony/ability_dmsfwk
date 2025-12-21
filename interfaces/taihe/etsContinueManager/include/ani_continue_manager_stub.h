@@ -17,7 +17,6 @@
 #define ANI_CONTINUE_MANAGER_STUB_H
 
 #include <memory>
-
 #include "ipc_skeleton.h"
 #include "iremote_stub.h"
 #include "iremote_broker.h"
