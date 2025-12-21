@@ -17,7 +17,6 @@
 #include "dtbschedmgr_log.h"
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
-#include "dtbschedmgr_log.h"
 #include "ani_continue_manager.h"
 #include "ani_continue_client.h"
 #include "ani_base_context.h"
