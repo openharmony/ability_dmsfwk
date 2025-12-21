@@ -356,7 +356,7 @@ abilityConnectionManagerTaihe::EventCallbackInfo EventCallbackInfoAdapter::Conve
     auto disconnectReason = DisconnectReasonAdapter::ConvertToTaihe(eventCallbackInfo.reason);
     std::vector<uint8_t> data;
     if (eventCallbackInfo.data != nullptr) {
-        data.reserve(eventCallbackInfo.data->Size());
+        data.resize(eventCallbackInfo.data->Size());
         auto ret = memcpy_s(data.data(), eventCallbackInfo.data->Size(),
             eventCallbackInfo.data->Data(), eventCallbackInfo.data->Size());
         if (ret != OHOS::ERR_OK) {
