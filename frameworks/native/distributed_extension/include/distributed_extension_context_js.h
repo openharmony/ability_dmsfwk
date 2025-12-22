@@ -16,55 +16,21 @@
 #ifndef OHOS_DISTRIBUTED_EXTENSION_CONTEXT_JS_H
 #define OHOS_DISTRIBUTED_EXTENSION_CONTEXT_JS_H
 
-#include "ability_connect_callback.h"
 #include "distributed_extension_context.h"
-#include "event_handler.h"
 #include "js_runtime_utils.h"
-#include "native_engine/native_engine.h"
-#include "native_engine/native_value.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
-napi_value CreateDistributedExtensionContextJS(napi_env env, std::shared_ptr<DistributedExtensionContext> ct);
-
-class DistributedExtensionContextJSConnection : public AbilityConnectCallback {
+class DistributedExtensionContextJS final {
 public:
-    explicit DistributedExtensionContextJSConnection(napi_env env);
-    ~DistributedExtensionContextJSConnection();
-    void OnAbilityConnectDone(const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject,
-        int32_t resultCode) override;
-    void OnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int32_t resultCode) override;
-    // this function need to execute in main thread.
-    void CallJsFailed(int32_t errorCode);
-    void SetJsConnectionObject(napi_value jsConnectionObject);
-
+    explicit DistributedExtensionContextJS(const std::shared_ptr<DistributedExtensionContext>& ct) : context(ct) {}
+    ~DistributedExtensionContextJS() = default;
+    static void Finalizer(napi_env env, void* data, void* hint);
 private:
-    void HandleOnAbilityConnectDone(const AppExecFwk::ElementName &element, const sptr<IRemoteObject> &remoteObject,
-        int32_t resultCode);
-    void HandleOnAbilityDisconnectDone(const AppExecFwk::ElementName &element, int32_t resultCode);
-    void ReleaseConnection();
-
-private:
-    napi_env env_;
-    napi_ref jsConnectionObject_ = nullptr;
-    std::shared_ptr<AppExecFwk::EventHandler> handler_ = nullptr;
+    std::weak_ptr<DistributedExtensionContext> context;
 };
 
-struct ConnectionKey {
-    AAFwk::Want want;
-    int64_t id;
-};
-
-struct key_compare {
-    bool operator()(const ConnectionKey &key1, const ConnectionKey &key2) const
-    {
-        return key1.id < key2.id;
-    }
-};
-
-static std::map<ConnectionKey, sptr<DistributedExtensionContextJSConnection>, key_compare> connects_;
-static int64_t serialNumber_ = 0;
-static std::mutex g_connectMapMtx;
+napi_value CreateDistributedExtensionContextJS(napi_env env, std::shared_ptr<DistributedExtensionContext> ct);
 }
 }
 
