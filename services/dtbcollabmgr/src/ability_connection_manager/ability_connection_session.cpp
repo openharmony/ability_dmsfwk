@@ -1636,11 +1636,6 @@ void AbilityConnectionSession::FinishSessionConnect()
 void AbilityConnectionSession::ExeuteConnectCallback(const ConnectResult& result)
 {
     HILOGI("called.");
-    if (eventHandler_ == nullptr) {
-        HILOGE("eventHandler_ is nullptr");
-        return;
-    }
-
     auto task = [this, result]() {
         HILOGI("execute connect callback task.");
         if (connectCallback_ == nullptr) {
@@ -1655,8 +1650,12 @@ void AbilityConnectionSession::ExeuteConnectCallback(const ConnectResult& result
             Release();
         }
     };
-    eventHandler_->PostTask(task,
-        "ExeuteConnectCallback", 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
+    std::unique_lock<std::mutex> lock(eventMutex_);
+    if (eventHandler_ == nullptr) {
+        HILOGE("eventHandler_ is nullptr");
+        return;
+    }
+    eventHandler_->PostTask(task, "ExeuteConnectCallback", 0, AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }
 
 AbilityConnectionSession::CollabChannelListener::CollabChannelListener(
