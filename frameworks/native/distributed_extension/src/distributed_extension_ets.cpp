@@ -26,7 +26,7 @@ namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DistributedExtensionETS";
 constexpr const char *ON_COLLABORATE =
-    "C{escompat.Record}:C{@ohos.app.ability.AbilityConstant.AbilityConstant.CollaborateResult}";
+    "C{std.core.Record}:C{@ohos.app.ability.AbilityConstant.AbilityConstant.CollaborateResult}";
 }
 
 extern "C" __attribute__((visibility("default"))) DistributedExtension *OHOS_ABILITY_DistributedExtensionETS(
