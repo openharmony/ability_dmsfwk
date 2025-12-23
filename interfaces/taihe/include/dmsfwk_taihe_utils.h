@@ -30,7 +30,7 @@ namespace OHOS {
 namespace DistributedCollab {
 
 bool IsSystemApp();
-std::string GetBusinessErrorInfo(int32_t errCode);
+void ThrowBusinessError(int32_t errCode);
 
 class PeerInfoAdapter {
 public:
