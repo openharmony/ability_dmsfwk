@@ -23,6 +23,7 @@
 #include "js_runtime_utils.h"
 #include "napi_common_util.h"
 #include "napi_error_code.h"
+#include "dtbcollabmgr_log.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
