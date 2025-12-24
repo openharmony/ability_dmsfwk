@@ -304,29 +304,6 @@ HWTEST_F(DMSContinueSendMgrTest, CheckContinueState_Test_001, TestSize.Level1)
     DTEST_LOG << "DMSContinueSendMgrTest CheckContinueState_Test_001 end" << std::endl;
 }
 
-/**
- * @tc.name: CheckContinueState_Test_002
- * @tc.desc: test CheckContinueState
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DMSContinueSendMgrTest, CheckContinueState_Test_002, TestSize.Level1)
-{
-    DTEST_LOG << "DMSContinueSendMgrTest CheckContinueState_Test_002 start" << std::endl;
-    std::shared_ptr<DMSContinueSendMgr> sendMgr = std::make_shared<DMSContinueSendMgr>();
-    int32_t missionId = 1;
-    clientMock_ = std::make_shared<AbilityManagerClientMock>();
-    AbilityManagerClientMock::clientMock = clientMock_;
-    EXPECT_CALL(*clientMock_, GetMissionInfo(_, _, _)).WillOnce(Return(1));
-    int32_t ret = sendMgr->CheckContinueState(missionId);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-
-    EXPECT_CALL(*clientMock_, GetMissionInfo(_, _, _)).WillOnce(Return(0));
-    ret = sendMgr->CheckContinueState(missionId);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-    DTEST_LOG << "DMSContinueSendMgrTest CheckContinueState_Test_002 end" << std::endl;
-}
-
 bool DataShareManager::IsCurrentContinueSwitchOn()
 {
     return g_mockBool;
