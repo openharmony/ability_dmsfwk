@@ -42,8 +42,7 @@ void OnCommon(T f, uintptr_t opq, int32_t sessionId, std::string type)
     auto result = AbilityConnectionManager::GetInstance().RegisterEventCallback(sessionId, type, listener);
     if (result != OHOS::ERR_OK) {
         HILOGE("Register event callback failed!");
-        taihe::set_business_error(
-            static_cast<int>(ERR_EXECUTE_FUNCTION), GetBusinessErrorInfo(ERR_EXECUTE_FUNCTION));
+        ThrowBusinessError(ERR_EXECUTE_FUNCTION);
     }
 }
 
@@ -52,8 +51,7 @@ void OffCommon(int32_t sessionId, std::string type)
     auto result = AbilityConnectionManager::GetInstance().UnregisterEventCallback(sessionId, type);
     if (result != OHOS::ERR_OK) {
         HILOGE("Unregister event callback failed!");
-        taihe::set_business_error(
-            static_cast<int>(ERR_EXECUTE_FUNCTION), GetBusinessErrorInfo(ERR_EXECUTE_FUNCTION));
+        ThrowBusinessError(ERR_EXECUTE_FUNCTION);
     }
 }
 
@@ -135,15 +133,13 @@ std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> GetAbilityInfoByContext(uintptr_t
     auto contextObj = reinterpret_cast<ani_object>(context);
     if (contextObj == nullptr) {
         HILOGE("Parameter context is nullptr.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_INVALID_PARAMETERS), GetBusinessErrorInfo(ERR_INVALID_PARAMETERS));
+        ThrowBusinessError(ERR_INVALID_PARAMETERS);
         return abilityInfo;
     }
     auto contextPtr = OHOS::AbilityRuntime::GetStageModeContext(taihe::get_env(), contextObj);
     if (contextPtr == nullptr) {
         HILOGE("get stage mode context failed!");
-        taihe::set_business_error(
-            static_cast<int>(ERR_INVALID_PARAMETERS), GetBusinessErrorInfo(ERR_INVALID_PARAMETERS));
+        ThrowBusinessError(ERR_INVALID_PARAMETERS);
         return abilityInfo;
     }
     auto abilityContext = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(contextPtr);
@@ -153,8 +149,7 @@ std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> GetAbilityInfoByContext(uintptr_t
             = OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::UIExtensionContext>(contextPtr);
         if (extensionContext == nullptr) {
             HILOGE("convertTo UIExtensionContext failed!");
-            taihe::set_business_error(
-                static_cast<int>(ERR_INVALID_PARAMETERS), GetBusinessErrorInfo(ERR_INVALID_PARAMETERS));
+            ThrowBusinessError(ERR_INVALID_PARAMETERS);
             return abilityInfo;
         }
         abilityInfo = extensionContext->GetAbilityInfo();
@@ -179,21 +174,18 @@ int32_t CreateAbilityConnectionSession(taihe::string_view serviceName, uintptr_t
     auto abilityInfo = GetAbilityInfoByContext(context);
     if (abilityInfo == nullptr) {
         HILOGE("get ability info failed!");
-        taihe::set_business_error(
-            static_cast<int>(ERR_INVALID_PARAMETERS), GetBusinessErrorInfo(ERR_INVALID_PARAMETERS));
+        ThrowBusinessError(ERR_INVALID_PARAMETERS);
         return ERR_INVALID_PARAMETERS;
     }
     auto ret = AbilityConnectionManager::GetInstance().CreateSession(
         realServiceName, abilityInfo, realPeerInfo, realconnectOptions, sessionId);
     if (ret == COLLAB_PERMISSION_DENIED || ret == INVALID_PARAMETERS_ERR) {
         HILOGE("create session failed due to param or permission valid");
-        taihe::set_business_error(
-            static_cast<int>(ret), GetBusinessErrorInfo(ret));
+        ThrowBusinessError(ret);
         return ret;
     } else if (ret != OHOS::ERR_OK) {
         HILOGE("create session failed due to function err");
-        taihe::set_business_error(
-            static_cast<int>(ret), GetBusinessErrorInfo(ret));
+        ThrowBusinessError(ERR_EXECUTE_FUNCTION);
         return ret;
     }
     return sessionId;
@@ -203,8 +195,7 @@ void DestroyAbilityConnectionSession(int32_t sessionId)
 {
     if (AbilityConnectionManager::GetInstance().DestroySession(sessionId) != OHOS::ERR_OK) {
         HILOGE("destroy session failed!");
-        taihe::set_business_error(
-            static_cast<int>(ERR_EXECUTE_FUNCTION), GetBusinessErrorInfo(ERR_EXECUTE_FUNCTION));
+        ThrowBusinessError(ERR_EXECUTE_FUNCTION);
     }
 }
 
@@ -246,8 +237,7 @@ void Disconnect(int32_t sessionId)
 {
     if (AbilityConnectionManager::GetInstance().DisconnectSession(sessionId) != OHOS::ERR_OK) {
         HILOGE("disconnect session failed!");
-        taihe::set_business_error(
-            static_cast<int>(ERR_EXECUTE_FUNCTION), GetBusinessErrorInfo(ERR_EXECUTE_FUNCTION));
+        ThrowBusinessError(ERR_EXECUTE_FUNCTION);
     }
 }
 
@@ -257,8 +247,7 @@ void AcceptConnectSync(int32_t sessionId, taihe::string_view token)
     auto result = AbilityConnectionManager::GetInstance().AcceptConnect(sessionId, tokenStr);
     if (result != OHOS::ERR_OK) {
         HILOGE("AcceptConnect failed.");
-        taihe::set_business_error(
-            static_cast<int>(result), GetBusinessErrorInfo(result));
+        ThrowBusinessError(result);
     }
 }
 
@@ -268,8 +257,7 @@ void Reject(taihe::string_view token, taihe::string_view reason)
     std::string reasonStr(reason);
     if (AbilityConnectionManager::GetInstance().Reject(tokenStr, reasonStr) != OHOS::ERR_OK) {
         HILOGE("Reject session failed!");
-        taihe::set_business_error(
-            static_cast<int>(ERR_EXECUTE_FUNCTION), GetBusinessErrorInfo(ERR_EXECUTE_FUNCTION));
+        ThrowBusinessError(ERR_EXECUTE_FUNCTION);
     }
 }
 
@@ -281,8 +269,7 @@ void SendMessageSync(int32_t sessionId, taihe::string_view msg)
     HILOGI("notify sendMessage event.");
     if (result != OHOS::ERR_OK) {
         HILOGE("SendMessage failed.");
-        taihe::set_business_error(
-            static_cast<int>(result), GetBusinessErrorInfo(result));
+        ThrowBusinessError(result);
     }
 }
 
@@ -292,15 +279,13 @@ void SendDataSync(int32_t sessionId, taihe::array_view<uint8_t> data)
     auto buffer = std::make_shared<AVTransDataBuffer>(length);
     if (memcpy_s(buffer->Data(), length, static_cast<const void*>(data.data()), length) != OHOS::ERR_OK) {
         HILOGE("pack recv data failed");
-        taihe::set_business_error(
-            static_cast<int>(ERR_EXECUTE_FUNCTION), GetBusinessErrorInfo(ERR_EXECUTE_FUNCTION));
+        ThrowBusinessError(ERR_EXECUTE_FUNCTION);
         return;
     }
     auto result = AbilityConnectionManager::GetInstance().SendData(sessionId, buffer);
     if (result != OHOS::ERR_OK) {
         HILOGE("SendData failed.");
-        taihe::set_business_error(
-            static_cast<int>(result), GetBusinessErrorInfo(result));
+        ThrowBusinessError(result);
     }
 }
 
@@ -308,32 +293,29 @@ void SendImageSync(int32_t sessionId, uintptr_t image, taihe::optional_view<int3
 {
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_IS_NOT_SYSTEM_APP), GetBusinessErrorInfo(ERR_IS_NOT_SYSTEM_APP));
+        ThrowBusinessError(ERR_IS_NOT_SYSTEM_APP);
         return;
     }
     auto pixelMapObj = reinterpret_cast<ani_object>(image);
     if (pixelMapObj == nullptr) {
         HILOGE("Parameter image is nullptr.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_INVALID_PARAMETERS), GetBusinessErrorInfo(ERR_INVALID_PARAMETERS));
+        ThrowBusinessError(ERR_INVALID_PARAMETERS);
         return;
     }
     auto pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(taihe::get_env(), pixelMapObj);
     if (pixelMap == nullptr) {
         HILOGE("Failed to unwrap image.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_INVALID_PARAMETERS), GetBusinessErrorInfo(ERR_INVALID_PARAMETERS));
+        ThrowBusinessError(ERR_INVALID_PARAMETERS);
         return;
     }
     int32_t realQuality = IMAGE_COMPRESSION_QUALITY;
     if (quality.has_value()) {
         realQuality = quality.value();
     }
-    auto ret = AbilityConnectionManager::GetInstance().SendImage(sessionId, pixelMap, realQuality);
-    if (ret != OHOS::ERR_OK) {
+    auto result = AbilityConnectionManager::GetInstance().SendImage(sessionId, pixelMap, realQuality);
+    if (result != OHOS::ERR_OK) {
         HILOGE("send image failed!");
-        taihe::set_business_error(static_cast<int>(ret), GetBusinessErrorInfo(ret));
+        ThrowBusinessError(result);
         return;
     }
 }
@@ -343,16 +325,14 @@ int32_t CreateStreamSync(int32_t sessionId, ohos::distributedsched::abilityConne
     int32_t streamId = -1;
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_IS_NOT_SYSTEM_APP), GetBusinessErrorInfo(ERR_IS_NOT_SYSTEM_APP));
+        ThrowBusinessError(ERR_IS_NOT_SYSTEM_APP);
         return streamId;
     }
     StreamParams streamParams = StreamParamAdapter::ConvertFromTaihe(param);
     auto result = AbilityConnectionManager::GetInstance().CreateStream(sessionId, streamParams, streamId);
     if (result != OHOS::ERR_OK) {
         HILOGE("CreateStream failed.");
-        taihe::set_business_error(
-            static_cast<int>(result), GetBusinessErrorInfo(result));
+        ThrowBusinessError(result);
     }
     return streamId;
 }
@@ -362,8 +342,7 @@ void SetSurfaceId(int32_t streamId, taihe::string_view surfaceId,
 {
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_IS_NOT_SYSTEM_APP), GetBusinessErrorInfo(ERR_IS_NOT_SYSTEM_APP));
+        ThrowBusinessError(ERR_IS_NOT_SYSTEM_APP);
         return;
     }
     std::string surfaceIdStr(surfaceId);
@@ -371,8 +350,7 @@ void SetSurfaceId(int32_t streamId, taihe::string_view surfaceId,
     auto result = AbilityConnectionManager::GetInstance().SetSurfaceId(streamId, surfaceIdStr, surfaceParams);
     if (result != OHOS::ERR_OK) {
         HILOGE("SetSurfaceId failed.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_EXECUTE_FUNCTION), GetBusinessErrorInfo(ERR_EXECUTE_FUNCTION));
+        ThrowBusinessError(ERR_EXECUTE_FUNCTION);
     }
 }
 
@@ -382,16 +360,14 @@ taihe::string GetSurfaceId(int32_t streamId,
     std::string surfaceId;
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_IS_NOT_SYSTEM_APP), GetBusinessErrorInfo(ERR_IS_NOT_SYSTEM_APP));
+        ThrowBusinessError(ERR_IS_NOT_SYSTEM_APP);
         return taihe::string(surfaceId);
     }
     SurfaceParams surfaceParams = SurfaceParamAdapter::ConvertFromTaihe(param);
     auto result = AbilityConnectionManager::GetInstance().GetSurfaceId(streamId, surfaceParams, surfaceId);
     if (result != OHOS::ERR_OK) {
         HILOGE("GetSurfaceId failed.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_EXECUTE_FUNCTION), GetBusinessErrorInfo(ERR_EXECUTE_FUNCTION));
+        ThrowBusinessError(ERR_EXECUTE_FUNCTION);
     }
     return taihe::string(surfaceId);
 }
@@ -400,16 +376,14 @@ void UpdateSurfaceParam(int32_t streamId, ohos::distributedsched::abilityConnect
 {
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_IS_NOT_SYSTEM_APP), GetBusinessErrorInfo(ERR_IS_NOT_SYSTEM_APP));
+        ThrowBusinessError(ERR_IS_NOT_SYSTEM_APP);
         return;
     }
     SurfaceParams surfaceParams = SurfaceParamAdapter::ConvertFromTaihe(param);
     auto result = AbilityConnectionManager::GetInstance().UpdateSurfaceParam(streamId, surfaceParams);
     if (result != OHOS::ERR_OK) {
         HILOGE("UpdateSurfaceParam failed.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_EXECUTE_FUNCTION), GetBusinessErrorInfo(ERR_EXECUTE_FUNCTION));
+        ThrowBusinessError(ERR_EXECUTE_FUNCTION);
     }
 }
 
@@ -417,15 +391,13 @@ void DestroyStream(int32_t streamId)
 {
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_IS_NOT_SYSTEM_APP), GetBusinessErrorInfo(ERR_IS_NOT_SYSTEM_APP));
+        ThrowBusinessError(ERR_IS_NOT_SYSTEM_APP);
         return;
     }
     auto result = AbilityConnectionManager::GetInstance().DestroyStream(streamId);
     if (result != OHOS::ERR_OK) {
         HILOGE("DestroyStream failed.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_EXECUTE_FUNCTION), GetBusinessErrorInfo(ERR_EXECUTE_FUNCTION));
+        ThrowBusinessError(ERR_EXECUTE_FUNCTION);
     }
 }
 
@@ -433,15 +405,13 @@ void StartStream(int32_t streamId)
 {
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_IS_NOT_SYSTEM_APP), GetBusinessErrorInfo(ERR_IS_NOT_SYSTEM_APP));
+        ThrowBusinessError(ERR_IS_NOT_SYSTEM_APP);
         return;
     }
     auto result = AbilityConnectionManager::GetInstance().StartStream(streamId);
     if (result != OHOS::ERR_OK) {
         HILOGE("StartStream failed.");
-        taihe::set_business_error(
-            static_cast<int>(result), GetBusinessErrorInfo(result));
+        ThrowBusinessError(result);
     }
 }
 
@@ -449,15 +419,13 @@ void StopStream(int32_t streamId)
 {
     if (!IsSystemApp()) {
         HILOGE("Permission verification failed.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_IS_NOT_SYSTEM_APP), GetBusinessErrorInfo(ERR_IS_NOT_SYSTEM_APP));
+        ThrowBusinessError(ERR_IS_NOT_SYSTEM_APP);
         return;
     }
     auto result = AbilityConnectionManager::GetInstance().StopStream(streamId);
     if (result != OHOS::ERR_OK) {
         HILOGE("StopStream failed.");
-        taihe::set_business_error(
-            static_cast<int>(ERR_EXECUTE_FUNCTION), GetBusinessErrorInfo(ERR_EXECUTE_FUNCTION));
+        ThrowBusinessError(ERR_EXECUTE_FUNCTION);
     }
 }
 }  // namespace
