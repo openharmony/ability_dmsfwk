@@ -585,6 +585,7 @@ int32_t AbilityConnectionSession::InitSenderEngine()
     }
     senderEngine_ = std::make_shared<AVSenderEngine>(DEFAULT_APP_UID, DEFAULT_APP_PID,
         sessionInfo_.localInfo_.bundleName, DEFAULT_INSTANCE_ID);
+    senderEngine_->SetColorSpace(static_cast<StreamColorSpace>(streamParam_.colorSpace));
     senderEngine_->Init();
     return ERR_OK;
 }
@@ -679,6 +680,7 @@ int32_t AbilityConnectionSession::ConfigEngineParam(std::shared_ptr<T> &engine, 
 int32_t AbilityConnectionSession::GetSurfaceId(const SurfaceParams& param, std::string& surfaceId)
 {
     HILOGI("called.");
+    std::unique_lock<std::shared_mutex> streamLock(streamMutex_);
     if (senderEngine_ == nullptr) {
         HILOGE("senderEngine_ Uninitialized.");
         return INVALID_PARAMETERS_ERR;

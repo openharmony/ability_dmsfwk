@@ -259,6 +259,12 @@ enum {
 
     NOT_SUPPORTED_COLOR_SPACE,
 
+    INVALID_COLORSPACE,
+
+    EMPTY_SURFACE,
+
+    CREATE_NATIVE_WINDOW_FAILED,
+
     /**
      * Result(29360161) for can not service registry.
      */

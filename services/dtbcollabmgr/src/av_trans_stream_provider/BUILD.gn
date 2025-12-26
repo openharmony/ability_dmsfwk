@@ -87,6 +87,12 @@ ohos_shared_library("dtbcollab_av_stream_trans_provider") {
     "media_foundation:media_foundation",
   ]
 
+  if (dmsfwk_vpe_enable) {
+    external_deps += [ "video_processing_engine:video_processing" ]
+    defines += [ "DMSFWK_VPE_ENABLE" ]
+    sources += [ "av_colorspace_converter.cpp" ]
+  }
+
   install_images = [ system_base_dir ]
   relative_install_dir = "platformsdk"
   part_name = "dmsfwk"
