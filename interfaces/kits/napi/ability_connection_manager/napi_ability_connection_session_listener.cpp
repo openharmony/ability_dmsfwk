@@ -224,7 +224,7 @@ napi_value NapiAbilityConnectionSessionListener::WrapAVTransDataBuffer(
 
     napi_value arrayBuffer;
     void* arrayBufferData;
-    NAPI_CALL(env, napi_create_arraybuffer(env, dataSize, &arrayBufferData, &arrayBuffer));
+    ABILITY_DMSFWK_CALL(napi_create_arraybuffer(env, dataSize, &arrayBufferData, &arrayBuffer));
 
     int32_t ret = memcpy_s(arrayBufferData, dataSize, data, dataSize);
     if (ret != EOK) {
