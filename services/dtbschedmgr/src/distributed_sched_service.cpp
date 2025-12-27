@@ -445,6 +445,7 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
     };
 #endif
     dataShareManager.UnInit();
+    DmsKvSyncE2E::GetInstance()->UnsubscriptionAccount();
     HILOGI("OnStop dms service end");
 }
 
@@ -761,9 +762,6 @@ void DistributedSchedService::InitCommonEventListener()
     auto applyMonitor = std::make_shared<CommonEventListener>(subscribeInfo);
     EventFwk::CommonEventManager::SubscribeCommonEvent(applyMonitor);
     DmsBmStorage::GetInstance()->UpdateDistributedData();
-    if (DmsKvSyncE2E::GetInstance()->CheckDeviceCfg()) {
-        DmsKvSyncE2E::GetInstance()->PushAndPullData();
-    }
 #endif
 }
 
@@ -811,6 +809,7 @@ void DistributedSchedService::InitDeviceCfg()
 {
     HILOGI("called");
     DmsKvSyncE2E::GetInstance()->QueryMDMControl();
+    DmsKvSyncE2E::GetInstance()->SubscriptionAccount();
     DmsKvSyncE2E::GetInstance()->SetDeviceCfg();
 }
 // LCOV_EXCL_STOP

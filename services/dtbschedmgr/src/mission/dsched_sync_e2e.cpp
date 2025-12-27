@@ -40,6 +40,7 @@ const std::string CONTINUE_CONFIG_RELATIVE_PATH = "etc/distributedhardware/dms/c
 const std::string ALLOW_APP_LIST_KEY = "allow_applist";
 constexpr int32_t MAX_CONFIG_PATH_LEN = 1024;
 const std::string CONSTRAINT = "constraint.distributed.transmission.outgoing";
+constexpr const char *TRANSMISSION_OUTGOING = "constraint.distributed.transmission.outgoing";
 }  // namespace
 
 std::shared_ptr<DmsKvSyncE2E> DmsKvSyncE2E::instance_ = nullptr;
@@ -400,6 +401,35 @@ bool DmsKvSyncE2E::IsMDMControl()
 {
     HILOGI("isMDMControl: %{public}d.", isMDMControl_.load());
     return isMDMControl_.load();
+}
+
+void DmsKvSyncE2E::SetMdmControl(bool isMdmControl)
+{
+    isMDMControl_.store(isMdmControl);
+}
+
+void DmsKvSyncE2E::SubscriptionAccount()
+{
+    const std::set<std::string> constraintSet = { TRANSMISSION_OUTGOING };
+    osAccountConstraintSubscriber_ = std::make_shared<AccountConstraintSubscriber>(constraintSet);
+    ErrCode constraintsErrCode = OHOS::AccountSA::OsAccountManager
+        ::SubscribeOsAccountConstraints(osAccountConstraintSubscriber_);
+    HILOGI("osAccountConstraintSubscriber os accouunt done errCode = %{public}d", constraintsErrCode);
+}
+
+void DmsKvSyncE2E::UnsubscriptionAccount()
+{
+    ErrCode constraintsErrCode = OHOS::AccountSA::OsAccountManager
+        ::UnsubscribeOsAccountConstraints(osAccountConstraintSubscriber_);
+    HILOGI("osAccountConstraintSubscriber os accouunt done errCode = %{public}d", constraintsErrCode);
+}
+
+void AccountConstraintSubscriber::OnConstraintChanged(
+    const OHOS::AccountSA::OsAccountConstraintStateData &constraintData)
+{
+    HILOGI("localId: %{private}d, constraint: %{public}s, isEnabled: %{public}d",
+        constraintData.localId, constraintData.constraint.c_str(), constraintData.isEnabled);
+    DmsKvSyncE2E::GetInstance()->SetMdmControl(constraintData.isEnabled);
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS
