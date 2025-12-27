@@ -54,6 +54,16 @@ namespace DistributedCollab {
 #define HILOGI(fmt, ...) HILOG_INFO(LOG_CORE, "%{public}s::%{public}s " fmt, TAG.c_str(), __FUNCTION__, ##__VA_ARGS__)
 #define HILOGD(fmt, ...) HILOG_DEBUG(LOG_CORE, "%{public}s::%{public}s " fmt, TAG.c_str(), __FUNCTION__, ##__VA_ARGS__)
 
+#define ABILITY_DMSFWK_NAPI_CALL_BASE(theCall, retVal)                                      \
+    do {                                                                    \
+        if ((theCall) != napi_ok) {                                         \
+            HILOGE("napi call failed, theCall: %{public}s", #theCall); \
+            return retVal;                                                  \
+        }                                                                   \
+    } while (0)
+
+#define ABILITY_DMSFWK_CALL(theCall) ABILITY_DMSFWK_NAPI_CALL_BASE(theCall, nullptr)
+
 enum {
     /**
      * Module type: Distributed schedule Service side
@@ -258,6 +268,12 @@ enum {
     NOT_SUPPORTED_BITATE,
 
     NOT_SUPPORTED_COLOR_SPACE,
+
+    INVALID_COLORSPACE,
+
+    EMPTY_SURFACE,
+
+    CREATE_NATIVE_WINDOW_FAILED,
 
     /**
      * Result(29360161) for can not service registry.
