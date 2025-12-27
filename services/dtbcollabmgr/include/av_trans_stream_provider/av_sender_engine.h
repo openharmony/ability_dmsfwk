@@ -15,6 +15,10 @@
 #ifndef OHOS_AV_TRANS_STREAM_AV_SENDER_ENGINE_H
 #define OHOS_AV_TRANS_STREAM_AV_SENDER_ENGINE_H
 
+#ifdef DMSFWK_VPE_ENABLE
+#include "av_colorspace_converter.h"
+#endif
+
 #include "av_sender_filter.h"
 #include "av_stream_common.h"
 #include "av_stream_param.h"
@@ -23,16 +27,20 @@
 #include "meta/meta.h"
 #include "pipeline/pipeline.h"
 #include "refbase.h"
-#include "surface.h"
 #include "surface_encoder_filter.h"
 #include <memory>
 #include <string>
-#include "cJSON.h"
+#include "surface_encoder_filter.h"
 #include "pixel_map.h"
 
 
 namespace OHOS {
 namespace DistributedCollab {
+    enum class StreamColorSpace : int32_t {
+        UNKNOWN = 0,
+        BT709_LIMIT = 16,
+    };
+
     class AVSenderEngine : public std::enable_shared_from_this<AVSenderEngine> {
     public:
         explicit AVSenderEngine(
@@ -65,6 +73,7 @@ namespace DistributedCollab {
         int32_t SendPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap, int32_t imageQuality);
         int32_t SetSurfaceParam(const SurfaceParam& param);
         EngineState GetState();
+        void SetColorSpace(StreamColorSpace value);
 #ifdef DSCH_COLLAB_AV_TRANS_TEST_DEMO
         void SetChannelListener(const std::shared_ptr<IChannelListener>& listener);
 #endif
@@ -80,7 +89,9 @@ namespace DistributedCollab {
         std::shared_ptr<Media::Meta> videoEncFormat_ = std::make_shared<Media::Meta>();
         std::shared_ptr<AVSenderFilter> senderFilter_ = nullptr;
         sptr<Surface> surface_ { nullptr };
-
+#ifdef DMSFWK_VPE_ENABLE
+        std::shared_ptr<AVColorspaceConverter> colorSpaceConverter_ { nullptr };
+#endif
         std::shared_ptr<Media::Pipeline::EventReceiver> engineEventReceiver_ = nullptr;
         std::shared_ptr<Media::Pipeline::FilterCallback> engineFilterCallback_ = nullptr;
         std::string engineId_;
@@ -92,6 +103,8 @@ namespace DistributedCollab {
         int32_t appPid_ { 0 };
         std::string bundleName_;
         uint64_t instanceId_ = 0;
+        StreamColorSpace colorSpace_ = StreamColorSpace::UNKNOWN;
+        std::atomic<bool> needVPE_ = false;
     };
 } // namespace DistributedCollab
 } // namespace OHOS

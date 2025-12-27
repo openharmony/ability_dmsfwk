@@ -44,6 +44,8 @@ const std::string COLLABORATE_KEYS_CONNECT_OPTIONS = "ohos.collaboration.key.con
 const std::string COLLABORATE_KEYS_COLLABORATE_TYPE = "ohos.collaboration.key.abilityCollaborateType";
 const std::string ABILITY_COLLABORATION_TYPE_DEFAULT  = "ohos.collaboration.value.abilityCollab";
 const std::string ABILITY_COLLABORATION_TYPE_CONNECT_PROXY = "ohos.collaboration.value.connectProxy";
+const std::string CAPABILITY_NOT_SUPPORT =
+    "Capability not supported.Failed to call the API due to limited device capabilities.";
 
 bool IsSystemApp()
 {
@@ -54,42 +56,54 @@ bool IsSystemApp()
     return isSystemApp;
 }
 
-std::string GetBusinessErrorInfo(int32_t errCode)
+void ThrowBusinessError(int32_t errCode)
 {
-    std::string errorInfo = "";
     switch (errCode) {
         case ERR_IS_NOT_SYSTEM_APP:
-            errorInfo = ERR_MESSAGE_NO_PERMISSION;
+            taihe::set_business_error(static_cast<int32_t>(BussinessErrorCode::ERR_NOT_SYSTEM_APP),
+                ERR_MESSAGE_NO_PERMISSION);
             break;
         case ERR_INVALID_PARAMETERS:
-            errorInfo = ERR_MESSAGE_INVALID_PARAMS;
+            taihe::set_business_error(static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
+                ERR_MESSAGE_INVALID_PARAMS);
             break;
         case ONLY_SUPPORT_ONE_STREAM:
-            errorInfo = ERR_MESSAGE_ONE_STREAM;
+            taihe::set_business_error(static_cast<int32_t>(BussinessErrorCode::ERR_ONLY_SUPPORT_ONE_STREAM),
+                ERR_MESSAGE_ONE_STREAM);
             break;
         case RECEIVE_STREAM_NOT_START:
-            errorInfo = ERR_MESSAGE_RECEIVE_NOT_START;
+            taihe::set_business_error(static_cast<int32_t>(BussinessErrorCode::ERR_RECEIVE_STREAM_NOT_START),
+                ERR_MESSAGE_RECEIVE_NOT_START);
             break;
         case NOT_SUPPORTED_BITATE:
-            errorInfo = ERR_MESSAGE_NOT_SUPPORTED_BITATE;
+            taihe::set_business_error(static_cast<int32_t>(BussinessErrorCode::ERR_BITATE_NOT_SUPPORTED),
+                ERR_MESSAGE_NOT_SUPPORTED_BITATE);
             break;
         case NOT_SUPPORTED_COLOR_SPACE:
-            errorInfo = ERR_MESSAGE_NOT_SUPPORTED_COLOR_SPACE;
+            taihe::set_business_error(static_cast<int32_t>(BussinessErrorCode::ERR_COLOR_SPACE_NOT_SUPPORTED),
+                ERR_MESSAGE_NOT_SUPPORTED_COLOR_SPACE);
             break;
         case ERR_EXECUTE_FUNCTION:
-            errorInfo = ERR_MESSAGE_FAILED;
+            taihe::set_business_error(static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
+                ERR_MESSAGE_FAILED);
             break;
         case COLLAB_PERMISSION_DENIED:
-            errorInfo = ERR_MESSAGE_NO_PERMISSION;
+            taihe::set_business_error(static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PERMISSION),
+                ERR_MESSAGE_NO_PERMISSION);
             break;
         case INVALID_PARAMETERS_ERR:
-            errorInfo = ERR_MESSAGE_INVALID_PARAMS;
+            taihe::set_business_error(static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
+                ERR_MESSAGE_INVALID_PARAMS);
+            break;
+        case CAPABILITY_NOT_SUPPORT_ERR:
+            taihe::set_business_error(static_cast<int32_t>(BussinessErrorCode::ERR_CAPABILITY_NOT_SUPPORT),
+                CAPABILITY_NOT_SUPPORT);
             break;
         default:
-            errorInfo = ERR_MESSAGE_FAILED;
+            taihe::set_business_error(static_cast<int32_t>(BussinessErrorCode::ERR_INVALID_PARAMS),
+                ERR_MESSAGE_FAILED);
             break;
     }
-    return errorInfo;
 }
 
 abilityConnectionManagerTaihe::PeerInfo PeerInfoAdapter::ConvertToTaihe(const PeerInfo &peerInfo)
@@ -287,7 +301,7 @@ StreamParams StreamParamAdapter::ConvertFromTaihe(const abilityConnectionManager
         // only BT709_LIMIT is supported
         if (realColorSpace != static_cast<int32_t>(ColorSpace::BT709_LIMIT)) {
             HILOGE("colorSpace not BT709_LIMIT.");
-            taihe::set_business_error(NOT_SUPPORTED_COLOR_SPACE, GetBusinessErrorInfo(NOT_SUPPORTED_COLOR_SPACE));
+            ThrowBusinessError(NOT_SUPPORTED_COLOR_SPACE);
             return result;
         }
         result.colorSpace = static_cast<ColorSpace>(realColorSpace);

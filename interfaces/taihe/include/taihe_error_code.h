@@ -16,35 +16,25 @@
 #ifndef SERVICES_DTBSCHEDMGR_TAIHE_ERROR_CODE_H_
 #define SERVICES_DTBSCHEDMGR_TAIHE_ERROR_CODE_H_
 
-#include "base/continuationmgr_log.h"
-
 namespace OHOS {
-namespace DistributedSchedule {
-enum {
-    /**
-     * Result(201) for permission denied.
-     */
-    PERMISSION_DENIED = 201,
-    /**
-     * Result(401) for parameter check failed.
-     */
-    PARAMETER_CHECK_FAILED = 401,
-    /**
-     * Result(16600001) for the system ability work abnormally.
-     */
-    SYSTEM_WORK_ABNORMALLY = 16600001,
-    /**
-     * Result(16600002) for token or callback not registered.
-     */
-    CALLBACK_TOKEN_UNREGISTERED = 16600002,
-    /**
-     * Result(16600003) for token register max times.
-     */
-    OVER_MAX_REGISTERED_TIMES = 16600003,
-    /**
-     * Result(16600004) for token has been registered.
-     */
-    REPEATED_REGISTRATION = 16600004,
+namespace DistributedCollab {
+enum BussinessErrorCode {
+    // Permission verification failed.
+    ERR_INVALID_PERMISSION = 201,
+    // The caller is not a system application.
+    ERR_NOT_SYSTEM_APP = 202,
+    // Input parameter error.
+    ERR_INVALID_PARAMS = 401,
+    // Capability not support.
+    ERR_CAPABILITY_NOT_SUPPORT = 801,
+    // Multiple streams can not be created.
+    ERR_ONLY_SUPPORT_ONE_STREAM = 32300001,
+    // The stream at the receive end is not started.
+    ERR_RECEIVE_STREAM_NOT_START = 32300002,
+    // Multiple streams can not be created.
+    ERR_BITATE_NOT_SUPPORTED = 32300003,
+    // The stream at the receive end is not started.
+    ERR_COLOR_SPACE_NOT_SUPPORTED = 32300004,
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

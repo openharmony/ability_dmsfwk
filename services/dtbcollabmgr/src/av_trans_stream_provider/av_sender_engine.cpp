@@ -12,6 +12,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+
+#include <vector>
+
 #include "av_sender_engine.h"
 #include "avcodec_info.h"
 #include "avcodec_list.h"
@@ -22,7 +25,6 @@
 #include "osal/task/pipeline_threadpool.h"
 #include "surface_type.h"
 #include "surface_utils.h"
-#include <vector>
 
 namespace OHOS {
 namespace DistributedCollab {
@@ -88,6 +90,14 @@ AVSenderEngine::~AVSenderEngine()
     Media::PipeLineThreadPool::GetInstance().DestroyThread(engineId_);
 }
 
+void AVSenderEngine::SetColorSpace(StreamColorSpace value)
+{
+    HILOGI("SetColorSpace: %{public}d", value);
+    bool newNeedVpe = (value == StreamColorSpace::BT709_LIMIT);
+    needVPE_.store(newNeedVpe, std::memory_order_release);
+    colorSpace_ = value;
+}
+
 void AVSenderEngine::Init()
 {
     HILOGI("AVSenderEngine::Init enter");
@@ -95,6 +105,16 @@ void AVSenderEngine::Init()
     engineFilterCallback_ = std::make_shared<AVSenderEngineFilterCallback>(shared_from_this());
     engineId_ = std::string("AVSenderEngine_") + std::to_string(Media::Pipeline::Pipeline::GetNextPipelineId());
     pipeline_->Init(engineEventReceiver_, engineFilterCallback_, engineId_);
+#ifdef DMSFWK_VPE_ENABLE
+    if (needVPE_.load()) {
+        colorSpaceConverter_ = std::make_shared<AVColorspaceConverter>();
+        int32_t ret = colorSpaceConverter_->Init();
+        if (ret != ERR_OK) {
+            needVPE_.store(false, std::memory_order_release);
+        }
+        HILOGI("ColorSpaceConverter init done");
+    }
+#endif
 }
 
 int32_t AVSenderEngine::InitVideoHeaderFilter()
@@ -187,8 +207,37 @@ uint64_t AVSenderEngine::GetSurface()
         surface_ = videoEncoderFilter_->GetInputSurface();
     }
     if (surface_ == nullptr) {
+        HILOGE("get surface from encoder failed");
         return 0;
     }
+#ifdef DMSFWK_VPE_ENABLE
+    if (colorSpaceConverter_) {
+        HILOGI("Get VPE Surface start.");
+        do {
+            int32_t ret = colorSpaceConverter_->SetSurface(surface_);
+            if (ret != ERR_OK) {
+                HILOGE("converter set surface failed, error=%{public}d", ret);
+                needVPE_.store(false, std::memory_order_release);
+                break;
+            }
+            ret = colorSpaceConverter_->Configure(OH_NativeBuffer_ColorSpace::OH_COLORSPACE_BT709_LIMIT);
+            if (ret != ERR_OK) {
+                HILOGE("config converter failed, error=%{public}d", ret);
+                needVPE_.store(false, std::memory_order_release);
+                break;
+            }
+            // get surface from converter
+            auto surfaceVPE = colorSpaceConverter_->GetSurface();
+            if (surfaceVPE == nullptr) {
+                HILOGE("get surface from converter failed");
+                needVPE_.store(false, std::memory_order_release);
+                break;
+            }
+            surface_ = surfaceVPE;
+            HILOGI("VPE SetSurface done");
+        } while (0);
+    }
+#endif
     surface_->SetDefaultUsage(surface_->GetDefaultUsage() & (~BUFFER_USAGE_VIDEO_ENCODER));
     uint64_t id = surface_->GetUniqueId();
     SurfaceError err = SurfaceUtils::GetInstance()->Add(id, surface_);
@@ -196,6 +245,7 @@ uint64_t AVSenderEngine::GetSurface()
         HILOGE("register surface failed");
         return 0;
     }
+    HILOGI("done");
     return id;
 }
 
@@ -289,6 +339,13 @@ int32_t AVSenderEngine::Start()
         return static_cast<int32_t>(Status::ERROR_WRONG_STATE);
     }
     Status ret = Status::OK;
+#ifdef DMSFWK_VPE_ENABLE
+    if (colorSpaceConverter_) {
+        HILOGI("Start VPE enter");
+        colorSpaceConverter_->Start();
+    }
+    HILOGI("VPE Start done");
+#endif
     ret = pipeline_->Start();
     if (ret == Status::OK) {
         ChangeState(EngineState::START);
@@ -308,6 +365,13 @@ int32_t AVSenderEngine::Stop()
         return static_cast<int32_t>(Status::ERROR_WRONG_STATE);
     }
     Status ret = Status::OK;
+#ifdef DMSFWK_VPE_ENABLE
+    if (colorSpaceConverter_) {
+        HILOGI("Stop VPE enter");
+        colorSpaceConverter_->Stop();
+    }
+    HILOGI("VPE Stop done");
+#endif
     ret = pipeline_->Stop();
     if (ret == Status::OK) {
         ChangeState(EngineState::STOP);

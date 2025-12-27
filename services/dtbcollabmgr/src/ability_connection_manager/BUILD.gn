@@ -91,6 +91,10 @@ ohos_shared_library("distributed_ability_connection_manager") {
     "window_manager:libwm",
   ]
 
+  if (dmsfwk_vpe_enable) {
+    external_deps += [ "video_processing_engine:video_processing" ]
+  }
+
   public_external_deps = [ "ability_runtime:ability_manager" ]
   install_images = [ system_base_dir ]
   relative_install_dir = "platformsdk"

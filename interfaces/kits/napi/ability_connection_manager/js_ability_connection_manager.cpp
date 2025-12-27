@@ -49,7 +49,7 @@ namespace {
     size_t argc = num;                \
     napi_value argv[num] = {nullptr}; \
     napi_value thisVar = nullptr;     \
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr))
+    ABILITY_DMSFWK_CALL(napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr))
 
 const std::string TAG = "JsAbilityConnectionManager";
 constexpr int32_t ARG_INDEX_ZERO = 0;
@@ -280,13 +280,13 @@ napi_value GenerateBusinessError(napi_env env,
     int32_t err, const std::string &msg)
 {
     napi_value businessError = nullptr;
-    NAPI_CALL(env, napi_create_object(env, &businessError));
+    ABILITY_DMSFWK_CALL(napi_create_object(env, &businessError));
     napi_value errorCode = nullptr;
-    NAPI_CALL(env, napi_create_int32(env, err, &errorCode));
+    ABILITY_DMSFWK_CALL(napi_create_int32(env, err, &errorCode));
     napi_value errorMsg = nullptr;
-    NAPI_CALL(env, napi_create_string_utf8(env, msg.c_str(), NAPI_AUTO_LENGTH, &errorMsg));
-    NAPI_CALL(env, napi_set_named_property(env, businessError, "code", errorCode));
-    NAPI_CALL(env, napi_set_named_property(env, businessError, "message", errorMsg));
+    ABILITY_DMSFWK_CALL(napi_create_string_utf8(env, msg.c_str(), NAPI_AUTO_LENGTH, &errorMsg));
+    ABILITY_DMSFWK_CALL(napi_set_named_property(env, businessError, "code", errorCode));
+    ABILITY_DMSFWK_CALL(napi_set_named_property(env, businessError, "message", errorMsg));
 
     return businessError;
 }
@@ -423,7 +423,7 @@ napi_value JsAbilityConnectionManager::ExecuteCreateSession(
         CreateBusinessError(env, ERR_EXECUTE_FUNCTION);
         return result;
     }
-    NAPI_CALL(env, napi_create_int32(env, sessionId, &result));
+    ABILITY_DMSFWK_CALL(napi_create_int32(env, sessionId, &result));
     return result;
 }
 
@@ -961,7 +961,7 @@ napi_value JsAbilityConnectionManager::ConnectInner(
 {
     napi_deferred deferred;
     napi_value promise = nullptr;
-    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
+    ABILITY_DMSFWK_CALL(napi_create_promise(env, &deferred, &promise));
 
     AsyncConnectCallbackInfo* asyncCallbackInfo = new AsyncConnectCallbackInfo();
     asyncCallbackInfo->deferred = deferred;
@@ -979,7 +979,7 @@ napi_value JsAbilityConnectionManager::ConnectInner(
     asyncCallbackInfo->tsfn = tsfn;
 
     napi_value asyncResourceName;
-    NAPI_CALL(env, napi_create_string_utf8(env, "connectAsync", NAPI_AUTO_LENGTH, &asyncResourceName));
+    ABILITY_DMSFWK_CALL(napi_create_string_utf8(env, "connectAsync", NAPI_AUTO_LENGTH, &asyncResourceName));
 
     napi_status status = napi_create_async_work(
         env, nullptr, asyncResourceName, ExecuteConnect, CompleteAsyncConnectWork,
@@ -1215,7 +1215,7 @@ napi_value JsAbilityConnectionManager::AcceptConnect(napi_env env, napi_callback
 
     napi_deferred deferred;
     napi_value promise = nullptr;
-    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
+    ABILITY_DMSFWK_CALL(napi_create_promise(env, &deferred, &promise));
 
     AsyncCallbackInfo* asyncCallbackInfo = new AsyncCallbackInfo();
     asyncCallbackInfo->deferred = deferred;
@@ -1223,7 +1223,7 @@ napi_value JsAbilityConnectionManager::AcceptConnect(napi_env env, napi_callback
     asyncCallbackInfo->token = token;
 
     napi_value asyncResourceName;
-    NAPI_CALL(env, napi_create_string_utf8(env, "acceptConnectAsync", NAPI_AUTO_LENGTH, &asyncResourceName));
+    ABILITY_DMSFWK_CALL(napi_create_string_utf8(env, "acceptConnectAsync", NAPI_AUTO_LENGTH, &asyncResourceName));
 
     napi_status status = napi_create_async_work(
         env, nullptr, asyncResourceName, ExecuteAcceptConnect, CompleteAsyncWork,
@@ -1288,7 +1288,7 @@ napi_value JsAbilityConnectionManager::SendMessage(napi_env env, napi_callback_i
     HILOGI("called.");
     napi_deferred deferred;
     napi_value promise = nullptr;
-    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
+    ABILITY_DMSFWK_CALL(napi_create_promise(env, &deferred, &promise));
 
     GET_PARAMS(env, info, ARG_COUNT_TWO);
     if (argc != ARG_COUNT_TWO) {
@@ -1338,7 +1338,7 @@ napi_value JsAbilityConnectionManager::SendData(napi_env env, napi_callback_info
     HILOGI("called.");
     napi_deferred deferred;
     napi_value promise = nullptr;
-    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
+    ABILITY_DMSFWK_CALL(napi_create_promise(env, &deferred, &promise));
 
     GET_PARAMS(env, info, ARG_COUNT_TWO);
     if (argc != ARG_COUNT_TWO) {
@@ -1421,7 +1421,7 @@ napi_value JsAbilityConnectionManager::SendImage(napi_env env, napi_callback_inf
 
     napi_deferred deferred;
     napi_value promise = nullptr;
-    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
+    ABILITY_DMSFWK_CALL(napi_create_promise(env, &deferred, &promise));
 
     GET_PARAMS(env, info, ARG_COUNT_THREE);
     if (argc < ARG_COUNT_TWO || argc > ARG_COUNT_THREE) {
@@ -1467,7 +1467,7 @@ napi_value JsAbilityConnectionManager::CreateSendImageAsyncWork(napi_env env, As
         return promise;
     }
     napi_value asyncResourceName;
-    NAPI_CALL(env, napi_create_string_utf8(env, "sendImageAsync", NAPI_AUTO_LENGTH, &asyncResourceName));
+    ABILITY_DMSFWK_CALL(napi_create_string_utf8(env, "sendImageAsync", NAPI_AUTO_LENGTH, &asyncResourceName));
 
     napi_status status = napi_create_async_work(
         env, nullptr, asyncResourceName, ExecuteSendImage, CompleteAsyncWork,
@@ -1508,7 +1508,7 @@ napi_value JsAbilityConnectionManager::CreateStream(napi_env env, napi_callback_
 
     napi_deferred deferred;
     napi_value promise = nullptr;
-    NAPI_CALL(env, napi_create_promise(env, &deferred, &promise));
+    ABILITY_DMSFWK_CALL(napi_create_promise(env, &deferred, &promise));
 
     GET_PARAMS(env, info, ARG_COUNT_TWO);
     if (argc != ARG_COUNT_TWO) {
