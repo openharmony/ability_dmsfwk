@@ -32,6 +32,13 @@ public:
     void SyncCompleted(const std::map<std::string, DistributedKv::Status> &result) override;
 };
 
+class AccountConstraintSubscriber final : public OHOS::AccountSA::OsAccountConstraintSubscriber {
+public:
+    explicit AccountConstraintSubscriber(const std::set<std::string> &constraintSet)
+        : OHOS::AccountSA::OsAccountConstraintSubscriber(constraintSet){};
+    void OnConstraintChanged(const OHOS::AccountSA::OsAccountConstraintStateData &constraintData) override;
+};
+
 class DmsKvSyncE2E {
 public:
     DmsKvSyncE2E();
@@ -46,6 +53,9 @@ public:
     bool CheckMDMCtrlRule(const std::string &bundleName);
     bool QueryMDMControl();
     bool IsMDMControl();
+    void SubscriptionAccount();
+    void UnsubscriptionAccount();
+    void SetMdmControl(bool isMdmControl);
 
 private:
     void TryTwice(const std::function<DistributedKv::Status()> &func) const;
@@ -68,6 +78,7 @@ private:
     std::string continueCfgFullPath_ = "";
     std::vector<std::string> whiteList_;
     std::atomic<bool> isMDMControl_ = false;
+    std::shared_ptr<AccountConstraintSubscriber> osAccountConstraintSubscriber_ = nullptr;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS
