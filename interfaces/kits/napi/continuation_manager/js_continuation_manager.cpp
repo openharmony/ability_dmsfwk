@@ -23,6 +23,7 @@
 #include "js_runtime_utils.h"
 #include "napi_common_util.h"
 #include "napi_error_code.h"
+#include "dtbcollabmgr_log.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -129,11 +130,11 @@ napi_value JsContinuationManager::OnRegister(napi_env env, napi_callback_info in
     size_t unwrapArgc = 0;
     size_t argc = ARG_COUNT_TWO;
     napi_value argv[ARG_COUNT_TWO] = { 0 };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    ABILITY_DMSFWK_CALL(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     napi_valuetype valuetype = napi_valuetype::napi_undefined;
     if (argc > 0) {
-        NAPI_CALL(env, napi_typeof(env, argv[0], &valuetype));
+        ABILITY_DMSFWK_CALL(napi_typeof(env, argv[0], &valuetype));
     }
     if (valuetype == napi_valuetype::napi_object) {
         HILOGI("register options is used.");
@@ -180,13 +181,13 @@ std::string JsContinuationManager::GetErrorInforForRegisterContination(napi_env 
 {
     size_t argc = ARG_COUNT_TWO;
     napi_value argv[ARG_COUNT_TWO] = { nullptr };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    ABILITY_DMSFWK_CALL(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc > ARG_COUNT_TWO) {
         return "Parameter error. The type of \"number of parameters\" must be less than 3";
     }
     napi_valuetype valuetype = napi_valuetype::napi_undefined;
     if (argc > 0 && argv[0] != nullptr) {
-        NAPI_CALL(env, napi_typeof(env, argv[0], &valuetype));
+        ABILITY_DMSFWK_CALL(napi_typeof(env, argv[0], &valuetype));
     }
     if (argc > 0 && valuetype == napi_valuetype::napi_object) {
         HILOGI("register options is used.");
@@ -212,7 +213,7 @@ napi_value JsContinuationManager::OnRegisterContinuation(napi_env env, napi_call
     }
     size_t argc = ARG_COUNT_TWO;
     napi_value argv[ARG_COUNT_TWO] = { 0 };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    ABILITY_DMSFWK_CALL(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     napi_value lastParam = (argc <= unwrapArgc) ? nullptr : argv[unwrapArgc];
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
@@ -254,7 +255,7 @@ napi_value JsContinuationManager::OnUnregister(napi_env env, napi_callback_info 
     int32_t errCode = 0;
     size_t argc = ARG_COUNT_TWO;
     napi_value argv[ARG_COUNT_TWO] = { 0 };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    ABILITY_DMSFWK_CALL(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc == 0) {
         HILOGE("Params not match");
         errCode = ERR_NOT_OK;
@@ -302,7 +303,7 @@ napi_value JsContinuationManager::OnUnregisterContinuation(napi_env env, napi_ca
     int32_t token = -1;
     size_t argc = ARG_COUNT_TWO;
     napi_value argv[ARG_COUNT_TWO] = { 0 };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    ABILITY_DMSFWK_CALL(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     std::string errInfo = [this, &env, &argc, argv, &token]() -> std::string {
         if (argc == 0 || argc > ARG_COUNT_TWO) {
             return "Parameter error. The type of \"number of parameters\" must be greater than 0 and less than 3";
@@ -353,7 +354,7 @@ std::string JsContinuationManager::OnRegisterDeviceSelectionCallbackParameterChe
 {
     size_t argc = ARG_COUNT_THREE;
     napi_value argv[ARG_COUNT_THREE] = { nullptr };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    ABILITY_DMSFWK_CALL(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc != ARG_COUNT_THREE) {
         return "Parameter error. The type of \"number of parameters\" must be 3";
     }
@@ -437,7 +438,7 @@ napi_value JsContinuationManager::OnUnregisterDeviceSelectionCallback(napi_env e
     std::string errInfo = [this, &env, &info, &cbType, &token, &errCode]() -> std::string {
         size_t argc = ARG_COUNT_TWO;
         napi_value argv[ARG_COUNT_TWO] = { 0 };
-        NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+        ABILITY_DMSFWK_CALL(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
         if (argc != ARG_COUNT_TWO) {
             return "Parameter error. The type of \"number of parameters\" must be 2";
         }
@@ -505,7 +506,7 @@ napi_value JsContinuationManager::OnUpdateConnectStatus(napi_env env, napi_callb
     int32_t errCode = 0;
     size_t argc = ARG_COUNT_FOUR;
     napi_value argv[ARG_COUNT_FOUR] = { 0 };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    ABILITY_DMSFWK_CALL(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc < ARG_COUNT_THREE) {
         HILOGE("Params not match");
         errCode = ERR_NOT_OK;
@@ -550,7 +551,7 @@ std::string JsContinuationManager::GetErrorInfo(napi_env env, napi_callback_info
 {
     size_t argc = ARG_COUNT_FOUR;
     napi_value argv[ARG_COUNT_FOUR] = { nullptr };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    ABILITY_DMSFWK_CALL(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc != ARG_COUNT_THREE && argc != ARG_COUNT_FOUR) {
         return "Parameter error. The type of \"number of parameters\" must be 3 or 4";
     }
@@ -591,7 +592,7 @@ napi_value JsContinuationManager::OnUpdateContinuationState(napi_env env, napi_c
     }
     size_t argc = ARG_COUNT_FOUR;
     napi_value argv[ARG_COUNT_FOUR] = { 0 };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    ABILITY_DMSFWK_CALL(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     napi_value lastParam = (argc == ARG_COUNT_THREE) ? nullptr : argv[ARG_COUNT_THREE];
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
@@ -646,13 +647,13 @@ napi_value JsContinuationManager::OnStartDeviceManager(napi_env env, napi_callba
     int32_t token = -1;
     size_t argc = ARG_COUNT_THREE;
     napi_value argv[ARG_COUNT_THREE] = { 0 };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    ABILITY_DMSFWK_CALL(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     int32_t errCode = CheckParamAndGetToken(env, argc, argv, token);
     size_t unwrapArgc = ARG_COUNT_ONE;
     std::shared_ptr<ContinuationExtraParams> continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     napi_valuetype valuetype = napi_valuetype::napi_undefined;
     if (argc > ARG_COUNT_ONE) {
-        NAPI_CALL(env, napi_typeof(env, argv[ARG_COUNT_ONE], &valuetype));
+        ABILITY_DMSFWK_CALL(napi_typeof(env, argv[ARG_COUNT_ONE], &valuetype));
     }
     if (valuetype == napi_valuetype::napi_object) {
         HILOGI("startDeviceManager options is used.");
@@ -700,7 +701,7 @@ std::string JsContinuationManager::GetErrorForStartContinuation(napi_env env, na
 {
     size_t argc = ARG_COUNT_THREE;
     napi_value argv[ARG_COUNT_THREE] = { nullptr };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
+    ABILITY_DMSFWK_CALL(napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
     if (argc < ARG_COUNT_ONE || argc > ARG_COUNT_THREE) {
         return "Parameter error. The type of \"number of parameters\" must be greater than 1 and less than 3";
     }
@@ -713,7 +714,7 @@ std::string JsContinuationManager::GetErrorForStartContinuation(napi_env env, na
     continuationExtraParams = std::make_shared<ContinuationExtraParams>();
     napi_valuetype valuetype = napi_valuetype::napi_undefined;
     if (argc > ARG_COUNT_ONE && argv[ARG_COUNT_ONE] != nullptr) {
-        NAPI_CALL(env, napi_typeof(env, argv[ARG_COUNT_ONE], &valuetype));
+        ABILITY_DMSFWK_CALL(napi_typeof(env, argv[ARG_COUNT_ONE], &valuetype));
         
         if (valuetype == napi_valuetype::napi_object) {
             HILOGI("StartContinuationDeviceManager options is used.");
@@ -743,7 +744,7 @@ napi_value JsContinuationManager::OnStartContinuationDeviceManager(napi_env env,
     size_t unwrapArgc = argc;
     size_t napiArgc = ARG_COUNT_THREE;
     napi_value argv[ARG_COUNT_THREE] = { 0 };
-    NAPI_CALL(env, napi_get_cb_info(env, info, &napiArgc, argv, nullptr, nullptr));
+    ABILITY_DMSFWK_CALL(napi_get_cb_info(env, info, &napiArgc, argv, nullptr, nullptr));
     napi_value lastParam = (napiArgc <= unwrapArgc) ? nullptr : argv[unwrapArgc];
     napi_value result = nullptr;
     std::unique_ptr<NapiAsyncTask> napiAsyncTask = CreateEmptyAsyncTask(env, lastParam, &result);
@@ -781,15 +782,15 @@ napi_value JsContinuationManager::OnStartContinuationDeviceManager(napi_env env,
 napi_value JsContinuationManager::OnInitDeviceConnectStateObject(napi_env env, napi_callback_info info)
 {
     napi_value object;
-    NAPI_CALL(env, napi_create_object(env, &object));
+    ABILITY_DMSFWK_CALL(napi_create_object(env, &object));
 
-    NAPI_CALL(env, SetEnumItem(env, object, "IDLE",
+    ABILITY_DMSFWK_CALL(SetEnumItem(env, object, "IDLE",
         static_cast<int32_t>(DeviceConnectStatus::IDLE)));
-    NAPI_CALL(env, SetEnumItem(env, object, "CONNECTING",
+    ABILITY_DMSFWK_CALL(SetEnumItem(env, object, "CONNECTING",
         static_cast<int32_t>(DeviceConnectStatus::CONNECTING)));
-    NAPI_CALL(env, SetEnumItem(env, object, "CONNECTED",
+    ABILITY_DMSFWK_CALL(SetEnumItem(env, object, "CONNECTED",
         static_cast<int32_t>(DeviceConnectStatus::CONNECTED)));
-    NAPI_CALL(env, SetEnumItem(env, object, "DISCONNECTING",
+    ABILITY_DMSFWK_CALL(SetEnumItem(env, object, "DISCONNECTING",
         static_cast<int32_t>(DeviceConnectStatus::DISCONNECTING)));
 
     return object;
@@ -798,11 +799,11 @@ napi_value JsContinuationManager::OnInitDeviceConnectStateObject(napi_env env, n
 napi_value JsContinuationManager::OnInitContinuationModeObject(napi_env env, napi_callback_info info)
 {
     napi_value object;
-    NAPI_CALL(env, napi_create_object(env, &object));
+    ABILITY_DMSFWK_CALL(napi_create_object(env, &object));
 
-    NAPI_CALL(env, SetEnumItem(env, object, "COLLABORATION_SINGLE",
+    ABILITY_DMSFWK_CALL(SetEnumItem(env, object, "COLLABORATION_SINGLE",
         static_cast<int32_t>(ContinuationMode::COLLABORATION_SINGLE)));
-    NAPI_CALL(env, SetEnumItem(env, object, "COLLABORATION_MULTIPLE",
+    ABILITY_DMSFWK_CALL(SetEnumItem(env, object, "COLLABORATION_MULTIPLE",
         static_cast<int32_t>(ContinuationMode::COLLABORATION_MUTIPLE)));
 
     return object;
