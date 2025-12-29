@@ -22,7 +22,7 @@ export default class DistributedExtensionAbility {
   public context: DistributedExtensionContext = {};
 
   onCreate(want: Want): void {
-    console.log(`DistributedExtensionAbility onCreate, want: ${want}`);
+    console.log(`DistributedExtensionAbility onCreate`);
   }
 
   onDestroy(): void {
@@ -30,7 +30,7 @@ export default class DistributedExtensionAbility {
   }
 
   onCollaborate(wantParam: Record<string, Object>): AbilityConstant.CollaborateResult {
-    console.log(`DistributedExtensionAbility onCollaborate, wantParam: ${wantParam}`);
+    console.log(`DistributedExtensionAbility onCollaborate`);
     return AbilityConstant.CollaborateResult.REJECT;
   }
 }
