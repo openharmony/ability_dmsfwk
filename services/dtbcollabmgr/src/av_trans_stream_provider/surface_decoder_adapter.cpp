@@ -328,11 +328,11 @@ namespace DistributedCollab {
 
     void SurfaceDecoderAdapter::OnInputBufferAvailable(uint32_t index, std::shared_ptr<AVBuffer> buffer)
     {
-        HILOGI("SurfaceDecoderAdapter::OnInputBufferAvailable enter");
         FALSE_RETURN_MSG(buffer != nullptr && buffer->meta_ != nullptr, "meta_ is nullptr.");
-        HILOGD(
-            "OnInputAvailable enter. index:%{public}u, "
-            "bufferid:%{public}" PRIu64", pts:%{public}" PRId64", flag:%{public}u",
+        HILOGI(
+            "SurfaceDecoderAdapter::OnInputBufferAvailable enter. "
+            "index:%{public}u, bufferid:%{public}" PRIu64", "
+            "pts:%{public}" PRId64", flag:%{public}u",
             index, buffer->GetUniqueId(), buffer->pts_, buffer->flag_);
         buffer->meta_->SetData(Tag::REGULAR_TRACK_ID, index);
         if (inputBufferQueueConsumer_ == nullptr) {
