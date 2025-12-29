@@ -371,7 +371,7 @@ HWTEST_F(AVSenderEngineTest, Start_Test, TestSize.Level1)
         "builtin.dtbcollab.sender", FilterType::FILTERTYPE_SOURCE);
     senderEngine_->curState_ = EngineState::START;
     ret = senderEngine_->Start();
-    EXPECT_EQ(ret, static_cast<int32_t>(Status::OK));
+    EXPECT_EQ(ret, static_cast<int32_t>(Status::ERROR_WRONG_STATE));
 
     senderEngine_->curState_ = EngineState::SETTING;
     ret = senderEngine_->Start();
@@ -397,11 +397,11 @@ HWTEST_F(AVSenderEngineTest, Stop_Test, TestSize.Level1)
     DTEST_LOG << "AVSenderEngineTest Prepare_Test begin" << std::endl;
     senderEngine_->curState_ = EngineState::INIT;
     auto ret = senderEngine_->Stop();
-    EXPECT_EQ(ret, static_cast<int32_t>(Status::OK));
+    EXPECT_EQ(ret, static_cast<int32_t>(Status::ERROR_WRONG_STATE));
 
     senderEngine_->curState_ = EngineState::STOP;
     ret = senderEngine_->Stop();
-    EXPECT_EQ(ret, static_cast<int32_t>(Status::OK));
+    EXPECT_EQ(ret, static_cast<int32_t>(Status::ERROR_WRONG_STATE));
 
     senderEngine_->curState_ = EngineState::SETTING;
     ret = senderEngine_->Stop();
