@@ -15,8 +15,35 @@
 
 #include "distributed_extension_context.h"
 
+#include "ability_connection.h"
+#include "ability_manager_client.h"
+#include "dtbschedmgr_log.h"
+
+
 namespace OHOS {
 namespace DistributedSchedule {
+const std::string TAG = "DistributedExtensionContextJS";
 using namespace AbilityRuntime;
+
+bool DistributedExtensionContext::ConnectAbility(const AAFwk::Want &want,
+    const sptr<AbilityConnectCallback> &connectCallback) const
+{
+    HILOGI("%{public}s start.", __func__);
+    ErrCode ret = ConnectionManager::GetInstance().ConnectAbility(token_, want, connectCallback);
+    HILOGI("DistributedExtensionContext::ConnectAbility ret: %{public}d", ret);
+    return ret == ERR_OK;
+}
+
+ErrCode DistributedExtensionContext::DisconnectAbility(const AAFwk::Want &want,
+    const sptr<AbilityConnectCallback> &connectCallback) const
+{
+    HILOGI("%{public}s start.", __func__);
+    ErrCode ret = ConnectionManager::GetInstance().DisconnectAbility(token_, want.GetElement(), connectCallback);
+    if (ret != ERR_OK) {
+        HILOGE("%{public}s end DisconnectAbility error, ret: %{public}d!", __func__, ret);
+    }
+    HILOGI("%{public}s end DisconnectAbility.", __func__);
+    return ret;
+}
 }
 }
