@@ -19,6 +19,7 @@
 #include "ani_continue_manager.h"
 #include "ani_continue_client.h"
 #include "ani_base_context.h"
+#include "ohos.app.ability.continueManager.ContinueResultInfo.ani.1.hpp"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -38,7 +39,8 @@ int32_t AniContinueManager::OnContinueStateCallback(uintptr_t context, uintptr_t
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOn Unsupported business type: %{public}s; need: %{public}s",
             stub == nullptr ? "" : stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
-        return ERR_DMS_WORK_ABNORMALLY;
+        taihe::set_business_error(ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_MSG.c_str());
+        return ANI_ERROR;
     }
 
     std::string key = std::to_string(stub->callbackData_.missionId) + stub->callbackData_.bundleName +
@@ -59,32 +61,30 @@ int32_t AniContinueManager::OnContinueStateCallback(uintptr_t context, uintptr_t
 
     AniContinuationStateClient client;
     int32_t result = client.RegisterContinueStateCallback(stub);
-    HILOGI("ContinueStateCallbackOn register callback result: %{public}d", result);
-
     if (result != ANI_OK) {
         HILOGE("RegisterContinueStateCallback fail {%{public}s} {%{public}s}",
             std::to_string(ERR_DMS_WORK_ABNORMALLY).c_str(), ERR_DMS_WORK_ABNORMALLY_MSG.c_str());
+        taihe::set_business_error(ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_MSG.c_str());
     }
     return result;
 }
 
-int32_t AniContinueManager::OffContinueStateCallback(uintptr_t context, ::taihe::optional_view<uintptr_t> opq)
+bool AniContinueManager::SendUnRegister(sptr<DistributedSchedule::AniContinuationStateManagerStub> &stub,
+    uintptr_t context, ::taihe::optional_view<uintptr_t> opq, int32_t &result)
 {
-    int32_t result = SUCCESS;
     uintptr_t tmp = 0;
     if (opq.has_value()) {
         tmp = opq.value();
     }
-    sptr<DistributedSchedule::AniContinuationStateManagerStub> stub = CreateStub(context, tmp, opq.has_value());
+    stub = CreateStub(context, tmp, opq.has_value());
     if (stub == nullptr || BIZTYPE_PREPARE_CONTINUE != stub->callbackData_.bizType) {
         HILOGE("ContinueStateCallbackOff Unsupported business type: %{public}s; need: %{public}s",
             stub == nullptr ? "" : stub->callbackData_.bizType.c_str(), BIZTYPE_PREPARE_CONTINUE.c_str());
-        return ERR_DMS_WORK_ABNORMALLY;
+        return false;
     }
-
+    
     AniContinuationStateClient client;
     result = client.UnRegisterContinueStateCallback(stub);
-    HILOGI("ContinueStateCallbackOff unregister callback result: %{public}d", result);
 
     std::string key = std::to_string(stub->callbackData_.missionId) + stub->callbackData_.bundleName +
         stub->callbackData_.moduleName + stub->callbackData_.abilityName;
@@ -94,24 +94,48 @@ int32_t AniContinueManager::OffContinueStateCallback(uintptr_t context, ::taihe:
             callbackStubs_.erase(key);
         }
     }
+    return true;
+}
+
+int32_t AniContinueManager::OffContinueStateCallback(uintptr_t context, ::taihe::optional_view<uintptr_t> opq)
+{
+    int32_t result = SUCCESS;
+    sptr<DistributedSchedule::AniContinuationStateManagerStub> stub = nullptr;
+    if (!SendUnRegister(stub, context, opq, result)) {
+        taihe::set_business_error(ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_MSG.c_str());
+        return ANI_ERROR;
+    }
 
     if (stub->callbackData_.callbackRef != nullptr) {
         std::vector<ani_ref> args;
-        ani_string msgIdArgs;
-        stub->callbackData_.env.String_NewUTF8("", 0, &msgIdArgs);
-        args.push_back(reinterpret_cast<ani_ref>(result));
-        args.push_back(reinterpret_cast<ani_ref>(msgIdArgs));
+
+        ani_env *env = taihe::get_env();
+        if (env == nullptr) {
+            HILOGE("env is nullptr!!!");
+            return ERR_DMS_WORK_ABNORMALLY;
+        }
+        ohos::app::ability::continueManager::ContinueStateCode state =
+            ohos::app::ability::continueManager::ContinueStateCode::key_t::SUCCESS;
+        if (result != ANI_OK) {
+            state = ohos::app::ability::continueManager::ContinueStateCode::key_t::SYSTEM_ERROR;
+        }
+        ohos::app::ability::continueManager::ContinueResultInfo info = {
+            .resultState = state,
+            .resultInfo = taihe::optional<taihe::string>(std::in_place_t{}, "")
+        };
+        ani_object param = taihe::into_ani<ohos::app::ability::continueManager::ContinueResultInfo>(env, info);
+        args.push_back(reinterpret_cast<ani_ref>(param));
         ani_fn_object onFn = reinterpret_cast<ani_fn_object>(stub->callbackData_.callbackRef);
         ani_ref result;
-        if (stub->callbackData_.env.FunctionalObject_Call(onFn, args.size(), args.data(), &result) != ANI_OK) {
+        if (env->FunctionalObject_Call(onFn, args.size(), args.data(), &result) != ANI_OK) {
             HILOGE("OnMessage functionalObject_Call failed");
-            return ANI_ERROR;
         }
     }
 
     if (result != ANI_OK) {
         HILOGE("UnRegisterContinueStateCallback fail {%{public}s} {%{public}s}",
             std::to_string(ERR_DMS_WORK_ABNORMALLY).c_str(), ERR_DMS_WORK_ABNORMALLY_MSG.c_str());
+        taihe::set_business_error(ERR_DMS_WORK_ABNORMALLY, ERR_DMS_WORK_ABNORMALLY_MSG.c_str());
         return result;
     }
     return ANI_OK;
@@ -131,6 +155,10 @@ sptr<AniContinuationStateManagerStub> AniContinueManager::CreateStub(uintptr_t c
         return nullptr;
     }
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = abilityContext->GetAbilityInfo();
+    if (abilityInfo == nullptr) {
+        HILOGD("get ability fail");
+        return nullptr;
+    }
     AniContinuationStateManagerStub::StateCallbackData callbackData;
     callbackData.env = *env;
     callbackData.bundleName = abilityInfo->bundleName;
