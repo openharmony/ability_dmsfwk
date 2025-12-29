@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,28 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_AV_TRANS_STREAM_AV_SENDER_ENGINE_TEST_H
-#define OHOS_AV_TRANS_STREAM_AV_SENDER_ENGINE_TEST_H
+#ifndef OHOS_AV_TRANS_STREAM_AV_COLORSPACE_CONVERTER_TEST_H
+#define OHOS_AV_TRANS_STREAM_AV_COLORSPACE_CONVERTER_TEST_H
 
+#include <cstdarg>
 #include <gtest/gtest.h>
-#include "av_sender_engine.h"
-
+#include <memory>
 #ifdef DMSFWK_VPE_ENABLE
+#define private public
 #include "av_colorspace_converter.h"
+#undef private
 #endif
+#include "native_window.h"
 
 namespace OHOS {
 namespace DistributedCollab {
-
-class AVSenderEngineTest : public testing::Test {
+class AVColorspaceConverterTest : public testing::Test {
 public:
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
     void TearDown() override;
 
-    static inline std::shared_ptr<AVSenderEngine> senderEngine_ = nullptr;
+protected:
+#ifdef DMSFWK_VPE_ENABLE
+    std::unique_ptr<AVColorspaceConverter> converter_;
+#endif
 };
 }  // namespace DistributedCollab
 }  // namespace OHOS
-#endif
+#endif // OHOS_AV_TRANS_STREAM_AV_COLORSPACE_CONVERTER_TEST_H

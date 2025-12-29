@@ -101,7 +101,10 @@ ohos_unittest("AVSenderEngineTest") {
     "media_foundation:media_foundation",
   ]
 
+  defines = []
+
   if (dmsfwk_vpe_enable) {
+    defines += [ "DMSFWK_VPE_ENABLE" ]
     external_deps += [ "video_processing_engine:video_processing" ]
   }
 
@@ -445,6 +448,51 @@ ohos_unittest("SurfaceEncoderFilterTest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("AVColorspaceConverterTest") {
+  visibility = [ ":*" ]
+
+  module_out_path = module_output_path
+
+  configs = [
+    ":test_config",
+    "${distributed_service}/dtbschedmgr/test/resource:coverage_flags",
+  ]
+
+  include_dirs = [ "${dms_path}/services/dtbcollabmgr/test/unittest" ]
+
+  sources = [ "av_colorspace_converter_test.cpp" ]
+
+  deps = [
+    "${dms_path}/common:distributed_sched_utils",
+    "${dms_path}/services/dtbcollabmgr/src/av_trans_stream_provider:dtbcollab_av_stream_trans_provider",
+    "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
+  ]
+
+  external_deps = [
+    "av_codec:av_codec_client",
+    "av_codec:native_media_codecbase",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "eventhandler:libeventhandler",
+    "graphic_surface:surface",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "image_framework:image_native",
+    "media_foundation:media_foundation",
+  ]
+
+  defines = []
+
+  if (dmsfwk_vpe_enable) {
+    defines += [ "DMSFWK_VPE_ENABLE" ]
+    external_deps += [ "video_processing_engine:video_processing" ]
+  }
+
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -458,5 +506,6 @@ group("unittest") {
     ":SurfaceDecoderFilterTest",
     ":SurfaceEncoderAdapterTest",
     ":SurfaceEncoderFilterTest",
+    ":AVColorspaceConverterTest",
   ]
 }
