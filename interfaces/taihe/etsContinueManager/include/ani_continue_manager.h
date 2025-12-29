@@ -29,6 +29,8 @@ public:
 private:
     sptr<AniContinuationStateManagerStub> CreateStub(uintptr_t context, uintptr_t opq, bool flag);
     bool GetAbilityContext(std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext, uintptr_t context);
+    bool SendUnRegister(sptr<DistributedSchedule::AniContinuationStateManagerStub> &stub, uintptr_t context,
+        ::taihe::optional_view<uintptr_t> opq, int32_t &result);
 
 public:
     std::recursive_mutex mutex_;
