@@ -15,6 +15,7 @@
 #include "av_sender_engine_test.h"
 
 #include "dtbcollabmgr_log.h"
+#include "iconsumer_surface.h"
 #include "media_description.h"
 #include "test_log.h"
 
@@ -462,7 +463,7 @@ HWTEST_F(AVSenderEngineTest, OnEvent_Test, TestSize.Level1)
     event.type = Media::EventType::EVENT_ERROR;
     senderEngine_->OnEvent(event);
     EXPECT_EQ(senderEngine_->GetState(), EngineState::ERROR);
-    
+
     event.type = Media::EventType::EVENT_READY;
     senderEngine_->OnEvent(event);
     EXPECT_EQ(senderEngine_->GetState(), EngineState::START);
@@ -471,6 +472,29 @@ HWTEST_F(AVSenderEngineTest, OnEvent_Test, TestSize.Level1)
     senderEngine_->OnEvent(event);
     EXPECT_EQ(senderEngine_->GetState(), EngineState::START);
     DTEST_LOG << "AVSenderEngineTest OnEvent_Test end" << std::endl;
+}
+
+/**
+ * @tc.name: Init_Test
+ * @tc.desc: Test Init
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVSenderEngineTest, Init_Test, TestSize.Level1)
+{
+    DTEST_LOG << "AVSenderEngineTest Init_Test begin" << std::endl;
+    senderEngine_->SetColorSpace(StreamColorSpace::UNKNOWN);
+    senderEngine_->Init();
+    senderEngine_->SetColorSpace(StreamColorSpace::BT709_LIMIT);
+    senderEngine_->Init();
+    senderEngine_->colorSpaceConverter_ = nullptr;
+    senderEngine_->senderFilter_ = std::make_shared<AVSenderFilter>(
+        "builtin.dtbcollab.sender", FilterType::FILTERTYPE_SOURCE);
+    senderEngine_->curState_ = EngineState::START;
+    auto ret = senderEngine_->Start();
+    EXPECT_EQ(ret, static_cast<int32_t>(Status::OK));
+
+    ret = senderEngine_->Stop();
+    EXPECT_EQ(ret, static_cast<int32_t>(Status::OK));
 }
 }  // namespace DistributedCollab
 }  // namespace OHOS
