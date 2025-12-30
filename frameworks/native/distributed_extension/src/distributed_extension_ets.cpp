@@ -66,7 +66,7 @@ void DistributedExtensionETS::Init(const std::shared_ptr<AbilityLocalRecord> &re
     const std::shared_ptr<OHOSApplication> &application, std::shared_ptr<AbilityHandler> &handler,
     const sptr<IRemoteObject> &token)
 {
-    HILOG_INFO("ldp Init call");
+    HILOG_INFO("Init call");
     if (record == nullptr) {
         HILOG_INFO("null localAbilityRecord");
         return;
@@ -115,14 +115,14 @@ void DistributedExtensionETS::GetSrcPath(std::string &srcPath)
 void DistributedExtensionETS::UpdateDistributedExtensionObj(
     std::shared_ptr<AbilityInfo> &abilityInfo, const std::string &moduleName, const std::string &srcPath)
 {
-    HILOG_INFO("ldp UpdateDistributedExtensionObj call");
+    HILOG_INFO("UpdateDistributedExtensionObj call");
     etsAbilityObj_ = etsRuntime_.LoadModule(moduleName, srcPath, abilityInfo->hapPath,
         abilityInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE, false, abilityInfo_->srcEntrance);
     if (etsAbilityObj_ == nullptr) {
-        HILOG_INFO("ldp null etsAbilityObj_");
+        HILOG_INFO("null etsAbilityObj_");
         return;
     }
-    HILOG_INFO("ldp UpdateDistributedExtensionObj End");
+    HILOG_INFO("UpdateDistributedExtensionObj End");
 }
 
 void DistributedExtensionETS::BindContext(std::shared_ptr<AbilityInfo> &abilityInfo, std::shared_ptr<AAFwk::Want> want,
