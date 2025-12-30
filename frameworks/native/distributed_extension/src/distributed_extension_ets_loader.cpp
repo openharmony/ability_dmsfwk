@@ -28,5 +28,5 @@ DistributedExtension *CreateDistributedExtensionETS(const std::unique_ptr<Runtim
 {
     return DistributedExtensionETS::Create(runtime);
 }
-} // namespace MiscServices
+} // namespace DistributedSchedule
 } // namespace OHOS
