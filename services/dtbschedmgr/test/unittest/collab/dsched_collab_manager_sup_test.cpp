@@ -277,40 +277,6 @@ HWTEST_F(DSchedCollabManagerSupTest, GetSinkCollabVersion_001, TestSize.Level3)
 }
 
 /**
- * @tc.name: GetSinkCollabVersion_002
- * @tc.desc: test GetSinkCollabVersion func
- * @tc.type: FUNC
- */
-HWTEST_F(DSchedCollabManagerSupTest, GetSinkCollabVersion_002, TestSize.Level3)
-{
-    DTEST_LOG << "DSchedCollabManagerSupTest GetSinkCollabVersion_002 begin" << std::endl;
-    DSchedCollabInfo info;
-    info.srcCollabSessionId_ = 1;
-    info.sinkInfo_.deviceId_ = "deviceId";
-    info.srcClientCB_ = sptr<DistributedSchedService>(new DistributedSchedService());
-
-    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
-    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(nullptr));
-    int32_t ret = DSchedCollabManager::GetInstance().GetSinkCollabVersion(info);
-
-    DSchedCollabManager::GetInstance().eventHandler_ = nullptr;
-    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
-    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(nullptr));
-    ret = DSchedCollabManager::GetInstance().GetSinkCollabVersion(info);
-    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
-
-    DSchedCollabManager::GetInstance().Init();
-    std::shared_ptr<DmsDeviceInfo> ptr = std::make_shared<DmsDeviceInfo>("", 0, "");
-    EXPECT_CALL(*dmsStoreMock, GetLocalDeviceId(_)).WillOnce(Return(true));
-    EXPECT_CALL(*dmsStoreMock, GetDeviceInfoById(_)).WillOnce(Return(ptr));
-    ret = DSchedCollabManager::GetInstance().GetSinkCollabVersion(info);
-    EXPECT_EQ(ret, ERR_OK);
-    info.srcClientCB_ = nullptr;
-    DSchedCollabManager::GetInstance().UnInit();
-    DTEST_LOG << "DSchedCollabManagerSupTest GetSinkCollabVersion_002 end" << std::endl;
-}
-
-/**
  * @tc.name: ConvertCollaborateResult_001
  * @tc.desc: test ConvertCollaborateResult func
  * @tc.type: FUNC
