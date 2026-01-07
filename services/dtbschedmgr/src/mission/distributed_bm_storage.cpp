@@ -1143,7 +1143,6 @@ std::string FindModuleName(const DmsBundleInfo& distributedBundleInfo, std::stri
 std::string DmsBmStorage::GetAbilityName(const std::string &networkId, std::string &bundleName,
     std::string &continueType)
 {
-    HILOGD("called.");
     HILOGD("networkId: %{public}s,  bundleName: %{public}s,  continueTypeId: %{public}s",
         GetAnonymStr(networkId).c_str(), bundleName.c_str(), continueType.c_str());
     if (!CheckKvStore()) {
@@ -1155,29 +1154,20 @@ std::string DmsBmStorage::GetAbilityName(const std::string &networkId, std::stri
         HILOGE("can not get udid by networkId");
         return "";
     }
-    Key allEntryKeyPrefix("");
-    std::vector<Entry> allEntries;
-    std::promise<OHOS::DistributedKv::Status> resultStatusSignal;
-    int64_t begin = GetTickCount();
-    GetEntries(networkId, allEntryKeyPrefix, resultStatusSignal, allEntries);
-    Status status = GetResultSatus(resultStatusSignal);
-    HILOGD("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
+
+    std::string keyOfBundle = udid + AppExecFwk::Constants::FILE_UNDERLINE + bundleName;
+    Key key(keyOfBundle);
+    Value value;
+    Status status = kvStorePtr_->Get(key, value);
     if (status != Status::SUCCESS) {
-        HILOGE("GetEntries error: %{public}d", status);
+        HILOGE("This information not be found in the database, Get error: %{public}d", status);
         return "";
     }
-    for (auto entry : allEntries) {
-        std::string key = entry.key.ToString();
-        std::string value =  entry.value.ToString();
-        if (key.find(udid) == std::string::npos) {
-            continue;
-        }
-        DmsBundleInfo distributedBundleInfo;
-        if (distributedBundleInfo.FromJsonString(value) && distributedBundleInfo.bundleName == bundleName) {
-            std::string abilityName = FindAbilityName(distributedBundleInfo, continueType);
-            if (abilityName != "") {
-                return abilityName;
-            }
+    DmsBundleInfo distributedBundleInfo;
+    if (distributedBundleInfo.FromJsonString(value.ToString())) {
+        std::string abilityName = FindAbilityName(distributedBundleInfo, continueType);
+        if (abilityName != "") {
+            return abilityName;
         }
     }
     HILOGW("Can't find abilityName");
@@ -1211,26 +1201,20 @@ bool DmsBmStorage::GetContinueTypeId(const std::string &bundleName, const std::s
         HILOGE("can not get udid by networkId");
         return false;
     }
-    Key allEntryKeyPrefix("");
-    std::vector<Entry> allEntries;
-    Status status = kvStorePtr_->GetEntries(allEntryKeyPrefix, allEntries);
+    std::string keyOfBundle = udid + AppExecFwk::Constants::FILE_UNDERLINE + bundleName;
+    Key key(keyOfBundle);
+    Value value;
+    Status status = kvStorePtr_->Get(key, value);
     if (status != Status::SUCCESS) {
-        HILOGE("GetEntries error: %{public}d", status);
+        HILOGE("This information not be found in the database, Get error: %{public}d", status);
         return false;
     }
-    for (auto entry : allEntries) {
-        std::string key = entry.key.ToString();
-        std::string value =  entry.value.ToString();
-        if (key.find(udid) == std::string::npos) {
-            continue;
-        }
-        DmsBundleInfo distributedBundleInfo;
-        if (distributedBundleInfo.FromJsonString(value) && distributedBundleInfo.bundleName == bundleName) {
-            continueTypeId = FindContinueTypeId(distributedBundleInfo, abilityName);
-            if (continueTypeId != MAX_CONTINUETYPEID) {
-                HILOGD("end.");
-                return true;
-            }
+    DmsBundleInfo distributedBundleInfo;
+    if (distributedBundleInfo.FromJsonString(value.ToString())) {
+        continueTypeId = FindContinueTypeId(distributedBundleInfo, abilityName);
+        if (continueTypeId != MAX_CONTINUETYPEID) {
+            HILOGD("end.");
+            return true;
         }
     }
     HILOGW("Can't find continueTypeId");
@@ -1251,33 +1235,22 @@ bool DmsBmStorage::GetContinueEventInfo(const std::string &networkId, const std:
         HILOGE("can not get udid by networkId");
         return false;
     }
-    Key allEntryKeyPrefix("");
-    std::vector<Entry> allEntries;
-    std::promise<OHOS::DistributedKv::Status> resultStatusSignal;
-    int64_t begin = GetTickCount();
-    GetEntries(networkId, allEntryKeyPrefix, resultStatusSignal, allEntries);
-    Status status = GetResultSatus(resultStatusSignal);
-    HILOGD("GetEntries spend %{public}" PRId64 " ms", GetTickCount() - begin);
+    std::string keyOfBundle = udid + AppExecFwk::Constants::FILE_UNDERLINE + bundleName;
+    Key key(keyOfBundle);
+    Value value;
+    Status status = kvStorePtr_->Get(key, value);
     if (status != Status::SUCCESS) {
-        HILOGE("GetEntries error: %{public}d", status);
+        HILOGE("This information not be found in the database, Get error: %{public}d", status);
         return false;
     }
-    for (auto entry : allEntries) {
-        std::string key = entry.key.ToString();
-        std::string value =  entry.value.ToString();
-        if (key.find(udid) == std::string::npos) {
-            continue;
-        }
-        DmsBundleInfo distributedBundleInfo;
-        if (distributedBundleInfo.FromJsonString(value) && distributedBundleInfo.bundleName == bundleName) {
-            HILOGD("value: %{public}s", value.c_str());
-            continueEventInfo.networkId = networkId;
-            continueEventInfo.bundleName = bundleName;
-            continueEventInfo.developerId = distributedBundleInfo.developerId;
-            continueEventInfo.abilityName = FindAbilityName(distributedBundleInfo, continueType);
-            continueEventInfo.moduleName = FindModuleName(distributedBundleInfo, continueType);
-            return true;
-        }
+    DmsBundleInfo distributedBundleInfo;
+    if (distributedBundleInfo.FromJsonString(value.ToString())) {
+        continueEventInfo.networkId = networkId;
+        continueEventInfo.bundleName = bundleName;
+        continueEventInfo.developerId = distributedBundleInfo.developerId;
+        continueEventInfo.abilityName = FindAbilityName(distributedBundleInfo, continueType);
+        continueEventInfo.moduleName = FindModuleName(distributedBundleInfo, continueType);
+        return true;
     }
     HILOGE("Can't find ContinueInfo!");
     return false;
