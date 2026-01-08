@@ -89,8 +89,7 @@
           "storage_service",
           "distributed_notification_service",
           "i18n",
-          "hiappevent",
-          "runtime_core"
+          "hiappevent"
         ],
         "third_party": []
       },

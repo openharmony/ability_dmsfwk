@@ -287,6 +287,7 @@ private:
     DSchedCollabInfo collabInfo_;
     int32_t softbusSessionId_ = INVALID_SESSION_ID;
     sptr<AbilityLifecycleObserver> appStateObserver_ = nullptr;
+    std::atomic<bool> isDisconnected_ = false;
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS
