@@ -785,7 +785,8 @@ int32_t DSchedCollab::ExeSrcCollabResult(const int32_t &result, const std::strin
 
 int32_t DSchedCollab::CleanUpSession()
 {
-    if (collabInfo_.direction_ == COLLAB_SOURCE) {
+    if (collabInfo_.direction_ == COLLAB_SOURCE && !isDisconnected_.load()) {
+        isDisconnected_.store(true);
         const std::string peerDeviceId = collabInfo_.sinkInfo_.deviceId_;
         HILOGI("disconnect peer device %{public}s", GetAnonymStr(peerDeviceId).c_str());
         DSchedTransportSoftbusAdapter::GetInstance().DisconnectDevice(peerDeviceId);
