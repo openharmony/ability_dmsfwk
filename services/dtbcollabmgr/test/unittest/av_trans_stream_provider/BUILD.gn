@@ -485,8 +485,11 @@ ohos_unittest("AVColorspaceConverterTest") {
   defines = []
 
   if (dmsfwk_vpe_enable) {
-    defines += [ "DMSFWK_VPE_ENABLE" ]
     external_deps += [ "video_processing_engine:video_processing" ]
+  }
+
+  if (!dmsfwk_softbus_adapter_common) {
+    defines += [ "DMSFWK_UT_COVER" ]
   }
 
   part_name = "dmsfwk"
