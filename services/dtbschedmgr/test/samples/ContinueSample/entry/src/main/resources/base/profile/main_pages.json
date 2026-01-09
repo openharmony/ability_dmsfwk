@@ -1,0 +1,9 @@
+{
+  "src": [
+    "pages/Index",
+    "continue/DataObj",
+    "continue/MultiAsset",
+    "continue/PageName",
+    "continue/Second"
+  ]
+}

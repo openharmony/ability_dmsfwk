@@ -1,0 +1,108 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "module description"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "ContinueSample"
+    },
+    {
+      "name": "Ability_deviceA_desc",
+      "value": "description"
+    },
+    {
+      "name": "Ability_deviceA_label",
+      "value": "label"
+    },
+    {
+      "name": "Ability_deviceB_desc",
+      "value": "description"
+    },
+    {
+      "name": "Ability_deviceB_label",
+      "value": "label"
+    },
+    {
+      "name": "MigrationAbility_desc",
+      "value": "description"
+    },
+    {
+      "name": "MigrationAbility_label",
+      "value": "label"
+    },
+    {
+      "name": "MigrationAbility_asset_desc",
+      "value": "description"
+    },
+    {
+      "name": "MigrationAbility_asset_label",
+      "value": "label"
+    },
+    {
+      "name": "MigrationAbility_multi_asset_desc",
+      "value": "description"
+    },
+    {
+      "name": "MigrationAbility_multi_asset_label",
+      "value": "label"
+    },
+    {
+      "name": "MigrationAbility_quickStart_desc",
+      "value": "description"
+    },
+    {
+      "name": "MigrationAbility_quickStart_label",
+      "value": "label"
+    },
+    {
+      "name": "setMissionContinueState_active",
+      "value": "Set it to the migrate state"
+    },
+    {
+      "name": "setMissionContinueState_inactive",
+      "value": "Set to non-transferable state"
+    },
+    {
+      "name": "setMissionContinueState",
+      "value": "Dynamic configuration of migration capabilities"
+    },
+    {
+      "name": "basic_continue_data_example",
+      "value": "Basic migration data example"
+    },
+    {
+      "name": "migrate_data_using_dataObject",
+      "value": "Migrate data using distributed data objects"
+    },
+    {
+      "name": "migrate_data_using_dataObject_asset",
+      "value": "Migrate data using distributed data objects (assets)"
+    },
+    {
+      "name": "migrate_data_using_dataObject_multi_asset",
+      "value": "Migrate data using distributed data objects (multiple assets)"
+    },
+    {
+      "name": "default_text",
+      "value": "default text"
+    },
+    {
+      "name": "verify_migrate_data_using_dataObject",
+      "value": "Verify the basic data migration of distributed objects"
+    },
+    {
+      "name": "verify_migrate_data_using_dataObject_asset",
+      "value": "Verify the data migration of distributed object assets"
+    },
+    {
+      "name": "verify_migrate_data_using_dataObject_multi_asset",
+      "value": "Verify the data migration of multiple assets of distributed objects"
+    }
+  ]
+}
