@@ -1,0 +1,48 @@
+{
+  "string": [
+    {
+      "name": "setMissionContinueState_active",
+      "value": "设置为可迁移状态"
+    },
+    {
+      "name": "setMissionContinueState_inactive",
+      "value": "设置为不可迁移状态"
+    },
+    {
+      "name": "setMissionContinueState",
+      "value": "动态配置迁移能力"
+    },
+    {
+      "name": "basic_continue_data_example",
+      "value": "基础迁移数据示例"
+    },
+    {
+      "name": "migrate_data_using_dataObject",
+      "value": "使用分布式数据对象迁移数据"
+    },
+    {
+      "name": "migrate_data_using_dataObject_asset",
+      "value": "使用分布式数据对象(资产)迁移数据"
+    },
+    {
+      "name": "migrate_data_using_dataObject_multi_asset",
+      "value": "使用分布式数据对象(多个资产)迁移数据"
+    },
+    {
+      "name": "default_text",
+      "value": "默认文本"
+    },
+    {
+      "name": "verify_migrate_data_using_dataObject",
+      "value": "验证分布式对象基础数据迁移"
+    },
+    {
+      "name": "verify_migrate_data_using_dataObject_asset",
+      "value": "验证分布式对象资产数据迁移"
+    },
+    {
+      "name": "verify_migrate_data_using_dataObject_multi_asset",
+      "value": "验证分布式对象多个资产数据迁移"
+    }
+  ]
+}
