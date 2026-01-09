@@ -395,21 +395,6 @@ sptr<AppExecFwk::IBundleMgr> BundleManagerInternal::GetBundleManager()
     return iface_cast<AppExecFwk::IBundleMgr>(bmsProxy);
 }
 
-sptr<AppExecFwk::IDistributedBms> BundleManagerInternal::GetDistributedBundleManager()
-{
-    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (samgrProxy == nullptr) {
-        HILOGE("failed to get samgrProxy from dbms");
-        return nullptr;
-    }
-    sptr<IRemoteObject> dbmsProxy = samgrProxy->GetSystemAbility(DISTRIBUTED_BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    if (dbmsProxy == nullptr) {
-        HILOGE("failed to get dbmsProxy from dbms");
-        return nullptr;
-    }
-    return iface_cast<AppExecFwk::IDistributedBms>(dbmsProxy);
-}
-
 int32_t BundleManagerInternal::GetUidFromBms(const std::string& bundleName)
 {
     auto bundleMgr = GetBundleManager();
