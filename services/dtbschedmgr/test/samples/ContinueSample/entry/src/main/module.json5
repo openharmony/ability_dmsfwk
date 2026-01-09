@@ -1,0 +1,120 @@
+/*
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+{
+  "module": {
+    "name": "entry",
+    "type": "entry",
+    "description": "$string:module_desc",
+    "mainElement": "EntryAbility",
+    "deviceTypes": [
+      "phone"
+    ],
+    "deliveryWithInstall": true,
+    "installationFree": false,
+    "pages": "$profile:main_pages",
+    "abilities": [
+      {
+        "name": "EntryAbility",
+        "srcEntry": "./ets/entryability/EntryAbility.ets",
+        "description": "$string:EntryAbility_desc",
+        "icon": "$media:layered_image",
+        "label": "$string:EntryAbility_label",
+        "startWindowIcon": "$media:startIcon",
+        "startWindowBackground": "$color:start_window_background",
+        "exported": true,
+        "continuable": true,
+        "skills": [
+          {
+            "entities": [
+              "entity.system.home"
+            ],
+            "actions": [
+              "ohos.want.action.home"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Ability_deviceA",
+        "continueType": [
+          'continueType1'
+        ],
+        "continuable": true,
+        "srcEntry": "./ets/ability_devicea/Ability_deviceA.ets",
+        "description": "$string:Ability_deviceA_desc",
+        "icon": "$media:layered_image",
+        "label": "$string:Ability_deviceA_label",
+        "startWindowIcon": "$media:startIcon",
+        "startWindowBackground": "$color:start_window_background",
+      },
+      {
+        "name": "Ability_deviceB",
+        "continueType": [
+          'continueType1'
+        ],
+        "continuable": true,
+        "srcEntry": "./ets/ability_deviceb/Ability_deviceB.ets",
+        "description": "$string:Ability_deviceB_desc",
+        "icon": "$media:layered_image",
+        "label": "$string:Ability_deviceB_label",
+        "startWindowIcon": "$media:startIcon",
+        "startWindowBackground": "$color:start_window_background",
+      },
+      {
+        "name": "MigrationAbility",
+        "srcEntry": "./ets/migrationability/MigrationAbility.ets",
+        "description": "$string:MigrationAbility_desc",
+        "icon": "$media:layered_image",
+        "label": "$string:MigrationAbility_label",
+        "startWindowIcon": "$media:startIcon",
+        "startWindowBackground": "$color:start_window_background",
+        "continuable": true,
+      },
+      {
+        "name": "MigrationAbility_quickStart",
+        "srcEntry": "./ets/migrationability_quickstart/MigrationAbility_quickStart.ets",
+        "description": "$string:MigrationAbility_quickStart_desc",
+        "icon": "$media:layered_image",
+        "label": "$string:MigrationAbility_quickStart_label",
+        "startWindowIcon": "$media:startIcon",
+        "startWindowBackground": "$color:start_window_background",
+        "continuable": true,
+        "continueType": [
+          'EntryAbility_ContinueQuickStart'
+        ]
+      },
+      {
+        "name": "MigrationAbility_asset",
+        "srcEntry": "./ets/migrationability_asset/MigrationAbility_asset.ets",
+        "description": "$string:MigrationAbility_asset_desc",
+        "icon": "$media:layered_image",
+        "label": "$string:MigrationAbility_asset_label",
+        "startWindowIcon": "$media:startIcon",
+        "startWindowBackground": "$color:start_window_background",
+        "continuable": true,
+      },
+      {
+        "name": "MigrationAbility_multi_asset",
+        "srcEntry": "./ets/migrationability_multi_asset/MigrationAbility_multi_asset.ets",
+        "description": "$string:MigrationAbility_multi_asset_desc",
+        "icon": "$media:layered_image",
+        "label": "$string:MigrationAbility_multi_asset_label",
+        "startWindowIcon": "$media:startIcon",
+        "startWindowBackground": "$color:start_window_background",
+        "continuable": true,
+      }
+    ]
+  }
+}
