@@ -251,7 +251,6 @@ ohos_shared_library("distributedschedsvr") {
     "device_info_manager:distributed_device_profile_sdk",
     "device_manager:devicemanagersdk",
     "device_security_level:dslm_sdk",
-    "distributed_bundle_framework:dbms_fwk",
     "distributed_notification_service:ans_innerkits",
     "dsoftbus:softbus_client",
     "dsoftbus:softbus_utils",
