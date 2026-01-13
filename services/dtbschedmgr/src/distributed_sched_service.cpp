@@ -68,6 +68,7 @@
 #include "switch_status_dependency.h"
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
 #include "common_event_listener.h"
+#include "util/distributed_sched_memory_utils.h"
 #endif
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
 #include "form_mgr_death_recipient.h"
@@ -491,6 +492,16 @@ void DistributedSchedService::HandleBootStart(const SystemAbilityOnDemandReason 
         }
         HILOGI("UnloadSystemAbility dms ok");
     }
+#ifdef SUPPORT_COMMON_EVENT_SERVICE
+    else {
+        HILOGI("reclaim start.");
+        int32_t memUsage = DistributedSchedMemoryUtils::GetInstance().GetCurrentProcessMemoryUsedKB();
+        HILOGI("memory used before reclaim: %{public}d KB", memUsage);
+        DistributedSchedMemoryUtils::GetInstance().ReclaimNow();
+        memUsage = DistributedSchedMemoryUtils::GetInstance().GetCurrentProcessMemoryUsedKB();
+        HILOGI("reclaim end. memory used after reclaim: %{public}d KB", memUsage);
+    }
+#endif
 }
 
 // LCOV_EXCL_START
@@ -760,6 +771,7 @@ void DistributedSchedService::InitCommonEventListener()
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     auto applyMonitor = std::make_shared<CommonEventListener>(subscribeInfo);
     EventFwk::CommonEventManager::SubscribeCommonEvent(applyMonitor);
