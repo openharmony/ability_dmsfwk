@@ -19,11 +19,9 @@
 #include <cstdarg>
 #include <gtest/gtest.h>
 #include <memory>
-#ifdef DMSFWK_VPE_ENABLE
 #define private public
 #include "av_colorspace_converter.h"
 #undef private
-#endif
 #include "native_window.h"
 
 namespace OHOS {
@@ -36,9 +34,7 @@ public:
     void TearDown() override;
 
 protected:
-#ifdef DMSFWK_VPE_ENABLE
     std::unique_ptr<AVColorspaceConverter> converter_;
-#endif
 };
 }  // namespace DistributedCollab
 }  // namespace OHOS

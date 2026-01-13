@@ -129,25 +129,27 @@ napi_value JsContinuationStateManager::ContinueStateCallbackOff(napi_env env, na
     return ret;
 }
 
+void JsContinuationStateManager::HandleError(napi_env env,
+    const std::string& errorMessage, const std::string& errorCode)
+{
+    HILOGE("%{public}s", errorMessage.c_str());
+    napi_throw_error(env, errorCode.c_str(), errorMessage.c_str());
+}
+
 sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateManager::CreateStub(
     napi_env env, napi_callback_info info, const bool isRegisterOn)
 {
-    // get and check all params
     size_t argc = ARG_COUNT_THREE;
     napi_value args[ARG_COUNT_THREE];
     napi_get_cb_info(env, info, &argc, args, nullptr, nullptr);
     if ((argc != ARG_COUNT_THREE && isRegisterOn) || (argc < ARG_COUNT_TWO && !isRegisterOn)) {
-        HILOGE("Mandatory parameters are left unspecified");
-        napi_throw_error(env, std::to_string(PARAMETER_CHECK_FAILED).c_str(),
-            "Mandatory parameters are left unspecified.");
+        HandleError(env, "Mandatory parameters are left unspecified", std::to_string(PARAMETER_CHECK_FAILED));
         return nullptr;
     }
-    // this.context is 2nd parameter
     std::shared_ptr<AbilityRuntime::AbilityContext> abilityContext = nullptr;
     GetAbilityContext(abilityContext, env, args[1]);
     if (abilityContext == nullptr) {
-        HILOGE("get ability context failed");
-        napi_throw_error(env, std::to_string(PARAMETER_CHECK_FAILED).c_str(), "get ability context failed");
+        HandleError(env, "get ability context failed", std::to_string(PARAMETER_CHECK_FAILED));
         return nullptr;
     }
     std::shared_ptr<AppExecFwk::AbilityInfo> abilityInfo = abilityContext->GetAbilityInfo();
@@ -158,6 +160,10 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     callbackData.abilityName = abilityInfo->name;
     size_t stringSize = 0;
     napi_get_value_string_utf8(env, args[0], nullptr, 0, &stringSize);
+    if (stringSize == 0) {
+        HandleError(env, "Parameter stringSize should be greater than zero.", std::to_string(PARAMETER_CHECK_FAILED));
+        return nullptr;
+    }
     std::string type(stringSize, '\0');
     napi_get_value_string_utf8(env, args[0], &type[0], stringSize + 1, &stringSize);
     callbackData.bizType = type.c_str();
@@ -165,8 +171,7 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
         napi_valuetype valuetype;
         napi_typeof(env, args[ARG_INDEX_4_CALLBACK_FUNC], &valuetype);
         if (valuetype != napi_function) {
-            napi_throw_error(env, std::to_string(PARAMETER_CHECK_FAILED).c_str(),
-                "The third parameter must be an asynchronous function");
+            HandleError(env, "Third parameter must be an asynchronous func", std::to_string(PARAMETER_CHECK_FAILED));
             return nullptr;
         }
         napi_ref callbackRef = nullptr;
