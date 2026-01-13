@@ -38,6 +38,7 @@ const uint8_t PACKAGE_ADDED = 5;
 const uint8_t PACKAGE_CHANGED = 6;
 const uint8_t PACKAGE_REMOVED = 7;
 const uint8_t USER_REMOVED = 8;
+const uint8_t BATTERY_CHARGING = 9;
 constexpr static int32_t INVALID_ID = 0;
 std::map<std::string, uint8_t> receiveEvent = {
     {EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED, SCREEN_LOCKED},
@@ -49,6 +50,7 @@ std::map<std::string, uint8_t> receiveEvent = {
     {EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED, PACKAGE_CHANGED},
     {EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED, PACKAGE_REMOVED},
     {EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED, USER_REMOVED},
+    {EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING, BATTERY_CHARGING},
 };
 }
 
@@ -85,6 +87,9 @@ void CommonEventListener::OnReceiveEvent(const EventFwk::CommonEventData &eventD
             break;
         case USER_REMOVED :
             HandleUserRemoved(accountId);
+            break;
+        case BATTERY_CHARGING :
+            HandleBatteryCharging();
             break;
         default:
             HILOGW("OnReceiveEvent undefined action");
@@ -191,6 +196,16 @@ int32_t CommonEventListener::GetForegroundOsAccountLocalId()
     }
     HILOGD("GetForegroundOsAccountLocalId accountId is: %{public}d", accountId);
     return accountId;
+}
+
+void CommonEventListener::HandleBatteryCharging()
+{
+    HILOGI("start.");
+    int32_t memUsage = DistributedSchedMemoryUtils::GetInstance().GetCurrentProcessMemoryUsedKB();
+    HILOGI("memory used before reclaim: %{public}d KB", memUsage);
+    DistributedSchedMemoryUtils::GetInstance().ReclaimNow();
+    memUsage = DistributedSchedMemoryUtils::GetInstance().GetCurrentProcessMemoryUsedKB();
+    HILOGI("end. memory used after reclaim: %{public}d KB", memUsage);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
