@@ -342,6 +342,7 @@ int32_t AVSenderFilter::SendStreamDataByBytes(const std::shared_ptr<AVTransStrea
     std::shared_ptr<AVTransDataBuffer> buffer = nullptr;
     int32_t ret = WriteDataToBuffer(buffer, headerJson, headerStr, streamData);
     if (ret != ERR_OK) {
+        FREE_CJSON(headerStr, headerJson);
         HILOGE("write send data failed, %{public}d", ret);
         return ret;
     }
