@@ -34,6 +34,7 @@ private:
     static void GetAbilityContext(std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext,
         napi_env env, napi_value context);
     static napi_status MakeEnumItem(const napi_env &env, napi_value object, const char* name, int32_t value);
+    static void HandleError(napi_env env, const std::string& errorMessage, const std::string& errorCode);
 private:
     static std::map<std::string, sptr<DistributedSchedule::JsContinuationStateManagerStub>> callbackStubs_;
 };

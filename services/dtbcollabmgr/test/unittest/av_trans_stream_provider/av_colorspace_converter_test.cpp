@@ -49,7 +49,7 @@ void AVColorspaceConverterTest::TearDown()
     converter_.reset();
 }
 
-#ifdef DMSFWK_VPE_ENABLE
+#ifdef DMSFWK_UT_COVER
 /**
  * @tc.name: Init_Test
  * @tc.desc: Test successful initialization
@@ -172,21 +172,6 @@ HWTEST_F(AVColorspaceConverterTest, Configure_Invalid_Test, TestSize.Level1)
 }
 
 /**
- * @tc.name: Start_Test
- * @tc.desc: Test start functionality with various scenarios
- * @tc.type: FUNC
- */
-HWTEST_F(AVColorspaceConverterTest, Start_Test, TestSize.Level1)
-{
-    DTEST_LOG << "AVColorspaceConverterTest Start_Test_001 begin" << std::endl;
-
-    auto ret = converter_->Start();
-    EXPECT_EQ(ret, NULL_POINTER_ERROR);
-    
-    DTEST_LOG << "AVColorspaceConverterTest Start_Test end" << std::endl;
-}
-
-/**
  * @tc.name: Stop_Test
  * @tc.desc: Test stop functionality with various scenarios
  * @tc.type: FUNC
@@ -207,5 +192,20 @@ HWTEST_F(AVColorspaceConverterTest, Stop_Test, TestSize.Level1)
     DTEST_LOG << "AVColorspaceConverterTest Stop_Test end" << std::endl;
 }
 #endif
+
+/**
+ * @tc.name: Start_Test
+ * @tc.desc: Test start functionality with various scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(AVColorspaceConverterTest, Start_Test, TestSize.Level1)
+{
+    DTEST_LOG << "AVColorspaceConverterTest Start_Test_001 begin" << std::endl;
+
+    auto ret = converter_->Start();
+    EXPECT_EQ(ret, NULL_POINTER_ERROR);
+    
+    DTEST_LOG << "AVColorspaceConverterTest Start_Test end" << std::endl;
+}
 }  // namespace DistributedCollab
 }  // namespace OHOS
