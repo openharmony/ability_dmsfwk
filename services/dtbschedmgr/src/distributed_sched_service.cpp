@@ -169,6 +169,7 @@ DataShareManager &dataShareManager = DataShareManager::GetInstance();
 const std::string DEFAULT_HAP_CODE_PATH = "1";
 const std::string LINUX_HAP_CODE_PATH = "2";
 const int32_t CONNECT_WAIT_TIME_S = 11; /* 11 second */
+constexpr int32_t MEMRE_CLEAN_DELAY = 100000; /* 100s */
 std::mutex getDistibutedProxyLock_;
 std::condition_variable getDistibutedProxyCondition_;
 }
@@ -493,13 +494,16 @@ void DistributedSchedService::HandleBootStart(const SystemAbilityOnDemandReason 
         HILOGI("UnloadSystemAbility dms ok");
     }
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
-    if (startReason.GetName() != BOOT_COMPLETED_EVENT || !dmDeviceInfoList.empty()) {
-        HILOGI("reclaim start.");
-        int32_t memUsage = DistributedSchedMemoryUtils::GetInstance().GetCurrentProcessMemoryUsedKB();
-        HILOGI("memory used before reclaim: %{public}d KB", memUsage);
-        DistributedSchedMemoryUtils::GetInstance().ReclaimNow();
-        memUsage = DistributedSchedMemoryUtils::GetInstance().GetCurrentProcessMemoryUsedKB();
-        HILOGI("reclaim end. memory used after reclaim: %{public}d KB", memUsage);
+    if ((startReason.GetName() != BOOT_COMPLETED_EVENT || !dmDeviceInfoList.empty()) &&
+        componentChangeHandler_ != nullptr) {
+        componentChangeHandler_->PostTask([]() {
+            HILOGI("reclaim start.");
+            int32_t memUsage = DistributedSchedMemoryUtils::GetInstance().GetCurrentProcessMemoryUsedKB();
+            HILOGI("memory used before reclaim: %{public}d KB", memUsage);
+            DistributedSchedMemoryUtils::GetInstance().ReclaimNow();
+            memUsage = DistributedSchedMemoryUtils::GetInstance().GetCurrentProcessMemoryUsedKB();
+            HILOGI("reclaim end. memory used after reclaim: %{public}d KB", memUsage);
+        }, MEMRE_CLEAN_DELAY);
     }
 #endif
 }
