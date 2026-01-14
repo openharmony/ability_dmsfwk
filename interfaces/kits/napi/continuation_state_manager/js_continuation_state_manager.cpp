@@ -161,7 +161,7 @@ sptr<DistributedSchedule::JsContinuationStateManagerStub> JsContinuationStateMan
     size_t stringSize = 0;
     napi_get_value_string_utf8(env, args[0], nullptr, 0, &stringSize);
     if (stringSize == 0) {
-        HandleError(env, "Parameter stringSize should be greater than zero.", std::to_string(PARAMETER_CHECK_FAILED));
+        HandleError(env, "Parameter stringSize should be greater than zero.", std::to_string(ERR_DMS_WORK_ABNORMALLY));
         return nullptr;
     }
     std::string type(stringSize, '\0');
