@@ -30,6 +30,7 @@ namespace {
     constexpr const char *RECLAIM_FILEPAGE_STRING_FOR_LINUX = "file";
     constexpr const char *KERNEL_PARAM_KEY = "ohos.boot.kernel";
     constexpr const char *KERNEL_TYPE_HM = "hongmeng";
+    constexpr const int VM_RSS_KEY_length = 6;
     constexpr const char *VM_RSS_KEY = "VmRSS:";
 }
 
@@ -41,7 +42,6 @@ DistributedSchedMemoryUtils& DistributedSchedMemoryUtils::GetInstance()
 
 DistributedSchedMemoryUtils::DistributedSchedMemoryUtils()
 {
-
 }
 
 void DistributedSchedMemoryUtils::ReclaimNow()
@@ -87,7 +87,7 @@ int32_t DistributedSchedMemoryUtils::GetCurrentProcessMemoryUsedKB()
     }
     std::string line;
     while (std::getline(statusFile, line)) {
-        if (line.substr(0, 6) == VM_RSS_KEY) {
+        if (line.substr(0, VM_RSS_KEY_length) == VM_RSS_KEY) {
             std::istringstream iss(line);
             std::string label;
             std::string value;
