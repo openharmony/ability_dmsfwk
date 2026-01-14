@@ -24,6 +24,7 @@
 #include "multi_user_manager.h"
 #include "os_account_manager.h"
 #include "switch_status_dependency.h"
+#include "util/distributed_sched_memory_utils.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
