@@ -493,7 +493,7 @@ void DistributedSchedService::HandleBootStart(const SystemAbilityOnDemandReason 
         HILOGI("UnloadSystemAbility dms ok");
     }
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
-    else {
+    if (startReason.GetName() != BOOT_COMPLETED_EVENT || !dmDeviceInfoList.empty()) {
         HILOGI("reclaim start.");
         int32_t memUsage = DistributedSchedMemoryUtils::GetInstance().GetCurrentProcessMemoryUsedKB();
         HILOGI("memory used before reclaim: %{public}d KB", memUsage);

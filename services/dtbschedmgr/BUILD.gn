@@ -204,6 +204,7 @@ ohos_shared_library("distributedschedsvr") {
     "src/softbus_adapter/transport/dsched_data_buffer.cpp",
     "src/softbus_adapter/transport/dsched_softbus_session.cpp",
     "src/softbus_adapter/transport/dsched_transport_softbus_adapter.cpp",
+    "src/util/distributed_sched_memory_utils.cpp",
     "src/svc_distributed_connection.cpp",
     "src/switch_status_dependency.cpp",
   ]

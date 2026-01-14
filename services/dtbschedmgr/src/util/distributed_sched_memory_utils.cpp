@@ -30,6 +30,7 @@ namespace {
     constexpr const char *RECLAIM_FILEPAGE_STRING_FOR_LINUX = "file";
     constexpr const char *KERNEL_PARAM_KEY = "ohos.boot.kernel";
     constexpr const char *KERNEL_TYPE_HM = "hongmeng";
+    constexpr const char *VM_RSS_KEY = "VmRSS:";
 }
 
 DistributedSchedMemoryUtils& DistributedSchedMemoryUtils::GetInstance()
@@ -38,7 +39,10 @@ DistributedSchedMemoryUtils& DistributedSchedMemoryUtils::GetInstance()
     return *instance;
 }
 
-DistributedSchedMemoryUtils::DistributedSchedMemoryUtils(){}
+DistributedSchedMemoryUtils::DistributedSchedMemoryUtils()
+{
+
+}
 
 void DistributedSchedMemoryUtils::ReclaimNow()
 {
@@ -48,7 +52,7 @@ void DistributedSchedMemoryUtils::ReclaimNow()
     int32_t pid = getpid();
     std::string path = "/proc/" + std::to_string(pid) + "/reclaim";
     std::string content = RECLAIM_FILEPAGE_STRING_FOR_LINUX;
-    if(system::GetParameter(KERNEL_PARAM_KEY, "") == KERNEL_TYPE_HM){
+    if (system::GetParameter(KERNEL_PARAM_KEY, "") == KERNEL_TYPE_HM) {
         content = RECLAIM_FILEPAGE_STRING_FOR_HM;
     }
     WriteToProcFile(path, content);
@@ -83,7 +87,7 @@ int32_t DistributedSchedMemoryUtils::GetCurrentProcessMemoryUsedKB()
     }
     std::string line;
     while (std::getline(statusFile, line)) {
-        if (line.substr(0, 6) == "VmRSS:") {
+        if (line.substr(0, 6) == VM_RSS_KEY) {
             std::istringstream iss(line);
             std::string label;
             std::string value;
