@@ -500,7 +500,7 @@ void DistributedSchedService::HandleBootStart(const SystemAbilityOnDemandReason 
                 HILOGI("start Reclaim.");
                 DistributedSchedMemoryUtils::GetInstance().ReclaimNow();
                 HILOGI("end.");
-        }, MEMRE_CLEAN_DELAY);
+            }, MEMRE_CLEAN_DELAY);
     }
 #endif
 }
