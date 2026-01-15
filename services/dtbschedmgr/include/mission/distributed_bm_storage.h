@@ -108,6 +108,8 @@ private:
     bool GetLastBundleNameId(uint16_t &bundleNameId);
     bool UpdateDistributedDataInternal(OHOS::sptr<OHOS::AppExecFwk::IBundleMgr>& bundleMgr,
         std::vector<AppExecFwk::BundleInfo>& bundleInfos, std::vector<std::string>& bundleNames);
+    void GetDmsAbilityInfos(DmsBundleInfo& distributedBundleInfo,
+        const AppExecFwk::HapModuleInfo& hapModuleInfo, uint8_t& pos);
 
 private:
     static std::mutex mutex_;
