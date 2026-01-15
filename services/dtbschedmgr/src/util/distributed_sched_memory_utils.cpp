@@ -30,8 +30,6 @@ namespace {
     constexpr const char *RECLAIM_FILEPAGE_STRING_FOR_LINUX = "file";
     constexpr const char *KERNEL_PARAM_KEY = "ohos.boot.kernel";
     constexpr const char *KERNEL_TYPE_HM = "hongmeng";
-    constexpr const int VM_RSS_KEY_length = 6;
-    constexpr const char *VM_RSS_KEY = "VmRSS:";
 }
 
 DistributedSchedMemoryUtils& DistributedSchedMemoryUtils::GetInstance()
@@ -46,9 +44,6 @@ DistributedSchedMemoryUtils::DistributedSchedMemoryUtils()
 
 void DistributedSchedMemoryUtils::ReclaimNow()
 {
-#ifdef DMS_MEM_CLEAN
-    return;
-#endif
     int32_t pid = getpid();
     std::string path = "/proc/" + std::to_string(pid) + "/reclaim";
     std::string content = RECLAIM_FILEPAGE_STRING_FOR_LINUX;
@@ -61,9 +56,6 @@ void DistributedSchedMemoryUtils::ReclaimNow()
 void DistributedSchedMemoryUtils::WriteToProcFile(const std::string &path,
     const std::string &content)
 {
-#ifdef DMS_MEM_CLEAN
-    return;
-#endif
     int fd = open(path.c_str(), O_WRONLY);
     if (fd == -1) {
         HILOGE("Failed to open %{public}s", path.c_str());
@@ -74,30 +66,6 @@ void DistributedSchedMemoryUtils::WriteToProcFile(const std::string &path,
     if (written != content.length()) {
         HILOGE("Failed to write to %{public}s", path.c_str());
     }
-}
-
-int32_t DistributedSchedMemoryUtils::GetCurrentProcessMemoryUsedKB()
-{
-#ifdef DMS_MEM_CLEAN
-    return 0;
-#endif
-    std::ifstream statusFile("/proc/self/status");
-    if (!statusFile.is_open()) {
-        return 0;
-    }
-    std::string line;
-    while (std::getline(statusFile, line)) {
-        if (line.substr(0, VM_RSS_KEY_length) == VM_RSS_KEY) {
-            std::istringstream iss(line);
-            std::string label;
-            std::string value;
-            std::string unit;
-            iss >> label >> value >> unit;
-            int32_t memoryKB = std::stoi(value);
-            return memoryKB;
-        }
-    }
-    return 0;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

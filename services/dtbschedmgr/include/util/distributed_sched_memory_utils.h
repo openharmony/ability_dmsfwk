@@ -31,7 +31,6 @@ public:
     DistributedSchedMemoryUtils& operator= (DistributedSchedMemoryUtils&&) = delete;
 
     void ReclaimNow();
-    int32_t GetCurrentProcessMemoryUsedKB();
 
 private:
     void WriteToProcFile(const std::string &path, const std::string &content);

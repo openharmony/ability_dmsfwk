@@ -497,12 +497,9 @@ void DistributedSchedService::HandleBootStart(const SystemAbilityOnDemandReason 
     if ((startReason.GetName() != BOOT_COMPLETED_EVENT || !dmDeviceInfoList.empty()) &&
         componentChangeHandler_ != nullptr) {
         componentChangeHandler_->PostTask([]() {
-            HILOGI("reclaim start.");
-            int32_t memUsage = DistributedSchedMemoryUtils::GetInstance().GetCurrentProcessMemoryUsedKB();
-            HILOGI("memory used before reclaim: %{public}d KB", memUsage);
-            DistributedSchedMemoryUtils::GetInstance().ReclaimNow();
-            memUsage = DistributedSchedMemoryUtils::GetInstance().GetCurrentProcessMemoryUsedKB();
-            HILOGI("reclaim end. memory used after reclaim: %{public}d KB", memUsage);
+                HILOGI("start Reclaim.");
+                DistributedSchedMemoryUtils::GetInstance().ReclaimNow();
+                HILOGI("end.");
         }, MEMRE_CLEAN_DELAY);
     }
 #endif

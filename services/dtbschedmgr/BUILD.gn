@@ -96,9 +96,6 @@ config("distributed_sched_config") {
   if (dmsfwk_check_screenlock) {
     defines += [ "DMS_CHECK_SCREENLOCK" ]
   }
-  if (!dmsfwk_mem_clean) {
-    defines += [ "DMS_MEM_CLEAN" ]
-  }
 }
 
 ohos_prebuilt_etc("dextension_prebuilt_config") {
