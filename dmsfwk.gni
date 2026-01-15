@@ -40,7 +40,6 @@ declare_args() {
   dmsfwk_feature_dams_enable = true
   dmsfwk_check_screenlock = false
   dmsfwk_vpe_enable = false
-  dmsfwk_mem_clean = false
   if (defined(global_parts_info)) {
     if (defined(global_parts_info.multimedia_image_framework)) {
       dmsfwk_mission_manager = true

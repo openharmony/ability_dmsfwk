@@ -201,12 +201,9 @@ int32_t CommonEventListener::GetForegroundOsAccountLocalId()
 
 void CommonEventListener::HandleBatteryCharging()
 {
-    HILOGI("start.");
-    int32_t memUsage = DistributedSchedMemoryUtils::GetInstance().GetCurrentProcessMemoryUsedKB();
-    HILOGI("memory used before reclaim: %{public}d KB", memUsage);
+    HILOGI("start Reclaim.");
     DistributedSchedMemoryUtils::GetInstance().ReclaimNow();
-    memUsage = DistributedSchedMemoryUtils::GetInstance().GetCurrentProcessMemoryUsedKB();
-    HILOGI("end. memory used after reclaim: %{public}d KB", memUsage);
+    HILOGI("end.");
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
