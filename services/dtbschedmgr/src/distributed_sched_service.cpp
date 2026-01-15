@@ -217,37 +217,38 @@ static int32_t GetBundleResourceInfo(std::string &bundleName, AppExecFwk::Bundle
 
 std::string GetDExtensionName(std::string bundleName, int32_t userId)
 {
-    std::vector<AppExecFwk::BundleInfo> installedBundles;
+    AppExecFwk::BundleInfo bundleInfo;
     auto bms = GetBundleManager();
     if (bms == nullptr) {
         HILOGE("Failed to get bundle manager");
         return "";
     }
 
-    if (!bms->GetBundleInfos(AppExecFwk::GET_BUNDLE_WITH_EXTENSION_INFO, installedBundles, userId)) {
+    if (!bms->GetBundleInfoV9(bundleName,
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION), bundleInfo, userId)) {
         HILOGE("Failed to get bundle infos");
         return "";
     }
 
-    for (const auto &installedBundle : installedBundles) {
-        if (installedBundle.applicationInfo.codePath == DEFAULT_HAP_CODE_PATH ||
-            installedBundle.applicationInfo.codePath == LINUX_HAP_CODE_PATH) {
-            HILOGI("Unsupported applications, name : %{public}s", installedBundle.name.data());
+    if (bundleInfo.applicationInfo.codePath == DEFAULT_HAP_CODE_PATH ||
+        bundleInfo.applicationInfo.codePath == LINUX_HAP_CODE_PATH) {
+        HILOGI("Unsupported applications, name : %{public}s", bundleInfo.name.data());
+        return "";
+    }
+
+    for (const auto &ext : bundleInfo.extensionInfos) {
+        if (ext.bundleName != bundleName) {
             continue;
         }
 
-        for (const auto &ext : installedBundle.extensionInfos) {
-            if (ext.bundleName != bundleName) {
-                continue;
-            }
-
-            if (ext.type != AppExecFwk::ExtensionAbilityType::DISTRIBUTED) {
-                continue;
-            }
-
-            HILOGI("bundleName: %{public}s, find extName: %{public}s", bundleName.c_str(), ext.name.c_str());
-            return ext.name;
+        if (ext.type != AppExecFwk::ExtensionAbilityType::DISTRIBUTED) {
+            continue;
         }
+
+        HILOGI("bundleName: %{public}s, find extName: %{public}s", bundleName.c_str(), ext.name.c_str());
+        return ext.name;
     }
 
     HILOGI("bundleName: %{public}s , find extName failed", bundleName.c_str());
@@ -256,37 +257,38 @@ std::string GetDExtensionName(std::string bundleName, int32_t userId)
 
 std::string GetDExtensionProcess(std::string bundleName, int32_t userId)
 {
-    std::vector<AppExecFwk::BundleInfo> installedBundles;
+    AppExecFwk::BundleInfo bundleInfo;
     auto bms = GetBundleManager();
     if (bms == nullptr) {
         HILOGE("Failed to get bundle manager");
         return "";
     }
 
-    if (!bms->GetBundleInfos(AppExecFwk::GET_BUNDLE_WITH_EXTENSION_INFO, installedBundles, userId)) {
+    if (!bms->GetBundleInfoV9(bundleName,
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_EXTENSION_ABILITY) |
+        static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_APPLICATION), bundleInfo, userId)) {
         HILOGE("Failed to get bundle infos");
         return "";
     }
 
-    for (const auto &installedBundle : installedBundles) {
-        if (installedBundle.applicationInfo.codePath == DEFAULT_HAP_CODE_PATH ||
-            installedBundle.applicationInfo.codePath == LINUX_HAP_CODE_PATH) {
-            HILOGI("Unsupported applications, name : %{public}s", installedBundle.name.data());
+    if (bundleInfo.applicationInfo.codePath == DEFAULT_HAP_CODE_PATH ||
+        bundleInfo.applicationInfo.codePath == LINUX_HAP_CODE_PATH) {
+        HILOGI("Unsupported applications, name : %{public}s", bundleInfo.name.data());
+        return "";
+    }
+
+    for (const auto &ext : bundleInfo.extensionInfos) {
+        if (ext.bundleName != bundleName) {
             continue;
         }
 
-        for (const auto &ext : installedBundle.extensionInfos) {
-            if (ext.bundleName != bundleName) {
-                continue;
-            }
-
-            if (ext.type != AppExecFwk::ExtensionAbilityType::DISTRIBUTED) {
-                continue;
-            }
-
-            HILOGI("bundleName: %{public}s, find process: %{public}s", bundleName.c_str(), ext.process.c_str());
-            return ext.process;
+        if (ext.type != AppExecFwk::ExtensionAbilityType::DISTRIBUTED) {
+            continue;
         }
+
+        HILOGI("bundleName: %{public}s, find process: %{public}s", bundleName.c_str(), ext.process.c_str());
+        return ext.process;
     }
 
     HILOGI("bundleName: %{public}s , find process failed", bundleName.c_str());
