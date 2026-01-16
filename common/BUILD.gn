@@ -39,7 +39,6 @@ ohos_shared_library("distributed_sched_utils") {
     "config_policy:configpolicy_util",
     "hilog:libhilog",
     "image_framework:image_native",
-    "ipc:ipc_single",
   ]
 
   install_images = [ system_base_dir ]

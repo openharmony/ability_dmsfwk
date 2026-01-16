@@ -43,32 +43,21 @@ ohos_shared_library("distributed_extension_ability_native") {
 
   deps = [ "${dms_path}/common:distributed_sched_utils" ]
   external_deps = [
-    "ability_base:configuration",
-    "ability_base:want",
     "ability_runtime:ability_context_native",
-    "ability_runtime:ability_manager",
-    "ability_runtime:ability_start_options",
-    "ability_runtime:abilitykit_native",
-    "ability_runtime:abilitykit_utils",
     "ability_runtime:app_context",
     "ability_runtime:extensionkit_native",
     "ability_runtime:ani_common",
     "ability_runtime:napi_common",
     "ability_runtime:runtime",
     "access_token:libaccesstoken_sdk",
-    "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
     "c_utils:utils",
-    "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "hitrace:hitrace_meter",
     "i18n:intl_util",
-    "ipc:ipc_core",
     "ipc:ipc_napi",
     "ipc:ipc_single",
     "napi:ace_napi",
     "runtime_core:ani",
-    "samgr:samgr_proxy",
   ]
 
   cflags_cc = []
@@ -102,23 +91,10 @@ ohos_shared_library("distributed_extension_sa") {
   deps = []
 
   external_deps = [
-    "ability_base:want",
-    "ability_runtime:ability_connect_callback_stub",
-    "ability_runtime:ability_manager",
-    "access_token:libaccesstoken_sdk",
-    "access_token:libtokenid_sdk",
-    "bundle_framework:appexecfwk_base",
-    "bundle_framework:appexecfwk_core",
     "c_utils:utils",
     "common_event_service:cesfwk_innerkits",
     "hilog:libhilog",
-    "hisysevent:libhisysevent",
-    "hitrace:hitrace_meter",
-    "init:libbegetutil",
     "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr:samgr_proxy",
-    "storage_service:storage_manager_sa_proxy",
   ]
 
   cflags_cc = [
