@@ -63,9 +63,6 @@ void DistributedSchedMemoryUtils::WriteToProcFile(const std::string &path,
     }
     ssize_t written = write(fd, content.c_str(), content.length());
     close(fd);
-    if (written != content.length()) {
-        HILOGE("Failed to write to %{public}s", path.c_str());
-    }
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
