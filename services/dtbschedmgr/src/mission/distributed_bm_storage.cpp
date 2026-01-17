@@ -37,9 +37,9 @@ const std::string PUBLIC_RECORDS = "publicRecords";
 const int32_t EL1 = 1;
 const int32_t MAX_TIMES = 600;              // 1min
 const int32_t SLEEP_INTERVAL = 100 * 1000;  // 100ms
-const int32_t FLAGS = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES |
-                      AppExecFwk::ApplicationFlag::GET_APPLICATION_INFO_WITH_DISABLE |
-                      AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_DISABLE;
+const int32_t FLAGS = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
+                      static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
+                      static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE);
 }  // namespace
 
 std::shared_ptr<DmsBmStorage> DmsBmStorage::instance_ = nullptr;
@@ -792,7 +792,20 @@ DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::Bun
     distributedBundleInfo.updateTime = bundleInfo.updateTime;
     distributedBundleInfo.developerId = appProvisionInfo.developerId;
     uint8_t pos = 0;
-    for (const auto &abilityInfo : bundleInfo.abilityInfos) {
+    for (const auto &hapModuleInfo : bundleInfo.hapModuleInfos) {
+        GetDmsAbilityInfos(distributedBundleInfo, hapModuleInfo, pos);
+    }
+    distributedBundleInfo.appIdentifier = appProvisionInfo.appIdentifier;
+    for (const auto &appIdentifierItem : srcAppIdentifierVec) {
+        distributedBundleInfo.appIdentifierVec.push_back(appIdentifierItem);
+    }
+    return distributedBundleInfo;
+}
+
+void DmsBmStorage::GetDmsAbilityInfos(DmsBundleInfo& distributedBundleInfo,
+    const AppExecFwk::HapModuleInfo& hapModuleInfo, uint8_t& pos)
+{
+    for (const auto &abilityInfo : hapModuleInfo.abilityInfos) {
         DmsAbilityInfo dmsAbilityInfo;
         dmsAbilityInfo.abilityName = abilityInfo.name;
         for (const auto &continueType : abilityInfo.continueType) {
@@ -805,11 +818,6 @@ DmsBundleInfo DmsBmStorage::ConvertToDistributedBundleInfo(const AppExecFwk::Bun
         }
         distributedBundleInfo.dmsAbilityInfos.push_back(dmsAbilityInfo);
     }
-    distributedBundleInfo.appIdentifier = appProvisionInfo.appIdentifier;
-    for (const auto &appIdentifierItem : srcAppIdentifierVec) {
-        distributedBundleInfo.appIdentifierVec.push_back(appIdentifierItem);
-    }
-    return distributedBundleInfo;
 }
 
 OHOS::sptr<OHOS::AppExecFwk::IBundleMgr> DmsBmStorage::GetBundleMgr()
