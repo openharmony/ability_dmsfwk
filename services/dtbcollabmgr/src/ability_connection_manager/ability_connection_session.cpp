@@ -56,6 +56,10 @@ constexpr int32_t DEFAULT_INSTANCE_ID = 0;
 constexpr int32_t HEX_WIDTH = 2;
 constexpr char FILL_CHAR = '0';
 constexpr int32_t WAIT_FOR_CONNECT = 11;
+constexpr int32_t BIND_RETRY_INTERVAL = 100;
+constexpr int32_t MAX_BIND_RETRY_TIME = 1000;
+constexpr int32_t MAX_RETRY_TIMES = 10;
+constexpr int32_t MS_TO_US = 1000;
 }
 
 AbilityConnectionSession::AbilityConnectionSession(int32_t sessionId, std::string serverSocketName,
@@ -380,11 +384,39 @@ ConnectErrorCode AbilityConnectionSession::ConvertToConnectErrorCode(int32_t col
 int32_t AbilityConnectionSession::RequestReceiveFileChannelConnection()
 {
     HILOGI("notify the peer end bind file.");
-    int32_t ret = SendMessage(localSocketName_, MessageType::CONNECT_FILE_CHANNEL);
-    if (ret != ERR_OK) {
+
+    int32_t ret = ERR_OK;
+    int retryCount = 0;
+
+    do {
+        ret = SendMessageSync(localSocketName_, MessageType::CONNECT_FILE_CHANNEL);
+        if (ret == ERR_OK) {
+            HILOGI("notify file channel connection success");
+            return ret;
+        }
+
         HILOGE("Failed to notify the file channel connection, ret = %{public}d", ret);
-        NotifyAppConnectResult(false);
-    }
+
+        if (ret != NO_CONNECTED_SOCKET_ID) {
+            NotifyAppConnectResult(false);
+            return ret;
+        }
+
+        if (retryCount * BIND_RETRY_INTERVAL >= MAX_BIND_RETRY_TIME) {
+            HILOGE("request file channel failed after max retry time %{public}d ms",
+                MAX_BIND_RETRY_TIME);
+            NotifyAppConnectResult(false);
+            return ret;
+        }
+
+        HILOGI("request file channel failed, retrying after %{public}d ms, retry %{public}d",
+            BIND_RETRY_INTERVAL, retryCount + 1);
+
+        usleep(BIND_RETRY_INTERVAL * MS_TO_US);
+        retryCount++;
+    } while (retryCount < MAX_RETRY_TIMES);
+
+    NotifyAppConnectResult(false);
     return ret;
 }
 
@@ -455,9 +487,9 @@ int32_t AbilityConnectionSession::HandleDisconnect()
     return ERR_OK;
 }
 
-int32_t AbilityConnectionSession::SendMessage(const std::string& msg, const MessageType& messageType)
+int32_t AbilityConnectionSession::PrepareSendMessage(const std::string& msg,
+    int32_t& channelId, std::shared_ptr<AVTransDataBuffer>& sendBuffer, const MessageType& messageType)
 {
-    HILOGI("called.");
     auto sendData = std::make_shared<AVTransDataBuffer>(msg.length() + 1);
     int32_t ret = memcpy_s(sendData->Data(), sendData->Capacity(), msg.c_str(), msg.length());
     if (ret != ERR_OK) {
@@ -466,18 +498,20 @@ int32_t AbilityConnectionSession::SendMessage(const std::string& msg, const Mess
     }
 
     uint32_t totalLen = sendData->Size() + MessageDataHeader::HEADER_LEN;
-
     MessageDataHeader headerPara(PROTOCOL_VERSION, static_cast<uint32_t>(messageType), totalLen);
     auto headerBuffer = headerPara.Serialize();
-    auto sendBuffer = std::make_shared<AVTransDataBuffer>(totalLen);
+
+    sendBuffer = std::make_shared<AVTransDataBuffer>(totalLen);
     uint8_t* header = sendBuffer->Data();
 
-    if (memcpy_s(header, sendBuffer->Size(), headerBuffer->Data(), MessageDataHeader::HEADER_LEN) != ERR_OK) {
+    if (memcpy_s(header, sendBuffer->Size(),
+        headerBuffer->Data(), MessageDataHeader::HEADER_LEN) != ERR_OK) {
         HILOGE("Write header failed");
         return WRITE_SESSION_HEADER_FAILED;
     }
 
-    ret = memcpy_s(header + MessageDataHeader::HEADER_LEN, sendBuffer->Size() - MessageDataHeader::HEADER_LEN,
+    ret = memcpy_s(header + MessageDataHeader::HEADER_LEN,
+        sendBuffer->Size() - MessageDataHeader::HEADER_LEN,
         sendData->Data(), sendData->Size());
     if (ret != ERR_OK) {
         HILOGE("Write data failed");
@@ -491,8 +525,41 @@ int32_t AbilityConnectionSession::SendMessage(const std::string& msg, const Mess
         return ret;
     }
 
-    int32_t channelId = transChannelInfo.channelId;
+    channelId = transChannelInfo.channelId;
+    return ERR_OK;
+}
+
+int32_t AbilityConnectionSession::SendMessage(const std::string& msg, const MessageType& messageType)
+{
+    HILOGI("called.");
+    int32_t channelId = INVALID_CHANNEL_ID;
+    std::shared_ptr<AVTransDataBuffer> sendBuffer;
+
+    int32_t ret = PrepareSendMessage(msg, channelId, sendBuffer, messageType);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+
     ret = ChannelManager::GetInstance().SendMessage(channelId, sendBuffer);
+    if (ret != ERR_OK) {
+        HILOGE("send message failed, channelId is %{public}d", channelId);
+        return ret;
+    }
+    return ERR_OK;
+}
+
+int32_t AbilityConnectionSession::SendMessageSync(const std::string& msg, const MessageType& messageType)
+{
+    HILOGI("called.");
+    int32_t channelId = INVALID_CHANNEL_ID;
+    std::shared_ptr<AVTransDataBuffer> sendBuffer;
+
+    int32_t ret = PrepareSendMessage(msg, channelId, sendBuffer, messageType);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+
+    ret = ChannelManager::GetInstance().SendMessageSync(channelId, sendBuffer);
     if (ret != ERR_OK) {
         HILOGE("send message failed, channelId is %{public}d", channelId);
         return ret;
