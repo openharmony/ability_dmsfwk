@@ -132,7 +132,10 @@ public:
         const std::string& dmsServerToken, const std::string& reason);
     int32_t HandleDisconnect();
 
+    int32_t PrepareSendMessage(const std::string& msg, int32_t& channelId,
+        std::shared_ptr<AVTransDataBuffer>& sendBuffer, const MessageType& messageType = MessageType::NORMAL);
     int32_t SendMessage(const std::string& msg, const MessageType& messageType = MessageType::NORMAL);
+    int32_t SendMessageSync(const std::string& msg, const MessageType& messageType = MessageType::NORMAL);
     int32_t SendData(const std::shared_ptr<AVTransDataBuffer>& buffer);
     int32_t SendImage(const std::shared_ptr<Media::PixelMap>& image, int32_t imageQuality);
     int32_t SendFile(const std::vector<std::string>& sFiles,

@@ -55,6 +55,7 @@ public:
     int32_t SendBytes(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data);
     int32_t SendStream(const int32_t channelId, const std::shared_ptr<AVTransStreamData>& data);
     int32_t SendMessage(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data);
+    int32_t SendMessageSync(const int32_t channelId, const std::shared_ptr<AVTransDataBuffer>& data);
     int32_t SendFile(const int32_t channelId, const std::vector<std::string>& sFiles,
         const std::vector<std::string>& dFiles);
 

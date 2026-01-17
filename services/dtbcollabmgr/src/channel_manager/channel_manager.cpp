@@ -1283,6 +1283,24 @@ int32_t ChannelManager::SendMessage(const int32_t channelId,
     return ERR_OK;
 }
 
+int32_t ChannelManager::SendMessageSync(const int32_t channelId,
+    const std::shared_ptr<AVTransDataBuffer>& data)
+{
+    if (!isValidChannelId(channelId) || data == nullptr) {
+        HILOGE("invalid channel id. %{public}d", channelId);
+        return INVALID_CHANNEL_ID;
+    }
+    HILOGI("start to send message, %{public}u", static_cast<uint32_t>(data->Size()));
+
+    int32_t ret = DoSendMessage(channelId, data);
+    if (ret != ERR_OK) {
+        HILOGE("failed to send message, ret=%{public}d", ret);
+        return ret;
+    }
+    HILOGD("send message task added to handler");
+    return ERR_OK;
+}
+
 int32_t ChannelManager::DoSendMessage(const int32_t channelId,
     const std::shared_ptr<AVTransDataBuffer>& data)
 {
