@@ -48,7 +48,6 @@ public:
     virtual int32_t CheckRemoteBundleInfoForContinuation(const std::string& dstDeviceId,
         const std::string& bundleName, AppExecFwk::DistributedBundleInfo& remoteBundleInfo) = 0;
     virtual sptr<AppExecFwk::IBundleMgr> GetBundleManager() = 0;
-    virtual sptr<AppExecFwk::IDistributedBms> GetDistributedBundleManager() = 0;
     virtual int32_t GetUidFromBms(const std::string& bundleName) = 0;
     virtual bool CheckIfRemoteCanInstall(const AAFwk::Want& want, int32_t missionId) = 0;
     virtual int32_t GetBundleNameId(const std::string& bundleName, uint16_t& bundleNameId) = 0;
@@ -92,7 +91,6 @@ public:
     MOCK_METHOD3(CheckRemoteBundleInfoForContinuation, int32_t(const std::string& dstDeviceId,
         const std::string& bundleName, AppExecFwk::DistributedBundleInfo& remoteBundleInfo));
     MOCK_METHOD0(GetBundleManager, sptr<AppExecFwk::IBundleMgr>());
-    MOCK_METHOD0(GetDistributedBundleManager, sptr<AppExecFwk::IDistributedBms>());
     MOCK_METHOD1(GetUidFromBms, int32_t(const std::string& bundleName));
     MOCK_METHOD2(CheckIfRemoteCanInstall, bool(const AAFwk::Want& want, int32_t missionId));
     MOCK_METHOD2(GetBundleNameId, int32_t(const std::string& bundleName, uint16_t& bundleNameId));

@@ -567,7 +567,6 @@ HWTEST_F(BundleManagerInternalTest, GetBundleNameId_002, TestSize.Level3)
     DTEST_LOG << "BundleManagerInternalTest GetBundleNameId_002 begin" << std::endl;
     const std::string bundleName = "com.ohos.mms";
     uint16_t bundleNameId = 0;
-    BundleManagerInternal::GetDistributedBundleManager();
     int32_t ret = BundleManagerInternal::GetBundleNameId(bundleName, bundleNameId);
     EXPECT_EQ(ret, CAN_NOT_FOUND_ABILITY_ERR);
     DTEST_LOG << "BundleManagerInternalTest GetBundleNameId_002 end "<< std::endl;
