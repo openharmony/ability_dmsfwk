@@ -364,6 +364,10 @@ int32_t DSchedCollab::PostSrcResultTask(std::shared_ptr<NotifyResultCmd> notifyR
 int32_t DSchedCollab::PostErrEndTask(const int32_t &result)
 {
     HILOGI("called, collabInfo %{public}s", collabInfo_.ToString().c_str());
+    if (isDisconnected_.load()) {
+        HILOGI("already in a disconnected state");
+        return ERR_OK;
+    }
     DSchedCollabEventType eventType = ERR_END_EVENT;
     auto data = std::make_shared<int32_t>(result);
     auto msgEvent = AppExecFwk::InnerEvent::Get(eventType, data, 0);
@@ -867,7 +871,7 @@ int32_t DSchedCollab::ExeClientDisconnectNotify()
     }
     PARCEL_WRITE_HELPER(data, Int32, collabSessionId);
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option = {MessageOption::TF_ASYNC};
     int32_t ret = clientCB->SendRequest(NOTIFY_COLLAB_DISCONNECT, data, reply, option);
     if (ret != ERR_OK) {
         HILOGE("send request failed, ret: %{public}d", ret);

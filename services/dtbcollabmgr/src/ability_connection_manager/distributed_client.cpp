@@ -166,7 +166,7 @@ int32_t DistributedClient::NotifyCloseCollabSession(const std::string& token)
     }
     PARCEL_WRITE_HELPER(data, String, token);
     MessageParcel reply;
-    PARCEL_TRANSACT_SYNC_RET_INT(remote, BNOTIFY_CLOSE_COLLAB_SESSION, data, reply);
+    PARCEL_TRANSACT_ASYNC_RET_INT(remote, BNOTIFY_CLOSE_COLLAB_SESSION, data, reply);
 }
 
 int32_t DistributedClient::NotifyRejectReason(const std::string& token, const std::string& reason)
