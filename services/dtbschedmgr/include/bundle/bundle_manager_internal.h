@@ -23,8 +23,6 @@
 
 #include "bundlemgr/bundle_mgr_interface.h"
 #include "bundlemgr/bundle_mgr_proxy.h"
-#include "distributed_bms_interface.h"
-#include "distributed_bms_proxy.h"
 #include "mission/distributed_bm_storage.h"
 #include "mission/distributed_bundle_info.h"
 #include "single_instance.h"
@@ -58,7 +56,6 @@ public:
     static int32_t CheckRemoteBundleInfoForContinuation(const std::string& dstDeviceId,
         const std::string& bundleName, AppExecFwk::DistributedBundleInfo& remoteBundleInfo);
     static sptr<AppExecFwk::IBundleMgr> GetBundleManager();
-    static sptr<AppExecFwk::IDistributedBms> GetDistributedBundleManager();
     static int32_t GetUidFromBms(const std::string& bundleName);
     static bool CheckIfRemoteCanInstall(const AAFwk::Want& want, int32_t missionId);
     static int32_t GetBundleNameId(const std::string& bundleName, uint16_t& bundleNameId);

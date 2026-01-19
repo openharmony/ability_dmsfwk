@@ -168,14 +168,6 @@ sptr<AppExecFwk::IBundleMgr> BundleManagerInternal::GetBundleManager()
     return IBundleManagerInternal::bundleMgrMock->GetBundleManager();
 }
 
-sptr<AppExecFwk::IDistributedBms> BundleManagerInternal::GetDistributedBundleManager()
-{
-    if (IBundleManagerInternal::bundleMgrMock == nullptr) {
-        return nullptr;
-    }
-    return IBundleManagerInternal::bundleMgrMock->GetDistributedBundleManager();
-}
-
 int32_t BundleManagerInternal::GetUidFromBms(const std::string& bundleName)
 {
     if (IBundleManagerInternal::bundleMgrMock == nullptr) {
