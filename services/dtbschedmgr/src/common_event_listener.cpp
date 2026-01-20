@@ -206,12 +206,10 @@ void CommonEventListener::HandleBatteryCharging()
     auto now = std::chrono::system_clock::now();
     int64_t currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
     int64_t lastTime = g_lastExecuteTime.load(std::memory_order_relaxed);
-
     if (currentTime - lastTime < MIN_TIME_INTERVAL) {
         HILOGI("HandleBatteryCharging skipped, executed recently.");
         return;
     }
-
     if (!g_lastExecuteTime.compare_exchange_strong(lastTime, currentTime)) {
         HILOGI("HandleBatteryCharging already being executed by another thread.");
         return;
