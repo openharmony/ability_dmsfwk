@@ -28,6 +28,7 @@
 #include "ui_extension_context.h"
 
 using namespace OHOS::DistributedCollab;
+using namespace ohos::distributedsched;
 
 namespace {
 constexpr int32_t IMAGE_COMPRESSION_QUALITY = 30;
@@ -199,16 +200,17 @@ void DestroyAbilityConnectionSession(int32_t sessionId)
     }
 }
 
-taihe::optional<abilityConnectionManagerTaihe::PeerInfo> GetPeerInfoById(int32_t sessionId)
+abilityConnectionManager::PeerInfoOrNull GetPeerInfoById(int32_t sessionId)
 {
     PeerInfo peerInfo;
     auto ret = AbilityConnectionManager::GetInstance().getPeerInfoBySessionId(sessionId, peerInfo);
     if (ret != OHOS::ERR_OK) {
         HILOGE("get peerInfo failed!");
-        return taihe::optional<abilityConnectionManagerTaihe::PeerInfo>(nullptr);
+        return abilityConnectionManager::PeerInfoOrNull::make_nullData();
     }
     abilityConnectionManagerTaihe::PeerInfo taihePeerInfo = PeerInfoAdapter::ConvertToTaihe(peerInfo);
-    return taihe::optional<abilityConnectionManagerTaihe::PeerInfo>(std::in_place_t{}, taihePeerInfo);
+    return abilityConnectionManager::PeerInfoOrNull::make_peerInfo(
+        taihe::optional<abilityConnectionManagerTaihe::PeerInfo>(std::in_place_t{}, taihePeerInfo));
 }
 
 ohos::distributedsched::abilityConnectionManager::ConnectResult ConnectSync(int32_t sessionId)
