@@ -68,6 +68,7 @@
 #include "switch_status_dependency.h"
 #ifdef SUPPORT_COMMON_EVENT_SERVICE
 #include "common_event_listener.h"
+#include "util/distributed_sched_memory_utils.h"
 #endif
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
 #include "form_mgr_death_recipient.h"
@@ -168,6 +169,7 @@ DataShareManager &dataShareManager = DataShareManager::GetInstance();
 const std::string DEFAULT_HAP_CODE_PATH = "1";
 const std::string LINUX_HAP_CODE_PATH = "2";
 const int32_t CONNECT_WAIT_TIME_S = 11; /* 11 second */
+constexpr int32_t MEMRE_CLEAN_DELAY = 100000; /* 100s */
 std::mutex getDistibutedProxyLock_;
 std::condition_variable getDistibutedProxyCondition_;
 }
@@ -491,6 +493,16 @@ void DistributedSchedService::HandleBootStart(const SystemAbilityOnDemandReason 
         }
         HILOGI("UnloadSystemAbility dms ok");
     }
+#ifdef SUPPORT_COMMON_EVENT_SERVICE
+    if ((startReason.GetName() != BOOT_COMPLETED_EVENT || !dmDeviceInfoList.empty()) &&
+        componentChangeHandler_ != nullptr) {
+        componentChangeHandler_->PostTask([]() {
+                HILOGI("start Reclaim.");
+                DistributedSchedMemoryUtils::GetInstance().ReclaimNow();
+                HILOGI("end.");
+            }, MEMRE_CLEAN_DELAY);
+    }
+#endif
 }
 
 // LCOV_EXCL_START
@@ -760,6 +772,7 @@ void DistributedSchedService::InitCommonEventListener()
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_ADDED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_CHANGED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
     auto applyMonitor = std::make_shared<CommonEventListener>(subscribeInfo);
     EventFwk::CommonEventManager::SubscribeCommonEvent(applyMonitor);
