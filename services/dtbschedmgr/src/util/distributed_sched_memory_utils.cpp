@@ -44,7 +44,7 @@ DistributedSchedMemoryUtils::DistributedSchedMemoryUtils()
 
 void DistributedSchedMemoryUtils::ReclaimNow()
 {
-    int32_t pid = getpid();
+    pid_t pid = getpid();
     std::string path = "/proc/" + std::to_string(pid) + "/reclaim";
     std::string content = RECLAIM_FILEPAGE_STRING_FOR_LINUX;
     if (system::GetParameter(KERNEL_PARAM_KEY, "") == KERNEL_TYPE_HM) {
