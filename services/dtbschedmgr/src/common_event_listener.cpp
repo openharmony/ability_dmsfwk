@@ -41,6 +41,8 @@ const uint8_t PACKAGE_REMOVED = 7;
 const uint8_t USER_REMOVED = 8;
 const uint8_t BATTERY_CHARGING = 9;
 constexpr static int32_t INVALID_ID = 0;
+constexpr int64_t MIN_TIME_INTERVAL = 60 * 1000; // 1min
+std::atomic<int64_t> g_lastExecuteTime(0);
 std::map<std::string, uint8_t> receiveEvent = {
     {EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_LOCKED, SCREEN_LOCKED},
     {EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF, SCREEN_OFF},
@@ -201,6 +203,19 @@ int32_t CommonEventListener::GetForegroundOsAccountLocalId()
 
 void CommonEventListener::HandleBatteryCharging()
 {
+    auto now = std::chrono::system_clock::now();
+    int64_t currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    int64_t lastTime = g_lastExecuteTime.load(std::memory_order_relaxed);
+
+    if (currentTime - lastTime < MIN_TIME_INTERVAL) {
+        HILOGI("HandleBatteryCharging skipped, executed recently.");
+        return;
+    }
+
+    if (!g_lastExecuteTime.compare_exchange_strong(lastTime, currentTime)) {
+        HILOGI("HandleBatteryCharging already being executed by another thread.");
+        return;
+    }
     HILOGI("start Reclaim.");
     DistributedSchedMemoryUtils::GetInstance().ReclaimNow();
     HILOGI("end.");
