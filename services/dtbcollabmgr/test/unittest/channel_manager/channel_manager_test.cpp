@@ -1660,5 +1660,113 @@ HWTEST_F(ChannelManagerTest, OnFileEventReceived_001, TestSize.Level1)
     event.type = FileEventType::FILE_EVENT_SEND_PROCESS;
     EXPECT_NO_FATAL_FAILURE(ChannelManager::GetInstance().OnFileEventReceived(socketId, &event));
 }
+
+/**
+ * @tc.name: SendMessageSync_Success
+ * @tc.desc: Test for SendMessage when channelId is valid and PostTask succeeds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChannelManagerTest, SendMessageSync_Success, TestSize.Level1)
+{
+    // Step 1: Initialize the ChannelManager
+    EXPECT_CALL(mockSoftbus, Socket(testing::_))
+        .WillRepeatedly(testing::Return(NUM_1234)); // Mock Socket to return a valid socket ID
+    EXPECT_CALL(mockSoftbus, Listen(testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(testing::Return(ERR_OK)); // Mock Listen to return success
+
+    int32_t initResult = ChannelManager::GetInstance().Init(ownerName);
+    EXPECT_EQ(initResult, ERR_OK); // Ensure Init was successful
+
+    // Step 2: Create Client Channel
+    std::string channelName = "TestMessageChannel";
+    ChannelDataType dataType = ChannelDataType::MESSAGE;  // Using message type for the data
+    ChannelPeerInfo peerInfo = { "peerName", "networkId" };
+
+    int32_t channelId = ChannelManager::GetInstance().CreateClientChannel(channelName, dataType, peerInfo);
+    EXPECT_EQ(channelId, MESSAGE_START_ID); // Verify the channel ID is correctly returned
+
+    // Step 3: Mock Bind to succeed
+    EXPECT_CALL(mockSoftbus, Bind(testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(testing::Return(ERR_OK)); // Mock Bind to succeed
+
+    // Step 4: Call ConnectChannel to establish the connection
+    int32_t result = ChannelManager::GetInstance().ConnectChannel(channelId);
+    EXPECT_EQ(result, ERR_OK); // Verify the connection is established
+
+    // Step 5: Prepare data for message
+    std::shared_ptr<AVTransDataBuffer> dataBuffer = std::make_shared<AVTransDataBuffer>(NUM_1024); // Set buffer size
+    EXPECT_CALL(mockSoftbus, SendMessage(NUM_1234, testing::_, testing::_))
+        .WillOnce(testing::Return(ERR_OK));
+      
+    // Step 6: Call SendMessage
+    result = ChannelManager::GetInstance().SendMessageSync(channelId, dataBuffer);
+    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_INIT));
+
+    EXPECT_EQ(result, ERR_OK); // Verify that message was sent successfully
+}
+
+/**
+ * @tc.name: SendMessageSync_InvalidChannelId
+ * @tc.desc: Test for SendMessage when channelId is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChannelManagerTest, SendMessageSync_InvalidChannelId, TestSize.Level1)
+{
+    int32_t invalidChannelId = -1; // Simulating an invalid channelId
+
+    // Step 3: Prepare data for message
+    std::shared_ptr<AVTransDataBuffer> dataBuffer = std::make_shared<AVTransDataBuffer>(NUM_1024); // Set buffer size
+
+    // Step 4: Call SendMessage with invalid channelId
+    int32_t result = ChannelManager::GetInstance().SendMessageSync(invalidChannelId, dataBuffer);
+    EXPECT_EQ(result, INVALID_CHANNEL_ID); // Verify that invalid channelId returns INVALID_CHANNEL_ID
+}
+
+/**
+ * @tc.name: SendMessageSync_NullData
+ * @tc.desc: Test for SendMessage when data is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChannelManagerTest, SendMessageSync_NullData, TestSize.Level1)
+{
+    int32_t result = ChannelManager::GetInstance().SendMessageSync(MESSAGE_START_ID, nullptr);
+    EXPECT_EQ(result, INVALID_CHANNEL_ID); // Verify that passing nullptr data returns INVALID_CHANNEL_ID
+}
+
+/**
+ * @tc.name: SendMessageSync_NotConnect
+ * @tc.desc: Test for SendMessage when NotConnect
+ * @tc.type: FUNC
+ */
+HWTEST_F(ChannelManagerTest, SendMessageSync_NotConnect, TestSize.Level1)
+{
+    // Step 1: Initialize the ChannelManager
+    EXPECT_CALL(mockSoftbus, Socket(testing::_))
+        .WillRepeatedly(testing::Return(NUM_1234)); // Mock Socket to return a valid socket ID
+    EXPECT_CALL(mockSoftbus, Listen(testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(testing::Return(ERR_OK)); // Mock Listen to return success
+
+    int32_t initResult = ChannelManager::GetInstance().Init(ownerName);
+    EXPECT_EQ(initResult, ERR_OK); // Ensure Init was successful
+
+    // Step 2: Create Client Channel
+    std::string channelName = "TestMessageChannel";
+    ChannelDataType dataType = ChannelDataType::MESSAGE;  // Using message type for the data
+    ChannelPeerInfo peerInfo = { "peerName", "networkId" };
+
+    int32_t channelId = ChannelManager::GetInstance().CreateClientChannel(channelName, dataType, peerInfo);
+    EXPECT_EQ(channelId, MESSAGE_START_ID); // Verify the channel ID is correctly returned
+
+    // Step 3: Mock Bind to succeed
+    EXPECT_CALL(mockSoftbus, Bind(testing::_, testing::_, testing::_, testing::_))
+        .WillOnce(testing::Return(-1)); // Mock Bind to succeed
+
+    // Step 4: Call ConnectChannel to establish the connection
+    int32_t result = ChannelManager::GetInstance().ConnectChannel(channelId);
+    EXPECT_EQ(result, CONNECT_CHANNEL_FAILED); // Verify the connection is established
+
+    // Step 6: Call SendMessage
+    result = ChannelManager::GetInstance().SendMessageSync(channelId, nullptr);
+}
 } // namespace DistributedCollab
 } // namespace OHOS

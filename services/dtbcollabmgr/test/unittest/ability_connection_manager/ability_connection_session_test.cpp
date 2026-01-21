@@ -991,5 +991,35 @@ HWTEST_F(AbilityConnectionSessionTest, ConnectTransChannel_Test_001, TestSize.Le
     EXPECT_EQ(result, STREAM_CHANNEL_NOT_EXITS);
     DTEST_LOG << "AbilityConnectionSessionTest ConnectTransChannel_Test_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: SendMessage_Test_001
+ * @tc.desc: call SendData
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, SendMessage_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest SendMessage_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    int32_t ret = connectionSesion_->SendMessage("SESSION_CONNECT_SUCCESS", MessageType::SESSION_CONNECT_SUCCESS);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "AbilityConnectionSessionTest SendMessage_Test_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SendMessage_Test_001
+ * @tc.desc: call SendData
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(AbilityConnectionSessionTest, SendMessageSync_Test_001, TestSize.Level3)
+{
+    DTEST_LOG << "AbilityConnectionSessionTest SendMessageSync_Test_001 begin" << std::endl;
+    ASSERT_NE(connectionSesion_, nullptr);
+    int32_t ret = connectionSesion_->SendMessageSync("SESSION_CONNECT_SUCCESS", MessageType::SESSION_CONNECT_SUCCESS);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "AbilityConnectionSessionTest SendMessageSync_Test_001 end" << std::endl;
+}
 }
 }
