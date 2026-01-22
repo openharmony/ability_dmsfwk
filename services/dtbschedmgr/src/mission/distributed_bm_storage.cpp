@@ -37,9 +37,13 @@ const std::string PUBLIC_RECORDS = "publicRecords";
 const int32_t EL1 = 1;
 const int32_t MAX_TIMES = 600;              // 1min
 const int32_t SLEEP_INTERVAL = 100 * 1000;  // 100ms
-const int32_t FLAGS = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
-                      static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
-                      static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE);
+const int32_t FLAGS = AppExecFwk::BundleFlag::GET_BUNDLE_WITH_ABILITIES |
+    AppExecFwk::ApplicationFlag::GET_APPLICATION_INFO_WITH_DISABLE |
+    AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_WITH_DISABLE;
+const int32_t CONTINUATIONFLAGS =
+    static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_HAP_MODULE) |
+    static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_ABILITY) |
+    static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_DISABLE);
 }  // namespace
 
 std::shared_ptr<DmsBmStorage> DmsBmStorage::instance_ = nullptr;
@@ -924,7 +928,8 @@ bool DmsBmStorage::UpdateDistributedDataInternal(OHOS::sptr<OHOS::AppExecFwk::IB
         HILOGE("Get bundleMgr shared_ptr nullptr");
         return false;
     }
-    if (!bundleMgr->GetBundleInfosForContinuation(FLAGS, bundleInfos, AppExecFwk::Constants::ALL_USERID)) {
+    if (!bundleMgr->GetBundleInfosForContinuation(CONTINUATIONFLAGS,
+        bundleInfos, AppExecFwk::Constants::ALL_USERID)) {
         HILOGE("get bundleInfos failed");
         return false;
     }
