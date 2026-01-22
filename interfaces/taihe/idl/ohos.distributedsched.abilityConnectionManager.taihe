@@ -32,6 +32,11 @@ struct PeerInfo {
     serviceName: Optional<String>;
 }
 
+union PeerInfoOrNull {
+    peerInfo: Optional<PeerInfo>;
+    nullData: @null unit;
+}
+
 struct ConnectOptions {
     needSendData: Optional<bool>;
     needSendStream: Optional<bool>;
@@ -136,7 +141,7 @@ function DestroyAbilityConnectionSession(sessionId: i32): void;
  * @syscap SystemCapability.DistributedSched.AppCollaboration
  * @since 22 static
  */
-function GetPeerInfoById(sessionId: i32): Optional<PeerInfo>;
+function GetPeerInfoById(sessionId: i32): PeerInfoOrNull;
 
 /**
  * Initiate an ability session connection.
