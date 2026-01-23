@@ -88,6 +88,19 @@ namespace DistributedSchedule {
         return result; \
     } while (0)
 
+#define PARCEL_TRANSACT_ASYNC_RET_INT(remote, code, data, reply) \
+    do { \
+        MessageOption option =  {MessageOption::TF_ASYNC}; \
+        int32_t error = remote->SendRequest(code, data, reply, option); \
+        if (error != ERR_NONE) { \
+            HILOGE("%{public}s transact failed, error: %{public}d", __func__, error); \
+            return error; \
+        } \
+        int32_t result = reply.ReadInt32(); \
+        HILOGD("%{public}s get result from server data = %{public}d", __func__, result); \
+        return result; \
+    } while (0)
+
 #define PARCEL_TRANSACT_SYNC_NORET(remote, code, data, reply) \
     do { \
         MessageOption option; \
