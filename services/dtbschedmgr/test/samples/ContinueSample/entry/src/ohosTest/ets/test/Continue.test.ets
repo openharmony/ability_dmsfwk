@@ -84,6 +84,7 @@ function ContinueTest_001(driver: Driver): Function {
       let button: Component = await driver.findComponent(ON.text('动态配置迁移能力'));
       await button.click();
       await driver.delayMs(COMMON_DELAY);
+      await driver.assertComponentExist(ON.text('动态配置迁移能力'));
     } catch (err) {
       console.error(TAG, `ContinueTest_001 err.code : ${err?.code}, message: ${err?.message}`);
     }
