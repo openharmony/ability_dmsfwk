@@ -147,6 +147,22 @@ void GetDSchedEventInfoInnerFuzzTest(const uint8_t* data, size_t size)
     PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
     DistributedSchedService::GetInstance().GetDSchedEventInfoInner(dataParcel, reply);
 }
+
+void ConnectDExtensionFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
+{
+    if ((data == nullptr) || (size < sizeof(int32_t))) {
+        return;
+    }
+    FuzzUtil::MockPermission();
+    MessageParcel dataParcel;
+    MessageParcel reply;
+    MessageOption option;
+    FuzzedDataProvider fdp(data, size);
+    DExtConnectInfo info;
+
+    PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &info);
+    DistributedSchedService::GetInstance().ConnectDExtensionFromRemoteInner(dataParcel, reply);
+}
 }
 }
 
@@ -158,5 +174,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::DistributedSchedule::ContinueMissionOfBundleNameInnerFuzzTest(data, size);
     OHOS::DistributedSchedule::GetMissionInfosInnerFuzzTest(data, size);
     OHOS::DistributedSchedule::GetDSchedEventInfoInnerFuzzTest(data, size);
+    OHOS::DistributedSchedule::ConnectDExtensionFromRemoteInnerFuzzTest(data, size);
     return 0;
 }
