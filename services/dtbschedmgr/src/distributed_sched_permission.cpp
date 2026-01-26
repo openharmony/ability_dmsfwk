@@ -673,6 +673,8 @@ int32_t DistributedSchedPermission::CheckPermissionAll(uint64_t accessToken, con
 
 void DistributedSchedPermission::MarkUriPermission(OHOS::AAFwk::Want& want, uint32_t accessToken)
 {
+    std::vector<std::string> uriVecPermission;
+    want.SetParam(PARAMS_URI, uriVecPermission);
     if ((want.GetFlags() & (Want::FLAG_AUTH_READ_URI_PERMISSION | Want::FLAG_AUTH_WRITE_URI_PERMISSION)) == 0) {
         return;
     }
@@ -684,7 +686,6 @@ void DistributedSchedPermission::MarkUriPermission(OHOS::AAFwk::Want& want, uint
     std::vector<std::string> uriVec = want.GetStringArrayParam(PARAMS_STREAM);
     std::string uriStr = want.GetUri().ToString();
     uriVec.emplace_back(uriStr);
-    std::vector<std::string> uriVecPermission;
     HILOGI("GrantUriPermission uriVec size: %{public}zu", uriVec.size());
     for (std::string str : uriVec) {
         Uri uri(str);
