@@ -1024,6 +1024,7 @@ int32_t DistributedSchedStub::ConnectRemoteAbilityInner(MessageParcel& data, Mes
     PARCEL_READ_HELPER(data, Uint32, accessToken);
     HILOGD("get callerUid = %{public}d, callerPid = %{public}d, AccessTokenID = %{private}s", callerUid, callerPid,
         GetAnonymStr(std::to_string(accessToken)).c_str());
+    DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
     int32_t result = ConnectRemoteAbility(*want, connect, callerUid, callerPid, accessToken);
     ReportEvent(*want, BehaviorEvent::CONNECT_REMOTE_ABILITY, result, callerUid);
     HILOGI("result = %{public}d", result);
@@ -1601,6 +1602,7 @@ int32_t DistributedSchedStub::StartRemoteAbilityByCallInner(MessageParcel& data,
     PARCEL_READ_HELPER(data, Int32, callerPid);
     uint32_t accessToken = 0;
     PARCEL_READ_HELPER(data, Uint32, accessToken);
+    DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
     int32_t result = StartRemoteAbilityByCall(*want, connect, callerUid, callerPid, accessToken);
     ReportEvent(*want, BehaviorEvent::START_REMOTE_ABILITY_BYCALL, result, callerUid);
     HILOGI("result = %{public}d", result);
