@@ -2951,6 +2951,7 @@ int32_t DistributedSchedService::ConnectAbilityFromRemote(const OHOS::AAFwk::Wan
     HILOGI("[PerformanceTest] ConnectAbilityFromRemote end");
     if (errCode == ERR_OK) {
         std::lock_guard<std::mutex> autoLock(connectLock_);
+        itConnect = connectAbilityMap_.find(connect);
         if (itConnect == connectAbilityMap_.end()) {
             ConnectInfo connectInfo {callerInfo, callbackWrapper, want.GetElement()};
             ReportDistributedComponentChange(connectInfo, DISTRIBUTED_COMPONENT_ADD,
