@@ -63,6 +63,7 @@ ohos_shared_library("continuemanager_napi") {
     "ability_runtime:ability_context_native",
     "ability_runtime:abilitykit_native",
     "ability_runtime:napi_base_context",
+    "ability_runtime:napi_common",
     "ability_runtime:wantagent_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
