@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -218,10 +218,12 @@ ohos::distributedsched::abilityConnectionManager::ConnectResult ConnectSync(int3
     std::mutex lock;
     std::condition_variable condition;
     bool callbackExecuted = false;
+    ConnectErrorCode errCode = ConnectErrorCode::CONNECTED_SESSION_EXISTS;
     abilityConnectionManagerTaihe::ConnectResult taiheResult;
     AbilityConnectionManager::ConnectCallback connectCallback
-        = [&taiheResult, &lock, &condition, &callbackExecuted](ConnectResult result) mutable {
+        = [&errCode, &taiheResult, &lock, &condition, &callbackExecuted](ConnectResult result) mutable {
         HILOGI("called.");
+        errCode = result.errorCode;
         taiheResult = ConnectResultAdapter::ConvertToTaihe(result);
         std::unique_lock<std::mutex> locker(lock);
         callbackExecuted = true;
@@ -232,6 +234,10 @@ ohos::distributedsched::abilityConnectionManager::ConnectResult ConnectSync(int3
     condition.wait(locker, [&callbackExecuted] {
         return callbackExecuted;
     });
+    if (!taiheResult.isConnected && errCode == ConnectErrorCode::INVALID_SESSION_ID) {
+        HILOGE("Session id is invalid!");
+        ThrowBusinessError(ERR_INVALID_PARAMETERS);
+    }
     return taiheResult;
 }
 
