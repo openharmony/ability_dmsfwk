@@ -108,6 +108,7 @@ int32_t DataSenderReceiver::SendStreamData(const std::shared_ptr<AVTransStreamDa
         .buf = jsonString,
         .bufLen = strlen(jsonString)
     };
+    HILOGI("index: %{public}u", sendData->GetStreamDataExt().index_);
     const StreamFrameInfo info = {
         .frameType = 0,
         .timeStamp = GetNowTimeStampUs(),

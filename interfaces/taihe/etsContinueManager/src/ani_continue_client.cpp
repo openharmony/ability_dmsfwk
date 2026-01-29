@@ -41,6 +41,10 @@ sptr<IRemoteObject> AniContinuationStateClient::GetDmsProxy()
 int32_t AniContinuationStateClient::RegisterContinueStateCallback(const sptr<AniContinuationStateManagerStub> &stub)
 {
     HILOGI("call");
+    if (stub == nullptr) {
+        HILOGE("stub is nullptr.");
+        return SEND_REQUEST_DEF_FAIL;
+    }
     AniContinuationStateManagerStub::StateCallbackData callbackData = stub->callbackData_;
     sptr <IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
@@ -90,6 +94,10 @@ int32_t AniContinuationStateClient::RegisterContinueStateCallback(const sptr<Ani
 int32_t AniContinuationStateClient::UnRegisterContinueStateCallback(const sptr<AniContinuationStateManagerStub> &stub)
 {
     HILOGI("call");
+    if (stub == nullptr) {
+        HILOGE("stub is nullptr.");
+        return SEND_REQUEST_DEF_FAIL;
+    }
     AniContinuationStateManagerStub::StateCallbackData callbackData = stub->callbackData_;
     sptr <IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
