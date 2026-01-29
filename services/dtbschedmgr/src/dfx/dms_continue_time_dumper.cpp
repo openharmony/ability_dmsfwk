@@ -144,26 +144,31 @@ bool DmsContinueTime::GetPull()
 
 void DmsContinueTime::SetSrcBundleName(const std::string bundleName)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     srcInfo_.bundleName = bundleName;
 }
 
 void DmsContinueTime::SetSrcAbilityName(const std::string abilityName)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     srcInfo_.abilityName = abilityName;
 }
 
 void DmsContinueTime::SetDstBundleName(const std::string bundleName)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     dstInfo_.bundleName = bundleName;
 }
 
 void DmsContinueTime::SetDstAbilityName(const std::string abilityName)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     dstInfo_.abilityName = abilityName;
 }
 
 void DmsContinueTime::SetNetWorkId(const std::string srcNetWorkId, const std::string dstNetWorkId)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     srcInfo_.netWorkId = srcNetWorkId;
     dstInfo_.netWorkId = dstNetWorkId;
 }
@@ -392,14 +397,16 @@ void DmsContinueTime::DealDurationPush()
 
 void DmsContinueTime::AppendInfo()
 {
+    std::string localInfo;
+
     if (isPull_) {
         SetDeviceNamePull();
         DealDurationPull();
-        appendInfo_.append("PULL\n");
+        localInfo.append("PULL\n");
     } else {
         SetDeviceNamePush();
         DealDurationPush();
-        appendInfo_.append("PUSH\n");
+        localInfo.append("PUSH\n");
     }
 
     std::stringstream str;
@@ -417,28 +424,31 @@ void DmsContinueTime::AppendInfo()
         << "Bundle Name : " << std::setw(DMSDURATION_SPACE) << std::left
         << dstInfo_.bundleName
         << "Ability Name : " << dstInfo_.abilityName << "\n";
-    appendInfo_.append(str.str());
-    appendInfo_.append("------------------------------------------------------------------------------------\n");
+
+    localInfo.append(str.str());
+    localInfo.append("------------------------------------------------------------------------------------\n");
 
     {
-        std::lock_guard<std::mutex> vecLock(infoMutex_);
+        std::lock_guard<std::mutex> lock(infoMutex_);
+
         for (auto duration : durationInfo_) {
-            appendInfo_.append(duration.GetDurationName().c_str());
-            appendInfo_.append(duration.GetStrTime().c_str());
-            appendInfo_.append("\n");
+            localInfo.append(duration.GetDurationName());
+            localInfo.append(duration.GetStrTime());
+            localInfo.append("\n");
         }
 
         if (timeInfoList_.size() >= DMSDURATION_MAXSIZE) {
             timeInfoList_.pop_front();
         }
-        timeInfoList_.push_back(appendInfo_);
-        appendInfo_.clear();
+
+        timeInfoList_.push_back(std::move(localInfo));
         durationInfo_.clear();
     }
 }
 
 void DmsContinueTime::ShowInfo(std::string& result)
 {
+    std::lock_guard<std::mutex> lock(infoMutex_);
     int32_t nIdx = 1;
     for (const auto& info : timeInfoList_) {
         result.append("[" + std::to_string(nIdx) + "]\n");
