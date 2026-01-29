@@ -285,10 +285,15 @@ int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
         HILOGE("The current user is not foreground. callingUid: %{public}d .", info.srcInfo_.uid_);
         return DMS_NOT_FOREGROUND_USER;
     }
-    if (!IsStartForeground(info) &&
-        !Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetCallingFullTokenID())) {
-        HILOGE("Non-system applications are prohibited from launching peer ability to the background.");
-        return DMS_START_CONTROL_PERMISSION_DENIED;
+    if (!Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(IPCSkeleton::GetCallingFullTokenID())) {
+        if (!IsStartForeground(info)) {
+            HILOGE("Non-system applications are prohibited from launching peer ability to the background.");
+            return DMS_START_CONTROL_PERMISSION_DENIED;
+        }
+        if ((info.srcOpt_.needSendStream_ || info.srcOpt_.needRecvStream_)) {
+            HILOGE("Non-system applications are prohibited from streaming.");
+            return DMS_START_CONTROL_PERMISSION_DENIED;
+        }
     }
     if (info.srcInfo_.bundleName_.empty() || info.sinkInfo_.bundleName_.empty() ||
         info.srcInfo_.moduleName_.empty() || info.sinkInfo_.moduleName_.empty() ||
