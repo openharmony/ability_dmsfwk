@@ -127,7 +127,7 @@ int32_t DSchedTransportSoftbusAdapter::CreateServerSocket()
     localSessionName_ = SOCKET_DMS_SESSION_NAME;
     SocketInfo info = {
         .name = const_cast<char*>(localSessionName_.c_str()),
-        .pkgName = const_cast<char*>(SOCKET_DMS_PKG_NAME.c_str()),
+        .pkgName = const_cast<char*>(SOCKET_DMS_PKG_NAME),
         .dataType = DATA_TYPE_BYTES
     };
     int32_t socket = Socket(info);
@@ -338,10 +338,10 @@ int32_t DSchedTransportSoftbusAdapter::CreateClientSocket(const std::string &pee
 {
     HILOGI("start");
     SocketInfo info = {
-        .name = const_cast<char*>(SOCKET_DMS_SESSION_NAME.c_str()),
-        .peerName = const_cast<char*>(SOCKET_DMS_SESSION_NAME.c_str()),
+        .name = const_cast<char*>(SOCKET_DMS_SESSION_NAME),
+        .peerName = const_cast<char*>(SOCKET_DMS_SESSION_NAME),
         .peerNetworkId = const_cast<char*>(peerDeviceId.c_str()),
-        .pkgName = const_cast<char*>(SOCKET_DMS_PKG_NAME.c_str()),
+        .pkgName = const_cast<char*>(SOCKET_DMS_PKG_NAME),
         .dataType = DATA_TYPE_BYTES
     };
     int32_t sessionId = Socket(info);
