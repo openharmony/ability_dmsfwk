@@ -28,25 +28,25 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
-const std::string CONTINUATION_BEHAVIOR = "CONTINUATION_BEHAVIOR";
-const std::string ERROR_CODE_UE = "ERROR_CODE_UE";
-const std::string PNAMEID = "PNAMEID";
-const std::string PVERSIONID = "PVERSIONID";
-const std::string BUNDLE_NAME = "BUNDLE_NAME";
-const std::string ABILITY_NAME = "ABILITY_NAME";
-const std::string SOURCE_DEVICE_TYPE = "SOURCE_DEVICE_TYPE";
+constexpr const char* CONTINUATION_BEHAVIOR = "CONTINUATION_BEHAVIOR";
+constexpr const char* ERROR_CODE_UE = "ERROR_CODE_UE";
+constexpr const char* PNAMEID = "PNAMEID";
+constexpr const char* PVERSIONID = "PVERSIONID";
+constexpr const char* BUNDLE_NAME = "BUNDLE_NAME";
+constexpr const char* ABILITY_NAME = "ABILITY_NAME";
+constexpr const char* SOURCE_DEVICE_TYPE = "SOURCE_DEVICE_TYPE";
 
-const std::string CONTINUATION_STATE = "CONTINUATION_STATE";
-const std::string FAILED_EXTRAINFO = "FAILED_EXTRAINFO";
-const std::string CONTINUATION_DURATION = "CONTINUATION_DURATION";
+constexpr const char* CONTINUATION_STATE = "CONTINUATION_STATE";
+constexpr const char* FAILED_EXTRAINFO = "FAILED_EXTRAINFO";
+constexpr const char* CONTINUATION_DURATION = "CONTINUATION_DURATION";
 
-const std::string SWITCH_STATE = "SWITCH_STATE";
+constexpr const char* SWITCH_STATE = "SWITCH_STATE";
 
-const std::string SHOW_CONTINUATION_ICON = "SHOW_CONTINUATION_ICON";
-const std::string CLICK_CONTINUATION_ICON = "CLICK_CONTINUATION_ICON";
-const std::string COMPLETE_OF_CONTINUATION = "COMPLETE_OF_CONTINUATION";
-const std::string ORIGINAL_SWITCH_STATE = "ORIGINAL_SWITCH_STATE";
-const std::string CHANGED_SWITCH_STATE = "CHANGED_SWITCH_STATE";
+constexpr const char* SHOW_CONTINUATION_ICON = "SHOW_CONTINUATION_ICON";
+constexpr const char* CLICK_CONTINUATION_ICON = "CLICK_CONTINUATION_ICON";
+constexpr const char* COMPLETE_OF_CONTINUATION = "COMPLETE_OF_CONTINUATION";
+constexpr const char* ORIGINAL_SWITCH_STATE = "ORIGINAL_SWITCH_STATE";
+constexpr const char* CHANGED_SWITCH_STATE = "CHANGED_SWITCH_STATE";
 
 constexpr char CONTINUATION_DOMAIN[] = "CONTINUATION_UE";
 
