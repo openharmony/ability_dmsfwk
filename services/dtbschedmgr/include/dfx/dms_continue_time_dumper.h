@@ -108,6 +108,7 @@ private:
     DmsDumperInfo dstInfo_;
     DmsDuration saveDataDuration_;
     std::mutex infoMutex_;
+    std::mutex mutex_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
