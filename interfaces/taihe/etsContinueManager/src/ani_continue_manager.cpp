@@ -20,6 +20,8 @@
 #include "ani_continue_client.h"
 #include "ani_base_context.h"
 #include "ohos.app.ability.continueManager.ContinueResultInfo.ani.1.hpp"
+#include "taihe/runtime.hpp"
+#include "taihe/platform/ani.hpp"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -109,7 +111,8 @@ int32_t AniContinueManager::OffContinueStateCallback(uintptr_t context, ::taihe:
     if (stub->callbackData_.callbackRef != nullptr) {
         std::vector<ani_ref> args;
 
-        ani_env *env = taihe::get_env();
+        taihe::env_guard guard;
+        ani_env *env = guard.get_env();
         if (env == nullptr) {
             HILOGE("env is nullptr!!!");
             return ERR_DMS_WORK_ABNORMALLY;
@@ -124,6 +127,9 @@ int32_t AniContinueManager::OffContinueStateCallback(uintptr_t context, ::taihe:
             .resultInfo = taihe::optional<taihe::string>(std::in_place_t{}, "")
         };
         ani_object param = taihe::into_ani<ohos::app::ability::continueManager::ContinueResultInfo>(env, info);
+        ani_ref undefNull = nullptr;
+        env->GetNull(&undefNull);
+        args.push_back(undefNull);
         args.push_back(reinterpret_cast<ani_ref>(param));
         ani_fn_object onFn = reinterpret_cast<ani_fn_object>(stub->callbackData_.callbackRef);
         ani_ref result;
