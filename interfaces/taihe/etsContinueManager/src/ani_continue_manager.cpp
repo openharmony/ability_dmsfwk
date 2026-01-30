@@ -112,7 +112,7 @@ int32_t AniContinueManager::OffContinueStateCallback(uintptr_t context, ::taihe:
         std::vector<ani_ref> args;
 
         taihe::env_guard guard;
-        ani_env *env = guard::get_env();
+        ani_env *env = guard.get_env();
         if (env == nullptr) {
             HILOGE("env is nullptr!!!");
             return ERR_DMS_WORK_ABNORMALLY;
