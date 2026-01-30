@@ -127,10 +127,10 @@ int32_t AniContinueManager::OffContinueStateCallback(uintptr_t context, ::taihe:
             .resultInfo = taihe::optional<taihe::string>(std::in_place_t{}, "")
         };
         ani_object param = taihe::into_ani<ohos::app::ability::continueManager::ContinueResultInfo>(env, info);
-        args.push_back(reinterpret_cast<ani_ref>(param));
         ani_ref undefNull = nullptr;
         env->GetNull(&undefNull);
         args.push_back(undefNull);
+        args.push_back(reinterpret_cast<ani_ref>(param));
         ani_fn_object onFn = reinterpret_cast<ani_fn_object>(stub->callbackData_.callbackRef);
         ani_ref result;
         if (env->FunctionalObject_Call(onFn, args.size(), args.data(), &result) != ANI_OK) {
