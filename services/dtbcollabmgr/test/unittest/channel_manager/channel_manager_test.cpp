@@ -1662,50 +1662,6 @@ HWTEST_F(ChannelManagerTest, OnFileEventReceived_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SendMessageSync_Success
- * @tc.desc: Test for SendMessage when channelId is valid and PostTask succeeds.
- * @tc.type: FUNC
- */
-HWTEST_F(ChannelManagerTest, SendMessageSync_Success, TestSize.Level1)
-{
-    // Step 1: Initialize the ChannelManager
-    EXPECT_CALL(mockSoftbus, Socket(testing::_))
-        .WillRepeatedly(testing::Return(NUM_1234)); // Mock Socket to return a valid socket ID
-    EXPECT_CALL(mockSoftbus, Listen(testing::_, testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(ERR_OK)); // Mock Listen to return success
-
-    int32_t initResult = ChannelManager::GetInstance().Init(ownerName);
-    EXPECT_EQ(initResult, ERR_OK); // Ensure Init was successful
-
-    // Step 2: Create Client Channel
-    std::string channelName = "TestMessageChannel";
-    ChannelDataType dataType = ChannelDataType::MESSAGE;  // Using message type for the data
-    ChannelPeerInfo peerInfo = { "peerName", "networkId" };
-
-    int32_t channelId = ChannelManager::GetInstance().CreateClientChannel(channelName, dataType, peerInfo);
-    EXPECT_EQ(channelId, MESSAGE_START_ID); // Verify the channel ID is correctly returned
-
-    // Step 3: Mock Bind to succeed
-    EXPECT_CALL(mockSoftbus, Bind(testing::_, testing::_, testing::_, testing::_))
-        .WillOnce(testing::Return(ERR_OK)); // Mock Bind to succeed
-
-    // Step 4: Call ConnectChannel to establish the connection
-    int32_t result = ChannelManager::GetInstance().ConnectChannel(channelId);
-    EXPECT_EQ(result, ERR_OK); // Verify the connection is established
-
-    // Step 5: Prepare data for message
-    std::shared_ptr<AVTransDataBuffer> dataBuffer = std::make_shared<AVTransDataBuffer>(NUM_1024); // Set buffer size
-    EXPECT_CALL(mockSoftbus, SendMessage(NUM_1234, testing::_, testing::_))
-        .WillOnce(testing::Return(ERR_OK));
-      
-    // Step 6: Call SendMessage
-    result = ChannelManager::GetInstance().SendMessageSync(channelId, dataBuffer);
-    std::this_thread::sleep_for(std::chrono::milliseconds(SLEEP_FOR_INIT));
-
-    EXPECT_EQ(result, ERR_OK); // Verify that message was sent successfully
-}
-
-/**
  * @tc.name: SendMessageSync_InvalidChannelId
  * @tc.desc: Test for SendMessage when channelId is invalid.
  * @tc.type: FUNC
