@@ -1238,12 +1238,12 @@ int32_t ChannelManager::GetValidSocket(const int32_t channelId)
 int32_t ChannelManager::SendStream(const int32_t channelId,
     const std::shared_ptr<AVTransStreamData>& data)
 {
+    HILOGI("called");
     if (!isValidChannelId(channelId) || data == nullptr) {
         HILOGE("invalid channel id");
         DoErrorCallback(channelId, INVALID_CHANNEL_ID);
         return INVALID_CHANNEL_ID;
     }
-    HILOGI("start to send stream");
     auto func = [=]() {
         DoSendStream(channelId, data);
     };
@@ -1253,13 +1253,12 @@ int32_t ChannelManager::SendStream(const int32_t channelId,
         HILOGE("failed to add send stream task, ret=%{public}d", ret);
         return POST_TASK_FAILED;
     }
-    HILOGI("send stream task added to handler");
     return ERR_OK;
 }
 
 int32_t ChannelManager::DoSendStream(const int32_t channelId, const std::shared_ptr<AVTransStreamData>& data)
 {
-    HILOGI("start to send stream");
+    HILOGI("called");
     return DoSendData(channelId, &DataSenderReceiver::SendStreamData, data);
 }
 

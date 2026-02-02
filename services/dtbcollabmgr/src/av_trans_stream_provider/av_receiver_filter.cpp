@@ -291,8 +291,9 @@ std::shared_ptr<AVTransStreamData> AVReceiverFilter::GetStreamData()
     }
     auto topData = dataQueue_.top();
     uint32_t curIndex = topData->GetStreamDataExt().index_;
+    HILOGI("curIndex: %{public}u, lastIndex: %{public}" PRId64"", curIndex, lastIndex_);
     while (lastIndex_ >= curIndex) {
-        HILOGE("invalid index=%{public}u, cur=%{public}" PRId64"", curIndex, lastIndex_);
+        HILOGE("invalid index");
         if (dataQueue_.empty()) {
             HILOGE("invalid data pop till queue empty");
             return nullptr;
@@ -436,7 +437,7 @@ int32_t AVReceiverFilter::RequestAndPushData(const std::shared_ptr<AVTransStream
         return static_cast<int32_t>(ret);
     }
 
-    HILOGD("write data to buffer, id=%{public}" PRIu64", size=%{public}d",
+    HILOGI("buffer id:%{public}" PRIu64", size: %{public}d",
         outputBuffer->GetUniqueId(), outputBuffer->GetConfig().size);
     auto& memory = outputBuffer->memory_;
     memory->SetSize(avBufferConfig.size);
@@ -469,10 +470,12 @@ void AVReceiverFilter::GetParameter(std::shared_ptr<Media::Meta>& parameter)
 
 void AVReceiverFilter::OnStream(const std::shared_ptr<AVTransStreamData>& stream)
 {
-    HILOGI("start to parse stream by Stream");
-    if (isRunning_) {
-        AddStreamData(stream);
+    HILOGI("called");
+    if (!isRunning_) {
+        HILOGE("is not running");
+        return;
     }
+    AddStreamData(stream);
 }
 
 void AVReceiverFilter::OnBytes(const std::shared_ptr<AVTransDataBuffer>& buffer)
