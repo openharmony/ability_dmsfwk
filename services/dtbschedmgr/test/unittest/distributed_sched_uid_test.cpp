@@ -60,8 +60,8 @@ void DistributedSchedUidTest::TearDown()
 void DistributedSchedUidTest::SetUp()
 {
     DTEST_LOG << "DistributedSchedUidTest::SetUp" << std::endl;
-    distributedSchedStub_ = new DistributedSchedService();
     DistributedSchedUtil::MockProcessAndPermission(FOUNDATION_PROCESS_NAME, PERMS, 1);
+    distributedSchedStub_ = new DistributedSchedService();
 }
 
 /**
