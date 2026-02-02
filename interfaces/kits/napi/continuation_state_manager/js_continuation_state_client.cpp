@@ -42,6 +42,10 @@ sptr<IRemoteObject> ContinuationStateClient::GetDmsProxy()
 int32_t ContinuationStateClient::RegisterContinueStateCallback(const sptr<JsContinuationStateManagerStub> stub)
 {
     HILOGI("call");
+    if (stub == nullptr) {
+        HILOGE("stub is nullptr.");
+        return SEND_REQUEST_DEF_FAIL;
+    }
     JsContinuationStateManagerStub::StateCallbackData callbackData = stub->callbackData_;
     sptr <IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
@@ -91,6 +95,10 @@ int32_t ContinuationStateClient::RegisterContinueStateCallback(const sptr<JsCont
 int32_t ContinuationStateClient::UnRegisterContinueStateCallback(const sptr<JsContinuationStateManagerStub> stub)
 {
     HILOGI("call");
+    if (stub == nullptr) {
+        HILOGE("stub is nullptr.");
+        return SEND_REQUEST_DEF_FAIL;
+    }
     JsContinuationStateManagerStub::StateCallbackData callbackData = stub->callbackData_;
     sptr <IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
