@@ -896,5 +896,169 @@ HWTEST_F(DistributedBmStorageTest, GetLastBundleNameIdTest_001, TestSize.Level1)
     }
     DTEST_LOG << "DistributedBmStorageTest GetLastBundleNameIdTest_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: SaveStorageDistributeInfoTest_001
+ * @tc.desc: test SaveStorageDistributeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, SaveStorageDistributeInfoTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest SaveStorageDistributeInfoTest_001 start" << std::endl;
+    // Arrange
+    std::string bundleName = "com.example.testbundle";
+    bool isPackageChange = false;
+
+    // Act
+    bool ret = dmsBmStorage_->SaveStorageDistributeInfo(bundleName, isPackageChange);
+
+    // Assert
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "DistributedBmStorageTest SaveStorageDistributeInfoTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: UpdatePublicRecordsTest_002
+ * @tc.desc: test UpdatePublicRecords
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, UpdatePublicRecordsTest_002, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest UpdatePublicRecordsTest_002 start" << std::endl;
+    // Arrange
+    std::string localUdid = "test_udid";
+
+    dmsBmStorage_->bundleNameIdTables_.emplace(10, "com.example.bundle");
+
+    // Act
+    bool ret = dmsBmStorage_->UpdatePublicRecords(localUdid);
+
+    // Assert
+    EXPECT_TRUE(ret);
+    DTEST_LOG << "DistributedBmStorageTest UpdatePublicRecordsTest_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: UpdatePublicRecordsTest_003
+ * @tc.desc: test UpdatePublicRecords
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, UpdatePublicRecordsTest_003, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest UpdatePublicRecordsTest_003 start" << std::endl;
+    // Arrange
+    std::string localUdid = "test_udid";
+
+    // Act
+    bool ret = dmsBmStorage_->UpdatePublicRecords(localUdid);
+
+    // Assert
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "DistributedBmStorageTest UpdatePublicRecordsTest_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: InnerSaveStorageDistributeInfoTest_003
+ * @tc.desc: test InnerSaveStorageDistributeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, InnerSaveStorageDistributeInfoTest_003, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest InnerSaveStorageDistributeInfoTest_003 start" << std::endl;
+    // Arrange
+    DmsBundleInfo bundleInfo;
+    bundleInfo.bundleName = "";
+    std::string localUdid = "test_udid";
+
+    // Act
+    bool ret = dmsBmStorage_->InnerSaveStorageDistributeInfo(bundleInfo, localUdid);
+
+    // Assert
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "DistributedBmStorageTest InnerSaveStorageDistributeInfoTest_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: InnerSaveStorageDistributeInfoTest_004
+ * @tc.desc: test InnerSaveStorageDistributeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, InnerSaveStorageDistributeInfoTest_004, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest InnerSaveStorageDistributeInfoTest_004 start" << std::endl;
+    // Arrange
+    DmsBundleInfo bundleInfo;
+    bundleInfo.bundleName = "com.example.bundle";
+    std::string localUdid = "test_udid";
+
+    // Act
+    bool ret = dmsBmStorage_->InnerSaveStorageDistributeInfo(bundleInfo, localUdid);
+
+    // Assert
+    EXPECT_TRUE(ret);
+    DTEST_LOG << "DistributedBmStorageTest InnerSaveStorageDistributeInfoTest_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: DealGetBundleNameTest_003
+ * @tc.desc: test DealGetBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, DealGetBundleNameTest_003, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest DealGetBundleNameTest_003 start" << std::endl;
+    // Arrange
+    std::string networkId = "test_network";
+    uint16_t bundleNameId = 999;
+    std::string bundleName;
+
+    // Act
+    bool ret = dmsBmStorage_->DealGetBundleName(networkId, bundleNameId, bundleName);
+
+    // Assert
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "DistributedBmStorageTest DealGetBundleNameTest_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: DealGetBundleNameTest_004
+ * @tc.desc: test DealGetBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, DealGetBundleNameTest_004, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest DealGetBundleNameTest_004 start" << std::endl;
+    // Arrange
+    std::string networkId = "test_network";
+    uint16_t bundleNameId = 1;
+    std::string bundleName;
+
+    // Act
+    bool ret = dmsBmStorage_->DealGetBundleName(networkId, bundleNameId, bundleName);
+
+    // Assert
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "DistributedBmStorageTest DealGetBundleNameTest_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: DeleteStorageDistributeInfoTest_004
+ * @tc.desc: test DeleteStorageDistributeInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, DeleteStorageDistributeInfoTest_004, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest DeleteStorageDistributeInfoTest_004 start" << std::endl;
+    // Arrange
+    std::string bundleName = "com.example.existbundle";
+
+    // Act
+    bool ret = dmsBmStorage_->DeleteStorageDistributeInfo(bundleName);
+
+    // Assert
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "DistributedBmStorageTest DeleteStorageDistributeInfoTest_004 end" << std::endl;
+}
+
 } // namespace DistributedSchedule
 } // namespace OHOS
