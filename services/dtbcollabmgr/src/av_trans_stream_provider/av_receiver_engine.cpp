@@ -257,7 +257,7 @@ cJSON* AVReceiverEngine::GetVideoCodecAbility()
     }
 
     cJSON* result = cJSON_CreateObject();
-    cJSON_AddItemToObject(result, VIDEO_CODEC_LIST_KEY.c_str(), abilityList);
+    cJSON_AddItemToObject(result, VIDEO_CODEC_LIST_KEY, abilityList);
     return result;
 }
 
