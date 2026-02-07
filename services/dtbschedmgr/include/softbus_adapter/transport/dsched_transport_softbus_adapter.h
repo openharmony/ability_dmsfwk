@@ -35,8 +35,8 @@ constexpr int32_t DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW = 40 * 1024 * 1024;
 constexpr int32_t DSCHED_QOS_TYPE_MAX_LATENCY = 6000;
 constexpr int32_t DSCHED_QOS_TYPE_MIN_LATENCY = 1000;
 
-const std::string SOCKET_DMS_SESSION_NAME = "ohos.distributedschedule.dms.connect";
-const std::string SOCKET_DMS_PKG_NAME = "dms";
+constexpr const char* SOCKET_DMS_SESSION_NAME = "ohos.distributedschedule.dms.connect";
+constexpr const char* SOCKET_DMS_PKG_NAME = "dms";
 }
 
 typedef enum {

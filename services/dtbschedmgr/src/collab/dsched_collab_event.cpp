@@ -415,9 +415,9 @@ int32_t SinkStartCmd::MarshalAccountInfo(std::string &jsonStr)
     }
     cJSON_AddItemToObject(accountInfoJson, "GroupIdList", groupIdList);
 
-    cJSON_AddStringToObject(accountInfoJson, Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID.c_str(),
+    cJSON_AddStringToObject(accountInfoJson, Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID,
         accountInfo_.activeAccountId.c_str());
-    cJSON_AddNumberToObject(accountInfoJson, Constants::EXTRO_INFO_JSON_KEY_USERID_ID.c_str(), accountInfo_.userId);
+    cJSON_AddNumberToObject(accountInfoJson, Constants::EXTRO_INFO_JSON_KEY_USERID_ID, accountInfo_.userId);
 
     char *data = cJSON_Print(accountInfoJson);
     if (data == nullptr) {
@@ -562,13 +562,13 @@ int32_t SinkStartCmd::UnmarshalAccountInfo(std::string &jsonStr)
     }
     accountInfo_.groupIdList = groupIdList;
 
-    cJSON *accountId = cJSON_GetObjectItemCaseSensitive(rootValue, Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID.c_str());
+    cJSON *accountId = cJSON_GetObjectItemCaseSensitive(rootValue, Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID);
     if (accountId == nullptr || !cJSON_IsString(accountId)) {
         HILOGE("accountId term in account info json is null or not string.");
     } else {
         accountInfo_.activeAccountId = accountId->valuestring;
     }
-    cJSON *userId = cJSON_GetObjectItemCaseSensitive(rootValue, Constants::EXTRO_INFO_JSON_KEY_USERID_ID.c_str());
+    cJSON *userId = cJSON_GetObjectItemCaseSensitive(rootValue, Constants::EXTRO_INFO_JSON_KEY_USERID_ID);
     if (userId == nullptr || !cJSON_IsNumber(userId)) {
         HILOGE("userId term in account info json is null or not number.");
     } else {

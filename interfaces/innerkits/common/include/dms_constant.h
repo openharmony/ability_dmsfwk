@@ -36,10 +36,10 @@ constexpr const char* DMS_SERVICE_TYPE = "appInfo";
 constexpr const char* PERMISSIONMGR_BUNDLE_NAME = "com.ohos.permissionmanager";
 constexpr const char* PERMISSIONMGR_ABILITY_NAME = "com.ohos.permissionmanager.GrantAbility";
 
-const std::string EXTRO_INFO_JSON_KEY_ACCOUNT_ID = "accountId";
-const std::string EXTRO_INFO_JSON_KEY_USERID_ID = "userId";
-const std::string EXTRO_INFO_JSON_KEY_CALLER_INFO_EX = "callerInfo_ExtraInfoJson";
-const std::string IS_CALLER_SYSAPP = "IsCallerSysApp";
+constexpr const char* EXTRO_INFO_JSON_KEY_ACCOUNT_ID = "accountId";
+constexpr const char* EXTRO_INFO_JSON_KEY_USERID_ID = "userId";
+constexpr const char* EXTRO_INFO_JSON_KEY_CALLER_INFO_EX = "callerInfo_ExtraInfoJson";
+constexpr const char* IS_CALLER_SYSAPP = "IsCallerSysApp";
 } // Constants
 } // DistributedSchedule
 } // OHOS

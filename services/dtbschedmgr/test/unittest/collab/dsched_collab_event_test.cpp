@@ -718,7 +718,7 @@ HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalAccountInfo_Test_002, TestSize.L
     EXPECT_EQ(ret, ERR_OK);
     cJSON_free(data);
 
-    cJSON_AddNumberToObject(rootValue, Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID.c_str(), 0);
+    cJSON_AddNumberToObject(rootValue, Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID, 0);
     data = cJSON_Print(rootValue);
     if (data == nullptr) {
         cJSON_Delete(rootValue);
@@ -744,7 +744,7 @@ HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalAccountInfo_Test_003, TestSize.L
     cJSON *rootValue = cJSON_CreateObject();
     ASSERT_NE(rootValue, nullptr);
     cJSON_AddNumberToObject(rootValue, "AccountType", 0);
-    cJSON_AddStringToObject(rootValue, Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID.c_str(),
+    cJSON_AddStringToObject(rootValue, Constants::EXTRO_INFO_JSON_KEY_ACCOUNT_ID,
         "test");
     char *data = cJSON_Print(rootValue);
     if (data == nullptr) {
@@ -757,7 +757,7 @@ HWTEST_F(CollabEventTest, SinkStartCmd_UnmarshalAccountInfo_Test_003, TestSize.L
     EXPECT_EQ(ret, ERR_OK);
     cJSON_free(data);
 
-    cJSON_AddStringToObject(rootValue, Constants::EXTRO_INFO_JSON_KEY_USERID_ID.c_str(),
+    cJSON_AddStringToObject(rootValue, Constants::EXTRO_INFO_JSON_KEY_USERID_ID,
         "test");
     data = cJSON_Print(rootValue);
     if (data == nullptr) {
