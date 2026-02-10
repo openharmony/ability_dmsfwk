@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1052,6 +1052,7 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, ConnectDevice_001, TestSize.Level3)
     DSchedTransportSoftbusAdapter::GetInstance().sessions_.clear();
     DSchedTransportSoftbusAdapter::GetInstance().sessions_[1] = nullptr;
     DSchedTransportSoftbusAdapter::GetInstance().sessions_[0] = ptr;
+    EXPECT_CALL(mockSoftbus, Socket(testing::_)).WillOnce(testing::Return(-1));
     int32_t ret = DSchedTransportSoftbusAdapter::GetInstance().ConnectDevice("peer", sessionId);
 
     ret = DSchedTransportSoftbusAdapter::GetInstance().ConnectDevice(peerDeviceId, sessionId);
@@ -1197,18 +1198,18 @@ HWTEST_F(DSchedTransportSoftbusAdapterTest, AddNewPeerSession_002, TestSize.Leve
     std::shared_ptr<DmsDeviceInfo> info = std::make_shared<DmsDeviceInfo>("", 0, "");
     info->osType_ = Constants::HO_OS_TYPE_EX;
     DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[peerDeviceId] = info;
-    EXPECT_CALL(mockSoftbus, Socket(testing::_)).WillOnce(testing::Return(1));
+    EXPECT_CALL(mockSoftbus, Socket(testing::_)).WillOnce(testing::Return(-1));
     int32_t ret = DSchedTransportSoftbusAdapter::GetInstance().AddNewPeerSession(peerDeviceId, sessionId,
         SERVICE_TYPE_CONTINUE);
-    EXPECT_EQ(ret, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, REMOTE_DEVICE_BIND_ABILITY_ERR);
 
     peerDeviceId = "peerDeviceId1";
     std::shared_ptr<DmsDeviceInfo> info1 = std::make_shared<DmsDeviceInfo>("", 0, "");
     DtbschedmgrDeviceInfoStorage::GetInstance().remoteDevices_[peerDeviceId] = info1;
-    EXPECT_CALL(mockSoftbus, Socket(testing::_)).WillOnce(testing::Return(1));
+    EXPECT_CALL(mockSoftbus, Socket(testing::_)).WillOnce(testing::Return(-1));
     ret = DSchedTransportSoftbusAdapter::GetInstance().AddNewPeerSession(peerDeviceId, sessionId,
         SERVICE_TYPE_CONTINUE);
-    EXPECT_NE(ret, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(ret, REMOTE_DEVICE_BIND_ABILITY_ERR);
     DTEST_LOG << "DSchedTransportSoftbusAdapterTest AddNewPeerSession_002 end" << std::endl;
 }
 

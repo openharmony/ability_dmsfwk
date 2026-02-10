@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -437,7 +437,7 @@ void AbilityConnectionSession::NotifyPeerSessionConnected()
 void AbilityConnectionSession::NotifyAppConnectResult(bool isConnected,
     const ConnectErrorCode errorCode, const std::string& reason)
 {
-    HILOGE("notify result from self %{public}d", sessionId_);
+    HILOGI("notify result from self %{public}d", sessionId_);
     ConnectResult connectResult(isConnected, errorCode, reason);
     if (isConnected) {
         connectResult.sessionId = sessionId_;
@@ -1489,7 +1489,9 @@ void AbilityConnectionSession::ExeuteMessageEventCallback(const std::string msg)
         HILOGI("handler sessionListener");
         listener->OnMessage(sessionId_, msg);
         auto func = [listener, msg, this]() {
+            HILOGI("onMessage begin");
             listener->OnMessage(sessionId_, msg);
+            HILOGI("onMessage end");
         };
         eventHandler_->PostTask(func, AppExecFwk::EventQueue::Priority::LOW);
     } else {
@@ -1497,7 +1499,9 @@ void AbilityConnectionSession::ExeuteMessageEventCallback(const std::string msg)
         callbackInfo.sessionId = sessionId_;
         callbackInfo.msg = msg;
         auto func = [callbackInfo, this]() mutable {
+            HILOGI("exeuteEventCallback begin");
             ExeuteEventCallback(EVENT_RECEIVE_MESSAGE, callbackInfo);
+            HILOGI("exeuteEventCallback end");
         };
         eventHandler_->PostTask(func, AppExecFwk::EventQueue::Priority::LOW);
     }
@@ -1669,7 +1673,9 @@ void AbilityConnectionSession::SetTimeOut(int32_t time)
 {
     HILOGI("called.");
     auto func = [this]() {
+        HILOGI("release begin");
         Release();
+        HILOGI("release end");
     };
     if (eventHandler_ == nullptr) {
         HILOGE("eventHandler_ is nullptr");
@@ -1712,7 +1718,7 @@ void AbilityConnectionSession::ExeuteConnectCallback(const ConnectResult& result
 {
     HILOGI("called.");
     auto task = [this, result]() {
-        HILOGI("execute connect callback task.");
+        HILOGI("exeuteConnectCallback begin");
         if (connectCallback_ == nullptr) {
             HILOGE("connect callback is nullptr.");
             return;
@@ -1724,6 +1730,7 @@ void AbilityConnectionSession::ExeuteConnectCallback(const ConnectResult& result
         if (!result.isConnected) {
             Release();
         }
+        HILOGI("exeuteConnectCallback end");
     };
     std::unique_lock<std::mutex> lock(eventMutex_);
     if (eventHandler_ == nullptr) {
