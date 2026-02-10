@@ -70,7 +70,7 @@ public:
         const int32_t userId, AppExecFwk::ApplicationInfo &appInfo);
     static ErrCode QueryOsAccount(int32_t& activeAccountId);
     static bool GetSrcAppIdentifierVec(std::string appServiceCapabilities,
-        std::vector<std::string>& srcAppIdentifierVec);
+        std::vector<std::string>& srcAppIdentifierVec, const std::string& bundleName);
 private:
     static std::vector<std::string> SplitString(const std::string& s, char delimiter);
 public:

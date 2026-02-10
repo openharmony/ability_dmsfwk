@@ -231,7 +231,8 @@ bool DMSContinueRecomMgr::GetAvailableRecommendList(const std::string& bundleNam
         return false;
     }
     bool judgeAppIdExist =
-        BundleManagerInternal::GetSrcAppIdentifierVec(appProvisionInfo.appServiceCapabilities, srcAppIdentifierVec);
+        BundleManagerInternal::GetSrcAppIdentifierVec(appProvisionInfo.appServiceCapabilities,
+            srcAppIdentifierVec, bundleName);
     if (!judgeAppIdExist) {
         HILOGE("Get srcAppIdentifierVec failed.");
         return GetAvailableRecommendListInternal(bundleName, availableList, appProvisionInfo);

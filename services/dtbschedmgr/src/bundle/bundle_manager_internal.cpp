@@ -505,7 +505,7 @@ ErrCode BundleManagerInternal::QueryOsAccount(int32_t& activeAccountId)
 }
 
 bool BundleManagerInternal::GetSrcAppIdentifierVec(std::string appServiceCapabilities,
-    std::vector<std::string>& srcAppIdentifierVec)
+    std::vector<std::string>& srcAppIdentifierVec, const std::string& bundleName)
 {
     cJSON* json = cJSON_Parse(appServiceCapabilities.c_str());
     if (json == nullptr) {
@@ -540,6 +540,10 @@ bool BundleManagerInternal::GetSrcAppIdentifierVec(std::string appServiceCapabil
         }
     } else {
         srcAppIdentifierVec.push_back(appidString);
+    }
+    for (std::string srcAppIdentifier : srcAppIdentifierVec) {
+        HILOGI("bundleName: %{public}s, srcAppIdentifier: %{public}s.",
+            bundleName.c_str(), GetAnonymStr(srcAppIdentifier).c_str());
     }
     cJSON_Delete(json);
     return true;
