@@ -518,11 +518,20 @@ std::shared_ptr<AbilityConnectionSession> AbilityConnectionManager::GetAbilityCo
     const int32_t streamId)
 {
     HILOGI("called. streamId is %{public}d", streamId);
+
     int32_t sessionId = -1;
     {
         std::shared_lock<std::shared_mutex> readLock(streamMutex_);
-        sessionId = streamMap_[streamId];
+
+        auto it = streamMap_.find(streamId);
+        if (it == streamMap_.end()) {
+            HILOGW("streamId %{public}d not found in streamMap", streamId);
+            return nullptr;
+        }
+
+        sessionId = it->second;
     }
+
     return GetAbilityConnectionSession(sessionId);
 }
 
