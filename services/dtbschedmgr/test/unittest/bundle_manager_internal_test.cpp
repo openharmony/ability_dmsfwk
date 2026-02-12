@@ -770,9 +770,10 @@ HWTEST_F(BundleManagerInternalTest, GetLocalAbilityInfo_001, TestSize.Level3)
 HWTEST_F(BundleManagerInternalTest, GetSrcAppIdentifierVec_001, TestSize.Level3)
 {
     DTEST_LOG << "BundleManagerInternalTest GetSrcAppIdentifierVec_001 begin" << std::endl;
+    std::string bundleName = "bundleName";
     std::string appServiceCapabilities = "";
     std::vector<std::string> srcAppIdentifierVec;
-    bool ret = BundleManagerInternal::GetSrcAppIdentifierVec(appServiceCapabilities, srcAppIdentifierVec);
+    bool ret = BundleManagerInternal::GetSrcAppIdentifierVec(appServiceCapabilities, srcAppIdentifierVec, bundleName);
     EXPECT_EQ(ret, false);
     DTEST_LOG << "BundleManagerInternalTest GetSrcAppIdentifierVec_001 end "<< std::endl;
 }
@@ -785,9 +786,10 @@ HWTEST_F(BundleManagerInternalTest, GetSrcAppIdentifierVec_001, TestSize.Level3)
 HWTEST_F(BundleManagerInternalTest, GetSrcAppIdentifierVec_002, TestSize.Level3)
 {
     DTEST_LOG << "BundleManagerInternalTest GetSrcAppIdentifierVec_002 begin" << std::endl;
+    std::string bundleName = "bundleName";
     std::string appServiceCapabilities = "{\"" + appListString_ + "\":{\"target_appids\":\"1\"}}";
     std::vector<std::string> srcAppIdentifierVec;
-    bool ret = BundleManagerInternal::GetSrcAppIdentifierVec(appServiceCapabilities, srcAppIdentifierVec);
+    bool ret = BundleManagerInternal::GetSrcAppIdentifierVec(appServiceCapabilities, srcAppIdentifierVec, bundleName);
     EXPECT_EQ(ret, true);
     DTEST_LOG << "BundleManagerInternalTest GetSrcAppIdentifierVec_002 end "<< std::endl;
 }
@@ -800,9 +802,10 @@ HWTEST_F(BundleManagerInternalTest, GetSrcAppIdentifierVec_002, TestSize.Level3)
 HWTEST_F(BundleManagerInternalTest, GetSrcAppIdentifierVec_003, TestSize.Level3)
 {
     DTEST_LOG << "BundleManagerInternalTest GetSrcAppIdentifierVec_003 begin" << std::endl;
+    std::string bundleName = "bundleName";
     std::string appServiceCapabilities = "{\"" + appListString_ + "\":{}}";
     std::vector<std::string> srcAppIdentifierVec;
-    bool ret = BundleManagerInternal::GetSrcAppIdentifierVec(appServiceCapabilities, srcAppIdentifierVec);
+    bool ret = BundleManagerInternal::GetSrcAppIdentifierVec(appServiceCapabilities, srcAppIdentifierVec, bundleName);
     EXPECT_EQ(ret, false);
     DTEST_LOG << "BundleManagerInternalTest GetSrcAppIdentifierVec_003 end "<< std::endl;
 }
@@ -815,9 +818,10 @@ HWTEST_F(BundleManagerInternalTest, GetSrcAppIdentifierVec_003, TestSize.Level3)
 HWTEST_F(BundleManagerInternalTest, GetSrcAppIdentifierVec_004, TestSize.Level3)
 {
     DTEST_LOG << "BundleManagerInternalTest GetSrcAppIdentifierVec_004 begin" << std::endl;
+    std::string bundleName = "bundleName";
     std::string appServiceCapabilities = "{\"" + appListString_ + "\":{\"target_appids\":\"\"}}";
     std::vector<std::string> srcAppIdentifierVec;
-    bool ret = BundleManagerInternal::GetSrcAppIdentifierVec(appServiceCapabilities, srcAppIdentifierVec);
+    bool ret = BundleManagerInternal::GetSrcAppIdentifierVec(appServiceCapabilities, srcAppIdentifierVec, bundleName);
     EXPECT_EQ(ret, false);
     DTEST_LOG << "BundleManagerInternalTest GetSrcAppIdentifierVec_004 end "<< std::endl;
 }
@@ -830,9 +834,10 @@ HWTEST_F(BundleManagerInternalTest, GetSrcAppIdentifierVec_004, TestSize.Level3)
 HWTEST_F(BundleManagerInternalTest, GetSrcAppIdentifierVec_005, TestSize.Level3)
 {
     DTEST_LOG << "BundleManagerInternalTest GetSrcAppIdentifierVec_005 begin" << std::endl;
+    std::string bundleName = "bundleName";
     std::string appServiceCapabilities = "{\"" + appListString_ + "\":{\"target_appids\":\"1,2,3\"}}";
     std::vector<std::string> srcAppIdentifierVec;
-    bool ret = BundleManagerInternal::GetSrcAppIdentifierVec(appServiceCapabilities, srcAppIdentifierVec);
+    bool ret = BundleManagerInternal::GetSrcAppIdentifierVec(appServiceCapabilities, srcAppIdentifierVec, bundleName);
     EXPECT_EQ(ret, true);
     DTEST_LOG << "BundleManagerInternalTest GetSrcAppIdentifierVec_005 end "<< std::endl;
 }

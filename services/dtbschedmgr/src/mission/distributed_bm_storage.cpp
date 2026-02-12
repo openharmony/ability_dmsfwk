@@ -121,7 +121,7 @@ bool DmsBmStorage::SaveStorageDistributeInfo(const std::string &bundleName, bool
             result = bundleMgr->GetAppProvisionInfo(bundleName, account.GetLocalId(), appProvisionInfo);
             if (result == ERR_OK && !appProvisionInfo.developerId.empty()) {
                 BundleManagerInternal::GetSrcAppIdentifierVec(appProvisionInfo.appServiceCapabilities,
-                    srcAppIdentifierVec);
+                    srcAppIdentifierVec, bundleName);
                 break;
             }
         }
@@ -887,19 +887,21 @@ void DmsBmStorage::UpdateDistributedData()
     std::string localUdid;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(localUdid);
     std::vector<DmsBundleInfo> dmsBundleInfos;
-    std::vector<std::string> srcAppIdentifierVec;
     for (const auto &bundleInfo : bundleInfos) {
+        std::vector<std::string> srcAppIdentifierVec;
         FindProvishionInfo(bundleMgr, appProvisionInfo, accounts, result, bundleInfo.name);
         bool judgeAppIdExist =
             BundleManagerInternal::GetSrcAppIdentifierVec(appProvisionInfo.appServiceCapabilities,
-            srcAppIdentifierVec);
+            srcAppIdentifierVec, bundleInfo.name);
         if (oldDistributedBundleInfos.find(bundleInfo.name) != oldDistributedBundleInfos.end()) {
             std::string keyOfKVStore = oldDistributedBundleInfos[bundleInfo.name].keyOfKVStore;
             int64_t updateTime = oldDistributedBundleInfos[bundleInfo.name].updateTime;
             std::string oldUdid = keyOfKVStore.substr(0, localUdid.length());
             if (updateTime != bundleInfo.updateTime || (!localUdid.empty() && oldUdid != localUdid) ||
                 oldDistributedBundleInfos[bundleInfo.name].developerId.empty() || judgeAppIdExist == true ||
-                oldDistributedBundleInfos[bundleInfo.name].appIdentifier.empty()) {
+                oldDistributedBundleInfos[bundleInfo.name].appIdentifier.empty() ||
+                (!oldDistributedBundleInfos[bundleInfo.name].appIdentifierVec.empty() &&
+                srcAppIdentifierVec.empty())) {
                 DmsBundleInfo dmsBundleInfo =
                     ConvertToDistributedBundleInfo(bundleInfo, appProvisionInfo, srcAppIdentifierVec, true);
                 dmsBundleInfos.push_back(dmsBundleInfo);
