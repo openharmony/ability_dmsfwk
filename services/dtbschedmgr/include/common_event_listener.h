@@ -42,7 +42,6 @@ private:
     void HandlePackageChange(const std::string& bundleName);
     void HandlePackageRemoved(const std::string& bundleName);
     void HandleUserRemoved(int32_t accountId);
-    void HandleBatteryCharging();
 };
 }  // namespace DistributedSchedule
 }  // namespace OHOS
