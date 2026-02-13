@@ -98,13 +98,19 @@ public:
      */
     void RegisterEventListener();
 
+    bool GetIsDelay() const { return isDelay_.load(); }
+    void SetIsDelay(bool value) { isDelay_.store(value); }
+
 public:
     SvcDistributedConnection(std::string bundleNameIndexInfo) : bundleNameIndexInfo_(bundleNameIndexInfo)
-    {}
+    {
+        weakPtr_ = this;
+    }
     ~SvcDistributedConnection() override {};
 
 private:
     std::mutex mutex_;
+    std::mutex callbackMutex_;
     std::condition_variable condition_;
     std::atomic<bool> isConnected_ = {false};
     std::atomic<bool> isCleanCalled_ = {false};
@@ -114,6 +120,7 @@ private:
 
     std::function<void(const std::string &&)> callConnected_;
     std::string bundleNameIndexInfo_;
+    wptr<SvcDistributedConnection> weakPtr_;
 };
 
 class EndTaskEventSubscriber : public EventFwk::CommonEventSubscriber {
