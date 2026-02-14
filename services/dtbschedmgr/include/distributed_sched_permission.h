@@ -33,7 +33,7 @@
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-const std::string DMS_IS_CALLER_FOREGROUND = "dmsIsCallerForeGround";
+constexpr const char* DMS_IS_CALLER_FOREGROUND = "dmsIsCallerForeGround";
 }
 
 struct GroupInfo {

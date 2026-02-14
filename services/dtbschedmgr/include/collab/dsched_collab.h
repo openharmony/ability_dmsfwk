@@ -35,9 +35,9 @@
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-const std::string KEY_START_OPTION = "ohos.collabrate.key.start.option";
-const std::string VALUE_START_OPTION_FOREGROUND = "ohos.collabrate.value.foreground";
-const std::string VALUE_START_OPTION_BACKGROUND = "ohos.collabrate.value.background";
+constexpr const char* KEY_START_OPTION = "ohos.collabrate.key.start.option";
+constexpr const char* VALUE_START_OPTION_FOREGROUND = "ohos.collabrate.value.foreground";
+constexpr const char* VALUE_START_OPTION_BACKGROUND = "ohos.collabrate.value.background";
 }
 using AccountInfo = IDistributedSched::AccountInfo;
 

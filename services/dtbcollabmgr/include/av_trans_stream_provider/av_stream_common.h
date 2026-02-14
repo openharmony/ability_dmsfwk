@@ -57,7 +57,7 @@ enum class VideoCodecFormat : int32_t {
     H265,
 };
 
-const std::string VIDEO_CODEC_LIST_KEY = "VideoCodecList";
+constexpr const char* VIDEO_CODEC_LIST_KEY = "VideoCodecList";
 } // namespace DistributedCollab
 } // namespace OHOS
 #endif
