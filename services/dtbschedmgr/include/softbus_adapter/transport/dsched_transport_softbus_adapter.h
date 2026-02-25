@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -80,6 +80,9 @@ private:
     void NotifyListenersSessionShutdown(int32_t sessionId, bool isSelfCalled);
     int32_t DecisionByAllConnect(const std::string &peerDeviceId, DSchedServiceType type);
     void NotifyConnectDecision(const std::string &peerDeviceId, DSchedServiceType type);
+    void SendSessionReuseMessage(int32_t sessionId);
+    void SendSessionReleaseMessage(int32_t sessionId);
+    int32_t SendDataLocked(int32_t sessionId, int32_t dataType, std::shared_ptr<DSchedDataBuffer> dataBuffer);
 
 private:
     std::map<int32_t, std::shared_ptr<DSchedSoftbusSession>> sessions_;

@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -768,6 +768,7 @@ ohos_unittest("softbusadaptertest") {
       "unittest/softbus_adapter/mock_softbus_adapter.cpp",
       "unittest/softbus_adapter/softbus_adapter_test.cpp",
       "unittest/softbus_adapter/softbus_transport_test.cpp",
+      "unittest/softbus_adapter/softbus_transport_session_reuse_test.cpp",
     ]
   } else {
     sources += [ "unittest/softbus_adapter/softbus_adapter_common_test.cpp" ]

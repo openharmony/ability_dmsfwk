@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,10 @@ constexpr int32_t BIND_RETRY_INTERVAL = 500;
 constexpr int32_t MAX_BIND_RETRY_TIME = 4000;
 constexpr int32_t MAX_RETRY_TIMES = 8;
 constexpr int32_t MS_TO_US = 1000;
+constexpr int32_t SESSION_REUSE_CMD = 10;
+constexpr int32_t SESSION_RELEASE_CMD = 11;
+constexpr int32_t DATA_TYPE_SESSION_REUSE = 100;
+constexpr int32_t DATA_TYPE_SESSION_RELEASE = 101;
 #ifndef DMS_CHECK_BLUETOOTH
 constexpr int32_t SOFTBUS_QOS_CASE_HIGH = 0;
 constexpr int32_t SOFTBUS_QOS_CASE_MIDDLE_HIGH = 1;
@@ -147,6 +151,9 @@ int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDevi
                     HILOGI("peer device already connected");
                     iter->second->OnConnect();
                     sessionId = iter->first;
+                    HILOGI("notify peer session reuse, sessionId: %{public}d", sessionId);
+                    SendSessionReuseMessage(sessionId);
+
 #ifdef DMSFWK_ALL_CONNECT_MGR
                     NotifyConnectDecision(peerDeviceId, type);
 #endif
@@ -389,15 +396,71 @@ void DSchedTransportSoftbusAdapter::DisconnectDevice(const std::string &peerDevi
             break;
         }
     }
-    if (sessionId != 0 && sessions_[sessionId] != nullptr && sessions_[sessionId]->OnDisconnect()) {
-        HILOGI("peer %{public}s shutdown, socket sessionId: %{public}d.",
-            GetAnonymStr(sessions_[sessionId]->GetPeerDeviceId()).c_str(), sessionId);
-        ShutdownSession(peerDeviceId, sessionId);
-        sessions_.erase(sessionId);
-        NotifyListenersSessionShutdown(sessionId, true);
+    if (sessionId != 0 && sessions_[sessionId] != nullptr) {
+        int32_t beforeRefCount = sessions_[sessionId]->GetRefCount();
+        HILOGI("before disconnect, refCount: %{public}d", beforeRefCount);
+
+        if (sessions_[sessionId]->OnDisconnect()) {
+            HILOGI("peer %{public}s shutdown, socket sessionId: %{public}d.",
+                GetAnonymStr(sessions_[sessionId]->GetPeerDeviceId()).c_str(), sessionId);
+            ShutdownSession(peerDeviceId, sessionId);
+            sessions_.erase(sessionId);
+            NotifyListenersSessionShutdown(sessionId, true);
+        } else {
+            HILOGI("peer still in use, notify peer to decrease refCount, sessionId: %{public}d", sessionId);
+            SendSessionReleaseMessage(sessionId);
+        }
     }
     HILOGI("finish, socket session id: %{public}d", sessionId);
     return;
+}
+
+void DSchedTransportSoftbusAdapter::SendSessionReuseMessage(int32_t sessionId)
+{
+    HILOGI("send session reuse message, sessionId: %{public}d", sessionId);
+    auto reuseMsg = std::make_shared<DSchedDataBuffer>(sizeof(uint32_t));
+    if (reuseMsg == nullptr) {
+        HILOGE("create reuse message failed");
+        return;
+    }
+    uint32_t cmdType = SESSION_REUSE_CMD;
+    int32_t ret = memcpy_s(reuseMsg->Data(), reuseMsg->Size(),
+                           &cmdType, sizeof(cmdType));
+    if (ret != 0) {
+        HILOGE("pack reuse message failed, ret: %{public}d", ret);
+        return;
+    }
+
+    ret = SendDataLocked(sessionId, DATA_TYPE_SESSION_REUSE, reuseMsg);
+    if (ret != ERR_OK) {
+        HILOGE("send reuse message failed, ret: %{public}d", ret);
+    } else {
+        HILOGI("send session reuse notification success");
+    }
+}
+
+void DSchedTransportSoftbusAdapter::SendSessionReleaseMessage(int32_t sessionId)
+{
+    HILOGI("send session release message, sessionId: %{public}d", sessionId);
+    auto releaseMsg = std::make_shared<DSchedDataBuffer>(sizeof(uint32_t));
+    if (releaseMsg == nullptr) {
+        HILOGE("create release message failed");
+        return;
+    }
+    uint32_t cmdType = SESSION_RELEASE_CMD;
+    int32_t ret = memcpy_s(releaseMsg->Data(), releaseMsg->Size(),
+                           &cmdType, sizeof(cmdType));
+    if (ret != 0) {
+        HILOGE("pack release message failed, ret: %{public}d", ret);
+        return;
+    }
+
+    ret = SendDataLocked(sessionId, DATA_TYPE_SESSION_RELEASE, releaseMsg);
+    if (ret != ERR_OK) {
+        HILOGE("send release message failed, ret: %{public}d", ret);
+    } else {
+        HILOGI("send session release notification success");
+    }
 }
 
 void DSchedTransportSoftbusAdapter::ShutdownSession(const std::string &peerDeviceId, int32_t sessionId)
@@ -513,6 +576,12 @@ int32_t DSchedTransportSoftbusAdapter::SendData(int32_t sessionId, int32_t dataT
     std::shared_ptr<DSchedDataBuffer> dataBuffer)
 {
     std::lock_guard<std::mutex> sessionLock(sessionMutex_);
+    return SendDataLocked(sessionId, dataType, dataBuffer);
+}
+
+int32_t DSchedTransportSoftbusAdapter::SendDataLocked(int32_t sessionId, int32_t dataType,
+    std::shared_ptr<DSchedDataBuffer> dataBuffer)
+{
     if (!sessions_.count(sessionId) || sessions_[sessionId] == nullptr) {
         HILOGE("error, invalid session id %{public}d", sessionId);
         return INVALID_SESSION_ID;
@@ -559,6 +628,38 @@ void DSchedTransportSoftbusAdapter::OnBytes(int32_t sessionId, const void *data,
 void DSchedTransportSoftbusAdapter::OnDataReady(int32_t sessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer,
     uint32_t dataType)
 {
+    if (dataType == DATA_TYPE_SESSION_REUSE) {
+        HILOGI("received session reuse notification, sessionId: %{public}d", sessionId);
+        auto iter = sessions_.find(sessionId);
+        if (iter != sessions_.end() && iter->second != nullptr) {
+            iter->second->OnConnect();
+            HILOGI("peer session reused, local refCount synced to %{public}d",
+                   iter->second->GetRefCount());
+        } else {
+            HILOGE("session %{public}d not found for reuse notification", sessionId);
+        }
+        return;
+    }
+    if (dataType == DATA_TYPE_SESSION_RELEASE) {
+        HILOGI("received session release notification, sessionId: %{public}d", sessionId);
+        auto iter = sessions_.find(sessionId);
+        if (iter != sessions_.end() && iter->second != nullptr) {
+            int32_t beforeRefCount = iter->second->GetRefCount();
+            HILOGI("before peer release, local refCount: %{public}d", beforeRefCount);
+            iter->second->OnDisconnect();
+            HILOGI("peer session released, local refCount decreased to %{public}d",
+                   iter->second->GetRefCount());
+            if (iter->second->GetRefCount() <= 0) {
+                HILOGI("local refCount <= 0, shutdown session: %{public}d", sessionId);
+                ShutdownSession(iter->second->GetPeerDeviceId(), sessionId);
+                sessions_.erase(sessionId);
+                NotifyListenersSessionShutdown(sessionId, true);
+            }
+        } else {
+            HILOGE("session %{public}d not found for release notification", sessionId);
+        }
+        return;
+    }
     std::lock_guard<std::mutex> listenerMapLock(listenerMutex_);
     if (listeners_.empty()) {
         HILOGE("no listener has registered");
