@@ -96,7 +96,10 @@ dsched_external_deps = [
     "samgr:samgr_proxy",
   ]
   if (dmsfwk_standard_form_share) {
-    dsched_external_deps += [ "form_fwk:form_manager" ]
+    dsched_external_deps += [
+      "form_fwk:form_manager",
+      "form_fwk:form_common_info",
+    ]
   }
   if (os_account_part) {
     dsched_external_deps += [ "os_account:os_account_innerkits" ]
