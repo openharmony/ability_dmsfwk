@@ -1474,6 +1474,10 @@ void AbilityConnectionSession::ExeuteMessageEventCallback(const std::string msg)
     // bi-channel need wait
     {
         std::unique_lock<std::mutex> lock(connectionMutex_);
+        if (sessionStatus_ == SessionStatus::UNCONNECTED) {
+            HILOGI("The link has been disconnected.");
+            return;
+        }
         bool isConnected = connectionCondition_.wait_for(
             lock,
             std::chrono::seconds(WAIT_FOR_CONNECT),
@@ -1591,6 +1595,10 @@ void AbilityConnectionSession::OnBytesReceived(int32_t channelId, const std::sha
     // bi-channel need wait
     {
         std::unique_lock<std::mutex> lock(connectionMutex_);
+        if (sessionStatus_ == SessionStatus::UNCONNECTED) {
+            HILOGI("The link has been disconnected.");
+            return;
+        }
         bool isConnected = connectionCondition_.wait_for(
             lock,
             std::chrono::seconds(WAIT_FOR_CONNECT),
