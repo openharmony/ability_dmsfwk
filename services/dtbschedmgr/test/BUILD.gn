@@ -102,7 +102,10 @@ if (dmsfwk_report_memmgr_plugins) {
 }
 
 if (dmsfwk_standard_form_share) {
-  dsched_external_deps += [ "form_fwk:form_manager" ]
+  dsched_external_deps += [
+    "form_fwk:form_manager",
+    "form_fwk:form_common_info",
+  ]
 }
 
 if (dmsfwk_mission_manager) {
