@@ -365,6 +365,10 @@ int32_t AVSenderEngine::Stop()
         return static_cast<int32_t>(Status::ERROR_WRONG_STATE);
     }
     Status ret = Status::OK;
+    ret = pipeline_->Stop();
+    if (ret == Status::OK) {
+        ChangeState(EngineState::STOP);
+    }
 #ifdef DMSFWK_VPE_ENABLE
     if (colorSpaceConverter_) {
         HILOGI("Stop VPE enter");
@@ -372,10 +376,6 @@ int32_t AVSenderEngine::Stop()
     }
     HILOGI("VPE Stop done");
 #endif
-    ret = pipeline_->Stop();
-    if (ret == Status::OK) {
-        ChangeState(EngineState::STOP);
-    }
     if (videoEncoderFilter_) {
         pipeline_->RemoveHeadFilter(videoEncoderFilter_);
     }
