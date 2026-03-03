@@ -80,7 +80,7 @@
 #include "mission/notification/dms_continue_send_manager.h"
 #include "mission/notification/dms_continue_recommend_manager.h"
 #include "mission/notification/dms_continue_recv_manager.h"
-#include "mission/distributed_sched_mission_manager.h"
+#include "mission/mission_loader.h"
 #include "mission/dsched_sync_e2e.h"
 #include "mission/wifi_state_listener.h"
 #include "mission/bluetooth_state_listener.h"
@@ -567,7 +567,10 @@ void DistributedSchedService::DeviceOnlineNotify(const std::string& networkId)
 {
     DistributedSchedAdapter::GetInstance().DeviceOnline(networkId);
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    DistributedSchedMissionManager::GetInstance().DeviceOnlineNotify(networkId);
+    auto& loader = MissionLoader::GetInstance();
+    if (loader.IsLoaded() && loader.DeviceOnlineNotify) {
+        loader.DeviceOnlineNotify(networkId);
+    }
     if (!MultiUserManager::GetInstance().CheckRegSoftbusListener() &&
         DistributedHardware::DeviceManager::GetInstance().IsSameAccount(networkId)) {
         HILOGI("DMSContinueRecvMgr need init");
@@ -590,7 +593,10 @@ void DistributedSchedService::DeviceOfflineNotify(const std::string& networkId)
     auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
     CHECK_POINTER_RETURN(recvMgr, "recvMgr");
     recvMgr->NotifyDeviceOffline(networkId);
-    DistributedSchedMissionManager::GetInstance().DeviceOfflineNotify(networkId);
+    auto& loader = MissionLoader::GetInstance();
+    if (loader.Load() && loader.DeviceOfflineNotify) {
+        loader.DeviceOfflineNotify(networkId);
+    }
 #endif
 }
 
@@ -645,8 +651,6 @@ void DistributedSchedService::InitMissionManager()
     if (!AddSystemAbilityListener(WINDOW_MANAGER_SERVICE_ID)) {
         HILOGE("Add System Ability Listener failed!");
     }
-    DistributedSchedMissionManager::GetInstance().Init();
-    DistributedSchedMissionManager::GetInstance().InitDataStorage();
     InitCommonEventListener();
     InitWifiStateListener();
     InitWifiSemiStateListener();
@@ -3159,7 +3163,10 @@ void DistributedSchedService::ProcessDeviceOffline(const std::string& deviceId)
         HILOGE("ProcessDeviceOffline check deviceId failed");
         return;
     }
-    DistributedSchedMissionManager::GetInstance().NotifyNetDisconnectOffline();
+    auto& loader = MissionLoader::GetInstance();
+    if (loader.Load() && loader.MissionNotifyNetDisconnectOffline) {
+        loader.MissionNotifyNetDisconnectOffline();
+    }
     RemoveConnectAbilityInfo(deviceId);
     ProcessCalleeOffline(deviceId);
     ProcessFreeInstallOffline(deviceId);
@@ -3360,21 +3367,32 @@ void DistributedSchedService::DumpElementLocked(const std::list<AppExecFwk::Elem
 int32_t DistributedSchedService::GetMissionInfos(const std::string& deviceId, int32_t numMissions,
     std::vector<MissionInfo>& missionInfos)
 {
-    return DistributedSchedMissionManager::GetInstance().GetMissionInfos(deviceId, numMissions, missionInfos);
+    auto& loader = MissionLoader::GetInstance();
+    if (!loader.Load() || !loader.GetMissionInfos) {
+        return ERR_NULL_OBJECT;
+    }
+    return loader.GetMissionInfos(deviceId, numMissions, missionInfos);
 }
 
 int32_t DistributedSchedService::NotifyMissionsChangedFromRemote(const std::vector<DstbMissionInfo>& missionInfos,
     const CallerInfo& callerInfo)
 {
-    return DistributedSchedMissionManager::GetInstance()
-        .NotifyMissionsChangedFromRemote(callerInfo, missionInfos);
+    auto& loader = MissionLoader::GetInstance();
+    if (!loader.Load() || !loader.MissionStartSyncMissionsFromRemote) {
+        return ERR_NULL_OBJECT;
+    }
+    return loader.MissionStartSyncMissionsFromRemote(callerInfo,
+        const_cast<std::vector<DstbMissionInfo>&>(missionInfos));
 }
 
 int32_t DistributedSchedService::GetRemoteMissionSnapshotInfo(const std::string& networkId, int32_t missionId,
     std::unique_ptr<MissionSnapshot>& missionSnapshot)
 {
-    return DistributedSchedMissionManager::GetInstance()
-        .GetRemoteMissionSnapshotInfo(networkId, missionId, missionSnapshot);
+    auto& loader = MissionLoader::GetInstance();
+    if (!loader.Load() || !loader.GetRemoteMissionSnapshotInfo) {
+        return ERR_NULL_OBJECT;
+    }
+    return loader.GetRemoteMissionSnapshotInfo(networkId, missionId, missionSnapshot);
 }
 
 int32_t DistributedSchedService::RegisterMissionListener(const std::u16string& devId,
@@ -3384,7 +3402,11 @@ int32_t DistributedSchedService::RegisterMissionListener(const std::u16string& d
         HILOGW("The current user is not foreground. callingUid: %{public}d.", callingUid);
         return DMS_NOT_FOREGROUND_USER;
     }
-    return DistributedSchedMissionManager::GetInstance().RegisterMissionListener(devId, obj);
+    auto& loader = MissionLoader::GetInstance();
+    if (!loader.Load() || !loader.RegisterMissionListener) {
+        return ERR_NULL_OBJECT;
+    }
+    return loader.RegisterMissionListener(devId, obj);
 }
 
 int32_t DistributedSchedService::RegisterOnListener(const std::string& type,
@@ -3402,7 +3424,11 @@ int32_t DistributedSchedService::RegisterOffListener(const std::string& type,
 int32_t DistributedSchedService::UnRegisterMissionListener(const std::u16string& devId,
     const sptr<IRemoteObject>& obj)
 {
-    return DistributedSchedMissionManager::GetInstance().UnRegisterMissionListener(devId, obj);
+    auto& loader = MissionLoader::GetInstance();
+    if (!loader.Load() || !loader.UnRegisterMissionListener) {
+        return ERR_NULL_OBJECT;
+    }
+    return loader.UnRegisterMissionListener(devId, obj);
 }
 
 int32_t DistributedSchedService::StartSyncRemoteMissions(const std::string& devId, bool fixConflict, int64_t tag,
@@ -3412,8 +3438,11 @@ int32_t DistributedSchedService::StartSyncRemoteMissions(const std::string& devI
         HILOGW("The current user is not foreground. callingUid: %{public}d.", callingUid);
         return DMS_NOT_FOREGROUND_USER;
     }
-    return DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(devId, fixConflict,
-        tag, callingTokenId);
+    auto& loader = MissionLoader::GetInstance();
+    if (!loader.Load() || !loader.StartSyncRemoteMissions) {
+        return ERR_NULL_OBJECT;
+    }
+    return loader.StartSyncRemoteMissions(devId, fixConflict, tag, callingTokenId);
 }
 
 int32_t DistributedSchedService::StopSyncRemoteMissions(const std::string& devId, int32_t callingUid)
@@ -3422,18 +3451,29 @@ int32_t DistributedSchedService::StopSyncRemoteMissions(const std::string& devId
         HILOGW("The current user is not foreground. callingUid: %{public}d.", callingUid);
         return DMS_NOT_FOREGROUND_USER;
     }
-    return DistributedSchedMissionManager::GetInstance().StopSyncRemoteMissions(devId, false, true);
+    auto& loader = MissionLoader::GetInstance();
+    if (!loader.Load() || !loader.StopSyncRemoteMissions) {
+        return ERR_NULL_OBJECT;
+    }
+    return loader.StopSyncRemoteMissions(devId, false, true);
 }
 
 int32_t DistributedSchedService::StartSyncMissionsFromRemote(const CallerInfo& callerInfo,
     std::vector<DstbMissionInfo>& missionInfos)
 {
-    return DistributedSchedMissionManager::GetInstance().StartSyncMissionsFromRemote(callerInfo, missionInfos);
+    auto& loader = MissionLoader::GetInstance();
+    if (!loader.Load() || !loader.MissionStartSyncMissionsFromRemote) {
+        return ERR_NULL_OBJECT;
+    }
+    return loader.MissionStartSyncMissionsFromRemote(callerInfo, missionInfos);
 }
 
 int32_t DistributedSchedService::StopSyncMissionsFromRemote(const CallerInfo& callerInfo)
 {
-    DistributedSchedMissionManager::GetInstance().StopSyncMissionsFromRemote(callerInfo.sourceDeviceId);
+    auto& loader = MissionLoader::GetInstance();
+    if (loader.Load() && loader.MissionStopSyncMissionsFromRemote) {
+        loader.MissionStopSyncMissionsFromRemote(callerInfo.sourceDeviceId);
+    }
     return ERR_NONE;
 }
 
@@ -3772,7 +3812,9 @@ bool DistributedSchedService::CheckSinkAccessControlUser(const FreeInstallInfo& 
         .userId = info.accountInfo.userId,
     };
     AccountInfo dstAccountInfo;
-    if (!DistributedSchedMissionManager::GetInstance().GetOsAccountData(dstAccountInfo)) {
+    auto& loader = MissionLoader::GetInstance();
+    if (!loader.Load() || !loader.MissionGetOsAccountData ||
+        !loader.MissionGetOsAccountData(dstAccountInfo)) {
         HILOGE("Get Os accountId and userId fail.");
         return false;
     }

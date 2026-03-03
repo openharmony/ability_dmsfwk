@@ -1285,27 +1285,6 @@ HWTEST_F(DistributedSchedStubTest, StartSyncMissionsFromRemoteInner_001, TestSiz
 }
 
 /**
- * @tc.name: StartSyncMissionsFromRemoteInner_002
- * @tc.desc: check StartSyncMissionsFromRemoteInner
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedStubTest, StartSyncMissionsFromRemoteInner_002, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedStubTest StartSyncMissionsFromRemoteInner_002 begin" << std::endl;
-    DistributedSchedUtil::MockManageMissions();
-    MessageParcel data;
-    MessageParcel reply;
-    CallerInfo callerInfo;
-    CallerInfoMarshalling(callerInfo, data);
-
-    DistributedSchedMissionManager::GetInstance().Init();
-    int32_t result = DistributedSchedService::GetInstance().StartSyncMissionsFromRemoteInner(data, reply);
-    EXPECT_EQ(result, ERR_NONE);
-    WaitHandlerTaskDone(DistributedSchedMissionManager::GetInstance().missionHandler_);
-    DTEST_LOG << "DistributedSchedStubTest StartSyncMissionsFromRemoteInner_002 end" << std::endl;
-}
-
-/**
  * @tc.name: StopSyncRemoteMissionsInner_001
  * @tc.desc: check StopSyncRemoteMissionsInner
  * @tc.type: FUNC
@@ -1364,26 +1343,6 @@ HWTEST_F(DistributedSchedStubTest, StopSyncMissionsFromRemoteInner_001, TestSize
     int32_t result = DistributedSchedService::GetInstance().StopSyncMissionsFromRemoteInner(data, reply);
     EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
     DTEST_LOG << "DistributedSchedStubTest StopSyncMissionsFromRemoteInner_001 end" << std::endl;
-}
-
-/**
- * @tc.name: StopSyncMissionsFromRemoteInner_002
- * @tc.desc: check StopSyncMissionsFromRemoteInner
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedStubTest, StopSyncMissionsFromRemoteInner_002, TestSize.Level3)
-{
-    DTEST_LOG << "DistributedSchedStubTest StopSyncMissionsFromRemoteInner_002 begin" << std::endl;
-    MessageParcel data;
-    MessageParcel reply;
-    CallerInfo callerInfo;
-    CallerInfoMarshalling(callerInfo, data);
-
-    DistributedSchedMissionManager::GetInstance().Init();
-    int32_t result = DistributedSchedService::GetInstance().StopSyncMissionsFromRemoteInner(data, reply);
-    EXPECT_NE(result, ERR_FLATTEN_OBJECT);
-    WaitHandlerTaskDone(DistributedSchedMissionManager::GetInstance().missionHandler_);
-    DTEST_LOG << "DistributedSchedStubTest StopSyncMissionsFromRemoteInner_002 end" << std::endl;
 }
 
 /**
