@@ -36,11 +36,6 @@ constexpr size_t PIXEL_MAP_MAX_BUFFER_SIZE = 600 * 1024;
 constexpr size_t INT_BYTE = 4;
 }
 
-Snapshot::~Snapshot()
-{
-    HILOGD("Snapshot destruct!");
-}
-
 bool Snapshot::WriteToParcel(MessageParcel& data) const
 {
     PARCEL_WRITE_HELPER_RET(data, Int32, 1, false);

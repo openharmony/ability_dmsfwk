@@ -555,6 +555,20 @@ ohos_unittest("distributedmissionmanagertest") {
     "unittest/mission/param/param_common_event_test.cpp",
     "unittest/mock_remote_stub.cpp",
   ]
+  if (dmsfwk_mission_manager) {
+    sources += [
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_data_storage.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_mission_info.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_sched_mission_manager.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/mission_changed_notify.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/mission_info_converter.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/snapshot.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/snapshot_converter.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/kvstore_death_recipient.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_data_change_listener.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_mission_change_listener.cpp",
+    ]
+  }
   sources += dtbschedmgr_sources
 
   configs = [
@@ -583,6 +597,20 @@ ohos_unittest("dmscontinueconditionmgrtest") {
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
   sources = [ "unittest/mission/dms_continue_condition_manager_test.cpp" ]
+  if (dmsfwk_mission_manager) {
+    sources += [
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_data_storage.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_mission_info.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_sched_mission_manager.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/mission_changed_notify.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/mission_info_converter.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/snapshot.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/snapshot_converter.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/kvstore_death_recipient.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_data_change_listener.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_mission_change_listener.cpp",
+    ]
+  }
   sources += dtbschedmgr_sources
 
   configs = [
@@ -610,6 +638,20 @@ ohos_unittest("dmscontinuemanagertest") {
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
   sources = [ "unittest/mission/dms_continue_manager_test.cpp" ]
+  if (dmsfwk_mission_manager) {
+    sources += [
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_data_storage.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_mission_info.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_sched_mission_manager.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/mission_changed_notify.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/mission_info_converter.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/snapshot.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/snapshot_converter.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/kvstore_death_recipient.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_data_change_listener.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_mission_change_listener.cpp",
+    ]
+  }
   sources += dtbschedmgr_sources
 
   configs = [
@@ -637,6 +679,20 @@ ohos_unittest("dschedsynce2etest") {
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
   sources = [ "unittest/mission/dsched_sync_e2e_test.cpp" ]
+  if (dmsfwk_mission_manager) {
+    sources += [
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_data_storage.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_mission_info.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_sched_mission_manager.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/mission_changed_notify.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/mission_info_converter.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/snapshot.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/snapshot_converter.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/kvstore_death_recipient.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_data_change_listener.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_mission_change_listener.cpp",
+    ]
+  }
   sources += dtbschedmgr_sources
 
   configs = [
@@ -670,6 +726,20 @@ ohos_unittest("dmscontinuerecommendmgrtest") {
     "unittest/mock/dms_continue_condition_manager_mock.cpp",
     "unittest/mock/dtbschedmgr_device_info_storage_mock.cpp",
   ]
+  if (dmsfwk_mission_manager) {
+    sources += [
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_data_storage.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_mission_info.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_sched_mission_manager.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/mission_changed_notify.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/mission_info_converter.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/snapshot.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/snapshot_converter.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/kvstore_death_recipient.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_data_change_listener.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_mission_change_listener.cpp",
+    ]
+  }
   sources += dtbschedmgr_sources
 
   configs = [
@@ -704,6 +774,20 @@ ohos_unittest("dmscontinuemgrtest") {
     "unittest/mock/dms_continue_condition_manager_mock.cpp",
     "unittest/mock/dsched_sync_e2e_mock.cpp",
   ]
+  if (dmsfwk_mission_manager) {
+    sources += [
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_data_storage.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_mission_info.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_sched_mission_manager.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/mission_changed_notify.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/mission_info_converter.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/snapshot.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/snapshot_converter.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/kvstore_death_recipient.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_data_change_listener.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_mission_change_listener.cpp",
+    ]
+  }
   sources += dtbschedmgr_sources
 
   configs = [
@@ -732,6 +816,20 @@ ohos_unittest("dmsmissionmanagertest") {
     "unittest/mission/dms_mission_manager_test.cpp",
     "unittest/mission/mock_image_packer.cpp",
   ]
+  if (dmsfwk_mission_manager) {
+    sources += [
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_data_storage.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_mission_info.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_sched_mission_manager.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/mission_changed_notify.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/mission_info_converter.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/snapshot.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/snapshot_converter.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/kvstore_death_recipient.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_data_change_listener.cpp",
+      "${dms_path}/services/dtbschedmgr/src/mission/distributed_mission_change_listener.cpp",
+    ]
+  }
   sources += dtbschedmgr_sources
 
   configs = [

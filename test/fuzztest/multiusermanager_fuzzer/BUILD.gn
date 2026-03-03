@@ -114,7 +114,6 @@ ohos_fuzztest("MultiUserManagerFuzzTest") {
   if (dmsfwk_standard_form_share) {
     external_deps += [
       "form_fwk:form_manager",
-      "form_fwk:form_common_info",
     ]
   }
 
