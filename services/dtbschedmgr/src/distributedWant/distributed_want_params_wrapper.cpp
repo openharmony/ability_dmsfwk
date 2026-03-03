@@ -21,6 +21,7 @@ using namespace OHOS::AAFwk;
 namespace OHOS {
 namespace DistributedSchedule {
 constexpr int32_t DISTRIBUTEDWANT_PARAM_WRAPPER_TWO = 2;
+constexpr size_t MAX_PARSE_DEPTH = 128;
 
 IINTERFACE_IMPL_1(DistributedWantParamWrapper, Object, IDistributedWantParams);
 const InterfaceID g_IID_IDistributedWantParams = {
@@ -130,8 +131,14 @@ size_t DistributedWantParamWrapper::FindMatchingBrace(const std::string& str, si
 
 sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::string& str)
 {
+    return ParseInternal(str, 0);
+}
+
+sptr<IDistributedWantParams> DistributedWantParamWrapper::ParseInternal(
+    const std::string& str, size_t depth)
+{
     DistributedWantParams wantParams;
-    if (!ValidateStr(str)) {
+    if (depth > MAX_PARSE_DEPTH || !ValidateStr(str)) {
         return nullptr;
     }
     std::string strKey = "";
@@ -139,7 +146,8 @@ sptr<IDistributedWantParams> DistributedWantParamWrapper::Parse(const std::strin
     for (size_t strnum = 0; strnum < str.size(); strnum++) {
         if (str[strnum] == '{' && strKey != "" && typeId == DistributedWantParams::VALUE_TYPE_WANTPARAMS) {
             size_t num = FindMatchingBrace(str, strnum);
-            wantParams.SetParam(strKey, DistributedWantParamWrapper::Parse(str.substr(strnum, num - strnum + 1)));
+            auto nested = ParseInternal(str.substr(strnum, num - strnum + 1), depth + 1);
+            wantParams.SetParam(strKey, nested);
             strKey = "";
             typeId = 0;
             strnum = num + 1;
