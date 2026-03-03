@@ -18,6 +18,7 @@
 
 #include "change_notification.h"
 #include "kvstore_observer.h"
+#include "mission/extension/dms_main_service_channel.h"
 
 namespace OHOS {
 namespace DistributedSchedule {

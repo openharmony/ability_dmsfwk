@@ -22,12 +22,13 @@
 
 #include "distributed_data_storage.h"
 #include "distributed_mission_change_listener.h"
-#include "distributed_mission_info.h"
+#include "mission/distributed_mission_info.h"
 #include "distributed_sched_interface.h"
 #include "event_handler.h"
 #include "single_instance.h"
 #include "snapshot.h"
 #include "distributed_sched_interface.h"
+#include "extension/dms_main_service_channel.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -111,6 +112,10 @@ public:
     void NotifyRemoteDied(const wptr<IRemoteObject>& remote);
     void NotifyNetDisconnectOffline();
     bool GetOsAccountData(AccountInfo& dmsAccountInfo);
+
+    void SetMainServiceChannel(const std::shared_ptr<DmsMainServiceChannel> &mainServiceChannel);
+    const std::shared_ptr<DmsMainServiceChannel> &GetMainServiceChannel() const;
+
 private:
     std::map<std::string, std::shared_ptr<AppExecFwk::EventHandler>> deviceHandle_;
     mutable std::mutex remoteMissionInfosLock_;
@@ -175,6 +180,8 @@ private:
     std::mutex remoteDmsLock_;
     std::shared_ptr<AppExecFwk::EventHandler> missionHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> updateHandler_;
+
+    std::shared_ptr<DmsMainServiceChannel> mainServiceChannel_ = nullptr;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

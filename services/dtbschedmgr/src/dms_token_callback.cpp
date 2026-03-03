@@ -24,7 +24,7 @@
 #include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
-#include "mission/distributed_sched_mission_manager.h"
+#include "mission/mission_loader.h"
 #include "multi_user_manager.h"
 #include "parcel_helper.h"
 #include "system_ability.h"
@@ -83,7 +83,9 @@ int32_t DmsTokenCallback::SendResult(OHOS::AAFwk::Want& want, int32_t callerUid,
 int32_t DmsTokenCallback::GetAccountInfoWrapper(const std::string& deviceId, CallerInfo& callerInfo,
     AccountInfo& accountInfo)
 {
-    if (!DistributedSchedMissionManager::GetInstance().GetOsAccountData(accountInfo)) {
+    auto& loader = MissionLoader::GetInstance();
+    if (!loader.Load() || !loader.MissionGetOsAccountData ||
+        !loader.MissionGetOsAccountData(accountInfo)) {
         HILOGE("Get Os accountId and userId fail.");
         return INVALID_PARAMETERS_ERR;
     }

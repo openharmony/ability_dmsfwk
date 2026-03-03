@@ -30,6 +30,7 @@
 #include "dtbschedmgr_log.h"
 #include "mission/notification/dms_continue_recv_manager.h"
 #include "multi_user_manager.h"
+#include "deviceManager/dms_device_info.h"
 
 using namespace std;
 namespace OHOS {
@@ -438,7 +439,7 @@ void DnetServiceDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
     DtbschedmgrDeviceInfoStorage::GetInstance().Init();
 }
 
-std::string DtbschedmgrDeviceInfoStorage::GetDeviceName(std::string netWorkId)
+std::string DtbschedmgrDeviceInfoStorage::GetDeviceName(const std::string& netWorkId)
 {
     lock_guard<mutex> autoLock(deviceLock_);
     for (auto device = remoteDevices_.begin(); device != remoteDevices_.end(); ++device) {
