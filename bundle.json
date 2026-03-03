@@ -114,6 +114,7 @@
             "//foundation/ability/dmsfwk/sa_profile:dms_sa_profile",
             "//foundation/ability/dmsfwk/services/dtbabilitymgr:distributed_ability_manager_svr",
             "//foundation/ability/dmsfwk/services/dtbschedmgr:distributedschedsvr",
+            "//foundation/ability/dmsfwk/services/dtbschedmgr:dms_mission_extension",
             "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/ability_connection_manager:distributed_ability_connection_manager",
             "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/av_trans_stream_provider:dtbcollab_av_stream_trans_provider",
             "//foundation/ability/dmsfwk/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",

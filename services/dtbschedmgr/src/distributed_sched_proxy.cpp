@@ -25,6 +25,7 @@
 #endif
 #include "parcel_helper.h"
 #include "string_ex.h"
+#include "mission/mission_loader.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -463,7 +464,11 @@ int32_t DistributedSchedProxy::StartSyncMissionsFromRemote(const CallerInfo& cal
     }
     int32_t version = reply.ReadInt32();
     HILOGD("version : %{public}d", version);
-    return DstbMissionInfo::ReadDstbMissionInfosFromParcel(reply, missionInfos) ? ERR_NONE : ERR_FLATTEN_OBJECT;
+    auto& loader = MissionLoader::GetInstance();
+    if (loader.Load() && loader.ReadDstbMissionInfosFromParcel) {
+        return loader.ReadDstbMissionInfosFromParcel(reply, missionInfos) ? ERR_NONE : ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NULL_OBJECT;
 }
 
 int32_t DistributedSchedProxy::StopSyncRemoteMissions(const std::string& devId, int32_t callingUid)
@@ -657,7 +662,11 @@ int32_t DistributedSchedProxy::GetMissionInfos(const std::string& deviceId, int3
         HILOGW("sendRequest fail, error: %{public}d", ret);
         return ret;
     }
-    return MissionInfoConverter::ReadMissionInfosFromParcel(reply, missionInfos) ? ERR_NONE : ERR_FLATTEN_OBJECT;
+    auto& loader = MissionLoader::GetInstance();
+    if (loader.Load() && loader.ReadMissionInfosFromParcel) {
+        return loader.ReadMissionInfosFromParcel(reply, missionInfos) ? ERR_NONE : ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NULL_OBJECT;
 }
 
 int32_t DistributedSchedProxy::NotifyMissionsChangedFromRemote(const std::vector<DstbMissionInfo>& missionInfos,
@@ -675,8 +684,11 @@ int32_t DistributedSchedProxy::NotifyMissionsChangedFromRemote(const std::vector
         return ERR_FLATTEN_OBJECT;
     }
     PARCEL_WRITE_HELPER(data, Int32, callerInfo.dmsVersion);
-    if (!DstbMissionInfo::WriteDstbMissionInfosToParcel(data, missionInfos)) {
-        return ERR_FLATTEN_OBJECT;
+    auto& loader = MissionLoader::GetInstance();
+    if (loader.Load() && loader.WriteDstbMissionInfosToParcel) {
+        if (!loader.WriteDstbMissionInfosToParcel(data, missionInfos)) {
+            return ERR_FLATTEN_OBJECT;
+        }
     }
     PARCEL_WRITE_HELPER(data, String, callerInfo.sourceDeviceId);
     PARCEL_WRITE_HELPER(data, Int32, callerInfo.uid);

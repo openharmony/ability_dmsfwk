@@ -48,12 +48,8 @@ constexpr int32_t RETRY_DELAYED = 2000;
 constexpr int32_t GET_FOREGROUND_SNAPSHOT_DELAY_TIME = 800; // ms
 const std::string DELETE_DATA_STORAGE = "DeleteDataStorage";
 constexpr int32_t DELETE_DATA_STORAGE_DELAYED = 60000; // ms
-const std::string INVAILD_LOCAL_DEVICE_ID = "-1";
 constexpr int32_t NET_STATE = 0;
 }
-namespace Mission {
-constexpr int32_t GET_MAX_MISSIONS = 20;
-} // Mission
 using namespace std::chrono;
 using namespace Constants::Mission;
 using namespace OHOS::DistributedKv;
@@ -109,7 +105,7 @@ sptr<IDistributedSched> DistributedSchedMissionManager::GetRemoteDms(const std::
             auto object = iter->second;
             if (object != nullptr) {
                 HILOGI("[PerformanceTest] GetRemoteDms from cache spend %{public}" PRId64 " ms",
-                    GetTickCount() - begin);
+                       GetTickCount() - begin);
                 return object;
             }
         }
@@ -146,7 +142,7 @@ bool DistributedSchedMissionManager::IsDeviceIdValidated(const std::string& devi
         HILOGE("IsDeviceIdValidated deviceId is empty!");
         return false;
     }
-    if (DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(deviceId) == nullptr) {
+    if (mainServiceChannel_ == nullptr || mainServiceChannel_->GetDeviceInfoById(deviceId) == nullptr) {
         HILOGW("IsDeviceIdValidated device offline.");
         return false;
     }
@@ -260,7 +256,7 @@ int32_t DistributedSchedMissionManager::RemoveSnapshotInfo(const std::string& de
 int32_t DistributedSchedMissionManager::GetRemoteMissionSnapshotInfo(const std::string& networkId, int32_t missionId,
     std::unique_ptr<AAFwk::MissionSnapshot>& missionSnapshot)
 {
-    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(networkId);
+    std::string uuid = mainServiceChannel_->GetUuidByNetworkId(networkId);
     if (uuid.empty()) {
         HILOGE("uuid is empty!");
         return INVALID_PARAMETERS_ERR;
@@ -268,7 +264,7 @@ int32_t DistributedSchedMissionManager::GetRemoteMissionSnapshotInfo(const std::
     std::unique_ptr<Snapshot> snapshotPtr = DequeueCachedSnapshotInfo(uuid, missionId);
     if (snapshotPtr != nullptr) {
         HILOGI("Get snapshot from cache success, uuid: %{public}s, missionId: %{public}d.",
-            GetAnonymStr(uuid).c_str(), missionId);
+               GetAnonymStr(uuid).c_str(), missionId);
         SnapshotConverter::ConvertToMissionSnapshot(*snapshotPtr, missionSnapshot);
         return ERR_NONE;
     }
@@ -288,7 +284,7 @@ int32_t DistributedSchedMissionManager::GetRemoteMissionSnapshotInfo(const std::
         return ERR_NULL_OBJECT;
     }
     HILOGI("Get snapshot from DistributedDB success, uuid: %{public}s, missionId: %{public}d.",
-        GetAnonymStr(uuid).c_str(), missionId);
+           GetAnonymStr(uuid).c_str(), missionId);
     SnapshotConverter::ConvertToMissionSnapshot(*snapshotPtr, missionSnapshot);
     return ERR_NONE;
 }
@@ -300,7 +296,7 @@ void DistributedSchedMissionManager::DeviceOnlineNotify(const std::string& netwo
         return;
     }
 
-    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(networkId);
+    std::string uuid = mainServiceChannel_->GetUuidByNetworkId(networkId);
     if (missionHandler_ != nullptr) {
         HILOGI("DeviceOnlineNotify RemoveTask");
         missionHandler_->RemoveTask(DELETE_DATA_STORAGE + uuid);
@@ -335,7 +331,7 @@ void DistributedSchedMissionManager::DeleteDataStorage(const std::string& device
         HILOGE("DeleteDataStorage DistributedDataStorage null!");
         return;
     }
-    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(deviceId);
+    std::string uuid = mainServiceChannel_->GetUuidByNetworkId(deviceId);
     auto callback = [this, uuid, deviceId]() {
         if (!distributedDataStorage_->FuzzyDelete(deviceId)) {
             HILOGE("DeleteDataStorage storage delete failed!");
@@ -360,7 +356,7 @@ void DistributedSchedMissionManager::DeleteDataStorage(const std::string& device
 int32_t DistributedSchedMissionManager::RegisterMissionListener(const std::u16string& devId,
     const sptr<IRemoteObject>& listener)
 {
-    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(Str16ToStr8(devId));
+    std::string uuid = mainServiceChannel_->GetUuidByNetworkId(Str16ToStr8(devId));
     if (uuid.empty()) {
         HILOGE("uuid is empty!");
         return INVALID_PARAMETERS_ERR;
@@ -374,7 +370,7 @@ int32_t DistributedSchedMissionManager::RegisterMissionListener(const std::u16st
     }
     std::string localDeviceId;
     std::string remoteDeviceId = Str16ToStr8(devId);
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)
+    if (!mainServiceChannel_->GetLocalDeviceId(localDeviceId)
         || localDeviceId == remoteDeviceId) {
         HILOGE("check deviceId failed!");
         return INVALID_PARAMETERS_ERR;
@@ -458,7 +454,7 @@ int32_t DistributedSchedMissionManager::StartSyncRemoteMissions(const std::strin
     int64_t begin = GetTickCount();
     int32_t ret = remoteDms->StartSyncMissionsFromRemote(callerInfo, missionInfos);
     HILOGI("[PerformanceTest] StartSyncMissionsFromRemote ret:%{public}d, spend %{public}" PRId64 " ms",
-        ret, GetTickCount() - begin);
+           ret, GetTickCount() - begin);
     if (ret == ERR_NONE) {
         RebornMissionCache(dstDevId, missionInfos);
     }
@@ -475,7 +471,7 @@ int32_t DistributedSchedMissionManager::UnRegisterMissionListener(const std::u16
         return INVALID_PARAMETERS_ERR;
     }
     std::string localDeviceId;
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)
+    if (!mainServiceChannel_->GetLocalDeviceId(localDeviceId)
         || localDeviceId == Str16ToStr8(devId)) {
         HILOGE("check deviceId fail");
         return INVALID_PARAMETERS_ERR;
@@ -554,13 +550,13 @@ int32_t DistributedSchedMissionManager::StartSyncRemoteMissions(const std::strin
     if (!IsDeviceIdValidated(dstDevId)) {
         return INVALID_PARAMETERS_ERR;
     }
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)
+    if (!mainServiceChannel_->GetLocalDeviceId(localDeviceId)
         || (dstDevId == localDeviceId)) {
         HILOGE("check deviceId fail");
         return INVALID_PARAMETERS_ERR;
     }
     HILOGI("begin, dstDevId is %{public}s, local deviceId is %{public}s",
-        GetAnonymStr(dstDevId).c_str(), GetAnonymStr(localDeviceId).c_str());
+           GetAnonymStr(dstDevId).c_str(), GetAnonymStr(localDeviceId).c_str());
     auto ret = StartSyncRemoteMissions(dstDevId, localDeviceId, callingTokenId);
     if (ret != ERR_NONE) {
         HILOGE("StartSyncRemoteMissions failed, %{public}d", ret);
@@ -591,12 +587,12 @@ int32_t DistributedSchedMissionManager::StartSyncMissionsFromRemote(const Caller
         }
     }
 
-    int32_t result = DistributedSchedAdapter::GetInstance().GetLocalMissionInfos(Mission::GET_MAX_MISSIONS,
-        missionInfoSet);
+    int32_t result = mainServiceChannel_->GetLocalMissionInfos(Constants::Mission::GET_MAX_MISSIONS,
+                                                               missionInfoSet);
     auto func = [this, missionInfoSet]() {
         HILOGD("RegisterMissionListener called.");
         if (!isRegMissionChange_) {
-            int32_t ret = DistributedSchedAdapter::GetInstance().RegisterMissionListener(missonChangeListener_);
+            int32_t ret = mainServiceChannel_->RegisterMissionListener(missonChangeListener_);
             if (ret == ERR_OK) {
                 isRegMissionChange_ = true;
             }
@@ -629,7 +625,7 @@ bool DistributedSchedMissionManager::CheckAccessControlForMissions(const CallerI
         .userId = accountInfo.userId,
     };
     std::string localDeviceId;
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
+    if (!mainServiceChannel_->GetLocalDeviceId(localDeviceId)) {
         HILOGE("GetLocalDeviceId failed");
         return false;
     }
@@ -654,7 +650,7 @@ void DistributedSchedMissionManager::StopSyncMissionsFromRemote(const std::strin
         remoteSyncDeviceSet_.erase(networkId);
         if (remoteSyncDeviceSet_.empty()) {
             auto func = [this]() {
-                int32_t ret = DistributedSchedAdapter::GetInstance().UnRegisterMissionListener(missonChangeListener_);
+                int32_t ret = mainServiceChannel_->UnRegisterMissionListener(missonChangeListener_);
                 if (ret == ERR_OK) {
                     isRegMissionChange_ = false;
                 }
@@ -793,7 +789,7 @@ void DistributedSchedMissionManager::DeleteCachedSnapshotInfo(const std::string&
         HILOGW("networkId empty!");
         return;
     }
-    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(networkId);
+    std::string uuid = mainServiceChannel_->GetUuidByNetworkId(networkId);
     if (uuid.empty()) {
         HILOGW("uuid empty!");
         return;
@@ -812,7 +808,7 @@ void DistributedSchedMissionManager::DeleteCachedSnapshotInfo(const std::string&
 int32_t DistributedSchedMissionManager::FetchCachedRemoteMissions(const std::string& srcId, int32_t numMissions,
     std::vector<DstbMissionInfo>& missionInfoSet)
 {
-    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(srcId);
+    std::string uuid = mainServiceChannel_->GetUuidByNetworkId(srcId);
     if (uuid.empty()) {
         HILOGE("uuid empty!");
         return INVALID_PARAMETERS_ERR;
@@ -831,7 +827,7 @@ int32_t DistributedSchedMissionManager::FetchCachedRemoteMissions(const std::str
         return ERR_NULL_OBJECT;
     }
     missionInfoSet.assign((iter->second).begin(),
-        (actualNums > numMissions) ? (iter->second).begin() + numMissions : (iter->second).end());
+                          (actualNums > numMissions) ? (iter->second).begin() + numMissions : (iter->second).end());
     return ERR_NONE;
 }
 
@@ -839,7 +835,7 @@ void DistributedSchedMissionManager::RebornMissionCache(const std::string& devic
     const std::vector<DstbMissionInfo>& missionInfoSet)
 {
     HILOGI("start! deviceId is %{public}s.", GetAnonymStr(deviceId).c_str());
-    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(deviceId);
+    std::string uuid = mainServiceChannel_->GetUuidByNetworkId(deviceId);
     if (uuid.empty()) {
         HILOGE("uuid empty!");
         return;
@@ -854,7 +850,7 @@ void DistributedSchedMissionManager::RebornMissionCache(const std::string& devic
 void DistributedSchedMissionManager::CleanMissionCache(const std::string& deviceId)
 {
     HILOGI("CleanMissionCache start! deviceId is %{public}s.", GetAnonymStr(deviceId).c_str());
-    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(deviceId);
+    std::string uuid = mainServiceChannel_->GetUuidByNetworkId(deviceId);
     if (uuid.empty()) {
         HILOGE("CleanMissionCache uuid empty!");
         return;
@@ -900,8 +896,8 @@ void DistributedSchedMissionManager::NotifyLocalMissionsChanged()
     auto func = [this]() {
         HILOGI("NotifyLocalMissionsChanged");
         std::vector<DstbMissionInfo> missionInfos;
-        int32_t ret = DistributedSchedAdapter::GetInstance().GetLocalMissionInfos(Mission::GET_MAX_MISSIONS,
-            missionInfos);
+        int32_t ret = mainServiceChannel_->GetLocalMissionInfos(Constants::Mission::GET_MAX_MISSIONS,
+                                                                missionInfos);
         if (ret == ERR_OK) {
             int32_t result = NotifyMissionsChangedToRemote(missionInfos);
             HILOGI("NotifyMissionsChangedToRemote result = %{public}d", result);
@@ -1007,13 +1003,13 @@ void DistributedSchedMissionManager::NotifyMissionsChangedToRemoteInner(const st
     int64_t begin = GetTickCount();
     int32_t result = remoteDms->NotifyMissionsChangedFromRemote(missionInfoSet, callerInfo);
     HILOGI("[PerformanceTest] NotifyMissionsChangedFromRemote ret:%{public}d, spend %{public}" PRId64 " ms",
-        result, GetTickCount() - begin);
+           result, GetTickCount() - begin);
 }
 
 bool DistributedSchedMissionManager::GenerateCallerInfo(CallerInfo& callerInfo)
 {
     std::string localUuid;
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localUuid)) {
+    if (!mainServiceChannel_->GetLocalDeviceId(localUuid)) {
         HILOGE("get local uuid failed!");
         return false;
     }
@@ -1033,7 +1029,7 @@ std::shared_ptr<AppExecFwk::EventHandler> DistributedSchedMissionManager::FetchD
         return nullptr;
     }
 
-    std::string uuid = DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(deviceId);
+    std::string uuid = mainServiceChannel_->GetUuidByNetworkId(deviceId);
     if (uuid.empty()) {
         HILOGE("FetchDeviceHandler uuid empty!");
         return nullptr;
@@ -1149,7 +1145,7 @@ void DistributedSchedMissionManager::OnRemoteDmsDied(const sptr<IRemoteObject>& 
     bool ret = HasSyncListener(devId);
     if (ret) {
         std::string localDeviceId;
-        if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
+        if (!mainServiceChannel_->GetLocalDeviceId(localDeviceId)) {
             return;
         }
         RetryStartSyncRemoteMissions(devId, localDeviceId, 0);
@@ -1172,7 +1168,7 @@ void DistributedSchedMissionManager::RetryRegisterMissionChange(int32_t retryTim
         if (!isRegMissionChange_) {
             return;
         }
-        int32_t ret = DistributedSchedAdapter::GetInstance().RegisterMissionListener(missonChangeListener_);
+        int32_t ret = mainServiceChannel_->RegisterMissionListener(missonChangeListener_);
         if (ret == ERR_NULL_OBJECT) {
             RetryRegisterMissionChange(retryTimes + 1);
             HILOGI("RetryRegisterMissionChange dmsproxy null, retry!");
@@ -1198,13 +1194,12 @@ void DistributedSchedMissionManager::InitAllSnapshots(const std::vector<DstbMiss
 int32_t DistributedSchedMissionManager::MissionSnapshotChanged(int32_t missionId)
 {
     std::string networkId;
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(networkId)) {
+    if (!mainServiceChannel_->GetLocalDeviceId(networkId)) {
         HILOGE("get local networkId failed!");
         return INVALID_PARAMETERS_ERR;
     }
     AAFwk::MissionSnapshot missionSnapshot;
-    ErrCode errCode = DistributedSchedAdapter::GetInstance()
-        .GetLocalMissionSnapshotInfo(networkId, missionId, missionSnapshot);
+    ErrCode errCode = mainServiceChannel_->GetLocalMissionSnapshotInfo(networkId, missionId, missionSnapshot);
     if (errCode != ERR_OK) {
         HILOGE("get local mission snapshot failed, missionId=%{public}d, errCode=%{public}d", missionId, errCode);
         return errCode;
@@ -1230,7 +1225,7 @@ int32_t DistributedSchedMissionManager::MissionSnapshotChanged(int32_t missionId
 int32_t DistributedSchedMissionManager::MissionSnapshotDestroyed(int32_t missionId)
 {
     std::string networkId;
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(networkId)) {
+    if (!mainServiceChannel_->GetLocalDeviceId(networkId)) {
         HILOGE("get local networkId failed!");
         return INVALID_PARAMETERS_ERR;
     }
@@ -1262,12 +1257,23 @@ void DistributedSchedMissionManager::OnDnetDied()
             return;
         }
         remoteSyncDeviceSet_.clear();
-        DistributedSchedAdapter::GetInstance().UnRegisterMissionListener(missonChangeListener_);
+        mainServiceChannel_->UnRegisterMissionListener(missonChangeListener_);
         isRegMissionChange_ = false;
     };
     if (missionHandler_ != nullptr) {
         missionHandler_->PostTask(dnetDiedFunc);
     }
+}
+
+void DistributedSchedMissionManager::SetMainServiceChannel(
+    const std::shared_ptr<DmsMainServiceChannel> &mainServiceChannel)
+{
+    mainServiceChannel_ = mainServiceChannel;
+}
+
+const std::shared_ptr<DmsMainServiceChannel> &DistributedSchedMissionManager::GetMainServiceChannel() const
+{
+    return mainServiceChannel_;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
