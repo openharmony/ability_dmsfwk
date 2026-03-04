@@ -67,14 +67,18 @@ ohos_shared_library("continuemanager_napi") {
     "ability_runtime:wantagent_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
-    "device_security_level:dslm_sdk",
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
     "resource_management:global_resmgr",
     "samgr:samgr_proxy",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [
+      "device_manager:devicemanagersdk",
+      "device_security_level:dslm_sdk",
+    ]
+  }
 
   relative_install_dir = "module/app/ability"
   subsystem_name = "ability"

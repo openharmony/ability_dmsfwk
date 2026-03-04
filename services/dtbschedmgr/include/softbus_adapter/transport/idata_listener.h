@@ -16,10 +16,23 @@
 #ifndef OHOS_I_DATA_LISTENER_H
 #define OHOS_I_DATA_LISTENER_H
 
+#include <memory>
+#include <string>
+#ifndef DISABLE_DISTRIBUTEDSCHED_SERVICE
 #include "socket.h"
+#endif
 
 namespace OHOS {
 namespace DistributedSchedule {
+
+#ifdef DISABLE_DISTRIBUTEDSCHED_SERVICE
+// Define placeholder types when distributed sched service is disabled
+struct PeerSocketInfo {
+    std::string networkId;
+    std::string name;
+};
+#endif
+
 class IDataListener {
 public:
     IDataListener() {}

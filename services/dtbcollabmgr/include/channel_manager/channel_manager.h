@@ -20,7 +20,6 @@
 #include "data_sender_receiver.h"
 #include "dms_interface_structure.h"
 #include "single_instance.h"
-#include "socket.h"
 #include <map>
 #include <memory>
 #include <mutex>

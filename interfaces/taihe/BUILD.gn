@@ -27,6 +27,11 @@ config("taihe_config") {
     "${dms_path}/services/dtbcollabmgr/include/av_trans_stream_provider",
     "${dms_path}/services/dtbcollabmgr/include/channel_manager",
   ]
+
+  defines = []
+  if (dmsfwk_disable_distributedsched_service) {
+    defines += [ "DISABLE_DISTRIBUTEDSCHED_SERVICE" ]
+  }
 }
 
 subsystem_name = "ability"
@@ -89,12 +94,14 @@ taihe_shared_library("dmsfwk_taihe_native") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_native",
     "image_framework:image_taihe",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 }
 
 generate_static_abc("dmsfwk_taihe_ani") {

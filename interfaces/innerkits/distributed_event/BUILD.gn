@@ -44,12 +44,14 @@ ohos_shared_library("distributed_sdk") {
   }
 
   sources = [
-    "${dms_path}/interfaces/innerkits/distributed_event/src/dms_client.cpp",
-    "${dms_path}/interfaces/innerkits/distributed_event/src/dms_handler.cpp",
     "${dms_path}/interfaces/innerkits/distributed_event/src/dms_listener_stub.cpp",
+    "${dms_path}/interfaces/innerkits/distributed_event/src/dms_handler.cpp",
+    "${dms_path}/interfaces/innerkits/distributed_event/src/dms_client.cpp",
     "${dms_path}/interfaces/innerkits/distributed_event/src/dms_sa_client.cpp",
-    "${dms_path}/interfaces/innerkits/distributed_event/src/dms_static_capability.cpp",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    sources += [ "${dms_path}/interfaces/innerkits/distributed_event/src/dms_static_capability.cpp" ]
+  }
 
   public_configs = [
     ":dms_sdk_public_config",
@@ -66,11 +68,13 @@ ohos_shared_library("distributed_sdk") {
 
   external_deps = [
     "c_utils:utils",
-    "device_info_manager:distributed_device_profile_common",
     "hilog:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "device_info_manager:distributed_device_profile_common" ]
+  }
   public_external_deps = [ "ability_runtime:ability_manager" ]
   subsystem_name = "ability"
   innerapi_tags = [ "platformsdk" ]

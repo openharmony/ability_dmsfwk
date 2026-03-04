@@ -45,18 +45,21 @@ ohos_shared_library("dtbcollab_av_stream_trans_provider") {
     "${dms_path}/services/dtbcollabmgr/src/channel_manager:dtbcollab_channel_manager",
   ]
 
-  sources = [
-    "av_receiver_engine.cpp",
-    "av_receiver_filter.cpp",
-    "av_receiver_filter_listener.cpp",
-    "av_sender_engine.cpp",
-    "av_sender_filter.cpp",
-    "av_stream_param.cpp",
-    "surface_decoder_adapter.cpp",
-    "surface_decoder_filter.cpp",
-    "surface_encoder_adapter.cpp",
-    "surface_encoder_filter.cpp",
-  ]
+  sources = []
+  if (!dmsfwk_disable_distributedsched_service) {
+    sources += [
+      "av_receiver_engine.cpp",
+      "av_receiver_filter.cpp",
+      "av_receiver_filter_listener.cpp",
+      "av_sender_engine.cpp",
+      "av_sender_filter.cpp",
+      "av_stream_param.cpp",
+      "surface_decoder_adapter.cpp",
+      "surface_decoder_filter.cpp",
+      "surface_encoder_adapter.cpp",
+      "surface_encoder_filter.cpp",
+    ]
+  }
 
   defines = []
 
@@ -78,7 +81,6 @@ ohos_shared_library("dtbcollab_av_stream_trans_provider") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -86,11 +88,18 @@ ohos_shared_library("dtbcollab_av_stream_trans_provider") {
     "image_framework:image_native",
     "media_foundation:media_foundation",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   if (dmsfwk_vpe_enable) {
     external_deps += [ "video_processing_engine:video_processing" ]
     defines += [ "DMSFWK_VPE_ENABLE" ]
     sources += [ "av_colorspace_converter.cpp" ]
+  }
+
+  if (dmsfwk_disable_distributedsched_service) {
+    sources = []
   }
 
   install_images = [ system_base_dir ]

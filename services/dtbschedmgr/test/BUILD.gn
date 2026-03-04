@@ -65,14 +65,22 @@ dsched_external_deps = [
   "c_utils:utils",
   "data_share:datashare_consumer",
   "device_auth:deviceauth_sdk",
-  "device_info_manager:distributed_device_profile_common",
-  "device_info_manager:distributed_device_profile_sdk",
-  "device_manager:devicemanagersdk",
-  "device_security_level:dslm_sdk",
-  "distributed_bundle_framework:dbms_fwk",
   "dmsfwk:continuation_manager",
-  "dsoftbus:softbus_client",
-  "dsoftbus:softbus_utils",
+]
+
+if (!dmsfwk_disable_distributedsched_service) {
+  dsched_external_deps += [
+    "distributed_bundle_framework:dbms_fwk",
+    "device_info_manager:distributed_device_profile_common",
+    "device_info_manager:distributed_device_profile_sdk",
+    "device_manager:devicemanagersdk",
+    "device_security_level:dslm_sdk",
+    "dsoftbus:softbus_client",
+    "dsoftbus:softbus_utils",
+  ]
+}
+
+dsched_external_deps += [
   "eventhandler:libeventhandler",
   "ffrt:libffrt",
   "hilog:libhilog",
@@ -89,6 +97,7 @@ dsched_external_deps = [
   "window_manager:scene_session",
   "window_manager:session_manager_lite",
 ]
+
 if (os_account_part) {
   dsched_external_deps += [ "os_account:os_account_innerkits" ]
 }
@@ -1340,51 +1349,53 @@ ohos_unittest("distributedadaptertest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":bundlemanagerinternaltest",
-    ":distributedadaptertest",
-    ":distributedcalltest",
-    ":distributedeventtest",
-    ":distributedschedadaptertest",
-    ":distributedschedcallbacktest",
-    ":distributedschedservicetest",
-    ":distributedschedstubtest",
-    ":distributeduidtest",
-    ":distributedwanttest",
-    ":dmsbasetest",
-    ":dmscollabeventtest",
-    ":dmscollabmgrtest",
-    ":dmscollabsrcstattest",
-    ":dmscollabstatetest",
-    ":dmscollabsuptest",
-    ":dmscollabtest",
-    ":dmsfreeinstallcbtest",
-    ":dmsversionmanagertest",
-    ":dschedconnecttest",
-    ":dschedcontinuationtest",
-    ":dschedcontinuemanagerstatetest",
-    ":dschedcontinuesinkstatetest",
-    ":dschedcontinuesrcstatetest",
-    ":dschedcontinuestatetest",
-    ":dschedcontinuesuptest",
-    ":dschedcontinuetest",
-    ":dschedswitchstatustest",
-    ":hisyseventreporttest",
-    ":multiusermanagertest",
-    ":softbusadaptertest",
-    "${dms_path}/common/test/unittest:distributed_sched_utils_test",
-  ]
-  if (dmsfwk_mission_manager) {
-    deps += [
-      ":distributedmissionmanagertest",
-      ":dmscontinueconditionmgrtest",
-      ":dmscontinuemanagertest",
-      ":dmscontinuemgrtest",
-      ":dmscontinuerecommendmgrtest",
-      ":dmsmissionmanagertest",
-      ":dschedpermissiontest",
-      ":dschedsynce2etest",
-      ":svcdistributedconnectiontest",
+  if (!dmsfwk_disable_distributedsched_service) {
+    deps = [
+      ":bundlemanagerinternaltest",
+      ":distributedadaptertest",
+      ":distributedcalltest",
+      ":distributedeventtest",
+      ":distributedschedadaptertest",
+      ":distributedschedcallbacktest",
+      ":distributedschedservicetest",
+      ":distributedschedstubtest",
+      ":distributeduidtest",
+      ":distributedwanttest",
+      ":dmsbasetest",
+      ":dmscollabeventtest",
+      ":dmscollabmgrtest",
+      ":dmscollabsrcstattest",
+      ":dmscollabstatetest",
+      ":dmscollabsuptest",
+      ":dmscollabtest",
+      ":dmsfreeinstallcbtest",
+      ":dmsversionmanagertest",
+      ":dschedconnecttest",
+      ":dschedcontinuationtest",
+      ":dschedcontinuemanagerstatetest",
+      ":dschedcontinuesinkstatetest",
+      ":dschedcontinuesrcstatetest",
+      ":dschedcontinuestatetest",
+      ":dschedcontinuesuptest",
+      ":dschedcontinuetest",
+      ":dschedswitchstatustest",
+      ":hisyseventreporttest",
+      ":multiusermanagertest",
+      ":softbusadaptertest",
+      "${dms_path}/common/test/unittest:distributed_sched_utils_test",
     ]
+    if (dmsfwk_mission_manager) {
+      deps += [
+        ":distributedmissionmanagertest",
+        ":dmscontinueconditionmgrtest",
+        ":dmscontinuemanagertest",
+        ":dmscontinuemgrtest",
+        ":dmscontinuerecommendmgrtest",
+        ":dmsmissionmanagertest",
+        ":dschedpermissiontest",
+        ":dschedsynce2etest",
+        ":svcdistributedconnectiontest",
+      ]
+    }
   }
 }
