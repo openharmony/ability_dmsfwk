@@ -269,6 +269,10 @@ cJSON* AVSenderEngine::GetVideoCodecAbility()
     }
 
     cJSON* result = cJSON_CreateObject();
+    if (result == nullptr) {
+        HILOGE("create json object failed");
+        return nullptr;
+    }
     cJSON_AddItemToObject(result, VIDEO_CODEC_LIST_KEY, abilityList);
     return result;
 }
