@@ -31,6 +31,11 @@ config("distributed_collab_config") {
     "${dms_path}/services/dtbcollabmgr/include/ability_connection_manager",
     "${dms_path}/services/dtbschedmgr/include",
   ]
+
+  defines = []
+  if (dmsfwk_disable_distributedsched_service) {
+    defines += [ "DISABLE_DISTRIBUTEDSCHED_SERVICE" ]
+  }
 }
 
 ohos_shared_library("distributed_ability_connection_manager") {
@@ -46,15 +51,25 @@ ohos_shared_library("distributed_ability_connection_manager") {
   public_configs = [ ":distributed_collab_config" ]
 
   sources = [
-    "${dms_path}/interfaces/kits/napi/ability_connection_manager/napi_ability_connection_session_listener.cpp",
     "ability_connection_info.cpp",
-    "ability_connection_manager.cpp",
-    "ability_connection_manager_listener.cpp",
-    "ability_connection_manager_stub.cpp",
-    "ability_connection_session.cpp",
-    "distributed_client.cpp",
-    "message_data_header.cpp",
+    "${dms_path}/interfaces/kits/napi/ability_connection_manager/napi_ability_connection_session_listener.cpp",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    sources += [
+      "ability_connection_manager.cpp",
+      "ability_connection_manager_listener.cpp",
+      "ability_connection_manager_stub.cpp",
+      "ability_connection_session.cpp",
+      "distributed_client.cpp",
+      "message_data_header.cpp",
+    ]
+  } else {
+    sources += [
+      "ability_connection_manager_disabled.cpp",
+      "ability_connection_manager_listener.cpp",
+      "ability_connection_manager_stub.cpp",
+    ]
+  }
 
   configs = [ ":distributed_collab_config" ]
 
@@ -75,7 +90,6 @@ ohos_shared_library("distributed_ability_connection_manager") {
     "bundle_framework:libappexecfwk_common",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -90,6 +104,9 @@ ohos_shared_library("distributed_ability_connection_manager") {
     "wifi:wifi_sdk",
     "window_manager:libwm",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   if (dmsfwk_vpe_enable) {
     external_deps += [ "video_processing_engine:video_processing" ]

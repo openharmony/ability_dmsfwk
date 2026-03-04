@@ -60,7 +60,6 @@ ohos_unittest("AbilityConnectionMgrTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "googletest:gmock",
     "hilog:libhilog",
@@ -68,6 +67,9 @@ ohos_unittest("AbilityConnectionMgrTest") {
     "media_foundation:media_foundation",
     "napi:ace_napi",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   if (dmsfwk_vpe_enable) {
     external_deps += [ "video_processing_engine:video_processing" ]
@@ -107,7 +109,6 @@ ohos_unittest("AbilityConnectionMgrStubTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "googletest:gmock",
     "hilog:libhilog",
@@ -115,6 +116,9 @@ ohos_unittest("AbilityConnectionMgrStubTest") {
     "media_foundation:media_foundation",
     "napi:ace_napi",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   if (dmsfwk_vpe_enable) {
     external_deps += [ "video_processing_engine:video_processing" ]
@@ -154,7 +158,6 @@ ohos_unittest("DistributedClientTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "googletest:gmock",
     "hilog:libhilog",
@@ -163,6 +166,9 @@ ohos_unittest("DistributedClientTest") {
     "media_foundation:media_foundation",
     "napi:ace_napi",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   if (dmsfwk_vpe_enable) {
     external_deps += [ "video_processing_engine:video_processing" ]
@@ -204,7 +210,6 @@ ohos_unittest("AbilityConnectionSessionTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "googletest:gmock",
     "hilog:libhilog",
@@ -213,6 +218,9 @@ ohos_unittest("AbilityConnectionSessionTest") {
     "media_foundation:media_foundation",
     "napi:ace_napi",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   if (dmsfwk_vpe_enable) {
     external_deps += [ "video_processing_engine:video_processing" ]
@@ -252,7 +260,6 @@ ohos_unittest("MessageDataHeaderTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "googletest:gmock",
     "hilog:libhilog",
@@ -260,6 +267,9 @@ ohos_unittest("MessageDataHeaderTest") {
     "media_foundation:media_foundation",
     "napi:ace_napi",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   if (dmsfwk_vpe_enable) {
     external_deps += [ "video_processing_engine:video_processing" ]
@@ -271,11 +281,13 @@ ohos_unittest("MessageDataHeaderTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":AbilityConnectionMgrStubTest",
-    ":AbilityConnectionMgrTest",
-    ":AbilityConnectionSessionTest",
-    ":DistributedClientTest",
-    ":MessageDataHeaderTest",
-  ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    deps = [
+      ":AbilityConnectionMgrStubTest",
+      ":AbilityConnectionMgrTest",
+      ":AbilityConnectionSessionTest",
+      ":DistributedClientTest",
+      ":MessageDataHeaderTest",
+    ]
+  }
 }

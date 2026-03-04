@@ -53,7 +53,6 @@ ohos_unittest("AVStreamParamTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -61,6 +60,9 @@ ohos_unittest("AVStreamParamTest") {
     "image_framework:image_native",
     "media_foundation:media_foundation",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   part_name = "dmsfwk"
   subsystem_name = "ability"
@@ -92,7 +94,6 @@ ohos_unittest("AVSenderEngineTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -100,6 +101,9 @@ ohos_unittest("AVSenderEngineTest") {
     "image_framework:image_native",
     "media_foundation:media_foundation",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   defines = []
 
@@ -138,7 +142,6 @@ ohos_unittest("AVReceiverEngineTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -146,6 +149,9 @@ ohos_unittest("AVReceiverEngineTest") {
     "image_framework:image_native",
     "media_foundation:media_foundation",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   part_name = "dmsfwk"
   subsystem_name = "ability"
@@ -181,7 +187,6 @@ ohos_unittest("SurfaceDecoderFilterTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -189,6 +194,9 @@ ohos_unittest("SurfaceDecoderFilterTest") {
     "image_framework:image_native",
     "media_foundation:media_foundation",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   part_name = "dmsfwk"
   subsystem_name = "ability"
@@ -231,7 +239,6 @@ ohos_unittest("SurfaceDecoderFilterSupTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "googletest:gmock",
     "graphic_surface:surface",
@@ -240,6 +247,9 @@ ohos_unittest("SurfaceDecoderFilterSupTest") {
     "image_framework:image_native",
     "media_foundation:media_foundation",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   part_name = "dmsfwk"
   subsystem_name = "ability"
@@ -275,7 +285,6 @@ ohos_unittest("SurfaceDecoderAdapterTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -283,6 +292,9 @@ ohos_unittest("SurfaceDecoderAdapterTest") {
     "image_framework:image_native",
     "media_foundation:media_foundation",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   part_name = "dmsfwk"
   subsystem_name = "ability"
@@ -318,7 +330,6 @@ ohos_unittest("SurfaceEncoderAdapterTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -326,6 +337,9 @@ ohos_unittest("SurfaceEncoderAdapterTest") {
     "image_framework:image_native",
     "media_foundation:media_foundation",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   part_name = "dmsfwk"
   subsystem_name = "ability"
@@ -357,7 +371,6 @@ ohos_unittest("AVReceiverFilterTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -365,6 +378,9 @@ ohos_unittest("AVReceiverFilterTest") {
     "image_framework:image_native",
     "media_foundation:media_foundation",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   part_name = "dmsfwk"
   subsystem_name = "ability"
@@ -396,7 +412,6 @@ ohos_unittest("AVSenderFilterTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -404,6 +419,9 @@ ohos_unittest("AVSenderFilterTest") {
     "image_framework:image_native",
     "media_foundation:media_foundation",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   part_name = "dmsfwk"
   subsystem_name = "ability"
@@ -435,7 +453,6 @@ ohos_unittest("SurfaceEncoderFilterTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -443,6 +460,9 @@ ohos_unittest("SurfaceEncoderFilterTest") {
     "image_framework:image_native",
     "media_foundation:media_foundation",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   part_name = "dmsfwk"
   subsystem_name = "ability"
@@ -473,7 +493,6 @@ ohos_unittest("AVColorspaceConverterTest") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "graphic_surface:surface",
     "hilog:libhilog",
@@ -481,6 +500,9 @@ ohos_unittest("AVColorspaceConverterTest") {
     "image_framework:image_native",
     "media_foundation:media_foundation",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   defines = []
 
@@ -498,17 +520,19 @@ ohos_unittest("AVColorspaceConverterTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":AVReceiverEngineTest",
-    ":AVReceiverFilterTest",
-    ":AVSenderEngineTest",
-    ":AVSenderFilterTest",
-    ":AVStreamParamTest",
-    ":SurfaceDecoderAdapterTest",
-    ":SurfaceDecoderFilterSupTest",
-    ":SurfaceDecoderFilterTest",
-    ":SurfaceEncoderAdapterTest",
-    ":SurfaceEncoderFilterTest",
-    ":AVColorspaceConverterTest",
-  ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    deps = [
+      ":AVReceiverEngineTest",
+      ":AVReceiverFilterTest",
+      ":AVSenderEngineTest",
+      ":AVSenderFilterTest",
+      ":AVStreamParamTest",
+      ":SurfaceDecoderAdapterTest",
+      ":SurfaceDecoderFilterSupTest",
+      ":SurfaceDecoderFilterTest",
+      ":SurfaceEncoderAdapterTest",
+      ":SurfaceEncoderFilterTest",
+      ":AVColorspaceConverterTest",
+    ]
+  }
 }

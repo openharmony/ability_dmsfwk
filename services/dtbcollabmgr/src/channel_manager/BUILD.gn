@@ -29,6 +29,11 @@ config("distributed_collab_config") {
     "${dms_path}/interfaces/innerkits/common/include",
     "${dms_path}/services/dtbcollabmgr/include/channel_manager",
   ]
+
+  defines = []
+  if (dmsfwk_disable_distributedsched_service) {
+    defines += [ "DISABLE_DISTRIBUTEDSCHED_SERVICE" ]
+  }
 }
 
 ohos_shared_library("dtbcollab_channel_manager") {
@@ -42,10 +47,16 @@ ohos_shared_library("dtbcollab_channel_manager") {
   sources = [
     "av_trans_data_buffer.cpp",
     "av_trans_stream_data.cpp",
-    "channel_manager.cpp",
-    "data_sender_receiver.cpp",
     "session_data_header.cpp",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    sources += [
+      "channel_manager.cpp",
+      "data_sender_receiver.cpp",
+    ]
+  } else {
+    sources += [ "channel_manager_disabled.cpp" ]
+  }
 
   configs = [ ":distributed_collab_config" ]
 
@@ -54,11 +65,15 @@ ohos_shared_library("dtbcollab_channel_manager") {
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
-    "dsoftbus:softbus_utils",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [
+      "dsoftbus:softbus_client",
+      "dsoftbus:softbus_utils",
+    ]
+  }
 
   install_images = [ system_base_dir ]
   relative_install_dir = "platformsdk"

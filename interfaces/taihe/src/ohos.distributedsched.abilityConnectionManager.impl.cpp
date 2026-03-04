@@ -164,6 +164,12 @@ int32_t CreateAbilityConnectionSession(taihe::string_view serviceName, uintptr_t
     ohos::distributedsched::abilityConnectionManager::PeerInfo const& peerInfo,
     ohos::distributedsched::abilityConnectionManager::ConnectOptions const& connectOptions)
 {
+#ifdef DISABLE_DISTRIBUTEDSCHED_SERVICE
+    HILOGI("Distributed sched service disabled, returning CAPABILITY_NOT_SUPPORT_ERR.");
+    ThrowBusinessError(CAPABILITY_NOT_SUPPORT_ERR);
+    return CAPABILITY_NOT_SUPPORT_ERR;
+#endif
+
     int32_t sessionId = -1;
     std::string realServiceName(serviceName);
     PeerInfo realPeerInfo = PeerInfoAdapter::ConvertFromTaihe(peerInfo);

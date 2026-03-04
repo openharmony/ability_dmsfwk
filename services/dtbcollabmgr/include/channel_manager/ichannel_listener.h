@@ -17,7 +17,6 @@
 #define OHOS_DSCHED_COLLAB_CHANNEL_ILISTENER_H
 #include "av_trans_stream_data.h"
 #include "channel_common_definition.h"
-#include "socket.h"
 #include <memory>
 
 namespace OHOS {

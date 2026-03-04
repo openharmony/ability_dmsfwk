@@ -17,5 +17,7 @@ import("//foundation/ability/dmsfwk/dmsfwk.gni")
 group("unittest") {
   testonly = true
 
-  deps = [ "distributed_extension:distributed_extension_ability_test" ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    deps = [ "distributed_extension:distributed_extension_ability_test" ]
+  }
 }

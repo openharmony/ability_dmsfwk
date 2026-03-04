@@ -49,7 +49,6 @@ dtbabilitymgr_external_deps = [
   "bundle_framework:appexecfwk_base",
   "bundle_framework:appexecfwk_core",
   "c_utils:utils",
-  "device_manager:devicemanagersdk",
   "eventhandler:libeventhandler",
   "ffrt:libffrt",
   "hilog:libhilog",
@@ -58,6 +57,11 @@ dtbabilitymgr_external_deps = [
   "safwk:system_ability_fwk",
   "samgr:samgr_proxy",
 ]
+if (!dmsfwk_disable_distributedsched_service) {
+  dtbabilitymgr_external_deps += [
+    "device_manager:devicemanagersdk",
+  ]
+}
 if (os_account_part) {
   dtbabilitymgr_external_deps += [ "os_account:os_account_innerkits" ]
 }
