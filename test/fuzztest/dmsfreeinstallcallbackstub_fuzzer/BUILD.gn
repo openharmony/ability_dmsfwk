@@ -71,12 +71,6 @@ ohos_fuzztest("DmsFreeInstallCallBackStubFuzzTest") {
     "c_utils:utils",
     "data_share:datashare_consumer",
     "device_auth:deviceauth_sdk",
-    "device_info_manager:distributed_device_profile_common",
-    "device_info_manager:distributed_device_profile_sdk",
-    "device_manager:devicemanagersdk",
-    "device_security_level:dslm_sdk",
-    "distributed_bundle_framework:dbms_fwk",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
@@ -88,6 +82,16 @@ ohos_fuzztest("DmsFreeInstallCallBackStubFuzzTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [
+      "distributed_bundle_framework:dbms_fwk",
+      "device_info_manager:distributed_device_profile_common",
+      "device_info_manager:distributed_device_profile_sdk",
+      "device_manager:devicemanagersdk",
+      "device_security_level:dslm_sdk",
+      "dsoftbus:softbus_client",
+    ]
+  }
 }
 
 group("fuzztest") {

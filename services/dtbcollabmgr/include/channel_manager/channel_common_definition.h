@@ -21,8 +21,45 @@
 #include <string>
 #include <vector>
 
+#ifndef DISABLE_DISTRIBUTEDSCHED_SERVICE
+// Include softbus types when distributed sched service is enabled
+#include "socket.h"
+#endif
+
 namespace OHOS {
 namespace DistributedCollab {
+
+#ifndef DISABLE_DISTRIBUTEDSCHED_SERVICE
+// softbus types are included from socket.h above
+#else
+// Define placeholder types when distributed sched service is disabled
+struct PeerSocketInfo {
+    std::string networkId;
+    std::string name;
+};
+
+enum ShutdownReason : int32_t {
+    SHUTDOWN_REASON_UNKNOWN = 0
+};
+
+struct StreamData {
+    const void* data = nullptr;
+    uint32_t dataLen = 0;
+};
+
+struct StreamFrameInfo {
+    int32_t code = 0;
+    const char* seq = nullptr;
+};
+
+struct FileEvent {
+    int32_t type = 0;
+    int32_t errorCode = 0;
+    const char* fileName = nullptr;
+    int64_t fileSize = 0;
+    int64_t finishedSize = 0;
+};
+#endif // DISABLE_DISTRIBUTEDSCHED_SERVICE
 enum class ChannelStatus {
     CONNECTED = 0,
     UNCONNECTED

@@ -77,12 +77,6 @@ dsched_external_deps = [
     "c_utils:utils",
     "data_share:datashare_consumer",
     "device_auth:deviceauth_sdk",
-    "device_info_manager:distributed_device_profile_common",
-    "device_info_manager:distributed_device_profile_sdk",
-    "device_manager:devicemanagersdk",
-    "device_security_level:dslm_sdk",
-    "distributed_bundle_framework:dbms_fwk",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
@@ -95,6 +89,17 @@ dsched_external_deps = [
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    dsched_external_deps += [
+      "distributed_bundle_framework:dbms_fwk",
+      "device_info_manager:distributed_device_profile_common",
+      "device_info_manager:distributed_device_profile_sdk",
+      "device_manager:devicemanagersdk",
+      "device_security_level:dslm_sdk",
+      "dsoftbus:softbus_client",
+      "dsoftbus:softbus_utils",
+    ]
+  }
   if (dmsfwk_standard_form_share) {
     dsched_external_deps += [
       "form_fwk:form_manager",

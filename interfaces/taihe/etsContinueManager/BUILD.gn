@@ -88,13 +88,15 @@ taihe_shared_library("continueManager_so") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "hilog:libhilog",
     "image_framework:image",
     "image_framework:image_taihe",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 }
 
 generate_static_abc("continueManager_taihe_abc") {

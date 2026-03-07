@@ -112,11 +112,13 @@ ohos_unittest("ChannelManagerDataSenderReceiverTest") {
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "googletest:gmock",
     "hilog:libhilog",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   part_name = "dmsfwk"
   subsystem_name = "ability"
@@ -155,11 +157,13 @@ ohos_unittest("ChannelManagerTest") {
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "googletest:gmock",
     "hilog:libhilog",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   part_name = "dmsfwk"
   subsystem_name = "ability"
@@ -167,10 +171,12 @@ ohos_unittest("ChannelManagerTest") {
 
 group("unittest") {
   testonly = true
-  deps = [
-    ":ChannelManagerAVTransStreamDataTest",
-    ":ChannelManagerDataSenderReceiverTest",
-    ":ChannelManagerSessionDataHeaderTest",
-    ":ChannelManagerTest",
-  ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    deps = [
+      ":ChannelManagerAVTransStreamDataTest",
+      ":ChannelManagerDataSenderReceiverTest",
+      ":ChannelManagerSessionDataHeaderTest",
+      ":ChannelManagerTest",
+    ]
+  }
 }

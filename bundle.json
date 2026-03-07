@@ -26,6 +26,7 @@
         "dmsfwk_report_memmgr_plugins",
         "dmsfwk_softbus_adapter_common",
         "dmsfwk_service_disable",
+        "dmsfwk_disable_distributedsched_service",
         "dmsfwk_check_bt",
         "dmsfwk_check_wifi",
         "dmsfwk_recv_broadcast",

@@ -24,6 +24,11 @@ config("abilityconnectionmanager_napi_public_config") {
     "${dms_path}/services/dtbcollabmgr/include/av_trans_stream_provider",
     "${dms_path}/services/dtbcollabmgr/include/channel_manager",
   ]
+
+  defines = []
+  if (dmsfwk_disable_distributedsched_service) {
+    defines += [ "DISABLE_DISTRIBUTEDSCHED_SERVICE" ]
+  }
 }
 
 ohos_shared_library("abilityconnectionmanager_napi") {
@@ -62,7 +67,6 @@ ohos_shared_library("abilityconnectionmanager_napi") {
     "av_codec:native_media_codecbase",
     "cJSON:cjson",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "graphic_surface:surface",
     "hiappevent:hiappevent_innerapi",
     "hilog:libhilog",
@@ -72,6 +76,9 @@ ohos_shared_library("abilityconnectionmanager_napi") {
     "media_foundation:media_foundation",
     "napi:ace_napi",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+  }
 
   relative_install_dir = "module/distributedsched"
 

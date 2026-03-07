@@ -46,9 +46,11 @@ ohos_executable("distributed_extension_test") {
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken_shared",
     "access_token:libtokensetproc_shared",
-    "device_manager:devicemanagersdk",
   ]
- 
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+  }
+
 defines = [
     "HI_LOG_ENABLE",
     "LOG_TAG=\"distributetest\"",
@@ -65,7 +67,9 @@ defines = [
  
 group("dExtensionDemo") {
   testonly = true
-  deps = [
-    ":distributed_extension_test",
-  ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    deps = [
+      ":distributed_extension_test",
+    ]
+  }
 }
