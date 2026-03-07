@@ -23,6 +23,8 @@ declare_args() {
   dmsfwk_report_memmgr_plugins = false
   dmsfwk_softbus_adapter_common = true
   dmsfwk_service_disable = false
+  # Tailor the distributed service-side, compile only the client
+  dmsfwk_disable_distributedsched_service = false
   dmsfwk_ces_listener = false
   dmsfwk_mmi_listener = false
   dmsfwk_check_bt = false

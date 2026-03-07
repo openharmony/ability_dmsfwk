@@ -358,6 +358,11 @@ napi_value CreateBusinessError(napi_env env, int32_t errCode, bool isAsync = tru
 napi_value JsAbilityConnectionManager::CreateAbilityConnectionSession(napi_env env, napi_callback_info info)
 {
     HILOGI("called.");
+#ifdef DISABLE_DISTRIBUTEDSCHED_SERVICE
+    HILOGE("Distributed sched service disabled, returning CAPABILITY_NOT_SUPPORT.");
+    CreateBusinessError(env, CAPABILITY_NOT_SUPPORT_ERR);
+    return nullptr;
+#endif
     GET_PARAMS(env, info, ARG_COUNT_FOUR);
     napi_value result = nullptr;
     if (AbilityConnectionManager::GetInstance().IsMDMControl()) {

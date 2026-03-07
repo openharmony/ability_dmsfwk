@@ -42,19 +42,24 @@ ohos_shared_library("distributed_ability_manager_svr") {
   }
 
   install_enable = true
+
   sources = [
-    "src/continuation_manager/app_connection_stub.cpp",
-    "src/continuation_manager/app_device_callback_stub.cpp",
-    "src/continuation_manager/connect_status_info.cpp",
     "src/continuation_manager/continuation_extra_params.cpp",
-    "src/continuation_manager/continuation_result.cpp",
-    "src/continuation_manager/device_selection_notifier_proxy.cpp",
-    "src/continuation_manager/device_selection_notifier_stub.cpp",
-    "src/continuation_manager/notifier_death_recipient.cpp",
-    "src/continuation_manager/notifier_info.cpp",
-    "src/distributed_ability_manager_dumper.cpp",
-    "src/distributed_ability_manager_service.cpp",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    sources += [
+      "src/continuation_manager/app_connection_stub.cpp",
+      "src/continuation_manager/app_device_callback_stub.cpp",
+      "src/continuation_manager/connect_status_info.cpp",
+      "src/continuation_manager/continuation_result.cpp",
+      "src/continuation_manager/device_selection_notifier_proxy.cpp",
+      "src/continuation_manager/device_selection_notifier_stub.cpp",
+      "src/continuation_manager/notifier_death_recipient.cpp",
+      "src/continuation_manager/notifier_info.cpp",
+      "src/distributed_ability_manager_dumper.cpp",
+      "src/distributed_ability_manager_service.cpp",
+    ]
+  }
 
   configs = [
     ":distributed_ability_manager_config",
