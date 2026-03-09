@@ -35,6 +35,10 @@ const AVTransStreamDataExt& AVTransStreamData::GetStreamDataExt() const
 cJSON* AVTransStreamData::SerializeStreamDataExt() const
 {
     cJSON* root = cJSON_CreateObject();
+    if (root == nullptr) {
+        HILOGE("create json object failed");
+        return nullptr;
+    }
     WriteExtFlagToJson(root);
     WriteExtIndexToJson(root);
     switch (ext_.flag_) {
@@ -93,6 +97,10 @@ inline void AVTransStreamData::WriteExtSendEncodeTToJson(cJSON* root) const
 inline void AVTransStreamData::WriteExtPixelMapPackOptionToJson(cJSON* root) const
 {
     cJSON* pixelMapJson = cJSON_CreateObject();
+    if (pixelMapJson == nullptr) {
+        HILOGE("create json object failed");
+        return;
+    }
     cJSON_AddNumberToObject(pixelMapJson, "quality", ext_.pixelMapOption_.quality);
     cJSON_AddNumberToObject(pixelMapJson, "width", ext_.pixelMapOption_.width);
     cJSON_AddNumberToObject(pixelMapJson, "height", ext_.pixelMapOption_.height);
@@ -102,6 +110,10 @@ inline void AVTransStreamData::WriteExtPixelMapPackOptionToJson(cJSON* root) con
 inline void AVTransStreamData::WriteExtSurfaceParamToJson(cJSON* root) const
 {
     cJSON* surfaceParamJson = cJSON_CreateObject();
+    if (surfaceParamJson == nullptr) {
+        HILOGE("create json object failed");
+        return;
+    }
     cJSON_AddNumberToObject(surfaceParamJson, "rotate", static_cast<uint32_t>(ext_.surfaceParam_.rotate));
     cJSON_AddNumberToObject(surfaceParamJson, "filp", static_cast<uint32_t>(ext_.surfaceParam_.filp));
     cJSON_AddItemToObject(root, "surface_param", surfaceParamJson);
