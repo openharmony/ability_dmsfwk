@@ -378,15 +378,19 @@ abilityConnectionManagerTaihe::EventCallbackInfo EventCallbackInfoAdapter::Conve
             return abilityConnectionManagerTaihe::EventCallbackInfo{};
         }
     }
-    auto pixelMapObj = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(taihe::get_env(), eventCallbackInfo.image);
-    auto pixelMapPtr = reinterpret_cast<uintptr_t>(pixelMapObj);
+    taihe::optional<uintptr_t> image;
+    if (eventCallbackInfo.image != nullptr) {
+        auto pixelMapObj = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(taihe::get_env(), eventCallbackInfo.image);
+        auto pixelMapPtr = reinterpret_cast<uintptr_t>(pixelMapObj);
+        image = taihe::optional<uintptr_t>(std::in_place_t{}, pixelMapPtr);
+    }
     abilityConnectionManagerTaihe::EventCallbackInfo result = {
         .sessionId = eventCallbackInfo.sessionId,
         .reason = taihe::optional<abilityConnectionManagerTaihe::DisconnectReason>(
             std::in_place_t{}, disconnectReason),
         .msg = taihe::optional<taihe::string>(std::in_place_t{}, eventCallbackInfo.msg),
         .data = taihe::optional<taihe::array<uint8_t>>(std::in_place_t{}, data),
-        .image = taihe::optional<uintptr_t>(std::in_place_t{}, pixelMapPtr)
+        .image = image
     };
     return result;
 }
