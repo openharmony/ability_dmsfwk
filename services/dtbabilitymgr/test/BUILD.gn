@@ -45,8 +45,6 @@ dtbabilitymgr_external_deps = [
   "bundle_framework:appexecfwk_core",
   "c_utils:utils",
   "device_auth:deviceauth_sdk",
-  "dmsfwk:common_sdk",
-  "dmsfwk:continuation_manager",
   "eventhandler:libeventhandler",
   "ffrt:libffrt",
   "hilog:libhilog",
@@ -98,8 +96,12 @@ ohos_unittest("continuationmanagertest") {
   deps =
       [ "${distributed_service}/dtbabilitymgr:distributed_ability_manager_svr" ]
   if (is_standard_system) {
+    deps += [
+      "${dms_path}/interfaces/innerkits/common:common_sdk",
+      "${dms_path}/interfaces/innerkits/continuation_manager:continuation_manager",
+    ]
     external_deps = dtbabilitymgr_external_deps
-    public_deps = dtbabilitymgr_public_deps
+    deps += dtbabilitymgr_public_deps
   }
   part_name = "dmsfwk"
 }
@@ -120,8 +122,12 @@ ohos_unittest("distributedabilitymanagerservicetest") {
   ldflags = [ "-rdynamic" ]
   configs += dtbabilitymgr_configs
   if (is_standard_system) {
+    deps = [
+      "${dms_path}/interfaces/innerkits/common:common_sdk",
+      "${dms_path}/interfaces/innerkits/continuation_manager:continuation_manager",
+    ]
     external_deps = dtbabilitymgr_external_deps
-    public_deps = dtbabilitymgr_public_deps
+    deps += dtbabilitymgr_public_deps
   }
   part_name = "dmsfwk"
 }
