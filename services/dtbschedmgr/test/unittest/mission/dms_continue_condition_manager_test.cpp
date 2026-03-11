@@ -461,6 +461,48 @@ HWTEST_F(DmsContinueConditionMgrTest, DmsContinueConditionMgr_CheckBlacklist_001
 }
 
 /**
+ * @tc.name: DmsContinueConditionMgr_CheckBlacklist_002
+ * @tc.desc: test CheckBlacklist on default not-found kv value path
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, DmsContinueConditionMgr_CheckBlacklist_002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_CheckBlacklist_002 start" << std::endl;
+
+    MissionStatus status;
+    status.accountId = 0;
+    status.missionId = 1;
+    status.bundleName = "com.example.bundle.not.exist";
+
+    (void)DmsContinueConditionMgr::GetInstance().GetKvStore();
+    bool ret = DmsContinueConditionMgr::GetInstance().CheckBlacklist(status);
+
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_CheckBlacklist_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: DmsContinueConditionMgr_CheckBlacklist_003
+ * @tc.desc: test CheckBlacklist on found kv value path
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, DmsContinueConditionMgr_CheckBlacklist_003, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_CheckBlacklist_003 start" << std::endl;
+
+    MissionStatus status;
+    status.accountId = 0;
+    status.missionId = 1;
+    status.bundleName = "com.huawei.hmos.notepad";
+
+    (void)DmsContinueConditionMgr::GetInstance().GetKvStore();
+    bool ret = DmsContinueConditionMgr::GetInstance().CheckBlacklist(status);
+
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_CheckBlacklist_003 end" << std::endl;
+}
+
+/**
  * @tc.name: DmsContinueConditionMgr_GetKvStore_001
  * @tc.desc: test GetKvStore executes without fatal failure
  * @tc.type: FUNC
@@ -489,6 +531,28 @@ HWTEST_F(DmsContinueConditionMgrTest, DmsContinueConditionMgr_CheckKvStore_001, 
 
     EXPECT_TRUE(ret == true || ret == false);
     DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_CheckKvStore_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DmsContinueConditionMgr_CheckKvStore_002
+ * @tc.desc: test CheckKvStore returns true directly when kvStorePtr_ is already valid
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, DmsContinueConditionMgr_CheckKvStore_002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_CheckKvStore_002 start" << std::endl;
+
+    auto fakeKvStore = std::shared_ptr<SingleKvStore>(reinterpret_cast<SingleKvStore *>(0x1),
+        [](SingleKvStore *ptr) {
+            (void)ptr;
+        });
+    DmsContinueConditionMgr::GetInstance().kvStorePtr_ = fakeKvStore;
+
+    bool ret = DmsContinueConditionMgr::GetInstance().CheckKvStore();
+    EXPECT_TRUE(ret);
+
+    DmsContinueConditionMgr::GetInstance().kvStorePtr_ = nullptr;
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_CheckKvStore_002 end" << std::endl;
 }
 
 /**
@@ -536,6 +600,27 @@ HWTEST_F(DmsContinueConditionMgrTest, DmsContinueConditionMgr_TryTwice_002, Test
 
     EXPECT_EQ(callCount, 2);
     DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_TryTwice_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: DmsContinueConditionMgr_TryTwice_003
+ * @tc.desc: test TryTwice still invokes exactly twice when both calls return IPC_ERROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, DmsContinueConditionMgr_TryTwice_003, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_TryTwice_003 start" << std::endl;
+
+    int32_t callCount = 0;
+    auto func = [&callCount]() -> Status {
+        ++callCount;
+        return Status::IPC_ERROR;
+    };
+
+    DmsContinueConditionMgr::GetInstance().TryTwice(func);
+
+    EXPECT_EQ(callCount, 2);
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_TryTwice_003 end" << std::endl;
 }
 }
 }

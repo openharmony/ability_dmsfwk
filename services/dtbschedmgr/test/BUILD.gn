@@ -561,7 +561,7 @@ ohos_unittest("distributedmissionmanagertest") {
 
   if (is_standard_system) {
     external_deps = dsched_external_deps
-    external_deps += [ "config_policy:configpolicy_util", ]
+    external_deps += [ "config_policy:configpolicy_util" ]
     public_deps = dsched_public_deps
   }
   part_name = "dmsfwk"
