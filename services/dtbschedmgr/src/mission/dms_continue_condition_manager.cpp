@@ -353,7 +353,6 @@ bool DmsContinueConditionMgr::CheckBlacklist(const MissionStatus& status)
     std::string udid;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
     std::string keyOfBundle = udid + AppExecFwk::Constants::FILE_UNDERLINE + status.bundleName;
-    HILOGI("CheckBlacklist, bundleName: %{public}s", status.bundleName.c_str());
     Key key(keyOfBundle);
     Value value;
     Status kvStatus = kvStorePtr_->Get(key, value);
@@ -490,8 +489,8 @@ int32_t DmsContinueConditionMgr::OnMissionInactive(int32_t accountId, int32_t mi
 
 bool DmsContinueConditionMgr::CheckSystemSendCondition(const MissionStatus& status)
 {
-    HILOGI("switch: %{public}d, wifi: %{public}d, bt: %{public}d",
-        isSwitchOn_.load(), isWifiActive_.load(), isBtActive_.load());
+    HILOGI("switch: %{public}d, wifi: %{public}d, bt: %{public}d, bundleName: %{public}s",
+        isSwitchOn_.load(), isWifiActive_.load(), isBtActive_.load(), status.bundleName.c_str());
 
     isOnBlacklist_ = CheckBlacklist(status);
     std::string reason = "";
@@ -513,7 +512,7 @@ bool DmsContinueConditionMgr::CheckSystemSendCondition(const MissionStatus& stat
         }
 #endif
         if (isOnBlacklist_) {
-            reason = "APP_IS_ON_THE_BLACKLIST";
+            reason = "APP_IS_ON_THE_CONTROLLIST";
             break;
         }
         HILOGI("PASS");

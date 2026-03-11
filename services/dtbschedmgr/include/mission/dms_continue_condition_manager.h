@@ -101,8 +101,6 @@ public:
     int32_t GetMissionIdByBundleName(int32_t accountId, const std::string& bundleName, int32_t& missionId);
     std::string TypeEnumToString(MissionEventType type);
     MissionStatus GetLastContinuableMissionStatus();
-    void RegisterSubscriber();
-    void UnRegisterSubscriber();
     bool CheckBlacklist(const MissionStatus& status);
 
 private:

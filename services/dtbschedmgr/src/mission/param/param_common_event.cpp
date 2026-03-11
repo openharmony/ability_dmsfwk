@@ -30,7 +30,8 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string TAG = "ParamManager";
-static int32_t RETRY_SUBSCRIBER = 3;
+const int32_t RETRY_SUBSCRIBER = 3;
+const int32_t TEN_BIT_SIZE = 10;
 const std::string EVENT_INFO_TYPE = "type";
 const std::string EVENT_INFO_SUBTYPE = "subtype";
 const std::string CONTINUATION_SERVICE_DATA_PATH =
@@ -43,11 +44,8 @@ ParamCommonEvent::ParamCommonEvent()
 {
     HILOGI("ParamCommonEvent ParamCommonEvent");
     handleEventFunc_["usual.event.DUE_SA_CFG_UPDATED"] = &ParamCommonEvent::HandleParamUpdate;
-
-    for (auto it = handleEventFunc_.begin(); it != handleEventFunc_.end(); ++it) {
-        HILOGI("Add event: %{public}s", it->first.c_str());
-        eventHandles_.emplace(it->first, std::bind(it->second, this, std::placeholders::_1));
-    }
+    eventHandles_["usual.event.DUE_SA_CFG_UPDATED"] = 
+        [this](const OHOS::AAFwk::Want &want) { this->HandleParamUpdate(want); };
 }
 
 ParamCommonEvent::~ParamCommonEvent()
@@ -146,10 +144,10 @@ static bool ParseUint32(const std::string &value, uint32_t &result)
             return false;
         }
         uint32_t digit = static_cast<uint32_t>(ch - '0');
-        if (acc > (std::numeric_limits<uint32_t>::max() - digit) / 10) {
+        if (acc > (std::numeric_limits<uint32_t>::max() - digit) / TEN_BIT_SIZE) {
             return false;
         }
-        acc = acc * 10 + digit;
+        acc = acc * TEN_BIT_SIZE + digit;
     }
     result = static_cast<uint32_t>(acc);
     return true;
@@ -191,21 +189,22 @@ bool ParamCommonEvent::UpdateBlacklist() const
     std::string filePath = CONTINUATION_SERVICE_DATA_PATH + CONTINUATION_SERVICE_DATA_FILE_NAME;
     std::ifstream file(filePath);
     if (!file.good()) {
-        HILOGI("Verify is not good,verifyFile:%{public}s", filePath.c_str());
+        HILOGE("Verify is not good,verifyFile:%{public}s", filePath.c_str());
         return false;
     }
 
     std::stringstream buffer;
     buffer << file.rdbuf();
     std::string jsonText = buffer.str();
+    HILOGI("UpdateBlacklist, file context:%{public}s", jsonText.c_str());
     if (jsonText.empty()) {
-        HILOGE("Blacklist file is empty.");
+        HILOGE("file is empty.");
         return false;
     }
 
     cJSON *root = cJSON_Parse(jsonText.c_str());
     if (root == nullptr || !cJSON_IsObject(root)) {
-        HILOGE("Parse blacklist json failed.");
+        HILOGE("Parse controllist json failed.");
         if (root != nullptr) {
             cJSON_Delete(root);
         }
@@ -250,7 +249,7 @@ bool ParamCommonEvent::UpdateBlacklistInner(cJSON *root) const
     }
 
     blackListMap_ = std::move(tempBlackList);
-    HILOGI("Update blacklist success, bundle size: %{public}zu.", blackListMap_.size());
+    HILOGI("Update controllist success, bundle size: %{public}zu.", blackListMap_.size());
     return true;
 }
 
@@ -265,7 +264,7 @@ bool ParamCommonEvent::CheckBlacklist(std::string bundleName, uint32_t versionCo
 
     for (const auto &range : bundleIter->second) {
         if (versionCode >= range.first && versionCode <= range.second) {
-            HILOGI("Hit blacklist, bundleName: %{public}s, versionCode: %{public}u.",
+            HILOGI("Hit controllist, bundleName: %{public}s, versionCode: %{public}u.",
                 bundleName.c_str(), versionCode);
             return true;
         }

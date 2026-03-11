@@ -339,7 +339,6 @@ ohos_shared_library("distributedschedsvr") {
     }
     external_deps += [
       "bluetooth:btframework",
-      "common_event_service:cesfwk_innerkits",
       "config_policy:configpolicy_util",
       "image_framework:image_native",
     ]
