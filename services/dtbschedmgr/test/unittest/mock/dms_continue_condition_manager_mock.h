@@ -27,7 +27,7 @@ public:
     virtual ~IDmsContinueConditionMgr() = default;
     virtual int32_t UpdateSystemStatus(SysEventType type, bool value);
     virtual int32_t UpdateMissionStatus(int32_t accountId, int32_t missionId, MissionEventType type);
-    virtual bool CheckSystemSendCondition();
+    virtual bool CheckSystemSendCondition(const MissionStatus& status);
     virtual bool CheckMissionSendCondition(const MissionStatus& status, MissionEventType type);
     virtual bool IsScreenLocked();
     virtual int32_t GetCurrentFocusedMission(int32_t accountId);
@@ -42,7 +42,7 @@ class DmsContinueConditionMgrMock : public IDmsContinueConditionMgr {
 public:
     MOCK_METHOD2(UpdateSystemStatus, int32_t(SysEventType type, bool value));
     MOCK_METHOD3(UpdateMissionStatus, int32_t(int32_t accountId, int32_t missionId, MissionEventType type));
-    MOCK_METHOD0(CheckSystemSendCondition, bool());
+    MOCK_METHOD1(CheckSystemSendCondition, bool(const MissionStatus& status));
     MOCK_METHOD2(CheckMissionSendCondition, bool(const MissionStatus& status, MissionEventType type));
     MOCK_METHOD0(IsScreenLocked, bool());
     MOCK_METHOD1(GetCurrentFocusedMission, int32_t(int32_t accountId));

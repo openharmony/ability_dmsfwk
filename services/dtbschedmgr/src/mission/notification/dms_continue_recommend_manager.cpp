@@ -134,7 +134,7 @@ void DMSContinueRecomMgr::PublishContinueRecommend(const MissionStatus& status, 
     auto typeStr = DmsContinueConditionMgr::GetInstance().TypeEnumToString(type);
     HILOGI("start, missionId: %{public}d, type: %{public}s", status.missionId, typeStr.c_str());
 
-    if (!DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition() ||
+    if (!DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition(status) ||
         !DmsContinueConditionMgr::GetInstance().CheckMissionSendCondition(status, type)) {
         HILOGE("CheckBroadcastCondition %{public}s failed! status: %{public}s",
             typeStr.c_str(), status.ToString().c_str());
