@@ -106,14 +106,14 @@ HWTEST_F(DMSContinueSendMgrTest, ExecuteSendStrategy_Test_001, TestSize.Level1)
     EXPECT_CALL(*mgrMock_, GetMissionStatus(_, _, _)).WillRepeatedly(Return(1));
     sendMgr->SendContinueBroadcast(missionId, MissionEventType::MISSION_EVENT_FOCUSED);
 
-    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(false));
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition(_)).WillOnce(Return(false));
     EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_FOCUSED));
 
-    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(true));
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition(_)).WillOnce(Return(true));
     EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillOnce(Return(false));
     EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_FOCUSED));
 
-    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(true));
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition(_)).WillOnce(Return(true));
     EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillOnce(Return(true));
     EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_FOCUSED));
 
@@ -142,14 +142,14 @@ HWTEST_F(DMSContinueSendMgrTest, ExecuteSendStrategy_Test_002, TestSize.Level1)
     EXPECT_CALL(*mgrMock_, GetMissionStatus(_, _, _)).WillRepeatedly(Return(true));
     sendMgr->SendContinueBroadcast(missionId, MissionEventType::MISSION_EVENT_BACKGROUND);
 
-    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(false));
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition(_)).WillOnce(Return(false));
     EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_BACKGROUND));
 
-    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(true));
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition(_)).WillOnce(Return(true));
     EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillOnce(Return(false));
     EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_BACKGROUND));
 
-    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillOnce(Return(true));
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition(_)).WillOnce(Return(true));
     EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillOnce(Return(true));
     EXPECT_NO_FATAL_FAILURE(sendMgr->SendContinueBroadcast(status, MissionEventType::MISSION_EVENT_BACKGROUND));
 

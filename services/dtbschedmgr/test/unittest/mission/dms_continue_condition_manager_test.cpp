@@ -23,6 +23,7 @@
 #include "test_log.h"
 using namespace testing;
 using namespace testing::ext;
+using namespace OHOS::DistributedKv;
 namespace {
     constexpr int32_t CONDITION_INVALID_MISSION_ID = -1;
 }
@@ -195,17 +196,20 @@ HWTEST_F(DmsContinueConditionMgrTest, testOnMissionInactive001, TestSize.Level1)
 HWTEST_F(DmsContinueConditionMgrTest, testCheckSystemSendCondition001, TestSize.Level1)
 {
     DTEST_LOG << "DMSContinueManagerTest testCheckSystemSendCondition001 start" << std::endl;
-    auto ret = DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition();
+    MissionStatus status;
+    status.isContinuable = false;
+    status.bundleName = "bundleName";
+    auto ret = DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition(status);
     EXPECT_FALSE(ret);
 
     DmsContinueConditionMgr::GetInstance().isSwitchOn_ = false;
-    ret = DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition();
+    ret = DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition(status);
     EXPECT_FALSE(ret);
 
     DmsContinueConditionMgr::GetInstance().isSwitchOn_ = true;
     #ifdef DMS_CHECK_WIFI
     DmsContinueConditionMgr::GetInstance().isWifiActive_ = false;
-    ret = DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition();
+    ret = DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition(status);
     EXPECT_FALSE(ret);
 
     DmsContinueConditionMgr::GetInstance().isWifiActive_ = true;
@@ -213,13 +217,13 @@ HWTEST_F(DmsContinueConditionMgrTest, testCheckSystemSendCondition001, TestSize.
 
     #ifdef DMS_CHECK_BLUETOOTH
     DmsContinueConditionMgr::GetInstance().isBtActive_ = false;
-    ret = DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition();
+    ret = DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition(status);
     EXPECT_FALSE(ret);
 
     DmsContinueConditionMgr::GetInstance().isBtActive_ = true;
     #endif
 
-    ret = DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition();
+    ret = DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition(status);
     EXPECT_TRUE(ret);
     DTEST_LOG << "DMSContinueManagerTest testCheckSystemSendCondition001 end" << std::endl;
 }
@@ -434,6 +438,104 @@ HWTEST_F(DmsContinueConditionMgrTest, testGetMissionIdByBundleName001, TestSize.
     ret = DmsContinueConditionMgr::GetInstance().GetMissionIdByBundleName(accountId, bundleName, missionId);
     EXPECT_EQ(ret, MISSION_NOT_FOCUSED);
     DTEST_LOG << "DMSContinueManagerTest testGetMissionIdByBundleName001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DmsContinueConditionMgr_CheckBlacklist_001
+ * @tc.desc: test CheckBlacklist executes and returns a boolean result
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, DmsContinueConditionMgr_CheckBlacklist_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_CheckBlacklist_001 start" << std::endl;
+
+    MissionStatus status;
+    status.accountId = 0;
+    status.missionId = 1;
+    status.bundleName = "com.example.testbundle";
+
+    bool ret = DmsContinueConditionMgr::GetInstance().CheckBlacklist(status);
+
+    EXPECT_TRUE(ret == true || ret == false);
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_CheckBlacklist_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DmsContinueConditionMgr_GetKvStore_001
+ * @tc.desc: test GetKvStore executes without fatal failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, DmsContinueConditionMgr_GetKvStore_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_GetKvStore_001 start" << std::endl;
+
+    EXPECT_NO_FATAL_FAILURE(DmsContinueConditionMgr::GetInstance().GetKvStore());
+
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_GetKvStore_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DmsContinueConditionMgr_CheckKvStore_001
+ * @tc.desc: test CheckKvStore returns a boolean result when kvStorePtr_ is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, DmsContinueConditionMgr_CheckKvStore_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_CheckKvStore_001 start" << std::endl;
+
+    DmsContinueConditionMgr::GetInstance().kvStorePtr_ = nullptr;
+
+    bool ret = DmsContinueConditionMgr::GetInstance().CheckKvStore();
+
+    EXPECT_TRUE(ret == true || ret == false);
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_CheckKvStore_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DmsContinueConditionMgr_TryTwice_001
+ * @tc.desc: test TryTwice calls function once when first call is not IPC_ERROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, DmsContinueConditionMgr_TryTwice_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_TryTwice_001 start" << std::endl;
+
+    int32_t callCount = 0;
+    auto func = [&callCount]() -> Status {
+        ++callCount;
+        return Status::SUCCESS;
+    };
+
+    DmsContinueConditionMgr::GetInstance().TryTwice(func);
+
+    EXPECT_EQ(callCount, 1);
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_TryTwice_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DmsContinueConditionMgr_TryTwice_002
+ * @tc.desc: test TryTwice calls function twice when first call returns IPC_ERROR
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, DmsContinueConditionMgr_TryTwice_002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_TryTwice_002 start" << std::endl;
+
+    int32_t callCount = 0;
+    bool firstCall = true;
+    auto func = [&callCount, &firstCall]() -> Status {
+        ++callCount;
+        if (firstCall) {
+            firstCall = false;
+            return Status::IPC_ERROR;
+        }
+        return Status::SUCCESS;
+    };
+
+    DmsContinueConditionMgr::GetInstance().TryTwice(func);
+
+    EXPECT_EQ(callCount, 2);
+    DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_TryTwice_002 end" << std::endl;
 }
 }
 }

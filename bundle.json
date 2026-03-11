@@ -108,6 +108,7 @@
           "service_group": [
             "//foundation/ability/dmsfwk/common:distributed_sched_utils",
             "//foundation/ability/dmsfwk/etc/init:etc",
+            "//foundation/ability/dmsfwk/etc/param:etc",
             "//foundation/ability/dmsfwk/etc/profile:distributedsched_trust",
             "//foundation/ability/dmsfwk/sa_profile:dms_sa_profile",
             "//foundation/ability/dmsfwk/services/dtbabilitymgr:distributed_ability_manager_svr",

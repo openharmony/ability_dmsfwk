@@ -195,7 +195,7 @@ HWTEST_F(DMSContinueRecomMgrTest, testOnMissionStatusChanged001, TestSize.Level1
     int32_t missionId = 0;
     MissionEventType type = MISSION_EVENT_INVALID;
     EXPECT_CALL(*mgrMock_, GetMissionStatus(_, _, _)).WillRepeatedly(Return(0));
-    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillRepeatedly(Return(false));
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition(_)).WillRepeatedly(Return(false));
     EXPECT_NO_FATAL_FAILURE(recomMgr->OnMissionStatusChanged(missionId, type));
     EXPECT_NO_FATAL_FAILURE(recomMgr->UnInit());
     DTEST_LOG << "DMSContinueRecomMgrTest testOnMissionStatusChanged001 end" << std::endl;
@@ -220,7 +220,7 @@ HWTEST_F(DMSContinueRecomMgrTest, testPublishContinueRecommend001, TestSize.Leve
     MissionEventType type = MISSION_EVENT_INVALID;
     EXPECT_NO_FATAL_FAILURE(recomMgr->PublishContinueRecommend(status, type));
 
-    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mgrMock_, CheckSystemSendCondition(_)).WillRepeatedly(Return(true));
     EXPECT_CALL(*mgrMock_, CheckMissionSendCondition(_, _)).WillRepeatedly(Return(false));
     EXPECT_NO_FATAL_FAILURE(recomMgr->PublishContinueRecommend(status, type));
 

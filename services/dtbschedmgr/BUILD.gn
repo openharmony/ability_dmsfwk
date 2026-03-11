@@ -323,6 +323,7 @@ ohos_shared_library("distributedschedsvr") {
         "src/mission/notification/dms_continue_recv_manager.cpp",
         "src/mission/notification/dms_continue_send_manager.cpp",
         "src/mission/notification/dms_continue_send_strategy.cpp",
+        "src/mission/param/param_common_event.cpp",
         "src/mission/snapshot.cpp",
         "src/mission/snapshot_converter.cpp",
         "src/mission/wifi_state_adapter.cpp",
@@ -338,6 +339,7 @@ ohos_shared_library("distributedschedsvr") {
     }
     external_deps += [
       "bluetooth:btframework",
+      "common_event_service:cesfwk_innerkits",
       "config_policy:configpolicy_util",
       "image_framework:image_native",
     ]

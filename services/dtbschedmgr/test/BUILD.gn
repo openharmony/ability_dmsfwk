@@ -548,6 +548,7 @@ ohos_unittest("distributedmissionmanagertest") {
     "unittest/mission/distributed_mission_info_test.cpp",
     "unittest/mission/mission_info_converter_test.cpp",
     "unittest/mission/snapshot_test.cpp",
+    "unittest/mission/param/param_common_event_test.cpp",
     "unittest/mock_remote_stub.cpp",
   ]
   sources += dtbschedmgr_sources
@@ -560,7 +561,7 @@ ohos_unittest("distributedmissionmanagertest") {
 
   if (is_standard_system) {
     external_deps = dsched_external_deps
-    external_deps += [ "config_policy:configpolicy_util" ]
+    external_deps += [ "config_policy:configpolicy_util", ]
     public_deps = dsched_public_deps
   }
   part_name = "dmsfwk"
