@@ -248,6 +248,7 @@ bool ParamCommonEvent::UpdateBlacklistInner(cJSON *root) const
         }
     }
 
+    std::lock_guard<std::mutex> lock(blackListMutex_);
     blackListMap_ = std::move(tempBlackList);
     HILOGI("Update controllist success, bundle size: %{public}zu.", blackListMap_.size());
     return true;
@@ -256,6 +257,7 @@ bool ParamCommonEvent::UpdateBlacklistInner(cJSON *root) const
 bool ParamCommonEvent::CheckBlacklist(std::string bundleName, uint32_t versionCode)
 {
     HILOGI("CheckBlacklist, versionCode: %{public}d", versionCode);
+    std::lock_guard<std::mutex> lock(blackListMutex_);
     auto bundleIter = blackListMap_.find(bundleName);
     if (bundleIter == blackListMap_.end()) {
         HILOGI("CheckBlacklist, bundleIter == blackListMap_.end()");

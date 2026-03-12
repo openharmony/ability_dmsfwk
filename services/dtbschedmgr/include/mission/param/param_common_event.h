@@ -64,6 +64,7 @@ private:
     std::map<std::string, EventHandle> eventHandles_;
     std::map<std::string, HandleEventFunc> handleEventFunc_;
     std::shared_ptr<ParamCommonEventSubscriber> subscriber_ = nullptr;
+    mutable std::mutex blackListMutex_;
     mutable std::unordered_map<std::string, std::vector<std::pair<uint32_t, uint32_t>>> blackListMap_;
 };
 } // namespace DistributedSchedule
