@@ -65,6 +65,7 @@
           "eventhandler",
           "ffrt",
           "form_fwk",
+          "graphic_2d",
           "graphic_surface",
           "hisysevent",
           "hitrace",
