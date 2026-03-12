@@ -373,7 +373,7 @@ bool FuzzDistributedWantToJson(const uint8_t* data, size_t size)
     std::string action = fdp.ConsumeRandomLengthString();
     want->SetAction(action);
 
-    unsigned int flags = static_cast<unsigned int>(data[0]);
+    unsigned int flags = fdp.ConsumeIntegral<unsigned int>();
     want->SetFlags(flags);
 
     std::string type = fdp.ConsumeRandomLengthString();

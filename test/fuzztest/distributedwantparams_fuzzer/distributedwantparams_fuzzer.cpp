@@ -49,7 +49,8 @@ constexpr int32_t OFFSET_24 = 24;
 constexpr int32_t OFFSET_16 = 16;
 constexpr int32_t OFFSET_8 = 8;
 constexpr int32_t MID_HALF = 2;
-constexpr size_t MAX_TEST_STRING_LEN = 32;
+const uint32_t MIN_DH_TYPE = 0;
+const uint32_t MAX_DH_TYPE = 10;
 
 inline size_t CalculateMid(size_t size)
 {
@@ -247,7 +248,7 @@ bool DistributedWantParamWrapperFindMatchingBraceFuzzTest(const uint8_t* data, s
     FuzzedDataProvider fdp(data, size);
     std::string inputStr = fdp.ConsumeRandomLengthString();
 
-    size_t startPos = size > 0 ? data[0] % size : 0;
+    size_t startPos = fdp.ConsumeIntegralInRange<int>(MIN_DH_TYPE, MAX_DH_TYPE);
 
     DistributedWantParams wantOther;
     std::shared_ptr<DistributedWantParams> wantParams = std::make_shared<DistributedWantParams>(wantOther);
@@ -298,9 +299,9 @@ void DistributedWantParamQueryFuzzTest(const uint8_t* data, size_t size)
     if (data == nullptr || size == 0) {
         return;
     }
-    size_t testSize = (size < MAX_TEST_STRING_LEN) ? size : MAX_TEST_STRING_LEN;
-    std::string testStr(reinterpret_cast<const char*>(data), testSize);
-    sptr<AAFwk::IInterface> iIt = String::Box(testStr);
+    FuzzedDataProvider fdp(data, size);
+    std::string inputStr = fdp.ConsumeRandomLengthString();
+    sptr<AAFwk::IInterface> iIt = String::Box(inputStr);
 
     DistributedWantParams::ArrayQueryToStr(iIt);
     DistributedWantParams::DistributedWantParamsQueryToStr(iIt);
