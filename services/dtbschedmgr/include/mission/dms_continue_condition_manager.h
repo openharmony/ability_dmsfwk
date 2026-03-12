@@ -135,9 +135,6 @@ private:
     void CleanLastFocusedFlagLocked(int32_t accountId, int32_t missionId);
     bool IsMissionStatusExistLocked(int32_t accountId, int32_t missionId);
     void SetMissionStatus(MissionStatus& missionStatus);
-    void TryTwice(const std::function<DistributedKv::Status()> &func) const;
-    bool CheckKvStore();
-    DistributedKv::Status GetKvStore();
     std::atomic<bool> isSwitchOn_ = false;
     std::atomic<bool> isWifiActive_ = false;
     std::atomic<bool> isBtActive_ = false;
@@ -155,11 +152,6 @@ private:
     std::mutex missionMutex_;
     std::map<int32_t, std::map<int32_t, MissionStatus>> missionMap_;
     MissionStatus lastContinuableMissionStatus_;
-    std::shared_ptr<DistributedKv::SingleKvStore> kvStorePtr_;
-    mutable std::mutex kvStorePtrMutex_;
-    DistributedKv::DistributedKvDataManager dataManager_;
-    const DistributedKv::AppId appId_ {DMS_BM_APP_ID};
-    const DistributedKv::StoreId storeId_ {DISTRIBUTE_BM_STORE_ID};
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

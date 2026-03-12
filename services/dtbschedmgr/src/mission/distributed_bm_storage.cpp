@@ -1270,5 +1270,31 @@ bool DmsBmStorage::GetContinueEventInfo(const std::string &networkId, const std:
     HILOGE("Can't find ContinueInfo!");
     return false;
 }
+
+bool DmsBmStorage::GetDistributedBundleInfo(const std::string &bundleName, DmsBundleInfo &distributeBundleInfo)
+{
+    HILOGD("bundleName: %{public}s", bundleName.c_str());
+    if (!CheckKvStore()) {
+        HILOGE("kvStore is nullptr");
+        return false;
+    }
+    std::string udid;
+    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
+    std::string keyOfBundle = udid + AppExecFwk::Constants::FILE_UNDERLINE + bundleName;
+    Key key(keyOfBundle);
+    Value value;
+    Status kvStatus = kvStorePtr_->Get(key, value);
+    if (kvStatus != Status::SUCCESS) {
+        HILOGE("BundleNameId not found, Get result: %{public}d", kvStatus);
+        return false;
+    }
+    
+    if (!distributeBundleInfo.FromJsonString(value.ToString())) {
+        HILOGE("BundleName not found");
+        return false;
+    }
+    HILOGD("End");
+    return true;
+}
 }  // namespace DistributedSchedule
 }  // namespace OHOS
