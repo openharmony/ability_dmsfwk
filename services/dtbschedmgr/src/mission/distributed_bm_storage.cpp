@@ -1280,6 +1280,10 @@ bool DmsBmStorage::GetDistributedBundleInfo(const std::string &bundleName, DmsBu
     }
     std::string udid;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
+    if (udid == "") {
+        HILOGE("GetLocalUdid failed");
+        return false;
+    }
     std::string keyOfBundle = udid + AppExecFwk::Constants::FILE_UNDERLINE + bundleName;
     Key key(keyOfBundle);
     Value value;
