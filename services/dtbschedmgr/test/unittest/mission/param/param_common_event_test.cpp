@@ -191,7 +191,7 @@ HWTEST_F(ParamCommonEventTest, ParamCommonEvent_OnReceiveEvent_003, TestSize.Lev
     DTEST_LOG << TAG << " ParamCommonEvent_OnReceiveEvent_003 start" << std::endl;
     ParamCommonEvent paramCommonEvent;
     AAFwk::Want want;
-    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_DUE_SA_CFG_UPDATED);
+    want.SetAction("usual.event.DUE_SA_CFG_UPDATED");
     EXPECT_NO_FATAL_FAILURE(paramCommonEvent.OnReceiveEvent(want));
     DTEST_LOG << TAG << " ParamCommonEvent_OnReceiveEvent_003 end" << std::endl;
 }

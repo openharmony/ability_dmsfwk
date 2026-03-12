@@ -34,20 +34,15 @@ namespace {
 const std::string TAG = "DmsContinueConditionMgr";
 constexpr int32_t GET_MAX_MISSIONS = 50;
 constexpr int32_t CONDITION_INVALID_MISSION_ID = -1;
-const int32_t MAX_TIMES = 600;
-const int32_t SLEEP_INTERVAL = 100 * 1000;
-const std::string BMS_KV_BASE_DIR = "/data/service/el1/public/database/DistributedSchedule";
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DmsContinueConditionMgr);
 
 void DmsContinueConditionMgr::Init()
 {
-    HILOGI("DmsContinueConditionMgr::init");
     InitConditionFuncs();
     InitSystemCondition();
     InitMissionCondition();
-    TryTwice([this] { return GetKvStore(); });
 }
 
 void DmsContinueConditionMgr::UnInit()
@@ -346,89 +341,15 @@ int32_t DmsContinueConditionMgr::OnMissionUnfocused(int32_t accountId, int32_t m
 
 bool DmsContinueConditionMgr::CheckBlacklist(const MissionStatus& status)
 {
-    if (!CheckKvStore()) {
-        HILOGE("load kvstore failed");
-        return false;
-    }
-    std::string udid;
-    DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalUdid(udid);
-    std::string keyOfBundle = udid + AppExecFwk::Constants::FILE_UNDERLINE + status.bundleName;
-    Key key(keyOfBundle);
-    Value value;
-    Status kvStatus = kvStorePtr_->Get(key, value);
-    if (kvStatus != Status::SUCCESS) {
-        HILOGE("BundleNameId not found, Get result: %{public}d", kvStatus);
-        return false;
-    }
     DmsBundleInfo distributedBundleInfo;
-    if (!distributedBundleInfo.FromJsonString(value.ToString())) {
-        HILOGE("BundleName not found");
+    bool ret = DmsBmStorage::GetInstance()->GetDistributedBundleInfo(status.bundleName, distributedBundleInfo);
+    if (!ret) {
+        HILOGE("get bundle info failed");
         return false;
     }
     HILOGI("CheckBlacklist, versionCode: %{public}d", distributedBundleInfo.versionCode);
     return OHOS::Singleton<ParamCommonEvent>::GetInstance().CheckBlacklist(
         status.bundleName, distributedBundleInfo.versionCode);
-}
-
-Status DmsContinueConditionMgr::GetKvStore()
-{
-    HILOGD("called.");
-    Options options = {
-        .createIfMissing = true,
-        .encrypt = false,
-        .autoSync = false,
-        .isPublic = true,
-        .securityLevel = SecurityLevel::S1,
-        .area = EL1,
-        .kvStoreType = KvStoreType::SINGLE_VERSION,
-        .baseDir = BMS_KV_BASE_DIR,
-        .dataType = DataType::TYPE_DYNAMICAL,
-        .cloudConfig = {
-            .enableCloud = true,
-            .autoSync = true
-        },
-    };
-    Status status = dataManager_.GetSingleKvStore(options, appId_, storeId_, kvStorePtr_);
-    if (status == Status::SUCCESS) {
-        HILOGD("get kvStore success");
-    } else if (status == DistributedKv::Status::STORE_META_CHANGED) {
-        HILOGE("This db meta changed, remove and rebuild it");
-        dataManager_.DeleteKvStore(appId_, storeId_, BMS_KV_BASE_DIR + appId_.appId);
-    }
-    HILOGD("end.");
-    return status;
-}
-
-bool DmsContinueConditionMgr::CheckKvStore()
-{
-    HILOGD("called.");
-    std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
-    if (kvStorePtr_ != nullptr) {
-        return true;
-    }
-    int32_t tryTimes = MAX_TIMES;
-    while (tryTimes > 0) {
-        Status status = GetKvStore();
-        if (status == Status::SUCCESS && kvStorePtr_ != nullptr) {
-            return true;
-        }
-        HILOGW("CheckKvStore, Times: %{public}d", tryTimes);
-        usleep(SLEEP_INTERVAL);
-        tryTimes--;
-    }
-    HILOGD("end.");
-    return kvStorePtr_ != nullptr;
-}
-
-void DmsContinueConditionMgr::TryTwice(const std::function<Status()> &func) const
-{
-    HILOGD("called.");
-    Status status = func();
-    if (status == Status::IPC_ERROR) {
-        status = func();
-        HILOGW("distribute database ipc error and try to call again, result = %{public}d", status);
-    }
-    HILOGD("end.");
 }
 
 int32_t DmsContinueConditionMgr::OnMissionBackground(int32_t accountId, int32_t missionId)

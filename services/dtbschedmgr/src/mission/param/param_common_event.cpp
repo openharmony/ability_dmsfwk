@@ -44,7 +44,7 @@ ParamCommonEvent::ParamCommonEvent()
 {
     HILOGI("ParamCommonEvent ParamCommonEvent");
     handleEventFunc_["usual.event.DUE_SA_CFG_UPDATED"] = &ParamCommonEvent::HandleParamUpdate;
-    eventHandles_["usual.event.DUE_SA_CFG_UPDATED"] = 
+    eventHandles_["usual.event.DUE_SA_CFG_UPDATED"] =
         [this](const OHOS::AAFwk::Want &want) { this->HandleParamUpdate(want); };
 }
 
