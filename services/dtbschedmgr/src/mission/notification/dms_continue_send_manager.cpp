@@ -209,7 +209,7 @@ void DMSContinueSendMgr::SendContinueBroadcast(const MissionStatus& status, Miss
     if (MissionEventType::MISSION_EVENT_DESTORYED == type) {
         screenLockedHandler_->ResetScreenLockedInfo();
     }
-    if (!DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition() ||
+    if (!DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition(status) ||
         !DmsContinueConditionMgr::GetInstance().CheckMissionSendCondition(status, type)) {
         HILOGE("CheckBroadcastCondition %{public}s failed! status: %{public}s",
             typeStr.c_str(), status.ToString().c_str());
@@ -378,7 +378,7 @@ int32_t DMSContinueSendMgr::SendScreenLockedEvent(uint8_t type)
         return ret;
     }
 
-    if (!DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition()) {
+    if (!DmsContinueConditionMgr::GetInstance().CheckSystemSendCondition(status)) {
         HILOGE("check system send condition failed!");
         return DMS_PERMISSION_DENIED;
     }

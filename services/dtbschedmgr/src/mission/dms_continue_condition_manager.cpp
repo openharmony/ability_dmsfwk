@@ -16,11 +16,14 @@
 #include "mission/dms_continue_condition_manager.h"
 
 #include "ability_manager_client.h"
+#include "common_event_manager.h"
+#include "common_event_support.h"
 #include "datashare_manager.h"
 #include "dtbschedmgr_log.h"
 #include "mission_info.h"
 #include "mission/bluetooth_state_adapter.h"
 #include "mission/dsched_sync_e2e.h"
+#include "mission/param/param_common_event.h"
 #include "mission/wifi_state_adapter.h"
 #include "multi_user_manager.h"
 
@@ -44,6 +47,7 @@ void DmsContinueConditionMgr::Init()
 
 void DmsContinueConditionMgr::UnInit()
 {
+    OHOS::Singleton<ParamCommonEvent>::GetInstance().UnSubscriberEvent();
     std::lock_guard<std::mutex> missionlock(missionMutex_);
     missionMap_.clear();
 }
@@ -76,6 +80,8 @@ void DmsContinueConditionMgr::InitConditionFuncs()
 
 void DmsContinueConditionMgr::InitSystemCondition()
 {
+    OHOS::Singleton<ParamCommonEvent>::GetInstance().SubscriberEvent();
+    OHOS::Singleton<ParamCommonEvent>::GetInstance().UpdateBlacklist();
     isSwitchOn_ = DataShareManager::GetInstance().IsCurrentContinueSwitchOn();
     isWifiActive_ = WifiStateAdapter::GetInstance().IsWifiActive();
 #ifdef DMS_CHECK_BLUETOOTH
@@ -333,6 +339,19 @@ int32_t DmsContinueConditionMgr::OnMissionUnfocused(int32_t accountId, int32_t m
     return ERR_OK;
 }
 
+bool DmsContinueConditionMgr::CheckBlacklist(const MissionStatus& status)
+{
+    DmsBundleInfo distributedBundleInfo;
+    bool ret = DmsBmStorage::GetInstance()->GetDistributedBundleInfo(status.bundleName, distributedBundleInfo);
+    if (!ret) {
+        HILOGE("get bundle info failed");
+        return false;
+    }
+    HILOGI("CheckBlacklist, versionCode: %{public}d", distributedBundleInfo.versionCode);
+    return OHOS::Singleton<ParamCommonEvent>::GetInstance().CheckBlacklist(
+        status.bundleName, distributedBundleInfo.versionCode);
+}
+
 int32_t DmsContinueConditionMgr::OnMissionBackground(int32_t accountId, int32_t missionId)
 {
     HILOGI("accountId %{public}d, missionId %{public}d", accountId, missionId);
@@ -389,11 +408,12 @@ int32_t DmsContinueConditionMgr::OnMissionInactive(int32_t accountId, int32_t mi
     return ERR_OK;
 }
 
-bool DmsContinueConditionMgr::CheckSystemSendCondition()
+bool DmsContinueConditionMgr::CheckSystemSendCondition(const MissionStatus& status)
 {
-    HILOGI("switch: %{public}d, wifi: %{public}d, bt: %{public}d",
-        isSwitchOn_.load(), isWifiActive_.load(), isBtActive_.load());
+    HILOGI("switch: %{public}d, wifi: %{public}d, bt: %{public}d, bundleName: %{public}s",
+        isSwitchOn_.load(), isWifiActive_.load(), isBtActive_.load(), status.bundleName.c_str());
 
+    isOnBlacklist_ = CheckBlacklist(status);
     std::string reason = "";
     do {
         if (!isSwitchOn_) {
@@ -412,6 +432,10 @@ bool DmsContinueConditionMgr::CheckSystemSendCondition()
             break;
         }
 #endif
+        if (isOnBlacklist_) {
+            reason = "APP_IS_ON_THE_CONTROLLIST";
+            break;
+        }
         HILOGI("PASS");
         return true;
     } while (0);
@@ -428,7 +452,6 @@ bool DmsContinueConditionMgr::CheckMissionSendCondition(const MissionStatus& sta
         HILOGE("invalid system status");
         return false;
     }
-
     auto memberFunc = iterFunc->second;
     return (this->*memberFunc)(status);
 }

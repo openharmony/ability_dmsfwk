@@ -29,9 +29,9 @@ int32_t DmsContinueConditionMgr::UpdateMissionStatus(int32_t accountId, int32_t 
     return IDmsContinueConditionMgr::conditionMgrMock->UpdateMissionStatus(accountId, missionId, type);
 }
 
-bool DmsContinueConditionMgr::CheckSystemSendCondition()
+bool DmsContinueConditionMgr::CheckSystemSendCondition(const MissionStatus& status)
 {
-    return IDmsContinueConditionMgr::conditionMgrMock->CheckSystemSendCondition();
+    return IDmsContinueConditionMgr::conditionMgrMock->CheckSystemSendCondition(status);
 }
 
 bool DmsContinueConditionMgr::CheckMissionSendCondition(const MissionStatus& status, MissionEventType type)
