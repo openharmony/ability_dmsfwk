@@ -287,7 +287,8 @@ StreamParams StreamParamAdapter::ConvertFromTaihe(const abilityConnectionManager
     }
     if (streamParam.colorSpaceConversionTarget.has_value()) {
         auto colorSpace = streamParam.colorSpaceConversionTarget.value();
-        auto env = taihe::get_env();
+        taihe::env_guard guard;
+        ani_env *env = guard.get_env();
         if (env == nullptr) {
             HILOGE("get env failed!");
             return result;
@@ -380,7 +381,9 @@ abilityConnectionManagerTaihe::EventCallbackInfo EventCallbackInfoAdapter::Conve
     }
     taihe::optional<uintptr_t> image;
     if (eventCallbackInfo.image != nullptr) {
-        auto pixelMapObj = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(taihe::get_env(), eventCallbackInfo.image);
+        taihe::env_guard guard;
+        ani_env *env = guard.get_env();
+        auto pixelMapObj = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(env, eventCallbackInfo.image);
         auto pixelMapPtr = reinterpret_cast<uintptr_t>(pixelMapObj);
         image = taihe::optional<uintptr_t>(std::in_place_t{}, pixelMapPtr);
     }

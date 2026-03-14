@@ -848,7 +848,8 @@ bool DistributedSchedService::CheckRemoteOsType(const std::string& netwokId)
 
     HILOGI("Remote device OsType %{public}d, netwokId: %{public}s.", devInfo->GetDeviceOSType(),
         GetAnonymStr(netwokId).c_str());
-    return (devInfo->GetDeviceOSType() == Constants::HO_OS_TYPE_EX);
+    return (devInfo->GetDeviceOSType() == Constants::HO_OS_TYPE_EX ||
+        devInfo->GetDeviceOSType() == Constants::HO_OS_TYPE);
 }
 
 int32_t DistributedSchedService::GetDmsInteractiveAdapterProxy()
