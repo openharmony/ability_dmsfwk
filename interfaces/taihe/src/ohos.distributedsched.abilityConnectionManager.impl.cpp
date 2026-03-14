@@ -38,7 +38,9 @@ const std::string TAG = "AbilityConnectionManagerImpl";
 template<class T>
 void OnCommon(T f, uintptr_t opq, int32_t sessionId, std::string type)
 {
-    auto listener = std::make_shared<TaiheAbilityConnectionSessionListener>(taihe::get_env());
+    taihe::env_guard guard;
+    ani_env *env = guard.get_env();
+    auto listener = std::make_shared<TaiheAbilityConnectionSessionListener>(env);
     listener->SetCallback(f, opq);
     auto result = AbilityConnectionManager::GetInstance().RegisterEventCallback(sessionId, type, listener);
     if (result != OHOS::ERR_OK) {
@@ -137,7 +139,9 @@ std::shared_ptr<OHOS::AppExecFwk::AbilityInfo> GetAbilityInfoByContext(uintptr_t
         ThrowBusinessError(ERR_INVALID_PARAMETERS);
         return abilityInfo;
     }
-    auto contextPtr = OHOS::AbilityRuntime::GetStageModeContext(taihe::get_env(), contextObj);
+    taihe::env_guard guard;
+    ani_env *env = guard.get_env();
+    auto contextPtr = OHOS::AbilityRuntime::GetStageModeContext(env, contextObj);
     if (contextPtr == nullptr) {
         HILOGE("get stage mode context failed!");
         ThrowBusinessError(ERR_INVALID_PARAMETERS);
@@ -316,7 +320,9 @@ void SendImageSync(int32_t sessionId, uintptr_t image, taihe::optional_view<int3
         ThrowBusinessError(ERR_INVALID_PARAMETERS);
         return;
     }
-    auto pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(taihe::get_env(), pixelMapObj);
+    taihe::env_guard guard;
+    ani_env *env = guard.get_env();
+    auto pixelMap = OHOS::Media::PixelMapTaiheAni::GetNativePixelMap(env, pixelMapObj);
     if (pixelMap == nullptr) {
         HILOGE("Failed to unwrap image.");
         ThrowBusinessError(ERR_INVALID_PARAMETERS);
