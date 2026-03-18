@@ -47,7 +47,11 @@ int32_t AniContinuationStateManagerStub::ContinueStateCallback(MessageParcel &da
 
     std::vector<ani_ref> args;
     ani_string msgIdArgs;
-    callbackData_.env.String_NewUTF8(message.c_str(), message.size(), &msgIdArgs);
+    auto status = callbackData_.env.String_NewUTF8(message.c_str(), message.size(), &msgIdArgs);
+    if (status != ANI_OK) {
+        HILOGE("String_NewUTF8 failed, status: %{public}d", status);
+        return ANI_ERROR;
+    }
     args.push_back(reinterpret_cast<ani_ref>(state));
     args.push_back(reinterpret_cast<ani_ref>(msgIdArgs));
 
