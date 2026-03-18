@@ -56,8 +56,12 @@ DistributedExtensionETS::~DistributedExtensionETS()
         HILOG_INFO("env null");
         return;
     }
-    if (etsAbilityObj_->aniRef) {
-        env->GlobalReference_Delete(etsAbilityObj_->aniRef);
+    if (etsAbilityObj_->aniRef == nullptr) {
+        HILOG_INFO("aniRef null");
+        return;
+    }
+    if (env->GlobalReference_Delete(etsAbilityObj_->aniRef) != ANI_OK) {
+        HILOG_INFO("Failed to delete global reference");
     }
     AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
 }
