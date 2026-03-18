@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ability_manager_errors.h"
 #include "dms_sa_client.h"
 
 namespace OHOS {

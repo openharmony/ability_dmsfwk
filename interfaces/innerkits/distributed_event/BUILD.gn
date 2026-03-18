@@ -75,7 +75,7 @@ ohos_shared_library("distributed_sdk") {
   if (!dmsfwk_disable_distributedsched_service) {
     external_deps += [ "device_info_manager:distributed_device_profile_common" ]
   }
-  public_external_deps = [ "ability_runtime:ability_manager" ]
+  external_deps += [ "ability_runtime:ability_manager" ]
   subsystem_name = "ability"
   innerapi_tags = [ "platformsdk" ]
   part_name = "dmsfwk"
