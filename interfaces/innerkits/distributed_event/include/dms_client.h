@@ -20,7 +20,6 @@
 
 #include "iremote_broker.h"
 
-#include "ability_manager_errors.h"
 #include "distributed_extension_types.h"
 #include "distributed_event_listener.h"
 #include "distributed_sched_types.h"
