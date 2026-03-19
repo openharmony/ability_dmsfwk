@@ -8,7 +8,11 @@ This is a **(OpenHarmony) native application** built with ArkTS (Ark TypeScript)
 
 **Key Technologies:**
 - **Language:** ArkTS (TypeScript with specific decorators and APIs)
+<<<<<<< HEAD
 - **UI Framework:** ArkUI
+=======
+- **UI Framework:** ArkUI (declarative, component-based UI similar to SwiftUI/Jetpack Compose)
+>>>>>>> 8929c13c53e6eaea36a2834db4d2a248a81433dc
 - **Build System:** Hvigor (build tool, Gradle-inspired)
 - **Package Manager:** OHPM (OpenHarmony Package Manager)
 - **IDE:** DevEco Studio (official IDE)
