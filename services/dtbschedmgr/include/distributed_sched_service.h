@@ -257,6 +257,7 @@ private:
     void InitCommonEventListener();
     int32_t GetCallerInfo(const std::string &localDeviceId, int32_t callerUid, uint32_t accessToken,
         CallerInfo &callerInfo);
+    std::string GetBundleNameFromConnectAbilityMap(const sptr<IRemoteObject>& connect);
     void RemoteConnectAbilityMappingLocked(const sptr<IRemoteObject>& connect, const std::string& localDeviceId,
         const std::string& remoteDeviceId, const AppExecFwk::ElementName& element, const CallerInfo& callerInfo,
         TargetComponent targetComponent);
