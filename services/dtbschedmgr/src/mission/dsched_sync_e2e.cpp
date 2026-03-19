@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,9 +20,11 @@
 #include <iostream>
 #include <parameter.h>
 
+#include "bundle/bundle_manager_internal.h"
 #include "config_policy_utils.h"
 #include "parameters.h"
 #include "securec.h"
+#include "want.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -403,6 +405,43 @@ bool DmsKvSyncE2E::IsMDMControl()
     return isMDMControl_.load();
 }
 
+int32_t DmsKvSyncE2E::GetActiveAccountId()
+{
+#ifdef OS_ACCOUNT_PART
+    std::vector<int32_t> ids;
+    ErrCode err = AccountSA::OsAccountManager::QueryActiveOsAccountIds(ids);
+    if (err == ERR_OK && !ids.empty()) {
+        return ids[0];
+    }
+#endif
+    return 0;
+}
+
+bool DmsKvSyncE2E::IsMDMControlWithExemption(const std::string &bundleName, int32_t serviceType, int32_t accountId)
+{
+#ifdef OS_ACCOUNT_PART
+    HILOGI("IsMDMControlWithExemption called, bundleName: %{public}s, serviceType: %{public}d, accountId: %{public}d",
+        bundleName.c_str(), serviceType, accountId);
+    std::string appId;
+    if (!BundleManagerInternal::GetCallerAppIdFromBms(bundleName, appId)) {
+        HILOGE("GetCallerAppIdFromBms failed for bundleName: %{public}s", bundleName.c_str());
+        return true;
+    }
+    HILOGI("Get appId: %{public}s for bundleName: %{public}s", appId.c_str(), bundleName.c_str());
+    AAFwk::Want admin;
+    std::vector<std::string> allowedAppIds = GetAllowedDistributeAbilityConnBundlesStub(admin, serviceType, accountId);
+    auto it = std::find(allowedAppIds.begin(), allowedAppIds.end(), appId);
+    if (it != allowedAppIds.end()) {
+        HILOGI("AppId %{public}s is in exemption list, allow access", appId.c_str());
+        return false;
+    }
+    HILOGI("AppId %{public}s is not in exemption list, block access", appId.c_str());
+    return true;
+#else
+    return false;
+#endif
+}
+
 void DmsKvSyncE2E::SetMdmControl(bool isMdmControl)
 {
     isMDMControl_.store(isMdmControl);
@@ -430,6 +469,15 @@ void AccountConstraintSubscriber::OnConstraintChanged(
     HILOGI("localId: %{private}d, constraint: %{public}s, isEnabled: %{public}d",
         constraintData.localId, constraintData.constraint.c_str(), constraintData.isEnabled);
     DmsKvSyncE2E::GetInstance()->SetMdmControl(constraintData.isEnabled);
+}
+
+std::vector<std::string> DmsKvSyncE2E::GetAllowedDistributeAbilityConnBundlesStub(const AAFwk::Want& admin,
+    int32_t serviceType, int32_t accountId)
+{
+    HILOGI("GetAllowedDistributeAbilityConnBundlesStub called, serviceType: %{public}d, accountId: %{public}d",
+        serviceType, accountId);
+    HILOGI("Strict control mode: return empty list, all apps will be blocked");
+    return {};
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS

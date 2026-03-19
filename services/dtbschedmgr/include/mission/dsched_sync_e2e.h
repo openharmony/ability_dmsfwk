@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,6 +53,8 @@ public:
     bool CheckMDMCtrlRule(const std::string &bundleName);
     bool QueryMDMControl();
     bool IsMDMControl();
+    bool IsMDMControlWithExemption(const std::string &bundleName, int32_t serviceType, int32_t accountId);
+    int32_t GetActiveAccountId();
     void SubscriptionAccount();
     void UnsubscriptionAccount();
     void SetMdmControl(bool isMdmControl);
@@ -64,6 +66,8 @@ private:
     bool IsValidPath(const std::string &inFilePath, std::string &realFilePath);
     bool UpdateWhiteList(const std::string &cfgJsonStr);
     int32_t LoadContinueConfig();
+    std::vector<std::string> GetAllowedDistributeAbilityConnBundlesStub(const AAFwk::Want& admin,
+    int32_t serviceType, int32_t accountId);
 
     static std::mutex mutex_;
     static std::shared_ptr<DmsKvSyncE2E> instance_;

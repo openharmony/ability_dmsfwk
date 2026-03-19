@@ -229,7 +229,7 @@ void DSchedCollabManager::UnInit()
 int32_t DSchedCollabManager::GetSinkCollabVersion(DSchedCollabInfo &info)
 {
     HILOGI("called, sessionId is: %{public}s", info.ToString().c_str());
-    CHECK_MDM_CONTROL(DmsKvSyncE2E::GetInstance()->IsMDMControl());
+    CHECK_MDM_CONTROL_WITH_EXEMPTION(info.srcInfo_.bundleName_, COLLABORATION_SERVICE);
     if (info.srcCollabSessionId_ < 0 || info.sinkInfo_.deviceId_.empty() || info.srcClientCB_ == nullptr) {
         HILOGE("invalid parameters.");
         return INVALID_PARAMETERS_ERR;
@@ -280,7 +280,7 @@ void DSchedCollabManager::HandleGetSinkCollabVersion(const DSchedCollabInfo &inf
 int32_t DSchedCollabManager::CollabMission(DSchedCollabInfo &info)
 {
     HILOGI("called, collabInfo is: %{public}s", info.ToString().c_str());
-    CHECK_MDM_CONTROL(DmsKvSyncE2E::GetInstance()->IsMDMControl());
+    CHECK_MDM_CONTROL_WITH_EXEMPTION(info.srcInfo_.bundleName_, COLLABORATION_SERVICE);
     if (!MultiUserManager::GetInstance().IsCallerForeground(info.srcInfo_.uid_)) {
         HILOGE("The current user is not foreground. callingUid: %{public}d .", info.srcInfo_.uid_);
         return DMS_NOT_FOREGROUND_USER;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,12 +79,19 @@ namespace DistributedSchedule {
         }                                                       \
     } while (0)
 
-#define CHECK_MDM_CONTROL(object)                               \
-    do {                                                        \
-        if ((object) == true) {                                 \
-            HILOGE("Current user is under MDM control.");       \
-            return ERR_CAPABILITY_NOT_SUPPORT;                  \
-        }                                                       \
+enum ServiceType {
+    COLLABORATION_SERVICE = 0,
+};
+
+#define CHECK_MDM_CONTROL_WITH_EXEMPTION(bundleName, serviceType)       \
+    do {                                                                \
+        if (DmsKvSyncE2E::GetInstance()->IsMDMControl()) {             \
+            int32_t accountId = DmsKvSyncE2E::GetInstance()->GetActiveAccountId(); \
+            if (DmsKvSyncE2E::GetInstance()->IsMDMControlWithExemption(bundleName, serviceType, accountId)) { \
+                HILOGE("Current user is under MDM control and not exempted."); \
+                return ERR_CAPABILITY_NOT_SUPPORT;                      \
+            }                                                           \
+        }                                                               \
     } while (0)
 
 enum {
