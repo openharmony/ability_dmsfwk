@@ -439,6 +439,7 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
     }
     DistributedSchedAdapter::GetInstance().UnRegisterMissionListener(missionFocusedListener_);
     DmsContinueConditionMgr::GetInstance().UnInit();
+    MissionLoader::GetInstance().Unload();
 #endif
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER

@@ -66,6 +66,8 @@ bool MissionLoader::Load()
         "StopSyncRemoteMissions"));
 
     if (!LoadPart2()) {
+        dlclose(handle_);
+        handle_ = nullptr;
         return false;
     }
     MissionInit();
@@ -126,6 +128,13 @@ bool MissionLoader::LoadPart2()
     // MainServiceChannel
     SetMainServiceChannel = reinterpret_cast<void (*)(std::shared_ptr<DmsMainServiceChannel> &)>(dlsym(
         handle_, "SetMainServiceChannel"));
+
+    // Validate critical symbols
+    if (!MissionInit || !SetMainServiceChannel) {
+        HILOGE("Failed to load critical symbols from mission library");
+        return false;
+    }
+
     std::shared_ptr<DmsMainServiceChannel> mainServiceChannel = std::make_shared<DmsMainServiceChannelImpl>();
     SetMainServiceChannel(mainServiceChannel);
     return true;
