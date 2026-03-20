@@ -18,9 +18,6 @@ import { common } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { util } from '@kit.ArkTS';
 
-let dialogTitle: string = '';
-let dialogMessage: string = '';
-
 @CustomDialog
 struct CustomDialog01 {
   controller: CustomDialogController;
@@ -53,6 +50,8 @@ struct Index {
   @State messageToSend: string = 'Hello from OpenHarmony';
   @State dataToSend: string = 'Test data payload';
   @State eventLog: Array<string> = [];
+  @State dialogTitle: string = '';
+  @State dialogMessage: string = '';
 
   private listenersActive: Map<string, boolean> = new Map([
     ['connect', false],
@@ -70,19 +69,19 @@ struct Index {
 
   dialogController: CustomDialogController = new CustomDialogController({
     builder: CustomDialog01({
-      dialogTitle: dialogTitle,
-      dialogMessage: dialogMessage
+      dialogTitle: this.dialogTitle,
+      dialogMessage: this.dialogMessage
     }),
   })
 
   private showDialog(title: string, message: string): void {
-    dialogTitle = title;
-    dialogMessage = message;
+    this.dialogTitle = title;
+    this.dialogMessage = message;
     this.dialogController.open();
   }
 
   private validateSession(): boolean {
-    return true;
+    this.currentSessionId !== -1;
   }
 
   private logEvent(eventType: string, data: Object): void {
@@ -577,8 +576,7 @@ struct Index {
   }
 
   private async testCreateAbilityConnectionSession(): Promise<void> {
-    const context =
-      ......as common.UIAbilityContext;
+    const context = getContext(this) as common.UIAbilityContext;
     let TestPeerInfo: abilityConnectionManager.PeerInfo = {
       deviceId: '',
       bundleName: 'com.example.peer',
@@ -683,7 +681,7 @@ struct Index {
     if (!this.validateSession()) return;
 
     try {
-      abilityConnectionManager.reject('', 'User rejected');
+      abilityConnectionManager.reject(this.currentSessionId, 'User rejected');
       this.connectionStatus = 'Rejected';
       hilog.info(1, 'testReject', 'Connection rejected');
       this.showDialog('Success', 'Connection rejected');
