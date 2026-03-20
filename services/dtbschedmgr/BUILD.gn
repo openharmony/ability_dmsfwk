@@ -272,6 +272,7 @@ ohos_shared_library("distributedschedsvr") {
     "window_manager:libwsutils",
     "window_manager:session_manager_lite",
   ]
+
   if (dmsfwk_check_screenlock) {
     external_deps += [ "screenlock_mgr:screenlock_client" ]
   }
@@ -300,33 +301,34 @@ ohos_shared_library("distributedschedsvr") {
   }
 
   if (dmsfwk_mission_manager) {
-    sources += [
-      "src/mission/distributed_bm_storage.cpp",
-      "src/mission/distributed_bundle_info.cpp",
-      "src/mission/distributed_mission_broadcast_listener.cpp",
-      "src/mission/distributed_mission_died_listener.cpp",
-      "src/mission/distributed_mission_focused_listener.cpp",
-      "src/mission/dms_continue_condition_manager.cpp",
-      "src/mission/dsched_sync_e2e.cpp",
-      "src/mission/mission_loader.cpp",
-      "src/mission/extension/dms_main_service_channel_impl.cpp",
-      "src/mission/notification/dms_continue_recommend_info.cpp",
-      "src/mission/notification/dms_continue_recommend_manager.cpp",
-      "src/mission/notification/dms_continue_recv_manager.cpp",
-      "src/mission/notification/dms_continue_send_manager.cpp",
-      "src/mission/notification/dms_continue_send_strategy.cpp",
-      "src/mission/wifi_state_adapter.cpp",
-      "src/mission/wifi_state_listener.cpp",
-      "src/mission/param/param_common_event.cpp",
-    ]
-
-    if (dmsfwk_check_bt) {
+    if (!dmsfwk_disable_distributedsched_service) {
       sources += [
-        "src/mission/bluetooth_state_adapter.cpp",
-        "src/mission/bluetooth_state_listener.cpp",
+        "src/mission/distributed_bm_storage.cpp",
+        "src/mission/distributed_bundle_info.cpp",
+        "src/mission/distributed_mission_broadcast_listener.cpp",
+        "src/mission/distributed_mission_died_listener.cpp",
+        "src/mission/distributed_mission_focused_listener.cpp",
+        "src/mission/dms_continue_condition_manager.cpp",
+        "src/mission/dsched_sync_e2e.cpp",
+        "src/mission/notification/dms_continue_recommend_info.cpp",
+        "src/mission/notification/dms_continue_recommend_manager.cpp",
+        "src/mission/notification/dms_continue_recv_manager.cpp",
+        "src/mission/notification/dms_continue_send_manager.cpp",
+        "src/mission/notification/dms_continue_send_strategy.cpp",
+        "src/mission/param/param_common_event.cpp",
+        "src/mission/wifi_state_adapter.cpp",
+        "src/mission/wifi_state_listener.cpp",
+        "src/mission/extension/mission_loader.cpp",
+        "src/mission/extension/dms_main_service_channel_impl.cpp",
       ]
-    }
 
+      if (dmsfwk_check_bt) {
+        sources += [
+          "src/mission/bluetooth_state_adapter.cpp",
+          "src/mission/bluetooth_state_listener.cpp",
+        ]
+      }
+    }
     external_deps += [
       "bluetooth:btframework",
       "config_policy:configpolicy_util",
@@ -380,17 +382,17 @@ ohos_shared_library("dms_mission_extension") {
   sources = []
   if (dmsfwk_mission_manager) {
     sources += [
-      "src/mission/distributed_data_storage.cpp",
-      "src/mission/distributed_mission_info.cpp",
-      "src/mission/distributed_sched_mission_manager.cpp",
+      "src/mission/extension/distributed_data_change_listener.cpp",
+      "src/mission/extension/distributed_data_storage.cpp",
+      "src/mission/extension/distributed_mission_change_listener.cpp",
+      "src/mission/extension/distributed_mission_info.cpp",
+      "src/mission/extension/distributed_sched_mission_manager.cpp",
       "src/mission/extension/dms_mission_extension_exports.cpp",
-      "src/mission/mission_changed_notify.cpp",
-      "src/mission/mission_info_converter.cpp",
-      "src/mission/snapshot.cpp",
-      "src/mission/snapshot_converter.cpp",
-      "src/mission/kvstore_death_recipient.cpp",
-      "src/mission/distributed_data_change_listener.cpp",
-      "src/mission/distributed_mission_change_listener.cpp",
+      "src/mission/extension/kvstore_death_recipient.cpp",
+      "src/mission/extension/mission_changed_notify.cpp",
+      "src/mission/extension/mission_info_converter.cpp",
+      "src/mission/extension/snapshot.cpp",
+      "src/mission/extension/snapshot_converter.cpp",
     ]
   }
 
