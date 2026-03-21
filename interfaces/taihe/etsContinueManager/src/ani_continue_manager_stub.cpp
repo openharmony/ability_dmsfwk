@@ -15,6 +15,7 @@
 
 #include "ani_continue_manager_stub.h"
 #include "distributedsched_ipc_interface_code.h"
+#include "event_handler.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -31,11 +32,28 @@ AniContinuationStateManagerStub::AniContinuationStateManagerStub()
 
 AniContinuationStateManagerStub::~AniContinuationStateManagerStub()
 {
-    if (callbackData_.callbackRef != nullptr && callbackData_.env != nullptr) {
-        if (callbackData_.env->GlobalReference_Delete(callbackData_.callbackRef) != ANI_OK) {
-            HILOGE("Failed to delete callback global reference");
-        }
+    if (callbackData_.callbackRef != nullptr) {
+        ani_ref callbackRef = callbackData_.callbackRef;
         callbackData_.callbackRef = nullptr;
+
+        auto task = [callbackRef]() {
+            ani_env *env = taihe::get_env();
+            if (env == nullptr) {
+                HILOGE("Env is null in destructor callback cleanup");
+                return;
+            }
+            if (env->GlobalReference_Delete(callbackRef) != ANI_OK) {
+                HILOGE("Failed to delete callback global reference in main thread");
+            }
+        };
+
+        auto handler = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+        if (handler != nullptr) {
+            handler->PostTask(task, "AniContinueManagerStub::CleanupCallback", 0,
+                AppExecFwk::EventQueue::Priority::VIP);
+        } else {
+            HILOGE("Failed to get main event handler for callback cleanup");
+        }
     }
 }
 
@@ -59,23 +77,44 @@ int32_t AniContinuationStateManagerStub::ContinueStateCallback(MessageParcel &da
 {
     int32_t state = data.ReadInt32();
     std::string message = data.ReadString();
+    ani_ref callbackRef = callbackData_.callbackRef;
 
-    std::vector<ani_ref> args;
-    ani_string msgIdArgs;
-    auto status = callbackData_.env->String_NewUTF8(message.c_str(), message.size(), &msgIdArgs);
-    if (status != ANI_OK) {
-        HILOGE("String_NewUTF8 failed, status: %{public}d", status);
+    auto task = [state, message, callbackRef]() {
+        ani_env *env = taihe::get_env();
+        if (env == nullptr) {
+            HILOGE("Env is null in callback task");
+            return;
+        }
+
+        std::vector<ani_ref> args;
+        ani_string msgIdArgs;
+        auto status = env->String_NewUTF8(message.c_str(), message.size(), &msgIdArgs);
+        if (status != ANI_OK) {
+            HILOGE("String_NewUTF8 failed, status: %{public}d", status);
+            return;
+        }
+
+        args.push_back(reinterpret_cast<ani_ref>(state));
+        args.push_back(reinterpret_cast<ani_ref>(msgIdArgs));
+
+        ani_fn_object onFn = reinterpret_cast<ani_fn_object>(callbackRef);
+        ani_ref result;
+        if (env->FunctionalObject_Call(onFn, args.size(), args.data(), &result) != ANI_OK) {
+            HILOGE("OnMessage functionalObject_Call failed");
+        }
+
+        if (env->GlobalReference_Delete(msgIdArgs) != ANI_OK) {
+            HILOGE("Failed to delete temporary msgIdArgs reference");
+        }
+    };
+
+    auto handler = std::make_shared<AppExecFwk::EventHandler>(AppExecFwk::EventRunner::GetMainEventRunner());
+    if (handler == nullptr || !handler->PostTask(task, "AniContinuationStateManagerStub::ContinueStateCallback", 0,
+        AppExecFwk::EventQueue::Priority::VIP)) {
+        HILOGE("Failed to post callback task to main event handler");
         return ANI_ERROR;
     }
-    args.push_back(reinterpret_cast<ani_ref>(state));
-    args.push_back(reinterpret_cast<ani_ref>(msgIdArgs));
 
-    ani_fn_object onFn = reinterpret_cast<ani_fn_object>(callbackData_.callbackRef);
-    ani_ref result;
-    if (callbackData_.env->FunctionalObject_Call(onFn, args.size(), args.data(), &result) != ANI_OK) {
-        HILOGE("OnMessage functionalObject_Call failed");
-        return ANI_ERROR;
-    }
     return ANI_OK;
 }
 }
