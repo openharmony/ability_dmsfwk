@@ -20,7 +20,7 @@
 
 @!sts_inject("""
 static
-{ loadLibrary("continueManager_so.z") }
+{ loadLibrary("continueManager_ani.z") }
 """)
 
 enum ContinueStateCode : i32 {

@@ -43,7 +43,7 @@ ohos_taihe("run_continueManager_taihe") {
   ]
 }
 
-taihe_shared_library("continueManager_so") {
+taihe_shared_library("continueManager_ani") {
   branch_protector_ret = "pac_ret"
   sanitize = {
     boundary_sanitize = true
@@ -115,9 +115,9 @@ ohos_prebuilt_etc("continueManager_etc") {
   deps = [ ":continueManager_taihe_abc" ]
 }
 
-group("continueManager_ani") {
+group("continueManager_target") {
   deps = [
     ":continueManager_etc",
-    ":continueManager_so",
+    ":continueManager_ani",
   ]
 }
