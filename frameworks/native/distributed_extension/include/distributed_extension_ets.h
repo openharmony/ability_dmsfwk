@@ -46,6 +46,11 @@ public:
 private:
     void BindContext(std::shared_ptr<AbilityInfo> &abilityInfo, std::shared_ptr<AAFwk::Want> want,
         const std::string &moduleName, const std::string &srcPath);
+    bool ValidateBindContextInputs(std::shared_ptr<AAFwk::Want> want);
+    bool InitializeAniEnvironment();
+    bool CreateAndSetContextObject();
+    bool SetContextObject(ani_ref contextObj);
+    void CacheMethods();
     void UpdateDistributedExtensionObj(std::shared_ptr<AbilityInfo> &abilityInfo,
         const std::string &moduleName, const std::string &srcPath);
     void GetSrcPath(std::string &srcPath);
@@ -53,6 +58,10 @@ private:
     AbilityRuntime::ETSRuntime &etsRuntime_;
     std::shared_ptr<AppExecFwk::ETSNativeReference> etsAbilityObj_;
     ani_vm *etsVm_ = nullptr;
+    ani_ref contextGlobalRef_ = nullptr;
+    ani_method onCreateMethod_ = nullptr;
+    ani_method onDestroyMethod_ = nullptr;
+    ani_method onCollaborateMethod_ = nullptr;
 };
 
 DistributedExtension *CreateDistributedExtensionETS(const std::unique_ptr<Runtime> &runtime);
