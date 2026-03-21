@@ -24,6 +24,21 @@ namespace {
     const int32_t CONTINUE_MANAGER_PERMISSION_ERR = -1;
 }
 
+AniContinuationStateManagerStub::AniContinuationStateManagerStub()
+{
+    callbackData_.callbackRef = nullptr;
+}
+
+AniContinuationStateManagerStub::~AniContinuationStateManagerStub()
+{
+    if (callbackData_.callbackRef != nullptr && callbackData_.env != nullptr) {
+        if (callbackData_.env->GlobalReference_Delete(callbackData_.callbackRef) != ANI_OK) {
+            HILOGE("Failed to delete callback global reference");
+        }
+        callbackData_.callbackRef = nullptr;
+    }
+}
+
 int32_t AniContinuationStateManagerStub::OnRemoteRequest(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {
@@ -47,7 +62,7 @@ int32_t AniContinuationStateManagerStub::ContinueStateCallback(MessageParcel &da
 
     std::vector<ani_ref> args;
     ani_string msgIdArgs;
-    auto status = callbackData_.env.String_NewUTF8(message.c_str(), message.size(), &msgIdArgs);
+    auto status = callbackData_.env->String_NewUTF8(message.c_str(), message.size(), &msgIdArgs);
     if (status != ANI_OK) {
         HILOGE("String_NewUTF8 failed, status: %{public}d", status);
         return ANI_ERROR;
@@ -57,7 +72,7 @@ int32_t AniContinuationStateManagerStub::ContinueStateCallback(MessageParcel &da
 
     ani_fn_object onFn = reinterpret_cast<ani_fn_object>(callbackData_.callbackRef);
     ani_ref result;
-    if (callbackData_.env.FunctionalObject_Call(onFn, args.size(), args.data(), &result) != ANI_OK) {
+    if (callbackData_.env->FunctionalObject_Call(onFn, args.size(), args.data(), &result) != ANI_OK) {
         HILOGE("OnMessage functionalObject_Call failed");
         return ANI_ERROR;
     }

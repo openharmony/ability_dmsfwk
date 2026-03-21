@@ -55,7 +55,7 @@ int32_t AniContinueManager::OnContinueStateCallback(uintptr_t context, uintptr_t
         } else {
             ani_ref oldCallbackRef = callbackStubs_[key]->callbackData_.callbackRef;
             if (oldCallbackRef != nullptr) {
-                stub->callbackData_.env.GlobalReference_Delete(oldCallbackRef);
+                callbackStubs_[key]->callbackData_.env->GlobalReference_Delete(oldCallbackRef);
             }
             callbackStubs_[key]->callbackData_.callbackRef = stub->callbackData_.callbackRef;
         }
@@ -166,7 +166,7 @@ sptr<AniContinuationStateManagerStub> AniContinueManager::CreateStub(uintptr_t c
         return nullptr;
     }
     AniContinuationStateManagerStub::StateCallbackData callbackData;
-    callbackData.env = *env;
+    callbackData.env = env;
     callbackData.bundleName = abilityInfo->bundleName;
     callbackData.moduleName = abilityInfo->moduleName;
     callbackData.abilityName = abilityInfo->name;
