@@ -41,7 +41,6 @@ public:
         std::string moduleName;
         std::string bundleName;
         std::string abilityName;
-        ani_env *env;
         ani_ref callbackRef;
     };
 
