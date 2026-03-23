@@ -53,6 +53,10 @@ AniContinuationStateManagerStub::~AniContinuationStateManagerStub()
                 AppExecFwk::EventQueue::Priority::VIP);
         } else {
             HILOGE("Failed to get main event handler for callback cleanup");
+            ani_env *env = taihe::get_env();
+            if (env != nullptr && env->GlobalReference_Delete(callbackRef) != ANI_OK) {
+                HILOGE("Failed to delete callback global reference directly in destructor");
+            }
         }
     }
 }
