@@ -133,6 +133,7 @@ bool MissionLoader::LoadPart2()
 
 void MissionLoader::Unload()
 {
+    std::lock_guard<std::mutex> autoLock(missionLoadLock_);
     if (handle_) {
         dlclose(handle_);
         handle_ = nullptr;
