@@ -20,6 +20,7 @@
 #include "ani_continue_client.h"
 #include "ani_base_context.h"
 #include "ohos.app.ability.continueManager.ContinueResultInfo.ani.1.hpp"
+#include "event_handler.h"
 #include "taihe/runtime.hpp"
 #include "taihe/platform/ani.hpp"
 
@@ -35,6 +36,48 @@ namespace {
     const int32_t SUCCESS = 0;
 }
 
+void AniContinueManager::ReleaseOldCallbackRef(ani_ref oldCallbackRef)
+{
+    if (oldCallbackRef == nullptr) {
+        return;
+    }
+
+    auto cleanupTask = [oldCallbackRef]() {
+        ani_env *innerEnv = taihe::get_env();
+        if (innerEnv == nullptr) {
+            HILOGE("Env is null when deleting old callback ref");
+            return;
+        }
+        if (innerEnv->GlobalReference_Delete(oldCallbackRef) != ANI_OK) {
+            HILOGE("Failed to delete old callback global reference");
+        }
+    };
+
+    auto handler = std::make_shared<AppExecFwk::EventHandler>(
+        AppExecFwk::EventRunner::GetMainEventRunner());
+    if (handler != nullptr) {
+        handler->PostTask(cleanupTask, "AniContinueManager::ReleaseOldCallback", 0,
+            AppExecFwk::EventQueue::Priority::VIP);
+    } else {
+        HILOGE("Failed to get main handler for callback cleanup");
+    }
+}
+
+void AniContinueManager::UpdateCallbackStub(const std::string &key,
+    sptr<DistributedSchedule::AniContinuationStateManagerStub> &stub)
+{
+    std::lock_guard<std::recursive_mutex> lock(mutex_);
+    auto cacheStubEntry = callbackStubs_.find(key);
+    if (cacheStubEntry == callbackStubs_.end() || cacheStubEntry->second == nullptr) {
+        callbackStubs_[key] = stub;
+        return;
+    }
+
+    ani_ref oldCallbackRef = cacheStubEntry->second->callbackData_.callbackRef;
+    ReleaseOldCallbackRef(oldCallbackRef);
+    cacheStubEntry->second->callbackData_.callbackRef = stub->callbackData_.callbackRef;
+}
+
 int32_t AniContinueManager::OnContinueStateCallback(uintptr_t context, uintptr_t opq)
 {
     sptr<DistributedSchedule::AniContinuationStateManagerStub> stub = CreateStub(context, opq, true);
@@ -47,19 +90,7 @@ int32_t AniContinueManager::OnContinueStateCallback(uintptr_t context, uintptr_t
 
     std::string key = std::to_string(stub->callbackData_.missionId) + stub->callbackData_.bundleName +
         stub->callbackData_.moduleName + stub->callbackData_.abilityName;
-    {
-        std::lock_guard<std::recursive_mutex> lock(mutex_);
-        auto cacheStubEntry = callbackStubs_.find(key);
-        if (cacheStubEntry == callbackStubs_.end() || cacheStubEntry->second == nullptr) {
-            callbackStubs_[key] = stub;
-        } else {
-            ani_ref oldCallbackRef = callbackStubs_[key]->callbackData_.callbackRef;
-            if (oldCallbackRef != nullptr) {
-                stub->callbackData_.env.GlobalReference_Delete(oldCallbackRef);
-            }
-            callbackStubs_[key]->callbackData_.callbackRef = stub->callbackData_.callbackRef;
-        }
-    }
+    UpdateCallbackStub(key, stub);
 
     AniContinuationStateClient client;
     int32_t result = client.RegisterContinueStateCallback(stub);
@@ -166,7 +197,6 @@ sptr<AniContinuationStateManagerStub> AniContinueManager::CreateStub(uintptr_t c
         return nullptr;
     }
     AniContinuationStateManagerStub::StateCallbackData callbackData;
-    callbackData.env = *env;
     callbackData.bundleName = abilityInfo->bundleName;
     callbackData.moduleName = abilityInfo->moduleName;
     callbackData.abilityName = abilityInfo->name;

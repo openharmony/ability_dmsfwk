@@ -41,9 +41,11 @@ public:
         std::string moduleName;
         std::string bundleName;
         std::string abilityName;
-        ani_env env;
         ani_ref callbackRef;
     };
+
+    AniContinuationStateManagerStub();
+    ~AniContinuationStateManagerStub();
 
     int32_t OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
     int32_t ContinueStateCallback(MessageParcel &data, MessageParcel &reply) override;
