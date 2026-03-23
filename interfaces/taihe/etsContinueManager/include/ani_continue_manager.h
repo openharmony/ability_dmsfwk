@@ -31,6 +31,8 @@ private:
     bool GetAbilityContext(std::shared_ptr<AbilityRuntime::AbilityContext> &abilityContext, uintptr_t context);
     bool SendUnRegister(sptr<DistributedSchedule::AniContinuationStateManagerStub> &stub, uintptr_t context,
         ::taihe::optional_view<uintptr_t> opq, int32_t &result);
+    void ReleaseOldCallbackRef(ani_ref oldCallbackRef);
+    void UpdateCallbackStub(const std::string &key, sptr<DistributedSchedule::AniContinuationStateManagerStub> &stub);
 
 public:
     std::recursive_mutex mutex_;
