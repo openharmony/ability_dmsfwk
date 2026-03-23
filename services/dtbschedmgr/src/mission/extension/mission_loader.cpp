@@ -45,11 +45,19 @@ bool MissionLoader::Load()
         return false;
     }
 
-    if (!LoadBasicSymbols() || !LoadDeviceNotifySymbols() ||
-        !LoadListenerSymbols() || !LoadSyncSymbols() ||
-        !LoadCoreSymbols() || !LoadSnapshotSymbols() ||
-        !LoadSnapshotNotifySymbols() || !LoadConverterSymbols() ||
-        !LoadChannelSymbol() || !InitializeServiceChannel()) {
+    if (!LoadBasicSymbols() || !LoadDeviceNotifySymbols() || !LoadListenerSymbols()) {
+        CleanupOnError();
+        return false;
+    }
+    if (!LoadSyncSymbols() || !LoadCoreSymbols() || !LoadSnapshotSymbols()) {
+        CleanupOnError();
+        return false;
+    }
+    if (!LoadSnapshotNotifySymbols() || !LoadConverterSymbols() || !LoadChannelSymbol()) {
+        CleanupOnError();
+        return false;
+    }
+    if (!InitializeServiceChannel()) {
         CleanupOnError();
         return false;
     }
@@ -338,6 +346,7 @@ void MissionLoader::CleanupOnError()
         dlclose(handle_);
         handle_ = nullptr;
     }
+    loaded_ = false;
 }
 
 void MissionLoader::Unload()
