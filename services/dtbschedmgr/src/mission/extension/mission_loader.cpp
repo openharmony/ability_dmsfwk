@@ -310,7 +310,7 @@ bool MissionLoader::LoadChannelSymbol()
         return false;
     }
 
-    MissionStartSyncMissionsFromRemote = reinterpret_cast<int32_t(*)>(
+    MissionStartSyncMissionsFromRemote = reinterpret_cast<int32_t(*)(
         const CallerInfo &, std::vector<DstbMissionInfo> &)>(dlsym(
             handle_, "MissionStartSyncMissionsFromRemote"));
     if (!MissionStartSyncMissionsFromRemote) {
