@@ -68,6 +68,12 @@ bool MissionLoader::Load()
     if (!LoadPart2()) {
         return false;
     }
+    // MainServiceChannel
+    SetMainServiceChannel = reinterpret_cast<void (*)(std::shared_ptr<DmsMainServiceChannel> &)>(dlsym(
+            handle_, "SetMainServiceChannel"));
+    std::shared_ptr<DmsMainServiceChannel> mainServiceChannel = std::make_shared<DmsMainServiceChannelImpl>();
+    SetMainServiceChannel(mainServiceChannel);
+
     MissionInit();
     MissionInitDataStorage();
     loaded_ = true;
@@ -122,12 +128,6 @@ bool MissionLoader::LoadPart2()
     // SnapshotConverter
     ConvertToSnapshot = reinterpret_cast<int32_t(*)(AAFwk::MissionSnapshot &, std::unique_ptr<Snapshot> &)>(dlsym(
         handle_, "ConvertToSnapshot"));
-
-    // MainServiceChannel
-    SetMainServiceChannel = reinterpret_cast<void (*)(std::shared_ptr<DmsMainServiceChannel> &)>(dlsym(
-        handle_, "SetMainServiceChannel"));
-    std::shared_ptr<DmsMainServiceChannel> mainServiceChannel = std::make_shared<DmsMainServiceChannelImpl>();
-    SetMainServiceChannel(mainServiceChannel);
     return true;
 }
 
