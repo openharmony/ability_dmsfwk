@@ -63,6 +63,12 @@ DistributedExtensionETS::~DistributedExtensionETS()
     if (env->GlobalReference_Delete(etsAbilityObj_->aniRef) != ANI_OK) {
         HILOG_INFO("Failed to delete global reference");
     }
+    if (contextGlobalRef_ != nullptr) {
+        if (env->GlobalReference_Delete(contextGlobalRef_) != ANI_OK) {
+            HILOG_INFO("Failed to delete context global reference");
+        }
+        contextGlobalRef_ = nullptr;
+    }
     AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
 }
 
@@ -134,51 +140,109 @@ void DistributedExtensionETS::BindContext(std::shared_ptr<AbilityInfo> &abilityI
 {
     HILOG_INFO("BindContext call");
     UpdateDistributedExtensionObj(abilityInfo, moduleName, srcPath);
-    if (etsAbilityObj_ == nullptr || want == nullptr) {
-        HILOG_INFO("etsAbilityObj_ or abilityContext_ or want is null");
+    if (!ValidateBindContextInputs(want)) {
         return;
     }
+    if (!InitializeAniEnvironment()) {
+        return;
+    }
+    if (!CreateAndSetContextObject()) {
+        return;
+    }
+    CacheMethods();
+    HILOG_INFO("BindContext End");
+}
+
+bool DistributedExtensionETS::ValidateBindContextInputs(std::shared_ptr<AAFwk::Want> want)
+{
+    if (etsAbilityObj_ == nullptr || want == nullptr) {
+        HILOG_INFO("etsAbilityObj_ or abilityContext_ or want is null");
+        return false;
+    }
+    return true;
+}
+
+bool DistributedExtensionETS::InitializeAniEnvironment()
+{
     auto env = etsRuntime_.GetAniEnv();
     if (env == nullptr) {
         HILOG_INFO("env null");
-        return;
+        return false;
     }
     ani_vm *aniVM = nullptr;
     if (env->GetVM(&aniVM) != ANI_OK) {
         HILOG_INFO("GetVM error");
-        return;
+        return false;
     }
     if (aniVM == nullptr) {
         HILOG_INFO("aniVM nullptr");
-        return;
+        return false;
     }
     etsVm_ = aniVM;
+    return true;
+}
+
+bool DistributedExtensionETS::CreateAndSetContextObject()
+{
     auto context = GetContext();
     if (context == nullptr) {
         HILOG_INFO("get context error");
-        return;
+        return false;
     }
+    auto env = etsRuntime_.GetAniEnv();
     ani_ref contextObj = CreateDistributedExtensionContextETS(env, context);
     if (contextObj == nullptr) {
         HILOG_INFO("Create context obj error");
-        return;
+        return false;
     }
+    return SetContextObject(contextObj);
+}
+
+bool DistributedExtensionETS::SetContextObject(ani_ref contextObj)
+{
+    auto env = etsRuntime_.GetAniEnv();
     ani_ref contextGlobalRef = nullptr;
     ani_field field = nullptr;
     ani_status status = ANI_ERROR;
+
     if ((status = env->GlobalReference_Create(contextObj, &contextGlobalRef)) != ANI_OK) {
         HILOG_INFO("GlobalReference_Create failed, status : %{public}d", status);
-        return;
+        return false;
     }
+
     if ((status = env->Class_FindField(etsAbilityObj_->aniCls, "context", &field)) != ANI_OK) {
         HILOG_INFO("Class_FindField failed, status : %{public}d", status);
-        return;
+        env->GlobalReference_Delete(contextGlobalRef);
+        return false;
     }
+
     if ((status = env->Object_SetField_Ref(etsAbilityObj_->aniObj, field, contextGlobalRef)) != ANI_OK) {
         HILOG_INFO("Object_SetField_Ref failed, status : %{public}d", status);
-        return;
+        env->GlobalReference_Delete(contextGlobalRef);
+        return false;
     }
-    HILOG_INFO("BindContext End");
+
+    contextGlobalRef_ = contextGlobalRef;
+    return true;
+}
+
+void DistributedExtensionETS::CacheMethods()
+{
+    auto env = etsRuntime_.GetAniEnv();
+    ani_status status = ANI_ERROR;
+
+    // Cache methods for performance
+    if ((status = env->Class_FindMethod(etsAbilityObj_->aniCls, "onCreate",
+        "C{@ohos.app.ability.Want.Want}:", &onCreateMethod_)) != ANI_OK) {
+        HILOG_INFO("Failed to find onCreate method, status : %{public}d", status);
+    }
+    if ((status = env->Class_FindMethod(etsAbilityObj_->aniCls, "onDestroy", "", &onDestroyMethod_)) != ANI_OK) {
+        HILOG_INFO("Failed to find onDestroy method, status : %{public}d", status);
+    }
+    if ((status = env->Class_FindMethod(etsAbilityObj_->aniCls, "onCollaborate",
+        ON_COLLABORATE, &onCollaborateMethod_)) != ANI_OK) {
+        HILOG_INFO("Failed to find onCollaborate method, status : %{public}d", status);
+    }
 }
 
 int32_t DistributedExtensionETS::TriggerOnCreate(AAFwk::Want& want)
@@ -194,24 +258,16 @@ int32_t DistributedExtensionETS::TriggerOnCreate(AAFwk::Want& want)
         HILOG_ERROR("env null");
         return EINVAL;
     }
-    ani_status status = ANI_ERROR;
-    do {
-        ani_ref wantRef = AppExecFwk::WrapWant(env, want);
-        ani_method function;
-        if ((status = env->Class_FindMethod(etsAbilityObj_->aniCls, "onCreate",
-            "C{@ohos.app.ability.Want.Want}:", &function)) != ANI_OK) {
-            HILOG_ERROR("Class_FindMethod status : %{public}d", status);
-            break;
-        }
-
-        status = env->Object_CallMethod_Void(etsAbilityObj_->aniObj, function, wantRef);
-        if (status != ANI_OK) {
-            HILOG_ERROR("Object_CallMethod_Void status : %{public}d", status);
-            break;
-        }
-    } while (false);
+    if (onCreateMethod_ == nullptr) {
+        HILOG_ERROR("onCreate method not cached");
+        AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
+        return EINVAL;
+    }
+    ani_ref wantRef = AppExecFwk::WrapWant(env, want);
+    ani_status status = env->Object_CallMethod_Void(etsAbilityObj_->aniObj, onCreateMethod_, wantRef);
     AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
     if (status != ANI_OK) {
+        HILOG_ERROR("Object_CallMethod_Void status : %{public}d", status);
         return EINVAL;
     }
     HILOG_INFO("OnCreate End");
@@ -232,21 +288,15 @@ int32_t DistributedExtensionETS::TriggerOnDestroy()
         return EINVAL;
     }
 
-    ani_status status = ANI_ERROR;
-    do {
-        ani_method function;
-        if ((status = env->Class_FindMethod(etsAbilityObj_->aniCls, "onDestroy", nullptr, &function)) != ANI_OK) {
-            HILOG_ERROR("Class_FindMethod status : %{public}d", status);
-            break;
-        }
-        status = env->Object_CallMethod_Void(etsAbilityObj_->aniObj, function);
-        if (status != ANI_OK) {
-            HILOG_ERROR("Object_CallMethod_Void status : %{public}d", status);
-            break;
-        }
-    } while (false);
+    if (onDestroyMethod_ == nullptr) {
+        HILOG_ERROR("onDestroy method not cached");
+        AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
+        return EINVAL;
+    }
+    ani_status status = env->Object_CallMethod_Void(etsAbilityObj_->aniObj, onDestroyMethod_);
     AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
     if (status != ANI_OK) {
+        HILOG_ERROR("Object_CallMethod_Void status : %{public}d", status);
         return EINVAL;
     }
     HILOG_INFO("OnDestroy End");
@@ -266,29 +316,23 @@ int32_t DistributedExtensionETS::TriggerOnCollaborate(AAFwk::WantParams &wantPar
         HILOG_ERROR("null env");
         return EINVAL;
     }
-    ani_status status = ANI_ERROR;
-    do {
-        ani_method method = nullptr;
-        status = env->Class_FindMethod(etsAbilityObj_->aniCls, "onCollaborate", ON_COLLABORATE, &method);
-        if (status != ANI_OK) {
-            HILOG_ERROR("onCollaborate FindMethod status: %{public}d, or null method", status);
-            break;
-        }
-        ani_ref wantParamsRef = AppExecFwk::WrapWantParams(env, wantParam);
-        if (wantParamsRef == nullptr) {
-            HILOG_ERROR("null wantParamsRef");
-            break;
-        }
-        ani_value args[] = { { .r = wantParamsRef } };
-        ani_ref result = nullptr;
-        if ((status = env->Object_CallMethod_Ref_A(etsAbilityObj_->aniObj, method, &result, args)) != ANI_OK ||
-            result == nullptr) {
-            HILOG_ERROR("CallMethod status: %{public}d, or null result", status);
-            break;
-        }
-    } while (false);
+    if (onCollaborateMethod_ == nullptr) {
+        HILOG_ERROR("onCollaborate method not cached");
+        AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
+        return EINVAL;
+    }
+    ani_ref wantParamsRef = AppExecFwk::WrapWantParams(env, wantParam);
+    if (wantParamsRef == nullptr) {
+        HILOG_ERROR("null wantParamsRef");
+        AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
+        return EINVAL;
+    }
+    ani_value args[] = { { .r = wantParamsRef } };
+    ani_ref result = nullptr;
+    ani_status status = env->Object_CallMethod_Ref_A(etsAbilityObj_->aniObj, onCollaborateMethod_, &result, args);
     AppExecFwk::DetachAniEnv(etsVm_, isAttachThread);
-    if (status != ANI_OK) {
+    if (status != ANI_OK || result == nullptr) {
+        HILOG_ERROR("CallMethod status: %{public}d, or null result", status);
         return EINVAL;
     }
     HILOG_INFO("OnCollaborate End");

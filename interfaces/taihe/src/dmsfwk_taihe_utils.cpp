@@ -431,8 +431,11 @@ TaiheAbilityConnectionSessionListener::~TaiheAbilityConnectionSessionListener()
         HILOGE("Failed to register, env is nullptr");
         return;
     }
-    if (env_->GlobalReference_Delete(callbackRef_) != ANI_OK) {
-        HILOGE("GlobalReference_Delete failed!");
+    if (callbackRef_ != nullptr) {
+        if (env_->GlobalReference_Delete(callbackRef_) != ANI_OK) {
+            HILOGE("GlobalReference_Delete failed!");
+        }
+        callbackRef_ = nullptr;
     }
 }
 
