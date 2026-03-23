@@ -86,7 +86,19 @@ private:
     MissionLoader() = default;
     ~MissionLoader();
 
-    bool LoadPart2();
+    void CleanupOnError();
+
+    // Symbol loading helper methods
+    bool LoadBasicSymbols();
+    bool LoadDeviceNotifySymbols();
+    bool LoadListenerSymbols();
+    bool LoadSyncSymbols();
+    bool LoadCoreSymbols();
+    bool LoadSnapshotSymbols();
+    bool LoadSnapshotNotifySymbols();
+    bool LoadConverterSymbols();
+    bool LoadChannelSymbol();
+    bool InitializeServiceChannel();
 
     std::mutex missionLoadLock_;
     void* handle_ = nullptr;
