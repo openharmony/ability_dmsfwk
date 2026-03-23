@@ -235,10 +235,8 @@ ohos_shared_library("distributedschedsvr") {
   ]
 
   external_deps = [
-    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
-    "ability_runtime:dataobs_manager",
     "ability_runtime:mission_info",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
@@ -411,25 +409,17 @@ ohos_shared_library("dms_mission_extension") {
   ]
 
   external_deps = [
-    "background_task_mgr:bgtaskmgr_innerkits",
     "os_account:libaccountkits",
     "os_account:os_account_innerkits",
     "ability_runtime:ability_manager",
-    "ability_base:base",
-    "ability_base:want",
     "ability_runtime:mission_info",
-    "ability_runtime:wantagent_innerkits",
     "cJSON:cjson",
     "c_utils:utils",
-    "data_share:datashare_consumer",
     "device_auth:deviceauth_sdk",
     "device_manager:devicemanagersdk",
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
-    "hisysevent:libhisysevent",
-    "hitrace:hitrace_meter",
-    "i18n:intl_util",
     "ipc:ipc_core",
     "kv_store:distributeddata_inner",
     "safwk:system_ability_fwk",
