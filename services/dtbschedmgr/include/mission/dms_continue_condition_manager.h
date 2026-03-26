@@ -127,6 +127,8 @@ private:
     bool CheckSendInactiveCondition(const MissionStatus& status);
     bool CheckSendContinueSwitchOffCondition(const MissionStatus& status);
 
+    bool CheckVirtualScreenScenario(const MissionStatus& status);
+
     int32_t GetMissionInfo(int32_t missionId, AAFwk::MissionInfo& info);
     int32_t GetMissionInfos(std::vector<AAFwk::MissionInfo>& missions);
 

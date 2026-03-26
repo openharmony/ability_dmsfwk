@@ -689,7 +689,7 @@ int32_t DSchedCollabManager::CleanUpSession(const std::string &collabToken)
 
 std::shared_ptr<DSchedCollab> DSchedCollabManager::GetDSchedCollabByTokenId(const std::string &tokenId)
 {
-    HILOGI("called, tokenId: %{public}s", tokenId.c_str());
+    HILOGI("called, tokenId: %{public}s", GetAnonymStr(tokenId).c_str());
     std::lock_guard<std::mutex> collabLock(collabMutex_);
     if (tokenId.empty() || collabs_.count(tokenId) == 0) {
         HILOGE("no such collaboration in progress.");
