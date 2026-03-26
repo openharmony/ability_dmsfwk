@@ -20,6 +20,7 @@
 #include <mutex>
 #include <queue>
 #include <string>
+#include <vector>
 
 #include "service_collaboration_manager_capi.h"
 #include "single_instance.h"
@@ -36,6 +37,7 @@ public:
     int32_t ApplyAdvanceResource(const std::string &peerNetworkId,
         ServiceCollaborationManager_ResourceRequestInfoSets reqInfoSets);
     void GetResourceRequest(ServiceCollaborationManager_ResourceRequestInfoSets &reqInfoSets);
+    std::vector<std::string> QueryAllServiceStateContext();
 
 private:
     DSchedAllConnectManager() = default;
@@ -45,6 +47,7 @@ private:
     int32_t UnregistLifecycleCallback();
     int32_t WaitAllConnectApplyCb(const std::string &peerNetworkId);
     void NotifyAllConnectDecision(const std::string &peerNetworkId, bool isSupport);
+    void LoadV2ApiExtended();
 
     static int32_t OnStop(const char *peerNetworkId);
     static int32_t ApplyResult(int32_t errorcode, int32_t result, const char *reason);
@@ -61,12 +64,15 @@ private:
 
     std::mutex allConnectMgrLock_;
     void *dllHandle_ = nullptr;
+
     ServiceCollaborationManager_API allConnectMgrApi_ = {
         .ServiceCollaborationManager_PublishServiceState = nullptr,
         .ServiceCollaborationManager_ApplyAdvancedResource = nullptr,
         .ServiceCollaborationManager_RegisterLifecycleCallback = nullptr,
         .ServiceCollaborationManager_UnRegisterLifecycleCallback = nullptr,
     };
+
+    std::vector<std::string> (*queryAllServiceStateContext_)() = nullptr;
 
     std::mutex connectDecisionMutex_;
     std::condition_variable connectDecisionCond_;

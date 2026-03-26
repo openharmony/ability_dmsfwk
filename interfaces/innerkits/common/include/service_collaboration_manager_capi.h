@@ -81,7 +81,12 @@ typedef struct ServiceCollaborationManager_API {
     int32_t (*ServiceCollaborationManager_UnRegisterLifecycleCallback)(const char *serviceName);
 } ServiceCollaborationManager_API;
 
+typedef struct ServiceCollaborationManagerV2ApiExtended {
+    std::vector<std::string> (*GetServiceNameList)();
+} ServiceCollaborationManagerV2ApiExtended;
+
 int32_t ServiceCollaborationManager_Export(ServiceCollaborationManager_API *exportapi);
+int32_t ServiceCollaborationManagerV2Export(ServiceCollaborationManagerV2ApiExtended *exportapi);
 
 #ifdef __cplusplus
 }
