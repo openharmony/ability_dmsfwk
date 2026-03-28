@@ -379,7 +379,7 @@ ohos_shared_library("dms_mission_extension") {
   install_enable = true
   cflags = [ "-fpie" ]
   sources = []
-  if (dmsfwk_mission_manager) {
+  if (!dmsfwk_disable_distributedsched_service && dmsfwk_mission_manager) {
     sources += [
       "src/mission/extension/distributed_data_change_listener.cpp",
       "src/mission/extension/distributed_data_storage.cpp",
