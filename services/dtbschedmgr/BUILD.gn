@@ -416,9 +416,6 @@ ohos_shared_library("dms_mission_extension") {
     "ability_runtime:mission_info",
     "cJSON:cjson",
     "c_utils:utils",
-    "device_auth:deviceauth_sdk",
-    "device_manager:devicemanagersdk",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "hilog:libhilog",
     "ipc:ipc_core",
@@ -428,6 +425,13 @@ ohos_shared_library("dms_mission_extension") {
     "form_fwk:form_manager",
     "image_framework:image_native",
   ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [
+      "device_auth:deviceauth_sdk",
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+    ]
+  }
 
   use_exceptions = true
   install_images = [ system_base_dir ]
