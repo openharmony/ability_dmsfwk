@@ -1504,7 +1504,6 @@ group("unittest") {
     ]
     if (dmsfwk_mission_manager) {
       deps += [
-        ":distributedmissionmanagertest",
         ":dmscontinueconditionmgrtest",
         ":dmscontinuemanagertest",
         ":dmscontinuemgrtest",
