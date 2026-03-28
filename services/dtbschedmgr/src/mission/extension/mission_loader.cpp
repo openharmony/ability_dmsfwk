@@ -257,7 +257,7 @@ bool MissionLoader::LoadConverterSymbols()
 {
     MissionInfoConverter = reinterpret_cast<int32_t(*)(
         std::vector<OHOS::AAFwk::MissionInfo> &, std::vector<OHOS::DistributedSchedule::DstbMissionInfo> &)>(dlsym(
-            handle_, "ConvertToDstbMissionInfos"));
+            handle_, "g_convertToDstbMissionInfos"));
     if (!MissionInfoConverter) {
         HILOGE("Failed to load symbol: ConvertToDstbMissionInfos");
         return false;
