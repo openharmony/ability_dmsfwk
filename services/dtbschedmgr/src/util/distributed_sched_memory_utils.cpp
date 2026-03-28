@@ -56,7 +56,7 @@ void DistributedSchedMemoryUtils::ReclaimNow()
 void DistributedSchedMemoryUtils::WriteToProcFile(const std::string &path,
     const std::string &content)
 {
-    int fd = open(path.c_str(), O_WRONLY);
+    int fd = open(path.c_str(), O_WRONLY | O_CLOEXEC);
     if (fd == -1) {
         HILOGE("Failed to open %{public}s", path.c_str());
         return;
