@@ -235,6 +235,7 @@ ohos_shared_library("distributedschedsvr") {
   ]
 
   external_deps = [
+    "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
     "ability_runtime:mission_info",
