@@ -362,6 +362,21 @@ static void TriggerProxyCallbacks(AAFwk::Want& want, const DExtConnectInfo& conn
     proxy->TriggerOnCollaborate(wantParam);
 }
 
+sptr<IDExtension> DistributedSchedService::WaitAndGetDExtensionProxy()
+{
+    // Already connected, return proxy directly without waiting
+    if (svcDConn_ && svcDConn_->IsExtAbilityConnected()) {
+        HILOGI("Already connected, skip waiting.");
+        return svcDConn_->GetDistributedExtProxy();
+    }
+    // Not connected yet, wait for OnAbilityConnectDone callback
+    std::unique_lock<std::mutex> lock(getDistibutedProxyLock_);
+    getDistibutedProxyCondition_.wait_for(lock, std::chrono::seconds(CONNECT_WAIT_TIME_S),
+        [this]() { return svcDConn_ && svcDConn_->IsExtAbilityConnected(); });
+    HILOGI("WaitAndGetDExtensionProxy end.");
+    return svcDConn_->GetDistributedExtProxy();
+}
+
 int32_t DistributedSchedService::ConnectDExtensionFromRemote(const DExtConnectInfo& connectInfo,
     DExtConnectResultInfo& resultInfo)
 {
@@ -392,9 +407,7 @@ int32_t DistributedSchedService::ConnectDExtensionFromRemote(const DExtConnectIn
         return ret;
     }
     resultInfo.errCode = ret;
-    std::unique_lock<std::mutex> lock(getDistibutedProxyLock_);
-    getDistibutedProxyCondition_.wait_for(lock, std::chrono::seconds(CONNECT_WAIT_TIME_S));
-    auto proxy = svcDConn_->GetDistributedExtProxy();
+    auto proxy = WaitAndGetDExtensionProxy();
     if (proxy == nullptr) {
         HILOGE("Extension distribute proxy is empty");
         return INVALID_PARAMETERS_ERR;
