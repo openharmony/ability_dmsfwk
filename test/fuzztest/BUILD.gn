@@ -865,46 +865,49 @@ ohos_fuzztest("DistributedSchedServiceNineFuzzTest") {
 
 group("fuzztest") {
   testonly = true
-  deps = [
-    "abilityconnectionwrapperstub_fuzzer:fuzztest",
-    "bundlemanagercallbackstub_fuzzer:fuzztest",
-    "continuationmanager_fuzzer:fuzztest",
-    "distributedwant_fuzzer:fuzztest",
-    "distributedwantparams_fuzzer:fuzztest",
-    "dmsfreeinstallcallbackstub_fuzzer:fuzztest",
-    "dschedallconnectmanager_fuzzer:fuzztest",
-    "dschedassemble_fuzzer:fuzztest",
-    "dschedsoftbussession_fuzzer:fuzztest",
-    "dschedtransportsoftbusadapter_fuzzer:fuzztest",
-    "multiusermanager_fuzzer:fuzztest",
-    "softbusadapter_fuzzer:fuzztest",
-    "distributedoperation_fuzzer:fuzztest",
-  ]
-
-  if (!dmsfwk_softbus_adapter_common) {
+  deps = []
+  if (!dmsfwk_disable_distributedsched_service) {
     deps += [
-      ":DistributedSchedStubFuzzTest",
-      ":DistributedSchedStubOneFuzzTest",
-      ":DistributedSchedStubTwoFuzzTest",
-      ":DistributedSchedStubThreeFuzzTest",
-      ":DistributedSchedStubFourFuzzTest",
-      ":DistributedSchedStubFiveFuzzTest",
-      ":DistributedSchedStubSixFuzzTest",
-      ":DistributedSchedStubSevenFuzzTest",
-      ":DistributedSchedStubEightFuzzTest",
-      ":DistributedSchedStubNineFuzzTest",
-      ":DistributedSchedStubTenFuzzTest",
-      ":DistributedSchedStubElevenFuzzTest",
-      ":DistributedSchedServiceFuzzTest",
-      ":DistributedSchedServiceOneFuzzTest",
-      ":DistributedSchedServiceTwoFuzzTest",
-      ":DistributedSchedServiceThreeFuzzTest",
-      ":DistributedSchedServiceFourFuzzTest",
-      ":DistributedSchedServiceFiveFuzzTest",
-      ":DistributedSchedServiceSixFuzzTest",
-      ":DistributedSchedServiceSevenFuzzTest",
-      ":DistributedSchedServiceEightFuzzTest",
-      ":DistributedSchedServiceNineFuzzTest",
+      "abilityconnectionwrapperstub_fuzzer:fuzztest",
+      "bundlemanagercallbackstub_fuzzer:fuzztest",
+      "continuationmanager_fuzzer:fuzztest",
+      "distributedwant_fuzzer:fuzztest",
+      "distributedwantparams_fuzzer:fuzztest",
+      "dmsfreeinstallcallbackstub_fuzzer:fuzztest",
+      "dschedallconnectmanager_fuzzer:fuzztest",
+      "dschedassemble_fuzzer:fuzztest",
+      "dschedsoftbussession_fuzzer:fuzztest",
+      "dschedtransportsoftbusadapter_fuzzer:fuzztest",
+      "multiusermanager_fuzzer:fuzztest",
+      "softbusadapter_fuzzer:fuzztest",
+      "distributedoperation_fuzzer:fuzztest",
     ]
+
+    if (!dmsfwk_softbus_adapter_common) {
+      deps += [
+        ":DistributedSchedStubFuzzTest",
+        ":DistributedSchedStubOneFuzzTest",
+        ":DistributedSchedStubTwoFuzzTest",
+        ":DistributedSchedStubThreeFuzzTest",
+        ":DistributedSchedStubFourFuzzTest",
+        ":DistributedSchedStubFiveFuzzTest",
+        ":DistributedSchedStubSixFuzzTest",
+        ":DistributedSchedStubSevenFuzzTest",
+        ":DistributedSchedStubEightFuzzTest",
+        ":DistributedSchedStubNineFuzzTest",
+        ":DistributedSchedStubTenFuzzTest",
+        ":DistributedSchedStubElevenFuzzTest",
+        ":DistributedSchedServiceFuzzTest",
+        ":DistributedSchedServiceOneFuzzTest",
+        ":DistributedSchedServiceTwoFuzzTest",
+        ":DistributedSchedServiceThreeFuzzTest",
+        ":DistributedSchedServiceFourFuzzTest",
+        ":DistributedSchedServiceFiveFuzzTest",
+        ":DistributedSchedServiceSixFuzzTest",
+        ":DistributedSchedServiceSevenFuzzTest",
+        ":DistributedSchedServiceEightFuzzTest",
+        ":DistributedSchedServiceNineFuzzTest",
+      ]
+    }
   }
 }
