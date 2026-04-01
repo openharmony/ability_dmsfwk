@@ -104,7 +104,6 @@ dsched_external_deps = [
   if (dmsfwk_standard_form_share) {
     dsched_external_deps += [
       "form_fwk:form_manager",
-      "form_fwk:form_common_info",
     ]
   }
   if (os_account_part) {

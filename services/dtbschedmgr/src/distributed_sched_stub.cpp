@@ -48,6 +48,7 @@
 
 #include "mission/distributed_sched_mission_manager.h"
 #include "mission/dsched_sync_e2e.h"
+#include "mission/mission_loader.h"
 #include "mission/notification/dms_continue_recv_manager.h"
 #include "mission/mission_info_converter.h"
 #include "mission/snapshot_converter.h"
@@ -1183,8 +1184,11 @@ int32_t DistributedSchedStub::GetMissionInfosInner(MessageParcel& data, MessageP
     std::vector<MissionInfo> missionInfos;
     int32_t result = GetMissionInfos(Str16ToStr8(deviceId), numMissions, missionInfos);
     HILOGI("result = %{public}d", result);
-    if (result == ERR_NONE) {
-        result = MissionInfoConverter::WriteMissionInfosToParcel(reply, missionInfos) ? ERR_NONE : ERR_FLATTEN_OBJECT;
+    auto& loader = MissionLoader::GetInstance();
+    if (loader.Load() && loader.WriteMissionInfosToParcel) {
+        if (result == ERR_NONE) {
+            result = loader.WriteMissionInfosToParcel(reply, missionInfos);
+        }
     }
     return result;
 }
@@ -1220,9 +1224,15 @@ int32_t DistributedSchedStub::GetRemoteMissionSnapshotInfoInner(MessageParcel& d
         return ERR_NULL_OBJECT;
     }
     std::unique_ptr<Snapshot> snapshotPtr = make_unique<Snapshot>();
-    SnapshotConverter::ConvertToSnapshot(*missionSnapshotPtr, snapshotPtr);
-    DistributedSchedMissionManager::GetInstance().EnqueueCachedSnapshotInfo(uuid,
-        missionId, std::move(snapshotPtr));
+    auto& loader = MissionLoader::GetInstance();
+    if (loader.Load()) {
+        if (loader.ConvertToSnapshot) {
+            loader.ConvertToSnapshot(*missionSnapshotPtr, snapshotPtr);
+        }
+        if (loader.MissionEnqueueCachedSnapshotInfo) {
+            loader.MissionEnqueueCachedSnapshotInfo(uuid, missionId, snapshotPtr.release());
+        }
+    }
     return ERR_NONE;
 }
 
@@ -1443,9 +1453,12 @@ int32_t DistributedSchedStub::StartSyncMissionsFromRemoteInner(MessageParcel& da
     if (!reply.WriteInt32(VERSION)) {
         return ERR_FLATTEN_OBJECT;
     }
-    if (!DstbMissionInfo::WriteDstbMissionInfosToParcel(reply, missionInfos)) {
-        HILOGE("write mission info failed!");
-        return ERR_FLATTEN_OBJECT;
+    auto& loader = MissionLoader::GetInstance();
+    if (loader.Load() && loader.WriteDstbMissionInfosToParcel) {
+        if (!loader.WriteDstbMissionInfosToParcel(reply, missionInfos)) {
+            HILOGE("write mission info failed!");
+            return ERR_FLATTEN_OBJECT;
+        }
     }
     return ERR_NONE;
 }
@@ -1486,8 +1499,11 @@ int32_t DistributedSchedStub::NotifyMissionsChangedFromRemoteInner(MessageParcel
     int32_t version = data.ReadInt32();
     HILOGD("version is %{public}d", version);
     std::vector<DstbMissionInfo> missionInfos;
-    if (!DstbMissionInfo::ReadDstbMissionInfosFromParcel(data, missionInfos)) {
-        return ERR_FLATTEN_OBJECT;
+    auto& loader = MissionLoader::GetInstance();
+    if (loader.Load() && loader.ReadDstbMissionInfosFromParcel) {
+        if (!loader.ReadDstbMissionInfosFromParcel(data, missionInfos)) {
+            return ERR_FLATTEN_OBJECT;
+        }
     }
     CallerInfo callerInfo;
     callerInfo.sourceDeviceId = data.ReadString();

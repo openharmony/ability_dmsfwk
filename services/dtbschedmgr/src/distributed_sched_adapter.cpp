@@ -31,6 +31,7 @@
 #include "os_account_manager.h"
 #include "parcel_helper.h"
 #include "string_ex.h"
+#include "mission/mission_loader.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -346,7 +347,11 @@ int32_t DistributedSchedAdapter::GetLocalMissionInfos(int32_t numMissions,
         return ERR_OK;
     }
     HILOGI("GetMissionInfos size:%{public}zu", amsMissions.size());
-    return MissionInfoConverter::ConvertToDstbMissionInfos(amsMissions, missionInfos);
+    auto& loader = MissionLoader::GetInstance();
+    if (loader.Load() && loader.MissionInfoConverter) {
+        return loader.MissionInfoConverter(amsMissions, missionInfos);
+    }
+    return ERR_INVALID_OPERATION;
 }
 
 int32_t DistributedSchedAdapter::RegisterMissionListener(const sptr<IMissionListener>& listener)

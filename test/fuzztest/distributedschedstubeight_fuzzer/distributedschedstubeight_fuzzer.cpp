@@ -63,75 +63,6 @@ uint32_t GetU32Data(const uint8_t* ptr, size_t size)
     return data;
 }
 
-void NotifyMissionsChangedFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
-{
-    if ((data == nullptr) || (size < sizeof(int32_t))) {
-        return;
-    }
-    FuzzUtil::MockPermission();
-    MessageParcel dataParcel;
-    MessageParcel reply;
-    MessageOption option;
-    FuzzedDataProvider fdp(data, size);
-    int32_t int32Data = fdp.ConsumeIntegral<int32_t>();
-    std::string str = fdp.ConsumeRandomLengthString();
-    std::vector<DstbMissionInfo> missionInfos;
-    CallerInfo callerInfo;
-    DistributedWant dstbWant;
-    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
-    std::string bundleName = fdp.ConsumeRandomLengthString();
-    std::string abilityName = fdp.ConsumeRandomLengthString();
-    
-    dstbWant.SetDeviceId(dstDeviceId);
-    dstbWant.SetElementName(bundleName, abilityName);
-
-    PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &dstbWant);
-    if (!DstbMissionInfo::WriteDstbMissionInfosToParcel(dataParcel, missionInfos)) {
-        return;
-    }
-    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
-    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
-    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
-    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
-    PARCEL_WRITE_HELPER_NORET(dataParcel, Int32, int32Data);
-    DistributedSchedService::GetInstance().NotifyMissionsChangedFromRemoteInner(dataParcel, reply);
-}
-
-void ReleaseAbilityFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
-{
-    if ((data == nullptr) || (size < sizeof(int32_t))) {
-        return;
-    }
-    FuzzUtil::MockPermission();
-    MessageParcel dataParcel;
-    MessageParcel reply;
-    MessageOption option;
-    sptr<IRemoteObject> connect(new MockDistributedSched());
-    AppExecFwk::ElementName element;
-    Want want;
-    const CallerInfo callerInfo;
-    FuzzedDataProvider fdp(data, size);
-    int32_t int32Data = fdp.ConsumeIntegral<int32_t>();
-    std::string str = fdp.ConsumeRandomLengthString();
-    std::string dstDeviceId = fdp.ConsumeRandomLengthString();
-    std::string bundleName = fdp.ConsumeRandomLengthString();
-    std::string abilityName = fdp.ConsumeRandomLengthString();
-    
-    want.SetDeviceId(dstDeviceId);
-    want.SetElementName(bundleName, abilityName);
-
-    PARCEL_WRITE_HELPER_NORET(dataParcel, RemoteObject, connect);
-    PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &element);
-    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
-    PARCEL_WRITE_HELPER_NORET(dataParcel, String, str);
-    DistributedSchedService::GetInstance().ReleaseAbilityFromRemoteInner(dataParcel, reply);
-    DistributedSchedService::GetInstance().TryStartRemoteAbilityByCall(want, connect, callerInfo);
-    DistributedSchedService::GetInstance().SaveCallerComponent(want, connect, callerInfo);
-    DistributedSchedService::GetInstance().SaveConnectToken(want, connect);
-    DistributedSchedService::GetInstance().NotifyStateChanged(int32Data, element, connect);
-    DistributedSchedService::GetInstance().SetCleanMissionFlag(want, int32Data);
-}
-
 void NotifyStateChangedFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
 {
     if ((data == nullptr) || (size < sizeof(int32_t))) {
@@ -216,8 +147,6 @@ void CollabMissionInnerFuzzTest(const uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DistributedSchedule::NotifyMissionsChangedFromRemoteInnerFuzzTest(data, size);
-    OHOS::DistributedSchedule::ReleaseAbilityFromRemoteInnerFuzzTest(data, size);
     OHOS::DistributedSchedule::NotifyStateChangedFromRemoteInnerFuzzTest(data, size);
     OHOS::DistributedSchedule::StartFreeInstallFromRemoteInnerFuzzTest(data, size);
     OHOS::DistributedSchedule::CollabMissionInnerFuzzTest(data, size);
