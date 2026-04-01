@@ -214,7 +214,8 @@ int32_t DataSenderReceiver::SendUnpackData(const std::shared_ptr<AVTransDataBuff
         GET_SOFTBUS_SESSION_OPTION(socketId_, maxSendSize, static_cast<uint32_t>(sizeof(maxSendSize)));
         headerPara.packetLen_ = maxSendSize;
         uint32_t remaining = dataEnd - current;
-        uint32_t currentPayloadLen = std::min(static_cast<uint32_t>(maxSendSize - SessionDataHeader::HEADER_LEN), remaining);
+        uint32_t maxPayloadLen = maxSendSize - SessionDataHeader::HEADER_LEN;
+        uint32_t currentPayloadLen = std::min(static_cast<uint32_t>(maxPayloadLen), remaining);
         headerPara.payloadLen_ = currentPayloadLen;
         headerPara.fragFlag_ = remaining > currentPayloadLen ? FRAG_TYPE::FRAG_MID : FRAG_TYPE::FRAG_END;
         headerPara.subSeq_++;
