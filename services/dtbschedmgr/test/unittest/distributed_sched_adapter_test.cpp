@@ -489,24 +489,6 @@ HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_001, TestSize.Le
 }
 
 /**
- * @tc.name: UnRegisterMissionListener_002
- * @tc.desc: listener is nullptr
- * @tc.type: FUNC
- * @tc.require: I5WKCK
- */
-HWTEST_F(DistributedSchedAdapterTest, UnRegisterMissionListener_002, TestSize.Level4)
-{
-    DTEST_LOG << "DistributedSchedAdapterTest UnRegisterMissionListener_002 begin" << std::endl;
-    const sptr<IRemoteObject> connect(new MockRemoteStub());
-    ASSERT_NE(distributedSchedAdapter_, nullptr);
-    distributedSchedAdapter_->ProcessCallResult(connect, connect);
-    const sptr<DistributedMissionChangeListener> listener(new DistributedMissionChangeListener());
-    int32_t result = distributedSchedAdapter_->UnRegisterMissionListener(listener);
-    EXPECT_NE(result, INVALID_PARAMETERS_ERR);
-    DTEST_LOG << "DistributedSchedAdapterTest UnRegisterMissionListener_002 end" << std::endl;
-}
-
-/**
  * @tc.name: GetLocalMissionSnapshotInfo_001
  * @tc.desc: networkId is invalid
  * @tc.type: FUNC

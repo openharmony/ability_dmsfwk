@@ -46,7 +46,6 @@ public:
     std::u16string sourceDeviceTips_;
     std::shared_ptr<Media::PixelMap> pixelMap_;
 
-    ~Snapshot();
     bool WriteToParcel(MessageParcel& data) const;
     static std::unique_ptr<Snapshot> Create(const std::vector<uint8_t>& data);
     bool WriteSnapshotInfo(MessageParcel& data) const;

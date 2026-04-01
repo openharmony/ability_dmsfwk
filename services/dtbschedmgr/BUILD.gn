@@ -210,7 +210,7 @@ ohos_shared_library("distributedschedsvr") {
       "src/svc_distributed_connection.cpp",
       "src/switch_status_dependency.cpp",
     ]
-  
+
     if (!dmsfwk_softbus_adapter_common) {
       sources += [ "src/softbus_adapter/softbus_adapter.cpp" ]
     } else {
@@ -238,7 +238,6 @@ ohos_shared_library("distributedschedsvr") {
     "ability_runtime:ability_connect_callback_stub",
     "ability_runtime:ability_manager",
     "ability_runtime:app_manager",
-    "ability_runtime:dataobs_manager",
     "ability_runtime:mission_info",
     "access_token:libaccesstoken_sdk",
     "access_token:libtokenid_sdk",
@@ -290,7 +289,7 @@ ohos_shared_library("distributedschedsvr") {
       "form_fwk:form_manager",
       "form_fwk:form_common_info",
     ]
-    
+
     if (!dmsfwk_disable_distributedsched_service) {
       sources += [ "src/form_mgr_death_recipient.cpp" ]
     }
@@ -305,29 +304,21 @@ ohos_shared_library("distributedschedsvr") {
       sources += [
         "src/mission/distributed_bm_storage.cpp",
         "src/mission/distributed_bundle_info.cpp",
-        "src/mission/distributed_data_change_listener.cpp",
-        "src/mission/distributed_data_storage.cpp",
         "src/mission/distributed_mission_broadcast_listener.cpp",
-        "src/mission/distributed_mission_change_listener.cpp",
         "src/mission/distributed_mission_died_listener.cpp",
         "src/mission/distributed_mission_focused_listener.cpp",
-        "src/mission/distributed_mission_info.cpp",
-        "src/mission/distributed_sched_mission_manager.cpp",
         "src/mission/dms_continue_condition_manager.cpp",
         "src/mission/dsched_sync_e2e.cpp",
-        "src/mission/kvstore_death_recipient.cpp",
-        "src/mission/mission_changed_notify.cpp",
-        "src/mission/mission_info_converter.cpp",
         "src/mission/notification/dms_continue_recommend_info.cpp",
         "src/mission/notification/dms_continue_recommend_manager.cpp",
         "src/mission/notification/dms_continue_recv_manager.cpp",
         "src/mission/notification/dms_continue_send_manager.cpp",
         "src/mission/notification/dms_continue_send_strategy.cpp",
         "src/mission/param/param_common_event.cpp",
-        "src/mission/snapshot.cpp",
-        "src/mission/snapshot_converter.cpp",
         "src/mission/wifi_state_adapter.cpp",
         "src/mission/wifi_state_listener.cpp",
+        "src/mission/extension/mission_loader.cpp",
+        "src/mission/extension/dms_main_service_channel_impl.cpp",
       ]
 
       if (dmsfwk_check_bt) {
@@ -340,7 +331,6 @@ ohos_shared_library("distributedschedsvr") {
     external_deps += [
       "bluetooth:btframework",
       "config_policy:configpolicy_util",
-      "image_framework:image_native",
     ]
   }
 
@@ -369,6 +359,81 @@ ohos_shared_library("distributedschedsvr") {
       sources += [ "src/adapter/mmi_adapter_common.cpp" ]
     }
   }
+  install_images = [ system_base_dir ]
+  relative_install_dir = "platformsdk"
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_shared_library("dms_mission_extension") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
+  install_enable = true
+  cflags = [ "-fpie" ]
+  sources = []
+  if (!dmsfwk_disable_distributedsched_service && dmsfwk_mission_manager) {
+    sources += [
+      "src/mission/extension/distributed_data_change_listener.cpp",
+      "src/mission/extension/distributed_data_storage.cpp",
+      "src/mission/extension/distributed_mission_change_listener.cpp",
+      "src/mission/extension/distributed_mission_info.cpp",
+      "src/mission/extension/distributed_sched_mission_manager.cpp",
+      "src/mission/extension/dms_mission_extension_exports.cpp",
+      "src/mission/extension/kvstore_death_recipient.cpp",
+      "src/mission/extension/mission_changed_notify.cpp",
+      "src/mission/extension/mission_info_converter.cpp",
+      "src/mission/extension/snapshot.cpp",
+      "src/mission/extension/snapshot_converter.cpp",
+    ]
+  }
+
+  configs = [
+    ":distributed_sched_config",
+    "//foundation/ability/dmsfwk/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+
+  ldflags = [
+    "-Wl,-z,relro",
+    "-Wl,-z,now",
+  ]
+
+  deps = [
+    "${dms_path}/common:distributed_sched_utils",
+  ]
+
+  external_deps = [
+    "os_account:libaccountkits",
+    "os_account:os_account_innerkits",
+    "ability_runtime:ability_manager",
+    "ability_runtime:mission_info",
+    "cJSON:cjson",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "ipc:ipc_core",
+    "kv_store:distributeddata_inner",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
+    "form_fwk:form_manager",
+    "image_framework:image_native",
+  ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [
+      "device_auth:deviceauth_sdk",
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+    ]
+  }
+
+  use_exceptions = true
   install_images = [ system_base_dir ]
   relative_install_dir = "platformsdk"
   part_name = "dmsfwk"
