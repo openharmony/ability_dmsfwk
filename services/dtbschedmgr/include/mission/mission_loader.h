@@ -100,7 +100,7 @@ private:
     bool LoadChannelSymbol();
     bool InitializeServiceChannel();
 
-    std::mutex missionLoadLock_;
+    mutable std::mutex missionLoadLock_;
     void* handle_ = nullptr;
     bool loaded_ = false;
 };

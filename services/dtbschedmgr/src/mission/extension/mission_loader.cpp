@@ -366,6 +366,7 @@ MissionLoader::~MissionLoader()
 
 bool MissionLoader::IsLoaded() const
 {
+    std::lock_guard<std::mutex> autoLock(missionLoadLock_);
     return loaded_;
 }
 } // namespace DistributedSchedule
