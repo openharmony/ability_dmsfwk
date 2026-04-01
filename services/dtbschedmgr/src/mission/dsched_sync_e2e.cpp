@@ -192,11 +192,10 @@ bool DmsKvSyncE2E::UpdateWhiteList(const std::string &cfgJsonStr)
 
 int32_t DmsKvSyncE2E::LoadContinueConfig()
 {
-    HILOGD("Load continue config, continueCfgFullPath %{public}s.", GetAnonymStr(continueCfgFullPath_).c_str());
     std::string tempPath = continueCfgFullPath_;
     if ((continueCfgFullPath_.empty() || !IsValidPath(tempPath, continueCfgFullPath_))) {
         char cfgPathBuf[MAX_CONFIG_PATH_LEN] = { 0 };
-        char *filePath  = GetOneCfgFile(CONTINUE_CONFIG_RELATIVE_PATH.c_str(), cfgPathBuf, MAX_CONFIG_PATH_LEN);
+        char *filePath = GetOneCfgFile(CONTINUE_CONFIG_RELATIVE_PATH.c_str(), cfgPathBuf, MAX_CONFIG_PATH_LEN);
         if (filePath == nullptr || filePath != cfgPathBuf) {
             HILOGE("Not find continue config file, relative path %{public}s.",
                 GetAnonymStr(CONTINUE_CONFIG_RELATIVE_PATH).c_str());
@@ -204,10 +203,8 @@ int32_t DmsKvSyncE2E::LoadContinueConfig()
             return ERR_OK;
         }
         continueCfgFullPath_ = std::string(filePath);
-        HILOGD("Get Continue config file full path success, cfgFullPath %{public}s.",
-            GetAnonymStr(continueCfgFullPath_).c_str());
+        HILOGD("cfgFullPath: %{public}s.", GetAnonymStr(continueCfgFullPath_).c_str());
     }
-
     tempPath = continueCfgFullPath_;
     if (!IsValidPath(tempPath, continueCfgFullPath_)) {
         HILOGE("Continue config full path is invalid, cfgFullPath %{public}s.",
@@ -221,20 +218,27 @@ int32_t DmsKvSyncE2E::LoadContinueConfig()
             GetAnonymStr(continueCfgFullPath_).c_str());
         return DMS_PERMISSION_DENIED;
     }
-
     std::string cfgFileContent;
     in.seekg(0, std::ios::end);
-    cfgFileContent.resize(in.tellg());
+    auto fileSize = in.tellg();
     in.seekg(0, std::ios::beg);
-    in.rdbuf()->sgetn(&cfgFileContent[0], cfgFileContent.size());
-    in.close();
-
-    if (!UpdateWhiteList(cfgFileContent)) {
-        HILOGE("Update allow app list fail, cfgFullPath %{public}s.",
-            GetAnonymStr(continueCfgFullPath_).c_str());
+    if (fileSize <= 0) {
+        HILOGE("Invalid file size: %{public}lld", static_cast<long long>(fileSize));
+        in.close();
         return DMS_PERMISSION_DENIED;
     }
-    HILOGD("Load continue config success, cfgFullPath %{public}s.", GetAnonymStr(continueCfgFullPath_).c_str());
+    cfgFileContent.resize(static_cast<size_t>(fileSize));
+    in.read(&cfgFileContent[0], fileSize);
+    if (in.gcount() != fileSize) {
+        HILOGE("Read incomplete");
+        in.close();
+        return DMS_PERMISSION_DENIED;
+    }
+    in.close();
+    if (!UpdateWhiteList(cfgFileContent)) {
+        HILOGE("Update fail, cfgFullPath %{public}s.", GetAnonymStr(continueCfgFullPath_).c_str());
+        return DMS_PERMISSION_DENIED;
+    }
     return ERR_OK;
 }
 
