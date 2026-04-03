@@ -205,7 +205,6 @@ int32_t DataSenderReceiver::SendUnpackData(const std::shared_ptr<AVTransDataBuff
         packetLen,
         payloadLen,
         subSeq);
-
     int32_t ret = DoSendPacket(headerPara, current, payloadLen);
     if (ret != ERR_OK) {
         return ret;
@@ -214,14 +213,17 @@ int32_t DataSenderReceiver::SendUnpackData(const std::shared_ptr<AVTransDataBuff
     while (current < dataEnd) {
         GET_SOFTBUS_SESSION_OPTION(socketId_, maxSendSize, static_cast<uint32_t>(sizeof(maxSendSize)));
         headerPara.packetLen_ = maxSendSize;
-        headerPara.payloadLen_ = maxSendSize - SessionDataHeader::HEADER_LEN;
-        headerPara.fragFlag_ = dataEnd - current > payloadLen ? FRAG_TYPE::FRAG_MID : FRAG_TYPE::FRAG_END;
+        uint32_t remaining = dataEnd - current;
+        uint32_t maxPayloadLen = maxSendSize - SessionDataHeader::HEADER_LEN;
+        uint32_t currentPayloadLen = std::min(static_cast<uint32_t>(maxPayloadLen), remaining);
+        headerPara.payloadLen_ = currentPayloadLen;
+        headerPara.fragFlag_ = remaining > currentPayloadLen ? FRAG_TYPE::FRAG_MID : FRAG_TYPE::FRAG_END;
         headerPara.subSeq_++;
-        ret = DoSendPacket(headerPara, current, payloadLen);
+        ret = DoSendPacket(headerPara, current, currentPayloadLen);
         if (ret != ERR_OK) {
             return ret;
         }
-        current += payloadLen;
+        current += currentPayloadLen;
     }
     HILOGI("finish send all bytes by packet");
     return ERR_OK;
