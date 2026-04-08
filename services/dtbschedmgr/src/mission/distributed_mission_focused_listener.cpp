@@ -213,7 +213,7 @@ void DistributedMissionFocusedListener::OnMissionMovedToBackground(int32_t missi
     auto feedfunc = [this, missionId, callingUid, appLaunchTime, bundleName]() {
         std::string sourceNetworkId = DmsContinueTime::GetInstance().GetSourceNetworkId();
         
-        if (appLaunchTime != 0 && appLaunchTime < ACCIDENTAL_TOUCH_THRESHOLD_MS) {
+        if (appLaunchTime > 0 && appLaunchTime < ACCIDENTAL_TOUCH_THRESHOLD_MS) {
             DmsUE::GetInstance().AccidentalContinuation(appLaunchTime, bundleName, sourceNetworkId, ERR_OK);
         }
         
