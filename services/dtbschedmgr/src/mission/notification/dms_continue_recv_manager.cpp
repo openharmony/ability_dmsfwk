@@ -524,12 +524,12 @@ bool DMSContinueRecvMgr::ValidateAndPrepareBundleInfo(DmsBundleInfo& distributed
             context.localBundleInfo.applicationInfo.bundleType);
         return false;
     }
-#endif
     if (state == ACTIVE && !IsBundleContinuable(context.localBundleInfo, context.abilityInfo.abilityName,
         context.abilityInfo.moduleName, context.continueType)) {
         HILOGE("Bundle %{public}s is not continuable", context.finalBundleName.c_str());
         return false;
     }
+#endif
     return true;
 }
 
