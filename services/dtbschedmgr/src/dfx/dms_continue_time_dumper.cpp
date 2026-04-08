@@ -238,6 +238,51 @@ DmsDuration DmsContinueTime::GetSaveDataDuration()
     return saveDataDuration_;
 }
 
+void DmsContinueTime::SetStartAbilityTime(const std::string& bundleName, const int64_t time)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    startAbilityTime_ = std::make_pair(bundleName, time);
+}
+
+int64_t DmsContinueTime::GetStartAbilityTime()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return startAbilityTime_.second;
+}
+
+std::pair<std::string, int64_t> DmsContinueTime::GetStartAbilityTimePair()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return startAbilityTime_;
+}
+
+int64_t DmsContinueTime::GetAppLaunchTime(const std::string& bundleName)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (startAbilityTime_.second == 0 || startAbilityTime_.first != bundleName) {
+        startAbilityTime_ = {"", 0};
+        return 0;
+    }
+    auto now = std::chrono::system_clock::now();
+    auto nowMs = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+    auto currentTime = nowMs.time_since_epoch().count();
+    int64_t appLaunchTime = currentTime - startAbilityTime_.second;
+    startAbilityTime_ = {"", 0};
+    return appLaunchTime;
+}
+
+std::string DmsContinueTime::GetSourceNetworkId()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return srcInfo_.netWorkId;
+}
+
+std::string DmsContinueTime::GetSinkNetworkId()
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return dstInfo_.netWorkId;
+}
+
 std::string DmsContinueTime::WriteDurationInfo(DmsDuration duration)
 {
     cJSON* durationInfo = cJSON_CreateObject();

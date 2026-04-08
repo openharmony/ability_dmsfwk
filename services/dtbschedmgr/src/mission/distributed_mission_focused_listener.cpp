@@ -17,10 +17,16 @@
 
 #include <sys/prctl.h>
 
+#include "bundle/bundle_manager_internal.h"
 #include "continue/dsched_continue_manager.h"
 #include "dfx/distributed_radar.h"
+#include "dfx/dms_continue_time_dumper.h"
+#include "dfx/distributed_ue.h"
+#include "dtbschedmgr_device_info_storage.h"
 #include "dtbschedmgr_log.h"
 #include "ipc_skeleton.h"
+#include "mission/dms_continue_condition_manager.h"
+#include "mission/notification/dms_continue_recv_manager.h"
 #include "mission/notification/dms_continue_send_manager.h"
 #include "mission/notification/dms_continue_recommend_manager.h"
 #include "multi_user_manager.h"
@@ -29,6 +35,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DistributedMissionFocusedListener";
+constexpr int64_t ACCIDENTAL_TOUCH_THRESHOLD_MS = 5000;
 }
 
 void DistributedMissionFocusedListener::Init()
@@ -88,11 +95,28 @@ void DistributedMissionFocusedListener::OnMissionDestroyed(int32_t missionId)
 {
     HILOGD("OnMissionDestroyed, missionId = %{public}d", missionId);
     int32_t callingUid = IPCSkeleton::GetCallingUid();
+    std::string bundleName;
+    int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
+    MissionStatus missionStatus;
+    if (DmsContinueConditionMgr::GetInstance().GetMissionStatus(currentAccountId, missionId, missionStatus) == ERR_OK) {
+        bundleName = missionStatus.bundleName;
+    }
+    int64_t appLaunchTime = DmsContinueTime::GetInstance().GetAppLaunchTime(bundleName);
     if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
         HILOGW("Current process is not foreground. callingUid = %{public}d", callingUid);
         return;
     }
-    auto feedfunc = [this, missionId, callingUid]() {
+    auto feedfunc = [this, missionId, callingUid, appLaunchTime, bundleName]() {
+        auto recvMgr = MultiUserManager::GetInstance().GetRecvMgrByCallingUid(callingUid);
+        std::string sourceNetworkId;
+        if (recvMgr != nullptr) {
+            sourceNetworkId = recvMgr->GetSenderNetworkId();
+        }
+        
+        if (appLaunchTime != 0 && appLaunchTime < ACCIDENTAL_TOUCH_THRESHOLD_MS) {
+            DmsUE::GetInstance().AccidentalContinuation(appLaunchTime, bundleName, sourceNetworkId, ERR_OK);
+        }
+        
         DSchedContinueManager::GetInstance().NotifyTerminateContinuation(missionId);
         auto sendMgr = MultiUserManager::GetInstance().GetSendMgrByCallingUid(callingUid);
         CHECK_POINTER_RETURN(sendMgr, "sendMgr");
@@ -175,12 +199,24 @@ void DistributedMissionFocusedListener::OnMissionMovedToBackground(int32_t missi
 {
     HILOGD("OnMissionBackground, missionId = %{public}d", missionId);
     int32_t callingUid = IPCSkeleton::GetCallingUid();
+    std::string bundleName;
+    int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
+    MissionStatus missionStatus;
+    if (DmsContinueConditionMgr::GetInstance().GetMissionStatus(currentAccountId, missionId, missionStatus) == ERR_OK) {
+        bundleName = missionStatus.bundleName;
+    }
+    int64_t appLaunchTime = DmsContinueTime::GetInstance().GetAppLaunchTime(bundleName);
     if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
         HILOGW("Current process is not foreground. callingUid = %{public}d", callingUid);
         return;
     }
-
-    auto feedfunc = [this, missionId, callingUid]() {
+    auto feedfunc = [this, missionId, callingUid, appLaunchTime, bundleName]() {
+        std::string sourceNetworkId = DmsContinueTime::GetInstance().GetSourceNetworkId();
+        
+        if (appLaunchTime != 0 && appLaunchTime < ACCIDENTAL_TOUCH_THRESHOLD_MS) {
+            DmsUE::GetInstance().AccidentalContinuation(appLaunchTime, bundleName, sourceNetworkId, ERR_OK);
+        }
+        
         auto sendMgr = MultiUserManager::GetInstance().GetSendMgrByCallingUid(callingUid);
         CHECK_POINTER_RETURN(sendMgr, "sendMgr");
         sendMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_BACKGROUND);
