@@ -95,18 +95,18 @@ void DistributedMissionFocusedListener::OnMissionDestroyed(int32_t missionId)
 {
     HILOGD("OnMissionDestroyed, missionId = %{public}d", missionId);
     int32_t callingUid = IPCSkeleton::GetCallingUid();
-    std::string bundleName;
-    int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
-    MissionStatus missionStatus;
-    if (DmsContinueConditionMgr::GetInstance().GetMissionStatus(currentAccountId, missionId, missionStatus) == ERR_OK) {
-        bundleName = missionStatus.bundleName;
-    }
-    int64_t appLaunchTime = DmsContinueTime::GetInstance().GetAppLaunchTime(bundleName);
     if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
         HILOGW("Current process is not foreground. callingUid = %{public}d", callingUid);
         return;
     }
     auto feedfunc = [this, missionId, callingUid, appLaunchTime, bundleName]() {
+        std::string bundleName;
+        int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
+        MissionStatus missionStatus;
+        if (DmsContinueConditionMgr::GetInstance().GetMissionStatus(currentAccountId, missionId, missionStatus) == ERR_OK) {
+            bundleName = missionStatus.bundleName;
+        }
+        int64_t appLaunchTime = DmsContinueTime::GetInstance().GetAppLaunchTime(bundleName);
         auto recvMgr = MultiUserManager::GetInstance().GetRecvMgrByCallingUid(callingUid);
         std::string sourceNetworkId;
         if (recvMgr != nullptr) {
@@ -126,7 +126,6 @@ void DistributedMissionFocusedListener::OnMissionDestroyed(int32_t missionId)
         CHECK_POINTER_RETURN(recomMgr, "recomMgr");
         recomMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_DESTORYED);
 
-        int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
         DmsContinueConditionMgr::GetInstance().UpdateMissionStatus(
             currentAccountId, missionId, MISSION_EVENT_DESTORYED);
     };
@@ -199,18 +198,18 @@ void DistributedMissionFocusedListener::OnMissionMovedToBackground(int32_t missi
 {
     HILOGD("OnMissionBackground, missionId = %{public}d", missionId);
     int32_t callingUid = IPCSkeleton::GetCallingUid();
-    std::string bundleName;
-    int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
-    MissionStatus missionStatus;
-    if (DmsContinueConditionMgr::GetInstance().GetMissionStatus(currentAccountId, missionId, missionStatus) == ERR_OK) {
-        bundleName = missionStatus.bundleName;
-    }
-    int64_t appLaunchTime = DmsContinueTime::GetInstance().GetAppLaunchTime(bundleName);
     if (!MultiUserManager::GetInstance().IsCallerForeground(callingUid)) {
         HILOGW("Current process is not foreground. callingUid = %{public}d", callingUid);
         return;
     }
     auto feedfunc = [this, missionId, callingUid, appLaunchTime, bundleName]() {
+        std::string bundleName;
+        int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
+        MissionStatus missionStatus;
+        if (DmsContinueConditionMgr::GetInstance().GetMissionStatus(currentAccountId, missionId, missionStatus) == ERR_OK) {
+            bundleName = missionStatus.bundleName;
+        }
+        int64_t appLaunchTime = DmsContinueTime::GetInstance().GetAppLaunchTime(bundleName);
         std::string sourceNetworkId = DmsContinueTime::GetInstance().GetSourceNetworkId();
         
         if (appLaunchTime > 0 && appLaunchTime < ACCIDENTAL_TOUCH_THRESHOLD_MS) {
@@ -221,7 +220,6 @@ void DistributedMissionFocusedListener::OnMissionMovedToBackground(int32_t missi
         CHECK_POINTER_RETURN(sendMgr, "sendMgr");
         sendMgr->OnMissionStatusChanged(missionId, MISSION_EVENT_BACKGROUND);
 
-        int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
         DmsContinueConditionMgr::GetInstance().UpdateMissionStatus(
             currentAccountId, missionId, MISSION_EVENT_BACKGROUND);
     };
