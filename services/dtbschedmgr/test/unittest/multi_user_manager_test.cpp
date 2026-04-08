@@ -49,8 +49,7 @@ void MultiUserManagerTest::SetUp()
     DTEST_LOG << "MultiUserManagerTest::SetUp" << std::endl;
 }
 
-void RemoteOnListenerStubTest::OnCallback(const uint32_t ContinueState, const std::string& srcDeviceId,
-    const std::string &bundleName, const std::string &continueType, const std::string &srcBundleName)
+void RemoteOnListenerStubTest::OnCallback(const AAFwk::OnCallbackInfo &info)
 {
 }
 
