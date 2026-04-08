@@ -103,7 +103,8 @@ void DistributedMissionFocusedListener::OnMissionDestroyed(int32_t missionId)
         std::string bundleName;
         int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
         MissionStatus missionStatus;
-        if (DmsContinueConditionMgr::GetInstance().GetMissionStatus(currentAccountId, missionId, missionStatus) == ERR_OK) {
+        if (DmsContinueConditionMgr::GetInstance().GetMissionStatus(currentAccountId, missionId,
+            missionStatus) == ERR_OK) {
             bundleName = missionStatus.bundleName;
         }
         int64_t appLaunchTime = DmsContinueTime::GetInstance().GetAppLaunchTime(bundleName);
@@ -206,7 +207,8 @@ void DistributedMissionFocusedListener::OnMissionMovedToBackground(int32_t missi
         std::string bundleName;
         int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
         MissionStatus missionStatus;
-        if (DmsContinueConditionMgr::GetInstance().GetMissionStatus(currentAccountId, missionId, missionStatus) == ERR_OK) {
+        if (DmsContinueConditionMgr::GetInstance().GetMissionStatus(currentAccountId, missionId,
+            missionStatus) == ERR_OK) {
             bundleName = missionStatus.bundleName;
         }
         int64_t appLaunchTime = DmsContinueTime::GetInstance().GetAppLaunchTime(bundleName);
