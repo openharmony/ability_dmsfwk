@@ -113,7 +113,7 @@ void DistributedMissionFocusedListener::OnMissionDestroyed(int32_t missionId)
             sourceNetworkId = recvMgr->GetSenderNetworkId();
         }
         
-        if (appLaunchTime != 0 && appLaunchTime < ACCIDENTAL_TOUCH_THRESHOLD_MS) {
+        if (appLaunchTime > 0 && appLaunchTime < ACCIDENTAL_TOUCH_THRESHOLD_MS) {
             DmsUE::GetInstance().AccidentalContinuation(appLaunchTime, bundleName, sourceNetworkId, ERR_OK);
         }
         
