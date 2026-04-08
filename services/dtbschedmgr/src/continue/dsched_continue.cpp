@@ -1155,10 +1155,6 @@ int32_t DSchedContinue::StartAbility(OHOS::AAFwk::Want& want, int32_t requestCod
     DmsRadar::GetInstance().ClickIconDmsStartAbility("StartAbility", ret);
 
     HILOGI("call StartAbility start, flag is %{public}d", want.GetFlags());
-    if (DmsContinueTime::GetInstance().GetPull()) {
-        int64_t begin = GetTickCount();
-        DmsContinueTime::GetInstance().SetDurationBegin(CONTINUE_START_ABILITY_TIME, begin);
-    }
     ret = AAFwk::AbilityManagerClient::GetInstance()->StartAbility(want, DEFAULT_REQUEST_CODE, accountId_);
     if (ret != ERR_OK) {
         HILOGE("failed %{public}d", ret);
