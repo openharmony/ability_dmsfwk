@@ -266,7 +266,10 @@ int64_t DmsContinueTime::GetAppLaunchTime(const std::string& bundleName)
     auto now = std::chrono::system_clock::now();
     auto nowMs = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
     auto currentTime = nowMs.time_since_epoch().count();
-    int64_t appLaunchTime = currentTime - startAbilityTime_.second;
+    int64_t appLaunchTime = 0;
+    if (currentTime >= startAbilityTime_.second) {
+        appLaunchTime = currentTime - startAbilityTime_.second;
+    }
     startAbilityTime_ = {"", 0};
     return appLaunchTime;
 }
