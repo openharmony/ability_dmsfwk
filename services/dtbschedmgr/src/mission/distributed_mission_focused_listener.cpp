@@ -99,7 +99,7 @@ void DistributedMissionFocusedListener::OnMissionDestroyed(int32_t missionId)
         HILOGW("Current process is not foreground. callingUid = %{public}d", callingUid);
         return;
     }
-    auto feedfunc = [this, missionId, callingUid, appLaunchTime, bundleName]() {
+    auto feedfunc = [this, missionId, callingUid]() {
         std::string bundleName;
         int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
         MissionStatus missionStatus;
@@ -202,7 +202,7 @@ void DistributedMissionFocusedListener::OnMissionMovedToBackground(int32_t missi
         HILOGW("Current process is not foreground. callingUid = %{public}d", callingUid);
         return;
     }
-    auto feedfunc = [this, missionId, callingUid, appLaunchTime, bundleName]() {
+    auto feedfunc = [this, missionId, callingUid]() {
         std::string bundleName;
         int32_t currentAccountId = MultiUserManager::GetInstance().GetForegroundUser();
         MissionStatus missionStatus;
