@@ -116,6 +116,7 @@ void DataShareManager::UnInit()
 {
     HILOGI("DataShareManager UnInit start");
     UnregisterObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY);
+    UnregisterObserver(SwitchStatusDependency::GetInstance().RECOMMEND_INSTALLATION_SWITCH_KEY);
     observer_ = nullptr;
     HILOGI("DataShareManager UnInit end");
 }
