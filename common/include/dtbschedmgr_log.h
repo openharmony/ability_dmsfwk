@@ -144,6 +144,14 @@ enum DmsInterfaceSdkErr {
      * the remote device is idle.
      */
     ERR_BIND_REMOTE_IN_BUSY_LINK = 16300509,
+    /**
+     * Result(16300510) throw to js for load dms system ability timeout.
+     */
+    ERR_DMS_LOAD_SA_TIMEOUT = 16300510,
+    /**
+     * Result(16300511) throw to js for load dms system ability failed.
+     */
+    ERR_DMS_LOAD_SA_FAILED = 16300511,
 };
 
 enum {

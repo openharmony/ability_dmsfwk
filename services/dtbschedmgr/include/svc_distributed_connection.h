@@ -86,7 +86,7 @@ public:
      * @brief publish a dextension notification.
      */
     void PublishDExtensionNotification(const std::string &deviceId, const std::string &bundleName,
-        const int32_t userId, const std::string &networkId, AppExecFwk::BundleResourceInfo &bundleResourceInfo);
+        const int32_t userId, const std::string &deviceName, AppExecFwk::BundleResourceInfo &bundleResourceInfo);
 
     /**
      * @brief Terminate the current DExtension.

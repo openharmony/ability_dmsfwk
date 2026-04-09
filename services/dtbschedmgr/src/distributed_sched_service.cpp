@@ -164,6 +164,7 @@ constexpr int32_t DSOFTBUS_UID = 1024;
 constexpr int32_t WEARLINK_UID = 7259;
 constexpr int32_t SA_READY_TO_UNLOAD = 0;
 constexpr int32_t SA_REFUSE_TO_UNLOAD = -1;
+constexpr int64_t DMS_AUTO_UNLOAD_DELAY_S = 40; // 40s
 DataShareManager &dataShareManager = DataShareManager::GetInstance();
 
 const std::string DEFAULT_HAP_CODE_PATH = "1";
@@ -327,6 +328,49 @@ static int32_t CheckCallingPermission(DExtConnectResultInfo& resultInfo)
     return ERR_OK;
 }
 
+int32_t DistributedSchedService::ScheduleAutoUnload()
+{
+    HILOGI("called.");
+    auto func = [this]() {
+        {
+            std::unique_lock<std::mutex> lock(unloadMutex_);
+            unloadCondition_.wait_for(lock, std::chrono::seconds(DMS_AUTO_UNLOAD_DELAY_S));
+        }
+        std::vector<DistributedHardware::DmDeviceInfo> dmDeviceInfoList;
+        DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", dmDeviceInfoList);
+        if (!dmDeviceInfoList.empty()) {
+            HILOGI("Network device online");
+            return;
+        }
+        if (dExtensionConnected_.load()) {
+            HILOGI("DExtension business still in progress, reschedule auto unload");
+            dExtensionConnected_.store(false);
+            ScheduleAutoUnload();
+            return;
+        }
+        HILOGI("UnloadSystemAbility dms");
+        auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (samgrProxy == nullptr) {
+            HILOGE("get samgr failed");
+            return;
+        }
+        int32_t ret = samgrProxy->UnloadSystemAbility(DISTRIBUTED_SCHED_SA_ID);
+        if (ret != ERR_OK) {
+            HILOGE("remove system ability failed");
+            return;
+        }
+        HILOGI("UnloadSystemAbility dms ok");
+    };
+    std::vector<DistributedHardware::DmDeviceInfo> dmDeviceInfoList;
+    DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", dmDeviceInfoList);
+    if (dmDeviceInfoList.empty()) {
+        std::thread task(func);
+        task.detach();
+    }
+    HILOGI("end.");
+    return ERR_OK;
+}
+
 static int32_t ValidateAndPrepareConnection(const DExtConnectInfo& connectInfo, DExtConnectResultInfo& resultInfo)
 {
     if (connectInfo.sinkInfo.IsEmpty()) {
@@ -360,54 +404,123 @@ static void TriggerProxyCallbacks(AAFwk::Want& want, const DExtConnectInfo& conn
     wantParam.SetParam(COLLABRATION_TYPE, String::Box(CONNECT_RPOXY));
     wantParam.SetParam(SOURCE_DELEGATEE, String::Box(connectInfo.delegatee));
     proxy->TriggerOnCollaborate(wantParam);
+    resultInfo.result = DExtConnectResult::SUCCESS;
 }
 
-sptr<IDExtension> DistributedSchedService::WaitAndGetDExtensionProxy()
+int32_t DistributedSchedService::PrepareSvcDConnection(const DExtConnectInfo& connectInfo,
+    AAFwk::Want& want, bool& isDelay)
+{
+    std::string bundleName = connectInfo.sinkInfo.bundleName;
+    sptr<SvcDistributedConnection> conn;
+    {
+        std::lock_guard<std::mutex> autoLock(svcDConnectLock_);
+        auto it = svcDConnMap_.find(bundleName);
+        if (it == svcDConnMap_.end() || it->second == nullptr) {
+            conn = sptr<SvcDistributedConnection>(new SvcDistributedConnection(bundleName));
+            conn->RegisterEventListener();
+            svcDConnMap_[bundleName] = conn;
+        } else {
+            conn = it->second;
+        }
+    }
+    if (conn == nullptr) {
+        HILOGE("PrepareSvcDConnection: connection not found for bundleName: %{public}s", bundleName.c_str());
+        return INVALID_PARAMETERS_ERR;
+    }
+    auto callConnected = GetDistributedConnectDone(bundleName);
+    conn->SetCallback(callConnected);
+    bool isCleanCalled = false;
+    want.SetElementName(bundleName, connectInfo.sinkInfo.abilityName);
+    return conn->ConnectDExtAbility(want, connectInfo.sinkInfo.userId, isCleanCalled,
+        connectInfo.delegatee, isDelay);
+}
+
+sptr<IDExtension> DistributedSchedService::WaitAndGetDExtensionProxy(const std::string bundleName)
 {
     // Already connected, return proxy directly without waiting
-    if (svcDConn_ && svcDConn_->IsExtAbilityConnected()) {
-        HILOGI("Already connected, skip waiting.");
-        return svcDConn_->GetDistributedExtProxy();
+    {
+        std::lock_guard<std::mutex> autoLock(svcDConnectLock_);
+        auto it = svcDConnMap_.find(bundleName);
+        if (it != svcDConnMap_.end() && it->second != nullptr && it->second->IsExtAbilityConnected()) {
+            HILOGI("Already connected, skip waiting.");
+            return it->second->GetDistributedExtProxy();
+        }
     }
     // Not connected yet, wait for OnAbilityConnectDone callback
     std::unique_lock<std::mutex> lock(getDistibutedProxyLock_);
     getDistibutedProxyCondition_.wait_for(lock, std::chrono::seconds(CONNECT_WAIT_TIME_S),
-        [this]() { return svcDConn_ && svcDConn_->IsExtAbilityConnected(); });
+        [this, bundleName]() {
+            std::lock_guard<std::mutex> autoLock(svcDConnectLock_);
+            auto it = svcDConnMap_.find(bundleName);
+            return it != svcDConnMap_.end() && it->second != nullptr && it->second->IsExtAbilityConnected();
+        });
     HILOGI("WaitAndGetDExtensionProxy end.");
-    return svcDConn_->GetDistributedExtProxy();
+    std::lock_guard<std::mutex> autoLock(svcDConnectLock_);
+    auto it = svcDConnMap_.find(bundleName);
+    if (it == svcDConnMap_.end() || it->second == nullptr) {
+        HILOGE("WaitAndGetDExtensionProxy: connection not found for bundleName: %{public}s", bundleName.c_str());
+        return nullptr;
+    }
+    return it->second->GetDistributedExtProxy();
+}
+
+int32_t DistributedSchedService::GetDeviceDisplayName(const DExtConnectInfo& connectInfo,
+    std::string& displayName, DExtConnectResultInfo& resultInfo)
+{
+    std::string networkId = connectInfo.sourceInfo.networkId;
+    std::string deviceName = connectInfo.sourceInfo.deviceName;
+    if (!deviceName.empty()) {
+        displayName = deviceName;
+        HILOGI("Using deviceName from parameter (sports watch)");
+        return ERR_OK;
+    }
+    if (!networkId.empty()) {
+        int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetDeviceName(PKG_NAME, networkId, displayName);
+        if (ret != ERR_OK) {
+            HILOGE("Failed to get device name from networkId, ret = %{public}d", ret);
+            resultInfo.errCode = INVALID_PARAMETERS_ERR;
+            return INVALID_PARAMETERS_ERR;
+        }
+        HILOGI("Got deviceName from networkId (smart watch)");
+        return ERR_OK;
+    }
+    HILOGE("Both networkId and deviceName are empty");
+    resultInfo.errCode = INVALID_PARAMETERS_ERR;
+    return INVALID_PARAMETERS_ERR;
+}
+
+int32_t DistributedSchedService::FinalizeDExtensionConnection(AAFwk::Want& want,
+    const DExtConnectInfo& connectInfo, const sptr<IDExtension>& proxy,
+    bool isDelay, DExtConnectResultInfo& resultInfo)
+{
+    if (isDelay) {
+        HILOGI("Connect ability again.");
+        return ERR_OK;
+    }
+    TriggerProxyCallbacks(want, connectInfo, resultInfo, proxy);
+    return ERR_OK;
 }
 
 int32_t DistributedSchedService::ConnectDExtensionFromRemote(const DExtConnectInfo& connectInfo,
     DExtConnectResultInfo& resultInfo)
 {
+    dExtensionConnected_.store(true);
+    ScheduleAutoUnload();
     int32_t ret = ValidateAndPrepareConnection(connectInfo, resultInfo);
-    if (ret!= ERR_OK) {
+    if (ret != ERR_OK) {
         resultInfo.errCode = ret;
         return ret;
     }
-    int32_t userId = connectInfo.sinkInfo.userId;
-    std::string bundleName = connectInfo.sinkInfo.bundleName;
-    std::string abilityName = connectInfo.sinkInfo.abilityName;
-    {
-        std::lock_guard<std::mutex> autoLock(svcDConnectLock_);
-        if (svcDConn_ == nullptr) {
-            svcDConn_ = sptr<SvcDistributedConnection>(new SvcDistributedConnection(bundleName));
-            svcDConn_->RegisterEventListener();
-        }
-    }
-    auto callConnected = GetDistributedConnectDone(bundleName);
-    svcDConn_->SetCallback(callConnected);
-    bool isCleanCalled = false;
     AAFwk::Want want;
-    want.SetElementName(bundleName, abilityName);
     bool isDelay = false;
-    ret = svcDConn_->ConnectDExtAbility(want, userId, isCleanCalled, connectInfo.delegatee, isDelay);
+    ret = PrepareSvcDConnection(connectInfo, want, isDelay);
     if (ret != ERR_OK) {
         resultInfo.errCode = ret;
         return ret;
     }
     resultInfo.errCode = ret;
-    auto proxy = WaitAndGetDExtensionProxy();
+    std::string bundleName = connectInfo.sinkInfo.bundleName;
+    auto proxy = WaitAndGetDExtensionProxy(bundleName);
     if (proxy == nullptr) {
         HILOGE("Extension distribute proxy is empty");
         return INVALID_PARAMETERS_ERR;
@@ -417,16 +530,37 @@ int32_t DistributedSchedService::ConnectDExtensionFromRemote(const DExtConnectIn
     if (ret != ERR_OK) {
         return ret;
     }
-    svcDConn_->PublishDExtensionNotification(connectInfo.sourceInfo.deviceId, bundleName, userId,
-        connectInfo.sourceInfo.networkId, bundleResourceInfo);
-
-    if (isDelay) {
-        HILOGI("Connect ability again.");
+    std::string displayName;
+    ret = GetDeviceDisplayName(connectInfo, displayName, resultInfo);
+    if (ret != ERR_OK) {
         return ret;
     }
-    TriggerProxyCallbacks(want, connectInfo, resultInfo, proxy);
-    resultInfo.result = DExtConnectResult::SUCCESS;
-    return ret;
+    {
+        std::lock_guard<std::mutex> autoLock(svcDConnectLock_);
+        auto it = svcDConnMap_.find(bundleName);
+        if (it != svcDConnMap_.end() && it->second != nullptr) {
+            it->second->PublishDExtensionNotification(connectInfo.sourceInfo.deviceId,
+                bundleName, connectInfo.sinkInfo.userId, displayName, bundleResourceInfo);
+        }
+    }
+    return FinalizeDExtensionConnection(want, connectInfo, proxy, isDelay, resultInfo);
+}
+
+ void DistributedSchedService::SetDExtensionConnected(bool connected)
+{
+    HILOGI("called.");
+    if (connected) {
+        dExtensionConnected_.store(true);
+        return;
+    }
+    std::lock_guard<std::mutex> autoLock(svcDConnectLock_);
+    for (auto it = svcDConnMap_.begin(); it != svcDConnMap_.end(); ++it) {
+        if (it->second != nullptr && it->second->IsExtAbilityConnected()) {
+            HILOGI("bundleName: %{public}s still connected, keep dExtensionConnected_ true", it->first.c_str());
+            return;
+        }
+    }
+    dExtensionConnected_.store(false);
 }
 
 void DistributedSchedService::OnStart(const SystemAbilityOnDemandReason &startReason)

@@ -46,6 +46,8 @@ ohos_executable("distributed_extension_test") {
     "access_token:libaccesstoken_sdk",
     "access_token:libnativetoken_shared",
     "access_token:libtokensetproc_shared",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
   if (!dmsfwk_disable_distributedsched_service) {
     external_deps += [ "device_manager:devicemanagersdk" ]

@@ -27,6 +27,8 @@ public:
     virtual ~IDeviceManager() = default;
     virtual int32_t GetTrustedDeviceList(const std::string &pkgName, const std::string &extra,
         std::vector<DmDeviceInfo> &deviceList);
+    virtual int32_t GetDeviceName(const std::string &pkgName, const std::string &networkId,
+        std::string &deviceName);
 public:
     static inline std::shared_ptr<IDeviceManager> deviceMgrMock = nullptr;
 };
@@ -35,6 +37,8 @@ class DeviceManagerMock : public IDeviceManager {
 public:
     MOCK_METHOD3(GetTrustedDeviceList, int32_t(const std::string &pkgName, const std::string &extra,
         std::vector<DmDeviceInfo> &deviceList));
+    MOCK_METHOD3(GetDeviceName, int32_t(const std::string &pkgName, const std::string &networkId,
+        std::string &deviceName));
 };
 }
 }
