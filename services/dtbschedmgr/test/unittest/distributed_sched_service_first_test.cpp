@@ -1758,7 +1758,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ReleaseAbilityFromRemote_002, TestSiz
  */
 HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test01, TestSize.Level1)
 {
-    DExtSourceInfo sourceInfo("device123", "network123", "testBundle", "testModule", "testAbility");
+    DExtSourceInfo sourceInfo("device123", "network123", "", "testBundle", "testModule", "testAbility");
     DExtSinkInfo sinkInfo(1001, 1234, "testBundle", "testModule", "testAbility", "testService");
     DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "validToken", "delegatee");
     DExtConnectResultInfo resultInfo;
@@ -1777,7 +1777,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test01, T
  */
 HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test02, TestSize.Level1)
 {
-    DExtSourceInfo sourceInfo("", "", "", "", "");
+    DExtSourceInfo sourceInfo("", "", "", "", "", "");
     DExtSinkInfo sinkInfo(0, 0, "", "", "", "");
     DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "validToken", "delegatee");
     DExtConnectResultInfo resultInfo;
@@ -1797,7 +1797,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test02, T
 HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test03, TestSize.Level1)
 {
     SetNativeToken();
-    DExtSourceInfo sourceInfo("device123", "network123", "testBundle", "testModule", "testAbility");
+    DExtSourceInfo sourceInfo("device123", "network123", "", "testBundle", "testModule", "testAbility");
     DExtSinkInfo sinkInfo(-1, 1234, "testBundle", "testModule", "testAbility", "testService");
     DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "validToken", "delegatee");
     DExtConnectResultInfo resultInfo;
@@ -1817,7 +1817,7 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test03, T
 HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test04, TestSize.Level1)
 {
     SetNativeToken();
-    DExtSourceInfo sourceInfo("device123", "network123", "testBundle", "testModule", "testAbility");
+    DExtSourceInfo sourceInfo("device123", "network123", "", "testBundle", "testModule", "testAbility");
     DExtSinkInfo sinkInfo(100, 0, "com.it.welink", "dms", "AttendanceDistributedAbility", "WeLink");
     DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "ohos.permission.dms_extension", "delegatee");
     DExtConnectResultInfo resultInfo;
@@ -1828,6 +1828,67 @@ HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test04, T
     EXPECT_EQ(resultInfo.result, DExtConnectResult::FAILED);
 
     DTEST_LOG << "DistributedSchedServiceFirstTest ConnectDExtensionFromRemote_Test04 end" << std::endl;
+}
+
+/**
+ * @tc.name  : ConnectDExtensionFromRemote_Test05
+ * @tc.number: ConnectDExtensionFromRemote_005
+ * @tc.desc  : Test ConnectDExtensionFromRemote function when check permission failed.
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test05, TestSize.Level1)
+{
+    DExtSourceInfo sourceInfo("device123", "", "deviceName1", "testBundle", "testModule", "testAbility");
+    DExtSinkInfo sinkInfo(100, 1234, "testBundle", "testModule", "testAbility", "testService");
+    DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "validToken", "delegatee");
+    DExtConnectResultInfo resultInfo;
+    setuid(9999);
+    
+    int32_t result = DistributedSchedService::GetInstance().ConnectDExtensionFromRemote(connectInfo, resultInfo);
+    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+    EXPECT_EQ(resultInfo.result, DExtConnectResult::PERMISSION_DENIED);
+
+    DTEST_LOG << "DistributedSchedServiceFirstTest ConnectDExtensionFromRemote_Test05 end" << std::endl;
+}
+
+/**
+ * @tc.name  : ConnectDExtensionFromRemote_Test06
+ * @tc.number: ConnectDExtensionFromRemote_006
+ * @tc.desc  : Test ConnectDExtensionFromRemote function when user is not foreground.
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test06, TestSize.Level1)
+{
+    SetNativeToken();
+    DExtSourceInfo sourceInfo("device123", "", "deviceName1", "testBundle", "testModule", "testAbility");
+    DExtSinkInfo sinkInfo(-1, 1234, "testBundle", "testModule", "testAbility", "testService");
+    DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "validToken", "delegatee");
+    DExtConnectResultInfo resultInfo;
+
+    int32_t result = DistributedSchedService::GetInstance().ConnectDExtensionFromRemote(connectInfo, resultInfo);
+    EXPECT_EQ(result, DMS_NOT_FOREGROUND_USER);
+    EXPECT_EQ(resultInfo.result, DExtConnectResult::FAILED);
+
+    DTEST_LOG << "DistributedSchedServiceFirstTest ConnectDExtensionFromRemote_Test06 end" << std::endl;
+}
+
+/**
+ * @tc.name  : ConnectDExtensionFromRemote_Test07
+ * @tc.number: ConnectDExtensionFromRemote_007
+ * @tc.desc  : Test ConnectDExtensionFromRemote function when ConnectDExtAbility failed.
+ */
+HWTEST_F(DistributedSchedServiceFirstTest, ConnectDExtensionFromRemote_Test07, TestSize.Level1)
+{
+    SetNativeToken();
+    DExtSourceInfo sourceInfo("device123", "", "deviceName1", "testBundle", "testModule", "testAbility");
+    DExtSinkInfo sinkInfo(100, 0, "com.it.welink", "dms", "AttendanceDistributedAbility", "WeLink");
+    DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "ohos.permission.dms_extension", "delegatee");
+    DExtConnectResultInfo resultInfo;
+
+    EXPECT_CALL(*svcDConnMock, ConnectDExtAbility(_, _, _, _, _)).WillOnce(Return(INVALID_PARAMETERS_ERR));
+    int32_t result = DistributedSchedService::GetInstance().ConnectDExtensionFromRemote(connectInfo, resultInfo);
+    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(resultInfo.result, DExtConnectResult::FAILED);
+
+    DTEST_LOG << "DistributedSchedServiceFirstTest ConnectDExtensionFromRemote_Test07 end" << std::endl;
 }
 
 /**

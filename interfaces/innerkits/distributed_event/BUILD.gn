@@ -70,6 +70,7 @@ ohos_shared_library("distributed_sdk") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
   if (!dmsfwk_disable_distributedsched_service) {

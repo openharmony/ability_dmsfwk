@@ -27,3 +27,12 @@ int32_t DeviceManagerImpl::GetTrustedDeviceList(const std::string &pkgName, cons
     }
     return IDeviceManager::deviceMgrMock->GetTrustedDeviceList(pkgName, extra, deviceList);
 }
+
+int32_t DeviceManagerImpl::GetDeviceName(const std::string &pkgName, const std::string &networkId,
+    std::string &deviceName)
+{
+    if (IDeviceManager::deviceMgrMock == nullptr) {
+        return 0;
+    }
+    return IDeviceManager::deviceMgrMock->GetDeviceName(pkgName, networkId, deviceName);
+}

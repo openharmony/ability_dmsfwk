@@ -40,6 +40,7 @@ const int32_t FIRST_CASE = 1;
 const int32_t SECOND_CASE = 2;
 const int32_t THIRD_CASE = 3;
 const int32_t FOURTH_CASE = 4;
+const int32_t FIVE_CASE = 5;
 const int32_t SYSTEM_USER_ID = 7259;
 const int32_t USER_ID = 120;
 const int32_t DEFAULT_USER_ID = 100;
@@ -88,10 +89,11 @@ static void PrintInteractiveUsage() // 根据提示输入相应的参数
 {
     std::cout << std::endl << "=============== InteractiveRunTestSelect ================" << std::endl;
     std::cout << "You can respond to instructions for corresponding option:" << std::endl;
-    std::cout <<  "\t enter 1 distribute dextension Start the process Message distribution selection. " << std::endl;
-    std::cout <<  "\t enter 2 distribute dextension Start the change bundle name. " << std::endl;
-    std::cout <<  "\t enter 3 distribute dextension Start the change ability name. " << std::endl;
-    std::cout <<  "\t enter 4 distribute dextension Start the change user ID. " << std::endl;
+    std::cout <<  "\t enter 1 distribute dextension Start the transmitting networkId scenario: " << std::endl;
+    std::cout <<  "\t enter 2 distribute dextension Start the transmitting deviceName scenario. " << std::endl;
+    std::cout <<  "\t enter 3 distribute dextension Start the change bundle name. " << std::endl;
+    std::cout <<  "\t enter 4 distribute dextension Start the change ability name. " << std::endl;
+    std::cout <<  "\t enter 5 distribute dextension Start the change user ID. " << std::endl;
     std::cout <<  "\t enter 0 to exit. " << std::endl;
 }
 
@@ -112,6 +114,7 @@ static void SetConnectInfo(DistributedSchedule::DExtConnectInfo& connectInfo)
     }
     srcInfo.deviceId = "123456";
     srcInfo.networkId = localDmDeviceInfo.networkId;
+    srcInfo.deviceName = "";
     srcInfo.bundleName = "com.example.dms_extension";
     srcInfo.moduleName = "Phone";
     srcInfo.abilityName = "EntrydistributedAbility";
@@ -136,6 +139,7 @@ static void HandleDExtensionEvent(const int32_t cmd) // 根据输入参数确定
         std::cout << "\t" << "ResultInfo.errCode:" << info.errCode << std::endl;
         std::cout << "\t" << "srcInfo.deviceId:" << info.connectInfo.sourceInfo.deviceId << std::endl;
         std::cout << "\t" << "srcInfo.networkId:" << info.connectInfo.sourceInfo.networkId << std::endl;
+        std::cout << "\t" << "srcInfo.deviceName:" << info.connectInfo.sourceInfo.deviceName << std::endl;
         std::cout << "\t" << "srcInfo.bundleName:" << info.connectInfo.sourceInfo.bundleName << std::endl;
         std::cout << "\t" << "srcInfo.moduleName:" << info.connectInfo.sourceInfo.moduleName << std::endl;
         std::cout << "\t" << "srcInfo.abilityName:" << info.connectInfo.sourceInfo.abilityName << std::endl;
@@ -151,14 +155,19 @@ static void HandleDExtensionEvent(const int32_t cmd) // 根据输入参数确定
             dmssaClient_->ConnectDExtensionFromRemote(connectInfo, fun);
             break;
         case SECOND_CASE :
-            connectInfo.sinkInfo.bundleName = "com.example.dms_extension_name";
+            connectInfo.sourceInfo.networkId = "";
+            connectInfo.sourceInfo.deviceName = "testDeviceName";
             dmssaClient_->ConnectDExtensionFromRemote(connectInfo, fun);
             break;
         case THIRD_CASE :
-            connectInfo.sinkInfo.abilityName = "EntrydistributedAbility_name";
+            connectInfo.sinkInfo.bundleName = "com.example.dms_extension_name";
             dmssaClient_->ConnectDExtensionFromRemote(connectInfo, fun);
             break;
         case FOURTH_CASE :
+            connectInfo.sinkInfo.abilityName = "EntrydistributedAbility_name";
+            dmssaClient_->ConnectDExtensionFromRemote(connectInfo, fun);
+            break;
+        case FIVE_CASE :
             connectInfo.sinkInfo.userId = USER_ID;
             dmssaClient_->ConnectDExtensionFromRemote(connectInfo, fun);
             break;

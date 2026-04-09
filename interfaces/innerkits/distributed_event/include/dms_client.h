@@ -16,9 +16,14 @@
 #ifndef OHOS_DMS_CLIENT_H
 #define OHOS_DMS_CLIENT_H
 
+#include <atomic>
+#include <condition_variable>
+#include <memory>
+#include <mutex>
 #include <string>
 
 #include "iremote_broker.h"
+#include "system_ability_load_callback_stub.h"
 
 #include "distributed_extension_types.h"
 #include "distributed_event_listener.h"
@@ -26,6 +31,25 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
+class DmsLoadCallback : public SystemAbilityLoadCallbackStub {
+public:
+    DmsLoadCallback() = default;
+    ~DmsLoadCallback() = default;
+
+    void OnLoadSystemAbilitySuccess(int32_t systemAbilityId,
+        const sptr<IRemoteObject>& remoteObject) override;
+    void OnLoadSystemAbilityFail(int32_t systemAbilityId) override;
+
+    bool WaitForLoadSuccess(int32_t timeoutMs);
+    sptr<IRemoteObject> GetRemoteObject() const;
+
+private:
+    mutable std::mutex mutex_;
+    std::condition_variable cv_;
+    std::atomic<bool> loadSuccess_ {false};
+    sptr<IRemoteObject> remoteObject_;
+};
+
 class DistributedClient {
 public:
     int32_t RegisterDSchedEventListener(const DSchedEventType& type, const sptr<IDSchedEventListener>& obj);
@@ -37,6 +61,7 @@ public:
 
 private:
     sptr<IRemoteObject> GetDmsProxy();
+    sptr<IRemoteObject> LoadDmsServiceWithTimeout();
     int32_t GetDecodeDSchedEventNotify(MessageParcel &reply, EventNotify &event);
 };
 }  // namespace DistributedSchedule

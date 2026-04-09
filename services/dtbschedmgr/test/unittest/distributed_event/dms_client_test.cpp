@@ -130,7 +130,7 @@ HWTEST_F(DistributedClientTest, DistributedClientTest_ConnectDExtensionFromRemot
     GTEST_LOG_(INFO) << "DistributedClientTest_ConnectDExtensionFromRemote_001 start";
 
     DistributedClient dmsClt;
-    DExtSourceInfo sourceInfo("device123", "network123", "bundleName", "moduleName", "abilityName");
+    DExtSourceInfo sourceInfo("device123", "network123", "", "bundleName", "moduleName", "abilityName");
     DExtSinkInfo sinkInfo(1001, 1234, "bundleName", "moduleName", "abilityName", "serviceName");
     DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "validToken", "delegatee");
     DExtConnectResultInfo resultInfo;
@@ -140,6 +140,29 @@ HWTEST_F(DistributedClientTest, DistributedClientTest_ConnectDExtensionFromRemot
     int32_t rlt = dmsClt.ConnectDExtensionFromRemote(connectInfo, callback);
     EXPECT_NE(rlt, ERR_NONE);
     GTEST_LOG_(INFO) << "DistributedClientTest_ConnectDExtensionFromRemote_001 end";
+}
+
+/**
+ * @tc.name: DistributedClientTest_ConnectDExtensionFromRemote_002
+ * @tc.desc: Verify the ConnectDExtensionFromRemote.
+ * @tc.type: FUNC
+ * @tc.require: IBP3MC
+ */
+HWTEST_F(DistributedClientTest, DistributedClientTest_ConnectDExtensionFromRemote_002, TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DistributedClientTest_ConnectDExtensionFromRemote_002 start";
+
+    DistributedClient dmsClt;
+    DExtSourceInfo sourceInfo("device123", "", "devicename", "bundleName", "moduleName", "abilityName");
+    DExtSinkInfo sinkInfo(1001, 1234, "bundleName", "moduleName", "abilityName", "serviceName");
+    DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "validToken", "delegatee");
+    DExtConnectResultInfo resultInfo;
+
+    auto callback = [](const DExtConnectResultInfo& result) {};
+
+    int32_t rlt = dmsClt.ConnectDExtensionFromRemote(connectInfo, callback);
+    EXPECT_NE(rlt, ERR_NONE);
+    GTEST_LOG_(INFO) << "DistributedClientTest_ConnectDExtensionFromRemote_002 end";
 }
 }
 }

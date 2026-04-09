@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <mutex>
+#include <condition_variable>
 #include <set>
 #include <unordered_map>
 
@@ -233,6 +234,7 @@ public:
         std::string abilityName);
     void SetCallerExtraInfo(CallerInfo &callerInfo, uint32_t accessToken, uint32_t specifyTokenId);
     bool IsTargetPermission(const OHOS::AAFwk::Want &want);
+    void SetDExtensionConnected(bool connected);
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     bool CheckRemoteOsType(const std::string& netwokId) override;
@@ -336,7 +338,13 @@ private:
     void NotifyCollaborateEventWithSessions(const std::list<ConnectAbilitySession> &sessionsList,
         DSchedEventState state, int32_t ret);
     bool CheckCallingUid();
-    sptr<IDExtension> WaitAndGetDExtensionProxy();
+    int32_t ScheduleAutoUnload();
+    int32_t PrepareSvcDConnection(const DExtConnectInfo& connectInfo, AAFwk::Want& want, bool& isDelay);
+        sptr<IDExtension> WaitAndGetDExtensionProxy(const std::string bundleName);
+    int32_t GetDeviceDisplayName(const DExtConnectInfo& connectInfo, std::string& displayName,
+        DExtConnectResultInfo& resultInfo);
+    int32_t FinalizeDExtensionConnection(AAFwk::Want& want, const DExtConnectInfo& connectInfo,
+        const sptr<IDExtension>& proxy, bool isDelay, DExtConnectResultInfo& resultInfo);
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     int32_t GetDmsInteractiveAdapterProxy();
@@ -358,7 +366,7 @@ private:
     std::mutex connectLock_;
     std::mutex svcDConnectLock_;
     sptr<IRemoteObject::DeathRecipient> connectDeathRecipient_;
-    sptr<SvcDistributedConnection> svcDConn_;
+    std::unordered_map<std::string, sptr<SvcDistributedConnection>> svcDConnMap_;
 #ifdef SUPPORT_DISTRIBUTED_FORM_SHARE
     sptr<IRemoteObject::DeathRecipient> formMgrDeathRecipient_;
     sptr<AppExecFwk::IFormMgr> formMgrProxy_;
@@ -379,6 +387,9 @@ private:
     std::mutex tokenMutex_;
     std::mutex registerMutex_;
     std::atomic<int32_t> token_ {0};
+    std::atomic<bool> dExtensionConnected_ {false};
+    std::mutex unloadMutex_;
+    std::condition_variable unloadCondition_;
     std::map<std::string, sptr<AppStateObserver>> bundleNameMap_;
     sptr<DistributedMissionFocusedListener> missionFocusedListener_ = nullptr;
 
