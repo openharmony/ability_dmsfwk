@@ -19,6 +19,7 @@
 #include <list>
 #include <mutex>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "single_instance.h"
@@ -87,6 +88,13 @@ public:
     void SetSaveDataDurationEnd(const int64_t time);
     DmsDuration GetSaveDataDuration();
 
+    void SetStartAbilityTime(const std::string& bundleName, const int64_t time);
+    int64_t GetStartAbilityTime();
+    int64_t GetAppLaunchTime(const std::string& bundleName);
+    std::pair<std::string, int64_t> GetStartAbilityTimePair();
+    std::string GetSourceNetworkId();
+    std::string GetSinkNetworkId();
+
     std::string WriteDurationInfo(DmsDuration duration);
     void ReadDurationInfo(const char* info);
     std::string WriteDstInfo(const std::string bundleName, const std::string abilityName);
@@ -107,6 +115,7 @@ private:
     DmsDumperInfo srcInfo_;
     DmsDumperInfo dstInfo_;
     DmsDuration saveDataDuration_;
+    std::pair<std::string, int64_t> startAbilityTime_;
     std::mutex infoMutex_;
     std::mutex mutex_;
 };

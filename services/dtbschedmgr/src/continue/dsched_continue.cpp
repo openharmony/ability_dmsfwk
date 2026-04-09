@@ -1139,6 +1139,10 @@ bool DSchedContinue::WaitAbilityStateInitial(int32_t persistentId)
 
 int32_t DSchedContinue::StartAbility(OHOS::AAFwk::Want& want, int32_t requestCode)
 {
+    auto now = std::chrono::system_clock::now();
+    auto nowMs = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+    int64_t startTime = nowMs.time_since_epoch().count();
+    DmsContinueTime::GetInstance().SetStartAbilityTime(continueInfo_.sinkBundleName_, startTime);
     want.SetParam(OHOS::AAFwk::Want::PARAM_APP_CLONE_INDEX_KEY, 0);
     int32_t ret = AAFwk::AbilityManagerClient::GetInstance()->Connect();
     if (ret != ERR_OK) {
@@ -1508,6 +1512,8 @@ void DSchedContinue::OnDataRecv(int32_t command, std::shared_ptr<DSchedDataBuffe
             break;
         }
         case DSCHED_CONTINUE_CMD_END: {
+            std::string sinkNetworkId = continueInfo_.sinkDeviceId_;
+            DmsUE::GetInstance().ContinuationMessage(continueInfo_.sourceBundleName_, sinkNetworkId, ERR_OK);
             auto endCmd = std::make_shared<DSchedContinueEndCmd>();
             ret = endCmd->Unmarshal(jsonStr);
             if (ret != ERR_OK) {

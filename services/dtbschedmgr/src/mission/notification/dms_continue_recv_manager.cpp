@@ -773,5 +773,11 @@ std::string DMSContinueRecvMgr::GetContinueType(const std::string& bundleName)
 
     return iconInfo_.continueType;
 }
+
+std::string DMSContinueRecvMgr::GetSenderNetworkId()
+{
+    std::lock_guard<std::mutex> currentIconLock(iconMutex_);
+    return iconInfo_.senderNetworkId;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
