@@ -35,7 +35,7 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DistributedMissionFocusedListener";
-constexpr int64_t ACCIDENTAL_TOUCH_THRESHOLD_MS = 5000;
+constexpr int64_t ACCIDENTAL_TOUCH_THRESHOLD_MS = 2000;
 }
 
 void DistributedMissionFocusedListener::Init()
