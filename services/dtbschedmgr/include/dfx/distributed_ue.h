@@ -33,6 +33,7 @@ constexpr const char* ERROR_CODE_UE = "ERROR_CODE_UE";
 constexpr const char* PNAMEID = "PNAMEID";
 constexpr const char* PVERSIONID = "PVERSIONID";
 constexpr const char* BUNDLE_NAME = "BUNDLE_NAME";
+constexpr const char* BUNDLENAME = "BUNDLENAME";
 constexpr const char* ABILITY_NAME = "ABILITY_NAME";
 constexpr const char* SOURCE_DEVICE_TYPE = "SOURCE_DEVICE_TYPE";
 constexpr const char* SINK_DEVICE_TYPE = "SINK_DEVICE_TYPE";
