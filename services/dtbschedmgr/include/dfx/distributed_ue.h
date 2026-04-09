@@ -33,8 +33,11 @@ constexpr const char* ERROR_CODE_UE = "ERROR_CODE_UE";
 constexpr const char* PNAMEID = "PNAMEID";
 constexpr const char* PVERSIONID = "PVERSIONID";
 constexpr const char* BUNDLE_NAME = "BUNDLE_NAME";
+constexpr const char* BUNDLENAME = "BUNDLENAME";
 constexpr const char* ABILITY_NAME = "ABILITY_NAME";
 constexpr const char* SOURCE_DEVICE_TYPE = "SOURCE_DEVICE_TYPE";
+constexpr const char* SINK_DEVICE_TYPE = "SINK_DEVICE_TYPE";
+constexpr const char* APP_LAUNCH_TIME = "APP_LAUNCH_TIME";
 
 constexpr const char* CONTINUATION_STATE = "CONTINUATION_STATE";
 constexpr const char* FAILED_EXTRAINFO = "FAILED_EXTRAINFO";
@@ -47,6 +50,8 @@ constexpr const char* CLICK_CONTINUATION_ICON = "CLICK_CONTINUATION_ICON";
 constexpr const char* COMPLETE_OF_CONTINUATION = "COMPLETE_OF_CONTINUATION";
 constexpr const char* ORIGINAL_SWITCH_STATE = "ORIGINAL_SWITCH_STATE";
 constexpr const char* CHANGED_SWITCH_STATE = "CHANGED_SWITCH_STATE";
+constexpr const char* ACCIDENTAL_CONTINUATION = "ACCIDENTAL_CONTINUATION";
+constexpr const char* CONTINUATION_MESSAGE = "CONTINUATION_MESSAGE";
 
 constexpr char CONTINUATION_DOMAIN[] = "CONTINUATION_UE";
 
@@ -66,8 +71,13 @@ public:
         const std::string& networkId, int32_t errCode);
     bool OriginalSwitchState(bool isContinueSwitchOn, int32_t errCode);
     bool ChangedSwitchState(bool isContinueSwitchOn, int32_t errCode);
+    bool AccidentalContinuation(int64_t appLaunchTime, const std::string& bundleName,
+        const std::string& sourceNetworkId, int32_t errCode);
+    bool ContinuationMessage(const std::string& bundleName,
+        const std::string& sinkNetworkId, int32_t errCode);
 
     int32_t GetDeviceTypeByNetworkId(std::string networkId);
+    int32_t GetLocalDeviceType();
     std::string ConvertErrCodeToStr(int32_t errorCode);
 };
 } // namespace DistributedSchedule

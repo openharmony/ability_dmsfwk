@@ -92,6 +92,7 @@ public:
     void OnContinueSwitchOff();
     void OnUserSwitch();
     std::string GetContinueType(const std::string& bundleName);
+    std::string GetSenderNetworkId();
 
 private:
     void StartEvent();

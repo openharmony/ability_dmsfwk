@@ -14,6 +14,7 @@
  */
 
 #include "dfx/distributed_ue.h"
+#include "adapter/dnetwork_adapter.h"
 #include "dfx/dms_continue_time_dumper.h"
 #include "dms_constant.h"
 
@@ -192,6 +193,74 @@ bool DmsUE::ChangedSwitchState(bool isContinueSwitchOn, int32_t errCode)
     return true;
 }
 
+bool DmsUE::AccidentalContinuation(int64_t appLaunchTime, const std::string& bundleName,
+    const std::string& sourceNetworkId, int32_t errCode)
+{
+    int32_t res = ERR_OK;
+    if (errCode == ERR_OK) {
+        res = HiSysEventWrite(
+            CONTINUATION_DOMAIN,
+            ACCIDENTAL_CONTINUATION,
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            PNAMEID, CONTINUATION_DOMAIN,
+            PVERSIONID, Constants::DMS_VERSION,
+            BUNDLENAME, bundleName,
+            APP_LAUNCH_TIME, appLaunchTime,
+            SOURCE_DEVICE_TYPE, GetDeviceTypeByNetworkId(sourceNetworkId),
+            SINK_DEVICE_TYPE, GetLocalDeviceType());
+    } else {
+        res = HiSysEventWrite(
+            CONTINUATION_DOMAIN,
+            ACCIDENTAL_CONTINUATION,
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            PNAMEID, CONTINUATION_DOMAIN,
+            PVERSIONID, Constants::DMS_VERSION,
+            BUNDLENAME, bundleName,
+            APP_LAUNCH_TIME, appLaunchTime,
+            SOURCE_DEVICE_TYPE, GetDeviceTypeByNetworkId(sourceNetworkId),
+            SINK_DEVICE_TYPE, GetLocalDeviceType(),
+            ERROR_CODE_UE, errCode);
+    }
+    if (res != ERR_OK) {
+        HILOGE("AccidentalContinuation error, res:%{public}d", res);
+        return false;
+    }
+    return true;
+}
+
+bool DmsUE::ContinuationMessage(const std::string& bundleName,
+    const std::string& sinkNetworkId, int32_t errCode)
+{
+    int32_t res = ERR_OK;
+    if (errCode == ERR_OK) {
+        res = HiSysEventWrite(
+            CONTINUATION_DOMAIN,
+            CONTINUATION_MESSAGE,
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            PNAMEID, CONTINUATION_DOMAIN,
+            PVERSIONID, Constants::DMS_VERSION,
+            BUNDLENAME, bundleName,
+            SOURCE_DEVICE_TYPE, GetLocalDeviceType(),
+            SINK_DEVICE_TYPE, GetDeviceTypeByNetworkId(sinkNetworkId));
+    } else {
+        res = HiSysEventWrite(
+            CONTINUATION_DOMAIN,
+            CONTINUATION_MESSAGE,
+            HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+            PNAMEID, CONTINUATION_DOMAIN,
+            PVERSIONID, Constants::DMS_VERSION,
+            BUNDLENAME, bundleName,
+            SOURCE_DEVICE_TYPE, GetLocalDeviceType(),
+            SINK_DEVICE_TYPE, GetDeviceTypeByNetworkId(sinkNetworkId),
+            ERROR_CODE_UE, errCode);
+    }
+    if (res != ERR_OK) {
+        HILOGE("ContinuationMessage error, res:%{public}d", res);
+        return false;
+    }
+    return true;
+}
+
 int32_t DmsUE::GetDeviceTypeByNetworkId(std::string networkId)
 {
     auto deviceInfo = DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(networkId);
@@ -199,6 +268,16 @@ int32_t DmsUE::GetDeviceTypeByNetworkId(std::string networkId)
         return DEVICE_TYPE_UNKNOWN;
     }
     return deviceInfo->GetDeviceType();
+}
+
+int32_t DmsUE::GetLocalDeviceType()
+{
+    DistributedHardware::DmDeviceInfo dmDeviceInfo;
+    if (!DnetworkAdapter::GetInstance()->GetLocalBasicInfo(dmDeviceInfo)) {
+        HILOGE("GetLocalBasicInfo failed");
+        return DEVICE_TYPE_UNKNOWN;
+    }
+    return static_cast<int32_t>(dmDeviceInfo.deviceTypeId);
 }
 
 std::string DmsUE::ConvertErrCodeToStr(int32_t errorCode)
