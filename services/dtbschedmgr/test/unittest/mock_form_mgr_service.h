@@ -63,6 +63,10 @@ public:
     {
         return ERR_OK;
     };
+    ErrCode RequestPublishFormCrossUser(Want &want, int32_t userId, int64_t &formId) override
+    {
+        return ERR_OK;
+    };
     ErrCode RequestPublishForm(Want &want, bool withFormBindingData,
         std::unique_ptr<FormProviderData> &formBindingData, int64_t &formId) override
     {
