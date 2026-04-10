@@ -212,13 +212,17 @@ bool DistributedExtensionETS::SetContextObject(ani_ref contextObj)
 
     if ((status = env->Class_FindField(etsAbilityObj_->aniCls, "context", &field)) != ANI_OK) {
         HILOG_INFO("Class_FindField failed, status : %{public}d", status);
-        env->GlobalReference_Delete(contextGlobalRef);
+        if (env->GlobalReference_Delete(contextGlobalRef) != ANI_OK) {
+            HILOG_ERROR("Failed to delete global reference after Class_FindField failed");
+        }
         return false;
     }
 
     if ((status = env->Object_SetField_Ref(etsAbilityObj_->aniObj, field, contextGlobalRef)) != ANI_OK) {
         HILOG_INFO("Object_SetField_Ref failed, status : %{public}d", status);
-        env->GlobalReference_Delete(contextGlobalRef);
+        if (env->GlobalReference_Delete(contextGlobalRef) != ANI_OK) {
+            HILOG_ERROR("Failed to delete global reference after Object_SetField_Ref failed");
+        }
         return false;
     }
 
