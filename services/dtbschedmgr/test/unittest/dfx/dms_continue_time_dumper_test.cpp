@@ -15,6 +15,8 @@
 
 #include "dms_continue_time_dumper_test.h"
 
+#include <chrono>
+
 #include "datetime_ex.h"
 #include "test_log.h"
 
@@ -390,6 +392,127 @@ HWTEST_F(DmsContinueTimeTest, ShowInfo_001, TestSize.Level3)
     DmsContinueTime::GetInstance().ShowInfo(result);
     EXPECT_EQ(result.empty(), false);
     DTEST_LOG << "DmsContinueTimeTest ShowInfo_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetStartAbilityTimePair_001
+ * @tc.desc: test GetStartAbilityTimePair func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueTimeTest, GetStartAbilityTimePair_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsContinueTimeTest GetStartAbilityTimePair_001 begin" << std::endl;
+    DmsContinueTime::GetInstance().Init();
+    auto ret = DmsContinueTime::GetInstance().GetStartAbilityTimePair();
+    EXPECT_EQ(ret.first, "");
+    EXPECT_EQ(ret.second, 0);
+
+    DmsContinueTime::GetInstance().SetStartAbilityTime(BUNDLE_NAME, 1000);
+    ret = DmsContinueTime::GetInstance().GetStartAbilityTimePair();
+    EXPECT_EQ(ret.first, BUNDLE_NAME);
+    EXPECT_EQ(ret.second, 1000);
+    DTEST_LOG << "DmsContinueTimeTest GetStartAbilityTimePair_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetAppLaunchTime_001
+ * @tc.desc: test GetAppLaunchTime func when startAbilityTime is zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueTimeTest, GetAppLaunchTime_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsContinueTimeTest GetAppLaunchTime_001 begin" << std::endl;
+    DmsContinueTime::GetInstance().Init();
+    int64_t ret = DmsContinueTime::GetInstance().GetAppLaunchTime(BUNDLE_NAME);
+    EXPECT_EQ(ret, 0);
+    DTEST_LOG << "DmsContinueTimeTest GetAppLaunchTime_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetAppLaunchTime_002
+ * @tc.desc: test GetAppLaunchTime func when bundleName does not match
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueTimeTest, GetAppLaunchTime_002, TestSize.Level3)
+{
+    DTEST_LOG << "DmsContinueTimeTest GetAppLaunchTime_002 begin" << std::endl;
+    DmsContinueTime::GetInstance().Init();
+    DmsContinueTime::GetInstance().SetStartAbilityTime(BUNDLE_NAME, 1000);
+    int64_t ret = DmsContinueTime::GetInstance().GetAppLaunchTime("wrongBundleName");
+    EXPECT_EQ(ret, 0);
+    DTEST_LOG << "DmsContinueTimeTest GetAppLaunchTime_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetAppLaunchTime_003
+ * @tc.desc: test GetAppLaunchTime func when bundleName matches
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueTimeTest, GetAppLaunchTime_003, TestSize.Level3)
+{
+    DTEST_LOG << "DmsContinueTimeTest GetAppLaunchTime_003 begin" << std::endl;
+    DmsContinueTime::GetInstance().Init();
+    auto now = std::chrono::system_clock::now();
+    auto nowMs = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+    int64_t beginTime = nowMs.time_since_epoch().count();
+    DmsContinueTime::GetInstance().SetStartAbilityTime(BUNDLE_NAME, beginTime);
+    int64_t ret = DmsContinueTime::GetInstance().GetAppLaunchTime(BUNDLE_NAME);
+    EXPECT_GE(ret, 0);
+    DTEST_LOG << "DmsContinueTimeTest GetAppLaunchTime_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetSourceNetworkId_001
+ * @tc.desc: test GetSourceNetworkId func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueTimeTest, GetSourceNetworkId_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsContinueTimeTest GetSourceNetworkId_001 begin" << std::endl;
+    DmsContinueTime::GetInstance().Init();
+    std::string ret = DmsContinueTime::GetInstance().GetSourceNetworkId();
+    EXPECT_EQ(ret, "");
+
+    DmsContinueTime::GetInstance().SetNetWorkId(NETWORK_ID, "");
+    ret = DmsContinueTime::GetInstance().GetSourceNetworkId();
+    EXPECT_EQ(ret, NETWORK_ID);
+    DTEST_LOG << "DmsContinueTimeTest GetSourceNetworkId_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetSinkNetworkId_001
+ * @tc.desc: test GetSinkNetworkId func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueTimeTest, GetSinkNetworkId_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsContinueTimeTest GetSinkNetworkId_001 begin" << std::endl;
+    DmsContinueTime::GetInstance().Init();
+    std::string ret = DmsContinueTime::GetInstance().GetSinkNetworkId();
+    EXPECT_EQ(ret, "");
+
+    DmsContinueTime::GetInstance().SetNetWorkId("", NETWORK_ID);
+    ret = DmsContinueTime::GetInstance().GetSinkNetworkId();
+    EXPECT_EQ(ret, NETWORK_ID);
+    DTEST_LOG << "DmsContinueTimeTest GetSinkNetworkId_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetStartAbilityTime_001
+ * @tc.desc: test GetStartAbilityTime func
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueTimeTest, GetStartAbilityTime_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsContinueTimeTest GetStartAbilityTime_001 begin" << std::endl;
+    DmsContinueTime::GetInstance().Init();
+    int64_t ret = DmsContinueTime::GetInstance().GetStartAbilityTime();
+    EXPECT_EQ(ret, 0);
+
+    DmsContinueTime::GetInstance().SetStartAbilityTime(BUNDLE_NAME, 1000);
+    ret = DmsContinueTime::GetInstance().GetStartAbilityTime();
+    EXPECT_EQ(ret, 1000);
+    DTEST_LOG << "DmsContinueTimeTest GetStartAbilityTime_001 end" << std::endl;
 }
 }
 }

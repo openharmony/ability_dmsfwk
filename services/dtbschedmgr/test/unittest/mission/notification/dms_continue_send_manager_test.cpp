@@ -487,5 +487,24 @@ HWTEST_F(DMSContinueRecvMgrTest, GetFinalBundleName_Test_001, TestSize.Level1)
     EXPECT_EQ(ret, true);
     DTEST_LOG << "DMSContinueRecvMgrTest GetFinalBundleName_Test_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: GetSenderNetworkId_Test_001
+ * @tc.desc: test GetSenderNetworkId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DMSContinueRecvMgrTest, GetSenderNetworkId_Test_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecvMgrTest GetSenderNetworkId_Test_001 start" << std::endl;
+    std::shared_ptr<DMSContinueRecvMgr> recvMgr = std::make_shared<DMSContinueRecvMgr>();
+    std::string ret = recvMgr->GetSenderNetworkId();
+    EXPECT_EQ(ret, "");
+
+    recvMgr->iconInfo_.senderNetworkId = "senderNetworkId";
+    ret = recvMgr->GetSenderNetworkId();
+    EXPECT_EQ(ret, "senderNetworkId");
+    DTEST_LOG << "DMSContinueRecvMgrTest GetSenderNetworkId_Test_001 end" << std::endl;
+}
 }
 }

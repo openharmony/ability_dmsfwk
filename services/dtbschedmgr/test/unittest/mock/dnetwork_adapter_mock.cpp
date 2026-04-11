@@ -25,5 +25,13 @@ std::string DnetworkAdapter::GetUdidByNetworkId(const std::string& networkId)
     }
     return IDnetworkAdapter::netAdapter->GetUdidByNetworkId(networkId);
 }
+
+bool DnetworkAdapter::GetLocalBasicInfo(DistributedHardware::DmDeviceInfo& dmDeviceInfo)
+{
+    if (IDnetworkAdapter::netAdapter == nullptr) {
+        return false;
+    }
+    return IDnetworkAdapter::netAdapter->GetLocalBasicInfo(dmDeviceInfo);
+}
 }
 }
