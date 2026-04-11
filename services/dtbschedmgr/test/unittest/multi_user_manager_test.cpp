@@ -335,6 +335,28 @@ HWTEST_F(MultiUserManagerTest, MultiUserManager_OnRegisterOnListener_001, TestSi
 }
 
 /**
+ * @tc.name: MultiUserManager_OnRegisterOnListener_002
+ * @tc.desc: test OnRegisterOnListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(MultiUserManagerTest, MultiUserManager_OnRegisterOnListener_002, TestSize.Level3)
+{
+    DTEST_LOG << "MultiUserManager_OnRegisterOnListener_002 start" << std::endl;
+    /**
+     * @tc.steps: step1. test OnUserRemoved with non-zero accountId
+     */
+    MultiUserManager::GetInstance().Init();
+
+    int32_t callingUid = 200001;
+    sptr<IRemoteObject> obj(new RemoteOnListenerStubTest());
+    auto ret = MultiUserManager::GetInstance().OnRegisterOnListener(TYPE, obj, callingUid);
+    EXPECT_EQ(ret, ERR_OK);
+
+    MultiUserManager::GetInstance().UnInit();
+    DTEST_LOG << "MultiUserManager_OnRegisterOnListener_002 end" << std::endl;
+}
+
+/**
  * @tc.name: MultiUserManager_OnRegisterOffListener_001
  * @tc.desc: test OnRegisterOffListener
  * @tc.type: FUNC
