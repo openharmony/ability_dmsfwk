@@ -29,11 +29,15 @@ constexpr int32_t ONE = 1;
 void DmsUETest::SetUpTestCase()
 {
     DTEST_LOG << "DmsUETest::SetUpTestCase" << std::endl;
+    netAdapterMock_ = std::make_shared<DnetworkAdapterMock>();
+    IDnetworkAdapter::netAdapter = netAdapterMock_;
 }
 
 void DmsUETest::TearDownTestCase()
 {
     DTEST_LOG << "DmsUETest::TearDownTestCase" << std::endl;
+    IDnetworkAdapter::netAdapter = nullptr;
+    netAdapterMock_ = nullptr;
 }
 
 void DmsUETest::TearDown()
@@ -129,6 +133,100 @@ HWTEST_F(DmsUETest, ConvertErrCodeToStr_002, TestSize.Level3)
     ret = DmsUE::GetInstance().ConvertErrCodeToStr(DMS_CONNECT_APPLY_REJECT_FAILED);
     EXPECT_NE(ret, "");
     DTEST_LOG << "DmsUETest ConvertErrCodeToStr_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetLocalDeviceType_001
+ * @tc.desc: test GetLocalDeviceType when GetLocalBasicInfo fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsUETest, GetLocalDeviceType_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsUETest GetLocalDeviceType_001 begin" << std::endl;
+    EXPECT_CALL(*netAdapterMock_, GetLocalBasicInfo(_)).WillOnce(Return(false));
+    int32_t ret = DmsUE::GetInstance().GetLocalDeviceType();
+    EXPECT_EQ(ret, 0);
+    DTEST_LOG << "DmsUETest GetLocalDeviceType_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetLocalDeviceType_002
+ * @tc.desc: test GetLocalDeviceType when GetLocalBasicInfo succeeds
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsUETest, GetLocalDeviceType_002, TestSize.Level3)
+{
+    DTEST_LOG << "DmsUETest GetLocalDeviceType_002 begin" << std::endl;
+    constexpr int32_t EXPECTED_DEVICE_TYPE = 1;
+    EXPECT_CALL(*netAdapterMock_, GetLocalBasicInfo(_))
+        .WillOnce([](DistributedHardware::DmDeviceInfo& info) {
+            info.deviceTypeId = static_cast<decltype(info.deviceTypeId)>(EXPECTED_DEVICE_TYPE);
+            return true;
+        });
+    int32_t ret = DmsUE::GetInstance().GetLocalDeviceType();
+    EXPECT_EQ(ret, EXPECTED_DEVICE_TYPE);
+    DTEST_LOG << "DmsUETest GetLocalDeviceType_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinuationMessage_001
+ * @tc.desc: test ContinuationMessage when errCode is ERR_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsUETest, ContinuationMessage_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsUETest ContinuationMessage_001 begin" << std::endl;
+    std::string bundleName = "com.test.bundle";
+    std::string sinkNetworkId = "sinkNetworkId";
+    bool ret = DmsUE::GetInstance().ContinuationMessage(bundleName, sinkNetworkId, ERR_OK);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "DmsUETest ContinuationMessage_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ContinuationMessage_002
+ * @tc.desc: test ContinuationMessage when errCode is not ERR_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsUETest, ContinuationMessage_002, TestSize.Level3)
+{
+    DTEST_LOG << "DmsUETest ContinuationMessage_002 begin" << std::endl;
+    std::string bundleName = "com.test.bundle";
+    std::string sinkNetworkId = "sinkNetworkId";
+    bool ret = DmsUE::GetInstance().ContinuationMessage(bundleName, sinkNetworkId, INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "DmsUETest ContinuationMessage_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: AccidentalContinuation_001
+ * @tc.desc: test AccidentalContinuation when errCode is ERR_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsUETest, AccidentalContinuation_001, TestSize.Level3)
+{
+    DTEST_LOG << "DmsUETest AccidentalContinuation_001 begin" << std::endl;
+    std::string bundleName = "com.test.bundle";
+    std::string sourceNetworkId = "sourceNetworkId";
+    bool ret = DmsUE::GetInstance().AccidentalContinuation(1000, bundleName, sourceNetworkId, ERR_OK);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "DmsUETest AccidentalContinuation_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: AccidentalContinuation_002
+ * @tc.desc: test AccidentalContinuation when errCode is not ERR_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsUETest, AccidentalContinuation_002, TestSize.Level3)
+{
+    DTEST_LOG << "DmsUETest AccidentalContinuation_002 begin" << std::endl;
+    std::string bundleName = "com.test.bundle";
+    std::string sourceNetworkId = "sourceNetworkId";
+    bool ret = DmsUE::GetInstance().AccidentalContinuation(1000, bundleName, sourceNetworkId,
+        INVALID_PARAMETERS_ERR);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << "DmsUETest AccidentalContinuation_002 end" << std::endl;
 }
 }
 }
