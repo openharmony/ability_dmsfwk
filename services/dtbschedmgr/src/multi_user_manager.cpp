@@ -136,6 +136,8 @@ void MultiUserManager::OnUserSwitched(int32_t accountId)
         .IsContinueSwitchOn());
     DistributedSchedService::GetInstance()
         .RegisterDataShareObserver(SwitchStatusDependency::GetInstance().CONTINUE_SWITCH_STATUS_KEY);
+    DistributedSchedService::GetInstance()
+        .RegisterDataShareObserver(SwitchStatusDependency::GetInstance().RECOMMEND_INSTALLATION_SWITCH_KEY);
     auto newSendMgr = GetCurrentSendMgr();
     if (newSendMgr == nullptr) {
         HILOGI("GetSendMgr failed.");

@@ -37,6 +37,9 @@ const std::string SwitchStatusDependency::SETTINGS_DATA_FIELD_VAL = "VALUE";
 const std::string SwitchStatusDependency::CONTINUE_SWITCH_STATUS_KEY = "Continue_Switch_Status";
 const std::string SwitchStatusDependency::CONTINUE_SWITCH_OFF = "0";
 const std::string SwitchStatusDependency::CONTINUE_SWITCH_ON = "1";
+const std::string SwitchStatusDependency::RECOMMEND_INSTALLATION_SWITCH_KEY =
+    "continuation_recommend_installation";
+const std::string SwitchStatusDependency::RECOMMEND_INSTALLATION_SWITCH_ON = "1";
 
 SwitchStatusDependency &SwitchStatusDependency::GetInstance()
 {
@@ -51,6 +54,16 @@ bool SwitchStatusDependency::IsContinueSwitchOn()
     HILOGD("start query switch status from dataShare");
     switchStatus_ = GetSwitchStatus(CONTINUE_SWITCH_STATUS_KEY, CONTINUE_SWITCH_ON);
     return switchStatus_ != CONTINUE_SWITCH_OFF;
+}
+
+bool SwitchStatusDependency::IsRecommendInstallationOn()
+{
+    HILOGD("IsRecommendInstallationOn start");
+    std::lock_guard<std::mutex> lock(dataShareMutex_);
+    HILOGD("start query recommend installation switch status from dataShare");
+    recommendInstallationSwitchStatus_ =
+        GetSwitchStatus(RECOMMEND_INSTALLATION_SWITCH_KEY, RECOMMEND_INSTALLATION_SWITCH_ON);
+    return recommendInstallationSwitchStatus_ == RECOMMEND_INSTALLATION_SWITCH_ON;
 }
 
 std::string SwitchStatusDependency::GetSwitchStatus(const std::string &key, const std::string &defaultValue)
