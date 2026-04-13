@@ -366,6 +366,110 @@ bool DMSContinueRecvMgr::GetFinalBundleName(DmsBundleInfo &distributedBundleInfo
     return false;
 }
 
+#ifdef SUPPORT_CONTINUATION_RECOMMEND_INSTALLATION
+bool DMSContinueRecvMgr::HandleEmptyAppIdentifierVec(DmsBundleInfo& distributedBundleInfo,
+    AppExecFwk::BundleInfo& localBundleInfo, std::string& finalBundleName,
+    std::vector<std::string>& finalAppIdentifierVec)
+{
+    HILOGI("src AppIdentifierList is empty");
+    std::string continueType;
+    if (!GetFinalBundleNameInternal(distributedBundleInfo, finalBundleName, localBundleInfo, continueType)) {
+        HILOGE("no continuable app installed.");
+        finalBundleName = "";
+        return true;
+    }
+    finalAppIdentifierVec.clear();
+    return false;
+}
+
+bool DMSContinueRecvMgr::HandleNonEmptyAppIdentifierVec(DmsBundleInfo& distributedBundleInfo,
+    AppExecFwk::BundleInfo& localBundleInfo, std::string& finalBundleName,
+    std::vector<std::string>& finalAppIdentifierVec)
+{
+    HILOGI("src AppIdentifierVec size: %{public}zu", distributedBundleInfo.appIdentifierVec.size());
+    std::vector<std::string> installedBundles;
+    bool continueBundleGot =
+            BundleManagerInternal::GetContinueBundle4Src(
+                distributedBundleInfo.bundleName, installedBundles);
+    if (!continueBundleGot) {
+        HILOGE("GetContinueBundle4Src: failed");
+        finalBundleName = "";
+        finalAppIdentifierVec = distributedBundleInfo.appIdentifierVec;
+        return true;
+    }
+
+    std::map<std::string, std::string> sinkAppIdentifierToBundleMap;
+    for (auto& installedBundle : installedBundles) {
+        AppExecFwk::AppProvisionInfo appProvisionInfo;
+        if (BundleManagerInternal::GetAppProvisionInfo4CurrentUser(installedBundle, appProvisionInfo) &&
+            !appProvisionInfo.appIdentifier.empty()) {
+            sinkAppIdentifierToBundleMap[appProvisionInfo.appIdentifier] = installedBundle;
+            HILOGI("installed bundle name: %{public}s; appIdentifier: %{public}s",
+                installedBundle.c_str(), GetAnonymStr(appProvisionInfo.appIdentifier).c_str());
+        }
+    }
+
+    size_t matchedIndex = 0;
+    for (size_t i = 0; i < distributedBundleInfo.appIdentifierVec.size(); ++i) {
+        matchedIndex = i;
+        std::string srcAppIdentifier = distributedBundleInfo.appIdentifierVec[i];
+        auto it = sinkAppIdentifierToBundleMap.find(srcAppIdentifier);
+        if (it != sinkAppIdentifierToBundleMap.end() &&
+            BundleManagerInternal::GetLocalBundleInfo(it->second, localBundleInfo) == ERR_OK &&
+            localBundleInfo.applicationInfo.bundleType == AppExecFwk::BundleType::APP) {
+            finalBundleName = it->second;
+            break;
+        }
+    }
+
+    if (!finalBundleName.empty() && matchedIndex == 0) {
+        HILOGE("is first bundle, bundle name: %{public}s", finalBundleName.c_str());
+        finalAppIdentifierVec.clear();
+        return false;
+    }
+    if (!finalBundleName.empty() && !SwitchStatusDependency::GetInstance().IsRecommendInstallationOn()) {
+        HILOGE("not first bundle, and Recommend Installation Off");
+        finalAppIdentifierVec.clear();
+        return false;
+    }
+    finalAppIdentifierVec = distributedBundleInfo.appIdentifierVec;
+    return true;
+}
+
+bool DMSContinueRecvMgr::GetFinalBundleNameOrAppIdentifierList(DmsBundleInfo& distributedBundleInfo,
+    AppExecFwk::BundleInfo& localBundleInfo, std::string& finalBundleName,
+    std::vector<std::string>& finalAppIdentifierVec)
+{
+    HILOGI("srcAppIdentifier: %{public}s; srcBundleName: %{public}s",
+        GetAnonymStr(distributedBundleInfo.appIdentifier).c_str(), distributedBundleInfo.bundleName.c_str());
+    finalBundleName = "";
+    finalAppIdentifierVec.clear();
+
+    if (distributedBundleInfo.appIdentifierVec.size() == 0) {
+        return HandleEmptyAppIdentifierVec(
+            distributedBundleInfo, localBundleInfo, finalBundleName, finalAppIdentifierVec);
+    }
+    return HandleNonEmptyAppIdentifierVec(
+        distributedBundleInfo, localBundleInfo, finalBundleName, finalAppIdentifierVec);
+}
+
+void DMSContinueRecvMgr::PrintFinalBundleInfoLog(const currentIconInfo& continueInfo)
+{
+    // Log all sent data with anonymized appIdentifier
+    std::string anonymizedAppId;
+    for (const auto& id : continueInfo.appIdentifierVec) {
+        if (!anonymizedAppId.empty()) {
+            anonymizedAppId += ",";
+        }
+        anonymizedAppId += GetAnonymStr(id);
+    }
+    HILOGI("NotifyRecvBroadcast success, networkId: %{public}s, sinkBundleName: %{public}s, "
+           "continueType: %{public}s, srcBundleName: %{public}s, appIdentifier: [%{public}s]",
+           GetAnonymStr(continueInfo.senderNetworkId).c_str(), continueInfo.bundleName.c_str(),
+           continueInfo.continueType.c_str(), continueInfo.sourceBundleName.c_str(), anonymizedAppId.c_str());
+}
+#endif
+
 int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNetworkId,
     uint16_t bundleNameId, uint8_t continueTypeId, const int32_t state, const int32_t retry)
 {
@@ -378,31 +482,15 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
         DmsKvSyncE2E::GetInstance()->PushAndPullData(senderNetworkId);
         return RetryPostBroadcast(senderNetworkId, bundleNameId, continueTypeId, state, retry);
     }
-    std::string bundleName = distributedBundleInfo.bundleName;
-    HILOGI("get distributedBundleInfo success, bundleName: %{public}s", bundleName.c_str());
-    std::string finalBundleName;
-    AppExecFwk::BundleInfo localBundleInfo;
-    std::string continueType;
-    DmsAbilityInfo abilityInfo;
-    FindContinueType(distributedBundleInfo, continueTypeId, continueType, abilityInfo);
-    if (!GetFinalBundleName(distributedBundleInfo, finalBundleName, localBundleInfo, continueType)) {
-        HILOGE("The app is not installed on the local device.");
+
+    BundleValidationContext context;
+    if (!ValidateAndPrepareBundleInfo(distributedBundleInfo, continueTypeId, state, context)) {
         NotifyIconDisappear(bundleNameId, senderNetworkId, state);
         return INVALID_PARAMETERS_ERR;
     }
-    HILOGI("got finalBundleName: %{public}s", finalBundleName.c_str());
-    if (localBundleInfo.applicationInfo.bundleType != AppExecFwk::BundleType::APP) {
-        HILOGE("The bundleType must be app, but it is %{public}d", localBundleInfo.applicationInfo.bundleType);
-        NotifyIconDisappear(bundleNameId, senderNetworkId, state);
-        return INVALID_PARAMETERS_ERR;
-    }
-    if (state == ACTIVE
-        && !IsBundleContinuable(localBundleInfo, abilityInfo.abilityName, abilityInfo.moduleName, continueType)) {
-        HILOGE("Bundle %{public}s is not continuable", finalBundleName.c_str());
-        NotifyIconDisappear(bundleNameId, senderNetworkId, state);
-        return BUNDLE_NOT_CONTINUABLE;
-    }
-    currentIconInfo info(senderNetworkId, bundleName, finalBundleName, continueType);
+
+    currentIconInfo info(senderNetworkId, distributedBundleInfo.bundleName, context.finalBundleName,
+        context.continueType, context.appIdentifiers);
     int32_t ret = DealDockDisplayBusiness(bundleNameId, info, state);
     if (ret != ERR_OK) {
         HILOGE("DealDockDisplayBusiness failed!");
@@ -410,6 +498,39 @@ int32_t DMSContinueRecvMgr::DealOnBroadcastBusiness(const std::string& senderNet
     }
     HILOGI("DealOnBroadcastBusiness end");
     return ERR_OK;
+}
+
+bool DMSContinueRecvMgr::ValidateAndPrepareBundleInfo(DmsBundleInfo& distributedBundleInfo,
+    uint8_t continueTypeId, const int32_t state, BundleValidationContext& context)
+{
+    FindContinueType(distributedBundleInfo, continueTypeId, context.continueType, context.abilityInfo);
+
+#ifdef SUPPORT_CONTINUATION_RECOMMEND_INSTALLATION
+    bool needCheckSwitch = GetFinalBundleNameOrAppIdentifierList(distributedBundleInfo,
+        context.localBundleInfo, context.finalBundleName, context.appIdentifiers);
+    HILOGI("needCheckSwitch: %{public}s;", needCheckSwitch ? "true" : "false");
+    if (needCheckSwitch && !SwitchStatusDependency::GetInstance().IsRecommendInstallationOn()) {
+        HILOGE("The app is not installed on the local device or Recommend Installation Switch is off");
+        return false;
+    }
+#else
+    if (!GetFinalBundleName(distributedBundleInfo, context.finalBundleName, context.localBundleInfo,
+        context.continueType)) {
+        HILOGE("The app is not installed on the local device.");
+        return false;
+    }
+    if (context.localBundleInfo.applicationInfo.bundleType != AppExecFwk::BundleType::APP) {
+        HILOGE("The bundleType must be app, but it is %{public}d",
+            context.localBundleInfo.applicationInfo.bundleType);
+        return false;
+    }
+    if (state == ACTIVE && !IsBundleContinuable(context.localBundleInfo, context.abilityInfo.abilityName,
+        context.abilityInfo.moduleName, context.continueType)) {
+        HILOGE("Bundle %{public}s is not continuable", context.finalBundleName.c_str());
+        return false;
+    }
+#endif
+    return true;
 }
 
 int32_t DMSContinueRecvMgr::DealDockDisplayBusiness(uint16_t bundleNameId, const currentIconInfo info,
@@ -530,6 +651,11 @@ void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
     PARCEL_WRITE_HELPER_NORET(data, String, sinkBundleName);
     PARCEL_WRITE_HELPER_NORET(data, String, continueType);
     PARCEL_WRITE_HELPER_NORET(data, String, srcBundleName);
+    // Write appIdentifierVec: first write size, then write each element
+    data.WriteUint32(static_cast<uint32_t>(continueInfo.appIdentifierVec.size()));
+    for (const auto& appIdentifier : continueInfo.appIdentifierVec) {
+        PARCEL_WRITE_HELPER_NORET(data, String, appIdentifier);
+    }
     HILOGI("[PerformanceTest] NotifyRecvBroadcast called, IPC begin = %{public}" PRId64, GetTickCount());
     int32_t error = obj->SendRequest(ON_CALLBACK, data, reply, option);
     if (state != INACTIVE) {
@@ -543,6 +669,9 @@ void DMSContinueRecvMgr::NotifyRecvBroadcast(const sptr<IRemoteObject>& obj,
         HILOGE("NotifyRecvBroadcast fail, error: %{public}d", error);
         return;
     }
+#ifdef SUPPORT_CONTINUATION_RECOMMEND_INSTALLATION
+    PrintFinalBundleInfoLog(continueInfo);
+#endif
     HILOGI("NotifyRecvBroadcast end");
 }
 

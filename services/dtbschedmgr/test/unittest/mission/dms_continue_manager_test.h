@@ -32,8 +32,7 @@ public:
 
 class RemoteOnListenerStubTest : public AAFwk::RemoteOnListenerStub {
 public:
-    void OnCallback(const uint32_t ContinueState, const std::string& srcDeviceId,
-        const std::string &bundleName, const std::string &continueType, const std::string &srcBundleName) override;
+    void OnCallback(const AAFwk::OnCallbackInfo &info) override;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

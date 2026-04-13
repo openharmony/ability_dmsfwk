@@ -33,7 +33,8 @@
         "dmsfwk_use_screenlock_icon_holdon",
         "dmsfwk_sync_data_on_package_event",
         "dmsfwk_all_connect",
-        "dmsfwk_feature_dams_enable"
+        "dmsfwk_feature_dams_enable",
+        "dmsfwk_continuation_recommend_installation"
       ],
       "hisysevent_config": [
         "//foundation/ability/dmsfwk/hisysevent.yaml"

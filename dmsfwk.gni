@@ -40,6 +40,7 @@ declare_args() {
   dmsfwk_softbus_file_ability = false
   dmsfwk_check_screenlock = false
   dmsfwk_feature_dams_enable = true
+  dmsfwk_continuation_recommend_installation = false
   dmsfwk_check_screenlock = false
   dmsfwk_vpe_enable = false
   if (defined(global_parts_info)) {

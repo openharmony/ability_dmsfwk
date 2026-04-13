@@ -28,19 +28,23 @@ class SwitchStatusDependency {
 public:
     static SwitchStatusDependency &GetInstance();
     bool IsContinueSwitchOn();
-    
+    bool IsRecommendInstallationOn();
+
     static const std::string SETTINGS_USER_SECURE_URI;
     static const std::string SETTINGS_DATA_FIELD_KEY;
     static const std::string SETTINGS_DATA_FIELD_VAL;
     static const std::string CONTINUE_SWITCH_STATUS_KEY;
     static const std::string CONTINUE_SWITCH_OFF;
     static const std::string CONTINUE_SWITCH_ON;
+    static const std::string RECOMMEND_INSTALLATION_SWITCH_KEY;
+    static const std::string RECOMMEND_INSTALLATION_SWITCH_ON;
 
 private:
     std::string GetSwitchStatus(const std::string &key, const std::string &defaultValue);
     std::shared_ptr<DataShare::DataShareHelper> GetDataShareHelper();
     std::mutex dataShareMutex_;
     std::string switchStatus_;
+    std::string recommendInstallationSwitchStatus_;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
