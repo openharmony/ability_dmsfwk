@@ -83,7 +83,13 @@ int32_t DSchedAllConnectManager::UninitAllConnectManager()
         .ServiceCollaborationManager_UnRegisterLifecycleCallback = nullptr,
     };
 
-    queryAllServiceStateContext_ = nullptr;
+    allConnectMgrV3_Api_ = {
+        .ServiceCollaborationManager_PublishServiceState = nullptr,
+        .ServiceCollaborationManager_ApplyAdvancedResource = nullptr,
+        .ServiceCollaborationManager_RegisterLifecycleCallback = nullptr,
+        .ServiceCollaborationManager_UnRegisterLifecycleCallback = nullptr,
+        .ServiceCollaborationManager_GetAllServiceState = nullptr,
+    };
     return ERR_OK;
 }
 
@@ -126,7 +132,7 @@ int32_t DSchedAllConnectManager::GetServiceCollaborationManagerProxy()
         }
     }
     if (ret == ERR_OK) {
-        LoadV2ApiExtended();
+        LoadV3ApiExtended();
     }
     if (ret != ERR_OK) {
         HILOGE("Get remote dms interactive adapter proxy fail, dlclose handle.");
@@ -138,23 +144,23 @@ int32_t DSchedAllConnectManager::GetServiceCollaborationManagerProxy()
     return ret;
 }
 
-void DSchedAllConnectManager::LoadV2ApiExtended()
+void DSchedAllConnectManager::LoadV3ApiExtended()
 {
-    HILOGI("Try to load QueryAllServiceStateContext from V2 API.");
-    auto ServiceCollaborationManagerV2Export =
-        reinterpret_cast<int32_t (*)(ServiceCollaborationManagerV2ApiExtended *)>(
-            dlsym(dllHandle_, "ServiceCollaborationManagerV2Export"));
-    if (ServiceCollaborationManagerV2Export != nullptr) {
-        ServiceCollaborationManagerV2ApiExtended v2ApiExtended = { .GetServiceNameList = nullptr };
-        int32_t v2Ret = ServiceCollaborationManagerV2Export(&v2ApiExtended);
-        if (v2Ret == ERR_OK && v2ApiExtended.GetServiceNameList != nullptr) {
-            queryAllServiceStateContext_ = v2ApiExtended.GetServiceNameList;
-            HILOGI("Load QueryAllServiceStateContext success.");
-        } else {
-            HILOGW("Load QueryAllServiceStateContext failed, ret: %{public}d.", v2Ret);
-        }
+    HILOGI("Try to load QueryAllServiceStateContext from V3 API.");
+    auto ServiceCollaborationManagerV3_Export =
+        reinterpret_cast<int32_t (*)(ServiceCollaborationManagerV3_API *)>(
+            dlsym(dllHandle_, "ServiceCollaborationManagerV3_Export"));
+
+    if (ServiceCollaborationManagerV3_Export == nullptr) {
+        HILOGE("V3 API symbols not found.");
+        return;
     } else {
-        HILOGW("V2 API symbols not found, QueryAllServiceStateContext unavailable.");
+        int32_t ret = ServiceCollaborationManagerV3_Export(&allConnectMgrV3_Api_);
+        if (ret != ERR_OK) {
+            HILOGE("Init V3 API proxy fail, ret: %{public}d.", ret);
+        } else {
+            HILOGI("Init V3 API proxy success.");
+        }
     }
 }
 
@@ -321,14 +327,40 @@ std::vector<std::string> DSchedAllConnectManager::QueryAllServiceStateContext()
 
     std::lock_guard<std::mutex> autoLock(allConnectMgrLock_);
 
-    if (queryAllServiceStateContext_ == nullptr) {
-        HILOGE("QueryAllServiceStateContext api is null.");
+    if (allConnectMgrV3_Api_.ServiceCollaborationManager_GetAllServiceState == nullptr) {
+        HILOGE("allConnectMgrV3_Api_ api is null.");
         return serviceNameList;
     }
 
-    serviceNameList = queryAllServiceStateContext_();
-    HILOGI("QueryAllServiceStateContext end, size: %{public}zu", serviceNameList.size());
+    uint16_t out_count = 0;
+    ServiceCollaborationManager_ServiceStateInfo* serviceStateInfo =
+        allConnectMgrV3_Api_.ServiceCollaborationManager_GetAllServiceState(&out_count);
 
+    if (serviceStateInfo == nullptr) {
+        HILOGE("serviceStateInfo is null.");
+        return serviceNameList;
+    }
+
+    for (int i = 0; i < out_count; ++i) {
+        if (serviceStateInfo[i].serviceName != nullptr) {
+            serviceNameList.push_back(serviceStateInfo[i].serviceName);
+        }
+    }
+
+    for (int i = 0; i < out_count; ++i) {
+        if (serviceStateInfo[i].peerNetworkId != nullptr) {
+            free(const_cast<char*>(serviceStateInfo[i].peerNetworkId));
+        }
+        if (serviceStateInfo[i].serviceName != nullptr) {
+            free(const_cast<char*>(serviceStateInfo[i].serviceName));
+        }
+        if (serviceStateInfo[i].extraInfo != nullptr) {
+            free(const_cast<char*>(serviceStateInfo[i].extraInfo));
+        }
+    }
+    delete[] serviceStateInfo;
+
+    HILOGI("QueryAllServiceStateContext end, size: %{public}zu", serviceNameList.size());
     return serviceNameList;
 }
 } // namespace DistributedSchedule
