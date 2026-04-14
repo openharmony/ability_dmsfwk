@@ -1004,6 +1004,7 @@ ohos_unittest("dmsbasetest") {
     "unittest/dfx/distributed_ue_test.cpp",
     "unittest/dfx/dms_continue_time_dumper_test.cpp",
     "unittest/dfx/dms_hisysevent_report_test.cpp",
+    "unittest/mock/dnetwork_adapter_mock.cpp",
     "unittest/mock_distributed_sched.cpp",
   ]
   sources += dtbschedmgr_sources
@@ -1016,6 +1017,7 @@ ohos_unittest("dmsbasetest") {
   configs += dsched_configs
   if (is_standard_system) {
     external_deps = dsched_external_deps
+    external_deps += [ "googletest:gmock" ]
     deps += dsched_public_deps
   }
   part_name = "dmsfwk"

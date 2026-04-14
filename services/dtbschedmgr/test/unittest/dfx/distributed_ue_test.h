@@ -20,6 +20,7 @@
 #include "test_log.h"
 
 #include "dfx/distributed_ue.h"
+#include "mock/dnetwork_adapter_mock.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -30,6 +31,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    static inline std::shared_ptr<DnetworkAdapterMock> netAdapterMock_ = nullptr;
 };
 } // namespace DistributedSchedule
 } // namespace OHOS
