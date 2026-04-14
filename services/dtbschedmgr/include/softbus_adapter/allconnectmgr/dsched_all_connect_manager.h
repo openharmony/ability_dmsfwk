@@ -47,7 +47,7 @@ private:
     int32_t UnregistLifecycleCallback();
     int32_t WaitAllConnectApplyCb(const std::string &peerNetworkId);
     void NotifyAllConnectDecision(const std::string &peerNetworkId, bool isSupport);
-    void LoadV2ApiExtended();
+    void LoadV3ApiExtended();
 
     static int32_t OnStop(const char *peerNetworkId);
     static int32_t ApplyResult(int32_t errorcode, int32_t result, const char *reason);
@@ -72,7 +72,13 @@ private:
         .ServiceCollaborationManager_UnRegisterLifecycleCallback = nullptr,
     };
 
-    std::vector<std::string> (*queryAllServiceStateContext_)() = nullptr;
+    ServiceCollaborationManagerV3_API allConnectMgrV3_Api_ = {
+        .ServiceCollaborationManager_PublishServiceState = nullptr,
+        .ServiceCollaborationManager_ApplyAdvancedResource = nullptr,
+        .ServiceCollaborationManager_RegisterLifecycleCallback = nullptr,
+        .ServiceCollaborationManager_UnRegisterLifecycleCallback = nullptr,
+        .ServiceCollaborationManager_GetAllServiceState = nullptr,
+    };
 
     std::mutex connectDecisionMutex_;
     std::condition_variable connectDecisionCond_;
