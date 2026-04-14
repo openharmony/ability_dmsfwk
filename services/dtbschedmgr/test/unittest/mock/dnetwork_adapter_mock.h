@@ -25,6 +25,7 @@ class IDnetworkAdapter {
 public:
     virtual ~IDnetworkAdapter() = default;
     virtual std::string GetUdidByNetworkId(const std::string& networkId) = 0;
+    virtual bool GetLocalBasicInfo(DistributedHardware::DmDeviceInfo& dmDeviceInfo) = 0;
 public:
     static inline std::shared_ptr<IDnetworkAdapter> netAdapter = nullptr;
 };
@@ -32,6 +33,7 @@ public:
 class DnetworkAdapterMock : public IDnetworkAdapter {
 public:
     MOCK_METHOD1(GetUdidByNetworkId, std::string(const std::string& networkId));
+    MOCK_METHOD1(GetLocalBasicInfo, bool(DistributedHardware::DmDeviceInfo& dmDeviceInfo));
 };
 }
 }
