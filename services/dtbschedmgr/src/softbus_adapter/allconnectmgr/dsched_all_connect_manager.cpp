@@ -331,22 +331,22 @@ std::vector<std::string> DSchedAllConnectManager::QueryAllServiceStateContext()
         return serviceNameList;
     }
 
-    uint16_t out_count = 0;
+    uint16_t outCount = 0;
     ServiceCollaborationManager_ServiceStateInfo* serviceStateInfo =
-        allConnectMgrV3_Api_.ServiceCollaborationManager_GetAllServiceState(&out_count);
+        allConnectMgrV3_Api_.ServiceCollaborationManager_GetAllServiceState(&outCount);
 
     if (serviceStateInfo == nullptr) {
         HILOGE("serviceStateInfo is null.");
         return serviceNameList;
     }
 
-    for (int i = 0; i < out_count; ++i) {
+    for (int i = 0; i < outCount; ++i) {
         if (serviceStateInfo[i].serviceName != nullptr) {
             serviceNameList.push_back(serviceStateInfo[i].serviceName);
         }
     }
 
-    for (int i = 0; i < out_count; ++i) {
+    for (int i = 0; i < outCount; ++i) {
         if (serviceStateInfo[i].peerNetworkId != nullptr) {
             free(const_cast<char*>(serviceStateInfo[i].peerNetworkId));
         }
@@ -357,7 +357,9 @@ std::vector<std::string> DSchedAllConnectManager::QueryAllServiceStateContext()
             free(const_cast<char*>(serviceStateInfo[i].extraInfo));
         }
     }
-    delete[] serviceStateInfo;
+    if (serviceStateInfo != nullptr) {
+        free(serviceStateInfo);
+    }
 
     HILOGI("QueryAllServiceStateContext end, size: %{public}zu", serviceNameList.size());
     return serviceNameList;

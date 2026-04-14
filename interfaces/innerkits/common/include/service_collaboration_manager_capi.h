@@ -99,7 +99,7 @@ typedef struct ServiceCollaborationManagerV3_API {
         ServiceCollaborationManager_Callback *callback);
     int32_t (*ServiceCollaborationManager_UnRegisterLifecycleCallback)(const char *serviceName);
     ServiceCollaborationManager_ServiceStateInfo *(*ServiceCollaborationManager_GetAllServiceState)(
-        uint16_t *out_count);
+        uint16_t *outCount);
 } ServiceCollaborationManagerV3_API;
 
 int32_t ServiceCollaborationManager_Export(ServiceCollaborationManager_API *exportapi);

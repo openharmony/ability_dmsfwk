@@ -36,6 +36,8 @@ const std::string TAG = "DmsContinueConditionMgr";
 constexpr int32_t GET_MAX_MISSIONS = 50;
 constexpr int32_t CONDITION_INVALID_MISSION_ID = -1;
 constexpr int32_t VIRTUAL_SCREEN_ID_THRESHOLD = 1000;
+const std::string SUPER_LAUNCHER_SERVICE_NAME = "SuperLauncher";
+const std::string SUPER_LAUNCHER_DUAL_SERVICE_NAME = "SuperLauncher-Dual";
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DmsContinueConditionMgr);
@@ -426,8 +428,8 @@ bool DmsContinueConditionMgr::CheckVirtualScreenScenario(const MissionStatus& st
         return false;
     }
 
-    HILOGI("Check virtual screen scenario, missionId: %{public}d, displayId: %{public}d, displayName: %{public}s",
-        status.missionId, displayInfo.id, displayInfo.displayName.c_str());
+    HILOGI("Check virtual screen scenario, missionId: %{public}d, displayId: %{public}d",
+        status.missionId, displayInfo.id);
 
     if (displayInfo.id >= VIRTUAL_SCREEN_ID_THRESHOLD) {
         HILOGI("Virtual screen detected (displayId: %{public}d), check service name list", displayInfo.id);
@@ -436,7 +438,7 @@ bool DmsContinueConditionMgr::CheckVirtualScreenScenario(const MissionStatus& st
             DSchedAllConnectManager::GetInstance().QueryAllServiceStateContext();
 
         for (const auto& serviceName : serviceNameList) {
-            if (serviceName == "SuperLaucher" || serviceName == "SuperLauncher-Dual") {
+            if (serviceName == SUPER_LAUNCHER_SERVICE_NAME || serviceName == SUPER_LAUNCHER_DUAL_SERVICE_NAME) {
                 HILOGI("Service name matched: %{public}s, block broadcast", serviceName.c_str());
                 return true;
             }
