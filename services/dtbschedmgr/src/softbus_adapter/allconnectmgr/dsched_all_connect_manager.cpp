@@ -150,7 +150,6 @@ void DSchedAllConnectManager::LoadV3ApiExtended()
     auto ServiceCollaborationManagerV3_Export =
         reinterpret_cast<int32_t (*)(ServiceCollaborationManagerV3_API *)>(
             dlsym(dllHandle_, "ServiceCollaborationManagerV3_Export"));
-
     if (ServiceCollaborationManagerV3_Export == nullptr) {
         HILOGE("V3 API symbols not found.");
         return;
