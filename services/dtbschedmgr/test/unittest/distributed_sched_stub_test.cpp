@@ -2570,7 +2570,7 @@ HWTEST_F(DistributedSchedStubTest, ConnectDExtensionFromRemoteInner_002, TestSiz
     DTEST_LOG << "DistributedSchedStubTest ConnectDExtensionFromRemoteInner_002 begin" << std::endl;
     MessageParcel data;
     MessageParcel reply;
-    DExtSourceInfo sourceInfo("device123", "network123", "bundleName", "moduleName", "abilityName");
+    DExtSourceInfo sourceInfo("device123", "network123", "", "bundleName", "moduleName", "abilityName");
     DExtSinkInfo sinkInfo(-1, 1234, "bundleName", "moduleName", "abilityName", "serviceName"); // Invalid userId
     DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "validToken", "delegatee");
 
@@ -2579,6 +2579,27 @@ HWTEST_F(DistributedSchedStubTest, ConnectDExtensionFromRemoteInner_002, TestSiz
     EXPECT_EQ(result, DMS_PERMISSION_DENIED);
 
     DTEST_LOG << " DistributedSchedStubTest ConnectDExtensionFromRemoteInner_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ConnectDExtensionFromRemoteInner_003
+ * @tc.desc: check ConnectDExtensionFromRemoteInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedSchedStubTest, ConnectDExtensionFromRemoteInner_003, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedSchedStubTest ConnectDExtensionFromRemoteInner_002 begin" << std::endl;
+    MessageParcel data;
+    MessageParcel reply;
+    DExtSourceInfo sourceInfo("device123", "", "devicename1", "bundleName", "moduleName", "abilityName");
+    DExtSinkInfo sinkInfo(-1, 1234, "bundleName", "moduleName", "abilityName", "serviceName"); // Invalid userId
+    DExtConnectInfo connectInfo(sourceInfo, sinkInfo, "validToken", "delegatee");
+
+    data.WriteParcelable(&connectInfo);
+    int32_t result = DistributedSchedService::GetInstance().ConnectDExtensionFromRemoteInner(data, reply);
+    EXPECT_EQ(result, DMS_PERMISSION_DENIED);
+
+    DTEST_LOG << " DistributedSchedStubTest ConnectDExtensionFromRemoteInner_003 end" << std::endl;
 }
 #endif
 }

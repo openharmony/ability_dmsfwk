@@ -26,20 +26,22 @@ namespace DistributedSchedule {
 struct DExtSourceInfo : public Parcelable {
     std::string deviceId;
     std::string networkId;
+    std::string deviceName;
     std::string bundleName;
     std::string moduleName;
     std::string abilityName;
 
     DExtSourceInfo() = default;
-    DExtSourceInfo(std::string deviceId, std::string networkId, std::string bundleName, std::string moduleName,
-        std::string abilityName)
-        : deviceId(deviceId), networkId(networkId), bundleName(bundleName), moduleName(moduleName),
-          abilityName(abilityName) {}
+    DExtSourceInfo(std::string deviceId, std::string networkId, std::string deviceName, std::string bundleName,
+        std::string moduleName, std::string abilityName)
+        : deviceId(deviceId), networkId(networkId), deviceName(deviceName), bundleName(bundleName),
+          moduleName(moduleName), abilityName(abilityName) {}
     
     bool ReadFromParcel(Parcel &parcel)
     {
         deviceId = parcel.ReadString();
         networkId = parcel.ReadString();
+        deviceName = parcel.ReadString();
         bundleName = parcel.ReadString();
         moduleName = parcel.ReadString();
         abilityName = parcel.ReadString();
@@ -52,6 +54,9 @@ struct DExtSourceInfo : public Parcelable {
             return false;
         }
         if (!parcel.WriteString(networkId)) {
+            return false;
+        }
+        if (!parcel.WriteString(deviceName)) {
             return false;
         }
         if (!parcel.WriteString(bundleName)) {
