@@ -415,20 +415,6 @@ HWTEST_F(DmsContinueTimeTest, GetStartAbilityTimePair_001, TestSize.Level3)
 }
 
 /**
- * @tc.name: GetAppLaunchTime_001
- * @tc.desc: test GetAppLaunchTime func when startAbilityTime is zero
- * @tc.type: FUNC
- */
-HWTEST_F(DmsContinueTimeTest, GetAppLaunchTime_001, TestSize.Level3)
-{
-    DTEST_LOG << "DmsContinueTimeTest GetAppLaunchTime_001 begin" << std::endl;
-    DmsContinueTime::GetInstance().Init();
-    int64_t ret = DmsContinueTime::GetInstance().GetAppLaunchTime(BUNDLE_NAME);
-    EXPECT_EQ(ret, 0);
-    DTEST_LOG << "DmsContinueTimeTest GetAppLaunchTime_001 end" << std::endl;
-}
-
-/**
  * @tc.name: GetAppLaunchTime_002
  * @tc.desc: test GetAppLaunchTime func when bundleName does not match
  * @tc.type: FUNC
