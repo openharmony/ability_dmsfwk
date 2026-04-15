@@ -74,6 +74,7 @@ void ConnectDExtensionFromRemoteFuzzTest(const uint8_t* data, size_t size)
     DExtSourceInfo sourceInfo;
     sourceInfo.deviceId = fdp.ConsumeRandomLengthString();
     sourceInfo.networkId = fdp.ConsumeRandomLengthString();
+    sourceInfo.deviceName = fdp.ConsumeRandomLengthString();
     sourceInfo.bundleName = fdp.ConsumeRandomLengthString();
     sourceInfo.moduleName = fdp.ConsumeRandomLengthString();
     sourceInfo.abilityName = fdp.ConsumeRandomLengthString();

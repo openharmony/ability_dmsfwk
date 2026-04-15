@@ -15,6 +15,8 @@
 
 #include "dms_client.h"
 
+#include <chrono>
+
 #include "ability_manager_errors.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
@@ -24,12 +26,50 @@
 
 #include "distributed_parcel_helper.h"
 #include "distributedsched_ipc_interface_code.h"
+#include "dtbschedmgr_log.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 const std::u16string DMS_PROXY_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
 constexpr uint32_t DSCHED_EVENT_MAX_NUM = 10000;
+constexpr int64_t DMS_AUTO_UNLOAD_DELAY_MS = 40000; // 40s
+}
+
+void DmsLoadCallback::OnLoadSystemAbilitySuccess(int32_t systemAbilityId,
+    const sptr<IRemoteObject>& remoteObject)
+{
+    HILOG_INFO("OnLoadSystemAbilitySuccess systemAbilityId:%{public}d", systemAbilityId);
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        remoteObject_ = remoteObject;
+        loadSuccess_ = true;
+    }
+    cv_.notify_one();
+}
+
+void DmsLoadCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId)
+{
+    HILOG_ERROR("OnLoadSystemAbilityFail systemAbilityId:%{public}d", systemAbilityId);
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        loadSuccess_ = false;
+    }
+    cv_.notify_one();
+}
+
+bool DmsLoadCallback::WaitForLoadSuccess(int32_t timeoutMs)
+{
+    std::unique_lock<std::mutex> lock(mutex_);
+    return cv_.wait_for(lock, std::chrono::milliseconds(timeoutMs), [this]() {
+        return loadSuccess_.load();
+    });
+}
+
+sptr<IRemoteObject> DmsLoadCallback::GetRemoteObject() const
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return remoteObject_;
 }
 
 sptr<IRemoteObject> DistributedClient::GetDmsProxy()
@@ -40,6 +80,43 @@ sptr<IRemoteObject> DistributedClient::GetDmsProxy()
         return nullptr;
     }
     return samgrProxy->CheckSystemAbility(DISTRIBUTED_SCHED_SA_ID);
+}
+
+sptr<IRemoteObject> DistributedClient::LoadDmsServiceWithTimeout()
+{
+    HILOG_INFO("LoadDmsServiceWithTimeout called");
+    auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (samgrProxy == nullptr) {
+        HILOG_ERROR("Get samgr failed");
+        return nullptr;
+    }
+
+    sptr<DmsLoadCallback> loadCallback = new DmsLoadCallback();
+    if (loadCallback == nullptr) {
+        HILOG_ERROR("Create DmsLoadCallback failed");
+        return nullptr;
+    }
+
+    int32_t ret = samgrProxy->LoadSystemAbility(DISTRIBUTED_SCHED_SA_ID, loadCallback);
+    if (ret != ERR_OK) {
+        HILOG_ERROR("LoadSystemAbility failed: %{public}d", ret);
+        return nullptr;
+    }
+
+    bool waitResult = loadCallback->WaitForLoadSuccess(DMS_AUTO_UNLOAD_DELAY_MS);
+    if (!waitResult) {
+        HILOG_ERROR("Load dms SA timeout");
+        return nullptr;
+    }
+
+    sptr<IRemoteObject> remoteObject = loadCallback->GetRemoteObject();
+    if (remoteObject == nullptr) {
+        HILOG_ERROR("Get remoteObject failed after load success");
+        return nullptr;
+    }
+
+    HILOG_INFO("LoadDmsServiceWithTimeout success");
+    return remoteObject;
 }
 
 int32_t DistributedClient::RegisterDSchedEventListener(const DSchedEventType& type,
@@ -97,8 +174,12 @@ int32_t DistributedClient::ConnectDExtensionFromRemote(const DExtConnectInfo& co
     HILOG_INFO("ConnectDExtensionFromRemote called");
     sptr<IRemoteObject> remote = GetDmsProxy();
     if (remote == nullptr) {
-        HILOG_ERROR("Remote system ablity is null");
-        return AAFwk::INVALID_PARAMETERS_ERR;
+        HILOG_INFO("DMS service not available, try to load on demand");
+        remote = LoadDmsServiceWithTimeout();
+        if (remote == nullptr) {
+            HILOG_ERROR("Load DMS service failed or timeout");
+            return ERR_DMS_LOAD_SA_FAILED;
+        }
     }
     MessageParcel data;
     MessageParcel reply;
@@ -130,7 +211,6 @@ int32_t DistributedClient::ConnectDExtensionFromRemote(const DExtConnectInfo& co
         return ERR_INVALID_DATA;
     }
     callback(*resultInfo);
-
     return resultCode;
 }
 

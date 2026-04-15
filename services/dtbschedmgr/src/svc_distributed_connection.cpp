@@ -15,6 +15,8 @@
 
 #include "svc_distributed_connection.h"
 
+#include "distributed_sched_service.h"
+
 #include <chrono>
 #include <iomanip>
 #include <thread>
@@ -206,6 +208,7 @@ ErrCode SvcDistributedConnection::ConnectDExtAbility(AAFwk::Want &want, int32_t 
 ErrCode SvcDistributedConnection::DisconnectDistributedExtAbility()
 {
     HILOGI("called begin");
+    DistributedSchedService::GetInstance().SetDExtensionConnected(false);
     std::unique_lock<std::mutex> lock(mutex_);
     isConnectCalled_.store(false);
     auto proxy = distributedProxy_;
@@ -451,19 +454,13 @@ static bool GetApplicationInfo(const std::string &bundleName, int32_t userId,
 
 void SvcDistributedConnection::PublishDExtensionNotification(const std::string &deviceId,
     const std::string &bundleName, const int32_t userId,
-    const std::string &networkId, AppExecFwk::BundleResourceInfo &bundleResourceInfo)
+    const std::string &deviceName, AppExecFwk::BundleResourceInfo &bundleResourceInfo)
 {
     HILOGI("SvcDistributedConnection::PublishDExtensionNotification called");
     UpdateResourceMapByLanguage();
     auto normalContent = std::make_shared<Notification::NotificationNormalContent>();
     if (normalContent == nullptr) {
         HILOGE("Set notification normal content nullptr");
-        return;
-    }
-    std::string deviceName;
-    int32_t ret = DistributedHardware::DeviceManager::GetInstance().GetDeviceName(PKG_NAME, networkId, deviceName);
-    if (ret != ERR_OK) {
-        HILOGE("Failed to get device name, ret = %{public}d", ret);
         return;
     }
     if (!SetNotificationContent(*normalContent, deviceName, bundleResourceInfo)) {
@@ -482,7 +479,7 @@ void SvcDistributedConnection::PublishDExtensionNotification(const std::string &
     SetBasicOptions(request, appInfo);
     request.SetContent(content);
     SetEndTaskButton(request);
-    ret = Notification::NotificationHelper::PublishNotification(request);
+    int32_t ret = Notification::NotificationHelper::PublishNotification(request);
     if (ret != 0) {
         HILOGE("Publish notification failed, ret = %{public}d", ret);
         return;
