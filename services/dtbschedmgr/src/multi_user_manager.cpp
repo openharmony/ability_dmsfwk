@@ -367,7 +367,7 @@ int32_t MultiUserManager::OnRegisterOnListener(const std::string& type,
     HILOGI("OnRegisterOnListener. accountId: %{public}d , callingUid: %{public}d.", accountId, callingUid);
     {
         std::lock_guard<std::mutex> lock(listenerMutex_);
-        if (!IsUserForeground(accountId) || accountId != currentUserId_) {
+        if (accountId != 0 && (!IsUserForeground(accountId) || accountId != currentUserId_)) {
             HILOGW("The current user is not foreground. accountId: %{public}d , currentUserId_: %{public}d.",
                 accountId, currentUserId_);
             std::map<std::string, sptr<IRemoteObject>> param;
