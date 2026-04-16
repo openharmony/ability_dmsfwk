@@ -27,6 +27,8 @@ public:
     virtual ~IAbilityManagerClient() = default;
     virtual ErrCode Connect() = 0;
     virtual ErrCode GetMissionInfo(const std::string &deviceId, int32_t missionId, MissionInfo &missionInfo) = 0;
+    virtual ErrCode GetMissionInfo(const std::string &deviceId, int32_t missionId, MissionInfo &missionInfo,
+        DisplayInfo &displayInfo) = 0;
     virtual ErrCode ContinueAbility(const std::string &deviceId, int32_t missionId, uint32_t versionCode) = 0;
     virtual int32_t GetAbilityStateByPersistentId(int32_t persistentId, bool &state) = 0;
     virtual ErrCode CleanMission(int32_t missionId) = 0;
@@ -42,6 +44,8 @@ class AbilityManagerClientMock : public IAbilityManagerClient {
 public:
     MOCK_METHOD0(Connect, ErrCode());
     MOCK_METHOD3(GetMissionInfo, ErrCode(const std::string &deviceId, int32_t missionId, MissionInfo &missionInfo));
+    MOCK_METHOD4(GetMissionInfo, ErrCode(const std::string &deviceId, int32_t missionId, MissionInfo &missionInfo,
+        DisplayInfo &displayInfo));
     MOCK_METHOD3(ContinueAbility, ErrCode(const std::string &deviceId, int32_t missionId, uint32_t versionCode));
     MOCK_METHOD2(GetAbilityStateByPersistentId, int32_t(int32_t persistentId, bool &state));
     MOCK_METHOD1(CleanMission, ErrCode(int32_t missionId));

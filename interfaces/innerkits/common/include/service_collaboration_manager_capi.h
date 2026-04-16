@@ -70,6 +70,13 @@ typedef struct ServiceCollaborationManager_Callback {
     int32_t (*ApplyResult)(int32_t errorcode, int32_t result, const char *reason);
 } ServiceCollaborationManager_Callback;
 
+typedef struct ServiceCollaborationManager_ServiceStateInfo {
+    const char *peerNetworkId = nullptr;
+    const char *serviceName = nullptr;
+    const char *extraInfo = nullptr;
+    ServiceCollaborationManagerBussinessStatus state = SCM_IDLE;
+} ServiceCollaborationManager_ServiceStateInfo;
+
 typedef struct ServiceCollaborationManager_API {
     int32_t (*ServiceCollaborationManager_PublishServiceState)(const char *peerNetworkId, const char *serviceName,
         const char *extraInfo, ServiceCollaborationManagerBussinessStatus state);
@@ -81,7 +88,22 @@ typedef struct ServiceCollaborationManager_API {
     int32_t (*ServiceCollaborationManager_UnRegisterLifecycleCallback)(const char *serviceName);
 } ServiceCollaborationManager_API;
 
+typedef struct ServiceCollaborationManagerV3_API {
+    int32_t (*ServiceCollaborationManager_PublishServiceState)(
+        ServiceCollaborationManager_ServiceStateInfo *serviceStateInfo,
+        ServiceCollaborationManager_ResourceRequestInfoSets *resourceRequest, int32_t userId);
+    int32_t (*ServiceCollaborationManager_ApplyAdvancedResource)(const char *peerNetworkId, const char *serviceName,
+        ServiceCollaborationManager_ResourceRequestInfoSets *resourceRequest, int32_t userId,
+        ServiceCollaborationManager_Callback *callback);
+    int32_t (*ServiceCollaborationManager_RegisterLifecycleCallback)(const char *serviceName,
+        ServiceCollaborationManager_Callback *callback);
+    int32_t (*ServiceCollaborationManager_UnRegisterLifecycleCallback)(const char *serviceName);
+    ServiceCollaborationManager_ServiceStateInfo *(*ServiceCollaborationManager_GetAllServiceState)(
+        uint16_t *outCount);
+} ServiceCollaborationManagerV3_API;
+
 int32_t ServiceCollaborationManager_Export(ServiceCollaborationManager_API *exportapi);
+int32_t ServiceCollaborationManagerV3_Export(ServiceCollaborationManagerV3_API *exportapi);
 
 #ifdef __cplusplus
 }

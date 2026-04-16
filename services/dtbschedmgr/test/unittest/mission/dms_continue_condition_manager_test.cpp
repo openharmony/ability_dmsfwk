@@ -479,5 +479,47 @@ HWTEST_F(DmsContinueConditionMgrTest, DmsContinueConditionMgr_CheckBlacklist_002
     EXPECT_FALSE(ret);
     DTEST_LOG << "DMSContinueManagerTest DmsContinueConditionMgr_CheckBlacklist_002 end" << std::endl;
 }
+
+/**
+ * @tc.name: CheckVirtualScreenScenario_001
+ * @tc.desc: test CheckVirtualScreenScenario with displayId >= 1000
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, CheckVirtualScreenScenario_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest CheckVirtualScreenScenario_001 start" << std::endl;
+
+    MissionStatus status;
+    status.accountId = 0;
+    status.missionId = 1;
+    status.bundleName = "com.example.testbundle";
+    status.abilityName = "MainAbility";
+
+    bool ret = DmsContinueConditionMgr::GetInstance().CheckVirtualScreenScenario(status);
+
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "DMSContinueManagerTest CheckVirtualScreenScenario_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CheckVirtualScreenScenario_002
+ * @tc.desc: test CheckVirtualScreenScenario with invalid missionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsContinueConditionMgrTest, CheckVirtualScreenScenario_002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest CheckVirtualScreenScenario_002 start" << std::endl;
+
+    MissionStatus status;
+    status.accountId = 0;
+    status.missionId = -1;
+    status.bundleName = "com.example.testbundle";
+    status.abilityName = "MainAbility";
+
+    bool ret = DmsContinueConditionMgr::GetInstance().CheckVirtualScreenScenario(status);
+
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "DMSContinueManagerTest CheckVirtualScreenScenario_002 end" << std::endl;
+}
 }
 }
