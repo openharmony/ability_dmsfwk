@@ -22,6 +22,7 @@
 #include "dtbschedmgr_log.h"
 #include "mission_info.h"
 #include "mission/bluetooth_state_adapter.h"
+#include "softbus_adapter/allconnectmgr/dsched_all_connect_manager.h"
 #include "mission/dsched_sync_e2e.h"
 #include "mission/param/param_common_event.h"
 #include "mission/wifi_state_adapter.h"
@@ -34,6 +35,9 @@ namespace {
 const std::string TAG = "DmsContinueConditionMgr";
 constexpr int32_t GET_MAX_MISSIONS = 50;
 constexpr int32_t CONDITION_INVALID_MISSION_ID = -1;
+constexpr int32_t VIRTUAL_SCREEN_ID_THRESHOLD = 1000;
+const std::string SUPER_LAUNCHER_SERVICE_NAME = "SuperLauncher";
+const std::string SUPER_LAUNCHER_DUAL_SERVICE_NAME = "SuperLauncher-Dual";
 }
 
 IMPLEMENT_SINGLE_INSTANCE(DmsContinueConditionMgr);
@@ -408,6 +412,44 @@ int32_t DmsContinueConditionMgr::OnMissionInactive(int32_t accountId, int32_t mi
     return ERR_OK;
 }
 
+bool DmsContinueConditionMgr::CheckVirtualScreenScenario(const MissionStatus& status)
+{
+    auto abilityMgr = AAFwk::AbilityManagerClient::GetInstance();
+    if (abilityMgr == nullptr) {
+        HILOGE("abilityMgr is null");
+        return false;
+    }
+
+    AAFwk::MissionInfo missionInfo;
+    AAFwk::DisplayInfo displayInfo;
+    int32_t ret = abilityMgr->GetMissionInfo("", status.missionId, missionInfo, displayInfo);
+    if (ret != ERR_OK) {
+        HILOGE("get missionInfo failed, missionId: %{public}d, ret: %{public}d", status.missionId, ret);
+        return false;
+    }
+
+    HILOGI("Check virtual screen scenario, missionId: %{public}d, displayId: %{public}d",
+        status.missionId, displayInfo.id);
+
+    if (displayInfo.id >= VIRTUAL_SCREEN_ID_THRESHOLD) {
+        HILOGI("Virtual screen detected (displayId: %{public}d), check service name list", displayInfo.id);
+
+        std::vector<std::string> serviceNameList =
+            DSchedAllConnectManager::GetInstance().QueryAllServiceStateContext();
+
+        for (const auto& serviceName : serviceNameList) {
+            if (serviceName == SUPER_LAUNCHER_SERVICE_NAME || serviceName == SUPER_LAUNCHER_DUAL_SERVICE_NAME) {
+                HILOGI("Service name matched: %{public}s, block broadcast", serviceName.c_str());
+                return true;
+            }
+        }
+
+        HILOGI("No matching service name found, allow broadcast");
+    }
+
+    return false;
+}
+
 bool DmsContinueConditionMgr::CheckSystemSendCondition(const MissionStatus& status)
 {
     HILOGI("switch: %{public}d, wifi: %{public}d, bt: %{public}d, bundleName: %{public}s",
@@ -434,6 +476,10 @@ bool DmsContinueConditionMgr::CheckSystemSendCondition(const MissionStatus& stat
 #endif
         if (isOnBlacklist_) {
             reason = "APP_IS_ON_THE_CONTROLLIST";
+            break;
+        }
+        if (CheckVirtualScreenScenario(status)) {
+            reason = "VIRTUAL_SCREEN_SCENARIO";
             break;
         }
         HILOGI("PASS");
