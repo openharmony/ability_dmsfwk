@@ -187,6 +187,7 @@ ohos_unittest("distributedschedservicetest") {
     "${dms_path}/services/dtbschedmgr/src/distributed_sched_service.cpp",
     "unittest/distributed_sched_service_first_test.cpp",
     "unittest/distributed_sched_service_mdm_test.cpp",
+    "unittest/distributed_sched_service_new_test.cpp",
     "unittest/distributed_sched_service_second_test.cpp",
     "unittest/mock/ability_manager_client_mock.cpp",
     "unittest/mock/accesstoken_kit_mock.cpp",
