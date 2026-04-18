@@ -30,6 +30,7 @@ namespace DistributedCollab {
 namespace {
     static constexpr uint16_t PROTOCOL_VERSION = 1;
     static const std::string TAG = "DSchedCollabDataSenderReceiver";
+
 #define GET_SOFTBUS_SESSION_OPTION(socketId, value, valueSize)                                            \
 do {                                                                                                  \
     int32_t ret = GetSessionOption(socketId, SESSION_OPTION_MAX_SENDBYTES_SIZE, &(value), valueSize); \

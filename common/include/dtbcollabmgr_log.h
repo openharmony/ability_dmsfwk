@@ -287,6 +287,14 @@ enum {
      * Result(29360161) for can not service registry.
      */
     NOT_FIND_SERVICE_REGISTRY = 29360161,
+
+    INVALID_SESSION_HEADER_PACKET_LEN = -2010,
+
+    INVALID_SESSION_HEADER_PAYLOAD_LEN = -2011,
+
+    INVALID_SESSION_HEADER_DATA_OFFSET = -2012,
+
+    INVALID_SESSION_HEADER_DATA_RANGE = -2013,
 };
 
 #define CHECK_NULL_VOID(ptr)                    \
