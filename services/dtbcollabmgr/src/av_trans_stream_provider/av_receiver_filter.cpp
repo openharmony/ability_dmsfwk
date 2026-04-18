@@ -522,7 +522,7 @@ void AVReceiverFilter::OnBytes(const std::shared_ptr<AVTransDataBuffer>& buffer)
         return;
     }
     std::shared_ptr<AVTransStreamData> stream = ReadStreamDataFromBuffer(dataHeader + offset,
-        headerLen, buffer->Size());
+        headerLen, buffer->Size() - offset);
     if (stream != nullptr && isRunning_) {
         AddStreamData(stream);
     }
