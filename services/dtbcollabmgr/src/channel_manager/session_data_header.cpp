@@ -175,6 +175,26 @@ std::optional<SessionDataHeader> SessionDataHeader::Deserialize(const uint8_t* b
         HILOGE("totalLen too small");
         return std::nullopt;
     }
+
+    // ✅ 新增：校验长度字段不超过实际缓冲区大小
+    if (sessionHeader.packetLen_ > bufLen) {
+        HILOGE("packetLen exceeds buffer size: %{public}u > %{public}zu",
+                sessionHeader.packetLen_, bufLen);
+        return std::nullopt;
+    }
+
+    if (sessionHeader.totalLen_ > bufLen) {
+        HILOGE("totalLen exceeds buffer size: %{public}u > %{public}zu",
+                sessionHeader.totalLen_, bufLen);
+        return std::nullopt;
+    }
+
+    if (sessionHeader.payloadLen_ > sessionHeader.packetLen_) {
+        HILOGE("payloadLen exceeds packetLen: %{public}u > %{public}u",
+                sessionHeader.payloadLen_, sessionHeader.packetLen_);
+        return std::nullopt;
+    }
+
     // verify header, maybe higher version
     uint32_t headerLen = 0;
     auto versionIt = HEADER_LEN_VERSION_MAP.find(sessionHeader.version_);
