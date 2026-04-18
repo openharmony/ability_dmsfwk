@@ -30,12 +30,6 @@ namespace DistributedCollab {
 namespace {
     static constexpr uint16_t PROTOCOL_VERSION = 1;
     static const std::string TAG = "DSchedCollabDataSenderReceiver";
-
-    // Session header validation error codes
-    constexpr int32_t INVALID_SESSION_HEADER_PACKET_LEN = -2010;
-    constexpr int32_t INVALID_SESSION_HEADER_PAYLOAD_LEN = -2011;
-    constexpr int32_t INVALID_SESSION_HEADER_DATA_OFFSET = -2012;
-    constexpr int32_t INVALID_SESSION_HEADER_DATA_RANGE = -2013;
 #define GET_SOFTBUS_SESSION_OPTION(socketId, value, valueSize)                                            \
 do {                                                                                                  \
     int32_t ret = GetSessionOption(socketId, SESSION_OPTION_MAX_SENDBYTES_SIZE, &(value), valueSize); \
