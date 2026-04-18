@@ -791,8 +791,8 @@ int32_t BundleManagerInternal::GetLocalBundleInfo(const std::string& bundleName,
         localBundleInfo.applicationInfo.bundleType = static_cast<AppExecFwk::BundleType>(0);  // APP = 0
         localBundleInfo.applicationInfo.codePath = "/" + bundleName;
         localBundleInfo.applicationInfo.dataDir = "/data/app/" + bundleName;
-        localBundleInfo.applicationInfo.accessTokenId = 10000000;
-        localBundleInfo.applicationInfo.uid = 10000;
+        localBundleInfo.applicationInfo.accessTokenId = 0;
+        localBundleInfo.applicationInfo.uid = 0;
         localBundleInfo.applicationInfo.isSystemApp = false;
         localBundleInfo.applicationInfo.enabled = true;
         localBundleInfo.abilityInfos.clear();
@@ -1048,7 +1048,8 @@ HWTEST_F(DMSContinueManagerTest, ValidateAndPrepareBundleInfo_001, TestSize.Leve
     int32_t state = ACTIVE;
 
     BundleValidationContext context;
-    EXPECT_NO_FATAL_FAILURE(recvMgr->ValidateAndPrepareBundleInfo(distributedBundleInfo, continueTypeId, state, context));
+    EXPECT_NO_FATAL_FAILURE(
+        recvMgr->ValidateAndPrepareBundleInfo(distributedBundleInfo, continueTypeId, state, context));
 #endif
     DTEST_LOG << "DMSContinueManagerTest ValidateAndPrepareBundleInfo_001 end" << std::endl;
 }
