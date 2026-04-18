@@ -176,7 +176,6 @@ std::optional<SessionDataHeader> SessionDataHeader::Deserialize(const uint8_t* b
         return std::nullopt;
     }
 
-    // ✅ 新增：校验长度字段不超过实际缓冲区大小
     if (sessionHeader.packetLen_ > bufLen) {
         HILOGE("packetLen exceeds buffer size: %{public}u > %{public}zu",
                 sessionHeader.packetLen_, bufLen);

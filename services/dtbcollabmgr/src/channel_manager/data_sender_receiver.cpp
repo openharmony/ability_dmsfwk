@@ -429,7 +429,6 @@ int32_t DataSenderReceiver::ProcessEndPacketRecv(const uint8_t* data,
 int32_t DataSenderReceiver::WriteRecvBytesDataToBuffer(const uint8_t* data,
     const uint32_t dataLen, const SessionDataHeader& headerPara)
 {
-    // ✅ 防御性校验：确保长度字段在合理范围内
     if (headerPara.packetLen_ > dataLen) {
         HILOGE("packetLen exceeds dataLen: %{public}u > %{public}u",
                 headerPara.packetLen_, dataLen);
@@ -442,7 +441,6 @@ int32_t DataSenderReceiver::WriteRecvBytesDataToBuffer(const uint8_t* data,
         return INVALID_SESSION_HEADER_PAYLOAD_LEN;
     }
 
-    // ✅ 校验数据偏移不会越界
     uint32_t dataOffset = headerPara.packetLen_ - headerPara.payloadLen_;
     if (dataOffset > dataLen) {
         HILOGE("dataOffset exceeds dataLen: %{public}u > %{public}u",
@@ -451,7 +449,7 @@ int32_t DataSenderReceiver::WriteRecvBytesDataToBuffer(const uint8_t* data,
     }
 
     if (dataOffset + headerPara.payloadLen_ > dataLen) {
-        HILOGE("payload data exceeds buffer range: offset=%{public}u, len=%{public}u, dataLen=%{public}u",
+        HILOGE("payload exceeds buffer range: offset=%{public}u, len=%{public}u, max=%{public}u",
                 dataOffset, headerPara.payloadLen_, dataLen);
         return INVALID_SESSION_HEADER_DATA_RANGE;
     }
