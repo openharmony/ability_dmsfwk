@@ -81,5 +81,32 @@ HWTEST_F(SwitchStatusDependencyTest, IsCreateDataShareHelper_001, TestSize.Level
         SwitchStatusDependency::GetInstance().GetSwitchStatus(key, defaultValue));
     DTEST_LOG << "SwitchStatusDependencyTest IsCreateDataShareHelper_001 end" << std::endl;
 }
+
+/**
+ * @tc.name: IsRecommendInstallationOn_001
+ * @tc.desc: test IsRecommendInstallationOn when switch is on
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwitchStatusDependencyTest, IsRecommendInstallationOn_001, TestSize.Level3)
+{
+    DTEST_LOG << "SwitchStatusDependencyTest IsRecommendInstallationOn_001 begin" << std::endl;
+    EXPECT_NO_FATAL_FAILURE(SwitchStatusDependency::GetInstance().IsRecommendInstallationOn());
+    DTEST_LOG << "SwitchStatusDependencyTest IsRecommendInstallationOn_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetSwitchStatus_WithRecommendInstallationKey_001
+ * @tc.desc: test GetSwitchStatus with RECOMMEND_INSTALLATION_SWITCH_KEY
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwitchStatusDependencyTest, GetSwitchStatus_WithRecommendInstallationKey_001, TestSize.Level3)
+{
+    DTEST_LOG << "SwitchStatusDependencyTest GetSwitchStatus_WithRecommendInstallationKey_001 begin" << std::endl;
+    std::string key = SwitchStatusDependency::RECOMMEND_INSTALLATION_SWITCH_KEY;
+    std::string defaultValue = SwitchStatusDependency::RECOMMEND_INSTALLATION_SWITCH_ON;
+    std::string ret = SwitchStatusDependency::GetInstance().GetSwitchStatus(key, defaultValue);
+    EXPECT_EQ(defaultValue, ret);
+    DTEST_LOG << "SwitchStatusDependencyTest GetSwitchStatus_WithRecommendInstallationKey_001 end" << std::endl;
+}
 }
 }
