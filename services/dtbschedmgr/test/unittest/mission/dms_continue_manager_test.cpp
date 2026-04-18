@@ -778,5 +778,367 @@ HWTEST_F(DMSContinueManagerTest, NotifyDockDisplay_001, TestSize.Level1)
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "DMSContinueManagerTest NotifyDockDisplay_001 end" << std::endl;
 }
+int32_t BundleManagerInternal::GetLocalBundleInfo(const std::string& bundleName,
+    AppExecFwk::BundleInfo &localBundleInfo)
+{
+    if (bundleName == "bundleName01") {
+        // IMPORTANT: Reset first to ensure clean state
+        localBundleInfo = AppExecFwk::BundleInfo();
+        // Fill BundleInfo with complete test data
+        localBundleInfo.name = bundleName;
+        localBundleInfo.applicationInfo.name = bundleName;
+        localBundleInfo.applicationInfo.bundleName = bundleName;
+        localBundleInfo.applicationInfo.bundleType = static_cast<AppExecFwk::BundleType>(0);  // APP = 0
+        localBundleInfo.applicationInfo.codePath = "/" + bundleName;
+        localBundleInfo.applicationInfo.dataDir = "/data/app/" + bundleName;
+        localBundleInfo.applicationInfo.accessTokenId = 10000000;
+        localBundleInfo.applicationInfo.uid = 10000;
+        localBundleInfo.applicationInfo.isSystemApp = false;
+        localBundleInfo.applicationInfo.enabled = true;
+        localBundleInfo.abilityInfos.clear();
+        // Ensure bundleType is set to APP (0)
+        if (localBundleInfo.applicationInfo.bundleType != AppExecFwk::BundleType::APP) {
+            localBundleInfo.applicationInfo.bundleType = AppExecFwk::BundleType::APP;
+        }
+        return ERR_OK;
+    }
+    return INVALID_PARAMETERS_ERR;
+}
+
+bool BundleManagerInternal::GetContinueBundle4Src(const std::string &srcBundleName,
+    std::vector<std::string> &bundleNameList)
+{
+    if (srcBundleName == "bundleName01") {
+        bundleNameList.push_back(srcBundleName);
+        return true;
+    }
+    return false;
+}
+
+bool BundleManagerInternal::GetAppProvisionInfo4CurrentUser(const std::string &bundleName,
+    AppExecFwk::AppProvisionInfo &appProvisionInfo)
+{
+    if (bundleName == "bundleName01") {
+        appProvisionInfo.appIdentifier = "id1";
+        return true;
+    }
+    return false;
+}
+
+/**
+ * @tc.name: HandleEmptyAppIdentifierVec_001
+ * @tc.desc: test HandleEmptyAppIdentifierVec when GetFinalBundleNameInternal returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, HandleEmptyAppIdentifierVec_001, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest HandleEmptyAppIdentifierVec_001 start" << std::endl;
+#ifdef SUPPORT_CONTINUATION_RECOMMEND_INSTALLATION
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+
+    DmsBundleInfo distributedBundleInfo;
+    distributedBundleInfo.bundleName = "testBundle";
+    distributedBundleInfo.appIdentifierVec.clear();
+
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::string finalBundleName = "initial";
+    std::vector<std::string> finalAppIdentifierVec = {};
+
+    bool ret = recvMgr->HandleEmptyAppIdentifierVec(
+        distributedBundleInfo, localBundleInfo, finalBundleName, finalAppIdentifierVec);
+
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(finalBundleName, "");
+    EXPECT_TRUE(finalAppIdentifierVec.empty());
+#endif
+    DTEST_LOG << "DMSContinueManagerTest HandleEmptyAppIdentifierVec_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleEmptyAppIdentifierVec_002
+ * @tc.desc: test HandleEmptyAppIdentifierVec when GetFinalBundleNameInternal returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, HandleEmptyAppIdentifierVec_002, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest HandleEmptyAppIdentifierVec_002 start" << std::endl;
+#ifdef SUPPORT_CONTINUATION_RECOMMEND_INSTALLATION
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+
+    DmsBundleInfo distributedBundleInfo;
+    distributedBundleInfo.bundleName = BUNDLENAME_01;
+    distributedBundleInfo.appIdentifierVec.clear();
+    distributedBundleInfo.appIdentifier = "testAppId";
+
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::string finalBundleName = "initial";
+    std::vector<std::string> finalAppIdentifierVec = {};
+
+    bool ret = recvMgr->HandleEmptyAppIdentifierVec(
+        distributedBundleInfo, localBundleInfo, finalBundleName, finalAppIdentifierVec);
+
+    EXPECT_FALSE(ret);
+    EXPECT_TRUE(finalAppIdentifierVec.empty());
+#endif
+    DTEST_LOG << "DMSContinueManagerTest HandleEmptyAppIdentifierVec_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleNonEmptyAppIdentifierVec_001
+ * @tc.desc: test HandleNonEmptyAppIdentifierVec when GetContinueBundle4Src fails
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, HandleNonEmptyAppIdentifierVec_001, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest HandleNonEmptyAppIdentifierVec_001 start" << std::endl;
+#ifdef SUPPORT_CONTINUATION_RECOMMEND_INSTALLATION
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+
+    DmsBundleInfo distributedBundleInfo;
+    distributedBundleInfo.bundleName = "nonExistentBundle";
+    distributedBundleInfo.appIdentifierVec = {"id1", "id2"};
+
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::string finalBundleName = "initial";
+    std::vector<std::string> finalAppIdentifierVec;
+
+    bool ret = recvMgr->HandleNonEmptyAppIdentifierVec(
+        distributedBundleInfo, localBundleInfo, finalBundleName, finalAppIdentifierVec);
+
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(finalBundleName, "");
+    EXPECT_EQ(finalAppIdentifierVec.size(), 2u);
+#endif
+    DTEST_LOG << "DMSContinueManagerTest HandleNonEmptyAppIdentifierVec_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleNonEmptyAppIdentifierVec_002
+ * @tc.desc: test HandleNonEmptyAppIdentifierVec with matched first bundle
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, HandleNonEmptyAppIdentifierVec_002, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest HandleNonEmptyAppIdentifierVec_002 start" << std::endl;
+#ifdef SUPPORT_CONTINUATION_RECOMMEND_INSTALLATION
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+
+    DmsBundleInfo distributedBundleInfo;
+    distributedBundleInfo.bundleName = BUNDLENAME_01;
+    distributedBundleInfo.appIdentifierVec = {"id1"};
+
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::string finalBundleName = "initial";
+    std::vector<std::string> finalAppIdentifierVec;
+
+    bool ret = recvMgr->HandleNonEmptyAppIdentifierVec(
+        distributedBundleInfo, localBundleInfo, finalBundleName, finalAppIdentifierVec);
+
+    EXPECT_FALSE(ret);
+    EXPECT_TRUE(finalAppIdentifierVec.empty());
+#endif
+    DTEST_LOG << "DMSContinueManagerTest HandleNonEmptyAppIdentifierVec_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: HandleNonEmptyAppIdentifierVec_003
+ * @tc.desc: test HandleNonEmptyAppIdentifierVec with matched non-first bundle and switch off
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, HandleNonEmptyAppIdentifierVec_003, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest HandleNonEmptyAppIdentifierVec_003 start" << std::endl;
+#ifdef SUPPORT_CONTINUATION_RECOMMEND_INSTALLATION
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+
+    DmsBundleInfo distributedBundleInfo;
+    distributedBundleInfo.bundleName = BUNDLENAME_01;
+    distributedBundleInfo.appIdentifierVec = {"id1", "id2"};
+
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::string finalBundleName = "initial";
+    std::vector<std::string> finalAppIdentifierVec;
+
+    bool ret = recvMgr->HandleNonEmptyAppIdentifierVec(
+        distributedBundleInfo, localBundleInfo, finalBundleName, finalAppIdentifierVec);
+
+    EXPECT_FALSE(ret);
+    EXPECT_TRUE(finalAppIdentifierVec.empty());
+#endif
+    DTEST_LOG << "DMSContinueManagerTest HandleNonEmptyAppIdentifierVec_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetFinalBundleNameOrAppIdentifierList_001
+ * @tc.desc: test GetFinalBundleNameOrAppIdentifierList with empty appIdentifierVec
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, GetFinalBundleNameOrAppIdentifierList_001, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest GetFinalBundleNameOrAppIdentifierList_001 start" << std::endl;
+#ifdef SUPPORT_CONTINUATION_RECOMMEND_INSTALLATION
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+
+    DmsBundleInfo distributedBundleInfo;
+    distributedBundleInfo.bundleName = "testBundle";
+    distributedBundleInfo.appIdentifierVec.clear();
+
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::string finalBundleName;
+    std::vector<std::string> finalAppIdentifierVec;
+
+    bool ret = recvMgr->GetFinalBundleNameOrAppIdentifierList(
+        distributedBundleInfo, localBundleInfo, finalBundleName, finalAppIdentifierVec);
+
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(finalBundleName, "");
+#endif
+    DTEST_LOG << "DMSContinueManagerTest GetFinalBundleNameOrAppIdentifierList_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetFinalBundleNameOrAppIdentifierList_002
+ * @tc.desc: test GetFinalBundleNameOrAppIdentifierList with non-empty appIdentifierVec
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, GetFinalBundleNameOrAppIdentifierList_002, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest GetFinalBundleNameOrAppIdentifierList_002 start" << std::endl;
+#ifdef SUPPORT_CONTINUATION_RECOMMEND_INSTALLATION
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+
+    DmsBundleInfo distributedBundleInfo;
+    distributedBundleInfo.bundleName = BUNDLENAME_01;
+    distributedBundleInfo.appIdentifierVec = {"id1", "id2"};
+
+    AppExecFwk::BundleInfo localBundleInfo;
+    std::string finalBundleName;
+    std::vector<std::string> finalAppIdentifierVec;
+
+    bool ret = recvMgr->GetFinalBundleNameOrAppIdentifierList(
+        distributedBundleInfo, localBundleInfo, finalBundleName, finalAppIdentifierVec);
+
+    EXPECT_FALSE(ret);
+#endif
+    DTEST_LOG << "DMSContinueManagerTest GetFinalBundleNameOrAppIdentifierList_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ValidateAndPrepareBundleInfo_001
+ * @tc.desc: test ValidateAndPrepareBundleInfo with invalid bundle info
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, ValidateAndPrepareBundleInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest ValidateAndPrepareBundleInfo_001 start" << std::endl;
+#ifdef SUPPORT_CONTINUATION_RECOMMEND_INSTALLATION
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+
+    DmsBundleInfo distributedBundleInfo;
+    distributedBundleInfo.bundleName = "nonExistentBundle";
+    uint8_t continueTypeId = 0;
+    int32_t state = ACTIVE;
+
+    BundleValidationContext context;
+    EXPECT_NO_FATAL_FAILURE(recvMgr->ValidateAndPrepareBundleInfo(distributedBundleInfo, continueTypeId, state, context));
+#endif
+    DTEST_LOG << "DMSContinueManagerTest ValidateAndPrepareBundleInfo_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ValidateAndPrepareBundleInfo_002
+ * @tc.desc: test ValidateAndPrepareBundleInfo with valid bundle info
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, ValidateAndPrepareBundleInfo_002, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest ValidateAndPrepareBundleInfo_002 start" << std::endl;
+#ifndef SUPPORT_CONTINUATION_RECOMMEND_INSTALLATION
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+
+    DmsBundleInfo distributedBundleInfo;
+    distributedBundleInfo.bundleName = BUNDLENAME_01;
+    distributedBundleInfo.appIdentifier = "testAppId";
+    uint8_t continueTypeId = 0;
+    int32_t state = ACTIVE;
+
+    BundleValidationContext context;
+    bool ret = recvMgr->ValidateAndPrepareBundleInfo(distributedBundleInfo, continueTypeId, state, context);
+    EXPECT_TRUE(ret);
+#endif
+    DTEST_LOG << "DMSContinueManagerTest ValidateAndPrepareBundleInfo_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyRecvBroadcast_002
+ * @tc.desc: test NotifyRecvBroadcast with appIdentifierVec
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, NotifyRecvBroadcast_002, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest NotifyRecvBroadcast_002 start" << std::endl;
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+
+    sptr<IRemoteObject> obj(new RemoteOnListenerStubTest());
+    std::vector<std::string> appIdentifierVec = {"id1", "id2", "id3"};
+    currentIconInfo info(NETWORKID_01, BUNDLENAME_01, BUNDLENAME_02, "continueType", appIdentifierVec);
+    int32_t state = ACTIVE;
+
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyRecvBroadcast(obj, info, state));
+
+    DTEST_LOG << "DMSContinueManagerTest NotifyRecvBroadcast_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyRecvBroadcast_003
+ * @tc.desc: test NotifyRecvBroadcast with empty appIdentifierVec
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, NotifyRecvBroadcast_003, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest NotifyRecvBroadcast_003 start" << std::endl;
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+
+    sptr<IRemoteObject> obj(new RemoteOnListenerStubTest());
+    std::vector<std::string> appIdentifierVec;
+    currentIconInfo info(NETWORKID_01, BUNDLENAME_01, BUNDLENAME_02, "continueType", appIdentifierVec);
+    int32_t state = INACTIVE;
+
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyRecvBroadcast(obj, info, state));
+
+    DTEST_LOG << "DMSContinueManagerTest NotifyRecvBroadcast_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyRecvBroadcast_004
+ * @tc.desc: test NotifyRecvBroadcast with single appIdentifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueManagerTest, NotifyRecvBroadcast_004, TestSize.Level3)
+{
+    DTEST_LOG << "DMSContinueManagerTest NotifyRecvBroadcast_004 start" << std::endl;
+    auto recvMgr = MultiUserManager::GetInstance().GetCurrentRecvMgr();
+    ASSERT_NE(nullptr, recvMgr);
+
+    sptr<IRemoteObject> obj(new RemoteOnListenerStubTest());
+    std::vector<std::string> appIdentifierVec = {"singleId"};
+    currentIconInfo info(NETWORKID_01, BUNDLENAME_01, BUNDLENAME_02, "continueType", appIdentifierVec);
+    int32_t state = ACTIVE;
+
+    EXPECT_NO_FATAL_FAILURE(recvMgr->NotifyRecvBroadcast(obj, info, state));
+
+    DTEST_LOG << "DMSContinueManagerTest NotifyRecvBroadcast_004 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
