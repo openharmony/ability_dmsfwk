@@ -25,13 +25,13 @@ namespace DistributedSchedule {
 const std::string TAG = "DistributedExtensionContextJS";
 using namespace AbilityRuntime;
 
-bool DistributedExtensionContext::ConnectAbility(const AAFwk::Want &want,
+ErrCode DistributedExtensionContext::ConnectAbility(const AAFwk::Want &want,
     const sptr<AbilityConnectCallback> &connectCallback) const
 {
     HILOGI("%{public}s start.", __func__);
     ErrCode ret = ConnectionManager::GetInstance().ConnectAbility(token_, want, connectCallback);
     HILOGI("DistributedExtensionContext::ConnectAbility ret: %{public}d", ret);
-    return ret == ERR_OK;
+    return ret;
 }
 
 ErrCode DistributedExtensionContext::DisconnectAbility(const AAFwk::Want &want,

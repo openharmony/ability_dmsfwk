@@ -42,9 +42,9 @@ public:
    * @param conn Indicates the callback object when the target ability is
    * connected.
    *
-   * @return True means success and false means failure
+   * @return Returns ERR_OK on success, others on failure.
    */
-    bool ConnectAbility(const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const;
+    ErrCode ConnectAbility(const AAFwk::Want &want, const sptr<AbilityConnectCallback> &connectCallback) const;
 
     /**
    * @brief Disconnects the current ability from an ability.
