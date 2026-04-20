@@ -69,6 +69,34 @@ std::unique_ptr<AVTransDataBuffer> SessionDataHeader::Serialize()
     return buffer;
 }
 
+bool SessionDataHeader::ValidateHeaderParameters(const SessionDataHeader& sessionHeader,
+    const size_t bufLen)
+{
+    if (sessionHeader.payloadLen_ > SessionDataHeader::BINARY_PAYLOAD_MAX_LEN
+        || sessionHeader.packetLen_ > SessionDataHeader::BINARY_DATA_MAX_TOTAL_LEN) {
+        HILOGE("invalid param");
+        return false;
+    }
+    if (sessionHeader.totalLen_ < sessionHeader.packetLen_) {
+        HILOGE("totalLen too small");
+        return false;
+    }
+
+    if (sessionHeader.packetLen_ > bufLen) {
+        HILOGE("packetLen exceeds buffer size: %{public}u > %{public}zu",
+            sessionHeader.packetLen_, bufLen);
+        return false;
+    }
+
+    if (sessionHeader.payloadLen_ > sessionHeader.packetLen_) {
+        HILOGE("payloadLen exceeds packetLen: %{public}u > %{public}u",
+            sessionHeader.payloadLen_, sessionHeader.packetLen_);
+        return false;
+    }
+
+    return true;
+}
+
 inline uint32_t SessionDataHeader::WriteVersion(uint8_t* header, const uint32_t bufLen)
 {
     TlvItem item = { TLV_TYPE::TLV_TYPE_VERSION, sizeof(version_), version_ };
@@ -166,25 +194,8 @@ std::optional<SessionDataHeader> SessionDataHeader::Deserialize(const uint8_t* b
         current += (TlvItem::HEADER_LEN_BYTES + TlvItem::HEADER_TYPE_BYTES);
         current += item.len;
     }
-    if (sessionHeader.payloadLen_ > SessionDataHeader::BINARY_PAYLOAD_MAX_LEN
-        || sessionHeader.packetLen_ > SessionDataHeader::BINARY_DATA_MAX_TOTAL_LEN) {
-        HILOGE("invalid param");
-        return std::nullopt;
-    }
-    if (sessionHeader.totalLen_ < sessionHeader.packetLen_) {
-        HILOGE("totalLen too small");
-        return std::nullopt;
-    }
 
-    if (sessionHeader.packetLen_ > bufLen) {
-        HILOGE("packetLen exceeds buffer size: %{public}u > %{public}zu",
-                sessionHeader.packetLen_, bufLen);
-        return std::nullopt;
-    }
-
-    if (sessionHeader.payloadLen_ > sessionHeader.packetLen_) {
-        HILOGE("payloadLen exceeds packetLen: %{public}u > %{public}u",
-                sessionHeader.payloadLen_, sessionHeader.packetLen_);
+    if (!ValidateHeaderParameters(sessionHeader, bufLen)) {
         return std::nullopt;
     }
 

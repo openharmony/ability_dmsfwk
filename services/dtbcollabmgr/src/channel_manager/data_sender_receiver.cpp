@@ -426,26 +426,26 @@ int32_t DataSenderReceiver::WriteRecvBytesDataToBuffer(const uint8_t* data,
 {
     if (headerPara.packetLen_ > dataLen) {
         HILOGE("packetLen exceeds dataLen: %{public}u > %{public}u",
-                headerPara.packetLen_, dataLen);
+            headerPara.packetLen_, dataLen);
         return INVALID_SESSION_HEADER_PACKET_LEN;
     }
 
     if (headerPara.payloadLen_ > headerPara.packetLen_) {
         HILOGE("payloadLen exceeds packetLen: %{public}u > %{public}u",
-                headerPara.payloadLen_, headerPara.packetLen_);
+            headerPara.payloadLen_, headerPara.packetLen_);
         return INVALID_SESSION_HEADER_PAYLOAD_LEN;
     }
 
     uint32_t dataOffset = headerPara.packetLen_ - headerPara.payloadLen_;
     if (dataOffset > dataLen) {
         HILOGE("dataOffset exceeds dataLen: %{public}u > %{public}u",
-                dataOffset, dataLen);
+            dataOffset, dataLen);
         return INVALID_SESSION_HEADER_DATA_OFFSET;
     }
 
     if (dataOffset + headerPara.payloadLen_ > dataLen) {
         HILOGE("payload exceeds buffer range: offset=%{public}u, len=%{public}u, max=%{public}u",
-                dataOffset, headerPara.payloadLen_, dataLen);
+            dataOffset, headerPara.payloadLen_, dataLen);
         return INVALID_SESSION_HEADER_DATA_RANGE;
     }
 

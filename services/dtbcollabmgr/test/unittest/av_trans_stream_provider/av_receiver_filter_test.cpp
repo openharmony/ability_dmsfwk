@@ -241,7 +241,7 @@ HWTEST_F(AVReceiverFilterTest, OnBytes_OutOfBounds_Read_Test_001, TestSize.Level
     memcpy_s(data + 12, headerLen, jsonHeader, headerLen);
 
     // 5. 填充合法数据（78字节）
-    memset(data + 22, 0xAA, 78);
+    memset_s(data + 22, bufferSize - 22, 0xAA, 78);
 
     // 调用OnBytes，修复后应该安全返回，不会越界读取
     filter.OnBytes(buffer);
@@ -283,7 +283,7 @@ HWTEST_F(AVReceiverFilterTest, OnBytes_Boundary_Check_Test_002, TestSize.Level1)
     memcpy_s(data + 12, headerLen, jsonHeader, headerLen);
 
     // 填充数据（78字节）
-    memset(data + 22, 0xBB, rawDataLen);
+    memset_s(data + 22, bufferSize - 22, 0xBB, rawDataLen);
 
     // 调用OnBytes，应该正常处理
     filter.OnBytes(buffer);
