@@ -44,12 +44,6 @@ config("distributed_sched_config") {
     "include/softbus_adapter/transport",
     "include/softbus_adapter/allconnectmgr",
   ]
-  if (dmsfwk_mission_manager) {
-    include_dirs += [
-      "//base/enterprise/enterprise_device_management/interfaces/inner_api/application_manager/include",
-      "//base/enterprise/enterprise_device_management/common/native/include",
-    ]
-  }
   defines = []
   if (dmsfwk_mission_manager) {
     defines += [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
@@ -346,7 +340,6 @@ ohos_shared_library("distributedschedsvr") {
     external_deps += [
       "bluetooth:btframework",
       "config_policy:configpolicy_util",
-      "enterprise_device_management:edm_innerkits",
       "image_framework:image_native",
     ]
   }

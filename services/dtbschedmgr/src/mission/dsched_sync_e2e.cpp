@@ -20,12 +20,8 @@
 #include <iostream>
 #include <parameter.h>
 
-#include "application_manager_proxy.h"
 #include "bundle/bundle_manager_internal.h"
 #include "config_policy_utils.h"
-#include "edm_constants.h"
-#include "ipc_skeleton.h"
-#include "message_parcel.h"
 #include "parameters.h"
 #include "securec.h"
 #include "want.h"
@@ -47,9 +43,6 @@ const std::string ALLOW_APP_LIST_KEY = "allow_applist";
 constexpr int32_t MAX_CONFIG_PATH_LEN = 1024;
 const std::string CONSTRAINT = "constraint.distributed.transmission.outgoing";
 constexpr const char *TRANSMISSION_OUTGOING = "constraint.distributed.transmission.outgoing";
-
-// ServiceType constants for collaboration service
-constexpr int32_t SERVICE_TYPE_COLLABORATION = 1;
 }  // namespace
 
 std::shared_ptr<DmsKvSyncE2E> DmsKvSyncE2E::instance_ = nullptr;
@@ -483,60 +476,8 @@ std::vector<std::string> DmsKvSyncE2E::GetAllowedDistributeAbilityConnBundlesStu
 {
     HILOGI("GetAllowedDistributeAbilityConnBundlesStub called, serviceType: %{public}d, accountId: %{public}d",
         serviceType, accountId);
-
-    // Check if serviceType is COLLABORATION_SERVICE
-    if (serviceType != SERVICE_TYPE_COLLABORATION) {
-        HILOGI("ServiceType %{public}d is not COLLABORATION_SERVICE, return empty list", serviceType);
-        return {};
-    }
-
-#ifdef OS_ACCOUNT_PART
-    // Call EDM to get allowed collaboration service bundles
-    auto proxy = EDM::ApplicationManagerProxy::GetApplicationManagerProxy();
-    if (proxy == nullptr) {
-        HILOGE("Failed to get ApplicationManagerProxy");
-        return {};
-    }
-
-    // Prepare MessageParcel for IPC call
-    MessageParcel data;
-    MessageParcel reply;
-
-    // Write admin element (empty Want object for null element)
-    if (!data.WriteParcelable(&admin)) {
-        HILOGE("Failed to write admin to MessageParcel");
-        return {};
-    }
-
-    // Write serviceType
-    if (!data.WriteInt32(serviceType)) {
-        HILOGE("Failed to write serviceType to MessageParcel");
-        return {};
-    }
-
-    // Write accountId as userId
-    if (!data.WriteInt32(accountId)) {
-        HILOGE("Failed to write accountId to MessageParcel");
-        return {};
-    }
-
-    std::vector<std::string> appIdentifiers;
-    int32_t ret = proxy->GetAllowedDistributeAbilityConnBundles(data, appIdentifiers);
-    if (ret != ERR_OK) {
-        HILOGE("GetAllowedDistributeAbilityConnBundles failed, ret: %{public}d", ret);
-        return {};
-    }
-
-    HILOGI("GetAllowedDistributeAbilityConnBundles success, got %{public}zu items", appIdentifiers.size());
-    for (const auto& appId : appIdentifiers) {
-        HILOGI("Allowed appId: %{public}s", appId.c_str());
-    }
-
-    return appIdentifiers;
-#else
-    HILOGI("OS_ACCOUNT_PART not defined, return empty list");
+    HILOGI("Strict control mode: return empty list, all apps will be blocked");
     return {};
-#endif
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS
