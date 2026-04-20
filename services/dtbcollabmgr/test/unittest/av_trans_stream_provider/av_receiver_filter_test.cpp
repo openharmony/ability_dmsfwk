@@ -219,7 +219,6 @@ HWTEST_F(AVReceiverFilterTest, OnBytes_OutOfBounds_Read_Test_001, TestSize.Level
     // 构造触发越界读取的数据包（修复前应该触发，修复后安全）
     constexpr size_t bufferSize = 100;
     constexpr size_t headerLen = 10;
-    constexpr size_t rawDataLen = 79;  // 比实际可用大1字节
 
     std::shared_ptr<AVTransDataBuffer> buffer = std::make_shared<AVTransDataBuffer>(bufferSize);
     uint8_t* data = buffer->Data();
