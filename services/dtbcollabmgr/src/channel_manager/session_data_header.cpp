@@ -182,12 +182,6 @@ std::optional<SessionDataHeader> SessionDataHeader::Deserialize(const uint8_t* b
         return std::nullopt;
     }
 
-    if (sessionHeader.totalLen_ > bufLen) {
-        HILOGE("totalLen exceeds buffer size: %{public}u > %{public}zu",
-                sessionHeader.totalLen_, bufLen);
-        return std::nullopt;
-    }
-
     if (sessionHeader.payloadLen_ > sessionHeader.packetLen_) {
         HILOGE("payloadLen exceeds packetLen: %{public}u > %{public}u",
                 sessionHeader.payloadLen_, sessionHeader.packetLen_);
