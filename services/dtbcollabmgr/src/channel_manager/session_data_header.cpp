@@ -78,7 +78,7 @@ bool SessionDataHeader::ValidateHeaderParameters(const SessionDataHeader& sessio
         return false;
     }
     if (sessionHeader.totalLen_ < sessionHeader.packetLen_) {
-        HILOGE("totalLen too small，size: %{public}u", sessionHeader.totalLen_);
+        HILOGE("totalLen too small, size: %{public}u", sessionHeader.totalLen_);
         return false;
     }
 
