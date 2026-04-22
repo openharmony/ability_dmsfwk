@@ -391,7 +391,7 @@ bool DMSContinueRecvMgr::HandleNonEmptyAppIdentifierVec(DmsBundleInfo& distribut
     bool continueBundleGot =
             BundleManagerInternal::GetContinueBundle4Src(distributedBundleInfo.bundleName, installedBundles);
     if (!continueBundleGot) {
-        HILOGE("Get bundleNameList failed, bundle name: %{public}s", bundleName.c_str());
+        HILOGE("Get bundleNameList failed, bundle name: %{public}s", distributedBundleInfo.bundleName.c_str());
     }
     if (BundleManagerInternal::GetLocalBundleInfo(distributedBundleInfo.bundleName, localBundleInfo) == ERR_OK) {
         installedBundles.push_back(distributedBundleInfo.bundleName);
