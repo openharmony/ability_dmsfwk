@@ -389,7 +389,7 @@ bool DMSContinueRecvMgr::HandleNonEmptyAppIdentifierVec(DmsBundleInfo& distribut
     HILOGI("src AppIdentifierVec size: %{public}zu", distributedBundleInfo.appIdentifierVec.size());
     std::vector<std::string> installedBundles;
     bool continueBundleGot =
-            BundleManagerInternal::GetContinueBundle4Src( distributedBundleInfo.bundleName, installedBundles);
+            BundleManagerInternal::GetContinueBundle4Src(distributedBundleInfo.bundleName, installedBundles);
     if (!continueBundleGot) {
         HILOGE("Get bundleNameList failed, bundle name: %{public}s", bundleName.c_str());
     }
