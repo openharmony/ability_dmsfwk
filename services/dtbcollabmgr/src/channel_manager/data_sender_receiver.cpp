@@ -30,6 +30,7 @@ namespace DistributedCollab {
 namespace {
     static constexpr uint16_t PROTOCOL_VERSION = 1;
     static const std::string TAG = "DSchedCollabDataSenderReceiver";
+
 #define GET_SOFTBUS_SESSION_OPTION(socketId, value, valueSize)                                            \
 do {                                                                                                  \
     int32_t ret = GetSessionOption(socketId, SESSION_OPTION_MAX_SENDBYTES_SIZE, &(value), valueSize); \
@@ -425,8 +426,33 @@ int32_t DataSenderReceiver::ProcessEndPacketRecv(const uint8_t* data,
 int32_t DataSenderReceiver::WriteRecvBytesDataToBuffer(const uint8_t* data,
     const uint32_t dataLen, const SessionDataHeader& headerPara)
 {
+    if (headerPara.packetLen_ > dataLen) {
+        HILOGE("packetLen exceeds dataLen: %{public}u > %{public}u",
+            headerPara.packetLen_, dataLen);
+        return INVALID_SESSION_HEADER_PACKET_LEN;
+    }
+
+    if (headerPara.payloadLen_ > headerPara.packetLen_) {
+        HILOGE("payloadLen exceeds packetLen: %{public}u > %{public}u",
+            headerPara.payloadLen_, headerPara.packetLen_);
+        return INVALID_SESSION_HEADER_PAYLOAD_LEN;
+    }
+
+    uint32_t dataOffset = headerPara.packetLen_ - headerPara.payloadLen_;
+    if (dataOffset > dataLen) {
+        HILOGE("dataOffset exceeds dataLen: %{public}u > %{public}u",
+            dataOffset, dataLen);
+        return INVALID_SESSION_HEADER_DATA_OFFSET;
+    }
+
+    if (dataOffset + headerPara.payloadLen_ > dataLen) {
+        HILOGE("payload exceeds buffer range: offset=%{public}u, len=%{public}u, max=%{public}u",
+            dataOffset, headerPara.payloadLen_, dataLen);
+        return INVALID_SESSION_HEADER_DATA_RANGE;
+    }
+
     uint8_t* header = const_cast<uint8_t*>(data);
-    uint8_t* dataHeader = header + (headerPara.packetLen_ - headerPara.payloadLen_);
+    uint8_t* dataHeader = header + dataOffset;
     if (packBuffer_ == nullptr) {
         packBuffer_ = std::make_unique<AVTransDataBuffer>(headerPara.totalLen_);
         currentPos = packBuffer_->Data();

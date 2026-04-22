@@ -109,6 +109,9 @@ private:
         + sizeof(uint8_t) * HEADER_UINT8_NUM;
 
 private:
+    static bool ValidateHeaderParameters(const SessionDataHeader& sessionHeader,
+        const size_t bufLen);
+
     int32_t WriteTlvItemToBuffer(const TlvItem& tlvItem, uint8_t* header,
         const uint32_t bufLen);
     uint32_t WriteVersion(uint8_t* header, const uint32_t bufLen);

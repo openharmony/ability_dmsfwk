@@ -1319,6 +1319,7 @@ int32_t ChannelManager::SendFile(const int32_t channelId, const std::vector<std:
         HILOGE("src size:%{public}d, dst size:%{public}d illegal",
             static_cast<int32_t>(sFiles.size()),
             static_cast<int32_t>(dFiles.size()));
+        return INVALID_PARAMETERS_ERR;
     }
     int32_t ret = ERR_OK;
     auto func = [channelId, sFiles, dFiles, this]() {
