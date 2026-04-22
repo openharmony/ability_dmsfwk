@@ -389,13 +389,12 @@ bool DMSContinueRecvMgr::HandleNonEmptyAppIdentifierVec(DmsBundleInfo& distribut
     HILOGI("src AppIdentifierVec size: %{public}zu", distributedBundleInfo.appIdentifierVec.size());
     std::vector<std::string> installedBundles;
     bool continueBundleGot =
-            BundleManagerInternal::GetContinueBundle4Src(
-                distributedBundleInfo.bundleName, installedBundles);
+            BundleManagerInternal::GetContinueBundle4Src(distributedBundleInfo.bundleName, installedBundles);
     if (!continueBundleGot) {
-        HILOGE("GetContinueBundle4Src: failed");
-        finalBundleName = "";
-        finalAppIdentifierVec = distributedBundleInfo.appIdentifierVec;
-        return true;
+        HILOGE("Get bundleNameList failed, bundle name: %{public}s", distributedBundleInfo.bundleName.c_str());
+    }
+    if (BundleManagerInternal::GetLocalBundleInfo(distributedBundleInfo.bundleName, localBundleInfo) == ERR_OK) {
+        installedBundles.push_back(distributedBundleInfo.bundleName);
     }
 
     std::map<std::string, std::string> sinkAppIdentifierToBundleMap;
