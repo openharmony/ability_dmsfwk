@@ -1375,7 +1375,7 @@ HWTEST_F(ChannelManagerTest, OnBytesReceived_Success, TestSize.Level1)
         .WillRepeatedly(testing::Return(NUM_1234));  // 模拟返回一个有效的 socketId
     EXPECT_CALL(mockSoftbus, Listen(testing::_, testing::_, testing::_, testing::_))
         .WillOnce(testing::Return(ERR_OK));  // 模拟监听成功
-  
+
     // 初始化 ChannelManager，验证初始化结果为 ERR_OK
     int32_t initResult = ChannelManager::GetInstance().Init(ownerName);
     EXPECT_EQ(initResult, ERR_OK); // 确保初始化成功
@@ -1387,7 +1387,12 @@ HWTEST_F(ChannelManagerTest, OnBytesReceived_Success, TestSize.Level1)
     int32_t channelId = ChannelManager::GetInstance().CreateClientChannel(channelName, dataType, peerInfo);
     EXPECT_EQ(channelId, BYTES_START_ID);
 
+    // Step 3: Get the actual socketId created by CreateClientChannel
+    // Note: CreateClientChannel internally calls CreateClientSocket which returns NUM_1234 (mocked)
+    // We need to manually bind the socket to the channel for this test
     int32_t socketId = NUM_1234;
+    int32_t bindResult = ChannelManager::GetInstance().RegisterSocket(socketId, channelId);
+    EXPECT_EQ(bindResult, ERR_OK);
 
     // Step 3: Prepare test data for OnBytesReceived
     auto buffer = std::make_unique<AVTransDataBuffer>(NUM_1024);
@@ -1427,7 +1432,9 @@ HWTEST_F(ChannelManagerTest, OnBytesReceived_Success, TestSize.Level1)
     EXPECT_EQ(result, ERR_OK);  // 确保注册监听器成功
 
     // Step 5: Call OnBytesReceived and expect the callback
-    ChannelManager::GetInstance().OnBytesReceived(socketId, header, dataLen);
+    // Note: dataLen should be the complete buffer size including header
+    uint32_t totalDataLen = SessionDataHeader::HEADER_LEN + dataLen;
+    ChannelManager::GetInstance().OnBytesReceived(socketId, header, totalDataLen);
 }
 
 /**

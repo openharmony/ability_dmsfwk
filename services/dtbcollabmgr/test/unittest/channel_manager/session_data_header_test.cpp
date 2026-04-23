@@ -52,7 +52,7 @@ void SessionDataHeaderTest::SetUp()
     dataType = NUM_2;
     seqNum = NUM_100;
     totalLen = NUM_500;
-    packetLen = NUM_128;
+    packetLen = NUM_128 + SessionDataHeader::HEADER_LEN; // Ensure packetLen >= HEADER_LEN + payloadLen
     payloadLen = NUM_64;
     subSeq = 0;
 
