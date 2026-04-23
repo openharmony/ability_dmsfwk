@@ -1418,6 +1418,32 @@ ohos_unittest("dschedcontinuemanagerstatetest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("abilityconnectionwrappertest") {
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [
+    "unittest/ability_connection_wrapper_proxy_test.cpp",
+    "unittest/ability_connection_wrapper_stub_test.cpp",
+    "unittest/connect_death_recipient_test.cpp",
+    "unittest/distributed_device_node_listener_test.cpp",
+    "unittest/mock_remote_stub.cpp",
+  ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = []
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    deps += dsched_public_deps
+  }
+  external_deps += [ "googletest:gmock" ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 ohos_unittest("distributedeventtest") {
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
