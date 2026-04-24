@@ -51,9 +51,9 @@ void SessionDataHeaderTest::SetUp()
     fragFlag = FRAG_TYPE::FRAG_START;
     dataType = NUM_2;
     seqNum = NUM_100;
-    totalLen = NUM_500;
-    packetLen = NUM_128 + SessionDataHeader::HEADER_LEN; // Ensure packetLen >= HEADER_LEN + payloadLen
-    payloadLen = NUM_64;
+    totalLen = SessionDataHeader::HEADER_LEN;  // Only header in this test
+    packetLen = SessionDataHeader::HEADER_LEN;  // Only header, no payload
+    payloadLen = 0;  // No payload data in this test
     subSeq = 0;
 
     header = std::make_unique<SessionDataHeader>(
