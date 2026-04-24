@@ -34,10 +34,10 @@ struct ContinueResultInfo {
 }
 
 @!sts_inject("""
-    function onPrepareContinue(context: Context, callback: AsyncCallback<ContinueResultInfo>) {
+    function onPrepareContinue(context: Context, callback: AsyncCallback<ContinueResultInfo>): void {
         return onPrepareContinueInner(context, callback);
       }
-    function offPrepareContinue(context: Context, callback?: AsyncCallback<ContinueResultInfo>) {
+    function offPrepareContinue(context: Context, callback?: AsyncCallback<ContinueResultInfo>): void {
         return offPrepareContinueInner(context, callback);
       }
 """)
