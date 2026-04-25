@@ -15,6 +15,7 @@
 
 #include "dsched_transport_softbus_adapter.h"
 
+#include "distributed_intent_dsoftbus_adapter.h"
 #include "distributed_sched_utils.h"
 #include "dsched_all_connect_manager.h"
 #include "dsched_collab_manager.h"
@@ -66,7 +67,14 @@ QosTV g_watch_collab_qosInfo[] = {
     { .qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_QOS_TYPE_MIN_LATENCY }
 };
 
+static QosTV g_intentQosInfo[] = {
+    { .qos = QOS_TYPE_MIN_BW, .value = DSCHED_COLLAB_LOW_QOS_TYPE_MIN_BW },
+    { .qos = QOS_TYPE_MAX_LATENCY, .value = DSCHED_QOS_TYPE_MAX_LATENCY },
+    { .qos = QOS_TYPE_MIN_LATENCY, .value = DSCHED_QOS_TYPE_MIN_LATENCY }
+};
+
 static uint32_t g_QosTV_Param_Index = static_cast<uint32_t>(sizeof(g_qosInfo) / sizeof(QosTV));
+static uint32_t g_Intent_QosTV_Param_Index = static_cast<uint32_t>(sizeof(g_intentQosInfo) / sizeof(QosTV));
 
 static void OnBind(int32_t socket, PeerSocketInfo info)
 {
@@ -88,6 +96,28 @@ ISocketListener iSocketListener = {
     .OnBind = OnBind,
     .OnShutdown = OnShutdown,
     .OnBytes = OnBytes
+};
+
+static void OnIntentBind(int32_t socket, PeerSocketInfo info)
+{
+    std::string peerDeviceId(info.networkId);
+    DistributedIntentDsoftbusAdapter::GetInstance().OnIntentBind(socket, peerDeviceId);
+}
+
+static void OnIntentShutdown(int32_t socket, ShutdownReason reason)
+{
+    DistributedIntentDsoftbusAdapter::GetInstance().OnIntentShutdown(socket);
+}
+
+static void OnIntentBytes(int32_t socket, const void *data, uint32_t dataLen)
+{
+    DistributedIntentDsoftbusAdapter::GetInstance().OnIntentBytes(socket, data, dataLen);
+}
+
+ISocketListener iIntentSocketListener = {
+    .OnBind = OnIntentBind,
+    .OnShutdown = OnIntentShutdown,
+    .OnBytes = OnIntentBytes
 };
 
 DSchedTransportSoftbusAdapter::DSchedTransportSoftbusAdapter()
@@ -121,6 +151,14 @@ int32_t DSchedTransportSoftbusAdapter::InitChannel()
         HILOGE("service listen failed, ret: %{public}d", ret);
         return ret;
     }
+    
+    // Initialize intent socket channel
+    ret = InitIntentChannel();
+    if (ret != ERR_OK) {
+        HILOGW("Init intent channel failed, ret: %{public}d", ret);
+        // Intent channel is optional, don't fail the whole initialization
+    }
+    
     HILOGI("end");
     return ERR_OK;
 }
@@ -137,6 +175,54 @@ int32_t DSchedTransportSoftbusAdapter::CreateServerSocket()
     int32_t socket = Socket(info);
     HILOGI("finish, socket session id: %{public}d", socket);
     return socket;
+}
+
+int32_t DSchedTransportSoftbusAdapter::CreateIntentServerSocket()
+{
+    HILOGI("start");
+    SocketInfo info = {
+        .name = const_cast<char*>(SOCKET_DMS_INTENT_NAME),
+        .pkgName = const_cast<char*>(SOCKET_DMS_PKG_NAME),
+        .dataType = DATA_TYPE_BYTES
+    };
+    int32_t socket = Socket(info);
+    HILOGI("finish, intent socket: %{public}d", socket);
+    return socket;
+}
+
+int32_t DSchedTransportSoftbusAdapter::InitIntentChannel()
+{
+    HILOGI("start init intent channel");
+    
+    intentServerSocket_ = CreateIntentServerSocket();
+    if (intentServerSocket_ <= 0) {
+        HILOGE("create intent socket failed, ret: %{public}d", intentServerSocket_);
+        return intentServerSocket_;
+    }
+
+    int32_t ret = Listen(intentServerSocket_, g_intentQosInfo, g_Intent_QosTV_Param_Index, &iIntentSocketListener);
+    if (ret != ERR_OK) {
+        HILOGE("intent socket listen failed, ret: %{public}d", ret);
+        Shutdown(intentServerSocket_);
+        intentServerSocket_ = 0;
+        return ret;
+    }
+    
+    HILOGI("init intent channel success, intentServerSocket: %{public}d", intentServerSocket_);
+    return ERR_OK;
+}
+
+int32_t DSchedTransportSoftbusAdapter::ReleaseIntentChannel()
+{
+    HILOGI("start release intent channel");
+    
+    if (intentServerSocket_ > 0) {
+        Shutdown(intentServerSocket_);
+        intentServerSocket_ = 0;
+    }
+    
+    HILOGI("release intent channel success");
+    return ERR_OK;
 }
 
 int32_t DSchedTransportSoftbusAdapter::ConnectDevice(const std::string &peerDeviceId,

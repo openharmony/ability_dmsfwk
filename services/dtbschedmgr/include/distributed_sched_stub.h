@@ -58,6 +58,8 @@ private:
     int32_t DisconnectAbilityFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t NotifyProcessDiedFromRemoteInner(MessageParcel& data, MessageParcel& reply);
     int32_t ConnectDExtensionFromRemoteInner(MessageParcel& data, MessageParcel& reply);
+    int32_t StartRemoteIntentInner(MessageParcel& data, MessageParcel& reply);
+    int32_t SendIntentResultInner(MessageParcel& data, MessageParcel& reply);
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     bool CheckDmsExtensionCallingUid();
@@ -115,6 +117,7 @@ private:
     void InitExtendedLocalFuncsInner();
     void InitLocalFuncsInner();
     void InitLocalMissionManagerInner();
+    void InitLocalIntentInner();
     void InitRemoteFuncsInner();
 
     int32_t StopRemoteExtensionAbilityInner(MessageParcel& data, MessageParcel& reply);

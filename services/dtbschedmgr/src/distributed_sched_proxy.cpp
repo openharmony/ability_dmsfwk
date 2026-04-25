@@ -1169,6 +1169,53 @@ int32_t DistributedSchedProxy::StopExtensionAbilityFromRemote(const OHOS::AAFwk:
     PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>
         (IDSchedInterfaceCode::STOP_EXTERNSION_ABILITY_FROM_REMOTE), data, reply);
 }
+
+int32_t DistributedSchedProxy::StartRemoteIntent(const OHOS::AAFwk::Want& want,
+    const IntentCallerInfo& callerInfo, const sptr<IRemoteObject>& resultCallback)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("StartRemoteIntent remote is null");
+        return ERR_NULL_OBJECT;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_WRITE_HELPER(data, Parcelable, &want);
+    PARCEL_WRITE_HELPER(data, String, want.GetModuleName());
+    PARCEL_WRITE_HELPER(data, Int32, callerInfo.callerUid);
+    PARCEL_WRITE_HELPER(data, Uint64, callerInfo.requestCode);
+    PARCEL_WRITE_HELPER(data, Uint32, callerInfo.accessToken);
+    PARCEL_WRITE_HELPER(data, Uint32, callerInfo.specifyTokenId);
+    PARCEL_WRITE_HELPER(data, RemoteObject, resultCallback);
+    MessageParcel reply;
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT),
+        data, reply);
+}
+
+int32_t DistributedSchedProxy::SendIntentResult(const OHOS::AAFwk::Want& want,
+    const IntentCallerInfo& callerInfo, const std::string& msg)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("SendIntentResult remote is null");
+        return ERR_NULL_OBJECT;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(DMS_PROXY_INTERFACE_TOKEN)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    PARCEL_WRITE_HELPER(data, Parcelable, &want);
+    PARCEL_WRITE_HELPER(data, Int32, callerInfo.callerUid);
+    PARCEL_WRITE_HELPER(data, Uint64, callerInfo.requestCode);
+    PARCEL_WRITE_HELPER(data, Uint32, callerInfo.accessToken);
+    PARCEL_WRITE_HELPER(data, Uint32, callerInfo.specifyTokenId);
+    PARCEL_WRITE_HELPER(data, String, msg);
+    MessageParcel reply;
+    PARCEL_TRANSACT_SYNC_RET_INT(remote, static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT),
+        data, reply);
+}
 } // namespace DistributedSchedule
 } // namespace OHOS
 

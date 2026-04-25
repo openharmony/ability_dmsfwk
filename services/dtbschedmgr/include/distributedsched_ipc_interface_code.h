@@ -111,6 +111,9 @@ enum class IDSchedInterfaceCode : uint32_t {
     GET_SINK_COLLAB_VERSION = 335,
     GET_WIFI_STATUS = 336,
     IS_MDM_CONTROL = 337,
+
+    START_REMOTE_INTENT = 400,
+    SEND_INTENT_RESULT = 401,
 };
 
 enum class IDRreeInstallCallbackInterfaceCode : uint32_t {

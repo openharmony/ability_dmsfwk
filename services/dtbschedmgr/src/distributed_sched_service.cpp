@@ -76,6 +76,7 @@
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
 #include "mission/distributed_bm_storage.h"
 #include "mission/distributed_mission_info.h"
+#include "mission/distributed_sched_mission_manager.h"
 #include "mission/dms_continue_condition_manager.h"
 #include "mission/notification/dms_continue_send_manager.h"
 #include "mission/notification/dms_continue_recommend_manager.h"
@@ -85,11 +86,15 @@
 #include "mission/wifi_state_listener.h"
 #include "mission/bluetooth_state_listener.h"
 #endif
+#include "remote_intent_manager.h"
+#include "distributedIntent/distributed_intent_service_stub.h"
+#include "distributedIntent/distributed_intent_service.h"
 #include "caller_info.h"
 #include "os_account_manager.h"
 #include "ohos_account_kits.h"
 #include "distributed_sched_permission.h"
 
+#include "distributedsched_ipc_interface_code.h"
 namespace OHOS {
 namespace DistributedSchedule {
 using namespace AAFwk;
@@ -180,6 +185,22 @@ const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&DistributedS
 
 DistributedSchedService::DistributedSchedService() : SystemAbility(DISTRIBUTED_SCHED_SA_ID, true)
 {
+}
+
+int32_t DistributedSchedService::OnRemoteRequest(uint32_t code,
+    MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    if (code >= static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT) &&
+        code <= static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT)) {
+        if (distributedIntentService_ == nullptr) {
+            std::lock_guard<std::mutex> lock(intentLoadMutex_);
+            if (distributedIntentService_ == nullptr) {
+                distributedIntentService_ = std::make_shared<DistributedIntentService>();
+            }
+        }
+        return distributedIntentService_->OnRemoteRequest(code, data, reply, option);
+    }
+    return DistributedSchedStub::OnRemoteRequest(code, data, reply, option);
 }
 
 static sptr<AppExecFwk::IBundleMgr> GetBundleManager()
@@ -4496,6 +4517,63 @@ std::string DistributedSchedService::GetBundleNameFromConnectAbilityMap(const sp
         }
     }
     return bundleName;
+}
+
+bool DistributedSchedService::CheckMDMControlByUid(int32_t uid)
+{
+    if (!DmsKvSyncE2E::GetInstance()->IsMDMControl()) {
+        return false;
+    }
+
+    std::string bundleName;
+    if (!BundleManagerInternal::GetSpecifyBundleNameFromBms(uid, bundleName)) {
+        HILOGE("Failed to get bundleName for uid: %{public}d", uid);
+        return true;
+    }
+    HILOGI("Got bundleName: %{public}s", GetAnonymStr(bundleName).c_str());
+
+    std::string appId;
+    if (!BundleManagerInternal::GetCallerAppIdFromBms(bundleName, appId)) {
+        HILOGE("Failed to get appId for bundleName: %{public}s", GetAnonymStr(bundleName).c_str());
+        return true;
+    }
+    HILOGI("Got appId: %{public}s", GetAnonymStr(appId).c_str());
+
+    int32_t activeAccountId = DmsKvSyncE2E::GetInstance()->GetActiveAccountId();
+    bool isControlled = DmsKvSyncE2E::GetInstance()->IsMDMControlWithExemption(
+        bundleName, COLLABORATION_SERVICE, activeAccountId);
+
+    HILOGI("bundleName: %{public}s, appId: %{public}s, isMDMControlled: %{public}d",
+        GetAnonymStr(bundleName).c_str(), GetAnonymStr(appId).c_str(), isControlled);
+
+    return isControlled;
+}
+
+int32_t DistributedSchedService::StartRemoteIntent(const OHOS::AAFwk::Want& want,
+    const IntentCallerInfo& callerInfo, const sptr<IRemoteObject>& resultCallback)
+{
+    HILOGI("StartRemoteIntent called");
+    if (distributedIntentService_ == nullptr) {
+        std::lock_guard<std::mutex> lock(intentLoadMutex_);
+        if (distributedIntentService_ == nullptr) {
+            distributedIntentService_ = std::make_shared<DistributedIntentService>();
+        }
+    }
+    return distributedIntentService_->StartRemoteIntent(want, callerInfo, resultCallback);
+}
+
+int32_t DistributedSchedService::SendIntentResult(const OHOS::AAFwk::Want& want,
+    const IntentCallerInfo& callerInfo, const std::string& msg)
+{
+    HILOGI("SendIntentResult called, requestCode=%{public}" PRIu64,
+        callerInfo.requestCode);
+    if (distributedIntentService_ == nullptr) {
+        std::lock_guard<std::mutex> lock(intentLoadMutex_);
+        if (distributedIntentService_ == nullptr) {
+            distributedIntentService_ = std::make_shared<DistributedIntentService>();
+        }
+    }
+    return distributedIntentService_->SendIntentResult(want, callerInfo, msg);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

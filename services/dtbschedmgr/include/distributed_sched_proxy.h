@@ -76,8 +76,13 @@ public:
     int32_t StartSyncMissionsFromRemote(const CallerInfo& callerInfo,
         std::vector<DstbMissionInfo>& missionInfos) override;
     int32_t StopSyncMissionsFromRemote(const CallerInfo& callerInfo) override;
-    int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state, int32_t callingUid) override;
+    int32_t SetMissionContinueState(int32_t missionId, const AAFwk::ContinueState &state, int32_t callingUid)
+        override;
 #endif
+    int32_t StartRemoteIntent(const OHOS::AAFwk::Want& want,
+        const IntentCallerInfo& callerInfo, const sptr<IRemoteObject>& resultCallback) override;
+    int32_t SendIntentResult(const OHOS::AAFwk::Want& want,
+        const IntentCallerInfo& callerInfo, const std::string& msg) override;
     int32_t StartRemoteAbilityByCall(const OHOS::AAFwk::Want& want, const sptr<IRemoteObject>& connect,
         int32_t callerUid, int32_t callerPid, uint32_t accessToken) override;
     int32_t ReleaseRemoteAbility(const sptr<IRemoteObject>& connect,

@@ -75,6 +75,9 @@ public:
     bool IsHigherAclVersion(const CallerInfo& callerInfo);
     bool CheckSrcBackgroundPermission(uint32_t accessTokenId);
     bool IsAbilityForeground(uint32_t accessTokenId);
+    bool CheckDeviceSecurityLevel(const std::string& srcDeviceId, const std::string& dstDeviceId) const;
+    bool CheckTargetAbilityVisible(const AppExecFwk::AbilityInfo& targetAbility, const CallerInfo& callerInfo) const;
+
 
 private:
     bool GetOsAccountData(AccountInfo& dmsAccountInfo);
@@ -112,9 +115,7 @@ private:
     bool CheckBackgroundPermission(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo, const AAFwk::Want& want, bool needCheckApiVersion) const;
     bool CheckMinApiVersion(const AppExecFwk::AbilityInfo& targetAbility, int32_t apiVersion) const;
-    bool CheckDeviceSecurityLevel(const std::string& srcDeviceId, const std::string& dstDeviceId) const;
     int32_t GetDeviceSecurityLevel(const std::string& udid) const;
-    bool CheckTargetAbilityVisible(const AppExecFwk::AbilityInfo& targetAbility, const CallerInfo& callerInfo) const;
     bool IsDistributedFile(const std::string& path) const;
     sptr<AppExecFwk::IAppMgr> GetAppManager() const;
 };

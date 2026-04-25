@@ -182,6 +182,16 @@ public:
         const OHOS::AAFwk::Want& want, int32_t callerUid, uint32_t accessToken, int32_t extensionType) = 0;
     virtual int32_t StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& want,
         const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t extensionType) = 0;
+    virtual int32_t StartRemoteIntent(const OHOS::AAFwk::Want& want, const IntentCallerInfo& callerInfo,
+        const sptr<IRemoteObject>& resultCallback)
+    {
+        return 0;
+    }
+    virtual int32_t SendIntentResult(const OHOS::AAFwk::Want& want,
+        const IntentCallerInfo& callerInfo, const std::string& msg)
+    {
+        return 0;
+    }
 };
 } // namespace DistributedSchedule
 } // namespace OHOS

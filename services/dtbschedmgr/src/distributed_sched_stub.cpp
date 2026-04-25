@@ -84,6 +84,7 @@ DistributedSchedStub::DistributedSchedStub()
 {
     InitExtendedLocalFuncsInner();
     InitLocalFuncsInner();
+    InitLocalIntentInner();
     InitRemoteFuncsInner();
 }
 
@@ -186,6 +187,14 @@ void DistributedSchedStub::InitLocalMissionManagerInner()
         &DistributedSchedStub::ContinueStateCallbackRegister;
     localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::CONTINUE_STATE_CALLBACK_UNREGISTER)] =
         &DistributedSchedStub::ContinueStateCallbackUnRegister;
+}
+
+void DistributedSchedStub::InitLocalIntentInner()
+{
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT)] =
+        &DistributedSchedStub::StartRemoteIntentInner;
+    localFuncsMap_[static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT)] =
+        &DistributedSchedStub::SendIntentResultInner;
 }
 
 void DistributedSchedStub::InitRemoteFuncsInner()
@@ -2023,5 +2032,76 @@ int32_t DistributedSchedStub::NotifyAbilityLifecycleChangedFromRemoteAdapterInne
     return ERR_OK;
 }
 #endif
+
+int32_t DistributedSchedStub::StartRemoteIntentInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!DistributedSchedPermission::GetInstance().IsFoundationCall()) {
+        return DMS_PERMISSION_DENIED;
+    }
+    std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    if (want == nullptr) {
+        HILOGE("StartRemoteIntentInner want read failed");
+        return ERR_NULL_OBJECT;
+    }
+    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(want);
+    std::string moduleName = data.ReadString();
+    want->SetModuleName(moduleName);
+    int32_t callerUid = 0;
+    PARCEL_READ_HELPER(data, Int32, callerUid);
+    uint64_t requestCode = 0;
+    PARCEL_READ_HELPER(data, Uint64, requestCode);
+    uint32_t accessToken = 0;
+    PARCEL_READ_HELPER(data, Uint32, accessToken);
+    uint32_t specifyTokenId = 0;
+    PARCEL_READ_HELPER(data, Uint32, specifyTokenId);
+    sptr<IRemoteObject> resultCallback = data.ReadRemoteObject();
+    DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
+
+    IntentCallerInfo callerInfo;
+    callerInfo.callerUid = callerUid;
+    callerInfo.requestCode = requestCode;
+    callerInfo.accessToken = accessToken;
+    callerInfo.specifyTokenId = specifyTokenId;
+    HILOGI("callerUid=%{public}d, requestCode=%{public}" PRIu64 ", accessToken=%{private}s",
+        callerUid, requestCode,
+        GetAnonymStr(std::to_string(accessToken)).c_str());
+
+    int32_t result = StartRemoteIntent(*want, callerInfo, resultCallback);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+    return ERR_OK;
+}
+
+int32_t DistributedSchedStub::SendIntentResultInner(MessageParcel& data, MessageParcel& reply)
+{
+    std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
+    if (want == nullptr) {
+        HILOGE("Read want failed");
+        return ERR_NULL_OBJECT;
+    }
+
+    int32_t callerUid = 0;
+    PARCEL_READ_HELPER(data, Int32, callerUid);
+    uint64_t requestCode = 0;
+    PARCEL_READ_HELPER(data, Uint64, requestCode);
+    uint32_t accessToken = 0;
+    PARCEL_READ_HELPER(data, Uint32, accessToken);
+    uint32_t specifyTokenId = 0;
+    PARCEL_READ_HELPER(data, Uint32, specifyTokenId);
+
+    std::string msg = data.ReadString();
+
+    IntentCallerInfo callerInfo;
+    callerInfo.callerUid = callerUid;
+    callerInfo.requestCode = requestCode;
+    callerInfo.accessToken = accessToken;
+    callerInfo.specifyTokenId = specifyTokenId;
+    HILOGI("callerUid=%{public}d, requestCode=%{public}" PRIu64,
+        callerUid, requestCode);
+
+    int32_t result = SendIntentResult(*want, callerInfo, msg);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
+    return ERR_OK;
+}
+
 } // namespace DistributedSchedule
 } // namespace OHOS
