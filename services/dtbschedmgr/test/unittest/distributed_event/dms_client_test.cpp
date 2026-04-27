@@ -164,5 +164,67 @@ HWTEST_F(DistributedClientTest, DistributedClientTest_ConnectDExtensionFromRemot
     EXPECT_NE(rlt, ERR_NONE);
     GTEST_LOG_(INFO) << "DistributedClientTest_ConnectDExtensionFromRemote_002 end";
 }
+
+/**
+ * @tc.name: DmsLoadCallback_OnLoadSystemAbilityFail_001
+ * @tc.desc: test OnLoadSystemAbilityFail with WaitForLoadSuccess
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedClientTest, DmsLoadCallback_OnLoadSystemAbilityFail_001, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedClientTest DmsLoadCallback_OnLoadSystemAbilityFail_001 start" << std::endl;
+    sptr<DmsLoadCallback> callback = new DmsLoadCallback();
+    callback->OnLoadSystemAbilityFail(DISTRIBUTED_SCHED_SA_ID);
+    bool result = callback->WaitForLoadSuccess(100);
+    EXPECT_FALSE(result);
+    DTEST_LOG << "DistributedClientTest DmsLoadCallback_OnLoadSystemAbilityFail_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: DmsLoadCallback_OnLoadSystemAbilityFail_002
+ * @tc.desc: test OnLoadSystemAbilityFail with GetRemoteObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedClientTest, DmsLoadCallback_OnLoadSystemAbilityFail_002, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedClientTest DmsLoadCallback_OnLoadSystemAbilityFail_002 start" << std::endl;
+    sptr<DmsLoadCallback> callback = new DmsLoadCallback();
+    callback->OnLoadSystemAbilityFail(DISTRIBUTED_SCHED_SA_ID);
+    EXPECT_EQ(callback->GetRemoteObject(), nullptr);
+    DTEST_LOG << "DistributedClientTest DmsLoadCallback_OnLoadSystemAbilityFail_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: DmsLoadCallback_OnLoadSystemAbilityFail_003
+ * @tc.desc: test OnLoadSystemAbilityFail after OnLoadSystemAbilitySuccess
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedClientTest, DmsLoadCallback_OnLoadSystemAbilityFail_003, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedClientTest DmsLoadCallback_OnLoadSystemAbilityFail_003 start" << std::endl;
+    sptr<DmsLoadCallback> callback = new DmsLoadCallback();
+    callback->OnLoadSystemAbilitySuccess(DISTRIBUTED_SCHED_SA_ID, nullptr);
+    callback->OnLoadSystemAbilityFail(DISTRIBUTED_SCHED_SA_ID);
+    bool result = callback->WaitForLoadSuccess(100);
+    EXPECT_FALSE(result);
+    EXPECT_EQ(callback->GetRemoteObject(), nullptr);
+    DTEST_LOG << "DistributedClientTest DmsLoadCallback_OnLoadSystemAbilityFail_003 end" << std::endl;
+}
+
+/**
+ * @tc.name: DmsLoadCallback_OnLoadSystemAbilityFail_004
+ * @tc.desc: test OnLoadSystemAbilityFail called multiple times
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedClientTest, DmsLoadCallback_OnLoadSystemAbilityFail_004, TestSize.Level3)
+{
+    DTEST_LOG << "DistributedClientTest DmsLoadCallback_OnLoadSystemAbilityFail_004 start" << std::endl;
+    sptr<DmsLoadCallback> callback = new DmsLoadCallback();
+    callback->OnLoadSystemAbilityFail(DISTRIBUTED_SCHED_SA_ID);
+    callback->OnLoadSystemAbilityFail(DISTRIBUTED_SCHED_SA_ID);
+    EXPECT_FALSE(callback->WaitForLoadSuccess(100));
+    EXPECT_EQ(callback->GetRemoteObject(), nullptr);
+    DTEST_LOG << "DistributedClientTest DmsLoadCallback_OnLoadSystemAbilityFail_004 end" << std::endl;
+}
 }
 }
