@@ -20,6 +20,10 @@
 #include "dsched_collab.h"
 
 #include "ability_connection_wrapper_stub.h"
+#include "common_event_manager.h"
+#include "distributed_sched_utils.h"
+#include "dtbschedmgr_log.h"
+#include "mission/dsched_sync_e2e.h"
 #include "ability_manager_client.h"
 #include "bool_wrapper.h"
 #include "bundle/bundle_manager_internal.h"
@@ -1063,54 +1067,95 @@ DSchedCollabInfo DSchedCollab::GetCollabInfo()
     return collabInfo_;
 }
 
+bool DSchedCollab::CheckMDMControl()
+{
+    if (!DmsKvSyncE2E::GetInstance()->IsMDMControl()) {
+        return false;
+    }
+    int32_t accountId = DmsKvSyncE2E::GetInstance()->GetActiveAccountId();
+    if (DmsKvSyncE2E::GetInstance()->IsMDMControlWithExemption(
+        collabInfo_.srcInfo_.bundleName_, COLLABORATION_SERVICE, accountId)) {
+        HILOGE("Current user is under MDM control and not exempted.");
+        return true;
+    }
+    return false;
+}
+
 void DSchedCollab::OnDataRecv(const std::string &peerDeviceId, int32_t command,
     std::shared_ptr<DSchedDataBuffer> dataBuffer)
 {
     CHECK_AND_RETURN_LOG(dataBuffer == nullptr, "dataBuffer is null");
-    int32_t ret = 0;
     uint8_t *data = dataBuffer->Data();
     CHECK_AND_RETURN_LOG(data == nullptr, "data is null");
     std::string jsonStr(reinterpret_cast<const char *>(data), dataBuffer->Capacity());
     switch (command) {
-        case SOURCE_GET_VERSION_CMD: {
-            auto getSinkCollabVersionCmd = std::make_shared<GetSinkCollabVersionCmd>();
-            ret = getSinkCollabVersionCmd->Unmarshal(jsonStr);
-            if (ret != ERR_OK) {
-                PostErrEndTask(ret);
-                return;
-            }
-            collabInfo_.sinkCollabVersion_ = getSinkCollabVersionCmd->sinkCollabVersion_;
-            PostSrcGetVersionTask();
+        case SOURCE_GET_VERSION_CMD:
+            HandleSourceGetVersionCmd(jsonStr);
             break;
-        }
-        case SINK_START_CMD: {
-            auto startCmd = std::make_shared<SinkStartCmd>();
-            ret = startCmd->Unmarshal(jsonStr);
-            if (ret != ERR_OK) {
-                PostErrEndTask(ret);
-                return;
-            }
-            SetSinkCollabInfo(startCmd);
-            PostSinkStartTask(peerDeviceId);
+        case SINK_START_CMD:
+            HandleSinkStartCmd(jsonStr, peerDeviceId);
             break;
-        }
-        case NOTIFY_RESULT_CMD: {
-            auto notifyResultCmd = std::make_shared<NotifyResultCmd>();
-            ret = notifyResultCmd->Unmarshal(jsonStr);
-            if (ret != ERR_OK) {
-                PostErrEndTask(ret);
-                return;
-            }
-            PostSrcResultTask(notifyResultCmd);
+        case NOTIFY_RESULT_CMD:
+            HandleNotifyResultCmd(jsonStr);
             break;
-        }
-        case DISCONNECT_CMD: {
-            CleanUpSession();
+        case DISCONNECT_CMD:
+            HandleDisconnectCmd();
             break;
-        }
         default:
             break;
     }
+}
+
+void DSchedCollab::HandleSourceGetVersionCmd(const std::string &jsonStr)
+{
+    auto getSinkCollabVersionCmd = std::make_shared<GetSinkCollabVersionCmd>();
+    int32_t ret = getSinkCollabVersionCmd->Unmarshal(jsonStr);
+    if (ret != ERR_OK) {
+        PostErrEndTask(ret);
+        return;
+    }
+    collabInfo_.sinkCollabVersion_ = getSinkCollabVersionCmd->sinkCollabVersion_;
+    PostSrcGetVersionTask();
+}
+
+void DSchedCollab::HandleSinkStartCmd(const std::string &jsonStr, const std::string &peerDeviceId)
+{
+    auto startCmd = std::make_shared<SinkStartCmd>();
+    int32_t ret = startCmd->Unmarshal(jsonStr);
+    if (ret != ERR_OK) {
+        PostErrEndTask(ret);
+        return;
+    }
+    SetSinkCollabInfo(startCmd);
+    if (CheckMDMControl()) {
+        PostErrEndTask(ERR_CAPABILITY_NOT_SUPPORT);
+        return;
+    }
+    PostSinkStartTask(peerDeviceId);
+}
+
+void DSchedCollab::HandleNotifyResultCmd(const std::string &jsonStr)
+{
+    auto notifyResultCmd = std::make_shared<NotifyResultCmd>();
+    int32_t ret = notifyResultCmd->Unmarshal(jsonStr);
+    if (ret != ERR_OK) {
+        PostErrEndTask(ret);
+        return;
+    }
+    if (CheckMDMControl()) {
+        PostErrEndTask(ERR_CAPABILITY_NOT_SUPPORT);
+        return;
+    }
+    PostSrcResultTask(notifyResultCmd);
+}
+
+void DSchedCollab::HandleDisconnectCmd()
+{
+    if (CheckMDMControl()) {
+        PostErrEndTask(ERR_CAPABILITY_NOT_SUPPORT);
+        return;
+    }
+    CleanUpSession();
 }
 
 void DSchedCollab::UpdateState(CollabStateType stateType)

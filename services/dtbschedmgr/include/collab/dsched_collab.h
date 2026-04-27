@@ -268,6 +268,11 @@ private:
     void UnregisterAbilityLifecycleObserver();
 
     void OnDataRecv(const std::string &peerDeviceId, int32_t command, std::shared_ptr<DSchedDataBuffer> dataBuffer);
+    bool CheckMDMControl();
+    void HandleSourceGetVersionCmd(const std::string &jsonStr);
+    void HandleSinkStartCmd(const std::string &jsonStr, const std::string &peerDeviceId);
+    void HandleNotifyResultCmd(const std::string &jsonStr);
+    void HandleDisconnectCmd();
     void OnShutDown();
     void OnBind();
     void SetScreenLockParameters(AAFwk::WantParams& wantParams);

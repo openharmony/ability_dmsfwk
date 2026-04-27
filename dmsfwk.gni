@@ -84,4 +84,10 @@ declare_args() {
   } else {
     os_account_part = false
   }
+  if (!defined(global_parts_info) ||
+      defined(global_parts_info.customization_enterprise_device_management)) {
+    dmsfwk_check_edm = true
+  } else {
+    dmsfwk_check_edm = false
+  }
 }

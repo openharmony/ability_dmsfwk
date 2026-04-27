@@ -867,9 +867,12 @@ int32_t DistributedSchedStub::IsMDMControlInner(MessageParcel& data, MessageParc
         HILOGE("check permission failed!");
         return DMS_PERMISSION_DENIED;
     }
-    bool isMDMControl = DmsKvSyncE2E::GetInstance()->IsMDMControl();
-    HILOGI("isMDMControl = %{public}d", isMDMControl);
-    PARCEL_WRITE_REPLY_NOERROR(reply, Bool, isMDMControl);
+    int32_t callingUid = IPCSkeleton::GetCallingUid();
+    HILOGI("callingUid = %{public}d", callingUid);
+
+    bool isControlled = DistributedSchedService::GetInstance().CheckMDMControlByUid(callingUid);
+    PARCEL_WRITE_REPLY_NOERROR(reply, Bool, isControlled);
+    return ERR_OK;
 }
 
 bool DistributedSchedStub::IsNewCollabVersion(const std::string& remoteDeviceId)

@@ -83,15 +83,28 @@ enum ServiceType {
     COLLABORATION_SERVICE = 0,
 };
 
-#define CHECK_MDM_CONTROL_WITH_EXEMPTION(bundleName, serviceType)       \
-    do {                                                                \
-        if (DmsKvSyncE2E::GetInstance()->IsMDMControl()) {             \
+#define CHECK_MDM_CONTROL_BY_BUNDLENAME(bundleName, serviceType)    \
+    do {                                                            \
+        if (DmsKvSyncE2E::GetInstance()->IsMDMControl()) {         \
             int32_t accountId = DmsKvSyncE2E::GetInstance()->GetActiveAccountId(); \
             if (DmsKvSyncE2E::GetInstance()->IsMDMControlWithExemption(bundleName, serviceType, accountId)) { \
                 HILOGE("Current user is under MDM control and not exempted."); \
-                return ERR_CAPABILITY_NOT_SUPPORT;                      \
-            }                                                           \
-        }                                                               \
+                return ERR_CAPABILITY_NOT_SUPPORT;                  \
+            }                                                       \
+        }                                                           \
+    } while (0)
+
+#define CHECK_MDM_CONTROL_BY_TOKEN(accessToken, specifyTokenId, serviceType) \
+    do {                                                                    \
+        if (DmsKvSyncE2E::GetInstance()->IsMDMControl()) {                 \
+            std::string bundleName =                                      \
+                DistributedSchedService::GetInstance().GetBundleNameFromToken(accessToken, specifyTokenId); \
+            int32_t accountId = DmsKvSyncE2E::GetInstance()->GetActiveAccountId(); \
+            if (DmsKvSyncE2E::GetInstance()->IsMDMControlWithExemption(bundleName, serviceType, accountId)) { \
+                HILOGE("Current user is under MDM control and not exempted."); \
+                return ERR_CAPABILITY_NOT_SUPPORT;                          \
+            }                                                               \
+        }                                                                   \
     } while (0)
 
 enum {

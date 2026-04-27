@@ -604,7 +604,7 @@ HWTEST_F(DmsKvSyncE2ETest, GetAllowedDistributeAbilityConnBundlesStubTest_001, T
         int32_t accountId = TEST_ACCOUNT_ID;
         
         std::vector<std::string> result = dmsKvSyncE2E_->GetInstance()->GetAllowedDistributeAbilityConnBundlesStub(
-            admin, serviceType, accountId);
+            serviceType, accountId);
         EXPECT_TRUE(result.empty());
     }
     DTEST_LOG << "DmsKvSyncE2ETest GetAllowedDistributeAbilityConnBundlesStubTest_001 end" << std::endl;
@@ -627,7 +627,7 @@ HWTEST_F(DmsKvSyncE2ETest, GetAllowedDistributeAbilityConnBundlesStubTest_002, T
         
         for (int32_t serviceType = 0; serviceType < 10; serviceType++) {
             std::vector<std::string> result = dmsKvSyncE2E_->GetInstance()->GetAllowedDistributeAbilityConnBundlesStub(
-                admin, serviceType, accountId);
+                serviceType, accountId);
             EXPECT_TRUE(result.empty());
         }
     }
@@ -651,7 +651,7 @@ HWTEST_F(DmsKvSyncE2ETest, GetAllowedDistributeAbilityConnBundlesStubTest_003, T
         
         for (int32_t accountId = 0; accountId < 10; accountId++) {
             std::vector<std::string> result = dmsKvSyncE2E_->GetInstance()->GetAllowedDistributeAbilityConnBundlesStub(
-                admin, serviceType, accountId);
+                serviceType, accountId);
             EXPECT_TRUE(result.empty());
         }
     }
@@ -675,7 +675,7 @@ HWTEST_F(DmsKvSyncE2ETest, GetAllowedDistributeAbilityConnBundlesStubTest_004, T
         int32_t accountId = INVALID_ACCOUNT_BUNDLE_ID;
         
         std::vector<std::string> result = dmsKvSyncE2E_->GetInstance()->GetAllowedDistributeAbilityConnBundlesStub(
-            admin, serviceType, accountId);
+            serviceType, accountId);
         EXPECT_TRUE(result.empty());
     }
     DTEST_LOG << "DmsKvSyncE2ETest GetAllowedDistributeAbilityConnBundlesStubTest_004 end" << std::endl;
@@ -698,7 +698,7 @@ HWTEST_F(DmsKvSyncE2ETest, GetAllowedDistributeAbilityConnBundlesStubTest_005, T
         int32_t accountId = INT32_MAX;
         
         std::vector<std::string> result = dmsKvSyncE2E_->GetInstance()->GetAllowedDistributeAbilityConnBundlesStub(
-            admin, serviceType, accountId);
+            serviceType, accountId);
         EXPECT_TRUE(result.empty());
     }
     DTEST_LOG << "DmsKvSyncE2ETest GetAllowedDistributeAbilityConnBundlesStubTest_005 end" << std::endl;
@@ -721,7 +721,7 @@ HWTEST_F(DmsKvSyncE2ETest, GetAllowedDistributeAbilityConnBundlesStubTest_006, T
         int32_t accountId = TEST_ACCOUNT_ID;
         
         std::vector<std::string> result = dmsKvSyncE2E_->GetInstance()->GetAllowedDistributeAbilityConnBundlesStub(
-            admin, serviceType, accountId);
+            serviceType, accountId);
         EXPECT_TRUE(result.empty());
     }
     DTEST_LOG << "DmsKvSyncE2ETest GetAllowedDistributeAbilityConnBundlesStubTest_006 end" << std::endl;
@@ -744,7 +744,7 @@ HWTEST_F(DmsKvSyncE2ETest, GetAllowedDistributeAbilityConnBundlesStubTest_007, T
         int32_t accountId = TEST_ACCOUNT_ID;
         
         std::vector<std::string> result = dmsKvSyncE2E_->GetInstance()->GetAllowedDistributeAbilityConnBundlesStub(
-            admin, serviceType, accountId);
+            serviceType, accountId);
         EXPECT_TRUE(result.empty());
     }
     DTEST_LOG << "DmsKvSyncE2ETest GetAllowedDistributeAbilityConnBundlesStubTest_007 end" << std::endl;
@@ -1056,7 +1056,7 @@ HWTEST_F(DmsKvSyncE2ETest, GetAllowedDistributeAbilityConnBundlesStubTest_008, T
         
         for (int i = 0; i < 100; i++) {
             std::vector<std::string> result = dmsKvSyncE2E_->GetInstance()->GetAllowedDistributeAbilityConnBundlesStub(
-                admin, serviceType, accountId);
+                serviceType, accountId);
             EXPECT_TRUE(result.empty());
         }
     }

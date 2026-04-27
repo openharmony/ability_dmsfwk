@@ -20,8 +20,17 @@
 #include <iostream>
 #include <parameter.h>
 
+#ifdef DMS_CHECK_EDM
+#include "application_manager_proxy.h"
+#endif
 #include "bundle/bundle_manager_internal.h"
+#include "dtbschedmgr_log.h"
 #include "config_policy_utils.h"
+#ifdef DMS_CHECK_EDM
+#include "edm_constants.h"
+#endif
+#include "ipc_skeleton.h"
+#include "message_parcel.h"
 #include "parameters.h"
 #include "securec.h"
 #include "want.h"
@@ -423,26 +432,31 @@ int32_t DmsKvSyncE2E::GetActiveAccountId()
 
 bool DmsKvSyncE2E::IsMDMControlWithExemption(const std::string &bundleName, int32_t serviceType, int32_t accountId)
 {
+#ifndef DMS_CHECK_EDM
+    HILOGI("DMS_CHECK_EDM not defined, allow all operations");
+    return false;
+#else
 #ifdef OS_ACCOUNT_PART
     HILOGI("IsMDMControlWithExemption called, bundleName: %{public}s, serviceType: %{public}d, accountId: %{public}d",
-        bundleName.c_str(), serviceType, accountId);
+        GetAnonymStr(bundleName).c_str(), serviceType, accountId);
     std::string appId;
     if (!BundleManagerInternal::GetCallerAppIdFromBms(bundleName, appId)) {
-        HILOGE("GetCallerAppIdFromBms failed for bundleName: %{public}s", bundleName.c_str());
+        HILOGE("GetCallerAppIdFromBms failed for bundleName: %{public}s", GetAnonymStr(bundleName).c_str());
         return true;
     }
-    HILOGI("Get appId: %{public}s for bundleName: %{public}s", appId.c_str(), bundleName.c_str());
-    AAFwk::Want admin;
-    std::vector<std::string> allowedAppIds = GetAllowedDistributeAbilityConnBundlesStub(admin, serviceType, accountId);
+    HILOGI("Get appId: %{public}s for bundleName: %{public}s",
+        GetAnonymStr(appId).c_str(), GetAnonymStr(bundleName).c_str());
+    std::vector<std::string> allowedAppIds = GetAllowedDistributeAbilityConnBundlesStub(serviceType, accountId);
     auto it = std::find(allowedAppIds.begin(), allowedAppIds.end(), appId);
     if (it != allowedAppIds.end()) {
-        HILOGI("AppId %{public}s is in exemption list, allow access", appId.c_str());
+        HILOGI("AppId %{public}s is in exemption list, allow access", GetAnonymStr(appId).c_str());
         return false;
     }
-    HILOGI("AppId %{public}s is not in exemption list, block access", appId.c_str());
+    HILOGI("AppId %{public}s is not in exemption list, block access", GetAnonymStr(appId).c_str());
     return true;
 #else
     return false;
+#endif
 #endif
 }
 
@@ -475,13 +489,43 @@ void AccountConstraintSubscriber::OnConstraintChanged(
     DmsKvSyncE2E::GetInstance()->SetMdmControl(constraintData.isEnabled);
 }
 
-std::vector<std::string> DmsKvSyncE2E::GetAllowedDistributeAbilityConnBundlesStub(const AAFwk::Want& admin,
+std::vector<std::string> DmsKvSyncE2E::GetAllowedDistributeAbilityConnBundlesStub(
     int32_t serviceType, int32_t accountId)
 {
+#ifdef DMS_CHECK_EDM
     HILOGI("GetAllowedDistributeAbilityConnBundlesStub called, serviceType: %{public}d, accountId: %{public}d",
         serviceType, accountId);
     HILOGI("Strict control mode: return empty list, all apps will be blocked");
+    if (serviceType != COLLABORATION_SERVICE) {
+        HILOGI("ServiceType %{public}d is not COLLABORATION_SERVICE, return empty list", serviceType);
+        return {};
+    }
+#ifdef OS_ACCOUNT_PART
+
+    auto proxy = EDM::ApplicationManagerProxy::GetApplicationManagerProxy();
+    if (proxy == nullptr) {
+        HILOGE("Failed to get ApplicationManagerProxy");
+        return {};
+    }
+    std::vector<std::string> appIdentifiers;
+    int32_t ret = proxy->GetAllowedDistributeAbilityConnBundles(serviceType, accountId, appIdentifiers);
+    if (ret != ERR_OK) {
+        HILOGE("GetAllowedDistributeAbilityConnBundles failed, ret: %{public}d", ret);
+        return {};
+    }
+    HILOGI("GetAllowedDistributeAbilityConnBundles success, got %{public}zu items", appIdentifiers.size());
+    for (const auto& appId : appIdentifiers) {
+        HILOGI("Allowed appId: %{public}s", GetAnonymStr(appId).c_str());
+    }
+    return appIdentifiers;
+#else
+    HILOGI("OS_ACCOUNT_PART not defined, return empty list");
     return {};
+#endif
+#else
+    HILOGI("DMS_CHECK_EDM not defined, return empty list");
+    return {};
+#endif
 }
 }  // namespace DistributedSchedule
 }  // namespace OHOS
