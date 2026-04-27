@@ -512,6 +512,12 @@ bool DMSContinueRecvMgr::ValidateAndPrepareBundleInfo(DmsBundleInfo& distributed
         HILOGE("The app is not installed on the local device or Recommend Installation Switch is off");
         return false;
     }
+    if (state == ACTIVE && !context.finalBundleName.empty() &&
+        !IsBundleContinuable(context.localBundleInfo, context.abilityInfo.abilityName,
+            context.abilityInfo.moduleName, context.continueType)) {
+        HILOGE("Bundle %{public}s is not continuable", context.finalBundleName.c_str());
+        return false;
+    }
 #else
     if (!GetFinalBundleName(distributedBundleInfo, context.finalBundleName, context.localBundleInfo,
         context.continueType)) {
