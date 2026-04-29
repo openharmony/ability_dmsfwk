@@ -22,8 +22,11 @@ class DistributedExtensionContext extends ExtensionContext {
       return this.__context_impl__.connectAbility(want, options);
     }
 
-    disconnectServiceExtensionAbility(want, options) {
-      return this.__context_impl__.disconnectAbility(want, options);
+    disconnectServiceExtensionAbility(connection, callback) {
+      if (callback !== undefined) {
+        return this.__context_impl__.disconnectAbility(connection, callback);
+      }
+      return this.__context_impl__.disconnectAbility(connection);
     }
 }
 export default DistributedExtensionContext;

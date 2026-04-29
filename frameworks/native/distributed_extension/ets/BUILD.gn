@@ -20,6 +20,7 @@ generate_static_abc("distributed_extension_ability_ani") {
   files = [
     "./@ohos.application.DistributedExtensionAbility.ets",
     "./@ohos.application.DistributedExtensionContext.ets",
+    "./utils/AbilityUtils.ets",
   ]
 
   is_boot_abc = "True"

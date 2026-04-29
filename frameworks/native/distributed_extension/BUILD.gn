@@ -27,6 +27,7 @@ ohos_shared_library("distributed_extension_ability_native") {
     "src/distributed_extension_context.cpp",
     "src/distributed_extension_context_ets.cpp",
     "src/distributed_extension_context_js.cpp",
+    "src/distributed_extension_error_utils.cpp",
     "src/distributed_extension_ets.cpp",
     "src/distributed_extension_js.cpp",
     "src/distributed_extension_loader.cpp",
@@ -56,6 +57,7 @@ ohos_shared_library("distributed_extension_ability_native") {
     "i18n:intl_util",
     "ipc:ipc_napi",
     "ipc:ipc_single",
+    "ipc:rpc_taihe",
     "napi:ace_napi",
     "runtime_core:ani",
   ]

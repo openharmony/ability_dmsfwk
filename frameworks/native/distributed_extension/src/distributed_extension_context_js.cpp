@@ -15,6 +15,7 @@
 
 #include "distributed_extension_context_js.h"
 
+#include "distributed_extension_error_utils.h"
 #include "dtbschedmgr_log.h"
 #include "js_data_struct_converter.h"
 #include "js_error_utils.h"
@@ -36,8 +37,6 @@ using namespace AbilityRuntime;
 
 constexpr int32_t INDEX_ZERO = 0;
 constexpr int32_t INDEX_ONE = 1;
-constexpr int32_t ERROR_CODE_ONE = 1;
-constexpr int32_t ERROR_CODE_TWO = 2;
 constexpr size_t ARGC_ONE = 1;
 constexpr size_t ARGC_TWO = 2;
 
@@ -110,20 +109,24 @@ private:
             auto context = weak.lock();
             if (context == nullptr) {
                 HILOGW("context is released.");
-                task->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "Context is released"));
+                auto errCode = DistributedErrorCode::ERROR_CODE_INVALID_CONTEXT;
+                task->Reject(env, CreateJsError(env, static_cast<int32_t>(errCode), GetErrorMsg(errCode)));
                 delete task;
                 return;
             }
             HILOGI("context->ConnectAbility connection: %{public}d.", static_cast<int32_t>(connectId));
-            if (!context->ConnectAbility(want, connection)) {
-                connection->CallJsFailed(ERROR_CODE_ONE);
+            auto ret = context->ConnectAbility(want, connection);
+            if (ret != ERR_OK) {
+                auto jsErrCode = GetJsErrorCodeByNativeError(ret);
+                connection->CallJsFailed(ToInt32(jsErrCode));
             }
             task->Resolve(env, CreateJsUndefined(env));
             delete task;
         };
         if (napi_send_event(env, asyncTask, napi_eprio_high, "distributedsched:OnConnectAbility") !=
             napi_status::napi_ok) {
-            napiAsyncTask->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "send event failed"));
+            auto errCode = DistributedErrorCode::ERROR_CODE_INNER;
+            napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(errCode), GetErrorMsg(errCode)));
         } else {
             napiAsyncTask.release();
         }
@@ -169,25 +172,32 @@ private:
             auto context = weak.lock();
             if (context == nullptr) {
                 HILOGW("context is released.");
-                task->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "Context is released"));
+                auto errCode = DistributedErrorCode::ERROR_CODE_INVALID_CONTEXT;
+                task->Reject(env, CreateJsError(env, static_cast<int32_t>(errCode), GetErrorMsg(errCode)));
                 delete task;
                 return;
             }
             if (connection == nullptr) {
                 HILOGW("connection is nullptr.");
-                task->Reject(env, CreateJsError(env, ERROR_CODE_TWO, "not found connection"));
+                auto errCode = DistributedErrorCode::ERROR_CODE_INNER;
+                task->Reject(env, CreateJsError(env, static_cast<int32_t>(errCode), GetErrorMsg(errCode)));
                 delete task;
                 return;
             }
             HILOGI("context->DisconnectAbility.");
             auto errcode = context->DisconnectAbility(want, connection);
-            errcode == 0 ? task->Resolve(env, CreateJsUndefined(env))
-                         : task->Reject(env, CreateJsError(env, errcode, "Disconnect Ability failed."));
+            if (errcode == 0) {
+                task->Resolve(env, CreateJsUndefined(env));
+            } else {
+                auto jsErrCode = GetJsErrorCodeByNativeError(errcode);
+                task->Reject(env, CreateJsError(env, ToInt32(jsErrCode), GetErrorMsg(jsErrCode)));
+            }
             delete task;
         };
         if (napi_send_event(env, asyncTask, napi_eprio_high, "distributedsched:OnDisconnectAbility") !=
             napi_status::napi_ok) {
-            napiAsyncTask->Reject(env, CreateJsError(env, ERROR_CODE_ONE, "send event failed"));
+            auto errCode = DistributedErrorCode::ERROR_CODE_INNER;
+            napiAsyncTask->Reject(env, CreateJsError(env, static_cast<int32_t>(errCode), GetErrorMsg(errCode)));
         } else {
             napiAsyncTask.release();
         }

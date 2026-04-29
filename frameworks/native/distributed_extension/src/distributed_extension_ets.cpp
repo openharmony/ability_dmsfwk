@@ -240,7 +240,7 @@ void DistributedExtensionETS::CacheMethods()
         "C{@ohos.app.ability.Want.Want}:", &onCreateMethod_)) != ANI_OK) {
         HILOG_INFO("Failed to find onCreate method, status : %{public}d", status);
     }
-    if ((status = env->Class_FindMethod(etsAbilityObj_->aniCls, "onDestroy", "", &onDestroyMethod_)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(etsAbilityObj_->aniCls, "onDestroy", ":", &onDestroyMethod_)) != ANI_OK) {
         HILOG_INFO("Failed to find onDestroy method, status : %{public}d", status);
     }
     if ((status = env->Class_FindMethod(etsAbilityObj_->aniCls, "onCollaborate",
