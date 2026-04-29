@@ -66,8 +66,7 @@ private:
     bool IsValidPath(const std::string &inFilePath, std::string &realFilePath);
     bool UpdateWhiteList(const std::string &cfgJsonStr);
     int32_t LoadContinueConfig();
-    std::vector<std::string> GetAllowedDistributeAbilityConnBundlesStub(const AAFwk::Want& admin,
-    int32_t serviceType, int32_t accountId);
+    std::vector<std::string> GetAllowedDistributeAbilityConnBundlesStub(int32_t serviceType, int32_t accountId);
 
     static std::mutex mutex_;
     static std::shared_ptr<DmsKvSyncE2E> instance_;
