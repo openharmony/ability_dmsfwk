@@ -329,8 +329,8 @@ void DistributedExtensionContextETS::OnDisconnectServiceExtensionAbility(ani_env
     }
     if (!connection) {
         errorObject = EtsErrorUtil::CreateError(env,
-            ToInt32(DistributedErrorCode::ERROR_CODE_INVALID_CONTEXT),
-            GetErrorMsg(DistributedErrorCode::ERROR_CODE_INVALID_CONTEXT));
+            ToInt32(DistributedErrorCode::ERROR_CODE_INVALID_ID),
+            GetErrorMsg(DistributedErrorCode::ERROR_CODE_INVALID_ID));
         AppExecFwk::AsyncCallback(env, callback, errorObject, nullptr);
         return;
     }
