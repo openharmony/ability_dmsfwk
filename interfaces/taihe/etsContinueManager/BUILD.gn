@@ -93,6 +93,7 @@ taihe_shared_library("continueManager_ani") {
     "image_framework:image_taihe",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
+    "eventhandler:libeventhandler",
   ]
   if (!dmsfwk_disable_distributedsched_service) {
     external_deps += [ "dsoftbus:softbus_client" ]
