@@ -34,6 +34,7 @@
 #include "datashare_manager.h"
 #include "distributed_sched_stub.h"
 #include "distributed_sched_continuation.h"
+#include "distributedIntent/distributed_intent_service.h"
 #include "dms_callback_task.h"
 #include "dsched_collaborate_callback_mgr.h"
 #include "idms_interactive_adapter.h"
@@ -101,6 +102,8 @@ public:
     void OnStop(const SystemAbilityOnDemandReason &stopReason) override;
     int32_t OnIdle(const SystemAbilityOnDemandReason& idleReason) override;
     void OnActive(const SystemAbilityOnDemandReason &activeReason) override;
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel& data,
+        MessageParcel& reply, MessageOption& option) override;
 
     /**
      * @brief If SA is pulled by root and not networked with other devices, uninstall SA after creating the database
@@ -220,6 +223,10 @@ public:
         uint32_t accessToken, int32_t extensionType) override;
     int32_t StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& remoteWant, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t extensionType) override;
+    int32_t StartRemoteIntent(const OHOS::AAFwk::Want& want,
+        const IntentCallerInfo& callerInfo, const sptr<IRemoteObject>& resultCallback) override;
+    int32_t SendIntentResult(const OHOS::AAFwk::Want& want,
+        const IntentCallerInfo& callerInfo, const std::string& msg) override;
     int32_t CheckTargetPermission(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
         const AccountInfo& accountInfo, int32_t flag, bool needQueryExtension);
     int32_t CheckTargetPermission4DiffBundle(const OHOS::AAFwk::Want& want, const CallerInfo& callerInfo,
@@ -378,6 +385,8 @@ private:
     std::map<sptr<IRemoteObject>, ConnectInfo> calleeMap_;
     sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_;
     std::shared_ptr<DmsCallbackTask> dmsCallbackTask_;
+    std::shared_ptr<DistributedIntentService> distributedIntentService_;
+    std::mutex intentLoadMutex_;
     std::shared_ptr<AppExecFwk::EventHandler> componentChangeHandler_;
     std::mutex callerLock_;
     std::map<sptr<IRemoteObject>, std::list<ConnectAbilitySession>> callerMap_;

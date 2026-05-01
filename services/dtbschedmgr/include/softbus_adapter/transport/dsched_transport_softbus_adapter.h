@@ -21,6 +21,7 @@
 
 #include "dsched_softbus_session.h"
 #include "idata_listener.h"
+#include "intent_socket_listener.h"
 #include "single_instance.h"
 
 namespace OHOS {
@@ -37,6 +38,7 @@ constexpr int32_t DSCHED_QOS_TYPE_MIN_LATENCY = 1000;
 
 constexpr const char* SOCKET_DMS_SESSION_NAME = "ohos.distributedschedule.dms.connect";
 constexpr const char* SOCKET_DMS_PKG_NAME = "dms";
+constexpr const char* SOCKET_DMS_INTENT_NAME = "ohos.distributedschedule.dms.intent";
 }
 
 typedef enum {
@@ -49,10 +51,12 @@ class DSchedTransportSoftbusAdapter {
 DECLARE_SINGLE_INSTANCE_BASE(DSchedTransportSoftbusAdapter);
 public:
     int32_t InitChannel();
+    int32_t InitIntentChannel();
     int32_t ConnectDevice(const std::string &peerDeviceId, int32_t &sessionId,
         DSchedServiceType type = SERVICE_TYPE_CONTINUE);
     void DisconnectDevice(const std::string &peerDeviceId);
     int32_t ReleaseChannel();
+    int32_t ReleaseIntentChannel();
     int32_t SendData(int32_t sessionId, int32_t dataType, std::shared_ptr<DSchedDataBuffer> dataBuffer);
     int32_t SendBytesBySoftbus(int32_t sessionId, std::shared_ptr<DSchedDataBuffer> dataBuffer);
     void OnBind(int32_t sessionId, const std::string &peerDeviceId);
@@ -65,11 +69,13 @@ public:
     bool GetSessionIdByDeviceId(const std::string &peerDeviceId, int32_t &sessionId);
     std::string GetPeerDeviceIdBySocket(const int32_t sessionId);
     bool IsNeedAllConnect(DSchedServiceType type);
+    int32_t GetIntentServerSocket() const { return intentServerSocket_; }
 
 private:
     DSchedTransportSoftbusAdapter();
     ~DSchedTransportSoftbusAdapter();
     int32_t CreateServerSocket();
+    int32_t CreateIntentServerSocket();
     int32_t CreateClientSocket(const std::string &peerDeviceId);
     int32_t CreateSessionRecord(int32_t sessionId, const std::string &peerDeviceId, bool isServer,
         DSchedServiceType type);
@@ -91,6 +97,7 @@ private:
     std::mutex sessionMutex_;
     std::mutex listenerMutex_;
     int32_t serverSocket_ = 0;
+    int32_t intentServerSocket_ = 0;
     std::string localSessionName_;
     int32_t callingTokenId_ = 0;
     bool isAllConnectExist_ = true;

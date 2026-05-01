@@ -237,6 +237,16 @@ int32_t MockDistributedSched::StopExtensionAbilityFromRemote(const OHOS::AAFwk::
 {
     return ERR_NONE;
 }
+int32_t MockDistributedSched::StartRemoteIntent(const OHOS::AAFwk::Want& want,
+    const IntentCallerInfo& callerInfo, const sptr<IRemoteObject>& resultCallback)
+{
+    return ERR_NONE;
+}
+int32_t MockDistributedSched::SendIntentResult(const OHOS::AAFwk::Want& want,
+    const IntentCallerInfo& callerInfo, const std::string& msg)
+{
+    return ERR_NONE;
+}
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
 bool MockDistributedSched::CheckRemoteOsType(const std::string& netwokId)

@@ -95,6 +95,10 @@ public:
         const OHOS::AAFwk::Want& want, int32_t callerUid, uint32_t accessToken, int32_t extensionType) override;
     int32_t StopExtensionAbilityFromRemote(const OHOS::AAFwk::Want& want,
         const CallerInfo& callerInfo, const AccountInfo& accountInfo, int32_t extensionType) override;
+    int32_t StartRemoteIntent(const OHOS::AAFwk::Want& want,
+        const IntentCallerInfo& callerInfo, const sptr<IRemoteObject>& resultCallback) override;
+    int32_t SendIntentResult(const OHOS::AAFwk::Want& want,
+        const IntentCallerInfo& callerInfo, const std::string& msg) override;
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     bool CheckRemoteOsType(const std::string& netwokId) override;
     int32_t StartRemoteAbilityAdapter(const OHOS::AAFwk::Want& want, int32_t callerUid, int32_t requestCode,

@@ -36,12 +36,15 @@ config("test_config") {
     "${distributed_service}/dtbschedmgr/include/continue/state",
     "${distributed_service}/dtbschedmgr/include/continue/state/source_state",
     "${distributed_service}/dtbschedmgr/include/continue/state/sink_state",
+    "${distributed_service}/dtbschedmgr/include/distributedIntent",
     "${distributed_service}/dtbschedmgr/include/distributedWant",
     "${distributed_service}/dtbschedmgr/include/softbus_adapter/transport",
+    "${distributed_service}/dtbschedmgr/src/distributedIntent/include",
     "${distributed_service}/dtbschedmgr/test/unittest",
     "${dms_path}/common/include",
     "${dms_path}/interfaces/innerkits/distributed_event/include",
     "${dms_path}/interfaces/innerkits/tests",
+    "${dms_path}/interfaces/kits/napi/include",
   ]
 }
 
@@ -1495,6 +1498,171 @@ ohos_unittest("distributedadaptertest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("distributedintentdsoftbusadaptertest") {
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [
+    "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/distributed_intent_dsoftbus_adapter.cpp",
+    "unittest/distributed_intent/distributed_intent_dsoftbus_adapter_test.cpp",
+    "unittest/distributed_intent/softbus_mock.cpp",
+    "unittest/distributed_intent/dtbschedmgr_device_info_storage_mock.cpp",
+    "unittest/mock_remote_stub.cpp",
+  ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = []
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    deps += dsched_public_deps
+  }
+  external_deps += [ "googletest:gmock" ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("distributedintentservicetest") {
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [
+    "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/distributed_intent_service.cpp",
+    "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/remote_intent_manager.cpp",
+    "unittest/distributed_intent/distributed_intent_service_test.cpp",
+    "unittest/distributed_intent/softbus_mock.cpp",
+    "unittest/distributed_intent/distributed_intent_dsoftbus_adapter_mock.cpp",
+    "unittest/distributed_intent/dtbschedmgr_device_info_storage_mock.cpp",
+    "unittest/distributed_intent/intent_permission_checker_mock.cpp",
+    "unittest/distributed_intent/distributed_sched_permission_mock.cpp",
+    "unittest/distributed_intent/ability_manager_client_mock.cpp",
+    "unittest/distributed_intent/bundle_manager_internal_mock.cpp",
+    "unittest/distributed_intent/access_token_kit_mock.cpp",
+    "unittest/distributed_intent/os_account_manager_mock.cpp",
+    "unittest/distributed_intent/ohos_account_kits_mock.cpp",
+    "unittest/distributed_intent/device_manager_mock.cpp",
+    "unittest/mock_remote_stub.cpp",
+  ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = []
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    deps += dsched_public_deps
+  }
+  external_deps += [ "googletest:gmock" ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("distributedintentservicestubtest") {
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [
+    "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/distributed_intent_service.cpp",
+    "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/distributed_intent_service_stub.cpp",
+    "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/remote_intent_manager.cpp",
+    "unittest/distributed_intent/distributed_intent_service_stub_test.cpp",
+    "unittest/distributed_intent/softbus_mock.cpp",
+    "unittest/distributed_intent/distributed_intent_dsoftbus_adapter_mock.cpp",
+    "unittest/distributed_intent/dtbschedmgr_device_info_storage_mock.cpp",
+    "unittest/distributed_intent/intent_permission_checker_mock.cpp",
+    "unittest/distributed_intent/distributed_sched_permission_mock.cpp",
+    "unittest/distributed_intent/ability_manager_client_mock.cpp",
+    "unittest/distributed_intent/bundle_manager_internal_mock.cpp",
+    "unittest/distributed_intent/access_token_kit_mock.cpp",
+    "unittest/distributed_intent/os_account_manager_mock.cpp",
+    "unittest/distributed_intent/ohos_account_kits_mock.cpp",
+    "unittest/distributed_intent/device_manager_mock.cpp",
+    "unittest/mock_remote_stub.cpp",
+  ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = []
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    deps += dsched_public_deps
+  }
+  external_deps += [ "googletest:gmock" ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("remoteintentmanagertest") {
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [
+    "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/remote_intent_manager.cpp",
+    "unittest/distributed_intent/remote_intent_manager_test.cpp",
+    "unittest/distributed_intent/softbus_mock.cpp",
+    "unittest/distributed_intent/distributed_intent_dsoftbus_adapter_mock.cpp",
+    "unittest/distributed_intent/dtbschedmgr_device_info_storage_mock.cpp",
+    "unittest/distributed_intent/intent_permission_checker_mock.cpp",
+    "unittest/distributed_intent/distributed_sched_permission_mock.cpp",
+    "unittest/distributed_intent/ability_manager_client_mock.cpp",
+    "unittest/distributed_intent/bundle_manager_internal_mock.cpp",
+    "unittest/distributed_intent/access_token_kit_mock.cpp",
+    "unittest/distributed_intent/os_account_manager_mock.cpp",
+    "unittest/distributed_intent/ohos_account_kits_mock.cpp",
+    "unittest/distributed_intent/device_manager_mock.cpp",
+    "unittest/mock_remote_stub.cpp",
+  ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = []
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    deps += dsched_public_deps
+  }
+  external_deps += [ "googletest:gmock" ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+ohos_unittest("intentpermissioncheckertest") {
+  module_out_path = module_output_path
+  cflags = [ "-Dprivate=public" ]
+  sources = [
+    "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/intent_permission_checker.cpp",
+    "unittest/distributed_intent/intent_permission_checker_test.cpp",
+    "unittest/distributed_intent/distributed_sched_permission_mock.cpp",
+    "unittest/distributed_intent/dtbschedmgr_device_info_storage_mock.cpp",
+    "unittest/distributed_intent/bundle_manager_internal_mock.cpp",
+    "unittest/distributed_intent/access_token_kit_mock.cpp",
+    "unittest/distributed_intent/os_account_manager_mock.cpp",
+    "unittest/distributed_intent/ohos_account_kits_mock.cpp",
+    "unittest/distributed_intent/device_manager_mock.cpp",
+    "unittest/mock/dnetwork_adapter_mock.cpp",
+  ]
+  sources += dtbschedmgr_sources
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  configs += dsched_configs
+  deps = []
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    deps += dsched_public_deps
+  }
+  external_deps += [ "googletest:gmock" ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 group("unittest") {
   testonly = true
   if (!dmsfwk_disable_distributedsched_service) {
@@ -1503,6 +1671,9 @@ group("unittest") {
       ":distributedadaptertest",
       ":distributedcalltest",
       ":distributedeventtest",
+      ":distributedintentdsoftbusadaptertest",
+      ":distributedintentservicestubtest",
+      ":distributedintentservicetest",
       ":distributedschedadaptertest",
       ":distributedschedcallbacktest",
       ":distributedschedservicetest",
@@ -1528,7 +1699,9 @@ group("unittest") {
       ":dschedcontinuetest",
       ":dschedswitchstatustest",
       ":hisyseventreporttest",
+      ":intentpermissioncheckertest",
       ":multiusermanagertest",
+      ":remoteintentmanagertest",
       ":softbusadaptertest",
       "${dms_path}/common/test/unittest:distributed_sched_utils_test",
     ]

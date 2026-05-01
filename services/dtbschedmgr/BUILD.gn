@@ -43,6 +43,8 @@ config("distributed_sched_config") {
     "include/distributedWantV2",
     "include/softbus_adapter/transport",
     "include/softbus_adapter/allconnectmgr",
+    "src/distributedIntent/include",
+    "include/distributedIntent",
   ]
   defines = []
   if (dmsfwk_mission_manager) {
@@ -215,6 +217,11 @@ ohos_shared_library("distributedschedsvr") {
       "src/util/distributed_sched_memory_utils.cpp",
       "src/svc_distributed_connection.cpp",
       "src/switch_status_dependency.cpp",
+      "src/distributedIntent/src/distributed_intent_service_stub.cpp",
+      "src/distributedIntent/src/distributed_intent_service.cpp",
+      "src/distributedIntent/src/remote_intent_manager.cpp",
+      "src/distributedIntent/src/distributed_intent_dsoftbus_adapter.cpp",
+      "src/distributedIntent/src/intent_permission_checker.cpp",
     ]
 
     if (!dmsfwk_softbus_adapter_common) {

@@ -26,6 +26,13 @@ public:
     std::string dstNetworkId_;
 };
 
+struct IntentCallerInfo {
+    int32_t callerUid = 0;
+    uint64_t requestCode = 0;
+    uint32_t accessToken = 0;
+    uint32_t specifyTokenId = 0;
+};
+
 enum DSchedEventType {
     DMS_UNKNOW = -1,
     DMS_CONTINUE = 0,
