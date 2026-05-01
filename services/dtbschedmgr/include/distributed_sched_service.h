@@ -240,8 +240,10 @@ public:
     int32_t ContinueStateCallbackUnRegister(int32_t missionId, std::string bundleName, std::string moduleName,
         std::string abilityName);
     void SetCallerExtraInfo(CallerInfo &callerInfo, uint32_t accessToken, uint32_t specifyTokenId);
+    std::string GetBundleNameFromToken(uint32_t accessToken, uint32_t specifyTokenId);
     bool IsTargetPermission(const OHOS::AAFwk::Want &want);
     void SetDExtensionConnected(bool connected);
+    bool CheckMDMControlByUid(int32_t uid);
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     bool CheckRemoteOsType(const std::string& netwokId) override;

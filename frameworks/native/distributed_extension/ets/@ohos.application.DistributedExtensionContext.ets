@@ -14,7 +14,10 @@
  */
 
 import { BusinessError, AsyncCallback } from '@ohos.base';
+import AsyncCallbackWrapper from './utils/AbilityUtils';
+import { ConnectOptions } from 'ability.connectOptions';
 import ExtensionContext from 'application.ExtensionContext';
+import Want from '@ohos.app.ability.Want';
 
 export class Cleaner {
   public ptr: long = 0;
@@ -40,6 +43,7 @@ export default class DistributedExtensionContext extends ExtensionContext {
     }
     this.registerCleaner(this.nativeEtsContext);
   }
+
   registerCleaner(ptr: long): void {
     this.cleaner = new Cleaner(ptr);
     destroyRegister.register(this, this.cleaner!, unregisterToken);
@@ -51,4 +55,27 @@ export default class DistributedExtensionContext extends ExtensionContext {
 
   nativeEtsContext: long = 0;
   private cleaner: Cleaner | null = null;
+
+  native nativeConnectServiceExtensionAbility(want: Want, options: ConnectOptions): long;
+
+  native nativeDisconnectServiceExtensionAbility(connection: long, callback: AsyncCallbackWrapper<void>): void;
+
+  connectServiceExtensionAbility(want: Want, options: ConnectOptions): long {
+    return this.nativeConnectServiceExtensionAbility(want, options);
+  }
+
+  disconnectServiceExtensionAbility(connection: long): Promise<void> {
+    return new Promise<void>((resolve: (data: undefined) => void, reject: (err: BusinessError) => void): void => {
+      let asyncCall = new AsyncCallbackWrapper<void>((err: BusinessError | null) => {
+        if (err == null || err.code == 0) {
+          resolve(undefined);
+        } else {
+          reject(err);
+        }
+      });
+      taskpool.execute((): void => {
+        this.nativeDisconnectServiceExtensionAbility(connection, asyncCall);
+      });
+    });
+  }
 }

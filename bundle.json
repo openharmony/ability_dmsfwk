@@ -64,6 +64,7 @@
           "data_share",
           "ets_frontend",
           "eventhandler",
+          "enterprise_device_management",
           "ffrt",
           "form_fwk",
           "graphic_2d",

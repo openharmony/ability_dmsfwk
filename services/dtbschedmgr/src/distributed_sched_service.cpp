@@ -1318,7 +1318,7 @@ int32_t DistributedSchedService::GetCallerInfo(const std::string &localDeviceId,
 int32_t DistributedSchedService::StartRemoteAbility(const OHOS::AAFwk::Want& want,
     int32_t callerUid, int32_t requestCode, uint32_t accessToken, uint32_t specifyTokenId)
 {
-    CHECK_MDM_CONTROL_WITH_EXEMPTION(want.GetElement().GetBundleName(), COLLABORATION_SERVICE);
+    CHECK_MDM_CONTROL_BY_TOKEN(accessToken, specifyTokenId, COLLABORATION_SERVICE);
     if (!MultiUserManager::GetInstance().IsCallerForeground(callerUid)) {
         HILOGW("The current user is not foreground. callingUid: %{public}d .", callerUid);
         return DMS_NOT_FOREGROUND_USER;
@@ -1393,11 +1393,32 @@ void DistributedSchedService::SetCallerExtraInfo(CallerInfo &callerInfo, uint32_
     }
 }
 
+std::string DistributedSchedService::GetBundleNameFromToken(uint32_t accessToken, uint32_t specifyTokenId)
+{
+    HILOGI("called");
+    if (specifyTokenId != 0) {
+        accessToken = specifyTokenId;
+    }
+    auto tokenType = Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(accessToken);
+    if (tokenType == Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
+        Security::AccessToken::HapTokenInfo hapInfo;
+        auto ret = Security::AccessToken::AccessTokenKit::GetHapTokenInfo(accessToken, hapInfo);
+        if (ret != Security::AccessToken::AccessTokenKitRet::RET_SUCCESS) {
+            HILOGE("get hap tokenInfo failed, ret: %{public}d", ret);
+            return "";
+        }
+        HILOGI("get bundleName: %{public}s from token", GetAnonymStr(hapInfo.bundleName).c_str());
+        return hapInfo.bundleName;
+    }
+    HILOGE("tokenType is not TOKEN_HAP");
+    return "";
+}
+
 int32_t DistributedSchedService::StartAbilityFromRemote(const OHOS::AAFwk::Want& want,
     const OHOS::AppExecFwk::AbilityInfo& abilityInfo, int32_t requestCode,
     const CallerInfo& callerInfo, const AccountInfo& accountInfo)
 {
-    CHECK_MDM_CONTROL_WITH_EXEMPTION(want.GetElement().GetBundleName(), COLLABORATION_SERVICE);
+    CHECK_MDM_CONTROL_BY_BUNDLENAME(want.GetElement().GetBundleName(), COLLABORATION_SERVICE);
     std::string localDeviceId;
     std::string timeInfo;
     std::string deviceId = want.GetElement().GetDeviceID();
@@ -2265,7 +2286,7 @@ int32_t DistributedSchedService::GetUidLocked(const std::list<ConnectAbilitySess
 int32_t DistributedSchedService::ConnectRemoteAbility(const OHOS::AAFwk::Want& want,
     const sptr<IRemoteObject>& connect, int32_t callerUid, int32_t callerPid, uint32_t accessToken)
 {
-    CHECK_MDM_CONTROL_WITH_EXEMPTION(want.GetElement().GetBundleName(), COLLABORATION_SERVICE);
+    CHECK_MDM_CONTROL_BY_TOKEN(accessToken, 0, COLLABORATION_SERVICE);
     if (!MultiUserManager::GetInstance().IsCallerForeground(callerUid)) {
         HILOGW("The current user is not foreground. callingUid: %{public}d .", callerUid);
         return DMS_NOT_FOREGROUND_USER;
@@ -2642,7 +2663,7 @@ int32_t DistributedSchedService::SaveConnectToken(const OHOS::AAFwk::Want& want,
 int32_t DistributedSchedService::StartRemoteAbilityByCall(const OHOS::AAFwk::Want& want,
     const sptr<IRemoteObject>& connect, int32_t callerUid, int32_t callerPid, uint32_t accessToken)
 {
-    CHECK_MDM_CONTROL_WITH_EXEMPTION(want.GetElement().GetBundleName(), COLLABORATION_SERVICE);
+    CHECK_MDM_CONTROL_BY_TOKEN(accessToken, 0, COLLABORATION_SERVICE);
     if (!MultiUserManager::GetInstance().IsCallerForeground(callerUid)) {
         HILOGW("The current user is not foreground. callingUid: %{public}d .", callerUid);
         return DMS_NOT_FOREGROUND_USER;
@@ -2694,7 +2715,7 @@ int32_t DistributedSchedService::StartRemoteAbilityByCall(const OHOS::AAFwk::Wan
 int32_t DistributedSchedService::ReleaseRemoteAbility(const sptr<IRemoteObject>& connect,
     const AppExecFwk::ElementName &element)
 {
-    CHECK_MDM_CONTROL_WITH_EXEMPTION(element.GetBundleName(), COLLABORATION_SERVICE);
+    CHECK_MDM_CONTROL_BY_BUNDLENAME(element.GetBundleName(), COLLABORATION_SERVICE);
     if (connect == nullptr) {
         HILOGE("ReleaseRemoteAbility connect is null");
         return INVALID_PARAMETERS_ERR;
@@ -2727,7 +2748,7 @@ int32_t DistributedSchedService::StartAbilityByCallFromRemote(const OHOS::AAFwk:
     const sptr<IRemoteObject>& connect, const CallerInfo& callerInfo, const AccountInfo& accountInfo)
 {
     HILOGI("[PerformanceTest] DistributedSchedService StartAbilityByCallFromRemote begin");
-    CHECK_MDM_CONTROL_WITH_EXEMPTION(want.GetElement().GetBundleName(), COLLABORATION_SERVICE);
+    CHECK_MDM_CONTROL_BY_BUNDLENAME(want.GetElement().GetBundleName(), COLLABORATION_SERVICE);
     if (connect == nullptr) {
         HILOGE("StartAbilityByCallFromRemote connect is null");
         return INVALID_REMOTE_PARAMETERS_ERR;
@@ -3093,7 +3114,7 @@ int32_t DistributedSchedService::ConnectAbilityFromRemote(const OHOS::AAFwk::Wan
         HILOGE("ConnectAbilityFromRemote connect is null");
         return INVALID_REMOTE_PARAMETERS_ERR;
     }
-    CHECK_MDM_CONTROL_WITH_EXEMPTION(want.GetElement().GetBundleName(), COLLABORATION_SERVICE);
+    CHECK_MDM_CONTROL_BY_BUNDLENAME(want.GetElement().GetBundleName(), COLLABORATION_SERVICE);
     HILOGI("ConnectAbilityFromRemote uid is %{public}d, pid is %{public}d, AccessTokenID is %{public}s",
         callerInfo.uid, callerInfo.pid, GetAnonymStr(std::to_string(callerInfo.accessToken)).c_str());
     std::string localDeviceId;
@@ -3156,7 +3177,7 @@ int32_t DistributedSchedService::DisconnectRemoteAbility(const sptr<IRemoteObjec
 {
     if (DmsKvSyncE2E::GetInstance()->IsMDMControl()) {
         std::string bundleName = GetBundleNameFromConnectAbilityMap(connect);
-        CHECK_MDM_CONTROL_WITH_EXEMPTION(bundleName, COLLABORATION_SERVICE);
+        CHECK_MDM_CONTROL_BY_BUNDLENAME(bundleName, COLLABORATION_SERVICE);
     }
     if (connect == nullptr) {
         HILOGE("DisconnectRemoteAbility connect is null");
@@ -3887,7 +3908,7 @@ int32_t DistributedSchedService::SetCallerInfo(
 int32_t DistributedSchedService::StartRemoteFreeInstall(const OHOS::AAFwk::Want& want, int32_t callerUid,
     int32_t requestCode, uint32_t accessToken, const sptr<IRemoteObject>& callback)
 {
-    CHECK_MDM_CONTROL_WITH_EXEMPTION(want.GetElement().GetBundleName(), COLLABORATION_SERVICE);
+    CHECK_MDM_CONTROL_BY_TOKEN(accessToken, 0, COLLABORATION_SERVICE);
     HILOGI("called");
     std::string localDeviceId;
     std::string deviceId = want.GetElement().GetDeviceID();
@@ -4423,7 +4444,7 @@ int32_t DistributedSchedService::CheckCollabStartPermission(const OHOS::AAFwk::W
 int32_t DistributedSchedService::StopRemoteExtensionAbility(const OHOS::AAFwk::Want& want, int32_t callerUid,
     uint32_t accessToken, int32_t extensionType)
 {
-    CHECK_MDM_CONTROL_WITH_EXEMPTION(want.GetElement().GetBundleName(), COLLABORATION_SERVICE);
+    CHECK_MDM_CONTROL_BY_TOKEN(accessToken, 0, COLLABORATION_SERVICE);
     std::string localDeviceId;
     std::string deviceId = want.GetDeviceId();
     if (!GetLocalDeviceId(localDeviceId) || !CheckDeviceId(localDeviceId, deviceId)) {
