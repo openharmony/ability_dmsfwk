@@ -444,7 +444,7 @@ void DistributedIntentDsoftbusAdapter::ProcessReceivedData(int32_t socketFd,
 
     uint32_t payloadLen = dataLen - headerSize;
     std::string payload;
-    if (payloadLen > 0) {
+    if (payloadLen > 0 &&  payloadLen <= MAX_SEND_BYTES_SIZE) {
         payload.resize(payloadLen);
         ret = memcpy_s(payload.data(), payloadLen, bytes + headerSize, payloadLen);
         if (ret != 0) {

@@ -394,7 +394,7 @@ int32_t RemoteIntentManager::HandleIntentExecute(const std::string& srcDeviceId,
     int32_t ret = DeserializeIntentData(data, want, ctx, ignoredResultMsg);
     if (ret != ERR_DI_OK) {
         HILOGE("DeserializeIntentData failed, ret=%{public}d", ret);
-        SendInnerResultBack(socketFd, 0, ERR_DI_SERIALIZE_FAILED,
+        SendInnerResultBack(socketFd, ctx.requestCode, ERR_DI_SERIALIZE_FAILED,
             IntentDataType::INTENT_DATA_TYPE_DMS_RESULT);
         return ERR_DI_SERIALIZE_FAILED;
     }

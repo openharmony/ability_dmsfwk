@@ -216,6 +216,7 @@ HWTEST_F(IntentPermissionCheckerTest, SetCallerExtraInfo_HapTokenSuccess_005, Te
     intentCallerInfo.accessToken = TEST_ACCESS_TOKEN;
 
     IntentPermissionChecker::GetInstance().SetCallerExtraInfo(callerInfo, intentCallerInfo);
+    EXPECT_EQ(callerInfo.accessToken, 0);
 }
 
 /**
@@ -235,7 +236,7 @@ HWTEST_F(IntentPermissionCheckerTest, SetCallerExtraInfo_GetHapTokenInfoFail_006
     IntentCallerInfo intentCallerInfo;
     intentCallerInfo.accessToken = TEST_ACCESS_TOKEN;
 
-    IntentPermissionChecker::GetInstance().SetCallerExtraInfo(callerInfo, intentCallerInfo);
+    EXPECT_NO_FATAL_FAILURE(IntentPermissionChecker::GetInstance().SetCallerExtraInfo(callerInfo, intentCallerInfo));
 }
 
 /**
@@ -253,7 +254,7 @@ HWTEST_F(IntentPermissionCheckerTest, SetCallerExtraInfo_NonHapToken_007, TestSi
     IntentCallerInfo intentCallerInfo;
     intentCallerInfo.accessToken = TEST_ACCESS_TOKEN;
 
-    IntentPermissionChecker::GetInstance().SetCallerExtraInfo(callerInfo, intentCallerInfo);
+    EXPECT_NO_FATAL_FAILURE(IntentPermissionChecker::GetInstance().SetCallerExtraInfo(callerInfo, intentCallerInfo));
 }
 
 /**

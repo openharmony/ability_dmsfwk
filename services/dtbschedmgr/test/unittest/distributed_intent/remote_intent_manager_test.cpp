@@ -571,8 +571,8 @@ HWTEST_F(RemoteIntentManagerTest, OnIntentDataReceived_ExecuteType_020, TestSize
         .WillRepeatedly(Return(false));
 
     std::string data = "{}";
-    RemoteIntentManager::GetInstance().OnIntentDataReceived(SRC_DEVICE_ID,
-        IntentDataType::INTENT_DATA_TYPE_EXECUTE, data, TEST_SOCKET_FD);
+    EXPECT_NO_FATAL_FAILURE(RemoteIntentManager::GetInstance().OnIntentDataReceived(SRC_DEVICE_ID,
+        IntentDataType::INTENT_DATA_TYPE_EXECUTE, data, TEST_SOCKET_FD));
 }
 
 /**
@@ -719,8 +719,8 @@ HWTEST_F(RemoteIntentManagerTest, HandleIntentExecute_ValidateFail_030, TestSize
         .WillRepeatedly(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
 
     std::string data = "{\"requestCode\":100,\"callerUid\":1000,\"accessToken\":200,\"wantJson\":{}}";
-    RemoteIntentManager::GetInstance().OnIntentDataReceived(SRC_DEVICE_ID,
-        IntentDataType::INTENT_DATA_TYPE_EXECUTE, data, TEST_SOCKET_FD);
+    EXPECT_NO_FATAL_FAILURE(RemoteIntentManager::GetInstance().OnIntentDataReceived(SRC_DEVICE_ID,
+        IntentDataType::INTENT_DATA_TYPE_EXECUTE, data, TEST_SOCKET_FD));
 }
 
 /**
