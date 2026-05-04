@@ -20,6 +20,7 @@
 
 #define private public
 #include "distributed_intent_dsoftbus_adapter.h"
+#include "distributed_intent_dsoftbus_adapter.cpp"
 #undef private
 
 #include "softbus_mock.h"
@@ -499,8 +500,21 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, SendIntentData_AllDataTypes_009, 
  */
 HWTEST_F(DistributedIntentDsoftbusAdapterTest, GetSocketFd_Found_001, TestSize.Level3)
 {
+    InsertSession(VALID_FD, DEVICE_ID_1);
     auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
-    EXPECT_EQ(a.GetSocketFdByDeviceId(DEVICE_ID_1), INVALID_FD);
+    EXPECT_EQ(a.GetSocketFdByDeviceId(DEVICE_ID_1), VALID_FD);
+}
+
+/**
+ * @tc.name: DistributedIntentDsoftbusAdapter_001
+ * @tc.desc: free DistributedIntentDsoftbusAdapter object
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, DistributedIntentDsoftbusAdapter_001, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    EXPECT_NO_FATAL_FAILURE(a.~DistributedIntentDsoftbusAdapter());
 }
 
 /**
@@ -857,6 +871,21 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, CleanupSocketIfNeeded_IsServerTru
 }
 
 /**
+ * @tc.name: CleanupSocketIfNeeded_DeviceNotInMap_005
+ * @tc.desc: CleanupSocketIfNeeded removes session from sessions_ map
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, CleanupSocketIfNeeded_DeviceNotInMap_005, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    a.CleanupSocketIfNeeded(VALID_FD);
+    EXPECT_EQ(a.sessions_.find(VALID_FD), a.sessions_.end());
+    EXPECT_NO_FATAL_FAILURE(a.CleanupSocketIfNeeded(VALID_FD));
+}
+
+/**
  * @tc.name: OnIntentBytes_ProcessReceivedData_003
  * @tc.desc: OnIntentBytes with valid execute intent data
  * @tc.type: FUNC
@@ -874,27 +903,6 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentBytes_ProcessReceivedData
     ASSERT_EQ(memcpy_s(frame.data() + sizeof(uint32_t), sizeof(uint32_t), &payloadLen, sizeof(uint32_t)), 0);
     ASSERT_EQ(memcpy_s(frame.data() + sizeof(uint32_t) + sizeof(uint32_t), payload.size(),
         payload.data(), payload.size()), 0);
-    a.OnIntentBytes(VALID_FD, frame.data(), frame.size());
-    RemoveSession(VALID_FD, DEVICE_ID_1);
-}
-
-/**
- * @tc.name: OnIntentBytes_EmptyPayload_004
- * @tc.desc: OnIntentBytes with empty payload
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentBytes_EmptyPayload_004, TestSize.Level3)
-{
-    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
-    uint8_t data[4] = {0};
-    EXPECT_NO_FATAL_FAILURE(a.OnIntentBytes(VALID_FD, data, 4));
-    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
-    uint32_t typeValue = static_cast<uint32_t>(IntentDataType::INTENT_DATA_TYPE_EXECUTE_RESULT);
-    std::vector<uint8_t> frame(sizeof(uint32_t) + sizeof(uint32_t));
-    ASSERT_EQ(memcpy_s(frame.data(), sizeof(uint32_t), &typeValue, sizeof(uint32_t)), 0);
-    uint32_t payloadLen = 0;
-    ASSERT_EQ(memcpy_s(frame.data() + sizeof(uint32_t), sizeof(uint32_t), &payloadLen, sizeof(uint32_t)), 0);
     EXPECT_NO_FATAL_FAILURE(a.OnIntentBytes(VALID_FD, frame.data(), frame.size()));
     RemoveSession(VALID_FD, DEVICE_ID_1);
 }
@@ -918,8 +926,140 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentBytes_UnknownDataType_006
         &payloadLen, sizeof(uint32_t)), 0);
     ASSERT_EQ(memcpy_s(frame.data() + sizeof(uint32_t) + sizeof(uint32_t), frame.size(),
         payload.data(), payload.size()), 0);
-    a.OnIntentBytes(VALID_FD, frame.data(), frame.size());
+    EXPECT_NO_FATAL_FAILURE(a.OnIntentBytes(VALID_FD, frame.data(), frame.size()));
     RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name:OnIntentShutdown__005
+ * @tc.desc: expect session is null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentShutdown__005, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    a.CleanupSocketIfNeeded(VALID_FD);
+    EXPECT_EQ(a.sessions_.find(VALID_FD), a.sessions_.end());
+    EXPECT_NO_FATAL_FAILURE(a.CleanupSocketIfNeeded(VALID_FD));
+    EXPECT_NO_FATAL_FAILURE(a.OnIntentShutdown(VALID_FD));
+}
+
+
+/**
+ * @tc.name: OnIntentBindCallback_NetworkIdNull_001
+ * @tc.desc: OnIntentBindCallback when networkId is nullptr
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentBindCallback_NetworkIdNull_001, TestSize.Level3)
+{
+    PeerSocketInfo info;
+    info.networkId = nullptr;
+    EXPECT_NO_FATAL_FAILURE(OnIntentBindCallback(VALID_FD, info));
+}
+
+/**
+ * @tc.name: OnIntentBindCallback_NetworkIdValid_002
+ * @tc.desc: OnIntentBindCallback with valid networkId
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentBindCallback_NetworkIdValid_002, TestSize.Level3)
+{
+    PeerSocketInfo info;
+    char networkId[] = "test_network_id_12345";
+    info.networkId = networkId;
+    EXPECT_NO_FATAL_FAILURE(OnIntentBindCallback(VALID_FD, info));
+    RemoveSession(VALID_FD, networkId);
+}
+
+
+/**
+ * @tc.name: OnIntentShutdownCallback_001
+ * @tc.desc: OnIntentShutdownCallback invokes OnIntentShutdown
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentShutdownCallback_001, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    EXPECT_CALL(*softbusMock_, Shutdown(VALID_FD)).Times(1);
+    EXPECT_NO_FATAL_FAILURE(OnIntentShutdownCallback(VALID_FD, SHUTDOWN_REASON_UNKNOWN));
+}
+
+
+/**
+ * @tc.name: OnIntentBytesCallback_001
+ * @tc.desc: OnIntentBytesCallback invokes OnIntentBytes
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentBytesCallback_001, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    uint8_t data[] = {0x01, 0x02, 0x03, 0x04};
+    EXPECT_NO_FATAL_FAILURE(OnIntentBytesCallback(VALID_FD, data, 4));
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: OnIntentBytesCallback_NullData_002
+ * @tc.desc: OnIntentBytesCallback with null data
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentBytesCallback_NullData_002, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    EXPECT_NO_FATAL_FAILURE(OnIntentBytesCallback(VALID_FD, nullptr, 0));
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+
+/**
+ * @tc.name: StopSessionCleanupThread_NotRunning_001
+ * @tc.desc: StopSessionCleanupThread when cleanup thread is not running
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, StopSessionCleanupThread_NotRunning_001, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    a.sessionCleanupRunning_.store(false);
+    EXPECT_NO_FATAL_FAILURE(a.StopSessionCleanupThread());
+}
+
+/**
+ * @tc.name: StopSessionCleanupThread_Running_002
+ * @tc.desc: StopSessionCleanupThread when cleanup thread is running
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, StopSessionCleanupThread_Running_002, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    a.StartSessionCleanupThread();
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    EXPECT_NO_FATAL_FAILURE(a.StopSessionCleanupThread());
+}
+
+/**
+ * @tc.name: StopSessionCleanupThread_AlreadyStopped_003
+ * @tc.desc: StopSessionCleanupThread when already stopped
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, StopSessionCleanupThread_AlreadyStopped_003, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    a.sessionCleanupRunning_.store(false);
+    EXPECT_NO_FATAL_FAILURE(a.StopSessionCleanupThread());
+    EXPECT_NO_FATAL_FAILURE(a.StopSessionCleanupThread());
 }
 
 

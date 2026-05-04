@@ -52,7 +52,7 @@ constexpr int32_t INTENT_MAX_BIND_RETRY_TIMES = 8;
 constexpr int32_t INTENT_QOS_MIN_BW = 40 * 1024 * 1024;
 constexpr int32_t INTENT_QOS_MAX_LATENCY = 6000;
 constexpr int32_t INTENT_QOS_MIN_LATENCY = 1000;
-constexpr size_t MAX_SEND_BYTES_SIZE = 400 * 1024;
+constexpr size_t MAX_SEND_BYTES_SIZE = 100 * 1024 * 1024;
 constexpr int64_t SESSION_IDLE_TIMEOUT_MS = 30000;
 constexpr int64_t SESSION_CLEANUP_INTERVAL_MS = 1000;
 

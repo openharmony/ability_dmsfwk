@@ -104,7 +104,6 @@ int32_t DistributedIntentServiceStub::StartRemoteIntentInner(MessageParcel& data
     int32_t result = StartRemoteIntent(*want, callerInfo, resultCallback);
 
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
-    return result;
 }
 
 int32_t DistributedIntentServiceStub::SendIntentResultInner(MessageParcel& data, MessageParcel& reply)
@@ -140,7 +139,6 @@ int32_t DistributedIntentServiceStub::SendIntentResultInner(MessageParcel& data,
 
     int32_t result = SendIntentResult(*want, callerInfo, resultMsg);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);
-    return result;
 }
 
 } // namespace DistributedSchedule

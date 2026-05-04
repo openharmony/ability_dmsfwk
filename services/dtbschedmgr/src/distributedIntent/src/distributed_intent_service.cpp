@@ -32,6 +32,10 @@ int32_t DistributedIntentService::StartRemoteIntent(const OHOS::AAFwk::Want& wan
     const sptr<IRemoteObject>& resultCallback)
 {
     HILOGI("DistributedIntentService::StartRemoteIntent");
+    if (resultCallback == nullptr) {
+        HILOGE("resultCallback is null");
+        return ERR_DI_INVALID_PARAMETER;
+    }
     std::string localDeviceId;
     if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
         HILOGE("Get local device id failed");

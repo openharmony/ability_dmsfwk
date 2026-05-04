@@ -95,7 +95,7 @@ HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_GetLocalDeviceIdFail_00
     OHOS::AAFwk::Want want;
     want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
     IntentCallerInfo callerInfo;
-    sptr<IRemoteObject> callback = nullptr;
+    sptr<IRemoteObject> callback = new MockRemoteStub();
 
     EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_PERMISSION_DENIED);
 }
@@ -114,7 +114,7 @@ HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_BothConditionsHitL36Fir
     OHOS::AAFwk::Want want;
     want.SetElementName("", BUNDLE_NAME, ABILITY_NAME);
     IntentCallerInfo callerInfo;
-    sptr<IRemoteObject> callback = nullptr;
+    sptr<IRemoteObject> callback = new MockRemoteStub();
 
     EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_PERMISSION_DENIED);
 }
@@ -133,7 +133,7 @@ HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_DstDeviceIdEmpty_003, T
     OHOS::AAFwk::Want want;
     want.SetElementName("", BUNDLE_NAME, ABILITY_NAME);
     IntentCallerInfo callerInfo;
-    sptr<IRemoteObject> callback = nullptr;
+    sptr<IRemoteObject> callback = new MockRemoteStub();
 
     EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_INVALID_PARAMETER);
 }
@@ -151,7 +151,7 @@ HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_NoElementSet_004, TestS
 
     OHOS::AAFwk::Want want;
     IntentCallerInfo callerInfo;
-    sptr<IRemoteObject> callback = nullptr;
+    sptr<IRemoteObject> callback = new MockRemoteStub();
 
     EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_INVALID_PARAMETER);
 }
@@ -173,7 +173,7 @@ HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_NormalPath_005, TestSiz
     callerInfo.callerUid = TEST_CALLER_UID;
     callerInfo.requestCode = TEST_REQUEST_CODE;
     callerInfo.accessToken = TEST_ACCESS_TOKEN;
-    sptr<IRemoteObject> callback = nullptr;
+    sptr<IRemoteObject> callback = new MockRemoteStub();
 
     int32_t result = service_->StartRemoteIntent(want, callerInfo, callback);
     EXPECT_NE(result, ERR_DI_PERMISSION_DENIED);
@@ -218,7 +218,7 @@ HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_LocalDeviceIdEmptyOut_0
     OHOS::AAFwk::Want want;
     want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
     IntentCallerInfo callerInfo;
-    sptr<IRemoteObject> callback = nullptr;
+    sptr<IRemoteObject> callback = new MockRemoteStub();
 
     int32_t result = service_->StartRemoteIntent(want, callerInfo, callback);
     EXPECT_NE(result, ERR_DI_PERMISSION_DENIED);
@@ -335,6 +335,22 @@ HWTEST_F(DistributedIntentServiceTest, ConstructorAndDestructor_Multiple_002, Te
         EXPECT_NE(svc, nullptr);
         svc.reset();
     }
+}
+
+/**
+ * @tc.name: StartRemoteIntent_CallBack_Null_001
+ * @tc.desc: StartRemoteIntent when call back is null
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_CallBack_Null_001, TestSize.Level3)
+{
+    OHOS::AAFwk::Want want;
+    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentCallerInfo callerInfo;
+    sptr<IRemoteObject> callback = nullptr;
+
+    EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_INVALID_PARAMETER);
 }
 
 } // namespace DistributedSchedule
