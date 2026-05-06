@@ -1117,15 +1117,11 @@ nlohmann::json DistributedWantV2::ToJson() const
 bool DistributedWantV2::CanReadFromJson(nlohmann::json& wantJson)
 {
     const auto& jsonObjectEnd = wantJson.end();
-    if ((wantJson.find("deviceId") == jsonObjectEnd)
-        || (wantJson.find("bundleName") == jsonObjectEnd)
-        || (wantJson.find("abilityName") == jsonObjectEnd)
-        || (wantJson.find("uri") == jsonObjectEnd)
-        || (wantJson.find("type") == jsonObjectEnd)
-        || (wantJson.find("flags") == jsonObjectEnd)
-        || (wantJson.find("action") == jsonObjectEnd)
-        || (wantJson.find("parameters") == jsonObjectEnd)
-        || (wantJson.find("entities") == jsonObjectEnd)) {
+    if ((wantJson.find("deviceId") == jsonObjectEnd) || (wantJson.find("bundleName") == jsonObjectEnd) ||
+        (wantJson.find("abilityName") == jsonObjectEnd) || (wantJson.find("uri") == jsonObjectEnd) ||
+        (wantJson.find("type") == jsonObjectEnd) || (wantJson.find("flags") == jsonObjectEnd) ||
+        (wantJson.find("action") == jsonObjectEnd) || (wantJson.find("parameters") == jsonObjectEnd) ||
+        (wantJson.find("entities") == jsonObjectEnd)) {
         return false;
     }
     if (!wantJson["deviceId"].is_string()) {
@@ -1160,6 +1156,10 @@ bool DistributedWantV2::CanReadFromJson(nlohmann::json& wantJson)
         HILOGE("parameters is not string");
         return false;
     }
+    if (!wantJson["entities"].is_null() && !wantJson["entities"].is_array()) {
+        HILOGE("entities is not an array");
+        return false;
+    }
     return true;
 }
 
@@ -1169,27 +1169,30 @@ bool DistributedWantV2::ReadFromJson(nlohmann::json& wantJson)
         HILOGE("can not read from json");
         return false;
     }
-    if (!wantJson.contains("deviceId") || !wantJson.contains("bundleName") ||
-        !wantJson.contains("abilityName") || !wantJson.contains("uri") ||
-        !wantJson.contains("type") || !wantJson.contains("flags") ||
-        !wantJson.contains("action") || !wantJson.contains("parameters") ||
-        !wantJson.contains("entities")) {
+    if (!wantJson.contains("deviceId") || !wantJson.contains("bundleName") || !wantJson.contains("abilityName") ||
+        !wantJson.contains("uri") || !wantJson.contains("type") || !wantJson.contains("flags") ||
+        !wantJson.contains("action") || !wantJson.contains("parameters") || !wantJson.contains("entities")) {
         HILOGE("data is empty");
         return false;
     }
+
     std::string deviceId = wantJson.at("deviceId").get<std::string>();
     std::string bundleName = wantJson.at("bundleName").get<std::string>();
     std::string abilityName = wantJson.at("abilityName").get<std::string>();
     SetElementName(deviceId, bundleName, abilityName);
+
     std::string uri = wantJson.at("uri").get<std::string>();
     SetUri(uri);
+
     std::string type = wantJson.at("type").get<std::string>();
     SetType(type);
+
     if (!wantJson.at("flags").is_number()) {
         return false;
     }
     unsigned int flags = wantJson.at("flags").get<unsigned int>();
     SetFlags(flags);
+
     std::string action = wantJson.at("action").get<std::string>();
     SetAction(action);
 
@@ -1197,15 +1200,9 @@ bool DistributedWantV2::ReadFromJson(nlohmann::json& wantJson)
         return false;
     }
     std::string parametersString = wantJson.at("parameters").get<std::string>();
-    AAFwk::WantParams parameters =
-        AAFwk::WantParamWrapper::ParseWantParams(parametersString);
+    AAFwk::WantParams parameters = AAFwk::WantParamWrapper::ParseWantParams(parametersString);
     SetParams(parameters);
-
     if (!wantJson.at("entities").is_null()) {
-        if (!wantJson.at("entities").is_array()) {
-            HILOGE("entities is not an array");
-            return false;
-        }
         std::vector<std::string> entities;
         wantJson.at("entities").get_to<std::vector<std::string>>(entities);
         for (size_t i = 0; i < entities.size(); i++) {
