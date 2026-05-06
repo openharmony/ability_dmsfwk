@@ -179,7 +179,7 @@ private:
             }
             if (connection == nullptr) {
                 HILOGW("connection is nullptr.");
-                auto errCode = DistributedErrorCode::ERROR_CODE_INNER;
+                auto errCode = DistributedErrorCode::ERROR_CODE_INVALID_ID;
                 task->Reject(env, CreateJsError(env, static_cast<int32_t>(errCode), GetErrorMsg(errCode)));
                 delete task;
                 return;
