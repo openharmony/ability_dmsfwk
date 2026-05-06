@@ -1160,6 +1160,10 @@ bool DistributedWantV2::CanReadFromJson(nlohmann::json& wantJson)
         HILOGE("parameters is not string");
         return false;
     }
+    if (!wantJson["entities"].is_null() && !wantJson["entities"].is_array()) {
+        HILOGE("entities is not an array");
+        return false;
+    }
     return true;
 }
 
