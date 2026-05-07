@@ -33,6 +33,9 @@ MissionLoader& MissionLoader::GetInstance()
 
 bool MissionLoader::Load()
 {
+#ifndef SUPPORT_DISTRIBUTED_MISSION_MANAGER
+    return false;
+#endif
     std::lock_guard<std::mutex> autoLock(missionLoadLock_);
     if (loaded_) {
         return true;
