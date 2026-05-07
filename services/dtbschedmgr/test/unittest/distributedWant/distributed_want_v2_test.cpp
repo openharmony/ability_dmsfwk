@@ -3944,5 +3944,221 @@ HWTEST_F(DistributedWantV2BaseTest, ReadFromJson_test_002, TestSize.Level3)
     EXPECT_EQ(want.FromString(str), nullptr);
     GTEST_LOG_(INFO) << "ReadFromJson_test_002 end";
 }
+
+/**
+ * @tc.number: ReadFromJson_test_003
+ * @tc.name: ReadFromJson with entities as string type
+ * @tc.desc: Test ReadFromJson when entities is string instead of array.
+ */
+HWTEST_F(DistributedWantV2BaseTest, ReadFromJson_test_003, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "ReadFromJson_test_003 start";
+    DistributedWantV2 want;
+    nlohmann::json wantJson;
+    wantJson["deviceId"] = "device1";
+    wantJson["bundleName"] = "bundle1";
+    wantJson["abilityName"] = "ability1";
+    wantJson["uri"] = "uri1";
+    wantJson["type"] = "type1";
+    wantJson["flags"] = 1u;
+    wantJson["action"] = "action1";
+    wantJson["parameters"] = "parameters1";
+    wantJson["entities"] = "invalid_string_type";
+    bool result = want.ReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+    GTEST_LOG_(INFO) << "ReadFromJson_test_003 end";
+}
+
+/**
+ * @tc.number: ReadFromJson_test_004
+ * @tc.name: ReadFromJson with entities as number type
+ * @tc.desc: Test ReadFromJson when entities is number instead of array.
+ */
+HWTEST_F(DistributedWantV2BaseTest, ReadFromJson_test_004, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "ReadFromJson_test_004 start";
+    DistributedWantV2 want;
+    nlohmann::json wantJson;
+    wantJson["deviceId"] = "device1";
+    wantJson["bundleName"] = "bundle1";
+    wantJson["abilityName"] = "ability1";
+    wantJson["uri"] = "uri1";
+    wantJson["type"] = "type1";
+    wantJson["flags"] = 1u;
+    wantJson["action"] = "action1";
+    wantJson["parameters"] = "parameters1";
+    wantJson["entities"] = 12345;
+    bool result = want.ReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+    GTEST_LOG_(INFO) << "ReadFromJson_test_004 end";
+}
+
+/**
+ * @tc.number: ReadFromJson_test_005
+ * @tc.name: ReadFromJson with entities as boolean type
+ * @tc.desc: Test ReadFromJson when entities is boolean instead of array.
+ */
+HWTEST_F(DistributedWantV2BaseTest, ReadFromJson_test_005, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "ReadFromJson_test_005 start";
+    DistributedWantV2 want;
+    nlohmann::json wantJson;
+    wantJson["deviceId"] = "device1";
+    wantJson["bundleName"] = "bundle1";
+    wantJson["abilityName"] = "ability1";
+    wantJson["uri"] = "uri1";
+    wantJson["type"] = "type1";
+    wantJson["flags"] = 1u;
+    wantJson["action"] = "action1";
+    wantJson["parameters"] = "parameters1";
+    wantJson["entities"] = true;
+    bool result = want.ReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+    GTEST_LOG_(INFO) << "ReadFromJson_test_005 end";
+}
+
+/**
+ * @tc.number: ReadFromJson_test_006
+ * @tc.name: ReadFromJson with entities as object type
+ * @tc.desc: Test ReadFromJson when entities is object instead of array.
+ */
+HWTEST_F(DistributedWantV2BaseTest, ReadFromJson_test_006, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "ReadFromJson_test_006 start";
+    DistributedWantV2 want;
+    nlohmann::json wantJson;
+    wantJson["deviceId"] = "device1";
+    wantJson["bundleName"] = "bundle1";
+    wantJson["abilityName"] = "ability1";
+    wantJson["uri"] = "uri1";
+    wantJson["type"] = "type1";
+    wantJson["flags"] = 1u;
+    wantJson["action"] = "action1";
+    wantJson["parameters"] = "parameters1";
+    wantJson["entities"] = nlohmann::json::object();
+    bool result = want.ReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+    GTEST_LOG_(INFO) << "ReadFromJson_test_006 end";
+}
+
+/**
+ * @tc.number: ReadFromJson_test_007
+ * @tc.name: ReadFromJson with valid entities array
+ * @tc.desc: Test ReadFromJson when entities is valid array.
+ */
+HWTEST_F(DistributedWantV2BaseTest, ReadFromJson_test_007, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "ReadFromJson_test_007 start";
+    DistributedWantV2 want;
+    nlohmann::json wantJson;
+    wantJson["deviceId"] = "device1";
+    wantJson["bundleName"] = "bundle1";
+    wantJson["abilityName"] = "ability1";
+    wantJson["uri"] = "uri1";
+    wantJson["type"] = "type1";
+    wantJson["flags"] = 1u;
+    wantJson["action"] = "action1";
+    wantJson["parameters"] = "parameters1";
+    wantJson["entities"] = nlohmann::json::array({"entity1", "entity2"});
+    bool result = want.ReadFromJson(wantJson);
+    EXPECT_EQ(result, true);
+    GTEST_LOG_(INFO) << "ReadFromJson_test_007 end";
+}
+
+/**
+ * @tc.number: CanReadFromJson_test_004
+ * @tc.name: CanReadFromJson with entities as string type
+ * @tc.desc: Test CanReadFromJson when entities is string instead of array.
+ */
+HWTEST_F(DistributedWantV2BaseTest, CanReadFromJson_test_004, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "CanReadFromJson_test_004 start";
+    DistributedWantV2 want;
+    nlohmann::json wantJson;
+    wantJson["deviceId"] = "device1";
+    wantJson["bundleName"] = "bundle1";
+    wantJson["abilityName"] = "ability1";
+    wantJson["uri"] = "uri1";
+    wantJson["type"] = "type1";
+    wantJson["flags"] = 1u;
+    wantJson["action"] = "action1";
+    wantJson["parameters"] = "parameters1";
+    wantJson["entities"] = "invalid_string_type";
+    bool result = want.CanReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+    GTEST_LOG_(INFO) << "CanReadFromJson_test_004 end";
+}
+
+/**
+ * @tc.number: CanReadFromJson_test_005
+ * @tc.name: CanReadFromJson with entities as number type
+ * @tc.desc: Test CanReadFromJson when entities is number instead of array.
+ */
+HWTEST_F(DistributedWantV2BaseTest, CanReadFromJson_test_005, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "CanReadFromJson_test_005 start";
+    DistributedWantV2 want;
+    nlohmann::json wantJson;
+    wantJson["deviceId"] = "device1";
+    wantJson["bundleName"] = "bundle1";
+    wantJson["abilityName"] = "ability1";
+    wantJson["uri"] = "uri1";
+    wantJson["type"] = "type1";
+    wantJson["flags"] = 1u;
+    wantJson["action"] = "action1";
+    wantJson["parameters"] = "parameters1";
+    wantJson["entities"] = 12345;
+    bool result = want.CanReadFromJson(wantJson);
+    EXPECT_EQ(result, false);
+    GTEST_LOG_(INFO) << "CanReadFromJson_test_005 end";
+}
+
+/**
+ * @tc.number: CanReadFromJson_test_006
+ * @tc.name: CanReadFromJson with entities as null
+ * @tc.desc: Test CanReadFromJson when entities is null (should pass).
+ */
+HWTEST_F(DistributedWantV2BaseTest, CanReadFromJson_test_006, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "CanReadFromJson_test_006 start";
+    DistributedWantV2 want;
+    nlohmann::json wantJson;
+    wantJson["deviceId"] = "device1";
+    wantJson["bundleName"] = "bundle1";
+    wantJson["abilityName"] = "ability1";
+    wantJson["uri"] = "uri1";
+    wantJson["type"] = "type1";
+    wantJson["flags"] = 1u;
+    wantJson["action"] = "action1";
+    wantJson["parameters"] = "parameters1";
+    wantJson["entities"] = nullptr;
+    bool result = want.CanReadFromJson(wantJson);
+    EXPECT_EQ(result, true);
+    GTEST_LOG_(INFO) << "CanReadFromJson_test_006 end";
+}
+
+/**
+ * @tc.number: CanReadFromJson_test_007
+ * @tc.name: CanReadFromJson with valid entities array
+ * @tc.desc: Test CanReadFromJson when entities is valid array.
+ */
+HWTEST_F(DistributedWantV2BaseTest, CanReadFromJson_test_007, TestSize.Level3)
+{
+    GTEST_LOG_(INFO) << "CanReadFromJson_test_007 start";
+    DistributedWantV2 want;
+    nlohmann::json wantJson;
+    wantJson["deviceId"] = "device1";
+    wantJson["bundleName"] = "bundle1";
+    wantJson["abilityName"] = "ability1";
+    wantJson["uri"] = "uri1";
+    wantJson["type"] = "type1";
+    wantJson["flags"] = 1u;
+    wantJson["action"] = "action1";
+    wantJson["parameters"] = "parameters1";
+    wantJson["entities"] = nlohmann::json::array({"entity1", "entity2"});
+    bool result = want.CanReadFromJson(wantJson);
+    EXPECT_EQ(result, true);
+    GTEST_LOG_(INFO) << "CanReadFromJson_test_007 end";
+}
 }  // namespace DistributedSchedule
 }  // namespace OHOS

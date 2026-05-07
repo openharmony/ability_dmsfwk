@@ -1117,15 +1117,11 @@ nlohmann::json DistributedWantV2::ToJson() const
 bool DistributedWantV2::CanReadFromJson(nlohmann::json& wantJson)
 {
     const auto& jsonObjectEnd = wantJson.end();
-    if ((wantJson.find("deviceId") == jsonObjectEnd)
-        || (wantJson.find("bundleName") == jsonObjectEnd)
-        || (wantJson.find("abilityName") == jsonObjectEnd)
-        || (wantJson.find("uri") == jsonObjectEnd)
-        || (wantJson.find("type") == jsonObjectEnd)
-        || (wantJson.find("flags") == jsonObjectEnd)
-        || (wantJson.find("action") == jsonObjectEnd)
-        || (wantJson.find("parameters") == jsonObjectEnd)
-        || (wantJson.find("entities") == jsonObjectEnd)) {
+    if ((wantJson.find("deviceId") == jsonObjectEnd) || (wantJson.find("bundleName") == jsonObjectEnd) ||
+        (wantJson.find("abilityName") == jsonObjectEnd) || (wantJson.find("uri") == jsonObjectEnd) ||
+        (wantJson.find("type") == jsonObjectEnd) || (wantJson.find("flags") == jsonObjectEnd) ||
+        (wantJson.find("action") == jsonObjectEnd) || (wantJson.find("parameters") == jsonObjectEnd) ||
+        (wantJson.find("entities") == jsonObjectEnd)) {
         return false;
     }
     if (!wantJson["deviceId"].is_string()) {
@@ -1160,6 +1156,10 @@ bool DistributedWantV2::CanReadFromJson(nlohmann::json& wantJson)
         HILOGE("parameters is not string");
         return false;
     }
+    if (!wantJson["entities"].is_null() && !wantJson["entities"].is_array()) {
+        HILOGE("entities is not an array");
+        return false;
+    }
     return true;
 }
 
@@ -1175,7 +1175,7 @@ bool DistributedWantV2::ReadFromJson(nlohmann::json& wantJson)
         HILOGE("data is empty");
         return false;
     }
-    
+
     std::string deviceId = wantJson.at("deviceId").get<std::string>();
     std::string bundleName = wantJson.at("bundleName").get<std::string>();
     std::string abilityName = wantJson.at("abilityName").get<std::string>();
@@ -1195,7 +1195,7 @@ bool DistributedWantV2::ReadFromJson(nlohmann::json& wantJson)
 
     std::string action = wantJson.at("action").get<std::string>();
     SetAction(action);
-    
+
     if (!wantJson.at("parameters").is_string()) {
         return false;
     }

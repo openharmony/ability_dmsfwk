@@ -143,6 +143,7 @@ HWTEST_F(DistributedWantV2SupTest, DistributedSchedule_DistributedWantV2_CanRead
     EXPECT_FALSE(dwant->CanReadFromJson(wantJson));
 
     wantJson["parameters"] = "parameters";
+    wantJson["entities"] = nullptr;
     EXPECT_TRUE(dwant->CanReadFromJson(wantJson));
 }
 
