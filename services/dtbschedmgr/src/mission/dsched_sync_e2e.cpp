@@ -101,11 +101,6 @@ void DmsKvSyncE2E::SetDeviceCfg()
     if (contralType == FORBID_SEND_FORBID_RECV) {
         isForbidSendAndRecv_ = true;
     }
-
-    int32_t result = LoadContinueConfig();
-    if (result != ERR_OK) {
-        HILOGE("Load continue config fail, result %{public}d.", result);
-    }
 }
 
 bool DmsKvSyncE2E::CheckDeviceCfg()
@@ -117,12 +112,6 @@ bool DmsKvSyncE2E::CheckDeviceCfg()
 bool DmsKvSyncE2E::CheckMDMCtrlRule(const std::string &bundleName)
 {
     HILOGD("called.");
-    if (isMDMControl_.load()) {
-        if (!CheckBundleContinueConfig(bundleName)) {
-            HILOGI("CheckMDMCtrlRule is true.");
-            return true;
-        }
-    }
     return false;
 }
 
@@ -159,112 +148,7 @@ bool DmsKvSyncE2E::IsValidPath(const std::string &inFilePath, std::string &realF
     return true;
 }
 
-bool DmsKvSyncE2E::UpdateWhiteList(const std::string &cfgJsonStr)
-{
-    cJSON *inJson = nullptr;
-    cJSON *allowList = nullptr;
-    bool isSuccess = false;
-    do {
-        inJson = cJSON_Parse(cfgJsonStr.c_str());
-        if (inJson == nullptr) {
-            HILOGE("parse continue config json file stream to json fail.");
-            break;
-        }
 
-        allowList = cJSON_GetObjectItem(inJson, ALLOW_APP_LIST_KEY.c_str());
-        if (allowList == nullptr || !cJSON_IsArray(allowList)) {
-            HILOGE("allow app list array is not in continue config json file.");
-            break;
-        }
-
-        std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
-        for (int32_t i = 0; i < cJSON_GetArraySize(allowList); i++) {
-            cJSON *iAllowAppJson = cJSON_GetArrayItem(allowList, i);
-            if (!cJSON_IsString(iAllowAppJson)) {
-                HILOGE("allow app list [%{public}d] is not string.", i);
-                continue;
-            }
-
-            std::string iAllowAppStr = std::string(cJSON_GetStringValue(iAllowAppJson));
-            HILOGI("allow app list show [%{public}d] : [%{public}s].", i, iAllowAppStr.c_str());
-            whiteList_.push_back(iAllowAppStr);
-        }
-        isSuccess = true;
-    } while (false);
-
-    if (inJson != nullptr) {
-        cJSON_Delete(inJson);
-        inJson = nullptr;
-    }
-    return isSuccess;
-}
-
-int32_t DmsKvSyncE2E::LoadContinueConfig()
-{
-    std::string tempPath = continueCfgFullPath_;
-    if ((continueCfgFullPath_.empty() || !IsValidPath(tempPath, continueCfgFullPath_))) {
-        char cfgPathBuf[MAX_CONFIG_PATH_LEN] = { 0 };
-        char *filePath = GetOneCfgFile(CONTINUE_CONFIG_RELATIVE_PATH.c_str(), cfgPathBuf, MAX_CONFIG_PATH_LEN);
-        if (filePath == nullptr || filePath != cfgPathBuf) {
-            HILOGE("Not find continue config file, relative path %{public}s.",
-                GetAnonymStr(CONTINUE_CONFIG_RELATIVE_PATH).c_str());
-            continueCfgFullPath_ = "";
-            return ERR_OK;
-        }
-        continueCfgFullPath_ = std::string(filePath);
-        HILOGD("cfgFullPath: %{public}s.", GetAnonymStr(continueCfgFullPath_).c_str());
-    }
-    tempPath = continueCfgFullPath_;
-    if (!IsValidPath(tempPath, continueCfgFullPath_)) {
-        HILOGE("Continue config full path is invalid, cfgFullPath %{public}s.",
-            GetAnonymStr(continueCfgFullPath_).c_str());
-        return DMS_PERMISSION_DENIED;
-    }
-    std::ifstream in;
-    in.open(continueCfgFullPath_.c_str(), std::ios::binary | std::ios::in);
-    if (!in.is_open()) {
-        HILOGE("Open continue config json file fail, cfgFullPath %{public}s.",
-            GetAnonymStr(continueCfgFullPath_).c_str());
-        return DMS_PERMISSION_DENIED;
-    }
-    std::string cfgFileContent;
-    in.seekg(0, std::ios::end);
-    auto fileSize = in.tellg();
-    in.seekg(0, std::ios::beg);
-    if (fileSize <= 0) {
-        HILOGE("Invalid file size: %{public}lld", static_cast<long long>(fileSize));
-        in.close();
-        return DMS_PERMISSION_DENIED;
-    }
-    cfgFileContent.resize(static_cast<size_t>(fileSize));
-    in.read(&cfgFileContent[0], fileSize);
-    if (in.gcount() != fileSize) {
-        HILOGE("Read incomplete");
-        in.close();
-        return DMS_PERMISSION_DENIED;
-    }
-    in.close();
-    if (!UpdateWhiteList(cfgFileContent)) {
-        HILOGE("Update fail, cfgFullPath %{public}s.", GetAnonymStr(continueCfgFullPath_).c_str());
-        return DMS_PERMISSION_DENIED;
-    }
-    return ERR_OK;
-}
-
-bool DmsKvSyncE2E::CheckBundleContinueConfig(const std::string &bundleName)
-{
-    std::lock_guard<std::mutex> lock(kvStorePtrMutex_);
-    auto it = std::find(whiteList_.begin(), whiteList_.end(), bundleName);
-    if (it == whiteList_.end()) {
-        HILOGE("Current app is not allow to continue in config file, bundleName %{public}s, cfgPath %{public}s.",
-            bundleName.c_str(), GetAnonymStr(continueCfgFullPath_).c_str());
-        return false;
-    }
-
-    HILOGD("Current app is allow to continue in config file, bundleName %{public}s, cfgPath %{public}s.",
-        bundleName.c_str(), GetAnonymStr(continueCfgFullPath_).c_str());
-    return true;
-}
 
 bool DmsKvSyncE2E::PushAndPullData()
 {
