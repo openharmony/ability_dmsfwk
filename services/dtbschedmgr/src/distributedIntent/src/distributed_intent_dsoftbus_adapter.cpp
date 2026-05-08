@@ -90,6 +90,19 @@ DistributedIntentDsoftbusAdapter::~DistributedIntentDsoftbusAdapter()
     sessions_.clear();
 }
 
+void DistributedIntentDsoftbusAdapter::StopSessionCleanupThread()
+{
+    sessionCleanupRunning_.store(false);
+    sessionCleanupCv_.notify_all();
+    if (sessionCleanupThread_.joinable()) {
+        if (sessionCleanupThread_.get_id() == std::this_thread::get_id()) {
+            sessionCleanupThread_.detach();
+        } else {
+            sessionCleanupThread_.join();
+        }
+    }
+}
+
 std::shared_ptr<IntentSocketSession> DistributedIntentDsoftbusAdapter::FindClientSession(
     const std::string& deviceId)
 {
@@ -551,31 +564,26 @@ void DistributedIntentDsoftbusAdapter::StartSessionCleanupThread()
     if (sessionCleanupRunning_.exchange(true)) {
         return;
     }
-    sessionCleanupThread_ = std::thread([this]() {
+    if (sessionCleanupThread_.joinable()) {
+        sessionCleanupThread_.detach();
+    }
+    sessionCleanupThread_ = std::thread([]() {
+        auto& adapter = DistributedIntentDsoftbusAdapter::GetInstance();
         HILOGI("Session cleanup thread started");
-        while (sessionCleanupRunning_.load()) {
+        while (adapter.sessionCleanupRunning_.load()) {
             {
-                std::unique_lock<std::mutex> lock(sessionCleanupMutex_);
-                sessionCleanupCv_.wait_for(lock,
+                std::unique_lock<std::mutex> lock(adapter.sessionCleanupMutex_);
+                adapter.sessionCleanupCv_.wait_for(lock,
                     std::chrono::milliseconds(SESSION_CLEANUP_INTERVAL_MS),
-                    [this]() { return !sessionCleanupRunning_.load(); });
+                    [&adapter]() { return !adapter.sessionCleanupRunning_.load(); });
             }
-            if (!sessionCleanupRunning_.load()) {
+            if (!adapter.sessionCleanupRunning_.load()) {
                 break;
             }
-            CleanupIdleSessions();
+            adapter.CleanupIdleSessions();
         }
         HILOGI("Session cleanup thread stopped");
     });
-}
-
-void DistributedIntentDsoftbusAdapter::StopSessionCleanupThread()
-{
-    sessionCleanupRunning_.store(false);
-    sessionCleanupCv_.notify_all();
-    if (sessionCleanupThread_.joinable()) {
-        sessionCleanupThread_.join();
-    }
 }
 
 } // namespace DistributedSchedule
