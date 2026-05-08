@@ -926,7 +926,6 @@ HWTEST_F(DistributedSchedServiceSecondTest, ContinueRemoteMission_001, TestSize.
     int32_t timeout = 5;
     DistributedSchedService::GetInstance().SetContinuationTimeout(missionId, timeout);
     WantParams wantParams;
-    EXPECT_EQ(ERR_OK, LoadContinueConfig());
     auto callback = GetDSchedService();
     int32_t result = DistributedSchedService::GetInstance().ContinueRemoteMission(
         "", "string", "bundleName", callback, wantParams);
@@ -943,7 +942,6 @@ HWTEST_F(DistributedSchedServiceSecondTest, ContinueRemoteMission_002, TestSize.
 {
     DTEST_LOG << "DSchedContinuationTest ContinueRemoteMission_002 start" << std::endl;
     WantParams wantParams;
-    EXPECT_EQ(ERR_OK, LoadContinueConfig());
     auto callback = GetDSchedService();
     std::string localDeviceId;
     DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId);

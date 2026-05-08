@@ -114,26 +114,6 @@ HWTEST_F(DistributedSchedUtilsTest, IsValidPath_004, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckBundleContinueConfig_001
- * @tc.desc: Check bundle continue config when existing config file
- * @tc.type: FUNC
- * @tc.require: I5WKCK
- */
-HWTEST_F(DistributedSchedUtilsTest, CheckBundleContinueConfig_001, TestSize.Level1)
-{
-    std::string cfgJsonStr = R"({
-        "allow_applist":["test_bundle_0"]
-    })";
-    EXPECT_TRUE(UpdateAllowAppList(cfgJsonStr));
-
-    std::string bundleName = "test";
-    EXPECT_FALSE(CheckBundleContinueConfig(bundleName));
-
-    bundleName = "test_bundle_0";
-    EXPECT_TRUE(CheckBundleContinueConfig(bundleName));
-}
-
-/**
  * @tc.name: UpdateAllowAppList_001
  * @tc.desc: Update allow app list with invalid cfgJsonStr
  * @tc.type: FUNC
@@ -171,32 +151,6 @@ HWTEST_F(DistributedSchedUtilsTest, UpdateAllowAppList_002, TestSize.Level1)
         "allow_applist":["test_bundle_1"]
     })";
     EXPECT_TRUE(UpdateAllowAppList(cfgJsonStr));
-}
-
-/**
- * @tc.name: LoadContinueConfig_001
- * @tc.desc: Load continue config success
- * @tc.type: FUNC
- * @tc.require: I5WKCK
- */
-HWTEST_F(DistributedSchedUtilsTest, LoadContinueConfig_001, TestSize.Level1)
-{
-    EXPECT_EQ(ERR_OK, LoadContinueConfig());
-    EXPECT_EQ(ERR_OK, LoadContinueConfig());
-}
-
-/**
- * @tc.name: CheckBundleContinueConfig_002
- * @tc.desc: Check bundle continue config when missing config file
- * @tc.type: FUNC
- * @tc.require: I5WKCK
- */
-HWTEST_F(DistributedSchedUtilsTest, CheckBundleContinueConfig_002, TestSize.Level1)
-{
-    EXPECT_EQ(ERR_OK, LoadContinueConfig());
-
-    std::string bundleName = "test_bundle_1";
-    EXPECT_TRUE(CheckBundleContinueConfig(bundleName));
 }
 
 /**

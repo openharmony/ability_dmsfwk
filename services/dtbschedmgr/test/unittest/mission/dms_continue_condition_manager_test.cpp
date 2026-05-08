@@ -298,7 +298,6 @@ HWTEST_F(DmsContinueConditionMgrTest, testCheckSendFocusedCondition001, TestSize
     DmsKvSyncE2E::GetInstance()->isCfgDevices_ = false;
     ret = DmsContinueConditionMgr::GetInstance().CheckSendFocusedCondition(status);
     EXPECT_TRUE(ret);
-    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
     DTEST_LOG << "DMSContinueManagerTest testCheckSendFocusedCondition001 end" << std::endl;
 }
 
@@ -313,7 +312,6 @@ HWTEST_F(DmsContinueConditionMgrTest, testCheckSendUnfocusedCondition001, TestSi
     MissionStatus status;
     status.isFocused = false;
     status.bundleName = "bundleName";
-    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
     DmsKvSyncE2E::GetInstance()->isCfgDevices_ = true;
     auto ret = DmsContinueConditionMgr::GetInstance().CheckSendUnfocusedCondition(status);
     EXPECT_FALSE(ret);
@@ -330,7 +328,6 @@ HWTEST_F(DmsContinueConditionMgrTest, testCheckSendUnfocusedCondition001, TestSi
     DmsKvSyncE2E::GetInstance()->isCfgDevices_ = false;
     ret = DmsContinueConditionMgr::GetInstance().CheckSendUnfocusedCondition(status);
     EXPECT_TRUE(ret);
-    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
     DTEST_LOG << "DMSContinueManagerTest testCheckSendUnfocusedCondition001 end" << std::endl;
 }
 
@@ -345,7 +342,6 @@ HWTEST_F(DmsContinueConditionMgrTest, testCheckSendActiveCondition001, TestSize.
     MissionStatus status;
     status.isFocused = false;
     status.bundleName = "bundleName";
-    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
     DmsKvSyncE2E::GetInstance()->isCfgDevices_ = true;
     auto ret = DmsContinueConditionMgr::GetInstance().CheckSendActiveCondition(status);
     EXPECT_FALSE(ret);
@@ -362,7 +358,6 @@ HWTEST_F(DmsContinueConditionMgrTest, testCheckSendActiveCondition001, TestSize.
     DmsKvSyncE2E::GetInstance()->isCfgDevices_ = false;
     ret = DmsContinueConditionMgr::GetInstance().CheckSendActiveCondition(status);
     EXPECT_TRUE(ret);
-    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
     DTEST_LOG << "DMSContinueManagerTest testCheckSendActiveCondition001 end" << std::endl;
 }
 
@@ -377,7 +372,6 @@ HWTEST_F(DmsContinueConditionMgrTest, testCheckSendInactiveCondition001, TestSiz
     MissionStatus status;
     status.isContinuable = false;
     status.bundleName = "bundleName";
-    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
     DmsKvSyncE2E::GetInstance()->isCfgDevices_ = true;
     auto ret = DmsContinueConditionMgr::GetInstance().CheckSendInactiveCondition(status);
     EXPECT_FALSE(ret);
@@ -389,7 +383,6 @@ HWTEST_F(DmsContinueConditionMgrTest, testCheckSendInactiveCondition001, TestSiz
     DmsKvSyncE2E::GetInstance()->isCfgDevices_ = false;
     ret = DmsContinueConditionMgr::GetInstance().CheckSendInactiveCondition(status);
     EXPECT_TRUE(ret);
-    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
     DTEST_LOG << "DMSContinueManagerTest testCheckSendInactiveCondition001 end" << std::endl;
 }
 

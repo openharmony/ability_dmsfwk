@@ -181,31 +181,7 @@ HWTEST_F(DmsKvSyncE2ETest, CheckCtrlRuleTest_001, TestSize.Level1)
     DTEST_LOG << "DmsKvSyncE2ETest CheckCtrlRuleTest_001 end" << std::endl;
 }
 
-/**
- * @tc.name: CheckBundleContinueConfigTest_001
- * @tc.desc: test insert DmsKvSyncE2E
- * @tc.type: FUNC
- */
-HWTEST_F(DmsKvSyncE2ETest, CheckBundleContinueConfigTest_001, TestSize.Level1)
-{
-    DTEST_LOG << "DmsKvSyncE2ETest CheckBundleContinueConfigTest_001 start" << std::endl;
-    ASSERT_NE(dmsKvSyncE2E_, nullptr);
-    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
-    EXPECT_NE(dmsKvSyncE2E, nullptr);
-    if (dmsKvSyncE2E != nullptr) {
-        const std::string bundleName = "123";
-        dmsKvSyncE2E_->GetInstance()->whiteList_.clear();
-        bool ret = dmsKvSyncE2E_->GetInstance()->CheckBundleContinueConfig(bundleName);
-        EXPECT_EQ(ret, false);
 
-        dmsKvSyncE2E_->GetInstance()->whiteList_.clear();
-        dmsKvSyncE2E_->GetInstance()->whiteList_.push_back(bundleName);
-        dmsKvSyncE2E_->GetInstance()->whiteList_.push_back(bundleName);
-        ret = dmsKvSyncE2E_->GetInstance()->CheckBundleContinueConfig(bundleName);
-        EXPECT_EQ(ret, true);
-    }
-    DTEST_LOG << "DmsKvSyncE2ETest CheckBundleContinueConfigTest_001 end" << std::endl;
-}
 
 /**
  * @tc.name: IsValidPath_001
@@ -231,24 +207,7 @@ HWTEST_F(DmsKvSyncE2ETest, IsValidPath_001, TestSize.Level1)
     DTEST_LOG << "DmsKvSyncE2ETest IsValidPath_001 end" << std::endl;
 }
 
-/**
- * @tc.name: UpdateWhiteListTest_001
- * @tc.desc: test UpdateWhiteList
- * @tc.type: FUNC
- */
-HWTEST_F(DmsKvSyncE2ETest, UpdateWhiteListTest_001, TestSize.Level1)
-{
-    DTEST_LOG << "DmsKvSyncE2ETest UpdateWhiteListTest_001 start" << std::endl;
-    ASSERT_NE(dmsKvSyncE2E_, nullptr);
-    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
-    EXPECT_NE(dmsKvSyncE2E, nullptr);
-    if (dmsKvSyncE2E != nullptr) {
-        const std::string cfgJsonStr = "cfgJsonStr";
-        bool ret = dmsKvSyncE2E_->GetInstance()->UpdateWhiteList(cfgJsonStr);
-        EXPECT_EQ(ret, false);
-    }
-    DTEST_LOG << "DmsKvSyncE2ETest UpdateWhiteListTest_001 end" << std::endl;
-}
+
 
 /**
  * @tc.name: CheckKvStoreTest_001
