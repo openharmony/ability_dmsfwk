@@ -304,11 +304,11 @@ int32_t IntentPermissionChecker::CheckStartPermission(const std::string& localDe
     }
     if (!DistributedSchedPermission::GetInstance().CheckTargetAbilityVisible(targetAbility, callerInfo)) {
         HILOGE("target ability is not visible and has no PERMISSION_START_INVISIBLE_ABILITY, permission denied");
-        return ERR_DI_PERMISSION_DENIED;
+        return ERR_DI_ABILITY_VISIBLE_FALSE_DENY_REQUEST;
     }
     if (!CheckCustomPermission(targetAbility, dAccessToken)) {
         HILOGE("CheckCustomPermission denied");
-        return ERR_DI_PERMISSION_DENIED;
+        return ERR_DI_STATIC_CFG_PERMISSION;
     }
     HILOGI("CheckStartPermission success");
     return ERR_DI_OK;
