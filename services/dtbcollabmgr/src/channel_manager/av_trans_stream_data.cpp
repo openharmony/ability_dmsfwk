@@ -119,13 +119,13 @@ inline void AVTransStreamData::WriteExtSurfaceParamToJson(cJSON* root) const
     cJSON_AddItemToObject(root, "surface_param", surfaceParamJson);
 }
 
-int32_t AVTransStreamData::DeserializeStreamDataExt(const char* data)
+int32_t AVTransStreamData::DeserializeStreamDataExt(const char* data, uint32_t len)
 {
-    if (data == nullptr) {
-        HILOGE("empty data");
+    if (data == nullptr || len == 0) {
+        HILOGE("invalid data or length");
         return NULL_POINTER_ERROR;
     }
-    cJSON* root = cJSON_Parse(data);
+    cJSON* root = cJSON_ParseWithLength(data, len);
     if (root == nullptr) {
         HILOGE("parse recv data ext failed");
         return PARSE_AV_TRANS_STREAM_EXT_FAILED;

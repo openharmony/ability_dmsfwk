@@ -1430,7 +1430,7 @@ void ChannelManager::OnStreamReceived(int32_t socketId, const StreamData* data,
     }
     AVTransStreamDataExt streamDataExt;
     std::shared_ptr<AVTransStreamData> streamData = std::make_shared<AVTransStreamData>(buffer, streamDataExt);
-    ret = streamData->DeserializeStreamDataExt(ext->buf);
+    ret = streamData->DeserializeStreamDataExt(ext->buf, ext->bufLen);
     if (ret != ERR_OK) {
         HILOGE("deserialize stream ext failed, %{public}d", socketId);
         DoErrorCallback(channelId, PARSE_AV_TRANS_STREAM_EXT_FAILED);
