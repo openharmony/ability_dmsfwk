@@ -205,8 +205,6 @@ HWTEST_F(DmsKvSyncE2ETest, IsValidPath_001, TestSize.Level1)
     DTEST_LOG << "DmsKvSyncE2ETest IsValidPath_001 end" << std::endl;
 }
 
-
-
 /**
  * @tc.name: CheckKvStoreTest_001
  * @tc.desc: test CheckKvStore
