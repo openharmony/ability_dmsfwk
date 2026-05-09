@@ -181,8 +181,6 @@ HWTEST_F(DmsKvSyncE2ETest, CheckCtrlRuleTest_001, TestSize.Level1)
     DTEST_LOG << "DmsKvSyncE2ETest CheckCtrlRuleTest_001 end" << std::endl;
 }
 
-
-
 /**
  * @tc.name: IsValidPath_001
  * @tc.desc: test IsValidPath
