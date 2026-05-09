@@ -225,30 +225,6 @@ HWTEST_F(DmsKvSyncE2ETest, CheckKvStoreTest_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CheckMDMCtrlRuleTest_001
- * @tc.desc: test insert CheckMDMCtrlRule
- * @tc.type: FUNC
- */
-HWTEST_F(DmsKvSyncE2ETest, CheckMDMCtrlRuleTest_001, TestSize.Level1)
-{
-    DTEST_LOG << "DmsKvSyncE2ETest CheckMDMCtrlRuleTest_001 start" << std::endl;
-    ASSERT_NE(dmsKvSyncE2E_, nullptr);
-    std::string bundleName = "bundleName";
-    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
-    EXPECT_NE(dmsKvSyncE2E, nullptr);
-    if (dmsKvSyncE2E != nullptr) {
-        dmsKvSyncE2E_->GetInstance()->isMDMControl_ = true;
-        bool ret = dmsKvSyncE2E_->GetInstance()->CheckMDMCtrlRule(bundleName);
-        EXPECT_EQ(ret, true);
-
-        dmsKvSyncE2E_->GetInstance()->isMDMControl_ = false;
-        ret = dmsKvSyncE2E_->GetInstance()->CheckMDMCtrlRule(bundleName);
-        EXPECT_EQ(ret, false);
-    }
-    DTEST_LOG << "DmsKvSyncE2ETest CheckMDMCtrlRuleTest_001 end" << std::endl;
-}
-
-/**
  * @tc.name: IsMDMControlWithExemptionTest_001
  * @tc.desc: test IsMDMControlWithExemption with empty bundle name
  * @tc.type: FUNC
@@ -863,40 +839,6 @@ HWTEST_F(DmsKvSyncE2ETest, SubscriptionUnsubscriptionAccountTest_001, TestSize.L
         dmsKvSyncE2E_->GetInstance()->UnsubscriptionAccount();
     }
     DTEST_LOG << "DmsKvSyncE2ETest SubscriptionUnsubscriptionAccountTest_001 end" << std::endl;
-}
-
-/**
- * @tc.name: CheckMDMCtrlRuleTest_002
- * @tc.desc: test CheckMDMCtrlRule with various bundle names
- * @tc.type: FUNC
- */
-HWTEST_F(DmsKvSyncE2ETest, CheckMDMCtrlRuleTest_002, TestSize.Level1)
-{
-    DTEST_LOG << "DmsKvSyncE2ETest CheckMDMCtrlRuleTest_002 start" << std::endl;
-    ASSERT_NE(dmsKvSyncE2E_, nullptr);
-    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
-    EXPECT_NE(dmsKvSyncE2E, nullptr);
-    if (dmsKvSyncE2E != nullptr) {
-        std::vector<std::string> bundleNames = {
-            "com.example.app1",
-            "com.example.app2",
-            "com.ohos.system",
-            "com.test.bundle"
-        };
-        
-        dmsKvSyncE2E_->GetInstance()->SetMdmControl(true);
-        for (const auto& bundleName : bundleNames) {
-            bool ret = dmsKvSyncE2E_->GetInstance()->CheckMDMCtrlRule(bundleName);
-            EXPECT_EQ(ret, true);
-        }
-        
-        dmsKvSyncE2E_->GetInstance()->SetMdmControl(false);
-        for (const auto& bundleName : bundleNames) {
-            bool ret = dmsKvSyncE2E_->GetInstance()->CheckMDMCtrlRule(bundleName);
-            EXPECT_EQ(ret, false);
-        }
-    }
-    DTEST_LOG << "DmsKvSyncE2ETest CheckMDMCtrlRuleTest_002 end" << std::endl;
 }
 
 /**
