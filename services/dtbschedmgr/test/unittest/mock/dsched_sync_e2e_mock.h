@@ -29,7 +29,6 @@ public:
     virtual bool PushAndPullData(const std::string &networkId) = 0;
     virtual bool CheckDeviceCfg() = 0;
     virtual bool CheckCtrlRule() = 0;
-    virtual bool CheckBundleContinueConfig(const std::string &bundleName) = 0;
 public:
     static inline std::shared_ptr<IDmsKvSyncE2E> dmsKvMock = nullptr;
 };
@@ -40,7 +39,6 @@ public:
     MOCK_METHOD1(PushAndPullData, bool(const std::string &networkId));
     MOCK_METHOD0(CheckDeviceCfg, bool());
     MOCK_METHOD0(CheckCtrlRule, bool());
-    MOCK_METHOD1(CheckBundleContinueConfig, bool(const std::string &bundleName));
 };
 }
 }

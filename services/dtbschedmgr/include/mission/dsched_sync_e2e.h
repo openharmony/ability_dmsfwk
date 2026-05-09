@@ -49,7 +49,6 @@ public:
     void SetDeviceCfg();
     bool CheckDeviceCfg();
     bool CheckCtrlRule();
-    bool CheckBundleContinueConfig(const std::string &bundleName);
     bool CheckMDMCtrlRule(const std::string &bundleName);
     bool QueryMDMControl();
     bool IsMDMControl();
@@ -64,8 +63,6 @@ private:
     bool CheckKvStore();
     DistributedKv::Status GetKvStore();
     bool IsValidPath(const std::string &inFilePath, std::string &realFilePath);
-    bool UpdateWhiteList(const std::string &cfgJsonStr);
-    int32_t LoadContinueConfig();
     std::vector<std::string> GetAllowedDistributeAbilityConnBundlesStub(int32_t serviceType, int32_t accountId);
 
     static std::mutex mutex_;
@@ -78,8 +75,6 @@ private:
     std::atomic<bool> isCfgDevices_ = false;
     std::map<std::string, bool> deviceSyncRecord_;
     std::atomic<bool> isForbidSendAndRecv_ = false;
-    std::string continueCfgFullPath_ = "";
-    std::vector<std::string> whiteList_;
     std::atomic<bool> isMDMControl_ = false;
     std::shared_ptr<AccountConstraintSubscriber> osAccountConstraintSubscriber_ = nullptr;
 };

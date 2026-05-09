@@ -50,11 +50,3 @@ bool DmsKvSyncE2E::CheckCtrlRule()
     }
     return IDmsKvSyncE2E::dmsKvMock->CheckCtrlRule();
 }
-
-bool DmsKvSyncE2E::CheckBundleContinueConfig(const std::string &bundleName)
-{
-    if (IDmsKvSyncE2E::dmsKvMock == nullptr) {
-        return false;
-    }
-    return IDmsKvSyncE2E::dmsKvMock->CheckBundleContinueConfig(bundleName);
-}
