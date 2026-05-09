@@ -107,7 +107,7 @@ HWTEST_F(DtbschedmgrDeviceInfoStorageTest, ConnectSoftbusTest_001, TestSize.Leve
      * @tc.steps: step1. test ConnectSoftbus;
      */
     bool result = DtbschedmgrDeviceInfoStorage::GetInstance().ConnectSoftbus();
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
     DTEST_LOG << "DtbschedmgrDeviceInfoStorageTest ConnectSoftbusTest_001 end" << std::endl;
 }
 

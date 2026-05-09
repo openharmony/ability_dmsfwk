@@ -33,6 +33,7 @@ const std::string NETWORKID = "1234567";
 constexpr int32_t SLEEP_TIME = 2000;
 constexpr int32_t MAX_WAIT_TIME = 10000;
 const int32_t WAITTIME = 2000;
+constexpr uint32_t THREAD_EXIT_WAIT_MS = 500;
 }
 
 namespace OHOS {
@@ -81,6 +82,22 @@ void DMSNetworkAdapterTest::TearDownTestCase()
     std::unique_lock<std::mutex> lock(caseDoneLock_);
     caseDoneCondition_.wait_for(lock, std::chrono::milliseconds(MAX_WAIT_TIME),
         [&] () { return isCaseDone_; });
+
+    // Stop EventRunner thread to prevent crash after test completion
+    if (DnetworkAdapter::GetInstance()->dnetworkHandler_ != nullptr) {
+        auto runner = DnetworkAdapter::GetInstance()->dnetworkHandler_->GetEventRunner();
+        if (runner != nullptr) {
+            runner->Stop();
+        }
+        DnetworkAdapter::GetInstance()->dnetworkHandler_.reset();
+        DnetworkAdapter::GetInstance()->dnetworkHandler_ = nullptr;
+    }
+
+    // Clean up static resources
+    DnetworkAdapter::listenerSet_.clear();
+
+    // Wait for thread to fully exit
+    std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_EXIT_WAIT_MS));
 }
 
 void DMSNetworkAdapterTest::SetUp()
@@ -90,6 +107,17 @@ void DMSNetworkAdapterTest::SetUp()
 void DMSNetworkAdapterTest::TearDown()
 {
     usleep(WAITTIME);
+
+    // Restore state that may have been modified by test cases
+    // This prevents test pollution when some cases set members to nullptr
+    if (DnetworkAdapter::GetInstance()->initCallback_ == nullptr) {
+        DnetworkAdapter::GetInstance()->initCallback_ =
+            std::make_shared<DnetworkAdapter::DeviceInitCallBack>();
+    }
+    if (DnetworkAdapter::GetInstance()->stateCallback_ == nullptr) {
+        DnetworkAdapter::GetInstance()->stateCallback_ =
+            std::make_shared<DnetworkAdapter::DmsDeviceStateCallback>();
+    }
 }
 
 /**
