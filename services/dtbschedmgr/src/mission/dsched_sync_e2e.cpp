@@ -148,8 +148,6 @@ bool DmsKvSyncE2E::IsValidPath(const std::string &inFilePath, std::string &realF
     return true;
 }
 
-
-
 bool DmsKvSyncE2E::PushAndPullData()
 {
     HILOGI("called.");
