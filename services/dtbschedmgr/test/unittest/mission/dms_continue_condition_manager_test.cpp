@@ -281,7 +281,6 @@ HWTEST_F(DmsContinueConditionMgrTest, testCheckSendFocusedCondition001, TestSize
     MissionStatus status;
     status.isContinuable = false;
     status.bundleName = "bundleName";
-    DmsKvSyncE2E::GetInstance()->whiteList_.clear();
     DmsKvSyncE2E::GetInstance()->isCfgDevices_ = true;
     auto ret = DmsContinueConditionMgr::GetInstance().CheckSendFocusedCondition(status);
     EXPECT_FALSE(ret);
