@@ -377,7 +377,7 @@ int32_t RemoteIntentManager::DoExecuteIntent(AAFwk::Want& want,
         want, srcDeviceId, ctx.requestCode, dAccessToken);
     if (err != ERR_OK) {
         HILOGE("ExecuteIntent failed, err=%{public}d", err);
-        return ERR_DI_EXECUTE_FAILED;
+        return err;
     }
     return ERR_DI_OK;
 }
@@ -438,7 +438,7 @@ int32_t RemoteIntentManager::CheckAndExecuteIntent(AAFwk::Want& want,
         localDeviceId, want, ctx.callerInfo, ctx.accountInfo, dAccessToken);
     if (ret != ERR_OK) {
         HILOGE("CheckStartPermission failed, ret=%{public}d", ret);
-        SendInnerResultBack(socketFd, ctx.requestCode, ERR_DI_PERMISSION_DENIED,
+        SendInnerResultBack(socketFd, ctx.requestCode, ConvertDiErrCode(ret),
             IntentDataType::INTENT_DATA_TYPE_DMS_RESULT);
         return ERR_DI_PERMISSION_DENIED;
     }
@@ -447,7 +447,7 @@ int32_t RemoteIntentManager::CheckAndExecuteIntent(AAFwk::Want& want,
         HILOGE("DoExecuteIntent failed, ret=%{public}d", ret);
         SendInnerResultBack(socketFd, ctx.requestCode, ret,
             IntentDataType::INTENT_DATA_TYPE_AMGR_RESULT);
-        return ret;
+        return ERR_DI_EXECUTE_FAILED;
     }
     return ERR_DI_OK;
 }

@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "ability_manager_errors.h"
+
 namespace OHOS {
 namespace DistributedSchedule {
 enum DistributedIntentErrorCode {
@@ -37,11 +39,6 @@ enum DistributedIntentErrorCode {
      * Result(401) for parameter check failed.
      */
     ERR_DI_INVALID_PARAMETER = 401,
-
-    /**
-     * Result(801) for capability not support.
-     */
-    ERR_DI_CAPABILITY_NOT_SUPPORT = 801,
 
     /**
      * Result(16700001) for the distributed intent system ability work abnormally.
@@ -152,12 +149,29 @@ enum DistributedIntentErrorCode {
      * Result(16700022) for intent data serialize or deserialize failed.
      */
     ERR_DI_SERIALIZE_FAILED = 16700022,
+
+    /**
+     * Result(16700023) for ability visible is false.
+     */
+    ERR_DI_ABILITY_VISIBLE_FALSE_DENY_REQUEST = 16700023,
+
+    /**
+     * Result(16700024) for static cfg permission denied.
+     */
+    ERR_DI_STATIC_CFG_PERMISSION = 16700024,
+
+    /**
+     * Result(16300509) for capability not support.
+     */
+    ERR_DI_CAPABILITY_NOT_SUPPORT = 16300509,
 };
 
 enum IntentLinkDisconnectReason {
     INTENT_LINK_DISCONNECT_REASON_SHUTDOWN = 0,
     INTENT_LINK_DISCONNECT_REASON_IDLE_TIMEOUT = 1,
 };
+
+int32_t ConvertDiErrCode(int32_t diErrCode);
 
 } // namespace DistributedSchedule
 } // namespace OHOS

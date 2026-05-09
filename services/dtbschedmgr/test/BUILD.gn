@@ -1637,6 +1637,26 @@ ohos_unittest("distributedremoteintentmanagertest") {
   subsystem_name = "ability"
 }
 
+ohos_unittest("distributedintenterorcodetest") {
+  module_out_path = module_output_path
+  sources = [
+    "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/distributed_intent_error_code.cpp",
+    "unittest/distributed_intent/distributed_intent_error_code_test.cpp",
+  ]
+  configs = [
+    ":test_config",
+    "${dms_path}/services/dtbschedmgr/test/resource:coverage_flags",
+  ]
+  deps = []
+  if (is_standard_system) {
+    external_deps = dsched_external_deps
+    deps += dsched_public_deps
+  }
+  external_deps += [ "googletest:gmock" ]
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
 ohos_unittest("distributedintentpermissioncheckertest") {
   module_out_path = module_output_path
   cflags = [ "-Dprivate=public" ]
@@ -1677,6 +1697,7 @@ group("unittest") {
       ":distributedcalltest",
       ":distributedeventtest",
       ":distributedintentdsoftbusadaptertest",
+      ":distributedintenterorcodetest",
       ":distributedintentpermissioncheckertest",
       ":distributedintentservicestubtest",
       ":distributedintentservicetest",
