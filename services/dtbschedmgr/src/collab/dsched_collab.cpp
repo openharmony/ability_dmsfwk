@@ -38,6 +38,11 @@
 #ifdef DMS_CHECK_SCREENLOCK
 #include "screenlock_manager.h"
 #endif
+#ifdef EFFICIENCY_MANAGER_ENABLE
+#include "res_type.h"
+#include "res_sched_client.h"
+#include "distributed_sched_proxy.h"
+#endif
 #include "string_wrapper.h"
 #include "system_ability_definition.h"
 
@@ -48,6 +53,16 @@ namespace {
 const std::string TAG = "DSchedCollab";
 const std::string DMS_VERSION_ID = "dmsVersion";
 const std::u16string NAPI_COLLAB_CALLBACK_INTERFACE_TOKEN = u"OHOS.DistributedCollab.IAbilityConnectionManager";
+#ifdef EFFICIENCY_MANAGER_ENABLE
+const std::string PID_KEY = "pid";
+const std::string UID_KEY = "uid";
+const std::string BUNDLE_NAME_KEY = "bundleName";
+const std::string COMPONENT_TYPE_KEY = "componentType";
+const std::string DEVICE_TYPE_KEY = "deviceType";
+const std::string CHANGE_TYPE_KEY = "changeType";
+constexpr int32_t DISTRIBUTED_COMPONENT_ADD = 1;
+constexpr int32_t DISTRIBUTED_COMPONENT_REMOVE = 2;
+#endif
 
 constexpr int32_t DSCHED_COLLAB_PROTOCOL_VERSION = 1;
 constexpr int32_t NOTIFY_COLLAB_PREPARE_RESULT = 0;
@@ -742,6 +757,9 @@ int32_t DSchedCollab::ExeSinkPrepareResult(const int32_t &result)
         return ret;
     }
     UpdateState(SINK_WAIT_END_STATE);
+#ifdef EFFICIENCY_MANAGER_ENABLE
+    ReportDistributedComponentChange(DISTRIBUTED_COMPONENT_ADD, IDistributedSched::CALLEE);
+#endif
     collabInfo_.srcUdid_ = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(
         collabInfo_.srcInfo_.deviceId_);
     collabInfo_.sinkUdid_ = DtbschedmgrDeviceInfoStorage::GetInstance().GetUdidByNetworkId(
@@ -787,12 +805,23 @@ int32_t DSchedCollab::ExeSrcCollabResult(const int32_t &result, const std::strin
         return PostErrEndTask(result);
     }
     UpdateState(SOURCE_WAIT_END_STATE);
+#ifdef EFFICIENCY_MANAGER_ENABLE
+    ReportDistributedComponentChange(DISTRIBUTED_COMPONENT_ADD, IDistributedSched::CALLER);
+#endif
     HILOGI("end");
     return ERR_OK;
 }
 
 int32_t DSchedCollab::CleanUpSession()
 {
+    HILOGI("called");
+#ifdef EFFICIENCY_MANAGER_ENABLE
+    int32_t deviceType = (collabInfo_.direction_ == COLLAB_SOURCE) ?
+        IDistributedSched::CALLER : IDistributedSched::CALLEE;
+    HILOGI("report REMOVE for deviceType: %{public}d", deviceType);
+    ReportDistributedComponentChange(DISTRIBUTED_COMPONENT_REMOVE, deviceType);
+#endif
+
     if (collabInfo_.direction_ == COLLAB_SOURCE && !isDisconnected_.load()) {
         isDisconnected_.store(true);
         const std::string peerDeviceId = collabInfo_.sinkInfo_.deviceId_;
@@ -1206,6 +1235,38 @@ void DSchedCollab::UnregisterAbilityLifecycleObserver()
     }
     HILOGI("success");
 }
+
+#ifdef EFFICIENCY_MANAGER_ENABLE
+void DSchedCollab::ReportDistributedComponentChange(int32_t changeType, int32_t deviceType)
+{
+    HILOGI("called, changeType: %{public}d, deviceType: %{public}d", changeType, deviceType);
+
+    const CollabMessage *info = nullptr;
+    if (deviceType == IDistributedSched::CALLER) {
+        info = &collabInfo_.srcInfo_;
+    } else if (deviceType == IDistributedSched::CALLEE) {
+        info = &collabInfo_.sinkInfo_;
+    }
+
+    if (info == nullptr || info->uid_ < 0 || info->bundleName_.empty()) {
+        HILOGW("info is invalid, deviceType: %{public}d, skip report", deviceType);
+        return;
+    }
+
+    std::unordered_map<std::string, std::string> payload;
+    payload[PID_KEY] = std::to_string(info->pid_);
+    payload[UID_KEY] = std::to_string(info->uid_);
+    payload[BUNDLE_NAME_KEY] = info->bundleName_;
+    payload[COMPONENT_TYPE_KEY] = std::to_string(IDistributedSched::CONNECT);
+    payload[DEVICE_TYPE_KEY] = std::to_string(deviceType);
+    payload[CHANGE_TYPE_KEY] = std::to_string(changeType);
+
+    uint32_t type = ResourceSchedule::ResType::RES_TYPE_REPORT_DISTRIBUTE_COMPONENT_CHANGE;
+    HILOGI("begin report data, changeType: %{public}d, deviceType: %{public}d, bundleName: %{public}s",
+        changeType, deviceType, info->bundleName_.c_str());
+    ResourceSchedule::ResSchedClient::GetInstance().ReportData(type, 0, payload);
+}
+#endif
 
 sptr<AppExecFwk::IAppMgr> DSchedCollab::GetAppManager()
 {

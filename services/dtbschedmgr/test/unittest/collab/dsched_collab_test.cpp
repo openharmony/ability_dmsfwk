@@ -26,6 +26,12 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
     const int32_t WAITTIME = 2000;
+    constexpr int32_t TEST_CALLER_PID = 1000;
+    constexpr int32_t TEST_CALLER_UID = 10000;
+    constexpr int32_t TEST_CALLEE_PID = 2000;
+    constexpr int32_t TEST_CALLEE_UID = 20000;
+    constexpr int32_t DISTRIBUTED_COMPONENT_ADD = 1;
+    constexpr int32_t DISTRIBUTED_COMPONENT_REMOVE = 2;
 }
 void DSchedCollabTest::SetUpTestCase()
 {
@@ -722,5 +728,85 @@ HWTEST_F(DSchedCollabTest, ExeStartAbility_002, TestSize.Level3)
     EXPECT_EQ(dSchedCollab_->ExeStartAbility(""), INVALID_PARAMETERS_ERR);
     DTEST_LOG << "DSchedCollabTest ExeStartAbility_002 end" << std::endl;
 }
+
+#ifdef EFFICIENCY_MANAGER_ENABLE
+/**
+ * @tc.name: ReportDistributedComponentChange_Caller_Add_001
+ * @tc.desc: test ReportDistributedComponentChange for Caller ADD event
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, ReportDistributedComponentChange_Caller_Add_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest ReportDistributedComponentChange_Caller_Add_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+
+    dSchedCollab_->collabInfo_.srcInfo_.pid_ = TEST_CALLER_PID;
+    dSchedCollab_->collabInfo_.srcInfo_.uid_ = TEST_CALLER_UID;
+    dSchedCollab_->collabInfo_.srcInfo_.bundleName_ = "test.bundle";
+    dSchedCollab_->collabInfo_.direction_ = COLLAB_SOURCE;
+
+    dSchedCollab_->ReportDistributedComponentChange(DISTRIBUTED_COMPONENT_ADD, IDistributedSched::CALLER);
+    DTEST_LOG << "DSchedCollabTest ReportDistributedComponentChange_Caller_Add_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReportDistributedComponentChange_Callee_Add_001
+ * @tc.desc: test ReportDistributedComponentChange for Callee ADD event
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, ReportDistributedComponentChange_Callee_Add_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest ReportDistributedComponentChange_Callee_Add_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+
+    dSchedCollab_->collabInfo_.sinkInfo_.pid_ = TEST_CALLEE_PID;
+    dSchedCollab_->collabInfo_.sinkInfo_.uid_ = TEST_CALLEE_UID;
+    dSchedCollab_->collabInfo_.sinkInfo_.bundleName_ = "test.bundle.sink";
+    dSchedCollab_->collabInfo_.direction_ = COLLAB_SINK;
+
+    dSchedCollab_->ReportDistributedComponentChange(DISTRIBUTED_COMPONENT_ADD, IDistributedSched::CALLEE);
+    DTEST_LOG << "DSchedCollabTest ReportDistributedComponentChange_Callee_Add_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReportDistributedComponentChange_Remove_001
+ * @tc.desc: test ReportDistributedComponentChange for REMOVE event
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, ReportDistributedComponentChange_Remove_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest ReportDistributedComponentChange_Remove_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+
+    dSchedCollab_->collabInfo_.srcInfo_.pid_ = TEST_CALLER_PID;
+    dSchedCollab_->collabInfo_.srcInfo_.uid_ = TEST_CALLER_UID;
+    dSchedCollab_->collabInfo_.srcInfo_.bundleName_ = "test.bundle";
+    dSchedCollab_->collabInfo_.direction_ = COLLAB_SOURCE;
+
+    dSchedCollab_->ReportDistributedComponentChange(DISTRIBUTED_COMPONENT_REMOVE, IDistributedSched::CALLER);
+    DTEST_LOG << "DSchedCollabTest ReportDistributedComponentChange_Remove_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ReportDistributedComponentChange_Invalid_Info_001
+ * @tc.desc: test ReportDistributedComponentChange with invalid info
+ * @tc.type: FUNC
+ * @tc.require: I6SJQ6
+ */
+HWTEST_F(DSchedCollabTest, ReportDistributedComponentChange_Invalid_Info_001, TestSize.Level3)
+{
+    DTEST_LOG << "DSchedCollabTest ReportDistributedComponentChange_Invalid_Info_001 begin" << std::endl;
+    ASSERT_NE(dSchedCollab_, nullptr);
+
+    dSchedCollab_->collabInfo_.srcInfo_.uid_ = -1;
+    dSchedCollab_->collabInfo_.srcInfo_.bundleName_ = "";
+
+    dSchedCollab_->ReportDistributedComponentChange(DISTRIBUTED_COMPONENT_ADD, IDistributedSched::CALLER);
+    DTEST_LOG << "DSchedCollabTest ReportDistributedComponentChange_Invalid_Info_001 end" << std::endl;
+}
+#endif
 }
 }
