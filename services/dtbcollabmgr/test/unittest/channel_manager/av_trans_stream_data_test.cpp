@@ -81,17 +81,17 @@ namespace DistributedCollab {
         int32_t indexVal = 10;
         char* jsonString = cJSON_PrintUnformatted(jsonData);
 
-        int32_t result = streamData_->DeserializeStreamDataExt(jsonString);
+        int32_t result = streamData_->DeserializeStreamDataExt(jsonString, static_cast<uint32_t>(strlen(jsonString)));
         EXPECT_EQ(result, ERR_OK);
         EXPECT_EQ(indexVal, streamData_->GetStreamDataExt().index_);
         cJSON_Delete(jsonData);
         free(jsonString);
-        
+
         jsonData = cJSON_CreateObject();
         ASSERT_NE(jsonData, nullptr);
 
         jsonString = cJSON_PrintUnformatted(jsonData);
-        result = streamData_->DeserializeStreamDataExt(jsonString);
+        result = streamData_->DeserializeStreamDataExt(jsonString, static_cast<uint32_t>(strlen(jsonString)));
         EXPECT_EQ(result, ERR_OK);
         cJSON_Delete(jsonData);
         free(jsonString);
@@ -104,11 +104,11 @@ namespace DistributedCollab {
      */
     HWTEST_F(AVTransStreamDataTest, DeserializeStreamDataExt_Null_Pointer, TestSize.Level1)
     {
-        int32_t result = streamData_->DeserializeStreamDataExt(nullptr);
+        int32_t result = streamData_->DeserializeStreamDataExt(nullptr, 0);
         EXPECT_EQ(result, NULL_POINTER_ERROR);
 
         std::string jsonString = "test";
-        result = streamData_->DeserializeStreamDataExt(jsonString.c_str());
+        result = streamData_->DeserializeStreamDataExt(jsonString.c_str(), static_cast<uint32_t>(jsonString.length()));
         EXPECT_EQ(result, PARSE_AV_TRANS_STREAM_EXT_FAILED);
     }
 
@@ -131,7 +131,7 @@ namespace DistributedCollab {
 
         char* jsonString = cJSON_PrintUnformatted(jsonData);
 
-        int32_t result = streamData_->DeserializeStreamDataExt(jsonString);
+        int32_t result = streamData_->DeserializeStreamDataExt(jsonString, static_cast<uint32_t>(strlen(jsonString)));
         EXPECT_EQ(result, ERR_OK);
         EXPECT_EQ(option.quality, streamData_->GetStreamDataExt().pixelMapOption_.quality);
         cJSON_Delete(jsonData);
@@ -141,13 +141,13 @@ namespace DistributedCollab {
         ASSERT_NE(jsonData, nullptr);
 
         jsonString = cJSON_PrintUnformatted(jsonData);
-        result = streamData_->DeserializeStreamDataExt(jsonString);
+        result = streamData_->DeserializeStreamDataExt(jsonString, static_cast<uint32_t>(strlen(jsonString)));
         EXPECT_EQ(result, ERR_OK);
         free(jsonString);
 
         cJSON_AddStringToObject(jsonData, "pixel_map", "pixel_map");
         jsonString = cJSON_PrintUnformatted(jsonData);
-        result = streamData_->DeserializeStreamDataExt(jsonString);
+        result = streamData_->DeserializeStreamDataExt(jsonString, static_cast<uint32_t>(strlen(jsonString)));
         EXPECT_EQ(result, ERR_OK);
         cJSON_Delete(jsonData);
         free(jsonString);
@@ -172,7 +172,7 @@ namespace DistributedCollab {
 
         char* jsonString = cJSON_PrintUnformatted(jsonData);
 
-        int32_t result = streamData_->DeserializeStreamDataExt(jsonString);
+        int32_t result = streamData_->DeserializeStreamDataExt(jsonString, static_cast<uint32_t>(strlen(jsonString)));
         EXPECT_EQ(result, ERR_OK);
         EXPECT_EQ(param.rotate, streamData_->GetStreamDataExt().surfaceParam_.rotate);
         EXPECT_EQ(param.filp, streamData_->GetStreamDataExt().surfaceParam_.filp);
@@ -183,13 +183,13 @@ namespace DistributedCollab {
         ASSERT_NE(jsonData, nullptr);
 
         jsonString = cJSON_PrintUnformatted(jsonData);
-        result = streamData_->DeserializeStreamDataExt(jsonString);
+        result = streamData_->DeserializeStreamDataExt(jsonString, static_cast<uint32_t>(strlen(jsonString)));
         EXPECT_EQ(result, ERR_OK);
         free(jsonString);
 
         cJSON_AddStringToObject(jsonData, "surface_param", "surface_param");
         jsonString = cJSON_PrintUnformatted(jsonData);
-        result = streamData_->DeserializeStreamDataExt(jsonString);
+        result = streamData_->DeserializeStreamDataExt(jsonString, static_cast<uint32_t>(strlen(jsonString)));
         EXPECT_EQ(result, ERR_OK);
         cJSON_Delete(jsonData);
         free(jsonString);
