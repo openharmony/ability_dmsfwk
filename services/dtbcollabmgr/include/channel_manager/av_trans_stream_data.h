@@ -80,7 +80,7 @@ public:
     std::shared_ptr<AVTransDataBuffer> StreamData();
     const AVTransStreamDataExt& GetStreamDataExt() const;
     cJSON* SerializeStreamDataExt() const;
-    int32_t DeserializeStreamDataExt(const char* data);
+    int32_t DeserializeStreamDataExt(const char* data, uint32_t len);
     void DeserializeExtFromJson(const cJSON* root);
 
 private:
