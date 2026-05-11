@@ -44,6 +44,7 @@ public:
     int32_t CheckBusinessResultPermission(const std::string& srcDeviceId,
         const OHOS::AAFwk::Want& want, const IntentContext& ctx);
     int32_t CheckCallerPermission(const AAFwk::Want& want, uint64_t accessToken);
+    bool GetOsAccountData(IDistributedSched::AccountInfo& dmsAccountInfo);
 
 private:
     IntentPermissionChecker();
@@ -51,7 +52,6 @@ private:
 
     bool CheckDstSameAccount(const std::string& dstNetworkId,
         const IDistributedSched::AccountInfo& dmsAccountInfo, const CallerInfo& callerInfo, bool isSrc);
-    bool GetOsAccountData(IDistributedSched::AccountInfo& dmsAccountInfo);
     bool CheckComponentPermission(const AppExecFwk::AbilityInfo& targetAbility) const;
     bool CheckCustomPermission(const AppExecFwk::AbilityInfo& targetAbility,
         const uint64_t& dAccessToken) const;

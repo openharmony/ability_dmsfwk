@@ -100,7 +100,7 @@ private:
     int32_t CheckAndExecuteIntent(AAFwk::Want& want, const std::string& srcDeviceId,
         const IntentContext& ctx, const std::string& localDeviceId, int32_t socketFd);
     int32_t DoExecuteIntent(AAFwk::Want& want, const std::string& srcDeviceId,
-        const IntentContext& ctx, uint64_t dAccessToken);
+        const IntentContext& ctx, uint64_t dAccessToken, int32_t userId);
 
     int32_t PrepareResultContext(const std::string& srcDeviceId, const std::string& localDeviceId,
         const IntentCallerInfo& intentCallerInfo, IntentContext& ctx);
