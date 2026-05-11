@@ -369,10 +369,10 @@ int32_t RemoteIntentManager::ValidateExecuteRequest(const std::string& srcDevice
     return ERR_DI_OK;
 }
 
-int32_t RemoteIntentManager::DoExecuteIntent(AAFwk::Want& want,
-    const std::string& srcDeviceId, const IntentContext& ctx, uint64_t dAccessToken)
+int32_t RemoteIntentManager::DoExecuteIntent(AAFwk::Want& want, const std::string& srcDeviceId,
+    const IntentContext& ctx, uint64_t dAccessToken, int32_t userId)
 {
-    want.SetParam(INSIGHT_INTENT_USER_ID, ctx.accountInfo.userId);
+    want.SetParam(INSIGHT_INTENT_USER_ID, userId);
     ErrCode err = AAFwk::AbilityManagerClient::GetInstance()->ExecuteIntentForDistributed(
         want, srcDeviceId, ctx.requestCode, dAccessToken);
     if (err != ERR_OK) {
@@ -442,7 +442,14 @@ int32_t RemoteIntentManager::CheckAndExecuteIntent(AAFwk::Want& want,
             IntentDataType::INTENT_DATA_TYPE_DMS_RESULT);
         return ERR_DI_PERMISSION_DENIED;
     }
-    ret = DoExecuteIntent(want, srcDeviceId, ctx, dAccessToken);
+    IDistributedSched::AccountInfo dstAccountInfo;
+    if (!IntentPermissionChecker::GetInstance().GetOsAccountData(dstAccountInfo)) {
+        HILOGE("Get Os accountId and userId fail.");
+        SendInnerResultBack(socketFd, ctx.requestCode, INVALID_PARAMETERS_ERR,
+            IntentDataType::INTENT_DATA_TYPE_DMS_RESULT);
+        return INVALID_PARAMETERS_ERR;
+    }
+    ret = DoExecuteIntent(want, srcDeviceId, ctx, dAccessToken, dstAccountInfo.userId);
     if (ret != ERR_DI_OK) {
         HILOGE("DoExecuteIntent failed, ret=%{public}d", ret);
         SendInnerResultBack(socketFd, ctx.requestCode, ret,
