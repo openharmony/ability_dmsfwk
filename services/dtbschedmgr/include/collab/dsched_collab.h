@@ -262,6 +262,9 @@ private:
         const int32_t &sinkPid, const int32_t &sinkUid, const int32_t &sinkAccessTokenId);
     int32_t CleanUpSession();
     void UpdateState(CollabStateType stateType);
+#ifdef EFFICIENCY_MANAGER_ENABLE
+    void ReportDistributedComponentChange(int32_t changeType, int32_t deviceType);
+#endif
 
     sptr<AppExecFwk::IAppMgr> GetAppManager();
     bool RegisterAbilityLifecycleObserver(const std::string &bundleName);
