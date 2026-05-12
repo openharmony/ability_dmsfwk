@@ -48,6 +48,21 @@ constexpr int32_t POS_3 = 3;
 constexpr int32_t OFFSET_24 = 24;
 constexpr int32_t OFFSET_16 = 16;
 constexpr int32_t OFFSET_8 = 8;
+constexpr uint32_t FUZZ_TEST_CASE_COUNT = 11;
+
+enum FuzzTestCase : uint32_t {
+    CASE_DISTRIBUTED_WANT_PARAMS_001,
+    CASE_DISTRIBUTED_WANT_PARAMS_002,
+    CASE_DISTRIBUTED_WANT_PARAMS_003,
+    CASE_DISTRIBUTED_WANT_PARAMS_004,
+    CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_EQUALS,
+    CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_FIND_MATCHING_BRACE,
+    CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_BOX,
+    CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_GET_TYPED_ID,
+    CASE_DISTRIBUTED_WANT_PARAM_QUERY,
+    CASE_DISTRIBUTED_UNSUPPORTED_DATA_COPY_ASSIGN,
+    CASE_DISTRIBUTED_UNSUPPORTED_DATA_MOVE_ASSIGN,
+};
 constexpr int32_t MID_HALF = 2;
 const uint32_t MIN_DH_TYPE = 0;
 const uint32_t MAX_DH_TYPE = 10;
@@ -381,16 +396,43 @@ void DistributedUnsupportedDataMoveAssignFuzzTest(const uint8_t* data, size_t si
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DoSomethingInterestingWithMyApiDistributedWantParams001(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWantParams002(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWant003(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWantParams004(data, size);
-    OHOS::DistributedWantParamWrapperEqualsFuzzTest(data, size);
-    OHOS::DistributedWantParamWrapperFindMatchingBraceFuzzTest(data, size);
-    OHOS::DistributedWantParamWrapperBoxFuzzTest(data, size);
-    OHOS::DistributedWantParamWrapperGerTypedIdFuzzTest(data, size);
-    OHOS::DistributedWantParamQueryFuzzTest(data, size);
-    OHOS::DistributedUnsupportedDataCopyAssignFuzzTest(data, size);
-    OHOS::DistributedUnsupportedDataMoveAssignFuzzTest(data, size);
+    FuzzedDataProvider fdp(data, size);
+    switch (fdp.ConsumeIntegralInRange<uint32_t>(0, FUZZ_TEST_CASE_COUNT - 1)) {
+        case CASE_DISTRIBUTED_WANT_PARAMS_001:
+            OHOS::DoSomethingInterestingWithMyApiDistributedWantParams001(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAMS_002:
+            OHOS::DoSomethingInterestingWithMyApiDistributedWantParams002(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAMS_003:
+            OHOS::DoSomethingInterestingWithMyApiDistributedWant003(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAMS_004:
+            OHOS::DoSomethingInterestingWithMyApiDistributedWantParams004(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_EQUALS:
+            OHOS::DistributedWantParamWrapperEqualsFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_FIND_MATCHING_BRACE:
+            OHOS::DistributedWantParamWrapperFindMatchingBraceFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_BOX:
+            OHOS::DistributedWantParamWrapperBoxFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_GET_TYPED_ID:
+            OHOS::DistributedWantParamWrapperGerTypedIdFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAM_QUERY:
+            OHOS::DistributedWantParamQueryFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_UNSUPPORTED_DATA_COPY_ASSIGN:
+            OHOS::DistributedUnsupportedDataCopyAssignFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_UNSUPPORTED_DATA_MOVE_ASSIGN:
+            OHOS::DistributedUnsupportedDataMoveAssignFuzzTest(data, size);
+            break;
+        default:
+            break;
+    }
     return 0;
 }

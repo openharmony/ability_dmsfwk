@@ -26,6 +26,20 @@ namespace OHOS {
 namespace DistributedSchedule {
 namespace {
 constexpr uint32_t MAX_BUFFER_SIZE = 80 * 1024 * 1024;
+constexpr uint32_t FUZZ_TEST_CASE_COUNT = 10;
+
+enum FuzzTestCase : uint32_t {
+    CASE_FUZZ_ON_BIND,
+    CASE_FUZZ_ON_SHUTDOWN,
+    CASE_FUZZ_ON_BYTES,
+    CASE_FUZZ_CONNECT_DEVICE,
+    CASE_FUZZ_DISCONNECT_DEVICE,
+    CASE_FUZZ_ON_DATA_READY,
+    CASE_FUZZ_REGISTER_LISTENER,
+    CASE_FUZZ_UNREGISTER_LISTENER,
+    CASE_FUZZ_SET_CALLING_TOKEN_ID,
+    CASE_FUZZ_GET_SESSION_ID_BY_DEVICE_ID,
+};
 }
 
 void FuzzOnBind(const uint8_t* data, size_t size)
@@ -171,15 +185,40 @@ void FuzzGetSessionIdByDeviceId(const uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DistributedSchedule::FuzzOnBind(data, size);
-    OHOS::DistributedSchedule::FuzzOnShutdown(data, size);
-    OHOS::DistributedSchedule::FuzzOnBytes(data, size);
-    OHOS::DistributedSchedule::FuzzConnectDevice(data, size);
-    OHOS::DistributedSchedule::FuzzDisconnectDevice(data, size);
-    OHOS::DistributedSchedule::FuzzOnDataReady(data, size);
-    OHOS::DistributedSchedule::FuzzRegisterListener(data, size);
-    OHOS::DistributedSchedule::FuzzUnregisterListener(data, size);
-    OHOS::DistributedSchedule::FuzzSetCallingTokenId(data, size);
-    OHOS::DistributedSchedule::FuzzGetSessionIdByDeviceId(data, size);
+    FuzzedDataProvider fdp(data, size);
+    switch (fdp.ConsumeIntegralInRange<uint32_t>(0, FUZZ_TEST_CASE_COUNT - 1)) {
+        case CASE_FUZZ_ON_BIND:
+            OHOS::DistributedSchedule::FuzzOnBind(data, size);
+            break;
+        case CASE_FUZZ_ON_SHUTDOWN:
+            OHOS::DistributedSchedule::FuzzOnShutdown(data, size);
+            break;
+        case CASE_FUZZ_ON_BYTES:
+            OHOS::DistributedSchedule::FuzzOnBytes(data, size);
+            break;
+        case CASE_FUZZ_CONNECT_DEVICE:
+            OHOS::DistributedSchedule::FuzzConnectDevice(data, size);
+            break;
+        case CASE_FUZZ_DISCONNECT_DEVICE:
+            OHOS::DistributedSchedule::FuzzDisconnectDevice(data, size);
+            break;
+        case CASE_FUZZ_ON_DATA_READY:
+            OHOS::DistributedSchedule::FuzzOnDataReady(data, size);
+            break;
+        case CASE_FUZZ_REGISTER_LISTENER:
+            OHOS::DistributedSchedule::FuzzRegisterListener(data, size);
+            break;
+        case CASE_FUZZ_UNREGISTER_LISTENER:
+            OHOS::DistributedSchedule::FuzzUnregisterListener(data, size);
+            break;
+        case CASE_FUZZ_SET_CALLING_TOKEN_ID:
+            OHOS::DistributedSchedule::FuzzSetCallingTokenId(data, size);
+            break;
+        case CASE_FUZZ_GET_SESSION_ID_BY_DEVICE_ID:
+            OHOS::DistributedSchedule::FuzzGetSessionIdByDeviceId(data, size);
+            break;
+        default:
+            break;
+    }
     return 0;
 }

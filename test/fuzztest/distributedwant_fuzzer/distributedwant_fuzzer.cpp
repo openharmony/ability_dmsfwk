@@ -38,6 +38,28 @@ constexpr int32_t POS_3 = 3;
 constexpr int32_t OFFSET_24 = 24;
 constexpr int32_t OFFSET_16 = 16;
 constexpr int32_t OFFSET_8 = 8;
+constexpr uint32_t FUZZ_TEST_CASE_COUNT = 18;
+
+enum FuzzTestCase : uint32_t {
+    CASE_DISTRIBUTED_WANT_001,
+    CASE_DISTRIBUTED_WANT_002,
+    CASE_DISTRIBUTED_WANT_003,
+    CASE_DISTRIBUTED_WANT_004,
+    CASE_DISTRIBUTED_WANT_005,
+    CASE_DISTRIBUTED_WANT_006,
+    CASE_DISTRIBUTED_WANT_GET_INT_PARAM,
+    CASE_DISTRIBUTED_WANT_SET_PARAM_INT,
+    CASE_DISTRIBUTED_WANT_GET_LONG_PARAM,
+    CASE_DISTRIBUTED_WANT_SET_PARAM_LONGLONG,
+    CASE_DISTRIBUTED_WANT_GET_OPERATION,
+    CASE_DISTRIBUTED_WANT_OPERATION_EQUALS,
+    CASE_DISTRIBUTED_WANT_SET_URI,
+    CASE_DISTRIBUTED_WANT_TO_JSON,
+    CASE_DISTRIBUTED_WANT_FROM_STRING,
+    CASE_DISTRIBUTED_WANT_COPY_CTOR,
+    CASE_DISTRIBUTED_WANT_ASSIGN_OPERATOR,
+    CASE_DISTRIBUTED_WANT_FROM_WANT,
+};
 }
 uint32_t GetU32Data(const char* ptr)
 {
@@ -468,23 +490,64 @@ void DistributedWantFromWantFuzzTest(const uint8_t* data, size_t size)
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DoSomethingInterestingWithMyApiDistributedWant001(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWant002(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWant003(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWant004(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWant005(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWant006(data, size);
-    OHOS::FuzzDistributedWantGetIntParam(data, size);
-    OHOS::FuzzDistributedWantSetParamInt(data, size);
-    OHOS::FuzzDistributedWantGetLongParam(data, size);
-    OHOS::FuzzDistributedWantSetParamLongLong(data, size);
-    OHOS::FuzzDistributedWantGetOperation(data, size);
-    OHOS::FuzzDistributedWantOperationEquals(data, size);
-    OHOS::FuzzDistributedWantSetUri(data, size);
-    OHOS::FuzzDistributedWantToJson(data, size);
-    OHOS::FuzzDistributedWantFromString(data, size);
-    OHOS::DistributedWantCopyCtorFuzzTest(data, size);
-    OHOS::DistributedWantAssignOperatorFuzzTest(data, size);
-    OHOS::DistributedWantFromWantFuzzTest(data, size);
+    FuzzedDataProvider fdp(data, size);
+    switch (fdp.ConsumeIntegralInRange<uint32_t>(0, FUZZ_TEST_CASE_COUNT - 1)) {
+        case CASE_DISTRIBUTED_WANT_001:
+            OHOS::DoSomethingInterestingWithMyApiDistributedWant001(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_002:
+            OHOS::DoSomethingInterestingWithMyApiDistributedWant002(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_003:
+            OHOS::DoSomethingInterestingWithMyApiDistributedWant003(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_004:
+            OHOS::DoSomethingInterestingWithMyApiDistributedWant004(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_005:
+            OHOS::DoSomethingInterestingWithMyApiDistributedWant005(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_006:
+            OHOS::DoSomethingInterestingWithMyApiDistributedWant006(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_GET_INT_PARAM:
+            OHOS::FuzzDistributedWantGetIntParam(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_SET_PARAM_INT:
+            OHOS::FuzzDistributedWantSetParamInt(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_GET_LONG_PARAM:
+            OHOS::FuzzDistributedWantGetLongParam(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_SET_PARAM_LONGLONG:
+            OHOS::FuzzDistributedWantSetParamLongLong(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_GET_OPERATION:
+            OHOS::FuzzDistributedWantGetOperation(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_OPERATION_EQUALS:
+            OHOS::FuzzDistributedWantOperationEquals(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_SET_URI:
+            OHOS::FuzzDistributedWantSetUri(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_TO_JSON:
+            OHOS::FuzzDistributedWantToJson(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_FROM_STRING:
+            OHOS::FuzzDistributedWantFromString(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_COPY_CTOR:
+            OHOS::DistributedWantCopyCtorFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_ASSIGN_OPERATOR:
+            OHOS::DistributedWantAssignOperatorFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_FROM_WANT:
+            OHOS::DistributedWantFromWantFuzzTest(data, size);
+            break;
+        default:
+            break;
+    }
     return 0;
 }

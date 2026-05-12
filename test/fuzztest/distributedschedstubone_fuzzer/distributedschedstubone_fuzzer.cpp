@@ -159,7 +159,8 @@ void ConnectDExtensionFromRemoteInnerFuzzTest(const uint8_t* data, size_t size)
     MessageOption option;
     FuzzedDataProvider fdp(data, size);
     DExtConnectInfo info;
-
+    info.tokenId = fdp.ConsumeRandomLengthString();
+    info.delegatee = fdp.ConsumeRandomLengthString();
     PARCEL_WRITE_HELPER_NORET(dataParcel, Parcelable, &info);
     DistributedSchedService::GetInstance().ConnectDExtensionFromRemoteInner(dataParcel, reply);
 }
