@@ -77,10 +77,9 @@ public:
     bool IsAbilityForeground(uint32_t accessTokenId);
     bool CheckDeviceSecurityLevel(const std::string& srcDeviceId, const std::string& dstDeviceId) const;
     bool CheckTargetAbilityVisible(const AppExecFwk::AbilityInfo& targetAbility, const CallerInfo& callerInfo) const;
-
+    bool GetOsAccountData(AccountInfo& dmsAccountInfo);
 
 private:
-    bool GetOsAccountData(AccountInfo& dmsAccountInfo);
     bool CheckSameAccount(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
         const CallerInfo& callerInfo, bool isSrc);
     bool CheckDstSameAccount(const std::string& dstNetworkId, const AccountInfo& dmsAccountInfo,
