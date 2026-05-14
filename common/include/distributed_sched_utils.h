@@ -27,10 +27,6 @@ namespace DistributedSchedule {
 constexpr static int32_t INVALID_MISSION_ID = -1;
 const std::string BASE_64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-bool IsValidPath(const std::string &inFilePath, std::string &realFilePath);
-bool UpdateAllowAppList(const std::string &cfgJsonStr);
-int32_t LoadContinueConfig();
-bool CheckBundleContinueConfig(const std::string &bundleName);
 int32_t GetCurrentMissionId();
 std::string ParcelToBase64Str(const Parcel& parcel);
 int32_t Base64StrToParcel(const std::string& rawStr, Parcel& parcel);

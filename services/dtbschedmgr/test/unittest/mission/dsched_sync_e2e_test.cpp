@@ -182,30 +182,6 @@ HWTEST_F(DmsKvSyncE2ETest, CheckCtrlRuleTest_001, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsValidPath_001
- * @tc.desc: test IsValidPath
- * @tc.type: FUNC
- */
-HWTEST_F(DmsKvSyncE2ETest, IsValidPath_001, TestSize.Level1)
-{
-    DTEST_LOG << "DmsKvSyncE2ETest CheckCtrlRuleTest_001 start" << std::endl;
-    ASSERT_NE(dmsKvSyncE2E_, nullptr);
-    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
-    EXPECT_NE(dmsKvSyncE2E, nullptr);
-    if (dmsKvSyncE2E != nullptr) {
-        std::string inFilePath = "";
-        std::string realFilePath;
-        bool ret = dmsKvSyncE2E_->GetInstance()->IsValidPath(inFilePath, realFilePath);
-        EXPECT_EQ(ret, false);
-
-        inFilePath = "inFilePath";
-        ret = dmsKvSyncE2E_->GetInstance()->IsValidPath(inFilePath, realFilePath);
-        EXPECT_EQ(ret, false);
-    }
-    DTEST_LOG << "DmsKvSyncE2ETest IsValidPath_001 end" << std::endl;
-}
-
-/**
  * @tc.name: CheckKvStoreTest_001
  * @tc.desc: test CheckKvStore
  * @tc.type: FUNC

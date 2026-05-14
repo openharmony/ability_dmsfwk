@@ -62,7 +62,6 @@ private:
     void TryTwice(const std::function<DistributedKv::Status()> &func) const;
     bool CheckKvStore();
     DistributedKv::Status GetKvStore();
-    bool IsValidPath(const std::string &inFilePath, std::string &realFilePath);
     std::vector<std::string> GetAllowedDistributeAbilityConnBundlesStub(int32_t serviceType, int32_t accountId);
 
     static std::mutex mutex_;
