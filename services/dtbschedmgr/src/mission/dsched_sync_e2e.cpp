@@ -15,8 +15,6 @@
 
 #include "mission/dsched_sync_e2e.h"
 
-#include <filesystem>
-#include <fstream>
 #include <iostream>
 #include <parameter.h>
 
@@ -47,9 +45,6 @@ const char DETERMINE_DEVICE_TYPE_KEY[] = "persist.distributed_scene.sys_settings
 static const int32_t FORBID_SEND_FORBID_RECV = 0;
 static const int32_t ALLOW_SEND_ALLOW_RECV = 1;
 const std::string PARAM_DISTRIBUTED_DATAFILES_TRANS_CTRL = "persist.distributed_scene.datafiles_trans_ctrl";
-const std::string CONTINUE_CONFIG_RELATIVE_PATH = "etc/distributedhardware/dms/continue_config.json";
-const std::string ALLOW_APP_LIST_KEY = "allow_applist";
-constexpr int32_t MAX_CONFIG_PATH_LEN = 1024;
 const std::string CONSTRAINT = "constraint.distributed.transmission.outgoing";
 constexpr const char *TRANSMISSION_OUTGOING = "constraint.distributed.transmission.outgoing";
 }  // namespace
@@ -122,29 +117,6 @@ bool DmsKvSyncE2E::CheckCtrlRule()
         HILOGE("The device is a special device and checkCtrlRule fail");
         return false;
     }
-    return true;
-}
-
-bool DmsKvSyncE2E::IsValidPath(const std::string &inFilePath, std::string &realFilePath)
-{
-    char path[PATH_MAX + 1] = { 0 };
-    if (inFilePath.empty() || inFilePath.length() > PATH_MAX || inFilePath.length() + 1 > MAX_CONFIG_PATH_LEN ||
-        realpath(inFilePath.c_str(), path) == nullptr) {
-        HILOGE("Get continue config file real path fail, inFilePath %{public}s.", GetAnonymStr(inFilePath).c_str());
-        return false;
-    }
-
-    realFilePath = std::string(path);
-    if (realFilePath.empty()) {
-        HILOGE("Real file path is empty.");
-        return false;
-    }
-    if (!std::filesystem::exists(realFilePath)) {
-        HILOGE("The real file path %{public}s does not exist in the file system.", GetAnonymStr(realFilePath).c_str());
-        realFilePath = "";
-        return false;
-    }
-    HILOGD("The real file path %{public}s exist in the file system.", GetAnonymStr(realFilePath).c_str());
     return true;
 }
 
