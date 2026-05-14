@@ -22,41 +22,48 @@
       - 2.6 分布式数据模块(KV存储)
       - 2.7 AccessToken模块(权限管理)
 
-  章节3_接续业务流程:
-    文件: reference/03_continue_flow.md
+  章节3_接续规则说明:
+    文件: reference/03_continue_rules.md
     内容:
-      - 3.1 阶段一_广播阶段(SRC发送/SINK接收)
-      - 3.1.1 广播触发条件(任务状态变化/MMI事件)
-      - 3.1.2 MMI事件监听流程(初始化/添加监听/移除监听)
-      - 3.1.3 MMI事件处理链路(捕获/投递/处理/触发广播)
-      - 3.1.4 MMI事件冻结机制(防止广播风暴)
-      - 3.1.5 Bundle管理交互(广播压缩/应用匹配验证)
-      - 3.2 阶段二_接续阶段(SRC推送/SINK拉取)
-      - 3.2.1 Bundle管理交互(权限校验/Bundle验证)
+      - 接续规则详细说明(待补充)
 
-  章节4_IPC通信架构:
-    文件: reference/04_ipc_architecture.md
+  章节4_接续业务流程:
+    主文件: reference/04_continue_flow.md
     内容:
-      - 4.1 核心原则(Stub服务端/Proxy客户端)
-      - 4.2 服务端列表(DistributedSchedStub等)
-      - 4.3 客户端列表(DistributedSchedProxy等)
-      - 4.4 场景角色对照(本端/远端角色映射)
+      - 4.1 阶段一_广播阶段(SRC发送/SINK接收)
+      - 4.1.1 广播触发条件(任务状态变化/MMI事件)
+      - 4.1.2 MMI事件监听流程(初始化/添加监听/移除监听)
+      - 4.1.3 MMI事件处理链路(捕获/投递/处理/触发广播)
+      - 4.1.4 MMI事件冻结机制(防止广播风暴)
+      - 4.1.5 Bundle管理交互(广播压缩/应用匹配验证)
+      - 4.1.6 SINK端包匹配(详见reference/04_01_06_sink_bundle_matching.md)
+      - 4.2 阶段二_接续阶段(SRC推送/SINK拉取)
+      - 4.2.1 Bundle管理交互(权限校验/Bundle验证)
+    子文件:
+      - reference/04_01_06_sink_bundle_matching.md (章节4.1.6 SINK端包匹配规则详解)
 
-  章节5_事件监听机制:
-    文件: reference/05_event_listener.md
+  章节5_IPC通信架构:
+    文件: reference/05_ipc_architecture.md
     内容:
-      - 5.1 任务级别事件监听(获焦/失焦/后台/前台)
-      - 5.2 应用级别事件监听(前台切换/进程死亡)
-      - 5.3 事件处理管理器(DmsContinueConditionMgr)
-      - 5.4 协作场景生命周期监听
+      - 5.1 核心原则(Stub服务端/Proxy客户端)
+      - 5.2 服务端列表(DistributedSchedStub等)
+      - 5.3 客户端列表(DistributedSchedProxy等)
+      - 5.4 场景角色对照(本端/远端角色映射)
 
-  章节6_Bundle管理交互:
-    文件: reference/06_bundle_interaction.md
+  章节6_事件监听机制:
+    文件: reference/06_event_listener.md
     内容:
-      - 6.1 概述(BundleManagerInternal与BMS交互)
-      - 6.2 功能分类(Bundle查询/Ability匹配/跨应用接续/权限验证)
-      - 6.3 接续流程中的使用(广播阶段/接续阶段)
-      - 6.4 免安装相关
-      - 6.5 调用位置索引
+      - 6.1 任务级别事件监听(获焦/失焦/后台/前台)
+      - 6.2 应用级别事件监听(前台切换/进程死亡)
+      - 6.3 事件处理管理器(DmsContinueConditionMgr)
+      - 6.4 协作场景生命周期监听
 
-  ```
+  章节7_Bundle管理交互:
+    文件: reference/07_bundle_interaction.md
+    内容:
+      - 7.1 概述(BundleManagerInternal与BMS交互)
+      - 7.2 功能分类(Bundle查询/Ability匹配/跨应用接续/权限验证)
+      - 7.3 接续流程中的使用(广播阶段/接续阶段)
+      - 7.4 免安装相关
+      - 7.5 调用位置索引
+```

@@ -1,6 +1,6 @@
-# 4. IPC通信架构
+# 5. IPC通信架构
 
-## 4.1 核心原则
+## 5.1 核心原则
 
 ```yaml
 IPC原则:
@@ -8,7 +8,7 @@ IPC原则:
   客户端Proxy: 继承IRemoteProxy，调用SendRequest，主动发起远端请求
 ```
 
-## 4.2 服务端列表
+## 5.2 服务端列表
 
 ```yaml
 服务端:
@@ -38,7 +38,7 @@ IPC原则:
     处理: [OnFreeInstallResult]
 ```
 
-## 4.3 客户端列表
+## 5.3 客户端列表
 
 ```yaml
 客户端:
@@ -58,7 +58,7 @@ IPC原则:
     发送: [OnFreeInstallResult]
 ```
 
-## 4.4 场景角色对照
+## 5.4 场景角色对照
 
 ```yaml
 场景角色:

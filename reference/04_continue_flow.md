@@ -1,6 +1,6 @@
-# 3. 接续业务流程
+# 4. 接续业务流程
 
-## 3.1 阶段一：广播阶段
+## 4.1 阶段一：广播阶段
 
 ```yaml
 广播阶段:
@@ -19,7 +19,7 @@
     触发: 软总线接收广播数据
 ```
 
-### 3.1.1 广播触发条件
+### 4.1.1 广播触发条件
 
 ```yaml
 广播触发条件:
@@ -46,7 +46,7 @@
     核心作用: MMI事件表示用户正在使用设备,触发发送接续广播,让SINK端知道SRC端有活跃的可接续页面可用于接续
 ```
 
-### 3.1.2 MMI事件监听流程
+### 4.1.2 MMI事件监听流程
 
 ```yaml
 MMI事件监听流程:
@@ -77,7 +77,7 @@ MMI事件监听流程:
     操作: MMIAdapter::GetInstance().RemoveMMIListener(mmiMonitorId_)
 ```
 
-### 3.1.3 MMI事件处理链路
+### 4.1.3 MMI事件处理链路
 
 ```yaml
 MMI事件处理链路:
@@ -116,7 +116,7 @@ MMI事件处理链路:
       - SendContinueBroadcast(missionId, MISSION_EVENT_MMI)
 ```
 
-### 3.1.4 MMI事件冻结机制
+### 4.1.4 MMI事件冻结机制
 
 ```yaml
 冻结机制:
@@ -140,12 +140,12 @@ MMI事件处理链路:
   效果: MMI事件触发后5秒内不再响应新的MMI事件,避免频繁发送接续广播
 ```
 
-### 3.1.5 Bundle管理交互
+### 4.1.5 Bundle管理交互
 
 ```yaml
 广播阶段_BMS交互:
   说明: 广播阶段与BMS的交互,用于广播数据压缩和应用匹配验证
-  详细说明: 见 [06_Bundle管理交互](06_bundle_interaction.md) 章节6.3.1
+  详细说明: 见 [07_Bundle管理交互](07_bundle_interaction.md) 章节7.3.1
 
   SRC端:
     SendContinueBroadcast():
@@ -162,7 +162,26 @@ MMI事件处理链路:
       - GetSrcAppIdentifierVec(appServiceCapabilities, bundleName): 应用标识匹配
 ```
 
-## 3.2 阶段二：接续阶段
+### 4.1.6 SINK端包匹配
+
+```yaml
+SINK端包匹配:
+  说明: SINK端接收广播后匹配本地可接续Bundle的详细规则
+  详细说明: 见 [04_01_06_SINK端包匹配规则](04_01_06_sink_bundle_matching.md)
+
+  匹配场景:
+    - 同Bundle接续: 源端Bundle在本地已安装
+    - 跨Bundle接续: 同开发者不同Bundle
+    - AppIdentifier匹配: 应用标识精确匹配
+
+  匹配优先级:
+    优先级1: 同Bundle匹配(最高优先级)
+    优先级2: AppIdentifier精确匹配
+    优先级3: 开发者ID匹配
+    优先级4: 匹配失败(推荐安装)
+```
+
+## 4.2 阶段二：接续阶段
 
 ```yaml
 接续阶段:
@@ -192,12 +211,12 @@ MMI事件处理链路:
       - StartAbility()
 ```
 
-### 3.2.1 Bundle管理交互
+### 4.2.1 Bundle管理交互
 
 ```yaml
 接续阶段_BMS交互:
   说明: 接续阶段与BMS的交互,用于权限校验和Bundle验证
-  详细说明: 见 [06_Bundle管理交互](06_bundle_interaction.md) 章节6.3.2
+  详细说明: 见 [07_Bundle管理交互](07_bundle_interaction.md) 章节7.3.2
 
   SRC端:
     ContinueMission():
