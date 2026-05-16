@@ -293,20 +293,35 @@ bool DmsKvSyncE2E::IsMDMControlWithExemption(const std::string &bundleName, int3
 #ifdef OS_ACCOUNT_PART
     HILOGI("IsMDMControlWithExemption called, bundleName: %{public}s, serviceType: %{public}d, accountId: %{public}d",
         GetAnonymStr(bundleName).c_str(), serviceType, accountId);
+
     std::string appId;
-    if (!BundleManagerInternal::GetCallerAppIdFromBms(bundleName, appId)) {
-        HILOGE("GetCallerAppIdFromBms failed for bundleName: %{public}s", GetAnonymStr(bundleName).c_str());
+    std::string appIdentifier;
+    if (!BundleManagerInternal::GetAppIdAndAppIdentifierFromBms(bundleName, appId, appIdentifier)) {
+        HILOGE("GetAppIdAndAppIdentifierFromBms failed for bundleName: %{public}s",
+            GetAnonymStr(bundleName).c_str());
         return true;
     }
-    HILOGI("Get appId: %{public}s for bundleName: %{public}s",
-        GetAnonymStr(appId).c_str(), GetAnonymStr(bundleName).c_str());
-    std::vector<std::string> allowedAppIds = GetAllowedDistributeAbilityConnBundlesStub(serviceType, accountId);
-    auto it = std::find(allowedAppIds.begin(), allowedAppIds.end(), appId);
-    if (it != allowedAppIds.end()) {
-        HILOGI("AppId %{public}s is in exemption list, allow access", GetAnonymStr(appId).c_str());
-        return false;
+    HILOGI("Get appId: %{public}s, appIdentifier: %{public}s for bundleName: %{public}s",
+        GetAnonymStr(appId).c_str(), GetAnonymStr(appIdentifier).c_str(), GetAnonymStr(bundleName).c_str());
+
+    std::vector<std::string> allowedList = GetAllowedDistributeAbilityConnBundlesStub(serviceType, accountId);
+    if (!appId.empty()) {
+        auto it = std::find(allowedList.begin(), allowedList.end(), appId);
+        if (it != allowedList.end()) {
+            HILOGI("AppId %{public}s is in exemption list, allow access", GetAnonymStr(appId).c_str());
+            return false;
+        }
     }
-    HILOGI("AppId %{public}s is not in exemption list, block access", GetAnonymStr(appId).c_str());
+    if (!appIdentifier.empty()) {
+        auto idIt = std::find(allowedList.begin(), allowedList.end(), appIdentifier);
+        if (idIt != allowedList.end()) {
+            HILOGI("AppIdentifier %{public}s is in exemption list, allow access",
+                GetAnonymStr(appIdentifier).c_str());
+            return false;
+        }
+    }
+    HILOGI("Neither AppId %{public}s nor AppIdentifier %{public}s is in exemption list, block access",
+        GetAnonymStr(appId).c_str(), GetAnonymStr(appIdentifier).c_str());
     return true;
 #else
     return false;
