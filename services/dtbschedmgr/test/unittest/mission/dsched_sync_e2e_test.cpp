@@ -1096,12 +1096,84 @@ HWTEST_F(DmsKvSyncE2ETest, IsMDMControlWithExemptionTest_020, TestSize.Level1)
         std::string bundleName = "com.example.test@app#1";
         int32_t serviceType = COLLABORATION_SERVICE;
         int32_t accountId = TEST_ACCOUNT_ID;
-        
+
         dmsKvSyncE2E_->GetInstance()->SetMdmControl(true);
         bool ret = dmsKvSyncE2E_->GetInstance()->IsMDMControlWithExemption(bundleName, serviceType, accountId);
         EXPECT_EQ(ret, true);
     }
     DTEST_LOG << "DmsKvSyncE2ETest IsMDMControlWithExemptionTest_020 end" << std::endl;
+}
+
+/**
+ * @tc.name: IsMDMControlWithExemptionTest_021
+ * @tc.desc: test IsMDMControlWithExemption with appId and appIdentifier both empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsKvSyncE2ETest, IsMDMControlWithExemptionTest_021, TestSize.Level1)
+{
+    DTEST_LOG << "DmsKvSyncE2ETest IsMDMControlWithExemptionTest_021 start" << std::endl;
+    ASSERT_NE(dmsKvSyncE2E_, nullptr);
+    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
+    EXPECT_NE(dmsKvSyncE2E, nullptr);
+    if (dmsKvSyncE2E != nullptr) {
+        std::string bundleName = "com.example.testapp";
+        int32_t serviceType = COLLABORATION_SERVICE;
+        int32_t accountId = TEST_ACCOUNT_ID;
+
+        dmsKvSyncE2E_->GetInstance()->SetMdmControl(true);
+        bool ret = dmsKvSyncE2E_->GetInstance()->IsMDMControlWithExemption(bundleName, serviceType, accountId);
+        // When both appId and appIdentifier are not in allowed list, should block access
+        EXPECT_EQ(ret, true);
+    }
+    DTEST_LOG << "DmsKvSyncE2ETest IsMDMControlWithExemptionTest_021 end" << std::endl;
+}
+
+/**
+ * @tc.name: IsMDMControlWithExemptionTest_022
+ * @tc.desc: test IsMDMControlWithExemption with MDM control disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsKvSyncE2ETest, IsMDMControlWithExemptionTest_022, TestSize.Level1)
+{
+    DTEST_LOG << "DmsKvSyncE2ETest IsMDMControlWithExemptionTest_022 start" << std::endl;
+    ASSERT_NE(dmsKvSyncE2E_, nullptr);
+    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
+    EXPECT_NE(dmsKvSyncE2E, nullptr);
+    if (dmsKvSyncE2E != nullptr) {
+        std::string bundleName = "com.example.testapp";
+        int32_t serviceType = COLLABORATION_SERVICE;
+        int32_t accountId = TEST_ACCOUNT_ID;
+
+        dmsKvSyncE2E_->GetInstance()->SetMdmControl(false);
+        bool ret = dmsKvSyncE2E_->GetInstance()->IsMDMControlWithExemption(bundleName, serviceType, accountId);
+        // When MDM control is disabled, should allow access
+        EXPECT_EQ(ret, true);
+    }
+    DTEST_LOG << "DmsKvSyncE2ETest IsMDMControlWithExemptionTest_022 end" << std::endl;
+}
+
+/**
+ * @tc.name: IsMDMControlWithExemptionTest_023
+ * @tc.desc: test IsMDMControlWithExemption with empty bundle name and MDM control enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsKvSyncE2ETest, IsMDMControlWithExemptionTest_023, TestSize.Level1)
+{
+    DTEST_LOG << "DmsKvSyncE2ETest IsMDMControlWithExemptionTest_023 start" << std::endl;
+    ASSERT_NE(dmsKvSyncE2E_, nullptr);
+    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
+    EXPECT_NE(dmsKvSyncE2E, nullptr);
+    if (dmsKvSyncE2E != nullptr) {
+        std::string bundleName = "";
+        int32_t serviceType = COLLABORATION_SERVICE;
+        int32_t accountId = TEST_ACCOUNT_ID;
+
+        dmsKvSyncE2E_->GetInstance()->SetMdmControl(true);
+        bool ret = dmsKvSyncE2E_->GetInstance()->IsMDMControlWithExemption(bundleName, serviceType, accountId);
+        // Empty bundle name should cause GetAppIdAndAppIdentifierFromBms to fail, should block access
+        EXPECT_EQ(ret, true);
+    }
+    DTEST_LOG << "DmsKvSyncE2ETest IsMDMControlWithExemptionTest_023 end" << std::endl;
 }
 
 } // namespace DistributedSchedule

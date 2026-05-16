@@ -35,6 +35,8 @@ class BundleManagerInternal {
 public:
     static bool GetCallerAppIdFromBms(int32_t callingUid, std::string& appId);
     static bool GetCallerAppIdFromBms(const std::string& bundleName, std::string& appId);
+    static bool GetAppIdAndAppIdentifierFromBms(const std::string& bundleName, std::string& appId,
+        std::string& appIdentifier);
     static bool GetSpecifyBundleNameFromBms(int32_t callingUid, std::string& bundleName);
     static bool GetBundleNameListFromBms(int32_t callingUid, std::vector<std::string>& bundleNameList);
     static bool GetBundleNameListFromBms(int32_t callingUid, std::vector<std::u16string>& u16BundleNameList);

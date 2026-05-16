@@ -64,6 +64,35 @@ bool BundleManagerInternal::GetCallerAppIdFromBms(const std::string& bundleName,
     return true;
 }
 
+bool BundleManagerInternal::GetAppIdAndAppIdentifierFromBms(const std::string& bundleName,
+    std::string& appId, std::string& appIdentifier)
+{
+    auto bundleMgr = GetBundleManager();
+    if (bundleMgr == nullptr) {
+        HILOGE("failed to get bms");
+        return false;
+    }
+    int32_t activeAccountId = 0;
+    ErrCode err = QueryOsAccount(activeAccountId);
+    if (err != ERR_OK) {
+        HILOGE("QueryOsAccount failed, err: %{public}d", err);
+        return false;
+    }
+
+    AppExecFwk::BundleInfo bundleInfo;
+    int32_t flags = static_cast<int32_t>(AppExecFwk::GetBundleInfoFlag::GET_BUNDLE_INFO_WITH_SIGNATURE_INFO);
+    ErrCode ret = bundleMgr->GetBundleInfoV9(bundleName, flags, bundleInfo, activeAccountId);
+    if (ret != ERR_OK) {
+        HILOGE("GetBundleInfoV9 failed for bundleName: %{public}s", GetAnonymStr(bundleName).c_str());
+        return false;
+    }
+
+    appId = bundleInfo.signatureInfo.appId;
+    appIdentifier = bundleInfo.signatureInfo.appIdentifier;
+    HILOGD("appId:%s, appIdentifier:%s", GetAnonymStr(appId).c_str(), GetAnonymStr(appIdentifier).c_str());
+    return true;
+}
+
 bool BundleManagerInternal::GetSpecifyBundleNameFromBms(int32_t callingUid, std::string& bundleName)
 {
     auto bundleMgr = GetBundleManager();
