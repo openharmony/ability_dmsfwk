@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,28 @@ constexpr int32_t POS_3 = 3;
 constexpr int32_t OFFSET_24 = 24;
 constexpr int32_t OFFSET_16 = 16;
 constexpr int32_t OFFSET_8 = 8;
+constexpr uint32_t FUZZ_TEST_CASE_COUNT = 18;
+
+enum FuzzTestCase : uint32_t {
+    CASE_DISTRIBUTED_WANT_001,
+    CASE_DISTRIBUTED_WANT_002,
+    CASE_DISTRIBUTED_WANT_003,
+    CASE_DISTRIBUTED_WANT_004,
+    CASE_DISTRIBUTED_WANT_005,
+    CASE_DISTRIBUTED_WANT_006,
+    CASE_DISTRIBUTED_WANT_GET_INT_PARAM,
+    CASE_DISTRIBUTED_WANT_SET_PARAM_INT,
+    CASE_DISTRIBUTED_WANT_GET_LONG_PARAM,
+    CASE_DISTRIBUTED_WANT_SET_PARAM_LONGLONG,
+    CASE_DISTRIBUTED_WANT_GET_OPERATION,
+    CASE_DISTRIBUTED_WANT_OPERATION_EQUALS,
+    CASE_DISTRIBUTED_WANT_SET_URI,
+    CASE_DISTRIBUTED_WANT_TO_JSON,
+    CASE_DISTRIBUTED_WANT_FROM_STRING,
+    CASE_DISTRIBUTED_WANT_COPY_CTOR,
+    CASE_DISTRIBUTED_WANT_ASSIGN_OPERATOR,
+    CASE_DISTRIBUTED_WANT_FROM_WANT,
+};
 }
 uint32_t GetU32Data(const char* ptr)
 {
@@ -463,28 +485,102 @@ void DistributedWantFromWantFuzzTest(const uint8_t* data, size_t size)
 
     DistributedWant distributedWant(want);
 }
+
+void HandleBasicFuzzCases(uint32_t testCase, const uint8_t* data, size_t size)
+{
+    switch (testCase) {
+        case CASE_DISTRIBUTED_WANT_001:
+            DoSomethingInterestingWithMyApiDistributedWant001(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_002:
+            DoSomethingInterestingWithMyApiDistributedWant002(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_003:
+            DoSomethingInterestingWithMyApiDistributedWant003(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_004:
+            DoSomethingInterestingWithMyApiDistributedWant004(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_005:
+            DoSomethingInterestingWithMyApiDistributedWant005(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_006:
+            FuzzDistributedWantGetIntParam(data, size);
+            break;
+        default:
+            break;
+    }
+}
+
+void HandleParamFuzzCases(uint32_t testCase, const uint8_t* data, size_t size)
+{
+    switch (testCase) {
+        case CASE_DISTRIBUTED_WANT_GET_INT_PARAM:
+            FuzzDistributedWantGetIntParam(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_SET_PARAM_INT:
+            FuzzDistributedWantSetParamInt(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_GET_LONG_PARAM:
+            FuzzDistributedWantGetLongParam(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_SET_PARAM_LONGLONG:
+            FuzzDistributedWantSetParamLongLong(data, size);
+            break;
+        default:
+            break;
+    }
+}
+
+void HandleAdvancedFuzzCases(uint32_t testCase, const uint8_t* data, size_t size)
+{
+    switch (testCase) {
+        case CASE_DISTRIBUTED_WANT_GET_OPERATION:
+            FuzzDistributedWantGetOperation(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_OPERATION_EQUALS:
+            FuzzDistributedWantOperationEquals(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_SET_URI:
+            FuzzDistributedWantSetUri(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_TO_JSON:
+            FuzzDistributedWantToJson(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_FROM_STRING:
+            FuzzDistributedWantFromString(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_COPY_CTOR:
+            DistributedWantCopyCtorFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_ASSIGN_OPERATOR:
+            DistributedWantAssignOperatorFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_FROM_WANT:
+            DistributedWantFromWantFuzzTest(data, size);
+            break;
+        default:
+            break;
+    }
+}
+
+void RunDistributedWantFuzzTest(uint32_t testCase, const uint8_t* data, size_t size)
+{
+    if (testCase <= CASE_DISTRIBUTED_WANT_006) {
+        HandleBasicFuzzCases(testCase, data, size);
+    } else if (testCase <= CASE_DISTRIBUTED_WANT_SET_PARAM_LONGLONG) {
+        HandleParamFuzzCases(testCase, data, size);
+    } else {
+        HandleAdvancedFuzzCases(testCase, data, size);
+    }
+}
 }
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DoSomethingInterestingWithMyApiDistributedWant001(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWant002(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWant003(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWant004(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWant005(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWant006(data, size);
-    OHOS::FuzzDistributedWantGetIntParam(data, size);
-    OHOS::FuzzDistributedWantSetParamInt(data, size);
-    OHOS::FuzzDistributedWantGetLongParam(data, size);
-    OHOS::FuzzDistributedWantSetParamLongLong(data, size);
-    OHOS::FuzzDistributedWantGetOperation(data, size);
-    OHOS::FuzzDistributedWantOperationEquals(data, size);
-    OHOS::FuzzDistributedWantSetUri(data, size);
-    OHOS::FuzzDistributedWantToJson(data, size);
-    OHOS::FuzzDistributedWantFromString(data, size);
-    OHOS::DistributedWantCopyCtorFuzzTest(data, size);
-    OHOS::DistributedWantAssignOperatorFuzzTest(data, size);
-    OHOS::DistributedWantFromWantFuzzTest(data, size);
+    FuzzedDataProvider fdp(data, size);
+    uint32_t testCase = fdp.ConsumeIntegralInRange<uint32_t>(0, OHOS::FUZZ_TEST_CASE_COUNT - 1);
+    OHOS::RunDistributedWantFuzzTest(testCase, data, size);
     return 0;
 }

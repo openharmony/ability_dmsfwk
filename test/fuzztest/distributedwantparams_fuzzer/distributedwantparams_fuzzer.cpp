@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,21 @@ constexpr int32_t POS_3 = 3;
 constexpr int32_t OFFSET_24 = 24;
 constexpr int32_t OFFSET_16 = 16;
 constexpr int32_t OFFSET_8 = 8;
+constexpr uint32_t FUZZ_TEST_CASE_COUNT = 11;
+
+enum FuzzTestCase : uint32_t {
+    CASE_DISTRIBUTED_WANT_PARAMS_001,
+    CASE_DISTRIBUTED_WANT_PARAMS_002,
+    CASE_DISTRIBUTED_WANT_PARAMS_003,
+    CASE_DISTRIBUTED_WANT_PARAMS_004,
+    CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_EQUALS,
+    CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_FIND_MATCHING_BRACE,
+    CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_BOX,
+    CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_GET_TYPED_ID,
+    CASE_DISTRIBUTED_WANT_PARAM_QUERY,
+    CASE_DISTRIBUTED_UNSUPPORTED_DATA_COPY_ASSIGN,
+    CASE_DISTRIBUTED_UNSUPPORTED_DATA_MOVE_ASSIGN,
+};
 constexpr int32_t MID_HALF = 2;
 const uint32_t MIN_DH_TYPE = 0;
 const uint32_t MAX_DH_TYPE = 10;
@@ -376,21 +391,54 @@ void DistributedUnsupportedDataMoveAssignFuzzTest(const uint8_t* data, size_t si
     lhs = std::move(rhs);
 }
 
+
+void RunDistributedWantParamsFuzzTest(uint32_t testCase, const uint8_t* data, size_t size)
+{
+    switch (testCase) {
+        case CASE_DISTRIBUTED_WANT_PARAMS_001:
+            DoSomethingInterestingWithMyApiDistributedWantParams001(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAMS_002:
+            DoSomethingInterestingWithMyApiDistributedWantParams002(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAMS_003:
+            DoSomethingInterestingWithMyApiDistributedWant003(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAMS_004:
+            DoSomethingInterestingWithMyApiDistributedWantParams004(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_EQUALS:
+            DistributedWantParamWrapperEqualsFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_FIND_MATCHING_BRACE:
+            DistributedWantParamWrapperFindMatchingBraceFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_BOX:
+            DistributedWantParamWrapperBoxFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAM_WRAPPER_GET_TYPED_ID:
+            DistributedWantParamWrapperGerTypedIdFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_WANT_PARAM_QUERY:
+            DistributedWantParamQueryFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_UNSUPPORTED_DATA_COPY_ASSIGN:
+            DistributedUnsupportedDataCopyAssignFuzzTest(data, size);
+            break;
+        case CASE_DISTRIBUTED_UNSUPPORTED_DATA_MOVE_ASSIGN:
+            DistributedUnsupportedDataMoveAssignFuzzTest(data, size);
+            break;
+        default:
+            break;
+    }
+}
 }
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DoSomethingInterestingWithMyApiDistributedWantParams001(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWantParams002(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWant003(data, size);
-    OHOS::DoSomethingInterestingWithMyApiDistributedWantParams004(data, size);
-    OHOS::DistributedWantParamWrapperEqualsFuzzTest(data, size);
-    OHOS::DistributedWantParamWrapperFindMatchingBraceFuzzTest(data, size);
-    OHOS::DistributedWantParamWrapperBoxFuzzTest(data, size);
-    OHOS::DistributedWantParamWrapperGerTypedIdFuzzTest(data, size);
-    OHOS::DistributedWantParamQueryFuzzTest(data, size);
-    OHOS::DistributedUnsupportedDataCopyAssignFuzzTest(data, size);
-    OHOS::DistributedUnsupportedDataMoveAssignFuzzTest(data, size);
+    FuzzedDataProvider fdp(data, size);
+    uint32_t testCase = fdp.ConsumeIntegralInRange<uint32_t>(0, OHOS::FUZZ_TEST_CASE_COUNT - 1);
+    OHOS::RunDistributedWantParamsFuzzTest(testCase, data, size);
     return 0;
 }
