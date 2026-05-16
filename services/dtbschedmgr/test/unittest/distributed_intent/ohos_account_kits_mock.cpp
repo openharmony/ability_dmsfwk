@@ -20,12 +20,77 @@ namespace AccountSA {
 
 const int ERR_FAIL = -1;
 
-int32_t GetOhosAccountInfo(OhosAccountInfo& info)
-{
-    if (IOhosAccountKits::ohosAccountMock == nullptr) {
+class MockOhosAccountKits : public OhosAccountKits {
+public:
+    std::pair<bool, OhosAccountInfo> QueryOhosAccountInfo() override
+    {
+        return {false, {}};
+    }
+
+    ErrCode GetOhosAccountInfo(OhosAccountInfo& accountInfo) override
+    {
+        if (IOhosAccountKits::ohosAccountMock == nullptr) {
+            return ERR_FAIL;
+        }
+        return IOhosAccountKits::ohosAccountMock->GetOhosAccountInfo(accountInfo);
+    }
+
+    ErrCode GetOsAccountDistributedInfo(int32_t localId, OhosAccountInfo& accountInfo) override
+    {
         return ERR_FAIL;
     }
-    return IOhosAccountKits::ohosAccountMock->GetOhosAccountInfo(info);
+
+    std::pair<bool, OhosAccountInfo> QueryOsAccountDistributedInfo(std::int32_t localId) override
+    {
+        return {false, {}};
+    }
+
+    ErrCode UpdateOhosAccountInfo(const std::string& accountName, const std::string& uid,
+        const std::string& eventStr) override
+    {
+        return ERR_FAIL;
+    }
+
+    ErrCode SetOhosAccountInfo(const OhosAccountInfo& ohosAccountInfo,
+    const std::string& eventStr) override
+    {
+        return ERR_FAIL;
+    }
+
+    ErrCode SetOsAccountDistributedInfo(
+        const int32_t localId, const OhosAccountInfo& ohosAccountInfo, const std::string& eventStr) override
+    {
+        return ERR_FAIL;
+    }
+
+    ErrCode QueryDeviceAccountId(std::int32_t& accountId) override
+    {
+        return ERR_FAIL;
+    }
+
+    ErrCode GetDeviceAccountIdByUID(std::int32_t& uid) override
+    {
+        return ERR_FAIL;
+    }
+
+    ErrCode SubscribeDistributedAccountEvent(const DISTRIBUTED_ACCOUNT_SUBSCRIBE_TYPE type,
+        const std::shared_ptr<DistributedAccountSubscribeCallback>& callback) override
+    {
+        return ERR_FAIL;
+    }
+
+    ErrCode UnsubscribeDistributedAccountEvent(const DISTRIBUTED_ACCOUNT_SUBSCRIBE_TYPE type,
+        const std::shared_ptr<DistributedAccountSubscribeCallback>& callback) override
+    {
+        return ERR_FAIL;
+    }
+};
+
+static MockOhosAccountKits g_mockOhosAccountKits;
+
+OhosAccountKits& OhosAccountKits::GetInstance()
+{
+    return g_mockOhosAccountKits;
 }
 
 } // namespace AccountSA

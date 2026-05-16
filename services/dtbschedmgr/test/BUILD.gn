@@ -1659,7 +1659,9 @@ ohos_unittest("distributedintenterorcodetest") {
 
 ohos_unittest("distributedintentpermissioncheckertest") {
   module_out_path = module_output_path
-  cflags = [ "-Dprivate=public" ]
+  cflags = [ "-Dprivate=public",
+             "-DDMSFWK_SAME_ACCOUNT"
+           ]
   sources = [
     "${dms_path}/services/dtbschedmgr/src/distributedIntent/src/intent_permission_checker.cpp",
     "unittest/distributed_intent/access_token_kit_mock.cpp",

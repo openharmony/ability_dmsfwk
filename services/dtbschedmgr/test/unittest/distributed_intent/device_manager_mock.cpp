@@ -13,12 +13,11 @@
  */
 
 #include "device_manager_mock.h"
-#include "device_manager.h"
 
 namespace OHOS {
 namespace DistributedHardware {
 
-bool CheckSinkIsSameAccount(const DmAccessCaller& caller, const DmAccessCallee& callee)
+bool DeviceManagerImpl::CheckSinkIsSameAccount(const DmAccessCaller& caller, const DmAccessCallee& callee)
 {
     if (IDeviceManager::deviceManagerMock == nullptr) {
         return false;
@@ -26,7 +25,7 @@ bool CheckSinkIsSameAccount(const DmAccessCaller& caller, const DmAccessCallee& 
     return IDeviceManager::deviceManagerMock->CheckSinkIsSameAccount(caller, callee);
 }
 
-bool CheckSrcIsSameAccount(const DmAccessCaller& caller, const DmAccessCallee& callee)
+bool DeviceManagerImpl::CheckSrcIsSameAccount(const DmAccessCaller& caller, const DmAccessCallee& callee)
 {
     if (IDeviceManager::deviceManagerMock == nullptr) {
         return false;

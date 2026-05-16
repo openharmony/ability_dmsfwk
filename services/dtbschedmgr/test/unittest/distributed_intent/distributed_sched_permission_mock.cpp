@@ -14,20 +14,22 @@
 
 #include "distributed_sched_permission_mock.h"
 #include "distributed_sched_permission.h"
+#include "distributed_intent_error_code.h"
 #include "single_instance.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
 
-int32_t CheckPermission(uint64_t accessToken, const std::string& permission)
+int32_t DistributedSchedPermission::CheckPermission(uint64_t accessToken, const std::string& permissionName) const
 {
     if (IDistributedSchedPermission::schedPermMock == nullptr) {
         return ERR_DI_SYSTEM_WORK_ABNORMALLY;
     }
-    return IDistributedSchedPermission::schedPermMock->CheckPermission(accessToken, permission);
+    return IDistributedSchedPermission::schedPermMock->CheckPermission(accessToken, permissionName);
 }
 
-bool GetTargetAbility(const AAFwk::Want& want, AppExecFwk::AbilityInfo& targetAbility)
+bool DistributedSchedPermission::GetTargetAbility(const AAFwk::Want& want,
+    AppExecFwk::AbilityInfo& targetAbility, bool needQueryExtension) const
 {
     if (IDistributedSchedPermission::schedPermMock == nullptr) {
         return false;
@@ -35,7 +37,8 @@ bool GetTargetAbility(const AAFwk::Want& want, AppExecFwk::AbilityInfo& targetAb
     return IDistributedSchedPermission::schedPermMock->GetTargetAbility(want, targetAbility);
 }
 
-bool CheckDeviceSecurityLevel(const std::string& srcDeviceId, const std::string& dstDeviceId)
+bool DistributedSchedPermission::CheckDeviceSecurityLevel(const std::string& srcDeviceId,
+    const std::string& dstDeviceId) const
 {
     if (IDistributedSchedPermission::schedPermMock == nullptr) {
         return false;
@@ -43,21 +46,13 @@ bool CheckDeviceSecurityLevel(const std::string& srcDeviceId, const std::string&
     return IDistributedSchedPermission::schedPermMock->CheckDeviceSecurityLevel(srcDeviceId, dstDeviceId);
 }
 
-bool CheckTargetAbilityVisible(const AppExecFwk::AbilityInfo& targetAbility,
-    const CallerInfo& callerInfo)
+bool DistributedSchedPermission::CheckTargetAbilityVisible(const AppExecFwk::AbilityInfo& targetAbility,
+    const CallerInfo& callerInfo) const
 {
     if (IDistributedSchedPermission::schedPermMock == nullptr) {
         return false;
     }
     return IDistributedSchedPermission::schedPermMock->CheckTargetAbilityVisible(targetAbility, callerInfo);
-}
-
-bool IsFoundationCall()
-{
-    if (IDistributedSchedPermission::schedPermMock == nullptr) {
-        return false;
-    }
-    return IDistributedSchedPermission::schedPermMock->IsFoundationCall();
 }
 
 } // namespace DistributedSchedule

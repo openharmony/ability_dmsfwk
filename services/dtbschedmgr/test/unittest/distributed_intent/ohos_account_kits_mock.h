@@ -16,7 +16,9 @@
 #define OHOS_ACCOUNT_KITS_MOCK_H
 
 #include <gmock/gmock.h>
+#include <memory>
 #include "ohos_account_kits.h"
+#include "distributed_account_subscribe_callback.h"
 
 namespace OHOS {
 namespace AccountSA {

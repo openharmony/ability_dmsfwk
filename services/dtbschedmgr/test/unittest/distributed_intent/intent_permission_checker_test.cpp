@@ -19,6 +19,7 @@
 #include "intent_permission_checker.h"
 #undef private
 
+#include "dtbschedmgr_log.h"
 #include "distributed_sched_permission_mock.h"
 #include "dtbschedmgr_device_info_storage_mock.h"
 #include "bundle_manager_internal_mock.h"
@@ -34,17 +35,21 @@
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS::AAFwk;
-#define DMSFWK_SAME_ACCOUNT
+
 
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
+const std::string PERMISSION_EXECUTE_DISTRIBUTED_INTENT = "ohos.permission.EXECUTE_DISTRIBUTED_INTENT";
+const std::string PERMISSION_EXECUTE_INSIGHT_INTENT = "ohos.permission.EXECUTE_INSIGHT_INTENT";
+const std::string PERMISSION_START_ABILITIES_FROM_BACKGROUND = "ohos.permission.START_ABILITIES_FROM_BACKGROUND";
 const std::string LOCAL_DEVICE_ID = "local_device_id_12345";
 const std::string REMOTE_DEVICE_ID = "remote_device_id_67890";
 const std::string SRC_DEVICE_ID = "src_device_id_11111";
 const std::string EMPTY_STRING;
 const int32_t ERR_OK = 0;
 const int32_t ERR_FAIL = -1;
+constexpr int32_t EXECUTEPARAM_MODE_NUM = 2;
 constexpr int32_t TEST_CALLER_UID = 1000;
 constexpr uint64_t TEST_INVALID_ACCESS_TOKEN = 0;
 constexpr uint32_t TEST_ACCESS_TOKEN = 200;
@@ -53,6 +58,7 @@ constexpr uint64_t TEST_D_ACCESS_TOKEN = 400;
 const std::string BUNDLE_NAME = "com.test.bundle";
 const std::string ABILITY_NAME = "MainAbility";
 const std::string PERMISSION = "ohos.permission.EXECUTE_INSIGHT_INTENT";
+const std::string TAG = "IntentPermissionCheckerTest";
 }
 
 struct PermissionCheckerMocks {
@@ -111,23 +117,23 @@ protected:
 
 void IntentPermissionCheckerTest::SetUpTestCase()
 {
-    DTEST_LOG << "IntentPermissionCheckerTest::SetUpTestCase" << std::endl;
+    HILOGI("IntentPermissionCheckerTest::SetUpTestCase");
 }
 
 void IntentPermissionCheckerTest::TearDownTestCase()
 {
-    DTEST_LOG << "IntentPermissionCheckerTest::TearDownTestCase" << std::endl;
+    HILOGI("IntentPermissionCheckerTest::TearDownTestCase");
 }
 
 void IntentPermissionCheckerTest::SetUp()
 {
-    DTEST_LOG << "IntentPermissionCheckerTest::SetUp" << std::endl;
+    HILOGI("IntentPermissionCheckerTest::SetUp");
     mocks_.SetupMocks();
 }
 
 void IntentPermissionCheckerTest::TearDown()
 {
-    DTEST_LOG << "IntentPermissionCheckerTest::TearDown" << std::endl;
+    HILOGI("IntentPermissionCheckerTest::TearDown");
     mocks_.ClearMocks();
 }
 
@@ -140,8 +146,9 @@ void IntentPermissionCheckerTest::TearDown()
 HWTEST_F(IntentPermissionCheckerTest, GetCallerInfo_GetCallerAppIdFail_001, TestSize.Level3)
 {
     CallerInfo callerInfo;
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().GetCallerInfo(LOCAL_DEVICE_ID, TEST_CALLER_UID,
-        TEST_ACCESS_TOKEN, callerInfo), INVALID_PARAMETERS_ERR);
+    int32_t ret = IntentPermissionChecker::GetInstance().GetCallerInfo(LOCAL_DEVICE_ID, TEST_CALLER_UID,
+        TEST_ACCESS_TOKEN, callerInfo);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 }
 
 /**
@@ -153,8 +160,10 @@ HWTEST_F(IntentPermissionCheckerTest, GetCallerInfo_GetCallerAppIdFail_001, Test
 HWTEST_F(IntentPermissionCheckerTest, GetCallerInfo_GetBundleNameListFail_002, TestSize.Level3)
 {
     CallerInfo callerInfo;
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().GetCallerInfo(LOCAL_DEVICE_ID, TEST_CALLER_UID,
-        TEST_ACCESS_TOKEN, callerInfo), INVALID_PARAMETERS_ERR);
+    EXPECT_CALL(*mocks_.bundleMock, GetCallerAppIdFromBms(_, _)).WillRepeatedly(Return(true));
+    int32_t ret = IntentPermissionChecker::GetInstance().GetCallerInfo(LOCAL_DEVICE_ID, TEST_CALLER_UID,
+        TEST_ACCESS_TOKEN, callerInfo);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
 }
 
 /**
@@ -166,19 +175,20 @@ HWTEST_F(IntentPermissionCheckerTest, GetCallerInfo_GetBundleNameListFail_002, T
 HWTEST_F(IntentPermissionCheckerTest, GetCallerInfo_Success_003, TestSize.Level3)
 {
     CallerInfo callerInfo;
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().GetCallerInfo(LOCAL_DEVICE_ID, TEST_CALLER_UID,
-        TEST_ACCESS_TOKEN, callerInfo), INVALID_PARAMETERS_ERR);
-    EXPECT_EQ(callerInfo.sourceDeviceId, LOCAL_DEVICE_ID);
-    EXPECT_EQ(callerInfo.uid, TEST_CALLER_UID);
+    EXPECT_CALL(*mocks_.bundleMock, GetCallerAppIdFromBms(_, _)).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mocks_.bundleMock, GetBundleNameListFromBms(_, _)).WillRepeatedly(Return(true));
+    int32_t ret = IntentPermissionChecker::GetInstance().GetCallerInfo(LOCAL_DEVICE_ID, TEST_CALLER_UID,
+        TEST_ACCESS_TOKEN, callerInfo);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
- * @tc.name: SetCallerExtraInfo_WithSpecifyTokenId_004
+ * @tc.name: SetCallerExtraInfo_WithSpecifyTokenId_001
  * @tc.desc: SetCallerExtraInfo with specifyTokenId set
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, SetCallerExtraInfo_WithSpecifyTokenId_004, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, SetCallerExtraInfo_WithSpecifyTokenId_001, TestSize.Level3)
 {
     EXPECT_CALL(*mocks_.tokenMock, GetTokenTypeFlag(_))
         .WillRepeatedly(Return(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP));
@@ -197,12 +207,12 @@ HWTEST_F(IntentPermissionCheckerTest, SetCallerExtraInfo_WithSpecifyTokenId_004,
 }
 
 /**
- * @tc.name: SetCallerExtraInfo_HapTokenSuccess_005
+ * @tc.name: SetCallerExtraInfo_HapTokenSuccess_002
  * @tc.desc: SetCallerExtraInfo when HAP token type success
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, SetCallerExtraInfo_HapTokenSuccess_005, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, SetCallerExtraInfo_HapTokenSuccess_002, TestSize.Level3)
 {
     EXPECT_CALL(*mocks_.tokenMock, GetTokenTypeFlag(_))
         .WillRepeatedly(Return(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP));
@@ -220,12 +230,12 @@ HWTEST_F(IntentPermissionCheckerTest, SetCallerExtraInfo_HapTokenSuccess_005, Te
 }
 
 /**
- * @tc.name: SetCallerExtraInfo_GetHapTokenInfoFail_006
+ * @tc.name: SetCallerExtraInfo_GetHapTokenInfoFail_003
  * @tc.desc: SetCallerExtraInfo when GetHapTokenInfo fails
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, SetCallerExtraInfo_GetHapTokenInfoFail_006, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, SetCallerExtraInfo_GetHapTokenInfoFail_003, TestSize.Level3)
 {
     EXPECT_CALL(*mocks_.tokenMock, GetTokenTypeFlag(_))
         .WillRepeatedly(Return(Security::AccessToken::ATokenTypeEnum::TOKEN_HAP));
@@ -240,12 +250,12 @@ HWTEST_F(IntentPermissionCheckerTest, SetCallerExtraInfo_GetHapTokenInfoFail_006
 }
 
 /**
- * @tc.name: SetCallerExtraInfo_NonHapToken_007
+ * @tc.name: SetCallerExtraInfo_NonHapToken_004
  * @tc.desc: SetCallerExtraInfo when token type is not HAP
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, SetCallerExtraInfo_NonHapToken_007, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, SetCallerExtraInfo_NonHapToken_004, TestSize.Level3)
 {
     EXPECT_CALL(*mocks_.tokenMock, GetTokenTypeFlag(_))
         .WillRepeatedly(Return(Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE));
@@ -258,27 +268,112 @@ HWTEST_F(IntentPermissionCheckerTest, SetCallerExtraInfo_NonHapToken_007, TestSi
 }
 
 /**
- * @tc.name: GetAccountInfo_EmptyNetworkId_008
+ * @tc.name: GetOsAccountData_EmptyUid_001
+ * @tc.desc: GetOsAccountData when account info has empty uid
+ * @tc.type: FUNC
+ * @tc.require:
+*/
+HWTEST_F(IntentPermissionCheckerTest, GetOsAccountData_EmptyUid_001, TestSize.Level3)
+{
+    IDistributedSched::AccountInfo dmsAccountInfo;
+    int32_t ret = IntentPermissionChecker::GetInstance().GetOsAccountData(dmsAccountInfo);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CheckDstSameAccount_GetOsAccountData_Fail_001
+ * @tc.desc: CheckDstSameAccount when GetOsAccountData fail on dst account
+ * @tc.type: FUNC
+ * @tc.require:
+*/
+HWTEST_F(IntentPermissionCheckerTest, CheckDstSameAccount_GetOsAccountData_Fail_001, TestSize.Level3)
+{
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
+    IDistributedSched::AccountInfo accountInfo;
+
+    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(0)));
+    EXPECT_CALL(*mocks_.networkMock, GetUdidByNetworkId(_))
+        .WillRepeatedly(Return("udid123"));
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckDstSameAccount(SRC_DEVICE_ID, accountInfo, callerInfo,
+        true);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CheckDstSameAccount_AccountsMatch_002
+ * @tc.desc: CheckDstSameAccount when accounts match
+ * @tc.type: FUNC
+ * @tc.require:
+*/
+HWTEST_F(IntentPermissionCheckerTest, CheckDstSameAccount_AccountsMatch_002, TestSize.Level3)
+{
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
+    IDistributedSched::AccountInfo accountInfo;
+
+    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(0)));
+    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo("uid123", "", 0)), Return(0)));
+    EXPECT_CALL(*mocks_.networkMock, GetUdidByNetworkId(_))
+        .WillRepeatedly(Return("udid123"));
+    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
+        .WillRepeatedly(Return(true));
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckDstSameAccount(SRC_DEVICE_ID, accountInfo, callerInfo,
+        false);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CheckDstSameAccount_AccountsMisMatch_003
+ * @tc.desc: CheckDstSameAccount when accounts do not match
+ * @tc.type: FUNC
+ * @tc.require:
+*/
+HWTEST_F(IntentPermissionCheckerTest, CheckDstSameAccount_AccountsMisMatch_003, TestSize.Level3)
+{
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
+    IDistributedSched::AccountInfo accountInfo;
+
+    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(0)));
+    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo("uid123", "", 0)), Return(0)));
+    EXPECT_CALL(*mocks_.networkMock, GetUdidByNetworkId(_))
+        .WillRepeatedly(Return("udid123"));
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckDstSameAccount(SRC_DEVICE_ID, accountInfo, callerInfo,
+        true);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetAccountInfo_EmptyNetworkId_001
  * @tc.desc: GetAccountInfo when remoteNetworkId is empty
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, GetAccountInfo_EmptyNetworkId_008, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, GetAccountInfo_EmptyNetworkId_001, TestSize.Level3)
 {
     CallerInfo callerInfo;
     IDistributedSched::AccountInfo accountInfo;
 
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().GetAccountInfo(EMPTY_STRING, callerInfo, accountInfo),
-        ERR_NULL_OBJECT);
+    int32_t ret = IntentPermissionChecker::GetInstance().GetAccountInfo(EMPTY_STRING, callerInfo, accountInfo);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
 }
 
 /**
- * @tc.name: GetAccountInfo_GetUdidFail_009
+ * @tc.name: GetAccountInfo_GetUdidFail_002
  * @tc.desc: GetAccountInfo when GetUdidByNetworkId returns empty
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, GetAccountInfo_GetUdidFail_009, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, GetAccountInfo_GetUdidFail_002, TestSize.Level3)
 {
     EXPECT_CALL(*mocks_.networkMock, GetUdidByNetworkId(_))
         .WillRepeatedly(Return(EMPTY_STRING));
@@ -286,61 +381,47 @@ HWTEST_F(IntentPermissionCheckerTest, GetAccountInfo_GetUdidFail_009, TestSize.L
     CallerInfo callerInfo;
     IDistributedSched::AccountInfo accountInfo;
 
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().GetAccountInfo(REMOTE_DEVICE_ID, callerInfo, accountInfo),
-        ERR_NULL_OBJECT);
+    int32_t ret = IntentPermissionChecker::GetInstance().GetAccountInfo(REMOTE_DEVICE_ID, callerInfo, accountInfo);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
 }
 
 /**
- * @tc.name: GetAccountInfo_GetOsAccountFail_010
+ * @tc.name: GetAccountInfo_GetOsAccountFail_003
  * @tc.desc: GetAccountInfo when GetOsAccountData fails
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, GetAccountInfo_GetOsAccountFail_010, TestSize.Level3)
-{
-    EXPECT_CALL(*mocks_.networkMock, GetUdidByNetworkId(_))
-        .WillRepeatedly(Return("test_udid"));
-
-    CallerInfo callerInfo;
-    IDistributedSched::AccountInfo accountInfo;
-
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().GetAccountInfo(REMOTE_DEVICE_ID, callerInfo, accountInfo),
-        ERR_DI_INVALID_PARAMETER);
-}
-
-/**
- * @tc.name: GetAccountInfo_CheckSameAccountFail_011
- * @tc.desc: GetAccountInfo when CheckDstSameAccount fails
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentPermissionCheckerTest, GetAccountInfo_CheckSameAccountFail_011, TestSize.Level3)
-{
-    EXPECT_CALL(*mocks_.networkMock, GetUdidByNetworkId(_))
-        .WillRepeatedly(Return("test_udid"));
-
-    CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = LOCAL_DEVICE_ID;
-    callerInfo.accessToken = TEST_ACCESS_TOKEN;
-    callerInfo.bundleNames.push_back(BUNDLE_NAME);
-    IDistributedSched::AccountInfo accountInfo;
-
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().GetAccountInfo(REMOTE_DEVICE_ID, callerInfo, accountInfo),
-        ERR_DI_INVALID_PARAMETER);
-}
-
-/**
- * @tc.name: GetAccountInfo_Success_012
- * @tc.desc: GetAccountInfo success case
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentPermissionCheckerTest, GetAccountInfo_Success_012, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, GetAccountInfo_GetOsAccountFail_003, TestSize.Level3)
 {
     EXPECT_CALL(*mocks_.networkMock, GetUdidByNetworkId(_))
         .WillRepeatedly(Return("test_udid"));
     EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
-        .WillRepeatedly(Return(ERR_OK));
+        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_FAIL)));
+
+    CallerInfo callerInfo;
+    IDistributedSched::AccountInfo accountInfo;
+
+    int32_t ret = IntentPermissionChecker::GetInstance().GetAccountInfo(REMOTE_DEVICE_ID, callerInfo, accountInfo);
+    EXPECT_EQ(ret, ERR_DI_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: GetAccountInfo_CheckSameAccountFail_004
+ * @tc.desc: GetAccountInfo when CheckDstSameAccount fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentPermissionCheckerTest, GetAccountInfo_CheckSameAccountFail_004, TestSize.Level3)
+{
+    EXPECT_CALL(*mocks_.networkMock, GetUdidByNetworkId(_))
+        .WillRepeatedly(Return("test_udid"));
+    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+        Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
+        .WillRepeatedly(Return(false));
 
     CallerInfo callerInfo;
     callerInfo.sourceDeviceId = LOCAL_DEVICE_ID;
@@ -348,389 +429,179 @@ HWTEST_F(IntentPermissionCheckerTest, GetAccountInfo_Success_012, TestSize.Level
     callerInfo.bundleNames.push_back(BUNDLE_NAME);
     IDistributedSched::AccountInfo accountInfo;
 
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().GetAccountInfo(REMOTE_DEVICE_ID, callerInfo, accountInfo),
-        ERR_DI_INVALID_PARAMETER);
+    int32_t ret = IntentPermissionChecker::GetInstance().GetAccountInfo(REMOTE_DEVICE_ID, callerInfo, accountInfo);
+    EXPECT_EQ(ret, ERR_DI_INVALID_PARAMETER);
 }
 
 /**
- * @tc.name: CheckStartPermission_GetTargetAbilityFail_013
- * @tc.desc: CheckStartPermission when GetTargetAbility fails
+ * @tc.name: GetAccountInfo_Success_005
+ * @tc.desc: GetAccountInfo success case
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_GetTargetAbilityFail_013, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, GetAccountInfo_Success_005, TestSize.Level3)
 {
-    Want want;
-    want.SetElementName(LOCAL_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-    callerInfo.accessToken = TEST_ACCESS_TOKEN;
-    IDistributedSched::AccountInfo accountInfo;
-    uint64_t dAccessToken = 0;
-
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
-        callerInfo, accountInfo, dAccessToken), ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: CheckStartPermission_CheckSameAccountFail_014
- * @tc.desc: CheckStartPermission when CheckDstSameAccount fails
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckSameAccountFail_014, TestSize.Level3)
-{
-    Want want;
-    want.SetElementName(LOCAL_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-    callerInfo.accessToken = TEST_ACCESS_TOKEN;
-    IDistributedSched::AccountInfo accountInfo;
-    uint64_t dAccessToken = 0;
-
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
-        callerInfo, accountInfo, dAccessToken), ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: CheckStartPermission_AllocLocalTokenFail_015
- * @tc.desc: CheckStartPermission when AllocLocalTokenID returns 0
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_AllocLocalTokenFail_015, TestSize.Level3)
-{
-    EXPECT_CALL(*mocks_.tokenMock, AllocLocalTokenID(_, _))
-        .WillRepeatedly(Return(0));
-
-    Want want;
-    want.SetElementName(LOCAL_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-    callerInfo.accessToken = TEST_ACCESS_TOKEN;
-    IDistributedSched::AccountInfo accountInfo;
-    uint64_t dAccessToken = 0;
-
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
-        callerInfo, accountInfo, dAccessToken), ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: CheckStartPermission_CheckPermissionFail_016
- * @tc.desc: CheckStartPermission when CheckPermission fails
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckPermissionFail_016, TestSize.Level3)
-{
+    EXPECT_CALL(*mocks_.networkMock, GetUdidByNetworkId(_))
+        .WillRepeatedly(Return("test_udid"));
+    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+        Return(ERR_OK)));
     EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(*mocks_.tokenMock, AllocLocalTokenID(_, _))
-        .WillRepeatedly(Return(TEST_D_ACCESS_TOKEN));
-
-    Want want;
-    want.SetElementName(LOCAL_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-    callerInfo.accessToken = TEST_ACCESS_TOKEN;
-    IDistributedSched::AccountInfo accountInfo;
-    uint64_t dAccessToken = 0;
-
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
-        callerInfo, accountInfo, dAccessToken), ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: CheckStartPermission_CheckSecurityLevelFail_017
- * @tc.desc: CheckStartPermission when CheckDeviceSecurityLevel fails for invisible ability
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckSecurityLevelFail_017, TestSize.Level3)
-{
-    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
+    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSrcIsSameAccount(_, _))
         .WillRepeatedly(Return(true));
-    EXPECT_CALL(*mocks_.tokenMock, AllocLocalTokenID(_, _))
-        .WillRepeatedly(Return(TEST_D_ACCESS_TOKEN));
-    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, _))
-        .WillRepeatedly(Return(ERR_DI_OK));
 
-    Want want;
-    want.SetElementName(LOCAL_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
     CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
+    callerInfo.sourceDeviceId = LOCAL_DEVICE_ID;
     callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    callerInfo.bundleNames.push_back(BUNDLE_NAME);
     IDistributedSched::AccountInfo accountInfo;
-    uint64_t dAccessToken = 0;
 
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
-        callerInfo, accountInfo, dAccessToken), ERR_DI_PERMISSION_DENIED);
+    int32_t ret = IntentPermissionChecker::GetInstance().GetAccountInfo(REMOTE_DEVICE_ID, callerInfo, accountInfo);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
- * @tc.name: CheckStartPermission_CheckVisibleFail_018
- * @tc.desc: CheckStartPermission when CheckTargetAbilityVisible fails
+ * @tc.name: CheckCallerPermission_DISTRIBUTED_INTENT_NOK_001
+ * @tc.desc: CheckCallerPermission when DISTRIBUTED_INTENT is not OK
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckVisibleFail_018, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, CheckCallerPermission_DISTRIBUTED_INTENT_NOK_001, TestSize.Level3)
 {
-    AppExecFwk::AbilityInfo targetAbility;
-    targetAbility.visible = false;
-    
-    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _))
-        .WillRepeatedly(DoAll(SetArgReferee<1>(targetAbility), Return(true)));
-    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
-        .WillRepeatedly(Return(true));
-    EXPECT_CALL(*mocks_.tokenMock, AllocLocalTokenID(_, _))
-        .WillRepeatedly(Return(TEST_D_ACCESS_TOKEN));
-    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, _))
-        .WillRepeatedly(Return(ERR_DI_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_DISTRIBUTED_INTENT))
+        .WillOnce(Return(DMS_PERMISSION_DENIED));
+
 
     Want want;
-    want.SetElementName(LOCAL_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-    callerInfo.accessToken = TEST_ACCESS_TOKEN;
-    IDistributedSched::AccountInfo accountInfo;
-    uint64_t dAccessToken = 0;
+    want.SetParam("ohos.insightIntent.executeParam.mode", EXECUTEPARAM_MODE_NUM);
 
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
-        callerInfo, accountInfo, dAccessToken), ERR_DI_PERMISSION_DENIED);
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckCallerPermission(want, TEST_ACCESS_TOKEN);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
 }
 
 /**
- * @tc.name: CheckStartPermission_CheckCustomPermissionFail_019
- * @tc.desc: CheckStartPermission when CheckCustomPermission fails
+ * @tc.name: CheckCallerPermission_INSIGHT_INTENT_NOK_002
+ * @tc.desc: CheckCallerPermission when INSIGHT_INTENT is not OK
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckCustomPermissionFail_019, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, CheckCallerPermission_INSIGHT_INTENT_NOK_002, TestSize.Level3)
 {
-    AppExecFwk::AbilityInfo targetAbility;
-    targetAbility.visible = true;
-    targetAbility.permissions.push_back("ohos.permission.TEST");
-    
-    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
-        .WillRepeatedly(Return(true));
-    EXPECT_CALL(*mocks_.tokenMock, AllocLocalTokenID(_, _))
-        .WillRepeatedly(Return(TEST_D_ACCESS_TOKEN));
-    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, _))
-        .WillRepeatedly(Return(ERR_DI_OK));
-    EXPECT_CALL(*mocks_.tokenMock, VerifyAccessToken(_, _))
-        .WillRepeatedly(Return(Security::AccessToken::PermissionState::PERMISSION_DENIED));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_DISTRIBUTED_INTENT))
+        .WillOnce(Return(ERR_DI_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_INSIGHT_INTENT))
+        .WillOnce(Return(DMS_PERMISSION_DENIED));
+
 
     Want want;
-    want.SetElementName(LOCAL_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-    callerInfo.accessToken = TEST_ACCESS_TOKEN;
-    IDistributedSched::AccountInfo accountInfo;
-    uint64_t dAccessToken = 0;
+    want.SetParam("ohos.insightIntent.executeParam.mode", -1);
 
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
-        callerInfo, accountInfo, dAccessToken), ERR_DI_PERMISSION_DENIED);
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckCallerPermission(want, TEST_ACCESS_TOKEN);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
 }
 
 /**
- * @tc.name: CheckStartPermission_Success_020
- * @tc.desc: CheckStartPermission success case
+ * @tc.name: CheckCallerPermission_DISTRIBUTED_INTENT_NOK_003
+ * @tc.desc: CheckCallerPermission when DISTRIBUTED_INTENT is not OK
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_Success_020, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, CheckCallerPermission_DISTRIBUTED_INTENT_NOK_003, TestSize.Level3)
 {
-    AppExecFwk::AbilityInfo targetAbility;
-    targetAbility.visible = true;
-    
-    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _)).WillRepeatedly(Return(true));
-    EXPECT_CALL(*mocks_.tokenMock, AllocLocalTokenID(_, _))
-        .WillRepeatedly(Return(TEST_D_ACCESS_TOKEN));
-    EXPECT_CALL(*mocks_.schedPermMock, CheckTargetAbilityVisible(_, _)).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_DISTRIBUTED_INTENT))
+        .WillOnce(Return(ERR_DI_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_INSIGHT_INTENT))
+        .WillOnce(Return(ERR_DI_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_START_ABILITIES_FROM_BACKGROUND))
+        .WillOnce(Return(DMS_PERMISSION_DENIED));
+
 
     Want want;
-    want.SetElementName(LOCAL_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-    callerInfo.accessToken = TEST_ACCESS_TOKEN;
-    IDistributedSched::AccountInfo accountInfo;
-    uint64_t dAccessToken = 0;
+    want.SetParam("ohos.insightIntent.executeParam.mode", 1);
 
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
-        callerInfo, accountInfo, dAccessToken), ERR_DI_PERMISSION_DENIED);
-    EXPECT_EQ(dAccessToken, TEST_INVALID_ACCESS_TOKEN);
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckCallerPermission(want, TEST_ACCESS_TOKEN);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
 }
 
 /**
- * @tc.name: CheckBusinessResultPermission_DeviceIdMismatch_021
- * @tc.desc: CheckBusinessResultPermission when deviceId mismatch
+ * @tc.name: CheckCallerPermission_ERR_DI_OK_004
+ * @tc.desc: CheckCallerPermission when ERR_DI_OK
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, CheckBusinessResultPermission_DeviceIdMismatch_021, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, CheckCallerPermission_ERR_DI_OK_004, TestSize.Level3)
 {
-    Want want;
-    IntentContext ctx;
-    ctx.callerInfo.sourceDeviceId = "different_device_id";
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_DISTRIBUTED_INTENT))
+        .WillOnce(Return(ERR_DI_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_INSIGHT_INTENT))
+        .WillOnce(Return(ERR_DI_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_START_ABILITIES_FROM_BACKGROUND))
+        .WillOnce(Return(ERR_DI_OK));
 
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().CheckBusinessResultPermission(SRC_DEVICE_ID, want, ctx),
-        ERR_DI_PERMISSION_DENIED);
+
+    Want want;
+    want.SetParam("ohos.insightIntent.executeParam.mode", 1);
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckCallerPermission(want, TEST_ACCESS_TOKEN);
+    EXPECT_EQ(ret, ERR_DI_OK);
 }
 
 /**
- * @tc.name: CheckBusinessResultPermission_GetLocalDeviceIdFail_022
- * @tc.desc: CheckBusinessResultPermission when GetLocalDeviceId fails
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentPermissionCheckerTest, CheckBusinessResultPermission_GetLocalDeviceIdFail_022, TestSize.Level3)
-{
-    EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
-        .WillRepeatedly(Return(false));
-
-    Want want;
-    want.SetElementName(LOCAL_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    IntentContext ctx;
-    ctx.callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().CheckBusinessResultPermission(SRC_DEVICE_ID, want, ctx),
-        ERR_DI_SYSTEM_WORK_ABNORMALLY);
-}
-
-/**
- * @tc.name: CheckBusinessResultPermission_TargetDeviceMismatch_023
- * @tc.desc: CheckBusinessResultPermission when target device is not local
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentPermissionCheckerTest, CheckBusinessResultPermission_TargetDeviceMismatch_023, TestSize.Level3)
-{
-    EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
-        .WillRepeatedly(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
-
-    Want want;
-    want.SetElementName("different_device", BUNDLE_NAME, ABILITY_NAME);
-    IntentContext ctx;
-    ctx.callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().CheckBusinessResultPermission(SRC_DEVICE_ID, want, ctx),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: CheckBusinessResultPermission_EmptyTargetDevice_024
- * @tc.desc: CheckBusinessResultPermission when target device is empty
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentPermissionCheckerTest, CheckBusinessResultPermission_EmptyTargetDevice_024, TestSize.Level3)
-{
-    EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
-        .WillRepeatedly(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
-
-    Want want;
-    want.SetElementName(EMPTY_STRING, BUNDLE_NAME, ABILITY_NAME);
-    IntentContext ctx;
-    ctx.callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().CheckBusinessResultPermission(SRC_DEVICE_ID, want, ctx),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: CheckBusinessResultPermission_CheckSameAccountFail_025
- * @tc.desc: CheckBusinessResultPermission when CheckDstSameAccount fails
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentPermissionCheckerTest, CheckBusinessResultPermission_CheckSameAccountFail_025, TestSize.Level3)
-{
-    EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
-        .WillRepeatedly(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
-
-    Want want;
-    want.SetElementName(LOCAL_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    IntentContext ctx;
-    ctx.callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-    ctx.callerInfo.accessToken = TEST_ACCESS_TOKEN;
-    ctx.callerInfo.bundleNames.push_back(BUNDLE_NAME);
-
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().CheckBusinessResultPermission(SRC_DEVICE_ID, want, ctx),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: CheckBusinessResultPermission_Success_026
- * @tc.desc: CheckBusinessResultPermission success case
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentPermissionCheckerTest, CheckBusinessResultPermission_Success_026, TestSize.Level3)
-{
-    EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
-        .WillRepeatedly(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
-
-    Want want;
-    want.SetElementName(LOCAL_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
-    IntentContext ctx;
-    ctx.callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-    ctx.callerInfo.accessToken = TEST_ACCESS_TOKEN;
-    ctx.callerInfo.bundleNames.push_back(BUNDLE_NAME);
-
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().CheckBusinessResultPermission(SRC_DEVICE_ID, want, ctx),
-        ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: CheckComponentPermission_NotVisible_027
+ * @tc.name: CheckComponentPermission_NotVisible_001
  * @tc.desc: CheckComponentPermission when ability is not visible
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, CheckComponentPermission_NotVisible_027, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, CheckComponentPermission_NotVisible_001, TestSize.Level3)
 {
     AppExecFwk::AbilityInfo targetAbility;
     targetAbility.visible = false;
 
-    EXPECT_FALSE(IntentPermissionChecker::GetInstance().CheckComponentPermission(targetAbility));
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckComponentPermission(targetAbility);
+    EXPECT_EQ(ret, false);
 }
 
 /**
- * @tc.name: CheckComponentPermission_Visible_028
+ * @tc.name: CheckComponentPermission_Visible_002
  * @tc.desc: CheckComponentPermission when ability is visible
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, CheckComponentPermission_Visible_028, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, CheckComponentPermission_Visible_002, TestSize.Level3)
 {
     AppExecFwk::AbilityInfo targetAbility;
     targetAbility.visible = true;
 
-    EXPECT_TRUE(IntentPermissionChecker::GetInstance().CheckComponentPermission(targetAbility));
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckComponentPermission(targetAbility);
+    EXPECT_EQ(ret, true);
 }
 
 /**
- * @tc.name: CheckCustomPermission_EmptyPermissions_029
+ * @tc.name: CheckCustomPermission_EmptyPermissions_001
  * @tc.desc: CheckCustomPermission when permissions list is empty
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, CheckCustomPermission_EmptyPermissions_029, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, CheckCustomPermission_EmptyPermissions_001, TestSize.Level3)
 {
     AppExecFwk::AbilityInfo targetAbility;
     targetAbility.permissions.clear();
     uint64_t dAccessToken = TEST_D_ACCESS_TOKEN;
 
-    EXPECT_TRUE(IntentPermissionChecker::GetInstance().CheckCustomPermission(targetAbility, dAccessToken));
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckCustomPermission(targetAbility, dAccessToken);
+    EXPECT_EQ(ret, true);
 }
 
 /**
- * @tc.name: CheckCustomPermission_PermissionGranted_030
+ * @tc.name: CheckCustomPermission_PermissionGranted_002
  * @tc.desc: CheckCustomPermission when permission is granted
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, CheckCustomPermission_PermissionGranted_030, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, CheckCustomPermission_PermissionGranted_002, TestSize.Level3)
 {
     AppExecFwk::AbilityInfo targetAbility;
     targetAbility.permissions.push_back("ohos.permission.TEST");
@@ -739,16 +610,17 @@ HWTEST_F(IntentPermissionCheckerTest, CheckCustomPermission_PermissionGranted_03
     EXPECT_CALL(*mocks_.tokenMock, VerifyAccessToken(_, _))
         .WillRepeatedly(Return(Security::AccessToken::PermissionState::PERMISSION_GRANTED));
 
-    EXPECT_TRUE(IntentPermissionChecker::GetInstance().CheckCustomPermission(targetAbility, dAccessToken));
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckCustomPermission(targetAbility, dAccessToken);
+    EXPECT_EQ(ret, true);
 }
 
 /**
- * @tc.name: CheckCustomPermission_MultiplePermissions_031
+ * @tc.name: CheckCustomPermission_MultiplePermissions_003
  * @tc.desc: CheckCustomPermission with multiple permissions, all granted
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, CheckCustomPermission_MultiplePermissions_031, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, CheckCustomPermission_MultiplePermissions_003, TestSize.Level3)
 {
     AppExecFwk::AbilityInfo targetAbility;
     targetAbility.permissions.push_back("ohos.permission.TEST1");
@@ -758,112 +630,33 @@ HWTEST_F(IntentPermissionCheckerTest, CheckCustomPermission_MultiplePermissions_
     EXPECT_CALL(*mocks_.tokenMock, VerifyAccessToken(_, _))
         .WillRepeatedly(Return(Security::AccessToken::PermissionState::PERMISSION_GRANTED));
 
-    EXPECT_TRUE(IntentPermissionChecker::GetInstance().CheckCustomPermission(targetAbility, dAccessToken));
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckCustomPermission(targetAbility, dAccessToken);
+    EXPECT_EQ(ret, true);
 }
 
 /**
- * @tc.name: GetOsAccountData_EmptyUid_033
- * @tc.desc: GetOsAccountData when account info has empty uid
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentPermissionCheckerTest, GetOsAccountData_EmptyUid_033, TestSize.Level3)
-{
-    IDistributedSched::AccountInfo dmsAccountInfo;
-    EXPECT_FALSE(IntentPermissionChecker::GetInstance().GetOsAccountData(dmsAccountInfo));
-}
-
-/**
- * @tc.name: CheckDstSameAccount_GetOsAccountDataFail_034
- * @tc.desc: CheckDstSameAccount when GetOsAccountData fails on dst account
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentPermissionCheckerTest, CheckDstSameAccount_GetOsAccountDataFail_034, TestSize.Level3)
-{
-    CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-    IDistributedSched::AccountInfo accountInfo;
-
-    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
-        .WillRepeatedly(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(0)));
-    EXPECT_CALL(*mocks_.networkMock, GetUdidByNetworkId(_))
-        .WillRepeatedly(Return("udid123"));
-
-    EXPECT_FALSE(IntentPermissionChecker::GetInstance().CheckDstSameAccount(SRC_DEVICE_ID, accountInfo, callerInfo,
-        true));
-}
-
-/**
- * @tc.name: CheckDstSameAccount_AccountsMatch_035
- * @tc.desc: CheckDstSameAccount when accounts match
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentPermissionCheckerTest, CheckDstSameAccount_AccountsMatch_035, TestSize.Level3)
-{
-    CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-    IDistributedSched::AccountInfo accountInfo;
-
-    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
-        .WillRepeatedly(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(0)));
-    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
-        .WillRepeatedly(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo("uid123", "", 0)), Return(0)));
-    EXPECT_CALL(*mocks_.networkMock, GetUdidByNetworkId(_))
-        .WillRepeatedly(Return("udid123"));
-    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
-        .WillRepeatedly(Return(true));
-
-    EXPECT_FALSE(IntentPermissionChecker::GetInstance().CheckDstSameAccount(SRC_DEVICE_ID, accountInfo, callerInfo,
-        false));
-}
-
-/**
- * @tc.name: CheckDstSameAccount_AccountsMismatch_036
- * @tc.desc: CheckDstSameAccount when accounts do not match
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(IntentPermissionCheckerTest, CheckDstSameAccount_AccountsMismatch_036, TestSize.Level3)
-{
-    CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-    IDistributedSched::AccountInfo accountInfo;
-
-    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
-        .WillRepeatedly(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(0)));
-    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
-        .WillRepeatedly(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo("uid123", "", 0)), Return(0)));
-    EXPECT_CALL(*mocks_.networkMock, GetUdidByNetworkId(_))
-        .WillRepeatedly(Return("udid123"));
-
-    EXPECT_FALSE(IntentPermissionChecker::GetInstance().CheckDstSameAccount(SRC_DEVICE_ID, accountInfo, callerInfo,
-        true));
-}
-
-/**
- * @tc.name: CheckCustomPermission_EmptyPermissionString_037
+ * @tc.name: CheckCustomPermission_EmptyPermissionString_004
  * @tc.desc: CheckCustomPermission when permission string is empty in list
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, CheckCustomPermission_EmptyPermissionString_037, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, CheckCustomPermission_EmptyPermissionString_004, TestSize.Level3)
 {
     AppExecFwk::AbilityInfo targetAbility;
     targetAbility.permissions.push_back("");
     uint64_t dAccessToken = TEST_D_ACCESS_TOKEN;
 
-    EXPECT_TRUE(IntentPermissionChecker::GetInstance().CheckCustomPermission(targetAbility, dAccessToken));
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckCustomPermission(targetAbility, dAccessToken);
+    EXPECT_EQ(ret, true);
 }
 
 /**
- * @tc.name: CheckCustomPermission_PermissionDenied_038
+ * @tc.name: CheckCustomPermission_PermissionDenied_005
  * @tc.desc: CheckCustomPermission when permission is denied
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, CheckCustomPermission_PermissionDenied_038, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, CheckCustomPermission_PermissionDenied_005, TestSize.Level3)
 {
     AppExecFwk::AbilityInfo targetAbility;
     targetAbility.permissions.push_back("ohos.permission.TEST");
@@ -872,53 +665,508 @@ HWTEST_F(IntentPermissionCheckerTest, CheckCustomPermission_PermissionDenied_038
     EXPECT_CALL(*mocks_.tokenMock, VerifyAccessToken(_, _))
         .WillRepeatedly(Return(Security::AccessToken::PermissionState::PERMISSION_DENIED));
 
-    EXPECT_FALSE(IntentPermissionChecker::GetInstance().CheckCustomPermission(targetAbility, dAccessToken));
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckCustomPermission(targetAbility, dAccessToken);
+    EXPECT_EQ(ret, false);
 }
 
 /**
- * @tc.name: GetAccountInfo_SameAccountSuccess_039
- * @tc.desc: GetAccountInfo when same account check succeeds
+ * @tc.name: CheckStartPermission_CheckDstSameAccount_Fail_001
+ * @tc.desc: CheckStartPermission when CheckDstSameAccount fail
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, GetAccountInfo_SameAccountSuccess_039, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckDstSameAccount_Fail_001, TestSize.Level3)
 {
+    Want want;
+    want.SetElementName(LOCAL_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
     CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
+    callerInfo.sourceDeviceId = LOCAL_DEVICE_ID;
+    callerInfo.accessToken = TEST_ACCESS_TOKEN;
     IDistributedSched::AccountInfo accountInfo;
+    accountInfo.activeAccountId = "test_account";
+    accountInfo.userId = 0;
+    uint64_t dAccessToken = 0;
 
-    EXPECT_CALL(*mocks_.networkMock, GetUdidByNetworkId(_))
-        .WillRepeatedly(Return("udid123"));
-    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
-        .WillRepeatedly(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(0)));
-    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
-        .WillRepeatedly(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo("uid123", "", 0)), Return(0)));
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
+        callerInfo, accountInfo, dAccessToken);
 
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().GetAccountInfo(REMOTE_DEVICE_ID, callerInfo, accountInfo),
-        ERR_DI_INVALID_PARAMETER);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
 }
 
 /**
- * @tc.name: GetAccountInfo_DifferentAccountSuccess_040
- * @tc.desc: GetAccountInfo when accounts are different but valid
+ * @tc.name: CheckStartPermission_AllocLocalTokenIdFailRetry_002
+ * @tc.desc: CheckStartPermission when AllocLocalTokenID returns 0(fail)
  * @tc.type: FUNC
  * @tc.require:
  */
-HWTEST_F(IntentPermissionCheckerTest, GetAccountInfo_DifferentAccountSuccess_040, TestSize.Level3)
+HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_AllocLocalTokenIdFailRetry_002, TestSize.Level3)
 {
-    CallerInfo callerInfo;
-    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-    IDistributedSched::AccountInfo accountInfo;
-
-    EXPECT_CALL(*mocks_.networkMock, GetUdidByNetworkId(_))
-        .WillRepeatedly(Return("udid123"));
     EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
-        .WillRepeatedly(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(0)));
+        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
     EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
-        .WillRepeatedly(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo("uid123", "abc", 0)), Return(ERR_OK)));
+        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+        Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
+        .WillRepeatedly(Return(true));
 
-    EXPECT_EQ(IntentPermissionChecker::GetInstance().GetAccountInfo(REMOTE_DEVICE_ID, callerInfo, accountInfo),
-        ERR_DI_INVALID_PARAMETER);
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = LOCAL_DEVICE_ID;
+    callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    callerInfo.bundleNames = {BUNDLE_NAME};
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.activeAccountId = "test_account";
+    accountInfo.userId = 100;
+    Want want;
+    uint64_t dAccessToken = 0;
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
+        callerInfo, accountInfo, dAccessToken);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: CheckStartPermission_CheckPermissionFail_003
+ * @tc.desc: CheckStartPermission when CheckPermission fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckPermissionFail_003, TestSize.Level3)
+{
+    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+        Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
+        .WillRepeatedly(Return(true));
+
+    Want want;
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = LOCAL_DEVICE_ID;
+    callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    callerInfo.bundleNames = {BUNDLE_NAME};
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.activeAccountId = "test_account";
+    accountInfo.userId =100;
+    uint64_t dAccessToken = 0;
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
+        callerInfo, accountInfo, dAccessToken);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: CheckStartPermission_CheckCallerPermission_Fail_004
+ * @tc.desc: CheckStartPermission when CheckCallerPermission fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckCallerPermission_Fail_004, TestSize.Level3)
+{
+    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+        Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*mocks_.tokenMock, AllocLocalTokenID(_, _))
+        .WillRepeatedly(Return(TEST_D_ACCESS_TOKEN));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_DISTRIBUTED_INTENT))
+        .WillRepeatedly(Return(DMS_PERMISSION_DENIED));
+
+    Want want;
+    want.SetElementName(REMOTE_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = LOCAL_DEVICE_ID;
+    callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    callerInfo.bundleNames = {BUNDLE_NAME};
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.activeAccountId = "test_account";
+    accountInfo.userId =100;
+    uint64_t dAccessToken = 0;
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
+        callerInfo, accountInfo, dAccessToken);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: CheckStartPermission_GetTargetAbility_Fail_005
+ * @tc.desc: CheckStartPermission when GetTargetAbility fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_GetTargetAbility_Fail_005, TestSize.Level3)
+{
+    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+        Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*mocks_.tokenMock, AllocLocalTokenID(_, _))
+        .WillRepeatedly(Return(TEST_D_ACCESS_TOKEN));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_DISTRIBUTED_INTENT))
+        .WillRepeatedly(Return(ERR_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_INSIGHT_INTENT))
+        .WillRepeatedly(Return(ERR_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _))
+        .WillRepeatedly(Invoke([](const AAFwk::Want&, AppExecFwk::AbilityInfo& abilityInfo) {
+            abilityInfo.bundleName = BUNDLE_NAME;
+            abilityInfo.name = ABILITY_NAME;
+            abilityInfo.visible = false;
+            abilityInfo.permissions = {};
+            return false;
+        }));
+
+    Want want;
+    want.SetElementName(REMOTE_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = LOCAL_DEVICE_ID;
+    callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    callerInfo.bundleNames = {BUNDLE_NAME};
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.activeAccountId = "test_account";
+    accountInfo.userId =100;
+    uint64_t dAccessToken = 0;
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
+        callerInfo, accountInfo, dAccessToken);
+    EXPECT_EQ(ret, ERR_DI_OK);
+}
+
+/**
+ * @tc.name: CheckStartPermission_CheckDeviceSecurityLevel_Fail_006
+ * @tc.desc: CheckStartPermission when CheckDeviceSecurityLevel Fail
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckDeviceSecurityLevel_Fail_006, TestSize.Level3)
+{
+    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+        Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*mocks_.tokenMock, AllocLocalTokenID(_, _))
+        .WillRepeatedly(Return(TEST_D_ACCESS_TOKEN));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_DISTRIBUTED_INTENT))
+        .WillRepeatedly(Return(ERR_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_INSIGHT_INTENT))
+        .WillRepeatedly(Return(ERR_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _))
+        .WillRepeatedly(Invoke([](const AAFwk::Want&, AppExecFwk::AbilityInfo& abilityInfo) {
+            abilityInfo.bundleName = BUNDLE_NAME;
+            abilityInfo.name = ABILITY_NAME;
+            abilityInfo.visible = false;
+            abilityInfo.permissions = {};
+            return true;
+        }));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckDeviceSecurityLevel(_, _))
+        .WillRepeatedly(Return(false));
+
+    Want want;
+    want.SetElementName(REMOTE_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = LOCAL_DEVICE_ID;
+    callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    callerInfo.bundleNames = {BUNDLE_NAME};
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.activeAccountId = "test_account";
+    accountInfo.userId = 100;
+    uint64_t dAccessToken = 0;
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
+        callerInfo, accountInfo, dAccessToken);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: CheckStartPermission_CheckDeviceSecurityLevel_Fail_007
+ * @tc.desc: CheckStartPermission when CheckDeviceSecurityLevel fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckVisible_Fail_007, TestSize.Level3)
+{
+    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+        Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*mocks_.tokenMock, AllocLocalTokenID(_, _))
+        .WillRepeatedly(Return(TEST_D_ACCESS_TOKEN));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_DISTRIBUTED_INTENT))
+        .WillRepeatedly(Return(ERR_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_INSIGHT_INTENT))
+        .WillRepeatedly(Return(ERR_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _))
+        .WillRepeatedly(Invoke([](const AAFwk::Want&, AppExecFwk::AbilityInfo& abilityInfo) {
+            abilityInfo.bundleName = BUNDLE_NAME;
+            abilityInfo.name = ABILITY_NAME;
+            abilityInfo.visible = false;
+            abilityInfo.permissions = {};
+            return true;
+        }));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckDeviceSecurityLevel(_, _))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckTargetAbilityVisible(_, _))
+        .WillRepeatedly(Return(false));
+
+    Want want;
+    want.SetElementName(REMOTE_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = LOCAL_DEVICE_ID;
+    callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    callerInfo.bundleNames = {BUNDLE_NAME};
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.activeAccountId = "test_account";
+    accountInfo.userId = 100;
+    uint64_t dAccessToken = 0;
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
+        callerInfo, accountInfo, dAccessToken);
+    EXPECT_EQ(ret, ERR_DI_ABILITY_VISIBLE_FALSE_DENY_REQUEST);
+}
+
+/**
+ * @tc.name: CheckStartPermission_CheckCustomPermission_Fail_008
+ * @tc.desc: CheckStartPermission when CheckCustomPermission fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckCustomPermission_Fail_008, TestSize.Level3)
+{
+    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+        Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*mocks_.tokenMock, AllocLocalTokenID(_, _))
+        .WillRepeatedly(Return(TEST_D_ACCESS_TOKEN));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_DISTRIBUTED_INTENT))
+        .WillRepeatedly(Return(ERR_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_INSIGHT_INTENT))
+        .WillRepeatedly(Return(ERR_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _))
+        .WillRepeatedly(Invoke([](const AAFwk::Want&, AppExecFwk::AbilityInfo& abilityInfo) {
+            abilityInfo.bundleName = BUNDLE_NAME;
+            abilityInfo.name = ABILITY_NAME;
+            abilityInfo.visible = false;
+            abilityInfo.permissions = {"ohos.permission.TEST"};
+            return true;
+        }));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckDeviceSecurityLevel(_, _))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckTargetAbilityVisible(_, _))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*mocks_.tokenMock, VerifyAccessToken(_, _))
+        .WillRepeatedly(Return(Security::AccessToken::PermissionState::PERMISSION_DENIED));
+
+    Want want;
+    want.SetElementName(REMOTE_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = LOCAL_DEVICE_ID;
+    callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    callerInfo.bundleNames = {BUNDLE_NAME};
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.activeAccountId = "test_account";
+    accountInfo.userId = 100;
+    uint64_t dAccessToken = 0;
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
+        callerInfo, accountInfo, dAccessToken);
+    EXPECT_EQ(ret, ERR_DI_STATIC_CFG_PERMISSION);
+}
+
+/**
+ * @tc.name: CheckStartPermission_Success_009
+ * @tc.desc: CheckStartPermission success case
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_Success_009, TestSize.Level3)
+{
+    AppExecFwk::AbilityInfo targetAbility;
+    targetAbility.visible = true;
+    targetAbility.permissions.push_back("");
+    
+    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+        Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*mocks_.tokenMock, AllocLocalTokenID(_, _))
+        .WillRepeatedly(Return(TEST_D_ACCESS_TOKEN));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_DISTRIBUTED_INTENT))
+        .WillRepeatedly(Return(ERR_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_INSIGHT_INTENT))
+        .WillRepeatedly(Return(ERR_OK));
+    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _))
+        .WillRepeatedly(Invoke([](const AAFwk::Want&, AppExecFwk::AbilityInfo& abilityInfo) {
+            abilityInfo.bundleName = BUNDLE_NAME;
+            abilityInfo.name = ABILITY_NAME;
+            abilityInfo.visible = false;
+            abilityInfo.permissions = {};
+            return true;
+        }));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckDeviceSecurityLevel(_, _))
+        .WillRepeatedly(Return(true));
+    EXPECT_CALL(*mocks_.schedPermMock, CheckTargetAbilityVisible(_, _))
+        .WillRepeatedly(Return(true));
+
+    Want want;
+    want.SetElementName(REMOTE_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    CallerInfo callerInfo;
+    callerInfo.sourceDeviceId = LOCAL_DEVICE_ID;
+    callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    callerInfo.bundleNames = {BUNDLE_NAME};
+    IDistributedSched::AccountInfo accountInfo;
+    accountInfo.activeAccountId = "test_account";
+    accountInfo.userId = 100;
+    uint64_t dAccessToken = 0;
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckStartPermission(LOCAL_DEVICE_ID, want,
+        callerInfo, accountInfo, dAccessToken);
+    EXPECT_EQ(ret, ERR_DI_OK);
+}
+
+/**
+ * @tc.name: CheckBusinessResultPermission_DeviceIdMismatch_001
+ * @tc.desc: CheckBusinessResultPermission when deviceId mismatch
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentPermissionCheckerTest, CheckBusinessResultPermission_DeviceIdMismatch_001, TestSize.Level3)
+{
+    Want want;
+    IntentContext ctx;
+    ctx.callerInfo.sourceDeviceId = "different_device_id";
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckBusinessResultPermission(SRC_DEVICE_ID, want, ctx);
+    EXPECT_EQ(ret,
+        ERR_DI_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: CheckBusinessResultPermission_GetLocalDeviceIdFail_002
+ * @tc.desc: CheckBusinessResultPermission when GetLocalDeviceId fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentPermissionCheckerTest, CheckBusinessResultPermission_GetLocalDeviceIdFail_002, TestSize.Level3)
+{
+    EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
+        .WillRepeatedly(Return(false));
+
+    Want want;
+    want.SetElementName(LOCAL_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentContext ctx;
+    ctx.callerInfo.sourceDeviceId = SRC_DEVICE_ID;
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckBusinessResultPermission(SRC_DEVICE_ID, want, ctx);
+    EXPECT_EQ(ret, ERR_DI_SYSTEM_WORK_ABNORMALLY);
+}
+
+/**
+ * @tc.name: CheckBusinessResultPermission_TargetDeviceMismatch_003
+ * @tc.desc: CheckBusinessResultPermission when target device is not local
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentPermissionCheckerTest, CheckBusinessResultPermission_TargetDeviceMismatch_003, TestSize.Level3)
+{
+    EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
+        .WillRepeatedly(Return(true));
+
+    Want want;
+    want.SetElementName("different_device", BUNDLE_NAME, ABILITY_NAME);
+    IntentContext ctx;
+    ctx.callerInfo.sourceDeviceId = SRC_DEVICE_ID;
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckBusinessResultPermission(SRC_DEVICE_ID, want, ctx);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: CheckBusinessResultPermission_EmptyTargetDevice_004
+ * @tc.desc: CheckBusinessResultPermission when target device is empty
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentPermissionCheckerTest, CheckBusinessResultPermission_EmptyTargetDevice_004, TestSize.Level3)
+{
+    EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
+        .WillRepeatedly(Return(true));
+
+    Want want;
+    want.SetElementName(EMPTY_STRING, BUNDLE_NAME, ABILITY_NAME);
+    IntentContext ctx;
+    ctx.callerInfo.sourceDeviceId = SRC_DEVICE_ID;
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckBusinessResultPermission(SRC_DEVICE_ID, want, ctx);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: CheckBusinessResultPermission_CheckSameAccountFail_005
+ * @tc.desc: CheckBusinessResultPermission when CheckDstSameAccount fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentPermissionCheckerTest, CheckBusinessResultPermission_CheckSameAccountFail_005, TestSize.Level3)
+{
+    EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
+        .WillRepeatedly(Return(true));
+
+    Want want;
+    want.SetElementName(LOCAL_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentContext ctx;
+    ctx.callerInfo.sourceDeviceId = SRC_DEVICE_ID;
+    ctx.callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    ctx.callerInfo.bundleNames.push_back(BUNDLE_NAME);
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckBusinessResultPermission(SRC_DEVICE_ID, want, ctx);
+    EXPECT_EQ(ret, ERR_DI_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: CheckBusinessResultPermission_Success_006
+ * @tc.desc: CheckBusinessResultPermission success case
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(IntentPermissionCheckerTest, CheckBusinessResultPermission_Success_006, TestSize.Level3)
+{
+    EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
+    EXPECT_CALL(*mocks_.osAccountMock, QueryActiveOsAccountIds(_))
+        .WillOnce(DoAll(SetArgReferee<0>(std::vector<int32_t>{100}), Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.ohosAccountMock, GetOhosAccountInfo(_))
+        .WillOnce(DoAll(SetArgReferee<0>(AccountSA::OhosAccountInfo{"test", "test_account", 0}),
+        Return(ERR_OK)));
+    EXPECT_CALL(*mocks_.deviceManagerMock, CheckSinkIsSameAccount(_, _))
+        .WillRepeatedly(Return(true));
+
+    Want want;
+    want.SetElementName(LOCAL_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentContext ctx;
+    ctx.callerInfo.sourceDeviceId = SRC_DEVICE_ID;
+    ctx.callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    ctx.callerInfo.bundleNames.push_back(BUNDLE_NAME);
+
+    int32_t ret = IntentPermissionChecker::GetInstance().CheckBusinessResultPermission(SRC_DEVICE_ID, want, ctx);
+    EXPECT_EQ(ret, ERR_DI_OK);
 }
 }
 }
