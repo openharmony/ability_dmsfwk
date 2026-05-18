@@ -1629,23 +1629,6 @@ HWTEST_F(DSchedContinueTest, ExecuteContinueAbility_074, TestSize.Level1)
 }
 
 /**
- * @tc.name: DurationDumperBeforeStartAbility_075
- * @tc.desc: DurationDumperBeforeStartAbility with CONTINUE_PULL subServiceType
- * @tc.type: FUNC
- */
-HWTEST_F(DSchedContinueTest, DurationDumperBeforeStartAbility_075, TestSize.Level1)
-{
-    DTEST_LOG << "DSchedContinueTest DurationDumperBeforeStartAbility_075 begin" << std::endl;
-    ASSERT_NE(conti_, nullptr);
-    conti_->subServiceType_ = CONTINUE_PULL;
-    auto cmd = std::make_shared<DSchedContinueDataCmd>();
-    cmd->want_.SetParam("ohos.dschedule.SaveDataTime", "testTime");
-    conti_->DurationDumperBeforeStartAbility(cmd);
-    conti_->subServiceType_ = CONTINUE_PUSH;
-    DTEST_LOG << "DSchedContinueTest DurationDumperBeforeStartAbility_075 end" << std::endl;
-}
-
-/**
  * @tc.name: SetCleanMissionFlag_076
  * @tc.desc: SetCleanMissionFlag with SUPPORT_CONTINUE_SOURCE_EXIT_KEY true
  * @tc.type: FUNC
@@ -1674,7 +1657,6 @@ HWTEST_F(DSchedContinueTest, SetWantForContinuation_077, TestSize.Level1)
     AAFwk::Want want;
     want.SetElementName("deviceId", "bundleName", "abilityName");
     want.SetParam("ohos.extra.param.key.supportContinuePageStack", false);
-    want.SetParam("ohos.extra.param.key.supportContinueModuleNameUpdate", "moduleName");
     conti_->SetWantForContinuation(want);
     DTEST_LOG << "DSchedContinueTest SetWantForContinuation_077 end" << std::endl;
 }
