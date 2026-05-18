@@ -20,7 +20,7 @@ namespace AccountSA {
 
 const int ERR_FAIL = -1;
 
-ErrCode QueryActiveOsAccountIds(std::vector<int32_t>& ids)
+ErrCode OsAccountManager::QueryActiveOsAccountIds(std::vector<int32_t>& ids)
 {
     if (IOsAccountManager::osAccountMock == nullptr) {
         return ERR_FAIL;

@@ -17,6 +17,7 @@
 
 #include <gmock/gmock.h>
 #include "dm_device_info.h"
+#include "device_manager_impl.h"
 
 namespace OHOS {
 namespace DistributedHardware {

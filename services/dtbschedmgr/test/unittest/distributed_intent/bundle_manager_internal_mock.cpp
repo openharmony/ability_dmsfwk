@@ -17,23 +17,25 @@
 #include "single_instance.h"
 
 namespace OHOS {
-namespace AppExecFwk {
+namespace DistributedSchedule {
 
-bool GetCallerAppIdFromBms(int32_t uid, std::string& appId)
+IMPLEMENT_SINGLE_INSTANCE(BundleManagerInternal);
+
+bool BundleManagerInternal::GetCallerAppIdFromBms(int32_t callingUid, std::string& appId)
 {
-    if (IBundleManagerInternal::bundleMock == nullptr) {
+    if (AppExecFwk::IBundleManagerInternal::bundleMock == nullptr) {
         return false;
     }
-    return IBundleManagerInternal::bundleMock->GetCallerAppIdFromBms(uid, appId);
+    return AppExecFwk::IBundleManagerInternal::bundleMock->GetCallerAppIdFromBms(callingUid, appId);
 }
 
-bool GetBundleNameListFromBms(int32_t uid, std::vector<std::string>& bundleNames)
+bool BundleManagerInternal::GetBundleNameListFromBms(int32_t callingUid, std::vector<std::string>& bundleNameList)
 {
-    if (IBundleManagerInternal::bundleMock == nullptr) {
+    if (AppExecFwk::IBundleManagerInternal::bundleMock == nullptr) {
         return false;
     }
-    return IBundleManagerInternal::bundleMock->GetBundleNameListFromBms(uid, bundleNames);
+    return AppExecFwk::IBundleManagerInternal::bundleMock->GetBundleNameListFromBms(callingUid, bundleNameList);
 }
 
-} // namespace AppExecFwk
+} // namespace DistributedSchedule
 } // namespace OHOS
