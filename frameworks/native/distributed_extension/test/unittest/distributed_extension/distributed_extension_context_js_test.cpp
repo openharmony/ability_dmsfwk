@@ -16,6 +16,8 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include "element_name.h"
+#include "iremote_object.h"
 #include "js_extension_context_mock.h"
 #include "napi_mock.h"
 #include "distributed_extension_context_js.cpp"
@@ -84,5 +86,23 @@ HWTEST_F(DExtensionContextJSTest, DExtensionContextJS_CreateDistributedExtension
         EXPECT_TRUE(false);
     }
     GTEST_LOG_(INFO) << "DExtensionContextJSTest DExtensionContextJS_CreateDistributedExtensionContextJS_0100 end";
+}
+
+/**
+ * @tc.number: DExtensionContextJS_Connection_OnAbilityConnectDone_0100
+ * @tc.name: DExtensionContextJS_Connection_OnAbilityConnectDone_0100
+ * @tc.desc: OnAbilityConnectDone returns early when JS connection object is not set
+ */
+HWTEST_F(DExtensionContextJSTest, DExtensionContextJS_Connection_OnAbilityConnectDone_0100,
+    testing::ext::TestSize.Level1)
+{
+    GTEST_LOG_(INFO) << "DExtensionContextJSTest DExtensionContextJS_Connection_OnAbilityConnectDone_0100 begin";
+    int stubEnv = 0;
+    napi_env env = reinterpret_cast<napi_env>(&stubEnv);
+    DistributedExtensionContextJSConnection connection(env);
+    AppExecFwk::ElementName element;
+    sptr<IRemoteObject> remote(nullptr);
+    connection.OnAbilityConnectDone(element, remote, 0);
+    GTEST_LOG_(INFO) << "DExtensionContextJSTest DExtensionContextJS_Connection_OnAbilityConnectDone_0100 end";
 }
 } // namespace OHOS::DistributedSchedule

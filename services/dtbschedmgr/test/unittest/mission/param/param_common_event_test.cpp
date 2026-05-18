@@ -360,6 +360,76 @@ HWTEST_F(ParamCommonEventTest, ParamCommonEvent_UnSubscriberEvent_001, TestSize.
     DTEST_LOG << TAG << " ParamCommonEvent_UnSubscriberEvent_001 end" << std::endl;
 }
 
+/**
+ * @tc.name: ParamCommonEvent_OnReceiveEvent_004
+ * @tc.desc: test OnReceiveEvent with unknown action string
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParamCommonEventTest, ParamCommonEvent_OnReceiveEvent_004, TestSize.Level1)
+{
+    DTEST_LOG << TAG << " ParamCommonEvent_OnReceiveEvent_004 start" << std::endl;
+    ParamCommonEvent paramCommonEvent;
+    AAFwk::Want want;
+    want.SetAction("unknown.action");
+    EXPECT_NO_FATAL_FAILURE(paramCommonEvent.OnReceiveEvent(want));
+    DTEST_LOG << TAG << " ParamCommonEvent_OnReceiveEvent_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: ParamCommonEvent_CheckBlacklist_002
+ * @tc.desc: test CheckBlacklist for missing bundle and inclusive version range
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParamCommonEventTest, ParamCommonEvent_CheckBlacklist_002, TestSize.Level1)
+{
+    DTEST_LOG << TAG << " ParamCommonEvent_CheckBlacklist_002 start" << std::endl;
+    ParamCommonEvent paramCommonEvent;
+    EXPECT_FALSE(paramCommonEvent.CheckBlacklist("nonexistent", 1));
+
+    paramCommonEvent.blackListMap_["com.test.app"] = {{100, 200}};
+    EXPECT_TRUE(paramCommonEvent.CheckBlacklist("com.test.app", 150));
+    EXPECT_TRUE(paramCommonEvent.CheckBlacklist("com.test.app", 100));
+    EXPECT_TRUE(paramCommonEvent.CheckBlacklist("com.test.app", 200));
+    EXPECT_FALSE(paramCommonEvent.CheckBlacklist("com.test.app", 50));
+    EXPECT_FALSE(paramCommonEvent.CheckBlacklist("com.test.app", 300));
+    EXPECT_FALSE(paramCommonEvent.CheckBlacklist("other.app", 150));
+    DTEST_LOG << TAG << " ParamCommonEvent_CheckBlacklist_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ParamCommonEvent_UpdateBlacklistInner_006
+ * @tc.desc: test UpdateBlacklistInner skips non-object bundle value in JSON root
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParamCommonEventTest, ParamCommonEvent_UpdateBlacklistInner_006, TestSize.Level1)
+{
+    DTEST_LOG << TAG << " ParamCommonEvent_UpdateBlacklistInner_006 start" << std::endl;
+    ParamCommonEvent paramCommonEvent;
+    EXPECT_FALSE(paramCommonEvent.UpdateBlacklistInner(nullptr));
+
+    cJSON *root = cJSON_CreateObject();
+    ASSERT_NE(root, nullptr);
+    cJSON_AddStringToObject(root, "key", "not_object");
+    EXPECT_TRUE(paramCommonEvent.UpdateBlacklistInner(root));
+    cJSON_Delete(root);
+    DTEST_LOG << TAG << " ParamCommonEvent_UpdateBlacklistInner_006 end" << std::endl;
+}
+
+/**
+ * @tc.name: ParamCommonEvent_HandleParamUpdate_001
+ * @tc.desc: test HandleParamUpdate for DUE_SA_CFG_UPDATED action
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParamCommonEventTest, ParamCommonEvent_HandleParamUpdate_001, TestSize.Level1)
+{
+    DTEST_LOG << TAG << " ParamCommonEvent_HandleParamUpdate_001 start" << std::endl;
+    ParamCommonEvent paramCommonEvent;
+    AAFwk::Want want;
+    want.SetAction("usual.event.DUE_SA_CFG_UPDATED");
+    EXPECT_NO_FATAL_FAILURE(paramCommonEvent.HandleParamUpdate(want));
+    DTEST_LOG << TAG << " ParamCommonEvent_HandleParamUpdate_001 end" << std::endl;
+}
+
 } // namespace DistributedSchedule
 } // namespace OHOS
 

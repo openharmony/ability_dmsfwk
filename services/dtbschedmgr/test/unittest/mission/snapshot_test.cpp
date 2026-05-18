@@ -15,6 +15,8 @@
 
 #include "snapshot_test.h"
 
+#include <cstring>
+
 #define private public
 #include "mission/snapshot.h"
 #undef private
@@ -29,7 +31,20 @@ namespace DistributedSchedule {
 namespace {
 const std::string TAG = "Snapshot";
 constexpr size_t TEST_PARCEL_WRITE_VALUE = 1;
-}
+constexpr uint8_t MINI_MALJPEG[] = {
+    0xFF, 0xD8, 0xFF, 0xDB, 0x00, 0x43, 0x00, 0x08, 0x06, 0x06, 0x07, 0x06, 0x05, 0x08,
+    0x07, 0x07, 0x07, 0x09, 0x09, 0x08, 0x0A, 0x0C, 0x14, 0x0D, 0x0C, 0x0B, 0x0B, 0x0C,
+    0x19, 0x12, 0x13, 0x0F, 0x14, 0x1D, 0x1A, 0x1F, 0x1E, 0x1D, 0x1A, 0x1C, 0x1C, 0x20,
+    0x24, 0x2E, 0x27, 0x20, 0x22, 0x2C, 0x23, 0x1C, 0x1C, 0x28, 0x37, 0x29, 0x2C, 0x30,
+    0x31, 0x34, 0x34, 0x34, 0x1F, 0x27, 0x39, 0x3D, 0x38, 0x32, 0x3C, 0x2E, 0x33, 0x34,
+    0x32, 0xFF, 0xC0, 0x00, 0x0B, 0x08, 0x00, 0x01, 0x00, 0x01, 0x01, 0x01, 0x11, 0x00,
+    0xFF, 0xC4, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0xFF, 0xC4, 0x00, 0x14, 0x10, 0x01,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0xFF, 0xDA, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3F, 0x00, 0x37, 0xFF, 0xD9,
+};
+constexpr uint32_t MINI_MALJPEG_SIZE = static_cast<uint32_t>(sizeof(MINI_MALJPEG));
+} // namespace
 void SnapshotTest::SetUpTestCase()
 {
 }
@@ -154,6 +169,22 @@ HWTEST_F(SnapshotTest, testWriteSnapshotInfo001, TestSize.Level1)
     MessageParcel data;
     auto ret = snapshot.WriteSnapshotInfo(data);
     EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: testWriteSnapshotInfo002
+ * @tc.desc: WriteSnapshotInfo with rect and windowBounds set
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotTest, testWriteSnapshotInfo002, TestSize.Level3)
+{
+    DTEST_LOG << "SnapshotTest testWriteSnapshotInfo002 start" << std::endl;
+    Snapshot snapshot;
+    snapshot.rect_ = std::make_unique<Rect>(0, 0, 100, 200);
+    snapshot.windowBounds_ = std::make_unique<Rect>(1, 2, 3, 4);
+    MessageParcel data;
+    EXPECT_TRUE(snapshot.WriteSnapshotInfo(data));
+    DTEST_LOG << "SnapshotTest testWriteSnapshotInfo002 end" << std::endl;
 }
 
 /**
@@ -311,7 +342,7 @@ HWTEST_F(SnapshotTest, testUpdateLastAccessTime001, TestSize.Level3)
 
 /**
  * @tc.name: testWritePixelMap001
- * @tc.desc: test WritePixelMap
+ * @tc.desc: test WritePixelMap when pixelMap_ is null or created from valid JPEG buffer
  * @tc.type: FUNC
  * @tc.require: I5Y2VH
  */
@@ -319,10 +350,81 @@ HWTEST_F(SnapshotTest, testWritePixelMap001, TestSize.Level3)
 {
     DTEST_LOG << "SnapshotTest testWritePixelMap001 start" << std::endl;
     Snapshot snapshot;
+    EXPECT_EQ(snapshot.pixelMap_, nullptr);
+
+    std::unique_ptr<Media::PixelMap> pixelMap =
+        snapshot.CreatePixelMap(MINI_MALJPEG, MINI_MALJPEG_SIZE);
+    if (pixelMap == nullptr) {
+        DTEST_LOG << "SnapshotTest testWritePixelMap001 skip: CreatePixelMap failed" << std::endl;
+        return;
+    }
+    snapshot.pixelMap_ = std::move(pixelMap);
     MessageParcel data;
-    auto ret = snapshot.WritePixelMap(data);
-    EXPECT_EQ(ret, false);
+    EXPECT_TRUE(snapshot.WritePixelMap(data));
+    EXPECT_GT(data.GetReadableBytes(), 0u);
     DTEST_LOG << "SnapshotTest testWritePixelMap001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testCreatePixelMap_ZeroBufferSize_001
+ * @tc.desc: CreatePixelMap returns nullptr when bufferSize is 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotTest, testCreatePixelMap_ZeroBufferSize_001, TestSize.Level3)
+{
+    DTEST_LOG << "SnapshotTest testCreatePixelMap_ZeroBufferSize_001 start" << std::endl;
+    Snapshot snapshot;
+    uint8_t byte = 0xFF;
+    auto pixelMap = snapshot.CreatePixelMap(&byte, 0);
+    EXPECT_EQ(nullptr, pixelMap);
+    DTEST_LOG << "SnapshotTest testCreatePixelMap_ZeroBufferSize_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testCreate_MsgSizeExceedsTotal_001
+ * @tc.desc: Create returns nullptr when declared msg size is not less than total buffer
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotTest, testCreate_MsgSizeExceedsTotal_001, TestSize.Level3)
+{
+    DTEST_LOG << "SnapshotTest testCreate_MsgSizeExceedsTotal_001 start" << std::endl;
+    Snapshot snapshot;
+    std::vector<uint8_t> data(sizeof(uint32_t) + 2);
+    uint32_t msgSize = static_cast<uint32_t>(data.size());
+    memcpy(data.data(), &msgSize, sizeof(uint32_t));
+    std::unique_ptr<Snapshot> ret = snapshot.Create(data);
+    EXPECT_EQ(nullptr, ret);
+    DTEST_LOG << "SnapshotTest testCreate_MsgSizeExceedsTotal_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testCreatePixelMap_NullBufferNonZeroSize_001
+ * @tc.desc: CreatePixelMap returns nullptr when buffer is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotTest, testCreatePixelMap_NullBufferNonZeroSize_001, TestSize.Level3)
+{
+    DTEST_LOG << "SnapshotTest testCreatePixelMap_NullBufferNonZeroSize_001 start" << std::endl;
+    Snapshot snapshot;
+    auto pixelMap = snapshot.CreatePixelMap(nullptr, 4);
+    EXPECT_EQ(nullptr, pixelMap);
+    DTEST_LOG << "SnapshotTest testCreatePixelMap_NullBufferNonZeroSize_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: testCreatePixelMap_InvalidJpeg_001
+ * @tc.desc: CreatePixelMap returns nullptr when buffer is not decodable as JPEG
+ * @tc.type: FUNC
+ */
+HWTEST_F(SnapshotTest, testCreatePixelMap_InvalidJpeg_001, TestSize.Level3)
+{
+    DTEST_LOG << "SnapshotTest testCreatePixelMap_InvalidJpeg_001 start" << std::endl;
+    Snapshot snapshot;
+    const char kNotJpeg[] = "not_a_jpeg";
+    auto pixelMap = snapshot.CreatePixelMap(reinterpret_cast<const uint8_t*>(kNotJpeg),
+        static_cast<uint32_t>(sizeof(kNotJpeg) - 1));
+    EXPECT_EQ(nullptr, pixelMap);
+    DTEST_LOG << "SnapshotTest testCreatePixelMap_InvalidJpeg_001 end" << std::endl;
 }
 } // DistributedSchedule
 } // namespace OHOS

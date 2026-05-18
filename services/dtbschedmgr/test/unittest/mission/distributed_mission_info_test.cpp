@@ -38,6 +38,30 @@ constexpr size_t TEST_PARCEL_WRITE_LEN = 5;
 const std::string TEST_DEVICE_ID = "test deviceId";
 const std::u16string TEST_DEVICEID = u"invalid deviceId";
 const std::u16string TEST_DEVICEID_TO_RETURN_FALSE = u"deviceId to return false";
+
+class LocalMockRemoteStub : public MockRemoteStub {
+public:
+    int32_t SendRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override
+    {
+        (void)data;
+        (void)reply;
+        (void)option;
+        constexpr uint32_t CODE_NOTIFY_MISSION = 0;
+        constexpr uint32_t NOTIFY_SNAP_SHOT = 1;
+        constexpr uint32_t NOTIFY_NET_DISCONNECT = 2;
+        constexpr int32_t FAIL_ON_NTH_NOTIFY_CALL = 2;
+        if (code == CODE_NOTIFY_MISSION || code == NOTIFY_SNAP_SHOT || code == NOTIFY_NET_DISCONNECT) {
+            ++notifySeq_;
+            if (notifySeq_ == FAIL_ON_NTH_NOTIFY_CALL) {
+                return -1;
+            }
+        }
+        return 0;
+    }
+
+private:
+    int notifySeq_ = 0;
+};
 }
 void DistributedMissionInfoTest::SetUpTestCase()
 {
@@ -348,7 +372,7 @@ HWTEST_F(DistributedMissionInfoTest, testWriteDstbMissionInfosToParcel001, TestS
     /**
      * @tc.steps: step2. test NotifyMissionsChanged when remoteObject is not nullptr
      */
-    remoteObject = new MockRemoteStub();
+    remoteObject = new LocalMockRemoteStub();
     MissionChangedNotify::NotifyMissionsChanged(remoteObject, TEST_DEVICEID);
     /**
      * @tc.steps: step3. test NotifyMissionsChanged when remoteObject return false
@@ -383,7 +407,7 @@ HWTEST_F(DistributedMissionInfoTest, testWriteDstbMissionInfosToParcel002, TestS
     /**
      * @tc.steps: step2. test NotifySnapshot when remoteObject is not nullptr
      */
-    remoteObject = new MockRemoteStub();
+    remoteObject = new LocalMockRemoteStub();
     MissionChangedNotify::NotifySnapshot(remoteObject, TEST_DEVICEID, missionId);
     /**
      * @tc.steps: step3. test NotifySnapshot when remoteObject return false
@@ -418,7 +442,7 @@ HWTEST_F(DistributedMissionInfoTest, testToString001, TestSize.Level3)
     /**
      * @tc.steps: step2. test NotifyNetDisconnect when remoteObject is not nullptr
      */
-    remoteObject = new MockRemoteStub();
+    remoteObject = new LocalMockRemoteStub();
     MissionChangedNotify::NotifyNetDisconnect(remoteObject, TEST_DEVICEID, state);
     /**
      * @tc.steps: step3. test NotifyNetDisconnect when remoteObject is not nullptr

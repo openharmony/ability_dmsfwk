@@ -1152,5 +1152,113 @@ HWTEST_F(DmsKvSyncE2ETest, IsMDMControlWithExemptionTest_023, TestSize.Level1)
     DTEST_LOG << "DmsKvSyncE2ETest IsMDMControlWithExemptionTest_023 end" << std::endl;
 }
 
+/**
+ * @tc.name: CheckMDMCtrlRuleTest_001
+ * @tc.desc: test CheckMDMCtrlRule with different bundle names
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsKvSyncE2ETest, CheckMDMCtrlRuleTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DmsKvSyncE2ETest CheckMDMCtrlRuleTest_001 start" << std::endl;
+    ASSERT_NE(dmsKvSyncE2E_, nullptr);
+    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
+    EXPECT_NE(dmsKvSyncE2E, nullptr);
+    if (dmsKvSyncE2E != nullptr) {
+        bool ret = dmsKvSyncE2E_->GetInstance()->CheckMDMCtrlRule("com.example.test");
+        EXPECT_FALSE(ret);
+
+        ret = dmsKvSyncE2E_->GetInstance()->CheckMDMCtrlRule("");
+        EXPECT_FALSE(ret);
+
+        ret = dmsKvSyncE2E_->GetInstance()->CheckMDMCtrlRule("any.bundle.name");
+        EXPECT_FALSE(ret);
+    }
+    DTEST_LOG << "DmsKvSyncE2ETest CheckMDMCtrlRuleTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: CheckCtrlRuleTest_002
+ * @tc.desc: test CheckCtrlRule with different isCfgDevices and isForbidSendAndRecv states
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsKvSyncE2ETest, CheckCtrlRuleTest_002, TestSize.Level1)
+{
+    DTEST_LOG << "DmsKvSyncE2ETest CheckCtrlRuleTest_002 start" << std::endl;
+    ASSERT_NE(dmsKvSyncE2E_, nullptr);
+    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
+    EXPECT_NE(dmsKvSyncE2E, nullptr);
+    if (dmsKvSyncE2E != nullptr) {
+        dmsKvSyncE2E_->GetInstance()->isCfgDevices_ = false;
+        dmsKvSyncE2E_->GetInstance()->isForbidSendAndRecv_ = false;
+        bool ret = dmsKvSyncE2E_->GetInstance()->CheckCtrlRule();
+        EXPECT_TRUE(ret);
+
+        dmsKvSyncE2E_->GetInstance()->isCfgDevices_ = false;
+        dmsKvSyncE2E_->GetInstance()->isForbidSendAndRecv_ = true;
+        ret = dmsKvSyncE2E_->GetInstance()->CheckCtrlRule();
+        EXPECT_TRUE(ret);
+
+        dmsKvSyncE2E_->GetInstance()->isCfgDevices_ = true;
+        dmsKvSyncE2E_->GetInstance()->isForbidSendAndRecv_ = false;
+        ret = dmsKvSyncE2E_->GetInstance()->CheckCtrlRule();
+        EXPECT_TRUE(ret);
+
+        dmsKvSyncE2E_->GetInstance()->isCfgDevices_ = true;
+        dmsKvSyncE2E_->GetInstance()->isForbidSendAndRecv_ = true;
+        ret = dmsKvSyncE2E_->GetInstance()->CheckCtrlRule();
+        EXPECT_FALSE(ret);
+    }
+    DTEST_LOG << "DmsKvSyncE2ETest CheckCtrlRuleTest_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: SyncCompletedTest_001
+ * @tc.desc: test SyncCompleted callback with different sync results
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsKvSyncE2ETest, SyncCompletedTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DmsKvSyncE2ETest SyncCompletedTest_001 start" << std::endl;
+    DmsKvSyncCB syncCB;
+    std::map<std::string, DistributedKv::Status> result;
+    result["uuid1"] = DistributedKv::Status::SUCCESS;
+    result["uuid2"] = DistributedKv::Status::ERROR;
+    EXPECT_NO_FATAL_FAILURE(syncCB.SyncCompleted(result));
+
+    std::map<std::string, DistributedKv::Status> emptyResult;
+    EXPECT_NO_FATAL_FAILURE(syncCB.SyncCompleted(emptyResult));
+    DTEST_LOG << "DmsKvSyncE2ETest SyncCompletedTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: TryTwiceTest_001
+ * @tc.desc: test TryTwice with success and failure callbacks
+ * @tc.type: FUNC
+ */
+HWTEST_F(DmsKvSyncE2ETest, TryTwiceTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DmsKvSyncE2ETest TryTwiceTest_001 start" << std::endl;
+    ASSERT_NE(dmsKvSyncE2E_, nullptr);
+    auto dmsKvSyncE2E = GetDmsKvSyncE2E();
+    EXPECT_NE(dmsKvSyncE2E, nullptr);
+    if (dmsKvSyncE2E != nullptr) {
+        int32_t callCount = 0;
+        auto func = [&callCount]() -> DistributedKv::Status {
+            callCount++;
+            return DistributedKv::Status::SUCCESS;
+        };
+        dmsKvSyncE2E_->GetInstance()->TryTwice(func);
+        EXPECT_EQ(callCount, 1);
+
+        callCount = 0;
+        auto funcFail = [&callCount]() -> DistributedKv::Status {
+            callCount++;
+            return DistributedKv::Status::IPC_ERROR;
+        };
+        dmsKvSyncE2E_->GetInstance()->TryTwice(funcFail);
+        EXPECT_EQ(callCount, 2);
+    }
+    DTEST_LOG << "DmsKvSyncE2ETest TryTwiceTest_001 end" << std::endl;
+}
 } // namespace DistributedSchedule
 } // namespace OHOS

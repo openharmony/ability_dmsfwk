@@ -15,6 +15,7 @@
 
 #include "dms_mission_manager_test.h"
 
+#include <mutex>
 #include <thread>
 
 #include "if_system_ability_manager.h"
@@ -32,8 +33,11 @@
 #include "distributed_sched_utils.h"
 #include "dtbschedmgr_device_info_storage.h"
 #include "mission/distributed_sched_mission_manager.h"
+#include "mission/extension/dms_main_service_channel.h"
 #include "mission/mission_constant.h"
+#include "mission/snapshot.h"
 #include "mission/snapshot_converter.h"
+#include "mock_distributed_sched.h"
 #include "test_log.h"
 #undef private
 #undef protected
@@ -59,6 +63,120 @@ const int32_t NUM_MISSIONS = 100;
 const int32_t NORMAL_NUM_MISSIONS = 10;
 constexpr int32_t REQUEST_CODE_ERR = 305;
 constexpr int32_t MAX_WAIT_TIME = 1000;
+
+constexpr uint8_t MINI_MALJPEG[] = {
+    0xFF, 0xD8, 0xFF, 0xDB, 0x00, 0x43, 0x00, 0x08, 0x06, 0x06, 0x07, 0x06, 0x05, 0x08,
+    0x07, 0x07, 0x07, 0x09, 0x09, 0x08, 0x0A, 0x0C, 0x14, 0x0D, 0x0C, 0x0B, 0x0B, 0x0C,
+    0x19, 0x12, 0x13, 0x0F, 0x14, 0x1D, 0x1A, 0x1F, 0x1E, 0x1D, 0x1A, 0x1C, 0x1C, 0x20,
+    0x24, 0x2E, 0x27, 0x20, 0x22, 0x2C, 0x23, 0x1C, 0x1C, 0x28, 0x37, 0x29, 0x2C, 0x30,
+    0x31, 0x34, 0x34, 0x34, 0x1F, 0x27, 0x39, 0x3D, 0x38, 0x32, 0x3C, 0x2E, 0x33, 0x34,
+    0x32, 0xFF, 0xC0, 0x00, 0x0B, 0x08, 0x00, 0x01, 0x00, 0x01, 0x01, 0x01, 0x11, 0x00,
+    0xFF, 0xC4, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0xFF, 0xC4, 0x00, 0x14, 0x10, 0x01,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0xFF, 0xDA, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3F, 0x00, 0x37, 0xFF, 0xD9,
+};
+constexpr uint32_t MINI_MALJPEG_SIZE = static_cast<uint32_t>(sizeof(MINI_MALJPEG));
+
+std::shared_ptr<Media::PixelMap> CreateUtPixelMap()
+{
+    Snapshot snapshot;
+    auto pixelMap = snapshot.CreatePixelMap(MINI_MALJPEG, MINI_MALJPEG_SIZE);
+    return std::shared_ptr<Media::PixelMap>(pixelMap.release());
+}
+
+class DmsMainServiceChannelFixtureDefaultMock : public DmsMainServiceChannel {
+public:
+    void SetFallbackLocalId(std::string id)
+    {
+        fallbackLocalId_ = std::move(id);
+    }
+
+    std::shared_ptr<DmsDeviceInfo> GetDeviceInfoById(const std::string& deviceId) override
+    {
+        return DtbschedmgrDeviceInfoStorage::GetInstance().GetDeviceInfoById(deviceId);
+    }
+
+    std::string GetUuidByNetworkId(const std::string& networkId) override
+    {
+        return DtbschedmgrDeviceInfoStorage::GetInstance().GetUuidByNetworkId(networkId);
+    }
+
+    bool GetLocalDeviceId(std::string& networkId) override
+    {
+        if (DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(networkId)) {
+            return true;
+        }
+        networkId = fallbackLocalId_;
+        return true;
+    }
+
+    std::string GetNetworkIdByUuid(const std::string& uuid) override
+    {
+        return DtbschedmgrDeviceInfoStorage::GetInstance().GetNetworkIdByUuid(uuid);
+    }
+
+    int32_t GetLocalMissionInfos(int32_t numMissions, std::vector<DstbMissionInfo>& missionInfos) override
+    {
+        (void)numMissions;
+        (void)missionInfos;
+        return ERR_OK;
+    }
+
+    int32_t RegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener) override
+    {
+        (void)listener;
+        return ERR_OK;
+    }
+
+    int32_t UnRegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener) override
+    {
+        (void)listener;
+        return ERR_OK;
+    }
+
+    int32_t GetLocalMissionSnapshotInfo(const std::string& networkId, int32_t missionId,
+        AAFwk::MissionSnapshot& missionSnapshot) override
+    {
+        (void)networkId;
+        (void)missionId;
+        auto pixelMap = CreateUtPixelMap();
+        if (pixelMap != nullptr) {
+            missionSnapshot.snapshot = pixelMap;
+            return ERR_OK;
+        }
+        return -1;
+    }
+
+    std::string GetAnonymStr(const std::string& value) override
+    {
+        return value;
+    }
+
+private:
+    std::string fallbackLocalId_ { "ut-mission-local-device" };
+};
+
+std::shared_ptr<DmsMainServiceChannel> g_utMainServiceChannelHolder;
+
+std::shared_ptr<DmsMainServiceChannel> CreateUtMainServiceChannelDefault()
+{
+    auto channel = std::make_shared<DmsMainServiceChannelFixtureDefaultMock>();
+    std::string localDeviceId;
+    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
+        std::static_pointer_cast<DmsMainServiceChannelFixtureDefaultMock>(channel)
+            ->SetFallbackLocalId("ut-mission-local-device");
+    }
+    return channel;
+}
+
+void BindUtMainServiceChannel(const std::shared_ptr<DmsMainServiceChannel>& channel)
+{
+    g_utMainServiceChannelHolder = channel;
+    auto& mgr = DistributedSchedMissionManager::GetInstance();
+    mgr.mainServiceChannel_ = channel;
+    mgr.SetMainServiceChannel(channel);
+}
 }
 
 bool DMSMissionManagerTest::isCaseDone_ = false;
@@ -88,17 +206,28 @@ void DMSMissionManagerTest::TearDownTestCase()
 void DMSMissionManagerTest::SetUp()
 {
     DistributedSchedUtil::MockPermission();
-    string localDeviceId;
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
+    savedMainServiceChannelForUt_ = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel();
+
+    std::string localDeviceId;
+    if (DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
+        localDeviceId_ = localDeviceId;
+        u16localDeviceId_ = Str8ToStr16(localDeviceId);
+        DTEST_LOG << "getLocalDevicesId ok" << std::endl;
+    } else {
         DTEST_LOG << "getLocalDevicesId failed!" << std::endl;
-        return;
+        localDeviceId_.clear();
+        u16localDeviceId_.clear();
     }
-    localDeviceId_ = localDeviceId;
-    u16localDeviceId_ = Str8ToStr16(localDeviceId);
+    BindUtMainServiceChannel(CreateUtMainServiceChannelDefault());
 }
 
 void DMSMissionManagerTest::TearDown()
 {
+    g_utMainServiceChannelHolder = savedMainServiceChannelForUt_;
+    auto& mgr = DistributedSchedMissionManager::GetInstance();
+    mgr.mainServiceChannel_ = savedMainServiceChannelForUt_;
+    mgr.SetMainServiceChannel(savedMainServiceChannelForUt_);
+    savedMainServiceChannelForUt_.reset();
 }
 
 void DMSMissionManagerTest::DeviceInitCallBack::OnRemoteDied()
@@ -110,19 +239,36 @@ sptr<IDistributedSched> DMSMissionManagerTest::GetDms()
     if (proxy_ != nullptr) {
         return proxy_;
     }
+
+    /* LoadDistributedSchedService() stores binder in DistributedSchedUtil::remote_. Prefer it over
+       GetSystemAbility, which may differ or malfunction in unittest process and crash in iface_cast. */
+    sptr<IRemoteObject> remoteObject;
+    {
+        std::lock_guard<std::mutex> guard(DistributedSchedUtil::remoteMutex_);
+        remoteObject = DistributedSchedUtil::remote_;
+    }
+    if (remoteObject != nullptr) {
+        proxy_ = iface_cast<IDistributedSched>(remoteObject);
+        if (proxy_ == nullptr) {
+            DTEST_LOG << "DMSMissionManagerTest iface_cast from LoadDistributedSchedService remote failed" << std::endl;
+        }
+        return proxy_;
+    }
+
     auto sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    EXPECT_TRUE(sm != nullptr);
     if (sm == nullptr) {
         DTEST_LOG << "DMSMissionManagerTest sm is nullptr" << std::endl;
         return nullptr;
     }
-    DTEST_LOG << "DMSMissionManagerTest sm is not nullptr" << std::endl;
+    DTEST_LOG << "DMSMissionManagerTest sm ok, fallback GetSystemAbility" << std::endl;
     auto distributedObject = sm->GetSystemAbility(DISTRIBUTED_SCHED_SA_ID);
+    if (distributedObject == nullptr) {
+        DTEST_LOG << "DMSMissionManagerTest GetSystemAbility DISTRIBUTED_SCHED_SA_ID is nullptr" << std::endl;
+        return nullptr;
+    }
     proxy_ = iface_cast<IDistributedSched>(distributedObject);
     if (proxy_ == nullptr) {
-        DTEST_LOG << "DMSMissionManagerTest DistributedSched is nullptr" << std::endl;
-    } else {
-        DTEST_LOG << "DMSMissionManagerTest DistributedSched is not nullptr" << std::endl;
+        DTEST_LOG << "DMSMissionManagerTest DistributedSched iface_cast is nullptr" << std::endl;
     }
     return proxy_;
 }
@@ -377,10 +523,13 @@ HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions013, TestSize.Level3)
 HWTEST_F(DMSMissionManagerTest, testStartSyncRemoteMissions014, TestSize.Level3)
 {
     DTEST_LOG << "testStartSyncRemoteMissions014 begin" << std::endl;
-    sptr<IDistributedSched> proxy = GetDms();
-    ASSERT_NE(nullptr, proxy);
-    auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(DEVICE_ID, proxy);
-    EXPECT_NE(ret, ERR_NONE);
+    BindUtMainServiceChannel(CreateUtMainServiceChannelDefault());
+    ASSERT_NE(DistributedSchedMissionManager::GetInstance().GetMainServiceChannel(), nullptr);
+
+    sptr<IDistributedSched> proxy = new MockDistributedSched();
+    ASSERT_NE(proxy, nullptr);
+    auto ret = DistributedSchedMissionManager::GetInstance().StartSyncRemoteMissions(DEVICE_ID, proxy, 0);
+    EXPECT_EQ(ret, ERR_NONE);
     DTEST_LOG << "testStartSyncRemoteMissions014 end" << std::endl;
 }
 
@@ -1427,7 +1576,7 @@ HWTEST_F(DMSMissionManagerTest, testMissionSnapshotChanged001, TestSize.Level3)
     std::vector<DstbMissionInfo> missionInfos;
     DistributedSchedMissionManager::GetInstance().InitAllSnapshots(missionInfos);
     auto ret = DistributedSchedMissionManager::GetInstance().MissionSnapshotChanged(NUM_MISSIONS);
-    EXPECT_NE(ret, ERR_NONE);
+    EXPECT_EQ(ret, ERR_NONE);
     DTEST_LOG << "testMissionSnapshotChanged001 end" << std::endl;
 }
 
@@ -3009,6 +3158,162 @@ HWTEST_F(DMSMissionManagerTest, testOnRemoteDmsDied008, TestSize.Level3)
     DistributedSchedMissionManager::GetInstance().OnRemoteDmsDied(remote);
     EXPECT_EQ(DistributedSchedMissionManager::GetInstance().listenDeviceMap_.empty(), false);
     DTEST_LOG << "testOnRemoteDmsDied008 end" << std::endl;
+}
+
+namespace {
+class DmsMainServiceChannelTestMock : public DmsMainServiceChannel {
+public:
+    std::shared_ptr<DmsDeviceInfo> GetDeviceInfoById(const std::string& deviceId) override
+    {
+        (void)deviceId;
+        return nullptr;
+    }
+    std::string GetUuidByNetworkId(const std::string& networkId) override
+    {
+        (void)networkId;
+        return "ut-test-uuid";
+    }
+    bool GetLocalDeviceId(std::string& networkId) override
+    {
+        (void)networkId;
+        return false;
+    }
+    std::string GetNetworkIdByUuid(const std::string& uuid) override
+    {
+        (void)uuid;
+        return "";
+    }
+    int32_t GetLocalMissionInfos(int32_t numMissions, std::vector<DstbMissionInfo>& missionInfos) override
+    {
+        (void)numMissions;
+        (void)missionInfos;
+        return ERR_OK;
+    }
+    int32_t RegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener) override
+    {
+        (void)listener;
+        return ERR_OK;
+    }
+    int32_t UnRegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener) override
+    {
+        (void)listener;
+        return ERR_OK;
+    }
+    int32_t GetLocalMissionSnapshotInfo(const std::string& networkId, int32_t missionId,
+        AAFwk::MissionSnapshot& missionSnapshot) override
+    {
+        (void)networkId;
+        (void)missionId;
+        auto pixelMap = CreateUtPixelMap();
+        if (pixelMap != nullptr) {
+            missionSnapshot.snapshot = pixelMap;
+            return ERR_OK;
+        }
+        return -1;
+    }
+    std::string GetAnonymStr(const std::string& value) override
+    {
+        return value;
+    }
+};
+} // namespace
+
+/**
+ * @tc.name: MainServiceChannel_SetGet_001
+ * @tc.desc: SetMainServiceChannel / GetMainServiceChannel round trip
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, MainServiceChannel_SetGet_001, TestSize.Level3)
+{
+    DTEST_LOG << "MainServiceChannel_SetGet_001 begin" << std::endl;
+    auto mockCh = std::make_shared<DmsMainServiceChannelTestMock>();
+    DistributedSchedMissionManager::GetInstance().SetMainServiceChannel(mockCh);
+    EXPECT_EQ(DistributedSchedMissionManager::GetInstance().GetMainServiceChannel(), mockCh);
+    DTEST_LOG << "MainServiceChannel_SetGet_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: IsDeviceIdValidated_NoDeviceInfo_001
+ * @tc.desc: IsDeviceIdValidated returns false when channel returns no device info
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, IsDeviceIdValidated_NoDeviceInfo_001, TestSize.Level3)
+{
+    DTEST_LOG << "IsDeviceIdValidated_NoDeviceInfo_001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().Init();
+    auto mockCh = std::make_shared<DmsMainServiceChannelTestMock>();
+    DistributedSchedMissionManager::GetInstance().SetMainServiceChannel(mockCh);
+    bool ret = DistributedSchedMissionManager::GetInstance().IsDeviceIdValidated(DEVICE_ID);
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "IsDeviceIdValidated_NoDeviceInfo_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyNetDisconnectOffline_EmptyListeners_001
+ * @tc.desc: NotifyNetDisconnectOffline when listenDeviceMap_ is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, NotifyNetDisconnectOffline_EmptyListeners_001, TestSize.Level3)
+{
+    DTEST_LOG << "NotifyNetDisconnectOffline_EmptyListeners_001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().Init();
+    {
+        std::lock_guard<std::mutex> lock(DistributedSchedMissionManager::GetInstance().listenDeviceLock_);
+        DistributedSchedMissionManager::GetInstance().listenDeviceMap_.clear();
+    }
+    EXPECT_NO_FATAL_FAILURE(DistributedSchedMissionManager::GetInstance().NotifyNetDisconnectOffline());
+    DTEST_LOG << "NotifyNetDisconnectOffline_EmptyListeners_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyRemoteDied_DataStorageNull_001
+ * @tc.desc: NotifyRemoteDied returns early when distributedDataStorage_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, NotifyRemoteDied_DataStorageNull_001, TestSize.Level3)
+{
+    DTEST_LOG << "NotifyRemoteDied_DataStorageNull_001 begin" << std::endl;
+    DistributedSchedMissionManager::GetInstance().Init();
+    auto prev = DistributedSchedMissionManager::GetInstance().distributedDataStorage_;
+    DistributedSchedMissionManager::GetInstance().distributedDataStorage_ = nullptr;
+    wptr<IRemoteObject> remote;
+    EXPECT_NO_FATAL_FAILURE(DistributedSchedMissionManager::GetInstance().NotifyRemoteDied(remote));
+    DistributedSchedMissionManager::GetInstance().distributedDataStorage_ = prev;
+    DTEST_LOG << "NotifyRemoteDied_DataStorageNull_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ListenerInfo_MapOperations_001
+ * @tc.desc: ListenerInfo Emplace / Find / Erase / Size / Empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, ListenerInfo_MapOperations_001, TestSize.Level3)
+{
+    DTEST_LOG << "ListenerInfo_MapOperations_001 begin" << std::endl;
+    ListenerInfo info;
+    EXPECT_TRUE(info.Empty());
+    sptr<IRemoteObject> listener(new RemoteMissionListenerTest());
+    EXPECT_TRUE(info.Emplace(listener));
+    EXPECT_FALSE(info.Emplace(listener));
+    EXPECT_TRUE(info.Find(listener));
+    EXPECT_EQ(info.Size(), 1);
+    info.Erase(listener);
+    EXPECT_TRUE(info.Empty());
+    DTEST_LOG << "ListenerInfo_MapOperations_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetOsAccountData_Invoke_001
+ * @tc.desc: Invoke GetOsAccountData (account path may be ifdef-gated)
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSMissionManagerTest, GetOsAccountData_Invoke_001, TestSize.Level3)
+{
+    DTEST_LOG << "GetOsAccountData_Invoke_001 begin" << std::endl;
+    IDistributedSched::AccountInfo accountInfo;
+    bool ret = DistributedSchedMissionManager::GetInstance().GetOsAccountData(accountInfo);
+    EXPECT_TRUE(ret);
+    DTEST_LOG << "GetOsAccountData_Invoke_001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

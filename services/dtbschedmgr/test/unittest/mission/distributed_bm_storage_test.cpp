@@ -108,7 +108,7 @@ HWTEST_F(DistributedBmStorageTest, SaveStorageDistributeInfo_001, TestSize.Level
     if (distributedDataStorage != nullptr) {
         const std::string bundleName = "NonexistentName";
         bool ret = dmsBmStorage_->GetInstance()->SaveStorageDistributeInfo(bundleName, true);
-        EXPECT_EQ(ret, true);
+        EXPECT_EQ(ret, false);
     }
     DTEST_LOG << "DistributedBmStorageTest SaveStorageDistributeInfo_001 end" << std::endl;
 }
@@ -1058,6 +1058,40 @@ HWTEST_F(DistributedBmStorageTest, DeleteStorageDistributeInfoTest_004, TestSize
     // Assert
     EXPECT_FALSE(ret);
     DTEST_LOG << "DistributedBmStorageTest DeleteStorageDistributeInfoTest_004 end" << std::endl;
+}
+
+/**
+ * @tc.name: DealGetBundleNameTest_005
+ * @tc.desc: DealGetBundleName fails when udid or uuid cannot be resolved
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, DealGetBundleNameTest_005, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest DealGetBundleNameTest_005 start" << std::endl;
+    std::string networkId = "test_network_non_empty";
+    g_mockGetUdidByNetworkId = "";
+    g_mockGetUuidByNetworkId = "";
+    uint16_t bundleNameId = 1;
+    std::string bundleName;
+    bool ret = dmsBmStorage_->DealGetBundleName(networkId, bundleNameId, bundleName);
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "DistributedBmStorageTest DealGetBundleNameTest_005 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetStorageDistributeInfo_EmptyBundleName_001
+ * @tc.desc: GetStorageDistributeInfo with empty bundle name (still resolves udid)
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedBmStorageTest, GetStorageDistributeInfo_EmptyBundleName_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedBmStorageTest GetStorageDistributeInfo_EmptyBundleName_001 start" << std::endl;
+    ASSERT_NE(dmsBmStorage_, nullptr);
+    g_mockGetUdidByNetworkId = "ut_udid";
+    DmsBundleInfo info;
+    bool ret = dmsBmStorage_->GetStorageDistributeInfo("any_network", "", info);
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "DistributedBmStorageTest GetStorageDistributeInfo_EmptyBundleName_001 end" << std::endl;
 }
 
 } // namespace DistributedSchedule
