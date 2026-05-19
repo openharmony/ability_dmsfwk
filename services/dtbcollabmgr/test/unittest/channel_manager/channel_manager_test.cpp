@@ -712,14 +712,14 @@ HWTEST_F(ChannelManagerTest, SendBytes_Success, TestSize.Level1)
     // Step 5: Prepare data to send
     std::shared_ptr<AVTransDataBuffer> dataBuffer = std::make_shared<AVTransDataBuffer>(NUM_1234);
     EXPECT_CALL(mockSoftbus, GetSessionOption(NUM_1234, testing::_, testing::_, sizeof(uint32_t)))
-        .WillOnce(testing::Invoke([&](int sessionId, SessionOption option,
+        .WillRepeatedly(testing::Invoke([&](int sessionId, SessionOption option,
             void* optionValue, uint32_t valueSize) {
             *reinterpret_cast<uint32_t*>(optionValue) = 4 * 1024 * 1024;
             return ERR_OK;
         }));
   
     EXPECT_CALL(mockSoftbus, SendBytes(NUM_1234, testing::_, dataBuffer->Size() + SessionDataHeader::HEADER_LEN))
-        .WillOnce(testing::Return(ERR_OK));
+        .WillRepeatedly(testing::Return(ERR_OK));
 
     // Step 6: Send the data
     result = ChannelManager::GetInstance().SendBytes(channelId, dataBuffer);

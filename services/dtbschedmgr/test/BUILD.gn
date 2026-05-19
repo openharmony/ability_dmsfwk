@@ -46,6 +46,9 @@ config("test_config") {
     "${distributed_service}/dtbschedmgr/include/softbus_adapter/transport",
     "${distributed_service}/dtbschedmgr/src/distributedIntent/include",
     "${distributed_service}/dtbschedmgr/test/unittest",
+    "${distributed_service}/dtbschedmgr/test/unittest/mission",
+    "${distributed_service}/dtbschedmgr/test/unittest/mission/notification",
+    "${distributed_service}/dtbschedmgr/test/unittest/mission/param",
     "${dms_path}/common/include",
     "${dms_path}/interfaces/innerkits/distributed_event/include",
     "${dms_path}/interfaces/innerkits/tests",
@@ -825,6 +828,7 @@ ohos_unittest("dmsmissionmanagertest") {
     "unittest/mission/distributed_data_storage_test.cpp",
     "unittest/mission/dms_mission_manager_test.cpp",
     "unittest/mission/mock_image_packer.cpp",
+    "unittest/mock_distributed_sched.cpp",
   ]
   if (dmsfwk_mission_manager) {
     sources += [
@@ -1735,6 +1739,7 @@ group("unittest") {
     ]
     if (dmsfwk_mission_manager) {
       deps += [
+        ":distributedmissionmanagertest",
         ":dmscontinueconditionmgrtest",
         ":dmscontinuemanagertest",
         ":dmscontinuemgrtest",

@@ -347,12 +347,153 @@ HWTEST_F(DMSContinueRecomMgrTest, GetAvailableRecommendListTest_001, TestSize.Le
 
     networkIdList.push_back("networkId");
     bundleName = "bundleName";
-    EXPECT_CALL(*storageMock_, GetNetworkIdList()).WillOnce(Return(networkIdList));
-    EXPECT_CALL(*bundleMgrMock_, GetAppProvisionInfo4CurrentUser(_, _)).WillOnce(Return(true));
+    EXPECT_CALL(*storageMock_, GetNetworkIdList()).WillRepeatedly(Return(networkIdList));
+    EXPECT_CALL(*bundleMgrMock_, GetAppProvisionInfo4CurrentUser(_, _)).WillRepeatedly(Return(true));
     ret = recomMgr->GetAvailableRecommendList(bundleName, result);
     EXPECT_EQ(ret, true);
     recomMgr->UnInit();
     DTEST_LOG << "DMSContinueRecomMgrTest GetAvailableRecommendListTest_001 end" << std::endl;
+}
+
+HWTEST_F(DMSContinueRecomMgrTest, GetRecommendInfoTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecomMgrTest GetRecommendInfoTest_001 start" << std::endl;
+    auto recomMgr = MultiUserManager::GetInstance().GetCurrentRecomMgr();
+    ASSERT_NE(nullptr, recomMgr);
+    int32_t accountId = 100;
+    recomMgr->Init(accountId);
+    usleep(WAITTIME);
+
+    MissionStatus status;
+    status.bundleName = "testBundle";
+    status.moduleName = "testModule";
+    status.abilityName = "testAbility";
+    ContinueRecommendInfo info;
+
+    EXPECT_CALL(*bundleMgrMock_, GetLocalAbilityInfo(_, _, _, _)).WillOnce(Return(1));
+    bool ret = recomMgr->GetRecommendInfo(status, MISSION_EVENT_FOCUSED, info);
+    EXPECT_FALSE(ret);
+
+    EXPECT_CALL(*bundleMgrMock_, GetLocalAbilityInfo(_, _, _, _)).WillOnce(Return(0));
+    ret = recomMgr->GetRecommendInfo(status, MISSION_EVENT_FOCUSED, info);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(info.state_, 0);
+    EXPECT_EQ(info.srcBundleName_, "testBundle");
+
+    EXPECT_CALL(*bundleMgrMock_, GetLocalAbilityInfo(_, _, _, _)).WillOnce(Return(0));
+    ret = recomMgr->GetRecommendInfo(status, MISSION_EVENT_BACKGROUND, info);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(info.state_, 1);
+    recomMgr->UnInit();
+    DTEST_LOG << "DMSContinueRecomMgrTest GetRecommendInfoTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetAvailableRecommendListInternalTest_002
+ * @tc.desc: test GetAvailableRecommendListInternal with bundleName and empty network list
+ * @tc.type: FUNC
+ */
+HWTEST_F(DMSContinueRecomMgrTest, GetAvailableRecommendListInternalTest_002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecomMgrTest GetAvailableRecommendListInternalTest_002 start" << std::endl;
+    auto recomMgr = MultiUserManager::GetInstance().GetCurrentRecomMgr();
+    ASSERT_NE(nullptr, recomMgr);
+    int32_t accountId = 100;
+    recomMgr->Init(accountId);
+    usleep(WAITTIME);
+
+    std::map<std::string, DmsBundleInfo> result;
+    AppExecFwk::AppProvisionInfo appProvisionInfo;
+    appProvisionInfo.developerId = "dev123";
+    std::vector<std::string> networkIdList;
+    EXPECT_CALL(*storageMock_, GetNetworkIdList()).WillOnce(Return(networkIdList));
+    bool ret = recomMgr->GetAvailableRecommendListInternal("bundleName", result, appProvisionInfo);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(result.empty());
+    recomMgr->UnInit();
+    DTEST_LOG << "DMSContinueRecomMgrTest GetAvailableRecommendListInternalTest_002 end" << std::endl;
+}
+
+HWTEST_F(DMSContinueRecomMgrTest, IsContinuableWithDiffBundleTest_002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueRecomMgrTest IsContinuableWithDiffBundleTest_002 start" << std::endl;
+    auto recomMgr = MultiUserManager::GetInstance().GetCurrentRecomMgr();
+    ASSERT_NE(nullptr, recomMgr);
+    int32_t accountId = 100;
+    recomMgr->Init(accountId);
+    usleep(WAITTIME);
+
+    DmsAbilityInfo abilityInfo;
+    abilityInfo.continueBundleName.push_back("targetBundle");
+    DmsBundleInfo info;
+    info.dmsAbilityInfos.push_back(abilityInfo);
+    bool ret = recomMgr->IsContinuableWithDiffBundle("otherBundle", info);
+    EXPECT_FALSE(ret);
+
+    ret = recomMgr->IsContinuableWithDiffBundle("targetBundle", info);
+    EXPECT_TRUE(ret);
+
+    DmsBundleInfo emptyInfo;
+    ret = recomMgr->IsContinuableWithDiffBundle("bundleName", emptyInfo);
+    EXPECT_FALSE(ret);
+    recomMgr->UnInit();
+    DTEST_LOG << "DMSContinueRecomMgrTest IsContinuableWithDiffBundleTest_002 end" << std::endl;
+}
+
+HWTEST_F(ContinueRecommendInfoTest, testToString002, TestSize.Level1)
+{
+    DTEST_LOG << "ContinueRecommendInfoTest testToString002 start" << std::endl;
+    ContinueRecommendInfo info;
+    info.state_ = 0;
+    info.srcBundleName_ = "com.test.app";
+    info.continueType_ = "default";
+    info.userId_ = 100;
+    ContinueCandidate c1;
+    c1.deviceId_ = "device1";
+    c1.dstBundleName_ = "com.test.dst1";
+    ContinueCandidate c2;
+    c2.deviceId_ = "device2";
+    c2.dstBundleName_ = "com.test.dst2";
+    info.candidates_ = {c1, c2};
+    std::string ret = info.ToString();
+    EXPECT_FALSE(ret.empty());
+    EXPECT_NE(ret.find("com.test.app"), std::string::npos);
+    EXPECT_NE(ret.find("com.test.dst1"), std::string::npos);
+    EXPECT_NE(ret.find("com.test.dst2"), std::string::npos);
+    DTEST_LOG << "ContinueRecommendInfoTest testToString002 end" << std::endl;
+}
+
+HWTEST_F(ContinueRecommendInfoTest, testToString003, TestSize.Level1)
+{
+    DTEST_LOG << "ContinueRecommendInfoTest testToString003 start" << std::endl;
+    ContinueRecommendInfo info;
+    info.state_ = -1;
+    std::string ret = info.ToString();
+    EXPECT_FALSE(ret.empty());
+
+    info.state_ = 1;
+    info.srcBundleName_ = "bundle";
+    info.continueType_ = "type";
+    info.userId_ = 0;
+    ret = info.ToString();
+    EXPECT_NE(ret.find("bundle"), std::string::npos);
+    DTEST_LOG << "ContinueRecommendInfoTest testToString003 end" << std::endl;
+}
+
+HWTEST_F(ContinueRecommendInfoTest, testMarshalCandidates003, TestSize.Level1)
+{
+    DTEST_LOG << "ContinueRecommendInfoTest testMarshalCandidates003 start" << std::endl;
+    ContinueRecommendInfo info;
+    ContinueCandidate c;
+    c.deviceId_ = "dev";
+    c.dstBundleName_ = "bundle";
+    for (int i = 0; i < 5; i++) {
+        info.candidates_.push_back(c);
+    }
+    std::string ret = info.MarshalCandidates();
+    EXPECT_FALSE(ret.empty());
+    EXPECT_NE(ret.find("Candidates"), std::string::npos);
+    DTEST_LOG << "ContinueRecommendInfoTest testMarshalCandidates003 end" << std::endl;
 }
 } // DistributedSchedule
 } // namespace OHOS

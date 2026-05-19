@@ -513,5 +513,360 @@ HWTEST_F(DmsContinueConditionMgrTest, CheckVirtualScreenScenario_002, TestSize.L
     EXPECT_FALSE(ret);
     DTEST_LOG << "DMSContinueManagerTest CheckVirtualScreenScenario_002 end" << std::endl;
 }
+
+HWTEST_F(DmsContinueConditionMgrTest, testTypeEnumToString002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testTypeEnumToString002 start" << std::endl;
+    MissionEventType type = MISSION_EVENT_BACKGROUND;
+    std::string ret = DmsContinueConditionMgr::GetInstance().TypeEnumToString(type);
+    EXPECT_EQ(ret, "BACKGROUND");
+
+    type = MISSION_EVENT_CONTINUE_SWITCH_OFF;
+    ret = DmsContinueConditionMgr::GetInstance().TypeEnumToString(type);
+    EXPECT_EQ(ret, "CONTINUE_SWITCH_OFF");
+    DTEST_LOG << "DMSContinueManagerTest testTypeEnumToString002 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testCheckSendBackgroundCondition001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testCheckSendBackgroundCondition001 start" << std::endl;
+    MissionStatus status;
+    status.isContinuable = false;
+    status.bundleName = "bundleName";
+    DmsKvSyncE2E::GetInstance()->isCfgDevices_ = true;
+    auto ret = DmsContinueConditionMgr::GetInstance().CheckSendBackgroundCondition(status);
+    EXPECT_FALSE(ret);
+
+    status.isContinuable = true;
+    status.continueState = AAFwk::ContinueState::CONTINUESTATE_INACTIVE;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendBackgroundCondition(status);
+    EXPECT_FALSE(ret);
+
+    status.continueState = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendBackgroundCondition(status);
+    EXPECT_TRUE(ret);
+
+    DmsKvSyncE2E::GetInstance()->isCfgDevices_ = false;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendBackgroundCondition(status);
+    EXPECT_TRUE(ret);
+    DTEST_LOG << "DMSContinueManagerTest testCheckSendBackgroundCondition001 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testCheckSendContinueSwitchOffCondition001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testCheckSendContinueSwitchOffCondition001 start" << std::endl;
+    MissionStatus status;
+    status.isContinuable = false;
+    status.bundleName = "bundleName";
+    DmsKvSyncE2E::GetInstance()->isCfgDevices_ = true;
+    auto ret = DmsContinueConditionMgr::GetInstance().CheckSendContinueSwitchOffCondition(status);
+    EXPECT_FALSE(ret);
+
+    status.isContinuable = true;
+    status.continueState = AAFwk::ContinueState::CONTINUESTATE_INACTIVE;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendContinueSwitchOffCondition(status);
+    EXPECT_FALSE(ret);
+
+    status.continueState = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendContinueSwitchOffCondition(status);
+    EXPECT_TRUE(ret);
+
+    DmsKvSyncE2E::GetInstance()->isCfgDevices_ = false;
+    ret = DmsContinueConditionMgr::GetInstance().CheckSendContinueSwitchOffCondition(status);
+    EXPECT_TRUE(ret);
+    DTEST_LOG << "DMSContinueManagerTest testCheckSendContinueSwitchOffCondition001 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testGetMissionStatus001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testGetMissionStatus001 start" << std::endl;
+    InitMissionMap();
+    int32_t missionId = 1;
+    int32_t accountId = 0;
+    MissionStatus status;
+    auto ret = DmsContinueConditionMgr::GetInstance().GetMissionStatus(accountId, missionId, status);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(status.bundleName, "bundleName");
+    EXPECT_EQ(status.isFocused, true);
+
+    missionId = 999;
+    ret = DmsContinueConditionMgr::GetInstance().GetMissionStatus(accountId, missionId, status);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+
+    accountId = 999;
+    ret = DmsContinueConditionMgr::GetInstance().GetMissionStatus(accountId, 1, status);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DMSContinueManagerTest testGetMissionStatus001 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testIsScreenLocked001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testIsScreenLocked001 start" << std::endl;
+    DmsContinueConditionMgr::GetInstance().isScreenLocked_ = false;
+    EXPECT_FALSE(DmsContinueConditionMgr::GetInstance().IsScreenLocked());
+
+    DmsContinueConditionMgr::GetInstance().isScreenLocked_ = true;
+    EXPECT_TRUE(DmsContinueConditionMgr::GetInstance().IsScreenLocked());
+
+    DmsContinueConditionMgr::GetInstance().isScreenLocked_ = false;
+    DTEST_LOG << "DMSContinueManagerTest testIsScreenLocked001 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testGetCurrentFocusedMission001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testGetCurrentFocusedMission001 start" << std::endl;
+    DmsContinueConditionMgr::GetInstance().missionMap_.clear();
+    int32_t ret = DmsContinueConditionMgr::GetInstance().GetCurrentFocusedMission(0);
+    EXPECT_EQ(ret, -1);
+
+    InitMissionMap();
+    ret = DmsContinueConditionMgr::GetInstance().GetCurrentFocusedMission(0);
+    EXPECT_EQ(ret, 1);
+
+    ret = DmsContinueConditionMgr::GetInstance().GetCurrentFocusedMission(999);
+    EXPECT_EQ(ret, -1);
+
+    DmsContinueConditionMgr::GetInstance().missionMap_[0][1].isFocused = false;
+    ret = DmsContinueConditionMgr::GetInstance().GetCurrentFocusedMission(0);
+    EXPECT_EQ(ret, -1);
+    DTEST_LOG << "DMSContinueManagerTest testGetCurrentFocusedMission001 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testGetCurrentFocusedMissionWithStatus001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testGetCurrentFocusedMissionWithStatus001 start" << std::endl;
+    DmsContinueConditionMgr::GetInstance().missionMap_.clear();
+    MissionStatus missionStatus;
+    int32_t ret = DmsContinueConditionMgr::GetInstance().GetCurrentFocusedMission(0, missionStatus);
+    EXPECT_EQ(ret, -1);
+    EXPECT_EQ(missionStatus.missionId, -1);
+
+    InitMissionMap();
+    ret = DmsContinueConditionMgr::GetInstance().GetCurrentFocusedMission(0, missionStatus);
+    EXPECT_EQ(ret, 1);
+    EXPECT_EQ(missionStatus.bundleName, "bundleName");
+    EXPECT_EQ(missionStatus.isFocused, true);
+
+    ret = DmsContinueConditionMgr::GetInstance().GetCurrentFocusedMission(999, missionStatus);
+    EXPECT_EQ(ret, -1);
+    DTEST_LOG << "DMSContinueManagerTest testGetCurrentFocusedMissionWithStatus001 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testGetLastContinuableMissionStatus001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testGetLastContinuableMissionStatus001 start" << std::endl;
+    MissionStatus status;
+    status.missionId = 5;
+    status.bundleName = "testBundle";
+    DmsContinueConditionMgr::GetInstance().lastContinuableMissionStatus_ = status;
+    auto ret = DmsContinueConditionMgr::GetInstance().GetLastContinuableMissionStatus();
+    EXPECT_EQ(ret.missionId, 5);
+    EXPECT_EQ(ret.bundleName, "testBundle");
+
+    MissionStatus emptyStatus;
+    DmsContinueConditionMgr::GetInstance().lastContinuableMissionStatus_ = emptyStatus;
+    ret = DmsContinueConditionMgr::GetInstance().GetLastContinuableMissionStatus();
+    EXPECT_EQ(ret.missionId, 0);
+    DTEST_LOG << "DMSContinueManagerTest testGetLastContinuableMissionStatus001 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testOnUserRemoved001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testOnUserRemoved001 start" << std::endl;
+    DmsContinueConditionMgr::GetInstance().missionMap_.clear();
+    DmsContinueConditionMgr::GetInstance().OnUserRemoved(0);
+    EXPECT_TRUE(DmsContinueConditionMgr::GetInstance().missionMap_.empty());
+
+    InitMissionMap();
+    EXPECT_FALSE(DmsContinueConditionMgr::GetInstance().missionMap_.empty());
+    DmsContinueConditionMgr::GetInstance().OnUserRemoved(0);
+    EXPECT_TRUE(DmsContinueConditionMgr::GetInstance().missionMap_.find(0) ==
+        DmsContinueConditionMgr::GetInstance().missionMap_.end());
+
+    InitMissionMap();
+    DmsContinueConditionMgr::GetInstance().OnUserRemoved(999);
+    EXPECT_TRUE(DmsContinueConditionMgr::GetInstance().missionMap_.find(0) !=
+        DmsContinueConditionMgr::GetInstance().missionMap_.end());
+    DTEST_LOG << "DMSContinueManagerTest testOnUserRemoved001 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testUnInit001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testUnInit001 start" << std::endl;
+    InitMissionMap();
+    EXPECT_FALSE(DmsContinueConditionMgr::GetInstance().missionMap_.empty());
+    DmsContinueConditionMgr::GetInstance().UnInit();
+    EXPECT_TRUE(DmsContinueConditionMgr::GetInstance().missionMap_.empty());
+    DTEST_LOG << "DMSContinueManagerTest testUnInit001 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testUpdateSystemStatus001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testUpdateSystemStatus001 start" << std::endl;
+    DmsContinueConditionMgr::GetInstance().sysFuncMap_[SYS_EVENT_CONTINUE_SWITCH] =
+        &DmsContinueConditionMgr::SetIsContinueSwitchOn;
+    auto ret = DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_CONTINUE_SWITCH, true);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_TRUE(DmsContinueConditionMgr::GetInstance().isSwitchOn_.load());
+
+    ret = DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_CONTINUE_SWITCH, false);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_FALSE(DmsContinueConditionMgr::GetInstance().isSwitchOn_.load());
+
+    DmsContinueConditionMgr::GetInstance().sysFuncMap_[SYS_EVENT_WIFI] =
+        &DmsContinueConditionMgr::SetIsWifiActive;
+    ret = DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_WIFI, true);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_TRUE(DmsContinueConditionMgr::GetInstance().isWifiActive_.load());
+
+    DmsContinueConditionMgr::GetInstance().sysFuncMap_[SYS_EVENT_BLUETOOTH] =
+        &DmsContinueConditionMgr::SetIsBtActive;
+    ret = DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_BLUETOOTH, true);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_TRUE(DmsContinueConditionMgr::GetInstance().isBtActive_.load());
+
+    DmsContinueConditionMgr::GetInstance().sysFuncMap_[SYS_EVENT_SCREEN_LOCK] =
+        &DmsContinueConditionMgr::SetIsScreenLocked;
+    ret = DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(SYS_EVENT_SCREEN_LOCK, true);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_TRUE(DmsContinueConditionMgr::GetInstance().IsScreenLocked());
+
+    ret = DmsContinueConditionMgr::GetInstance().UpdateSystemStatus(
+        static_cast<SysEventType>(999), true);
+    EXPECT_EQ(ret, INVALID_PARAMETERS_ERR);
+    DTEST_LOG << "DMSContinueManagerTest testUpdateSystemStatus001 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testConvertToMissionStatus001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testConvertToMissionStatus001 start" << std::endl;
+    AAFwk::MissionInfo missionInfo;
+    missionInfo.id = 10;
+    missionInfo.continuable = true;
+    missionInfo.continueState = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
+    AAFwk::Want want;
+    want.SetElementName("", "testBundle", "testAbility", "testModule");
+    want.SetFlags(0x01);
+    missionInfo.want = want;
+
+    MissionStatus status;
+    DmsContinueConditionMgr::GetInstance().ConvertToMissionStatus(missionInfo, 100, status);
+    const auto& element = missionInfo.want.GetElement();
+    EXPECT_EQ(status.accountId, 100);
+    EXPECT_EQ(status.missionId, 10);
+    EXPECT_EQ(status.bundleName, element.GetBundleName());
+    EXPECT_EQ(status.moduleName, element.GetModuleName());
+    EXPECT_EQ(status.abilityName, element.GetAbilityName());
+    EXPECT_EQ(status.isContinuable, true);
+    EXPECT_EQ(status.launchFlag, 0x01);
+    EXPECT_EQ(status.continueState, AAFwk::ContinueState::CONTINUESTATE_ACTIVE);
+    DTEST_LOG << "DMSContinueManagerTest testConvertToMissionStatus001 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testCleanLastFocusedFlagLocked001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testCleanLastFocusedFlagLocked001 start" << std::endl;
+    DmsContinueConditionMgr::GetInstance().missionMap_.clear();
+    int32_t accountId = 0;
+    std::map<int32_t, MissionStatus> missionList;
+    MissionStatus status1{.missionId = 1, .bundleName = "b1", .isFocused = true};
+    MissionStatus status2{.missionId = 2, .bundleName = "b2", .isFocused = true};
+    missionList[1] = status1;
+    missionList[2] = status2;
+    DmsContinueConditionMgr::GetInstance().missionMap_[accountId] = missionList;
+
+    DmsContinueConditionMgr::GetInstance().CleanLastFocusedFlagLocked(accountId, 1);
+    EXPECT_FALSE(DmsContinueConditionMgr::GetInstance().missionMap_[accountId][2].isFocused);
+
+    DmsContinueConditionMgr::GetInstance().missionMap_[accountId][1].isFocused = true;
+    DmsContinueConditionMgr::GetInstance().CleanLastFocusedFlagLocked(accountId, 2);
+    EXPECT_FALSE(DmsContinueConditionMgr::GetInstance().missionMap_[accountId][1].isFocused);
+    DTEST_LOG << "DMSContinueManagerTest testCleanLastFocusedFlagLocked001 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testSetMissionStatus001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testSetMissionStatus001 start" << std::endl;
+    MissionStatus status;
+    status.accountId = 100;
+    status.missionId = 10;
+    status.bundleName = "testBundle";
+    status.isContinuable = true;
+    status.isFocused = true;
+    status.continueState = AAFwk::ContinueState::CONTINUESTATE_ACTIVE;
+
+    DmsContinueConditionMgr::GetInstance().SetMissionStatus(status);
+    EXPECT_EQ(status.accountId, 0);
+    EXPECT_EQ(status.missionId, 0);
+    EXPECT_EQ(status.bundleName, "");
+    EXPECT_EQ(status.isContinuable, false);
+    EXPECT_EQ(status.isFocused, false);
+    EXPECT_EQ(status.continueState, AAFwk::ContinueState::CONTINUESTATE_UNKNOWN);
+    DTEST_LOG << "DMSContinueManagerTest testSetMissionStatus001 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testIsMissionStatusExistLocked001, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testIsMissionStatusExistLocked001 start" << std::endl;
+    DmsContinueConditionMgr::GetInstance().missionMap_.clear();
+    EXPECT_FALSE(DmsContinueConditionMgr::GetInstance().IsMissionStatusExistLocked(0, 1));
+
+    InitMissionMap();
+    EXPECT_TRUE(DmsContinueConditionMgr::GetInstance().IsMissionStatusExistLocked(0, 1));
+    EXPECT_FALSE(DmsContinueConditionMgr::GetInstance().IsMissionStatusExistLocked(0, 999));
+    EXPECT_FALSE(DmsContinueConditionMgr::GetInstance().IsMissionStatusExistLocked(999, 1));
+    DTEST_LOG << "DMSContinueManagerTest testIsMissionStatusExistLocked001 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testGetMissionIdByBundleName002, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testGetMissionIdByBundleName002 start" << std::endl;
+    int32_t accountId = 0;
+    std::string bundleName = "bundleName";
+    int32_t missionId = -1;
+    InitMissionMap();
+
+    DmsContinueConditionMgr::GetInstance().lastContinuableMissionStatus_ = {};
+    auto ret = DmsContinueConditionMgr::GetInstance().GetMissionIdByBundleName(
+        accountId, bundleName, missionId);
+    EXPECT_EQ(ret, ERR_OK);
+
+    DmsContinueConditionMgr::GetInstance().missionMap_[0][1].isContinuable = false;
+    bundleName = "otherBundle";
+    missionId = -1;
+    ret = DmsContinueConditionMgr::GetInstance().GetMissionIdByBundleName(
+        accountId, bundleName, missionId);
+    EXPECT_EQ(ret, MISSION_NOT_FOCUSED);
+
+    MissionStatus lastStatus;
+    lastStatus.missionId = 1;
+    lastStatus.bundleName = "otherBundle";
+    lastStatus.isContinuable = true;
+    DmsContinueConditionMgr::GetInstance().lastContinuableMissionStatus_ = lastStatus;
+    // Fallback matches bundleName on the mission map entry for lastContinuableMissionStatus_.missionId.
+    DmsContinueConditionMgr::GetInstance().missionMap_[0][1].bundleName = "otherBundle";
+    DmsContinueConditionMgr::GetInstance().missionMap_[0][1].isContinuable = true;
+    ret = DmsContinueConditionMgr::GetInstance().GetMissionIdByBundleName(
+        accountId, bundleName, missionId);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(missionId, 1);
+    DTEST_LOG << "DMSContinueManagerTest testGetMissionIdByBundleName002 end" << std::endl;
+}
+
+HWTEST_F(DmsContinueConditionMgrTest, testOnMissionUnfocusedNotExist, TestSize.Level1)
+{
+    DTEST_LOG << "DMSContinueManagerTest testOnMissionUnfocusedNotExist start" << std::endl;
+    DmsContinueConditionMgr::GetInstance().missionMap_.clear();
+    int32_t accountId = 0;
+    int32_t missionId = 999;
+    auto ret = DmsContinueConditionMgr::GetInstance().OnMissionUnfocused(accountId, missionId);
+    EXPECT_EQ(ret, -1);
+
+    InitMissionMap();
+    ret = DmsContinueConditionMgr::GetInstance().OnMissionUnfocused(accountId, 1);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_FALSE(DmsContinueConditionMgr::GetInstance().missionMap_[accountId][1].isFocused);
+    DTEST_LOG << "DMSContinueManagerTest testOnMissionUnfocusedNotExist end" << std::endl;
+}
 }
 }

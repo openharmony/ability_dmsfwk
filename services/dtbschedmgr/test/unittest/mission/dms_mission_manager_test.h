@@ -19,9 +19,9 @@
 #include "gtest/gtest.h"
 
 #include "device_manager.h"
-#include "remote_mission_listener_stub.h"
-
 #include "distributed_sched_interface.h"
+#include "mission/extension/dms_main_service_channel.h"
+#include "remote_mission_listener_stub.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -32,6 +32,7 @@ public:
     void SetUp() override;
     void TearDown() override;
 protected:
+    std::shared_ptr<DmsMainServiceChannel> savedMainServiceChannelForUt_;
     std::string localDeviceId_;
     std::u16string u16localDeviceId_;
     sptr<IDistributedSched> proxy_;

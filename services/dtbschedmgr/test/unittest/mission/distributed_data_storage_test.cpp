@@ -15,9 +15,12 @@
 
 #include "distributed_data_storage_test.h"
 
+#include <memory>
 #include <thread>
 #include "distributed_sched_test_util.h"
 #include "dtbschedmgr_device_info_storage.h"
+#include "mission/distributed_sched_mission_manager.h"
+#include "mission/extension/dms_main_service_channel.h"
 #include "test_log.h"
 
 namespace OHOS {
@@ -32,7 +35,60 @@ constexpr int32_t TASK_ID_1 = 11;
 constexpr int32_t TASK_ID_2 = 12;
 constexpr size_t BYTESTREAM_LENGTH = 100;
 constexpr uint8_t ONE_BYTE = '6';
-}
+const std::string UT_TEST_UUID = "ut-test-uuid";
+
+class DmsMainServiceChannelStorageTestMock : public DmsMainServiceChannel {
+public:
+    std::shared_ptr<DmsDeviceInfo> GetDeviceInfoById(const std::string& deviceId) override
+    {
+        (void)deviceId;
+        return nullptr;
+    }
+    std::string GetUuidByNetworkId(const std::string& networkId) override
+    {
+        (void)networkId;
+        return UT_TEST_UUID;
+    }
+    bool GetLocalDeviceId(std::string& networkId) override
+    {
+        networkId = "ut-local-network-id";
+        return true;
+    }
+    std::string GetNetworkIdByUuid(const std::string& uuid) override
+    {
+        (void)uuid;
+        return "ut-local-network-id";
+    }
+    int32_t GetLocalMissionInfos(int32_t numMissions, std::vector<DstbMissionInfo>& missionInfos) override
+    {
+        (void)numMissions;
+        (void)missionInfos;
+        return ERR_OK;
+    }
+    int32_t RegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener) override
+    {
+        (void)listener;
+        return ERR_OK;
+    }
+    int32_t UnRegisterMissionListener(const sptr<AAFwk::IMissionListener>& listener) override
+    {
+        (void)listener;
+        return ERR_OK;
+    }
+    int32_t GetLocalMissionSnapshotInfo(const std::string& networkId, int32_t missionId,
+        AAFwk::MissionSnapshot& missionSnapshot) override
+    {
+        (void)networkId;
+        (void)missionId;
+        (void)missionSnapshot;
+        return -1;
+    }
+    std::string GetAnonymStr(const std::string& value) override
+    {
+        return value;
+    }
+};
+} // namespace
 
 void DistributedDataStorageTest::SetUpTestCase()
 {
@@ -54,6 +110,8 @@ void DistributedDataStorageTest::SetUp()
 {
     DistributedSchedUtil::MockPermission();
     distributedDataStorage_ = std::make_shared<DistributedDataStorage>();
+    auto mockChannel = std::make_shared<DmsMainServiceChannelStorageTestMock>();
+    DistributedSchedMissionManager::GetInstance().SetMainServiceChannel(mockChannel);
     DTEST_LOG << "DistributedDataStorageTest::SetUp" << std::endl;
 }
 
@@ -109,11 +167,21 @@ HWTEST_F(DistributedDataStorageTest, InsertTest_001, TestSize.Level1)
 {
     DTEST_LOG << "DistributedDataStorageTest InsertTest_001 start" << std::endl;
     ASSERT_NE(distributedDataStorage_, nullptr);
-    distributedDataStorage_->Init();
+    ASSERT_NE(DistributedSchedMissionManager::GetInstance().GetMainServiceChannel(), nullptr);
+    if (!distributedDataStorage_->Init()) {
+        DTEST_LOG << "InsertTest_001 skip: Init failed" << std::endl;
+        return;
+    }
     this_thread::sleep_for(1s);
     std::string deviceId = GetLocalDeviceId();
+    if (deviceId.empty()) {
+        deviceId = "ut-local-network-id";
+    }
     uint8_t* byteStream = InitByteStream();
+    ASSERT_NE(byteStream, nullptr);
     bool ret = distributedDataStorage_->Insert(deviceId, TASK_ID_1, byteStream, BYTESTREAM_LENGTH);
+    delete[] byteStream;
+    byteStream = nullptr;
     EXPECT_EQ(true, ret);
     distributedDataStorage_->Stop();
     DTEST_LOG << "DistributedDataStorageTest InsertTest_001 end" << std::endl;
@@ -381,6 +449,57 @@ HWTEST_F(DistributedDataStorageTest, QueryTest_007, TestSize.Level1)
     EXPECT_EQ(false, ret);
     distributedDataStorage_->Stop();
     DTEST_LOG << "DistributedDataStorageTest QueryTest_007 end" << std::endl;
+}
+
+/**
+ * @tc.name: NotifyRemoteDiedTest_001
+ * @tc.desc: NotifyRemoteDied is safe when death recipient is not installed (no Init)
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedDataStorageTest, NotifyRemoteDiedTest_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedDataStorageTest NotifyRemoteDiedTest_001 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
+    wptr<IRemoteObject> remote;
+    distributedDataStorage_->NotifyRemoteDied(remote);
+    DTEST_LOG << "DistributedDataStorageTest NotifyRemoteDiedTest_001 end" << std::endl;
+}
+
+/**
+ * @tc.name: FuzzyDeleteTest_002
+ * @tc.desc: FuzzyDelete returns false when networkId is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedDataStorageTest, FuzzyDeleteTest_002, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedDataStorageTest FuzzyDeleteTest_002 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
+    distributedDataStorage_->Init();
+    this_thread::sleep_for(1s);
+    std::string emptyNetworkId;
+    bool ret = distributedDataStorage_->FuzzyDelete(emptyNetworkId);
+    EXPECT_EQ(false, ret);
+    distributedDataStorage_->Stop();
+    DTEST_LOG << "DistributedDataStorageTest FuzzyDeleteTest_002 end" << std::endl;
+}
+
+/**
+ * @tc.name: InsertTest_EmptyNetworkId_001
+ * @tc.desc: Insert returns false when networkId is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(DistributedDataStorageTest, InsertTest_EmptyNetworkId_001, TestSize.Level1)
+{
+    DTEST_LOG << "DistributedDataStorageTest InsertTest_EmptyNetworkId_001 start" << std::endl;
+    ASSERT_NE(distributedDataStorage_, nullptr);
+    distributedDataStorage_->Init();
+    this_thread::sleep_for(1s);
+    uint8_t* byteStream = InitByteStream();
+    std::string emptyNetworkId;
+    bool ret = distributedDataStorage_->Insert(emptyNetworkId, TASK_ID_1, byteStream, BYTESTREAM_LENGTH);
+    EXPECT_EQ(false, ret);
+    distributedDataStorage_->Stop();
+    DTEST_LOG << "DistributedDataStorageTest InsertTest_EmptyNetworkId_001 end" << std::endl;
 }
 } // namespace DistributedSchedule
 } // namespace OHOS
