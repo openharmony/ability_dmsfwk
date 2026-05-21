@@ -208,7 +208,6 @@ ErrCode SvcDistributedConnection::ConnectDExtAbility(AAFwk::Want &want, int32_t 
 ErrCode SvcDistributedConnection::DisconnectDistributedExtAbility()
 {
     HILOGI("called begin");
-    DistributedSchedService::GetInstance().SetDExtensionConnected(false);
     std::unique_lock<std::mutex> lock(mutex_);
     isConnectCalled_.store(false);
     auto proxy = distributedProxy_;
@@ -228,6 +227,7 @@ ErrCode SvcDistributedConnection::DisconnectDistributedExtAbility()
         HILOGI("Wait until connection ends");
     }
     HILOGI("called end, ret=%{public}d", ret);
+    DistributedSchedService::GetInstance().SetDExtensionConnected(false);
     return ret;
 }
 
