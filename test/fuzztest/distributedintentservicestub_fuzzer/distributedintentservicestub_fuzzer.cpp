@@ -17,7 +17,7 @@
 
 #include <fuzzer/FuzzedDataProvider.h>
 
-#include "distributed_sched_service.h"
+#include "distributed_intent_service.h"
 #include "distributedsched_ipc_interface_code.h"
 #include "mock_fuzz_util.h"
 #include "parcel_helper.h"
@@ -25,29 +25,6 @@
 
 namespace OHOS {
 namespace DistributedSchedule {
-
-void FuzzOnRemoteRequest(const uint8_t* data, size_t size)
-{
-    if (data == nullptr || size < sizeof(uint32_t)) {
-        return;
-    }
-    FuzzedDataProvider fdp(data, size);
-    uint32_t code = fdp.ConsumeIntegral<uint32_t>();
-    std::vector<uint8_t> remaining = fdp.ConsumeRemainingBytes<uint8_t>();
-
-    MessageParcel parcelData;
-    parcelData.WriteInterfaceToken(u"ohos.distributedschedule.accessToken");
-
-    if (!remaining.empty()) {
-        parcelData.WriteBuffer(remaining.data(), remaining.size());
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    DistributedSchedService::GetInstance().OnRemoteRequest(code, parcelData, reply, option);
-    FuzzUtil::MockPermission();
-    DistributedSchedService::GetInstance().OnRemoteRequest(code, parcelData, reply, option);
-}
 
 void FuzzStartRemoteIntentInner(const uint8_t* data, size_t size)
 {
@@ -79,10 +56,11 @@ void FuzzStartRemoteIntentInner(const uint8_t* data, size_t size)
 
     MessageParcel reply;
     MessageOption option;
+    DistributedIntentService intentService;
     uint32_t code = static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT);
-    DistributedSchedService::GetInstance().OnRemoteRequest(code, parcelData, reply, option);
+    intentService.OnRemoteRequest(code, parcelData, reply, option);
     FuzzUtil::MockPermission();
-    DistributedSchedService::GetInstance().OnRemoteRequest(code, parcelData, reply, option);
+    intentService.OnRemoteRequest(code, parcelData, reply, option);
 }
 
 void FuzzSendIntentResultInner(const uint8_t* data, size_t size)
@@ -112,17 +90,17 @@ void FuzzSendIntentResultInner(const uint8_t* data, size_t size)
 
     MessageParcel reply;
     MessageOption option;
+    DistributedIntentService intentService;
     uint32_t code = static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT);
-    DistributedSchedService::GetInstance().OnRemoteRequest(code, parcelData, reply, option);
+    intentService.OnRemoteRequest(code, parcelData, reply, option);
     FuzzUtil::MockPermission();
-    DistributedSchedService::GetInstance().OnRemoteRequest(code, parcelData, reply, option);
+    intentService.OnRemoteRequest(code, parcelData, reply, option);
 }
 }
 }
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DistributedSchedule::FuzzOnRemoteRequest(data, size);
     OHOS::DistributedSchedule::FuzzStartRemoteIntentInner(data, size);
     OHOS::DistributedSchedule::FuzzSendIntentResultInner(data, size);
     return 0;

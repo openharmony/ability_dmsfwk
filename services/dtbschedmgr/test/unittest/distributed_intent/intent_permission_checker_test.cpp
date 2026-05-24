@@ -22,6 +22,8 @@
 #include "dtbschedmgr_log.h"
 #include "distributed_sched_permission_mock.h"
 #include "dtbschedmgr_device_info_storage_mock.h"
+#include "distributed_intent_plugin.h"
+#include "distributed_intent_provider_impl.h"
 #include "bundle_manager_internal_mock.h"
 #include "access_token_kit_mock.h"
 #include "os_account_manager_mock.h"
@@ -40,16 +42,13 @@ using namespace OHOS::AAFwk;
 namespace OHOS {
 namespace DistributedSchedule {
 namespace {
-const std::string PERMISSION_EXECUTE_DISTRIBUTED_INTENT = "ohos.permission.EXECUTE_DISTRIBUTED_INTENT";
-const std::string PERMISSION_EXECUTE_INSIGHT_INTENT = "ohos.permission.EXECUTE_INSIGHT_INTENT";
-const std::string PERMISSION_START_ABILITIES_FROM_BACKGROUND = "ohos.permission.START_ABILITIES_FROM_BACKGROUND";
+const std::string TAG = "IntentPermissionCheckerTest";
 const std::string LOCAL_DEVICE_ID = "local_device_id_12345";
 const std::string REMOTE_DEVICE_ID = "remote_device_id_67890";
 const std::string SRC_DEVICE_ID = "src_device_id_11111";
 const std::string EMPTY_STRING;
 const int32_t ERR_OK = 0;
 const int32_t ERR_FAIL = -1;
-constexpr int32_t EXECUTEPARAM_MODE_NUM = 2;
 constexpr int32_t TEST_CALLER_UID = 1000;
 constexpr uint64_t TEST_INVALID_ACCESS_TOKEN = 0;
 constexpr uint32_t TEST_ACCESS_TOKEN = 200;
@@ -58,7 +57,11 @@ constexpr uint64_t TEST_D_ACCESS_TOKEN = 400;
 const std::string BUNDLE_NAME = "com.test.bundle";
 const std::string ABILITY_NAME = "MainAbility";
 const std::string PERMISSION = "ohos.permission.EXECUTE_INSIGHT_INTENT";
-const std::string TAG = "IntentPermissionCheckerTest";
+const std::string PERMISSION_EXECUTE_DISTRIBUTED_INTENT = "ohos.permission.EXECUTE_DISTRIBUTED_INTENT";
+const std::string PERMISSION_EXECUTE_INSIGHT_INTENT = "ohos.permission.EXECUTE_INSIGHT_INTENT";
+const std::string PERMISSION_START_ABILITIES_FROM_BACKGROUND = "ohos.permission.START_ABILITIES_FROM_BACKGROUND";
+constexpr int32_t EXECUTEPARAM_MODE_NUM = 1;
+std::shared_ptr<IIntentPlugin> testIntentPlugin_;
 }
 
 struct PermissionCheckerMocks {
@@ -118,11 +121,15 @@ protected:
 void IntentPermissionCheckerTest::SetUpTestCase()
 {
     HILOGI("IntentPermissionCheckerTest::SetUpTestCase");
+    static DmsIntentProviderImpl provider;
+    void *pluginPtr = CreateIntentPlugin(&provider);
+    testIntentPlugin_.reset(static_cast<IIntentPlugin *>(pluginPtr));
 }
 
 void IntentPermissionCheckerTest::TearDownTestCase()
 {
     HILOGI("IntentPermissionCheckerTest::TearDownTestCase");
+    testIntentPlugin_.reset();
 }
 
 void IntentPermissionCheckerTest::SetUp()
@@ -812,8 +819,8 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_GetTargetAbility_Fail
         .WillRepeatedly(Return(ERR_OK));
     EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_INSIGHT_INTENT))
         .WillRepeatedly(Return(ERR_OK));
-    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _))
-        .WillRepeatedly(Invoke([](const AAFwk::Want&, AppExecFwk::AbilityInfo& abilityInfo) {
+    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _, _))
+        .WillRepeatedly(Invoke([](const AAFwk::Want&, AppExecFwk::AbilityInfo& abilityInfo, bool) {
             abilityInfo.bundleName = BUNDLE_NAME;
             abilityInfo.name = ABILITY_NAME;
             abilityInfo.visible = false;
@@ -858,8 +865,8 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckDeviceSecurityLe
         .WillRepeatedly(Return(ERR_OK));
     EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_INSIGHT_INTENT))
         .WillRepeatedly(Return(ERR_OK));
-    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _))
-        .WillRepeatedly(Invoke([](const AAFwk::Want&, AppExecFwk::AbilityInfo& abilityInfo) {
+    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _, _))
+        .WillRepeatedly(Invoke([](const AAFwk::Want&, AppExecFwk::AbilityInfo& abilityInfo, bool) {
             abilityInfo.bundleName = BUNDLE_NAME;
             abilityInfo.name = ABILITY_NAME;
             abilityInfo.visible = false;
@@ -906,8 +913,8 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckVisible_Fail_007
         .WillRepeatedly(Return(ERR_OK));
     EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_INSIGHT_INTENT))
         .WillRepeatedly(Return(ERR_OK));
-    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _))
-        .WillRepeatedly(Invoke([](const AAFwk::Want&, AppExecFwk::AbilityInfo& abilityInfo) {
+    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _, _))
+        .WillRepeatedly(Invoke([](const AAFwk::Want&, AppExecFwk::AbilityInfo& abilityInfo, bool) {
             abilityInfo.bundleName = BUNDLE_NAME;
             abilityInfo.name = ABILITY_NAME;
             abilityInfo.visible = false;
@@ -956,8 +963,8 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_CheckCustomPermission
         .WillRepeatedly(Return(ERR_OK));
     EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_INSIGHT_INTENT))
         .WillRepeatedly(Return(ERR_OK));
-    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _))
-        .WillRepeatedly(Invoke([](const AAFwk::Want&, AppExecFwk::AbilityInfo& abilityInfo) {
+    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _, _))
+        .WillRepeatedly(Invoke([](const AAFwk::Want&, AppExecFwk::AbilityInfo& abilityInfo, bool) {
             abilityInfo.bundleName = BUNDLE_NAME;
             abilityInfo.name = ABILITY_NAME;
             abilityInfo.visible = false;
@@ -1012,8 +1019,8 @@ HWTEST_F(IntentPermissionCheckerTest, CheckStartPermission_Success_009, TestSize
         .WillRepeatedly(Return(ERR_OK));
     EXPECT_CALL(*mocks_.schedPermMock, CheckPermission(_, PERMISSION_EXECUTE_INSIGHT_INTENT))
         .WillRepeatedly(Return(ERR_OK));
-    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _))
-        .WillRepeatedly(Invoke([](const AAFwk::Want&, AppExecFwk::AbilityInfo& abilityInfo) {
+    EXPECT_CALL(*mocks_.schedPermMock, GetTargetAbility(_, _, _))
+        .WillRepeatedly(Invoke([](const AAFwk::Want&, AppExecFwk::AbilityInfo& abilityInfo, bool) {
             abilityInfo.bundleName = BUNDLE_NAME;
             abilityInfo.name = ABILITY_NAME;
             abilityInfo.visible = false;

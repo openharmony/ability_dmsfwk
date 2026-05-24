@@ -870,6 +870,8 @@ group("fuzztest") {
       "abilityconnectionwrapperstub_fuzzer:fuzztest",
       "bundlemanagercallbackstub_fuzzer:fuzztest",
       "continuationmanager_fuzzer:fuzztest",
+      "distributedintentdsoftbusadapter_fuzzer:fuzztest",
+      "distributedintentservicestub_fuzzer:fuzztest",
       "distributedwant_fuzzer:fuzztest",
       "distributedwantparams_fuzzer:fuzztest",
       "dmsfreeinstallcallbackstub_fuzzer:fuzztest",
@@ -880,6 +882,7 @@ group("fuzztest") {
       "multiusermanager_fuzzer:fuzztest",
       "softbusadapter_fuzzer:fuzztest",
       "distributedoperation_fuzzer:fuzztest",
+      "remoteintentmanager_fuzzer:fuzztest",
     ]
 
     if (!dmsfwk_softbus_adapter_common) {

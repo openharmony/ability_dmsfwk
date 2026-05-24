@@ -20,6 +20,9 @@ namespace DistributedSchedule {
 
 IMPLEMENT_SINGLE_INSTANCE(DistributedIntentDsoftbusAdapter);
 
+DistributedIntentDsoftbusAdapter::DistributedIntentDsoftbusAdapter() {}
+DistributedIntentDsoftbusAdapter::~DistributedIntentDsoftbusAdapter() {}
+
 int32_t DistributedIntentDsoftbusAdapter::BindIntentSession(const std::string& deviceId, int32_t& socketFd)
 {
     if (IDistributedIntentDsoftbusAdapter::adapterMock == nullptr) {
@@ -51,6 +54,25 @@ int32_t DistributedIntentDsoftbusAdapter::GetSocketFdByDeviceId(const std::strin
     }
     return IDistributedIntentDsoftbusAdapter::adapterMock->GetSocketFdByDeviceId(deviceId);
 }
+
+void DistributedIntentDsoftbusAdapter::ShutdownDeviceSession(const std::string& deviceId)
+{
+    if (IDistributedIntentDsoftbusAdapter::adapterMock != nullptr) {
+        IDistributedIntentDsoftbusAdapter::adapterMock->ShutdownDeviceSession(deviceId);
+    }
+}
+
+void DistributedIntentDsoftbusAdapter::ForceCleanupDeviceSessions(const std::string& deviceId,
+    std::vector<int32_t>& closedSockets)
+{
+    if (IDistributedIntentDsoftbusAdapter::adapterMock != nullptr) {
+        IDistributedIntentDsoftbusAdapter::adapterMock->ForceCleanupDeviceSessions(deviceId, closedSockets);
+    }
+}
+
+void DistributedIntentDsoftbusAdapter::OnIntentBind(int32_t socket, const std::string& peerDeviceId) {}
+void DistributedIntentDsoftbusAdapter::OnIntentShutdown(int32_t socket) {}
+void DistributedIntentDsoftbusAdapter::OnIntentBytes(int32_t socket, const void* data, uint32_t dataLen) {}
 
 } // namespace DistributedSchedule
 } // namespace OHOS

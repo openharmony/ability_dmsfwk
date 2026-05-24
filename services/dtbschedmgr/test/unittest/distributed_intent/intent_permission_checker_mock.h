@@ -39,11 +39,13 @@ public:
     virtual int32_t CheckStartPermission(const std::string& localDeviceId, const AAFwk::Want& want,
         const CallerInfo& callerInfo, const IDistributedSched::AccountInfo& accountInfo,
         uint64_t& dAccessToken) = 0;
+    virtual int32_t CheckTargetAbilityPermission(const AAFwk::Want& want,
+        const CallerInfo& callerInfo, uint64_t dAccessToken) = 0;
     virtual int32_t CheckBusinessResultPermission(const std::string& srcDeviceId,
         const AAFwk::Want& want, const IntentContext& ctx) = 0;
     virtual bool CheckComponentPermission(const AppExecFwk::AbilityInfo& targetAbility) const = 0;
     virtual bool CheckCustomPermission(const AppExecFwk::AbilityInfo& targetAbility,
-        const uint64_t& dAccessToken) const = 0;
+        const uint64_t dAccessToken) const = 0;
 public:
     static inline std::shared_ptr<IIntentPermissionChecker> permCheckerMock = nullptr;
 };
@@ -58,11 +60,13 @@ public:
     MOCK_METHOD5(CheckStartPermission, int32_t(const std::string& localDeviceId, const AAFwk::Want& want,
         const CallerInfo& callerInfo, const IDistributedSched::AccountInfo& accountInfo,
         uint64_t& dAccessToken));
+    MOCK_METHOD3(CheckTargetAbilityPermission, int32_t(const AAFwk::Want& want,
+        const CallerInfo& callerInfo, uint64_t dAccessToken));
     MOCK_METHOD3(CheckBusinessResultPermission, int32_t(const std::string& srcDeviceId,
         const AAFwk::Want& want, const IntentContext& ctx));
     MOCK_CONST_METHOD1(CheckComponentPermission, bool(const AppExecFwk::AbilityInfo& targetAbility));
     MOCK_CONST_METHOD2(CheckCustomPermission, bool(const AppExecFwk::AbilityInfo& targetAbility,
-        const uint64_t& dAccessToken));
+        const uint64_t dAccessToken));
 };
 
 } // namespace DistributedSchedule

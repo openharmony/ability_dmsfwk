@@ -31,7 +31,6 @@ public:
     virtual bool IsSystemAppByFullTokenID(uint64_t fullTokenId) = 0;
     virtual int32_t VerifyAccessToken(uint64_t token, const std::string& permission) = 0;
     virtual uint64_t AllocLocalTokenID(const std::string& sourceDeviceId, uint32_t accessToken) = 0;
-public:
     static inline std::shared_ptr<IAccessTokenKit> tokenMock = nullptr;
 };
 

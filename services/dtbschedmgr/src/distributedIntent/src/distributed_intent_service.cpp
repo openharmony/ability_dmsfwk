@@ -13,8 +13,8 @@
  */
 
 #include "distributed_intent_service.h"
+#include "distributed_intent_provider.h"
 #include "dtbschedmgr_log.h"
-#include "dtbschedmgr_device_info_storage.h"
 #include "remote_intent_manager.h"
 
 namespace OHOS {
@@ -36,10 +36,15 @@ int32_t DistributedIntentService::StartRemoteIntent(const OHOS::AAFwk::Want& wan
         HILOGE("resultCallback is null");
         return ERR_DI_INVALID_PARAMETER;
     }
+    auto* provider = DistributedIntentServiceStub::GetProvider();
+    if (provider == nullptr) {
+        HILOGE("provider is null");
+        return ERR_DI_SYSTEM_WORK_ABNORMALLY;
+    }
     std::string localDeviceId;
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
+    if (!provider->GetLocalDeviceId(localDeviceId)) {
         HILOGE("Get local device id failed");
-        return ERR_DI_PERMISSION_DENIED;
+        return ERR_DI_INVALID_PARAMETER;
     }
     std::string dstDeviceId = want.GetElement().GetDeviceID();
     if (dstDeviceId.empty()) {

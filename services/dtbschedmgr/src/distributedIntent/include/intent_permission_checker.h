@@ -18,12 +18,13 @@
 #include <string>
 #include <vector>
 
-#include "single_instance.h"
-#include "distributed_want.h"
-#include "distributed_intent_error_code.h"
 #include "caller_info.h"
-#include "distributed_sched_types.h"
+#include "distributed_intent_error_code.h"
+#include "distributed_intent_provider.h"
 #include "distributed_sched_interface.h"
+#include "distributed_sched_types.h"
+#include "distributed_want.h"
+#include "single_instance.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -45,6 +46,8 @@ public:
         const OHOS::AAFwk::Want& want, const IntentContext& ctx);
     int32_t CheckCallerPermission(const AAFwk::Want& want, uint64_t accessToken);
     bool GetOsAccountData(IDistributedSched::AccountInfo& dmsAccountInfo);
+    void SetProvider(IIntentProvider* provider) { provider_ = provider; }
+    IIntentProvider* GetProvider() const { return provider_; }
 
 private:
     IntentPermissionChecker();
@@ -52,9 +55,13 @@ private:
 
     bool CheckDstSameAccount(const std::string& dstNetworkId,
         const IDistributedSched::AccountInfo& dmsAccountInfo, const CallerInfo& callerInfo, bool isSrc);
+    int32_t CheckTargetAbilityPermission(const AAFwk::Want& want,
+        const CallerInfo& callerInfo, uint64_t dAccessToken);
     bool CheckComponentPermission(const AppExecFwk::AbilityInfo& targetAbility) const;
     bool CheckCustomPermission(const AppExecFwk::AbilityInfo& targetAbility,
-        const uint64_t& dAccessToken) const;
+        const uint64_t dAccessToken) const;
+
+    IIntentProvider* provider_ = nullptr;
 };
 
 } // namespace DistributedSchedule

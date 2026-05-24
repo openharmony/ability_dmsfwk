@@ -20,6 +20,8 @@
 namespace OHOS {
 namespace DistributedSchedule {
 
+IMPLEMENT_SINGLE_INSTANCE(DistributedSchedPermission);
+
 int32_t DistributedSchedPermission::CheckPermission(uint64_t accessToken, const std::string& permissionName) const
 {
     if (IDistributedSchedPermission::schedPermMock == nullptr) {
@@ -34,7 +36,7 @@ bool DistributedSchedPermission::GetTargetAbility(const AAFwk::Want& want,
     if (IDistributedSchedPermission::schedPermMock == nullptr) {
         return false;
     }
-    return IDistributedSchedPermission::schedPermMock->GetTargetAbility(want, targetAbility);
+    return IDistributedSchedPermission::schedPermMock->GetTargetAbility(want, targetAbility, needQueryExtension);
 }
 
 bool DistributedSchedPermission::CheckDeviceSecurityLevel(const std::string& srcDeviceId,
@@ -53,6 +55,14 @@ bool DistributedSchedPermission::CheckTargetAbilityVisible(const AppExecFwk::Abi
         return false;
     }
     return IDistributedSchedPermission::schedPermMock->CheckTargetAbilityVisible(targetAbility, callerInfo);
+}
+
+bool DistributedSchedPermission::IsFoundationCall() const
+{
+    if (IDistributedSchedPermission::schedPermMock == nullptr) {
+        return false;
+    }
+    return IDistributedSchedPermission::schedPermMock->IsFoundationCall();
 }
 
 } // namespace DistributedSchedule

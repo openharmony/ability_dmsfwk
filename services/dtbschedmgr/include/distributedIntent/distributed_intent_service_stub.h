@@ -17,10 +17,11 @@
 
 #include <cstdint>
 #include <map>
-#include "iremote_stub.h"
-#include "iremote_object.h"
-#include "nocopyable.h"
+#include "distributed_intent_provider.h"
 #include "distributed_intent_service_interface.h"
+#include "iremote_object.h"
+#include "iremote_stub.h"
+#include "nocopyable.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -37,12 +38,16 @@ public:
     int32_t SendIntentResult(const OHOS::AAFwk::Want& want,
         const IntentCallerInfo& callerInfo, const std::string& resultMsg) override;
 
+    static void SetProvider(IIntentProvider* provider);
+    static IIntentProvider* GetProvider();
+
 private:
     DISALLOW_COPY_AND_MOVE(DistributedIntentServiceStub);
     using RequestHandler = int32_t (DistributedIntentServiceStub::*)(MessageParcel&, MessageParcel&);
     int32_t StartRemoteIntentInner(MessageParcel& data, MessageParcel& reply);
     int32_t SendIntentResultInner(MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, RequestHandler> requestHandlers_;
+    static IIntentProvider* provider_;
 };
 
 } // namespace DistributedSchedule

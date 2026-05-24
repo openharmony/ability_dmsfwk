@@ -58,7 +58,10 @@ ohos_fuzztest("DistributedIntentServiceStubFuzzTest") {
     "distributedintentservicestub_fuzzer.cpp",
   ]
 
-  deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
+  deps = [
+    "${dms_path}/services/dtbschedmgr:distributedschedsvr",
+    "${dms_path}/services/dtbschedmgr:distributed_intent",
+  ]
 
   defines = []
   if (dmsfwk_mission_manager) {
@@ -114,5 +117,7 @@ ohos_fuzztest("DistributedIntentServiceStubFuzzTest") {
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":DistributedIntentServiceStubFuzzTest" ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    deps = [ ":DistributedIntentServiceStubFuzzTest" ]
+  }
 }

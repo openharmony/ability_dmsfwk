@@ -86,9 +86,10 @@
 #include "mission/wifi_state_listener.h"
 #include "mission/bluetooth_state_listener.h"
 #endif
-#include "remote_intent_manager.h"
-#include "distributedIntent/distributed_intent_service_stub.h"
-#include "distributedIntent/distributed_intent_service.h"
+#include "distributed_intent_plugin.h"
+#include "distributed_intent_error_code.h"
+#include "distributedIntent/distributed_intent_provider_impl.h"
+#include "dsched_transport_softbus_adapter.h"
 #include "caller_info.h"
 #include "os_account_manager.h"
 #include "ohos_account_kits.h"
@@ -139,6 +140,7 @@ const std::string COLLABRATION_TYPE = "CollabrationType";
 const std::string SOURCE_DELEGATEE = "SourceDelegatee";
 const std::string CONNECT_RPOXY = "VALUE_ABILITY_COLLAB_TYPE_CONNECT_PROXY";
 const std::string DISABLE_CONTINUATION_SERVICE = "const.continuation.disable_application_continuation";
+const std::string DISABLE_INTENT_SERVICE = "const.intent.disable_distributed_intent";
 constexpr int32_t DEFAULT_DMS_MISSION_ID = -1;
 constexpr int32_t DEFAULT_DMS_CONNECT_TOKEN = -1;
 constexpr int32_t BIND_CONNECT_RETRY_TIMES = 3;
@@ -192,13 +194,16 @@ int32_t DistributedSchedService::OnRemoteRequest(uint32_t code,
 {
     if (code >= static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT) &&
         code <= static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT)) {
-        if (distributedIntentService_ == nullptr) {
-            std::lock_guard<std::mutex> lock(intentLoadMutex_);
-            if (distributedIntentService_ == nullptr) {
-                distributedIntentService_ = std::make_shared<DistributedIntentService>();
-            }
+        if (system::GetBoolParameter(DISABLE_INTENT_SERVICE, false)) {
+            HILOGE("distributed intent service is disabled");
+            return ERR_DI_CAPABILITY_NOT_SUPPORT;
         }
-        return distributedIntentService_->OnRemoteRequest(code, data, reply, option);
+        auto plugin = LoadIntentPlugin();
+        if (plugin == nullptr) {
+            HILOGE("LoadIntentPlugin failed");
+            return ERR_NULL_OBJECT;
+        }
+        return plugin->OnRemoteRequest(code, data, reply, option);
     }
     return DistributedSchedStub::OnRemoteRequest(code, data, reply, option);
 }
@@ -619,6 +624,7 @@ void DistributedSchedService::OnStop(const SystemAbilityOnDemandReason &stopReas
 #endif
     dataShareManager.UnInit();
     DmsKvSyncE2E::GetInstance()->UnsubscriptionAccount();
+    intentPlugin_.reset();
     HILOGI("OnStop dms service end");
 }
 
@@ -767,6 +773,10 @@ void DistributedSchedService::DeviceOfflineNotify(const std::string& networkId)
         loader.DeviceOfflineNotify(networkId);
     }
 #endif
+    auto plugin = GetIntentPlugin();
+    if (plugin != nullptr) {
+        plugin->OnDeviceOffline(networkId);
+    }
 }
 
 void DistributedSchedService::DeviceOfflineNotifyAfterDelete(const std::string& networkId)
@@ -799,6 +809,11 @@ bool DistributedSchedService::Init()
     DistributedSchedAdapter::GetInstance().Init();
     if (SwitchStatusDependency::GetInstance().IsContinueSwitchOn()) {
         DSchedContinueManager::GetInstance().Init();
+    }
+    bool isDisableIntent = system::GetBoolParameter(DISABLE_INTENT_SERVICE, false);
+    HILOGI("isDisableIntent: %{public}d", isDisableIntent);
+    if (!isDisableIntent) {
+        DSchedTransportSoftbusAdapter::GetInstance().InitIntentChannel();
     }
     connectDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new ConnectDeathRecipient());
     callerDeathRecipient_ = sptr<IRemoteObject::DeathRecipient>(new CallerDeathRecipient());
@@ -4570,31 +4585,80 @@ bool DistributedSchedService::CheckMDMControlByUid(int32_t uid)
     return isControlled;
 }
 
+std::shared_ptr<IIntentPlugin> DistributedSchedService::LoadIntentPlugin()
+{
+    if (intentPlugin_ != nullptr) {
+        return intentPlugin_;
+    }
+    std::lock_guard<std::mutex> lock(intentLoadMutex_);
+    if (intentPlugin_ != nullptr) {
+        return intentPlugin_;
+    }
+    #if (defined(__aarch64__) || defined(__x86_64__))
+    char resolvedPath[100] = "/system/lib64/platformsdk/libdistributed_intent.z.so";
+#else
+    char resolvedPath[100] = "/system/lib/platformsdk/libdistributed_intent.z.so";
+#endif
+
+    static DmsIntentProviderImpl provider;
+
+    void* handle = dlopen(resolvedPath, RTLD_NOW);
+    if (handle == nullptr) {
+        HILOGE("dlopen libdistributed_intent.z.so failed: %{public}s", dlerror());
+        return nullptr;
+    }
+
+    auto createFn = reinterpret_cast<void*(*)(IIntentProvider*)>(dlsym(handle, "CreateIntentPlugin"));
+    if (createFn == nullptr) {
+        HILOGE("dlsym CreateIntentPlugin failed: %{public}s", dlerror());
+        dlclose(handle);
+        return nullptr;
+    }
+
+    void* pluginPtr = createFn(&provider);
+    if (pluginPtr == nullptr) {
+        HILOGE("CreateIntentPlugin returned null");
+        dlclose(handle);
+        return nullptr;
+    }
+
+    intentPlugin_.reset(static_cast<IIntentPlugin*>(pluginPtr));
+    HILOGI("LoadIntentPlugin success");
+    return intentPlugin_;
+}
+
+void DistributedSchedService::EnsureIntentPluginLoaded()
+{
+    LoadIntentPlugin();
+}
+
+std::shared_ptr<IIntentPlugin> DistributedSchedService::GetIntentPlugin()
+{
+    return intentPlugin_;
+}
+
 int32_t DistributedSchedService::StartRemoteIntent(const OHOS::AAFwk::Want& want,
     const IntentCallerInfo& callerInfo, const sptr<IRemoteObject>& resultCallback)
 {
-    HILOGI("StartRemoteIntent called");
-    if (distributedIntentService_ == nullptr) {
-        std::lock_guard<std::mutex> lock(intentLoadMutex_);
-        if (distributedIntentService_ == nullptr) {
-            distributedIntentService_ = std::make_shared<DistributedIntentService>();
-        }
+    HILOGI("StartRemoteIntent");
+    auto plugin = LoadIntentPlugin();
+    if (plugin == nullptr) {
+        HILOGE("intent plugin not loaded");
+        return ERR_DI_SYSTEM_WORK_ABNORMALLY;
     }
-    return distributedIntentService_->StartRemoteIntent(want, callerInfo, resultCallback);
+    return plugin->StartRemoteIntent(want, callerInfo, resultCallback);
 }
 
 int32_t DistributedSchedService::SendIntentResult(const OHOS::AAFwk::Want& want,
     const IntentCallerInfo& callerInfo, const std::string& msg)
 {
-    HILOGI("SendIntentResult called, requestCode=%{public}" PRIu64,
-        callerInfo.requestCode);
-    if (distributedIntentService_ == nullptr) {
-        std::lock_guard<std::mutex> lock(intentLoadMutex_);
-        if (distributedIntentService_ == nullptr) {
-            distributedIntentService_ = std::make_shared<DistributedIntentService>();
-        }
+    HILOGI("SendIntentResult");
+    auto plugin = LoadIntentPlugin();
+    if (plugin == nullptr) {
+        HILOGE("intent plugin not loaded");
+        return ERR_DI_SYSTEM_WORK_ABNORMALLY;
     }
-    return distributedIntentService_->SendIntentResult(want, callerInfo, msg);
+    return plugin->SendIntentResult(want, callerInfo, msg);
 }
 } // namespace DistributedSchedule
 } // namespace OHOS

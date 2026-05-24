@@ -13,11 +13,11 @@
  */
 
 #include "distributed_intent_service_stub.h"
-#include "parcel_helper.h"
-#include "dtbschedmgr_log.h"
 #include "distributed_intent_error_code.h"
-#include "distributed_sched_permission.h"
+#include "distributed_intent_provider.h"
+#include "dtbschedmgr_log.h"
 #include "parcel.h"
+#include "parcel_helper.h"
 #include "string_ex.h"
 #include "want.h"
 
@@ -26,6 +26,18 @@ namespace DistributedSchedule {
 namespace {
 const std::string TAG = "DistributedIntentServiceStub";
 const std::u16string INTENT_SERVICE_INTERFACE_TOKEN = u"ohos.distributedschedule.accessToken";
+}
+
+IIntentProvider* DistributedIntentServiceStub::provider_ = nullptr;
+
+void DistributedIntentServiceStub::SetProvider(IIntentProvider* provider)
+{
+    provider_ = provider;
+}
+
+IIntentProvider* DistributedIntentServiceStub::GetProvider()
+{
+    return provider_;
 }
 
 DistributedIntentServiceStub::DistributedIntentServiceStub()
@@ -66,7 +78,7 @@ int32_t DistributedIntentServiceStub::SendIntentResult(const OHOS::AAFwk::Want& 
 
 int32_t DistributedIntentServiceStub::StartRemoteIntentInner(MessageParcel& data, MessageParcel& reply)
 {
-    if (!DistributedSchedPermission::GetInstance().IsFoundationCall()) {
+    if (provider_ == nullptr || !provider_->IsFoundationCall()) {
         return ERR_DI_PERMISSION_DENIED;
     }
 
@@ -75,7 +87,7 @@ int32_t DistributedIntentServiceStub::StartRemoteIntentInner(MessageParcel& data
         HILOGE("Read want failed");
         return ERR_NULL_OBJECT;
     }
-    DistributedSchedPermission::GetInstance().RemoveRemoteObjectFromWant(want);
+    provider_->RemoveRemoteObjectFromWant(want);
     std::string moduleName = data.ReadString();
     want->SetModuleName(moduleName);
     int32_t callerUid = 0;
@@ -92,14 +104,14 @@ int32_t DistributedIntentServiceStub::StartRemoteIntentInner(MessageParcel& data
         HILOGE("resultCallback is null");
         return ERR_NULL_OBJECT;
     }
-    DistributedSchedPermission::GetInstance().MarkUriPermission(*want, accessToken);
+    provider_->MarkUriPermission(*want, accessToken);
 
     IntentCallerInfo callerInfo;
     callerInfo.callerUid = callerUid;
     callerInfo.requestCode = requestCode;
     callerInfo.accessToken = accessToken;
     callerInfo.specifyTokenId = specifyTokenId;
-    HILOGI("callerUid=%{public}d, requestCode=%{public}" PRIu64 "", callerUid, requestCode);
+    HILOGI("requestCode=%{public}" PRIu64 "", requestCode);
 
     int32_t result = StartRemoteIntent(*want, callerInfo, resultCallback);
 
@@ -108,7 +120,7 @@ int32_t DistributedIntentServiceStub::StartRemoteIntentInner(MessageParcel& data
 
 int32_t DistributedIntentServiceStub::SendIntentResultInner(MessageParcel& data, MessageParcel& reply)
 {
-    if (!DistributedSchedPermission::GetInstance().IsFoundationCall()) {
+    if (provider_ == nullptr || !provider_->IsFoundationCall()) {
         return ERR_DI_PERMISSION_DENIED;
     }
 
@@ -134,8 +146,7 @@ int32_t DistributedIntentServiceStub::SendIntentResultInner(MessageParcel& data,
     callerInfo.requestCode = requestCode;
     callerInfo.accessToken = accessToken;
     callerInfo.specifyTokenId = specifyTokenId;
-    HILOGI("callerUid=%{public}d, requestCode=%{public}" PRIu64,
-        callerUid, requestCode);
+    HILOGI("requestCode=%{public}" PRIu64, requestCode);
 
     int32_t result = SendIntentResult(*want, callerInfo, resultMsg);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);

@@ -284,7 +284,6 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, BindIntentSession_Success_005, Te
     RemoveSession(VALID_FD, DEVICE_ID_1);
 }
 
-
 /**
  * @tc.name: UnbindIntentSession_SessionNotFound_001
  * @tc.desc: UnbindIntentSession when session is not found
@@ -946,7 +945,6 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentShutdown__005, TestSize.L
     EXPECT_NO_FATAL_FAILURE(a.OnIntentShutdown(VALID_FD));
 }
 
-
 /**
  * @tc.name: OnIntentBindCallback_NetworkIdNull_001
  * @tc.desc: OnIntentBindCallback when networkId is nullptr
@@ -1060,6 +1058,141 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, StopSessionCleanupThread_AlreadyS
     a.sessionCleanupRunning_.store(false);
     EXPECT_NO_FATAL_FAILURE(a.StopSessionCleanupThread());
     EXPECT_NO_FATAL_FAILURE(a.StopSessionCleanupThread());
+}
+
+
+/**
+ * @tc.name: ForceCleanupDeviceSessions_NoSession_001
+ * @tc.desc: Test ForceCleanupDeviceSessions with no sessions returns empty closed sockets
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ForceCleanupDeviceSessions_NoSession, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    std::vector<int32_t> closedSockets;
+    a.ForceCleanupDeviceSessions(DEVICE_ID_1, closedSockets);
+    EXPECT_TRUE(closedSockets.empty());
+}
+
+/**
+ * @tc.name: ForceCleanupDeviceSessions_HasSessions_001
+ * @tc.desc: Test ForceCleanupDeviceSessions closes all sessions for the given device
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ForceCleanupDeviceSessions_HasSessions, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    InsertSession(ANOTHER_FD, DEVICE_ID_1, true, false, 1);
+    EXPECT_CALL(*softbusMock_, Shutdown(VALID_FD)).Times(1);
+    EXPECT_CALL(*softbusMock_, Shutdown(ANOTHER_FD)).Times(1);
+    std::vector<int32_t> closedSockets;
+    a.ForceCleanupDeviceSessions(DEVICE_ID_1, closedSockets);
+    EXPECT_EQ(closedSockets.size(), 2u);
+    EXPECT_TRUE(a.sessions_.empty());
+}
+
+/**
+ * @tc.name: ForceCleanupDeviceSessions_MixedDevices_001
+ * @tc.desc: Test ForceCleanupDeviceSessions only closes sessions for the target device
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, ForceCleanupDeviceSessions_MixedDevices, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    InsertSession(ANOTHER_FD, DEVICE_ID_2, true, false, 1);
+    EXPECT_CALL(*softbusMock_, Shutdown(VALID_FD)).Times(1);
+    std::vector<int32_t> closedSockets;
+    a.ForceCleanupDeviceSessions(DEVICE_ID_1, closedSockets);
+    EXPECT_EQ(closedSockets.size(), 1u);
+    EXPECT_EQ(closedSockets[0], VALID_FD);
+    EXPECT_NE(a.sessions_.find(ANOTHER_FD), a.sessions_.end());
+    RemoveSession(ANOTHER_FD, DEVICE_ID_2);
+}
+
+/**
+ * @tc.name: OnIntentBind_WhenStopped_001
+ * @tc.desc: Test OnIntentBind does not create session when adapter is stopped
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentBind_WhenStopped, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    a.stopped_.store(true);
+    a.OnIntentBind(SERVER_FD, DEVICE_ID_1);
+    EXPECT_EQ(a.sessions_.find(SERVER_FD), a.sessions_.end());
+    a.stopped_.store(false);
+}
+
+/**
+ * @tc.name: OnIntentShutdown_WhenStopped_001
+ * @tc.desc: Test OnIntentShutdown does not remove session when adapter is stopped
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentShutdown_WhenStopped, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    a.stopped_.store(true);
+    a.OnIntentShutdown(VALID_FD);
+    EXPECT_NE(a.sessions_.find(VALID_FD), a.sessions_.end());
+    a.stopped_.store(false);
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: OnIntentBytes_WhenStopped_001
+ * @tc.desc: Test OnIntentBytes does not deliver data when adapter is stopped
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentBytes_WhenStopped, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    a.stopped_.store(true);
+    auto& mock = RemoteIntentManager::GetInstance();
+    EXPECT_CALL(mock, OnIntentDataReceived(_, _, _, _)).Times(0);
+    uint8_t data[] = {0x01, 0x02, 0x03, 0x04};
+    a.OnIntentBytes(VALID_FD, data, sizeof(data));
+    a.stopped_.store(false);
+    RemoveSession(VALID_FD, DEVICE_ID_1);
+}
+
+/**
+ * @tc.name: DeliverIntentData_NoSession_001
+ * @tc.desc: Test DeliverIntentData with no session does not crash
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, DeliverIntentData_NoSession, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    EXPECT_NO_FATAL_FAILURE(a.DeliverIntentData(VALID_FD,
+        IntentDataType::INTENT_DATA_TYPE_EXECUTE, TEST_DATA));
+}
+
+/**
+ * @tc.name: DeliverIntentData_Success_001
+ * @tc.desc: Test DeliverIntentData delivers data to RemoteIntentManager for valid session
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentDsoftbusAdapterTest, DeliverIntentData_Success, TestSize.Level3)
+{
+    auto& a = DistributedIntentDsoftbusAdapter::GetInstance();
+    InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
+    auto& mock = RemoteIntentManager::GetInstance();
+    EXPECT_CALL(mock, OnIntentDataReceived(DEVICE_ID_1,
+        IntentDataType::INTENT_DATA_TYPE_EXECUTE, TEST_DATA, VALID_FD)).Times(1);
+    a.DeliverIntentData(VALID_FD, IntentDataType::INTENT_DATA_TYPE_EXECUTE, TEST_DATA);
+    RemoveSession(VALID_FD, DEVICE_ID_1);
 }
 
 

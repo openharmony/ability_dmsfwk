@@ -28,7 +28,6 @@ public:
     virtual ~IAbilityManagerClient() = default;
     virtual ErrCode ExecuteIntentForDistributed(const Want& want, const std::string& srcDeviceId,
         uint64_t requestCode, uint64_t dAccessToken) = 0;
-public:
     static inline std::shared_ptr<IAbilityManagerClient> abilityMock = nullptr;
 };
 
