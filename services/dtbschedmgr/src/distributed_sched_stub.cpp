@@ -2065,8 +2065,7 @@ int32_t DistributedSchedStub::StartRemoteIntentInner(MessageParcel& data, Messag
     callerInfo.requestCode = requestCode;
     callerInfo.accessToken = accessToken;
     callerInfo.specifyTokenId = specifyTokenId;
-    HILOGI("callerUid=%{public}d, requestCode=%{public}" PRIu64 ", accessToken=%{private}s",
-        callerUid, requestCode,
+    HILOGI("requestCode=%{public}" PRIu64 ", accessToken=%{private}s", requestCode,
         GetAnonymStr(std::to_string(accessToken)).c_str());
 
     int32_t result = StartRemoteIntent(*want, callerInfo, resultCallback);
@@ -2098,8 +2097,7 @@ int32_t DistributedSchedStub::SendIntentResultInner(MessageParcel& data, Message
     callerInfo.requestCode = requestCode;
     callerInfo.accessToken = accessToken;
     callerInfo.specifyTokenId = specifyTokenId;
-    HILOGI("callerUid=%{public}d, requestCode=%{public}" PRIu64,
-        callerUid, requestCode);
+    HILOGI("requestCode=%{public}" PRIu64, requestCode);
 
     int32_t result = SendIntentResult(*want, callerInfo, msg);
     PARCEL_WRITE_REPLY_NOERROR(reply, Int32, result);

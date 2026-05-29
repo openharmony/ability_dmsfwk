@@ -217,12 +217,7 @@ ohos_shared_library("distributedschedsvr") {
       "src/util/distributed_sched_memory_utils.cpp",
       "src/svc_distributed_connection.cpp",
       "src/switch_status_dependency.cpp",
-      "src/distributedIntent/src/distributed_intent_service_stub.cpp",
-      "src/distributedIntent/src/distributed_intent_service.cpp",
-      "src/distributedIntent/src/remote_intent_manager.cpp",
-      "src/distributedIntent/src/distributed_intent_dsoftbus_adapter.cpp",
-      "src/distributedIntent/src/distributed_intent_error_code.cpp",
-      "src/distributedIntent/src/intent_permission_checker.cpp",
+      "src/distributedIntent/src/distributed_intent_provider_impl.cpp",
     ]
 
     if (!dmsfwk_softbus_adapter_common) {
@@ -448,6 +443,113 @@ ohos_shared_library("dms_mission_extension") {
       "device_auth:deviceauth_sdk",
       "device_manager:devicemanagersdk",
       "dsoftbus:softbus_client",
+    ]
+  }
+
+  use_exceptions = true
+  install_images = [ system_base_dir ]
+  relative_install_dir = "platformsdk"
+  part_name = "dmsfwk"
+  subsystem_name = "ability"
+}
+
+config("distributed_intent_config") {
+  visibility = [ ":*" ]
+  include_dirs = [
+    "include",
+    "include/distributedIntent",
+    "include/distributedWant",
+    "src/distributedIntent/include",
+    "${dms_path}/common/include",
+    "${dms_path}/interfaces/innerkits/common/include",
+    "${dms_path}/interfaces/kits/napi/include",
+    "include/softbus_adapter/transport",
+    "include/softbus_adapter/allconnectmgr",
+  ]
+  defines = []
+  if (use_libfuzzer || use_clang_coverage) {
+    defines += [ "TEST_COVERAGE" ]
+  }
+  if (dmsfwk_disable_distributedsched_service) {
+    defines += [ "DISABLE_DISTRIBUTEDSCHED_SERVICE" ]
+  }
+  if (dmsfwk_all_connect) {
+    defines += [ "COLLAB_ALL_CONNECT_DECISIONS" ]
+  }
+  if (dmsfwk_mission_manager) {
+    defines += [ "SUPPORT_DISTRIBUTED_MISSION_MANAGER" ]
+  }
+  if (os_account_part) {
+    defines += [ "OS_ACCOUNT_PART" ]
+  }
+  if (dmsfwk_check_bt) {
+    defines += [ "DMS_CHECK_BLUETOOTH" ]
+  }
+  if (!dmsfwk_softbus_adapter_common) {
+    defines += [
+      "DMSFWK_SAME_ACCOUNT",
+      "DMSFWK_ALL_CONNECT_MGR"
+    ]
+  }
+}
+
+ohos_shared_library("distributed_intent") {
+  branch_protector_ret = "pac_ret"
+  sanitize = {
+    boundary_sanitize = true
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    integer_overflow = true
+    ubsan = true
+  }
+
+  install_enable = true
+
+  sources = []
+  if (!dmsfwk_disable_distributedsched_service) {
+    sources += [
+      "src/distributedIntent/src/distributed_intent_service_stub.cpp",
+      "src/distributedIntent/src/distributed_intent_service.cpp",
+      "src/distributedIntent/src/remote_intent_manager.cpp",
+      "src/distributedIntent/src/distributed_intent_dsoftbus_adapter.cpp",
+      "src/distributedIntent/src/distributed_intent_version_checker.cpp",
+      "src/distributedIntent/src/distributed_intent_error_code.cpp",
+      "src/distributedIntent/src/intent_permission_checker.cpp",
+      "src/distributedIntent/src/distributed_intent_plugin.cpp",
+    ]
+    if (!dmsfwk_softbus_adapter_common) {
+      sources += [ "src/distributedIntent/src/intent_all_connect_manager.cpp" ]
+    }
+  }
+
+  configs = [ ":distributed_intent_config" ]
+
+  ldflags = [
+    "-Wl,-z,relro",
+    "-Wl,-z,now",
+  ]
+
+  deps = [
+    "${dms_path}/common:distributed_sched_utils"
+  ]
+
+  external_deps = []
+  if (!dmsfwk_disable_distributedsched_service) {
+    external_deps += [
+      "ability_base:want",
+      "ability_runtime:ability_manager",
+      "access_token:libaccesstoken_sdk",
+      "cJSON:cjson",
+      "c_utils:utils",
+      "device_info_manager:distributed_device_profile_common",
+      "device_info_manager:distributed_device_profile_sdk",
+      "device_manager:devicemanagersdk",
+      "dsoftbus:softbus_client",
+      "hilog:libhilog",
+      "ipc:ipc_core",
+      "os_account:libaccountkits",
+      "os_account:os_account_innerkits",
     ]
   }
 

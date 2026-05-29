@@ -21,6 +21,8 @@ namespace DistributedSchedule {
 
 IMPLEMENT_SINGLE_INSTANCE(IntentPermissionChecker);
 
+IntentPermissionChecker::IntentPermissionChecker() {}
+
 int32_t IntentPermissionChecker::GetCallerInfo(const std::string& localDeviceId, int32_t callerUid,
     uint32_t accessToken, CallerInfo& callerInfo)
 {
@@ -57,6 +59,15 @@ int32_t IntentPermissionChecker::CheckStartPermission(const std::string& localDe
         accountInfo, dAccessToken);
 }
 
+int32_t IntentPermissionChecker::CheckTargetAbilityPermission(const AAFwk::Want& want,
+    const CallerInfo& callerInfo, uint64_t dAccessToken)
+{
+    if (IIntentPermissionChecker::permCheckerMock == nullptr) {
+        return ERR_DI_SYSTEM_WORK_ABNORMALLY;
+    }
+    return IIntentPermissionChecker::permCheckerMock->CheckTargetAbilityPermission(want, callerInfo, dAccessToken);
+}
+
 int32_t IntentPermissionChecker::CheckBusinessResultPermission(const std::string& srcDeviceId,
     const AAFwk::Want& want, const IntentContext& ctx)
 {
@@ -75,7 +86,7 @@ bool IntentPermissionChecker::CheckComponentPermission(const AppExecFwk::Ability
 }
 
 bool IntentPermissionChecker::CheckCustomPermission(const AppExecFwk::AbilityInfo& targetAbility,
-    const uint64_t& dAccessToken) const
+    const uint64_t dAccessToken) const
 {
     if (IIntentPermissionChecker::permCheckerMock == nullptr) {
         return false;

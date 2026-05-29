@@ -15,25 +15,18 @@
 #include "remote_intent_manager.h"
 
 #include <algorithm>
+#include <cinttypes>
 #include <vector>
-#include "distributed_intent_error_code.h"
 #include "ability_manager_client.h"
-#include "dtbschedmgr_device_info_storage.h"
-#include "dtbschedmgr_log.h"
-#include "distributed_sched_utils.h"
-#include "distributed_sched_permission.h"
-#include "nlohmann/json.hpp"
-#include "distributed_want_v2.h"
-#include "parcel.h"
-#include "iremote_object.h"
-#include "single_instance.h"
 #include "distributed_intent_dsoftbus_adapter.h"
-#include "distributed_sched_types.h"
-#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-#include "mission/dsched_sync_e2e.h"
-#include "distributed_sched_service.h"
-#endif
+#include "distributed_intent_error_code.h"
+#include "distributed_intent_provider.h"
+#include "distributed_intent_version_checker.h"
+#include "distributed_sched_utils.h"
+#include "dtbschedmgr_log.h"
 #include "intent_permission_checker.h"
+#include "parcel.h"
+#include "single_instance.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -42,7 +35,6 @@ const std::string TAG = "RemoteIntentManager";
 const std::u16string INTENT_RESULT_CALLBACK_TOKEN = u"ohos.distributedschedule.IRemoteIntentResultCallback";
 constexpr int32_t ON_INTENT_RESULT = 1;
 constexpr int32_t ON_LINK_DISCONNECTED = 2;
-constexpr size_t INTENT_DATA_MAX_SIZE = 100 * 1024 * 1024;
 constexpr int64_t CALLBACK_TIMEOUT_MS = 30000;
 const std::string MODULE_NAME_PARAM = "moduleName";
 const std::string INSIGHT_INTENT_USER_ID = "ohos.insightIntent.userId";
@@ -60,9 +52,8 @@ RemoteIntentManager::~RemoteIntentManager()
     HILOGI("RemoteIntentManager destruct");
 }
 
-int32_t RemoteIntentManager::PrepareCallerContext(const std::string& localDeviceId,
-    const std::string& dstDeviceId, const IntentCallerInfo& intentCallerInfo,
-    CallerInfo& callerInfo, IDistributedSched::AccountInfo& accountInfo)
+int32_t RemoteIntentManager::PrepareCallerContext(const std::string& localDeviceId, const std::string& dstDeviceId,
+    const IntentCallerInfo& intentCallerInfo, CallerInfo& callerInfo, IDistributedSched::AccountInfo& accountInfo)
 {
     auto& checker = IntentPermissionChecker::GetInstance();
     checker.SetCallerExtraInfo(callerInfo, intentCallerInfo);
@@ -73,7 +64,15 @@ int32_t RemoteIntentManager::PrepareCallerContext(const std::string& localDevice
         return ERR_DI_SYSTEM_WORK_ABNORMALLY;
     }
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    CHECK_MDM_CONTROL_BY_TOKEN(callerInfo.accessToken, 0, COLLABORATION_SERVICE);
+    auto* provider = checker.GetProvider();
+    if (provider != nullptr && provider->IsMDMControl()) {
+        std::string bundleName = provider->GetBundleNameFromToken(callerInfo.accessToken, 0);
+        int32_t accountId = provider->GetActiveAccountId();
+        if (provider->IsMDMControlWithExemption(bundleName, COLLABORATION_SERVICE, accountId)) {
+            HILOGE("Current user is under MDM control and not exempted.");
+            return ERR_CAPABILITY_NOT_SUPPORT;
+        }
+    }
 #endif
     ret = checker.GetAccountInfo(dstDeviceId, callerInfo, accountInfo);
     if (ret != ERR_DI_OK) {
@@ -132,7 +131,8 @@ int32_t RemoteIntentManager::StartRemoteIntent(const OHOS::AAFwk::Want& want,
         return ERR_DI_INVALID_PARAMETER;
     }
     std::string localDeviceId;
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
+    auto* provider = IntentPermissionChecker::GetInstance().GetProvider();
+    if (provider == nullptr || !provider->GetLocalDeviceId(localDeviceId)) {
         HILOGE("GetLocalDeviceId failed");
         return ERR_DI_SYSTEM_WORK_ABNORMALLY;
     }
@@ -140,10 +140,14 @@ int32_t RemoteIntentManager::StartRemoteIntent(const OHOS::AAFwk::Want& want,
         HILOGE("Invalid deviceId, local same as dst or local empty");
         return ERR_DI_INVALID_PARAMETER;
     }
+    int32_t versionRet = DistributedIntentVersionChecker::CheckRemoteDistributedIntentSupport(dstDeviceId);
+    if (versionRet != ERR_DI_OK) {
+        HILOGE("CheckRemoteDistributedIntentSupport failed, ret=%{public}d", versionRet);
+        return ERR_DI_CAPABILITY_NOT_SUPPORT;
+    }
     CallerInfo callerInfo;
     IDistributedSched::AccountInfo accountInfo;
-    int32_t ret = PrepareCallerContext(localDeviceId, dstDeviceId,
-        intentCallerInfo, callerInfo, accountInfo);
+    int32_t ret = PrepareCallerContext(localDeviceId, dstDeviceId, intentCallerInfo, callerInfo, accountInfo);
     if (ret != ERR_DI_OK) {
         return ret;
     }
@@ -169,150 +173,41 @@ int32_t RemoteIntentManager::StartRemoteIntent(const OHOS::AAFwk::Want& want,
 int32_t RemoteIntentManager::SerializeIntentData(const OHOS::AAFwk::Want& want,
     const IntentContext& ctx, std::string& data, const std::string& resultMsg)
 {
-    DistributedWantV2 distributedWant(want);
-    OHOS::Parcel parcel;
-    if (!distributedWant.Marshalling(parcel)) {
-        HILOGE("DistributedWant Marshalling failed");
+    auto* provider = IntentPermissionChecker::GetInstance().GetProvider();
+    if (provider == nullptr) {
+        HILOGE("provider is null");
         return ERR_DI_SERIALIZE_FAILED;
     }
-    nlohmann::json root;
-    root["wantData"] = ParcelToBase64Str(parcel);
-    root["requestCode"] = ctx.requestCode;
-    root["uid"] = ctx.callerInfo.uid;
-    root["pid"] = ctx.callerInfo.pid;
-    root["callerType"] = ctx.callerInfo.callerType;
-    root["sourceDeviceId"] = ctx.callerInfo.sourceDeviceId;
-    root["duid"] = ctx.callerInfo.duid;
-    root["callerAppId"] = ctx.callerInfo.callerAppId;
-    root["bundleNames"] = ctx.callerInfo.bundleNames;
-    root["dmsVersion"] = ctx.callerInfo.dmsVersion;
-    root["accessToken"] = ctx.callerInfo.accessToken;
-    root["extraInfoJson"] = ctx.callerInfo.extraInfoJson;
-    root["accountUserId"] = ctx.accountInfo.userId;
-    root["accountActiveAccountId"] = ctx.accountInfo.activeAccountId;
-    if (!resultMsg.empty()) {
-        root["resultMsg"] = resultMsg;
+    int32_t ret = provider->SerializeIntentData(want, ctx, data, resultMsg);
+    if (ret != ERR_DI_OK) {
+        HILOGE("provider SerializeIntentData failed, ret=%{public}d", ret);
+        return ERR_DI_SERIALIZE_FAILED;
     }
-    data = root.dump();
     HILOGI("SerializeIntentData success, size=%{public}zu, requestCode=%{public}" PRIu64,
         data.size(), ctx.requestCode);
     return ERR_DI_OK;
 }
 
-int32_t RemoteIntentManager::DecodeWantFromJson(const nlohmann::json& root,
-    OHOS::AAFwk::Want& want)
-{
-    if (!root.contains("wantData") || !root["wantData"].is_string()) {
-        HILOGE("wantData not found or not string in json");
-        return ERR_DI_INVALID_PARAMETER;
-    }
-    std::string wantData = root["wantData"].get<std::string>();
-    if (wantData.empty()) {
-        HILOGE("wantData is empty");
-        return ERR_DI_INVALID_PARAMETER;
-    }
-    std::string decodedData = Base64Decode(wantData);
-    if (decodedData.empty()) {
-        HILOGE("Base64StrToParcel failed");
-        return ERR_DI_INVALID_PARAMETER;
-    }
-    if (decodedData.size() > INTENT_DATA_MAX_SIZE) {
-        HILOGE("wantData too large, size=%{public}zu", wantData.size());
-        return ERR_DI_INVALID_PARAMETER;
-    }
-    OHOS::Parcel parcel;
-    parcel.WriteBuffer(decodedData.data(), decodedData.size());
-    DistributedWantV2* distributedWant = DistributedWantV2::Unmarshalling(parcel);
-    if (distributedWant == nullptr) {
-        HILOGE("distributed want Unmarshalling failed");
-        return ERR_DI_INVALID_PARAMETER;
-    }
-    auto aafwkWant = distributedWant->ToWant();
-    delete distributedWant;
-    distributedWant = nullptr;
-    if (aafwkWant == nullptr) {
-        HILOGE("ToWant failed");
-        return ERR_DI_INVALID_PARAMETER;
-    }
-    std::string srcModuldeName = aafwkWant->GetStringParam(MODULE_NAME_PARAM);
-    if (!srcModuldeName.empty()) {
-        aafwkWant->SetModuleName(srcModuldeName);
-    }
-    want = *aafwkWant;
-    return ERR_DI_OK;
-}
-
-int32_t RemoteIntentManager::ParseCallerInfoFromJson(const nlohmann::json& root,
-    CallerInfo& callerInfo)
-{
-    callerInfo.uid = root.value("uid", -1);
-    callerInfo.pid = root.value("pid", -1);
-    callerInfo.callerType = root.value("callerType", 0);
-    callerInfo.sourceDeviceId = root.value("sourceDeviceId", "");
-    callerInfo.duid = root.value("duid", -1);
-    callerInfo.callerAppId = root.value("callerAppId", "");
-    if (root.contains("bundleNames") && root["bundleNames"].is_array()) {
-        root["bundleNames"].get_to<std::vector<std::string>>(callerInfo.bundleNames);
-    }
-    callerInfo.dmsVersion = root.value("dmsVersion", -1);
-    callerInfo.accessToken = root.value("accessToken", 0u);
-    if (root.contains("extraInfoJson") && root["extraInfoJson"].is_object()) {
-        callerInfo.extraInfoJson = root["extraInfoJson"];
-    }
-    return ERR_DI_OK;
-}
-
-int32_t RemoteIntentManager::ValidateCallerInfo(const CallerInfo& callerInfo)
-{
-    if (callerInfo.accessToken == 0) {
-        HILOGE("Invalid accessToken: zero");
-        return ERR_DI_PERMISSION_DENIED;
-    }
-    if (callerInfo.sourceDeviceId.empty()) {
-        HILOGE("srcDeviceId is empty in payload");
-        return ERR_DI_PERMISSION_DENIED;
-    }
-    return ERR_DI_OK;
-}
-
-void RemoteIntentManager::ParseAccountInfoFromJson(const nlohmann::json& root,
-    IDistributedSched::AccountInfo& accountInfo)
-{
-    accountInfo.userId = root.value("accountUserId", -1);
-    accountInfo.activeAccountId = root.value("accountActiveAccountId", "");
-}
-
 int32_t RemoteIntentManager::DeserializeIntentData(const std::string& data,
     OHOS::AAFwk::Want& want, IntentContext& ctx, std::string& resultMsg)
 {
-    nlohmann::json root = nlohmann::json::parse(data, nullptr, false);
-    if (!root.is_object()) {
-        HILOGE("Invalid json data");
+    auto* provider = IntentPermissionChecker::GetInstance().GetProvider();
+    if (provider == nullptr) {
+        HILOGE("provider is null");
         return ERR_DI_INVALID_PARAMETER;
     }
-    if (!root.contains("requestCode") || !root["requestCode"].is_number()) {
-        HILOGE("requestCode not found or not number in json");
+    int32_t ret = provider->DeserializeIntentData(data, want, ctx, resultMsg);
+    if (ret != ERR_DI_OK) {
+        HILOGE("provider DeserializeIntentData failed, ret=%{public}d", ret);
+        return ret;
+    }
+    if (ctx.callerInfo.accessToken == 0) {
+        HILOGE("Invalid accessToken: zero");
         return ERR_DI_INVALID_PARAMETER;
     }
-    ctx.requestCode = root.value("requestCode", (uint64_t)0);
-    int32_t ret = DecodeWantFromJson(root, want);
-    if (ret != ERR_DI_OK) {
-        HILOGE("DecodeWantFromJson failed, ret=%{public}d", ret);
-        return ret;
-    }
-    ret = ParseCallerInfoFromJson(root, ctx.callerInfo);
-    if (ret != ERR_DI_OK) {
-        HILOGE("ParseCallerInfoFromJson failed, ret=%{public}d", ret);
-        return ret;
-    }
-    ret = ValidateCallerInfo(ctx.callerInfo);
-    if (ret != ERR_DI_OK) {
-        HILOGE("ValidateCallerInfo failed, ret=%{public}d", ret);
-        return ret;
-    }
-    ParseAccountInfoFromJson(root, ctx.accountInfo);
-    if (root.contains("resultMsg") && root["resultMsg"].is_string()) {
-        resultMsg = root.value("resultMsg", "");
+    if (ctx.callerInfo.sourceDeviceId.empty()) {
+        HILOGE("srcDeviceId is empty in payload");
+        return ERR_DI_INVALID_PARAMETER;
     }
     HILOGI("DeserializeIntentData success");
     return ERR_DI_OK;
@@ -322,11 +217,16 @@ int32_t RemoteIntentManager::SerializeResultData(int32_t resultCode,
     const std::string& resultMsg, uint64_t requestCode, std::string& data)
 {
     HILOGI("SerializeResultData start, requestCode=%{public}" PRIu64, requestCode);
-    nlohmann::json root;
-    root["requestCode"] = requestCode;
-    root["result"] = resultCode;
-    root["resultMsg"] = resultMsg;
-    data = root.dump();
+    auto* provider = IntentPermissionChecker::GetInstance().GetProvider();
+    if (provider == nullptr) {
+        HILOGE("provider is null");
+        return ERR_DI_SERIALIZE_FAILED;
+    }
+    int32_t ret = provider->SerializeResultData(resultCode, resultMsg, requestCode, data);
+    if (ret != ERR_DI_OK) {
+        HILOGE("provider SerializeResultData failed, ret=%{public}d", ret);
+        return ERR_DI_SERIALIZE_FAILED;
+    }
     HILOGI("SerializeResultData success, size=%{public}zu", data.size());
     return ERR_DI_OK;
 }
@@ -347,6 +247,9 @@ void RemoteIntentManager::OnIntentDataReceived(const std::string& srcDeviceId,
         case IntentDataType::INTENT_DATA_TYPE_EXECUTE_RESULT:
             HandleBusinessResult(srcDeviceId, data, socketFd);
             break;
+        case IntentDataType::INTENT_DATA_TYPE_DISCONNECT:
+            HandleDisconnect(srcDeviceId, data, socketFd);
+            break;
         default:
             HILOGE("Unknown dataType=%{public}d", static_cast<int32_t>(dataType));
             break;
@@ -359,12 +262,12 @@ int32_t RemoteIntentManager::ValidateExecuteRequest(const std::string& srcDevice
     if (srcDeviceId != ctx.callerInfo.sourceDeviceId) {
         HILOGE("Device ID mismatch: session=%{public}s, payload=%{public}s",
             GetAnonymStr(srcDeviceId).c_str(), GetAnonymStr(ctx.callerInfo.sourceDeviceId).c_str());
-        return ERR_DI_PERMISSION_DENIED;
+        return ERR_DI_INVALID_PARAMETER;
     }
     std::string targetDeviceId = want.GetElement().GetDeviceID();
     if (targetDeviceId.empty() || targetDeviceId != localDeviceId) {
         HILOGE("Target device is not local device");
-        return ERR_DI_PERMISSION_DENIED;
+        return ERR_DI_INVALID_PARAMETER;
     }
     return ERR_DI_OK;
 }
@@ -398,19 +301,21 @@ int32_t RemoteIntentManager::HandleIntentExecute(const std::string& srcDeviceId,
             IntentDataType::INTENT_DATA_TYPE_DMS_RESULT);
         return ERR_DI_SERIALIZE_FAILED;
     }
-
+    auto socketKey = std::make_pair(srcDeviceId, ctx.requestCode);
     {
         std::lock_guard<std::mutex> lock(requestSocketMutex_);
-        requestSocketMap_[{srcDeviceId, ctx.requestCode}] = socketFd;
+        requestSocketMap_[socketKey] = socketFd;
         HILOGI("Record socket mapping: device=%{public}s, requestCode=%{public}" PRIu64
             ", socket=%{public}d", GetAnonymStr(srcDeviceId).c_str(), ctx.requestCode, socketFd);
     }
 
     std::string localDeviceId;
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
+    auto* provider = IntentPermissionChecker::GetInstance().GetProvider();
+    if (provider == nullptr || !provider->GetLocalDeviceId(localDeviceId)) {
         HILOGE("GetLocalDeviceId failed");
         SendInnerResultBack(socketFd, ctx.requestCode, ERR_DI_SYSTEM_WORK_ABNORMALLY,
             IntentDataType::INTENT_DATA_TYPE_DMS_RESULT);
+        RemoveSocketMapping(srcDeviceId, ctx.requestCode);
         return ERR_DI_SYSTEM_WORK_ABNORMALLY;
     }
     ret = ValidateExecuteRequest(srcDeviceId, want, ctx, localDeviceId);
@@ -418,11 +323,13 @@ int32_t RemoteIntentManager::HandleIntentExecute(const std::string& srcDeviceId,
         HILOGE("ValidateExecuteRequest failed, ret=%{public}d", ret);
         SendInnerResultBack(socketFd, ctx.requestCode, ERR_DI_PERMISSION_DENIED,
             IntentDataType::INTENT_DATA_TYPE_DMS_RESULT);
+        RemoveSocketMapping(srcDeviceId, ctx.requestCode);
         return ERR_DI_PERMISSION_DENIED;
     }
     ret = CheckAndExecuteIntent(want, srcDeviceId, ctx, localDeviceId, socketFd);
     if (ret != ERR_DI_OK) {
         HILOGE("CheckAndExecuteIntent failed, ret=%{public}d", ret);
+        RemoveSocketMapping(srcDeviceId, ctx.requestCode);
         return ret;
     }
     HILOGI("HandleIntentExecute success, requestCode=%{public}" PRIu64, ctx.requestCode);
@@ -464,14 +371,14 @@ int32_t RemoteIntentManager::HandleIntentResult(const std::string& srcDeviceId,
 {
     HILOGI("HandleIntentResult: srcDeviceId=%{public}s, socket=%{public}d",
         GetAnonymStr(srcDeviceId).c_str(), socketFd);
-    nlohmann::json root = nlohmann::json::parse(data, nullptr, false);
-    if (!root.is_object()) {
-        HILOGE("Invalid json data");
+    uint64_t requestCode = 0;
+    int32_t resultCode = 0;
+    std::string resultMsg;
+    auto* provider = IntentPermissionChecker::GetInstance().GetProvider();
+    if (provider == nullptr || !provider->ParseResultData(data, requestCode, resultCode, resultMsg)) {
+        HILOGE("ParseResultData failed");
         return ERR_DI_SYSTEM_WORK_ABNORMALLY;
     }
-    uint64_t requestCode = root.value("requestCode", (uint64_t)0);
-    int32_t resultCode = root.value("result", 0);
-    std::string resultMsg = root.value("resultMsg", "");
     sptr<IRemoteObject> callback;
     {
         std::lock_guard<std::mutex> lock(connectMutex_);
@@ -529,6 +436,41 @@ int32_t RemoteIntentManager::HandleBusinessResult(const std::string& srcDeviceId
     HILOGI("HandleBusinessResult done, ret=%{public}d, requestCode=%{public}" PRIu64, ret, ctx.requestCode);
     DistributedIntentDsoftbusAdapter::GetInstance().UnbindIntentSession(socketFd);
     return ret;
+}
+
+void RemoteIntentManager::HandleDisconnect(const std::string& srcDeviceId,
+    const std::string& data, int32_t socketFd)
+{
+    HILOGI("HandleDisconnect: srcDeviceId=%{public}s, socket=%{public}d",
+        GetAnonymStr(srcDeviceId).c_str(), socketFd);
+    int32_t resultCode = INTENT_LINK_DISCONNECT_REASON_PEER_DISCONNECT;
+    std::string resultMsg;
+    auto* provider = IntentPermissionChecker::GetInstance().GetProvider();
+    if (provider != nullptr) {
+        provider->ParseDisconnectData(data, resultCode, resultMsg);
+    }
+    std::vector<std::pair<uint64_t, sptr<IRemoteObject>>> disconnectedCallbacks;
+    {
+        std::lock_guard<std::mutex> lock(connectMutex_);
+        for (auto it = requestCodeCallbackMap_.begin(); it != requestCodeCallbackMap_.end();) {
+            if (it->second.deviceId == srcDeviceId) {
+                disconnectedCallbacks.emplace_back(it->first, it->second.callback);
+                it = requestCodeCallbackMap_.erase(it);
+            } else {
+                ++it;
+            }
+        }
+    }
+    for (auto& [requestCode, callback] : disconnectedCallbacks) {
+        if (callback != nullptr) {
+            std::string msg = resultMsg;
+            NotifyIntentResult(callback, requestCode, resultCode, msg);
+        }
+    }
+    HILOGI("HandleDisconnect notified=%{public}zu callbacks", disconnectedCallbacks.size());
+    CleanupSocketMapping(srcDeviceId, socketFd);
+    DistributedIntentDsoftbusAdapter::GetInstance().ShutdownDeviceSession(srcDeviceId);
+    HILOGI("HandleDisconnect done, srcDeviceId=%{public}s", GetAnonymStr(srcDeviceId).c_str());
 }
 
 int32_t RemoteIntentManager::NotifyIntentResult(const sptr<IRemoteObject>& callback,
@@ -592,6 +534,15 @@ int32_t RemoteIntentManager::SendInnerResultBack(int32_t socketFd, uint64_t requ
     return ERR_DI_OK;
 }
 
+void RemoteIntentManager::RemoveSocketMapping(const std::string& deviceId, uint64_t requestCode)
+{
+    std::lock_guard<std::mutex> lock(requestSocketMutex_);
+    auto key = std::make_pair(deviceId, requestCode);
+    requestSocketMap_.erase(key);
+    HILOGI("RemoveSocketMapping: deviceId=%{public}s, requestCode=%{public}" PRIu64 ,
+        GetAnonymStr(deviceId).c_str(), requestCode);
+}
+
 void RemoteIntentManager::CleanupSocketMapping(const std::string& deviceId, int32_t socketFd)
 {
     HILOGI("CleanupSocketMapping: deviceId=%{public}s, socket=%{public}d",
@@ -606,6 +557,21 @@ void RemoteIntentManager::CleanupSocketMapping(const std::string& deviceId, int3
             ++it;
         }
     }
+}
+
+int32_t RemoteIntentManager::SendDisconnectToRemote(int32_t socketFd,
+    uint64_t requestCode, int32_t resultCode, const std::string& resultMsg)
+{
+    HILOGI("SendDisconnectToRemote: socket=%{public}d, requestCode=%{public}" PRIu64,
+        socketFd, requestCode);
+    std::string data;
+    int32_t ret = SerializeResultData(resultCode, resultMsg, requestCode, data);
+    if (ret != ERR_DI_OK) {
+        HILOGE("SerializeResultData failed, ret=%{public}d", ret);
+        return ERR_DI_SERIALIZE_FAILED;
+    }
+    return DistributedIntentDsoftbusAdapter::GetInstance().SendIntentDataBySession(
+        socketFd, IntentDataType::INTENT_DATA_TYPE_DISCONNECT, data);
 }
 
 int32_t RemoteIntentManager::PrepareResultContext(const std::string& srcDeviceId,
@@ -675,7 +641,8 @@ int32_t RemoteIntentManager::HandleSendIntentResult(const OHOS::AAFwk::Want& wan
     }
 
     std::string localDeviceId;
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
+    auto* provider = IntentPermissionChecker::GetInstance().GetProvider();
+    if (provider == nullptr || !provider->GetLocalDeviceId(localDeviceId)) {
         HILOGE("GetLocalDeviceId failed");
         return ERR_DI_SYSTEM_WORK_ABNORMALLY;
     }

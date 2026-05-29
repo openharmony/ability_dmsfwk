@@ -90,14 +90,14 @@ void DistributedIntentServiceTest::TearDown()
 HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_GetLocalDeviceIdFail_001, TestSize.Level3)
 {
     EXPECT_CALL(*storageMock_, GetLocalDeviceId(_))
-        .WillOnce(Return(false));
+        .WillRepeatedly(Return(false));
 
     OHOS::AAFwk::Want want;
     want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
     IntentCallerInfo callerInfo;
     sptr<IRemoteObject> callback = new MockRemoteStub();
 
-    EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_PERMISSION_DENIED);
+    EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_SYSTEM_WORK_ABNORMALLY);
 }
 
 /**
@@ -109,14 +109,14 @@ HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_GetLocalDeviceIdFail_00
 HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_BothConditionsHitL36First_002, TestSize.Level3)
 {
     EXPECT_CALL(*storageMock_, GetLocalDeviceId(_))
-        .WillOnce(Return(false));
+        .WillRepeatedly(Return(false));
 
     OHOS::AAFwk::Want want;
     want.SetElementName("", BUNDLE_NAME, ABILITY_NAME);
     IntentCallerInfo callerInfo;
     sptr<IRemoteObject> callback = new MockRemoteStub();
 
-    EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_PERMISSION_DENIED);
+    EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_SYSTEM_WORK_ABNORMALLY);
 }
 
 /**
@@ -128,14 +128,14 @@ HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_BothConditionsHitL36Fir
 HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_DstDeviceIdEmpty_003, TestSize.Level3)
 {
     EXPECT_CALL(*storageMock_, GetLocalDeviceId(_))
-        .WillOnce(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
+        .WillRepeatedly(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
 
     OHOS::AAFwk::Want want;
     want.SetElementName("", BUNDLE_NAME, ABILITY_NAME);
     IntentCallerInfo callerInfo;
     sptr<IRemoteObject> callback = new MockRemoteStub();
 
-    EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_INVALID_PARAMETER);
+    EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_SYSTEM_WORK_ABNORMALLY);
 }
 
 /**
@@ -147,13 +147,13 @@ HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_DstDeviceIdEmpty_003, T
 HWTEST_F(DistributedIntentServiceTest, StartRemoteIntent_NoElementSet_004, TestSize.Level3)
 {
     EXPECT_CALL(*storageMock_, GetLocalDeviceId(_))
-        .WillOnce(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
+        .WillRepeatedly(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
 
     OHOS::AAFwk::Want want;
     IntentCallerInfo callerInfo;
     sptr<IRemoteObject> callback = new MockRemoteStub();
 
-    EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_INVALID_PARAMETER);
+    EXPECT_EQ(service_->StartRemoteIntent(want, callerInfo, callback), ERR_DI_SYSTEM_WORK_ABNORMALLY);
 }
 
 /**

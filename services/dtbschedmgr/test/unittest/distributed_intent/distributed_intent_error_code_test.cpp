@@ -140,5 +140,17 @@ HWTEST_F(DistributedIntentErrorCodeTest, ConvertDiErrCode_DefaultCase_005, TestS
     EXPECT_EQ(result, negativeCode);
 }
 
+/**
+ * @tc.name: ConvertDiErrCode_LinkDisconnected_001_001
+ * @tc.desc: Test ConvertDiErrCode returns unchanged code for link disconnected error
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentErrorCodeTest, ConvertDiErrCode_LinkDisconnected_001, TestSize.Level3)
+{
+    int32_t result = ConvertDiErrCode(ERR_DI_LINK_DISCONNECTED);
+    EXPECT_EQ(result, ERR_DI_LINK_DISCONNECTED);
+}
+
 } // namespace DistributedSchedule
 } // namespace OHOS

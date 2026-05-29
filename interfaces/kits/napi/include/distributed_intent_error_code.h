@@ -161,6 +161,11 @@ enum DistributedIntentErrorCode {
     ERR_DI_STATIC_CFG_PERMISSION = 16700024,
 
     /**
+     * Result(16700025) for link preempted disconnected.
+     */
+    ERR_DI_LINK_DISCONNECTED = 16700025,
+
+    /**
      * Result(16300509) for capability not support.
      */
     ERR_DI_CAPABILITY_NOT_SUPPORT = 16300509,
@@ -169,6 +174,7 @@ enum DistributedIntentErrorCode {
 enum IntentLinkDisconnectReason {
     INTENT_LINK_DISCONNECT_REASON_SHUTDOWN = 0,
     INTENT_LINK_DISCONNECT_REASON_IDLE_TIMEOUT = 1,
+    INTENT_LINK_DISCONNECT_REASON_PEER_DISCONNECT = 2,
 };
 
 int32_t ConvertDiErrCode(int32_t diErrCode);

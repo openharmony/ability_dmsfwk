@@ -15,22 +15,21 @@
 #ifndef OHOS_DISTRIBUTED_REMOTE_INTENT_MANAGER_H
 #define OHOS_DISTRIBUTED_REMOTE_INTENT_MANAGER_H
 
-#include <string>
-#include <set>
+#include <chrono>
 #include <map>
 #include <mutex>
-#include <chrono>
+#include <set>
+#include <string>
 #include <vector>
 
-#include "single_instance.h"
-#include "distributed_want.h"
+#include "caller_info.h"
+#include "dms_constant.h"
 #include "distributed_intent_dsoftbus_adapter.h"
 #include "distributed_intent_error_code.h"
-#include "caller_info.h"
-#include "distributed_sched_types.h"
 #include "distributed_sched_interface.h"
-#include "dms_version_manager.h"
-#include "dms_constant.h"
+#include "distributed_sched_types.h"
+#include "distributed_want.h"
+#include "single_instance.h"
 
 namespace OHOS {
 namespace DistributedSchedule {
@@ -68,6 +67,8 @@ public:
         const std::string& data, int32_t socketFd);
     int32_t HandleBusinessResult(const std::string& srcDeviceId,
         const std::string& data, int32_t socketFd);
+    void HandleDisconnect(const std::string& srcDeviceId,
+        const std::string& data, int32_t socketFd);
 
     int32_t NotifyIntentResult(const sptr<IRemoteObject>& callback,
         uint64_t requestCode, int32_t resultCode, std::string& resultMsg);
@@ -80,6 +81,8 @@ public:
     void NotifyAllCallbacksDisconnected(const std::string& deviceId, int32_t reason);
 
     void CleanupSocketMapping(const std::string& deviceId, int32_t socketFd);
+    int32_t SendDisconnectToRemote(int32_t socketFd,
+        uint64_t requestCode = 0, int32_t resultCode = 0, const std::string& resultMsg = "");
 
 private:
     int32_t PrepareCallerContext(const std::string& localDeviceId, const std::string& dstDeviceId,
@@ -89,11 +92,6 @@ private:
         const IntentContext& ctx, int32_t& socketFd);
     void RegisterResultCallback(uint64_t requestCode, const std::string& deviceId,
         const sptr<IRemoteObject>& callback);
-
-    int32_t DecodeWantFromJson(const nlohmann::json& root, OHOS::AAFwk::Want& want);
-    int32_t ParseCallerInfoFromJson(const nlohmann::json& root, CallerInfo& callerInfo);
-    int32_t ValidateCallerInfo(const CallerInfo& callerInfo);
-    void ParseAccountInfoFromJson(const nlohmann::json& root, IDistributedSched::AccountInfo& accountInfo);
 
     int32_t ValidateExecuteRequest(const std::string& srcDeviceId, const AAFwk::Want& want,
         const IntentContext& ctx, const std::string& localDeviceId);
@@ -108,6 +106,7 @@ private:
         const IntentContext& ctx, const std::string& msg);
 
     void CleanupExpiredCallbacks();
+    void RemoveSocketMapping(const std::string& deviceId, uint64_t requestCode);
 
 private:
     RemoteIntentManager();

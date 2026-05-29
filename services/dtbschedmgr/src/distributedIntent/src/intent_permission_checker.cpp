@@ -15,22 +15,17 @@
 #include "intent_permission_checker.h"
 
 #include <vector>
-#include "dtbschedmgr_device_info_storage.h"
-#include "dtbschedmgr_log.h"
-#include "distributed_sched_utils.h"
-#include "distributed_sched_permission.h"
-#include "distributed_intent_error_code.h"
 #include "access_token.h"
 #include "accesstoken_kit.h"
-#include "bundle/bundle_manager_internal.h"
+#include "device_manager.h"
+#include "distributed_intent_error_code.h"
+#include "distributed_intent_provider.h"
+#include "distributed_sched_utils.h"
+#include "dms_constant.h"
+#include "dtbschedmgr_log.h"
+#include "insight_intent_execute_param.h"
 #include "ohos_account_kits.h"
 #include "os_account_manager.h"
-#include "dms_constant.h"
-#ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-#include "mission/dsched_sync_e2e.h"
-#include "distributed_sched_service.h"
-#endif
-
 #include "remote_intent_manager.h"
 
 namespace OHOS {
@@ -43,7 +38,6 @@ const std::string PERMISSION_EXECUTE_INSIGHT_INTENT = "ohos.permission.EXECUTE_I
 const std::string PERMISSION_EXECUTE_DISTRIBUTED_INTENT = "ohos.permission.EXECUTE_DISTRIBUTED_INTENT";
 const std::string PERMISSION_START_ABILITIES_FROM_BACKGROUND = "ohos.permission.START_ABILITIES_FROM_BACKGROUND";
 const std::string INSIGHT_INTENT_EXECUTE_PARAM_MODE = "ohos.insightIntent.executeParam.mode";
-constexpr int32_t EXECUTE_MODE_UI_ABILITY_BACKGROUND = 1;
 
 #ifdef DMSFWK_SAME_ACCOUNT
 bool CheckIsSameAccountByBundle(DistributedHardware::DmAccessCaller& dmSrcCaller,
@@ -85,11 +79,11 @@ int32_t IntentPermissionChecker::GetCallerInfo(const std::string& localDeviceId,
     callerInfo.sourceDeviceId = localDeviceId;
     callerInfo.uid = callerUid;
     callerInfo.accessToken = accessToken;
-    if (!BundleManagerInternal::GetCallerAppIdFromBms(callerInfo.uid, callerInfo.callerAppId)) {
+    if (!provider_->GetCallerAppIdFromBms(callerInfo.uid, callerInfo.callerAppId)) {
         HILOGE("GetCallerAppIdFromBms failed");
         return INVALID_PARAMETERS_ERR;
     }
-    if (!BundleManagerInternal::GetBundleNameListFromBms(callerInfo.uid, callerInfo.bundleNames)) {
+    if (!provider_->GetBundleNameListFromBms(callerInfo.uid, callerInfo.bundleNames)) {
         HILOGE("GetBundleNameListFromBms failed");
         return INVALID_PARAMETERS_ERR;
     }
@@ -190,7 +184,7 @@ int32_t IntentPermissionChecker::GetAccountInfo(const std::string& remoteNetwork
         HILOGE("remoteNetworkId is empty");
         return ERR_NULL_OBJECT;
     }
-    std::string udid = DnetworkAdapter::GetInstance()->GetUdidByNetworkId(remoteNetworkId);
+    std::string udid = provider_->GetUdidByNetworkId(remoteNetworkId);
     if (udid.empty()) {
         HILOGE("udid is empty");
         return ERR_NULL_OBJECT;
@@ -209,19 +203,19 @@ int32_t IntentPermissionChecker::GetAccountInfo(const std::string& remoteNetwork
 
 int32_t IntentPermissionChecker::CheckCallerPermission(const AAFwk::Want& want, uint64_t accessToken)
 {
-    if (DistributedSchedPermission::GetInstance().CheckPermission(
+    if (provider_->CheckPermission(
         accessToken, PERMISSION_EXECUTE_DISTRIBUTED_INTENT) != ERR_DI_OK) {
         HILOGE("CheckPermission EXECUTE_DISTRIBUTED_INTENT failed");
         return ERR_DI_PERMISSION_DENIED;
     }
-    if (DistributedSchedPermission::GetInstance().CheckPermission(
+    if (provider_->CheckPermission(
         accessToken, PERMISSION_EXECUTE_INSIGHT_INTENT) != ERR_DI_OK) {
         HILOGE("CheckPermission EXECUTE_INSIGHT_INTENT failed");
         return ERR_DI_PERMISSION_DENIED;
     }
     int32_t executeMode = want.GetIntParam(INSIGHT_INTENT_EXECUTE_PARAM_MODE, -1);
-    if (executeMode == EXECUTE_MODE_UI_ABILITY_BACKGROUND) {
-        if (DistributedSchedPermission::GetInstance().CheckPermission(
+    if (executeMode == OHOS::AppExecFwk::ExecuteMode::UI_ABILITY_BACKGROUND) {
+        if (provider_->CheckPermission(
             accessToken, PERMISSION_START_ABILITIES_FROM_BACKGROUND) != ERR_DI_OK) {
             HILOGE("CheckPermission START_ABILITIES_FROM_BACKGROUND failed");
             return ERR_DI_PERMISSION_DENIED;
@@ -242,7 +236,7 @@ bool IntentPermissionChecker::CheckComponentPermission(
 }
 
 bool IntentPermissionChecker::CheckCustomPermission(
-    const AppExecFwk::AbilityInfo& targetAbility, const uint64_t& dAccessToken) const
+    const AppExecFwk::AbilityInfo& targetAbility, const uint64_t dAccessToken) const
 {
     const auto& permissions = targetAbility.permissions;
     if (permissions.empty()) {
@@ -263,12 +257,54 @@ bool IntentPermissionChecker::CheckCustomPermission(
     return true;
 }
 
+int32_t IntentPermissionChecker::CheckTargetAbilityPermission(const AAFwk::Want& want,
+    const CallerInfo& callerInfo, uint64_t dAccessToken)
+{
+    AppExecFwk::AbilityInfo targetAbility;
+    bool needQueryExtension = false;
+    int32_t executeMode = want.GetIntParam(INSIGHT_INTENT_EXECUTE_PARAM_MODE, -1);
+    if (executeMode == OHOS::AppExecFwk::ExecuteMode::UI_EXTENSION_ABILITY ||
+        executeMode == OHOS::AppExecFwk::ExecuteMode::SERVICE_EXTENSION_ABILITY) {
+        HILOGD("check Extension ability");
+        needQueryExtension = true;
+    }
+    bool result = provider_->GetTargetAbility(want, targetAbility, needQueryExtension);
+    if (!result) {
+        HILOGE("can not find the target ability, check by ability manager");
+        return ERR_DI_OK;
+    }
+    HILOGD("target ability info bundleName:%{public}s abilityName:%{public}s visible:%{public}d",
+        targetAbility.bundleName.c_str(), targetAbility.name.c_str(), targetAbility.visible);
+    if (!targetAbility.visible &&
+        !provider_->CheckDeviceSecurityLevel(callerInfo.sourceDeviceId,
+            want.GetElement().GetDeviceID())) {
+        HILOGE("check device security level failed!");
+        return ERR_DI_PERMISSION_DENIED;
+    }
+    if (!provider_->CheckTargetAbilityVisible(targetAbility, callerInfo)) {
+        HILOGE("target ability is not visible and has no PERMISSION_START_INVISIBLE_ABILITY, permission denied");
+        return ERR_DI_ABILITY_VISIBLE_FALSE_DENY_REQUEST;
+    }
+    if (!CheckCustomPermission(targetAbility, dAccessToken)) {
+        HILOGE("CheckCustomPermission denied");
+        return ERR_DI_STATIC_CFG_PERMISSION;
+    }
+    return ERR_DI_OK;
+}
+
 int32_t IntentPermissionChecker::CheckStartPermission(const std::string& localDeviceId,
     const AAFwk::Want& want, const CallerInfo& callerInfo,
     const IDistributedSched::AccountInfo& accountInfo, uint64_t& dAccessToken)
 {
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    CHECK_MDM_CONTROL_BY_TOKEN(callerInfo.accessToken, 0, COLLABORATION_SERVICE);
+    if (provider_->IsMDMControl()) {
+        std::string bundleName = provider_->GetBundleNameFromToken(callerInfo.accessToken, 0);
+        int32_t accountId = provider_->GetActiveAccountId();
+        if (provider_->IsMDMControlWithExemption(bundleName, COLLABORATION_SERVICE, accountId)) {
+            HILOGE("Current user is under MDM control and not exempted.");
+            return ERR_CAPABILITY_NOT_SUPPORT;
+        }
+    }
 #endif
     if (!CheckDstSameAccount(localDeviceId, accountInfo, callerInfo, false)) {
         HILOGE("CheckDstSameAccount fail");
@@ -287,28 +323,9 @@ int32_t IntentPermissionChecker::CheckStartPermission(const std::string& localDe
     if (ret != ERR_DI_OK) {
         return ERR_DI_PERMISSION_DENIED;
     }
-    DistributedSchedPermission& permissionInstance = DistributedSchedPermission::GetInstance();
-    AppExecFwk::AbilityInfo targetAbility;
-    bool result = permissionInstance.GetTargetAbility(want, targetAbility);
-    if (!result) {
-        HILOGE("can not find the target ability, check by ability manager");
-        return ERR_DI_OK;
-    }
-    HILOGD("target ability info bundleName:%{public}s abilityName:%{public}s visible:%{public}d",
-        targetAbility.bundleName.c_str(), targetAbility.name.c_str(), targetAbility.visible);
-    if (!targetAbility.visible &&
-        !DistributedSchedPermission::GetInstance().CheckDeviceSecurityLevel(callerInfo.sourceDeviceId,
-            want.GetElement().GetDeviceID())) {
-        HILOGE("check device security level failed!");
-        return ERR_DI_PERMISSION_DENIED;
-    }
-    if (!DistributedSchedPermission::GetInstance().CheckTargetAbilityVisible(targetAbility, callerInfo)) {
-        HILOGE("target ability is not visible and has no PERMISSION_START_INVISIBLE_ABILITY, permission denied");
-        return ERR_DI_ABILITY_VISIBLE_FALSE_DENY_REQUEST;
-    }
-    if (!CheckCustomPermission(targetAbility, dAccessToken)) {
-        HILOGE("CheckCustomPermission denied");
-        return ERR_DI_STATIC_CFG_PERMISSION;
+    ret = CheckTargetAbilityPermission(want, callerInfo, dAccessToken);
+    if (ret != ERR_DI_OK) {
+        return ret;
     }
     HILOGI("CheckStartPermission success");
     return ERR_DI_OK;
@@ -324,11 +341,18 @@ int32_t IntentPermissionChecker::CheckBusinessResultPermission(const std::string
     }
 
 #ifdef SUPPORT_DISTRIBUTED_MISSION_MANAGER
-    CHECK_MDM_CONTROL_BY_TOKEN(ctx.callerInfo.accessToken, 0, COLLABORATION_SERVICE);
+    if (provider_->IsMDMControl()) {
+        std::string bundleName = provider_->GetBundleNameFromToken(ctx.callerInfo.accessToken, 0);
+        int32_t accountId = provider_->GetActiveAccountId();
+        if (provider_->IsMDMControlWithExemption(bundleName, COLLABORATION_SERVICE, accountId)) {
+            HILOGE("Current user is under MDM control and not exempted.");
+            return ERR_CAPABILITY_NOT_SUPPORT;
+        }
+    }
 #endif
 
     std::string localDeviceId;
-    if (!DtbschedmgrDeviceInfoStorage::GetInstance().GetLocalDeviceId(localDeviceId)) {
+    if (!provider_->GetLocalDeviceId(localDeviceId)) {
         HILOGE("GetLocalDeviceId failed");
         return ERR_DI_SYSTEM_WORK_ABNORMALLY;
     }

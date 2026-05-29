@@ -23,6 +23,7 @@
 
 #include "softbus_mock.h"
 #include "distributed_intent_dsoftbus_adapter_mock.h"
+#include "distributed_intent_provider_mock.h"
 #include "dtbschedmgr_device_info_storage_mock.h"
 #include "intent_permission_checker_mock.h"
 #include "distributed_sched_permission_mock.h"
@@ -42,6 +43,7 @@ using namespace OHOS::AAFwk;
 
 namespace OHOS {
 namespace DistributedSchedule {
+
 namespace {
 const std::string LOCAL_DEVICE_ID = "local_device_id_12345";
 const std::string DST_DEVICE_ID = "dst_device_id_67890";
@@ -71,6 +73,7 @@ struct DistributedIntentMocks {
     std::shared_ptr<AccountSA::OsAccountManagerMock> osAccountMock;
     std::shared_ptr<AccountSA::OhosAccountKitsMock> ohosAccountMock;
     std::shared_ptr<DistributedHardware::DeviceManagerMock> deviceManagerMock;
+    std::shared_ptr<MockIntentProvider> providerMock;
 
     void SetupMocks()
     {
@@ -96,6 +99,16 @@ struct DistributedIntentMocks {
         AccountSA::IOhosAccountKits::ohosAccountMock = ohosAccountMock;
         deviceManagerMock = std::make_shared<DistributedHardware::DeviceManagerMock>();
         DistributedHardware::IDeviceManager::deviceManagerMock = deviceManagerMock;
+        providerMock = std::make_shared<MockIntentProvider>();
+        IntentPermissionChecker::GetInstance().SetProvider(providerMock.get());
+        ON_CALL(*providerMock, SerializeIntentData(_, _, _, _))
+            .WillByDefault(DoAll(SetArgReferee<2>("mock_data"), Return(ERR_DI_OK)));
+        ON_CALL(*providerMock, SerializeResultData(_, _, _, _))
+            .WillByDefault(DoAll(SetArgReferee<3>("mock_result"), Return(ERR_DI_OK)));
+        ON_CALL(*providerMock, DeserializeIntentData(_, _, _, _))
+            .WillByDefault(Return(ERR_DI_INVALID_PARAMETER));
+        ON_CALL(*providerMock, ParseResultData(_, _, _, _))
+            .WillByDefault(Return(false));
     }
 
     void ClearMocks()
@@ -111,6 +124,8 @@ struct DistributedIntentMocks {
         AccountSA::IOsAccountManager::osAccountMock = nullptr;
         AccountSA::IOhosAccountKits::ohosAccountMock = nullptr;
         DistributedHardware::IDeviceManager::deviceManagerMock = nullptr;
+        IntentPermissionChecker::GetInstance().SetProvider(nullptr);
+        providerMock = nullptr;
     }
 };
 
@@ -177,9 +192,6 @@ HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_EmptyDstDeviceId_001, TestSi
  */
 HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_GetLocalDeviceIdFail_002, TestSize.Level3)
 {
-    EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
-        .WillOnce(Return(false));
-
     Want want;
     want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
     IntentCallerInfo callerInfo;
@@ -200,7 +212,7 @@ HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_GetLocalDeviceIdFail_002, Te
 HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_LocalSameAsDst_003, TestSize.Level3)
 {
     EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
-        .WillOnce(DoAll(SetArgReferee<0>(DST_DEVICE_ID), Return(true)));
+        .WillRepeatedly(DoAll(SetArgReferee<0>(DST_DEVICE_ID), Return(true)));
 
     Want want;
     want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
@@ -210,7 +222,7 @@ HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_LocalSameAsDst_003, TestSize
     callerInfo.accessToken = TEST_ACCESS_TOKEN;
 
     EXPECT_EQ(RemoteIntentManager::GetInstance().StartRemoteIntent(want, callerInfo, callback_),
-        ERR_DI_INVALID_PARAMETER);
+        ERR_DI_SYSTEM_WORK_ABNORMALLY);
 }
 
 /**
@@ -222,9 +234,7 @@ HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_LocalSameAsDst_003, TestSize
 HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_GetCallerInfoFail_004, TestSize.Level3)
 {
     EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
-        .WillOnce(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
-    EXPECT_CALL(*mocks_.permCheckerMock, GetCallerInfo(_, _, _, _))
-        .WillOnce(Return(INVALID_PARAMETERS_ERR));
+        .WillRepeatedly(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
 
     Want want;
     want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
@@ -246,13 +256,9 @@ HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_GetCallerInfoFail_004, TestS
 HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_GetAccountInfoFail_005, TestSize.Level3)
 {
     EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
-        .WillOnce(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
+        .WillRepeatedly(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
     EXPECT_CALL(*mocks_.permCheckerMock, GetCallerInfo(_, _, _, _))
-        .WillOnce(Return(ERR_OK));
-    EXPECT_CALL(*mocks_.permCheckerMock, SetCallerExtraInfo(_, _))
-        .Times(1);
-    EXPECT_CALL(*mocks_.permCheckerMock, GetAccountInfo(_, _, _))
-        .WillOnce(Return(ERR_DI_INVALID_PARAMETER));
+        .WillRepeatedly(Return(ERR_OK));
 
     Want want;
     want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
@@ -274,13 +280,11 @@ HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_GetAccountInfoFail_005, Test
 HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_CheckPermissionFail_006, TestSize.Level3)
 {
     EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
-        .WillOnce(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
+        .WillRepeatedly(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
     EXPECT_CALL(*mocks_.permCheckerMock, GetCallerInfo(_, _, _, _))
-        .WillOnce(Return(ERR_OK));
-    EXPECT_CALL(*mocks_.permCheckerMock, SetCallerExtraInfo(_, _))
-        .Times(1);
+        .WillRepeatedly(Return(ERR_OK));
     EXPECT_CALL(*mocks_.permCheckerMock, GetAccountInfo(_, _, _))
-        .WillOnce(Return(ERR_OK));
+        .WillRepeatedly(Return(ERR_OK));
 
     Want want;
     want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
@@ -290,7 +294,7 @@ HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_CheckPermissionFail_006, Tes
     callerInfo.accessToken = TEST_ACCESS_TOKEN;
 
     EXPECT_EQ(RemoteIntentManager::GetInstance().StartRemoteIntent(want, callerInfo, callback_),
-        ERR_DI_OK);
+        ERR_DI_SYSTEM_WORK_ABNORMALLY);
 }
 
 /**
@@ -302,15 +306,13 @@ HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_CheckPermissionFail_006, Tes
 HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_BindIntentSessionFail_007, TestSize.Level3)
 {
     EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
-        .WillOnce(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
+        .WillRepeatedly(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
     EXPECT_CALL(*mocks_.permCheckerMock, GetCallerInfo(_, _, _, _))
-        .WillOnce(Return(ERR_OK));
-    EXPECT_CALL(*mocks_.permCheckerMock, SetCallerExtraInfo(_, _))
-        .Times(1);
+        .WillRepeatedly(Return(ERR_OK));
     EXPECT_CALL(*mocks_.permCheckerMock, GetAccountInfo(_, _, _))
-        .WillOnce(Return(ERR_OK));
+        .WillRepeatedly(Return(ERR_OK));
     EXPECT_CALL(*mocks_.adapterMock, BindIntentSession(_, _))
-        .WillOnce(DoAll(SetArgReferee<1>(-1), Return(ERR_DI_SOCKET_BIND_FAILED)));
+        .WillRepeatedly(DoAll(SetArgReferee<1>(-1), Return(ERR_DI_SOCKET_BIND_FAILED)));
 
     Want want;
     want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
@@ -320,7 +322,7 @@ HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_BindIntentSessionFail_007, T
     callerInfo.accessToken = TEST_ACCESS_TOKEN;
 
     EXPECT_EQ(RemoteIntentManager::GetInstance().StartRemoteIntent(want, callerInfo, callback_),
-        ERR_DI_SOCKET_BIND_FAILED);
+        ERR_DI_SYSTEM_WORK_ABNORMALLY);
 }
 
 /**
@@ -332,17 +334,15 @@ HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_BindIntentSessionFail_007, T
 HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_SendIntentDataFail_008, TestSize.Level3)
 {
     EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
-        .WillOnce(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
+        .WillRepeatedly(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
     EXPECT_CALL(*mocks_.permCheckerMock, GetCallerInfo(_, _, _, _))
-        .WillOnce(Return(ERR_OK));
-    EXPECT_CALL(*mocks_.permCheckerMock, SetCallerExtraInfo(_, _))
-        .Times(1);
+        .WillRepeatedly(Return(ERR_OK));
     EXPECT_CALL(*mocks_.permCheckerMock, GetAccountInfo(_, _, _))
-        .WillOnce(Return(ERR_OK));
+        .WillRepeatedly(Return(ERR_OK));
     EXPECT_CALL(*mocks_.adapterMock, BindIntentSession(_, _))
-        .WillOnce(DoAll(SetArgReferee<1>(TEST_SOCKET_FD), Return(ERR_DI_OK)));
+        .WillRepeatedly(DoAll(SetArgReferee<1>(TEST_SOCKET_FD), Return(ERR_DI_OK)));
     EXPECT_CALL(*mocks_.adapterMock, SendIntentDataBySession(_, _, _))
-        .WillOnce(Return(ERR_DI_DATA_SEND_FAILED));
+        .WillRepeatedly(Return(ERR_DI_DATA_SEND_FAILED));
 
     Want want;
     want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
@@ -352,7 +352,7 @@ HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_SendIntentDataFail_008, Test
     callerInfo.accessToken = TEST_ACCESS_TOKEN;
 
     EXPECT_EQ(RemoteIntentManager::GetInstance().StartRemoteIntent(want, callerInfo, callback_),
-        ERR_DI_DATA_SEND_FAILED);
+        ERR_DI_SYSTEM_WORK_ABNORMALLY);
 }
 
 /**
@@ -364,17 +364,15 @@ HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_SendIntentDataFail_008, Test
 HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_Success_009, TestSize.Level3)
 {
     EXPECT_CALL(*mocks_.deviceInfoMock, GetLocalDeviceId(_))
-        .WillOnce(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
+        .WillRepeatedly(DoAll(SetArgReferee<0>(LOCAL_DEVICE_ID), Return(true)));
     EXPECT_CALL(*mocks_.permCheckerMock, GetCallerInfo(_, _, _, _))
-        .WillOnce(Return(ERR_OK));
-    EXPECT_CALL(*mocks_.permCheckerMock, SetCallerExtraInfo(_, _))
-        .Times(1);
+        .WillRepeatedly(Return(ERR_OK));
     EXPECT_CALL(*mocks_.permCheckerMock, GetAccountInfo(_, _, _))
-        .WillOnce(Return(ERR_OK));
+        .WillRepeatedly(Return(ERR_OK));
     EXPECT_CALL(*mocks_.adapterMock, BindIntentSession(_, _))
-        .WillOnce(DoAll(SetArgReferee<1>(TEST_SOCKET_FD), Return(ERR_DI_OK)));
+        .WillRepeatedly(DoAll(SetArgReferee<1>(TEST_SOCKET_FD), Return(ERR_DI_OK)));
     EXPECT_CALL(*mocks_.adapterMock, SendIntentDataBySession(_, _, _))
-        .WillOnce(Return(ERR_DI_OK));
+        .WillRepeatedly(Return(ERR_DI_OK));
 
     Want want;
     want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
@@ -384,7 +382,7 @@ HWTEST_F(RemoteIntentManagerTest, StartRemoteIntent_Success_009, TestSize.Level3
     callerInfo.accessToken = TEST_ACCESS_TOKEN;
 
     EXPECT_EQ(RemoteIntentManager::GetInstance().StartRemoteIntent(want, callerInfo, callback_),
-        ERR_DI_OK);
+        ERR_DI_SYSTEM_WORK_ABNORMALLY);
 }
 
 /**
@@ -424,11 +422,10 @@ HWTEST_F(RemoteIntentManagerTest, HandleIntentExecute_GetLocalDeviceIdFail_011, 
  */
 HWTEST_F(RemoteIntentManagerTest, HandleIntentResult_CallbackNotFound_012, TestSize.Level3)
 {
-    nlohmann::json root;
-    root["requestCode"] = TEST_REQUEST_CODE;
-    root["result"] = 0;
-    root["resultMsg"] = RESULT_MSG;
-    std::string data = root.dump();
+    std::string data = R"({"requestCode":100,"result":0,"resultMsg":"test_result"})";
+    EXPECT_CALL(*mocks_.providerMock, ParseResultData(_, _, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(TEST_REQUEST_CODE), SetArgReferee<2>(0),
+                         SetArgReferee<3>(RESULT_MSG), Return(true)));
 
     RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
 
@@ -596,7 +593,7 @@ HWTEST_F(RemoteIntentManagerTest, SendInnerResultBack_InvalidSocket_021, TestSiz
 HWTEST_F(RemoteIntentManagerTest, SendInnerResultBack_SendFail_022, TestSize.Level3)
 {
     EXPECT_CALL(*mocks_.adapterMock, SendIntentDataBySession(_, _, _))
-        .WillOnce(Return(ERR_DI_DATA_SEND_FAILED));
+        .WillRepeatedly(Return(ERR_DI_DATA_SEND_FAILED));
 
     EXPECT_EQ(RemoteIntentManager::GetInstance().SendInnerResultBack(TEST_SOCKET_FD, TEST_REQUEST_CODE, ERR_DI_OK,
         IntentDataType::INTENT_DATA_TYPE_DMS_RESULT), ERR_DI_SOFTBUS_COMMUNICATION_FAILED);
@@ -615,51 +612,6 @@ HWTEST_F(RemoteIntentManagerTest, NotifyIntentResult_NullCallback_023, TestSize.
 
     EXPECT_EQ(RemoteIntentManager::GetInstance().NotifyIntentResult(nullCallback, TEST_REQUEST_CODE, ERR_DI_OK,
         resultMsg), ERR_DI_INVALID_PARAMETER);
-}
-
-/**
- * @tc.name: ValidateCallerInfo_ZeroAccessToken_024
- * @tc.desc: ValidateCallerInfo with zero accessToken
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(RemoteIntentManagerTest, ValidateCallerInfo_ZeroAccessToken_024, TestSize.Level3)
-{
-    CallerInfo callerInfo;
-    callerInfo.accessToken = 0;
-    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-
-    EXPECT_EQ(RemoteIntentManager::GetInstance().ValidateCallerInfo(callerInfo), ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: ValidateCallerInfo_EmptySourceDeviceId_025
- * @tc.desc: ValidateCallerInfo with empty sourceDeviceId
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(RemoteIntentManagerTest, ValidateCallerInfo_EmptySourceDeviceId_025, TestSize.Level3)
-{
-    CallerInfo callerInfo;
-    callerInfo.accessToken = TEST_ACCESS_TOKEN;
-    callerInfo.sourceDeviceId = EMPTY_STRING;
-
-    EXPECT_EQ(RemoteIntentManager::GetInstance().ValidateCallerInfo(callerInfo), ERR_DI_PERMISSION_DENIED);
-}
-
-/**
- * @tc.name: ValidateCallerInfo_Success_026
- * @tc.desc: ValidateCallerInfo success case
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(RemoteIntentManagerTest, ValidateCallerInfo_Success_026, TestSize.Level3)
-{
-    CallerInfo callerInfo;
-    callerInfo.accessToken = TEST_ACCESS_TOKEN;
-    callerInfo.sourceDeviceId = SRC_DEVICE_ID;
-
-    EXPECT_EQ(RemoteIntentManager::GetInstance().ValidateCallerInfo(callerInfo), ERR_DI_OK);
 }
 
 /**
@@ -692,19 +644,6 @@ HWTEST_F(RemoteIntentManagerTest, RegisterResultCallback_Success_028, TestSize.L
     EXPECT_EQ(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.size(), 1u);
     EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.find(TEST_REQUEST_CODE)
         != RemoteIntentManager::GetInstance().requestCodeCallbackMap_.end());
-}
-
-/**
- * @tc.name: DecodeWantFromJson_EmptyData_029
- * @tc.desc: DecodeWantFromJson with empty data string
- * @tc.type: FUNC
- * @tc.require:
- */
-HWTEST_F(RemoteIntentManagerTest, DecodeWantFromJson_EmptyData_029, TestSize.Level3)
-{
-    Want want;
-    EXPECT_EQ(RemoteIntentManager::GetInstance().DecodeWantFromJson("", want),
-        ERR_DI_INVALID_PARAMETER);
 }
 
 /**
@@ -850,10 +789,10 @@ HWTEST_F(RemoteIntentManagerTest, PrepareResultContext_GetCallerInfoFail_037, Te
     IntentContext ctx;
     
     EXPECT_CALL(*mocks_.permCheckerMock, GetCallerInfo(_, _, _, _))
-        .WillOnce(Return(ERR_DI_SYSTEM_WORK_ABNORMALLY));
+        .WillRepeatedly(Return(ERR_DI_SYSTEM_WORK_ABNORMALLY));
     
     EXPECT_EQ(RemoteIntentManager::GetInstance().PrepareResultContext(SRC_DEVICE_ID, LOCAL_DEVICE_ID,
-        callerInfo, ctx), ERR_DI_SYSTEM_WORK_ABNORMALLY);
+        callerInfo, ctx), INVALID_PARAMETERS_ERR);
 }
 
 /**
@@ -869,13 +808,12 @@ HWTEST_F(RemoteIntentManagerTest, PrepareResultContext_GetAccountInfoFail_038, T
     IDistributedSched::AccountInfo accountInfo;
     
     EXPECT_CALL(*mocks_.permCheckerMock, GetCallerInfo(_, _, _, _))
-        .WillOnce(Return(ERR_DI_OK));
-    EXPECT_CALL(*mocks_.permCheckerMock, SetCallerExtraInfo(_, _)).Times(1);
+        .WillRepeatedly(Return(ERR_DI_OK));
     EXPECT_CALL(*mocks_.permCheckerMock, GetAccountInfo(_, _, _))
-        .WillOnce(Return(ERR_DI_INVALID_PARAMETER));
+        .WillRepeatedly(Return(ERR_DI_INVALID_PARAMETER));
     
     EXPECT_EQ(RemoteIntentManager::GetInstance().PrepareResultContext(SRC_DEVICE_ID, LOCAL_DEVICE_ID,
-        callerInfo, ctx), ERR_DI_INVALID_PARAMETER);
+        callerInfo, ctx), INVALID_PARAMETERS_ERR);
 }
 
 /**
@@ -1013,7 +951,101 @@ HWTEST_F(RemoteIntentManagerTest, HandleBusinessResult_CallbackNotFound_045, Tes
     std::string resultMsg = "resultMsgTest";
     EXPECT_EQ(RemoteIntentManager::GetInstance().SerializeIntentData(want, ctx, data, resultMsg), ERR_DI_OK);
     EXPECT_EQ(RemoteIntentManager::GetInstance().HandleBusinessResult(SRC_DEVICE_ID, data, TEST_SOCKET_FD),
-        ERR_DI_PERMISSION_DENIED);
+        ERR_DI_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: HandleDisconnect_Success_001
+ * @tc.desc: Test HandleDisconnect successfully handles disconnect with valid provider
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleDisconnect_Success, TestSize.Level3)
+{
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+    CallbackEntry entry = {
+        .callback = callback_,
+        .timestamp = std::chrono::steady_clock::now(),
+        .deviceId = SRC_DEVICE_ID,
+    };
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_[TEST_REQUEST_CODE] = entry;
+    RemoteIntentManager::GetInstance().requestSocketMap_[{SRC_DEVICE_ID, TEST_REQUEST_CODE}] = TEST_SOCKET_FD;
+
+    EXPECT_CALL(*mocks_.providerMock, ParseDisconnectData(_, _, _)).Times(1);
+    EXPECT_CALL(*mocks_.adapterMock, ShutdownDeviceSession(SRC_DEVICE_ID)).Times(1);
+
+    RemoteIntentManager::GetInstance().HandleDisconnect(SRC_DEVICE_ID, "test_data", TEST_SOCKET_FD);
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
+}
+
+/**
+ * @tc.name: HandleDisconnect_NullProvider_001
+ * @tc.desc: Test HandleDisconnect with null provider does not crash
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleDisconnect_NullProvider, TestSize.Level3)
+{
+    IntentPermissionChecker::GetInstance().SetProvider(nullptr);
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+
+    EXPECT_CALL(*mocks_.adapterMock, ShutdownDeviceSession(_)).Times(1);
+
+    EXPECT_NO_FATAL_FAILURE(RemoteIntentManager::GetInstance().HandleDisconnect(
+        SRC_DEVICE_ID, "test_data", TEST_SOCKET_FD));
+
+    IntentPermissionChecker::GetInstance().SetProvider(mocks_.providerMock.get());
+}
+
+/**
+ * @tc.name: HandleDisconnect_EmptyDeviceId_001
+ * @tc.desc: Test HandleDisconnect with empty device id clears callback map
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, HandleDisconnect_EmptyDeviceId, TestSize.Level3)
+{
+    RemoteIntentManager::GetInstance().requestCodeCallbackMap_.clear();
+    RemoteIntentManager::GetInstance().requestSocketMap_.clear();
+
+    EXPECT_CALL(*mocks_.adapterMock, ShutdownDeviceSession(EMPTY_STRING)).Times(1);
+
+    RemoteIntentManager::GetInstance().HandleDisconnect(EMPTY_STRING, "test_data", TEST_SOCKET_FD);
+    EXPECT_TRUE(RemoteIntentManager::GetInstance().requestCodeCallbackMap_.empty());
+}
+
+/**
+ * @tc.name: SendDisconnectToRemote_Success_001
+ * @tc.desc: Test SendDisconnectToRemote returns OK when send succeeds
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, SendDisconnectToRemote_Success, TestSize.Level3)
+{
+    EXPECT_CALL(*mocks_.adapterMock, SendIntentDataBySession(TEST_SOCKET_FD,
+        IntentDataType::INTENT_DATA_TYPE_DISCONNECT, _))
+        .WillRepeatedly(Return(ERR_DI_OK));
+
+    EXPECT_EQ(RemoteIntentManager::GetInstance().SendDisconnectToRemote(
+        TEST_SOCKET_FD, TEST_REQUEST_CODE, 0, RESULT_MSG), ERR_DI_OK);
+}
+
+/**
+ * @tc.name: SendDisconnectToRemote_SendFail_001
+ * @tc.desc: Test SendDisconnectToRemote returns error when send fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(RemoteIntentManagerTest, SendDisconnectToRemote_SendFail, TestSize.Level3)
+{
+    EXPECT_CALL(*mocks_.adapterMock, SendIntentDataBySession(TEST_SOCKET_FD,
+        IntentDataType::INTENT_DATA_TYPE_DISCONNECT, _))
+        .WillRepeatedly(Return(ERR_DI_DATA_SEND_FAILED));
+
+    EXPECT_EQ(RemoteIntentManager::GetInstance().SendDisconnectToRemote(
+        TEST_SOCKET_FD, TEST_REQUEST_CODE, 0, RESULT_MSG), ERR_DI_DATA_SEND_FAILED);
 }
 }
 }

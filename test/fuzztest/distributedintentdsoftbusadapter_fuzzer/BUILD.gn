@@ -27,7 +27,8 @@ ohos_fuzztest("DistributedIntentDsoftbusAdapterFuzzTest") {
     "${dms_path}/services/dtbschedmgr/src/distributedIntent/include",
     "${dms_path}/interfaces/innerkits/common/include/",
     "${dms_path}/common/include/",
-    "{dms_path}/interfaces/innerkits/kits/napi/include",
+    "${dms_path}/interfaces/kits/napi/include",
+    "${dms_path}/services/dtbschedmgr/include/softbus_adapter/transport",
   ]
 
   fuzz_config_file =
@@ -45,7 +46,10 @@ ohos_fuzztest("DistributedIntentDsoftbusAdapterFuzzTest") {
 
   sources = [ "distributedintentdsoftbusadapter_fuzzer.cpp" ]
 
-  deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
+  deps = [
+    "${dms_path}/services/dtbschedmgr:distributedschedsvr",
+    "${dms_path}/services/dtbschedmgr:distributed_intent",
+  ]
 
   defines = []
   if (dmsfwk_mission_manager) {
@@ -101,5 +105,7 @@ ohos_fuzztest("DistributedIntentDsoftbusAdapterFuzzTest") {
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":DistributedIntentDsoftbusAdapterFuzzTest" ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    deps = [ ":DistributedIntentDsoftbusAdapterFuzzTest" ]
+  }
 }

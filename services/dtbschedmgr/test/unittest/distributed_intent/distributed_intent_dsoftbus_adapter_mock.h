@@ -17,6 +17,7 @@
 
 #include <gmock/gmock.h>
 #include <string>
+#include <vector>
 #include "distributed_intent_error_code.h"
 #include "distributed_intent_dsoftbus_adapter.h"
 
@@ -31,6 +32,10 @@ public:
         const std::string& data) = 0;
     virtual void UnbindIntentSession(int32_t socketFd) = 0;
     virtual int32_t GetSocketFdByDeviceId(const std::string& deviceId) = 0;
+    virtual void ShutdownDeviceSession(const std::string& deviceId) = 0;
+    virtual void ForceCleanupDeviceSessions(const std::string& deviceId, std::vector<int32_t>& closedSockets) = 0;
+    virtual void SetStopped(bool stopped) = 0;
+    virtual bool IsStopped() const = 0;
 public:
     static inline std::shared_ptr<IDistributedIntentDsoftbusAdapter> adapterMock = nullptr;
 };
@@ -42,6 +47,11 @@ public:
         const std::string& data));
     MOCK_METHOD1(UnbindIntentSession, void(int32_t socketFd));
     MOCK_METHOD1(GetSocketFdByDeviceId, int32_t(const std::string& deviceId));
+    MOCK_METHOD1(ShutdownDeviceSession, void(const std::string& deviceId));
+    MOCK_METHOD2(ForceCleanupDeviceSessions, void(const std::string& deviceId,
+        std::vector<int32_t>& closedSockets));
+    MOCK_METHOD1(SetStopped, void(bool stopped));
+    MOCK_CONST_METHOD0(IsStopped, bool());
 };
 
 } // namespace DistributedSchedule

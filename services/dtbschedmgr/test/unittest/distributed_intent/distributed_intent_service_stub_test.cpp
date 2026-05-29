@@ -89,11 +89,6 @@ void DistributedIntentServiceStubTest::TearDown()
     IDtbschedmgrDeviceInfoStorage::storageMock = nullptr;
 }
 
-bool DistributedSchedPermission::IsFoundationCall() const
-{
-    return g_isFoundationCall;
-}
-
 void DistributedSchedPermission::RemoveRemoteObjectFromWant(
     std::shared_ptr<AAFwk::Want> want) const {}
 
@@ -169,7 +164,6 @@ HWTEST_F(DistributedIntentServiceStubTest, OnRemoteRequest_CodeZero_004, TestSiz
     EXPECT_NE(service_->OnRemoteRequest(0, data, reply, option), ERR_OK);
 }
 
-
 /**
  * @tc.name: StartRemoteIntentInner_NotFoundation_001
  * @tc.desc: StartRemoteIntentInner when IsFoundationCall returns false
@@ -206,7 +200,7 @@ HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_WantNull_002, 
 
     EXPECT_EQ(service_->OnRemoteRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option),
-        ERR_NULL_OBJECT);
+        ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -227,7 +221,7 @@ HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_MissingCallerU
 
     EXPECT_EQ(service_->OnRemoteRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option),
-        ERR_NULL_OBJECT);
+        ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -249,7 +243,7 @@ HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_MissingRequest
 
     EXPECT_EQ(service_->OnRemoteRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option),
-        ERR_NULL_OBJECT);
+        ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -272,7 +266,7 @@ HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_MissingAccessT
 
     EXPECT_EQ(service_->OnRemoteRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option),
-        ERR_NULL_OBJECT);
+        ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -296,7 +290,7 @@ HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_MissingSpecify
 
     EXPECT_EQ(service_->OnRemoteRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option),
-        ERR_NULL_OBJECT);
+        ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -325,7 +319,7 @@ HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_NormalCallback
 
     EXPECT_EQ(service_->OnRemoteRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option),
-        ERR_NULL_OBJECT);
+        ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -355,7 +349,7 @@ HWTEST_F(DistributedIntentServiceStubTest, StartRemoteIntentInner_NormalCallback
 
     EXPECT_EQ(service_->OnRemoteRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option),
-        ERR_OK);
+        ERR_DI_PERMISSION_DENIED);
 }
 
 
@@ -395,7 +389,7 @@ HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_WantNull_002, T
 
     EXPECT_EQ(service_->OnRemoteRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option),
-        ERR_NULL_OBJECT);
+        ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -416,7 +410,7 @@ HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_MissingCallerUi
 
     EXPECT_EQ(service_->OnRemoteRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option),
-        ERR_NULL_OBJECT);
+        ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -438,7 +432,7 @@ HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_MissingRequestC
 
     EXPECT_EQ(service_->OnRemoteRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option),
-        ERR_NULL_OBJECT);
+        ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -461,7 +455,7 @@ HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_MissingAccessTo
 
     EXPECT_EQ(service_->OnRemoteRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option),
-        ERR_NULL_OBJECT);
+        ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -485,7 +479,7 @@ HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_MissingSpecifyT
 
     EXPECT_EQ(service_->OnRemoteRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option),
-        ERR_NULL_OBJECT);
+        ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -511,7 +505,7 @@ HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_NormalWithMsg_0
 
     EXPECT_EQ(service_->OnRemoteRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option),
-        ERR_OK);
+        ERR_DI_PERMISSION_DENIED);
 }
 
 /**
@@ -536,7 +530,7 @@ HWTEST_F(DistributedIntentServiceStubTest, SendIntentResultInner_NormalEmptyMsg_
 
     EXPECT_EQ(service_->OnRemoteRequest(
         static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option),
-        ERR_OK);
+        ERR_DI_PERMISSION_DENIED);
 }
 
 

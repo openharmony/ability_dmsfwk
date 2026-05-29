@@ -25,11 +25,12 @@ ohos_fuzztest("RemoteIntentManagerFuzzTest") {
     "${dms_path}/services/dtbschedmgr/include/",
     "${dms_path}/services/dtbschedmgr/include/distributedIntent",
     "${dms_path}/services/dtbschedmgr/src/distributedIntent/include",
+    "${dms_path}/interfaces/kits/napi/include",
     "${dms_path}/interfaces/innerkits/common/include/",
     "${dms_path}/common/include/",
     "${dms_path}/frameworks/native/distributed_extension/include",
     "${dms_path}/services/dtbschedmgr/include/collaborate",
-    "${dms_path}/services/dtbschedmgr/include/distributedwant",
+    "${dms_path}/services/dtbschedmgr/include/distributedWant",
     "${dms_path}/services/dtbschedmgr/include/collab",
     "${dms_path}/services/dtbschedmgr/include/collab/state",
     "${dms_path}/services/dtbschedmgr/include/softbus_adapter/transport",
@@ -53,7 +54,10 @@ ohos_fuzztest("RemoteIntentManagerFuzzTest") {
 
   sources = [ "remoteintentmanager_fuzzer.cpp" ]
 
-  deps = [ "${dms_path}/services/dtbschedmgr:distributedschedsvr" ]
+  deps = [
+    "${dms_path}/services/dtbschedmgr:distributedschedsvr",
+    "${dms_path}/services/dtbschedmgr:distributed_intent",
+  ]
 
   defines = []
   if (dmsfwk_mission_manager) {
@@ -109,5 +113,7 @@ ohos_fuzztest("RemoteIntentManagerFuzzTest") {
 
 group("fuzztest") {
   testonly = true
-  deps = [ ":RemoteIntentManagerFuzzTest" ]
+  if (!dmsfwk_disable_distributedsched_service) {
+    deps = [ ":RemoteIntentManagerFuzzTest" ]
+  }
 }

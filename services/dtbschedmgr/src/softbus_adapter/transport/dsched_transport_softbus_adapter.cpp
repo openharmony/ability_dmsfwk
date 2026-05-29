@@ -15,7 +15,7 @@
 
 #include "dsched_transport_softbus_adapter.h"
 
-#include "distributed_intent_dsoftbus_adapter.h"
+#include "distributed_intent_plugin.h"
 #include "distributed_sched_utils.h"
 #include "dsched_all_connect_manager.h"
 #include "dsched_collab_manager.h"
@@ -98,20 +98,37 @@ ISocketListener iSocketListener = {
     .OnBytes = OnBytes
 };
 
+static IIntentSocketEventListener* GetIntentSocketListenerFromPlugin()
+{
+    auto plugin = DistributedSchedService::GetInstance().GetIntentPlugin();
+    return plugin ? plugin->GetSocketListener() : nullptr;
+}
+
 static void OnIntentBind(int32_t socket, PeerSocketInfo info)
 {
     std::string peerDeviceId(info.networkId);
-    DistributedIntentDsoftbusAdapter::GetInstance().OnIntentBind(socket, peerDeviceId);
+    DistributedSchedService::GetInstance().EnsureIntentPluginLoaded();
+    auto* listener = GetIntentSocketListenerFromPlugin();
+    if (listener) {
+        listener->OnIntentSocketBind(socket, peerDeviceId);
+    }
 }
 
 static void OnIntentShutdown(int32_t socket, ShutdownReason reason)
 {
-    DistributedIntentDsoftbusAdapter::GetInstance().OnIntentShutdown(socket);
+    auto* listener = GetIntentSocketListenerFromPlugin();
+    if (listener) {
+        listener->OnIntentSocketShutdown(socket);
+    }
 }
 
 static void OnIntentBytes(int32_t socket, const void *data, uint32_t dataLen)
 {
-    DistributedIntentDsoftbusAdapter::GetInstance().OnIntentBytes(socket, data, dataLen);
+    DistributedSchedService::GetInstance().EnsureIntentPluginLoaded();
+    auto* listener = GetIntentSocketListenerFromPlugin();
+    if (listener) {
+        listener->OnIntentSocketBytes(socket, data, dataLen);
+    }
 }
 
 ISocketListener iIntentSocketListener = {
@@ -151,14 +168,7 @@ int32_t DSchedTransportSoftbusAdapter::InitChannel()
         HILOGE("service listen failed, ret: %{public}d", ret);
         return ret;
     }
-    
-    // Initialize intent socket channel
-    ret = InitIntentChannel();
-    if (ret != ERR_OK) {
-        HILOGW("Init intent channel failed, ret: %{public}d", ret);
-        // Intent channel is optional, don't fail the whole initialization
-    }
-    
+
     HILOGI("end");
     return ERR_OK;
 }

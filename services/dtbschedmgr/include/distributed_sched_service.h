@@ -34,7 +34,7 @@
 #include "datashare_manager.h"
 #include "distributed_sched_stub.h"
 #include "distributed_sched_continuation.h"
-#include "distributedIntent/distributed_intent_service.h"
+#include "distributed_intent_plugin.h"
 #include "dms_callback_task.h"
 #include "dsched_collaborate_callback_mgr.h"
 #include "idms_interactive_adapter.h"
@@ -244,6 +244,8 @@ public:
     bool IsTargetPermission(const OHOS::AAFwk::Want &want);
     void SetDExtensionConnected(bool connected);
     bool CheckMDMControlByUid(int32_t uid);
+    void EnsureIntentPluginLoaded();
+    std::shared_ptr<IIntentPlugin> GetIntentPlugin();
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     bool CheckRemoteOsType(const std::string& netwokId) override;
@@ -354,6 +356,7 @@ private:
         DExtConnectResultInfo& resultInfo);
     int32_t FinalizeDExtensionConnection(AAFwk::Want& want, const DExtConnectInfo& connectInfo,
         const sptr<IDExtension>& proxy, bool isDelay, DExtConnectResultInfo& resultInfo);
+    std::shared_ptr<IIntentPlugin> LoadIntentPlugin();
 
 #ifdef DMSFWK_INTERACTIVE_ADAPTER
     int32_t GetDmsInteractiveAdapterProxy();
@@ -385,7 +388,7 @@ private:
     std::map<sptr<IRemoteObject>, ConnectInfo> calleeMap_;
     sptr<IRemoteObject::DeathRecipient> callerDeathRecipient_;
     std::shared_ptr<DmsCallbackTask> dmsCallbackTask_;
-    std::shared_ptr<DistributedIntentService> distributedIntentService_;
+    std::shared_ptr<IIntentPlugin> intentPlugin_;
     std::mutex intentLoadMutex_;
     std::shared_ptr<AppExecFwk::EventHandler> componentChangeHandler_;
     std::mutex callerLock_;

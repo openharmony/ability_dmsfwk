@@ -26,10 +26,12 @@ class IDistributedSchedPermission {
 public:
     virtual ~IDistributedSchedPermission() = default;
     virtual int32_t CheckPermission(uint64_t accessToken, const std::string& permissionName) = 0;
-    virtual bool GetTargetAbility(const AAFwk::Want& want, AppExecFwk::AbilityInfo& targetAbility) = 0;
+    virtual bool GetTargetAbility(const AAFwk::Want& want, AppExecFwk::AbilityInfo& targetAbility,
+        bool needQueryExtension = false) = 0;
     virtual bool CheckDeviceSecurityLevel(const std::string& srcDeviceId, const std::string& dstDeviceId) = 0;
     virtual bool CheckTargetAbilityVisible(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo) = 0;
+    virtual bool IsFoundationCall() const = 0;
 public:
     static inline std::shared_ptr<IDistributedSchedPermission> schedPermMock = nullptr;
 };
@@ -37,10 +39,12 @@ public:
 class DistributedSchedPermissionMock : public IDistributedSchedPermission {
 public:
     MOCK_METHOD2(CheckPermission, int32_t(uint64_t accessToken, const std::string& permissionName));
-    MOCK_METHOD2(GetTargetAbility, bool(const AAFwk::Want& want, AppExecFwk::AbilityInfo& targetAbility));
+    MOCK_METHOD3(GetTargetAbility, bool(const AAFwk::Want& want, AppExecFwk::AbilityInfo& targetAbility,
+        bool needQueryExtension));
     MOCK_METHOD2(CheckDeviceSecurityLevel, bool(const std::string& srcDeviceId, const std::string& dstDeviceId));
     MOCK_METHOD2(CheckTargetAbilityVisible, bool(const AppExecFwk::AbilityInfo& targetAbility,
         const CallerInfo& callerInfo));
+    MOCK_CONST_METHOD0(IsFoundationCall, bool());
 };
 
 } // namespace DistributedSchedule
