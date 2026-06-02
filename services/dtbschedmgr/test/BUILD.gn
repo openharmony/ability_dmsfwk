@@ -596,6 +596,7 @@ ohos_unittest("distributedmissionmanagertest") {
     deps = [ "${dms_path}/interfaces/innerkits/continuation_manager:continuation_manager" ]
     external_deps = dsched_external_deps
     external_deps += [ "config_policy:configpolicy_util" ]
+    external_deps += [ "openssl:libcrypto_shared" ]
     deps += dsched_public_deps
   }
   part_name = "dmsfwk"
