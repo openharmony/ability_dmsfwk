@@ -33,7 +33,9 @@ const std::string TAG = "ParamManager";
 const int32_t RETRY_SUBSCRIBER = 3;
 const int32_t TEN_BIT_SIZE = 10;
 const std::string EVENT_INFO_TYPE = "type";
+const std::string EVENT_INFO_TYPE_VALUE = "ContinuationService";
 const std::string EVENT_INFO_SUBTYPE = "subtype";
+const std::string EVENT_INFO_SUBTYPE_VALUE = "generic";
 const std::string CONTINUATION_SERVICE_DATA_PATH =
     "/data/service/el1/public/update/param_service/install/system/etc/ContinuationService/generic/";
 const std::string CONTINUATION_SERVICE_DATA_FILE_NAME = "disable_continuation_service_applist.json";
@@ -66,6 +68,7 @@ void ParamCommonEvent::SubscriberEvent()
         matchingSkills.AddEvent(event.first);
     }
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    subscribeInfo.SetPermission("ohos.permission.RECEIVE_UPDATE_MESSAGE");
     subscriber_ = std::make_shared<ParamCommonEventSubscriber>(subscribeInfo, *this);
 
     int32_t retry = RETRY_SUBSCRIBER;
@@ -116,6 +119,10 @@ void ParamCommonEvent::HandleParamUpdate(const AAFwk::Want &want) const
     std::string subtype = want.GetStringParam(EVENT_INFO_SUBTYPE);
     HILOGI("recive param update event: %{public}s ,%{public}s ,%{public}s ", action.c_str(), type.c_str(),
         subtype.c_str());
+    if (type != EVENT_INFO_TYPE_VALUE || subtype != EVENT_INFO_SUBTYPE_VALUE) {
+        HILOGW("Invalid type or subtype !!");
+        return;
+    }
     UpdateBlacklist();
 }
 
