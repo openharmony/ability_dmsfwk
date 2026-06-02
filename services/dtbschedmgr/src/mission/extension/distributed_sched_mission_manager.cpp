@@ -1008,6 +1008,7 @@ void DistributedSchedMissionManager::NotifyMissionsChangedToRemoteInner(const st
 
 bool DistributedSchedMissionManager::GenerateCallerInfo(CallerInfo& callerInfo)
 {
+    HILOGI("GenerateCallerInfo called");
     if (mainServiceChannel_ == nullptr) {
         HILOGE("mainServiceChannel_ is null!");
         return false;
