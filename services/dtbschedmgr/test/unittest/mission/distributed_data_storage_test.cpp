@@ -111,7 +111,7 @@ HWTEST_F(DistributedDataStorageTest, InsertTest_001, TestSize.Level1)
     ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
-    std::string deviceId = GetLocalDeviceId();
+    std::string deviceId;
     uint8_t* byteStream = InitByteStream();
     bool ret = distributedDataStorage_->Insert(deviceId, TASK_ID_1, byteStream, BYTESTREAM_LENGTH);
     EXPECT_EQ(true, ret);
