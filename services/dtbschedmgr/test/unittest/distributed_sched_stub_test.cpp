@@ -1056,6 +1056,7 @@ HWTEST_F(DistributedSchedStubTest, GetMissionInfosInner_001, TestSize.Level3)
 HWTEST_F(DistributedSchedStubTest, GetMissionInfosInner_002, TestSize.Level3)
 {
     DTEST_LOG << "DistributedSchedStubTest GetMissionInfosInner_002 begin" << std::endl;
+    DistributedSchedUtil::MockPermission();
     int32_t code = static_cast<uint32_t>(IDSchedInterfaceCode::GET_MISSION_INFOS);
     MessageParcel data;
     MessageParcel reply;
