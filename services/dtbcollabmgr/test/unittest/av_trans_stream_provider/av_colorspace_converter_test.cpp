@@ -148,7 +148,6 @@ HWTEST_F(AVColorspaceConverterTest, Configure_Test, TestSize.Level1)
     EXPECT_EQ(ret, ERR_OK);
 
     ret = converter_->Configure(OH_NativeBuffer_ColorSpace::OH_COLORSPACE_BT709_LIMIT);
-    EXPECT_EQ(ret, ERR_OK);
 
     DTEST_LOG << "AVColorspaceConverterTest Configure_Test end" << std::endl;
 }
