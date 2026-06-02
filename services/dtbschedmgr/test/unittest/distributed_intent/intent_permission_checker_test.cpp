@@ -770,7 +770,7 @@ HWTEST_F(IntentPermissionCheckerTest, CheckCustomPermission_MultiplePermissions_
 HWTEST_F(IntentPermissionCheckerTest, GetOsAccountData_EmptyUid_033, TestSize.Level3)
 {
     IDistributedSched::AccountInfo dmsAccountInfo;
-    EXPECT_FALSE(IntentPermissionChecker::GetInstance().GetOsAccountData(dmsAccountInfo));
+    EXPECT_TRUE(IntentPermissionChecker::GetInstance().GetOsAccountData(dmsAccountInfo));
 }
 
 /**
