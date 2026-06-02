@@ -50,7 +50,8 @@ private:
     void CalcBase64(uint8_t *input, uint32_t inputLen, std::string &encodedStr) const;
     bool VerifyParamFile(const std::string& cfgDirPath, const std::string &filePathStr) const;
     int ForEachFileSegment(const std::string &fpath, std::function<void(char *, size_t)> executor) const;
-    bool VerifyFileSign(const std::string &pubKeyPath, const std::string &signPath, const std::string &digestPath) const;
+    bool VerifyFileSign(const std::string &pubKeyPath, const std::string &signPath,
+        const std::string &digestPath) const;
     bool IsFileExists(const std::string &fileName) const;
     int64_t GetFileSize(const std::string &fileName) const;
     std::string GetfileStream(const std::string &filepath) const;

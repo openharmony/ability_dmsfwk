@@ -238,19 +238,20 @@ bool ParamCommonEvent::UpdateBlacklist() const
 }
 
 // 校验下载的参数文件是否合法
+/*
+    // 获取签名文件
+    std::string certFile = CONTINUATION_SERVICE_DATA_PATH + "CERT.ENC";
+    // 验证CERT.SF文件是否合法
+    if (!VerifyFileSign(PUBKEY_FILE, certFile, verifyFile)) {
+        HILOGE("signToolManager verify failed %{public}s,%{public}s, %{public}s", PUBKEY_FILE.c_str(),
+                  certFile.c_str(), verifyFile.c_str());
+        return false;
+    }
+ * */
 bool ParamCommonEvent::VerifyCertSfFile() const
 {
-//    // 获取签名文件
-//    std::string certFile = CONTINUATION_SERVICE_DATA_PATH + "CERT.ENC";
     // 获取待验证的文件
     std::string verifyFile = CONTINUATION_SERVICE_DATA_PATH + "CERT.SF";
-//
-//    // 验证CERT.SF文件是否合法
-//    if (!VerifyFileSign(PUBKEY_FILE, certFile, verifyFile)) {
-//        HILOGE("signToolManager verify failed %{public}s,%{public}s, %{public}s", PUBKEY_FILE.c_str(),
-//                  certFile.c_str(), verifyFile.c_str());
-//        return false;
-//    }
 
     // 验证MANIFEST.MF 是否合法
     std::string manifestFile = CONTINUATION_SERVICE_DATA_PATH + "MANIFEST.MF";
@@ -321,7 +322,7 @@ bool ParamCommonEvent::VerifyParamFile(const std::string& cfgDirPath, const std:
         return true;
     } else {
         HILOGI("VerifyParamFile failed ,sha256Digest: %{public}s, fileShaDigest:%{public}s ", sha256Digest.c_str(),
-                  std::get<1>(ret).c_str());
+            std::get<1>(ret).c_str());
         return false;
     }
 }
