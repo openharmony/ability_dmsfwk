@@ -22,6 +22,10 @@
 #include <unistd.h>
 #include <iosfwd>
 #include <sstream>
+#include <openssl/bio.h>
+#include <openssl/evp.h>
+#include <openssl/pem.h>
+#include <openssl/sha.h>
 
 #include "dtbschedmgr_log.h"
 #include "common_event_subscriber.h"
@@ -33,11 +37,16 @@ const std::string TAG = "ParamManager";
 const int32_t RETRY_SUBSCRIBER = 3;
 const int32_t TEN_BIT_SIZE = 10;
 const std::string EVENT_INFO_TYPE = "type";
+const std::string EVENT_INFO_TYPE_VALUE = "ContinuationService";
 const std::string EVENT_INFO_SUBTYPE = "subtype";
+const std::string EVENT_INFO_SUBTYPE_VALUE = "generic";
 const std::string CONTINUATION_SERVICE_DATA_PATH =
     "/data/service/el1/public/update/param_service/install/system/etc/ContinuationService/generic/";
+//const std::string PUBKEY_FILE = "/system/profile/hwkey_param_upgrade_v1.pem";
 const std::string CONTINUATION_SERVICE_DATA_FILE_NAME = "disable_continuation_service_applist.json";
+const std::string VERSION_FILE_NAME = "version.txt";
 constexpr char VERSION_CODE_KEY[] = "versionCode";
+constexpr int64_t FILE_MAX_SIZE = 10 * 1024; // 限制文件大小为10KB 防止不可信文件导致内存过大
 }
 
 ParamCommonEvent::ParamCommonEvent()
@@ -66,6 +75,7 @@ void ParamCommonEvent::SubscriberEvent()
         matchingSkills.AddEvent(event.first);
     }
     EventFwk::CommonEventSubscribeInfo subscribeInfo(matchingSkills);
+    subscribeInfo.SetPermission("ohos.permission.RECEIVE_UPDATE_MESSAGE");
     subscriber_ = std::make_shared<ParamCommonEventSubscriber>(subscribeInfo, *this);
 
     int32_t retry = RETRY_SUBSCRIBER;
@@ -116,6 +126,10 @@ void ParamCommonEvent::HandleParamUpdate(const AAFwk::Want &want) const
     std::string subtype = want.GetStringParam(EVENT_INFO_SUBTYPE);
     HILOGI("recive param update event: %{public}s ,%{public}s ,%{public}s ", action.c_str(), type.c_str(),
         subtype.c_str());
+    if (type != EVENT_INFO_TYPE_VALUE || subtype != EVENT_INFO_SUBTYPE_VALUE) {
+        HILOGW("Invalid type or subtype !!");
+        return;
+    }
     UpdateBlacklist();
 }
 
@@ -186,13 +200,20 @@ static bool ParseVersionRange(const std::string &rule, std::pair<uint32_t, uint3
 bool ParamCommonEvent::UpdateBlacklist() const
 {
     HILOGI("UpdateBlacklist");
-    std::string filePath = CONTINUATION_SERVICE_DATA_PATH + CONTINUATION_SERVICE_DATA_FILE_NAME;
-    std::ifstream file(filePath);
-    if (!file.good()) {
-        HILOGE("Verify is not good,verifyFile:%{public}s", filePath.c_str());
+    if (!VerifyCertSfFile()) {
+        HILOGE("VerifyCertSfFile failed !");
         return false;
     }
-
+    if (!VerifyParamFile(CONTINUATION_SERVICE_DATA_PATH, VERSION_FILE_NAME)) {
+        HILOGE("Verify Version File failed !");
+        return false;
+    }
+    if (!VerifyParamFile(CONTINUATION_SERVICE_DATA_PATH, CONTINUATION_SERVICE_DATA_FILE_NAME)) {
+        HILOGE("Verify Config File failed !");
+        return false;
+    }
+    std::string filePath = CONTINUATION_SERVICE_DATA_PATH + CONTINUATION_SERVICE_DATA_FILE_NAME;
+    std::ifstream file(filePath);
     std::stringstream buffer;
     buffer << file.rdbuf();
     std::string jsonText = buffer.str();
@@ -214,6 +235,285 @@ bool ParamCommonEvent::UpdateBlacklist() const
     bool ret =  UpdateBlacklistInner(root);
     cJSON_Delete(root);
     return ret;
+}
+
+// 校验下载的参数文件是否合法
+bool ParamCommonEvent::VerifyCertSfFile() const
+{
+//    // 获取签名文件
+//    std::string certFile = CONTINUATION_SERVICE_DATA_PATH + "CERT.ENC";
+    // 获取待验证的文件
+    std::string verifyFile = CONTINUATION_SERVICE_DATA_PATH + "CERT.SF";
+//
+//    // 验证CERT.SF文件是否合法
+//    if (!VerifyFileSign(PUBKEY_FILE, certFile, verifyFile)) {
+//        HILOGE("signToolManager verify failed %{public}s,%{public}s, %{public}s", PUBKEY_FILE.c_str(),
+//                  certFile.c_str(), verifyFile.c_str());
+//        return false;
+//    }
+
+    // 验证MANIFEST.MF 是否合法
+    std::string manifestFile = CONTINUATION_SERVICE_DATA_PATH + "MANIFEST.MF";
+    std::ifstream file(verifyFile);
+    if (!file.good()) {
+        HILOGE("Verify is not good,verifyFile:%{public}s", verifyFile.c_str());
+        return false;
+    }
+    std::string line;
+    std::string sha256Digest;
+    std::getline(file, line);
+    file.close();
+    sha256Digest = Split(line, ':')[1];
+    Trim(sha256Digest);
+    HILOGI("Verify manifestFile ,sha256Digest:%{public}s", sha256Digest.c_str());
+
+    std::tuple<int, std::string> ret = CalcFileSha256Digest(manifestFile);
+    std::string manifestDigest = std::get<1>(ret);
+    HILOGI("CalcFileSha256Digest manifestFile ,manifestDigest:%{public}s", manifestDigest.c_str());
+    if (sha256Digest == manifestDigest) {
+        return true;
+    }
+    return false;
+}
+
+// 校验下载的参数文件的完整性
+bool ParamCommonEvent::VerifyParamFile(const std::string& cfgDirPath, const std::string &filePathStr) const
+{
+    HILOGI("VerifyParamFile ,filePathStr:%{public}s", filePathStr.c_str());
+    std::string absFilePath = cfgDirPath + filePathStr;
+    std::string manifestFile = cfgDirPath + "MANIFEST.MF";
+    std::ifstream file(manifestFile);
+    std::string line;
+    std::string sha256Digest;
+
+    if (!file.good()) {
+        HILOGI("manifestFile is not good,manifestFile:%{public}s", manifestFile.c_str());
+        return false;
+    }
+    std::ifstream paramFile(absFilePath);
+    if (!paramFile.good()) {
+        HILOGI("paramFile is not good,paramFile:%{public}s", absFilePath.c_str());
+        return false;
+    }
+
+    while (std::getline(file, line)) {
+        std::string nextline;
+        if (line.find("Name: " + filePathStr) != std::string::npos) {
+            std::getline(file, nextline);
+            sha256Digest = Split(nextline, ':')[1];
+            Trim(sha256Digest);
+            break;
+        }
+    }
+    HILOGI("VerifyParamFile, Read manifestFile, sha256Digest:%{public}s", sha256Digest.c_str());
+    if (sha256Digest.empty()) {
+        HILOGI("VerifyParamFile failed ,sha256Digest is empty");
+        return false;
+    }
+
+    std::tuple<int, std::string> ret = CalcFileSha256Digest(absFilePath);
+    if (std::get<0>(ret) != 0) {
+        HILOGI("CalcFileSha256Digest failed,error : %{public}d ", std::get<0>(ret));
+        return false;
+    }
+    HILOGI("VerifyParamFile, CalcFileSha256Digest, sha256Digest:%{public}s", std::get<1>(ret).c_str());
+    if (sha256Digest == std::get<1>(ret)) {
+        return true;
+    } else {
+        HILOGI("VerifyParamFile failed ,sha256Digest: %{public}s, fileShaDigest:%{public}s ", sha256Digest.c_str(),
+                  std::get<1>(ret).c_str());
+        return false;
+    }
+}
+
+std::vector<std::string> ParamCommonEvent::Split(const std::string &str, char delim) const
+{
+    std::vector<std::string> tokens;
+    size_t start;
+    size_t end = 0;
+    while ((start = str.find_first_not_of(delim, end)) != std::string::npos) {
+        end = str.find(delim, start);
+        tokens.push_back(str.substr(start, end - start));
+    }
+    return tokens;
+}
+
+void ParamCommonEvent::Trim(std::string &inputStr) const
+{
+    inputStr.erase(inputStr.begin(),
+        std::find_if(inputStr.begin(), inputStr.end(), [](unsigned char ch) { return !std::isspace(ch); }));
+    inputStr.erase(
+        std::find_if(inputStr.rbegin(), inputStr.rend(), [](unsigned char ch) { return !std::isspace(ch); }).base(),
+        inputStr.end());
+}
+
+std::tuple<int, std::string> ParamCommonEvent::CalcFileSha256Digest(const std::string &fpath) const
+{
+    auto res = std::make_unique<unsigned char[]>(SHA256_DIGEST_LENGTH);
+    SHA256_CTX ctx;
+    SHA256_Init(&ctx);
+    auto sha256Update = [ctx = &ctx](char *buf, size_t len) { SHA256_Update(ctx, buf, len); };
+    int err = ForEachFileSegment(fpath, sha256Update);
+    SHA256_Final(res.get(), &ctx);
+    if (err) {
+        return { err, "" };
+    }
+    std::string dist;
+    CalcBase64(res.get(), SHA256_DIGEST_LENGTH, dist);
+    return { err, dist };
+}
+
+void ParamCommonEvent::CalcBase64(uint8_t *input, uint32_t inputLen, std::string &encodedStr) const
+{
+    size_t expectedLength = 4 * ((inputLen + 2) / 3);
+    encodedStr.resize(expectedLength);
+    size_t actualLength = EVP_EncodeBlock(reinterpret_cast<uint8_t *>(&encodedStr[0]), input, inputLen);
+    encodedStr.resize(actualLength);
+    HILOGI("expectedLength = %{public}zu, actualLength = %{public}zu", expectedLength, actualLength);
+}
+
+int ParamCommonEvent::ForEachFileSegment(const std::string &fpath, std::function<void(char *, size_t)> executor) const
+{
+    std::unique_ptr<FILE, decltype(&fclose)> filp = { fopen(fpath.c_str(), "r"), fclose };
+    if (!filp) {
+        return errno;
+    }
+    const size_t pageSize { getpagesize() };
+    auto buf = std::make_unique<char[]>(pageSize);
+    size_t actLen;
+    do {
+        actLen = fread(buf.get(), 1, pageSize, filp.get());
+        if (actLen > 0) {
+            executor(buf.get(), actLen);
+        }
+    } while (actLen == pageSize);
+
+    return ferror(filp.get()) ? errno : 0;
+}
+
+bool ParamCommonEvent::VerifyFileSign(const std::string &pubKeyPath, const std::string &signPath,
+    const std::string &digestPath) const
+{
+    if (!(IsFileExists(pubKeyPath) && IsFileExists(signPath) && IsFileExists(digestPath))) {
+        HILOGE("file not exist");
+        return false;
+    }
+
+    if (GetFileSize(signPath) > FILE_MAX_SIZE || GetFileSize(digestPath) > FILE_MAX_SIZE) {
+        HILOGE("VerifyFileSign error, file size is invalid");
+        return false;
+    }
+
+    const std::string signStr = GetfileStream(signPath);
+    const std::string digestStr = GetfileStream(digestPath);
+    if (signStr.empty() || digestStr.empty()) {
+        HILOGE("VerifyFileSign error, signStr or digestStr is empty");
+        return false;
+    }
+
+    BIO *bio = BIO_new_file(pubKeyPath.c_str(), "r");
+    RSA *pubKey = RSA_new();
+    if (PEM_read_bio_RSA_PUBKEY(bio, &pubKey, nullptr, nullptr) == nullptr) {
+        HILOGI("get pubKey is failed");
+        return false;
+    }
+
+    bool verify = false;
+    if (!(pubKey == nullptr || signStr.empty() || digestStr.empty())) {
+        verify = VerifyRsa(pubKey, digestStr, signStr);
+    } else {
+        HILOGE("pubKey == NULL || signStr.empty() || digeststr.empty()");
+    }
+    BIO_free(bio);
+    RSA_free(pubKey);
+    return verify;
+}
+
+bool ParamCommonEvent::IsFileExists(const std::string &fileName) const
+{
+    std::ifstream file(fileName);
+    bool ret = file.good();
+    if (!ret) {
+        if (access(fileName.c_str(), F_OK) == 0) {
+            HILOGI("file is exist but not accessible, no read permission or selinux control");
+        } else {
+            HILOGI("file is not exist errno is %{public}d", errno);
+        }
+    }
+    return ret;
+}
+
+int64_t ParamCommonEvent::GetFileSize(const std::string &fileName) const
+{
+    std::error_code errorCode;
+    int64_t fileSize = static_cast<int64_t>(std::filesystem::file_size(fileName, errorCode));
+    if (errorCode.operator bool()) {
+        HILOGE("get file size error, file = %{public}s", fileName.c_str());
+        return 0;
+    }
+    return fileSize;
+}
+
+std::string ParamCommonEvent::GetfileStream(const std::string &filepath) const
+{
+    std::ifstream file(filepath, std::ios::in | std::ios::binary);
+    // 文件流的异常处理，不能用try catch的形式
+    if (!file) {
+        HILOGI("Failed to open the file!");
+        return NULL;
+    }
+    std::stringstream infile;
+    infile << file.rdbuf();
+    const std::string fileString = infile.str();
+    if (fileString.empty()) {
+        return NULL;
+    }
+    return fileString;
+}
+
+bool ParamCommonEvent::VerifyRsa(RSA *pubKey, const std::string &digest, const std::string &sign) const
+{
+    EVP_PKEY *evpKey = nullptr;
+    EVP_MD_CTX *ctx = nullptr;
+    evpKey = EVP_PKEY_new();
+    if (evpKey == nullptr) {
+        HILOGW("evpKey == nullptr");
+        return false;
+    }
+    if (EVP_PKEY_set1_RSA(evpKey, pubKey) != 1) {
+        HILOGW("EVP_PKEY_set1_RSA(evpKey, pubKey) != 1");
+        return false;
+    }
+    ctx = EVP_MD_CTX_new();
+    EVP_MD_CTX_init(ctx);
+    if (ctx == nullptr) {
+        HILOGW("ctx == nullptr");
+        EVP_PKEY_free(evpKey);
+        return false;
+    }
+    // warnning：需要与签名的hash算法一致，当前使用的是 sha256withrsa ，需要选择 EVP_sha256()
+    if (EVP_VerifyInit_ex(ctx, EVP_sha256(), nullptr) != 1) {
+        HILOGW("EVP_VerifyInit_ex(ctx, EVP_sha256(), NULL) != 1");
+        EVP_PKEY_free(evpKey);
+        EVP_MD_CTX_free(ctx);
+        return false;
+    }
+    if (EVP_VerifyUpdate(ctx, digest.c_str(), digest.size()) != 1) {
+        HILOGW("EVP_VerifyUpdate(ctx, digest.c_str(), digest.size()) != 1");
+        EVP_PKEY_free(evpKey);
+        EVP_MD_CTX_free(ctx);
+        return false;
+    }
+    if (EVP_VerifyFinal(ctx, (unsigned char *)sign.c_str(), sign.size(), evpKey) != 1) {
+        HILOGW("EVP_VerifyFinal(ctx, (unsigned char *)sign.c_str(), sign.size(), evpKey) != 1)");
+        EVP_PKEY_free(evpKey);
+        EVP_MD_CTX_free(ctx);
+        return false;
+    }
+
+    EVP_PKEY_free(evpKey);
+    EVP_MD_CTX_free(ctx);
+    return true;
 }
 
 bool ParamCommonEvent::UpdateBlacklistInner(cJSON *root) const

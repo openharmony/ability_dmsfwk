@@ -24,6 +24,7 @@
 #include <iostream>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <openssl/rsa.h>
 
 #include "common_event_subscriber.h"
 #include "cJSON.h"
@@ -41,6 +42,19 @@ public:
     bool UpdateBlacklistInner(cJSON *root) const;
     bool CheckBlacklist(std::string bundleName, uint32_t versionCode);
 
+private:
+    bool VerifyCertSfFile() const;
+    std::vector<std::string> Split(const std::string &str, char delim) const;
+    void Trim(std::string &inputStr) const;
+    std::tuple<int, std::string> CalcFileSha256Digest(const std::string &fpath) const;
+    void CalcBase64(uint8_t *input, uint32_t inputLen, std::string &encodedStr) const;
+    bool VerifyParamFile(const std::string& cfgDirPath, const std::string &filePathStr) const;
+    int ForEachFileSegment(const std::string &fpath, std::function<void(char *, size_t)> executor) const;
+    bool VerifyFileSign(const std::string &pubKeyPath, const std::string &signPath, const std::string &digestPath) const;
+    bool IsFileExists(const std::string &fileName) const;
+    int64_t GetFileSize(const std::string &fileName) const;
+    std::string GetfileStream(const std::string &filepath) const;
+    bool VerifyRsa(RSA *pubKey, const std::string &digest, const std::string &sign) const;
 private:
     class ParamCommonEventSubscriber : public EventFwk::CommonEventSubscriber {
     public:
