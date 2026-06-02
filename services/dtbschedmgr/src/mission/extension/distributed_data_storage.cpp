@@ -240,14 +240,7 @@ bool DistributedDataStorage::Insert(const string& networkId, int32_t missionId,
         HILOGW("missionId is invalid!");
         return false;
     }
-    auto mainServiceChannel = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel();
-    string uuid;
-    if (mainServiceChannel == nullptr) {
-        HILOGW("mainServiceChannel is null, using DnetworkAdapter as fallback!");
-        uuid = DnetworkAdapter::GetInstance()->GetUuidByNetworkId(networkId);
-    } else {
-        uuid = mainServiceChannel->GetUuidByNetworkId(networkId);
-    }
+    string uuid = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel()->GetUuidByNetworkId(networkId);
     if (uuid.empty()) {
         HILOGW("uuid is empty!");
         return false;
@@ -296,14 +289,7 @@ bool DistributedDataStorage::Delete(const string& networkId, int32_t missionId)
         HILOGW("missionId is invalid!");
         return false;
     }
-    auto mainServiceChannel = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel();
-    string uuid;
-    if (mainServiceChannel == nullptr) {
-        HILOGW("mainServiceChannel is null, using DnetworkAdapter as fallback!");
-        uuid = DnetworkAdapter::GetInstance()->GetUuidByNetworkId(networkId);
-    } else {
-        uuid = mainServiceChannel->GetUuidByNetworkId(networkId);
-    }
+    string uuid = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel()->GetUuidByNetworkId(networkId);
     if (uuid.empty()) {
         HILOGW("uuid is empty!");
         return false;
@@ -405,14 +391,7 @@ bool DistributedDataStorage::QueryInnerLocked(const string& networkId, int32_t m
         HILOGW("kvStorePtr is null!");
         return false;
     }
-    auto mainServiceChannel = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel();
-    string uuid;
-    if (mainServiceChannel == nullptr) {
-        HILOGW("mainServiceChannel is null, using DnetworkAdapter as fallback!");
-        uuid = DnetworkAdapter::GetInstance()->GetUuidByNetworkId(networkId);
-    } else {
-        uuid = mainServiceChannel->GetUuidByNetworkId(networkId);
-    }
+    string uuid = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel()->GetUuidByNetworkId(networkId);
     if (uuid.empty()) {
         HILOGW("uuid is empty!");
         return false;
