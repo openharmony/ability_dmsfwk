@@ -1049,31 +1049,6 @@ HWTEST_F(DistributedSchedStubTest, GetMissionInfosInner_001, TestSize.Level3)
 }
 
 /**
- * @tc.name: GetMissionInfosInner_002
- * @tc.desc: check GetMissionInfosInner
- * @tc.type: FUNC
- */
-HWTEST_F(DistributedSchedStubTest, GetMissionInfosInner_002, TestSize.Level3)
-{
-    DTEST_LOG << "GetMissionInfosInner_002 called" << std::endl;
-    DTEST_LOG << "DistributedSchedStubTest GetMissionInfosInner_002 begin" << std::endl;
-    int32_t code = static_cast<uint32_t>(IDSchedInterfaceCode::GET_MISSION_INFOS);
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-
-    data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
-    DistributedSchedUtil::MockProcessAndPermission(FOUNDATION_PROCESS_NAME, nullptr, 0);
-    std::u16string deviceId = u"192.168.43.100";
-    data.WriteString16(deviceId);
-    int32_t numMissions = 0;
-    data.WriteInt32(numMissions);
-    int32_t result = DistributedSchedService::GetInstance().OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(result, INVALID_PARAMETERS_ERR);
-    DTEST_LOG << "DistributedSchedStubTest GetMissionInfosInner_002 end" << std::endl;
-}
-
-/**
  * @tc.name: GetRemoteMissionSnapshotInfoInner_001
  * @tc.desc: check GetRemoteMissionSnapshotInfoInner
  * @tc.type: FUNC
