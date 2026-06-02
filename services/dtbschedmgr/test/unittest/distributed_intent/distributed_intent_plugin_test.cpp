@@ -20,9 +20,14 @@
 #include "distributed_intent_provider_mock.h"
 #include "test_log.h"
 #include "want.h"
+#include "parcel.h"
+#include "message_option.h"
+#include "distributedsched_ipc_interface_code.h"
+#include "mock_remote_stub.h"
 
 #define private public
 #include "distributed_intent_dsoftbus_adapter.h"
+#include "distributed_intent_service_stub.h"
 #include "intent_permission_checker.h"
 #include "remote_intent_manager.h"
 #undef private
@@ -40,6 +45,11 @@ namespace DistributedSchedule {
 
 namespace {
 const std::string DEVICE_ID = "device_id_12345";
+const std::string DST_DEVICE_ID = "dst_device_id_67890";
+const std::string BUNDLE_NAME = "com.test.bundle";
+const std::string ABILITY_NAME = "MainAbility";
+const std::string RESULT_MSG = "test_result";
+const std::u16string INTENT_SERVICE_INTERFACE_TOKEN = u"ohos.distributedschedule.IDistributedIntentService";
 }
 
 class DistributedIntentPluginTest : public testing::Test {
@@ -152,6 +162,215 @@ HWTEST_F(DistributedIntentPluginTest, GetSocketListener_NotNull, TestSize.Level3
 
     IIntentSocketEventListener* listener = plugin->GetSocketListener();
     EXPECT_NE(listener, nullptr);
+    delete plugin;
+}
+
+/**
+ * @tc.name: OnRemoteRequest_LazyInit_001
+ * @tc.desc: Test OnRemoteRequest lazily initializes intentService_ (nullptr branch)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentPluginTest, OnRemoteRequest_LazyInit, TestSize.Level3)
+{
+    IIntentPlugin* plugin = static_cast<IIntentPlugin*>(
+        CreateIntentPlugin(providerMock_.get()));
+    ASSERT_NE(plugin, nullptr);
+
+    EXPECT_CALL(*adapterMock_, ForceCleanupDeviceSessions(_, _))
+        .WillRepeatedly(Invoke([](const std::string&, std::vector<int32_t>& closed) {
+            closed.clear();
+        }));
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
+
+    int32_t result = plugin->OnRemoteRequest(
+        static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data, reply, option);
+    EXPECT_NE(result, ERR_OK);
+
+    MessageParcel data2;
+    MessageParcel reply2;
+    MessageOption option2;
+    data2.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
+    int32_t result2 = plugin->OnRemoteRequest(
+        static_cast<uint32_t>(IDSchedInterfaceCode::START_REMOTE_INTENT), data2, reply2, option2);
+    EXPECT_NE(result2, ERR_OK);
+
+    delete plugin;
+}
+
+/**
+ * @tc.name: OnRemoteRequest_InvalidCode_001
+ * @tc.desc: Test OnRemoteRequest with unknown code after lazy init
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentPluginTest, OnRemoteRequest_InvalidCode, TestSize.Level3)
+{
+    IIntentPlugin* plugin = static_cast<IIntentPlugin*>(
+        CreateIntentPlugin(providerMock_.get()));
+    ASSERT_NE(plugin, nullptr);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
+
+    int32_t result = plugin->OnRemoteRequest(9999, data, reply, option);
+    EXPECT_NE(result, ERR_OK);
+
+    delete plugin;
+}
+
+/**
+ * @tc.name: StartRemoteIntent_LazyInit_001
+ * @tc.desc: Test StartRemoteIntent lazily initializes intentService_ (nullptr branch)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentPluginTest, StartRemoteIntent_LazyInit, TestSize.Level3)
+{
+    IIntentPlugin* plugin = static_cast<IIntentPlugin*>(
+        CreateIntentPlugin(providerMock_.get()));
+    ASSERT_NE(plugin, nullptr);
+
+    EXPECT_CALL(*deviceInfoMock_, GetLocalDeviceId(_))
+        .WillRepeatedly(Return(false));
+
+    OHOS::AAFwk::Want want;
+    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentCallerInfo callerInfo;
+    callerInfo.callerUid = 1000;
+    sptr<IRemoteObject> callback = nullptr;
+
+    int32_t result = plugin->StartRemoteIntent(want, callerInfo, callback);
+    EXPECT_NE(result, ERR_OK);
+
+    EXPECT_CALL(*deviceInfoMock_, GetLocalDeviceId(_))
+        .WillRepeatedly(Return(false));
+
+    int32_t result2 = plugin->StartRemoteIntent(want, callerInfo, callback);
+    EXPECT_NE(result2, ERR_OK);
+
+    delete plugin;
+}
+
+/**
+ * @tc.name: StartRemoteIntent_WithCallback_001
+ * @tc.desc: Test StartRemoteIntent with non-null callback (non-null intentService_ branch)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentPluginTest, StartRemoteIntent_WithCallback, TestSize.Level3)
+{
+    IIntentPlugin* plugin = static_cast<IIntentPlugin*>(
+        CreateIntentPlugin(providerMock_.get()));
+    ASSERT_NE(plugin, nullptr);
+
+    EXPECT_CALL(*deviceInfoMock_, GetLocalDeviceId(_))
+        .WillRepeatedly(DoAll(SetArgReferee<0>("local_device_id"), Return(true)));
+
+    OHOS::AAFwk::Want want;
+    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentCallerInfo callerInfo;
+    callerInfo.callerUid = 1000;
+    callerInfo.requestCode = 100;
+    callerInfo.accessToken = 200;
+    sptr<IRemoteObject> callback = new MockRemoteStub();
+
+    int32_t result = plugin->StartRemoteIntent(want, callerInfo, callback);
+    EXPECT_NE(result, ERR_DI_PERMISSION_DENIED);
+
+    delete plugin;
+}
+
+/**
+ * @tc.name: SendIntentResult_LazyInit_001
+ * @tc.desc: Test SendIntentResult lazily initializes intentService_ (nullptr branch)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentPluginTest, SendIntentResult_LazyInit, TestSize.Level3)
+{
+    IIntentPlugin* plugin = static_cast<IIntentPlugin*>(
+        CreateIntentPlugin(providerMock_.get()));
+    ASSERT_NE(plugin, nullptr);
+
+    OHOS::AAFwk::Want want;
+    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentCallerInfo callerInfo;
+    callerInfo.callerUid = 1000;
+    callerInfo.requestCode = 100;
+
+    int32_t result = plugin->SendIntentResult(want, callerInfo, RESULT_MSG);
+    EXPECT_NE(result, ERR_OK);
+
+    int32_t result2 = plugin->SendIntentResult(want, callerInfo, RESULT_MSG);
+    EXPECT_NE(result2, ERR_OK);
+
+    delete plugin;
+}
+
+/**
+ * @tc.name: SendIntentResult_EmptyMsg_001
+ * @tc.desc: Test SendIntentResult with empty resultMsg after lazy init
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentPluginTest, SendIntentResult_EmptyMsg, TestSize.Level3)
+{
+    IIntentPlugin* plugin = static_cast<IIntentPlugin*>(
+        CreateIntentPlugin(providerMock_.get()));
+    ASSERT_NE(plugin, nullptr);
+
+    OHOS::AAFwk::Want want;
+    IntentCallerInfo callerInfo;
+    std::string emptyMsg;
+
+    int32_t result = plugin->SendIntentResult(want, callerInfo, emptyMsg);
+    EXPECT_NE(result, ERR_OK);
+
+    delete plugin;
+}
+
+/**
+ * @tc.name: CrossMethod_LazyInit_001
+ * @tc.desc: Test that intentService_ created by one method is reused by another
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentPluginTest, CrossMethod_LazyInit, TestSize.Level3)
+{
+    IIntentPlugin* plugin = static_cast<IIntentPlugin*>(
+        CreateIntentPlugin(providerMock_.get()));
+    ASSERT_NE(plugin, nullptr);
+
+    EXPECT_CALL(*deviceInfoMock_, GetLocalDeviceId(_))
+        .WillRepeatedly(Return(false));
+
+    OHOS::AAFwk::Want want;
+    want.SetElementName(DST_DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentCallerInfo callerInfo;
+    callerInfo.callerUid = 1000;
+    sptr<IRemoteObject> callback = nullptr;
+
+    int32_t result = plugin->StartRemoteIntent(want, callerInfo, callback);
+    EXPECT_NE(result, ERR_OK);
+
+    int32_t result2 = plugin->SendIntentResult(want, callerInfo, RESULT_MSG);
+    EXPECT_NE(result2, ERR_OK);
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    data.WriteInterfaceToken(INTENT_SERVICE_INTERFACE_TOKEN);
+    int32_t result3 = plugin->OnRemoteRequest(
+        static_cast<uint32_t>(IDSchedInterfaceCode::SEND_INTENT_RESULT), data, reply, option);
+    EXPECT_NE(result3, ERR_OK);
+
     delete plugin;
 }
 

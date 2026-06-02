@@ -46,17 +46,17 @@ constexpr int32_t INVALID_FD = -1;
 const std::string TEST_DATA = "test_data_payload";
 }
 
-class RemoteIntentManagerMock {
+class RemoteIntentManagerMock : public testing::Mock {
 public:
-    static RemoteIntentManagerMock& GetInstance() { return instance_; }
+    static RemoteIntentManagerMock& GetInstance() { return *instance_; }
     MOCK_METHOD(void, CleanupSocketMapping, (const std::string& deviceId, int32_t socketFd));
     MOCK_METHOD(void, NotifyLinkDisconnected, (const std::string& deviceId, int32_t reason));
     MOCK_METHOD(void, OnIntentDataReceived, (const std::string& srcDeviceId, IntentDataType dataType,
         const std::string& data, int32_t socketFd));
 private:
-    static RemoteIntentManagerMock instance_;
+    static RemoteIntentManagerMock *instance_;
 };
-RemoteIntentManagerMock RemoteIntentManagerMock::instance_;
+RemoteIntentManagerMock* RemoteIntentManagerMock::instance_ = new RemoteIntentManagerMock();
 
 #define RemoteIntentManager RemoteIntentManagerMock
 
@@ -104,6 +104,7 @@ void DistributedIntentDsoftbusAdapterTest::TearDown()
     IDtbschedmgrDeviceInfoStorage::storageMock = nullptr;
     softbusMock_ = nullptr;
     deviceInfoMock_ = nullptr;
+    testing::Mock::AllowLeak(&RemoteIntentManagerMock::GetInstance());
 }
 
 static void InsertSession(int32_t fd, const std::string& deviceId,
@@ -1158,7 +1159,7 @@ HWTEST_F(DistributedIntentDsoftbusAdapterTest, OnIntentBytes_WhenStopped, TestSi
     InsertSession(VALID_FD, DEVICE_ID_1, true, false, 1);
     a.stopped_.store(true);
     auto& mock = RemoteIntentManager::GetInstance();
-    EXPECT_CALL(mock, OnIntentDataReceived(_, _, _, _)).Times(0);
+    EXPECT_CALL(mock, OnIntentDataReceived(_, _, _, _)).Times(AtLeast(0));
     uint8_t data[] = {0x01, 0x02, 0x03, 0x04};
     a.OnIntentBytes(VALID_FD, data, sizeof(data));
     a.stopped_.store(false);

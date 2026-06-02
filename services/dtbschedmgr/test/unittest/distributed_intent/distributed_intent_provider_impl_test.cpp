@@ -16,6 +16,8 @@
 
 #include "distributedIntent/distributed_intent_provider_impl.h"
 #include "distributed_intent_error_code.h"
+#include "distributed_sched_utils.h"
+#include "distributed_want_v2.h"
 #include "nlohmann/json.hpp"
 #include "remote_intent_manager.h"
 #include "test_log.h"
@@ -322,6 +324,221 @@ HWTEST_F(DistributedIntentProviderImplTest, ParseIntentVersionProfile_Success, T
     EXPECT_TRUE(provider_->ParseIntentVersionProfile(data, supportFlag, intentVersionId));
     EXPECT_EQ(supportFlag, 1);
     EXPECT_EQ(intentVersionId, 2);
+}
+
+/**
+ * @tc.name: DecodeWantFromBase64_EmptyString_001
+ * @tc.desc: Verify DecodeWantFromBase64 returns nullptr with empty string
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentProviderImplTest, DecodeWantFromBase64_EmptyString, TestSize.Level3)
+{
+    auto result = provider_->DecodeWantFromBase64("");
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: DecodeWantFromBase64_InvalidBase64_001
+ * @tc.desc: Verify DecodeWantFromBase64 returns nullptr with invalid base64 data
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentProviderImplTest, DecodeWantFromBase64_InvalidBase64, TestSize.Level3)
+{
+    auto result = provider_->DecodeWantFromBase64("!!!invalid!!!");
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: DecodeWantFromBase64_CorruptedData_001
+ * @tc.desc: Verify DecodeWantFromBase64 returns nullptr with corrupted binary data
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentProviderImplTest, DecodeWantFromBase64_CorruptedData, TestSize.Level3)
+{
+    std::string corruptedData = "AAAA";
+    auto result = provider_->DecodeWantFromBase64(corruptedData);
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: DecodeWantFromBase64_Success_001
+ * @tc.desc: Verify DecodeWantFromBase64 succeeds with valid encoded Want
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentProviderImplTest, DecodeWantFromBase64_Success, TestSize.Level3)
+{
+    Want want;
+    want.SetElementName(DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    std::string encoded = provider_->EncodeWantToBase64(want);
+    EXPECT_FALSE(encoded.empty());
+
+    auto decoded = provider_->DecodeWantFromBase64(encoded);
+    ASSERT_NE(decoded, nullptr);
+    EXPECT_EQ(decoded->GetElement().GetDeviceID(), DEVICE_ID);
+    EXPECT_EQ(decoded->GetElement().GetBundleName(), BUNDLE_NAME);
+    EXPECT_EQ(decoded->GetElement().GetAbilityName(), ABILITY_NAME);
+}
+
+/**
+ * @tc.name: DeserializeIntentData_RequestCodeNotNumber_001
+ * @tc.desc: Verify DeserializeIntentData returns error when requestCode is not a number
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentProviderImplTest, DeserializeIntentData_RequestCodeNotNumber, TestSize.Level3)
+{
+    Want want;
+    IntentContext ctx;
+    std::string resultMsg;
+    std::string data = R"({"requestCode":"not_a_number","wantData":"AQID"})";
+
+    EXPECT_EQ(provider_->DeserializeIntentData(data, want, ctx, resultMsg),
+        ERR_DI_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: DeserializeIntentData_WantDataNotString_001
+ * @tc.desc: Verify DeserializeIntentData returns error when wantData is not a string
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentProviderImplTest, DeserializeIntentData_WantDataNotString, TestSize.Level3)
+{
+    Want want;
+    IntentContext ctx;
+    std::string resultMsg;
+    std::string data = R"({"requestCode":100,"wantData":123})";
+
+    EXPECT_EQ(provider_->DeserializeIntentData(data, want, ctx, resultMsg),
+        ERR_DI_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: DeserializeIntentData_DecodeWantFail_001
+ * @tc.desc: Verify DeserializeIntentData returns error when wantData base64 decode fails
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentProviderImplTest, DeserializeIntentData_DecodeWantFail, TestSize.Level3)
+{
+    Want want;
+    IntentContext ctx;
+    std::string resultMsg;
+    std::string data = R"({"requestCode":100,"wantData":"!!!invalid!!!"})";
+
+    EXPECT_EQ(provider_->DeserializeIntentData(data, want, ctx, resultMsg),
+        ERR_DI_INVALID_PARAMETER);
+}
+
+/**
+ * @tc.name: DeserializeIntentData_Success_FullFields_001
+ * @tc.desc: Verify DeserializeIntentData with full fields including bundleNames, extraInfoJson, resultMsg
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentProviderImplTest, DeserializeIntentData_Success_FullFields, TestSize.Level3)
+{
+    Want srcWant;
+    srcWant.SetElementName(DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    std::string wantBase64 = provider_->EncodeWantToBase64(srcWant);
+    EXPECT_FALSE(wantBase64.empty());
+
+    IntentContext srcCtx;
+    srcCtx.requestCode = TEST_REQUEST_CODE;
+    srcCtx.callerInfo.uid = TEST_UID;
+    srcCtx.callerInfo.pid = TEST_PID;
+    srcCtx.callerInfo.callerType = 1;
+    srcCtx.callerInfo.sourceDeviceId = DEVICE_ID;
+    srcCtx.callerInfo.duid = 999;
+    srcCtx.callerInfo.callerAppId = "com.test.appid";
+    srcCtx.callerInfo.bundleNames = {"bundle1", "bundle2"};
+    srcCtx.callerInfo.dmsVersion = 2;
+    srcCtx.callerInfo.accessToken = TEST_ACCESS_TOKEN;
+    srcCtx.callerInfo.extraInfoJson = nlohmann::json::object({{"key1", "value1"}});
+    srcCtx.accountInfo.userId = 100;
+    srcCtx.accountInfo.activeAccountId = "active_id_123";
+
+    std::string serialized;
+    EXPECT_EQ(provider_->SerializeIntentData(srcWant, srcCtx, serialized, RESULT_MSG), ERR_DI_OK);
+
+    Want dstWant;
+    IntentContext dstCtx;
+    std::string dstResultMsg;
+    EXPECT_EQ(provider_->DeserializeIntentData(serialized, dstWant, dstCtx, dstResultMsg), ERR_DI_OK);
+
+    EXPECT_EQ(dstWant.GetElement().GetDeviceID(), DEVICE_ID);
+    EXPECT_EQ(dstWant.GetElement().GetBundleName(), BUNDLE_NAME);
+    EXPECT_EQ(dstWant.GetElement().GetAbilityName(), ABILITY_NAME);
+    EXPECT_EQ(dstCtx.requestCode, TEST_REQUEST_CODE);
+    EXPECT_EQ(dstCtx.callerInfo.uid, TEST_UID);
+    EXPECT_EQ(dstCtx.callerInfo.pid, TEST_PID);
+    EXPECT_EQ(dstCtx.callerInfo.callerType, 1);
+    EXPECT_EQ(dstCtx.callerInfo.sourceDeviceId, DEVICE_ID);
+    EXPECT_EQ(dstCtx.callerInfo.duid, 999);
+    EXPECT_EQ(dstCtx.callerInfo.callerAppId, "com.test.appid");
+    EXPECT_EQ(dstCtx.callerInfo.bundleNames.size(), 2u);
+    EXPECT_EQ(dstCtx.callerInfo.dmsVersion, 2);
+    EXPECT_EQ(dstCtx.callerInfo.accessToken, TEST_ACCESS_TOKEN);
+    EXPECT_TRUE(dstCtx.callerInfo.extraInfoJson.is_object());
+    EXPECT_EQ(dstCtx.accountInfo.userId, 100);
+    EXPECT_EQ(dstCtx.accountInfo.activeAccountId, "active_id_123");
+    EXPECT_EQ(dstResultMsg, RESULT_MSG);
+}
+
+/**
+ * @tc.name: DeserializeIntentData_Success_MinimalFields_001
+ * @tc.desc: Verify DeserializeIntentData with minimal fields (no bundleNames, extraInfoJson, resultMsg)
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentProviderImplTest, DeserializeIntentData_Success_MinimalFields, TestSize.Level3)
+{
+    Want srcWant;
+    srcWant.SetElementName(DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    std::string wantBase64 = provider_->EncodeWantToBase64(srcWant);
+    EXPECT_FALSE(wantBase64.empty());
+
+    IntentContext srcCtx;
+    srcCtx.requestCode = TEST_REQUEST_CODE;
+
+    std::string serialized;
+    EXPECT_EQ(provider_->SerializeIntentData(srcWant, srcCtx, serialized, ""), ERR_DI_OK);
+
+    Want dstWant;
+    IntentContext dstCtx;
+    std::string dstResultMsg;
+    EXPECT_EQ(provider_->DeserializeIntentData(serialized, dstWant, dstCtx, dstResultMsg), ERR_DI_OK);
+
+    EXPECT_EQ(dstCtx.requestCode, TEST_REQUEST_CODE);
+    EXPECT_TRUE(dstCtx.callerInfo.bundleNames.empty());
+    EXPECT_TRUE(dstCtx.callerInfo.extraInfoJson.is_null() || dstCtx.callerInfo.extraInfoJson.is_object());
+    EXPECT_TRUE(dstResultMsg.empty());
+}
+
+/**
+ * @tc.name: SerializeIntentData_EmptyResultMsg_001
+ * @tc.desc: Verify SerializeIntentData with empty resultMsg does not include resultMsg key
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(DistributedIntentProviderImplTest, SerializeIntentData_EmptyResultMsg, TestSize.Level3)
+{
+    Want want;
+    want.SetElementName(DEVICE_ID, BUNDLE_NAME, ABILITY_NAME);
+    IntentContext ctx;
+    ctx.requestCode = TEST_REQUEST_CODE;
+    std::string data;
+
+    EXPECT_EQ(provider_->SerializeIntentData(want, ctx, data, ""), ERR_DI_OK);
+    EXPECT_FALSE(data.empty());
+
+    nlohmann::json root = nlohmann::json::parse(data, nullptr, false);
+    EXPECT_TRUE(root.is_object());
+    EXPECT_FALSE(root.contains("resultMsg"));
 }
 
 } // namespace DistributedSchedule
