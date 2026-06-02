@@ -241,11 +241,13 @@ bool DistributedDataStorage::Insert(const string& networkId, int32_t missionId,
         return false;
     }
     auto mainServiceChannel = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel();
+    string uuid;
     if (mainServiceChannel == nullptr) {
-        HILOGW("mainServiceChannel is null!");
-        return false;
+        HILOGW("mainServiceChannel is null, using DnetworkAdapter as fallback!");
+        uuid = DnetworkAdapter::GetInstance()->GetUuidByNetworkId(networkId);
+    } else {
+        uuid = mainServiceChannel->GetUuidByNetworkId(networkId);
     }
-    string uuid = mainServiceChannel->GetUuidByNetworkId(networkId);
     if (uuid.empty()) {
         HILOGW("uuid is empty!");
         return false;
@@ -295,11 +297,13 @@ bool DistributedDataStorage::Delete(const string& networkId, int32_t missionId)
         return false;
     }
     auto mainServiceChannel = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel();
+    string uuid;
     if (mainServiceChannel == nullptr) {
-        HILOGW("mainServiceChannel is null!");
-        return false;
+        HILOGW("mainServiceChannel is null, using DnetworkAdapter as fallback!");
+        uuid = DnetworkAdapter::GetInstance()->GetUuidByNetworkId(networkId);
+    } else {
+        uuid = mainServiceChannel->GetUuidByNetworkId(networkId);
     }
-    string uuid = mainServiceChannel->GetUuidByNetworkId(networkId);
     if (uuid.empty()) {
         HILOGW("uuid is empty!");
         return false;
@@ -402,11 +406,13 @@ bool DistributedDataStorage::QueryInnerLocked(const string& networkId, int32_t m
         return false;
     }
     auto mainServiceChannel = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel();
+    string uuid;
     if (mainServiceChannel == nullptr) {
-        HILOGW("mainServiceChannel is null!");
-        return false;
+        HILOGW("mainServiceChannel is null, using DnetworkAdapter as fallback!");
+        uuid = DnetworkAdapter::GetInstance()->GetUuidByNetworkId(networkId);
+    } else {
+        uuid = mainServiceChannel->GetUuidByNetworkId(networkId);
     }
-    string uuid = mainServiceChannel->GetUuidByNetworkId(networkId);
     if (uuid.empty()) {
         HILOGW("uuid is empty!");
         return false;
