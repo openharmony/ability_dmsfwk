@@ -1062,6 +1062,7 @@ HWTEST_F(DistributedSchedStubTest, GetMissionInfosInner_002, TestSize.Level3)
     MessageOption option;
 
     data.WriteInterfaceToken(DMS_STUB_INTERFACE_TOKEN);
+    DistributedSchedUtil::MockProcessAndPermission(FOUNDATION_PROCESS_NAME, nullptr, 0);
     std::u16string deviceId = u"192.168.43.100";
     data.WriteString16(deviceId);
     int32_t numMissions = 0;
