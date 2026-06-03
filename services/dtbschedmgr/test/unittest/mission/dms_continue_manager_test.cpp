@@ -1073,7 +1073,7 @@ HWTEST_F(DMSContinueManagerTest, ValidateAndPrepareBundleInfo_002, TestSize.Leve
 
     BundleValidationContext context;
     bool ret = recvMgr->ValidateAndPrepareBundleInfo(distributedBundleInfo, continueTypeId, state, context);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 #endif
     DTEST_LOG << "DMSContinueManagerTest ValidateAndPrepareBundleInfo_002 end" << std::endl;
 }

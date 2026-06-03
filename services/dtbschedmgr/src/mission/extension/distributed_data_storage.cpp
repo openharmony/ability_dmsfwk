@@ -240,7 +240,12 @@ bool DistributedDataStorage::Insert(const string& networkId, int32_t missionId,
         HILOGW("missionId is invalid!");
         return false;
     }
-    string uuid = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel()->GetUuidByNetworkId(networkId);
+    auto mainServiceChannel = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel();
+    if (mainServiceChannel == nullptr) {
+        HILOGW("mainServiceChannel is null!");
+        return false;
+    }
+    string uuid = mainServiceChannel->GetUuidByNetworkId(networkId);
     if (uuid.empty()) {
         HILOGW("uuid is empty!");
         return false;
@@ -289,7 +294,12 @@ bool DistributedDataStorage::Delete(const string& networkId, int32_t missionId)
         HILOGW("missionId is invalid!");
         return false;
     }
-    string uuid = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel()->GetUuidByNetworkId(networkId);
+    auto mainServiceChannel = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel();
+    if (mainServiceChannel == nullptr) {
+        HILOGW("mainServiceChannel is null!");
+        return false;
+    }
+    string uuid = mainServiceChannel->GetUuidByNetworkId(networkId);
     if (uuid.empty()) {
         HILOGW("uuid is empty!");
         return false;
@@ -391,7 +401,12 @@ bool DistributedDataStorage::QueryInnerLocked(const string& networkId, int32_t m
         HILOGW("kvStorePtr is null!");
         return false;
     }
-    string uuid = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel()->GetUuidByNetworkId(networkId);
+    auto mainServiceChannel = DistributedSchedMissionManager::GetInstance().GetMainServiceChannel();
+    if (mainServiceChannel == nullptr) {
+        HILOGW("mainServiceChannel is null!");
+        return false;
+    }
+    string uuid = mainServiceChannel->GetUuidByNetworkId(networkId);
     if (uuid.empty()) {
         HILOGW("uuid is empty!");
         return false;

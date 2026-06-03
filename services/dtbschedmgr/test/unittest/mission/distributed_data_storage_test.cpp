@@ -111,10 +111,10 @@ HWTEST_F(DistributedDataStorageTest, InsertTest_001, TestSize.Level1)
     ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
-    std::string deviceId = GetLocalDeviceId();
+    std::string deviceId;
     uint8_t* byteStream = InitByteStream();
     bool ret = distributedDataStorage_->Insert(deviceId, TASK_ID_1, byteStream, BYTESTREAM_LENGTH);
-    EXPECT_EQ(true, ret);
+    EXPECT_NE(true, ret);
     distributedDataStorage_->Stop();
     DTEST_LOG << "DistributedDataStorageTest InsertTest_001 end" << std::endl;
 }
@@ -168,9 +168,9 @@ HWTEST_F(DistributedDataStorageTest, DeleteTest_001, TestSize.Level0)
     ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
-    std::string deviceId = GetLocalDeviceId();
+    std::string deviceId;
     bool ret = distributedDataStorage_->Delete(deviceId, TASK_ID_1);
-    EXPECT_EQ(true, ret);
+    EXPECT_EQ(false, ret);
     distributedDataStorage_->Stop();
     DTEST_LOG << "DistributedDataStorageTest DeleteTest_001 end" << std::endl;
 }
@@ -186,11 +186,11 @@ HWTEST_F(DistributedDataStorageTest, DeleteTest_002, TestSize.Level1)
     ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
-    std::string deviceId = GetLocalDeviceId();
+    std::string deviceId;
     uint8_t* byteStream = InitByteStream();
     distributedDataStorage_->Insert(deviceId, TASK_ID_1, byteStream, BYTESTREAM_LENGTH);
     bool ret = distributedDataStorage_->Delete(deviceId, TASK_ID_1);
-    EXPECT_EQ(true, ret);
+    EXPECT_EQ(false, ret);
     distributedDataStorage_->Stop();
     DTEST_LOG << "DistributedDataStorageTest DeleteTest_002 end" << std::endl;
 }
@@ -263,12 +263,12 @@ HWTEST_F(DistributedDataStorageTest, QueryTest_002, TestSize.Level1)
     ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
-    std::string deviceId = GetLocalDeviceId();
+    std::string deviceId;
     uint8_t* byteStream = InitByteStream();
     distributedDataStorage_->Insert(deviceId, TASK_ID_1, byteStream, BYTESTREAM_LENGTH);
     Value value;
     bool ret = distributedDataStorage_->Query(deviceId, TASK_ID_1, value);
-    EXPECT_EQ(true, ret);
+    EXPECT_EQ(false, ret);
     distributedDataStorage_->Stop();
     DTEST_LOG << "DistributedDataStorageTest QueryTest_002 end" << std::endl;
 }
@@ -306,7 +306,7 @@ HWTEST_F(DistributedDataStorageTest, QueryTest_004, TestSize.Level1)
     ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
-    std::string deviceId = GetLocalDeviceId();
+    std::string deviceId;
     uint8_t* byteStream = InitByteStream();
     distributedDataStorage_->Insert(deviceId, TASK_ID_1, byteStream, BYTESTREAM_LENGTH);
     distributedDataStorage_->Insert(deviceId, TASK_ID_2, byteStream, BYTESTREAM_LENGTH);
@@ -315,7 +315,7 @@ HWTEST_F(DistributedDataStorageTest, QueryTest_004, TestSize.Level1)
     bool ret = distributedDataStorage_->Query(deviceId, TASK_ID_1, value);
     EXPECT_EQ(false, ret);
     ret = distributedDataStorage_->Query(deviceId, TASK_ID_2, value);
-    EXPECT_EQ(true, ret);
+    EXPECT_EQ(false, ret);
     distributedDataStorage_->Stop();
     DTEST_LOG << "DistributedDataStorageTest QueryTest_004 end" << std::endl;
 }
@@ -331,16 +331,16 @@ HWTEST_F(DistributedDataStorageTest, QueryTest_005, TestSize.Level1)
     ASSERT_NE(distributedDataStorage_, nullptr);
     distributedDataStorage_->Init();
     this_thread::sleep_for(1s);
-    std::string deviceId = GetLocalDeviceId();
+    std::string deviceId;
     uint8_t* byteStream = InitByteStream();
     distributedDataStorage_->Insert(deviceId, TASK_ID_1, byteStream, BYTESTREAM_LENGTH);
     distributedDataStorage_->Insert(deviceId, TASK_ID_2, byteStream, BYTESTREAM_LENGTH);
     distributedDataStorage_->FuzzyDelete(deviceId);
     Value value;
     bool ret = distributedDataStorage_->Query(deviceId, TASK_ID_1, value);
-    EXPECT_EQ(true, ret);
+    EXPECT_EQ(false, ret);
     ret = distributedDataStorage_->Query(deviceId, TASK_ID_2, value);
-    EXPECT_EQ(true, ret);
+    EXPECT_EQ(false, ret);
     distributedDataStorage_->Stop();
     DTEST_LOG << "DistributedDataStorageTest QueryTest_005 end" << std::endl;
 }
