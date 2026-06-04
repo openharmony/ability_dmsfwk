@@ -1737,7 +1737,6 @@ group("unittest") {
         ":dmscontinuemanagertest",
         ":dmscontinuemgrtest",
         ":dmscontinuerecommendmgrtest",
-        ":dmsmissionmanagertest",
         ":dschedpermissiontest",
         ":dschedsynce2etest",
         ":svcdistributedconnectiontest",
