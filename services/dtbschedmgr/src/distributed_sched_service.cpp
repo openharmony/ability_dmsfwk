@@ -354,45 +354,61 @@ static int32_t CheckCallingPermission(DExtConnectResultInfo& resultInfo)
     return ERR_OK;
 }
 
-int32_t DistributedSchedService::ScheduleAutoUnload()
+void DistributedSchedService::AutoUnloadTask()
 {
-    HILOGI("called.");
-    auto func = [this]() {
+    while (true) {
         {
             std::unique_lock<std::mutex> lock(unloadMutex_);
-            unloadCondition_.wait_for(lock, std::chrono::seconds(DMS_AUTO_UNLOAD_DELAY_S));
+            if (unloadCondition_.wait_for(lock, std::chrono::seconds(DMS_AUTO_UNLOAD_DELAY_S))
+                == std::cv_status::no_timeout) {
+                HILOGI("Timer reset, restart waiting.");
+                continue;
+            }
         }
         std::vector<DistributedHardware::DmDeviceInfo> dmDeviceInfoList;
         DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", dmDeviceInfoList);
         if (!dmDeviceInfoList.empty()) {
             HILOGI("Network device online");
+            isUnloadScheduled_.store(false);
             return;
         }
         if (dExtensionConnected_.load()) {
-            HILOGI("DExtension business still in progress, reschedule auto unload");
+            HILOGI("DExtension business still in progress, restart waiting.");
             dExtensionConnected_.store(false);
-            ScheduleAutoUnload();
-            return;
+            continue;
         }
         HILOGI("UnloadSystemAbility dms");
         auto samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
         if (samgrProxy == nullptr) {
             HILOGE("get samgr failed");
+            isUnloadScheduled_.store(false);
             return;
         }
         int32_t ret = samgrProxy->UnloadSystemAbility(DISTRIBUTED_SCHED_SA_ID);
+        isUnloadScheduled_.store(false);
         if (ret != ERR_OK) {
             HILOGE("remove system ability failed");
             return;
         }
         HILOGI("UnloadSystemAbility dms ok");
-    };
-    std::vector<DistributedHardware::DmDeviceInfo> dmDeviceInfoList;
-    DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", dmDeviceInfoList);
-    if (dmDeviceInfoList.empty()) {
-        std::thread task(func);
-        task.detach();
+        return;
     }
+}
+
+int32_t DistributedSchedService::ScheduleAutoUnload()
+{
+    HILOGI("called.");
+    if (isUnloadScheduled_.exchange(true)) {
+        if (dExtensionConnected_.load()) {
+            HILOGI("DExtension connected, keep current timer.");
+            return ERR_OK;
+        }
+        HILOGI("Auto unload already scheduled, reset timer.");
+        unloadCondition_.notify_one();
+        return ERR_OK;
+    }
+    std::thread task([this]() { AutoUnloadTask(); });
+    task.detach();
     HILOGI("end.");
     return ERR_OK;
 }
