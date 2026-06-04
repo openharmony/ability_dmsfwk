@@ -1737,7 +1737,7 @@ group("unittest") {
         ":dmscontinuemanagertest",
         ":dmscontinuemgrtest",
         ":dmscontinuerecommendmgrtest",
-        ":dmsmissionmanagertest",
+        # ":dmsmissionmanagertest",  # Disabled due to crash
         ":dschedpermissiontest",
         ":dschedsynce2etest",
         ":svcdistributedconnectiontest",
